@@ -4,7 +4,12 @@
 class ContributorsController < ApplicationController
   before_action :login_required
 
-  # Contributors index
+  ##############################################################################
+  # INDEX
+  #
+  def index
+    build_index_with_query
+  end
 
   # Used by ApplicationController to dispatch #index to a private method
   @index_subaction_param_keys = [
@@ -16,8 +21,6 @@ class ContributorsController < ApplicationController
     q: :index_query_results,
     id: :index_query_results
   }.freeze
-
-  ###########################################################
 
   private
 

@@ -19,14 +19,14 @@
 #
 class ImagesController < ApplicationController
   before_action :login_required
-  # disable cop because index is defined in ApplicationController
-  # rubocop:disable Rails/LexicallyScopedActionFilter
   before_action :pass_query_params, except: [:index]
-  # rubocop:enable Rails/LexicallyScopedActionFilter
 
   ##############################################################################
+  # INDEX
   #
-  # index::
+  def index
+    build_index_with_query
+  end
 
   # ApplicationController uses this table to dispatch #index to a private method
   @index_subaction_param_keys = [
@@ -44,8 +44,6 @@ class ImagesController < ApplicationController
     q: :index_query_results,
     id: :index_query_results
   }.freeze
-
-  #############################################
 
   private # private methods used by #index
 

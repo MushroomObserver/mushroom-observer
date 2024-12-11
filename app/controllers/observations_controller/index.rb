@@ -3,12 +3,14 @@
 # see observations_controller.rb
 class ObservationsController
   module Index
+    def index
+      build_index_with_query
+    end
+
     private
 
-    # #index - defined in Application Controller
-    #
     # index subactions:
-    # methods called by #index via a dispatch table in ObservationController
+    # methods called by #index via a dispatch table in ObservationsController
 
     def default_index_subaction
       list_all

@@ -29,8 +29,8 @@ module ApplicationController::Indexes
   #
   ##############################################################################
 
-  # Dispatch to a subaction
-  def index
+  # Dispatch to a subaction (original version, built with Query)
+  def build_index_with_query
     self.class.index_subaction_param_keys.each do |subaction|
       if params[subaction].present?
         return send(

@@ -4,13 +4,16 @@
 # rubocop:disable Metrics/ClassLength
 class HerbariumRecordsController < ApplicationController
   before_action :login_required
-  # disable cop because index is defined in ApplicationController
-  # rubocop:disable Rails/LexicallyScopedActionFilter
   before_action :pass_query_params, except: :index
   before_action :store_location, except: [:index, :destroy]
-  # rubocop:enable Rails/LexicallyScopedActionFilter
 
-  # index
+  ##############################################################################
+  # INDEX
+  #
+  def index
+    build_index_with_query
+  end
+
   # ApplicationController uses this table to dispatch #index to a private method
   @index_subaction_param_keys = [
     :pattern,

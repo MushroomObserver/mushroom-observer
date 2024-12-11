@@ -256,7 +256,6 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     )
     # Seems like these destroy links don't work with `click_button`
     first(class: /destroy_herbarium_link/).click
-    # assert_selector("#title", text: :herbarium_index.l)
     assert_selector("body.herbaria__index")
   end
 

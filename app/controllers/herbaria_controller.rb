@@ -57,7 +57,12 @@ class HerbariaController < ApplicationController
   ]
   before_action :keep_track_of_referrer, only: [:destroy, :edit, :new]
 
-  # ---------- Actions to Display data (index, show, etc.) ---------------------
+  ##############################################################################
+  # INDEX
+  #
+  def index
+    build_index_with_query
+  end
 
   # Display list of selected herbaria, based on params
   #   params[:pattern].present? - Herbaria based on Pattern Search
@@ -75,8 +80,6 @@ class HerbariaController < ApplicationController
     q: :index_query_results,
     id: :index_query_results
   }.freeze
-
-  ##############################################################################
 
   private
 

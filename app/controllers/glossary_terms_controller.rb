@@ -5,7 +5,12 @@ class GlossaryTermsController < ApplicationController
   before_action :login_required, except: [:index, :show]
   before_action :store_location, except: [:create, :update, :destroy]
 
-  # ---------- Actions to Display data (index, show, etc.) ---------------------
+  ##############################################################################
+  # INDEX
+  #
+  def index
+    build_index_with_query
+  end
 
   # Used by ApplicationController to dispatch #index to a private method
   @index_subaction_param_keys = [
@@ -17,8 +22,6 @@ class GlossaryTermsController < ApplicationController
     q: :index_query_results,
     id: :index_query_results
   }.freeze
-
-  ##############################################################################
 
   private
 
@@ -40,7 +43,6 @@ class GlossaryTermsController < ApplicationController
     show_selected(query, at_id_args)
   end
 
-  # TODO: check if id match can be generalized
   def pattern
     pattern = params[:pattern].to_s
     # If it matches the term ID

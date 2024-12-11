@@ -11,18 +11,19 @@
 #
 class CommentsController < ApplicationController
   before_action :login_required
-  # disable cop because index is defined in ApplicationController
-  # rubocop:disable Rails/LexicallyScopedActionFilter
   before_action :pass_query_params, except: [:index]
-  # rubocop:enable Rails/LexicallyScopedActionFilter
 
   # Bullet doesn't seem to be able to figure out that we cannot eager load
   # through polymorphic relations, so I'm just disabling it for these actions.
   around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [:index]
 
   ##############################################################################
+  # INDEX
+  #
+  def index
+    build_index_with_query
+  end
 
-  # index::
   # ApplicationController uses this table to dispatch #index to a private method
   @index_subaction_param_keys = [
     :target, :pattern, :by_user, :for_user, :by
@@ -31,8 +32,6 @@ class CommentsController < ApplicationController
   @index_subaction_dispatch_table = {
     by: :index_query_results
   }.freeze
-
-  ###########################################################
 
   private
 

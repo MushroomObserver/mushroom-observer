@@ -7,11 +7,13 @@ class UsersController < ApplicationController
 
   before_action :login_required
 
-  # Users index
-  # TODO: Use dispatcher to provide q, id, and by params to index_query_results
   ##############################################################################
   # INDEX
   #
+  def index
+    build_index_with_query
+  end
+
   # Used by ApplicationController to dispatch #index to a private method
   @index_subaction_param_keys = [
     :pattern, :by, :q, :id

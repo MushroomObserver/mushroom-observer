@@ -4,9 +4,15 @@ class ProjectsController < ApplicationController
   include Validators
 
   before_action :login_required
-  # disable cop because index is defined in ApplicationController
-  before_action :pass_query_params, except: [:index] # rubocop:disable Rails/LexicallyScopedActionFilter
-  # index::
+  before_action :pass_query_params, except: [:index]
+
+  ##############################################################################
+  # INDEX
+  #
+  def index
+    build_index_with_query
+  end
+
   # ApplicationController uses this to dispatch #index to a private method
   @index_subaction_param_keys = [:pattern, :by, :member].freeze
 

@@ -4,8 +4,12 @@
 module FieldSlipsController::Index
   private
 
-  # index subactions:
-  # methods called by #index via the dispatch table in FieldSlipsController
+  ##############################################################################
+  # INDEX
+  #
+  def index
+    build_index_with_query
+  end
 
   # checked by ApplicationController#index
   def default_index_subaction

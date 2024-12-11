@@ -4,12 +4,17 @@
 module Projects
   # Actions
   # -------
+  # index (get)
   # edit (get)
   # update (patch)
   #
   class ViolationsController < ApplicationController
     before_action :login_required
     before_action :pass_query_params
+
+    def index
+      build_index_with_query
+    end
 
     def update
       unless (@project = find_or_goto_index(Project, params[:project_id]))

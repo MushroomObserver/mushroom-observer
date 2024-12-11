@@ -13,6 +13,10 @@ class CollectionNumbersController < ApplicationController
 
   ##############################################################################
   # INDEX
+  #
+  def index
+    build_index_with_query
+  end
 
   # Used by ApplicationController to dispatch #index to a private method
   @index_subaction_param_keys = [
