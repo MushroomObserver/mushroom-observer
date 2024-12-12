@@ -82,7 +82,7 @@ class HerbariaController < ApplicationController
   end
 
   # Used by ApplicationController to dispatch #index to a private method
-  def index_subaction_param_keys
+  def index_active_params
     [:pattern, :nonpersonal, :by, :q, :id].freeze
   end
 

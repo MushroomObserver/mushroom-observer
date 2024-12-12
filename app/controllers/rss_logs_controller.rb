@@ -25,7 +25,7 @@ class RssLogsController < ApplicationController
   end
 
   # ApplicationController uses this to dispatch #index to a private method
-  def index_subaction_param_keys
+  def index_active_params
     [:type, :by, :q, :id].freeze
   end
 

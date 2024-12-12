@@ -24,7 +24,7 @@ class GlossaryTermsController < ApplicationController
   end
 
   # Used by ApplicationController to dispatch #index to a private method
-  def index_subaction_param_keys
+  def index_active_params
     [:pattern, :by, :q, :id].freeze
   end
 
@@ -123,9 +123,8 @@ class GlossaryTermsController < ApplicationController
 
   # --------- show, create, edit private methods
 
+  # Doesn't use `find_or_goto_index` because we need the includes
   def find_glossary_term!
-    # @glossary_term = find_or_goto_index(GlossaryTerm,
-    #                                     params[:id].to_s)
     @glossary_term = GlossaryTerm.show_includes.safe_find(params[:id]) ||
                      flash_error_and_goto_index(GlossaryTerm, params[:id])
   end

@@ -8,7 +8,7 @@ class ObservationsControllerShowIndexTest < FunctionalTestCase
   ######## Index ################################################
   # Tests of index, with tests arranged as follows:
   # default subaction; then
-  # other subactions in order of @index_subaction_param_keys
+  # other subactions in order of index_active_params
   # miscellaneous tests using get(:index)
 
   # First, test that the index does not require login - AN 20230923

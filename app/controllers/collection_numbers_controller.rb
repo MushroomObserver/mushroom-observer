@@ -28,14 +28,8 @@ class CollectionNumbersController < ApplicationController
   end
 
   # Used by ApplicationController to dispatch #index to a private method
-  def index_subaction_param_keys
+  def index_active_params
     [:pattern, :observation, :by, :q, :id].freeze
-  end
-
-  # Displays matrix of selected CollectionNumber's (based on current Query).
-  def index_query_results
-    query = find_or_create_query(:CollectionNumber, by: params[:by])
-    show_selected(query, index_at_id_args)
   end
 
   # Display list of CollectionNumbers for an Observation

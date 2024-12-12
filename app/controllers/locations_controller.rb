@@ -42,15 +42,9 @@ class LocationsController < ApplicationController
   end
 
   # ApplicationController uses this to dispatch #index to a private method
-  def index_subaction_param_keys
+  def index_active_params
     [:advanced_search, :pattern, :country, :project, :by_user, :by_editor,
      :by, :q, :id].freeze
-  end
-
-  # Displays a list of selected locations, based on current Query.
-  def index_query_results
-    query = find_or_create_query(:Location, by: params[:by])
-    show_selected(query, index_at_id_args)
   end
 
   # Displays matrix of advanced search results.

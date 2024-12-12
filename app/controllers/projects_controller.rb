@@ -26,18 +26,12 @@ class ProjectsController < ApplicationController
   end
 
   # ApplicationController uses this to dispatch #index to a private method
-  def index_subaction_param_keys
+  def index_active_params
     [:pattern, :by, :member].freeze
   end
 
-  def index_subaction_dispatch_table
-    { by: :index_query_results }.freeze
-  end
-
-  # Show list of selected projects, based on current Query.
-  def index_query_results
-    query = find_or_create_query(:Project, by: params[:by])
-    show_selected(query, index_at_id_args)
+  def index_basic_params
+    [:by].freeze
   end
 
   # Display list of projects with a given member, sorted by date.

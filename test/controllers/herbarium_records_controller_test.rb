@@ -17,7 +17,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
   # Test of index, with tests arranged as follows:
   # default subaction; then
-  # other subactions in order of @index_subaction_param_keys
+  # other subactions in order of index_active_params
   def test_index
     login
     get(:index)

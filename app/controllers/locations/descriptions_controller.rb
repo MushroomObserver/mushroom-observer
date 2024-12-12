@@ -37,14 +37,8 @@ module Locations
     end
 
     # Used by ApplicationController to dispatch #index to a private method
-    def index_subaction_param_keys
+    def index_active_params
       [:by_author, :by_editor, :by, :q, :id].freeze
-    end
-
-    # Displays a list of selected locations, based on current Query.
-    def index_query_results
-      query = find_or_create_query(:LocationDescription, by: params[:by])
-      show_selected(query, index_at_id_args)
     end
 
     # Display list of location_descriptions that a given user is author on.

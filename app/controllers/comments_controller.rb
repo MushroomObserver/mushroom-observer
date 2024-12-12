@@ -37,12 +37,12 @@ class CommentsController < ApplicationController
   end
 
   # ApplicationController uses this table to dispatch #index to a private method
-  def index_subaction_param_keys
+  def index_active_params
     [:target, :pattern, :by_user, :for_user, :by].freeze
   end
 
-  def index_subaction_dispatch_table
-    { by: :index_query_results }.freeze
+  def index_basic_params
+    [:by].freeze
   end
 
   # Show selected list of comments, based on current Query.  (Linked from

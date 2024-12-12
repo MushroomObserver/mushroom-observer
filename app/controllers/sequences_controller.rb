@@ -60,17 +60,12 @@ class SequencesController < ApplicationController
     show_selected(query)
   end
 
-  def index_subaction_param_keys
+  def index_active_params
     [:all, :by, :q].freeze
   end
 
   def all
     unfiltered_index
-  end
-
-  def index_query_results
-    query = find_or_create_query(:Sequence, by: params[:by])
-    show_selected(query, index_at_id_args)
   end
 
   def show_selected(query, args = {})

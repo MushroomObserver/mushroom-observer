@@ -37,13 +37,8 @@ class ArticlesController < ApplicationController
   end
 
   # Used by ApplicationController to dispatch #index to a private method
-  def index_subaction_param_keys
+  def index_active_params
     [:by, :q, :id].freeze
-  end
-
-  def index_query_results
-    query = find_or_create_query(:Article, by: params[:by])
-    show_selected(query, index_at_id_args)
   end
 
   # Show selected list of articles.

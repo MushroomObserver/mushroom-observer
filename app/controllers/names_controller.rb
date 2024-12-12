@@ -26,15 +26,9 @@ class NamesController < ApplicationController
   end
 
   # ApplicationController uses this to dispatch #index to a private method
-  def index_subaction_param_keys
+  def index_active_params
     [:advanced_search, :pattern, :with_observations, :with_descriptions,
      :need_descriptions, :by_user, :by_editor, :by, :q, :id].freeze
-  end
-
-  # Display list of names in last index/search query.
-  def index_query_results
-    query = find_or_create_query(:Name, by: params[:by])
-    show_selected(query, index_at_id_args)
   end
 
   # Displays list of advanced search results.

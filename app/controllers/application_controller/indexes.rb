@@ -13,32 +13,34 @@ module ApplicationController::Indexes
 
   # Dispatch to a subaction (original version, built with Query)
   def build_index_with_query
-    index_subaction_param_keys.each do |subaction|
+    index_active_params.each do |subaction|
       if params[subaction].present?
-        return send(
-          index_subaction_dispatch_table[subaction] ||
-          subaction
-        )
+        return send(index_param_method_or_default(subaction))
       end
     end
     unfiltered_index
   end
 
-  def index_subaction_param_keys
+  def index_active_params
     []
   end
 
-  def index_subaction_dispatch_table
-    {
-      by: :index_query_results,
-      q: :index_query_results,
-      id: :index_query_results
-    }.freeze
+  def index_basic_params
+    [:by, :q, :id].freeze
   end
 
   # It's not always the controller_name, e.g. ContributorsController -> User
   def controller_model_name
     controller_name.classify
+  end
+
+  def index_param_method_or_default(subaction)
+    index_basic_params.include?(subaction) ? :index_query_results : subaction
+  end
+
+  def index_query_results
+    query = find_or_create_query(controller_model_name.to_sym, by: params[:by])
+    show_selected(query, index_at_id_args)
   end
 
   # Most pattern searches follow this, um, pattern.

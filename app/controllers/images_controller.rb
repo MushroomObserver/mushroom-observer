@@ -61,14 +61,8 @@ class ImagesController < ApplicationController
   end
 
   # ApplicationController uses this table to dispatch #index to a private method
-  def index_subaction_param_keys
+  def index_active_params
     [:advanced_search, :pattern, :by_user, :project, :by, :q, :id].freeze
-  end
-
-  # Display matrix of selected images, based on current Query.
-  def index_query_results
-    query = find_or_create_query(:Image, by: params[:by])
-    show_selected(query, index_at_id_args)
   end
 
   # Display matrix of images by a given user.

@@ -20,7 +20,7 @@ module Observations
       "Observation"
     end
 
-    def index_subaction_param_keys
+    def index_active_params
       [:filter, :q, :id].freeze
     end
 

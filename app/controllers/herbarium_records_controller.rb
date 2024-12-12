@@ -28,14 +28,8 @@ class HerbariumRecordsController < ApplicationController
   end
 
   # ApplicationController uses this table to dispatch #index to a private method
-  def index_subaction_param_keys
+  def index_active_params
     [:pattern, :herbarium, :observation, :by, :q, :id].freeze
-  end
-
-  # Displays matrix of selected HerbariumRecord's (based on current Query).
-  def index_query_results
-    query = find_or_create_query(:HerbariumRecord, by: params[:by])
-    show_selected(query, index_at_id_args)
   end
 
   def herbarium

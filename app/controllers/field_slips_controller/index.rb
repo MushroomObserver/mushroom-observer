@@ -13,15 +13,8 @@ module FieldSlipsController::Index
     show_selected(query)
   end
 
-  def index_subaction_param_keys
+  def index_active_params
     [:project, :by_user, :by, :q, :id].freeze
-  end
-
-  # Displays index at the page containing the last field slip viewed.
-  # (can be used by the "Back" button on the show page.)
-  def index_query_results
-    query = find_or_create_query(:FieldSlip, by: params[:by])
-    show_selected(query, index_at_id_args)
   end
 
   # Display list of FieldSlips attached to a given project.
