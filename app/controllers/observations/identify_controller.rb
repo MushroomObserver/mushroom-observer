@@ -20,9 +20,11 @@ module Observations
       [:filter, :q, :id].freeze
     end
 
-    # Ideally the form should pass the term as the clade/region param.
-    # This isn't currently able to filter by multiple params because the form is
-    # either/or. Params needs both a :filter and a filter[:term] to work.
+    # Ideally the filter form should pass the clade/region params with separate
+    # terms, so we can build the query by multiple flat params as expected.
+    # However, this form uses a single field with swapping autocompleter;
+    # the form scope is :filter and the field name is always :term.
+    # Currently params needs both a :filter[:type] and a filter[:term] to work.
     def filter
       return unless (type = params.dig(:filter, :type).to_sym)
       return unless (term = params.dig(:filter, :term).strip)
