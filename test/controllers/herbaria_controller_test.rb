@@ -158,7 +158,7 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_index_all
     login
-    get(:index, params: { flavor: :all })
+    get(:index)
 
     assert_response(:success)
     assert_select("#title", { text: "#{:HERBARIA.l} by Name" },
@@ -206,7 +206,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_true(dicks_personal.can_edit?(dick)) # user's personal herbarium
 
     login("dick")
-    get(:index, params: { flavor: :all })
+    get(:index)
 
     assert_select("a[href^='#{edit_herbarium_path(nybg)}']", count: 0)
     assert_select("a[href^='#{edit_herbarium_path(fundis)}']", count: 1)
@@ -221,7 +221,7 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_index_all_merge_source_links_presence_admin
     make_admin("zero")
-    get(:index, params: { flavor: :all })
+    get(:index)
 
     assert_select("a[href^='#{edit_herbarium_path(nybg)}']", count: 1)
     assert_select("a[href^='#{edit_herbarium_path(fundis)}']", count: 1)
@@ -235,7 +235,7 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   def test_index_all_no_login
-    get(:index, params: { flavor: :all })
+    get(:index)
     assert_redirected_to(new_account_login_path)
     assert_select("a[href*=edit]", count: 0)
     assert_select("a[href^='herbaria_merge_path']", count: 0)
@@ -248,7 +248,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_false(dicks_personal.can_edit?(rolf)) # another user's hebarium
 
     login("rolf")
-    get(:index, params: { flavor: :all, merge: source.id })
+    get(:index, params: { merge: source.id })
 
     assert_select("form[action *= 'dest=#{source.id}']", count: 0)
     assert_select("form[action *= 'dest=#{nybg.id}']", count: 1)
@@ -263,7 +263,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_true(dicks_personal.can_edit?(dick)) # user's personal herbarium
 
     login("dick")
-    get(:index, params: { flavor: :all, merge: source.id })
+    get(:index, params: { merge: source.id })
     assert_select("form[action *= 'dest=#{source.id}']", count: 0)
     assert_select("form[action *= 'dest=#{nybg.id}']", count: 1)
     assert_select("form[action *= 'dest=#{fundis.id}']", count: 1)
@@ -273,7 +273,7 @@ class HerbariaControllerTest < FunctionalTestCase
   def test_index_all_merge_target_buttons_presence_admin
     source = field_museum
     make_admin("zero")
-    get(:index, params: { flavor: :all, merge: source.id })
+    get(:index, params: { merge: source.id })
 
     assert_select("form[action *= 'dest=#{source.id}']", count: 0)
     assert_select("form[action *= 'dest=#{nybg.id}']", count: 1)
@@ -283,7 +283,7 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_index_all_merge_target_buttons_presence_no_login
     source = field_museum
-    get(:index, params: { flavor: :all, merge: source.id })
+    get(:index, params: { merge: source.id })
 
     assert_redirected_to(new_account_login_path)
     assert_select("a[href*=edit]", count: 0)

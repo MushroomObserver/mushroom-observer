@@ -143,7 +143,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
   def test_index_sort_links
     user = users(:zero_user)
     login(user)
-    visit(herbaria_path(flavor: :all))
+    visit(herbaria_path)
     assert_selector("body.herbaria__index")
 
     herbaria_show_links = page.all("td > a[class^='herbarium_link']")
@@ -232,7 +232,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     user = users(:mary)
     assert_equal([], user.curated_herbaria)
     login!(user.login)
-    visit(herbaria_path(flavor: :all))
+    visit(herbaria_path)
     click_link(class: "new_herbarium_link")
 
     within("#herbarium_form") do
@@ -308,7 +308,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     mary_herbarium = mary.create_personal_herbarium
 
     login!("mary")
-    visit(herbaria_path(flavor: :all))
+    visit(herbaria_path)
     click_link(href: herbaria_path(merge: fundis))
     within("form[action *= 'dest=#{mary_herbarium.id}']") do
       click_commit

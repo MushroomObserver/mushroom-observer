@@ -89,7 +89,7 @@ module Tabs
 
     def herbaria_index_tab
       [:herbarium_index_list_all_herbaria.l,
-       herbaria_path(flavor: :all),
+       herbaria_path,
        { class: tab_id(__method__.to_s) }]
     end
 
