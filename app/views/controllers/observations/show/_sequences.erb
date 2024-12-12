@@ -3,8 +3,6 @@ sequences = obs.sequences
 can_edit  = in_admin_mode? || obs.can_edit?
 %>
 
-<% unless @user.try(&:hide_specimen_stuff?) ||
-          obs.user.try(&:hide_specimen_stuff?) %>
   <%=
   tag.div(
     class: "obs-sequence", id: "observation_sequences",
@@ -51,4 +49,3 @@ can_edit  = in_admin_mode? || obs.can_edit?
     end) if sequences.any?
 
   end %>
-<% end %>
