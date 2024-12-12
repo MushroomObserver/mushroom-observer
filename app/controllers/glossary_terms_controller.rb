@@ -120,6 +120,7 @@ class GlossaryTermsController < ApplicationController
   end
 
   private
+
   # --------- show, create, edit private methods
 
   def find_glossary_term!
