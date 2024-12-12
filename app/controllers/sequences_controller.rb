@@ -38,32 +38,39 @@ class SequencesController < ApplicationController
 
   ################# Actions that show data without modifying it
 
-  # display a list of Sequences, depending on flavor & params
+  # display a list of Sequences, depending on params
   # Example:
-  #  https://mushroomobserver.org/sequences?flavor=all
+  #  https://mushroomobserver.org/sequences?all=true
   #    => displays a list of all sequences in MO
   #
   # NOTE: #index does not handle params[:pattern] or params[:ids] because
   # we don't offer sequence pattern search. However, the Query::SequenceBase
   # class can handle a pattern param.
-  # TODO: use dispatcher, rename `flavor` to `all`. check callers!
   def index
-    case params[:flavor]
-    when "all"
-      unfiltered_index
-    else
-      query = find_or_create_query(:Sequence, by: params[:by])
-      at_id_args = { id: params[:id].to_s, always_index: true }
-      show_selected(query, at_id_args)
-    end
+    build_index_with_query
   end
 
   private
 
+  # Because people usually want "sequences of a given observation",
+  # this is not the default index. Accessible with the `all` param.
   def unfiltered_index
     store_location
     query = create_query(:Sequence, :all)
     show_selected(query)
+  end
+
+  def index_subaction_param_keys
+    [:all, :by, :q].freeze
+  end
+
+  def all
+    unfiltered_index
+  end
+
+  def index_query_results
+    query = find_or_create_query(:Sequence, by: params[:by])
+    show_selected(query, index_at_id_args)
   end
 
   def show_selected(query, args = {})

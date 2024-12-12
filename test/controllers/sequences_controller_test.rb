@@ -34,7 +34,7 @@ class SequencesControllerTest < FunctionalTestCase
 
   def test_index_all
     login
-    get(:index, params: { flavor: :all })
+    get(:index, params: { all: true })
 
     assert_response(:success)
     assert_select("#title", { text: "#{:SEQUENCE.l} Index" },
@@ -48,10 +48,8 @@ class SequencesControllerTest < FunctionalTestCase
   end
 
   def test_index_by_observation
-    by = "observation"
-
     login
-    get(:index, params: { by: by })
+    get(:index, params: { by: "observation" })
 
     assert_response(:success)
     assert_displayed_title("Sequences by Observation")
