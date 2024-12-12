@@ -88,7 +88,7 @@ module Tabs
     end
 
     def herbaria_index_tab
-      [:herbarium_index_unfiltered_index_herbaria.l,
+      [:herbarium_index_list_all_herbaria.l,
        herbaria_path(flavor: :all),
        { class: tab_id(__method__.to_s) }]
     end

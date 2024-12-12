@@ -3051,7 +3051,7 @@ class QueryTest < UnitTestCase
                  :Sequence, :all, pattern: "deposited_sequence")
   end
 
-  def test_species_unfiltered_index
+  def test_species_list_all
     expect = SpeciesList.order(:title).to_a
     assert_query(expect, :SpeciesList, :all)
   end
