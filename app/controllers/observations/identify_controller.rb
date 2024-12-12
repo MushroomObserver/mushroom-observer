@@ -5,69 +5,57 @@ module Observations
     before_action :login_required
     before_action :pass_query_params
 
-    # TODO: use dispatcher, add q, id (order is not adjustable)
-    # refactor to flat params `clade` and `region`
     def index
-      @layout = calc_layout_params
-      # first deal with filters, or clear filter
-      return unfiltered_index if params[:commit] == :CLEAR.l
-
-      if (type = params.dig(:filter, :type))
-        return filtered_index(type.to_sym)
-      end
-
-      unfiltered_index
+      build_index_with_query
     end
 
     private
 
     def unfiltered_index
-      query = create_query(*q_args, q_kwargs)
-
+      query = create_query(:Observation, :needs_naming, by: :rss_log)
       show_selected(query)
     end
 
-    def q_args
-      [:Observation, :needs_naming]
+    def index_subaction_param_keys
+      [:filter, :q, :id].freeze
     end
 
-    def q_kwargs
-      { by: :rss_log }
-    end
-
-    # need both a :type and a :term
-    def filtered_index(type)
+    # Ideally the form should pass the term as the clade/region param.
+    # This isn't currently able to filter by multiple params because the form is
+    # either/or. Params needs both a :filter and a filter[:term] to work.
+    def filter
+      return unless (type = params.dig(:filter, :type).to_sym)
       return unless (term = params.dig(:filter, :term).strip)
 
       case type
       when :clade
-        clade_filter(term)
+        clade(term)
       when :region
-        region_filter(term)
+        region(term)
         # when :user
-        #   user_filter(term)
+        #   user(term)
       end
     end
 
     # Some inefficiency here comes from having to parse the name from a string.
-    # TODO: Write a filtered select/autocomplete that passes the name_id?
-    def clade_filter(term)
+    # Check if the autocompleters return a name_id or location_id.
+    def clade(term)
       # return unless (clade = Name.find_by(text_name: term))
 
-      query = create_query(*q_args, q_kwargs.merge({ in_clade: term }))
-
+      query = create_query(:Observation, :needs_naming,
+                           by: :rss_log, in_clade: term)
       show_selected(query)
     end
 
-    def region_filter(term)
-      query = create_query(*q_args, q_kwargs.merge({ in_region: term }))
-
+    def region(term)
+      query = create_query(:Observation, :needs_naming,
+                           by: :rss_log, in_region: term)
       show_selected(query)
     end
 
     # def user_filter(term)
-    #   query = create_query(*q_args, q_kwargs.merge({ by_user: term }))
-
+    #   query = create_query(:Observation, :needs_naming,
+    #                        by: :rss_log, by_user: params[:user])
     #   show_selected(query)
     # end
 
