@@ -12,7 +12,7 @@
 #  tp::                 Textilize with paragraphs (no obj links).
 #  tpl::                Textilize with paragraphs and obj links.
 #  tp_nodiv::           Textilize with paragraphs (no obj links, without div).
-#  tpl_nodiv::          Textilize with paragraphs and obj links (without div).
+#  tl_for_api::         Textilize with obj links and paragraphs when needed
 #  ---
 #  gsub!::              Gobal replace in place.
 #  to_ascii::           Convert string from UTF-8 to plain ASCII.
@@ -419,14 +419,10 @@ class String
     Textile.textilize_safe(self, do_object_links: false, sanitize: sanitize)
   end
 
-  def tpl_nodiv(sanitize = true)
-    Textile.textilize_safe(self, do_object_links: true, sanitize: sanitize)
-  end
-
   def tl_for_api(sanitize = true)
-    return self.tl(sanitize) unless self.include?("\n")
+    return tl(sanitize) unless include?("\n")
 
-    self.tpl_nodiv(sanitize)
+    Textile.textilize_safe(self, do_object_links: true, sanitize: sanitize)
   end
 
   ### String transformations ###

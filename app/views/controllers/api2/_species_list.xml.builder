@@ -7,7 +7,7 @@ xml.tag!(
   type: "species_list"
 ) do
   xml_string(xml, :title, object.title)
-  xml_html_string(xml, :notes, object.notes.to_s.tpl_nodiv)
+  xml_html_string(xml, :notes, object.notes.to_s.tl_for_api)
   xml_date(xml, :date, object.when)
   xml_datetime(xml, :created_at, object.created_at)
   xml_datetime(xml, :updated_at, object.updated_at)

@@ -13,8 +13,8 @@ json.source_name(object.source_name.to_s) if object.source_name.present?
 json.license(object.license.try(&:display_name).to_s)
 json.public(object.public ? true : false)
 json.locale(object.locale.to_s)
-json.gen_desc(object.gen_desc.to_s.tpl_nodiv) if object.gen_desc.present?
-json.ecology(object.ecology.to_s.tpl_nodiv) if object.ecology.present?
-json.species(object.species.to_s.tpl_nodiv) if object.species.present?
-json.notes(object.notes.to_s.tpl_nodiv) if object.notes.present?
-json.refs(object.refs.to_s.tpl_nodiv) if object.refs.present?
+json.gen_desc(object.gen_desc.to_s.tl_for_api) if object.gen_desc.present?
+json.ecology(object.ecology.to_s.tl_for_api) if object.ecology.present?
+json.species(object.species.to_s.tl_for_api) if object.species.present?
+json.notes(object.notes.to_s.tl_for_api) if object.notes.present?
+json.refs(object.refs.to_s.tl_for_api) if object.refs.present?
