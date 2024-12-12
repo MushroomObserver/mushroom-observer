@@ -14,23 +14,12 @@ class HerbariumRecordsController < ApplicationController
     build_index_with_query
   end
 
-  # ApplicationController uses this table to dispatch #index to a private method
-  @index_subaction_param_keys = [
-    :pattern,
-    :herbarium,
-    :observation,
-    :by,
-    :q,
-    :id
-  ].freeze
-
-  @index_subaction_dispatch_table = {
-    by: :index_query_results,
-    q: :index_query_results,
-    id: :index_query_results
-  }.freeze
-
   private
+
+  # ApplicationController uses this table to dispatch #index to a private method
+  def index_subaction_param_keys
+    [:pattern, :herbarium, :observation, :by, :q, :id].freeze
+  end
 
   # Show list of herbarium_records.
   def unfiltered_index

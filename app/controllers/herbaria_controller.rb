@@ -59,29 +59,23 @@ class HerbariaController < ApplicationController
 
   ##############################################################################
   # INDEX
-  #
-  def index
-    build_index_with_query
-  end
 
   # Display list of selected herbaria, based on params
   #   params[:pattern].present? - Herbaria based on Pattern Search
   #   [:nonpersonal].blank? - all Herbaria, regardless of query
   #   [:nonpersonal].present? - all nonpersonal (institutional) Herbaria
   #   default - Herbaria based on current Query (Sort links land on this action)
-
-  # Used by ApplicationController to dispatch #index to a private method
-  @index_subaction_param_keys = [
-    :pattern, :nonpersonal, :by, :q, :id
-  ].freeze
-
-  @index_subaction_dispatch_table = {
-    by: :index_query_results,
-    q: :index_query_results,
-    id: :index_query_results
-  }.freeze
+  #
+  def index
+    build_index_with_query
+  end
 
   private
+
+  # Used by ApplicationController to dispatch #index to a private method
+  def index_subaction_param_keys
+    [:pattern, :nonpersonal, :by, :q, :id].freeze
+  end
 
   def default_sort_order
     :name

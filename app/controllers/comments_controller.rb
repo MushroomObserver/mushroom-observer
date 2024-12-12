@@ -24,16 +24,16 @@ class CommentsController < ApplicationController
     build_index_with_query
   end
 
-  # ApplicationController uses this table to dispatch #index to a private method
-  @index_subaction_param_keys = [
-    :target, :pattern, :by_user, :for_user, :by
-  ].freeze
-
-  @index_subaction_dispatch_table = {
-    by: :index_query_results
-  }.freeze
-
   private
+
+  # ApplicationController uses this table to dispatch #index to a private method
+  def index_subaction_param_keys
+    [:target, :pattern, :by_user, :for_user, :by].freeze
+  end
+
+  def index_subaction_dispatch_table
+    { by: :index_query_results }.freeze
+  end
 
   # Show list of latest comments. (Linked from left panel.)
   def unfiltered_index

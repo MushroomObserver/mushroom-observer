@@ -1,45 +1,43 @@
 # frozen_string_literal: true
 
+##############################################################################
+#
+#  :section: Indexes
+#
+##############################################################################
 # see application_controller.rb
 module ApplicationController::Indexes
   def self.included(base)
     base.helper_method(:paginate_numbers)
-    base.extend(ClassMethods)
   end
-
-  # TODO: make these methods of the classes. No need for ivars.
-  module ClassMethods
-    def index_subaction_param_keys
-      @index_subaction_param_keys ||= []
-    end
-
-    def index_subaction_dispatch_table
-      @index_subaction_dispatch_table ||= {}
-    end
-
-    # Could provide defaults here ?
-    def index_display_args
-      @index_display_args ||= {}
-    end
-  end
-
-  ##############################################################################
-  #
-  #  :section: Indexes
-  #
-  ##############################################################################
 
   # Dispatch to a subaction (original version, built with Query)
   def build_index_with_query
-    self.class.index_subaction_param_keys.each do |subaction|
+    index_subaction_param_keys.each do |subaction|
       if params[subaction].present?
         return send(
-          self.class.index_subaction_dispatch_table[subaction] ||
+          index_subaction_dispatch_table[subaction] ||
           subaction
         )
       end
     end
     unfiltered_index
+  end
+
+  def index_subaction_param_keys
+    []
+  end
+
+  def index_subaction_dispatch_table
+    {
+      by: :index_query_results,
+      q: :index_query_results,
+      id: :index_query_results
+    }.freeze
+  end
+
+  def index_display_args(_args, _query)
+    {}
   end
 
   # Render an index or set of search results as a list or matrix. Arguments:

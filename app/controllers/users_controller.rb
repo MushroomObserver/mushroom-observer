@@ -14,23 +14,17 @@ class UsersController < ApplicationController
     build_index_with_query
   end
 
-  # Used by ApplicationController to dispatch #index to a private method
-  @index_subaction_param_keys = [
-    :pattern, :by, :q, :id
-  ].freeze
-
-  @index_subaction_dispatch_table = {
-    by: :index_query_results,
-    q: :index_query_results,
-    id: :index_query_results
-  }.freeze
-
   alias index_user index
   # People guess this page name frequently for whatever reason, and
   # since there is a view with this name, it crashes each time.
   alias list_users index
 
   private
+
+  # Used by ApplicationController to dispatch #index to a private method
+  def index_subaction_param_keys
+    [:pattern, :by, :q, :id].freeze
+  end
 
   # NOTE: Only admins can get the full user index.
   # Others get here via search, so they shouldn't hit unfiltered_index

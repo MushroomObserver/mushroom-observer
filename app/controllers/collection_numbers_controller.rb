@@ -18,22 +18,12 @@ class CollectionNumbersController < ApplicationController
     build_index_with_query
   end
 
-  # Used by ApplicationController to dispatch #index to a private method
-  @index_subaction_param_keys = [
-    :pattern,
-    :observation,
-    :by,
-    :q,
-    :id
-  ].freeze
-
-  @index_subaction_dispatch_table = {
-    by: :index_query_results,
-    q: :index_query_results,
-    id: :index_query_results
-  }.freeze
-
   private
+
+  # Used by ApplicationController to dispatch #index to a private method
+  def index_subaction_param_keys
+    [:pattern, :observation, :by, :q, :id].freeze
+  end
 
   # Show list of collection_numbers.
   def unfiltered_index

@@ -16,6 +16,16 @@ module Projects
       build_index_with_query
     end
 
+    private
+
+    def unfiltered_index
+      return unless find_project!
+
+      @violations = @project.violations
+    end
+
+    public
+
     def update
       unless (@project = find_or_goto_index(Project, params[:project_id]))
         return
@@ -31,15 +41,7 @@ module Projects
       redirect_with_query(project_path(@project))
     end
 
-    #########
-
     private
-
-    def unfiltered_index
-      return unless find_project!
-
-      @violations = @project.violations
-    end
 
     def find_project!
       @project = find_or_goto_index(Project, params[:project_id])

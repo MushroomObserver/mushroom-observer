@@ -9,6 +9,12 @@ class ObservationsController
 
     private
 
+    # Searches come 1st because they may have the other params
+    def index_subaction_param_keys
+      [:advanced_search, :pattern, :look_alikes, :related_taxa, :name,
+       :by_user, :location, :where, :project, :by, :q, :id].freeze
+    end
+
     # index subactions:
     # methods called by #index via a dispatch table in ObservationsController
 

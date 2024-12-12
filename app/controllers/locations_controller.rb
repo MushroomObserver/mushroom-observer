@@ -29,26 +29,13 @@ class LocationsController < ApplicationController
     build_index_with_query
   end
 
+  private
+
   # ApplicationController uses this to dispatch #index to a private method
-  @index_subaction_param_keys = [
-    :advanced_search,
-    :pattern,
-    :country,
-    :project,
-    :by_user,
-    :by_editor,
-    :by,
-    :q,
-    :id
-  ].freeze
-
-  @index_subaction_dispatch_table = {
-    by: :index_query_results,
-    q: :index_query_results,
-    id: :index_query_results
-  }.freeze
-
-  private # private methods used by #index
+  def index_subaction_param_keys
+    [:advanced_search, :pattern, :country, :project, :by_user, :by_editor,
+     :by, :q, :id].freeze
+  end
 
   # Displays a list of all locations.
   def unfiltered_index

@@ -13,29 +13,13 @@ class NamesController < ApplicationController
     build_index_with_query
   end
 
+  private
+
   # ApplicationController uses this to dispatch #index to a private method
-  @index_subaction_param_keys = [
-    :advanced_search,
-    :pattern,
-    :with_observations,
-    :with_descriptions,
-    :need_descriptions,
-    :by_user,
-    :by_editor,
-    :by,
-    :q,
-    :id
-  ].freeze
-
-  @index_subaction_dispatch_table = {
-    by: :index_query_results,
-    q: :index_query_results,
-    id: :index_query_results
-  }.freeze
-
-  ###################################
-
-  private # private methods used by #index
+  def index_subaction_param_keys
+    [:advanced_search, :pattern, :with_observations, :with_descriptions,
+     :need_descriptions, :by_user, :by_editor, :by, :q, :id].freeze
+  end
 
   # Display list of all (correctly-spelled) names in the database.
   def unfiltered_index

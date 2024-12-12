@@ -8,6 +8,10 @@ module FieldSlipsController::Index
 
   private
 
+  def index_subaction_param_keys
+    [:by_user, :project, :by, :q, :id].freeze
+  end
+
   def unfiltered_index
     query = create_query(:FieldSlip, :all)
     show_selected(query)
