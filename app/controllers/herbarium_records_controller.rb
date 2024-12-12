@@ -16,11 +16,6 @@ class HerbariumRecordsController < ApplicationController
 
   private
 
-  # ApplicationController uses this table to dispatch #index to a private method
-  def index_subaction_param_keys
-    [:pattern, :herbarium, :observation, :by, :q, :id].freeze
-  end
-
   # Show list of herbarium_records.
   def unfiltered_index
     store_location
@@ -32,11 +27,15 @@ class HerbariumRecordsController < ApplicationController
     ::Query::HerbariumBase.default_order
   end
 
+  # ApplicationController uses this table to dispatch #index to a private method
+  def index_subaction_param_keys
+    [:pattern, :herbarium, :observation, :by, :q, :id].freeze
+  end
+
   # Displays matrix of selected HerbariumRecord's (based on current Query).
   def index_query_results
     query = find_or_create_query(:HerbariumRecord, by: params[:by])
-    at_id_args = { id: params[:id].to_s, always_index: true }
-    show_selected(query, at_id_args)
+    show_selected(query, index_at_id_args)
   end
 
   # Display list of HerbariumRecords whose text matches a string pattern.

@@ -47,8 +47,7 @@ module Names
     # Display list of name descriptions in last index/search query.
     def index_query_results
       query = find_or_create_query(:NameDescription, by: params[:by])
-      at_id_args = { id: params[:id].to_s, always_index: true }
-      show_selected(query, at_id_args)
+      show_selected(query, index_at_id_args)
     end
 
     # Is :name.

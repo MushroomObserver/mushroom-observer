@@ -15,15 +15,6 @@ class ProjectsController < ApplicationController
 
   private
 
-  # ApplicationController uses this to dispatch #index to a private method
-  def index_subaction_param_keys
-    [:pattern, :by, :member].freeze
-  end
-
-  def index_subaction_dispatch_table
-    { by: :index_query_results }.freeze
-  end
-
   # Show list of latest projects.  (Linked from left panel.)
   def unfiltered_index
     query = create_query(:Project, :all, by: default_sort_order)
@@ -34,11 +25,19 @@ class ProjectsController < ApplicationController
     ::Query::ProjectBase.default_order
   end
 
+  # ApplicationController uses this to dispatch #index to a private method
+  def index_subaction_param_keys
+    [:pattern, :by, :member].freeze
+  end
+
+  def index_subaction_dispatch_table
+    { by: :index_query_results }.freeze
+  end
+
   # Show list of selected projects, based on current Query.
   def index_query_results
     query = find_or_create_query(:Project, by: params[:by])
-    at_id_args = { id: params[:id].to_s, always_index: true }
-    show_selected(query, at_id_args)
+    show_selected(query, index_at_id_args)
   end
 
   # Display list of Project's whose title or notes match a string pattern.

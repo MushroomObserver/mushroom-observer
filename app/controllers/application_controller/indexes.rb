@@ -40,6 +40,10 @@ module ApplicationController::Indexes
     {}
   end
 
+  def index_at_id_args
+    { id: params[:id].to_s, always_index: true }
+  end
+
   # Render an index or set of search results as a list or matrix. Arguments:
   # query::     Query instance describing search/index.
   # args::      Hash of options.

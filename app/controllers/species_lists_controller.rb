@@ -51,8 +51,7 @@ class SpeciesListsController < ApplicationController
   def index_query_results
     by_param = params[:by] || :date # needs a value to affect title
     query = find_or_create_query(:SpeciesList, by: by_param)
-    at_id_args = { id: params[:id].to_s, always_index: true }
-    show_selected(query, at_id_args)
+    show_selected(query, index_at_id_args)
   end
 
   # Display list of user's species_lists, sorted by date.

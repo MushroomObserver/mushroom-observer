@@ -31,12 +31,6 @@ class LocationsController < ApplicationController
 
   private
 
-  # ApplicationController uses this to dispatch #index to a private method
-  def index_subaction_param_keys
-    [:advanced_search, :pattern, :country, :project, :by_user, :by_editor,
-     :by, :q, :id].freeze
-  end
-
   # Displays a list of all locations.
   def unfiltered_index
     query = create_query(:Location, :all, by: default_sort_order)
@@ -47,11 +41,16 @@ class LocationsController < ApplicationController
     ::Query::LocationBase.default_order
   end
 
+  # ApplicationController uses this to dispatch #index to a private method
+  def index_subaction_param_keys
+    [:advanced_search, :pattern, :country, :project, :by_user, :by_editor,
+     :by, :q, :id].freeze
+  end
+
   # Displays a list of selected locations, based on current Query.
   def index_query_results
     query = find_or_create_query(:Location, by: params[:by])
-    at_id_args = { id: params[:id].to_s, always_index: true }
-    show_selected(query, at_id_args)
+    show_selected(query, index_at_id_args)
   end
 
   # Displays matrix of advanced search results.

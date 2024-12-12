@@ -9,20 +9,17 @@ class ObservationsController
 
     private
 
-    # Searches come 1st because they may have the other params
-    def index_subaction_param_keys
-      [:advanced_search, :pattern, :look_alikes, :related_taxa, :name,
-       :by_user, :location, :where, :project, :by, :q, :id].freeze
-    end
-
-    # index subactions:
-    # methods called by #index via a dispatch table in ObservationsController
-
     # Displays home matrix of all Observation's, sorted by :rss_log
     # Note all other filters of the obs index are sorted by date.
     def unfiltered_index
       query = create_query(:Observation, :all, by: :rss_log)
       show_selected(query)
+    end
+
+    # Searches come 1st because they may have the other params
+    def index_subaction_param_keys
+      [:advanced_search, :pattern, :look_alikes, :related_taxa, :name,
+       :by_user, :location, :where, :project, :by, :q, :id].freeze
     end
 
     def default_sort_order
@@ -32,8 +29,7 @@ class ObservationsController
     # Displays matrix of selected Observations (based on current Query).
     def index_query_results
       query = find_or_create_query(:Observation, by: params[:by])
-      at_id_args = { id: params[:id].to_s, always_index: true }
-      show_selected(query, at_id_args)
+      show_selected(query, index_at_id_args)
     end
 
     # Displays matrix of Observations with the given text_name (or search_name).

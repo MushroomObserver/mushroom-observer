@@ -13,27 +13,36 @@ class RssLogsController < ApplicationController
   # Default page.  Just displays latest happenings.  The actual action is
   # buried way down toward the end of this file.
   # Displays matrix of selected RssLog's (based on current Query, if exists).
-  # TODO: use dispatcher, split off `type` action
   def index
-    # POST requests with param `type` potentially show an array of types
-    # of objects. The array comes from the checkboxes in tabset
-    if params[:type].present?
-      query = find_or_create_query(:RssLog,
-                                   type: types_query_string_from_params)
-    # Previously saved query, incorporating type and other params
-    elsif params[:q].present?
-      query = find_query(:RssLog)
-      query ||= create_query(:RssLog, :all,
-                             type: @user ? @user.default_rss_type : "all")
-    # Fresh version of the index, no existing query
-    else
-      query = create_query(:RssLog, :all,
-                           type: @user ? @user.default_rss_type : "all")
-    end
-    show_selected(query, id: params[:id].to_s, always_index: true)
+    build_index_with_query
   end
 
   private
+
+  def unfiltered_index
+    query = create_query(:RssLog, :all,
+                         type: @user ? @user.default_rss_type : "all")
+    show_selected(query, index_at_id_args)
+  end
+
+  # ApplicationController uses this to dispatch #index to a private method
+  def index_subaction_param_keys
+    [:type, :by, :q, :id].freeze
+  end
+
+  def index_query_results
+    query = find_or_create_query(
+      :RssLog, :all, type: @user ? @user.default_rss_type : "all"
+    )
+    show_selected(query, index_at_id_args)
+  end
+
+  # requests with param `type` potentially show an array of types
+  # of objects. The array comes from the checkboxes in tabset
+  def type
+    query = find_or_create_query(:RssLog, type: types_query_string_from_params)
+    show_selected(query, index_at_id_args)
+  end
 
   # Show selected search results as a matrix with "index" template.
   def show_selected(query, args = {})

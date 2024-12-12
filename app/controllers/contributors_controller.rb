@@ -13,19 +13,19 @@ class ContributorsController < ApplicationController
 
   private
 
-  # Used by ApplicationController to dispatch #index to a private method
-  def index_subaction_param_keys
-    [:by, :q, :id].freeze
+  def unfiltered_index
+    query = create_query(:User, :all, with_contribution: true,
+                                      by: :contribution)
+    show_selected(query)
   end
 
   def default_sort_order
     :contribution
   end
 
-  def unfiltered_index
-    query = create_query(:User, :all, with_contribution: true,
-                                      by: :contribution)
-    show_selected(query)
+  # Used by ApplicationController to dispatch #index to a private method
+  def index_subaction_param_keys
+    [:by, :q, :id].freeze
   end
 
   # Show selected list, based on current Query.
@@ -33,8 +33,7 @@ class ContributorsController < ApplicationController
   def index_query_results
     sorted_by = params[:by].present? ? params[:by].to_s : default_sort_order
     query = find_or_create_query(:User, with_contribution: true, by: sorted_by)
-    at_id_args = { id: params[:id].to_s, always_index: true }
-    show_selected(query, at_id_args)
+    show_selected(query, index_at_id_args)
   end
 
   def show_selected(query, args = {})

@@ -40,8 +40,7 @@ module Locations
     # Displays a list of selected locations, based on current Query.
     def index_query_results
       query = find_or_create_query(:LocationDescription, by: params[:by])
-      at_id_args = { id: params[:id].to_s, always_index: true }
-      show_selected(query, at_id_args)
+      show_selected(query, index_at_id_args)
     end
 
     # Display list of location_descriptions that a given user is author on.

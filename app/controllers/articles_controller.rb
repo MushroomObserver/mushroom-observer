@@ -31,20 +31,19 @@ class ArticlesController < ApplicationController
 
   private
 
-  # Used by ApplicationController to dispatch #index to a private method
-  def index_subaction_param_keys
-    [:by, :q, :id].freeze
-  end
-
   def unfiltered_index
     query = create_query(:Article, :all, by: :created_at)
     show_selected(query)
   end
 
+  # Used by ApplicationController to dispatch #index to a private method
+  def index_subaction_param_keys
+    [:by, :q, :id].freeze
+  end
+
   def index_query_results
     query = find_or_create_query(:Article, by: params[:by])
-    at_id_args = { id: params[:id].to_s, always_index: true }
-    show_selected(query, at_id_args)
+    show_selected(query, index_at_id_args)
   end
 
   # Show selected list of articles.

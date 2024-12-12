@@ -26,15 +26,6 @@ class CommentsController < ApplicationController
 
   private
 
-  # ApplicationController uses this table to dispatch #index to a private method
-  def index_subaction_param_keys
-    [:target, :pattern, :by_user, :for_user, :by].freeze
-  end
-
-  def index_subaction_dispatch_table
-    { by: :index_query_results }.freeze
-  end
-
   # Show list of latest comments. (Linked from left panel.)
   def unfiltered_index
     query = create_query(:Comment, :all, by: default_sort_order)
@@ -45,13 +36,21 @@ class CommentsController < ApplicationController
     ::Query::CommentBase.default_order
   end
 
+  # ApplicationController uses this table to dispatch #index to a private method
+  def index_subaction_param_keys
+    [:target, :pattern, :by_user, :for_user, :by].freeze
+  end
+
+  def index_subaction_dispatch_table
+    { by: :index_query_results }.freeze
+  end
+
   # Show selected list of comments, based on current Query.  (Linked from
   # show_comment, next to "prev" and "next"... or will be.)
   def index_query_results
     sorted_by = params[:by].present? ? params[:by].to_s : default_sort_order
     query = find_or_create_query(:Comment, by: sorted_by)
-    at_id_args = { id: params[:id].to_s, always_index: true }
-    show_selected(query, at_id_args)
+    show_selected(query, index_at_id_args)
   end
 
   # Shows comments by a given user, most recent first. (Linked from show_user.)

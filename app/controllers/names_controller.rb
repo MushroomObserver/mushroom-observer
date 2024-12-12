@@ -15,12 +15,6 @@ class NamesController < ApplicationController
 
   private
 
-  # ApplicationController uses this to dispatch #index to a private method
-  def index_subaction_param_keys
-    [:advanced_search, :pattern, :with_observations, :with_descriptions,
-     :need_descriptions, :by_user, :by_editor, :by, :q, :id].freeze
-  end
-
   # Display list of all (correctly-spelled) names in the database.
   def unfiltered_index
     query = create_query(:Name, :all, by: default_sort_order)
@@ -31,11 +25,16 @@ class NamesController < ApplicationController
     ::Query::NameBase.default_order
   end
 
+  # ApplicationController uses this to dispatch #index to a private method
+  def index_subaction_param_keys
+    [:advanced_search, :pattern, :with_observations, :with_descriptions,
+     :need_descriptions, :by_user, :by_editor, :by, :q, :id].freeze
+  end
+
   # Display list of names in last index/search query.
   def index_query_results
     query = find_or_create_query(:Name, by: params[:by])
-    at_id_args = { id: params[:id].to_s, always_index: true }
-    show_selected(query, at_id_args)
+    show_selected(query, index_at_id_args)
   end
 
   # Displays list of advanced search results.

@@ -28,12 +28,7 @@ class ImagesController < ApplicationController
     build_index_with_query
   end
 
-  private # private methods used by #index
-
-  # ApplicationController uses this table to dispatch #index to a private method
-  def index_subaction_param_keys
-    [:advanced_search, :pattern, :by_user, :project, :by, :q, :id].freeze
-  end
+  private
 
   # Display matrix of images, most recent first.
   def unfiltered_index
@@ -41,6 +36,10 @@ class ImagesController < ApplicationController
 
     query = create_query(:Image, :all, by: default_sort_order)
     show_selected(query)
+  end
+
+  def default_sort_order
+    ::Query::ImageBase.default_order
   end
 
   def too_many_results
@@ -61,15 +60,15 @@ class ImagesController < ApplicationController
     )
   end
 
-  def default_sort_order
-    ::Query::ImageBase.default_order
+  # ApplicationController uses this table to dispatch #index to a private method
+  def index_subaction_param_keys
+    [:advanced_search, :pattern, :by_user, :project, :by, :q, :id].freeze
   end
 
   # Display matrix of selected images, based on current Query.
   def index_query_results
     query = find_or_create_query(:Image, by: params[:by])
-    at_id_args = { id: params[:id].to_s, always_index: true }
-    show_selected(query, at_id_args)
+    show_selected(query, index_at_id_args)
   end
 
   # Display matrix of images by a given user.

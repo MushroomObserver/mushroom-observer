@@ -20,11 +20,6 @@ class CollectionNumbersController < ApplicationController
 
   private
 
-  # Used by ApplicationController to dispatch #index to a private method
-  def index_subaction_param_keys
-    [:pattern, :observation, :by, :q, :id].freeze
-  end
-
   # Show list of collection_numbers.
   def unfiltered_index
     store_location
@@ -32,11 +27,15 @@ class CollectionNumbersController < ApplicationController
     show_selected(query)
   end
 
+  # Used by ApplicationController to dispatch #index to a private method
+  def index_subaction_param_keys
+    [:pattern, :observation, :by, :q, :id].freeze
+  end
+
   # Displays matrix of selected CollectionNumber's (based on current Query).
   def index_query_results
     query = find_or_create_query(:CollectionNumber, by: params[:by])
-    show_selected(query, id: params[:id].to_s,
-                                            always_index: true)
+    show_selected(query, index_at_id_args)
   end
 
   # Display list of CollectionNumbers whose text matches a string pattern.

@@ -21,8 +21,7 @@ module FieldSlipsController::Index
   # (can be used by the "Back" button on the show page.)
   def index_query_results
     query = find_or_create_query(:FieldSlip, by: params[:by])
-    at_id_args = { id: params[:id].to_s, always_index: true }
-    show_selected(query, at_id_args)
+    show_selected(query, index_at_id_args)
   end
 
   # Display list of FieldSlips attached to a given project.
