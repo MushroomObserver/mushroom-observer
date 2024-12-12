@@ -15,7 +15,7 @@ class ContributorsController < ApplicationController
 
   def unfiltered_index
     query = create_query(:User, :all, with_contribution: true,
-                                      by: :contribution)
+                                      by: default_sort_order)
     show_selected(query)
   end
 
