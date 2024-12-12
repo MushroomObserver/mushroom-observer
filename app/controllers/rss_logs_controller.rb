@@ -20,8 +20,7 @@ class RssLogsController < ApplicationController
   private
 
   def unfiltered_index
-    query = create_query(:RssLog, :all,
-                         type: @user ? @user.default_rss_type : "all")
+    query = create_query(:RssLog, :all, type: index_type_default)
     show_selected(query, index_at_id_args)
   end
 
@@ -31,16 +30,14 @@ class RssLogsController < ApplicationController
   end
 
   def index_query_results
-    query = find_or_create_query(
-      :RssLog, :all, type: @user ? @user.default_rss_type : "all"
-    )
+    query = find_or_create_query(:RssLog, type: index_type_default)
     show_selected(query, index_at_id_args)
   end
 
-  # requests with param `type` potentially show an array of types
+  # Requests with param `type` potentially show an array of types
   # of objects. The array comes from the checkboxes in tabset
   def type
-    query = find_or_create_query(:RssLog, type: types_query_string_from_params)
+    query = find_or_create_query(:RssLog, type: index_type_from_params)
     show_selected(query, index_at_id_args)
   end
 
@@ -68,8 +65,12 @@ class RssLogsController < ApplicationController
     }.merge(args)
   end
 
+  def index_type_default
+    @user ? @user.default_rss_type : "all"
+  end
+
   # Get the types whose value == "1"
-  def types_query_string_from_params
+  def index_type_from_params
     types = ""
     if params[:type].is_a?(ActionController::Parameters)
       types = params[:type].select { |_key, value| value == "1" }.keys
