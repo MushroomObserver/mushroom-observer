@@ -21,18 +21,18 @@ module Observations
 
     private
 
+    def unfiltered_index
+      query = create_query(*q_args, q_kwargs)
+
+      show_selected(query)
+    end
+
     def q_args
       [:Observation, :needs_naming]
     end
 
     def q_kwargs
       { by: :rss_log }
-    end
-
-    def unfiltered_index
-      query = create_query(*q_args, q_kwargs)
-
-      show_selected(query)
     end
 
     # need both a :type and a :term

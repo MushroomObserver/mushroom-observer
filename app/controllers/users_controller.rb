@@ -21,11 +21,6 @@ class UsersController < ApplicationController
 
   private
 
-  # Used by ApplicationController to dispatch #index to a private method
-  def index_subaction_param_keys
-    [:pattern, :by, :q, :id].freeze
-  end
-
   # NOTE: Only admins can get the full user index.
   # Others get here via search, so they shouldn't hit unfiltered_index
   def unfiltered_index
@@ -37,6 +32,11 @@ class UsersController < ApplicationController
 
   def default_sort_order
     :name
+  end
+
+  # Used by ApplicationController to dispatch #index to a private method
+  def index_subaction_param_keys
+    [:pattern, :by, :q, :id].freeze
   end
 
   def index_query_results

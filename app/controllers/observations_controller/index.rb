@@ -16,14 +16,14 @@ class ObservationsController
       show_selected(query)
     end
 
+    def default_sort_order
+      ::Query::ObserationBase.default_order # :date
+    end
+
     # Searches come 1st because they may have the other params
     def index_subaction_param_keys
       [:advanced_search, :pattern, :look_alikes, :related_taxa, :name,
        :by_user, :location, :where, :project, :by, :q, :id].freeze
-    end
-
-    def default_sort_order
-      ::Query::ObserationBase.default_order
     end
 
     # Displays matrix of selected Observations (based on current Query).

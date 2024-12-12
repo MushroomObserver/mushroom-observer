@@ -33,26 +33,25 @@ module Names
 
     private
 
-    # Used by ApplicationController to dispatch #index to a private method
-    def index_subaction_param_keys
-      [:by_author, :by_editor, :by, :q, :id].freeze
-    end
-
     # Display list of all (correctly-spelled) name_descriptions in the database.
     def unfiltered_index
       query = create_query(:NameDescription, :all, by: default_sort_order)
       show_selected(query)
     end
 
+    def default_sort_order
+      ::Query::NameDescriptionBase.default_order # :name
+    end
+
+    # Used by ApplicationController to dispatch #index to a private method
+    def index_subaction_param_keys
+      [:by_author, :by_editor, :by, :q, :id].freeze
+    end
+
     # Display list of name descriptions in last index/search query.
     def index_query_results
       query = find_or_create_query(:NameDescription, by: params[:by])
       show_selected(query, index_at_id_args)
-    end
-
-    # Is :name.
-    def default_sort_order
-      ::Query::NameDescriptionBase.default_order
     end
 
     # Display list of name_descriptions that a given user is author on.

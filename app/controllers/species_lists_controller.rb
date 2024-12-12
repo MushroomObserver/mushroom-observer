@@ -30,20 +30,20 @@ class SpeciesListsController < ApplicationController
 
   private
 
-  # Used by ApplicationController to dispatch #index to a private method
-  def index_subaction_param_keys
-    [:pattern, :by_user, :project, :by, :q, :id].freeze
-  end
-
   # Display list of all species_lists, sorted by title.
   def unfiltered_index
     query = create_query(:SpeciesList, :all, by: :date)
     show_selected(query)
   end
 
-  # unused now. should be :date, i think - AN
+  # unused now. should be :date, i'd say - AN
   def default_sort_order
     ::Query::SpeciesListBase.default_order # :title
+  end
+
+  # Used by ApplicationController to dispatch #index to a private method
+  def index_subaction_param_keys
+    [:pattern, :by_user, :project, :by, :q, :id].freeze
   end
 
   # Display list of selected species_lists, based on current Query.

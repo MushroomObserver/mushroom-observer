@@ -21,11 +21,6 @@ module Locations
 
     private
 
-    # Used by ApplicationController to dispatch #index to a private method
-    def index_subaction_param_keys
-      [:by_author, :by_editor, :by, :q, :id].freeze
-    end
-
     # Displays a list of all location_descriptions.
     def unfiltered_index
       query = create_query(:LocationDescription, :all, by: default_sort_order)
@@ -35,6 +30,11 @@ module Locations
     # Is :name
     def default_sort_order
       ::Query::LocationDescriptionBase.default_order
+    end
+
+    # Used by ApplicationController to dispatch #index to a private method
+    def index_subaction_param_keys
+      [:by_author, :by_editor, :by, :q, :id].freeze
     end
 
     # Displays a list of selected locations, based on current Query.
