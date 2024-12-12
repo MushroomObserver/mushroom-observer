@@ -19,6 +19,10 @@ class GlossaryTermsController < ApplicationController
     show_selected(query)
   end
 
+  def default_sort_order
+    :name
+  end
+
   # Used by ApplicationController to dispatch #index to a private method
   def index_subaction_param_keys
     [:pattern, :by, :q, :id].freeze
@@ -35,10 +39,8 @@ class GlossaryTermsController < ApplicationController
   def pattern
     pattern = params[:pattern].to_s
     # If it matches the term ID
-    if pattern.match?(/^\d+$/) &&
-       (glossary_term = GlossaryTerm.safe_find(pattern))
-      render(:show, params: { id: glossary_term.id },
-                    location: glossary_term_path(glossary_term.id)) and return
+    if pattern.match?(/^\d+$/) && (g_term = GlossaryTerm.safe_find(pattern))
+      redirect_to(glossary_term_path(g_term.id))
     else
       query = create_query(:GlossaryTerm, :all, pattern: pattern)
       show_selected(query)
