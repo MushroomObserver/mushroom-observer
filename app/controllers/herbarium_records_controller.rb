@@ -38,18 +38,6 @@ class HerbariumRecordsController < ApplicationController
     show_selected(query, index_at_id_args)
   end
 
-  # Display list of HerbariumRecords whose text matches a string pattern.
-  def pattern
-    pattern = params[:pattern].to_s
-    if pattern.match?(/^\d+$/) &&
-       (herbarium_record = HerbariumRecord.safe_find(pattern))
-      redirect_to(herbarium_record_path(herbarium_record.id))
-    else
-      query = create_query(:HerbariumRecord, :all, pattern: pattern)
-      show_selected(query)
-    end
-  end
-
   def herbarium
     store_location
     query = create_query(:HerbariumRecord, :all,

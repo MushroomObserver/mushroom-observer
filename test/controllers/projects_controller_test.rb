@@ -204,9 +204,7 @@ class ProjectsControllerTest < FunctionalTestCase
 
     login
     get(:index, params: { pattern: project.id.to_s })
-
-    assert_response(:success)
-    assert_displayed_title(project.title)
+    assert_redirected_to(project_path(project.id))
   end
 
   def test_add_project

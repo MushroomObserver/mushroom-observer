@@ -36,17 +36,6 @@ class GlossaryTermsController < ApplicationController
     show_selected(query, index_at_id_args)
   end
 
-  def pattern
-    pattern = params[:pattern].to_s
-    # If it matches the term ID
-    if pattern.match?(/^\d+$/) && (g_term = GlossaryTerm.safe_find(pattern))
-      redirect_to(glossary_term_path(g_term.id))
-    else
-      query = create_query(:GlossaryTerm, :all, pattern: pattern)
-      show_selected(query)
-    end
-  end
-
   # Show selected list of glossary_terms.
   def show_selected(query, args = {})
     show_index_of_objects(query, index_display_args(args, query))

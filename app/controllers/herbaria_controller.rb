@@ -101,16 +101,6 @@ class HerbariaController < ApplicationController
     show_selected(query, always_index)
   end
 
-  def pattern
-    pattern = params[:pattern].to_s
-    if pattern.match?(/^\d+$/) && (herbarium = Herbarium.safe_find(pattern))
-      redirect_to(herbarium_path(herbarium.id))
-    else
-      query = create_query(:Herbarium, :all, pattern: pattern)
-      show_selected(query)
-    end
-  end
-
   # TODO: Generalize `set_extra_index_ivars`
   # NOTE: make `merge` an action when this is a param builder.
   def show_selected(query, args = {})

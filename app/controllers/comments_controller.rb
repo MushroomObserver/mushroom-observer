@@ -94,17 +94,6 @@ class CommentsController < ApplicationController
     redirect_back_or_default(action: :index)
   end
 
-  # Display list of Comment's whose text matches a string pattern.
-  def pattern
-    pattern = params[:pattern].to_s
-    if pattern.match?(/^\d+$/) && (comment = Comment.safe_find(pattern))
-      redirect_to(action: :show, id: comment.id)
-    else
-      query = create_query(:Comment, :all, pattern: pattern)
-      show_selected(query)
-    end
-  end
-
   # Show selected list of comments.
   def show_selected(query, args = {})
     show_index_of_objects(query, index_display_args(args, query))

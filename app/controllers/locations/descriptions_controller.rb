@@ -32,6 +32,10 @@ module Locations
       ::Query::LocationDescriptionBase.default_order
     end
 
+    def controller_model_name
+      "LocationDescription"
+    end
+
     # Used by ApplicationController to dispatch #index to a private method
     def index_subaction_param_keys
       [:by_author, :by_editor, :by, :q, :id].freeze

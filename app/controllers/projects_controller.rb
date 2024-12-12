@@ -40,19 +40,6 @@ class ProjectsController < ApplicationController
     show_selected(query, index_at_id_args)
   end
 
-  # Display list of Project's whose title or notes match a string pattern.
-  def pattern
-    pattern = params[:pattern].to_s
-    if pattern.match(/^\d+$/) &&
-       (@project = Project.safe_find(pattern))
-      set_ivars_for_show
-      render("show", location: project_path(@project.id))
-    else
-      query = create_query(:Project, :all, pattern: pattern)
-      show_selected(query)
-    end
-  end
-
   # Display list of projects with a given member, sorted by date.
   def member
     user = find_obj_or_goto_index(

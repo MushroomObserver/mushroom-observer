@@ -75,19 +75,6 @@ class SpeciesListsController < ApplicationController
     show_selected(query, always_index: true)
   end
 
-  # Display list of SpeciesList's whose title, notes, etc. matches a string
-  # pattern.
-  def pattern
-    pattern = params[:pattern].to_s
-    spl = SpeciesList.safe_find(pattern) if /^\d+$/.match?(pattern)
-    if spl
-      redirect_to(action: :show, id: spl.id)
-    else
-      query = create_query(:SpeciesList, :all, pattern: pattern)
-      show_selected(query)
-    end
-  end
-
   # Show selected list of species_lists.
   def show_selected(query, args = {})
     show_index_of_objects(query, index_display_args(args, query))

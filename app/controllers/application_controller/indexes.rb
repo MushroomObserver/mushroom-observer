@@ -36,8 +36,32 @@ module ApplicationController::Indexes
     }.freeze
   end
 
-  def index_display_args(_args, _query)
-    {}
+  # It's not always the controller_name, e.g. ContributorsController -> User
+  def controller_model_name
+    controller_name.classify
+  end
+
+  # Most pattern searches follow this, um, pattern.
+  def pattern
+    pattern = params[:pattern].to_s
+    if (obj = maybe_pattern_is_an_id(pattern))
+      redirect_to(send(:"#{controller_model_name.underscore}_path", obj.id))
+    else
+      query = create_query(controller_model_name.to_sym, :all, pattern:)
+      show_selected(query)
+    end
+  end
+
+  def maybe_pattern_is_an_id(pattern)
+    if /^\d+$/.match?(pattern)
+      return controller_model_name.constantize.safe_find(pattern)
+    end
+
+    false
+  end
+
+  def index_display_args(args, _query)
+    {}.merge(args)
   end
 
   def index_at_id_args

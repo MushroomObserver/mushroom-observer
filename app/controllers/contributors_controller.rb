@@ -11,6 +11,10 @@ class ContributorsController < ApplicationController
     build_index_with_query
   end
 
+  def self.controller_model_name
+    "User"
+  end
+
   private
 
   def unfiltered_index

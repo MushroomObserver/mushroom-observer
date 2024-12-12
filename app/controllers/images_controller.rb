@@ -92,18 +92,6 @@ class ImagesController < ApplicationController
     show_selected(query, always_index: 1)
   end
 
-  # Display matrix of images whose notes, names, etc. match a string pattern.
-  def pattern
-    pattern = params[:pattern].to_s
-    if pattern.match?(/^\d+$/) &&
-       (image = Image.safe_find(pattern))
-      redirect_to(action: "show", id: image.id)
-    else
-      query = create_query(:Image, :all, pattern: pattern)
-      show_selected(query)
-    end
-  end
-
   # Displays matrix of advanced search results.
   def advanced_search
     return if handle_advanced_search_invalid_q_param?

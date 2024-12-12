@@ -16,6 +16,10 @@ module Observations
       show_selected(query)
     end
 
+    def controller_model_name
+      "Observation"
+    end
+
     def index_subaction_param_keys
       [:filter, :q, :id].freeze
     end

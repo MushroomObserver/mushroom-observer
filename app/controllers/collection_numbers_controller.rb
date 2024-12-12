@@ -38,18 +38,6 @@ class CollectionNumbersController < ApplicationController
     show_selected(query, index_at_id_args)
   end
 
-  # Display list of CollectionNumbers whose text matches a string pattern.
-  def pattern
-    pat = params[:pattern].to_s
-    if pat.match?(/^\d+$/) &&
-       (collection_number = CollectionNumber.safe_find(pat))
-      redirect_to(action: :show, id: collection_number.id)
-    else
-      query = create_query(:CollectionNumber, :all, pattern: pat)
-      show_selected(query)
-    end
-  end
-
   # Display list of CollectionNumbers for an Observation
   def observation
     @observation = Observation.find(params[:observation])

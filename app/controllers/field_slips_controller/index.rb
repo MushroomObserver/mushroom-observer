@@ -14,7 +14,7 @@ module FieldSlipsController::Index
   end
 
   def index_subaction_param_keys
-    [:by_user, :project, :by, :q, :id].freeze
+    [:project, :by_user, :by, :q, :id].freeze
   end
 
   # Displays index at the page containing the last field slip viewed.
@@ -36,7 +36,7 @@ module FieldSlipsController::Index
 
   # Displays list of User's FieldSlips, by date.
   def by_user
-    return unless (user = find_or_goto_index(User, params[:user]))
+    return unless (user = find_or_goto_index(User, params[:by_user]))
 
     query = create_query(:FieldSlip, :all, by_user: user)
     show_selected(query)
