@@ -64,7 +64,7 @@ class HerbariaController < ApplicationController
   #   params[:pattern].present? - Herbaria based on Pattern Search
   #   [:nonpersonal].blank? - all Herbaria, regardless of query
   #   [:nonpersonal].present? - all nonpersonal (institutional) Herbaria
-  #   index_query_results - Herbaria based on current Query
+  #   index_sorted_query - Herbaria based on current Query
   #                         (Sort links land on this action)
   #
   def index
@@ -84,17 +84,16 @@ class HerbariaController < ApplicationController
     :name
   end
 
-  # Used by ApplicationController to dispatch #index to a private method
   def index_active_params
     [:pattern, :nonpersonal, :by, :q, :id].freeze
   end
 
   # Show selected list, based on current Query.
   # (Linked from show template, next to "prev" and "next"... or will be.)
-  def index_query_results
-    sorted_by = params[:by].present? ? params[:by].to_s : default_sort_order
-    query = find_or_create_query(:Herbarium, by: sorted_by)
-    index_selected(query, index_display_at_id_args)
+  # Passes explicit :by param to affect title (only).
+  def index_sorted_query_opts
+    sorted_by = params[:by] || default_sort_order
+    super.merge(query_args: { by: sorted_by })
   end
 
   def nonpersonal

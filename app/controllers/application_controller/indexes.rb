@@ -22,75 +22,6 @@ module ApplicationController::Indexes
     unfiltered_index
   end
 
-  def index_active_params
-    []
-  end
-
-  def index_basic_params
-    [:by, :q, :id].freeze
-  end
-
-  def index_param_method_or_default(subaction)
-    index_basic_params.include?(subaction) ? :index_query_results : subaction
-  end
-
-  # Generally this is the default index action, no params given.
-  # In some controllers, you have to pass params[:all] to get this, however.
-  def unfiltered_index
-    args = { by: default_sort_order }.merge(unfiltered_index_extra_args)
-    query = create_query(controller_model_name.to_sym,
-                         unfiltered_index_query_flavor, **args)
-    # display_args = index_display_args(unfiltered_index_display_args, query)
-    # show_index_of_objects(query, display_args)
-    index_selected(query, unfiltered_index_display_args)
-  end
-
-  def unfiltered_index_query_flavor
-    :all
-  end
-
-  def unfiltered_index_extra_args
-    {}
-  end
-
-  def unfiltered_index_display_args
-    {}
-  end
-
-  # The index if you pass any of the basic params.
-  def index_query_results
-    query = find_or_create_query(controller_model_name.to_sym, by: params[:by])
-    # display_args = index_display_args(index_display_at_id_args, query)
-    # show_index_of_objects(query, display_args)
-    index_selected(query, index_display_at_id_args)
-  end
-
-  # The filtered index.
-  def index_selected(query, extra_args = {})
-    query = index_selected_pre_query(query, extra_args)
-    display_args = index_display_args(extra_args, query)
-
-    show_index_of_objects(query, display_args)
-  end
-
-  # This is a hook for controllers to modify the query before it is used,
-  # or do anything else before the index is displayed.
-  # NOTE: Must return the query (if writing an override).
-  def index_selected_pre_query(query, _display_args)
-    query
-  end
-
-  # Default for the display_args hash passed to show_index_of_objects.
-  def index_display_args(extra_args, _query)
-    {}.merge(extra_args)
-  end
-
-  # Default for the display_args hash passed to show_index_of_objects
-  # when the index is called with an id.
-  def index_display_at_id_args
-    { id: params[:id].to_s, always_index: true }
-  end
-
   # It's not always the controller_name, e.g. ContributorsController -> User
   def controller_model_name
     controller_name.classify
@@ -103,6 +34,90 @@ module ApplicationController::Indexes
     # query_base = "::Query::#{controller_model_name}Base".constantize
     # query_base.send(:default_order) || nil
     nil
+  end
+
+  # Basic params most controllers can handle
+  INDEX_BASIC_PARAMS = [:by, :q, :id].freeze
+
+  # Provide defaults for the params an index can handle.
+  # Overrides should include any of the above basics if relevant.
+  def index_active_params
+    ApplicationController::Indexes::INDEX_BASIC_PARAMS
+  end
+
+  # The basic params that get handled by :index_sorted_query.
+  # Some controllers don't handle all three, so we intersect.
+  def index_basic_params
+    index_active_params.intersection(INDEX_BASIC_PARAMS)
+  end
+
+  def index_param_method_or_default(subaction)
+    index_basic_params.include?(subaction) ? :index_sorted_query : subaction
+  end
+
+  # Generally this is the default index action, no params given.
+  # In some controllers, you have to pass params[:all] to get this, however.
+  def unfiltered_index
+    return unless unfiltered_index_permitted?
+
+    args = { by: default_sort_order }.merge(unfiltered_index_opts[:query_args])
+    query = create_query(controller_model_name.to_sym,
+                         unfiltered_index_opts[:query_flavor], **args)
+
+    index_selected(query, unfiltered_index_opts[:display_args])
+  end
+
+  def unfiltered_index_permitted?
+    true
+  end
+
+  def unfiltered_index_opts
+    { query_flavor: :all, query_args: {}, display_args: {} }
+  end
+
+  # The index if you pass any of the basic params.
+  def index_sorted_query
+    return unless index_sorted_query_permitted?
+
+    query = find_or_create_query(controller_model_name.to_sym,
+                                 **index_sorted_query_opts[:query_args])
+
+    index_selected(query, index_sorted_query_opts[:display_args])
+  end
+
+  def index_sorted_query_permitted?
+    true
+  end
+
+  def index_sorted_query_opts
+    { query_args: { by: params[:by] }, display_args: index_display_at_id_args }
+  end
+
+  # The filtered index.
+  def index_selected(query, extra_display_args = {})
+    query = index_selected_final_hook(query, extra_display_args)
+    display_args = index_display_args(extra_display_args, query)
+
+    show_index_of_objects(query, display_args)
+  end
+
+  # This is a hook for controllers to modify the query before it is used,
+  # or do anything else before the index is displayed.
+  # NOTE: Must return the query (if writing an override).
+  def index_selected_final_hook(query, _display_args)
+    query
+  end
+
+  # Default for the display_args hash passed to show_index_of_objects.
+  # These are pretty different per controller.
+  def index_display_args(extra_display_args, _query)
+    {}.merge(extra_display_args)
+  end
+
+  # Default for the display_args hash passed to show_index_of_objects
+  # when the index is called with an id.
+  def index_display_at_id_args
+    { id: params[:id].to_s, always_index: true }
   end
 
   # Most pattern searches follow this, um, pattern.

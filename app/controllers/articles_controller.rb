@@ -35,11 +35,6 @@ class ArticlesController < ApplicationController
     :created_at
   end
 
-  # Used by ApplicationController to dispatch #index to a private method
-  def index_active_params
-    [:by, :q, :id].freeze
-  end
-
   def index_display_args(args, _query)
     {
       action: :index,

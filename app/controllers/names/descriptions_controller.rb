@@ -71,7 +71,7 @@ module Names
     end
 
     # Hook runs before template displayed. Must return query.
-    def index_selected_pre_query(query, _display_args)
+    def index_selected_final_hook(query, _display_args)
       store_query_in_session(query)
       query
     end

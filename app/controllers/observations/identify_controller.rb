@@ -11,17 +11,13 @@ module Observations
 
     private
 
-    # override the default Query flavor :all
-    def unfiltered_index_query_flavor
-      :needs_naming
-    end
-
-    def unfiltered_index_extra_args
-      { by: :rss_log }
-    end
-
     def controller_model_name
       "Observation"
+    end
+
+    # override the default Query flavor :all
+    def unfiltered_index_opts
+      super.merge(query_flavor: :needs_naming, query_args: { by: :rss_log })
     end
 
     def index_active_params

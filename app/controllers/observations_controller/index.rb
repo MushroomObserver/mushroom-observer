@@ -9,17 +9,17 @@ class ObservationsController
 
     private
 
-    # Note all other filters of the obs index are sorted by date.
-    def unfiltered_index_extra_args
-      { by: :rss_log }
-    end
-
     # Default on home is :rss_log (:log_updated_at), not :date.
     # Maybe other filters should explicitly specify :date?
     # Then we could use default_sort_order above.
     # Or, set an "unfiltered sort order" method that defaults to this.
     def default_sort_order
       ::Query::ObservationBase.default_order # :date
+    end
+
+    # Note all other filters of the obs index are sorted by date.
+    def unfiltered_index_opts
+      super.merge(query_args: { by: :rss_log })
     end
 
     # Searches come 1st because they may have the other params
@@ -175,7 +175,7 @@ class ObservationsController
     end
 
     # Hook runs before template displayed. Must return query.
-    def index_selected_pre_query(query, _display_args)
+    def index_selected_final_hook(query, _display_args)
       store_query_in_session(query)
       # Restrict to subset within a geographical region (used by map
       # if it needed to stuff multiple locations into a single marker).

@@ -13,15 +13,16 @@ module Projects
     before_action :pass_query_params
 
     def index
+      return unless find_project!
+
+      @violations = @project.violations
       build_index_with_query
     end
 
     private
 
-    def unfiltered_index
-      return unless find_project!
-
-      @violations = @project.violations
+    def controller_model_name
+      "Project"
     end
 
     public

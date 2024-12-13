@@ -61,8 +61,8 @@ class SequencesController < ApplicationController
     [:all, :by, :q].freeze
   end
 
-  # In this controller, you usually want sequences for an observation.
-  # If you want all sequences, use the :all param.
+  # This is a param handler. In this controller, people usually want sequences
+  # for an observation. If they want all sequences, use the :all param.
   def all
     unfiltered_index
   end

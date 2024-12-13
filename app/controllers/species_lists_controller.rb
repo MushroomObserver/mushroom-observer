@@ -30,14 +30,13 @@ class SpeciesListsController < ApplicationController
 
   private
 
-  # Display list of all species_lists, sorted by title.
-  def unfiltered_index_extra_args
-    { by: :date }
-  end
-
-  # unused now. should be :date, i'd say - AN
+  # unused now. should be :date, maybe - AN
   def default_sort_order
     ::Query::SpeciesListBase.default_order # :title
+  end
+
+  def unfiltered_index_opts
+    super.merge(query_args: { by: :date })
   end
 
   # Used by ApplicationController to dispatch #index to a private method
@@ -47,10 +46,10 @@ class SpeciesListsController < ApplicationController
 
   # Display list of selected species_lists, based on current Query.
   # (Linked from show_species_list, next to "prev" and "next".)
-  def index_query_results
-    by_param = params[:by] || :date # needs a value to affect title
-    query = find_or_create_query(:SpeciesList, by: by_param)
-    index_selected(query, index_display_at_id_args)
+  # Passes explicit :by param to affect title (only).
+  def index_sorted_query_opts
+    sorted_by = params[:by] || :date
+    super.merge(query_args: { by: sorted_by })
   end
 
   # Display list of user's species_lists, sorted by date.

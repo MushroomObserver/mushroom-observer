@@ -25,7 +25,6 @@ class CollectionNumbersController < ApplicationController
     nil # [:name, :number]
   end
 
-  # Used by ApplicationController to dispatch #index to a private method
   def index_active_params
     [:pattern, :observation, :by, :q, :id].freeze
   end

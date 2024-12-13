@@ -30,11 +30,12 @@ class ImagesController < ApplicationController
 
   private
 
-  # Display matrix of images, most recent first.
-  def unfiltered_index
-    return render_too_many_results if too_many_results
+  # Don't show the index if they're asking too much.
+  def unfiltered_index_permitted?
+    return true unless too_many_results
 
-    super
+    render_too_many_results
+    false
   end
 
   def too_many_results
@@ -97,7 +98,7 @@ class ImagesController < ApplicationController
   end
 
   # Hook runs before template displayed. Must return query.
-  def index_selected_pre_query(query, _display_args)
+  def index_selected_final_hook(query, _display_args)
     store_query_in_session(query)
     query
   end

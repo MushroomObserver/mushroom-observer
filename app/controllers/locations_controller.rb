@@ -31,12 +31,12 @@ class LocationsController < ApplicationController
 
   private
 
-  def unfiltered_index_display_args
-    { link_all_sorts: true }
-  end
-
   def default_sort_order
     ::Query::LocationBase.default_order # :name
+  end
+
+  def unfiltered_index_opts
+    super.merge(display_args: { link_all_sorts: true })
   end
 
   # ApplicationController uses this to dispatch #index to a private method
@@ -113,7 +113,7 @@ class LocationsController < ApplicationController
   end
 
   # Hook runs before template displayed. Must return query.
-  def index_selected_pre_query(query, display_args)
+  def index_selected_final_hook(query, display_args)
     # Restrict to subset within a geographical region (used by map
     # if it needed to stuff multiple locations into a single marker).
     query = restrict_query_to_box(query)

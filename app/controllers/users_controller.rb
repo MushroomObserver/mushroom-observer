@@ -23,10 +23,17 @@ class UsersController < ApplicationController
 
   # NOTE: Only admins can get the full user index.
   # Others get here via search, so they shouldn't hit unfiltered_index
-  def unfiltered_index
-    return unless index_query_authorized?
+  def unfiltered_index_permitted?
+    index_query_authorized?
+  end
 
-    super
+  # Also used by index_sorted_query below
+  def index_query_authorized?
+    return true if in_admin_mode? || find_query(:User)
+
+    flash_error(:runtime_search_has_expired.t)
+    redirect_to("/")
+    false
   end
 
   def default_sort_order
@@ -38,18 +45,8 @@ class UsersController < ApplicationController
     [:pattern, :by, :q, :id].freeze
   end
 
-  def index_query_results
-    return unless index_query_authorized?
-
-    super
-  end
-
-  def index_query_authorized?
-    return true if in_admin_mode? || find_query(:User)
-
-    flash_error(:runtime_search_has_expired.t)
-    redirect_to("/")
-    false
+  def index_sorted_query_permitted?
+    index_query_authorized?
   end
 
   # Display list of Users whose name, notes, etc. match a string pattern.
@@ -76,7 +73,7 @@ class UsersController < ApplicationController
   end
 
   # Hook runs before template displayed. Must return query.
-  def index_selected_pre_query(query, _display_args)
+  def index_selected_final_hook(query, _display_args)
     store_query_in_session(query)
     query
   end

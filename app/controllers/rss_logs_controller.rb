@@ -19,16 +19,16 @@ class RssLogsController < ApplicationController
 
   private
 
-  def unfiltered_index_extra_args
-    { type: index_type_default }
+  def default_sort_order
+    :updated_at
+  end
+
+  def unfiltered_index_opts
+    super.merge(query_args: { type: index_type_default })
   end
 
   def index_type_default
     @user ? @user.default_rss_type : "all"
-  end
-
-  def default_sort_order
-    :updated_at
   end
 
   # ApplicationController uses this to dispatch #index to a private method
@@ -36,9 +36,9 @@ class RssLogsController < ApplicationController
     [:type, :by, :q, :id].freeze
   end
 
-  def index_query_results
-    query = find_or_create_query(:RssLog, type: index_type_default)
-    index_selected(query, index_display_at_id_args)
+  # Show selected list, based on current Query.
+  def index_sorted_query_opts
+    super.merge(query_args: { type: index_type_default })
   end
 
   # Requests with param `type` potentially show an array of types
@@ -64,7 +64,7 @@ class RssLogsController < ApplicationController
   end
 
   # Hook runs before template displayed. Must return query.
-  def index_selected_pre_query(query, _display_args)
+  def index_selected_final_hook(query, _display_args)
     store_query_in_session(query)
     query_params_set(query)
 
