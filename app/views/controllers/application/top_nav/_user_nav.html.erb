@@ -5,13 +5,13 @@ admin_mode_args = in_admin_mode? ? { turn_off: true } : { turn_on: true }
 
 <ul class="nav navbar-nav navbar-right hidden-xs mr-0">
   <% if @user.admin %>
-  <li>
-    <%= icon_link_to(
-        admin_title, admin_mode_path(**admin_mode_args),
-        { icon: :admin, id: "user_nav_admin_mode_link", button_to: true,
-          class: "btn btn-link navbar-btn", data: { placement: "bottom" } }
-      ) %>
-  </li>
+    <li>
+      <%= icon_link_to(
+          admin_title, admin_mode_path(**admin_mode_args),
+          { icon: :admin, id: "user_nav_admin_mode_link", button_to: true,
+            class: "btn btn-link navbar-btn", data: { placement: "bottom" } }
+        ) %>
+    </li>
   <% end %>
   <li>
     <%= icon_link_to(

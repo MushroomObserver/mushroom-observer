@@ -9,14 +9,14 @@ add_page_title(:inat_import_tracker.t)
   <span id="state"><%= @inat_import.state %></span>
 </p>
 <% if @inat_import.response_errors.present? %>
-<p>
-  <b><%= :ERRORS.t %>: </b>
-  <%= tag.span(id: "errors", class: "violation-highlight") do %>
-  <% @inat_import.response_errors.each_line do |error| %>
-  <%= error %></br>
-  <% end %>
-  <% end %>
-</p>
+  <p>
+    <b><%= :ERRORS.t %>: </b>
+    <%= tag.span(id: "errors", class: "violation-highlight") do %>
+    <% @inat_import.response_errors.each_line do |error| %>
+    <%= error %></br>
+    <% end %>
+    <% end %>
+  </p>
 <% end %>
 
 <p>
@@ -26,11 +26,11 @@ add_page_title(:inat_import_tracker.t)
 
 <%# Prominently refresh button if job is incomplete%>
 <% if import_incomplete?(@inat_import) %>
-<p>
-  <%= link_to(:inat_import_tracker_refresh.l,
-              inat_import_job_tracker_path(@tracker),
-              { class: "btn btn-default" } ) %>
-</p>
+  <p>
+    <%= link_to(:inat_import_tracker_refresh.l,
+                inat_import_job_tracker_path(@tracker),
+                { class: "btn btn-default" } ) %>
+  </p>
 <% end %>
 
 <p>
@@ -45,7 +45,7 @@ add_page_title(:inat_import_tracker.t)
 
 <p>
   <% if import_done?(@inat_import) %>
-  <%= link_to(:app_your_observations.l,
+    <%= link_to(:app_your_observations.l,
                 observations_path(by_user: User.current.id),
                 { class: "btn btn-default" } ) %>
   <% end %>
