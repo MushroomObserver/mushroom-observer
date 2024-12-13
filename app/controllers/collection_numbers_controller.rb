@@ -36,7 +36,7 @@ class CollectionNumbersController < ApplicationController
     store_location
     query = create_query(:CollectionNumber, :all,
                          observation: params[:observation].to_s)
-    show_selected(query, always_index: true)
+    index_selected(query, always_index: true)
   end
 
   def index_display_args(args, _query)

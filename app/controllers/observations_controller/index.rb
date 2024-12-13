@@ -34,7 +34,7 @@ class ObservationsController
                            names: [params[:name]],
                            include_synonyms: true,
                            by: :confidence)
-      show_selected(query)
+      index_selected(query)
     end
 
     # Displays matrix of Observations with the given name proposed but not
@@ -46,7 +46,7 @@ class ObservationsController
                            include_all_name_proposals: true,
                            exclude_consensus: true,
                            by: :confidence)
-      show_selected(query)
+      index_selected(query)
     end
 
     # Displays matrix of Observations of subtaxa of the parent of given name.
@@ -55,7 +55,7 @@ class ObservationsController
                            names: parents(params[:name]),
                            include_subtaxa: true,
                            by: :confidence)
-      show_selected(query)
+      index_selected(query)
     end
 
     def parents(name_str)
@@ -72,7 +72,7 @@ class ObservationsController
       )
 
       query = create_query(:Observation, :by_user, user: user)
-      show_selected(query)
+      index_selected(query)
     end
 
     # Displays matrix of Observations at a Location, by date.
@@ -82,7 +82,7 @@ class ObservationsController
       )
 
       query = create_query(:Observation, :at_location, location: location)
-      show_selected(query)
+      index_selected(query)
     end
 
     # Display matrix of Observations whose "where" matches a string.
@@ -92,7 +92,7 @@ class ObservationsController
       query = create_query(:Observation, :at_where,
                            user_where: where,
                            location: Location.user_format(@user, where))
-      show_selected(query, always_index: true)
+      index_selected(query, always_index: true)
     end
 
     # Display matrix of Observations attached to a given project.
@@ -102,7 +102,7 @@ class ObservationsController
       )
 
       query = create_query(:Observation, :for_project, project: project)
-      show_selected(query, always_index: true)
+      index_selected(query, always_index: true)
     end
 
     # Display matrix of Observations whose notes, etc. match a string pattern.
@@ -126,7 +126,7 @@ class ObservationsController
           identify_observations_path(q: get_query_param(search.query))
         )
       else
-        show_selected(search.query)
+        index_selected(search.query)
       end
     end
 
@@ -144,7 +144,7 @@ class ObservationsController
       query = advanced_search_query
       return unless query
 
-      show_selected(query)
+      index_selected(query)
     rescue StandardError => e
       flash_error(e.to_s) if e.present?
       redirect_to(search_advanced_path)
@@ -175,7 +175,7 @@ class ObservationsController
     end
 
     # Show selected search results as a matrix with "index" template.
-    def show_selected(query, args = {})
+    def index_selected(query, args = {})
       store_query_in_session(query)
       # Restrict to subset within a geographical region (used by map
       # if it needed to stuff multiple locations into a single marker).

@@ -50,7 +50,7 @@ class SpeciesListsController < ApplicationController
   def index_query_results
     by_param = params[:by] || :date # needs a value to affect title
     query = find_or_create_query(:SpeciesList, by: by_param)
-    show_selected(query, index_display_at_id_args)
+    index_selected(query, index_display_at_id_args)
   end
 
   # Display list of user's species_lists, sorted by date.
@@ -62,7 +62,7 @@ class SpeciesListsController < ApplicationController
     return unless user
 
     query = create_query(:SpeciesList, :all, by_user: user, by: :date)
-    show_selected(query)
+    index_selected(query)
   end
 
   # Display list of SpeciesList's attached to a given project.
@@ -71,7 +71,7 @@ class SpeciesListsController < ApplicationController
     return unless project
 
     query = create_query(:SpeciesList, :all, project: project)
-    show_selected(query, always_index: true)
+    index_selected(query, always_index: true)
   end
 
   def index_display_args(args, query)

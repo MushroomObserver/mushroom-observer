@@ -30,7 +30,7 @@ class NamesController < ApplicationController
     return if handle_advanced_search_invalid_q_param?
 
     query = find_query(:Name)
-    show_selected(query)
+    index_selected(query)
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
     redirect_to(search_advanced_path)
@@ -56,20 +56,20 @@ class NamesController < ApplicationController
       render("names/index")
     else
       @suggest_alternate_spellings = search.query.params[:pattern]
-      show_selected(search.query)
+      index_selected(search.query)
     end
   end
 
   # Display list of names that have observations.
   def with_observations
     query = create_query(:Name, :with_observations)
-    show_selected(query)
+    index_selected(query)
   end
 
   # Display list of names with descriptions that have authors.
   def with_descriptions
     query = create_query(:Name, :with_descriptions)
-    show_selected(query)
+    index_selected(query)
   end
 
   # Display list of the most popular 100 names that don't have descriptions.
@@ -77,7 +77,7 @@ class NamesController < ApplicationController
   def need_descriptions
     @help = :needed_descriptions_help
     query = Name.descriptions_needed
-    show_selected(query, num_per_page: 100)
+    index_selected(query, num_per_page: 100)
   end
 
   # Display list of names that a given user is author on.
@@ -89,7 +89,7 @@ class NamesController < ApplicationController
     return unless user
 
     query = create_query(:Name, :by_user, user: user)
-    show_selected(query)
+    index_selected(query)
   end
 
   # Display list of names that a given user is editor on.
@@ -101,11 +101,11 @@ class NamesController < ApplicationController
     return unless user
 
     query = create_query(:Name, :by_editor, user: user)
-    show_selected(query)
+    index_selected(query)
   end
 
   # Show selected search results as a list with 'index' template.
-  def show_selected(query, args = {})
+  def index_selected(query, args = {})
     store_query_in_session(query)
     args = index_display_args(args, query)
 
@@ -149,7 +149,7 @@ class NamesController < ApplicationController
       @test_pagination_args = { anchor: params[:test_anchor] }
     end
 
-    show_selected(query, num_per_page: params[:num_per_page].to_i)
+    index_selected(query, num_per_page: params[:num_per_page].to_i)
   end
 
   ##############################################################################

@@ -44,7 +44,7 @@ module Locations
       return unless user
 
       query = create_query(:LocationDescription, :by_author, user: user)
-      show_selected(query)
+      index_selected(query)
     end
 
     # Display list of location_descriptions that a given user is editor on.
@@ -56,11 +56,11 @@ module Locations
       return unless user
 
       query = create_query(:LocationDescription, :by_editor, user: user)
-      show_selected(query)
+      index_selected(query)
     end
 
     # Show selected search results as a list with 'list_locations' template.
-    def show_selected(query, args = {})
+    def index_selected(query, args = {})
       store_query_in_session(query)
       super
     end

@@ -31,7 +31,7 @@ class HerbariumRecordsController < ApplicationController
     query = create_query(:HerbariumRecord, :all,
                          herbarium: params[:herbarium].to_s,
                          by: :herbarium_label)
-    show_selected(query, always_index)
+    index_selected(query, always_index)
   end
 
   def observation
@@ -40,7 +40,7 @@ class HerbariumRecordsController < ApplicationController
     query = create_query(:HerbariumRecord, :all,
                          observation: params[:observation].to_s,
                          by: :herbarium_label)
-    show_selected(query, always_index)
+    index_selected(query, always_index)
   end
 
   def index_display_args(args, _query)

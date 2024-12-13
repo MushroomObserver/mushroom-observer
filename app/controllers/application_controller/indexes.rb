@@ -27,7 +27,7 @@ module ApplicationController::Indexes
                          unfiltered_index_query_flavor, **args)
     # display_args = index_display_args(unfiltered_index_display_args, query)
     # show_index_of_objects(query, display_args)
-    show_selected(query, unfiltered_index_display_args)
+    index_selected(query, unfiltered_index_display_args)
   end
 
   def unfiltered_index_query_flavor
@@ -58,11 +58,11 @@ module ApplicationController::Indexes
     query = find_or_create_query(controller_model_name.to_sym, by: params[:by])
     # display_args = index_display_args(index_display_at_id_args, query)
     # show_index_of_objects(query, display_args)
-    show_selected(query, index_display_at_id_args)
+    index_selected(query, index_display_at_id_args)
   end
 
   # Show selected list of articles.
-  def show_selected(query, extra_args = {})
+  def index_selected(query, extra_args = {})
     display_args = index_display_args(extra_args, query)
     show_index_of_objects(query, display_args)
   end
@@ -96,7 +96,7 @@ module ApplicationController::Indexes
       redirect_to(send(:"#{controller_model_name.underscore}_path", obj.id))
     else
       query = create_query(controller_model_name.to_sym, :all, pattern:)
-      show_selected(query)
+      index_selected(query)
     end
   end
 

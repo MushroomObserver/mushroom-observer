@@ -55,7 +55,7 @@ module Names
       return unless user
 
       query = create_query(:NameDescription, :by_author, user: user)
-      show_selected(query)
+      index_selected(query)
     end
 
     # Display list of name_descriptions that a given user is editor on.
@@ -67,12 +67,12 @@ module Names
       return unless user
 
       query = create_query(:NameDescription, :by_editor, user: user)
-      show_selected(query)
+      index_selected(query)
     end
 
     # Show selected search results as a list with ???
     #              'names/descriptions/index' template ???
-    def show_selected(query, args = {})
+    def index_selected(query, args = {})
       store_query_in_session(query)
       super
     end

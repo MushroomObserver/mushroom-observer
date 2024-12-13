@@ -50,7 +50,7 @@ class LocationsController < ApplicationController
     return if handle_advanced_search_invalid_q_param?
 
     query = find_query(:Location)
-    show_selected(query, link_all_sorts: true)
+    index_selected(query, link_all_sorts: true)
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
     redirect_to(search_advanced_path)
@@ -67,7 +67,7 @@ class LocationsController < ApplicationController
         :Location, :pattern_search,
         pattern: Location.user_format(@user, pattern)
       )
-      show_selected(query, link_all_sorts: true)
+      index_selected(query, link_all_sorts: true)
     end
   end
 
@@ -76,7 +76,7 @@ class LocationsController < ApplicationController
     query = create_query(
       :Location, :regexp_search, regexp: "#{params[:country]}$"
     )
-    show_selected(query, link_all_sorts: true)
+    index_selected(query, link_all_sorts: true)
   end
 
   # Displays a list of all locations whose country matches the id param.
@@ -85,7 +85,7 @@ class LocationsController < ApplicationController
       :Location, :with_observations_for_project,
       project: Project.find(params[:project])
     )
-    show_selected(query, link_all_sorts: true)
+    index_selected(query, link_all_sorts: true)
   end
 
   # Display list of locations that a given user created.
@@ -97,7 +97,7 @@ class LocationsController < ApplicationController
     return unless user
 
     query = create_query(:Location, :by_user, user: user)
-    show_selected(query, link_all_sorts: true)
+    index_selected(query, link_all_sorts: true)
   end
 
   # Display list of locations that a given user is editor on.
@@ -109,11 +109,11 @@ class LocationsController < ApplicationController
     return unless user
 
     query = create_query(:Location, :by_editor, user: user)
-    show_selected(query)
+    index_selected(query)
   end
 
   # Show selected search results as a list with 'index' template.
-  def show_selected(query, args = {})
+  def index_selected(query, args = {})
     # Restrict to subset within a geographical region (used by map
     # if it needed to stuff multiple locations into a single marker).
     query = restrict_query_to_box(query)

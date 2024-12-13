@@ -59,7 +59,7 @@ class UsersController < ApplicationController
       redirect_to(user_path(user.id))
     else
       query = create_query(:User, :all, pattern: pattern)
-      show_selected(query)
+      index_selected(query)
     end
   end
 
@@ -75,7 +75,7 @@ class UsersController < ApplicationController
     false
   end
 
-  def show_selected(query, args = {})
+  def index_selected(query, args = {})
     store_query_in_session(query)
     show_index_of_objects(query, index_display_args(args, query))
   end

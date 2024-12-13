@@ -38,14 +38,14 @@ class RssLogsController < ApplicationController
 
   def index_query_results
     query = find_or_create_query(:RssLog, type: index_type_default)
-    show_selected(query, index_display_at_id_args)
+    index_selected(query, index_display_at_id_args)
   end
 
   # Requests with param `type` potentially show an array of types
   # of objects. The array comes from the checkboxes in tabset
   def type
     query = find_or_create_query(:RssLog, type: index_type_from_params)
-    show_selected(query, index_display_at_id_args)
+    index_selected(query, index_display_at_id_args)
   end
 
   # Get the types whose value == "1"
@@ -64,7 +64,7 @@ class RssLogsController < ApplicationController
   end
 
   # Show selected search results as a matrix with "index" template.
-  def show_selected(query, args = {})
+  def index_selected(query, args = {})
     store_query_in_session(query)
     query_params_set(query)
 

@@ -37,7 +37,7 @@ class ProjectsController < ApplicationController
     return unless user
 
     query = create_query(:Project, :all, member: user)
-    show_selected(query)
+    index_selected(query)
   end
 
   def index_display_args(args, _query)

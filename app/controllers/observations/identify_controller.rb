@@ -54,19 +54,19 @@ module Observations
 
       query = create_query(:Observation, :needs_naming,
                            by: :rss_log, in_clade: term)
-      show_selected(query)
+      index_selected(query)
     end
 
     def region(term)
       query = create_query(:Observation, :needs_naming,
                            by: :rss_log, in_region: term)
-      show_selected(query)
+      index_selected(query)
     end
 
     # def user_filter(term)
     #   query = create_query(:Observation, :needs_naming,
     #                        by: :rss_log, by_user: params[:user])
-    #   show_selected(query)
+    #   index_selected(query)
     # end
 
     def index_display_args(args, _query)

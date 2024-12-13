@@ -44,7 +44,7 @@ class CommentsController < ApplicationController
   def index_query_results
     sorted_by = params[:by].present? ? params[:by].to_s : default_sort_order
     query = find_or_create_query(:Comment, by: sorted_by)
-    show_selected(query, index_display_at_id_args)
+    index_selected(query, index_display_at_id_args)
   end
 
   # Shows comments by a given user, most recent first. (Linked from show_user.)
@@ -56,7 +56,7 @@ class CommentsController < ApplicationController
     return unless user
 
     query = create_query(:Comment, :all, by_user: user)
-    show_selected(query)
+    index_selected(query)
   end
 
   # Shows comments for a given user's Observations, most recent first.
@@ -69,7 +69,7 @@ class CommentsController < ApplicationController
     return unless user
 
     query = create_query(:Comment, :all, for_user: user)
-    show_selected(query)
+    index_selected(query)
   end
 
   # Shows comments for a given object, most recent first. (Linked from the
@@ -80,7 +80,7 @@ class CommentsController < ApplicationController
 
     query = create_query(:Comment, :all, target: target.id,
                                          type: target.class.name)
-    show_selected(query)
+    index_selected(query)
   end
 
   def no_model
