@@ -6,6 +6,7 @@
 #
 ##############################################################################
 # see application_controller.rb
+# rubocop:disable Metrics/ModuleLength
 module ApplicationController::Indexes
   def self.included(base)
     base.helper_method(:paginate_numbers)
@@ -21,6 +22,20 @@ module ApplicationController::Indexes
     unfiltered_index
   end
 
+  def index_active_params
+    []
+  end
+
+  def index_basic_params
+    [:by, :q, :id].freeze
+  end
+
+  def index_param_method_or_default(subaction)
+    index_basic_params.include?(subaction) ? :index_query_results : subaction
+  end
+
+  # Generally this is the default index action, no params given.
+  # In some controllers, you have to pass params[:all] to get this, however.
   def unfiltered_index
     args = { by: default_sort_order }.merge(unfiltered_index_extra_args)
     query = create_query(controller_model_name.to_sym,
@@ -42,18 +57,7 @@ module ApplicationController::Indexes
     {}
   end
 
-  def index_active_params
-    []
-  end
-
-  def index_basic_params
-    [:by, :q, :id].freeze
-  end
-
-  def index_param_method_or_default(subaction)
-    index_basic_params.include?(subaction) ? :index_query_results : subaction
-  end
-
+  # The index if you pass any of the basic params.
   def index_query_results
     query = find_or_create_query(controller_model_name.to_sym, by: params[:by])
     # display_args = index_display_args(index_display_at_id_args, query)
@@ -61,34 +65,28 @@ module ApplicationController::Indexes
     index_selected(query, index_display_at_id_args)
   end
 
-  # Show selected list of articles.
-  # Pass a block method to generate extra data for each object.
-  # Honestly that sounds a little too fancy, maybe it could be handled in a
-  # template or helper? But whatevs.
-  def index_selected(query, extra_args = {}, block_method = nil)
+  # The filtered index.
+  def index_selected(query, extra_args = {})
     query = index_selected_pre_query(query, extra_args)
     display_args = index_display_args(extra_args, query)
 
-    if block_method
-      show_index_of_objects(query, display_args) do |obj|
-        send(block_method, obj)
-      end
-    else
-      show_index_of_objects(query, display_args)
-    end
+    show_index_of_objects(query, display_args)
   end
 
   # This is a hook for controllers to modify the query before it is used,
-  # or do something else before the index is displayed.
-  # NOTE: Local overrides need to return the query.
+  # or do anything else before the index is displayed.
+  # NOTE: Must return the query (if writing an override).
   def index_selected_pre_query(query, _display_args)
     query
   end
 
+  # Default for the display_args hash passed to show_index_of_objects.
   def index_display_args(extra_args, _query)
     {}.merge(extra_args)
   end
 
+  # Default for the display_args hash passed to show_index_of_objects
+  # when the index is called with an id.
   def index_display_at_id_args
     { id: params[:id].to_s, always_index: true }
   end
@@ -118,6 +116,7 @@ module ApplicationController::Indexes
     end
   end
 
+  # If so, redirect to the show page for that object.
   def maybe_pattern_is_an_id(pattern)
     if /^\d+$/.match?(pattern)
       return controller_model_name.constantize.safe_find(pattern)
@@ -459,3 +458,4 @@ module ApplicationController::Indexes
     1
   end
 end
+# rubocop:enable Metrics/ModuleLength
