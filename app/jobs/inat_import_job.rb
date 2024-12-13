@@ -261,14 +261,12 @@ class InatImportJob < ApplicationJob
       image = Image.find(api.results.first.id)
 
       # Imaage attributes to potentially update manually
-      # t.boolean "ok_for_export", default: true, null: false
       # t.boolean "gps_stripped", default: false, null: false
-      # t.boolean "diagnostic", default: true, null: false
       image.update(
-        user_id: @user.id, # throws Error if done as API param above
-        # NOTE: 2024-09-09 get when from image EXIF instead of @observation.when
-        # https://github.com/MushroomObserver/mushroom-observer/issues/2379
-        when: @observation.when # throws Error if done as API param above
+        # These throw errors if done as API params above
+        user_id: @user.id,
+        when: @observation.when,
+        original_name: photo.original_name
       )
       @observation.add_image(image)
     end
