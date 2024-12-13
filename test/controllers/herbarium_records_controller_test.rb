@@ -164,11 +164,11 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
                   "Missing link to MyCoPortal record")
   end
 
-  def test_show_herbarium_record_mcp_only_db
+  def test_show_herbarium_record_mcp_unsearchable
     herbarium_record = herbarium_records(:agaricus_campestris_spec)
     herbarium = herbarium_record.herbarium
     assert(
-      herbarium&.mycoportal_db.present?,
+      herbarium&.mcp_searchable?,
       "Test needs HerbariumRecord in a Herbarium with a MyCoPortal db"
     )
     # Make the Herbarium code something that's not in the MyCoPortal network
@@ -178,7 +178,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     login
     get(:show, params: { id: herbarium_record.id })
 
-    assert_select("a[href=?]", herbarium_record.mcp_url, true,
+    assert_select("a[href=?]", herbarium_record.mcp_url, false,
                   "Missing link to MyCoPortal record")
   end
 

@@ -371,7 +371,7 @@ class API2ControllerTest < FunctionalTestCase
               nil
             end
     assert_not_equal("", key.to_s)
-    assert_equal(CGI.escapeHTML("<p>New API2 Key</p>"), notes.to_s)
+    assert_equal(CGI.escapeHTML("New API2 Key"), notes.to_s)
   end
 
   # NOTE: Checking ActionMailer::Base.deliveries works here only because
