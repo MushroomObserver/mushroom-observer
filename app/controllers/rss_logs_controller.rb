@@ -19,9 +19,16 @@ class RssLogsController < ApplicationController
 
   private
 
-  def unfiltered_index
-    query = create_query(:RssLog, :all, type: index_type_default)
-    show_selected(query, index_at_id_args)
+  def unfiltered_index_extra_args
+    { type: index_type_default }
+  end
+
+  def index_type_default
+    @user ? @user.default_rss_type : "all"
+  end
+
+  def default_sort_order
+    :updated_at
   end
 
   # ApplicationController uses this to dispatch #index to a private method
@@ -39,6 +46,21 @@ class RssLogsController < ApplicationController
   def type
     query = find_or_create_query(:RssLog, type: index_type_from_params)
     show_selected(query, index_at_id_args)
+  end
+
+  # Get the types whose value == "1"
+  def index_type_from_params
+    types = ""
+    if params[:type].is_a?(ActionController::Parameters)
+      types = params[:type].select { |_key, value| value == "1" }.keys
+      types = RssLog.all_types.intersection(types)
+      types = "all" if types.length == RssLog.all_types.length
+      types = "none" if types.empty?
+      types = types.map(&:to_s).join(" ") if types.is_a?(Array)
+    elsif params[:type].is_a?(String)
+      types = params[:type]
+    end
+    types
   end
 
   # Show selected search results as a matrix with "index" template.
@@ -63,25 +85,6 @@ class RssLogsController < ApplicationController
       matrix: true, cache: true,
       include: rss_log_includes
     }.merge(args)
-  end
-
-  def index_type_default
-    @user ? @user.default_rss_type : "all"
-  end
-
-  # Get the types whose value == "1"
-  def index_type_from_params
-    types = ""
-    if params[:type].is_a?(ActionController::Parameters)
-      types = params[:type].select { |_key, value| value == "1" }.keys
-      types = RssLog.all_types.intersection(types)
-      types = "all" if types.length == RssLog.all_types.length
-      types = "none" if types.empty?
-      types = types.map(&:to_s).join(" ") if types.is_a?(Array)
-    elsif params[:type].is_a?(String)
-      types = params[:type]
-    end
-    types
   end
 
   public

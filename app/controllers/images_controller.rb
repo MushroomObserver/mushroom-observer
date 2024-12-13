@@ -34,12 +34,7 @@ class ImagesController < ApplicationController
   def unfiltered_index
     return render_too_many_results if too_many_results
 
-    query = create_query(:Image, :all, by: default_sort_order)
-    show_selected(query)
-  end
-
-  def default_sort_order
-    ::Query::ImageBase.default_order
+    super
   end
 
   def too_many_results
@@ -58,6 +53,10 @@ class ImagesController < ApplicationController
         And please stop hammering our server!
       TOO_MANY_RESULTS
     )
+  end
+
+  def default_sort_order
+    ::Query::ImageBase.default_order # :created_at
   end
 
   # ApplicationController uses this table to dispatch #index to a private method

@@ -26,8 +26,7 @@ class UsersController < ApplicationController
   def unfiltered_index
     return unless index_query_authorized?
 
-    query = create_query(:User, :all, by: default_sort_order)
-    show_selected(query)
+    super
   end
 
   def default_sort_order

@@ -15,16 +15,14 @@ class CollectionNumbersController < ApplicationController
   # INDEX
   #
   def index
+    store_location
     build_index_with_query
   end
 
   private
 
-  # Show list of collection_numbers.
-  def unfiltered_index
-    store_location
-    query = create_query(:CollectionNumber, :all)
-    show_selected(query)
+  def default_sort_order
+    nil # [:name, :number]
   end
 
   # Used by ApplicationController to dispatch #index to a private method

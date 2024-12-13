@@ -31,9 +31,8 @@ class SpeciesListsController < ApplicationController
   private
 
   # Display list of all species_lists, sorted by title.
-  def unfiltered_index
-    query = create_query(:SpeciesList, :all, by: :date)
-    show_selected(query)
+  def unfiltered_index_extra_args
+    { by: :date }
   end
 
   # unused now. should be :date, i'd say - AN

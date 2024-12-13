@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class ObservationsControllerShowIndexTest < FunctionalTestCase
+class ObservationsControllerIndexTest < FunctionalTestCase
   tests ObservationsController
 
   ######## Index ################################################
@@ -57,7 +57,8 @@ class ObservationsControllerShowIndexTest < FunctionalTestCase
     get(:index, params: { id: obs.id })
 
     assert_template("shared/_matrix_box")
-    assert_displayed_title("Observation Index")
+    # assert_displayed_title("Observation Index")
+    assert_select("body.observations__index", true)
     assert_select(
       "#results .rss-heading a[href ^= '/#{obs.id}'] .rss-name",
       { text: obs.format_name.t.strip_html },

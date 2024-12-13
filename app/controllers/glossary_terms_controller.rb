@@ -14,11 +14,6 @@ class GlossaryTermsController < ApplicationController
 
   private
 
-  def unfiltered_index
-    query = create_query(:GlossaryTerm, :all, by: :name)
-    show_selected(query)
-  end
-
   def default_sort_order
     :name
   end

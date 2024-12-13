@@ -33,12 +33,6 @@ module Names
 
     private
 
-    # Display list of all (correctly-spelled) name_descriptions in the database.
-    def unfiltered_index
-      query = create_query(:NameDescription, :all, by: default_sort_order)
-      show_selected(query)
-    end
-
     def default_sort_order
       ::Query::NameDescriptionBase.default_order # :name
     end

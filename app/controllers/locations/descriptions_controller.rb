@@ -21,15 +21,9 @@ module Locations
 
     private
 
-    # Displays a list of all location_descriptions.
-    def unfiltered_index
-      query = create_query(:LocationDescription, :all, by: default_sort_order)
-      show_selected(query)
-    end
-
     # Is :name
     def default_sort_order
-      ::Query::LocationDescriptionBase.default_order
+      ::Query::LocationDescriptionBase.default_order # :name
     end
 
     def controller_model_name

@@ -11,20 +11,14 @@ class HerbariumRecordsController < ApplicationController
   # INDEX
   #
   def index
+    store_location
     build_index_with_query
   end
 
   private
 
-  # Show list of herbarium_records.
-  def unfiltered_index
-    store_location
-    query = create_query(:HerbariumRecord, :all, by: default_sort_order)
-    show_selected(query)
-  end
-
   def default_sort_order
-    ::Query::HerbariumBase.default_order
+    ::Query::HerbariumBase.default_order # :name
   end
 
   # ApplicationController uses this table to dispatch #index to a private method

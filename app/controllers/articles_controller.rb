@@ -31,9 +31,8 @@ class ArticlesController < ApplicationController
 
   private
 
-  def unfiltered_index
-    query = create_query(:Article, :all, by: :created_at)
-    show_selected(query)
+  def default_sort_order
+    :created_at
   end
 
   # Used by ApplicationController to dispatch #index to a private method

@@ -11,9 +11,12 @@ module Observations
 
     private
 
-    def unfiltered_index
-      query = create_query(:Observation, :needs_naming, by: :rss_log)
-      show_selected(query)
+    def unfiltered_index_query_flavor
+      :needs_naming
+    end
+
+    def unfiltered_index_extra_args
+      { by: :rss_log }
     end
 
     def controller_model_name

@@ -8,9 +8,8 @@ module FieldSlipsController::Index
 
   private
 
-  def unfiltered_index
-    query = create_query(:FieldSlip, :all)
-    show_selected(query)
+  def default_sort_order
+    :date
   end
 
   def index_active_params

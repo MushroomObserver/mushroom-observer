@@ -26,14 +26,8 @@ class CommentsController < ApplicationController
 
   private
 
-  # Show list of latest comments. (Linked from left panel.)
-  def unfiltered_index
-    query = create_query(:Comment, :all, by: default_sort_order)
-    show_selected(query)
-  end
-
   def default_sort_order
-    ::Query::CommentBase.default_order
+    ::Query::CommentBase.default_order # :created_at
   end
 
   # ApplicationController uses this table to dispatch #index to a private method

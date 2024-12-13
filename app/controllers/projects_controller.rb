@@ -15,14 +15,8 @@ class ProjectsController < ApplicationController
 
   private
 
-  # Show list of latest projects.  (Linked from left panel.)
-  def unfiltered_index
-    query = create_query(:Project, :all, by: default_sort_order)
-    show_selected(query)
-  end
-
   def default_sort_order
-    ::Query::ProjectBase.default_order
+    ::Query::ProjectBase.default_order # :updated_at
   end
 
   # ApplicationController uses this to dispatch #index to a private method

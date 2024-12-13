@@ -11,20 +11,18 @@ class ContributorsController < ApplicationController
     build_index_with_query
   end
 
-  def self.controller_model_name
-    "User"
-  end
-
   private
-
-  def unfiltered_index
-    query = create_query(:User, :all, with_contribution: true,
-                                      by: default_sort_order)
-    show_selected(query)
-  end
 
   def default_sort_order
     :contribution
+  end
+
+  def unfiltered_index_extra_args
+    { with_contribution: true }
+  end
+
+  def controller_model_name
+    "User"
   end
 
   # Used by ApplicationController to dispatch #index to a private method

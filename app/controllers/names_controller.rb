@@ -15,14 +15,8 @@ class NamesController < ApplicationController
 
   private
 
-  # Display list of all (correctly-spelled) names in the database.
-  def unfiltered_index
-    query = create_query(:Name, :all, by: default_sort_order)
-    show_selected(query)
-  end
-
   def default_sort_order
-    ::Query::NameBase.default_order
+    ::Query::NameBase.default_order # :name
   end
 
   # ApplicationController uses this to dispatch #index to a private method

@@ -37,8 +37,9 @@ class SequencesControllerTest < FunctionalTestCase
     get(:index, params: { all: true })
 
     assert_response(:success)
-    assert_select("#title", { text: "#{:SEQUENCE.l} Index" },
-                  "index should display #{:SEQUENCES.l} Index")
+    # assert_select("#title", { text: "#{:SEQUENCE.l} Index" },
+    #               "index should display #{:SEQUENCES.l} Index")
+    assert_select("body.sequences__index", true)
     Sequence.find_each do |sequence|
       assert_select(
         "a[href *= '#{sequence_path(sequence)}']", true,

@@ -47,17 +47,14 @@ class SequencesController < ApplicationController
   # we don't offer sequence pattern search. However, the Query::SequenceBase
   # class can handle a pattern param.
   def index
+    store_location
     build_index_with_query
   end
 
   private
 
-  # Because people usually want "sequences of a given observation",
-  # this is not the default index. Accessible with the `all` param.
-  def unfiltered_index
-    store_location
-    query = create_query(:Sequence, :all)
-    show_selected(query)
+  def default_sort_order
+    :created_at
   end
 
   def index_active_params

@@ -9,15 +9,17 @@ class ObservationsController
 
     private
 
-    # Displays home matrix of all Observation's, sorted by :rss_log
     # Note all other filters of the obs index are sorted by date.
-    def unfiltered_index
-      query = create_query(:Observation, :all, by: :rss_log)
-      show_selected(query)
+    def unfiltered_index_extra_args
+      { by: :rss_log }
     end
 
+    # Default on home is :rss_log (:log_updated_at), not :date.
+    # Maybe other filters should explicitly specify :date?
+    # Then we could use default_sort_order above.
+    # Or, set an "unfiltered sort order" method that defaults to this.
     def default_sort_order
-      ::Query::ObserationBase.default_order # :date
+      ::Query::ObservationBase.default_order # :date
     end
 
     # Searches come 1st because they may have the other params
@@ -175,11 +177,10 @@ class ObservationsController
     # Show selected search results as a matrix with "index" template.
     def show_selected(query, args = {})
       store_query_in_session(query)
-      args = index_display_args(args, query)
       # Restrict to subset within a geographical region (used by map
       # if it needed to stuff multiple locations into a single marker).
       query = restrict_query_to_box(query)
-      show_index_of_objects(query, args)
+      show_index_of_objects(query, index_display_args(args, query))
     end
 
     def index_display_args(args, query)

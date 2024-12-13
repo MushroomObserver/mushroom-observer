@@ -31,14 +31,12 @@ class LocationsController < ApplicationController
 
   private
 
-  # Displays a list of all locations.
-  def unfiltered_index
-    query = create_query(:Location, :all, by: default_sort_order)
-    show_selected(query, link_all_sorts: true)
+  def unfiltered_index_display_args
+    { link_all_sorts: true }
   end
 
   def default_sort_order
-    ::Query::LocationBase.default_order
+    ::Query::LocationBase.default_order # :name
   end
 
   # ApplicationController uses this to dispatch #index to a private method
