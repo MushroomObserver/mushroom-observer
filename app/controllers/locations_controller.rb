@@ -125,7 +125,7 @@ class LocationsController < ApplicationController
   # Paginate the defined locations using the usual helper.
   def index_display_args(args, _query)
     {
-      always_index: @undef_pages&.num_total&.positive?,
+      always_index: @undef_pages&.num_total&.positive?
     }.merge(args)
   end
 
