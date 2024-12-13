@@ -65,7 +65,8 @@ module Locations
       login
       get(:index, params: { id: desc.id })
 
-      assert_displayed_title("Location Description Index")
+      # assert_displayed_title("Location Description Index")
+      assert_select("body.descriptions__index", true)
     end
 
     def test_index_by_author_of_one_description

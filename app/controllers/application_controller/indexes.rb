@@ -21,17 +21,23 @@ module ApplicationController::Indexes
     unfiltered_index
   end
 
-  def index_active_params
-    []
+  def unfiltered_index
+    args = { by: default_sort_order }.merge(unfiltered_index_extra_args)
+    query = create_query(controller_model_name.to_sym,
+                         unfiltered_index_query_flavor, **args)
+    show_selected(query, unfiltered_index_display_args)
   end
 
-  def index_basic_params
-    [:by, :q, :id].freeze
+  def unfiltered_index_query_flavor
+    :all
   end
 
-  # It's not always the controller_name, e.g. ContributorsController -> User
-  def controller_model_name
-    controller_name.classify
+  def unfiltered_index_extra_args
+    {}
+  end
+
+  def unfiltered_index_display_args
+    {}
   end
 
   def index_param_method_or_default(subaction)
@@ -41,6 +47,36 @@ module ApplicationController::Indexes
   def index_query_results
     query = find_or_create_query(controller_model_name.to_sym, by: params[:by])
     show_selected(query, index_at_id_args)
+  end
+
+  def index_active_params
+    []
+  end
+
+  def index_basic_params
+    [:by, :q, :id].freeze
+  end
+
+  def index_display_args(args, _query)
+    {}.merge(args)
+  end
+
+  def index_at_id_args
+    { id: params[:id].to_s, always_index: true }
+  end
+
+  # It's not always the controller_name, e.g. ContributorsController -> User
+  def controller_model_name
+    controller_name.classify
+  end
+
+  # NOTE: Currently some controllers prefer nil. Even though the resulting sort
+  # order is the same, passing no explicit sort order means the index is titled
+  # "____ Index", rather than "____ by ____". Could be simplified.
+  def default_sort_order
+    # query_base = "::Query::#{controller_model_name}Base".constantize
+    # query_base.send(:default_order) || nil
+    nil
   end
 
   # Most pattern searches follow this, um, pattern.
@@ -60,14 +96,6 @@ module ApplicationController::Indexes
     end
 
     false
-  end
-
-  def index_display_args(args, _query)
-    {}.merge(args)
-  end
-
-  def index_at_id_args
-    { id: params[:id].to_s, always_index: true }
   end
 
   # Render an index or set of search results as a list or matrix. Arguments:
