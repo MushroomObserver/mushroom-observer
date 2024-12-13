@@ -88,7 +88,7 @@ class HerbariaController < ApplicationController
   def index_query_results
     sorted_by = params[:by].present? ? params[:by].to_s : default_sort_order
     query = find_or_create_query(:Herbarium, by: sorted_by)
-    show_selected(query, index_at_id_args)
+    show_selected(query, index_display_at_id_args)
   end
 
   def nonpersonal

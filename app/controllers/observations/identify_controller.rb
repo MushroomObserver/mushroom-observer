@@ -11,6 +11,7 @@ module Observations
 
     private
 
+    # override the default Query flavor :all
     def unfiltered_index_query_flavor
       :needs_naming
     end

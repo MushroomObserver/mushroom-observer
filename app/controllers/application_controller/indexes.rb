@@ -40,15 +40,6 @@ module ApplicationController::Indexes
     {}
   end
 
-  def index_param_method_or_default(subaction)
-    index_basic_params.include?(subaction) ? :index_query_results : subaction
-  end
-
-  def index_query_results
-    query = find_or_create_query(controller_model_name.to_sym, by: params[:by])
-    show_selected(query, index_at_id_args)
-  end
-
   def index_active_params
     []
   end
@@ -57,11 +48,25 @@ module ApplicationController::Indexes
     [:by, :q, :id].freeze
   end
 
+  def index_param_method_or_default(subaction)
+    index_basic_params.include?(subaction) ? :index_query_results : subaction
+  end
+
+  def index_query_results
+    query = find_or_create_query(controller_model_name.to_sym, by: params[:by])
+    show_selected(query, index_display_at_id_args)
+  end
+
+  # Show selected list of articles.
+  def show_selected(query, args = {})
+    show_index_of_objects(query, index_display_args(args, query))
+  end
+
   def index_display_args(args, _query)
     {}.merge(args)
   end
 
-  def index_at_id_args
+  def index_display_at_id_args
     { id: params[:id].to_s, always_index: true }
   end
 

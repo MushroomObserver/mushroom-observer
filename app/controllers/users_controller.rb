@@ -42,7 +42,7 @@ class UsersController < ApplicationController
     return unless index_query_authorized?
 
     query = find_or_create_query(:User, by: params[:by])
-    show_selected(query, index_at_id_args)
+    show_selected(query, index_display_at_id_args)
   end
 
   def index_query_authorized?
