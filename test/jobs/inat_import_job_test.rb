@@ -201,7 +201,16 @@ class InatImportJobTest < ActiveJob::TestCase
 
     obs = Observation.order(created_at: :asc).last
     standard_assertions(obs: obs, name: name, loc: loc)
+
     assert_equal(1, obs.images.length, "Obs should have 1 image")
+    inat_photo = JSON.parse(mock_inat_response)["results"].
+                 first["observation_photos"].first
+    imported_img = obs.images.first
+    assert_equal(
+      "iNat photo_id: #{inat_photo["photo_id"]}, uuid: #{inat_photo["uuid"]}",
+      imported_img.original_name
+    )
+
     assert(obs.sequences.none?)
   end
 
@@ -783,9 +792,10 @@ class InatImportJobTest < ActiveJob::TestCase
     # but that class doesn’t have a stub method by default. Therefore:
     # Create a mock photo importer
     mock_photo_importer = Minitest::Mock.new
+    img = images(:mock_imported_inat_image)
     mock_photo_importer.expect(
       :new, nil,
-      [{ api: MockImageAPI.new(errors: [], results: [Image.first]) }]
+      [{ api: MockImageAPI.new(errors: [], results: [img]) }]
     )
     results = JSON.parse(mock_inat_response)["results"]
     # NOTE: This simply insures that ImageAPI is called the right # of times.
@@ -794,7 +804,7 @@ class InatImportJobTest < ActiveJob::TestCase
       observation["observation_photos"].each do
         mock_photo_importer.expect(
           :api, # nil,
-          MockImageAPI.new(errors: [], results: [Image.first])
+          MockImageAPI.new(errors: [], results: [img])
         )
       end
     end
