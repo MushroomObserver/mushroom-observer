@@ -112,16 +112,14 @@ class LocationsController < ApplicationController
     index_selected(query)
   end
 
-  # Show selected search results as a list with 'index' template.
-  def index_selected(query, args = {})
+  # Hook runs before template displayed. Must return query.
+  def index_selected_pre_query(query, display_args)
     # Restrict to subset within a geographical region (used by map
     # if it needed to stuff multiple locations into a single marker).
     query = restrict_query_to_box(query)
-
     # Get matching *undefined* locations.
-    get_matching_undefined_locations(query, args)
-
-    show_index_of_objects(query, index_display_args(args, query))
+    set_matching_undefined_location_ivars(query, display_args)
+    query
   end
 
   # Paginate the defined locations using the usual helper.
@@ -132,14 +130,14 @@ class LocationsController < ApplicationController
     }.merge(args)
   end
 
-  def get_matching_undefined_locations(query, args)
+  def set_matching_undefined_location_ivars(query, display_args)
     @undef_location_format = User.current_location_format
     if (query2 = coerce_query_for_undefined_locations(query))
       select_args = {
         group: "observations.where",
         select: "observations.where AS w, COUNT(observations.id) AS c"
       }
-      if args[:link_all_sorts]
+      if display_args[:link_all_sorts]
         select_args[:order] = "c DESC"
         # (This tells it to say "by name" and "by frequency" by the subtitles.
         # If user has explicitly selected the order, then this is disabled.)
@@ -147,7 +145,7 @@ class LocationsController < ApplicationController
       end
       @undef_pages = paginate_letters(:letter2,
                                       :page2,
-                                      args[:num_per_page] || 50)
+                                      display_args[:num_per_page] || 50)
       @undef_data = query2.select_rows(select_args)
       @undef_pages.used_letters = @undef_data.map { |row| row[0][0, 1] }.uniq
       if (letter = params[:letter2].to_s.downcase) != ""

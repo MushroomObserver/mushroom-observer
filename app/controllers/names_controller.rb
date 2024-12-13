@@ -68,6 +68,7 @@ class NamesController < ApplicationController
 
   # Display list of names with descriptions that have authors.
   def with_descriptions
+    @with_descriptions = true # signals to add desc info to name list
     query = create_query(:Name, :with_descriptions)
     index_selected(query)
   end
@@ -104,26 +105,19 @@ class NamesController < ApplicationController
     index_selected(query)
   end
 
-  # Show selected search results as a list with 'index' template.
-  def index_selected(query, args = {})
+  # Hook runs before template displayed. Must return query.
+  def index_selected_pre_query(query, _display_args)
     store_query_in_session(query)
-    args = index_display_args(args, query)
+    query
+  end
 
-    # Add some extra fields to the index for authored_names.
-    if query.flavor == :with_descriptions
-      show_index_of_objects(query, args) do |name|
-        if (desc = name.description)
-          [desc.authors.map(&:login).join(", "),
-           desc.note_status.map(&:to_s).join("/"),
-           :"review_#{desc.review_status}".t]
-        else
-          []
-        end
-      end
+  def add_descriptions_extra_info(name)
+    if (desc = name.description)
+      [desc.authors.map(&:login).join(", "),
+       desc.note_status.map(&:to_s).join("/"),
+       :"review_#{desc.review_status}".t]
     else
-      # NOTE: if show_selected is called with a block
-      # it will *not* get passed to show_index_of_objects.
-      show_index_of_objects(query, args)
+      []
     end
   end
 
@@ -132,7 +126,8 @@ class NamesController < ApplicationController
       controller: "/names",
       action: "index",
       letters: "names.sort_name",
-      num_per_page: (/^[a-z]/i.match?(params[:letter].to_s) ? 500 : 50)
+      num_per_page: (/^[a-z]/i.match?(params[:letter].to_s) ? 500 : 50),
+      include: [:description]
     }.merge(args)
   end
 

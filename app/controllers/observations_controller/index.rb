@@ -174,14 +174,12 @@ class ObservationsController
       create_query(:Observation, :advanced_search, search)
     end
 
-    # Show selected search results as a matrix with "index" template.
-    def index_selected(query, args = {})
+    # Hook runs before template displayed. Must return query.
+    def index_selected_pre_query(query, _display_args)
       store_query_in_session(query)
       # Restrict to subset within a geographical region (used by map
       # if it needed to stuff multiple locations into a single marker).
-      query = restrict_query_to_box(query)
-
-      super
+      restrict_query_to_box(query) # returns this query
     end
 
     def index_display_args(args, query)

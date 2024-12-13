@@ -70,11 +70,10 @@ module Names
       index_selected(query)
     end
 
-    # Show selected search results as a list with ???
-    #              'names/descriptions/index' template ???
-    def index_selected(query, args = {})
+    # Hook runs before template displayed. Must return query.
+    def index_selected_pre_query(query, _display_args)
       store_query_in_session(query)
-      super
+      query
     end
 
     def index_display_args(args, _query)

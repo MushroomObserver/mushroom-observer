@@ -75,9 +75,10 @@ class UsersController < ApplicationController
     false
   end
 
-  def index_selected(query, args = {})
+  # Hook runs before template displayed. Must return query.
+  def index_selected_pre_query(query, _display_args)
     store_query_in_session(query)
-    show_index_of_objects(query, index_display_args(args, query))
+    query
   end
 
   def index_display_args(args, query)

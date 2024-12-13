@@ -62,9 +62,27 @@ module ApplicationController::Indexes
   end
 
   # Show selected list of articles.
-  def index_selected(query, extra_args = {})
+  # Pass a block method to generate extra data for each object.
+  # Honestly that sounds a little too fancy, maybe it could be handled in a
+  # template or helper? But whatevs.
+  def index_selected(query, extra_args = {}, block_method = nil)
+    query = index_selected_pre_query(query, extra_args)
     display_args = index_display_args(extra_args, query)
-    show_index_of_objects(query, display_args)
+
+    if block_method
+      show_index_of_objects(query, display_args) do |obj|
+        send(block_method, obj)
+      end
+    else
+      show_index_of_objects(query, display_args)
+    end
+  end
+
+  # This is a hook for controllers to modify the query before it is used,
+  # or do something else before the index is displayed.
+  # NOTE: Local overrides need to return the query.
+  def index_selected_pre_query(query, _display_args)
+    query
   end
 
   def index_display_args(extra_args, _query)

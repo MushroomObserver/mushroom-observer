@@ -63,8 +63,8 @@ class RssLogsController < ApplicationController
     types
   end
 
-  # Show selected search results as a matrix with "index" template.
-  def index_selected(query, args = {})
+  # Hook runs before template displayed. Must return query.
+  def index_selected_pre_query(query, _display_args)
     store_query_in_session(query)
     query_params_set(query)
 
@@ -76,7 +76,7 @@ class RssLogsController < ApplicationController
       @user.save_without_our_callbacks
     end
 
-    show_index_of_objects(query, index_display_args(args, query))
+    query
   end
 
   def index_display_args(args, _query)

@@ -96,10 +96,10 @@ class ImagesController < ApplicationController
     redirect_to(search_advanced_path)
   end
 
-  # Show selected search results as a matrix with "list_images" template.
-  def index_selected(query, args = {})
+  # Hook runs before template displayed. Must return query.
+  def index_selected_pre_query(query, _display_args)
     store_query_in_session(query)
-    super
+    query
   end
 
   # I can't figure out why ActiveRecord is not eager-loading all the names.
