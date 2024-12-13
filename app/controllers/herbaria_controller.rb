@@ -45,8 +45,7 @@
 # See https://tinyurl.com/ynapvpt7
 
 # View and modify Herbaria (displayed as "Fungaria")
-# rubocop:disable Metrics/ClassLength
-class HerbariaController < ApplicationController
+class HerbariaController < ApplicationController # rubocop:disable Metrics/ClassLength
   include ::Locationable
 
   before_action :login_required
@@ -245,8 +244,7 @@ class HerbariaController < ApplicationController
   end
 
   def normalize_parameters
-    [:name, :code, :mycoportal_db, :email, :place_name,
-     :mailing_address].
+    [:name, :code, :email, :place_name, :mailing_address].
       each do |arg|
         val = @herbarium.send(arg).to_s.strip_html.strip_squeeze
         @herbarium.send(:"#{arg}=", val)
@@ -426,9 +424,8 @@ class HerbariaController < ApplicationController
     return {} unless params[:herbarium]
 
     params.require(:herbarium).
-      permit(:name, :code, :mycoportal_db, :email, :mailing_address,
+      permit(:name, :code, :email, :mailing_address,
              :description, :location_id,
              :place_name, :personal, :personal_user_name)
   end
 end
-# rubocop:enable Metrics/ClassLength

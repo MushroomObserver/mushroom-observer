@@ -181,7 +181,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     obs = observations(:agaricus_campestris_obs)
     herbarium_record = herbarium_records(:agaricus_campestris_spec)
     herbarium = herbarium_record&.herbarium
-    herbarium.update(code: "notInMcp", mycoportal_db: nil)
+    herbarium.update(code: "notInMcp")
 
     user = users(:dick)
     assert(user.curated_herbaria.any?,
