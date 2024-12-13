@@ -180,7 +180,8 @@ class ObservationsController
       # Restrict to subset within a geographical region (used by map
       # if it needed to stuff multiple locations into a single marker).
       query = restrict_query_to_box(query)
-      show_index_of_objects(query, index_display_args(args, query))
+
+      super
     end
 
     def index_display_args(args, query)

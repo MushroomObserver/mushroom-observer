@@ -34,11 +34,6 @@ module FieldSlipsController::Index
     show_selected(query)
   end
 
-  # Show selected list of field_slips.
-  def show_selected(query, args = {})
-    show_index_of_objects(query, index_display_args(args, query))
-  end
-
   def index_display_args(args, _query)
     {
       action: :index,

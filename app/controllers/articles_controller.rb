@@ -40,11 +40,6 @@ class ArticlesController < ApplicationController
     [:by, :q, :id].freeze
   end
 
-  # Show selected list of articles.
-  def show_selected(query, args = {})
-    show_index_of_objects(query, index_display_args(args, query))
-  end
-
   def index_display_args(args, _query)
     {
       action: :index,

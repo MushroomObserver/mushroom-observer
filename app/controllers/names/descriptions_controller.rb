@@ -74,7 +74,7 @@ module Names
     #              'names/descriptions/index' template ???
     def show_selected(query, args = {})
       store_query_in_session(query)
-      show_index_of_objects(query, index_display_args(args, query))
+      super
     end
 
     def index_display_args(args, _query)

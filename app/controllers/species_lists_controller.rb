@@ -74,11 +74,6 @@ class SpeciesListsController < ApplicationController
     show_selected(query, always_index: true)
   end
 
-  # Show selected list of species_lists.
-  def show_selected(query, args = {})
-    show_index_of_objects(query, index_display_args(args, query))
-  end
-
   def index_display_args(args, query)
     args = {
       action: :index,

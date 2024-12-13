@@ -61,12 +61,10 @@ class SequencesController < ApplicationController
     [:all, :by, :q].freeze
   end
 
+  # In this controller, you usually want sequences for an observation.
+  # If you want all sequences, use the :all param.
   def all
     unfiltered_index
-  end
-
-  def show_selected(query, args = {})
-    show_index_of_objects(query, index_display_args(args, query))
   end
 
   def index_display_args(args, _query)

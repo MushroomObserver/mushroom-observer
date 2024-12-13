@@ -43,10 +43,6 @@ class HerbariumRecordsController < ApplicationController
     show_selected(query, always_index)
   end
 
-  def show_selected(query, args = {})
-    show_index_of_objects(query, index_display_args(args, query))
-  end
-
   def index_display_args(args, _query)
     {
       action: :index,

@@ -25,6 +25,8 @@ module ApplicationController::Indexes
     args = { by: default_sort_order }.merge(unfiltered_index_extra_args)
     query = create_query(controller_model_name.to_sym,
                          unfiltered_index_query_flavor, **args)
+    # display_args = index_display_args(unfiltered_index_display_args, query)
+    # show_index_of_objects(query, display_args)
     show_selected(query, unfiltered_index_display_args)
   end
 
@@ -54,16 +56,19 @@ module ApplicationController::Indexes
 
   def index_query_results
     query = find_or_create_query(controller_model_name.to_sym, by: params[:by])
+    # display_args = index_display_args(index_display_at_id_args, query)
+    # show_index_of_objects(query, display_args)
     show_selected(query, index_display_at_id_args)
   end
 
   # Show selected list of articles.
-  def show_selected(query, args = {})
-    show_index_of_objects(query, index_display_args(args, query))
+  def show_selected(query, extra_args = {})
+    display_args = index_display_args(extra_args, query)
+    show_index_of_objects(query, display_args)
   end
 
-  def index_display_args(args, _query)
-    {}.merge(args)
+  def index_display_args(extra_args, _query)
+    {}.merge(extra_args)
   end
 
   def index_display_at_id_args

@@ -31,11 +31,6 @@ class GlossaryTermsController < ApplicationController
     show_selected(query, index_display_at_id_args)
   end
 
-  # Show selected list of glossary_terms.
-  def show_selected(query, args = {})
-    show_index_of_objects(query, index_display_args(args, query))
-  end
-
   def index_display_args(args, _query)
     {
       action: :index,

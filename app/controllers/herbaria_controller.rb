@@ -74,6 +74,12 @@ class HerbariaController < ApplicationController
 
   private
 
+  # If user clicks "merge" on an herbarium, it reloads the page and asks
+  # them to click on the destination herbarium to merge it with.
+  def set_merge_ivar
+    @merge = Herbarium.safe_find(params[:merge])
+  end
+
   def default_sort_order
     :name
   end
@@ -96,18 +102,6 @@ class HerbariaController < ApplicationController
     query = create_query(:Herbarium, :all, nonpersonal: true,
                                            by: :code_then_name)
     show_selected(query, always_index)
-  end
-
-  # TODO: Generalize `set_extra_index_ivars`
-  # NOTE: make `merge` an action when this is a param builder.
-  def show_selected(query, args = {})
-    show_index_of_objects(query, index_display_args(args, query))
-  end
-
-  # If user clicks "merge" on an herbarium, it reloads the page and asks
-  # them to click on the destination herbarium to merge it with.
-  def set_merge_ivar
-    @merge = Herbarium.safe_find(params[:merge])
   end
 
   def index_display_args(args, _query)

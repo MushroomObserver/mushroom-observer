@@ -99,7 +99,7 @@ class ImagesController < ApplicationController
   # Show selected search results as a matrix with "list_images" template.
   def show_selected(query, args = {})
     store_query_in_session(query)
-    show_index_of_objects(query, index_display_args(args, query))
+    super
   end
 
   # I can't figure out why ActiveRecord is not eager-loading all the names.
