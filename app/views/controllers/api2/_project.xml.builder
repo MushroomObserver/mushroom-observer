@@ -7,7 +7,7 @@ xml.tag!(
   type: "project"
 ) do
   xml_string(xml, :title, object.title)
-  xml_html_string(xml, :summary, object.summary.to_s.tpl_nodiv)
+  xml_html_string(xml, :summary, object.summary.to_s.tl_for_api)
   xml_string(xml, :field_slip_prefix, object.field_slip_prefix)
   xml_datetime(xml, :created_at, object.created_at)
   xml_datetime(xml, :updated_at, object.updated_at)

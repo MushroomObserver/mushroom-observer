@@ -14,7 +14,7 @@ module API2InlineHelper
   def json_api_key(api_key)
     strip_hash(id: api_key.id,
                key: api_key.key.to_s,
-               notes: api_key.notes.to_s.tpl_nodiv,
+               notes: api_key.notes.to_s.tl_for_api,
                created_at: api_key.created_at.try(:utc),
                last_used: api_key.last_used.try(:utc),
                verified: api_key.verified.try(:utc),
@@ -23,7 +23,7 @@ module API2InlineHelper
 
   def xml_api_key(xml, api_key)
     xml_string(xml, :key, api_key.key)
-    xml_html_string(xml, :notes, api_key.notes.to_s.tpl_nodiv)
+    xml_html_string(xml, :notes, api_key.notes.to_s.tl_for_api)
     xml_datetime(xml, :created_at, api_key.created_at)
     xml_datetime(xml, :last_used, api_key.last_used)
     xml_date(xml, :verified, api_key.verified)
@@ -44,7 +44,7 @@ module API2InlineHelper
   def json_comment(comment)
     strip_hash(id: comment.id,
                summary: comment.summary.to_s.tl,
-               content: comment.comment.to_s.tpl_nodiv,
+               content: comment.comment.to_s.tl_for_api,
                created_at: comment.created_at.try(:utc),
                updated_at: comment.updated_at.try(:utc),
                owner: json_user(comment.user))
@@ -52,7 +52,7 @@ module API2InlineHelper
 
   def xml_comment(xml, comment)
     xml_string(xml, :summary, comment.summary.to_s.tl)
-    xml_html_string(xml, :content, comment.comment.to_s.tpl_nodiv)
+    xml_html_string(xml, :content, comment.comment.to_s.tl_for_api)
     xml_datetime(xml, :created_at, comment.created_at)
     xml_datetime(xml, :updated_at, comment.updated_at)
     xml_detailed_object(xml, :owner, comment.user)
@@ -102,7 +102,7 @@ module API2InlineHelper
     strip_hash(id: image.id,
                date: image.when,
                license: image.license.try(:display_name).to_s,
-               notes: image.notes.to_s.tpl_nodiv,
+               notes: image.notes.to_s.tl_for_api,
                quality: image.vote_cache,
                owner: json_user(image.user),
                copyright_holder: image.copyright_holder,
@@ -112,7 +112,7 @@ module API2InlineHelper
   def xml_image(xml, image)
     xml_date(xml, :date, image.when)
     xml_string(xml, :license, image.license.try(:display_name).to_s)
-    xml_html_string(xml, :notes, image.notes.to_s.tpl_nodiv)
+    xml_html_string(xml, :notes, image.notes.to_s.tl_for_api)
     xml_confidence_level(xml, :quality, image.vote_cache)
     xml_detailed_object(xml, :owner, image.user)
     xml_string(xml, :copyright_holder, image.copyright_holder)
@@ -169,7 +169,7 @@ module API2InlineHelper
 
   def json_reasons(reasons)
     reasons.select(&:used?).map do |reason|
-      { reason: reason.label.l, notes: reason.notes.to_s.tpl_nodiv }
+      { reason: reason.label.l, notes: reason.notes.to_s.tl_for_api }
     end
   end
 
@@ -191,7 +191,7 @@ module API2InlineHelper
   def xml_reason(xml, reason)
     xml.reason do
       xml_string(xml, :reason, reason.label.l)
-      xml_string(xml, :notes, reason.notes.to_s.tpl_nodiv)
+      xml_string(xml, :notes, reason.notes.to_s.tl_for_api)
     end
   end
 
@@ -210,7 +210,7 @@ module API2InlineHelper
                bases: sequence.bases.to_s,
                archive: sequence.archive.to_s,
                accession: sequence.accession.to_s,
-               notes: sequence.notes.to_s.tpl_nodiv)
+               notes: sequence.notes.to_s.tl_for_api)
   end
 
   def xml_sequence(xml, sequence)
@@ -218,7 +218,7 @@ module API2InlineHelper
     xml_string(xml, :bases, sequence.bases)
     xml_string(xml, :archive, sequence.archive)
     xml_string(xml, :accession, sequence.accession)
-    xml_string(xml, :notes, sequence.notes.to_s.tpl_nodiv)
+    xml_string(xml, :notes, sequence.notes.to_s.tl_for_api)
   end
 
   def json_user(user)

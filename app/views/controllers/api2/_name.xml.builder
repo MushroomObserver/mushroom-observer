@@ -12,7 +12,7 @@ xml.tag!(
   xml_boolean(xml, :deprecated, true) if object.deprecated
   xml_boolean(xml, :misspelled, true) if object.is_misspelling?
   xml_html_string(xml, :citation, object.citation.to_s.tl)
-  xml_html_string(xml, :notes, object.notes.to_s.tpl_nodiv)
+  xml_html_string(xml, :notes, object.notes.to_s.tl_for_api)
   xml_datetime(xml, :created_at, object.created_at)
   xml_datetime(xml, :updated_at, object.updated_at)
   xml_integer(xml, :number_of_views, object.num_views)
