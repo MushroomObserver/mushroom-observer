@@ -31,7 +31,7 @@ class HerbariumRecordsController < ApplicationController
     query = create_query(:HerbariumRecord, :all,
                          herbarium: params[:herbarium].to_s,
                          by: :herbarium_label)
-    filtered_index(query, always_index)
+    filtered_index(query, always_index_opts)
   end
 
   def observation
@@ -40,18 +40,18 @@ class HerbariumRecordsController < ApplicationController
     query = create_query(:HerbariumRecord, :all,
                          observation: params[:observation].to_s,
                          by: :herbarium_label)
-    filtered_index(query, always_index)
+    filtered_index(query, always_index_opts)
   end
 
-  def index_display_args(args, _query)
+  def index_display_opts(opts, _query)
     {
       letters: "herbarium_records.initial_det",
       num_per_page: 100,
       include: [{ herbarium: :curators }, { observations: :name }, :user]
-    }.merge(args)
+    }.merge(opts)
   end
 
-  def always_index
+  def always_index_opts
     { always_index: true }
   end
 

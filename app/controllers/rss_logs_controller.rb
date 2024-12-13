@@ -45,7 +45,7 @@ class RssLogsController < ApplicationController
   # of objects. The array comes from the checkboxes in tabset
   def type
     query = find_or_create_query(:RssLog, type: index_type_from_params)
-    filtered_index(query, index_display_at_id_args)
+    filtered_index(query, index_display_at_id_opts)
   end
 
   # Get the types whose value == "1"
@@ -64,7 +64,7 @@ class RssLogsController < ApplicationController
   end
 
   # Hook runs before template displayed. Must return query.
-  def filtered_index_final_hook(query, _display_args)
+  def filtered_index_final_hook(query, _display_opts)
     store_query_in_session(query)
     query_params_set(query)
 
@@ -79,11 +79,11 @@ class RssLogsController < ApplicationController
     query
   end
 
-  def index_display_args(args, _query)
+  def index_display_opts(opts, _query)
     {
       matrix: true, cache: true,
       include: rss_log_includes
-    }.merge(args)
+    }.merge(opts)
   end
 
   public

@@ -84,22 +84,22 @@ class CommentsController < ApplicationController
     redirect_back_or_default(action: :index)
   end
 
-  def index_display_args(args, query)
-    args = {
+  def index_display_opts(opts, query)
+    opts = {
       num_per_page: 25,
       # (Eager-loading of names might fail when comments start to apply to
       # objects other than observations.)
       include: [:target, :user]
-    }.merge(args)
+    }.merge(opts)
 
     # Paginate by letter if sorting by user.
     if (query.params[:by] == "user") || (query.params[:by] == "reverse_user")
-      args[:letters] = "users.login"
+      opts[:letters] = "users.login"
     end
 
     @full_detail = query.params[:for_target].present?
 
-    args
+    opts
   end
 
   public

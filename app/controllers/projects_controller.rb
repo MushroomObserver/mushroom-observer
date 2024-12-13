@@ -36,12 +36,12 @@ class ProjectsController < ApplicationController
     filtered_index(query)
   end
 
-  def index_display_args(args, _query)
+  def index_display_opts(opts, _query)
     {
       letters: "projects.title",
       num_per_page: 50,
       include: :user
-    }.merge(args)
+    }.merge(opts)
   end
 
   public ####################################################################

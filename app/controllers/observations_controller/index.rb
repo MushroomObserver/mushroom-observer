@@ -175,29 +175,31 @@ class ObservationsController
     end
 
     # Hook runs before template displayed. Must return query.
-    def filtered_index_final_hook(query, _display_args)
+    def filtered_index_final_hook(query, _display_opts)
       store_query_in_session(query)
       # Restrict to subset within a geographical region (used by map
       # if it needed to stuff multiple locations into a single marker).
       restrict_query_to_box(query) # returns this query
     end
 
-    def index_display_args(args, query)
+    def index_display_opts(opts, query)
       # We always want cached matrix boxes for observations if possible.
       # cache: true  will batch load the includes only for fragments not cached.
-      args = { matrix: true, cache: true,
-               include: observation_index_includes }.merge(args)
+      opts = {
+        matrix: true, cache: true,
+        include: observation_index_includes
+      }.merge(opts)
 
       # Paginate by letter if sorting by user.
       case query.params[:by]
       when "user", "reverse_user"
-        args[:letters] = "users.login"
+        opts[:letters] = "users.login"
       # Paginate by letter if sorting by name.
       when "name", "reverse_name"
-        args[:letters] = "names.sort_name"
+        opts[:letters] = "names.sort_name"
       end
 
-      args
+      opts
     end
 
     # The { images: } hash is necessary for the index carousels.

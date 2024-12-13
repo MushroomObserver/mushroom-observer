@@ -106,27 +106,17 @@ class NamesController < ApplicationController
   end
 
   # Hook runs before template displayed. Must return query.
-  def filtered_index_final_hook(query, _display_args)
+  def filtered_index_final_hook(query, _display_opts)
     store_query_in_session(query)
     query
   end
 
-  def add_descriptions_extra_info(name)
-    if (desc = name.description)
-      [desc.authors.map(&:login).join(", "),
-       desc.note_status.map(&:to_s).join("/"),
-       :"review_#{desc.review_status}".t]
-    else
-      []
-    end
-  end
-
-  def index_display_args(args, _query)
+  def index_display_opts(opts, _query)
     {
       letters: "names.sort_name",
       num_per_page: (/^[a-z]/i.match?(params[:letter].to_s) ? 500 : 50),
       include: [:description]
-    }.merge(args)
+    }.merge(opts)
   end
 
   ###################################

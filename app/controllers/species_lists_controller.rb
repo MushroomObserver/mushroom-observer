@@ -73,23 +73,23 @@ class SpeciesListsController < ApplicationController
     filtered_index(query, always_index: true)
   end
 
-  def index_display_args(args, query)
-    args = {
+  def index_display_opts(opts, query)
+    opts = {
       num_per_page: 20,
       include: [:location, :user],
       letters: "species_lists.title"
-    }.merge(args)
+    }.merge(opts)
 
     # Paginate by letter if sorting by user.
-    args[:letters] =
+    opts[:letters] =
       if [query.params[:by]].intersect?(%w[user reverse_user])
         "users.login"
       else
         # Can always paginate by title letter.
-        args[:letters] = "species_lists.title"
+        opts[:letters] = "species_lists.title"
       end
 
-    args
+    opts
   end
 
   public

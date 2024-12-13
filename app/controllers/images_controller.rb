@@ -98,7 +98,7 @@ class ImagesController < ApplicationController
   end
 
   # Hook runs before template displayed. Must return query.
-  def filtered_index_final_hook(query, _display_args)
+  def filtered_index_final_hook(query, _display_opts)
     store_query_in_session(query)
     query
   end
@@ -107,23 +107,23 @@ class ImagesController < ApplicationController
   # When I do an explicit test (load the first 100 images) it eager-loads
   # about 90%, but for some reason misses 10%, and always the same 10%, but
   # apparently with no rhyme or reason. -JPH 20100204
-  def index_display_args(args, query)
-    args = {
+  def index_display_opts(opts, query)
+    opts = {
       matrix: true,
       include: [:user, { observations: :name }, :license, :profile_users,
                 :projects, :thumb_glossary_terms, :glossary_terms, :image_votes]
-    }.merge(args)
+    }.merge(opts)
 
     # Paginate by letter if sorting by user.
     case query.params[:by]
     when "user", "reverse_user"
-      args[:letters] = "users.login"
+      opts[:letters] = "users.login"
     # Paginate by letter if sorting by name.
     when "name", "reverse_name"
-      args[:letters] = "names.sort_name"
+      opts[:letters] = "names.sort_name"
     end
 
-    args
+    opts
   end
 
   public

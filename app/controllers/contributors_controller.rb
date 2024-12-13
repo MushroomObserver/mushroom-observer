@@ -33,10 +33,10 @@ class ContributorsController < ApplicationController
     super.merge(query_args: { with_contribution: true, by: sorted_by })
   end
 
-  def index_display_args(args, _query)
+  def index_display_opts(opts, _query)
     {
       matrix: true,
       include: [:image]
-    }.merge(args)
+    }.merge(opts)
   end
 end

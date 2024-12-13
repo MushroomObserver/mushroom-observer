@@ -71,15 +71,13 @@ module Names
     end
 
     # Hook runs before template displayed. Must return query.
-    def filtered_index_final_hook(query, _display_args)
+    def filtered_index_final_hook(query, _display_opts)
       store_query_in_session(query)
       query
     end
 
-    def index_display_args(args, _query)
-      {
-        num_per_page: 50
-      }.merge(args)
+    def index_display_opts(opts, _query)
+      { num_per_page: 50 }.merge(opts)
     end
 
     public

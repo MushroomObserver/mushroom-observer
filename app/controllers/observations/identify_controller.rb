@@ -65,11 +65,11 @@ module Observations
     #   filtered_index(query)
     # end
 
-    def index_display_args(args, _query)
+    def index_display_opts(opts, _query)
       {
         matrix: true, cache: true,
         include: observation_identify_index_includes
-      }.merge(args)
+      }.merge(opts)
     end
 
     def observation_identify_index_includes

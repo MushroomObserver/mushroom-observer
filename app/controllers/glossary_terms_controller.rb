@@ -31,12 +31,12 @@ class GlossaryTermsController < ApplicationController
     super.merge(query_args: { by: sorted_by })
   end
 
-  def index_display_args(args, _query)
+  def index_display_opts(opts, _query)
     {
       letters: "glossary_terms.name",
       num_per_page: 50,
       include: { thumb_image: :image_votes }
-    }.merge(args)
+    }.merge(opts)
   end
 
   public

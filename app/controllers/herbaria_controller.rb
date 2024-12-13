@@ -102,12 +102,12 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     filtered_index(query, always_index)
   end
 
-  def index_display_args(args, _query)
+  def index_display_opts(opts, _query)
     {
       letters: "herbaria.name",
       num_per_page: 100,
       include: [:curators, :herbarium_records, :personal_user]
-    }.merge(args)
+    }.merge(opts)
   end
 
   def always_index

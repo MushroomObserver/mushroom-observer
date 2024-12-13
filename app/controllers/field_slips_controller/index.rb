@@ -34,11 +34,11 @@ module FieldSlipsController::Index
     filtered_index(query)
   end
 
-  def index_display_args(args, _query)
+  def index_display_opts(opts, _query)
     {
       num_per_page: 50,
       include: field_slip_includes
-    }.merge(args)
+    }.merge(opts)
   end
 
   # Used on index, but could be used on show, edit? update? as well.

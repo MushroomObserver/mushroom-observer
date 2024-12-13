@@ -65,7 +65,7 @@ module ApplicationController::Indexes
     query = create_query(controller_model_name.to_sym,
                          unfiltered_index_opts[:query_flavor], **args)
 
-    filtered_index(query, unfiltered_index_opts[:display_args])
+    filtered_index(query, unfiltered_index_opts[:display_opts])
   end
 
   # Can be overridden to prevent the unfiltered index from being called.
@@ -75,7 +75,7 @@ module ApplicationController::Indexes
 
   # Defaults for the unfiltered index. Controllers pass their own opts.
   def unfiltered_index_opts
-    { query_flavor: :all, query_args: {}, display_args: {} }
+    { query_flavor: :all, query_args: {}, display_opts: {} }
   end
 
   # This handles the index if you pass any of the basic params.
@@ -85,7 +85,7 @@ module ApplicationController::Indexes
     query = find_or_create_query(controller_model_name.to_sym,
                                  **sorted_index_opts[:query_args])
 
-    filtered_index(query, sorted_index_opts[:display_args])
+    filtered_index(query, sorted_index_opts[:display_opts])
   end
 
   def sorted_index_permitted?
@@ -93,33 +93,33 @@ module ApplicationController::Indexes
   end
 
   def sorted_index_opts
-    { query_args: { by: params[:by] }, display_args: index_display_at_id_args }
+    { query_args: { by: params[:by] }, display_opts: index_display_at_id_opts }
   end
 
   # The filtered index.
-  def filtered_index(query, extra_display_args = {})
-    query = filtered_index_final_hook(query, extra_display_args)
-    display_args = index_display_args(extra_display_args, query)
+  def filtered_index(query, extra_display_opts = {})
+    query = filtered_index_final_hook(query, extra_display_opts)
+    display_opts = index_display_opts(extra_display_opts, query)
 
-    show_index_of_objects(query, display_args)
+    show_index_of_objects(query, display_opts)
   end
 
   # This is a hook for controllers to modify the query before it is used,
   # or do anything else before the index is displayed.
   # NOTE: Must return the query (if writing an override).
-  def filtered_index_final_hook(query, _display_args)
+  def filtered_index_final_hook(query, _display_opts)
     query
   end
 
-  # Default for the display_args hash passed to show_index_of_objects.
+  # Default for the display_opts hash passed to show_index_of_objects.
   # These are pretty different per controller.
-  def index_display_args(extra_display_args, _query)
-    {}.merge(extra_display_args)
+  def index_display_opts(extra_display_opts, _query)
+    {}.merge(extra_display_opts)
   end
 
-  # Default for the display_args hash passed to show_index_of_objects
+  # Default for the display_opts hash passed to show_index_of_objects
   # when the index is called with an id.
-  def index_display_at_id_args
+  def index_display_at_id_opts
     { id: params[:id].to_s, always_index: true }
   end
 
@@ -144,12 +144,11 @@ module ApplicationController::Indexes
   end
 
   # Render an index or set of search results as a list or matrix. Arguments:
-  # query::     Query instance describing search/index.
-  # args::      Hash of options.
+  # query::         Query instance describing search/index.
+  # display_opts::  Hash of options.
   #
   # Options include these:
-  # id::            Warp to page that includes object with this id.
-  # action::        Template used to render results.
+  # id::            Load the page that includes object with this id.
   # matrix::        Displaying results as matrix?
   # cache::         Cache the HTML of the results?
   # letters::       Paginating by letter?
@@ -172,25 +171,25 @@ module ApplicationController::Indexes
   # query_params_set::        Tells +query_params+ to pass this query on
   #                           in links on this page.
   #
-  def show_index_of_objects(query, args = {})
-    show_index_setup(query, args)
-    if (@num_results == 1) && !args[:always_index]
+  def show_index_of_objects(query, display_opts = {})
+    show_index_setup(query, display_opts)
+    if (@num_results == 1) && !display_opts[:always_index]
       show_action_redirect(query)
     else
-      calc_pages_and_objects(query, args)
-      render(action: :index) # must be explicit for names `test_index` action
+      calc_pages_and_objects(query, display_opts)
+      render(action: :index) # must be explicit for names' `test_index` action
     end
   end
 
   private ##########
 
-  def show_index_setup(query, args)
+  def show_index_setup(query, display_opts)
     apply_content_filters(query)
     store_location
     clear_query_in_session if session[:checklist_source] != query.id
     query_params_set(query)
-    query.need_letters = args[:letters] if args[:letters]
-    set_index_view_ivars(query, args)
+    query.need_letters = display_opts[:letters] if display_opts[:letters]
+    set_index_view_ivars(query, display_opts)
   end
 
   def apply_content_filters(query)
@@ -225,10 +224,10 @@ module ApplicationController::Indexes
   # Set some ivars used in all index views.
   # Makes @query available to the :index template for query-dependent tabs
   #
-  def set_index_view_ivars(query, args)
+  def set_index_view_ivars(query, display_opts)
     @query = query
     @error ||= :runtime_no_matches.t(type: query.model.type_tag)
-    @layout = calc_layout_params if args[:matrix]
+    @layout = calc_layout_params if display_opts[:matrix]
     @num_results = query.num_results
   end
 
@@ -240,29 +239,29 @@ module ApplicationController::Indexes
                         id: query.result_ids.first)
   end
 
-  def calc_pages_and_objects(query, args)
-    number_arg = args[:number_arg] || :page
-    @pages = if args[:letters]
-               paginate_letters(args[:letter_arg] || :letter, number_arg,
-                                num_per_page(args))
+  def calc_pages_and_objects(query, display_opts)
+    number_arg = display_opts[:number_arg] || :page
+    @pages = if display_opts[:letters]
+               paginate_letters(display_opts[:letter_arg] || :letter,
+                                number_arg, num_per_page(display_opts))
              else
-               paginate_numbers(number_arg, num_per_page(args))
+               paginate_numbers(number_arg, num_per_page(display_opts))
              end
-    skip_if_coming_back(query, args)
-    find_objects(query, args)
+    skip_if_coming_back(query, display_opts)
+    find_objects(query, display_opts)
   end
 
-  def num_per_page(args)
-    return @layout["count"] if args[:matrix]
+  def num_per_page(display_opts)
+    return @layout["count"] if display_opts[:matrix]
 
-    args[:num_per_page] || 50
+    display_opts[:num_per_page] || 50
   end
 
-  def skip_if_coming_back(query, args)
-    if args[:id].present? &&
+  def skip_if_coming_back(query, display_opts)
+    if display_opts[:id].present? &&
        params[@pages.letter_arg].blank? &&
        params[@pages.number_arg].blank?
-      @pages.show_index(query.index(args[:id]))
+      @pages.show_index(query.index(display_opts[:id]))
     end
   end
 
@@ -271,12 +270,12 @@ module ApplicationController::Indexes
   # allows us to optimize eager-loading, doing it only for records not cached.
   # (The other place is from the template to the `matrix_box` helper, which
   # actually caches the HTML.)
-  def find_objects(query, args)
+  def find_objects(query, display_opts)
     logger.warn("QUERY starting: #{query.query.inspect}")
     @timer_start = Time.current
 
     # Instantiate correct subset, with or without includes.
-    @objects = instantiated_object_subset(query, args)
+    @objects = instantiated_object_subset(query, display_opts)
 
     @timer_end = Time.current
     logger.warn("QUERY finished: model=#{query.model}, " \
@@ -284,9 +283,9 @@ module ApplicationController::Indexes
                 "time=#{(@timer_end - @timer_start).to_f}")
   end
 
-  def instantiated_object_subset(query, args)
-    caching = args[:cache] || false
-    include = args[:include] || nil
+  def instantiated_object_subset(query, display_opts)
+    caching = display_opts[:cache] || false
+    include = display_opts[:include] || nil
 
     if caching
       objects_with_only_needed_eager_loads(query, include)

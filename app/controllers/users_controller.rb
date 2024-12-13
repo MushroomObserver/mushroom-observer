@@ -73,26 +73,26 @@ class UsersController < ApplicationController
   end
 
   # Hook runs before template displayed. Must return query.
-  def filtered_index_final_hook(query, _display_args)
+  def filtered_index_final_hook(query, _display_opts)
     store_query_in_session(query)
     query
   end
 
-  def index_display_args(args, query)
-    args = {
+  def index_display_opts(opts, query)
+    opts = {
       include: :user_groups,
       matrix: !in_admin_mode?
-    }.merge(args)
+    }.merge(opts)
 
     # Paginate by "correct" letter.
-    args[:letters] = if (query.params[:by] == "login") ||
+    opts[:letters] = if (query.params[:by] == "login") ||
                         (query.params[:by] == "reverse_login")
                        "users.login"
                      else
                        "users.name"
                      end
 
-    args
+    opts
   end
 
   public

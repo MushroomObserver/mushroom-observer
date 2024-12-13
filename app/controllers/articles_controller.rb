@@ -35,12 +35,12 @@ class ArticlesController < ApplicationController
     :created_at
   end
 
-  def index_display_args(args, _query)
+  def index_display_opts(opts, _query)
     {
       letters: "articles.title",
       num_per_page: 50,
       include: :user
-    }.merge(args)
+    }.merge(opts)
   end
 
   public

@@ -67,12 +67,12 @@ class SequencesController < ApplicationController
     unfiltered_index
   end
 
-  def index_display_args(args, _query)
+  def index_display_opts(opts, _query)
     {
       include: [{ observation: :name }, :user],
       letters: "sequences.locus",
       num_per_page: 50
-    }.merge(args)
+    }.merge(opts)
   end
 
   public ####################################################################
