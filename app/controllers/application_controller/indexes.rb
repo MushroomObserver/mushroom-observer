@@ -146,7 +146,6 @@ module ApplicationController::Indexes
   # @layout::
   # @pages::        Paginator instance.
   # @objects::      Array of objects to be shown.
-  # @extra_data::   Results of block yielded on every object if block given.
   #
   # Other side-effects:
   # store_location::          Sets this as the +redirect_back_or_default+
@@ -162,13 +161,6 @@ module ApplicationController::Indexes
       show_action_redirect(query)
     else
       calc_pages_and_objects(query, args)
-      if block_given?
-        @extra_data = @objects.each_with_object({}) do |object, data|
-          row = yield(object)
-          row = [row] unless row.is_a?(Array)
-          data[object.id] = row
-        end
-      end
       show_index_render(args)
     end
   end
