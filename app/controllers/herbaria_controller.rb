@@ -64,9 +64,11 @@ class HerbariaController < ApplicationController
   #   params[:pattern].present? - Herbaria based on Pattern Search
   #   [:nonpersonal].blank? - all Herbaria, regardless of query
   #   [:nonpersonal].present? - all nonpersonal (institutional) Herbaria
-  #   default - Herbaria based on current Query (Sort links land on this action)
+  #   index_query_results - Herbaria based on current Query
+  #                         (Sort links land on this action)
   #
   def index
+    set_merge_ivar if params[:merge]
     build_index_with_query
   end
 
@@ -104,13 +106,12 @@ class HerbariaController < ApplicationController
   # TODO: Generalize `set_extra_index_ivars`
   # NOTE: make `merge` an action when this is a param builder.
   def show_selected(query, args = {})
-    set_extra_index_ivars
     show_index_of_objects(query, index_display_args(args, query))
   end
 
   # If user clicks "merge" on an herbarium, it reloads the page and asks
   # them to click on the destination herbarium to merge it with.
-  def set_extra_index_ivars
+  def set_merge_ivar
     @merge = Herbarium.safe_find(params[:merge])
   end
 
