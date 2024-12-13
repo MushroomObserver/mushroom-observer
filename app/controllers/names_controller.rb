@@ -30,7 +30,7 @@ class NamesController < ApplicationController
     return if handle_advanced_search_invalid_q_param?
 
     query = find_query(:Name)
-    index_selected(query)
+    filtered_index(query)
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
     redirect_to(search_advanced_path)
@@ -56,21 +56,21 @@ class NamesController < ApplicationController
       render("names/index")
     else
       @suggest_alternate_spellings = search.query.params[:pattern]
-      index_selected(search.query)
+      filtered_index(search.query)
     end
   end
 
   # Display list of names that have observations.
   def with_observations
     query = create_query(:Name, :with_observations)
-    index_selected(query)
+    filtered_index(query)
   end
 
   # Display list of names with descriptions that have authors.
   def with_descriptions
     @with_descriptions = true # signals to add desc info to name list
     query = create_query(:Name, :with_descriptions)
-    index_selected(query)
+    filtered_index(query)
   end
 
   # Display list of the most popular 100 names that don't have descriptions.
@@ -78,7 +78,7 @@ class NamesController < ApplicationController
   def need_descriptions
     @help = :needed_descriptions_help
     query = Name.descriptions_needed
-    index_selected(query, num_per_page: 100)
+    filtered_index(query, num_per_page: 100)
   end
 
   # Display list of names that a given user is author on.
@@ -90,7 +90,7 @@ class NamesController < ApplicationController
     return unless user
 
     query = create_query(:Name, :by_user, user: user)
-    index_selected(query)
+    filtered_index(query)
   end
 
   # Display list of names that a given user is editor on.
@@ -102,11 +102,11 @@ class NamesController < ApplicationController
     return unless user
 
     query = create_query(:Name, :by_editor, user: user)
-    index_selected(query)
+    filtered_index(query)
   end
 
   # Hook runs before template displayed. Must return query.
-  def index_selected_final_hook(query, _display_args)
+  def filtered_index_final_hook(query, _display_args)
     store_query_in_session(query)
     query
   end
@@ -123,8 +123,6 @@ class NamesController < ApplicationController
 
   def index_display_args(args, _query)
     {
-      controller: "/names",
-      action: "index",
       letters: "names.sort_name",
       num_per_page: (/^[a-z]/i.match?(params[:letter].to_s) ? 500 : 50),
       include: [:description]
@@ -144,7 +142,7 @@ class NamesController < ApplicationController
       @test_pagination_args = { anchor: params[:test_anchor] }
     end
 
-    index_selected(query, num_per_page: params[:num_per_page].to_i)
+    filtered_index(query, num_per_page: params[:num_per_page].to_i)
   end
 
   ##############################################################################

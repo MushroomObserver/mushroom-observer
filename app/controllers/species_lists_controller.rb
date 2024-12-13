@@ -47,7 +47,7 @@ class SpeciesListsController < ApplicationController
   # Display list of selected species_lists, based on current Query.
   # (Linked from show_species_list, next to "prev" and "next".)
   # Passes explicit :by param to affect title (only).
-  def index_sorted_query_opts
+  def sorted_index_opts
     sorted_by = params[:by] || :date
     super.merge(query_args: { by: sorted_by })
   end
@@ -61,7 +61,7 @@ class SpeciesListsController < ApplicationController
     return unless user
 
     query = create_query(:SpeciesList, :all, by_user: user, by: :date)
-    index_selected(query)
+    filtered_index(query)
   end
 
   # Display list of SpeciesList's attached to a given project.
@@ -70,12 +70,11 @@ class SpeciesListsController < ApplicationController
     return unless project
 
     query = create_query(:SpeciesList, :all, project: project)
-    index_selected(query, always_index: true)
+    filtered_index(query, always_index: true)
   end
 
   def index_display_args(args, query)
     args = {
-      action: :index,
       num_per_page: 20,
       include: [:location, :user],
       letters: "species_lists.title"

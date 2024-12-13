@@ -37,7 +37,6 @@ class ArticlesController < ApplicationController
 
   def index_display_args(args, _query)
     {
-      action: :index,
       letters: "articles.title",
       num_per_page: 50,
       include: :user

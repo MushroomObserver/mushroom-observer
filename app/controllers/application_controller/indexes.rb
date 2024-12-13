@@ -27,32 +27,33 @@ module ApplicationController::Indexes
     controller_name.classify
   end
 
-  # NOTE: Currently some controllers prefer nil. Even though the resulting sort
-  # order is the same, passing no explicit sort order means the index is titled
-  # "____ Index", rather than "____ by ____". Could be simplified.
+  # Currently some controller tests expect nil: Even though the sort order
+  # resulting from `nil` is the default, passing no explicit :by param
+  # means the index is titled "____ Index", rather than "____ by ____".
+  # NOTE: Could be standardized.
   def default_sort_order
     # query_base = "::Query::#{controller_model_name}Base".constantize
     # query_base.send(:default_order) || nil
     nil
   end
 
-  # Basic params most controllers can handle
+  # Provide defaults for the params an index can handle.
   INDEX_BASIC_PARAMS = [:by, :q, :id].freeze
 
-  # Provide defaults for the params an index can handle.
-  # Overrides should include any of the above basics if relevant.
+  # Overrides should include any of the above basics, if relevant.
   def index_active_params
     ApplicationController::Indexes::INDEX_BASIC_PARAMS
   end
 
-  # The basic params that get handled by :index_sorted_query.
-  # Some controllers don't handle all three, so we intersect.
+  # Figure which of the active params should get handled by :sorted_index.
+  # Some controllers don't handle all three basics, so we derive what's there.
   def index_basic_params
     index_active_params.intersection(INDEX_BASIC_PARAMS)
   end
 
+  # Should this param be handled by :sorted_index or a named method?
   def index_param_method_or_default(subaction)
-    index_basic_params.include?(subaction) ? :index_sorted_query : subaction
+    index_basic_params.include?(subaction) ? :sorted_index : subaction
   end
 
   # Generally this is the default index action, no params given.
@@ -64,38 +65,40 @@ module ApplicationController::Indexes
     query = create_query(controller_model_name.to_sym,
                          unfiltered_index_opts[:query_flavor], **args)
 
-    index_selected(query, unfiltered_index_opts[:display_args])
+    filtered_index(query, unfiltered_index_opts[:display_args])
   end
 
+  # Can be overridden to prevent the unfiltered index from being called.
   def unfiltered_index_permitted?
     true
   end
 
+  # Defaults for the unfiltered index. Controllers pass their own opts.
   def unfiltered_index_opts
     { query_flavor: :all, query_args: {}, display_args: {} }
   end
 
-  # The index if you pass any of the basic params.
-  def index_sorted_query
-    return unless index_sorted_query_permitted?
+  # This handles the index if you pass any of the basic params.
+  def sorted_index
+    return unless sorted_index_permitted?
 
     query = find_or_create_query(controller_model_name.to_sym,
-                                 **index_sorted_query_opts[:query_args])
+                                 **sorted_index_opts[:query_args])
 
-    index_selected(query, index_sorted_query_opts[:display_args])
+    filtered_index(query, sorted_index_opts[:display_args])
   end
 
-  def index_sorted_query_permitted?
+  def sorted_index_permitted?
     true
   end
 
-  def index_sorted_query_opts
+  def sorted_index_opts
     { query_args: { by: params[:by] }, display_args: index_display_at_id_args }
   end
 
   # The filtered index.
-  def index_selected(query, extra_display_args = {})
-    query = index_selected_final_hook(query, extra_display_args)
+  def filtered_index(query, extra_display_args = {})
+    query = filtered_index_final_hook(query, extra_display_args)
     display_args = index_display_args(extra_display_args, query)
 
     show_index_of_objects(query, display_args)
@@ -104,7 +107,7 @@ module ApplicationController::Indexes
   # This is a hook for controllers to modify the query before it is used,
   # or do anything else before the index is displayed.
   # NOTE: Must return the query (if writing an override).
-  def index_selected_final_hook(query, _display_args)
+  def filtered_index_final_hook(query, _display_args)
     query
   end
 
@@ -127,7 +130,7 @@ module ApplicationController::Indexes
       redirect_to(send(:"#{controller_model_name.underscore}_path", obj.id))
     else
       query = create_query(controller_model_name.to_sym, :all, pattern:)
-      index_selected(query)
+      filtered_index(query)
     end
   end
 
@@ -175,7 +178,7 @@ module ApplicationController::Indexes
       show_action_redirect(query)
     else
       calc_pages_and_objects(query, args)
-      show_index_render(args)
+      render(action: :index) # must be explicit for names `test_index` action
     end
   end
 
@@ -319,14 +322,6 @@ module ApplicationController::Indexes
     digest_path = helpers.digest_path_from_template(template)
 
     fragment_exist?([digest_path, obj, locale])
-  end
-
-  def show_index_render(args)
-    if args[:template]
-      render(template: args[:template]) # Render the list if given template.
-    elsif args[:action]
-      render(action: args[:action])
-    end
   end
 
   def users_content_filters

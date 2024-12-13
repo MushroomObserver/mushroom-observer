@@ -74,7 +74,7 @@ class ImagesController < ApplicationController
     return unless user
 
     query = create_query(:Image, :by_user, user: user)
-    index_selected(query)
+    filtered_index(query)
   end
 
   # Display matrix of Image's attached to a given project.
@@ -83,7 +83,7 @@ class ImagesController < ApplicationController
     return unless project
 
     query = create_query(:Image, :for_project, project: project)
-    index_selected(query, always_index: 1)
+    filtered_index(query, always_index: 1)
   end
 
   # Displays matrix of advanced search results.
@@ -91,14 +91,14 @@ class ImagesController < ApplicationController
     return if handle_advanced_search_invalid_q_param?
 
     query = find_query(:Image)
-    index_selected(query)
+    filtered_index(query)
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
     redirect_to(search_advanced_path)
   end
 
   # Hook runs before template displayed. Must return query.
-  def index_selected_final_hook(query, _display_args)
+  def filtered_index_final_hook(query, _display_args)
     store_query_in_session(query)
     query
   end
@@ -109,7 +109,6 @@ class ImagesController < ApplicationController
   # apparently with no rhyme or reason. -JPH 20100204
   def index_display_args(args, query)
     args = {
-      action: "index",
       matrix: true,
       include: [:user, { observations: :name }, :license, :profile_users,
                 :projects, :thumb_glossary_terms, :glossary_terms, :image_votes]

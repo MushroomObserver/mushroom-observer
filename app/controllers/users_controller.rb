@@ -27,7 +27,7 @@ class UsersController < ApplicationController
     index_query_authorized?
   end
 
-  # Also used by index_sorted_query below
+  # Also used by sorted_index below
   def index_query_authorized?
     return true if in_admin_mode? || find_query(:User)
 
@@ -45,7 +45,7 @@ class UsersController < ApplicationController
     [:pattern, :by, :q, :id].freeze
   end
 
-  def index_sorted_query_permitted?
+  def sorted_index_permitted?
     index_query_authorized?
   end
 
@@ -56,7 +56,7 @@ class UsersController < ApplicationController
       redirect_to(user_path(user.id))
     else
       query = create_query(:User, :all, pattern: pattern)
-      index_selected(query)
+      filtered_index(query)
     end
   end
 
@@ -73,14 +73,13 @@ class UsersController < ApplicationController
   end
 
   # Hook runs before template displayed. Must return query.
-  def index_selected_final_hook(query, _display_args)
+  def filtered_index_final_hook(query, _display_args)
     store_query_in_session(query)
     query
   end
 
   def index_display_args(args, query)
     args = {
-      action: "index",
       include: :user_groups,
       matrix: !in_admin_mode?
     }.merge(args)

@@ -38,7 +38,7 @@ class CommentsController < ApplicationController
   # Show selected list of comments, based on current Query.
   # (Linked from show_comment, next to "prev" and "next"... or will be.)
   # Passes explicit :by param to affect title (only).
-  def index_sorted_query_opts
+  def sorted_index_opts
     sorted_by = params[:by] || default_sort_order
     super.merge(query_args: { by: sorted_by })
   end
@@ -52,7 +52,7 @@ class CommentsController < ApplicationController
     return unless user
 
     query = create_query(:Comment, :all, by_user: user)
-    index_selected(query)
+    filtered_index(query)
   end
 
   # Shows comments for a given user's Observations, most recent first.
@@ -65,7 +65,7 @@ class CommentsController < ApplicationController
     return unless user
 
     query = create_query(:Comment, :all, for_user: user)
-    index_selected(query)
+    filtered_index(query)
   end
 
   # Shows comments for a given object, most recent first. (Linked from the
@@ -76,7 +76,7 @@ class CommentsController < ApplicationController
 
     query = create_query(:Comment, :all, target: target.id,
                                          type: target.class.name)
-    index_selected(query)
+    filtered_index(query)
   end
 
   def no_model
@@ -86,7 +86,6 @@ class CommentsController < ApplicationController
 
   def index_display_args(args, query)
     args = {
-      action: :index,
       num_per_page: 25,
       # (Eager-loading of names might fail when comments start to apply to
       # objects other than observations.)

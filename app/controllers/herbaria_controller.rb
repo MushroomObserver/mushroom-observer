@@ -64,7 +64,7 @@ class HerbariaController < ApplicationController
   #   params[:pattern].present? - Herbaria based on Pattern Search
   #   [:nonpersonal].blank? - all Herbaria, regardless of query
   #   [:nonpersonal].present? - all nonpersonal (institutional) Herbaria
-  #   index_sorted_query - Herbaria based on current Query
+  #   sorted_index - Herbaria based on current Query
   #                         (Sort links land on this action)
   #
   def index
@@ -91,7 +91,7 @@ class HerbariaController < ApplicationController
   # Show selected list, based on current Query.
   # (Linked from show template, next to "prev" and "next"... or will be.)
   # Passes explicit :by param to affect title (only).
-  def index_sorted_query_opts
+  def sorted_index_opts
     sorted_by = params[:by] || default_sort_order
     super.merge(query_args: { by: sorted_by })
   end
@@ -100,7 +100,7 @@ class HerbariaController < ApplicationController
     store_location
     query = create_query(:Herbarium, :all, nonpersonal: true,
                                            by: :code_then_name)
-    index_selected(query, always_index)
+    filtered_index(query, always_index)
   end
 
   def index_display_args(args, _query)

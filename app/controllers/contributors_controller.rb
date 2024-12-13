@@ -28,14 +28,13 @@ class ContributorsController < ApplicationController
   # Show selected list, based on current Query.
   # Passes explicit :by param to affect title (only).
   # (Linked from show template, next to "prev" and "next"... or will be.)
-  def index_sorted_query_opts
+  def sorted_index_opts
     sorted_by = params[:by] || default_sort_order
     super.merge(query_args: { with_contribution: true, by: sorted_by })
   end
 
   def index_display_args(args, _query)
     {
-      action: :index,
       matrix: true,
       include: [:image]
     }.merge(args)

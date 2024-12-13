@@ -26,14 +26,13 @@ class GlossaryTermsController < ApplicationController
   # Show selected list, based on current Query.
   # (Linked from show template, next to "prev" and "next"... or will be.)
   # Passes explicit :by param to affect title (only).
-  def index_sorted_query_opts
+  def sorted_index_opts
     sorted_by = params[:by] || default_sort_order
     super.merge(query_args: { by: sorted_by })
   end
 
   def index_display_args(args, _query)
     {
-      action: :index,
       letters: "glossary_terms.name",
       num_per_page: 50,
       include: { thumb_image: :image_votes }

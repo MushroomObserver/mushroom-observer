@@ -33,12 +33,11 @@ class ProjectsController < ApplicationController
     return unless user
 
     query = create_query(:Project, :all, member: user)
-    index_selected(query)
+    filtered_index(query)
   end
 
   def index_display_args(args, _query)
     {
-      action: :index,
       letters: "projects.title",
       num_per_page: 50,
       include: :user

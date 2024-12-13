@@ -55,7 +55,7 @@ module Names
       return unless user
 
       query = create_query(:NameDescription, :by_author, user: user)
-      index_selected(query)
+      filtered_index(query)
     end
 
     # Display list of name_descriptions that a given user is editor on.
@@ -67,19 +67,17 @@ module Names
       return unless user
 
       query = create_query(:NameDescription, :by_editor, user: user)
-      index_selected(query)
+      filtered_index(query)
     end
 
     # Hook runs before template displayed. Must return query.
-    def index_selected_final_hook(query, _display_args)
+    def filtered_index_final_hook(query, _display_args)
       store_query_in_session(query)
       query
     end
 
     def index_display_args(args, _query)
       {
-        controller: "/names/descriptions",
-        action: :index,
         num_per_page: 50
       }.merge(args)
     end

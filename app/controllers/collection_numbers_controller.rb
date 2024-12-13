@@ -35,12 +35,11 @@ class CollectionNumbersController < ApplicationController
     store_location
     query = create_query(:CollectionNumber, :all,
                          observation: params[:observation].to_s)
-    index_selected(query, always_index: true)
+    filtered_index(query, always_index: true)
   end
 
   def index_display_args(args, _query)
     {
-      action: :index,
       letters: "collection_numbers.name",
       num_per_page: 100
     }.merge(args)
