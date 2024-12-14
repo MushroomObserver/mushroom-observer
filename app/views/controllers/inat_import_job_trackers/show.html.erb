@@ -1,13 +1,27 @@
 <%
-@container = :wide
-add_page_title(:inat_import_tracker.t)
-# add_tab_set(article_show_tabs(article: @article, user: @user))
+  @container = :wide
+  add_page_title(:inat_import_tracker.t)
+  # add_tab_set(article_show_tabs(article: @article, user: @user))
 %>
 
 <p>
   <b><%= :inat_import_tracker_status.t %>: </b>
   <span id="state"><%= @inat_import.state %></span>
 </p>
+
+<p>
+  Via Stimulus:
+  <%=
+    tag.span(id: "status", class: "text-right",
+              data: { controller: "inat-import-job",
+                      status: @tracker.status,
+                      endpoint: inat_import_job_tracker_path(@tracker.id),
+                      inat_import_job_target: "status" }) do
+                        @tracker.status
+                      end
+  %>
+</p>
+
 <% if @inat_import.response_errors.present? %>
   <p>
     <b><%= :ERRORS.t %>: </b>
