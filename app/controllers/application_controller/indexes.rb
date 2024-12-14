@@ -14,21 +14,19 @@ module ApplicationController::Indexes
 
   # Get args from a param subaction, or if none given, the unfiltered_index.
   def build_index_with_query
-    bail = false
     index_active_params.each do |subaction|
       next if params[subaction].blank?
 
       query, display_opts = send(index_param_method_or_default(subaction))
-      # Some actions may redirect instead of returning a query.
-      # If we have the param but get a blank query we should bail.
-      if query.blank?
-        bail = true
-        break
-      end
+      # Some actions may redirect instead of returning a query, such as pattern
+      # searches that resolve to a single object or get no results. So if we
+      # had the param, but got a blank query, we should bail to allow the
+      # redirect without rendering a blank index.
+      return nil if query.blank?
+
       # If we have a query, display it.
       return filtered_index(query, display_opts)
     end
-    return if bail
 
     # Otherwise, display the unfiltered index.
     new_query, display_opts = unfiltered_index
