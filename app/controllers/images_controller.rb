@@ -88,7 +88,7 @@ class ImagesController < ApplicationController
 
   # Displays matrix of advanced search results.
   def advanced_search
-    return [nil, {}] if handle_advanced_search_invalid_q_param?
+    return if handle_advanced_search_invalid_q_param?
 
     query = find_query(:Image)
     # Have to check this here because we're not running the query yet.

@@ -72,9 +72,7 @@ class CommentsController < ApplicationController
   # "and more..." thingy at the bottom of truncated embedded comment lists.)
   def target
     return no_model unless (model = Comment.safe_model_from_name(params[:type]))
-    unless (target = find_or_goto_index(model, params[:target].to_s))
-      return [nil, {}]
-    end
+    return unless (target = find_or_goto_index(model, params[:target].to_s))
 
     query = create_query(:Comment, :all, target: target.id,
                                          type: target.class.name)
