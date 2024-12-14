@@ -113,6 +113,13 @@ module Report
       obs_alt || loc_low
     end
 
+    def best_alt
+      return obs_alt if obs_alt
+      return (loc_high + loc_low)/2 if loc_high && loc_low
+
+      loc_high || loc_low
+    end
+
     # --------------------
 
     def genus

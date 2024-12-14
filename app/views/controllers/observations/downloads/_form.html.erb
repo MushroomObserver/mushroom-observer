@@ -26,6 +26,9 @@
     <%= radio_with_label(form: f, field: :format, value: :fundis,
                           checked: (@format == "fundis") && "checked",
                           label: :download_observations_fundis.t) %>
+    <%= radio_with_label(form: f, field: :format, value: :nama,
+                          checked: (@format == "nama") && "checked",
+                          label: :download_observations_nama.t) %>
   </div>
 
   <p><%= :download_observations_encoding.t %>:</p>

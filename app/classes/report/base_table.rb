@@ -80,7 +80,8 @@ module Report
         '""',
         '""',
         '""',
-        '""'
+        '""',
+        "observations.inat_id"
       ]
     end
 
@@ -111,7 +112,8 @@ module Report
         "locations.east",
         "locations.west",
         "locations.high",
-        "locations.low"
+        "locations.low",
+        "observations.inat_id"
       ]
     end
 
