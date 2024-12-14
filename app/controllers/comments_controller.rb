@@ -52,7 +52,7 @@ class CommentsController < ApplicationController
     return unless user
 
     query = create_query(:Comment, :all, by_user: user)
-    filtered_index(query)
+    [query, {}]
   end
 
   # Shows comments for a given user's Observations, most recent first.
@@ -65,23 +65,26 @@ class CommentsController < ApplicationController
     return unless user
 
     query = create_query(:Comment, :all, for_user: user)
-    filtered_index(query)
+    [query, {}]
   end
 
   # Shows comments for a given object, most recent first. (Linked from the
   # "and more..." thingy at the bottom of truncated embedded comment lists.)
   def target
     return no_model unless (model = Comment.safe_model_from_name(params[:type]))
-    return unless (target = find_or_goto_index(model, params[:target].to_s))
+    unless (target = find_or_goto_index(model, params[:target].to_s))
+      return [nil, {}]
+    end
 
     query = create_query(:Comment, :all, target: target.id,
                                          type: target.class.name)
-    filtered_index(query)
+    [query, {}]
   end
 
   def no_model
     flash_error(:runtime_invalid.t(type: '"type"', value: params[:type].to_s))
     redirect_back_or_default(action: :index)
+    [nil, {}]
   end
 
   def index_display_opts(opts, query)

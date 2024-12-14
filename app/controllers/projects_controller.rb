@@ -33,15 +33,13 @@ class ProjectsController < ApplicationController
     return unless user
 
     query = create_query(:Project, :all, member: user)
-    filtered_index(query)
+    [query, {}]
   end
 
   def index_display_opts(opts, _query)
-    {
-      letters: "projects.title",
+    { letters: "projects.title",
       num_per_page: 50,
-      include: :user
-    }.merge(opts)
+      include: :user }.merge(opts)
   end
 
   public ####################################################################

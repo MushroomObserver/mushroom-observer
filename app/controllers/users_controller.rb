@@ -54,9 +54,10 @@ class UsersController < ApplicationController
     pattern = params[:pattern].to_s
     if (user = user_exact_match(pattern))
       redirect_to(user_path(user.id))
+      [nil, {}]
     else
       query = create_query(:User, :all, pattern: pattern)
-      filtered_index(query)
+      [query, {}]
     end
   end
 
@@ -85,8 +86,7 @@ class UsersController < ApplicationController
     }.merge(opts)
 
     # Paginate by "correct" letter.
-    opts[:letters] = if (query.params[:by] == "login") ||
-                        (query.params[:by] == "reverse_login")
+    opts[:letters] = if %w[login reverse_login].include?(query.params[:by])
                        "users.login"
                      else
                        "users.name"

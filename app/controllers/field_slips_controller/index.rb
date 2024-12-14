@@ -23,7 +23,7 @@ module FieldSlipsController::Index
     )
 
     query = create_query(:FieldSlip, :all, project: project)
-    filtered_index(query, always_index: true)
+    [query, { always_index: true }]
   end
 
   # Displays list of User's FieldSlips, by date.
@@ -31,14 +31,12 @@ module FieldSlipsController::Index
     return unless (user = find_or_goto_index(User, params[:by_user]))
 
     query = create_query(:FieldSlip, :all, by_user: user)
-    filtered_index(query)
+    [query, {}]
   end
 
   def index_display_opts(opts, _query)
-    {
-      num_per_page: 50,
-      include: field_slip_includes
-    }.merge(opts)
+    { num_per_page: 50,
+      include: field_slip_includes }.merge(opts)
   end
 
   # Used on index, but could be used on show, edit? update? as well.

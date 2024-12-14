@@ -130,19 +130,14 @@ class ImagesControllerTest < FunctionalTestCase
   end
 
   def test_index_advanced_search_error
-    query = Query.lookup_and_save(:Image, :advanced_search,
-                                  name: "Don't know",
-                                  user: "myself",
-                                  content: "Long pink stem and small pink cap",
-                                  location: "Eastern Oklahoma")
+    query_no_conditions = Query.lookup_and_save(:Image, :advanced_search)
+
     login
+    params = @controller.query_params(query_no_conditions).
+             merge({ advanced_search: true })
+    get(:index, params:)
 
-    @controller.stub(:filtered_index, -> { raise(StandardError) }) do
-      get(:index,
-          params: @controller.query_params(query).
-          merge({ advanced_search: "1" }))
-    end
-
+    assert_flash_error(:runtime_no_conditions.l)
     assert_redirected_to(search_advanced_path)
   end
 

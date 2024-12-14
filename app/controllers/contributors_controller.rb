@@ -34,9 +34,7 @@ class ContributorsController < ApplicationController
   end
 
   def index_display_opts(opts, _query)
-    {
-      matrix: true,
-      include: [:image]
-    }.merge(opts)
+    { matrix: true,
+      include: [:image] }.merge(opts)
   end
 end

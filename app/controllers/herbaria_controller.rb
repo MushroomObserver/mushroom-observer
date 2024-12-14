@@ -99,19 +99,13 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     store_location
     query = create_query(:Herbarium, :all, nonpersonal: true,
                                            by: :code_then_name)
-    filtered_index(query, always_index)
+    [query, { always_index: true }]
   end
 
   def index_display_opts(opts, _query)
-    {
-      letters: "herbaria.name",
+    { letters: "herbaria.name",
       num_per_page: 100,
-      include: [:curators, :herbarium_records, :personal_user]
-    }.merge(opts)
-  end
-
-  def always_index
-    { always_index: true }
+      include: [:curators, :herbarium_records, :personal_user] }.merge(opts)
   end
 
   public

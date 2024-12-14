@@ -68,11 +68,9 @@ class SequencesController < ApplicationController
   end
 
   def index_display_opts(opts, _query)
-    {
-      include: [{ observation: :name }, :user],
+    { include: [{ observation: :name }, :user],
       letters: "sequences.locus",
-      num_per_page: 50
-    }.merge(opts)
+      num_per_page: 50 }.merge(opts)
   end
 
   public ####################################################################

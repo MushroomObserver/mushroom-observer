@@ -27,13 +27,17 @@ class NamesController < ApplicationController
 
   # Displays list of advanced search results.
   def advanced_search
-    return if handle_advanced_search_invalid_q_param?
+    return [nil, {}] if handle_advanced_search_invalid_q_param?
 
     query = find_query(:Name)
-    filtered_index(query)
+    # Have to check this here because we're not running the query yet.
+    raise(:runtime_no_conditions.l) unless query.params.any?
+
+    [query, {}]
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
     redirect_to(search_advanced_path)
+    [nil, {}]
   end
 
   # Display list of names that match a string.
@@ -42,6 +46,7 @@ class NamesController < ApplicationController
     if pattern.match?(/^\d+$/) &&
        (name = Name.safe_find(pattern))
       redirect_to(name_path(name.id))
+      [nil, {}]
     else
       show_non_id_pattern_results(pattern)
     end
@@ -54,23 +59,24 @@ class NamesController < ApplicationController
         flash_error(error.to_s)
       end
       render("names/index")
+      [nil, {}]
     else
       @suggest_alternate_spellings = search.query.params[:pattern]
-      filtered_index(search.query)
+      [search.query, {}]
     end
   end
 
   # Display list of names that have observations.
   def with_observations
     query = create_query(:Name, :with_observations)
-    filtered_index(query)
+    [query, {}]
   end
 
   # Display list of names with descriptions that have authors.
   def with_descriptions
     @with_descriptions = true # signals to add desc info to name list
     query = create_query(:Name, :with_descriptions)
-    filtered_index(query)
+    [query, {}]
   end
 
   # Display list of the most popular 100 names that don't have descriptions.
@@ -78,7 +84,7 @@ class NamesController < ApplicationController
   def need_descriptions
     @help = :needed_descriptions_help
     query = Name.descriptions_needed
-    filtered_index(query, num_per_page: 100)
+    [query, { num_per_page: 100 }]
   end
 
   # Display list of names that a given user is author on.
@@ -90,7 +96,7 @@ class NamesController < ApplicationController
     return unless user
 
     query = create_query(:Name, :by_user, user: user)
-    filtered_index(query)
+    [query, {}]
   end
 
   # Display list of names that a given user is editor on.
@@ -102,7 +108,7 @@ class NamesController < ApplicationController
     return unless user
 
     query = create_query(:Name, :by_editor, user: user)
-    filtered_index(query)
+    [query, {}]
   end
 
   # Hook runs before template displayed. Must return query.

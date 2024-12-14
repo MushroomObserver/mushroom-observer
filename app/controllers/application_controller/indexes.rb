@@ -12,14 +12,29 @@ module ApplicationController::Indexes
     base.helper_method(:paginate_numbers)
   end
 
-  # Dispatch to a subaction (original version, built with Query)
+  # Get args from a param subaction, or if none given, the unfiltered_index.
   def build_index_with_query
+    bail = false
     index_active_params.each do |subaction|
-      if params[subaction].present?
-        return send(index_param_method_or_default(subaction))
+      next if params[subaction].blank?
+
+      query, display_opts = send(index_param_method_or_default(subaction))
+      # Some actions may redirect instead of returning a query.
+      # If we have the param but get a blank query we should bail.
+      if query.blank?
+        bail = true
+        break
       end
+      # If we have a query, display it.
+      return filtered_index(query, display_opts)
     end
-    unfiltered_index
+    return if bail
+
+    # Otherwise, display the unfiltered index.
+    new_query, display_opts = unfiltered_index
+    return unless new_query
+
+    filtered_index(new_query, display_opts)
   end
 
   # It's not always the controller_name, e.g. ContributorsController -> User
@@ -65,7 +80,7 @@ module ApplicationController::Indexes
     query = create_query(controller_model_name.to_sym,
                          unfiltered_index_opts[:query_flavor], **args)
 
-    filtered_index(query, unfiltered_index_opts[:display_opts])
+    [query, unfiltered_index_opts[:display_opts]]
   end
 
   # Can be overridden to prevent the unfiltered index from being called.
@@ -73,7 +88,7 @@ module ApplicationController::Indexes
     true
   end
 
-  # Defaults for the unfiltered index. Controllers pass their own opts.
+  # Defaults for the unfiltered index. Controllers may pass their own opts.
   def unfiltered_index_opts
     { query_flavor: :all, query_args: {}, display_opts: {} }
   end
@@ -85,7 +100,7 @@ module ApplicationController::Indexes
     query = find_or_create_query(controller_model_name.to_sym,
                                  **sorted_index_opts[:query_args])
 
-    filtered_index(query, sorted_index_opts[:display_opts])
+    [query, sorted_index_opts[:display_opts]]
   end
 
   def sorted_index_permitted?
@@ -128,9 +143,10 @@ module ApplicationController::Indexes
     pattern = params[:pattern].to_s
     if (obj = maybe_pattern_is_an_id(pattern))
       redirect_to(send(:"#{controller_model_name.underscore}_path", obj.id))
+      [nil, {}]
     else
       query = create_query(controller_model_name.to_sym, :all, pattern:)
-      filtered_index(query)
+      [query, {}]
     end
   end
 

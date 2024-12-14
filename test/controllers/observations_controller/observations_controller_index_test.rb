@@ -246,16 +246,14 @@ class ObservationsControllerIndexTest < FunctionalTestCase
   end
 
   def test_index_advanced_search_error
-    query = Query.lookup_and_save(:Observation, :advanced_search, name: "Fungi")
+    query_no_conditions = Query.lookup_and_save(:Observation, :advanced_search)
 
     login
-    @controller.stub(:filtered_index, -> { raise(RuntimeError) }) do
-      get(:index,
-          params: @controller.query_params(query).merge(
-            { advanced_search: "1" }
-          ))
-    end
+    params = @controller.query_params(query_no_conditions).
+             merge(advanced_search: true)
+    get(:index, params:)
 
+    assert_flash_error(:runtime_no_conditions.l)
     assert_redirected_to(
       search_advanced_path,
       "Advanced Search should reload form if it throws an error"

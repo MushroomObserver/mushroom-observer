@@ -44,7 +44,7 @@ module Locations
       return unless user
 
       query = create_query(:LocationDescription, :by_author, user: user)
-      filtered_index(query)
+      [query, {}]
     end
 
     # Display list of location_descriptions that a given user is editor on.
@@ -56,7 +56,7 @@ module Locations
       return unless user
 
       query = create_query(:LocationDescription, :by_editor, user: user)
-      filtered_index(query)
+      [query, {}]
     end
 
     # Hook runs before template displayed. Must return query.

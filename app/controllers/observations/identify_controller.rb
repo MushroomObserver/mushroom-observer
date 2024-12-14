@@ -50,26 +50,24 @@ module Observations
 
       query = create_query(:Observation, :needs_naming,
                            by: :rss_log, in_clade: term)
-      filtered_index(query)
+      [query, {}]
     end
 
     def region(term)
       query = create_query(:Observation, :needs_naming,
                            by: :rss_log, in_region: term)
-      filtered_index(query)
+      [query, {}]
     end
 
     # def user_filter(term)
     #   query = create_query(:Observation, :needs_naming,
     #                        by: :rss_log, by_user: params[:user])
-    #   filtered_index(query)
+    #   [query, {}]
     # end
 
     def index_display_opts(opts, _query)
-      {
-        matrix: true, cache: true,
-        include: observation_identify_index_includes
-      }.merge(opts)
+      { matrix: true, cache: true,
+        include: observation_identify_index_includes }.merge(opts)
     end
 
     def observation_identify_index_includes

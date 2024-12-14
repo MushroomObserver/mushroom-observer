@@ -47,10 +47,13 @@ class LocationsController < ApplicationController
 
   # Displays matrix of advanced search results.
   def advanced_search
-    return if handle_advanced_search_invalid_q_param?
+    return [nil, {}] if handle_advanced_search_invalid_q_param?
 
     query = find_query(:Location)
-    filtered_index(query, link_all_sorts: true)
+    # Have to check this here because we're not running the query yet.
+    raise(:runtime_no_conditions.l) unless query.params.any?
+
+    [query, { link_all_sorts: true }]
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
     redirect_to(search_advanced_path)
@@ -62,12 +65,13 @@ class LocationsController < ApplicationController
     loc = Location.safe_find(pattern) if /^\d+$/.match?(pattern)
     if loc
       redirect_to(location_path(loc.id))
+      [nil, {}]
     else
       query = create_query(
         :Location, :pattern_search,
         pattern: Location.user_format(@user, pattern)
       )
-      filtered_index(query, link_all_sorts: true)
+      [query, { link_all_sorts: true }]
     end
   end
 
@@ -76,7 +80,7 @@ class LocationsController < ApplicationController
     query = create_query(
       :Location, :regexp_search, regexp: "#{params[:country]}$"
     )
-    filtered_index(query, link_all_sorts: true)
+    [query, { link_all_sorts: true }]
   end
 
   # Displays a list of all locations whose country matches the id param.
@@ -85,7 +89,7 @@ class LocationsController < ApplicationController
       :Location, :with_observations_for_project,
       project: Project.find(params[:project])
     )
-    filtered_index(query, link_all_sorts: true)
+    [query, { link_all_sorts: true }]
   end
 
   # Display list of locations that a given user created.
@@ -97,7 +101,7 @@ class LocationsController < ApplicationController
     return unless user
 
     query = create_query(:Location, :by_user, user: user)
-    filtered_index(query, link_all_sorts: true)
+    [query, { link_all_sorts: true }]
   end
 
   # Display list of locations that a given user is editor on.
@@ -109,7 +113,7 @@ class LocationsController < ApplicationController
     return unless user
 
     query = create_query(:Location, :by_editor, user: user)
-    filtered_index(query)
+    [query, {}]
   end
 
   # Hook runs before template displayed. Must return query.

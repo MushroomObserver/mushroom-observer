@@ -149,14 +149,12 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def test_index_advanced_search_error
-    query_without_conditions = Query.lookup_and_save(
-      :Name, :advanced_search
-    )
+    query_no_conditions = Query.lookup_and_save(:Name, :advanced_search)
 
     login
-    get(:index,
-        params: @controller.query_params(query_without_conditions).
-                            merge(advanced_search: true))
+    params = @controller.query_params(query_no_conditions).
+             merge({ advanced_search: true })
+    get(:index, params:)
 
     assert_flash_error(:runtime_no_conditions.l)
     assert_redirected_to(search_advanced_path)

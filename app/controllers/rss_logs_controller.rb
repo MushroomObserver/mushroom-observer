@@ -45,7 +45,7 @@ class RssLogsController < ApplicationController
   # of objects. The array comes from the checkboxes in tabset
   def type
     query = find_or_create_query(:RssLog, type: index_type_from_params)
-    filtered_index(query, index_display_at_id_opts)
+    [query, index_display_at_id_opts]
   end
 
   # Get the types whose value == "1"
@@ -80,10 +80,8 @@ class RssLogsController < ApplicationController
   end
 
   def index_display_opts(opts, _query)
-    {
-      matrix: true, cache: true,
-      include: rss_log_includes
-    }.merge(opts)
+    { matrix: true, cache: true,
+      include: rss_log_includes }.merge(opts)
   end
 
   public
