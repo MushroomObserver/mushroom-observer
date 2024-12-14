@@ -4,28 +4,56 @@
 # rubocop:disable Metrics/ClassLength
 class HerbariumRecordsController < ApplicationController
   before_action :login_required
-  # disable cop because index is defined in ApplicationController
-  # rubocop:disable Rails/LexicallyScopedActionFilter
   before_action :pass_query_params, except: :index
   before_action :store_location, except: [:index, :destroy]
-  # rubocop:enable Rails/LexicallyScopedActionFilter
 
-  # index
+  ##############################################################################
+  # INDEX
+  #
+  def index
+    store_location
+    build_index_with_query
+  end
+
+  private
+
+  def default_sort_order
+    ::Query::HerbariumBase.default_order # :name
+  end
+
   # ApplicationController uses this table to dispatch #index to a private method
-  @index_subaction_param_keys = [
-    :pattern,
-    :herbarium_id,
-    :observation_id,
-    :by,
-    :q,
-    :id
-  ].freeze
+  def index_active_params
+    [:pattern, :herbarium, :observation, :by, :q, :id].freeze
+  end
 
-  @index_subaction_dispatch_table = {
-    by: :index_query_results,
-    q: :index_query_results,
-    id: :index_query_results
-  }.freeze
+  def herbarium
+    store_location
+    query = create_query(:HerbariumRecord, :all,
+                         herbarium: params[:herbarium].to_s,
+                         by: :herbarium_label)
+    [query, { always_index: true }]
+  end
+
+  def observation
+    @observation = Observation.find(params[:observation])
+    store_location
+    query = create_query(:HerbariumRecord, :all,
+                         observation: params[:observation].to_s,
+                         by: :herbarium_label)
+    [query, { always_index: true }]
+  end
+
+  def index_display_opts(opts, _query)
+    {
+      letters: "herbarium_records.initial_det",
+      num_per_page: 100,
+      include: [{ herbarium: :curators }, { observations: :name }, :user]
+    }.merge(opts)
+  end
+
+  public
+
+  ####################################################################
 
   def show
     case params[:flow]
@@ -121,68 +149,6 @@ class HerbariumRecordsController < ApplicationController
   def herbarium_record_includes
     [:user,
      { observations: [:user, observation_matrix_box_image_includes] }]
-  end
-
-  def default_index_subaction
-    list_all
-  end
-
-  # Show list of herbarium_records.
-  def list_all
-    store_location
-    query = create_query(:HerbariumRecord, :all, by: default_sort_order)
-    show_selected_herbarium_records(query)
-  end
-
-  def default_sort_order
-    ::Query::HerbariumBase.default_order
-  end
-
-  # Displays matrix of selected HerbariumRecord's (based on current Query).
-  def index_query_results
-    query = find_or_create_query(:HerbariumRecord, by: params[:by])
-    show_selected_herbarium_records(query, id: params[:id].to_s,
-                                           always_index: true)
-  end
-
-  # Display list of HerbariumRecords whose text matches a string pattern.
-  def pattern
-    pattern = params[:pattern].to_s
-    if pattern.match?(/^\d+$/) &&
-       (herbarium_record = HerbariumRecord.safe_find(pattern))
-      redirect_to(herbarium_record_path(herbarium_record.id))
-    else
-      query = create_query(:HerbariumRecord, :all, pattern: pattern)
-      show_selected_herbarium_records(query)
-    end
-  end
-
-  def herbarium_id
-    store_location
-    query = create_query(:HerbariumRecord, :all,
-                         herbarium: params[:herbarium_id].to_s,
-                         by: :herbarium_label)
-    show_selected_herbarium_records(query, always_index: true)
-  end
-
-  def observation_id
-    @observation = Observation.find(params[:observation_id])
-    store_location
-    query = create_query(:HerbariumRecord, :all,
-                         observation: params[:observation_id].to_s,
-                         by: :herbarium_label)
-    show_selected_herbarium_records(query, always_index: true)
-  end
-
-  def show_selected_herbarium_records(query, args = {})
-    args = {
-      action: :index,
-      letters: "herbarium_records.initial_det",
-      num_per_page: 100,
-      include: [{ herbarium: :curators }, { observations: :name }, :user]
-    }.merge(args)
-
-    show_index_of_objects(query, args)
   end
 
   def default_herbarium_record

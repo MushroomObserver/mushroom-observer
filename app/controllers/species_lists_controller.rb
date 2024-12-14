@@ -9,31 +9,92 @@
 #
 class SpeciesListsController < ApplicationController
   before_action :login_required
-  # disable cop because index is defined in ApplicationController
   before_action :require_successful_user, only: [:new, :create]
-
+  # Bullet wants us to eager load synonyms for @deprecated_names in
+  # edit_species_list, and I thought it would be possible, but I can't
+  # get it to work.  Seems toooo minor to waste any more time on.
+  # Also, as of 20231212, it wants a cached column for Observation.name,
+  # but this is not as simple as an AR default column_cache because count
+  # needs to be recalculated whenever an observation's consensus name
+  # changes, not just on create or destroy of the Observation.name.
   around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [
-    # Bullet wants us to eager load synonyms for @deprecated_names in
-    # edit_species_list, and I thought it would be possible, but I can't
-    # get it to work.  Seems toooo minor to waste any more time on.
-    # Also, as of 20231212, it wants a cached column for Observation.name,
-    # but this is not as simple as an AR default column_cache because count
-    # needs to be recalculated whenever an observation's consensus name
-    # changes, not just on create or destroy of the Observation.name.
     :create, :update
   ]
 
-  # Used by ApplicationController to dispatch #index to a private method
-  @index_subaction_param_keys = [
-    :pattern,
-    :by_user,
-    :for_project,
-    :by
-  ].freeze
+  ##############################################################################
+  # INDEX
+  #
+  def index
+    build_index_with_query
+  end
 
-  @index_subaction_dispatch_table = {
-    by: :by_title_or_selected_by_query
-  }.freeze
+  private
+
+  # unused now. should be :date, maybe - AN
+  def default_sort_order
+    ::Query::SpeciesListBase.default_order # :title
+  end
+
+  def unfiltered_index_opts
+    super.merge(query_args: { by: :date })
+  end
+
+  # Used by ApplicationController to dispatch #index to a private method
+  def index_active_params
+    [:pattern, :by_user, :project, :by, :q, :id].freeze
+  end
+
+  # Display list of selected species_lists, based on current Query.
+  # (Linked from show_species_list, next to "prev" and "next".)
+  # Passes explicit :by param to affect title (only).
+  def sorted_index_opts
+    sorted_by = params[:by] || :date
+    super.merge(query_args: { by: sorted_by })
+  end
+
+  # Display list of user's species_lists, sorted by date.
+  def by_user
+    user = find_obj_or_goto_index(
+      model: User, obj_id: params[:by_user].to_s,
+      index_path: species_lists_path
+    )
+    return unless user
+
+    query = create_query(:SpeciesList, :all, by_user: user, by: :date)
+    [query, {}]
+  end
+
+  # Display list of SpeciesList's attached to a given project.
+  def project
+    project = find_or_goto_index(Project, params[:project].to_s)
+    return unless project
+
+    query = create_query(:SpeciesList, :all, project: project)
+    [query, { always_index: true }]
+  end
+
+  def index_display_opts(opts, query)
+    opts = {
+      num_per_page: 20,
+      include: [:location, :user],
+      letters: "species_lists.title"
+    }.merge(opts)
+
+    # Paginate by letter if sorting by user.
+    opts[:letters] =
+      if [query.params[:by]].intersect?(%w[user reverse_user])
+        "users.login"
+      else
+        # Can always paginate by title letter.
+        opts[:letters] = "species_lists.title"
+      end
+
+    opts
+  end
+
+  public
+
+  ##############################################################################
 
   def show
     store_location
@@ -110,103 +171,6 @@ class SpeciesListsController < ApplicationController
     else
       redirect_to(species_list_path(@species_list))
     end
-  end
-
-  ##############################################################################
-
-  private
-
-  #  :section: Index
-
-  def default_index_subaction
-    list_all
-  end
-
-  # Display list of all species_lists, sorted by date.
-  def list_all
-    query = create_query(:SpeciesList, :all, by: sorted_by_default_or_date)
-    show_selected_species_lists(query, id: params[:id].to_s, by: params[:by])
-  end
-
-  def sorted_by_default_or_date
-    params[:by] == default_sort_order ? default_sort_order.to_sym : :date
-  end
-
-  def default_sort_order
-    ::Query::SpeciesListBase.default_order
-  end
-
-  # choose another subaction when params[:by].present?
-  def by_title_or_selected_by_query
-    params[:by] == "title" ? species_lists_by_title : index_query_results
-  end
-
-  # Display list of all species_lists, sorted by title.
-  def species_lists_by_title
-    query = create_query(:SpeciesList, :all, by: :title)
-    show_selected_species_lists(query)
-  end
-
-  # Display list of selected species_lists, based on current Query.
-  # (Linked from show_species_list, next to "prev" and "next".)
-  def index_query_results
-    query = find_or_create_query(:SpeciesList, by: params[:by])
-    show_selected_species_lists(query, id: params[:id].to_s, always_index: true)
-  end
-
-  # Display list of user's species_lists, sorted by date.
-  def by_user
-    user = find_obj_or_goto_index(
-      model: User, obj_id: params[:by_user].to_s,
-      index_path: species_lists_path
-    )
-    return unless user
-
-    query = create_query(:SpeciesList, :all, by_user: user)
-    show_selected_species_lists(query)
-  end
-
-  # Display list of SpeciesList's attached to a given project.
-  def for_project
-    project = find_or_goto_index(Project, params[:for_project].to_s)
-    return unless project
-
-    query = create_query(:SpeciesList, :all, project: project)
-    show_selected_species_lists(query, always_index: 1)
-  end
-
-  # Display list of SpeciesList's whose title, notes, etc. matches a string
-  # pattern.
-  def pattern
-    pattern = params[:pattern].to_s
-    spl = SpeciesList.safe_find(pattern) if /^\d+$/.match?(pattern)
-    if spl
-      redirect_to(action: :show, id: spl.id)
-    else
-      query = create_query(:SpeciesList, :all, pattern: pattern)
-      show_selected_species_lists(query)
-    end
-  end
-
-  # Show selected list of species_lists.
-  def show_selected_species_lists(query, args = {})
-    args = {
-      action: :index,
-      num_per_page: 20,
-      include: [:location, :user],
-      letters: "species_lists.title"
-    }.merge(args)
-
-    # Paginate by letter if sorting by user.
-    args[:letters] =
-      if [query.params[:by]].intersect?(%w[user reverse_user])
-        "users.login"
-      else
-        # Can always paginate by title letter.
-        args[:letters] = "species_lists.title"
-      end
-
-    show_index_of_objects(query, args)
   end
 
   ##############################################################################

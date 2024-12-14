@@ -11,7 +11,7 @@ class FieldSlipsIntegrationTest < CapybaraIntegrationTestCase
   def test_visiting_the_index
     login!(mary)
     visit(field_slips_url)
-    assert_selector("h1", text: :FIELD_SLIPS.t)
+    assert_selector("h1", text: :FIELD_SLIP.t)
   end
 
   def test_navigating_to_show_field_slip

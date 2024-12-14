@@ -809,11 +809,11 @@ MushroomObserver::Application.routes.draw do
   get("/herbarium/index", to: redirect("/herbaria"))
   get("/herbarium/index_herbarium/:id", to: redirect("/herbaria?id=%{id}"))
   get("/herbarium/index_herbarium", to: redirect("/herbaria"))
-  get("/herbarium/list_herbaria", to: redirect("/herbaria?flavor=all"))
+  get("/herbarium/list_herbaria", to: redirect("/herbaria"))
   get("/herbarium/request_to_be_curator/:id",
       to: redirect("/herbaria/curator_requests/new?id=%{id}"))
   # Must be the final route in order to give the others priority
-  get("/herbarium", to: redirect("/herbaria?flavor=nonpersonal"))
+  get("/herbarium", to: redirect("/herbaria?nonpersonal=true"))
 
   # ----- Images: legacy action redirects
   redirect_legacy_actions(

@@ -7,8 +7,8 @@
 # edit (get)
 # index (get)                      (default) list query results
 # index (get, pattern: present)    list Herbaria matching a string pattern
-# index (get, flavor: nonpersonal) list institutional Herbaria registered in IH
-# index (get, flavor: all)         list all Herbaria
+# index (get, nonpersonal: true)   list institutional Herbaria registered in IH
+# index (get)                       list all Herbaria
 # new (get)
 # show (get)                       show one herbarium
 # show { flow: :prev } (get)       show next herbarium in search results
@@ -31,7 +31,7 @@
 # edit_herbarium (get)              edit (get)
 # edit_herbarium (post)             update (patch)
 # herbarium_search (get)            index (get, pattern: present)
-# index (get)                       index (get, flavor: nonpersonal)
+# index (get)                       index (get, nonpersonal: true)
 # index_herbarium (get)             index (get) - lists query results
 # list_herbaria (get)               index (get, flavor: all) - all herbaria
 # *merge_herbaria (get)             Herbaria::Merges#create (post)
@@ -56,33 +56,62 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   ]
   before_action :keep_track_of_referrer, only: [:destroy, :edit, :new]
 
-  # ---------- Actions to Display data (index, show, etc.) ---------------------
+  ##############################################################################
+  # INDEX
 
   # Display list of selected herbaria, based on params
   #   params[:pattern].present? - Herbaria based on Pattern Search
-  #   [:flavor] == "all" - all Herbaria, regardless of query
-  #   [:flavor] == "nonpersonal" - all nonpersonal (institutional) Herbaria
-  #   default - Herbaria based on current Query (Sort links land on this action)
+  #   [:nonpersonal].blank? - all Herbaria, regardless of query
+  #   [:nonpersonal].present? - all nonpersonal (institutional) Herbaria
+  #   sorted_index - Herbaria based on current Query
+  #                         (Sort links land on this action)
+  #
   def index
-    return patterned_index if params[:pattern].present?
-
-    case params[:flavor]
-    when "all" # List all herbaria
-      show_selected_herbaria(
-        create_query(:Herbarium, :all, by: :name), always_index: true
-      )
-    when "nonpersonal" # List institutional Herbaria
-      store_location
-      show_selected_herbaria(
-        create_query(:Herbarium, :all, nonpersonal: true, by: :code_then_name),
-        always_index: true
-      )
-    else # default List herbaria resulting from query
-      show_selected_herbaria(find_or_create_query(:Herbarium, by: params[:by]),
-                             id: params[:id].to_s, always_index: true)
-    end
+    set_merge_ivar if params[:merge]
+    build_index_with_query
   end
 
+  private
+
+  # If user clicks "merge" on an herbarium, it reloads the page and asks
+  # them to click on the destination herbarium to merge it with.
+  def set_merge_ivar
+    @merge = Herbarium.safe_find(params[:merge])
+  end
+
+  def default_sort_order
+    :name
+  end
+
+  def index_active_params
+    [:pattern, :nonpersonal, :by, :q, :id].freeze
+  end
+
+  # Show selected list, based on current Query.
+  # (Linked from show template, next to "prev" and "next"... or will be.)
+  # Passes explicit :by param to affect title (only).
+  def sorted_index_opts
+    sorted_by = params[:by] || default_sort_order
+    super.merge(query_args: { by: sorted_by })
+  end
+
+  def nonpersonal
+    store_location
+    query = create_query(:Herbarium, :all, nonpersonal: true,
+                                           by: :code_then_name)
+    [query, { always_index: true }]
+  end
+
+  def index_display_opts(opts, _query)
+    { letters: "herbaria.name",
+      num_per_page: 100,
+      include: [:curators, :herbarium_records, :personal_user] }.merge(opts)
+  end
+
+  public
+
+  ##############################################################################
+  #
   # Display a single herbarium, based on :flow params
   # :flow is added in _prev_next_page partial, ApplicationHelper#link_next
   def show
@@ -203,37 +232,6 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   private
 
   include Herbaria::SharedPrivateMethods
-
-  # ---------- Index -----------------------------------------------------------
-
-  def patterned_index
-    pattern = params[:pattern].to_s
-    if pattern.match?(/^\d+$/) && (herbarium = Herbarium.safe_find(pattern))
-      redirect_to(herbarium_path(herbarium.id))
-    else
-      show_selected_herbaria(
-        create_query(:Herbarium, :all, pattern: pattern)
-      )
-    end
-  end
-
-  def show_selected_herbaria(query, args = {})
-    args = show_index_args(args)
-
-    # If user clicks "merge" on an herbarium, it reloads the page and asks
-    # them to click on the destination herbarium to merge it with.
-    @merge = Herbarium.safe_find(params[:merge])
-
-    show_index_of_objects(query, args)
-  end
-
-  def show_index_args(args)
-    { # default args
-      letters: "herbaria.name",
-      num_per_page: 100,
-      include: [:curators, :herbarium_records, :personal_user]
-    }.merge(args)
-  end
 
   def make_sure_can_edit!
     return true if in_admin_mode? || @herbarium.can_edit?

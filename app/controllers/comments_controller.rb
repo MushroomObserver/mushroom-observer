@@ -11,51 +11,36 @@
 #
 class CommentsController < ApplicationController
   before_action :login_required
-  # disable cop because index is defined in ApplicationController
-  # rubocop:disable Rails/LexicallyScopedActionFilter
   before_action :pass_query_params, except: [:index]
-  # rubocop:enable Rails/LexicallyScopedActionFilter
 
   # Bullet doesn't seem to be able to figure out that we cannot eager load
   # through polymorphic relations, so I'm just disabling it for these actions.
   around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [:index]
 
   ##############################################################################
-
-  # index::
-  # ApplicationController uses this table to dispatch #index to a private method
-  @index_subaction_param_keys = [
-    :target, :pattern, :by_user, :for_user, :by
-  ].freeze
-
-  @index_subaction_dispatch_table = {
-    by: :index_query_results
-  }.freeze
-
-  ###########################################################
+  # INDEX
+  #
+  def index
+    build_index_with_query
+  end
 
   private
 
-  def default_index_subaction
-    list_all
-  end
-
-  # Show list of latest comments. (Linked from left panel.)
-  def list_all
-    query = create_query(:Comment, :all, by: default_sort_order)
-    show_selected_comments(query)
-  end
-
   def default_sort_order
-    ::Query::CommentBase.default_order
+    ::Query::CommentBase.default_order # :created_at
   end
 
-  # Show selected list of comments, based on current Query.  (Linked from
-  # show_comment, next to "prev" and "next"... or will be.)
-  def index_query_results
-    sorted_by = params[:by].present? ? params[:by].to_s : default_sort_order
-    query = find_or_create_query(:Comment, by: sorted_by)
-    show_selected_comments(query, id: params[:id].to_s, always_index: true)
+  # ApplicationController uses this table to dispatch #index to a private method
+  def index_active_params
+    [:target, :pattern, :by_user, :for_user, :by].freeze
+  end
+
+  # Show selected list of comments, based on current Query.
+  # (Linked from show_comment, next to "prev" and "next"... or will be.)
+  # Passes explicit :by param to affect title (only).
+  def sorted_index_opts
+    sorted_by = params[:by] || default_sort_order
+    super.merge(query_args: { by: sorted_by })
   end
 
   # Shows comments by a given user, most recent first. (Linked from show_user.)
@@ -67,7 +52,7 @@ class CommentsController < ApplicationController
     return unless user
 
     query = create_query(:Comment, :all, by_user: user)
-    show_selected_comments(query)
+    [query, {}]
   end
 
   # Shows comments for a given user's Observations, most recent first.
@@ -80,7 +65,7 @@ class CommentsController < ApplicationController
     return unless user
 
     query = create_query(:Comment, :all, for_user: user)
-    show_selected_comments(query)
+    [query, {}]
   end
 
   # Shows comments for a given object, most recent first. (Linked from the
@@ -91,44 +76,31 @@ class CommentsController < ApplicationController
 
     query = create_query(:Comment, :all, target: target.id,
                                          type: target.class.name)
-    show_selected_comments(query)
+    [query, {}]
   end
 
   def no_model
     flash_error(:runtime_invalid.t(type: '"type"', value: params[:type].to_s))
     redirect_back_or_default(action: :index)
+    [nil, {}]
   end
 
-  # Display list of Comment's whose text matches a string pattern.
-  def pattern
-    pattern = params[:pattern].to_s
-    if pattern.match?(/^\d+$/) && (comment = Comment.safe_find(pattern))
-      redirect_to(action: :show, id: comment.id)
-    else
-      query = create_query(:Comment, :all, pattern: pattern)
-      show_selected_comments(query)
-    end
-  end
-
-  # Show selected list of comments.
-  def show_selected_comments(query, args = {})
-    # (Eager-loading of names might fail when comments start to apply to
-    # objects other than observations.)
-    args = {
-      action: :index,
+  def index_display_opts(opts, query)
+    opts = {
       num_per_page: 25,
+      # (Eager-loading of names might fail when comments start to apply to
+      # objects other than observations.)
       include: [:target, :user]
-    }.merge(args)
+    }.merge(opts)
 
     # Paginate by letter if sorting by user.
-    if (query.params[:by] == "user") ||
-       (query.params[:by] == "reverse_user")
-      args[:letters] = "users.login"
+    if (query.params[:by] == "user") || (query.params[:by] == "reverse_user")
+      opts[:letters] = "users.login"
     end
 
     @full_detail = query.params[:for_target].present?
 
-    show_index_of_objects(query, args)
+    opts
   end
 
   public

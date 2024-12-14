@@ -12,4 +12,10 @@ class ContributorsControllerTest < FunctionalTestCase
     get(:index)
     assert_template("contributors/_contributor")
   end
+
+  def test_indexing_by_id
+    login
+    get(:index, params: { id: users(:rolf).id })
+    assert_template("contributors/_contributor")
+  end
 end

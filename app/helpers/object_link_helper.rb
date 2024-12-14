@@ -254,7 +254,7 @@ module ObjectLinkHelper
     if count.positive?
 
       link_to((count == 1 ? :herbarium_record.t : :herbarium_records.t),
-              herbarium_records_path(observation_id: obs.id),
+              herbarium_records_path(observation: obs.id),
               { class: "herbarium_records_for_observation_link" })
     else
       return :show_observation_specimen_available.t if obs.specimen

@@ -15,7 +15,7 @@ class TitleAndTabsetHelperTest < ActionView::TestCase
 
     # Prove that if @title is absent,
     # and there's an en.txt label for :title_for_action_name,
-    # then <title> contents are the translation for that label
+    # then <title> contents are the translation for that label.
     title = ""
     action_name = "user_search"
     assert_equal("User Search",

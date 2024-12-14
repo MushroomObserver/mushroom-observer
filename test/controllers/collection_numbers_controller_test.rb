@@ -45,7 +45,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_equal(1, obs.collection_numbers.count)
 
     login
-    get(:index, params: { observation_id: obs.id })
+    get(:index, params: { observation: obs.id })
 
     assert_no_flash
     assert_displayed_title(
@@ -60,7 +60,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_operator(obs.collection_numbers.count, :>, 1)
 
     login
-    get(:index, params: { observation_id: obs.id })
+    get(:index, params: { observation: obs.id })
 
     assert_no_flash
     assert_displayed_title(
@@ -75,7 +75,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_empty(obs.collection_numbers)
 
     login
-    get(:index, params: { observation_id: obs.id })
+    get(:index, params: { observation: obs.id })
 
     assert_displayed_title("List Collection Numbers")
     assert_flash_text(/no matching collection numbers found/i)

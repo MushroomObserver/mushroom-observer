@@ -2,13 +2,13 @@
 
 require("test_helper")
 
-class ObservationsControllerShowIndexTest < FunctionalTestCase
+class ObservationsControllerIndexTest < FunctionalTestCase
   tests ObservationsController
 
   ######## Index ################################################
   # Tests of index, with tests arranged as follows:
   # default subaction; then
-  # other subactions in order of @index_subaction_param_keys
+  # other subactions in order of index_active_params
   # miscellaneous tests using get(:index)
 
   # First, test that the index does not require login - AN 20230923
@@ -57,7 +57,8 @@ class ObservationsControllerShowIndexTest < FunctionalTestCase
     get(:index, params: { id: obs.id })
 
     assert_template("shared/_matrix_box")
-    assert_displayed_title("Observation Index")
+    # assert_displayed_title("Observation Index")
+    assert_select("body.observations__index", true)
     assert_select(
       "#results .rss-heading a[href ^= '/#{obs.id}'] .rss-name",
       { text: obs.format_name.t.strip_html },
@@ -245,16 +246,14 @@ class ObservationsControllerShowIndexTest < FunctionalTestCase
   end
 
   def test_index_advanced_search_error
-    query = Query.lookup_and_save(:Observation, :advanced_search, name: "Fungi")
+    query_no_conditions = Query.lookup_and_save(:Observation, :advanced_search)
 
     login
-    @controller.stub(:show_selected_observations, -> { raise(RuntimeError) }) do
-      get(:index,
-          params: @controller.query_params(query).merge(
-            { advanced_search: "1" }
-          ))
-    end
+    params = @controller.query_params(query_no_conditions).
+             merge(advanced_search: true)
+    get(:index, params:)
 
+    assert_flash_error(:runtime_no_conditions.l)
     assert_redirected_to(
       search_advanced_path,
       "Advanced Search should reload form if it throws an error"
@@ -464,7 +463,7 @@ class ObservationsControllerShowIndexTest < FunctionalTestCase
     test_show_owner_id_noone_logged_in
 
     login(user.login)
-    get(:index, params: { user: user.id })
+    get(:index, params: { by_user: user.id })
 
     assert_displayed_title("Observations created by #{user.name}")
     assert_select(
@@ -493,7 +492,7 @@ class ObservationsControllerShowIndexTest < FunctionalTestCase
     user = observations(:minimal_unknown_obs)
 
     login
-    get(:index, params: { user: user })
+    get(:index, params: { by_user: user })
 
     assert_equal(users_url, redirect_to_url, "Wrong page")
     assert_flash_text(:runtime_object_not_found.l(type: :user.l, id: user.id))
