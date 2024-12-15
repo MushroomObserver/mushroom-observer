@@ -13,12 +13,12 @@
   Via Stimulus:
   <%=
     tag.span(id: "status", class: "text-right",
-              data: { controller: "inat-import-job",
-                      status: @tracker.status,
-                      endpoint: inat_import_job_tracker_path(@tracker.id),
-                      inat_import_job_target: "status" }) do
-                        @tracker.status
-                      end
+             data: { controller: "inat-import-job",
+                     status: @tracker.status,
+                     endpoint: inat_import_job_tracker_path(@tracker.id),
+                     inat_import_job_target: "status" }) do
+                       @tracker.status
+                     end
   %>
 </p>
 
