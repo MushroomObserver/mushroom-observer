@@ -6,7 +6,7 @@ class Query::NameWithObservationsForProject < Query::NameWithObservations
   def parameter_declarations
     super.merge(
       project: Project
-    )
+    ).except(:project?)
   end
 
   def initialize_flavor
@@ -18,6 +18,6 @@ class Query::NameWithObservationsForProject < Query::NameWithObservations
   end
 
   def coerce_into_observation_query
-    Query.lookup(:Observation, :for_project, params_with_old_by_restored)
+    Query.lookup(:Observation, :all, params_with_old_by_restored)
   end
 end

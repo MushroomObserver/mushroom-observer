@@ -82,7 +82,7 @@ class ImagesController < ApplicationController
     project = find_or_goto_index(Project, params[:project].to_s)
     return unless project
 
-    query = create_query(:Image, :for_project, project: project)
+    query = create_query(:Image, :all, project: project)
     [query, { always_index: true }]
   end
 

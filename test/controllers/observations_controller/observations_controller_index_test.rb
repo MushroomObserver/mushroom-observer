@@ -580,6 +580,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     assert_response(:success)
     assert_displayed_title("")
+    assert_flash_text(:runtime_no_matches.l(type: :observation))
   end
 
   # Prove that lichen content_filter works on observations

@@ -938,7 +938,7 @@ class QueryTest < UnitTestCase
     q8a = Query.lookup_and_save(:Observation, :at_location,
                                 location: locations(:burbank))
     q9a = Query.lookup_and_save(:Observation, :at_where,
-                                location: "california")
+                                user_where: "california")
     assert_equal(7, QueryRecord.count)
 
     # Try coercing them all.
@@ -1036,7 +1036,7 @@ class QueryTest < UnitTestCase
     q8a = Query.lookup_and_save(:Observation, :at_location,
                                 location: locations(:burbank))
     q9a = Query.lookup_and_save(:Observation, :at_where,
-                                location: "california")
+                                user_where: "california")
     assert_equal(7, QueryRecord.count)
 
     # Try coercing them all.
@@ -1149,7 +1149,7 @@ class QueryTest < UnitTestCase
     q8a = Query.lookup_and_save(:Observation, :at_location,
                                 location: locations(:burbank))
     q9a = Query.lookup_and_save(:Observation, :at_where,
-                                location: "california")
+                                user_where: "california")
     assert_equal(7, QueryRecord.count)
 
     # Try coercing them all.
@@ -1598,9 +1598,9 @@ class QueryTest < UnitTestCase
   def test_image_for_project
     assert_query(
       projects(:bolete_project).images.sort,
-      :Image, :for_project, project: projects(:bolete_project), by: :id
+      :Image, :all, project: projects(:bolete_project), by: :id
     )
-    assert_query([], :Image, :for_project, project: projects(:empty_project))
+    assert_query([], :Image, :all, project: projects(:empty_project))
   end
 
   def test_image_pattern_search
@@ -1773,10 +1773,10 @@ class QueryTest < UnitTestCase
   def test_image_with_observations_at_where
     assert_query([images(:connected_coprinus_comatus_image).id],
                  :Image, :with_observations_at_where,
-                 user_where: "glendale", location: "glendale")
+                 user_where: "glendale")
     assert_query([],
                  :Image, :with_observations_at_where,
-                 user_where: "snazzle", location: "snazzle")
+                 user_where: "snazzle")
   end
 
   def test_image_with_observations_by_user
@@ -2607,7 +2607,7 @@ class QueryTest < UnitTestCase
   def test_name_with_observations_at_where
     assert_query([names(:coprinus_comatus).id],
                  :Name, :with_observations_at_where,
-                 user_where: "glendale", location: "glendale")
+                 user_where: "glendale")
   end
 
   def test_name_with_observations_by_user
@@ -2739,8 +2739,7 @@ class QueryTest < UnitTestCase
 
   def test_observation_at_where
     assert_query([observations(:coprinus_comatus_obs).id],
-                 :Observation, :at_where, user_where: "glendale",
-                                          location: "glendale")
+                 :Observation, :at_where, user_where: "glendale")
   end
 
   def test_observation_by_rss_log
@@ -2760,9 +2759,9 @@ class QueryTest < UnitTestCase
 
   def test_observation_for_project
     assert_query([],
-                 :Observation, :for_project, project: projects(:empty_project))
+                 :Observation, :all, project: projects(:empty_project))
     assert_query(projects(:bolete_project).observations,
-                 :Observation, :for_project, project: projects(:bolete_project))
+                 :Observation, :all, project: projects(:bolete_project))
   end
 
   def test_observation_in_set
@@ -3067,11 +3066,9 @@ class QueryTest < UnitTestCase
 
   def test_species_list_at_where
     assert_query([],
-                 :SpeciesList, :at_where, user_where: "nowhere",
-                                          location: "nowhere")
+                 :SpeciesList, :at_where, user_where: "nowhere")
     assert_query([species_lists(:where_no_mushrooms_list)],
-                 :SpeciesList, :at_where, user_where: "no mushrooms",
-                                          location: "no mushrooms")
+                 :SpeciesList, :at_where, user_where: "no mushrooms")
   end
 
   def test_species_list_by_rss_log

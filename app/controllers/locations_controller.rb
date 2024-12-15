@@ -195,12 +195,10 @@ class LocationsController < ApplicationController
       true
 
     # Simple coercions.
-    when :with_observations
+    when :with_observations, :with_observations_for_project
       flavor = :all
     when :with_observations_by_user
       flavor = :by_user
-    when :with_observations_for_project
-      flavor = :for_project
     when :with_observations_in_set
       flavor = :in_set
     when :with_observations_in_species_list

@@ -213,7 +213,7 @@ module Observations
 
     def test_project_labels
       login("roy")
-      query = Query.lookup_and_save(:Observation, :for_project,
+      query = Query.lookup_and_save(:Observation, :all,
                                     project: projects(:open_membership_project))
       get(:print_labels, params: { q: query.id.alphabetize })
       trusted_hidden = observations(:trusted_hidden)

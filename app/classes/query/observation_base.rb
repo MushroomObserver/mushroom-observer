@@ -23,6 +23,7 @@ module Query
         herbarium_records?: [:string],
         locations?: [:string],
         notes_has?: :string,
+        project?: Project,
         projects?: [:string],
         project_lists?: [:string],
         species_lists?: [:string],
@@ -67,6 +68,7 @@ module Query
       add_where_condition("observations", params[:locations])
       initialize_herbaria_parameter
       initialize_herbarium_records_parameter
+      add_for_project_condition
       initialize_projects_parameter
       initialize_project_lists_parameter
       initialize_species_lists_parameter
@@ -87,6 +89,16 @@ module Query
         lookup_herbarium_records_by_name(params[:herbarium_records]),
         :observation_herbarium_records
       )
+    end
+
+    def add_for_project_condition
+      return if params[:project].blank?
+
+      project = find_cached_parameter_instance(Project, :project)
+      @title_tag = :query_title_for_project
+      @title_args[:project] = project.title
+      where << "project_observations.project_id = '#{params[:project]}'"
+      add_join("project_observations")
     end
 
     def initialize_projects_parameter

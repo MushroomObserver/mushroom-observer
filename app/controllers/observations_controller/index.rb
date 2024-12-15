@@ -158,8 +158,7 @@ class ObservationsController
       where = params[:where].to_s
       params[:location] = where
       query = create_query(:Observation, :at_where,
-                           user_where: where,
-                           location: Location.user_format(@user, where))
+                           user_where: where)
       [query, { always_index: true }]
     end
 
@@ -169,7 +168,7 @@ class ObservationsController
         project = find_or_goto_index(Project, params[:project].to_s)
       )
 
-      query = create_query(:Observation, :for_project, project: project)
+      query = create_query(:Observation, :all, project: project)
       [query, { always_index: true }]
     end
 
