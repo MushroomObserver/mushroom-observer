@@ -3,14 +3,14 @@
 class Query::ObservationAtWhere < Query::ObservationBase
   def parameter_declarations
     super.merge(
-      location: :string,
       user_where?: :string # used to pass parameter to create_location
     )
   end
 
   def initialize_flavor
-    title_args[:where] = params[:where]
-    pattern = clean_pattern(params[:location])
+    location = params[:user_where]
+    title_args[:where] = location
+    pattern = clean_pattern(location)
     where << "observations.where LIKE '%#{pattern}%'"
     super
   end
