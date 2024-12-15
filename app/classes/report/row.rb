@@ -169,5 +169,9 @@ module Report
     def add_val(val, num)
       @vals[25 + num] = val
     end
+
+    def inat_id
+      @vals[26]
+    end
   end
 end
