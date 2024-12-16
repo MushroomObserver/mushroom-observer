@@ -155,9 +155,19 @@ class ObservationsController
     end
 
     # Display matrix of Observations whose "where" matches a string.
+    # NOTE: To consolidate flavors in Query, we're passing the possible
+    # `user_where` param from the advanced search form straight through to
+    # Query's obs advanced search class, which searches two tables (obs and
+    # loc) for the fuzzy match.
+    # Here we are passing the front end's `where` to the similar Query
+    # `locations` string handling param of Query::ObservationBase. If the param
+    # names in ObservationBase were the same, with ObservationAdvancedSearch,
+    # because of inheritance, query would use it first for AdvancedSearch's
+    # table-join search, but then Base would add an extra AND clause to search
+    # observations, that will preclude getting results.
     def where
       where = params[:where].to_s
-      query = create_query(:Observation, :all, user_where: where)
+      query = create_query(:Observation, :all, locations: where)
       [query, { always_index: true }]
     end
 

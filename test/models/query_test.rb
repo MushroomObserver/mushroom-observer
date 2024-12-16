@@ -2740,11 +2740,6 @@ class QueryTest < UnitTestCase
     assert_query(expect, :Observation, :all, location: locations(:burbank))
   end
 
-  def test_observation_at_where
-    assert_query([observations(:coprinus_comatus_obs).id],
-                 :Observation, :all, user_where: "glendale")
-  end
-
   def test_observation_by_rss_log
     expect = Observation.where.not(rss_log: nil)
     assert_query(expect, :Observation, :all, by: :rss_log)

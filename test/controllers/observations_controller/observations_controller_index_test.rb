@@ -238,10 +238,6 @@ class ObservationsControllerIndexTest < FunctionalTestCase
         })
 
     assert_response(:success)
-    # @where=
-    # ["names.search_name LIKE '%Fungi%'",
-    #  "IF(locations.id,CONCAT(locations.name,locations.notes),observations.where) LIKE '%String in notes%'",
-    #  "observations.where LIKE '%\\\"String in notes\\\"%'"]>
 
     results = @controller.instance_variable_get(:@objects)
     assert_equal(3, results.length)
@@ -548,8 +544,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     login
     get(:index, params: { where: location.name })
-
-    assert_displayed_title("Matching Observations")
+    assert_displayed_title("Observations from #{location.name}")
   end
 
   def test_index_where_page2
@@ -557,10 +552,9 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     login
     get(:index, params: { where: location.name, page: 2 })
-
     assert_select("#results a", { text: "« Prev" },
                   "Wrong page or display is missing a link to Prev page")
-    assert_displayed_title("Matching Observations")
+    assert_displayed_title("Observations from #{location.name}")
     assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
   end
 

@@ -63,7 +63,6 @@ module Query
       initialize_name_parameters
       initialize_association_parameters
       initialize_boolean_parameters
-      initialize_at_where_parameter
       initialize_search_parameters
       add_range_condition("observations.vote_cache", params[:confidence])
       add_bounding_box_conditions_for_observations
@@ -183,14 +182,6 @@ module Query
         "observations.notes  = #{escape(Observation.no_notes_persisted)}",
         params[:with_notes]
       )
-    end
-
-    def initialize_at_where_parameter
-      return unless params[:user_where]
-
-      location_str = params[:user_where]
-      title_args[:where] = location_str
-      where << "observations.where LIKE '%#{clean_pattern(location_str)}%'"
     end
 
     def initialize_search_parameters
