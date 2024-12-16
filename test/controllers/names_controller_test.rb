@@ -122,7 +122,7 @@ class NamesControllerTest < FunctionalTestCase
                                   name: "Don't know",
                                   user: "myself",
                                   content: "Long pink stem and small pink cap",
-                                  location: "Eastern Oklahoma")
+                                  user_where: "Eastern Oklahoma")
 
     login
     get(:index,
@@ -138,7 +138,7 @@ class NamesControllerTest < FunctionalTestCase
                                   name: "Don't know",
                                   user: "myself",
                                   content: "Long pink stem and small pink cap",
-                                  location: "Eastern Oklahoma")
+                                  user_where: "Eastern Oklahoma")
     params = @controller.query_params(query).merge(advanced_search: true)
     query.record.delete
 

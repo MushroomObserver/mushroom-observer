@@ -10,9 +10,9 @@ class Query::ImageWithObservationsAtWhere < Query::ImageWithObservations
   end
 
   def initialize_flavor
-    location = params[:user_where]
-    title_args[:where] = location
-    where << "observations.where LIKE '%#{clean_pattern(location)}%'"
+    location_str = params[:user_where]
+    title_args[:where] = location_str
+    where << "observations.where LIKE '%#{clean_pattern(location_str)}%'"
     where << "observations.is_collection_location IS TRUE"
     super
   end
@@ -22,6 +22,6 @@ class Query::ImageWithObservationsAtWhere < Query::ImageWithObservations
   end
 
   def coerce_into_observation_query
-    Query.lookup(:Observation, :at_where, params_with_old_by_restored)
+    Query.lookup(:Observation, :all, params_with_old_by_restored)
   end
 end

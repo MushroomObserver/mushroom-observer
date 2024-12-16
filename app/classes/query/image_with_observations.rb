@@ -11,6 +11,8 @@ module Query
       super.merge(
         old_by?: :string,
         herbaria?: [:string],
+        location?: Location,
+        user_where?: :string,
         is_collection_location?: :boolean,
         with_public_lat_lng?: :boolean,
         with_name?: :boolean,
@@ -31,6 +33,7 @@ module Query
       add_owner_and_time_stamp_conditions("observations")
       add_date_condition("observations.when", params[:date])
       initialize_association_parameters
+      add_where_conditions
       initialize_boolean_parameters
       initialize_search_parameters
       add_bounding_box_conditions_for_observations
@@ -49,6 +52,19 @@ module Query
         lookup_projects_by_name(params[:projects]),
         :observation_images, :observations, :project_observations
       )
+    end
+
+    def add_where_conditions
+      initialize_at_location_parameter
+      add_search_condition("observations.where", params[:user_where])
+    end
+
+    def initialize_at_location_parameter
+      return unless params[:location]
+
+      location = find_cached_parameter_instance(Location, :location)
+      title_args[:location] = location.title_display_name
+      where << "observations.location_id = '#{location.id}'"
     end
 
     def initialize_boolean_parameters

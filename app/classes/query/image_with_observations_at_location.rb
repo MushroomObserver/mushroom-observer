@@ -22,6 +22,6 @@ class Query::ImageWithObservationsAtLocation < Query::ImageWithObservations
   end
 
   def coerce_into_observation_query
-    Query.lookup(:Observation, :at_location, params_with_old_by_restored)
+    Query.lookup(:Observation, :all, params_with_old_by_restored)
   end
 end

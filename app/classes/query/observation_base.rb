@@ -11,7 +11,14 @@ module Query
     end
 
     def parameter_declarations
-      super.merge(
+      super.merge(local_parameter_declarations).
+        merge(content_filter_parameter_declarations(Observation)).
+        merge(names_parameter_declarations).
+        merge(consensus_parameter_declarations)
+    end
+
+    def local_parameter_declarations
+      {
         # dates/times
         date?: [:date],
         created_at?: [:time],
@@ -21,6 +28,8 @@ module Query
         with_notes_fields?: [:string],
         herbaria?: [:string],
         herbarium_records?: [:string],
+        location?: Location,
+        user_where?: :string,
         locations?: [:string],
         notes_has?: :string,
         projects?: [:string],
@@ -44,9 +53,7 @@ module Query
         with_notes?: :boolean,
         with_sequences?: { boolean: [true] },
         is_collection_location?: :boolean
-      ).merge(content_filter_parameter_declarations(Observation)).
-        merge(names_parameter_declarations).
-        merge(consensus_parameter_declarations)
+      }
     end
 
     def initialize_flavor
@@ -56,6 +63,7 @@ module Query
       initialize_name_parameters
       initialize_association_parameters
       initialize_boolean_parameters
+      initialize_at_where_parameter
       initialize_search_parameters
       add_range_condition("observations.vote_cache", params[:confidence])
       add_bounding_box_conditions_for_observations
@@ -67,6 +75,7 @@ module Query
       add_where_condition("observations", params[:locations])
       initialize_herbaria_parameter
       initialize_herbarium_records_parameter
+      initialize_at_location_parameter
       initialize_projects_parameter
       initialize_project_lists_parameter
       initialize_species_lists_parameter
@@ -87,6 +96,14 @@ module Query
         lookup_herbarium_records_by_name(params[:herbarium_records]),
         :observation_herbarium_records
       )
+    end
+
+    def initialize_at_location_parameter
+      return unless params[:location]
+
+      location = find_cached_parameter_instance(Location, :location)
+      title_args[:location] = location.title_display_name
+      where << "observations.location_id = '#{location.id}'"
     end
 
     def initialize_projects_parameter
@@ -166,6 +183,14 @@ module Query
         "observations.notes  = #{escape(Observation.no_notes_persisted)}",
         params[:with_notes]
       )
+    end
+
+    def initialize_at_where_parameter
+      return unless params[:user_where]
+
+      location_str = params[:user_where]
+      title_args[:where] = location_str
+      where << "observations.where LIKE '%#{clean_pattern(location_str)}%'"
     end
 
     def initialize_search_parameters

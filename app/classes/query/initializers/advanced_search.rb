@@ -7,7 +7,7 @@ module Query
       def advanced_search_parameter_declarations
         {
           name?: :string,
-          location?: :string,
+          user_where?: :string,
           user?: :string,
           content?: :string,
           search_location_notes?: :boolean
@@ -27,7 +27,7 @@ module Query
         [
           google_parse(params[:name]),
           google_parse(params[:user].to_s.gsub(/ *<[^<>]*>/, "")),
-          google_parse(params[:location]),
+          google_parse(params[:user_where]),
           google_parse(params[:content])
         ]
       end

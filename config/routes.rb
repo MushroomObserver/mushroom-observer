@@ -869,8 +869,6 @@ MushroomObserver::Application.routes.draw do
       to: redirect("/observations?user=%{id}"))
   get("/observer/observations_at_location/:id",
       to: redirect("/observations?location=%{id}"))
-  get("/observer/observations_at_where/:id",
-      to: redirect("/observations?where=%{id}"))
   get("/observer/observations_for_project/:id",
       to: redirect("/observations?project=%{id}"))
   get("/observer/show_observation/:id",
