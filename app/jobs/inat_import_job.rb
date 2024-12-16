@@ -379,10 +379,9 @@ class InatImportJob < ApplicationJob
                  archive: sequence[:archive],
                  accession: sequence[:accession],
                  notes: sequence[:notes] }
-
-      # NOTE: Error handling? 2024-06-19 jdc.
-      # https://github.com/MushroomObserver/mushroom-observer/issues/2382
       api = API2.execute(params)
+      next if api.errors.any?
+
       seq = api.results.first
       seq.update(user: @user)
     end
