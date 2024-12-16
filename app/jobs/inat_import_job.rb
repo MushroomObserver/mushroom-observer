@@ -382,7 +382,9 @@ class InatImportJob < ApplicationJob
 
       # NOTE: Error handling? 2024-06-19 jdc.
       # https://github.com/MushroomObserver/mushroom-observer/issues/2382
-      API2.execute(params)
+      api = API2.execute(params)
+      seq = api.results.first
+      seq.update(user: @user)
     end
   end
 

@@ -273,6 +273,8 @@ class InatImportJobTest < ActiveJob::TestCase
 
     assert(obs.images.any?, "Obs should have images")
     assert(obs.sequences.one?, "Obs should have a sequence")
+    assert_equal(user, obs.sequences.first.user,
+                 "Sequences should belong to the user who imported the obs")
 
     ids = JSON.parse(mock_inat_response)["results"].first["identifications"]
     unique_suggested_taxon_names = ids.each_with_object([]) do |id, ary|
