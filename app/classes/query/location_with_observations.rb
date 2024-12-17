@@ -48,7 +48,7 @@ module Query
 
     def add_where_conditions
       add_where_condition(:observations, params[:locations])
-      add_id_condition(:observations, params[:location])
+      add_at_location_parameter(:observations)
       add_search_condition("observations.where", params[:user_where])
     end
 
