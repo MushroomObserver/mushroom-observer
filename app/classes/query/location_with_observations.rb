@@ -79,6 +79,7 @@ module Query
       @title_tag = :query_title_for_project
       @title_args[:project] = project.title
       where << "project_observations.project_id = '#{params[:project]}'"
+      where << "observations.is_collection_location IS TRUE"
       add_join(:observations, :project_observations)
     end
 
