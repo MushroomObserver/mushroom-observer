@@ -72,9 +72,9 @@ module Query
 
     def initialize_association_parameters
       add_where_condition("observations", params[:locations])
+      add_at_location_parameter(:observations)
       initialize_herbaria_parameter
       initialize_herbarium_records_parameter
-      initialize_at_location_parameter
       initialize_projects_parameter
       initialize_project_lists_parameter
       initialize_species_lists_parameter
