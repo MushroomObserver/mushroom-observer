@@ -100,7 +100,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     login
     get(:index,
-        params: { name: name, location: location,
+        params: { name: name, user_where: location,
                   advanced_search: "1" })
 
     assert_response(:success)
@@ -133,7 +133,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
                                   name: "Don't know",
                                   user: "myself",
                                   content: "Long pink stem and small pink cap",
-                                  location: "Eastern Oklahoma")
+                                  user_where: "Eastern Oklahoma")
 
     login
     get(:index,
@@ -150,20 +150,19 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index,
         params: {
           name: "Fungi",
-          location: "String in notes",
+          user_where: "String in notes",
           # Deliberately omit search_location_notes: 1
-          advanced_search: "1"
+          advanced_search: true
         })
 
     assert_response(:success)
-    assert_select("title", { text: "#{:app_title.l}: Index" },
-                  "Wrong page or metadata <title>")
-    assert_flash_text(:runtime_no_matches.l(type: :observations.l))
     assert_select(
       "#results a", false,
       "There should be no results when string is missing from notes, " \
       "and search_location_notes param is missing"
     )
+    assert_flash_text(:runtime_no_matches.l(type: :observations.l))
+    assert_displayed_title("")
   end
 
   def test_index_advanced_search_notes2
@@ -173,21 +172,20 @@ class ObservationsControllerIndexTest < FunctionalTestCase
       :index,
       params: {
         name: "Fungi",
-        location: '"String in notes"',
+        user_where: '"String in notes"',
         search_location_notes: 1,
-        advanced_search: "1"
+        advanced_search: true
       }
     )
 
     assert_response(:success)
-    assert_select("title", { text: "#{:app_title.l}: Index" },
-                  "Wrong page or metadata <title>")
-    assert_flash_text(:runtime_no_matches.l(type: :observations.l))
     assert_select(
       "#results a", false,
       "There should be no results when string is missing from notes, " \
       "even if search_location_notes param is true"
     )
+    assert_flash_text(:runtime_no_matches.l(type: :observations.l))
+    assert_displayed_title("")
   end
 
   def test_index_advanced_search_notes3
@@ -204,20 +202,19 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index,
         params: {
           name: "Fungi",
-          location: "String in notes",
+          user_where: "String in notes",
           # Deliberately omit search_location_notes: 1
-          advanced_search: "1"
+          advanced_search: true
         })
 
     assert_response(:success)
-    assert_select("title", { text: "#{:app_title.l}: Index" },
-                  "Wrong page or metadata <title>")
-    assert_flash_text(:runtime_no_matches.l(type: :observations.l))
     assert_select(
       "#results a", false,
       "There should be no results when notes include search string, " \
       "if search_location_notes param is missing"
     )
+    assert_flash_text(:runtime_no_matches.l(type: :observations.l))
+    assert_displayed_title("")
   end
 
   def test_index_advanced_search_notes4
@@ -235,12 +232,13 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index,
         params: {
           name: "Fungi",
-          location: '"String in notes"',
+          user_where: '"String in notes"',
           search_location_notes: 1,
-          advanced_search: "1"
+          advanced_search: true
         })
 
     assert_response(:success)
+
     results = @controller.instance_variable_get(:@objects)
     assert_equal(3, results.length)
   end
@@ -505,7 +503,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login
     get(:index, params: params)
 
-    assert_displayed_title("Observations from #{location.title_display_name}")
+    assert_displayed_title("Matching Observations")
   end
 
   def test_index_location_without_observations
@@ -546,8 +544,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     login
     get(:index, params: { where: location.name })
-
-    assert_displayed_title("Observations from ‘#{location.name}’")
+    assert_displayed_title("Observations from #{location.name}")
   end
 
   def test_index_where_page2
@@ -555,11 +552,10 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     login
     get(:index, params: { where: location.name, page: 2 })
-
-    assert_displayed_title("Observations from ‘#{location.name}’")
-    assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
     assert_select("#results a", { text: "« Prev" },
                   "Wrong page or display is missing a link to Prev page")
+    assert_displayed_title("Observations from #{location.name}")
+    assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
   end
 
   def test_index_project

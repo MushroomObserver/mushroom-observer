@@ -11,7 +11,14 @@ module Query
     end
 
     def parameter_declarations
-      super.merge(
+      super.merge(local_parameter_declarations).
+        merge(content_filter_parameter_declarations(Observation)).
+        merge(names_parameter_declarations).
+        merge(consensus_parameter_declarations)
+    end
+
+    def local_parameter_declarations
+      {
         # dates/times
         date?: [:date],
         created_at?: [:time],
@@ -21,6 +28,8 @@ module Query
         with_notes_fields?: [:string],
         herbaria?: [:string],
         herbarium_records?: [:string],
+        location?: Location,
+        user_where?: :string,
         locations?: [:string],
         notes_has?: :string,
         project?: Project,
@@ -45,9 +54,7 @@ module Query
         with_notes?: :boolean,
         with_sequences?: { boolean: [true] },
         is_collection_location?: :boolean
-      ).merge(content_filter_parameter_declarations(Observation)).
-        merge(names_parameter_declarations).
-        merge(consensus_parameter_declarations)
+      }
     end
 
     def initialize_flavor
@@ -66,6 +73,7 @@ module Query
 
     def initialize_association_parameters
       add_where_condition("observations", params[:locations])
+      add_at_location_parameter(:observations)
       initialize_herbaria_parameter
       initialize_herbarium_records_parameter
       add_for_project_condition

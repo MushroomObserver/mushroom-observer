@@ -78,7 +78,7 @@ class ImagesControllerTest < FunctionalTestCase
     query = Query.lookup_and_save(:Image, :advanced_search,
                                   name: obs.text_name,
                                   user: obs.user.name,
-                                  location: obs.where)
+                                  user_where: obs.where)
     assert(query.results.many?)
 
     login
@@ -110,7 +110,7 @@ class ImagesControllerTest < FunctionalTestCase
                                   name: "Don't know",
                                   user: "myself",
                                   content: "Long pink stem and small pink cap",
-                                  location: "Eastern Oklahoma")
+                                  user_where: "Eastern Oklahoma")
     assert(query.results.count.zero?)
 
     login
@@ -123,7 +123,7 @@ class ImagesControllerTest < FunctionalTestCase
 
   def test_index_advanced_search_invalid_q_param
     login
-    get(:index, params: { q: "xxxxx", advanced_search: "1" })
+    get(:index, params: { q: "xxxxx", advanced_search: true })
 
     assert_flash_text(:advanced_search_bad_q_error.l)
     assert_redirected_to(search_advanced_path)

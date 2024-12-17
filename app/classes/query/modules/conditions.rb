@@ -132,6 +132,14 @@ module Query
         add_joins(*)
       end
 
+      def add_at_location_parameter(table)
+        return unless params[:location]
+
+        location = find_cached_parameter_instance(Location, :location)
+        title_args[:location] = location.title_display_name
+        @where << "#{table}.location_id = '#{location.id}'"
+      end
+
       def add_rank_condition(vals, *)
         return if vals.empty?
 

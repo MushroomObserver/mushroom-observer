@@ -15,7 +15,7 @@ class SearchControllerTest < FunctionalTestCase
             user: "myself",
             model: model.name.underscore,
             content: "Long pink stem and small pink cap",
-            location: "Eastern Oklahoma"
+            user_where: "Eastern Oklahoma"
           },
           commit: "Search"
         }
