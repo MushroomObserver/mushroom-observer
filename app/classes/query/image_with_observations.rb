@@ -13,6 +13,7 @@ module Query
         herbaria?: [:string],
         location?: Location,
         user_where?: :string,
+        project?: Project,
         is_collection_location?: :boolean,
         with_public_lat_lng?: :boolean,
         with_name?: :boolean,
@@ -52,11 +53,17 @@ module Query
         lookup_projects_by_name(params[:projects]),
         :observation_images, :observations, :project_observations
       )
-      add_id_condition(
-        "project_observations.project_id",
-        [params[:project]],
-        :observation_images, :observations, :project_observations
-      )
+      add_for_project_condition
+    end
+
+    def add_for_project_condition
+      return if params[:project].blank?
+
+      project = find_cached_parameter_instance(Project, :project)
+      @title_tag = :query_title_for_project
+      @title_args[:project] = project.title
+      where << "project_observations.project_id = '#{params[:project]}'"
+      add_join(:observations, :project_observations)
     end
 
     def add_where_conditions

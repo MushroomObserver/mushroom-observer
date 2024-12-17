@@ -14,6 +14,7 @@ module Query
         locations?: [:string],
         location?: Location,
         user_where?: :string,
+        project?: Project,
         projects?: [:string],
         species_lists?: [:string],
         herbaria?: [:string],
@@ -58,11 +59,7 @@ module Query
         lookup_projects_by_name(params[:projects]),
         :observations, :project_observations
       )
-      add_id_condition(
-        "project_observations.project_id",
-        [params[:project]],
-        :observations, :project_observations
-      )
+      add_for_project_condition
       add_id_condition(
         "species_list_observations.species_list_id",
         lookup_species_lists_by_name(params[:species_lists]),
@@ -73,6 +70,16 @@ module Query
         lookup_herbaria_by_name(params[:herbaria]),
         :observations, :observation_herbarium_records, :herbarium_records
       )
+    end
+
+    def add_for_project_condition
+      return if params[:project].blank?
+
+      project = find_cached_parameter_instance(Project, :project)
+      @title_tag = :query_title_for_project
+      @title_args[:project] = project.title
+      where << "project_observations.project_id = '#{params[:project]}'"
+      add_join(:observations, :project_observations)
     end
 
     def initialize_boolean_parameters

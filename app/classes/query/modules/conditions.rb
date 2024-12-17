@@ -100,7 +100,7 @@ module Query
       end
 
       def add_id_condition(col, ids, *)
-        return if ids.nil?
+        return if ids.empty?
 
         set = clean_id_set(ids)
         @where << "#{col} IN (#{set})"
@@ -108,7 +108,7 @@ module Query
       end
 
       def add_not_id_condition(col, ids, *)
-        return if ids.nil?
+        return if ids.empty?
 
         set = clean_id_set(ids)
         @where << "#{col} NOT IN (#{set})"

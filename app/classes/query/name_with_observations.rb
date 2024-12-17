@@ -11,6 +11,7 @@ module Query
       super.merge(
         old_by?: :string,
         date?: [:date],
+        project?: Project,
         projects?: [:string],
         herbaria?: [:string],
         confidence?: [:float],
@@ -33,8 +34,8 @@ module Query
       add_join(:observations)
       add_owner_and_time_stamp_conditions("observations")
       add_date_condition("observations.when", params[:date])
-      initialize_association_parameters
       add_where_conditions
+      initialize_association_parameters
       initialize_boolean_parameters
       initialize_search_parameters
       initialize_name_parameters(:observations)
@@ -50,16 +51,22 @@ module Query
         lookup_projects_by_name(params[:projects]),
         :observations, :project_observations
       )
-      add_id_condition(
-        "project_observations.project_id",
-        [params[:project]],
-        :observations, :project_observations
-      )
+      add_for_project_condition
       add_id_condition(
         "herbarium_records.herbarium_id",
         lookup_herbaria_by_name(params[:herbaria]),
         :observations, :observation_herbarium_records, :herbarium_records
       )
+    end
+
+    def add_for_project_condition
+      return if params[:project].blank?
+
+      project = find_cached_parameter_instance(Project, :project)
+      @title_tag = :query_title_for_project
+      @title_args[:project] = project.title
+      where << "project_observations.project_id = '#{params[:project]}'"
+      add_join(:observations, :project_observations)
     end
 
     def add_where_conditions
