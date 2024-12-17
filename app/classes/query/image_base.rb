@@ -66,10 +66,7 @@ module Query
                        params[:observations], :observation_images)
       add_where_condition("observations", params[:locations],
                           :observation_images, :observations)
-      add_for_project_condition
-      add_id_condition("project_images.project_id",
-                       lookup_projects_by_name(params[:projects]),
-                       :project_images)
+      add_project_conditions
       add_id_condition(
         "species_list_observations.species_list_id",
         lookup_species_lists_by_name(params[:species_lists]),
@@ -78,15 +75,21 @@ module Query
       add_id_condition("images.license_id", params[:license])
     end
 
+    def add_project_conditions
+      add_for_project_condition
+      add_id_condition("project_images.project_id",
+                       lookup_projects_by_name(params[:projects]),
+                       :project_images)
+    end
+
     def add_for_project_condition
       return if params[:project].blank?
 
       project = find_cached_parameter_instance(Project, :project)
       @title_tag = :query_title_for_project
       @title_args[:project] = project.title
-      where << "project_observations.project_id = '#{params[:project]}'"
-      add_join(:observation_images, :observations)
-      add_join(:observations, :project_observations)
+      where << "project_images.project_id = '#{project.id}'"
+      add_join(:project_images)
     end
 
     def initialize_image_parameters
