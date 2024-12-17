@@ -268,7 +268,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
 
     # Get a list of observations from there.  (Several so goes to index.)
     within("#location_coordinates") do
-      click_link(text: "Observations at this Location")
+      click_link(text: :show_location_observations.l)
     end
     assert_match("Matching Observations", page.title, "Wrong page")
     save_results = find_all("#results a").select do |l|
