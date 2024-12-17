@@ -86,7 +86,7 @@ class LocationsController < ApplicationController
   # Displays a list of all locations whose country matches the id param.
   def project
     query = create_query(
-      :Location, :with_observations_for_project,
+      :Location, :with_observations,
       project: Project.find(params[:project])
     )
     [query, { link_all_sorts: true }]
@@ -195,7 +195,7 @@ class LocationsController < ApplicationController
       true
 
     # Simple coercions.
-    when :with_observations, :with_observations_for_project
+    when :with_observations
       flavor = :all
     when :with_observations_by_user
       flavor = :by_user

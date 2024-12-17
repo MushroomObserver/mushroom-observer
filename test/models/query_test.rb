@@ -1799,10 +1799,10 @@ class QueryTest < UnitTestCase
 
   def test_image_with_observations_for_project
     assert_query([],
-                 :Image, :with_observations_for_project,
+                 :Image, :with_observations,
                  project: projects(:empty_project))
     assert_query(observations(:two_img_obs).images,
-                 :Image, :with_observations_for_project,
+                 :Image, :with_observations,
                  project: projects(:two_img_obs_project))
   end
 
@@ -2201,10 +2201,10 @@ class QueryTest < UnitTestCase
 
   def test_location_with_observations_for_project
     assert_query([],
-                 :Location, :with_observations_for_project,
+                 :Location, :with_observations,
                  project: projects(:empty_project))
     assert_query([observations(:collected_at_obs).location],
-                 :Location, :with_observations_for_project,
+                 :Location, :with_observations,
                  project: projects(:obs_collected_and_displayed_project))
   end
 
@@ -2626,11 +2626,11 @@ class QueryTest < UnitTestCase
 
   def test_name_with_observations_for_project
     assert_query([],
-                 :Name, :with_observations_for_project,
+                 :Name, :with_observations,
                  project: projects(:empty_project))
 
     assert_query([observations(:two_img_obs).name],
-                 :Name, :with_observations_for_project,
+                 :Name, :with_observations,
                  project: projects(:two_img_obs_project))
   end
 

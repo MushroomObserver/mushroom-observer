@@ -52,6 +52,11 @@ module Query
         lookup_projects_by_name(params[:projects]),
         :observation_images, :observations, :project_observations
       )
+      add_id_condition(
+        "project_observations.project_id",
+        [params[:project]],
+        :observation_images, :observations, :project_observations
+      )
     end
 
     def add_where_conditions

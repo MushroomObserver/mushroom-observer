@@ -59,6 +59,11 @@ module Query
         :observations, :project_observations
       )
       add_id_condition(
+        "project_observations.project_id",
+        [params[:project]],
+        :observations, :project_observations
+      )
+      add_id_condition(
         "species_list_observations.species_list_id",
         lookup_species_lists_by_name(params[:species_lists]),
         :observations, :species_list_observations

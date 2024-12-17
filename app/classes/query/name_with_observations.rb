@@ -51,6 +51,11 @@ module Query
         :observations, :project_observations
       )
       add_id_condition(
+        "project_observations.project_id",
+        [params[:project]],
+        :observations, :project_observations
+      )
+      add_id_condition(
         "herbarium_records.herbarium_id",
         lookup_herbaria_by_name(params[:herbaria]),
         :observations, :observation_herbarium_records, :herbarium_records
