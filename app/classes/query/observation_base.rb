@@ -97,14 +97,6 @@ module Query
       )
     end
 
-    def initialize_at_location_parameter
-      return unless params[:location]
-
-      location = find_cached_parameter_instance(Location, :location)
-      title_args[:location] = location.title_display_name
-      where << "observations.location_id = '#{location.id}'"
-    end
-
     def initialize_projects_parameter
       add_id_condition(
         "project_observations.project_id",
