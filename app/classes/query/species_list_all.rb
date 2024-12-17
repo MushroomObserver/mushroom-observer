@@ -6,7 +6,8 @@ class Query::SpeciesListAll < Query::SpeciesListBase
     super
   end
 
-  def sort_order
+  # Only instance methods have access to params.
+  def default_order
     if params[:user_where].present? || params[:location].present?
       "name"
     else
