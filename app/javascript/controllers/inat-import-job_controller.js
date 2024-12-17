@@ -40,13 +40,17 @@ export default class extends Controller {
       // Set the intervalId to the interval so we can clear it later
       this.intervalId = setInterval(async () => {
         console.log("sending fetch request to " + this.endpoint_url)
-          const response = await get(this.endpoint_url,
-                                     { responseKind: "turbo-stream" });
+        const response = await get(this.endpoint_url,
+          { responseKind: "turbo-stream" });
         if (response.ok) {
-          // Turbo replaces the element in the page already
+          // Turbo updates the element in the page already,
+          // from the InatImport::JobTrackersController#show action
         } else {
           console.log(`got a ${response.status}`);
         }
+        // Update our status variable with the current status of the import,
+        // as printed by Turbo
+        this.status = this.element.innerHTML
       }, 1000);
     } else {
       // If the import is done, we can remove this Stimulus controller from the
