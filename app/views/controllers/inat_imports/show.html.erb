@@ -15,7 +15,9 @@
     tag.span(id: "status", class: "text-right",
              data: { controller: "inat-import-job",
                      status: @tracker.status,
-                     endpoint: inat_import_job_tracker_path(@tracker.id),
+                     endpoint: inat_import_job_tracker_path(
+                       inat_import: @inat_import.id, id: @tracker.id
+                     ),
                      inat_import_job_target: "status" }) do
                        @tracker.status
                      end
