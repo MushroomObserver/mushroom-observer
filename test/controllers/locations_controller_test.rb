@@ -217,7 +217,7 @@ class LocationsControllerTest < FunctionalTestCase
 
   def test_index_advanced_search
     query = Query.lookup_and_save(:Location, :advanced_search,
-                                  location: "California")
+                                  user_where: "California")
     login
     get(:index,
         params: @controller.query_params(query).merge(advanced_search: true))

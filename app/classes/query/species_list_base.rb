@@ -17,6 +17,8 @@ module Query
         date?: [:date],
         users?: [User],
         ids?: [SpeciesList],
+        location?: Location,
+        user_where?: :string,
         locations?: [:string],
         projects?: [:string],
         title_has?: :string,
@@ -40,6 +42,7 @@ module Query
       initialize_name_parameters(:species_list_observations, :observations)
       initialize_association_parameters
       initialize_boolean_parameters
+      initialize_at_where_parameter
       initialize_search_parameters
       super
     end
@@ -61,12 +64,21 @@ module Query
     end
 
     def initialize_association_parameters
+      initialize_at_location_parameter
       add_where_condition("species_lists", params[:locations])
       add_id_condition(
         "project_species_lists.project_id",
         lookup_projects_by_name(params[:projects]),
         :project_species_lists
       )
+    end
+
+    def initialize_at_location_parameter
+      return unless params[:location]
+
+      location = find_cached_parameter_instance(Location, :location)
+      title_args[:location] = location.display_name
+      where << "species_lists.location_id = '#{location.id}'"
     end
 
     def initialize_boolean_parameters
@@ -76,6 +88,14 @@ module Query
         params[:with_notes]
       )
       add_join(:comments) if params[:with_comments]
+    end
+
+    def initialize_at_where_parameter
+      return unless params[:user_where]
+
+      location_str = params[:user_where]
+      title_args[:where] = location_str
+      where << "species_lists.where LIKE '%#{clean_pattern(location_str)}%'"
     end
 
     def initialize_search_parameters

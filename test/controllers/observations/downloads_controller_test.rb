@@ -167,7 +167,7 @@ module Observations
     end
 
     def test_download_too_many_observations_reasonable_query
-      query = Query.lookup_and_save(:Observation, :at_location,
+      query = Query.lookup_and_save(:Observation, :all,
                                     location: locations(:albion))
       login("mary")
 

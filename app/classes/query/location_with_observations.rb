@@ -12,6 +12,8 @@ module Query
         old_by?: :string,
         date?: [:date],
         locations?: [:string],
+        location?: Location,
+        user_where?: :string,
         projects?: [:string],
         species_lists?: [:string],
         herbaria?: [:string],
@@ -35,13 +37,19 @@ module Query
       add_owner_and_time_stamp_conditions("observations")
       add_date_condition("observations.when", params[:date])
       initialize_name_parameters
-      add_where_condition(:observations, params[:locations])
+      add_where_conditions
       initialize_association_parameters
       add_range_condition("observations.vote_cache", params[:confidence])
       initialize_boolean_parameters
       initialize_search_parameters
       initialize_content_filters(Observation)
       super
+    end
+
+    def add_where_conditions
+      add_where_condition(:observations, params[:locations])
+      add_at_location_parameter(:observations)
+      add_search_condition("observations.where", params[:user_where])
     end
 
     def initialize_association_parameters

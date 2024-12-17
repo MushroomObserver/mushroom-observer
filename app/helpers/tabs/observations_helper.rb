@@ -135,7 +135,7 @@ module Tabs
     def observations_at_where_tabs(query)
       # Add some extra links to the index user is sent to if they click on an
       # undefined location.
-      return [] unless query.flavor == :at_where
+      return [] if params[:where].blank?
 
       [define_location_tab(query),
        assign_undefined_location_tab(query),
