@@ -20,6 +20,7 @@
 # 4. MO continues in the authorization_response action
 #    Reads the saved InatImport instance
 #    Updates the InatImport instance with the code received from iNat
+#    Instantiates an InatImportJobTracker, passing in the InatImport instance
 #    Enqueues an InatImportJob, passing in the InatImport instance
 # 5. The rest happens in the background. The InatImportJob:
 #      Uses the `code` to obtain an oauth access_token
