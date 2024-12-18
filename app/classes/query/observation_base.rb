@@ -25,6 +25,7 @@ module Query
         created_at?: [:time],
         updated_at?: [:time],
 
+        ids?: [Observation],
         comments_has?: :string,
         with_notes_fields?: [:string],
         herbaria?: [:string],
@@ -39,6 +40,7 @@ module Query
         species_list?: SpeciesList,
         species_lists?: [:string],
         by_user?: User,
+        by_editor?: User, # for coercions from name/location
         users?: [User],
         field_slips?: [:string],
         # pattern?: :string,
@@ -62,6 +64,7 @@ module Query
     # rubocop:enable Metrics/MethodLength
 
     def initialize_flavor
+      add_ids_condition
       add_owner_and_time_stamp_conditions("observations")
       add_by_user_condition("observations")
       add_date_condition("observations.when", params[:date])

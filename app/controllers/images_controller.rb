@@ -73,7 +73,7 @@ class ImagesController < ApplicationController
     )
     return unless user
 
-    query = create_query(:Image, :by_user, user: user)
+    query = create_query(:Image, :all, by_user: user)
     [query, {}]
   end
 

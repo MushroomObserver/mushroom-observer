@@ -409,7 +409,7 @@ class ApplicationController < ActionController::Base
   def query_images_to_reuse(all_users, user)
     return create_query(:Image, :all, by: :updated_at) if all_users || !user
 
-    create_query(:Image, :by_user, user: user, by: :updated_at)
+    create_query(:Image, :all, by_user: user, by: :updated_at)
   end
   helper_method :query_images_to_reuse
 

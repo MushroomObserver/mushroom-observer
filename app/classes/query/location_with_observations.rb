@@ -11,6 +11,8 @@ module Query
       super.merge(
         old_by?: :string,
         date?: [:date],
+        ids?: [Observation],
+        old_title?: :string,
         locations?: [:string],
         location?: Location,
         user_where?: :string,
@@ -36,6 +38,7 @@ module Query
 
     def initialize_flavor
       add_join(:observations)
+      add_ids_condition("observations")
       add_owner_and_time_stamp_conditions("observations")
       add_by_user_condition("observations")
       add_date_condition("observations.when", params[:date])
@@ -47,6 +50,15 @@ module Query
       initialize_search_parameters
       initialize_content_filters(Observation)
       super
+    end
+
+    def add_ids_condition(table)
+      return unless params[:ids]
+
+      @title_args[:observations] = params[:old_title] ||
+                                   :query_title_in_set.t(type: :observation)
+      where << "observations.is_collection_location IS TRUE"
+      initialize_in_set_flavor(table)
     end
 
     def add_where_conditions

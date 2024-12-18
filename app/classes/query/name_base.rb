@@ -15,6 +15,9 @@ module Query
       super.merge(
         created_at?: [:time],
         updated_at?: [:time],
+        ids?: [Name],
+        by_user?: User,
+        by_editor?: User,
         users?: [User],
         misspellings?: { string: [:no, :either, :only] },
         deprecated?: { string: [:either, :no, :only] },
@@ -48,8 +51,12 @@ module Query
     # rubocop:enable Metrics/MethodLength
 
     def initialize_flavor
-      unless is_a?(Query::NameWithObservations)
+      unless is_a?(Query::NameWithObservations) ||
+             is_a?(Query::NameWithDescriptions)
+        add_ids_condition("names")
         add_owner_and_time_stamp_conditions("names")
+        add_by_user_condition("names")
+        add_by_editor_condition
         initialize_comments_and_notes_parameters
         initialize_name_parameters_for_name_queries
       end
@@ -60,6 +67,19 @@ module Query
       initialize_description_parameters
       initialize_content_filters(Name)
       super
+    end
+
+    def add_by_editor_condition
+      return unless params[:by_editor]
+
+      user = find_cached_parameter_instance(User, :by_editor)
+      @title_tag = :query_title_by_editor.t(type: :name,
+                                            user: user.legal_name)
+      @title_args[:user] = user.legal_name
+      version_table = :name_versions
+      add_join(version_table)
+      where << "#{version_table}.user_id = '#{user.id}'"
+      where << "names.user_id != '#{user.id}'"
     end
 
     def initialize_comments_and_notes_parameters

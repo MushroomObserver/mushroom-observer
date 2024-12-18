@@ -14,9 +14,9 @@ module Query
         created_at?: [:time],
         updated_at?: [:time],
         date?: [:date],
-        # by_user?: User,
+        ids?: [Image],
+        by_user?: User,
         users?: [User],
-        # ids?: [Image],
         locations?: [:string],
         observations?: [Observation],
         project?: Project,
@@ -40,7 +40,9 @@ module Query
     def initialize_flavor
       super
       unless is_a?(Query::ImageWithObservations)
+        add_ids_condition("images")
         add_owner_and_time_stamp_conditions("images")
+        add_by_user_condition("images")
         add_date_condition("images.when", params[:date])
         add_join(:observation_images) if params[:with_observation]
         initialize_notes_parameters

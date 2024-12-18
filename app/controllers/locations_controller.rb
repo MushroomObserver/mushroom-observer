@@ -100,19 +100,19 @@ class LocationsController < ApplicationController
     )
     return unless user
 
-    query = create_query(:Location, :by_user, user: user)
+    query = create_query(:Location, :all, by_user: user)
     [query, { link_all_sorts: true }]
   end
 
   # Display list of locations that a given user is editor on.
   def by_editor
-    user = find_obj_or_goto_index(
+    editor = find_obj_or_goto_index(
       model: User, obj_id: params[:by_editor].to_s,
       index_path: locations_path
     )
-    return unless user
+    return unless editor
 
-    query = create_query(:Location, :by_editor, user: user)
+    query = create_query(:Location, :all, by_editor: editor)
     [query, {}]
   end
 
@@ -191,16 +191,12 @@ class LocationsController < ApplicationController
     case query.flavor
 
     # These are okay as-is.
-    when :all, :by_user
+    when :all
       true
 
     # Simple coercions.
-    when :with_observations
+    when :with_observations, :by_user, :in_set
       flavor = :all
-    when :with_observations_by_user
-      flavor = :by_user
-    when :with_observations_in_set
-      flavor = :in_set
 
     # Temporarily kludge in pattern search the old way.
     when :pattern_search

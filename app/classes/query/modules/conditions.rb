@@ -90,6 +90,11 @@ module Query
         return if params[:ids].nil? # [] is valid
 
         initialize_in_set_flavor(table)
+
+        @title_tag = :query_title_in_set.t(type: table.singularize.to_sym)
+        # @title_args[:by] = :query_sorted_by.t(field: :original_name)
+        # @title_args[:descriptions] =
+        #   :query_title_in_set.t(type: table.singularize.to_sym)
       end
 
       # move this above when all in_set flavors converted

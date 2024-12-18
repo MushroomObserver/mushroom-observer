@@ -9,7 +9,9 @@ module Query
 
     def parameter_declarations
       super.merge(
+        old_title?: :string,
         old_by?: :string,
+        ids?: [Observation],
         herbaria?: [:string],
         location?: Location,
         user_where?: :string,
@@ -32,6 +34,7 @@ module Query
 
     def initialize_flavor
       add_join(:observation_images, :observations)
+      add_ids_condition("observations")
       add_owner_and_time_stamp_conditions("observations")
       add_by_user_condition("observations")
       add_date_condition("observations.when", params[:date])

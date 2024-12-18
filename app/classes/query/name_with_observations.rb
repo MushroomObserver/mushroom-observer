@@ -9,8 +9,10 @@ module Query
 
     def parameter_declarations
       super.merge(
+        old_title?: :string,
         old_by?: :string,
         date?: [:date],
+        ids?: [Observation],
         by_user?: User,
         project?: Project,
         projects?: [:string],
@@ -34,6 +36,7 @@ module Query
 
     def initialize_flavor
       add_join(:observations)
+      add_ids_condition("observations")
       add_owner_and_time_stamp_conditions("observations")
       add_by_user_condition("observations")
       add_date_condition("observations.when", params[:date])
