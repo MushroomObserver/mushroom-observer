@@ -174,6 +174,10 @@ class LocationsController < ApplicationController
     args   = query.params.dup
     result = nil
 
+    # Location param not handled by Observation. (does handle :by_user)
+    # If this is passed, we're not looking for undefined locations.
+    return nil if args[:by_editor].present?
+
     # Select only observations with undefined location.
     if !args[:where]
       args[:where] = []
@@ -186,12 +190,6 @@ class LocationsController < ApplicationController
     if args[:by].blank? ||
        (args[:by] == "name")
       args[:by] = "where"
-    end
-
-    # This is a location param not handled by Observation.
-    # (Observation does handle :by_user)
-    if args[:by_editor].present?
-      args[:where] << "observations.user_id = '#{args[:by_editor]}'"
     end
 
     case query.flavor
