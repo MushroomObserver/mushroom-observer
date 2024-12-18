@@ -2,7 +2,7 @@
 
 require "test_helper"
 
-class InatImportJobTrackersControllerTest < FunctionalTestCase
+class InatImportsControllerTest < FunctionalTestCase
   def test_show
     import = inat_imports(:rolf_inat_import)
     tracker = InatImportJobTracker.create(inat_import: import.id)
