@@ -35,8 +35,8 @@ class Inat
     private
 
     def response_bad?(response)
-      response.is_a?(RestClient::RequestFailed) ||
-        response.instance_of?(RestClient::Response) && response.code != 200 ||
+      response.is_a?(::RestClient::RequestFailed) ||
+        response.instance_of?(::RestClient::Response) && response.code != 200 ||
         # RestClient was happy, but the user wasn't authorized
         response.is_a?(Hash) && response[:status] == 401
     end
@@ -55,10 +55,10 @@ class Inat
       # Nimmo 2024-06-19 jdc. Moving the request from the inat class to here.
       # RestClient::Request.execute wasn't available in the class
       headers = { authorization: "Bearer #{@importer.token}", accept: :json }
-      RestClient::Request.execute(
+      ::RestClient::Request.execute(
         method: :get, url: "#{API_BASE}/observations?#{query}", headers: headers
       )
-    rescue RestClient::ExceptionWithResponse => e
+    rescue ::RestClient::ExceptionWithResponse => e
       @importer.add_response_error(e.response)
       e.response
     end
