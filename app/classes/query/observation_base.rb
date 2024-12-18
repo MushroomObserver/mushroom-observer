@@ -17,6 +17,7 @@ module Query
         merge(consensus_parameter_declarations)
     end
 
+    # rubocop:disable Metrics/MethodLength
     def local_parameter_declarations
       {
         # dates/times
@@ -58,6 +59,7 @@ module Query
         is_collection_location?: :boolean
       }
     end
+    # rubocop:enable Metrics/MethodLength
 
     def initialize_flavor
       add_owner_and_time_stamp_conditions("observations")
