@@ -399,7 +399,7 @@ class LocationsControllerTest < FunctionalTestCase
   def test_index_by_editor_of_one_location
     user = katrina
     locs_edited_by_user = Location.joins(:versions).
-                          where.not(user: user).
+                          where.not(user_id: user.id).
                           where(versions: { user_id: user.id })
     assert(locs_edited_by_user.one?)
 

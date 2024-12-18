@@ -90,6 +90,11 @@ module Query
         return if params[:ids].nil? # [] is valid
 
         initialize_in_set_flavor(table)
+
+        @title_tag = :query_title_in_set.t(type: table.singularize.to_sym)
+        # @title_args[:by] = :query_sorted_by.t(field: :original_name)
+        # @title_args[:descriptions] =
+        #   :query_title_in_set.t(type: table.singularize.to_sym)
       end
 
       # move this above when all in_set flavors converted
@@ -100,7 +105,7 @@ module Query
       end
 
       def add_id_condition(col, ids, *)
-        return if ids.nil?
+        return if ids.empty?
 
         set = clean_id_set(ids)
         @where << "#{col} IN (#{set})"
@@ -108,7 +113,7 @@ module Query
       end
 
       def add_not_id_condition(col, ids, *)
-        return if ids.nil?
+        return if ids.empty?
 
         set = clean_id_set(ids)
         @where << "#{col} NOT IN (#{set})"

@@ -54,7 +54,7 @@ module Names
       )
       return unless user
 
-      query = create_query(:NameDescription, :by_author, user: user)
+      query = create_query(:NameDescription, :all, by_author: user)
       [query, {}]
     end
 
@@ -66,7 +66,7 @@ module Names
       )
       return unless user
 
-      query = create_query(:NameDescription, :by_editor, user: user)
+      query = create_query(:NameDescription, :all, by_editor: user)
       [query, {}]
     end
 

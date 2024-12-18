@@ -576,6 +576,28 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     assert_response(:success)
     assert_displayed_title("")
+    assert_flash_text(:runtime_no_matches.l(type: :observation))
+  end
+
+  def test_index_species_list
+    spl = species_lists(:unknown_species_list)
+
+    login
+    get(:index, params: { species_list: spl.id })
+
+    assert_response(:success)
+    assert_displayed_title("Observations in #{spl.title}")
+  end
+
+  def test_index_species_list_without_observations
+    spl = species_lists(:first_species_list)
+
+    login
+    get(:index, params: { species_list: spl.id })
+
+    assert_response(:success)
+    assert_displayed_title("")
+    assert_flash_text(:runtime_no_matches.l(type: :observation))
   end
 
   # Prove that lichen content_filter works on observations

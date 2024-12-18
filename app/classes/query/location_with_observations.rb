@@ -11,10 +11,14 @@ module Query
       super.merge(
         old_by?: :string,
         date?: [:date],
+        ids?: [Observation],
+        old_title?: :string,
         locations?: [:string],
         location?: Location,
         user_where?: :string,
+        project?: Project,
         projects?: [:string],
+        species_list?: SpeciesList,
         species_lists?: [:string],
         herbaria?: [:string],
         confidence?: [:float],
@@ -34,7 +38,9 @@ module Query
 
     def initialize_flavor
       add_join(:observations)
+      add_ids_condition("observations")
       add_owner_and_time_stamp_conditions("observations")
+      add_by_user_condition("observations")
       add_date_condition("observations.when", params[:date])
       initialize_name_parameters
       add_where_conditions
@@ -44,6 +50,15 @@ module Query
       initialize_search_parameters
       initialize_content_filters(Observation)
       super
+    end
+
+    def add_ids_condition(table)
+      return unless params[:ids]
+
+      @title_args[:observations] = params[:old_title] ||
+                                   :query_title_in_set.t(type: :observation)
+      where << "observations.is_collection_location IS TRUE"
+      initialize_in_set_flavor(table)
     end
 
     def add_where_conditions
@@ -58,16 +73,40 @@ module Query
         lookup_projects_by_name(params[:projects]),
         :observations, :project_observations
       )
+      add_for_project_condition
       add_id_condition(
         "species_list_observations.species_list_id",
         lookup_species_lists_by_name(params[:species_lists]),
         :observations, :species_list_observations
       )
+      add_in_species_list_condition
       add_id_condition(
         "herbarium_records.herbarium_id",
         lookup_herbaria_by_name(params[:herbaria]),
         :observations, :observation_herbarium_records, :herbarium_records
       )
+    end
+
+    def add_for_project_condition
+      return if params[:project].blank?
+
+      project = find_cached_parameter_instance(Project, :project)
+      @title_tag = :query_title_for_project
+      @title_args[:project] = project.title
+      where << "project_observations.project_id = '#{params[:project]}'"
+      where << "observations.is_collection_location IS TRUE"
+      add_join(:observations, :project_observations)
+    end
+
+    def add_in_species_list_condition
+      return if params[:species_list].blank?
+
+      spl = find_cached_parameter_instance(SpeciesList, :species_list)
+      @title_tag = :query_title_in_species_list
+      @title_args[:species_list] = spl.format_name
+      add_join(:observations, :species_list_observations)
+      where << "species_list_observations.species_list_id = '#{spl.id}'"
+      where << "observations.is_collection_location IS TRUE"
     end
 
     def initialize_boolean_parameters

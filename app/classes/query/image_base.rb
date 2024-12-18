@@ -14,11 +14,12 @@ module Query
         created_at?: [:time],
         updated_at?: [:time],
         date?: [:date],
-        # by_user?: User,
+        ids?: [Image],
+        by_user?: User,
         users?: [User],
-        # ids?: [Image],
         locations?: [:string],
         observations?: [Observation],
+        project?: Project,
         projects?: [:string],
         species_lists?: [:string],
         with_observation?: { boolean: [true] },
@@ -39,7 +40,9 @@ module Query
     def initialize_flavor
       super
       unless is_a?(Query::ImageWithObservations)
+        add_ids_condition("images")
         add_owner_and_time_stamp_conditions("images")
+        add_by_user_condition("images")
         add_date_condition("images.when", params[:date])
         add_join(:observation_images) if params[:with_observation]
         initialize_notes_parameters
@@ -65,15 +68,30 @@ module Query
                        params[:observations], :observation_images)
       add_where_condition("observations", params[:locations],
                           :observation_images, :observations)
-      add_id_condition("project_images.project_id",
-                       lookup_projects_by_name(params[:projects]),
-                       :project_images)
+      add_project_conditions
       add_id_condition(
         "species_list_observations.species_list_id",
         lookup_species_lists_by_name(params[:species_lists]),
         :observation_images, :observations, :species_list_observations
       )
       add_id_condition("images.license_id", params[:license])
+    end
+
+    def add_project_conditions
+      add_for_project_condition
+      add_id_condition("project_images.project_id",
+                       lookup_projects_by_name(params[:projects]),
+                       :project_images)
+    end
+
+    def add_for_project_condition
+      return if params[:project].blank?
+
+      project = find_cached_parameter_instance(Project, :project)
+      @title_tag = :query_title_for_project
+      @title_args[:project] = project.title
+      where << "project_images.project_id = '#{project.id}'"
+      add_join(:project_images)
     end
 
     def initialize_image_parameters

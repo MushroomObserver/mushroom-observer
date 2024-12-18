@@ -43,7 +43,7 @@ class Query::ObservationAdvancedSearch < Query::ObservationBase
   end
 
   def do_coerce(new_model)
-    Query.lookup(new_model, :with_observations_in_set,
+    Query.lookup(new_model, :with_observations,
                  add_old_title(add_old_by(ids: result_ids)))
   end
 end

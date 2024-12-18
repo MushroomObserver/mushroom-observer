@@ -95,7 +95,7 @@ class NamesController < ApplicationController
     )
     return unless user
 
-    query = create_query(:Name, :by_user, user: user)
+    query = create_query(:Name, :all, by_user: user)
     [query, {}]
   end
 
@@ -107,7 +107,7 @@ class NamesController < ApplicationController
     )
     return unless user
 
-    query = create_query(:Name, :by_editor, user: user)
+    query = create_query(:Name, :all, by_editor: user)
     [query, {}]
   end
 

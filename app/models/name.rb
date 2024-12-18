@@ -717,8 +717,7 @@ class Name < AbstractModel
   def self.descriptions_needed
     names = description_needed.limit(100).map(&:id)
 
-    ::Query.lookup(:Name, :in_set, ids: names,
-                                   title: :needed_descriptions_title.l)
+    ::Query.lookup(:Name, :all, ids: names, title: :needed_descriptions_title.l)
   end
 
   ##############################################################################

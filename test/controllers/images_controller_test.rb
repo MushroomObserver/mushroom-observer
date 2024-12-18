@@ -210,11 +210,9 @@ class ImagesControllerTest < FunctionalTestCase
     c_comatus =    observations(:coprinus_comatus_obs)    # 1 image
 
     # query 1 (outer)
-    outer = Query.lookup_and_save(:Observation,
-                                  :in_set, ids: [det_unknown,
-                                                 min_unknown,
-                                                 a_campestris,
-                                                 c_comatus])
+    outer = Query.lookup_and_save(:Observation, :all,
+                                  ids: [det_unknown, min_unknown,
+                                        a_campestris, c_comatus])
     # query 2 (inner for first obs)
     inner = Query.lookup_and_save(:Image, :inside_observation,
                                   outer: outer, observation: det_unknown,
@@ -274,7 +272,7 @@ class ImagesControllerTest < FunctionalTestCase
     image = Image.find(rolfs_favorite_image_id)
 
     # Create simple index.
-    query = Query.lookup_and_save(:Image, :by_user, user: rolf)
+    query = Query.lookup_and_save(:Image, :all, by_user: rolf)
     ids = query.result_ids
     assert(ids.length > 3)
     rolfs_index = ids.index(rolfs_favorite_image_id)
@@ -305,11 +303,9 @@ class ImagesControllerTest < FunctionalTestCase
     a_campestris = observations(:agaricus_campestris_obs).id
     c_comatus =    observations(:coprinus_comatus_obs).id
 
-    outer = Query.lookup_and_save(:Observation,
-                                  :in_set, ids: [det_unknown,
-                                                 min_unknown,
-                                                 a_campestris,
-                                                 c_comatus])
+    outer = Query.lookup_and_save(:Observation, :all,
+                                  ids: [det_unknown, min_unknown,
+                                        a_campestris, c_comatus])
     inner = Query.lookup_and_save(:Image, :inside_observation,
                                   outer: outer, observation: a_campestris,
                                   by: :id)
@@ -470,7 +466,7 @@ class ImagesControllerTest < FunctionalTestCase
     next_image = user.images.first
     obs = image.observations.first
     assert(obs.images.member?(image))
-    query = Query.lookup_and_save(:Image, :by_user, user: user)
+    query = Query.lookup_and_save(:Image, :all, by_user: user)
     q = query.id.alphabetize
     params = { id: image.id, q: q }
 
