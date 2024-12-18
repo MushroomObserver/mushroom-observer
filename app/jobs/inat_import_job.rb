@@ -121,7 +121,7 @@ class InatImportJob < ApplicationJob
     # Search for one page of results at a time, until done with all pages
     # To get one page, use iNats `per_page` & `id_above` params.
     # https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
-    parser = InatPageParser.new(@inat_import, inat_ids, restricted_user_login)
+    parser = Inat::PageParser.new(@inat_import, inat_ids, restricted_user_login)
     while parsing(parser); end
   end
 
