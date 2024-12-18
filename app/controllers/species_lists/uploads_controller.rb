@@ -9,7 +9,7 @@ module SpeciesLists
       return unless (@species_list = find_species_list!)
 
       if check_permission!(@species_list)
-        query = create_query(:Observation, :in_species_list,
+        query = create_query(:Observation, :all,
                              by: :name, species_list: @species_list)
         @observation_list = query.results
       else

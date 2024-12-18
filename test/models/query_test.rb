@@ -921,8 +921,7 @@ class QueryTest < UnitTestCase
     q1a = Query.lookup_and_save(:Observation, :all, by: :id)
     q2a = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
     q3a = Query.lookup_and_save(
-      :Observation, :in_species_list,
-      species_list: species_lists(:first_species_list).id
+      :Observation, :all, species_list: species_lists(:first_species_list).id
     )
     q5a = Query.lookup_and_save(:Observation, :in_set,
                                 ids: [
@@ -981,7 +980,7 @@ class QueryTest < UnitTestCase
 
     assert_equal(:with_observations, q1b.flavor)
     assert_equal(:with_observations_by_user, q2b.flavor)
-    assert_equal(:with_observations_in_species_list, q3b.flavor)
+    assert_equal(:with_observations, q3b.flavor)
     assert_equal(:with_observations_in_set, q5b.flavor)
     # assert_equal(:with_observations_in_set, q6b.flavor)
     assert_equal(:with_observations_in_set, q7b.flavor)
@@ -1021,8 +1020,7 @@ class QueryTest < UnitTestCase
     q1a = Query.lookup_and_save(:Observation, :all, by: :id)
     q2a = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
     q3a = Query.lookup_and_save(
-      :Observation, :in_species_list,
-      species_list: species_lists(:first_species_list).id
+      :Observation, :all, species_list: species_lists(:first_species_list).id
     )
     q5a = Query.lookup_and_save(:Observation, :in_set,
                                 ids:
@@ -1079,7 +1077,7 @@ class QueryTest < UnitTestCase
 
     assert_equal(:with_observations, q1b.flavor)
     assert_equal(:with_observations_by_user, q2b.flavor)
-    assert_equal(:with_observations_in_species_list, q3b.flavor)
+    assert_equal(:with_observations, q3b.flavor)
     assert_equal(:with_observations_in_set, q5b.flavor)
     # assert_equal(:with_observations_in_set, q6b.flavor)
     assert_equal(:with_observations_in_set, q7b.flavor)
@@ -1141,8 +1139,7 @@ class QueryTest < UnitTestCase
     q1a = Query.lookup_and_save(:Observation, :all, by: :id)
     q2a = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
     q3a = Query.lookup_and_save(
-      :Observation, :in_species_list,
-      species_list: species_lists(:first_species_list).id
+      :Observation, :all, species_list: species_lists(:first_species_list).id
     )
     q5a = Query.lookup_and_save(:Observation, :in_set,
                                 ids: [
@@ -1200,7 +1197,7 @@ class QueryTest < UnitTestCase
 
     assert_equal(:with_observations, q1b.flavor)
     assert_equal(:with_observations_by_user, q2b.flavor)
-    assert_equal(:with_observations_in_species_list, q3b.flavor)
+    assert_equal(:with_observations, q3b.flavor)
     assert_equal(:with_observations_in_set, q5b.flavor)
     # assert_equal(:with_observations_in_set, q6b.flavor)
     assert_equal(:with_observations_in_set, q7b.flavor)
@@ -1820,9 +1817,9 @@ class QueryTest < UnitTestCase
   def test_image_with_observations_in_species_list
     assert_query([images(:turned_over_image).id,
                   images(:in_situ_image).id],
-                 :Image, :with_observations_in_species_list,
+                 :Image, :with_observations,
                  species_list: species_lists(:unknown_species_list).id)
-    assert_query([], :Image, :with_observations_in_species_list,
+    assert_query([], :Image, :with_observations,
                  species_list: species_lists(:first_species_list).id)
   end
 
@@ -2218,9 +2215,9 @@ class QueryTest < UnitTestCase
 
   def test_location_with_observations_in_species_list
     assert_query([locations(:burbank).id],
-                 :Location, :with_observations_in_species_list,
+                 :Location, :with_observations,
                  species_list: species_lists(:unknown_species_list).id)
-    assert_query([], :Location, :with_observations_in_species_list,
+    assert_query([], :Location, :with_observations,
                  species_list: species_lists(:first_species_list).id)
   end
 
@@ -2645,10 +2642,9 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_with_observations_in_species_list
-    assert_query([names(:fungi).id], :Name,
-                 :with_observations_in_species_list,
+    assert_query([names(:fungi).id], :Name, :with_observations,
                  species_list: species_lists(:unknown_species_list).id)
-    assert_query([], :Name, :with_observations_in_species_list,
+    assert_query([], :Name, :with_observations,
                  species_list: species_lists(:first_species_list).id)
   end
 
@@ -2779,7 +2775,7 @@ class QueryTest < UnitTestCase
     # These two are identical, so should be disambiguated by reverse_id.
     assert_query([observations(:detailed_unknown_obs).id,
                   observations(:minimal_unknown_obs).id],
-                 :Observation, :in_species_list,
+                 :Observation, :all,
                  species_list: species_lists(:unknown_species_list).id)
   end
 

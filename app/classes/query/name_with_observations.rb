@@ -13,6 +13,7 @@ module Query
         date?: [:date],
         project?: Project,
         projects?: [:string],
+        species_list?: SpeciesList,
         herbaria?: [:string],
         confidence?: [:float],
         location?: Location,
@@ -52,6 +53,7 @@ module Query
         :observations, :project_observations
       )
       add_for_project_condition
+      add_in_species_list_condition
       add_id_condition(
         "herbarium_records.herbarium_id",
         lookup_herbaria_by_name(params[:herbaria]),
@@ -67,6 +69,16 @@ module Query
       @title_args[:project] = project.title
       where << "project_observations.project_id = '#{params[:project]}'"
       add_join(:observations, :project_observations)
+    end
+
+    def add_in_species_list_condition
+      return if params[:species_list].blank?
+
+      spl = find_cached_parameter_instance(SpeciesList, :species_list)
+      @title_tag = :query_title_in_species_list
+      @title_args[:species_list] = spl.format_name
+      where << "species_list_observations.species_list_id = '#{spl.id}'"
+      add_join(:observations, :species_list_observations)
     end
 
     def add_where_conditions

@@ -35,6 +35,7 @@ module Query
         project?: Project,
         projects?: [:string],
         project_lists?: [:string],
+        species_list?: SpeciesList,
         species_lists?: [:string],
         users?: [User],
         field_slips?: [:string],
@@ -79,6 +80,7 @@ module Query
       add_for_project_condition
       initialize_projects_parameter
       initialize_project_lists_parameter
+      add_in_species_list_condition
       initialize_species_lists_parameter
       initialize_field_slips_parameter
     end
@@ -123,6 +125,16 @@ module Query
         lookup_lists_for_projects_by_name(params[:project_lists]),
         :species_list_observations
       )
+    end
+
+    def add_in_species_list_condition
+      return if params[:species_list].blank?
+
+      spl = find_cached_parameter_instance(SpeciesList, :species_list)
+      @title_tag = :query_title_in_species_list
+      @title_args[:species_list] = spl.format_name
+      where << "species_list_observations.species_list_id = '#{spl.id}'"
+      add_join(:species_list_observations)
     end
 
     def initialize_species_lists_parameter

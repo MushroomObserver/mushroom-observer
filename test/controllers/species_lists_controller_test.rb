@@ -1384,9 +1384,9 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login("rolf")
     spl1 = species_lists(:unknown_species_list)
     spl2 = species_lists(:one_genus_three_species_list)
-    query1 = Query.lookup_and_save(:Observation, :in_species_list,
+    query1 = Query.lookup_and_save(:Observation, :all,
                                    species_list: spl1.id, by: :name)
-    query2 = Query.lookup_and_save(:Observation, :in_species_list,
+    query2 = Query.lookup_and_save(:Observation, :all,
                                    species_list: spl2.id, by: :name)
 
     # make sure the "Set Source" link is on the page somewhere

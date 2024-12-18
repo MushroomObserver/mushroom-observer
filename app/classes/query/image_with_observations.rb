@@ -14,6 +14,7 @@ module Query
         location?: Location,
         user_where?: :string,
         project?: Project,
+        species_list?: SpeciesList,
         is_collection_location?: :boolean,
         with_public_lat_lng?: :boolean,
         with_name?: :boolean,
@@ -54,6 +55,7 @@ module Query
         :observation_images, :observations, :project_observations
       )
       add_for_project_condition
+      add_in_species_list_condition
     end
 
     def add_for_project_condition
@@ -64,6 +66,17 @@ module Query
       @title_args[:project] = project.title
       where << "project_observations.project_id = '#{params[:project]}'"
       add_join(:observations, :project_observations)
+    end
+
+    def add_in_species_list_condition
+      return if params[:species_list].blank?
+
+      spl = find_cached_parameter_instance(SpeciesList, :species_list)
+      @title_tag = :query_title_in_species_list
+      @title_args[:species_list] = spl.format_name
+      add_join(:observation_images, :observations)
+      add_join(:observations, :species_list_observations)
+      where << "species_list_observations.species_list_id = '#{spl.id}'"
     end
 
     def add_where_conditions

@@ -25,7 +25,8 @@ class ObservationsController
     # Searches come 1st because they may have the other params
     def index_active_params
       [:advanced_search, :pattern, :look_alikes, :related_taxa, :name,
-       :by_user, :location, :where, :project, :by, :q, :id].freeze
+       :by_user, :location, :where, :project, :species_list,
+       :by, :q, :id].freeze
     end
 
     # Displays matrix of advanced search results.
@@ -178,6 +179,16 @@ class ObservationsController
       )
 
       query = create_query(:Observation, :all, project: project)
+      [query, { always_index: true }]
+    end
+
+    # Display matrix of Observations attached to a given species list.
+    def species_list
+      return unless (
+        spl = find_or_goto_index(SpeciesList, params[:species_list].to_s)
+      )
+
+      query = create_query(:Observation, :all, species_list: spl)
       [query, { always_index: true }]
     end
 

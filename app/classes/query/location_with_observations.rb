@@ -16,6 +16,7 @@ module Query
         user_where?: :string,
         project?: Project,
         projects?: [:string],
+        species_list?: SpeciesList,
         species_lists?: [:string],
         herbaria?: [:string],
         confidence?: [:float],
@@ -65,6 +66,7 @@ module Query
         lookup_species_lists_by_name(params[:species_lists]),
         :observations, :species_list_observations
       )
+      add_in_species_list_condition
       add_id_condition(
         "herbarium_records.herbarium_id",
         lookup_herbaria_by_name(params[:herbaria]),
@@ -81,6 +83,17 @@ module Query
       where << "project_observations.project_id = '#{params[:project]}'"
       where << "observations.is_collection_location IS TRUE"
       add_join(:observations, :project_observations)
+    end
+
+    def add_in_species_list_condition
+      return if params[:species_list].blank?
+
+      spl = find_cached_parameter_instance(SpeciesList, :species_list)
+      @title_tag = :query_title_in_species_list
+      @title_args[:species_list] = spl.format_name
+      add_join(:observations, :species_list_observations)
+      where << "species_list_observations.species_list_id = '#{spl.id}'"
+      where << "observations.is_collection_location IS TRUE"
     end
 
     def initialize_boolean_parameters

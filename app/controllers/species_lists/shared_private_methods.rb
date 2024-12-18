@@ -362,7 +362,7 @@ module SpeciesLists
     def init_name_vars_for_clone(clone_id)
       return unless (clone = SpeciesList.safe_find(clone_id))
 
-      query = create_query(:Observation, :in_species_list, species_list: clone)
+      query = create_query(:Observation, :all, species_list: clone)
       @checklist = calc_checklist(query)
       @species_list.when = clone.when
       @species_list.place_name = clone.place_name
