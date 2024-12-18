@@ -37,6 +37,7 @@ module Query
         project_lists?: [:string],
         species_list?: SpeciesList,
         species_lists?: [:string],
+        by_user?: User,
         users?: [User],
         field_slips?: [:string],
         # pattern?: :string,
@@ -60,6 +61,7 @@ module Query
 
     def initialize_flavor
       add_owner_and_time_stamp_conditions("observations")
+      add_by_user_condition("observations")
       add_date_condition("observations.when", params[:date])
       # add_pattern_condition
       initialize_name_parameters

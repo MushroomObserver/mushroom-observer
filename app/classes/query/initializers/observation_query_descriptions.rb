@@ -22,7 +22,7 @@ module Query
         # For now just deal with simple cases which correspond more or less
         # to the old flavors.
         args = [:herbaria, :locations, :names, :project, :projects,
-                :project_lists, :species_lists,
+                :project_lists, :species_list, :species_lists, :by_user,
                 :user, :users].reject { |arg| params[arg].to_s.empty? }
         if args.length == 1
           send(:"title_for_#{args.first}")
@@ -64,9 +64,19 @@ module Query
         :query_title_in_lists_for_project.t(type: :observation, project: str)
       end
 
+      def title_for_species_list
+        str = ensure_integer(params[:species_list], SpeciesList, :title)
+        :query_title_in_species_list.t(type: :observation, species_list: str)
+      end
+
       def title_for_species_lists
         str = map_join_and_truncate(:species_lists, SpeciesList, :title)
         :query_title_in_species_list.t(type: :observation, species_list: str)
+      end
+
+      def title_for_by_user
+        str = ensure_integer(params[:by_user], User, :name)
+        :query_title_by_user.t(type: :observation, user: str)
       end
 
       def title_for_user

@@ -37,6 +37,7 @@ module Query
     def initialize_flavor
       add_join(:observations)
       add_owner_and_time_stamp_conditions("observations")
+      add_by_user_condition("observations")
       add_date_condition("observations.when", params[:date])
       initialize_name_parameters
       add_where_conditions

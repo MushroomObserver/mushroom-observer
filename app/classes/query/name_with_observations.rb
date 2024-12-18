@@ -11,6 +11,7 @@ module Query
       super.merge(
         old_by?: :string,
         date?: [:date],
+        by_user?: User,
         project?: Project,
         projects?: [:string],
         species_list?: SpeciesList,
@@ -34,6 +35,7 @@ module Query
     def initialize_flavor
       add_join(:observations)
       add_owner_and_time_stamp_conditions("observations")
+      add_by_user_condition("observations")
       add_date_condition("observations.when", params[:date])
       add_where_conditions
       initialize_association_parameters

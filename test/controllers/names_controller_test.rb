@@ -70,7 +70,7 @@ class NamesControllerTest < FunctionalTestCase
 
   def test_index_with_saved_query
     user = dick
-    query = Query.lookup_and_save(:Observation, :by_user, user: user)
+    query = Query.lookup_and_save(:Observation, :all, by_user: user)
     q = query.id.alphabetize
 
     login

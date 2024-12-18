@@ -7,7 +7,7 @@ module Observations
     def test_download_observation_index
       obs = Observation.where(user: mary)
       assert(obs.length >= 4)
-      query = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
+      query = Query.lookup_and_save(:Observation, :all, by_user: mary.id)
 
       # Add herbarium_record to fourth obs for testing purposes.
       login("mary")
@@ -192,7 +192,7 @@ module Observations
 
     def test_print_labels
       login
-      query = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
+      query = Query.lookup_and_save(:Observation, :all, by_user: mary.id)
       assert_operator(query.num_results, :>=, 4)
       get(:print_labels, params: { q: query.id.alphabetize })
       # \pard is paragraph command in rtf, one paragraph per result
@@ -232,7 +232,7 @@ module Observations
 
     def test_print_labels_query_nil
       login
-      query = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
+      query = Query.lookup_and_save(:Observation, :all, by_user: mary.id)
 
       # simulate passing a query param, but that query doesn't exist
       @controller.stub(:find_query, nil) do

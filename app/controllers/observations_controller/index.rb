@@ -141,7 +141,7 @@ class ObservationsController
     def by_user
       return unless (user = find_or_goto_index(User, params[:by_user]))
 
-      query = create_query(:Observation, :by_user, user: user)
+      query = create_query(:Observation, :all, by_user: user)
       [query, {}]
     end
 

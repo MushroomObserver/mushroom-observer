@@ -586,7 +586,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: { species_list: spl.id })
 
     assert_response(:success)
-    # assert_displayed_title("Observations in #{spl.title}")
+    assert_displayed_title("Observations in #{spl.title}")
   end
 
   def test_index_species_list_without_observations

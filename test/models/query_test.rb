@@ -919,7 +919,7 @@ class QueryTest < UnitTestCase
   def test_observation_image_coercion
     # Several observation queries can be turned into image queries.
     q1a = Query.lookup_and_save(:Observation, :all, by: :id)
-    q2a = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
+    q2a = Query.lookup_and_save(:Observation, :all, by_user: mary.id)
     q3a = Query.lookup_and_save(
       :Observation, :all, species_list: species_lists(:first_species_list).id
     )
@@ -1018,7 +1018,7 @@ class QueryTest < UnitTestCase
     # Almost any query on observations should be mappable, i.e. coercable into
     # a query on those observations' locations.
     q1a = Query.lookup_and_save(:Observation, :all, by: :id)
-    q2a = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
+    q2a = Query.lookup_and_save(:Observation, :all, by_user: mary.id)
     q3a = Query.lookup_and_save(
       :Observation, :all, species_list: species_lists(:first_species_list).id
     )
@@ -1137,7 +1137,7 @@ class QueryTest < UnitTestCase
   def test_observation_name_coercion
     # Several observation queries can be turned into name queries.
     q1a = Query.lookup_and_save(:Observation, :all, by: :id)
-    q2a = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
+    q2a = Query.lookup_and_save(:Observation, :all, by_user: mary.id)
     q3a = Query.lookup_and_save(
       :Observation, :all, species_list: species_lists(:first_species_list).id
     )
@@ -2743,12 +2743,12 @@ class QueryTest < UnitTestCase
 
   def test_observation_by_user
     expect = Observation.where(user_id: rolf.id).to_a
-    assert_query(expect, :Observation, :by_user, user: rolf, by: :id)
+    assert_query(expect, :Observation, :all, by_user: rolf, by: :id)
     expect = Observation.where(user_id: mary.id).to_a
-    assert_query(expect, :Observation, :by_user, user: mary, by: :id)
+    assert_query(expect, :Observation, :all, by_user: mary, by: :id)
     expect = Observation.where(user_id: dick.id).to_a
-    assert_query(expect, :Observation, :by_user, user: dick, by: :id)
-    assert_query([], :Observation, :by_user, user: junk, by: :id)
+    assert_query(expect, :Observation, :all, by_user: dick, by: :id)
+    assert_query([], :Observation, :all, by_user: junk, by: :id)
   end
 
   def test_observation_for_project
