@@ -4,12 +4,28 @@
 module Projects
   # Actions
   # -------
+  # index (get)
   # edit (get)
   # update (patch)
   #
   class ViolationsController < ApplicationController
     before_action :login_required
     before_action :pass_query_params
+
+    def index
+      return unless find_project!
+
+      @violations = @project.violations
+      build_index_with_query
+    end
+
+    private
+
+    def controller_model_name
+      "Project"
+    end
+
+    public
 
     def update
       unless (@project = find_or_goto_index(Project, params[:project_id]))
@@ -26,19 +42,7 @@ module Projects
       redirect_with_query(project_path(@project))
     end
 
-    #########
-
     private
-
-    def default_index_subaction
-      list_all
-    end
-
-    def list_all
-      return unless find_project!
-
-      @violations = @project.violations
-    end
 
     def find_project!
       @project = find_or_goto_index(Project, params[:project_id])

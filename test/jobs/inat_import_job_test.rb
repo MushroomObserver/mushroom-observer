@@ -273,6 +273,8 @@ class InatImportJobTest < ActiveJob::TestCase
 
     assert(obs.images.any?, "Obs should have images")
     assert(obs.sequences.one?, "Obs should have a sequence")
+    assert_equal(user, obs.sequences.first.user,
+                 "Sequences should belong to the user who imported the obs")
 
     ids = JSON.parse(mock_inat_response)["results"].first["identifications"]
     unique_suggested_taxon_names = ids.each_with_object([]) do |id, ary|
@@ -378,7 +380,7 @@ class InatImportJobTest < ActiveJob::TestCase
     standard_assertions(obs: obs, name: name)
 
     assert(obs.images.any?, "Obs should have Images")
-    assert(obs.sequences.one?, "Obs should have a Sequence")
+    assert(obs.sequences.one?, "Obs should have one Sequence")
     assert(obs.specimen, "Obs should show that a Specimen is available")
   end
 
@@ -410,7 +412,6 @@ class InatImportJobTest < ActiveJob::TestCase
     standard_assertions(obs: obs, name: name)
 
     proposed_name = obs.namings.first
-    inat_manager = User.find_by(login: "MO Webmaster")
     assert_equal(inat_manager, proposed_name.user,
                  "Name should be proposed by #{inat_manager.login}")
     used_references = 2
@@ -427,7 +428,7 @@ class InatImportJobTest < ActiveJob::TestCase
                  proposed_name_notes)
 
     assert(obs.images.any?, "Obs should have images")
-    assert(obs.sequences.one?, "Obs should have a sequence")
+    assert(obs.sequences.one?, "Obs should have one sequence")
   end
 
   def test_import_job_prov_name_pnw_style
@@ -457,7 +458,7 @@ class InatImportJobTest < ActiveJob::TestCase
     standard_assertions(obs: obs, name: name)
 
     assert(obs.images.any?, "Obs should have images")
-    assert(obs.sequences.one?, "Obs should have a sequence")
+    assert(obs.sequences.one?, "Obs should have one sequence")
   end
 
   def test_import_plant

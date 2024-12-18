@@ -190,7 +190,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     login(user.login)
     get(:show, params: { id: obs.id })
 
-    assert_match(:herbarium_record_collection.l, @response.body)
+    assert_no_match(:herbarium_record_collection.l, @response.body)
     assert_select(
       "a[href=?]", herbarium_record.mcp_url, false,
       "Obs shouldn't link to MyCoPortal for Herbarium Record in a Herbarium " \

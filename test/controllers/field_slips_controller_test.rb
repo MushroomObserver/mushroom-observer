@@ -24,7 +24,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
   end
 
   test "should get index for user" do
-    requires_login(:index, user: @field_slip.user.id)
+    requires_login(:index, by_user: @field_slip.user.id)
     assert_response :success
   end
 

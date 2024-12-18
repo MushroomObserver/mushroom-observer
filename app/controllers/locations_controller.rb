@@ -18,58 +18,31 @@
 # Locations controller.
 # rubocop:disable Metrics/ClassLength
 class LocationsController < ApplicationController
-  # disable cop because index is defined in ApplicationController
-  # rubocop:disable Rails/LexicallyScopedActionFilter
   before_action :store_location, except: [:index, :destroy]
   before_action :pass_query_params, except: [:index]
-  # rubocop:enable Rails/LexicallyScopedActionFilter
   before_action :login_required
 
   ##############################################################################
+  # INDEX
   #
-  # index::
-
-  # ApplicationController uses this to dispatch #index to a private method
-  @index_subaction_param_keys = [
-    :advanced_search,
-    :pattern,
-    :country,
-    :project,
-    :by_user,
-    :by_editor,
-    :by,
-    :q,
-    :id
-  ].freeze
-
-  @index_subaction_dispatch_table = {
-    by: :index_query_results,
-    q: :index_query_results,
-    id: :index_query_results
-  }.freeze
-
-  #############################################
-
-  private # private methods used by #index
-
-  def default_index_subaction
-    list_locations
+  def index
+    build_index_with_query
   end
 
-  # Displays a list of all locations.
-  def list_locations
-    query = create_query(:Location, :all, by: default_sort_order)
-    show_selected_locations(query, link_all_sorts: true)
-  end
+  private
 
   def default_sort_order
-    ::Query::LocationBase.default_order
+    ::Query::LocationBase.default_order # :name
   end
 
-  # Displays a list of selected locations, based on current Query.
-  def index_query_results
-    query = find_or_create_query(:Location, by: params[:by])
-    show_selected_locations(query, id: params[:id].to_s, always_index: true)
+  def unfiltered_index_opts
+    super.merge(display_opts: { link_all_sorts: true })
+  end
+
+  # ApplicationController uses this to dispatch #index to a private method
+  def index_active_params
+    [:advanced_search, :pattern, :country, :project, :by_user, :by_editor,
+     :by, :q, :id].freeze
   end
 
   # Displays matrix of advanced search results.
@@ -77,7 +50,10 @@ class LocationsController < ApplicationController
     return if handle_advanced_search_invalid_q_param?
 
     query = find_query(:Location)
-    show_selected_locations(query, link_all_sorts: true)
+    # Have to check this here because we're not running the query yet.
+    raise(:runtime_no_conditions.l) unless query.params.any?
+
+    [query, { link_all_sorts: true }]
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
     redirect_to(search_advanced_path)
@@ -89,12 +65,13 @@ class LocationsController < ApplicationController
     loc = Location.safe_find(pattern) if /^\d+$/.match?(pattern)
     if loc
       redirect_to(location_path(loc.id))
+      [nil, {}]
     else
       query = create_query(
         :Location, :pattern_search,
         pattern: Location.user_format(@user, pattern)
       )
-      show_selected_locations(query, link_all_sorts: true)
+      [query, { link_all_sorts: true }]
     end
   end
 
@@ -103,7 +80,7 @@ class LocationsController < ApplicationController
     query = create_query(
       :Location, :regexp_search, regexp: "#{params[:country]}$"
     )
-    show_selected_locations(query, link_all_sorts: true)
+    [query, { link_all_sorts: true }]
   end
 
   # Displays a list of all locations whose country matches the id param.
@@ -112,7 +89,7 @@ class LocationsController < ApplicationController
       :Location, :with_observations_for_project,
       project: Project.find(params[:project])
     )
-    show_selected_locations(query, link_all_sorts: true)
+    [query, { link_all_sorts: true }]
   end
 
   # Display list of locations that a given user created.
@@ -124,7 +101,7 @@ class LocationsController < ApplicationController
     return unless user
 
     query = create_query(:Location, :by_user, user: user)
-    show_selected_locations(query, link_all_sorts: true)
+    [query, { link_all_sorts: true }]
   end
 
   # Display list of locations that a given user is editor on.
@@ -136,32 +113,32 @@ class LocationsController < ApplicationController
     return unless user
 
     query = create_query(:Location, :by_editor, user: user)
-    show_selected_locations(query)
+    [query, {}]
   end
 
-  # Show selected search results as a list with 'list_locations' template.
-  def show_selected_locations(query, args = {})
+  # Hook runs before template displayed. Must return query.
+  def filtered_index_final_hook(query, display_opts)
     # Restrict to subset within a geographical region (used by map
     # if it needed to stuff multiple locations into a single marker).
     query = restrict_query_to_box(query)
-
     # Get matching *undefined* locations.
-    get_matching_undefined_locations(query, args)
-
-    # Paginate the defined locations using the usual helper.
-    args[:always_index] = @undef_pages&.num_total&.positive?
-    args[:action] = args[:action] || :index
-    show_index_of_objects(query, args)
+    set_matching_undefined_location_ivars(query, display_opts)
+    query
   end
 
-  def get_matching_undefined_locations(query, args)
+  # Paginate the defined locations using the usual helper.
+  def index_display_opts(opts, _query)
+    { always_index: @undef_pages&.num_total&.positive? }.merge(opts)
+  end
+
+  def set_matching_undefined_location_ivars(query, display_opts)
     @undef_location_format = User.current_location_format
     if (query2 = coerce_query_for_undefined_locations(query))
       select_args = {
         group: "observations.where",
         select: "observations.where AS w, COUNT(observations.id) AS c"
       }
-      if args[:link_all_sorts]
+      if display_opts[:link_all_sorts]
         select_args[:order] = "c DESC"
         # (This tells it to say "by name" and "by frequency" by the subtitles.
         # If user has explicitly selected the order, then this is disabled.)
@@ -169,7 +146,7 @@ class LocationsController < ApplicationController
       end
       @undef_pages = paginate_letters(:letter2,
                                       :page2,
-                                      args[:num_per_page] || 50)
+                                      display_opts[:num_per_page] || 50)
       @undef_data = query2.select_rows(select_args)
       @undef_pages.used_letters = @undef_data.map { |row| row[0][0, 1] }.uniq
       if (letter = params[:letter2].to_s.downcase) != ""
@@ -185,7 +162,7 @@ class LocationsController < ApplicationController
     end
   end
 
-  #############################################
+  ##############################################################################
 
   public # for test!
 

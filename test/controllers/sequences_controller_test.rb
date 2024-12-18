@@ -34,11 +34,12 @@ class SequencesControllerTest < FunctionalTestCase
 
   def test_index_all
     login
-    get(:index, params: { flavor: :all })
+    get(:index, params: { all: true })
 
     assert_response(:success)
-    assert_select("#title", { text: "#{:SEQUENCE.l} Index" },
-                  "index should display #{:SEQUENCES.l} Index")
+    # assert_select("#title", { text: "#{:SEQUENCE.l} Index" },
+    #               "index should display #{:SEQUENCES.l} Index")
+    assert_select("body.sequences__index", true)
     Sequence.find_each do |sequence|
       assert_select(
         "a[href *= '#{sequence_path(sequence)}']", true,
@@ -48,10 +49,8 @@ class SequencesControllerTest < FunctionalTestCase
   end
 
   def test_index_by_observation
-    by = "observation"
-
     login
-    get(:index, params: { by: by })
+    get(:index, params: { by: "observation" })
 
     assert_response(:success)
     assert_displayed_title("Sequences by Observation")

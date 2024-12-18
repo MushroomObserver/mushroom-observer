@@ -5,7 +5,7 @@ tag.div("#{:INDEXES.t}:", class: classes[:heading])
 [
 active_link_to(:GLOSSARY.t, glossary_terms_path,
                class: classes[:indent], id: "nav_glossary_terms_link"),
-active_link_to(:HERBARIA.t, herbaria_path(flavor: :all),
+active_link_to(:HERBARIA.t, herbaria_path,
                class: classes[:indent], id: "nav_herbaria_link"),
 active_link_to(:LOCATIONS.t, locations_path,
                class: classes[:indent], id: "nav_locations_link"),

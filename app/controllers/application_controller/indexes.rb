@@ -1,48 +1,168 @@
 # frozen_string_literal: true
 
+##############################################################################
+#
+#  :section: Indexes
+#
+##############################################################################
 # see application_controller.rb
+# rubocop:disable Metrics/ModuleLength
 module ApplicationController::Indexes
   def self.included(base)
     base.helper_method(:paginate_numbers)
-    base.extend(ClassMethods)
   end
 
-  module ClassMethods
-    def index_subaction_param_keys
-      @index_subaction_param_keys ||= []
+  # Get args from a param subaction, or if none given, the unfiltered_index.
+  def build_index_with_query
+    index_active_params.each do |subaction|
+      next if params[subaction].blank?
+
+      query, display_opts = send(index_param_method_or_default(subaction))
+      # Some actions may redirect instead of returning a query, such as pattern
+      # searches that resolve to a single object or get no results. So if we
+      # had the param, but got a blank query, we should bail to allow the
+      # redirect without rendering a blank index.
+      return nil if query.blank?
+
+      # If we have a query, display it.
+      return filtered_index(query, display_opts)
     end
 
-    def index_subaction_dispatch_table
-      @index_subaction_dispatch_table ||= {}
+    # Otherwise, display the unfiltered index.
+    new_query, display_opts = unfiltered_index
+    return unless new_query
+
+    filtered_index(new_query, display_opts)
+  end
+
+  # It's not always the controller_name, e.g. ContributorsController -> User
+  def controller_model_name
+    controller_name.classify
+  end
+
+  # Currently some controller tests expect nil: Even though the sort order
+  # resulting from `nil` is the default, passing no explicit :by param
+  # means the index is titled "____ Index", rather than "____ by ____".
+  # NOTE: Could be standardized.
+  def default_sort_order
+    # query_base = "::Query::#{controller_model_name}Base".constantize
+    # query_base.send(:default_order) || nil
+    nil
+  end
+
+  # Provide defaults for the params an index can handle.
+  INDEX_BASIC_PARAMS = [:by, :q, :id].freeze
+
+  # Overrides should include any of the above basics, if relevant.
+  def index_active_params
+    ApplicationController::Indexes::INDEX_BASIC_PARAMS
+  end
+
+  # Figure which of the active params should get handled by :sorted_index.
+  # Some controllers don't handle all three basics, so we derive what's there.
+  def index_basic_params
+    index_active_params.intersection(INDEX_BASIC_PARAMS)
+  end
+
+  # Should this param be handled by :sorted_index or a named method?
+  def index_param_method_or_default(subaction)
+    index_basic_params.include?(subaction) ? :sorted_index : subaction
+  end
+
+  # Generally this is the default index action, no params given.
+  # In some controllers, you have to pass params[:all] to get this, however.
+  def unfiltered_index
+    return unless unfiltered_index_permitted?
+
+    args = { by: default_sort_order }.merge(unfiltered_index_opts[:query_args])
+    query = create_query(controller_model_name.to_sym,
+                         unfiltered_index_opts[:query_flavor], **args)
+
+    [query, unfiltered_index_opts[:display_opts]]
+  end
+
+  # Can be overridden to prevent the unfiltered index from being called.
+  def unfiltered_index_permitted?
+    true
+  end
+
+  # Defaults for the unfiltered index. Controllers may pass their own opts.
+  def unfiltered_index_opts
+    { query_flavor: :all, query_args: {}, display_opts: {} }
+  end
+
+  # This handles the index if you pass any of the basic params.
+  def sorted_index
+    return unless sorted_index_permitted?
+
+    query = find_or_create_query(controller_model_name.to_sym,
+                                 **sorted_index_opts[:query_args])
+
+    [query, sorted_index_opts[:display_opts]]
+  end
+
+  def sorted_index_permitted?
+    true
+  end
+
+  def sorted_index_opts
+    { query_args: { by: params[:by] }, display_opts: index_display_at_id_opts }
+  end
+
+  # The filtered index.
+  def filtered_index(query, extra_display_opts = {})
+    query = filtered_index_final_hook(query, extra_display_opts)
+    display_opts = index_display_opts(extra_display_opts, query)
+
+    show_index_of_objects(query, display_opts)
+  end
+
+  # This is a hook for controllers to modify the query before it is used,
+  # or do anything else before the index is displayed.
+  # NOTE: Must return the query (if writing an override).
+  def filtered_index_final_hook(query, _display_opts)
+    query
+  end
+
+  # Default for the display_opts hash passed to show_index_of_objects.
+  # These are pretty different per controller.
+  def index_display_opts(extra_display_opts, _query)
+    {}.merge(extra_display_opts)
+  end
+
+  # Default for the display_opts hash passed to show_index_of_objects
+  # when the index is called with an id.
+  def index_display_at_id_opts
+    { id: params[:id].to_s, always_index: true }
+  end
+
+  # Most pattern searches follow this, um, pattern.
+  def pattern
+    pattern = params[:pattern].to_s
+    if (obj = maybe_pattern_is_an_id(pattern))
+      redirect_to(send(:"#{controller_model_name.underscore}_path", obj.id))
+      [nil, {}]
+    else
+      query = create_query(controller_model_name.to_sym, :all, pattern:)
+      [query, {}]
     end
   end
 
-  ##############################################################################
-  #
-  #  :section: Indexes
-  #
-  ##############################################################################
-
-  # Dispatch to a subaction
-  def index
-    self.class.index_subaction_param_keys.each do |subaction|
-      if params[subaction].present?
-        return send(
-          self.class.index_subaction_dispatch_table[subaction] ||
-          subaction
-        )
-      end
+  # If so, redirect to the show page for that object.
+  def maybe_pattern_is_an_id(pattern)
+    if /^\d+$/.match?(pattern)
+      return controller_model_name.constantize.safe_find(pattern)
     end
-    default_index_subaction
+
+    false
   end
 
   # Render an index or set of search results as a list or matrix. Arguments:
-  # query::     Query instance describing search/index.
-  # args::      Hash of options.
+  # query::         Query instance describing search/index.
+  # display_opts::  Hash of options.
   #
   # Options include these:
-  # id::            Warp to page that includes object with this id.
-  # action::        Template used to render results.
+  # id::            Load the page that includes object with this id.
   # matrix::        Displaying results as matrix?
   # cache::         Cache the HTML of the results?
   # letters::       Paginating by letter?
@@ -56,7 +176,6 @@ module ApplicationController::Indexes
   # @layout::
   # @pages::        Paginator instance.
   # @objects::      Array of objects to be shown.
-  # @extra_data::   Results of block yielded on every object if block given.
   #
   # Other side-effects:
   # store_location::          Sets this as the +redirect_back_or_default+
@@ -66,32 +185,25 @@ module ApplicationController::Indexes
   # query_params_set::        Tells +query_params+ to pass this query on
   #                           in links on this page.
   #
-  def show_index_of_objects(query, args = {})
-    show_index_setup(query, args)
-    if (@num_results == 1) && !args[:always_index]
+  def show_index_of_objects(query, display_opts = {})
+    show_index_setup(query, display_opts)
+    if (@num_results == 1) && !display_opts[:always_index]
       show_action_redirect(query)
     else
-      calc_pages_and_objects(query, args)
-      if block_given?
-        @extra_data = @objects.each_with_object({}) do |object, data|
-          row = yield(object)
-          row = [row] unless row.is_a?(Array)
-          data[object.id] = row
-        end
-      end
-      show_index_render(args)
+      calc_pages_and_objects(query, display_opts)
+      render(action: :index) # must be explicit for names' `test_index` action
     end
   end
 
   private ##########
 
-  def show_index_setup(query, args)
+  def show_index_setup(query, display_opts)
     apply_content_filters(query)
     store_location
     clear_query_in_session if session[:checklist_source] != query.id
     query_params_set(query)
-    query.need_letters = args[:letters] if args[:letters]
-    set_index_view_ivars(query, args)
+    query.need_letters = display_opts[:letters] if display_opts[:letters]
+    set_index_view_ivars(query, display_opts)
   end
 
   def apply_content_filters(query)
@@ -126,10 +238,10 @@ module ApplicationController::Indexes
   # Set some ivars used in all index views.
   # Makes @query available to the :index template for query-dependent tabs
   #
-  def set_index_view_ivars(query, args)
+  def set_index_view_ivars(query, display_opts)
     @query = query
     @error ||= :runtime_no_matches.t(type: query.model.type_tag)
-    @layout = calc_layout_params if args[:matrix]
+    @layout = calc_layout_params if display_opts[:matrix]
     @num_results = query.num_results
   end
 
@@ -141,29 +253,29 @@ module ApplicationController::Indexes
                         id: query.result_ids.first)
   end
 
-  def calc_pages_and_objects(query, args)
-    number_arg = args[:number_arg] || :page
-    @pages = if args[:letters]
-               paginate_letters(args[:letter_arg] || :letter, number_arg,
-                                num_per_page(args))
+  def calc_pages_and_objects(query, display_opts)
+    number_arg = display_opts[:number_arg] || :page
+    @pages = if display_opts[:letters]
+               paginate_letters(display_opts[:letter_arg] || :letter,
+                                number_arg, num_per_page(display_opts))
              else
-               paginate_numbers(number_arg, num_per_page(args))
+               paginate_numbers(number_arg, num_per_page(display_opts))
              end
-    skip_if_coming_back(query, args)
-    find_objects(query, args)
+    skip_if_coming_back(query, display_opts)
+    find_objects(query, display_opts)
   end
 
-  def num_per_page(args)
-    return @layout["count"] if args[:matrix]
+  def num_per_page(display_opts)
+    return @layout["count"] if display_opts[:matrix]
 
-    args[:num_per_page] || 50
+    display_opts[:num_per_page] || 50
   end
 
-  def skip_if_coming_back(query, args)
-    if args[:id].present? &&
+  def skip_if_coming_back(query, display_opts)
+    if display_opts[:id].present? &&
        params[@pages.letter_arg].blank? &&
        params[@pages.number_arg].blank?
-      @pages.show_index(query.index(args[:id]))
+      @pages.show_index(query.index(display_opts[:id]))
     end
   end
 
@@ -172,12 +284,12 @@ module ApplicationController::Indexes
   # allows us to optimize eager-loading, doing it only for records not cached.
   # (The other place is from the template to the `matrix_box` helper, which
   # actually caches the HTML.)
-  def find_objects(query, args)
+  def find_objects(query, display_opts)
     logger.warn("QUERY starting: #{query.query.inspect}")
     @timer_start = Time.current
 
     # Instantiate correct subset, with or without includes.
-    @objects = instantiated_object_subset(query, args)
+    @objects = instantiated_object_subset(query, display_opts)
 
     @timer_end = Time.current
     logger.warn("QUERY finished: model=#{query.model}, " \
@@ -185,9 +297,9 @@ module ApplicationController::Indexes
                 "time=#{(@timer_end - @timer_start).to_f}")
   end
 
-  def instantiated_object_subset(query, args)
-    caching = args[:cache] || false
-    include = args[:include] || nil
+  def instantiated_object_subset(query, display_opts)
+    caching = display_opts[:cache] || false
+    include = display_opts[:include] || nil
 
     if caching
       objects_with_only_needed_eager_loads(query, include)
@@ -223,14 +335,6 @@ module ApplicationController::Indexes
     digest_path = helpers.digest_path_from_template(template)
 
     fragment_exist?([digest_path, obj, locale])
-  end
-
-  def show_index_render(args)
-    if args[:template]
-      render(template: args[:template]) # Render the list if given template.
-    elsif args[:action]
-      render(action: args[:action])
-    end
   end
 
   def users_content_filters
@@ -377,3 +481,4 @@ module ApplicationController::Indexes
     1
   end
 end
+# rubocop:enable Metrics/ModuleLength
