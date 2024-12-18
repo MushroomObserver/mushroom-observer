@@ -5,7 +5,7 @@ class Inat
     attr_accessor :last_import_id
 
     # The iNat API
-    API_BASE = Observations::InatImportsController::API_BASE
+    API_BASE = InatImportsController::API_BASE
     # limit results iNat API requests, with Protozoa as a proxy for slime molds
     ICONIC_TAXA = "Fungi,Protozoa"
 

@@ -439,9 +439,13 @@ MushroomObserver::Application.routes.draw do
     end
   end
 
-  resources :inat_imports, only: [:show] do
+  # ----- InatImports ----------------------------
+  resources :inat_imports, only: [:show, :new, :create] do
     resources :job_trackers, only: [:show]
   end
+  get("inat_imports/authorization_response",
+      to: "inat_imports#authorization_response",
+      as: "inat_import_authorization_response")
 
   # ----- Info: no resources, just forms and pages ----------------------------
   get("/info/how_to_help", to: "info#how_to_help")
@@ -584,10 +588,6 @@ MushroomObserver::Application.routes.draw do
   # ----- Observations: standard actions  ----------------------------
   namespace :observations do
     resources :downloads, only: [:new, :create]
-    resources :inat_imports, only: [:new, :create]
-    get("inat_imports/authorization_response",
-        to: "inat_imports#authorization_response",
-        as: "inat_import_authorization_response")
 
     # Not under resources :observations because the obs doesn't have an id yet
     get("images/uploads/new", to: "images/uploads#new",
