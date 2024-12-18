@@ -132,34 +132,34 @@ class LocationsController < ApplicationController
   end
 
   def set_matching_undefined_location_ivars(query, display_opts)
-    @undef_location_format = User.current_location_format
-    if (query2 = coerce_query_for_undefined_locations(query))
-      select_args = {
-        group: "observations.where",
-        select: "observations.where AS w, COUNT(observations.id) AS c"
-      }
-      if display_opts[:link_all_sorts]
-        select_args[:order] = "c DESC"
-        # (This tells it to say "by name" and "by frequency" by the subtitles.
-        # If user has explicitly selected the order, then this is disabled.)
-        @default_orders = true
-      end
-      @undef_pages = paginate_letters(:letter2,
-                                      :page2,
-                                      display_opts[:num_per_page] || 50)
-      @undef_data = query2.select_rows(select_args)
-      @undef_pages.used_letters = @undef_data.map { |row| row[0][0, 1] }.uniq
-      if (letter = params[:letter2].to_s.downcase) != ""
-        @undef_data = @undef_data.select do |row|
-          row[0][0, 1].downcase == letter
-        end
-      end
-      @undef_pages.num_total = @undef_data.length
-      @undef_data = @undef_data[@undef_pages.from..@undef_pages.to]
-    else
+    unless (query2 = coerce_query_for_undefined_locations(query))
       @undef_pages = nil
       @undef_data = nil
+      return false
     end
+
+    @undef_location_format = User.current_location_format
+    select_args = {
+      group: "observations.where",
+      select: "observations.where AS w, COUNT(observations.id) AS c"
+    }
+    if display_opts[:link_all_sorts]
+      select_args[:order] = "c DESC"
+      # (This tells it to say "by name" and "by frequency" by the subtitles.
+      # If user has explicitly selected the order, then this is disabled.)
+      @default_orders = true
+    end
+    @undef_pages = paginate_letters(:letter2, :page2,
+                                    display_opts[:num_per_page] || 50)
+    @undef_data = query2.select_rows(select_args)
+    @undef_pages.used_letters = @undef_data.map { |row| row[0][0, 1] }.uniq
+    if (letter = params[:letter2].to_s.downcase) != ""
+      @undef_data = @undef_data.select do |row|
+        row[0][0, 1].downcase == letter
+      end
+    end
+    @undef_pages.num_total = @undef_data.length
+    @undef_data = @undef_data[@undef_pages.from..@undef_pages.to]
   end
 
   ##############################################################################
@@ -170,7 +170,7 @@ class LocationsController < ApplicationController
   # Yes, still a kludge, but a little better than tweaking SQL by hand...
   def coerce_query_for_undefined_locations(query)
     model  = :Observation
-    flavor = query.flavor
+    flavor = :all
     args   = query.params.dup
     result = nil
 
@@ -188,25 +188,22 @@ class LocationsController < ApplicationController
       args[:by] = "where"
     end
 
+    # This is a location param not handled by Observation.
+    # (Observation does handle :by_user)
+    if args[:by_editor].present?
+      args[:where] << "observations.user_id = '#{args[:by_editor]}'"
+    end
+
     case query.flavor
-
     # These are okay as-is.
-    when :all
+    when :all, :with_observations
       true
-
-    # Simple coercions.
-    when :with_observations, :by_user, :in_set
-      flavor = :all
-
     # Temporarily kludge in pattern search the old way.
     when :pattern_search
-      flavor = :all
       search = query.google_parse(args[:pattern])
       args[:where] += query.google_conditions(search, "observations.where")
       args.delete(:pattern)
-
     # when :regexp_search  ### NOT SURE WHAT DO FOR THIS
-
     # None of the rest make sense.
     else
       flavor = nil
