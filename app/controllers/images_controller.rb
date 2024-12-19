@@ -200,8 +200,7 @@ class ImagesController < ApplicationController
 
     obs_query = find_or_create_query(:Observation)
     obs_query.current = obs
-    img_query = create_query(:Image, :inside_observation,
-                             observation: obs, outer: obs_query)
+    img_query = create_query(:Image, :all, observation: obs, outer: obs_query)
     query_params_set(img_query)
   end
 

@@ -671,7 +671,7 @@ class QueryTest < UnitTestCase
     outer = Query.lookup_and_save(:Observation, :all, by: :id)
 
     q = Query.lookup(
-      :Image, :inside_observation,
+      :Image, :all,
       outer: outer,
       observation: observations(:minimal_unknown_obs).id, by: :id
     )
@@ -695,35 +695,35 @@ class QueryTest < UnitTestCase
     ]
 
     inner1 = Query.lookup_and_save(
-      :Image, :inside_observation,
+      :Image, :all,
       outer: outer,
       observation: inners_details.first[:obs], by: :id
     )
     assert_equal(inners_details.first[:imgs], inner1.result_ids)
 
     inner2 = Query.lookup_and_save(
-      :Image, :inside_observation,
+      :Image, :all,
       outer: outer,
       observation: inners_details.second[:obs], by: :id
     )
     assert_equal(inners_details.second[:imgs], inner2.result_ids)
 
     inner3 = Query.lookup_and_save(
-      :Image, :inside_observation,
+      :Image, :all,
       outer: outer,
       observation: inners_details.third[:obs], by: :id
     )
     assert_equal(inners_details.third[:imgs], inner3.result_ids)
 
     inner4 = Query.lookup_and_save(
-      :Image, :inside_observation,
+      :Image, :all,
       outer: outer,
       observation: inners_details.fourth[:obs], by: :id
     )
     assert_equal(inners_details.fourth[:imgs], inner4.result_ids)
 
     inner5 = Query.lookup_and_save(
-      :Image, :inside_observation,
+      :Image, :all,
       outer: outer,
       observation: inners_details.fifth[:obs], by: :id
     )
@@ -1588,11 +1588,11 @@ class QueryTest < UnitTestCase
     obs = observations(:detailed_unknown_obs)
     assert_equal(2, obs.images.length)
     expect = obs.images.sort_by(&:id)
-    assert_query(expect, :Image, :inside_observation,
+    assert_query(expect, :Image, :all,
                  observation: obs, outer: 1) # (outer is only used by prev/next)
     obs = observations(:minimal_unknown_obs)
     assert_equal(0, obs.images.length)
-    assert_query(obs.images, :Image, :inside_observation,
+    assert_query(obs.images, :Image, :all,
                  observation: obs, outer: 1) # (outer is only used by prev/next)
   end
 
