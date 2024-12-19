@@ -21,6 +21,19 @@ module Query
         where << "#{table}.user_id = '#{user.id}'"
       end
 
+      def add_by_editor_condition(type)
+        return unless params[:by_editor]
+
+        user = find_cached_parameter_instance(User, :by_editor)
+        @title_tag = :query_title_by_editor
+        @title_args[:user] = user.legal_name
+        @title_args[:type] = type
+        version_table = :"#{type}_versions"
+        add_join(version_table)
+        where << "#{version_table}.user_id = '#{user.id}'"
+        where << "#{type}s.user_id != '#{user.id}'"
+      end
+
       def add_pattern_condition
         return if params[:pattern].blank?
 

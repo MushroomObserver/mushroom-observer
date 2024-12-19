@@ -30,26 +30,13 @@ class Query::LocationBase < Query::Base
       add_ids_condition("locations")
       add_owner_and_time_stamp_conditions("locations")
       add_by_user_condition("locations")
-      add_by_editor_condition
+      add_by_editor_condition(:location)
     end
     add_bounding_box_conditions_for_locations
     add_pattern_condition
     add_regexp_condition
     initialize_content_filters(Location)
     super
-  end
-
-  def add_by_editor_condition
-    return unless params[:by_editor]
-
-    user = find_cached_parameter_instance(User, :by_editor)
-    @title_tag = :query_title_by_editor.t(type: :location,
-                                          user: user.legal_name)
-    @title_args[:user] = user.legal_name
-    version_table = :location_versions
-    add_join(version_table)
-    where << "#{version_table}.user_id = '#{user.id}'"
-    where << "locations.user_id != '#{user.id}'"
   end
 
   def add_pattern_condition
