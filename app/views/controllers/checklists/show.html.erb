@@ -20,7 +20,7 @@ add_tab_set(checklist_show_tabs(user: @show_user,
   <ul class="list-unstyled">
     <% @data.taxa.each do |taxon| %>
       <%= checklist_name_link(taxon:, data: @data, user: @show_user,
-                              project: @project, list: @species_list) %>
+            project: @project, location: @location, list: @species_list) %>
     <% end %>
   </ul>
 <% end %>
