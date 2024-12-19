@@ -50,13 +50,12 @@ module PatternSearch
       super
 
       # Temporary hack to get include_subtaxa/synonyms to work.
-      # Will rip out when we do away with pattern search query flavor.
-      if flavor == :pattern_search &&
-         (!args[:include_subtaxa].nil? || !args[:include_synonyms].nil?)
-        self.flavor = :all
-        args[:names] = args[:pattern]
-        args.delete(:pattern)
-      end
+      # NOTE: this affects the index title. Let's keep it
+      return unless args[:include_subtaxa].present? ||
+                    args[:include_synonyms].present?
+
+      args[:names] = args[:pattern]
+      args.delete(:pattern)
     end
   end
 end
