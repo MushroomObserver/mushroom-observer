@@ -172,18 +172,14 @@ class LocationsController < ApplicationController
     args   = query.params.dup
     # Location params not handled by Observation. (does handle :by_user)
     # If these are passed, we're not looking for undefined locations.
-    return nil if [:by_editor, :regexp, :pattern].any? { |key| args[key] }
+    return nil if [:by_editor, :regexp].any? { |key| args[key] }
 
     model  = :Observation
     flavor = :all
     result = nil
 
     # Select only observations with undefined location.
-    if !args[:where]
-      args[:where] = []
-    elsif !args[:where].is_a?(Array)
-      args[:where] = [args[:where]]
-    end
+    args[:where] = [args[:where]].compact unless args[:where].is_a?(Array)
     args[:where] << "observations.location_id IS NULL"
 
     # "By name" means something different to observation.
