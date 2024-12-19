@@ -73,6 +73,7 @@ class ChecklistsControllerTest < FunctionalTestCase
     assert_match(/#{title}/, css_select("title").text,
                  "Wrong page")
     assert_match(/\(1\)/, @response.body)
+    assert_match("location%3A#{location.id}", @response.body)
 
     prove_checklist_content(expect)
   end
