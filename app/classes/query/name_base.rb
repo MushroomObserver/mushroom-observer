@@ -26,6 +26,7 @@ module Query
         species_lists?: [:string],
         rank?: [{ string: Name.all_ranks }],
         is_deprecated?: :boolean,
+        pattern?: :string,
         text_name_has?: :string,
         with_author?: :boolean,
         author_has?: :string,
@@ -59,6 +60,7 @@ module Query
         add_by_editor_condition
         initialize_comments_and_notes_parameters
         initialize_name_parameters_for_name_queries
+        add_pattern_condition
       end
       initialize_taxonomy_parameters
       initialize_boolean_parameters
@@ -246,6 +248,24 @@ module Query
       fields = fields.map { |f| "COALESCE(name_descriptions.#{f},'')" }
       fields = "CONCAT(#{fields.join(",")})"
       add_search_condition(fields, params[:desc_content])
+    end
+
+    def add_pattern_condition
+      return if params[:pattern].blank?
+
+      add_join(:"name_descriptions.default!")
+      super
+    end
+
+    def search_fields
+      fields = [
+        "names.search_name",
+        "COALESCE(names.citation,'')",
+        "COALESCE(names.notes,'')"
+      ] + NameDescription.all_note_fields.map do |x|
+        "COALESCE(name_descriptions.#{x},'')"
+      end
+      "CONCAT(#{fields.join(",")})"
     end
 
     def self.default_order

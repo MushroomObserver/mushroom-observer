@@ -68,18 +68,15 @@ class LocationsController < ApplicationController
       [nil, {}]
     else
       query = create_query(
-        :Location, :pattern_search,
-        pattern: Location.user_format(@user, pattern)
+        :Location, :all, pattern: Location.user_format(@user, pattern)
       )
       [query, { link_all_sorts: true }]
     end
   end
 
-  # Displays a list of all locations whose country matches the id param.
+  # Displays a list of all locations whose country matches the param.
   def country
-    query = create_query(
-      :Location, :regexp_search, regexp: "#{params[:country]}$"
-    )
+    query = create_query(:Location, :all, regexp: "#{params[:country]}$")
     [query, { link_all_sorts: true }]
   end
 
@@ -174,9 +171,9 @@ class LocationsController < ApplicationController
     args   = query.params.dup
     result = nil
 
-    # Location param not handled by Observation. (does handle :by_user)
-    # If this is passed, we're not looking for undefined locations.
-    return nil if args[:by_editor].present?
+    # Location params not handled by Observation. (does handle :by_user)
+    # If these are passed, we're not looking for undefined locations.
+    return nil if [:by_editor, :regexp, :pattern].any? { |key| args[key] }
 
     # Select only observations with undefined location.
     if !args[:where]

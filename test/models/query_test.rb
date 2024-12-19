@@ -114,25 +114,22 @@ class QueryTest < UnitTestCase
                  Query.lookup(:User, :all,
                               ids: [rolf, mary.id, junk.id.to_s]).params[:ids])
 
-    assert_raises(RuntimeError) { Query.lookup(:Name, :pattern_search) }
+    # assert_raises(RuntimeError) { Query.lookup(:Name, :all) }
     assert_raises(RuntimeError) do
-      Query.lookup(:Name, :pattern_search, pattern: true)
+      Query.lookup(:Name, :all, pattern: true)
     end
     assert_raises(RuntimeError) do
-      Query.lookup(:Name, :pattern_search, pattern: [1, 2, 3])
+      Query.lookup(:Name, :all, pattern: [1, 2, 3])
     end
     assert_raises(RuntimeError) do
-      Query.lookup(:Name, :pattern_search, pattern: rolf)
+      Query.lookup(:Name, :all, pattern: rolf)
     end
     assert_equal("123",
-                 Query.lookup(:Name, :pattern_search, pattern: 123).
-                 params[:pattern])
+                 Query.lookup(:Name, :all, pattern: 123).params[:pattern])
     assert_equal("rolf",
-                 Query.lookup(:Name, :pattern_search, pattern: "rolf").
-                 params[:pattern])
+                 Query.lookup(:Name, :all, pattern: "rolf").params[:pattern])
     assert_equal("rolf",
-                 Query.lookup(:Name, :pattern_search, pattern: :rolf).
-                 params[:pattern])
+                 Query.lookup(:Name, :all, pattern: :rolf).params[:pattern])
 
     assert_equal(["table"],
                  Query.lookup(:Name, :all, join: :table).params[:join])
@@ -241,7 +238,7 @@ class QueryTest < UnitTestCase
     q1 = Query.lookup_and_save(:Observation)
     assert_equal(1, QueryRecord.count)
 
-    Query.lookup_and_save(:Observation, :pattern_search, pattern: "blah")
+    Query.lookup_and_save(:Observation, :all, pattern: "blah")
     assert_equal(2, QueryRecord.count)
 
     # New because params are different from q1.
@@ -259,16 +256,15 @@ class QueryTest < UnitTestCase
     assert_equal(q3, q5, QueryRecord.count)
 
     # New pattern is new query.
-    Query.lookup_and_save(:Observation, :pattern_search, pattern: "new blah")
+    Query.lookup_and_save(:Observation, :all, pattern: "new blah")
     assert_equal(4, QueryRecord.count)
 
     # Old pattern but new order.
-    Query.lookup_and_save(:Observation,
-                          :pattern_search, pattern: "blah", by: :date)
+    Query.lookup_and_save(:Observation, :all, pattern: "blah", by: :date)
     assert_equal(5, QueryRecord.count)
 
     # Identical, even though :by is explicitly set in one.
-    Query.lookup_and_save(:Observation, :pattern_search, pattern: "blah")
+    Query.lookup_and_save(:Observation, :all, pattern: "blah")
     assert_equal(5, QueryRecord.count)
 
     # Identical query, but new query because order given explicitly.  Order is
@@ -902,7 +898,7 @@ class QueryTest < UnitTestCase
   def test_basic_coerce
     assert_equal(0, QueryRecord.count)
 
-    q1 = Query.lookup_and_save(:Observation, :pattern_search, pattern: "search")
+    q1 = Query.lookup_and_save(:Observation, :all, pattern: "search")
     assert_equal(1, QueryRecord.count)
 
     # Trvial coercion: any flavor from a model to the same model.
@@ -930,7 +926,7 @@ class QueryTest < UnitTestCase
                                   observations(:agaricus_campestras_obs).id
                                 ])
     # removed q6a which searched for "somewhere else" in the notes
-    # q6a = Query.lookup_and_save(:Observation, :pattern_search,
+    # q6a = Query.lookup_and_save(:Observation, :all,
     #                             pattern: '"somewhere else"')
     q7a = Query.lookup_and_save(:Observation, :advanced_search,
                                 user_where: "glendale")
@@ -1027,7 +1023,7 @@ class QueryTest < UnitTestCase
                                   [observations(:detailed_unknown_obs).id,
                                    observations(:agaricus_campestris_obs).id,
                                    observations(:agaricus_campestras_obs).id])
-    # q6a = Query.lookup_and_save(:Observation, :pattern_search,
+    # q6a = Query.lookup_and_save(:Observation, :all,
     #                             pattern: '"somewhere else"')
     q7a = Query.lookup_and_save(:Observation, :advanced_search,
                                 user_where: "glendale")
@@ -1147,7 +1143,7 @@ class QueryTest < UnitTestCase
                                   observations(:agaricus_campestris_obs).id,
                                   observations(:agaricus_campestras_obs).id
                                 ])
-    # q6a = Query.lookup_and_save(:Observation, :pattern_search,
+    # q6a = Query.lookup_and_save(:Observation, :all,
     #                             pattern: '"somewhere else"')
     q7a = Query.lookup_and_save(:Observation, :advanced_search,
                                 user_where: "glendale")
@@ -1945,15 +1941,15 @@ class QueryTest < UnitTestCase
   def test_location_pattern_search
     expect = Location.select { |l| l.display_name =~ /california/i }
     assert_query(expect,
-                 :Location, :pattern_search, pattern: "California", by: :id)
+                 :Location, :all, pattern: "California", by: :id)
     assert_query([locations(:elgin_co).id],
-                 :Location, :pattern_search, pattern: "Canada")
-    assert_query([], :Location, :pattern_search, pattern: "Canada -Elgin")
+                 :Location, :all, pattern: "Canada")
+    assert_query([], :Location, :all, pattern: "Canada -Elgin")
   end
 
   def test_location_regexp_search
     assert_query(Location.where(Location[:name].matches_regexp("California")),
-                 :Location, :regexp_search, regexp: ".alifornia")
+                 :Location, :all, regexp: ".alifornia")
   end
 
   def test_location_with_descriptions
@@ -2396,28 +2392,28 @@ class QueryTest < UnitTestCase
   def test_name_pattern_search
     assert_query(
       [],
-      :Name, :pattern_search, pattern: "petigera" # search_name
+      :Name, :all, pattern: "petigera" # search_name
     )
     assert_query(
       [names(:petigera).id],
-      :Name, :pattern_search, pattern: "petigera", misspellings: :either
+      :Name, :all, pattern: "petigera", misspellings: :either
     )
     assert_query(
       [names(:peltigera).id],
-      :Name, :pattern_search, pattern: "ye auld manual of lichenes" # citation
+      :Name, :all, pattern: "ye auld manual of lichenes" # citation
     )
     assert_query(
       [names(:agaricus_campestras).id],
-      :Name, :pattern_search, pattern: "prevent me" # description notes
+      :Name, :all, pattern: "prevent me" # description notes
     )
     assert_query(
       [names(:suillus)],
-      :Name, :pattern_search, pattern: "smell as sweet" # gen_desc
+      :Name, :all, pattern: "smell as sweet" # gen_desc
     )
     # Prove pattern search gets hits for description look_alikes
     assert_query(
       [names(:peltigera).id],
-      :Name, :pattern_search, pattern: "superficially similar"
+      :Name, :all, pattern: "superficially similar"
     )
   end
 
@@ -2910,24 +2906,24 @@ class QueryTest < UnitTestCase
     #               observations(:agaricus_campestros_obs).id,
     #               observations(:agaricus_campestrus_obs).id,
     #               observations(:strobilurus_diminutivus_obs).id],
-    #              :Observation, :pattern_search, pattern: '"somewhere else"')
+    #              :Observation, :all, pattern: '"somewhere else"')
     # where
     assert_query([observations(:strobilurus_diminutivus_obs).id],
-                 :Observation, :pattern_search, pattern: "pipi valley")
+                 :Observation, :all, pattern: "pipi valley")
     # location
     expect = Observation.where(location_id: locations(:burbank)).
              joins(:name).order(
                [Name[:text_name], Name[:author], Observation[:id].desc]
              ).to_a
     assert_query(expect,
-                 :Observation, :pattern_search, pattern: "burbank", by: :name)
+                 :Observation, :all, pattern: "burbank", by: :name)
 
     # name
     expect = Observation.
              where(Name[:text_name].matches("agaricus%")).joins(:name).
              order([Name[:text_name], Name[:author], Observation[:id].desc])
     assert_query(expect.map(&:id),
-                 :Observation, :pattern_search, pattern: "agaricus", by: :name)
+                 :Observation, :all, pattern: "agaricus", by: :name)
   end
 
   def test_project_all

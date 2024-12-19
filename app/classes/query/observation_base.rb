@@ -43,7 +43,8 @@ module Query
         by_editor?: User, # for coercions from name/location
         users?: [User],
         field_slips?: [:string],
-        # pattern?: :string,
+        pattern?: :string,
+        regexp?: :string, # for coercions from location
 
         # numeric
         confidence?: [:float],
@@ -68,7 +69,7 @@ module Query
       add_owner_and_time_stamp_conditions("observations")
       add_by_user_condition("observations")
       add_date_condition("observations.when", params[:date])
-      # add_pattern_condition
+      add_pattern_condition
       initialize_name_parameters
       initialize_association_parameters
       initialize_boolean_parameters
@@ -77,6 +78,20 @@ module Query
       add_bounding_box_conditions_for_observations
       initialize_content_filters(Observation)
       super
+    end
+
+    def add_pattern_condition
+      return if params[:pattern].blank?
+
+      add_join(:names)
+      super
+    end
+
+    def search_fields
+      "CONCAT(" \
+        "names.search_name," \
+        "observations.where" \
+        ")"
     end
 
     def initialize_association_parameters

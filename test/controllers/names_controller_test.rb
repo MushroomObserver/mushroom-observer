@@ -925,7 +925,7 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def test_next_and_prev2
-    query = Query.lookup_and_save(:Name, :pattern_search, pattern: "lactarius")
+    query = Query.lookup_and_save(:Name, :all, pattern: "lactarius")
     q = @controller.query_params(query)
 
     name1 = query.results[0]

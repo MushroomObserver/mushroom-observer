@@ -183,6 +183,16 @@ class LocationsControllerTest < FunctionalTestCase
     assert_displayed_title("Locations by Name")
   end
 
+  def test_index_project
+    project = projects(:open_membership_project)
+
+    login
+    get(:index, params: { project: project.id })
+
+    location = project.observations[0].location
+    assert_match(location.display_name, @response.body)
+  end
+
   def test_index_with_non_default_sort
     login
 
@@ -241,11 +251,16 @@ class LocationsControllerTest < FunctionalTestCase
 
   def test_index_pattern
     search_str = "California"
+    matches = Location.where(Location[:name].matches("%#{search_str}%"))
 
     login
     get(:index, params: { pattern: search_str })
 
     assert_displayed_title("Locations Matching ‘#{search_str}’")
+    assert_select(
+      "#content a:match('href', ?)", %r{#{locations_path}/\d+},
+      { count: matches.count }, "Wrong number of Locations"
+    )
   end
 
   def test_index_pattern_id
@@ -258,6 +273,7 @@ class LocationsControllerTest < FunctionalTestCase
 
   def test_index_country
     country = "USA"
+    matches = Location.where(Location[:name].matches("%#{country}"))
 
     login
     get(:index, params: { country: country })
@@ -267,19 +283,8 @@ class LocationsControllerTest < FunctionalTestCase
     assert_displayed_title(/^Locations Matching ‘#{country}.?’/)
     assert_select(
       "#content a:match('href', ?)", %r{#{locations_path}/\d+},
-      { count: Location.where(Location[:name].matches("%#{country}")).count },
-      "Wrong number of Locations"
+      { count: matches.count }, "Wrong number of Locations"
     )
-  end
-
-  def test_index_project
-    project = projects(:open_membership_project)
-
-    login
-    get(:index, params: { project: project.id })
-
-    location = project.observations[0].location
-    assert_match(location.display_name, @response.body)
   end
 
   def test_index_country_includes_state_named_after_other_country
@@ -292,8 +297,7 @@ class LocationsControllerTest < FunctionalTestCase
     assert_displayed_title(/^Locations Matching ‘#{country}.?’/)
     assert_select(
       "#content a:match('href', ?)", /#{location_path(new_mexico)}/,
-      true,
-      "USA page should include New Mexico"
+      true, "USA page should include New Mexico"
     )
   end
 
@@ -323,12 +327,17 @@ class LocationsControllerTest < FunctionalTestCase
 
   def test_index_country_missing_country_with_apostrophe
     country = "Cote d'Ivoire"
+    matches = Location.where(Location[:name].matches("%#{country}"))
 
     login
     get(:index, params: { country: country })
 
     assert_template("index")
     assert_flash_text(:runtime_no_matches.l(type: :locations.l))
+    assert_select(
+      "#content a:match('href', ?)", %r{#{locations_path}/\d+},
+      { count: matches.count }, "Wrong number of Locations"
+    )
   end
 
   def test_index_by_user_who_created_multiple_locations
@@ -893,7 +902,7 @@ class LocationsControllerTest < FunctionalTestCase
   end
 
   def named_obs_query(name)
-    Query.lookup(:Observation, :pattern_search, pattern: name, by: :name)
+    Query.lookup(:Observation, :all, pattern: name, by: :name)
   end
 
   def test_coercing_sorted_observation_query_into_location_query
