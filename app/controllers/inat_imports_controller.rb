@@ -22,6 +22,7 @@
 #    Updates the InatImport instance with the code received from iNat
 #    Instantiates an InatImportJobTracker, passing in the InatImport instance
 #    Enqueues an InatImportJob, passing in the InatImport instance
+#    Redirects to InatImport show page for that InatImport instance
 # 5. The rest happens in the background. The InatImportJob:
 #      Uses the `code` to obtain an oauth access_token
 #      Trades the oauth token for a JWT api_token
@@ -42,11 +43,6 @@ class InatImportsController < ApplicationController
   before_action :login_required
   before_action :pass_query_params
 
-  def show
-    @tracker = InatImportJobTracker.find(params[:id])
-    @inat_import = InatImport.find(@tracker.inat_import)
-  end
-
   # Site for authorization and authentication requests
   SITE = "https://www.inaturalist.org"
   # iNat calls this after iNat user authorizes MO to access their data.
@@ -55,6 +51,11 @@ class InatImportsController < ApplicationController
   APP_ID = Rails.application.credentials.inat.id
   # The iNat API. Not called here, but referenced in tests and ActiveJob
   API_BASE = "https://api.inaturalist.org/v1"
+
+  def show
+    @tracker = InatImportJobTracker.find(params[:id])
+    @inat_import = InatImport.find(@tracker.inat_import)
+  end
 
   def new; end
 
@@ -99,12 +100,14 @@ class InatImportsController < ApplicationController
 
   # iNat redirects here after user completes iNat authorization
   def authorization_response
+    debugger
     auth_code = params[:code]
     return not_authorized if auth_code.blank?
 
     @inat_import = InatImport.find_or_create_by(user: User.current)
     @inat_import.update(token: auth_code, state: "Authenticating")
-    InatImportJobTracker.create(inat_import: @inat_import.id)
+    tracker = InatImportJobTracker.create(inat_import: @inat_import.id)
+    debugger
 
     Rails.logger.info(
       "Enqueuing InatImportJob for InatImport id: #{@inat_import.id}"
