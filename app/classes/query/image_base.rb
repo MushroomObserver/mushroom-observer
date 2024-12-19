@@ -19,11 +19,12 @@ module Query
         users?: [User],
         locations?: [:string],
         observation?: Observation, # for images inside observations
+        outer?: :query, # for images inside observations
         observations?: [Observation],
         project?: Project,
         projects?: [:string],
         species_lists?: [:string],
-        with_observation?: { boolean: [true] },
+        with_observations?: { boolean: [true] },
         size?: { string: Image::ALL_SIZES - [:full_size] },
         content_types?: [{ string: Image::ALL_EXTENSIONS }],
         with_notes?: :boolean,
@@ -34,8 +35,7 @@ module Query
         quality?: [:float],
         confidence?: [:float],
         ok_for_export?: :boolean,
-        pattern?: :string,
-        outer?: :query # for images inside observations
+        pattern?: :string
       ).merge(names_parameter_declarations)
     end
 

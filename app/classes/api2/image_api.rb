@@ -46,8 +46,8 @@ class API2
         observations: parse_array(:observation, :observation, as: :id),
         projects: parse_array(:project, :project, as: :id),
         species_lists: parse_array(:species_list, :species_list, as: :id),
-        with_observation: parse(:boolean, :has_observation,
-                                limit: true, help: 1),
+        with_observations: parse(:boolean, :has_observation,
+                                 limit: true, help: 1),
         size: parse(
           :enum, :size, limit: Image::ALL_SIZES - [:full_size], help: :min_size
         ),
