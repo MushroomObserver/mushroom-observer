@@ -18,6 +18,7 @@ module Query
         by_user?: User,
         users?: [User],
         locations?: [:string],
+        outer?: :query, # for images inside observations
         observation?: Observation, # for images inside observations
         observations?: [Observation],
         project?: Project,
@@ -34,8 +35,7 @@ module Query
         quality?: [:float],
         confidence?: [:float],
         ok_for_export?: :boolean,
-        pattern?: :string,
-        outer?: :query # for images inside observations
+        pattern?: :string
       ).merge(names_parameter_declarations)
     end
 

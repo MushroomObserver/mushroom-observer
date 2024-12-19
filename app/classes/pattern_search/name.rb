@@ -49,8 +49,8 @@ module PatternSearch
     def build_query
       super
 
-      # Temporary hack to get include_subtaxa/synonyms to work.
-      # NOTE: this affects the index title. Let's keep it
+      # This converts any search that *looks like* a name search into
+      # an actual name search. NOTE: This affects the index title.
       return unless args[:include_subtaxa].present? ||
                     args[:include_synonyms].present?
 
