@@ -214,7 +214,7 @@ class ImagesControllerTest < FunctionalTestCase
                                   ids: [det_unknown, min_unknown,
                                         a_campestris, c_comatus])
     # query 2 (inner for first obs)
-    inner = Query.lookup_and_save(:Image, :inside_observation,
+    inner = Query.lookup_and_save(:Image, :all,
                                   outer: outer, observation: det_unknown,
                                   by: :id)
 
@@ -306,7 +306,7 @@ class ImagesControllerTest < FunctionalTestCase
     outer = Query.lookup_and_save(:Observation, :all,
                                   ids: [det_unknown, min_unknown,
                                         a_campestris, c_comatus])
-    inner = Query.lookup_and_save(:Image, :inside_observation,
+    inner = Query.lookup_and_save(:Image, :all,
                                   outer: outer, observation: a_campestris,
                                   by: :id)
 

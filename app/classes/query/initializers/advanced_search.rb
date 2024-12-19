@@ -6,6 +6,7 @@ module Query
     module AdvancedSearch
       # NOTE: The autocomplaters for name, location, and user all make the ids
       # available now, so this could be a lot more efficient.
+      # But sometimes you're looking for strings that aren't ids.
       def advanced_search_parameter_declarations
         {
           name?: :string,

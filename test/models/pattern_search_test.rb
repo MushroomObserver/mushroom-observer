@@ -421,7 +421,7 @@ class PatternSearchTest < UnitTestCase
     # "Turkey" is not a name, and no taxa modifiers present, so no reason to
     # suspect that this is a name query.  Should leave it completely alone.
     x = PatternSearch::Observation.new("Turkey")
-    assert_equal(:pattern_search, x.flavor)
+    assert_equal(:all, x.flavor)
     assert_equal({ pattern: "Turkey" }, x.args)
 
     # "Agaricus" is a name, so let's assume this is a name query.  Note that

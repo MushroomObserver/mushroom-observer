@@ -18,6 +18,8 @@ module Query
         by_user?: User,
         users?: [User],
         locations?: [:string],
+        outer?: :query, # for images inside observations
+        observation?: Observation, # for images inside observations
         observations?: [Observation],
         project?: Project,
         projects?: [:string],
@@ -37,10 +39,12 @@ module Query
       ).merge(names_parameter_declarations)
     end
 
+    # rubocop:disable Metrics/AbcSize
     def initialize_flavor
       super
       unless is_a?(Query::ImageWithObservations)
         add_ids_condition("images")
+        add_inside_observation_conditions
         add_owner_and_time_stamp_conditions("images")
         add_by_user_condition("images")
         add_date_condition("images.when", params[:date])
@@ -55,6 +59,7 @@ module Query
       initialize_image_parameters
       initialize_vote_parameters
     end
+    # rubocop:enable Metrics/AbcSize
 
     def initialize_notes_parameters
       add_boolean_condition("LENGTH(COALESCE(images.notes,'')) > 0",
@@ -118,11 +123,36 @@ module Query
     def add_pattern_condition
       return if params[:pattern].blank?
 
-      add_search_condition(search_fields, params[:pattern])
       add_join(:observation_images, :observations)
       add_join(:observations, :locations!)
       add_join(:observations, :names)
       super
+    end
+
+    def add_inside_observation_conditions
+      return unless params[:observation] && params[:outer]
+
+      obs = find_cached_parameter_instance(Observation, :observation)
+      @title_args[:observation] = obs.unique_format_name
+      imgs = image_set(obs)
+      where << "images.id IN (#{imgs})"
+      self.order = "FIND_IN_SET(images.id,'#{imgs}') ASC"
+      self.outer_id = params[:outer]
+      skip_observations_with_no_images
+    end
+
+    def image_set(obs)
+      ids = []
+      ids << obs.thumb_image_id if obs.thumb_image_id
+      ids += obs.image_ids - [obs.thumb_image_id]
+      clean_id_set(ids)
+    end
+
+    # Tell outer query to skip observations with no images!
+    def skip_observations_with_no_images
+      self.tweak_outer_query = lambda do |outer|
+        extend_where(outer.params) << "observations.thumb_image_id IS NOT NULL"
+      end
     end
 
     def search_fields
