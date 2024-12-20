@@ -226,19 +226,25 @@ class LocationsControllerTest < FunctionalTestCase
   end
 
   def test_index_advanced_search
-    query = Query.lookup_and_save(:Location, :advanced_search,
-                                  user_where: "California")
+    query = Query.lookup_and_save(:Location, :all, user_where: "California")
+    matches = Location.name_includes("California")
+
     login
     get(:index,
         params: @controller.query_params(query).merge(advanced_search: true))
 
     assert_response(:success)
     assert_template("index")
-    assert_displayed_title("Advanced Search")
+    assert_select(
+      "#content a:match('href', ?)", %r{#{locations_path}/\d+},
+      { count: matches.count }, "Wrong number of Locations"
+    )
+    # Don't care what the title is, but good to know if it changes.
+    assert_displayed_title("Matching Locations")
   end
 
   def test_index_advanced_search_error
-    query_no_conditions = Query.lookup_and_save(:Location, :advanced_search)
+    query_no_conditions = Query.lookup_and_save(:Location, :all)
 
     login
     params = @controller.query_params(query_no_conditions).
@@ -256,11 +262,11 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: search_str })
 
-    assert_displayed_title("Locations Matching ‘#{search_str}’")
     assert_select(
       "#content a:match('href', ?)", %r{#{locations_path}/\d+},
       { count: matches.count }, "Wrong number of Locations"
     )
+    assert_displayed_title("Locations Matching ‘#{search_str}’")
   end
 
   def test_index_pattern_id

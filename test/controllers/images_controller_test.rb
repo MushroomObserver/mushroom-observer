@@ -75,7 +75,7 @@ class ImagesControllerTest < FunctionalTestCase
   def test_index_advanced_search_multiple_hits
     obs = observations(:fungi_obs)
     assert(obs.images.many?)
-    query = Query.lookup_and_save(:Image, :advanced_search,
+    query = Query.lookup_and_save(:Image, :all,
                                   name: obs.text_name,
                                   user: obs.user.name,
                                   user_where: obs.where)
@@ -88,13 +88,13 @@ class ImagesControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_template("index")
     assert_template(partial: "_matrix_box")
-    assert_displayed_title("Advanced Search")
+    # Don't care about the title, but good to know if it changes
+    assert_displayed_title("Matching Images")
   end
 
   def test_index_advanced_search_one_hit
     image = images(:connected_coprinus_comatus_image)
-    query = Query.lookup_and_save(:Image, :advanced_search,
-                                  name: "Coprinus comatus")
+    query = Query.lookup_and_save(:Image, :all, name: "Coprinus comatus")
     assert(query.results.one?)
 
     login
@@ -106,7 +106,7 @@ class ImagesControllerTest < FunctionalTestCase
   end
 
   def test_index_advanced_search_no_hits
-    query = Query.lookup_and_save(:Image, :advanced_search,
+    query = Query.lookup_and_save(:Image, :all,
                                   name: "Don't know",
                                   user: "myself",
                                   content: "Long pink stem and small pink cap",
@@ -130,7 +130,7 @@ class ImagesControllerTest < FunctionalTestCase
   end
 
   def test_index_advanced_search_error
-    query_no_conditions = Query.lookup_and_save(:Image, :advanced_search)
+    query_no_conditions = Query.lookup_and_save(:Image, :all)
 
     login
     params = @controller.query_params(query_no_conditions).

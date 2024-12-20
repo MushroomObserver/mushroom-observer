@@ -95,28 +95,25 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     name = "Agaricus"
     location = "California"
     expected_hits = Observation.where(Observation[:text_name] =~ name).
-                    where(Observation[:where] =~ location).
-                    count
+                    where(Observation[:where] =~ location)
 
     login
     get(:index,
-        params: { name: name, user_where: location,
-                  advanced_search: "1" })
+        params: { name: name, user_where: location, advanced_search: true })
 
     assert_response(:success)
-    assert_displayed_title("Advanced Search")
     assert_select(
       "#results .rss-what a:match('href', ?)", %r{^/\d},
-      { count: expected_hits },
+      { count: expected_hits.count },
       "Wrong number of results"
     )
+    assert_displayed_title("Matching Observations")
   end
 
   def test_index_advanced_search_name_one_hit
     obs = observations(:strobilurus_diminutivus_obs)
     search_string = obs.text_name
-    query = Query.lookup_and_save(:Observation, :advanced_search,
-                                  name: search_string)
+    query = Query.lookup_and_save(:Observation, :all, name: search_string)
     assert(query.results.one?,
            "Test needs a string that has exactly one hit")
 
@@ -129,7 +126,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
   end
 
   def test_index_advanced_search_no_hits
-    query = Query.lookup_and_save(:Observation, :advanced_search,
+    query = Query.lookup_and_save(:Observation, :all,
                                   name: "Don't know",
                                   user: "myself",
                                   content: "Long pink stem and small pink cap",
@@ -141,18 +138,18 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     assert_select("title", { text: "#{:app_title.l}: Index" },
                   "Wrong page or metadata <title>")
-    assert_displayed_title("")
     assert_flash_text(:runtime_no_matches.l(type: :observations.l))
+    assert_displayed_title("")
   end
 
   def test_index_advanced_search_notes1
     login
     get(:index,
         params: {
+          advanced_search: true,
           name: "Fungi",
-          user_where: "String in notes",
+          user_where: "String in notes"
           # Deliberately omit search_location_notes: 1
-          advanced_search: true
         })
 
     assert_response(:success)
@@ -171,10 +168,10 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(
       :index,
       params: {
+        advanced_search: true,
         name: "Fungi",
         user_where: '"String in notes"',
-        search_location_notes: 1,
-        advanced_search: true
+        search_location_notes: 1
       }
     )
 
@@ -201,10 +198,10 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     # Forget to include notes again.
     get(:index,
         params: {
+          advanced_search: true,
           name: "Fungi",
-          user_where: "String in notes",
+          user_where: "String in notes"
           # Deliberately omit search_location_notes: 1
-          advanced_search: true
         })
 
     assert_response(:success)
@@ -231,10 +228,10 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     # has the magic string in its notes, and we're looking for it.
     get(:index,
         params: {
+          advanced_search: true,
           name: "Fungi",
           user_where: '"String in notes"',
-          search_location_notes: 1,
-          advanced_search: true
+          search_location_notes: 1
         })
 
     assert_response(:success)
@@ -244,7 +241,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
   end
 
   def test_index_advanced_search_error
-    query_no_conditions = Query.lookup_and_save(:Observation, :advanced_search)
+    query_no_conditions = Query.lookup_and_save(:Observation, :all)
 
     login
     params = @controller.query_params(query_no_conditions).

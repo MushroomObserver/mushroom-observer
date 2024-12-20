@@ -21,8 +21,10 @@ class Query::ObservationAll < Query::ObservationBase
   end
 
   def do_coerce(new_model)
-    pargs = if params[:pattern].present?
-              add_old_title(add_old_by(ids: result_ids))
+    is_search = params[:pattern].present? ||
+                advanced_search_params.any? { |key| params[key].present? }
+    pargs = if is_search
+              add_old_title(params_plus_old_by)
             else
               params_plus_old_by
             end

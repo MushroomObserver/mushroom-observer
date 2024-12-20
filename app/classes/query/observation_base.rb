@@ -2,9 +2,11 @@
 
 module Query
   # methods for initializing Query's for Observations
+  # rubocop:disable Metrics/ClassLength
   class ObservationBase < Query::Base
     include Query::Initializers::ContentFilters
     include Query::Initializers::Names
+    include Query::Initializers::AdvancedSearch
 
     def model
       Observation
@@ -14,7 +16,8 @@ module Query
       super.merge(local_parameter_declarations).
         merge(content_filter_parameter_declarations(Observation)).
         merge(names_parameter_declarations).
-        merge(consensus_parameter_declarations)
+        merge(consensus_parameter_declarations).
+        merge(advanced_search_parameter_declarations)
     end
 
     # rubocop:disable Metrics/MethodLength
@@ -67,12 +70,14 @@ module Query
     end
     # rubocop:enable Metrics/MethodLength
 
+    # rubocop:disable Metrics/AbcSize
     def initialize_flavor
       add_ids_condition
       add_owner_and_time_stamp_conditions("observations")
       add_by_user_condition("observations")
       add_date_condition("observations.when", params[:date])
       add_pattern_condition
+      add_advanced_search_conditions
       add_needs_naming_condition
       initialize_name_parameters
       initialize_association_parameters
@@ -83,6 +88,7 @@ module Query
       initialize_content_filters(Observation)
       super
     end
+    # rubocop:enable Metrics/AbcSize
 
     def add_pattern_condition
       return if params[:pattern].blank?
@@ -91,11 +97,10 @@ module Query
       super
     end
 
-    def search_fields
-      "CONCAT(" \
-        "names.search_name," \
-        "observations.where" \
-        ")"
+    def add_advanced_search_conditions
+      return if advanced_search_params.all? { |key| params[key].blank? }
+
+      initialize_advanced_search
     end
 
     def initialize_association_parameters
@@ -310,12 +315,32 @@ module Query
       )
     end
 
-    def add_join_to_locations!
+    def add_join_to_names
+      add_join(:names)
+    end
+
+    def add_join_to_users
+      add_join(:users)
+    end
+
+    def add_join_to_locations
       add_join(:locations!)
+    end
+
+    def content_join_spec
+      :comments
+    end
+
+    def search_fields
+      "CONCAT(" \
+        "names.search_name," \
+        "observations.where" \
+        ")"
     end
 
     def self.default_order
       "date"
     end
   end
+  # rubocop:enable Metrics/ClassLength
 end
