@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class Query::LocationBase < Query::Base
+  include Query::Initializers::Locations
   include Query::Initializers::ContentFilters
   include Query::Initializers::AdvancedSearch
 
@@ -16,13 +17,10 @@ class Query::LocationBase < Query::Base
       by_user?: User,
       by_editor?: User,
       users?: [User],
-      north?: :float,
-      south?: :float,
-      east?: :float,
-      west?: :float,
       pattern?: :string,
       regexp?: :string
-    ).merge(content_filter_parameter_declarations(Location)).
+    ).merge(bounding_box_parameter_declarations).
+      merge(content_filter_parameter_declarations(Location)).
       merge(advanced_search_parameter_declarations)
   end
 

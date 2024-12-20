@@ -3,33 +3,21 @@
 module Query
   # Query's for Images where Observation meets specified conditions
   class ImageWithObservations < Query::ImageBase
-    include Query::Initializers::ContentFilters
     include Query::Initializers::Names
+    include Query::Initializers::Observations
+    include Query::Initializers::Locations
+    include Query::Initializers::ContentFilters
     include Query::Initializers::ObservationQueryDescriptions
 
     def parameter_declarations
       super.merge(
         old_title?: :string,
         old_by?: :string,
-        ids?: [Observation],
-        herbaria?: [:string],
-        location?: Location,
-        user_where?: :string,
-        project?: Project,
-        species_list?: SpeciesList,
-        is_collection_location?: :boolean,
-        with_public_lat_lng?: :boolean,
-        with_name?: :boolean,
-        with_comments?: { boolean: [true] },
-        with_sequences?: { boolean: [true] },
-        with_notes_fields?: [:string],
-        comments_has?: :string,
-        north?: :float,
-        south?: :float,
-        east?: :float,
-        west?: :float
-      ).merge(content_filter_parameter_declarations(Observation)).
-        merge(consensus_parameter_declarations)
+        ids?: [Observation]
+      ).merge(observations_parameter_declarations).
+        merge(bounding_box_parameter_declarations).
+        merge(content_filter_parameter_declarations(Observation)).
+        merge(naming_consensus_parameter_declarations)
     end
 
     def initialize_flavor

@@ -14,31 +14,17 @@ module Query
         }
       end
 
-      def consensus_parameter_declarations
+      def naming_consensus_parameter_declarations
         {
           include_all_name_proposals?: :boolean,
           exclude_consensus?: :boolean
         }
       end
 
-      def names_parameters
-        {
-          names: params[:names],
-          include_synonyms: params[:include_synonyms],
-          include_subtaxa: params[:include_subtaxa],
-          include_immediate_subtaxa: params[:include_immediate_subtaxa],
-          exclude_original_names: params[:exclude_original_names]
-        }
-      end
-
       def initialize_name_parameters(*joins)
         return force_empty_results if irreconcilable_name_parameters?
 
-        table = if params[:include_all_name_proposals]
-                  "namings"
-                else
-                  "observations"
-                end
+        table = params[:include_all_name_proposals] ? "namings" : "observations"
         column = "#{table}.name_id"
         ids = lookup_names_by_name(names_parameters)
         add_id_condition(column, ids, *joins)
@@ -53,6 +39,14 @@ module Query
       def initialize_name_parameters_for_name_queries
         # Much simpler form for non-observation-based name queries.
         add_id_condition("names.id", lookup_names_by_name(names_parameters))
+      end
+
+      # Copy only the names_parameters into a name_params hash we use here.
+      def names_parameters
+        name_params = names_parameter_declarations.dup
+        name_params.transform_keys! { |k| k.to_s.chomp("?").to_sym }
+        name_params.each_key { |k| name_params[k] = params[k] }
+        name_params
       end
 
       # ------------------------------------------------------------------------

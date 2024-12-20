@@ -3,37 +3,21 @@
 module Query
   # Query's for Locations where Observation meets specified conditions
   class LocationWithObservations < Query::LocationBase
-    include Query::Initializers::ContentFilters
     include Query::Initializers::Names
+    include Query::Initializers::Observations
+    include Query::Initializers::ContentFilters
     include Query::Initializers::ObservationQueryDescriptions
 
     def parameter_declarations
       super.merge(
+        old_title?: :string,
         old_by?: :string,
         date?: [:date],
-        ids?: [Observation],
-        old_title?: :string,
-        locations?: [:string],
-        location?: Location,
-        user_where?: :string,
-        project?: Project,
-        projects?: [:string],
-        species_list?: SpeciesList,
-        species_lists?: [:string],
-        herbaria?: [:string],
-        confidence?: [:float],
-        is_collection_location?: :boolean,
-        with_public_lat_lng?: :boolean,
-        with_name?: :boolean,
-        with_comments?: { boolean: [true] },
-        with_sequences?: { boolean: [true] },
-        with_notes?: :boolean,
-        with_notes_fields?: [:string],
-        notes_has?: :string,
-        comments_has?: :string
-      ).merge(content_filter_parameter_declarations(Observation)).
+        ids?: [Observation]
+      ).merge(observations_parameter_declarations).
+        merge(content_filter_parameter_declarations(Observation)).
         merge(names_parameter_declarations).
-        merge(consensus_parameter_declarations)
+        merge(naming_consensus_parameter_declarations)
     end
 
     def initialize_flavor

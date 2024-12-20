@@ -3,8 +3,10 @@
 module Query
   # Query's for Names where Observations meet specified conditions
   class NameWithObservations < Query::NameBase
-    include Query::Initializers::ContentFilters
     include Query::Initializers::Names
+    include Query::Initializers::Observations
+    include Query::Initializers::Locations
+    include Query::Initializers::ContentFilters
     include Query::Initializers::ObservationQueryDescriptions
 
     def parameter_declarations
@@ -12,26 +14,11 @@ module Query
         old_title?: :string,
         old_by?: :string,
         date?: [:date],
-        ids?: [Observation],
-        by_user?: User,
-        project?: Project,
-        projects?: [:string],
-        species_list?: SpeciesList,
-        herbaria?: [:string],
-        confidence?: [:float],
-        location?: Location,
-        user_where?: :string,
-        is_collection_location?: :boolean,
-        with_public_lat_lng?: :boolean,
-        with_name?: :boolean,
-        with_sequences?: { boolean: [true] },
-        with_notes_fields?: [:string],
-        north?: :float,
-        south?: :float,
-        east?: :float,
-        west?: :float
-      ).merge(content_filter_parameter_declarations(Observation)).
-        merge(consensus_parameter_declarations)
+        ids?: [Observation]
+      ).merge(observations_parameter_declarations).
+        merge(bounding_box_parameter_declarations).
+        merge(content_filter_parameter_declarations(Observation)).
+        merge(naming_consensus_parameter_declarations)
     end
 
     def initialize_flavor
