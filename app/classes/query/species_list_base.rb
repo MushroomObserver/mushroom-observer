@@ -55,21 +55,13 @@ module Query
     end
 
     def initialize_association_parameters
-      initialize_at_location_parameter
-      add_where_condition("species_lists", params[:locations])
+      add_at_location_condition
+      add_where_condition(:species_lists, params[:locations])
       add_id_condition(
         "project_species_lists.project_id",
         lookup_projects_by_name(params[:projects]),
         :project_species_lists
       )
-    end
-
-    def initialize_at_location_parameter
-      return unless params[:location]
-
-      location = find_cached_parameter_instance(Location, :location)
-      title_args[:location] = location.display_name
-      where << "species_lists.location_id = '#{location.id}'"
     end
 
     def initialize_boolean_parameters

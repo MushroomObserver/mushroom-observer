@@ -21,7 +21,7 @@ module Query
         add_joins(*)
       end
 
-      def add_at_location_parameter(table)
+      def add_at_location_condition(table = model.table_name)
         return unless params[:location]
 
         location = find_cached_parameter_instance(Location, :location)
