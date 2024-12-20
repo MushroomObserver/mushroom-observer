@@ -1715,10 +1715,8 @@ class QueryTest < UnitTestCase
   ##### numeric parameters #####
 
   def test_image_with_observations_bounding_box
-    obs = observations(:unknown_with_lat_lng) # obs has lat/lon
-    # give it some images
-    obs.images = [images(:conic_image), images(:convex_image)]
-    obs.save
+    obs = give_geolocated_observation_some_images
+
     lat = obs.lat
     lng = obs.lng
     expect = Image.joins(:observations).
@@ -1731,6 +1729,14 @@ class QueryTest < UnitTestCase
     )
   end
 
+  def give_geolocated_observation_some_images
+    obs = observations(:unknown_with_lat_lng) # obs has lat/lon
+    # give it some images
+    obs.images = [images(:conic_image), images(:convex_image)]
+    obs.save
+    obs
+  end
+
   ##### boolean parameters #####
 
   def test_image_with_observations_with_comments
@@ -1740,6 +1746,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_image_with_observations_with_public_lat_lng
+    give_geolocated_observation_some_images
+
     expect = Image.joins(:observations).
              where.not(observations: { lat: false }).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
