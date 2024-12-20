@@ -38,7 +38,8 @@ module Query
       add_pattern_condition
       add_ids_condition
       add_by_user_condition("species_lists")
-      add_for_project_condition
+      add_for_project_condition(:project_species_lists,
+                                [:project_species_lists])
       initialize_name_parameters(:species_list_observations, :observations)
       initialize_association_parameters
       initialize_boolean_parameters
@@ -51,16 +52,6 @@ module Query
       add_search_condition(search_fields, params[:pattern])
       add_join(:locations!)
       super
-    end
-
-    def add_for_project_condition
-      return if params[:project].blank?
-
-      project = find_cached_parameter_instance(Project, :project)
-      @title_tag = :query_title_for_project
-      @title_args[:project] = project.title
-      where << "project_species_lists.project_id = '#{params[:project]}'"
-      add_join("project_species_lists")
     end
 
     def initialize_association_parameters

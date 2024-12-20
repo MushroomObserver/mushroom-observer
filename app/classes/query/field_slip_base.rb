@@ -22,15 +22,6 @@ module Query
       super
     end
 
-    def add_for_project_condition
-      return if params[:project].blank?
-
-      project = find_cached_parameter_instance(Project, :project)
-      @title_tag = :query_title_for_project
-      @title_args[:project] = project.title
-      where << "field_slips.project_id = '#{project.id}'"
-    end
-
     def self.default_order
       "date"
     end

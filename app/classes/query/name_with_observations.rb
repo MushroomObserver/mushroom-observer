@@ -38,7 +38,8 @@ module Query
 
     def initialize_association_parameters
       initialize_projects_parameter
-      add_for_project_condition
+      add_for_project_condition(:project_observations,
+                                [:observations, :project_observations])
       add_in_species_list_condition
       initialize_herbaria_parameter
     end

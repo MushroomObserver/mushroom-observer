@@ -2634,6 +2634,14 @@ class QueryTest < UnitTestCase
                  :Observation, :all, project: projects(:bolete_project))
   end
 
+  def test_observation_for_project_projects_equivalence
+    qu1 = Query.lookup_and_save(:Observation, :all,
+                                project: projects(:bolete_project))
+    qu2 = Query.lookup_and_save(:Observation, :all,
+                                projects: projects(:bolete_project).id.to_s)
+    assert_equal(qu1.results, qu2.results)
+  end
+
   def test_observation_in_set
     obs_set_ids = [observations(:unknown_with_no_naming).id,
                    observations(:minimal_unknown_obs).id,

@@ -83,7 +83,8 @@ module Query
       add_at_location_parameter(:observations)
       initialize_herbaria_parameter
       initialize_herbarium_records_parameter
-      add_for_project_condition
+      add_for_project_condition(:project_observations,
+                                [:observations, :project_observations])
       initialize_projects_parameter
       initialize_project_lists_parameter
       add_in_species_list_condition

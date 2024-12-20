@@ -53,8 +53,6 @@ module Query
         add_join(:observation_images) if params[:with_observation]
         initialize_notes_parameters
       end
-      # add_by_user_condition("images")
-      # add_ids_condition
       add_pattern_condition
       add_advanced_search_conditions
       initialize_association_parameters
@@ -86,20 +84,10 @@ module Query
     end
 
     def add_project_conditions
-      add_for_project_condition
+      add_for_project_condition(:project_images, [:project_images])
       add_id_condition("project_images.project_id",
                        lookup_projects_by_name(params[:projects]),
                        :project_images)
-    end
-
-    def add_for_project_condition
-      return if params[:project].blank?
-
-      project = find_cached_parameter_instance(Project, :project)
-      @title_tag = :query_title_for_project
-      @title_args[:project] = project.title
-      where << "project_images.project_id = '#{project.id}'"
-      add_join(:project_images)
     end
 
     def initialize_image_parameters

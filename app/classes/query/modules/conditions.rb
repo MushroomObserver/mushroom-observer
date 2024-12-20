@@ -129,31 +129,6 @@ module Query
         add_joins(*)
       end
 
-      def add_where_condition(table, vals, *)
-        return if vals.empty?
-
-        loc_col   = "#{table}.location_id"
-        where_col = "#{table}.where"
-        ids       = clean_id_set(lookup_locations_by_name(vals))
-        cond      = "#{loc_col} IN (#{ids})"
-        vals.each do |val|
-          if /\D/.match?(val)
-            pattern = clean_pattern(val)
-            cond += " OR #{where_col} LIKE '%#{pattern}%'"
-          end
-        end
-        @where << cond
-        add_joins(*)
-      end
-
-      def add_at_location_parameter(table)
-        return unless params[:location]
-
-        location = find_cached_parameter_instance(Location, :location)
-        title_args[:location] = location.title_display_name
-        @where << "#{table}.location_id = '#{location.id}'"
-      end
-
       def add_rank_condition(vals, *)
         return if vals.empty?
 

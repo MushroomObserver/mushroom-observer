@@ -75,17 +75,6 @@ module Query
         )
       end
 
-      def add_for_project_condition
-        return if params[:project].blank?
-
-        project = find_cached_parameter_instance(Project, :project)
-        @title_tag = :query_title_for_project
-        @title_args[:project] = project.title
-        where << "project_observations.project_id = '#{params[:project]}'"
-        add_is_collection_location_condition_for_locations
-        add_join(:observations, :project_observations)
-      end
-
       def initialize_project_lists_parameter
         add_id_condition(
           "species_list_observations.species_list_id",
@@ -111,12 +100,6 @@ module Query
         where << "species_list_observations.species_list_id = '#{spl.id}'"
         add_is_collection_location_condition_for_locations
         add_join(:observations, :species_list_observations)
-      end
-
-      def add_is_collection_location_condition_for_locations
-        return unless model == Location
-
-        where << "observations.is_collection_location IS TRUE"
       end
 
       def initialize_is_collection_location_parameter
