@@ -22,8 +22,15 @@
 #    Updates the InatImport instance with the code received from iNat
 #    Instantiates an InatImportJobTracker, passing in the InatImport instance
 #    Enqueues an InatImportJob, passing in the InatImport instance
-#    Redirects to InatImport show page for that InatImport instance
-# 5. The rest happens in the background. The InatImportJob:
+#    Redirects to InatImport show page for that InatImport instance,
+#      passing the JobTracker.id as the tracker_id param.
+# 5  The InatImport show page (app/views/controllers/inat_imports/show.html.erb)
+#    instantiates a Stimulus controller (inat-import-job_controller.js)
+#    with an endpoint of InatImportJobTrackerController#show
+# 6 Two things then proceed in parallel:
+#    A background InatImportJob
+#    The Stimulus controller updates the InatImport show page
+# 6a The InatImportJob:
 #      Uses the `code` to obtain an oauth access_token
 #      Trades the oauth token for a JWT api_token
 #      Checks if the MO user is trying to import some else's obss
@@ -36,6 +43,9 @@
 #         adds an MO Comment with a snapshot of the imported data
 #         updates the iNat obs with a Mushroom Observer URL Observation Field
 #         updates the iNat obs Notes
+#      Updates the InatImport instance with status of the Job
+# 6a The Stimulus controller regulary polls the InatImport instance and
+#     via a Turbo stream, updates the InatImport show page
 #
 class InatImportsController < ApplicationController
   include Validators
@@ -53,7 +63,7 @@ class InatImportsController < ApplicationController
   API_BASE = "https://api.inaturalist.org/v1"
 
   def show
-    @tracker = InatImportJobTracker.find(params[:id])
+    @tracker = InatImportJobTracker.find(params[:tracker_id])
     @inat_import = InatImport.find(@tracker.inat_import)
   end
 
@@ -114,8 +124,10 @@ class InatImportsController < ApplicationController
     )
     # InatImportJob.perform_now(@inat_import) # for manual testing
     InatImportJob.perform_later(@inat_import)
-
-    redirect_to(inat_import_path(@inat_import.id))
+    redirect_to(
+      inat_import_path(@inat_import.id,
+                       params: { tracker_id: tracker.id })
+    )
   end
 
   # ---------------------------------
