@@ -40,6 +40,14 @@ module Query
         }
       end
 
+      # This is just to allow the additional location conditions
+      def add_ids_condition(table = model.table_name, ids = :ids)
+        return if params[ids].nil? # [] is valid
+
+        super
+        add_is_collection_location_condition_for_locations
+      end
+
       def initialize_herbaria_parameter
         add_id_condition(
           "herbarium_records.herbarium_id",
@@ -74,7 +82,7 @@ module Query
         @title_tag = :query_title_for_project
         @title_args[:project] = project.title
         where << "project_observations.project_id = '#{params[:project]}'"
-        add_collection_location_condition_for_locations
+        add_is_collection_location_condition_for_locations
         add_join(:observations, :project_observations)
       end
 
@@ -101,11 +109,11 @@ module Query
         @title_tag = :query_title_in_species_list
         @title_args[:species_list] = spl.format_name
         where << "species_list_observations.species_list_id = '#{spl.id}'"
-        add_collection_location_condition_for_locations
+        add_is_collection_location_condition_for_locations
         add_join(:observations, :species_list_observations)
       end
 
-      def add_collection_location_condition_for_locations
+      def add_is_collection_location_condition_for_locations
         return unless model == Location
 
         where << "observations.is_collection_location IS TRUE"

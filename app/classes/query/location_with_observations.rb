@@ -20,7 +20,7 @@ module Query
 
     def initialize_flavor
       add_join(:observations)
-      add_ids_condition
+      add_ids_condition("observations", :obs_ids)
       add_owner_and_time_stamp_conditions("observations")
       add_by_user_condition("observations")
       add_date_condition("observations.when", params[:date])
@@ -32,18 +32,6 @@ module Query
       initialize_search_parameters
       initialize_content_filters(Observation)
       super
-    end
-
-    def add_ids_condition
-      return unless params[:obs_ids]
-
-      set = clean_id_set(params[:obs_ids])
-      @where << "observations.id IN (#{set})"
-      self.order = "FIND_IN_SET(observations.id,'#{set}') ASC"
-
-      @title_args[:observations] = params[:old_title] ||
-                                   :query_title_in_set.t(type: :observation)
-      where << "observations.is_collection_location IS TRUE"
     end
 
     def add_where_conditions
