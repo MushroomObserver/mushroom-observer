@@ -17,6 +17,14 @@ module Query
         }
       end
 
+      def descriptions_coercion_parameter_declarations
+        {
+          old_title?: :string,
+          old_by?: :string,
+          by_author?: User
+        }
+      end
+
       def initialize_description_parameters(type = :name)
         initialize_with_default_desc_parameter(type)
         initialize_join_desc_parameter(type)

@@ -3,11 +3,8 @@
 class Query::LocationWithDescriptions < Query::LocationBase
   def parameter_declarations
     super.merge(
-      ids?: [LocationDescription],
-      old_title?: :string,
-      old_by?: :string,
-      by_author?: User
-    )
+      ids?: [LocationDescription]
+    ).merge(descriptions_coercion_parameter_declarations)
   end
 
   def initialize_flavor

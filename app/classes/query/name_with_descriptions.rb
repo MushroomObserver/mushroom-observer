@@ -3,11 +3,8 @@
 class Query::NameWithDescriptions < Query::NameBase
   def parameter_declarations
     super.merge(
-      ids?: [NameDescription],
-      old_title?: :string,
-      old_by?: :string,
-      by_author?: User
-    )
+      ids?: [NameDescription]
+    ).merge(descriptions_coercion_parameter_declarations)
   end
 
   def initialize_flavor
