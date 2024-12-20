@@ -4,6 +4,22 @@ module Query
   module Modules
     # Helper methods for turning Query parameters into SQL conditions.
     module Associations
+      def initialize_herbaria_parameter
+        add_id_condition(
+          "herbarium_records.herbarium_id",
+          lookup_herbaria_by_name(params[:herbaria]),
+          :observations, :observation_herbarium_records, :herbarium_records
+        )
+      end
+
+      def initialize_herbarium_records_parameter
+        add_id_condition(
+          "observation_herbarium_records.herbarium_record_id",
+          lookup_herbarium_records_by_name(params[:herbarium_records]),
+          :observations, :observation_herbarium_records
+        )
+      end
+
       def add_where_condition(table, vals, *)
         return if vals.empty?
 

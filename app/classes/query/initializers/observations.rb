@@ -48,19 +48,19 @@ module Query
         add_is_collection_location_condition_for_locations
       end
 
-      def initialize_herbaria_parameter
-        add_id_condition(
-          "herbarium_records.herbarium_id",
-          lookup_herbaria_by_name(params[:herbaria]),
-          :observations, :observation_herbarium_records, :herbarium_records
+      def initialize_obs_date_parameter(param_name = :date)
+        add_date_condition(
+          "observations.when",
+          params[param_name],
+          :observations
         )
       end
 
-      def initialize_herbarium_records_parameter
-        add_id_condition(
-          "observation_herbarium_records.herbarium_record_id",
-          lookup_herbarium_records_by_name(params[:herbarium_records]),
-          :observations, :observation_herbarium_records
+      def initialize_confidence_parameter
+        add_range_condition(
+          "observations.vote_cache",
+          params[:confidence],
+          :observations
         )
       end
 
@@ -76,7 +76,8 @@ module Query
         add_boolean_condition(
           "observations.is_collection_location IS TRUE",
           "observations.is_collection_location IS FALSE",
-          params[:is_collection_location]
+          params[:is_collection_location],
+          :observations
         )
       end
 
@@ -84,7 +85,26 @@ module Query
         add_boolean_condition(
           "observations.lat IS NOT NULL AND observations.gps_hidden IS FALSE",
           "observations.lat IS NULL OR observations.gps_hidden IS TRUE",
-          params[:with_public_lat_lng]
+          params[:with_public_lat_lng],
+          :observations
+        )
+      end
+
+      def initialize_with_images_parameter
+        add_boolean_condition(
+          "observations.thumb_image_id IS NOT NULL",
+          "observations.thumb_image_id IS NULL",
+          params[:with_images],
+          :observations
+        )
+      end
+
+      def initialize_with_specimen_parameter
+        add_boolean_condition(
+          "observations.specimen IS TRUE",
+          "observations.specimen IS FALSE",
+          params[:with_specimen],
+          :observations
         )
       end
 
@@ -99,15 +119,16 @@ module Query
         )
       end
 
-      def initialize_with_notes_parameter
+      def initialize_with_obs_notes_parameter(param_name = :with_notes)
         add_boolean_condition(
           "observations.notes != #{escape(Observation.no_notes_persisted)}",
           "observations.notes  = #{escape(Observation.no_notes_persisted)}",
-          params[:with_notes]
+          params[param_name],
+          :observations
         )
       end
 
-      def initialize_search_parameters
+      def initialize_obs_search_parameters
         add_search_condition(
           "observations.notes",
           params[:notes_has]

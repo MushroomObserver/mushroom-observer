@@ -29,7 +29,7 @@ module Query
       initialize_association_parameters
       add_range_condition("observations.vote_cache", params[:confidence])
       initialize_boolean_parameters
-      initialize_search_parameters
+      initialize_obs_search_parameters
       initialize_content_filters(Observation)
       super
     end
@@ -53,7 +53,7 @@ module Query
       initialize_is_collection_location_parameter
       initialize_with_public_lat_lng_parameter
       initialize_with_name_parameter
-      initialize_with_notes_parameter
+      initialize_with_obs_notes_parameter
       add_with_notes_fields_condition(params[:with_notes_fields])
       add_join(:observations, :comments) if params[:with_comments]
       add_join(:observations, :sequences) if params[:with_sequences]

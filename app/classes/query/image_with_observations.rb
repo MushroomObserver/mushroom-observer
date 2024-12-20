@@ -28,7 +28,7 @@ module Query
       initialize_association_parameters
       add_where_conditions
       initialize_boolean_parameters
-      initialize_search_parameters
+      initialize_obs_search_parameters
       add_bounding_box_conditions_for_observations
       initialize_content_filters(Observation)
       super
@@ -51,7 +51,7 @@ module Query
       initialize_is_collection_location_parameter
       initialize_with_public_lat_lng_parameter
       initialize_with_name_parameter
-      initialize_with_notes_parameter
+      initialize_with_obs_notes_parameter
       add_join(:observations, :comments) if params[:with_comments]
       add_join(:observations, :sequences) if params[:with_sequences]
       add_with_notes_fields_condition(params[:with_notes_fields])

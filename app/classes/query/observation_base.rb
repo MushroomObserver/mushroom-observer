@@ -45,25 +45,23 @@ module Query
       }
     end
 
-    # rubocop:disable Metrics/AbcSize
     def initialize_flavor
       add_ids_condition
       add_owner_and_time_stamp_conditions("observations")
       add_by_user_condition("observations")
-      add_date_condition("observations.when", params[:date])
+      initialize_obs_date_parameter(:date)
       add_pattern_condition
       add_advanced_search_conditions
       add_needs_naming_condition
       initialize_name_parameters
       initialize_association_parameters
       initialize_boolean_parameters
-      initialize_search_parameters
-      add_range_condition("observations.vote_cache", params[:confidence])
+      initialize_obs_search_parameters
+      initialize_confidence_parameter
       add_bounding_box_conditions_for_observations
       initialize_content_filters(Observation)
       super
     end
-    # rubocop:enable Metrics/AbcSize
 
     def add_pattern_condition
       return if params[:pattern].blank?
@@ -160,24 +158,11 @@ module Query
       where << conds
     end
 
-    # The tricky thing here is, without the user.id being the value passed in
-    # params[:filter][:term], we're hunting for a user from a string like
-    # "Name <name>". Better to have the id as the value!
-    # Below uses the method in query/initializers/advanced_search to get a
-    # string but is expensive. Something like
-    # joins(:users).where((User[:login] + User[:name]).matches(str))
-    # def add_by_user_condition
-    #   return unless params[:by_user]
-    #
-    #   user = find_cached_parameter_instance(User, :by_user)
-    #   user = params[:by_user].to_s.gsub(/ *<[^<>]*>/, "")
-    # end
-
     def initialize_boolean_parameters
       initialize_is_collection_location_parameter
       initialize_with_public_lat_lng_parameter
       initialize_with_name_parameter
-      initialize_with_notes_parameter
+      initialize_with_obs_notes_parameter
       add_with_notes_fields_condition(params[:with_notes_fields])
       add_join(:comments) if params[:with_comments]
       add_join(:sequences) if params[:with_sequences]

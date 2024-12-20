@@ -4,6 +4,7 @@ module Query
   # Methods to validate parameters and initialize Query's which return Sequences
   class SequenceBase < Query::Base
     include Query::Initializers::Names
+    include Query::Initializers::Observations
 
     def model
       Sequence
@@ -89,13 +90,14 @@ module Query
     def initialize_association_parameters
       add_id_condition("sequences.observation_id", params[:observations])
       initialize_observers_parameter
-      initialize_locations_parameter
+      add_where_condition("observations", params[:locations], :observations)
       initialize_herbaria_parameter
       initialize_herbarium_records_parameter
       initialize_projects_parameter
       initialize_species_lists_parameter
     end
 
+    # Different because it can take multiple users
     def initialize_observers_parameter
       add_id_condition(
         "observations.user_id",
@@ -104,47 +106,10 @@ module Query
       )
     end
 
-    def initialize_locations_parameter
-      add_id_condition(
-        "observations.location_id",
-        lookup_locations_by_name(params[:locations]),
-        :observations
-      )
-    end
-
-    def initialize_herbaria_parameter
-      add_id_condition(
-        "herbarium_records.herbarium_id",
-        lookup_herbaria_by_name(params[:herbaria]),
-        :observations, :observation_herbarium_records, :herbarium_records
-      )
-    end
-
-    def initialize_herbarium_records_parameter
-      add_id_condition(
-        "observation_herbarium_records.herbarium_record_id",
-        lookup_herbarium_records_by_name(params[:herbarium_records]),
-        :observations, :observation_herbarium_records
-      )
-    end
-
     def initialize_observation_parameters
-      add_date_condition(
-        "observations.when",
-        params[:obs_date],
-        :observations
-      )
-      add_boolean_condition(
-        "observations.is_collection_location IS TRUE",
-        "observations.is_collection_location IS FALSE",
-        params[:is_collection_location],
-        :observations
-      )
-      add_range_condition(
-        "observations.vote_cache",
-        params[:confidence],
-        :observations
-      )
+      initialize_obs_date_parameter(:obs_date)
+      initialize_is_collection_location_parameter
+      initialize_confidence_parameter
     end
 
     def initialize_exact_match_parameters
@@ -157,46 +122,8 @@ module Query
       initialize_with_images_parameter
       initialize_with_specimen_parameter
       initialize_with_name_parameter
-      initialize_with_obs_notes_parameter
+      initialize_with_obs_notes_parameter(:with_obs_notes)
       add_with_notes_fields_condition(params[:with_notes_fields], :observations)
-    end
-
-    def initialize_with_images_parameter
-      add_boolean_condition(
-        "observations.thumb_image_id IS NOT NULL",
-        "observations.thumb_image_id IS NULL",
-        params[:with_images],
-        :observations
-      )
-    end
-
-    def initialize_with_specimen_parameter
-      add_boolean_condition(
-        "observations.specimen IS TRUE",
-        "observations.specimen IS FALSE",
-        params[:with_specimen],
-        :observations
-      )
-    end
-
-    def initialize_with_name_parameter
-      genus = Name.ranks[:Genus]
-      group = Name.ranks[:Group]
-      add_boolean_condition(
-        "names.`rank` <= #{genus} or names.`rank` = #{group}",
-        "names.`rank` > #{genus} and names.`rank` < #{group}",
-        params[:with_name],
-        :observations, :names
-      )
-    end
-
-    def initialize_with_obs_notes_parameter
-      add_boolean_condition(
-        "observations.notes != #{escape(Observation.no_notes_persisted)}",
-        "observations.notes  = #{escape(Observation.no_notes_persisted)}",
-        params[:with_obs_notes],
-        :observations
-      )
     end
 
     def initialize_search_parameters
