@@ -5,6 +5,8 @@ module Query
   class NameBase < Query::Base
     include Query::Initializers::ContentFilters
     include Query::Initializers::Names
+    include Query::Initializers::Descriptions
+    include Query::Initializers::AdvancedSearch
 
     def model
       Name
@@ -26,6 +28,7 @@ module Query
         species_lists?: [:string],
         rank?: [{ string: Name.all_ranks }],
         is_deprecated?: :boolean,
+        pattern?: :string,
         text_name_has?: :string,
         with_author?: :boolean,
         author_has?: :string,
@@ -37,16 +40,11 @@ module Query
         notes_has?: :string,
         with_comments?: { boolean: [true] },
         comments_has?: :string,
-        with_observations?: { boolean: [true] },
-        with_default_desc?: :boolean,
-        join_desc?: { string: [:default, :any] },
-        desc_type?: [{ string: [Description.all_source_types] }],
-        desc_project?: [:string],
-        desc_creator?: [User],
-        desc_content?: :string,
-        ok_for_export?: :boolean
+        with_observations?: { boolean: [true] }
       ).merge(content_filter_parameter_declarations(Name)).
-        merge(names_parameter_declarations)
+        merge(names_parameter_declarations).
+        merge(descriptions_parameter_declarations).
+        merge(advanced_search_parameter_declarations)
     end
     # rubocop:enable Metrics/MethodLength
 
@@ -56,9 +54,11 @@ module Query
         add_ids_condition("names")
         add_owner_and_time_stamp_conditions("names")
         add_by_user_condition("names")
-        add_by_editor_condition
+        add_by_editor_condition(:name)
         initialize_comments_and_notes_parameters
         initialize_name_parameters_for_name_queries
+        add_pattern_condition
+        add_advanced_search_conditions
       end
       initialize_taxonomy_parameters
       initialize_boolean_parameters
@@ -67,19 +67,6 @@ module Query
       initialize_description_parameters
       initialize_content_filters(Name)
       super
-    end
-
-    def add_by_editor_condition
-      return unless params[:by_editor]
-
-      user = find_cached_parameter_instance(User, :by_editor)
-      @title_tag = :query_title_by_editor.t(type: :name,
-                                            user: user.legal_name)
-      @title_args[:user] = user.legal_name
-      version_table = :name_versions
-      add_join(version_table)
-      where << "#{version_table}.user_id = '#{user.id}'"
-      where << "names.user_id != '#{user.id}'"
     end
 
     def initialize_comments_and_notes_parameters
@@ -123,16 +110,14 @@ module Query
 
     def initialize_is_deprecated_parameter
       add_boolean_condition(
-        "names.deprecated IS TRUE",
-        "names.deprecated IS FALSE",
+        "names.deprecated IS TRUE", "names.deprecated IS FALSE",
         params[:is_deprecated]
       )
     end
 
     def initialize_ok_for_export_parameter
       add_boolean_condition(
-        "names.ok_for_export IS TRUE",
-        "names.ok_for_export IS FALSE",
+        "names.ok_for_export IS TRUE", "names.ok_for_export IS FALSE",
         params[:ok_for_export]
       )
     end
@@ -157,8 +142,7 @@ module Query
 
     def initialize_with_synonyms_parameter
       add_boolean_condition(
-        "names.synonym_id IS NOT NULL",
-        "names.synonym_id IS NULL",
+        "names.synonym_id IS NOT NULL", "names.synonym_id IS NULL",
         params[:with_synonyms]
       )
     end
@@ -194,58 +178,43 @@ module Query
       add_search_condition("names.classification", params[:classification_has])
     end
 
-    def initialize_description_parameters
-      initialize_with_default_desc_parameter
-      initialize_join_desc_parameter
-      initialize_desc_type_parameter
-      initialize_desc_project_parameter
-      initialize_desc_creator_parameter
-      initialize_desc_content_parameter
+    def add_pattern_condition
+      return if params[:pattern].blank?
+
+      add_join(:"name_descriptions.default!")
+      super
     end
 
-    def initialize_with_default_desc_parameter
-      add_boolean_condition(
-        "names.description_id IS NOT NULL",
-        "names.description_id IS NULL",
-        params[:with_default_desc]
-      )
+    def add_advanced_search_conditions
+      return if advanced_search_params.all? { |key| params[key].blank? }
+
+      add_join(:observations) if params[:content].present?
+      initialize_advanced_search
     end
 
-    def initialize_join_desc_parameter
-      if params[:join_desc] == :default
-        add_join(:"name_descriptions.default")
-      elsif any_param_desc_fields?
-        add_join(:name_descriptions)
+    def add_join_to_names; end
+
+    def add_join_to_users
+      add_join(:observations, :users)
+    end
+
+    def add_join_to_locations
+      add_join(:observations, :locations!)
+    end
+
+    def content_join_spec
+      { observations: :comments }
+    end
+
+    def search_fields
+      fields = [
+        "names.search_name",
+        "COALESCE(names.citation,'')",
+        "COALESCE(names.notes,'')"
+      ] + NameDescription.all_note_fields.map do |x|
+        "COALESCE(name_descriptions.#{x},'')"
       end
-    end
-
-    def initialize_desc_type_parameter
-      add_indexed_enum_condition(
-        "name_descriptions.source_type",
-        params[:desc_type],
-        Description.all_source_types
-      )
-    end
-
-    def initialize_desc_project_parameter
-      add_id_condition(
-        "name_descriptions.project_id",
-        lookup_projects_by_name(params[:desc_project])
-      )
-    end
-
-    def initialize_desc_creator_parameter
-      add_id_condition(
-        "name_descriptions.user_id",
-        lookup_users_by_name(params[:desc_creator])
-      )
-    end
-
-    def initialize_desc_content_parameter
-      fields = NameDescription.all_note_fields
-      fields = fields.map { |f| "COALESCE(name_descriptions.#{f},'')" }
-      fields = "CONCAT(#{fields.join(",")})"
-      add_search_condition(fields, params[:desc_content])
+      "CONCAT(#{fields.join(",")})"
     end
 
     def self.default_order
