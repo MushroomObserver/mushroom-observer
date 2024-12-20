@@ -440,12 +440,12 @@ MushroomObserver::Application.routes.draw do
   end
 
   # ----- InatImports ----------------------------
-  resources :inat_imports, only: [:show, :new, :create] do
-    resources :job_trackers, only: [:show]
-  end
   get("inat_imports/authorization_response",
       to: "inat_imports#authorization_response",
       as: "inat_import_authorization_response")
+  resources :inat_imports, only: [:show, :new, :create] do
+    resources :job_trackers, only: [:show]
+  end
 
   # ----- Info: no resources, just forms and pages ----------------------------
   get("/info/how_to_help", to: "info#how_to_help")
