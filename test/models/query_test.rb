@@ -1229,54 +1229,45 @@ class QueryTest < UnitTestCase
     assert_equal(q9a, q9c)
   end
 
-  def test_description_coercion
+  def test_name_description_coercion
+    ds1 = name_descriptions(:coprinus_comatus_desc)
+    ds2 = name_descriptions(:peltigera_desc)
+    description_coercion_assertions(ds1, ds2, :Name)
+  end
+
+  def description_coercion_assertions(ds1, ds2, model)
+    qa = qb = qc = []
+
+    desc_model = :"#{model}Description"
     # Several description queries can be turned into name queries and back.
-    q1a = Query.lookup_and_save(:NameDescription, :all)
-    q2a = Query.lookup_and_save(:NameDescription, :all, by_author: rolf.id)
-    q3a = Query.lookup_and_save(:NameDescription, :all, by_editor: rolf.id)
-    q4a = Query.lookup_and_save(:NameDescription, :all, by_user: rolf.id)
-    assert_equal(4, QueryRecord.count)
+    qa[0] = Query.lookup_and_save(desc_model, :all)
+    qa[1] = Query.lookup_and_save(desc_model, :all, by_author: rolf.id)
+    qa[2] = Query.lookup_and_save(desc_model, :all, by_editor: rolf.id)
+    qa[3] = Query.lookup_and_save(desc_model, :all, by_user: rolf.id)
+    qa[4] = Query.lookup_and_save(desc_model, :all, ids: [ds1.id, ds2.id])
+    assert_equal(5, QueryRecord.count)
 
     # Try coercing them into name queries.
-    assert(q1b = q1a.coerce(:Name))
-    assert(q2b = q2a.coerce(:Name))
-    assert(q3b = q3a.coerce(:Name))
-    assert(q4b = q4a.coerce(:Name))
-
-    # They should all be new records
-    assert(q1b.record.new_record?)
-    assert_save(q1b)
-    assert(q2b.record.new_record?)
-    assert_save(q2b)
-    assert(q3b.record.new_record?)
-    assert_save(q3b)
-    assert(q4b.record.new_record?)
-    assert_save(q4b)
-
+    [*0..4].each do |i|
+      assert(qb[i] = qa[i].coerce(model))
+      # They should all be new records
+      assert(qb[i].record.new_record?)
+      assert_save(qb[i])
+      assert_equal(model.to_s, qb[i].model.to_s)
+      assert_equal(:with_descriptions, qb[i].flavor)
+    end
     # Make sure they're right.
-    assert_equal("Name", q1b.model.to_s)
-    assert_equal("Name", q2b.model.to_s)
-    assert_equal("Name", q3b.model.to_s)
-    assert_equal("Name", q4b.model.to_s)
-    assert_equal(:with_descriptions, q1b.flavor)
-    assert_equal(:with_descriptions, q2b.flavor)
-    assert_equal(:with_descriptions, q3b.flavor)
-    assert_equal(:with_descriptions, q4b.flavor)
-    assert_equal(rolf.id, q2b.params[:by_author])
-    assert_equal(rolf.id, q3b.params[:by_editor])
-    assert_equal(rolf.id, q4b.params[:by_user])
+    assert_equal(rolf.id, qb[1].params[:by_author])
+    assert_equal(rolf.id, qb[2].params[:by_editor])
+    assert_equal(rolf.id, qb[3].params[:by_user])
+    assert_equal([ds1.id, ds2.id], qb[4].params[:desc_ids])
 
     # Try coercing them back.
-    assert(q1c = q1b.coerce(:NameDescription))
-    assert(q2c = q2b.coerce(:NameDescription))
-    assert(q3c = q3b.coerce(:NameDescription))
-    assert(q4c = q4b.coerce(:NameDescription))
-
     # None should be new records
-    assert_equal(q1a, q1c)
-    assert_equal(q2a, q2c)
-    assert_equal(q3a, q3c)
-    assert_equal(q4a, q4c)
+    [*0..4].each do |i|
+      assert(qc[i] = qb[i].coerce(desc_model))
+      assert_equal(qa[i], qc[i])
+    end
   end
 
   def test_rss_log_coercion
@@ -2349,6 +2340,12 @@ class QueryTest < UnitTestCase
     assert_query([location_descriptions(:albion_desc).id],
                  :LocationDescription, :all,
                  ids: [rolf.id, location_descriptions(:albion_desc).id])
+  end
+
+  def test_location_description_coercion
+    ds1 = location_descriptions(:albion_desc)
+    ds2 = location_descriptions(:no_mushrooms_location_desc)
+    description_coercion_assertions(ds1, ds2, :Location)
   end
 
   def test_name_advanced_search
