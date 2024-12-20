@@ -131,7 +131,7 @@ module Tabs
       tabs << build_tab("#{project.user_group.users.count} #{:MEMBERS.l}",
                         project_members_path(project.id),
                         "members")
-      tabs << violations_tab(project)
+      tabs << violations_tab(project) if project.constraints?
 
       content_for(:project_tabs) do
         tag.ul(safe_join(tabs), class: "nav nav-tabs")
