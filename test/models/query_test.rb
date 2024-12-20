@@ -1640,7 +1640,7 @@ class QueryTest < UnitTestCase
 
   ##### date/time parameters #####
 
-  def test_name_with_observations_created_at
+  def test_image_with_observations_created_at
     created_at = observations(:detailed_unknown_obs).created_at
     expect =
       Image.joins(:observations).
@@ -1649,7 +1649,7 @@ class QueryTest < UnitTestCase
     assert_query(expect, :Image, :with_observations, created_at: created_at)
   end
 
-  def test_name_with_observations_updated_at
+  def test_image_with_observations_updated_at
     updated_at = observations(:detailed_unknown_obs).updated_at
     expect =
       Image.joins(:observations).
@@ -1658,7 +1658,7 @@ class QueryTest < UnitTestCase
     assert_query(expect, :Image, :with_observations, updated_at: updated_at)
   end
 
-  def test_name_with_observations_date
+  def test_image_with_observations_date
     date = observations(:detailed_unknown_obs).when
     expect = Image.joins(:observations).where(Observation[:when] >= date).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
@@ -1667,7 +1667,7 @@ class QueryTest < UnitTestCase
 
   ##### list/string parameters #####
 
-  def test_name_with_observations_comments_has
+  def test_image_with_observations_comments_has
     expect =
       Image.joins(observations: :comments).
       where(Comment[:summary].matches("%give%")).
@@ -1677,7 +1677,7 @@ class QueryTest < UnitTestCase
     assert_query(expect, :Image, :with_observations, comments_has: "give")
   end
 
-  def test_name_with_observations_with_notes_fields
+  def test_image_with_observations_with_notes_fields
     obs = observations(:substrate_notes_obs) # obs has notes substrate: field
     # give it some images
     obs.images = [images(:conic_image), images(:convex_image)]
@@ -1690,7 +1690,7 @@ class QueryTest < UnitTestCase
                  :Image, :with_observations, with_notes_fields: "substrate")
   end
 
-  def test_name_with_observations_herbaria
+  def test_image_with_observations_herbaria
     name = "The New York Botanical Garden"
     expect = Image.joins(observations: { herbarium_records: :herbarium }).
              where(herbaria: { name: name }).uniq
@@ -1698,7 +1698,7 @@ class QueryTest < UnitTestCase
     assert_query(expect, :Image, :with_observations, herbaria: name)
   end
 
-  def test_name_with_observations_projects
+  def test_image_with_observations_projects
     project = projects(:bolete_project)
     expect = Image.joins(observations: :projects).
              where(projects: { title: project.title }).uniq
@@ -1706,7 +1706,7 @@ class QueryTest < UnitTestCase
     assert_query(expect, :Image, :with_observations, projects: [project.title])
   end
 
-  def test_name_with_observations_users
+  def test_image_with_observations_users
     expect = Image.joins(:observations).where(observations: { user: dick }).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, Image, :with_observations, users: dick)
@@ -1714,7 +1714,7 @@ class QueryTest < UnitTestCase
 
   ##### numeric parameters #####
 
-  def test_name_with_observations_bounding_box
+  def test_image_with_observations_bounding_box
     obs = observations(:unknown_with_lat_lng) # obs has lat/lon
     # give it some images
     obs.images = [images(:conic_image), images(:convex_image)]
@@ -1733,27 +1733,27 @@ class QueryTest < UnitTestCase
 
   ##### boolean parameters #####
 
-  def test_name_with_observations_with_comments
+  def test_image_with_observations_with_comments
     expect = Image.joins(observations: :comments).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Image, :with_observations, with_comments: true)
   end
 
-  def test_name_with_observations_with_public_lat_lng
+  def test_image_with_observations_with_public_lat_lng
     expect = Image.joins(:observations).
              where.not(observations: { lat: false }).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Image, :with_observations, with_public_lat_lng: true)
   end
 
-  def test_name_with_observations_with_name
+  def test_image_with_observations_with_name
     expect = Image.joins(:observations).
              where(observations: { name_id: Name.unknown }).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Image, :with_observations, with_name: false)
   end
 
-  def test_name_with_observations_with_notes
+  def test_image_with_observations_with_notes
     expect =
       Image.joins(:observations).
       where.not(observations: { notes: Observation.no_notes }).uniq
@@ -1761,13 +1761,13 @@ class QueryTest < UnitTestCase
     assert_query(expect, :Image, :with_observations, with_notes: true)
   end
 
-  def test_name_with_observations_with_sequences
+  def test_image_with_observations_with_sequences
     expect = Image.joins(observations: :sequences).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, Image, :with_observations, with_sequences: true)
   end
 
-  def test_name_with_observations_is_collection_location
+  def test_image_with_observations_is_collection_location
     expect =
       Image.joins(:observations).
       where(observations: { is_collection_location: true }).uniq
