@@ -1,16 +1,17 @@
 <%
-no_hits = params[:pattern].present? ? :title_for_observation_search.l : ""
-if @project
-  add_project_banner(@project)
-  @container = :wide
-else
-  add_index_title(@query, no_hits: no_hits) # note default above is non-nil
-  @container = :full
-end
-add_tab_set(observations_index_tabs(query: @query)) if @objects.any?
-add_sorter(@query, observations_index_sorts)
+  no_hits = params[:pattern].present? ? :title_for_observation_search.l : ""
+  if @project
+    add_project_banner(@project)
+    @container = :wide
+  else
+    add_index_title(@query, no_hits: no_hits) # note default above is non-nil
+    @container = :full
+    add_tab_set(observations_index_tabs(query: @query)) if @objects.any?
+  end
+  project_observation_buttons(@project, @query)
+  add_sorter(@query, observations_index_sorts)
 
-flash_error(@error) if @error && @objects.empty?
+  flash_error(@error) if @error && @objects.empty?
 %>
 
 <% if @suggest_alternate_spellings && @objects.empty?

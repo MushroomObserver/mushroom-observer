@@ -1,20 +1,26 @@
 <%
-add_index_title(@query, no_hits: :FIELD_SLIPS.t)
-add_tab_set(field_slips_index_tabs)
+if @project
+  add_project_banner(@project)
+else
+  add_index_title(@query, no_hits: :FIELD_SLIPS.t)
+  add_tab_set(field_slips_index_tabs)
+  project_title = @query&.params_cache&.dig(:project)&.title || ""
+end
 @container = :wide
-project_title = @query&.params_cache&.dig(:project)&.title || ""
 %>
 
 <% if notice %>
-<%= tag.p(notice, class: "alert alert-success") %>
+  <%= tag.p(notice, class: "alert alert-success") %>
 <% end %>
 
-<%= form_with(method: :get, url: field_slips_path) do |form| %>
-<%= autocompleter_field(form:, field: :project_name, type: :project,
-                        hidden_name: :project, inline: true,
-                        value: project_title,
-                        label: "Filter by #{:project.l}:") %>
-<%= submit_button(form:, button: "Filter") %>
+<% unless @project %>
+  <%= form_with(method: :get, url: field_slips_path) do |form| %>
+    <%= autocompleter_field(form:, field: :project_name, type: :project,
+                            hidden_name: :project, inline: true,
+                            value: project_title,
+                            label: "Filter by #{:project.l}:") %>
+    <%= submit_button(form:, button: "Filter") %>
+  <% end %>
 <% end %>
 
 <%= paginate_block(@pages) do %>

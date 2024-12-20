@@ -92,7 +92,7 @@ module Tabs
 
     def build_tab(link_text, link, controller)
       tag.li(class: "nav-item") do
-        classes = "nav-link #{active_tab?(controller) ? "active" : ""}"
+        classes = "mt-3 nav-link #{active_tab?(controller) ? "active" : ""}"
         link_to(link_text, link,
                 { class: classes })
       end
@@ -101,9 +101,9 @@ module Tabs
     def violations_tab(project)
       violations_count = project.count_violations
       classes = if violations_count.zero?
-                  "nav-link #{active_tab?("violations") ? "active" : ""}"
+                  "mt-3 nav-link #{active_tab?("violations") ? "active" : ""}"
                 else
-                  "nav-link text-warning"
+                  "mt-3 nav-link text-warning"
                 end
 
       tag.li(class: "nav-item") do
@@ -114,20 +114,8 @@ module Tabs
     end
 
     def project_tabs(project)
-      tabs = []
-      tabs << build_tab(:SUMMARY.t, project_path(id: project.id), "projects")
-
-      if project.observations.any?
-        tabs << build_tab("#{project.observations.length} #{:OBSERVATIONS.l}",
-                          observations_path(project: project.id),
-                          "observations")
-        tabs << build_tab("#{project.name_count} #{:NAMES.l}",
-                          checklist_path(project_id: project.id),
-                          "checklists")
-        tabs << build_tab("#{project.location_count} #{:LOCATIONS.l}",
-                          project_locations_path(project_id: project.id),
-                          "locations")
-      end
+      tabs = [build_tab(:SUMMARY.t, project_path(id: project.id), "projects")]
+      tabs += observation_tabs(project)
       tabs << build_tab("#{project.user_group.users.count} #{:MEMBERS.l}",
                         project_members_path(project.id),
                         "members")
@@ -138,9 +126,48 @@ module Tabs
       end
     end
 
+    def observation_tabs(project)
+      tabs = []
+      if project.observations.any?
+        tabs << build_tab("#{project.observations.length} #{:OBSERVATIONS.l}",
+                          observations_path(project: project.id),
+                          "observations")
+        tabs << build_tab("#{project.name_count} #{:NAMES.l}",
+                          checklist_path(project_id: project.id),
+                          "checklists")
+        tabs << build_tab("#{project.location_count} #{:LOCATIONS.l}",
+                          project_locations_path(project_id: project.id),
+                          "locations")
+        if project.field_slips.any?
+          tabs << build_tab("#{project.field_slips.length} #{:FIELD_SLIPS.l}",
+                            field_slips_path(project: project.id),
+                            "field_slips")
+        end
+      end
+      tabs
+    end
+
     # Helper method to determine active tab
     def active_tab?(tab_name)
       controller_name == tab_name
+    end
+
+    def project_observation_buttons(project, query)
+      return unless project
+
+      img_name, img_link, = coerced_image_query_tab(query)
+      styling = { class: "btn btn-default btn-lg my-3 mr-3" }
+      buttons = [link_to(:show_object.t(type: :map),
+                         map_observations_path(q: get_query_param(query)),
+                         styling),
+                 link_to(img_name, img_link, styling),
+                 link_to(:list_observations_download_as_csv.l,
+                         add_query_param(new_observations_download_path, query),
+                         styling)]
+      # Download Observations
+      content_for(:observation_buttons) do
+        tag.div(safe_join(buttons))
+      end
     end
   end
 end
