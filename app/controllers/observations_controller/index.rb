@@ -42,9 +42,10 @@ class ObservationsController
     end
 
     def advanced_search_query
-      if params[:name] || params[:user_where] || params[:user] ||
-         params[:content]
-        create_advanced_search_query(params)
+      if any_advanced_search_params_present?
+        params_plus_flags = advanced_search_params << :search_location_notes
+        search = params.permit(*params_plus_flags).to_h
+        create_query(:Observation, :all, search)
       elsif handle_advanced_search_invalid_q_param?
         nil
       else
@@ -52,18 +53,12 @@ class ObservationsController
       end
     end
 
-    def create_advanced_search_query(params)
-      search = {}
-      [
-        :name,
-        :user_where,
-        :user,
-        :content,
-        :search_location_notes
-      ].each do |key|
-        search[key] = params[key] if params[key].present?
-      end
-      create_query(:Observation, :advanced_search, search)
+    def any_advanced_search_params_present?
+      advanced_search_params.any? { |k| params[k].present? }
+    end
+
+    def advanced_search_params
+      Query::Initializers::AdvancedSearch.advanced_search_params
     end
 
     # Display matrix of Observations whose notes, etc. match a string pattern.

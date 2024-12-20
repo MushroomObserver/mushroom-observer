@@ -68,18 +68,15 @@ class LocationsController < ApplicationController
       [nil, {}]
     else
       query = create_query(
-        :Location, :pattern_search,
-        pattern: Location.user_format(@user, pattern)
+        :Location, :all, pattern: Location.user_format(@user, pattern)
       )
       [query, { link_all_sorts: true }]
     end
   end
 
-  # Displays a list of all locations whose country matches the id param.
+  # Displays a list of all locations whose country matches the param.
   def country
-    query = create_query(
-      :Location, :regexp_search, regexp: "#{params[:country]}$"
-    )
+    query = create_query(:Location, :all, regexp: "#{params[:country]}$")
     [query, { link_all_sorts: true }]
   end
 
@@ -169,42 +166,29 @@ class LocationsController < ApplicationController
   # Try to turn this into a query on observations.where instead.
   # Yes, still a kludge, but a little better than tweaking SQL by hand...
   def coerce_query_for_undefined_locations(query)
+    # None of the rest make sense.
+    return nil unless [:all, :with_observations].include?(query.flavor)
+
+    args   = query.params.dup
+    # Location params not handled by Observation. (does handle :by_user)
+    # If these are passed, we're not looking for undefined locations.
+    return nil if [:by_editor, :regexp].any? { |key| args[key] }
+
     model  = :Observation
     flavor = :all
-    args   = query.params.dup
     result = nil
 
-    # Location param not handled by Observation. (does handle :by_user)
-    # If this is passed, we're not looking for undefined locations.
-    return nil if args[:by_editor].present?
-
     # Select only observations with undefined location.
-    if !args[:where]
-      args[:where] = []
-    elsif !args[:where].is_a?(Array)
-      args[:where] = [args[:where]]
-    end
+    args[:where] = [args[:where]].compact unless args[:where].is_a?(Array)
     args[:where] << "observations.location_id IS NULL"
 
     # "By name" means something different to observation.
-    if args[:by].blank? ||
-       (args[:by] == "name")
-      args[:by] = "where"
-    end
+    args[:by] = "where" if args[:by].blank? || (args[:by] == "name")
 
-    case query.flavor
-    # These are okay as-is.
-    when :all, :with_observations
-      true
-    # Temporarily kludge in pattern search the old way.
-    when :pattern_search
+    if args[:pattern]
       search = query.google_parse(args[:pattern])
       args[:where] += query.google_conditions(search, "observations.where")
       args.delete(:pattern)
-    # when :regexp_search  ### NOT SURE WHAT DO FOR THIS
-    # None of the rest make sense.
-    else
-      flavor = nil
     end
 
     # These are only used to create title, which isn't used,

@@ -20,10 +20,12 @@ class AdvancedSearchIntegrationTest < CapybaraIntegrationTestCase
     within("#advanced_search_form") do
       click_commit
     end
-    assert_match(:app_advanced_search.l, page.title, "Wrong page")
-    obs = Observation.where(name: names(:fungi),
-                            location: locations(:falmouth).id)
-    total = all(".matrix-box", visible: :any).count
-    assert_equal(obs.count, total)
+    expected_hits = Observation.where(name: names(:fungi),
+                                      location: locations(:falmouth).id)
+    total_hits = all(".matrix-box", visible: :any).count
+
+    assert_equal(expected_hits.count, total_hits)
+    assert_match(:query_title_all_filtered.t(type: :observation), page.title,
+                 "Wrong page")
   end
 end

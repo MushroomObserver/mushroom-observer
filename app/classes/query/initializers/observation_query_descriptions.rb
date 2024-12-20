@@ -74,15 +74,18 @@ module Query
         :query_title_in_species_list.t(type: :observation, species_list: str)
       end
 
+      # takes a user_id
       def title_for_by_user
         str = ensure_integer(params[:by_user], User, :name)
         :query_title_by_user.t(type: :observation, user: str)
       end
 
+      # takes a search string
       def title_for_user
-        ensure_integer(params[:user], User, :name)
+        :query_title_by_user.t(type: :observation, user: params[:user])
       end
 
+      # takes a list of user_ids
       def title_for_users
         str = map_join_and_truncate(:users, User, :login)
         :query_title_for_user.t(type: :observation, user: str)

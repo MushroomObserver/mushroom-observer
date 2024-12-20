@@ -223,7 +223,7 @@ module Query
                            :observations)
     end
 
-    def add_join_to_locations!
+    def add_join_to_locations
       add_join(:observations, :locations!)
     end
 

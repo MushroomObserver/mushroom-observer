@@ -6,6 +6,7 @@ module Query
     module AdvancedSearch
       # NOTE: The autocomplaters for name, location, and user all make the ids
       # available now, so this could be a lot more efficient.
+      # But sometimes you're looking for strings that aren't ids.
       def advanced_search_parameter_declarations
         {
           name?: :string,
@@ -16,6 +17,15 @@ module Query
         }
       end
 
+      # These are the ones that if present, are definitive of advanced_search.
+      def self.advanced_search_params
+        [:name, :user, :user_where, :content]
+      end
+
+      def advanced_search_params
+        [:name, :user, :user_where, :content]
+      end
+
       def initialize_advanced_search
         name, user, location, content = google_parse_params
         make_sure_user_entered_something(name, user, location, content)
@@ -23,6 +33,7 @@ module Query
         add_user_condition(user)
         add_location_condition(location)
         add_content_condition(content)
+        @title_tag = :query_title_all_filtered # no longer set by flavor
       end
 
       def google_parse_params

@@ -74,12 +74,10 @@ module PatternSearch
     private
 
     # Temporary hack to get include_subtaxa/synonyms to work.
-    # Will rip out when we do away with pattern search query flavor.
     # This converts any search that *looks like* a name search into
-    # an actual name search.
+    # an actual name search. NOTE: This affects the index title.
     def hack_name_query
-      return unless flavor == :pattern_search &&
-                    args[:names].empty? &&
+      return unless args[:pattern].present? && args[:names].empty? &&
                     (is_pattern_a_name? || any_taxa_modifiers_present?)
 
       self.flavor = :all

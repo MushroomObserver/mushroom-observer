@@ -147,10 +147,6 @@ module Query
       )
     end
 
-    def add_join_to_locations!
-      add_join(:observations, :locations!)
-    end
-
     def coerce_into_observation_query
       Query.lookup(:Observation, :all, params_with_old_by_restored)
     end
