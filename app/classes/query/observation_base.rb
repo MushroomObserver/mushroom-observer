@@ -41,7 +41,7 @@ module Query
         regexp?: :string, # for coercions from location
         needs_naming?: :boolean,
         in_clade?: :string,
-        in_region?: :string,
+        in_region?: :string
       }
     end
 

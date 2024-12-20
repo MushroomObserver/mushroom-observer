@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Query
   module Initializers
     # initializing methods inherited by all Query's for Locations

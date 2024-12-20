@@ -10,11 +10,9 @@ module Query
 
     def parameter_declarations
       super.merge(
-        old_title?: :string,
-        old_by?: :string,
-        date?: [:date],
         ids?: [Observation]
       ).merge(observations_parameter_declarations).
+        merge(observations_coercion_parameter_declarations).
         merge(content_filter_parameter_declarations(Observation)).
         merge(names_parameter_declarations).
         merge(naming_consensus_parameter_declarations)

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Query
   module Initializers
     # initializing methods inherited by all Query's for Observations
@@ -27,6 +29,14 @@ module Query
 
           # numeric
           confidence?: [:float]
+        }
+      end
+
+      def observations_coercion_parameter_declarations
+        {
+          old_title?: :string,
+          old_by?: :string,
+          date?: [:date]
         }
       end
     end
