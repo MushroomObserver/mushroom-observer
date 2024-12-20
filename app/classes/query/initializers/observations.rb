@@ -72,25 +72,6 @@ module Query
         )
       end
 
-      def initialize_species_lists_parameter
-        add_id_condition(
-          "species_list_observations.species_list_id",
-          lookup_species_lists_by_name(params[:species_lists]),
-          :observations, :species_list_observations
-        )
-      end
-
-      def add_in_species_list_condition
-        return if params[:species_list].blank?
-
-        spl = find_cached_parameter_instance(SpeciesList, :species_list)
-        @title_tag = :query_title_in_species_list
-        @title_args[:species_list] = spl.format_name
-        where << "species_list_observations.species_list_id = '#{spl.id}'"
-        add_is_collection_location_condition_for_locations
-        add_join(:observations, :species_list_observations)
-      end
-
       def initialize_is_collection_location_parameter
         add_boolean_condition(
           "observations.is_collection_location IS TRUE",

@@ -128,22 +128,6 @@ module Query
       )
     end
 
-    def initialize_projects_parameter
-      add_id_condition(
-        "project_observations.project_id",
-        lookup_projects_by_name(params[:projects]),
-        :observations, :project_observations
-      )
-    end
-
-    def initialize_species_lists_parameter
-      add_id_condition(
-        "species_list_observations.species_list_id",
-        lookup_species_lists_by_name(params[:species_lists]),
-        :observations, :species_list_observations
-      )
-    end
-
     def initialize_observation_parameters
       add_date_condition(
         "observations.when",
