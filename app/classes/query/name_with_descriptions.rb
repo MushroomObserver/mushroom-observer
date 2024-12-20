@@ -3,11 +3,8 @@
 class Query::NameWithDescriptions < Query::NameBase
   def parameter_declarations
     super.merge(
-      ids?: [NameDescription],
-      old_title?: :string,
-      old_by?: :string,
-      by_author?: User
-    )
+      desc_ids?: [NameDescription]
+    ).merge(descriptions_coercion_parameter_declarations)
   end
 
   def initialize_flavor
@@ -20,12 +17,15 @@ class Query::NameWithDescriptions < Query::NameBase
   end
 
   def add_ids_condition
-    return unless params[:ids]
+    return unless params[:desc_ids]
+
+    set = clean_id_set(params[:desc_ids])
+    @where << "name_descriptions.id IN (#{set})"
+    self.order = "FIND_IN_SET(name_descriptions.id,'#{set}') ASC"
 
     @title_tag = :query_title_with_descriptions.t(type: :name)
     @title_args[:descriptions] = params[:old_title] ||
                                  :query_title_in_set.t(type: :description)
-    initialize_in_set_flavor("name_descriptions")
   end
 
   def add_by_user_condition
@@ -59,6 +59,6 @@ class Query::NameWithDescriptions < Query::NameBase
   end
 
   def coerce_into_name_description_query
-    Query.lookup(:NameDescription, :all, params_with_old_by_restored)
+    Query.lookup(:NameDescription, :all, params_back_to_description_params)
   end
 end

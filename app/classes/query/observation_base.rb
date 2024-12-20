@@ -2,10 +2,11 @@
 
 module Query
   # methods for initializing Query's for Observations
-  # rubocop:disable Metrics/ClassLength
   class ObservationBase < Query::Base
-    include Query::Initializers::ContentFilters
     include Query::Initializers::Names
+    include Query::Initializers::Observations
+    include Query::Initializers::Locations
+    include Query::Initializers::ContentFilters
     include Query::Initializers::AdvancedSearch
 
     def model
@@ -14,13 +15,14 @@ module Query
 
     def parameter_declarations
       super.merge(local_parameter_declarations).
+        merge(observations_parameter_declarations).
+        merge(bounding_box_parameter_declarations).
         merge(content_filter_parameter_declarations(Observation)).
         merge(names_parameter_declarations).
-        merge(consensus_parameter_declarations).
+        merge(naming_consensus_parameter_declarations).
         merge(advanced_search_parameter_declarations)
     end
 
-    # rubocop:disable Metrics/MethodLength
     def local_parameter_declarations
       {
         # dates/times
@@ -29,19 +31,8 @@ module Query
         updated_at?: [:time],
 
         ids?: [Observation],
-        comments_has?: :string,
-        with_notes_fields?: [:string],
-        herbaria?: [:string],
         herbarium_records?: [:string],
-        location?: Location,
-        user_where?: :string,
-        locations?: [:string],
-        notes_has?: :string,
-        project?: Project,
-        projects?: [:string],
         project_lists?: [:string],
-        species_list?: SpeciesList,
-        species_lists?: [:string],
         by_user?: User,
         by_editor?: User, # for coercions from name/location
         users?: [User],
@@ -50,25 +41,9 @@ module Query
         regexp?: :string, # for coercions from location
         needs_naming?: :boolean,
         in_clade?: :string,
-        in_region?: :string,
-
-        # numeric
-        confidence?: [:float],
-        east?: :float,
-        north?: :float,
-        south?: :float,
-        west?: :float,
-
-        # boolean
-        with_comments?: { boolean: [true] },
-        with_public_lat_lng?: :boolean,
-        with_name?: :boolean,
-        with_notes?: :boolean,
-        with_sequences?: { boolean: [true] },
-        is_collection_location?: :boolean
+        in_region?: :string
       }
     end
-    # rubocop:enable Metrics/MethodLength
 
     # rubocop:disable Metrics/AbcSize
     def initialize_flavor
@@ -342,5 +317,4 @@ module Query
       "date"
     end
   end
-  # rubocop:enable Metrics/ClassLength
 end

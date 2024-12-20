@@ -13,6 +13,7 @@ class Query::NameDescriptionAll < Query::NameDescriptionBase
   end
 
   def coerce_into_name_query
-    Query.lookup(:Name, :with_descriptions, params_plus_old_by)
+    pargs = params_out_to_with_descriptions_params
+    Query.lookup(:Name, :with_descriptions, pargs)
   end
 end
