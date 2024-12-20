@@ -79,6 +79,7 @@ module Tabs
       end
 
       add_background_image(project.image)
+      project_tabs(project)
     end
 
     def add_background_image(image)
@@ -87,6 +88,59 @@ module Tabs
       content_for(:background_image) do
         image_tag(image.large_url, class: "image-title")
       end
+    end
+
+    def build_tab(link_text, link, controller)
+      tag.li(class: "nav-item") do
+        classes = "nav-link #{active_tab?(controller) ? "active" : ""}"
+        link_to(link_text, link,
+                { class: classes })
+      end
+    end
+
+    def violations_tab(project)
+      violations_count = project.count_violations
+      classes = if violations_count.zero?
+                  "nav-link #{active_tab?("violations") ? "active" : ""}"
+                else
+                  "nav-link text-warning"
+                end
+
+      tag.li(class: "nav-item") do
+        link_to("#{violations_count} #{:CONSTRAINT_VIOLATIONS.l}",
+                project_violations_path(project_id: project.id),
+                { class: classes })
+      end
+    end
+
+    def project_tabs(project)
+      tabs = []
+      tabs << build_tab(:SUMMARY.t, project_path(id: project.id), "projects")
+
+      if project.observations.any?
+        tabs << build_tab("#{project.observations.length} #{:OBSERVATIONS.l}",
+                          observations_path(project: project.id),
+                          "observations")
+        tabs << build_tab("#{project.name_count} #{:NAMES.l}",
+                          checklist_path(project_id: project.id),
+                          "checklists")
+        tabs << build_tab("#{project.location_count} #{:LOCATIONS.l}",
+                          project_locations_path(project_id: project.id),
+                          "locations")
+      end
+      tabs << build_tab("#{project.user_group.users.count} #{:MEMBERS.l}",
+                        project_members_path(project.id),
+                        "members")
+      tabs << violations_tab(project)
+
+      content_for(:project_tabs) do
+        tag.ul(safe_join(tabs), class: "nav nav-tabs")
+      end
+    end
+
+    # Helper method to determine active tab
+    def active_tab?(tab_name)
+      controller_name == tab_name
     end
   end
 end
