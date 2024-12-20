@@ -56,11 +56,8 @@ module Query
     def initialize_association_parameters
       add_at_location_condition
       add_where_condition(:species_lists, params[:locations])
-      add_id_condition(
-        "project_species_lists.project_id",
-        lookup_projects_by_name(params[:projects]),
-        :project_species_lists
-      )
+      initialize_projects_parameter(:project_species_lists,
+                                    [:project_species_lists])
     end
 
     def initialize_boolean_parameters
@@ -81,14 +78,8 @@ module Query
     end
 
     def initialize_search_parameters
-      add_search_condition(
-        "species_lists.title",
-        params[:title_has]
-      )
-      add_search_condition(
-        "species_lists.notes",
-        params[:notes_has]
-      )
+      add_search_condition("species_lists.title", params[:title_has])
+      add_search_condition("species_lists.notes", params[:notes_has])
       add_search_condition(
         "CONCAT(comments.summary,COALESCE(comments.comment,''))",
         params[:comments_has],
