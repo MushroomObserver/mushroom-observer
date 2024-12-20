@@ -138,11 +138,11 @@ module Tabs
         tabs << build_tab("#{project.location_count} #{:LOCATIONS.l}",
                           project_locations_path(project_id: project.id),
                           "locations")
-        if project.field_slips.any?
-          tabs << build_tab("#{project.field_slips.length} #{:FIELD_SLIPS.l}",
-                            field_slips_path(project: project.id),
-                            "field_slips")
-        end
+      end
+      if project.field_slip_prefix
+        tabs << build_tab("#{project.field_slips.length} #{:FIELD_SLIPS.l}",
+                          field_slips_path(project: project.id),
+                          "field_slips")
       end
       tabs
     end

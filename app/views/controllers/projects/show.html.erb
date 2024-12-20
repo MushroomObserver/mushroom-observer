@@ -28,19 +28,7 @@ add_project_banner(@project)
   <% end %>
 
   <p><b><%= :show_project_created_at.t %>:</b> <%= @project.created_at.web_date %></p>
-  <% if @project.field_slip_prefix %>
-    <p>
-      <b><%= :show_project_field_slip_prefix.t %>:</b> <%= @project.field_slip_prefix %>
-      <% if @project.member?(User.current) %>
-        <%= link_to(:show_project_field_slip_create.t,
-                    new_project_field_slip_path(project_id: @project.id),
-                    { class: "btn btn-default" }) %>
-      <% end %>
-    </p>
-  <% end %>
 <% end %>
-
-<br />
 
 <p id="project_join_trust_edit">
   <% if @project.can_join?(@user) %>
