@@ -1251,6 +1251,21 @@ class QueryTest < UnitTestCase
                  :ExternalLink, :all, url: "iNaturalist")
   end
 
+  def test_field_slip_all
+    expect = FieldSlip.all.sort_by(&:date)
+    assert_query(expect, :FieldSlip, :all)
+  end
+
+  def test_field_slip_by_user
+    expect = FieldSlip.by_user(users(:mary)).sort_by(&:date)
+    assert_query(expect, :FieldSlip, :all, by_user: mary)
+  end
+
+  def test_field_slip_for_project
+    expect = FieldSlip.for_project(projects(:eol_project)).sort_by(&:date)
+    assert_query(expect, :FieldSlip, :all, project: projects(:eol_project))
+  end
+
   def test_glossary_term_all
     expect = GlossaryTerm.all.sort_by(&:name)
     assert_query(expect, :GlossaryTerm, :all)
