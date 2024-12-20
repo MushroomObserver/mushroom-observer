@@ -100,12 +100,14 @@ class InatImportsController < ApplicationController
 
   # iNat redirects here after user completes iNat authorization
   def authorization_response
+    debugger
     auth_code = params[:code]
     return not_authorized if auth_code.blank?
 
     @inat_import = InatImport.find_or_create_by(user: User.current)
     @inat_import.update(token: auth_code, state: "Authenticating")
     tracker = InatImportJobTracker.create(inat_import: @inat_import.id)
+    debugger
 
     Rails.logger.info(
       "Enqueuing InatImportJob for InatImport id: #{@inat_import.id}"
