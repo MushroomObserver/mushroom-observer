@@ -1089,14 +1089,14 @@ class QueryTest < UnitTestCase
     assert_equal([observations(:detailed_unknown_obs).id,
                   observations(:agaricus_campestris_obs).id,
                   observations(:agaricus_campestras_obs).id],
-                 q5b.params[:ids])
+                 q5b.params[:obs_ids])
     assert_equal(1, q5b.params.keys.length)
     # assert_equal(2, q6b.params.keys.length)
     # assert_equal([observations(:strobilurus_diminutivus_obs).id,
     #               observations(:agaricus_campestros_obs).id,
     #               observations(:agaricus_campestras_obs).id,
     #               observations(:agaricus_campestrus_obs).id],
-    #              q6b.params[:ids])
+    #              q6b.params[:obs_ids])
     # assert_match(/Observations.*Matching.*somewhere.*else/,
     #              q6b.params[:old_title])
     assert_equal("glendale", q7b.params[:user_where])
@@ -1826,10 +1826,10 @@ class QueryTest < UnitTestCase
                   images(:turned_over_image).id,
                   images(:in_situ_image).id],
                  :Image, :with_observations,
-                 ids: [observations(:detailed_unknown_obs).id,
-                       observations(:agaricus_campestris_obs).id])
+                 obs_ids: [observations(:detailed_unknown_obs).id,
+                           observations(:agaricus_campestris_obs).id])
     assert_query([], :Image, :with_observations,
-                 ids: [observations(:minimal_unknown_obs).id])
+                 obs_ids: [observations(:minimal_unknown_obs).id])
   end
 
   def test_image_with_observations_in_species_list
@@ -2001,15 +2001,17 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_with_descriptions_in_set
-    assert_query([locations(:albion), locations(:no_mushrooms_location)],
-                 :Location, :with_descriptions,
-                 ids: [location_descriptions(:albion_desc).id,
-                       location_descriptions(:no_mushrooms_location_desc).id])
+    assert_query(
+      [locations(:albion), locations(:no_mushrooms_location)],
+      :Location, :with_descriptions,
+      desc_ids: [location_descriptions(:albion_desc).id,
+                 location_descriptions(:no_mushrooms_location_desc).id]
+    )
     assert_query([locations(:albion)],
                  :Location, :with_descriptions,
-                 ids: [location_descriptions(:albion_desc).id, rolf.id])
+                 desc_ids: [location_descriptions(:albion_desc).id, rolf.id])
     assert_query([],
-                 :Location, :with_descriptions, ids: [rolf.id])
+                 :Location, :with_descriptions, desc_ids: [rolf.id])
   end
 
   def test_location_with_observations
@@ -2247,9 +2249,9 @@ class QueryTest < UnitTestCase
   def test_location_with_observations_in_set
     assert_query([locations(:burbank).id],
                  :Location, :with_observations,
-                 ids: [observations(:minimal_unknown_obs).id])
+                 obs_ids: [observations(:minimal_unknown_obs).id])
     assert_query([], :Location, :with_observations,
-                 ids: [observations(:coprinus_comatus_obs).id])
+                 obs_ids: [observations(:coprinus_comatus_obs).id])
   end
 
   def test_location_with_observations_in_species_list
@@ -2501,7 +2503,7 @@ class QueryTest < UnitTestCase
     name1 = names(:peltigera)
     name2 = names(:boletus_edulis)
     assert_query([name2, name1],
-                 :Name, :with_descriptions, ids: [desc1, desc2, desc3])
+                 :Name, :with_descriptions, desc_ids: [desc1, desc2, desc3])
   end
 
   def test_name_with_observations
@@ -2687,9 +2689,9 @@ class QueryTest < UnitTestCase
                   names(:agaricus_campestris).id,
                   names(:fungi).id],
                  :Name, :with_observations,
-                 ids: [observations(:detailed_unknown_obs).id,
-                       observations(:agaricus_campestris_obs).id,
-                       observations(:agaricus_campestras_obs).id])
+                 obs_ids: [observations(:detailed_unknown_obs).id,
+                           observations(:agaricus_campestris_obs).id,
+                           observations(:agaricus_campestras_obs).id])
   end
 
   def test_name_with_observations_in_species_list

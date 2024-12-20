@@ -2,6 +2,7 @@
 
 class Query::LocationBase < Query::Base
   include Query::Initializers::Locations
+  include Query::Initializers::Descriptions
   include Query::Initializers::ContentFilters
   include Query::Initializers::AdvancedSearch
 

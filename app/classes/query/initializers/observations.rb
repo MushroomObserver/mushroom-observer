@@ -39,6 +39,21 @@ module Query
           date?: [:date]
         }
       end
+
+      def params_out_to_with_observations_params(pargs)
+        return pargs if pargs[:ids].blank?
+
+        pargs[:obs_ids] = pargs.delete(:ids)
+        pargs
+      end
+
+      def params_back_to_observation_params
+        pargs = params_with_old_by_restored
+        return pargs if pargs[:obs_ids].blank?
+
+        pargs[:ids] = pargs.delete(:obs_ids)
+        pargs
+      end
     end
   end
 end

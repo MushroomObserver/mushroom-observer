@@ -25,6 +25,22 @@ module Query
         }
       end
 
+      def params_out_to_with_descriptions_params
+        pargs = params_plus_old_by
+        return pargs if pargs[:ids].blank?
+
+        pargs[:desc_ids] = pargs.delete(:ids)
+        pargs
+      end
+
+      def params_back_to_description_params
+        pargs = params_with_old_by_restored
+        return pargs if pargs[:desc_ids].blank?
+
+        pargs[:ids] = pargs.delete(:desc_ids)
+        pargs
+      end
+
       def initialize_description_parameters(type = :name)
         initialize_with_default_desc_parameter(type)
         initialize_join_desc_parameter(type)

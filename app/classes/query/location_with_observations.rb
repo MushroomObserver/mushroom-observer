@@ -10,7 +10,7 @@ module Query
 
     def parameter_declarations
       super.merge(
-        ids?: [Observation]
+        obs_ids?: [Observation]
       ).merge(observations_parameter_declarations).
         merge(observations_coercion_parameter_declarations).
         merge(content_filter_parameter_declarations(Observation)).
@@ -20,7 +20,7 @@ module Query
 
     def initialize_flavor
       add_join(:observations)
-      add_ids_condition("observations")
+      add_ids_condition
       add_owner_and_time_stamp_conditions("observations")
       add_by_user_condition("observations")
       add_date_condition("observations.when", params[:date])
@@ -34,13 +34,16 @@ module Query
       super
     end
 
-    def add_ids_condition(table)
-      return unless params[:ids]
+    def add_ids_condition
+      return unless params[:obs_ids]
+
+      set = clean_id_set(params[:obs_ids])
+      @where << "observations.id IN (#{set})"
+      self.order = "FIND_IN_SET(observations.id,'#{set}') ASC"
 
       @title_args[:observations] = params[:old_title] ||
                                    :query_title_in_set.t(type: :observation)
       where << "observations.is_collection_location IS TRUE"
-      initialize_in_set_flavor(table)
     end
 
     def add_where_conditions
@@ -149,7 +152,7 @@ module Query
     end
 
     def coerce_into_observation_query
-      Query.lookup(:Observation, :all, params_with_old_by_restored)
+      Query.lookup(:Observation, :all, params_back_to_observation_params)
     end
 
     def title
