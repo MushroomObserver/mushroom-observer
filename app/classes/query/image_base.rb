@@ -84,7 +84,7 @@ module Query
     end
 
     def add_project_conditions
-      add_for_project_condition(:project_images, [:project_images])
+      add_for_project_condition(:project_images)
       add_id_condition("project_images.project_id",
                        lookup_projects_by_name(params[:projects]),
                        :project_images)

@@ -64,17 +64,6 @@ module Query
         )
       end
 
-      def initialize_projects_parameter
-        project_joins = [:observations, :project_observations]
-        project_joins << :observation_images if model == Image
-
-        add_id_condition(
-          "project_observations.project_id",
-          lookup_projects_by_name(params[:projects]),
-          *project_joins
-        )
-      end
-
       def initialize_project_lists_parameter
         add_id_condition(
           "species_list_observations.species_list_id",

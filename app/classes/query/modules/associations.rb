@@ -35,7 +35,7 @@ module Query
         where << "observations.is_collection_location IS TRUE"
       end
 
-      def add_for_project_condition(table = model.table_name, joins = nil)
+      def add_for_project_condition(table = model.table_name, joins = [table])
         return if params[:project].blank?
 
         project = find_cached_parameter_instance(Project, :project)
@@ -43,7 +43,15 @@ module Query
         @title_args[:project] = project.title
         where << "#{table}.project_id = '#{params[:project]}'"
         add_is_collection_location_condition_for_locations
-        add_join(*joins) if joins
+        add_join(*joins)
+      end
+
+      def initialize_projects_parameter(table, joins = [table])
+        add_id_condition(
+          "#{table}.project_id",
+          lookup_projects_by_name(params[:projects]),
+          *joins
+        )
       end
     end
   end

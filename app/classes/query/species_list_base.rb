@@ -38,8 +38,7 @@ module Query
       add_pattern_condition
       add_ids_condition
       add_by_user_condition("species_lists")
-      add_for_project_condition(:project_species_lists,
-                                [:project_species_lists])
+      add_for_project_condition(:project_species_lists)
       initialize_name_parameters(:species_list_observations, :observations)
       initialize_association_parameters
       initialize_boolean_parameters
