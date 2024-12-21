@@ -125,11 +125,7 @@ module Query
     def initialize_association_parameters
       add_id_condition("observations.id", params[:observations], :observations)
       add_where_condition("observations", params[:locations], :observations)
-      add_id_condition(
-        "species_list_observations.species_list_id",
-        lookup_species_lists_by_name(params[:species_lists]),
-        :observations, :species_list_observations
-      )
+      initialize_species_lists_parameter
     end
 
     def initialize_boolean_parameters

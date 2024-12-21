@@ -88,7 +88,7 @@ module Query
     end
 
     def initialize_association_parameters
-      add_id_condition("sequences.observation_id", params[:observations])
+      initialize_observations_parameter(:sequences)
       initialize_observers_parameter
       add_where_condition("observations", params[:locations], :observations)
       initialize_herbaria_parameter

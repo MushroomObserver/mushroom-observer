@@ -4,11 +4,14 @@ module Query
   module Modules
     # Helper methods for turning Query parameters into SQL conditions.
     module Associations
-      def initialize_herbaria_parameter
+      def initialize_herbaria_parameter(
+        joins = [:observations, :observation_herbarium_records,
+                 :herbarium_records]
+      )
         add_id_condition(
           "herbarium_records.herbarium_id",
           lookup_herbaria_by_name(params[:herbaria]),
-          :observations, :observation_herbarium_records, :herbarium_records
+          *joins
         )
       end
 
@@ -49,6 +52,25 @@ module Query
         return unless model == Location
 
         where << "observations.is_collection_location IS TRUE"
+      end
+
+      def add_for_observation_condition(
+        table = :"observation_#{model.table_name}", joins = [table]
+      )
+        return if params[:observation].blank?
+
+        obs = find_cached_parameter_instance(Observation, :observation)
+        @title_tag = :query_title_for_observation
+        @title_args[:observation] = obs.unique_format_name
+        where << "#{table}.observation_id = '#{obs.id}'"
+        add_join(*joins)
+      end
+
+      def initialize_observations_parameter(
+        table = :"observation_#{model.table_name}", joins = [table]
+      )
+        add_id_condition("#{table}.observation_id", params[:observations],
+                         *joins)
       end
 
       def add_for_project_condition(table = model.table_name, joins = [table])
