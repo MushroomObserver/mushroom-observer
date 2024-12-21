@@ -2,13 +2,13 @@
 
 class InatImportJob < ApplicationJob
   # iNat's id for the MO application
-  APP_ID = Observations::InatImportsController::APP_ID
+  APP_ID = InatImportsController::APP_ID
   # site for authorization, authentication
-  SITE = Observations::InatImportsController::SITE
+  SITE = InatImportsController::SITE
   # iNat calls this after iNat user authorizes MO access to user's data
-  REDIRECT_URI = Observations::InatImportsController::REDIRECT_URI
+  REDIRECT_URI = InatImportsController::REDIRECT_URI
   # The iNat API
-  API_BASE = Observations::InatImportsController::API_BASE
+  API_BASE = InatImportsController::API_BASE
   # limit results iNat API requests, with Protozoa as a proxy for slime molds
   ICONIC_TAXA = "Fungi,Protozoa"
   # This string + date is added to description of iNat observation
@@ -121,7 +121,7 @@ class InatImportJob < ApplicationJob
     # Search for one page of results at a time, until done with all pages
     # To get one page, use iNats `per_page` & `id_above` params.
     # https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
-    parser = InatPageParser.new(@inat_import, inat_ids, restricted_user_login)
+    parser = Inat::PageParser.new(@inat_import, inat_ids, restricted_user_login)
     while parsing(parser); end
   end
 

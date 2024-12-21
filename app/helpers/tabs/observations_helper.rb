@@ -214,7 +214,7 @@ module Tabs
 
     def new_inat_import_tab(query: nil)
       [:create_observation_inat_import_link.l,
-       add_query_param(new_observations_inat_import_path, query),
+       add_query_param(new_inat_import_path, query),
        { class: tab_id(__method__.to_s) }]
     end
 
