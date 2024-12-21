@@ -72,6 +72,17 @@ module Query
         )
       end
 
+      def initialize_field_slips_parameter
+        return unless params[:field_slips]
+
+        add_join(:field_slips)
+        add_exact_match_condition(
+          "field_slips.code",
+          params[:field_slips],
+          :observations
+        )
+      end
+
       def initialize_is_collection_location_parameter
         add_boolean_condition(
           "observations.is_collection_location IS TRUE",

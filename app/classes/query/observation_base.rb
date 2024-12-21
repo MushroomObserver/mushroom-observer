@@ -89,16 +89,6 @@ module Query
       initialize_field_slips_parameter
     end
 
-    def initialize_field_slips_parameter
-      return unless params[:field_slips]
-
-      add_join(:field_slips)
-      add_exact_match_condition(
-        "field_slips.code",
-        params[:field_slips]
-      )
-    end
-
     def add_needs_naming_condition
       return unless params[:needs_naming]
 

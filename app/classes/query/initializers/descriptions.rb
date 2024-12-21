@@ -25,20 +25,54 @@ module Query
         }
       end
 
-      def params_out_to_with_descriptions_params
-        pargs = params_plus_old_by
-        return pargs if pargs[:ids].blank?
+      def add_desc_ids_condition(type)
+        return unless params[:desc_ids]
 
-        pargs[:desc_ids] = pargs.delete(:ids)
-        pargs
+        set = clean_id_set(params[:desc_ids])
+        @where << "#{type}_descriptions.id IN (#{set})"
+        self.order = "FIND_IN_SET(#{type}_descriptions.id,'#{set}') ASC"
+
+        @title_tag = :query_title_with_descriptions.t(type: type)
+        @title_args[:descriptions] = params[:old_title] ||
+                                     :query_title_in_set.t(type: :description)
       end
 
-      def params_back_to_description_params
-        pargs = params_with_old_by_restored
-        return pargs if pargs[:desc_ids].blank?
+      def add_desc_by_user_condition(type)
+        return unless params[:by_user]
 
-        pargs[:ids] = pargs.delete(:desc_ids)
-        pargs
+        user = find_cached_parameter_instance(User, :by_user)
+        @title_tag = :query_title_with_descriptions_by_user.t(type: type)
+        @title_args[:user] = user.legal_name
+        add_join(:"#{type}_descriptions")
+        where << "#{type}_descriptions.user_id = '#{user.id}'"
+      end
+
+      def add_desc_by_author_condition(type)
+        return unless params[:by_author]
+
+        # Change this conditional to check for :with_descriptions param
+        with_desc = [Name, Location].include?(model) ? "_with_descriptions" : ""
+        user = find_cached_parameter_instance(User, :by_author)
+        @title_tag = :"query_title#{with_desc}_by_author".t(
+          type: :"#{type}_description", user: user.legal_name
+        )
+        @title_args[:user] = user.legal_name
+        add_join(:"#{type}_descriptions", :"#{type}_description_authors")
+        where << "#{type}_description_authors.user_id = '#{user.id}'"
+      end
+
+      def add_desc_by_editor_condition(type)
+        return unless params[:by_editor]
+
+        # Change this conditional to check for :with_descriptions param
+        with_desc = [Name, Location].include?(model) ? "_with_descriptions" : ""
+        user = find_cached_parameter_instance(User, :by_editor)
+        @title_tag = :"query_title#{with_desc}_by_editor".t(
+          type: :"#{type}_description", user: user.legal_name
+        )
+        @title_args[:user] = user.legal_name
+        add_join(:"#{type}_descriptions", :"#{type}_description_editors")
+        where << "#{type}_description_editors.user_id = '#{user.id}'"
       end
 
       def initialize_description_parameters(type = :name)
@@ -94,6 +128,22 @@ module Query
         fields = fields.map { |f| "COALESCE(#{type}_descriptions.#{f},'')" }
         fields = "CONCAT(#{fields.join(",")})"
         add_search_condition(fields, params[:desc_content])
+      end
+
+      def params_out_to_with_descriptions_params
+        pargs = params_plus_old_by
+        return pargs if pargs[:ids].blank?
+
+        pargs[:desc_ids] = pargs.delete(:ids)
+        pargs
+      end
+
+      def params_back_to_description_params
+        pargs = params_with_old_by_restored
+        return pargs if pargs[:desc_ids].blank?
+
+        pargs[:ids] = pargs.delete(:desc_ids)
+        pargs
       end
     end
   end
