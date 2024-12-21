@@ -88,25 +88,25 @@ class NamesControllerTest < FunctionalTestCase
 
   def test_index_advanced_search_multiple_hits
     search_string = "Suil"
-    query = Query.lookup_and_save(:Name, :advanced_search, name: search_string)
+    query = Query.lookup_and_save(:Name, :all, name: search_string)
 
     login
     get(:index,
         params: @controller.query_params(query).merge(advanced_search: true))
 
     assert_response(:success)
-    assert_displayed_title("Advanced Search")
     assert_select(
       "#results a:match('href', ?)", %r{^#{names_path}/\d+},
       { count: Name.where(Name[:text_name] =~ /#{search_string}/i).
                     with_correct_spelling.count },
       "Wrong number of (correctly spelled) Names"
     )
+    assert_displayed_title("Matching Names")
   end
 
   def test_index_advanced_search_one_hit
     search_string = "Stereum hirsutum"
-    query = Query.lookup_and_save(:Name, :advanced_search, name: search_string)
+    query = Query.lookup_and_save(:Name, :all, name: search_string)
     assert(query.results.one?,
            "Test needs a string that has exactly one hit")
 
@@ -118,7 +118,7 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def test_index_advanced_search_no_hits
-    query = Query.lookup_and_save(:Name, :advanced_search,
+    query = Query.lookup_and_save(:Name, :all,
                                   name: "Don't know",
                                   user: "myself",
                                   content: "Long pink stem and small pink cap",
@@ -134,7 +134,7 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def test_index_advanced_search_with_deleted_query
-    query = Query.lookup_and_save(:Name, :advanced_search,
+    query = Query.lookup_and_save(:Name, :all,
                                   name: "Don't know",
                                   user: "myself",
                                   content: "Long pink stem and small pink cap",
@@ -149,7 +149,7 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def test_index_advanced_search_error
-    query_no_conditions = Query.lookup_and_save(:Name, :advanced_search)
+    query_no_conditions = Query.lookup_and_save(:Name, :all)
 
     login
     params = @controller.query_params(query_no_conditions).
@@ -925,7 +925,7 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def test_next_and_prev2
-    query = Query.lookup_and_save(:Name, :pattern_search, pattern: "lactarius")
+    query = Query.lookup_and_save(:Name, :all, pattern: "lactarius")
     q = @controller.query_params(query)
 
     name1 = query.results[0]

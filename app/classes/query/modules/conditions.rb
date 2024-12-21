@@ -21,6 +21,19 @@ module Query
         where << "#{table}.user_id = '#{user.id}'"
       end
 
+      def add_by_editor_condition(type)
+        return unless params[:by_editor]
+
+        user = find_cached_parameter_instance(User, :by_editor)
+        @title_tag = :query_title_by_editor
+        @title_args[:user] = user.legal_name
+        @title_args[:type] = type
+        version_table = :"#{type}_versions"
+        add_join(version_table)
+        where << "#{version_table}.user_id = '#{user.id}'"
+        where << "#{type}s.user_id != '#{user.id}'"
+      end
+
       def add_pattern_condition
         return if params[:pattern].blank?
 
@@ -86,22 +99,18 @@ module Query
         add_joins(*)
       end
 
-      def add_ids_condition(table = model.table_name)
-        return if params[:ids].nil? # [] is valid
+      # Generalized so the param can be :obs_ids or :desc_ids
+      def add_ids_condition(table = model.table_name, ids = :ids)
+        return if params[ids].nil? # [] is valid
 
-        initialize_in_set_flavor(table)
+        set = clean_id_set(params[ids])
+        @where << "#{table}.id IN (#{set})"
+        self.order = "FIND_IN_SET(#{table}.id,'#{set}') ASC"
 
         @title_tag = :query_title_in_set.t(type: table.singularize.to_sym)
         # @title_args[:by] = :query_sorted_by.t(field: :original_name)
         # @title_args[:descriptions] =
         #   :query_title_in_set.t(type: table.singularize.to_sym)
-      end
-
-      # move this above when all in_set flavors converted
-      def initialize_in_set_flavor(table = model.table_name)
-        set = clean_id_set(params[:ids])
-        @where << "#{table}.id IN (#{set})"
-        self.order = "FIND_IN_SET(#{table}.id,'#{set}') ASC"
       end
 
       def add_id_condition(col, ids, *)

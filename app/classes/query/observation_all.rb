@@ -21,7 +21,12 @@ class Query::ObservationAll < Query::ObservationBase
   end
 
   def do_coerce(new_model)
-    Query.lookup(new_model, :with_observations, params_plus_old_by)
+    is_search = params[:pattern].present? ||
+                advanced_search_params.any? { |key| params[key].present? }
+    pargs = is_search ? add_old_title(params_plus_old_by) : params_plus_old_by
+    # transform :ids to :obs_ids
+    pargs = params_out_to_with_observations_params(pargs)
+    Query.lookup(new_model, :with_observations, pargs)
   end
 
   def title

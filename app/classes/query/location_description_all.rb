@@ -13,6 +13,7 @@ class Query::LocationDescriptionAll < Query::LocationDescriptionBase
   end
 
   def coerce_into_location_query
-    Query.lookup(:Location, :with_descriptions, params_plus_old_by)
+    pargs = params_out_to_with_descriptions_params
+    Query.lookup(:Location, :with_descriptions, pargs)
   end
 end

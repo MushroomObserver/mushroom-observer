@@ -146,7 +146,7 @@
 #
 #    # The setup all happens in observations/show:
 #    outer = find_or_create_query(:Observation)
-#    inner = create_query(:Image, :inside_observation, outer: outer,
+#    inner = create_query(:Image, :all, outer: outer,
 #                         observation: @observation)
 #    inner.results each do |image|
 #      link_to(image,

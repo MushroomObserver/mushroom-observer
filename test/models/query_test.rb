@@ -114,25 +114,22 @@ class QueryTest < UnitTestCase
                  Query.lookup(:User, :all,
                               ids: [rolf, mary.id, junk.id.to_s]).params[:ids])
 
-    assert_raises(RuntimeError) { Query.lookup(:Name, :pattern_search) }
+    # assert_raises(RuntimeError) { Query.lookup(:Name, :all) }
     assert_raises(RuntimeError) do
-      Query.lookup(:Name, :pattern_search, pattern: true)
+      Query.lookup(:Name, :all, pattern: true)
     end
     assert_raises(RuntimeError) do
-      Query.lookup(:Name, :pattern_search, pattern: [1, 2, 3])
+      Query.lookup(:Name, :all, pattern: [1, 2, 3])
     end
     assert_raises(RuntimeError) do
-      Query.lookup(:Name, :pattern_search, pattern: rolf)
+      Query.lookup(:Name, :all, pattern: rolf)
     end
     assert_equal("123",
-                 Query.lookup(:Name, :pattern_search, pattern: 123).
-                 params[:pattern])
+                 Query.lookup(:Name, :all, pattern: 123).params[:pattern])
     assert_equal("rolf",
-                 Query.lookup(:Name, :pattern_search, pattern: "rolf").
-                 params[:pattern])
+                 Query.lookup(:Name, :all, pattern: "rolf").params[:pattern])
     assert_equal("rolf",
-                 Query.lookup(:Name, :pattern_search, pattern: :rolf).
-                 params[:pattern])
+                 Query.lookup(:Name, :all, pattern: :rolf).params[:pattern])
 
     assert_equal(["table"],
                  Query.lookup(:Name, :all, join: :table).params[:join])
@@ -241,7 +238,7 @@ class QueryTest < UnitTestCase
     q1 = Query.lookup_and_save(:Observation)
     assert_equal(1, QueryRecord.count)
 
-    Query.lookup_and_save(:Observation, :pattern_search, pattern: "blah")
+    Query.lookup_and_save(:Observation, :all, pattern: "blah")
     assert_equal(2, QueryRecord.count)
 
     # New because params are different from q1.
@@ -259,16 +256,15 @@ class QueryTest < UnitTestCase
     assert_equal(q3, q5, QueryRecord.count)
 
     # New pattern is new query.
-    Query.lookup_and_save(:Observation, :pattern_search, pattern: "new blah")
+    Query.lookup_and_save(:Observation, :all, pattern: "new blah")
     assert_equal(4, QueryRecord.count)
 
     # Old pattern but new order.
-    Query.lookup_and_save(:Observation,
-                          :pattern_search, pattern: "blah", by: :date)
+    Query.lookup_and_save(:Observation, :all, pattern: "blah", by: :date)
     assert_equal(5, QueryRecord.count)
 
     # Identical, even though :by is explicitly set in one.
-    Query.lookup_and_save(:Observation, :pattern_search, pattern: "blah")
+    Query.lookup_and_save(:Observation, :all, pattern: "blah")
     assert_equal(5, QueryRecord.count)
 
     # Identical query, but new query because order given explicitly.  Order is
@@ -675,7 +671,7 @@ class QueryTest < UnitTestCase
     outer = Query.lookup_and_save(:Observation, :all, by: :id)
 
     q = Query.lookup(
-      :Image, :inside_observation,
+      :Image, :all,
       outer: outer,
       observation: observations(:minimal_unknown_obs).id, by: :id
     )
@@ -699,35 +695,35 @@ class QueryTest < UnitTestCase
     ]
 
     inner1 = Query.lookup_and_save(
-      :Image, :inside_observation,
+      :Image, :all,
       outer: outer,
       observation: inners_details.first[:obs], by: :id
     )
     assert_equal(inners_details.first[:imgs], inner1.result_ids)
 
     inner2 = Query.lookup_and_save(
-      :Image, :inside_observation,
+      :Image, :all,
       outer: outer,
       observation: inners_details.second[:obs], by: :id
     )
     assert_equal(inners_details.second[:imgs], inner2.result_ids)
 
     inner3 = Query.lookup_and_save(
-      :Image, :inside_observation,
+      :Image, :all,
       outer: outer,
       observation: inners_details.third[:obs], by: :id
     )
     assert_equal(inners_details.third[:imgs], inner3.result_ids)
 
     inner4 = Query.lookup_and_save(
-      :Image, :inside_observation,
+      :Image, :all,
       outer: outer,
       observation: inners_details.fourth[:obs], by: :id
     )
     assert_equal(inners_details.fourth[:imgs], inner4.result_ids)
 
     inner5 = Query.lookup_and_save(
-      :Image, :inside_observation,
+      :Image, :all,
       outer: outer,
       observation: inners_details.fifth[:obs], by: :id
     )
@@ -902,7 +898,7 @@ class QueryTest < UnitTestCase
   def test_basic_coerce
     assert_equal(0, QueryRecord.count)
 
-    q1 = Query.lookup_and_save(:Observation, :pattern_search, pattern: "search")
+    q1 = Query.lookup_and_save(:Observation, :all, pattern: "search")
     assert_equal(1, QueryRecord.count)
 
     # Trvial coercion: any flavor from a model to the same model.
@@ -917,368 +913,187 @@ class QueryTest < UnitTestCase
   end
 
   def test_observation_image_coercion
+    query_a = []
+
     # Several observation queries can be turned into image queries.
-    q1a = Query.lookup_and_save(:Observation, :all, by: :id)
-    q2a = Query.lookup_and_save(:Observation, :all, by_user: mary.id)
-    q3a = Query.lookup_and_save(
+    query_a[0] = Query.lookup_and_save(:Observation, :all, by: :id)
+    query_a[1] = Query.lookup_and_save(:Observation, :all, by_user: mary.id)
+    query_a[2] = Query.lookup_and_save(
       :Observation, :all, species_list: species_lists(:first_species_list).id
     )
-    q5a = Query.lookup_and_save(:Observation, :all,
-                                ids: [
-                                  observations(:detailed_unknown_obs).id,
-                                  observations(:agaricus_campestris_obs).id,
-                                  observations(:agaricus_campestras_obs).id
-                                ])
-    # removed q6a which searched for "somewhere else" in the notes
-    # q6a = Query.lookup_and_save(:Observation, :pattern_search,
-    #                             pattern: '"somewhere else"')
-    q7a = Query.lookup_and_save(:Observation, :advanced_search,
-                                user_where: "glendale")
-    q8a = Query.lookup_and_save(:Observation, :all,
-                                location: locations(:burbank))
-    q9a = Query.lookup_and_save(:Observation, :all,
-                                user_where: "california")
+    query_a[3] = Query.lookup_and_save(
+      :Observation, :all, ids: [observations(:detailed_unknown_obs).id,
+                                observations(:agaricus_campestris_obs).id,
+                                observations(:agaricus_campestras_obs).id]
+    )
+    query_a[4] = Query.lookup_and_save(:Observation, :all,
+                                       user_where: "glendale")
+    query_a[5] = Query.lookup_and_save(:Observation, :all,
+                                       location: locations(:burbank))
+    query_a[6] = Query.lookup_and_save(:Observation, :all,
+                                       user_where: "california")
+    # removed query_a[7] which searched for "somewhere else" in the notes
+    # query_a[7] = Query.lookup_and_save(:Observation, :all,
+    #                                    pattern: '"somewhere else"')
     assert_equal(7, QueryRecord.count)
 
-    # Try coercing them all.
-    assert(q1b = q1a.coerce(:Image))
-    assert(q2b = q2a.coerce(:Image))
-    assert(q3b = q3a.coerce(:Image))
-    assert(q5b = q5a.coerce(:Image))
-    # assert(q6b = q6a.coerce(:Image))
-    assert(q7b = q7a.coerce(:Image))
-    assert(q8b = q8a.coerce(:Image))
-    assert(q9b = q9a.coerce(:Image))
-
-    # They should all be new records
-    assert(q1b.record.new_record?)
-    assert_save(q1b)
-    assert(q2b.record.new_record?)
-    assert_save(q2b)
-    assert(q3b.record.new_record?)
-    assert_save(q3b)
-    assert(q5b.record.new_record?)
-    assert_save(q5b)
-    # assert(q6b.record.new_record?)
-    # assert_save(q6b)
-    assert(q7b.record.new_record?)
-    assert_save(q7b)
-    assert(q8b.record.new_record?)
-    assert_save(q8b)
-    assert(q9b.record.new_record?)
-    assert_save(q9b)
-
-    # Check their descriptions.
-    assert_equal("Image", q1b.model.to_s)
-    assert_equal("Image", q2b.model.to_s)
-    assert_equal("Image", q3b.model.to_s)
-    assert_equal("Image", q5b.model.to_s)
-    # assert_equal("Image", q6b.model.to_s)
-    assert_equal("Image", q7b.model.to_s)
-    assert_equal("Image", q8b.model.to_s)
-    assert_equal("Image", q9b.model.to_s)
-
-    assert_equal(:with_observations, q1b.flavor)
-    assert_equal(:with_observations, q2b.flavor)
-    assert_equal(:with_observations, q3b.flavor)
-    assert_equal(:with_observations, q5b.flavor)
-    # assert_equal(:with_observations, q6b.flavor)
-    assert_equal(:with_observations, q7b.flavor)
-    assert_equal(:with_observations, q8b.flavor)
-    assert_equal(:with_observations, q9b.flavor)
-
-    # Now try to coerce them back to Observation.
-    assert(q1c = q1b.coerce(:Observation))
-    assert(q2c = q2b.coerce(:Observation))
-    assert(q3c = q3b.coerce(:Observation))
-    assert(q5c = q5b.coerce(:Observation))
-    # assert(q6c = q6b.coerce(:Observation))
-    assert(q7c = q7b.coerce(:Observation))
-    assert(q8c = q8b.coerce(:Observation))
-    assert(q9c = q9b.coerce(:Observation))
-
-    # Only some should be new.
-    assert_not(q1c.record.new_record?)
-    assert_equal(q1a, q1c)
-    assert_not(q2c.record.new_record?)
-    assert_equal(q2a, q2c)
-    assert_not(q3c.record.new_record?)
-    assert_equal(q3a, q3c)
-    assert_not(q5c.record.new_record?)
-    assert_equal(q5a, q5c)
-    # assert(q6c.record.new_record?)  # (converted to in_set)
-    assert(q7c.record.new_record?) # (converted to in_set)
-    assert_not(q8c.record.new_record?)
-    assert_equal(q8a, q8c)
-    assert_not(q9c.record.new_record?)
-    assert_equal(q9a, q9c)
+    observation_coercion_assertions(query_a, :Image)
   end
 
   def test_observation_location_coercion
+    query_a = []
+
     # Almost any query on observations should be mappable, i.e. coercable into
     # a query on those observations' locations.
-    q1a = Query.lookup_and_save(:Observation, :all, by: :id)
-    q2a = Query.lookup_and_save(:Observation, :all, by_user: mary.id)
-    q3a = Query.lookup_and_save(
+    query_a[0] = Query.lookup_and_save(:Observation, :all, by: :id)
+    query_a[1] = Query.lookup_and_save(:Observation, :all, by_user: mary.id)
+    query_a[2] = Query.lookup_and_save(
       :Observation, :all, species_list: species_lists(:first_species_list).id
     )
-    q5a = Query.lookup_and_save(:Observation, :all,
-                                ids:
-                                  [observations(:detailed_unknown_obs).id,
-                                   observations(:agaricus_campestris_obs).id,
-                                   observations(:agaricus_campestras_obs).id])
-    # q6a = Query.lookup_and_save(:Observation, :pattern_search,
-    #                             pattern: '"somewhere else"')
-    q7a = Query.lookup_and_save(:Observation, :advanced_search,
-                                user_where: "glendale")
-    q8a = Query.lookup_and_save(:Observation, :all,
-                                location: locations(:burbank))
-    q9a = Query.lookup_and_save(:Observation, :all,
-                                user_where: "california")
+    query_a[3] = Query.lookup_and_save(
+      :Observation, :all, ids: [observations(:detailed_unknown_obs).id,
+                                observations(:agaricus_campestris_obs).id,
+                                observations(:agaricus_campestras_obs).id]
+    )
+    query_a[4] = Query.lookup_and_save(:Observation, :all,
+                                       user_where: "glendale")
+    query_a[5] = Query.lookup_and_save(:Observation, :all,
+                                       location: locations(:burbank))
+    query_a[6] = Query.lookup_and_save(:Observation, :all,
+                                       user_where: "california")
+    # query_a[7] = Query.lookup_and_save(:Observation, :all,
+    #                                    pattern: '"somewhere else"')
     assert_equal(7, QueryRecord.count)
 
-    # Try coercing them all.
-    assert(q1b = q1a.coerce(:Location))
-    assert(q2b = q2a.coerce(:Location))
-    assert(q3b = q3a.coerce(:Location))
-    assert(q5b = q5a.coerce(:Location))
-    # assert(q6b = q6a.coerce(:Location))
-    assert(q7b = q7a.coerce(:Location))
-    assert(q8b = q8a.coerce(:Location))
-    assert(q9b = q9a.coerce(:Location))
+    query_b = observation_coercion_assertions(query_a, :Location)
 
-    # They should all be new records
-    assert(q1b.record.new_record?)
-    assert_save(q1b)
-    assert(q2b.record.new_record?)
-    assert_save(q2b)
-    assert(q3b.record.new_record?)
-    assert_save(q3b)
-    assert(q5b.record.new_record?)
-    assert_save(q5b)
-    # assert(q6b.record.new_record?)
-    # assert_save(q6b)
-    assert(q7b.record.new_record?)
-    assert_save(q7b)
-    assert(q8b.record.new_record?)
-    assert_save(q8b)
-    assert(q9b.record.new_record?)
-    assert_save(q9b)
-
-    # Check their descriptions.
-    assert_equal("Location", q1b.model.to_s)
-    assert_equal("Location", q2b.model.to_s)
-    assert_equal("Location", q3b.model.to_s)
-    assert_equal("Location", q5b.model.to_s)
-    # assert_equal("Location", q6b.model.to_s)
-    assert_equal("Location", q7b.model.to_s)
-    assert_equal("Location", q8b.model.to_s)
-    assert_equal("Location", q9b.model.to_s)
-
-    assert_equal(:with_observations, q1b.flavor)
-    assert_equal(:with_observations, q2b.flavor)
-    assert_equal(:with_observations, q3b.flavor)
-    assert_equal(:with_observations, q5b.flavor)
-    # assert_equal(:with_observations, q6b.flavor)
-    assert_equal(:with_observations, q7b.flavor)
-    assert_equal(:with_observations, q8b.flavor)
-    assert_equal(:with_observations, q9b.flavor)
-
-    assert_equal({ old_by: "id" }, q1b.params)
-    assert_equal({ by_user: mary.id }, q2b.params)
+    # Now, check the parameters of those coerced queries.
+    assert_equal({ old_by: "id" }, query_b[0].params)
+    assert_equal({ by_user: mary.id }, query_b[1].params)
     assert_equal({ species_list: species_lists(:first_species_list).id },
-                 q3b.params)
-    assert_equal({ location: locations(:burbank).id }, q8b.params)
-
+                 query_b[2].params)
     assert_equal([observations(:detailed_unknown_obs).id,
                   observations(:agaricus_campestris_obs).id,
                   observations(:agaricus_campestras_obs).id],
-                 q5b.params[:ids])
+                 query_b[3].params[:obs_ids])
+    assert_equal(1, query_b[3].params.keys.length)
+    assert_equal("glendale", query_b[4].params[:user_where])
+    assert_equal(2, query_b[4].params.keys.length)
+    assert_equal(locations(:burbank).id, query_b[5].params[:location])
+    assert_equal(1, query_b[5].params.keys.length)
+    assert_equal("california", query_b[6].params[:user_where])
+    assert_equal(2, query_b[6].params.keys.length)
+    # assert_equal(2, query_b[7].params.keys.length)
     # assert_equal([observations(:strobilurus_diminutivus_obs).id,
     #               observations(:agaricus_campestros_obs).id,
     #               observations(:agaricus_campestras_obs).id,
     #               observations(:agaricus_campestrus_obs).id],
-    #              q6b.params[:ids])
-    assert_equal([observations(:coprinus_comatus_obs).id], q7b.params[:ids])
+    #              query_b[7].params[:obs_ids])
     # assert_match(/Observations.*Matching.*somewhere.*else/,
-    #              q6b.params[:old_title])
-    assert_match(/Advanced.*Search/,
-                 q7b.params[:old_title])
-    assert_equal(1, q5b.params.keys.length)
-    # assert_equal(2, q6b.params.keys.length)
-    assert_equal(2, q7b.params.keys.length)
-    assert_equal(1, q9b.params.keys.length)
-
-    # Now try to coerce them back to Observation.
-    assert(q1c = q1b.coerce(:Observation))
-    assert(q2c = q2b.coerce(:Observation))
-    assert(q3c = q3b.coerce(:Observation))
-    assert(q5c = q5b.coerce(:Observation))
-    # assert(q6c = q6b.coerce(:Observation))
-    assert(q7c = q7b.coerce(:Observation))
-    assert(q8c = q8b.coerce(:Observation))
-    assert(q9c = q9b.coerce(:Observation))
-
-    # Only some should be new.
-    assert_not(q1c.record.new_record?)
-    assert_equal(q1a, q1c)
-    assert_not(q2c.record.new_record?)
-    assert_equal(q2a, q2c)
-    assert_not(q3c.record.new_record?)
-    assert_equal(q3a, q3c)
-    assert_not(q5c.record.new_record?)
-    assert_equal(q5a, q5c)
-    # assert(q6c.record.new_record?)  # (converted to in_set)
-    assert(q7c.record.new_record?) # (converted to in_set)
-    assert_not(q8c.record.new_record?)
-    assert_not(q9c.record.new_record?)
+    #              query_b[7].params[:old_title])
   end
 
   def test_observation_name_coercion
+    query_a = []
+
     # Several observation queries can be turned into name queries.
-    q1a = Query.lookup_and_save(:Observation, :all, by: :id)
-    q2a = Query.lookup_and_save(:Observation, :all, by_user: mary.id)
-    q3a = Query.lookup_and_save(
+    query_a[0] = Query.lookup_and_save(:Observation, :all, by: :id)
+    query_a[1] = Query.lookup_and_save(:Observation, :all, by_user: mary.id)
+    query_a[2] = Query.lookup_and_save(
       :Observation, :all, species_list: species_lists(:first_species_list).id
     )
-    q5a = Query.lookup_and_save(:Observation, :all,
-                                ids: [
-                                  observations(:detailed_unknown_obs).id,
-                                  observations(:agaricus_campestris_obs).id,
-                                  observations(:agaricus_campestras_obs).id
-                                ])
-    # q6a = Query.lookup_and_save(:Observation, :pattern_search,
+    query_a[3] = Query.lookup_and_save(
+      :Observation, :all, ids: [observations(:detailed_unknown_obs).id,
+                                observations(:agaricus_campestris_obs).id,
+                                observations(:agaricus_campestras_obs).id]
+    )
+    # qa[4] = Query.lookup_and_save(:Observation, :all,
     #                             pattern: '"somewhere else"')
-    q7a = Query.lookup_and_save(:Observation, :advanced_search,
-                                user_where: "glendale")
-    q8a = Query.lookup_and_save(:Observation, :all,
-                                location: locations(:burbank))
-    q9a = Query.lookup_and_save(:Observation, :all,
-                                user_where: "california")
+    query_a[4] = Query.lookup_and_save(:Observation, :all,
+                                       user_where: "glendale")
+    query_a[5] = Query.lookup_and_save(:Observation, :all,
+                                       location: locations(:burbank))
+    query_a[6] = Query.lookup_and_save(:Observation, :all,
+                                       user_where: "california")
     assert_equal(7, QueryRecord.count)
 
-    # Try coercing them all.
-    assert(q1b = q1a.coerce(:Name))
-    assert(q2b = q2a.coerce(:Name))
-    assert(q3b = q3a.coerce(:Name))
-    assert(q5b = q5a.coerce(:Name))
-    # assert(q6b = q6a.coerce(:Name))
-    assert(q7b = q7a.coerce(:Name))
-    assert(q8b = q8a.coerce(:Name))
-    assert(q9b = q9a.coerce(:Name))
-
-    # They should all be new records
-    assert(q1b.record.new_record?)
-    assert_save(q1b)
-    assert(q2b.record.new_record?)
-    assert_save(q2b)
-    assert(q3b.record.new_record?)
-    assert_save(q3b)
-    assert(q5b.record.new_record?)
-    assert_save(q5b)
-    # assert(q6b.record.new_record?)
-    # assert_save(q6b)
-    assert(q7b.record.new_record?)
-    assert_save(q7b)
-    assert(q8b.record.new_record?)
-    assert_save(q8b)
-    assert(q9b.record.new_record?)
-    assert_save(q9b)
-
-    # Check their descriptions.
-    assert_equal("Name", q1b.model.to_s)
-    assert_equal("Name", q2b.model.to_s)
-    assert_equal("Name", q3b.model.to_s)
-    assert_equal("Name", q5b.model.to_s)
-    # assert_equal("Name", q6b.model.to_s)
-    assert_equal("Name", q7b.model.to_s)
-    assert_equal("Name", q8b.model.to_s)
-    assert_equal("Name", q9b.model.to_s)
-
-    assert_equal(:with_observations, q1b.flavor)
-    assert_equal(:with_observations, q2b.flavor)
-    assert_equal(:with_observations, q3b.flavor)
-    assert_equal(:with_observations, q5b.flavor)
-    # assert_equal(:with_observations, q6b.flavor)
-    assert_equal(:with_observations, q7b.flavor)
-    assert_equal(:with_observations, q8b.flavor)
-    assert_equal(:with_observations, q9b.flavor)
-
-    # Now try to coerce them back to Observation.
-    assert(q1c = q1b.coerce(:Observation))
-    assert(q2c = q2b.coerce(:Observation))
-    assert(q3c = q3b.coerce(:Observation))
-    assert(q5c = q5b.coerce(:Observation))
-    # assert(q6c = q6b.coerce(:Observation))
-    assert(q7c = q7b.coerce(:Observation))
-    assert(q8c = q8b.coerce(:Observation))
-    assert(q9c = q9b.coerce(:Observation))
-
-    # Only some should be new.
-    assert_not(q1c.record.new_record?)
-    assert_equal(q1a, q1c)
-    assert_not(q2c.record.new_record?)
-    assert_equal(q2a, q2c)
-    assert_not(q3c.record.new_record?)
-    assert_equal(q3a, q3c)
-    assert_not(q5c.record.new_record?)
-    assert_equal(q5a, q5c)
-    # assert(q6c.record.new_record?)  # (converted to in_set)
-    assert(q7c.record.new_record?) # (converted to in_set)
-    assert_not(q8c.record.new_record?)
-    assert_equal(q8a, q8c)
-    assert_not(q9c.record.new_record?)
-    assert_equal(q9a, q9c)
+    observation_coercion_assertions(query_a, :Name)
   end
 
-  def test_description_coercion
+  # General purpose repetitive assertions for coercing observation queries.
+  # query_a is original, query_b is coerced, and query_c is coerced back.
+  # Returns the coerced query (query_check) for further testing
+  def observation_coercion_assertions(query_a, model)
+    query_b = query_c = []
+    len = query_a.size - 1
+
+    [*0..len].each do |i|
+      # Try coercing them all.
+      assert(query_b[i] = query_a[i].coerce(model))
+
+      # They should all be new records
+      assert(query_b[i].record.new_record?)
+      assert_save(query_b[i])
+
+      # Check the query descriptions.
+      assert_equal(model.to_s, query_b[i].model.to_s)
+      assert_equal(:with_observations, query_b[i].flavor)
+    end
+
+    # The `coerce` changes query_b, so save it for later comparison.
+    query_check = query_b.dup
+
+    [*0..len].each do |i|
+      # Now try to coerce them back to Observation.
+      assert(query_c[i] = query_b[i].coerce(:Observation))
+
+      # They should not be new records
+      assert_not(query_c[i].record.new_record?)
+      assert_equal(query_a[i], query_c[i])
+    end
+
+    query_check
+  end
+
+  def test_name_description_coercion
+    ds1 = name_descriptions(:coprinus_comatus_desc)
+    ds2 = name_descriptions(:peltigera_desc)
+    description_coercion_assertions(ds1, ds2, :Name)
+  end
+
+  def description_coercion_assertions(ds1, ds2, model)
+    qa = qb = qc = []
+
+    desc_model = :"#{model}Description"
     # Several description queries can be turned into name queries and back.
-    q1a = Query.lookup_and_save(:NameDescription, :all)
-    q2a = Query.lookup_and_save(:NameDescription, :all, by_author: rolf.id)
-    q3a = Query.lookup_and_save(:NameDescription, :all, by_editor: rolf.id)
-    q4a = Query.lookup_and_save(:NameDescription, :all, by_user: rolf.id)
-    assert_equal(4, QueryRecord.count)
+    qa[0] = Query.lookup_and_save(desc_model, :all)
+    qa[1] = Query.lookup_and_save(desc_model, :all, by_author: rolf.id)
+    qa[2] = Query.lookup_and_save(desc_model, :all, by_editor: rolf.id)
+    qa[3] = Query.lookup_and_save(desc_model, :all, by_user: rolf.id)
+    qa[4] = Query.lookup_and_save(desc_model, :all, ids: [ds1.id, ds2.id])
+    assert_equal(5, QueryRecord.count)
 
     # Try coercing them into name queries.
-    assert(q1b = q1a.coerce(:Name))
-    assert(q2b = q2a.coerce(:Name))
-    assert(q3b = q3a.coerce(:Name))
-    assert(q4b = q4a.coerce(:Name))
-
-    # They should all be new records
-    assert(q1b.record.new_record?)
-    assert_save(q1b)
-    assert(q2b.record.new_record?)
-    assert_save(q2b)
-    assert(q3b.record.new_record?)
-    assert_save(q3b)
-    assert(q4b.record.new_record?)
-    assert_save(q4b)
-
+    [*0..4].each do |i|
+      assert(qb[i] = qa[i].coerce(model))
+      # They should all be new records
+      assert(qb[i].record.new_record?)
+      assert_save(qb[i])
+      assert_equal(model.to_s, qb[i].model.to_s)
+      assert_equal(:with_descriptions, qb[i].flavor)
+    end
     # Make sure they're right.
-    assert_equal("Name", q1b.model.to_s)
-    assert_equal("Name", q2b.model.to_s)
-    assert_equal("Name", q3b.model.to_s)
-    assert_equal("Name", q4b.model.to_s)
-    assert_equal(:with_descriptions, q1b.flavor)
-    assert_equal(:with_descriptions, q2b.flavor)
-    assert_equal(:with_descriptions, q3b.flavor)
-    assert_equal(:with_descriptions, q4b.flavor)
-    assert_equal(rolf.id, q2b.params[:by_author])
-    assert_equal(rolf.id, q3b.params[:by_editor])
-    assert_equal(rolf.id, q4b.params[:by_user])
+    assert_equal(rolf.id, qb[1].params[:by_author])
+    assert_equal(rolf.id, qb[2].params[:by_editor])
+    assert_equal(rolf.id, qb[3].params[:by_user])
+    assert_equal([ds1.id, ds2.id], qb[4].params[:desc_ids])
 
     # Try coercing them back.
-    assert(q1c = q1b.coerce(:NameDescription))
-    assert(q2c = q2b.coerce(:NameDescription))
-    assert(q3c = q3b.coerce(:NameDescription))
-    assert(q4c = q4b.coerce(:NameDescription))
-
     # None should be new records
-    assert_equal(q1a, q1c)
-    assert_equal(q2a, q2c)
-    assert_equal(q3a, q3c)
-    assert_equal(q4a, q4c)
+    [*0..4].each do |i|
+      assert(qc[i] = qb[i].coerce(desc_model))
+      assert_equal(qa[i], qc[i])
+    end
   end
 
   def test_rss_log_coercion
@@ -1532,28 +1347,26 @@ class QueryTest < UnitTestCase
 
   def test_image_advanced_search
     assert_query([images(:agaricus_campestris_image).id],
-                 :Image, :advanced_search, name: "Agaricus")
+                 :Image, :all, name: "Agaricus")
     assert_query(Image.joins(observations: :location).
                        where(observations: { location: locations(:burbank) }).
                        where(observations: { is_collection_location: true }),
-                 :Image, :advanced_search, user_where: "burbank")
-    assert_query([images(:connected_coprinus_comatus_image).id], :Image,
-                 :advanced_search, user_where: "glendale")
+                 :Image, :all, user_where: "burbank")
+    assert_query([images(:connected_coprinus_comatus_image).id],
+                 :Image, :all, user_where: "glendale")
     assert_query(Image.includes(:observations).
                        where(observations: { user: mary }),
-                 :Image, :advanced_search, user: "mary")
+                 :Image, :all, user: "mary")
     assert_query([images(:turned_over_image).id, images(:in_situ_image).id],
-                 :Image, :advanced_search, content: "little")
+                 :Image, :all, content: "little")
     assert_query([images(:connected_coprinus_comatus_image).id],
-                 :Image, :advanced_search, content: "fruiting")
+                 :Image, :all, content: "fruiting")
     assert_query([],
-                 :Image, :advanced_search,
-                 name: "agaricus", user_where: "glendale")
-    assert_query([images(:agaricus_campestris_image).id], :Image,
-                 :advanced_search, name: "agaricus", user_where: "burbank")
+                 :Image, :all, name: "agaricus", user_where: "glendale")
+    assert_query([images(:agaricus_campestris_image).id],
+                 :Image, :all, name: "agaricus", user_where: "burbank")
     assert_query([images(:turned_over_image).id, images(:in_situ_image).id],
-                 :Image, :advanced_search,
-                 content: "little", user_where: "burbank")
+                 :Image, :all, content: "little", user_where: "burbank")
   end
 
   def test_image_all
@@ -1592,11 +1405,11 @@ class QueryTest < UnitTestCase
     obs = observations(:detailed_unknown_obs)
     assert_equal(2, obs.images.length)
     expect = obs.images.sort_by(&:id)
-    assert_query(expect, :Image, :inside_observation,
+    assert_query(expect, :Image, :all,
                  observation: obs, outer: 1) # (outer is only used by prev/next)
     obs = observations(:minimal_unknown_obs)
     assert_equal(0, obs.images.length)
-    assert_query(obs.images, :Image, :inside_observation,
+    assert_query(obs.images, :Image, :all,
                  observation: obs, outer: 1) # (outer is only used by prev/next)
   end
 
@@ -1635,39 +1448,43 @@ class QueryTest < UnitTestCase
     assert_query(Image.includes(:observations).
                        where.not(observations: { thumb_image: nil }),
                  :Image, :with_observations)
+  end
 
-    # Prove that :with_observations flavor of Image Query works with each
-    # parameter P for which (a) there's no other test of P for any flavor of
-    # Image, OR (b) P behaves differently in :with_observations than in
-    # all other flavors of Image Query's.
+  # Prove that :with_observations flavor of Image Query works with each
+  # parameter P for which (a) there's no other test of P for any flavor of
+  # Image, OR (b) P behaves differently in :with_observations than in
+  # all other flavors of Image Query's.
 
-    ##### date/time parameters #####
+  ##### date/time parameters #####
 
-    # created_at
+  def test_image_with_observations_created_at
     created_at = observations(:detailed_unknown_obs).created_at
     expect =
       Image.joins(:observations).
       where(Observation[:created_at] >= created_at).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Image, :with_observations, created_at: created_at)
+  end
 
-    # updated_at
+  def test_image_with_observations_updated_at
     updated_at = observations(:detailed_unknown_obs).updated_at
     expect =
       Image.joins(:observations).
       where(Observation[:updated_at] >= updated_at).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Image, :with_observations, updated_at: updated_at)
+  end
 
-    # date
+  def test_image_with_observations_date
     date = observations(:detailed_unknown_obs).when
     expect = Image.joins(:observations).where(Observation[:when] >= date).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Image, :with_observations, date: date)
+  end
 
-    ##### list/string parameters #####
+  ##### list/string parameters #####
 
-    # comments_has
+  def test_image_with_observations_comments_has
     expect =
       Image.joins(observations: :comments).
       where(Comment[:summary].matches("%give%")).
@@ -1675,8 +1492,9 @@ class QueryTest < UnitTestCase
          where(Comment[:comment].matches("%give%"))).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Image, :with_observations, comments_has: "give")
+  end
 
-    # with_notes_fields
+  def test_image_with_observations_with_notes_fields
     obs = observations(:substrate_notes_obs) # obs has notes substrate: field
     # give it some images
     obs.images = [images(:conic_image), images(:convex_image)]
@@ -1687,33 +1505,35 @@ class QueryTest < UnitTestCase
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect,
                  :Image, :with_observations, with_notes_fields: "substrate")
+  end
 
-    # herbaria
+  def test_image_with_observations_herbaria
     name = "The New York Botanical Garden"
     expect = Image.joins(observations: { herbarium_records: :herbarium }).
              where(herbaria: { name: name }).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Image, :with_observations, herbaria: name)
+  end
 
-    # projects
+  def test_image_with_observations_projects
     project = projects(:bolete_project)
     expect = Image.joins(observations: :projects).
              where(projects: { title: project.title }).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Image, :with_observations, projects: [project.title])
+  end
 
-    # users
+  def test_image_with_observations_users
     expect = Image.joins(:observations).where(observations: { user: dick }).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, Image, :with_observations, users: dick)
+  end
 
-    ##### numeric parameters #####
+  ##### numeric parameters #####
 
-    # north/south/east/west
-    obs = observations(:unknown_with_lat_lng) # obs has lat/lon
-    # give it some images
-    obs.images = [images(:conic_image), images(:convex_image)]
-    obs.save
+  def test_image_with_observations_bounding_box
+    obs = give_geolocated_observation_some_images
+
     lat = obs.lat
     lng = obs.lng
     expect = Image.joins(:observations).
@@ -1724,39 +1544,55 @@ class QueryTest < UnitTestCase
       :Image, :with_observations,
       north: lat.to_f, south: lat.to_f, west: lat.to_f, east: lat.to_f
     )
+  end
 
-    ##### boolean parameters #####
+  def give_geolocated_observation_some_images
+    obs = observations(:unknown_with_lat_lng) # obs has lat/lon
+    # give it some images
+    obs.images = [images(:conic_image), images(:convex_image)]
+    obs.save
+    obs
+  end
 
-    # :with_comments
+  ##### boolean parameters #####
+
+  def test_image_with_observations_with_comments
     expect = Image.joins(observations: :comments).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Image, :with_observations, with_comments: true)
+  end
 
-    # with_public_lat_lng
+  def test_image_with_observations_with_public_lat_lng
+    give_geolocated_observation_some_images
+
     expect = Image.joins(:observations).
              where.not(observations: { lat: false }).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Image, :with_observations, with_public_lat_lng: true)
+  end
 
-    # with_name
+  def test_image_with_observations_with_name
     expect = Image.joins(:observations).
              where(observations: { name_id: Name.unknown }).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Image, :with_observations, with_name: false)
+  end
 
-    # :with_notes
+  def test_image_with_observations_with_notes
     expect =
       Image.joins(:observations).
       where.not(observations: { notes: Observation.no_notes }).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Image, :with_observations, with_notes: true)
+  end
 
-    # with_sequences
+  def test_image_with_observations_with_sequences
     expect = Image.joins(observations: :sequences).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, Image, :with_observations, with_sequences: true)
+  end
 
-    # is_collection_location
+  def test_image_with_observations_is_collection_location
     expect =
       Image.joins(:observations).
       where(observations: { is_collection_location: true }).uniq
@@ -1807,10 +1643,10 @@ class QueryTest < UnitTestCase
                   images(:turned_over_image).id,
                   images(:in_situ_image).id],
                  :Image, :with_observations,
-                 ids: [observations(:detailed_unknown_obs).id,
-                       observations(:agaricus_campestris_obs).id])
+                 obs_ids: [observations(:detailed_unknown_obs).id,
+                           observations(:agaricus_campestris_obs).id])
     assert_query([], :Image, :with_observations,
-                 ids: [observations(:minimal_unknown_obs).id])
+                 obs_ids: [observations(:minimal_unknown_obs).id])
   end
 
   def test_image_with_observations_in_species_list
@@ -1861,46 +1697,44 @@ class QueryTest < UnitTestCase
 
   def test_location_advanced_search
     assert_query([locations(:burbank).id],
-                 :Location, :advanced_search, name: "agaricus")
-    assert_query([], :Location, :advanced_search, name: "coprinus")
+                 :Location, :all, name: "agaricus")
+    assert_query([], :Location, :all, name: "coprinus")
     assert_query([locations(:burbank).id],
-                 :Location, :advanced_search, user_where: "burbank")
+                 :Location, :all, user_where: "burbank")
     assert_query([locations(:howarth_park).id,
                   locations(:salt_point).id],
-                 :Location, :advanced_search, user_where: "park")
+                 :Location, :all, user_where: "park")
 
     assert_query(Location.joins(observations: :user).
                           where(observations: { user: rolf }).distinct,
-                 :Location, :advanced_search, user: "rolf")
+                 :Location, :all, user: "rolf")
 
     assert_query(Location.joins(:observations).
                           where(observations: { user: dick }).distinct,
-                 :Location, :advanced_search, user: "dick")
+                 :Location, :all, user: "dick")
 
     # content in obs.notes
     assert_query([locations(:burbank).id],
-                 :Location, :advanced_search, content: '"strange place"')
+                 :Location, :all, content: '"strange place"')
     # content in Comment
     assert_query(
       [locations(:burbank).id],
-      :Location, :advanced_search, content: '"a little of everything"'
+      :Location, :all, content: '"a little of everything"'
     )
     # no search loc.notes
     assert_query([],
-                 :Location, :advanced_search, content: '"play with"')
+                 :Location, :all, content: '"play with"')
     assert_query([locations(:burbank).id],
-                 :Location, :advanced_search, name: "agaricus",
-                                              content: '"lawn"')
+                 :Location, :all, name: "agaricus", content: '"lawn"')
     assert_query([],
-                 :Location, :advanced_search, name: "agaricus",
-                                              content: '"play with"')
+                 :Location, :all, name: "agaricus", content: '"play with"')
     # from observation and comment for same observation
     assert_query([locations(:burbank).id],
-                 :Location, :advanced_search,
+                 :Location, :all,
                  content: '"a little of everything" "strange place"')
     # from different comments, should fail
     assert_query([],
-                 :Location, :advanced_search,
+                 :Location, :all,
                  content: '"minimal unknown" "complicated"')
   end
 
@@ -1945,15 +1779,15 @@ class QueryTest < UnitTestCase
   def test_location_pattern_search
     expect = Location.select { |l| l.display_name =~ /california/i }
     assert_query(expect,
-                 :Location, :pattern_search, pattern: "California", by: :id)
+                 :Location, :all, pattern: "California", by: :id)
     assert_query([locations(:elgin_co).id],
-                 :Location, :pattern_search, pattern: "Canada")
-    assert_query([], :Location, :pattern_search, pattern: "Canada -Elgin")
+                 :Location, :all, pattern: "Canada")
+    assert_query([], :Location, :all, pattern: "Canada -Elgin")
   end
 
   def test_location_regexp_search
     assert_query(Location.where(Location[:name].matches_regexp("California")),
-                 :Location, :regexp_search, regexp: ".alifornia")
+                 :Location, :all, regexp: ".alifornia")
   end
 
   def test_location_with_descriptions
@@ -1984,53 +1818,60 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_with_descriptions_in_set
-    assert_query([locations(:albion), locations(:no_mushrooms_location)],
-                 :Location, :with_descriptions,
-                 ids: [location_descriptions(:albion_desc).id,
-                       location_descriptions(:no_mushrooms_location_desc).id])
+    assert_query(
+      [locations(:albion), locations(:no_mushrooms_location)],
+      :Location, :with_descriptions,
+      desc_ids: [location_descriptions(:albion_desc).id,
+                 location_descriptions(:no_mushrooms_location_desc).id]
+    )
     assert_query([locations(:albion)],
                  :Location, :with_descriptions,
-                 ids: [location_descriptions(:albion_desc).id, rolf.id])
+                 desc_ids: [location_descriptions(:albion_desc).id, rolf.id])
     assert_query([],
-                 :Location, :with_descriptions, ids: [rolf.id])
+                 :Location, :with_descriptions, desc_ids: [rolf.id])
   end
 
   def test_location_with_observations
     assert_query(Location.joins(:observations).distinct,
                  :Location, :with_observations)
+  end
 
-    # Prove that :with_observations flavor of Location Query works with each
-    # parameter P for which (a) there's no other test of P for any flavor of
-    # Location, OR (b) P behaves differently in :with_observations than in
-    # all other flavors of Location Query's.
+  # Prove that :with_observations flavor of Location Query works with each
+  # parameter P for which (a) there's no other test of P for any flavor of
+  # Location, OR (b) P behaves differently in :with_observations than in
+  # all other flavors of Location Query's.
 
-    ##### date/time parameters #####
+  ##### date/time parameters #####
 
-    # created_at
+  def test_location_with_observations_created_at
     created_at = observations(:california_obs).created_at
     assert_query(
       Location.joins(:observations).
                where(Observation[:created_at] >= created_at).uniq,
       :Location, :with_observations, created_at: created_at
     )
+  end
 
-    # updated_at
+  def test_location_with_observations_updated_at
     updated_at = observations(:california_obs).updated_at
     assert_query(
       Location.joins(:observations).
                where(Observation[:updated_at] >= updated_at).uniq,
       :Location, :with_observations, updated_at: updated_at
     )
-    # date
+  end
+
+  def test_location_with_observations_date
     date = observations(:california_obs).when
     assert_query(
       Location.joins(:observations).where(Observation[:when] >= date).uniq,
       :Location, :with_observations, date: date
     )
+  end
 
-    ##### list/string parameters #####
+  ##### list/string parameters #####
 
-    # include_subtaxa
+  def test_location_with_observations_include_subtaxa
     parent = names(:agaricus)
     children = Name.where(Name[:text_name].matches_regexp(parent.text_name))
     assert_query(
@@ -2039,8 +1880,9 @@ class QueryTest < UnitTestCase
       :Location, :with_observations,
       names: parent.text_name, include_subtaxa: true
     )
+  end
 
-    # comments_has
+  def test_location_with_observations_comments_has
     # Create a Comment, unfortunately hitting the db because
     # (a) the query should find multiple Locations;
     # (b) all Observation fixtures with Comments have the same Location; and
@@ -2061,21 +1903,24 @@ class QueryTest < UnitTestCase
                ).uniq,
       :Location, :with_observations, comments_has: "cool"
     )
+  end
 
-    # with_notes_fields
+  def test_location_with_observations_with_notes_fields
     assert_query(
       Location.joins(:observations).
                where(Observation[:notes].matches("%:substrate:%")).uniq,
       :Location, :with_observations, with_notes_fields: "substrate"
     )
+  end
 
-    # herbaria
+  def test_location_with_observations_herbaria
     name = "The New York Botanical Garden"
     expect = Location.joins(observations: { herbarium_records: :herbarium }).
              where(herbaria: { name: name }).uniq
     assert_query(expect, :Location, :with_observations, herbaria: name)
+  end
 
-    # names
+  def test_location_with_observations_names
     names = [names(:boletus_edulis), names(:agaricus_campestris)].
             map(&:text_name)
     assert_query(
@@ -2083,15 +1928,17 @@ class QueryTest < UnitTestCase
                where(observations: { text_name: names }).uniq,
       :Location, :with_observations, names: names
     )
+  end
 
-    # notes_has
+  def test_location_with_observations_notes_has
     assert_query(
       Location.joins(:observations).
                where(Observation[:notes].matches("%somewhere%")).uniq,
       :Location, :with_observations, notes_has: "somewhere"
     )
+  end
 
-    # locations
+  def test_location_with_observations_locations
     loc_with_observations = locations(:burbank)
     loc_without_observations = locations(:no_mushrooms_location)
     locations = [loc_with_observations, loc_without_observations]
@@ -2099,15 +1946,18 @@ class QueryTest < UnitTestCase
       [loc_with_observations],
       :Location, :with_observations, locations: locations.map(&:name)
     )
-    # projects
+  end
+
+  def test_location_with_observations_projects
     project = projects(:bolete_project)
     assert_query(
       Location.joins(observations: :projects).
                where(projects: { title: project.title }).uniq,
       :Location, :with_observations, projects: project.title
     )
+  end
 
-    # include_synonyms
+  def test_location_with_observations_include_synonyms
     # Create Observations of synonyms, unfortunately hitting the db, because:
     # (a) there are no Observation fixtures for a Name with a synonym_names; and
     # (b) tests are brittle, so adding an Observation fixture will break them.
@@ -2126,16 +1976,18 @@ class QueryTest < UnitTestCase
       :Location, :with_observations,
       names: "Macrolepiota rachodes", include_synonyms: true
     )
+  end
 
-    # users
+  def test_location_with_observations_users
     assert_query(
       Location.joins(:observations).where(observations: { user: dick }).uniq,
       :Location, :with_observations, users: dick
     )
+  end
 
-    ##### numeric parameters #####
+  ##### numeric parameters #####
 
-    # confidence
+  def test_location_with_observations_confidence
     # Create Observations with both vote_cache and location, because:
     # (a) there aren't Observation fixtures like that, and
     # (b) tests are brittle, so adding or modifying a fixture will break them.
@@ -2146,40 +1998,48 @@ class QueryTest < UnitTestCase
       where(observations: { vote_cache: 1..3 }).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
     assert_query(expect, :Location, :with_observations, confidence: [1.0, 3.0])
+  end
 
-    ##### boolean parameters #####
-
-    # :with_comments
+  ##### boolean parameters #####
+  def test_location_with_observations_with_comments
     assert_query(
       Location.joins(observations: :comments).uniq,
       :Location, :with_observations, with_comments: true
     )
+  end
 
-    # with_public_lat_lng
+  def test_location_with_observations_with_public_lat_lng
     assert_query(
       Location.joins(:observations).where(observations: { gps_hidden: false }).
                where.not(observations: { lat: false }).uniq,
       :Location, :with_observations, with_public_lat_lng: true
     )
+  end
 
-    # with_name
+  def test_location_with_observations_with_name
     assert_query(
       Location.joins(:observations).
                where(observations: { name_id: Name.unknown }).uniq,
       :Location, :with_observations, with_name: false
     )
-    # :with_notes
+  end
+
+  def test_location_with_observations_with_notes
     assert_query(
       Location.joins(:observations).
                where.not(observations: { notes: Observation.no_notes }).uniq,
       :Location, :with_observations, with_notes: true
     )
-    # with_sequences
+  end
+
+  def test_location_with_observations_with_sequences
     assert_query(
       Location.joins(observations: :sequences).uniq,
       Location, :with_observations, with_sequences: true
     )
-    # is_collection_location
+  end
+
+  def test_location_with_observations_is_collection_location
     assert_query(
       Location.joins(:observations).
                where(observations: { is_collection_location: true }).uniq,
@@ -2206,9 +2066,9 @@ class QueryTest < UnitTestCase
   def test_location_with_observations_in_set
     assert_query([locations(:burbank).id],
                  :Location, :with_observations,
-                 ids: [observations(:minimal_unknown_obs).id])
+                 obs_ids: [observations(:minimal_unknown_obs).id])
     assert_query([], :Location, :with_observations,
-                 ids: [observations(:coprinus_comatus_obs).id])
+                 obs_ids: [observations(:coprinus_comatus_obs).id])
   end
 
   def test_location_with_observations_in_species_list
@@ -2308,23 +2168,27 @@ class QueryTest < UnitTestCase
                  ids: [rolf.id, location_descriptions(:albion_desc).id])
   end
 
+  def test_location_description_coercion
+    ds1 = location_descriptions(:albion_desc)
+    ds2 = location_descriptions(:no_mushrooms_location_desc)
+    description_coercion_assertions(ds1, ds2, :Location)
+  end
+
   def test_name_advanced_search
-    assert_query([names(:macrocybe_titans).id], :Name, :advanced_search,
+    assert_query([names(:macrocybe_titans).id], :Name, :all,
                  name: "macrocybe*titans")
-    assert_query([names(:coprinus_comatus).id], :Name, :advanced_search,
+    assert_query([names(:coprinus_comatus).id], :Name, :all,
                  user_where: "glendale") # where
     expect = Name.where("observations.location_id" =>
                   locations(:burbank).id).
              includes(:observations).order(:text_name, :author).to_a
-    assert_query(expect, :Name, :advanced_search,
-                 user_where: "burbank") # location
+    assert_query(expect, :Name, :all, user_where: "burbank") # location
     expect = Name.where("observations.user_id" => rolf.id).
              includes(:observations).order(:text_name, :author).to_a
-    assert_query(expect, :Name, :advanced_search,
-                 user: "rolf")
-    assert_query([names(:coprinus_comatus).id], :Name, :advanced_search,
+    assert_query(expect, :Name, :all, user: "rolf")
+    assert_query([names(:coprinus_comatus).id], :Name, :all,
                  content: "second fruiting") # notes
-    assert_query([names(:fungi).id], :Name, :advanced_search,
+    assert_query([names(:fungi).id], :Name, :all,
                  content: '"a little of everything"') # comment
   end
 
@@ -2396,28 +2260,28 @@ class QueryTest < UnitTestCase
   def test_name_pattern_search
     assert_query(
       [],
-      :Name, :pattern_search, pattern: "petigera" # search_name
+      :Name, :all, pattern: "petigera" # search_name
     )
     assert_query(
       [names(:petigera).id],
-      :Name, :pattern_search, pattern: "petigera", misspellings: :either
+      :Name, :all, pattern: "petigera", misspellings: :either
     )
     assert_query(
       [names(:peltigera).id],
-      :Name, :pattern_search, pattern: "ye auld manual of lichenes" # citation
+      :Name, :all, pattern: "ye auld manual of lichenes" # citation
     )
     assert_query(
       [names(:agaricus_campestras).id],
-      :Name, :pattern_search, pattern: "prevent me" # description notes
+      :Name, :all, pattern: "prevent me" # description notes
     )
     assert_query(
       [names(:suillus)],
-      :Name, :pattern_search, pattern: "smell as sweet" # gen_desc
+      :Name, :all, pattern: "smell as sweet" # gen_desc
     )
     # Prove pattern search gets hits for description look_alikes
     assert_query(
       [names(:peltigera).id],
-      :Name, :pattern_search, pattern: "superficially similar"
+      :Name, :all, pattern: "superficially similar"
     )
   end
 
@@ -2462,55 +2326,60 @@ class QueryTest < UnitTestCase
     name1 = names(:peltigera)
     name2 = names(:boletus_edulis)
     assert_query([name2, name1],
-                 :Name, :with_descriptions, ids: [desc1, desc2, desc3])
+                 :Name, :with_descriptions, desc_ids: [desc1, desc2, desc3])
   end
 
   def test_name_with_observations
     expect = Name.with_correct_spelling.joins(:observations).
              select(:name).distinct.pluck(:name_id).sort
     assert_query(expect, :Name, :with_observations, by: :id)
+  end
 
-    # Prove that :with_observations flavor of Name Query works with each
-    # parameter P for which (a) there's no other test of P for any flavor of
-    # Name, OR (b) P behaves differently in :with_observations than in
-    # all other flavors of Name Query's.
+  # Prove that :with_observations flavor of Name Query works with each
+  # parameter P for which (a) there's no other test of P for any flavor of
+  # Name, OR (b) P behaves differently in :with_observations than in
+  # all other flavors of Name Query's.
 
-    ##### date/time parameters #####
+  ##### date/time parameters #####
 
-    # created_at
+  def test_name_with_observations_created_at
     created_at = observations(:california_obs).created_at
     assert_query(
       Name.with_correct_spelling.joins(:observations).
            where(Observation[:created_at] >= created_at).uniq,
       :Name, :with_observations, created_at: created_at
     )
+  end
 
-    # updated_at
+  def test_name_with_observations_updated_at
     updated_at = observations(:california_obs).updated_at
     assert_query(
       Name.with_correct_spelling.joins(:observations).
            where(Observation[:updated_at] >= updated_at).uniq,
       :Name, :with_observations, updated_at: updated_at
     )
+  end
 
-    # date
+  def test_name_with_observations_date
     date = observations(:california_obs).when
     assert_query(
       Name.with_correct_spelling.joins(:observations).
            where(Observation[:when] >= date).uniq,
       :Name, :with_observations, date: date
     )
+  end
 
-    ##### list/string parameters #####
+  ##### list/string parameters #####
 
-    # with_notes_fields
+  def test_name_with_observations_with_notes_fields
     assert_query(
       Name.with_correct_spelling.joins(:observations).
            where(Observation[:notes].matches("%:substrate:%")).uniq,
       :Name, :with_observations, with_notes_fields: "substrate"
     )
+  end
 
-    # herbaria
+  def test_name_with_observations_herbaria
     name = "The New York Botanical Garden"
     assert_query(
       Name.with_correct_spelling.
@@ -2518,24 +2387,27 @@ class QueryTest < UnitTestCase
            where(herbaria: { name: name }).uniq,
       :Name, :with_observations, herbaria: name
     )
+  end
 
-    # projects
+  def test_name_with_observations_projects
     project = projects(:bolete_project)
     assert_query(
       project.observations.map(&:name).uniq,
       :Name, :with_observations, projects: project.title
     )
+  end
 
-    # users
+  def test_name_with_observations_users
     assert_query(
       Name.with_correct_spelling.joins(:observations).
            where(observations: { user: dick }).uniq,
       :Name, :with_observations, users: dick
     )
+  end
 
-    ##### numeric parameters #####
+  ##### numeric parameters #####
 
-    # confidence
+  def test_name_with_observations_confidence
     expect = Name.with_correct_spelling.joins(:observations).
              where(observations: { vote_cache: 1..3 }).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
@@ -2552,43 +2424,49 @@ class QueryTest < UnitTestCase
       :Name, :with_observations,
       north: lat.to_f, south: lat.to_f, west: lat.to_f, east: lat.to_f
     )
+  end
 
-    ##### boolean parameters #####
+  ##### boolean parameters #####
 
-    # :with_comments
+  def test_name_with_observations_with_comments
     assert_query(
       Name.with_correct_spelling.joins(observations: :comments).uniq,
       :Name, :with_observations, with_comments: true
     )
+  end
 
-    # with_public_lat_lng
+  def test_name_with_observations_with_public_lat_lng
     assert_query(
       Name.joins(:observations).
            where.not(observations: { lat: false }).uniq,
       :Name, :with_observations, with_public_lat_lng: true
     )
+  end
 
-    # with_name
+  def test_name_with_observations_with_name
     assert_query(
       Name.with_correct_spelling.joins(:observations).
            where(observations: { name_id: Name.unknown }).uniq,
       :Name, :with_observations, with_name: false
     )
+  end
 
-    # :with_notes
+  def test_name_with_observations_with_notes
     assert_query(
       Name.with_correct_spelling.joins(:observations).
            where.not(observations: { notes: Observation.no_notes }).uniq,
       :Name, :with_observations, with_notes: true
     )
+  end
 
-    # with_sequences
+  def test_name_with_observations_with_sequences
     assert_query(
       Name.with_correct_spelling.joins(observations: :sequences).uniq,
       Name, :with_observations, with_sequences: true
     )
+  end
 
-    # is_collection_location
+  def test_name_with_observations_is_collection_location
     assert_query(
       Name.with_correct_spelling.joins(:observations).
            where(observations: { is_collection_location: true }).uniq,
@@ -2634,9 +2512,9 @@ class QueryTest < UnitTestCase
                   names(:agaricus_campestris).id,
                   names(:fungi).id],
                  :Name, :with_observations,
-                 ids: [observations(:detailed_unknown_obs).id,
-                       observations(:agaricus_campestris_obs).id,
-                       observations(:agaricus_campestras_obs).id])
+                 obs_ids: [observations(:detailed_unknown_obs).id,
+                           observations(:agaricus_campestris_obs).id,
+                           observations(:agaricus_campestras_obs).id])
   end
 
   def test_name_with_observations_in_species_list
@@ -2704,18 +2582,18 @@ class QueryTest < UnitTestCase
 
   def test_observation_advanced_search
     assert_query([observations(:strobilurus_diminutivus_obs).id],
-                 :Observation, :advanced_search, name: "diminutivus")
+                 :Observation, :all, name: "diminutivus")
     assert_query([observations(:coprinus_comatus_obs).id],
-                 :Observation, :advanced_search, user_where: "glendale") # where
+                 :Observation, :all, user_where: "glendale") # where
     expect = Observation.where(location_id: locations(:burbank)).to_a
-    assert_query(expect, :Observation, :advanced_search,
+    assert_query(expect, :Observation, :all,
                  user_where: "burbank", by: :id) # location
     expect = Observation.where(user_id: rolf.id).to_a
-    assert_query(expect, :Observation, :advanced_search, user: "rolf", by: :id)
+    assert_query(expect, :Observation, :all, user: "rolf", by: :id)
     assert_query([observations(:coprinus_comatus_obs).id], # notes
-                 :Observation, :advanced_search, content: "second fruiting")
+                 :Observation, :all, content: "second fruiting")
     assert_query([observations(:minimal_unknown_obs).id],
-                 :Observation, :advanced_search, content: "agaricus") # comment
+                 :Observation, :all, content: "agaricus") # comment
   end
 
   def test_observation_all
@@ -2910,24 +2788,24 @@ class QueryTest < UnitTestCase
     #               observations(:agaricus_campestros_obs).id,
     #               observations(:agaricus_campestrus_obs).id,
     #               observations(:strobilurus_diminutivus_obs).id],
-    #              :Observation, :pattern_search, pattern: '"somewhere else"')
+    #              :Observation, :all, pattern: '"somewhere else"')
     # where
     assert_query([observations(:strobilurus_diminutivus_obs).id],
-                 :Observation, :pattern_search, pattern: "pipi valley")
+                 :Observation, :all, pattern: "pipi valley")
     # location
     expect = Observation.where(location_id: locations(:burbank)).
              joins(:name).order(
                [Name[:text_name], Name[:author], Observation[:id].desc]
              ).to_a
     assert_query(expect,
-                 :Observation, :pattern_search, pattern: "burbank", by: :name)
+                 :Observation, :all, pattern: "burbank", by: :name)
 
     # name
     expect = Observation.
              where(Name[:text_name].matches("agaricus%")).joins(:name).
              order([Name[:text_name], Name[:author], Observation[:id].desc])
     assert_query(expect.map(&:id),
-                 :Observation, :pattern_search, pattern: "agaricus", by: :name)
+                 :Observation, :all, pattern: "agaricus", by: :name)
   end
 
   def test_project_all
