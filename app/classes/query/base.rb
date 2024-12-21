@@ -7,6 +7,7 @@ module Query
     include Query::Modules::BoundingBox
     include Query::Modules::Coercion
     include Query::Modules::Conditions
+    include Query::Modules::Associations
     include Query::Modules::Datetime
     include Query::Modules::GoogleSearch
     include Query::Modules::HighLevelQueries

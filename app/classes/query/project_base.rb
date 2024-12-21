@@ -56,14 +56,8 @@ class Query::ProjectBase < Query::Base
   end
 
   def initialize_search_parameters
-    add_search_condition(
-      "projects.title",
-      params[:title_has]
-    )
-    add_search_condition(
-      "projects.summary",
-      params[:summary_has]
-    )
+    add_search_condition("projects.title", params[:title_has])
+    add_search_condition("projects.summary", params[:summary_has])
     add_search_condition(
       "projects.field_slip_prefix",
       params[:field_slip_prefix_has]

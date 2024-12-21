@@ -9,6 +9,13 @@ class FieldSlip < AbstractModel
   belongs_to :user
   default_scope { order(:code) }
 
+  scope :by_user, lambda { |user|
+    where(user_id: user.id).distinct
+  }
+  scope :for_project, lambda { |project|
+    where(project_id: project.id).distinct
+  }
+
   validates :code, uniqueness: true
   validates :code, presence: true
   validate do |field_slip|
