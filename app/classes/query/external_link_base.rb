@@ -18,7 +18,7 @@ class Query::ExternalLinkBase < Query::Base
 
   def initialize_flavor
     add_owner_and_time_stamp_conditions("external_links")
-    add_id_condition("external_links.observation_id", params[:observations])
+    initialize_observations_parameter(:external_links)
     add_id_condition("external_links.external_site_id",
                      lookup_external_sites_by_name(params[:external_sites]))
     add_search_condition("external_links.url", params[:url])

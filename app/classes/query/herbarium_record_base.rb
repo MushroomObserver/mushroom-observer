@@ -26,8 +26,6 @@ class Query::HerbariumRecordBase < Query::Base
 
   def initialize_flavor
     add_owner_and_time_stamp_conditions("herbarium_records")
-    add_for_observation_condition
-    add_in_herbarium_condition
     add_pattern_condition
     initialize_association_parameters
     initialize_boolean_parameters
@@ -36,14 +34,11 @@ class Query::HerbariumRecordBase < Query::Base
     super
   end
 
-  def add_for_observation_condition
-    return if params[:observation].blank?
-
-    obs = find_cached_parameter_instance(Observation, :observation)
-    @title_tag = :query_title_for_observation
-    @title_args[:observation] = obs.unique_format_name
-    where << "observation_herbarium_records.observation_id = '#{obs.id}'"
-    add_join(:observation_herbarium_records)
+  def initialize_association_parameters
+    add_in_herbarium_condition
+    initialize_herbaria_parameter([])
+    add_for_observation_condition
+    initialize_observations_parameter
   end
 
   def add_in_herbarium_condition
@@ -53,21 +48,6 @@ class Query::HerbariumRecordBase < Query::Base
     @title_tag = :query_title_in_herbarium
     @title_args[:herbarium] = herbarium.name
     where << "herbarium_records.herbarium_id = '#{herbarium.id}'"
-  end
-
-  def search_fields
-    "CONCAT(" \
-      "herbarium_records.initial_det," \
-      "herbarium_records.accession_number," \
-      "COALESCE(herbarium_records.notes,'')" \
-      ")"
-  end
-
-  def initialize_association_parameters
-    add_id_condition("herbarium_records.herbarium_id",
-                     lookup_herbaria_by_name(params[:herbaria]))
-    add_id_condition("observation_herbarium_records.observation_id",
-                     params[:observations], :observation_herbarium_records)
   end
 
   def initialize_boolean_parameters
@@ -90,6 +70,14 @@ class Query::HerbariumRecordBase < Query::Base
                          params[:initial_det_has])
     add_search_condition("herbarium_records.accession_number",
                          params[:accession_number_has])
+  end
+
+  def search_fields
+    "CONCAT(" \
+      "herbarium_records.initial_det," \
+      "herbarium_records.accession_number," \
+      "COALESCE(herbarium_records.notes,'')" \
+      ")"
   end
 
   def self.default_order
