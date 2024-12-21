@@ -74,6 +74,7 @@ class FieldSlipsController < ApplicationController
         end
         format.json { render(:show, status: :ok, location: @field_slip) }
       else
+        @field_slip.reload
         format.html { render(:edit, status: :unprocessable_entity) }
         format.json do
           render(json: @field_slip.errors, status: :unprocessable_entity)

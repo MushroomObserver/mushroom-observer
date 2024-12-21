@@ -46,6 +46,7 @@ class Checklist
   class ForProject < Checklist
     def initialize(project, location = nil)
       @project = project
+      @location = location
       @observations = if location.present?
                         project.observations.where(location: location)
                       else

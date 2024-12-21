@@ -49,8 +49,6 @@ class ChecklistsControllerTest < FunctionalTestCase
                       { project_id: project.id } } }).distinct
 
     get(:show, params: { project_id: project.id })
-    assert_match(/Checklist for #{project.title}/, css_select("title").text,
-                 "Wrong page")
     assert_match(/\(1\)/, @response.body)
 
     prove_checklist_content(expect)
@@ -66,13 +64,8 @@ class ChecklistsControllerTest < FunctionalTestCase
                            location: location } }).distinct
 
     get(:show, params: { project_id: project.id, location_id: location.id })
-    title = :checklist_for_project_location_title.t(
-      project: project.title,
-      location: location.display_name
-    )
-    assert_match(/#{title}/, css_select("title").text,
-                 "Wrong page")
     assert_match(/\(1\)/, @response.body)
+    assert_match("location%3A#{location.id}", @response.body)
 
     prove_checklist_content(expect)
   end

@@ -190,7 +190,7 @@ MushroomObserver::Application.configure do
   config.default_content_filter = nil
 
   # Maximum number of Observations that can be downloaded in a single request
-  config.max_downloads = 120
+  config.max_downloads = 5000
 
   # List of User ids of users that can see the image recognition
   # "Suggest Names" button on the observation page.

@@ -173,7 +173,8 @@ class ObservationsController
         project = find_or_goto_index(Project, params[:project].to_s)
       )
 
-      query = create_query(:Observation, :all, project: project)
+      query = create_query(:Observation, :all, project:)
+      @project = project
       [query, { always_index: true }]
     end
 

@@ -67,3 +67,29 @@ button:disabled {
   }
 }
 
+.nav-tabs .nav-link {
+  color: $LEFT_BAR_FG_COLOR;
+  font-size: 125%;
+  background-color: $LEFT_BAR_BG_COLOR;
+  border: 1px solid #dee2e6;
+}
+
+.nav-tabs .nav-link.active {
+  color: $LINK_FG_COLOR;
+  background-color: $BODY_BG_COLOR;
+  border-color: #dee2e6 #dee2e6 #fff;
+}
+
+.nav-tabs .nav-link.text-warning {
+  color: $WARNING_FG_COLOR;
+  background-color: $WARNING_BG_COLOR;
+}
+
+.nav-tabs .nav-link.text-warning:hover {
+  color: #cc9a06;
+}
+
+.nav-tabs .nav-link.text-warning.active {
+  color: $WARNING_FG_COLOR;
+  border-color: #ffc107 #ffc107 #fff;
+}

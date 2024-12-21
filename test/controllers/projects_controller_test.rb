@@ -138,11 +138,9 @@ class ProjectsControllerTest < FunctionalTestCase
     login(user.login)
     get(:show, params: { id: project.id })
 
-    assert_select(
-      "#project_summary a[href =
-        '#{project_violations_path(project_id: project.id)}']",
-      true, "Page is missing a link to violations"
-    )
+    assert_match(project_violations_path(project_id: project.id),
+                 @response.body,
+                 "Page is missing a link to violations")
   end
 
   def test_index
