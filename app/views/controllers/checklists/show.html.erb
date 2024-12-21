@@ -4,11 +4,8 @@ if @project
   add_project_banner(@project)
 else
   add_page_title(checklist_show_title(user: @show_user,
-                                      project: @project,
-                                      location: @location,
                                       list: @species_list))
   add_tab_set(checklist_show_tabs(user: @show_user,
-                                  project: @project,
                                   list: @species_list))
 end
 %>
