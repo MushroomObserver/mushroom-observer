@@ -64,10 +64,6 @@ class ChecklistsControllerTest < FunctionalTestCase
                            location: location } }).distinct
 
     get(:show, params: { project_id: project.id, location_id: location.id })
-    title = :checklist_for_project_location_title.t(
-      project: project.title,
-      location: location.display_name
-    )
     assert_match(/\(1\)/, @response.body)
     assert_match("location%3A#{location.id}", @response.body)
 
