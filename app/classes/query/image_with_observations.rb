@@ -43,16 +43,6 @@ module Query
       add_in_species_list_condition
     end
 
-    def initialize_boolean_parameters
-      initialize_obs_is_collection_location_parameter
-      initialize_obs_with_public_lat_lng_parameter
-      initialize_obs_with_name_parameter
-      initialize_obs_with_notes_parameter
-      add_with_notes_fields_condition(params[:with_notes_fields])
-      add_join(:observations, :comments) if params[:with_comments]
-      add_join(:observations, :sequences) if params[:with_sequences]
-    end
-
     def default_order
       "name"
     end
