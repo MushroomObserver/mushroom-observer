@@ -82,8 +82,8 @@ module Query
         initialize_obs_naming_confidence_parameter
         initialize_obs_with_notes_parameter
         add_with_notes_fields_condition(params[:with_notes_fields])
-        add_join(:comments) if params[:with_comments]
-        add_join(:sequences) if params[:with_sequences]
+        add_join(:observations, :comments) if params[:with_comments]
+        add_join(:observations, :sequences) if params[:with_sequences]
       end
 
       def initialize_obs_is_collection_location_parameter
