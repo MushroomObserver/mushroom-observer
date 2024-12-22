@@ -22,8 +22,21 @@
 #    Updates the InatImport instance with the code received from iNat
 #    Instantiates an InatImportJobTracker, passing in the InatImport instance
 #    Enqueues an InatImportJob, passing in the InatImport instance
-#    Redirects to InatImport show page for that InatImport instance
-# 5. The rest happens in the background. The InatImportJob:
+#    Redirects to InatImport.show (for that InatImport instance)
+#    ---------------------------------
+#    InatImport.show view:
+#      Includes a `#status` element which:
+#        Instantiates a Stimulus controller (inat-import-job_controller)
+#        with an endpoint of InatImportJobTracker.show
+#        is updated by a TurboStream response from the endpoint
+#    ---------------------------------
+#    Stimulus controller (inat-import-job_controller):
+#      Makes a request every second to the InatImportJobTracker.show endpoint
+#    ---------------------------------
+#    The InatImportJobTracker.show endpoint action:
+#      returns the status of the InatImport as a TurboStream response
+#    ---------------------------------
+# 5. The InatImportJob:
 #      Uses the `code` to obtain an oauth access_token
 #      Trades the oauth token for a JWT api_token
 #      Checks if the MO user is trying to import some else's obss
@@ -36,6 +49,8 @@
 #         adds an MO Comment with a snapshot of the imported data
 #         updates the iNat obs with a Mushroom Observer URL Observation Field
 #         updates the iNat obs Notes
+#      updates the InatImport instance attributes:
+#         state, importables, imported_count, response_errors
 #
 class InatImportsController < ApplicationController
   include Validators
