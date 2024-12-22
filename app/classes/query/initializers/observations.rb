@@ -156,7 +156,7 @@ module Query
       end
 
       def initialize_obs_search_parameters
-        add_search_condition("observations.notes",params[:notes_has])
+        add_search_condition("observations.notes", params[:notes_has])
         add_search_condition(
           "CONCAT(comments.summary,COALESCE(comments.comment,''))",
           params[:comments_has], :observations, :comments
