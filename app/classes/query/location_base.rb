@@ -28,9 +28,9 @@ class Query::LocationBase < Query::Base
   def initialize_flavor
     unless is_a?(Query::LocationWithObservations) ||
            is_a?(Query::LocationWithDescriptions)
-      add_ids_condition("locations")
-      add_owner_and_time_stamp_conditions("locations")
-      add_by_user_condition("locations")
+      add_ids_condition
+      add_owner_and_time_stamp_conditions
+      add_by_user_condition
       add_by_editor_condition(:location)
       add_pattern_condition
       add_regexp_condition

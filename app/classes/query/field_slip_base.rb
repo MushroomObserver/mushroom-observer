@@ -16,8 +16,8 @@ module Query
     end
 
     def initialize_flavor
-      add_owner_and_time_stamp_conditions("field_slips")
-      add_by_user_condition("field_slips")
+      add_owner_and_time_stamp_conditions
+      add_by_user_condition
       add_for_project_condition
       super
     end

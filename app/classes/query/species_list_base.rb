@@ -33,11 +33,11 @@ module Query
     end
 
     def initialize_flavor
-      add_owner_and_time_stamp_conditions("species_lists")
+      add_owner_and_time_stamp_conditions
       add_date_condition("species_lists.when", params[:date])
       add_pattern_condition
       add_ids_condition
-      add_by_user_condition("species_lists")
+      add_by_user_condition
       add_for_project_condition(:project_species_lists)
       initialize_name_parameters(:species_list_observations, :observations)
       initialize_association_parameters

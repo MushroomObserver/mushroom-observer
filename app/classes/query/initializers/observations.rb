@@ -40,6 +40,14 @@ module Query
         }
       end
 
+      def initialize_obs_basic_parameters
+        ids_param = model == Observation ? :ids : :obs_ids
+        add_ids_condition("observations", ids_param)
+        add_owner_and_time_stamp_conditions("observations")
+        add_by_user_condition("observations")
+        initialize_obs_date_parameter(:date)
+      end
+
       # This is just to allow the additional location conditions
       def add_ids_condition(table = model.table_name, ids = :ids)
         return if params[ids].nil? # [] is valid
@@ -50,17 +58,7 @@ module Query
 
       def initialize_obs_date_parameter(param_name = :date)
         add_date_condition(
-          "observations.when",
-          params[param_name],
-          :observations
-        )
-      end
-
-      def initialize_confidence_parameter
-        add_range_condition(
-          "observations.vote_cache",
-          params[:confidence],
-          :observations
+          "observations.when", params[param_name], :observations
         )
       end
 
@@ -81,6 +79,17 @@ module Query
           params[:field_slips],
           :observations
         )
+      end
+
+      def initialize_obs_record_parameters
+        initialize_is_collection_location_parameter
+        initialize_with_public_lat_lng_parameter
+        initialize_with_name_parameter
+        initialize_confidence_parameter
+        initialize_with_obs_notes_parameter
+        add_with_notes_fields_condition(params[:with_notes_fields])
+        add_join(:observations, :comments) if params[:with_comments]
+        add_join(:observations, :sequences) if params[:with_sequences]
       end
 
       def initialize_is_collection_location_parameter
@@ -130,6 +139,12 @@ module Query
         )
       end
 
+      def initialize_confidence_parameter
+        add_range_condition(
+          "observations.vote_cache", params[:confidence], :observations
+        )
+      end
+
       def initialize_with_obs_notes_parameter(param_name = :with_notes)
         add_boolean_condition(
           "observations.notes != #{escape(Observation.no_notes_persisted)}",
@@ -140,15 +155,14 @@ module Query
       end
 
       def initialize_obs_search_parameters
-        add_search_condition(
-          "observations.notes",
-          params[:notes_has]
-        )
+        add_search_condition("observations.notes",params[:notes_has])
         add_search_condition(
           "CONCAT(comments.summary,COALESCE(comments.comment,''))",
-          params[:comments_has],
-          :observations, :comments
+          params[:comments_has], :observations, :comments
         )
+        return if model == Observation
+
+        add_search_condition("observations.where", params[:user_where])
       end
 
       def params_out_to_with_observations_params(pargs)

@@ -51,9 +51,9 @@ module Query
     def initialize_flavor
       unless is_a?(Query::NameWithObservations) ||
              is_a?(Query::NameWithDescriptions)
-        add_ids_condition("names")
-        add_owner_and_time_stamp_conditions("names")
-        add_by_user_condition("names")
+        add_ids_condition
+        add_owner_and_time_stamp_conditions
+        add_by_user_condition
         add_by_editor_condition(:name)
         initialize_comments_and_notes_parameters
         initialize_name_parameters_for_name_queries

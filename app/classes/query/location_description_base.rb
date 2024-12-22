@@ -23,9 +23,9 @@ class Query::LocationDescriptionBase < Query::Base
   end
 
   def initialize_flavor
-    add_ids_condition("location_descriptions")
-    add_owner_and_time_stamp_conditions("location_descriptions")
-    add_by_user_condition("location_descriptions")
+    add_ids_condition
+    add_owner_and_time_stamp_conditions
+    add_by_user_condition
     add_desc_by_author_condition(:location)
     add_desc_by_editor_condition(:location)
     locations = lookup_locations_by_name(params[:locations])

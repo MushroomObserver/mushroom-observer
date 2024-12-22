@@ -23,9 +23,9 @@ class Query::NameDescriptionBase < Query::Base
   end
 
   def initialize_flavor
-    add_ids_condition("name_descriptions")
-    add_owner_and_time_stamp_conditions("name_descriptions")
-    add_by_user_condition("name_descriptions")
+    add_ids_condition
+    add_owner_and_time_stamp_conditions
+    add_by_user_condition
     add_desc_by_author_condition(:name)
     add_desc_by_editor_condition(:name)
     names = lookup_names_by_name(names: params[:names])

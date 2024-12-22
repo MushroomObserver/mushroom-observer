@@ -17,7 +17,7 @@ class Query::ArticleBase < Query::Base
   end
 
   def initialize_flavor
-    add_owner_and_time_stamp_conditions("articles")
+    add_owner_and_time_stamp_conditions
     add_ids_condition
     add_search_condition("articles.title", params[:title_has])
     add_search_condition("articles.body", params[:body_has])

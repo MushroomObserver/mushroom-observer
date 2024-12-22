@@ -21,13 +21,10 @@ module Query
 
     def initialize_flavor
       add_join(:observation_images, :observations)
-      add_ids_condition("observations", :obs_ids)
-      add_owner_and_time_stamp_conditions("observations")
-      add_by_user_condition("observations")
-      add_date_condition("observations.when", params[:date])
+      initialize_obs_basic_parameters
       initialize_association_parameters
       add_where_conditions
-      initialize_boolean_parameters
+      initialize_obs_record_parameters
       initialize_obs_search_parameters
       add_bounding_box_conditions_for_observations
       initialize_content_filters(Observation)
@@ -44,17 +41,6 @@ module Query
 
     def add_where_conditions
       add_at_location_condition(:observations)
-      add_search_condition("observations.where", params[:user_where])
-    end
-
-    def initialize_boolean_parameters
-      initialize_is_collection_location_parameter
-      initialize_with_public_lat_lng_parameter
-      initialize_with_name_parameter
-      initialize_with_obs_notes_parameter
-      add_join(:observations, :comments) if params[:with_comments]
-      add_join(:observations, :sequences) if params[:with_sequences]
-      add_with_notes_fields_condition(params[:with_notes_fields])
     end
 
     def default_order
