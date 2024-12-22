@@ -26,7 +26,8 @@ class InatImportsControllerTest < FunctionalTestCase
     tracker = InatImportJobTracker.create(inat_import: import.id)
 
     login
-    get(:show, params: { id: tracker.id })
+
+    get(:show, params: { id: import.id, tracker_id: tracker.id })
 
     assert_response(:success)
     assert_select("span#importables_count", /^\d+$/,
