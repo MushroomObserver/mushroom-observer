@@ -55,9 +55,8 @@ module Query
       add_needs_naming_condition
       initialize_name_parameters
       initialize_association_parameters
-      initialize_boolean_parameters
+      initialize_obs_record_parameters
       initialize_obs_search_parameters
-      initialize_confidence_parameter
       add_bounding_box_conditions_for_observations
       initialize_content_filters(Observation)
       super
@@ -146,16 +145,6 @@ module Query
                 "observations.where LIKE #{escape("%#{region}")}"
               end
       where << conds
-    end
-
-    def initialize_boolean_parameters
-      initialize_is_collection_location_parameter
-      initialize_with_public_lat_lng_parameter
-      initialize_with_name_parameter
-      initialize_with_obs_notes_parameter
-      add_with_notes_fields_condition(params[:with_notes_fields])
-      add_join(:comments) if params[:with_comments]
-      add_join(:sequences) if params[:with_sequences]
     end
 
     def add_join_to_names

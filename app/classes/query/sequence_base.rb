@@ -108,7 +108,7 @@ module Query
 
     def initialize_observation_parameters
       initialize_obs_date_parameter(:obs_date)
-      initialize_is_collection_location_parameter
+      initialize_obs_is_collection_location_parameter
       initialize_confidence_parameter
     end
 
@@ -119,10 +119,10 @@ module Query
     end
 
     def initialize_boolean_parameters
-      initialize_with_images_parameter
-      initialize_with_specimen_parameter
-      initialize_with_name_parameter
-      initialize_with_obs_notes_parameter(:with_obs_notes)
+      initialize_obs_with_images_parameter
+      initialize_obs_with_specimen_parameter
+      initialize_obs_with_name_parameter
+      initialize_obs_with_notes_parameter(:with_obs_notes)
       add_with_notes_fields_condition(params[:with_notes_fields], :observations)
     end
 
