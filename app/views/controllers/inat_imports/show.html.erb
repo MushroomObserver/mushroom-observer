@@ -14,10 +14,10 @@
   <%=
     # Outer span calls Stimulus controller, passing in the endpoint
     tag.span(id: "status", class: "text-right",
-              data: { controller: "inat-import-job",
-                      endpoint: inat_import_job_tracker_path(
-                        inat_import_id: @inat_import.id, id: @tracker.id
-                      ) }) do
+             data: { controller: "inat-import-job",
+                     endpoint: inat_import_job_tracker_path(
+                       inat_import_id: @inat_import.id, id: @tracker.id
+                     ) }) do
       # Inner span is replaced by Stimulus
       tag.span(@tracker.status, data: { inat_import_job_target: "status",
                                         status: @tracker.status })
