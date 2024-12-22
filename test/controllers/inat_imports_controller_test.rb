@@ -267,8 +267,10 @@ class InatImportsControllerTest < FunctionalTestCase
       end
     end
 
-    # tracker = InatImportJobTracker.find_by(inat_import: inat_import)
-    assert_redirected_to(inat_import_path(inat_import.id))
+    tracker = InatImportJobTracker.where(inat_import: inat_import.id).last
+    assert_redirected_to(
+      inat_import_path(inat_import, params: { tracker_id: tracker.id })
+    )
   end
 
   def test_inat_username_unchanged_if_authorization_denied
