@@ -21,7 +21,7 @@ class Query::CollectionNumberBase < Query::Base
   end
 
   def initialize_flavor
-    add_owner_and_time_stamp_conditions("collection_numbers")
+    add_owner_and_time_stamp_conditions
     add_for_observation_condition
     initialize_observations_parameter
     add_pattern_condition

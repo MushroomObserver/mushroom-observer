@@ -5,14 +5,14 @@ module Query
     # Helper methods for turning Query parameters into SQL conditions.
     module Conditions
       # Just because these three are used over and over again.
-      def add_owner_and_time_stamp_conditions(table)
+      def add_owner_and_time_stamp_conditions(table = model.table_name)
         add_time_condition("#{table}.created_at", params[:created_at])
         add_time_condition("#{table}.updated_at", params[:updated_at])
         add_id_condition("#{table}.user_id",
                          lookup_users_by_name(params[:users]))
       end
 
-      def add_by_user_condition(table)
+      def add_by_user_condition(table = model.table_name)
         return if params[:by_user].blank?
 
         user = find_cached_parameter_instance(User, :by_user)
@@ -21,7 +21,7 @@ module Query
         where << "#{table}.user_id = '#{user.id}'"
       end
 
-      def add_by_editor_condition(type)
+      def add_by_editor_condition(type = model.type_tag)
         return unless params[:by_editor]
 
         user = find_cached_parameter_instance(User, :by_editor)

@@ -45,17 +45,17 @@ module Query
     def initialize_flavor
       super
       unless is_a?(Query::ImageWithObservations)
-        add_ids_condition("images")
+        add_ids_condition
         add_inside_observation_conditions
-        add_owner_and_time_stamp_conditions("images")
-        add_by_user_condition("images")
+        add_owner_and_time_stamp_conditions
+        add_by_user_condition
         add_date_condition("images.when", params[:date])
         add_join(:observation_images) if params[:with_observation]
         initialize_notes_parameters
+        initialize_association_parameters
       end
       add_pattern_condition
       add_advanced_search_conditions
-      initialize_association_parameters
       initialize_name_parameters(:observation_images, :observations)
       initialize_image_parameters
       initialize_vote_parameters
@@ -70,8 +70,7 @@ module Query
     end
 
     def initialize_association_parameters
-      add_id_condition("observation_images.observation_id",
-                       params[:observations], :observation_images)
+      initialize_observations_parameter
       add_where_condition("observations", params[:locations],
                           :observation_images, :observations)
       add_for_project_condition(:project_images)

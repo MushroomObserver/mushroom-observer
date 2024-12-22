@@ -25,7 +25,7 @@ class Query::HerbariumRecordBase < Query::Base
   end
 
   def initialize_flavor
-    add_owner_and_time_stamp_conditions("herbarium_records")
+    add_owner_and_time_stamp_conditions
     add_pattern_condition
     initialize_association_parameters
     initialize_boolean_parameters

@@ -23,18 +23,14 @@ class Query::NameDescriptionBase < Query::Base
   end
 
   def initialize_flavor
-    add_ids_condition("name_descriptions")
-    add_owner_and_time_stamp_conditions("name_descriptions")
-    add_by_user_condition("name_descriptions")
+    add_ids_condition
+    add_owner_and_time_stamp_conditions
+    add_by_user_condition
     add_desc_by_author_condition(:name)
     add_desc_by_editor_condition(:name)
     names = lookup_names_by_name(names: params[:names])
     add_id_condition("name_descriptions.name_id", names)
-    add_boolean_condition(
-      "name_descriptions.public IS TRUE",
-      "name_descriptions.public IS FALSE",
-      params[:public]
-    )
+    initialize_description_public_parameter(:name)
     super
   end
 

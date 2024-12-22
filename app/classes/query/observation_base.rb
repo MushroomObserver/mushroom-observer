@@ -46,16 +46,13 @@ module Query
     end
 
     def initialize_flavor
-      add_ids_condition
-      add_owner_and_time_stamp_conditions("observations")
-      add_by_user_condition("observations")
-      initialize_obs_date_parameter(:date)
+      initialize_obs_basic_parameters
       add_pattern_condition
       add_advanced_search_conditions
       add_needs_naming_condition
       initialize_name_parameters
       initialize_association_parameters
-      initialize_boolean_parameters
+      initialize_obs_record_parameters
       initialize_obs_search_parameters
       initialize_confidence_parameter
       add_bounding_box_conditions_for_observations
@@ -146,16 +143,6 @@ module Query
                 "observations.where LIKE #{escape("%#{region}")}"
               end
       where << conds
-    end
-
-    def initialize_boolean_parameters
-      initialize_is_collection_location_parameter
-      initialize_with_public_lat_lng_parameter
-      initialize_with_name_parameter
-      initialize_with_obs_notes_parameter
-      add_with_notes_fields_condition(params[:with_notes_fields])
-      add_join(:comments) if params[:with_comments]
-      add_join(:sequences) if params[:with_sequences]
     end
 
     def add_join_to_names

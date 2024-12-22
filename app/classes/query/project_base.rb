@@ -26,7 +26,7 @@ class Query::ProjectBase < Query::Base
   end
 
   def initialize_flavor
-    add_owner_and_time_stamp_conditions("projects")
+    add_owner_and_time_stamp_conditions
     initialize_association_parameters
     initialize_boolean_parameters
     initialize_search_parameters

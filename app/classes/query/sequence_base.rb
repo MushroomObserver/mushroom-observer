@@ -62,7 +62,7 @@ module Query
       # delimiters which could interrupt the subsequence the user is searching
       # for.  Users would probably not understand why the search fails to find
       # some sequences because of this.
-      add_owner_and_time_stamp_conditions("sequences")
+      add_owner_and_time_stamp_conditions
       add_pattern_condition
       add_ids_condition
       initialize_association_parameters

@@ -18,7 +18,7 @@ module Query
     end
 
     def initialize_flavor
-      add_owner_and_time_stamp_conditions("glossary_terms")
+      add_owner_and_time_stamp_conditions
       add_pattern_condition
       add_search_condition("glossary_terms.name", params[:name_has])
       add_search_condition("glossary_terms.description",
