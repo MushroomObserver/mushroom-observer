@@ -118,9 +118,9 @@ class InatImportsController < ApplicationController
     auth_code = params[:code]
     return not_authorized if auth_code.blank?
 
-    @inat_import = InatImport.find_or_create_by(user: User.current)
-    @inat_import.update(token: auth_code, state: "Authenticating")
-    tracker = InatImportJobTracker.create(inat_import: @inat_import.id)
+    inat_import = InatImport.find_or_create_by(user: User.current)
+    inat_import.update(token: auth_code, state: "Authenticating")
+    tracker = InatImportJobTracker.create(inat_import: inat_import.id)
 
     Rails.logger.info(
       "Enqueuing InatImportJob for InatImport id: #{@inat_import.id}"
@@ -128,8 +128,7 @@ class InatImportsController < ApplicationController
     # InatImportJob.perform_now(@inat_import) # for manual testing
     InatImportJob.perform_later(@inat_import)
 
-    # redirect_to(inat_import_path(@inat_import.id))
-    redirect_to(inat_import_path(@inat_import,
+    redirect_to(inat_import_path(inat_import,
                                  params: { tracker_id: tracker.id }))
   end
 
