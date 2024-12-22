@@ -320,6 +320,11 @@ export default class extends Controller {
       this.getElevationTarget.disabled = true
   }
 
+  // Using a regular expression
+  isValidDecimal(str) {
+    return /^-?\d*\.?\d+$/.test(str);
+  }
+
   // Convert from human readable and do a rough check if they make sense
   validateLatLngInputs(update = false) {
     this.verbose("geocode:validateLatLngInputs")
@@ -331,9 +336,21 @@ export default class extends Controller {
       origLng = this.lngInputTarget.value
     let lat, lng
 
-    lat = parseFloat(origLat)
-    lng = parseFloat(origLng)
-
+    if (this.isValidDecimal(origLat) && this.isValidDecimal(origLng)) {
+      lat = parseFloat(origLat)
+      lng = parseFloat(origLng)
+    } else {
+      try {
+        let coords = convert(origLat + " " + origLng)
+        lat = coords.decimalLatitude,
+          lng = coords.decimalLongitude
+      }
+      // Toss any degree-minute-second notation and just take the first number
+      catch {
+        lat = parseFloat(origLat)
+        lng = parseFloat(origLng)
+      }
+    }
     if (!lat || !lng)
       return false
     if (lat > 90 || lat < -90 || lng > 180 || lng < -180)
