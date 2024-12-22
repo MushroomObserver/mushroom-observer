@@ -331,16 +331,8 @@ export default class extends Controller {
       origLng = this.lngInputTarget.value
     let lat, lng
 
-    try {
-      let coords = convert(origLat + " " + origLng)
-      lat = coords.decimalLatitude,
-        lng = coords.decimalLongitude
-    }
-    // Toss any degree-minute-second notation and just take the first number
-    catch {
-      lat = parseFloat(origLat)
-      lng = parseFloat(origLng)
-    }
+    lat = parseFloat(origLat)
+    lng = parseFloat(origLng)
 
     if (!lat || !lng)
       return false
