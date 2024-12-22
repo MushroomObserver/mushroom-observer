@@ -21,7 +21,7 @@ module Query
         where << "#{table}.user_id = '#{user.id}'"
       end
 
-      def add_by_editor_condition(type)
+      def add_by_editor_condition(type = model.type_tag)
         return unless params[:by_editor]
 
         user = find_cached_parameter_instance(User, :by_editor)

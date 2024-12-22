@@ -10,9 +10,7 @@ module Query
     include Query::Initializers::ObservationQueryDescriptions
 
     def parameter_declarations
-      super.merge(
-        obs_ids?: [Observation]
-      ).merge(observations_parameter_declarations).
+      super.merge(observations_parameter_declarations).
         merge(observations_coercion_parameter_declarations).
         merge(bounding_box_parameter_declarations).
         merge(content_filter_parameter_declarations(Observation)).
@@ -22,8 +20,7 @@ module Query
     def initialize_flavor
       add_join(:observation_images, :observations)
       initialize_obs_basic_parameters
-      initialize_association_parameters
-      add_where_conditions
+      initialize_obs_association_parameters
       initialize_obs_record_parameters
       initialize_obs_search_parameters
       add_bounding_box_conditions_for_observations
@@ -31,16 +28,13 @@ module Query
       super
     end
 
-    def initialize_association_parameters
+    def initialize_obs_association_parameters
+      add_at_location_condition(:observations)
       initialize_herbaria_parameter
       initialize_projects_parameter(:project_observations)
       add_for_project_condition(:project_observations,
                                 [:observations, :project_observations])
       add_in_species_list_condition
-    end
-
-    def add_where_conditions
-      add_at_location_condition(:observations)
     end
 
     def default_order

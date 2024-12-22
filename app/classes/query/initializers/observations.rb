@@ -36,7 +36,8 @@ module Query
         {
           old_title?: :string,
           old_by?: :string,
-          date?: [:date]
+          date?: [:date],
+          obs_ids?: [Observation]
         }
       end
 

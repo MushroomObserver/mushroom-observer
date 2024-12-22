@@ -18,14 +18,31 @@ module Query
       end
 
       def descriptions_coercion_parameter_declarations
+        desc_model = "#{model}Description".constantize
         {
           old_title?: :string,
           old_by?: :string,
-          by_author?: User
+          by_author?: User,
+          desc_ids?: [desc_model]
         }
       end
 
-      def add_desc_ids_condition(type)
+      def initialize_description_public_parameter(type)
+        add_boolean_condition(
+          "#{type}_descriptions.public IS TRUE",
+          "#{type}_descriptions.public IS FALSE",
+          params[:public]
+        )
+      end
+
+      def initialize_with_desc_basic_parameters(type = model.type_tag)
+        add_with_desc_ids_condition(type)
+        add_desc_by_user_condition(type)
+        add_desc_by_author_condition(type)
+        add_desc_by_editor_condition(type)
+      end
+
+      def add_with_desc_ids_condition(type = model.type_tag)
         return unless params[:desc_ids]
 
         set = clean_id_set(params[:desc_ids])
@@ -75,7 +92,7 @@ module Query
         where << "#{type}_description_editors.user_id = '#{user.id}'"
       end
 
-      def initialize_description_parameters(type = :name)
+      def initialize_description_parameters(type = model.type_tag)
         initialize_with_default_desc_parameter(type)
         initialize_join_desc_parameter(type)
         initialize_desc_type_parameter(type)

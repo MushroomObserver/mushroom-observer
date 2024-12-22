@@ -52,10 +52,10 @@ module Query
         add_date_condition("images.when", params[:date])
         add_join(:observation_images) if params[:with_observation]
         initialize_notes_parameters
+        initialize_association_parameters
       end
       add_pattern_condition
       add_advanced_search_conditions
-      initialize_association_parameters
       initialize_name_parameters(:observation_images, :observations)
       initialize_image_parameters
       initialize_vote_parameters

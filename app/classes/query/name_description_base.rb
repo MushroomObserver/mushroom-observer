@@ -30,11 +30,7 @@ class Query::NameDescriptionBase < Query::Base
     add_desc_by_editor_condition(:name)
     names = lookup_names_by_name(names: params[:names])
     add_id_condition("name_descriptions.name_id", names)
-    add_boolean_condition(
-      "name_descriptions.public IS TRUE",
-      "name_descriptions.public IS FALSE",
-      params[:public]
-    )
+    initialize_description_public_parameter(:name)
     super
   end
 

@@ -30,11 +30,7 @@ class Query::LocationDescriptionBase < Query::Base
     add_desc_by_editor_condition(:location)
     locations = lookup_locations_by_name(params[:locations])
     add_id_condition("location_descriptions.location_id", locations)
-    add_boolean_condition(
-      "location_descriptions.public IS TRUE",
-      "location_descriptions.public IS FALSE",
-      params[:public]
-    )
+    initialize_description_public_parameter(:location)
     super
   end
 

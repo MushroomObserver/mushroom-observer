@@ -31,7 +31,7 @@ class Query::LocationBase < Query::Base
       add_ids_condition
       add_owner_and_time_stamp_conditions
       add_by_user_condition
-      add_by_editor_condition(:location)
+      add_by_editor_condition
       add_pattern_condition
       add_regexp_condition
       add_advanced_search_conditions
