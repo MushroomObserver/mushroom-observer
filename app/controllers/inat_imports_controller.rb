@@ -68,7 +68,7 @@ class InatImportsController < ApplicationController
   API_BASE = "https://api.inaturalist.org/v1"
 
   def show
-    @tracker = InatImportJobTracker.find(params[:id])
+    @tracker = InatImportJobTracker.find(params[:tracker_id])
     @inat_import = InatImport.find(@tracker.inat_import)
   end
 
@@ -128,7 +128,9 @@ class InatImportsController < ApplicationController
     # InatImportJob.perform_now(@inat_import) # for manual testing
     InatImportJob.perform_later(@inat_import)
 
-    redirect_to(inat_import_path(@inat_import.id))
+    # redirect_to(inat_import_path(@inat_import.id))
+    redirect_to(inat_import_path(@inat_import,
+                                 params: { tracker_id: tracker.id }))
   end
 
   # ---------------------------------

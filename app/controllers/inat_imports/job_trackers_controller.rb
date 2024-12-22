@@ -4,7 +4,7 @@ module InatImports
   class JobTrackersController < ApplicationController
     before_action :login_required
 
-    # This is only a Turbo endpoint updating the the status of a job.
+    # This is only a Turbo endpoint updating the display of the status of a job.
     def show
       return unless (@tracker = InatImportJobTracker.find(params[:id]))
 
