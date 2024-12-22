@@ -109,7 +109,7 @@ module Query
     def initialize_observation_parameters
       initialize_obs_date_parameter(:obs_date)
       initialize_obs_is_collection_location_parameter
-      initialize_confidence_parameter
+      initialize_obs_naming_confidence_parameter
     end
 
     def initialize_exact_match_parameters

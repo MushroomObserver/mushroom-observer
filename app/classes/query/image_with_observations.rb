@@ -25,7 +25,7 @@ module Query
       add_owner_and_time_stamp_conditions("observations")
       add_by_user_condition("observations")
       add_date_condition("observations.when", params[:date])
-      initialize_obs_association_parameters
+      initialize_association_parameters
       initialize_obs_record_parameters
       initialize_obs_search_parameters
       add_bounding_box_conditions_for_observations
@@ -33,13 +33,24 @@ module Query
       super
     end
 
-    def initialize_obs_association_parameters
+    # Needs to overwrite the one in ImageBase.
+    def initialize_association_parameters
       add_at_location_condition(:observations)
       initialize_herbaria_parameter
-      initialize_projects_parameter(:project_observations)
-      add_for_project_condition(:project_observations,
-                                [:observations, :project_observations])
+      project_joins = [:observations, :project_observations]
+      add_for_project_condition(:project_observations, project_joins)
+      initialize_projects_parameter(:project_observations, project_joins)
       add_in_species_list_condition
+    end
+
+    def initialize_boolean_parameters
+      initialize_obs_is_collection_location_parameter
+      initialize_obs_with_public_lat_lng_parameter
+      initialize_obs_with_name_parameter
+      initialize_obs_with_notes_parameter
+      add_with_notes_fields_condition(params[:with_notes_fields])
+      add_join(:observations, :comments) if params[:with_comments]
+      add_join(:observations, :sequences) if params[:with_sequences]
     end
 
     def default_order

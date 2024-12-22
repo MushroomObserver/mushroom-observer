@@ -25,14 +25,14 @@ module Query
       add_by_user_condition("observations")
       add_date_condition("observations.when", params[:date])
       initialize_name_parameters
-      initialize_obs_association_parameters
+      initialize_association_parameters
       initialize_obs_record_parameters
       initialize_obs_search_parameters
       initialize_content_filters(Observation)
       super
     end
 
-    def initialize_obs_association_parameters
+    def initialize_association_parameters
       add_at_location_condition(:observations)
       add_where_condition(:observations, params[:locations])
       project_joins = [:observations, :project_observations]
