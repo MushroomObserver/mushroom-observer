@@ -123,10 +123,10 @@ class InatImportsController < ApplicationController
     tracker = InatImportJobTracker.create(inat_import: inat_import.id)
 
     Rails.logger.info(
-      "Enqueuing InatImportJob for InatImport id: #{@inat_import.id}"
+      "Enqueuing InatImportJob for InatImport id: #{inat_import.id}"
     )
-    # InatImportJob.perform_now(@inat_import) # for manual testing
-    InatImportJob.perform_later(@inat_import)
+    # InatImportJob.perform_now(@inat_import) # uncomment for manual testing
+    InatImportJob.perform_later(inat_import) # uncomment for production
 
     redirect_to(inat_import_path(inat_import,
                                  params: { tracker_id: tracker.id }))
