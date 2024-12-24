@@ -391,6 +391,25 @@ Ensure that the file is executable:
 chmod +x .git/hooks/pre-commit
 ```
 
+### Ruby upgrade with chruby
+
+Install the selected version.
+
+  ruby-install ruby 3.3.2
+
+Once that succeeds, update Ruby versions in .ruby-version and
+Gemfile.lock.
+
+In a new shell run:
+
+  chruby ruby-3.3.2
+  bundle install
+  gem pristine --all
+
+In another new shell now run:
+
+  rails t
+
 ### Other
 
 @JoeCohen had to generate a new developmemt master key.
