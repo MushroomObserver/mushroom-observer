@@ -507,14 +507,14 @@ PLATFORMS
 
 DEPENDENCIES
   RedCloth
-  actioncable (~> 7.1.3)
-  actionmailer (~> 7.1.3)
-  actionpack (~> 7.1.3)
-  actionview (~> 7.1.3)
-  activejob (~> 7.1.3)
-  activemodel (~> 7.1.3)
-  activerecord (~> 7.1.3)
-  activesupport (~> 7.1.3)
+  actioncable (~> 7.1.5.1)
+  actionmailer (~> 7.1.5.1)
+  actionpack (~> 7.1.5.1)
+  actionview (~> 7.1.5.1)
+  activejob (~> 7.1.5.1)
+  activemodel (~> 7.1.5.1)
+  activerecord (~> 7.1.5.1)
+  activesupport (~> 7.1.5.1)
   arel-helpers
   arel_extensions
   bcrypt
@@ -548,7 +548,7 @@ DEPENDENCIES
   prawn-svg
   puma
   rails-controller-testing
-  railties (~> 7.1.3)
+  railties (~> 7.1.5.1)
   redis (~> 4.0)
   requestjs-rails
   rest-client
