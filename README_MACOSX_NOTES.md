@@ -31,6 +31,7 @@ brew outdated
 brew upgrade
 ```
 
+Note: do not run `brew upgrade` if you're on old hardware and you already have the stuff below installed. Homebrew is pretty hardware-ignorant and will try to install incompatible versions, rendering your dev environment inoperable and difficult to downgrade.
 Install a bunch of useful stuff from `Homebrew`
 
 ```sh
