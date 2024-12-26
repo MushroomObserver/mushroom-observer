@@ -102,7 +102,7 @@ will prevent them from ever working properly.
 brew services stop mysql
 brew uninstall mysql
 rm -r /usr/local/var/mysql # or wherever homebrew installed mysql
-rm /usr/local/etc/my.cnf # and any other .cnf files
+rm /usr/local/etc/my.cnf # and any other .cnf files you can find
 brew install mysql
 brew services start mysql
 mysql_secure_installation
