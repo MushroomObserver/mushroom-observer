@@ -24,14 +24,15 @@ You will also need `homebrew` from <https://brew.sh/>:
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-If you already have `homebrew` installed you may want to do:
+If you already have `homebrew` installed you may want to upgrade.
+
+Note: do not run `brew upgrade` if you're on old hardware and you already have everything below installed. Homebrew is pretty hardware-ignorant and will try to install incompatible versions, rendering your dev environment inoperable and difficult to downgrade.
 
 ```sh
 brew outdated
-brew upgrade
+brew upgrade # see caveat above!
 ```
 
-Note: do not run `brew upgrade` if you're on old hardware and you already have the stuff below installed. Homebrew is pretty hardware-ignorant and will try to install incompatible versions, rendering your dev environment inoperable and difficult to downgrade.
 Install a bunch of useful stuff from `Homebrew`
 
 ```sh
@@ -86,63 +87,22 @@ Set the root password
 
 ```sh
 brew services start mysql
-mysqladmin -u root password 'root'
+mysql_secure_installation # sets the root password, new style.
+# mysql > 8.0 uses this new configuration wizard. It asks several questions.
 ```
 
-@JoeCohen had problems setting the MySQL root password
-as follows:
-
-```sh
-~ % mysqladmin -u root password 'root'
-mysqladmin: connect to server at 'localhost' failed
-error: 'Access denied for user 'root'@'localhost' (using password: NO)'
-```
-
-He used this solution (from ChatGPT, explanations omitted)
-
-1. Stop MySQL Server
+If you have trouble with this step, you may have an old mysql configuration
+interfering. If that is the case, it's usually more efficient to completely
+delete mysql and all configurations, and reinstall, than to debug:
 
 ```sh
 brew services stop mysql
-```
-
-2. Start MySQL in Safe Mode
-
-```sh
-mysqld_safe --skip-grant-tables
-```
-
-3. Open a New Terminal Window
-4. In the new terminal window, access MySQL as Root without a password:
-
-```sh
-mysql -u root
-```
-
-5. Inside the MySQL prompt (in the new terminal window), update the root password:
-Temporarily use `mysql_native_password` instead of `caching_sha2_password`
-
-```sql
-USE mysql;
-UPDATE user SET authentication_string=PASSWORD('root') WHERE User='root';
-FLUSH PRIVILEGES;
-exit;
-# nimmo used this syntax, it is different in mysql 8; the above did not work:
-UPDATE USER SET AUTHENTICATION_STRING='null' WHERE user='root';
-FLUSH PRIVILEGES;
-exit;
-# Setting it to null above seems necessary. Then:
-mysql -u root
-ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';
-```
-
-6. Stop Safe Mode MySQL Server:
-In the original terminal window where you started MySQL in safe mode,
-press Ctrl C to stop the server.
-7. Restart MySQL
-
-```sh
+brew uninstall mysql
+rm -r /usr/local/var/mysql
+rm /usr/local/etc/my.cnf # and any other .cnf files
+brew install mysql
 brew services start mysql
+mysql_secure_installation
 ```
 
 Test the New Password: Verify that the new root password is working:
@@ -225,9 +185,10 @@ or for bash:
 
 - download the snapshot from <http://images.mushroomobserver.org/checkpoint_stripped.gz>
 - copy (or move) the downloaded .gz file to the `mushroom-observer` directory.
-Then:
+  Then:
 
 Mac users have to uncomment/comment the relevant/irrelevant lines in `config/database.yml`:
+
 ```yml
 shared:
   adapter: trilogy
