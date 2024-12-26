@@ -99,7 +99,8 @@ module Query
       # Tell outer query to skip observations with no images!
       def skip_observations_with_no_images
         self.tweak_outer_query = lambda do |outer|
-          extend_where(outer.params) << "observations.thumb_image_id IS NOT NULL"
+          extend_where(outer.params) <<
+            "observations.thumb_image_id IS NOT NULL"
         end
       end
     end
