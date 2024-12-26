@@ -66,6 +66,18 @@ left_cols = add_right_tabs ? "col-xs-8 col-lg-7" : "col-xs-12"
         yield(:type_filters)
       end %>
 
+  <% if content_for?(:project_tabs) %>
+    <%= tag.div(class: left_cols, id: "project_tabs") do
+          yield(:project_tabs)
+	end %>
+  <% end %>
+
+  <% if content_for?(:observation_buttons) %>
+    <%= tag.div(class: left_cols, id: "observation_buttons") do
+          yield(:observation_buttons)
+	end %>
+  <% end %>
+
   <!-- Sorter. conditionally renders the partial -->
   <%= yield(:sorter) %>
 
