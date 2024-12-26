@@ -41,7 +41,8 @@ brew install git mysql exiftool libjpeg shared-mime-info openssl imagemagick fin
 
 ### Install Bash if you're not using Zsh
 
-If you haven't done so already, install a recent version of [Bash](https://www.gnu.org/software/bash/) and set
+If you haven't done so already, either switch your shell to zsh (supported by Apple) or
+install a recent version of [Bash](https://www.gnu.org/software/bash/) and set
 it as the default shell. You can find your installed version like this:
 
 ```sh
