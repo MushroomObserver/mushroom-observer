@@ -55,14 +55,6 @@ class Query::LocationBase < Query::Base
     initialize_advanced_search
   end
 
-  def add_regexp_condition
-    return if params[:regexp].blank?
-
-    @title_tag = :query_title_regexp_search
-    regexp = escape(params[:regexp].to_s.strip_squeeze)
-    where << "locations.name REGEXP #{regexp}"
-  end
-
   def add_join_to_names
     add_join(:observations, :names)
   end
