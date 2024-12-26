@@ -4,6 +4,36 @@ module Query
   module Initializers
     # initializing methods inherited by all Query's for Images
     module Images
+      def images_only_parameter_declarations
+        {
+          created_at?: [:time],
+          updated_at?: [:time],
+          date?: [:date],
+          ids?: [Image],
+          by_user?: User,
+          users?: [User],
+          locations?: [:string],
+          outer?: :query, # for images inside observations
+          observation?: Observation, # for images inside observations
+          observations?: [Observation],
+          project?: Project,
+          projects?: [:string],
+          species_lists?: [:string],
+          with_observation?: { boolean: [true] },
+          size?: { string: Image::ALL_SIZES - [:full_size] },
+          content_types?: [{ string: Image::ALL_EXTENSIONS }],
+          with_notes?: :boolean,
+          notes_has?: :string,
+          copyright_holder_has?: :string,
+          license?: [License],
+          with_votes?: :boolean,
+          quality?: [:float],
+          confidence?: [:float],
+          ok_for_export?: :boolean,
+          pattern?: :string
+        }
+      end
+
       def initialize_img_notes_parameters
         add_boolean_condition("LENGTH(COALESCE(images.notes,'')) > 0",
                               "LENGTH(COALESCE(images.notes,'')) = 0",
@@ -47,7 +77,7 @@ module Query
 
       def add_img_advanced_search_conditions
         return if advanced_search_params.all? { |key| params[key].blank? }
-        return if handle_content_search!
+        return if handle_img_content_search!
 
         add_join(:observation_images, :observations)
         initialize_advanced_search
@@ -55,15 +85,15 @@ module Query
 
       # Perform content search as an observation query, then
       # coerce into images.
-      def handle_content_search!
+      def handle_img_content_search!
         return false if params[:content].blank?
 
         self.executor = lambda do |args|
-          execute_content_search(args)
+          execute_img_content_search(args)
         end
       end
 
-      def execute_content_search(args)
+      def execute_img_content_search(args)
         # [Sorry, yes, this is a mess. But I don't expect this type of search
         # to survive much longer. Image searches are in desperate need of
         # critical revision for performance concerns, anyway. -JPH 20210809]
@@ -77,7 +107,7 @@ module Query
         model.connection.select_rows(query(args2))
       end
 
-      def add_inside_observation_conditions
+      def add_img_inside_observation_conditions
         return unless params[:observation] && params[:outer]
 
         obs = find_cached_parameter_instance(Observation, :observation)

@@ -11,16 +11,8 @@ class Query::LocationBase < Query::Base
   end
 
   def parameter_declarations
-    super.merge(
-      created_at?: [:time],
-      updated_at?: [:time],
-      ids?: [Location],
-      by_user?: User,
-      by_editor?: User,
-      users?: [User],
-      pattern?: :string,
-      regexp?: :string
-    ).merge(bounding_box_parameter_declarations).
+    super.merge(locations_only_parameter_declarations).
+      merge(bounding_box_parameter_declarations).
       merge(content_filter_parameter_declarations(Location)).
       merge(advanced_search_parameter_declarations)
   end

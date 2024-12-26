@@ -12,41 +12,13 @@ module Query
       Name
     end
 
-    # rubocop:disable Metrics/MethodLength
     def parameter_declarations
-      super.merge(
-        created_at?: [:time],
-        updated_at?: [:time],
-        ids?: [Name],
-        by_user?: User,
-        by_editor?: User,
-        users?: [User],
-        misspellings?: { string: [:no, :either, :only] },
-        deprecated?: { string: [:either, :no, :only] },
-        with_synonyms?: :boolean,
-        locations?: [:string],
-        species_lists?: [:string],
-        rank?: [{ string: Name.all_ranks }],
-        is_deprecated?: :boolean,
-        pattern?: :string,
-        text_name_has?: :string,
-        with_author?: :boolean,
-        author_has?: :string,
-        with_citation?: :boolean,
-        citation_has?: :string,
-        with_classification?: :boolean,
-        classification_has?: :string,
-        with_notes?: :boolean,
-        notes_has?: :string,
-        with_comments?: { boolean: [true] },
-        comments_has?: :string,
-        with_observations?: { boolean: [true] }
-      ).merge(content_filter_parameter_declarations(Name)).
+      super.merge(names_only_parameter_declarations).
+        merge(content_filter_parameter_declarations(Name)).
         merge(names_parameter_declarations).
         merge(descriptions_parameter_declarations).
         merge(advanced_search_parameter_declarations)
     end
-    # rubocop:enable Metrics/MethodLength
 
     def initialize_flavor
       unless is_a?(Query::NameWithObservations) ||

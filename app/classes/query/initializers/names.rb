@@ -4,6 +4,39 @@ module Query
   module Initializers
     # initializing methods inherited by all Query's for Names
     module Names
+      # Either not compatible, redundant, or just not used with other queries.
+      def names_only_parameter_declarations
+        {
+          created_at?: [:time],
+          updated_at?: [:time],
+          ids?: [Name],
+          by_user?: User,
+          by_editor?: User,
+          users?: [User],
+          misspellings?: { string: [:no, :either, :only] },
+          deprecated?: { string: [:either, :no, :only] },
+          with_synonyms?: :boolean,
+          locations?: [:string],
+          species_lists?: [:string],
+          rank?: [{ string: Name.all_ranks }],
+          is_deprecated?: :boolean,
+          pattern?: :string,
+          text_name_has?: :string,
+          with_author?: :boolean,
+          author_has?: :string,
+          with_citation?: :boolean,
+          citation_has?: :string,
+          with_classification?: :boolean,
+          classification_has?: :string,
+          with_notes?: :boolean,
+          notes_has?: :string,
+          with_comments?: { boolean: [true] },
+          comments_has?: :string,
+          with_observations?: { boolean: [true] }
+        }
+      end
+
+      # Used in coerced queries for obs, plus sequence and species_list queries
       def names_parameter_declarations
         {
           names?: [:string],
