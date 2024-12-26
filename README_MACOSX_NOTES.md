@@ -91,14 +91,17 @@ mysql_secure_installation # sets the root password, new style.
 # mysql > 8.0 uses this new configuration wizard. It asks several questions.
 ```
 
-If you have trouble with this step, you may have an old mysql configuration
-interfering. If that is the case, it's usually more efficient to completely
-delete mysql and all configurations, and reinstall, than to debug:
+If you have trouble with that step, you may have an old mysql configuration
+interfering. It is usually more efficient to completely delete the mysql
+directory and all config files, and reinstall, than to debug.
+
+Bad installs can have all kinds of directory permissions problems that
+will prevent them from ever working properly.
 
 ```sh
 brew services stop mysql
 brew uninstall mysql
-rm -r /usr/local/var/mysql
+rm -r /usr/local/var/mysql # or wherever homebrew installed mysql
 rm /usr/local/etc/my.cnf # and any other .cnf files
 brew install mysql
 brew services start mysql
