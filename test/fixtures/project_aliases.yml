@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  target: one
+  target_type: Target
+  name: MyString
+  project: one
+
+two:
+  target: two
+  target_type: Target
+  name: MyString
+  project: two
