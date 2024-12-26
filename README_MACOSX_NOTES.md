@@ -24,9 +24,9 @@ You will also need `homebrew` from <https://brew.sh/>:
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-If you already have `homebrew` installed you may want to upgrade.
+If you already have `homebrew` installed you may (or may not) want to upgrade your packages.
 
-Note: do not run `brew upgrade` if you're on old hardware and you already have everything below installed. Homebrew is pretty hardware-ignorant and will try to install incompatible versions, rendering your dev environment inoperable and difficult to downgrade.
+Warning: do not run `brew upgrade` if you're on very old hardware and you already have everything below installed. Homebrew is pretty hardware-ignorant and will try to upgrade you to incompatible versions, rendering your dev environment inoperable and difficult to downgrade.
 
 ```sh
 brew outdated
@@ -39,7 +39,7 @@ Install a bunch of useful stuff from `Homebrew`
 brew install git mysql exiftool libjpeg shared-mime-info openssl imagemagick findutils
 ```
 
-### Install Bash
+### Install Bash if you're not using Zsh
 
 If you haven't done so already, install a recent version of [Bash](https://www.gnu.org/software/bash/) and set
 it as the default shell. You can find your installed version like this:
