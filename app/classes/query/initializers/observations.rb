@@ -4,6 +4,30 @@ module Query
   module Initializers
     # initializing methods inherited by all Query's for Observations
     module Observations
+      # Either not compatible, redundant, or just not used with coercions.
+      def observations_only_parameter_declarations
+        {
+          # dates/times
+          date?: [:date],
+          created_at?: [:time],
+          updated_at?: [:time],
+
+          ids?: [Observation],
+          herbarium_records?: [:string],
+          project_lists?: [:string],
+          by_user?: User,
+          by_editor?: User, # for coercions from name/location
+          users?: [User],
+          field_slips?: [:string],
+          pattern?: :string,
+          regexp?: :string, # for coercions from location
+          needs_naming?: :boolean,
+          in_clade?: :string,
+          in_region?: :string
+        }
+      end
+
+      # for observations, or coercions to observations.
       def observations_parameter_declarations
         {
           notes_has?: :string,
@@ -138,6 +162,65 @@ module Query
           params[:with_name],
           :observations, :names
         )
+      end
+
+      def add_needs_naming_condition
+        return unless params[:needs_naming]
+
+        user = User.current_id
+        # 15x faster to use this AR scope to assemble the IDs vs using
+        # SQL SELECT DISTINCT
+        where << Observation.needs_naming_and_not_reviewed_by_user(user).
+                 to_sql.gsub(/^.*?WHERE/, "")
+
+        # additional filters:
+        add_name_in_clade_condition
+        add_location_in_region_condition
+        # add_by_user_condition
+      end
+
+      # from content_filter/clade.rb
+      # parse_name and check the already initialize_unfiltered list of
+      # observations against observations.classification. Some inefficiency
+      # here comes from having to parse the name from a string.
+      # NOTE: Write an in_clade autocompleter that passes the name_id as val
+      def add_name_in_clade_condition
+        return unless params[:in_clade]
+
+        val = params[:in_clade]
+        name, rank = parse_name(val)
+        conds = if Name.ranks_above_genus.include?(rank)
+                  "observations.text_name = '#{name}' OR " \
+                  "observations.classification REGEXP '#{rank}: _#{name}_'"
+                else
+                  "observations.text_name = '#{name}' OR " \
+                  "observations.text_name REGEXP '^#{name} '"
+                end
+        where << conds
+      end
+
+      def parse_name(val)
+        name = Name.best_match(val)
+        return [name.text_name, name.rank] if name
+
+        [val, Name.guess_rank(val) || "Genus"]
+      end
+
+      # from content_filter/region.rb, but simpler.
+      # includes region itself (i.e., no comma before region in 2nd regex)
+      def add_location_in_region_condition
+        return unless params[:in_region]
+
+        region = params[:in_region]
+        region = Location.reverse_name_if_necessary(region)
+
+        conds = if Location.understood_continent?(region)
+                  countries = Location.countries_in_continent(region).join("|")
+                  "observations.where REGEXP #{escape(", (#{countries})$")}"
+                else
+                  "observations.where LIKE #{escape("%#{region}")}"
+                end
+        where << conds
       end
 
       def initialize_confidence_parameter

@@ -11,16 +11,8 @@ class Query::LocationBase < Query::Base
   end
 
   def parameter_declarations
-    super.merge(
-      created_at?: [:time],
-      updated_at?: [:time],
-      ids?: [Location],
-      by_user?: User,
-      by_editor?: User,
-      users?: [User],
-      pattern?: :string,
-      regexp?: :string
-    ).merge(bounding_box_parameter_declarations).
+    super.merge(locations_only_parameter_declarations).
+      merge(bounding_box_parameter_declarations).
       merge(content_filter_parameter_declarations(Location)).
       merge(advanced_search_parameter_declarations)
   end
@@ -53,14 +45,6 @@ class Query::LocationBase < Query::Base
 
     add_join(:observations) if params[:content].present?
     initialize_advanced_search
-  end
-
-  def add_regexp_condition
-    return if params[:regexp].blank?
-
-    @title_tag = :query_title_regexp_search
-    regexp = escape(params[:regexp].to_s.strip_squeeze)
-    where << "locations.name REGEXP #{regexp}"
   end
 
   def add_join_to_names
