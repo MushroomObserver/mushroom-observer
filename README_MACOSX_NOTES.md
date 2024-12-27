@@ -132,7 +132,7 @@ FLUSH PRIVILEGES;
 exit;
 # Setting it to null above seems necessary. Then:
 mysql -u root
-ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';
+ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';
 ```
 
 6. Stop Safe Mode MySQL Server:
