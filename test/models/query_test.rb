@@ -1633,7 +1633,7 @@ class QueryTest < UnitTestCase
                  :Image, :all,
                  with_observations: 1, location: locations(:burbank).id)
     assert_query([], :Image, :all,
-                 with_observations: 1,location: locations(:mitrula_marsh).id)
+                 with_observations: 1, location: locations(:mitrula_marsh).id)
   end
 
   def test_image_with_observations_at_where
@@ -1652,7 +1652,8 @@ class QueryTest < UnitTestCase
                        where(observations: { user: mary }),
                  :Image, :all, with_observations: 1, by_user: mary)
 
-    assert_query([], :Image, :all, with_observations: 1, by_user: users(:zero_user))
+    assert_query([], :Image, :all,
+                 with_observations: 1, by_user: users(:zero_user))
   end
 
   def test_image_with_observations_for_project
@@ -1851,13 +1852,14 @@ class QueryTest < UnitTestCase
   def test_location_with_descriptions_in_set
     assert_query(
       [locations(:albion), locations(:no_mushrooms_location)],
-      :Location, :all, with_descriptions: 1,
-                       desc_ids: [location_descriptions(:albion_desc).id,
-                                  location_descriptions(:no_mushrooms_location_desc).id]
+      :Location, :all,
+      with_descriptions: 1,
+      desc_ids: [location_descriptions(:albion_desc).id,
+                 location_descriptions(:no_mushrooms_location_desc).id]
     )
-    assert_query([locations(:albion)],
-                 :Location, :all, with_descriptions: 1,
-                                  desc_ids: [location_descriptions(:albion_desc).id, rolf.id])
+    assert_query([locations(:albion)], :Location, :all,
+                 with_descriptions: 1,
+                 desc_ids: [location_descriptions(:albion_desc).id, rolf.id])
     assert_query([],
                  :Location, :all, with_descriptions: 1, desc_ids: [rolf.id])
   end
