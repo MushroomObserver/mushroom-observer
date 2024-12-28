@@ -1467,10 +1467,10 @@ class QueryTest < UnitTestCase
                  :Image, :all, with_observations: true)
   end
 
-  # Prove that :with_observations flavor of Image Query works with each
+  # Prove that :with_observations param of Image Query works with each
   # parameter P for which (a) there's no other test of P for any flavor of
   # Image, OR (b) P behaves differently in :with_observations than in
-  # all other flavors of Image Query's.
+  # all other params of Image Query's.
 
   ##### date/time parameters #####
 
@@ -1613,7 +1613,8 @@ class QueryTest < UnitTestCase
   def test_image_with_observations_with_sequences
     expect = Image.joins(observations: :sequences).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
-    assert_query(expect, Image, :with_observations, with_sequences: true)
+    assert_query(expect, :Image, :all,
+                 with_observations: 1, with_sequences: true)
   end
 
   def test_image_with_observations_is_collection_location
@@ -1869,10 +1870,10 @@ class QueryTest < UnitTestCase
                  :Location, :all, with_observations: 1)
   end
 
-  # Prove that :with_observations flavor of Location Query works with each
+  # Prove that :with_observations param of Location Query works with each
   # parameter P for which (a) there's no other test of P for any flavor of
   # Location, OR (b) P behaves differently in :with_observations than in
-  # all other flavors of Location Query's.
+  # all other params of Location Query's.
 
   ##### date/time parameters #####
 
@@ -2379,10 +2380,10 @@ class QueryTest < UnitTestCase
     assert_query(expect, :Name, :all, with_observations: 1, by: :id)
   end
 
-  # Prove that :with_observations flavor of Name Query works with each
+  # Prove that :with_observations param of Name Query works with each
   # parameter P for which (a) there's no other test of P for any flavor of
   # Name, OR (b) P behaves differently in :with_observations than in
-  # all other flavors of Name Query's.
+  # all other params of Name Query's.
 
   ##### date/time parameters #####
 
@@ -2507,7 +2508,7 @@ class QueryTest < UnitTestCase
   def test_name_with_observations_with_sequences
     assert_query(
       Name.with_correct_spelling.joins(observations: :sequences).uniq,
-      Name, :with_observations, with_sequences: true
+      Name, :all, with_observations: 1, with_sequences: true
     )
   end
 
