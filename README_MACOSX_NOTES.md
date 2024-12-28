@@ -108,62 +108,6 @@ brew services start mysql
 mysqladmin -u root password 'root'
 ```
 
-@JoeCohen had problems setting the MySQL root password
-as follows:
-
-```sh
-~ % mysqladmin -u root password 'root'
-mysqladmin: connect to server at 'localhost' failed
-error: 'Access denied for user 'root'@'localhost' (using password: NO)'
-```
-
-He used this solution (from ChatGPT, explanations omitted)
-
-1. Stop MySQL Server
-
-```sh
-brew services stop mysql
-```
-
-2. Start MySQL in Safe Mode
-
-```sh
-mysqld_safe --skip-grant-tables
-```
-
-3. Open a New Terminal Window
-4. In the new terminal window, access MySQL as Root without a password:
-
-```sh
-mysql -u root
-```
-
-5. Inside the MySQL prompt (in the new terminal window), update the root password:
-Temporarily use `mysql_native_password` instead of `caching_sha2_password`
-
-```sql
-USE mysql;
-UPDATE user SET authentication_string=PASSWORD('root') WHERE User='root';
-FLUSH PRIVILEGES;
-exit;
-# nimmo used this syntax, it is different in mysql 8; the above did not work:
-UPDATE USER SET AUTHENTICATION_STRING='null' WHERE user='root';
-FLUSH PRIVILEGES;
-exit;
-# Setting it to null above seems necessary. Then:
-mysql -u root
-ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';
-```
-
-6. Stop Safe Mode MySQL Server:
-In the original terminal window where you started MySQL in safe mode,
-press Ctrl C to stop the server.
-7. Restart MySQL
-
-```sh
-brew services start mysql
-```
-
 Test the New Password: Verify that the new root password is working:
 
 ```sh
