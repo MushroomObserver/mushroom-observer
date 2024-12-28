@@ -31,6 +31,26 @@ brew outdated
 brew upgrade
 ```
 
+#### Important: If you have mysql < 9.0 installed you must remove mysql and all its vestiges before continuing.
+
+- `ps -ax | grep mysql`
+- stop and kill any MySQL processes
+- `brew remove mysql`
+- `brew cleanup`
+- `sudo rm /usr/local/mysql`
+- `sudo rm /etc/my.cnf`
+- `sudo rm /usr/local/etc/my.cnf`
+- `sudo rm -rf /usr/local/var/mysql`
+- `sudo rm -rf /usr/local/mysql*`
+- `sudo rm ~/Library/LaunchAgents/homebrew.mxcl.mysql.plist`
+- `sudo rm -rf /Library/StartupItems/MySQLCOM`
+- `sudo rm -rf /Library/PreferencePanes/My*`
+- edit /etc/hostconfig and remove the line `MYSQLCOM=-YES-`
+- `rm -rf ~/Library/PreferencePanes/My*`
+- `sudo rm -rf /Library/Receipts/mysql*`
+- `sudo rm -rf /Library/Receipts/MySQL*`
+- `sudo rm -rf /private/var/db/receipts/*mysql*`
+
 Install a bunch of useful stuff from `Homebrew`
 
 ```sh
