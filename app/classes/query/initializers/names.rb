@@ -5,7 +5,7 @@ module Query
     # initializing methods inherited by all Query's for Names
     module Names
       # Either not compatible, redundant, or just not used with other queries.
-      def names_only_parameter_declarations
+      def names_per_se_parameter_declarations
         {
           created_at?: [:time],
           updated_at?: [:time],
@@ -32,6 +32,7 @@ module Query
           notes_has?: :string,
           with_comments?: { boolean: [true] },
           comments_has?: :string,
+          with_descriptions?: :boolean,
           with_observations?: { boolean: [true] }
         }
       end

@@ -4,8 +4,8 @@ module Query
   module Initializers
     # initializing methods inherited by all Query's for Locations
     module Locations
-      # Either not compatible, redundant, or just not used with other queries.
-      def locations_only_parameter_declarations
+      # The basic Location parameters.
+      def locations_per_se_parameter_declarations
         {
           created_at?: [:time],
           updated_at?: [:time],
@@ -14,7 +14,9 @@ module Query
           by_editor?: User,
           users?: [User],
           pattern?: :string,
-          regexp?: :string
+          regexp?: :string,
+          with_descriptions?: :boolean,
+          with_observations?: :boolean
         }
       end
 

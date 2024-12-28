@@ -74,10 +74,11 @@ module Query
       end
 
       # This is just to allow the additional location conditions
+      # to be added FOR coerced queries.
       def add_ids_condition(table = model.table_name, ids = :ids)
-        return if params[ids].nil? # [] is valid
-
         super
+        return if model != Observation
+
         add_is_collection_location_condition_for_locations
       end
 
@@ -111,7 +112,7 @@ module Query
         initialize_with_public_lat_lng_parameter
         initialize_with_name_parameter
         initialize_confidence_parameter
-        initialize_with_obs_notes_parameter
+        initialize_obs_with_notes_parameter
         add_with_notes_fields_condition(params[:with_notes_fields])
         add_join(:observations, :comments) if params[:with_comments]
         add_join(:observations, :sequences) if params[:with_sequences]
@@ -229,7 +230,7 @@ module Query
         )
       end
 
-      def initialize_with_obs_notes_parameter(param_name = :with_notes)
+      def initialize_obs_with_notes_parameter(param_name = :with_notes)
         add_boolean_condition(
           "observations.notes != #{escape(Observation.no_notes_persisted)}",
           "observations.notes  = #{escape(Observation.no_notes_persisted)}",
@@ -250,6 +251,7 @@ module Query
       end
 
       def params_out_to_with_observations_params(pargs)
+        pargs = pargs.merge(with_observations: true)
         return pargs if pargs[:ids].blank?
 
         pargs[:obs_ids] = pargs.delete(:ids)
@@ -257,7 +259,7 @@ module Query
       end
 
       def params_back_to_observation_params
-        pargs = params_with_old_by_restored
+        pargs = params_with_old_by_restored.except(:with_observations)
         return pargs if pargs[:obs_ids].blank?
 
         pargs[:ids] = pargs.delete(:obs_ids)
