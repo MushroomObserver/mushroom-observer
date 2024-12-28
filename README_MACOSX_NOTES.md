@@ -207,6 +207,10 @@ rake db:drop
 mysql -u root -p < db/initialize.sql
 ```
 
+NOTE: 2024-12-27 @JoeCohen: For me (but not others) `rake db:drop` threw an error
+because `config/database.yml` was missing.
+Please contact us if that is the case.
+
 When prompted to `Enter password:`<br>
 Enter `root`, return.
 Then:
