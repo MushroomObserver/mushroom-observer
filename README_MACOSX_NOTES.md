@@ -31,7 +31,8 @@ brew outdated
 brew upgrade
 ```
 
-#### Important: If you have mysql < 9.0 installed you must remove mysql and all its vestiges before continuing.
+#### Important:
+If you have mysql < 9.0 installed remove mysql and all vestiges before continuing.
 
 - `ps -ax | grep mysql`
 - stop and kill any MySQL processes
@@ -139,7 +140,7 @@ git clone https://github.com/MushroomObserver/mushroom-observer
 cd mushroom-observer
 ```
 
-### Make sure you have the current version of Ruby.
+### Make sure you have the current version of Ruby
 
 ```sh
 if ! [[ `ruby --version` =~ `cat .ruby-version` ]]; then
@@ -191,6 +192,7 @@ or for bash:
 Then:
 
 Mac users have to uncomment/comment the relevant/irrelevant lines in `config/database.yml`:
+
 ```yml
 shared:
   adapter: trilogy
@@ -211,7 +213,7 @@ NOTE: 2024-12-27 @JoeCohen: For me (but not others) `rake db:drop` threw an erro
 because `config/database.yml` was missing.
 Please contact us if that is the case.
 
-When prompted to `Enter password:`<br>
+When prompted to "Enter password:" <br>
 Enter `root`, return.
 Then:
 
@@ -297,8 +299,6 @@ fi
 
 ### Install trilogy
 
-Currently do this:
-
 ```sh
 gem install trilogy
 ```
@@ -361,9 +361,19 @@ chmod +x .git/hooks/pre-commit
 
 ### Other
 
+You probably need to generate a new development master key (see below)
+if you get a test failure like this:
+
+```txt
+ FAIL ConfigTest#test_secrets (24.96s)
+    Expected: "magic"
+     Actual: nil
+    test/models/config_test.rb:9:in `test_secrets'
+```
+
 @JoeCohen had to generate a new developmemt master key.
 In the mushroom-observer directory, create the file
-`/config/master.key` with the following content:
+`/config/master.key` with this content:
 
 ```txt
 5f343cfc11a623c470d23e25221972b5
