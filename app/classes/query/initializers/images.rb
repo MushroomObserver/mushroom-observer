@@ -4,7 +4,7 @@ module Query
   module Initializers
     # initializing methods inherited by all Query's for Images
     module Images
-      def images_only_parameter_declarations
+      def images_per_se_parameter_declarations
         {
           created_at?: [:time],
           updated_at?: [:time],
@@ -30,7 +30,8 @@ module Query
           quality?: [:float],
           confidence?: [:float],
           ok_for_export?: :boolean,
-          pattern?: :string
+          pattern?: :string,
+          with_observations?: :boolean
         }
       end
 

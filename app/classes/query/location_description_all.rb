@@ -3,7 +3,8 @@
 class Query::LocationDescriptionAll < Query::LocationDescriptionBase
   def parameter_declarations
     super.merge(
-      old_by?: :string
+      old_by?: :string,
+      with_descriptions?: :boolean
     )
   end
 
@@ -14,6 +15,6 @@ class Query::LocationDescriptionAll < Query::LocationDescriptionBase
 
   def coerce_into_location_query
     pargs = params_out_to_with_descriptions_params
-    Query.lookup(:Location, :with_descriptions, pargs)
+    Query.lookup(:Location, :all, pargs)
   end
 end

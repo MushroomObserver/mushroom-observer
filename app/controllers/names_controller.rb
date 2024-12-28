@@ -68,14 +68,14 @@ class NamesController < ApplicationController
 
   # Display list of names that have observations.
   def with_observations
-    query = create_query(:Name, :with_observations)
+    query = create_query(:Name, :all, with_observations: 1)
     [query, {}]
   end
 
   # Display list of names with descriptions that have authors.
   def with_descriptions
     @with_descriptions = true # signals to add desc info to name list
-    query = create_query(:Name, :with_descriptions)
+    query = create_query(:Name, :all, with_descriptions: 1)
     [query, {}]
   end
 

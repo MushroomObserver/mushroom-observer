@@ -122,7 +122,7 @@ module Query
       initialize_with_images_parameter
       initialize_with_specimen_parameter
       initialize_with_name_parameter
-      initialize_with_obs_notes_parameter(:with_obs_notes)
+      initialize_obs_with_notes_parameter(:with_obs_notes)
       add_with_notes_fields_condition(params[:with_notes_fields], :observations)
     end
 
