@@ -14,7 +14,7 @@ require_relative "../config/environment"
 class BackfillInatImgOrigFname
   CUTOFF = Time.new(2024, 12, 13, 15, 3, 37, "-08:00")
 
-  def self.run
+  def self.run # rubocop:disable Metrics/AbcSize
     obss = Observation.where(source: "mo_inat_import").
            where(Observation[:created_at].lt(CUTOFF))
 
