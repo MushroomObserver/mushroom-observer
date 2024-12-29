@@ -26,7 +26,7 @@ class Query::ObservationAll < Query::ObservationBase
     pargs = is_search ? add_old_title(params_plus_old_by) : params_plus_old_by
     # transform :ids to :obs_ids
     pargs = params_out_to_with_observations_params(pargs)
-    Query.lookup(new_model, :with_observations, pargs)
+    Query.lookup(new_model, :all, pargs)
   end
 
   def title

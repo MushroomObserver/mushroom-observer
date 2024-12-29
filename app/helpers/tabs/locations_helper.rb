@@ -114,10 +114,10 @@ module Tabs
     end
 
     def location_map_title(query:)
-      if query.flavor == :all
-        :map_locations_global_map.t
-      else
+      if query&.params&.dig(:with_observations)
         :map_locations_title.t(locations: query.title)
+      else
+        :map_locations_global_map.t
       end
     end
 

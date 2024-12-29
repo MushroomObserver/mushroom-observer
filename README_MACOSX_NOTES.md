@@ -31,6 +31,27 @@ brew outdated
 brew upgrade
 ```
 
+#### Important:
+If you have mysql < 9.0 installed remove mysql and all vestiges before continuing.
+
+- `ps -ax | grep mysql`
+- stop and kill any MySQL processes
+- `brew remove mysql`
+- `brew cleanup`
+- `sudo rm /usr/local/mysql`
+- `sudo rm /etc/my.cnf`
+- `sudo rm /usr/local/etc/my.cnf`
+- `sudo rm -rf /usr/local/var/mysql`
+- `sudo rm -rf /usr/local/mysql*`
+- `sudo rm ~/Library/LaunchAgents/homebrew.mxcl.mysql.plist`
+- `sudo rm -rf /Library/StartupItems/MySQLCOM`
+- `sudo rm -rf /Library/PreferencePanes/My*`
+- edit /etc/hostconfig and remove the line `MYSQLCOM=-YES-`
+- `rm -rf ~/Library/PreferencePanes/My*`
+- `sudo rm -rf /Library/Receipts/mysql*`
+- `sudo rm -rf /Library/Receipts/MySQL*`
+- `sudo rm -rf /private/var/db/receipts/*mysql*`
+
 Install a bunch of useful stuff from `Homebrew`
 
 ```sh
@@ -88,62 +109,6 @@ brew services start mysql
 mysqladmin -u root password 'root'
 ```
 
-@JoeCohen had problems setting the MySQL root password
-as follows:
-
-```sh
-~ % mysqladmin -u root password 'root'
-mysqladmin: connect to server at 'localhost' failed
-error: 'Access denied for user 'root'@'localhost' (using password: NO)'
-```
-
-He used this solution (from ChatGPT, explanations omitted)
-
-1. Stop MySQL Server
-
-```sh
-brew services stop mysql
-```
-
-2. Start MySQL in Safe Mode
-
-```sh
-mysqld_safe --skip-grant-tables
-```
-
-3. Open a New Terminal Window
-4. In the new terminal window, access MySQL as Root without a password:
-
-```sh
-mysql -u root
-```
-
-5. Inside the MySQL prompt (in the new terminal window), update the root password:
-Temporarily use `mysql_native_password` instead of `caching_sha2_password`
-
-```sql
-USE mysql;
-UPDATE user SET authentication_string=PASSWORD('root') WHERE User='root';
-FLUSH PRIVILEGES;
-exit;
-# nimmo used this syntax, it is different in mysql 8; the above did not work:
-UPDATE USER SET AUTHENTICATION_STRING='null' WHERE user='root';
-FLUSH PRIVILEGES;
-exit;
-# Setting it to null above seems necessary. Then:
-mysql -u root
-ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';
-```
-
-6. Stop Safe Mode MySQL Server:
-In the original terminal window where you started MySQL in safe mode,
-press Ctrl C to stop the server.
-7. Restart MySQL
-
-```sh
-brew services start mysql
-```
-
 Test the New Password: Verify that the new root password is working:
 
 ```sh
@@ -175,7 +140,7 @@ git clone https://github.com/MushroomObserver/mushroom-observer
 cd mushroom-observer
 ```
 
-### Make sure you have the current version of Ruby.
+### Make sure you have the current version of Ruby
 
 ```sh
 if ! [[ `ruby --version` =~ `cat .ruby-version` ]]; then
@@ -227,6 +192,7 @@ or for bash:
 Then:
 
 Mac users have to uncomment/comment the relevant/irrelevant lines in `config/database.yml`:
+
 ```yml
 shared:
   adapter: trilogy
@@ -243,7 +209,11 @@ rake db:drop
 mysql -u root -p < db/initialize.sql
 ```
 
-When prompted to `Enter password:`<br>
+NOTE: 2024-12-27 @JoeCohen: For me (but not others) `rake db:drop` threw an error
+because `config/database.yml` was missing.
+Please contact us if that is the case.
+
+When prompted to "Enter password:" <br>
 Enter `root`, return.
 Then:
 
@@ -329,8 +299,6 @@ fi
 
 ### Install trilogy
 
-Currently do this:
-
 ```sh
 gem install trilogy
 ```
@@ -412,9 +380,19 @@ In another new shell now run:
 
 ### Other
 
+You probably need to generate a new development master key (see below)
+if you get a test failure like this:
+
+```txt
+ FAIL ConfigTest#test_secrets (24.96s)
+    Expected: "magic"
+     Actual: nil
+    test/models/config_test.rb:9:in `test_secrets'
+```
+
 @JoeCohen had to generate a new developmemt master key.
 In the mushroom-observer directory, create the file
-`/config/master.key` with the following content:
+`/config/master.key` with this content:
 
 ```txt
 5f343cfc11a623c470d23e25221972b5

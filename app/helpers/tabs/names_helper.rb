@@ -267,15 +267,14 @@ module Tabs
     end
 
     def all_names_tab(query)
-      return if query&.flavor == :all || query&.flavor&.empty?
+      return unless query&.params&.dig(:with_observations)
 
       [:all_objects.t(type: :name), names_path,
        { class: tab_id(__method__.to_s) }]
     end
 
     def names_index_sorts(query:)
-      rss_log = query&.params&.dig(:by) == :rss_log ||
-                query&.flavor == :rss_log
+      rss_log = query&.params&.dig(:by) == :rss_log
       [
         ["name", :sort_by_name.t],
         ["created_at", :sort_by_created_at.t],
