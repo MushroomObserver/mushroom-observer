@@ -212,7 +212,7 @@ class NamesControllerTest < FunctionalTestCase
     get(:index, params: { with_observations: true })
 
     assert_response(:success)
-    assert_displayed_title("Names with Observations")
+    assert_displayed_title(/Names.*Observations/)
     assert_select(
       "#results a:match('href', ?)", %r{#{names_path}/\d+},
       { count: Name.joins(:observations).
@@ -235,7 +235,7 @@ class NamesControllerTest < FunctionalTestCase
     get(:index, params: { with_observations: true, letter: letter })
 
     assert_response(:success)
-    assert_displayed_title("Names with Observations")
+    assert_displayed_title(/Names.*Observations/)
     names.each do |name|
       assert_select("#results a[href*='/names/#{name.id}'] .display-name",
                     name.search_name)

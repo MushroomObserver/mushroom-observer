@@ -83,8 +83,8 @@ class LocationsController < ApplicationController
   # Displays a list of all locations whose country matches the id param.
   def project
     query = create_query(
-      :Location, :with_observations,
-      project: Project.find(params[:project])
+      :Location, :all,
+      with_observations: true, project: Project.find(params[:project])
     )
     [query, { link_all_sorts: true }]
   end
@@ -166,10 +166,7 @@ class LocationsController < ApplicationController
   # Try to turn this into a query on observations.where instead.
   # Yes, still a kludge, but a little better than tweaking SQL by hand...
   def coerce_query_for_undefined_locations(query)
-    # None of the rest make sense.
-    return nil unless [:all, :with_observations].include?(query.flavor)
-
-    args   = query.params.dup
+    args   = query.params.dup.except(:with_observations)
     # Location params not handled by Observation. (does handle :by_user)
     # If these are passed, we're not looking for undefined locations.
     return nil if [:by_editor, :regexp].any? { |key| args[key] }
