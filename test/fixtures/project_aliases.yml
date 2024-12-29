@@ -1,13 +1,13 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  target: one
-  target_type: Target
+  target: rolf
+  target_type: User
   name: MyString
-  project: one
+  project: eol_project
 
 two:
-  target: two
-  target_type: Target
+  target: albion
+  target_type: Location
   name: MyString
-  project: two
+  project: eol_project
