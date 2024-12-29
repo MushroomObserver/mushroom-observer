@@ -111,7 +111,6 @@ GEM
     crass (1.0.6)
     css_parser (1.19.1)
       addressable
-    csv (3.3.0)
     cuprite (0.15.1)
       capybara (~> 3.0)
       ferrum (~> 0.15.0)
@@ -208,10 +207,6 @@ GEM
     http-accept (1.7.0)
     http-cookie (1.0.7)
       domain_name (~> 0.5)
-    httparty (0.22.0)
-      csv
-      mini_mime (>= 1.0.0)
-      multi_xml (>= 0.5.2)
     httpclient (2.8.3)
     i18n (1.14.6)
       concurrent-ruby (~> 1.0)
@@ -530,7 +525,6 @@ DEPENDENCIES
   debug
   fastimage
   google-cloud-storage
-  httparty
   i18n
   importmap-rails
   jbuilder
