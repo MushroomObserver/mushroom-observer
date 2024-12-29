@@ -22,7 +22,7 @@ group :rails do
   gem("actioncable", "~> 7.1.3")
   # gem("actionmailbox", "~> 7.1.3")
   gem("actionmailer", "~> 7.1.3")
-  gem("actionpack", "~> 7.1.3")
+  gem("actionpack", "~> 7.1.5")
   # gem("actiontext", "~> 7.1.3")
   gem("actionview", "~> 7.1.3")
   gem("activejob", "~> 7.1.3")
