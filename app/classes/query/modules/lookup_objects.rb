@@ -52,7 +52,7 @@ module Query::Modules::LookupObjects
 
   def lookup_users_by_name(vals)
     lookup_objects_by_name(vals) do |name|
-      User.where(login: name.sub(/ *<.*>/, ""))
+      User.where(login: User.remove_bracketed_name(name))
     end
   end
 

@@ -36,7 +36,7 @@ module Query::Initializers::AdvancedSearch
   def google_parse_params
     [
       google_parse(params[:name]),
-      google_parse(params[:user].to_s.gsub(/ *<[^<>]*>/, "")),
+      google_parse(User.remove_bracketed_name(params[:user].to_s)),
       google_parse(params[:user_where]),
       google_parse(params[:content])
     ]
