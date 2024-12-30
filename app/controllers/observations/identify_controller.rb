@@ -15,10 +15,9 @@ module Observations
       "Observation"
     end
 
-    # override the default Query flavor :all
+    # override the default? maybe no longer necessary
     def unfiltered_index_opts
-      super.merge(query_flavor: :all,
-                  query_args: { needs_naming: true, by: :rss_log })
+      super.merge(query_args: { needs_naming: true, by: :rss_log })
     end
 
     def index_active_params
@@ -49,19 +48,19 @@ module Observations
     def clade(term)
       # return unless (clade = Name.find_by(text_name: term))
 
-      query = create_query(:Observation, :all,
+      query = create_query(:Observation,
                            needs_naming: true, by: :rss_log, in_clade: term)
       [query, {}]
     end
 
     def region(term)
-      query = create_query(:Observation, :all,
+      query = create_query(:Observation,
                            needs_naming: true, by: :rss_log, in_region: term)
       [query, {}]
     end
 
     # def user_filter(term)
-    #   query = create_query(:Observation, :all,
+    #   query = create_query(:Observation,
     #                        needs_naming: true, by: :rss_log,
     #                        by_user: params[:user])
     #   [query, {}]

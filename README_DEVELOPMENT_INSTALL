@@ -198,7 +198,7 @@ jason> mysql -u root -p
   CREATE DATABASE mo_development;
   CREATE DATABASE mo_test;
   CREATE DATABASE cache_development;
-  CREATE USER 'mo'@'localhost' IDENTIFIED WITH MYSQL_NATIVE_PASSWORD BY 'xxx';
+  CREATE USER 'mo'@'localhost' IDENTIFIED BY 'xxx';
   # Command used to reset password if needed later:
   # SET PASSWORD FOR 'mo'@'localhost' = PASSWORD('xxx');
   GRANT ALL PRIVILEGES ON mo_development.* TO 'mo'@'localhost' WITH GRANT OPTION;

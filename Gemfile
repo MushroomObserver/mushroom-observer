@@ -116,8 +116,6 @@ gem("fastimage")
 # for detecting file type of uploaded images
 gem("mimemagic")
 
-# Get data from third-party websites
-gem("httparty")
 # Gems used for iNat import
 gem("oauth2")
 gem("rest-client")
@@ -153,6 +151,9 @@ gem("prawn-svg")
 # And now prawn in a separate 'section' to make rubocop happy.
 gem("prawn")
 gem("prawn-manual_builder")
+
+# csv generation support
+gem("csv")
 
 # Use puma as the app server, also available for system tests
 # To use Webrick locally, run `bundle config set --local without 'production'`

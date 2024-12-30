@@ -19,7 +19,7 @@ class ArticlesControllerTest < FunctionalTestCase
 
   def test_index_filtered
     article = Article.first
-    query = Query.lookup(:Article, :all, ids: [article.id])
+    query = Query.lookup(:Article, ids: [article.id])
     params = @controller.query_params(query)
     get(:index, params: params)
 
