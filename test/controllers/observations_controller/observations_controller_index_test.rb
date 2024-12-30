@@ -113,7 +113,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
   def test_index_advanced_search_name_one_hit
     obs = observations(:strobilurus_diminutivus_obs)
     search_string = obs.text_name
-    query = Query.lookup_and_save(:Observation, :all, name: search_string)
+    query = Query.lookup_and_save(:Observation, name: search_string)
     assert(query.results.one?,
            "Test needs a string that has exactly one hit")
 
@@ -126,7 +126,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
   end
 
   def test_index_advanced_search_no_hits
-    query = Query.lookup_and_save(:Observation, :all,
+    query = Query.lookup_and_save(:Observation,
                                   name: "Don't know",
                                   user: "myself",
                                   content: "Long pink stem and small pink cap",
@@ -241,7 +241,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
   end
 
   def test_index_advanced_search_error
-    query_no_conditions = Query.lookup_and_save(:Observation, :all)
+    query_no_conditions = Query.lookup_and_save(:Observation)
 
     login
     params = @controller.query_params(query_no_conditions).

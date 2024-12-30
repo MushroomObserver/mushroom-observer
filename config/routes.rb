@@ -891,7 +891,7 @@ MushroomObserver::Application.routes.draw do
       to: redirect("/sequences/new?obs_id=%{id}"))
   get("/sequence/edit_sequence/:id", to: redirect("/sequences/%{id}/edit"))
   # ----- Sequences: nonstandard legacy action redirects
-  get("/sequence/list_sequences", to: redirect("/sequences?flavor=all"))
+  get("/sequence/list_sequences", to: redirect("/sequences?all=true"))
 
   # ----- SpeciesLists: legacy action redirects
   redirect_legacy_actions(

@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
 # base class for Query's which return Names
-class Query::NameBase < Query::Base
+class Query::Names < Query::Base
   include Query::Initializers::Names
   include Query::Initializers::Descriptions
   include Query::Initializers::AdvancedSearch
   include Query::Initializers::Observations
   include Query::Initializers::Locations
   include Query::Initializers::ContentFilters
-  include Query::Initializers::ObservationQueryDescriptions
+  include Query::Initializers::ObservationsQueryDescriptions
 
   def model
     Name
@@ -46,6 +46,7 @@ class Query::NameBase < Query::Base
   end
 
   def initialize_flavor
+    add_sort_order_to_title
     if params[:with_descriptions].present?
       initialize_names_with_descriptions
     elsif params[:with_observations].present?
@@ -135,7 +136,7 @@ class Query::NameBase < Query::Base
   end
 
   def coerce_into_name_description_query
-    Query.lookup(:NameDescription, :all, params_back_to_description_params)
+    Query.lookup(:NameDescription, params_back_to_description_params)
   end
 
   def title

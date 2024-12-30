@@ -244,7 +244,7 @@ module Tabs
     end
 
     def names_with_observations_tab(query)
-      return unless query&.flavor == :with_observations
+      return unless query&.params&.dig(:with_observations)
 
       [:all_objects.t(type: :name), names_path(with_observations: true),
        { class: tab_id(__method__.to_s) }]

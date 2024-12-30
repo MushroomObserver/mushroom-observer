@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Query::CollectionNumberBase < Query::Base
+class Query::CollectionNumbers < Query::Base
   def model
     CollectionNumber
   end
@@ -21,6 +21,7 @@ class Query::CollectionNumberBase < Query::Base
   end
 
   def initialize_flavor
+    add_sort_order_to_title
     add_owner_and_time_stamp_conditions
     add_for_observation_condition
     initialize_observations_parameter

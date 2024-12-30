@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Query::ExternalSiteBase < Query::Base
+class Query::ExternalSites < Query::Base
   def model
     ExternalSite
   end
@@ -12,6 +12,7 @@ class Query::ExternalSiteBase < Query::Base
   end
 
   def initialize_flavor
+    add_sort_order_to_title
     add_search_condition("external_sites.name", params[:name])
     super
   end

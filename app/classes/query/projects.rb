@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Query::ProjectBase < Query::Base
+class Query::Projects < Query::Base
   def model
     Project
   end
@@ -26,6 +26,7 @@ class Query::ProjectBase < Query::Base
   end
 
   def initialize_flavor
+    add_sort_order_to_title
     add_owner_and_time_stamp_conditions
     initialize_association_parameters
     initialize_boolean_parameters

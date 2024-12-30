@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Query::NameDescriptionBase < Query::Base
+class Query::NameDescriptions < Query::Base
   include Query::Initializers::Descriptions
 
   def model
@@ -18,11 +18,13 @@ class Query::NameDescriptionBase < Query::Base
       old_by?: :string,
       users?: [User],
       names?: [Name],
-      public?: :boolean
+      public?: :boolean,
+      with_descriptions?: :boolean
     )
   end
 
   def initialize_flavor
+    add_sort_order_to_title
     add_ids_condition
     add_owner_and_time_stamp_conditions
     add_by_user_condition
@@ -32,6 +34,11 @@ class Query::NameDescriptionBase < Query::Base
     add_id_condition("name_descriptions.name_id", names)
     initialize_description_public_parameter(:name)
     super
+  end
+
+  def coerce_into_name_query
+    pargs = params_out_to_with_descriptions_params
+    Query.lookup(:Name, pargs)
   end
 
   def self.default_order

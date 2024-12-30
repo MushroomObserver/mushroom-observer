@@ -16,7 +16,7 @@ class NamesController < ApplicationController
   private
 
   def default_sort_order
-    ::Query::NameBase.default_order # :name
+    ::Query::Names.default_order # :name
   end
 
   # ApplicationController uses this to dispatch #index to a private method
@@ -68,14 +68,14 @@ class NamesController < ApplicationController
 
   # Display list of names that have observations.
   def with_observations
-    query = create_query(:Name, :all, with_observations: 1)
+    query = create_query(:Name, with_observations: 1)
     [query, {}]
   end
 
   # Display list of names with descriptions that have authors.
   def with_descriptions
     @with_descriptions = true # signals to add desc info to name list
-    query = create_query(:Name, :all, with_descriptions: 1)
+    query = create_query(:Name, with_descriptions: 1)
     [query, {}]
   end
 
@@ -95,7 +95,7 @@ class NamesController < ApplicationController
     )
     return unless user
 
-    query = create_query(:Name, :all, by_user: user)
+    query = create_query(:Name, by_user: user)
     [query, {}]
   end
 
@@ -107,7 +107,7 @@ class NamesController < ApplicationController
     )
     return unless user
 
-    query = create_query(:Name, :all, by_editor: user)
+    query = create_query(:Name, by_editor: user)
     [query, {}]
   end
 
@@ -214,7 +214,7 @@ class NamesController < ApplicationController
     # Note this is only creating a schematic of a query, used in the link.
 
     # Create query for immediate children.
-    @children_query = create_query(:Name, :all,
+    @children_query = create_query(:Name,
                                    names: @name.id,
                                    include_immediate_subtaxa: true,
                                    exclude_original_names: true)
@@ -242,7 +242,7 @@ class NamesController < ApplicationController
     # and select_count all (excluding obs of original name) to get @has_subtaxa.
     # Would need to write include_subtaxa scope, as above.
     if @name.at_or_below_genus?
-      @subtaxa_query = create_query(:Observation, :all,
+      @subtaxa_query = create_query(:Observation,
                                     names: @name.id,
                                     include_subtaxa: true,
                                     exclude_original_names: true,
