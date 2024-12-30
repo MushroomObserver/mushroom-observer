@@ -45,7 +45,7 @@ module ApplicationController::Indexes
   # means the index is titled "____ Index", rather than "____ by ____".
   # NOTE: Could be standardized.
   def default_sort_order
-    # query_base = "::Query::#{controller_model_name}Base".constantize
+    # query_base = "::Query::#{controller_model_name.pluralize}".constantize
     # query_base.send(:default_order) || nil
     nil
   end

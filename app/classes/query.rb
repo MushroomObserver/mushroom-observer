@@ -276,8 +276,8 @@
 #  @params_cache::      Hash: where instances passed in via params are cached.
 #
 module Query
-  def self.new(model, flavor = :all, params = {}, current = nil)
-    klass = "Query::#{model}#{flavor.to_s.camelize}".constantize
+  def self.new(model, _flavor = :all, params = {}, current = nil)
+    klass = "Query::#{model.to_s.pluralize}".constantize
     query = klass.new
     query.params = params
     query.validate_params

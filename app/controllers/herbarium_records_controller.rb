@@ -18,7 +18,7 @@ class HerbariumRecordsController < ApplicationController
   private
 
   def default_sort_order
-    ::Query::HerbariumBase.default_order # :name
+    ::Query::Herbaria.default_order # :name
   end
 
   # ApplicationController uses this table to dispatch #index to a private method

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Query::UserBase < Query::Base
+class Query::Users < Query::Base
   def model
     User
   end
@@ -16,6 +16,7 @@ class Query::UserBase < Query::Base
   end
 
   def initialize_flavor
+    add_sort_order_to_title
     add_time_condition("users.created_at", params[:created_at])
     add_time_condition("users.updated_at", params[:updated_at])
     add_ids_condition

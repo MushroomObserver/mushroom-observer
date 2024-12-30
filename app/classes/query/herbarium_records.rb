@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Query::HerbariumRecordBase < Query::Base
+class Query::HerbariumRecords < Query::Base
   def model
     HerbariumRecord
   end
@@ -25,6 +25,7 @@ class Query::HerbariumRecordBase < Query::Base
   end
 
   def initialize_flavor
+    add_sort_order_to_title
     add_owner_and_time_stamp_conditions
     add_pattern_condition
     initialize_association_parameters

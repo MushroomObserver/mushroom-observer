@@ -18,7 +18,7 @@ class ImagesControllerTest < FunctionalTestCase
   def test_index
     login
     get(:index)
-    default_sorted_by = :"sort_by_#{::Query::ImageBase.default_order}".l
+    default_sorted_by = :"sort_by_#{::Query::Images.default_order}".l
 
     assert_template("index")
     assert_template(partial: "_matrix_box")

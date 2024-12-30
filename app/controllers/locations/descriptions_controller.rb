@@ -23,7 +23,7 @@ module Locations
 
     # Is :name
     def default_sort_order
-      ::Query::LocationDescriptionBase.default_order # :name
+      ::Query::LocationDescriptions.default_order # :name
     end
 
     def controller_model_name

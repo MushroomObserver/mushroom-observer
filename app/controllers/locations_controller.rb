@@ -32,7 +32,7 @@ class LocationsController < ApplicationController
   private
 
   def default_sort_order
-    ::Query::LocationBase.default_order # :name
+    ::Query::Locations.default_order # :name
   end
 
   def unfiltered_index_opts

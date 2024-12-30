@@ -16,7 +16,7 @@ class NamesController < ApplicationController
   private
 
   def default_sort_order
-    ::Query::NameBase.default_order # :name
+    ::Query::Names.default_order # :name
   end
 
   # ApplicationController uses this to dispatch #index to a private method

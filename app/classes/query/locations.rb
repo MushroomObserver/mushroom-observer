@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-class Query::LocationBase < Query::Base
+class Query::Locations < Query::Base
   include Query::Initializers::Locations
   include Query::Initializers::Descriptions
   include Query::Initializers::AdvancedSearch
   include Query::Initializers::Names
   include Query::Initializers::Observations
   include Query::Initializers::ContentFilters
-  include Query::Initializers::ObservationQueryDescriptions
+  include Query::Initializers::ObservationsQueryDescriptions
 
   def model
     Location
@@ -44,6 +44,7 @@ class Query::LocationBase < Query::Base
   end
 
   def initialize_flavor
+    add_sort_order_to_title
     if params[:with_descriptions].present?
       initialize_locations_with_descriptions
     elsif params[:with_observations].present?

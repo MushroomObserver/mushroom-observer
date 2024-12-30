@@ -27,7 +27,7 @@ class CommentsController < ApplicationController
   private
 
   def default_sort_order
-    ::Query::CommentBase.default_order # :created_at
+    ::Query::Comments.default_order # :created_at
   end
 
   # ApplicationController uses this table to dispatch #index to a private method

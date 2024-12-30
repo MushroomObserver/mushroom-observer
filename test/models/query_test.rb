@@ -28,7 +28,8 @@ class QueryTest < UnitTestCase
 
   def test_basic
     assert_raises(NameError) { Query.lookup(:BogusModel) }
-    assert_raises(NameError) { Query.lookup(:Name, :bogus) }
+    # All queries assumed to be :all by default.
+    # assert_raises(NameError) { Query.lookup(:Name, :bogus) }
 
     query = Query.lookup(:Observation)
     assert(query.record.new_record?)

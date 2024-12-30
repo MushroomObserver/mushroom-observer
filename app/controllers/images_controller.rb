@@ -57,7 +57,7 @@ class ImagesController < ApplicationController
   end
 
   def default_sort_order
-    ::Query::ImageBase.default_order # :created_at
+    ::Query::Images.default_order # :created_at
   end
 
   # ApplicationController uses this table to dispatch #index to a private method

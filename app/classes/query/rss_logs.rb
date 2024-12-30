@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Query::RssLogBase < Query::Base
+class Query::RssLogs < Query::Base
   include Query::Initializers::ContentFilters
 
   def model
@@ -17,6 +17,7 @@ class Query::RssLogBase < Query::Base
   end
 
   def initialize_flavor
+    add_sort_order_to_title
     add_time_condition("rss_logs.updated_at", params[:updated_at])
     initialize_type_parameter
     add_ids_condition
@@ -41,6 +42,42 @@ class Query::RssLogBase < Query::Base
                  "rss_logs.#{type}_id IS NOT NULL"
                end.join(" OR ")
              end
+  end
+
+  def coerce_into_article_query
+    do_coerce(:Article)
+  end
+
+  def coerce_into_location_query
+    do_coerce(:Location)
+  end
+
+  def coerce_into_name_query
+    do_coerce(:Name)
+  end
+
+  def coerce_into_observation_query
+    do_coerce(:Observation)
+  end
+
+  def coerce_into_project_query
+    do_coerce(:Project)
+  end
+
+  def coerce_into_species_list_query
+    do_coerce(:SpeciesList)
+  end
+
+  def do_coerce(new_model)
+    Query.lookup(new_model, :all, params_minus_type.merge(by: :rss_log))
+  end
+
+  def params_minus_type
+    return params unless params.key?(:type)
+
+    params2 = params.dup
+    params2.delete(:type)
+    params2
   end
 
   def self.default_order

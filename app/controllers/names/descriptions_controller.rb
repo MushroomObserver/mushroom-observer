@@ -34,7 +34,7 @@ module Names
     private
 
     def default_sort_order
-      ::Query::NameDescriptionBase.default_order # :name
+      ::Query::NameDescriptions.default_order # :name
     end
 
     def controller_model_name

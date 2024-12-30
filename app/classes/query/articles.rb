@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Query::ArticleBase < Query::Base
+class Query::Articles < Query::Base
   def model
     Article
   end
@@ -17,6 +17,7 @@ class Query::ArticleBase < Query::Base
   end
 
   def initialize_flavor
+    add_sort_order_to_title
     add_owner_and_time_stamp_conditions
     add_ids_condition
     add_search_condition("articles.title", params[:title_has])

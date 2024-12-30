@@ -44,7 +44,7 @@ class SequencesController < ApplicationController
   #    => displays a list of all sequences in MO
   #
   # NOTE: #index does not handle params[:pattern] or params[:ids] because
-  # we don't offer sequence pattern search. However, the Query::SequenceBase
+  # we don't offer sequence pattern search. However, the Query::Sequences
   # class can handle a pattern param.
   def index
     store_location
