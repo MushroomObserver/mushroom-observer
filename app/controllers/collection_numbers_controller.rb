@@ -33,7 +33,7 @@ class CollectionNumbersController < ApplicationController
   def observation
     @observation = Observation.find(params[:observation])
     store_location
-    query = create_query(:CollectionNumber, :all,
+    query = create_query(:CollectionNumber,
                          observation: params[:observation].to_s)
     [query, { always_index: true }]
   end

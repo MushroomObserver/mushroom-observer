@@ -11,7 +11,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
   end
 
   def test_index_with_query
-    query = Query.lookup_and_save(:CollectionNumber, :all, users: rolf)
+    query = Query.lookup_and_save(:CollectionNumber, users: rolf)
     assert_operator(query.num_results, :>, 1)
 
     login
@@ -135,7 +135,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
   end
 
   def test_next_and_prev_collection_number
-    query = Query.lookup_and_save(:CollectionNumber, :all, users: rolf)
+    query = Query.lookup_and_save(:CollectionNumber, users: rolf)
     assert_operator(query.num_results, :>, 1)
     number1 = query.results[0]
     number2 = query.results[1]
@@ -273,7 +273,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
 
   def test_create_collection_number_redirect
     obs = observations(:coprinus_comatus_obs)
-    query = Query.lookup_and_save(:CollectionNumber, :all)
+    query = Query.lookup_and_save(:CollectionNumber)
     q = query.id.alphabetize
     params = {
       observation_id: obs.id,
@@ -412,7 +412,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
   def test_update_collection_number_redirect
     obs   = observations(:detailed_unknown_obs)
     num   = obs.collection_numbers.first
-    query = Query.lookup_and_save(:CollectionNumber, :all)
+    query = Query.lookup_and_save(:CollectionNumber)
     q     = query.id.alphabetize
     login(obs.user.login)
     params = {
@@ -478,7 +478,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
   def test_destroy_collection_number_redirect
     obs   = observations(:detailed_unknown_obs)
     nums  = obs.collection_numbers
-    query = Query.lookup_and_save(:CollectionNumber, :all)
+    query = Query.lookup_and_save(:CollectionNumber)
     q     = query.id.alphabetize
     login(obs.user.login)
     assert_operator(nums.length, :>, 1)

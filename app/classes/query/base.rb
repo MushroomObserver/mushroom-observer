@@ -23,10 +23,6 @@ class Query::Base
   include Query::Modules::Titles
   include Query::Modules::Validation
 
-  def flavor
-    :all
-  end
-
   def parameter_declarations
     {
       join?: [:string],
@@ -53,7 +49,7 @@ class Query::Base
 
   def default_order
     self.class.default_order ||
-      raise("Didn't supply default order for #{model} #{flavor} query.")
+      raise("Didn't supply default order for #{model} query.")
   end
 
   def ==(other)

@@ -97,7 +97,7 @@ module Query::Initializers::Images
     # critical revision for performance concerns, anyway. -JPH 20210809]
     args2 = args.except(:select, :order, :group)
     params2 = params.except(:by)
-    ids = Query.lookup(:Observation, flavor, params2).result_ids(args2)
+    ids = Query.lookup(:Observation, params2).result_ids(args2)
     ids = clean_id_set(ids)
     args2 = args.dup
     extend_join(args2) << :observation_images

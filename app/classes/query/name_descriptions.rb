@@ -38,7 +38,7 @@ class Query::NameDescriptions < Query::Base
 
   def coerce_into_name_query
     pargs = params_out_to_with_descriptions_params
-    Query.lookup(:Name, :all, pargs)
+    Query.lookup(:Name, pargs)
   end
 
   def self.default_order

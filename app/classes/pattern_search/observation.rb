@@ -80,7 +80,6 @@ module PatternSearch
       return unless args[:pattern].present? && args[:names].empty? &&
                     (is_pattern_a_name? || any_taxa_modifiers_present?)
 
-      self.flavor = :all
       args[:names] = args[:pattern]
       args.delete(:pattern)
     end

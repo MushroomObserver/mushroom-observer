@@ -106,7 +106,7 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   def test_show_next
-    query = Query.lookup_and_save(:Herbarium, :all)
+    query = Query.lookup_and_save(:Herbarium)
     assert_operator(query.num_results, :>, 1)
     number1 = query.results[0]
     number2 = query.results[1]
@@ -118,7 +118,7 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   def test_show_prev
-    query = Query.lookup_and_save(:Herbarium, :all)
+    query = Query.lookup_and_save(:Herbarium)
     assert_operator(query.num_results, :>, 1)
     number1 = query.results[0]
     number2 = query.results[1]
@@ -131,7 +131,7 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_index
     set = [nybg, herbaria(:rolf_herbarium)]
-    query = Query.lookup_and_save(:Herbarium, :all, by: :name, ids: set)
+    query = Query.lookup_and_save(:Herbarium, by: :name, ids: set)
     login("zero") # Does not own any herbarium in set
     get(:index, params: { q: query.record.id.alphabetize })
 

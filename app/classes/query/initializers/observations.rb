@@ -264,6 +264,6 @@ module Query::Initializers::Observations
   end
 
   def coerce_into_observation_query
-    Query.lookup(:Observation, :all, params_back_to_observation_params)
+    Query.lookup(:Observation, params_back_to_observation_params)
   end
 end

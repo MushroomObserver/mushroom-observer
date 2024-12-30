@@ -97,7 +97,7 @@ module Query::Modules::NestedQueries
     else
       new_params[new_outer.model.type_tag] = new_outer.current_id
     end
-    Query.lookup(model, flavor, new_params)
+    Query.lookup(model, new_params)
   end
 
   # Create a new copy of this query if the outer query changed, otherwise

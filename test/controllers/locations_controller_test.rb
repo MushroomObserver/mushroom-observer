@@ -226,7 +226,7 @@ class LocationsControllerTest < FunctionalTestCase
   end
 
   def test_index_advanced_search
-    query = Query.lookup_and_save(:Location, :all, user_where: "California")
+    query = Query.lookup_and_save(:Location, user_where: "California")
     matches = Location.name_includes("California")
 
     login
@@ -244,7 +244,7 @@ class LocationsControllerTest < FunctionalTestCase
   end
 
   def test_index_advanced_search_error
-    query_no_conditions = Query.lookup_and_save(:Location, :all)
+    query_no_conditions = Query.lookup_and_save(:Location)
 
     login
     params = @controller.query_params(query_no_conditions).
@@ -908,7 +908,7 @@ class LocationsControllerTest < FunctionalTestCase
   end
 
   def named_obs_query(name)
-    Query.lookup(:Observation, :all, pattern: name, by: :name)
+    Query.lookup(:Observation, pattern: name, by: :name)
   end
 
   def test_coercing_sorted_observation_query_into_location_query

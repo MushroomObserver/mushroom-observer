@@ -199,11 +199,11 @@ module ApplicationController::Queries
       # otherwise the modifications won't persist.
       # Use the existing query as the template, though.
       if query_needs_update?(args, result)
-        result = create_query(model, result.flavor, result.params.merge(args))
+        result = create_query(model, result.params.merge(args))
       end
     # If no query found, just create a default one.
     else
-      result = create_query(model, :all, args)
+      result = create_query(model, args)
     end
     result
   end
@@ -262,11 +262,10 @@ module ApplicationController::Queries
       !QueryRecord.exists?(id: params[:q].dealphabetize)
   end
 
-  # Create a new Query of the given flavor for the given model.  Pass it
-  # in all the args you would to Query#new. *NOTE*: Not all flavors are
-  # capable of supplying defaults for every argument.
-  def create_query(model_symbol, flavor = :all, args = {})
-    Query.lookup(model_symbol, flavor, args)
+  # Create a new Query of the given model.  Pass it
+  # in all the args you would to Query#new.
+  def create_query(model_symbol, args = {})
+    Query.lookup(model_symbol, args)
   end
 
   private ##########
@@ -283,9 +282,8 @@ module ApplicationController::Queries
     return query if params[:north].blank?
 
     model = query.model.to_s.to_sym
-    flavor = query.flavor
     tweaked_params = query.params.merge(tweaked_bounding_box_params)
-    Query.lookup(model, flavor, tweaked_params)
+    Query.lookup(model, tweaked_params)
   end
 
   def tweaked_bounding_box_params

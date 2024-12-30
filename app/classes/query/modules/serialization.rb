@@ -7,10 +7,7 @@ module Query::Modules::Serialization
   end
 
   def serialize
-    hash = params.merge(
-      model: model.to_s.to_sym,
-      flavor: flavor
-    )
+    hash = params.merge(model: model.to_s.to_sym)
     hash.keys.sort_by(&:to_s).map do |key|
       serialize_key_value(key, hash[key])
     end.join(";")
@@ -45,10 +42,8 @@ module Query::Modules::Serialization
     def deserialize(str)
       params = deserialize_params(str)
       model  = params[:model]
-      flavor = params[:flavor]
       params.delete(:model)
-      params.delete(:flavor)
-      Query.new(model, flavor, params)
+      Query.new(model, params)
     end
 
     def deserialize_params(str)

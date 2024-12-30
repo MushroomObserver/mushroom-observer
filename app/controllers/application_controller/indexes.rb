@@ -75,8 +75,7 @@ module ApplicationController::Indexes
     return unless unfiltered_index_permitted?
 
     args = { by: default_sort_order }.merge(unfiltered_index_opts[:query_args])
-    query = create_query(controller_model_name.to_sym,
-                         unfiltered_index_opts[:query_flavor], **args)
+    query = create_query(controller_model_name.to_sym, **args)
 
     [query, unfiltered_index_opts[:display_opts]]
   end
@@ -88,7 +87,7 @@ module ApplicationController::Indexes
 
   # Defaults for the unfiltered index. Controllers may pass their own opts.
   def unfiltered_index_opts
-    { query_flavor: :all, query_args: {}, display_opts: {} }
+    { query_args: {}, display_opts: {} }
   end
 
   # This handles the index if you pass any of the basic params.
@@ -143,7 +142,7 @@ module ApplicationController::Indexes
       redirect_to(send(:"#{controller_model_name.underscore}_path", obj.id))
       [nil, {}]
     else
-      query = create_query(controller_model_name.to_sym, :all, pattern:)
+      query = create_query(controller_model_name.to_sym, pattern:)
       [query, {}]
     end
   end
@@ -293,7 +292,7 @@ module ApplicationController::Indexes
 
     @timer_end = Time.current
     logger.warn("QUERY finished: model=#{query.model}, " \
-                "flavor=#{query.flavor}, params=#{query.params.inspect}, " \
+                "params=#{query.params.inspect}, " \
                 "time=#{(@timer_end - @timer_start).to_f}")
   end
 
@@ -425,7 +424,7 @@ module ApplicationController::Indexes
   # arg::    Name of parameter to use.  (default is 'letter')
   #
   #   # In controller:
-  #   query  = create_query(:Name, :by_user, :user => params[:id].to_s)
+  #   query  = create_query(:Name, :user => params[:id].to_s)
   #   query.need_letters('names.display_name')
   #   @pages = paginate_letters(:letter, :page, 50)
   #   @names = query.paginate(@pages)
@@ -451,7 +450,7 @@ module ApplicationController::Indexes
   # num_per_page::  Number of results per page.  (default is 50)
   #
   #   # In controller:
-  #   query    = create_query(:Name, :by_user, :user => params[:id].to_s)
+  #   query    = create_query(:Name, :user => params[:id].to_s)
   #   @numbers = paginate_numbers(:page, 50)
   #   @names   = query.paginate(@numbers)
   #

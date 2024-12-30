@@ -135,7 +135,7 @@ class Query::Locations < Query::Base
   end
 
   def coerce_into_location_description_query
-    Query.lookup(:LocationDescription, :all, params_back_to_description_params)
+    Query.lookup(:LocationDescription, params_back_to_description_params)
   end
 
   def title

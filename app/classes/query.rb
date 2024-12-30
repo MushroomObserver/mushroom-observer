@@ -8,11 +8,8 @@
 #  are dyamically joined with any number of additional tables, as required by
 #  sorting and selection conditions.
 #
-#  Queries are specified by a model and flavor.  The model specifies which kind
-#  of objects are being requested, e.g. :Name or :Observation.  The flavor
-#  summarizes the type of search, e.g. :all or :at_location.  Only certain
-#  flavors are allowed for a given model.  For example, it makes no sense to
-#  request comments sorted by name since they have no name.
+#  Queries are specified by a model.  The model specifies which kind
+#  of objects are being requested, e.g. :Name or :Observation.
 #
 #  Each model has a default search flavor (:default), which is used by the prev
 #  and next actions when the specified query no longer exists.  For example, if
@@ -25,8 +22,8 @@
 #
 #  In addition, some queries require additional parameters.  For example,
 #  :Comment :for_user requires a user_id (it retrieves comments posted on a
-#  given user's observations).  These parameters are saved along-side the model
-#  and flavor, and together the three fully-specify a query so that it may be
+#  given user's observations).  These parameters are saved along-side the model,
+#  and together these fully specify a query so that it may be
 #  recreated and executed at a later time, even potentially by another user
 #  (e.g., if users share links that have query specs embedded in them).
 #
@@ -34,7 +31,7 @@
 #
 #  Get observations created by @user:
 #
-#    query = Query.lookup(:Observation, :all, users: [@user])
+#    query = Query.lookup(:Observation, users: [@user])
 #
 #  You may further tweak a query after it's been created:
 #
@@ -146,7 +143,7 @@
 #
 #    # The setup all happens in observations/show:
 #    outer = find_or_create_query(:Observation)
-#    inner = create_query(:Image, :all, outer: outer,
+#    inner = create_query(:Image, outer: outer,
 #                         observation: @observation)
 #    inner.results each do |image|
 #      link_to(image,
@@ -276,7 +273,7 @@
 #  @params_cache::      Hash: where instances passed in via params are cached.
 #
 module Query
-  def self.new(model, _flavor = :all, params = {}, current = nil)
+  def self.new(model, params = {}, current = nil)
     klass = "Query::#{model.to_s.pluralize}".constantize
     query = klass.new
     query.params = params

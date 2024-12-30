@@ -43,7 +43,7 @@ module Locations
       )
       return unless user
 
-      query = create_query(:LocationDescription, :all, by_author: user)
+      query = create_query(:LocationDescription, by_author: user)
       [query, {}]
     end
 
@@ -55,7 +55,7 @@ module Locations
       )
       return unless user
 
-      query = create_query(:LocationDescription, :all, by_editor: user)
+      query = create_query(:LocationDescription, by_editor: user)
       [query, {}]
     end
 

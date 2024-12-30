@@ -30,7 +30,7 @@ module Query::Modules::Validation
         new_args[arg_sym] = val
       elsif !optional
         raise(
-          "Missing :#{arg_sym} parameter for #{model} :#{flavor} query."
+          "Missing :#{arg_sym} parameter for #{model} query."
         )
       else
         new_args[arg_sym] = nil
@@ -38,7 +38,7 @@ module Query::Modules::Validation
     rescue MissingValue
       unless optional
         raise(
-          "Missing :#{arg_sym} parameter for #{model} :#{flavor} query."
+          "Missing :#{arg_sym} parameter for #{model} query."
         )
       end
     end
@@ -63,7 +63,7 @@ module Query::Modules::Validation
     return if old_args.keys.empty?
 
     str = old_args.keys.map(&:to_s).join("', '")
-    raise("Unexpected parameter(s) '#{str}' for #{model} :#{flavor} query.")
+    raise("Unexpected parameter(s) '#{str}' for #{model} query.")
   end
 
   def array_validate(arg, val, arg_type)
@@ -89,7 +89,7 @@ module Query::Modules::Validation
     elsif arg_type.is_a?(Hash)
       validate_enum(arg, val, arg_type)
     else
-      raise("Invalid declaration of :#{arg} for #{model} :#{flavor} " \
+      raise("Invalid declaration of :#{arg} for #{model} " \
             "query! (invalid type: #{arg_type.class.name})")
     end
   end
@@ -97,7 +97,7 @@ module Query::Modules::Validation
   def validate_enum(arg, val, hash)
     if hash.keys.length != 1
       raise(
-        "Invalid enum declaration for :#{arg} for #{model} :#{flavor} " \
+        "Invalid enum declaration for :#{arg} for #{model} " \
         "query! (wrong number of keys in hash)"
       )
     end
@@ -106,7 +106,7 @@ module Query::Modules::Validation
     set = hash.values.first
     unless set.is_a?(Array)
       raise(
-        "Invalid enum declaration for :#{arg} for #{model} :#{flavor} " \
+        "Invalid enum declaration for :#{arg} for #{model} " \
         "query! (expected value to be an array of allowed values)"
       )
     end

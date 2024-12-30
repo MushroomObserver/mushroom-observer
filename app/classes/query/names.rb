@@ -136,7 +136,7 @@ class Query::Names < Query::Base
   end
 
   def coerce_into_name_description_query
-    Query.lookup(:NameDescription, :all, params_back_to_description_params)
+    Query.lookup(:NameDescription, params_back_to_description_params)
   end
 
   def title

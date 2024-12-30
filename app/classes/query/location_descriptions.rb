@@ -38,7 +38,7 @@ class Query::LocationDescriptions < Query::Base
 
   def coerce_into_location_query
     pargs = params_out_to_with_descriptions_params
-    Query.lookup(:Location, :all, pargs)
+    Query.lookup(:Location, pargs)
   end
 
   def self.default_order

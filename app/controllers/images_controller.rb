@@ -73,7 +73,7 @@ class ImagesController < ApplicationController
     )
     return unless user
 
-    query = create_query(:Image, :all, by_user: user)
+    query = create_query(:Image, by_user: user)
     [query, {}]
   end
 
@@ -82,7 +82,7 @@ class ImagesController < ApplicationController
     project = find_or_goto_index(Project, params[:project].to_s)
     return unless project
 
-    query = create_query(:Image, :all, project: project)
+    query = create_query(:Image, project: project)
     [query, { always_index: true }]
   end
 
@@ -200,7 +200,7 @@ class ImagesController < ApplicationController
 
     obs_query = find_or_create_query(:Observation)
     obs_query.current = obs
-    img_query = create_query(:Image, :all, observation: obs, outer: obs_query)
+    img_query = create_query(:Image, observation: obs, outer: obs_query)
     query_params_set(img_query)
   end
 

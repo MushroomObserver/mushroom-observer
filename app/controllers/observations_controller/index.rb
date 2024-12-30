@@ -45,7 +45,7 @@ class ObservationsController
       if any_advanced_search_params_present?
         params_plus_flags = advanced_search_params << :search_location_notes
         search = params.permit(*params_plus_flags).to_h
-        create_query(:Observation, :all, search)
+        create_query(:Observation, search)
       elsif handle_advanced_search_invalid_q_param?
         nil
       else
@@ -98,7 +98,7 @@ class ObservationsController
     # Displays matrix of Observations with the given name proposed but not
     # actually that name.
     def look_alikes
-      query = create_query(:Observation, :all,
+      query = create_query(:Observation,
                            names: [params[:name]],
                            include_synonyms: true,
                            include_all_name_proposals: true,
@@ -109,7 +109,7 @@ class ObservationsController
 
     # Displays matrix of Observations of subtaxa of the parent of given name.
     def related_taxa
-      query = create_query(:Observation, :all,
+      query = create_query(:Observation,
                            names: parents(params[:name]),
                            include_subtaxa: true,
                            by: :confidence)
@@ -118,7 +118,7 @@ class ObservationsController
 
     # Displays matrix of Observations with the given text_name (or search_name).
     def name
-      query = create_query(:Observation, :all,
+      query = create_query(:Observation,
                            names: [params[:name]],
                            include_synonyms: true,
                            by: :confidence)
@@ -136,7 +136,7 @@ class ObservationsController
     def by_user
       return unless (user = find_or_goto_index(User, params[:by_user]))
 
-      query = create_query(:Observation, :all, by_user: user)
+      query = create_query(:Observation, by_user: user)
       [query, {}]
     end
 
@@ -146,7 +146,7 @@ class ObservationsController
         location = find_or_goto_index(Location, params[:location].to_s)
       )
 
-      query = create_query(:Observation, :all, location: location)
+      query = create_query(:Observation, location: location)
       [query, {}]
     end
 
@@ -163,7 +163,7 @@ class ObservationsController
     # observations, that will preclude getting results.
     def where
       where = params[:where].to_s
-      query = create_query(:Observation, :all, locations: where)
+      query = create_query(:Observation, locations: where)
       [query, { always_index: true }]
     end
 
@@ -173,7 +173,7 @@ class ObservationsController
         project = find_or_goto_index(Project, params[:project].to_s)
       )
 
-      query = create_query(:Observation, :all, project:)
+      query = create_query(:Observation, project:)
       @project = project
       [query, { always_index: true }]
     end
@@ -184,7 +184,7 @@ class ObservationsController
         spl = find_or_goto_index(SpeciesList, params[:species_list].to_s)
       )
 
-      query = create_query(:Observation, :all, species_list: spl)
+      query = create_query(:Observation, species_list: spl)
       [query, { always_index: true }]
     end
 

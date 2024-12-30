@@ -9,7 +9,7 @@
 #     # An index of all observations can be coerced easily into a query for
 #     # their names. Just lookup all names which have observations.
 #     def coerce_into_name_query
-#       Query.lookup(:Name, :with_observations, params)
+#       Query.lookup(:Name, params)
 #     end
 #   end
 #
