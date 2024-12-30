@@ -152,6 +152,9 @@ gem("prawn-svg")
 gem("prawn")
 gem("prawn-manual_builder")
 
+# csv generation support
+gem("csv")
+
 # Use puma as the app server, also available for system tests
 # To use Webrick locally, run `bundle config set --local without 'production'`
 # https://stackoverflow.com/a/23125762/3357635

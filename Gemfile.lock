@@ -111,6 +111,7 @@ GEM
     crass (1.0.6)
     css_parser (1.19.1)
       addressable
+    csv (3.3.0)
     cuprite (0.15.1)
       capybara (~> 3.0)
       ferrum (~> 0.15.0)
@@ -519,6 +520,7 @@ DEPENDENCIES
   bundler
   cache_with_locale
   capybara
+  csv
   cuprite
   dartsass-sprockets
   database_cleaner-active_record
