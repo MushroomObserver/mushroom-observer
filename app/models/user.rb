@@ -199,7 +199,6 @@
 class User < AbstractModel # rubocop:disable Metrics/ClassLength
   require "digest/sha1"
 
-  # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
   # first value is the default
   enum thumbnail_size:

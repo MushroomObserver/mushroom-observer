@@ -65,7 +65,6 @@
 class NameDescription < Description
   require "acts_as_versioned"
 
-  # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
   enum review_status:
         {
