@@ -9,7 +9,7 @@ module Query::Initializers::ObservationsQueryDescriptions
                                                 subtitle: description)
     else
       :query_title_with_observations_by_user.t(type: model.type_tag,
-                                                user: description)
+                                               user: description)
     end
   end
 

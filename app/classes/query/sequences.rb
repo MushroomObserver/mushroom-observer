@@ -130,7 +130,7 @@ class Query::Sequences < Query::Base
     add_search_condition("sequences.accession", params[:accession_has])
     add_search_condition("sequences.notes", params[:notes_has])
     add_search_condition("observations.notes", params[:obs_notes_has],
-                          :observations)
+                         :observations)
   end
 
   def add_join_to_locations

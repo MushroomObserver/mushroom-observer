@@ -121,4 +121,3 @@ class Query::Images < Query::Base
     with_observations_query_description || default
   end
 end
-

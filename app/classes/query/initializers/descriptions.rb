@@ -47,7 +47,7 @@ module Query::Initializers::Descriptions
 
     @title_tag = :query_title_with_descriptions.t(type: type)
     @title_args[:descriptions] = params[:old_title] ||
-                                  :query_title_in_set.t(type: :description)
+                                 :query_title_in_set.t(type: :description)
   end
 
   def add_desc_by_user_condition(type)

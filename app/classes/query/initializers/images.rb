@@ -54,7 +54,7 @@ module Query::Initializers::Images
 
   def initialize_img_record_parameters
     add_search_condition("images.copyright_holder",
-                          params[:copyright_holder_has])
+                         params[:copyright_holder_has])
     add_image_size_condition(params[:size])
     add_image_type_condition(params[:content_types])
     add_boolean_condition(

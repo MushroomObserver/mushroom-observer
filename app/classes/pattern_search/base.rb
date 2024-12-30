@@ -15,7 +15,7 @@ module PatternSearch
     end
 
     def build_query
-      self.args   = {}
+      self.args = {}
       parser.terms.each do |term|
         if term.var == :pattern
           args[:pattern] = term.parse_pattern

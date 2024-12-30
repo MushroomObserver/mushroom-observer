@@ -266,4 +266,3 @@ module Query::Modules::Validation
       val.is_a?(String) && (val == "0") && (arg == :user)
   end
 end
-

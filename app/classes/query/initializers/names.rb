@@ -105,8 +105,7 @@ module Query::Initializers::Names
   end
 
   def initialize_name_association_parameters
-    add_id_condition("observations.id", params[:observations],
-                      :observations)
+    add_id_condition("observations.id", params[:observations], :observations)
     add_where_condition("observations", params[:locations], :observations)
     initialize_species_lists_parameter
   end
@@ -154,8 +153,7 @@ module Query::Initializers::Names
     add_search_condition("names.text_name", params[:text_name_has])
     add_search_condition("names.author", params[:author_has])
     add_search_condition("names.citation", params[:citation_has])
-    add_search_condition("names.classification",
-                          params[:classification_has])
+    add_search_condition("names.classification", params[:classification_has])
   end
 
   def add_name_advanced_search_conditions
