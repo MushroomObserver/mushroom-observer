@@ -5,12 +5,12 @@ class FieldSlipJobTracker < AbstractModel
   SUBDIR = "shared"
   PDF_DIR = PUBLIC_DIR + SUBDIR
 
-  enum status:
-         {
-           Starting: 1,
-           Processing: 2,
-           Done: 3
-         }
+  enum :status,
+       {
+         Starting: 1,
+         Processing: 2,
+         Done: 3
+       }
 
   belongs_to :user
 

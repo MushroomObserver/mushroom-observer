@@ -51,7 +51,7 @@ class LocationDescription < Description
   require "acts_as_versioned"
 
   # Do not change the integer associated with a value
-  enum source_type:
+  enum :source_type,
        {
          public: 1,
          foreign: 2,
