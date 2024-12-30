@@ -363,14 +363,14 @@ chmod +x .git/hooks/pre-commit
 
 Install the selected version.
 
-  ruby-install ruby 3.3.2
+  ruby-install ruby 3.3.6
 
 Once that succeeds, update Ruby versions in .ruby-version and
 Gemfile.lock.
 
 In a new shell run:
 
-  chruby ruby-3.3.2
+  chruby ruby-3.3.6
   bundle install
   gem pristine --all
 
