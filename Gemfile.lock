@@ -5,6 +5,18 @@ GIT
     mo_acts_as_versioned (0.6.6)
       activerecord (>= 3.0.9)
 
+GIT
+  remote: https://github.com/botandrose/dartsass-sprockets
+  revision: a7ec979be0bd777f6b8fb71637c3b9c553344902
+  branch: fix-secondary-import-tracking
+  specs:
+    dartsass-sprockets (3.1.0)
+      railties (>= 4.0.0)
+      sassc-embedded (~> 1.69)
+      sprockets (> 3.0)
+      sprockets-rails
+      tilt
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -114,12 +126,6 @@ GEM
     cuprite (0.15.1)
       capybara (~> 3.0)
       ferrum (~> 0.15.0)
-    dartsass-sprockets (3.1.0)
-      railties (>= 4.0.0)
-      sassc-embedded (~> 1.69)
-      sprockets (> 3.0)
-      sprockets-rails
-      tilt
     database_cleaner-active_record (2.2.0)
       activerecord (>= 5.a)
       database_cleaner-core (~> 2.0.0)
@@ -524,7 +530,7 @@ DEPENDENCIES
   cache_with_locale
   capybara
   cuprite
-  dartsass-sprockets
+  dartsass-sprockets!
   database_cleaner-active_record
   debug
   fastimage

@@ -55,7 +55,9 @@ gem("sprockets-rails")
 # https://github.com/hotwired/stimulus-rails/issues/108
 gem("sprockets", "~>4.2.1")
 # Compile SCSS for stylesheets
-gem("dartsass-sprockets")
+gem("dartsass-sprockets",
+    git: "https://github.com/botandrose/dartsass-sprockets",
+    branch: "fix-secondary-import-tracking")
 # Use bootstrap style generator
 gem("bootstrap-sass")
 # Use Terser as compressor for JavaScript assets
