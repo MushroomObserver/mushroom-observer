@@ -409,7 +409,7 @@ module ApplicationController::Queries
   # 2) current object missing from results of the current query
   # 3) no more objects being left in the query in the given direction
   def query_and_next_object_normal(object, method, id)
-    query = find_or_create_query(object.class.to_sym)
+    query = find_or_create_query(object.class.to_s.to_sym)
     query.current = object
 
     if !query.index(object)
