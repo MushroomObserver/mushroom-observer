@@ -2,7 +2,7 @@
 /*
 /* runtime:  flags:
 /* 2.8956
-/* 2.1513    (ImageMagick's convert)
+/* 2.1513    (ImageMagick's magick (formerly convert))
 /* 1.3060    -O2                      <------ (i.e., probably makes no difference!)
 /* 1.3120    -O2 -m64
 /* 1.3122    -O2 -mmmx -msse -msse2
