@@ -222,7 +222,7 @@ class ImagesController < ApplicationController
   end
 
   def goto_next_image
-    query = find_or_create_query(Image)
+    query = find_or_create_query(:Image)
     query.current = @image
     @image = query.current if query.index(@image) && (query = query.next)
   end
