@@ -251,8 +251,7 @@ module NamingsHelper
   # N+1: should not be checking permission here
   # N+1: vote is naming.users_vote, so should be an instance of Vote.
   # NamingsController#index iteration over namings in table_row
-  # This could be a form with model: vote so it can has an id, sent in url
-  # rubocop:disable Metrics/MethodLength
+  # This may be a form_with(model: vote) so it gets an id, sent in url
   def naming_vote_form(naming, vote, context: "blank")
     vote_id = vote&.id
     method = vote_id ? :patch : :post
@@ -262,19 +261,9 @@ module NamingsHelper
            else
              Vote.confidence_menu
            end
-    localizations = {
-      lose_changes: :show_namings_lose_changes.l.tr("\n", " "),
-      saving: :show_namings_saving.l
-    }.to_json
+    localizations = naming_vote_form_localizations
 
-    form_with(
-      model: vote,
-      url: naming_vote_form_commit_url(naming, vote), method: method,
-      id: "naming_vote_form_#{naming.id}",
-      class: "naming-vote-form d-inline-block float-right float-sm-none",
-      data: { turbo: true, controller: "naming-vote", naming_id: naming.id,
-              localization: localizations }
-    ) do |fv|
+    form_with(**naming_vote_form_args(naming, vote, method)) do |fv|
       [
         fv.select(:value, menu, {},
                   { class: "form-control w-100",
@@ -291,9 +280,27 @@ module NamingsHelper
       ].safe_join
     end
   end
-  # rubocop:enable Metrics/MethodLength
 
   private
+
+  def naming_vote_form_args(naming, vote, method)
+    args = {
+      url: naming_vote_form_commit_url(naming, vote), method: method,
+      id: "naming_vote_form_#{naming.id}",
+      class: "naming-vote-form d-inline-block float-right float-sm-none",
+      data: { turbo: true, controller: "naming-vote", naming_id: naming.id,
+              localization: localizations }
+    }
+    args = args.merge(model: vote) if vote&.id
+    args
+  end
+
+  def naming_vote_form_localizations
+    {
+      lose_changes: :show_namings_lose_changes.l.tr("\n", " "),
+      saving: :show_namings_saving.l
+    }.to_json
+  end
 
   # form can commit to update or create
   def naming_vote_form_commit_url(naming, vote)
