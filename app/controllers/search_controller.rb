@@ -45,7 +45,7 @@ class SearchController < ApplicationController
     query_params = {}
     add_filled_in_text_fields(query_params)
     add_applicable_filter_parameters(query_params, model)
-    query = create_query(model, :advanced_search, query_params)
+    query = create_query(model, query_params)
     redirect_to_model_controller(model, query)
   end
 
@@ -81,8 +81,10 @@ class SearchController < ApplicationController
     end
   end
 
+  # NOTE: The autocompleters for name, location, and user all make the ids
+  # available now, so this could be a lot more efficient.
   def add_filled_in_text_fields(query_params)
-    [:content, :location, :name, :user].each do |field|
+    [:content, :user_where, :name, :user].each do |field|
       val = params[:search][field].to_s
       next if val.blank?
 

@@ -23,7 +23,7 @@ module Locations
 
     # Is :name
     def default_sort_order
-      ::Query::LocationDescriptionBase.default_order # :name
+      ::Query::LocationDescriptions.default_order # :name
     end
 
     def controller_model_name
@@ -43,7 +43,7 @@ module Locations
       )
       return unless user
 
-      query = create_query(:LocationDescription, :by_author, user: user)
+      query = create_query(:LocationDescription, by_author: user)
       [query, {}]
     end
 
@@ -55,7 +55,7 @@ module Locations
       )
       return unless user
 
-      query = create_query(:LocationDescription, :by_editor, user: user)
+      query = create_query(:LocationDescription, by_editor: user)
       [query, {}]
     end
 

@@ -492,6 +492,16 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     [old_legal_name, new_legal_name]
   end
 
+  # remove <user.name> from search string "#{user[:login]} <#{user[:name]}>"
+  def self.remove_bracketed_name(input)
+    previous = nil
+    while input != previous
+      previous = input
+      input = input.sub(/ *<.*>/, "")
+    end
+    input
+  end
+
   # TODO: Move this to an ActiveJob, once we get jobs going - AN 20240220
   # This can be fairly expensive if the user has a lot of images
   def update_image_copyright_holder

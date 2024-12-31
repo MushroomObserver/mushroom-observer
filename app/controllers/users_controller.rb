@@ -56,7 +56,7 @@ class UsersController < ApplicationController
       redirect_to(user_path(user.id))
       [nil, {}]
     else
-      query = create_query(:User, :all, pattern: pattern)
+      query = create_query(:User, pattern: pattern)
       [query, {}]
     end
   end
@@ -138,14 +138,14 @@ class UsersController < ApplicationController
     # NOTE: This query is pretty well optimized.
     # First check the user's observation thumbnails for their own favorites
     image_includes = { thumb_image: [:image_votes, :projects, :license, :user] }
-    @query = Query.lookup(:Observation, :by_user, user: @show_user,
-                                                  by: :owners_thumbnail_quality)
+    @query = Query.lookup(:Observation, by_user: @show_user,
+                                        by: :owners_thumbnail_quality)
     observations = @query.results(limit: 6, include: image_includes)
 
     # If not enough, check for other people's favorites
     if (MAX_THUMBS - observations.length).positive?
-      @query = Query.lookup(:Observation, :by_user, user: @show_user,
-                                                    by: :thumbnail_quality)
+      @query = Query.lookup(:Observation, by_user: @show_user,
+                                          by: :thumbnail_quality)
       other_users_favorites = @query.results(limit: MAX_THUMBS,
                                              include: image_includes)
       observations = observations.union(other_users_favorites).take(MAX_THUMBS)

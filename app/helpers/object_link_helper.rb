@@ -18,12 +18,12 @@ module ObjectLinkHelper
       link_string = where_string(location.name, count)
       link_string += " [#{:click_for_map.t}]" if click
       link_to(link_string, location_path(id: location.id),
-              { id: "show_location_link_#{location.id}" })
+              { class: "show_location_link show_location_link_#{location.id}" })
     else
       link_string = where_string(where, count)
       link_string += " [#{:SEARCH.t}]" if click
       link_to(link_string, observations_path(where: where),
-              { id: "index_observations_at_where_link" })
+              { class: "index_observations_at_where_link" })
     end
   end
 

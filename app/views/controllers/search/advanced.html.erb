@@ -38,7 +38,7 @@
                           separator: " OR ") %>
 
   <% loc_betw = help_note(:span, :advanced_search_location_help.t) %>
-  <%= autocompleter_field(form: f, field: :location, type: :location,
+  <%= autocompleter_field(form: f, field: :user_where, type: :location,
                           label: "#{:LOCATION.t}:", between: loc_betw,
                           separator: " OR " ) %>
 

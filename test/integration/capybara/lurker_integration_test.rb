@@ -231,7 +231,9 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     select("Region", from: "filter_type")
     click_button("Search")
     assert_match(/#{:obs_needing_id.t}/, page.title, "Wrong page")
-    where_ats = find_all(".rss-where").map(&:text)
+    # Note that .rss-where now gets both postal and scientific addresses as a
+    # single mashed up string, because they're shown/hidden by css.
+    where_ats = find_all(".rss-where .location-postal").map(&:text)
     assert(where_ats.all? { |wa| wa.match(place) },
            "Expected only obs from #{place}" \
            "Found these: #{where_ats.inspect}")
@@ -268,10 +270,9 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
 
     # Get a list of observations from there.  (Several so goes to index.)
     within("#location_coordinates") do
-      click_link(text: "Observations at this Location")
+      click_link(text: :show_location_observations.l)
     end
-    assert_match("Observations from Burbank",
-                 page.title, "Wrong page")
+    assert_match("Matching Observations", page.title, "Wrong page")
     save_results = find_all("#results a").select do |l|
       l[:href].match(%r{^/\d+})
     end

@@ -27,7 +27,7 @@ class CommentsController < ApplicationController
   private
 
   def default_sort_order
-    ::Query::CommentBase.default_order # :created_at
+    ::Query::Comments.default_order # :created_at
   end
 
   # ApplicationController uses this table to dispatch #index to a private method
@@ -51,7 +51,7 @@ class CommentsController < ApplicationController
     )
     return unless user
 
-    query = create_query(:Comment, :all, by_user: user)
+    query = create_query(:Comment, by_user: user)
     [query, {}]
   end
 
@@ -64,7 +64,7 @@ class CommentsController < ApplicationController
     )
     return unless user
 
-    query = create_query(:Comment, :all, for_user: user)
+    query = create_query(:Comment, for_user: user)
     [query, {}]
   end
 
@@ -74,8 +74,7 @@ class CommentsController < ApplicationController
     return no_model unless (model = Comment.safe_model_from_name(params[:type]))
     return unless (target = find_or_goto_index(model, params[:target].to_s))
 
-    query = create_query(:Comment, :all, target: target.id,
-                                         type: target.class.name)
+    query = create_query(:Comment, target: target.id, type: target.class.name)
     [query, {}]
   end
 

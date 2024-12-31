@@ -12,7 +12,7 @@ module Observations
     #
     ############################################################################
 
-    # NOTE: This "form" is only accessed from one index flavor,
+    # NOTE: This "form" is only accessed from one index param,
     #       "OBSERVATIONS AT WHERE"
     #
     # It's a UI for Observations lacking a Location association in the db,

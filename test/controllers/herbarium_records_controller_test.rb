@@ -183,7 +183,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
   end
 
   def test_next_and_prev_herbarium_record
-    query = Query.lookup_and_save(:HerbariumRecord, :all)
+    query = Query.lookup_and_save(:HerbariumRecord)
     assert_operator(query.num_results, :>, 1)
     number1 = query.results[0]
     number2 = query.results[1]
@@ -314,7 +314,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
   def test_create_herbarium_record_redirect
     obs = observations(:coprinus_comatus_obs)
-    query = Query.lookup_and_save(:HerbariumRecord, :all)
+    query = Query.lookup_and_save(:HerbariumRecord)
     q = query.id.alphabetize
     params = {
       observation_id: obs.id,
@@ -383,7 +383,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
   def test_update_herbarium_record_redirect
     obs   = observations(:detailed_unknown_obs)
     rec   = obs.herbarium_records.first
-    query = Query.lookup_and_save(:HerbariumRecord, :all)
+    query = Query.lookup_and_save(:HerbariumRecord)
     q     = query.id.alphabetize
     make_admin("rolf")
     params = {
@@ -452,7 +452,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
   def test_destroy_herbarium_record_redirect
     obs   = observations(:detailed_unknown_obs)
     recs  = obs.herbarium_records
-    query = Query.lookup_and_save(:HerbariumRecord, :all)
+    query = Query.lookup_and_save(:HerbariumRecord)
     q     = query.id.alphabetize
     assert_operator(recs.length, :>, 1)
     make_admin("rolf")

@@ -155,7 +155,7 @@ mo> echo blahblahblah > config/master.key
 # (You will have to add the new IP address to the database server!)
 database_server_root> mysql -u root -p
   # For each remote user:
-  CREATE USER 'mo'@'$WEB_SERVER' IDENTIFIED WITH MYSQL_NATIVE_PASSWORD BY '$DB_PASSWORD';
+  CREATE USER 'mo'@'$WEB_SERVER' IDENTIFIED BY '$DB_PASSWORD';
   GRANT ALL PRIVILEGES ON mo_production.* TO 'mo'@'$WEB_SERVER' WITH GRANT OPTION;
   GRANT PROCESS, SELECT, LOCK TABLES ON *.* TO 'mo'@'$WEB_SERVER';
 database_server_root> service mysql restart
@@ -199,7 +199,7 @@ root> systemctl enable solidqueue
 # If installing database locally:
 root> mysql -u root -p
   CREATE DATABASE mo_production;
-  CREATE USER 'mo'@'localhost' IDENTIFIED WITH MYSQL_NATIVE_PASSWORD BY '$DB_PASSWORD';
+  CREATE USER 'mo'@'localhost' IDENTIFIED BY '$DB_PASSWORD';
   GRANT ALL PRIVILEGES ON mo_production.* TO 'mo'@'localhost' WITH GRANT OPTION;
   EXIT
 root> scp $SNAPSHOT_PATH/checkpoint.gz .

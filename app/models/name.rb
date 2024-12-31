@@ -469,7 +469,7 @@ class Name < AbstractModel
         -> { where(description_id: nil) }
   # Names without descriptions, order by most frequently used
   scope :description_needed, lambda {
-    without_description.joins(:observations).
+    with_correct_spelling.without_description.joins(:observations).
       group(:name_id).order(Arel.star.count.desc)
   }
   scope :description_includes,
@@ -717,8 +717,7 @@ class Name < AbstractModel
   def self.descriptions_needed
     names = description_needed.limit(100).map(&:id)
 
-    ::Query.lookup(:Name, :in_set, ids: names,
-                                   title: :needed_descriptions_title.l)
+    ::Query.lookup(:Name, ids: names, title: :needed_descriptions_title.l)
   end
 
   ##############################################################################
