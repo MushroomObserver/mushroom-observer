@@ -101,6 +101,8 @@ class Query::Names < Query::Base
   end
 
   def add_need_description_condition
+    return unless params[:need_description]
+
     add_join(:observations)
     @where << "#{model.table_name}.description_id IS NULL"
   end
