@@ -264,7 +264,7 @@ class NamesControllerTest < FunctionalTestCase
     get(:index, params: { need_description: true })
 
     assert_response(:success)
-    # assert_displayed_title("Selected Names")
+    assert_displayed_title(:query_title_needs_description.t(type: :name))
     assert_select(
       "#results a:match('href', ?)", %r{^#{names_path}/\d+},
       # need length; count & size return a hash; description_needed is grouped
