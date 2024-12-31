@@ -16,7 +16,7 @@ class ProjectsController < ApplicationController
   private
 
   def default_sort_order
-    ::Query::ProjectBase.default_order # :updated_at
+    ::Query::Projects.default_order # :updated_at
   end
 
   # ApplicationController uses this to dispatch #index to a private method
@@ -32,7 +32,7 @@ class ProjectsController < ApplicationController
     )
     return unless user
 
-    query = create_query(:Project, :all, member: user)
+    query = create_query(:Project, member: user)
     [query, {}]
   end
 

@@ -32,7 +32,7 @@ class SpeciesListsController < ApplicationController
 
   # unused now. should be :date, maybe - AN
   def default_sort_order
-    ::Query::SpeciesListBase.default_order # :title
+    ::Query::SpeciesLists.default_order # :title
   end
 
   def unfiltered_index_opts
@@ -60,7 +60,7 @@ class SpeciesListsController < ApplicationController
     )
     return unless user
 
-    query = create_query(:SpeciesList, :all, by_user: user, by: :date)
+    query = create_query(:SpeciesList, by_user: user, by: :date)
     [query, {}]
   end
 
@@ -69,7 +69,7 @@ class SpeciesListsController < ApplicationController
     project = find_or_goto_index(Project, params[:project].to_s)
     return unless project
 
-    query = create_query(:SpeciesList, :all, project: project)
+    query = create_query(:SpeciesList, project: project)
     [query, { always_index: true }]
   end
 
@@ -182,8 +182,7 @@ class SpeciesListsController < ApplicationController
   def init_ivars_for_show
     @canonical_url =
       "#{MO.http_domain}/species_lists/#{@species_list.id}"
-    @query = create_query(:Observation, :all,
-                          by: :name, species_list: @species_list)
+    @query = create_query(:Observation, by: :name, species_list: @species_list)
     store_query_in_session(@query) if params[:set_source].present?
     @query.need_letters = "names.sort_name"
     @pages = paginate_letters(:letter, :page, 100)

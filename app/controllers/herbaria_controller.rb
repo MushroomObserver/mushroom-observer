@@ -33,7 +33,7 @@
 # herbarium_search (get)            index (get, pattern: present)
 # index (get)                       index (get, nonpersonal: true)
 # index_herbarium (get)             index (get) - lists query results
-# list_herbaria (get)               index (get, flavor: all) - all herbaria
+# list_herbaria (get)               index (get) - all herbaria
 # *merge_herbaria (get)             Herbaria::Merges#create (post)
 # *next_herbarium (get)             show { flow: :next } (get))
 # *prev_herbarium (get)             show { flow: :prev } (get)
@@ -97,8 +97,7 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
 
   def nonpersonal
     store_location
-    query = create_query(:Herbarium, :all, nonpersonal: true,
-                                           by: :code_then_name)
+    query = create_query(:Herbarium, nonpersonal: true, by: :code_then_name)
     [query, { always_index: true }]
   end
 

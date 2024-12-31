@@ -32,7 +32,7 @@ class LocationsController < ApplicationController
   private
 
   def default_sort_order
-    ::Query::LocationBase.default_order # :name
+    ::Query::Locations.default_order # :name
   end
 
   def unfiltered_index_opts
@@ -68,7 +68,7 @@ class LocationsController < ApplicationController
       [nil, {}]
     else
       query = create_query(
-        :Location, :all, pattern: Location.user_format(@user, pattern)
+        :Location, pattern: Location.user_format(@user, pattern)
       )
       [query, { link_all_sorts: true }]
     end
@@ -76,14 +76,14 @@ class LocationsController < ApplicationController
 
   # Displays a list of all locations whose country matches the param.
   def country
-    query = create_query(:Location, :all, regexp: "#{params[:country]}$")
+    query = create_query(:Location, regexp: "#{params[:country]}$")
     [query, { link_all_sorts: true }]
   end
 
   # Displays a list of all locations whose country matches the id param.
   def project
     query = create_query(
-      :Location, :all,
+      :Location,
       with_observations: true, project: Project.find(params[:project])
     )
     [query, { link_all_sorts: true }]
@@ -97,7 +97,7 @@ class LocationsController < ApplicationController
     )
     return unless user
 
-    query = create_query(:Location, :all, by_user: user)
+    query = create_query(:Location, by_user: user)
     [query, { link_all_sorts: true }]
   end
 
@@ -109,7 +109,7 @@ class LocationsController < ApplicationController
     )
     return unless editor
 
-    query = create_query(:Location, :all, by_editor: editor)
+    query = create_query(:Location, by_editor: editor)
     [query, {}]
   end
 
@@ -171,10 +171,6 @@ class LocationsController < ApplicationController
     # If these are passed, we're not looking for undefined locations.
     return nil if [:by_editor, :regexp].any? { |key| args[key] }
 
-    model  = :Observation
-    flavor = :all
-    result = nil
-
     # Select only observations with undefined location.
     args[:where] = [args[:where]].compact unless args[:where].is_a?(Array)
     args[:where] << "observations.location_id IS NULL"
@@ -194,13 +190,11 @@ class LocationsController < ApplicationController
     args.delete(:old_by)
 
     # Create query if okay.  (Still need to tweak select and group clauses.)
-    if flavor
-      result = create_query(model, flavor, args)
+    result = create_query(:Observation, args)
 
-      # Also make sure it doesn't reference locations anywhere.  This would
-      # presumably be the result of customization of one of the above flavors.
-      result = nil if /\Wlocations\./.match?(result.query)
-    end
+    # Also make sure it doesn't reference locations anywhere.  This would
+    # presumably be the result of customization of one of the above.
+    result = nil if /\Wlocations\./.match?(result.query)
 
     result
   end

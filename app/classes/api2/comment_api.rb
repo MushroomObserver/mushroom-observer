@@ -58,10 +58,6 @@ class API2
       }
     end
 
-    def query_flavor
-      :all
-    end
-
     def validate_create_params!(params)
       raise(MissingParameter.new(:summary)) if params[:summary].blank?
       raise(MissingParameter.new(:content)) if params[:comment].blank?

@@ -59,7 +59,7 @@ class InfoController < ApplicationController
     @site_data = SiteData.new.get_site_data
 
     # Get the last six observations whose thumbnails are highly rated.
-    query = Query.lookup(:Observation, :all,
+    query = Query.lookup(:Observation,
                          by: :updated_at,
                          where: "images.vote_cache >= 3",
                          join: :"images.thumb_image")

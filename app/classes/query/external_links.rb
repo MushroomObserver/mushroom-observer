@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Query::ExternalLinkBase < Query::Base
+class Query::ExternalLinks < Query::Base
   def model
     ExternalLink
   end
@@ -17,6 +17,7 @@ class Query::ExternalLinkBase < Query::Base
   end
 
   def initialize_flavor
+    add_sort_order_to_title
     add_owner_and_time_stamp_conditions
     initialize_observations_parameter(:external_links)
     add_id_condition("external_links.external_site_id",

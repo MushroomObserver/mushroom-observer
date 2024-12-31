@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
 # base class for Query's which return Names
-class Query::NameBase < Query::Base
+class Query::Names < Query::Base
   include Query::Initializers::Names
   include Query::Initializers::Descriptions
   include Query::Initializers::AdvancedSearch
   include Query::Initializers::Observations
   include Query::Initializers::Locations
   include Query::Initializers::ContentFilters
-  include Query::Initializers::ObservationQueryDescriptions
+  include Query::Initializers::ObservationsQueryDescriptions
 
   def model
     Name
@@ -46,6 +46,7 @@ class Query::NameBase < Query::Base
   end
 
   def initialize_flavor
+    add_sort_order_to_title
     if params[:with_descriptions].present?
       initialize_names_with_descriptions
     elsif params[:with_observations].present?
@@ -69,6 +70,7 @@ class Query::NameBase < Query::Base
     initialize_name_comments_and_notes_parameters
     initialize_name_parameters_for_name_queries
     add_pattern_condition
+    add_need_description_condition
     add_name_advanced_search_conditions
     initialize_name_association_parameters
   end
@@ -96,6 +98,14 @@ class Query::NameBase < Query::Base
     add_for_project_condition(:project_observations, project_joins)
     add_in_species_list_condition
     initialize_herbaria_parameter
+  end
+
+  def add_need_description_condition
+    return unless params[:need_description]
+
+    add_join(:observations)
+    @where << "#{model.table_name}.description_id IS NULL"
+    @title_tag = :query_title_needs_description.t(type: :name)
   end
 
   def add_pattern_condition
@@ -135,7 +145,7 @@ class Query::NameBase < Query::Base
   end
 
   def coerce_into_name_description_query
-    Query.lookup(:NameDescription, :all, params_back_to_description_params)
+    Query.lookup(:NameDescription, params_back_to_description_params)
   end
 
   def title

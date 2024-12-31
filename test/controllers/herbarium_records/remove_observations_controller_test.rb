@@ -61,7 +61,7 @@ class HerbariumRecords::RemoveObservationsControllerTest < FunctionalTestCase
   def test_remove_observation_redirect
     obs   = observations(:detailed_unknown_obs)
     recs  = obs.herbarium_records
-    query = Query.lookup_and_save(:HerbariumRecord, :all)
+    query = Query.lookup_and_save(:HerbariumRecord)
     q     = query.id.alphabetize
     login(obs.user.login)
     assert_operator(recs.length, :>, 1)

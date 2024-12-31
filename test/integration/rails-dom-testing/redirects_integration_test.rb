@@ -98,7 +98,7 @@ class RedirectsIntegrationTest < IntegrationTestCase
   # herbarium_search (get)            index (get, pattern: present)
   # index (get)                       index (get, nonpersonal: true)
   # index_herbarium (get)             index (get) - query results
-  # list_herbaria (get)               index (get, flavor: all) - all herbaria
+  # list_herbaria (get)               index (get) - all herbaria
   # *merge_herbaria (get)             Herbaria::Merges#create (post)
   # *next_herbarium (get)             show { flow: :next } (get))
   # *prev_herbarium (get)             show { flow: :prev } (get)

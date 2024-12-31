@@ -158,7 +158,7 @@ class UsersControllerTest < FunctionalTestCase
   end
 
   def test_show_next
-    query = Query.lookup_and_save(:User, :all)
+    query = Query.lookup_and_save(:User)
     assert_operator(query.num_results, :>, 1)
     number8 = query.results[7]
     number9 = query.results[8]
@@ -170,7 +170,7 @@ class UsersControllerTest < FunctionalTestCase
   end
 
   def test_show_prev
-    query = Query.lookup_and_save(:User, :all)
+    query = Query.lookup_and_save(:User)
     assert_operator(query.num_results, :>, 1)
     number8 = query.results[7]
     number7 = query.results[6]

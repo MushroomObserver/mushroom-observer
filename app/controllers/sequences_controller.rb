@@ -8,7 +8,7 @@
 #    destroy::  Destroy sequence
 #    edit::     Show form to edit a Sequence
 #    new::      Show form to create new Sequence for an Observation
-#    index::    List selected Sequences, based on index flavor and current Query
+#    index::    List selected Sequences, based on index and current Query
 #    show::     Display Sequence details
 #    update::   Update a Sequence
 #
@@ -22,7 +22,7 @@
 # edit_sequence (get)               edit (get)
 # *edit_sequence (post)             update (patch)
 # index_sequence (get)              index (get) -- lists query results
-# list_sequences (get)              index (get, flavor: all) -- all Sequences
+# list_sequences (get)              index (get) -- all Sequences
 # *next_sequence (get)              show { flow: :next } (get))
 # *prev_sequence (get)              show { flow: :prev } (get)
 # *observation_index (get)          n.a (unused, listed Seqs for one Obs)
@@ -44,7 +44,7 @@ class SequencesController < ApplicationController
   #    => displays a list of all sequences in MO
   #
   # NOTE: #index does not handle params[:pattern] or params[:ids] because
-  # we don't offer sequence pattern search. However, the Query::SequenceBase
+  # we don't offer sequence pattern search. However, the Query::Sequences
   # class can handle a pattern param.
   def index
     store_location
