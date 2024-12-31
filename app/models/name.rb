@@ -469,7 +469,7 @@ class Name < AbstractModel
         -> { where(description_id: nil) }
   # Names without descriptions, order by most frequently used
   scope :description_needed, lambda {
-    without_description.joins(:observations).
+    with_correct_spelling.without_description.joins(:observations).
       group(:name_id).order(Arel.star.count.desc)
   }
   scope :description_includes,
