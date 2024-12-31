@@ -32,8 +32,7 @@ class ProjectsController < ApplicationController
     )
     return unless user
 
-    query = create_query(:Project, member: user)
-    [query, {}]
+    [{ member: user }, {}]
   end
 
   def index_display_opts(opts, _query)

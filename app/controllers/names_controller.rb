@@ -33,7 +33,7 @@ class NamesController < ApplicationController
     # Have to check this here because we're not running the query yet.
     raise(:runtime_no_conditions.l) unless query.params.any?
 
-    [query, {}]
+    [query.params, {}]
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
     redirect_to(search_advanced_path)
@@ -62,29 +62,29 @@ class NamesController < ApplicationController
       [nil, {}]
     else
       @suggest_alternate_spellings = search.query.params[:pattern]
-      [search.query, {}]
+      [search.query.params, {}]
     end
   end
 
   # Display list of names that have observations.
   def with_observations
-    query = create_query(:Name, with_observations: 1)
-    [query, {}]
+    [{ with_observations: 1 }, {}]
   end
 
   # Display list of names with descriptions that have authors.
   def with_descriptions
     @with_descriptions = true # signals to add desc info to name list
-    query = create_query(:Name, with_descriptions: 1)
-    [query, {}]
+    [{ with_descriptions: 1 }, {}]
   end
 
   # Display list of the most popular 100 names that don't have descriptions.
   # NOTE: all this extra info and help will be lost if user re-sorts.
   def need_descriptions
     @help = :needed_descriptions_help
-    query = Name.descriptions_needed
-    [query, { num_per_page: 100 }]
+    query_args = { need_description: 1,
+                   group: "observations.name_id",
+                   order: "count(*) DESC" }
+    [query_args, { num_per_page: 100 }]
   end
 
   # Display list of names that a given user is author on.
@@ -95,8 +95,7 @@ class NamesController < ApplicationController
     )
     return unless user
 
-    query = create_query(:Name, by_user: user)
-    [query, {}]
+    [{ by_user: user }, {}]
   end
 
   # Display list of names that a given user is editor on.
@@ -107,8 +106,7 @@ class NamesController < ApplicationController
     )
     return unless user
 
-    query = create_query(:Name, by_editor: user)
-    [query, {}]
+    [{ by_editor: user }, {}]
   end
 
   # Hook runs before template displayed. Must return query.

@@ -56,8 +56,7 @@ class UsersController < ApplicationController
       redirect_to(user_path(user.id))
       [nil, {}]
     else
-      query = create_query(:User, pattern: pattern)
-      [query, {}]
+      [{ pattern: }, {}]
     end
   end
 

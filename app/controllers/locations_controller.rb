@@ -53,7 +53,7 @@ class LocationsController < ApplicationController
     # Have to check this here because we're not running the query yet.
     raise(:runtime_no_conditions.l) unless query.params.any?
 
-    [query, { link_all_sorts: true }]
+    [query.params, { link_all_sorts: true }]
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
     redirect_to(search_advanced_path)
@@ -67,26 +67,22 @@ class LocationsController < ApplicationController
       redirect_to(location_path(loc.id))
       [nil, {}]
     else
-      query = create_query(
-        :Location, pattern: Location.user_format(@user, pattern)
-      )
-      [query, { link_all_sorts: true }]
+      pattern = Location.user_format(@user, pattern)
+      [{ pattern: }, { link_all_sorts: true }]
     end
   end
 
   # Displays a list of all locations whose country matches the param.
   def country
-    query = create_query(:Location, regexp: "#{params[:country]}$")
-    [query, { link_all_sorts: true }]
+    [{ regexp: "#{params[:country]}$" }, { link_all_sorts: true }]
   end
 
   # Displays a list of all locations whose country matches the id param.
   def project
-    query = create_query(
-      :Location,
+    query_args = {
       with_observations: true, project: Project.find(params[:project])
-    )
-    [query, { link_all_sorts: true }]
+    }
+    [query_args, { link_all_sorts: true }]
   end
 
   # Display list of locations that a given user created.
@@ -97,8 +93,7 @@ class LocationsController < ApplicationController
     )
     return unless user
 
-    query = create_query(:Location, by_user: user)
-    [query, { link_all_sorts: true }]
+    [{ by_user: user }, { link_all_sorts: true }]
   end
 
   # Display list of locations that a given user is editor on.
@@ -109,8 +104,7 @@ class LocationsController < ApplicationController
     )
     return unless editor
 
-    query = create_query(:Location, by_editor: editor)
-    [query, {}]
+    [{ by_editor: editor }, {}]
   end
 
   # Hook runs before template displayed. Must return query.

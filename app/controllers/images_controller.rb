@@ -73,8 +73,7 @@ class ImagesController < ApplicationController
     )
     return unless user
 
-    query = create_query(:Image, by_user: user)
-    [query, {}]
+    [{ by_user: user }, {}]
   end
 
   # Display matrix of Image's attached to a given project.
@@ -82,8 +81,7 @@ class ImagesController < ApplicationController
     project = find_or_goto_index(Project, params[:project].to_s)
     return unless project
 
-    query = create_query(:Image, project: project)
-    [query, { always_index: true }]
+    [{ project: project }, { always_index: true }]
   end
 
   # Displays matrix of advanced search results.
@@ -94,7 +92,7 @@ class ImagesController < ApplicationController
     # Have to check this here because we're not running the query yet.
     raise(:runtime_no_conditions.l) unless query.params.any?
 
-    [query, {}]
+    [query.params, {}]
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
     redirect_to(search_advanced_path)

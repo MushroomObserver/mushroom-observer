@@ -51,21 +51,18 @@ class CommentsController < ApplicationController
     )
     return unless user
 
-    query = create_query(:Comment, by_user: user)
-    [query, {}]
+    [{ by_user: user }, {}]
   end
 
   # Shows comments for a given user's Observations, most recent first.
   # (Linked from show_user.)
   def for_user
     user = find_obj_or_goto_index(
-      model: User, obj_id: params[:for_user].to_s,
-      index_path: comments_path
+      model: User, obj_id: params[:for_user].to_s, index_path: comments_path
     )
     return unless user
 
-    query = create_query(:Comment, for_user: user)
-    [query, {}]
+    [{ for_user: user }, {}]
   end
 
   # Shows comments for a given object, most recent first. (Linked from the
@@ -74,8 +71,7 @@ class CommentsController < ApplicationController
     return no_model unless (model = Comment.safe_model_from_name(params[:type]))
     return unless (target = find_or_goto_index(model, params[:target].to_s))
 
-    query = create_query(:Comment, target: target.id, type: target.class.name)
-    [query, {}]
+    [{ target: target.id, type: target.class.name }, {}]
   end
 
   def no_model
