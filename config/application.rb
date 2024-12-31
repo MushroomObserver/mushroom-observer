@@ -43,7 +43,7 @@ module MushroomObserver
 
     # Uncomment this after migrating to all recommended default configs for 7.1
     # config/initializers/new_framework_defaults_7_1.rb
-    config.load_defaults = 7.1
+    config.load_defaults(7.1)
 
     # Set Time.zone default to the specified zone and
     # make Active Record auto-convert to this zone.
