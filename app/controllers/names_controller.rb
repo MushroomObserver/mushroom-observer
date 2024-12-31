@@ -22,7 +22,7 @@ class NamesController < ApplicationController
   # ApplicationController uses this to dispatch #index to a private method
   def index_active_params
     [:advanced_search, :pattern, :with_observations, :with_descriptions,
-     :need_descriptions, :by_user, :by_editor, :by, :q, :id].freeze
+     :need_description, :by_user, :by_editor, :by, :q, :id].freeze
   end
 
   # Displays list of advanced search results.
@@ -79,7 +79,7 @@ class NamesController < ApplicationController
 
   # Display list of the most popular 100 names that don't have descriptions.
   # NOTE: all this extra info and help will be lost if user re-sorts.
-  def need_descriptions
+  def need_description
     @help = :needed_descriptions_help
     query_args = { need_description: 1,
                    group: "observations.name_id",

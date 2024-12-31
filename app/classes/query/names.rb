@@ -101,8 +101,11 @@ class Query::Names < Query::Base
   end
 
   def add_need_description_condition
+    return unless params[:need_description]
+
     add_join(:observations)
     @where << "#{model.table_name}.description_id IS NULL"
+    @title_tag = :query_title_needs_description.t(type: :name)
   end
 
   def add_pattern_condition
