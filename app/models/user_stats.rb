@@ -73,9 +73,9 @@ class UserStats < ApplicationRecord
 
   # This causes the data structures in these fields to be serialized
   # automatically with YAML and stored as plain old text strings.
-  serialize :languages, type: Hash
-  serialize :bonuses
-  serialize :checklist, type: Hash
+  serialize :languages, type: Hash, coder: YAML
+  serialize :bonuses, coder: YAML
+  serialize :checklist, type: Hash, coder: YAML
 
   ALL_FIELDS = {
     name_description_authors: { weight: 100 },

@@ -319,7 +319,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   belongs_to :license       # user's default license
   belongs_to :location      # primary location
 
-  serialize :content_filter, type: Hash
+  serialize :content_filter, type: Hash, coder: YAML
 
   ##############################################################################
   #
@@ -344,8 +344,8 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # This causes the data structures in these fields to be serialized
   # automatically with YAML and stored as plain old text strings.
-  serialize :bonuses
-  serialize :alert
+  serialize :bonuses, coder: YAML
+  serialize :alert, coder: YAML
 
   scope :by_contribution, lambda {
     order(contribution: :desc, name: :asc, login: :asc)
