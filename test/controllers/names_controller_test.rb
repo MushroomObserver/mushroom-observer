@@ -259,9 +259,9 @@ class NamesControllerTest < FunctionalTestCase
     )
   end
 
-  def test_index_needing_descriptions
+  def test_index_needing_description
     login
-    get(:index, params: { need_descriptions: true })
+    get(:index, params: { need_description: true })
 
     assert_response(:success)
     # assert_displayed_title("Selected Names")
