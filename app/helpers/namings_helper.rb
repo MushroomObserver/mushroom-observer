@@ -261,7 +261,6 @@ module NamingsHelper
            else
              Vote.confidence_menu
            end
-    localizations = naming_vote_form_localizations
 
     form_with(**naming_vote_form_args(naming, vote, method)) do |fv|
       [
@@ -269,7 +268,6 @@ module NamingsHelper
                   { class: "form-control w-100",
                     id: "vote_value_#{naming.id}",
                     data: { naming_vote_target: "select",
-                            localization: localizations,
                             action: "naming-vote#sendVote" } }),
         hidden_field_tag(:context, context),
         tag.noscript do
@@ -289,7 +287,7 @@ module NamingsHelper
       id: "naming_vote_form_#{naming.id}",
       class: "naming-vote-form d-inline-block float-right float-sm-none",
       data: { turbo: true, controller: "naming-vote", naming_id: naming.id,
-              localization: localizations }
+              localization: naming_vote_form_localizations }
     }
     args = args.merge(model: vote) if vote&.id
     args
