@@ -61,6 +61,7 @@ module Query::Modules::Validation
 
   def check_for_unexpected_params(old_args)
     return if old_args.keys.empty?
+    return if old_args.keys == [:flavor]
 
     str = old_args.keys.map(&:to_s).join("', '")
     raise("Unexpected parameter(s) '#{str}' for #{model} query.")
