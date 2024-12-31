@@ -104,7 +104,7 @@ class Query::Names < Query::Base
     return unless params[:need_description]
 
     add_join(:observations)
-    @where << "#{model.table_name}.description_id IS NULL"
+    @where << "names.description_id IS NULL"
     @title_tag = :query_title_needs_description.t(type: :name)
   end
 

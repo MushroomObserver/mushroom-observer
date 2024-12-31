@@ -22,17 +22,15 @@ module FieldSlipsController::Index
       project = find_or_goto_index(Project, params[:project].to_s)
     )
 
-    query = create_query(:FieldSlip, project:)
     @project = project
-    [query, { always_index: true }]
+    [{ project: }, { always_index: true }]
   end
 
   # Displays list of User's FieldSlips, by date.
   def by_user
     return unless (user = find_or_goto_index(User, params[:by_user]))
 
-    query = create_query(:FieldSlip, by_user: user)
-    [query, {}]
+    [{ by_user: user }, {}]
   end
 
   def index_display_opts(opts, _query)

@@ -14,25 +14,46 @@ module ApplicationController::Indexes
 
   # Get args from a param subaction, or if none given, the unfiltered_index.
   def build_index_with_query
+    we_need_to_bail, we_have_a_query, query_args, display_opts =
+      try_building_query_args_from_params
+
+    return if we_need_to_bail
+    return filtered_index(query_args, display_opts) if we_have_a_query
+
+    # Otherwise, display the unfiltered index.
+    new_query_args, display_opts = unfiltered_index
+    return unless new_query_args
+
+    filtered_index(new_query_args, display_opts)
+  end
+
+  def try_building_query_args_from_params
+    all_query_args = {}
+    all_display_opts = {}
+    we_have_a_query = false
+    we_need_to_bail = false
+
     index_active_params.each do |subaction|
       next if params[subaction].blank?
 
-      query, display_opts = send(index_param_method_or_default(subaction))
+      query_args, display_opts = send(index_param_method_or_default(subaction))
       # Some actions may redirect instead of returning a query, such as pattern
-      # searches that resolve to a single object or get no results. So if we
-      # had the param, but got a blank query, we should bail to allow the
-      # redirect without rendering a blank index.
-      return nil if query.blank?
+      # searches that resolve to a single object or get no results.
+      # So if we had the param, but got a blank query, we should bail to allow
+      # the redirect without rendering a blank index.
+      if query_args.blank?
+        we_need_to_bail = true
+        break
+      end
 
-      # If we have a query, display it.
-      return filtered_index(query, display_opts)
+      # NOTE: we are merging, which may overwrite some keys.
+      all_query_args = all_query_args.merge(query_args)
+      all_display_opts = all_display_opts.merge(display_opts)
+      # Mark that we have enough for a query.
+      we_have_a_query = true
     end
 
-    # Otherwise, display the unfiltered index.
-    new_query, display_opts = unfiltered_index
-    return unless new_query
-
-    filtered_index(new_query, display_opts)
+    [we_need_to_bail, we_have_a_query, all_query_args, all_display_opts]
   end
 
   # It's not always the controller_name, e.g. ContributorsController -> User
@@ -74,10 +95,10 @@ module ApplicationController::Indexes
   def unfiltered_index
     return unless unfiltered_index_permitted?
 
-    args = { by: default_sort_order }.merge(unfiltered_index_opts[:query_args])
-    query = create_query(controller_model_name.to_sym, **args)
+    query_args = { by: default_sort_order }.
+                 merge(unfiltered_index_opts[:query_args])
 
-    [query, unfiltered_index_opts[:display_opts]]
+    [query_args, unfiltered_index_opts[:display_opts]]
   end
 
   # Can be overridden to prevent the unfiltered index from being called.
@@ -94,10 +115,7 @@ module ApplicationController::Indexes
   def sorted_index
     return unless sorted_index_permitted?
 
-    query = find_or_create_query(controller_model_name.to_sym,
-                                 **sorted_index_opts[:query_args])
-
-    [query, sorted_index_opts[:display_opts]]
+    [sorted_index_opts[:query_args], sorted_index_opts[:display_opts]]
   end
 
   def sorted_index_permitted?
@@ -109,7 +127,8 @@ module ApplicationController::Indexes
   end
 
   # The filtered index.
-  def filtered_index(query, extra_display_opts = {})
+  def filtered_index(query_args, extra_display_opts = {})
+    query = create_query(controller_model_name.to_sym, **query_args)
     query = filtered_index_final_hook(query, extra_display_opts)
     display_opts = index_display_opts(extra_display_opts, query)
 
@@ -142,8 +161,7 @@ module ApplicationController::Indexes
       redirect_to(send(:"#{controller_model_name.underscore}_path", obj.id))
       [nil, {}]
     else
-      query = create_query(controller_model_name.to_sym, pattern:)
-      [query, {}]
+      [{ pattern: }, {}]
     end
   end
 

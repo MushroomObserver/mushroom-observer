@@ -35,7 +35,7 @@ class ObservationsController
       # Have to check this here because we're not running the query yet.
       raise(:runtime_no_conditions.l) unless query.params.any?
 
-      [query, {}]
+      [query.params, {}]
     rescue StandardError => e
       flash_error(e.to_s) if e.present?
       redirect_to(search_advanced_path)
@@ -83,7 +83,7 @@ class ObservationsController
         )
         [nil, {}]
       else
-        [search.query, {}]
+        [search.query.params, {}]
       end
     end
 
@@ -98,31 +98,28 @@ class ObservationsController
     # Displays matrix of Observations with the given name proposed but not
     # actually that name.
     def look_alikes
-      query = create_query(:Observation,
-                           names: [params[:name]],
-                           include_synonyms: true,
-                           include_all_name_proposals: true,
-                           exclude_consensus: true,
-                           by: :confidence)
-      [query, {}]
+      query_args = { names: [params[:name]],
+                     include_synonyms: true,
+                     include_all_name_proposals: true,
+                     exclude_consensus: true,
+                     by: :confidence }
+      [query_args, {}]
     end
 
     # Displays matrix of Observations of subtaxa of the parent of given name.
     def related_taxa
-      query = create_query(:Observation,
-                           names: parents(params[:name]),
-                           include_subtaxa: true,
-                           by: :confidence)
-      [query, {}]
+      query_args = { names: parents(params[:name]),
+                     include_subtaxa: true,
+                     by: :confidence }
+      [query_args, {}]
     end
 
     # Displays matrix of Observations with the given text_name (or search_name).
     def name
-      query = create_query(:Observation,
-                           names: [params[:name]],
-                           include_synonyms: true,
-                           by: :confidence)
-      [query, {}]
+      query_args = { names: [params[:name]],
+                     include_synonyms: true,
+                     by: :confidence }
+      [query_args, {}]
     end
 
     def parents(name_str)
@@ -136,8 +133,7 @@ class ObservationsController
     def by_user
       return unless (user = find_or_goto_index(User, params[:by_user]))
 
-      query = create_query(:Observation, by_user: user)
-      [query, {}]
+      [{ by_user: user }, {}]
     end
 
     # Displays matrix of Observations at a Location, by date.
@@ -146,8 +142,7 @@ class ObservationsController
         location = find_or_goto_index(Location, params[:location].to_s)
       )
 
-      query = create_query(:Observation, location: location)
-      [query, {}]
+      [{ location: }, {}]
     end
 
     # Display matrix of Observations whose "where" matches a string.
@@ -163,8 +158,7 @@ class ObservationsController
     # observations, that will preclude getting results.
     def where
       where = params[:where].to_s
-      query = create_query(:Observation, locations: where)
-      [query, { always_index: true }]
+      [{ locations: where }, { always_index: true }]
     end
 
     # Display matrix of Observations attached to a given project.
@@ -173,9 +167,8 @@ class ObservationsController
         project = find_or_goto_index(Project, params[:project].to_s)
       )
 
-      query = create_query(:Observation, project:)
       @project = project
-      [query, { always_index: true }]
+      [{ project: }, { always_index: true }]
     end
 
     # Display matrix of Observations attached to a given species list.
@@ -184,8 +177,7 @@ class ObservationsController
         spl = find_or_goto_index(SpeciesList, params[:species_list].to_s)
       )
 
-      query = create_query(:Observation, species_list: spl)
-      [query, { always_index: true }]
+      [{ species_list: spl }, { always_index: true }]
     end
 
     # Hook runs before template displayed. Must return query.
