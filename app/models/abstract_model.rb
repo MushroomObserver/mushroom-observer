@@ -132,6 +132,11 @@ class AbstractModel < ApplicationRecord
     where(arel_table[:updated_at].format("%Y-%m-%d") >= earliest).
       where(arel_table[:updated_at].format("%Y-%m-%d") <= latest)
   }
+  scope :sort_by_user, lambda {
+    joins(:user).order(User[:name].when(nil).then(User[:login]).
+                                   when("").then(User[:login]).
+                                   else(User[:name]).asc, id: :desc).distinct
+  }
 
   ##############################################################################
   #
