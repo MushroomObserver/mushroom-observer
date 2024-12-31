@@ -47,8 +47,8 @@ module ApplicationController::Indexes
       end
 
       # NOTE: we are merging, which may overwrite some keys.
-      all_query_args.merge(query_args)
-      all_display_opts.merge(display_opts)
+      all_query_args = all_query_args.merge(query_args)
+      all_display_opts = all_display_opts.merge(display_opts)
       # Mark that we have enough for a query.
       we_have_a_query = true
     end
