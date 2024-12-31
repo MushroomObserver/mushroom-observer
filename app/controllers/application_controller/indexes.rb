@@ -14,19 +14,37 @@ module ApplicationController::Indexes
 
   # Get args from a param subaction, or if none given, the unfiltered_index.
   def build_index_with_query
+    we_need_to_bail, we_have_a_query, query_args, display_opts =
+      try_building_query_args_from_params
+
+    return if we_need_to_bail
+    return filtered_index(query_args, display_opts) if we_have_a_query
+
+    # Otherwise, display the unfiltered index.
+    new_query_args, display_opts = unfiltered_index
+    return unless new_query_args
+
+    filtered_index(new_query_args, display_opts)
+  end
+
+  def try_building_query_args_from_params
     all_query_args = {}
     all_display_opts = {}
     we_have_a_query = false
+    we_need_to_bail = false
 
     index_active_params.each do |subaction|
       next if params[subaction].blank?
 
       query_args, display_opts = send(index_param_method_or_default(subaction))
       # Some actions may redirect instead of returning a query, such as pattern
-      # searches that resolve to a single object or get no results. So if we
-      # had the param, but got a blank query, we should bail to allow the
-      # redirect without rendering a blank index.
-      return nil if query_args.blank?
+      # searches that resolve to a single object or get no results.
+      # So if we had the param, but got a blank query, we should bail to allow
+      # the redirect without rendering a blank index.
+      if query_args.blank?
+        we_need_to_bail = true
+        break
+      end
 
       # NOTE: we are merging, which may overwrite some keys.
       all_query_args.merge(query_args)
@@ -35,13 +53,7 @@ module ApplicationController::Indexes
       we_have_a_query = true
     end
 
-    return filtered_index(all_query_args, all_display_opts) if we_have_a_query
-
-    # Otherwise, display the unfiltered index.
-    new_query_args, display_opts = unfiltered_index
-    return unless new_query_args
-
-    filtered_index(new_query_args, display_opts)
+    [we_need_to_bail, we_have_a_query, all_query_args, all_display_opts]
   end
 
   # It's not always the controller_name, e.g. ContributorsController -> User
