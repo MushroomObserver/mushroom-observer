@@ -46,6 +46,8 @@ class Query::SpeciesLists < Query::Base
   end
 
   def add_pattern_condition
+    return if params[:pattern].blank?
+
     add_search_condition(search_fields, params[:pattern])
     add_join(:locations!)
     super
