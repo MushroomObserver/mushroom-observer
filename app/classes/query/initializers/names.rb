@@ -28,6 +28,7 @@ module Query::Initializers::Names
       notes_has?: :string,
       with_comments?: { boolean: [true] },
       comments_has?: :string,
+      need_description?: :boolean,
       with_descriptions?: :boolean,
       with_observations?: { boolean: [true] }
     }

@@ -70,6 +70,7 @@ class Query::Names < Query::Base
     initialize_name_comments_and_notes_parameters
     initialize_name_parameters_for_name_queries
     add_pattern_condition
+    add_need_description_condition
     add_name_advanced_search_conditions
     initialize_name_association_parameters
   end
@@ -97,6 +98,11 @@ class Query::Names < Query::Base
     add_for_project_condition(:project_observations, project_joins)
     add_in_species_list_condition
     initialize_herbaria_parameter
+  end
+
+  def add_need_description_condition
+    add_join(:observations)
+    @where << "#{model.table_name}.description_id IS NULL"
   end
 
   def add_pattern_condition
