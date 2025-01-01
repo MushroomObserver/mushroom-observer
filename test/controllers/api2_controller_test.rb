@@ -119,10 +119,12 @@ class API2ControllerTest < FunctionalTestCase
   end
 
   def do_basic_get_request_for_model(model, *args)
+    # Some models have a default_scope sort order applied.
+    # Reorder our expects preventatively to match API2's order.
     expected_object = if args.empty?
-                        model.reorder(created_at: :asc).first
+                        model.reorder(id: :asc).first
                       else
-                        model.reorder(created_at: :asc).where(*args).first
+                        model.where(*args).reorder(id: :asc).first
                       end
     response_formats = [:xml, :json]
     [:none, :low, :high].each do |detail|
