@@ -467,10 +467,11 @@ class Name < AbstractModel
         -> { where.not(description_id: nil) }
   scope :without_description,
         -> { where(description_id: nil) }
-  # Names without descriptions, order by most frequently used
+  # Names without descriptions
   scope :description_needed, lambda {
-    with_correct_spelling.without_description.joins(:observations).
-      group(:name_id).order(Arel.star.count.desc)
+    with_correct_spelling.without_description.joins(:observations).distinct
+      # in the template: order by most frequently used
+      # group(:name_id).order(Arel.star.count.desc)
   }
   scope :description_includes,
         lambda { |text|
