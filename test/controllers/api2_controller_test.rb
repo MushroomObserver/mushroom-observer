@@ -119,7 +119,11 @@ class API2ControllerTest < FunctionalTestCase
   end
 
   def do_basic_get_request_for_model(model, *args)
-    expected_object = args.empty? ? model.first : model.where(*args).first
+    expected_object = if args.empty?
+                        model.reorder(created_at: :asc).first
+                      else
+                        model.reorder(created_at: :asc).where(*args).first
+                      end
     response_formats = [:xml, :json]
     [:none, :low, :high].each do |detail|
       response_formats.each do |format|

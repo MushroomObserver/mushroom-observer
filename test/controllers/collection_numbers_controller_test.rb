@@ -236,7 +236,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
          params: { observation_id: obs.id, collection_number: params })
     assert_equal(collection_number_count + 1, CollectionNumber.count)
     assert_flash_success
-    number = CollectionNumber.last
+    number = CollectionNumber.reorder(created_at: :asc).last
     assert_obj_arrays_equal([number], obs.reload.collection_numbers)
 
     post(:create,

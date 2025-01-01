@@ -66,7 +66,7 @@ class ObservationCommentSystemTest < ApplicationSystemTestCase
     end
 
     # Define `com` outside session context so it can be used in any session
-    com = Comment.last
+    com = Comment.reorder(created_at: :asc).last
 
     using_session("katrina_session") do
       scroll_to(find("#comments_for_object"), align: :center)

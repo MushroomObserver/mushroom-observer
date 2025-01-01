@@ -129,7 +129,7 @@ class API2Test < UnitTestCase
   end
 
   def assert_last_comment_correct
-    com = Comment.last
+    com = Comment.reorder(created_at: :asc).last
     assert_users_equal(@user, com.user)
     assert_in_delta(Time.zone.now, com.created_at, 1.minute)
     assert_in_delta(Time.zone.now, com.updated_at, 1.minute)

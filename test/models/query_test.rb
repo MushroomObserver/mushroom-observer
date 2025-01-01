@@ -1139,13 +1139,12 @@ class QueryTest < UnitTestCase
   ##############################################################################
 
   def test_article_all
-    expects = Article.order(created_at: :desc, id: :desc).uniq
+    expects = Article.all
     assert_query(expects, :Article)
   end
 
   def test_article_by_rss_log
-    assert_query(Article.joins(:rss_log).distinct,
-                 :Article, by: :rss_log)
+    assert_query(Article.joins(:rss_log).distinct, :Article, by: :rss_log)
   end
 
   def test_article_in_set
@@ -1155,13 +1154,13 @@ class QueryTest < UnitTestCase
   end
 
   def test_collection_number_all
-    expect = CollectionNumber.all.sort_by(&:format_name)
+    expect = CollectionNumber.all
     assert_query(expect, :CollectionNumber)
   end
 
   def test_collection_number_for_observation
     obs = observations(:detailed_unknown_obs)
-    expects = obs.collection_numbers.sort_by(&:format_name)
+    expects = CollectionNumber.for_observation(obs)
     assert_query(expects, :CollectionNumber, observation: obs.id)
   end
 
