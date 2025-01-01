@@ -1313,19 +1313,19 @@ class QueryTest < UnitTestCase
   end
 
   def test_herbarium_record_all
-    expect = HerbariumRecord.all.sort_by(&:herbarium_label)
+    expect = HerbariumRecord.all
     assert_query(expect, :HerbariumRecord)
   end
 
   def test_herbarium_record_for_observation
     obs = observations(:coprinus_comatus_obs)
-    expect = obs.herbarium_records.sort_by(&:herbarium_label)
+    expect = HerbariumRecord.for_observation(obs)
     assert_query(expect, :HerbariumRecord, observation: obs.id)
   end
 
   def test_herbarium_record_in_herbarium
     nybg = herbaria(:nybg_herbarium)
-    expect = nybg.herbarium_records.sort_by(&:herbarium_label)
+    expect = HerbariumRecord.where(herbarium: nybg)
     assert_query(expect, :HerbariumRecord, herbarium: nybg.id)
   end
 
@@ -1350,9 +1350,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_herbarium_record_pattern_search_blank
-    expects = HerbariumRecord.order(
-      initial_det: :asc, accession_number: :asc, id: :desc
-    )
+    expects = HerbariumRecord.all
     assert_query(expects, :HerbariumRecord, pattern: "")
   end
 
@@ -1360,7 +1358,7 @@ class QueryTest < UnitTestCase
     HerbariumRecord.where(
       HerbariumRecord[:initial_det].concat(HerbariumRecord[:accession_number]).
       concat(HerbariumRecord[:notes].coalesce("")).matches("%#{pattern}%")
-    ).uniq
+    ).distinct
   end
 
   def test_image_all

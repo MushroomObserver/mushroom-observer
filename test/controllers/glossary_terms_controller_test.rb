@@ -264,7 +264,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   end
 
   def test_create_duplicate_name
-    existing_name = GlossaryTerm.first.name
+    existing_name = GlossaryTerm.reorder(created_at: :asc).first.name
     params = create_term_params
     params[:glossary_term][:name] = existing_name
     login
@@ -442,7 +442,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   end
 
   def test_destroy_no_login
-    term = GlossaryTerm.first
+    term = GlossaryTerm.reorder(created_at: :asc).first
     login(users(:zero_user).login)
     delete(:destroy, params: { id: term.id })
 
