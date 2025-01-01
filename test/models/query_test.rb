@@ -1180,7 +1180,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_comment_all
-    expects = Comment.order(Comment[:created_at].desc, Comment[:id].desc).  uniq
+    expects = Comment.order(Comment[:created_at].desc, Comment[:id].desc).uniq
     assert_query(expects, :Comment)
   end
 
@@ -1366,7 +1366,7 @@ class QueryTest < UnitTestCase
   def herbarium_record_pattern_search(pattern)
     HerbariumRecord.where(
       HerbariumRecord[:initial_det].concat(HerbariumRecord[:accession_number]).
-      concat(HerbariumRecord[:notes].coalesce('')).matches("%#{pattern}%")
+      concat(HerbariumRecord[:notes].coalesce("")).matches("%#{pattern}%")
     ).uniq
   end
 
@@ -1883,8 +1883,7 @@ class QueryTest < UnitTestCase
     expects = Location.joins(:descriptions).
               where(descriptions: { user: rolf }).
               order(Location[:name].asc, Location[:id].desc).distinct
-    assert_query([locations(:albion).id],
-                 :Location, with_descriptions: 1, by_user: rolf)
+    assert_query(expects, :Location, with_descriptions: 1, by_user: rolf)
 
     assert_query([], :Location, with_descriptions: 1, by_user: mary)
   end
@@ -3206,10 +3205,10 @@ class QueryTest < UnitTestCase
 
   def species_list_pattern_search(pattern)
     SpeciesList.left_outer_joins(:location).
-                where(SpeciesList[:title].matches("%#{pattern}%").
-                      or(SpeciesList[:notes].matches("%#{pattern}%")).
-                      or(SpeciesList[:where].matches("%#{pattern}%")).
-                      or(Location[:name].matches("%#{pattern}%"))).
+      where(SpeciesList[:title].matches("%#{pattern}%").
+            or(SpeciesList[:notes].matches("%#{pattern}%")).
+            or(SpeciesList[:where].matches("%#{pattern}%")).
+            or(Location[:name].matches("%#{pattern}%"))).
       order(title: :asc, id: :desc).uniq
   end
 
