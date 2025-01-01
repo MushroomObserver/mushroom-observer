@@ -1141,7 +1141,8 @@ class QueryTest < UnitTestCase
   ##############################################################################
 
   def test_article_all
-    assert_query(Article.all, :Article)
+    expects = Article.order(created_at: :desc, id: :desc).uniq
+    assert_query(expects, :Article)
   end
 
   def test_article_by_rss_log
@@ -1259,21 +1260,21 @@ class QueryTest < UnitTestCase
   end
 
   def test_glossary_term_all
-    expect = GlossaryTerm.all.sort_by(&:name)
-    assert_query(expect, :GlossaryTerm)
+    expects = GlossaryTerm.
+              order(GlossaryTerm[:name].asc, GlossaryTerm[:id].desc)
+    assert_query(expects, :GlossaryTerm)
   end
 
   def test_glossary_term_pattern_search
     assert_query([], :GlossaryTerm, pattern: "no glossary term has this")
     # name
-    assert_query(
-      GlossaryTerm.
-        where(GlossaryTerm[:name].matches("%conic_glossary_term%").
-        or(GlossaryTerm[:description].matches("%conic_glossary_term%"))),
-      :GlossaryTerm, pattern: "conic_glossary_term"
-    )
+    expects = GlossaryTerm.
+              where(GlossaryTerm[:name].matches("%conic_glossary_term%").
+              or(GlossaryTerm[:description].matches("%conic_glossary_term%"))).
+              order(GlossaryTerm[:name].asc, GlossaryTerm[:id].desc).uniq
+    assert_query(expects, :GlossaryTerm, pattern: "conic_glossary_term")
     # description
-    expect =
+    expects =
       GlossaryTerm.where(GlossaryTerm[:name].matches("%Description%")).
       where(GlossaryTerm[:name].matches("%of%")).
       where(GlossaryTerm[:name].matches("%Term%")).
@@ -1281,9 +1282,12 @@ class QueryTest < UnitTestCase
         GlossaryTerm.where(GlossaryTerm[:description].matches("%Description%")).
         where(GlossaryTerm[:description].matches("%of%")).
         where(GlossaryTerm[:description].matches("%Term%"))
-      )
-    assert_query(expect, :GlossaryTerm, pattern: "Description of Term")
-    assert_query(GlossaryTerm.all, :GlossaryTerm, pattern: "")
+      ).order(GlossaryTerm[:name].asc, GlossaryTerm[:id].desc).uniq
+    assert_query(expects, :GlossaryTerm, pattern: "Description of Term")
+    # blank
+    expects = GlossaryTerm.
+              order(GlossaryTerm[:name].asc, GlossaryTerm[:id].desc)
+    assert_query(expects, :GlossaryTerm, pattern: "")
   end
 
   def test_herbarium_all
@@ -1292,12 +1296,11 @@ class QueryTest < UnitTestCase
   end
 
   def test_herbarium_by_records
-    expect = Herbarium.
-             left_joins(:herbarium_records).
+    expect = Herbarium.left_outer_joins(:herbarium_records).
              group(:id).
              # Wrap known safe argument in Arel
              # to prevent "Dangerous query method" Deprecation Warning
-             order(HerbariumRecord[:id].count.desc)
+             order(HerbariumRecord[:id].count.desc, Herbarium[:id].desc)
     assert_query(expect, :Herbarium, by: :records)
   end
 
@@ -1331,62 +1334,57 @@ class QueryTest < UnitTestCase
     assert_query(expect, :HerbariumRecord, herbarium: nybg.id)
   end
 
-  def test_herbarium_record_pattern_search
-    expect = [herbarium_records(:interesting_unknown)]
-    assert_query(expect, :HerbariumRecord, pattern: "dried")
-
-    assert_query([], :HerbariumRecord,
-                 pattern: "no herbarium record has this")
-    assert_query(
-      HerbariumRecord.where(
-        HerbariumRecord[:initial_det].matches("%Agaricus%")
-      ),
-      :HerbariumRecord, pattern: "Agaricus"
-    )
-    assert_query(
-      HerbariumRecord.where(HerbariumRecord[:notes].matches("%rare%")),
-      :HerbariumRecord, pattern: "rare"
-    )
-    assert_query(
-      HerbariumRecord.all, :HerbariumRecord, pattern: ""
-    )
+  def test_herbarium_record_pattern_search_notes
+    expects = herbarium_record_pattern_search("dried")
+    assert_query(expects, :HerbariumRecord, pattern: "dried")
   end
 
-  def test_image_advanced_search
-    assert_query([images(:agaricus_campestris_image).id],
-                 :Image, name: "Agaricus")
-    assert_query(Image.joins(observations: :location).
-                       where(observations: { location: locations(:burbank) }).
-                       where(observations: { is_collection_location: true }),
-                 :Image, user_where: "burbank")
-    assert_query([images(:connected_coprinus_comatus_image).id],
-                 :Image, user_where: "glendale")
-    assert_query(Image.includes(:observations).
-                       where(observations: { user: mary }),
-                 :Image, user: "mary")
-    assert_query([images(:turned_over_image).id, images(:in_situ_image).id],
-                 :Image, content: "little")
-    assert_query([images(:connected_coprinus_comatus_image).id],
-                 :Image, content: "fruiting")
-    assert_query([],
-                 :Image, name: "agaricus", user_where: "glendale")
-    assert_query([images(:agaricus_campestris_image).id],
-                 :Image, name: "agaricus", user_where: "burbank")
-    assert_query([images(:turned_over_image).id, images(:in_situ_image).id],
-                 :Image, content: "little", user_where: "burbank")
+  def test_herbarium_record_pattern_search_not_findable
+    assert_query([], :HerbariumRecord,
+                 pattern: "no herbarium record has this")
+  end
+
+  def test_herbarium_record_pattern_search_initial_det
+    expects = herbarium_record_pattern_search("Agaricus")
+    assert_query(expects, :HerbariumRecord, pattern: "Agaricus")
+  end
+
+  def test_herbarium_record_pattern_search_accession_number
+    expects = herbarium_record_pattern_search("123a")
+    assert_query(expects, :HerbariumRecord, pattern: "123a")
+  end
+
+  def test_herbarium_record_pattern_search_blank
+    expects = HerbariumRecord.order(
+      initial_det: :asc, accession_number: :asc, id: :desc
+    )
+    assert_query(expects, :HerbariumRecord, pattern: "")
+  end
+
+  def herbarium_record_pattern_search(pattern)
+    HerbariumRecord.where(
+      HerbariumRecord[:initial_det].concat(HerbariumRecord[:accession_number]).
+      concat(HerbariumRecord[:notes].coalesce('')).matches("%#{pattern}%")
+    ).uniq
   end
 
   def test_image_all
-    expect = Image.all.reverse
-    assert_query(expect, :Image)
+    expects = Image.order(created_at: :desc, id: :desc).uniq
+    assert_query(expects, :Image)
+  end
 
+  def test_image_for_observations
     obs = observations(:two_img_obs)
-    expect = obs.images
-    assert_query(expect, :Image, observations: obs)
+    expects = Image.joins(:observations).where(observations: { id: obs.id }).
+              order(Image[:created_at].desc, Image[:id].desc).uniq
+    assert_query(expects, :Image, observations: obs)
+  end
 
+  def test_image_for_projects
     project = projects(:bolete_project)
-    expect = project.images
-    assert_query(expect, :Image, projects: [project.title])
+    expects = Image.joins(:projects).where(projects: { id: project.id }).
+              order(Image[:created_at].desc, Image[:id].desc).uniq
+    assert_query(expects, :Image, projects: [project.title])
   end
 
   def test_image_by_user
@@ -1426,6 +1424,45 @@ class QueryTest < UnitTestCase
       :Image, project: projects(:bolete_project), by: :id
     )
     assert_query([], :Image, project: projects(:empty_project))
+  end
+
+  def test_image_advanced_search_name
+    assert_query([images(:agaricus_campestris_image).id],
+                 :Image, name: "Agaricus")
+  end
+
+  def test_image_advanced_search_user_where
+    expects = Image.joins(:observations).
+              where(observations: { location: locations(:burbank) }).
+              where(observations: { is_collection_location: true }).
+              order(Image[:created_at].desc, Image[:id].desc).uniq
+    assert_query(expects, :Image, user_where: "burbank")
+
+    assert_query([images(:connected_coprinus_comatus_image).id],
+                 :Image, user_where: "glendale")
+  end
+
+  def test_image_advanced_search_user
+    expects = Image.joins(observations: :user).
+              where(observations: { user: mary }).
+              order(Image[:created_at].desc, Image[:id].desc).uniq
+    assert_query(expects, :Image, user: "mary")
+  end
+
+  def test_image_advanced_search_content
+    assert_query([images(:turned_over_image).id, images(:in_situ_image).id],
+                 :Image, content: "little")
+    assert_query([images(:connected_coprinus_comatus_image).id],
+                 :Image, content: "fruiting")
+  end
+
+  def test_image_advanced_search_combos
+    assert_query([],
+                 :Image, name: "agaricus", user_where: "glendale")
+    assert_query([images(:agaricus_campestris_image).id],
+                 :Image, name: "agaricus", user_where: "burbank")
+    assert_query([images(:turned_over_image).id, images(:in_situ_image).id],
+                 :Image, content: "little", user_where: "burbank")
   end
 
   def test_image_pattern_search
@@ -2935,7 +2972,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_project_all
-    assert_query(Project.all, :Project)
+    expects = Project.order(updated_at: :desc, id: :desc).uniq
+    assert_query(expects, :Project)
   end
 
   def test_project_by_rss_log
@@ -2954,15 +2992,20 @@ class QueryTest < UnitTestCase
     assert_query([],
                  :Project, pattern: "no project has this")
     # title
-    assert_query(Project.where(Project[:summary].matches("%bolete%").
-                               or(Project[:title].matches("%bolete%"))),
-                 :Project, pattern: "bolete")
+    expects = project_pattern_search("bolete")
+    assert_query(expects, :Project, pattern: "bolete")
     # summary
-    assert_query(Project.where(Project[:summary].matches("%two lists%").
-                               or(Project[:title].matches("%two lists%"))),
-                 :Project, pattern: "two lists")
-    assert_query(Project.all,
-                 :Project, pattern: "")
+    expects = project_pattern_search("two lists")
+    assert_query(expects, :Project, pattern: "two lists")
+
+    expects = Project.order(updated_at: :desc, id: :desc).uniq
+    assert_query(expects, :Project, pattern: "")
+  end
+
+  def project_pattern_search(pattern)
+    Project.where(Project[:title].matches("%#{pattern}%").
+                  or(Project[:summary].matches("%#{pattern}%"))).
+      order(updated_at: :desc, id: :desc).uniq
   end
 
   def test_rss_log_all
@@ -3048,7 +3091,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_species_list_all
-    expect = SpeciesList.order(:title).to_a
+    expect = SpeciesList.order(title: :asc, id: :desc).to_a
     assert_query(expect, :SpeciesList)
   end
 
@@ -3063,8 +3106,9 @@ class QueryTest < UnitTestCase
   end
 
   def test_species_list_at_location
-    assert_query(SpeciesList.where(location: locations(:burbank)),
-                 :SpeciesList, location: locations(:burbank))
+    expects = SpeciesList.where(location: locations(:burbank)).
+              order(title: :asc, id: :desc).uniq
+    assert_query(expects, :SpeciesList, location: locations(:burbank))
     assert_query(
       [], :SpeciesList, location: locations(:unused_location)
     )
@@ -3082,12 +3126,16 @@ class QueryTest < UnitTestCase
   end
 
   def test_species_list_by_user
-    assert_query([species_lists(:first_species_list).id,
-                  species_lists(:another_species_list).id],
-                 :SpeciesList, by_user: rolf, by: :id)
-    assert_query(SpeciesList.where(user: mary),
-                 :SpeciesList, by_user: mary)
+    expects = SpeciesList.where(user: mary).
+              order(title: :asc, id: :desc).uniq
+    assert_query(expects, :SpeciesList, by_user: mary)
     assert_query([], :SpeciesList, by_user: dick)
+  end
+
+  def test_species_list_by_user_sort_by_id
+    expects = SpeciesList.where(user: rolf).
+              order(id: :asc).uniq
+    assert_query(expects, :SpeciesList, by_user: rolf, by: :id)
   end
 
   def test_species_list_for_project
@@ -3111,24 +3159,33 @@ class QueryTest < UnitTestCase
     assert_query([],
                  :SpeciesList, pattern: "nonexistent pattern")
     # in title
-    assert_query(SpeciesList.where(title: "query_first_list"),
-                 :SpeciesList, pattern: "query_first_list")
+    pattern = "query_first_list"
+    expects = species_list_pattern_search(pattern)
+    assert_query(expects, :SpeciesList, pattern: "query_first_list")
     # in notes
     pattern = species_lists(:query_notes_list).notes
-    assert_query(SpeciesList.where(notes: pattern),
-                 :SpeciesList, pattern: pattern)
+    expects = species_list_pattern_search(pattern)
+    assert_query(expects, :SpeciesList, pattern: pattern)
     # in location
-    assert_query(
-      SpeciesList.where(location: locations(:burbank)),
-      :SpeciesList, pattern: locations(:burbank).name
-    )
+    pattern = locations(:burbank).name
+    expects = species_list_pattern_search(pattern)
+    assert_query(expects, :SpeciesList, pattern: locations(:burbank).name)
     # in where
     pattern = species_lists(:where_list).where
-    assert_query(SpeciesList.where(where: pattern),
-                 :SpeciesList, pattern: pattern)
+    expects = species_list_pattern_search(pattern)
+    assert_query(expects, :SpeciesList, pattern: pattern)
 
-    assert_query(SpeciesList.all,
-                 :SpeciesList, pattern: "")
+    expects = SpeciesList.order(title: :asc, id: :desc).to_a
+    assert_query(expects, :SpeciesList, pattern: "")
+  end
+
+  def species_list_pattern_search(pattern)
+    SpeciesList.left_outer_joins(:location).
+                where(SpeciesList[:title].matches("%#{pattern}%").
+                      or(SpeciesList[:notes].matches("%#{pattern}%")).
+                      or(SpeciesList[:where].matches("%#{pattern}%")).
+                      or(Location[:name].matches("%#{pattern}%"))).
+      order(title: :asc, id: :desc).uniq
   end
 
   def test_user_all
