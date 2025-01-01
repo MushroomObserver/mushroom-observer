@@ -1237,20 +1237,17 @@ class QueryTest < UnitTestCase
 
   # In the model these are all getting a default_scope order: :code thrown on.
   def test_field_slip_all
-    expects = FieldSlip.reorder("").
-              order(FieldSlip[:created_at].desc, FieldSlip[:id].desc).distinct
+    expects = FieldSlip.all
     assert_query(expects, :FieldSlip)
   end
 
   def test_field_slip_by_user
-    expects = FieldSlip.by_user(mary).reorder("").
-              order(created_at: :desc, id: :desc).distinct
+    expects = FieldSlip.by_user(mary)
     assert_query(expects, :FieldSlip, by_user: mary)
   end
 
   def test_field_slip_for_project
-    expects = FieldSlip.where(project: projects(:eol_project)).reorder("").
-              order(created_at: :desc, id: :desc).distinct
+    expects = FieldSlip.where(project: projects(:eol_project))
     assert_query(expects, :FieldSlip, project: projects(:eol_project))
   end
 
