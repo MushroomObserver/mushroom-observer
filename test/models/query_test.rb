@@ -10,10 +10,8 @@ class QueryTest < UnitTestCase
     actual = test_ids ? query.result_ids : query.results
     msg = "Query results are wrong. SQL is:\n#{query.last_query}"
     if test_ids
-      # assert_equal(expect.sort, actual.sort, msg)
       assert_equal(expect, actual, msg)
     else
-      # assert_obj_arrays_equal(expect.sort_by(&:id), actual.sort_by(&:id), msg)
       assert_obj_arrays_equal(expect, actual, msg)
     end
     type = args[0].to_s.underscore.to_sym.t.titleize.sub(/um$/, "(um|a)")
@@ -3013,7 +3011,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_rss_log_all
-    ids = RssLog.all.map(&:id)
+    ids = RssLog.order(updated_at: :desc, id: :desc).uniq
     assert_query(ids, :RssLog)
   end
 
@@ -3268,61 +3266,79 @@ class QueryTest < UnitTestCase
   #
   ##############################################################################
 
-  def test_filtering_content
-    ##### with_images filter #####
-    expect = Observation.where.not(thumb_image_id: nil)
-    assert_query(expect, :Observation, with_images: "yes")
+  def test_filtering_content_with_images
+    expects = Observation.where.not(thumb_image_id: nil).
+              order(when: :desc, id: :desc).uniq
+    assert_query(expects, :Observation, with_images: "yes")
 
-    expect = Observation.where(thumb_image_id: nil)
-    assert_query(expect, :Observation, with_images: "no")
+    expects = Observation.where(thumb_image_id: nil).
+              order(when: :desc, id: :desc).uniq
+    assert_query(expects, :Observation, with_images: "no")
+  end
 
-    ##### with_specimen filter #####
-    expect = Observation.where(specimen: true)
-    assert_query(expect, :Observation, with_specimen: "yes")
+  def test_filtering_content_with_specimen
+    expects = Observation.where(specimen: true).
+              order(when: :desc, id: :desc).uniq
+    assert_query(expects, :Observation, with_specimen: "yes")
 
-    expect = Observation.where(specimen: false)
-    assert_query(expect, :Observation, with_specimen: "no")
+    expects = Observation.where(specimen: false).
+              order(when: :desc, id: :desc).uniq
+    assert_query(expects, :Observation, with_specimen: "no")
+  end
 
-    ##### lichen filters #####
-    expect_obs = Observation.where(
-      Observation[:lifeform].matches("%lichen%")
-    ).to_a
-    expect_names = Name.where(Name[:lifeform].matches("%lichen%")).
-                   reject(&:correct_spelling_id).to_a
-    assert_query(expect_obs, :Observation, lichen: "yes")
-    assert_query(expect_names, :Name, lichen: "yes")
+  def test_filtering_content_with_lichen
+    expects_obs = Observation.where(Observation[:lifeform].matches("%lichen%")).
+                  order(when: :desc, id: :desc).uniq
+    expects_names = Name.with_correct_spelling.
+                    where(Name[:lifeform].matches("%lichen%")).
+                    order(sort_name: :asc, id: :desc).uniq
+    assert_query(expects_obs, :Observation, lichen: "yes")
+    assert_query(expects_names, :Name, lichen: "yes")
+  end
 
-    expect_obs = Observation.where(
-      Observation[:lifeform].does_not_match("% lichen %")
-    ).to_a
-    expect_names = Name.where(Name[:lifeform].does_not_match("% lichen %")).
-                   reject(&:correct_spelling_id).to_a
-    assert_query(expect_obs, :Observation, lichen: "no")
-    assert_query(expect_names, :Name, lichen: "no")
+  def test_filtering_content_with_non_lichen
+    expects_obs = Observation.
+                  where(Observation[:lifeform].does_not_match("% lichen %")).
+                  order(when: :desc, id: :desc).uniq
+    expects_names = Name.with_correct_spelling.
+                    where(Name[:lifeform].does_not_match("% lichen %")).
+                    order(sort_name: :asc, id: :desc).uniq
+    assert_query(expects_obs, :Observation, lichen: "no")
+    assert_query(expects_names, :Name, lichen: "no")
+  end
 
-    ##### region filter #####
-    expect = Location.where(Location[:name].matches("%California%"))
-    assert_query(expect, :Location, region: "California, USA")
-    assert_query(expect, :Location, region: "USA, California")
+  def test_filtering_content_region
+    expects = Location.where(Location[:name].matches("%California%")).
+              order(name: :asc, id: :desc).uniq
+    assert_query(expects, :Location, region: "California, USA")
+    assert_query(expects, :Location, region: "USA, California")
 
-    expect = Observation.where(
-      Observation[:where].matches("%California, USA")
-    )
-    assert_query(expect, :Observation, region: "California, USA")
+    expects = Observation.
+              where(Observation[:where].matches("%California, USA")).
+              order(when: :desc, id: :desc).uniq
+    assert_query(expects, :Observation, region: "California, USA")
 
-    expect = Location.where(Location[:name].matches("%, USA").
-              or(Location[:name].matches("%, Canada")))
-    assert(expect.include?(locations(:albion))) # usa
-    assert(expect.include?(locations(:elgin_co))) # canada
-    assert_query(expect, :Location, region: "North America")
+    expects = Location.where(Location[:name].matches("%, USA").
+              or(Location[:name].matches("%, Canada"))).
+              order(name: :asc, id: :desc).uniq
+    assert(expects.include?(locations(:albion))) # usa
+    assert(expects.include?(locations(:elgin_co))) # canada
+    assert_query(expects, :Location, region: "North America")
+  end
 
-    ##### clade filter #####
-    expect_names = Name.where(Name[:classification].matches("%Agaricales%")).
-                   reject(&:correct_spelling_id).to_a
-    expect_names << names(:agaricales)
-    expect_obs = expect_names.map(&:observations).flatten
-    assert_query(expect_obs, :Observation, clade: "Agaricales")
-    assert_query(expect_names, :Name, clade: "Agaricales")
+  def test_filtering_content_clade
+    names = Name.with_correct_spelling.where(text_name: "Agaricales").or(
+      Name.where(
+        Name[:classification].matches_regexp("Order: _Agaricales_")
+      )
+    ).order(sort_name: :asc, id: :desc).distinct
+    obs = Observation.where(text_name: "Agaricales").or(
+      Observation.where(
+        Observation[:classification].matches_regexp("Order: _Agaricales_")
+      )
+    ).order(when: :desc, id: :desc).distinct
+    assert_query(obs, :Observation, clade: "Agaricales")
+    assert_query(names, :Name, clade: "Agaricales")
   end
 
   ##############################################################################

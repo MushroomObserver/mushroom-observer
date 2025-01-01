@@ -10,13 +10,13 @@ add_link = put_button(name: :ADD.t,
                         id: @observation.id, species_list_id: species_list.id,
                         commit: "add"
                       ))
+place = species_list.place_name.t rescue :UNKNOWN.t
 %>
 
 <tr>
   <td>
     <%= species_list_link %><br />
-    <%= tag.span(species_list.place_name.t rescue :UNKNOWN.t,
-                 class: "list_where") %> |
+    <%= tag.span(place, class: "list_where") %> |
     <%= tag.span(user_link(species_list.user), class: "list_who") %>
   </td>
 
