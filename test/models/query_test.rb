@@ -1252,8 +1252,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_glossary_term_all
-    expects = GlossaryTerm.
-              order(GlossaryTerm[:name].asc, GlossaryTerm[:id].desc)
+    expects = GlossaryTerm.all
     assert_query(expects, :GlossaryTerm)
   end
 
@@ -1263,7 +1262,7 @@ class QueryTest < UnitTestCase
     expects = GlossaryTerm.
               where(GlossaryTerm[:name].matches("%conic_glossary_term%").
               or(GlossaryTerm[:description].matches("%conic_glossary_term%"))).
-              order(GlossaryTerm[:name].asc, GlossaryTerm[:id].desc).uniq
+              distinct
     assert_query(expects, :GlossaryTerm, pattern: "conic_glossary_term")
     # description
     expects =
@@ -1274,11 +1273,10 @@ class QueryTest < UnitTestCase
         GlossaryTerm.where(GlossaryTerm[:description].matches("%Description%")).
         where(GlossaryTerm[:description].matches("%of%")).
         where(GlossaryTerm[:description].matches("%Term%"))
-      ).order(GlossaryTerm[:name].asc, GlossaryTerm[:id].desc).uniq
+      ).distinct
     assert_query(expects, :GlossaryTerm, pattern: "Description of Term")
     # blank
-    expects = GlossaryTerm.
-              order(GlossaryTerm[:name].asc, GlossaryTerm[:id].desc)
+    expects = GlossaryTerm.all
     assert_query(expects, :GlossaryTerm, pattern: "")
   end
 
