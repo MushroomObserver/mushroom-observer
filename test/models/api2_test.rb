@@ -139,7 +139,7 @@ class API2Test < UnitTestCase
   end
 
   def assert_last_herbarium_record_correct
-    rec = HerbariumRecord.last
+    rec = HerbariumRecord.reorder(created_at: :asc).last
     assert_users_equal(@user, rec.user)
     assert_in_delta(Time.zone.now, rec.created_at, 1.minute)
     assert_in_delta(Time.zone.now, rec.updated_at, 1.minute)
@@ -1109,20 +1109,21 @@ class API2Test < UnitTestCase
     assert_api_pass(params)
     assert_last_herbarium_record_correct
 
+    last_h_r = HerbariumRecord.reorder(created_at: :asc).last
     herbarium_record_count = HerbariumRecord.count
     rolfs_other_obs = observations(:stereum_hirsutum_1)
     assert_api_pass(params.merge(observation: rolfs_other_obs.id))
     assert_equal(herbarium_record_count, HerbariumRecord.count)
     assert_obj_arrays_equal([rolfs_obs, rolfs_other_obs],
-                            HerbariumRecord.last.observations, :sort)
+                            last_h_r.observations, :sort)
 
     # Make sure it gives correct default for initial_det.
     assert_api_pass(params.except(:initial_det).merge(accession_number: "2"))
-    assert_equal(rolfs_obs.name.text_name, HerbariumRecord.last.initial_det)
+    assert_equal(rolfs_obs.name.text_name, last_h_r.initial_det)
 
     # Check default accession number if obs has no collection number.
     assert_api_pass(params.except(:accession_number))
-    assert_equal("MO #{rolfs_obs.id}", HerbariumRecord.last.accession_number)
+    assert_equal("MO #{rolfs_obs.id}", last_h_r.accession_number)
 
     # Check default accession number if obs has one collection number.
     obs = observations(:coprinus_comatus_obs)
@@ -1130,7 +1131,7 @@ class API2Test < UnitTestCase
     assert_operator(obs.collection_numbers.count, :==, 1)
     assert_api_pass(params.except(:accession_number).
                            merge(observation: obs.id))
-    assert_equal(num.format_name, HerbariumRecord.last.accession_number)
+    assert_equal(num.format_name, last_h_r.accession_number)
 
     # Check default accession number if obs has two collection numbers.
     # Also check that Rolf can add a record to Mary's obs if he's a curator.
@@ -1139,7 +1140,7 @@ class API2Test < UnitTestCase
     assert_operator(marys_obs.collection_numbers.count, :>, 1)
     assert_api_pass(params.except(:accession_number).
                       merge(observation: marys_obs.id, herbarium: nybg.id))
-    assert_equal("MO #{marys_obs.id}", HerbariumRecord.last.accession_number)
+    assert_equal("MO #{marys_obs.id}", last_h_r.accession_number)
   end
 
   def test_patching_herbarium_records
@@ -2592,7 +2593,7 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(has_specimen: "yes"))
 
     obs = Observation.last
-    spec = HerbariumRecord.last
+    spec = HerbariumRecord.reorder(created_at: :asc).last
     assert_objs_equal(rolf.personal_herbarium, spec.herbarium)
     assert_equal("Peltigera: MO #{obs.id}", spec.herbarium_label)
     assert_obj_arrays_equal([obs], spec.observations)
@@ -2602,7 +2603,7 @@ class API2Test < UnitTestCase
                                  collection_number: "12345"))
 
     obs = Observation.last
-    spec = HerbariumRecord.last
+    spec = HerbariumRecord.reorder(created_at: :asc).last
     assert_objs_equal(nybg, spec.herbarium)
     assert_equal("Peltigera: Rolf Singer 12345", spec.herbarium_label)
     assert_obj_arrays_equal([obs], spec.observations)
