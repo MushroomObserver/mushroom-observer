@@ -1281,16 +1281,15 @@ class QueryTest < UnitTestCase
   end
 
   def test_herbarium_all
-    expect = Herbarium.order(name: :asc, id: :desc)
+    expect = Herbarium.all
     assert_query(expect.select(:id).distinct, :Herbarium)
   end
 
   def test_herbarium_by_records
-    expect = Herbarium.left_outer_joins(:herbarium_records).
-             group(:id).
+    expect = Herbarium.left_outer_joins(:herbarium_records).group(:id).
              # Wrap known safe argument in Arel
              # to prevent "Dangerous query method" Deprecation Warning
-             order(HerbariumRecord[:id].count.desc, Herbarium[:id].desc)
+             reorder(HerbariumRecord[:id].count.desc, Herbarium[:id].desc)
     assert_query(expect, :Herbarium, by: :records)
   end
 
@@ -1303,8 +1302,14 @@ class QueryTest < UnitTestCase
   end
 
   def test_herbarium_pattern_search
-    expect = [herbaria(:nybg_herbarium)]
-    assert_query(expect, :Herbarium, pattern: "awesome")
+    # [herbaria(:nybg_herbarium)]
+    expects = Herbarium.where(
+      Herbarium[:code].concat(Herbarium[:name]).
+      concat(Herbarium[:description].coalesce("")).
+      concat(Herbarium[:mailing_address].coalesce("")).matches("%awesome%")
+    ).distinct
+
+    assert_query(expects, :Herbarium, pattern: "awesome")
   end
 
   def test_herbarium_record_all

@@ -221,7 +221,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
       post(:create, params: params)
     end
 
-    term = GlossaryTerm.last
+    term = GlossaryTerm.reorder(created_at: :asc).last
     assert_equal(params[:glossary_term][:name], term.name)
     assert_equal(params[:glossary_term][:description], term.description)
     assert_not_nil(term.rss_log)
@@ -236,7 +236,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_difference("Image.count") do
       post(:create, params: params)
     end
-    term = GlossaryTerm.last
+    term = GlossaryTerm.reorder(created_at: :asc).last
     assert_equal(Image.last, term.thumb_image)
   end
 
@@ -300,7 +300,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
         post(:create, params: term_with_image_params)
       end
     end
-    assert_empty(GlossaryTerm.last.images)
+    assert_empty(GlossaryTerm.reorder(created_at: :asc).last.images)
   end
 
   def test_create_process_image_failure
