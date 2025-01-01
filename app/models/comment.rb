@@ -117,6 +117,7 @@ class Comment < AbstractModel
   after_create :notify_users
   after_create :oil_and_water
 
+  default_scope { order(created_at: :desc, id: :desc) }
   scope :by_user,
         ->(user) { where(user: user) }
 

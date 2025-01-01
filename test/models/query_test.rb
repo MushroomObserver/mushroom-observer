@@ -1180,29 +1180,24 @@ class QueryTest < UnitTestCase
   end
 
   def test_comment_all
-    expects = Comment.order(Comment[:created_at].desc, Comment[:id].desc).uniq
+    expects = Comment.all
     assert_query(expects, :Comment)
   end
 
   def test_comment_by_user
-    expects = Comment.where(user_id: mary.id).
-              order(Comment[:created_at].desc, Comment[:id].desc).uniq
+    expects = Comment.where(user_id: mary.id).distinct
     assert_query(expects, :Comment, by_user: mary)
   end
 
   def test_comment_for_target
     obs = observations(:minimal_unknown_obs)
-    expects = Comment.where(target_id: obs.id).
-              order(Comment[:created_at].desc, Comment[:id].desc).uniq
+    expects = Comment.where(target_id: obs.id).distinct
     assert_query(expects, :Comment, target: obs, type: "Observation")
   end
 
   def test_comment_for_user
-    expects = Comment.
-              order(Comment[:created_at].desc, Comment[:id].desc).uniq.
-              select { |c| c.target.user == mary }
-    # expects = Comment.joins(:target).where(targets: { user_id: mary.id }).
-    #           order(Comment[:created_at].desc, Comment[:id].desc).uniq
+    expects = Comment.all.select { |c| c.target.user == mary }
+    # expects = Comment.joins(:target).where(targets: { user_id: mary.id }).uniq
     assert_query(expects, :Comment, for_user: mary)
     assert_query([], :Comment, for_user: rolf)
   end
@@ -1217,8 +1212,7 @@ class QueryTest < UnitTestCase
 
   def test_comment_pattern_search
     expects = Comment.where(Comment[:summary].matches("%unknown%").
-                            or(Comment[:comment].matches("%unknown%"))).
-              order(Comment[:created_at].desc, Comment[:id].desc).uniq
+                            or(Comment[:comment].matches("%unknown%"))).uniq
     assert_query(expects, :Comment, pattern: "unknown")
   end
 
