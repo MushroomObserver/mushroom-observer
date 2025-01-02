@@ -7,6 +7,7 @@ class FieldSlipJobTracker < AbstractModel
 
   enum status:
          {
+           unused: 0,
            Starting: 1,
            Processing: 2,
            Done: 3

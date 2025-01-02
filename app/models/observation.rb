@@ -1261,6 +1261,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Which agent created this observation?
   enum :source, {
+    unused: 0,
     mo_website: 1,
     mo_android_app: 2,
     mo_iphone_app: 3,

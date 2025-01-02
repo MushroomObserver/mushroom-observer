@@ -351,6 +351,7 @@ class Name < AbstractModel
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
   enum :rank, {
+    unused: 0,
     Form: 1,
     Variety: 2,
     Subspecies: 3,

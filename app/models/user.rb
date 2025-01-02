@@ -204,6 +204,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   # first value is the default
   enum thumbnail_size:
        {
+         unused: 0,
          thumbnail: 1,
          small: 2
        },
@@ -212,6 +213,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
 
   enum image_size:
        {
+         unused: 0,
          thumbnail: 1,
          small: 2,
          medium: 3,
@@ -224,6 +226,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
 
   enum votes_anonymous:
        {
+         unused: 0,
          no: 1,
          yes: 2,
          old: 3
@@ -233,6 +236,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
 
   enum location_format:
        {
+         unused: 0,
          postal: 1,
          scientific: 2
        },
@@ -241,6 +245,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
 
   enum hide_authors:
        {
+         unused: 0,
          none: 1,
          above_species: 2
        },
@@ -249,6 +254,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
 
   enum keep_filenames:
        {
+         unused: 0,
          toss: 1,
          keep_but_hide: 2,
          keep_and_show: 3

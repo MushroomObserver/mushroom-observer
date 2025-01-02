@@ -3,6 +3,7 @@
 class ProjectMember < ApplicationRecord
   enum trust_level:
          {
+           unused: 0,
            no_trust: 1,
            hidden_gps: 2,
            editing: 3

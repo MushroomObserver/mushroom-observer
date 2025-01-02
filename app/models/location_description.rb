@@ -54,6 +54,7 @@ class LocationDescription < Description
   # Do not change the integer associated with a value
   enum source_type:
        {
+         unused: 0,
          public: 1,
          foreign: 2,
          project: 3,

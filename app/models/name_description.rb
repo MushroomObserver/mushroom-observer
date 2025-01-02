@@ -69,6 +69,7 @@ class NameDescription < Description
   # Do not change the integer associated with a value
   enum review_status:
         {
+          unused: 0,
           unreviewed: 1,
           unvetted: 2,
           vetted: 3,
@@ -76,6 +77,7 @@ class NameDescription < Description
         }
   enum source_type:
         {
+          unused: 0,
           public: 1,
           foreign: 2,
           project: 3,
