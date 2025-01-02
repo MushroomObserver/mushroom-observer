@@ -1814,26 +1814,31 @@ class QueryTest < UnitTestCase
     assert_query([], :Location, pattern: "Canada -Elgin")
   end
 
-  def test_location_advanced_search
+  def test_location_advanced_search_name
     assert_query([locations(:burbank).id],
                  :Location, name: "agaricus")
     assert_query([], :Location, name: "coprinus")
+  end
+
+  def test_location_advanced_search_user_where
     assert_query([locations(:burbank).id],
                  :Location, user_where: "burbank")
     assert_query([locations(:howarth_park).id,
                   locations(:salt_point).id],
                  :Location, user_where: "park")
+  end
 
+  def test_location_advanced_search_user
     expects = Location.joins(observations: :user).
-              where(observations: { user: rolf }).
-              order(Location[:name].asc, Location[:id].desc).distinct
+              where(observations: { user: rolf }).distinct
     assert_query(expects, :Location, user: "rolf")
 
     expects = Location.joins(observations: :user).
-              where(observations: { user: dick }).
-              order(Location[:name].asc, Location[:id].desc).distinct
+              where(observations: { user: dick }).distinct
     assert_query(expects, :Location, user: "dick")
+  end
 
+  def test_location_advanced_search_content
     # content in obs.notes
     assert_query([locations(:burbank).id],
                  :Location, content: '"strange place"')
@@ -1845,6 +1850,9 @@ class QueryTest < UnitTestCase
     # no search loc.notes
     assert_query([],
                  :Location, content: '"play with"')
+  end
+
+  def test_location_advanced_search_content_combos
     assert_query([locations(:burbank).id],
                  :Location, name: "agaricus", content: '"lawn"')
     assert_query([],
