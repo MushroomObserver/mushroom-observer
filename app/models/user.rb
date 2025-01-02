@@ -231,6 +231,14 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
        _prefix: true,
        _default: "postal"
 
+  enum :hide_authors,
+       {
+         none: 1,
+         above_species: 2
+       },
+       _prefix: true,
+       _default: "none"
+
   enum :keep_filenames,
        {
          toss: 1,

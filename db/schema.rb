@@ -914,6 +914,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_01_02_214347) do
     t.integer "votes_anonymous", default: 1
     t.integer "location_format", default: 1
     t.datetime "last_activity", precision: nil
+    t.integer "hide_authors", default: 1, null: false
     t.boolean "thumbnail_maps", default: true, null: false
     t.string "auth_code", limit: 40
     t.integer "keep_filenames", default: 1, null: false
