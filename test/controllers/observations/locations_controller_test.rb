@@ -28,6 +28,10 @@ module Observations
       # Case seen in the wild that causes error
       requires_login(:edit, where: "")
       assert(assigns(:matches).include?(albion))
+
+      # Another case that caused an error
+      requires_login(:edit, where: "CA")
+      assert(assigns(:matches).include?(albion))
     end
 
     def test_add_to_location
