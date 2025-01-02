@@ -445,7 +445,7 @@ class QueryTest < UnitTestCase
     assert_equal(num_agaricus,
                  query.select_count(where: 'text_name LIKE "Agaricus%"'))
 
-    names_now = Name.reorder(id: :asc)
+    names_now = Name.unscoped
     assert_equal(names_now.first.id, query.select_value)
     assert_equal(names_now.offset(10).first.id,
                  query.select_value(limit: "10, 10")) # 11th id
@@ -514,9 +514,9 @@ class QueryTest < UnitTestCase
       Set.new,
       Set.new([rolf, mary, junk, dick, katrina, roy]) - query.results
     )
-    assert_equal(User.all.find_index(junk), query.index(junk))
-    assert_equal(User.all.find_index(dick), query.index(dick))
-    assert_equal(User.all.find_index(mary), query.index(mary))
+    assert_equal(User.unscoped.find_index(junk), query.index(junk))
+    assert_equal(User.unscoped.find_index(dick), query.index(dick))
+    assert_equal(User.unscoped.find_index(mary), query.index(mary))
 
     # Verify that it's getting all this crap from cache.
     query.result_ids = [rolf.id, junk.id, katrina.id, 100]
@@ -532,7 +532,7 @@ class QueryTest < UnitTestCase
   end
 
   def paginate_test_setup(number, num_per_page)
-    @names = Name.order(:id)
+    @names = Name.unscoped.order(:id)
     @pages = MOPaginator.new(number: number,
                              num_per_page: num_per_page)
     @query = Query.lookup(:Name, misspellings: :either, by: :id)
@@ -642,7 +642,7 @@ class QueryTest < UnitTestCase
 
   def test_next_and_prev
     query = Query.lookup(:Name, misspellings: :either, by: :id)
-    @names = Name.all
+    @names = Name.unscoped
 
     query.current = @names[2]
     assert_equal(query, query.prev)
@@ -1769,12 +1769,12 @@ class QueryTest < UnitTestCase
   def test_location_all
     expect = Location.all
     assert_query(expect, :Location)
-    expect = Location.reorder(id: :asc)
+    expect = Location.unscoped
     assert_query(expect, :Location, by: :id)
   end
 
   def test_location_by_user
-    assert_query(Location.where(user: rolf).reorder(id: :asc).distinct,
+    assert_query(Location.unscoped.where(user: rolf).distinct,
                  :Location, by_user: rolf, by: :id)
     assert_query([], :Location, by_user: users(:zero_user))
   end
@@ -1808,8 +1808,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_pattern_search
-    expects = Location.where(Location[:name].matches("%California%")).
-              reorder(id: :asc).distinct
+    expects = Location.unscoped.where(Location[:name].matches("%California%")).distinct
     assert_query(expects, :Location, pattern: "California", by: :id)
     assert_query([locations(:elgin_co).id],
                  :Location, pattern: "Canada")
@@ -2315,8 +2314,7 @@ class QueryTest < UnitTestCase
   def test_name_by_editor
     assert_query([], :Name, by_editor: rolf)
     assert_query([], :Name, by_editor: mary)
-    expects = Name.with_correct_spelling.by_editor(dick).
-              reorder(id: :asc).distinct
+    expects = Name.unscoped.with_correct_spelling.by_editor(dick).distinct
     assert_query(expects, :Name, by_editor: dick, by: :id)
   end
 
@@ -3309,12 +3307,12 @@ class QueryTest < UnitTestCase
       Name.where(
         Name[:classification].matches_regexp("Order: _Agaricales_")
       )
-    ).order(sort_name: :asc, id: :desc).distinct
+    ).reorder(sort_name: :asc, id: :desc).distinct
     obs = Observation.where(text_name: "Agaricales").or(
       Observation.where(
         Observation[:classification].matches_regexp("Order: _Agaricales_")
       )
-    ).order(when: :desc, id: :desc).distinct
+    ).reorder(when: :desc, id: :desc).distinct
     assert_query(obs, :Observation, clade: "Agaricales")
     assert_query(names, :Name, clade: "Agaricales")
   end

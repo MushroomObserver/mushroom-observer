@@ -904,12 +904,12 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_name_search_has_description
-    expect = Name.with_description.reorder(id: :asc)
+    expect = Name.unscoped.with_description
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_description:yes")
     assert_name_arrays_equal(expect, x.query.results, :sort)
 
-    expect = Name.without_description.reorder(id: :asc)
+    expect = Name.unscoped.without_description
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_description:no")
     assert_name_arrays_equal(expect, x.query.results, :sort)

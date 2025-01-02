@@ -466,7 +466,7 @@ class Name < AbstractModel
   scope :not_deprecated,
         -> { where(deprecated: false) }
   scope :with_description,
-        -> { with_correct_spelling.joins(:descriptions).distinct }
+        -> { with_correct_spelling.where.not(description_id: nil) }
   scope :without_description,
         -> { with_correct_spelling.where(description_id: nil) }
   # Names needing descriptions

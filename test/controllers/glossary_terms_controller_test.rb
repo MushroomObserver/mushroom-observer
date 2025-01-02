@@ -300,7 +300,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
         post(:create, params: term_with_image_params)
       end
     end
-    assert_empty(GlossaryTerm.reorder(id: :asc).last.images)
+    assert_empty(GlossaryTerm.unscoped.last.images)
   end
 
   def test_create_process_image_failure
