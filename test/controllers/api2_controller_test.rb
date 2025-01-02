@@ -147,7 +147,7 @@ class API2ControllerTest < FunctionalTestCase
     params = { api_key: api_keys(:rolfs_api_key).key, location: "Earth" }
     post(:observations, params: params)
     assert_no_api_errors
-    obs = Observation.last
+    obs = Observation.reorder(id: :asc).last
     assert_users_equal(rolf, obs.user)
     assert_equal(Time.zone.today.web_date, obs.when.web_date)
     assert_objs_equal(Location.unknown, obs.location)
@@ -174,7 +174,7 @@ class API2ControllerTest < FunctionalTestCase
                code: "EOL-135" }
     post(:observations, params: params)
     assert_no_api_errors
-    obs = Observation.last
+    obs = Observation.reorder(id: :asc).last
     assert(obs.field_slips[0].project.observations.include?(obs))
   end
 
@@ -183,7 +183,7 @@ class API2ControllerTest < FunctionalTestCase
                code: "OPEN-135" }
     post(:observations, params: params)
     assert_no_api_errors
-    obs = Observation.last
+    obs = Observation.reorder(id: :asc).last
     project = Project.find_by(field_slip_prefix: "OPEN")
     assert(project.member?(obs.user))
   end
@@ -209,7 +209,7 @@ class API2ControllerTest < FunctionalTestCase
     }
     post(:observations, params: params)
     assert_no_api_errors
-    obs = Observation.last
+    obs = Observation.reorder(id: :asc).last
     assert_users_equal(rolf, obs.user)
     assert_equal("2012-06-26", obs.when.web_date)
     assert_objs_equal(locations(:burbank), obs.location)
@@ -227,7 +227,7 @@ class API2ControllerTest < FunctionalTestCase
                    "These are notes.\nThey look like this." }, obs.notes)
     assert_obj_arrays_equal([images(:in_situ_image),
                              images(:turned_over_image)],
-                             obs.images.reorder(id: :asc))
+                            obs.images.reorder(id: :asc))
     assert_objs_equal(images(:turned_over_image), obs.thumb_image)
     assert_obj_arrays_equal([projects(:eol_project)], obs.projects)
     assert_obj_arrays_equal([species_lists(:another_species_list)],
@@ -355,7 +355,7 @@ class API2ControllerTest < FunctionalTestCase
     }
     post(:users, params: params)
     assert_no_api_errors
-    user = User.last
+    user = User.reorder(id: :asc).last
     assert_equal("miles", user.login)
     assert_false(user.verified)
     assert_equal(1, user.api_keys.length)
@@ -395,7 +395,7 @@ class API2ControllerTest < FunctionalTestCase
     }
     post(:api_keys, params: params)
     assert_no_api_errors
-    api_key = APIKey.last
+    api_key = APIKey.reorder(id: :asc).last
     assert_equal("Mushroom Mapper", api_key.notes)
     assert_users_equal(rolf, api_key.user)
     assert_not_nil(api_key.verified)
@@ -408,7 +408,7 @@ class API2ControllerTest < FunctionalTestCase
     }
     post(:api_keys, params: params)
     assert_no_api_errors
-    api_key = APIKey.last
+    api_key = APIKey.reorder(id: :asc).last
     assert_equal("Mushroom Mapper", api_key.notes)
     assert_users_equal(mary, api_key.user)
     assert_nil(api_key.verified)
@@ -431,7 +431,7 @@ class API2ControllerTest < FunctionalTestCase
     }
     post(:sequences, params: params)
     assert_no_api_errors
-    sequence = Sequence.last
+    sequence = Sequence.reorder(id: :asc).last
     assert_equal(obs, sequence.observation)
     assert_users_equal(mary, sequence.user)
     assert_not_equal(obs.user, sequence.user)
