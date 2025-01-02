@@ -1362,41 +1362,38 @@ class QueryTest < UnitTestCase
   end
 
   def test_image_all
-    expects = Image.order(created_at: :desc, id: :desc).uniq
+    expects = Image.all
     assert_query(expects, :Image)
   end
 
   def test_image_for_observations
     obs = observations(:two_img_obs)
     expects = Image.joins(:observations).where(observations: { id: obs.id }).
-              order(Image[:created_at].desc, Image[:id].desc).uniq
+              distinct
     assert_query(expects, :Image, observations: obs)
   end
 
   def test_image_for_projects
     project = projects(:bolete_project)
     expects = Image.joins(:projects).where(projects: { id: project.id }).
-              order(Image[:created_at].desc, Image[:id].desc).uniq
+              distinct
     assert_query(expects, :Image, projects: [project.title])
   end
 
   def test_image_by_user
-    expect = Image.where(user_id: rolf.id).reverse
+    expect = Image.where(user_id: rolf.id).distinct
     assert_query(expect, :Image, by_user: rolf)
-    expect = Image.where(user_id: mary.id).reverse
+    expect = Image.where(user_id: mary.id).distinct
     assert_query(expect, :Image, by_user: mary)
-    expect = Image.where(user_id: dick.id).reverse
+    expect = Image.where(user_id: dick.id).distinct
     assert_query(expect, :Image, by_user: dick)
   end
 
   def test_image_in_set
-    assert_query([images(:turned_over_image).id,
-                  images(:agaricus_campestris_image).id,
-                  images(:disconnected_coprinus_comatus_image).id],
-                 :Image,
-                 ids: [images(:turned_over_image).id,
-                       images(:agaricus_campestris_image).id,
-                       images(:disconnected_coprinus_comatus_image).id])
+    ids = [images(:turned_over_image).id,
+           images(:agaricus_campestris_image).id,
+           images(:disconnected_coprinus_comatus_image).id]
+    assert_query(ids, :Image, ids: ids)
   end
 
   def test_image_inside_observation
@@ -1412,23 +1409,24 @@ class QueryTest < UnitTestCase
   end
 
   def test_image_for_project
-    assert_query(
-      projects(:bolete_project).images.sort,
-      :Image, project: projects(:bolete_project), by: :id
-    )
+    project = projects(:bolete_project)
+    expects = Image.joins(:project_images).
+              where(project_images: { project: project }).reorder(id: :asc)
+    assert_query(expects, :Image, project: project, by: :id)
     assert_query([], :Image, project: projects(:empty_project))
   end
 
   def test_image_advanced_search_name
-    assert_query([images(:agaricus_campestris_image).id],
-                 :Image, name: "Agaricus")
+    # expects = [] # [images(:agaricus_campestris_image).id]
+    expects = Image.joins(observations: :name).
+              where(Name[:search_name].matches("%Agaricus%")).distinct
+    assert_query(expects, :Image, name: "Agaricus")
   end
 
   def test_image_advanced_search_user_where
     expects = Image.joins(:observations).
-              where(observations: { location: locations(:burbank) }).
-              where(observations: { is_collection_location: true }).
-              order(Image[:created_at].desc, Image[:id].desc).uniq
+              where(Observation[:where].matches("%burbank%")).
+              where(observations: { is_collection_location: true }).distinct
     assert_query(expects, :Image, user_where: "burbank")
 
     assert_query([images(:connected_coprinus_comatus_image).id],
@@ -1705,10 +1703,11 @@ class QueryTest < UnitTestCase
                observations(:agaricus_campestris_obs).id]
     # There's an order_by find_in_set thing here we can't do in Arel.
     # But luckily there is an equivalent, just sort by the obs id.
-    expect = Image.joins(:observations).where(observations: { id: obs_ids }).
-             order(Observation[:id].desc, Image[:id].desc).uniq
-
-    assert_query(expect, :Image, with_observations: 1, obs_ids: obs_ids)
+    oids = obs_ids.join(",")
+    expects = Image.joins(:observations).where(observations: { id: obs_ids }).
+              reorder(Arel.sql("FIND_IN_SET(observations.id,'#{oids}')").asc,
+                      Image[:id].desc).distinct
+    assert_query(expects, :Image, with_observations: 1, obs_ids: obs_ids)
     assert_query([], :Image,
                  with_observations: 1,
                  obs_ids: [observations(:minimal_unknown_obs).id])

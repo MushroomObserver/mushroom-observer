@@ -24,7 +24,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
   end
 
   def test_index_with_id_and_sorted
-    last_number = CollectionNumber.reorder(created_at: :asc).last
+    last_number = CollectionNumber.reorder(id: :asc).last
     params = { id: last_number.id, by: :reverse_date }
 
     login

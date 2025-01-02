@@ -129,7 +129,7 @@ class API2Test < UnitTestCase
   end
 
   def assert_last_comment_correct
-    com = Comment.reorder(created_at: :asc).last
+    com = Comment.reorder(id: :asc).last
     assert_users_equal(@user, com.user)
     assert_in_delta(Time.zone.now, com.created_at, 1.minute)
     assert_in_delta(Time.zone.now, com.updated_at, 1.minute)
@@ -139,7 +139,7 @@ class API2Test < UnitTestCase
   end
 
   def assert_last_herbarium_record_correct
-    rec = HerbariumRecord.reorder(created_at: :asc).last
+    rec = HerbariumRecord.reorder(id: :asc).last
     assert_users_equal(@user, rec.user)
     assert_in_delta(Time.zone.now, rec.created_at, 1.minute)
     assert_in_delta(Time.zone.now, rec.updated_at, 1.minute)
@@ -151,7 +151,7 @@ class API2Test < UnitTestCase
   end
 
   def assert_last_image_correct
-    img = Image.last
+    img = Image.reorder(created_at: :asc).last
     assert_users_equal(@user, img.user)
     assert_in_delta(Time.zone.now, img.created_at, 1.minute)
     assert_in_delta(Time.zone.now, img.updated_at, 1.minute)
@@ -240,7 +240,8 @@ class API2Test < UnitTestCase
     assert_equal(@specimen, obs.specimen)
     assert_equal(@notes, obs.notes)
     assert_objs_equal(@img2, obs.thumb_image)
-    assert_obj_arrays_equal([@img1, @img2].compact, obs.images)
+    assert_obj_arrays_equal([@img1, @img2].compact,
+                            obs.images.reorder(id: :asc))
     assert_equal(@loc.name, obs.where)
     assert_objs_equal(@loc, obs.location)
     assert_equal(@loc.name, obs.place_name)
@@ -251,8 +252,10 @@ class API2Test < UnitTestCase
     assert(@lat == obs.lat)
     assert(@long == obs.lng)
     assert(@alt == obs.alt)
-    assert_obj_arrays_equal([@proj].compact, obs.projects)
-    assert_obj_arrays_equal([@spl].compact, obs.species_lists)
+    assert_obj_arrays_equal([@proj].compact,
+                            obs.projects.reorder(id: :asc))
+    assert_obj_arrays_equal([@spl].compact,
+                            obs.species_lists.reorder(id: :asc))
     assert_names_equal(@name, obs.name)
     assert_in_delta(@vote, obs.vote_cache, 1) # vote_cache is weird
     if @name
@@ -1109,7 +1112,7 @@ class API2Test < UnitTestCase
     assert_api_pass(params)
     assert_last_herbarium_record_correct
 
-    last_h_r = HerbariumRecord.reorder(created_at: :asc).last
+    last_h_r = HerbariumRecord.reorder(id: :asc).last
     herbarium_record_count = HerbariumRecord.count
     rolfs_other_obs = observations(:stereum_hirsutum_1)
     assert_api_pass(params.merge(observation: rolfs_other_obs.id))
@@ -1415,7 +1418,8 @@ class API2Test < UnitTestCase
       File.stub(:chmod, true) do
         api = API2.execute(params)
         assert_no_errors(api, "Errors while posting image")
-        assert_obj_arrays_equal([Image.last], api.results)
+        assert_obj_arrays_equal([Image.reorder(id: :asc).last],
+                                api.results)
       end
     end
     assert_last_image_correct
@@ -1453,7 +1457,8 @@ class API2Test < UnitTestCase
       File.stub(:chmod, true) do
         api = API2.execute(params)
         assert_no_errors(api, "Errors while posting image")
-        assert_obj_arrays_equal([Image.last], api.results)
+        assert_obj_arrays_equal([Image.reorder(id: :asc).last],
+                                api.results)
       end
     end
     assert_last_image_correct
@@ -1482,7 +1487,7 @@ class API2Test < UnitTestCase
     File.stub(:rename, false) do
       api = API2.execute(params)
       assert_no_errors(api, "Errors while posting image")
-      img = Image.last
+      img = Image.reorder(id: :asc).last
       assert_obj_arrays_equal([img], api.results)
       actual = File.read(img.full_filepath(:full_size))
       expect = Rails.root.join("test/images/test_image.jpg").read
@@ -2593,7 +2598,7 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(has_specimen: "yes"))
 
     obs = Observation.last
-    spec = HerbariumRecord.reorder(created_at: :asc).last
+    spec = HerbariumRecord.reorder(id: :asc).last
     assert_objs_equal(rolf.personal_herbarium, spec.herbarium)
     assert_equal("Peltigera: MO #{obs.id}", spec.herbarium_label)
     assert_obj_arrays_equal([obs], spec.observations)
@@ -2603,7 +2608,7 @@ class API2Test < UnitTestCase
                                  collection_number: "12345"))
 
     obs = Observation.last
-    spec = HerbariumRecord.reorder(created_at: :asc).last
+    spec = HerbariumRecord.reorder(id: :asc).last
     assert_objs_equal(nybg, spec.herbarium)
     assert_equal("Peltigera: Rolf Singer 12345", spec.herbarium_label)
     assert_obj_arrays_equal([obs], spec.observations)
@@ -3543,7 +3548,7 @@ class API2Test < UnitTestCase
     @notes = " Here are some notes\nThey look like this!\n "
     @license = (License.where(deprecated: false) - [License.preferred]).first
     @location = Location.last
-    @image = Image.last
+    @image = Image.reorder(id: :asc).last
     @address = " I live here "
     @new_key = "  Blah  Blah  Blah  "
     params = {

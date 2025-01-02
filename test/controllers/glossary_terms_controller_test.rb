@@ -237,7 +237,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
       post(:create, params: params)
     end
     term = GlossaryTerm.reorder(created_at: :asc).last
-    assert_equal(Image.last, term.thumb_image)
+    assert_equal(Image.reorder(created_at: :asc).last, term.thumb_image)
   end
 
   def test_create_no_name
@@ -300,7 +300,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
         post(:create, params: term_with_image_params)
       end
     end
-    assert_empty(GlossaryTerm.reorder(created_at: :asc).last.images)
+    assert_empty(GlossaryTerm.reorder(id: :asc).last.images)
   end
 
   def test_create_process_image_failure

@@ -486,7 +486,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_checked_field("observation_specimen", visible: :all)
     assert_field(other_notes_id, with: "Notes for observation", visible: :all)
 
-    imgs = Image.last(2)
+    imgs = Image.reorder(created_at: :asc).last(2)
     cci = imgs.find { |img| img[:original_name] == "Coprinus_comatus.jpg" }
     geo = imgs.find { |img| img[:original_name] == "geotagged_s_pasadena.jpg" }
     img_ids = imgs.map(&:id)
@@ -754,7 +754,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
   def assert_observation_has_correct_image(expected_values)
     new_obs = Observation.last
-    new_imgs = Image.last(2)
+    new_imgs = Image.reorder(created_at: :asc).last(2)
     assert_obj_arrays_equal(new_imgs, new_obs.images)
     # Dates are no longer copied from image to obs/other images
     # assert_dates_equal(expected_values[:when], new_imgs[0].when)
@@ -775,7 +775,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   def assert_show_observation_page_has_important_info
     new_obs = Observation.last
     new_loc = Location.last
-    # new_img = Image.last
+    # new_img = Image.reorder(created_at: :asc).last
     assert_text(new_obs.when.web_date)
     assert_text(new_loc.name)
     if new_obs.is_collection_location

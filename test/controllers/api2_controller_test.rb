@@ -226,7 +226,8 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal({ Observation.other_notes_key =>
                    "These are notes.\nThey look like this." }, obs.notes)
     assert_obj_arrays_equal([images(:in_situ_image),
-                             images(:turned_over_image)], obs.images)
+                             images(:turned_over_image)],
+                             obs.images.reorder(id: :asc))
     assert_objs_equal(images(:turned_over_image), obs.thumb_image)
     assert_obj_arrays_equal([projects(:eol_project)], obs.projects)
     assert_obj_arrays_equal([species_lists(:another_species_list)],
@@ -246,7 +247,7 @@ class API2ControllerTest < FunctionalTestCase
     end
     assert_no_api_errors
     assert_equal(count + 1, Image.count)
-    img = Image.last
+    img = Image.reorder(id: :asc).last
     assert_users_equal(rolf, img.user)
     assert_equal(Time.zone.today.web_date, img.when.web_date)
     assert_equal("", img.notes)
@@ -327,7 +328,7 @@ class API2ControllerTest < FunctionalTestCase
                          observations: obs.id)
     end
     assert_no_api_errors
-    img = Image.last
+    img = Image.reorder(id: :asc).last
     assert_users_equal(rolf, img.user)
     assert_equal("2012-06-26", img.when.web_date)
     assert_equal("Here are some notes.", img.notes)
