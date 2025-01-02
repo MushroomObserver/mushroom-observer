@@ -397,9 +397,7 @@ module Name::Taxonomy
 
   module ClassMethods
     def all_ranks
-      ranks.map do |name, _integer|
-        next if name == "unused"
-
+      ranks.except(:unused).map do |name, _integer|
         name
       end
     end

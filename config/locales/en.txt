@@ -1044,6 +1044,8 @@
   rank_group: group or clade
   RANK_PLURAL_GROUP: Groups or Clades
   rank_plural_group: groups or clades
+  RANK_UNUSED: Unused
+  rank_unused: unused
 
   # These two are used when parsing rank, e.g., in name pattern search.
   rank_alt_phylum: phylum, division
