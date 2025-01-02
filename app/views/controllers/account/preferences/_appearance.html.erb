@@ -26,9 +26,6 @@ image_sizes = options_for_select(
 
 <%= tag.div(:prefs_appearance.t, class: "form-group mt-3 font-weight-bold") %>
 
-<%= select_with_label(form: f, field: :hide_authors, prefs: true, inline: true,
-                      options: hide_authors, selected: @user.hide_authors) %>
-
 <%= select_with_label(form: f, field: :location_format, prefs: true,
                       inline: true, options: location_formats,
                       selected: @user.location_format) %>
