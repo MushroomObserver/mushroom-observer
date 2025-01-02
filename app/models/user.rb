@@ -202,14 +202,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
   # first value is the default
-  enum :thumbnail_size,
-       {
-         thumbnail: 1,
-         small: 2
-       },
-       _prefix: :thumb_size,
-       _default: "thumbnail"
-
   enum :image_size,
        {
          thumbnail: 1,
