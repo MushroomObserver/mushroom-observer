@@ -56,7 +56,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     assert_not(good_name.reload.deprecated)
     assert_not_nil(bad_name.synonym_id)
     assert_equal(bad_name.synonym_id, good_name.synonym_id)
-    comment = bad_name.comments.reorder(created_at: :asc).last
+    comment = bad_name.comments.reorder(id: :asc).last
     assert_not_nil(comment)
     assert_equal("bad name", comment.comment)
 
@@ -70,7 +70,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     assert_not(good_name.reload.deprecated)
     assert_not_nil(bad_name.synonym_id)
     assert_equal(bad_name.synonym_id, good_name.synonym_id)
-    comment = bad_name.comments.reorder(created_at: :asc).last
+    comment = bad_name.comments.reorder(id: :asc).last
     assert_not_nil(comment)
     assert_equal("my bad", comment.comment)
 

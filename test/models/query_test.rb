@@ -1765,12 +1765,14 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_all
-    expect = Location.all.to_a
+    expect = Location.all
+    assert_query(expect, :Location)
+    expect = Location.reorder(id: :asc)
     assert_query(expect, :Location, by: :id)
   end
 
   def test_location_by_user
-    assert_query(Location.where(user: rolf),
+    assert_query(Location.where(user: rolf).reorder(id: :asc).distinct,
                  :Location, by_user: rolf, by: :id)
     assert_query([], :Location, by_user: users(:zero_user))
   end
@@ -1787,7 +1789,7 @@ class QueryTest < UnitTestCase
 
   def test_location_by_rss_log
     expect = Location.joins(:rss_log).
-             order(RssLog[:updated_at].desc, Location[:id].desc).distinct
+             reorder(RssLog[:updated_at].desc, Location[:id].desc).distinct
     assert_query(expect.to_a, :Location, by: :rss_log)
   end
 
@@ -1804,9 +1806,9 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_pattern_search
-    expect = Location.select { |l| l.display_name =~ /california/i }
-    assert_query(expect,
-                 :Location, pattern: "California", by: :id)
+    expects = Location.where(Location[:name].matches("%California%")).
+              reorder(id: :asc).distinct
+    assert_query(expects, :Location, pattern: "California", by: :id)
     assert_query([locations(:elgin_co).id],
                  :Location, pattern: "Canada")
     assert_query([], :Location, pattern: "Canada -Elgin")
@@ -1859,7 +1861,7 @@ class QueryTest < UnitTestCase
 
   def test_location_regexp_search
     expects = Location.where(Location[:name].matches_regexp("California")).
-              order(Location[:name].asc, Location[:id].desc).distinct
+              distinct
     assert_query(expects, :Location, regexp: ".alifornia")
   end
 

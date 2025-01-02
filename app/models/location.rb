@@ -155,6 +155,8 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
+  default_scope { order(name: :asc, id: :desc) }
+
   # NOTE: To improve Coveralls display, do not use one-line stabby lambda scopes
   scope :name_includes,
         ->(place_name) { where(Location[:name].matches("%#{place_name}%")) }
