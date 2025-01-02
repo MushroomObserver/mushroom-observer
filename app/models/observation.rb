@@ -227,6 +227,13 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # Automatically (but silently) log destruction.
   self.autolog_events = [:destroyed]
 
+  default_scope { order(when: :desc, id: :desc) }
+
+  # The order used on the home page
+  scope :by_activity, lambda {
+    where.not(rss_log: nil).reorder(log_updated_at: :desc, id: :desc)
+  }
+
   # NOTE: To improve Coveralls display, do not use one-line stabby lambda scopes
   # Extra timestamp scopes for when Observation found:
   scope :found_on, lambda { |ymd_string|
@@ -279,7 +286,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
                   select(:observation_id))
   }
   scope :needs_naming_and_not_reviewed_by_user, lambda { |user|
-    needs_naming.not_reviewed_by_user(user).distinct
+    unscoped.needs_naming.not_reviewed_by_user(user).distinct
   }
   # Higher taxa: returns narrowed-down group of id'd obs,
   # in higher taxa under the given taxon
@@ -374,7 +381,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # used for preloading values in the create obs form. call with `.last`
   scope :recent_by_user,
         lambda { |user|
-          includes(:location, :projects, :species_lists).
+          unscoped.includes(:location, :projects, :species_lists).
             where(user_id: user.id).order(:created_at)
         }
   scope :mappable,
@@ -535,6 +542,20 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
             or(Observation[:lng] < box.west).
             or(Observation[:lng] > box.east)
           )
+        }
+  scope :in_box_of_max_area,
+        lambda { |**args|
+          args[:area] ||= MO.obs_location_max_area
+
+          unscoped.joins(:location).
+            where(Location[:box_area].lteq(args[:area])).group(:location_id)
+        }
+  scope :in_box_gt_max_area,
+        lambda { |**args|
+          args[:area] ||= MO.obs_location_max_area
+
+          unscoped.joins(:location).
+            where(Location[:box_area].gt(args[:area])).group(:location_id)
         }
 
   scope :is_collection_location,

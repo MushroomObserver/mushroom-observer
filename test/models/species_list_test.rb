@@ -55,15 +55,15 @@ class SpeciesListTest < UnitTestCase
     proj.add_species_list(spl)
     assert_obj_arrays_equal([lone_wolf], proj.user_group.users)
     User.current = lone_wolf
-    name = Name.first
+    name = Name.unscoped.first
 
     # Test defaults first.
     now = Time.zone.now
     spl.construct_observation(name)
-    o = Observation.last
-    n = Naming.last
-    v = Vote.last
-    assert_objs_equal(o, spl.observations.last)
+    o = Observation.unscoped.last
+    n = Naming.unscoped.last
+    v = Vote.unscoped.last
+    assert_objs_equal(o, spl.observations.unscoped.last)
     assert(o.created_at >= 1.minute.ago)
     assert(o.updated_at >= 1.minute.ago)
     assert_users_equal(lone_wolf, o.user)
@@ -104,10 +104,10 @@ class SpeciesListTest < UnitTestCase
       specimen: true,
       vote: Vote.next_best_vote
     )
-    o = Observation.last
-    n = Naming.last
-    v = Vote.last
-    assert_objs_equal(o, spl.observations.last)
+    o = Observation.unscoped.last
+    n = Naming.unscoped.last
+    v = Vote.unscoped.last
+    assert_objs_equal(o, spl.observations.unscoped.last)
     assert_users_equal(mary, o.user)
     assert_obj_arrays_equal([], o.projects)
     assert_equal("2012-01-13", o.when.web_date)

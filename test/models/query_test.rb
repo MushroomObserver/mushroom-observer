@@ -2708,24 +2708,8 @@ class QueryTest < UnitTestCase
                  :NameDescription, ids: [rolf.id, NameDescription.first.id])
   end
 
-  def test_observation_advanced_search
-    assert_query([observations(:strobilurus_diminutivus_obs).id],
-                 :Observation, name: "diminutivus")
-    assert_query([observations(:coprinus_comatus_obs).id],
-                 :Observation, user_where: "glendale") # where
-    expect = Observation.where(location_id: locations(:burbank)).to_a
-    assert_query(expect, :Observation,
-                 user_where: "burbank", by: :id) # location
-    expect = Observation.where(user_id: rolf.id).to_a
-    assert_query(expect, :Observation, user: "rolf", by: :id)
-    assert_query([observations(:coprinus_comatus_obs).id], # notes
-                 :Observation, content: "second fruiting")
-    assert_query([observations(:minimal_unknown_obs).id],
-                 :Observation, content: "agaricus") # comment
-  end
-
   def test_observation_all
-    expect = Observation.order(when: :desc, id: :desc).uniq
+    expect = Observation.all
     assert_query(expect, :Observation)
   end
 
@@ -2733,29 +2717,27 @@ class QueryTest < UnitTestCase
     project = projects(:bolete_project)
     # expects = project.species_lists.map(&:observations).flatten.to_a
     expects = Observation.joins(species_lists: :project_species_lists).
-              where(project_species_lists: { project: project }).
-              order(Observation[:when].desc, Observation[:id].desc).uniq
+              where(project_species_lists: { project: project }).distinct
     assert_query(expects, :Observation, project_lists: project.title)
   end
 
   def test_observation_at_location
-    expects = Observation.where(location: locations(:burbank)).
-              order(when: :desc, id: :desc).uniq
+    expects = Observation.where(location: locations(:burbank)).distinct
     assert_query(expects, :Observation, location: locations(:burbank))
   end
 
   def test_observation_by_rss_log
     expects = Observation.where.not(rss_log: nil).
-              order(log_updated_at: :desc, id: :desc).uniq
+              reorder(log_updated_at: :desc, id: :desc).distinct
     assert_query(expects, :Observation, by: :rss_log)
   end
 
   def test_observation_by_user
-    expect = Observation.where(user_id: rolf.id).to_a
+    expect = Observation.unscoped.where(user: rolf.id).to_a
     assert_query(expect, :Observation, by_user: rolf, by: :id)
-    expect = Observation.where(user_id: mary.id).to_a
+    expect = Observation.unscoped.where(user: mary.id).to_a
     assert_query(expect, :Observation, by_user: mary, by: :id)
-    expect = Observation.where(user_id: dick.id).to_a
+    expect = Observation.unscoped.where(user: dick.id).to_a
     assert_query(expect, :Observation, by_user: dick, by: :id)
     assert_query([], :Observation, by_user: junk, by: :id)
   end
@@ -2798,15 +2780,13 @@ class QueryTest < UnitTestCase
 
   def test_observation_of_children
     name = names(:agaricus)
-    expects = Observation.of_name(name, include_subtaxa: true).
-              order(when: :desc, id: :desc).uniq
+    expects = Observation.of_name(name, include_subtaxa: true).distinct
     assert_query(expects, :Observation, names: [name.id], include_subtaxa: true)
   end
 
-  def test_observation_of_name
+  def test_observation_of_name_with_modifiers
     User.current = rolf
-    expects = Observation.where(name: names(:fungi)).
-              order(when: :desc, id: :desc).uniq
+    expects = Observation.where(name: names(:fungi)).distinct
     assert_query(expects, :Observation, names: [names(:fungi).id])
     assert_query([],
                  :Observation, names: [names(:macrolepiota_rachodes).id])
@@ -2945,8 +2925,24 @@ class QueryTest < UnitTestCase
     Observation.joins(:name).
       where(Name[:search_name].concat(Observation[:where]).
             matches("%#{pattern}%")).
-      order(Name[:sort_name].asc,
-            Observation[:when].desc, Observation[:id].desc)
+      reorder(Name[:sort_name].asc,
+              Observation[:when].desc, Observation[:id].desc)
+  end
+
+  def test_observation_advanced_search
+    assert_query([observations(:strobilurus_diminutivus_obs).id],
+                 :Observation, name: "diminutivus")
+    assert_query([observations(:coprinus_comatus_obs).id],
+                 :Observation, user_where: "glendale") # where
+    expect = Observation.unscoped.where(location: locations(:burbank)).distinct
+    assert_query(expect, :Observation,
+                 user_where: "burbank", by: :id) # location
+    expect = Observation.unscoped.where(user: rolf.id).distinct
+    assert_query(expect, :Observation, user: "rolf", by: :id)
+    assert_query([observations(:coprinus_comatus_obs).id], # notes
+                 :Observation, content: "second fruiting")
+    assert_query([observations(:minimal_unknown_obs).id],
+                 :Observation, content: "agaricus") # comment
   end
 
   def test_project_all
