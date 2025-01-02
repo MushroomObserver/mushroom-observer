@@ -470,7 +470,7 @@ module Name::Taxonomy
     def batch_lookup_all_matches(name_or_names, includes = [])
       Name.includes(includes).where(Name[:search_name].in(name_or_names)).
         or(Name.where(Name[:text_name].in(name_or_names))).
-        with_correct_spelling
+        with_correct_spelling.reorder(id: :asc)
     end
 
     # NOTE: may return nil if no match
@@ -606,17 +606,13 @@ module Name::Taxonomy
     # This is meant to be run nightly to ensure that all the classification
     # caches are up to date.  It only pays attention to genera or higher.
     def refresh_classification_caches(dry_run: false)
-      query =
-        Name.joins(:description).
-        where(rank: 0..Name.ranks[:Genus]).
-        where(NameDescription[:classification].not_eq(Name[:classification])).
-        where(NameDescription[:classification].not_blank)
+      query = Name.unscoped.with_description_classification_differing
       msgs = query.map do |name|
         "Classification for #{name.search_name} didn't match description."
       end
       unless dry_run || msgs.none?
         query.update_all(
-          Name[:classification].eq(NameDescription[:classification]).to_sql
+          "names.classification = name_descriptions.classification"
         )
       end
       msgs

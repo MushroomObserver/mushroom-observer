@@ -509,6 +509,14 @@ class Name < AbstractModel
           joins(:descriptions).
             merge(NameDescription.where(source_type: source))
         }
+  scope :with_description_classification_differing,
+        lambda {
+          joins(:descriptions).
+            where(rank: 0..Name.ranks[:Genus]).
+            where(Name[:classification].
+                  not_eq(NameDescription[:classification])).
+            where(NameDescription[:classification].not_blank)
+        }
   scope :by_editor,
         lambda { |user|
           joins(:versions).where(name_versions: { user_id: user.id }).
