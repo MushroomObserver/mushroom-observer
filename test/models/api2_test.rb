@@ -105,7 +105,7 @@ class API2Test < UnitTestCase
   end
 
   def assert_last_api_key_correct
-    api_key = APIKey.last
+    api_key = APIKey.reorder(id: :asc).last
     assert_in_delta(Time.zone.now, api_key.created_at, 1.minute)
     if @verified
       assert_in_delta(Time.zone.now, api_key.verified, 1.minute)
@@ -119,7 +119,7 @@ class API2Test < UnitTestCase
   end
 
   def assert_last_collection_number_correct
-    num = CollectionNumber.last
+    num = CollectionNumber.reorder(id: :asc).last
     assert_users_equal(@user, num.user)
     assert_in_delta(Time.zone.now, num.created_at, 1.minute)
     assert_in_delta(Time.zone.now, num.updated_at, 1.minute)
@@ -151,7 +151,7 @@ class API2Test < UnitTestCase
   end
 
   def assert_last_image_correct
-    img = Image.reorder(created_at: :asc).last
+    img = Image.reorder(id: :asc).last
     assert_users_equal(@user, img.user)
     assert_in_delta(Time.zone.now, img.created_at, 1.minute)
     assert_in_delta(Time.zone.now, img.updated_at, 1.minute)
@@ -174,7 +174,7 @@ class API2Test < UnitTestCase
   end
 
   def assert_last_location_correct
-    loc = Location.last
+    loc = Location.reorder(id: :asc).last
     assert_in_delta(Time.zone.now, loc.created_at, 1.minute)
     assert_in_delta(Time.zone.now, loc.updated_at, 1.minute)
     assert_users_equal(@user, loc.user)
@@ -191,7 +191,7 @@ class API2Test < UnitTestCase
     assert_nil(loc.notes) unless @notes
   end
 
-  def assert_last_name_correct(name = Name.last)
+  def assert_last_name_correct(name = Name.reorder(id: :asc).last)
     assert_in_delta(Time.zone.now, name.created_at, 1.minute)
     assert_in_delta(Time.zone.now, name.updated_at, 1.minute)
     assert_users_equal(@user, name.user)
@@ -205,9 +205,9 @@ class API2Test < UnitTestCase
   end
 
   def assert_last_naming_correct
-    obs = Observation.last
-    naming = Naming.last
-    vote = Vote.last
+    obs = Observation.reorder(id: :asc).last
+    naming = Naming.reorder(id: :asc).last
+    vote = Vote.reorder(id: :asc).last
     assert_names_equal(@name, naming.name)
     assert_objs_equal(obs, naming.observation)
     assert_users_equal(@user, naming.user)
@@ -232,7 +232,7 @@ class API2Test < UnitTestCase
   end
 
   def assert_last_observation_correct
-    obs = Observation.last
+    obs = Observation.reorder(id: :asc).last
     assert_in_delta(Time.zone.now, obs.created_at, 1.minute)
     assert_in_delta(Time.zone.now, obs.updated_at, 1.minute)
     assert_equal(@date.web_date, obs.when.web_date)
@@ -260,9 +260,9 @@ class API2Test < UnitTestCase
     assert_in_delta(@vote, obs.vote_cache, 1) # vote_cache is weird
     if @name
       assert_equal(1, obs.namings.length)
-      assert_objs_equal(Naming.last, obs.namings.first)
+      assert_objs_equal(Naming.reorder(id: :asc).last, obs.namings.first)
       assert_equal(1, obs.votes.length)
-      assert_objs_equal(Vote.last, obs.votes.first)
+      assert_objs_equal(Vote.reorder(id: :asc).last, obs.votes.first)
     else
       assert_equal(0, obs.namings.length)
       assert_equal(0, obs.votes.length)
@@ -270,7 +270,7 @@ class API2Test < UnitTestCase
   end
 
   def assert_last_project_correct
-    proj = Project.last
+    proj = Project.reorder(id: :asc).last
     assert_in_delta(Time.zone.now, proj.created_at, 1.minute)
     assert_in_delta(Time.zone.now, proj.updated_at, 1.minute)
     assert_users_equal(@user, proj.user)
@@ -280,9 +280,9 @@ class API2Test < UnitTestCase
     assert_user_arrays_equal(@members, proj.user_group.users)
   end
 
-  def assert_last_sequence_correct(seq = Sequence.last)
+  def assert_last_sequence_correct(seq = Sequence.reorder(id: :asc).last)
     assert_in_delta(Time.zone.now, seq.created_at, 1.minute) \
-      unless seq != Sequence.last
+      unless seq != Sequence.reorder(id: :asc).last
     assert_in_delta(Time.zone.now, seq.updated_at, 1.minute)
     assert_users_equal(@user, seq.user)
     assert_objs_equal(@obs, seq.observation)
@@ -293,9 +293,9 @@ class API2Test < UnitTestCase
     assert_equal(@notes.to_s, seq.notes.to_s)
   end
 
-  def assert_last_species_list_correct(spl = SpeciesList.last)
+  def assert_last_species_list_correct(spl = SpeciesList.reorder(id: :asc).last)
     assert_in_delta(Time.zone.now, spl.created_at, 1.minute) \
-      unless spl != SpeciesList.last
+      unless spl != SpeciesList.reorder(id: :asc).last
     assert_in_delta(Time.zone.now, spl.updated_at, 1.minute)
     assert_users_equal(@user, spl.user)
     assert_equal(@title, spl.title)
@@ -306,7 +306,7 @@ class API2Test < UnitTestCase
   end
 
   def assert_last_user_correct
-    user = User.last
+    user = User.reorder(id: :asc).last
     assert_equal(@login, user.login)
     assert_equal(@name, user.name)
     assert_equal(@email, user.email)
@@ -335,9 +335,9 @@ class API2Test < UnitTestCase
   end
 
   def assert_last_vote_correct
-    obs = Observation.last
-    naming = Naming.last
-    vote = Vote.last
+    obs = Observation.reorder(id: :asc).last
+    naming = Naming.reorder(id: :asc).last
+    vote = Vote.reorder(id: :asc).last
     assert_objs_equal(naming, vote.naming)
     assert_objs_equal(obs, vote.observation)
     assert_users_equal(@user, vote.user)
@@ -459,7 +459,7 @@ class API2Test < UnitTestCase
     }
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting api key")
-    assert_obj_arrays_equal([APIKey.last], api.results)
+    assert_obj_arrays_equal([APIKey.reorder(id: :asc).last], api.results)
     assert_last_api_key_correct
     assert_api_fail(params.except(:api_key))
     assert_api_fail(params.except(:app))
@@ -479,7 +479,7 @@ class API2Test < UnitTestCase
     }
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting api key")
-    assert_obj_arrays_equal([APIKey.last], api.results)
+    assert_obj_arrays_equal([APIKey.reorder(id: :asc).last], api.results)
     assert_api_fail(params.except(:api_key))
     assert_api_fail(params.except(:app))
     assert_equal(email_count, ActionMailer::Base.deliveries.size)
@@ -499,7 +499,7 @@ class API2Test < UnitTestCase
     }
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting api key")
-    assert_obj_arrays_equal([APIKey.last], api.results)
+    assert_obj_arrays_equal([APIKey.reorder(id: :asc).last], api.results)
     assert_last_api_key_correct
     assert_api_fail(params.except(:api_key))
     assert_api_fail(params.except(:app))
@@ -523,7 +523,7 @@ class API2Test < UnitTestCase
     }
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting api key")
-    assert_obj_arrays_equal([APIKey.last], api.results)
+    assert_obj_arrays_equal([APIKey.reorder(id: :asc).last], api.results)
     assert_last_api_key_correct
     assert_api_fail(params.merge(password: "bogus"))
     assert_equal(email_count, ActionMailer::Base.deliveries.size)
@@ -656,7 +656,8 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(observation: rolfs_other_obs.id))
     assert_equal(collection_number_count, CollectionNumber.count)
     assert_obj_arrays_equal([rolfs_obs, rolfs_other_obs],
-                            CollectionNumber.last.observations, :sort)
+                            CollectionNumber.reorder(id: :asc).last.
+                            observations.reorder(id: :asc), :sort)
   end
 
   def test_patching_collection_numbers
@@ -1118,22 +1119,25 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(observation: rolfs_other_obs.id))
     assert_equal(herbarium_record_count, HerbariumRecord.count)
     assert_obj_arrays_equal([rolfs_obs, rolfs_other_obs],
-                            last_h_r.observations, :sort)
+                            last_h_r.observations.reorder(id: :asc), :sort)
 
     # Make sure it gives correct default for initial_det.
     assert_api_pass(params.except(:initial_det).merge(accession_number: "2"))
+    last_h_r = HerbariumRecord.reorder(id: :asc).last
     assert_equal(rolfs_obs.name.text_name, last_h_r.initial_det)
 
     # Check default accession number if obs has no collection number.
     assert_api_pass(params.except(:accession_number))
+    last_h_r = HerbariumRecord.reorder(id: :asc).last
     assert_equal("MO #{rolfs_obs.id}", last_h_r.accession_number)
 
     # Check default accession number if obs has one collection number.
     obs = observations(:coprinus_comatus_obs)
-    num = obs.collection_numbers.first
+    num = obs.collection_numbers.reorder(id: :asc).first
     assert_operator(obs.collection_numbers.count, :==, 1)
     assert_api_pass(params.except(:accession_number).
                            merge(observation: obs.id))
+    last_h_r = HerbariumRecord.reorder(id: :asc).last
     assert_equal(num.format_name, last_h_r.accession_number)
 
     # Check default accession number if obs has two collection numbers.
@@ -1143,6 +1147,7 @@ class API2Test < UnitTestCase
     assert_operator(marys_obs.collection_numbers.count, :>, 1)
     assert_api_pass(params.except(:accession_number).
                       merge(observation: marys_obs.id, herbarium: nybg.id))
+    last_h_r = HerbariumRecord.reorder(id: :asc).last
     assert_equal("MO #{marys_obs.id}", last_h_r.accession_number)
   end
 
@@ -1182,7 +1187,7 @@ class API2Test < UnitTestCase
     assert_equal("new notes", nybgs_rec.notes)
 
     # Rolfs_rec is now at fundis, so Rolf is not a curator, just owns rec.
-    old_obs   = rolfs_rec.observations.first
+    old_obs   = rolfs_rec.observations.reorder(id: :asc).first
     rolfs_obs = observations(:agaricus_campestris_obs)
     marys_obs = observations(:minimal_unknown_obs)
     params = {
@@ -1438,7 +1443,7 @@ class API2Test < UnitTestCase
     @width  = 407
     @height = 500
     @vote   = 3
-    @obs    = @user.observations.last
+    @obs    = @user.observations.reorder(id: :asc).last
     params  = {
       method: :post,
       action: :image,
@@ -2374,9 +2379,9 @@ class API2Test < UnitTestCase
     }
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting observation")
-    assert_obj_arrays_equal([Observation.last], api.results)
+    assert_obj_arrays_equal([Observation.reorder(id: :asc).last], api.results)
     assert_last_observation_correct
-    assert_equal("mo_api", Observation.last.source)
+    assert_equal("mo_api", Observation.reorder(id: :asc).last.source)
     assert_api_fail(params.except(:location))
   end
 
@@ -2407,9 +2412,9 @@ class API2Test < UnitTestCase
     }
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting observation")
-    assert_obj_arrays_equal([Observation.last], api.results)
+    assert_obj_arrays_equal([Observation.reorder(id: :asc).last], api.results)
     assert_last_observation_correct
-    assert_equal("mo_api", Observation.last.source)
+    assert_equal("mo_api", Observation.reorder(id: :asc).last.source)
     assert_api_fail(params.except(:location))
   end
 
@@ -2468,9 +2473,9 @@ class API2Test < UnitTestCase
     }
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting observation")
-    assert_obj_arrays_equal([Observation.last], api.results)
+    assert_obj_arrays_equal([Observation.reorder(id: :asc).last], api.results)
     assert_last_observation_correct
-    assert_equal("mo_iphone_app", Observation.last.source)
+    assert_equal("mo_iphone_app", Observation.reorder(id: :asc).last.source)
     assert_last_naming_correct
     assert_last_vote_correct
     assert_api_fail(params.except(:api_key))
@@ -2508,7 +2513,7 @@ class API2Test < UnitTestCase
     }
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting observation")
-    obs = Observation.last
+    obs = Observation.reorder(id: :asc).last
     assert_nil(obs.rss_log_id)
   end
 
@@ -2547,14 +2552,14 @@ class API2Test < UnitTestCase
     params[:location] = "New Place, California, USA"
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting observation")
-    obs = Observation.last
+    obs = Observation.reorder(id: :asc).last
     assert_nil(obs.location_id)
     assert_equal("New Place, California, USA", obs.where)
 
     params[:location] = "Burbank, California, USA"
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting observation")
-    obs = Observation.last
+    obs = Observation.reorder(id: :asc).last
     assert_equal("Burbank, California, USA", obs.where)
     assert_objs_equal(locations(:burbank), obs.location)
 
@@ -2569,14 +2574,14 @@ class API2Test < UnitTestCase
     params[:location] = "Somewhere Else, California, USA"
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting observation")
-    obs = Observation.last
+    obs = Observation.reorder(id: :asc).last
     assert_nil(obs.location_id)
     assert_equal("Somewhere Else, California, USA", obs.where)
 
     params[:location] = "Burbank, California, USA"
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting observation")
-    obs = Observation.last
+    obs = Observation.reorder(id: :asc).last
     assert_equal("Burbank, California, USA", obs.where)
     assert_objs_equal(locations(:burbank), obs.location)
   end
@@ -2597,7 +2602,7 @@ class API2Test < UnitTestCase
 
     assert_api_pass(params.merge(has_specimen: "yes"))
 
-    obs = Observation.last
+    obs = Observation.reorder(id: :asc).last
     spec = HerbariumRecord.reorder(id: :asc).last
     assert_objs_equal(rolf.personal_herbarium, spec.herbarium)
     assert_equal("Peltigera: MO #{obs.id}", spec.herbarium_label)
@@ -2607,7 +2612,7 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(has_specimen: "yes", herbarium: nybg.code,
                                  collection_number: "12345"))
 
-    obs = Observation.last
+    obs = Observation.reorder(id: :asc).last
     spec = HerbariumRecord.reorder(id: :asc).last
     assert_objs_equal(nybg, spec.herbarium)
     assert_equal("Peltigera: Rolf Singer 12345", spec.herbarium_label)
@@ -3528,7 +3533,7 @@ class API2Test < UnitTestCase
     }
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting user")
-    assert_obj_arrays_equal([User.last], api.results)
+    assert_obj_arrays_equal([User.reorder(id: :asc).last], api.results)
     assert_last_user_correct
     assert_api_fail(params)
     params[:login] = "miles"
@@ -3547,7 +3552,7 @@ class API2Test < UnitTestCase
     @locale = "el"
     @notes = " Here are some notes\nThey look like this!\n "
     @license = (License.where(deprecated: false) - [License.preferred]).first
-    @location = Location.last
+    @location = Location.reorder(id: :asc).last
     @image = Image.reorder(id: :asc).last
     @address = " I live here "
     @new_key = "  Blah  Blah  Blah  "
@@ -3569,7 +3574,7 @@ class API2Test < UnitTestCase
     }
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting user")
-    assert_obj_arrays_equal([User.last], api.results)
+    assert_obj_arrays_equal([User.reorder(id: :asc).last], api.results)
     assert_last_user_correct
     params[:login] = "miles"
     assert_api_fail(params.merge(name: "x" * 1000))
