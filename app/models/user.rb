@@ -231,7 +231,8 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
        _prefix: true,
        _default: "postal"
 
-  enum :hide_authors,
+  # Formatted differently else it autocreates a `none?` method.
+  enum hide_authors:
        {
          none: 1,
          above_species: 2
