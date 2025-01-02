@@ -202,7 +202,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
   # first value is the default
-  enum :image_size,
+  enum image_size:
        {
          thumbnail: 1,
          small: 2,
@@ -214,7 +214,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
        _prefix: true,
        _default: "medium"
 
-  enum :votes_anonymous,
+  enum votes_anonymous:
        {
          no: 1,
          yes: 2,
@@ -223,7 +223,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
        _prefix: :votes_anon,
        _default: "no"
 
-  enum :location_format,
+  enum location_format:
        {
          postal: 1,
          scientific: 2

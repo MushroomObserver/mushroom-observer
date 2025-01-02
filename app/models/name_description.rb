@@ -67,14 +67,14 @@ class NameDescription < Description
 
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
-  enum :review_status,
+  enum review_status:
        {
          unreviewed: 1,
          unvetted: 2,
          vetted: 3,
          inaccurate: 4
        }
-  enum :source_type,
+  enum source_type:
        {
          public: 1,
          foreign: 2,

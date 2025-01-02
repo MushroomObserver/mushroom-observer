@@ -30,7 +30,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_01_02_214347) do
     t.datetime "updated_at", precision: nil, null: false
   end
 
-  create_table "banners", charset: "utf8mb3", force: :cascade do |t|
+  create_table "banners", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.text "message"
     t.integer "version"
     t.datetime "created_at", null: false
