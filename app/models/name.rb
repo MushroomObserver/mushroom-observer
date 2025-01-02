@@ -454,6 +454,8 @@ class Name < AbstractModel
     end
   end
 
+  default_scope { order(sort_name: :asc, id: :desc) }
+
   # NOTE: To improve Coveralls display, do not use one-line stabby lambda scopes
   scope :of_lichens,
         -> { where(Name[:lifeform].matches("%lichen%")) }
@@ -464,14 +466,14 @@ class Name < AbstractModel
   scope :not_deprecated,
         -> { where(deprecated: false) }
   scope :with_description,
-        -> { where.not(description_id: nil) }
+        -> { with_correct_spelling.joins(:descriptions).distinct }
   scope :without_description,
-        -> { where(description_id: nil) }
-  # Names without descriptions
+        -> { with_correct_spelling.where(description_id: nil) }
+  # Names needing descriptions
   scope :description_needed, lambda {
-    with_correct_spelling.without_description.joins(:observations).distinct
-      # in the template: order by most frequently used
-      # group(:name_id).order(Arel.star.count.desc)
+    without_description.joins(:observations).distinct
+    # in the template: order by most frequently used
+    # group(:name_id).reorder(Arel.star.count.desc)
   }
   scope :description_includes,
         lambda { |text|
@@ -506,6 +508,11 @@ class Name < AbstractModel
 
           joins(:descriptions).
             merge(NameDescription.where(source_type: source))
+        }
+  scope :by_editor,
+        lambda { |user|
+          joins(:versions).where(name_versions: { user_id: user.id }).
+            where.not(user: user)
         }
 
   ### Module Name::Spelling

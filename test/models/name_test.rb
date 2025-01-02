@@ -1755,16 +1755,17 @@ class NameTest < UnitTestCase
     pph  = create_test_name("Petigera polydactylon var. hymenina (Ach.) Flotow")
     ppn  = create_test_name("Petigera polydactylon var. neopolydactyla Gyelnik")
 
-    assert_name_arrays_equal([pa, pc, pp, pp2], pet.children, :sort)
-    assert_name_arrays_equal([pcr, pcs], pc.children, :sort)
+    assert_name_arrays_equal([pa, pc, pp, pp2],
+                             pet.children.reorder(id: :asc), :sort)
+    assert_name_arrays_equal([pcr, pcs], pc.children.reorder(id: :asc), :sort)
     assert_name_arrays_equal([pcri], pcr.children, :sort)
     assert_name_arrays_equal([pav], pa.children, :sort)
-    assert_name_arrays_equal([pph, ppn], pp.children, :sort)
+    assert_name_arrays_equal([pph, ppn], pp.children.reorder(id: :asc), :sort)
 
     # Oops! Petigera is misspelled, so these aren't right...
     assert_name_arrays_equal([], pc.all_parents)
     assert_name_arrays_equal([pc], pcr.all_parents)
-    assert_name_arrays_equal([pcr, pc], pcri.all_parents)
+    assert_name_arrays_equal([pcr, pc], pcri.all_parents.reorder(id: :asc))
     assert_name_arrays_equal([pc], pcs.all_parents)
     assert_name_arrays_equal([], pa.all_parents)
     assert_name_arrays_equal([pa], pac.all_parents)
@@ -1791,7 +1792,8 @@ class NameTest < UnitTestCase
 
     assert_name_arrays_equal([pet], pc.all_parents, :sort)
     assert_name_arrays_equal([pc], pcr.all_parents, :sort)
-    assert_name_arrays_equal([pcr, pc], pcri.all_parents, :sort)
+    assert_name_arrays_equal([pcr, pc], pcri.all_parents.reorder(id: :asc),
+                             :sort)
     assert_name_arrays_equal([pc], pcs.all_parents, :sort)
     assert_name_arrays_equal([pet], pa.all_parents, :sort)
     assert_name_arrays_equal([pa], pac.all_parents, :sort)
@@ -1815,7 +1817,8 @@ class NameTest < UnitTestCase
     pp2.change_deprecated(true)
     pp2.save
 
-    assert_name_arrays_equal([pa, pc, pp, pp2], pet.children, :sort)
+    assert_name_arrays_equal([pa, pc, pp, pp2], pet.children.reorder(id: :asc),
+                             :sort)
     assert_name_arrays_equal([pp], pph.all_parents, :sort)
     assert_name_arrays_equal([pp], ppn.all_parents, :sort)
     assert_name_arrays_equal([pp], pph.parents, :sort)
@@ -1824,9 +1827,12 @@ class NameTest < UnitTestCase
     pp.change_deprecated(true)
     pp.save
 
-    assert_name_arrays_equal([pa, pc, pp, pp2], pet.children, :sort)
-    assert_name_arrays_equal([pp, pet], pph.all_parents, :sort)
-    assert_name_arrays_equal([pp, pet], ppn.all_parents, :sort)
+    assert_name_arrays_equal([pa, pc, pp, pp2], pet.children.reorder(id: :asc),
+                             :sort)
+    assert_name_arrays_equal([pp, pet], pph.all_parents.reorder(id: :asc),
+                             :sort)
+    assert_name_arrays_equal([pp, pet], ppn.all_parents.reorder(id: :asc),
+                             :sort)
     assert_name_arrays_equal([pp], pph.parents, :sort)
     assert_name_arrays_equal([pp], ppn.parents, :sort)
   end
@@ -2858,7 +2864,8 @@ class NameTest < UnitTestCase
     a1.change_deprecated(true)
     a1.save
     assert_obj_arrays_equal([a1, b1, c1],
-                            Name.names_from_synonymous_genera("Lepiota testa"))
+                            Name.names_from_synonymous_genera("Lepiota testa").
+                            reorder(id: :asc))
   end
 
   def test_suggest_alternate_spelling
@@ -2873,17 +2880,21 @@ class NameTest < UnitTestCase
     assert_name_arrays_equal([genus1],
                              Name.guess_with_errors("Lecanora", 1))
     assert_name_arrays_equal([genus1, genus2],
-                             Name.guess_with_errors("Lecanoa", 1))
+                             Name.guess_with_errors("Lecanoa", 1).
+                             reorder(id: :asc))
     assert_name_arrays_equal([],
                              Name.guess_with_errors("Lecanroa", 1))
     assert_name_arrays_equal([genus1, genus2],
-                             Name.guess_with_errors("Lecanroa", 2))
+                             Name.guess_with_errors("Lecanroa", 2).
+                             reorder(id: :asc))
     assert_name_arrays_equal([genus1],
                              Name.guess_with_errors("Lecanosa", 1))
     assert_name_arrays_equal([genus1, genus2],
-                             Name.guess_with_errors("Lecanosa", 2))
+                             Name.guess_with_errors("Lecanosa", 2).
+                             reorder(id: :asc))
     assert_name_arrays_equal([genus1, genus2],
-                             Name.guess_with_errors("Lecanroa", 3))
+                             Name.guess_with_errors("Lecanroa", 3).
+                             reorder(id: :asc))
     assert_name_arrays_equal([genus1],
                              Name.guess_with_errors("Lacanora", 1))
     assert_name_arrays_equal([genus1],
@@ -2893,33 +2904,41 @@ class NameTest < UnitTestCase
     assert_name_arrays_equal([genus1],
                              Name.guess_word("", "Lacanora"))
     assert_name_arrays_equal([genus1, genus2],
-                             Name.guess_word("", "Lecanroa"))
+                             Name.guess_word("", "Lecanroa").
+                             reorder(id: :asc))
 
     assert_name_arrays_equal([species1, species2],
-                             Name.guess_with_errors("Lecanora galactina", 1))
+                             Name.guess_with_errors("Lecanora galactina", 1).
+                             reorder(id: :asc))
     assert_name_arrays_equal([species3],
                              Name.guess_with_errors("Lecanora granti", 1))
     assert_name_arrays_equal([species3, species4],
-                             Name.guess_with_errors("Lecanora granti", 2))
+                             Name.guess_with_errors("Lecanora granti", 2).
+                             reorder(id: :asc))
     assert_name_arrays_equal([],
                              Name.guess_with_errors("Lecanora gran", 3))
     assert_name_arrays_equal([species3],
                              Name.guess_word("Lecanora", "granti"))
 
     assert_name_arrays_equal([names(:lecanorales), genus1],
-                             Name.suggest_alternate_spellings("Lecanora"))
+                             Name.suggest_alternate_spellings("Lecanora").
+                             reorder(id: :asc))
     assert_name_arrays_equal([names(:lecanorales), genus1],
-                             Name.suggest_alternate_spellings("Lecanora\\"))
+                             Name.suggest_alternate_spellings("Lecanora\\").
+                             reorder(id: :asc))
     assert_name_arrays_equal([genus1, genus2],
-                             Name.suggest_alternate_spellings("Lecanoa"))
+                             Name.suggest_alternate_spellings("Lecanoa").
+                             reorder(id: :asc))
     assert_name_arrays_equal(
       [species3], Name.suggest_alternate_spellings("Lecanora granti")
     )
     assert_name_arrays_equal(
-      [species3, species4], Name.suggest_alternate_spellings("Lecanora grandi")
+      [species3, species4], Name.suggest_alternate_spellings("Lecanora grandi").
+                            reorder(id: :asc)
     )
     assert_name_arrays_equal(
-      [species4, species5], Name.suggest_alternate_spellings("Lecanoa grandis")
+      [species4, species5], Name.suggest_alternate_spellings("Lecanoa grandis").
+                            reorder(id: :asc)
     )
   end
 

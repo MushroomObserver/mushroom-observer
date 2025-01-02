@@ -605,7 +605,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
         approved_name: "Lecanoromycetes L." },
       1, 1, 1, 0
     )
-    name = Name.last
+    name = Name.reorder(created_at: :asc).last
     assert_equal("Lecanoromycetes", name.text_name)
     assert_equal("L.", name.author)
     assert_equal("Class", name.rank)
@@ -628,7 +628,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     params  = modified_generic_params(params, user)
 
     post_requires_login(:create, params)
-    name = Name.last
+    name = Name.reorder(created_at: :asc).last
 
     # assert_redirected_to(action: :show)
     assert_response(:redirect)
@@ -655,7 +655,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
         approved_name: "Morchella elata group" },
       1, 1, 2, 0
     )
-    name = Name.last
+    name = Name.reorder(created_at: :asc).last
     assert_equal("Morchella elata group", name.text_name)
     assert_equal("", name.author)
     assert_equal("Group", name.rank)
@@ -687,7 +687,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
       1, 1, 1, 0, roy
     )
 
-    name = Name.last
+    name = Name.reorder(created_at: :asc).last
     assert_equal("Cladina pictum", name.text_name)
     assert_true(name.deprecated)
   end
