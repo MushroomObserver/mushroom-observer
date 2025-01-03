@@ -758,7 +758,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   def self.refresh_cached_column(type: nil, foreign: nil, local: foreign,
                                  dry_run: false)
     tbl = type.camelize.constantize.arel_table
-    query = Observation.joins(type.to_sym).
+    query = Observation.unscoped.joins(type.to_sym).
             where(Observation[local.to_sym].not_eq(tbl[foreign.to_sym]))
     msgs = query.map do |obs|
       "Fixing #{type} #{foreign} for obs ##{obs.id}, " \
@@ -778,7 +778,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # date.  Fixes and returns a messages for each one that was wrong.
   # Used by refresh_caches script
   def self.make_sure_no_observations_are_misspelled(dry_run: false)
-    query = Observation.joins(:name).
+    query = Observation.unscoped.joins(:name).
             where(Name[:correct_spelling_id].not_eq(nil))
     msgs = query.pluck(Observation[:id], Name[:text_name]).
            map do |id, search_name|
