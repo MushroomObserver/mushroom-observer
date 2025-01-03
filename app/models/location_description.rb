@@ -52,7 +52,7 @@ class LocationDescription < Description
 
   # enum definitions for use by simple_enum gem
   # Need a migration to change the integer associated with a value
-  enum :source_type, [:unused, :public, :foreign, :project, :source, :user],
+  enum :source_type, [:public, :foreign, :project, :source, :user],
        suffix: :source
 
   belongs_to :license

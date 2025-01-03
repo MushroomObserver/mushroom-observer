@@ -203,28 +203,28 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   # Do not change the integer associated with a value
   # first value is the default
   enum :thumbnail_size,
-       [:unused, :thumbnail, :small],
+       [:thumbnail, :small],
        prefix: :thumb_size, default: :thumbnail, instance_methods: false
 
   enum :image_size,
-       [:unused, :thumbnail, :small, :medium, :large, :huge, :full_size],
+       [:thumbnail, :small, :medium, :large, :huge, :full_size],
        prefix: true, default: :medium, instance_methods: false
 
   enum :votes_anonymous,
-       [:unused, :no, :yes],
-       prefix: :votes_anon, default: :no
+       [:no, :yes],
+       prefix: :votes_anon, default: :no, instance_methods: false
 
   enum :location_format,
-       [:unused, :postal, :scientific],
-       prefix: true, default: :postal
+       [:postal, :scientific],
+       prefix: true, default: :postal, instance_methods: false
 
   enum :hide_authors,
-       [:unused, :none, :above_species],
-       prefix: true, default: :none
+       [:none, :above_species],
+       prefix: true, default: :none, instance_methods: false
 
   enum :keep_filenames,
-       [:unused, :toss, :keep_but_hide, :keep_and_show],
-       suffix: :filenames, default: :toss
+       [:toss, :keep_but_hide, :keep_and_show],
+       suffix: :filenames, default: :toss, instance_methods: false
 
   has_one :user_stats, dependent: :destroy
 

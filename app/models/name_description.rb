@@ -67,8 +67,8 @@ class NameDescription < Description
 
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
-  enum review_status: [:unused, :unreviewed, :unvetted, :vetted, :inaccurate]
-  enum source_type: [:unused, :public, :foreign, :project, :source, :user],
+  enum :review_status, [:unreviewed, :unvetted, :vetted, :inaccurate]
+  enum :source_type, [:public, :foreign, :project, :source, :user],
        suffix: :source
 
   belongs_to :license
