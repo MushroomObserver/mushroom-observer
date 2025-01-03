@@ -59,9 +59,9 @@ $LIST_BORDER_COLOR:           transparent;
 $LIST_HEADER_FG_COLOR:        #777777;
 $LIST_HEADER_BG_COLOR:        #EEEEEE;
 $LIST_FG_COLOR:               $pachycolea_foreground;
-$LIST_BG_COLOR:               mix($pachycolea_background, black, 80%);
+$LIST_BG_COLOR:               color.mix($pachycolea_background, black, 80%);
 $LIST_EVEN_BG_COLOR:          $LIST_BG_COLOR;
-$LIST_ODD_BG_COLOR:           mix($LIST_EVEN_BG_COLOR, black, 25%);
+$LIST_ODD_BG_COLOR:           color.mix($LIST_EVEN_BG_COLOR, black, 25%);
 
 $TOOLTIP_FG_COLOR:            $pachycolea_background;
 $TOOLTIP_BG_COLOR:            $pachycolea_foreground;

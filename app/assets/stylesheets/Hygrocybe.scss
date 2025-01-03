@@ -56,7 +56,7 @@ $LIST_BORDER_COLOR:           transparent;
 $LIST_HEADER_FG_COLOR:        #777777;
 $LIST_HEADER_BG_COLOR:        #EEEEEE;
 $LIST_FG_COLOR:               $conica_stain;
-$LIST_BG_COLOR:               mix($punicea_light_stipe, white, 50%);
+$LIST_BG_COLOR:               color.mix($punicea_light_stipe, white, 50%);
 
 $TOOLTIP_BG_COLOR:            $punicea_cap_light;
 
@@ -87,6 +87,6 @@ $DANGER_BG_COLOR:                   #FFE0E0;
 $DANGER_BORDER_COLOR:               #F07070;
 $DANGER_FG_COLOR:                   $BODY_FG_COLOR;
 
-$WELL_FG_COLOR:                     lighten($conica_stain, 25%);
+$WELL_FG_COLOR:                     color.scale($conica_stain, $lightness, 30%);
 
 @import "mushroom_observer";
