@@ -16,15 +16,9 @@
 #  log::             serialized log of inat import job
 #
 class InatImport < ApplicationRecord
-  enum :state, {
-    Unstarted: 0,
-    # waiting for User to authorize MO to access iNat data
-    Authorizing: 1,
-    # trading iNat authorization code for an authentication token
-    Authenticating: 2,
-    Importing: 3,
-    Done: 4
-  }
+  # Authorizing: waiting for User to authorize MO to access iNat data
+  # Authenticating: trading iNat authorization code for an authentication token
+  enum :state, [:Unstarted, :Authorizing, :Authenticating, :Importing, :Done]
 
   belongs_to :user
 
