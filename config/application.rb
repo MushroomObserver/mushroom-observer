@@ -103,6 +103,10 @@ module MushroomObserver
     config.cache_store = :solid_cache_store
 
     config.solid_cache.connects_to = { database: { writing: :cache } }
+
+    # dartsass-sprockets - sssh! about the bootstrap deprectations
+    config.sass.quiet_deps = true
+    config.sass.silence_deprecations = ["import"]
   end
 end
 

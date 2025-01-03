@@ -2285,6 +2285,10 @@ class QueryTest < UnitTestCase
                  exclude_original_names: true)
   end
 
+  def test_name_need_description
+    assert_query(Name.description_needed.to_a, :Name, need_description: 1)
+  end
+
   def test_name_pattern_search
     assert_query(
       [],
