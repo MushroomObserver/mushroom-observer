@@ -95,8 +95,8 @@ Rails.application.config.active_record.
 ###
 # Disable deprecated singular associations names.
 #++
-Rails.application.config.active_record.
-  allow_deprecated_singular_associations_name = false
+# Rails.application.config.active_record.
+#   allow_deprecated_singular_associations_name = false
 
 ###
 # Enable the Active Job `BigDecimal` argument serializer, which guarantees
@@ -108,7 +108,7 @@ Rails.application.config.active_record.
 # serializer. Therefore, this setting should only be enabled after all replicas
 # have been successfully upgraded to Rails 7.1.
 #++
-Rails.application.config.active_job.use_big_decimal_serializer = true
+# Rails.application.config.active_job.use_big_decimal_serializer = true
 
 ###
 # Specify if an `ArgumentError` should be raised if `Rails.cache` `fetch` or
@@ -244,8 +244,8 @@ Rails.application.config.active_record.
 # Whether a `transaction` block is committed or rolled back when exited via
 # `return`, `break` or `throw`.
 #++
-Rails.application.config.active_record.
-  commit_transaction_on_non_local_return = true
+# Rails.application.config.active_record.
+#   commit_transaction_on_non_local_return = true
 
 ###
 # Controls when to generate a value for <tt>has_secure_token</tt> declarations.
