@@ -45,8 +45,10 @@ MushroomObserver::Application.configure do
 
   # REDIRECT_URI (Callback URL)
   # iNat calls this after iNat user authorizes MO to access their data.
+  # Must match the redirect_uri in the iNat application settings for iNat's
+  # Mushroom Observer app https://www.inaturalist.org/oauth/applications/857
   config.redirect_uri =
-    "https://mushroomobserver.org/observations/inat_imports/authorization_response"
+    "https://mushroomobserver.org/inat_imports/authorization_response"
 
   # Disable Mission Control default HTTP Basic Authentication because
   # we specify AdminController as the base class for Mission Control

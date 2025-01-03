@@ -25,9 +25,9 @@ class MockPhotoImporter
 end
 
 class InatImportJobTest < ActiveJob::TestCase
-  SITE = Observations::InatImportsController::SITE
-  REDIRECT_URI = Observations::InatImportsController::REDIRECT_URI
-  API_BASE = Observations::InatImportsController::API_BASE
+  SITE = InatImportsController::SITE
+  REDIRECT_URI = InatImportsController::REDIRECT_URI
+  API_BASE = InatImportsController::API_BASE
   PHOTO_BASE = "https://inaturalist-open-data.s3.amazonaws.com/photos"
 
   ICONIC_TAXA = InatImportJob::ICONIC_TAXA

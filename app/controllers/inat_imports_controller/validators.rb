@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Observations::InatImportsControllerValidators
+module InatImportsController::Validators
   private
 
   SITE = "https://www.inaturalist.org"
