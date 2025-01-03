@@ -22,7 +22,8 @@ class InatImport < ApplicationRecord
 
   belongs_to :user
 
-  serialize :log, type: Array
+  serialize :log, type: Array, coder: YAML
+
   def add_response_error(error)
     response_errors << "#{error.class.name}: #{error.message}\n"
     save
