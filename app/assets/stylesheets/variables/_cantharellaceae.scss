@@ -53,7 +53,7 @@ $LIST_BORDER_COLOR:           transparent;
 $LIST_HEADER_FG_COLOR:        #777777;
 $LIST_HEADER_BG_COLOR:        #EEEEEE;
 $LIST_FG_COLOR:               $cornucopioides_dark_hymenium;
-$LIST_BG_COLOR:               color.mix($californicus_stipe, white, 50%);
+$LIST_BG_COLOR:               mix($californicus_stipe, white, 50%);
 
 $TOOLTIP_FG_COLOR:            $californicus_stipe;
 $TOOLTIP_BG_COLOR:            $cornucopioides_dark_hymenium;
@@ -92,4 +92,4 @@ $DANGER_BG_COLOR:                   #FFE0E0;
 $DANGER_BORDER_COLOR:               #F07070;
 $DANGER_FG_COLOR:                   $BODY_FG_COLOR;
 
-$WELL_FG_COLOR:    color.scale($cornucopioides_dark_hymenium, $lightness, 30%);
+$WELL_FG_COLOR:    lighten($cornucopioides_dark_hymenium, 25%);
