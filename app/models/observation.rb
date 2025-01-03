@@ -1260,14 +1260,9 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   ##############################################################################
 
   # Which agent created this observation?
-  enum :source, {
-    unused: 0,
-    mo_website: 1,
-    mo_android_app: 2,
-    mo_iphone_app: 3,
-    mo_api: 4,
-    mo_inat_import: 5
-  }
+  enum :source,
+    [:unused, :mo_website, :mo_android_app, :mo_iphone_app, :mo_api,
+     :mo_inat_import]
 
   # Message to use to credit the agent which created this observation.
   # Intended to be used with .tpl to render as HTML:
