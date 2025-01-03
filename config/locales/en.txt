@@ -924,6 +924,9 @@
   # doesn't feel comfortable declaring it "accurate"; thus "unvetted" means
   # "reviewed" and "vetted" means "approved".  Sorry, we inherited these odd
   # terms from EOL; they weren't my choice!)
+  # "unused" is to use Rails 8 default enums, which must not have assigned
+  # values and must start with 0
+  review_unused: unused
   review_unreviewed: Unreviewed
   review_unvetted: Reviewed
   review_vetted: Approved
