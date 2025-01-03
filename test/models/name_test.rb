@@ -2858,7 +2858,8 @@ class NameTest < UnitTestCase
     a1.change_deprecated(true)
     a1.save
     assert_obj_arrays_equal([a1, b1, c1],
-                            Name.names_from_synonymous_genera("Lepiota testa"))
+                            Name.names_from_synonymous_genera("Lepiota testa"),
+                            :sort)
   end
 
   def test_suggest_alternate_spelling
@@ -2873,17 +2874,17 @@ class NameTest < UnitTestCase
     assert_name_arrays_equal([genus1],
                              Name.guess_with_errors("Lecanora", 1))
     assert_name_arrays_equal([genus1, genus2],
-                             Name.guess_with_errors("Lecanoa", 1))
+                             Name.guess_with_errors("Lecanoa", 1), :sort)
     assert_name_arrays_equal([],
                              Name.guess_with_errors("Lecanroa", 1))
     assert_name_arrays_equal([genus1, genus2],
-                             Name.guess_with_errors("Lecanroa", 2))
+                             Name.guess_with_errors("Lecanroa", 2), :sort)
     assert_name_arrays_equal([genus1],
                              Name.guess_with_errors("Lecanosa", 1))
     assert_name_arrays_equal([genus1, genus2],
-                             Name.guess_with_errors("Lecanosa", 2))
+                             Name.guess_with_errors("Lecanosa", 2), :sort)
     assert_name_arrays_equal([genus1, genus2],
-                             Name.guess_with_errors("Lecanroa", 3))
+                             Name.guess_with_errors("Lecanroa", 3), :sort)
     assert_name_arrays_equal([genus1],
                              Name.guess_with_errors("Lacanora", 1))
     assert_name_arrays_equal([genus1],
@@ -2893,33 +2894,39 @@ class NameTest < UnitTestCase
     assert_name_arrays_equal([genus1],
                              Name.guess_word("", "Lacanora"))
     assert_name_arrays_equal([genus1, genus2],
-                             Name.guess_word("", "Lecanroa"))
+                             Name.guess_word("", "Lecanroa"), :sort)
 
     assert_name_arrays_equal([species1, species2],
-                             Name.guess_with_errors("Lecanora galactina", 1))
+                             Name.guess_with_errors("Lecanora galactina", 1),
+                             :sort)
     assert_name_arrays_equal([species3],
                              Name.guess_with_errors("Lecanora granti", 1))
     assert_name_arrays_equal([species3, species4],
-                             Name.guess_with_errors("Lecanora granti", 2))
+                             Name.guess_with_errors("Lecanora granti", 2),
+                             :sort)
     assert_name_arrays_equal([],
                              Name.guess_with_errors("Lecanora gran", 3))
     assert_name_arrays_equal([species3],
                              Name.guess_word("Lecanora", "granti"))
 
     assert_name_arrays_equal([names(:lecanorales), genus1],
-                             Name.suggest_alternate_spellings("Lecanora"))
+                             Name.suggest_alternate_spellings("Lecanora"),
+                             :sort)
     assert_name_arrays_equal([names(:lecanorales), genus1],
-                             Name.suggest_alternate_spellings("Lecanora\\"))
+                             Name.suggest_alternate_spellings("Lecanora\\"),
+                             :sort)
     assert_name_arrays_equal([genus1, genus2],
-                             Name.suggest_alternate_spellings("Lecanoa"))
+                             Name.suggest_alternate_spellings("Lecanoa"), :sort)
     assert_name_arrays_equal(
       [species3], Name.suggest_alternate_spellings("Lecanora granti")
     )
     assert_name_arrays_equal(
-      [species3, species4], Name.suggest_alternate_spellings("Lecanora grandi")
+      [species3, species4],
+      Name.suggest_alternate_spellings("Lecanora grandi"), :sort
     )
     assert_name_arrays_equal(
-      [species4, species5], Name.suggest_alternate_spellings("Lecanoa grandis")
+      [species4, species5],
+      Name.suggest_alternate_spellings("Lecanoa grandis"), :sort
     )
   end
 

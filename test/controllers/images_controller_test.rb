@@ -236,7 +236,7 @@ class ImagesControllerTest < FunctionalTestCase
     assert_nil(new_outer)
 
     # Start with inner at last image of first observation (det_unknown).
-    inner.current = det_unknown.images.last.id
+    inner.current = det_unknown.images.reorder(created_at: :asc).last.id
 
     # No more images for det_unknowns, so inner goes to next obs (min_unknown),
     # but this has no images, so goes to next (a_campestris),
@@ -256,7 +256,8 @@ class ImagesControllerTest < FunctionalTestCase
     assert_nil(new_new_inner.next)
 
     params = {
-      id: det_unknown.images.last.id, # inner for first obs
+      # inner for first obs
+      id: det_unknown.images.reorder(created_at: :asc).last.id,
       params: @controller.query_params(inner).merge({ flow: :next })
     }.flatten
     login
@@ -332,11 +333,13 @@ class ImagesControllerTest < FunctionalTestCase
     inner.current_id = images(:agaricus_campestris_image).id
     assert(new_inner = inner.prev)
     assert_not_equal(inner, new_inner)
-    assert_equal(observations(:detailed_unknown_obs).images.second.id,
+    assert_equal(observations(:detailed_unknown_obs).images.
+                 reorder(created_at: :asc).second.id,
                  new_inner.current_id)
     assert(new_new_inner = new_inner.prev)
     assert_equal(new_inner, new_new_inner)
-    assert_equal(observations(:detailed_unknown_obs).images.first.id,
+    assert_equal(observations(:detailed_unknown_obs).images.
+                 reorder(created_at: :asc).first.id,
                  new_inner.current_id)
     assert_nil(new_inner.prev)
 
@@ -348,7 +351,8 @@ class ImagesControllerTest < FunctionalTestCase
     get(:show, params: params)
     assert_redirected_to(
       action: :show,
-      id: observations(:detailed_unknown_obs).images.second.id,
+      id: observations(:detailed_unknown_obs).images.
+          reorder(created_at: :asc).second.id,
       params: @controller.query_params(QueryRecord.last)
     )
   end
@@ -462,9 +466,9 @@ class ImagesControllerTest < FunctionalTestCase
   def test_destroy_image_with_query
     user = users(:mary)
     assert(user.images.size > 1, "Need different fixture for test")
-    image = user.images.second
-    next_image = user.images.first
-    obs = image.observations.first
+    image = user.images.reorder(created_at: :asc).second
+    next_image = user.images.reorder(created_at: :asc).first
+    obs = image.observations.reorder(created_at: :asc).first
     assert(obs.images.member?(image))
     query = Query.lookup_and_save(:Image, by_user: user)
     q = query.id.alphabetize

@@ -124,7 +124,7 @@ class LocationTest < UnitTestCase
     assert_equal(not_set.center_lat, not_set.calculate_lat,
                  "Location #{not_set.name} should have had center_lat " \
                  "calculated by update_box_area_and_center_columns")
-    not_set.observations.each do |obs|
+    not_set.observations.find_each do |obs|
       assert_equal(obs.location_lat, not_set.center_lat,
                    "Observation #{obs.name} should have had location_lat " \
                    "copied from #{not_set.name}")
@@ -132,7 +132,7 @@ class LocationTest < UnitTestCase
     # Location area / center are in fixtures, but center not set in obs fixtures
     locs = [locations(:burbank), locations(:albion)]
     locs.each do |loc|
-      loc.observations.each do |obs|
+      loc.observations.find_each do |obs|
         assert_equal(obs.location_lat, loc.center_lat,
                      "Observation #{obs.name} should have had location_lat " \
                      "copied from #{loc.name}")

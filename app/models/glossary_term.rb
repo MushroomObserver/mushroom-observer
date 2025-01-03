@@ -43,6 +43,8 @@ class GlossaryTerm < AbstractModel
   )
   versioned_class.before_save { |x| x.user_id = User.current_id }
 
+  default_scope { order(name: :asc, id: :desc) }
+
   scope :show_includes, lambda {
     strict_loading.includes(
       :glossary_term_images,

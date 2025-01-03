@@ -184,7 +184,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
              }
            })
     end
-    obs = Observation.last
+    obs = Observation.unscoped.last
     assert_equal(date, obs.when)
     assert_redirected_to observation_url(obs.id)
   end
@@ -206,7 +206,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
              }
            })
     end
-    obs = Observation.last
+    obs = Observation.unscoped.last
     assert_match("https://www.inaturalist.org/observations",
                  obs.notes[:Other_Codes])
   end
@@ -242,7 +242,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
              }
            })
     end
-    obs = Observation.last
+    obs = Observation.unscoped.last
     assert_redirected_to observation_url(obs.id)
     assert_equal(obs.text_name, "Fungi")
   end
@@ -262,7 +262,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
              }
            })
     end
-    obs = Observation.last
+    obs = Observation.unscoped.last
     assert_redirected_to observation_url(obs.id)
   end
 

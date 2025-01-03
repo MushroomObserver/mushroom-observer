@@ -118,7 +118,7 @@ class UserStatsTest < UnitTestCase
   #     :name => names(:fungi),
   #     :specimen => true,
   #     :notes => '1234567890',
-  #     :thumb_image => Image.first
+  #     :thumb_image => Image.reorder(created_at: :asc).first
   #   )
   #   User.current = mary
   #   rolf.reload
@@ -146,7 +146,7 @@ class UserStatsTest < UnitTestCase
   #   rolf.reload
   #   assert_equal(score + 1, rolf.contribution)
   #
-  #   obs.update_attribute(:thumb_image, Image.last)
+  #   obs.update_attribute(:thumb_image, Image.reorder(created_at: :asc).last)
   #   rolf.reload
   #   assert_equal(score + 10, rolf.contribution)
   #

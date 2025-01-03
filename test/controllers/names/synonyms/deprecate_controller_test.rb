@@ -55,7 +55,7 @@ module Names::Synonyms
       assert_equal(new_synonym_length + 1, new_synonym.names.size)
       assert_equal(new_version, new_name.version)
 
-      comment = Comment.last
+      comment = Comment.reorder(created_at: :asc).last
       assert_equal("Name", comment.target_type)
       assert_equal(old_name.id, comment.target_id)
       assert_match(/deprecat/i, comment.summary)

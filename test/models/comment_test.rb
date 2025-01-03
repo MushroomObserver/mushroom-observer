@@ -28,7 +28,7 @@ class CommentTest < UnitTestCase
   end
 
   def do_highlight_test(expected, string)
-    comment = Comment.first
+    comment = Comment.reorder(created_at: :asc).first
     assert_user_arrays_equal(expected, comment.send(:highlighted_users, string))
   end
 

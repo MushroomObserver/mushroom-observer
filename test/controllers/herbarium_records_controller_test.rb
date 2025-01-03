@@ -245,7 +245,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_not(obs.specimen)
     post(:create, params: params)
     assert_equal(herbarium_record_count + 1, HerbariumRecord.count)
-    herbarium_record = HerbariumRecord.last
+    herbarium_record = HerbariumRecord.reorder(created_at: :asc).last
     assert_equal("The New York Botanical Garden",
                  herbarium_record.herbarium.name)
     assert_equal(params[:herbarium_record][:initial_det],
@@ -266,7 +266,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     post(:create, params: params)
     mary = User.find(mary.id) # Reload user
     assert_equal(herbarium_count + 1, mary.curated_herbaria.count)
-    herbarium = Herbarium.order(created_at: :desc)[0]
+    herbarium = Herbarium.reorder(created_at: :desc)[0]
     assert(herbarium.curators.member?(mary))
   end
 

@@ -79,8 +79,8 @@ class ChecklistTest < UnitTestCase
     before_num_genera = before_data.num_genera
 
     Observation.create!(name: names(:agaricus))
-    assert_names_equal(names(:agaricus), Observation.last.name)
-    assert_users_equal(dick, Observation.last.user)
+    assert_names_equal(names(:agaricus), Observation.unscoped.last.name)
+    assert_users_equal(dick, Observation.unscoped.last.user)
     data = Checklist::ForUser.new(dick)
     assert_equal(before_num_species, data.num_species)
 

@@ -301,7 +301,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
       first(:button, "Create").click
     end
     assert(
-      proj.observations.exclude?(Observation.order(created_at: :asc).last),
+      proj.observations.exclude?(Observation.reorder(created_at: :asc).last),
       "Observation should not be added to Project if user unchecks Project"
     )
 
@@ -335,7 +335,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
       first(:button, "Create").click
     end
     assert(
-      proj.observations.include?(Observation.order(created_at: :asc).last),
+      proj.observations.include?(Observation.reorder(created_at: :asc).last),
       "Failed to include Obs in Project when user fixes Observation When"
     )
 
@@ -367,7 +367,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
       first(:button, "Create").click # override warning by clicking button
     end
     assert(
-      proj.observations.include?(Observation.order(created_at: :asc).last),
+      proj.observations.include?(Observation.reorder(created_at: :asc).last),
       "Failed to include Obs in Project when user overrides warning"
     )
   end

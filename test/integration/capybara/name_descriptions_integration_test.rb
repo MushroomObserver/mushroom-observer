@@ -67,7 +67,7 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
     end
     assert_flash_success(session: session)
     # assert_template("name/show_name_description")
-    marys_draft = NameDescription.last
+    marys_draft = NameDescription.reorder(created_at: :asc).last
 
     # Make sure it shows up on main show_name page and can edit it.
     session.visit("/names/#{name.id}")
@@ -101,7 +101,7 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
   def check_admin(name, url, gen_desc, project, session:)
     session.visit(url)
     # The latest ND should be Mary's draft
-    marys_draft = NameDescription.last
+    marys_draft = NameDescription.reorder(created_at: :asc).last
     # show n.d link should be restricted
     assert(session.has_link?(href: name_description_path(marys_draft.id),
                              text: /Restricted/))
@@ -130,7 +130,7 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
   # Can view but not edit.
   def check_another_student(url, session:)
     session.visit(url)
-    marys_draft = NameDescription.last
+    marys_draft = NameDescription.reorder(created_at: :asc).last
     session.first(:link, href: name_description_path(marys_draft.id)).click
     assert(
       session.has_no_link?(href: edit_name_description_path(marys_draft.id))
@@ -143,7 +143,7 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
   # Knows it exists but can't even view it.
   def check_another_user(url, session:)
     session.visit(url)
-    marys_draft = NameDescription.last
+    marys_draft = NameDescription.reorder(created_at: :asc).last
     assert(session.has_link?(href: name_description_path(marys_draft.id)))
     session.first(:link, href: name_description_path(marys_draft.id)).click
     assert_flash_error(session: session)
@@ -412,7 +412,7 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
     end
 
     def name_description
-      @name_description ||= NameDescription.last
+      @name_description ||= NameDescription.reorder(created_at: :asc).last
     end
 
     def show_name_uri

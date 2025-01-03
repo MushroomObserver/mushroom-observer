@@ -23,6 +23,6 @@ class Query::FieldSlips < Query::Base
   end
 
   def self.default_order
-    "date"
+    "code_then_date"
   end
 end

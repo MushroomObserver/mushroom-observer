@@ -255,7 +255,7 @@ class CommentsControllerTest < FunctionalTestCase
     assert_equal(11, rolf.reload.contribution)
     obs.reload
     assert_equal(comment_count + 1, obs.comments.size)
-    comment = Comment.last
+    comment = Comment.reorder(created_at: :asc).last
     assert_equal("A Summary", comment.summary)
     assert_equal("Some text.", comment.comment)
   end

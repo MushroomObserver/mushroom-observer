@@ -641,7 +641,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
 
   def test_prev_and_next_observation_simple
     # Uses non-default observation query. :when is the default order
-    o_chron = Observation.order(created_at: :desc, id: :desc)
+    o_chron = Observation.reorder(created_at: :desc, id: :desc)
     login
     # need to save a query here to get :next in a non-standard order
     Query.lookup_and_save(:Observation, by: :created_at)

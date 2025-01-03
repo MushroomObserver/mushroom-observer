@@ -38,7 +38,7 @@ module Images
 
     def setup
       @mock_storage = MockStorage.new
-      @test_image = Image.first
+      @test_image = Image.reorder(created_at: :asc).first
       @test_file = "#{DIR}/#{@test_image.id}.jpg"
       @id_cutoff = @test_image.id + 1
       FileUtils.rm_rf(DIR)
