@@ -1011,7 +1011,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # Notes are exported as shown, except that the intial "Notes:" caption is
   # omitted, and any markup is stripped from the keys.
 
-  serialize :notes
+  serialize :notes, coder: YAML
 
   # value of observation.notes if there are no notes
   def self.no_notes
