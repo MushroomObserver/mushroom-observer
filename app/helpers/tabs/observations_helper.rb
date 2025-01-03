@@ -145,14 +145,24 @@ module Tabs
     # these are from the observations form
     def define_location_tab(query)
       [:list_observations_location_define.l,
-       add_query_param(new_location_path(where: query.params[:user_where])),
+       add_query_param(new_location_path(where: where_param(query.params))),
        { class: tab_id(__method__.to_s) }]
+    end
+
+    # Hack to use the :locations param if it's present and the :user_where
+    # param is missing.
+    def where_param(params)
+      result = params[:user_where]
+      return result if result
+      return params[:locations][0] if params.include?(:locations)
+
+      ""
     end
 
     def assign_undefined_location_tab(query)
       [:list_observations_location_merge.l,
        add_query_param(matching_locations_for_observations_path(
-                         where: query.params[:user_where]
+                         where: where_param(query.params)
                        )),
        { class: tab_id(__method__.to_s) }]
     end
