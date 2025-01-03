@@ -3479,7 +3479,7 @@ class API2Test < UnitTestCase
     }
     assert_api_fail(params.except(:api_key))
     assert_api_fail(params.merge(id: marys_spl.id))
-    assert_api_fail(params.merge(set_title: SpeciesList.first.title))
+    assert_api_fail(params.merge(set_title: SpeciesList.unscoped.first.title))
     assert_api_fail(params.merge(set_location: "bogus location"))
     assert_api_fail(params.merge(set_title: ""))
     assert_api_fail(params.merge(set_date: ""))

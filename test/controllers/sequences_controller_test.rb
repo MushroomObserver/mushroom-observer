@@ -371,7 +371,8 @@ class SequencesControllerTest < FunctionalTestCase
     login(obs.user.login)
     get(:edit, params: params.merge(back: obs.id, q: q))
 
-    assert_select("form:match('action', ?)", %r{^/sequences/226969185}, true,
+    assert_select("form:match('action', ?)",
+                  %r{^/sequences/#{sequence.id}}, true,
                   "submit action for edit Sequence form should start with " \
                   "`/sequences/<sequence.id>`")
     assert_select("form:match('action', ?)", /back=#{obs.id}/, true,

@@ -3030,7 +3030,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_sequence_filters
-    sequences = Sequence.all
+    sequences = Sequence.unscoped.all
     seq1 = sequences[0]
     seq2 = sequences[1]
     seq3 = sequences[3]
