@@ -36,7 +36,7 @@ module Query::Modules::Initialization
     set.presence || "-1"
   end
 
-  # array of max of 1000 unique ids for use with Arel "in"
+  # array of max of MO.query_max_array unique ids for use with Arel "in"
   #    where(<x>.in(limited_id_set(ids)))
   def limited_id_set(ids)
     ids.map(&:to_i).uniq[0, MO.query_max_array]

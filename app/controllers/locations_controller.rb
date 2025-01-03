@@ -171,8 +171,6 @@ class LocationsController < ApplicationController
     # If these are passed, we're not looking for undefined locations.
     return nil if [:by_editor, :regexp].any? { |key| args[key] }
 
-    model  = :Observation
-
     # Select only observations with undefined location.
     args[:where] = [args[:where]].compact unless args[:where].is_a?(Array)
     args[:where] << "observations.location_id IS NULL"
@@ -192,7 +190,7 @@ class LocationsController < ApplicationController
     args.delete(:old_by)
 
     # Create query if okay.  (Still need to tweak select and group clauses.)
-    result = create_query(model, args)
+    result = create_query(:Observation, args)
 
     # Also make sure it doesn't reference locations anywhere.  This would
     # presumably be the result of customization of one of the above.
