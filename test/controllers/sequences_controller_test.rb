@@ -152,7 +152,7 @@ class SequencesControllerTest < FunctionalTestCase
     login(user.login)
 
     assert_difference("Sequence.count", 1) { post(:create, params: params) }
-    sequence = Sequence.last
+    sequence = Sequence.unscoped.last
     assert_objs_equal(obs, sequence.observation)
     assert_users_equal(user, sequence.user)
     assert_equal(locus, sequence.locus)
@@ -179,7 +179,7 @@ class SequencesControllerTest < FunctionalTestCase
     login(owner.login)
 
     assert_difference("Sequence.count", 1) { post(:create, params: params) }
-    sequence = Sequence.last
+    sequence = Sequence.unscoped.last
     assert_objs_equal(obs, sequence.observation)
     assert_users_equal(owner, sequence.user)
     assert_equal(locus, sequence.locus)
@@ -207,7 +207,7 @@ class SequencesControllerTest < FunctionalTestCase
     make_admin("zero")
 
     assert_difference("Sequence.count", 1) { post(:create, params: params) }
-    sequence = Sequence.last
+    sequence = Sequence.unscoped.last
     assert_equal(locus, sequence.locus)
     assert_empty(sequence.bases)
     assert_equal(archive, sequence.archive)
@@ -310,7 +310,7 @@ class SequencesControllerTest < FunctionalTestCase
     post(:create, params: params)
 
     assert_flash_success
-    assert_equal(caron, Sequence.last.notes,
+    assert_equal(caron, Sequence.unscoped.last.notes,
                  "Failed to include utf8 caron (#{caron}) in Sequence Notes")
   end
 

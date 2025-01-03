@@ -88,6 +88,8 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
             format: { with: /\A[A-Z0-9][A-Z0-9-]*\z/,
                       message: proc { :alphanumerics_only.t } }
 
+  default_scope { order(updated_at: :desc, id: :desc) }
+
   scope :show_includes, lambda {
     strict_loading.includes(
       { comments: :user },

@@ -1808,7 +1808,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_pattern_search
-    expects = Location.unscoped.where(Location[:name].matches("%California%")).distinct
+    expects = Location.unscoped.
+              where(Location[:name].matches("%California%")).distinct
     assert_query(expects, :Location, pattern: "California", by: :id)
     assert_query([locations(:elgin_co).id],
                  :Location, pattern: "Canada")
@@ -2946,14 +2947,14 @@ class QueryTest < UnitTestCase
   end
 
   def test_project_all
-    expects = Project.order(updated_at: :desc, id: :desc).uniq
+    expects = Project.all
     assert_query(expects, :Project)
   end
 
   def test_project_by_rss_log
-    expect = Project.joins(:rss_log).
-             order(RssLog[:updated_at].desc, Project[:id].desc)
-    assert_query(expect.select(Project[:id]).distinct, :Project, by: :rss_log)
+    expects = Project.joins(:rss_log).
+              reorder(RssLog[:updated_at].desc, Project[:id].desc).distinct
+    assert_query(expects, :Project, by: :rss_log)
   end
 
   def test_project_in_set
@@ -2972,18 +2973,17 @@ class QueryTest < UnitTestCase
     expects = project_pattern_search("two lists")
     assert_query(expects, :Project, pattern: "two lists")
 
-    expects = Project.order(updated_at: :desc, id: :desc).uniq
+    expects = Project.all
     assert_query(expects, :Project, pattern: "")
   end
 
   def project_pattern_search(pattern)
     Project.where(Project[:title].matches("%#{pattern}%").
-                  or(Project[:summary].matches("%#{pattern}%"))).
-      order(updated_at: :desc, id: :desc).uniq
+                  or(Project[:summary].matches("%#{pattern}%"))).distinct
   end
 
   def test_rss_log_all
-    ids = RssLog.order(updated_at: :desc, id: :desc).uniq
+    ids = RssLog.all
     assert_query(ids, :RssLog)
   end
 
@@ -2999,13 +2999,12 @@ class QueryTest < UnitTestCase
   end
 
   def test_sequence_all
-    expect = Sequence.order(created_at: :desc, id: :desc).uniq
+    expect = Sequence.all
     assert_query(expect, :Sequence)
   end
 
   def test_sequence_locus_has
-    assert_query(Sequence.where(Sequence[:locus].matches("ITS%")).
-                 order(created_at: :desc, id: :desc).uniq,
+    assert_query(Sequence.where(Sequence[:locus].matches("ITS%")).distinct,
                  :Sequence, locus_has: "ITS")
   end
 
@@ -3048,8 +3047,7 @@ class QueryTest < UnitTestCase
     expects = Sequence.joins(:observation).
               where(observations: { location: locations(:burbank) }).
               or(Sequence.joins(:observation).
-                 where(Observation[:where].matches("Burbank"))).
-              order(created_at: :desc, id: :desc).uniq
+                 where(Observation[:where].matches("Burbank"))).distinct
     assert_query(expects, :Sequence, locations: "Burbank")
     assert_query([seq2], :Sequence, projects: "Bolete Project")
     assert_query([seq1, seq2], :Sequence,
@@ -3078,8 +3076,7 @@ class QueryTest < UnitTestCase
 
   def test_sequence_pattern_search
     assert_query([], :Sequence, pattern: "nonexistent")
-    assert_query(Sequence.where(Sequence[:locus].matches("ITS%")).
-                 order(created_at: :desc, id: :desc).uniq,
+    assert_query(Sequence.where(Sequence[:locus].matches("ITS%")).distinct,
                  :Sequence, pattern: "ITS")
     assert_query([sequences(:alternate_archive)],
                  :Sequence, pattern: "UNITE")
@@ -3088,7 +3085,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_species_list_all
-    expect = SpeciesList.order(title: :asc, id: :desc).to_a
+    expect = SpeciesList.all
     assert_query(expect, :SpeciesList)
   end
 
@@ -3103,8 +3100,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_species_list_at_location
-    expects = SpeciesList.where(location: locations(:burbank)).
-              order(title: :asc, id: :desc).uniq
+    expects = SpeciesList.where(location: locations(:burbank)).distinct
     assert_query(expects, :SpeciesList, location: locations(:burbank))
     assert_query(
       [], :SpeciesList, location: locations(:unused_location)
@@ -3123,15 +3119,13 @@ class QueryTest < UnitTestCase
   end
 
   def test_species_list_by_user
-    expects = SpeciesList.where(user: mary).
-              order(title: :asc, id: :desc).uniq
+    expects = SpeciesList.where(user: mary).distinct
     assert_query(expects, :SpeciesList, by_user: mary)
     assert_query([], :SpeciesList, by_user: dick)
   end
 
   def test_species_list_by_user_sort_by_id
-    expects = SpeciesList.where(user: rolf).
-              order(id: :asc).uniq
+    expects = SpeciesList.where(user: rolf).reorder(id: :asc).uniq
     assert_query(expects, :SpeciesList, by_user: rolf, by: :id)
   end
 
@@ -3172,7 +3166,7 @@ class QueryTest < UnitTestCase
     expects = species_list_pattern_search(pattern)
     assert_query(expects, :SpeciesList, pattern: pattern)
 
-    expects = SpeciesList.order(title: :asc, id: :desc).to_a
+    expects = SpeciesList.all
     assert_query(expects, :SpeciesList, pattern: "")
   end
 
@@ -3181,8 +3175,7 @@ class QueryTest < UnitTestCase
       where(SpeciesList[:title].matches("%#{pattern}%").
             or(SpeciesList[:notes].matches("%#{pattern}%")).
             or(SpeciesList[:where].matches("%#{pattern}%")).
-            or(Location[:name].matches("%#{pattern}%"))).
-      order(title: :asc, id: :desc).uniq
+            or(Location[:name].matches("%#{pattern}%"))).distinct
   end
 
   def test_user_all

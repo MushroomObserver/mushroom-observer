@@ -99,6 +99,8 @@ class SpeciesList < AbstractModel
 
   attr_accessor :data
 
+  default_scope { order(title: :asc, id: :desc) }
+
   scope :show_includes, lambda {
     strict_loading.includes(
       { comments: :user },
