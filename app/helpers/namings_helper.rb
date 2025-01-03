@@ -289,7 +289,7 @@ module NamingsHelper
       data: { turbo: true, controller: "naming-vote", naming_id: naming.id,
               localization: naming_vote_form_localizations }
     }
-    args = args.merge(model: vote) if vote&.id
+    args = args.merge(model: vote) if vote
     args
   end
 
