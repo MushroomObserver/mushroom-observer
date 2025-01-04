@@ -800,8 +800,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     # and it'll only appear once in the resulting WHERE condition. Go figure.
     query = Observation.
             where(needs_naming: false).without_confident_name.
-            or(Observation.
-               where(needs_naming: false).with_name_above_genus)
+            or(where(needs_naming: false).with_name_above_genus)
     msgs = query.map do |obs|
       "Observation #{obs.id}, #{obs.text_name}, needs a name."
     end

@@ -612,7 +612,7 @@ module Name::Taxonomy
       end
       unless dry_run || msgs.none?
         query.update_all(
-          "names.classification = name_descriptions.classification"
+          Name[:classification].eq(NameDescription[:classification]).to_sql
         )
       end
       msgs
