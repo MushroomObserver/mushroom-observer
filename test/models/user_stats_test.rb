@@ -8,7 +8,7 @@ class UserStatsTest < UnitTestCase
       where(Name::Version.arel_table[:user_id].eq(rolf.id)).
       where.not(
         Name::Version.arel_table[:user_id].eq(Name[:user_id])
-      ).distinct.select(Name::Version.arel_table[:name_id]).count
+      ).distinct.count
   end
 
   def test_refresh_user_stats
