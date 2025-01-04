@@ -202,59 +202,24 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
   # first value is the default
-  enum thumbnail_size:
-       {
-         thumbnail: 1,
-         small: 2
-       },
-       _prefix: :thumb_size,
-       _default: "thumbnail"
+  enum :thumbnail_size, { thumbnail: 1, small: 2 },
+       prefix: :thumb_size, default: "thumbnail", instance_methods: false
 
-  enum image_size:
-       {
-         thumbnail: 1,
-         small: 2,
-         medium: 3,
-         large: 4,
-         huge: 5,
-         full_size: 6
-       },
-       _prefix: true,
-       _default: "medium"
+  enum :image_size,
+       { thumbnail: 1, small: 2, medium: 3, large: 4, huge: 5, full_size: 6 },
+       prefix: true, default: "medium", instance_methods: false
 
-  enum votes_anonymous:
-       {
-         no: 1,
-         yes: 2,
-         old: 3
-       },
-       _prefix: :votes_anon,
-       _default: "no"
+  enum :votes_anonymous, { no: 1, yes: 2, old: 3 },
+       prefix: :votes_anon, default: "no", instance_methods: false
 
-  enum location_format:
-       {
-         postal: 1,
-         scientific: 2
-       },
-       _prefix: true,
-       _default: "postal"
+  enum :location_format, { postal: 1, scientific: 2 },
+       prefix: true, default: "postal", instance_methods: false
 
-  enum hide_authors:
-       {
-         none: 1,
-         above_species: 2
-       },
-       _prefix: true,
-       _default: "none"
+  enum :hide_authors, { none: 1, above_species: 2 },
+       prefix: true, default: "none", instance_methods: false
 
-  enum keep_filenames:
-       {
-         toss: 1,
-         keep_but_hide: 2,
-         keep_and_show: 3
-       },
-       _suffix: :filenames,
-       _default: "toss"
+  enum :keep_filenames, { toss: 1, keep_but_hide: 2, keep_and_show: 3 },
+       suffix: :filenames, default: "toss", instance_methods: false
 
   has_one :user_stats, dependent: :destroy
 
