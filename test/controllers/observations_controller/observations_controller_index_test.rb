@@ -542,6 +542,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login
     get(:index, params: { where: location.name })
     assert_displayed_title("Observations from #{location.name}")
+    assert_match(new_location_path(where: location.name), @response.body)
   end
 
   def test_index_where_page2

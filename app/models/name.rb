@@ -348,7 +348,6 @@ class Name < AbstractModel
   extend Parse
   extend Create
 
-  # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
   enum :rank, {
     Form: 1,
