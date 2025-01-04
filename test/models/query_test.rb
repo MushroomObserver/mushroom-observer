@@ -3,16 +3,16 @@
 require("test_helper")
 
 class QueryTest < UnitTestCase
-  def assert_query(expect, *args)
-    test_ids = expect.first.is_a?(Integer)
-    expect = expect.to_a unless expect.respond_to?(:map!)
+  def assert_query(expects, *args)
+    test_ids = expects.first.is_a?(Integer)
+    expects = expects.to_a unless expects.respond_to?(:map!)
     query = Query.lookup(*args)
     actual = test_ids ? query.result_ids : query.results
     msg = "Query results are wrong. SQL is:\n#{query.last_query}"
     if test_ids
-      assert_equal(expect, actual, msg)
+      assert_equal(expects, actual, msg)
     else
-      assert_obj_arrays_equal(expect, actual, msg)
+      assert_obj_arrays_equal(expects, actual, msg)
     end
     type = args[0].to_s.underscore.to_sym.t.titleize.sub(/um$/, "(um|a)")
     assert_match(/#{type}|Advanced Search|(Lower|Higher) Taxa/, query.title)
@@ -1156,8 +1156,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_collection_number_all
-    expect = CollectionNumber.all
-    assert_query(expect, :CollectionNumber)
+    expects = CollectionNumber.all
+    assert_query(expects, :CollectionNumber)
   end
 
   def test_collection_number_for_observation
@@ -1278,24 +1278,24 @@ class QueryTest < UnitTestCase
   end
 
   def test_herbarium_all
-    expect = Herbarium.all
-    assert_query(expect.select(:id).distinct, :Herbarium)
+    expects = Herbarium.all
+    assert_query(expects.select(:id).distinct, :Herbarium)
   end
 
   def test_herbarium_by_records
-    expect = Herbarium.left_outer_joins(:herbarium_records).group(:id).
-             # Wrap known safe argument in Arel
-             # to prevent "Dangerous query method" Deprecation Warning
-             reorder(HerbariumRecord[:id].count.desc, Herbarium[:id].desc)
-    assert_query(expect, :Herbarium, by: :records)
+    expects = Herbarium.left_outer_joins(:herbarium_records).group(:id).
+              # Wrap known safe argument in Arel
+              # to prevent "Dangerous query method" Deprecation Warning
+              reorder(HerbariumRecord[:id].count.desc, Herbarium[:id].desc)
+    assert_query(expects, :Herbarium, by: :records)
   end
 
   def test_herbarium_in_set
-    expect = [
+    expects = [
       herbaria(:dick_herbarium),
       herbaria(:nybg_herbarium)
     ]
-    assert_query(expect, :Herbarium, ids: expect)
+    assert_query(expects, :Herbarium, ids: expects)
   end
 
   def test_herbarium_pattern_search
@@ -1310,20 +1310,20 @@ class QueryTest < UnitTestCase
   end
 
   def test_herbarium_record_all
-    expect = HerbariumRecord.all
-    assert_query(expect, :HerbariumRecord)
+    expects = HerbariumRecord.all
+    assert_query(expects, :HerbariumRecord)
   end
 
   def test_herbarium_record_for_observation
     obs = observations(:coprinus_comatus_obs)
-    expect = HerbariumRecord.for_observation(obs)
-    assert_query(expect, :HerbariumRecord, observation: obs.id)
+    expects = HerbariumRecord.for_observation(obs)
+    assert_query(expects, :HerbariumRecord, observation: obs.id)
   end
 
   def test_herbarium_record_in_herbarium
     nybg = herbaria(:nybg_herbarium)
-    expect = HerbariumRecord.where(herbarium: nybg)
-    assert_query(expect, :HerbariumRecord, herbarium: nybg.id)
+    expects = HerbariumRecord.where(herbarium: nybg)
+    assert_query(expects, :HerbariumRecord, herbarium: nybg.id)
   end
 
   def test_herbarium_record_pattern_search_notes
@@ -1378,12 +1378,12 @@ class QueryTest < UnitTestCase
   end
 
   def test_image_by_user
-    expect = Image.where(user_id: rolf.id).distinct
-    assert_query(expect, :Image, by_user: rolf)
-    expect = Image.where(user_id: mary.id).distinct
-    assert_query(expect, :Image, by_user: mary)
-    expect = Image.where(user_id: dick.id).distinct
-    assert_query(expect, :Image, by_user: dick)
+    expects = Image.where(user_id: rolf.id).distinct
+    assert_query(expects, :Image, by_user: rolf)
+    expects = Image.where(user_id: mary.id).distinct
+    assert_query(expects, :Image, by_user: mary)
+    expects = Image.where(user_id: dick.id).distinct
+    assert_query(expects, :Image, by_user: dick)
   end
 
   def test_image_in_set
@@ -1396,8 +1396,8 @@ class QueryTest < UnitTestCase
   def test_image_inside_observation
     obs = observations(:detailed_unknown_obs)
     assert_equal(2, obs.images.length)
-    expect = obs.images.sort_by(&:id)
-    assert_query(expect, :Image,
+    expects = obs.images.sort_by(&:id)
+    assert_query(expects, :Image,
                  observation: obs, outer: 1) # (outer is only used by prev/next)
     obs = observations(:minimal_unknown_obs)
     assert_equal(0, obs.images.length)
@@ -1912,28 +1912,28 @@ class QueryTest < UnitTestCase
 
   def test_location_with_observations_created_at
     created_at = observations(:california_obs).created_at
-    expect = Location.joins(:observations).
-             where(Observation[:created_at] >= created_at).distinct
+    expects = Location.joins(:observations).
+              where(Observation[:created_at] >= created_at).distinct
     assert_query(
-      expect, :Location, with_observations: 1, created_at: created_at
+      expects, :Location, with_observations: 1, created_at: created_at
     )
   end
 
   def test_location_with_observations_updated_at
     updated_at = observations(:california_obs).updated_at
-    expect = Location.joins(:observations).
-             where(Observation[:updated_at] >= updated_at).distinct
+    expects = Location.joins(:observations).
+              where(Observation[:updated_at] >= updated_at).distinct
     assert_query(
-      expect, :Location, with_observations: 1, updated_at: updated_at
+      expects, :Location, with_observations: 1, updated_at: updated_at
     )
   end
 
   def test_location_with_observations_date
     date = observations(:california_obs).when
-    expect = Location.joins(:observations).
-             where(Observation[:when] >= date).distinct
+    expects = Location.joins(:observations).
+              where(Observation[:when] >= date).distinct
     assert_query(
-      expect, :Location, with_observations: 1, date: date
+      expects, :Location, with_observations: 1, date: date
     )
   end
 
@@ -1983,9 +1983,9 @@ class QueryTest < UnitTestCase
 
   def test_location_with_observations_herbaria
     name = "The New York Botanical Garden"
-    expect = Location.joins(observations: { herbarium_records: :herbarium }).
-             where(herbaria: { name: name }).distinct
-    assert_query(expect, :Location, with_observations: 1, herbaria: name)
+    expects = Location.joins(observations: { herbarium_records: :herbarium }).
+              where(herbaria: { name: name }).distinct
+    assert_query(expects, :Location, with_observations: 1, herbaria: name)
   end
 
   def test_location_with_observations_names
@@ -2061,11 +2061,10 @@ class QueryTest < UnitTestCase
     # (b) tests are brittle, so adding or modifying a fixture will break them.
     obses = Observation.where(vote_cache: 1..3)
     obses.each { |obs| obs.update!(location: locations(:albion)) }
-    expect =
-      Location.joins(:observations).
-      where(observations: { vote_cache: 1..3 }).distinct
-    assert_not_empty(expect, "'expect` is broken; it should not be empty")
-    assert_query(expect, :Location,
+    expects = Location.joins(:observations).
+              where(observations: { vote_cache: 1..3 }).distinct
+    assert_not_empty(expects, "'expect` is broken; it should not be empty")
+    assert_query(expects, :Location,
                  with_observations: 1, confidence: [1.0, 3.0])
   end
 
@@ -2257,6 +2256,7 @@ class QueryTest < UnitTestCase
 
   def test_name_all
     # NOTE: misspellings are modified by `do_test_name_all`
+    # This saves looking up Name.all a bunch of times.
     expect = Name.all
     expects = expect.to_a
     # SQL does not sort 'Kuhner' and 'Kühner'
@@ -2317,10 +2317,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_include_subtaxa_exclude_original_names
-    # expect = Name.where(Name[:text_name].matches("agaricus %")).distinct
-    # expect.reject!(&:is_misspelling?)
-    expect = Name.subtaxa_of(names(:agaricus))
-    assert_query(expect, :Name,
+    expects = Name.subtaxa_of(names(:agaricus))
+    assert_query(expects, :Name,
                  names: [names(:agaricus).id], include_subtaxa: true,
                  exclude_original_names: true)
   end
@@ -2363,13 +2361,13 @@ class QueryTest < UnitTestCase
                  name: "macrocybe*titans")
     assert_query([names(:coprinus_comatus).id], :Name,
                  user_where: "glendale") # where
-    expect = Name.where("observations.location_id" =>
-                  locations(:burbank).id).
-             includes(:observations).order(:text_name, :author).to_a
-    assert_query(expect, :Name, user_where: "burbank") # location
-    expect = Name.where("observations.user_id" => rolf.id).
-             includes(:observations).order(:text_name, :author).to_a
-    assert_query(expect, :Name, user: "rolf")
+    expects = Name.joins(:observations).
+              where(Observation[:location_id].eq(locations(:burbank).id)).
+              distinct
+    assert_query(expects, :Name, user_where: "burbank") # location
+    expects = Name.joins(:observations).
+              where(Observation[:user_id].eq(rolf.id)).distinct
+    assert_query(expects, :Name, user: "rolf")
     assert_query([names(:coprinus_comatus).id], :Name,
                  content: "second fruiting") # notes
     assert_query([names(:fungi).id], :Name,
@@ -2377,8 +2375,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_with_descriptions
-    expect = Name.with_correct_spelling.joins(:descriptions).distinct
-    assert_query(expect, :Name, with_descriptions: 1)
+    expects = Name.with_correct_spelling.joins(:descriptions).distinct
+    assert_query(expects, :Name, with_descriptions: 1)
   end
 
   def test_name_with_descriptions_by_user
@@ -2441,9 +2439,9 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_with_observations
-    expect = Name.with_correct_spelling.joins(:observations).
-             select(:name).distinct.pluck(:name_id).sort
-    assert_query(expect, :Name, with_observations: 1, by: :id)
+    expects = Name.with_correct_spelling.joins(:observations).
+              select(:name).distinct.pluck(:name_id).sort
+    assert_query(expects, :Name, with_observations: 1, by: :id)
   end
 
   # Prove that :with_observations param of Name Query works with each
@@ -2687,8 +2685,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_observation_all
-    expect = Observation.all
-    assert_query(expect, :Observation)
+    expects = Observation.all
+    assert_query(expects, :Observation)
   end
 
   def test_observation_in_project_list
@@ -2711,12 +2709,12 @@ class QueryTest < UnitTestCase
   end
 
   def test_observation_by_user
-    expect = Observation.reorder(id: :asc).where(user: rolf.id).to_a
-    assert_query(expect, :Observation, by_user: rolf, by: :id)
-    expect = Observation.reorder(id: :asc).where(user: mary.id).to_a
-    assert_query(expect, :Observation, by_user: mary, by: :id)
-    expect = Observation.reorder(id: :asc).where(user: dick.id).to_a
-    assert_query(expect, :Observation, by_user: dick, by: :id)
+    expects = Observation.reorder(id: :asc).where(user: rolf.id).to_a
+    assert_query(expects, :Observation, by_user: rolf, by: :id)
+    expects = Observation.reorder(id: :asc).where(user: mary.id).to_a
+    assert_query(expects, :Observation, by_user: mary, by: :id)
+    expects = Observation.reorder(id: :asc).where(user: dick.id).to_a
+    assert_query(expects, :Observation, by_user: dick, by: :id)
     assert_query([], :Observation, by_user: junk, by: :id)
   end
 
@@ -2977,8 +2975,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_sequence_all
-    expect = Sequence.all
-    assert_query(expect, :Sequence)
+    expects = Sequence.all
+    assert_query(expects, :Sequence)
   end
 
   def test_sequence_locus_has
@@ -3063,18 +3061,18 @@ class QueryTest < UnitTestCase
   end
 
   def test_species_list_all
-    expect = SpeciesList.all
-    assert_query(expect, :SpeciesList)
+    expects = SpeciesList.all
+    assert_query(expects, :SpeciesList)
   end
 
   def test_species_list_sort_by_user
-    expect = SpeciesList.sort_by_user.to_a
-    assert_query(expect, :SpeciesList, by: :user)
+    expects = SpeciesList.sort_by_user.to_a
+    assert_query(expects, :SpeciesList, by: :user)
   end
 
   def test_species_list_sort_by_title
-    expect = SpeciesList.order(:title).to_a
-    assert_query(expect, :SpeciesList, by: :title)
+    expects = SpeciesList.order(:title).to_a
+    assert_query(expects, :SpeciesList, by: :title)
   end
 
   def test_species_list_at_location
@@ -3157,10 +3155,10 @@ class QueryTest < UnitTestCase
   end
 
   def test_user_all
-    expect = User.order(:name).to_a
-    assert_query(expect, :User)
-    expect = User.order(:login).to_a
-    assert_query(expect, :User, by: :login)
+    expects = User.order(:name).to_a
+    assert_query(expects, :User)
+    expects = User.order(:login).to_a
+    assert_query(expects, :User, by: :login)
   end
 
   def test_user_in_set
@@ -3445,11 +3443,11 @@ class QueryTest < UnitTestCase
     name
   end
 
-  def assert_lookup_names_by_name(expect, args)
+  def assert_lookup_names_by_name(expects, args)
     query = Query.new(:Name)
     actual = query.lookup_names_by_name(args)
-    expect = expect.sort_by(&:text_name)
+    expects = expects.sort_by(&:text_name)
     actual = actual.map { |id| Name.find(id) }.sort_by(&:text_name)
-    assert_name_arrays_equal(expect, actual)
+    assert_name_arrays_equal(expects, actual)
   end
 end
