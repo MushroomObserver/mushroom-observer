@@ -678,6 +678,10 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       :user
     )
   }
+  # overwrite the one in abstract_model, because we have it cached on a column
+  scope :order_by_rss_log, lambda {
+    where.not(rss_log: nil).reorder(log_updated_at: :desc, id: :desc).distinct
+  }
 
   def self.build_observation(location, name, notes, date)
     return nil unless location
