@@ -626,9 +626,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
   end
 
   def test_index_with_region_filter
-    observations_in_region = Observation.where(
-      Observation[:where].matches("%California, USA")
-    ).order(:id).to_a
+    observations_in_region =
+      Observation.reorder(id: :asc).in_region("California, USA")
 
     user = users(:californian)
     # Make sure the fixture is still okay

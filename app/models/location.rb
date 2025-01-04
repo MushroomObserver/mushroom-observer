@@ -155,6 +155,8 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
+  default_scope { order(name: :asc, id: :desc) }
+
   # NOTE: To improve Coveralls display, do not use one-line stabby lambda scopes
   scope :name_includes,
         ->(place_name) { where(Location[:name].matches("%#{place_name}%")) }
@@ -311,17 +313,14 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     # update the locations
     update_all(update_center_and_area_sql)
     # give center points to associated observations in batches
-    Observation.joins(:location).
-      where(Location[:box_area].lteq(MO.obs_location_max_area)).
-      group(:location_id).update_all(
-        location_lat: Location[:center_lat], location_lng: Location[:center_lng]
-      )
+    # Observation must be unscoped or it will not join to locations
+    Observation.unscoped.in_box_of_max_area.update_all(
+      location_lat: Location[:center_lat], location_lng: Location[:center_lng]
+    )
     # null center points where area is above the threshold
-    Observation.joins(:location).
-      where(Location[:box_area].gt(MO.obs_location_max_area)).
-      group(:location_id).update_all(
-        location_lat: nil, location_lng: nil
-      )
+    Observation.unscoped.in_box_gt_max_area.update_all(
+      location_lat: nil, location_lng: nil
+    )
   end
 
   # Let attached observations update their cache if these fields changed.
@@ -582,7 +581,8 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Looks for a matching location using either location order just to be sure
   def self.find_by_name_or_reverse_name(name)
-    Location.where(name: name).or(Location.where(scientific_name: name)).first
+    Location.where(name: name).
+      or(Location.where(scientific_name: name)).first
   end
 
   def self.user_format(user, name)

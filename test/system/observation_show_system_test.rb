@@ -164,7 +164,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_no_selector("#modal_sequence")
 
     # edit sequence
-    seq = Sequence.last
+    seq = Sequence.reorder(id: :asc).last
     within("#observation_sequences") do
       assert_link(text: /LSU/)
       assert_link(:EDIT.t)

@@ -516,7 +516,8 @@ class LocationsControllerTest < FunctionalTestCase
     params[:location][:display_name] = " Strip  This,  Maine,  USA "
     post(:create, params: params)
     assert_response(:redirect)
-    assert_equal("Strip This, Maine, USA", Location.last.display_name)
+    assert_equal("Strip This, Maine, USA",
+                 Location.reorder(id: :asc).last.display_name)
   end
 
   def test_construct_location_errors

@@ -1023,8 +1023,9 @@ class NamesControllerTest < FunctionalTestCase
     post(:create, params: params)
 
     assert_response(:success)
+    last_name = Name.reorder(created_at: :asc).last
     assert_equal(count, Name.count,
-                 "Shouldn't have created #{Name.last.search_name.inspect}.")
+                 "Shouldn't have created #{last_name.search_name.inspect}.")
     names = Name.where(text_name: text_name)
     assert_obj_arrays_equal([names(:conocybe_filaris)], names)
     assert_equal(10, rolf.reload.contribution)
@@ -1047,10 +1048,12 @@ class NamesControllerTest < FunctionalTestCase
     login("mary")
     post(:create, params: params)
     assert_response(:success)
+    last_name = Name.reorder(created_at: :asc).last
     assert_equal(name_count, Name.count,
-                 "Shouldn't have created #{Name.last.search_name.inspect}.")
+                 "Shouldn't have created #{last_name.search_name.inspect}.")
     assert_equal(rss_log_count, RssLog.count,
-                 "Shouldn't have created an RSS log! #{RssLog.last.inspect}.")
+                 "Shouldn't have created an RSS log! " \
+                 "#{RssLog.reorder(id: :asc).last.inspect}.")
   end
 
   def test_create_name_matching_multiple_names
@@ -1071,8 +1074,9 @@ class NamesControllerTest < FunctionalTestCase
 
     assert_flash_text(flash_text)
     assert_response(:success)
+    last_name = Name.reorder(created_at: :asc).last
     assert_equal(count, Name.count,
-                 "Shouldn't have created #{Name.last.search_name.inspect}.")
+                 "Shouldn't have created #{last_name.search_name.inspect}.")
   end
 
   def test_create_name_unauthored_authored
@@ -1296,7 +1300,7 @@ class NamesControllerTest < FunctionalTestCase
     }
     post(:create, params: params)
     assert_flash_success
-    assert_redirected_to(name_path(Name.last.id))
+    assert_redirected_to(name_path(Name.reorder(created_at: :asc).last.id))
   end
 
   def test_create_family
@@ -3138,7 +3142,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_not(Name.exists?(edited_name.id))
     assert_equal(208_785, survivor.reload.icn_id)
 
-    log = RssLog.last.parse_log
+    log = RssLog.reorder(id: :asc).last.parse_log
     assert_equal(:log_orphan, log[0][0])
     assert_equal({ title: destroyed_display_name }, log[0][1])
     assert_equal(:log_name_merged, log[1][0])

@@ -11,6 +11,8 @@ module Projects
   class ViolationsController < ApplicationController
     before_action :login_required
     before_action :pass_query_params
+    # Cannot figure out the eager loading here.
+    around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [:index]
 
     def index
       return unless find_project!
@@ -45,7 +47,8 @@ module Projects
     private
 
     def find_project!
-      @project = find_or_goto_index(Project, params[:project_id])
+      @project = Project.violations_includes.find(params[:project_id]) ||
+                 flash_error_and_goto_index(Project, params[:project_id])
     end
 
     def remove_observation_if_permitted(obs_id)

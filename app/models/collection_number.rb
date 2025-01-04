@@ -58,6 +58,13 @@ class CollectionNumber < AbstractModel
   before_update :log_update
   before_destroy :log_destroy
 
+  default_scope { order(name: :asc, number: :asc) }
+
+  scope :for_observation, lambda { |obs|
+    joins(:observation_collection_numbers).
+      where(observation_collection_numbers: { observation: obs })
+  }
+
   def format_name
     "#{name} #{number}"
   end

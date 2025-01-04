@@ -41,6 +41,8 @@ class Sequence < AbstractModel
   after_update  :log_update_sequence
   after_destroy :log_destroy_sequence
 
+  default_scope { order(created_at: :desc, id: :desc) }
+
   ##############################################################################
   #
   #  :section: Matchers

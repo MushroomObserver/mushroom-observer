@@ -542,12 +542,12 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Return an Array of Project's that this User is an admin for.
   def projects_admin
-    Project.joins(:admin_group_users).where(user_id: id)
+    Project.unscoped.joins(:admin_group_users).where(user_id: id)
   end
 
   # Return an Array of Project's that this User is a member of.
   def projects_member(order: :created_at, include: nil)
-    @projects_member ||= Project.where(user_group: user_groups.ids).
+    @projects_member ||= Project.unscoped.where(user_group: user_groups.ids).
                          includes(include).order(order).to_a
   end
 

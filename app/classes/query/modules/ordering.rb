@@ -57,6 +57,11 @@ module Query::Modules::Ordering
     "herbaria.code ASC"
   end
 
+  def sort_by_code_then_date(_model)
+    "field_slips.code ASC, field_slips.created_at DESC, " \
+    "field_slips.id DESC"
+  end
+
   def sort_by_code_then_name(_model)
     "IF(herbaria.code = '', '~', herbaria.code) ASC, herbaria.name ASC"
   end

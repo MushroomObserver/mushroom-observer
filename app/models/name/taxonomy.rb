@@ -468,9 +468,9 @@ module Name::Taxonomy
     # Now allows includes, for batch lookup of Naming email interested parties
     # GOTCHA: `search_name` cannot be used as a field in this AR where clause
     def batch_lookup_all_matches(name_or_names, includes = [])
-      Name.includes(includes).where(Name[:search_name].in(name_or_names)).
-        or(Name.where(Name[:text_name].in(name_or_names))).
-        with_correct_spelling
+      Name.unscoped.where(Name[:search_name].in(name_or_names)).
+        or(Name.unscoped.where(Name[:text_name].in(name_or_names))).
+        with_correct_spelling.includes(includes)
     end
 
     # NOTE: may return nil if no match
@@ -606,11 +606,7 @@ module Name::Taxonomy
     # This is meant to be run nightly to ensure that all the classification
     # caches are up to date.  It only pays attention to genera or higher.
     def refresh_classification_caches(dry_run: false)
-      query =
-        Name.joins(:description).
-        where(rank: 0..Name.ranks[:Genus]).
-        where(NameDescription[:classification].not_eq(Name[:classification])).
-        where(NameDescription[:classification].not_blank)
+      query = Name.unscoped.with_description_classification_differing
       msgs = query.map do |name|
         "Classification for #{name.search_name} didn't match description."
       end
