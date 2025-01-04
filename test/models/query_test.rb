@@ -1262,20 +1262,15 @@ class QueryTest < UnitTestCase
     assert_query([], :GlossaryTerm, pattern: "no glossary term has this")
     # name
     expects = GlossaryTerm.
-              where(GlossaryTerm[:name].matches("%conic_glossary_term%").
-              or(GlossaryTerm[:description].matches("%conic_glossary_term%"))).
+              where(GlossaryTerm[:description].matches("%conic_glossary_term%").
+                    or(GlossaryTerm[:name].matches("%conic_glossary_term%"))).
               distinct
     assert_query(expects, :GlossaryTerm, pattern: "conic_glossary_term")
     # description
-    expects =
-      GlossaryTerm.where(GlossaryTerm[:name].matches("%Description%")).
-      where(GlossaryTerm[:name].matches("%of%")).
-      where(GlossaryTerm[:name].matches("%Term%")).
-      or(
-        GlossaryTerm.where(GlossaryTerm[:description].matches("%Description%")).
-        where(GlossaryTerm[:description].matches("%of%")).
-        where(GlossaryTerm[:description].matches("%Term%"))
-      ).distinct
+    expects = GlossaryTerm.
+              where(GlossaryTerm[:description].matches("%Description of Term%").
+                    or(GlossaryTerm[:name].matches("%Description of Term%"))).
+              distinct
     assert_query(expects, :GlossaryTerm, pattern: "Description of Term")
     # blank
     expects = GlossaryTerm.all
@@ -1526,9 +1521,9 @@ class QueryTest < UnitTestCase
   ##### list/string parameters #####
 
   def test_image_with_observations_comments_has
-    expect = Image.joins(observations: :comments).
+    expect = Image.unscoped.joins(observations: :comments).
              where(Comment[:summary].matches("%give%")).
-             or(Image.joins(observations: :comments).
+             or(Image.unscoped.joins(observations: :comments).
                 where(Comment[:comment].matches("%give%"))).
              order(Image[:created_at].desc, Image[:id].desc).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
@@ -3292,13 +3287,14 @@ class QueryTest < UnitTestCase
   end
 
   def test_filtering_content_clade
-    names = Name.with_correct_spelling.where(text_name: "Agaricales").or(
-      Name.where(
-        Name[:classification].matches_regexp("Order: _Agaricales_")
-      )
-    ).reorder(sort_name: :asc, id: :desc).distinct
-    obs = Observation.where(text_name: "Agaricales").or(
-      Observation.where(
+    names = Name.unscoped.
+            with_correct_spelling.where(text_name: "Agaricales").or(
+              Name.unscoped.where(
+                Name[:classification].matches_regexp("Order: _Agaricales_")
+              )
+            ).reorder(sort_name: :asc, id: :desc).distinct
+    obs = Observation.unscoped.where(text_name: "Agaricales").or(
+      Observation.unscoped.where(
         Observation[:classification].matches_regexp("Order: _Agaricales_")
       )
     ).reorder(when: :desc, id: :desc).distinct

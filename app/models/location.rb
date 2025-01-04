@@ -580,7 +580,8 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Looks for a matching location using either location order just to be sure
   def self.find_by_name_or_reverse_name(name)
-    Location.where(name: name).or(Location.where(scientific_name: name)).first
+    Location.unscoped.where(name: name).
+      or(Location.unscoped.where(scientific_name: name)).first
   end
 
   def self.user_format(user, name)

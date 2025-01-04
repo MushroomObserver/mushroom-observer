@@ -276,8 +276,8 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     return true if @herbarium.place_name.blank?
 
     @herbarium.location =
-      Location.where(name: @herbarium.place_name).
-      or(Location.where(scientific_name: @herbarium.place_name)).first
+      Location.unscoped.where(name: @herbarium.place_name).
+      or(Location.unscoped.where(scientific_name: @herbarium.place_name)).first
     # Will redirect to create location if not found.
     true
   end

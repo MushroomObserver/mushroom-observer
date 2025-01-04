@@ -468,10 +468,9 @@ module Name::Taxonomy
     # Now allows includes, for batch lookup of Naming email interested parties
     # GOTCHA: `search_name` cannot be used as a field in this AR where clause
     def batch_lookup_all_matches(name_or_names, includes = [])
-      Name.includes(includes).
-        where(Name[:search_name].in(name_or_names)).
-        or(Name.where(Name[:text_name].in(name_or_names))).
-        with_correct_spelling.reorder(id: :asc)
+      Name.unscoped.where(Name[:search_name].in(name_or_names)).
+        or(Name.unscoped.where(Name[:text_name].in(name_or_names))).
+        with_correct_spelling.includes(includes)
     end
 
     # NOTE: may return nil if no match

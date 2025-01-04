@@ -22,7 +22,7 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
     ]
     list = names.join("\r\n")
 
-    amanita = Name.unscoped.where(text_name: "Amanita baccata")
+    amanita = Name.where(text_name: "Amanita baccata")
 
     albion = locations(:albion)
     albion_name_reverse = Location.reverse_name(albion.name)
@@ -99,7 +99,7 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
     assert_equal("List Title", spl.title)
     assert_equal(albion, spl.location)
     assert_equal("List notes.", spl.notes.strip)
-    obs_last = obs.reorder(created_at: :asc).last
+    obs_last = obs.reorder(id: :asc).last
     assert_equal(albion, obs_last.location)
     assert_equal(member_notes,
                  obs_last.notes[Observation.other_notes_key].strip)
@@ -147,7 +147,6 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
 
     spl.reload
     obs = spl.observations
-    obs_last = obs.reorder(created_at: :asc).last
     assert_equal(7, obs.length, obs.map(&:text_name).inspect)
     assert_equal([
       "Peltigera (Old) New Auth.",
@@ -162,6 +161,7 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
     assert_equal(new_location, spl.where)
     assert_nil(spl.location)
     assert_equal("New list notes.", spl.notes.strip)
+    obs_last = obs.reorder(id: :asc).last
     assert_nil(obs_last.location)
     assert_equal(new_location, obs_last.where)
     assert_nil(obs_last.location)
@@ -192,7 +192,7 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
     assert_equal(newer_location_reverse, loc.display_name)
     spl.reload
     obs = spl.observations
-    obs_last = obs.reorder(created_at: :asc).last
+    obs_last = obs.reorder(id: :asc).last
     assert_equal(loc.name, spl.where)
     assert_equal(loc, spl.location)
     assert_equal(loc.name, obs_last.where)

@@ -86,8 +86,8 @@ module Query::Modules::LookupNames
   def find_matching_names(name)
     parse = Name.parse_name(name)
     name2 = parse ? parse.search_name : Name.clean_incoming_string(name)
-    matches = Name.where(search_name: name2) if parse&.author.present?
-    matches = Name.where(text_name: name2) if matches.empty?
+    matches = Name.unscoped.where(search_name: name2) if parse&.author.present?
+    matches = Name.unscoped.where(text_name: name2) if matches.empty?
     matches.map { |name3| minimal_name_data(name3) }
   end
 
@@ -95,7 +95,7 @@ module Query::Modules::LookupNames
     ids = min_names.map { |min_name| min_name[1] || min_name[0] }
     return [] if ids.empty?
 
-    Name.
+    Name.unscoped.
       where(Name[:correct_spelling_id].coalesce(Name[:id]).
             in(limited_id_set(ids))).
       pluck(*minimal_name_columns)
@@ -106,26 +106,26 @@ module Query::Modules::LookupNames
     return min_names if ids.empty?
 
     min_names.reject { |min_name| min_name[2] } +
-      Name.where(synonym_id: clean_id_set(ids).split(",")).
+      Name.unscoped.where(synonym_id: clean_id_set(ids).split(",")).
       pluck(*minimal_name_columns)
   end
 
   def add_subtaxa(min_names)
     higher_names = genera_and_up(min_names)
     lower_names = genera_and_down(min_names)
-    query = Name.where(id: min_names.map(&:first))
+    query = Name.unscoped.where(id: min_names.map(&:first))
     query = add_lower_names(query, lower_names)
     query = add_higher_names(query, higher_names) unless higher_names.empty?
     query.distinct.pluck(*minimal_name_columns)
   end
 
   def add_lower_names(query, names)
-    query.or(Name.
+    query.or(Name.unscoped.
       where(Name[:text_name] =~ /^(#{names.join("|")}) /))
   end
 
   def add_higher_names(query, names)
-    query.or(Name.
+    query.or(Name.unscoped.
       where(Name[:classification] =~ /: _(#{names.join("|")})_/))
   end
 
@@ -133,7 +133,7 @@ module Query::Modules::LookupNames
     higher_names = genera_and_up(min_names)
     lower_names = genera_and_down(min_names)
 
-    query = Name.where(id: min_names.map(&:first))
+    query = Name.unscoped.where(id: min_names.map(&:first))
     query = add_immediate_lower_names(query, lower_names)
     unless higher_names.empty?
       query = add_immediate_higher_names(query, higher_names)
@@ -142,13 +142,13 @@ module Query::Modules::LookupNames
   end
 
   def add_immediate_lower_names(query, lower_names)
-    query.or(Name.
+    query.or(Name.unscoped.
       where(Name[:text_name] =~
         /^(#{lower_names.join("|")}) [^[:blank:]]+( [^[:blank:]]+)?$/))
   end
 
   def add_immediate_higher_names(query, higher_names)
-    query.or(Name.
+    query.or(Name.unscoped.
       where(Name[:classification] =~ /: _(#{higher_names.join("|")})_$/).
       where.not(Name[:text_name].matches("% %")))
   end

@@ -96,6 +96,11 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
       :location
     )
   }
+  scope :violations_includes, lambda {
+    strict_loading.includes(
+      { observations: [:location, :user] }
+    )
+  }
 
   # Project handles all of its own logging.
   self.autolog_events = []
@@ -450,8 +455,8 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     elsif end_date.nil?
       observations.where(Observation[:when] < start_date)
     else
-      observations.where(Observation[:when] > end_date).
-        or(observations.where(Observation[:when] < start_date))
+      observations.reorder("").where(Observation[:when] > end_date).
+        or(observations.reorder("").where(Observation[:when] < start_date))
     end
   end
 
@@ -463,8 +468,8 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     elsif end_date.nil?
       observations.where(Observation[:when] >= start_date)
     else
-      observations.where(Observation[:when] <= end_date).
-        and(observations.where(Observation[:when] >= start_date))
+      observations.reorder("").where(Observation[:when] <= end_date).
+        and(observations.reorder("").where(Observation[:when] >= start_date))
     end
   end
 
@@ -503,15 +508,15 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   private ###############################
 
   def obs_geoloc_outside_project_location
-    observations.
+    observations.reorder("").
       where.not(observations: { lat: nil }).not_in_box(**location.bounding_box)
   end
 
   def obs_without_geoloc_location_not_contained_in_location
-    observations.where(lat: nil).joins(:location).
+    observations.reorder("").where(lat: nil).joins(:location).
       merge(
         # invert_where is safe (doesn't invert observations.where(lat: nil))
-        Location.not_in_box(**location.bounding_box)
+        Location.unscoped.not_in_box(**location.bounding_box)
       )
   end
 end

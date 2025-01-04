@@ -547,14 +547,14 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
         lambda { |**args|
           args[:area] ||= MO.obs_location_max_area
 
-          unscoped.joins(:location).
+          reorder("").joins(:location).
             where(Location[:box_area].lteq(args[:area])).group(:location_id)
         }
   scope :in_box_gt_max_area,
         lambda { |**args|
           args[:area] ||= MO.obs_location_max_area
 
-          unscoped.joins(:location).
+          reorder("").joins(:location).
             where(Location[:box_area].gt(args[:area])).group(:location_id)
         }
 
@@ -797,8 +797,10 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   def self.refresh_needs_naming_column(dry_run: false)
     # Need to repeat `needs_naming:false` even though AR will optimize it out
     # and it'll only appear once in the resulting WHERE condition. Go figure.
-    query = Observation.where(needs_naming: false).without_confident_name.
-            or(where(needs_naming: false).with_name_above_genus)
+    query = Observation.unscoped.
+            where(needs_naming: false).without_confident_name.
+            or(Observation.unscoped.
+               where(needs_naming: false).with_name_above_genus)
     msgs = query.map do |obs|
       "Observation #{obs.id}, #{obs.text_name}, needs a name."
     end

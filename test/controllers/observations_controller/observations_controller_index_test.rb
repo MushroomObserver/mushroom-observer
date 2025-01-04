@@ -409,10 +409,10 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     name = names(:tremella_mesenterica)
     parent = name.parents.first
     obss_of_related_taxa =
-      Observation.where(
+      Observation.reorder("").where(
         name: Name.where(Name[:text_name] =~ /#{parent.text_name} /).or(
           Name.where(Name[:classification] =~ /: _#{parent.text_name}_/)
-        ).or(Name.where(id: parent.id))
+        ).or(Name.reorder("").where(id: parent.id))
       )
 
     login

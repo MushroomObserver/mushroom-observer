@@ -734,8 +734,8 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_multiple_regions
-    expect = Observation.in_region("California, USA").
-             or(Observation.in_region("New York, USA")).to_a
+    expect = Observation.unscoped.in_region("California, USA").
+             or(Observation.unscoped.in_region("New York, USA")).to_a
     assert(expect.any? { |obs| obs.where.include?("California, USA") })
     assert(expect.any? { |obs| obs.where.include?("New York, USA") })
     str = 'region:"USA, California","USA, New York"'
