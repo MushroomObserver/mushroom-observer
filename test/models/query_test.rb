@@ -2291,7 +2291,8 @@ class QueryTest < UnitTestCase
   def test_name_by_editor
     assert_query([], :Name, by_editor: rolf)
     assert_query([], :Name, by_editor: mary)
-    expects = Name.reorder(id: :asc).with_correct_spelling.by_editor(dick).distinct
+    expects = Name.reorder(id: :asc).
+              with_correct_spelling.by_editor(dick).distinct
     assert_query(expects, :Name, by_editor: dick, by: :id)
   end
 
@@ -2911,11 +2912,12 @@ class QueryTest < UnitTestCase
                  :Observation, name: "diminutivus")
     assert_query([observations(:coprinus_comatus_obs).id],
                  :Observation, user_where: "glendale") # where
-    expect = Observation.reorder(id: :asc).where(location: locations(:burbank)).distinct
-    assert_query(expect, :Observation,
+    expects = Observation.reorder(id: :asc).
+              where(location: locations(:burbank)).distinct
+    assert_query(expects, :Observation,
                  user_where: "burbank", by: :id) # location
-    expect = Observation.reorder(id: :asc).where(user: rolf.id).distinct
-    assert_query(expect, :Observation, user: "rolf", by: :id)
+    expects = Observation.reorder(id: :asc).where(user: rolf.id).distinct
+    assert_query(expects, :Observation, user: "rolf", by: :id)
     assert_query([observations(:coprinus_comatus_obs).id], # notes
                  :Observation, content: "second fruiting")
     assert_query([observations(:minimal_unknown_obs).id],
