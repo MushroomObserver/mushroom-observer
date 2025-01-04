@@ -1146,7 +1146,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_article_by_rss_log
-    assert_query(Article.joins(:rss_log).distinct, :Article, by: :rss_log)
+    assert_query(Article.order_by_rss_log, :Article, by: :rss_log)
   end
 
   def test_article_in_set
@@ -1766,8 +1766,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_by_rss_log
-    expects = Location.joins(:rss_log).
-              reorder(RssLog[:updated_at].desc, Location[:id].desc).distinct
+    expects = Location.order_by_rss_log
     assert_query(expects.to_a, :Location, by: :rss_log)
   end
 
@@ -2297,8 +2296,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_by_rss_log
-    expects = Name.joins(:rss_log).
-              reorder(RssLog[:updated_at].desc, Name[:id].desc).distinct
+    expects = Name.order_by_rss_log
     assert_query(expects, :Name, by: :rss_log)
   end
 
@@ -2703,8 +2701,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_observation_by_rss_log
-    expects = Observation.where.not(rss_log: nil).
-              reorder(log_updated_at: :desc, id: :desc).distinct
+    expects = Observation.order_by_rss_log
     assert_query(expects, :Observation, by: :rss_log)
   end
 
@@ -2928,8 +2925,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_project_by_rss_log
-    expects = Project.joins(:rss_log).
-              reorder(RssLog[:updated_at].desc, Project[:id].desc).distinct
+    expects = Project.order_by_rss_log
     assert_query(expects, :Project, by: :rss_log)
   end
 
@@ -3066,7 +3062,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_species_list_sort_by_user
-    expects = SpeciesList.sort_by_user.to_a
+    expects = SpeciesList.order_by_user.to_a
     assert_query(expects, :SpeciesList, by: :user)
   end
 
@@ -3090,8 +3086,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_species_list_by_rss_log
-    assert_query([species_lists(:first_species_list).id],
-                 :SpeciesList, by: :rss_log)
+    assert_query(SpeciesList.order_by_rss_log, :SpeciesList, by: :rss_log)
   end
 
   def test_species_list_by_user
