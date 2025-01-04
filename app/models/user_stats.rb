@@ -527,7 +527,6 @@ class UserStats < ApplicationRecord
   def count_versions(parent_type, user_id)
     parent_class = parent_type.classify.constantize
     version_class = "#{parent_class}::Version".constantize
-    parent_id = "#{parent_type}_id"
 
     version_class.joins(:"#{parent_type}").
       where(version_class.arel_table[:user_id].eq(user_id)).
