@@ -24,6 +24,14 @@ module Observations
       # Shouldn't match anything.
       requires_login(:edit, where: "Somewhere out there")
       assert_empty(assigns(:matches))
+
+      # Case seen in the wild that causes error
+      requires_login(:edit, where: "")
+      assert(assigns(:matches).include?(albion))
+
+      # Another case that caused an error
+      requires_login(:edit, where: "CA")
+      assert(assigns(:matches).include?(albion))
     end
 
     def test_add_to_location
