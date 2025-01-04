@@ -151,8 +151,8 @@ module Tabs
 
     # Hack to use the :locations param if it's present and the :user_where
     # param is missing.
-    def where_param(params)
-      params[:user_where] || params[:locations][0]
+    def where_param(query_params)
+      query_params[:user_where] || params[:where]
     end
 
     def assign_undefined_location_tab(query)
