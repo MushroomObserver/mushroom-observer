@@ -927,8 +927,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_01_03_050121) do
     t.boolean "no_emails", default: false, null: false
     t.string "inat_username"
     t.integer "original_image_quota", default: 0
-    t.integer "hide_authors"
-    t.integer "thumbnail_size"
+    t.integer "hide_authors", default: 1, null: false
+    t.integer "thumbnail_size", default: 1
     t.index ["login"], name: "login_index"
   end
 
