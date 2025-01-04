@@ -1,3 +1,5 @@
+# Setup MacOSX Development Environment
+
 The following is the beginning of a native MacOSX setup script.
 It is based on @mo-nathan's notes while getting his local Apple M1
 working under the Monterey (12.4) version of MacOS.
@@ -31,28 +33,12 @@ brew outdated
 brew upgrade
 ```
 
-#### Important:
-If you have mysql < 9.0 installed remove mysql and all vestiges before continuing.
+### Install a bunch of useful stuff from Homebrew
 
-- `ps -ax | grep mysql`
-- stop and kill any MySQL processes
-- `brew remove mysql`
-- `brew cleanup`
-- `sudo rm /usr/local/mysql`
-- `sudo rm /etc/my.cnf`
-- `sudo rm /usr/local/etc/my.cnf`
-- `sudo rm -rf /usr/local/var/mysql`
-- `sudo rm -rf /usr/local/mysql*`
-- `sudo rm ~/Library/LaunchAgents/homebrew.mxcl.mysql.plist`
-- `sudo rm -rf /Library/StartupItems/MySQLCOM`
-- `sudo rm -rf /Library/PreferencePanes/My*`
-- edit /etc/hostconfig and remove the line `MYSQLCOM=-YES-`
-- `rm -rf ~/Library/PreferencePanes/My*`
-- `sudo rm -rf /Library/Receipts/mysql*`
-- `sudo rm -rf /Library/Receipts/MySQL*`
-- `sudo rm -rf /private/var/db/receipts/*mysql*`
+#### WARNING
 
-Install a bunch of useful stuff from `Homebrew`
+**If you have mysql version < 9.0 installed, remove mysql and all its vestiges before
+continuing. See footnote 1.<sup id="a1">[1](#f1)</sup>**
 
 ```sh
 brew install git mysql exiftool libjpeg shared-mime-info openssl imagemagick findutils
@@ -109,6 +95,11 @@ brew services start mysql
 mysqladmin -u root password 'root'
 ```
 
+#### IMPORTANT
+
+> If you cannot set the mysql root password, please contact us
+> instead of applying random "solutions" from AI or StackOverflow.
+
 Test the New Password: Verify that the new root password is working:
 
 ```sh
@@ -156,8 +147,8 @@ because it was already installed.
 For chruby, run:
 
 ```sh
-ruby-build $RUBY_VERSION ~/.rubies/ruby-$RUBY_VERSION
-   chruby $RUBY_VERSION
+  ruby-build $RUBY_VERSION ~/.rubies/ruby-$RUBY_VERSION
+  chruby $RUBY_VERSION
 ```
 
 @nimmolo and @JoeCohen used rbenv.
@@ -185,13 +176,15 @@ or for bash:
    rbenv global $RUBY_VERSION
 ```
 
-### Load an MO database snapshot.
+### Load an MO database snapshot
 
+- Make sure you have the file `config/database.yml`.
+  If not, create the file with the content shown in footnote 2.<sup id="a2">[2](#f2)</sup>
 - download the snapshot from <http://images.mushroomobserver.org/checkpoint_stripped.gz>
 - copy (or move) the downloaded .gz file to the `mushroom-observer` directory.
 Then:
 
-Mac users have to uncomment/comment the relevant/irrelevant lines in `config/database.yml`:
+Mac users must uncomment/comment the relevant/irrelevant lines in `config/database.yml`:
 
 ```yml
 shared:
@@ -208,10 +201,6 @@ Then:
 rake db:drop
 mysql -u root -p < db/initialize.sql
 ```
-
-NOTE: 2024-12-27 @JoeCohen: For me (but not others) `rake db:drop` threw an error
-because `config/database.yml` was missing.
-Please contact us if that is the case.
 
 When prompted to "Enter password:" <br>
 Enter `root`, return.
@@ -330,70 +319,162 @@ rm config/credentials.yml.enc
 EDITOR='echo "test_secret: magic" >> ' rails credentials:edit
 ```
 
-Hopefully this is not necessary on a fresh clean system,
-but @mo-nathan had to run
+Hopefully this is not necessary on a fresh clean system, but
+@mo-nathan had to run the following for each version of Ruby in chruby.
 
 ```sh
-gem pristine --all
+  gem pristine --all
 ```
-
-for each version of Ruby in chruby
 
 ### Prevent commits directly to the main branch
 
-Create a file `.git/hooks/pre-commit` with the following content:
+> Create a file `.git/hooks/pre-commit` with the following content:
 
 ```sh
-#!/bin/sh
-branch=$(git rev-parse --abbrev-ref HEAD)
-if [ "$branch" = "main" ]
-then
+  #!/bin/sh
+  branch=$(git rev-parse --abbrev-ref HEAD)
+  if [ "$branch" = "main" ]
+  then
     echo "Do not commit directly to the $branch branch"
     exit 1
-fi
+  fi
 ```
 
-Ensure that the file is executable:
+> Ensure that the file is executable:
 
 ```sh
-chmod +x .git/hooks/pre-commit
+  chmod +x .git/hooks/pre-commit
 ```
 
 ### Ruby upgrade with chruby
 
-Install the selected version.
+- Install the selected version.
 
+```sh
   ruby-install ruby 3.3.6
+```
 
-Once that succeeds, update Ruby versions in .ruby-version and
-Gemfile.lock.
+- Once that succeeds, update Ruby versions in .ruby-version and Gemfile.lock.
 
-In a new shell run:
+- In a new shell run:
 
+```sh
   chruby ruby-3.3.6
   bundle install
   gem pristine --all
+```
 
-In another new shell now run:
+- In another new shell now run:
 
+```sh
   rails t
+```
 
 ### Other
 
 You probably need to generate a new development master key (see below)
 if you get a test failure like this:
 
-```txt
+```sh
+  Stopped processing SimpleCov as a previous error not related to SimpleCov has
+  been detected ... inat_imports_controller.rb:50:in
+  <class:InatImportsController>: undefined method id for nil (NoMethodError)
+```
+
+or like this:
+
+```ruby
  FAIL ConfigTest#test_secrets (24.96s)
     Expected: "magic"
      Actual: nil
     test/models/config_test.rb:9:in `test_secrets'
 ```
 
-@JoeCohen had to generate a new developmemt master key.
-In the mushroom-observer directory, create the file
-`/config/master.key` with this content:
+To generate a new developmemt master key.
+In the `mushroom-observer` directory, create the file
+`config/master.key` with this content:
 
 ```txt
 5f343cfc11a623c470d23e25221972b5
+```
+
+-----
+
+### Footnotes
+
+<b id="f1">1.</b> Suggested procedure for removing vestiges of mysql [↩](#a1)
+
+- `ps -ax | grep mysql`
+- stop and kill any MySQL processes
+- `brew remove mysql`
+- `brew cleanup`
+- `sudo rm /.my.cnf`
+- `sudo rm /.mysql_history`
+- `sudo rm /etc/my.cnf`
+- `sudo rm /usr/local/etc/my.cnf.default`
+- `sudo rm -rf /usr/local/etc/my.cnf`
+- `sudo rm -rf /usr/local/var/mysql`
+- `sudo rm -rf /usr/local/mysql*`
+- `sudo rm ~/Library/LaunchAgents/homebrew.mxcl.mysql.plist`
+- `sudo rm -rf /Library/StartupItems/MySQLCOM`
+- `sudo rm -rf /Library/PreferencePanes/My*`
+- `rm -rf ~/Library/PreferencePanes/My*`
+- `sudo rm -rf /Library/Receipts/mysql*`
+- `sudo rm -rf /Library/Receipts/MySQL*`
+- `sudo rm -rf /private/var/db/receipts/*mysql*`
+- edit /etc/hostconfig and remove the line `MYSQLCOM=-YES-`
+
+<b id="f2">2.</b>  Content of `/config/database.yml` [↩](#a2)
+
+```yml
+# This file should not be checked into subversion
+
+# MySQL (default setup).
+#
+# Get the fast C bindings:
+#   gem install trilogy
+#   (on OS X: gem install mysql -- --include=/usr/local/lib)
+
+shared:
+  adapter: trilogy
+  # Default (works for MacOS X)
+  socket: /tmp/mysql.sock
+  # For Ubuntu/Debian
+  # socket: /var/run/mysqld/mysqld.sock
+  # For Fedora
+  # socket: /var/lib/mysql/mysql.sock
+  # Connect on a TCP socket.  If omitted, the adapter will connect on the
+  # domain socket given by socket instead.
+  #host: localhost
+  #port: 3306
+  # For mysql >= 5.7.5
+  # Do not require SELECT list to include ORDER BY columns in DISTINCT queries,
+  # And do not not require ORDER BY to include the DISTINCT column.
+  variables:
+    sql_mode: TRADITIONAL
+
+development:
+  primary:
+    database: mo_development
+    username: mo
+    password: mo
+  cache:
+    database: cache_development
+    username: mo
+    password: mo
+    host: localhost
+    migrations_paths: "db/cache/migrate"
+
+# Warning: The database defined as 'test' will be erased and
+# re-generated from your development database when you run 'rake'.
+# Do not set this db to the same as development or production.
+test:
+  database: mo_test
+  username: mo
+  password: mo
+
+production:
+  database: mo_production
+  username: mo
+  password: mo
 ```
