@@ -445,7 +445,7 @@ class QueryTest < UnitTestCase
     assert_equal(num_agaricus,
                  query.select_count(where: 'text_name LIKE "Agaricus%"'))
 
-    names_now = Name.unscoped
+    names_now = Name.reorder(id: :asc)
     assert_equal(names_now.first.id, query.select_value)
     assert_equal(names_now.offset(10).first.id,
                  query.select_value(limit: "10, 10")) # 11th id
@@ -514,9 +514,9 @@ class QueryTest < UnitTestCase
       Set.new,
       Set.new([rolf, mary, junk, dick, katrina, roy]) - query.results
     )
-    assert_equal(User.unscoped.find_index(junk), query.index(junk))
-    assert_equal(User.unscoped.find_index(dick), query.index(dick))
-    assert_equal(User.unscoped.find_index(mary), query.index(mary))
+    assert_equal(User.reorder(id: :asc).find_index(junk), query.index(junk))
+    assert_equal(User.reorder(id: :asc).find_index(dick), query.index(dick))
+    assert_equal(User.reorder(id: :asc).find_index(mary), query.index(mary))
 
     # Verify that it's getting all this crap from cache.
     query.result_ids = [rolf.id, junk.id, katrina.id, 100]
@@ -532,7 +532,7 @@ class QueryTest < UnitTestCase
   end
 
   def paginate_test_setup(number, num_per_page)
-    @names = Name.unscoped.order(:id)
+    @names = Name.reorder(id: :asc).order(:id)
     @pages = MOPaginator.new(number: number,
                              num_per_page: num_per_page)
     @query = Query.lookup(:Name, misspellings: :either, by: :id)
@@ -642,7 +642,7 @@ class QueryTest < UnitTestCase
 
   def test_next_and_prev
     query = Query.lookup(:Name, misspellings: :either, by: :id)
-    @names = Name.unscoped
+    @names = Name.reorder(id: :asc)
 
     query.current = @names[2]
     assert_equal(query, query.prev)
@@ -1521,9 +1521,9 @@ class QueryTest < UnitTestCase
   ##### list/string parameters #####
 
   def test_image_with_observations_comments_has
-    expect = Image.unscoped.joins(observations: :comments).
+    expect = Image.joins(observations: :comments).
              where(Comment[:summary].matches("%give%")).
-             or(Image.unscoped.joins(observations: :comments).
+             or(Image.joins(observations: :comments).
                 where(Comment[:comment].matches("%give%"))).
              order(Image[:created_at].desc, Image[:id].desc).uniq
     assert_not_empty(expect, "'expect` is broken; it should not be empty")
@@ -1764,12 +1764,12 @@ class QueryTest < UnitTestCase
   def test_location_all
     expect = Location.all
     assert_query(expect, :Location)
-    expect = Location.unscoped
+    expect = Location.reorder(id: :asc)
     assert_query(expect, :Location, by: :id)
   end
 
   def test_location_by_user
-    assert_query(Location.unscoped.where(user: rolf).distinct,
+    assert_query(Location.reorder(id: :asc).where(user: rolf).distinct,
                  :Location, by_user: rolf, by: :id)
     assert_query([], :Location, by_user: users(:zero_user))
   end
@@ -1803,7 +1803,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_pattern_search
-    expects = Location.unscoped.
+    expects = Location.reorder(id: :asc).
               where(Location[:name].matches("%California%")).distinct
     assert_query(expects, :Location, pattern: "California", by: :id)
     assert_query([locations(:elgin_co).id],
@@ -2310,7 +2310,7 @@ class QueryTest < UnitTestCase
   def test_name_by_editor
     assert_query([], :Name, by_editor: rolf)
     assert_query([], :Name, by_editor: mary)
-    expects = Name.unscoped.with_correct_spelling.by_editor(dick).distinct
+    expects = Name.reorder(id: :asc).with_correct_spelling.by_editor(dick).distinct
     assert_query(expects, :Name, by_editor: dick, by: :id)
   end
 
@@ -2729,11 +2729,11 @@ class QueryTest < UnitTestCase
   end
 
   def test_observation_by_user
-    expect = Observation.unscoped.where(user: rolf.id).to_a
+    expect = Observation.reorder(id: :asc).where(user: rolf.id).to_a
     assert_query(expect, :Observation, by_user: rolf, by: :id)
-    expect = Observation.unscoped.where(user: mary.id).to_a
+    expect = Observation.reorder(id: :asc).where(user: mary.id).to_a
     assert_query(expect, :Observation, by_user: mary, by: :id)
-    expect = Observation.unscoped.where(user: dick.id).to_a
+    expect = Observation.reorder(id: :asc).where(user: dick.id).to_a
     assert_query(expect, :Observation, by_user: dick, by: :id)
     assert_query([], :Observation, by_user: junk, by: :id)
   end
@@ -2930,10 +2930,10 @@ class QueryTest < UnitTestCase
                  :Observation, name: "diminutivus")
     assert_query([observations(:coprinus_comatus_obs).id],
                  :Observation, user_where: "glendale") # where
-    expect = Observation.unscoped.where(location: locations(:burbank)).distinct
+    expect = Observation.reorder(id: :asc).where(location: locations(:burbank)).distinct
     assert_query(expect, :Observation,
                  user_where: "burbank", by: :id) # location
-    expect = Observation.unscoped.where(user: rolf.id).distinct
+    expect = Observation.reorder(id: :asc).where(user: rolf.id).distinct
     assert_query(expect, :Observation, user: "rolf", by: :id)
     assert_query([observations(:coprinus_comatus_obs).id], # notes
                  :Observation, content: "second fruiting")
@@ -3025,7 +3025,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_sequence_filters
-    sequences = Sequence.unscoped.all
+    sequences = Sequence.reorder(id: :asc).all
     seq1 = sequences[0]
     seq2 = sequences[1]
     seq3 = sequences[3]
@@ -3287,14 +3287,14 @@ class QueryTest < UnitTestCase
   end
 
   def test_filtering_content_clade
-    names = Name.unscoped.
+    names = Name.reorder(id: :asc).
             with_correct_spelling.where(text_name: "Agaricales").or(
-              Name.unscoped.where(
+              Name.reorder(id: :asc).where(
                 Name[:classification].matches_regexp("Order: _Agaricales_")
               )
             ).reorder(sort_name: :asc, id: :desc).distinct
-    obs = Observation.unscoped.where(text_name: "Agaricales").or(
-      Observation.unscoped.where(
+    obs = Observation.reorder(id: :asc).where(text_name: "Agaricales").or(
+      Observation.reorder(id: :asc).where(
         Observation[:classification].matches_regexp("Order: _Agaricales_")
       )
     ).reorder(when: :desc, id: :desc).distinct

@@ -1046,7 +1046,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
       }
     )
 
-    obs = Observation.unscoped.last
+    obs = Observation.reorder(id: :asc).last
     assert_equal(3, obs.images.length)
     new_img = (obs.images - [old_img1, old_img2]).first
     assert_true(new_img.gps_stripped)
@@ -1321,7 +1321,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     post(:create, params: params)
 
     assert_equal(o_size + 1, Observation.count)
-    obs = Observation.unscoped.last.reload
+    obs = Observation.reorder(id: :asc).last.reload
     assert_redirected_to(action: :show, id: obs.id)
     assert_equal(expected_notes, obs.notes)
   end

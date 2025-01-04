@@ -409,10 +409,10 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     name = names(:tremella_mesenterica)
     parent = name.parents.first
     obss_of_related_taxa =
-      Observation.unscoped.where(
+      Observation.where(
         name: Name.where(Name[:text_name] =~ /#{parent.text_name} /).or(
           Name.where(Name[:classification] =~ /: _#{parent.text_name}_/)
-        ).or(Name.unscoped.where(id: parent.id))
+        ).or(Name.where(id: parent.id))
       )
 
     login
@@ -626,7 +626,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
   end
 
   def test_index_with_region_filter
-    observations_in_region = Observation.unscoped.in_region("California, USA")
+    observations_in_region = Observation.reorder(id: :asc).in_region("California, USA")
 
     user = users(:californian)
     # Make sure the fixture is still okay

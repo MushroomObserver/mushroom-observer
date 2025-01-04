@@ -67,8 +67,8 @@ module Name::Resolve
       str2 = str.sub(/ [A-Z]/, &:downcase)
 
       # Return corrected name if that name exists, else keep original name.
-      if Name.unscoped.where(search_name: str2).
-         or(Name.unscoped.where(text_name: str2)).present?
+      if Name.where(search_name: str2).
+         or(Name.where(text_name: str2)).present?
         str2
       else
         str

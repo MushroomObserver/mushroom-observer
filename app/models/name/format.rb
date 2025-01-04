@@ -158,9 +158,9 @@ module Name::Format
     # boldface for deprecated names.
     def make_sure_names_are_bolded_correctly(dry_run: false)
       msgs = []
-      needs_fixing = Name.unscoped.where(deprecated: true).
+      needs_fixing = Name.where(deprecated: true).
                      where(Name[:display_name].matches("%*%")).
-                     or(Name.unscoped.not_deprecated.
+                     or(Name.not_deprecated.
                         where(Name[:display_name].does_not_match("%*%")))
       needs_fixing.each do |name|
         unless dry_run

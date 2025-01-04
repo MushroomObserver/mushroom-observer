@@ -86,7 +86,7 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
     assert_flash_success
     assert_selector("body.species_lists__show")
 
-    spl = SpeciesList.unscoped.last
+    spl = SpeciesList.reorder(id: :asc).last
     obs = spl.observations
     assert_equal(5, obs.length, obs.map(&:text_name).inspect)
     assert_equal([
@@ -186,7 +186,7 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("#title", text: /#{spl.title}/)
     assert_link(href: edit_species_list_path(spl.id))
 
-    loc = Location.unscoped.last
+    loc = Location.reorder(id: :asc).last
     assert_equal(newer_location, loc.name)
     assert_equal(dick, User.current)
     assert_equal(newer_location_reverse, loc.display_name)
