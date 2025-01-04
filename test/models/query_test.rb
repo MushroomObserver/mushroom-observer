@@ -1477,10 +1477,9 @@ class QueryTest < UnitTestCase
   end
 
   def test_image_with_observations
-    expect = Image.includes(:observations).
-             where.not(observations: { thumb_image: nil }).
-             order(Image[:created_at].desc, Image[:id].desc).uniq
-    assert_query(expect, :Image, with_observations: true)
+    expects = Image.includes(:observations).
+              where.not(observations: { thumb_image: nil }).distinct
+    assert_query(expects, :Image, with_observations: true)
   end
 
   # Prove that :with_observations param of Image Query works with each
@@ -1492,42 +1491,39 @@ class QueryTest < UnitTestCase
 
   def test_image_with_observations_created_at
     created_at = observations(:detailed_unknown_obs).created_at
-    expect = Image.joins(:observations).
-             where(Observation[:created_at] >= created_at).
-             order(Image[:created_at].desc, Image[:id].desc).uniq
-    assert_not_empty(expect, "'expect` is broken; it should not be empty")
-    assert_query(expect, :Image,
+    expects = Image.joins(:observations).
+              where(Observation[:created_at] >= created_at).distinct
+    assert_not_empty(expects, "'expect` is broken; it should not be empty")
+    assert_query(expects, :Image,
                  with_observations: 1, created_at: created_at)
   end
 
   def test_image_with_observations_updated_at
     updated_at = observations(:detailed_unknown_obs).updated_at
-    expect = Image.joins(:observations).
-             where(Observation[:updated_at] >= updated_at).
-             order(Image[:created_at].desc, Image[:id].desc).uniq
-    assert_not_empty(expect, "'expect` is broken; it should not be empty")
-    assert_query(expect, :Image,
+    expects = Image.joins(:observations).
+              where(Observation[:updated_at] >= updated_at).distinct
+    assert_not_empty(expects, "'expect` is broken; it should not be empty")
+    assert_query(expects, :Image,
                  with_observations: 1, updated_at: updated_at)
   end
 
   def test_image_with_observations_date
     date = observations(:detailed_unknown_obs).when
-    expect = Image.joins(:observations).where(Observation[:when] >= date).
-             order(Image[:created_at].desc, Image[:id].desc).uniq
-    assert_not_empty(expect, "'expect` is broken; it should not be empty")
-    assert_query(expect, :Image, with_observations: 1, date: date)
+    expects = Image.joins(:observations).where(Observation[:when] >= date).
+              distinct
+    assert_not_empty(expects, "'expect` is broken; it should not be empty")
+    assert_query(expects, :Image, with_observations: 1, date: date)
   end
 
   ##### list/string parameters #####
 
   def test_image_with_observations_comments_has
-    expect = Image.joins(observations: :comments).
-             where(Comment[:summary].matches("%give%")).
-             or(Image.joins(observations: :comments).
-                where(Comment[:comment].matches("%give%"))).
-             order(Image[:created_at].desc, Image[:id].desc).uniq
-    assert_not_empty(expect, "'expect` is broken; it should not be empty")
-    assert_query(expect, :Image,
+    expects = Image.joins(observations: :comments).
+              where(Comment[:summary].matches("%give%")).
+              or(Image.joins(observations: :comments).
+                 where(Comment[:comment].matches("%give%"))).distinct
+    assert_not_empty(expects, "'expect` is broken; it should not be empty")
+    assert_query(expects, :Image,
                  with_observations: 1, comments_has: "give")
   end
 
@@ -1536,38 +1532,35 @@ class QueryTest < UnitTestCase
     # give it some images
     obs.images = [images(:conic_image), images(:convex_image)]
     obs.save
-    expect =
-      Image.joins(:observations).
-      where(Observation[:notes].matches("%:substrate:%")).uniq
-    assert_not_empty(expect, "'expect` is broken; it should not be empty")
-    assert_query(expect, :Image,
+    expects = Image.joins(:observations).
+              where(Observation[:notes].matches("%:substrate:%")).uniq
+    assert_not_empty(expects, "'expects` is broken; it should not be empty")
+    assert_query(expects, :Image,
                  with_observations: 1, with_notes_fields: "substrate")
   end
 
   def test_image_with_observations_herbaria
     name = "The New York Botanical Garden"
-    expect = Image.joins(observations: { herbarium_records: :herbarium }).
-             where(herbaria: { name: name }).
-             order(Image[:created_at].desc, Image[:id].desc).uniq
-    assert_not_empty(expect, "'expect` is broken; it should not be empty")
-    assert_query(expect, :Image, with_observations: 1, herbaria: name)
+    expects = Image.joins(observations: { herbarium_records: :herbarium }).
+              where(herbaria: { name: name }).distinct
+    assert_not_empty(expects, "'expect` is broken; it should not be empty")
+    assert_query(expects, :Image, with_observations: 1, herbaria: name)
   end
 
   def test_image_with_observations_projects
     project = projects(:bolete_project)
-    expect = Image.joins(observations: :projects).
-             where(projects: { title: project.title }).
-             order(Image[:created_at].desc, Image[:id].desc).uniq
-    assert_not_empty(expect, "'expect` is broken; it should not be empty")
-    assert_query(expect,
+    expects = Image.joins(observations: :projects).
+              where(projects: { title: project.title }).distinct
+    assert_not_empty(expects, "'expect` is broken; it should not be empty")
+    assert_query(expects,
                  :Image, with_observations: 1, projects: [project.title])
   end
 
   def test_image_with_observations_users
-    expect = Image.joins(:observations).where(observations: { user: dick }).
-             order(Image[:created_at].desc, Image[:id].desc).uniq
-    assert_not_empty(expect, "'expect` is broken; it should not be empty")
-    assert_query(expect, :Image, with_observations: 1, users: dick)
+    expects = Image.joins(:observations).where(observations: { user: dick }).
+              distinct
+    assert_not_empty(expects, "'expect` is broken; it should not be empty")
+    assert_query(expects, :Image, with_observations: 1, users: dick)
   end
 
   ##### numeric parameters #####
@@ -1577,11 +1570,11 @@ class QueryTest < UnitTestCase
 
     lat = obs.lat
     lng = obs.lng
-    expect = Image.joins(:observations).
-             where(observations: { lat: lat }).
-             where(observations: { lng: lng }).uniq
+    expects = Image.joins(:observations).
+              where(observations: { lat: lat }).
+              where(observations: { lng: lng }).distinct
     assert_query(
-      expect,
+      expects,
       :Image,
       with_observations: 1,
       north: lat.to_f, south: lat.to_f, west: lat.to_f, east: lat.to_f
@@ -1599,64 +1592,55 @@ class QueryTest < UnitTestCase
   ##### boolean parameters #####
 
   def test_image_with_observations_with_comments
-    expect = Image.joins(observations: :comments).
-             order(Image[:created_at].desc, Image[:id].desc).uniq
-    assert_not_empty(expect, "'expect` is broken; it should not be empty")
-    assert_query(expect,
+    expects = Image.joins(observations: :comments).distinct
+    assert_not_empty(expects, "'expect` is broken; it should not be empty")
+    assert_query(expects,
                  :Image, with_observations: 1, with_comments: true)
   end
 
   def test_image_with_observations_with_public_lat_lng
     give_geolocated_observation_some_images
 
-    expect = Image.joins(:observations).
-             where.not(observations: { lat: false }).
-             order(Image[:created_at].desc, Image[:id].desc).uniq
-    assert_not_empty(expect, "'expect` is broken; it should not be empty")
-    assert_query(expect,
+    expects = Image.joins(:observations).
+              where.not(observations: { lat: false }).distinct
+    assert_not_empty(expects, "'expect` is broken; it should not be empty")
+    assert_query(expects,
                  :Image, with_observations: 1, with_public_lat_lng: true)
   end
 
   def test_image_with_observations_with_name
-    expect = Image.joins(:observations).
-             where(observations: { name_id: Name.unknown }).
-             order(Image[:created_at].desc, Image[:id].desc).uniq
-    assert_not_empty(expect, "'expect` is broken; it should not be empty")
-    assert_query(expect, :Image, with_observations: 1, with_name: false)
+    expects = Image.joins(:observations).
+              where(observations: { name_id: Name.unknown }).distinct
+    assert_not_empty(expects, "'expect` is broken; it should not be empty")
+    assert_query(expects, :Image, with_observations: 1, with_name: false)
   end
 
   def test_image_with_observations_with_notes
-    expect = Image.joins(:observations).
-             where.not(observations: { notes: Observation.no_notes }).
-             order(Image[:created_at].desc, Image[:id].desc).uniq
-    assert_not_empty(expect, "'expect` is broken; it should not be empty")
-    assert_query(expect, :Image, with_observations: 1, with_notes: true)
+    expects = Image.joins(:observations).
+              where.not(observations: { notes: Observation.no_notes }).distinct
+    assert_not_empty(expects, "'expect` is broken; it should not be empty")
+    assert_query(expects, :Image, with_observations: 1, with_notes: true)
   end
 
   def test_image_with_observations_with_sequences
-    expect = Image.joins(observations: :sequences).
-             order(Image[:created_at].desc, Image[:id].desc).uniq
-    assert_not_empty(expect, "'expect` is broken; it should not be empty")
-    assert_query(expect, :Image,
-                 with_observations: 1, with_sequences: true)
+    expects = Image.joins(observations: :sequences).distinct
+    assert_not_empty(expects, "'expect` is broken; it should not be empty")
+    assert_query(expects, :Image, with_observations: 1, with_sequences: true)
   end
 
   def test_image_with_observations_is_collection_location
-    expect = Image.joins(:observations).
-             where(observations: { is_collection_location: true }).
-             order(Image[:created_at].desc, Image[:id].desc).uniq
-    assert_not_empty(expect, "'expect` is broken; it should not be empty")
-    assert_query(expect,
-                 :Image,
-                 with_observations: 1, is_collection_location: true)
+    expects = Image.joins(:observations).
+              where(observations: { is_collection_location: true }).distinct
+    assert_not_empty(expects, "'expect` is broken; it should not be empty")
+    assert_query(expects,
+                 :Image, with_observations: 1, is_collection_location: true)
   end
 
   def test_image_with_observations_at_location
-    expect = Image.joins(observations: :location).
-             where(observations: { location: locations(:burbank) }).
-             where(observations: { is_collection_location: true }).
-             order(Image[:created_at].desc, Image[:id].desc).uniq
-    assert_query(expect,
+    expects = Image.joins(observations: :location).
+              where(observations: { location: locations(:burbank) }).
+              where(observations: { is_collection_location: true }).distinct
+    assert_query(expects,
                  :Image, with_observations: 1, location: locations(:burbank).id)
     assert_query([], :Image,
                  with_observations: 1, location: locations(:mitrula_marsh).id)
@@ -1670,27 +1654,25 @@ class QueryTest < UnitTestCase
   end
 
   def test_image_with_observations_by_user
-    expect = image_with_observations_by_user(rolf)
-    assert_query(expect.to_a, :Image, with_observations: 1, by_user: rolf)
+    expects = image_with_observations_by_user(rolf)
+    assert_query(expects.to_a, :Image, with_observations: 1, by_user: rolf)
 
-    expect = image_with_observations_by_user(mary)
-    assert_query(expect.to_a, :Image, with_observations: 1, by_user: mary)
+    expects = image_with_observations_by_user(mary)
+    assert_query(expects.to_a, :Image, with_observations: 1, by_user: mary)
 
     assert_query([], :Image,
                  with_observations: 1, by_user: users(:zero_user))
   end
 
   def image_with_observations_by_user(user)
-    Image.joins(:observations).where(observations: { user: user }).
-      order(Image[:created_at].desc, Image[:id].desc)
+    Image.joins(:observations).where(observations: { user: user }).distinct
   end
 
   def test_image_with_observations_for_project
     assert_query([],
                  :Image,
                  with_observations: 1, project: projects(:empty_project))
-    assert_query(observations(:two_img_obs).images.
-                 order(Image[:created_at].desc, Image[:id].desc).uniq,
+    assert_query(observations(:two_img_obs).images.distinct,
                  :Image,
                  with_observations: 1, project: projects(:two_img_obs_project))
   end
@@ -1699,7 +1681,7 @@ class QueryTest < UnitTestCase
     obs_ids = [observations(:detailed_unknown_obs).id,
                observations(:agaricus_campestris_obs).id]
     # There's an order_by find_in_set thing here we can't do in Arel.
-    # But luckily there is an equivalent, just sort by the obs id.
+    # But luckily we can just quote the method.
     oids = obs_ids.join(",")
     expects = Image.joins(:observations).where(observations: { id: obs_ids }).
               reorder(Arel.sql("FIND_IN_SET(observations.id,'#{oids}')").asc,
@@ -1746,10 +1728,9 @@ class QueryTest < UnitTestCase
   end
 
   def test_image_with_observations_of_name
-    expect = Image.joins(:observation_images, :observations).
-             where(observations: { name: names(:fungi) }).
-             order(Image[:created_at].desc, Image[:id].desc).uniq
-    assert_query(expect,
+    expects = Image.joins(:observation_images, :observations).
+              where(observations: { name: names(:fungi) }).distinct
+    assert_query(expects,
                  :Image, with_observations: 1, names: [names(:fungi).id])
     assert_query([images(:connected_coprinus_comatus_image).id],
                  :Image,
@@ -1762,10 +1743,10 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_all
-    expect = Location.all
-    assert_query(expect, :Location)
-    expect = Location.reorder(id: :asc)
-    assert_query(expect, :Location, by: :id)
+    expects = Location.all
+    assert_query(expects, :Location)
+    expects = Location.reorder(id: :asc)
+    assert_query(expects, :Location, by: :id)
   end
 
   def test_location_by_user
@@ -1785,9 +1766,9 @@ class QueryTest < UnitTestCase
   end
 
   def test_location_by_rss_log
-    expect = Location.joins(:rss_log).
-             reorder(RssLog[:updated_at].desc, Location[:id].desc).distinct
-    assert_query(expect.to_a, :Location, by: :rss_log)
+    expects = Location.joins(:rss_log).
+              reorder(RssLog[:updated_at].desc, Location[:id].desc).distinct
+    assert_query(expects.to_a, :Location, by: :rss_log)
   end
 
   def test_location_in_set
