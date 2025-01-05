@@ -64,13 +64,13 @@ class ArticlesController < ApplicationController
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
 
   def create
-    return render(:new) if flash_missing_title?
-
     @article = Article.new(
-      title: params[:article][:title],
-      body: params[:article][:body],
+      title: params.dig(:article, :title),
+      body: params.dig(:article, :body),
       user_id: @user.id
     )
+    return render(:new) if flash_missing_title?
+
     @article.save
     redirect_to(article_path(@article.id))
   end
@@ -79,8 +79,8 @@ class ArticlesController < ApplicationController
     @article = Article.find(params[:id])
     return render(:edit) if flash_missing_title?
 
-    @article.title = params[:article][:title]
-    @article.body = params[:article][:body]
+    @article.title = params.dig(:article, :title)
+    @article.body = params.dig(:article, :body)
 
     save_any_changes
     redirect_to(article_path(@article.id))
@@ -105,7 +105,7 @@ class ArticlesController < ApplicationController
 
   # add flash message if title missing
   def flash_missing_title?
-    return false if params[:article][:title].present?
+    return false if params.dig(:article, :title).present?
 
     flash_error(:article_title_required.t)
     true
