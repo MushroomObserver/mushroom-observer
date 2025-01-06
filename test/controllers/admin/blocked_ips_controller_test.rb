@@ -5,6 +5,7 @@ require("test_helper")
 module Admin
   class BlockedIpsControllerTest < FunctionalTestCase
     def test_blocked_ips
+      ActiveSupport.to_time_preserves_timezone = true
       new_ip = "5.4.3.2"
       IpStats.remove_blocked_ips([new_ip])
       # make sure there is an API key logged to test that part of view
