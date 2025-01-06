@@ -13,5 +13,5 @@
 #     schedule: every day at 9am
 production:
   repopulate_location_and_observation_center_lat_lng:
-    command: "Location.update_box_area_and_center_columns"
+    class: UpdateBoxAreaAndCenterColumnsJob
     schedule: every saturday at midnight
