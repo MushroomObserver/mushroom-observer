@@ -548,15 +548,13 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
         lambda { |**args|
           args[:area] ||= MO.obs_location_max_area
 
-          joins(:location).
-            where(Location[:box_area].lteq(args[:area])).group(:location_id)
+          joins(:location).where(Location[:box_area].lteq(args[:area]))
         }
   scope :in_box_gt_max_area,
         lambda { |**args|
           args[:area] ||= MO.obs_location_max_area
 
-          joins(:location).
-            where(Location[:box_area].gt(args[:area])).group(:location_id)
+          joins(:location).where(Location[:box_area].gt(args[:area]))
         }
 
   scope :is_collection_location,
