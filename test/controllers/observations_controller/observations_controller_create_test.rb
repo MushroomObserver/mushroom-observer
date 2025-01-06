@@ -605,7 +605,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
         approved_name: "Lecanoromycetes L." },
       1, 1, 1, 0
     )
-    name = Name.last
+    name = Name.reorder(created_at: :asc).last
     assert_equal("Lecanoromycetes", name.text_name)
     assert_equal("L.", name.author)
     assert_equal("Class", name.rank)
@@ -628,7 +628,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     params  = modified_generic_params(params, user)
 
     post_requires_login(:create, params)
-    name = Name.last
+    name = Name.reorder(created_at: :asc).last
 
     # assert_redirected_to(action: :show)
     assert_response(:redirect)
@@ -655,7 +655,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
         approved_name: "Morchella elata group" },
       1, 1, 2, 0
     )
-    name = Name.last
+    name = Name.reorder(created_at: :asc).last
     assert_equal("Morchella elata group", name.text_name)
     assert_equal("", name.author)
     assert_equal("Group", name.rank)
@@ -687,7 +687,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
       1, 1, 1, 0, roy
     )
 
-    name = Name.last
+    name = Name.reorder(created_at: :asc).last
     assert_equal("Cladina pictum", name.text_name)
     assert_true(name.deprecated)
   end
@@ -1046,7 +1046,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
       }
     )
 
-    obs = Observation.last
+    obs = Observation.reorder(id: :asc).last
     assert_equal(3, obs.images.length)
     new_img = (obs.images - [old_img1, old_img2]).first
     assert_true(new_img.gps_stripped)
@@ -1321,7 +1321,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     post(:create, params: params)
 
     assert_equal(o_size + 1, Observation.count)
-    obs = Observation.last.reload
+    obs = Observation.reorder(id: :asc).last.reload
     assert_redirected_to(action: :show, id: obs.id)
     assert_equal(expected_notes, obs.notes)
   end
