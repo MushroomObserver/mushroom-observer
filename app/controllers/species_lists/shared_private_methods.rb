@@ -464,8 +464,7 @@ module SpeciesLists
 
     def init_project_vars_for_create
       init_project_vars
-      last_obs = Observation.where(user_id: User.current_id).
-                 order(:created_at).last
+      last_obs = Observation.recent_by_user(@user).last
       return unless last_obs && last_obs.created_at > 1.hour.ago
 
       last_obs.projects.each { |proj| @project_checks[proj.id] = true }
