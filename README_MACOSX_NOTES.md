@@ -1,16 +1,45 @@
-# Setup MacOSX Development Environment
+Setup MacOSX Development Environment
 
-The following is the beginning of a native MacOSX setup script.
-It is based on @mo-nathan's notes while getting his local Apple M1
-working under the Monterey (12.4) version of MacOS.
-It also includes some notes later added by @nimmolo, and by
-@JoeCohen when getting his local Apple Intel working under MacOS Ventura 13.6
+This the start of a native MacOSX setup script.
+It is based on @mo-nathan's notes for his local Apple M1 with MacOS Monterey (12.4).
+It includes notes later added by @nimmolo, and by
+@JoeCohen for his local Apple Intel with MacOS Ventura 13.6
+though Sequoia 15.2.
 
-### Install Xcode
+- [Install Needed Tools](#install-needed-tools)
+  - [Xcode](#xcode)
+  - [Xcode Command Line Tools](#xcode-command-line-tools)
+  - [homebrew](#homebrew)
+    - [WARNING: Older macOS or Mac hardware](#warning-older-macos-or-mac-hardware)
+  - [Install a bunch of useful stuff from Homebrew](#install-a-bunch-of-useful-stuff-from-homebrew)
+    - [WARNING: Previously Installed Versions Of MySQL](#warning-previously-installed-versions-of-mysql)
+  - [Bash](#bash)
+  - [Configure MySQL](#configure-mysql)
+      - [IMPORTANT](#important)
+- [Obtain and configure MO](#obtain-and-configure-mo)
+  - [Clone the MO repo](#clone-the-mo-repo)
+  - [Switch to the cloned repo](#switch-to-the-cloned-repo)
+  - [Make sure you have the current version of Ruby](#make-sure-you-have-the-current-version-of-ruby)
+    - [chruby](#chruby)
+    - [rbenv](#rbenv)
+    - [Load an MO database snapshot](#load-an-mo-database-snapshot)
+  - [Run the rest of the mo-dev script](#run-the-rest-of-the-mo-dev-script)
+    - [Install trilogy](#install-trilogy)
+  - [Continue the mo-dev script](#continue-the-mo-dev-script)
+  - [Prevent direct commits to the main branch](#prevent-direct-commits-to-the-main-branch)
+  - [Ruby upgrade with chruby](#ruby-upgrade-with-chruby)
+  - [Other](#other)
+- [Footnotes](#footnotes)
+
+<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+
+# Install Needed Tools
+
+## Xcode
 
 Get Xcode (free download from the [App Store](https://www.apple.com/app-store/))
 
-### Install Xcode Command Line Tools
+## Xcode Command Line Tools
 
 install the command line tools with:
 
@@ -18,7 +47,13 @@ install the command line tools with:
 xcode-select --install
 ```
 
-### Install homebrew
+## homebrew
+
+### WARNING: Older macOS or Mac hardware
+
+**Do not update Homebrew or MySQL if you have older hardware or macOS < 11.
+MySQL 9 will not install in any case on older Macs.**
+
 
 You will also need `homebrew` from <https://brew.sh/>:
 
@@ -33,18 +68,19 @@ brew outdated
 brew upgrade
 ```
 
-### Install a bunch of useful stuff from Homebrew
+## Install a bunch of useful stuff from Homebrew
 
-#### WARNING
+### WARNING: Previously Installed Versions Of MySQL
 
 **If you have mysql version < 9.0 installed, remove mysql and all its vestiges before
 continuing. See footnote 1.<sup id="a1">[1](#f1)</sup>**
+
 
 ```sh
 brew install git mysql exiftool libjpeg shared-mime-info openssl imagemagick findutils
 ```
 
-### Install Bash
+## Bash
 
 If you haven't done so already, install a recent version of [Bash](https://www.gnu.org/software/bash/) and set
 it as the default shell. You can find your installed version like this:
@@ -86,7 +122,7 @@ Check those versions
 
 `/usr/local/bin/bash` should be the new one.
 
-### Configure MySQL
+## Configure MySQL
 
 Set the root password
 
@@ -109,7 +145,9 @@ mysql -u root -p
 When prompted, enter the new root password.
 You should be able to access MySQL with the new password.
 
-### Clone the MO repo.
+# Obtain and configure MO
+
+## Clone the MO repo
 
 Make sure you have an up-to-date checkout of this repo in a local directory.
 Since you're reading this you may have already done that.
@@ -125,13 +163,13 @@ git clone git@github.com:MushroomObserver/mushroom-observer.git
 git clone https://github.com/MushroomObserver/mushroom-observer
 ```
 
-### Switch to the cloned repo
+## Switch to the cloned repo
 
 ```sh
 cd mushroom-observer
 ```
 
-### Make sure you have the current version of Ruby
+## Make sure you have the current version of Ruby
 
 ```sh
 if ! [[ `ruby --version` =~ `cat .ruby-version` ]]; then
@@ -140,16 +178,20 @@ fi
 ```
 
 There are various tools for this (rvm, chruby, rbenv).
-In the past MO used rvm, but it caused havoc on the vm.
 We recently switched to rbenv.
-@mo-nathan used chruby most recently
-because it was already installed.
+(In the past MO used rvm, but it caused havoc on the vm.)
+@mo-nathan used chruby most recently because it was already installed.
+
+### chruby
+
 For chruby, run:
 
 ```sh
   ruby-build $RUBY_VERSION ~/.rubies/ruby-$RUBY_VERSION
   chruby $RUBY_VERSION
 ```
+
+### rbenv
 
 @nimmolo and @JoeCohen used rbenv.
 For rbenv run: (installing ruby-build maybe also needed above)
@@ -232,7 +274,7 @@ cp db/macos/database.yml config
 
 Optionally delete `checkpoint_stripped.gz` from the mushroom-observer directory
 
-### Run the rest of the mo-dev script
+## Run the rest of the mo-dev script
 
 (See <https://github.com/MushroomObserver/developer-startup/blob/main/mo-dev>)
 (Both @nimmolo and @JoeCohen did this in pieces.)
@@ -292,7 +334,7 @@ fi
 gem install trilogy
 ```
 
-### Continue the mo-dev script
+## Continue the mo-dev script
 
 ```sh
 git pull
@@ -326,7 +368,7 @@ Hopefully this is not necessary on a fresh clean system, but
   gem pristine --all
 ```
 
-### Prevent commits directly to the main branch
+## Prevent direct commits to the main branch
 
 > Create a file `.git/hooks/pre-commit` with the following content:
 
@@ -346,7 +388,7 @@ Hopefully this is not necessary on a fresh clean system, but
   chmod +x .git/hooks/pre-commit
 ```
 
-### Ruby upgrade with chruby
+## Ruby upgrade with chruby
 
 - Install the selected version.
 
@@ -354,8 +396,7 @@ Hopefully this is not necessary on a fresh clean system, but
   ruby-install ruby 3.3.6
 ```
 
-- Once that succeeds, update Ruby versions in .ruby-version and Gemfile.lock.
-
+- Once that succeeds, update Ruby versions in `.ruby-version` and `Gemfile.lock`.
 - In a new shell run:
 
 ```sh
@@ -370,7 +411,7 @@ Hopefully this is not necessary on a fresh clean system, but
   rails t
 ```
 
-### Other
+## Other
 
 You probably need to generate a new development master key (see below)
 if you get a test failure like this:
@@ -400,7 +441,7 @@ In the `mushroom-observer` directory, create the file
 
 -----
 
-### Footnotes
+# Footnotes
 
 <b id="f1">1.</b> Suggested procedure for removing vestiges of mysql [↩](#a1)
 
