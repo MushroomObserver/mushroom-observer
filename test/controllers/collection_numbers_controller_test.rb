@@ -24,7 +24,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
   end
 
   def test_index_with_id_and_sorted
-    last_number = CollectionNumber.last
+    last_number = CollectionNumber.reorder(created_at: :desc).last
     params = { id: last_number.id, by: :reverse_date }
 
     login
@@ -236,7 +236,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
          params: { observation_id: obs.id, collection_number: params })
     assert_equal(collection_number_count + 1, CollectionNumber.count)
     assert_flash_success
-    number = CollectionNumber.last
+    number = CollectionNumber.reorder(created_at: :asc).last
     assert_obj_arrays_equal([number], obs.reload.collection_numbers)
 
     post(:create,
