@@ -548,15 +548,13 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
         lambda { |**args|
           args[:area] ||= MO.obs_location_max_area
 
-          joins(:location).
-            where(Location[:box_area].lteq(args[:area])).group(:location_id)
+          joins(:location).where(Location[:box_area].lteq(args[:area]))
         }
   scope :in_box_gt_max_area,
         lambda { |**args|
           args[:area] ||= MO.obs_location_max_area
 
-          joins(:location).
-            where(Location[:box_area].gt(args[:area])).group(:location_id)
+          joins(:location).where(Location[:box_area].gt(args[:area]))
         }
 
   scope :is_collection_location,
@@ -763,6 +761,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   def self.refresh_cached_column(type: nil, foreign: nil, local: foreign,
                                  dry_run: false)
     tbl = type.camelize.constantize.arel_table
+    # Observation must be unscoped in order to join to another table.
+    # (removing default_scope)
     query = Observation.unscoped.joins(type.to_sym).
             where(Observation[local.to_sym].not_eq(tbl[foreign.to_sym]))
     msgs = query.map do |obs|
@@ -783,6 +783,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # date.  Fixes and returns a messages for each one that was wrong.
   # Used by refresh_caches script
   def self.make_sure_no_observations_are_misspelled(dry_run: false)
+    # Observation must be unscoped in order to join to name.
+    # (removing default_scope)
     query = Observation.unscoped.joins(:name).
             where(Name[:correct_spelling_id].not_eq(nil))
     msgs = query.pluck(Observation[:id], Name[:text_name]).

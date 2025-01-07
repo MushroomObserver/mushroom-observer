@@ -312,13 +312,14 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   def self.update_box_area_and_center_columns
     # update the locations
     update_all(update_center_and_area_sql)
-    # give center points to associated observations in batches
-    # Observation must be unscoped or it will not join to locations
-    Observation.unscoped.in_box_of_max_area.update_all(
+    # give center points to associated observations in batches by location_id
+    # Observation must be unscoped in order to join to locations.
+    # (removing default_scope)
+    Observation.unscoped.in_box_of_max_area.group(:location_id).update_all(
       location_lat: Location[:center_lat], location_lng: Location[:center_lng]
     )
     # null center points where area is above the threshold
-    Observation.unscoped.in_box_gt_max_area.update_all(
+    Observation.unscoped.in_box_gt_max_area.group(:location_id).update_all(
       location_lat: nil, location_lng: nil
     )
   end
