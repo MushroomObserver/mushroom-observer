@@ -510,10 +510,10 @@ class Name < AbstractModel
         }
   scope :with_description_classification_differing,
         lambda {
-          joins(:descriptions).
+          joins(:description).
             where(rank: 0..Name.ranks[:Genus]).
-            where(Name[:classification].
-                  not_eq(NameDescription[:classification])).
+            where(NameDescription[:classification].
+                  not_eq(Name[:classification])).
             where(NameDescription[:classification].not_blank)
         }
   scope :by_editor,
