@@ -170,6 +170,46 @@ class InatImportJobTest < ActiveJob::TestCase
   end
 
   # Had 1 photo, 1 identification, 0 observation_fields
+  def test_import_job_obs_with_sequence_and_multiple_ids
+    file_name = "lycoperdon"
+    mock_inat_response = File.read("test/inat/#{file_name}.txt")
+    user = users(:rolf)
+    inat_import = create_inat_import(inat_response: mock_inat_response)
+
+    name = Name.create(
+      text_name: "Lycoperdon", author: "Pers.", rank: "Genus",
+      display_name: "**__Lycoperdon__** Pers.", user: user
+    )
+
+    stub_inat_interactions(inat_import: inat_import,
+                           mock_inat_response: mock_inat_response)
+
+    Inat::PhotoImporter.stub(:new,
+                             stub_mo_photo_importer(mock_inat_response)) do
+      assert_difference("Observation.count", 1,
+                        "Failed to create observation") do
+        InatImportJob.perform_now(inat_import)
+      end
+    end
+
+    obs = Observation.order(created_at: :asc).last
+    standard_assertions(obs: obs, name: name)
+
+    assert(obs.images.any?, "Obs should have images")
+    assert(obs.sequences.one?, "Obs should have a sequence")
+    assert_equal(user, obs.sequences.first.user,
+                 "Sequences should belong to the user who imported the obs")
+
+    ids = JSON.parse(mock_inat_response)["results"].first["identifications"]
+    unique_suggested_taxon_names = ids.each_with_object([]) do |id, ary|
+      ary << id["taxon"]["name"]
+    end
+    unique_suggested_taxon_names.each do |taxon_name|
+      assert_match(taxon_name, obs.comments.first.comment,
+                   "Snapshot comment missing suggested name #{taxon_name}")
+    end
+  end
+
   def test_import_job_obs_with_one_photo
     file_name = "evernia"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
@@ -246,46 +286,6 @@ class InatImportJobTest < ActiveJob::TestCase
 
   # Had 2 photos, 6 identifications of 3 taxa, a different taxon,
   # 9 obs fields, including "DNA Barcode ITS", "Collection number", "Collector"
-  def test_import_job_obs_with_sequence_and_multiple_ids
-    file_name = "lycoperdon"
-    mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    user = users(:rolf)
-    inat_import = create_inat_import(inat_response: mock_inat_response)
-
-    name = Name.create(
-      text_name: "Lycoperdon", author: "Pers.", rank: "Genus",
-      display_name: "**__Lycoperdon__** Pers.", user: user
-    )
-
-    stub_inat_interactions(inat_import: inat_import,
-                           mock_inat_response: mock_inat_response)
-
-    Inat::PhotoImporter.stub(:new,
-                             stub_mo_photo_importer(mock_inat_response)) do
-      assert_difference("Observation.count", 1,
-                        "Failed to create observation") do
-        InatImportJob.perform_now(inat_import)
-      end
-    end
-
-    obs = Observation.order(created_at: :asc).last
-    standard_assertions(obs: obs, name: name)
-
-    assert(obs.images.any?, "Obs should have images")
-    assert(obs.sequences.one?, "Obs should have a sequence")
-    assert_equal(user, obs.sequences.first.user,
-                 "Sequences should belong to the user who imported the obs")
-
-    ids = JSON.parse(mock_inat_response)["results"].first["identifications"]
-    unique_suggested_taxon_names = ids.each_with_object([]) do |id, ary|
-      ary << id["taxon"]["name"]
-    end
-    unique_suggested_taxon_names.each do |taxon_name|
-      assert_match(taxon_name, obs.comments.first.comment,
-                   "Snapshot comment missing suggested name #{taxon_name}")
-    end
-  end
-
   def test_import_job_infra_specific_name
     file_name = "i_obliquus_f_sterilis"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
