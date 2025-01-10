@@ -14,4 +14,4 @@
 production:
   repopulate_location_and_observation_center_lat_lng:
     class: UpdateBoxAreaAndCenterColumnsJob
-    schedule: every saturday at midnight
+    schedule: every day at midnight
