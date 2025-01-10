@@ -9,7 +9,7 @@ gem("sorted_set")
 source("https://rubygems.org")
 
 # To bundle edge Rails instead: gem "rails", github: "rails/rails"
-# gem("rails", "~> 7.1.3")
+# gem("rails", "~> 7.2.2.1")
 
 # To skip loading parts of Rails, bundle the constituent gems separately.
 # NOTE: Remember to require the classes also, in config/application.rb
@@ -19,19 +19,19 @@ source("https://rubygems.org")
 # Convenience group for updating rails constituents with one command
 # Usage: bundle update --group==rails
 group :rails do
-  gem("actioncable", "~> 7.1.3")
-  # gem("actionmailbox", "~> 7.1.3")
-  gem("actionmailer", "~> 7.1.3")
-  gem("actionpack", "~> 7.1.3")
-  # gem("actiontext", "~> 7.1.3")
-  gem("actionview", "~> 7.1.3")
-  gem("activejob", "~> 7.1.3")
-  gem("activemodel", "~> 7.1.3")
-  gem("activerecord", "~> 7.1.3")
-  # gem("activestorage", "~> 7.1.3")
-  gem("activesupport", "~> 7.1.3")
+  gem("actioncable", "~> 7.2.2.1")
+  # gem("actionmailbox", "~> 7.2.2.1")
+  gem("actionmailer", "~> 7.2.2.1")
+  gem("actionpack", "~> 7.2.2.1")
+  # gem("actiontext", "~> 7.2.2.1")
+  gem("actionview", "~> 7.2.2.1")
+  gem("activejob", "~> 7.2.2.1")
+  gem("activemodel", "~> 7.2.2.1")
+  gem("activerecord", "~> 7.2.2.1")
+  # gem("activestorage", "~> 7.2.2.1")
+  gem("activesupport", "~> 7.2.2.1")
   gem("bundler")
-  gem("railties", "~> 7.1.3")
+  gem("railties", "~> 7.2.2.1")
 end
 
 # Use trilogy as db connector
@@ -116,8 +116,6 @@ gem("fastimage")
 # for detecting file type of uploaded images
 gem("mimemagic")
 
-# Get data from third-party websites
-gem("httparty")
 # Gems used for iNat import
 gem("oauth2")
 gem("rest-client")
@@ -153,6 +151,9 @@ gem("prawn-svg")
 # And now prawn in a separate 'section' to make rubocop happy.
 gem("prawn")
 gem("prawn-manual_builder")
+
+# csv generation support
+gem("csv")
 
 # Use puma as the app server, also available for system tests
 # To use Webrick locally, run `bundle config set --local without 'production'`

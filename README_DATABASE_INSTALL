@@ -58,9 +58,9 @@ root> vi /etc/rc.local
 root> apt-get install -y mysql-server mysql-client
 root> mysql -u root -p
   # Default root password is `root`
-  ALTER USER 'root'@'localhost' IDENTIFIED WITH MYSQL_NATIVE_PASSWORD BY '$DB_ROOT_PASSWORD';
+  ALTER USER 'root'@'localhost' IDENTIFIED BY '$DB_ROOT_PASSWORD';
   CREATE DATABASE mo_production;
-  CREATE USER 'mo'@'localhost' IDENTIFIED WITH MYSQL_NATIVE_PASSWORD BY '$DB_PASSWORD';
+  CREATE USER 'mo'@'localhost' IDENTIFIED BY '$DB_PASSWORD';
   # set password for 'mo'@'localhost' = password('$DB_PASSWORD');
   GRANT ALL PRIVILEGES ON mo_production.* TO 'mo'@'localhost' WITH GRANT OPTION;
   EXIT
@@ -77,7 +77,7 @@ root> vi /etc/mysql/mysql.conf.d/mysqld.cnf
   # bind-address = 127.0.0.1
 root> mysql -u root -p
   # For each remote user:
-  CREATE USER 'mo'@'$WEB_SERVER' IDENTIFIED WITH MYSQL_NATIVE_PASSWORD BY '$DB_PASSWORD';
+  CREATE USER 'mo'@'$WEB_SERVER' IDENTIFIED BY '$DB_PASSWORD';
   GRANT ALL PRIVILEGES ON mo_production.* TO 'mo'@'$WEB_SERVER' WITH GRANT OPTION;
   GRANT PROCESS, SELECT, LOCK TABLES ON *.* TO 'mo'@'$WEB_SERVER';
 root> service mysql restart

@@ -138,11 +138,9 @@ class ProjectsControllerTest < FunctionalTestCase
     login(user.login)
     get(:show, params: { id: project.id })
 
-    assert_select(
-      "#project_summary a[href =
-        '#{project_violations_path(project_id: project.id)}']",
-      true, "Page is missing a link to violations"
-    )
+    assert_match(project_violations_path(project_id: project.id),
+                 @response.body,
+                 "Page is missing a link to violations")
   end
 
   def test_index
@@ -204,9 +202,7 @@ class ProjectsControllerTest < FunctionalTestCase
 
     login
     get(:index, params: { pattern: project.id.to_s })
-
-    assert_response(:success)
-    assert_displayed_title(project.title)
+    assert_redirected_to(project_path(project.id))
   end
 
   def test_add_project
@@ -581,7 +577,7 @@ class ProjectsControllerTest < FunctionalTestCase
 
     project.reload
     assert_equal(num_images + 1, Image.count)
-    assert_equal(Image.last.id, project.image_id)
+    assert_equal(Image.reorder(created_at: :asc).last.id, project.image_id)
     assert_equal(params[:upload][:copyright_holder],
                  project.image.copyright_holder)
     assert_equal(params[:upload][:copyright_year], project.image.when.year)

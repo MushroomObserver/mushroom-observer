@@ -48,7 +48,7 @@ class NamesControllerTest < FunctionalTestCase
   #
   # Tests of index, with tests arranged as follows:
   # default subaction; then
-  # other subactions in order of @index_subaction_param_keys
+  # other subactions in order of index_active_params
   # miscellaneous tests using get(:index)
   def test_index
     login
@@ -70,7 +70,7 @@ class NamesControllerTest < FunctionalTestCase
 
   def test_index_with_saved_query
     user = dick
-    query = Query.lookup_and_save(:Observation, :by_user, user: user)
+    query = Query.lookup_and_save(:Observation, by_user: user)
     q = query.id.alphabetize
 
     login
@@ -88,25 +88,25 @@ class NamesControllerTest < FunctionalTestCase
 
   def test_index_advanced_search_multiple_hits
     search_string = "Suil"
-    query = Query.lookup_and_save(:Name, :advanced_search, name: search_string)
+    query = Query.lookup_and_save(:Name, name: search_string)
 
     login
     get(:index,
         params: @controller.query_params(query).merge(advanced_search: true))
 
     assert_response(:success)
-    assert_displayed_title("Advanced Search")
     assert_select(
       "#results a:match('href', ?)", %r{^#{names_path}/\d+},
       { count: Name.where(Name[:text_name] =~ /#{search_string}/i).
                     with_correct_spelling.count },
       "Wrong number of (correctly spelled) Names"
     )
+    assert_displayed_title("Matching Names")
   end
 
   def test_index_advanced_search_one_hit
     search_string = "Stereum hirsutum"
-    query = Query.lookup_and_save(:Name, :advanced_search, name: search_string)
+    query = Query.lookup_and_save(:Name, name: search_string)
     assert(query.results.one?,
            "Test needs a string that has exactly one hit")
 
@@ -118,11 +118,11 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def test_index_advanced_search_no_hits
-    query = Query.lookup_and_save(:Name, :advanced_search,
+    query = Query.lookup_and_save(:Name,
                                   name: "Don't know",
                                   user: "myself",
                                   content: "Long pink stem and small pink cap",
-                                  location: "Eastern Oklahoma")
+                                  user_where: "Eastern Oklahoma")
 
     login
     get(:index,
@@ -134,11 +134,11 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def test_index_advanced_search_with_deleted_query
-    query = Query.lookup_and_save(:Name, :advanced_search,
+    query = Query.lookup_and_save(:Name,
                                   name: "Don't know",
                                   user: "myself",
                                   content: "Long pink stem and small pink cap",
-                                  location: "Eastern Oklahoma")
+                                  user_where: "Eastern Oklahoma")
     params = @controller.query_params(query).merge(advanced_search: true)
     query.record.delete
 
@@ -149,14 +149,12 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def test_index_advanced_search_error
-    query_without_conditions = Query.lookup_and_save(
-      :Name, :advanced_search
-    )
+    query_no_conditions = Query.lookup_and_save(:Name)
 
     login
-    get(:index,
-        params: @controller.query_params(query_without_conditions).
-                            merge(advanced_search: true))
+    params = @controller.query_params(query_no_conditions).
+             merge({ advanced_search: true })
+    get(:index, params:)
 
     assert_flash_error(:runtime_no_conditions.l)
     assert_redirected_to(search_advanced_path)
@@ -214,7 +212,7 @@ class NamesControllerTest < FunctionalTestCase
     get(:index, params: { with_observations: true })
 
     assert_response(:success)
-    assert_displayed_title("Names with Observations")
+    assert_displayed_title(/Names.*Observations/)
     assert_select(
       "#results a:match('href', ?)", %r{#{names_path}/\d+},
       { count: Name.joins(:observations).
@@ -237,7 +235,7 @@ class NamesControllerTest < FunctionalTestCase
     get(:index, params: { with_observations: true, letter: letter })
 
     assert_response(:success)
-    assert_displayed_title("Names with Observations")
+    assert_displayed_title(/Names.*Observations/)
     names.each do |name|
       assert_select("#results a[href*='/names/#{name.id}'] .display-name",
                     name.search_name)
@@ -261,12 +259,12 @@ class NamesControllerTest < FunctionalTestCase
     )
   end
 
-  def test_index_needing_descriptions
+  def test_index_needing_description
     login
-    get(:index, params: { need_descriptions: true })
+    get(:index, params: { need_description: true })
 
     assert_response(:success)
-    assert_displayed_title("Selected Names")
+    assert_displayed_title(:query_title_needs_description.t(type: :name))
     assert_select(
       "#results a:match('href', ?)", %r{^#{names_path}/\d+},
       # need length; count & size return a hash; description_needed is grouped
@@ -388,7 +386,7 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def pagination_query_params
-    query = Query.lookup_and_save(:Name, :all, by: :name)
+    query = Query.lookup_and_save(:Name, by: :name)
     @controller.query_params(query)
   end
 
@@ -548,18 +546,19 @@ class NamesControllerTest < FunctionalTestCase
     get(:show, params: { id: names(:coprinus_comatus).id })
     assert_template("show")
     # Creates three for children and all four observations sections,
-    # but one never used. (? Now 4 - AN 20240107)
-    assert_equal(4, QueryRecord.count)
+    # but one never used. (? Now 4 - AN 20240107) (? Now 5 - AN 20241217)
+    assert_equal(5, QueryRecord.count)
 
     get(:show, params: { id: names(:coprinus_comatus).id })
     assert_template("show")
     # Should re-use all the old queries.
-    assert_equal(4, QueryRecord.count)
+    assert_equal(5, QueryRecord.count)
 
     get(:show, params: { id: names(:agaricus_campestris).id })
     assert_template("show")
-    # Needs new queries this time. (? Up from 7 - AN 20240107)
-    assert_equal(9, QueryRecord.count)
+    # Needs new queries this time.
+    # (? Up from 7 to 9 - AN 20240107) (? Now 11 - AN 20241217)
+    assert_equal(11, QueryRecord.count)
 
     # Agarcius: has children taxa.
     get(:show, params: { id: names(:agaricus).id })
@@ -926,7 +925,7 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def test_next_and_prev2
-    query = Query.lookup_and_save(:Name, :pattern_search, pattern: "lactarius")
+    query = Query.lookup_and_save(:Name, pattern: "lactarius")
     q = @controller.query_params(query)
 
     name1 = query.results[0]
@@ -1024,8 +1023,9 @@ class NamesControllerTest < FunctionalTestCase
     post(:create, params: params)
 
     assert_response(:success)
+    last_name = Name.reorder(created_at: :asc).last
     assert_equal(count, Name.count,
-                 "Shouldn't have created #{Name.last.search_name.inspect}.")
+                 "Shouldn't have created #{last_name.search_name.inspect}.")
     names = Name.where(text_name: text_name)
     assert_obj_arrays_equal([names(:conocybe_filaris)], names)
     assert_equal(10, rolf.reload.contribution)
@@ -1048,10 +1048,12 @@ class NamesControllerTest < FunctionalTestCase
     login("mary")
     post(:create, params: params)
     assert_response(:success)
+    last_name = Name.reorder(created_at: :asc).last
     assert_equal(name_count, Name.count,
-                 "Shouldn't have created #{Name.last.search_name.inspect}.")
+                 "Shouldn't have created #{last_name.search_name.inspect}.")
     assert_equal(rss_log_count, RssLog.count,
-                 "Shouldn't have created an RSS log! #{RssLog.last.inspect}.")
+                 "Shouldn't have created an RSS log! " \
+                 "#{RssLog.reorder(id: :asc).last.inspect}.")
   end
 
   def test_create_name_matching_multiple_names
@@ -1072,8 +1074,9 @@ class NamesControllerTest < FunctionalTestCase
 
     assert_flash_text(flash_text)
     assert_response(:success)
+    last_name = Name.reorder(created_at: :asc).last
     assert_equal(count, Name.count,
-                 "Shouldn't have created #{Name.last.search_name.inspect}.")
+                 "Shouldn't have created #{last_name.search_name.inspect}.")
   end
 
   def test_create_name_unauthored_authored
@@ -1297,7 +1300,7 @@ class NamesControllerTest < FunctionalTestCase
     }
     post(:create, params: params)
     assert_flash_success
-    assert_redirected_to(name_path(Name.last.id))
+    assert_redirected_to(name_path(Name.reorder(created_at: :asc).last.id))
   end
 
   def test_create_family
@@ -3139,7 +3142,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_not(Name.exists?(edited_name.id))
     assert_equal(208_785, survivor.reload.icn_id)
 
-    log = RssLog.last.parse_log
+    log = RssLog.reorder(id: :asc).last.parse_log
     assert_equal(:log_orphan, log[0][0])
     assert_equal({ title: destroyed_display_name }, log[0][1])
     assert_equal(:log_name_merged, log[1][0])

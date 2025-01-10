@@ -1,9 +1,11 @@
 <%
 # This form can create OR update a tracker, via params[:commit]
 # Idk why rails does not recognize the model scope and nest the attributes.
+form_args = { url: action, method: method, id: "name_tracker_form" }
+form_args[:model] = @name_tracker if @name_tracker
 %>
-<%= form_with(model: @name_tracker, url: action, method: method,
-              id: "name_tracker_form") do |f| %>
+
+<%= form_with(**form_args) do |f| %>
 
   <div class="text-center my-3">
     <%= if @name_tracker

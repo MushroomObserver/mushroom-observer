@@ -11,6 +11,7 @@ class RandomIntegrationTest < CapybaraIntegrationTestCase
 
   def test_uptime_probe
     visit("/test")
+    assert_selector("body")
   end
 
   def test_login_and_logout
@@ -45,6 +46,7 @@ class RandomIntegrationTest < CapybaraIntegrationTestCase
     login(mary, session: mary_session)
     katrina_session = open_session
     login(katrina, session: katrina_session)
+    assert_equal(true, true) # Rails complains this test has no assertions
 
     rolf_session.visit("/info/intro")
     rolf_session.assert_text("rolf")

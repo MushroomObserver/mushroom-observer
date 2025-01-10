@@ -135,7 +135,7 @@ module Tabs
     def observations_at_where_tabs(query)
       # Add some extra links to the index user is sent to if they click on an
       # undefined location.
-      return [] unless query.flavor == :at_where
+      return [] if params[:where].blank?
 
       [define_location_tab(query),
        assign_undefined_location_tab(query),
@@ -145,14 +145,20 @@ module Tabs
     # these are from the observations form
     def define_location_tab(query)
       [:list_observations_location_define.l,
-       add_query_param(new_location_path(where: query.params[:user_where])),
+       add_query_param(new_location_path(where: where_param(query.params))),
        { class: tab_id(__method__.to_s) }]
+    end
+
+    # Hack to use the :locations param if it's present and the :user_where
+    # param is missing.
+    def where_param(query_params)
+      query_params[:user_where] || params[:where]
     end
 
     def assign_undefined_location_tab(query)
       [:list_observations_location_merge.l,
        add_query_param(matching_locations_for_observations_path(
-                         where: query.params[:user_where]
+                         where: where_param(query.params)
                        )),
        { class: tab_id(__method__.to_s) }]
     end
@@ -293,7 +299,7 @@ module Tabs
     # for show_obs - query is for a single obs label
     def print_labels_button(obs)
       name = :download_observations_print_labels.l
-      query = Query.lookup(Observation, :in_set, ids: [obs.id])
+      query = Query.lookup(Observation, ids: [obs.id])
       path = add_query_param(observations_downloads_path(commit: name), query)
 
       post_button(name: name, path: path, icon: :print,

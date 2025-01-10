@@ -421,13 +421,11 @@ class PatternSearchTest < UnitTestCase
     # "Turkey" is not a name, and no taxa modifiers present, so no reason to
     # suspect that this is a name query.  Should leave it completely alone.
     x = PatternSearch::Observation.new("Turkey")
-    assert_equal(:pattern_search, x.flavor)
     assert_equal({ pattern: "Turkey" }, x.args)
 
     # "Agaricus" is a name, so let's assume this is a name query.  Note that
     # it will include synonyms and subtaxa by default.
     x = PatternSearch::Observation.new("Agaricus")
-    assert_equal(:all, x.flavor)
     assert_equal({ names: "Agaricus", include_subtaxa: true,
                    include_synonyms: true }, x.args)
 
@@ -435,7 +433,6 @@ class PatternSearchTest < UnitTestCase
     # so they must have expected "Turkey" to be a name.  Note that it will also
     # include subtaxa by default, because that behavior was not specified.
     x = PatternSearch::Observation.new("Turkey include_synonyms:yes")
-    assert_equal(:all, x.flavor)
     assert_equal({ names: "Turkey", include_synonyms: true,
                    include_subtaxa: true }, x.args)
 
@@ -443,7 +440,6 @@ class PatternSearchTest < UnitTestCase
     # subtaxa in any names query.
     x = PatternSearch::Observation.new("Foo bar include_synonyms:no " \
                                        "include_subtaxa:no")
-    assert_equal(:all, x.flavor)
     assert_equal({ names: "Foo bar", include_synonyms: false,
                    include_subtaxa: false }, x.args)
   end
@@ -738,8 +734,8 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_multiple_regions
-    expect = Observation.in_region("California, USA").
-             or(Observation.in_region("New York, USA")).to_a
+    expect = Observation.reorder(id: :asc).in_region("California, USA").
+             or(Observation.reorder(id: :asc).in_region("New York, USA")).to_a
     assert(expect.any? { |obs| obs.where.include?("California, USA") })
     assert(expect.any? { |obs| obs.where.include?("New York, USA") })
     str = 'region:"USA, California","USA, New York"'
@@ -908,12 +904,12 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_name_search_has_description
-    expect = Name.with_correct_spelling.with_description
+    expect = Name.reorder(id: :asc).with_description
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_description:yes")
     assert_name_arrays_equal(expect, x.query.results, :sort)
 
-    expect = Name.with_correct_spelling.without_description
+    expect = Name.reorder(id: :asc).without_description
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_description:no")
     assert_name_arrays_equal(expect, x.query.results, :sort)

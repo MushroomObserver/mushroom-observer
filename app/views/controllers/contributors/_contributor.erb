@@ -19,7 +19,7 @@ columns ||= "col-xs-12 col-sm-6 col-md-4 col-lg-3"
             tag.span(number, class: "badge pull-right")].safe_join
         end,
         "#{user.contribution} #{:users_by_contribution_2f.t}", safe_br,
-        link_to(:Observations.t, observations_path(user: user.id))].safe_join
+        link_to(:Observations.t, observations_path(by_user: user.id))].safe_join
       end %>
     <% end %>
   <% end %>

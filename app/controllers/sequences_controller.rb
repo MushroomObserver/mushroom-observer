@@ -8,7 +8,7 @@
 #    destroy::  Destroy sequence
 #    edit::     Show form to edit a Sequence
 #    new::      Show form to create new Sequence for an Observation
-#    index::    List selected Sequences, based on index flavor and current Query
+#    index::    List selected Sequences, based on index and current Query
 #    show::     Display Sequence details
 #    update::   Update a Sequence
 #
@@ -22,7 +22,7 @@
 # edit_sequence (get)               edit (get)
 # *edit_sequence (post)             update (patch)
 # index_sequence (get)              index (get) -- lists query results
-# list_sequences (get)              index (get, flavor: all) -- all Sequences
+# list_sequences (get)              index (get) -- all Sequences
 # *next_sequence (get)              show { flow: :next } (get))
 # *prev_sequence (get)              show { flow: :prev } (get)
 # *observation_index (get)          n.a (unused, listed Seqs for one Obs)
@@ -38,23 +38,42 @@ class SequencesController < ApplicationController
 
   ################# Actions that show data without modifying it
 
-  # display a list of Sequences, depending on flavor & params
+  # display a list of Sequences, depending on params
   # Example:
-  #  https://mushroomobserver.org/sequences?flavor=all
+  #  https://mushroomobserver.org/sequences?all=true
   #    => displays a list of all sequences in MO
   #
   # NOTE: #index does not handle params[:pattern] or params[:ids] because
-  # we don't offer sequence pattern search. However, the Query::SequenceBase
+  # we don't offer sequence pattern search. However, the Query::Sequences
   # class can handle a pattern param.
   def index
-    case params[:flavor]
-    when "all"
-      index_all
-    else
-      query = find_or_create_query(:Sequence, by: params[:by])
-      show_selected_sequences(query, id: params[:id].to_s, always_index: true)
-    end
+    store_location
+    build_index_with_query
   end
+
+  private
+
+  def default_sort_order
+    :created_at
+  end
+
+  def index_active_params
+    [:all, :by, :q].freeze
+  end
+
+  # This is a param handler. In this controller, people usually want sequences
+  # for an observation. If they want all sequences, use the :all param.
+  def all
+    unfiltered_index
+  end
+
+  def index_display_opts(opts, _query)
+    { include: [{ observation: :name }, :user],
+      letters: "sequences.locus",
+      num_per_page: 50 }.merge(opts)
+  end
+
+  public ####################################################################
 
   def show
     case params[:flow]
@@ -158,21 +177,6 @@ class SequencesController < ApplicationController
   def figure_out_where_to_go_back_to
     @back = params[:back]
     @back_object = @back == "show" ? @sequence : @sequence.observation
-  end
-
-  # ---------- Index -----------------------------------------------------------
-
-  def index_all
-    store_location
-    query = create_query(:Sequence, :all)
-    show_selected_sequences(query)
-  end
-
-  def show_selected_sequences(query, args = {})
-    args = { include: [{ observation: :name }, :user],
-             letters: "sequences.locus",
-             num_per_page: 50 }.merge(args)
-    show_index_of_objects(query, args)
   end
 
   # ---------- Create, Edit ----------------------------------------------------

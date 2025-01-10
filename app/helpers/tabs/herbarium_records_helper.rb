@@ -70,7 +70,7 @@ module Tabs
     def herbarium_record_tab(h_r, obs)
       # This is passed in to show_herbarium_record, allowing users to do prev,
       # next and index from there to navigate through all the rest for this obs.
-      hr_query = Query.lookup(:HerbariumRecord, :all, observations: obs.id)
+      hr_query = Query.lookup(:HerbariumRecord, observations: obs.id)
 
       [h_r.accession_at_herbarium.t,
        add_query_param(h_r.show_link_args, hr_query),

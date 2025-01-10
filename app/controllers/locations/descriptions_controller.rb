@@ -5,56 +5,34 @@ module Locations
     include ::Descriptions
     include ::Locations::Descriptions::SharedPrivateMethods
 
-    # disable cop because index is defined in ApplicationController
-    # rubocop:disable Rails/LexicallyScopedActionFilter
     before_action :store_location, except: [:index, :destroy]
     before_action :pass_query_params, except: [:index]
-    # rubocop:enable Rails/LexicallyScopedActionFilter
     before_action :login_required
     before_action :require_successful_user, only: [
       :new, :create
     ]
 
     ############################################################################
+    # INDEX
     #
-    #  Index
+    def index
+      build_index_with_query
+    end
+
+    private
+
+    # Is :name
+    def default_sort_order
+      ::Query::LocationDescriptions.default_order # :name
+    end
+
+    def controller_model_name
+      "LocationDescription"
+    end
 
     # Used by ApplicationController to dispatch #index to a private method
-    @index_subaction_param_keys = [
-      :by_author,
-      :by_editor,
-      :by,
-      :q,
-      :id
-    ].freeze
-
-    @index_subaction_dispatch_table = {
-      by: :index_query_results,
-      q: :index_query_results,
-      id: :index_query_results
-    }.freeze
-
-    private # private methods used by #index  ##################################
-
-    def default_index_subaction
-      list_all
-    end
-
-    # Displays a list of all location_descriptions.
-    def list_all
-      query = create_query(:LocationDescription, :all, by: default_sort_order)
-      show_selected_location_descriptions(query)
-    end
-
-    def default_sort_order
-      ::Query::LocationDescriptionBase.default_order
-    end
-
-    # Displays a list of selected locations, based on current Query.
-    def index_query_results
-      query = find_or_create_query(:LocationDescription, by: params[:by])
-      show_selected_location_descriptions(query, id: params[:id].to_s,
-                                                 always_index: true)
+    def index_active_params
+      [:by_author, :by_editor, :by, :q, :id].freeze
     end
 
     # Display list of location_descriptions that a given user is author on.
@@ -65,8 +43,8 @@ module Locations
       )
       return unless user
 
-      query = create_query(:LocationDescription, :by_author, user: user)
-      show_selected_location_descriptions(query)
+      query = create_query(:LocationDescription, by_author: user)
+      [query, {}]
     end
 
     # Display list of location_descriptions that a given user is editor on.
@@ -77,26 +55,23 @@ module Locations
       )
       return unless user
 
-      query = create_query(:LocationDescription, :by_editor, user: user)
-      show_selected_location_descriptions(query)
+      query = create_query(:LocationDescription, by_editor: user)
+      [query, {}]
     end
 
-    # Show selected search results as a list with 'list_locations' template.
-    def show_selected_location_descriptions(query, args = {})
+    # Hook runs before template displayed. Must return query.
+    def filtered_index_final_hook(query, _display_opts)
       store_query_in_session(query)
-
-      args = {
-        controller: "/locations/descriptions",
-        action: :index,
-        num_per_page: 50
-      }.merge(args)
-
-      show_index_of_objects(query, args)
+      query
     end
 
-    ############################################################################
+    def index_display_opts(opts, _query)
+      { num_per_page: 50 }.merge(opts)
+    end
 
     public
+
+    ############################################################################
 
     def show
       return unless find_description!

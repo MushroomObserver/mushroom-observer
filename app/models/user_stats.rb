@@ -73,9 +73,9 @@ class UserStats < ApplicationRecord
 
   # This causes the data structures in these fields to be serialized
   # automatically with YAML and stored as plain old text strings.
-  serialize :languages, type: Hash
-  serialize :bonuses
-  serialize :checklist, type: Hash
+  serialize :languages, type: Hash, coder: YAML
+  serialize :bonuses, coder: YAML
+  serialize :checklist, type: Hash, coder: YAML
 
   ALL_FIELDS = {
     name_description_authors: { weight: 100 },
@@ -527,13 +527,11 @@ class UserStats < ApplicationRecord
   def count_versions(parent_type, user_id)
     parent_class = parent_type.classify.constantize
     version_class = "#{parent_class}::Version".constantize
-    parent_id = "#{parent_type}_id"
 
     version_class.joins(:"#{parent_type}").
       where(version_class.arel_table[:user_id].eq(user_id)).
-      where.not(
-        version_class.arel_table[:user_id].eq(parent_class[:user_id])
-      ).distinct.select(version_class.arel_table[:"#{parent_id}"]).count
+      where(version_class.arel_table[:user_id].not_eq(parent_class[:user_id])).
+      distinct.count
   end
 
   # Regular count, by :user_id

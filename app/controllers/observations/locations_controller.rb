@@ -12,7 +12,7 @@ module Observations
     #
     ############################################################################
 
-    # NOTE: This "form" is only accessed from one index flavor,
+    # NOTE: This "form" is only accessed from one index param,
     #       "OBSERVATIONS AT WHERE"
     #
     # It's a UI for Observations lacking a Location association in the db,
@@ -81,7 +81,7 @@ module Observations
       # Try for segments: split by comma, or by space if no commas
       places = @where.split(",")
       words = @where.split
-      return unless places.length > 1 || words.length > 1
+      return matches unless places.length > 1 || words.length > 1
 
       matches += Location.name_includes(places.first)
       # Try for specific segment matches if we have enough of them.

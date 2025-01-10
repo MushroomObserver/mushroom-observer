@@ -10,15 +10,8 @@ class ObservationsController < ApplicationController
 
   # Disable cop: all these methods are defined in files included above.
   # rubocop:disable Rails/LexicallyScopedActionFilter
-  before_action :login_required, except: [
-    :show,
-    :index
-  ]
-  before_action :pass_query_params, only: [
-    :show,
-    :edit,
-    :update
-  ]
+  before_action :login_required, except: [:show, :index]
+  before_action :pass_query_params, only: [:show, :edit, :update]
   # rubocop:enable Rails/LexicallyScopedActionFilter
 
   around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [
@@ -29,27 +22,4 @@ class ObservationsController < ApplicationController
     # the observation to a species_list, but I can't figure out how.
     :create
   ]
-
-  # NOTE: Must be an ivar of ObservationController
-  # Defining them in index.rb does not work
-  @index_subaction_param_keys = [
-    :advanced_search, # Searches come 1st because they may have the other params
-    :pattern,
-    :look_alikes,
-    :related_taxa,
-    :name,
-    :user,
-    :location,
-    :where,
-    :project,
-    :by,
-    :q,
-    :id
-  ].freeze
-
-  @index_subaction_dispatch_table = {
-    by: :index_query_results,
-    q: :index_query_results,
-    id: :index_query_results
-  }.freeze
 end

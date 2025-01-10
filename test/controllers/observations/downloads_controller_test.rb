@@ -5,9 +5,9 @@ require("test_helper")
 module Observations
   class DownloadsControllerTest < FunctionalTestCase
     def test_download_observation_index
-      obs = Observation.where(user: mary)
+      obs = Observation.reorder(id: :asc).where(user: mary)
       assert(obs.length >= 4)
-      query = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
+      query = Query.lookup_and_save(:Observation, by_user: mary.id)
 
       # Add herbarium_record to fourth obs for testing purposes.
       login("mary")
@@ -155,7 +155,7 @@ module Observations
     end
 
     def test_download_too_many_observations
-      query = Query.lookup_and_save(:Observation, :all)
+      query = Query.lookup_and_save(:Observation)
       login("mary")
 
       MO.stub(:max_downloads, Observation.count - 1) do
@@ -167,7 +167,7 @@ module Observations
     end
 
     def test_download_too_many_observations_reasonable_query
-      query = Query.lookup_and_save(:Observation, :at_location,
+      query = Query.lookup_and_save(:Observation,
                                     location: locations(:albion))
       login("mary")
 
@@ -179,7 +179,7 @@ module Observations
     end
 
     def test_download_too_many_observations_admin
-      query = Query.lookup_and_save(:Observation, :all)
+      query = Query.lookup_and_save(:Observation)
       login("mary")
       make_admin("mary")
 
@@ -192,7 +192,7 @@ module Observations
 
     def test_print_labels
       login
-      query = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
+      query = Query.lookup_and_save(:Observation, by_user: mary.id)
       assert_operator(query.num_results, :>=, 4)
       get(:print_labels, params: { q: query.id.alphabetize })
       # \pard is paragraph command in rtf, one paragraph per result
@@ -213,7 +213,7 @@ module Observations
 
     def test_project_labels
       login("roy")
-      query = Query.lookup_and_save(:Observation, :for_project,
+      query = Query.lookup_and_save(:Observation,
                                     project: projects(:open_membership_project))
       get(:print_labels, params: { q: query.id.alphabetize })
       trusted_hidden = observations(:trusted_hidden)
@@ -226,13 +226,13 @@ module Observations
     # are tested and at least not crashing.
     def test_print_labels_all
       login
-      query = Query.lookup_and_save(:Observation, :all)
+      query = Query.lookup_and_save(:Observation)
       get(:print_labels, params: { q: query.id.alphabetize })
     end
 
     def test_print_labels_query_nil
       login
-      query = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
+      query = Query.lookup_and_save(:Observation, by_user: mary.id)
 
       # simulate passing a query param, but that query doesn't exist
       @controller.stub(:find_query, nil) do
