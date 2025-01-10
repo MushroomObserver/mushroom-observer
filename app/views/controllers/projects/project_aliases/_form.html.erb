@@ -1,0 +1,36 @@
+<%= form_with(model: project_alias, url:) do |form| %>
+  <% if project_alias.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(project_alias.errors.count, "error") %> prohibited this project alias from being saved:</h2>
+      <ul>
+        <% project_alias.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :name %>
+    <%= form.text_field :name %>
+  </div>
+
+  <div class="field">
+    <%= form.label :project_id %>
+    <%= form.collection_select :project_id, Project.all, :id, :title %>
+  </div>
+
+  <div class="field">
+    <%= form.label :target_type %>
+    <%= form.select :target_type, ['Location', 'User'] %>
+  </div>
+
+  <div class="field">
+    <%= form.label :target_id %>
+    <%= form.number_field :target_id %>
+  </div>
+
+  <div class="actions">
+    <%= form.submit %>
+  </div>
+<% end %>
