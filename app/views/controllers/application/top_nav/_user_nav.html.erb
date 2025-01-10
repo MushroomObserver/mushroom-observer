@@ -7,10 +7,10 @@ admin_mode_args = in_admin_mode? ? { turn_off: true } : { turn_on: true }
   <% if @user.admin %>
     <li>
       <%= icon_link_to(
-        admin_title, admin_mode_path(**admin_mode_args),
-        { icon: :admin, id: "user_nav_admin_mode_link", button_to: true,
-          class: "btn btn-link navbar-btn", data: { placement: "bottom" } }
-      ) %>
+          admin_title, admin_mode_path(**admin_mode_args),
+          { icon: :admin, id: "user_nav_admin_mode_link", button_to: true,
+            class: "btn btn-link navbar-btn", data: { placement: "bottom" } }
+        ) %>
     </li>
   <% end %>
   <li>
@@ -49,14 +49,13 @@ admin_mode_args = in_admin_mode? ? { turn_off: true } : { turn_on: true }
         ) %>
   </li>
   <li id="user_drop_down" class="dropdown">
-    <a href="#" class="dropdown-toggle" data-toggle="dropdown"
-        role="button" aria-expanded="false">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
       <%= h(@user.login) %>
       <span class="caret"></span>
     </a>
     <ul class="dropdown-menu" role="menu">
       <li><%= link_to(:app_your_observations.l,
-                      observations_path(user: @user.id),
+                      observations_path(by_user: @user.id),
                       { class: "" } ) %></li>
       <li><%= link_to(:app_your_projects.l, projects_path(member: @user.id),
                       { class: "", id: "user_drop_projects_link" }) %></li>
@@ -74,7 +73,8 @@ admin_mode_args = in_admin_mode? ? { turn_off: true } : { turn_on: true }
                 :app_logout.l,
                 account_logout_path,
                 { class: "btn btn-link", id: "user_drop_logout_link" }
-              ) %><li>
+              ) %>
+      <li>
     </ul>
   </li>
   <li>

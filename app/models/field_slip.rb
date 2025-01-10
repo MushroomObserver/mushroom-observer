@@ -7,7 +7,14 @@ class FieldSlip < AbstractModel
   belongs_to :observation
   belongs_to :project
   belongs_to :user
-  default_scope { order(:code) }
+  default_scope { order(code: :asc, created_at: :desc, id: :desc) }
+
+  scope :by_user, lambda { |user|
+    where(user_id: user.id).distinct
+  }
+  scope :for_project, lambda { |project|
+    where(project_id: project.id).distinct
+  }
 
   validates :code, uniqueness: true
   validates :code, presence: true

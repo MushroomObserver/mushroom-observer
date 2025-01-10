@@ -88,10 +88,17 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
             format: { with: /\A[A-Z0-9][A-Z0-9-]*\z/,
                       message: proc { :alphanumerics_only.t } }
 
+  default_scope { order(updated_at: :desc, id: :desc) }
+
   scope :show_includes, lambda {
     strict_loading.includes(
       { comments: :user },
       :location
+    )
+  }
+  scope :violations_includes, lambda {
+    strict_loading.includes(
+      { observations: [:location, :user] }
     )
   }
 
@@ -180,6 +187,10 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def constraints
     "#{:DATES.t}: #{date_range}; #{:LOCATION.t}: #{place_name}"
+  end
+
+  def constraints?
+    start_date || end_date || location
   end
 
   # Check if user has permission to edit a given object.

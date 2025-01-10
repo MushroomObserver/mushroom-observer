@@ -24,7 +24,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
   end
 
   test "should get index for user" do
-    requires_login(:index, user: @field_slip.user.id)
+    requires_login(:index, by_user: @field_slip.user.id)
     assert_response :success
   end
 
@@ -184,7 +184,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
              }
            })
     end
-    obs = Observation.last
+    obs = Observation.reorder(id: :asc).last
     assert_equal(date, obs.when)
     assert_redirected_to observation_url(obs.id)
   end
@@ -206,7 +206,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
              }
            })
     end
-    obs = Observation.last
+    obs = Observation.reorder(id: :asc).last
     assert_match("https://www.inaturalist.org/observations",
                  obs.notes[:Other_Codes])
   end
@@ -242,7 +242,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
              }
            })
     end
-    obs = Observation.last
+    obs = Observation.reorder(id: :asc).last
     assert_redirected_to observation_url(obs.id)
     assert_equal(obs.text_name, "Fungi")
   end
@@ -262,7 +262,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
              }
            })
     end
-    obs = Observation.last
+    obs = Observation.reorder(id: :asc).last
     assert_redirected_to observation_url(obs.id)
   end
 

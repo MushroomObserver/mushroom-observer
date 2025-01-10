@@ -40,8 +40,7 @@ module SpeciesLists
     private
 
     def lookup_species_list_query(list)
-      Query.lookup_and_save(:Observation, :in_species_list,
-                            species_list: list)
+      Query.lookup_and_save(:Observation, species_list: list)
     end
 
     # Used by download.

@@ -10,22 +10,6 @@ class FieldSlipsController < ApplicationController
   before_action :login_required, except: [:show]
   # rubocop:enable Rails/LexicallyScopedActionFilter
 
-  # NOTE: Must be an ivar of FieldSlipsController
-  # Defining them in an index.rb does not work
-  @index_subaction_param_keys = [
-    :user,
-    :project,
-    :by,
-    :q,
-    :id
-  ].freeze
-
-  @index_subaction_dispatch_table = {
-    by: :index_query_results,
-    q: :index_query_results,
-    id: :index_query_results
-  }.freeze
-
   # GET /field_slips or /field_slips.json
   #
   # #index - defined in Application Controller
@@ -90,6 +74,7 @@ class FieldSlipsController < ApplicationController
         end
         format.json { render(:show, status: :ok, location: @field_slip) }
       else
+        @field_slip.reload
         format.html { render(:edit, status: :unprocessable_entity) }
         format.json do
           render(json: @field_slip.errors, status: :unprocessable_entity)

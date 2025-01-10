@@ -164,7 +164,7 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     assert_equal(img2.user_id, obs.user_id)
     assert_not_equal(img3.user_id, obs.user_id)
 
-    img_ids = obs.images.map(&:id)
+    img_ids = obs.images.reorder(created_at: :asc).map(&:id)
     assert_equal([img1.id, img2.id, img3.id], img_ids)
 
     old_img1_notes = img1.notes

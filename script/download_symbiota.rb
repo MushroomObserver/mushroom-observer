@@ -7,7 +7,7 @@ require(File.expand_path("../app/extensions/extensions.rb", __dir__))
 
 def do_report(year, do_labels = false)
   warn("Doing #{year.inspect}...")
-  query = Query.lookup(:Observation, :all, date: year)
+  query = Query.lookup(:Observation, date: year)
   report = Report::Symbiota.new(query: query).render
   report.sub!(/^[^\n]*\n/, "") unless do_labels
   puts(report)

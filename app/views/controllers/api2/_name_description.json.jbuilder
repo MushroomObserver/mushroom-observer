@@ -13,15 +13,15 @@ json.source_name(object.source_name.to_s) if object.source_name.present?
 json.license(object.license.try(&:display_name).to_s)
 json.public(object.public ? true : false)
 json.locale(object.locale.to_s)
-json.gen_desc(object.gen_desc.to_s.tpl_nodiv) if object.gen_desc.present?
-json.diag_desc(object.diag_desc.to_s.tpl_nodiv) if object.diag_desc.present?
-json.distribution(object.distribution.to_s.tpl_nodiv) \
+json.gen_desc(object.gen_desc.to_s.tl_for_api) if object.gen_desc.present?
+json.diag_desc(object.diag_desc.to_s.tl_for_api) if object.diag_desc.present?
+json.distribution(object.distribution.to_s.tl_for_api) \
   if object.distribution.present?
-json.habitat(object.habitat.to_s.tpl_nodiv) if object.habitat.present?
-json.look_alikes(object.look_alikes.to_s.tpl_nodiv) \
+json.habitat(object.habitat.to_s.tl_for_api) if object.habitat.present?
+json.look_alikes(object.look_alikes.to_s.tl_for_api) \
   if object.look_alikes.present?
-json.uses(object.uses.to_s.tpl_nodiv) if object.uses.present?
-json.notes(object.notes.to_s.tpl_nodiv) if object.notes.present?
-json.refs(object.refs.to_s.tpl_nodiv) if object.refs.present?
-json.classification(object.classification.to_s.tpl_nodiv) \
+json.uses(object.uses.to_s.tl_for_api) if object.uses.present?
+json.notes(object.notes.to_s.tl_for_api) if object.notes.present?
+json.refs(object.refs.to_s.tl_for_api) if object.refs.present?
+json.classification(object.classification.to_s.tl_for_api) \
   if object.classification.present?

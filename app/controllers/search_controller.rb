@@ -25,13 +25,7 @@ class SearchController < ApplicationController
     session[:pattern] = pattern
     session[:search_type] = type
 
-    special_params = if type == :herbarium
-                       { flavor: :all }
-                     else
-                       {}
-                     end
-
-    forward_pattern_search(type, pattern, special_params)
+    forward_pattern_search(type, pattern)
   end
 
   ADVANCED_SEARCHABLE_MODELS = [Image, Location, Name, Observation].freeze
@@ -51,7 +45,7 @@ class SearchController < ApplicationController
     query_params = {}
     add_filled_in_text_fields(query_params)
     add_applicable_filter_parameters(query_params, model)
-    query = create_query(model, :advanced_search, query_params)
+    query = create_query(model, query_params)
     redirect_to_model_controller(model, query)
   end
 
@@ -69,7 +63,7 @@ class SearchController < ApplicationController
   end
 
   # In the case of "needs_naming", this is added to the search path params
-  def forward_pattern_search(type, pattern, special_params)
+  def forward_pattern_search(type, pattern)
     case type
     when :google
       site_google_search(pattern)
@@ -78,8 +72,8 @@ class SearchController < ApplicationController
       redirect_to_search_or_index(
         pattern: pattern,
         search_path: send(:"#{type.to_s.pluralize}_path",
-                          params: { pattern: pattern }.merge(special_params)),
-        index_path: send(:"#{type.to_s.pluralize}_path", special_params)
+                          params: { pattern: pattern }),
+        index_path: send(:"#{type.to_s.pluralize}_path")
       )
     else
       flash_error(:runtime_invalid.t(type: :search, value: type.inspect))
@@ -87,8 +81,10 @@ class SearchController < ApplicationController
     end
   end
 
+  # NOTE: The autocompleters for name, location, and user all make the ids
+  # available now, so this could be a lot more efficient.
   def add_filled_in_text_fields(query_params)
-    [:content, :location, :name, :user].each do |field|
+    [:content, :user_where, :name, :user].each do |field|
       val = params[:search][field].to_s
       next if val.blank?
 

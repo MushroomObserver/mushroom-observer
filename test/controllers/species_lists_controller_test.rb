@@ -111,17 +111,22 @@ class SpeciesListsControllerTest < FunctionalTestCase
     )
   end
 
+  # These tests for titles were never returning the actual sorted results!
+  # The params "created" and "modified" do not even work.
+  # The incorrect query (often blank) simply got the "right" title.
   def test_index_sorted_by_user
     by = "user"
 
     login
     get(:index, params: { by: by })
 
+    assert_equal(SpeciesList.order_by_user.map(&:user_id),
+                 assigns(:objects).map(&:user_id))
     assert_displayed_title("Species Lists by #{by.capitalize}")
   end
 
-  def test_index_sorted_by_time_modifed
-    by = "modified"
+  def test_index_sorted_by_updated_at
+    by = "updated_at"
 
     login
     get(:index, params: { by: by })
@@ -130,8 +135,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_displayed_title("Species Lists by Time Last Modified")
   end
 
-  def test_index_sorted_by_date_created
-    by = "created"
+  def test_index_sorted_by_created_at
+    by = "created_at"
 
     login
     get(:index, params: { by: by })
@@ -243,7 +248,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     project = projects(:bolete_project)
 
     login
-    get(:index, params: { for_project: project.id })
+    get(:index, params: { project: project.id })
 
     assert_displayed_title("Species Lists for #{project.title}")
   end
@@ -252,7 +257,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     project = projects(:empty_project)
 
     login
-    get(:index, params: { for_project: project.id })
+    get(:index, params: { project: project.id })
 
     assert_response(:success)
     assert_displayed_title("")
@@ -263,7 +268,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     project = observations(:minimal_unknown_obs)
 
     login
-    get(:index, params: { for_project: project.id })
+    get(:index, params: { project: project.id })
 
     assert_response(:redirect)
     assert_redirected_to(projects_path)
@@ -369,7 +374,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
   def test_show_flow
     login
-    query = Query.lookup_and_save(:SpeciesList, :all, by: "reverse_user")
+    query = Query.lookup_and_save(:SpeciesList, by: "reverse_user")
     query_params = @controller.query_params(query)
     get(:index, params: query_params)
     assert_template(:index)
@@ -452,7 +457,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
       }
     }
     post_requires_login(:create, params)
-    spl = SpeciesList.last
+    spl = SpeciesList.reorder(id: :asc).last
     assert_redirected_to(species_list_path(spl.id))
     assert_equal(BASE_CONTRIBUTION + v_spl + v_obs, rolf.reload.contribution)
     assert_not_nil(spl)
@@ -484,7 +489,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
       }
     }
     post_requires_login(:create, params)
-    spl = SpeciesList.last
+    spl = SpeciesList.reorder(id: :asc).last
     assert_redirected_to(species_list_path(spl.id))
     assert_objs_equal(Location.unknown, spl.location)
   end
@@ -789,7 +794,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
                                bugs_names.second.id }
     }
     post(:create, params: params)
-    spl = SpeciesList.last
+    spl = SpeciesList.reorder(id: :asc).last
 
     assert_redirected_to(species_list_path(spl.id))
     assert_equal(BASE_CONTRIBUTION + v_spl + v_obs, rolf.reload.contribution)
@@ -849,7 +854,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     }
     login("rolf")
     post(:create, params: params)
-    spl = SpeciesList.last
+    spl = SpeciesList.reorder(id: :asc).last
 
     assert_equal(
       spl.created_at.to_date, spl.when,
@@ -1384,9 +1389,9 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login("rolf")
     spl1 = species_lists(:unknown_species_list)
     spl2 = species_lists(:one_genus_three_species_list)
-    query1 = Query.lookup_and_save(:Observation, :in_species_list,
+    query1 = Query.lookup_and_save(:Observation,
                                    species_list: spl1.id, by: :name)
-    query2 = Query.lookup_and_save(:Observation, :in_species_list,
+    query2 = Query.lookup_and_save(:Observation,
                                    species_list: spl2.id, by: :name)
 
     # make sure the "Set Source" link is on the page somewhere

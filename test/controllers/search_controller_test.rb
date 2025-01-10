@@ -15,7 +15,7 @@ class SearchControllerTest < FunctionalTestCase
             user: "myself",
             model: model.name.underscore,
             content: "Long pink stem and small pink cap",
-            location: "Eastern Oklahoma"
+            user_where: "Eastern Oklahoma"
           },
           commit: "Search"
         }
@@ -130,6 +130,6 @@ class SearchControllerTest < FunctionalTestCase
     # rather than the index that lists query results.
     params = { search: { pattern: "", type: :herbarium } }
     get(:pattern, params: params)
-    assert_redirected_to(herbaria_path(flavor: :all))
+    assert_redirected_to(herbaria_path)
   end
 end

@@ -8,7 +8,7 @@ xml.tag!(
 ) do
   xml_string(xml, :initial_determination, object.initial_det)
   xml_string(xml, :accession_number, object.accession_number)
-  xml_html_string(xml, :notes, object.notes.to_s.tpl_nodiv)
+  xml_html_string(xml, :notes, object.notes.to_s.tl_for_api)
   xml_datetime(xml, :created_at, object.created_at)
   xml_datetime(xml, :updated_at, object.updated_at)
   if detail

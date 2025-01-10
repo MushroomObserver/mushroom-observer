@@ -199,62 +199,26 @@
 class User < AbstractModel # rubocop:disable Metrics/ClassLength
   require "digest/sha1"
 
-  # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
-  # first value is the default
-  enum thumbnail_size:
-       {
-         thumbnail: 1,
-         small: 2
-       },
-       _prefix: :thumb_size,
-       _default: "thumbnail"
+  # First value is the default
+  enum :thumbnail_size, { thumbnail: 1, small: 2 },
+       prefix: :thumb_size, default: :thumbnail, instance_methods: false
 
-  enum image_size:
-       {
-         thumbnail: 1,
-         small: 2,
-         medium: 3,
-         large: 4,
-         huge: 5,
-         full_size: 6
-       },
-       _prefix: true,
-       _default: "medium"
+  enum :image_size,
+       { thumbnail: 1, small: 2, medium: 3, large: 4, huge: 5, full_size: 6 },
+       prefix: true, default: :medium, instance_methods: false
 
-  enum votes_anonymous:
-       {
-         no: 1,
-         yes: 2,
-         old: 3
-       },
-       _prefix: :votes_anon,
-       _default: "no"
+  enum :votes_anonymous, { no: 1, yes: 2, old: 3 },
+       prefix: :votes_anon, default: :no, instance_methods: false
 
-  enum location_format:
-       {
-         postal: 1,
-         scientific: 2
-       },
-       _prefix: true,
-       _default: "postal"
+  enum :location_format, { postal: 1, scientific: 2 },
+       prefix: true, default: :postal, instance_methods: false
 
-  enum hide_authors:
-       {
-         none: 1,
-         above_species: 2
-       },
-       _prefix: true,
-       _default: "none"
+  enum :hide_authors, { none: 1, above_species: 2 },
+       prefix: true, default: :none, instance_methods: false
 
-  enum keep_filenames:
-       {
-         toss: 1,
-         keep_but_hide: 2,
-         keep_and_show: 3
-       },
-       _suffix: :filenames,
-       _default: "toss"
+  enum :keep_filenames, { toss: 1, keep_but_hide: 2, keep_and_show: 3 },
+       suffix: :filenames, default: :toss, instance_methods: false
 
   has_one :user_stats, dependent: :destroy
 
@@ -319,7 +283,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   belongs_to :license       # user's default license
   belongs_to :location      # primary location
 
-  serialize :content_filter, type: Hash
+  serialize :content_filter, type: Hash, coder: YAML
 
   ##############################################################################
   #
@@ -344,8 +308,8 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # This causes the data structures in these fields to be serialized
   # automatically with YAML and stored as plain old text strings.
-  serialize :bonuses
-  serialize :alert
+  serialize :bonuses, coder: YAML
+  serialize :alert, coder: YAML
 
   scope :by_contribution, lambda {
     order(contribution: :desc, name: :asc, login: :asc)
@@ -436,11 +400,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     "#<User #{id}: #{unique_text_name.inspect}>"
   end
 
-  # For now just special exception to keep Adolf from wasting my life.
-  def hide_specimen_stuff?
-    id == 2873
-  end
-
   ##############################################################################
   #
   #  :section: Names
@@ -495,6 +454,16 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     return nil if old_legal_name == new_legal_name
 
     [old_legal_name, new_legal_name]
+  end
+
+  # remove <user.name> from search string "#{user[:login]} <#{user[:name]}>"
+  def self.remove_bracketed_name(input)
+    previous = nil
+    while input != previous
+      previous = input
+      input = input.sub(/ *<.*>/, "")
+    end
+    input
   end
 
   # TODO: Move this to an ActiveJob, once we get jobs going - AN 20240220
@@ -572,13 +541,16 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # Return an Array of Project's that this User is an admin for.
+  # Project must be unscoped in order to join to another table.
+  # (removing default_scope)
   def projects_admin
-    Project.joins(:admin_group_users).where(user_id: id)
+    Project.unscoped.joins(:admin_group_users).where(user_id: id)
   end
 
   # Return an Array of Project's that this User is a member of.
+  # unscoped: see above
   def projects_member(order: :created_at, include: nil)
-    @projects_member ||= Project.where(user_group: user_groups.ids).
+    @projects_member ||= Project.unscoped.where(user_group: user_groups.ids).
                          includes(include).order(order).to_a
   end
 

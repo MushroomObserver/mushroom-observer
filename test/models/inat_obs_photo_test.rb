@@ -18,8 +18,11 @@ class InatObsPhotoTest < UnitTestCase
     assert_equal("img/jpeg", photo.content_type)
     assert_equal("(c) Tim C., some rights reserved (CC BY-NC)",
                  photo.copyright_holder)
-    assert_equal("iNat photo uuid 6c223538-04d6-404c-8e84-b7d881dbe550",
-                 photo.original_name)
+    inat_photo = inat_obs[:observation_photos].first
+    assert_equal(
+      "iNat photo_id: #{inat_photo[:photo_id]}, uuid: #{inat_photo[:uuid]}",
+      photo.original_name
+    )
     assert_equal(
       "Imported from iNat #{DateTime.now.utc.strftime("%Y-%m-%d %H:%M:%S %z")}",
       photo.notes

@@ -3,10 +3,7 @@ records = obs.herbarium_records
 can_add = in_admin_mode? || obs.can_edit? ||
           @user && @user.curated_herbaria.any?
 %>
-
 <%=
-unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
-
   tag.div(
     id: "observation_herbarium_records",
     class: "obs-herbarium",
@@ -45,14 +42,16 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
                 )
               end
               concat(tag.br)
-              concat(
-                link_to_if(
-                  record.herbarium.web_searchable?,
-                  "#{record.herbarium.code} #{:herbarium_record_collection.t}",
-                     record.herbarium.mcp_url(record.accession_number),
-                     target: "_blank"
+              if record.herbarium.web_searchable?
+                concat(
+                  link_to(
+                    "#{record.herbarium.code} " \
+                    "#{:herbarium_record_collection.t}",
+                      record.herbarium.mcp_url(record.accession_number),
+                      target: "_blank"
+                  )
                 )
-              )
+              end
             end
           end.safe_join
         end
@@ -68,14 +67,16 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
             tag.li(id: "herbarium_record_#{record.id}") do
               concat(link_to(*herbarium_record_tab(record, obs)))
               concat(tag.br)
-              concat(
-                link_to_if(
-                  record.herbarium.web_searchable?,
-                  "#{record.herbarium.code} #{:herbarium_record_collection.t}",
-                     record.herbarium.mcp_url(record.accession_number),
-                     target: "_blank"
+              if record.herbarium.web_searchable?
+                concat(
+                  link_to(
+                    "#{record.herbarium.code} " \
+                    "#{:herbarium_record_collection.t}",
+                    record.herbarium.mcp_url(record.accession_number),
+                    target: "_blank"
+                  )
                 )
-              )
+              end
             end
           end.safe_join
         end
@@ -91,5 +92,4 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
       ].safe_join
     end
   end
-end
 %>

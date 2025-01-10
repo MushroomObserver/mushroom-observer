@@ -181,7 +181,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     obs = observations(:agaricus_campestris_obs)
     herbarium_record = herbarium_records(:agaricus_campestris_spec)
     herbarium = herbarium_record&.herbarium
-    herbarium.update(code: "notInMcp", mycoportal_db: nil)
+    herbarium.update(code: "notInMcp")
 
     user = users(:dick)
     assert(user.curated_herbaria.any?,
@@ -190,7 +190,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     login(user.login)
     get(:show, params: { id: obs.id })
 
-    assert_match(:herbarium_record_collection.l, @response.body)
+    assert_no_match(:herbarium_record_collection.l, @response.body)
     assert_select(
       "a[href=?]", herbarium_record.mcp_url, false,
       "Obs shouldn't link to MyCoPortal for Herbarium Record in a Herbarium " \
@@ -641,10 +641,10 @@ class ObservationsControllerShowTest < FunctionalTestCase
 
   def test_prev_and_next_observation_simple
     # Uses non-default observation query. :when is the default order
-    o_chron = Observation.order(created_at: :desc, id: :desc)
+    o_chron = Observation.reorder(created_at: :desc, id: :desc)
     login
     # need to save a query here to get :next in a non-standard order
-    Query.lookup_and_save(:Observation, :all, by: :created_at)
+    Query.lookup_and_save(:Observation, by: :created_at)
     qr = QueryRecord.last.id.alphabetize
 
     get(:show, params: { id: o_chron.fourth.id, flow: :next, q: qr })
@@ -674,7 +674,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     # When requesting non-synonym observations of n2, it should include n1,
     # since an observation of n1 was clearly intended to be an observation of
     # n2.
-    query = Query.lookup_and_save(:Observation, :all,
+    query = Query.lookup_and_save(:Observation,
                                   names: n2.id,
                                   include_synonyms: false,
                                   by: :name)
@@ -682,7 +682,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
 
     # Likewise, when requesting *synonym* observations, neither n1 nor n2
     # should be included.
-    query = Query.lookup_and_save(:Observation, :all,
+    query = Query.lookup_and_save(:Observation,
                                   names: n2.id,
                                   include_synonyms: true,
                                   exclude_original_names: true,
@@ -690,7 +690,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_equal(2, query.num_results)
 
     # But for our prev/next test, lets do the all-inclusive query.
-    query = Query.lookup_and_save(:Observation, :all,
+    query = Query.lookup_and_save(:Observation,
                                   names: n2.id,
                                   include_synonyms: true,
                                   by: :name)

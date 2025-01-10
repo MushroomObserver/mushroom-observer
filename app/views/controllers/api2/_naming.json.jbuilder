@@ -12,6 +12,6 @@ json.votes(object.votes.map { |vote| json_vote(vote) }) if detail
 reasons = object.reasons_array.select(&:used?)
 if reasons.any?
   json.reasons(reasons.map do |reason|
-    { type: reason.label.l, notes: reason.notes.to_s.tpl_nodiv }
+    { type: reason.label.l, notes: reason.notes.to_s.tl_for_api }
   end)
 end

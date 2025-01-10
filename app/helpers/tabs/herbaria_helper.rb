@@ -6,15 +6,18 @@ module Tabs
   module HerbariaHelper
     def herbaria_index_tabs(query:)
       links ||= []
-      links << herbaria_index_tab unless query&.flavor == :all
-      unless query&.flavor == :nonpersonal
-        links << labeled_nonpersonal_herbaria_index_tab
-      end
+      links << if query&.params&.dig(:nonpersonal)
+                 herbaria_index_tab
+               else
+                 labeled_nonpersonal_herbaria_index_tab
+               end
       links << new_herbarium_tab
     end
 
     def herbaria_index_sorts(query:)
-      return nonpersonal_herbaria_index_sorts if query&.flavor == :nonpersonal
+      if query&.params&.dig(:nonpersonal)
+        return nonpersonal_herbaria_index_sorts
+      end
 
       full_herbaria_index_sorts
     end
@@ -89,7 +92,7 @@ module Tabs
 
     def herbaria_index_tab
       [:herbarium_index_list_all_herbaria.l,
-       herbaria_path(flavor: :all),
+       herbaria_path,
        { class: tab_id(__method__.to_s) }]
     end
 
@@ -101,13 +104,13 @@ module Tabs
 
     def nonpersonal_herbaria_index_tab
       [:herbarium_index.t,
-       add_query_param(herbaria_path(flavor: :nonpersonal)),
+       add_query_param(herbaria_path(nonpersonal: true)),
        { class: tab_id(__method__.to_s) }]
     end
 
     def labeled_nonpersonal_herbaria_index_tab
       [:herbarium_index_nonpersonal_herbaria.l,
-       herbaria_path(flavor: :nonpersonal),
+       herbaria_path(nonpersonal: true),
        { class: "nonpersonal_herbaria_index_link" }]
     end
   end

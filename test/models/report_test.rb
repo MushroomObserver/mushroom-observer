@@ -514,7 +514,7 @@ class ReportTest < UnitTestCase
   end
 
   def test_ascii_encoding
-    query = Query.lookup(:Observation, :all)
+    query = Query.lookup(:Observation)
     report = Report::Raw.new(query: query)
     report.encoding = "ASCII"
     body = report.body
@@ -522,7 +522,7 @@ class ReportTest < UnitTestCase
   end
 
   def test_utf_16_encoding
-    query = Query.lookup(:Observation, :all)
+    query = Query.lookup(:Observation)
     report = Report::Raw.new(query: query)
     report.encoding = "UTF-16"
     body = report.body
@@ -531,7 +531,7 @@ class ReportTest < UnitTestCase
 
   def test_project_tweaker_report
     obs = observations(:trusted_hidden)
-    query = Query.lookup(:Observation, :all)
+    query = Query.lookup(:Observation)
     report_type = Report::Raw
     body = report_body(report_type, query)
     table = CSV.parse(body, col_sep: report_type.separator)
@@ -551,7 +551,7 @@ class ReportTest < UnitTestCase
   private
 
   def do_csv_test(report_type, obs, expect, &block)
-    query = Query.lookup(:Observation, :all)
+    query = Query.lookup(:Observation)
     body = report_body(report_type, query)
     table = CSV.parse(body, col_sep: report_type.separator)
     assert_equal(query.num_results + 1, table.count)
@@ -568,7 +568,7 @@ class ReportTest < UnitTestCase
   end
 
   def do_tsv_test(report_type, obs, expect, &block)
-    query = Query.lookup(:Observation, :all)
+    query = Query.lookup(:Observation)
     body = report_body(report_type, query)
     rows = body.split("\n")
     assert_equal(query.num_results + 1, rows.length)
@@ -577,13 +577,22 @@ class ReportTest < UnitTestCase
   end
 
   def do_zip_test(report_type, expect)
-    body = report_body(report_type, Query.lookup(:Observation, :all))
+    body = report_body(report_type, Query.lookup(:Observation))
     zio = Zip::InputStream.new(StringIO.new(body))
     contents = []
     while (entry = zio.get_next_entry)
       contents << entry.name
     end
     assert_equal(expect, contents)
+  end
+
+  def build_taxa_report
+    query = Query.lookup(:Observation)
+    observations = Report::Darwin::Observations.new(query: query)
+    return if observations.body.empty?
+
+    report_type = Report::Darwin::Taxa
+    report_type.new(query: query, observations: observations)
   end
 
   def do_split_test(name, author, rank, expect)

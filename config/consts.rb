@@ -183,14 +183,19 @@ MushroomObserver::Application.configure do
   # Default number of items for an RSS page
   config.default_layout_count = 12
 
-  # Max number of results Query will put in "IN (...)" clauses.
-  config.query_max_array = 1000
+  # Max number of results Query will put in "IN (...)" clauses.  This
+  # was originally 1000, but searching for "Russula" or "Amanita" now
+  # exceeds that limit (Dec. 2024) and is causing issues.  Raising it
+  # to 10,000 allows those cases to work.  Tested a simple query with
+  # 11,000 ids on the current version of MySQL which completed in
+  # around 0.1 seconds.
+  config.query_max_array = 10_000
 
   # Filter(s) to apply to all Querys
   config.default_content_filter = nil
 
   # Maximum number of Observations that can be downloaded in a single request
-  config.max_downloads = 120
+  config.max_downloads = 5000
 
   # List of User ids of users that can see the image recognition
   # "Suggest Names" button on the observation page.

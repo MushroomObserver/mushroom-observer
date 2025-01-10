@@ -49,7 +49,7 @@ class Naming < AbstractModel
   belongs_to :user
   has_many :votes, dependent: :destroy
 
-  serialize :reasons
+  serialize :reasons, coder: YAML
 
   before_save :did_name_change?
   before_save :enforce_default_reasons
