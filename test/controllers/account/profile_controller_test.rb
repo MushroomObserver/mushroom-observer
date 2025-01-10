@@ -66,7 +66,7 @@ module Account
 
       rolf.reload
       assert_equal(num_images + 1, Image.count)
-      assert_equal(Image.last.id, rolf.image_id)
+      assert_equal(Image.reorder(created_at: :asc).last.id, rolf.image_id)
       assert_equal("Someone Else", rolf.image.copyright_holder)
       assert_equal(2003, rolf.image.when.year)
       assert_equal(licenses(:ccnc25), rolf.image.license)

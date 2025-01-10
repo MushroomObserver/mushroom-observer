@@ -111,17 +111,22 @@ class SpeciesListsControllerTest < FunctionalTestCase
     )
   end
 
+  # These tests for titles were never returning the actual sorted results!
+  # The params "created" and "modified" do not even work.
+  # The incorrect query (often blank) simply got the "right" title.
   def test_index_sorted_by_user
     by = "user"
 
     login
     get(:index, params: { by: by })
 
+    assert_equal(SpeciesList.order_by_user.map(&:user_id),
+                 assigns(:objects).map(&:user_id))
     assert_displayed_title("Species Lists by #{by.capitalize}")
   end
 
-  def test_index_sorted_by_time_modifed
-    by = "modified"
+  def test_index_sorted_by_updated_at
+    by = "updated_at"
 
     login
     get(:index, params: { by: by })
@@ -130,8 +135,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_displayed_title("Species Lists by Time Last Modified")
   end
 
-  def test_index_sorted_by_date_created
-    by = "created"
+  def test_index_sorted_by_created_at
+    by = "created_at"
 
     login
     get(:index, params: { by: by })
@@ -452,7 +457,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
       }
     }
     post_requires_login(:create, params)
-    spl = SpeciesList.last
+    spl = SpeciesList.reorder(id: :asc).last
     assert_redirected_to(species_list_path(spl.id))
     assert_equal(BASE_CONTRIBUTION + v_spl + v_obs, rolf.reload.contribution)
     assert_not_nil(spl)
@@ -484,7 +489,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
       }
     }
     post_requires_login(:create, params)
-    spl = SpeciesList.last
+    spl = SpeciesList.reorder(id: :asc).last
     assert_redirected_to(species_list_path(spl.id))
     assert_objs_equal(Location.unknown, spl.location)
   end
@@ -789,7 +794,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
                                bugs_names.second.id }
     }
     post(:create, params: params)
-    spl = SpeciesList.last
+    spl = SpeciesList.reorder(id: :asc).last
 
     assert_redirected_to(species_list_path(spl.id))
     assert_equal(BASE_CONTRIBUTION + v_spl + v_obs, rolf.reload.contribution)
@@ -849,7 +854,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     }
     login("rolf")
     post(:create, params: params)
-    spl = SpeciesList.last
+    spl = SpeciesList.reorder(id: :asc).last
 
     assert_equal(
       spl.created_at.to_date, spl.when,

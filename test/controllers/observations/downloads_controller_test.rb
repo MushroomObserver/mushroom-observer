@@ -5,7 +5,7 @@ require("test_helper")
 module Observations
   class DownloadsControllerTest < FunctionalTestCase
     def test_download_observation_index
-      obs = Observation.where(user: mary)
+      obs = Observation.reorder(id: :asc).where(user: mary)
       assert(obs.length >= 4)
       query = Query.lookup_and_save(:Observation, by_user: mary.id)
 

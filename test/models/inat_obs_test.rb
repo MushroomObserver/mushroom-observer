@@ -181,8 +181,9 @@ class InatObsTest < UnitTestCase
 
   def test_names_approved_vs_deprecated
     # Make sure fixtures still OK
-    names = Name.where(text_name: "Lentinellus ursinus", rank: "Species",
-                       deprecated: false)
+    names = Name.reorder(id: :asc).
+            where(text_name: "Lentinellus ursinus", rank: "Species",
+                  deprecated: false)
     assert(names.many? { |name| !name.author.start_with?("sensu ") },
            "Test needs a name with many non-sensu matching fixtures")
     first_name = names.first
