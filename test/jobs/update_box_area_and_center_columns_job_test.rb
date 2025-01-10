@@ -11,7 +11,7 @@ class UpdateBoxAreaAndCenterColumnsJobTest < ActiveJob::TestCase
     job.perform
 
     assert_empty(Observation.in_box_of_max_area.where(location_lat: nil))
-    # Note: All locations should already have a box_area, so this was nil before
+    # NOTE: All locations may already have a box_area, so probably nil before
     assert_empty(Location.where(box_area: nil))
   end
 
@@ -22,7 +22,7 @@ class UpdateBoxAreaAndCenterColumnsJobTest < ActiveJob::TestCase
     job = UpdateBoxAreaAndCenterColumnsJob.new
     _loc_count, obs_count = job.perform(dry_run: true)
 
-    # check it again
+    # check it again and be sure it did NOT update the obs
     needs_update = Observation.in_box_of_max_area.where(location_lat: nil)
     assert_not_empty(needs_update)
     assert_equal(obs_count, needs_update.count)
