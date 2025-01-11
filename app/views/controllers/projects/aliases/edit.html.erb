@@ -1,0 +1,9 @@
+<h1>Editing Project Alias</h1>
+
+<%= render('form', project_alias: @project_alias) %>
+
+<%
+  project_id = @project_alias.project_id
+%>
+<%= link_to 'Show', project_alias_path(project_id:, id: @project_alias.id) %> |
+<%= link_to 'Back', project_aliases_path(project_id:) %>

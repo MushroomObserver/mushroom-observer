@@ -1,4 +1,4 @@
-<%= form_with(model: project_alias, url:) do |form| %>
+<%= form_with(model: project_alias) do |form| %>
   <% if project_alias.errors.any? %>
     <div id="error_explanation">
       <h2><%= pluralize(project_alias.errors.count, "error") %> prohibited this project alias from being saved:</h2>

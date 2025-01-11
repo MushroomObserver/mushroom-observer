@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Projects
-  class ProjectAliasesController < ApplicationController
+  class AliasesController < ApplicationController
     before_action :login_required
     before_action :pass_query_params, except: [:index]
     before_action :set_project_alias, only: [:show, :edit, :update, :destroy]
