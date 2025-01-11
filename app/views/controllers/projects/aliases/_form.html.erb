@@ -11,23 +11,23 @@
   <% end %>
 
   <div class="field">
-    <%= form.label :name %>
-    <%= form.text_field :name %>
+    <%= form.label(:name) %>
+    <%= form.text_field(:name) %>
   </div>
 
   <div class="field">
-    <%= form.label :project_id %>
-    <%= form.collection_select :project_id, Project.all, :id, :title %>
+    <%= form.label(:project_id) %>
+    <%= form.collection_select(:project_id, Project.all, :id, :title) %>
   </div>
 
   <div class="field">
-    <%= form.label :target_type %>
-    <%= form.select :target_type, ['Location', 'User'] %>
+    <%= form.label(:target_type) %>
+    <%= form.select(:target_type, ['Location', 'User']) %>
   </div>
 
   <div class="field">
-    <%= form.label :target_id %>
-    <%= form.number_field :target_id %>
+    <%= form.label(:target_id) %>
+    <%= form.number_field(:target_id) %>
   </div>
 
   <div class="actions">
