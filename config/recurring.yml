@@ -11,3 +11,7 @@
 #   a_cleanup_task:
 #     command: "DeletedStuff.clear_all"
 #     schedule: every day at 9am
+production:
+  repopulate_location_and_observation_center_lat_lng:
+    class: UpdateBoxAreaAndCenterColumnsJob
+    schedule: every day at midnight
