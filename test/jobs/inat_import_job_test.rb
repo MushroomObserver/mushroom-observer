@@ -169,7 +169,8 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_match(suggestion_date, proposed_name_notes)
   end
 
-  # Had 1 photo, 1 identification, 0 observation_fields
+  # Had 2 photos, 6 identifications of 3 taxa, a different taxon,
+  # 9 obs fields, including "DNA Barcode ITS", "Collection number", "Collector"
   def test_import_job_obs_with_sequence_and_multiple_ids
     file_name = "lycoperdon"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
@@ -222,6 +223,7 @@ class InatImportJobTest < ActiveJob::TestCase
     import_job_obs_with_one_photo
   end
 
+  # Had 1 photo, 1 identification, 0 observation_fields
   def import_job_obs_with_one_photo
     file_name = "evernia"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
@@ -296,8 +298,6 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(obs.sequences.none?)
   end
 
-  # Had 2 photos, 6 identifications of 3 taxa, a different taxon,
-  # 9 obs fields, including "DNA Barcode ITS", "Collection number", "Collector"
   def test_import_job_infra_specific_name
     file_name = "i_obliquus_f_sterilis"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
