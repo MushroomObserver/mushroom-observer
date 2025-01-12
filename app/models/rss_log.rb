@@ -149,7 +149,7 @@ class RssLog < AbstractModel
   belongs_to :project
   belongs_to :species_list
 
-  default_scope { order(updated_at: :desc, id: :desc) }
+  scope :index_order, -> { order(updated_at: :desc, id: :desc) }
 
   # Maximum allowed length (in bytes) of notes column.  Actually it should be
   # 65535, I think, but let's mak sure there's a safe buffer.

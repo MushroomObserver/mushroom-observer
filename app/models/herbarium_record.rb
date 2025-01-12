@@ -57,7 +57,9 @@ class HerbariumRecord < AbstractModel
   before_update :log_update
   before_destroy :log_destroy
 
-  default_scope { order(initial_det: :asc, accession_number: :asc, id: :desc) }
+  scope :index_order, lambda {
+    order(initial_det: :asc, accession_number: :asc, id: :desc)
+  }
 
   scope :for_observation, lambda { |obs|
     joins(:observation_herbarium_records).

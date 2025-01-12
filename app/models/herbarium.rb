@@ -63,7 +63,7 @@ class Herbarium < AbstractModel
   # Used by create/edit form.
   attr_accessor :place_name, :personal, :personal_user_name
 
-  default_scope { order(name: :asc, id: :desc) }
+  scope :index_order, -> { order(name: :asc, id: :desc) }
 
   def self.mcp_collections
     @mcp_collections ||=

@@ -26,7 +26,7 @@ class Article < AbstractModel
   belongs_to :user
   belongs_to :rss_log
 
-  default_scope { order(created_at: :desc, id: :desc) }
+  scope :index_order, -> { order(created_at: :desc, id: :desc) }
 
   # Automatically log standard events.
   self.autolog_events = [:created!, :updated!, :destroyed!]

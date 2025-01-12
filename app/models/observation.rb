@@ -227,7 +227,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # Automatically (but silently) log destruction.
   self.autolog_events = [:destroyed]
 
-  default_scope { order(when: :desc, id: :desc) }
+  scope :index_order, -> { order(when: :desc, id: :desc) }
 
   # The order used on the home page
   scope :by_activity, lambda {

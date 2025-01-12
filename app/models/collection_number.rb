@@ -58,7 +58,7 @@ class CollectionNumber < AbstractModel
   before_update :log_update
   before_destroy :log_destroy
 
-  default_scope { order(name: :asc, number: :asc) }
+  scope :index_order, -> { order(name: :asc, number: :asc) }
 
   scope :for_observation, lambda { |obs|
     joins(:observation_collection_numbers).
