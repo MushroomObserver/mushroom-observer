@@ -542,16 +542,13 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # Return an Array of Project's that this User is an admin for.
-  # Project must be unscoped in order to join to another table.
-  # (removing default_scope)
   def projects_admin
-    Project.unscoped.joins(:admin_group_users).where(user_id: id)
+    Project.joins(:admin_group_users).where(user_id: id)
   end
 
   # Return an Array of Project's that this User is a member of.
-  # unscoped: see above
   def projects_member(order: :created_at, include: nil)
-    @projects_member ||= Project.unscoped.where(user_group: user_groups.ids).
+    @projects_member ||= Project.where(user_group: user_groups.ids).
                          includes(include).order(order).to_a
   end
 

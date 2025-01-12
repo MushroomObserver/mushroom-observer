@@ -146,7 +146,7 @@ class UserStatsTest < UnitTestCase
   #   rolf.reload
   #   assert_equal(score + 1, rolf.contribution)
   #
-  #   obs.update_attribute(:thumb_image, Image.reorder(created_at: :asc).last)
+  #   obs.update_attribute(:thumb_image, Image.last)
   #   rolf.reload
   #   assert_equal(score + 10, rolf.contribution)
   #

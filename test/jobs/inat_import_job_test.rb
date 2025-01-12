@@ -81,7 +81,7 @@ class InatImportJobTest < ActiveJob::TestCase
       end
     end
 
-    obs = Observation.reorder(created_at: :asc).last
+    obs = Observation.last
 
     standard_assertions(obs: obs, name: name, loc: loc)
 
@@ -148,7 +148,7 @@ class InatImportJobTest < ActiveJob::TestCase
       end
     end
 
-    obs = Observation.reorder(created_at: :asc).last
+    obs = Observation.last
     proposed_name = obs.namings.first
     assert_equal(user, proposed_name.user,
                  "Name should be proposed by #{user.login}")
@@ -199,7 +199,7 @@ class InatImportJobTest < ActiveJob::TestCase
       end
     end
 
-    obs = Observation.reorder(created_at: :asc).last
+    obs = Observation.last
     standard_assertions(obs: obs, name: name, loc: loc)
 
     assert_equal(1, obs.images.length, "Obs should have 1 image")
@@ -242,7 +242,7 @@ class InatImportJobTest < ActiveJob::TestCase
       end
     end
 
-    obs = Observation.reorder(created_at: :asc).last
+    obs = Observation.last
     standard_assertions(obs: obs, name: name)
     assert(obs.images.any?, "Obs should have images")
     assert(obs.sequences.none?)
@@ -272,7 +272,7 @@ class InatImportJobTest < ActiveJob::TestCase
       end
     end
 
-    obs = Observation.reorder(created_at: :asc).last
+    obs = Observation.last
     standard_assertions(obs: obs, name: name)
 
     assert(obs.images.any?, "Obs should have images")
@@ -316,7 +316,7 @@ class InatImportJobTest < ActiveJob::TestCase
       end
     end
 
-    obs = Observation.reorder(created_at: :asc).last
+    obs = Observation.last
     standard_assertions(obs: obs, name: name)
     assert_equal(1, obs.images.length, "Obs should have 1 image")
     assert(obs.sequences.none?)
@@ -347,7 +347,7 @@ class InatImportJobTest < ActiveJob::TestCase
       end
     end
 
-    obs = Observation.reorder(created_at: :asc).last
+    obs = Observation.last
     standard_assertions(obs: obs, name: name)
     assert_equal(1, obs.images.length, "Obs should have 1 image")
     assert(obs.sequences.none?)
@@ -380,7 +380,7 @@ class InatImportJobTest < ActiveJob::TestCase
       end
     end
 
-    obs = Observation.reorder(created_at: :asc).last
+    obs = Observation.last
     standard_assertions(obs: obs, name: name)
 
     assert(obs.images.any?, "Obs should have Images")
@@ -407,7 +407,7 @@ class InatImportJobTest < ActiveJob::TestCase
       InatImportJob.perform_now(inat_import)
     end
 
-    obs = Observation.reorder(created_at: :asc).last
+    obs = Observation.last
     name = Name.find_by(text_name: 'Arrhenia "sp-NY02"')
     assert(name.present?, "Failed to create provisional name")
     assert(name.rss_log_id.present?,
@@ -458,7 +458,7 @@ class InatImportJobTest < ActiveJob::TestCase
       end
     end
 
-    obs = Observation.reorder(created_at: :asc).last
+    obs = Observation.last
     standard_assertions(obs: obs, name: name)
 
     assert(obs.images.any?, "Obs should have images")

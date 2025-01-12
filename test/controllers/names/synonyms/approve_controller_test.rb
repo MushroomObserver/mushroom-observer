@@ -41,7 +41,7 @@ module Names::Synonyms
 
       approved_synonyms.each { |n| assert(n.reload.deprecated) }
 
-      comment = Comment.reorder(created_at: :asc).last
+      comment = Comment.last
       assert_equal("Name", comment.target_type)
       assert_equal(old_name.id, comment.target_id)
       assert_match(/approve/i, comment.summary)

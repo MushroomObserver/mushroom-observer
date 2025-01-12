@@ -453,7 +453,7 @@ class Name < AbstractModel
     end
   end
 
-  default_scope { order(sort_name: :asc, id: :desc) }
+  scope :index_order, -> { order(sort_name: :asc, id: :desc) }
 
   # NOTE: To improve Coveralls display, do not use one-line stabby lambda scopes
   scope :of_lichens,

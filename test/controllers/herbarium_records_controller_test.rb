@@ -245,7 +245,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_not(obs.specimen)
     post(:create, params: params)
     assert_equal(herbarium_record_count + 1, HerbariumRecord.count)
-    herbarium_record = HerbariumRecord.reorder(created_at: :asc).last
+    herbarium_record = HerbariumRecord.last
     assert_equal("The New York Botanical Garden",
                  herbarium_record.herbarium.name)
     assert_equal(params[:herbarium_record][:initial_det],

@@ -80,8 +80,8 @@ class ChecklistTest < UnitTestCase
 
     Observation.create!(name: names(:agaricus))
     assert_names_equal(names(:agaricus),
-                       Observation.reorder(id: :asc).last.name)
-    assert_users_equal(dick, Observation.reorder(id: :asc).last.user)
+                       Observation.last.name)
+    assert_users_equal(dick, Observation.last.user)
     data = Checklist::ForUser.new(dick)
     assert_equal(before_num_species, data.num_species)
 

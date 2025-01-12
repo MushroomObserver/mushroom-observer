@@ -5,5 +5,5 @@ class GlossaryTermImage < ApplicationRecord
   belongs_to :glossary_term
   belongs_to :image
 
-  # default_scope -> { order("image.vote_cache DESC") }
+  # scope :index_order, -> -> { order("image.vote_cache DESC") }
 end
