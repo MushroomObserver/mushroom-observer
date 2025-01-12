@@ -86,7 +86,7 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
     assert_flash_success
     assert_selector("body.species_lists__show")
 
-    spl = SpeciesList.reorder(id: :asc).last
+    spl = SpeciesList.last
     obs = spl.observations
     assert_equal(5, obs.length, obs.map(&:text_name).inspect)
     assert_equal([
@@ -99,7 +99,7 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
     assert_equal("List Title", spl.title)
     assert_equal(albion, spl.location)
     assert_equal("List notes.", spl.notes.strip)
-    obs_last = obs.reorder(id: :asc).last
+    obs_last = obs.last
     assert_equal(albion, obs_last.location)
     assert_equal(member_notes,
                  obs_last.notes[Observation.other_notes_key].strip)
@@ -161,7 +161,7 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
     assert_equal(new_location, spl.where)
     assert_nil(spl.location)
     assert_equal("New list notes.", spl.notes.strip)
-    obs_last = obs.reorder(id: :asc).last
+    obs_last = obs.last
     assert_nil(obs_last.location)
     assert_equal(new_location, obs_last.where)
     assert_nil(obs_last.location)
@@ -186,13 +186,13 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("#title", text: /#{spl.title}/)
     assert_link(href: edit_species_list_path(spl.id))
 
-    loc = Location.reorder(id: :asc).last
+    loc = Location.last
     assert_equal(newer_location, loc.name)
     assert_equal(dick, User.current)
     assert_equal(newer_location_reverse, loc.display_name)
     spl.reload
     obs = spl.observations
-    obs_last = obs.reorder(id: :asc).last
+    obs_last = obs.last
     assert_equal(loc.name, spl.where)
     assert_equal(loc, spl.location)
     assert_equal(loc.name, obs_last.where)

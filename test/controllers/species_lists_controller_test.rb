@@ -457,7 +457,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
       }
     }
     post_requires_login(:create, params)
-    spl = SpeciesList.reorder(id: :asc).last
+    spl = SpeciesList.last
     assert_redirected_to(species_list_path(spl.id))
     assert_equal(BASE_CONTRIBUTION + v_spl + v_obs, rolf.reload.contribution)
     assert_not_nil(spl)
@@ -489,7 +489,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
       }
     }
     post_requires_login(:create, params)
-    spl = SpeciesList.reorder(id: :asc).last
+    spl = SpeciesList.last
     assert_redirected_to(species_list_path(spl.id))
     assert_objs_equal(Location.unknown, spl.location)
   end
@@ -794,7 +794,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
                                bugs_names.second.id }
     }
     post(:create, params: params)
-    spl = SpeciesList.reorder(id: :asc).last
+    spl = SpeciesList.last
 
     assert_redirected_to(species_list_path(spl.id))
     assert_equal(BASE_CONTRIBUTION + v_spl + v_obs, rolf.reload.contribution)
@@ -854,7 +854,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     }
     login("rolf")
     post(:create, params: params)
-    spl = SpeciesList.reorder(id: :asc).last
+    spl = SpeciesList.last
 
     assert_equal(
       spl.created_at.to_date, spl.when,

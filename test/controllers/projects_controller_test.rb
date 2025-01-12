@@ -577,7 +577,7 @@ class ProjectsControllerTest < FunctionalTestCase
 
     project.reload
     assert_equal(num_images + 1, Image.count)
-    assert_equal(Image.reorder(created_at: :asc).last.id, project.image_id)
+    assert_equal(Image.last.id, project.image_id)
     assert_equal(params[:upload][:copyright_holder],
                  project.image.copyright_holder)
     assert_equal(params[:upload][:copyright_year], project.image.when.year)
