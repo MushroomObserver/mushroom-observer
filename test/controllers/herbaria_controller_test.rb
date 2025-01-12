@@ -421,7 +421,7 @@ class HerbariaControllerTest < FunctionalTestCase
 
     assert_equal(herbarium_count + 1, Herbarium.count)
     assert_response(:redirect)
-    herbarium = Herbarium.reorder(created_at: :asc).last
+    herbarium = Herbarium.last
     assert_equal("Burbank Herbarium", herbarium.name)
     assert_equal("BH", herbarium.code)
     assert_objs_equal(locations(:burbank), herbarium.location)
@@ -497,7 +497,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_flash_text(/must define this location/i)
     assert_equal(herbarium_count + 1, Herbarium.count)
     assert_response(:redirect)
-    herbarium = Herbarium.reorder(created_at: :asc).last
+    herbarium = Herbarium.last
     assert_equal("New Herbarium", herbarium.name)
     assert_equal("", herbarium.code)
     assert_nil(herbarium.location)
@@ -522,7 +522,7 @@ class HerbariaControllerTest < FunctionalTestCase
     post(:create, params: { herbarium: params })
     assert_equal(herbarium_count + 1, Herbarium.count)
     assert_response(:redirect)
-    herbarium = Herbarium.reorder(created_at: :asc).last
+    herbarium = Herbarium.last
     assert_equal("My Herbarium", herbarium.name)
     assert_equal("", herbarium.code)
     assert_nil(herbarium.location)

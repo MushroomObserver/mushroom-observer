@@ -285,9 +285,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     where.not(id: ObservationView.where(user_id: user_id, reviewed: 1).
                   select(:observation_id))
   }
-  # unscoped because it doesn't work otherwise. not chainable after others, obv
   scope :needs_naming_and_not_reviewed_by_user, lambda { |user|
-    unscoped.needs_naming.not_reviewed_by_user(user).distinct
+    needs_naming.not_reviewed_by_user(user).distinct
   }
   # Higher taxa: returns narrowed-down group of id'd obs,
   # in higher taxa under the given taxon
@@ -761,9 +760,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   def self.refresh_cached_column(type: nil, foreign: nil, local: foreign,
                                  dry_run: false)
     tbl = type.camelize.constantize.arel_table
-    # Observation must be unscoped in order to join to another table.
-    # (removing default_scope)
-    query = Observation.unscoped.joins(type.to_sym).
+    query = Observation.joins(type.to_sym).
             where(Observation[local.to_sym].not_eq(tbl[foreign.to_sym]))
     msgs = query.map do |obs|
       "Fixing #{type} #{foreign} for obs ##{obs.id}, " \
@@ -783,9 +780,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # date.  Fixes and returns a messages for each one that was wrong.
   # Used by refresh_caches script
   def self.make_sure_no_observations_are_misspelled(dry_run: false)
-    # Observation must be unscoped in order to join to name.
-    # (removing default_scope)
-    query = Observation.unscoped.joins(:name).
+    query = Observation.joins(:name).
             where(Name[:correct_spelling_id].not_eq(nil))
     msgs = query.pluck(Observation[:id], Name[:text_name]).
            map do |id, search_name|

@@ -8,7 +8,7 @@ class ImagePresenterTest < ActionView::TestCase
 
   # This test may become unnecessary when covered by other (integration?) tests
   # def test_image_link_html
-  #   link = Image.url(:full_size, Image.reorder(created_at: :asc).last.id)
+  #   link = Image.url(:full_size, Image.last.id)
   #   put_link = image_link_html(link, :put)
   #   assert_match(/form class="button_to"/, put_link)
   #   assert_match(/input type="hidden" name="_method" value="put"/,

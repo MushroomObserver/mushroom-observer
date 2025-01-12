@@ -236,7 +236,7 @@ class ImagesControllerTest < FunctionalTestCase
     assert_nil(new_outer)
 
     # Start with inner at last image of first observation (det_unknown).
-    inner.current = det_unknown.images.reorder(created_at: :asc).last.id
+    inner.current = det_unknown.images.last.id
 
     # No more images for det_unknowns, so inner goes to next obs (min_unknown),
     # but this has no images, so goes to next (a_campestris),
@@ -257,7 +257,7 @@ class ImagesControllerTest < FunctionalTestCase
 
     params = {
       # inner for first obs
-      id: det_unknown.images.reorder(created_at: :asc).last.id,
+      id: det_unknown.images.last.id,
       params: @controller.query_params(inner).merge({ flow: :next })
     }.flatten
     login

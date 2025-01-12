@@ -2250,7 +2250,7 @@ class QueryTest < UnitTestCase
                  ids: rolf.id)
     assert_query(LocationDescription.all,
                  :LocationDescription,
-                 ids: LocationDescription.all.select(:id).to_a)
+                 ids: LocationDescription.select(:id).to_a)
     assert_query([location_descriptions(:albion_desc).id],
                  :LocationDescription,
                  ids: [rolf.id, location_descriptions(:albion_desc).id])

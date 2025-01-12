@@ -73,7 +73,7 @@ class AbstractModelTest < UnitTestCase
     # Make sure our local time is the same after being saved then retrieved
     # from database.  'Make sure the updated_at' timestamp also gets set to some
     # time between then and now.
-    obs = Observation.reorder(id: :asc).last
+    obs = Observation.last
     now1 = now.in_time_zone
     now2 = Time.now.in_time_zone
     assert_equal(now1.to_s, obs.created_at.to_s, '"created_at" got mangled.')

@@ -66,7 +66,7 @@ class ArticlesControllerTest < FunctionalTestCase
   # But we want to test a `destroy_button` tab too.
   # That method calls `add_query_param` and others unavailable to helper tests
   def test_create_links_to_helper
-    article = Article.reorder(created_at: :asc).last
+    article = Article.last
     links = [[:create_article_title.t, new_article_path,
               { class: "new_article_link" }],
              [:EDIT.t, edit_article_path(article.id),
@@ -165,7 +165,7 @@ class ArticlesControllerTest < FunctionalTestCase
     assert_difference("Article.count", 1) do
       post(:create, params: params)
     end
-    article = Article.reorder(created_at: :asc).last
+    article = Article.last
     assert_equal(body, article.body)
     assert_equal(title, article.title)
     assert_redirected_to(article_path(article.id))
