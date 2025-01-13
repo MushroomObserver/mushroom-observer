@@ -11,23 +11,30 @@
   <% end %>
 
   <div class="field">
-    <%= form.label(:name) %>
-    <%= form.text_field(:name) %>
+    <%= text_field_with_label(form:, field: :name, label: "#{:Name.t}:", inline: true) %>
   </div>
 
   <div class="field">
-    <%= form.label(:project_id) %>
-    <%= form.collection_select(:project_id, Project.all, :id, :title) %>
+    <%= form.hidden_field(:project_id, value: project_alias.project_id) %>
   </div>
 
   <div class="field">
-    <%= form.label(:target_type) %>
-    <%= form.select(:target_type, ['Location', 'User']) %>
+    <%= select_with_label(form:,
+                          field: :target_type,
+                          label: "#{:project_alias_type.t}:",
+                          options: [:LOCATION.t, :USER.t],
+                          inline: true,
+                          selected: project_alias.target_type || :LOCATION.t) %>
   </div>
 
   <div class="field">
-    <%= form.label(:target_id) %>
-    <%= form.number_field(:target_id) %>
+    <%= autocompleter_field(form:, field: :target,
+                            label: :USER.t + ":", type: :user) %>
+  </div>
+
+  <div class="field">
+    <%= autocompleter_field(form:, field: :target,
+                            label: :LOCATION.t + ":", type: :location) %>
   </div>
 
   <div class="actions">

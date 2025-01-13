@@ -1,11 +1,7 @@
 <%
-add_project_banner(@project)
-
-@container = :wide
-
-project_id = @project.id
-action = { controller: "/projects/project_aliases", action: :create,
-            project_id: @project.id, q: get_query_param }
+  add_project_banner(@project)
+  @container = :wide
+  project_id = @project.id
 %>
 
 <h1>Project Aliases</h1>

@@ -1,3 +1,9 @@
+<%
+  add_project_banner(@project_alias.project)
+  @container = :wide
+  project_id = @project_alias.project_id
+%>
+
 <p>
   <strong>Name:</strong>
   <%= @project_alias.name %>
@@ -13,5 +19,5 @@
   <%= @project_alias.target.try(:name) %>
 </p>
 
-<%= link_to 'Edit', edit_project_alias_path(prjoect_id: @project_alias.project_id, id: @project_alias.id) %> |
+<%= link_to 'Edit', edit_project_alias_path(project_id:, id: @project_alias.id) %> |
 <%= link_to 'Back', project_aliases_path %>

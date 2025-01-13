@@ -34,8 +34,7 @@ module Projects
       respond_to do |format|
         if @project_alias.save
           format.html do
-            redirect_to(@project_alias,
-                        notice: :project_alias_created.t)
+            project_alias_redirect(@project_alias)
           end
           format.json do
             render(json: @project_alias, status: :created,
@@ -54,7 +53,10 @@ module Projects
       respond_to do |format|
         if @project_alias.update(project_alias_params)
           format.html do
-            redirect_to(@project_alias,
+            redirect_to(project_alias_path(
+                          project_id: @project_alias.project_id,
+                          id: @project_alias.id
+                        ),
                         notice: :project_alias_updated.t)
           end
           format.json { render(json: @project_alias) }
@@ -68,10 +70,11 @@ module Projects
     end
 
     def destroy
+      project_id = @project_alias.project_id
       @project_alias.destroy
       respond_to do |format|
         format.html do
-          redirect_to(project_aliases_url,
+          redirect_to(project_aliases_pat(project_id:),
                       notice: :project_alias_deleted.t)
         end
         format.json { head(:no_content) }
@@ -79,6 +82,14 @@ module Projects
     end
 
     private
+
+    def project_alias_redirect(project_alias)
+      redirect_to(project_alias_path(
+                    project_id: project_alias.project_id,
+                    id: project_alias.id
+                  ),
+                  notice: :project_alias_created.t)
+    end
 
     def set_project_alias
       @project_alias = ProjectAlias.find(params[:id])
