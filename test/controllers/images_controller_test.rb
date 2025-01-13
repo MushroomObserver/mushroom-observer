@@ -373,6 +373,17 @@ class ImagesControllerTest < FunctionalTestCase
     end
   end
 
+  def test_show_image_nil_user
+    image = images(:peltigera_image)
+    image.update(user: nil)
+
+    login
+    get(:show, params: { id: image.id })
+
+    assert_response(:success)
+    assert_template("show", partial: "_form_ccbyncsa25")
+  end
+
   # Prove show works when params include obs
   def test_show_with_obs_param
     obs = observations(:peltigera_obs)
