@@ -36,13 +36,13 @@
   <span id="started"><%= @tracker.created_at %></span>
 </p>
 
-<%# Prominently refresh button if job is incomplete%>
+<%# Display refresh button if job is incomplete%>
 <% if import_incomplete?(@inat_import) %>
-<p>
-  <button class="btn btn-default" onclick="location.reload();">
-    <%= :inat_import_tracker_refresh.l %>
-  </button>
-</p>
+  <p>
+    <button class="btn btn-default" onclick="location.reload();">
+      <%= :inat_import_tracker_refresh.l %>
+    </button>
+  </p>
 <% end %>
 
 <p>
