@@ -176,6 +176,24 @@ module Query::Initializers::Observations
     )
   end
 
+  def add_with_notes_fields_condition(fields, *)
+    return if fields.empty?
+
+    conds = fields.map { |field| notes_field_presence_condition(field) }
+    @where << conds.join(" OR ")
+    add_joins(*)
+  end
+
+  def notes_field_presence_condition(field)
+    field = field.dup
+    pat = if field.gsub!(/(["\\])/) { '\\\1' }
+            "\":#{field}:\""
+          else
+            ":#{field}:"
+          end
+    "observations.notes like \"%#{pat}%\""
+  end
+
   def initialize_obs_search_parameters
     add_search_condition("observations.notes", params[:notes_has])
     add_search_condition(

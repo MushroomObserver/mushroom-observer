@@ -33,6 +33,46 @@ module Query::Initializers::Images
     )
   end
 
+  def add_image_size_condition(vals, *)
+    return if vals.empty?
+
+    min, max = vals
+    sizes = Image::ALL_SIZES
+    pixels = Image::ALL_SIZES_IN_PIXELS
+    if min
+      size = pixels[sizes.index(min)]
+      @where << "images.width >= #{size} OR images.height >= #{size}"
+    end
+    if max
+      size = pixels[sizes.index(max) + 1]
+      @where << "images.width < #{size} AND images.height < #{size}"
+    end
+    add_joins(*)
+  end
+
+  def add_image_type_condition(vals, *)
+    return if vals.empty?
+
+    exts  = Image::ALL_EXTENSIONS.map(&:to_s)
+    mimes = Image::ALL_CONTENT_TYPES.map(&:to_s) - [""]
+    types = vals & exts
+    return if vals.empty?
+
+    other = types.include?("raw")
+    types -= ["raw"]
+    types = types.map { |x| mimes[exts.index(x)] }
+    str1 = "images.content_type IN ('#{types.join("','")}')"
+    str2 = "images.content_type NOT IN ('#{mimes.join("','")}')"
+    @where << if types.empty?
+                str2
+              elsif other
+                "#{str1} OR #{str2}"
+              else
+                str1
+              end
+    add_joins(*)
+  end
+
   def initialize_img_vote_parameters
     add_boolean_condition("images.vote_cache IS NOT NULL",
                           "images.vote_cache IS NULL",
