@@ -57,7 +57,7 @@ class Query::Observations < Query::Base
   end
 
   def initialize_association_parameters
-    add_where_condition("observations", params[:locations])
+    add_where_condition(:observations, params[:locations])
     add_at_location_condition
     initialize_herbaria_parameter
     initialize_herbarium_records_parameter

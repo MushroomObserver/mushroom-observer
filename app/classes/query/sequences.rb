@@ -91,7 +91,7 @@ class Query::Sequences < Query::Base
   def initialize_association_parameters
     initialize_observations_parameter(:sequences)
     initialize_observers_parameter
-    add_where_condition("observations", params[:locations], :observations)
+    add_where_condition(:observations, params[:locations], :observations)
     initialize_herbaria_parameter
     initialize_herbarium_records_parameter
     initialize_projects_parameter
