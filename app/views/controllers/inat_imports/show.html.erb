@@ -6,11 +6,6 @@
 
 <p>
   <b><%= :inat_import_tracker_status.t %>: </b>
-  <span id="state"><%= @inat_import.state %></span>
-</p>
-
-<p>
-  Via Stimulus:
   <%=
     # Outer span calls Stimulus controller, passing in the endpoint
     tag.span(
