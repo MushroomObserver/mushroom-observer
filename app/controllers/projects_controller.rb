@@ -50,7 +50,7 @@ class ProjectsController < ApplicationController
   # Outputs: @project
   def show
     store_location
-    return unless find_project_and_where!
+    return if find_project_and_where!.blank?
 
     set_ivars_for_show
   end
