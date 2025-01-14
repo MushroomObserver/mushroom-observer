@@ -39,9 +39,9 @@
 <%# Prominently refresh button if job is incomplete%>
 <% if import_incomplete?(@inat_import) %>
 <p>
-  <%= link_to(:inat_import_tracker_refresh.l,
-                inat_import_job_tracker_path(@tracker),
-                { class: "btn btn-default" } ) %>
+  <button class="btn btn-default" onclick="location.reload();">
+    <%= :inat_import_tracker_refresh.l %>
+  </button>
 </p>
 <% end %>
 
