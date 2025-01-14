@@ -19,11 +19,8 @@
               endpoint: inat_import_job_tracker_path(@inat_import, @tracker) }
     ) do
       # Inner span is replaced by Stimulus
-      tag.span(
-        @tracker.status,
-        data: { inat_import_job_target: "status",
-                status: @tracker.status }
-      )
+      render(partial: "inat_imports/job_trackers/status",
+             locals: { tracker: @tracker })
     end
   %>
 </p>
