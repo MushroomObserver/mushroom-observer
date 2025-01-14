@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class Query::SpeciesLists < Query::Base
+  include Query::Params::Names
   include Query::Initializers::Names
 
   def model
