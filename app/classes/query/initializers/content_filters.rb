@@ -1,12 +1,6 @@
 # frozen_string_literal: true
 
 module Query::Initializers::ContentFilters
-  def content_filter_parameter_declarations(model)
-    ContentFilter.by_model(model).each_with_object({}) do |fltr, decs|
-      decs[:"#{fltr.sym}?"] = fltr.type
-    end
-  end
-
   def initialize_content_filters_for_rss_log(model)
     conds = content_filter_sql_conds(model)
     return unless conds.any?

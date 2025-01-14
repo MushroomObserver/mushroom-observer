@@ -1,13 +1,19 @@
 # frozen_string_literal: true
 
 class Query::Locations < Query::Base
+  include Query::Params::Locations
+  include Query::Params::Descriptions
+  include Query::Params::Names
+  include Query::Params::Observations
+  include Query::Params::AdvancedSearch
+  include Query::Params::ContentFilters
   include Query::Initializers::Locations
   include Query::Initializers::Descriptions
-  include Query::Initializers::AdvancedSearch
   include Query::Initializers::Names
   include Query::Initializers::Observations
+  include Query::Initializers::AdvancedSearch
   include Query::Initializers::ContentFilters
-  include Query::Initializers::ObservationsQueryDescriptions
+  include Query::Titles::Observations
 
   def model
     Location

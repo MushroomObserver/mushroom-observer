@@ -1,57 +1,6 @@
 # frozen_string_literal: true
 
 module Query::Initializers::Names
-  def names_per_se_parameter_declarations
-    {
-      created_at?: [:time],
-      updated_at?: [:time],
-      ids?: [Name],
-      by_user?: User,
-      by_editor?: User,
-      users?: [User],
-      misspellings?: { string: [:no, :either, :only] },
-      deprecated?: { string: [:either, :no, :only] },
-      with_synonyms?: :boolean,
-      locations?: [:string],
-      species_lists?: [:string],
-      rank?: [{ string: Name.all_ranks }],
-      is_deprecated?: :boolean,
-      pattern?: :string,
-      text_name_has?: :string,
-      with_author?: :boolean,
-      author_has?: :string,
-      with_citation?: :boolean,
-      citation_has?: :string,
-      with_classification?: :boolean,
-      classification_has?: :string,
-      with_notes?: :boolean,
-      notes_has?: :string,
-      with_comments?: { boolean: [true] },
-      comments_has?: :string,
-      need_description?: :boolean,
-      with_descriptions?: :boolean,
-      with_observations?: { boolean: [true] }
-    }
-  end
-
-  # Used in coerced queries for obs, plus sequence and species_list queries
-  def names_parameter_declarations
-    {
-      names?: [:string],
-      include_synonyms?: :boolean,
-      include_subtaxa?: :boolean,
-      include_immediate_subtaxa?: :boolean,
-      exclude_original_names?: :boolean
-    }
-  end
-
-  def naming_consensus_parameter_declarations
-    {
-      include_all_name_proposals?: :boolean,
-      exclude_consensus?: :boolean
-    }
-  end
-
   def initialize_name_comments_and_notes_parameters
     add_boolean_condition(
       "LENGTH(COALESCE(names.notes,'')) > 0",
@@ -107,7 +56,7 @@ module Query::Initializers::Names
 
   def initialize_name_association_parameters
     add_id_condition("observations.id", params[:observations], :observations)
-    add_where_condition("observations", params[:locations], :observations)
+    add_where_condition(:observations, params[:locations], :observations)
     initialize_species_lists_parameter
   end
 

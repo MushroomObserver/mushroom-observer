@@ -1,19 +1,24 @@
 # frozen_string_literal: true
 
 class Query::Observations < Query::Base
+  include Query::Params::Observations
+  include Query::Params::Locations
+  include Query::Params::Names
+  include Query::Params::AdvancedSearch
+  include Query::Params::ContentFilters
   include Query::Initializers::Names
   include Query::Initializers::Observations
   include Query::Initializers::Locations
   include Query::Initializers::ContentFilters
   include Query::Initializers::AdvancedSearch
-  include Query::Initializers::ObservationsQueryDescriptions
+  include Query::Titles::Observations
 
   def model
     Observation
   end
 
   def parameter_declarations
-    super.merge(observations_only_parameter_declarations).
+    super.merge(observations_per_se_parameter_declarations).
       merge(observations_parameter_declarations).
       merge(bounding_box_parameter_declarations).
       merge(content_filter_parameter_declarations(Observation)).
@@ -52,7 +57,7 @@ class Query::Observations < Query::Base
   end
 
   def initialize_association_parameters
-    add_where_condition("observations", params[:locations])
+    add_where_condition(:observations, params[:locations])
     add_at_location_condition
     initialize_herbaria_parameter
     initialize_herbarium_records_parameter
