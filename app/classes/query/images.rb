@@ -1,13 +1,19 @@
 # frozen_string_literal: true
 
 class Query::Images < Query::Base
+  include Query::Params::Images
+  include Query::Params::Names
+  include Query::Params::Locations
+  include Query::Params::Observations
+  include Query::Params::AdvancedSearch
+  include Query::Params::ContentFilters
   include Query::Initializers::Images
   include Query::Initializers::Names
-  include Query::Initializers::AdvancedSearch
-  include Query::Initializers::Observations
   include Query::Initializers::Locations
+  include Query::Initializers::Observations
+  include Query::Initializers::AdvancedSearch
   include Query::Initializers::ContentFilters
-  include Query::Initializers::ObservationsQueryDescriptions
+  include Query::Titles::Observations
 
   def model
     Image

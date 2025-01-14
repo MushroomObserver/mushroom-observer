@@ -58,7 +58,7 @@ class ObservationsController
     end
 
     def advanced_search_params
-      Query::Initializers::AdvancedSearch.advanced_search_params
+      Query::Params::AdvancedSearch.advanced_search_params
     end
 
     # Display matrix of Observations whose notes, etc. match a string pattern.

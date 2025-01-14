@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Query::Initializers::ObservationsQueryDescriptions
+module Query::Titles::Observations
   def with_observations_query_description
     return nil unless (description = observation_query_description)
 
