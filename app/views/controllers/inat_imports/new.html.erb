@@ -3,15 +3,15 @@
 %>
 
 <div>
-  <%= form_with url: observations_inat_imports_path, method: :post do |f| %>
-    <%= f.label :inat_username, "#{:inat_username.l}: " %>
+  <%= form_with(url: inat_imports_path, method: :post) do |f| %>
+    <%= f.label(:inat_username, "#{:inat_username.l}: ") %>
     <%= f.text_field(:inat_username, size: 10, class: "form-control",
                      value: User.current.inat_username) %>
 
     <%= panel_block(id: "choose_observation",
                     heading: :inat_choose_observations.l,
                     class: "name-section") do %>
-      <%= f.label :inat_id, "#{:inat_import_list.l}: " %>
+      <%= f.label(:inat_id, "#{:inat_import_list.l}: ") %>
       <%= f.text_field(:inat_ids, size: 10, value: @inat_ids,
           class: "form-control") %>
       <%#= check_box_with_label(form: f, field: :all,
