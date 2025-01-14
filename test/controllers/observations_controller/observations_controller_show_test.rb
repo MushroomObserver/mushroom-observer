@@ -198,6 +198,16 @@ class ObservationsControllerShowTest < FunctionalTestCase
     )
   end
 
+  def test_show_observation_nil_user
+    obs = observations(:detailed_unknown_obs)
+    obs.update(user: nil)
+
+    get(:show, params: { id: obs.id })
+
+    assert_response(:success)
+    assert_template("observations/show")
+  end
+
   ##############################################################################
 
   # ------ Show ----------------------------------------------- #

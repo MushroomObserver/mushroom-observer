@@ -100,7 +100,7 @@ module ImagesHelper
   def show_image_copyright?(image, object)
     object.type_tag != :observation ||
       (object.type_tag == :observation &&
-       image.copyright_holder != object.user.legal_name)
+       image.copyright_holder != object.user&.legal_name)
   end
 
   def show_best_image(obs)
