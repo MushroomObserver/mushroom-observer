@@ -1,6 +1,6 @@
 <%# Replace the title in the lightbox caption %>
 <%= turbo_stream.replace("observation_what_#{obs.id}") do
-  caption_obs_title(obs: obs)
+  caption_obs_title(obs: obs, identify: true)
 end %>
 
 <%# Replace the title in the matrix_box %>
@@ -9,7 +9,9 @@ end %>
                    id: obs.id)
 end %>
 
-<%# removes modal via data-controller="section-update" on caption_obs_title %>
-<%# turbo_stream.close_modal("modal_#{obs.id}_naming") %>
-<%# turbo_stream.remove("modal_#{obs.id}_naming") %>
+<%# are not removed via data-controller="section-update" because replaced %>
+<%= turbo_stream.close_modal("modal_obs_#{obs.id}_naming") %>
+<%= turbo_stream.remove("modal_obs_#{obs.id}_naming") %>
+<%= turbo_stream.close_modal("mo_ajax_progress") %>
+<%= turbo_stream.remove("mo_ajax_progress") %>
 <%= turbo_stream.remove("observation_identify_#{obs.id}") %>
