@@ -2935,6 +2935,42 @@ class QueryTest < UnitTestCase
                  :Observation, content: "agaricus") # comment
   end
 
+  def test_observation_date_years
+    assert_query(Observation.index_order.when_in_range("2005", "2009"),
+                 :Observation, date: %w[2005 2009] )
+  end
+
+  # observations in a month range, any year
+  def test_observation_date_months
+    assert_query(Observation.index_order.when_in_range("05", "12"),
+                 :Observation, date: %w[05 12] )
+  end
+
+  # observations found in a date range, any year
+  def test_observation_date_period
+    assert_query(Observation.index_order.when_in_range("02-22", "08-22"),
+                 :Observation, date: %w[02-22 08-22] )
+  end
+
+  # period wraps around the new year
+  def test_observation_date_period_wrap
+    assert_query(Observation.index_order.when_in_range("08-22", "02-22"),
+                 :Observation, date: %w[08-22 02-22] )
+  end
+
+  def test_observation_date_full
+    assert_query(Observation.index_order.
+                 when_in_range("2009-08-22", "2009-10-20"),
+                 :Observation, date: %w[2009-08-22 2009-10-20] )
+  end
+
+  # date wraps around the new year
+  def test_observation_date_wrap
+    assert_query(Observation.index_order.
+                 when_in_range("2015-08-22", "2016-02-22"),
+                 :Observation, date: %w[2015-08-22 2016-02-22] )
+  end
+
   def test_project_all
     expects = Project.index_order
     assert_query(expects, :Project)

@@ -106,6 +106,16 @@ class AbstractModel < ApplicationRecord
   #
   ##############################################################################
 
+  scope :order_by_user, lambda {
+    joins(:user).
+      reorder(User[:name].when(nil).then(User[:login]).
+              when("").then(User[:login]).
+              else(User[:name]).asc, id: :desc).distinct
+  }
+  scope :order_by_rss_log, lambda {
+    joins(:rss_log).
+      reorder(RssLog[:updated_at].desc, model.arel_table[:id].desc).distinct
+  }
   scope :created_on, lambda { |ymd_string|
     where(arel_table[:created_at].format("%Y-%m-%d").eq(ymd_string))
   }
@@ -132,16 +142,80 @@ class AbstractModel < ApplicationRecord
     where(arel_table[:updated_at].format("%Y-%m-%d") >= earliest).
       where(arel_table[:updated_at].format("%Y-%m-%d") <= latest)
   }
-  scope :order_by_user, lambda {
-    joins(:user).
-      reorder(User[:name].when(nil).then(User[:login]).
-              when("").then(User[:login]).
-              else(User[:name]).asc, id: :desc).distinct
+  # Allows searching for date ranges in the :when column: either within
+  # a logical time range, or within a periodic time range in recurring years.
+  # This is possible because the :when column already has the format("%Y-%m-%d")
+  scope :when_in_range, lambda { |earliest, latest|
+    if wrapped_date?(earliest, latest)
+      when_in_period_wrapping_new_year(earliest, latest)
+    else
+      when_after(earliest).when_before(latest)
+    end
   }
-  scope :order_by_rss_log, lambda {
-    joins(:rss_log).
-      reorder(RssLog[:updated_at].desc, model.arel_table[:id].desc).distinct
+  # scope for objects whose :when is in a certain period of the year that
+  # overlaps the new year, defined by a range of months or mm-dd
+  scope :when_in_period_wrapping_new_year, lambda { |earliest, latest|
+    m1, d1 = earliest.to_s.split("-")
+    m2, d2 = latest.to_s.split("-")
+    where(
+      arel_table[:when].month.gt(m1).
+      or(arel_table[:when].month.lt(m2)).
+      or(arel_table[:when].month.eq(m1).and(arel_table[:when].day.gteq(d1))).
+      or(arel_table[:when].month.eq(m2).and(arel_table[:when].day.lteq(d2)))
+    )
   }
+  # Note that these two conditions can take dates, or months, or month-days!
+  scope :when_after, ->(date) { half_date_condition(true, date) }
+  scope :when_before, ->(date) { half_date_condition(false, date) }
+
+  # Only works on month/day periods, because years where earliest > latest
+  # would make no sense
+  def self.wrapped_date?(earliest, latest)
+    earliest.to_s.match(/^\d\d-\d\d$/) && latest.to_s.match(/^\d\d-\d\d$/) &&
+      earliest.to_s > latest.to_s
+  end
+
+  def self.half_date_condition(min, val)
+    dir = min ? :gt : :lt
+    if starts_with_year?(val)
+      half_date_condition_with_year(min, dir, val)
+    elsif month_and_day?(val)
+      half_date_condition_with_month_and_day(dir, val)
+    elsif month_only?(val)
+      where(arel_table[:when].month.send(:"#{dir}eq", val))
+    end
+  end
+
+  def self.half_date_condition_with_year(min, dir, val)
+    y, m, d = val.split("-")
+    m ||= min ? 1 : 12
+    d ||= min ? 1 : 31
+    date = [y.to_i, m.to_i, d.to_i].join("-")
+    where(arel_table[:when].send(dir, date))
+  end
+
+  def self.half_date_condition_with_month_and_day(dir, val)
+    m, d = val.split("-")
+    where(
+      arel_table[:when].month.send(dir, m).
+      or(
+        arel_table[:when].month.eq(m).
+        and(arel_table[:when].day.send(:"#{dir}eq", d))
+      )
+    )
+  end
+
+  def self.starts_with_year?(val)
+    /^\d\d\d\d/.match?(val.to_s)
+  end
+
+  def self.month_and_day?(val)
+    /^\d\d-\d\d/.match?(val.to_s)
+  end
+
+  def self.month_only?(val)
+    /^\d\d/.match?(val.to_s) && val.to_i <= 12
+  end
 
   ##############################################################################
   #
