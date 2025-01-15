@@ -54,8 +54,10 @@ module LightboxHelper
   def caption_identify_ui(obs:)
     tag.div(class: "obs-identify", id: "observation_identify_#{obs.id}") do
       [
-        propose_naming_link(obs.id, context: "lightgallery",
-                                    btn_class: "btn d-inline-block"),
+        propose_naming_link(
+          obs.id, context: "lightgallery",
+                  btn_class: "btn btn-primary d-inline-block"
+        ),
         tag.span("&nbsp;".html_safe, class: "mx-2"),
         mark_as_reviewed_toggle(obs.id)
       ].safe_join
@@ -64,8 +66,10 @@ module LightboxHelper
 
   # This is different from show_obs_title, it's more like the matrix_box title
   def caption_obs_title(obs:)
-    tag.h4(class: "obs-what", id: "observation_what_#{obs.id}",
-           data: { controller: "section-update" }) do
+    tag.h4(
+      class: "obs-what", id: "observation_what_#{obs.id}",
+      data: { controller: "section-update" }
+    ) do
       [
         link_to(obs.id, add_query_param(obs.show_link_args),
                 class: "btn btn-primary mr-3",
