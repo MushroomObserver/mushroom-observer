@@ -159,15 +159,15 @@ class AbstractModel < ApplicationRecord
   end
 
   # Fills out the datetime with min/max values for month, day, hour, minute,
-  # second, as appropriate for < > comparisons. Year required.
+  # second, as appropriate for < > comparisons. Only year is required.
   def self.datetime_condition_formatted(min, val)
     y, m, d, h, n, s = val.split("-").map!(&:to_i)
     return unless /^\d\d\d\d/.match?(y.to_s)
 
     returns = min ? [y, 1, 1, 0, 0, 0] : [y, 12, 31, 23, 59, 59]
-    vals = [m, d, h, n, s].compact
-    returns[1, vals.length] = vals
-
+    vals = [m, d, h, n, s].compact # get as many specific values as were sent
+    returns[1, vals.length] = vals # merge these into the defaults, after year
+    # reformat to "%Y-%m-%d %H:%i:%s" as expected
     [returns[0..2]&.join("-"), returns[3..5]&.join(":")].join(" ")
   end
 
