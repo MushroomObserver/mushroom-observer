@@ -148,6 +148,8 @@ class AbstractModel < ApplicationRecord
     where(arel_table[col].format("%Y-%m-%d %H:%i:%s").send(dir, datetime))
   end
 
+  # Fills out the datetime with min/max values for month, day, hour, minute,
+  # second, as appropriate for < > comparisons. Year required.
   def self.datetime_condition_formatted(min, val)
     y, m, d, h, n, s = val.split("-").map!(&:to_i)
     return unless /^\d\d\d\d/.match?(y.to_s)
@@ -169,7 +171,7 @@ class AbstractModel < ApplicationRecord
       when_after(earliest).when_before(latest)
     end
   }
-  # scope for objects whose :when is in a certain period of the year that
+  # Scope for objects whose :when is in a certain period of the year that
   # overlaps the new year, defined by a range of months or mm-dd
   scope :when_in_period_wrapping_new_year, lambda { |earliest, latest|
     m1, d1 = earliest.to_s.split("-")
@@ -209,6 +211,8 @@ class AbstractModel < ApplicationRecord
     where(arel_table[:when].send(dir, date))
   end
 
+  # Fills out the date with min/max values for month and day as appropriate
+  # for < > comparisons. Requires year, prevalidated by `starts_with_year?`.
   def self.date_condition_formatted(min, val)
     y, m, d = val.split("-").map!(&:to_i)
     m ||= min ? 1 : 12
