@@ -35,10 +35,10 @@ module LightboxHelper
   def lightbox_obs_caption(obs, identify)
     html = []
 
-    html << caption_identify_ui(obs: obs) if identify
-    html << caption_obs_title(obs: obs)
-    html << observation_details_when_where_who(obs: obs)
-    html << caption_truncated_notes(obs: obs)
+    html << caption_identify_ui(obs:) if identify
+    html << caption_obs_title(obs:, identify:)
+    html << observation_details_when_where_who(obs:)
+    html << caption_truncated_notes(obs:)
     html
   end
 
@@ -52,7 +52,7 @@ module LightboxHelper
 
   # This gets removed on successful propose
   def caption_identify_ui(obs:)
-    tag.div(class: "obs-identify", id: "observation_identify_#{obs.id}") do
+    tag.div(class: "obs-identify mb-3", id: "observation_identify_#{obs.id}") do
       [
         propose_naming_link(
           obs.id, context: "lightgallery",
@@ -65,17 +65,24 @@ module LightboxHelper
   end
 
   # This is different from show_obs_title, it's more like the matrix_box title
-  def caption_obs_title(obs:)
+  def caption_obs_title(obs:, identify:)
+    btn_style = identify ? "text-bold" : "btn btn-primary"
+    text = if identify
+             tag.span("#{:OBSERVATION.l}: ", class: "font-weight-normal")
+           else
+             ""
+           end
     tag.h4(
       class: "obs-what", id: "observation_what_#{obs.id}",
       data: { controller: "section-update" }
     ) do
       [
+        text,
         link_to(obs.id, add_query_param(obs.show_link_args),
-                class: "btn btn-primary mr-3",
+                class: "#{btn_style} mr-3",
                 id: "caption_obs_link_#{obs.id}"),
         obs.format_name.t.small_author
-      ].safe_join(" ")
+      ].compact_blank!.safe_join(" ")
     end
   end
 
