@@ -480,15 +480,15 @@ class AbstractModelTest < UnitTestCase
   # ----------------------------------------------------
 
   def start_of_time
-    Date.jd(0).strftime("%Y, %m, %d")
+    Date.jd(0).strftime("%Y-%m-%d")
   end
 
   def a_century_from_now
-    (Time.zone.today + 100.years).strftime("%Y, %m, %d")
+    (Time.zone.today + 100.years).strftime("%Y-%m-%d")
   end
 
   def two_centuries_from_now
-    (Time.zone.today + 200.years).strftime("%Y, %m, %d")
+    (Time.zone.today + 200.years).strftime("%Y-%m-%d")
   end
 
   def test_scope_created_after
