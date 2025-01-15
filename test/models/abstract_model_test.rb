@@ -479,8 +479,8 @@ class AbstractModelTest < UnitTestCase
   #    Explicit tests of some scopes to improve coverage
   # ----------------------------------------------------
 
-  def start_of_time
-    Date.jd(0).strftime("%Y-%m-%d")
+  def improbably_early
+    "1600-01-01"
   end
 
   def a_century_from_now
@@ -493,20 +493,20 @@ class AbstractModelTest < UnitTestCase
 
   def test_scope_created_after
     assert_equal(Observation.count,
-                 Observation.created_after(start_of_time).count)
+                 Observation.created_after(improbably_early).count)
     assert_empty(Observation.created_after(a_century_from_now))
   end
 
   def test_scope_created_before
     assert_equal(Observation.count,
                  Observation.created_before(a_century_from_now).count)
-    assert_empty(Observation.created_before(start_of_time))
+    assert_empty(Observation.created_before(improbably_early))
   end
 
   def test_scope_created_between
     assert_equal(
       Observation.count,
-      Observation.created_between(start_of_time, a_century_from_now).count
+      Observation.created_between(improbably_early, a_century_from_now).count
     )
     assert_empty(
       Observation.created_between(a_century_from_now, two_centuries_from_now)
@@ -515,20 +515,20 @@ class AbstractModelTest < UnitTestCase
 
   def test_scope_updated_after
     assert_equal(Observation.count,
-                 Observation.updated_after(start_of_time).count)
+                 Observation.updated_after(improbably_early).count)
     assert_empty(Observation.updated_after(a_century_from_now))
   end
 
   def test_scope_updated_before
     assert_equal(Observation.count,
                  Observation.updated_before(a_century_from_now).count)
-    assert_empty(Observation.updated_before(start_of_time))
+    assert_empty(Observation.updated_before(improbably_early))
   end
 
   def test_scope_updated_between
     assert_equal(
       Observation.count,
-      Observation.updated_between(start_of_time, a_century_from_now).count
+      Observation.updated_between(improbably_early, a_century_from_now).count
     )
     assert_empty(
       Observation.updated_between(a_century_from_now, two_centuries_from_now)

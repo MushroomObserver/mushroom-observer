@@ -2938,6 +2938,8 @@ class QueryTest < UnitTestCase
   def test_observation_date
     # blank should return all
     assert_query(Observation.index_order, :Observation, date: nil)
+    # impossible dates should return none
+    assert_query([], :Observation, date: %w[1550 1551])
     # single date should return after
     assert_query(Observation.index_order.when_after("2011-05-12"),
                  :Observation, date: "2011-05-12")
@@ -2969,6 +2971,8 @@ class QueryTest < UnitTestCase
   def test_observation_created_at
     # blank should return all
     assert_query(Observation.index_order, :Observation, created_at: nil)
+    # impossible dates should return none
+    assert_query([], :Observation, created_at: %w[2000 2001])
     # single datetime should return after
     assert_query(Observation.index_order.
                  created_after("2011-05-12-12-59-57"),
@@ -2996,6 +3000,8 @@ class QueryTest < UnitTestCase
   def test_observation_updated_at
     # blank should return all
     assert_query(Observation.index_order, :Observation, updated_at: nil)
+    # impossible dates should return none
+    assert_query([], :Observation, updated_at: %w[2000 2001])
     # single datetime should return after
     assert_query(Observation.index_order.
                  updated_after("2011-05-12-12-59-57"),
