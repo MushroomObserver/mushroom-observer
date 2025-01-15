@@ -6,7 +6,7 @@ module Query::Scopes::Datetime
     return if vals.empty?
 
     earliest, latest = vals
-    @scopes << latest ? when_in_range(earliest, latest) : when_after(earliest)
+    @scopes << latest ? when_between(earliest, latest) : when_after(earliest)
     add_joins(*joins)
   end
 

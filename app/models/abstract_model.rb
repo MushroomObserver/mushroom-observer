@@ -145,7 +145,7 @@ class AbstractModel < ApplicationRecord
   # Allows searching for date ranges in the :when column: either within
   # a logical time range, or within a periodic time range in recurring years.
   # This is possible because the :when column already has the format("%Y-%m-%d")
-  scope :when_in_range, lambda { |earliest, latest|
+  scope :when_between, lambda { |earliest, latest|
     if wrapped_date?(earliest, latest)
       when_in_period_wrapping_new_year(earliest, latest)
     else
