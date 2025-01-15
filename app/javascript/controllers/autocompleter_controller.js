@@ -221,9 +221,9 @@ export default class extends Controller {
     if (type == undefined) { return; }
 
     let location = false;
-    if (detail.hasOwnProperty("request_params") &&
-      detail.request_params.hasOwnProperty("lat") &&
-      detail.request_params.hasOwnProperty("lng")) {
+    if (detail?.hasOwnProperty("request_params") &&
+      detail.request_params?.hasOwnProperty("lat") &&
+      detail.request_params?.hasOwnProperty("lng")) {
       location = detail.request_params;
     }
 

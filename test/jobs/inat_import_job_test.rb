@@ -25,9 +25,9 @@ class MockPhotoImporter
 end
 
 class InatImportJobTest < ActiveJob::TestCase
-  SITE = Observations::InatImportsController::SITE
-  REDIRECT_URI = Observations::InatImportsController::REDIRECT_URI
-  API_BASE = Observations::InatImportsController::API_BASE
+  SITE = InatImportsController::SITE
+  REDIRECT_URI = InatImportsController::REDIRECT_URI
+  API_BASE = InatImportsController::API_BASE
   PHOTO_BASE = "https://inaturalist-open-data.s3.amazonaws.com/photos"
 
   ICONIC_TAXA = InatImportJob::ICONIC_TAXA
@@ -169,8 +169,10 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_match(suggestion_date, proposed_name_notes)
   end
 
-  # Had 1 photo, 1 identification, 0 observation_fields
-  def test_import_job_obs_with_one_photo
+  # Had 1 photo, 1 identification, 0 observation_fields; 0 sequences
+  # See note below about why this test is not run as its own test
+  # def test_import_job_obs_with_one_photo
+  def import_job_obs_with_one_photo
     file_name = "evernia"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
     user = users(:rolf)
@@ -204,16 +206,16 @@ class InatImportJobTest < ActiveJob::TestCase
 
     assert_equal(1, obs.images.length, "Obs should have 1 image")
 
-    # Something weird is going on with stubbing here since this succeeds if
-    # some of the other tests run before this one.
-    #
-    # inat_photo = JSON.parse(mock_inat_response)["results"].
-    #              first["observation_photos"].first
-    # imported_img = obs.images.first
-    # assert_equal(
-    #   "iNat photo_id: #{inat_photo["photo_id"]}, uuid: #{inat_photo["uuid"]}",
-    #   imported_img.original_name
-    # )
+    # JDC 2025-01-11
+    # Something weird happens with stubs if this method is run as its own test.
+    # The `assert_equal` passes only if certain other tests run before this one.
+    inat_photo = JSON.parse(mock_inat_response)["results"].
+                 first["observation_photos"].first
+    imported_img = obs.images.first
+    assert_equal(
+      "iNat photo_id: #{inat_photo["photo_id"]}, uuid: #{inat_photo["uuid"]}",
+      imported_img.original_name
+    )
 
     assert(obs.sequences.none?)
   end
@@ -288,6 +290,9 @@ class InatImportJobTest < ActiveJob::TestCase
       assert_match(taxon_name, obs.comments.first.comment,
                    "Snapshot comment missing suggested name #{taxon_name}")
     end
+
+    # See note in import_job_obs_with_one_photo
+    import_job_obs_with_one_photo
   end
 
   def test_import_job_infra_specific_name
