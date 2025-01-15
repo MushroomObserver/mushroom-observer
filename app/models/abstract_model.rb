@@ -116,6 +116,7 @@ class AbstractModel < ApplicationRecord
     joins(:rss_log).
       reorder(RssLog[:updated_at].desc, model.arel_table[:id].desc).distinct
   }
+  scope :by_user, ->(user) { where(user: user) }
   scope :created_on, lambda { |ymd_string|
     where(arel_table[:created_at].format("%Y-%m-%d").eq(ymd_string))
   }
