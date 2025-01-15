@@ -516,11 +516,6 @@ class Name < AbstractModel
                   not_eq(Name[:classification])).
             where(NameDescription[:classification].not_blank)
         }
-  scope :by_editor,
-        lambda { |user|
-          joins(:versions).where(name_versions: { user_id: user.id }).
-            where.not(user: user)
-        }
 
   ### Module Name::Spelling
   scope :with_correct_spelling,

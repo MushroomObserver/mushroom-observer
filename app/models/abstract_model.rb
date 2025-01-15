@@ -117,6 +117,15 @@ class AbstractModel < ApplicationRecord
       reorder(RssLog[:updated_at].desc, model.arel_table[:id].desc).distinct
   }
   scope :by_user, ->(user) { where(user: user) }
+  scope :by_editor, lambda { |user|
+    version_table = :"#{type_tag}_versions"
+    return all unless ActiveRecord::Base.connection.table_exists?(version_table)
+
+    user_id = user.is_a?(Integer) ? user : user&.id
+
+    joins(:versions).where("#{version_table}": { user_id: user_id }).
+      where.not(user: user)
+  }
   scope :created_on, lambda { |ymd_string|
     where(arel_table[:created_at].format("%Y-%m-%d").eq(ymd_string))
   }
