@@ -534,4 +534,14 @@ class AbstractModelTest < UnitTestCase
       Observation.updated_between(a_century_from_now, two_centuries_from_now)
     )
   end
+
+  def test_scope_by_editor
+    # if no version table, should return all
+    assert_equal(
+      Observation.count, Observation.by_editor(rolf).count
+    )
+    assert_not_equal(
+      Name.by_user(rolf).count, Name.by_editor(rolf).count
+    )
+  end
 end
