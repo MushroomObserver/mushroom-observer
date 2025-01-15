@@ -9,7 +9,7 @@ end %>
                    id: obs.id)
 end %>
 
-<%# removes modal via data-controller="section-update" on caption_obs_title %>
+<%# are not removed via data-controller="section-update" because replaced %>
 <%= turbo_stream.close_modal("modal_obs_#{obs.id}_naming") %>
 <%= turbo_stream.remove("modal_obs_#{obs.id}_naming") %>
 <%= turbo_stream.close_modal("mo_ajax_progress") %>
