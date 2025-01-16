@@ -376,8 +376,6 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   }
 
-  scope :by_user,
-        ->(user) { where(user: user) }
   # used for preloading values in the create obs form. call with `.last`
   scope :recent_by_user,
         lambda { |user|

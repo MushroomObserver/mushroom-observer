@@ -112,37 +112,62 @@ class AbstractModel < ApplicationRecord
               when("").then(User[:login]).
               else(User[:name]).asc, id: :desc).distinct
   }
-  scope :order_by_rss_log, lambda {
-    joins(:rss_log).
-      reorder(RssLog[:updated_at].desc, model.arel_table[:id].desc).distinct
+  scope :by_user, ->(user) { where(user: user) }
+  scope :by_editor, lambda { |user|
+    version_table = :"#{type_tag}_versions"
+    return all unless ActiveRecord::Base.connection.table_exists?(version_table)
+
+    user_id = user.is_a?(Integer) ? user : user&.id
+
+    joins(:versions).where("#{version_table}": { user_id: user_id }).
+      where.not(user: user)
   }
   scope :created_on, lambda { |ymd_string|
     where(arel_table[:created_at].format("%Y-%m-%d").eq(ymd_string))
   }
-  scope :created_after, lambda { |ymd_string|
-    where(arel_table[:created_at].format("%Y-%m-%d") >= ymd_string)
+  scope :created_after, lambda { |datetime|
+    half_datetime_condition(:created_at, true, datetime)
   }
-  scope :created_before, lambda { |ymd_string|
-    where(arel_table[:created_at].format("%Y-%m-%d") <= ymd_string)
+  scope :created_before, lambda { |datetime|
+    half_datetime_condition(:created_at, false, datetime)
   }
   scope :created_between, lambda { |earliest, latest|
-    where(arel_table[:created_at].format("%Y-%m-%d") >= earliest).
-      where(arel_table[:created_at].format("%Y-%m-%d") <= latest)
+    created_after(earliest).created_before(latest)
   }
   scope :updated_on, lambda { |ymd_string|
     where(arel_table[:updated_at].format("%Y-%m-%d").eq(ymd_string))
   }
-  scope :updated_after, lambda { |ymd_string|
-    where(arel_table[:updated_at].format("%Y-%m-%d") >= ymd_string)
+  scope :updated_after, lambda { |datetime|
+    half_datetime_condition(:updated_at, true, datetime)
   }
-  scope :updated_before, lambda { |ymd_string|
-    where(arel_table[:updated_at].format("%Y-%m-%d") <= ymd_string)
+  scope :updated_before, lambda { |datetime|
+    half_datetime_condition(:updated_at, false, datetime)
   }
   scope :updated_between, lambda { |earliest, latest|
-    where(arel_table[:updated_at].format("%Y-%m-%d") >= earliest).
-      where(arel_table[:updated_at].format("%Y-%m-%d") <= latest)
+    updated_after(earliest).updated_before(latest)
   }
-  # Allows searching for date ranges in the :when column: either within
+
+  def self.half_datetime_condition(col, min, val)
+    return unless (datetime = datetime_condition_formatted(min, val))
+
+    dir = min ? :gt : :lt
+    where(arel_table[col].format("%Y-%m-%d %H:%i:%s").send(dir, datetime))
+  end
+
+  # Fills out the datetime with min/max values for month, day, hour, minute,
+  # second, as appropriate for < > comparisons. Only year is required.
+  def self.datetime_condition_formatted(min, val)
+    y, m, d, h, n, s = val.split("-").map!(&:to_i)
+    return unless /^\d\d\d\d/.match?(y.to_s)
+
+    returns = min ? [y, 1, 1, 0, 0, 0] : [y, 12, 31, 23, 59, 59]
+    vals = [m, d, h, n, s].compact # get as many specific values as were sent
+    returns[1, vals.length] = vals # merge these into the defaults, after year
+    # reformat to "%Y-%m-%d %H:%i:%s" as expected
+    [returns[0..2]&.join("-"), returns[3..5]&.join(":")].join(" ")
+  end
+
+  # Allows searching for date ranges in the :when column, either within
   # a logical time range, or within a periodic time range in recurring years.
   # This is possible because the :when column already has the format("%Y-%m-%d")
   scope :when_between, lambda { |earliest, latest|
@@ -152,7 +177,7 @@ class AbstractModel < ApplicationRecord
       when_after(earliest).when_before(latest)
     end
   }
-  # scope for objects whose :when is in a certain period of the year that
+  # Scope for objects whose :when is in a certain period of the year that
   # overlaps the new year, defined by a range of months or mm-dd
   scope :when_in_period_wrapping_new_year, lambda { |earliest, latest|
     m1, d1 = earliest.to_s.split("-")
@@ -175,6 +200,7 @@ class AbstractModel < ApplicationRecord
       earliest.to_s > latest.to_s
   end
 
+  # NOTE: all three conditions validate numeric format
   def self.half_date_condition(min, val)
     dir = min ? :gt : :lt
     if starts_with_year?(val)
@@ -187,11 +213,17 @@ class AbstractModel < ApplicationRecord
   end
 
   def self.half_date_condition_with_year(min, dir, val)
-    y, m, d = val.split("-")
+    date = date_condition_formatted(min, val)
+    where(arel_table[:when].send(dir, date))
+  end
+
+  # Fills out the date with min/max values for month and day as appropriate
+  # for < > comparisons. Requires year, prevalidated by `starts_with_year?`.
+  def self.date_condition_formatted(min, val)
+    y, m, d = val.split("-").map!(&:to_i)
     m ||= min ? 1 : 12
     d ||= min ? 1 : 31
-    date = [y.to_i, m.to_i, d.to_i].join("-")
-    where(arel_table[:when].send(dir, date))
+    [y, m, d].join("-")
   end
 
   def self.half_date_condition_with_month_and_day(dir, val)

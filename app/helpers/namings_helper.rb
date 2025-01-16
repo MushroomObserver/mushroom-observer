@@ -289,8 +289,8 @@ module NamingsHelper
       data: { turbo: true, controller: "naming-vote", naming_id: naming.id,
               localization: naming_vote_form_localizations }
     }
-    args = args.merge(model: vote) if vote
-    args
+    # Only gets the :model arg if instance exists, else :scope
+    args.merge(vote ? { model: vote } : { scope: :vote })
   end
 
   def naming_vote_form_localizations
@@ -399,7 +399,7 @@ module NamingsHelper
   # The new_naming_tab now has an icon. icon buttons send icon: true
   def propose_naming_link(obs_id, text: :create_naming.t,
                           context: "namings_table", icon: false,
-                          btn_class: "btn-primary my-3")
+                          btn_class: "btn btn-primary my-3")
     name, path, args = *new_naming_tab(
       obs_id, text: text, btn_class: btn_class, context: context
     )

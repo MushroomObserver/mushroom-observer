@@ -6,7 +6,7 @@ require("test_helper")
 class InatImportsTest < CapybaraIntegrationTestCase
   def test_inat_import_no_imports_designated
     login(mary)
-    visit(new_observations_inat_import_path)
+    visit(new_inat_import_path)
 
     fill_in("inat_username", with: "anything")
     page.check("consent")
