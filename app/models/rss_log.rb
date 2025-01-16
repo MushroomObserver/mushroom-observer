@@ -48,10 +48,10 @@
 #       def unique_text_name
 #       def unique_format_name
 #
-#  3) RssLog: Create association, add type to RssLog.all_types.
+#  3) RssLog: Create association, add type to RssLog::ALL_TYPES.
 #
 #       belongs_to :model
-#       self.all_types # add "model"
+#       ALL_TYPES # add "model"
 #
 #  4) View: Modify MatrixBoxPresenter if who/what/when/where are nonstandard.
 #
@@ -117,9 +117,9 @@
 #  name, name_id::      Owning Name (or nil).
 #  etc.::               (Pair of methods for each type of model.)
 #
-#  == Class methods
+#  == Class constants
 #
-#  all_types::          Object types with RssLog's (Array of Symbol's).
+#  ALL_TYPES::          Object types with RssLog's (Array of Symbol's).
 #
 #  == Instance methods
 #
@@ -157,13 +157,13 @@ class RssLog < AbstractModel
 
   # List of all object types that can have RssLog's.  (This is the order they
   # appear on the activity log page.)
-  def self.all_types
-    %w[observation name location species_list project glossary_term article]
-  end
+  ALL_TYPES = %w[
+    observation name location species_list project glossary_term article
+  ].freeze
 
   # Returns the associated object, or nil if it's an orphan.
   def target
-    RssLog.all_types.each do |type|
+    ALL_TYPES.each do |type|
       obj = send(type.to_sym)
       return obj if obj
     end
@@ -172,7 +172,7 @@ class RssLog < AbstractModel
 
   # Returns the associated object's id, or nil if it's an orphan.
   def target_id
-    RssLog.all_types.each do |type|
+    ALL_TYPES.each do |type|
       obj_id = send(:"#{type}_id")
       return obj_id if obj_id
     end
@@ -182,7 +182,7 @@ class RssLog < AbstractModel
   # Return the type of object of the target, e.g., :observation
   # or nil if it's an orphan
   def target_type
-    RssLog.all_types.each do |type|
+    ALL_TYPES.each do |type|
       return type.to_sym if send(:"#{type}_id")
     end
     nil
@@ -190,7 +190,7 @@ class RssLog < AbstractModel
 
   # Clear association with target.
   def clear_target_id
-    RssLog.all_types.each do |type|
+    ALL_TYPES.each do |type|
       send(:"#{type}_id=", nil)
     end
   end

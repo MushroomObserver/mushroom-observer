@@ -35,7 +35,8 @@ class Query::RssLogs < Query::Base
     return if types.include?("all")
 
     types = self.types
-    types &= RssLog.all_types
+    types &= RssLog::ALL_TYPES
+
     where << if types.empty?
                "FALSE"
              else

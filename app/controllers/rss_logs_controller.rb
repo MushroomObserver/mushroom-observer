@@ -53,8 +53,10 @@ class RssLogsController < ApplicationController
     types = ""
     if params[:type].is_a?(ActionController::Parameters)
       types = params[:type].select { |_key, value| value == "1" }.keys
-      types = RssLog.all_types.intersection(types)
-      types = "all" if types.length == RssLog.all_types.length
+      types = RssLog::ALL_TYPES
+.intersection(types)
+      types = "all" if types.length == RssLog::ALL_TYPES
+.length
       types = "none" if types.empty?
       types = types.map(&:to_s).join(" ") if types.is_a?(Array)
     elsif params[:type].is_a?(String)

@@ -19,7 +19,7 @@
 #  allow the owner/authors of the object commented on to be notified of the
 #  new comment.  Just follow these easy steps:
 #
-#  1. Add to +all_types+ Array in this file and AbstractModel.NAME_TO_TYPE
+#  1. Add to +ALL_TYPES+ Array in this file and AbstractModel.NAME_TO_TYPE
 #  2. Add +has_many+ relationships to the model:
 #
 #       has_many :comments,  :as => :target, :dependent => :destroy
@@ -110,16 +110,20 @@ class Comment < AbstractModel
   belongs_to :user
   belongs_to :target, polymorphic: true
 
+  # Maintain this Array of all models (Classes) which take comments.
+  ALL_TYPES = [
+    Location, LocationDescription, Name, NameDescription,
+    Observation, Project, SpeciesList
+  ].freeze
+
+  # Returns Array of all valid +target_type+ values (Symbols).
+  ALL_TYPE_TAGS = ALL_TYPES.map { |type| type.to_s.underscore.to_sym }.freeze
+
   # Allow explicit joining for all polymorphic associations,
   # e.g. `Comment.joins(:location).where(target_id: 29513)`,
   # by restating the association below with a scope.
   # https://veelenga.github.io/joining-polymorphic-associations/
-  JOINABLE_TARGETS = [
-    :location, :location_description, :name, :name_description,
-    :observation, :project, :species_list
-  ].freeze
-
-  JOINABLE_TARGETS.each do |model|
+  ALL_TYPE_TAGS.each do |model|
     belongs_to model, lambda {
       where(comments: { target_type: model.to_s.camelize })
     }, foreign_key: "target_id", inverse_of: :comments
@@ -139,7 +143,7 @@ class Comment < AbstractModel
   # execute multiple db queries:
   #
   #   target_ids = []
-  #   all_types.each do |model|
+  #   ALL_TYPES.each do |model|
   #     target_ids |= model.where(user: user).pluck(:id)
   #   end
   #   where(target_id: target_ids)
@@ -153,26 +157,14 @@ class Comment < AbstractModel
   #        target_id: Location.where(user: user)).
   #   or(where(target_type: :name,
   #            target_id: Name.where(user: user))) etc.
-  scope :for_user,
-        lambda { |user|
-          all_types.inject(nil) do |scope, model|
-            scope2 = where(target_type: model.name.underscore.to_sym,
-                           target_id: model.where(user: user))
-            scope ? scope.or(scope2) : scope2
-          end
-        }
-  scope :for_target,
-        ->(target) { where(target: target) }
-
-  # Returns Array of all models (Classes) which take comments.
-  def self.all_types
-    [Location, Name, Observation, Project, SpeciesList]
-  end
-
-  # Returns Array of all valid +target_type+ values (Symbol's).
-  def self.all_type_tags
-    [:location, :name, :observation, :project, :species_list]
-  end
+  scope :for_user, lambda { |user|
+    ALL_TYPES.inject(nil) do |scope, model|
+      scope2 = where(target_type: model.name.underscore.to_sym,
+                     target_id: model.where(user: user))
+      scope ? scope.or(scope2) : scope2
+    end
+  }
+  scope :for_target, ->(target) { where(target: target) }
 
   # Returns +summary+ for debugging.
   def text_name
@@ -214,7 +206,7 @@ class Comment < AbstractModel
   # Return model if params[:type] is the name of a commentable model
   # Else nil
   def self.safe_model_from_name(name)
-    all_types.find { |m| m.name == name }
+    ALL_TYPES.find { |m| m.name == name }
   end
 
   ############################################################################

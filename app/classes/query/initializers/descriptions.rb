@@ -99,7 +99,7 @@ module Query::Initializers::Descriptions
     add_indexed_enum_condition(
       "#{type}_descriptions.source_type",
       params[:desc_type],
-      Description.all_source_types
+      Description::ALL_SOURCE_TYPES
     )
   end
 

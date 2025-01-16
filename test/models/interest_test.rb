@@ -45,8 +45,8 @@ class InterestTest < UnitTestCase
   end
 
   def test_polymorphic_joins
-    Interest::JOINABLE_TARGETS.each do |model|
-      assert_true(Interest.joins(model))
+    Interest::ALL_TYPE_TAGS.each do |type_tag|
+      assert_true(Interest.joins(type_tag))
     end
   end
 end

@@ -43,7 +43,8 @@ class RssLogsControllerTest < FunctionalTestCase
 
     # Show all.
     params = {}
-    params[:type] = RssLog.all_types
+    params[:type] = RssLog::ALL_TYPES
+
     post(:index, params: params)
     assert_template(:index)
 
