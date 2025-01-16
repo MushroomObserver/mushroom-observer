@@ -8,7 +8,7 @@ class RssLogTest < UnitTestCase
   # normalized.
   # See https://www.pivotaltracker.com/story/show/174685402
   def test_url_for_normalized_controllers
-    RssLog::ALL_TYPES.each do |type|
+    RssLog::ALL_TYPE_TAGS.each do |type|
       rss_log = create_rss_log(type)
       id = rss_log.target_id
 
