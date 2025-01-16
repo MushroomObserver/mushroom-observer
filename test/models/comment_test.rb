@@ -152,4 +152,14 @@ class CommentTest < UnitTestCase
     end
     "These emails were queued:\n#{strs.join("\n")}"
   end
+
+  def test_polymorphic_joins
+    assert_true(Comment.joins(:location))
+    assert_true(Comment.joins(:location_description))
+    assert_true(Comment.joins(:name))
+    assert_true(Comment.joins(:name_description))
+    assert_true(Comment.joins(:observation))
+    assert_true(Comment.joins(:project))
+    assert_true(Comment.joins(:species_list))
+  end
 end

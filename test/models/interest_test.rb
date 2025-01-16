@@ -43,4 +43,14 @@ class InterestTest < UnitTestCase
 
     assert_equal(true, dick.watching?(names(:agaricus_campestris)))
   end
+
+  def test_polymorphic_joins
+    assert_true(Interest.joins(:location))
+    assert_true(Interest.joins(:location_description))
+    assert_true(Interest.joins(:name))
+    assert_true(Interest.joins(:name_description))
+    assert_true(Interest.joins(:observation))
+    assert_true(Interest.joins(:project))
+    assert_true(Interest.joins(:species_list))
+  end
 end
