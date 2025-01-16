@@ -233,6 +233,9 @@ class Description < AbstractModel
   #
   ##############################################################################
 
+  # Return an Array of source type Strings, e.g. "public", "project", etc.
+  # Note, this is the order they will be listed in show_name descriptions
+  # panel, list_descriptions.
   ALL_SOURCE_TYPES = [
     "public",    # Public ones created by any user.
     "foreign",   # Foreign "public" description(s) written on another server.
@@ -246,21 +249,6 @@ class Description < AbstractModel
     "source",    # Derived from another source, e.g. another website or book.
     "user"       # Created by an individual user.
   ].freeze
-
-  # Return an Array of source type Strings, e.g. "public", "project", etc.
-  # Note, this is the order they will be listed in show_name descriptions
-  # panel, list_descriptions.
-  def self.all_source_types
-    ALL_SOURCE_TYPES
-    # NOTE: Why not keep this simple and just load them in order of the enums?
-    # source_types.map do |name, _integer|
-    #   name
-    # end
-  end
-
-  def self.basic_source_types
-    BASIC_SOURCE_TYPES
-  end
 
   # Retreive object representing the source (if applicable).  Presently, this
   # only works for Project drafts and User's personal descriptions.  All others
@@ -276,8 +264,7 @@ class Description < AbstractModel
 
   # Does this Description belong to a given Project?
   def belongs_to_project?(project)
-    (source_type == "project") &&
-      (project_id == project.id)
+    (source_type == "project") && (project_id == project.id)
   end
 
   ##############################################################################

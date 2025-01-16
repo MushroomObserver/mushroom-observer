@@ -87,13 +87,11 @@ class Sequence < AbstractModel
   end
 
   # Default number of characters (including diaresis) for truncating locus
-  def self.locus_width
-    24
-  end
+  LOCUS_WIDTH = 24
 
   # wrapper around class method
   def locus_width
-    Sequence.locus_width
+    LOCUS_WIDTH
   end
 
   ##############################################################################

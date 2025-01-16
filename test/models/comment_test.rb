@@ -12,7 +12,7 @@ class CommentTest < UnitTestCase
   end
 
   def test_find_object_for_all_types
-    Comment.all_types.each do |type|
+    Comment::ALL_TYPES.each do |type|
       assert(AbstractModel.find_object(type.to_s, type.first.id),
              "Unable to use find_object to find #{type}")
     end
@@ -151,5 +151,11 @@ class CommentTest < UnitTestCase
       "to: #{to_user}, email: #{email}"
     end
     "These emails were queued:\n#{strs.join("\n")}"
+  end
+
+  def test_polymorphic_joins
+    Comment::ALL_TYPE_TAGS.each do |type_tag|
+      assert_true(Comment.joins(type_tag))
+    end
   end
 end
