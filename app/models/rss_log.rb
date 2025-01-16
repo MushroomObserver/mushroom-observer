@@ -157,14 +157,15 @@ class RssLog < AbstractModel
 
   # List of all object types that can have RssLog's.  (This is the order they
   # appear on the activity log page.)
-  ALL_TYPES = %w[
-    observation name location species_list project glossary_term article
+  ALL_TYPES = [
+    :observation, :name, :location, :species_list, :project,
+    :glossary_term, :article
   ].freeze
 
   # Returns the associated object, or nil if it's an orphan.
   def target
     ALL_TYPES.each do |type|
-      obj = send(type.to_sym)
+      obj = send(type)
       return obj if obj
     end
     nil
@@ -183,7 +184,7 @@ class RssLog < AbstractModel
   # or nil if it's an orphan
   def target_type
     ALL_TYPES.each do |type|
-      return type.to_sym if send(:"#{type}_id")
+      return type if send(:"#{type}_id")
     end
     nil
   end

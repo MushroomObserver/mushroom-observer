@@ -78,7 +78,7 @@ class RssLogTest < UnitTestCase
   # ---------- helpers ---------------------------------------------------------
 
   def model(type)
-    type.camelize.constantize
+    type.to_s.camelize.constantize
   end
 
   # rss_log factory

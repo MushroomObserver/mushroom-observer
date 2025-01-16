@@ -52,6 +52,9 @@ class RssLogsControllerTest < FunctionalTestCase
     get(:index, params: { type: "all" })
     assert_template("shared/_matrix_box")
 
+    get(:index, params: { type: [:article, :glossary_term] })
+    assert_template(:index)
+
     get(:index, params: { type: [] })
     assert_template(:index)
   end
