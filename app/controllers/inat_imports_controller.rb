@@ -24,7 +24,7 @@
 #    Enqueues an InatImportJob, passing in the InatImport instance
 #    Redirects to InatImport.show (for that InatImport instance)
 #    ---------------------------------
-#    InatImport.show view:
+#    InatImport.show view: (app/views/controllers/inat_imports/show.html.erb)
 #      Includes a `#status` element which:
 #        Instantiates a Stimulus controller (inat-import-job_controller)
 #        with an endpoint of InatImportJobTracker.show
@@ -33,8 +33,8 @@
 #    Stimulus controller (inat-import-job_controller):
 #      Makes a request every second to the InatImportJobTracker.show endpoint
 #    ---------------------------------
-#    The InatImportJobTracker.show endpoint action:
-#      returns the status of the InatImport as a TurboStream response
+#    The endpoint (app/controllers/inat_imports/job_trackers_controller.rb):
+#      renders the InatImport as a TurboStream response
 #    ---------------------------------
 # 5. The InatImportJob:
 #      Uses the `code` to obtain an oauth access_token
