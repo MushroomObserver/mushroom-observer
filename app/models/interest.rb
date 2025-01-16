@@ -50,34 +50,23 @@
 ################################################################################
 #
 class Interest < AbstractModel
-  belongs_to :target, polymorphic: true
   belongs_to :user
+  belongs_to :target, polymorphic: true
 
   # Allow explicit joining for all polymorphic associations,
   # e.g. `Interest.joins(:location).where(target_id: 29513)`,
   # by restating the association below with a scope.
   # https://veelenga.github.io/joining-polymorphic-associations/
-  belongs_to :location_description, lambda {
-    where(interests: { target_type: "LocationDescription" })
-  }, foreign_key: "target_id", inverse_of: :interests
-  belongs_to :location, lambda {
-    where(interests: { target_type: "Location" })
-  }, foreign_key: "target_id", inverse_of: :interests
-  belongs_to :name_description, lambda {
-    where(interests: { target_type: "NameDescription" })
-  }, foreign_key: "target_id", inverse_of: :interests
-  belongs_to :name, lambda {
-    where(interests: { target_type: "Name" })
-  }, foreign_key: "target_id", inverse_of: :interests
-  belongs_to :observation, lambda {
-    where(interests: { target_type: "Observation" })
-  }, foreign_key: "target_id", inverse_of: :interests
-  belongs_to :project, lambda {
-    where(interests: { target_type: "Project" })
-  }, foreign_key: "target_id", inverse_of: :interests
-  belongs_to :species_list, lambda {
-    where(interests: { target_type: "SpeciesList" })
-  }, foreign_key: "target_id", inverse_of: :interests
+  JOINABLE_TARGETS = [
+    :location, :location_description, :name, :name_description,
+    :observation, :project, :species_list
+  ].freeze
+
+  JOINABLE_TARGETS.each do |model_tag|
+    belongs_to model_tag, lambda {
+      where(interests: { target_type: model_tag.to_s.camelize })
+    }, foreign_key: "target_id", inverse_of: :interests
+  end
 
   scope :for_user,
         ->(user) { where(user: user) }

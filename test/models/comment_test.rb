@@ -154,12 +154,8 @@ class CommentTest < UnitTestCase
   end
 
   def test_polymorphic_joins
-    assert_true(Comment.joins(:location))
-    assert_true(Comment.joins(:location_description))
-    assert_true(Comment.joins(:name))
-    assert_true(Comment.joins(:name_description))
-    assert_true(Comment.joins(:observation))
-    assert_true(Comment.joins(:project))
-    assert_true(Comment.joins(:species_list))
+    Comment::JOINABLE_TARGETS.each do |model|
+      assert_true(Comment.joins(model))
+    end
   end
 end

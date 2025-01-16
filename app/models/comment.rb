@@ -107,34 +107,23 @@
 class Comment < AbstractModel
   include Callbacks
 
-  belongs_to :target, polymorphic: true
   belongs_to :user
+  belongs_to :target, polymorphic: true
 
   # Allow explicit joining for all polymorphic associations,
   # e.g. `Comment.joins(:location).where(target_id: 29513)`,
   # by restating the association below with a scope.
   # https://veelenga.github.io/joining-polymorphic-associations/
-  belongs_to :location_description, lambda {
-    where(comments: { target_type: "LocationDescription" })
-  }, foreign_key: "target_id", inverse_of: :comments
-  belongs_to :location, lambda {
-    where(comments: { target_type: "Location" })
-  }, foreign_key: "target_id", inverse_of: :comments
-  belongs_to :name_description, lambda {
-    where(comments: { target_type: "NameDescription" })
-  }, foreign_key: "target_id", inverse_of: :comments
-  belongs_to :name, lambda {
-    where(comments: { target_type: "Name" })
-  }, foreign_key: "target_id", inverse_of: :comments
-  belongs_to :observation, lambda {
-    where(comments: { target_type: "Observation" })
-  }, foreign_key: "target_id", inverse_of: :comments
-  belongs_to :project, lambda {
-    where(comments: { target_type: "Project" })
-  }, foreign_key: "target_id", inverse_of: :comments
-  belongs_to :species_list, lambda {
-    where(comments: { target_type: "SpeciesList" })
-  }, foreign_key: "target_id", inverse_of: :comments
+  JOINABLE_TARGETS = [
+    :location, :location_description, :name, :name_description,
+    :observation, :project, :species_list
+  ].freeze
+
+  JOINABLE_TARGETS.each do |model|
+    belongs_to model, lambda {
+      where(comments: { target_type: model.to_s.camelize })
+    }, foreign_key: "target_id", inverse_of: :comments
+  end
 
   broadcasts_to(->(comment) { [comment.target, :comments] },
                 inserts_by: :prepend, partial: "comments/comment",

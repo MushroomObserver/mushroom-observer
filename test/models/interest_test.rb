@@ -45,12 +45,8 @@ class InterestTest < UnitTestCase
   end
 
   def test_polymorphic_joins
-    assert_true(Interest.joins(:location))
-    assert_true(Interest.joins(:location_description))
-    assert_true(Interest.joins(:name))
-    assert_true(Interest.joins(:name_description))
-    assert_true(Interest.joins(:observation))
-    assert_true(Interest.joins(:project))
-    assert_true(Interest.joins(:species_list))
+    Interest::JOINABLE_TARGETS.each do |model|
+      assert_true(Interest.joins(model))
+    end
   end
 end
