@@ -58,7 +58,7 @@ module DescriptionsHelper
   # Sort, putting the default one on top, followed by public ones, followed
   # by others ending in personal ones, sorting by "length" among groups.
   def sort_description_list(object, list)
-    type_order = Description.all_source_types
+    type_order = Description::ALL_SOURCE_TYPES
     list.sort_by! do |x|
       [
         (x.id == object.description_id ? 0 : 1),
@@ -320,7 +320,7 @@ module DescriptionsHelper
   # Source type options for description forms.
   def source_type_options_all
     options = []
-    Description.all_source_types.each do |type|
+    Description::ALL_SOURCE_TYPES.each do |type|
       options << [:"form_description_source_#{type}".l, type]
     end
     options
@@ -328,7 +328,7 @@ module DescriptionsHelper
 
   def source_type_options_basic
     options = []
-    Description.basic_source_types.each do |type|
+    Description::BASIC_SOURCE_TYPES.each do |type|
       options << [:"form_description_source_#{type}".l, type]
     end
     options
