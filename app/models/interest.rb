@@ -53,6 +53,32 @@ class Interest < AbstractModel
   belongs_to :target, polymorphic: true
   belongs_to :user
 
+  # Allow explicit joining for all polymorphic associations,
+  # e.g. `Interest.joins(:location).where(target_id: 29513)`,
+  # by restating the association below with a scope.
+  # https://veelenga.github.io/joining-polymorphic-associations/
+  belongs_to :location_description, lambda {
+    where(interests: { target_type: "LocationDescription" })
+  }, foreign_key: "target_id", inverse_of: :interests
+  belongs_to :location, lambda {
+    where(interests: { target_type: "Location" })
+  }, foreign_key: "target_id", inverse_of: :interests
+  belongs_to :name_description, lambda {
+    where(interests: { target_type: "NameDescription" })
+  }, foreign_key: "target_id", inverse_of: :interests
+  belongs_to :name, lambda {
+    where(interests: { target_type: "Name" })
+  }, foreign_key: "target_id", inverse_of: :interests
+  belongs_to :observation, lambda {
+    where(interests: { target_type: "Observation" })
+  }, foreign_key: "target_id", inverse_of: :interests
+  belongs_to :project, lambda {
+    where(interests: { target_type: "Project" })
+  }, foreign_key: "target_id", inverse_of: :interests
+  belongs_to :species_list, lambda {
+    where(interests: { target_type: "SpeciesList" })
+  }, foreign_key: "target_id", inverse_of: :interests
+
   scope :for_user,
         ->(user) { where(user: user) }
 

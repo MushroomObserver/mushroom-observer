@@ -110,6 +110,32 @@ class Comment < AbstractModel
   belongs_to :target, polymorphic: true
   belongs_to :user
 
+  # Allow explicit joining for all polymorphic associations,
+  # e.g. `Comment.joins(:location).where(target_id: 29513)`,
+  # by restating the association below with a scope.
+  # https://veelenga.github.io/joining-polymorphic-associations/
+  belongs_to :location_description, lambda {
+    where(comments: { target_type: "LocationDescription" })
+  }, foreign_key: "target_id", inverse_of: :comments
+  belongs_to :location, lambda {
+    where(comments: { target_type: "Location" })
+  }, foreign_key: "target_id", inverse_of: :comments
+  belongs_to :name_description, lambda {
+    where(comments: { target_type: "NameDescription" })
+  }, foreign_key: "target_id", inverse_of: :comments
+  belongs_to :name, lambda {
+    where(comments: { target_type: "Name" })
+  }, foreign_key: "target_id", inverse_of: :comments
+  belongs_to :observation, lambda {
+    where(comments: { target_type: "Observation" })
+  }, foreign_key: "target_id", inverse_of: :comments
+  belongs_to :project, lambda {
+    where(comments: { target_type: "Project" })
+  }, foreign_key: "target_id", inverse_of: :comments
+  belongs_to :species_list, lambda {
+    where(comments: { target_type: "SpeciesList" })
+  }, foreign_key: "target_id", inverse_of: :comments
+
   broadcasts_to(->(comment) { [comment.target, :comments] },
                 inserts_by: :prepend, partial: "comments/comment",
                 target: "comments")

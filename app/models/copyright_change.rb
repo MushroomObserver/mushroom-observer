@@ -29,6 +29,14 @@ class CopyrightChange < AbstractModel
   belongs_to :target, polymorphic: true
   belongs_to :license
 
+  # Allow explicit joining for all polymorphic associations,
+  # e.g. `CopyrightChange.joins(:image).where(target_id: 29513)`,
+  # by restating the association below with a scope.
+  # https://veelenga.github.io/joining-polymorphic-associations/
+  belongs_to :image, lambda {
+    where(copyright_changes: { target_type: "Image" })
+  }, foreign_key: "target_id", inverse_of: :copyright_changes
+
   ##############################################################################
 
   protected
