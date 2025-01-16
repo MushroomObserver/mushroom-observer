@@ -112,6 +112,10 @@ class AbstractModel < ApplicationRecord
               when("").then(User[:login]).
               else(User[:name]).asc, id: :desc).distinct
   }
+  scope :order_by_rss_log, lambda {
+    joins(:rss_log).
+      reorder(RssLog[:updated_at].desc, model.arel_table[:id].desc).distinct
+  }
   scope :by_user, ->(user) { where(user: user) }
   scope :by_editor, lambda { |user|
     version_table = :"#{type_tag}_versions"
