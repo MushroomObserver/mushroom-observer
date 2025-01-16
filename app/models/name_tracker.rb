@@ -27,6 +27,7 @@
 class NameTracker < AbstractModel
   belongs_to :user
   belongs_to :name
+  has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
 
   scope :for_user, ->(user) { where(user: user) }
 

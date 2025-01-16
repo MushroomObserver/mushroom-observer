@@ -55,7 +55,7 @@ class Interest < AbstractModel
 
   # Maintain this Array of all models (targets) which take interests.
   ALL_TYPES = [
-    Location, LocationDescription, Name, NameDescription,
+    Location, LocationDescription, Name, NameDescription, NameTracker,
     Observation, Project, SpeciesList
   ].freeze
 
