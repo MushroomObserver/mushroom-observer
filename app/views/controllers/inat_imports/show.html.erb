@@ -11,7 +11,10 @@
     tag.span(
       id: "status", class: "text-right",
       data: { controller: "inat-import-job",
-              endpoint: inat_import_job_tracker_path(@inat_import, @tracker) }
+              # job tracker path is nested, so need 2 arguments
+              endpoint: inat_import_job_tracker_path(
+                @tracker.inat_import, @tracker
+              ) }
     ) do
       # Inner span is replaced by Stimulus
       render(partial: "inat_imports/job_trackers/updates",
