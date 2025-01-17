@@ -1,12 +1,38 @@
 # frozen_string_literal: true
 
 # Helper methods for turning Query parameters into AR conditions.
-module Query::Scopes::Conditions
+module Query::Scopes::Shared
   # Just because these three are used over and over again.
   def add_owner_and_time_stamp_conditions(_table = model.table_name)
     add_time_condition(:created_at, params[:created_at])
     add_time_condition(:updated_at, params[:updated_at])
     add_id_condition(:user_id, lookup_users_by_name(params[:users]))
+  end
+
+  def add_date_condition(col, vals, *joins)
+    return if vals.empty?
+
+    earliest, latest = vals
+    @scope = if latest
+               @scope.date_between(col, earliest, latest)
+             else
+               @scope.date_after(col, earliest)
+             end
+
+    add_joins(*joins)
+  end
+
+  def add_time_condition(col, vals, *joins)
+    return unless vals
+
+    earliest, latest = vals
+    @scope = if latest
+               @scope.datetime_between(col, earliest, latest)
+             else
+               @scope.datetime_after(col, earliest)
+             end
+
+    add_joins(*joins)
   end
 
   def add_by_user_condition(_table = model.table_name)
@@ -29,13 +55,6 @@ module Query::Scopes::Conditions
     @scopes = @scopes.by_editor(user)
   end
 
-  def add_pattern_condition
-    return if params[:pattern].blank?
-
-    @title_tag = :query_title_pattern_search
-    add_search_condition(search_fields, params[:pattern])
-  end
-
   def add_boolean_condition(true_cond, false_cond, val, *)
     return if val.nil?
 
@@ -53,14 +72,6 @@ module Query::Scopes::Conditions
               else
                 "LOWER(#{col}) IN (#{vals.join(", ")})"
               end
-    add_joins(*)
-  end
-
-  def add_search_condition(col, val, *)
-    return if val.blank?
-
-    search = google_parse(val)
-    @where += google_conditions(search, col)
     add_joins(*)
   end
 

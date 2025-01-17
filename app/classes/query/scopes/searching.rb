@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# Helper methods for turning Query parameters into SQL conditions.
-module Query::Scopes::GoogleSearch
+# Helper methods for adding search conditions to query.
+module Query::Scopes::Searching
   # Give search string for notes google-like syntax:
   #   word1 word2     -->  any has both word1 and word2
   #   word1 OR word2  -->  any has either word1 or word2
@@ -37,6 +37,21 @@ module Query::Scopes::GoogleSearch
   #   search.goods = [ [ "agaricus", "amanita" ] ]
   #   search.bads  = [ "amanitarita" ]
   #
+  def add_pattern_condition
+    return if params[:pattern].blank?
+
+    @title_tag = :query_title_pattern_search
+    add_search_condition(search_fields, params[:pattern])
+  end
+
+  def add_search_condition(col, val, *)
+    return if val.blank?
+
+    search = google_parse(val)
+    @where += google_conditions(search, col)
+    add_joins(*)
+  end
+
   def google_parse(str)
     goods = []
     bads  = []
