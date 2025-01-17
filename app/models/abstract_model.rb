@@ -116,6 +116,7 @@ class AbstractModel < ApplicationRecord
     joins(:rss_log).
       reorder(RssLog[:updated_at].desc, model.arel_table[:id].desc).distinct
   }
+
   scope :by_user, ->(user) { where(user: user) }
   scope :by_editor, lambda { |user|
     version_table = :"#{type_tag}_versions"
@@ -126,6 +127,7 @@ class AbstractModel < ApplicationRecord
     joins(:versions).where("#{version_table}": { user_id: user_id }).
       where.not(user: user)
   }
+
   scope :created_on, lambda { |ymd_string|
     where(arel_table[:created_at].format("%Y-%m-%d").eq(ymd_string))
   }
@@ -138,6 +140,7 @@ class AbstractModel < ApplicationRecord
   scope :created_between, lambda { |earliest, latest|
     created_after(earliest).created_before(latest)
   }
+
   scope :updated_on, lambda { |ymd_string|
     where(arel_table[:updated_at].format("%Y-%m-%d").eq(ymd_string))
   }
@@ -149,6 +152,16 @@ class AbstractModel < ApplicationRecord
   }
   scope :updated_between, lambda { |earliest, latest|
     updated_after(earliest).updated_before(latest)
+  }
+
+  scope :datetime_after, lambda { |col, datetime|
+    half_datetime_condition(col, true, datetime)
+  }
+  scope :datetime_before, lambda { |col, datetime|
+    half_datetime_condition(col, false, datetime)
+  }
+  scope :datetime_between, lambda { |col, earliest, latest|
+    datetime_after(col, earliest).datetime_before(col, latest)
   }
 
   def self.half_datetime_condition(col, min, val)
@@ -171,31 +184,38 @@ class AbstractModel < ApplicationRecord
     [returns[0..2]&.join("-"), returns[3..5]&.join(":")].join(" ")
   end
 
-  # Allows searching for date ranges in the :when column, either within
-  # a logical time range, or within a periodic time range in recurring years.
-  # This is possible because the :when column already has the format("%Y-%m-%d")
   scope :when_between, lambda { |earliest, latest|
+    date_between(:when, earliest, latest)
+  }
+  scope :when_after, ->(date) { half_date_condition(:when, true, date) }
+  scope :when_before, ->(date) { half_date_condition(:when, false, date) }
+
+  # Allows searching for date ranges in a date (:when) column, either within
+  # a logical time range, or within a periodic time range in recurring years.
+  # This is possible because a date column already has the format("%Y-%m-%d").
+  scope :date_between, lambda { |col, earliest, latest|
     if wrapped_date?(earliest, latest)
-      when_in_period_wrapping_new_year(earliest, latest)
+      date_in_period_wrapping_new_year(col, earliest, latest)
     else
-      when_after(earliest).when_before(latest)
+      date_after(col, earliest).date_before(col, latest)
     end
   }
-  # Scope for objects whose :when is in a certain period of the year that
+  # Note that these two conditions can take dates, or months, or month-days!
+  scope :date_after, ->(col, date) { half_date_condition(col, true, date) }
+  scope :date_before, ->(col, date) { half_date_condition(col, false, date) }
+
+  # Scope for objects whose date is in a certain period of the year that
   # overlaps the new year, defined by a range of months or mm-dd
-  scope :when_in_period_wrapping_new_year, lambda { |earliest, latest|
+  scope :date_in_period_wrapping_new_year, lambda { |col, earliest, latest|
     m1, d1 = earliest.to_s.split("-")
     m2, d2 = latest.to_s.split("-")
     where(
-      arel_table[:when].month.gt(m1).
-      or(arel_table[:when].month.lt(m2)).
-      or(arel_table[:when].month.eq(m1).and(arel_table[:when].day.gteq(d1))).
-      or(arel_table[:when].month.eq(m2).and(arel_table[:when].day.lteq(d2)))
+      arel_table[col].month.gt(m1).
+      or(arel_table[col].month.lt(m2)).
+      or(arel_table[col].month.eq(m1).and(arel_table[col].day.gteq(d1))).
+      or(arel_table[col].month.eq(m2).and(arel_table[col].day.lteq(d2)))
     )
   }
-  # Note that these two conditions can take dates, or months, or month-days!
-  scope :when_after, ->(date) { half_date_condition(true, date) }
-  scope :when_before, ->(date) { half_date_condition(false, date) }
 
   # Only works on month/day periods, because years where earliest > latest
   # would make no sense
@@ -205,38 +225,39 @@ class AbstractModel < ApplicationRecord
   end
 
   # NOTE: all three conditions validate numeric format
-  def self.half_date_condition(min, val)
+  def self.half_date_condition(col, min, val)
     dir = min ? :gt : :lt
     if starts_with_year?(val)
-      half_date_condition_with_year(min, dir, val)
+      half_date_condition_with_year(col, dir, val)
     elsif month_and_day?(val)
-      half_date_condition_with_month_and_day(dir, val)
+      half_date_condition_with_month_and_day(col, dir, val)
     elsif month_only?(val)
-      where(arel_table[:when].month.send(:"#{dir}eq", val))
+      where(arel_table[col].month.send(:"#{dir}eq", val))
     end
   end
 
-  def self.half_date_condition_with_year(min, dir, val)
-    date = date_condition_formatted(min, val)
-    where(arel_table[:when].send(dir, date))
+  def self.half_date_condition_with_year(col, dir, val)
+    date = date_condition_formatted(dir, val)
+    where(arel_table[col].send(dir, date))
   end
 
   # Fills out the date with min/max values for month and day as appropriate
   # for < > comparisons. Requires year, prevalidated by `starts_with_year?`.
-  def self.date_condition_formatted(min, val)
+  def self.date_condition_formatted(dir, val)
+    min = (dir == :gt)
     y, m, d = val.split("-").map!(&:to_i)
     m ||= min ? 1 : 12
     d ||= min ? 1 : 31
     [y, m, d].join("-")
   end
 
-  def self.half_date_condition_with_month_and_day(dir, val)
+  def self.half_date_condition_with_month_and_day(col, dir, val)
     m, d = val.split("-")
     where(
-      arel_table[:when].month.send(dir, m).
+      arel_table[col].month.send(dir, m).
       or(
-        arel_table[:when].month.eq(m).
-        and(arel_table[:when].day.send(:"#{dir}eq", d))
+        arel_table[col].month.eq(m).
+        and(arel_table[col].day.send(:"#{dir}eq", d))
       )
     )
   end
@@ -251,6 +272,43 @@ class AbstractModel < ApplicationRecord
 
   def self.month_only?(val)
     /^\d\d/.match?(val.to_s) && val.to_i <= 12
+  end
+
+  # All of these sanitize the ids as integers, then strings. NOTE: this
+  # ordering seems backwards but the `&` builds the right FIND_IN_SET SQL.
+  # Note the set comes first, and is SQL-quoted.
+  #   "FIND_IN_SET(#{table}.id,'#{set}') ASC"
+  scope :in_id_set, lambda { |ids|
+    in_named_id_set(nil, :id, ids).
+      reorder(Arel::Nodes.build_quoted(set.join(",")) & arel_table[:id])
+  }
+  scope :in_named_id_set, lambda { |model, col, ids|
+    model ||= self
+    col ||= :id
+    set = clean_id_set(ids)
+    where(model.arel_table[col].in(set))
+  }
+  scope :not_in_named_id_set, lambda { |model, col, ids|
+    model ||= self
+    col ||= :id
+    set = clean_id_set(ids)
+    where.not(model.arel_table[col].in(set))
+  }
+
+  # Put together a list of ids for use in a "id IN (1,2,...)" condition.
+  #
+  #   set = clean_id_set(name.children)
+  #   @where << "names.id IN (#{set})"
+  #
+  def clean_id_set(ids)
+    set = limited_id_set(ids).map(&:to_s).join(",")
+    set.presence || "-1"
+  end
+
+  # array of max of MO.query_max_array unique ids for use with Arel "in"
+  #    where(<x>.in(limited_id_set(ids)))
+  def limited_id_set(ids)
+    ids.map(&:to_i).uniq[0, MO.query_max_array]
   end
 
   ##############################################################################
