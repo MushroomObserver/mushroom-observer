@@ -92,7 +92,7 @@ module Query::Modules::Conditions
     vals = vals.filter_map { |v| allowed.index_of(v.to_sym) }
     return if vals.empty?
 
-    @where << "#{col} IN (#{val.join(",")})"
+    @where << "#{col} IN (#{vals.join(",")})"
     add_joins(*)
   end
 
