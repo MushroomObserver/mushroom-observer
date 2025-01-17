@@ -97,7 +97,7 @@ module Projects
 
     def project_alias_params
       params.require(:project_alias).permit(:name, :project_id, :target_type,
-                                            :target_id)
+                                            :location_id, :user_id)
     end
   end
 end

@@ -1,5 +1,9 @@
+<%
+  type = project_alias.target_type.downcase.to_sym || :location
+  value = project_alias.target.name || ""
+%>
 <%= form_with(model: project_alias,
-              data: { controller: :autocompleter, type: :location }) do |form| %>
+              data: { controller: :autocompleter, type: }) do |form| %>
   <% if project_alias.errors.any? %>
     <div id="error_explanation">
       <h2><%= pluralize(project_alias.errors.count, "error") %> prohibited this project alias from being saved:</h2>
@@ -25,15 +29,14 @@
       <%= select_with_label(form:,
                             field: :target_type,
                             label: "#{:project_alias_type.t}:",
-                            options: [[:LOCATION.l, :location], [:USER.l, :user]],
+                            options: [[:USER.l, :user], [:LOCATION.l, :location]],
                             inline: true,
-                            selected: project_alias.target_type || :LOCATION.t,
+                            selected: type,
                             data: { autocompleter_target: "select",
                                     action: "autocompleter#swap" }) %>
     </div>
 
-    <% value = project_alias.target_type || "" %>
-    <%= autocompleter_hidden_field(form:, type: :location) %>
+    <%= autocompleter_hidden_field(form:, type:) %>
     <%= form.text_field(
       :term, value: value, class: "form-control",
       data: { autocompleter_target: "input" }
