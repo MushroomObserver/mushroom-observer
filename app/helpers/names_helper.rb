@@ -61,13 +61,17 @@ module NamesHelper
   #   link_to_obss_of(query, :obss_of_taxon.t)
   #   => <a href="/observations?q=Q">This Taxon, any name</a> (19)
   def link_to_obss_of(query, title, count)
-    # count = query.select_count # This executes a query per link.
     return nil if count.zero?
 
     query.save
+    # Debugging: we need to execute the query first by counting `num_results`,
+    # then we can get the actual SQL it executed via `last_query`:
+    # count = query.num_results
+    # last_query = query.last_query.squish
     link_to(
       title,
       add_query_param(observations_path, query)
+      # data: { count:, last_query: }
     ) + " (#{count})"
   end
 
