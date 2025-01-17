@@ -102,11 +102,11 @@ module Query::Scopes::Shared
     vals = vals.filter_map { |v| allowed.index_of(v.to_sym) }
     return if vals.empty?
 
-    @where << "#{col} IN (#{val.join(",")})"
+    @where << "#{col} IN (#{vals.join(",")})"
     add_joins(*)
   end
 
-  # Simply an id in set condition for the model's table. No joins.
+  # Simply an id in set condition for the current table. No joins.
   def add_ids_condition(table = model.table_name, ids = :ids)
     return if params[ids].nil? # [] is valid
 
