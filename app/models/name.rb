@@ -503,7 +503,7 @@ class Name < AbstractModel
   scope :with_description_of_type,
         lambda { |source|
           # Check that it's a valid source type (string enum value)
-          return none if Description.all_source_types.exclude?(source)
+          return none if Description::ALL_SOURCE_TYPES.exclude?(source)
 
           joins(:descriptions).
             merge(NameDescription.where(source_type: source))
