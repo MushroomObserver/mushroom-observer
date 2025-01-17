@@ -21,22 +21,27 @@ class Name
              order(vote_cache: :desc).distinct
     end
 
+    # "Observations of this name"
     def of_taxon_this_name
       @all.select { |obs| obs&.name_id == @name.id }
     end
 
+    # "Observations of this taxon, other names"
     def of_taxon_other_names
       @all.select { |obs| obs&.name_id.in?(@other_name_ids) }
     end
 
+    # "Observations of this taxon, any name"
     def of_taxon_any_name
       @all.select { |obs| obs&.name_id.in?(@name_ids) }
     end
 
+    # "Observations of other taxa, this taxon proposed"
     def where_taxon_proposed
       @all.reject { |obs| obs&.name_id == @name.id }
     end
 
+    # "Observations of any taxon, this name proposed"
     def where_name_proposed
       @all
     end
