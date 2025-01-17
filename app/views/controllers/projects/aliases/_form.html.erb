@@ -1,4 +1,5 @@
-<%= form_with(model: project_alias) do |form| %>
+<%= form_with(model: project_alias,
+              data: { controller: :autocompleter, type: :location }) do |form| %>
   <% if project_alias.errors.any? %>
     <div id="error_explanation">
       <h2><%= pluralize(project_alias.errors.count, "error") %> prohibited this project alias from being saved:</h2>
@@ -18,24 +19,27 @@
     <%= form.hidden_field(:project_id, value: project_alias.project_id) %>
   </div>
 
-  <div class="field">
-    <%= select_with_label(form:,
-                          field: :target_type,
-                          label: "#{:project_alias_type.t}:",
-                          options: [:LOCATION.t, :USER.t],
-                          inline: true,
-                          selected: project_alias.target_type || :LOCATION.t) %>
-  </div>
+  <%= tag.div(class: "form-group dropdown",
+              data: { autocompleter_target: "wrap" } ) do %>
+    <div class="field">
+      <%= select_with_label(form:,
+                            field: :target_type,
+                            label: "#{:project_alias_type.t}:",
+                            options: [[:LOCATION.l, :location], [:USER.l, :user]],
+                            inline: true,
+                            selected: project_alias.target_type || :LOCATION.t,
+                            data: { autocompleter_target: "select",
+                                    action: "autocompleter#swap" }) %>
+    </div>
 
-  <div class="field">
-    <%= autocompleter_field(form:, field: :target,
-                            label: :USER.t + ":", type: :user) %>
-  </div>
-
-  <div class="field">
-    <%= autocompleter_field(form:, field: :target,
-                            label: :LOCATION.t + ":", type: :location) %>
-  </div>
+    <% value = project_alias.target_type || "" %>
+    <%= autocompleter_hidden_field(form:, type: :location) %>
+    <%= form.text_field(
+      :term, value: value, class: "form-control",
+      data: { autocompleter_target: "input" }
+    ) %>
+    <%= autocompleter_dropdown %>
+  <% end %>
 
   <div class="actions">
     <%= form.submit %>
