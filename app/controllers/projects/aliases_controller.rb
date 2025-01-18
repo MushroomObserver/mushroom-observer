@@ -74,7 +74,7 @@ module Projects
       @project_alias.destroy
       respond_to do |format|
         format.html do
-          redirect_to(project_aliases_pat(project_id:),
+          redirect_to(project_aliases_path(project_id:),
                       notice: :project_alias_deleted.t)
         end
         format.json { head(:no_content) }
