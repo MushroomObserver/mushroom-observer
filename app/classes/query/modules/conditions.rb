@@ -38,6 +38,14 @@ module Query::Modules::Conditions
     add_search_condition(search_fields, params[:pattern])
   end
 
+  def initialize_ok_for_export_parameter
+    add_boolean_condition(
+      "#{model.table_name}.ok_for_export IS TRUE",
+      "#{model.table_name}.ok_for_export IS FALSE",
+      params[:ok_for_export]
+    )
+  end
+
   def add_boolean_condition(true_cond, false_cond, val, *)
     return if val.nil?
 
@@ -84,14 +92,6 @@ module Query::Modules::Conditions
 
     @where << "#{col} IN ('#{vals.join("','")}')"
     add_joins(*)
-  end
-
-  def initialize_ok_for_export_parameter
-    add_boolean_condition(
-      "#{model.table_name}.ok_for_export IS TRUE",
-      "#{model.table_name}.ok_for_export IS FALSE",
-      params[:ok_for_export]
-    )
   end
 
   # Send the whole enum Hash as `allowed`, so we can find the corresponding
