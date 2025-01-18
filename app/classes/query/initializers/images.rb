@@ -26,11 +26,7 @@ module Query::Initializers::Images
                          params[:copyright_holder_has])
     add_image_size_condition(params[:size])
     add_image_type_condition(params[:content_types])
-    add_boolean_condition(
-      "images.ok_for_export IS TRUE",
-      "images.ok_for_export IS FALSE",
-      params[:ok_for_export]
-    )
+    initialize_ok_for_export_parameter
   end
 
   def add_image_size_condition(vals, *)
