@@ -428,7 +428,19 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Used in auto_complete, because it's ordered by login.
   def unique_text_name_login_first
-    login + name.blank? ? "" : " <#{name}>"
+    if name.blank?
+      login
+    else
+      "#{login} <#{name}>"
+    end
+  end
+
+  def self.unique_text_name_login_first(user)
+    if user[:name].blank?
+      user[:login]
+    else
+      "#{user[:login]} <#{user[:name]}>"
+    end
   end
 
   def format_name
