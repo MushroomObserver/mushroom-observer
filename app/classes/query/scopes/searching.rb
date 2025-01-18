@@ -44,12 +44,15 @@ module Query::Scopes::Searching
     add_search_condition(search_fields, params[:pattern])
   end
 
-  def add_search_condition(col, val, *)
+  def add_search_condition(model, col, val, *)
     return if val.blank?
 
+    @scopes = model.all
     search = google_parse(val)
-    @where += google_conditions(search, col)
+    add_google_conditions_good(search, model, col)
+    add_google_conditions_bad(search, model, col)
     add_joins(*)
+    @scopes.to_sql
   end
 
   def google_parse(str)
@@ -67,16 +70,24 @@ module Query::Scopes::Searching
     )
   end
 
-  # Put together a bunch of SQL conditions that describe a given search.
-  def google_conditions(search, field)
-    goods = search.goods
-    bads  = search.bads
-    ands = []
-    ands += goods.map do |good|
-      or_clause(*good.map { |str| "#{field} LIKE '%#{clean_pattern(str)}%'" })
+  # Put together a bunch of AR conditions that describe a given search.
+  # needs an OR in here if not the first one
+  def add_google_conditions_good(search, model, col)
+    search.goods.each do |good|
+      parts = *good # break up phrases
+      ors = model.arel_table[col].matches(clean_pattern(parts.shift))
+      parts.each do |str|
+        ors = ors.or(model.arel_table[col].matches(clean_pattern(str)))
+      end
     end
-    ands += bads.map { |bad| "#{field} NOT LIKE '%#{clean_pattern(bad)}%'" }
-    [ands.join(" AND ")]
+  end
+
+  def add_google_conditions_bad(search, model, col)
+    search.bads.each do |bad|
+      @scopes = @scopes.where(
+        model.arel_table[col].does_not_match(clean_pattern(bad))
+      )
+    end
   end
 
   # ----------------------------------------------------------------------------
