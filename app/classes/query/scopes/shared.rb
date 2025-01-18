@@ -56,10 +56,18 @@ module Query::Scopes::Shared
     @title_args[:type] = type
   end
 
+  def initialize_ok_for_export_parameter
+    add_boolean_condition(
+      model.arel_table[:ok_for_export].eq(true),
+      model.arel_table[:ok_for_export].eq(false),
+      params[:ok_for_export]
+    )
+  end
+
   def add_boolean_condition(true_cond, false_cond, val, *)
     return if val.nil?
 
-    @where << (val ? true_cond : false_cond)
+    @scopes = @scopes.send(:where, (val ? true_cond : false_cond))
     add_joins(*)
   end
 
@@ -68,23 +76,21 @@ module Query::Scopes::Shared
 
     vals = [vals] unless vals.is_a?(Array)
     vals = vals.map { |v| escape(v.downcase) }
-    @where << if vals.length == 1
-                "LOWER(#{col}) = #{vals.first}"
-              else
-                "LOWER(#{col}) IN (#{vals.join(", ")})"
-              end
+    @scopes = @scopes.where(model.arel_table[col].downcase.in(*vals))
     add_joins(*)
   end
 
+  # rubocop:disable Metrics/AbcSize
   def add_range_condition(col, val, *)
-    return if val.blank?
-    return if val[0].blank? && val[1].blank?
+    return if val.blank? || val[0].blank? && val[1].blank?
 
     min, max = val
-    @where << "#{col} >= #{min}" if min.present?
-    @where << "#{col} <= #{max}" if max.present?
+    @scopes = @scopes.where(model.arel_table[col].gteq(min)) if min.present?
+    @scopes = @scopes.where(model.arel_table[col].lteq(max)) if max.present?
+
     add_joins(*)
   end
+  # rubocop:enable Metrics/AbcSize
 
   def add_string_enum_condition(col, vals, allowed, *)
     return if vals.empty?
@@ -92,41 +98,72 @@ module Query::Scopes::Shared
     vals = vals.map(&:to_s) & allowed.map(&:to_s)
     return if vals.empty?
 
-    @where << "#{col} IN ('#{vals.join("','")}')"
+    @scopes = @scopes.where(model.arel_table[col].in(*vals))
+
     add_joins(*)
   end
 
+  # Send the whole enum Hash as `allowed`, so we can find the corresponding
+  # values of the keys. MO's enum values currently may not start at 0.
   def add_indexed_enum_condition(col, vals, allowed, *)
     return if vals.empty?
 
-    vals = vals.filter_map { |v| allowed.index_of(v.to_sym) }
+    vals = allowed.values_at(*vals)
     return if vals.empty?
 
-    @where << "#{col} IN (#{vals.join(",")})"
+    @scopes = @scopes.where(model.arel_table[col].in(*vals))
+
     add_joins(*)
   end
 
-  # Simply an id in set condition for the current table. No joins.
+  # Simply an id in set condition for the current table's :id column. No joins.
+  # NOTE: this `reorder` seems backwards but the `&` builds the FIND_IN_SET
+  # SQL correctly. Note the set comes first, and gets "quoted" in the SQL.
+  #
+  #   builds: "FIND_IN_SET(#{table}.id,'#{set}') ASC"
+  #
+  # rubocop:disable Metrics/AbcSize
   def add_ids_condition(table = model.table_name, ids = :ids)
     return if params[ids].nil? # [] is valid
 
-    @scope = @scope.in_ids_set(ids)
+    set = clean_id_set(ids)
+    @scopes = @scopes.where(model.arel_table[col].in(set)).
+              reorder(Arel::Nodes.build_quoted(set.join(",")) & arel_table[:id])
     @title_tag = :query_title_in_set.t(type: table.singularize.to_sym)
   end
+  # rubocop:enable Metrics/AbcSize
 
   # Generalized so the model and column name can be sent as params
   # e.g. (Observation, :location_id, ids) or (Location, :description_id, ids)
   def add_id_condition(model, col, ids, *)
     return if ids.empty?
 
-    @scope = @scope.in_named_id_set(model, col, ids)
+    set = clean_id_set(ids)
+    @scopes = @scopes.where(model.arel_table[col].in(set))
     add_joins(*)
   end
 
   def add_not_id_condition(model, col, ids, *)
     return if ids.empty?
 
-    @scope = @scope.not_in_named_id_set(model, col, ids)
+    set = clean_id_set(ids)
+    @scopes = @scopes.where(model.arel_table[col].not_in(set))
     add_joins(*)
+  end
+
+  # Put together a list of ids for use in a "id IN (1,2,...)" condition.
+  #
+  #   set = clean_id_set(name.children)
+  #   @where << "names.id IN (#{set})"
+  #
+  def clean_id_set(ids)
+    set = limited_id_set(ids).map(&:to_s).join(",")
+    set.presence || "-1"
+  end
+
+  # array of max of MO.query_max_array unique ids for use with Arel "in"
+  #    where(<x>.in(limited_id_set(ids)))
+  def limited_id_set(ids)
+    ids.map(&:to_i).uniq[0, MO.query_max_array]
   end
 end
