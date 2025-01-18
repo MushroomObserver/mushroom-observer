@@ -1,6 +1,7 @@
 <%
-  type = project_alias.target_type.downcase.to_sym || :location
-  value = project_alias.target.name || ""
+  @container = :text
+  type = (project_alias.target_type || :location).downcase.to_sym
+  value = project_alias.target&.name || ""
 %>
 <%= form_with(model: project_alias,
               data: { controller: :autocompleter, type: }) do |form| %>
