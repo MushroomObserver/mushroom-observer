@@ -37,7 +37,7 @@ module Projects
             project_alias_redirect(@project_alias)
           end
         else
-          @project_alias = ProjectAlias.new(project_id: params.require(:project_id))
+          @project_alias = ProjectAlias.new(project_id: params[:project_id])
           format.html { render(:new) }
           format.json do
             render(json: @project_alias.errors, status: :unprocessable_entity)
