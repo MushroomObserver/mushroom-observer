@@ -21,7 +21,7 @@ class Query::NameDescriptions < Query::Base
       names?: [Name],
       public?: :boolean,
       with_descriptions?: :boolean
-    )
+    ).merge(name_descriptions_parameter_declarations)
   end
 
   def initialize_flavor
@@ -34,6 +34,7 @@ class Query::NameDescriptions < Query::Base
     names = lookup_names_by_name(names: params[:names])
     add_id_condition("name_descriptions.name_id", names)
     initialize_description_public_parameter(:name)
+    initialize_name_descriptions_parameters
     super
   end
 
