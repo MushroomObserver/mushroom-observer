@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 module Query::Params::Descriptions
-  def descriptions_parameter_declarations
+  def name_descriptions_parameter_declarations
     {
       with_default_desc?: :boolean,
       join_desc?: { string: [:default, :any] },
-      desc_type?: [{ string: [Description::ALL_SOURCE_TYPES] }],
+      desc_type?: [{ string: Description::ALL_SOURCE_TYPES }],
       desc_project?: [:string],
       desc_creator?: [User],
       desc_content?: :string,

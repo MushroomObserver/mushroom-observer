@@ -2693,6 +2693,50 @@ class QueryTest < UnitTestCase
                  ids: [rolf.id, NameDescription.first.id])
   end
 
+  def test_name_description_with_default_desc
+    assert_query(NameDescription.is_default.index_order,
+                 :NameDescription, with_default_desc: 1)
+    assert_query(NameDescription.is_not_default.index_order,
+                 :NameDescription, with_default_desc: 0)
+  end
+
+  def test_name_description_desc_type_user
+    assert_query(NameDescription.where(source_type: 5).index_order,
+                 :NameDescription, desc_type: "user")
+  end
+
+  def test_name_description_desc_type_project
+    assert_query(NameDescription.where(source_type: 3).index_order,
+                 :NameDescription, desc_type: "project")
+  end
+
+  def test_name_description_desc_project
+    assert_query(NameDescription.
+                 where(project: projects(:eol_project)).index_order,
+                 :NameDescription, desc_project: projects(:eol_project).id)
+  end
+
+  def test_name_description_desc_creator
+    assert_query(NameDescription.where(user: rolf).index_order,
+                 :NameDescription, desc_creator: rolf.id)
+    assert_query(NameDescription.where(user: mary).index_order,
+                 :NameDescription, desc_creator: mary.id)
+  end
+
+  # waiting on a new AbstractModel scope for searches,
+  # plus a specific NameDescription scope coalescing the fields.
+  # def test_name_description_desc_content
+  #   assert_query(NameDescription.notes_has("some notes")).index_order,
+  #                :NameDescription, desc_content: "some notes")
+  # end
+
+  def test_name_description_ok_for_export
+    assert_query(NameDescription.where(ok_for_export: 1).index_order,
+                 :NameDescription, ok_for_export: 1)
+    assert_query(NameDescription.where(ok_for_export: 0).index_order,
+                 :NameDescription, ok_for_export: 0)
+  end
+
   def test_observation_all
     expects = Observation.index_order
     assert_query(expects, :Observation)
