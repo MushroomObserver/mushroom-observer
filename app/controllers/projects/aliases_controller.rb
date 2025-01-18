@@ -36,11 +36,8 @@ module Projects
           format.html do
             project_alias_redirect(@project_alias)
           end
-          format.json do
-            render(json: @project_alias, status: :created,
-                   location: @project_alias)
-          end
         else
+          @project_alias = ProjectAlias.new(project_id: params.require(:project_id))
           format.html { render(:new) }
           format.json do
             render(json: @project_alias.errors, status: :unprocessable_entity)
@@ -75,7 +72,7 @@ module Projects
       respond_to do |format|
         format.html do
           redirect_to(project_aliases_path(project_id:),
-                      notice: :project_alias_deleted.t)
+                      notice: :project_alias_destroyed.t)
         end
         format.json { head(:no_content) }
       end

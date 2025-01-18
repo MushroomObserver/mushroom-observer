@@ -3,11 +3,11 @@
 one:
   target: rolf
   target_type: User
-  name: MyString
+  name: RS
   project: eol_project
 
 two:
   target: albion
   target_type: Location
-  name: MyString
+  name: Walk 1
   project: eol_project

@@ -81,7 +81,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :project_species_lists, dependent: :destroy
   has_many :species_lists, through: :project_species_lists
 
-  has_many :project_aliases, dependent: :destroy
+  has_many :aliases, class_name: "ProjectAlias", dependent: :destroy
 
   before_destroy :orphan_drafts
   validates :field_slip_prefix, uniqueness: true, allow_blank: true
