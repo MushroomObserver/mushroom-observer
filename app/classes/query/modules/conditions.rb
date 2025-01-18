@@ -86,10 +86,20 @@ module Query::Modules::Conditions
     add_joins(*)
   end
 
+  def initialize_ok_for_export_parameter
+    add_boolean_condition(
+      "#{model.table_name}.ok_for_export IS TRUE",
+      "#{model.table_name}.ok_for_export IS FALSE",
+      params[:ok_for_export]
+    )
+  end
+
+  # Send the whole enum Hash as `allowed`, so we can find the corresponding
+  # values of the keys. MO's enum values currently may not start at 0.
   def add_indexed_enum_condition(col, vals, allowed, *)
     return if vals.empty?
 
-    vals = vals.filter_map { |v| allowed.index_of(v.to_sym) }
+    vals = allowed.values_at(*vals)
     return if vals.empty?
 
     @where << "#{col} IN (#{vals.join(",")})"
