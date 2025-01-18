@@ -274,43 +274,6 @@ class AbstractModel < ApplicationRecord
     /^\d\d/.match?(val.to_s) && val.to_i <= 12
   end
 
-  # All of these sanitize the ids as integers, then strings. NOTE: this
-  # ordering seems backwards but the `&` builds the right FIND_IN_SET SQL.
-  # Note the set comes first, and is SQL-quoted.
-  #   "FIND_IN_SET(#{table}.id,'#{set}') ASC"
-  scope :in_id_set, lambda { |ids|
-    in_named_id_set(nil, :id, ids).
-      reorder(Arel::Nodes.build_quoted(set.join(",")) & arel_table[:id])
-  }
-  scope :in_named_id_set, lambda { |model, col, ids|
-    model ||= self
-    col ||= :id
-    set = clean_id_set(ids)
-    where(model.arel_table[col].in(set))
-  }
-  scope :not_in_named_id_set, lambda { |model, col, ids|
-    model ||= self
-    col ||= :id
-    set = clean_id_set(ids)
-    where.not(model.arel_table[col].in(set))
-  }
-
-  # Put together a list of ids for use in a "id IN (1,2,...)" condition.
-  #
-  #   set = clean_id_set(name.children)
-  #   @where << "names.id IN (#{set})"
-  #
-  def clean_id_set(ids)
-    set = limited_id_set(ids).map(&:to_s).join(",")
-    set.presence || "-1"
-  end
-
-  # array of max of MO.query_max_array unique ids for use with Arel "in"
-  #    where(<x>.in(limited_id_set(ids)))
-  def limited_id_set(ids)
-    ids.map(&:to_i).uniq[0, MO.query_max_array]
-  end
-
   ##############################################################################
   #
   #  :section: "Find" Extensions
