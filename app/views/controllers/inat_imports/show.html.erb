@@ -33,11 +33,6 @@
 </p>
 <% end %>
 
-<p>
-  <b><%= :inat_import_tracker_started.t %>: </b>
-  <span id="started"><%= @tracker.created_at %></span>
-</p>
-
 <%# Display refresh button if job is incomplete%>
 <% if import_incomplete?(@inat_import) %>
   <p>

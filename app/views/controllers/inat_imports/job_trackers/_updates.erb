@@ -5,6 +5,14 @@
     end,
     tag.span(@tracker.status,
              data: { inat_import_job_target: "status",
-                    status: @tracker.status })
+                     status: @tracker.status }),
+
+
+    tag.span(class: "font-weight-bold") do
+      "#{:inat_import_tracker_started.t}: "
+    end,
+    tag.span(@tracker.created_at,
+             data: { inat_import_job_target: "started",
+                     started: @tracker.created_at }),
   ].safe_join
 %>
