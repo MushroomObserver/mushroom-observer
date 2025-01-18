@@ -23,9 +23,9 @@
         <td><%= project_alias.target_type %></td>
         <td><%= project_alias.target.try(:name) %></td>
         <td>
-          <%= link_to 'Show', project_alias_path(project_id:, id: project_alias.id) %>
-          <%= link_to 'Edit', edit_project_alias_path(project_id:, id: project_alias.id) %>
-          <%= link_to 'Delete', project_alias_path(project_id:, id: project_alias.id), method: :delete, data: { confirm: 'Are you sure?' } %>
+          <%= link_to('Show', project_alias_path(project_id:, id: project_alias.id)) %>
+          <%= link_to('Edit', edit_project_alias_path(project_id:, id: project_alias.id)) %>
+          <%= link_to('Delete', project_alias_path(project_id:, id: project_alias.id), method: :delete, data: { confirm: 'Are you sure?' }) %>
         </td>
       </tr>
     <% end %>
