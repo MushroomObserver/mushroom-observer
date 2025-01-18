@@ -61,13 +61,6 @@ module Query::Initializers::Names
     )
   end
 
-  def initialize_ok_for_export_parameter
-    add_boolean_condition(
-      "names.ok_for_export IS TRUE", "names.ok_for_export IS FALSE",
-      params[:ok_for_export]
-    )
-  end
-
   def initialize_name_association_parameters
     add_id_condition("observations.id", params[:observations], :observations)
     add_where_condition(:observations, params[:locations], :observations)

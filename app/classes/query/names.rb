@@ -35,7 +35,7 @@ class Query::Names < Query::Base
     names_per_se_parameter_declarations.
       merge(content_filter_parameter_declarations(Name)).
       merge(names_parameter_declarations).
-      merge(descriptions_parameter_declarations). # yes in the general
+      merge(name_descriptions_parameter_declarations). # yes in the general
       merge(advanced_search_parameter_declarations)
   end
 
@@ -63,7 +63,7 @@ class Query::Names < Query::Base
     initialize_taxonomy_parameters
     initialize_name_record_parameters
     initialize_name_search_parameters
-    initialize_description_parameters
+    initialize_name_descriptions_parameters
     initialize_content_filters(Name)
     super
   end
@@ -163,17 +163,5 @@ class Query::Names < Query::Base
     else
       default
     end
-  end
-
-  # --------------------------------------------------------------------------
-
-  private
-
-  def any_param_desc_fields?
-    params[:join_desc] == :any ||
-      params[:desc_type].present? ||
-      params[:desc_project].present? ||
-      params[:desc_creator].present? ||
-      params[:desc_content].present?
   end
 end

@@ -108,6 +108,10 @@ class Description < AbstractModel
     type_tag.to_s.sub("_description", "")
   end
 
+  def self.parent_type
+    type_tag.to_s.sub("_description", "")
+  end
+
   # Shorthand for "public && public_write"
   def fully_public?
     public && public_write
@@ -234,8 +238,9 @@ class Description < AbstractModel
   ##############################################################################
 
   # Return an Array of source type Strings, e.g. "public", "project", etc.
-  # Note, this is the order they will be listed in show_name descriptions
-  # panel, list_descriptions.
+  # as would `NameDescription.source_types.keys`. However, the below order is
+  # different. It is a preferred order, and is how these will be listed in
+  # the show_name descriptions panel, list_descriptions.
   ALL_SOURCE_TYPES = [
     "public",    # Public ones created by any user.
     "foreign",   # Foreign "public" description(s) written on another server.

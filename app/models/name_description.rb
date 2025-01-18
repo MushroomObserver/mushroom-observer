@@ -100,17 +100,29 @@ class NameDescription < Description
   has_many :editors, through: :name_description_editors,
                      source: :user
 
-  scope :for_eol_export,
-        lambda {
-          where(review_status: review_statuses.values_at(
-            "unvetted", "vetted"
-          )).
-            where(NameDescription[:gen_desc].not_blank).
-            where(ok_for_export: true).
-            where(public: true)
-        }
+  scope :for_eol_export, lambda {
+    where(review_status: review_statuses.values_at(
+      "unvetted", "vetted"
+    )).
+      where(NameDescription[:gen_desc].not_blank).
+      where(ok_for_export: true).
+      where(public: true)
+  }
   scope :show_includes, lambda {
     strict_loading
+  }
+  scope :is_default, lambda {
+    joins(:name).where(Name[:description_id].not_eq(nil))
+  }
+  scope :is_not_default, lambda {
+    joins(:name).where(Name[:description_id].eq(nil))
+  }
+  # scope searching note content. must use search condition and coalesce fields
+  # scope :notes_has, lambda {
+  # }
+  scope :index_order, lambda {
+    joins(:name).order(Name[:sort_name].asc, NameDescription[:created_at].asc,
+                       NameDescription[:id].desc)
   }
 
   EOL_NOTE_FIELDS = [
