@@ -37,7 +37,7 @@
                                     action: "autocompleter#swap" }) %>
     </div>
 
-    <%= autocompleter_hidden_field(form:, type:) %>
+    <%= autocompleter_hidden_field(form:, type:, hidden_value: project_alias.target_id) %>
     <%= form.text_field(
       :term, value: value, class: "form-control",
       data: { autocompleter_target: "input" }

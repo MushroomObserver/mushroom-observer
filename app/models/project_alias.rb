@@ -15,6 +15,6 @@ class ProjectAlias < ApplicationRecord
   end
 
   def target_type=(type)
-    type.capitalize
+    self[:target_type] = type.capitalize
   end
 end
