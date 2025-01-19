@@ -204,15 +204,16 @@ class AutocompletersControllerTest < FunctionalTestCase
     good_autocompleter_request(type: :user, string: "Rover")
     assert_equivalent(
       [{ name: "R", id: 0 },
-       { name: "rolf <Rolf Singer>", id: rolf.id },
-       { name: "roy <Roy Halling>", id: roy.id },
-       { name: "second_roy <Roy Rogers>", id: users(:second_roy).id }],
+       { name: "Rolf Singer (rolf)", id: rolf.id },
+       { name: "Roy Halling (roy)", id: roy.id },
+       { name: "Roy Rogers (second_roy)", id: users(:second_roy).id }],
       JSON.parse(@response.body)
     )
 
     good_autocompleter_request(type: :user, string: "Dodo")
     assert_equivalent([{ name: "D", id: 0 },
-                       { name: "dick <Tricky Dick>", id: dick.id }],
+                       { name: "#{dick.name} (#{dick.login})",
+                         id: dick.id }],
                       JSON.parse(@response.body))
 
     good_autocompleter_request(type: :user, string: "Komodo")
