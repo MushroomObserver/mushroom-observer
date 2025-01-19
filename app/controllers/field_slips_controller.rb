@@ -62,7 +62,7 @@ class FieldSlipsController < ApplicationController
           if params[:commit] == :field_slip_create_obs.t
             redirect_to(new_observation_url(
                           field_code: @field_slip.code,
-                          place_name: params[:field_slip][:location],
+                          place_name: place_name,
                           date: extract_date,
                           notes: field_slip_notes.compact_blank!
                         ))
@@ -103,6 +103,10 @@ class FieldSlipsController < ApplicationController
 
   private
 
+  def place_name
+    @place_name ||= check_for_alias(params[:field_slip][:location], Location)
+  end
+
   def set_field_slip
     @field_slip = FieldSlip.find(params[:id])
   end
@@ -113,7 +117,7 @@ class FieldSlipsController < ApplicationController
     elsif params[:commit] == :field_slip_add_images.t
       redirect_to(new_observation_url(
                     field_code: @field_slip.code,
-                    place_name: params[:field_slip][:location],
+                    place_name: place_name,
                     date: extract_date,
                     notes: field_slip_notes.compact_blank!
                   ))
@@ -126,7 +130,6 @@ class FieldSlipsController < ApplicationController
 
   def quick_create_observation
     fs_params = params[:field_slip]
-    place_name = fs_params[:location]
     # Must have valid name and location
     location = Location.place_name_to_location(place_name)
     flash_error(:field_slip_quick_no_location.t) unless location
@@ -162,7 +165,7 @@ class FieldSlipsController < ApplicationController
 
     check_name
     observation.when = extract_date
-    observation.place_name = params[:field_slip][:location]
+    observation.place_name = place_name
     observation.notes.merge!(field_slip_notes)
     observation.notes.compact_blank!
     observation.save!
@@ -216,23 +219,32 @@ class FieldSlipsController < ApplicationController
     end
   end
 
-  def collector = user_str(params[:field_slip][:collector])
+  def collector
+    user_str(params[:field_slip][:collector])
+  end
 
-  def field_slip_id_by = user_str(params[:field_slip][:field_slip_id_by])
+  def field_slip_id_by
+    user_str(params[:field_slip][:field_slip_id_by])
+  end
+
+  def user_str(str)
+    User.lookup_unique_text_name(check_for_alias(str, User))
+  end
+
+  def check_for_alias(str, target_type)
+    return str unless @field_slip.project
+
+    project_alias = @field_slip.project.aliases.find_by(name: str, target_type:)
+    return str unless project_alias
+
+    project_alias.target.format_name
+  end
 
   def field_slip_id
     str = params[:field_slip][:field_slip_name]
     return str if str.empty? || str.starts_with?("_")
 
     "_#{str}_"
-  end
-
-  def user_str(str)
-    if str.to_s.match?(/ <.*>$/)
-      user = User.find_by(login: str.to_s.sub(/ <.*>$/, ""))
-      return "_user #{user.login}_" if user
-    end
-    str
   end
 
   # Only allow a list of trusted parameters through.
