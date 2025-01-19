@@ -374,6 +374,7 @@
   project: project
   PROJECTS: Projects
   projects: projects
+  PROJECT_ALIAS: Project Alias
   PUBLICATION: Publication
   publication: publication
   PUBLICATIONS: Publications
@@ -852,6 +853,7 @@
   list_objects: List [TYPES]
   remove_object: Remove [TYPE]
   remove_objects: Remove [TYPES]
+  update_object: Update [TYPE]
   show_all: Show All
   map_all: Map All
   show_location: Show [LOCATION]

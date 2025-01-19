@@ -38,7 +38,5 @@
     <%= autocompleter_dropdown %>
   <% end %>
 
-  <div class="actions">
-    <%= form.submit %>
-  </div>
+  <%= submit_button(form:, button: form_submit_text(@project_alias), class: "mb-5") %>
 <% end %>
