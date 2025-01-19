@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 # Helper methods for turning Query parameters into AR conditions.
-module Query::Modules::InitializationAR
-  attr_accessor :join, :tables, :where, :group, :order, :executor
+module Query::Scopes::Initialization
+  attr_accessor :tables, :scopes, :executor
 
   def initialized?
     @initialized ? true : false
@@ -10,11 +10,8 @@ module Query::Modules::InitializationAR
 
   def initialize_query
     @initialized = true
-    @join        = []
     @tables      = []
-    @where       = []
-    @group       = ""
-    @order       = ""
+    @scopes      = model.arel_table.all
     @executor    = nil
     initialize_title
     initialize_flavor
@@ -42,9 +39,9 @@ module Query::Modules::InitializationAR
     ids.map(&:to_i).uniq[0, MO.query_max_array]
   end
 
-  # Clean a pattern for use in LIKE condition.  Takes and returns a String.
+  # Clean a pattern for use in LIKE condition.  Takes and returns a "%String%".
   def clean_pattern(pattern)
-    pattern.gsub(/[%'"\\]/) { |x| "\\#{x}" }.tr("*", "%")
+    "%#{pattern.gsub(/[%'"\\]/) { |x| "\\#{x}" }.tr("*", "%")}%"
   end
 
   # Combine args into one parenthesized condition by ANDing them.
