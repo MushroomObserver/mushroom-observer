@@ -21,9 +21,8 @@
       <tr>
         <td><%= project_alias.name %></td>
         <td><%= project_alias.target_type %></td>
-        <td><%= project_alias.target.try(:name) %></td>
+        <td><%= link_to(project_alias.target.try(:name), project_alias.target) %></td>
         <td>
-          <%= link_to('Show', project_alias_path(project_id:, id: project_alias.id)) %>
           <%= link_to('Edit', edit_project_alias_path(project_id:, id: project_alias.id)) %>
           <%= link_to('Delete', project_alias_path(project_id:, id: project_alias.id),
 	              data: { turbo_method: :delete, turbo_confirm: 'Are you sure?' }) %>
