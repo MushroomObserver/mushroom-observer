@@ -70,18 +70,30 @@ module Query::Scopes::Searching
     )
   end
 
-  # Put together a bunch of AR conditions that describe a given search.
-  # needs an OR in here if not the first one
+  # Put together a bunch of AR conditions that describe what a given search.
+  # is looking for. These are ANDS, but grouped parts can be ORS.
+  # For example this search string (from QueryTest):
+  #   'foo OR bar OR "any*thing" -bad surprise! -"lost boys"'
+  # should produce this SQL:
+  #   "(x LIKE '%foo%' OR x LIKE '%bar%' OR x LIKE '%any%thing%') " \
+  #   "AND x LIKE '%surprise!%' AND x NOT LIKE '%bad%' " \
+  #   "AND x NOT LIKE '%lost boys%'"
+  #
   def add_google_conditions_good(search, model, col)
     search.goods.each do |good|
       parts = *good # break up phrases
+      # pop the first phrase off to start the condition chain without an `OR`
       ors = model.arel_table[col].matches(clean_pattern(parts.shift))
       parts.each do |str|
+        # join the parts with `or`
         ors = ors.or(model.arel_table[col].matches(clean_pattern(str)))
       end
+      # Add a where condition for each good (equivalent to `AND`)
+      @scopes = @scopes.where(ors)
     end
   end
 
+  # AR conditions for what the search wants to avoid. These are ANDS
   def add_google_conditions_bad(search, model, col)
     search.bads.each do |bad|
       @scopes = @scopes.where(
