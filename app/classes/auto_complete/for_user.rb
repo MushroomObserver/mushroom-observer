@@ -27,7 +27,7 @@ class AutoComplete::ForUser < AutoComplete::ByString
       name = user.unique_text_name
       user = user.attributes.symbolize_keys
       user[:name] = name
-      user.except(:login, :bonuses) # idk why this is getting bonuses                                                                                            
+      user.except(:login, :bonuses) # idk why this is getting bonuses
     end
     matches.sort_by! { |user| user[:name] }
   end
