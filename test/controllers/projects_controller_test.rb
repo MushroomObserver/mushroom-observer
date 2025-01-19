@@ -78,6 +78,15 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_select("form[action=?]", project_path(p_id), count: 0)
   end
 
+  def test_show_project_nonexistent
+    p_id = -1
+
+    login("zero")
+    get(:show, params: { id: p_id })
+
+    assert_redirected_to(projects_path)
+  end
+
   def test_show_project_logged_in_owner
     project = projects(:eol_project)
 
