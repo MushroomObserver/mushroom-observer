@@ -24,14 +24,11 @@ class AutoComplete::ForUser < AutoComplete::ByString
   # Turn the instances into hashes, and figure out what name to display
   def matches_array(users)
     matches = users.map do |user|
+      name = user.unique_text_name
       user = user.attributes.symbolize_keys
-      user[:name] = if user[:name].empty?
-                      user[:login]
-                    else
-                      User.unique_text_name(user)
-                    end
+      user[:name] = name
       user.except(:login, :bonuses) # idk why this is getting bonuses
     end
-    matches.sort_by! { |user| User.unique_text_name(user) }
+    matches.sort_by! { |user| user[:name] }
   end
 end

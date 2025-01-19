@@ -426,14 +426,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
-  def self.unique_text_name(user)
-    if user[:name].blank?
-      user[:login]
-    else
-      "#{user[:name]} (#{user[:login]})"
-    end
-  end
-
   def format_name
     unique_text_name
   end
