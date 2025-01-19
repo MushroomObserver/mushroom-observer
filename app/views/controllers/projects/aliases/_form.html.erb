@@ -16,26 +16,19 @@
     </div>
   <% end %>
 
-  <div class="field">
-    <%= text_field_with_label(form:, field: :name, label: "#{:Name.t}:", inline: true) %>
-  </div>
-
-  <div class="field">
-    <%= form.hidden_field(:project_id, value: project_alias.project_id) %>
-  </div>
+  <%= text_field_with_label(form:, field: :name, label: "#{:Name.t}:", inline: true) %>
+  <%= form.hidden_field(:project_id, value: project_alias.project_id) %>
 
   <%= tag.div(class: "form-group dropdown",
               data: { autocompleter_target: "wrap" } ) do %>
-    <div class="field">
-      <%= select_with_label(form:,
-                            field: :target_type,
-                            label: "#{:project_alias_type.t}:",
-                            options: [[:USER.l, :user], [:LOCATION.l, :location]],
-                            inline: true,
-                            selected: type,
-                            data: { autocompleter_target: "select",
-                                    action: "autocompleter#swap" }) %>
-    </div>
+    <%= select_with_label(form:,
+                          field: :target_type,
+                          label: "#{:project_alias_type.t}:",
+                          options: [[:USER.l, :user], [:LOCATION.l, :location]],
+                          inline: true,
+                          selected: type,
+                          data: { autocompleter_target: "select",
+                                  action: "autocompleter#swap" }) %>
 
     <%= autocompleter_hidden_field(form:, type:, hidden_value: project_alias.target_id) %>
     <%= form.text_field(
