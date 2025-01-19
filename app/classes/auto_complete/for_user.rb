@@ -28,7 +28,7 @@ class AutoComplete::ForUser < AutoComplete::ByString
       user[:name] = if user[:name].empty?
                       user[:login]
                     else
-                      User.unique_text_name_login_first(user)
+                      User.unique_text_name(user)
                     end
       user.except(:login, :bonuses) # idk why this is getting bonuses
     end

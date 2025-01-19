@@ -45,7 +45,7 @@ class AutoCompleteTest < UnitTestCase
 
     auto = AutoComplete::ForUser.new(string: "Rolf Singer")
     results = auto.matching_records
-    assert(results.pluck(:name).include?("rolf <Rolf Singer>"))
+    assert(results.pluck(:name).include?("Rolf Singer (rolf)"))
   end
 
   def test_typical_use_with_exact_match
@@ -74,7 +74,7 @@ class AutoCompleteTest < UnitTestCase
 
     auto = AutoComplete::ForUser.new(string: "Rolf Singer")
     results = auto.first_matching_record
-    assert_equal("rolf <Rolf Singer>", results.first[:name])
+    assert_equal("Rolf Singer (rolf)", results.first[:name])
   end
 
   def test_truncate
