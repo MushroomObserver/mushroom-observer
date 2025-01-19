@@ -6,7 +6,7 @@ class AutoComplete::ForUser < AutoComplete::ByString
             where(User[:login].matches("#{letter}%").
               or(User[:name].matches("#{letter}%")).
               or(User[:name].matches("% #{letter}%"))).
-            order(login: :asc)
+            order(name: :asc, login: :asc)
 
     matches_array(users)
   end
@@ -32,6 +32,6 @@ class AutoComplete::ForUser < AutoComplete::ByString
                     end
       user.except(:login, :bonuses) # idk why this is getting bonuses
     end
-    matches.sort_by! { |user| user[:name] }
+    matches.sort_by! { |user| User.unique_text_name(user) }
   end
 end
