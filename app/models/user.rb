@@ -315,7 +315,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   scope :by_contribution, lambda {
     order(contribution: :desc, name: :asc, login: :asc)
   }
-
   # NOTE: the obs images are a separate optimized query
   scope :show_includes, lambda {
     strict_loading.includes(
@@ -323,6 +322,8 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
       :user_stats
     )
   }
+  scope :verified, -> { where.not(verified: nil) }
+  scope :unverified, -> { where(verified: nil) }
 
   # These are used by forms.
   attr_accessor :place_name
