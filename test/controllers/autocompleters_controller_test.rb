@@ -217,7 +217,7 @@ class AutocompletersControllerTest < FunctionalTestCase
 
     good_autocompleter_request(type: :user, string: "Komodo")
     assert_equivalent([{ name: "K", id: 0 },
-                       { name: "#{katrina.login} <#{katrina.name}>",
+                       { name: "#{katrina.name} (#{katrina.login})",
                          id: katrina.id }],
                       JSON.parse(@response.body))
 
