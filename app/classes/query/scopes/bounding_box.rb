@@ -24,17 +24,43 @@ module Query::Scopes::BoundingBox
 
   # ----------------------------------------------------------------------------
 
+  # Condition which returns true if the observation's lat/long is plausible.
+  # (should be identical to Mappable::BoxMethods.lat_lng_close? but is not)
   def lat_lng_plausible
-    # Condition which returns true if the observation's lat/long is plausible.
-    # (should be identical to Mappable::BoxMethods.lat_lng_close?)
-    %(
-      observations.lat >= locations.south*1.2 - locations.north*0.2 AND
-      observations.lat <= locations.north*1.2 - locations.south*0.2 AND
-      if(locations.west <= locations.east,
-        observations.lng >= locations.west*1.2 - locations.east*0.2 AND
-        observations.lng <= locations.east*1.2 - locations.west*0.2,
-        observations.lng >= locations.west*0.8 + locations.east*0.2 + 72 OR
-        observations.lng <= locations.east*0.8 + locations.west*0.2 - 72
+    # %(
+    #   observations.lat >= locations.south*1.2 - locations.north*0.2 AND
+    #   observations.lat <= locations.north*1.2 - locations.south*0.2 AND
+    #   if(locations.west <= locations.east,
+    #     observations.lng >= locations.west*1.2 - locations.east*0.2 AND
+    #     observations.lng <= locations.east*1.2 - locations.west*0.2,
+    #     observations.lng >= locations.west*0.8 + locations.east*0.2 + 72 OR
+    #     observations.lng <= locations.east*0.8 + locations.west*0.2 - 72
+    #   )
+    # )
+    Observation[:lat].gteq(
+      (Location[:south] * 1.2) - (Location[:north] * 0.2)
+    ).and(
+      Observation[:lat].gteq(
+        (Location[:south] * 1.2) - (Location[:north] * 0.2)
+      )
+    ).and(
+      Location[:west].lteq(Location[:east]).
+      when(true).then(
+        Observation[:lng].gteq(
+          (Location[:west] * 1.2) - (Location[:east] * 0.2)
+        ).and(
+          Observation[:lng].lteq(
+            (Location[:east] * 1.2) - (Location[:west] * 0.2)
+          )
+        )
+      ).when(false).then(
+        Observation[:lng].gteq(
+          (Location[:west] * 0.8) - (Location[:east] * 0.2 + 72)
+        ).or(
+          Observation[:lng].lteq(
+            (Location[:east] * 0.8) - (Location[:west] * 0.2 - 72)
+          )
+        )
       )
     )
   end
