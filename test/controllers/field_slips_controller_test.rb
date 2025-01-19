@@ -432,7 +432,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
                       code: @field_slip.code,
                       observation_id: @field_slip.observation_id,
                       field_slip_name: names(:coprinus_comatus).text_name,
-                      field_slip_id_by: "#{user.login} <#{user.name}>",
+                      field_slip_id_by: "#{user.name} (#{user.login})",
                       project_id: @field_slip.project_id,
                       notes: { Other: notes }
                     } })
