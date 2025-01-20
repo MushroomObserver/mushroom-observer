@@ -51,9 +51,13 @@ module Query::Scopes::Ordering
   end
 
   def sort_by_code_then_date(_model)
+    return unless model == FieldSlip
+
     # "field_slips.code ASC, field_slips.created_at DESC, " \
     # "field_slips.id DESC"
-    @scopes = @scopes.order(code: :asc, created_at: :desc, id: :desc)
+    @scopes = @scopes.order(
+      FieldSlip[:code].asc, FieldSlip[:created_at].desc, FieldSlip[:id].desc
+    )
   end
 
   def sort_by_code_then_name(_model)
@@ -106,6 +110,8 @@ module Query::Scopes::Ordering
   end
 
   def sort_by_herbarium_label(_model)
+    return unless model == HerbariumRecord
+
     # "herbarium_records.initial_det ASC, " \
     # "herbarium_records.accession_number ASC"
     @scopes = @scopes.order(HerbariumRecords[:initial_det].asc,
@@ -113,9 +119,11 @@ module Query::Scopes::Ordering
   end
 
   def sort_by_herbarium_name(_model)
-    add_join(:herbaria)
+    return unless model == HerbariumRecord
+
+    # add_join(:herbaria)
     # "herbaria.name ASC"
-    @scopes = @scopes.order(Herbaria[:name].asc)
+    @scopes = @scopes.joins(:herbarium).order(Herbaria[:name].asc)
   end
 
   # (for testing)
@@ -217,6 +225,7 @@ module Query::Scopes::Ordering
               order(ImageVote[:value].desc)
   end
 
+  # rubocop:disable Metrics/AbcSize
   def sort_by_owners_thumbnail_quality(model)
     return unless model == Observation
 
@@ -233,8 +242,11 @@ module Query::Scopes::Ordering
               order(ImageVote[:value].desc, Image[:vote_cache].desc,
                     Observation[:vote_cache].desc)
   end
+  # rubocop:enable Metrics/AbcSize
 
   def sort_by_records(_model)
+    return unless model == Herbarium
+
     # outer_join needed to show herbaria with no records
     # add_join(:herbarium_records!)
     # self.group = "herbaria.id"
@@ -297,7 +309,7 @@ module Query::Scopes::Ordering
   end
 
   def sort_by_user(_model)
-    add_join(:users)
+    # add_join(:users)
     # 'IF(users.name = "" OR users.name IS NULL, users.login, users.name) ASC'
     @scopes = @scopes.joins(:user).
               order(User[:name].blank?.
@@ -342,10 +354,10 @@ module Query::Scopes::Ordering
   end
 
   def sort_name_descriptions_by_name
-    add_join(:names)
+    # add_join(:names)
     # "names.sort_name ASC, name_descriptions.created_at ASC"
-    @scopes = @scopes.order(Name[:sort_name].asc,
-                            NameDescription[:created_at].asc)
+    @scopes = @scopes.joins(:name).
+              order(Name[:sort_name].asc, NameDescription[:created_at].asc)
   end
 
   def sort_names_by_name
@@ -354,9 +366,10 @@ module Query::Scopes::Ordering
   end
 
   def sort_observations_by_name
-    add_join(:names)
+    # add_join(:names)
     # "names.sort_name ASC, observations.when DESC"
-    @scopes = @scopes.order(Name[:sort_name].asc, Observation[:when].desc)
+    @scopes = @scopes.joins(:name).
+              order(Name[:sort_name].asc, Observation[:when].desc)
   end
 
   def sort_other_models_by_name(model)
