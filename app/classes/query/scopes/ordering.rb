@@ -251,8 +251,8 @@ module Query::Scopes::Ordering
     # add_join(:herbarium_records!)
     # self.group = "herbaria.id"
     # "count(herbarium_records.id) DESC"
-    @scopes = @scopes.left_outer_joins(:herbarium_records).group(Herbaria[:id]).
-              order(HerbariumRecord[:id].count.desc)
+    @scopes = @scopes.left_outer_joins(:herbarium_records).
+              group(Herbaria[:id]).order(HerbariumRecord[:id].count.desc)
   end
 
   def sort_by_rss_log(model)
