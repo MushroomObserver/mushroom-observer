@@ -519,8 +519,8 @@ class Name < AbstractModel
 
   ### Module Name::Taxonomy. Rank scopes take text values, e.g. "Genus"
   scope :with_rank, ->(rank) { where(rank: ranks[rank]) if rank }
-  scope :with_rank_between, lambda { |min, max|
-    return with_rank(min) if !max || min == max
+  scope :with_rank_between, lambda { |min, max = min|
+    return with_rank(min) if min == max
 
     all_ranks = Name.all_ranks
     a = all_ranks.index(min) || 0
