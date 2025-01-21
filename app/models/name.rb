@@ -473,7 +473,7 @@ class Name < AbstractModel
     # in the template: order by most frequently used
     # group(:name_id).reorder(Arel.star.count.desc)
   }
-  # FIXME: different in Query
+  # FIXME: different in Query. Add google conditions to AbstractModel
   scope :description_includes, lambda { |text|
     joins(:descriptions).
       where(NameDescription[:gen_desc].matches("%#{text}%")).
