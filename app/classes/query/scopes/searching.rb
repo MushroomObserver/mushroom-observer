@@ -45,15 +45,15 @@ module Query::Scopes::Searching
     return if params[:pattern].blank?
 
     @title_tag = :query_title_pattern_search
-    add_search_conditions(params[:pattern], search_fields)
+    add_search_conditions(search_fields, params[:pattern])
   end
 
-  def add_search_conditions(val, table_columns, *)
+  def add_search_conditions(table_columns, val, *)
     return if val.blank?
 
     search = google_parse(val)
-    add_google_conditions_good(search, table_columns)
-    add_google_conditions_bad(search, table_columns)
+    add_google_conditions_good(table_columns, search)
+    add_google_conditions_bad(table_columns, search)
     add_joins(*)
     @scopes.to_sql
   end
@@ -82,7 +82,7 @@ module Query::Scopes::Searching
   #   "AND x LIKE '%surprise!%' AND x NOT LIKE '%bad%' " \
   #   "AND x NOT LIKE '%lost boys%'"
   #
-  def add_google_conditions_good(search, table_columns)
+  def add_google_conditions_good(table_columns, search)
     search.goods.each do |good|
       parts = *good # break up phrases
       # pop the first phrase off to start the condition chain without an `OR`
@@ -97,7 +97,7 @@ module Query::Scopes::Searching
   end
 
   # AR conditions for what the search wants to avoid. These are ANDS
-  def add_google_conditions_bad(search, table_columns)
+  def add_google_conditions_bad(table_columns, search)
     search.bads.each do |bad|
       @scopes = @scopes.where(
         table_columns.does_not_match(clean_pattern(bad))

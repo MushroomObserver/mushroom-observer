@@ -118,11 +118,11 @@ module Query::Scopes::Descriptions
   def initialize_join_desc_parameter(type)
     if params[:join_desc] == :default
       # add_join(:"#{type}_descriptions.default")
-      joins(:"#{type}_descriptions").
-        where(desc_model(type)[:default].eq(true))
+      @scopes = @scopes.joins(:"#{type}_descriptions").
+                where(desc_model(type)[:default].eq(true))
     elsif any_param_desc_fields?
       # add_join(:"#{type}_descriptions")
-      joins(:"#{type}_descriptions")
+      @scopes = @scopes.joins(:"#{type}_descriptions")
     end
   end
 
@@ -156,13 +156,11 @@ module Query::Scopes::Descriptions
     # fields = fields.map { |f| "COALESCE(#{type}_descriptions.#{f},'')" }
     # fields = "CONCAT(#{fields.join(",")})"
     fields = fields.map { |f| desc_model(type)[f].coalesce("") }
-    concats = fields.shift
+    table_columns = fields.shift
     # rubocop:disable Style/SelfAssignment
-    fields.each do |f|
-      concats = concats + f
-    end
+    fields.each { |f| table_columns = table_columns + f }
     # rubocop:enable Style/SelfAssignment
-    add_search_condition(concats, params[:desc_content])
+    add_search_conditions(table_columns, params[:desc_content])
   end
 
   def params_out_to_with_descriptions_params

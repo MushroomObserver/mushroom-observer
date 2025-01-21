@@ -133,20 +133,20 @@ module Query::Scopes::Shared
 
   # Generalized so the model and column name can be sent as params
   # e.g. (Observation[:location_id], ids) or (Location[:description_id], ids)
-  def add_id_condition(table_column, ids, *)
+  def add_id_condition(table_column, ids, joins)
     return if ids.empty?
 
     set = clean_id_set(ids)
     @scopes = @scopes.where(table_column.in(set))
-    add_joins(*)
+    @scopes = @scopes.joins(joins) if joins
   end
 
-  def add_not_id_condition(table_column, ids, *)
+  def add_not_id_condition(table_column, ids, joins)
     return if ids.empty?
 
     set = clean_id_set(ids)
     @scopes = @scopes.where(table_column.not_in(set))
-    add_joins(*)
+    @scopes = @scopes.joins(joins) if joins
   end
 
   # Put together a list of ids for use in a "id IN (1,2,...)" condition.

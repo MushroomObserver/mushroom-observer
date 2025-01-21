@@ -2,28 +2,40 @@
 
 module Query::Scopes::Images
   def initialize_img_notes_parameters
-    add_boolean_condition("LENGTH(COALESCE(images.notes,'')) > 0",
-                          "LENGTH(COALESCE(images.notes,'')) = 0",
-                          params[:with_notes])
-    add_search_condition("images.notes", params[:notes_has])
+    add_boolean_condition(
+      # "LENGTH(COALESCE(images.notes,'')) > 0",
+      # "LENGTH(COALESCE(images.notes,'')) = 0",
+      Image[:notes].coalesce.length.gt(0),
+      Image[:notes].coalesce.length.eq(0),
+      params[:with_notes]
+    )
+    add_search_condition(Image[:notes], params[:notes_has])
   end
 
   def initialize_img_association_parameters
     initialize_observations_parameter
-    add_where_condition(:observations, params[:locations],
-                        :observation_images, :observations)
+    add_where_condition(
+      Observation,
+      params[:locations],
+      { observation_images: :observations }
+    )
     add_for_project_condition(:project_images)
     initialize_projects_parameter(:project_images, [:project_images])
     initialize_species_lists_parameter(
       :species_list_observations,
       [:observation_images, :observations, :species_list_observations]
     )
-    add_id_condition("images.license_id", params[:license])
+    add_id_condition(
+      "images.license_id",
+      params[:license]
+    )
   end
 
   def initialize_img_record_parameters
-    add_search_condition("images.copyright_holder",
-                         params[:copyright_holder_has])
+    add_search_condition(
+      "images.copyright_holder",
+      params[:copyright_holder_has]
+    )
     add_image_size_condition(params[:size])
     add_image_type_condition(params[:content_types])
     initialize_ok_for_export_parameter
@@ -70,12 +82,20 @@ module Query::Scopes::Images
   end
 
   def initialize_img_vote_parameters
-    add_boolean_condition("images.vote_cache IS NOT NULL",
-                          "images.vote_cache IS NULL",
-                          params[:with_votes])
-    add_range_condition("images.vote_cache", params[:quality])
-    add_range_condition("observations.vote_cache", params[:confidence],
-                        :observation_images, :observations)
+    add_boolean_condition(
+      "images.vote_cache IS NOT NULL",
+      "images.vote_cache IS NULL",
+      params[:with_votes]
+    )
+    add_range_condition(
+      "images.vote_cache",
+      params[:quality]
+    )
+    add_range_condition(
+      "observations.vote_cache",
+      params[:confidence],
+      :observation_images, :observations
+    )
   end
 
   def add_img_advanced_search_conditions
