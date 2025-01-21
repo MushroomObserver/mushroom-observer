@@ -25,7 +25,7 @@ module Query::Scopes::Associations
   end
 
   # pass a model (arel_table)
-  def add_where_condition(table, vals, joins)
+  def add_observation_location_condition(table, vals, joins)
     return if vals.empty?
 
     # loc_col   = "#{table}.location_id"
@@ -33,14 +33,14 @@ module Query::Scopes::Associations
     ids = clean_id_set(lookup_locations_by_name(vals))
     # cond      = "#{loc_col} IN (#{ids})"
     conditions = table[:location_id].in(ids)
-    conditions = chain_where_conditions(conditions, table, vals)
+    conditions = chain_location_string_conditions(conditions, table, vals)
     # @where << cond
     @scopes = @scopes.where(conditions)
     # add_joins(*)
     @scopes = @scopes.joins(joins) if joins
   end
 
-  def chain_where_conditions(conditions, table, vals)
+  def chain_location_string_conditions(conditions, table, vals)
     vals.each do |val|
       next unless /\D/.match?(val)
 

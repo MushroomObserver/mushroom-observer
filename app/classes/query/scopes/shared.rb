@@ -19,7 +19,7 @@ module Query::Scopes::Shared
                @scope.date_after(col, earliest)
              end
 
-    add_joins(*joins)
+    @scopes = @scopes.joins(joins) if joins
   end
 
   def add_time_condition(col, vals, *joins)
@@ -32,10 +32,10 @@ module Query::Scopes::Shared
                @scope.datetime_after(col, earliest)
              end
 
-    add_joins(*joins)
+    @scopes = @scopes.joins(joins) if joins
   end
 
-  def add_by_user_condition(_table = model.table_name)
+  def add_by_user_condition
     return if params[:by_user].blank?
 
     user = find_cached_parameter_instance(User, :by_user)
@@ -64,54 +64,71 @@ module Query::Scopes::Shared
     )
   end
 
-  def add_boolean_condition(true_cond, false_cond, val, *)
+  def add_boolean_condition(true_cond, false_cond, val, joins)
     return if val.nil?
 
     @scopes = @scopes.send(:where, (val ? true_cond : false_cond))
-    add_joins(*)
+    @scopes = @scopes.joins(joins) if joins
   end
 
-  def add_exact_match_condition(table_column, vals, *)
+  # Like boolean, but less verbose. When the column itself is boolean
+  def add_boolean_column_condition(table_column, val, joins)
+    return if val.nil?
+
+    true_cond = table_column.eq(true)
+    false_cond = table_column.eq(false)
+    @scopes = @scopes.send(:where, (val ? true_cond : false_cond))
+    @scopes = @scopes.joins(joins) if joins
+  end
+
+  # Like boolean, but less verbose
+  def add_presence_condition(table_column, val, joins)
+    return if val.nil?
+
+    true_cond = table_column.coalesce("").length.gt(0)
+    false_cond = table_column.coalesce("").length.eq(0)
+    @scopes = @scopes.send(:where, (val ? true_cond : false_cond))
+    @scopes = @scopes.joins(joins) if joins
+  end
+
+  def add_exact_match_condition(table_column, vals, joins)
     return if vals.blank?
 
     vals = [vals] unless vals.is_a?(Array)
     vals = vals.map { |v| escape(v.downcase) }
     @scopes = @scopes.where(table_column.downcase.in(*vals))
-    add_joins(*)
+    @scopes = @scopes.joins(joins) if joins
   end
 
-  def add_range_condition(table_column, val, *)
+  def add_range_condition(table_column, val, joins)
     return if val.blank? || val[0].blank? && val[1].blank?
 
     min, max = val
     @scopes = @scopes.where(table_column.gteq(min)) if min.present?
     @scopes = @scopes.where(table_column.lteq(max)) if max.present?
-
-    add_joins(*)
+    @scopes = @scopes.joins(joins) if joins
   end
 
-  def add_string_enum_condition(table_column, vals, allowed, *)
+  def add_string_enum_condition(table_column, vals, allowed, joins)
     return if vals.empty?
 
     vals = vals.map(&:to_s) & allowed.map(&:to_s)
     return if vals.empty?
 
     @scopes = @scopes.where(table_column.in(*vals))
-
-    add_joins(*)
+    @scopes = @scopes.joins(joins) if joins
   end
 
   # Send the whole enum Hash as `allowed`, so we can find the corresponding
   # values of the keys. MO's enum values currently may not start at 0.
-  def add_indexed_enum_condition(table_column, vals, allowed, *)
+  def add_indexed_enum_condition(table_column, vals, allowed, joins)
     return if vals.empty?
 
     vals = allowed.values_at(*vals)
     return if vals.empty?
 
     @scopes = @scopes.where(table_column.in(*vals))
-
-    add_joins(*)
+    @scopes = @scopes.joins(joins) if joins
   end
 
   # Simply an id in set condition for the current table's :id column. No joins.

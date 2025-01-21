@@ -5,7 +5,8 @@ module Query::Scopes::Locations
     return if params[:regexp].blank?
 
     regexp = escape(params[:regexp].to_s.strip_squeeze)
-    where << "locations.name REGEXP #{regexp}"
+    # where << "locations.name REGEXP #{regexp}"
+    @scopes = @scopes.where(Location[:name] =~ regexp)
 
     @title_tag = :query_title_regexp_search
   end

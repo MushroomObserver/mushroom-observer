@@ -14,7 +14,7 @@ module Query::Scopes::Images
 
   def initialize_img_association_parameters
     initialize_observations_parameter
-    add_where_condition(
+    add_observation_location_condition(
       Observation,
       params[:locations],
       { observation_images: :observations }

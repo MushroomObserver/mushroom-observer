@@ -151,6 +151,7 @@ module Query::Scopes::Descriptions
     )
   end
 
+  # FIXME: Fix Name and Location `description_includes` scopes
   def initialize_desc_content_parameter(type)
     fields = desc_model(type).all_note_fields
     # fields = fields.map { |f| "COALESCE(#{type}_descriptions.#{f},'')" }
