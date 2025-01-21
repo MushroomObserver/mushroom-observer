@@ -29,21 +29,21 @@ module Query::Scopes::AdvancedSearch
   def add_name_condition(name)
     return if name.blank?
 
-    add_search_conditions(name, name_field)
+    add_search_conditions(name_field, name)
     add_join_to_names
   end
 
   def add_user_condition(user)
     return if user.blank?
 
-    add_search_conditions(user, user_field)
+    add_search_conditions(user_field, user)
     add_join_to_users
   end
 
   def add_location_condition(location)
     return if location.blank?
 
-    add_search_conditions(location, location_field)
+    add_search_conditions(location_field, location)
     add_join_to_locations
   end
 
@@ -58,9 +58,9 @@ module Query::Scopes::AdvancedSearch
     # self.executor = lambda do |args|
     #   content_search_one(content, args) | content_search_two(content, args)
     # end
-    add_search_conditions(content, content_field_no_comments)
+    add_search_conditions(content_field_no_comments, content)
     @scopes = @scopes.joins(content_join_sources)
-    add_search_conditions(content, content_field_with_comments)
+    add_search_conditions(content_field_with_comments, content)
   end
 
   # def content_search_one(content, args)
