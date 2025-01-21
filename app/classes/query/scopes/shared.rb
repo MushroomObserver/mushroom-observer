@@ -71,47 +71,45 @@ module Query::Scopes::Shared
     add_joins(*)
   end
 
-  def add_exact_match_condition(col, vals, *)
+  def add_exact_match_condition(table_column, vals, *)
     return if vals.blank?
 
     vals = [vals] unless vals.is_a?(Array)
     vals = vals.map { |v| escape(v.downcase) }
-    @scopes = @scopes.where(model.arel_table[col].downcase.in(*vals))
+    @scopes = @scopes.where(table_column.downcase.in(*vals))
     add_joins(*)
   end
 
-  # rubocop:disable Metrics/AbcSize
-  def add_range_condition(col, val, *)
+  def add_range_condition(table_column, val, *)
     return if val.blank? || val[0].blank? && val[1].blank?
 
     min, max = val
-    @scopes = @scopes.where(model.arel_table[col].gteq(min)) if min.present?
-    @scopes = @scopes.where(model.arel_table[col].lteq(max)) if max.present?
+    @scopes = @scopes.where(table_column.gteq(min)) if min.present?
+    @scopes = @scopes.where(table_column.lteq(max)) if max.present?
 
     add_joins(*)
   end
-  # rubocop:enable Metrics/AbcSize
 
-  def add_string_enum_condition(col, vals, allowed, *)
+  def add_string_enum_condition(table_column, vals, allowed, *)
     return if vals.empty?
 
     vals = vals.map(&:to_s) & allowed.map(&:to_s)
     return if vals.empty?
 
-    @scopes = @scopes.where(model.arel_table[col].in(*vals))
+    @scopes = @scopes.where(table_column.in(*vals))
 
     add_joins(*)
   end
 
   # Send the whole enum Hash as `allowed`, so we can find the corresponding
   # values of the keys. MO's enum values currently may not start at 0.
-  def add_indexed_enum_condition(col, vals, allowed, *)
+  def add_indexed_enum_condition(table_column, vals, allowed, *)
     return if vals.empty?
 
     vals = allowed.values_at(*vals)
     return if vals.empty?
 
-    @scopes = @scopes.where(model.arel_table[col].in(*vals))
+    @scopes = @scopes.where(table_column.in(*vals))
 
     add_joins(*)
   end
@@ -134,20 +132,20 @@ module Query::Scopes::Shared
   # rubocop:enable Metrics/AbcSize
 
   # Generalized so the model and column name can be sent as params
-  # e.g. (Observation, :location_id, ids) or (Location, :description_id, ids)
-  def add_id_condition(model, col, ids, *)
+  # e.g. (Observation[:location_id], ids) or (Location[:description_id], ids)
+  def add_id_condition(table_column, ids, *)
     return if ids.empty?
 
     set = clean_id_set(ids)
-    @scopes = @scopes.where(model.arel_table[col].in(set))
+    @scopes = @scopes.where(table_column.in(set))
     add_joins(*)
   end
 
-  def add_not_id_condition(model, col, ids, *)
+  def add_not_id_condition(table_column, ids, *)
     return if ids.empty?
 
     set = clean_id_set(ids)
-    @scopes = @scopes.where(model.arel_table[col].not_in(set))
+    @scopes = @scopes.where(table_column.not_in(set))
     add_joins(*)
   end
 

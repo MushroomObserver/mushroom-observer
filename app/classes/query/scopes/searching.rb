@@ -37,20 +37,23 @@ module Query::Scopes::Searching
   #   search.goods = [ [ "agaricus", "amanita" ] ]
   #   search.bads  = [ "amanitarita" ]
   #
+  #  AR: `search_fields` should be defined in the Query class as either
+  #  model.arel_table[:column] or a concatenation of columns in parentheses.
+  #  e.g. Observation[:notes] or (Observation[:notes] + Observation[:name])
+  #
   def add_pattern_condition
     return if params[:pattern].blank?
 
     @title_tag = :query_title_pattern_search
-    add_search_condition(search_fields, params[:pattern])
+    add_search_conditions(params[:pattern], search_fields)
   end
 
-  def add_search_condition(model, col, val, *)
+  def add_search_conditions(val, table_columns, *)
     return if val.blank?
 
-    @scopes = model.all
     search = google_parse(val)
-    add_google_conditions_good(search, model, col)
-    add_google_conditions_bad(search, model, col)
+    add_google_conditions_good(search, table_columns)
+    add_google_conditions_bad(search, table_columns)
     add_joins(*)
     @scopes.to_sql
   end
@@ -79,14 +82,14 @@ module Query::Scopes::Searching
   #   "AND x LIKE '%surprise!%' AND x NOT LIKE '%bad%' " \
   #   "AND x NOT LIKE '%lost boys%'"
   #
-  def add_google_conditions_good(search, model, col)
+  def add_google_conditions_good(search, table_columns)
     search.goods.each do |good|
       parts = *good # break up phrases
       # pop the first phrase off to start the condition chain without an `OR`
-      ors = model.arel_table[col].matches(clean_pattern(parts.shift))
+      ors = table_columns.matches(clean_pattern(parts.shift))
       parts.each do |str|
         # join the parts with `or`
-        ors = ors.or(model.arel_table[col].matches(clean_pattern(str)))
+        ors = ors.or(table_columns.matches(clean_pattern(str)))
       end
       # Add a where condition for each good (equivalent to `AND`)
       @scopes = @scopes.where(ors)
@@ -94,10 +97,10 @@ module Query::Scopes::Searching
   end
 
   # AR conditions for what the search wants to avoid. These are ANDS
-  def add_google_conditions_bad(search, model, col)
+  def add_google_conditions_bad(search, table_columns)
     search.bads.each do |bad|
       @scopes = @scopes.where(
-        model.arel_table[col].does_not_match(clean_pattern(bad))
+        table_columns.does_not_match(clean_pattern(bad))
       )
     end
   end

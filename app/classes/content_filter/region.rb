@@ -26,5 +26,29 @@ class ContentFilter
         "LIKE #{query.escape("%, #{val}")}"
       end
     end
+
+    # The "+" is an arel extensions operator
+    # rubocop:disable Style/StringConcatenation
+    def scope_condition(query, model, val)
+      val = Location.reverse_name_if_necessary(val)
+      concat = if model == Location
+                 Location[:name] + ", "
+               else
+                 Observation[:where] + ", "
+               end
+      make_scope_regexp(query, concat, val)
+    end
+    # rubocop:enable Style/StringConcatenation
+
+    def make_scope_regexp(query, concat, val)
+      if Location.understood_continent?(val)
+        vals = Location.countries_in_continent(val).join("|")
+        # "REGEXP #{query.escape(", (#{vals})$")}"
+        concat =~ query.escape(", (#{vals})$")
+      else
+        # "LIKE #{query.escape("%, #{val}")}"
+        concat.matches(query.escape("%, #{val}"))
+      end
+    end
   end
 end
