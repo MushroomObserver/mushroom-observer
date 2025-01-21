@@ -19,43 +19,53 @@ module Query::Scopes::Images
       params[:locations],
       { observation_images: :observations }
     )
-    add_for_project_condition(:project_images)
-    initialize_projects_parameter(:project_images, [:project_images])
+    add_for_project_condition(ProjectImage)
+    initialize_projects_parameter(ProjectImage, :project_images)
     initialize_species_lists_parameter(
-      :species_list_observations,
-      [:observation_images, :observations, :species_list_observations]
+      SpeciesListObservation,
+      { observation_images: { observations: :species_list_observations } }
     )
     add_id_condition(
-      "images.license_id",
+      Image[:license_id],
       params[:license]
     )
   end
 
   def initialize_img_record_parameters
     add_search_condition(
-      "images.copyright_holder",
+      Image[:copyright_holder],
       params[:copyright_holder_has]
     )
-    add_image_size_condition(params[:size])
+    add_image_size_conditions(params[:size])
     add_image_type_condition(params[:content_types])
     initialize_ok_for_export_parameter
   end
 
-  def add_image_size_condition(vals, *)
+  def add_image_size_conditions(vals, joins)
     return if vals.empty?
 
     min, max = vals
     sizes = Image::ALL_SIZES
     pixels = Image::ALL_SIZES_IN_PIXELS
-    if min
-      size = pixels[sizes.index(min)]
-      @where << "images.width >= #{size} OR images.height >= #{size}"
-    end
-    if max
-      size = pixels[sizes.index(max) + 1]
-      @where << "images.width < #{size} AND images.height < #{size}"
-    end
-    add_joins(*)
+    add_min_size_condition(min, sizes, pixels) if min
+    add_max_size_condition(max, sizes, pixels) if max
+    @scopes = @scopes.joins(joins) if joins
+  end
+
+  def add_min_size_condition(min, sizes, pixels)
+    size = pixels[sizes.index(min)]
+    # @where << "images.width >= #{size} OR images.height >= #{size}"
+    @scopes = @scopes.where(
+      Image[:width].gteq(size).or(Image[:height].gteq(size))
+    )
+  end
+
+  def add_max_size_condition(max, sizes, pixels)
+    size = pixels[sizes.index(max) + 1]
+    # @where << "images.width < #{size} AND images.height < #{size}"
+    @scopes = @scopes.where(
+      Image[:width].lt(size).or(Image[:height].lt(size))
+    )
   end
 
   def add_image_type_condition(vals, *)
@@ -83,18 +93,22 @@ module Query::Scopes::Images
 
   def initialize_img_vote_parameters
     add_boolean_condition(
-      "images.vote_cache IS NOT NULL",
-      "images.vote_cache IS NULL",
+      # "images.vote_cache IS NOT NULL",
+      # "images.vote_cache IS NULL",
+      Image[:vote_cache].not_eq(nil),
+      Image[:vote_cache].eq(nil),
       params[:with_votes]
     )
     add_range_condition(
-      "images.vote_cache",
+      # "images.vote_cache",
+      Image[:vote_cache],
       params[:quality]
     )
     add_range_condition(
-      "observations.vote_cache",
+      # "observations.vote_cache",
+      Observation[:vote_cache],
       params[:confidence],
-      :observation_images, :observations
+      { observation_images: :observations }
     )
   end
 
@@ -102,7 +116,8 @@ module Query::Scopes::Images
     return if advanced_search_params.all? { |key| params[key].blank? }
     return if handle_img_content_search!
 
-    add_join(:observation_images, :observations)
+    # add_join(:observation_images, :observations)
+    @scopes = @scopes.joins(observation_images: :observations)
     initialize_advanced_search
   end
 

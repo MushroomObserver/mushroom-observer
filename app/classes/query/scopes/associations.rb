@@ -70,7 +70,7 @@ module Query::Scopes::Associations
 
   def add_for_observation_condition(
     table = "Observation#{model}".constantize,
-    joins = :"observation_#{model.table_name}"
+    joins = table.table_name
   )
     return if params[:observation].blank?
 
@@ -97,7 +97,8 @@ module Query::Scopes::Associations
     )
   end
 
-  def add_for_project_condition(table = model, joins = [table])
+  # pass a model (arel_table)
+  def add_for_project_condition(table = model, joins = table.table_name)
     return if params[:project].blank?
 
     project = find_cached_parameter_instance(Project, :project)
