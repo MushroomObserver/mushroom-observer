@@ -473,7 +473,7 @@ class Name < AbstractModel
     # in the template: order by most frequently used
     # group(:name_id).reorder(Arel.star.count.desc)
   }
-  # FIXME: different in Query
+  # NOTE: different in Query
   scope :description_includes, lambda { |text|
     joins(:descriptions).
       where(NameDescription[:gen_desc].matches("%#{text}%")).
