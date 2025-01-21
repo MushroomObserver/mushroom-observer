@@ -3,13 +3,13 @@
 # Helper methods for turning Query parameters into AR conditions.
 module Query::Scopes::Shared
   # Just because these three are used over and over again.
-  def add_owner_and_time_stamp_conditions(_table = model.table_name)
+  def add_owner_and_time_stamp_conditions
     add_time_condition(:created_at, params[:created_at])
     add_time_condition(:updated_at, params[:updated_at])
     add_id_condition(:user_id, lookup_users_by_name(params[:users]))
   end
 
-  def add_date_condition(col, vals, *joins)
+  def add_date_condition(col, vals, joins)
     return if vals.empty?
 
     earliest, latest = vals
@@ -22,7 +22,7 @@ module Query::Scopes::Shared
     @scopes = @scopes.joins(joins) if joins
   end
 
-  def add_time_condition(col, vals, *joins)
+  def add_time_condition(col, vals, joins)
     return unless vals
 
     earliest, latest = vals
@@ -81,8 +81,18 @@ module Query::Scopes::Shared
     @scopes = @scopes.joins(joins) if joins
   end
 
-  # Like boolean, but less verbose
+  # Like boolean, but less verbose. When you're querying for not nil
   def add_presence_condition(table_column, val, joins)
+    return if val.nil?
+
+    true_cond = table_column.not_eq(nil)
+    false_cond = table_column.eq(nil)
+    @scopes = @scopes.send(:where, (val ? true_cond : false_cond))
+    @scopes = @scopes.joins(joins) if joins
+  end
+
+  # Like boolean, but less verbose
+  def add_coalesced_presence_condition(table_column, val, joins)
     return if val.nil?
 
     true_cond = table_column.coalesce("").length.gt(0)
@@ -138,12 +148,12 @@ module Query::Scopes::Shared
   #   builds: "FIND_IN_SET(#{table}.id,'#{set}') ASC"
   #
   # rubocop:disable Metrics/AbcSize
-  def add_ids_condition(table = model.table_name, ids = :ids)
-    return if params[ids].nil? # [] is valid
+  def add_ids_condition(table = model, ids_param = :ids)
+    return if params[ids_param].nil? # [] is valid
 
-    set = clean_id_set(ids)
-    @scopes = @scopes.where(model.arel_table[col].in(set)).
-              reorder(Arel::Nodes.build_quoted(set.join(",")) & arel_table[:id])
+    set = clean_id_set(params[ids_param])
+    @scopes = @scopes.where(table[:id].in(set)).
+              reorder(Arel::Nodes.build_quoted(set.join(",")) & table[:id])
     @title_tag = :query_title_in_set.t(type: table.singularize.to_sym)
   end
   # rubocop:enable Metrics/AbcSize

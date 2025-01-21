@@ -3,15 +3,29 @@
 module Query::Scopes::Observations
   def initialize_obs_basic_parameters
     ids_param = model == Observation ? :ids : :obs_ids
-    add_ids_condition("observations", ids_param)
-    add_owner_and_time_stamp_conditions("observations")
-    add_by_user_condition("observations")
+    add_ids_condition(Observation, ids_param)
+    add_owner_and_time_stamp_conditions
+    add_by_user_condition
     initialize_obs_date_parameter(:date)
+  end
+
+  def join_to_observations_if_necessary
+    return if model == Observation
+
+    @scopes = @scopes.joins(:observations)
+  end
+
+  def joins_through_observations_if_necessary(table)
+    if model == Observation
+      table
+    else
+      { observations: table }
+    end
   end
 
   # This is just to allow the additional location conditions
   # to be added FOR coerced queries.
-  def add_ids_condition(table = model.table_name, ids = :ids)
+  def add_ids_condition(table = model.table_name, ids_param = :ids)
     super
     return if model != Observation
 
@@ -19,27 +33,29 @@ module Query::Scopes::Observations
   end
 
   def initialize_obs_date_parameter(param_name = :date)
-    add_date_condition(
-      "observations.when", params[param_name], :observations
-    )
+    add_date_condition(Observation[:when], params[param_name])
+    join_to_observations_if_necessary
   end
 
   def initialize_project_lists_parameter
     add_id_condition(
-      "species_list_observations.species_list_id",
+      # "species_list_observations.species_list_id",
+      SpeciesListObservation[:species_list_id],
       lookup_lists_for_projects_by_name(params[:project_lists]),
-      :observations, :species_list_observations
+      joins_through_observations_if_necessary(:species_list_observations)
     )
   end
 
   def initialize_field_slips_parameter
     return unless params[:field_slips]
 
-    add_join(:field_slips)
+    # add_join(:field_slips)
+    @scopes = @scopes.joins(:field_slips)
+    join_to_observations_if_necessary
     add_exact_match_condition(
-      "field_slips.code",
-      params[:field_slips],
-      :observations
+      # "field_slips.code",
+      FieldSlip[:code],
+      params[:field_slips]
     )
   end
 
@@ -50,56 +66,65 @@ module Query::Scopes::Observations
     initialize_confidence_parameter
     initialize_obs_with_notes_parameter
     add_with_notes_fields_condition(params[:with_notes_fields])
-    add_join(:observations, :comments) if params[:with_comments]
-    add_join(:observations, :sequences) if params[:with_sequences]
+    @scopes = @scopes.joins(observations: :comments) if params[:with_comments]
+    @scopes = @scopes.joins(observations: :sequences) if params[:with_sequences]
   end
 
   def initialize_is_collection_location_parameter
-    add_boolean_condition(
-      "observations.is_collection_location IS TRUE",
-      "observations.is_collection_location IS FALSE",
-      params[:is_collection_location],
-      :observations
+    join_to_observations_if_necessary
+    add_boolean_column_condition(
+      # "observations.is_collection_location IS TRUE",
+      # "observations.is_collection_location IS FALSE",
+      Observation[:is_collection_location],
+      params[:is_collection_location]
     )
   end
 
   def initialize_with_public_lat_lng_parameter
+    join_to_observations_if_necessary
     add_boolean_condition(
-      "observations.lat IS NOT NULL AND observations.gps_hidden IS FALSE",
-      "observations.lat IS NULL OR observations.gps_hidden IS TRUE",
-      params[:with_public_lat_lng],
-      :observations
+      # "observations.lat IS NOT NULL AND observations.gps_hidden IS FALSE",
+      # "observations.lat IS NULL OR observations.gps_hidden IS TRUE",
+      Observation[:lat].not_eq(nil).and(Observation[:gps_hidden].eq(false)),
+      Observation[:lat].eq(nil).or(Observation[:gps_hidden].eq(true)),
+      params[:with_public_lat_lng]
     )
   end
 
   def initialize_with_images_parameter
-    add_boolean_condition(
-      "observations.thumb_image_id IS NOT NULL",
-      "observations.thumb_image_id IS NULL",
-      params[:with_images],
-      :observations
+    join_to_observations_if_necessary
+    add_presence_condition(
+      # "observations.thumb_image_id IS NOT NULL",
+      # "observations.thumb_image_id IS NULL",
+      Observation[:thumb_image_id],
+      params[:with_images]
     )
   end
 
   def initialize_with_specimen_parameter
-    add_boolean_condition(
-      "observations.specimen IS TRUE",
-      "observations.specimen IS FALSE",
-      params[:with_specimen],
-      :observations
+    join_to_observations_if_necessary
+    add_boolean_column_condition(
+      # "observations.specimen IS TRUE",
+      # "observations.specimen IS FALSE",
+      Observation[:specimen],
+      params[:with_specimen]
     )
   end
 
+  # rubocop:disable Metrics/AbcSize
   def initialize_with_name_parameter
     genus = Name.ranks[:Genus]
     group = Name.ranks[:Group]
     add_boolean_condition(
-      "names.`rank` <= #{genus} or names.`rank` = #{group}",
-      "names.`rank` > #{genus} and names.`rank` < #{group}",
+      # "names.`rank` <= #{genus} or names.`rank` = #{group}",
+      # "names.`rank` > #{genus} and names.`rank` < #{group}",
+      Name[:rank].lteq(genus).or( Name[:rank].eq(group)),
+      Name[:rank].gt(genus).and( Name[:rank].lt(group)),
       params[:with_name],
-      :observations, :names
+      joins_through_observations_if_necessary(:names)
     )
   end
+  # rubocop:enable Metrics/AbcSize
 
   def add_needs_naming_condition
     return unless params[:needs_naming]
@@ -107,8 +132,9 @@ module Query::Scopes::Observations
     user = User.current_id
     # 15x faster to use this AR scope to assemble the IDs vs using
     # SQL SELECT DISTINCT
-    where << Observation.needs_naming_and_not_reviewed_by_user(user).
-             to_sql.gsub(/^.*?WHERE/, "")
+    @scopes = @scopes.where(
+      Observation.needs_naming_and_not_reviewed_by_user(user)
+    )
 
     # additional filters:
     add_name_in_clade_condition

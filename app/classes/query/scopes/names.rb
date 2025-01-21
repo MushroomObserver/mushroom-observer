@@ -12,7 +12,7 @@ module Query::Scopes::Names
     #   "LENGTH(COALESCE(names.notes,'')) = 0",
     #   params[:with_notes]
     # )
-    add_presence_condition(Name[:notes], params[:with_notes])
+    add_coalesced_presence_condition(Name[:notes], params[:with_notes])
     add_search_condition(
       # "names.notes",
       Name[:notes],
@@ -106,7 +106,7 @@ module Query::Scopes::Names
     #   "LENGTH(COALESCE(names.author,'')) = 0",
     #   params[:with_author]
     # )
-    add_presence_condition(Name[:author], params[:with_author])
+    add_coalesced_presence_condition(Name[:author], params[:with_author])
   end
 
   def initialize_with_citation_parameter
@@ -115,7 +115,7 @@ module Query::Scopes::Names
     #   "LENGTH(COALESCE(names.citation,'')) = 0",
     #   params[:with_citation]
     # )
-    add_presence_condition(Name[:citation], params[:with_citation])
+    add_coalesced_presence_condition(Name[:citation], params[:with_citation])
   end
 
   def initialize_with_classification_parameter
@@ -124,7 +124,9 @@ module Query::Scopes::Names
     #   "LENGTH(COALESCE(names.classification,'')) = 0",
     #   params[:with_classification]
     # )
-    add_presence_condition(Name[:classification], params[:with_classification])
+    add_coalesced_presence_condition(
+      Name[:classification], params[:with_classification]
+    )
   end
 
   def initialize_name_search_parameters
