@@ -593,4 +593,10 @@ class UserTest < UnitTestCase
     assert_equal("Deleted 1 unverified user(s).", msgs.first)
     assert_nil(User.find_by(id: unverified.id))
   end
+
+  def test_lookup_unique_text_name
+    User.all.find_each do |user|
+      assert_equal(user, User.lookup_unique_text_name(user.unique_text_name))
+    end
+  end
 end
