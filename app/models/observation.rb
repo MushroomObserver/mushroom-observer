@@ -362,6 +362,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   }
   def self.parse_name_and_rank(val)
+    return [val.text_name, val.rank] if val.is_a?(Name)
+
     name = Name.best_match(val)
     return [name.text_name, name.rank] if name
 

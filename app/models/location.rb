@@ -219,15 +219,16 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     containers.min_by(&:box_area)
   }
   # Use named parameters, north:, south:, east:, west:
+  #
+  #   w/e    | Location     | Location contains w/e
+  #   ______ | ____________ | ______________________
+  #   w <= e | west <= east | west <= w && e <= east
+  #   w <= e | west > east  | west <= w || e <= east
+  #   w > e  | west <= east | none
+  #   w > e  | west > east  | west <= w && e <= east
+  #
   scope :contains_box, lambda { |**args|
     args => { north:, south:, east:, west: }
-
-    # w/e    | Location     | Location contains w/e
-    # ______ | ____________ | ______________________
-    # w <= e | west <= east | west <= w && e <= east
-    # w <= e | west > east  | west <= w || e <= east
-    # w > e  | west <= east | none
-    # w > e  | west > east  | west <= w && e <= east
 
     if west <= east # w / e don't straddle 180
       where(Location[:south].lteq(south).and(Location[:north].gteq(north)).
