@@ -9,20 +9,6 @@ module Query::Scopes::Observations
     initialize_obs_date_parameter(:date)
   end
 
-  def join_to_observations_if_necessary
-    return if model == Observation
-
-    @scopes = @scopes.joins(:observations)
-  end
-
-  def joins_through_observations_if_necessary(table)
-    if model == Observation
-      table
-    else
-      { observations: table }
-    end
-  end
-
   # This is just to allow the additional location conditions
   # to be added FOR coerced queries.
   def add_ids_condition(table = model.table_name, ids_param = :ids)
@@ -34,7 +20,7 @@ module Query::Scopes::Observations
 
   def initialize_obs_date_parameter(param_name = :date)
     add_date_condition(Observation[:when], params[param_name])
-    join_to_observations_if_necessary
+    add_join_to_observations_if_necessary
   end
 
   def initialize_project_lists_parameter
@@ -51,7 +37,7 @@ module Query::Scopes::Observations
 
     # add_join(:field_slips)
     @scopes = @scopes.joins(:field_slips)
-    join_to_observations_if_necessary
+    add_join_to_observations_if_necessary
     add_exact_match_condition(
       # "field_slips.code",
       FieldSlip[:code],
@@ -71,7 +57,7 @@ module Query::Scopes::Observations
   end
 
   def initialize_is_collection_location_parameter
-    join_to_observations_if_necessary
+    add_join_to_observations_if_necessary
     add_boolean_column_condition(
       # "observations.is_collection_location IS TRUE",
       # "observations.is_collection_location IS FALSE",
@@ -81,7 +67,7 @@ module Query::Scopes::Observations
   end
 
   def initialize_with_public_lat_lng_parameter
-    join_to_observations_if_necessary
+    add_join_to_observations_if_necessary
     add_boolean_condition(
       # "observations.lat IS NOT NULL AND observations.gps_hidden IS FALSE",
       # "observations.lat IS NULL OR observations.gps_hidden IS TRUE",
@@ -92,7 +78,7 @@ module Query::Scopes::Observations
   end
 
   def initialize_with_images_parameter
-    join_to_observations_if_necessary
+    add_join_to_observations_if_necessary
     add_presence_condition(
       # "observations.thumb_image_id IS NOT NULL",
       # "observations.thumb_image_id IS NULL",
@@ -102,7 +88,7 @@ module Query::Scopes::Observations
   end
 
   def initialize_with_specimen_parameter
-    join_to_observations_if_necessary
+    add_join_to_observations_if_necessary
     add_boolean_column_condition(
       # "observations.specimen IS TRUE",
       # "observations.specimen IS FALSE",
@@ -150,24 +136,25 @@ module Query::Scopes::Observations
   def add_name_in_clade_condition
     return unless params[:in_clade]
 
-    val = params[:in_clade]
-    name, rank = parse_name(val)
-    conds = if Name.ranks_above_genus.include?(rank)
-              "observations.text_name = '#{name}' OR " \
-              "observations.classification REGEXP '#{rank}: _#{name}_'"
-            else
-              "observations.text_name = '#{name}' OR " \
-              "observations.text_name REGEXP '^#{name} '"
-            end
-    where << conds
+    # val = params[:in_clade]
+    # name, rank = parse_name(val)
+    # conds = if Name.ranks_above_genus.include?(rank)
+    #           "observations.text_name = '#{name}' OR " \
+    #           "observations.classification REGEXP '#{rank}: _#{name}_'"
+    #         else
+    #           "observations.text_name = '#{name}' OR " \
+    #           "observations.text_name REGEXP '^#{name} '"
+    #         end
+    # where << conds
+    @scopes = @scopes.in_clade(params[:in_clade])
   end
 
-  def parse_name(val)
-    name = Name.best_match(val)
-    return [name.text_name, name.rank] if name
+  # def parse_name(val)
+  #   name = Name.best_match(val)
+  #   return [name.text_name, name.rank] if name
 
-    [val, Name.guess_rank(val) || "Genus"]
-  end
+  #   [val, Name.guess_rank(val) || "Genus"]
+  # end
 
   # from content_filter/region.rb, but simpler.
   # includes region itself (i.e., no comma before region in 2nd regex)
@@ -175,60 +162,72 @@ module Query::Scopes::Observations
     return unless params[:in_region]
 
     region = params[:in_region]
-    region = Location.reverse_name_if_necessary(region)
-
-    conds =
-      if Location.understood_continent?(region)
-        countries = Location.countries_in_continent(region).join("|")
-        "observations.where REGEXP #{escape(", (#{countries})$")}"
-      else
-        "observations.where LIKE #{escape("%#{region}")}"
-      end
-    where << conds
+    @scopes = if model == Observation
+                @scopes.in_region(region)
+              else
+                @scopes.merge(Observation.in_region(region))
+              end
   end
 
   def initialize_confidence_parameter
-    add_range_condition(
-      "observations.vote_cache", params[:confidence], :observations
-    )
+    add_join_to_observations_if_necessary
+    add_range_condition(Observation[:vote_cache], params[:confidence])
   end
 
   def initialize_obs_with_notes_parameter(param_name = :with_notes)
+    add_join_to_observations_if_necessary
     add_boolean_condition(
-      "observations.notes != #{escape(Observation.no_notes_persisted)}",
-      "observations.notes  = #{escape(Observation.no_notes_persisted)}",
-      params[param_name],
-      :observations
+      # "observations.notes != #{escape(Observation.no_notes_persisted)}",
+      # "observations.notes  = #{escape(Observation.no_notes_persisted)}",
+      Observation[:notes].not_eq(Observation.no_notes_persisted),
+      Observation[:notes].eq(Observation.no_notes_persisted),
+      params[param_name]
     )
   end
 
-  def add_with_notes_fields_condition(fields, *)
+  def add_with_notes_fields_condition(fields, joins)
     return if fields.empty?
 
-    conds = fields.map { |field| notes_field_presence_condition(field) }
-    @where << conds.join(" OR ")
-    add_joins(*)
-  end
-
-  def notes_field_presence_condition(field)
-    field = field.dup
-    pat = if field.gsub!(/(["\\])/) { '\\\1' }
-            "\":#{field}:\""
-          else
-            ":#{field}:"
-          end
-    "observations.notes like \"%#{pat}%\""
+    @scopes = if model == Observation
+                @scopes.with_notes_fields(fields)
+              else
+                @scopes.merge(Observation.with_notes_fields(fields))
+              end
+    @scopes = @scopes.joins(joins) if joins
   end
 
   def initialize_obs_search_parameters
-    add_search_condition("observations.notes", params[:notes_has])
-    add_search_condition(
-      "CONCAT(comments.summary,COALESCE(comments.comment,''))",
-      params[:comments_has], :observations, :comments
-    )
+    add_search_condition(Observation[:notes], params[:notes_has])
+    add_observation_comments_search_condition
     return if model == Observation
 
-    add_search_condition("observations.where", params[:user_where])
+    add_search_condition(Observation[:where], params[:user_where])
+  end
+
+  def add_observation_comments_search_condition
+    add_search_condition(
+      # "CONCAT(comments.summary,COALESCE(comments.comment,''))",
+      Comment[:summary] + Comment[:comment].coalesce(""),
+      params[:comments_has],
+      joins_through_observations_if_necessary(:comments)
+    )
+  end
+
+  # Adds a join to observations to the scope
+  def add_join_to_observations_if_necessary
+    return if model == Observation
+
+    @scopes = @scopes.joins(:observations)
+  end
+
+  # Provides joins parameter for another helper, with either a simple table join
+  # or a join through observations to the table
+  def joins_through_observations_if_necessary(table)
+    if model == Observation
+      table
+    else
+      { observations: table }
+    end
   end
 
   def params_out_to_with_observations_params(pargs)

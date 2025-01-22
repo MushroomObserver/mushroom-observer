@@ -251,21 +251,20 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   }
 
   # For activerecord subqueries, DON'T pre-map the primary key (id)
-  scope :with_name,
-        -> { where.not(name: Name.unknown) }
-  scope :without_name,
-        -> { where(name: Name.unknown) }
-  scope :with_name_above_genus,
-        -> { where(name_id: Name.with_rank_above_genus) }
-  scope :without_confident_name,
-        -> { where(vote_cache: ..0) }
+  scope :with_name, -> { where.not(name: Name.unknown) }
+  scope :without_name, -> { where(name: Name.unknown) }
+  scope :with_name_above_genus, lambda {
+    where(name_id: Name.with_rank_above_genus)
+  }
+  scope :without_confident_name, -> { where(vote_cache: ..0) }
   # Use this definition when running script to populate the column:
   # scope :needs_naming, lambda {
   #   with_name_above_genus.or(without_confident_name)
   # }
   scope :needs_naming, -> { where(needs_naming: true) }
-  scope :with_name_correctly_spelled,
-        -> { joins({ namings: :name }).where(names: { correct_spelling: nil }) }
+  scope :with_name_correctly_spelled, lambda {
+    joins({ namings: :name }).where(names: { correct_spelling: nil })
+  }
 
   scope :with_vote_by_user, lambda { |user|
     user_id = user.is_a?(Integer) ? user : user&.id
@@ -348,22 +347,9 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       where(name_id: name_ids)
     end
   }
-
-  scope :of_name_like,
-        ->(name) { where(name: Name.text_name_includes(name)) }
-
+  scope :of_name_like, ->(name) { where(name: Name.text_name_includes(name)) }
   scope :in_clade, lambda { |val|
-    if val.is_a?(Name)
-      name = val
-      text_name = name.text_name
-      rank = name.rank
-    elsif val.is_a?(String) && (name = Name.best_match(val))
-      text_name = name.text_name
-      rank = name.rank
-    else
-      text_name = val
-      rank = "Genus"
-    end
+    text_name, rank = parse_name_and_rank(val)
 
     if Name.ranks_above_genus.include?(rank)
       where(text_name: text_name).or(
@@ -375,218 +361,210 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       )
     end
   }
+  def self.parse_name_and_rank(val)
+    name = Name.best_match(val)
+    return [name.text_name, name.rank] if name
+
+    [val, Name.guess_rank(val) || "Genus"]
+  end
 
   # used for preloading values in the create obs form. call with `.last`
-  scope :recent_by_user,
-        lambda { |user|
-          includes(:location, :projects, :species_lists).
-            where(user_id: user.id).reorder(:created_at)
-        }
-  scope :mappable,
-        -> { where.not(location: nil).or(where.not(lat: nil)) }
-  scope :unmappable,
-        -> { where(location: nil).and(where(lat: nil)) }
-  scope :with_location,
-        -> { where.not(location: nil) }
-  scope :without_location,
-        -> { where(location: nil) }
-  scope :with_geolocation,
-        -> { where.not(lat: nil) }
-  scope :without_geolocation,
-        -> { where(lat: nil) }
+  scope :recent_by_user, lambda { |user|
+    includes(:location, :projects, :species_lists).
+      where(user_id: user.id).reorder(:created_at)
+  }
+  scope :mappable, -> { where.not(location: nil).or(where.not(lat: nil)) }
+  scope :unmappable, -> { where(location: nil).and(where(lat: nil)) }
+  scope :with_location, -> { where.not(location: nil) }
+  scope :without_location, -> { where(location: nil) }
+  scope :with_geolocation, -> { where.not(lat: nil) }
+  scope :without_geolocation, -> { where(lat: nil) }
   scope :with_public_geolocation,
         -> { where(gps_hidden: false).where.not(lat: nil) }
   scope :without_public_geolocation,
         -> { where(gps_hidden: true).or(where(lat: nil)) }
-  scope :at_location,
-        ->(location) { where(location: location) }
-  scope :in_region,
-        lambda { |region|
-          region = Location.reverse_name_if_necessary(region)
-          if Location.understood_continent?(region)
-            countries = Location.countries_in_continent(region).join("|")
-            where(Observation[:where].matches(", (#{countries})$"))
-          else
-            where(Observation[:where].matches("%#{region}"))
-          end
-        }
+  scope :at_location, ->(location) { where(location: location) }
+  scope :in_region, lambda { |place_name|
+    region = Location.reverse_name_if_necessary(place_name)
+
+    if Location.understood_continent?(region)
+      countries = Location.countries_in_continent(region)
+      where(Observation[:where] =~ ", (#{countries.join("|")})$")
+    else
+      where(Observation[:where].matches("%#{region}"))
+    end
+  }
   # Pass kwargs (:north, :south, :east, :west), any order
   # Pass mappable: false to include all obs, including with vague locations.
-  scope :in_box,
-        lambda { |**args|
-          args[:mappable] ||= false
-          box = Mappable::Box.new(**args.except(:mappable))
-          return none unless box.valid?
+  scope :in_box, lambda { |**args|
+    args[:mappable] ||= false
+    box = Mappable::Box.new(**args.except(:mappable))
+    return none unless box.valid?
 
-          if box.straddles_180_deg?
-            in_box_straddling_dateline(**args)
-          else
-            in_box_regular(**args)
-          end
-        }
-  scope :in_box_straddling_dateline, # mostly a helper for in_box
-        lambda { |**args|
-          args[:mappable] ||= true
-          box = Mappable::Box.new(**args.except(:mappable))
-          return none unless box.valid?
-
-          where(
-            (Observation[:lat] >= box.south).
-            and(Observation[:lat] <= box.north).
-            and(Observation[:lng] >= box.west).
-            or(Observation[:lng] <= box.east)
-          ).or(Observation.location_straddling_dateline(**args))
-        }
-  scope :location_straddling_dateline,
-        lambda { |**args|
-          box = Mappable::Box.new(**args.except(:mappable))
-          return none unless box.valid?
-
-          if args[:mappable]
-            where(
-              Observation[:lat].eq(nil).
-              and(Observation[:location_lat] >= box.south).
-              and(Observation[:location_lat] <= box.north).
-              and(Observation[:location_lng] >= box.west).
-              or(Observation[:location_lng] <= box.east)
-            )
-          else
-            joins(:location).
-              where(
-                Observation[:lat].eq(nil).
-                and(Location[:center_lat] >= box.south).
-                and(Location[:center_lat] <= box.north).
-                and(Location[:center_lng] <= box.east).
-                and(Location[:center_lng] >= box.west)
-              )
-          end
-        }
-  scope :in_box_regular, # mostly a helper for in_box
-        lambda { |**args|
-          args[:mappable] ||= true
-          box = Mappable::Box.new(**args.except(:mappable))
-          return none unless box.valid?
-
-          where(
-            (Observation[:lat] >= box.south).
-            and(Observation[:lat] <= box.north).
-            and(Observation[:lng] >= box.west).
-            and(Observation[:lng] <= box.east)
-          ).or(Observation.location_center_in_box(**args))
-        }
-  scope :location_center_in_box,
-        lambda { |**args|
-          box = Mappable::Box.new(**args.except(:mappable))
-          return none unless box.valid?
-
-          # odd! will toss entire condition if below order is west, east
-          if args[:mappable]
-            where(
-              Observation[:lat].eq(nil).
-              and(Observation[:location_lat] >= box.south).
-              and(Observation[:location_lat] <= box.north).
-              and(Observation[:location_lng] <= box.east).
-              and(Observation[:location_lng] >= box.west)
-            )
-          else
-            joins(:location).
-              where(
-                Observation[:lat].eq(nil).
-                and(Location[:center_lat] >= box.south).
-                and(Location[:center_lat] <= box.north).
-                and(Location[:center_lng] <= box.east).
-                and(Location[:center_lng] >= box.west)
-              )
-          end
-        }
-
-  scope :not_in_box, # Pass kwargs (:north, :south, :east, :west), any order
-        lambda { |**args|
-          args[:mappable] ||= false
-          box = Mappable::Box.new(**args.except(:mappable))
-          return Observation.all unless box.valid?
-
-          # should be in_box(**args).invert_where
-          if box.straddles_180_deg?
-            not_in_box_straddling_dateline(**args)
-          else
-            not_in_box_regular(**args)
-          end
-        }
-  scope :not_in_box_straddling_dateline, # helper for not_in_box
-        lambda { |**args|
-          args[:mappable] ||= false
-          box = Mappable::Box.new(**args.except(:mappable))
-          return Observation.all unless box.valid?
-
-          where(
-            Observation[:lat].eq(nil).
-            or(Observation[:lat] < box.south).
-            or(Observation[:lat] > box.north).
-            or((Observation[:lng] < box.west).
-                and(Observation[:lng] > box.east))
-          )
-        }
-  scope :not_in_box_regular, # helper for not_in_box
-        lambda { |**args|
-          args[:mappable] ||= false
-          box = Mappable::Box.new(**args.except(:mappable))
-          return Observation.all unless box.valid?
-
-          where(
-            Observation[:lat].eq(nil).
-            or(Observation[:lat] < box.south).
-            or(Observation[:lat] > box.north).
-            or(Observation[:lng] < box.west).
-            or(Observation[:lng] > box.east)
-          )
-        }
-  scope :in_box_of_max_area,
-        lambda { |**args|
-          args[:area] ||= MO.obs_location_max_area
-
-          joins(:location).where(Location[:box_area].lteq(args[:area]))
-        }
-  scope :in_box_gt_max_area,
-        lambda { |**args|
-          args[:area] ||= MO.obs_location_max_area
-
-          joins(:location).where(Location[:box_area].gt(args[:area]))
-        }
-
-  scope :is_collection_location,
-        -> { where(is_collection_location: true) }
-  scope :not_collection_location,
-        -> { where(is_collection_location: false) }
-  scope :with_images,
-        -> { where.not(thumb_image: nil) }
-  scope :without_images,
-        -> { where(thumb_image: nil) }
-  scope :with_notes,
-        -> { where.not(notes: no_notes) }
-  scope :without_notes,
-        -> { where(notes: no_notes) }
-  scope :with_notes_field,
-        ->(field) { where(Observation[:notes].matches("%:#{field}:%")) }
-  scope :notes_include,
-        ->(notes) { where(Observation[:notes].matches("%#{notes}%")) }
-  scope :with_specimen,
-        -> { where(specimen: true) }
-  scope :without_specimen,
-        -> { where(specimen: false) }
-  scope :with_sequences,
-        -> { joins(:sequences).distinct }
-  scope :without_sequences, lambda {
-    # much faster than `missing(:sequences)` which uses left outer join.
-    where.not(id: with_sequences)
+    if box.straddles_180_deg?
+      in_box_straddling_dateline(**args)
+    else
+      in_box_regular(**args)
+    end
   }
+  # mostly a helper for in_box
+  scope :in_box_straddling_dateline, lambda { |**args|
+    args[:mappable] ||= true
+    box = Mappable::Box.new(**args.except(:mappable))
+    return none unless box.valid?
+
+    where(
+      (Observation[:lat] >= box.south).
+      and(Observation[:lat] <= box.north).
+      and(Observation[:lng] >= box.west).
+      or(Observation[:lng] <= box.east)
+    ).or(Observation.location_straddling_dateline(**args))
+  }
+  scope :location_straddling_dateline, lambda { |**args|
+    box = Mappable::Box.new(**args.except(:mappable))
+    return none unless box.valid?
+
+    if args[:mappable]
+      where(
+        Observation[:lat].eq(nil).
+        and(Observation[:location_lat] >= box.south).
+        and(Observation[:location_lat] <= box.north).
+        and(Observation[:location_lng] >= box.west).
+        or(Observation[:location_lng] <= box.east)
+      )
+    else
+      joins(:location).
+        where(
+          Observation[:lat].eq(nil).
+          and(Location[:center_lat] >= box.south).
+          and(Location[:center_lat] <= box.north).
+          and(Location[:center_lng] <= box.east).
+          and(Location[:center_lng] >= box.west)
+        )
+    end
+  }
+  # mostly a helper for in_box
+  scope :in_box_regular, lambda { |**args|
+    args[:mappable] ||= true
+    box = Mappable::Box.new(**args.except(:mappable))
+    return none unless box.valid?
+
+    where(
+      (Observation[:lat] >= box.south).and(Observation[:lat] <= box.north).
+      and(Observation[:lng] >= box.west).and(Observation[:lng] <= box.east)
+    ).or(Observation.location_center_in_box(**args))
+  }
+  scope :location_center_in_box, lambda { |**args|
+    box = Mappable::Box.new(**args.except(:mappable))
+    return none unless box.valid?
+
+    # odd! will toss entire condition if below order is west, east
+    if args[:mappable]
+      where(
+        Observation[:lat].eq(nil).
+        and(Observation[:location_lat] >= box.south).
+        and(Observation[:location_lat] <= box.north).
+        and(Observation[:location_lng] <= box.east).
+        and(Observation[:location_lng] >= box.west)
+      )
+    else
+      joins(:location).
+        where(
+          Observation[:lat].eq(nil).
+          and(Location[:center_lat] >= box.south).
+          and(Location[:center_lat] <= box.north).
+          and(Location[:center_lng] <= box.east).
+          and(Location[:center_lng] >= box.west)
+        )
+    end
+  }
+  # Pass kwargs (:north, :south, :east, :west), any order
+  scope :not_in_box, lambda { |**args|
+    args[:mappable] ||= false
+    box = Mappable::Box.new(**args.except(:mappable))
+    return Observation.all unless box.valid?
+
+    # should be in_box(**args).invert_where
+    if box.straddles_180_deg?
+      not_in_box_straddling_dateline(**args)
+    else
+      not_in_box_regular(**args)
+    end
+  }
+  # helper for not_in_box
+  scope :not_in_box_straddling_dateline, lambda { |**args|
+    args[:mappable] ||= false
+    box = Mappable::Box.new(**args.except(:mappable))
+    return Observation.all unless box.valid?
+
+    where(
+      Observation[:lat].eq(nil).
+      or(Observation[:lat] < box.south).or(Observation[:lat] > box.north).
+      or((Observation[:lng] < box.west).and(Observation[:lng] > box.east))
+    )
+  }
+  # helper for not_in_box
+  scope :not_in_box_regular, lambda { |**args|
+    args[:mappable] ||= false
+    box = Mappable::Box.new(**args.except(:mappable))
+    return Observation.all unless box.valid?
+
+    where(
+      Observation[:lat].eq(nil).
+      or(Observation[:lat] < box.south).or(Observation[:lat] > box.north).
+      or(Observation[:lng] < box.west).or(Observation[:lng] > box.east)
+    )
+  }
+  scope :in_box_of_max_area, lambda { |**args|
+    args[:area] ||= MO.obs_location_max_area
+
+    joins(:location).where(Location[:box_area].lteq(args[:area]))
+  }
+  scope :in_box_gt_max_area, lambda { |**args|
+    args[:area] ||= MO.obs_location_max_area
+
+    joins(:location).where(Location[:box_area].gt(args[:area]))
+  }
+
+  scope :is_collection_location, -> { where(is_collection_location: true) }
+  scope :not_collection_location, -> { where(is_collection_location: false) }
+  scope :with_images, -> { where.not(thumb_image: nil) }
+  scope :without_images, -> { where(thumb_image: nil) }
+  scope :with_notes, -> { where.not(notes: no_notes) }
+  scope :without_notes, -> { where(notes: no_notes) }
+  scope :with_notes_field, lambda { |field|
+    where(Observation[:notes].matches("%:#{field}:%"))
+  }
+  scope :with_notes_fields, lambda { |fields|
+    return if fields.empty?
+
+    fields.map! { |field| notes_field_presence_condition(field) }
+    conditions = fields.shift
+    fields.each { |field| conditions = conditions.or(field) }
+    where(conditions)
+  }
+  def self.notes_field_presence_condition(field)
+    field = field.dup
+    pat = if field.gsub!(/(["\\])/) { '\\\1' }
+            "\":#{field}:\""
+          else
+            ":#{field}:"
+          end
+    Observation[:notes].matches("%#{pat}%")
+  end
+  scope :notes_include, lambda { |notes|
+    where(Observation[:notes].matches("%#{notes}%"))
+  }
+  scope :with_specimen, -> { where(specimen: true) }
+  scope :without_specimen, -> { where(specimen: false) }
+  scope :with_sequences, -> { joins(:sequences).distinct }
+  # much faster than `missing(:sequences)` which uses left outer join.
+  scope :without_sequences, -> { where.not(id: with_sequences) }
   scope :confidence, lambda { |min, max = min| # confidence between min & max %
     where(vote_cache: (min.to_f / (100 / 3))..(max.to_f / (100 / 3)))
   }
-  scope :with_comments,
-        -> { joins(:comments).distinct }
-  scope :without_comments,
-        -> { where.not(id: Observation.with_comments) }
+  scope :with_comments, -> { joins(:comments).distinct }
+  scope :without_comments, -> { where.not(id: Observation.with_comments) }
   scope :comments_include, lambda { |summary|
     joins(:comments).where(Comment[:summary].matches("%#{summary}%")).distinct
   }
