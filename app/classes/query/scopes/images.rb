@@ -2,22 +2,14 @@
 
 module Query::Scopes::Images
   def initialize_img_notes_parameters
-    add_boolean_condition(
-      # "LENGTH(COALESCE(images.notes,'')) > 0",
-      # "LENGTH(COALESCE(images.notes,'')) = 0",
-      Image[:notes].coalesce.length.gt(0),
-      Image[:notes].coalesce.length.eq(0),
-      params[:with_notes]
-    )
+    add_coalesced_presence_condition(Image[:notes], params[:with_notes])
     add_search_condition(Image[:notes], params[:notes_has])
   end
 
   def initialize_img_association_parameters
     initialize_observations_parameter
     add_observation_location_condition(
-      Observation,
-      params[:locations],
-      { observation_images: :observations }
+      Observation, params[:locations], { observation_images: :observations }
     )
     add_for_project_condition(ProjectImage)
     initialize_projects_parameter(ProjectImage, :project_images)
@@ -25,16 +17,12 @@ module Query::Scopes::Images
       SpeciesListObservation,
       { observation_images: { observations: :species_list_observations } }
     )
-    add_id_condition(
-      Image[:license_id],
-      params[:license]
-    )
+    add_id_condition(Image[:license_id], params[:license])
   end
 
   def initialize_img_record_parameters
     add_search_condition(
-      Image[:copyright_holder],
-      params[:copyright_holder_has]
+      Image[:copyright_holder], params[:copyright_holder_has]
     )
     add_image_size_conditions(params[:size])
     add_image_type_condition(params[:content_types])
@@ -45,69 +33,22 @@ module Query::Scopes::Images
     return if vals.empty?
 
     min, max = vals
-    sizes = Image::ALL_SIZES
-    pixels = Image::ALL_SIZES_IN_PIXELS
-    add_min_size_condition(min, sizes, pixels) if min
-    add_max_size_condition(max, sizes, pixels) if max
+    @scopes = @scopes.merge(Image.with_sizes(min, max))
     @scopes = @scopes.joins(joins) if joins
   end
 
-  def add_min_size_condition(min, sizes, pixels)
-    size = pixels[sizes.index(min)]
-    # @where << "images.width >= #{size} OR images.height >= #{size}"
-    @scopes = @scopes.where(
-      Image[:width].gteq(size).or(Image[:height].gteq(size))
-    )
-  end
-
-  def add_max_size_condition(max, sizes, pixels)
-    size = pixels[sizes.index(max) + 1]
-    # @where << "images.width < #{size} AND images.height < #{size}"
-    @scopes = @scopes.where(
-      Image[:width].lt(size).or(Image[:height].lt(size))
-    )
-  end
-
-  def add_image_type_condition(vals, *)
+  def add_image_type_condition(vals, joins)
     return if vals.empty?
 
-    exts  = Image::ALL_EXTENSIONS.map(&:to_s)
-    mimes = Image::ALL_CONTENT_TYPES.map(&:to_s) - [""]
-    types = vals & exts
-    return if vals.empty?
-
-    other = types.include?("raw")
-    types -= ["raw"]
-    types = types.map { |x| mimes[exts.index(x)] }
-    str1 = "images.content_type IN ('#{types.join("','")}')"
-    str2 = "images.content_type NOT IN ('#{mimes.join("','")}')"
-    @where << if types.empty?
-                str2
-              elsif other
-                "#{str1} OR #{str2}"
-              else
-                str1
-              end
-    add_joins(*)
+    @scopes = @scopes.merge(Image.with_content_types(vals))
+    @scopes = @scopes.joins(joins) if joins
   end
 
   def initialize_img_vote_parameters
-    add_boolean_condition(
-      # "images.vote_cache IS NOT NULL",
-      # "images.vote_cache IS NULL",
-      Image[:vote_cache].not_eq(nil),
-      Image[:vote_cache].eq(nil),
-      params[:with_votes]
-    )
+    add_presence_condition(Image[:vote_cache], params[:with_votes])
+    add_range_condition(Image[:vote_cache], params[:quality])
     add_range_condition(
-      # "images.vote_cache",
-      Image[:vote_cache],
-      params[:quality]
-    )
-    add_range_condition(
-      # "observations.vote_cache",
-      Observation[:vote_cache],
-      params[:confidence],
+      Observation[:vote_cache], params[:confidence],
       { observation_images: :observations }
     )
   end
@@ -116,7 +57,6 @@ module Query::Scopes::Images
     return if advanced_search_params.all? { |key| params[key].blank? }
     return if handle_img_content_search!
 
-    # add_join(:observation_images, :observations)
     @scopes = @scopes.joins(observation_images: :observations)
     initialize_advanced_search
   end
