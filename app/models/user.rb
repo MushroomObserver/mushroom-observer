@@ -430,6 +430,31 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     unique_text_name
   end
 
+  def self.lookup_unique_text_name(str)
+    return nil unless str
+
+    user = nil
+    login = nil
+    if (match = str.match(/\(([^(]+)\)$/))
+      login = match[1]
+      user = find_name_match(User.where(login:), str)
+    end
+    user ||= find_name_match(User.where(login: str), str)
+    if login && !user
+      pattern = "%#{ActiveRecord::Base.sanitize_sql(login)}%"
+      user = find_name_match(User.where("login like ?", pattern), str)
+    end
+    user
+  end
+
+  def self.find_name_match(users, str)
+    return users.first if users.count == 1
+
+    users.find_each do |user|
+      return user if user.unique_text_name == str
+    end
+  end
+
   # Return User's full name if present, else return login.
   #
   #   name present:  "Fred Flintstone"

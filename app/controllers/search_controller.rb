@@ -100,8 +100,8 @@ class SearchController < ApplicationController
       user = User.find_by(id: params[:user_id])
       return user.login if user
     end
-    match = params[:user].match(/\((.*?)\)$/)
-    return match[1] if match
+    user = User.lookup_unique_text_name(params[:user])
+    return user.login if user
 
     params[:user]
   end
