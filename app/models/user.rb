@@ -432,6 +432,8 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def self.lookup_unique_text_name(str)
+    return str unless str
+
     user = nil
     login = nil
     if (match = str.match(/\(([^(]+)\)$/))
