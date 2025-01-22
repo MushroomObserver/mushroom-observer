@@ -77,8 +77,7 @@ module Query::Scopes::Shared
 
     true_cond = table_column.eq(true)
     false_cond = table_column.eq(false)
-    @scopes = @scopes.send(:where, (val ? true_cond : false_cond))
-    @scopes = @scopes.joins(joins) if joins
+    add_boolean_condition(true_cond, false_cond, val, joins)
   end
 
   # Like boolean, but less verbose. When you're querying for not nil
@@ -87,8 +86,7 @@ module Query::Scopes::Shared
 
     true_cond = table_column.not_eq(nil)
     false_cond = table_column.eq(nil)
-    @scopes = @scopes.send(:where, (val ? true_cond : false_cond))
-    @scopes = @scopes.joins(joins) if joins
+    add_boolean_condition(true_cond, false_cond, val, joins)
   end
 
   # Like boolean, but less verbose
@@ -97,8 +95,7 @@ module Query::Scopes::Shared
 
     true_cond = table_column.coalesce("").length.gt(0)
     false_cond = table_column.coalesce("").length.eq(0)
-    @scopes = @scopes.send(:where, (val ? true_cond : false_cond))
-    @scopes = @scopes.joins(joins) if joins
+    add_boolean_condition(true_cond, false_cond, val, joins)
   end
 
   def add_exact_match_condition(table_column, vals, joins)
