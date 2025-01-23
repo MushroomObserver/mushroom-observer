@@ -181,52 +181,52 @@ class QueryTest < UnitTestCase
   end
 
   def test_google_parse
-    query = Query.lookup(:Name)
-    assert_equal([["blah"]], query.google_parse("blah").goods)
-    assert_equal([%w[foo bar]], query.google_parse("foo OR bar").goods)
+    assert_equal([["blah"]], SearchParams.new(phrase: "blah").goods)
+    assert_equal([%w[foo bar]], SearchParams.new(phrase: "foo OR bar").goods)
     assert_equal([["one"], %w[foo bar], ["two"]],
-                 query.google_parse("one foo OR bar two").goods)
+                 SearchParams.new(phrase: "one foo OR bar two").goods)
     assert_equal([["one"], ["foo", "bar", "quoted phrase", "-gar"], ["two"]],
-                 query.google_parse(
+                 SearchParams.new(phrase:
                    'one foo OR bar OR "quoted phrase" OR -gar two'
                  ).goods)
-    assert_equal([], query.google_parse("-bad").goods)
-    assert_equal(["bad"], query.google_parse("-bad").bads)
-    assert_equal(["bad"], query.google_parse("foo -bad bar").bads)
-    assert_equal(["bad wolf"], query.google_parse('foo -"bad wolf" bar').bads)
+    assert_equal([], SearchParams.new(phrase: "-bad").goods)
+    assert_equal(["bad"], SearchParams.new(phrase: "-bad").bads)
+    assert_equal(["bad"], SearchParams.new(phrase: "foo -bad bar").bads)
+    assert_equal(["bad wolf"],
+                 SearchParams.new(phrase: 'foo -"bad wolf" bar').bads)
     assert_equal(["bad wolf", "foo", "bar"],
-                 query.google_parse('-"bad wolf" -foo -bar').bads)
+                 SearchParams.new(phrase: '-"bad wolf" -foo -bar').bads)
   end
 
   def test_google_conditions
     query = Query.lookup(:Name)
     assert_equal(
       ["x LIKE '%blah%'"],
-      query.google_conditions(query.google_parse("blah"), "x")
+      query.google_conditions(SearchParams.new(phrase: "blah"), "x")
     )
     assert_equal(
       ["x NOT LIKE '%bad%'"],
-      query.google_conditions(query.google_parse("-bad"), "x")
+      query.google_conditions(SearchParams.new(phrase: "-bad"), "x")
     )
     assert_equal(
       ["x LIKE '%foo%' AND x NOT LIKE '%bad%'"],
-      query.google_conditions(query.google_parse("foo -bad"), "x")
+      query.google_conditions(SearchParams.new(phrase: "foo -bad"), "x")
     )
     assert_equal(
       ["x LIKE '%foo%' AND x LIKE '%bar%' AND x NOT LIKE '%bad%'"],
-      query.google_conditions(query.google_parse("foo bar -bad"), "x")
+      query.google_conditions(SearchParams.new(phrase: "foo bar -bad"), "x")
     )
     assert_equal(
       ["(x LIKE '%foo%' OR x LIKE '%bar%') AND x NOT LIKE '%bad%'"],
-      query.google_conditions(query.google_parse("foo OR bar -bad"), "x")
+      query.google_conditions(SearchParams.new(phrase: "foo OR bar -bad"), "x")
     )
     assert_equal(
       ["(x LIKE '%foo%' OR x LIKE '%bar%' OR x LIKE '%any%thing%') " \
         "AND x LIKE '%surprise!%' AND x NOT LIKE '%bad%' " \
         "AND x NOT LIKE '%lost boys%'"],
       query.google_conditions(
-        query.google_parse(
-          'foo OR bar OR "any*thing" -bad surprise! -"lost boys"'
+        SearchParams.new(
+          phrase: 'foo OR bar OR "any*thing" -bad surprise! -"lost boys"'
         ), "x"
       )
     )
