@@ -1,0 +1,178 @@
+# frozen_string_literal: true
+
+module AbstractModel::Scopes
+  extend ActiveSupport::Concern
+
+  included do # rubocop:disable Metrics/BlockLength
+    scope :order_by_user, lambda {
+      joins(:user).
+        reorder(User[:name].when(nil).then(User[:login]).
+                when("").then(User[:login]).
+                else(User[:name]).asc, id: :desc).distinct
+    }
+    scope :order_by_rss_log, lambda {
+      joins(:rss_log).
+        reorder(RssLog[:updated_at].desc, model.arel_table[:id].desc).distinct
+    }
+
+    scope :by_user, ->(user) { where(user: user) }
+    scope :by_editor, lambda { |user|
+      version_table = :"#{type_tag}_versions"
+      unless ActiveRecord::Base.connection.table_exists?(version_table)
+        return all
+      end
+
+      user_id = user.is_a?(Integer) ? user : user&.id
+
+      joins(:versions).where("#{version_table}": { user_id: user_id }).
+        where.not(user: user)
+    }
+
+    scope :created_on, lambda { |ymd_string|
+      where(arel_table[:created_at].format("%Y-%m-%d").eq(ymd_string))
+    }
+    scope :created_after, lambda { |datetime|
+      datetime_compare(:created_at, :gt, datetime)
+    }
+    scope :created_before, lambda { |datetime|
+      datetime_compare(:created_at, false, datetime)
+    }
+    scope :created_between, lambda { |earliest, latest|
+      created_after(earliest).created_before(latest)
+    }
+
+    scope :updated_on, lambda { |ymd_string|
+      where(arel_table[:updated_at].format("%Y-%m-%d").eq(ymd_string))
+    }
+    scope :updated_after, lambda { |datetime|
+      datetime_compare(:updated_at, :gt, datetime)
+    }
+    scope :updated_before, lambda { |datetime|
+      datetime_compare(:updated_at, :lt, datetime)
+    }
+    scope :updated_between, lambda { |earliest, latest|
+      updated_after(earliest).updated_before(latest)
+    }
+
+    scope :datetime_after, lambda { |col, datetime|
+      datetime_compare(col, :gt, datetime)
+    }
+    scope :datetime_before, lambda { |col, datetime|
+      datetime_compare(col, :lt, datetime)
+    }
+    scope :datetime_between, lambda { |col, earliest, latest|
+      datetime_after(col, earliest).datetime_before(col, latest)
+    }
+
+    scope :datetime_compare, lambda { |col, dir, val|
+      # `datetime_condition_formatted` defined in ClassMethods below
+      return unless (datetime = datetime_condition_formatted(dir, val))
+
+      where(arel_table[col].format("%Y-%m-%d %H:%i:%s").send(dir, datetime))
+    }
+
+    scope :when_between, lambda { |earliest, latest|
+      date_between(:when, earliest, latest)
+    }
+    scope :when_after, ->(date) { date_compare(:when, :gt, date) }
+    scope :when_before, ->(date) { date_compare(:when, :lt, date) }
+
+    # Allows searching for date ranges in a date (:when) column, either within
+    # a logical time range, or within a periodic time range in recurring years.
+    # This is possible because a date column already has the format("%Y-%m-%d").
+    scope :date_between, lambda { |col, earliest, latest|
+      if wrapped_date?(earliest, latest)
+        date_in_period_wrapping_new_year(col, earliest, latest)
+      else
+        date_after(col, earliest).date_before(col, latest)
+      end
+    }
+    # Scope for objects whose date is in a certain period of the year that
+    # overlaps the new year, defined by a range of months or mm-dd
+    scope :date_in_period_wrapping_new_year, lambda { |col, earliest, latest|
+      m1, d1 = earliest.to_s.split("-")
+      m2, d2 = latest.to_s.split("-")
+      where(
+        arel_table[col].month.gt(m1).
+        or(arel_table[col].month.lt(m2)).
+        or(arel_table[col].month.eq(m1).and(arel_table[col].day.gteq(d1))).
+        or(arel_table[col].month.eq(m2).and(arel_table[col].day.lteq(d2)))
+      )
+    }
+    # Note that these two conditions can take dates, or months, or month-days!
+    scope :date_after, ->(col, date) { date_compare(col, :gt, date) }
+    scope :date_before, ->(col, date) { date_compare(col, :lt, date) }
+    # NOTE: all three conditions validate numeric format
+    scope :date_compare, lambda { |col, dir, date|
+      if starts_with_year?(val)
+        date_compare_year(col, dir, date)
+      elsif month_and_day?(val)
+        date_compare_month_and_day(col, dir, date)
+      elsif month_only?(val)
+        where(arel_table[col].month.send(:"#{dir}eq", date))
+      end
+    }
+    # Compare only the year
+    scope :date_compare_year, lambda { |col, dir, val|
+      date = date_condition_formatted(dir, val)
+      where(arel_table[col].send(dir, date))
+    }
+    # Compare only the month and day, any year (i.e. "season")
+    scope :date_compare_month_and_day, lambda { |col, dir, val|
+      m, d = val.split("-")
+      where(
+        arel_table[col].month.send(dir, m).
+        or(
+          arel_table[col].month.eq(m).
+          and(arel_table[col].day.send(:"#{dir}eq", d))
+        )
+      )
+    }
+  end
+
+  module ClassMethods
+    # class methods here, `self` included
+
+    # Fills out the datetime with min/max values for month, day, hour, minute,
+    # second, as appropriate for < > comparisons. Only year is required.
+    def datetime_condition_formatted(dir, val)
+      y, m, d, h, n, s = val.split("-").map!(&:to_i)
+      return unless /^\d\d\d\d/.match?(y.to_s)
+
+      returns = dir == :gt ? [y, 1, 1, 0, 0, 0] : [y, 12, 31, 23, 59, 59]
+      vals = [m, d, h, n, s].compact # get as many specific values as were sent
+      returns[1, vals.length] = vals # merge these into the defaults, after year
+      # reformat to "%Y-%m-%d %H:%i:%s" as expected
+      [returns[0..2]&.join("-"), returns[3..5]&.join(":")].join(" ")
+    end
+
+    # Only works on month/day periods, because years where earliest > latest
+    # would make no sense
+    def wrapped_date?(earliest, latest)
+      earliest.to_s.match(/^\d\d-\d\d$/) && latest.to_s.match(/^\d\d-\d\d$/) &&
+        earliest.to_s > latest.to_s
+    end
+
+    # Fills out the date with min/max values for month and day as appropriate
+    # for < > comparisons. Requires year, prevalidated by `starts_with_year?`.
+    def date_condition_formatted(dir, val)
+      min = (dir == :gt)
+      y, m, d = val.split("-").map!(&:to_i)
+      m ||= min ? 1 : 12
+      d ||= min ? 1 : 31
+      [y, m, d].join("-")
+    end
+
+    def starts_with_year?(val)
+      /^\d\d\d\d/.match?(val.to_s)
+    end
+
+    def month_and_day?(val)
+      /^\d\d-\d\d/.match?(val.to_s)
+    end
+
+    def month_only?(val)
+      /^\d\d/.match?(val.to_s) && val.to_i <= 12
+    end
+  end
+end
