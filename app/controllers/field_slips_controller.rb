@@ -228,7 +228,10 @@ class FieldSlipsController < ApplicationController
   end
 
   def user_str(str)
-    User.lookup_unique_text_name(check_for_alias(str, User))
+    user = User.lookup_unique_text_name(check_for_alias(str, User))
+    return user.login if user
+
+    str
   end
 
   def check_for_alias(str, target_type)
