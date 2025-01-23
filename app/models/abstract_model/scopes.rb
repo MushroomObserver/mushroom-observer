@@ -35,7 +35,7 @@ module AbstractModel::Scopes
       datetime_compare(:created_at, :gt, datetime)
     }
     scope :created_before, lambda { |datetime|
-      datetime_compare(:created_at, false, datetime)
+      datetime_compare(:created_at, :lt, datetime)
     }
     scope :created_between, lambda { |earliest, latest|
       created_after(earliest).created_before(latest)
@@ -63,7 +63,6 @@ module AbstractModel::Scopes
     scope :datetime_between, lambda { |col, earliest, latest|
       datetime_after(col, earliest).datetime_before(col, latest)
     }
-
     scope :datetime_compare, lambda { |col, dir, val|
       # `datetime_condition_formatted` defined in ClassMethods below
       return unless (datetime = datetime_condition_formatted(dir, val))
@@ -103,13 +102,13 @@ module AbstractModel::Scopes
     scope :date_after, ->(col, date) { date_compare(col, :gt, date) }
     scope :date_before, ->(col, date) { date_compare(col, :lt, date) }
     # NOTE: all three conditions validate numeric format
-    scope :date_compare, lambda { |col, dir, date|
+    scope :date_compare, lambda { |col, dir, val|
       if starts_with_year?(val)
-        date_compare_year(col, dir, date)
+        date_compare_year(col, dir, val)
       elsif month_and_day?(val)
-        date_compare_month_and_day(col, dir, date)
+        date_compare_month_and_day(col, dir, val)
       elsif month_only?(val)
-        where(arel_table[col].month.send(:"#{dir}eq", date))
+        where(arel_table[col].month.send(:"#{dir}eq", val))
       end
     }
     # Compare only the year
