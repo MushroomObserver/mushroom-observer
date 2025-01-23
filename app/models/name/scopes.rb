@@ -26,12 +26,7 @@ module Name::Scopes
       # group(:name_id).reorder(Arel.star.count.desc)
     }
     scope :description_includes, lambda { |text|
-      fields = NameDescription::ALL_NOTE_FIELDS.dup
-      starting = NameDescription[fields.shift]
-      concats = fields.reduce(starting) do |result, field|
-        result + NameDescription[field]
-      end
-      joins(:descriptions).where(concats.matches("%#{text}%"))
+      joins(:descriptions).where(description_notes_concats.matches("%#{text}%"))
     }
     scope :with_description_in_project, lambda { |project|
       joins(descriptions: :project).
@@ -72,12 +67,7 @@ module Name::Scopes
     scope :with_rank_between, lambda { |min, max = min|
       return with_rank(min) if min == max
 
-      all_ranks = Name.all_ranks
-      a = all_ranks.index(min) || 0
-      b = all_ranks.index(max) || (all_ranks.length - 1)
-      a, b = b, a if a > b # reverse if wrong order
-      range = all_ranks[a..b].map { |r| Name.ranks[r] } # values start at 1
-      where(Name[:rank].in(range))
+      where(Name[:rank].in(rank_range(min, max)))
     }
     scope :with_rank_below, lambda { |rank|
       where(Name[:rank] < ranks[rank]) if rank
@@ -215,5 +205,20 @@ module Name::Scopes
 
   module ClassMethods
     # class methods here, `self` included
+    def rank_range(min, max)
+      all_ranks = Name.all_ranks
+      a = all_ranks.index(min) || 0
+      b = all_ranks.index(max) || (all_ranks.length - 1)
+      a, b = b, a if a > b # reverse if wrong order
+      all_ranks[a..b].map { |r| Name.ranks[r] } # values start at 1
+    end
+
+    def description_notes_concats
+      fields = NameDescription::ALL_NOTE_FIELDS.dup
+      starting = NameDescription[fields.shift].coalesce("")
+      fields.reduce(starting) do |result, field|
+        result + NameDescription[field].coalesce("")
+      end
+    end
   end
 end
