@@ -49,7 +49,8 @@ class SearchControllerTest < FunctionalTestCase
     params = {
       search: {
         model: "observation",
-        user: users(:rolf).unique_text_name
+        user: users(:rolf).unique_text_name,
+        user_id: users(:rolf).id
       },
       content_filter: {
         with_images: "",
