@@ -56,14 +56,6 @@ module Query::Scopes::Shared
     @title_args[:type] = type
   end
 
-  def initialize_ok_for_export_parameter
-    add_boolean_condition(
-      model.arel_table[:ok_for_export].eq(true),
-      model.arel_table[:ok_for_export].eq(false),
-      params[:ok_for_export]
-    )
-  end
-
   def add_boolean_condition(true_cond, false_cond, val, joins)
     return if val.nil?
 
@@ -78,6 +70,14 @@ module Query::Scopes::Shared
     true_cond = table_column.eq(true)
     false_cond = table_column.eq(false)
     add_boolean_condition(true_cond, false_cond, val, joins)
+  end
+
+  # Shared by multiple Query model classes
+  def initialize_ok_for_export_parameter
+    add_boolean_column_condition(
+      model.arel_table[:ok_for_export],
+      params[:ok_for_export]
+    )
   end
 
   # Like boolean, but less verbose. When you're querying for not nil
@@ -187,5 +187,16 @@ module Query::Scopes::Shared
   #    where(<x>.in(limited_id_set(ids)))
   def limited_id_set(ids)
     ids.map(&:to_i).uniq[0, MO.query_max_array]
+  end
+
+  # AR: `search_fields` should be defined in the Query class as either
+  # model.arel_table[:column] or a concatenation of columns in parentheses.
+  # e.g. Observation[:notes] or (Observation[:notes] + Observation[:name])
+  # `pattern` should be a google-search-formatted string, for SearchParams.
+  def add_pattern_condition
+    return if params[:pattern].blank?
+
+    @title_tag = :query_title_pattern_search
+    search_columns(search_fields, params[:pattern])
   end
 end
