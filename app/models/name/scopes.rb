@@ -25,16 +25,13 @@ module Name::Scopes
       # in the template: order by most frequently used
       # group(:name_id).reorder(Arel.star.count.desc)
     }
-    # FIXME: different in Query. Add google conditions to AbstractModel
     scope :description_includes, lambda { |text|
-      joins(:descriptions).
-        where(NameDescription[:gen_desc].matches("%#{text}%")).
-        or(where(NameDescription[:diag_desc].matches("%#{text}%"))).
-        or(where(NameDescription[:distribution].matches("%#{text}%"))).
-        or(where(NameDescription[:habitat].matches("%#{text}%"))).
-        or(where(NameDescription[:look_alikes].matches("%#{text}%"))).
-        or(where(NameDescription[:notes].matches("%#{text}%"))).
-        or(where(NameDescription[:refs].matches("%#{text}%")))
+      fields = NameDescription::ALL_NOTE_FIELDS.dup
+      starting = NameDescription[fields.shift]
+      concats = fields.reduce(starting) do |result, field|
+        result + NameDescription[field]
+      end
+      joins(:descriptions).where(concats.matches("%#{text}%"))
     }
     scope :with_description_in_project, lambda { |project|
       joins(descriptions: :project).
