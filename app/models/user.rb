@@ -432,7 +432,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def self.lookup_unique_text_name(str)
-    return str unless str
+    return nil unless str
 
     user = nil
     login = nil
@@ -445,9 +445,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
       pattern = "%#{ActiveRecord::Base.sanitize_sql(login)}%"
       user = find_name_match(User.where("login like ?", pattern), str)
     end
-    return str unless user
-
-    "_user #{user.login}_"
+    user
   end
 
   def self.find_name_match(users, str)
