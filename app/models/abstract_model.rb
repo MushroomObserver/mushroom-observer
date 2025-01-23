@@ -274,6 +274,51 @@ class AbstractModel < ApplicationRecord
     /^\d\d/.match?(val.to_s) && val.to_i <= 12
   end
 
+  def self.add_search_conditions(table_columns, val)
+    return if val.blank?
+
+    search = SearchParams.new(phrase: val)
+    clauses = add_google_conditions_good(table_columns, search)
+    clauses += add_google_conditions_bad(table_columns, search)
+    send_where_chain(clauses)
+  end
+
+  def self.send_where_chain(clauses)
+    clauses.inject(self) { |result, clause| result.send(:where, clause) }
+  end
+
+  # Put together a bunch of AR conditions that describe what a given search.
+  # is looking for. These are ANDS, but grouped parts can be ORS.
+  # For example this search string (from QueryTest):
+  #   'foo OR bar OR "any*thing" -bad surprise! -"lost boys"'
+  # should produce this SQL:
+  #   "(x LIKE '%foo%' OR x LIKE '%bar%' OR x LIKE '%any%thing%') " \
+  #   "AND x LIKE '%surprise!%' AND x NOT LIKE '%bad%' " \
+  #   "AND x NOT LIKE '%lost boys%'"
+  #
+  def self.add_google_conditions_good(table_columns, search)
+    clauses = []
+    search.goods.each do |good|
+      parts = *good # break up phrases
+      # pop the first phrase off to start the condition chain without an `OR`
+      clause = table_columns.matches(parts.shift.clean_pattern)
+      parts.each do |str|
+        # join the parts with `or`
+        clause = clause.or(table_columns.matches(str.clean_pattern))
+      end
+      # Add a where condition for each good (equivalent to `AND`)
+      clauses << clause
+    end
+    clauses
+  end
+
+  # AR conditions for what the search wants to avoid. These are ANDS
+  def self.add_google_conditions_bad(table_columns, search)
+    search.bads.map do |bad|
+      table_columns.does_not_match(bad.clean_pattern)
+    end
+  end
+
   ##############################################################################
   #
   #  :section: "Find" Extensions
