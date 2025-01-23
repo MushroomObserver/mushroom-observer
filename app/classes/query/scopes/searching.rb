@@ -24,7 +24,7 @@ module Query::Scopes::Searching
   # Each negative assertion is a single string.  None of the fields being
   # searched may contain any of the negative assertions.
   #
-  #   search = google_parse(search_string)
+  #   search = SearchParams.new(phrase: search_string)
   #   search.goods = [
   #     [ "str1", "or str2", ... ],
   #     [ "str3", "or str3", ... ],
@@ -51,25 +51,9 @@ module Query::Scopes::Searching
   def add_search_conditions(table_columns, val)
     return if val.blank?
 
-    search = google_parse(val)
     add_google_conditions_good(table_columns, search)
     add_google_conditions_bad(table_columns, search)
     # @scopes.to_sql
-  end
-
-  def google_parse(str)
-    goods = []
-    bads  = []
-    if (str = str.to_s.strip_squeeze) != ""
-      str.gsub!(/\s+/, " ")
-      loop do
-        google_parse_one_clause(str, goods, bads) && break
-      end
-    end
-    GoogleSearch.new(
-      goods: goods,
-      bads: bads
-    )
   end
 
   # Put together a bunch of AR conditions that describe what a given search.
@@ -101,46 +85,6 @@ module Query::Scopes::Searching
       @scopes = @scopes.where(
         table_columns.does_not_match(clean_pattern(bad))
       )
-    end
-  end
-
-  # ----------------------------------------------------------------------------
-
-  private
-
-  # Pull off one "and" clause from the beginning of the string.
-  def google_parse_one_clause(str, goods, bads)
-    if str.sub!(/^-"([^"]+)"( |$)/, "") ||
-       str.sub!(/^-(\S+)( |$)/, "")
-      bads << Regexp.last_match(1)
-    elsif str.sub!(/^(("[^"]+"|\S+)( OR ("[^"]+"|\S+))*)( |$)/, "")
-      str2 = Regexp.last_match(1)
-      or_strs = []
-      while str2.sub!(/^"([^"]+)"( OR |$)/, "") ||
-            str2.sub!(/^(\S+)( OR |$)/, "")
-        or_strs << Regexp.last_match(1)
-      end
-      goods << or_strs
-    else
-      raise("Invalid search string syntax at: '#{str}'") if str != ""
-
-      return true
-    end
-    false
-  end
-
-  # Simple class to hold the results of +google_parse+.  It just has two
-  # attributes, +goods+ and +bads+.
-  class GoogleSearch
-    attr_accessor :goods, :bads
-
-    def initialize(args = {})
-      @goods = args[:goods]
-      @bads = args[:bads]
-    end
-
-    def blank?
-      @goods.none? && @bads.none?
     end
   end
 end

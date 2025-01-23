@@ -13,10 +13,10 @@ module Query::Scopes::AdvancedSearch
 
   def google_parse_params
     [
-      google_parse(params[:name]),
-      google_parse(User.remove_bracketed_name(params[:user].to_s)),
-      google_parse(params[:user_where]),
-      google_parse(params[:content])
+      SearchParams.new(phrase: params[:name]),
+      SearchParams.new(phrase: User.remove_bracketed_name(params[:user].to_s)),
+      SearchParams.new(phrase: params[:user_where]),
+      SearchParams.new(phrase: params[:content])
     ]
   end
 
