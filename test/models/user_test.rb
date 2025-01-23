@@ -595,7 +595,7 @@ class UserTest < UnitTestCase
   end
 
   def test_lookup_unique_text_name
-    User.all.find_each do |user|
+    User.find_each do |user|
       assert_equal(user, User.lookup_unique_text_name(user.unique_text_name))
     end
   end
