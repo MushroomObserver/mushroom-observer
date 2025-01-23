@@ -48,14 +48,13 @@ module Query::Scopes::Searching
     add_search_conditions(search_fields, params[:pattern])
   end
 
-  def add_search_conditions(table_columns, val, *)
+  def add_search_conditions(table_columns, val)
     return if val.blank?
 
     search = google_parse(val)
     add_google_conditions_good(table_columns, search)
     add_google_conditions_bad(table_columns, search)
-    add_joins(*)
-    @scopes.to_sql
+    # @scopes.to_sql
   end
 
   def google_parse(str)
