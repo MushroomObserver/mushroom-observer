@@ -558,8 +558,12 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     where(Observation[:notes].matches("%#{notes}%"))
   }
   # This is the "advanced search" scope that joins to :comments
-  scope :search_content, lambda { |content|
-    notes_include(content)
+  scope :search_content, lambda { |phrase|
+    add_search_conditions(Observation[:notes], phrase).
+      joins(:comments).add_search_conditions(
+        (Observation[:notes] + Comment[:summary] + Comment[:comment]),
+        phrase
+      )
   }
   scope :with_specimen, -> { where(specimen: true) }
   scope :without_specimen, -> { where(specimen: false) }

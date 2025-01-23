@@ -286,6 +286,7 @@ class AbstractModel < ApplicationRecord
     send_where_chain(clauses)
   end
 
+  # This just stacks `where` clauses in a chain, on the class
   def self.send_where_chain(clauses)
     clauses.inject(self) { |result, clause| result.send(:where, clause) }
   end
