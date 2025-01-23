@@ -186,8 +186,8 @@ class QueryTest < UnitTestCase
     assert_equal([["one"], %w[foo bar], ["two"]],
                  SearchParams.new(phrase: "one foo OR bar two").goods)
     assert_equal([["one"], ["foo", "bar", "quoted phrase", "-gar"], ["two"]],
-                 SearchParams.new(phrase:
-                   'one foo OR bar OR "quoted phrase" OR -gar two'
+                 SearchParams.new(
+                   phrase: 'one foo OR bar OR "quoted phrase" OR -gar two'
                  ).goods)
     assert_equal([], SearchParams.new(phrase: "-bad").goods)
     assert_equal(["bad"], SearchParams.new(phrase: "-bad").bads)
