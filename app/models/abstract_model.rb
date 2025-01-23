@@ -274,6 +274,9 @@ class AbstractModel < ApplicationRecord
     /^\d\d/.match?(val.to_s) && val.to_i <= 12
   end
 
+  # `table_columns` can be a column, or a concatenation of columns
+  # (Name[:id] + Name[:text_name] + Name[:classification])
+  # `val` should be the search string, not a SearchParams instance.
   def self.add_search_conditions(table_columns, val)
     return if val.blank?
 

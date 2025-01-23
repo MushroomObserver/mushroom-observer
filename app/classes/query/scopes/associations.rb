@@ -45,7 +45,7 @@ module Query::Scopes::Associations
       next unless /\D/.match?(val)
 
       # cond += " OR #{where_col} LIKE '%#{pattern}%'"
-      conditions = conditions.or(table[:where].matches(clean_pattern(val)))
+      conditions = conditions.or(table[:where].matches(val.clean_pattern))
     end
     conditions
   end

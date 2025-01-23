@@ -69,10 +69,10 @@ module Query::Scopes::Searching
     search.goods.each do |good|
       parts = *good # break up phrases
       # pop the first phrase off to start the condition chain without an `OR`
-      ors = table_columns.matches(clean_pattern(parts.shift))
+      ors = table_columns.matches(parts.shift.clean_pattern)
       parts.each do |str|
         # join the parts with `or`
-        ors = ors.or(table_columns.matches(clean_pattern(str)))
+        ors = ors.or(table_columns.matches(str.clean_pattern))
       end
       # Add a where condition for each good (equivalent to `AND`)
       @scopes = @scopes.where(ors)
@@ -83,7 +83,7 @@ module Query::Scopes::Searching
   def add_google_conditions_bad(table_columns, search)
     search.bads.each do |bad|
       @scopes = @scopes.where(
-        table_columns.does_not_match(clean_pattern(bad))
+        table_columns.does_not_match(bad.clean_pattern)
       )
     end
   end
