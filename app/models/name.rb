@@ -553,4 +553,3 @@ class Name < AbstractModel
                :name_error_field_start.t(field: :CITATION.t, start: start))
   end
 end
-

@@ -333,7 +333,8 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :with_sequences, -> { joins(:sequences).distinct }
     # much faster than `missing(:sequences)` which uses left outer join.
     scope :without_sequences, -> { where.not(id: with_sequences) }
-    scope :confidence, lambda { |min, max = min| # confidence between min & max %
+    # confidence between min & max, in percentages
+    scope :confidence, lambda { |min, max = min|
       where(vote_cache: (min.to_f / (100 / 3))..(max.to_f / (100 / 3)))
     }
     scope :with_comments, -> { joins(:comments).distinct }
