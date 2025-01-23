@@ -9,9 +9,9 @@ module Query::Modules::GoogleSearch
     bads  = search.bads
     ands = []
     ands += goods.map do |good|
-      or_clause(*good.map { |str| "#{field} LIKE '%#{clean_pattern(str)}%'" })
+      or_clause(*good.map { |str| "#{field} LIKE '%#{str.clean_pattern}%'" })
     end
-    ands += bads.map { |bad| "#{field} NOT LIKE '%#{clean_pattern(bad)}%'" }
+    ands += bads.map { |bad| "#{field} NOT LIKE '%#{bad.clean_pattern}%'" }
     [ands.join(" AND ")]
   end
 end

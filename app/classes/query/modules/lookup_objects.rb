@@ -22,7 +22,7 @@ module Query::Modules::LookupObjects
 
   def lookup_locations_by_name(vals)
     lookup_objects_by_name(vals) do |name|
-      pattern = clean_pattern(Location.clean_name(name))
+      pattern = Location.clean_name(name).clean_pattern
       Location.where("name LIKE ?", "%#{pattern}%")
     end
   end

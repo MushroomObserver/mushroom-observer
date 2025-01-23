@@ -42,11 +42,6 @@ module Query::Modules::Initialization
     ids.map(&:to_i).uniq[0, MO.query_max_array]
   end
 
-  # Clean a pattern for use in LIKE condition.  Takes and returns a String.
-  def clean_pattern(pattern)
-    pattern.gsub(/[%'"\\]/) { |x| "\\#{x}" }.tr("*", "%")
-  end
-
   # Combine args into one parenthesized condition by ANDing them.
   def and_clause(*args)
     if args.length > 1

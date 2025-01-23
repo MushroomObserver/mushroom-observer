@@ -680,6 +680,11 @@ class String
     dup.force_encoding("binary")[0].ord < 128
   end
 
+  # Clean a pattern for use in LIKE condition. Takes and returns a String.
+  def clean_pattern
+    gsub(/[%'"\\]/) { |x| "\\#{x}" }.tr("*", "%")
+  end
+
   # Returns percentage match between +self+ and +other+, where 1.0 means the two
   # strings are equal, and 0.0 means every character is different.
   def percent_match(other)
