@@ -321,12 +321,13 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
     # This is the "advanced search" scope that joins to :comments
     scope :search_content, lambda { |phrase|
-      add_search_conditions(Observation[:notes], phrase).
-        joins(:comments).add_search_conditions(
+      search_columns(Observation[:notes], phrase).
+        joins(:comments).search_columns(
           (Observation[:notes] + Comment[:summary] + Comment[:comment]),
           phrase
         )
     }
+
     scope :with_specimen, -> { where(specimen: true) }
     scope :without_specimen, -> { where(specimen: false) }
     scope :with_sequences, -> { joins(:sequences).distinct }

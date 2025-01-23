@@ -165,6 +165,9 @@ class Comment < AbstractModel
     end
   }
   scope :for_target, ->(target) { where(target: target) }
+  scope :search_content, lambda { |phrase|
+    search_columns((Comment[:summary] + Comment[:comment]), phrase)
+  }
 
   # Returns +summary+ for debugging.
   def text_name

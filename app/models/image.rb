@@ -303,7 +303,13 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
       where(in_types)
     end
   }
-
+  scope :notes_include, lambda { |notes|
+    where(Image[:notes].matches("%#{notes}%"))
+  }
+  scope :search_content, lambda { |phrase|
+    search_columns(Image[:notes], phrase).
+      joins(:observations).merge(Observation.search_content(phrase))
+  }
   scope :interactive_includes, lambda {
     strict_loading.includes(
       :image_votes, :license, :projects, :user
