@@ -69,7 +69,7 @@ module Query::Modules::Conditions
   def add_search_condition(col, val, *)
     return if val.blank?
 
-    search = google_parse(val)
+    search = SearchParams.new(phrase: val)
     @where += google_conditions(search, col)
     add_joins(*)
   end
