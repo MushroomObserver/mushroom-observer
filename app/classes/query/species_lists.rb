@@ -75,7 +75,7 @@ class Query::SpeciesLists < Query::Base
 
     location_str = params[:user_where]
     title_args[:where] = location_str
-    where << "species_lists.where LIKE '%#{location_str.clean_pattern}%'"
+    where << "species_lists.where LIKE '%#{clean_pattern(location_str)}%'"
   end
 
   def initialize_search_parameters

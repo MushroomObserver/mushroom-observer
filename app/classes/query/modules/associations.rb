@@ -29,7 +29,7 @@ module Query::Modules::Associations
     cond      = "#{loc_col} IN (#{ids})"
     vals.each do |val|
       if /\D/.match?(val)
-        pattern = val.clean_pattern
+        pattern = clean_pattern(val)
         cond += " OR #{where_col} LIKE '%#{pattern}%'"
       end
     end

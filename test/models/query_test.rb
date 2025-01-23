@@ -161,11 +161,11 @@ class QueryTest < UnitTestCase
     assert_equal("4,1,2", query.clean_id_set(["4", 1, 4, 2, 4, 1, 2]))
     assert_equal("-1", query.clean_id_set([]))
 
-    assert_equal("blah", "blah".clean_pattern)
-    assert_equal("foo bar", "foo bar".clean_pattern)
-    assert_equal('\\"foo\\%bar\\"', '"foo%bar"'.clean_pattern)
-    assert_equal('one\\\\two', 'one\\two'.clean_pattern)
-    assert_equal("foo%bar", "foo*bar".clean_pattern)
+    assert_equal("blah", query.clean_pattern("blah"))
+    assert_equal("foo bar", query.clean_pattern("foo bar"))
+    assert_equal('\\"foo\\%bar\\"', query.clean_pattern('"foo%bar"'))
+    assert_equal('one\\\\two', query.clean_pattern('one\\two'))
+    assert_equal("foo%bar", query.clean_pattern("foo*bar"))
 
     assert_nil(query.and_clause)
     assert_equal("one", query.and_clause("one"))
