@@ -197,3 +197,18 @@ webmaster:
   login: "MO Webmaster" # must match production
   name: "webmaster" # must match production
   user_groups: all_users, $LABEL_only, super_importers_admin
+
+paren_login:
+  <<: *DEFAULTS
+  login: Paren (user)
+  name: nil
+
+alt_user:
+  <<: *DEFAULTS
+  login: User
+  name: Alt User
+
+ann_user:
+  <<: *DEFAULTS
+  login: user
+  name: Ann User
