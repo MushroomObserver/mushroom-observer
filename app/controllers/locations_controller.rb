@@ -179,7 +179,7 @@ class LocationsController < ApplicationController
     args[:by] = "where" if args[:by].blank? || (args[:by] == "name")
 
     if args[:pattern]
-      search = query.google_parse(args[:pattern])
+      search = SearchParams.new(phrase: args[:pattern])
       args[:where] += query.google_conditions(search, "observations.where")
       args.delete(:pattern)
     end
