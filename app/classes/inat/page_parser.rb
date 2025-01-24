@@ -47,7 +47,8 @@ class Inat
         order: "asc", order_by: "id",
         # obss of only the iNat user with iNat login @inat_import.inat_username
         user_login: nil,
-        iconic_taxa: ICONIC_TAXA
+        iconic_taxa: ICONIC_TAXA,
+        without_field: "Mushroom Observer URL"
       }.merge(args)
       query = URI.encode_www_form(query_args)
 

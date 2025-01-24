@@ -27,6 +27,7 @@ All data as of the time of importing. (The corresponding iNat Observation may ha
 | evernia| [216357655](https://www.inaturalist.org/observations/216357655) | 1 | public | user `jgerend` Casual, lichen, no fields, place: Troutdale, 1 Project |
 | fuligo_septica| [219783802](https://www.inaturalist.org/observations/219783802) | 1 | public | slime mold **Protozoa** Richmond, CA |
 | gyromitra_ancilis| [216745568](https://www.inaturalist.org/observations/216745568) | 3 | public | **cc-by license**, **many projects**, US 20, Linn Co.|
+| manual_duplicate | [238907914](https://www.inaturalist.org/observations/238907914) | 4 | public | iNat obs which `alan_rockfeller` manually duplicated in MO, adding an iNat `Mushroom Observer URL` Observation Field |
 | import_all |  |  | | all fungal obss (total of 5) of iNat user `devin189`, 2 per page (this user had few fungal observations) |
 | inocybe| [222904190](https://www.inaturalist.org/observations/222904190) | 5 | public | cc-by-nc, **2 tags** |
 | i_obliquus_f_sterilis | [232919689](https://www.inaturalist.org/observations/232919689) | 1 | public | `taigamushrooms` cc-by-nc, **infraspecific name** |
@@ -38,7 +39,7 @@ All data as of the time of importing. (The corresponding iNat Observation may ha
 | somion_unicolor| [**202555552**](https://www.inaturalist.org/observations/202555552) | 5 | public |  `jdcohenesq` Research Grade, Notes, Activity, >1 ID, 1 field (Mushroom Observer URL), **mirrored from MO** |
 | trametes| [220370929](https://www.inaturalist.org/observations/220370929) | 2 | public | user `dannymi` different collector; Notes; **Observation Fields: Collector**, place: 25th Ave NE, Seattle, WA, US, with huge error |
 | tremella_mesenterica| [213508767](https://www.inaturalist.org/observations/213508767) | 1 | public | place: Lewisville, TX 75057, USA |
-| xeromphalina_campanella_complex| [215969102](https://www.inaturalist.org/observations/215969102) | 2 | public | `jdcohenesq` **Complex** |
+| xeromphalina_campanella_complex | [215969102](https://www.inaturalist.org/observations/215969102) | 2 | public | `jdcohenesq` **Complex** |
 | zero_results| n.a. | | n.a. | response with total_results: 0, to expose and prevent reversion of bug |
 <!-- markdownlint-enable MD013 -->
 
