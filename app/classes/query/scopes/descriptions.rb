@@ -151,17 +151,17 @@ module Query::Scopes::Descriptions
     )
   end
 
-  # FIXME: Fix Name and Location `description_includes` scopes
-  def initialize_desc_content_parameter(type)
-    fields = desc_model(type).all_note_fields
-    # fields = fields.map { |f| "COALESCE(#{type}_descriptions.#{f},'')" }
-    # fields = "CONCAT(#{fields.join(",")})"
-    fields = fields.map { |f| desc_model(type)[f].coalesce("") }
-    table_columns = fields.shift
-    # rubocop:disable Style/SelfAssignment
-    fields.each { |f| table_columns = table_columns + f }
-    # rubocop:enable Style/SelfAssignment
-    add_search_conditions(table_columns, params[:desc_content])
+  # NOTE: check Name and Location `description_contains` scopes
+  def initialize_desc_content_parameter(_type)
+    return unless params[:desc_content]
+
+    # fields = desc_model(type).all_note_fields
+    # # fields = fields.map { |f| "COALESCE(#{type}_descriptions.#{f},'')" }
+    # # fields = "CONCAT(#{fields.join(",")})"
+    # fields = fields.map { |f| desc_model(type)[f] }
+    # table_columns = fields.shift
+    # fields.each { |f| table_columns = table_columns + f }
+    @scopes = @scopes.search_content(params[:desc_content])
   end
 
   def params_out_to_with_descriptions_params
