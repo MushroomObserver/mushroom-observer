@@ -20,16 +20,17 @@ module Description::Scopes
   end
 
   module ClassMethods
+    # class methods here, `self` included
     def parent_class
       parent_type.camelize.constantize
     end
 
-    # class methods here, `self` included
+    # .coalesce("") is needed on each concatenated column here.
     def description_notes_columns
       fields = self::ALL_NOTE_FIELDS.dup
-      starting = arel_table[fields.shift]
+      starting = arel_table[fields.shift].coalesce("")
       fields.reduce(starting) do |result, field|
-        result + arel_table[field]
+        result + arel_table[field].coalesce("")
       end
     end
   end
