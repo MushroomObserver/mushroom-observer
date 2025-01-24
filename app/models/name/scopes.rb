@@ -145,13 +145,14 @@ module Name::Scopes
     scope :without_notes,
           -> { where(Name[:notes].blank) }
     scope :notes_include,
-          ->(notes) { where(Name[:notes].matches("%#{notes}%")) }
+          ->(phrase) { search_columns(Name[:notes], phrase) }
     scope :with_comments,
           -> { joins(:comments).distinct }
     scope :without_comments,
           -> { where.not(id: with_comments) }
-    scope :comments_include, lambda { |summary|
-      joins(:comments).where(Comment[:summary].matches("%#{summary}%")).distinct
+    scope :comments_include, lambda { |phrase|
+      joins(:comments).
+        search_columns((Comment[:summary] + Comment[:comment]), phrase)
     }
     scope :on_species_list, lambda { |species_list|
       joins(observations: :species_lists).

@@ -129,6 +129,24 @@ module AbstractModel::Scopes
         )
       )
     }
+
+    # Search given `table_columns` for given values (both "good" and "bad").
+    # The arg `table_columns` can be a column, like Name[:text_name], or a
+    # concatenation of columns, like (Name[:text_name] + Name[:classification]).
+    # If you send a concatenation from different tables be sure to join to them.
+    # `phrase` should be a google-search-phrased search string. This method
+    # creates a SearchParams instance to parse the phrase's `goods` and `bads`.
+    # Then generates a chain of AR `where` clauses that gets those matches from
+    # the given columns, and avoids the `does_not_match`es.
+    # This can be called on joins, because the columns specify the table.
+    scope :search_columns, lambda { |table_columns, phrase|
+      return all if phrase.blank?
+
+      search = SearchParams.new(phrase:)
+      conditions = search_conditions_good(table_columns, search.goods)
+      conditions += search_conditions_bad(table_columns, search.bads)
+      send_where_chain(conditions).distinct
+    }
   end
 
   module ClassMethods

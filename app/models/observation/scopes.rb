@@ -336,14 +336,14 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       where(conditions)
     }
     scope :notes_include,
-          ->(notes) { where(Observation[:notes].matches("%#{notes}%")) }
-    # This is the "advanced search" scope that joins to :comments
+          ->(phrase) { search_columns(Observation[:notes], phrase) }
+    # This is the "advanced search" scope that joins to :comments.
+    # Oddly the merge-or is faster than concatting the columns together.
     scope :search_content, lambda { |phrase|
-      add_search_conditions(Observation[:notes], phrase).
-        joins(:comments).add_search_conditions(
-          (Observation[:notes] + Comment[:summary] + Comment[:comment]),
-          phrase
-        )
+      joins(:comments).merge(
+        Observation.search_columns(Observation[:notes], phrase).
+        or(Comment.search_content(phrase))
+      )
     }
     scope :with_specimen,
           -> { where(specimen: true) }
