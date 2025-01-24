@@ -3319,16 +3319,19 @@ class QueryTest < UnitTestCase
             or(Location[:name].matches("%#{pattern}%"))).distinct
   end
 
-  def test_user_all
-    expects = User.order(:name).to_a
+  def test_user_all_by_name
+    expects = User.order(name: :asc, id: :desc).to_a
     assert_query(expects, :User)
-    expects = User.order(:login).to_a
+  end
+
+  def test_user_all_by_login
+    expects = User.order(login: :asc, id: :desc).to_a
     assert_query(expects, :User, by: :login)
   end
 
   def test_user_in_set
-    assert_query([rolf.id, mary.id, junk.id], :User,
-                 ids: [junk.id, mary.id, rolf.id], by: :reverse_name)
+    assert_query([rolf.id, mary.id, junk.id],
+                 :User, ids: [junk.id, mary.id, rolf.id], by: :reverse_name)
   end
 
   def test_user_pattern_search_nonexistent

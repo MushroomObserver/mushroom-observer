@@ -164,7 +164,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   scope :in_region,
         ->(place_name) { where(Location[:name].matches("%#{place_name}")) }
   scope :name_contains,
-        ->(phrase) { search_column(Location[:name], phrase) }
+        ->(phrase) { search_columns(Location[:name], phrase) }
   # This returns locations whose bounding box is entirely within the given box.
   # Pass kwargs (:north, :south, :east, :west), any order
   scope :in_box, lambda { |**args|
