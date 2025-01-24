@@ -182,6 +182,7 @@
 #  include_synonyms_of(name)
 #  include_subtaxa_of(name)
 #  text_name_contains(text_name)
+#  search_name_contains(phrase)
 #  with_classification
 #  without_classification
 #  classification_contains(classification)

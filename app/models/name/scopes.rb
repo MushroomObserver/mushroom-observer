@@ -85,6 +85,8 @@ module Name::Scopes
           ->(name) { include_subtaxa_of(name).with_rank_above_genus }
     scope :text_name_contains,
           ->(phrase) { search_columns(Name[:text_name], phrase) }
+    scope :search_name_contains,
+          ->(phrase) { search_columns(Name[:search_name], phrase) }
     scope :with_classification,
           -> { where(Name[:classification].not_blank) }
     scope :without_classification,
