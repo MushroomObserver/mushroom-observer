@@ -1,9 +1,13 @@
 # frozen_string_literal: true
 
 module AbstractModel::Scopes
+  # This is using Concern so we can define the scopes in this included module.
   extend ActiveSupport::Concern
 
   included do # rubocop:disable Metrics/BlockLength
+    # NOTE: To improve Coveralls display, avoid one-line stabby lambda scopes.
+    # Two line stabby lambdas are OK, it's just the declaration line that a
+    # always shows as covered.
     scope :order_by_user, lambda {
       joins(:user).
         reorder(User[:name].when(nil).then(User[:login]).
@@ -15,7 +19,8 @@ module AbstractModel::Scopes
         reorder(RssLog[:updated_at].desc, model.arel_table[:id].desc).distinct
     }
 
-    scope :by_user, ->(user) { where(user: user) }
+    scope :by_user,
+          ->(user) { where(user: user) }
     scope :by_editor, lambda { |user|
       version_table = :"#{type_tag}_versions"
       unless ActiveRecord::Base.connection.table_exists?(version_table)
@@ -31,12 +36,10 @@ module AbstractModel::Scopes
     scope :created_on, lambda { |ymd_string|
       where(arel_table[:created_at].format("%Y-%m-%d").eq(ymd_string))
     }
-    scope :created_after, lambda { |datetime|
-      datetime_compare(:created_at, :gt, datetime)
-    }
-    scope :created_before, lambda { |datetime|
-      datetime_compare(:created_at, :lt, datetime)
-    }
+    scope :created_after,
+          ->(datetime) { datetime_compare(:created_at, :gt, datetime) }
+    scope :created_before,
+          ->(datetime) { datetime_compare(:created_at, :lt, datetime) }
     scope :created_between, lambda { |earliest, latest|
       created_after(earliest).created_before(latest)
     }
@@ -44,22 +47,18 @@ module AbstractModel::Scopes
     scope :updated_on, lambda { |ymd_string|
       where(arel_table[:updated_at].format("%Y-%m-%d").eq(ymd_string))
     }
-    scope :updated_after, lambda { |datetime|
-      datetime_compare(:updated_at, :gt, datetime)
-    }
-    scope :updated_before, lambda { |datetime|
-      datetime_compare(:updated_at, :lt, datetime)
-    }
+    scope :updated_after,
+          ->(datetime) { datetime_compare(:updated_at, :gt, datetime) }
+    scope :updated_before,
+          ->(datetime) { datetime_compare(:updated_at, :lt, datetime) }
     scope :updated_between, lambda { |earliest, latest|
       updated_after(earliest).updated_before(latest)
     }
 
-    scope :datetime_after, lambda { |col, datetime|
-      datetime_compare(col, :gt, datetime)
-    }
-    scope :datetime_before, lambda { |col, datetime|
-      datetime_compare(col, :lt, datetime)
-    }
+    scope :datetime_after,
+          ->(col, datetime) { datetime_compare(col, :gt, datetime) }
+    scope :datetime_before,
+          ->(col, datetime) { datetime_compare(col, :lt, datetime) }
     scope :datetime_between, lambda { |col, earliest, latest|
       datetime_after(col, earliest).datetime_before(col, latest)
     }
@@ -70,12 +69,18 @@ module AbstractModel::Scopes
       where(arel_table[col].format("%Y-%m-%d %H:%i:%s").send(dir, datetime))
     }
 
-    scope :when_between, lambda { |earliest, latest|
-      date_between(:when, earliest, latest)
-    }
-    scope :when_after, ->(date) { date_compare(:when, :gt, date) }
-    scope :when_before, ->(date) { date_compare(:when, :lt, date) }
+    scope :when_after,
+          ->(date) { date_compare(:when, :gt, date) }
+    scope :when_before,
+          ->(date) { date_compare(:when, :lt, date) }
+    scope :when_between,
+          ->(earliest, latest) { date_between(:when, earliest, latest) }
 
+    # Note that these two conditions can take dates, or months, or month-days!
+    scope :date_after,
+          ->(col, date) { date_compare(col, :gt, date) }
+    scope :date_before,
+          ->(col, date) { date_compare(col, :lt, date) }
     # Allows searching for date ranges in a date (:when) column, either within
     # a logical time range, or within a periodic time range in recurring years.
     # This is possible because a date column already has the format("%Y-%m-%d").
@@ -98,9 +103,6 @@ module AbstractModel::Scopes
         or(arel_table[col].month.eq(m2).and(arel_table[col].day.lteq(d2)))
       )
     }
-    # Note that these two conditions can take dates, or months, or month-days!
-    scope :date_after, ->(col, date) { date_compare(col, :gt, date) }
-    scope :date_before, ->(col, date) { date_compare(col, :lt, date) }
     # NOTE: all three conditions validate numeric format
     scope :date_compare, lambda { |col, dir, val|
       if starts_with_year?(val)

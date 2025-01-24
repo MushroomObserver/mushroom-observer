@@ -1,17 +1,21 @@
 # frozen_string_literal: true
 
 module Observation::Scopes # rubocop:disable Metrics/ModuleLength
+  # This is using Concern so we can define the scopes in this included module.
   extend ActiveSupport::Concern
 
   included do # rubocop:disable Metrics/BlockLength
-    scope :index_order, -> { order(when: :desc, id: :desc) }
+    # NOTE: To improve Coveralls display, avoid one-line stabby lambda scopes.
+    # Two line stabby lambdas are OK, it's just the declaration line that a
+    # always shows as covered.
+    scope :index_order,
+          -> { order(when: :desc, id: :desc) }
 
     # The order used on the home page
     scope :by_activity, lambda {
       where.not(rss_log: nil).reorder(log_updated_at: :desc, id: :desc)
     }
 
-    # NOTE: To improve Coveralls display, avoid one-line stabby lambda scopes
     # Extra timestamp scopes for when Observation found:
     scope :found_on, lambda { |ymd_string|
       where(arel_table[:when].format("%Y-%m-%d").eq(ymd_string))
@@ -28,17 +32,20 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
 
     # For activerecord subqueries, DON'T pre-map the primary key (id)
-    scope :with_name, -> { where.not(name: Name.unknown) }
-    scope :without_name, -> { where(name: Name.unknown) }
-    scope :with_name_above_genus, lambda {
-      where(name_id: Name.with_rank_above_genus)
-    }
-    scope :without_confident_name, -> { where(vote_cache: ..0) }
+    scope :with_name,
+          -> { where.not(name: Name.unknown) }
+    scope :without_name,
+          -> { where(name: Name.unknown) }
+    scope :with_name_above_genus,
+          -> { where(name_id: Name.with_rank_above_genus) }
+    scope :without_confident_name,
+          -> { where(vote_cache: ..0) }
     # Use this definition when running script to populate the column:
     # scope :needs_naming, lambda {
     #   with_name_above_genus.or(without_confident_name)
     # }
-    scope :needs_naming, -> { where(needs_naming: true) }
+    scope :needs_naming,
+          -> { where(needs_naming: true) }
     scope :with_name_correctly_spelled, lambda {
       joins({ namings: :name }).where(names: { correct_spelling: nil })
     }
@@ -124,7 +131,8 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         where(name_id: name_ids)
       end
     }
-    scope :of_name_like, ->(name) { where(name: Name.text_name_includes(name)) }
+    scope :of_name_like,
+          ->(name) { where(name: Name.text_name_includes(name)) }
     scope :in_clade, lambda { |val|
       # parse_name_and_rank defined below
       text_name, rank = parse_name_and_rank(val)
@@ -146,12 +154,18 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       includes(:location, :projects, :species_lists).
         where(user_id: user.id).reorder(:created_at)
     }
-    scope :mappable, -> { where.not(location: nil).or(where.not(lat: nil)) }
-    scope :unmappable, -> { where(location: nil).and(where(lat: nil)) }
-    scope :with_location, -> { where.not(location: nil) }
-    scope :without_location, -> { where(location: nil) }
-    scope :with_geolocation, -> { where.not(lat: nil) }
-    scope :without_geolocation, -> { where(lat: nil) }
+    scope :mappable,
+          -> { where.not(location: nil).or(where.not(lat: nil)) }
+    scope :unmappable,
+          -> { where(location: nil).and(where(lat: nil)) }
+    scope :with_location,
+          -> { where.not(location: nil) }
+    scope :without_location,
+          -> { where(location: nil) }
+    scope :with_geolocation,
+          -> { where.not(lat: nil) }
+    scope :without_geolocation,
+          -> { where(lat: nil) }
     scope :with_public_geolocation,
           -> { where(gps_hidden: false).where.not(lat: nil) }
     scope :without_public_geolocation,
@@ -299,15 +313,20 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       joins(:location).where(Location[:box_area].gt(args[:area]))
     }
 
-    scope :is_collection_location, -> { where(is_collection_location: true) }
-    scope :not_collection_location, -> { where(is_collection_location: false) }
-    scope :with_images, -> { where.not(thumb_image: nil) }
-    scope :without_images, -> { where(thumb_image: nil) }
-    scope :with_notes, -> { where.not(notes: no_notes) }
-    scope :without_notes, -> { where(notes: no_notes) }
-    scope :with_notes_field, lambda { |field|
-      where(Observation[:notes].matches("%:#{field}:%"))
-    }
+    scope :is_collection_location,
+          -> { where(is_collection_location: true) }
+    scope :not_collection_location,
+          -> { where(is_collection_location: false) }
+    scope :with_images,
+          -> { where.not(thumb_image: nil) }
+    scope :without_images,
+          -> { where(thumb_image: nil) }
+    scope :with_notes,
+          -> { where.not(notes: no_notes) }
+    scope :without_notes,
+          -> { where(notes: no_notes) }
+    scope :with_notes_field,
+          ->(field) { where(Observation[:notes].matches("%:#{field}:%")) }
     scope :with_notes_fields, lambda { |fields|
       return if fields.empty?
 
@@ -316,9 +335,8 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       fields.each { |field| conditions = conditions.or(field) }
       where(conditions)
     }
-    scope :notes_include, lambda { |notes|
-      where(Observation[:notes].matches("%#{notes}%"))
-    }
+    scope :notes_include,
+          ->(notes) { where(Observation[:notes].matches("%#{notes}%")) }
     # This is the "advanced search" scope that joins to :comments
     scope :search_content, lambda { |phrase|
       add_search_conditions(Observation[:notes], phrase).
@@ -327,17 +345,23 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
           phrase
         )
     }
-    scope :with_specimen, -> { where(specimen: true) }
-    scope :without_specimen, -> { where(specimen: false) }
-    scope :with_sequences, -> { joins(:sequences).distinct }
+    scope :with_specimen,
+          -> { where(specimen: true) }
+    scope :without_specimen,
+          -> { where(specimen: false) }
+    scope :with_sequences,
+          -> { joins(:sequences).distinct }
     # much faster than `missing(:sequences)` which uses left outer join.
-    scope :without_sequences, -> { where.not(id: with_sequences) }
+    scope :without_sequences,
+          -> { where.not(id: with_sequences) }
     # confidence between min & max, in percentages
     scope :confidence, lambda { |min, max = min|
       where(vote_cache: (min.to_f / (100 / 3))..(max.to_f / (100 / 3)))
     }
-    scope :with_comments, -> { joins(:comments).distinct }
-    scope :without_comments, -> { where.not(id: Observation.with_comments) }
+    scope :with_comments,
+          -> { joins(:comments).distinct }
+    scope :without_comments,
+          -> { where.not(id: Observation.with_comments) }
     scope :comments_include, lambda { |summary|
       joins(:comments).where(Comment[:summary].matches("%#{summary}%")).distinct
     }
