@@ -145,7 +145,7 @@ module AbstractModel::Scopes
       search = SearchParams.new(phrase:)
       conditions = search_conditions_good(table_columns, search.goods)
       conditions += search_conditions_bad(table_columns, search.bads)
-      send_where_chain(conditions)
+      send_where_chain(conditions).distinct
     }
   end
 

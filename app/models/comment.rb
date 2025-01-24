@@ -169,6 +169,12 @@ class Comment < AbstractModel
     search_columns((Comment[:summary] + Comment[:comment]), phrase)
   }
 
+  scope :search_content, lambda { |phrase|
+    # `or` is 10-20% faster than concatenating the columns
+    search_columns(Comment[:comment], phrase).
+      or(Comment.search_columns(Comment[:summary], phrase)).distinct
+  }
+
   # Returns +summary+ for debugging.
   def text_name
     summary.to_s

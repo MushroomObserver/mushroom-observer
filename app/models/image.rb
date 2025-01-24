@@ -303,13 +303,15 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
       where(in_types)
     end
   }
-  scope :notes_include, lambda { |notes|
-    where(Image[:notes].matches("%#{notes}%"))
-  }
+  scope :notes_include,
+        ->(phrase) { search_columns(Image[:notes], phrase) }
   scope :search_content, lambda { |phrase|
-    search_columns(Image[:notes], phrase).
-      joins(:observations).merge(Observation.search_content(phrase))
+    # This is waay faster than the 3x join
+    obs = Observation.search_content(phrase).includes(:images)
+    imgs = obs.map(&:images).flatten.uniq
+    notes_include(phrase).distinct.or(Image.where(id: imgs).distinct)
   }
+
   scope :interactive_includes, lambda {
     strict_loading.includes(
       :image_votes, :license, :projects, :user
