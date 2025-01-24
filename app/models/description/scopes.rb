@@ -9,10 +9,10 @@ module Description::Scopes
   # always show as covered.
   included do
     scope :is_default, lambda {
-      joins(:name).where(parent_class[:description_id].not_eq(nil))
+      joins(:name).where(parent_class[:description_id].not_eq(nil)).distinct
     }
     scope :is_not_default, lambda {
-      joins(:name).where(parent_class[:description_id].eq(nil))
+      joins(:name).where(parent_class[:description_id].eq(nil)).distinct
     }
     # scope searching note content, using a SearchParams phrase
     scope :search_content,
