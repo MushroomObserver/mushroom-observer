@@ -49,7 +49,8 @@ class SearchControllerTest < FunctionalTestCase
     params = {
       search: {
         model: "observation",
-        user: "rolf"
+        user: users(:rolf).unique_text_name,
+        user_id: users(:rolf).id
       },
       content_filter: {
         with_images: "",
@@ -61,6 +62,7 @@ class SearchControllerTest < FunctionalTestCase
     }
     get(:advanced, params: params)
     query = QueryRecord.last.query
+    assert_true(query.num_results.positive?)
     assert_equal("", query.params[:with_images])
     assert_true(query.params[:with_specimen])
     assert_false(query.params[:lichen])

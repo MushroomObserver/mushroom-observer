@@ -46,7 +46,7 @@
 #  updated_after("yyyymmdd")
 #  updated_before("yyyymmdd")
 #  updated_between(start, end)
-#  name_includes(place_name)
+#  name_contains(place_name)
 #  in_region(place_name)
 #  in_box(north:, south:, east:, west:)
 #
@@ -155,15 +155,16 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
-  scope :index_order, -> { order(name: :asc, id: :desc) }
+  # NOTE: To improve Coveralls display, avoid one-line stabby lambda scopes.
+  # Two line stabby lambdas are OK, it's just the declaration line that will
+  # always show as covered.
+  scope :index_order,
+        -> { order(name: :asc, id: :desc) }
 
-  # NOTE: To improve Coveralls display, do not use one-line stabby lambda scopes
-  scope :name_includes, lambda { |place_name|
-    where(Location[:name].matches("%#{place_name}%"))
-  }
-  scope :in_region, lambda { |place_name|
-    where(Location[:name].matches("%#{place_name}"))
-  }
+  scope :in_region,
+        ->(place_name) { where(Location[:name].matches("%#{place_name}")) }
+  scope :name_contains,
+        ->(phrase) { search_column(Location[:name], phrase) }
   # This returns locations whose bounding box is entirely within the given box.
   # Pass kwargs (:north, :south, :east, :west), any order
   scope :in_box, lambda { |**args|
@@ -247,7 +248,8 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
                and(Location[:west] <= west).and(Location[:east] >= east)))
     end
   }
-  scope :with_observations, -> { joins(:observations).distinct }
+  scope :with_observations,
+        -> { joins(:observations).distinct }
 
   scope :show_includes, lambda {
     strict_loading.includes(

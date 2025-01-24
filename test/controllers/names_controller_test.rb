@@ -2658,7 +2658,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_equal(old_desc, new_name.description.notes)
   end
 
-  def test_update_name_merged_notes_include_notes_from_both_names
+  def test_update_name_merged_notes_contain_notes_from_both_names
     old_name = names(:hygrocybe_russocoriacea_bad_author) # has notes
     new_name = names(:russula_brevipes_author_notes)
     original_notes = new_name.notes

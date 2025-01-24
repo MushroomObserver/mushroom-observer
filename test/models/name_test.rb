@@ -1834,7 +1834,7 @@ class NameTest < UnitTestCase
   def test_ancestors_3
     # Make sure only Ascomycetes through Peltigera have
     # Ascomycota in their classification at first.
-    assert_equal(4, Name.classification_includes("Ascomycota").count)
+    assert_equal(4, Name.classification_contains("Ascomycota").count)
 
     kng = names(:fungi)
     phy = names(:ascomycota)
@@ -3422,12 +3422,12 @@ class NameTest < UnitTestCase
   #    Explicit tests of some scopes to improve coverage
   # ----------------------------------------------------
 
-  def test_scope_description_includes
+  def test_scope_description_contains
     assert_equal(
       [names(:suillus)],
-      Name.description_includes("by any other name would smell as sweet").to_a
+      Name.description_contains("by any other name would smell as sweet").to_a
     )
-    assert_equal(0, Name.description_includes(ARBITRARY_SHA).count)
+    assert_equal(0, Name.description_contains(ARBITRARY_SHA).count)
   end
 
   def test_scope_with_description_in_project
@@ -3603,11 +3603,11 @@ class NameTest < UnitTestCase
     assert_not_includes(Name.without_comments, names(:fungi))
   end
 
-  def test_scope_comments_include
-    assert_includes(Name.comments_include("do not change"), names(:fungi))
-    assert_empty(Name.comments_include(ARBITRARY_SHA))
+  def test_scope_comments_contain
+    assert_includes(Name.comments_contain("do not change"), names(:fungi))
+    assert_empty(Name.comments_contain(ARBITRARY_SHA))
     assert_empty(
-      Name.comments_include(comments(:detailed_unknown_obs_comment).summary)
+      Name.comments_contain(comments(:detailed_unknown_obs_comment).summary)
     )
   end
 

@@ -230,7 +230,7 @@ class PatternSearchTest < UnitTestCase
     x.vals = ids.map(&:to_s)
     assert_equal(ids, x.parse_list_of_locations)
     x.vals = ["*California, USA"]
-    expect = Location.name_includes("California, USA").map(&:id).sort
+    expect = Location.name_contains("California, USA").map(&:id).sort
     assert_operator(expect.count, :>, 1)
     assert_equal(expect, x.parse_list_of_locations.sort)
     x.vals = ["USA, California*"]
@@ -582,14 +582,14 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_notes
-    expect = Observation.notes_include("somewhere else")
+    expect = Observation.notes_contain("somewhere else")
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new('notes:"somewhere else"')
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_comments
-    expect = Observation.comments_include("complicated")
+    expect = Observation.comments_contain("complicated")
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("comments:complicated")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
@@ -916,28 +916,28 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_name_search_author
-    expect = Name.with_correct_spelling.author_includes("Vittad")
+    expect = Name.with_correct_spelling.author_contains("Vittad")
     assert_not_empty(expect)
     x = PatternSearch::Name.new("author:vittad")
     assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_citation
-    expect = Name.with_correct_spelling.citation_includes("lichenes")
+    expect = Name.with_correct_spelling.citation_contains("lichenes")
     assert_not_empty(expect)
     x = PatternSearch::Name.new("citation:lichenes")
     assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_classification
-    expect = Name.with_correct_spelling.classification_includes("ascomycota")
+    expect = Name.with_correct_spelling.classification_contains("ascomycota")
     assert_not_empty(expect)
     x = PatternSearch::Name.new("classification:Ascomycota")
     assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_notes
-    expect = Name.with_correct_spelling.notes_include("lichen")
+    expect = Name.with_correct_spelling.notes_contain("lichen")
     assert_not_empty(expect)
     x = PatternSearch::Name.new("notes:lichen")
     assert_name_arrays_equal(expect, x.query.results, :sort)

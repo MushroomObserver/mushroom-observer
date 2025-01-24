@@ -11,10 +11,13 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # default ordering for index queries
     scope :index_order,
           -> { order(when: :desc, id: :desc) }
-    # The order used on the home page
-    scope :by_activity, lambda {
-      where.not(rss_log: nil).reorder(log_updated_at: :desc, id: :desc)
+    # overwrite the one in abstract_model, because we have it cached on a column
+    scope :order_by_rss_log, lambda {
+      where.not(rss_log: nil).reorder(log_updated_at: :desc, id: :desc).distinct
     }
+    # The order used on the home page
+    scope :by_activity,
+          -> { order_by_rss_log }
 
     # Extra timestamp scopes for when Observation found:
     scope :found_on, lambda { |ymd_string|
@@ -132,7 +135,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       end
     }
     scope :of_name_like,
-          ->(name) { where(name: Name.text_name_includes(name)) }
+          ->(name) { where(name: Name.text_name_contains(name)) }
     scope :in_clade, lambda { |val|
       # parse_name_and_rank defined below
       text_name, rank = parse_name_and_rank(val)
@@ -335,7 +338,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       fields.each { |field| conditions = conditions.or(field) }
       where(conditions)
     }
-    scope :notes_include,
+    scope :notes_contain,
           ->(phrase) { search_columns(Observation[:notes], phrase) }
     # This is the "advanced search" scope that joins to :comments.
     # Oddly the merge-or is faster than concatting the columns together.
@@ -362,8 +365,9 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
           -> { joins(:comments).distinct }
     scope :without_comments,
           -> { where.not(id: Observation.with_comments) }
-    scope :comments_include, lambda { |summary|
-      joins(:comments).where(Comment[:summary].matches("%#{summary}%")).distinct
+    scope :comments_contain, lambda { |phrase|
+      joins(:comments).
+        search_columns((Comment[:summary] + Comment[:comment]), phrase).distinct
     }
     scope :for_project, lambda { |project|
       joins(:project_observations).
@@ -373,9 +377,8 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       joins(:herbarium_records).
         where(HerbariumRecord[:herbarium_id].eq(herbarium.id)).distinct
     }
-    scope :herbarium_record_notes_include, lambda { |notes|
-      joins(:herbarium_records).
-        where(HerbariumRecord[:notes].matches("%#{notes}%")).distinct
+    scope :herbarium_record_notes_contain, lambda { |phrase|
+      joins(:herbarium_records).search_columns(HerbariumRecord[:notes], phrase)
     }
     scope :on_species_list, lambda { |species_list|
       joins(:species_list_observations).
@@ -386,6 +389,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       joins(species_lists: :project_species_lists).
         where(ProjectSpeciesList[:project_id].eq(project.id)).distinct
     }
+
     scope :show_includes, lambda {
       strict_loading.includes(
         :collection_numbers,
@@ -447,10 +451,6 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         :thumb_image,
         :user
       )
-    }
-    # overwrite the one in abstract_model, because we have it cached on a column
-    scope :order_by_rss_log, lambda {
-      where.not(rss_log: nil).reorder(log_updated_at: :desc, id: :desc).distinct
     }
   end
 

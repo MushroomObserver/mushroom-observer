@@ -109,7 +109,7 @@
 #  with_notes
 #  without_notes
 #  has_notes_field(field)
-#  notes_include(note)
+#  notes_contain(note)
 #  with_specimen
 #  without_specimen
 #  with_sequences
@@ -117,10 +117,10 @@
 #  confidence (min %, max %)
 #  with_comments
 #  without_comments
-#  comments_include(summary)
+#  comments_contain(summary)
 #  for_project(project)
 #  in_herbarium(herbarium)
-#  herbarium_record_notes_include(notes)
+#  herbarium_record_notes_contain(notes)
 #  on_species_list(species_list)
 #  on_species_list_of_project(project)
 #
