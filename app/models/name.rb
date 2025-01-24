@@ -160,7 +160,7 @@
 #  not_deprecated
 #  with_description
 #  without_description
-#  description_includes
+#  description_contains
 #  with_description_in_project(project)
 #  with_description_created_by(user)
 #  with_description_reviewed_by(user)
@@ -181,22 +181,22 @@
 #  subtaxa_of(name)
 #  include_synonyms_of(name)
 #  include_subtaxa_of(name)
-#  text_name_includes(text_name)
+#  text_name_contains(text_name)
 #  with_classification
 #  without_classification
-#  classification_includes(classification)
+#  classification_contains(classification)
 #  with_author
 #  without_author
-#  author_includes(author)
+#  author_contains(author)
 #  with_citation
 #  without_citation
-#  citation_includes(citation)
+#  citation_contains(citation)
 #  with_notes
 #  without_notes
-#  notes_include(notes)
+#  notes_contain(notes)
 #  with_comments
 #  without_comments
-#  comments_include(summary)
+#  comments_contain(summary)
 #  on_species_list(species_list)
 #  at_location(location)
 #  in_box(north:, south:, east:, west:)

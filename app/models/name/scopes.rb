@@ -29,8 +29,8 @@ module Name::Scopes
     #   Name.description_needed.group(:name_id).reorder(Arel.star.count.desc)
     scope :description_needed,
           -> { without_description.joins(:observations).distinct }
-    scope :description_includes, lambda { |text|
-      joins(:descriptions).where(description_notes_concats.matches("%#{text}%"))
+    scope :description_contains, lambda { |phrase|
+      joins(:descriptions).search_columns(description_notes_concats, phrase)
     }
     scope :with_description_in_project, lambda { |project|
       joins(descriptions: :project).
@@ -91,7 +91,7 @@ module Name::Scopes
         where(Name[:rank].not_eq(ranks[:Group]))
     }
     scope :subtaxa_of_genus_or_below, lambda { |text_name|
-      # Note small diff w :text_name_includes scope
+      # Note small diff w :text_name_contains scope
       where(Name[:text_name].matches("#{text_name} %"))
     }
     scope :subtaxa_of, lambda { |name|
@@ -119,38 +119,37 @@ module Name::Scopes
     }
     scope :include_subtaxa_above_genus,
           ->(name) { include_subtaxa_of(name).with_rank_above_genus }
-    scope :text_name_includes,
-          ->(text_name) { where(Name[:text_name].matches("%#{text_name}%")) }
+    scope :text_name_contains,
+          ->(phrase) { search_columns(Name[:text_name], phrase) }
     scope :with_classification,
           -> { where(Name[:classification].not_blank) }
     scope :without_classification,
           -> { where(Name[:classification].blank) }
-    scope :classification_includes, lambda { |classification|
-      where(Name[:classification].matches("%#{classification}%"))
-    }
+    scope :classification_contains,
+          ->(phrase) { search_columns(Name[:classification], phrase) }
     scope :with_author,
           -> { where(Name[:author].not_blank) }
     scope :without_author,
           -> { where(Name[:author].blank) }
-    scope :author_includes,
-          ->(author) { where(Name[:author].matches("%#{author}%")) }
+    scope :author_contains,
+          ->(phrase) { search_columns(Name[:author], phrase) }
     scope :with_citation,
           -> { where(Name[:citation].not_blank) }
     scope :without_citation,
           -> { where(Name[:citation].blank) }
-    scope :citation_includes,
-          ->(citation) { where(Name[:citation].matches("%#{citation}%")) }
+    scope :citation_contains,
+          ->(phrase) { search_columns(Name[:citation], phrase) }
     scope :with_notes,
           -> { where(Name[:notes].not_blank) }
     scope :without_notes,
           -> { where(Name[:notes].blank) }
-    scope :notes_include,
+    scope :notes_contain,
           ->(phrase) { search_columns(Name[:notes], phrase) }
     scope :with_comments,
           -> { joins(:comments).distinct }
     scope :without_comments,
           -> { where.not(id: with_comments) }
-    scope :comments_include, lambda { |phrase|
+    scope :comments_contain, lambda { |phrase|
       joins(:comments).
         search_columns((Comment[:summary] + Comment[:comment]), phrase)
     }
