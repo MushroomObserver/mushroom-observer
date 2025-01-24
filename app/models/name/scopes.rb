@@ -30,7 +30,8 @@ module Name::Scopes
     scope :description_needed,
           -> { without_description.joins(:observations).distinct }
     scope :description_contains, lambda { |phrase|
-      joins(:descriptions).search_columns(description_notes_concats, phrase)
+      joins(:descriptions).
+        merge(NameDescription.search_content(phrase)).distinct
     }
     scope :with_description_in_project, lambda { |project|
       joins(descriptions: :project).
@@ -150,9 +151,19 @@ module Name::Scopes
     scope :without_comments,
           -> { where.not(id: with_comments) }
     scope :comments_contain, lambda { |phrase|
-      joins(:comments).
-        search_columns((Comment[:summary] + Comment[:comment]), phrase)
+      joins(:comments).merge(Comment.search_content(phrase))
     }
+    # A search of all searchable Name fields, concatenated.
+    scope :search_content,
+          ->(phrase) { search_columns(Name.name_searchable_columns, phrase) }
+    # A more comprehensive search of Name fields, plus descriptions/comments.
+    scope :search_content_and_associations, lambda { |phrase|
+      fields = Name.search_fields(phrase).map(&:id)
+      com = Name.comments_contain(phrase).map(&:id)
+      descs = Name.description_contains(phrase).map(&:id)
+      where(id: fields + com + descs).distinct
+    }
+
     scope :on_species_list, lambda { |species_list|
       joins(observations: :species_lists).
         merge(SpeciesListObservation.where(species_list: species_list))
@@ -227,11 +238,11 @@ module Name::Scopes
       all_ranks[a..b].map { |r| Name.ranks[r] } # values start at 1
     end
 
-    def description_notes_concats
-      fields = NameDescription::ALL_NOTE_FIELDS.dup
-      starting = NameDescription[fields.shift].coalesce("")
+    def name_searchable_columns
+      fields = self::SEARCHABLE_FIELDS.dup
+      starting = arel_table[fields.shift].coalesce("")
       fields.reduce(starting) do |result, field|
-        result + NameDescription[field].coalesce("")
+        result + arel_table[field].coalesce("")
       end
     end
   end

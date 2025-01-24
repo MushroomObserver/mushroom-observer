@@ -439,6 +439,10 @@ class Name < AbstractModel
   # Used by name/_form_name.rhtml
   attr_accessor :misspelling
 
+  SEARCHABLE_FIELDS = [
+    :text_name, :classification, :author, :citation, :notes
+  ].freeze
+
   # (Create should not be logged at all.  Update is already logged with more
   # sphistication than the autologger allows.  Merge will already log the
   # destruction as a merge and orphan the log.
