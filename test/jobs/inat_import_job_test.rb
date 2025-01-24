@@ -504,6 +504,34 @@ class InatImportJobTest < ActiveJob::TestCase
     end
   end
 
+  def test_import_already_imported
+    file_name = "xeromphalina_campanella_complex" # has Obs Field
+    mock_inat_response = File.read("test/inat/#{file_name}.txt")
+    # foo["results"].first["ofvs"].first["name"]
+    observation_fields = JSON.parse(mock_inat_response)["results"].first["ofvs"]
+    assert(
+      observation_fields.any? do |field|
+        field["name"] == "Mushroom Observer URL"
+      end,
+      "Test needs response with a 'Mushroom Observer URL' Observation field"
+    )
+    inat_import = create_inat_import(inat_response: mock_inat_response)
+
+    stub_inat_interactions(inat_import: inat_import,
+                           mock_inat_response: mock_inat_response)
+
+    Inat::PhotoImporter.stub(:new,
+                             stub_mo_photo_importer(mock_inat_response)) do
+      assert_no_difference(
+        "Observation.count",
+        "Should not import an iNat obs which already has " \
+        "'Mushroom Observer URL' Observation Field"
+      ) do
+        InatImportJob.perform_now(inat_import)
+      end
+    end
+  end
+
   def test_import_update_inat_username_if_job_succeeds
     user = users(:rolf)
     assert_empty(user.inat_username,
