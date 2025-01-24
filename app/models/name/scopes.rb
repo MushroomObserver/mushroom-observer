@@ -79,7 +79,7 @@ module Name::Scopes
       where(Name[:rank].in(rank_range(min, max)))
     }
     scope :with_rank_below,
-          ->(rank) {where(Name[:rank] < ranks[rank]) if rank }
+          ->(rank) { where(Name[:rank] < ranks[rank]) if rank }
     scope :with_rank_and_name_in_classification, lambda { |rank, text_name|
       where(Name[:classification].matches("%#{rank}: _#{text_name}_%"))
     }
@@ -120,7 +120,7 @@ module Name::Scopes
     scope :include_subtaxa_above_genus,
           ->(name) { include_subtaxa_of(name).with_rank_above_genus }
     scope :text_name_includes,
-          ->(text_name) {where(Name[:text_name].matches("%#{text_name}%")) }
+          ->(text_name) { where(Name[:text_name].matches("%#{text_name}%")) }
     scope :with_classification,
           -> { where(Name[:classification].not_blank) }
     scope :without_classification,
@@ -145,7 +145,7 @@ module Name::Scopes
     scope :without_notes,
           -> { where(Name[:notes].blank) }
     scope :notes_include,
-          ->(notes) {where(Name[:notes].matches("%#{notes}%")) }
+          ->(notes) { where(Name[:notes].matches("%#{notes}%")) }
     scope :with_comments,
           -> { joins(:comments).distinct }
     scope :without_comments,
