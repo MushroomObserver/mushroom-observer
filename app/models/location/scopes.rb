@@ -162,13 +162,5 @@ module Location::Scopes
 
   module ClassMethods
     # class methods here, `self` included
-
-    def searchable_columns
-      fields = self::SEARCHABLE_FIELDS.dup
-      starting = arel_table[fields.shift].coalesce("")
-      fields.reduce(starting) do |result, field|
-        result + arel_table[field].coalesce("")
-      end
-    end
   end
 end

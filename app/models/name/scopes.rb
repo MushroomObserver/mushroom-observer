@@ -235,13 +235,5 @@ module Name::Scopes
       a, b = b, a if a > b # reverse if wrong order
       all_ranks[a..b].map { |r| Name.ranks[r] } # values start at 1
     end
-
-    def searchable_columns
-      fields = self::SEARCHABLE_FIELDS.dup
-      starting = arel_table[fields.shift].coalesce("")
-      fields.reduce(starting) do |result, field|
-        result + arel_table[field].coalesce("")
-      end
-    end
   end
 end

@@ -239,5 +239,16 @@ module AbstractModel::Scopes
         table_columns.does_not_match(bad.clean_pattern)
       end
     end
+
+    # These should be defined in the model
+    def searchable_columns
+      return [] unless defined?(self::SEARCHABLE_FIELDS)
+
+      fields = self::SEARCHABLE_FIELDS.dup
+      starting = arel_table[fields.shift].coalesce("")
+      fields.reduce(starting) do |result, field|
+        result + arel_table[field].coalesce("")
+      end
+    end
   end
 end

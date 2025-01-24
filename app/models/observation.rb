@@ -229,6 +229,10 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # Automatically (but silently) log destruction.
   self.autolog_events = [:destroyed]
 
+  SEARCHABLE_FIELDS = [
+    :where, :name, :notes
+  ].freeze
+
   def self.build_observation(location, name, notes, date)
     return nil unless location
 
