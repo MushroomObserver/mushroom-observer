@@ -228,7 +228,7 @@ module AbstractModel::Scopes
           condition = condition.or(table_columns.matches(str.clean_pattern))
         end
         # Add a where condition for each good (equivalent to `AND`)
-        conditions << clause
+        conditions << condition
       end
       conditions
     end
