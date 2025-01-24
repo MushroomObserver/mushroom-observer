@@ -4,13 +4,13 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
   # This is using Concern so we can define the scopes in this included module.
   extend ActiveSupport::Concern
 
+  # NOTE: To improve Coveralls display, avoid one-line stabby lambda scopes.
+  # Two line stabby lambdas are OK, it's just the declaration line that will
+  # always show as covered.
   included do # rubocop:disable Metrics/BlockLength
-    # NOTE: To improve Coveralls display, avoid one-line stabby lambda scopes.
-    # Two line stabby lambdas are OK, it's just the declaration line that a
-    # always shows as covered.
+    # default ordering for index queries
     scope :index_order,
           -> { order(when: :desc, id: :desc) }
-
     # The order used on the home page
     scope :by_activity, lambda {
       where.not(rss_log: nil).reorder(log_updated_at: :desc, id: :desc)
