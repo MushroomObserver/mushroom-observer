@@ -340,9 +340,12 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
     scope :notes_contain,
           ->(phrase) { search_columns(Observation[:notes], phrase) }
-    # This is the "advanced search" scope that joins to :comments.
-    # Oddly the merge-or is faster than concatting the columns together.
-    scope :search_content, lambda { |phrase|
+    # Searches Observation fields :name, :where and :notes (currently)
+    scope :search_content,
+          ->(phrase) { search_columns(Observation.searchable_columns, phrase) }
+    # This is the "advanced search" scope that joins to :comments. Unexpectedly,
+    # merge/or is faster than concatting the Obs and Comment columns together.
+    scope :search_content_and_comments, lambda { |phrase|
       joins(:comments).merge(
         Observation.search_columns(Observation[:notes], phrase).
         or(Comment.search_content(phrase))
