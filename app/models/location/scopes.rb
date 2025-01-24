@@ -24,21 +24,22 @@ module Location::Scopes
           -> { where(Location[:notes].blank) }
     scope :notes_contain,
           ->(phrase) { search_columns(Location[:notes], phrase) }
+    scope :search_content,
+          ->(phrase) { search_columns(Location.searchable_columns, phrase) }
+    # More comprehensive search of Location fields, plus descriptions/comments.
+    scope :search_content_and_associations, lambda { |phrase|
+      fields = Location.search_content(phrase).map(&:id)
+      comments = Location.comments_contain(phrase).map(&:id)
+      descs = Location.description_contains(phrase).map(&:id)
+      where(id: fields + comments + descs).distinct
+    }
+
     scope :with_comments,
           -> { joins(:comments).distinct }
     scope :without_comments,
           -> { where.not(id: with_comments) }
     scope :comments_contain,
           ->(phrase) { joins(:comments).merge(Comment.search_content(phrase)) }
-    scope :search_content,
-          ->(phrase) { search_columns(Location.searchable_columns, phrase) }
-    # More comprehensive search of Location fields, plus descriptions/comments.
-    scope :search_content_and_associations, lambda { |phrase|
-      fields = Location.search_fields(phrase).map(&:id)
-      com = Location.comments_contain(phrase).map(&:id)
-      descs = Location.description_contains(phrase).map(&:id)
-      where(id: fields + com + descs).distinct
-    }
 
     scope :with_description,
           -> { where.not(description_id: nil) }

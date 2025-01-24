@@ -126,6 +126,7 @@ class NameDescription < Description
   ALL_NOTE_FIELDS = (
     [:classification] + EOL_NOTE_FIELDS + [:refs, :notes]
   ).freeze
+  SEARCHABLE_FIELDS = ALL_NOTE_FIELDS
 
   acts_as_versioned(
     if_changed: ALL_NOTE_FIELDS,

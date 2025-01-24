@@ -109,22 +109,24 @@ module Name::Scopes
           -> { where(Name[:notes].blank) }
     scope :notes_contain,
           ->(phrase) { search_columns(Name[:notes], phrase) }
+    # A search of all searchable Name fields, concatenated.
+    scope :search_content,
+          ->(phrase) { search_columns(Name.searchable_columns, phrase) }
+    # A more comprehensive search of Name fields, plus descriptions/comments.
+    scope :search_content_and_associations, lambda { |phrase|
+      fields = Name.search_content(phrase).map(&:id)
+      comments = Name.comments_contain(phrase).map(&:id)
+      descs = Name.description_contains(phrase).map(&:id)
+      where(id: fields + comments + descs).distinct
+    }
+
     scope :with_comments,
           -> { joins(:comments).distinct }
     scope :without_comments,
           -> { where.not(id: with_comments) }
     scope :comments_contain,
           ->(phrase) { joins(:comments).merge(Comment.search_content(phrase)) }
-    # A search of all searchable Name fields, concatenated.
-    scope :search_content,
-          ->(phrase) { search_columns(Name.searchable_columns, phrase) }
-    # A more comprehensive search of Name fields, plus descriptions/comments.
-    scope :search_content_and_associations, lambda { |phrase|
-      fields = Name.search_fields(phrase).map(&:id)
-      com = Name.comments_contain(phrase).map(&:id)
-      descs = Name.description_contains(phrase).map(&:id)
-      where(id: fields + com + descs).distinct
-    }
+
     scope :with_description,
           -> { with_correct_spelling.where.not(description_id: nil) }
     scope :without_description,
