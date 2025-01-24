@@ -1,37 +1,36 @@
 # frozen_string_literal: true
 
 module Name::Scopes
+  # This is using Concern so we can define the scopes in this included module.
   extend ActiveSupport::Concern
 
+  # NOTE: To improve Coveralls display, avoid one-line stabby lambda scopes.
+  # Two line stabby lambdas are OK, it's just the declaration line that will
+  # always show as covered.
   included do # rubocop:disable Metrics/BlockLength
-    scope :index_order, -> { order(sort_name: :asc, id: :desc) }
+    # default ordering for index queries
+    scope :index_order,
+          -> { order(sort_name: :asc, id: :desc) }
 
-    # NOTE: To improve Coveralls display, avoid one-line stabby lambda scopes
-    scope :of_lichens, -> { where(Name[:lifeform].matches("%lichen%")) }
-    scope :not_lichens, lambda {
-      where(Name[:lifeform].does_not_match("% lichen %"))
-    }
-    scope :deprecated, -> { where(deprecated: true) }
-    scope :not_deprecated, -> { where(deprecated: false) }
-    scope :with_description, lambda {
-      with_correct_spelling.where.not(description_id: nil)
-    }
-    scope :without_description, lambda {
-      with_correct_spelling.where(description_id: nil)
-    }
+    scope :of_lichens,
+          -> { where(Name[:lifeform].matches("%lichen%")) }
+    scope :not_lichens,
+          -> { where(Name[:lifeform].does_not_match("% lichen %")) }
+    scope :deprecated,
+          -> { where(deprecated: true) }
+    scope :not_deprecated,
+          -> { where(deprecated: false) }
+    scope :with_description,
+          -> { with_correct_spelling.where.not(description_id: nil) }
+    scope :without_description,
+          -> { with_correct_spelling.where(description_id: nil) }
     # Names needing descriptions
-    scope :description_needed, lambda {
-      without_description.joins(:observations).distinct
-      # in the template: order by most frequently used
-      # group(:name_id).reorder(Arel.star.count.desc)
-    }
+    # In the template, order scope `description_needed` by most frequently used:
+    #   Name.description_needed.group(:name_id).reorder(Arel.star.count.desc)
+    scope :description_needed,
+          -> { without_description.joins(:observations).distinct }
     scope :description_includes, lambda { |text|
-      fields = NameDescription::ALL_NOTE_FIELDS.dup
-      starting = NameDescription[fields.shift]
-      concats = fields.reduce(starting) do |result, field|
-        result + NameDescription[field]
-      end
-      joins(:descriptions).where(concats.matches("%#{text}%"))
+      joins(:descriptions).where(description_notes_concats.matches("%#{text}%"))
     }
     scope :with_description_in_project, lambda { |project|
       joins(descriptions: :project).
@@ -58,30 +57,29 @@ module Name::Scopes
     }
 
     ### Module Name::Spelling
-    scope :with_correct_spelling, -> { where(correct_spelling_id: nil) }
-    scope :with_incorrect_spelling, -> { where.not(correct_spelling_id: nil) }
-    scope :with_self_referential_misspelling, lambda {
-      where(Name[:correct_spelling_id].eq(Name[:id]))
-    }
-    scope :with_synonyms, -> { where.not(synonym_id: nil) }
-    scope :without_synonyms, -> { where(synonym_id: nil) }
-    scope :ok_for_export, -> { where(ok_for_export: true) }
+    scope :with_correct_spelling,
+          -> { where(correct_spelling_id: nil) }
+    scope :with_incorrect_spelling,
+          -> { where.not(correct_spelling_id: nil) }
+    scope :with_self_referential_misspelling,
+          -> { where(Name[:correct_spelling_id].eq(Name[:id])) }
+    scope :with_synonyms,
+          -> { where.not(synonym_id: nil) }
+    scope :without_synonyms,
+          -> { where(synonym_id: nil) }
+    scope :ok_for_export,
+          -> { where(ok_for_export: true) }
 
     ### Module Name::Taxonomy. Rank scopes take text values, e.g. "Genus"
-    scope :with_rank, ->(rank) { where(rank: ranks[rank]) if rank }
+    scope :with_rank,
+          ->(rank) { where(rank: ranks[rank]) if rank }
     scope :with_rank_between, lambda { |min, max = min|
       return with_rank(min) if min == max
 
-      all_ranks = Name.all_ranks
-      a = all_ranks.index(min) || 0
-      b = all_ranks.index(max) || (all_ranks.length - 1)
-      a, b = b, a if a > b # reverse if wrong order
-      range = all_ranks[a..b].map { |r| Name.ranks[r] } # values start at 1
-      where(Name[:rank].in(range))
+      where(Name[:rank].in(rank_range(min, max)))
     }
-    scope :with_rank_below, lambda { |rank|
-      where(Name[:rank] < ranks[rank]) if rank
-    }
+    scope :with_rank_below,
+          ->(rank) { where(Name[:rank] < ranks[rank]) if rank }
     scope :with_rank_and_name_in_classification, lambda { |rank, text_name|
       where(Name[:classification].matches("%#{rank}: _#{text_name}_%"))
     }
@@ -113,39 +111,45 @@ module Name::Scopes
       where(id: name.synonyms.map(&:id)).with_correct_spelling
     }
     # alias of `include_subtaxa_of`
-    scope :in_clade, ->(name) { include_subtaxa_of(name) }
+    scope :in_clade,
+          ->(name) { include_subtaxa_of(name) }
     scope :include_subtaxa_of, lambda { |name|
       names = [name] + subtaxa_of(name)
       where(id: names.map(&:id)).with_correct_spelling
     }
-    scope :include_subtaxa_above_genus, lambda { |name|
-      include_subtaxa_of(name).with_rank_above_genus
-    }
-    scope :text_name_includes, lambda { |text_name|
-      where(Name[:text_name].matches("%#{text_name}%"))
-    }
-    scope :with_classification, -> { where(Name[:classification].not_blank) }
-    scope :without_classification, -> { where(Name[:classification].blank) }
+    scope :include_subtaxa_above_genus,
+          ->(name) { include_subtaxa_of(name).with_rank_above_genus }
+    scope :text_name_includes,
+          ->(text_name) { where(Name[:text_name].matches("%#{text_name}%")) }
+    scope :with_classification,
+          -> { where(Name[:classification].not_blank) }
+    scope :without_classification,
+          -> { where(Name[:classification].blank) }
     scope :classification_includes, lambda { |classification|
       where(Name[:classification].matches("%#{classification}%"))
     }
-    scope :with_author, -> { where(Name[:author].not_blank) }
-    scope :without_author, -> { where(Name[:author].blank) }
-    scope :author_includes, lambda { |author|
-      where(Name[:author].matches("%#{author}%"))
-    }
-    scope :with_citation, -> { where(Name[:citation].not_blank) }
-    scope :without_citation, -> { where(Name[:citation].blank) }
-    scope :citation_includes, lambda { |citation|
-      where(Name[:citation].matches("%#{citation}%"))
-    }
-    scope :with_notes, -> { where(Name[:notes].not_blank) }
-    scope :without_notes, -> { where(Name[:notes].blank) }
-    scope :notes_include, lambda { |notes|
-      where(Name[:notes].matches("%#{notes}%"))
-    }
-    scope :with_comments, -> { joins(:comments).distinct }
-    scope :without_comments, -> { where.not(id: with_comments) }
+    scope :with_author,
+          -> { where(Name[:author].not_blank) }
+    scope :without_author,
+          -> { where(Name[:author].blank) }
+    scope :author_includes,
+          ->(author) { where(Name[:author].matches("%#{author}%")) }
+    scope :with_citation,
+          -> { where(Name[:citation].not_blank) }
+    scope :without_citation,
+          -> { where(Name[:citation].blank) }
+    scope :citation_includes,
+          ->(citation) { where(Name[:citation].matches("%#{citation}%")) }
+    scope :with_notes,
+          -> { where(Name[:notes].not_blank) }
+    scope :without_notes,
+          -> { where(Name[:notes].blank) }
+    scope :notes_include,
+          ->(notes) { where(Name[:notes].matches("%#{notes}%")) }
+    scope :with_comments,
+          -> { joins(:comments).distinct }
+    scope :without_comments,
+          -> { where.not(id: with_comments) }
     scope :comments_include, lambda { |summary|
       joins(:comments).where(Comment[:summary].matches("%#{summary}%")).distinct
     }
@@ -215,5 +219,20 @@ module Name::Scopes
 
   module ClassMethods
     # class methods here, `self` included
+    def rank_range(min, max)
+      all_ranks = Name.all_ranks
+      a = all_ranks.index(min) || 0
+      b = all_ranks.index(max) || (all_ranks.length - 1)
+      a, b = b, a if a > b # reverse if wrong order
+      all_ranks[a..b].map { |r| Name.ranks[r] } # values start at 1
+    end
+
+    def description_notes_concats
+      fields = NameDescription::ALL_NOTE_FIELDS.dup
+      starting = NameDescription[fields.shift].coalesce("")
+      fields.reduce(starting) do |result, field|
+        result + NameDescription[field].coalesce("")
+      end
+    end
   end
 end
