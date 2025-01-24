@@ -193,5 +193,51 @@ module AbstractModel::Scopes
     def month_only?(val)
       /^\d\d/.match?(val.to_s) && val.to_i <= 12
     end
+
+    # This stacks `where` conditions in a chain, on the class (self).
+    # The conditions should be Arel::Nodes, e.g. Observation[:id].eq(foo)
+    def send_where_chain(conditions)
+      conditions.reduce(self) { |result, cond| result.send(:where, cond) }
+    end
+
+    # Returns an array of AR conditions describing what a search is looking for.
+    #
+    # Each array member ["foo", "fah"] gets joined in a chain of AR "where"
+    # clauses by `send_where_chain`, producing this SQL:
+    #     WHERE (`table`.`col` LIKE '%foo%') AND (`table`.`col` LIKE '%fah%')"
+    # Nested subarrays [["foo", "fah"]] are joined here with OR.
+    #     WHERE (`table`.`col` LIKE '%foo%') OR (`table`.`col` LIKE '%fah%')"
+    # so they can be `AND`ed with the other members of the array.
+    #
+    # For example this search string (from QueryTest):
+    #   'foo OR bar OR "any*thing" -bad surprise! -"lost boys"'
+    # will produce this SQL:
+    #   "(x LIKE '%foo%' OR x LIKE '%bar%' OR x LIKE '%any%thing%') " \
+    #   "AND x LIKE '%surprise!%' AND x NOT LIKE '%bad%' " \
+    #   "AND x NOT LIKE '%lost boys%'"
+    #
+    def search_conditions_good(table_columns, goods)
+      conditions = []
+      goods.each do |good|
+        # break up phrases
+        parts = *good
+        # pop the first phrase off, to start the condition chain without an `OR`
+        condition = table_columns.matches(parts.shift.clean_pattern)
+        parts.each do |str|
+          # join the parts with `or`
+          condition = condition.or(table_columns.matches(str.clean_pattern))
+        end
+        # Add a where condition for each good (equivalent to `AND`)
+        conditions << condition
+      end
+      conditions
+    end
+
+    # Array of conditions for what the search wants to avoid. Joined with `AND`.
+    def search_conditions_bad(table_columns, bads)
+      bads.map do |bad|
+        table_columns.does_not_match(bad.clean_pattern)
+      end
+    end
   end
 end
