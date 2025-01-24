@@ -346,16 +346,18 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # This is the "advanced search" scope for "content". Unexpectedly,
     # merge/or is faster than concatting the Obs and Comment columns together.
     scope :search_notes_and_comments, lambda { |phrase|
-      joins(:comments).merge(
-        Observation.search_columns(Observation[:notes], phrase).
-        or(Comment.search_content(phrase))
-      )
-    }
-    # More comprehensive search of Observation fields, plus comments.
-    scope :search_content_and_associations, lambda { |phrase|
-      fields = Observation.search_content(phrase).map(&:id)
       comments = Observation.comments_contain(phrase).map(&:id)
-      where(id: fields + comments).distinct
+      notes_contain(phrase).distinct.
+        or(Observation.where(id: comments).distinct)
+    }
+    # More comprehensive search of Observation fields, Name.search_name,
+    # (plus comments ?).
+    scope :search_content_and_associations, lambda { |phrase|
+      ids = Name.search_name_contains(phrase).
+            includes(:observations).map(&:observations).flatten.uniq
+      ids += Observation.search_content(phrase).map(&:id)
+      # ids += Observation.comments_contain(phrase).map(&:id)
+      where(id: ids).distinct
     }
     scope :with_comments,
           -> { joins(:comments).distinct }

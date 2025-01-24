@@ -88,7 +88,8 @@ class Query::Observations < Query::Base
   def search_fields
     "CONCAT(" \
       "names.search_name," \
-      "observations.where" \
+      "observations.where," \
+      "observations.notes" \
       ")"
   end
 
