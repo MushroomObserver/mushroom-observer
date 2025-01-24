@@ -343,14 +343,27 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # Searches Observation fields :name, :where and :notes (currently)
     scope :search_content,
           ->(phrase) { search_columns(Observation.searchable_columns, phrase) }
-    # This is the "advanced search" scope that joins to :comments. Unexpectedly,
+    # This is the "advanced search" scope for "content". Unexpectedly,
     # merge/or is faster than concatting the Obs and Comment columns together.
-    scope :search_content_and_comments, lambda { |phrase|
+    scope :search_notes_and_comments, lambda { |phrase|
       joins(:comments).merge(
         Observation.search_columns(Observation[:notes], phrase).
         or(Comment.search_content(phrase))
       )
     }
+    # More comprehensive search of Observation fields, plus comments.
+    scope :search_content_and_associations, lambda { |phrase|
+      fields = Observation.search_content(phrase).map(&:id)
+      comments = Observation.comments_contain(phrase).map(&:id)
+      where(id: fields + comments).distinct
+    }
+    scope :with_comments,
+          -> { joins(:comments).distinct }
+    scope :without_comments,
+          -> { where.not(id: Observation.with_comments) }
+    scope :comments_contain,
+          ->(phrase) { joins(:comments).merge(Comment.search_content(phrase)) }
+
     scope :with_specimen,
           -> { where(specimen: true) }
     scope :without_specimen,
@@ -363,14 +376,6 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # confidence between min & max, in percentages
     scope :confidence, lambda { |min, max = min|
       where(vote_cache: (min.to_f / (100 / 3))..(max.to_f / (100 / 3)))
-    }
-    scope :with_comments,
-          -> { joins(:comments).distinct }
-    scope :without_comments,
-          -> { where.not(id: Observation.with_comments) }
-    scope :comments_contain, lambda { |phrase|
-      joins(:comments).
-        search_columns((Comment[:summary] + Comment[:comment]), phrase).distinct
     }
     scope :for_project, lambda { |project|
       joins(:project_observations).
