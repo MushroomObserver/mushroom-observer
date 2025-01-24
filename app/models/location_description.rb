@@ -50,6 +50,8 @@
 class LocationDescription < Description
   require "acts_as_versioned"
 
+  include Description::Scopes
+
   # Do not change the integer associated with a value
   enum :source_type,
        { public: 1, foreign: 2, project: 3, source: 4, user: 5 },
