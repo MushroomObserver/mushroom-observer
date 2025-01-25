@@ -50,14 +50,15 @@ class Inat
         iconic_taxa: ICONIC_TAXA,
         without_field: "Mushroom Observer URL"
       }.merge(args)
-      query = URI.encode_www_form(query_args)
 
       # ::Inat.new(operation: query, token: @inat_import.token).body
       # Nimmo 2024-06-19 jdc. Moving the request from the inat class to here.
       # RestClient::Request.execute wasn't available in the class
       headers = { authorization: "Bearer #{@importer.token}", accept: :json }
       ::RestClient::Request.execute(
-        method: :get, url: "#{API_BASE}/observations?#{query}", headers: headers
+        method: :get,
+        url: "#{API_BASE}/observations?#{query_args.to_query}",
+        headers: headers
       )
     rescue ::RestClient::ExceptionWithResponse => e
       @importer.add_response_error(e.response)

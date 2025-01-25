@@ -793,21 +793,21 @@ class InatImportJobTest < ActiveJob::TestCase
 
   def stub_inat_api_request(inat_import:, mock_inat_response:, id_above: 0,
                             superimporter: false)
-    # Params must be in same order as in the controller
-    # Limit search to observations by the user, unless superimporter
-    # omit trailing "=" since the controller omits it (via `merge`)
-    # user_login must be last so that its trailing `=` can be chomped
-    params = <<~PARAMS.delete("\n").chomp("=")
-      ?iconic_taxa=#{ICONIC_TAXA}
-      &id=#{inat_import.inat_ids}
-      &id_above=#{id_above}
-      &per_page=200
-      &only_id=false
-      &order=asc&order_by=id
-      &without_field=Mushroom+Observer+URL
-      &user_login=#{inat_import.inat_username unless superimporter}
-    PARAMS
-    add_stub(stub_request(:get, "#{API_BASE}/observations#{params}").
+    query_args = {
+      iconic_taxa: ICONIC_TAXA,
+      id: inat_import.inat_ids,
+      id_above: id_above,
+      per_page: 200,
+      only_id: false,
+      order: "asc",
+      order_by: "id",
+      without_field: "Mushroom Observer URL",
+      # Limit results to observations by the user, unless superimporter
+      user_login: (inat_import.inat_username unless superimporter)
+    }
+
+    add_stub(stub_request(:get,
+                          "#{API_BASE}/observations?#{query_args.to_query}").
       with(headers:
     { "Accept" => "application/json",
       "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
