@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Query::ContentFilter
+class Query::Filter
   class WithSpecimen < BooleanFilter
     def initialize
       super(

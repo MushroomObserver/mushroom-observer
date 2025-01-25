@@ -2,19 +2,19 @@
 
 require("test_helper")
 
-# tests of ContentFilter class to be included in QueryTest
-module Query::ContentFiltersTest
+# tests of Filter class to be included in QueryTest
+module Query::FiltersTest
   def test_filters
     assert_equal([:with_images, :with_specimen, :lichen, :region, :clade],
-                 Query::ContentFilter.all.map(&:sym))
+                 Query::Filter.all.map(&:sym))
     assert_equal([:region],
-                 Query::ContentFilter.by_model(Location).map(&:sym))
+                 Query::Filter.by_model(Location).map(&:sym))
     assert_equal([:lichen, :clade],
-                 Query::ContentFilter.by_model(Name).map(&:sym))
+                 Query::Filter.by_model(Name).map(&:sym))
   end
 
   def test_find
-    fltr = Query::ContentFilter.find(:with_images)
+    fltr = Query::Filter.find(:with_images)
     assert_not_nil(fltr)
     assert_equal(:with_images, fltr.sym)
   end

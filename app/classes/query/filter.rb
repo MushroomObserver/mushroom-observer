@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 #
-#  = ContentFilter
+#  = Filter
 #
 #  This class describes a set of content-filtering parameters which can be
 #  applied to Query's.
@@ -31,7 +31,7 @@
 #    (search for "filters_with_images")
 #  * Supplement app/classes/query/initializers/xxx_filters.rb
 #
-class Query::ContentFilter
+class Query::Filter
   attr_accessor :sym, :models, :name
 
   def initialize(opts)

@@ -5,7 +5,7 @@
   <p>
 </div>
 
-<% Query::ContentFilter.all.each do |filter| %>
+<% Query::Filter.all.each do |filter| %>
 
 <% if filter.type == :boolean && filter.prefs_vals.one? %>
 <%= render(partial: "account/preferences/filters/checkbox",

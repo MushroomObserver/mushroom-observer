@@ -9,7 +9,7 @@
     <p>
   </div>
 
-  <% Query::ContentFilter.all.each do |filter| %>
+  <% Query::Filter.all.each do |filter| %>
   <% models = filter.models.map { |m| m.name.underscore }.join(" ") %>
 
   <%= tag.div(

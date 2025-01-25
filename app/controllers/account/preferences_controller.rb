@@ -98,7 +98,7 @@ module Account
     end
 
     def update_content_filter(pref, val)
-      filter = Query::ContentFilter.find(pref)
+      filter = Query::Filter.find(pref)
       @user.content_filter[pref] =
         if filter.type == :boolean && filter.prefs_vals.one?
           val == "1" ? filter.prefs_vals.first : filter.off_val
@@ -167,7 +167,7 @@ module Account
     end
 
     def content_filter_types
-      Query::ContentFilter.all.map do |fltr|
+      Query::Filter.all.map do |fltr|
         [fltr.sym, :content_filter]
       end
     end
