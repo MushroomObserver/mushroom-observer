@@ -24,32 +24,6 @@ class MockPhotoImporter
   end
 end
 
-# mock the response from calling the iNat API for a given filename
-# returns 0 results if the mocked iNat obs
-# has a `Mushroom Observer URL` Observation Field
-# (which means it was already imported into MO)
-class MockInatResponder
-  attr_reader :filename
-
-  def initialize(filename)
-    @filename = filename
-  end
-
-  def response
-    unfiltered_response = JSON.parse(File.read("test/inat/#{filename}.txt"))
-    observation_fields = unfiltered_response["results"].first["ofvs"]
-    mo_url = observation_fields.find do |field|
-      field["name"] == "Mushroom Observer URL"
-    end
-    @response =
-      if mo_url.empty?
-        unfiltered_response
-      else
-        "{\"total_results\":0,\"page\":1,\"per_page\":200,\"results\":[]}"
-      end
-  end
-end
-
 class InatImportJobTest < ActiveJob::TestCase
   SITE = InatImportsController::SITE
   REDIRECT_URI = InatImportsController::REDIRECT_URI
@@ -528,18 +502,6 @@ class InatImportJobTest < ActiveJob::TestCase
         InatImportJob.perform_now(inat_import)
       end
     end
-  end
-
-  def test_import_manual_duplicate
-    # iNat obs manually duplicated in MO,
-    # with an iNat `Mushroom Observer URL` Observation Field
-    file_name = "manual_duplicate"
-    mock_inat_response = MockInatResponder.new(file_name).response
-    results = JSON.parse(mock_inat_response, symbolize_names: true)
-
-    assert_equal(0, results[:total_results],
-                 "iNat API request should return 0 results for an iNat obs " \
-                 "which has a `Mushroom Observer URL` observation field")
   end
 
   def test_import_update_inat_username_if_job_succeeds
