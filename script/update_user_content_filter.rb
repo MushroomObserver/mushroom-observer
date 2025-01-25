@@ -17,7 +17,7 @@ abort(<<HELP) if ARGV.length != 1
   DESCRIPTION::
 
     Updates the keys of the serialized hash in `user`.`content_filter`
-    to match the new keys in the `ContentFilter` class.
+    to match the new keys in the `Query::ContentFilter` class.
 
   PARAMETERS::
 

@@ -31,7 +31,7 @@
 #    (search for "filters_with_images")
 #  * Supplement app/classes/query/initializers/xxx_filters.rb
 #
-class ContentFilter
+class Query::ContentFilter
   attr_accessor :sym, :models, :name
 
   def initialize(opts)

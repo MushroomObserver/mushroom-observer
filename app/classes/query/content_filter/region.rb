@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ContentFilter
+class Query::ContentFilter
   # Content filter to restrict observations and locations to just one region.
   class Region < StringFilter
     def initialize

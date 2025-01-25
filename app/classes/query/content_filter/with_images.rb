@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ContentFilter
+class Query::ContentFilter
   class WithImages < BooleanFilter
     def initialize
       super(
