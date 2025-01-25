@@ -2,9 +2,11 @@
 
 require("test_helper")
 
-require("auto_complete")
+require("autocomplete")
 
-class AutoCompleteMock < AutoComplete::ByString
+# These empty classes and methods are required for the test to work.
+# rubocop:disable Lint/UselessMethodDefinition
+class AutocompleteMock < Autocomplete::ByString
   attr_accessor :rough_matches, :limit
 
   def truncate_matches
@@ -16,7 +18,7 @@ class AutoCompleteMock < AutoComplete::ByString
   end
 end
 
-class AutoComplete::ForMock < AutoComplete::ByWord
+class Autocomplete::ForMock < Autocomplete::ByWord
   attr_accessor :rough_matches, :limit
 
   def truncate_matches
@@ -27,59 +29,60 @@ class AutoComplete::ForMock < AutoComplete::ByWord
     super
   end
 end
+# rubocop:enable Lint/UselessMethodDefinition
 
-class AutoCompleteTest < UnitTestCase
+class AutocompleteTest < UnitTestCase
   def test_subclass
-    assert_equal("AutoComplete::ForName", AutoComplete.subclass("name").name)
-    assert_equal("AutoComplete::ForMock",
-                 AutoComplete.subclass("mock").name)
-    assert_raise(RuntimeError) { AutoComplete.subclass("bogus") }
+    assert_equal("Autocomplete::ForName", Autocomplete.subclass("name").name)
+    assert_equal("Autocomplete::ForMock",
+                 Autocomplete.subclass("mock").name)
+    assert_raise(RuntimeError) { Autocomplete.subclass("bogus") }
   end
 
   def test_typical_use
-    auto = AutoComplete::ForName.new(string: "Agaricus")
+    auto = Autocomplete::ForName.new(string: "Agaricus")
     results = auto.matching_records
     assert_equal("A", results.first[:name])
     assert(results.pluck(:name).include?("Agaricus"))
     assert(results.pluck(:name).include?("Agaricus campestris"))
 
-    auto = AutoComplete::ForUser.new(string: "Rolf Singer")
+    auto = Autocomplete::ForUser.new(string: "Rolf Singer")
     results = auto.matching_records
     assert(results.pluck(:name).include?("Rolf Singer (rolf)"))
   end
 
   def test_typical_use_with_exact_match
-    auto = AutoComplete::ForName.new(string: "Agaricus campestris")
+    auto = Autocomplete::ForName.new(string: "Agaricus campestris")
     results = auto.first_matching_record
     assert_equal("Agaricus campestris", results.first[:name])
 
-    auto = AutoComplete::ForLocation.new(string: "Gualala, California, USA")
+    auto = Autocomplete::ForLocation.new(string: "Gualala, California, USA")
     results = auto.first_matching_record
     assert_equal("Gualala, California, USA", results.first[:name])
 
-    auto = AutoComplete::ForSpeciesList.new(string: "Another Species List")
+    auto = Autocomplete::ForSpeciesList.new(string: "Another Species List")
     results = auto.first_matching_record
     assert_equal("Another Species List", results.first[:name])
 
-    auto = AutoComplete::ForProject.new(string: "Bolete Project")
+    auto = Autocomplete::ForProject.new(string: "Bolete Project")
     results = auto.first_matching_record
     assert_equal("Bolete Project", results.first[:name])
 
     # Result strings include the code for the herbarium.
-    auto = AutoComplete::ForHerbarium.new(
+    auto = Autocomplete::ForHerbarium.new(
       string: "The New York Botanical Garden"
     )
     results = auto.first_matching_record
     assert_equal("NY - The New York Botanical Garden", results.first[:name])
 
-    auto = AutoComplete::ForUser.new(string: "Rolf Singer")
+    auto = Autocomplete::ForUser.new(string: "Rolf Singer")
     results = auto.first_matching_record
     assert_equal("Rolf Singer (rolf)", results.first[:name])
   end
 
   def test_truncate
     list = %w[b0 b1 b2 b3 b4 b5 b6 b7 b8 b9].map { |str| { name: str, id: 0 } }
-    auto = AutoCompleteMock.new(string: "blah")
+    auto = AutocompleteMock.new(string: "blah")
     auto.matches = list
     assert_equal(list, auto.matches)
 
@@ -101,7 +104,7 @@ class AutoCompleteTest < UnitTestCase
   def test_multiline_matches
     list1 = [" line one \n line two\n  ", "good match", "  padded match  "]
     list2 = ["line one", "good match", "padded match"]
-    auto = AutoCompleteMock.new(string: "blah")
+    auto = AutocompleteMock.new(string: "blah")
     auto.matches = list1.map { |str| { name: str, id: 0 } }
     assert_equal(list1.map { |str| { name: str, id: 0 } }, auto.matches)
     auto.clean_matches
@@ -112,7 +115,7 @@ class AutoCompleteTest < UnitTestCase
     pattern = "one two three"
     @list = string_list
     string_examples.each do |limit, expected_matches, expected_string|
-      auto = AutoCompleteMock.new(string: pattern)
+      auto = AutocompleteMock.new(string: pattern)
       auto.matches = @list.sort_by { rand }.map { |str| { name: str, id: 0 } }
       auto.limit = limit
       assert_refines_correctly(auto, expected_matches, expected_string)
@@ -123,7 +126,7 @@ class AutoCompleteTest < UnitTestCase
     pattern = "one two shree"
     @list = word_list
     word_examples.each do |limit, expected_matches, expected_string|
-      auto = AutoComplete::ForMock.new(string: pattern)
+      auto = Autocomplete::ForMock.new(string: pattern)
       auto.matches = @list.sort_by { rand }.map { |str| { name: str, id: 0 } }
       auto.limit = limit
       assert_refines_correctly(auto, expected_matches, expected_string)

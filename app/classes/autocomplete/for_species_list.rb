@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class AutoComplete::ForSpeciesList < AutoComplete::ByWord
+class Autocomplete::ForSpeciesList < Autocomplete::ByWord
   def rough_matches(letter)
     lists = SpeciesList.select(:title, :id).distinct.
             where(SpeciesList[:title].matches("#{letter}%").

@@ -7,7 +7,7 @@
 # Or would this scatter the code?
 # Thinking the scope could be useful, or it could use this class.
 #
-class AutoComplete::ForLocation < AutoComplete::ByWord
+class Autocomplete::ForLocation < Autocomplete::ByWord
   attr_accessor :reverse
 
   def initialize(params)

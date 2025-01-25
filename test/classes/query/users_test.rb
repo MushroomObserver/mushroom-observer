@@ -1,0 +1,57 @@
+# frozen_string_literal: true
+
+require("test_helper")
+
+# tests of Query::Users class to be included in QueryTest
+module Query::UsersTest
+  def test_user_all_by_name
+    expects = User.order(name: :asc, id: :desc).to_a
+    assert_query(expects, :User)
+  end
+
+  def test_user_all_by_login
+    expects = User.order(login: :asc, id: :desc).to_a
+    assert_query(expects, :User, by: :login)
+  end
+
+  def test_user_in_set
+    assert_query([rolf.id, mary.id, junk.id],
+                 :User, ids: [junk.id, mary.id, rolf.id], by: :reverse_name)
+  end
+
+  def test_user_pattern_search_nonexistent
+    assert_query([],
+                 :User, pattern: "nonexistent pattern")
+  end
+
+  def test_user_pattern_search_login
+    # in login
+    expects = user_pattern_search(users(:spammer).login)
+    assert_query(expects, :User, pattern: users(:spammer).login)
+  end
+
+  def test_user_pattern_search_name
+    # in name
+    expects = user_pattern_search(users(:mary).name)
+    assert_query(expects, :User, pattern: users(:mary).name)
+  end
+
+  def test_user_pattern_search_blank
+    assert_query(User.order(name: :asc, id: :desc).to_a,
+                 :User, pattern: "")
+  end
+
+  def test_user_pattern_search_sorted_by_location
+    # sorted by location should include Users without location
+    # (Differs from searches on other Classes or by other sort orders)
+    expects = User.left_outer_joins(:location).
+              order(Location[:name].asc, User[:id].desc).uniq
+    assert_query(expects, :User, pattern: "", by: "location")
+  end
+
+  def user_pattern_search(pattern)
+    User.where(User[:login].matches("%#{pattern}%").
+               or(User[:name].matches("%#{pattern}%"))).
+      order(name: :asc, id: :desc).uniq
+  end
+end
