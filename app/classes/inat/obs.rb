@@ -296,7 +296,7 @@ class Inat
 
     def to_rad(degrees) = degrees * Math::PI / 180.0
 
-    # copied from AutoComplete::ForLocationContaining
+    # copied from Autocomplete::ForLocationContaining
     def location_box(loc)
       Mappable::Box.new(north: loc[:north], south: loc[:south],
                         east: loc[:east], west: loc[:west])

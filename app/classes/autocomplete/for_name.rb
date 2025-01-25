@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class AutoComplete::ForName < AutoComplete::ByString
+class Autocomplete::ForName < Autocomplete::ByString
   def rough_matches(letter)
     names = Name.with_correct_spelling.
             select(:text_name, :id, :deprecated).distinct.
