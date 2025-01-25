@@ -19,8 +19,8 @@ module Query::Scopes::Observations
   end
 
   def initialize_obs_date_parameter(param_name = :date)
+    add_join_to_observations
     add_date_condition(Observation[:when], params[param_name])
-    add_join_to_observations_if_necessary
   end
 
   def initialize_project_lists_parameter
@@ -37,7 +37,7 @@ module Query::Scopes::Observations
 
     # add_join(:field_slips)
     @scopes = @scopes.joins(:field_slips)
-    add_join_to_observations_if_necessary
+    add_join_to_observations
     add_exact_match_condition(
       # "field_slips.code",
       FieldSlip[:code],
@@ -57,7 +57,7 @@ module Query::Scopes::Observations
   end
 
   def initialize_is_collection_location_parameter
-    add_join_to_observations_if_necessary
+    add_join_to_observations
     add_boolean_column_condition(
       # "observations.is_collection_location IS TRUE",
       # "observations.is_collection_location IS FALSE",
@@ -67,7 +67,7 @@ module Query::Scopes::Observations
   end
 
   def initialize_with_public_lat_lng_parameter
-    add_join_to_observations_if_necessary
+    add_join_to_observations
     add_boolean_condition(
       # "observations.lat IS NOT NULL AND observations.gps_hidden IS FALSE",
       # "observations.lat IS NULL OR observations.gps_hidden IS TRUE",
@@ -78,7 +78,7 @@ module Query::Scopes::Observations
   end
 
   def initialize_with_images_parameter
-    add_join_to_observations_if_necessary
+    add_join_to_observations
     add_presence_condition(
       # "observations.thumb_image_id IS NOT NULL",
       # "observations.thumb_image_id IS NULL",
@@ -88,7 +88,7 @@ module Query::Scopes::Observations
   end
 
   def initialize_with_specimen_parameter
-    add_join_to_observations_if_necessary
+    add_join_to_observations
     add_boolean_column_condition(
       # "observations.specimen IS TRUE",
       # "observations.specimen IS FALSE",
@@ -115,9 +115,8 @@ module Query::Scopes::Observations
   def add_needs_naming_condition
     return unless params[:needs_naming]
 
+    add_join_to_observations
     user = User.current_id
-    # 15x faster to use this AR scope to assemble the IDs vs using
-    # SQL SELECT DISTINCT
     @scopes = @scopes.where(
       Observation.needs_naming_and_not_reviewed_by_user(user)
     )
@@ -170,12 +169,12 @@ module Query::Scopes::Observations
   end
 
   def initialize_confidence_parameter
-    add_join_to_observations_if_necessary
+    add_join_to_observations
     add_range_condition(Observation[:vote_cache], params[:confidence])
   end
 
   def initialize_obs_with_notes_parameter(param_name = :with_notes)
-    add_join_to_observations_if_necessary
+    add_join_to_observations
     add_boolean_condition(
       # "observations.notes != #{escape(Observation.no_notes_persisted)}",
       # "observations.notes  = #{escape(Observation.no_notes_persisted)}",
@@ -188,6 +187,7 @@ module Query::Scopes::Observations
   def add_with_notes_fields_condition(fields, joins)
     return if fields.empty?
 
+    add_join_to_observations
     @scopes = if model == Observation
                 @scopes.with_notes_fields(fields)
               else
@@ -201,6 +201,7 @@ module Query::Scopes::Observations
     add_observation_comments_search_condition
     return if model == Observation
 
+    add_join_to_observations
     add_search_condition(Observation[:where], params[:user_where])
   end
 
@@ -211,23 +212,6 @@ module Query::Scopes::Observations
       params[:comments_has],
       joins_through_observations_if_necessary(:comments)
     )
-  end
-
-  # Adds a join to observations to the scope
-  def add_join_to_observations_if_necessary
-    return if model == Observation
-
-    @scopes = @scopes.joins(:observations)
-  end
-
-  # Provides joins parameter for another helper, with either a simple table join
-  # or a join through observations to the table
-  def joins_through_observations_if_necessary(table)
-    if model == Observation
-      table
-    else
-      { observations: table }
-    end
   end
 
   def params_out_to_with_observations_params(pargs)

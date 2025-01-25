@@ -89,7 +89,7 @@ module Query::Scopes::Names
     initialize_with_author_parameter
     initialize_with_citation_parameter
     initialize_with_classification_parameter
-    add_join(:observations) if params[:with_observations]
+    @scopes = @scopes.joins(:observations) if params[:with_observations]
   end
 
   def initialize_with_synonyms_parameter
@@ -139,8 +139,7 @@ module Query::Scopes::Names
   def add_name_advanced_search_conditions
     return if advanced_search_params.all? { |key| params[key].blank? }
 
-    # add_join(:observations) if params[:content].present?
-    @scopes = @scopes.joins(:observations) if params[:content].present?
+    add_join_to_observations if params[:content].present?
     initialize_advanced_search
   end
 

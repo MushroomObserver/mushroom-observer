@@ -49,4 +49,21 @@ module Query::Scopes::Joining
                       end
     @scopes = @scopes.joins(content_sources)
   end
+
+  # Adds a join to observations to the scope, if necessary
+  def add_join_to_observations
+    return if model == Observation
+
+    @scopes = @scopes.joins(:observations)
+  end
+
+  # Provides joins parameter for another helper, with either a simple table join
+  # or a join through observations to the table
+  def joins_through_observations_if_necessary(table)
+    if model == Observation
+      table
+    else
+      { observations: table }
+    end
+  end
 end

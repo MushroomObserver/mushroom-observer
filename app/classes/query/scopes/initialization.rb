@@ -42,7 +42,9 @@ module Query::Scopes::Initialization
   # Combine args into one parenthesized condition by ANDing them.
   def and_clause(*args)
     if args.length > 1
-      "(#{args.join(" AND ")})"
+      # "(#{args.join(" AND ")})"
+      starting = args.shift
+      args.reduce(starting) { |result, arg| result.and(arg) }
     else
       args.first
     end
@@ -51,7 +53,9 @@ module Query::Scopes::Initialization
   # Combine args into one parenthesized condition by ORing them.
   def or_clause(*args)
     if args.length > 1
-      "(#{args.join(" OR ")})"
+      # "(#{args.join(" OR ")})"
+      starting = args.shift
+      args.reduce(starting) { |result, arg| result.or(arg) }
     else
       args.first
     end
@@ -70,21 +74,21 @@ module Query::Scopes::Initialization
   #   add_join(:names, :descriptions)
   #     => join << {:observations => {:names => :descriptions}}
   #
-  def add_join(*)
-    @join.add_leaf(*)
-  end
+  # def add_join(*)
+  #   @join.add_leaf(*)
+  # end
 
   # Same as add_join but can provide chain of more than two tables.
-  def add_joins(*args)
-    if args.length == 1
-      @join.add_leaf(args[0])
-    elsif args.length > 1
-      while args.length > 1
-        @join.add_leaf(args[0], args[1])
-        args.shift
-      end
-    end
-  end
+  # def add_joins(*args)
+  #   if args.length == 1
+  #     @join.add_leaf(args[0])
+  #   elsif args.length > 1
+  #     while args.length > 1
+  #       @join.add_leaf(args[0], args[1])
+  #       args.shift
+  #     end
+  #   end
+  # end
 
   # Safely add to :where in +args+. Dups <tt>args[:where]</tt>,
   # casts it into an Array, and returns the new Array.
