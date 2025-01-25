@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Autocompleter for location names that encompass a given lat/lng.
-class AutoComplete::ForLocationContaining < AutoComplete::ByWord
+class Autocomplete::ForLocationContaining < Autocomplete::ByWord
   attr_accessor :reverse, :lat, :lng
 
   # include Mappable::BoxMethods

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # This requires Stimulus delaying the fetch until we have a complete word.
-class AutoComplete::ForRegion < AutoComplete::ByWord
+class Autocomplete::ForRegion < Autocomplete::ByWord
   attr_accessor :reverse
 
   def initialize(params)

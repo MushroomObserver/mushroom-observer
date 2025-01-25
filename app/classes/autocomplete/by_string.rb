@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class AutoComplete::ByString < AutoComplete
+class Autocomplete::ByString < Autocomplete
   # Find minimal string whose matches are within the limit.  This is designed
   # to reduce the number of AJAX requests required if the user backspaces from
   # the end of the text field string.

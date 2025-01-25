@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Note this gets a params[:user_id] but we're ignoring it here
-class AutoComplete::ForHerbarium < AutoComplete::ByWord
+class Autocomplete::ForHerbarium < Autocomplete::ByWord
   def rough_matches(letter)
     herbaria =
       Herbarium.select(:code, :name, :id).distinct.

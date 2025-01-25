@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
 #
-#  = AutoComplete base class
+#  = Autocomplete base class
 #
-#    results = AutoCompleteName.new(string: 'Agaricus') # ...or...
-#    results = AutoComplete.subclass('name').new(string: 'Agaricus')
+#    results = AutocompleteName.new(string: 'Agaricus') # ...or...
+#    results = Autocomplete.subclass('name').new(string: 'Agaricus')
 #    render(json: ActiveSupport::JSON.encode(results)
 #
 ################################################################################
 
-class AutoComplete
+class Autocomplete
   attr_accessor :string, :matches, :all, :whole
 
   PUNCTUATION = '[ -\x2F\x3A-\x40\x5B-\x60\x7B-\x7F]'
@@ -19,7 +19,7 @@ class AutoComplete
   end
 
   def self.subclass(type)
-    "AutoComplete::For#{type.camelize}".constantize
+    "Autocomplete::For#{type.camelize}".constantize
   rescue StandardError
     raise("Invalid auto-complete type: #{type.inspect}")
   end

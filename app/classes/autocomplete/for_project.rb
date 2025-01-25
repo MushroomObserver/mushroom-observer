@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class AutoComplete::ForProject < AutoComplete::ByWord
+class Autocomplete::ForProject < Autocomplete::ByWord
   def rough_matches(letter)
     projects = Project.select(:title, :id).distinct.
                where(Project[:title].matches("#{letter}%").

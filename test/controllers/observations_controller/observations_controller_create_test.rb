@@ -244,7 +244,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     generic_construct_observation(
       { observation: { specimen: "1" },
         herbarium_record: {
-          herbarium_name: herbaria(:nybg_herbarium).auto_complete_name,
+          herbarium_name: herbaria(:nybg_herbarium).autocomplete_name,
           accession_number: "1234"
         },
         naming: { name: "Coprinus comatus" } },
@@ -259,7 +259,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     generic_construct_observation(
       { observation: { specimen: "1" },
         herbarium_record: {
-          herbarium_name: herbaria(:nybg_herbarium).auto_complete_name,
+          herbarium_name: herbaria(:nybg_herbarium).autocomplete_name,
           accession_number: "1234"
         },
         naming: { name: "Cortinarius sp." } },
@@ -275,7 +275,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     generic_construct_observation(
       { observation: { specimen: "1" },
         herbarium_record: {
-          herbarium_name: herbaria(:nybg_herbarium).auto_complete_name,
+          herbarium_name: herbaria(:nybg_herbarium).autocomplete_name,
           accession_number: ""
         },
         naming: { name: name } },
@@ -289,7 +289,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
   def test_create_observation_with_herbarium_but_no_specimen
     generic_construct_observation(
       { herbarium_record: {
-          herbarium_name: herbaria(:nybg_herbarium).auto_complete_name,
+          herbarium_name: herbaria(:nybg_herbarium).autocomplete_name,
           accession_number: "1234"
         },
         naming: { name: "Coprinus comatus" } },
