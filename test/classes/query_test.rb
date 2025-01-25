@@ -1159,7 +1159,7 @@ class QueryTest < UnitTestCase
   include Query::SequencesTest
   include Query::SpeciesListsTest
   include Query::UsersTest
-  include Query::ContentFiltersTest
+  include Query::FiltersTest
 
   ##############################################################################
   #

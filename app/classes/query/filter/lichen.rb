@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ContentFilter
+class Query::Filter
   # Content filter specifically to filter out or just show lichens.
   class Lichen < BooleanFilter
     def initialize

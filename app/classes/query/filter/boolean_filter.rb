@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-class ContentFilter
-  class BooleanFilter < ContentFilter
+class Query::Filter
+  class BooleanFilter < Query::Filter
     attr_accessor :on_vals, :prefs_vals, :off_val
 
     def type

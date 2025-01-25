@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ContentFilter
+class Query::Filter
   # Content filter to restrict observations and names to a taxonomic clade.
   class Clade < StringFilter
     def initialize

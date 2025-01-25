@@ -2,8 +2,23 @@
 
 require("test_helper")
 
-# tests of ContentFilter class to be included in QueryTest
-module Query::ContentFiltersTest
+# tests of Filter class to be included in QueryTest
+module Query::FiltersTest
+  def test_filters
+    assert_equal([:with_images, :with_specimen, :lichen, :region, :clade],
+                 Query::Filter.all.map(&:sym))
+    assert_equal([:region],
+                 Query::Filter.by_model(Location).map(&:sym))
+    assert_equal([:lichen, :clade],
+                 Query::Filter.by_model(Name).map(&:sym))
+  end
+
+  def test_find
+    fltr = Query::Filter.find(:with_images)
+    assert_not_nil(fltr)
+    assert_equal(:with_images, fltr.sym)
+  end
+
   def test_filtering_content_with_images
     expects = Observation.where.not(thumb_image_id: nil).index_order.uniq
     assert_query(expects, :Observation, with_images: "yes")

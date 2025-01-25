@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-class ContentFilter
-  class StringFilter < ContentFilter
+class Query::Filter
+  class StringFilter < Query::Filter
     def type
       [:string]
     end
