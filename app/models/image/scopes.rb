@@ -54,6 +54,7 @@ module Image::Scopes
           ->(phrase) { search_columns(Image[:notes], phrase) }
     scope :copyright_holder_contains,
           ->(phrase) { search_columns(Image[:copyright_holder], phrase) }
+
     # Grabbing image ids from the Observation.includes is waay faster than
     # a 3x join from images to observation_images to observations to comments.
     scope :search_content_and_associations, lambda { |phrase|
