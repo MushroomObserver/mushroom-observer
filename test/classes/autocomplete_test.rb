@@ -4,6 +4,8 @@ require("test_helper")
 
 require("autocomplete")
 
+# These empty classes and methods are required for the test to work.
+# rubocop:disable Lint/UselessMethodDefinition
 class AutocompleteMock < Autocomplete::ByString
   attr_accessor :rough_matches, :limit
 
@@ -27,6 +29,7 @@ class Autocomplete::ForMock < Autocomplete::ByWord
     super
   end
 end
+# rubocop:enable Lint/UselessMethodDefinition
 
 class AutocompleteTest < UnitTestCase
   def test_subclass

@@ -13,7 +13,7 @@ class LocalizationFilesTest < UnitTestCase
   ##############################################################################
 
   def test_localization_files_exist
-    Language.all.each { |lang| assert(File.exist?(lang.localization_file)) }
+    Language.find_each { |lang| assert(File.exist?(lang.localization_file)) }
   end
 
   def test_syntax_of_official_export_file
@@ -32,7 +32,7 @@ class LocalizationFilesTest < UnitTestCase
   # Make sure all "[:tag]" refs inside the translations exist.
   def test_embedded_refs
     errors = []
-    Language.all.each do |lang|
+    Language.find_each do |lang|
       data = File.open(lang.localization_file, "r:utf-8") do |fh|
         YAML.safe_load(fh)
       end
