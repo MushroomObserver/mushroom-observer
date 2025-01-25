@@ -1365,6 +1365,67 @@ class QueryTest < UnitTestCase
     assert_query(expects, :Image)
   end
 
+  def test_image_size
+    expects = Image.index_order.with_sizes(:thumbnail)
+    assert_query(expects, :Image, size: :thumbnail)
+  end
+
+  def test_image_content_types
+    expects = Image.index_order.with_content_types(%w[jpg gif png])
+    assert_query(expects, :Image, content_types: %w[jpg gif png])
+    expects = Image.index_order.with_content_types(%w[raw])
+    assert_query(expects, :Image, content_types: %w[raw])
+  end
+
+  def test_image_with_notes
+    expects = Image.index_order.with_notes
+    assert_query(expects, :Image, with_notes: true)
+    expects = Image.index_order.without_notes
+    assert_query(expects, :Image, with_notes: false)
+  end
+
+  def test_image_notes_has
+    expects = Image.index_order.notes_contain('"looked like"')
+    assert_query(expects, :Image, notes_has: '"looked like"')
+    expects = Image.index_order.notes_contain("illustration -convex")
+    assert_query(expects, :Image, notes_has: "illustration -convex")
+  end
+
+  def test_image_copyright_holder_has
+    expects = Image.index_order.copyright_holder_contains('"Insil Choi"')
+    assert_query(expects, :Image, copyright_holder_has: '"Insil Choi"')
+  end
+
+  def test_image_license
+    expects = Image.index_order.with_license(License.preferred)
+    assert_query(expects, :Image, license: License.preferred)
+  end
+
+  def test_image_with_votes
+    expects = Image.index_order.with_votes
+    assert_query(expects, :Image, with_votes: true)
+    expects = Image.index_order.without_votes
+    assert_query(expects, :Image, with_votes: false)
+  end
+
+  def test_image_quality
+    expects = Image.index_order.with_quality(50)
+    assert_query(expects, :Image, quality: 50)
+    expects = Image.index_order.with_quality(30, 50)
+    assert_query(expects, :Image, quality: [30, 50])
+  end
+
+  def test_image_confidence
+    expects = Image.index_order.with_confidence(50)
+    assert_query(expects, :Image, confidence: 50)
+    expects = Image.index_order.with_confidence(30, 50)
+    assert_query(expects, :Image, confidence: [30, 50])
+  end
+
+  def test_image_ok_for_export
+
+  end
+
   def test_image_for_observations
     obs = observations(:two_img_obs)
     expects = Image.index_order.joins(:observations).
@@ -1440,9 +1501,9 @@ class QueryTest < UnitTestCase
   end
 
   def test_image_advanced_search_content
-    assert_query([images(:turned_over_image).id, images(:in_situ_image).id],
+    assert_query(Image.index_order.search_content_and_associations("little"),
                  :Image, content: "little")
-    assert_query([images(:connected_coprinus_comatus_image).id],
+    assert_query(Image.index_order.search_content_and_associations("fruiting"),
                  :Image, content: "fruiting")
   end
 

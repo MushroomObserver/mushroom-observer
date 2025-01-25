@@ -19,16 +19,16 @@ module Image::Scopes
       end
     }
     scope :with_min_size, lambda { |min|
-      size = ALL_SIZES_INDEX[min.to_sym]
+      size = Image::ALL_SIZES_INDEX[min.to_sym]
       where(Image[:width].gteq(size).or(Image[:height].gteq(size)))
     }
     scope :with_max_size, lambda { |max|
-      size = ALL_SIZES_INDEX[max.to_sym]
+      size = Image::ALL_SIZES_INDEX[max.to_sym]
       where(Image[:width].lt(size).or(Image[:height].lt(size)))
     }
     scope :with_content_types, lambda { |types|
-      exts  = ALL_EXTENSIONS.map(&:to_s)
-      mimes = ALL_CONTENT_TYPES.map(&:to_s).compact_blank
+      exts  = Image::ALL_EXTENSIONS.map(&:to_s)
+      mimes = Image::ALL_CONTENT_TYPES.map(&:to_s).compact_blank
       types &= exts # intersection
       return if types.empty?
 
@@ -46,16 +46,46 @@ module Image::Scopes
       end
     }
 
+    scope :with_notes,
+          -> { where.not(notes: no_notes) }
+    scope :without_notes,
+          -> { where(notes: no_notes) }
     scope :notes_contain,
           ->(phrase) { search_columns(Image[:notes], phrase) }
+    scope :copyright_holder_contains,
+          ->(phrase) { search_columns(Image[:copyright_holder], phrase) }
+    # Grabbing image ids from the Observation.includes is waay faster than
+    # a 3x join from images to observation_images to observations to comments.
     scope :search_content_and_associations, lambda { |phrase|
-      # This is waay faster than the 3x join
-      # from images to observation_images to observations to comments.
-      obs = Observation.search_content(phrase).includes(:images)
+      obs = Observation.search_notes_and_comments(phrase).includes(:images)
       imgs = obs.map(&:images).flatten.uniq
-
       notes_contain(phrase).distinct.or(Image.where(id: imgs).distinct)
     }
+    scope :with_license,
+          ->(license) { where(license: license) }
+    scope :with_votes,
+          -> { where(Image[:vote_cache].not_eq(nil)) }
+    scope :without_votes,
+          -> { where(Image[:vote_cache].eq(nil)) }
+    scope :with_quality, lambda { |min, max = min|
+      if max == min
+        where(Image[:vote_cache].gteq(min))
+      else
+        where(Image[:vote_cache].gteq(min).and(Image[:vote_cache].lteq(max)))
+      end
+    }
+    scope :with_confidence, lambda { |min, max = min|
+      if max == min
+        joins(:observations).where(Observation[:vote_cache].gteq(min))
+      else
+        joins(:observations).where(Observation[:vote_cache].gteq(min).
+                                   and(Observation[:vote_cache].lteq(max)))
+      end
+    }
+    scope :is_ok_for_export?,
+          -> { where(ok_for_export: true) }
+    scope :not_ok_for_export?,
+          -> { where(ok_for_export: trfalseue) }
 
     scope :interactive_includes, lambda {
       strict_loading.includes(
