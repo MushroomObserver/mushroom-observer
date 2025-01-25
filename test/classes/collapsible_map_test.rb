@@ -32,8 +32,8 @@ class CollapsibleMapTest < UnitTestCase
     end
   end
 
-  def assert_mapset(mapset, lat, long,
-                    north, south, east, west, north_south, east_west)
+  def assert_mapset(*args)
+    mapset, lat, long, north, south, east, west, north_south, east_west = args
     assert_extents(mapset, north, south, east, west)
     assert_in_delta(lat, mapset.lat, 0.0001,
                     "expect <#{lat.round(4)}>, actual <#{mapset.lat.round(4)}>")
@@ -307,43 +307,72 @@ class CollapsibleMapTest < UnitTestCase
     assert_mapset_is_box(mapset, n, s, e, w)
   end
 
-  # rubocop:disable Layout/LineLength
-  def test_extending_mapset_with_boxes_over_dateline
-    # Neither old nor new box straddling dateline:
-    do_box_extension_test(-170, -150, 150, 170, 150, -150)   # | ▀▀▀▀▀       ▄▄▄▄▄ |
-    do_box_extension_test(-50, -10, 10, 50, -50, 50)         # |    ▀▀▀▀▀ ▄▄▄▄▄    |
-    do_box_extension_test(-30, 10, -10, 30, -30, 30)         # |      ▀▀███▄▄      |
-    do_box_extension_test(-10, 10, -20, 20, -20, 20)         # |       ▄███▄       |
-    do_box_extension_test(-20, 20, -10, 10, -20, 20)         # |       ▀███▀       |
-    do_box_extension_test(-10, 30, -30, 10, -30, 30)         # |      ▄▄███▀▀      |
-    do_box_extension_test(10, 50, -50, -10, -50, 50)         # |    ▄▄▄▄▄ ▀▀▀▀▀    |
-    do_box_extension_test(150, 170, -170, -150, 150, -150)   # | ▄▄▄▄▄       ▀▀▀▀▀ |
-
-    # New straddling dateline, but not old:
-    do_box_extension_test(-170, -160, 150, -150, 150, -150)  # |▄█▄             ▄▄▄|
-    do_box_extension_test(-170, -120, 150, -150, 150, -120)  # |▄██▀▀           ▄▄▄|
-    do_box_extension_test(-140, -100, 150, -150, 150, -100)  # |▄▄▄ ▀▀▀▀        ▄▄▄|
-    do_box_extension_test(100, 140, 150, -150, 100, -150)    # |▄▄▄        ▀▀▀▀ ▄▄▄|
-    do_box_extension_test(120, 170, 150, -150, 120, -150)    # |▄▄▄           ▀▀██▄|
-    do_box_extension_test(160, 170, 150, -150, 150, -150)    # |▄▄▄             ▄█▄|
-
-    # Old straddling dateline, but not new:
-    do_box_extension_test(170, -170, 80, 90, 80, -170)       # |▀█▀             ▀▀▀|
-    do_box_extension_test(165, -170, 160, 170, 160, -170)    # |▀██▄▄           ▀▀▀|
-    do_box_extension_test(150, -170, 160, 170, 150, -170)    # |▀▀▀ ▄▄▄▄        ▀▀▀|
-    do_box_extension_test(170, -170, -80, -70, 170, -70)     # |▀▀▀        ▄▄▄▄ ▀▀▀|
-    do_box_extension_test(170, -165, -170, -160, 170, -160)  # |▀▀▀           ▄▄██▀|
-    do_box_extension_test(170, -150, -170, -160, 170, -150)  # |▀▀▀             ▀█▀|
-
-    # Both straddling dateline:
-    do_box_extension_test(150, -170, 170, -150, 150, -150)   # |██▄             ▀██|
-    do_box_extension_test(170, -170, 150, -150, 150, -150)   # |██▄             ▄██|
-    do_box_extension_test(150, -150, 170, -170, 150, -150)   # |██▀             ▀██|
-    do_box_extension_test(170, -150, 150, -170, 150, -150)   # |██▀             ▄██|
+  # Neither old nor new box straddling dateline:
+  def test_extending_mapset_with_neither_over_dateline
+    # | ▀▀▀▀▀       ▄▄▄▄▄ |
+    do_box_extension_test(-170, -150, 150, 170, 150, -150)
+    # |    ▀▀▀▀▀ ▄▄▄▄▄    |
+    do_box_extension_test(-50, -10, 10, 50, -50, 50)
+    # |      ▀▀███▄▄      |
+    do_box_extension_test(-30, 10, -10, 30, -30, 30)
+    # |       ▄███▄       |
+    do_box_extension_test(-10, 10, -20, 20, -20, 20)
+    # |       ▀███▀       |
+    do_box_extension_test(-20, 20, -10, 10, -20, 20)
+    # |      ▄▄███▀▀      |
+    do_box_extension_test(-10, 30, -30, 10, -30, 30)
+    # |    ▄▄▄▄▄ ▀▀▀▀▀    |
+    do_box_extension_test(10, 50, -50, -10, -50, 50)
+    # | ▄▄▄▄▄       ▀▀▀▀▀ |
+    do_box_extension_test(150, 170, -170, -150, 150, -150)
   end
-  # rubocop:enable Layout/LineLength
 
-  def do_box_extension_test(west1, east1, west2, east2, west3, east3)
+  # New straddling dateline, but not old:
+  def test_extending_mapset_with_new_over_dateline_but_not_old
+    # |▄█▄             ▄▄▄|
+    do_box_extension_test(-170, -160, 150, -150, 150, -150)
+    # |▄██▀▀           ▄▄▄|
+    do_box_extension_test(-170, -120, 150, -150, 150, -120)
+    # |▄▄▄ ▀▀▀▀        ▄▄▄|
+    do_box_extension_test(-140, -100, 150, -150, 150, -100)
+    # |▄▄▄        ▀▀▀▀ ▄▄▄|
+    do_box_extension_test(100, 140, 150, -150, 100, -150)
+    # |▄▄▄           ▀▀██▄|
+    do_box_extension_test(120, 170, 150, -150, 120, -150)
+    # |▄▄▄             ▄█▄|
+    do_box_extension_test(160, 170, 150, -150, 150, -150)
+  end
+
+  # Old straddling dateline, but not new:
+  def test_extending_mapset_with_old_over_dateline_but_not_new
+    # |▀█▀             ▀▀▀|
+    do_box_extension_test(170, -170, 80, 90, 80, -170)
+    # |▀██▄▄           ▀▀▀|
+    do_box_extension_test(165, -170, 160, 170, 160, -170)
+    # |▀▀▀ ▄▄▄▄        ▀▀▀|
+    do_box_extension_test(150, -170, 160, 170, 150, -170)
+    # |▀▀▀        ▄▄▄▄ ▀▀▀|
+    do_box_extension_test(170, -170, -80, -70, 170, -70)
+    # |▀▀▀           ▄▄██▀|
+    do_box_extension_test(170, -165, -170, -160, 170, -160)
+    # |▀▀▀             ▀█▀|
+    do_box_extension_test(170, -150, -170, -160, 170, -150)
+  end
+
+  # Both straddling dateline:
+  def test_extending_mapset_with_both_over_dateline
+    # |██▄             ▀██|
+    do_box_extension_test(150, -170, 170, -150, 150, -150)
+    # |██▄             ▄██|
+    do_box_extension_test(170, -170, 150, -150, 150, -150)
+    # |██▀             ▀██|
+    do_box_extension_test(150, -150, 170, -170, 150, -150)
+    # |██▀             ▄██|
+    do_box_extension_test(170, -150, 150, -170, 150, -150)
+  end
+
+  def do_box_extension_test(*args)
+    west1, east1, west2, east2, west3, east3 = args
     loc = Location.new
     loc.north = 50
     loc.south = 40

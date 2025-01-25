@@ -6,26 +6,10 @@ require("autocomplete")
 
 class AutocompleteMock < Autocomplete::ByString
   attr_accessor :rough_matches, :limit
-
-  def truncate_matches
-    super
-  end
-
-  def clean_matches
-    super
-  end
 end
 
 class Autocomplete::ForMock < Autocomplete::ByWord
   attr_accessor :rough_matches, :limit
-
-  def truncate_matches
-    super
-  end
-
-  def clean_matches
-    super
-  end
 end
 
 class AutocompleteTest < UnitTestCase
