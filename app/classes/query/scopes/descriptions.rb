@@ -106,11 +106,10 @@ module Query::Scopes::Descriptions
   end
 
   def initialize_with_default_desc_parameter(type)
-    add_boolean_condition(
+    add_presence_condition(
       # "#{type}s.description_id IS NOT NULL",
       # "#{type}s.description_id IS NULL",
-      parent_model(type)[:description_id].not_eq(nil),
-      parent_model(type)[:description_id].eq(nil),
+      parent_model(type)[:description_id],
       params[:with_default_desc]
     )
   end
@@ -155,12 +154,6 @@ module Query::Scopes::Descriptions
   def initialize_desc_content_parameter(_type)
     return unless params[:desc_content]
 
-    # fields = desc_model(type).all_note_fields
-    # # fields = fields.map { |f| "COALESCE(#{type}_descriptions.#{f},'')" }
-    # # fields = "CONCAT(#{fields.join(",")})"
-    # fields = fields.map { |f| desc_model(type)[f] }
-    # table_columns = fields.shift
-    # fields.each { |f| table_columns = table_columns + f }
     @scopes = @scopes.search_content(params[:desc_content])
   end
 
