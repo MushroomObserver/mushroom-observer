@@ -796,6 +796,7 @@ class InatImportJobTest < ActiveJob::TestCase
     # Params must be in same order as in the controller
     # Limit search to observations by the user, unless superimporter
     # omit trailing "=" since the controller omits it (via `merge`)
+    # user_login must be last so that its trailing `=` can be chomped
     params = <<~PARAMS.delete("\n").chomp("=")
       ?iconic_taxa=#{ICONIC_TAXA}
       &id=#{inat_import.inat_ids}
@@ -803,8 +804,8 @@ class InatImportJobTest < ActiveJob::TestCase
       &per_page=200
       &only_id=false
       &order=asc&order_by=id
+      &without_field=Mushroom+Observer+URL
       &user_login=#{inat_import.inat_username unless superimporter}
-      &without_field=Mushroom%20Observer%20URL
     PARAMS
     add_stub(stub_request(:get, "#{API_BASE}/observations#{params}").
       with(headers:
