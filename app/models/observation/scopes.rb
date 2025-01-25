@@ -343,22 +343,31 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # Searches Observation fields :name, :where and :notes (currently)
     scope :search_content,
           ->(phrase) { search_columns(Observation.searchable_columns, phrase) }
-    # This is the "advanced search" scope for "content". Unexpectedly,
-    # merge/or is faster than concatting the Obs and Comment columns together.
+    # The "advanced search" scope for "content". Unexpectedly, merge/or is
+    # faster than concatting the Obs and Comment columns together.
     scope :search_notes_and_comments, lambda { |phrase|
       comments = Observation.comments_contain(phrase).map(&:id)
       notes_contain(phrase).distinct.
         or(Observation.where(id: comments).distinct)
     }
-    # More comprehensive search of Observation fields, Name.search_name,
-    # (plus comments ?).
-    scope :search_content_and_associations, lambda { |phrase|
+    # Scope used by PatternSearch. It checks Name[:search_name], which includes
+    # the author (unlike Observation[:text_name]) and is not cached on the obs
+    scope :search_location_and_name, lambda { |phrase|
       ids = Name.search_name_contains(phrase).
             includes(:observations).map(&:observations).flatten.uniq
-      ids += Observation.search_content(phrase).map(&:id)
-      # ids += Observation.comments_contain(phrase).map(&:id)
+      ids += Observation.search_columns(Observation[:where], phrase).map(&:id)
       where(id: ids).distinct
     }
+    # More comprehensive search of Observation fields + Name.search_name,
+    # (plus comments ?).
+    # scope :search_content_and_associations, lambda { |phrase|
+    #   ids = Name.search_name_contains(phrase).
+    #         includes(:observations).map(&:observations).flatten.uniq
+    #   ids += Observation.search_content_except_notes(phrase).map(&:id)
+    #   ids += Observation.comments_contain(phrase).map(&:id)
+    #   where(id: ids).distinct
+    # }
+
     scope :with_comments,
           -> { joins(:comments).distinct }
     scope :without_comments,

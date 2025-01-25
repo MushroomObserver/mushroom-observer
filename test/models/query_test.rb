@@ -2950,10 +2950,11 @@ class QueryTest < UnitTestCase
                  projects: [proj.title])
   end
 
-  def test_observation_pattern_search_notes
-    assert_query(observation_pattern_search('"somewhere else"'),
-                 :Observation, pattern: '"somewhere else"')
-  end
+  # notes search disabled because it may mention other species. confusing
+  # def test_observation_pattern_search_notes
+  #   assert_query(observation_pattern_search('"somewhere else"'),
+  #                :Observation, pattern: '"somewhere else"')
+  # end
 
   def test_observation_pattern_search_where
     assert_query([observations(:strobilurus_diminutivus_obs).id],
@@ -2971,8 +2972,7 @@ class QueryTest < UnitTestCase
   end
 
   def observation_pattern_search(pattern)
-    Observation.index_order.
-      search_content_and_associations(pattern).distinct
+    Observation.index_order.search_location_and_name(pattern).distinct
   end
 
   def test_observation_advanced_search
