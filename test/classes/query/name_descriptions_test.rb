@@ -105,5 +105,4 @@ module Query::NameDescriptionsTest
     assert_query(NameDescription.where(ok_for_export: 0).index_order,
                  :NameDescription, ok_for_export: 0)
   end
-
 end
