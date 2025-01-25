@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 class Query::RssLogs < Query::Base
-  include Query::Params::ContentFilters
-  include Query::Initializers::ContentFilters
+  include Query::Params::Filters
+  include Query::Initializers::Filters
 
   def model
     RssLog

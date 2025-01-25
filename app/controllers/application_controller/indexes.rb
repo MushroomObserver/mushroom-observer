@@ -208,8 +208,8 @@ module ApplicationController::Indexes
   def apply_content_filters(query)
     filters = users_content_filters || {}
     @any_content_filters_applied = false
-    # disable cop because ContentFilter is not an ActiveRecord model
-    ContentFilter.all.each do |fltr| # rubocop:disable Rails/FindEach
+    # disable cop because Query::Filter is not an ActiveRecord model
+    Query::Filter.all.each do |fltr| # rubocop:disable Rails/FindEach
       apply_one_content_filter(fltr, query, filters[fltr.sym])
     end
   end
