@@ -1792,7 +1792,7 @@ class API2Test < UnitTestCase
     )
     assert_api_results(names)
 
-    names = Name.with_correct_spelling.classification_contains("Fungi").
+    names = Name.with_correct_spelling.classification_includes("Fungi").
             map do |n|
       genus = n.text_name.split.first
       Name.where(Name[:text_name].matches("#{genus} %")) + [n]
@@ -1904,27 +1904,27 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(has_description: "no"))
     assert_api_results(without)
 
-    names = Name.with_correct_spelling.text_name_contains("bunny")
+    names = Name.with_correct_spelling.text_name_includes("bunny")
     assert_not_empty(names)
     assert_api_pass(params.merge(text_name_has: "bunny"))
     assert_api_results(names)
 
-    names = Name.with_correct_spelling.author_contains("peck")
+    names = Name.with_correct_spelling.author_includes("peck")
     assert_not_empty(names)
     assert_api_pass(params.merge(author_has: "peck"))
     assert_api_results(names)
 
-    names = Name.with_correct_spelling.citation_contains("lichenes")
+    names = Name.with_correct_spelling.citation_includes("lichenes")
     assert_not_empty(names)
     assert_api_pass(params.merge(citation_has: "lichenes"))
     assert_api_results(names)
 
-    names = Name.with_correct_spelling.classification_contains("lecanorales")
+    names = Name.with_correct_spelling.classification_includes("lecanorales")
     assert_not_empty(names)
     assert_api_pass(params.merge(classification_has: "lecanorales"))
     assert_api_results(names)
 
-    names = Name.with_correct_spelling.notes_contain("known")
+    names = Name.with_correct_spelling.notes_include("known")
     assert_not_empty(names)
     assert_api_pass(params.merge(notes_has: "known"))
     assert_api_results(names)
@@ -2319,13 +2319,13 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(has_notes: "no"))
     assert_api_results(without)
 
-    obses = Observation.notes_contain(":substrate:").
+    obses = Observation.notes_include(":substrate:").
             reject { |o| o.notes[:substrate].blank? }
     assert(obses.length > 1)
     assert_api_pass(params.merge(has_notes_field: "substrate"))
     assert_api_results(obses)
 
-    obses = Observation.notes_contain("orphan")
+    obses = Observation.notes_include("orphan")
     assert(obses.length > 1)
     assert_api_pass(params.merge(notes_has: "orphan"))
     assert_api_results(obses)
@@ -3127,11 +3127,7 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(has_images: "no"))
     assert_api_results(without.map(&:sequences).flatten.sort_by(&:id))
 
-    # Can't use `rank` scope because it filters out misspellings, but
-    # Query::Sequences :has_name does not.
-    # names = Name.with_rank_at_or_below_genus
-    names = Name.where((Name[:rank] <= Name.ranks[:Genus]).
-                       or(Name[:rank].eq(Name.ranks[:Group])))
+    names = Name.with_rank_at_or_below_genus
     with = Observation.where(name: names)
     without = Observation.where.not(name: names)
     assert(with.length > 1)
@@ -3159,13 +3155,13 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(has_obs_notes: "no"))
     assert_api_results(without.map(&:sequences).flatten.sort_by(&:id))
 
-    obses = Observation.notes_contain(":substrate:").
+    obses = Observation.notes_include(":substrate:").
             reject { |o| o.notes[:substrate].blank? }
     assert(obses.length > 1)
     assert_api_pass(params.merge(has_notes_field: "substrate"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
 
-    obses = Observation.notes_contain("orphan")
+    obses = Observation.notes_include("orphan")
     assert(obses.length > 1)
     assert_api_pass(params.merge(obs_notes_has: "orphan"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))

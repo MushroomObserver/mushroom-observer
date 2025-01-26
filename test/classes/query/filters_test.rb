@@ -38,14 +38,14 @@ module Query::FiltersTest
   def test_filtering_content_with_lichen
     expects_obs = Observation.of_lichens.index_order.uniq
     assert_query(expects_obs, :Observation, lichen: "yes")
-    expects_names = Name.of_lichens.index_order.uniq
+    expects_names = Name.with_correct_spelling.of_lichens.index_order.uniq
     assert_query(expects_names, :Name, lichen: "yes")
   end
 
   def test_filtering_content_with_non_lichen
     expects_obs = Observation.not_lichens.index_order.uniq
     assert_query(expects_obs, :Observation, lichen: "no")
-    expects_names = Name.not_lichens.index_order.uniq
+    expects_names = Name.with_correct_spelling.not_lichens.index_order.uniq
     assert_query(expects_names, :Name, lichen: "no")
   end
 
