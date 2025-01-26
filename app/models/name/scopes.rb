@@ -52,10 +52,9 @@ module Name::Scopes
       with_correct_spelling.
         where(Name[:classification].matches("%#{rank}: _#{text_name}_%"))
     }
-    # FIXME: Exception for Sequence with_name queries:
-    # for some reason they accept misspelled names.
     scope :with_rank_at_or_below_genus, lambda {
-      where((Name[:rank] <= ranks[:Genus]).or(Name[:rank].eq(ranks[:Group])))
+      with_correct_spelling.
+        where((Name[:rank] <= ranks[:Genus]).or(Name[:rank].eq(ranks[:Group])))
     }
     scope :with_rank_above_genus, lambda {
       with_correct_spelling.where(Name[:rank] > ranks[:Genus]).

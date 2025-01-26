@@ -3127,7 +3127,11 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(has_images: "no"))
     assert_api_results(without.map(&:sequences).flatten.sort_by(&:id))
 
-    names = Name.with_rank_at_or_below_genus
+    # Can't use `rank` scope because it filters out misspellings, but
+    # Query::Sequences :has_name does not.
+    # names = Name.with_rank_at_or_below_genus
+    names = Name.where((Name[:rank] <= ranks[:Genus]).
+                       or(Name[:rank].eq(ranks[:Group])))
     with = Observation.where(name: names)
     without = Observation.where.not(name: names)
     assert(with.length > 1)
