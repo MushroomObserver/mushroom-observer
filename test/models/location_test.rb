@@ -556,12 +556,12 @@ class LocationTest < UnitTestCase
   #    Explicit tests of some scopes to improve coverage
   # ----------------------------------------------------
 
-  def test_scope_name_includes
+  def test_scope_name_contains
     assert_includes(
-      Location.name_includes("Albion"),
+      Location.name_contains("Albion"),
       locations(:albion)
     )
-    assert_empty(Location.name_includes(ARBITRARY_SHA))
+    assert_empty(Location.name_contains(ARBITRARY_SHA))
   end
 
   def test_scope_in_region

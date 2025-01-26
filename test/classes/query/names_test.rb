@@ -28,24 +28,6 @@ module Query::NamesTest
     assert_query(expect_bad.to_a, :Name, misspellings: :only)
   end
 
-  def test_name_by_user
-    assert_query(Name.index_order.where(user: mary).with_correct_spelling,
-                 :Name, by_user: mary)
-    assert_query(Name.index_order.where(user: dick).with_correct_spelling,
-                 :Name, by_user: dick)
-    assert_query(Name.index_order.where(user: rolf).with_correct_spelling,
-                 :Name, by_user: rolf)
-    assert_query([], :Name, by_user: users(:zero_user))
-  end
-
-  def test_name_by_editor
-    assert_query([], :Name, by_editor: rolf)
-    assert_query([], :Name, by_editor: mary)
-    expects = Name.reorder(id: :asc).
-              with_correct_spelling.by_editor(dick).distinct
-    assert_query(expects, :Name, by_editor: dick, by: :id)
-  end
-
   def test_name_by_rss_log
     expects = Name.order_by_rss_log
     assert_query(expects, :Name, by: :rss_log)
@@ -65,16 +47,103 @@ module Query::NamesTest
                        names(:lactarius_subalpinus).id])
   end
 
-  def test_name_include_subtaxa_exclude_original_names
-    expects = Name.index_order.subtaxa_of(names(:agaricus))
-    assert_query(expects, :Name,
-                 names: [names(:agaricus).id], include_subtaxa: true,
-                 exclude_original_names: true)
+  def test_name_by_user
+    assert_query(Name.index_order.where(user: mary).with_correct_spelling,
+                 :Name, by_user: mary)
+    assert_query(Name.index_order.where(user: dick).with_correct_spelling,
+                 :Name, by_user: dick)
+    assert_query(Name.index_order.where(user: rolf).with_correct_spelling,
+                 :Name, by_user: rolf)
+    assert_query([], :Name, by_user: users(:zero_user))
   end
 
-  def test_name_need_description
-    expects = Name.index_order.description_needed.distinct
-    assert_query(expects, :Name, need_description: 1)
+  def test_name_by_editor
+    assert_query([], :Name, by_editor: rolf)
+    assert_query([], :Name, by_editor: mary)
+    expects = Name.reorder(id: :asc).
+              with_correct_spelling.by_editor(dick).distinct
+    assert_query(expects, :Name, by_editor: dick, by: :id)
+  end
+
+  # non-arrays and arrays of strings don't work
+  def test_name_users
+    # users = users(:rolf).login
+    # expects = Name.where(user: users).index_order
+    # assert_query(expects, :Name, users: users)
+    users = [users(:rolf), users(:mary)].map(&:id)
+    expects = Name.where(user: users).index_order
+    assert_query(expects, :Name, users: users)
+    # users = [users(:rolf), users(:mary)].map(&:login)
+    # assert_query(expects, :Name, users: users)
+    users = [users(:rolf), users(:mary)]
+    assert_query(expects, :Name, users: users)
+  end
+
+  # Takes region strings or ids, but not instances
+  def test_name_locations
+    locations = [locations(:salt_point), locations(:gualala)].
+                map { |x| x.id.to_s }
+    expects = Name.at_locations(locations).index_order
+    assert_query(expects, :Name, locations: locations)
+    # locations = [locations(:salt_point), locations(:gualala)]
+    # assert_query(expects, :Name, locations: locations)
+
+    locations = ["Sonoma Co., California, USA"]
+    expects = Name.at_locations(locations).index_order
+    assert_query(expects, :Name, locations: locations)
+  end
+
+  def test_name_species_lists
+    spl = [species_lists(:unknown_species_list).title]
+    expects = Name.on_species_lists(spl).index_order
+    assert_query(expects, :Name, species_lists: spl)
+  end
+
+  def test_name_names_include_subtaxa_exclude_original
+    assert_query(
+      Name.index_order.subtaxa_of(names(:agaricus)),
+      :Name, names: [names(:agaricus).id],
+             include_subtaxa: true, exclude_original_names: true
+    )
+  end
+
+  def test_name_names_include_subtaxa_include_original
+    assert_query(
+      Name.index_order.include_subtaxa_of(names(:agaricus)),
+      :Name, names: [names(:agaricus).id],
+             include_subtaxa: true, exclude_original_names: false
+    )
+  end
+
+  def test_name_names_include_immediate_subtaxa
+    assert_query(
+      Name.index_order.include_immediate_subtaxa_of(names(:agaricus)),
+      :Name, names: [names(:agaricus).id],
+             include_immediate_subtaxa: true, exclude_original_names: false
+    )
+  end
+
+  def test_name_deprecated_only
+    expects = Name.with_correct_spelling.deprecated.index_order
+    assert_query(expects, :Name, deprecated: :only)
+    expects = Name.with_correct_spelling.not_deprecated.index_order
+    assert_query(expects, :Name, deprecated: :no)
+    expects = Name.with_correct_spelling.index_order
+    assert_query(expects, :Name, deprecated: :either)
+  end
+
+  def test_name_is_deprecated
+    expects = Name.with_correct_spelling.deprecated.index_order
+    assert_query(expects, :Name, is_deprecated: true)
+    expects = Name.with_correct_spelling.not_deprecated.index_order
+    assert_query(expects, :Name, is_deprecated: false)
+  end
+
+  def test_name_with_synonyms
+    expects = Name.with_correct_spelling.with_synonyms.index_order
+    assert_query(expects, :Name, with_synonyms: true)
+    expects = Name.with_correct_spelling.without_synonyms.index_order
+    assert_query(expects, :Name, with_synonyms: false)
   end
 
   def test_name_rank_single
@@ -90,6 +159,80 @@ module Query::NamesTest
 
     expects = Name.with_correct_spelling.with_rank("Family").index_order
     assert_query(expects, :Name, rank: %w[Family Family])
+  end
+
+  def test_name_text_name_has
+    expects = Name.with_correct_spelling.
+              text_name_contains("Agaricus").index_order
+    assert_query(expects, :Name, text_name_has: "Agaricus")
+  end
+
+  def test_name_with_author
+    expects = Name.with_correct_spelling.with_author.index_order
+    assert_query(expects, :Name, with_author: true)
+    expects = Name.with_correct_spelling.without_author.index_order
+    assert_query(expects, :Name, with_author: false)
+  end
+
+  def test_name_author_has
+    expects = Name.with_correct_spelling.author_contains("Pers.").index_order
+    assert_query(expects, :Name, author_has: "Pers.")
+  end
+
+  def test_name_with_citation
+    expects = Name.with_correct_spelling.with_citation.index_order
+    assert_query(expects, :Name, with_citation: true)
+    expects = Name.with_correct_spelling.without_citation.index_order
+    assert_query(expects, :Name, with_citation: false)
+  end
+
+  def test_name_citation_has
+    expects = Name.with_correct_spelling.
+              citation_contains("Lichenes").index_order
+    assert_query(expects, :Name, citation_has: "Lichenes")
+  end
+
+  def test_name_with_classification
+    expects = Name.with_correct_spelling.with_classification.index_order
+    assert_query(expects, :Name, with_classification: true)
+    expects = Name.with_correct_spelling.without_classification.index_order
+    assert_query(expects, :Name, with_classification: false)
+  end
+
+  def test_name_classification_has
+    expects = Name.with_correct_spelling.
+              classification_contains("Tremellales").index_order
+    assert_query(expects, :Name, classification_has: "Tremellales")
+  end
+
+  def test_name_with_notes
+    expects = Name.with_correct_spelling.with_notes.index_order
+    assert_query(expects, :Name, with_notes: true)
+    expects = Name.with_correct_spelling.without_notes.index_order
+    assert_query(expects, :Name, with_notes: false)
+  end
+
+  def test_name_notes_has
+    expects = Name.with_correct_spelling.
+              notes_contain('"at least one"').index_order
+    assert_query(expects, :Name, notes_has: '"at least one"')
+  end
+
+  def test_name_with_comments_true
+    expects = Name.with_correct_spelling.with_comments.index_order
+    assert_query(expects, :Name, with_comments: true)
+  end
+
+  # Note that this is not a withOUT comments condition
+  def test_name_with_comments_false
+    expects = Name.with_correct_spelling.index_order
+    assert_query(expects, :Name, with_comments: false)
+  end
+
+  def test_name_comments_has
+    expects = Name.with_correct_spelling.
+              comments_contain('"messes things up"').index_order
+    assert_query(expects, :Name, comments_has: '"messes things up"')
   end
 
   def test_name_pattern_search
@@ -136,6 +279,11 @@ module Query::NamesTest
                  content: "second fruiting") # notes
     assert_query([names(:fungi).id], :Name,
                  content: '"a little of everything"') # comment
+  end
+
+  def test_name_need_description
+    expects = Name.with_correct_spelling.index_order.description_needed.distinct
+    assert_query(expects, :Name, need_description: 1)
   end
 
   def test_name_with_descriptions

@@ -94,10 +94,10 @@ module Query::NameDescriptionsTest
 
   # waiting on a new AbstractModel scope for searches,
   # plus a specific NameDescription scope coalescing the fields.
-  # def test_name_description_desc_content
-  #   assert_query(NameDescription.notes_has("some notes")).index_order,
-  #                :NameDescription, desc_content: "some notes")
-  # end
+  def test_name_description_desc_content
+    assert_query(NameDescription.search_content('"some notes"').index_order,
+                 :NameDescription, desc_content: '"some notes"')
+  end
 
   def test_name_description_ok_for_export
     assert_query(NameDescription.where(ok_for_export: 1).index_order,

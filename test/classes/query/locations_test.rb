@@ -44,9 +44,24 @@ module Query::LocationsTest
                        locations(:elgin_co).id])
   end
 
+  def test_location_with_notes
+    expects = Location.index_order.with_notes
+    assert_query(expects, :Location, with_notes: true)
+    expects = Location.index_order.without_notes
+    assert_query(expects, :Location, with_notes: false)
+  end
+
+  def test_location_notes_has
+    expects = Location.index_order.notes_contain('"should persist"')
+    assert_query(expects, :Location, notes_has: '"should persist"')
+    expects = Location.index_order.
+              notes_contain('"legal to collect" -"Salt Point"')
+    assert_query(expects,
+                 :Location, notes_has: '"legal to collect" -"Salt Point"')
+  end
+
   def test_location_pattern_search
-    expects = Location.reorder(id: :asc).
-              where(Location[:name].matches("%California%")).distinct
+    expects = Location.reorder(id: :asc).pattern_search("California")
     assert_query(expects, :Location, pattern: "California", by: :id)
     assert_query([locations(:elgin_co).id],
                  :Location, pattern: "Canada")
@@ -77,18 +92,23 @@ module Query::LocationsTest
     assert_query(expects, :Location, user: "dick")
   end
 
-  def test_location_advanced_search_content
-    # content in obs.notes
-    assert_query([locations(:burbank).id],
+  # content in obs.notes
+  def test_location_advanced_search_content_obs_notes
+    assert_query(Location.advanced_search('"strange place"'),
                  :Location, content: '"strange place"')
-    # content in Comment
+  end
+
+  # content in Obs Comment
+  def test_location_advanced_search_content_obs_comments
     assert_query(
-      [locations(:burbank).id],
+      Location.advanced_search('"a little of everything"'),
       :Location, content: '"a little of everything"'
     )
-    # no search loc.notes
+  end
+
+  def test_location_advanced_search_content_location_notes
     assert_query([],
-                 :Location, content: '"play with"')
+                 :Location, content: '"legal to collect"')
   end
 
   def test_location_advanced_search_content_combos

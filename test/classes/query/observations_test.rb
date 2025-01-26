@@ -202,47 +202,54 @@ module Query::ObservationsTest
                  projects: [proj.title])
   end
 
-  def test_observation_pattern_search
-    # notes
-    # assert_query([observations(:agaricus_campestras_obs).id,
-    #               observations(:agaricus_campestros_obs).id,
-    #               observations(:agaricus_campestrus_obs).id,
-    #               observations(:strobilurus_diminutivus_obs).id],
-    #              :Observation, pattern: '"somewhere else"')
-    # where
+  # notes search disabled because it may mention other species. confusing
+  # def test_observation_pattern_search_notes
+  #   assert_query(observation_pattern_search('"somewhere else"'),
+  #                :Observation, pattern: '"somewhere else"')
+  # end
+
+  def test_observation_pattern_search_where
     assert_query([observations(:strobilurus_diminutivus_obs).id],
                  :Observation, pattern: "pipi valley")
-    # location
-    expects = observation_pattern_search("burbank")
-    assert_query(expects.uniq, :Observation, pattern: "burbank", by: :name)
+  end
 
-    # name
-    expects = observation_pattern_search("agaricus")
-    assert_query(expects.uniq, :Observation, pattern: "agaricus", by: :name)
+  def test_observation_pattern_search_location
+    assert_query(observation_pattern_search("burbank"),
+                 :Observation, pattern: "burbank")
+  end
+
+  def test_observation_pattern_search_name
+    assert_query(observation_pattern_search("agaricus"),
+                 :Observation, pattern: "agaricus")
   end
 
   def observation_pattern_search(pattern)
-    Observation.joins(:name).
-      where(Name[:search_name].concat(Observation[:where]).
-            matches("%#{pattern}%")).
-      reorder(Name[:sort_name].asc,
-              Observation[:when].desc, Observation[:id].desc)
+    Observation.index_order.pattern_search(pattern).distinct
   end
 
-  def test_observation_advanced_search
+  def test_observation_advanced_search_name
     assert_query([observations(:strobilurus_diminutivus_obs).id],
                  :Observation, name: "diminutivus")
+  end
+
+  def test_observation_advanced_search_where
     assert_query([observations(:coprinus_comatus_obs).id],
                  :Observation, user_where: "glendale") # where
     expects = Observation.reorder(id: :asc).
               where(location: locations(:burbank)).distinct
     assert_query(expects, :Observation,
                  user_where: "burbank", by: :id) # location
+  end
+
+  def test_observation_advanced_search_user
     expects = Observation.reorder(id: :asc).where(user: rolf.id).distinct
     assert_query(expects, :Observation, user: "rolf", by: :id)
-    assert_query([observations(:coprinus_comatus_obs).id], # notes
-                 :Observation, content: "second fruiting")
-    assert_query([observations(:minimal_unknown_obs).id],
+  end
+
+  def test_observation_advanced_search_content
+    assert_query(Observation.advanced_search("second fruiting"),
+                 :Observation, content: "second fruiting") # notes
+    assert_query(Observation.advanced_search("agaricus"),
                  :Observation, content: "agaricus") # comment
   end
 

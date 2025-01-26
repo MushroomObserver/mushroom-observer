@@ -17,6 +17,7 @@ module Query::Params::Images
       projects?: [:string],
       species_lists?: [:string],
       with_observation?: { boolean: [true] },
+      # does not yet handle range of sizes. Param is minimum size.
       size?: { string: Image::ALL_SIZES - [:full_size] },
       content_types?: [{ string: Image::ALL_EXTENSIONS }],
       with_notes?: :boolean,
