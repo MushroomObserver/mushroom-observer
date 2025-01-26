@@ -55,13 +55,23 @@ module Image::Scopes
     scope :copyright_holder_contains,
           ->(phrase) { search_columns(Image[:copyright_holder], phrase) }
 
+    # A search of all searchable Image fields, concatenated.
+    scope :search_content,
+          ->(phrase) { search_columns(Image.searchable_columns, phrase) }
     # Grabbing image ids from the Observation.includes is waay faster than
     # a 3x join from images to observation_images to observations to comments.
-    scope :search_content_and_associations, lambda { |phrase|
-      obs = Observation.search_notes_and_comments(phrase).includes(:images)
-      imgs = obs.map(&:images).flatten.uniq
-      notes_contain(phrase).distinct.or(Image.where(id: imgs).distinct)
+    # Advanced search scope. Does not check Name[:search_name] (author)
+    scope :search_content_observation_and_comments, lambda { |phrase|
+      obs_imgs = Observation.search_notes_and_comments(phrase).
+                 includes(:images).map(&:images).flatten.uniq
+      search_content(phrase).distinct.or(Image.where(id: obs_imgs).distinct)
     }
+    # Pattern search scope. Excludes images without observations!
+    scope :search_content_name_and_location, lambda { |phrase|
+      cols = Image.searchable_columns + Observation[:where] + Name[:search_name]
+      joins(observations: :name).search_columns(cols, phrase).distinct
+    }
+
     scope :with_license,
           ->(license) { where(license: license) }
     scope :with_votes,
@@ -83,10 +93,10 @@ module Image::Scopes
                                    and(Observation[:vote_cache].lteq(max)))
       end
     }
-    scope :is_ok_for_export?,
+    scope :ok_for_export,
           -> { where(ok_for_export: true) }
-    scope :not_ok_for_export?,
-          -> { where(ok_for_export: trfalseue) }
+    scope :not_ok_for_export,
+          -> { where(ok_for_export: false) }
 
     scope :interactive_includes, lambda {
       strict_loading.includes(
