@@ -200,6 +200,28 @@ module AbstractModel::Scopes
       conditions.reduce(self) { |result, cond| result.send(:where, cond) }
     end
 
+    # Combine args into one parenthesized condition by ANDing them.
+    def and_clause(*args)
+      if args.length > 1
+        # "(#{args.join(" AND ")})"
+        starting = args.shift
+        args.reduce(starting) { |result, arg| result.and(arg) }
+      else
+        args.first
+      end
+    end
+
+    # Combine args into one parenthesized condition by ORing them.
+    def or_clause(*args)
+      if args.length > 1
+        # "(#{args.join(" OR ")})"
+        starting = args.shift
+        args.reduce(starting) { |result, arg| result.or(arg) }
+      else
+        args.first
+      end
+    end
+
     # Returns an array of AR conditions describing what a search is looking for.
     #
     # Each array member ["foo", "fah"] gets joined in a chain of AR "where"
@@ -220,12 +242,12 @@ module AbstractModel::Scopes
       conditions = []
       goods.each do |good|
         # break up phrases
-        parts = *good
+        parts = *good.map(&:clean_pattern)
         # pop the first phrase off, to start the condition chain without an `OR`
-        condition = table_columns.matches(parts.shift.clean_pattern)
+        condition = table_columns.matches("%#{parts.shift}%")
         parts.each do |str|
           # join the parts with `or`
-          condition = condition.or(table_columns.matches(str.clean_pattern))
+          condition = condition.or(table_columns.matches("%#{str}%"))
         end
         # Add a where condition for each good (equivalent to `AND`)
         conditions << condition
@@ -236,7 +258,7 @@ module AbstractModel::Scopes
     # Array of conditions for what the search wants to avoid. Joined with `AND`.
     def search_conditions_bad(table_columns, bads)
       bads.map do |bad|
-        table_columns.does_not_match(bad.clean_pattern)
+        table_columns.does_not_match("%#{bad.clean_pattern}%")
       end
     end
 
@@ -249,6 +271,87 @@ module AbstractModel::Scopes
       fields.reduce(starting) do |result, field|
         result + arel_table[field].coalesce("")
       end
+    end
+
+    def lookup_external_sites_by_name(vals)
+      lookup_object_ids_by_name(vals) do |name|
+        ExternalSite.where(name: name)
+      end
+    end
+
+    def lookup_herbaria_by_name(vals)
+      lookup_object_ids_by_name(vals) do |name|
+        Herbarium.where(name: name)
+      end
+    end
+
+    def lookup_herbarium_records_by_name(vals)
+      lookup_object_ids_by_name(vals) do |name|
+        HerbariumRecord.where(id: name)
+      end
+    end
+
+    def lookup_locations_by_name(vals)
+      lookup_object_ids_by_name(vals) do |name|
+        pattern = Location.clean_name(name).clean_pattern
+        Location.name_contains(pattern)
+      end
+    end
+
+    def lookup_regions_by_name(vals)
+      lookup_object_ids_by_name(vals) do |name|
+        # does not lowercase it, because we want a match to the end of string
+        pattern = name.clean_pattern
+        Location.in_region(pattern)
+      end
+    end
+
+    def lookup_projects_by_name(vals)
+      lookup_object_ids_by_name(vals) do |name|
+        Project.where(title: name)
+      end
+    end
+
+    def lookup_lists_for_projects_by_name(vals)
+      return unless vals
+
+      project_ids = lookup_projects_by_name(vals)
+      return [] if project_ids.empty?
+
+      # Have to map(&:id) because it doesn't return lookup_object_ids_by_name
+      SpeciesList.joins(:project_species_lists).
+        where(project_species_lists: { project_id: project_ids }).
+        distinct.map(&:id)
+    end
+
+    def lookup_species_lists_by_name(vals)
+      lookup_object_ids_by_name(vals) do |name|
+        SpeciesList.where(title: name)
+      end
+    end
+
+    def lookup_users_by_name(vals)
+      lookup_object_ids_by_name(vals) do |name|
+        User.where(login: User.remove_bracketed_name(name))
+      end
+    end
+
+    # Used by scopes to get IDs when they're passed strings or instances.
+    # In the last condition, `yield` == run any block provided to this method.
+    # (Only in the case it doesn't have an ID does it look up the record.)
+    def lookup_object_ids_by_name(vals)
+      return unless vals
+
+      vals = [vals] unless vals.is_a?(Array)
+      vals.map do |val|
+        if val.is_a?(AbstractModel)
+          val.id
+        elsif /^\d+$/.match?(val.to_s)
+          val
+        else
+          yield(val).map(&:id)
+        end
+      end.flatten.uniq.compact
     end
   end
 end

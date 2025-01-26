@@ -20,9 +20,9 @@ module Name::Scopes
         where(Name[:lifeform].does_not_match("% lichen %"))
     }
     scope :deprecated,
-          -> { where(deprecated: true) }
+          -> { with_correct_spelling.where(deprecated: true) }
     scope :not_deprecated,
-          -> { where(deprecated: false) }
+          -> { with_correct_spelling.where(deprecated: false) }
     ### Module Name::Spelling
     scope :with_correct_spelling,
           -> { where(correct_spelling_id: nil) }
@@ -31,11 +31,11 @@ module Name::Scopes
     scope :with_self_referential_misspelling,
           -> { where(Name[:correct_spelling_id].eq(Name[:id])) }
     scope :with_synonyms,
-          -> { where.not(synonym_id: nil) }
+          -> { with_correct_spelling.where.not(synonym_id: nil) }
     scope :without_synonyms,
-          -> { where(synonym_id: nil) }
+          -> { with_correct_spelling.where(synonym_id: nil) }
     scope :ok_for_export,
-          -> { where(ok_for_export: true) }
+          -> { with_correct_spelling.where(ok_for_export: true) }
 
     ### Module Name::Taxonomy. Rank scopes take text values, e.g. "Genus"
     scope :with_rank,
@@ -186,26 +186,22 @@ module Name::Scopes
     scope :with_description_classification_differing, lambda {
       joins(:description).
         where(rank: 0..Name.ranks[:Genus]).
-        where(NameDescription[:classification].
-              not_eq(Name[:classification])).
+        where(NameDescription[:classification].not_eq(Name[:classification])).
         where(NameDescription[:classification].not_blank)
     }
 
-    scope :on_species_list, lambda { |species_list|
-      joins(observations: :species_lists).
-        merge(SpeciesListObservation.where(species_list: species_list))
+    scope :on_species_lists, lambda { |species_lists|
+      species_list_ids = lookup_species_lists_by_name(species_lists)
+      with_correct_spelling.joins(observations: :species_list_observations).
+        merge(SpeciesListObservation.where(species_list: species_list_ids)).
+        distinct
     }
     # Accepts region string, location_id, or Location instance
-    scope :at_location, lambda { |location|
-      case location
-      when String # treat it as a region, not looking for all string matches
-        joins(observations: :location).
-          where(Location[:name].matches("%#{location}"))
-      when Integer, Location
-        joins(:observations).where(observations: { location: location })
-      else
-        none
-      end
+    scope :at_locations, lambda { |locations|
+      location_ids = lookup_regions_by_name(locations)
+      with_correct_spelling.
+        joins(:observations).where(observations: { location: location_ids }).
+        distinct
     }
     # Names with Observations whose lat/lon are in a box
     # Pass kwargs (:north, :south, :east, :west), any order

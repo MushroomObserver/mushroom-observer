@@ -65,6 +65,40 @@ module Query::NamesTest
     assert_query(expects, :Name, by_editor: dick, by: :id)
   end
 
+  # non-arrays and arrays of strings don't work
+  def test_name_users
+    # users = users(:rolf).login
+    # expects = Name.where(user: users).index_order
+    # assert_query(expects, :Name, users: users)
+    users = [users(:rolf), users(:mary)].map(&:id)
+    expects = Name.where(user: users).index_order
+    assert_query(expects, :Name, users: users)
+    # users = [users(:rolf), users(:mary)].map(&:login)
+    # assert_query(expects, :Name, users: users)
+    users = [users(:rolf), users(:mary)]
+    assert_query(expects, :Name, users: users)
+  end
+
+  # Takes region strings or ids, but not instances
+  def test_name_locations
+    locations = [locations(:salt_point), locations(:gualala)].
+                map{ |x| x.id.to_s }
+    expects = Name.at_locations(locations).index_order
+    assert_query(expects, :Name, locations: locations)
+    # locations = [locations(:salt_point), locations(:gualala)]
+    # assert_query(expects, :Name, locations: locations)
+
+    locations = ["Sonoma Co., California, USA"]
+    expects = Name.at_locations(locations).index_order
+    assert_query(expects, :Name, locations: locations)
+  end
+
+  def test_name_species_lists
+    spl = [species_lists(:unknown_species_list).title]
+    expects = Name.on_species_lists(spl).index_order
+    assert_query(expects, :Name, species_lists: spl)
+  end
+
   def test_name_names_include_subtaxa_exclude_original
     assert_query(
       Name.index_order.subtaxa_of(names(:agaricus)),
@@ -89,11 +123,28 @@ module Query::NamesTest
     )
   end
 
-  def test_name_deprecated; end
-  def test_name_is_deprecated; end
-  def test_name_with_synonyms; end
-  def test_name_locations; end
-  def test_name_species_lists; end
+  def test_name_deprecated
+    expects = Name.deprecated.index_order
+    assert_query(expects, :Name, deprecated: :only)
+    expects = Name.not_deprecated.index_order
+    assert_query(expects, :Name, deprecated: :no)
+    expects = Name.index_order
+    assert_query(expects, :Name, deprecated: :either)
+  end
+
+  def test_name_is_deprecated
+    expects = Name.deprecated.index_order
+    assert_query(expects, :Name, is_deprecated: true)
+    expects = Name.not_deprecated.index_order
+    assert_query(expects, :Name, is_deprecated: false)
+  end
+
+  def test_name_with_synonyms
+    expects = Name.with_synonyms.index_order
+    assert_query(expects, :Name, with_synonyms: true)
+    expects = Name.without_synonyms.index_order
+    assert_query(expects, :Name, with_synonyms: false)
+  end
 
   def test_name_rank_single
     expects = Name.with_correct_spelling.with_rank("Family").index_order

@@ -680,10 +680,10 @@ class String
     dup.force_encoding("binary")[0].ord < 128
   end
 
-  # Clean a pattern for use in LIKE condition. Takes and returns a "%String%".
-  # This is a replacement for Query's method `clean_pattern`, without "%...%"
+  # Clean a pattern for use in LIKE condition. Takes and returns a String.
+  # This is a replacement for Query's method `clean_pattern`
   def clean_pattern
-    "%#{gsub(/[%'"\\]/) { |x| "\\#{x}" }.tr("*", "%")}%"
+    gsub(/[%'"\\]/) { |x| "\\#{x}" }.tr("*", "%")
   end
 
   # Returns percentage match between +self+ and +other+, where 1.0 means the two
