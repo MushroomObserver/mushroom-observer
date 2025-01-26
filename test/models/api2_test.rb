@@ -3130,8 +3130,8 @@ class API2Test < UnitTestCase
     # Can't use `rank` scope because it filters out misspellings, but
     # Query::Sequences :has_name does not.
     # names = Name.with_rank_at_or_below_genus
-    names = Name.where((Name[:rank] <= ranks[:Genus]).
-                       or(Name[:rank].eq(ranks[:Group])))
+    names = Name.where((Name[:rank] <= Name.ranks[:Genus]).
+                       or(Name[:rank].eq(Name.ranks[:Group])))
     with = Observation.where(name: names)
     without = Observation.where.not(name: names)
     assert(with.length > 1)
