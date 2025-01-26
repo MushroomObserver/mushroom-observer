@@ -13,8 +13,14 @@ module Location::Scopes
           -> { order(name: :asc, id: :desc) }
 
     scope :in_region, lambda { |place_name|
-      place_name = Location.reverse_name_if_necessary(place_name)
-      where(Location[:name].matches("%#{place_name}"))
+      region = Location.reverse_name_if_necessary(place_name)
+
+      if understood_continent?(region)
+        countries = countries_in_continent(region)
+        where(Location[:name] =~ ", (#{countries.join("|")})$")
+      else
+        where(Location[:name].matches("%#{region}"))
+      end
     }
     scope :name_contains,
           ->(phrase) { search_columns(Location[:name], phrase) }

@@ -34,6 +34,10 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         where(arel_table[:when].format("%Y-%m-%d") <= latest)
     }
 
+    scope :of_lichens,
+          -> { where(Observation[:lifeform].matches("%lichen%")) }
+    scope :not_lichens,
+          -> { where(Observation[:lifeform].does_not_match("% lichen %")) }
     # For activerecord subqueries, DON'T pre-map the primary key (id)
     scope :with_name,
           -> { where.not(name: Name.unknown) }

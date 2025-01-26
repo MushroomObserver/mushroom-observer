@@ -12,10 +12,13 @@ module Name::Scopes
     scope :index_order,
           -> { order(sort_name: :asc, id: :desc) }
 
-    scope :of_lichens,
-          -> { where(Name[:lifeform].matches("%lichen%")) }
-    scope :not_lichens,
-          -> { where(Name[:lifeform].does_not_match("% lichen %")) }
+    scope :of_lichens, lambda {
+      with_correct_spelling.where(Name[:lifeform].matches("%lichen%"))
+    }
+    scope :not_lichens, lambda {
+      with_correct_spelling.
+        where(Name[:lifeform].does_not_match("% lichen %"))
+    }
     scope :deprecated,
           -> { where(deprecated: true) }
     scope :not_deprecated,
@@ -59,6 +62,7 @@ module Name::Scopes
       where(Name[:text_name].matches("#{text_name} %"))
     }
     scope :subtaxa_of, lambda { |name|
+      name = find_by(text_name: name) if name.is_a?(String)
       if name.at_or_below_genus?
         # Subtaxa can be determined from the text_nam
         subtaxa_of_genus_or_below(name.text_name).
@@ -78,8 +82,9 @@ module Name::Scopes
     scope :in_clade,
           ->(name) { include_subtaxa_of(name) }
     scope :include_subtaxa_of, lambda { |name|
+      name = find_by(text_name: name) if name.is_a?(String)
       names = [name] + subtaxa_of(name)
-      where(id: names.map(&:id)).with_correct_spelling
+      with_correct_spelling.where(id: names.map(&:id))
     }
     scope :include_subtaxa_above_genus,
           ->(name) { include_subtaxa_of(name).with_rank_above_genus }
