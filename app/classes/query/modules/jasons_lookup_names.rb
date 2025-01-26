@@ -75,9 +75,9 @@ module Query::Modules::JasonsLookupNames
 
   def find_exact_name_matches(vals)
     vals.inject([]) do |result, val|
-      if /^\d+$/.match?(val.to_s)
+      if /^\d+$/.match?(val.to_s) # from an id
         result << minimal_name_data(Name.safe_find(val))
-      else
+      else # from a string
         result += find_matching_names(val)
       end
       result
