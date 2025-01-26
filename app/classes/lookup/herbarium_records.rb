@@ -4,6 +4,7 @@ class Lookup::HerbariumRecords < Lookup
   def initialize(vals, params = {})
     super
     @model = HerbariumRecord
+    @name_column = :id
   end
 
   def lookup_method(name)

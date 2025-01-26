@@ -4,6 +4,7 @@ class Lookup::Names < Lookup
   def initialize(vals, params = {})
     super
     @model = Name
+    @name_column = :search_name
   end
 
   def lookup_instances

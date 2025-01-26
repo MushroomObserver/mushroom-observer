@@ -4,6 +4,7 @@ class Lookup::Locations < Lookup
   def initialize(vals, params = {})
     super
     @model = Location
+    @name_column = :name
   end
 
   def lookup_method(name)

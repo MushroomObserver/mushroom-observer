@@ -26,6 +26,10 @@ class Lookup
     @instances ||= lookup_instances
   end
 
+  def titles
+    @titles ||= lookup_titles_from_instances
+  end
+
   def lookup_ids
     return [] unless @vals
 
@@ -38,6 +42,10 @@ class Lookup
 
     @vals = [@vals] unless @vals.is_a?(Array)
     evaluate_values_as_instances
+  end
+
+  def lookup_titles
+    @instances.map(&:"#{@name_column}")
   end
 
   # This is checking for an instance, then sanity-checking for an instance of

@@ -4,6 +4,7 @@ class Lookup::ProjectSpeciesLists < Lookup
   def initialize(vals, params = {})
     super
     @model = SpeciesList
+    @name_column = :title
   end
 
   def ids
