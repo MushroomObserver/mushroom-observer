@@ -12,8 +12,7 @@ module Name::Scopes
     scope :index_order,
           -> { order(sort_name: :asc, id: :desc) }
 
-    ### Module Name::Spelling.
-    # with_correct_spelling is tacked on to most Name queries.
+    # NOTE: with_correct_spelling is tacked on to most Name queries.
     scope :with_correct_spelling,
           -> { where(correct_spelling_id: nil) }
     scope :with_incorrect_spelling,
