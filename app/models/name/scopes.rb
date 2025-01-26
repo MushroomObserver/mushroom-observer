@@ -58,22 +58,34 @@ module Name::Scopes
         where(Name[:rank].not_eq(ranks[:Group]))
     }
     scope :subtaxa_of_genus_or_below, lambda { |text_name|
-      # Note small diff w :text_name_contains scope
+      # Note the space " " difference from :text_name_contains scope
       where(Name[:text_name].matches("#{text_name} %"))
     }
-    scope :subtaxa_of, lambda { |name|
+    scope :subtaxa_of, lambda { |name, exclude_original = true|
       name = find_by(text_name: name) if name.is_a?(String)
-      if name.at_or_below_genus?
-        # Subtaxa can be determined from the text_nam
-        subtaxa_of_genus_or_below(name.text_name).
-          with_correct_spelling
-      else
-        # Need to examine the classification strings
-        with_rank_and_name_in_classification(name.rank, name.text_name).
-          with_correct_spelling
-      end
+      scope = if name.at_or_below_genus?
+                # Subtaxa can be determined from the text_name
+                subtaxa_of_genus_or_below(name.text_name).
+                  with_correct_spelling
+              else
+                # Need to examine the classification strings
+                with_rank_and_name_in_classification(name.rank, name.text_name).
+                  with_correct_spelling
+              end
+      scope = scope.or(Name.where(id: name.id)) unless exclude_original == true
+      scope
     }
-
+    # needed for query
+    scope :immediate_subtaxa_of, lambda { |name, exclude_original = true|
+      name = find_by(text_name: name) if name.is_a?(String)
+      scope = if ranks_above_genus.include?(name.rank)
+                subtaxa_of(name).with_rank(ranks[name.rank] - 1)
+              else
+                subtaxa_of(name)
+              end
+      scope = scope.or(Name.where(id: name.id)) unless exclude_original == true
+      scope
+    }
     ### Pattern Search
     scope :include_synonyms_of, lambda { |name|
       where(id: name.synonyms.map(&:id)).with_correct_spelling
@@ -83,11 +95,19 @@ module Name::Scopes
           ->(name) { include_subtaxa_of(name) }
     scope :include_subtaxa_of, lambda { |name|
       name = find_by(text_name: name) if name.is_a?(String)
-      names = [name] + subtaxa_of(name)
-      with_correct_spelling.where(id: names.map(&:id))
+      # names = [name] + subtaxa_of(name)
+      # with_correct_spelling.where(id: names.map(&:id))
+      subtaxa_of(name, false) # include original name
+    }
+    scope :include_immediate_subtaxa_of, lambda { |name|
+      name = find_by(text_name: name) if name.is_a?(String)
+      # names = [name] + immediate_subtaxa_of(name)
+      # with_correct_spelling.where(id: names.map(&:id))
+      immediate_subtaxa_of(name, false) # include original name
     }
     scope :include_subtaxa_above_genus,
           ->(name) { include_subtaxa_of(name).with_rank_above_genus }
+
     scope :text_name_contains,
           ->(phrase) { search_columns(Name[:text_name], phrase) }
     scope :search_name_contains,

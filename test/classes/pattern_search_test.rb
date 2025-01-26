@@ -744,12 +744,12 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_lichen
-    expect = Observation.where(name: Name.of_lichens)
+    expect = Observation.of_lichens
     assert_not_empty(expect)
     x = PatternSearch::Observation.new("lichen:yes")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
 
-    expect = Observation.where(name: Name.not_lichens)
+    expect = Observation.not_lichens
     assert_not_empty(expect)
     x = PatternSearch::Observation.new("lichen:false")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
