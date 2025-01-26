@@ -86,7 +86,7 @@ module Query::LookupNamesTest
     assert_lookup_names_by_name([name2, name3], names: ["Peltigera"])
     assert_lookup_names_by_name([name2, name3], names: ["Petigera"])
     assert_lookup_names_by_name([name1, name2, name3, name4, name5, name6,
-                                name7],
+                                 name7],
                                 names: ["Peltigeraceae"],
                                 include_subtaxa: true)
     assert_lookup_names_by_name([name1, name2, name3],
