@@ -89,6 +89,12 @@ module Query::NamesTest
     )
   end
 
+  def test_name_deprecated; end
+  def test_name_is_deprecated; end
+  def test_name_with_synonyms; end
+  def test_name_locations; end
+  def test_name_species_lists; end
+
   def test_name_rank_single
     expects = Name.with_correct_spelling.with_rank("Family").index_order
     assert_query(expects, :Name, rank: "Family")
@@ -103,6 +109,18 @@ module Query::NamesTest
     expects = Name.with_correct_spelling.with_rank("Family").index_order
     assert_query(expects, :Name, rank: %w[Family Family])
   end
+
+  def test_name_text_name_has; end
+  def test_name_with_author; end
+  def test_name_author_has; end
+  def test_name_with_citation; end
+  def test_name_citation_has; end
+  def test_name_with_classification; end
+  def test_name_classification_has; end
+  def test_name_with_notes; end
+  def test_name_notes_has; end
+  def test_name_with_comments; end
+  def test_name_comments_has; end
 
   def test_name_pattern_search
     assert_query(
