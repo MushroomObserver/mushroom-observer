@@ -149,10 +149,10 @@ module Query::ImagesTest
 
   def test_image_advanced_search_content
     assert_query(Image.index_order.
-                 search_content_observation_and_comments("little"),
+                 advanced_search("little"),
                  :Image, content: "little")
     assert_query(Image.index_order.
-                 search_content_observation_and_comments("fruiting"),
+                 advanced_search("fruiting"),
                  :Image, content: "fruiting")
   end
 
@@ -166,32 +166,32 @@ module Query::ImagesTest
   end
 
   def test_image_pattern_search_name
-    assert_query(Image.index_order.search_content_name_and_location("agaricus"),
+    assert_query(Image.index_order.pattern_search("agaricus"),
                  :Image, pattern: "agaricus") # name
   end
 
   def test_image_pattern_search_copyright_holder
-    assert_query(Image.index_order.search_content_name_and_location("bob dob"),
+    assert_query(Image.index_order.pattern_search("bob dob"),
                  :Image, pattern: "bob dob") # copyright holder
   end
 
   def test_image_pattern_search_notes
     assert_query(
       Image.index_order.
-      search_content_name_and_location("looked gorilla OR original"),
+      pattern_search("looked gorilla OR original"),
       :Image, pattern: "looked gorilla OR original" # notes
     )
     assert_query(Image.index_order.
-                 search_content_name_and_location("notes some"),
+                 pattern_search("notes some"),
                  :Image, pattern: "notes some") # notes
     assert_query(
-      Image.index_order.search_content_name_and_location("dobbs -notes"),
+      Image.index_order.pattern_search("dobbs -notes"),
       :Image, pattern: "dobbs -notes" # (c), not notes
     )
   end
 
   def test_image_pattern_search_original_filename
-    assert_query(Image.index_order.search_content_name_and_location("DSCN8835"),
+    assert_query(Image.index_order.pattern_search("DSCN8835"),
                  :Image, pattern: "DSCN8835") # original filename
   end
 

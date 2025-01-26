@@ -349,14 +349,14 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
     # The "advanced search" scope for "content". Unexpectedly, merge/or is
     # faster than concatting the Obs and Comment columns together.
-    scope :search_notes_and_comments, lambda { |phrase|
+    scope :advanced_search, lambda { |phrase|
       comments = Observation.comments_contain(phrase).map(&:id)
       notes_contain(phrase).distinct.
         or(Observation.where(id: comments).distinct)
     }
-    # Scope used by PatternSearch. It checks Name[:search_name], which includes
-    # the author (unlike Observation[:text_name]) and is not cached on the obs
-    scope :search_location_and_name, lambda { |phrase|
+    # Checks Name[:search_name], which includes the author
+    # (unlike Observation[:text_name]) and is not cached on the obs
+    scope :pattern_search, lambda { |phrase|
       ids = name_search_name_observation_ids(phrase)
       ids += search_columns(Observation[:where], phrase).map(&:id)
       where(id: ids).distinct
