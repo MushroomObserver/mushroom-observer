@@ -39,38 +39,39 @@ module Name::Scopes
 
     ### Module Name::Taxonomy. Rank scopes take text values, e.g. "Genus"
     scope :with_rank,
-          ->(rank) { where(rank: ranks[rank]) if rank }
+          ->(rank) { with_correct_spelling.where(rank: ranks[rank]) if rank }
     scope :with_rank_between, lambda { |min, max = min|
       return with_rank(min) if min == max
 
-      where(Name[:rank].in(rank_range(min, max)))
+      with_correct_spelling.where(Name[:rank].in(rank_range(min, max)))
     }
-    scope :with_rank_below,
-          ->(rank) { where(Name[:rank] < ranks[rank]) if rank }
+    scope :with_rank_below, lambda { |rank|
+      with_correct_spelling.where(Name[:rank] < ranks[rank]) if rank
+    }
     scope :with_rank_and_name_in_classification, lambda { |rank, text_name|
-      where(Name[:classification].matches("%#{rank}: _#{text_name}_%"))
+      with_correct_spelling.
+        where(Name[:classification].matches("%#{rank}: _#{text_name}_%"))
     }
     scope :with_rank_at_or_below_genus, lambda {
-      where((Name[:rank] <= ranks[:Genus]).or(Name[:rank].eq(ranks[:Group])))
+      with_correct_spelling.
+        where((Name[:rank] <= ranks[:Genus]).or(Name[:rank].eq(ranks[:Group])))
     }
     scope :with_rank_above_genus, lambda {
-      where(Name[:rank] > ranks[:Genus]).
+      with_correct_spelling.where(Name[:rank] > ranks[:Genus]).
         where(Name[:rank].not_eq(ranks[:Group]))
     }
     scope :subtaxa_of_genus_or_below, lambda { |text_name|
       # Note the space " " difference from :text_name_contains scope
-      where(Name[:text_name].matches("#{text_name} %"))
+      with_correct_spelling.where(Name[:text_name].matches("#{text_name} %"))
     }
     scope :subtaxa_of, lambda { |name, exclude_original = true|
       name = find_by(text_name: name) if name.is_a?(String)
       scope = if name.at_or_below_genus?
                 # Subtaxa can be determined from the text_name
-                subtaxa_of_genus_or_below(name.text_name).
-                  with_correct_spelling
+                subtaxa_of_genus_or_below(name.text_name)
               else
                 # Need to examine the classification strings
-                with_rank_and_name_in_classification(name.rank, name.text_name).
-                  with_correct_spelling
+                with_rank_and_name_in_classification(name.rank, name.text_name)
               end
       scope = scope.or(Name.where(id: name.id)) unless exclude_original == true
       scope
@@ -88,7 +89,7 @@ module Name::Scopes
     }
     ### Pattern Search
     scope :include_synonyms_of, lambda { |name|
-      where(id: name.synonyms.map(&:id)).with_correct_spelling
+      with_correct_spelling.where(id: name.synonyms.map(&:id))
     }
     # alias of `include_subtaxa_of`
     scope :in_clade,
@@ -108,37 +109,44 @@ module Name::Scopes
     scope :include_subtaxa_above_genus,
           ->(name) { include_subtaxa_of(name).with_rank_above_genus }
 
-    scope :text_name_contains,
-          ->(phrase) { search_columns(Name[:text_name], phrase) }
-    scope :search_name_contains,
-          ->(phrase) { search_columns(Name[:search_name], phrase) }
+    scope :text_name_contains, lambda { |phrase|
+      with_correct_spelling.search_columns(Name[:text_name], phrase)
+    }
+    scope :search_name_contains, lambda { |phrase|
+      with_correct_spelling.search_columns(Name[:search_name], phrase)
+    }
     scope :with_classification,
-          -> { where(Name[:classification].not_blank) }
+          -> { with_correct_spelling.where(Name[:classification].not_blank) }
     scope :without_classification,
-          -> { where(Name[:classification].blank) }
-    scope :classification_contains,
-          ->(phrase) { search_columns(Name[:classification], phrase) }
+          -> { with_correct_spelling.where(Name[:classification].blank) }
+    scope :classification_contains, lambda { |phrase|
+      with_correct_spelling.search_columns(Name[:classification], phrase)
+    }
     scope :with_author,
-          -> { where(Name[:author].not_blank) }
+          -> { with_correct_spelling.where(Name[:author].not_blank) }
     scope :without_author,
-          -> { where(Name[:author].blank) }
-    scope :author_contains,
-          ->(phrase) { search_columns(Name[:author], phrase) }
+          -> { with_correct_spelling.where(Name[:author].blank) }
+    scope :author_contains, lambda { |phrase|
+      with_correct_spelling.search_columns(Name[:author], phrase)
+    }
     scope :with_citation,
-          -> { where(Name[:citation].not_blank) }
+          -> { with_correct_spelling.where(Name[:citation].not_blank) }
     scope :without_citation,
-          -> { where(Name[:citation].blank) }
-    scope :citation_contains,
-          ->(phrase) { search_columns(Name[:citation], phrase) }
+          -> { with_correct_spelling.where(Name[:citation].blank) }
+    scope :citation_contains, lambda { |phrase|
+      with_correct_spelling.search_columns(Name[:citation], phrase)
+    }
     scope :with_notes,
-          -> { where(Name[:notes].not_blank) }
+          -> { with_correct_spelling.where(Name[:notes].not_blank) }
     scope :without_notes,
-          -> { where(Name[:notes].blank) }
-    scope :notes_contain,
-          ->(phrase) { search_columns(Name[:notes], phrase) }
+          -> { with_correct_spelling.where(Name[:notes].blank) }
+    scope :notes_contain, lambda { |phrase|
+      with_correct_spelling.search_columns(Name[:notes], phrase)
+    }
     # A search of all searchable Name fields, concatenated.
-    scope :search_content,
-          ->(phrase) { search_columns(Name.searchable_columns, phrase) }
+    scope :search_content, lambda { |phrase|
+      with_correct_spelling.search_columns(Name.searchable_columns, phrase)
+    }
     # A more comprehensive search of Name fields, plus descriptions/comments.
     scope :search_content_and_associations, lambda { |phrase|
       fields = Name.search_content(phrase).map(&:id)
@@ -148,11 +156,13 @@ module Name::Scopes
     }
 
     scope :with_comments,
-          -> { joins(:comments).distinct }
+          -> { with_correct_spelling.joins(:comments).distinct }
     scope :without_comments,
-          -> { where.not(id: with_comments) }
-    scope :comments_contain,
-          ->(phrase) { joins(:comments).merge(Comment.search_content(phrase)) }
+          -> { with_correct_spelling.where.not(id: with_comments) }
+    scope :comments_contain, lambda { |phrase|
+      with_correct_spelling.joins(:comments).
+        merge(Comment.search_content(phrase))
+    }
 
     scope :with_description,
           -> { with_correct_spelling.where.not(description_id: nil) }
@@ -164,27 +174,30 @@ module Name::Scopes
     scope :description_needed,
           -> { without_description.joins(:observations).distinct }
     scope :description_contains, lambda { |phrase|
-      joins(:descriptions).
+      with_correct_spelling.joins(:descriptions).
         merge(NameDescription.search_content(phrase)).distinct
     }
     scope :with_description_in_project, lambda { |project|
-      joins(descriptions: :project).
+      with_correct_spelling.joins(descriptions: :project).
         merge(NameDescription.where(project: project))
     }
     scope :with_description_created_by, lambda { |user|
-      joins(:descriptions).merge(NameDescription.where(user: user))
+      with_correct_spelling.
+        joins(:descriptions).merge(NameDescription.where(user: user))
     }
     scope :with_description_reviewed_by, lambda { |user|
-      joins(:descriptions).merge(NameDescription.where(reviewer: user))
+      with_correct_spelling.
+        joins(:descriptions).merge(NameDescription.where(reviewer: user))
     }
     scope :with_description_of_type, lambda { |source|
       # Check that it's a valid source type (string enum value)
       return none if Description::ALL_SOURCE_TYPES.exclude?(source)
 
-      joins(:descriptions).merge(NameDescription.where(source_type: source))
+      with_correct_spelling.
+        joins(:descriptions).merge(NameDescription.where(source_type: source))
     }
     scope :with_description_classification_differing, lambda {
-      joins(:description).
+      with_correct_spelling.joins(:description).
         where(rank: 0..Name.ranks[:Genus]).
         where(NameDescription[:classification].not_eq(Name[:classification])).
         where(NameDescription[:classification].not_blank)
@@ -206,7 +219,8 @@ module Name::Scopes
     # Names with Observations whose lat/lon are in a box
     # Pass kwargs (:north, :south, :east, :west), any order
     scope :in_box, lambda { |**args|
-      joins(:observations).merge(Observation.in_box(**args)).distinct
+      with_correct_spelling.
+        joins(:observations).merge(Observation.in_box(**args)).distinct
     }
 
     ### Specialized Scopes for Name::Create

@@ -82,7 +82,7 @@ module Query::NamesTest
   # Takes region strings or ids, but not instances
   def test_name_locations
     locations = [locations(:salt_point), locations(:gualala)].
-                map{ |x| x.id.to_s }
+                map { |x| x.id.to_s }
     expects = Name.at_locations(locations).index_order
     assert_query(expects, :Name, locations: locations)
     # locations = [locations(:salt_point), locations(:gualala)]
@@ -123,12 +123,12 @@ module Query::NamesTest
     )
   end
 
-  def test_name_deprecated
+  def test_name_deprecated_only
     expects = Name.deprecated.index_order
     assert_query(expects, :Name, deprecated: :only)
     expects = Name.not_deprecated.index_order
     assert_query(expects, :Name, deprecated: :no)
-    expects = Name.index_order
+    expects = Name.with_correct_spelling.index_order
     assert_query(expects, :Name, deprecated: :either)
   end
 
@@ -147,31 +147,87 @@ module Query::NamesTest
   end
 
   def test_name_rank_single
-    expects = Name.with_correct_spelling.with_rank("Family").index_order
+    expects = Name.with_rank("Family").index_order
     assert_query(expects, :Name, rank: "Family")
   end
 
   # NOTE: Something is wrong in the fixtures between Genus and Family
   def test_name_rank_range
-    expects = Name.with_correct_spelling.
-              with_rank_between("Genus", "Kingdom").index_order
+    expects = Name.with_rank_between("Genus", "Kingdom").index_order
     assert_query(expects, :Name, rank: %w[Genus Kingdom])
 
-    expects = Name.with_correct_spelling.with_rank("Family").index_order
+    expects = Name.with_rank("Family").index_order
     assert_query(expects, :Name, rank: %w[Family Family])
   end
 
-  def test_name_text_name_has; end
-  def test_name_with_author; end
-  def test_name_author_has; end
-  def test_name_with_citation; end
-  def test_name_citation_has; end
-  def test_name_with_classification; end
-  def test_name_classification_has; end
-  def test_name_with_notes; end
-  def test_name_notes_has; end
-  def test_name_with_comments; end
-  def test_name_comments_has; end
+  def test_name_text_name_has
+    expects = Name.text_name_contains("Agaricus").index_order
+    assert_query(expects, :Name, text_name_has: "Agaricus")
+  end
+
+  def test_name_with_author
+    expects = Name.with_author.index_order
+    assert_query(expects, :Name, with_author: true)
+    expects = Name.without_author.index_order
+    assert_query(expects, :Name, with_author: false)
+  end
+
+  def test_name_author_has
+    expects = Name.author_contains("Pers.").index_order
+    assert_query(expects, :Name, author_has: "Pers.")
+  end
+
+  def test_name_with_citation
+    expects = Name.with_citation.index_order
+    assert_query(expects, :Name, with_citation: true)
+    expects = Name.without_citation.index_order
+    assert_query(expects, :Name, with_citation: false)
+  end
+
+  def test_name_citation_has
+    expects = Name.citation_contains("Lichenes").index_order
+    assert_query(expects, :Name, citation_has: "Lichenes")
+  end
+
+  def test_name_with_classification
+    expects = Name.with_classification.index_order
+    assert_query(expects, :Name, with_classification: true)
+    expects = Name.without_classification.index_order
+    assert_query(expects, :Name, with_classification: false)
+  end
+
+  def test_name_classification_has
+    expects = Name.classification_contains("Tremellales").index_order
+    assert_query(expects, :Name, classification_has: "Tremellales")
+  end
+
+  def test_name_with_notes
+    expects = Name.with_notes.index_order
+    assert_query(expects, :Name, with_notes: true)
+    expects = Name.without_notes.index_order
+    assert_query(expects, :Name, with_notes: false)
+  end
+
+  def test_name_notes_has
+    expects = Name.notes_contain('"at least one"').index_order
+    assert_query(expects, :Name, notes_has: '"at least one"')
+  end
+
+  def test_name_with_comments_true
+    expects = Name.with_comments.index_order
+    assert_query(expects, :Name, with_comments: true)
+  end
+
+  # Note that this is not a withOUT comments condition
+  def test_name_with_comments_false
+    expects = Name.with_correct_spelling.index_order
+    assert_query(expects, :Name, with_comments: false)
+  end
+
+  def test_name_comments_has
+    expects = Name.comments_contain('"messes things up"').index_order
+    assert_query(expects, :Name, comments_has: '"messes things up"')
+  end
 
   def test_name_pattern_search
     assert_query(
