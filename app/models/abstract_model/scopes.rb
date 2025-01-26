@@ -293,7 +293,7 @@ module AbstractModel::Scopes
 
     def lookup_locations_by_name(vals)
       lookup_object_ids_by_name(vals) do |name|
-        pattern = Location.clean_name(name).clean_pattern
+        pattern = Location.clean_name(name.to_s).clean_pattern
         Location.name_contains(pattern)
       end
     end
@@ -301,7 +301,7 @@ module AbstractModel::Scopes
     def lookup_regions_by_name(vals)
       lookup_object_ids_by_name(vals) do |name|
         # does not lowercase it, because we want a match to the end of string
-        pattern = name.clean_pattern
+        pattern = name.to_s.clean_pattern
         Location.in_region(pattern)
       end
     end

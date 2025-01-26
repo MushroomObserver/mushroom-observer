@@ -3611,36 +3611,36 @@ class NameTest < UnitTestCase
     )
   end
 
-  def test_scope_on_species_list
+  def test_scope_on_species_lists
     assert_includes(
-      Name.on_species_list(species_lists(:unknown_species_list)), names(:fungi)
+      Name.on_species_lists(species_lists(:unknown_species_list)), names(:fungi)
     )
-    assert_empty(Name.on_species_list(species_lists(:first_species_list)))
+    assert_empty(Name.on_species_lists(species_lists(:first_species_list)))
   end
 
-  def test_scope_at_location
+  def test_scope_at_locations
     assert_includes(
-      Name.at_location(locations(:burbank)), # at location called with Location
+      Name.at_locations(locations(:burbank)), # at location called with Location
       names(:agaricus_campestris)
     )
     assert_includes(
-      Name.at_location(locations(:burbank).id), # at location called with id
+      Name.at_locations(locations(:burbank).id), # at location called with id
       names(:agaricus_campestris)
     )
     assert_includes(
-      Name.at_location(locations(:burbank).name), # called with string
+      Name.at_locations(locations(:burbank).name), # called with string
       names(:agaricus_campestris)
     )
     assert_includes(
-      Name.at_location(locations(:california).name), # region
+      Name.at_locations(locations(:california).name), # region
       names(:agaricus_campestris)
     )
     assert_not_includes(
-      Name.at_location(locations(:obs_default_location)),
+      Name.at_locations(locations(:obs_default_location)),
       names(:notification_but_no_observation)
     )
     assert_empty(
-      Name.at_location({}),
+      Name.at_locations({}),
       "Name.at_location should be empty if called with bad argument class"
     )
   end
