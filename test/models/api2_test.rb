@@ -1792,7 +1792,7 @@ class API2Test < UnitTestCase
     )
     assert_api_results(names)
 
-    names = Name.with_correct_spelling.classification_includes("Fungi").
+    names = Name.with_correct_spelling.classification_contains("Fungi").
             map do |n|
       genus = n.text_name.split.first
       Name.where(Name[:text_name].matches("#{genus} %")) + [n]
@@ -1904,22 +1904,22 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(has_description: "no"))
     assert_api_results(without)
 
-    names = Name.with_correct_spelling.text_name_includes("bunny")
+    names = Name.with_correct_spelling.text_name_contains("bunny")
     assert_not_empty(names)
     assert_api_pass(params.merge(text_name_has: "bunny"))
     assert_api_results(names)
 
-    names = Name.with_correct_spelling.author_includes("peck")
+    names = Name.with_correct_spelling.author_contains("peck")
     assert_not_empty(names)
     assert_api_pass(params.merge(author_has: "peck"))
     assert_api_results(names)
 
-    names = Name.with_correct_spelling.citation_includes("lichenes")
+    names = Name.with_correct_spelling.citation_contains("lichenes")
     assert_not_empty(names)
     assert_api_pass(params.merge(citation_has: "lichenes"))
     assert_api_results(names)
 
-    names = Name.with_correct_spelling.classification_includes("lecanorales")
+    names = Name.with_correct_spelling.classification_contains("lecanorales")
     assert_not_empty(names)
     assert_api_pass(params.merge(classification_has: "lecanorales"))
     assert_api_results(names)
