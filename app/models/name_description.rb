@@ -65,6 +65,8 @@
 class NameDescription < Description
   require "acts_as_versioned"
 
+  include Description::Scopes
+
   # Do not change the integer associated with a value
   enum :review_status, { unreviewed: 1, unvetted: 2, vetted: 3, inaccurate: 4 }
 
@@ -100,6 +102,11 @@ class NameDescription < Description
   has_many :editors, through: :name_description_editors,
                      source: :user
 
+  scope :index_order, lambda {
+    joins(:name).order(Name[:sort_name].asc, NameDescription[:created_at].asc,
+                       NameDescription[:id].desc)
+  }
+
   scope :for_eol_export, lambda {
     where(review_status: review_statuses.values_at(
       "unvetted", "vetted"
@@ -108,21 +115,9 @@ class NameDescription < Description
       where(ok_for_export: true).
       where(public: true)
   }
+
   scope :show_includes, lambda {
     strict_loading
-  }
-  scope :is_default, lambda {
-    joins(:name).where(Name[:description_id].not_eq(nil))
-  }
-  scope :is_not_default, lambda {
-    joins(:name).where(Name[:description_id].eq(nil))
-  }
-  # scope searching note content. must use search condition and coalesce fields
-  # scope :notes_has, lambda {
-  # }
-  scope :index_order, lambda {
-    joins(:name).order(Name[:sort_name].asc, NameDescription[:created_at].asc,
-                       NameDescription[:id].desc)
   }
 
   EOL_NOTE_FIELDS = [
@@ -131,6 +126,7 @@ class NameDescription < Description
   ALL_NOTE_FIELDS = (
     [:classification] + EOL_NOTE_FIELDS + [:refs, :notes]
   ).freeze
+  SEARCHABLE_FIELDS = ALL_NOTE_FIELDS
 
   acts_as_versioned(
     if_changed: ALL_NOTE_FIELDS,

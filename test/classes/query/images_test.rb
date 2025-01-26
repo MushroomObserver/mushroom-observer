@@ -9,6 +9,70 @@ module Query::ImagesTest
     assert_query(expects, :Image)
   end
 
+  def test_image_size
+    expects = Image.index_order.with_sizes(:thumbnail)
+    assert_query(expects, :Image, size: :thumbnail)
+  end
+
+  def test_image_content_types
+    expects = Image.index_order.with_content_types(%w[jpg gif png])
+    assert_query(expects, :Image, content_types: %w[jpg gif png])
+    expects = Image.index_order.with_content_types(%w[raw])
+    assert_query(expects, :Image, content_types: %w[raw])
+  end
+
+  def test_image_with_notes
+    expects = Image.index_order.with_notes
+    assert_query(expects, :Image, with_notes: true)
+    expects = Image.index_order.without_notes
+    assert_query(expects, :Image, with_notes: false)
+  end
+
+  def test_image_notes_has
+    expects = Image.index_order.notes_contain('"looked like"')
+    assert_query(expects, :Image, notes_has: '"looked like"')
+    expects = Image.index_order.notes_contain("illustration -convex")
+    assert_query(expects, :Image, notes_has: "illustration -convex")
+  end
+
+  def test_image_copyright_holder_has
+    expects = Image.index_order.copyright_holder_contains('"Insil Choi"')
+    assert_query(expects, :Image, copyright_holder_has: '"Insil Choi"')
+  end
+
+  def test_image_license
+    expects = Image.index_order.with_license(License.preferred)
+    assert_query(expects, :Image, license: License.preferred)
+  end
+
+  def test_image_with_votes
+    expects = Image.index_order.with_votes
+    assert_query(expects, :Image, with_votes: true)
+    expects = Image.index_order.without_votes
+    assert_query(expects, :Image, with_votes: false)
+  end
+
+  def test_image_quality
+    expects = Image.index_order.with_quality(50)
+    assert_query(expects, :Image, quality: 50)
+    expects = Image.index_order.with_quality(30, 50)
+    assert_query(expects, :Image, quality: [30, 50])
+  end
+
+  def test_image_confidence
+    expects = Image.index_order.with_confidence(50)
+    assert_query(expects, :Image, confidence: 50)
+    expects = Image.index_order.with_confidence(30, 50)
+    assert_query(expects, :Image, confidence: [30, 50])
+  end
+
+  def test_image_ok_for_export
+    expects = Image.index_order.ok_for_export
+    assert_query(expects, :Image, ok_for_export: true)
+    expects = Image.index_order.not_ok_for_export
+    assert_query(expects, :Image, ok_for_export: false)
+  end
+
   def test_image_for_observations
     obs = observations(:two_img_obs)
     expects = Image.index_order.joins(:observations).
@@ -78,15 +142,17 @@ module Query::ImagesTest
 
   def test_image_advanced_search_user
     expects = Image.index_order.joins(observations: :user).
-              where(observations: { user: mary }).
-              order(Image[:created_at].desc, Image[:id].desc).uniq
+              where(observations: { user: mary }).distinct.
+              order(Image[:created_at].desc, Image[:id].desc)
     assert_query(expects, :Image, user: "mary")
   end
 
   def test_image_advanced_search_content
-    assert_query([images(:turned_over_image).id, images(:in_situ_image).id],
+    assert_query(Image.index_order.
+                 advanced_search("little"),
                  :Image, content: "little")
-    assert_query([images(:connected_coprinus_comatus_image).id],
+    assert_query(Image.index_order.
+                 advanced_search("fruiting"),
                  :Image, content: "fruiting")
   end
 
@@ -99,27 +165,34 @@ module Query::ImagesTest
                  :Image, content: "little", user_where: "burbank")
   end
 
-  def test_image_pattern_search
-    assert_query([images(:agaricus_campestris_image).id],
+  def test_image_pattern_search_name
+    assert_query(Image.index_order.pattern_search("agaricus"),
                  :Image, pattern: "agaricus") # name
-    assert_query([images(:agaricus_campestris_image).id,
-                  images(:connected_coprinus_comatus_image).id,
-                  images(:turned_over_image).id,
-                  images(:in_situ_image).id],
+  end
+
+  def test_image_pattern_search_copyright_holder
+    assert_query(Image.index_order.pattern_search("bob dob"),
                  :Image, pattern: "bob dob") # copyright holder
+  end
+
+  def test_image_pattern_search_notes
     assert_query(
-      [images(:in_situ_image).id],
+      Image.index_order.
+      pattern_search("looked gorilla OR original"),
       :Image, pattern: "looked gorilla OR original" # notes
     )
-    assert_query([images(:agaricus_campestris_image).id,
-                  images(:connected_coprinus_comatus_image).id],
+    assert_query(Image.index_order.
+                 pattern_search("notes some"),
                  :Image, pattern: "notes some") # notes
     assert_query(
-      [images(:turned_over_image).id, images(:in_situ_image).id],
+      Image.index_order.pattern_search("dobbs -notes"),
       :Image, pattern: "dobbs -notes" # (c), not notes
     )
-    assert_query([images(:in_situ_image).id], :Image,
-                 pattern: "DSCN8835") # original filename
+  end
+
+  def test_image_pattern_search_original_filename
+    assert_query(Image.index_order.pattern_search("DSCN8835"),
+                 :Image, pattern: "DSCN8835") # original filename
   end
 
   def test_image_with_observations

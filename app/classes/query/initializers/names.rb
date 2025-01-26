@@ -40,6 +40,13 @@ module Query::Initializers::Names
     where << "names.deprecated IS TRUE"  if val == :only
   end
 
+  def initialize_is_deprecated_parameter
+    add_boolean_condition(
+      "names.deprecated IS TRUE", "names.deprecated IS FALSE",
+      params[:is_deprecated]
+    )
+  end
+
   def add_rank_condition(vals, *)
     return if vals.empty?
 
@@ -52,13 +59,6 @@ module Query::Initializers::Names
     ranks = all_ranks[a..b].map { |r| Name.ranks[r] }
     @where << "names.`rank` IN (#{ranks.join(",")})"
     add_joins(*)
-  end
-
-  def initialize_is_deprecated_parameter
-    add_boolean_condition(
-      "names.deprecated IS TRUE", "names.deprecated IS FALSE",
-      params[:is_deprecated]
-    )
   end
 
   def initialize_name_association_parameters
