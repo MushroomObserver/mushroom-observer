@@ -26,20 +26,21 @@ module Location::Scopes
           ->(phrase) { search_columns(Location[:notes], phrase) }
     scope :search_content,
           ->(phrase) { search_columns(Location.searchable_columns, phrase) }
-    # More comprehensive search of Location fields, plus descriptions/comments.
-    scope :search_content_and_associations, lambda { |phrase|
-      fields = Location.search_content(phrase).map(&:id)
-      comments = Location.comments_contain(phrase).map(&:id)
-      descs = Location.description_contains(phrase).map(&:id)
-      where(id: fields + comments + descs).distinct
+    # Location[:name] + descriptions, Observation[:notes] + comments
+    # Does not search location notes or location comments.
+    scope :advanced_search, lambda { |phrase|
+      ids = Location.name_contains(phrase).map(&:id)
+      ids += Location.description_contains(phrase).map(&:id)
+      ids += Observation.advanced_search(phrase).
+             includes(:location).map(&:location).flatten.uniq
+      where(id: ids).distinct
     }
-
-    scope :with_comments,
-          -> { joins(:comments).distinct }
-    scope :without_comments,
-          -> { where.not(id: with_comments) }
-    scope :comments_contain,
-          ->(phrase) { joins(:comments).merge(Comment.search_content(phrase)) }
+    # Does not search location notes, observation notes or comments on either.
+    scope :pattern_search, lambda { |phrase|
+      cols = Location[:name] + LocationDescription.searchable_columns
+      left_outer_joins(:descriptions).search_columns(cols, phrase)
+    }
+    # We do not yet support location comment queries.
 
     scope :with_description,
           -> { where.not(description_id: nil) }

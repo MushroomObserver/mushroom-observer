@@ -83,6 +83,7 @@ class Query::Locations < Query::Base
     add_owner_and_time_stamp_conditions
     add_by_user_condition
     add_by_editor_condition
+    initialize_location_notes_parameters
     add_pattern_condition
     add_regexp_condition
     add_advanced_search_conditions

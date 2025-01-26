@@ -12,6 +12,8 @@ module Query::Params::Locations
       users?: [User],
       pattern?: :string,
       regexp?: :string,
+      with_notes?: :boolean,
+      notes_has?: :string,
       with_descriptions?: :boolean,
       with_observations?: :boolean
     }
