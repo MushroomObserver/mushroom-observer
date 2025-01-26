@@ -6,6 +6,10 @@ class Lookup::Names < Lookup
     @model = Name
   end
 
+  def lookup_instances
+    @ids.map { |id| Name.find(id) }
+  end
+
   def lookup_ids
     unless (@vals = params[:names])
       complain_about_unused_flags!(args)
