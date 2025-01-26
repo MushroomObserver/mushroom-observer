@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# Helper methods to help parsing Name instances from parameter strings.
-module Query::Modules::LookupNames
+# Helper methods to help parsing name instances from parameter strings.
+module Query::Modules::JasonsLookupNames
   def lookup_names_by_name(args)
     unless (vals = args[:names])
       complain_about_unused_flags!(args)
@@ -13,10 +13,10 @@ module Query::Modules::LookupNames
     min_names2 = add_subtaxa_if_necessary(min_names, args)
     min_names  = add_synonyms_again(min_names, min_names2, args)
     min_names -= orig_names if args[:exclude_original_names]
-    min_names.pluck(0)
+    min_names.map { |min_name| min_name[0] }
   end
 
-  # ------------------------------------------------------------------------
+  # ----------------------------------------------------------------------------
 
   private
 
@@ -62,7 +62,7 @@ module Query::Modules::LookupNames
   def complain_about_unused_flags!(args)
     complain_about_unused_flag!(args, :include_synonyms)
     complain_about_unused_flag!(args, :include_subtaxa)
-    complain_about_unused_flag!(args, :include_all_name_proposals)
+    complain_about_unused_flag!(args, :include_nonconsensus)
     complain_about_unused_flag!(args, :exclude_consensus)
     complain_about_unused_flag!(args, :exclude_original_names)
   end
@@ -78,15 +78,16 @@ module Query::Modules::LookupNames
       if /^\d+$/.match?(val.to_s)
         result << minimal_name_data(Name.safe_find(val))
       else
-        result + find_matching_names(val)
+        result += find_matching_names(val)
       end
+      result
     end.uniq.compact
   end
 
   def find_matching_names(name)
     parse = Name.parse_name(name)
     name2 = parse ? parse.search_name : Name.clean_incoming_string(name)
-    matches = Name.where(search_name: name2) if parse&.author.present?
+    matches = Name.where(search_name: name2) if parse.author.present?
     matches = Name.where(text_name: name2) if matches.empty?
     matches.map { |name3| minimal_name_data(name3) }
   end
@@ -95,77 +96,72 @@ module Query::Modules::LookupNames
     ids = min_names.map { |min_name| min_name[1] || min_name[0] }
     return [] if ids.empty?
 
-    Name.where(Name[:correct_spelling_id].coalesce(Name[:id]).
-               in(limited_id_set(ids))).pluck(*minimal_name_columns)
+    Name.connection.select_rows(%(
+      SELECT #{minimal_name_columns} FROM names
+      WHERE COALESCE(correct_spelling_id, id) IN (#{clean_id_set(ids)})
+    ))
   end
 
   def add_synonyms(min_names)
-    ids = min_names.filter_map { |min_name| min_name[2] }
+    ids = min_names.map { |min_name| min_name[2] }.reject(&:nil?)
     return min_names if ids.empty?
 
     min_names.reject { |min_name| min_name[2] } +
-      Name.where(synonym_id: clean_id_set(ids).split(",")).
-      pluck(*minimal_name_columns)
+      Name.connection.select_rows(%(
+        SELECT #{minimal_name_columns} FROM names
+        WHERE synonym_id IN (#{clean_id_set(ids)})
+      ))
   end
 
   def add_subtaxa(min_names)
     higher_names = genera_and_up(min_names)
     lower_names = genera_and_down(min_names)
-    query = Name.where(id: min_names.map(&:first))
-    query = add_lower_names(query, lower_names)
-    query = add_higher_names(query, higher_names) unless higher_names.empty?
-    query.distinct.pluck(*minimal_name_columns)
-  end
-
-  def add_lower_names(query, names)
-    query.or(Name.
-      where(Name[:text_name] =~ /^(#{names.join("|")}) /))
-  end
-
-  def add_higher_names(query, names)
-    query.or(Name.
-      where(Name[:classification] =~ /: _(#{names.join("|")})_/))
+    unless higher_names.empty?
+      min_names += Name.connection.select_rows(%(
+        SELECT #{minimal_name_columns} FROM names
+        WHERE classification REGEXP ": _(#{higher_names.join("|")})_"
+      ))
+    end
+    min_names += Name.connection.select_rows(%(
+      SELECT #{minimal_name_columns} FROM names
+      WHERE text_name REGEXP "^(#{lower_names.join("|")}) "
+    ))
+    min_names.uniq
   end
 
   def add_immediate_subtaxa(min_names)
     higher_names = genera_and_up(min_names)
     lower_names = genera_and_down(min_names)
-
-    query = Name.where(id: min_names.map(&:first))
-    query = add_immediate_lower_names(query, lower_names)
     unless higher_names.empty?
-      query = add_immediate_higher_names(query, higher_names)
+      min_names += Name.connection.select_rows(%(
+        SELECT #{minimal_name_columns} FROM names
+        WHERE classification REGEXP ": _(#{higher_names.join("|")})_$"
+        AND text_name NOT LIKE "% %"
+      ))
     end
-    query.distinct.pluck(*minimal_name_columns)
-  end
-
-  def add_immediate_lower_names(query, lower_names)
-    query.or(Name.
-      where(Name[:text_name] =~
-        /^(#{lower_names.join("|")}) [^[:blank:]]+( [^[:blank:]]+)?$/))
-  end
-
-  def add_immediate_higher_names(query, higher_names)
-    query.or(Name.
-      where(Name[:classification] =~ /: _(#{higher_names.join("|")})_$/).
-      where.not(Name[:text_name].matches("% %")))
+    min_names += Name.connection.select_rows(%(
+      SELECT #{minimal_name_columns} FROM names
+      WHERE text_name REGEXP
+        "^(#{lower_names.join("|")}) [^[:blank:]]+( [^[:blank:]]+)?$"
+    ))
+    min_names.uniq
   end
 
   def genera_and_up(min_names)
-    min_names.pluck(3).
+    min_names.map { |min_name| min_name[3] }.
       reject { |min_name| min_name.include?(" ") }
   end
 
   def genera_and_down(min_names)
     genera = {}
-    text_names = min_names.pluck(3)
+    text_names = min_names.map { |min_name| min_name[3] }
     # Make hash of all genera present.
     text_names.each do |text_name|
       genera[text_name] = true unless text_name.include?(" ")
     end
     # Remove species if genus also present.
     text_names.reject do |text_name|
-      text_name.include?(" ") && genera[text_name.split.first]
+      text_name.include?(" ") && genera[text_name.split(" ").first]
     end.uniq
   end
 
@@ -190,6 +186,6 @@ module Query::Modules::LookupNames
   end
 
   def minimal_name_columns
-    [:id, :correct_spelling_id, :synonym_id, :text_name].freeze
+    "id, correct_spelling_id, synonym_id, text_name"
   end
 end
