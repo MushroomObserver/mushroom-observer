@@ -75,7 +75,7 @@ module Name::Scopes
       scope = scope.or(Name.where(id: name.id)) unless exclude_original == true
       scope
     }
-    # needed for query
+    # "Immediate" has a vaguer meaning at and below Genus
     scope :immediate_subtaxa_of, lambda { |name, exclude_original = true|
       name = find_by(text_name: name) if name.is_a?(String)
       scope = if ranks_above_genus.include?(name.rank)
