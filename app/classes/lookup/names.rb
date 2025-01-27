@@ -3,7 +3,7 @@
 class Lookup::Names < Lookup
   def initialize(vals, params = {})
     @model = Name
-    @name_column = :search_name
+    @title_column = :search_name
     super
   end
 

@@ -3,7 +3,7 @@
 class Lookup::Locations < Lookup
   def initialize(vals, params = {})
     @model = Location
-    @name_column = :name
+    @title_column = :name
     super
   end
 

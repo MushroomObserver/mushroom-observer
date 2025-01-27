@@ -3,7 +3,7 @@
 class Lookup::HerbariumRecords < Lookup
   def initialize(vals, params = {})
     @model = HerbariumRecord
-    @name_column = :id
+    @title_column = :id
     super
   end
 

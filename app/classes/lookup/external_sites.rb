@@ -3,7 +3,7 @@
 class Lookup::ExternalSites < Lookup
   def initialize(vals, params = {})
     @model = ExternalSite
-    @name_column = :name
+    @title_column = :name
     super
   end
 

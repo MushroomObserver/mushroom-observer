@@ -30,7 +30,7 @@
 #
 # ids:        Array of ids of records matching the values sent to the instance
 # instances:  Array of instances of those records
-# titles:     Array of names of those records, from @name_column set in subclass
+# titles:     Array of names of those records, from @title_column set in subclass
 #
 class Lookup
   attr_reader :model, :vals, :params
@@ -76,7 +76,7 @@ class Lookup
   def lookup_titles
     return [] if @vals.blank?
 
-    instances.map(&:"#{@name_column}")
+    instances.map(&:"#{@title_column}")
   end
 
   def evaluate_values_as_ids

@@ -3,7 +3,7 @@
 class Lookup::Users < Lookup
   def initialize(vals, params = {})
     @model = User
-    @name_column = :login
+    @title_column = :login
     super
   end
 

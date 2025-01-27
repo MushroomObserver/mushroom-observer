@@ -3,7 +3,7 @@
 class Lookup::ProjectSpeciesLists < Lookup
   def initialize(vals, params = {})
     @model = SpeciesList
-    @name_column = :title
+    @title_column = :title
     super
   end
 

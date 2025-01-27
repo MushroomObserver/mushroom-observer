@@ -3,7 +3,7 @@
 class Lookup::Projects < Lookup
   def initialize(vals, params = {})
     @model = Project
-    @name_column = :title
+    @title_column = :title
     super
   end
 
