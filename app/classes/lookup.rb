@@ -63,7 +63,7 @@ class Lookup
     end.flatten.uniq.compact
   end
 
-  def evaluate_values_as_instances(&)
+  def evaluate_values_as_instances
     @vals.map do |val|
       if val.is_a?(@model)
         val
