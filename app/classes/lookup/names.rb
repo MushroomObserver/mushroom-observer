@@ -19,11 +19,10 @@ class Lookup::Names < Lookup
   def lookup_ids
     return [] if @vals.blank?
 
-    orig_names = given_names
-    names = add_synonyms_if_necessary(orig_names)
+    names = add_synonyms_if_necessary(original_names)
     names_plus_subtaxa = add_subtaxa_if_necessary(names)
     names = add_synonyms_again(names, names_plus_subtaxa)
-    names -= orig_names if @params[:exclude_original_names]
+    names -= original_names if @params[:exclude_original_names]
     names.map(&:id)
   end
 
@@ -34,16 +33,16 @@ class Lookup::Names < Lookup
     ids.map { |id| Name.find(id) }
   end
 
-  def given_names
-    if @params[:exclude_original_names]
-      add_other_spellings(matches)
-    else
-      matches
-    end
+  def original_names
+    @original_names ||= if @params[:exclude_original_names]
+                          add_other_spellings(original_matches)
+                        else
+                          original_matches
+                        end
   end
 
-  def matches
-    @matches ||= @vals.map do |val|
+  def original_matches
+    @original_matches ||= @vals.map do |val|
       if val.is_a?(@model)
         val.id
       elsif val.is_a?(AbstractModel)
@@ -60,7 +59,11 @@ class Lookup::Names < Lookup
   # various parts/formats of the name, NOT an Name instance
   def find_matching_names(name)
     parse = Name.parse_name(name)
-    srch_str = parse ? parse.search_name : Name.clean_incoming_string(name)
+    srch_str = if parse
+                 parse.search_name
+               else
+                 Name.clean_incoming_string(name)
+               end
     if parse&.author.present?
       matches = Name.where(search_name: srch_str).select(*minimal_name_columns)
     end
