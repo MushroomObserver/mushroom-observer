@@ -26,14 +26,15 @@ class Lookup::Names < Lookup
     names.map(&:id)
   end
 
-  # Look up all instances from the ids. Too complicated otherwise.
+  # Re-lookup all instances from the matched ids. Too complicated to try to grab
+  # instances if they were in the given vals, because of `add_other_spellings`.
   def lookup_instances
     return [] if @vals.blank?
 
     ids.map { |id| Name.find(id) }
   end
 
-  # Could be quite a few more than the given set.
+  # "Original" names could turn out to be quite a few more than the given vals.
   # Memoized to avoid recalculating, or passing the value around.
   def original_names
     @original_names ||= if @params[:exclude_original_names]
@@ -43,7 +44,7 @@ class Lookup::Names < Lookup
                         end
   end
 
-  # Matches for the given set, from the db.
+  # Matches for the given vals, from the db.
   def original_matches
     @original_matches ||= @vals.map do |val|
       if val.is_a?(@model)
