@@ -12,16 +12,16 @@ class Lookup::Names < Lookup
   end
 
   def lookup_ids
-    unless (@vals = params[:names])
-      complain_about_unused_flags!(args)
-      return
-    end
+    # unless (@vals = params[:names])
+    #   complain_about_unused_flags!(args)
+    #   return
+    # end
 
-    orig_names = given_names(@vals, params)
-    min_names  = add_synonyms_if_necessary(orig_names, params)
-    min_names2 = add_subtaxa_if_necessary(min_names, params)
-    min_names  = add_synonyms_again(min_names, min_names2, params)
-    min_names -= orig_names if params[:exclude_original_names]
+    orig_names = given_names(@vals, @params)
+    min_names  = add_synonyms_if_necessary(orig_names, @params)
+    min_names2 = add_subtaxa_if_necessary(min_names, @params)
+    min_names  = add_synonyms_again(min_names, min_names2, @params)
+    min_names -= orig_names if @params[:exclude_original_names]
     min_names.map { |min_name| min_name[0] }
   end
 

@@ -274,84 +274,39 @@ module AbstractModel::Scopes
     end
 
     def lookup_external_sites_by_name(vals)
-      lookup_object_ids_by_name(vals) do |name|
-        ExternalSite.where(name: name)
-      end
+      Lookup::ExternalSites.new(vals).ids
     end
 
     def lookup_herbaria_by_name(vals)
-      lookup_object_ids_by_name(vals) do |name|
-        Herbarium.where(name: name)
-      end
+      Lookup::Herbaria.new(vals).ids
     end
 
     def lookup_herbarium_records_by_name(vals)
-      lookup_object_ids_by_name(vals) do |name|
-        HerbariumRecord.where(id: name)
-      end
+      Lookup::HerbariumRecords.new(vals).ids
     end
 
     def lookup_locations_by_name(vals)
-      lookup_object_ids_by_name(vals) do |name|
-        pattern = Location.clean_name(name.to_s).clean_pattern
-        Location.name_contains(pattern)
-      end
+      Lookup::Locations.new(vals).ids
     end
 
     def lookup_regions_by_name(vals)
-      lookup_object_ids_by_name(vals) do |name|
-        # does not lowercase it, because we want a match to the end of string
-        pattern = name.to_s.clean_pattern
-        Location.in_region(pattern)
-      end
+      Lookup::Regions.new(vals).ids
     end
 
     def lookup_projects_by_name(vals)
-      lookup_object_ids_by_name(vals) do |name|
-        Project.where(title: name)
-      end
+      Lookup::Projects.new(vals).ids
     end
 
     def lookup_lists_for_projects_by_name(vals)
-      return unless vals
-
-      project_ids = lookup_projects_by_name(vals)
-      return [] if project_ids.empty?
-
-      # Have to map(&:id) because it doesn't return lookup_object_ids_by_name
-      SpeciesList.joins(:project_species_lists).
-        where(project_species_lists: { project_id: project_ids }).
-        distinct.map(&:id)
+      Lookup::ProjectSpeciesLists.new(vals).ids
     end
 
     def lookup_species_lists_by_name(vals)
-      lookup_object_ids_by_name(vals) do |name|
-        SpeciesList.where(title: name)
-      end
+      Lookup::SpeciesLists.new(vals).ids
     end
 
     def lookup_users_by_name(vals)
-      lookup_object_ids_by_name(vals) do |name|
-        User.where(login: User.remove_bracketed_name(name))
-      end
-    end
-
-    # Used by scopes to get IDs when they're passed strings or instances.
-    # In the last condition, `yield` == run any block provided to this method.
-    # (Only in the case it doesn't have an ID does it look up the record.)
-    def lookup_object_ids_by_name(vals)
-      return unless vals
-
-      vals = [vals] unless vals.is_a?(Array)
-      vals.map do |val|
-        if val.is_a?(AbstractModel)
-          val.id
-        elsif /^\d+$/.match?(val.to_s)
-          val
-        else
-          yield(val).map(&:id)
-        end
-      end.flatten.uniq.compact
+      Lookup::Users.new(vals).ids
     end
   end
 end

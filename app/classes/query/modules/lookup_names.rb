@@ -8,13 +8,22 @@ module Query::Modules::LookupNames
       return
     end
 
-    orig_names = given_names(vals, args)
-    min_names  = add_synonyms_if_necessary(orig_names, args)
-    min_names2 = add_subtaxa_if_necessary(min_names, args)
-    min_names  = add_synonyms_again(min_names, min_names2, args)
-    min_names -= orig_names if args[:exclude_original_names]
-    min_names.pluck(0)
+    Lookup::Names.new(vals, **args).ids
   end
+
+  # def lookup_names_by_name(args)
+  #   unless (vals = args[:names])
+  #     complain_about_unused_flags!(args)
+  #     return
+  #   end
+
+  #   orig_names = given_names(vals, args)
+  #   min_names  = add_synonyms_if_necessary(orig_names, args)
+  #   min_names2 = add_subtaxa_if_necessary(min_names, args)
+  #   min_names  = add_synonyms_again(min_names, min_names2, args)
+  #   min_names -= orig_names if args[:exclude_original_names]
+  #   min_names.pluck(0)
+  # end
 
   # ------------------------------------------------------------------------
 
