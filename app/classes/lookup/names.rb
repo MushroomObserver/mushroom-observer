@@ -33,6 +33,8 @@ class Lookup::Names < Lookup
     ids.map { |id| Name.find(id) }
   end
 
+  # Could be quite a few more than the given set.
+  # Memoized to avoid recalculating, or passing the value around.
   def original_names
     @original_names ||= if @params[:exclude_original_names]
                           add_other_spellings(original_matches)
@@ -41,6 +43,7 @@ class Lookup::Names < Lookup
                         end
   end
 
+  # Matches for the given set, from the db.
   def original_matches
     @original_matches ||= @vals.map do |val|
       if val.is_a?(@model)
