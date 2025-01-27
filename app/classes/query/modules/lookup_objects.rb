@@ -18,6 +18,10 @@ module Query::Modules::LookupObjects
     Lookup::Locations.new(vals).ids
   end
 
+  def lookup_names_by_name(vals, params = {})
+    Lookup::Names.new(vals, **params).ids
+  end
+
   def lookup_projects_by_name(vals)
     Lookup::Projects.new(vals).ids
   end

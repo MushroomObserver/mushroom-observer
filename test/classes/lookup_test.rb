@@ -30,30 +30,29 @@ class Lookup::NamesTest
     name4.update(synonym_id: name1.synonym_id)
     name5.update(synonym_id: name2.synonym_id)
 
-    assert_lookup_names_by_name([name1], names: ["Macrolepiota"])
-    assert_lookup_names_by_name([name2], names: ["Macrolepiota rachodes"])
-    assert_lookup_names_by_name([name1, name4],
-                                names: ["Macrolepiota"],
+    assert_lookup_names_by_name([name1], ["Macrolepiota"])
+    assert_lookup_names_by_name([name2], ["Macrolepiota rachodes"])
+    assert_lookup_names_by_name([name1, name4], ["Macrolepiota"],
                                 include_synonyms: true)
     assert_lookup_names_by_name([name2, name3, name5],
-                                names: ["Macrolepiota rachodes"],
+                                ["Macrolepiota rachodes"],
                                 include_synonyms: true)
     assert_lookup_names_by_name([name3, name5],
-                                names: ["Macrolepiota rachodes"],
+                                ["Macrolepiota rachodes"],
                                 include_synonyms: true,
                                 exclude_original_names: true)
     assert_lookup_names_by_name([name1, name2, name3],
-                                names: ["Macrolepiota"],
+                                ["Macrolepiota"],
                                 include_subtaxa: true)
     assert_lookup_names_by_name([name1, name2, name3],
-                                names: ["Macrolepiota"],
+                                ["Macrolepiota"],
                                 include_immediate_subtaxa: true)
     assert_lookup_names_by_name([name1, name2, name3, name4, name5],
-                                names: ["Macrolepiota"],
+                                ["Macrolepiota"],
                                 include_synonyms: true,
                                 include_subtaxa: true)
     assert_lookup_names_by_name([name2, name3, name4, name5],
-                                names: ["Macrolepiota"],
+                                ["Macrolepiota"],
                                 include_synonyms: true,
                                 include_subtaxa: true,
                                 exclude_original_names: true)
@@ -61,7 +60,7 @@ class Lookup::NamesTest
     name5.update(synonym_id: nil)
     name5 = Name.where(text_name: "Pseudolepiota rachodes").index_order.first
     assert_lookup_names_by_name([name1, name2, name3, name4, name5],
-                                names: ["Macrolepiota"],
+                                ["Macrolepiota"],
                                 include_synonyms: true,
                                 include_subtaxa: true)
   end
@@ -82,26 +81,26 @@ class Lookup::NamesTest
     name6.update(classification: name2.classification)
     name7.update(classification: name2.classification)
 
-    assert_lookup_names_by_name([name2, name3], names: ["Peltigera"])
-    assert_lookup_names_by_name([name2, name3], names: ["Petigera"])
+    assert_lookup_names_by_name([name2, name3], ["Peltigera"])
+    assert_lookup_names_by_name([name2, name3], ["Petigera"])
     assert_lookup_names_by_name([name1, name2, name3, name4, name5, name6,
                                  name7],
-                                names: ["Peltigeraceae"],
+                                ["Peltigeraceae"],
                                 include_subtaxa: true)
     assert_lookup_names_by_name([name1, name2, name3],
-                                names: ["Peltigeraceae"],
+                                ["Peltigeraceae"],
                                 include_immediate_subtaxa: true)
     assert_lookup_names_by_name([name2, name3, name4, name5, name6, name7],
-                                names: ["Peltigera"],
+                                ["Peltigera"],
                                 include_subtaxa: true)
     assert_lookup_names_by_name([name2, name3, name4, name6],
-                                names: ["Peltigera"],
+                                ["Peltigera"],
                                 include_immediate_subtaxa: true)
     assert_lookup_names_by_name([name6, name7],
-                                names: ["Peltigera subg. Foo"],
+                                ["Peltigera subg. Foo"],
                                 include_immediate_subtaxa: true)
     assert_lookup_names_by_name([name4, name5],
-                                names: ["Peltigera canina"],
+                                ["Peltigera canina"],
                                 include_immediate_subtaxa: true)
   end
 
@@ -116,16 +115,16 @@ class Lookup::NamesTest
     children = Name.index_order.where(Name[:text_name].matches("Lactarius %"))
 
     assert_lookup_names_by_name([name1] + children,
-                                names: ["Lactarius"],
+                                ["Lactarius"],
                                 include_subtaxa: true)
 
     assert_lookup_names_by_name(children,
-                                names: ["Lactarius"],
+                                ["Lactarius"],
                                 include_immediate_subtaxa: true,
                                 exclude_original_names: true)
   end
 
   def test_lookup_names_by_name4
-    assert_lookup_names_by_name([], names: ["¡not a name!"])
+    assert_lookup_names_by_name([], ["¡not a name!"])
   end
 end

@@ -12,30 +12,30 @@ class Lookup::Names < Lookup
   end
 
   def lookup_ids
-    # unless (@vals = params[:names])
-    #   complain_about_unused_flags!(args)
-    #   return
-    # end
+    if @vals.blank?
+      complain_about_unused_flags!
+      return []
+    end
 
-    orig_names = given_names(@vals, @params)
-    min_names  = add_synonyms_if_necessary(orig_names, @params)
-    min_names2 = add_subtaxa_if_necessary(min_names, @params)
-    min_names  = add_synonyms_again(min_names, min_names2, @params)
+    orig_names = given_names
+    min_names  = add_synonyms_if_necessary(orig_names)
+    min_names2 = add_subtaxa_if_necessary(min_names)
+    min_names  = add_synonyms_again(min_names, min_names2)
     min_names -= orig_names if @params[:exclude_original_names]
     min_names.map { |min_name| min_name[0] }
   end
 
-  def given_names(vals, args)
-    min_names = find_exact_name_matches(vals)
-    if args[:exclude_original_names]
+  def given_names
+    min_names = find_exact_name_matches(@vals)
+    if @params[:exclude_original_names]
       add_other_spellings(min_names)
     else
       min_names
     end
   end
 
-  def add_synonyms_if_necessary(min_names, args)
-    if args[:include_synonyms]
+  def add_synonyms_if_necessary(min_names)
+    if @params[:include_synonyms]
       add_synonyms(min_names)
     elsif !args[:exclude_original_names]
       add_other_spellings(min_names)
@@ -44,8 +44,8 @@ class Lookup::Names < Lookup
     end
   end
 
-  def add_subtaxa_if_necessary(min_names, args)
-    if args[:include_subtaxa]
+  def add_subtaxa_if_necessary(min_names)
+    if @params[:include_subtaxa]
       add_subtaxa(min_names)
     elsif args[:include_immediate_subtaxa]
       add_immediate_subtaxa(min_names)
@@ -54,32 +54,32 @@ class Lookup::Names < Lookup
     end
   end
 
-  def add_synonyms_again(min_names, min_names2, args)
+  def add_synonyms_again(min_names, min_names2)
     if min_names.length >= min_names2.length
       min_names
-    elsif args[:include_synonyms]
+    elsif @params[:include_synonyms]
       add_synonyms(min_names2)
     else
       add_other_spellings(min_names2)
     end
   end
 
-  def complain_about_unused_flags!(args)
-    complain_about_unused_flag!(args, :include_synonyms)
-    complain_about_unused_flag!(args, :include_subtaxa)
-    complain_about_unused_flag!(args, :include_nonconsensus)
-    complain_about_unused_flag!(args, :exclude_consensus)
-    complain_about_unused_flag!(args, :exclude_original_names)
+  def complain_about_unused_flags!
+    complain_about_unused_flag!(@params, :include_synonyms)
+    complain_about_unused_flag!(@params, :include_subtaxa)
+    complain_about_unused_flag!(@params, :include_nonconsensus)
+    complain_about_unused_flag!(@params, :exclude_consensus)
+    complain_about_unused_flag!(@params, :exclude_original_names)
   end
 
-  def complain_about_unused_flag!(args, arg)
-    return if args[arg].nil?
+  def complain_about_unused_flag!(param)
+    return if @params[arg].nil?
 
-    raise("Flag \"#{arg}\" is invalid without \"names\" parameter.")
+    raise("Flag \"#{param}\" is invalid without \"names\" parameter.")
   end
 
-  def find_exact_name_matches(vals)
-    vals.inject([]) do |result, val|
+  def find_exact_name_matches
+    @vals.inject([]) do |result, val|
       if /^\d+$/.match?(val.to_s) # from an id
         result << minimal_name_data(Name.safe_find(val))
       else # from a string
@@ -117,19 +117,19 @@ class Lookup::Names < Lookup
   def add_subtaxa(min_names)
     higher_names = genera_and_up(min_names)
     lower_names = genera_and_down(min_names)
-    query = Name.where(id: min_names.map(&:first))
-    query = add_lower_names(query, lower_names)
-    query = add_higher_names(query, higher_names) unless higher_names.empty?
-    query.distinct.pluck(*minimal_name_columns)
+    @name_query = Name.where(id: min_names.map(&:first))
+    @name_query = add_lower_names(lower_names)
+    @name_query = add_higher_names(higher_names) unless higher_names.empty?
+    @name_query.distinct.pluck(*minimal_name_columns)
   end
 
-  def add_lower_names(query, names)
-    query.or(Name.
+  def add_lower_names(names)
+    @name_query.or(Name.
       where(Name[:text_name] =~ /^(#{names.join("|")}) /))
   end
 
-  def add_higher_names(query, names)
-    query.or(Name.
+  def add_higher_names(names)
+    @name_query.or(Name.
       where(Name[:classification] =~ /: _(#{names.join("|")})_/))
   end
 
@@ -137,22 +137,22 @@ class Lookup::Names < Lookup
     higher_names = genera_and_up(min_names)
     lower_names = genera_and_down(min_names)
 
-    query = Name.where(id: min_names.map(&:first))
-    query = add_immediate_lower_names(query, lower_names)
+    @name_query = Name.where(id: min_names.map(&:first))
+    @name_query = add_immediate_lower_names(lower_names)
     unless higher_names.empty?
-      query = add_immediate_higher_names(query, higher_names)
+      @name_query = add_immediate_higher_names(higher_names)
     end
-    query.distinct.pluck(*minimal_name_columns)
+    @name_query.distinct.pluck(*minimal_name_columns)
   end
 
-  def add_immediate_lower_names(query, lower_names)
-    query.or(Name.
+  def add_immediate_lower_names(lower_names)
+    @name_query.or(Name.
       where(Name[:text_name] =~
         /^(#{lower_names.join("|")}) [^[:blank:]]+( [^[:blank:]]+)?$/))
   end
 
-  def add_immediate_higher_names(query, higher_names)
-    query.or(Name.
+  def add_immediate_higher_names(higher_names)
+    @name_query.or(Name.
       where(Name[:classification] =~ /: _(#{higher_names.join("|")})_$/).
       where.not(Name[:text_name].matches("% %")))
   end
