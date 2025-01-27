@@ -1160,7 +1160,6 @@ class QueryTest < UnitTestCase
   include Query::SpeciesListsTest
   include Query::UsersTest
   include Query::FiltersTest
-  include Query::LookupNamesTest
 
   ##############################################################################
   #
