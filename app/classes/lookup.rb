@@ -30,7 +30,8 @@
 #
 # ids:        Array of ids of records matching the values sent to the instance
 # instances:  Array of instances of those records
-# titles:     Array of titles of those records, @title_column set in subclass
+# titles:     Array of names of those records, via @title_column set in subclass
+#             (A `names` method seemed too confusing, because Lookup::Names...)
 #
 class Lookup
   attr_reader :model, :vals, :params
