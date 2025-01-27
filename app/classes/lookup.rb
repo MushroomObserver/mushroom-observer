@@ -23,7 +23,7 @@ class Lookup
   end
 
   def titles
-    @titles ||= lookup_titles_from_instances
+    @titles ||= lookup_titles
   end
 
   def lookup_ids
