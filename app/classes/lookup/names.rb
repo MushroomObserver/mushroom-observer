@@ -196,15 +196,13 @@ class Lookup::Names < Lookup
   end
 
   def complain_about_unused_flags!
-    complain_about_unused_flag!(:include_synonyms)
-    complain_about_unused_flag!(:include_subtaxa)
-    complain_about_unused_flag!(:include_nonconsensus)
-    complain_about_unused_flag!(:exclude_consensus)
-    complain_about_unused_flag!(:exclude_original_names)
+    return if @params.blank?
+
+    @params.each_key { |param| complain_about_unused_flag!(param) }
   end
 
   def complain_about_unused_flag!(param)
-    return if @params.blank? || @params[param].nil?
+    return if @params[param].nil?
 
     raise("Flag \"#{param}\" is invalid without \"names\" parameter.")
   end
