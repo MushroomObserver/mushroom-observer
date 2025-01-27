@@ -21,7 +21,7 @@ import { get } from "@rails/request.js"
 // margin-top of the <ul> to simulate scrolling.
 
 const DEFAULT_OPTS = {
-  // what type of autocompleter, corresponds to a subclass of `AutoComplete`
+  // what type of autocompleter, corresponds to a subclass of `Autocomplete`
   TYPE: null,
   // Whether to ignore order of words when matching, set by type
   // (collapse must be 0 if this is true!)

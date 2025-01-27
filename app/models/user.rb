@@ -105,7 +105,7 @@
 #  view_owner_id::      View Observation author's ID on Obs page
 #
 #  ==== Content filter options
-#  content_filter::     Serialized Hash of ContentFilter parameters.
+#  content_filter::     Serialized Hash of Query::Filter parameters.
 #
 #  ==== Email options
 #  Send notifications if...

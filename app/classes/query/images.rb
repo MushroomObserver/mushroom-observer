@@ -6,13 +6,13 @@ class Query::Images < Query::Base
   include Query::Params::Locations
   include Query::Params::Observations
   include Query::Params::AdvancedSearch
-  include Query::Params::ContentFilters
+  include Query::Params::Filters
   include Query::Initializers::Images
   include Query::Initializers::Names
   include Query::Initializers::Locations
   include Query::Initializers::Observations
   include Query::Initializers::AdvancedSearch
-  include Query::Initializers::ContentFilters
+  include Query::Initializers::Filters
   include Query::Titles::Observations
 
   def model
