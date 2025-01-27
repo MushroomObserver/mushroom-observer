@@ -55,8 +55,8 @@ class Lookup::Names < Lookup
     end.flatten.uniq.compact
   end
 
-  # NOTE: Name.parse_name returns a ParsedName instance which is a hash of
-  # various parts/formats of the name, NOT an Name instance
+  # NOTE: Name.parse_name returns a ParsedName instance, not an Name instance.
+  # A ParsedName is a hash of segments and formatted strings of the name.
   def find_matching_names(name)
     parse = Name.parse_name(name)
     srch_str = if parse
