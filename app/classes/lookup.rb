@@ -11,11 +11,7 @@ class Lookup
   def prepare_vals(vals)
     return [] if vals.blank?
 
-    if vals.is_a?(Array)
-      vals
-    else
-      [vals]
-    end
+    [vals].flatten
   end
 
   def ids
@@ -31,20 +27,20 @@ class Lookup
   end
 
   def lookup_ids
-    return [] unless @vals
+    return [] if @vals.blank?
 
-    @vals = [@vals] unless @vals.is_a?(Array)
     evaluate_values_as_ids
   end
 
   def lookup_instances
-    return [] unless @vals
+    return [] if @vals.blank?
 
-    @vals = [@vals] unless @vals.is_a?(Array)
     evaluate_values_as_instances
   end
 
   def lookup_titles
+    return [] if @vals.blank?
+
     @instances.map(&:"#{@name_column}")
   end
 
