@@ -33,12 +33,22 @@
 # titles:     Array of names of those records, via @title_column set in subclass
 #             (A `names` method seemed too confusing, because Lookup::Names...)
 #
+# Class constants:
+#   (defined in subclass)
+#
+# MODEL:
+# TITLE_COLUMN:
+#
 class Lookup
-  attr_reader :model, :vals, :params
+  attr_reader :vals, :params
 
   def initialize(vals, params = {})
-    raise("Lookup is only usable via the subclasses.") if @model.blank?
+    unless defined?(self.class::MODEL)
+      raise("Lookup is only usable via the subclasses, like Lookup::Names.")
+    end
 
+    @model = self.class::MODEL
+    @title_column = self.class::TITLE_COLUMN
     @vals = prepare_vals(vals)
     @params = params
   end

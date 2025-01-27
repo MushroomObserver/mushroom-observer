@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 class Lookup::ExternalSites < Lookup
+  MODEL = ExternalSite
+  TITLE_COLUMN = :name
+
   def initialize(vals, params = {})
-    @model = ExternalSite
-    @title_column = :name
     super
   end
 

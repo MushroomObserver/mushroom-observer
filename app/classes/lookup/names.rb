@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 class Lookup::Names < Lookup
+  MODEL = Name
+  TITLE_COLUMN = :search_name
+
   def initialize(vals, params = {})
-    @model = Name
-    @title_column = :search_name
     super
   end
 

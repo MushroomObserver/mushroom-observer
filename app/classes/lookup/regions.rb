@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 class Lookup::Regions < Lookup
+  MODEL = Location
+  TITLE_COLUMN = :name
+
   def initialize(vals, params = {})
-    @model = Location
-    @title_column = :name
     super
   end
 

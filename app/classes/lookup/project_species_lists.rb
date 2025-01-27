@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 class Lookup::ProjectSpeciesLists < Lookup
+  MODEL = SpeciesList
+  TITLE_COLUMN = :title
+
   def initialize(vals, params = {})
-    @model = SpeciesList
-    @title_column = :title
     super
   end
 

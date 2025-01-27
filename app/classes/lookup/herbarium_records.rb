@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 class Lookup::HerbariumRecords < Lookup
+  MODEL = HerbariumRecord
+  TITLE_COLUMN = :id
+
   def initialize(vals, params = {})
-    @model = HerbariumRecord
-    @title_column = :id
     super
   end
 

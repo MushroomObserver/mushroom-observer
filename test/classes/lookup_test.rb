@@ -3,20 +3,63 @@
 require("test_helper")
 
 class LookupTest < UnitTestCase
+  def assert_lookup_objects_by_name(type, expects, vals, **)
+    lookup = "Lookup::#{type}".constantize
+    actual = lookup.new(vals, **).titles.sort
+    expects = expects.map(&:"#{lookup::TITLE_COLUMN}").sort
+    assert_arrays_equal(expects, actual)
+  end
+
+  def assert_lookup_names_by_name(expects, vals, **)
+    assert_lookup_objects_by_name(:Names, expects, vals, **)
+  end
+
+  def test_lookup_external_sites_by_name
+    expects = [external_sites(:inaturalist)]
+    assert_lookup_objects_by_name(:ExternalSites, expects, "iNaturalist")
+  end
+
+  def test_lookup_herbaria_by_name
+    expects = [herbaria(:rolf_herbarium), herbaria(:dick_herbarium)]
+    assert_lookup_objects_by_name(:Herbaria, expects, expects.map(&:name))
+  end
+
+  def test_lookup_herbarium_records_by_name
+    expects = [herbarium_records(:coprinus_comatus_nybg_spec),
+               herbarium_records(:coprinus_comatus_rolf_spec)]
+    assert_lookup_objects_by_name(:HerbariumRecords, expects, expects.map(&:id))
+  end
+
+  def test_lookup_locations_by_name
+    expects = [locations(:salt_point), locations(:burbank)]
+    assert_lookup_objects_by_name(:Locations, expects, expects.map(&:name))
+  end
+
+  def test_lookup_projects_by_name
+    expects = [projects(:bolete_project)]
+    assert_lookup_objects_by_name(:Projects, expects, expects.map(&:title))
+  end
+
+  def test_lookup_project_species_lists_by_name
+    expects = [species_lists(:unknown_species_list)]
+    assert_lookup_objects_by_name(:ProjectSpeciesLists, expects,
+                                  "Bolete Project")
+  end
+
+  def test_lookup_regions_by_name
+    expects = [locations(:point_reyes)]
+    assert_lookup_objects_by_name(:Regions, expects,
+                                  "Marin Co., California, USA")
+  end
+
+  def test_lookup_species_lists_by_name
+    expects = [species_lists(:unknown_species_list)]
+    assert_lookup_objects_by_name(:SpeciesLists, expects, "List of mysteries")
+  end
+
+  ########################################################################
   # tests of Lookup::Names
-  def create_test_name(name)
-    name = Name.new_name(Name.parse_name(name).params)
-    name.save
-    name
-  end
-
-  def assert_lookup_names_by_name(expects, vals, params = {})
-    actual = Lookup::Names.new(vals, **params).instances.sort_by(&:text_name)
-    expects = expects.sort_by(&:text_name)
-    # actual = actual.map { |id| Name.find(id) }.sort_by(&:text_name)
-    assert_name_arrays_equal(expects, actual)
-  end
-
+  #
   def test_lookup_names_by_name
     User.current = rolf
 
@@ -65,7 +108,7 @@ class LookupTest < UnitTestCase
                                 include_subtaxa: true)
   end
 
-  def test_lookup_names_by_name2
+  def test_lookup_names_by_name_classifications
     User.current = rolf
 
     name1 = names(:peltigeraceae)
@@ -104,7 +147,7 @@ class LookupTest < UnitTestCase
                                 include_immediate_subtaxa: true)
   end
 
-  def test_lookup_names_by_name3
+  def test_lookup_names_by_name_invalid_classification
     User.current = rolf
 
     name1 = names(:lactarius)
@@ -124,7 +167,13 @@ class LookupTest < UnitTestCase
                                 exclude_original_names: true)
   end
 
-  def test_lookup_names_by_name4
+  def test_lookup_names_by_name_invalid
     assert_lookup_names_by_name([], ["¡not a name!"])
+  end
+
+  def create_test_name(name)
+    name = Name.new_name(Name.parse_name(name).params)
+    name.save
+    name
   end
 end

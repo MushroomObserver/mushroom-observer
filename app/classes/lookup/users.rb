@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 class Lookup::Users < Lookup
+  MODEL = User
+  TITLE_COLUMN = :login
+
   def initialize(vals, params = {})
-    @model = User
-    @title_column = :login
     super
   end
 
