@@ -289,8 +289,8 @@ module AbstractModel::Scopes
       Lookup::Locations.new(vals).ids
     end
 
-    def lookup_regions_by_name(vals)
-      Lookup::Regions.new(vals).ids
+    def lookup_names_by_name(vals, params = {})
+      Lookup::Names.new(vals, **params).ids
     end
 
     def lookup_projects_by_name(vals)
@@ -303,6 +303,10 @@ module AbstractModel::Scopes
 
     def lookup_species_lists_by_name(vals)
       Lookup::SpeciesLists.new(vals).ids
+    end
+
+    def lookup_regions_by_name(vals)
+      Lookup::Regions.new(vals).ids
     end
 
     def lookup_users_by_name(vals)
