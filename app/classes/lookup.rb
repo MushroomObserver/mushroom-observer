@@ -32,6 +32,7 @@ class Lookup
     evaluate_values_as_ids
   end
 
+  # Could just look them up from the ids, but vals may already have instances
   def lookup_instances
     return [] if @vals.blank?
 
@@ -41,7 +42,7 @@ class Lookup
   def lookup_titles
     return [] if @vals.blank?
 
-    @instances.map(&:"#{@name_column}")
+    instances.map(&:"#{@name_column}")
   end
 
   # This is checking for an instance, then sanity-checking for an instance of
