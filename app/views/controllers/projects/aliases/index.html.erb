@@ -23,13 +23,13 @@
         <td><%= project_alias.target_type %></td>
         <td><%= link_to(project_alias.target.try(:name), project_alias.target) %></td>
         <td>
-          <%= link_to('Edit', edit_project_alias_path(project_id:, id: project_alias.id)) %>
-          <%= link_to('Delete', project_alias_path(project_id:, id: project_alias.id),
-	              data: { turbo_method: :delete, turbo_confirm: 'Are you sure?' }) %>
+          <%= link_to(:EDIT.t, edit_project_alias_path(project_id:, id: project_alias.id)) %>
+          <%= link_to(:DELETE.t, project_alias_path(project_id:, id: project_alias.id),
+	              data: { turbo_method: :delete, turbo_confirm: :are_you_sure.t }) %>
         </td>
       </tr>
     <% end %>
   </tbody>
 </table>
 
-<%= link_to 'New Project Alias', new_project_alias_path(project_id:) %>
+<%= link_to(:project_alias_new.t, new_project_alias_path(project_id:)) %>

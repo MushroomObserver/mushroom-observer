@@ -507,7 +507,22 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     member?(user) || can_join?(user)
   end
 
+  def alias_data(user)
+    @user_alias_details ||= user_alias_details
+    @user_alias_details[user.id] || []
+  end
+
   private ###############################
+
+  def user_alias_details
+    aliases.
+      where(target_type: "User").
+      order(:name).
+      group_by(&:target_id).
+      transform_values do |aliases|
+        aliases.map { |project_alias| [project_alias.name, project_alias.id] }
+      end
+  end
 
   def obs_geoloc_outside_project_location
     observations.

@@ -1,7 +1,7 @@
 <%
   @container = :text
   type = (project_alias.target_type || :location).downcase.to_sym
-  value = project_alias.target&.name || ""
+  value = project_alias.target&.format_name || ""
 %>
 <%= form_with(model: project_alias,
               data: { controller: :autocompleter, type: }) do |form| %>
@@ -32,7 +32,7 @@
 
     <%= autocompleter_hidden_field(form:, type:, hidden_value: project_alias.target_id) %>
     <%= form.text_field(
-      :term, value: value, class: "form-control",
+      :term, value:, class: "form-control",
       data: { autocompleter_target: "input" }
     ) %>
     <%= autocompleter_dropdown %>

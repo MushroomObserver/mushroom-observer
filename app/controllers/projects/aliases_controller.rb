@@ -23,7 +23,10 @@ module Projects
     end
 
     def new
-      @project_alias = ProjectAlias.new(project_id: params.require(:project_id))
+      project_id = params.require(:project_id)
+      new_params = params.permit(:user_id, :target_type)
+      new_params[:project_id] = project_id
+      @project_alias = ProjectAlias.new(new_params)
     end
 
     def edit; end
