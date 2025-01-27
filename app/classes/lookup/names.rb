@@ -7,81 +7,45 @@ class Lookup::Names < Lookup
     @name_column = :search_name
   end
 
-  def lookup_instances
-    @ids.map { |id| Name.find(id) }
-  end
-
-  def lookup_ids
+  def prepare_vals(vals)
     if @vals.blank?
       complain_about_unused_flags!
       return []
     end
 
+    [vals].flatten
+  end
+
+  def lookup_instances
+    return [] if @vals.blank?
+
+    @ids.map { |id| Name.find(id) }
+  end
+
+  def lookup_ids
+    return [] if @vals.blank?
+
     orig_names = given_names
-    min_names  = add_synonyms_if_necessary(orig_names)
-    min_names2 = add_subtaxa_if_necessary(min_names)
-    min_names  = add_synonyms_again(min_names, min_names2)
-    min_names -= orig_names if @params[:exclude_original_names]
-    min_names.map { |min_name| min_name[0] }
+    names  = add_synonyms_if_necessary(orig_names)
+    names_plus_subtaxa = add_subtaxa_if_necessary(names)
+    names  = add_synonyms_again(names, names_plus_subtaxa)
+    names -= orig_names if @params[:exclude_original_names]
+    names.map(&:id)
   end
 
   def given_names
-    min_names = find_exact_name_matches(@vals)
+    given_names = find_exact_name_matches(@vals)
     if @params[:exclude_original_names]
-      add_other_spellings(min_names)
+      add_other_spellings(given_names)
     else
-      min_names
+      given_names
     end
-  end
-
-  def add_synonyms_if_necessary(min_names)
-    if @params[:include_synonyms]
-      add_synonyms(min_names)
-    elsif !args[:exclude_original_names]
-      add_other_spellings(min_names)
-    else
-      min_names
-    end
-  end
-
-  def add_subtaxa_if_necessary(min_names)
-    if @params[:include_subtaxa]
-      add_subtaxa(min_names)
-    elsif args[:include_immediate_subtaxa]
-      add_immediate_subtaxa(min_names)
-    else
-      min_names
-    end
-  end
-
-  def add_synonyms_again(min_names, min_names2)
-    if min_names.length >= min_names2.length
-      min_names
-    elsif @params[:include_synonyms]
-      add_synonyms(min_names2)
-    else
-      add_other_spellings(min_names2)
-    end
-  end
-
-  def complain_about_unused_flags!
-    complain_about_unused_flag!(@params, :include_synonyms)
-    complain_about_unused_flag!(@params, :include_subtaxa)
-    complain_about_unused_flag!(@params, :include_nonconsensus)
-    complain_about_unused_flag!(@params, :exclude_consensus)
-    complain_about_unused_flag!(@params, :exclude_original_names)
-  end
-
-  def complain_about_unused_flag!(param)
-    return if @params[arg].nil?
-
-    raise("Flag \"#{param}\" is invalid without \"names\" parameter.")
   end
 
   def find_exact_name_matches
     @vals.inject([]) do |result, val|
       if /^\d+$/.match?(val.to_s) # from an id
-        result << minimal_name_data(Name.safe_find(val))
+        result << Name.where(id: val).select(*minimal_name_columns)
       else # from a string
         result += find_matching_names(val)
       end
@@ -89,60 +53,95 @@ class Lookup::Names < Lookup
     end.uniq.compact
   end
 
+  # NOTE: Name.parse_name returns a ParsedName instance which is a hash of
+  # various parts/formats of the name, NOT an Name instance
   def find_matching_names(name)
     parse = Name.parse_name(name)
-    name2 = parse ? parse.search_name : Name.clean_incoming_string(name)
-    matches = Name.where(search_name: name2) if parse.author.present?
-    matches = Name.where(text_name: name2) if matches.empty?
-    matches.map { |name3| minimal_name_data(name3) }
+    srch_str = parse ? parse.search_name : Name.clean_incoming_string(name)
+    if parse.author.present?
+      matches = Name.where(search_name: srch_str).select(*minimal_name_columns)
+    end
+    return matches unless matches.empty?
+
+    Name.where(text_name: srch_str).select(*minimal_name_columns)
   end
 
-  def add_other_spellings(min_names)
-    ids = min_names.map { |min_name| min_name[1] || min_name[0] }
+  def add_synonyms_if_necessary(names)
+    if @params[:include_synonyms]
+      add_synonyms(names)
+    elsif !args[:exclude_original_names]
+      add_other_spellings(names)
+    else
+      names
+    end
+  end
+
+  def add_subtaxa_if_necessary(names)
+    if @params[:include_subtaxa]
+      add_subtaxa(names)
+    elsif args[:include_immediate_subtaxa]
+      add_immediate_subtaxa(names)
+    else
+      names
+    end
+  end
+
+  def add_synonyms_again(names, names_plus_subtaxa)
+    if names.length >= names_plus_subtaxa.length
+      names
+    elsif @params[:include_synonyms]
+      add_synonyms(names_plus_subtaxa)
+    else
+      add_other_spellings(names_plus_subtaxa)
+    end
+  end
+
+  def add_other_spellings(names)
+    ids = names.map { |name| name[:correct_spelling_id] || name[:id] }
     return [] if ids.empty?
 
     Name.where(Name[:correct_spelling_id].coalesce(Name[:id]).
-               in(limited_id_set(ids))).pluck(*minimal_name_columns)
+               in(limited_id_set(ids))).select(*minimal_name_columns)
   end
 
-  def add_synonyms(min_names)
-    ids = min_names.filter_map { |min_name| min_name[2] }
-    return min_names if ids.empty?
+  def add_synonyms(names)
+    ids = names.pluck(:synonym_id).compact
+    return names if ids.empty?
 
-    min_names.reject { |min_name| min_name[2] } +
+    names.reject { |name| name[:synonym_id] } +
       Name.where(synonym_id: limited_id_set(ids)).
-      pluck(*minimal_name_columns)
+      select(*minimal_name_columns)
   end
 
-  def add_subtaxa(min_names)
-    higher_names = genera_and_up(min_names)
-    lower_names = genera_and_down(min_names)
-    @name_query = Name.where(id: min_names.map(&:first))
+  def add_subtaxa(names)
+    higher_names = genera_and_up(names)
+    lower_names = genera_and_down(names)
+    @name_query = Name.where(id: names.map(&:id))
     @name_query = add_lower_names(lower_names)
     @name_query = add_higher_names(higher_names) unless higher_names.empty?
-    @name_query.distinct.pluck(*minimal_name_columns)
+    @name_query.distinct.select(*minimal_name_columns)
   end
 
   def add_lower_names(names)
-    @name_query.or(Name.
-      where(Name[:text_name] =~ /^(#{names.join("|")}) /))
+    @name_query.or(Name.where(Name[:text_name] =~ /^(#{names.join("|")}) /))
   end
 
   def add_higher_names(names)
-    @name_query.or(Name.
-      where(Name[:classification] =~ /: _(#{names.join("|")})_/))
+    @name_query.or(
+      Name.where(Name[:classification] =~ /: _(#{names.join("|")})_/)
+    )
   end
 
-  def add_immediate_subtaxa(min_names)
-    higher_names = genera_and_up(min_names)
-    lower_names = genera_and_down(min_names)
+  def add_immediate_subtaxa(names)
+    higher_names = genera_and_up(names)
+    lower_names = genera_and_down(names)
 
-    @name_query = Name.where(id: min_names.map(&:first))
+    @name_query = Name.where(id: names.map(&:id))
     @name_query = add_immediate_lower_names(lower_names)
     unless higher_names.empty?
       @name_query = add_immediate_higher_names(higher_names)
     end
-    @name_query.distinct.pluck(*minimal_name_columns)
+    @name_query.distinct.select(*minimal_name_columns)
   end
 
   def add_immediate_lower_names(lower_names)
@@ -157,14 +156,14 @@ class Lookup::Names < Lookup
       where.not(Name[:text_name].matches("% %")))
   end
 
-  def genera_and_up(min_names)
-    min_names.pluck(3).
-      reject { |min_name| min_name.include?(" ") }
+  def genera_and_up(names)
+    names.pluck(:text_name).
+      reject { |name| name.include?(" ") }
   end
 
-  def genera_and_down(min_names)
+  def genera_and_down(names)
     genera = {}
-    text_names = min_names.pluck(3)
+    text_names = names.pluck(:text_name)
     # Make hash of all genera present.
     text_names.each do |text_name|
       genera[text_name] = true unless text_name.include?(" ")
@@ -184,24 +183,38 @@ class Lookup::Names < Lookup
   # understand.  But hopefully once we get it working it will remain stable.
   # Blame it on me... -Jason, July 2019
 
-  def minimal_name_data(name)
-    return nil unless name
+  # def minimal_name_data(name)
+  #   return nil unless name
 
-    [
-      name.id,                   # 0
-      name.correct_spelling_id,  # 1
-      name.synonym_id,           # 2
-      name.text_name             # 3
-    ]
-  end
+  #   [
+  #     name.id,                   # 0
+  #     name.correct_spelling_id,  # 1
+  #     name.synonym_id,           # 2
+  #     name.text_name             # 3
+  #   ]
+  # end
 
   def minimal_name_columns
-    "id, correct_spelling_id, synonym_id, text_name"
+    [:id, :correct_spelling_id, :synonym_id, :text_name]
   end
 
   # array of max of MO.query_max_array unique ids for use with Arel "in"
   #    where(<x>.in(limited_id_set(ids)))
   def limited_id_set(ids)
     ids.map(&:to_i).uniq[0, MO.query_max_array]
+  end
+
+  def complain_about_unused_flags!
+    complain_about_unused_flag!(:include_synonyms)
+    complain_about_unused_flag!(:include_subtaxa)
+    complain_about_unused_flag!(:include_nonconsensus)
+    complain_about_unused_flag!(:exclude_consensus)
+    complain_about_unused_flag!(:exclude_original_names)
+  end
+
+  def complain_about_unused_flag!(param)
+    return if @params.blank? || @params[param].nil?
+
+    raise("Flag \"#{param}\" is invalid without \"names\" parameter.")
   end
 end
