@@ -36,6 +36,8 @@ class Lookup
   attr_reader :model, :vals, :params
 
   def initialize(vals, params = {})
+    raise("Lookup is only usable via the subclasses.") if @model.blank?
+
     @vals = prepare_vals(vals)
     @params = params
   end

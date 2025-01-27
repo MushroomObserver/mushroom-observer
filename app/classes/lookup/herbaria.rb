@@ -2,9 +2,9 @@
 
 class Lookup::Herbaria < Lookup
   def initialize(vals, params = {})
-    super
     @model = Herbarium
     @name_column = :name
+    super
   end
 
   def lookup_method(name)

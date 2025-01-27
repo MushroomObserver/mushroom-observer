@@ -2,8 +2,9 @@
 
 class Lookup::Users < Lookup
   def initialize(vals, params = {})
-    super
     @model = User
+    @name_column = :login
+    super
   end
 
   def lookup_method(name)

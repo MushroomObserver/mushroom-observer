@@ -2,9 +2,9 @@
 
 class Lookup::ExternalSites < Lookup
   def initialize(vals, params = {})
-    super
     @model = ExternalSite
     @name_column = :name
+    super
   end
 
   def lookup_method(name)
