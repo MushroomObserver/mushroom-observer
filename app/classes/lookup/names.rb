@@ -110,7 +110,7 @@ class Lookup::Names < Lookup
     return min_names if ids.empty?
 
     min_names.reject { |min_name| min_name[2] } +
-      Name.where(synonym_id: clean_id_set(ids).split(",")).
+      Name.where(synonym_id: limited_id_set(ids)).
       pluck(*minimal_name_columns)
   end
 
@@ -197,5 +197,11 @@ class Lookup::Names < Lookup
 
   def minimal_name_columns
     "id, correct_spelling_id, synonym_id, text_name"
+  end
+
+  # array of max of MO.query_max_array unique ids for use with Arel "in"
+  #    where(<x>.in(limited_id_set(ids)))
+  def limited_id_set(ids)
+    ids.map(&:to_i).uniq[0, MO.query_max_array]
   end
 end
