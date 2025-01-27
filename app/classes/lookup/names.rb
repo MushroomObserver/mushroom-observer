@@ -2,13 +2,13 @@
 
 class Lookup::Names < Lookup
   def initialize(vals, params = {})
-    super
     @model = Name
     @name_column = :search_name
+    super
   end
 
   def prepare_vals(vals)
-    if @vals.blank?
+    if vals.blank?
       complain_about_unused_flags!
       return []
     end
@@ -16,41 +16,44 @@ class Lookup::Names < Lookup
     [vals].flatten
   end
 
-  def lookup_instances
-    return [] if @vals.blank?
-
-    @ids.map { |id| Name.find(id) }
-  end
-
   def lookup_ids
     return [] if @vals.blank?
 
     orig_names = given_names
-    names  = add_synonyms_if_necessary(orig_names)
+    names = add_synonyms_if_necessary(orig_names)
     names_plus_subtaxa = add_subtaxa_if_necessary(names)
-    names  = add_synonyms_again(names, names_plus_subtaxa)
+    names = add_synonyms_again(names, names_plus_subtaxa)
     names -= orig_names if @params[:exclude_original_names]
     names.map(&:id)
   end
 
+  # If we got params, look up all instances from the ids.
+  def lookup_instances
+    return [] if @vals.blank?
+
+    ids.map { |id| Name.find(id) }
+  end
+
   def given_names
-    given_names = find_exact_name_matches(@vals)
     if @params[:exclude_original_names]
-      add_other_spellings(given_names)
+      add_other_spellings(matches)
     else
-      given_names
+      matches
     end
   end
 
-  def find_exact_name_matches
-    @vals.inject([]) do |result, val|
-      if /^\d+$/.match?(val.to_s) # from an id
-        result << Name.where(id: val).select(*minimal_name_columns)
+  def matches
+    @matches ||= @vals.map do |val|
+      if val.is_a?(@model)
+        val.id
+      elsif val.is_a?(AbstractModel)
+        raise("Passed a #{val.class} to LookupIDs for #{@model}.")
+      elsif /^\d+$/.match?(val.to_s) # from an id
+        Name.where(id: val).select(*minimal_name_columns)
       else # from a string
-        result += find_matching_names(val)
+        find_matching_names(val)
       end
-      result
-    end.uniq.compact
+    end.flatten.uniq.compact
   end
 
   # NOTE: Name.parse_name returns a ParsedName instance which is a hash of
@@ -58,7 +61,7 @@ class Lookup::Names < Lookup
   def find_matching_names(name)
     parse = Name.parse_name(name)
     srch_str = parse ? parse.search_name : Name.clean_incoming_string(name)
-    if parse.author.present?
+    if parse&.author.present?
       matches = Name.where(search_name: srch_str).select(*minimal_name_columns)
     end
     return matches unless matches.empty?
@@ -69,7 +72,7 @@ class Lookup::Names < Lookup
   def add_synonyms_if_necessary(names)
     if @params[:include_synonyms]
       add_synonyms(names)
-    elsif !args[:exclude_original_names]
+    elsif !@params[:exclude_original_names]
       add_other_spellings(names)
     else
       names
@@ -79,7 +82,7 @@ class Lookup::Names < Lookup
   def add_subtaxa_if_necessary(names)
     if @params[:include_subtaxa]
       add_subtaxa(names)
-    elsif args[:include_immediate_subtaxa]
+    elsif @params[:include_immediate_subtaxa]
       add_immediate_subtaxa(names)
     else
       names
