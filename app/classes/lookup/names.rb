@@ -180,26 +180,11 @@ class Lookup::Names < Lookup
     end.uniq
   end
 
-  # This ugliness with "minimal name data" is a way to avoid having Rails
-  # instantiate all the names (which can get quite huge if you start talking
-  # about all the children of Kingdom Fungi!)  It allows us to use low-level
-  # mysql queries, and restricts the dataflow back and forth to the database
-  # to just the few columns we actually need.  Unfortunately it is ugly,
-  # it totally violates the autonomy of Name, and it is probably hard to
-  # understand.  But hopefully once we get it working it will remain stable.
-  # Blame it on me... -Jason, July 2019
-
-  # def minimal_name_data(name)
-  #   return nil unless name
-
-  #   [
-  #     name.id,                   # 0
-  #     name.correct_spelling_id,  # 1
-  #     name.synonym_id,           # 2
-  #     name.text_name             # 3
-  #   ]
-  # end
-
+  # Selecting "minimal_name_columns" is a way to avoid having Rails instantiate
+  # all the names getting passed around (which can get quite huge if we've got
+  # all the children of Kingdom Fungi!) It allows us to use quicker AR selects,
+  # optimized to restrict the dataflow back and forth to the database to just
+  # the few columns we actually need.
   def minimal_name_columns
     [:id, :correct_spelling_id, :synonym_id, :text_name]
   end
