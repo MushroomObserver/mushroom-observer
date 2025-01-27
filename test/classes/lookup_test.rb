@@ -2,16 +2,16 @@
 
 require("test_helper")
 
-# tests of Lookup::Names
-class Lookup::NamesTest
+class LookupTest < UnitTestCase
+  # tests of Lookup::Names
   def create_test_name(name)
     name = Name.new_name(Name.parse_name(name).params)
     name.save
     name
   end
 
-  def assert_lookup_names_by_name(expects, args)
-    actual = Lookup::Names.new(args).instances.sort_by(&:text_name)
+  def assert_lookup_names_by_name(expects, vals, params = {})
+    actual = Lookup::Names.new(vals, **params).instances.sort_by(&:text_name)
     expects = expects.sort_by(&:text_name)
     # actual = actual.map { |id| Name.find(id) }.sort_by(&:text_name)
     assert_name_arrays_equal(expects, actual)
