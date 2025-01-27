@@ -26,7 +26,7 @@ class Lookup::Names < Lookup
     names.map(&:id)
   end
 
-  # If we got params, look up all instances from the ids.
+  # Look up all instances from the ids. Too complicated otherwise.
   def lookup_instances
     return [] if @vals.blank?
 

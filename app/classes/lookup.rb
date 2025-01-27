@@ -45,10 +45,6 @@ class Lookup
     instances.map(&:"#{@name_column}")
   end
 
-  # This is checking for an instance, then sanity-checking for an instance of
-  # the wrong model, then for an ID, then yielding to the lookup lambda.
-  # In the last condition, `yield` means run any lambda block provided to this
-  # method. (It only looks up the record in the case it can't find an ID.)
   def evaluate_values_as_ids
     @vals.map do |val|
       if val.is_a?(@model)
@@ -57,8 +53,8 @@ class Lookup
         raise("Passed a #{val.class} to LookupIDs for #{@model}.")
       elsif /^\d+$/.match?(val.to_s)
         val
-      else # each lookup returns an array
-        lookup_method(val).map(&:id)
+      else
+        lookup_method(val).map(&:id) # each lookup returns an array
       end
     end.flatten.uniq.compact
   end
@@ -71,7 +67,7 @@ class Lookup
         raise("Passed a #{val.class} to LookupIDs for #{@model}.")
       elsif /^\d+$/.match?(val.to_s)
         @model.find(val.to_i)
-      else # each lookup returns an array
+      else
         lookup_method(val)
       end
     end.flatten.uniq.compact
