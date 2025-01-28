@@ -87,7 +87,7 @@ class QueryTest < UnitTestCase
     assert_equal(rolf.id,
                  Query.lookup(:Image, by_user: rolf.id.to_s).
                  params[:by_user])
-    assert_equal(rolf.login,
+    assert_equal(rolf.id,
                  Query.lookup(:Image, by_user: rolf.login).params[:by_user])
   end
 
@@ -102,7 +102,7 @@ class QueryTest < UnitTestCase
                  Query.lookup(:Image, users: rolf.id).params[:users])
     assert_equal([rolf.id],
                  Query.lookup(:Image, users: rolf.id.to_s).params[:users])
-    assert_equal([rolf.login],
+    assert_equal([rolf.id],
                  Query.lookup(:Image, users: rolf.login).params[:users])
   end
 
@@ -110,10 +110,10 @@ class QueryTest < UnitTestCase
     # Oops, this query is generic,
     # doesn't know to require Name instances here.
     # assert_raises(RuntimeError) { Query.lookup(:Name, ids: rolf) }
-    # assert_raises(RuntimeError) { Query.lookup(:Name, ids: "one") }
-    # assert_raises(RuntimeError) { Query.lookup(:Name, ids: "1,2,3") }
-    assert_equal([], Query.lookup(:Name, ids: "one"))
-    assert_equal([], Query.lookup(:Name, ids: "1,2,3"))
+    assert_raises(RuntimeError) { Query.lookup(:Name, ids: "one") }
+    assert_raises(RuntimeError) { Query.lookup(:Name, ids: "1,2,3") }
+    assert_equal([names(:fungi).id],
+                 Query.lookup(:Name, ids: names(:fungi).text_name).params[:ids])
     assert_equal([names(:fungi).id],
                  Query.lookup(:Name,
                               ids: names(:fungi).id.to_s).params[:ids])

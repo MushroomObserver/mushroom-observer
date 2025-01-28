@@ -166,7 +166,12 @@ module Query::Modules::Validation
     elsif could_be_record_id?(val)
       val.to_i
     elsif val.is_a?(String)
-      val # lookup happens later
+      lookup = "Lookup::#{type.name.pluralize}"
+      lookup = lookup.constantize
+      result = lookup.new(val).ids&.first
+      raise("Couldn't find an id for : #{val.inspect}") unless result
+
+      result
     else
       raise("Value for :#{arg} should be id, string or an #{type} instance, " \
             "got: #{val.inspect}")
