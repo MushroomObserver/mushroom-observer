@@ -65,17 +65,35 @@ module Query::NamesTest
     assert_query(expects, :Name, by_editor: dick, by: :id)
   end
 
-  # non-arrays and arrays of strings don't work
-  def test_name_users
-    # users = users(:rolf).login
-    # expects = Name.where(user: users).index_order
-    # assert_query(expects, :Name, users: users)
+  def test_name_users_login
+    # single
+    expects = Name.where(user: users(:rolf)).index_order
+    assert_query(expects, :Name, users: users(:rolf).login)
+    # array
+    users = [users(:rolf), users(:mary)]
+    expects = Name.where(user: users).index_order
+    assert_query(expects, :Name, users: users.map(&:login))
+  end
+
+  def test_name_users_id
+    # single
+    users = users(:rolf).id
+    expects = Name.where(user: users).index_order
+    assert_query(expects, :Name, users: users)
+    # array
     users = [users(:rolf), users(:mary)].map(&:id)
     expects = Name.where(user: users).index_order
     assert_query(expects, :Name, users: users)
-    # users = [users(:rolf), users(:mary)].map(&:login)
-    # assert_query(expects, :Name, users: users)
+  end
+
+  def test_name_users_instance
+    # single
+    users = users(:rolf)
+    expects = Name.where(user: users).index_order
+    assert_query(expects, :Name, users: users)
+    # array
     users = [users(:rolf), users(:mary)]
+    expects = Name.where(user: users).index_order
     assert_query(expects, :Name, users: users)
   end
 
