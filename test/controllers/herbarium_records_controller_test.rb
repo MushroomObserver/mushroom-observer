@@ -7,7 +7,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     {
       observation_id: observations(:strobilurus_diminutivus_obs).id,
       herbarium_record: {
-        herbarium_name: rolf.preferred_herbarium.auto_complete_name,
+        herbarium_name: rolf.preferred_herbarium.autocomplete_name,
         initial_det: "Strobilurus diminutivus det. Rolf Singer",
         accession_number: "1234567",
         notes: "Some notes about this herbarium record"
@@ -17,7 +17,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
   # Test of index, with tests arranged as follows:
   # default subaction; then
-  # other subactions in order of @index_subaction_param_keys
+  # other subactions in order of index_active_params
   def test_index
     login
     get(:index)
@@ -83,7 +83,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     herbarium = herbaria(:nybg_herbarium)
 
     login
-    get(:index, params: { herbarium_id: herbarium.id })
+    get(:index, params: { herbarium: herbarium.id })
 
     assert_displayed_title(
       :query_title_in_herbarium.l(types: :HERBARIUM_RECORDS.l,
@@ -98,7 +98,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     herbarium = herbaria(:dick_herbarium)
 
     login
-    get(:index, params: { herbarium_id: herbarium.id })
+    get(:index, params: { herbarium: herbarium.id })
 
     assert_displayed_title(:list_objects.l(type: :HERBARIUM_RECORDS.l))
     assert_flash_text(:runtime_no_matches.l(type: :herbarium_records.l))
@@ -108,7 +108,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     obs = observations(:coprinus_comatus_obs)
 
     login
-    get(:index, params: { observation_id: obs.id })
+    get(:index, params: { observation: obs.id })
 
     assert_displayed_title(
       :query_title_for_observation.l(types: :HERBARIUM_RECORDS.l,
@@ -122,7 +122,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     login
 
     obs = observations(:strobilurus_diminutivus_obs)
-    get(:index, params: { observation_id: obs.id })
+    get(:index, params: { observation: obs.id })
 
     assert_displayed_title(:list_objects.l(type: :HERBARIUM_RECORDS.l))
     assert_flash_text(:runtime_no_matches.l(type: :herbarium_records.l))
@@ -134,7 +134,9 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     herbarium_record = herbarium_records(:coprinus_comatus_nybg_spec)
     assert(herbarium_record)
     login
+
     get(:show, params: { id: herbarium_record.id })
+
     assert_template(:show)
     assert_template("shared/_matrix_box")
   end
@@ -148,8 +150,40 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_template("shared/_matrix_box")
   end
 
+  def test_show_herbarium_record_mcp_searchable
+    herbarium_record = herbarium_records(:agaricus_campestris_spec)
+    assert(
+      herbarium_record&.herbarium&.mcp_searchable?,
+      "Test needs HerbariumRecord fixture that's searchable via MyCoPortal"
+    )
+
+    login
+    get(:show, params: { id: herbarium_record.id })
+
+    assert_select("a[href=?]", herbarium_record.mcp_url, true,
+                  "Missing link to MyCoPortal record")
+  end
+
+  def test_show_herbarium_record_mcp_unsearchable
+    herbarium_record = herbarium_records(:agaricus_campestris_spec)
+    herbarium = herbarium_record.herbarium
+    assert(
+      herbarium&.mcp_searchable?,
+      "Test needs HerbariumRecord in a Herbarium with a MyCoPortal db"
+    )
+    # Make the Herbarium code something that's not in the MyCoPortal network
+    herbarium.update(code: "notInMcp")
+    assert_not(herbarium.mcp_searchable?)
+
+    login
+    get(:show, params: { id: herbarium_record.id })
+
+    assert_select("a[href=?]", herbarium_record.mcp_url, false,
+                  "Missing link to MyCoPortal record")
+  end
+
   def test_next_and_prev_herbarium_record
-    query = Query.lookup_and_save(:HerbariumRecord, :all)
+    query = Query.lookup_and_save(:HerbariumRecord)
     assert_operator(query.num_results, :>, 1)
     number1 = query.results[0]
     number2 = query.results[1]
@@ -232,7 +266,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     post(:create, params: params)
     mary = User.find(mary.id) # Reload user
     assert_equal(herbarium_count + 1, mary.curated_herbaria.count)
-    herbarium = Herbarium.order(created_at: :desc)[0]
+    herbarium = Herbarium.reorder(created_at: :desc)[0]
     assert(herbarium.curators.member?(mary))
   end
 
@@ -280,12 +314,12 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
   def test_create_herbarium_record_redirect
     obs = observations(:coprinus_comatus_obs)
-    query = Query.lookup_and_save(:HerbariumRecord, :all)
+    query = Query.lookup_and_save(:HerbariumRecord)
     q = query.id.alphabetize
     params = {
       observation_id: obs.id,
       herbarium_record: { herbarium_name:
-                          obs.user.preferred_herbarium.auto_complete_name },
+                          obs.user.preferred_herbarium.autocomplete_name },
       q: q
     }
 
@@ -349,13 +383,13 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
   def test_update_herbarium_record_redirect
     obs   = observations(:detailed_unknown_obs)
     rec   = obs.herbarium_records.first
-    query = Query.lookup_and_save(:HerbariumRecord, :all)
+    query = Query.lookup_and_save(:HerbariumRecord)
     q     = query.id.alphabetize
     make_admin("rolf")
     params = {
       id: rec.id,
       herbarium_record: {
-        herbarium_name: rec.herbarium.auto_complete_name,
+        herbarium_name: rec.herbarium.autocomplete_name,
         initial_det: rec.initial_det,
         accession_number: rec.accession_number,
         notes: rec.notes
@@ -418,7 +452,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
   def test_destroy_herbarium_record_redirect
     obs   = observations(:detailed_unknown_obs)
     recs  = obs.herbarium_records
-    query = Query.lookup_and_save(:HerbariumRecord, :all)
+    query = Query.lookup_and_save(:HerbariumRecord)
     q     = query.id.alphabetize
     assert_operator(recs.length, :>, 1)
     make_admin("rolf")

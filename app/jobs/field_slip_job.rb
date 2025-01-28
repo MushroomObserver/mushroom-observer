@@ -37,12 +37,4 @@ class FieldSlipJob < ApplicationJob
       tracker.destroy
     end
   end
-
-  def log(str)
-    time = Time.zone.now.to_s
-    log_entry = "#{time}: #{str}\n"
-    open("log/job.log", "a") do |f|
-      f.write(log_entry)
-    end
-  end
 end

@@ -25,13 +25,7 @@ class SearchController < ApplicationController
     session[:pattern] = pattern
     session[:search_type] = type
 
-    special_params = if type == :herbarium
-                       { flavor: :all }
-                     else
-                       {}
-                     end
-
-    forward_pattern_search(type, pattern, special_params)
+    forward_pattern_search(type, pattern)
   end
 
   ADVANCED_SEARCHABLE_MODELS = [Image, Location, Name, Observation].freeze
@@ -51,7 +45,7 @@ class SearchController < ApplicationController
     query_params = {}
     add_filled_in_text_fields(query_params)
     add_applicable_filter_parameters(query_params, model)
-    query = create_query(model, :advanced_search, query_params)
+    query = create_query(model, query_params)
     redirect_to_model_controller(model, query)
   end
 
@@ -69,7 +63,7 @@ class SearchController < ApplicationController
   end
 
   # In the case of "needs_naming", this is added to the search path params
-  def forward_pattern_search(type, pattern, special_params)
+  def forward_pattern_search(type, pattern)
     case type
     when :google
       site_google_search(pattern)
@@ -78,8 +72,8 @@ class SearchController < ApplicationController
       redirect_to_search_or_index(
         pattern: pattern,
         search_path: send(:"#{type.to_s.pluralize}_path",
-                          params: { pattern: pattern }.merge(special_params)),
-        index_path: send(:"#{type.to_s.pluralize}_path", special_params)
+                          params: { pattern: pattern }),
+        index_path: send(:"#{type.to_s.pluralize}_path")
       )
     else
       flash_error(:runtime_invalid.t(type: :search, value: type.inspect))
@@ -87,20 +81,33 @@ class SearchController < ApplicationController
     end
   end
 
+  # NOTE: The autocompleters for name, location, and user all make the ids
+  # available now, so this could be a lot more efficient.
   def add_filled_in_text_fields(query_params)
-    [:content, :location, :name, :user].each do |field|
+    [:content, :user_where, :name, :user].each do |field|
       val = params[:search][field].to_s
       next if val.blank?
 
       # Treat User field differently; remove angle-bracketed user name,
       # since it was included by the auto-completer only as a hint.
-      val = val.sub(/ <.*/, "") if field == :user
+      val = user_login(params[:search]) if field == :user
       query_params[field] = val
     end
   end
 
+  def user_login(params)
+    if params.include?(:user_id)
+      user = User.find_by(id: params[:user_id])
+      return user.login if user
+    end
+    user = User.lookup_unique_text_name(params[:user])
+    return user.login if user
+
+    params[:user]
+  end
+
   def add_applicable_filter_parameters(query_params, model)
-    ContentFilter.by_model(model).each do |fltr|
+    Query::Filter.by_model(model).each do |fltr|
       query_params[fltr.sym] = params.dig(:content_filter, fltr.sym)
     end
   end

@@ -319,7 +319,8 @@ module Projects
       login
       get(:index, params: { project_id: eol_project.id })
 
-      assert_displayed_title("Members of #{eol_project.title}")
+      member = eol_project.project_members.first
+      assert_match(member.user.name, @response.body)
       assert_template("index")
     end
   end

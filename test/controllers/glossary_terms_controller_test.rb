@@ -35,6 +35,16 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     )
   end
 
+  def test_index_by_id
+    term = glossary_terms(:plane_glossary_term)
+    get(:index, params: { id: term.id })
+    assert_template("index")
+    assert_select(
+      "a[href *= '#{glossary_term_path(term.id)}']", true,
+      "Glossary Index at `P` missing link to #{term.unique_text_name})"
+    )
+  end
+
   def test_glossary_term_search
     conic = glossary_terms(:conic_glossary_term)
     convex = glossary_terms(:convex_glossary_term)
@@ -42,6 +52,9 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     get(:index, params: { pattern: "conic" })
     qr = QueryRecord.last.id.alphabetize
     assert_redirected_to(glossary_term_path(conic.id, params: { q: qr }))
+
+    get(:index, params: { pattern: conic.id })
+    assert_redirected_to(glossary_term_path(conic.id))
 
     login
     get(:index, params: { pattern: "con" })
@@ -251,7 +264,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   end
 
   def test_create_duplicate_name
-    existing_name = GlossaryTerm.first.name
+    existing_name = GlossaryTerm.reorder(created_at: :asc).first.name
     params = create_term_params
     params[:glossary_term][:name] = existing_name
     login
@@ -429,7 +442,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   end
 
   def test_destroy_no_login
-    term = GlossaryTerm.first
+    term = GlossaryTerm.reorder(created_at: :asc).first
     login(users(:zero_user).login)
     delete(:destroy, params: { id: term.id })
 

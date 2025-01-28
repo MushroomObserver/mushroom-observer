@@ -18,12 +18,12 @@ module ObjectLinkHelper
       link_string = where_string(location.name, count)
       link_string += " [#{:click_for_map.t}]" if click
       link_to(link_string, location_path(id: location.id),
-              { id: "show_location_link_#{location.id}" })
+              { class: "show_location_link show_location_link_#{location.id}" })
     else
       link_string = where_string(where, count)
       link_string += " [#{:SEARCH.t}]" if click
       link_to(link_string, observations_path(where: where),
-              { id: "index_observations_at_where_link" })
+              { class: "index_observations_at_where_link" })
     end
   end
 
@@ -254,7 +254,7 @@ module ObjectLinkHelper
     if count.positive?
 
       link_to((count == 1 ? :herbarium_record.t : :herbarium_records.t),
-              herbarium_records_path(observation_id: obs.id),
+              herbarium_records_path(observation: obs.id),
               { class: "herbarium_records_for_observation_link" })
     else
       return :show_observation_specimen_available.t if obs.specimen

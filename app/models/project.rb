@@ -76,6 +76,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   has_many :project_observations, dependent: :destroy
   has_many :observations, through: :project_observations
+  has_many :locations, through: :observations
 
   has_many :project_species_lists, dependent: :destroy
   has_many :species_lists, through: :project_species_lists
@@ -87,10 +88,17 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
             format: { with: /\A[A-Z0-9][A-Z0-9-]*\z/,
                       message: proc { :alphanumerics_only.t } }
 
+  scope :index_order, -> { order(updated_at: :desc, id: :desc) }
+
   scope :show_includes, lambda {
     strict_loading.includes(
       { comments: :user },
       :location
+    )
+  }
+  scope :violations_includes, lambda {
+    strict_loading.includes(
+      { observations: [:location, :user] }
     )
   }
 
@@ -149,6 +157,14 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     open_membership && !member?(user)
   end
 
+  def join(user)
+    return unless can_join?(user)
+
+    ProjectMember.create!(project: self, user:,
+                          trust_level: "hidden_gps")
+    user_group.users << user unless user_group.users.member?(user)
+  end
+
   def can_leave?(user)
     user && user_group.users.member?(user) && user.id != user_id
   end
@@ -171,6 +187,10 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def constraints
     "#{:DATES.t}: #{date_range}; #{:LOCATION.t}: #{place_name}"
+  end
+
+  def constraints?
+    start_date || end_date || location
   end
 
   # Check if user has permission to edit a given object.
@@ -399,6 +419,10 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     Checklist::ForProject.new(self).num_taxa
   end
 
+  def location_count
+    locations.distinct.count
+  end
+
   def count_collections(name)
     observations.where(name:).count
   end
@@ -420,14 +444,6 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   #  :section: queries re related Observations
   #
   ##############################################################################
-
-  def happening?
-    now = Time.zone.now
-    return false if start_date.present? && now < start_date
-    return false if end_date.present? && now > end_date
-
-    true
-  end
 
   def out_of_range_observations
     if start_date.nil? && end_date.nil?

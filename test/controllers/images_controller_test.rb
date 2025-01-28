@@ -14,11 +14,11 @@ class ImagesControllerTest < FunctionalTestCase
 
   # Tests of index, with tests arranged as follows:
   # default subaction; then
-  # other subactions in order of @index_subaction_param_keys
+  # other subactions in order of index_active_params
   def test_index
     login
     get(:index)
-    default_sorted_by = :"sort_by_#{::Query::ImageBase.default_order}".l
+    default_sorted_by = :"sort_by_#{::Query::Images.default_order}".l
 
     assert_template("index")
     assert_template(partial: "_matrix_box")
@@ -75,10 +75,10 @@ class ImagesControllerTest < FunctionalTestCase
   def test_index_advanced_search_multiple_hits
     obs = observations(:fungi_obs)
     assert(obs.images.many?)
-    query = Query.lookup_and_save(:Image, :advanced_search,
+    query = Query.lookup_and_save(:Image,
                                   name: obs.text_name,
                                   user: obs.user.name,
-                                  location: obs.where)
+                                  user_where: obs.where)
     assert(query.results.many?)
 
     login
@@ -88,13 +88,13 @@ class ImagesControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_template("index")
     assert_template(partial: "_matrix_box")
-    assert_displayed_title("Advanced Search")
+    # Don't care about the title, but good to know if it changes
+    assert_displayed_title("Matching Images")
   end
 
   def test_index_advanced_search_one_hit
     image = images(:connected_coprinus_comatus_image)
-    query = Query.lookup_and_save(:Image, :advanced_search,
-                                  name: "Coprinus comatus")
+    query = Query.lookup_and_save(:Image, name: "Coprinus comatus")
     assert(query.results.one?)
 
     login
@@ -106,11 +106,11 @@ class ImagesControllerTest < FunctionalTestCase
   end
 
   def test_index_advanced_search_no_hits
-    query = Query.lookup_and_save(:Image, :advanced_search,
+    query = Query.lookup_and_save(:Image,
                                   name: "Don't know",
                                   user: "myself",
                                   content: "Long pink stem and small pink cap",
-                                  location: "Eastern Oklahoma")
+                                  user_where: "Eastern Oklahoma")
     assert(query.results.count.zero?)
 
     login
@@ -123,26 +123,21 @@ class ImagesControllerTest < FunctionalTestCase
 
   def test_index_advanced_search_invalid_q_param
     login
-    get(:index, params: { q: "xxxxx", advanced_search: "1" })
+    get(:index, params: { q: "xxxxx", advanced_search: true })
 
     assert_flash_text(:advanced_search_bad_q_error.l)
     assert_redirected_to(search_advanced_path)
   end
 
   def test_index_advanced_search_error
-    query = Query.lookup_and_save(:Image, :advanced_search,
-                                  name: "Don't know",
-                                  user: "myself",
-                                  content: "Long pink stem and small pink cap",
-                                  location: "Eastern Oklahoma")
+    query_no_conditions = Query.lookup_and_save(:Image)
+
     login
+    params = @controller.query_params(query_no_conditions).
+             merge({ advanced_search: true })
+    get(:index, params:)
 
-    @controller.stub(:show_selected_images, -> { raise(StandardError) }) do
-      get(:index,
-          params: @controller.query_params(query).
-          merge({ advanced_search: "1" }))
-    end
-
+    assert_flash_error(:runtime_no_conditions.l)
     assert_redirected_to(search_advanced_path)
   end
 
@@ -201,8 +196,7 @@ class ImagesControllerTest < FunctionalTestCase
   def test_index_for_project
     project = projects(:bolete_project).id
     login
-    get(:index,
-        params: { for_project: project })
+    get(:index, params: { project: project })
 
     assert_template("index", partial: "_image")
   end
@@ -217,12 +211,10 @@ class ImagesControllerTest < FunctionalTestCase
 
     # query 1 (outer)
     outer = Query.lookup_and_save(:Observation,
-                                  :in_set, ids: [det_unknown,
-                                                 min_unknown,
-                                                 a_campestris,
-                                                 c_comatus])
+                                  ids: [det_unknown, min_unknown,
+                                        a_campestris, c_comatus])
     # query 2 (inner for first obs)
-    inner = Query.lookup_and_save(:Image, :inside_observation,
+    inner = Query.lookup_and_save(:Image,
                                   outer: outer, observation: det_unknown,
                                   by: :id)
 
@@ -264,7 +256,8 @@ class ImagesControllerTest < FunctionalTestCase
     assert_nil(new_new_inner.next)
 
     params = {
-      id: det_unknown.images.last.id, # inner for first obs
+      # inner for first obs
+      id: det_unknown.images.last.id,
       params: @controller.query_params(inner).merge({ flow: :next })
     }.flatten
     login
@@ -280,7 +273,7 @@ class ImagesControllerTest < FunctionalTestCase
     image = Image.find(rolfs_favorite_image_id)
 
     # Create simple index.
-    query = Query.lookup_and_save(:Image, :by_user, user: rolf)
+    query = Query.lookup_and_save(:Image, by_user: rolf)
     ids = query.result_ids
     assert(ids.length > 3)
     rolfs_index = ids.index(rolfs_favorite_image_id)
@@ -312,11 +305,9 @@ class ImagesControllerTest < FunctionalTestCase
     c_comatus =    observations(:coprinus_comatus_obs).id
 
     outer = Query.lookup_and_save(:Observation,
-                                  :in_set, ids: [det_unknown,
-                                                 min_unknown,
-                                                 a_campestris,
-                                                 c_comatus])
-    inner = Query.lookup_and_save(:Image, :inside_observation,
+                                  ids: [det_unknown, min_unknown,
+                                        a_campestris, c_comatus])
+    inner = Query.lookup_and_save(:Image,
                                   outer: outer, observation: a_campestris,
                                   by: :id)
 
@@ -342,11 +333,13 @@ class ImagesControllerTest < FunctionalTestCase
     inner.current_id = images(:agaricus_campestris_image).id
     assert(new_inner = inner.prev)
     assert_not_equal(inner, new_inner)
-    assert_equal(observations(:detailed_unknown_obs).images.second.id,
+    assert_equal(observations(:detailed_unknown_obs).images.
+                 reorder(created_at: :asc).second.id,
                  new_inner.current_id)
     assert(new_new_inner = new_inner.prev)
     assert_equal(new_inner, new_new_inner)
-    assert_equal(observations(:detailed_unknown_obs).images.first.id,
+    assert_equal(observations(:detailed_unknown_obs).images.
+                 reorder(created_at: :asc).first.id,
                  new_inner.current_id)
     assert_nil(new_inner.prev)
 
@@ -358,7 +351,8 @@ class ImagesControllerTest < FunctionalTestCase
     get(:show, params: params)
     assert_redirected_to(
       action: :show,
-      id: observations(:detailed_unknown_obs).images.second.id,
+      id: observations(:detailed_unknown_obs).images.
+          reorder(created_at: :asc).second.id,
       params: @controller.query_params(QueryRecord.last)
     )
   end
@@ -377,6 +371,17 @@ class ImagesControllerTest < FunctionalTestCase
       get(:show, params: { id: image.id, size: size })
       assert_template("show", partial: "_form_ccbyncsa25")
     end
+  end
+
+  def test_show_image_nil_user
+    image = images(:peltigera_image)
+    image.update(user: nil)
+
+    login
+    get(:show, params: { id: image.id })
+
+    assert_response(:success)
+    assert_template("show", partial: "_form_ccbyncsa25")
   end
 
   # Prove show works when params include obs
@@ -472,11 +477,11 @@ class ImagesControllerTest < FunctionalTestCase
   def test_destroy_image_with_query
     user = users(:mary)
     assert(user.images.size > 1, "Need different fixture for test")
-    image = user.images.second
-    next_image = user.images.first
-    obs = image.observations.first
+    image = user.images.reorder(created_at: :asc).second
+    next_image = user.images.reorder(created_at: :asc).first
+    obs = image.observations.reorder(created_at: :asc).first
     assert(obs.images.member?(image))
-    query = Query.lookup_and_save(:Image, :by_user, user: user)
+    query = Query.lookup_and_save(:Image, by_user: user)
     q = query.id.alphabetize
     params = { id: image.id, q: q }
 

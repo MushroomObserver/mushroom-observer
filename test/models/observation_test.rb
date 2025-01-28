@@ -905,7 +905,7 @@ class ObservationTest < UnitTestCase
     # with order scrambled in the Observation
     obs   = observations(:template_and_orphaned_notes_scrambled_obs)
     parts = ["Cap", "Nearby trees", "odor", "orphaned caption 1",
-             "orphaned caption 2", "Other"]
+             "orphaned caption 2", "Collector", "Other"]
     assert_equal(parts, obs.form_notes_parts(obs.user))
   end
 
@@ -1460,16 +1460,16 @@ class ObservationTest < UnitTestCase
                         observations(:minimal_unknown_obs))
   end
 
-  def test_scope_herbarium_record_notes_include
+  def test_scope_herbarium_record_notes_contain
     obss_with_hr_notes =
-      Observation.herbarium_record_notes_include("cleaned & dried at 115°")
+      Observation.herbarium_record_notes_contain("cleaned & dried at 115°")
     assert_includes(obss_with_hr_notes,
                     observations(:minimal_unknown_obs))
     assert_includes(obss_with_hr_notes,
                     observations(:detailed_unknown_obs))
     assert_not_includes(obss_with_hr_notes,
                         observations(:imageless_unvouchered_obs))
-    assert_empty(Observation.herbarium_record_notes_include("ARBITRARY_SHA"))
+    assert_empty(Observation.herbarium_record_notes_contain("ARBITRARY_SHA"))
   end
 
   def test_source_credit

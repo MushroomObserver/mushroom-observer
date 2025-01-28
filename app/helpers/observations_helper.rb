@@ -221,8 +221,8 @@ module ObservationsHelper
       "#{:WHO.t}:",
       user_link(obs_user)
     ]
-    if obs_user != User.current && !obs_user.no_emails &&
-       obs_user.email_general_question
+    if obs_user != User.current && !obs_user&.no_emails &&
+       obs_user&.email_general_question
 
       html += [
         "[",
@@ -237,14 +237,25 @@ module ObservationsHelper
   end
 
   def observation_details_notes(obs:)
-    return "" unless obs.notes?
+    notes = obs.notes
+    return "" unless notes
+    return "#{:NOTES.t}:\n#{notes[:Other]}".tpl if notes.keys == [:Other]
 
-    notes = obs.notes_show_formatted.sub(/^\A/, "#{:NOTES.t}:\n").tpl
-
-    tag.div(class: "obs-notes", id: "observation_notes") do
+    # This used to use
+    #
+    # notes = obs.notes_show_preformatted.sub(/^/, "#{:NOTES.t}:\n").tpl
+    #
+    # However, this fails if one of the values has a '+' sign, e.g., "+photo"
+    # because the textile interpretation ends up affecting multiple lines.
+    # This approach passes each note independently to textile.
+    tag.div(class: "obs-notes textile", id: "observation_notes") do
       Textile.clear_textile_cache
       Textile.register_name(obs.name)
-      tag.div(notes)
+      concat("<p>#{:NOTES.t}:<br>".t)
+      notes.each_with_object(+"") do |(key, value), _str|
+        concat("+#{key}+: #{value}<br>".tl)
+      end
+      concat("</p>".t)
     end
   end
 

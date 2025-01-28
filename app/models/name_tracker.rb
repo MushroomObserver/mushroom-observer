@@ -27,9 +27,9 @@
 class NameTracker < AbstractModel
   belongs_to :user
   belongs_to :name
+  has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
 
-  scope :for_user,
-        ->(user) { where(user: user) }
+  scope :for_user, ->(user) { where(user: user) }
 
   # Used as an "opt-in" check-box in the UI form.
   attr_accessor :note_template_enabled

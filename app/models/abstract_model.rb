@@ -80,6 +80,8 @@
 ############################################################################
 
 class AbstractModel < ApplicationRecord
+  include Scopes
+
   self.abstract_class = true
 
   def self.acts_like_model?
@@ -99,39 +101,6 @@ class AbstractModel < ApplicationRecord
   def type_tag
     self.class.name.underscore.to_sym
   end
-
-  ##############################################################################
-  #
-  #  :section: Scopes
-  #
-  ##############################################################################
-
-  scope :created_on, lambda { |ymd_string|
-    where(arel_table[:created_at].format("%Y-%m-%d").eq(ymd_string))
-  }
-  scope :created_after, lambda { |ymd_string|
-    where(arel_table[:created_at].format("%Y-%m-%d") >= ymd_string)
-  }
-  scope :created_before, lambda { |ymd_string|
-    where(arel_table[:created_at].format("%Y-%m-%d") <= ymd_string)
-  }
-  scope :created_between, lambda { |earliest, latest|
-    where(arel_table[:created_at].format("%Y-%m-%d") >= earliest).
-      where(arel_table[:created_at].format("%Y-%m-%d") <= latest)
-  }
-  scope :updated_on, lambda { |ymd_string|
-    where(arel_table[:updated_at].format("%Y-%m-%d").eq(ymd_string))
-  }
-  scope :updated_after, lambda { |ymd_string|
-    where(arel_table[:updated_at].format("%Y-%m-%d") >= ymd_string)
-  }
-  scope :updated_before, lambda { |ymd_string|
-    where(arel_table[:updated_at].format("%Y-%m-%d") <= ymd_string)
-  }
-  scope :updated_between, lambda { |earliest, latest|
-    where(arel_table[:updated_at].format("%Y-%m-%d") >= earliest).
-      where(arel_table[:updated_at].format("%Y-%m-%d") <= latest)
-  }
 
   ##############################################################################
   #

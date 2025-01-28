@@ -41,6 +41,8 @@ class Sequence < AbstractModel
   after_update  :log_update_sequence
   after_destroy :log_destroy_sequence
 
+  scope :index_order, -> { order(created_at: :desc, id: :desc) }
+
   ##############################################################################
   #
   #  :section: Matchers
@@ -85,13 +87,11 @@ class Sequence < AbstractModel
   end
 
   # Default number of characters (including diaresis) for truncating locus
-  def self.locus_width
-    24
-  end
+  LOCUS_WIDTH = 24
 
   # wrapper around class method
   def locus_width
-    Sequence.locus_width
+    LOCUS_WIDTH
   end
 
   ##############################################################################
@@ -115,16 +115,18 @@ class Sequence < AbstractModel
 
   # url of NCBI page to set up BLAST for the Sequence
   def blast_url
-    if blastable_by_accession?
-      "#{blast_url_prefix}#{accession.gsub(/\s/, "")}"
-    else
-      "#{blast_url_prefix}#{bases_nucleotides}"
-    end
+    query =
+      if blastable_by_accession?
+        accession.gsub(/\s/, "")
+      else
+        bases_nucleotides
+      end
+    "#{blast_url_prefix}&QUERY=#{query}"
   end
 
   def self.blast_url_prefix
-    "https://blast.ncbi.nlm.nih.gov/Blast.cgi?" \
-    "CMD=Post&DATABASE=nt&PROGRAM=blastn&QUERY="
+    "https://blast.ncbi.nlm.nih.gov/Blast.cgi?PROGRAM=blastn&" \
+    "PAGE_TYPE=BlastSearch&LINK_LOC=blasthome&DATABASE=core_nt"
   end
 
   # convenience wrapper around class method of same name

@@ -114,10 +114,10 @@ module Tabs
     end
 
     def location_map_title(query:)
-      if query.flavor == :all
-        :map_locations_global_map.t
-      else
+      if query&.params&.dig(:with_observations)
         :map_locations_title.t(locations: query.title)
+      else
+        :map_locations_global_map.t
       end
     end
 
@@ -135,11 +135,11 @@ module Tabs
 
     # Add some alternate sorting criteria.
     def location_index_sorts(query:)
+      rss_log = query&.params&.dig(:by) == :rss_log
       [
         ["name", :sort_by_name.t],
         ["created_at", :sort_by_created_at.t],
-        [(query&.flavor == :by_rss_log ? "rss_log" : "updated_at"),
-         :sort_by_updated_at.t],
+        [(rss_log ? "rss_log" : "updated_at"), :sort_by_updated_at.t],
         ["num_views", :sort_by_num_views.t],
         ["box_area", :sort_by_box_area.t]
       ]

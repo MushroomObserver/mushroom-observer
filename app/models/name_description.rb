@@ -65,23 +65,14 @@
 class NameDescription < Description
   require "acts_as_versioned"
 
-  # enum definitions for use by simple_enum gem
+  include Description::Scopes
+
   # Do not change the integer associated with a value
-  enum review_status:
-        {
-          unreviewed: 1,
-          unvetted: 2,
-          vetted: 3,
-          inaccurate: 4
-        }
-  enum source_type:
-        {
-          public: 1,
-          foreign: 2,
-          project: 3,
-          source: 4,
-          user: 5
-        }, _suffix: :source
+  enum :review_status, { unreviewed: 1, unvetted: 2, vetted: 3, inaccurate: 4 }
+
+  enum :source_type, { public: 1, foreign: 2, project: 3, source: 4, user: 5 },
+       suffix: :source, instance_methods: false
+
   belongs_to :license
   belongs_to :name
   belongs_to :project
@@ -111,15 +102,20 @@ class NameDescription < Description
   has_many :editors, through: :name_description_editors,
                      source: :user
 
-  scope :for_eol_export,
-        lambda {
-          where(review_status: review_statuses.values_at(
-            "unvetted", "vetted"
-          )).
-            where(NameDescription[:gen_desc].not_blank).
-            where(ok_for_export: true).
-            where(public: true)
-        }
+  scope :index_order, lambda {
+    joins(:name).order(Name[:sort_name].asc, NameDescription[:created_at].asc,
+                       NameDescription[:id].desc)
+  }
+
+  scope :for_eol_export, lambda {
+    where(review_status: review_statuses.values_at(
+      "unvetted", "vetted"
+    )).
+      where(NameDescription[:gen_desc].not_blank).
+      where(ok_for_export: true).
+      where(public: true)
+  }
+
   scope :show_includes, lambda {
     strict_loading
   }
@@ -130,6 +126,7 @@ class NameDescription < Description
   ALL_NOTE_FIELDS = (
     [:classification] + EOL_NOTE_FIELDS + [:refs, :notes]
   ).freeze
+  SEARCHABLE_FIELDS = ALL_NOTE_FIELDS
 
   acts_as_versioned(
     if_changed: ALL_NOTE_FIELDS,

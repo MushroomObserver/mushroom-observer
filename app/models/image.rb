@@ -234,6 +234,8 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   require "mimemagic"
   require "fastimage"
 
+  include Scopes
+
   has_many :glossary_term_images, dependent: :destroy
   has_many :glossary_terms, through: :glossary_term_images
   has_many :thumb_glossary_terms, class_name: "GlossaryTerm",
@@ -265,12 +267,6 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
   after_update :track_copyright_changes
   before_destroy :update_thumbnails
-
-  scope :interactive_includes, lambda {
-    strict_loading.includes(
-      :image_votes, :license, :projects, :user
-    )
-  }
 
   # Array of all observations, users and glossary terms using this image.
   def all_subjects
@@ -352,6 +348,10 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # in the image.  It's just that we haven't seen any other types yet.)
   ALL_CONTENT_TYPES = ["image/jpeg", "image/gif", "image/png", "image/tiff",
                        "image/x-ms-bmp", "image/bmp", nil].freeze
+
+  SEARCHABLE_FIELDS = [
+    :original_name, :copyright_holder, :notes
+  ].freeze
 
   def image_url(size)
     Image::URL.new(
@@ -446,6 +446,22 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
       end
     end
     [w, h]
+  end
+
+  def self.cached_original_file_path(id)
+    "#{MO.local_original_image_cache_path}/#{id}.jpg"
+  end
+
+  def self.cached_original_url(id)
+    "#{MO.local_original_image_cache_url}/#{id}.jpg"
+  end
+
+  def cached_original_file_path
+    self.class.cached_original_file_path(id)
+  end
+
+  def cached_original_url
+    self.class.cached_original_url(id)
   end
 
   ##############################################################################

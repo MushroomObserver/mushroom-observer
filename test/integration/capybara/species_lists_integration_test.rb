@@ -99,11 +99,12 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
     assert_equal("List Title", spl.title)
     assert_equal(albion, spl.location)
     assert_equal("List notes.", spl.notes.strip)
-    assert_equal(albion, obs.last.location)
+    obs_last = obs.last
+    assert_equal(albion, obs_last.location)
     assert_equal(member_notes,
-                 obs.last.notes[Observation.other_notes_key].strip)
-    assert_true(obs.last.is_collection_location)
-    assert_true(obs.last.specimen)
+                 obs_last.notes[Observation.other_notes_key].strip)
+    assert_true(obs_last.is_collection_location)
+    assert_true(obs_last.specimen)
 
     # Try making some edits, too.
     first(:link, href: /#{edit_species_list_path(spl.id)}/).click
@@ -160,13 +161,14 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
     assert_equal(new_location, spl.where)
     assert_nil(spl.location)
     assert_equal("New list notes.", spl.notes.strip)
-    assert_nil(obs.last.location)
-    assert_equal(new_location, obs.last.where)
-    assert_nil(obs.last.location)
+    obs_last = obs.last
+    assert_nil(obs_last.location)
+    assert_equal(new_location, obs_last.where)
+    assert_nil(obs_last.location)
     assert_equal(new_member_notes,
-                 obs.last.notes[Observation.other_notes_key].strip)
-    assert_false(obs.last.is_collection_location)
-    assert_false(obs.last.specimen)
+                 obs_last.notes[Observation.other_notes_key].strip)
+    assert_false(obs_last.is_collection_location)
+    assert_false(obs_last.specimen)
 
     # Should have chained us into create_location.  Define this location
     # and make sure it updates both the observations and the list.
@@ -190,10 +192,11 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
     assert_equal(newer_location_reverse, loc.display_name)
     spl.reload
     obs = spl.observations
+    obs_last = obs.last
     assert_equal(loc.name, spl.where)
     assert_equal(loc, spl.location)
-    assert_equal(loc.name, obs.last.where)
-    assert_equal(loc, obs.last.location)
+    assert_equal(loc.name, obs_last.where)
+    assert_equal(loc, obs_last.location)
 
     # Try adding a comment, just for kicks. This will hit HTML, not Turbo
     click_link(href: /#{new_comment_path}/)

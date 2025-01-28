@@ -10,18 +10,16 @@ module PatternSearch
       self.parser = PatternSearch::Parser.new(string)
       self.form_params = make_terms_available_to_faceted_form
       build_query
-      self.query = Query.lookup(model.name.to_sym, flavor, args)
+      self.query = Query.lookup(model.name.to_sym, args)
     rescue Error => e
       errors << e
     end
 
     # rubocop:disable Metrics/AbcSize
     def build_query
-      self.flavor = :all
-      self.args   = {}
+      self.args = {}
       parser.terms.each do |term|
         if term.var == :pattern
-          self.flavor = :pattern_search
           args[:pattern] = term.parse_pattern
         elsif (param = lookup_param(term.var))
           query_param, parse_method = param

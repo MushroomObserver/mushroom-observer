@@ -35,15 +35,13 @@ flash_error(@error) if @error && @objects.empty?
           concat(tag.span(name.display_name.html_safe.t, class: "display-name"))
           concat(tag.span(counts[name.id], class: "badge")) if counts[name.id]
         end %>
-        <% if @extra_data %>
-          <%
-          data = @extra_data[name.id]
-          if data.any?
-            data.each do |val| %>
-              <span><%= val %></span>
-          <% end
-          else %>
-          <span>--- not the default ---</span>
+        <% if @with_descriptions %>
+          <% if (desc = name.description)%>
+            <span><%= desc.authors.map(&:login).join(", ") %></span>
+            <span><%= desc.note_status.map(&:to_s).join("/") %></span>
+            <span><%= :"review_#{desc.review_status}".l %></span>
+          <% else %>
+            <span>--- not the default ---</span>
           <% end %>
         <% end %>
       <% end %>

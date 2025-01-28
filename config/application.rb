@@ -43,7 +43,7 @@ module MushroomObserver
 
     # Uncomment this after migrating to all recommended default configs for 7.1
     # config/initializers/new_framework_defaults_7_1.rb
-    # config.load_defaults = 7.1
+    # config.load_defaults(7.1)
 
     # Set Time.zone default to the specified zone and
     # make Active Record auto-convert to this zone.
@@ -103,6 +103,10 @@ module MushroomObserver
     config.cache_store = :solid_cache_store
 
     config.solid_cache.connects_to = { database: { writing: :cache } }
+
+    # dartsass-sprockets - sssh! about the bootstrap deprectations
+    config.sass.quiet_deps = true
+    config.sass.silence_deprecations = ["import"]
   end
 end
 

@@ -251,3 +251,10 @@ nowhere_2023_09_project:
   end_date: 2023-09-30
   # location: nil
   observations: brett_woods_2023_09_obs, falmouth_2023_09_obs, falmouth_2022_obs, nybg_2023_09_obs # roy (non-admin) owns nybg_2023_09_obs
+
+super_importers_project:
+  <<: *DEFAULTS
+  title: SuperImporters # should track production
+  user: webmaster # should track production
+  admin_group: webmaster_only # should track production
+  user_group: super_importers_users

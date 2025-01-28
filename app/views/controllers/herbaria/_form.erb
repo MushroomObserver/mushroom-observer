@@ -65,10 +65,12 @@ end
   <%= submit_button(form: f, button: button_name, center: true) %>
 
   <% if !@herbarium.personal_user_id %>
-    <%= text_field_with_label(form: f, field: :code, size: 8, inline: true,
-                              label: :create_herbarium_code.l + ":",
-                              help: :create_herbarium_code_help.t,
-                              between: :optional) %>
+    <%= text_field_with_label(
+      form: f, field: :code, size: 8, inline: true,
+      label: :create_herbarium_code.l + ":",
+      help: :create_herbarium_code_help.t,
+      between: "(#{:create_herbarium_code_recommended.l}) "
+    ) %>
   <% end %>
 
   <!-- MAP -->

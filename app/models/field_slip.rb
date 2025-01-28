@@ -7,7 +7,12 @@ class FieldSlip < AbstractModel
   belongs_to :observation
   belongs_to :project
   belongs_to :user
-  default_scope { order(:code) }
+
+  scope :index_order, -> { order(code: :asc, created_at: :desc, id: :desc) }
+
+  scope :for_project, lambda { |project|
+    where(project_id: project.id).distinct
+  }
 
   validates :code, uniqueness: true
   validates :code, presence: true
@@ -58,7 +63,7 @@ class FieldSlip < AbstractModel
 
   def notes_fields
     # Should we figure out a way to internationalize these tags?
-    [:"Odor/Taste", :Substrate, :Plants, :Habit, :Other].map do |field|
+    [:"Odor/Taste", :"Trees/Shrubs", :Substrate, :Habit, :Other].map do |field|
       NoteField.new(name: field, value: field_value(field))
     end
   end
@@ -99,9 +104,13 @@ class FieldSlip < AbstractModel
   end
 
   def collector
-    observation.collector if observation&.collector
+    return observation.collector if observation&.collector
 
     "_user #{(user || User.current).login}_"
+  end
+
+  def date
+    observation&.when || created_at
   end
 
   def field_slip_name

@@ -244,7 +244,7 @@ module Tabs
     end
 
     def names_with_observations_tab(query)
-      return unless query&.flavor == :with_observations
+      return unless query&.params&.dig(:with_observations)
 
       [:all_objects.t(type: :name), names_path(with_observations: true),
        { class: tab_id(__method__.to_s) }]
@@ -267,18 +267,18 @@ module Tabs
     end
 
     def all_names_tab(query)
-      return if query&.flavor == :all || query&.flavor&.empty?
+      return unless query&.params&.dig(:with_observations)
 
       [:all_objects.t(type: :name), names_path,
        { class: tab_id(__method__.to_s) }]
     end
 
     def names_index_sorts(query:)
+      rss_log = query&.params&.dig(:by) == :rss_log
       [
         ["name", :sort_by_name.t],
         ["created_at", :sort_by_created_at.t],
-        [(query&.flavor == :by_rss_log ? "rss_log" : "updated_at"),
-         :sort_by_updated_at.t],
+        [(rss_log ? "rss_log" : "updated_at"), :sort_by_updated_at.t],
         ["num_views", :sort_by_num_views.t]
       ]
     end

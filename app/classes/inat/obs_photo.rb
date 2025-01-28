@@ -54,9 +54,12 @@ class Inat
       "Imported from iNat #{DateTime.now.utc.strftime("%Y-%m-%d %H:%M:%S %z")}"
     end
 
-    # iNat doesn't preserve (or maybe reveal) user's original filename
-    # so map it to an iNat uuid
-    def original_name = "iNat photo uuid #{@photo[:uuid]}"
+    # iNat doesn't preserve user's original filename
+    # Preserve photo_id and uuid for purposed of syncing updates
+    def original_name
+      "iNat photo_id: #{@photo[:photo_id]}, uuid: #{@photo[:uuid]}"
+    end
+
     def url = @photo[:photo][:url].sub("/square.", "/original.")
   end
 end

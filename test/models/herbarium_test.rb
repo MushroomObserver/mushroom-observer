@@ -62,4 +62,37 @@ class HerbariumTest < UnitTestCase
     assert_equal(curators.map(&:id).sort, curator_ids.sort)
     assert_obj_arrays_equal(herbarium_records, result.herbarium_records)
   end
+
+  def test_mcp_collid
+    fungarium = herbaria(:nybg_herbarium)
+    # Sorry for the magic numbers, but they are the values in MCP
+    assert_equal(3, fungarium.mcp_collid)
+
+    fungarium.update(code: "TENN") # make it the U of Tenn herbarium
+    assert_equal(
+      7, fungarium.mcp_collid,
+      "Index Herborarium code should match " \
+      "hyphenated MyCoPortal InstitutionCode"
+    )
+
+    fungarium.update(code: "notInMCP") # make it not an MCP collection
+    assert_nil(fungarium.mcp_collid)
+
+    assert_nil(herbaria(:rolf_herbarium).mcp_collid)
+  end
+
+  def test_web_searchable
+    nybg = herbaria(:nybg_herbarium)
+    assert(nybg.web_searchable?)
+
+    nybg.update(code: "notInMCP")
+    assert_not(nybg.web_searchable?)
+
+    assert_not(herbaria(:rolf_herbarium).web_searchable?)
+  end
+
+  def test_mcp_searchable
+    assert(herbaria(:nybg_herbarium).mcp_searchable?)
+    assert_not(herbaria(:rolf_herbarium).mcp_searchable?)
+  end
 end

@@ -96,9 +96,9 @@ class RedirectsIntegrationTest < IntegrationTestCase
   # edit_herbarium (get)              edit (get)
   # edit_herbarium (post)             update (patch)
   # herbarium_search (get)            index (get, pattern: present)
-  # index (get)                       index (get, flavor: nonpersonal)
+  # index (get)                       index (get, nonpersonal: true)
   # index_herbarium (get)             index (get) - query results
-  # list_herbaria (get)               index (get, flavor: all) - all herbaria
+  # list_herbaria (get)               index (get) - all herbaria
   # *merge_herbaria (get)             Herbaria::Merges#create (post)
   # *next_herbarium (get)             show { flow: :next } (get))
   # *prev_herbarium (get)             show { flow: :prev } (get)
@@ -119,7 +119,7 @@ class RedirectsIntegrationTest < IntegrationTestCase
   def test_herbarium
     login
     assert_old_url_redirects_to_new_path(
-      :get, "/herbarium", herbaria_path(flavor: :nonpersonal)
+      :get, "/herbarium", herbaria_path(nonpersonal: true)
     )
   end
 
@@ -133,7 +133,7 @@ class RedirectsIntegrationTest < IntegrationTestCase
   def test_list_herbaria
     login
     assert_old_url_redirects_to_new_path(
-      :get, "/herbarium/list_herbaria", herbaria_path(flavor: :all)
+      :get, "/herbarium/list_herbaria", herbaria_path
     )
   end
 

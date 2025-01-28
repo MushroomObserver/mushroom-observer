@@ -948,6 +948,10 @@
   naming_reason_label_3: Based on microscopic features
   naming_reason_label_4: Based on chemical features
 
+  # Naming reasons notes
+  naming_reason_suggested_on_inat: Suggested on iNat by [user]
+  naming_inat_provisional: Added on iNat by [user]
+
   # Name/location description types.  These are used as page title and in index
   # results -- must include both the type of description and the title of the
   # object ([object]) they're describing.
@@ -1357,7 +1361,9 @@
   app_title: Mushroom Observer
 
   # This goes in a box at the top of the page.
-  app_banner_box: "Check out the \"Mushroom Observer Etsy store\":https://www.etsy.com/shop/MushroomObsMerch — T-shirts, bags and swag! <br>\nWe're working on MO. If you have trouble posting, try logging out and logging back in again.<br>\nPlease \"report a bug\":admin/emails/webmaster_questions/new if you find one."
+  banner_update: Update Banner
+  banner_update_failure: Failed to update banner.
+  banner_update_success: Banner updated successfully.
 
   # These are the controls/links in the left-hand panel.
   app_intro: Introduction
@@ -1400,6 +1406,7 @@
   app_join_mailing_list: Join Mailing List
   app_logout: Logout
   app_admin: Admin
+  app_jobs: Jobs
   app_blocked_ips: Blocked IPs
   app_switch_users: Switch Users
   app_users: "[:list_objects(type=:user)]"
@@ -1831,6 +1838,9 @@
   image_show_huge: Huge
   image_show_full_size: Full Size
   image_show_original: Show Original Image
+  image_show_original_loading: Loading
+  image_show_original_maxed_out: Sorry, you've maxed out the number of original images you can download in one day.
+  image_show_original_error: Sorry, failed
   image_show_exif: Show EXIF Header
   image_show_original_name: Original File Name
   image_show_make_default: Make this the default size
@@ -2298,6 +2308,7 @@
   show_observation_details_inat_import: Imported [date] from
   show_observation_details_inat_export: Copied to iNaturalist as
   show_observation_inat_lat_lng: Public lat/lng
+  show_observation_inat_suggested_ids: Suggested IDs
   show_observation_edit_observation: "[:edit_object(type=:observation)]"
   show_observation_propose_new_name: "[:show_namings_propose_new_name]"
   show_observation_debug_consensus: Debug Consensus
@@ -2642,10 +2653,12 @@
   herbarium_curators: Curators
   herbarium_mailing_address: Mailing Address
   herbarium_code: Code
+  herbarium_mcp_db: 'MyCoPortal Collection ID'
   user_personal_herbarium: "[name]: Personal Fungarium"
 
   # herbaria/show
   show_herbarium_herbarium_record_count: This fungarium contains [count] fungarium record(s).
+  show_herbarium_mcp_db_missing: Missing
   show_herbarium_add_curator: Add Curator
   show_herbarium_no_user: Unable to find the user '[login]'.
   show_herbarium_curator_request: Request to be a Curator
@@ -2658,13 +2671,14 @@
   create_herbarium_personal: Check this box if this is your personal fungarium
   create_herbarium_personal_help: Each user can have one personal fungarium that they have curator privileges for. By default it is called "[name]", but you can change that name to anything you like.
   create_herbarium_code: Standard Abbreviation
+  create_herbarium_code_recommended: recommended for Index Herbariorum-listed Fungaria
   create_herbarium_code_help: Look up the standard abbreviation for a fungarium at "Index Herbariorum":https://sweetgum.nybg.org/science/ih/.
   create_herbarium_email: Email Address
   create_herbarium_mailing_address: Mailing Address
   create_herbarium_duplicate_name: Fungarium called '[name]' already exists.
   create_herbarium_personal_already_exists: You've already created a personal fungarium called '[name]'.
   create_herbarium_must_define_location: You must define this location before we can use it for this fungarium. Any other information you provided has been saved.
-  create_herbarium_name_blank: Herbarium name must not be blank.
+  create_herbarium_name_blank: Fungarium name must not be blank.
 
   # herbaria/edit
   edit_herbarium: Edit Fungarium
@@ -2695,6 +2709,8 @@
   herbarium_record_accession_number: Accession Number
   herbarium_record_user: Record Creator
   herbarium_record_notes: Fungarium Record Notes
+
+  herbarium_record_collection: Collection Record
 
   # herbarium_record/create_herbarium_record
   create_herbarium_record: Add Fungarium Record
@@ -2852,7 +2868,7 @@
   # Field Slips
   field_slip_add_images: Add Images or Other Data
   field_slip_cant_join_project: Either no Project was found or you are unable to join the associated Project
-  field_slip_code: Code
+  field_slip_code: Field Slip Code
   field_slip_code_format_error: code must have non-numeric characters other than period (.) and dash (-)
   field_slip_constraint_violation: The selected observation violates one or more project constraints
   field_slip_created: Field slip was successfully created.
@@ -2960,11 +2976,14 @@
   bulk_license_link: Bulk License Updater
 
   # checklists
+  checklist_any_deprecated: "* This name is not considered current on MO"
+  checklist_duplicate_synonyms: "+ This name has a synonym in this checklist"
   checklist_for_site_title: Checklist for Mushroom Observer
   checklist_for_user_title: Checklist for [user]
+  checklist_for_project_location_title: Checklist for [project] at [location]
   checklist_for_project_title: Checklist for [project]
   checklist_for_species_list_title: Checklist for [list]
-  checklist_summary: "Summary: [names] names including [species] species in [genera] genera"
+  checklist_summary: "Summary: [names] names including [species] species and [genera] genera"
 
   # theme/color_themes
   color_themes_text: "**General Concept:** The [:app_title] website provides a number of color themes, some based on different groups of mushrooms.  By default the simple clean \"Black on White\" theme is used.  However, a [:user] can choose to use a particular theme throughout the site by selecting the theme on the [:user] preference page.\n\nThe idea of using mushrooms for color follows in the tradition of using mushrooms to dye fabrics.  Each color in a mushroom theme was pulled from a photograph included in the site from the given group.  The colors attempt to express the characteristic colors of the group.  In a few cases, the [:images] were adjusted using an automatic color balance operation in order to get a more characteristic color.\n\nThe following links describe each of the available themes including links to the [:images] the colors were extracted from:"
@@ -3048,11 +3067,12 @@
   inat_no_imports_designated: You must list the iNat observation(s) to be imported
   inat_previous_import: iNat [inat_id] previously imported as MO Observation [mo_obs_id]
   inat_previous_mirror: iNat [inat_id] is a "mirror" of existing MO Observation [mo_obs_id]
-  inat_too_many_ids_listed: "Too many ids listed"
+  inat_too_many_ids_listed: Too many ids listed
   inat_import_started: Your import has started. Refresh page to update results.
 
   inat_no_authorization: iNat import aborted; MO did not received authorization to access iNat user data
   inat_wrong_user: You cannot import an iNat observation created by someone else. To import your own observation, make sure that noone else is logged into iNat on your device and that you entered the correct iNat username.
+  inat_page_of_obs_failed: Failed to get page of observations from iNat API
 
   inat_data_comment: Snapshot of Imported iNat Data
   inat_dqa_casual: Casual
@@ -3064,6 +3084,7 @@
   inat_details_list: "- MO will list most iNat data and/or map it to analogous MO fields.\n- Coordinates are hidden from the public if iNat obscured them.\n- Location is a rectangle with an MO-style name, rather than the iNat Place name."
 
   # /inat_import_job_tracker
+  INAT_IMPORTS: iNat Imports
   INAT_IMPORT_JOB_TRACKERS: iNat Import Trackers
   inat_import_tracker: iNat Import Tracker
   inat_import_tracker_status: "[:STATUS]"
@@ -3354,7 +3375,7 @@
   change_member_status_make_admin: Make Admin
   change_member_status_make_admin_help: Make Admin - Allows [:user] to perform admin functions.  They will be able to add or remove members, change the ability for other members to perform admin functions, and edit any content associated with this project from users who trust admins for editing.  This [:user] is also made a member of the project if they are not already.
   change_member_status_make_member: Make Regular Member
-  change_member_status_make_member_help: Make Regular Member - Ensures that [:user] is a member of the project, but not in the admin group. Afterwords the [:user] will be able to view and create draft names for this project.  They will be the only non-admin members able to edit their drafts.
+  change_member_status_make_member_help: "[:change_member_status_make_member] - Ensures that [:user] is a member of the project, but is not an Admin. The [:user] will be able to view and create draft names for this project. They will be the only non-admin members able to edit their drafts."
   change_member_status_members: Current Project Members
   change_member_status_remove_member: Remove Member
   change_member_status_remove_member_help: Remove Member - Removes all member and admin privileges for a project.  [:user] will no longer be able view or create draft names for this project.  They will not be able to perform any admin functions.
@@ -4387,6 +4408,7 @@
   query_title_in_species_list: "[TYPES] in [SPECIES_LIST]"
   query_title_inside_observation: "[TYPES] of [OBSERVATION]"
   query_title_needs_id: "[OBSERVATIONS] needing identification for [USER]"
+  query_title_needs_description: "[TYPES] needing descriptions"
   query_title_nonpersonal: List of Institutional Fungaria
   query_title_of_children: Lower Taxa under [NAME]
   query_title_of_name: "[TYPES] of [NAME]"

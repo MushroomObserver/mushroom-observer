@@ -21,6 +21,10 @@
 #  mailing_address::  Postal address for sending specimens to (optional).
 #  description::      Random notes (optional).
 #
+#  == Class methods
+#
+#  mcp_collections    array of herbaria searchable via MyCoPortal
+#
 #  == Instance methods
 #
 #  herbarium_records::      HerbariumRecord(s) belonging to this Herbarium.
@@ -32,6 +36,9 @@
 #  curator?(user)::         Check if a User is a curator.
 #  add_curator(user)::      Add User as a curator unless already is one.
 #  delete_curator(user)::   Remove User from curators.
+#  web_searchable?::        Are its digital records searchable via the internet?
+#  mcp_searchable?          Are its digital records searchable via MyCoPortal?
+#  mcp_collid::             MyCoPortal collection ID for this herbarium.
 #  sort_name::              Stripped-down version of name for sorting.
 #  merge(other_herbarium):: merge other_herbarium into this one
 #
@@ -41,6 +48,7 @@
 #                     HerbariumRecord to an Herbarium.  Called after create.
 #
 ################################################################################
+
 class Herbarium < AbstractModel
   has_many :herbarium_records, dependent: :destroy
   belongs_to :location
@@ -54,6 +62,29 @@ class Herbarium < AbstractModel
 
   # Used by create/edit form.
   attr_accessor :place_name, :personal, :personal_user_name
+
+  scope :index_order, -> { order(name: :asc, id: :desc) }
+
+  def self.mcp_collections
+    @mcp_collections ||=
+      begin
+        collections_source =
+          Rails.public_path.join("mycoportal_collections.json")
+        collections = JSON.parse(File.read(collections_source))["results"]
+        # Extract InstitutionCode and CollID
+        collections.map do |collection|
+          {
+            InstitutionCode: collection["InstitutionCode"],
+            CollID: collection["CollID"]
+          }
+        end
+      end
+  end
+
+  # wrap the class method
+  def mcp_collections
+    self.class.mcp_collections
+  end
 
   def can_edit?(user = User.current)
     if personal_user_id
@@ -87,7 +118,7 @@ class Herbarium < AbstractModel
     name.t.html_to_ascii.gsub(/\W+/, " ").strip_squeeze.downcase
   end
 
-  def auto_complete_name
+  def autocomplete_name
     code.blank? ? name : "#{code} - #{name}"
   end
 
@@ -164,5 +195,38 @@ class Herbarium < AbstractModel
 
   def self.find_by_name_with_wildcards(str)
     find_using_wildcards("name", str)
+  end
+
+  def web_searchable?
+    mcp_searchable?
+  end
+
+  def mcp_searchable?
+    mcp_collid.present?
+  end
+
+  def mcp_collid
+    collection = mcp_collections.find do |c|
+      # Some MCP collection acryonyms comprise a standard herbarium code plus
+      # a dash and other characters. Ex: "TENN-F".
+      # We want to match only the standard code.
+      c[:InstitutionCode].split("-").first == code
+    end
+    collection ? collection[:CollID] : nil
+  end
+
+  def mcp_url(accession)
+    base_url = "https://www.mycoportal.org/portal/collections/list.php"
+    search_params =
+      { catnum: strip_leading_code(accession), db: mcp_collid,
+        includeothercatnum: 1 }
+
+    "#{base_url}?#{search_params.to_query}"
+  end
+
+  private
+
+  def strip_leading_code(accession)
+    accession.gsub(/"^#{code} "/, "")
   end
 end

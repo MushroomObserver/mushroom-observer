@@ -78,6 +78,15 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_select("form[action=?]", project_path(p_id), count: 0)
   end
 
+  def test_show_project_nonexistent
+    p_id = -1
+
+    login("zero")
+    get(:show, params: { id: p_id })
+
+    assert_redirected_to(projects_path)
+  end
+
   def test_show_project_logged_in_owner
     project = projects(:eol_project)
 
@@ -138,11 +147,9 @@ class ProjectsControllerTest < FunctionalTestCase
     login(user.login)
     get(:show, params: { id: project.id })
 
-    assert_select(
-      "#project_summary a[href =
-        '#{project_violations_path(project_id: project.id)}']",
-      true, "Page is missing a link to violations"
-    )
+    assert_match(project_violations_path(project_id: project.id),
+                 @response.body,
+                 "Page is missing a link to violations")
   end
 
   def test_index
@@ -204,9 +211,7 @@ class ProjectsControllerTest < FunctionalTestCase
 
     login
     get(:index, params: { pattern: project.id.to_s })
-
-    assert_response(:success)
-    assert_displayed_title(project.title)
+    assert_redirected_to(project_path(project.id))
   end
 
   def test_add_project

@@ -4,8 +4,6 @@ can_edit = in_admin_mode? || obs.can_edit?
 %>
 
 <%=
-unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
-
   tag.div(
     id: "observation_collection_numbers",
     class: "obs-collection",
@@ -63,5 +61,4 @@ unless @user.try(&:hide_specimen_stuff?) || obs.user.try(&:hide_specimen_stuff?)
       ].safe_join
     end
   end
-end
 %>

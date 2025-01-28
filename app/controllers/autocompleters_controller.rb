@@ -6,13 +6,15 @@ class AutocompletersController < ApplicationController
   # Requiring login here would mean "advanced search" must also require login.
   around_action :catch_ajax_errors
 
+  # Reduce overhead for these requests.
+  disable_filters
   layout false
 
-  # The AutoComplete class returns "primers": 1000 records starting with the
+  # The Autocomplete class returns "primers": 1000 records starting with the
   # first letter the user types. The Stimulus controller refines the results as
   # the user types, to minimize server requests. The eventual result is, we
   # auto-complete a string corresponding to the name of a record, e.g. Name.
-  # AutoComplete currently renders a list of strings in plain text, but
+  # Autocomplete currently renders a list of strings in plain text, but
   # could add record ids. The first line of the returned results is the actual
   # (minimal) string used to match the records. If it had to truncate the list
   # of results, the last string is "...".
@@ -25,7 +27,7 @@ class AutocompletersController < ApplicationController
       render(json: ActiveSupport::JSON.encode([]))
     else
       add_context_params
-      render(json: ActiveSupport::JSON.encode(auto_complete_results))
+      render(json: ActiveSupport::JSON.encode(autocomplete_results))
     end
   end
 
@@ -37,13 +39,13 @@ class AutocompletersController < ApplicationController
     params[:user_id] = @user&.id
   end
 
-  def auto_complete_results
+  def autocomplete_results
     # Don't pass region or clade as the @type with `exact` here.
     if params[:exact].present?
-      return ::AutoComplete.subclass(@type).new(params).first_matching_record
+      return ::Autocomplete.subclass(@type).new(params).first_matching_record
     end
 
-    ::AutoComplete.subclass(@type).new(params).matching_records
+    ::Autocomplete.subclass(@type).new(params).matching_records
   end
 
   # callback on `around_action`

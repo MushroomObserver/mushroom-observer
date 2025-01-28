@@ -18,8 +18,8 @@ class ArticlesControllerTest < FunctionalTestCase
   end
 
   def test_index_filtered
-    article = Article.first
-    query = Query.lookup(:Article, :in_set, ids: [article.id])
+    article = Article.reorder(created_at: :asc).first # oldest
+    query = Query.lookup(:Article, ids: [article.id])
     params = @controller.query_params(query)
     get(:index, params: params)
 

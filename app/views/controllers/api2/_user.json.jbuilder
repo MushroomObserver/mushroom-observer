@@ -9,7 +9,7 @@ json.verified(object.verified.try(&:utc))
 json.last_login(object.last_login.try(&:utc))
 json.last_activity(object.last_activity.try(&:utc))
 json.contribution(object.contribution) if object.contribution.present?
-json.notes(object.notes.to_s.tpl_nodiv) if object.notes.present?
+json.notes(object.notes.to_s.tl_for_api) if object.notes.present?
 json.notes_template(object.notes_template_parts) \
   if object.notes_template.present?
 json.mailing_address(object.mailing_address.to_s) \

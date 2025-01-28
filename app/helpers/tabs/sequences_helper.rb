@@ -28,7 +28,7 @@ module Tabs
     def sequence_tab(seq, obs)
       # This is passed in to show_sequence, allowing users to do prev,
       # next and index from there to navigate through all the rest for this obs.
-      sq_query = Query.lookup(:Sequence, :all, observations: obs.id)
+      sq_query = Query.lookup(:Sequence, observations: obs.id)
       locus = seq.locus.truncate(seq.locus_width)
       txt = if seq.deposit?
               "#{locus} - #{seq.archive} ##{seq.accession}"

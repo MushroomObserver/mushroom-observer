@@ -100,12 +100,6 @@ class TranslationString < AbstractModel
     I18n.backend.store_translations(locale, { mo: hash_of_tags_and_texts })
   end
 
-  # Get age of official language's banner.  (Used by application layout to
-  # determine if user has dismissed it yet.)
-  def self.banner_time
-    find_by(tag: "app_banner_box", language: Language.official).updated_at
-  end
-
   # Call this method from a migration whenever we rename a tag, so we don't lose
   # our existing translation strings. Requires hash of old_tag => new_tag pairs.
   # Keys and values can be symbols or strings, but will be stored as strings.

@@ -4,7 +4,11 @@
 #
 # == Attributes
 #
-#  inat_import::  the iNat import for the job
+#  inat_import::  the iNatImport for the job
+#  status::       the state of the iNat import of this tracker
 #
 class InatImportJobTracker < ApplicationRecord
+  def status
+    InatImport.find(inat_import).state
+  end
 end

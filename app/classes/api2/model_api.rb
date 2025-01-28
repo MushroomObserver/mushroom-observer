@@ -39,13 +39,9 @@ class API2
       params = query_params
       params.remove_nils!
       params[:by] = :id
-      Query.lookup(model.name.to_sym, query_flavor, params)
+      Query.lookup(model.name.to_sym, params)
     rescue RuntimeError => e
       raise(QueryError.new(e))
-    end
-
-    def query_flavor
-      :all
     end
 
     # Stub for parsing and validating params passed to Query.

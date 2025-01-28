@@ -317,7 +317,7 @@ MushroomObserver::Application.routes.draw do
     resource :users, only: [:edit, :update, :destroy]
     resource :donations, only: [:new, :create, :edit, :update, :destroy]
     get("review_donations", to: "donations#edit") # alternate path
-    resource :banner, only: [:edit, :update], controller: "banner"
+    resources :banners, only: [:index, :create]
     resource :blocked_ips, only: [:edit, :update]
     resource :add_user_to_group, only: [:new, :create],
                                  controller: "add_user_to_group"
@@ -433,8 +433,19 @@ MushroomObserver::Application.routes.draw do
     end
     put("/vote", to: "images/votes#update", as: "vote")
   end
+  resources :images, only: [:show] do
+    member do
+      get("original", to: "images/originals#show")
+    end
+  end
 
-  resources :inat_import_job_trackers, only: [:show]
+  # ----- InatImports ----------------------------
+  get("inat_imports/authorization_response",
+      to: "inat_imports#authorization_response",
+      as: "inat_import_authorization_response")
+  resources :inat_imports, only: [:show, :new, :create] do
+    resources :job_trackers, only: [:show], module: :inat_imports
+  end
 
   # ----- Info: no resources, just forms and pages ----------------------------
   get("/info/how_to_help", to: "info#how_to_help")
@@ -582,10 +593,6 @@ MushroomObserver::Application.routes.draw do
   # ----- Observations: standard actions  ----------------------------
   namespace :observations do
     resources :downloads, only: [:new, :create]
-    resources :inat_imports, only: [:new, :create]
-    get("inat_imports/authorization_response",
-        to: "inat_imports#authorization_response",
-        as: "inat_import_authorization_response")
 
     get("search/new", to: "filters#new", as: "new_search")
     post("search", to: "filters#create", as: "search")
@@ -658,6 +665,8 @@ MushroomObserver::Application.routes.draw do
                                controller: "projects/admin_requests"
     resources :field_slips, only: [:new, :create],
                             controller: "projects/field_slips"
+    resources :locations, only: [:index],
+                          controller: "projects/locations"
     resources :members, only: [:new, :create, :edit, :update, :index],
                         controller: "projects/members", param: :candidate
     resources :violations, only: [:index], controller: "projects/violations"
@@ -809,11 +818,11 @@ MushroomObserver::Application.routes.draw do
   get("/herbarium/index", to: redirect("/herbaria"))
   get("/herbarium/index_herbarium/:id", to: redirect("/herbaria?id=%{id}"))
   get("/herbarium/index_herbarium", to: redirect("/herbaria"))
-  get("/herbarium/list_herbaria", to: redirect("/herbaria?flavor=all"))
+  get("/herbarium/list_herbaria", to: redirect("/herbaria"))
   get("/herbarium/request_to_be_curator/:id",
       to: redirect("/herbaria/curator_requests/new?id=%{id}"))
   # Must be the final route in order to give the others priority
-  get("/herbarium", to: redirect("/herbaria?flavor=nonpersonal"))
+  get("/herbarium", to: redirect("/herbaria?nonpersonal=true"))
 
   # ----- Images: legacy action redirects
   redirect_legacy_actions(
@@ -869,8 +878,6 @@ MushroomObserver::Application.routes.draw do
       to: redirect("/observations?user=%{id}"))
   get("/observer/observations_at_location/:id",
       to: redirect("/observations?location=%{id}"))
-  get("/observer/observations_at_where/:id",
-      to: redirect("/observations?where=%{id}"))
   get("/observer/observations_for_project/:id",
       to: redirect("/observations?project=%{id}"))
   get("/observer/show_observation/:id",
@@ -893,7 +900,7 @@ MushroomObserver::Application.routes.draw do
       to: redirect("/sequences/new?obs_id=%{id}"))
   get("/sequence/edit_sequence/:id", to: redirect("/sequences/%{id}/edit"))
   # ----- Sequences: nonstandard legacy action redirects
-  get("/sequence/list_sequences", to: redirect("/sequences?flavor=all"))
+  get("/sequence/list_sequences", to: redirect("/sequences?all=true"))
 
   # ----- SpeciesLists: legacy action redirects
   redirect_legacy_actions(
@@ -935,4 +942,8 @@ MushroomObserver::Application.routes.draw do
 
   # routes for actions that Rails automatically creates from view templates
   MO.themes.each { |scheme| get "/theme/#{scheme}" }
+
+  # Make Mission Control Job's UI available to MO app
+  # https://github.com/rails/mission_control-jobs?tab=readme-ov-file#basic-configuration
+  mount MissionControl::Jobs::Engine, at: "/jobs"
 end

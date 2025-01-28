@@ -240,7 +240,8 @@ class API2Test < UnitTestCase
     assert_equal(@specimen, obs.specimen)
     assert_equal(@notes, obs.notes)
     assert_objs_equal(@img2, obs.thumb_image)
-    assert_obj_arrays_equal([@img1, @img2].compact, obs.images)
+    assert_obj_arrays_equal([@img1, @img2].compact,
+                            obs.images.reorder(id: :asc))
     assert_equal(@loc.name, obs.where)
     assert_objs_equal(@loc, obs.location)
     assert_equal(@loc.name, obs.place_name)
@@ -251,8 +252,10 @@ class API2Test < UnitTestCase
     assert(@lat == obs.lat)
     assert(@long == obs.lng)
     assert(@alt == obs.alt)
-    assert_obj_arrays_equal([@proj].compact, obs.projects)
-    assert_obj_arrays_equal([@spl].compact, obs.species_lists)
+    assert_obj_arrays_equal([@proj].compact,
+                            obs.projects.reorder(id: :asc))
+    assert_obj_arrays_equal([@spl].compact,
+                            obs.species_lists.reorder(id: :asc))
     assert_names_equal(@name, obs.name)
     assert_in_delta(@vote, obs.vote_cache, 1) # vote_cache is weird
     if @name
@@ -463,6 +466,25 @@ class API2Test < UnitTestCase
     assert_equal(email_count, ActionMailer::Base.deliveries.size)
   end
 
+  def test_posting_api_key_with_email
+    email_count = ActionMailer::Base.deliveries.size
+    @for_user = rolf.email
+    @app = "  Mushroom  Mapper  "
+    @verified = true
+    params = {
+      method: :post,
+      action: :api_key,
+      api_key: @api_key.key,
+      app: @app
+    }
+    api = API2.execute(params)
+    assert_no_errors(api, "Errors while posting api key")
+    assert_obj_arrays_equal([APIKey.last], api.results)
+    assert_api_fail(params.except(:api_key))
+    assert_api_fail(params.except(:app))
+    assert_equal(email_count, ActionMailer::Base.deliveries.size)
+  end
+
   def test_posting_api_key_for_another_user_without_password
     email_count = ActionMailer::Base.deliveries.size
     @for_user = katrina
@@ -634,7 +656,8 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(observation: rolfs_other_obs.id))
     assert_equal(collection_number_count, CollectionNumber.count)
     assert_obj_arrays_equal([rolfs_obs, rolfs_other_obs],
-                            CollectionNumber.last.observations, :sort)
+                            CollectionNumber.last.
+                            observations.reorder(id: :asc), :sort)
   end
 
   def test_patching_collection_numbers
@@ -1090,28 +1113,32 @@ class API2Test < UnitTestCase
     assert_api_pass(params)
     assert_last_herbarium_record_correct
 
+    last_h_r = HerbariumRecord.last
     herbarium_record_count = HerbariumRecord.count
     rolfs_other_obs = observations(:stereum_hirsutum_1)
     assert_api_pass(params.merge(observation: rolfs_other_obs.id))
     assert_equal(herbarium_record_count, HerbariumRecord.count)
     assert_obj_arrays_equal([rolfs_obs, rolfs_other_obs],
-                            HerbariumRecord.last.observations, :sort)
+                            last_h_r.observations.reorder(id: :asc), :sort)
 
     # Make sure it gives correct default for initial_det.
     assert_api_pass(params.except(:initial_det).merge(accession_number: "2"))
-    assert_equal(rolfs_obs.name.text_name, HerbariumRecord.last.initial_det)
+    last_h_r = HerbariumRecord.last
+    assert_equal(rolfs_obs.name.text_name, last_h_r.initial_det)
 
     # Check default accession number if obs has no collection number.
     assert_api_pass(params.except(:accession_number))
-    assert_equal("MO #{rolfs_obs.id}", HerbariumRecord.last.accession_number)
+    last_h_r = HerbariumRecord.last
+    assert_equal("MO #{rolfs_obs.id}", last_h_r.accession_number)
 
     # Check default accession number if obs has one collection number.
     obs = observations(:coprinus_comatus_obs)
-    num = obs.collection_numbers.first
+    num = obs.collection_numbers.reorder(id: :asc).first
     assert_operator(obs.collection_numbers.count, :==, 1)
     assert_api_pass(params.except(:accession_number).
                            merge(observation: obs.id))
-    assert_equal(num.format_name, HerbariumRecord.last.accession_number)
+    last_h_r = HerbariumRecord.last
+    assert_equal(num.format_name, last_h_r.accession_number)
 
     # Check default accession number if obs has two collection numbers.
     # Also check that Rolf can add a record to Mary's obs if he's a curator.
@@ -1120,7 +1147,8 @@ class API2Test < UnitTestCase
     assert_operator(marys_obs.collection_numbers.count, :>, 1)
     assert_api_pass(params.except(:accession_number).
                       merge(observation: marys_obs.id, herbarium: nybg.id))
-    assert_equal("MO #{marys_obs.id}", HerbariumRecord.last.accession_number)
+    last_h_r = HerbariumRecord.last
+    assert_equal("MO #{marys_obs.id}", last_h_r.accession_number)
   end
 
   def test_patching_herbarium_records
@@ -1159,7 +1187,7 @@ class API2Test < UnitTestCase
     assert_equal("new notes", nybgs_rec.notes)
 
     # Rolfs_rec is now at fundis, so Rolf is not a curator, just owns rec.
-    old_obs   = rolfs_rec.observations.first
+    old_obs   = rolfs_rec.observations.reorder(id: :asc).first
     rolfs_obs = observations(:agaricus_campestris_obs)
     marys_obs = observations(:minimal_unknown_obs)
     params = {
@@ -1395,7 +1423,8 @@ class API2Test < UnitTestCase
       File.stub(:chmod, true) do
         api = API2.execute(params)
         assert_no_errors(api, "Errors while posting image")
-        assert_obj_arrays_equal([Image.last], api.results)
+        assert_obj_arrays_equal([Image.last],
+                                api.results)
       end
     end
     assert_last_image_correct
@@ -1433,7 +1462,8 @@ class API2Test < UnitTestCase
       File.stub(:chmod, true) do
         api = API2.execute(params)
         assert_no_errors(api, "Errors while posting image")
-        assert_obj_arrays_equal([Image.last], api.results)
+        assert_obj_arrays_equal([Image.last],
+                                api.results)
       end
     end
     assert_last_image_correct
@@ -1762,7 +1792,7 @@ class API2Test < UnitTestCase
     )
     assert_api_results(names)
 
-    names = Name.with_correct_spelling.classification_includes("Fungi").
+    names = Name.with_correct_spelling.classification_contains("Fungi").
             map do |n|
       genus = n.text_name.split.first
       Name.where(Name[:text_name].matches("#{genus} %")) + [n]
@@ -1874,27 +1904,27 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(has_description: "no"))
     assert_api_results(without)
 
-    names = Name.with_correct_spelling.text_name_includes("bunny")
+    names = Name.with_correct_spelling.text_name_contains("bunny")
     assert_not_empty(names)
     assert_api_pass(params.merge(text_name_has: "bunny"))
     assert_api_results(names)
 
-    names = Name.with_correct_spelling.author_includes("peck")
+    names = Name.with_correct_spelling.author_contains("peck")
     assert_not_empty(names)
     assert_api_pass(params.merge(author_has: "peck"))
     assert_api_results(names)
 
-    names = Name.with_correct_spelling.citation_includes("lichenes")
+    names = Name.with_correct_spelling.citation_contains("lichenes")
     assert_not_empty(names)
     assert_api_pass(params.merge(citation_has: "lichenes"))
     assert_api_results(names)
 
-    names = Name.with_correct_spelling.classification_includes("lecanorales")
+    names = Name.with_correct_spelling.classification_contains("lecanorales")
     assert_not_empty(names)
     assert_api_pass(params.merge(classification_has: "lecanorales"))
     assert_api_results(names)
 
-    names = Name.with_correct_spelling.notes_include("known")
+    names = Name.with_correct_spelling.notes_contain("known")
     assert_not_empty(names)
     assert_api_pass(params.merge(notes_has: "known"))
     assert_api_results(names)
@@ -2289,13 +2319,13 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(has_notes: "no"))
     assert_api_results(without)
 
-    obses = Observation.notes_include(":substrate:").
+    obses = Observation.notes_contain(":substrate:").
             reject { |o| o.notes[:substrate].blank? }
     assert(obses.length > 1)
     assert_api_pass(params.merge(has_notes_field: "substrate"))
     assert_api_results(obses)
 
-    obses = Observation.notes_include("orphan")
+    obses = Observation.notes_contain("orphan")
     assert(obses.length > 1)
     assert_api_pass(params.merge(notes_has: "orphan"))
     assert_api_results(obses)
@@ -2346,6 +2376,39 @@ class API2Test < UnitTestCase
       action: :observation,
       api_key: @api_key.key,
       location: "Anywhere"
+    }
+    api = API2.execute(params)
+    assert_no_errors(api, "Errors while posting observation")
+    assert_obj_arrays_equal([Observation.last], api.results)
+    assert_last_observation_correct
+    assert_equal("mo_api", Observation.last.source)
+    assert_api_fail(params.except(:location))
+  end
+
+  def test_post_observation_with_geoloc_and_earth
+    burbank = locations(:burbank)
+    @user = rolf
+    @name = Name.unknown
+    @loc = burbank
+    @img1 = nil
+    @img2 = nil
+    @spl = nil
+    @proj = nil
+    @date = Time.zone.today
+    @notes = Observation.no_notes
+    @vote = Vote.maximum_vote
+    @specimen = false
+    @is_col_loc = true
+    @lat = burbank.center_lat
+    @long = burbank.center_lng
+    @alt = nil
+    params = {
+      method: :post,
+      action: :observation,
+      api_key: @api_key.key,
+      latitude: @lat,
+      longitude: @long,
+      location: "Earth"
     }
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting observation")
@@ -3092,13 +3155,13 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(has_obs_notes: "no"))
     assert_api_results(without.map(&:sequences).flatten.sort_by(&:id))
 
-    obses = Observation.notes_include(":substrate:").
+    obses = Observation.notes_contain(":substrate:").
             reject { |o| o.notes[:substrate].blank? }
     assert(obses.length > 1)
     assert_api_pass(params.merge(has_notes_field: "substrate"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
 
-    obses = Observation.notes_include("orphan")
+    obses = Observation.notes_contain("orphan")
     assert(obses.length > 1)
     assert_api_pass(params.merge(obs_notes_has: "orphan"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
@@ -3416,7 +3479,9 @@ class API2Test < UnitTestCase
     }
     assert_api_fail(params.except(:api_key))
     assert_api_fail(params.merge(id: marys_spl.id))
-    assert_api_fail(params.merge(set_title: SpeciesList.first.title))
+    assert_api_fail(
+      params.merge(set_title: SpeciesList.reorder(id: :asc).first.title)
+    )
     assert_api_fail(params.merge(set_location: "bogus location"))
     assert_api_fail(params.merge(set_title: ""))
     assert_api_fail(params.merge(set_date: ""))
@@ -4011,6 +4076,7 @@ class API2Test < UnitTestCase
     assert_parse(:user, API2::ObjectNotFoundById, "12345")
     assert_parse(:user, rolf, rolf.login)
     assert_parse(:user, rolf, rolf.name)
+    assert_parse(:user, rolf, rolf.email)
   end
 
   def test_parse_object

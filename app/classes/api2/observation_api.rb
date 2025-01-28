@@ -180,8 +180,19 @@ class API2
 
         field_slip.update!(observation:)
       else
-        FieldSlip.create!(observation:, code: @code)
+        field_slip = FieldSlip.create!(observation:, code: @code)
       end
+      update_project(field_slip.project, observation)
+    end
+
+    def update_project(project, observation)
+      return unless project && !project.violates_constraints?(observation)
+
+      user = observation.user
+      project.join(user)
+      return unless project.member?(user)
+
+      project.add_observation(observation)
     end
 
     def create_specimen_records(obs)
@@ -361,6 +372,20 @@ class API2
       @latitude  = parse(:latitude, :latitude)
       @longitude = parse(:longitude, :longitude)
       @altitude  = parse(:altitude, :altitude)
+      prefer_minimum_bounding_box_to_earth!
+    end
+
+    def prefer_minimum_bounding_box_to_earth!
+      return unless Location.is_unknown?(@location) &&
+                    @latitude.present? && @longitude.present?
+
+      mbb =
+        Location.with_minimum_bounding_box_containing_point(
+          lat: @latitude, lng: @longitude
+        ).
+        # See comment at Observation#prefer_minimum_bounding_box_to_earth
+        presence || Location.unknown
+      @location = mbb.name
     end
 
     def parse_herbarium_and_specimen!

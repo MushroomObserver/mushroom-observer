@@ -2,11 +2,9 @@
 
 module Tabs
   module ChecklistsHelper
-    def checklist_show_title(user:, project:, list:)
+    def checklist_show_title(user:, list:)
       if user
         :checklist_for_user_title.t(user: user.legal_name)
-      elsif project
-        :checklist_for_project_title.t(project: project.title)
       elsif list
         :checklist_for_species_list_title.t(list: list.title)
       else
@@ -14,11 +12,9 @@ module Tabs
       end
     end
 
-    def checklist_show_tabs(user:, project:, list:)
+    def checklist_show_tabs(user:, list:)
       if user
         checklist_for_user_tabs(user)
-      elsif project
-        checklist_for_project_tabs(project)
       elsif list
         checklist_for_species_list_tabs(list)
       else
@@ -31,13 +27,6 @@ module Tabs
         user_profile_tab(user),
         user_observations_tab(user),
         email_user_question_tab(user)
-      ]
-    end
-
-    def checklist_for_project_tabs(project)
-      [
-        show_object_tab(project),
-        object_index_tab(project)
       ]
     end
 

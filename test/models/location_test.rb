@@ -124,7 +124,7 @@ class LocationTest < UnitTestCase
     assert_equal(not_set.center_lat, not_set.calculate_lat,
                  "Location #{not_set.name} should have had center_lat " \
                  "calculated by update_box_area_and_center_columns")
-    not_set.observations.each do |obs|
+    not_set.observations.find_each do |obs|
       assert_equal(obs.location_lat, not_set.center_lat,
                    "Observation #{obs.name} should have had location_lat " \
                    "copied from #{not_set.name}")
@@ -132,7 +132,7 @@ class LocationTest < UnitTestCase
     # Location area / center are in fixtures, but center not set in obs fixtures
     locs = [locations(:burbank), locations(:albion)]
     locs.each do |loc|
-      loc.observations.each do |obs|
+      loc.observations.find_each do |obs|
         assert_equal(obs.location_lat, loc.center_lat,
                      "Observation #{obs.name} should have had location_lat " \
                      "copied from #{loc.name}")
@@ -556,12 +556,12 @@ class LocationTest < UnitTestCase
   #    Explicit tests of some scopes to improve coverage
   # ----------------------------------------------------
 
-  def test_scope_name_includes
+  def test_scope_name_contains
     assert_includes(
-      Location.name_includes("Albion"),
+      Location.name_contains("Albion"),
       locations(:albion)
     )
-    assert_empty(Location.name_includes(ARBITRARY_SHA))
+    assert_empty(Location.name_contains(ARBITRARY_SHA))
   end
 
   def test_scope_in_region
@@ -687,6 +687,23 @@ class LocationTest < UnitTestCase
     # These failed depending on the rounding correction used by `contains_box`
     do_contains_box(loc: perkatkun, regions: [wrangel, earth])
     do_contains_box(loc: california, regions: [earth])
+  end
+
+  def test_scope_with_minimum_bounding_box_containing_point
+    falmouth = locations(:falmouth)
+    assert_equal(
+      falmouth,
+      Location.with_minimum_bounding_box_containing_point(
+        lat: falmouth.center_lat, lng: falmouth.center_lng
+      )
+    )
+
+    california_locations = Location.where(Location[:name] =~ /California, USA$/)
+    assert_empty(
+      california_locations.with_minimum_bounding_box_containing_point(
+        lat: falmouth.center_lat, lng: falmouth.center_lng
+      )
+    )
   end
 
   def albion

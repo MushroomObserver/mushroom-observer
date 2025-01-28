@@ -13,7 +13,7 @@ xml.tag!(
   xml_datetime(xml, :last_login, object.last_login)
   xml_datetime(xml, :last_activity, object.last_activity)
   xml_integer(xml, :contribution, object.contribution)
-  xml_html_string(xml, :notes, object.notes.to_s.tpl_nodiv)
+  xml_html_string(xml, :notes, object.notes.to_s.tl_for_api)
   if object.notes_template.present?
     fields = object.notes_template_parts
     xml.tag!(:notes_template, length: fields.length) do
@@ -21,7 +21,7 @@ xml.tag!(
     end
   end
   xml_string(xml, :mailing_address,
-             object.mailing_address.to_s.tpl_nodiv.html_to_ascii)
+             object.mailing_address.to_s.tl_for_api.html_to_ascii)
   if detail
     xml_detailed_object(xml, :location, object.location)
     xml_detailed_object(xml, :image, object.image)

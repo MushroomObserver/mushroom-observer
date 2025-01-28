@@ -8,13 +8,20 @@ map = @herbarium.location
 @container = :wide
 %>
 
+<% if @herbarium.mcp_searchable? %>
+  <div id="mcp_number" class="mt-3">
+    <span class="font-weight-bold"><%= :herbarium_mcp_db.t %></span>:
+    <%= @herbarium.mcp_collid %>
+  </div>
+<% end %>
+
 <div class="row">
   <div class="col-xs-12 col-sm-<%= map ? 8 : 12 %>">
     <div class="mt-3">
       <%= link_to(:show_herbarium_herbarium_record_count.t(
                     count: @herbarium.herbarium_records.length
                   ),
-                  herbarium_records_path(herbarium_id: @herbarium.id),
+                  herbarium_records_path(herbarium: @herbarium.id),
                   class: "herbarium_records_for_herbarium_link") %>
     </div>
 
@@ -22,7 +29,7 @@ map = @herbarium.location
 
       <% if @herbarium.curators.present? %>
         <%= render(partial: "herbaria/curator_table",
-                  locals: { herbarium: @herbarium }) %>
+                   locals: { herbarium: @herbarium }) %>
       <% end %>
 
       <% if @herbarium.curator?(@user) || in_admin_mode? %>
@@ -32,10 +39,10 @@ map = @herbarium.location
                       id: "herbarium_curators_form") do |f| %>
           <div class="form-inline mt-3">
             <%= autocompleter_field(form: f, field: :add_curator,
-                                    type: :user) %>
+                                        type: :user) %>
             <label for="add_curator">
               <%= submit_button(form: f,
-                                button: :show_herbarium_add_curator.t) %>
+                                    button: :show_herbarium_add_curator.t) %>
             </label>
           </div>
         <% end %>
@@ -43,10 +50,10 @@ map = @herbarium.location
       <% else %>
 
         <%= link_with_query(
-              :show_herbarium_curator_request.t,
-              new_herbaria_curator_request_path(id: @herbarium.id),
-              class: "new_herbaria_curator_request_link"
-            ) %>
+                :show_herbarium_curator_request.t,
+                new_herbaria_curator_request_path(id: @herbarium.id),
+                class: "new_herbaria_curator_request_link"
+              ) %>
 
       <% end %>
     </div>
@@ -70,13 +77,14 @@ map = @herbarium.location
     <div class="col-xs-12 col-sm-4 mt-3" style="max-width:320px">
       <%= tag.div(class: "mb-3") { make_map(objects: [@herbarium.location]) } %>
       <%= tag.p(id: "herbarium_location") do
-        "#{:LOCATION.l}: #{@herbarium.location.text_name}"
-      end %>
+          "#{:LOCATION.l}: #{@herbarium.location.text_name}"
+        end %>
     </div>
   <% end %>
-</div><!--.row-->
+</div>
+<!--.row-->
 
-<div class="mt-3 text-center" style="max-width:<%= map ? 930 : 600 %>px">
-  <%= :CREATED_AT.t %>: <%= @herbarium.created_at.web_date %><br/>
-  <%= :UPDATED_AT.t %>: <%= @herbarium.updated_at.web_date %><br/>
-</div><!-- .text-center -->
+<div class="mt-3" style="max-width:<%= map ? 930 : 600 %>px">
+  <%= :CREATED_AT.t %>: <%= @herbarium.created_at.web_date %><br />
+  <%= :UPDATED_AT.t %>: <%= @herbarium.updated_at.web_date %><br />
+</div>

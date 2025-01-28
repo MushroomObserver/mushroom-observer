@@ -28,7 +28,7 @@ end
                            between: :required) %>
   <%= help_block_with_arrow("up", id: "sequence_locus_help",
                             class: "mt-3") do
-    :form_sequence_locus_help.t(locus_width: Sequence.locus_width)
+    :form_sequence_locus_help.t(locus_width: Sequence::LOCUS_WIDTH)
   end %>
 
   <%# bases %>

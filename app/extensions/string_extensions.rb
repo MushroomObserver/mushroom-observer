@@ -12,7 +12,7 @@
 #  tp::                 Textilize with paragraphs (no obj links).
 #  tpl::                Textilize with paragraphs and obj links.
 #  tp_nodiv::           Textilize with paragraphs (no obj links, without div).
-#  tpl_nodiv::          Textilize with paragraphs and obj links, without div).
+#  tl_for_api::         Textilize with obj links and paragraphs when needed
 #  ---
 #  gsub!::              Gobal replace in place.
 #  to_ascii::           Convert string from UTF-8 to plain ASCII.
@@ -419,7 +419,9 @@ class String
     Textile.textilize_safe(self, do_object_links: false, sanitize: sanitize)
   end
 
-  def tpl_nodiv(sanitize = true)
+  def tl_for_api(sanitize = true)
+    return tl(sanitize) unless include?("\n")
+
     Textile.textilize_safe(self, do_object_links: true, sanitize: sanitize)
   end
 
@@ -676,6 +678,12 @@ class String
   # Does this string start with a ASCII character?
   def is_ascii_character?
     dup.force_encoding("binary")[0].ord < 128
+  end
+
+  # Clean a pattern for use in LIKE condition. Takes and returns a String.
+  # This is a replacement for Query's method `clean_pattern`
+  def clean_pattern
+    gsub(/[%'"\\]/) { |x| "\\#{x}" }.tr("*", "%")
   end
 
   # Returns percentage match between +self+ and +other+, where 1.0 means the two

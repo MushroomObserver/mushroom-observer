@@ -28,7 +28,7 @@
 #        :number       => params[:page],
 #        :num_per_page => 100,
 #      )
-#      query = Query.lookup(:Model, :flavor)
+#      query = Query.lookup(:Model)
 #      @results = query.paginate(@pages)
 #    end
 #
@@ -41,7 +41,7 @@
 #        :number       => params[:page],
 #        :num_per_page => 100,
 #      )
-#      query = Query.lookup(:Model, :flavor)
+#      query = Query.lookup(:Model)
 #      @results = query.paginate(@pages)
 #    end
 #

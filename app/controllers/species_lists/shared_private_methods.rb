@@ -362,7 +362,7 @@ module SpeciesLists
     def init_name_vars_for_clone(clone_id)
       return unless (clone = SpeciesList.safe_find(clone_id))
 
-      query = create_query(:Observation, :in_species_list, species_list: clone)
+      query = create_query(:Observation, species_list: clone)
       @checklist = calc_checklist(query)
       @species_list.when = clone.when
       @species_list.place_name = clone.place_name
@@ -464,8 +464,7 @@ module SpeciesLists
 
     def init_project_vars_for_create
       init_project_vars
-      last_obs = Observation.where(user_id: User.current_id).
-                 order(:created_at).last
+      last_obs = Observation.recent_by_user(@user).last
       return unless last_obs && last_obs.created_at > 1.hour.ago
 
       last_obs.projects.each { |proj| @project_checks[proj.id] = true }

@@ -16,6 +16,7 @@
 
 <% if field_slip.code %>
   <%= form_with(model: field_slip) do |form| %>
+    <%= text_field_with_label(form:, field: :code, label: "#{:field_slip_code.t}:") %>
     <% if field_slip.projects %>
       <%= select_with_label(form:, field: :project_id, inline: true,
                             selected: field_slip.project&.id,
@@ -23,10 +24,10 @@
                             options: field_slip.projects) %>
     <% end %>
 
-    <%= form.hidden_field(:code, value: field_slip.code) %>
     <%= date_select_with_label(form:, field: :date, label: "#{:DATE.t}:",
                                object: field_slip, inline: true,
                                order: [:year, :month, :day],
+                               selected: field_slip.date,
                                start_year: Date.today.year - 10,
                                end_year: Date.today.year + 10) %>
     <%= autocompleter_field(form:, field: :collector,
@@ -75,7 +76,7 @@
   <% end %>
 <% else %>
   <%= form_with(url: new_field_slip_url, method: :get) do |form| %>
-    <%= text_field_with_label(form:, field: :code, label: :field_slip_code.t + ":") %>
+    <%= text_field_with_label(form:, field: :code, label: "#{:field_slip_code.t}:") %>
     <%= submit_button(form:, button: :field_slip_create_obs.t,
                       class: "mt-5") %>
   <% end %>
