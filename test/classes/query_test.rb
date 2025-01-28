@@ -51,8 +51,6 @@ class QueryTest < UnitTestCase
   end
 
   def test_validate_params
-    @fungi = names(:fungi)
-
     assert_raises(RuntimeError) { Query.lookup(:Name, xxx: true) }
     assert_raises(RuntimeError) { Query.lookup(:Name, by: [1, 2, 3]) }
     assert_raises(RuntimeError) { Query.lookup(:Name, by: true) }
@@ -73,24 +71,48 @@ class QueryTest < UnitTestCase
       Query.lookup(:Name, misspellings: true)
     end
     assert_raises(RuntimeError) { Query.lookup(:Name, misspellings: 123) }
+  end
+
+  def test_validate_params_instances_by_user
+    @fungi = names(:fungi)
 
     # assert_raises(RuntimeError) { Query.lookup(:Image) }
     assert_raises(RuntimeError) { Query.lookup(:Image, by_user: :bogus) }
-    assert_raises(RuntimeError) { Query.lookup(:Image, by_user: "rolf") }
+    assert_raises(RuntimeError) { Query.lookup(:Image, by_user: "foo") }
     assert_raises(RuntimeError) { Query.lookup(:Image, by_user: @fungi) }
     assert_equal(rolf.id,
                  Query.lookup(:Image, by_user: rolf).params[:by_user])
     assert_equal(rolf.id,
                  Query.lookup(:Image, by_user: rolf.id).params[:by_user])
     assert_equal(rolf.id,
-                 Query.lookup(:Image, by_user: rolf.id.to_s).
-                 params[:by_user])
+                 Query.lookup(:Image, by_user: rolf.id.to_s).params[:by_user])
+    assert_equal(rolf.id,
+                 Query.lookup(:Image, by_user: "rolf").params[:by_user])
+  end
 
+  def test_validate_params_instances_users
+    @fungi = names(:fungi)
+
+    assert_raises(RuntimeError) { Query.lookup(:Image, users: :bogus) }
+    assert_raises(RuntimeError) { Query.lookup(:Image, users: @fungi) }
+    assert_equal([rolf.id],
+                 Query.lookup(:Image, users: rolf).params[:users])
+    assert_equal([rolf.id],
+                 Query.lookup(:Image, users: rolf.id).params[:users])
+    assert_equal([rolf.id],
+                 Query.lookup(:Image, users: rolf.id.to_s).params[:users])
+    assert_equal([rolf.id],
+                 Query.lookup(:Image, users: rolf.login).params[:users])
+  end
+
+  def test_validate_params_ids
     # Oops, this query is generic,
     # doesn't know to require Name instances here.
     # assert_raises(RuntimeError) { Query.lookup(:Name, ids: rolf) }
     assert_raises(RuntimeError) { Query.lookup(:Name, ids: "one") }
     assert_raises(RuntimeError) { Query.lookup(:Name, ids: "1,2,3") }
+    assert_equal([names(:fungi).id],
+                 Query.lookup(:Name, ids: names(:fungi).text_name).params[:ids])
     assert_equal([names(:fungi).id],
                  Query.lookup(:Name,
                               ids: names(:fungi).id.to_s).params[:ids])
@@ -113,7 +135,9 @@ class QueryTest < UnitTestCase
     assert_equal([rolf.id, mary.id, junk.id],
                  Query.lookup(:User,
                               ids: [rolf, mary.id, junk.id.to_s]).params[:ids])
+  end
 
+  def test_validate_params_pattern
     # assert_raises(RuntimeError) { Query.lookup(:Name) }
     assert_raises(RuntimeError) do
       Query.lookup(:Name, pattern: true)
@@ -130,28 +154,42 @@ class QueryTest < UnitTestCase
                  Query.lookup(:Name, pattern: "rolf").params[:pattern])
     assert_equal("rolf",
                  Query.lookup(:Name, pattern: :rolf).params[:pattern])
+  end
 
+  def test_validate_params_join
     assert_equal(["table"],
                  Query.lookup(:Name, join: :table).params[:join])
     assert_equal(%w[table1 table2],
                  Query.lookup(:Name, join: [:table1, :table2]).
                  params[:join])
+  end
+
+  def test_validate_params_tables
     assert_equal(["table"],
                  Query.lookup(:Name, tables: :table).params[:tables])
     assert_equal(%w[table1 table2],
                  Query.lookup(:Name, tables: [:table1, :table2]).
                  params[:tables])
+  end
+
+  def test_validate_params_where
     assert_equal(["foo = bar"],
                  Query.lookup(:Name, where: "foo = bar").params[:where])
     assert_equal(["foo = bar", "id in (1,2,3)"],
                  Query.lookup(:Name,
                               where: ["foo = bar", "id in (1,2,3)"]).
                  params[:where])
+  end
+
+  def test_validate_params_group
     assert_equal("names.id",
                  Query.lookup(:Name, group: "names.id").params[:group])
+    assert_raises(RuntimeError) { Query.lookup(:Name, group: %w[1 2]) }
+  end
+
+  def test_validate_params_order
     assert_equal("id DESC",
                  Query.lookup(:Name, order: "id DESC").params[:order])
-    assert_raises(RuntimeError) { Query.lookup(:Name, group: %w[1 2]) }
     assert_raises(RuntimeError) { Query.lookup(:Name, order: %w[1 2]) }
   end
 
@@ -1160,7 +1198,6 @@ class QueryTest < UnitTestCase
   include Query::SpeciesListsTest
   include Query::UsersTest
   include Query::FiltersTest
-  include Query::LookupNamesTest
 
   ##############################################################################
   #

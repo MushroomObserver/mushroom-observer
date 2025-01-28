@@ -85,7 +85,7 @@ module Query::Modules::Validation
       send(:"validate_#{arg_type}", arg, val)
     elsif arg_type.is_a?(Class) &&
           arg_type.respond_to?(:descends_from_active_record?)
-      validate_id(arg, val, arg_type)
+      validate_record_or_id_or_string(arg, val, arg_type)
     elsif arg_type.is_a?(Hash)
       validate_enum(arg, val, arg_type)
     else
@@ -151,6 +151,25 @@ module Query::Modules::Validation
       val.to_f
     else
       raise("Value for :#{arg} should be a float, got: #{val.inspect}")
+    end
+  end
+
+  def validate_record_or_id_or_string(arg, val, type = ActiveRecord::Base)
+    if val.is_a?(type)
+      raise("Value for :#{arg} is an unsaved #{type} instance.") unless val.id
+
+      # Cache the instance for later use, in case we both instantiate and
+      # execute query in the same action.
+      @params_cache ||= {}
+      @params_cache[arg] = val
+      val.id
+    elsif could_be_record_id?(val)
+      val.to_i
+    elsif val.is_a?(String)
+      lookup_record_by_name(type, val).id
+    else
+      raise("Value for :#{arg} should be id, string or an #{type} instance, " \
+            "got: #{val.inspect}")
     end
   end
 
@@ -243,7 +262,11 @@ module Query::Modules::Validation
 
   def find_cached_parameter_instance(model, arg)
     @params_cache ||= {}
-    @params_cache[arg] ||= model.find(params[arg])
+    @params_cache[arg] ||= if could_be_record_id?(params[arg])
+                             model.find(params[arg])
+                           else
+                             lookup_record_by_name(model, params[arg])
+                           end
   end
 
   def get_cached_parameter_instance(arg)
@@ -264,5 +287,13 @@ module Query::Modules::Validation
       val.is_a?(String) && val.match(/^[1-9]\d*$/) ||
       # (blasted admin user has id = 0!)
       val.is_a?(String) && (val == "0") && (arg == :user)
+  end
+
+  def lookup_record_by_name(type, val)
+    lookup = "Lookup::#{type.name.pluralize}".constantize
+    result = lookup.new(val).instances&.first
+    raise("Couldn't find an id for : #{val.inspect}") unless result
+
+    result
   end
 end
