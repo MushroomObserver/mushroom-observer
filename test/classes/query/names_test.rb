@@ -33,23 +33,36 @@ module Query::NamesTest
     assert_query(expects, :Name, by: :rss_log)
   end
 
-  def test_name_in_set
-    assert_query([names(:fungi).id,
-                  names(:coprinus_comatus).id,
-                  names(:conocybe_filaris).id,
-                  names(:lepiota_rhacodes).id,
-                  names(:lactarius_subalpinus).id],
-                 :Name,
-                 ids: [names(:fungi).id,
-                       names(:coprinus_comatus).id,
-                       names(:conocybe_filaris).id,
-                       names(:lepiota_rhacodes).id,
-                       names(:lactarius_subalpinus).id])
+  def names_set
+    [
+      names(:fungi),
+      names(:coprinus_comatus),
+      names(:conocybe_filaris),
+      names(:lepiota_rhacodes),
+      names(:lactarius_subalpinus)
+    ]
+  end
+
+  def test_name_ids_with_name_ids
+    assert_query(names_set.map(&:id),
+                 :Name, ids: names_set.map(&:id))
+  end
+
+  def test_name_ids_with_name_instances
+    assert_query(names_set.map(&:id),
+                 :Name, ids: names_set)
+  end
+
+  def test_name_ids_with_name_search_names
+    assert_query(names_set.map(&:id),
+                 :Name, ids: names_set.map(&:search_name))
   end
 
   def test_name_by_user
     assert_query(Name.index_order.where(user: mary).with_correct_spelling,
                  :Name, by_user: mary)
+    assert_query(Name.index_order.where(user: mary).with_correct_spelling,
+                 :Name, by_user: "mary")
     assert_query(Name.index_order.where(user: dick).with_correct_spelling,
                  :Name, by_user: dick)
     assert_query(Name.index_order.where(user: rolf).with_correct_spelling,
@@ -65,17 +78,35 @@ module Query::NamesTest
     assert_query(expects, :Name, by_editor: dick, by: :id)
   end
 
-  # non-arrays and arrays of strings don't work
-  def test_name_users
-    # users = users(:rolf).login
-    # expects = Name.where(user: users).index_order
-    # assert_query(expects, :Name, users: users)
+  def test_name_users_login
+    # single
+    expects = Name.where(user: users(:rolf)).index_order
+    assert_query(expects, :Name, users: users(:rolf).login)
+    # array
+    users = [users(:rolf), users(:mary)]
+    expects = Name.where(user: users).index_order
+    assert_query(expects, :Name, users: users.map(&:login))
+  end
+
+  def test_name_users_id
+    # single
+    users = users(:rolf).id
+    expects = Name.where(user: users).index_order
+    assert_query(expects, :Name, users: users)
+    # array
     users = [users(:rolf), users(:mary)].map(&:id)
     expects = Name.where(user: users).index_order
     assert_query(expects, :Name, users: users)
-    # users = [users(:rolf), users(:mary)].map(&:login)
-    # assert_query(expects, :Name, users: users)
+  end
+
+  def test_name_users_instance
+    # single
+    users = users(:rolf)
+    expects = Name.where(user: users).index_order
+    assert_query(expects, :Name, users: users)
+    # array
     users = [users(:rolf), users(:mary)]
+    expects = Name.where(user: users).index_order
     assert_query(expects, :Name, users: users)
   end
 
