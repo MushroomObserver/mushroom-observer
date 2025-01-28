@@ -50,6 +50,8 @@ module Query::NamesTest
   def test_name_by_user
     assert_query(Name.index_order.where(user: mary).with_correct_spelling,
                  :Name, by_user: mary)
+    assert_query(Name.index_order.where(user: mary).with_correct_spelling,
+                 :Name, by_user: "mary")
     assert_query(Name.index_order.where(user: dick).with_correct_spelling,
                  :Name, by_user: dick)
     assert_query(Name.index_order.where(user: rolf).with_correct_spelling,
