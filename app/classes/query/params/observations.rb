@@ -9,46 +9,42 @@ module Query::Params::Observations
       updated_at?: [:time],
 
       ids?: [Observation],
-      herbarium_records?: [:string],
-      project_lists?: [:string],
+      users?: [User],
       by_user?: User,
       by_editor?: User, # for coercions from name/location
-      users?: [User],
       field_slips?: [:string],
-      pattern?: :string,
-      regexp?: :string, # for coercions from location
+      herbarium_records?: [:string],
+      project_lists?: [:string],
       needs_naming?: :boolean,
       in_clade?: :string,
-      in_region?: :string
+      in_region?: :string,
+      pattern?: :string,
+      regexp?: :string # for coercions from location
     }
   end
 
   # for observations, or coercions to observations.
   def observations_parameter_declarations
     {
-      notes_has?: :string,
-      with_notes_fields?: [:string],
-      comments_has?: :string,
-      herbaria?: [:string],
-      user_where?: :string,
-      by_user?: User,
+      with_name?: :boolean,
+      confidence?: [:float],
       location?: Location,
       locations?: [:string],
+      user_where?: :string,
+      is_collection_location?: :boolean,
+      with_public_lat_lng?: :boolean,
+      by_user?: User,
+      with_notes?: :boolean,
+      notes_has?: :string,
+      with_notes_fields?: [:string],
+      with_comments?: { boolean: [true] },
+      comments_has?: :string,
+      with_sequences?: { boolean: [true] },
+      herbaria?: [:string],
       project?: Project,
       projects?: [:string],
       species_list?: SpeciesList,
-      species_lists?: [:string],
-
-      # boolean
-      with_comments?: { boolean: [true] },
-      with_public_lat_lng?: :boolean,
-      with_name?: :boolean,
-      with_notes?: :boolean,
-      with_sequences?: { boolean: [true] },
-      is_collection_location?: :boolean,
-
-      # numeric
-      confidence?: [:float]
+      species_lists?: [:string]
     }
   end
 

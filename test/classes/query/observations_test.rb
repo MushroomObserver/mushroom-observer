@@ -9,6 +9,46 @@ module Query::ObservationsTest
     assert_query(expects, :Observation)
   end
 
+  # Overwrites scope `order_by_rss_log` in abstract_model
+  def test_observation_by_rss_log
+    expects = Observation.order_by_rss_log
+    assert_query(expects, :Observation, by: :rss_log)
+  end
+
+  def observations_set
+    [
+      observations(:unknown_with_no_naming),
+      observations(:minimal_unknown_obs),
+      observations(:strobilurus_diminutivus_obs),
+      observations(:detailed_unknown_obs),
+      observations(:agaricus_campestros_obs),
+      observations(:coprinus_comatus_obs),
+      observations(:agaricus_campestras_obs),
+      observations(:agaricus_campestris_obs),
+      observations(:agaricus_campestrus_obs)
+    ]
+  end
+
+  def test_observation_ids_ids
+    assert_query(observations_set.map(&:id),
+                 :Observation, ids: observations_set.map(&:id))
+  end
+
+  def test_observation_ids_instances
+    assert_query(observations_set.map(&:id),
+                 :Observation, ids: observations_set)
+  end
+
+  def test_observation_by_user
+    expects = Observation.reorder(id: :asc).where(user: rolf.id).to_a
+    assert_query(expects, :Observation, by_user: rolf, by: :id)
+    expects = Observation.reorder(id: :asc).where(user: mary.id).to_a
+    assert_query(expects, :Observation, by_user: mary, by: :id)
+    expects = Observation.reorder(id: :asc).where(user: dick.id).to_a
+    assert_query(expects, :Observation, by_user: dick, by: :id)
+    assert_query([], :Observation, by_user: junk, by: :id)
+  end
+
   def test_observation_in_project_list
     project = projects(:bolete_project)
     # expects = project.species_lists.map(&:observations).flatten.to_a
@@ -24,22 +64,6 @@ module Query::ObservationsTest
     assert_query(expects, :Observation, location: locations(:burbank))
   end
 
-  # Overwrites scope `order_by_rss_log` in abstract_model
-  def test_observation_by_rss_log
-    expects = Observation.order_by_rss_log
-    assert_query(expects, :Observation, by: :rss_log)
-  end
-
-  def test_observation_by_user
-    expects = Observation.reorder(id: :asc).where(user: rolf.id).to_a
-    assert_query(expects, :Observation, by_user: rolf, by: :id)
-    expects = Observation.reorder(id: :asc).where(user: mary.id).to_a
-    assert_query(expects, :Observation, by_user: mary, by: :id)
-    expects = Observation.reorder(id: :asc).where(user: dick.id).to_a
-    assert_query(expects, :Observation, by_user: dick, by: :id)
-    assert_query([], :Observation, by_user: junk, by: :id)
-  end
-
   def test_observation_for_project
     assert_query([],
                  :Observation, project: projects(:empty_project))
@@ -53,19 +77,6 @@ module Query::ObservationsTest
     qu2 = Query.lookup_and_save(:Observation,
                                 projects: projects(:bolete_project).id.to_s)
     assert_equal(qu1.results, qu2.results)
-  end
-
-  def test_observation_in_set
-    obs_set_ids = [observations(:unknown_with_no_naming).id,
-                   observations(:minimal_unknown_obs).id,
-                   observations(:strobilurus_diminutivus_obs).id,
-                   observations(:detailed_unknown_obs).id,
-                   observations(:agaricus_campestros_obs).id,
-                   observations(:coprinus_comatus_obs).id,
-                   observations(:agaricus_campestras_obs).id,
-                   observations(:agaricus_campestris_obs).id,
-                   observations(:agaricus_campestrus_obs).id]
-    assert_query(obs_set_ids, :Observation, ids: obs_set_ids)
   end
 
   def test_observation_in_species_list

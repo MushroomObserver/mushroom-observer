@@ -47,6 +47,10 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
           -> { where(name_id: Name.with_rank_above_genus) }
     scope :without_confident_name,
           -> { where(vote_cache: ..0) }
+    # confidence between min & max, in percentages
+    scope :confidence, lambda { |min, max = min|
+      where(vote_cache: (min.to_f / (100 / 3))..(max.to_f / (100 / 3)))
+    }
     # Use this definition when running script to populate the column:
     # scope :needs_naming, lambda {
     #   with_name_above_genus.or(without_confident_name)
@@ -395,29 +399,28 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # much faster than `missing(:sequences)` which uses left outer join.
     scope :without_sequences,
           -> { where.not(id: with_sequences) }
-    # confidence between min & max, in percentages
-    scope :confidence, lambda { |min, max = min|
-      where(vote_cache: (min.to_f / (100 / 3))..(max.to_f / (100 / 3)))
-    }
-    scope :for_project, lambda { |project|
+    scope :for_project, lambda { |projects|
+      project_ids = Lookup::Projects.new(projects).ids
       joins(:project_observations).
-        where(ProjectObservation[:project_id].eq(project.id)).distinct
+        where(project_observations: { project: project_ids }).distinct
     }
-    scope :in_herbarium, lambda { |herbarium|
+    scope :in_herbarium, lambda { |herbaria|
+      herbaria_ids = Lookup::Herbaria.new(herbaria).ids
       joins(:herbarium_records).
-        where(HerbariumRecord[:herbarium_id].eq(herbarium.id)).distinct
+        where(herbarium_records: { herbarium: herbaria_ids }).distinct
     }
     scope :herbarium_record_notes_contain, lambda { |phrase|
       joins(:herbarium_records).search_columns(HerbariumRecord[:notes], phrase)
     }
-    scope :on_species_list, lambda { |species_list|
+    scope :on_species_list, lambda { |species_lists|
+      spl_ids = Lookup::SpeciesLists.new(species_lists).ids
       joins(:species_list_observations).
-        where(SpeciesListObservation[:species_list_id].eq(species_list.id)).
-        distinct
+        where(species_list_observation: { species_list: spl_ids }).distinct
     }
-    scope :on_species_list_of_project, lambda { |project|
+    scope :project_species_lists, lambda { |projects|
+      project_ids = Lookup::Projects.new(projects).ids
       joins(species_lists: :project_species_lists).
-        where(ProjectSpeciesList[:project_id].eq(project.id)).distinct
+        where(project_species_lists: { project: project_ids }).distinct
     }
 
     scope :show_includes, lambda {

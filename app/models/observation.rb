@@ -122,7 +122,7 @@
 #  in_herbarium(herbarium)
 #  herbarium_record_notes_contain(notes)
 #  on_species_list(species_list)
-#  on_species_list_of_project(project)
+#  on_project_species_lists(project)
 #
 #  == Instance methods
 #
