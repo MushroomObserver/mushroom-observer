@@ -166,12 +166,7 @@ module Query::Modules::Validation
     elsif could_be_record_id?(val)
       val.to_i
     elsif val.is_a?(String)
-      lookup = "Lookup::#{type.name.pluralize}"
-      lookup = lookup.constantize
-      result = lookup.new(val).ids&.first
-      raise("Couldn't find an id for : #{val.inspect}") unless result
-
-      result
+      lookup_record_by_name(type, val).id
     else
       raise("Value for :#{arg} should be id, string or an #{type} instance, " \
             "got: #{val.inspect}")
@@ -267,16 +262,10 @@ module Query::Modules::Validation
 
   def find_cached_parameter_instance(model, arg)
     @params_cache ||= {}
-    # unless could_be_record_id?(arg)
-    #   raise("Value for :#{arg} is not an id, got #{val.inspect}")
-    # end
-    # @params_cache[arg] ||= model.find(params[arg])
     @params_cache[arg] ||= if could_be_record_id?(params[arg])
                              model.find(params[arg])
                            else
-                             lookup = "Lookup::#{model.name.pluralize}"
-                             lookup = lookup.constantize
-                             lookup.new(params[arg]).instances.first
+                             lookup_record_by_name(model, params[arg])
                            end
   end
 
@@ -298,5 +287,13 @@ module Query::Modules::Validation
       val.is_a?(String) && val.match(/^[1-9]\d*$/) ||
       # (blasted admin user has id = 0!)
       val.is_a?(String) && (val == "0") && (arg == :user)
+  end
+
+  def lookup_record_by_name(type, val)
+    lookup = "Lookup::#{type.name.pluralize}".constantize
+    result = lookup.new(val).instances&.first
+    raise("Couldn't find an id for : #{val.inspect}") unless result
+
+    result
   end
 end
