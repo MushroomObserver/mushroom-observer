@@ -200,6 +200,28 @@ module AbstractModel::Scopes
       conditions.reduce(self) { |result, cond| result.send(:where, cond) }
     end
 
+    # Combine args into one parenthesized condition by ANDing them.
+    def and_clause(*args)
+      if args.length > 1
+        # "(#{args.join(" AND ")})"
+        starting = args.shift
+        args.reduce(starting) { |result, arg| result.and(arg) }
+      else
+        args.first
+      end
+    end
+
+    # Combine args into one parenthesized condition by ORing them.
+    def or_clause(*args)
+      if args.length > 1
+        # "(#{args.join(" OR ")})"
+        starting = args.shift
+        args.reduce(starting) { |result, arg| result.or(arg) }
+      else
+        args.first
+      end
+    end
+
     # Returns an array of AR conditions describing what a search is looking for.
     #
     # Each array member ["foo", "fah"] gets joined in a chain of AR "where"
@@ -220,12 +242,12 @@ module AbstractModel::Scopes
       conditions = []
       goods.each do |good|
         # break up phrases
-        parts = *good
+        parts = *good.map(&:clean_pattern)
         # pop the first phrase off, to start the condition chain without an `OR`
-        condition = table_columns.matches(parts.shift.clean_pattern)
+        condition = table_columns.matches("%#{parts.shift}%")
         parts.each do |str|
           # join the parts with `or`
-          condition = condition.or(table_columns.matches(str.clean_pattern))
+          condition = condition.or(table_columns.matches("%#{str}%"))
         end
         # Add a where condition for each good (equivalent to `AND`)
         conditions << condition
@@ -236,7 +258,7 @@ module AbstractModel::Scopes
     # Array of conditions for what the search wants to avoid. Joined with `AND`.
     def search_conditions_bad(table_columns, bads)
       bads.map do |bad|
-        table_columns.does_not_match(bad.clean_pattern)
+        table_columns.does_not_match("%#{bad.clean_pattern}%")
       end
     end
 
@@ -249,6 +271,46 @@ module AbstractModel::Scopes
       fields.reduce(starting) do |result, field|
         result + arel_table[field].coalesce("")
       end
+    end
+
+    def lookup_external_sites_by_name(vals)
+      Lookup::ExternalSites.new(vals).ids
+    end
+
+    def lookup_herbaria_by_name(vals)
+      Lookup::Herbaria.new(vals).ids
+    end
+
+    def lookup_herbarium_records_by_name(vals)
+      Lookup::HerbariumRecords.new(vals).ids
+    end
+
+    def lookup_locations_by_name(vals)
+      Lookup::Locations.new(vals).ids
+    end
+
+    def lookup_names_by_name(vals, params = {})
+      Lookup::Names.new(vals, **params).ids
+    end
+
+    def lookup_projects_by_name(vals)
+      Lookup::Projects.new(vals).ids
+    end
+
+    def lookup_lists_for_projects_by_name(vals)
+      Lookup::ProjectSpeciesLists.new(vals).ids
+    end
+
+    def lookup_species_lists_by_name(vals)
+      Lookup::SpeciesLists.new(vals).ids
+    end
+
+    def lookup_regions_by_name(vals)
+      Lookup::Regions.new(vals).ids
+    end
+
+    def lookup_users_by_name(vals)
+      Lookup::Users.new(vals).ids
     end
   end
 end

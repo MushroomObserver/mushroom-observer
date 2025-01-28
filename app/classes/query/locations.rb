@@ -6,13 +6,13 @@ class Query::Locations < Query::Base
   include Query::Params::Names
   include Query::Params::Observations
   include Query::Params::AdvancedSearch
-  include Query::Params::ContentFilters
+  include Query::Params::Filters
   include Query::Initializers::Locations
   include Query::Initializers::Descriptions
   include Query::Initializers::Names
   include Query::Initializers::Observations
   include Query::Initializers::AdvancedSearch
-  include Query::Initializers::ContentFilters
+  include Query::Initializers::Filters
   include Query::Titles::Observations
 
   def model
@@ -83,6 +83,7 @@ class Query::Locations < Query::Base
     add_owner_and_time_stamp_conditions
     add_by_user_condition
     add_by_editor_condition
+    initialize_location_notes_parameters
     add_pattern_condition
     add_regexp_condition
     add_advanced_search_conditions

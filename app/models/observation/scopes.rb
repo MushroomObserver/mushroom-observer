@@ -34,6 +34,10 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         where(arel_table[:when].format("%Y-%m-%d") <= latest)
     }
 
+    scope :of_lichens,
+          -> { where(Observation[:lifeform].matches("%lichen%")) }
+    scope :not_lichens,
+          -> { where(Observation[:lifeform].does_not_match("% lichen %")) }
     # For activerecord subqueries, DON'T pre-map the primary key (id)
     scope :with_name,
           -> { where.not(name: Name.unknown) }
@@ -340,22 +344,25 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
     scope :notes_contain,
           ->(phrase) { search_columns(Observation[:notes], phrase) }
-    # Searches Observation fields :name, :where and :notes (currently)
-    scope :search_content,
-          ->(phrase) { search_columns(Observation.searchable_columns, phrase) }
+    # Observation SEARCHABLE_FIELDS :text_name, :where and :notes (currently)
+    # NOTE: Must search Name[:search_name], not ideal
+    scope :search_content, lambda { |phrase|
+      ids = name_search_name_observation_ids(phrase)
+      ids += search_columns(Observation.searchable_columns, phrase).map(&:id)
+      where(id: ids).distinct
+    }
     # The "advanced search" scope for "content". Unexpectedly, merge/or is
     # faster than concatting the Obs and Comment columns together.
-    scope :search_notes_and_comments, lambda { |phrase|
+    scope :advanced_search, lambda { |phrase|
       comments = Observation.comments_contain(phrase).map(&:id)
       notes_contain(phrase).distinct.
         or(Observation.where(id: comments).distinct)
     }
-    # Scope used by PatternSearch. It checks Name[:search_name], which includes
-    # the author (unlike Observation[:text_name]) and is not cached on the obs
-    scope :search_location_and_name, lambda { |phrase|
-      ids = Name.search_name_contains(phrase).
-            includes(:observations).map(&:observations).flatten.uniq
-      ids += Observation.search_columns(Observation[:where], phrase).map(&:id)
+    # Checks Name[:search_name], which includes the author
+    # (unlike Observation[:text_name]) and is not cached on the obs
+    scope :pattern_search, lambda { |phrase|
+      ids = name_search_name_observation_ids(phrase)
+      ids += search_columns(Observation[:where], phrase).map(&:id)
       where(id: ids).distinct
     }
     # More comprehensive search of Observation fields + Name.search_name,
@@ -367,6 +374,10 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     #   ids += Observation.comments_contain(phrase).map(&:id)
     #   where(id: ids).distinct
     # }
+    def self.name_search_name_observation_ids(phrase)
+      Name.search_name_contains(phrase).
+        includes(:observations).map(&:observations).flatten.uniq
+    end
 
     scope :with_comments,
           -> { joins(:comments).distinct }

@@ -5,11 +5,11 @@ class Query::Observations < Query::Base
   include Query::Params::Locations
   include Query::Params::Names
   include Query::Params::AdvancedSearch
-  include Query::Params::ContentFilters
+  include Query::Params::Filters
   include Query::Initializers::Names
   include Query::Initializers::Observations
   include Query::Initializers::Locations
-  include Query::Initializers::ContentFilters
+  include Query::Initializers::Filters
   include Query::Initializers::AdvancedSearch
   include Query::Titles::Observations
 

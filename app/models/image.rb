@@ -349,6 +349,10 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   ALL_CONTENT_TYPES = ["image/jpeg", "image/gif", "image/png", "image/tiff",
                        "image/x-ms-bmp", "image/bmp", nil].freeze
 
+  SEARCHABLE_FIELDS = [
+    :original_name, :copyright_holder, :notes
+  ].freeze
+
   def image_url(size)
     Image::URL.new(
       size: size,
