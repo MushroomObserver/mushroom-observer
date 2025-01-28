@@ -33,18 +33,29 @@ module Query::NamesTest
     assert_query(expects, :Name, by: :rss_log)
   end
 
-  def test_name_in_set
-    assert_query([names(:fungi).id,
-                  names(:coprinus_comatus).id,
-                  names(:conocybe_filaris).id,
-                  names(:lepiota_rhacodes).id,
-                  names(:lactarius_subalpinus).id],
-                 :Name,
-                 ids: [names(:fungi).id,
-                       names(:coprinus_comatus).id,
-                       names(:conocybe_filaris).id,
-                       names(:lepiota_rhacodes).id,
-                       names(:lactarius_subalpinus).id])
+  def names_set_for_ids
+    [
+      names(:fungi),
+      names(:coprinus_comatus),
+      names(:conocybe_filaris),
+      names(:lepiota_rhacodes),
+      names(:lactarius_subalpinus)
+    ]
+  end
+
+  def test_name_ids_with_ids
+    assert_query(names_set_for_ids.map(&:id),
+                 :Name, ids: names_set_for_ids.map(&:id))
+  end
+
+  def test_name_ids_with_instances
+    assert_query(names_set_for_ids.map(&:id),
+                 :Name, ids: names_set_for_ids)
+  end
+
+  def test_name_ids_with_search_names
+    assert_query(names_set_for_ids.map(&:id),
+                 :Name, ids: names_set_for_ids.map(&:search_name))
   end
 
   def test_name_by_user
