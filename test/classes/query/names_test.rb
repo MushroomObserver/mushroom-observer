@@ -33,7 +33,7 @@ module Query::NamesTest
     assert_query(expects, :Name, by: :rss_log)
   end
 
-  def names_set_for_ids
+  def names_set
     [
       names(:fungi),
       names(:coprinus_comatus),
@@ -43,19 +43,19 @@ module Query::NamesTest
     ]
   end
 
-  def test_name_ids_with_ids
-    assert_query(names_set_for_ids.map(&:id),
-                 :Name, ids: names_set_for_ids.map(&:id))
+  def test_name_ids_with_name_ids
+    assert_query(names_set.map(&:id),
+                 :Name, ids: names_set.map(&:id))
   end
 
-  def test_name_ids_with_instances
-    assert_query(names_set_for_ids.map(&:id),
-                 :Name, ids: names_set_for_ids)
+  def test_name_ids_with_name_instances
+    assert_query(names_set.map(&:id),
+                 :Name, ids: names_set)
   end
 
-  def test_name_ids_with_search_names
-    assert_query(names_set_for_ids.map(&:id),
-                 :Name, ids: names_set_for_ids.map(&:search_name))
+  def test_name_ids_with_name_search_names
+    assert_query(names_set.map(&:id),
+                 :Name, ids: names_set.map(&:search_name))
   end
 
   def test_name_by_user
