@@ -1,5 +1,6 @@
 <% project_id = project.id %>
 <% project.alias_data(user).each do |name, id| %>
+  <%= edit_project_alias_modal(project_id, name, id) %>
   <%= link_to(name, edit_project_alias_path(project_id:, id:)) %><br/>
 <% end %>
 <% if project.alias_data(user).any? %>

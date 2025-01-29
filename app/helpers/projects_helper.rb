@@ -48,6 +48,13 @@ module ProjectsHelper
     end
   end
 
+  def edit_project_alias_modal(project_id, name, id)
+    modal_link_to(
+      "project_alias_#{id}", name,
+      add_query_param(edit_project_alias_path(project_id:, id:)),
+      class: "#{tab_id(__method__.to_s)}_#{id}")
+  end
+
   #########
 
   private

@@ -29,7 +29,12 @@ module Projects
       @project_alias = ProjectAlias.new(new_params)
     end
 
-    def edit; end
+    def edit
+      respond_to do |format|
+        format.turbo_stream { render_modal_project_alias_form }
+        format.html
+      end
+    end
 
     def create
       @project_alias = ProjectAlias.new(project_alias_params)
@@ -82,6 +87,23 @@ module Projects
     end
 
     private
+
+    def render_modal_project_alias_form
+      render(
+        partial: "shared/modal_form",
+        locals: { title: "Modal Title", identifier: modal_identifier,
+                  form: "projects/aliases/form" }
+      ) and return
+    end
+
+    def modal_identifier
+      case action_name
+      when "new", "create"
+        "project_alias"
+      when "edit", "update"
+        "project_alias_#{@project_alias.id}"
+      end
+    end
 
     def project_alias_redirect(project_alias)
       redirect_to(project_alias_path(
