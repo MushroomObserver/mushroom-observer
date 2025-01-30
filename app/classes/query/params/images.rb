@@ -9,13 +9,13 @@ module Query::Params::Images
       ids?: [Image],
       by_user?: User,
       users?: [User],
-      locations?: [:string],
+      locations?: [Location],
       outer?: :query, # for images inside observations
       observation?: Observation, # for images inside observations
       observations?: [Observation],
       project?: Project,
-      projects?: [:string],
-      species_lists?: [:string],
+      projects?: [Project],
+      species_lists?: [SpeciesList],
       with_observation?: { boolean: [true] },
       # does not yet handle range of sizes. Param is minimum size.
       size?: { string: Image::ALL_SIZES - [:full_size] },

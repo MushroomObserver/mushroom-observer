@@ -9,8 +9,8 @@ module Query::Params::Names
       by_user?: User,
       by_editor?: User,
       users?: [User],
-      locations?: [:string],
-      species_lists?: [:string],
+      locations?: [Location],
+      species_lists?: [SpeciesList],
       misspellings?: { string: [:no, :either, :only] },
       deprecated?: { string: [:either, :no, :only] },
       is_deprecated?: :boolean, # api param
@@ -37,7 +37,7 @@ module Query::Params::Names
   # Used in coerced queries for obs, plus sequence and species_list queries
   def names_parameter_declarations
     {
-      names?: [:string],
+      names?: [Name],
       include_synonyms?: :boolean,
       include_subtaxa?: :boolean,
       include_immediate_subtaxa?: :boolean,

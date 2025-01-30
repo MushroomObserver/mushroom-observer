@@ -13,20 +13,20 @@ class Query::SpeciesLists < Query::Base
       created_at?: [:time],
       updated_at?: [:time],
       date?: [:date],
+      by_user?: User,
       users?: [User],
       ids?: [SpeciesList],
       location?: Location,
+      locations?: [Location],
       user_where?: :string,
-      locations?: [:string],
-      projects?: [:string],
+      project?: Project,
+      projects?: [Project],
       title_has?: :string,
       with_notes?: :boolean,
       notes_has?: :string,
       with_comments?: { boolean: [true] },
       comments_has?: :string,
-      pattern?: :string,
-      project?: Project,
-      by_user?: User
+      pattern?: :string
     ).merge(names_parameter_declarations)
   end
 
