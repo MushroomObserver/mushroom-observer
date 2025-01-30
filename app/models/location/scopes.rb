@@ -35,12 +35,19 @@ module Location::Scopes
     }
     scope :name_contains,
           ->(phrase) { search_columns(Location[:name], phrase) }
-    scope :with_notes,
-          -> { where(Location[:notes].not_blank) }
+
+    scope :with_notes, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
+        where(Location[:notes].not_blank)
+      else
+        without_notes
+      end
+    }
     scope :without_notes,
           -> { where(Location[:notes].blank) }
     scope :notes_contain,
           ->(phrase) { search_columns(Location[:notes], phrase) }
+
     scope :search_content,
           ->(phrase) { search_columns(Location.searchable_columns, phrase) }
     # Location[:name] + descriptions, Observation[:notes] + comments
@@ -59,8 +66,13 @@ module Location::Scopes
     }
     # We do not yet support location comment queries.
 
-    scope :with_description,
-          -> { where.not(description_id: nil) }
+    scope :with_description, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
+        where.not(description_id: nil)
+      else
+        without_description
+      end
+    }
     scope :without_description,
           -> { where(description_id: nil) }
     scope :description_contains, lambda { |phrase|

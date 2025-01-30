@@ -13,6 +13,15 @@ module Name::Scopes
           -> { order(sort_name: :asc, id: :desc) }
 
     # NOTE: with_correct_spelling is tacked on to most Name queries.
+    scope :misspellings, lambda { |boolish = :no|
+      # if :either, returns all
+      case boolish.to_sym
+      when :no
+        with_correct_spelling
+      when :only
+        with_incorrect_spelling
+      end
+    }
     scope :with_correct_spelling,
           -> { where(correct_spelling_id: nil) }
     scope :with_incorrect_spelling,
@@ -24,20 +33,95 @@ module Name::Scopes
     scope :search_name_contains,
           ->(phrase) { search_columns(Name[:search_name], phrase) }
 
-    scope :of_lichens,
-          -> { where(Name[:lifeform].matches("%lichen%")) }
+    scope :of_lichens, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
+        where(Name[:lifeform].matches("%lichen%"))
+      else
+        not_lichens
+      end
+    }
     scope :not_lichens,
           -> { where(Name[:lifeform].does_not_match("% lichen %")) }
-    scope :deprecated,
-          -> { where(deprecated: true) }
+
+    scope :deprecated, lambda { |boolish = :only|
+      # if :either, returns all
+      case boolish.to_sym
+      when :no
+        not_deprecated
+      when :only
+        where(deprecated: true)
+      end
+    }
     scope :not_deprecated,
           -> { where(deprecated: false) }
-    scope :with_synonyms,
-          -> { where.not(synonym_id: nil) }
+
+    scope :with_synonyms, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
+        where.not(synonym_id: nil)
+      else
+        without_synonyms
+      end
+    }
     scope :without_synonyms,
           -> { where(synonym_id: nil) }
-    scope :ok_for_export,
-          -> { where(ok_for_export: true) }
+
+    scope :ok_for_export, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
+        where(ok_for_export: true)
+      else
+        not_ok_for_export
+      end
+    }
+    scope :not_ok_for_export,
+          -> { where(ok_for_export: false) }
+
+    scope :with_classification, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
+        where(Name[:classification].not_blank)
+      else
+        without_classification
+      end
+    }
+    scope :without_classification,
+          -> { where(Name[:classification].blank) }
+    scope :classification_contains,
+          ->(phrase) { search_columns(Name[:classification], phrase) }
+
+    scope :with_author, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
+        where(Name[:author].not_blank)
+      else
+        without_author
+      end
+    }
+    scope :without_author,
+          -> { where(Name[:author].blank) }
+    scope :author_contains,
+          ->(phrase) { search_columns(Name[:author], phrase) }
+
+    scope :with_citation, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
+        where(Name[:citation].not_blank)
+      else
+        without_citation
+      end
+    }
+    scope :without_citation,
+          -> { where(Name[:citation].blank) }
+    scope :citation_contains,
+          ->(phrase) { search_columns(Name[:citation], phrase) }
+
+    scope :with_notes, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
+        where(Name[:notes].not_blank)
+      else
+        without_notes
+      end
+    }
+    scope :without_notes,
+          -> { where(Name[:notes].blank) }
+    scope :notes_contain,
+          ->(phrase) { search_columns(Name[:notes], phrase) }
 
     ### Module Name::Taxonomy. Rank scopes take text values, e.g. "Genus"
     scope :with_rank,
@@ -109,30 +193,6 @@ module Name::Scopes
     scope :include_subtaxa_above_genus,
           ->(name) { include_subtaxa_of(name).with_rank_above_genus }
 
-    scope :with_classification,
-          -> { where(Name[:classification].not_blank) }
-    scope :without_classification,
-          -> { where(Name[:classification].blank) }
-    scope :classification_contains,
-          ->(phrase) { search_columns(Name[:classification], phrase) }
-    scope :with_author,
-          -> { where(Name[:author].not_blank) }
-    scope :without_author,
-          -> { where(Name[:author].blank) }
-    scope :author_contains,
-          ->(phrase) { search_columns(Name[:author], phrase) }
-    scope :with_citation,
-          -> { where(Name[:citation].not_blank) }
-    scope :without_citation,
-          -> { where(Name[:citation].blank) }
-    scope :citation_contains,
-          ->(phrase) { search_columns(Name[:citation], phrase) }
-    scope :with_notes,
-          -> { where(Name[:notes].not_blank) }
-    scope :without_notes,
-          -> { where(Name[:notes].blank) }
-    scope :notes_contain,
-          ->(phrase) { search_columns(Name[:notes], phrase) }
     # A search of all searchable Name fields, concatenated.
     scope :search_content,
           ->(phrase) { search_columns(Name.searchable_columns, phrase) }
@@ -144,16 +204,26 @@ module Name::Scopes
       where(id: fields + comments + descs).distinct
     }
 
-    scope :with_comments,
-          -> { joins(:comments).distinct }
+    scope :with_comments, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
+        joins(:comments).distinct
+      else
+        without_comments
+      end
+    }
     scope :without_comments,
-          -> { where.not(id: with_comments) }
+          -> { where.not(id: Name.with_comments) }
     scope :comments_contain, lambda { |phrase|
       joins(:comments).merge(Comment.search_content(phrase)).distinct
     }
 
-    scope :with_description,
-          -> { where.not(description_id: nil) }
+    scope :with_description, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
+        where.not(description_id: nil)
+      else
+        without_description
+      end
+    }
     scope :without_description,
           -> { where(description_id: nil) }
     # Names needing descriptions
