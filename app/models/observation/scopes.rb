@@ -148,13 +148,15 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
           -> { where(vote_cache: ..0) }
     scope :with_name_correctly_spelled, lambda { |bool = true|
       if bool.to_s.to_boolean == true
-        joins({ namings: :name }).where(names: { correct_spelling: nil })
+        joins({ namings: :name }).
+          where(names: { correct_spelling: nil }).distinct
       else
         with_misspelled_name
       end
     }
     scope :with_misspelled_name, lambda {
-      joins({ namings: :name }).where.not(names: { correct_spelling: nil })
+      joins({ namings: :name }).
+        where.not(names: { correct_spelling: nil }).distinct
     }
 
     scope :with_vote_by_user, lambda { |user|
@@ -410,12 +412,12 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :in_box_of_max_area, lambda { |**args|
       args[:area] ||= MO.obs_location_max_area
 
-      joins(:location).where(Location[:box_area].lteq(args[:area]))
+      joins(:location).where(Location[:box_area].lteq(args[:area])).distinct
     }
     scope :in_box_gt_max_area, lambda { |**args|
       args[:area] ||= MO.obs_location_max_area
 
-      joins(:location).where(Location[:box_area].gt(args[:area]))
+      joins(:location).where(Location[:box_area].gt(args[:area])).distinct
     }
 
     scope :with_comments, lambda { |bool = true|
@@ -427,8 +429,9 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
     scope :without_comments,
           -> { where.not(id: Observation.with_comments) }
-    scope :comments_contain,
-          ->(phrase) { joins(:comments).merge(Comment.search_content(phrase)) }
+    scope :comments_contain, lambda { |phrase|
+      joins(:comments).merge(Comment.search_content(phrase)).distinct
+    }
 
     scope :with_specimen, lambda { |bool = true|
       if bool.to_s.to_boolean == true
@@ -469,7 +472,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         where(project_species_lists: { project: project_ids }).distinct
     }
     scope :for_field_slips, lambda { |codes|
-      joins(:field_slips).search_columns(FieldSlip[:code], codes)
+      joins(:field_slips).search_columns(FieldSlip[:code], codes).distinct
     }
     scope :for_herbarium_records, lambda { |records|
       hr_ids = Lookup::HerbariumRecords.new(records).ids
@@ -483,8 +486,8 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         where(herbarium_records: { herbarium: h_ids }).distinct
     }
     scope :herbarium_record_notes_contain, lambda { |phrase|
-      joins(:herbarium_records).search_columns(HerbariumRecord[:notes], phrase).
-      distinct
+      joins(:herbarium_records).
+        search_columns(HerbariumRecord[:notes], phrase).distinct
     }
 
     scope :show_includes, lambda {
