@@ -49,7 +49,7 @@ class Lookup::Names < Lookup
   def original_matches
     @original_matches ||= @vals.map do |val|
       if val.is_a?(@model)
-        val.id
+        val
       elsif val.is_a?(AbstractModel)
         raise("Passed a #{val.class} to LookupIDs for #{@model}.")
       elsif /^\d+$/.match?(val.to_s) # from an id
@@ -108,19 +108,19 @@ class Lookup::Names < Lookup
   end
 
   def add_other_spellings(names)
-    ids = names.map { |name| name[:correct_spelling_id] || name[:id] }
-    return [] if ids.empty?
+    name_ids = names.map { |name| name[:correct_spelling_id] || name[:id] }
+    return [] if name_ids.empty?
 
     Name.where(Name[:correct_spelling_id].coalesce(Name[:id]).
-               in(limited_id_set(ids))).select(*minimal_name_columns)
+               in(limited_id_set(name_ids))).select(*minimal_name_columns)
   end
 
   def add_synonyms(names)
-    ids = names.pluck(:synonym_id).compact
-    return names if ids.empty?
+    name_ids = names.pluck(:synonym_id).compact
+    return names if name_ids.empty?
 
     names.reject { |name| name[:synonym_id] } +
-      Name.where(synonym_id: limited_id_set(ids)).
+      Name.where(synonym_id: limited_id_set(name_ids)).
       select(*minimal_name_columns)
   end
 
@@ -194,10 +194,10 @@ class Lookup::Names < Lookup
     [:id, :correct_spelling_id, :synonym_id, :text_name]
   end
 
-  # array of max of MO.query_max_array unique ids for use with Arel "in"
-  #    where(<x>.in(limited_id_set(ids)))
-  def limited_id_set(ids)
-    ids.map(&:to_i).uniq[0, MO.query_max_array]
+  # array of max of MO.query_max_array unique name_ids for use with Arel "in"
+  #    where(<x>.in(limited_id_set(name_ids)))
+  def limited_id_set(name_ids)
+    name_ids.map(&:to_i).uniq[0, MO.query_max_array]
   end
 
   def complain_about_unused_flags!
