@@ -530,22 +530,22 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_include_synonyms
-    expect = Observation.where(name: [names(:peltigera), names(:petigera)])
+    expect = Observation.of_names([names(:peltigera), names(:petigera)])
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("Petigera include_synonyms:yes")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_include_subtaxa
-    expect = Observation.of_name(names(:agaricus), include_subtaxa: true)
+    expect = Observation.of_names(names(:agaricus), include_subtaxa: true)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("Agaricus include_subtaxa:yes")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_include_all_name_proposals
-    expect = Observation.of_name(names(:agaricus_campestris),
-                                 include_all_name_proposals: true)
+    expect = Observation.of_names(names(:agaricus_campestris),
+                                  include_all_name_proposals: true)
     consensus = Observation.where(name: name)
     assert(consensus.count < expect.count)
     x = PatternSearch::Observation.new("Agaricus campestris " \
