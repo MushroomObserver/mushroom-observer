@@ -3067,7 +3067,7 @@ class API2Test < UnitTestCase
     assert_api_pass(params.merge(name: "Agaricus", include_subtaxa: "yes"))
     assert_api_results(ssp_sequences << agaricus_sequence)
 
-    obses = Observation.at_location(locations(:burbank))
+    obses = Observation.at_locations(locations(:burbank))
     assert(obses.length > 1)
     assert_api_pass(params.merge(location: 'Burbank\, California\, USA'))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))

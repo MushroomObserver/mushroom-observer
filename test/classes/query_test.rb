@@ -934,12 +934,6 @@ class QueryTest < UnitTestCase
     assert_equal(1, QueryRecord.count)
   end
 
-  def three_amigos
-    [observations(:detailed_unknown_obs).id,
-     observations(:agaricus_campestris_obs).id,
-     observations(:agaricus_campestras_obs).id]
-  end
-
   def test_observation_image_coercion
     burbank = locations(:burbank)
     query_a = []

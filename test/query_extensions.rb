@@ -18,10 +18,16 @@ module QueryExtensions
     type = args[0].to_s.underscore.to_sym.t.titleize.sub(/um$/, "(um|a)")
     assert_match(/#{type}|Advanced Search|(Lower|Higher) Taxa/, query.title)
     assert_not(query.title.include?("[:"),
-              "Title contains undefined localizations: <#{query.title}>")
+               "Title contains undefined localizations: <#{query.title}>")
   end
 
   def clean(str)
     str.gsub(/\s+/, " ").strip
+  end
+
+  def three_amigos
+    [observations(:detailed_unknown_obs).id,
+     observations(:agaricus_campestris_obs).id,
+     observations(:agaricus_campestras_obs).id]
   end
 end

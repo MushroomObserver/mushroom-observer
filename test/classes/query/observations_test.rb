@@ -60,9 +60,9 @@ class Query::ObservationsTest < UnitTestCase
   end
 
   def test_observation_with_public_lat_lng
-    assert_query(Observation.index_order.with_public_lat_lng(true),
+    assert_query(Observation.index_order.with_public_geolocation(true),
                  :Observation, with_public_lat_lng: true)
-    assert_query(Observation.index_order.with_public_lat_lng(false),
+    assert_query(Observation.index_order.with_public_geolocation(false),
                  :Observation, with_public_lat_lng: false)
   end
 
@@ -101,7 +101,7 @@ class Query::ObservationsTest < UnitTestCase
   def test_observation_with_comments
     assert_query(Observation.index_order.with_comments(true),
                  :Observation, with_comments: true)
-    assert_query(Observation.index_order.with_comments(false),
+    assert_query(Observation.index_order,
                  :Observation, with_comments: false)
   end
 
@@ -116,7 +116,7 @@ class Query::ObservationsTest < UnitTestCase
   def test_observation_with_sequences
     assert_query(Observation.index_order.with_sequences(true),
                  :Observation, with_sequences: true)
-    assert_query(Observation.index_order.with_sequences(false),
+    assert_query(Observation.index_order,
                  :Observation, with_sequences: false)
   end
 
@@ -130,10 +130,10 @@ class Query::ObservationsTest < UnitTestCase
 
   def test_observation_herbarium_records
     h_r = herbarium_records(:interesting_unknown)
-    assert_query([observations(:minimal_unknown_obs),
-                  observations(:detailed_unknown_obs)],
+    assert_query([observations(:detailed_unknown_obs),
+                  observations(:minimal_unknown_obs)],
                  :Observation, herbarium_records: h_r.id)
-    assert_query(Observation.index_order.for_herbarium_records(h_r.id),
+    assert_query(Observation.index_order.for_herbarium_records(h_r),
                  :Observation, herbarium_records: h_r.id)
   end
 
@@ -154,18 +154,18 @@ class Query::ObservationsTest < UnitTestCase
     assert_query(expects, :Observation, project_lists: projects.map(&:title))
   end
 
-  def test_observation_at_location
+  def test_observation_at_locations
     expects = Observation.index_order.
-              at_location(locations(:burbank)).distinct
+              at_locations(locations(:burbank)).distinct
     assert_query(expects, :Observation, location: locations(:burbank))
   end
 
-  def test_observation_for_project
+  def test_observation_for_projects
     assert_query([],
                  :Observation, project: projects(:empty_project))
     project = projects(:bolete_project)
     assert_query(project.observations, :Observation, project: project)
-    assert_query(Observation.index_order.for_project(project.title),
+    assert_query(Observation.index_order.for_projects(project.title),
                  :Observation, project: project)
   end
 

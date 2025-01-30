@@ -98,7 +98,7 @@
 #  by_user(user)
 #  with_location
 #  without_location
-#  at_location(location)
+#  at_locations(location)
 #  in_region(where)
 #  in_box(north:, south:, east:, west:) geoloc is in the box
 #  not_in_box(north:, south:, east:, west:) geoloc is outside the box
@@ -118,8 +118,8 @@
 #  with_comments
 #  without_comments
 #  comments_contain(summary)
-#  for_project(project)
-#  in_herbarium(herbarium)
+#  for_projects(project)
+#  in_herbaria(herbaria)
 #  herbarium_record_notes_contain(notes)
 #  on_species_lists(species_list)
 #  on_project_species_lists(project)

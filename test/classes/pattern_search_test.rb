@@ -561,7 +561,7 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_project
-    expect = Observation.for_project(projects(:bolete_project))
+    expect = Observation.for_projects(projects(:bolete_project))
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new('project:"Bolete Project"')
     assert_obj_arrays_equal(expect, x.query.results, :sort)
@@ -716,7 +716,7 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_herbarium
-    expect = Observation.in_herbarium(herbaria(:nybg_herbarium))
+    expect = Observation.in_herbaria(herbaria(:nybg_herbarium))
     assert_not_empty(expect)
     x = PatternSearch::Observation.new(
       'herbarium:"The New York Botanical Garden"'

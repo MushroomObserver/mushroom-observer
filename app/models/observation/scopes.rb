@@ -251,11 +251,17 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
           -> { where.not(lat: nil) }
     scope :without_geolocation,
           -> { where(lat: nil) }
-    scope :with_public_geolocation,
-          -> { where(gps_hidden: false).where.not(lat: nil) }
+    scope :with_public_geolocation, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
+        where(gps_hidden: false).where.not(lat: nil)
+      else
+        without_public_geolocation
+      end
+    }
     scope :without_public_geolocation,
           -> { where(gps_hidden: true).or(where(lat: nil)) }
-    scope :at_location, lambda { |locations|
+
+    scope :at_locations, lambda { |locations|
       location_ids = Lookup::Locations.new(locations).ids
       where(location: location_ids).distinct
     }
@@ -436,18 +442,10 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
 
     # For activerecord subqueries, no need to pre-map the primary key (id)
     # but Lookup has to return something. Ids are cheapest.
-    scope :for_project, lambda { |projects|
+    scope :for_projects, lambda { |projects|
       project_ids = Lookup::Projects.new(projects).ids
       joins(:project_observations).
         where(project_observations: { project: project_ids }).distinct
-    }
-    scope :in_herbarium, lambda { |herbaria|
-      herbaria_ids = Lookup::Herbaria.new(herbaria).ids
-      joins(:herbarium_records).
-        where(herbarium_records: { herbarium: herbaria_ids }).distinct
-    }
-    scope :herbarium_record_notes_contain, lambda { |phrase|
-      joins(:herbarium_records).search_columns(HerbariumRecord[:notes], phrase)
     }
     scope :on_species_lists, lambda { |species_lists|
       spl_ids = Lookup::SpeciesLists.new(species_lists).ids
@@ -464,15 +462,18 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
     scope :for_herbarium_records, lambda { |records|
       hr_ids = Lookup::HerbariumRecords.new(records).ids
-
       joins(:observation_herbarium_records).
-        where(observation_herbarium_records: hr_ids)
+        where(observation_herbarium_records: { herbarium_record: hr_ids }).
+        distinct
     }
-    scope :for_herbaria, lambda { |herbaria|
+    scope :in_herbaria, lambda { |herbaria|
       h_ids = Lookup::Herbaria.new(herbaria).ids
-
       joins(observation_herbarium_records: :herbarium_record).
-        where(herbarium_records: { herbarium: h_ids })
+        where(herbarium_records: { herbarium: h_ids }).distinct
+    }
+    scope :herbarium_record_notes_contain, lambda { |phrase|
+      joins(:herbarium_records).search_columns(HerbariumRecord[:notes], phrase).
+      distinct
     }
 
     scope :show_includes, lambda {
