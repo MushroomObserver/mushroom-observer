@@ -68,16 +68,19 @@ module Location::Scopes
         merge(LocationDescription.search_content(phrase)).distinct
     }
     scope :with_description_created_by, lambda { |user|
-      joins(:descriptions).merge(LocationDescription.where(user: user))
+      joins(:descriptions).
+        merge(LocationDescription.where(user: user)).distinct
     }
     scope :with_description_reviewed_by, lambda { |user|
-      joins(:descriptions).merge(LocationDescription.where(reviewer: user))
+      joins(:descriptions).
+        merge(LocationDescription.where(reviewer: user)).distinct
     }
     scope :with_description_of_type, lambda { |source|
       # Check that it's a valid source type (string enum value)
       return none if Description::ALL_SOURCE_TYPES.exclude?(source)
 
-      joins(:descriptions).merge(LocationDescription.where(source_type: source))
+      joins(:descriptions).
+        merge(LocationDescription.where(source_type: source)).distinct
     }
 
     # Returns locations whose bounding box is entirely within the given box.

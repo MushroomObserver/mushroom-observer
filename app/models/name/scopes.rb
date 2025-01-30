@@ -148,8 +148,9 @@ module Name::Scopes
           -> { joins(:comments).distinct }
     scope :without_comments,
           -> { where.not(id: with_comments) }
-    scope :comments_contain,
-          ->(phrase) { joins(:comments).merge(Comment.search_content(phrase)) }
+    scope :comments_contain, lambda { |phrase|
+      joins(:comments).merge(Comment.search_content(phrase)).distinct
+    }
 
     scope :with_description,
           -> { where.not(description_id: nil) }
@@ -166,25 +167,28 @@ module Name::Scopes
     }
     scope :with_description_in_project, lambda { |project|
       joins(descriptions: :project).
-        merge(NameDescription.where(project: project))
+        merge(NameDescription.where(project: project)).distinct
     }
     scope :with_description_created_by, lambda { |user|
-      joins(:descriptions).merge(NameDescription.where(user: user))
+      joins(:descriptions).
+        merge(NameDescription.where(user: user)).distinct
     }
     scope :with_description_reviewed_by, lambda { |user|
-      joins(:descriptions).merge(NameDescription.where(reviewer: user))
+      joins(:descriptions).
+        merge(NameDescription.where(reviewer: user)).distinct
     }
     scope :with_description_of_type, lambda { |source|
       # Check that it's a valid source type (string enum value)
       return none if Description::ALL_SOURCE_TYPES.exclude?(source)
 
-      joins(:descriptions).merge(NameDescription.where(source_type: source))
+      joins(:descriptions).
+        merge(NameDescription.where(source_type: source)).distinct
     }
     scope :with_description_classification_differing, lambda {
       joins(:description).
         where(rank: 0..Name.ranks[:Genus]).
         where(NameDescription[:classification].not_eq(Name[:classification])).
-        where(NameDescription[:classification].not_blank)
+        where(NameDescription[:classification].not_blank).distinct
     }
 
     scope :on_species_lists, lambda { |species_lists|
@@ -196,8 +200,8 @@ module Name::Scopes
     # Accepts region string, location_id, or Location instance
     scope :at_locations, lambda { |locations|
       location_ids = lookup_regions_by_name(locations)
-      joins(:observations).where(observations: { location: location_ids }).
-        distinct
+      joins(:observations).
+        where(observations: { location: location_ids }).distinct
     }
     # Names with Observations whose lat/lon are in a box
     # Pass kwargs (:north, :south, :east, :west), any order

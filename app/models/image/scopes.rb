@@ -87,10 +87,11 @@ module Image::Scopes
     }
     scope :with_confidence, lambda { |min, max = min|
       if max == min
-        joins(:observations).where(Observation[:vote_cache].gteq(min))
+        joins(:observations).where(Observation[:vote_cache].gteq(min)).distinct
       else
-        joins(:observations).where(Observation[:vote_cache].gteq(min).
-                                   and(Observation[:vote_cache].lteq(max)))
+        joins(:observations).
+          where(Observation[:vote_cache].gteq(min).
+                and(Observation[:vote_cache].lteq(max))).distinct
       end
     }
     scope :ok_for_export,
