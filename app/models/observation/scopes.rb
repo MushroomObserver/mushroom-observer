@@ -34,18 +34,38 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         where(arel_table[:when].format("%Y-%m-%d") <= latest)
     }
 
-    scope :is_collection_location,
-          -> { where(is_collection_location: true) }
+    scope :is_collection_location, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
+        where(is_collection_location: true)
+      else
+        not_collection_location
+      end
+    }
     scope :not_collection_location,
           -> { where(is_collection_location: false) }
-    scope :with_images,
-          -> { where.not(thumb_image: nil) }
+
+    scope :with_images, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
+        where.not(thumb_image: nil)
+      else
+        without_images
+      end
+    }
     scope :without_images,
           -> { where(thumb_image: nil) }
-    scope :with_notes,
-          -> { where.not(notes: no_notes) }
+
+    scope :with_notes, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
+        where.not(notes: no_notes)
+      else
+        without_notes
+      end
+    }
     scope :without_notes,
           -> { where(notes: no_notes) }
+    scope :notes_contain,
+          ->(phrase) { search_columns(Observation[:notes], phrase) }
+
     scope :with_notes_field,
           ->(field) { where(Observation[:notes].matches("%:#{field}:%")) }
     scope :with_notes_fields, lambda { |fields|
@@ -56,8 +76,6 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       fields.each { |field| conditions = conditions.or(field) }
       where(conditions)
     }
-    scope :notes_contain,
-          ->(phrase) { search_columns(Observation[:notes], phrase) }
 
     # Observation SEARCHABLE_FIELDS :text_name, :where and :notes (currently)
     # NOTE: Must search Name[:search_name], not ideal
@@ -94,19 +112,26 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         includes(:observations).map(&:observations).flatten.uniq
     end
 
-    scope :of_lichens,
-          -> { where(Observation[:lifeform].matches("%lichen%")) }
+    scope :of_lichens, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
+        where(Observation[:lifeform].matches("%lichen%"))
+      else
+        not_lichens
+      end
+    }
     scope :not_lichens,
           -> { where(Observation[:lifeform].does_not_match("% lichen %")) }
-    # For activerecord subqueries, DON'T pre-map the primary key (id)
-    scope :with_name,
-          -> { where.not(name: Name.unknown) }
+
+    scope :with_name, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
+        where.not(name: Name.unknown)
+      else
+        without_name
+      end
+    }
     scope :without_name,
           -> { where(name: Name.unknown) }
-    scope :with_name_above_genus,
-          -> { where(name_id: Name.with_rank_above_genus) }
-    scope :without_confident_name,
-          -> { where(vote_cache: ..0) }
+
     # confidence between min & max, in percentages
     scope :confidence, lambda { |min, max = min|
       where(vote_cache: (min.to_f / (100 / 3))..(max.to_f / (100 / 3)))
@@ -117,8 +142,19 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # }
     scope :needs_naming,
           -> { where(needs_naming: true) }
-    scope :with_name_correctly_spelled, lambda {
-      joins({ namings: :name }).where(names: { correct_spelling: nil })
+    scope :with_name_above_genus,
+          -> { where(name_id: Name.with_rank_above_genus) }
+    scope :without_confident_name,
+          -> { where(vote_cache: ..0) }
+    scope :with_name_correctly_spelled, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
+        joins({ namings: :name }).where(names: { correct_spelling: nil })
+      else
+        with_misspelled_name
+      end
+    }
+    scope :with_misspelled_name, lambda {
+      joins({ namings: :name }).where.not(names: { correct_spelling: nil })
     }
 
     scope :with_vote_by_user, lambda { |user|
@@ -365,22 +401,41 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       joins(:location).where(Location[:box_area].gt(args[:area]))
     }
 
-    scope :with_comments,
-          -> { joins(:comments).distinct }
+    scope :with_comments, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
+        joins(:comments).distinct
+      else
+        without_comments
+      end
+    }
     scope :without_comments,
           -> { where.not(id: Observation.with_comments) }
     scope :comments_contain,
           ->(phrase) { joins(:comments).merge(Comment.search_content(phrase)) }
 
-    scope :with_specimen,
-          -> { where(specimen: true) }
+    scope :with_specimen, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
+        where(specimen: true)
+      else
+        without_specimen
+      end
+    }
     scope :without_specimen,
           -> { where(specimen: false) }
-    scope :with_sequences,
-          -> { joins(:sequences).distinct }
+
+    scope :with_sequences, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
+        joins(:sequences).distinct
+      else
+        without_sequences
+      end
+    }
     # much faster than `missing(:sequences)` which uses left outer join.
     scope :without_sequences,
           -> { where.not(id: with_sequences) }
+
+    # For activerecord subqueries, no need to pre-map the primary key (id)
+    # but Lookup has to return something. Ids are cheapest.
     scope :for_project, lambda { |projects|
       project_ids = Lookup::Projects.new(projects).ids
       joins(:project_observations).
@@ -403,6 +458,21 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       project_ids = Lookup::Projects.new(projects).ids
       joins(species_lists: :project_species_lists).
         where(project_species_lists: { project: project_ids }).distinct
+    }
+    scope :for_field_slips, lambda { |codes|
+      joins(:field_slips).search_columns(FieldSlip[:code], codes)
+    }
+    scope :for_herbarium_records, lambda { |records|
+      hr_ids = Lookup::HerbariumRecords.new(records).ids
+
+      joins(:observation_herbarium_records).
+        where(observation_herbarium_records: hr_ids)
+    }
+    scope :for_herbaria, lambda { |herbaria|
+      h_ids = Lookup::Herbaria.new(herbaria).ids
+
+      joins(observation_herbarium_records: :herbarium_record).
+        where(herbarium_records: { herbarium: h_ids })
     }
 
     scope :show_includes, lambda {
