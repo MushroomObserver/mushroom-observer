@@ -86,10 +86,4 @@ class Query::LocationDescriptionsTest < UnitTestCase
                  :LocationDescription,
                  ids: [rolf.id, location_descriptions(:albion_desc).id])
   end
-
-  def test_location_description_coercion
-    ds1 = location_descriptions(:albion_desc)
-    ds2 = location_descriptions(:no_mushrooms_location_desc)
-    description_coercion_assertions(ds1, ds2, :Location)
-  end
 end

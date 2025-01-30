@@ -1056,6 +1056,12 @@ class QueryTest < UnitTestCase
     query_check
   end
 
+  def test_location_description_coercion
+    ds1 = location_descriptions(:albion_desc)
+    ds2 = location_descriptions(:no_mushrooms_location_desc)
+    description_coercion_assertions(ds1, ds2, :Location)
+  end
+
   def test_name_description_coercion
     ds1 = name_descriptions(:coprinus_comatus_desc)
     ds2 = name_descriptions(:peltigera_desc)
