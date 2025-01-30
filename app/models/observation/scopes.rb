@@ -133,7 +133,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
           -> { where(name: Name.unknown) }
 
     # confidence between min & max, in percentages
-    scope :confidence, lambda { |min, max = min|
+    scope :confidence, lambda { |min, max = 100|
       where(vote_cache: (min.to_f / (100 / 3))..(max.to_f / (100 / 3)))
     }
     # Use this definition when running script to populate the column:
