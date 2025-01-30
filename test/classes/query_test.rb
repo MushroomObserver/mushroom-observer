@@ -1171,7 +1171,7 @@ class QueryTest < UnitTestCase
 
     User.current = roy
     assert_equal("scientific", User.current_location_format)
-    assert_query([elgin_co, albion], :Location,
+    assert_query([elgin_co, albion],
                  :Location, ids: [albion.id, elgin_co.id], by: :name)
 
     obs1 = observations(:minimal_unknown_obs)
