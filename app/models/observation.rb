@@ -91,8 +91,8 @@
 #  found_after("yyyymmdd")
 #  found_before("yyyymmdd")
 #  found_between(start, end)
-#  of_name(name)
-#  of_name_like(string)
+#  of_names(name)
+#  of_names_like(string)
 #  with_name
 #  without_name
 #  by_user(user)

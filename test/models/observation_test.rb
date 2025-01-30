@@ -1212,10 +1212,10 @@ class ObservationTest < UnitTestCase
     )
   end
 
-  def test_scope_of_name
-    assert_includes(Observation.of_name(names(:peltigera).id),
+  def test_scope_of_names
+    assert_includes(Observation.of_names(names(:peltigera).id),
                     observations(:peltigera_obs))
-    assert_not_includes(Observation.of_name(names(:fungi)),
+    assert_not_includes(Observation.of_names(names(:fungi)),
                         observations(:peltigera_obs))
   end
 
@@ -1265,7 +1265,7 @@ class ObservationTest < UnitTestCase
                  tremella_obs,
                  "Test needs different fixture")
     assert_includes(
-      Observation.of_name(names(:tremella_mesenterica), of_look_alikes: true),
+      Observation.of_names(names(:tremella_mesenterica), of_look_alikes: true),
       tremella_obs,
       "Observations of look-alikes of <Name> should include " \
       "Observations of other Names for which <Name> was proposed"
