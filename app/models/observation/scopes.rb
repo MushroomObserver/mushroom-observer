@@ -92,7 +92,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     #   ).without_vote_by_user(user).not_reviewed_by_user(user).distinct
     # }
 
-    # scope :of_name(name, **args)
+    # scope :of_names(name, **args)
     #
     # Accepts either a Name instance, a string, or an id as the first argument.
     #  Other args:
@@ -101,32 +101,10 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     #  - include_all_name_proposals: boolean
     #  - of_look_alikes: boolean
     #
-    scope :of_name, lambda { |name, **args|
-      # First, get a name record if string or id submitted
-      case name
-      when String
-        name = Name.find_by(text_name: name)
-      when Integer
-        name = Name.find_by(id: name)
-      end
-      return Observation.none unless name.is_a?(Name)
-
-      # Filter args may add to an array of names to collect Observations
-      names_array = [name]
-      # Maybe add synonyms (Name#synonyms includes original name)
-      names_array = name.synonyms if args[:include_synonyms]
-      # Keep names_array intact as is; maybe add more to its clone name_ids.
-      # (I'm thinking it's easier to pass name ids to the Observation query)
-      name_ids = names_array
-
-      # Add subtaxa to name_ids array. Subtaxa of synonyms too, if requested
-      # (don't modify the names_array we're iterating over)
-      if args[:include_subtaxa]
-        names_array.each do |n|
-          # |= don't add duplicates
-          name_ids |= Name.subtaxa_of(n)
-        end
-      end
+    scope :of_names, lambda { |names, **args|
+      # First, lookup names, plus synonyms and subtaxa if requested
+      lookup_args = args.slice(:include_synonyms, :include_subtaxa)
+      name_ids = Lookup::Names.new(names, **lookup_args).ids
 
       # Query, with possible join to Naming. Mutually exclusive options:
       if args[:include_all_name_proposals]
@@ -138,7 +116,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         where(name_id: name_ids)
       end
     }
-    scope :of_name_like,
+    scope :of_names_like,
           ->(name) { where(name: Name.text_name_contains(name)) }
     scope :in_clade, lambda { |val|
       # parse_name_and_rank defined below

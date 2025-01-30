@@ -79,7 +79,7 @@ module Query::ObservationsTest
   def test_observation_of_children
     name = names(:agaricus)
     expects = Observation.index_order.
-              of_name(name, include_subtaxa: true).distinct
+              of_names(name, include_subtaxa: true).distinct
     assert_query(expects, :Observation, names: [name.id], include_subtaxa: true)
   end
 
