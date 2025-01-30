@@ -109,8 +109,10 @@ module Query::Initializers::Observations
     # SQL SELECT DISTINCT
     where << Observation.needs_naming_and_not_reviewed_by_user(user).
              to_sql.gsub(/^.*?WHERE/, "")
+  end
 
-    # additional filters:
+  def add_needs_naming_filter_conditions
+    # additional filters, note these are the same as content filters.
     add_name_in_clade_condition
     add_location_in_region_condition
     # add_by_user_condition

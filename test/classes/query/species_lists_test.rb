@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
 require("test_helper")
+require("query_extensions")
 
 # tests of Query::SpeciesLists class to be included in QueryTest
-module Query::SpeciesListsTest
+class Query::SpeciesListsTest < UnitTestCase
+  include QueryExtensions
+
   def test_species_list_all
     expects = SpeciesList.index_order
     assert_query(expects, :SpeciesList)

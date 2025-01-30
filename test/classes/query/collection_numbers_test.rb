@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
 require("test_helper")
+require("query_extensions")
 
 # tests of Query::CollectionNumbers class to be included in QueryTest
-module Query::CollectionNumbersTest
+class Query::CollectionNumbersTest < UnitTestCase
+  include QueryExtensions
+
   def test_collection_number_all
     expects = CollectionNumber.index_order
     assert_query(expects, :CollectionNumber)

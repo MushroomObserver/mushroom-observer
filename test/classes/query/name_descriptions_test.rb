@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
 require("test_helper")
+require("query_extensions")
 
 # tests of Query::NameDescriptions class to be included in QueryTest
-module Query::NameDescriptionsTest
+class Query::NameDescriptionsTest < UnitTestCase
+  include QueryExtensions
+
   def test_name_description_all
     pelt = names(:peltigera)
     all_descs = NameDescription.all.to_a

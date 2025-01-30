@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
 require("test_helper")
+require("query_extensions")
 
 # tests of Query::Names class to be included in QueryTest
-module Query::NamesTest
+class Query::NamesTest < UnitTestCase
+  include QueryExtensions
+
   def test_name_all
     # NOTE: misspellings are modified by `do_test_name_all`
     # This saves looking up Name.index_order a bunch of times.

@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
 require("test_helper")
+require("query_extensions")
 
 # tests of Query::Locations class to be included in QueryTest
-module Query::LocationsTest
+class Query::LocationsTest < UnitTestCase
+  include QueryExtensions
+
   def test_location_all
     expects = Location.index_order
     assert_query(expects, :Location)

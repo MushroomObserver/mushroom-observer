@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
 require("test_helper")
+require("query_extensions")
 
 # tests of Query::Comments class to be included in QueryTest
-module Query::CommentsTest
+class Query::CommentsTest < UnitTestCase
+  include QueryExtensions
+
   def test_comment_all
     expects = Comment.index_order
     assert_query(expects, :Comment)

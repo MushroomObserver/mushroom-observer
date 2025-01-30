@@ -46,14 +46,30 @@ module Image::Scopes
       end
     }
 
-    scope :with_notes,
-          -> { where(Image[:notes].coalesce("").length.gt(0)) }
+    scope :with_notes, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
+        where(Image[:notes].coalesce("").length.gt(0))
+      else
+        without_notes
+      end
+    }
     scope :without_notes,
           -> { where(Image[:notes].coalesce("").length.eq(0)) }
     scope :notes_contain,
           ->(phrase) { search_columns(Image[:notes], phrase) }
     scope :copyright_holder_contains,
           ->(phrase) { search_columns(Image[:copyright_holder], phrase) }
+    scope :with_license,
+          ->(license) { where(license: license) }
+    scope :ok_for_export, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
+        where(ok_for_export: true)
+      else
+        not_ok_for_export
+      end
+    }
+    scope :not_ok_for_export,
+          -> { where(ok_for_export: false) }
 
     # A search of all Image SEARCHABLE_FIELDS, concatenated.
     scope :search_content,
@@ -72,10 +88,13 @@ module Image::Scopes
       joins(observations: :name).search_columns(cols, phrase).distinct
     }
 
-    scope :with_license,
-          ->(license) { where(license: license) }
-    scope :with_votes,
-          -> { where(Image[:vote_cache].not_eq(nil)) }
+    scope :with_votes, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
+        where(Image[:vote_cache].not_eq(nil))
+      else
+        without_votes
+      end
+    }
     scope :without_votes,
           -> { where(Image[:vote_cache].eq(nil)) }
     scope :with_quality, lambda { |min, max = min|
@@ -87,16 +106,13 @@ module Image::Scopes
     }
     scope :with_confidence, lambda { |min, max = min|
       if max == min
-        joins(:observations).where(Observation[:vote_cache].gteq(min))
+        joins(:observations).where(Observation[:vote_cache].gteq(min)).distinct
       else
-        joins(:observations).where(Observation[:vote_cache].gteq(min).
-                                   and(Observation[:vote_cache].lteq(max)))
+        joins(:observations).
+          where(Observation[:vote_cache].gteq(min).
+                and(Observation[:vote_cache].lteq(max))).distinct
       end
     }
-    scope :ok_for_export,
-          -> { where(ok_for_export: true) }
-    scope :not_ok_for_export,
-          -> { where(ok_for_export: false) }
 
     scope :interactive_includes, lambda {
       strict_loading.includes(
