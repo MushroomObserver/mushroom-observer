@@ -2221,7 +2221,7 @@ class API2Test < UnitTestCase
       Observation.where(text_name: "Agaricus"),
       "Tests won't work if there's already an Observation for genus Agaricus"
     )
-    ssp_obs = Observation.of_name_like("Agaricus")
+    ssp_obs = Observation.of_names_like("Agaricus")
     assert(ssp_obs.length > 1)
     agaricus = Name.where(text_name: "Agaricus").first # (an existing autonym)s
     agaricus_obs = Observation.create(name: agaricus, user: rolf)
@@ -3054,7 +3054,7 @@ class API2Test < UnitTestCase
       Observation.where(text_name: "Agaricus"),
       "Tests won't work if there's already an Observation for genus Agaricus"
     )
-    ssp_obs = Observation.of_name_like("Agaricus")
+    ssp_obs = Observation.of_names_like("Agaricus")
     assert(ssp_obs.length > 1)
     agaricus = Name.where(text_name: "Agaricus").first # (an existing autonym)
     agaricus_obs = Observation.create(name: agaricus, user: rolf)
@@ -3348,7 +3348,7 @@ class API2Test < UnitTestCase
       Observation.where(text_name: "Agaricus"),
       "Tests won't work if there's already an Observation for genus Agaricus"
     )
-    obses = Observation.of_name_like("Agaricus")
+    obses = Observation.of_names_like("Agaricus")
     ssp_lists = obses.map(&:species_lists).flatten.uniq.sort_by(&:id)
     assert_not_empty(ssp_lists)
     agaricus = Name.where(text_name: "Agaricus").first # (an existing autonym)

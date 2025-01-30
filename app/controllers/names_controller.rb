@@ -240,7 +240,7 @@ class NamesController < ApplicationController
     # Second query: Observations of name including (all) subtaxa.
     # This is only used for the link to "observations of this name's subtaxa".
     # We also query for obs (with images) below, so we could maybe refactor to
-    # get Observation.of_name(name.id).include_subtaxa.order(:vote_cache).
+    # get Observation.of_names(name.id).include_subtaxa.order(:vote_cache).
     # Then, select those of original name with thumb_image_id for @best_images,
     # and select_count all (excluding obs of original name) to get @has_subtaxa.
     # Would need to write include_subtaxa scope, as above.

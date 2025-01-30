@@ -117,7 +117,7 @@ class Query::ObservationsTest < UnitTestCase
   def test_observation_of_children
     name = names(:agaricus)
     expects = Observation.index_order.
-              of_name(name, include_subtaxa: true).distinct
+              of_names(name, include_subtaxa: true).distinct
     assert_query(expects, :Observation, names: [name.id], include_subtaxa: true)
   end
 
@@ -126,7 +126,7 @@ class Query::ObservationsTest < UnitTestCase
     expects = Observation.index_order.where(name: names(:fungi)).distinct
     assert_query(expects, :Observation, names: [names(:fungi).id])
     assert_query([],
-                :Observation, names: [names(:macrolepiota_rachodes).id])
+                 :Observation, names: [names(:macrolepiota_rachodes).id])
 
     # test all truthy/falsy combinations of these boolean parameters:
     #  include_synonyms, include_all_name_proposals, exclude_consensus

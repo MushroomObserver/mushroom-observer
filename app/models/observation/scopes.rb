@@ -156,7 +156,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     #   ).without_vote_by_user(user).not_reviewed_by_user(user).distinct
     # }
 
-    # scope :of_name(name, **args)
+    # scope :of_names(name, **args)
     #
     # Accepts either a Name instance, a string, or an id as the first argument.
     #  Other args:
@@ -165,7 +165,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     #  - include_all_name_proposals: boolean
     #  - of_look_alikes: boolean
     #
-    scope :of_name, lambda { |names, **args|
+    scope :of_names, lambda { |names, **args|
       # First, lookup names, plus synonyms and subtaxa if requested
       lookup_args = args.slice(:include_synonyms, :include_subtaxa)
       name_ids = Lookup::Names.new(names, **lookup_args).ids
@@ -180,7 +180,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         where(name_id: name_ids)
       end
     }
-    scope :of_name_like,
+    scope :of_names_like,
           ->(name) { where(name: Name.text_name_contains(name)) }
     scope :in_clade, lambda { |val|
       # parse_name_and_rank defined below

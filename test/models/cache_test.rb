@@ -80,18 +80,18 @@ class CacheTest < UnitTestCase
   def test_propagate_classification
     name = names(:agaricus)
     saved_obs_updated_ats =
-      Observation.of_name("Agaricus", include_subtaxa: 1).map(&:updated_at)
+      Observation.of_names("Agaricus", include_subtaxa: 1).map(&:updated_at)
     new_classification = names(:peltigera).classification
 
     name.update(classification: new_classification)
     name.propagate_classification
 
-    Observation.of_name("Agaricus", include_subtaxa: 1).each do |obs|
+    Observation.of_names("Agaricus", include_subtaxa: 1).each do |obs|
       assert_equal(new_classification, obs.classification)
     end
     assert_equal(
       saved_obs_updated_ats,
-      Observation.of_name("Agaricus", include_subtaxa: 1).map(&:updated_at)
+      Observation.of_names("Agaricus", include_subtaxa: 1).map(&:updated_at)
     )
   end
 
@@ -102,11 +102,11 @@ class CacheTest < UnitTestCase
     saved_name_updated_ats = Name.subtaxa_of_genus_or_below("Agaricus").
                              map(&:updated_at)
     saved_obs_updated_ats =
-      Observation.of_name("Agaricus", include_subtaxa: 1).map(&:updated_at)
+      Observation.of_names("Agaricus", include_subtaxa: 1).map(&:updated_at)
 
     name.propagate_add_lifeform("lichen")
 
-    Observation.of_name("Agaricus", include_subtaxa: 1).each do |obs|
+    Observation.of_names("Agaricus", include_subtaxa: 1).each do |obs|
       assert_true(obs.lifeform.include?(" lichen "))
     end
     assert_equal(
@@ -124,12 +124,12 @@ class CacheTest < UnitTestCase
 
     name.propagate_remove_lifeform("lichen")
 
-    Observation.of_name("Agaricus", include_subtaxa: 1).each do |obs|
+    Observation.of_names("Agaricus", include_subtaxa: 1).each do |obs|
       assert_false(obs.lifeform.include?(" lichen "))
     end
     assert_equal(
       saved_obs_updated_ats,
-      Observation.of_name("Agaricus", include_subtaxa: 1).map(&:updated_at)
+      Observation.of_names("Agaricus", include_subtaxa: 1).map(&:updated_at)
     )
 
     Name.subtaxa_of_genus_or_below("Agaricus").each do |nam|
