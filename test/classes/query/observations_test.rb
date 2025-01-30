@@ -141,10 +141,10 @@ class Query::ObservationsTest < UnitTestCase
     herb = herbaria(:fundis_herbarium)
     assert_query([observations(:detailed_unknown_obs)],
                  :Observation, herbaria: herb.name)
-    assert_query(Observation.index_order.for_herbaria(herb.name),
+    assert_query(Observation.index_order.in_herbaria(herb.name),
                  :Observation, herbaria: herb.name)
     herb = herbaria(:nybg_herbarium)
-    assert_query(Observation.index_order.for_herbaria(herb.name),
+    assert_query(Observation.index_order.in_herbaria(herb.name),
                  :Observation, herbaria: herb.id)
   end
 
