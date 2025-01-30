@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
 require("test_helper")
+require("query_extensions")
 
 # tests of Query::LocationDescriptions class to be included in QueryTest
-module Query::LocationDescriptionsTest
+class Query::LocationDescriptionsTest < UnitTestCase
+  include QueryExtensions
+
   def test_location_description_all
     gualala = locations(:gualala)
     all_descs = LocationDescription.all.to_a

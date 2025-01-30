@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
 require("test_helper")
+require("query_extensions")
 
 # tests of Query::Observations class to be included in QueryTest
-module Query::ObservationsTest
+class Query::ObservationsTest < UnitTestCase
+  include QueryExtensions
+
   def test_observation_all
     expects = Observation.index_order
     assert_query(expects, :Observation)
@@ -31,12 +34,12 @@ module Query::ObservationsTest
 
   def test_observation_ids_ids
     assert_query(observations_set.map(&:id),
-                 :Observation, ids: observations_set.map(&:id))
+                :Observation, ids: observations_set.map(&:id))
   end
 
   def test_observation_ids_instances
     assert_query(observations_set.map(&:id),
-                 :Observation, ids: observations_set)
+                :Observation, ids: observations_set)
   end
 
   def test_observation_by_user
@@ -49,26 +52,42 @@ module Query::ObservationsTest
     assert_query([], :Observation, by_user: junk, by: :id)
   end
 
-  def test_observation_in_project_list
-    project = projects(:bolete_project)
-    # expects = project.species_lists.map(&:observations).flatten.to_a
-    expects = Observation.index_order.
-              joins(species_lists: :project_species_lists).
-              where(project_species_lists: { project: project }).distinct
-    assert_query(expects, :Observation, project_lists: project.title)
+  # field_slips
+  # herbarium_records
+  # herbaria
+  # needs_naming
+  # in_clade
+  # in_region
+  # confidence
+  # with_public_lat_lng
+  # is_collection_location
+  # with_notes
+  # notes_has
+  # with_notes_fields
+  # with_comments
+  # comments_has
+  # with_sequences
+  #
+
+  def test_observation_on_project_species_lists
+    projects = [projects(:bolete_project), projects(:eol_project)]
+    expects = Observation.index_order.on_project_species_lists(projects)
+    assert_query(expects, :Observation, project_lists: projects.map(&:title))
   end
 
   def test_observation_at_location
     expects = Observation.index_order.
-              where(location: locations(:burbank)).distinct
+              at_location(locations(:burbank)).distinct
     assert_query(expects, :Observation, location: locations(:burbank))
   end
 
   def test_observation_for_project
     assert_query([],
                  :Observation, project: projects(:empty_project))
-    assert_query(projects(:bolete_project).observations,
-                 :Observation, project: projects(:bolete_project))
+    project = projects(:bolete_project)
+    assert_query(project.observations, :Observation, project: project)
+    assert_query(Observation.index_order.for_project(project.title),
+                 :Observation, project: project)
   end
 
   def test_observation_for_project_projects_equivalence
@@ -79,12 +98,20 @@ module Query::ObservationsTest
     assert_equal(qu1.results, qu2.results)
   end
 
-  def test_observation_in_species_list
+  def test_observation_on_species_lists
+    spl = species_lists(:unknown_species_list)
     # These two are identical, so should be disambiguated by reverse_id.
     assert_query([observations(:detailed_unknown_obs).id,
                   observations(:minimal_unknown_obs).id],
-                 :Observation,
-                 species_list: species_lists(:unknown_species_list).id)
+                 :Observation, species_list: spl.id)
+    assert_query(Observation.index_order.on_species_lists(spl),
+                 :Observation, species_list: spl.id)
+    # check the other param!
+    assert_query(Observation.index_order.on_species_lists(spl),
+                 :Observation, species_lists: spl.id)
+    spl2 = species_lists(:one_genus_three_species_list)
+    assert_query(Observation.index_order.on_species_lists([spl, spl2]).distinct,
+                 :Observation, species_lists: [spl.title, spl2.title])
   end
 
   def test_observation_of_children
@@ -99,7 +126,7 @@ module Query::ObservationsTest
     expects = Observation.index_order.where(name: names(:fungi)).distinct
     assert_query(expects, :Observation, names: [names(:fungi).id])
     assert_query([],
-                 :Observation, names: [names(:macrolepiota_rachodes).id])
+                :Observation, names: [names(:macrolepiota_rachodes).id])
 
     # test all truthy/falsy combinations of these boolean parameters:
     #  include_synonyms, include_all_name_proposals, exclude_consensus
@@ -113,65 +140,65 @@ module Query::ObservationsTest
 
     # observations where name(s) is consensus
     assert_query([observations(:agaricus_campestris_obs).id],
-                 :Observation,
-                 names: [names(:agaricus_campestris).id],
-                 include_synonyms: false,
-                 include_all_name_proposals: false,
-                 exclude_consensus: false)
+                :Observation,
+                names: [names(:agaricus_campestris).id],
+                include_synonyms: false,
+                include_all_name_proposals: false,
+                exclude_consensus: false)
 
     # name(s) is consensus, but is not the consensus (an oxymoron)
     assert_query([],
-                 :Observation,
-                 names: [names(:agaricus_campestris).id],
-                 include_synonyms: false,
-                 include_all_name_proposals: false,
-                 exclude_consensus: true)
+                :Observation,
+                names: [names(:agaricus_campestris).id],
+                include_synonyms: false,
+                include_all_name_proposals: false,
+                exclude_consensus: true)
 
     # name(s) is proposed
     assert_query([observations(:agaricus_campestris_obs).id,
                   observations(:coprinus_comatus_obs).id],
-                 :Observation,
-                 names: [names(:agaricus_campestris).id],
-                 include_synonyms: false,
-                 include_all_name_proposals: true,
-                 exclude_consensus: false)
+                :Observation,
+                names: [names(:agaricus_campestris).id],
+                include_synonyms: false,
+                include_all_name_proposals: true,
+                exclude_consensus: false)
 
     # name(s) is proposed, but is not the consensus
     assert_query([observations(:coprinus_comatus_obs).id],
-                 :Observation,
-                 names: [names(:agaricus_campestris).id],
-                 include_synonyms: false,
-                 include_all_name_proposals: true,
-                 exclude_consensus: true)
+                :Observation,
+                names: [names(:agaricus_campestris).id],
+                include_synonyms: false,
+                include_all_name_proposals: true,
+                exclude_consensus: true)
 
     # consensus is a synonym of name(s)
     assert_query([observations(:agaricus_campestros_obs).id,
                   observations(:agaricus_campestras_obs).id,
                   observations(:agaricus_campestrus_obs).id,
                   observations(:agaricus_campestris_obs).id],
-                 :Observation,
-                 names: [names(:agaricus_campestris).id],
-                 include_synonyms: true,
-                 include_all_name_proposals: false,
-                 exclude_consensus: false)
+                :Observation,
+                names: [names(:agaricus_campestris).id],
+                include_synonyms: true,
+                include_all_name_proposals: false,
+                exclude_consensus: false)
 
     # same as above but exclude_original_names
     # conensus is a synonym of name(s) other than name(s)
     assert_query([observations(:agaricus_campestros_obs).id,
                   observations(:agaricus_campestras_obs).id,
                   observations(:agaricus_campestrus_obs).id],
-                 :Observation,
-                 names: [names(:agaricus_campestris).id],
-                 include_synonyms: true,
-                 exclude_original_names: true)
+                :Observation,
+                names: [names(:agaricus_campestris).id],
+                include_synonyms: true,
+                exclude_original_names: true)
 
     # consensus is a synonym of name(s) but not a synonym of name(s) (oxymoron)
     assert_query([],
-                 :Observation,
-                 names: [names(:agaricus_campestras).id],
-                 include_synonyms: true,
-                 include_all_name_proposals: false,
-                 exclude_consensus: true)
+                :Observation,
+                names: [names(:agaricus_campestras).id],
+                include_synonyms: true,
+                include_all_name_proposals: false,
+                exclude_consensus: true)
 
     # where synonyms of names are proposed
     assert_query([observations(:agaricus_campestros_obs).id,
@@ -179,19 +206,19 @@ module Query::ObservationsTest
                   observations(:agaricus_campestrus_obs).id,
                   observations(:agaricus_campestris_obs).id,
                   observations(:coprinus_comatus_obs).id],
-                 :Observation,
-                 names: [names(:agaricus_campestris).id],
-                 include_synonyms: true,
-                 include_all_name_proposals: true,
-                 exclude_consensus: false)
+                :Observation,
+                names: [names(:agaricus_campestris).id],
+                include_synonyms: true,
+                include_all_name_proposals: true,
+                exclude_consensus: false)
 
     # where synonyms of name are proposed, but are not the consensus
     assert_query([observations(:coprinus_comatus_obs).id],
-                 :Observation,
-                 names: [names(:agaricus_campestras).id],
-                 include_synonyms: true,
-                 include_all_name_proposals: true,
-                 exclude_consensus: true)
+                :Observation,
+                names: [names(:agaricus_campestras).id],
+                include_synonyms: true,
+                include_all_name_proposals: true,
+                exclude_consensus: true)
 
     spl = species_lists(:first_species_list)
     spl.observations << observations(:agaricus_campestrus_obs)
@@ -202,18 +229,19 @@ module Query::ObservationsTest
 
     assert_query([observations(:agaricus_campestros_obs).id,
                   observations(:agaricus_campestrus_obs).id],
-                 :Observation,
-                 names: agaricus_ssp.map(&:text_name),
-                 species_lists: [spl.title])
+                :Observation,
+                names: agaricus_ssp.map(&:text_name),
+                species_lists: [spl.title])
 
     assert_query([observations(:agaricus_campestras_obs).id,
                   observations(:agaricus_campestris_obs).id],
-                 :Observation,
-                 names: agaricus_ssp.map(&:text_name),
-                 projects: [proj.title])
+                :Observation,
+                names: agaricus_ssp.map(&:text_name),
+                projects: [proj.title])
   end
 
-  # notes search disabled because it may mention other species. confusing
+  # notes search disabled because it may mention other species.
+  # deemed confusing for users.
   # def test_observation_pattern_search_notes
   #   assert_query(observation_pattern_search('"somewhere else"'),
   #                :Observation, pattern: '"somewhere else"')
@@ -221,17 +249,17 @@ module Query::ObservationsTest
 
   def test_observation_pattern_search_where
     assert_query([observations(:strobilurus_diminutivus_obs).id],
-                 :Observation, pattern: "pipi valley")
+                :Observation, pattern: "pipi valley")
   end
 
   def test_observation_pattern_search_location
     assert_query(observation_pattern_search("burbank"),
-                 :Observation, pattern: "burbank")
+                :Observation, pattern: "burbank")
   end
 
   def test_observation_pattern_search_name
     assert_query(observation_pattern_search("agaricus"),
-                 :Observation, pattern: "agaricus")
+                :Observation, pattern: "agaricus")
   end
 
   def observation_pattern_search(pattern)
@@ -240,16 +268,16 @@ module Query::ObservationsTest
 
   def test_observation_advanced_search_name
     assert_query([observations(:strobilurus_diminutivus_obs).id],
-                 :Observation, name: "diminutivus")
+                :Observation, name: "diminutivus")
   end
 
   def test_observation_advanced_search_where
     assert_query([observations(:coprinus_comatus_obs).id],
-                 :Observation, user_where: "glendale") # where
+                :Observation, user_where: "glendale") # where
     expects = Observation.reorder(id: :asc).
               where(location: locations(:burbank)).distinct
     assert_query(expects, :Observation,
-                 user_where: "burbank", by: :id) # location
+                user_where: "burbank", by: :id) # location
   end
 
   def test_observation_advanced_search_user
@@ -259,9 +287,9 @@ module Query::ObservationsTest
 
   def test_observation_advanced_search_content
     assert_query(Observation.advanced_search("second fruiting"),
-                 :Observation, content: "second fruiting") # notes
+                :Observation, content: "second fruiting") # notes
     assert_query(Observation.advanced_search("agaricus"),
-                 :Observation, content: "agaricus") # comment
+                :Observation, content: "agaricus") # comment
   end
 
   def test_observation_date
@@ -271,30 +299,30 @@ module Query::ObservationsTest
     assert_query([], :Observation, date: %w[1550 1551])
     # single date should return after
     assert_query(Observation.index_order.when_after("2011-05-12"),
-                 :Observation, date: "2011-05-12")
+                :Observation, date: "2011-05-12")
     # year should return after
     assert_query(Observation.index_order.when_after("2005"),
-                 :Observation, date: "2005")
+                :Observation, date: "2005")
     # years should return between
     assert_query(Observation.index_order.when_between("2005", "2009"),
-                 :Observation, date: %w[2005 2009])
+                :Observation, date: %w[2005 2009])
     # in a month range, any year
     assert_query(Observation.index_order.when_between("05", "12"),
-                 :Observation, date: %w[05 12])
+                :Observation, date: %w[05 12])
     # in a date range, any year
     assert_query(Observation.index_order.when_between("02-22", "08-22"),
-                 :Observation, date: %w[02-22 08-22])
+                :Observation, date: %w[02-22 08-22])
     # period wraps around the new year
     assert_query(Observation.index_order.when_between("08-22", "02-22"),
-                 :Observation, date: %w[08-22 02-22])
+                :Observation, date: %w[08-22 02-22])
     # full dates
     assert_query(Observation.index_order.
-                 when_between("2009-08-22", "2009-10-20"),
-                 :Observation, date: %w[2009-08-22 2009-10-20])
+                when_between("2009-08-22", "2009-10-20"),
+                :Observation, date: %w[2009-08-22 2009-10-20])
     # date wraps around the new year
     assert_query(Observation.index_order.
-                 when_between("2015-08-22", "2016-02-22"),
-                 :Observation, date: %w[2015-08-22 2016-02-22])
+                when_between("2015-08-22", "2016-02-22"),
+                :Observation, date: %w[2015-08-22 2016-02-22])
   end
 
   def test_observation_created_at
@@ -304,26 +332,26 @@ module Query::ObservationsTest
     assert_query([], :Observation, created_at: %w[2000 2001])
     # single datetime should return after
     assert_query(Observation.index_order.
-                 created_after("2011-05-12-12-59-57"),
-                 :Observation, created_at: "2011-05-12-12-59-57")
+                created_after("2011-05-12-12-59-57"),
+                :Observation, created_at: "2011-05-12-12-59-57")
     # single date should return after
     assert_query(Observation.index_order.created_after("2011-05-12"),
-                 :Observation, created_at: "2011-05-12")
+                :Observation, created_at: "2011-05-12")
     # year should return after
     assert_query(Observation.index_order.created_after("2005"),
-                 :Observation, created_at: "2005")
+                :Observation, created_at: "2005")
     # years should return between
     assert_query(Observation.index_order.created_between("2005", "2009"),
-                 :Observation, created_at: %w[2005 2009])
+                :Observation, created_at: %w[2005 2009])
     # full dates
     assert_query(Observation.index_order.
-                 created_between("2009-08-22", "2009-10-20"),
-                 :Observation, created_at: %w[2009-08-22 2009-10-20])
+                created_between("2009-08-22", "2009-10-20"),
+                :Observation, created_at: %w[2009-08-22 2009-10-20])
     # full datetimes
     assert_query(Observation.index_order.
-                 created_between("2009-08-22-03-04-22", "2009-10-20-03-04-22"),
-                 :Observation,
-                 created_at: %w[2009-08-22-03-04-22 2009-10-20-03-04-22])
+                created_between("2009-08-22-03-04-22", "2009-10-20-03-04-22"),
+                :Observation,
+                created_at: %w[2009-08-22-03-04-22 2009-10-20-03-04-22])
   end
 
   def test_observation_updated_at
@@ -333,25 +361,25 @@ module Query::ObservationsTest
     assert_query([], :Observation, updated_at: %w[2000 2001])
     # single datetime should return after
     assert_query(Observation.index_order.
-                 updated_after("2011-05-12-12-59-57"),
-                 :Observation, updated_at: "2011-05-12-12-59-57")
+                updated_after("2011-05-12-12-59-57"),
+                :Observation, updated_at: "2011-05-12-12-59-57")
     # single date should return after
     assert_query(Observation.index_order.updated_after("2011-05-12"),
-                 :Observation, updated_at: "2011-05-12")
+                :Observation, updated_at: "2011-05-12")
     # year should return after
     assert_query(Observation.index_order.updated_after("2005"),
-                 :Observation, updated_at: "2005")
+                :Observation, updated_at: "2005")
     # years should return between
     assert_query(Observation.index_order.updated_between("2005", "2009"),
-                 :Observation, updated_at: %w[2005 2009])
+                :Observation, updated_at: %w[2005 2009])
     # full dates
     assert_query(Observation.index_order.
-                 updated_between("2009-08-22", "2009-10-20"),
-                 :Observation, updated_at: %w[2009-08-22 2009-10-20])
+                updated_between("2009-08-22", "2009-10-20"),
+                :Observation, updated_at: %w[2009-08-22 2009-10-20])
     # full datetimes
     assert_query(Observation.index_order.
-                 updated_between("2009-08-22-03-04-22", "2009-10-20-03-04-22"),
-                 :Observation,
-                 updated_at: %w[2009-08-22-03-04-22 2009-10-20-03-04-22])
+                updated_between("2009-08-22-03-04-22", "2009-10-20-03-04-22"),
+                :Observation,
+                updated_at: %w[2009-08-22-03-04-22 2009-10-20-03-04-22])
   end
 end

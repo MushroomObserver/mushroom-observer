@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
 require("test_helper")
+require("query_extensions")
 
 # tests of Query::GlossaryTerms class to be included in QueryTest
-module Query::GlossaryTermsTest
+class Query::GlossaryTermsTest < UnitTestCase
+  include QueryExtensions
+
   def test_glossary_term_all
     expects = GlossaryTerm.index_order
     assert_query(expects, :GlossaryTerm)
