@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Name::Scopes
+module Name::Scopes # rubocop:disable Metrics/ModuleLength
   # This is using Concern so we can define the scopes in this included module.
   extend ActiveSupport::Concern
 
