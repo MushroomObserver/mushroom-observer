@@ -568,7 +568,7 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_project_lists
-    expect = Observation.on_project_species_lists(projects(:bolete_project))
+    expect = Observation.on_projects_species_lists(projects(:bolete_project))
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new('project_lists:"Bolete Project"')
     assert_obj_arrays_equal(expect, x.query.results, :sort)

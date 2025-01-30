@@ -148,9 +148,9 @@ class Query::ObservationsTest < UnitTestCase
                  :Observation, herbaria: herb.id)
   end
 
-  def test_observation_on_project_species_lists
+  def test_observation_on_projects_species_lists
     projects = [projects(:bolete_project), projects(:eol_project)]
-    expects = Observation.index_order.on_project_species_lists(projects)
+    expects = Observation.index_order.on_projects_species_lists(projects)
     assert_query(expects, :Observation, project_lists: projects.map(&:title))
   end
 
