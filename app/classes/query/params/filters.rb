@@ -5,7 +5,7 @@ module Query::Params::Filters
   # :with_images, :with_specimens, :lichen, :region, :clade
   def content_filter_parameter_declarations(model)
     Query::Filter.by_model(model).each_with_object({}) do |fltr, decs|
-      decs[:"#{fltr.sym}?"] = fltr.type
+      decs[fltr.sym] = fltr.type
     end
   end
 end

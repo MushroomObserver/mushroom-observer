@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
 require("test_helper")
+require("query_extensions")
 
 # tests of Query::LocationDescriptions class to be included in QueryTest
-module Query::LocationDescriptionsTest
+class Query::LocationDescriptionsTest < UnitTestCase
+  include QueryExtensions
+
   def test_location_description_all
     gualala = locations(:gualala)
     all_descs = LocationDescription.all.to_a
@@ -82,11 +85,5 @@ module Query::LocationDescriptionsTest
     assert_query([location_descriptions(:albion_desc).id],
                  :LocationDescription,
                  ids: [rolf.id, location_descriptions(:albion_desc).id])
-  end
-
-  def test_location_description_coercion
-    ds1 = location_descriptions(:albion_desc)
-    ds2 = location_descriptions(:no_mushrooms_location_desc)
-    description_coercion_assertions(ds1, ds2, :Location)
   end
 end

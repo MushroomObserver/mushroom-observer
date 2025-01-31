@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
 require("test_helper")
+require("query_extensions")
 
 # tests of Query::Herbaria class to be included in QueryTest
-module Query::HerbariaTest
+class Query::HerbariaTest < UnitTestCase
+  include QueryExtensions
+
   def test_herbarium_all
     expects = Herbarium.index_order
     assert_query(expects.select(:id).distinct, :Herbarium)

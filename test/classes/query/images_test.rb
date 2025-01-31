@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
 require("test_helper")
+require("query_extensions")
 
 # tests of Query::Images class to be included in QueryTest
-module Query::ImagesTest
+class Query::ImagesTest < UnitTestCase
+  include QueryExtensions
+
   def test_image_all
     expects = Image.index_order
     assert_query(expects, :Image)

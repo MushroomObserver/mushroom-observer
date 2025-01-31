@@ -33,6 +33,7 @@ class Query::Observations < Query::Base
     add_pattern_condition
     add_advanced_search_conditions
     add_needs_naming_condition
+    add_needs_naming_filter_conditions
     initialize_name_parameters
     initialize_association_parameters
     initialize_obs_record_parameters

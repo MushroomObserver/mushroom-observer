@@ -198,7 +198,7 @@
 #  with_comments
 #  without_comments
 #  comments_contain(summary)
-#  on_species_list(species_list)
+#  on_species_lists(species_list)
 #  at_location(location)
 #  in_box(north:, south:, east:, west:)
 #
