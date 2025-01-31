@@ -10,17 +10,17 @@ class Query::NameDescriptions < Query::Base
 
   def parameter_declarations
     super.merge(
-      created_at?: [:time],
-      updated_at?: [:time],
-      ids?: [NameDescription],
-      by_user?: User,
-      by_author?: User,
-      by_editor?: User,
-      old_by?: :string,
-      users?: [User],
-      names?: [Name],
-      public?: :boolean,
-      with_descriptions?: :boolean
+      created_at: [:time],
+      updated_at: [:time],
+      ids: [NameDescription],
+      by_user: User,
+      by_author: User,
+      by_editor: User,
+      old_by: :string,
+      users: [User],
+      names: [Name],
+      public: :boolean,
+      with_descriptions: :boolean
     ).merge(name_descriptions_parameter_declarations)
   end
 

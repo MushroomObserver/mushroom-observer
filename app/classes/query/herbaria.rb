@@ -7,15 +7,15 @@ class Query::Herbaria < Query::Base
 
   def parameter_declarations
     super.merge(
-      created_at?: [:time],
-      updated_at?: [:time],
-      code?: :string,
-      name?: :string,
-      ids?: [Herbarium],
-      description?: :string,
-      address?: :string,
-      pattern?: :string,
-      nonpersonal?: :boolean
+      created_at: [:time],
+      updated_at: [:time],
+      code: :string,
+      name: :string,
+      ids: [Herbarium],
+      description: :string,
+      address: :string,
+      pattern: :string,
+      nonpersonal: :boolean
     )
   end
 

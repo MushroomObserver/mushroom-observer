@@ -18,42 +18,42 @@ class Query::Sequences < Query::Base
 
   def sequence_parameter_declarations
     {
-      created_at?: [:time],
-      updated_at?: [:time],
-      observations?: [Observation],
-      users?: [User],
-      locus?: [:string],
-      archive?: [:string],
-      accession?: [:string],
-      locus_has?: :string,
-      accession_has?: :string,
-      notes_has?: :string,
-      pattern?: :string,
-      ids?: [Sequence]
+      created_at: [:time],
+      updated_at: [:time],
+      observations: [Observation],
+      users: [User],
+      locus: [:string],
+      archive: [:string],
+      accession: [:string],
+      locus_has: :string,
+      accession_has: :string,
+      notes_has: :string,
+      pattern: :string,
+      ids: [Sequence]
     }
   end
 
   def observation_parameter_declarations
     {
-      obs_date?: [:date],
-      observers?: [User],
-      locations?: [:string],
-      herbaria?: [:string],
-      herbarium_records?: [:string],
-      projects?: [:string],
-      species_lists?: [:string],
-      confidence?: [:float],
-      north?: :float,
-      south?: :float,
-      east?: :float,
-      west?: :float,
-      is_collection_location?: :boolean,
-      with_images?: :boolean,
-      with_name?: :boolean,
-      with_specimen?: :boolean,
-      with_obs_notes?: :boolean,
-      with_notes_fields?: [:string],
-      obs_notes_has?: :string
+      obs_date: [:date],
+      observers: [User],
+      locations: [:string],
+      herbaria: [:string],
+      herbarium_records: [:string],
+      projects: [:string],
+      species_lists: [:string],
+      confidence: [:float],
+      north: :float,
+      south: :float,
+      east: :float,
+      west: :float,
+      is_collection_location: :boolean,
+      with_images: :boolean,
+      with_name: :boolean,
+      with_specimen: :boolean,
+      with_obs_notes: :boolean,
+      with_notes_fields: [:string],
+      obs_notes_has: :string
     }
   end
 

@@ -24,13 +24,13 @@ class Query::Base
 
   def parameter_declarations
     {
-      join?: [:string],
-      tables?: [:string],
-      where?: [:string],
-      group?: :string,
-      order?: :string,
-      by?: :string,
-      title?: [:string]
+      join: [:string],
+      tables: [:string],
+      where: [:string],
+      group: :string,
+      order: :string,
+      by: :string,
+      title: [:string]
     }
   end
 
