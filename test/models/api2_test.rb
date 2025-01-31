@@ -1753,193 +1753,248 @@ class API2Test < UnitTestCase
   #  :section: Name Requests
   # --------------------------
 
+  def name_get_params
+    @name_get_params ||= { method: :get, action: :name }
+  end
+
   def test_getting_names
-    params = { method: :get, action: :name }
-
     name = Name.with_correct_spelling.sample
-    assert_api_pass(params.merge(id: name.id))
+    assert_api_pass(name_get_params.merge(id: name.id))
     assert_api_results([name])
+  end
 
+  def test_getting_names_year
     names = Name.with_correct_spelling.where(Name[:created_at].year.eq(2008))
     assert_not_empty(names)
-    assert_api_pass(params.merge(created_at: "2008"))
+    assert_api_pass(name_get_params.merge(created_at: "2008"))
     assert_api_results(names)
+  end
 
+  def test_getting_names_date
     names = Name.with_correct_spelling.updated_on("2008-09-05")
     assert_not_empty(names)
-    assert_api_pass(params.merge(updated_at: "2008-09-05"))
+    assert_api_pass(name_get_params.merge(updated_at: "2008-09-05"))
     assert_api_results(names)
+  end
 
+  def test_getting_names_user
     names = Name.with_correct_spelling.where(user: mary)
     assert_not_empty(names)
-    assert_api_pass(params.merge(user: "mary"))
+    assert_api_pass(name_get_params.merge(user: "mary"))
     assert_api_results(names)
+  end
 
+  def test_getting_names_text_name
     names = Name.with_correct_spelling.where(text_name: "Lentinellus ursinus")
     assert_not_empty(names)
-    assert_api_fail(params.merge(name: "Lentinellus ursinus"))
-    assert_api_pass(params.merge(name: "Lentinellus ursinus Kühner,
-                                        Lentinellus ursinus Kuhner"))
+    assert_api_fail(name_get_params.merge(name: "Lentinellus ursinus"))
+    assert_api_pass(name_get_params.merge(name: "Lentinellus ursinus Kühner,
+                                                 Lentinellus ursinus Kuhner"))
     assert_api_results(names)
+  end
 
+  def test_getting_names_with_synonyms
     names = names(:lactarius_alpinus).synonyms.sort_by(&:id).
             reject(&:correct_spelling_id)
     assert_not_empty(names)
-    assert_api_pass(params.merge(synonyms_of: "Lactarius alpinus"))
+    assert_api_pass(name_get_params.merge(synonyms_of: "Lactarius alpinus"))
     assert_api_results(names)
-    assert_api_pass(
-      params.merge(name: "Lactarius alpinus", include_synonyms: "yes")
-    )
+    assert_api_pass(name_get_params.merge(name: "Lactarius alpinus",
+                                          include_synonyms: "yes"))
     assert_api_results(names)
+  end
 
+  def test_getting_names_classification
     names = Name.with_correct_spelling.classification_contains("Fungi").
             map do |n|
       genus = n.text_name.split.first
       Name.where(Name[:text_name].matches("#{genus} %")) + [n]
     end.flatten.uniq.sort_by(&:id)
     assert_not_empty(names)
-    assert_api_pass(params.merge(children_of: "Fungi"))
+    assert_api_pass(name_get_params.merge(children_of: "Fungi"))
     assert_api_results(names)
-    assert_api_pass(params.merge(name: "Fungi", include_subtaxa: "yes"))
+    assert_api_pass(name_get_params.merge(name: "Fungi",
+                                          include_subtaxa: "yes"))
     assert_api_results(names << names(:fungi))
+  end
 
+  def test_getting_names_deprecated
     names = Name.with_correct_spelling.deprecated
     assert_not_empty(names)
-    assert_api_pass(params.merge(is_deprecated: "true"))
+    assert_api_pass(name_get_params.merge(is_deprecated: "true"))
     assert_api_results(names)
+  end
 
+  def test_getting_names_misspellings
     names = Name.updated_on("2009-10-12")
     goods = names.reject(&:correct_spelling_id)
     bads  = names.select(&:correct_spelling_id)
     assert_not_empty(names)
     assert_not_empty(goods)
     assert_not_empty(bads)
-    assert_api_pass(params.merge(updated_at: "20091012", misspellings: :either))
+    assert_api_pass(name_get_params.merge(updated_at: "20091012",
+                                          misspellings: :either))
     assert_api_results(names)
-    assert_api_pass(params.merge(updated_at: "20091012", misspellings: :only))
+    assert_api_pass(name_get_params.merge(updated_at: "20091012",
+                                          misspellings: :only))
     assert_api_results(bads)
-    assert_api_pass(params.merge(updated_at: "20091012", misspellings: :no))
+    assert_api_pass(name_get_params.merge(updated_at: "20091012",
+                                          misspellings: :no))
     assert_api_results(goods)
-    assert_api_pass(params.merge(updated_at: "20091012"))
+    assert_api_pass(name_get_params.merge(updated_at: "20091012"))
     assert_api_results(goods)
+  end
 
+  def test_getting_names_with_without_synonyms
     without = Name.without_synonyms
     with    = Name.with_correct_spelling.with_synonyms
     assert_not_empty(without)
     assert_not_empty(with)
-    assert_api_pass(params.merge(has_synonyms: "no"))
+    assert_api_pass(name_get_params.merge(has_synonyms: "no"))
     assert_api_results(without)
-    assert_api_pass(params.merge(has_synonyms: "true"))
+    assert_api_pass(name_get_params.merge(has_synonyms: "true"))
     assert_api_results(with)
+  end
 
+  def test_getting_names_locations
     loc   = locations(:burbank)
     names = loc.observations.map(&:name).
             flatten.uniq.sort_by(&:id).
             reject(&:correct_spelling_id)
     assert_not_empty(names)
-    assert_api_pass(params.merge(location: loc.id))
+    assert_api_pass(name_get_params.merge(location: loc.id))
     assert_api_results(names)
+  end
 
+  def test_getting_names_species_lists
     spl   = species_lists(:unknown_species_list)
     names = spl.observations.map(&:name).
             flatten.uniq.sort_by(&:id).
             reject(&:correct_spelling_id)
     assert_not_empty(names)
-    assert_api_pass(params.merge(species_list: spl.id))
+    assert_api_pass(name_get_params.merge(species_list: spl.id))
     assert_api_results(names)
+  end
 
+  def test_getting_names_with_rank
     names = Name.with_correct_spelling.with_rank("Variety")
     assert_not_empty(names)
-    assert_api_pass(params.merge(rank: "variety"))
+    assert_api_pass(name_get_params.merge(rank: "variety"))
     assert_api_results(names)
+  end
 
+  def test_getting_names_with_author
     with    = Name.with_correct_spelling.with_author
     without = Name.with_correct_spelling.without_author
     assert_not_empty(with)
     assert_not_empty(without)
-    assert_api_pass(params.merge(has_author: "yes"))
+    assert_api_pass(name_get_params.merge(has_author: "yes"))
     assert_api_results(with)
-    assert_api_pass(params.merge(has_author: "no"))
+    assert_api_pass(name_get_params.merge(has_author: "no"))
     assert_api_results(without)
+  end
 
+  def test_getting_names_with_citation
     with    = Name.with_correct_spelling.with_citation
     without = Name.with_correct_spelling.without_citation
     assert_not_empty(with)
     assert_not_empty(without)
-    assert_api_pass(params.merge(has_citation: "yes"))
+    assert_api_pass(name_get_params.merge(has_citation: "yes"))
     assert_api_results(with)
-    assert_api_pass(params.merge(has_citation: "no"))
+    assert_api_pass(name_get_params.merge(has_citation: "no"))
     assert_api_results(without)
+  end
 
+  def test_getting_names_with_classification
     with    = Name.with_correct_spelling.with_classification
     without = Name.with_correct_spelling.without_classification
     assert_not_empty(with)
     assert_not_empty(without)
-    assert_api_pass(params.merge(has_classification: "yes"))
+    assert_api_pass(name_get_params.merge(has_classification: "yes"))
     assert_api_results(with)
-    assert_api_pass(params.merge(has_classification: "no"))
+    assert_api_pass(name_get_params.merge(has_classification: "no"))
     assert_api_results(without)
+  end
 
+  def test_getting_names_with_notes
     with    = Name.with_correct_spelling.with_notes
     without = Name.with_correct_spelling.without_notes
     assert_not_empty(with)
     assert_not_empty(without)
-    assert_api_pass(params.merge(has_notes: "yes"))
+    assert_api_pass(name_get_params.merge(has_notes: "yes"))
     assert_api_results(with)
-    assert_api_pass(params.merge(has_notes: "no"))
+    assert_api_pass(name_get_params.merge(has_notes: "no"))
     assert_api_results(without)
+  end
 
+  def test_getting_names_with_comment
     names = Comment.where(target_type: "Name").map(&:target).
             uniq.sort_by(&:id).reject(&:correct_spelling_id)
     assert_not_empty(names)
-    assert_api_pass(params.merge(has_comments: "yes"))
+    assert_api_pass(name_get_params.merge(has_comments: "yes"))
     assert_api_results(names)
+  end
 
+  def test_getting_names_with_description
     with    = Name.with_correct_spelling.with_description
     without = Name.with_correct_spelling.without_description
     assert_not_empty(with)
     assert_not_empty(without)
-    assert_api_pass(params.merge(has_description: "yes"))
+    assert_api_pass(name_get_params.merge(has_description: "yes"))
     assert_api_results(with)
-    assert_api_pass(params.merge(has_description: "no"))
+    assert_api_pass(name_get_params.merge(has_description: "no"))
     assert_api_results(without)
+  end
 
+  def test_getting_names_text_name_contains
     names = Name.with_correct_spelling.text_name_contains("bunny")
     assert_not_empty(names)
-    assert_api_pass(params.merge(text_name_has: "bunny"))
+    assert_api_pass(name_get_params.merge(text_name_has: "bunny"))
     assert_api_results(names)
+  end
 
+  def test_getting_names_author_contains
     names = Name.with_correct_spelling.author_contains("peck")
     assert_not_empty(names)
-    assert_api_pass(params.merge(author_has: "peck"))
+    assert_api_pass(name_get_params.merge(author_has: "peck"))
     assert_api_results(names)
+  end
 
+  def test_getting_names_citation_contains
     names = Name.with_correct_spelling.citation_contains("lichenes")
     assert_not_empty(names)
-    assert_api_pass(params.merge(citation_has: "lichenes"))
+    assert_api_pass(name_get_params.merge(citation_has: "lichenes"))
     assert_api_results(names)
+  end
 
+  def test_getting_names_classification_contains
     names = Name.with_correct_spelling.classification_contains("lecanorales")
     assert_not_empty(names)
-    assert_api_pass(params.merge(classification_has: "lecanorales"))
+    assert_api_pass(name_get_params.merge(classification_has: "lecanorales"))
     assert_api_results(names)
+  end
 
+  def test_getting_names_notes_contain
     names = Name.with_correct_spelling.notes_contain("known")
     assert_not_empty(names)
-    assert_api_pass(params.merge(notes_has: "known"))
+    assert_api_pass(name_get_params.merge(notes_has: "known"))
     assert_api_results(names)
+  end
 
+  def test_getting_names_comment_contains
     names = Comment.where(
       Comment[:target_type].eq("name").and(Comment[:comment].matches("%mess%"))
     ).map(&:target).uniq.sort_by(&:id).reject(&:correct_spelling_id)
     assert_not_empty(names)
-    assert_api_pass(params.merge(comments_has: "mess"))
+    assert_api_pass(name_get_params.merge(comments_has: "mess"))
     assert_api_results(names)
+  end
 
+  def test_getting_names_ok_for_export
     Name.with_correct_spelling.sample.update!(ok_for_export: true)
     names = Name.with_correct_spelling.ok_for_export
     assert_not_empty(names)
-    assert_api_pass(params.merge(ok_for_export: "yes"))
+    assert_api_pass(name_get_params.merge(ok_for_export: "yes"))
     assert_api_results(names)
   end
 
@@ -2170,38 +2225,52 @@ class API2Test < UnitTestCase
   #  :section: Observation Requests
   # ---------------------------------
 
+  def obss_params
+    @obss_params ||= { method: :get, action: :observation }
+  end
+
   def test_getting_observations
-    params = { method: :get, action: :observation }
-
     obs = Observation.all.sample
-    assert_api_pass(params.merge(id: obs.id))
+    assert_api_pass(obss_params.merge(id: obs.id))
     assert_api_results([obs])
+  end
 
+  def test_getting_observations_year
     obses = Observation.where(Observation[:created_at].year.eq(2010))
     assert_not_empty(obses)
-    assert_api_pass(params.merge(created_at: "2010"))
+    assert_api_pass(obss_params.merge(created_at: "2010"))
     assert_api_results(obses)
+  end
 
+  def test_getting_observations_updated
     obses = Observation.updated_on("2007-06-24")
     assert_not_empty(obses)
-    assert_api_pass(params.merge(updated_at: "20070624"))
+    assert_api_pass(obss_params.merge(updated_at: "20070624"))
     assert_api_results(obses)
+  end
 
+  def test_getting_observations_year_between
     obses = Observation.where(Observation[:when].year.between(2012..2014))
     assert_not_empty(obses)
-    assert_api_pass(params.merge(date: "2012-2014"))
+    assert_api_pass(obss_params.merge(date: "2012-2014"))
     assert_api_results(obses)
+  end
 
+  def test_getting_observations_user
     obses = Observation.where(user: dick)
     assert_not_empty(obses)
-    assert_api_pass(params.merge(user: "dick"))
+    assert_api_pass(obss_params.merge(user: "dick"))
     assert_api_results(obses)
+  end
 
+  def test_getting_observations_names
     obses = Observation.where(name: names(:fungi))
     assert_not_empty(obses)
-    assert_api_pass(params.merge(name: "Fungi"))
+    assert_api_pass(obss_params.merge(name: "Fungi"))
     assert_api_results(obses)
+  end
 
+  def test_getting_observations_names_and_where
     Observation.create!(user: rolf, when: Time.zone.now,
                         where: locations(:burbank),
                         name: names(:lactarius_alpinus))
@@ -2210,13 +2279,14 @@ class API2Test < UnitTestCase
                         name: names(:lactarius_alpigenes))
     obses = Observation.where(name: names(:lactarius_alpinus).synonyms)
     assert(obses.length > 1)
-    assert_api_pass(params.merge(synonyms_of: "Lactarius alpinus"))
+    assert_api_pass(obss_params.merge(synonyms_of: "Lactarius alpinus"))
     assert_api_results(obses)
-    assert_api_pass(
-      params.merge(name: "Lactarius alpinus", include_synonyms: "yes")
-    )
+    assert_api_pass(obss_params.merge(name: "Lactarius alpinus",
+                                      include_synonyms: "yes"))
     assert_api_results(obses)
+  end
 
+  def test_getting_observations_text_name
     assert_blank(
       Observation.where(text_name: "Agaricus"),
       "Tests won't work if there's already an Observation for genus Agaricus"
@@ -2225,59 +2295,80 @@ class API2Test < UnitTestCase
     assert(ssp_obs.length > 1)
     agaricus = Name.where(text_name: "Agaricus").first # (an existing autonym)s
     agaricus_obs = Observation.create(name: agaricus, user: rolf)
-    assert_api_pass(params.merge(children_of: "Agaricus"))
+    assert_api_pass(obss_params.merge(children_of: "Agaricus"))
     assert_api_results(ssp_obs)
-    assert_api_pass(params.merge(name: "Agaricus", include_subtaxa: "yes"))
+    assert_api_pass(obss_params.merge(name: "Agaricus",
+                                      include_subtaxa: "yes"))
     assert_api_results(ssp_obs.to_a << agaricus_obs)
+  end
 
+  def test_getting_observations_locations
     obses = Observation.where(location: locations(:burbank))
     assert(obses.length > 1)
-    assert_api_pass(params.merge(location: 'Burbank\, California\, USA'))
+    assert_api_pass(obss_params.merge(location: 'Burbank\, California\, USA'))
     assert_api_results(obses)
+  end
 
+  def test_getting_observations_herbaria
     obses = HerbariumRecord.where(herbarium: herbaria(:nybg_herbarium)).
             map(&:observations).flatten.sort_by(&:id)
     assert(obses.length > 1)
-    assert_api_pass(params.merge(herbarium: "The New York Botanical Garden"))
+    assert_api_pass(obss_params.merge(
+      herbarium: "The New York Botanical Garden"
+    ))
     assert_api_results(obses)
+  end
 
+  def test_getting_observations_herbarium_records
     rec = herbarium_records(:interesting_unknown)
     obses = rec.observations.sort_by(&:id)
     assert(obses.length > 1)
-    assert_api_pass(params.merge(herbarium_record: rec.id))
+    assert_api_pass(obss_params.merge(herbarium_record: rec.id))
     assert_api_results(obses)
+  end
 
+  def test_getting_observations_projects
     proj = projects(:one_genus_two_species_project)
     obses = proj.observations.sort_by(&:id)
     assert(obses.length > 1)
-    assert_api_pass(params.merge(project: proj.id))
+    assert_api_pass(obss_params.merge(project: proj.id))
     assert_api_results(obses)
+  end
 
+  def test_getting_observations_species_lists
     spl = species_lists(:one_genus_three_species_list)
     obses = spl.observations.sort_by(&:id)
     assert(obses.length > 1)
-    assert_api_pass(params.merge(species_list: spl.id))
+    assert_api_pass(obss_params.merge(species_list: spl.id))
     assert_api_results(obses)
+  end
 
+  def test_getting_observations_confidence
     obses = Observation.where(vote_cache: 3)
     assert(obses.length > 1)
-    assert_api_pass(params.merge(confidence: "3.0"))
+    assert_api_pass(obss_params.merge(confidence: "3.0"))
     assert_api_results(obses)
+  end
 
+  def test_getting_observations_collection_location
     obses = Observation.not_collection_location
     assert(obses.length > 1)
-    assert_api_pass(params.merge(is_collection_location: "no"))
+    assert_api_pass(obss_params.merge(is_collection_location: "no"))
     assert_api_results(obses)
+  end
 
+  def test_getting_observations_with_images
     with    = Observation.with_images
     without = Observation.without_images
     assert(with.length > 1)
     assert(without.length > 1)
-    assert_api_pass(params.merge(has_images: "yes"))
+    assert_api_pass(obss_params.merge(has_images: "yes"))
     assert_api_results(with)
-    assert_api_pass(params.merge(has_images: "no"))
+    assert_api_pass(obss_params.merge(has_images: "no"))
     assert_api_results(without)
+  end
 
+  def test_getting_observations_has_name
     genus = Name.ranks[:Genus]
     group = Name.ranks[:Group]
     names = Name.where((Name[:rank] <= genus).or(Name[:rank].eq(group)))
@@ -2285,26 +2376,32 @@ class API2Test < UnitTestCase
     without = Observation.where.not(name: names)
     assert(with.length > 1)
     assert(without.length > 1)
-    assert_api_pass(params.merge(has_name: "yes"))
+    assert_api_pass(obss_params.merge(has_name: "yes"))
     assert_api_results(with)
-    assert_api_pass(params.merge(has_name: "no"))
+    assert_api_pass(obss_params.merge(has_name: "no"))
     assert_api_results(without)
+  end
 
+  def test_getting_observations_with_comments
     obses = Comment.where(target_type: "Observation").
             map(&:target).uniq.sort_by(&:id)
     assert(obses.length > 1)
-    assert_api_pass(params.merge(has_comments: "yes"))
+    assert_api_pass(obss_params.merge(has_comments: "yes"))
     assert_api_results(obses)
+  end
 
+  def test_getting_observations_with_specimen
     with    = Observation.with_specimen
     without = Observation.without_specimen
     assert(with.length > 1)
     assert(without.length > 1)
-    assert_api_pass(params.merge(has_specimen: "yes"))
+    assert_api_pass(obss_params.merge(has_specimen: "yes"))
     assert_api_results(with)
-    assert_api_pass(params.merge(has_specimen: "no"))
+    assert_api_pass(obss_params.merge(has_specimen: "no"))
     assert_api_results(without)
+  end
 
+  def test_getting_observations_with_notes
     # no_notes = Observation.no_notes_persisted
     # with = Observation.where("notes != ?", no_notes)
     # without = Observation.where("notes = ?", no_notes)
@@ -2314,44 +2411,53 @@ class API2Test < UnitTestCase
     without = Observation.without_notes
     assert(with.length > 1)
     assert(without.length > 1)
-    assert_api_pass(params.merge(has_notes: "yes"))
+    assert_api_pass(obss_params.merge(has_notes: "yes"))
     assert_api_results(with)
-    assert_api_pass(params.merge(has_notes: "no"))
+    assert_api_pass(obss_params.merge(has_notes: "no"))
     assert_api_results(without)
+  end
 
+  def test_getting_observations_notes_contain
     obses = Observation.notes_contain(":substrate:").
             reject { |o| o.notes[:substrate].blank? }
     assert(obses.length > 1)
-    assert_api_pass(params.merge(has_notes_field: "substrate"))
+    assert_api_pass(obss_params.merge(has_notes_field: "substrate"))
     assert_api_results(obses)
 
     obses = Observation.notes_contain("orphan")
     assert(obses.length > 1)
-    assert_api_pass(params.merge(notes_has: "orphan"))
+    assert_api_pass(obss_params.merge(notes_has: "orphan"))
     assert_api_results(obses)
+  end
 
+  def test_getting_observations_comments_contain
     obses = Comment.where(
       Comment[:summary].concat(Comment[:comment]).matches("%let's%")
     ).map(&:target).uniq.sort_by(&:id)
     assert(obses.length > 1)
-    assert_api_pass(params.merge(comments_has: "let's"))
+    assert_api_pass(obss_params.merge(comments_has: "let's"))
     assert_api_results(obses)
+  end
 
+  def test_getting_observations_in_box
     obses = Observation.where(lat: [34..35], lng: [-119..-118])
     locs = Location.in_box(north: 35, south: 34, east: -118, west: -119)
 
     obses = (obses + locs.map(&:observations)).flatten.uniq.sort_by(&:id)
     assert_not_empty(obses)
-    assert_api_fail(params.merge(south: 34, east: -118, west: -119))
-    assert_api_fail(params.merge(north: 35, east: -118, west: -119))
-    assert_api_fail(params.merge(north: 35, south: 34, west: -119))
-    assert_api_fail(params.merge(north: 35, south: 34, east: -118))
-    assert_api_pass(params.merge(north: 35, south: 34, east: -118, west: -119))
+    assert_api_fail(obss_params.merge(south: 34, east: -118, west: -119))
+    assert_api_fail(obss_params.merge(north: 35, east: -118, west: -119))
+    assert_api_fail(obss_params.merge(north: 35, south: 34, west: -119))
+    assert_api_fail(obss_params.merge(north: 35, south: 34, east: -118))
+    assert_api_pass(obss_params.merge(north: 35, south: 34, east: -118,
+                                      west: -119))
     assert_api_results(obses)
+  end
 
+  def test_getting_observations_in_region
     obses = Observation.in_region("California, USA")
     assert_not_empty(obses)
-    assert_api_pass(params.merge(region: "California, USA"))
+    assert_api_pass(obss_params.merge(region: "California, USA"))
     assert_api_results(obses)
   end
 
