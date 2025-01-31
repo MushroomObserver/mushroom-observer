@@ -352,7 +352,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_template(:edit)
   end
 
-  def test_udpate_herbarium_record
+  def test_update_herbarium_record
     login("rolf")
     nybg_rec    = herbarium_records(:coprinus_comatus_nybg_spec)
     nybg_user   = nybg_rec.user
