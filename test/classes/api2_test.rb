@@ -3,15 +3,6 @@
 require("test_helper")
 require("api2_extensions")
 
-# Test naming API
-# See https://www.pivotaltracker.com/story/show/174886715
-
-# Test vote API
-# See https://www.pivotaltracker.com/story/show/174886762
-
-# Test image_vote API
-# See https://www.pivotaltracker.com/story/show/174886806
-
 class API2Test < UnitTestCase
   include API2Extensions
 
