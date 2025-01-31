@@ -7,7 +7,28 @@
       tag.span(@tracker.status,
                data: { inat_import_job_target: "status",
                        status: @tracker.status }),
+
       tag.br,
+      tag.span(class: "font-weight-bold") do
+        "#{:inat_import_imported.t}: "
+      end,
+      tag.span() do
+        "n"
+      end,
+      tag.span() do
+        " #{:of.t} "
+      end,
+      tag.span() do
+        "m"
+      end,
+      tag.span() do
+        "#{:observations.t}"
+      end,
+
+      tag.br,
+      tag.span(class: "font-weight-bold") do
+        "#{:inat_import_tracker_status.t}: "
+      end,
       tag.span(class: "font-weight-bold") do
         "#{:inat_import_tracker_started.t}: "
       end,
