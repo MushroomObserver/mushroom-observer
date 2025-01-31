@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require("test_helper")
 require("api2_extensions")
 
@@ -100,9 +102,9 @@ class API2::ObservationsTest < UnitTestCase
     obses = HerbariumRecord.where(herbarium: herbaria(:nybg_herbarium)).
             map(&:observations).flatten.sort_by(&:id)
     assert(obses.length > 1)
-    assert_api_pass(obss_params.merge(
-      herbarium: "The New York Botanical Garden"
-    ))
+    assert_api_pass(
+      obss_params.merge(herbarium: "The New York Botanical Garden")
+    )
     assert_api_results(obses)
   end
 
