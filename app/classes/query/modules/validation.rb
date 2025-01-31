@@ -20,15 +20,11 @@ module Query::Modules::Validation
     new_params[param] = val
   end
 
-  class MissingValue < RuntimeError; end
-
   def pop_param_value(old_params, param)
     if old_params.key?(param)
       val = old_params[param]
     elsif old_params.key?(param.to_s)
       val = old_params[param.to_s]
-    else
-      raise(MissingValue.new)
     end
     old_params.delete(param)
     old_params.delete(param.to_s)
