@@ -36,9 +36,9 @@ module Query::Initializers::Observations
     return unless params[:field_slips]
 
     add_join(:field_slips)
-    add_exact_match_condition(
-      "field_slips.code",
-      params[:field_slips],
+    add_id_condition(
+      "field_slips.id",
+      lookup_field_slips_by_name(params[:field_slips]),
       :observations
     )
   end

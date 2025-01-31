@@ -277,6 +277,10 @@ module AbstractModel::Scopes
       Lookup::ExternalSites.new(vals).ids
     end
 
+    def lookup_field_slips_by_name(vals)
+      Lookup::FieldSlips.new(vals).ids
+    end
+
     def lookup_herbaria_by_name(vals)
       Lookup::Herbaria.new(vals).ids
     end
