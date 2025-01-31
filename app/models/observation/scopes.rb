@@ -472,7 +472,8 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         where(project_species_lists: { project: project_ids }).distinct
     }
     scope :for_field_slips, lambda { |codes|
-      joins(:field_slips).search_columns(FieldSlip[:code], codes).distinct
+      fs_ids = Lookup::FieldSlips.new(codes).ids
+      joins(:field_slips).where(field_slips: { id: fs_ids }).distinct
     }
     scope :for_herbarium_records, lambda { |records|
       hr_ids = Lookup::HerbariumRecords.new(records).ids

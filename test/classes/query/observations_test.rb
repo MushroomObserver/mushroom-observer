@@ -124,8 +124,14 @@ class Query::ObservationsTest < UnitTestCase
     f_s = field_slips(:field_slip_one)
     assert_query([observations(:minimal_unknown_obs)],
                  :Observation, field_slips: f_s.code)
-    assert_query(Observation.index_order.for_field_slips(f_s.code),
-                 :Observation, field_slips: f_s.code)
+    fs2 = field_slips(:field_slip_falmouth_one)
+    assert_query([observations(:falmouth_2022_obs),
+                  observations(:minimal_unknown_obs)],
+                 :Observation, field_slips: [f_s.id, fs2.id])
+    assert_query(Observation.index_order.for_field_slips([f_s.code, fs2.code]),
+                 :Observation, field_slips: [f_s.code, fs2.code])
+    assert_query(Observation.index_order.for_field_slips([f_s.id, fs2.id]),
+                 :Observation, field_slips: [f_s.id, fs2.id])
   end
 
   def test_observation_herbarium_records
