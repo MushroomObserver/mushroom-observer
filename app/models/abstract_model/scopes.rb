@@ -33,34 +33,51 @@ module AbstractModel::Scopes
         where.not(user: user)
     }
 
+    # Parsing of user text values like "yesterday"/"la semana pasada" would be
+    # done upstream in PatternSearch. The values we're getting in the scope
+    # should be parseable as datetimes in Ruby.
+    scope :created_at, lambda { |early, late = early|
+      if late == early
+        created_after(early)
+      else
+        created_between(early, late)
+      end
+    }
     scope :created_on, lambda { |ymd_string|
       where(arel_table[:created_at].format("%Y-%m-%d").eq(ymd_string))
     }
     scope :created_after,
-          ->(datetime) { datetime_compare(:created_at, :gt, datetime) }
+          ->(datetime) { datetime_after(:created_at, datetime) }
     scope :created_before,
-          ->(datetime) { datetime_compare(:created_at, :lt, datetime) }
-    scope :created_between, lambda { |earliest, latest|
-      created_after(earliest).created_before(latest)
-    }
+          ->(datetime) { datetime_before(:created_at, datetime) }
+    scope :created_between,
+          ->(early, late) { datetime_between(:created_at, early, late) }
 
+    scope :updated_at, lambda { |early, late = early|
+      if late == early
+        updated_after(early)
+      else
+        updated_between(early, late)
+      end
+    }
     scope :updated_on, lambda { |ymd_string|
       where(arel_table[:updated_at].format("%Y-%m-%d").eq(ymd_string))
     }
     scope :updated_after,
-          ->(datetime) { datetime_compare(:updated_at, :gt, datetime) }
+          ->(datetime) { datetime_after(:updated_at, datetime) }
     scope :updated_before,
-          ->(datetime) { datetime_compare(:updated_at, :lt, datetime) }
-    scope :updated_between, lambda { |earliest, latest|
-      updated_after(earliest).updated_before(latest)
-    }
+          ->(datetime) { datetime_before(:updated_at, datetime) }
+    scope :updated_between,
+          ->(early, late) { datetime_between(:updated_at, early, late) }
 
+    # Datetimes can be sent any format, any order (for between)
     scope :datetime_after,
           ->(col, datetime) { datetime_compare(col, :gt, datetime) }
     scope :datetime_before,
           ->(col, datetime) { datetime_compare(col, :lt, datetime) }
-    scope :datetime_between, lambda { |col, earliest, latest|
-      datetime_after(col, earliest).datetime_before(col, latest)
+    scope :datetime_between, lambda { |col, early, late|
+      early, late = [late, early] if early > late
+      datetime_after(col, early).datetime_before(col, late)
     }
     scope :datetime_compare, lambda { |col, dir, val|
       # `datetime_condition_formatted` defined in ClassMethods below
