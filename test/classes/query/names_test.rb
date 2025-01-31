@@ -547,6 +547,7 @@ class Query::NamesTest < UnitTestCase
     assert_query(expects, :Name, with_observations: 1, project: project2)
   end
 
+  # ORDER BY FIND_IN_SET is MySQL-specific and does not have an Arel equivalent
   def test_name_with_observations_in_set
     oids = three_amigos.join(",")
     expects = Name.with_correct_spelling.joins(:observations).
