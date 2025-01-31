@@ -7,11 +7,11 @@ class Query::Users < Query::Base
 
   def parameter_declarations
     super.merge(
-      created_at?: [:time],
-      updated_at?: [:time],
-      ids?: [User],
-      pattern?: :string,
-      with_contribution?: :boolean
+      created_at: [:time],
+      updated_at: [:time],
+      ids: [User],
+      pattern: :string,
+      with_contribution: :boolean
     )
   end
 

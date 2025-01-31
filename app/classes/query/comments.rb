@@ -7,18 +7,18 @@ class Query::Comments < Query::Base
 
   def parameter_declarations
     super.merge(
-      created_at?: [:time],
-      updated_at?: [:time],
-      ids?: [Comment],
-      by_user?: User,
-      for_user?: User,
-      users?: [User],
-      types?: [{ string: Comment::ALL_TYPE_TAGS }],
-      summary_has?: :string,
-      content_has?: :string,
-      pattern?: :string,
-      target?: AbstractModel,
-      type?: :string
+      created_at: [:time],
+      updated_at: [:time],
+      ids: [Comment],
+      by_user: User,
+      for_user: User,
+      users: [User],
+      types: [{ string: Comment::ALL_TYPE_TAGS }],
+      summary_has: :string,
+      content_has: :string,
+      pattern: :string,
+      target: AbstractModel,
+      type: :string
     )
   end
 

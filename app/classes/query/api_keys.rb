@@ -7,9 +7,9 @@ class Query::APIKeys < Query::Base
 
   def parameter_declarations
     super.merge(
-      created_at?: [:time],
-      updated_at?: [:time],
-      notes_has?: :string
+      created_at: [:time],
+      updated_at: [:time],
+      notes_has: :string
     )
   end
 

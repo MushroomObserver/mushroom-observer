@@ -10,23 +10,23 @@ class Query::SpeciesLists < Query::Base
 
   def parameter_declarations
     super.merge(
-      created_at?: [:time],
-      updated_at?: [:time],
-      date?: [:date],
-      by_user?: User,
-      users?: [User],
-      ids?: [SpeciesList],
-      location?: Location,
-      locations?: [Location],
-      user_where?: :string,
-      project?: Project,
-      projects?: [Project],
-      title_has?: :string,
-      with_notes?: :boolean,
-      notes_has?: :string,
-      with_comments?: { boolean: [true] },
-      comments_has?: :string,
-      pattern?: :string
+      created_at: [:time],
+      updated_at: [:time],
+      date: [:date],
+      by_user: User,
+      users: [User],
+      ids: [SpeciesList],
+      location: Location,
+      locations: [Location],
+      user_where: :string,
+      project: Project,
+      projects: [Project],
+      title_has: :string,
+      with_notes: :boolean,
+      notes_has: :string,
+      with_comments: { boolean: [true] },
+      comments_has: :string,
+      pattern: :string
     ).merge(names_parameter_declarations)
   end
 

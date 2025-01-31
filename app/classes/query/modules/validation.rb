@@ -4,12 +4,6 @@
 module Query::Modules::Validation
   attr_accessor :params, :params_cache
 
-  def required_parameters
-    keys = parameter_declarations.keys
-    keys.select! { |x| x.to_s[-1] == "?" }
-    keys.sort_by(&:to_s)
-  end
-
   def validate_params
     old_params = @params.dup
     new_params = {}
@@ -22,7 +16,7 @@ module Query::Modules::Validation
 
   def validate_param(old_params, new_params, param_sym, param_type)
     param = param_sym.to_s.sub(/\?$/, "").to_sym
-    optional = (param != param_sym)
+    optional = true
     begin
       val = pop_param_value(old_params, param)
       val = validate_value(param_type, param, val) if val.present?
