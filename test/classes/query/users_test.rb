@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
 require("test_helper")
+require("query_extensions")
 
 # tests of Query::Users class to be included in QueryTest
-module Query::UsersTest
+class Query::UsersTest < UnitTestCase
+  include QueryExtensions
+
   def test_user_all_by_name
     expects = User.order(name: :asc, id: :desc).to_a
     assert_query(expects, :User)

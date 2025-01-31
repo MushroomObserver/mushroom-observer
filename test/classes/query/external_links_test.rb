@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
 require("test_helper")
+require("query_extensions")
 
 # tests of Query::ExternalLinks class to be included in QueryTest
-module Query::ExternalLinksTest
+class Query::ExternalLinksTest < UnitTestCase
+  include QueryExtensions
+
   def test_external_link_all
     assert_query(ExternalLink.all.sort_by(&:url), :ExternalLink)
     assert_query(ExternalLink.where(user: users(:mary)).sort_by(&:url),

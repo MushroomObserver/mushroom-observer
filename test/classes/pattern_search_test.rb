@@ -530,22 +530,22 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_include_synonyms
-    expect = Observation.where(name: [names(:peltigera), names(:petigera)])
+    expect = Observation.of_names([names(:peltigera), names(:petigera)])
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("Petigera include_synonyms:yes")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_include_subtaxa
-    expect = Observation.of_name(names(:agaricus), include_subtaxa: true)
+    expect = Observation.of_names(names(:agaricus), include_subtaxa: true)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("Agaricus include_subtaxa:yes")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_include_all_name_proposals
-    expect = Observation.of_name(names(:agaricus_campestris),
-                                 include_all_name_proposals: true)
+    expect = Observation.of_names(names(:agaricus_campestris),
+                                  include_all_name_proposals: true)
     consensus = Observation.where(name: name)
     assert(consensus.count < expect.count)
     x = PatternSearch::Observation.new("Agaricus campestris " \
@@ -554,28 +554,28 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_location
-    expect = Observation.where(location: locations(:burbank))
+    expect = Observation.at_locations(locations(:burbank))
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new('location:"USA, California, Burbank"')
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_project
-    expect = Observation.for_project(projects(:bolete_project))
+    expect = Observation.for_projects(projects(:bolete_project))
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new('project:"Bolete Project"')
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_project_lists
-    expect = Observation.on_species_list_of_project(projects(:bolete_project))
+    expect = Observation.on_projects_species_lists(projects(:bolete_project))
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new('project_lists:"Bolete Project"')
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_list
-    expect = Observation.on_species_list(species_lists(:unknown_species_list))
+    expect = Observation.on_species_lists(species_lists(:unknown_species_list))
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new('list:"List of mysteries"')
     assert_obj_arrays_equal(expect, x.query.results, :sort)
@@ -597,15 +597,14 @@ class PatternSearchTest < UnitTestCase
 
   def test_observation_search_field_slip
     code_val = field_slips(:field_slip_one).code
-    expect = Observation.joins(:field_slips).
-             where(FieldSlip[:code].eq(code_val))
+    expect = Observation.for_field_slips(code_val)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("field_slip:#{code_val}")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_confidence
-    expect = Observation.where(vote_cache: 3)
+    expect = Observation.confidence(90)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("confidence:90")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
@@ -621,21 +620,21 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_has_images_no
-    expect = Observation.without_images
+    expect = Observation.with_images(false)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_images:no")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_has_images_yes
-    expect = Observation.with_images
+    expect = Observation.with_images(true)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_images:yes")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_has_specimen_no
-    expect = Observation.without_specimen
+    expect = Observation.with_specimen(false)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_specimen:no")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
@@ -681,7 +680,7 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_has_name_no
-    expect = Observation.without_name
+    expect = Observation.with_name(false)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_name:no")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
@@ -695,7 +694,7 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_has_notes_no
-    expect = Observation.without_notes
+    expect = Observation.with_notes(false)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_notes:no")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
@@ -716,7 +715,7 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_herbarium
-    expect = Observation.in_herbarium(herbaria(:nybg_herbarium))
+    expect = Observation.in_herbaria(herbaria(:nybg_herbarium))
     assert_not_empty(expect)
     x = PatternSearch::Observation.new(
       'herbarium:"The New York Botanical Garden"'
@@ -734,8 +733,8 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_multiple_regions
-    expect = Observation.reorder(id: :asc).in_region("California, USA").
-             or(Observation.reorder(id: :asc).in_region("New York, USA")).to_a
+    expect = Observation.in_regions(["California, USA", "New York, USA"]).
+             reorder(id: :asc).to_a
     assert(expect.any? { |obs| obs.where.include?("California, USA") })
     assert(expect.any? { |obs| obs.where.include?("New York, USA") })
     str = 'region:"USA, California","USA, New York"'

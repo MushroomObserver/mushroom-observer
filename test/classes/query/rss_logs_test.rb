@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
 require("test_helper")
+require("query_extensions")
 
 # tests of Query::RssLogs class to be included in QueryTest
-module Query::RssLogsTest
+class Query::RssLogsTest < UnitTestCase
+  include QueryExtensions
+
   def test_rss_log_all
     ids = RssLog.index_order
     assert_query(ids, :RssLog)

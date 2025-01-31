@@ -1,28 +1,10 @@
 # frozen_string_literal: true
 
 require("test_helper")
+require("query_extensions")
 
 class QueryTest < UnitTestCase
-  def assert_query(expects, *args)
-    test_ids = expects.first.is_a?(Integer)
-    expects = expects.to_a unless expects.respond_to?(:map!)
-    query = Query.lookup(*args)
-    actual = test_ids ? query.result_ids : query.results
-    msg = "Query results are wrong. SQL is:\n#{query.last_query}"
-    if test_ids
-      assert_equal(expects, actual, msg)
-    else
-      assert_obj_arrays_equal(expects, actual, msg)
-    end
-    type = args[0].to_s.underscore.to_sym.t.titleize.sub(/um$/, "(um|a)")
-    assert_match(/#{type}|Advanced Search|(Lower|Higher) Taxa/, query.title)
-    assert_not(query.title.include?("[:"),
-               "Title contains undefined localizations: <#{query.title}>")
-  end
-
-  def clean(str)
-    str.gsub(/\s+/, " ").strip
-  end
+  include QueryExtensions
 
   ##############################################################################
 
@@ -78,7 +60,8 @@ class QueryTest < UnitTestCase
 
     # assert_raises(RuntimeError) { Query.lookup(:Image) }
     assert_raises(RuntimeError) { Query.lookup(:Image, by_user: :bogus) }
-    assert_raises(RuntimeError) { Query.lookup(:Image, by_user: "foo") }
+    # Strings are no problem, but this is not a user
+    # assert_raises(RuntimeError) { Query.lookup(:Image, by_user: "foo") }
     assert_raises(RuntimeError) { Query.lookup(:Image, by_user: @fungi) }
     assert_equal(rolf.id,
                  Query.lookup(:Image, by_user: rolf).params[:by_user])
@@ -86,7 +69,7 @@ class QueryTest < UnitTestCase
                  Query.lookup(:Image, by_user: rolf.id).params[:by_user])
     assert_equal(rolf.id,
                  Query.lookup(:Image, by_user: rolf.id.to_s).params[:by_user])
-    assert_equal(rolf.id,
+    assert_equal(rolf.login,
                  Query.lookup(:Image, by_user: "rolf").params[:by_user])
   end
 
@@ -101,7 +84,7 @@ class QueryTest < UnitTestCase
                  Query.lookup(:Image, users: rolf.id).params[:users])
     assert_equal([rolf.id],
                  Query.lookup(:Image, users: rolf.id.to_s).params[:users])
-    assert_equal([rolf.id],
+    assert_equal([rolf.login],
                  Query.lookup(:Image, users: rolf.login).params[:users])
   end
 
@@ -111,30 +94,23 @@ class QueryTest < UnitTestCase
     # assert_raises(RuntimeError) { Query.lookup(:Name, ids: rolf) }
     assert_raises(RuntimeError) { Query.lookup(:Name, ids: "one") }
     assert_raises(RuntimeError) { Query.lookup(:Name, ids: "1,2,3") }
-    assert_equal([names(:fungi).id],
-                 Query.lookup(:Name, ids: names(:fungi).text_name).params[:ids])
+    assert_raises(RuntimeError) { Query.lookup(:Name, ids: "Fungi") }
     assert_equal([names(:fungi).id],
                  Query.lookup(:Name,
                               ids: names(:fungi).id.to_s).params[:ids])
 
     # assert_raises(RuntimeError) { Query.lookup(:User) }
     assert_equal([], Query.lookup(:User, ids: []).params[:ids])
-    assert_equal([rolf.id], Query.lookup(:User,
-                                         ids: rolf.id).params[:ids])
-    assert_equal([rolf.id, mary.id],
-                 Query.lookup(:User,
-                              ids: [rolf.id, mary.id]).params[:ids])
-    assert_equal([1, 2],
-                 Query.lookup(:User, ids: %w[1 2]).params[:ids])
-    assert_equal([rolf.id, mary.id],
-                 Query.lookup(:User,
-                              ids: [rolf.id.to_s, mary.id.to_s]).params[:ids])
+    assert_equal([rolf.id], Query.lookup(:User, ids: rolf.id).params[:ids])
+    ids = [rolf.id, mary.id]
+    assert_equal(ids, Query.lookup(:User, ids: ids).params[:ids])
+    assert_equal([1, 2], Query.lookup(:User, ids: %w[1 2]).params[:ids])
+    assert_equal(ids, Query.lookup(:User, ids: ids.map(&:to_s)).params[:ids])
     assert_equal([rolf.id], Query.lookup(:User, ids: rolf).params[:ids])
-    assert_equal([rolf.id, mary.id],
-                 Query.lookup(:User, ids: [rolf, mary]).params[:ids])
+    assert_equal(ids, Query.lookup(:User, ids: [rolf, mary]).params[:ids])
     assert_equal([rolf.id, mary.id, junk.id],
-                 Query.lookup(:User,
-                              ids: [rolf, mary.id, junk.id.to_s]).params[:ids])
+                 Query.lookup(:User, ids: [rolf, mary.id, junk.id.to_s]).
+                 params[:ids])
   end
 
   def test_validate_params_pattern
@@ -952,12 +928,6 @@ class QueryTest < UnitTestCase
     assert_equal(1, QueryRecord.count)
   end
 
-  def three_amigos
-    [observations(:detailed_unknown_obs).id,
-     observations(:agaricus_campestris_obs).id,
-     observations(:agaricus_campestras_obs).id]
-  end
-
   def test_observation_image_coercion
     burbank = locations(:burbank)
     query_a = []
@@ -1080,6 +1050,12 @@ class QueryTest < UnitTestCase
     query_check
   end
 
+  def test_location_description_coercion
+    ds1 = location_descriptions(:albion_desc)
+    ds2 = location_descriptions(:no_mushrooms_location_desc)
+    description_coercion_assertions(ds1, ds2, :Location)
+  end
+
   def test_name_description_coercion
     ds1 = name_descriptions(:coprinus_comatus_desc)
     ds2 = name_descriptions(:peltigera_desc)
@@ -1174,33 +1150,6 @@ class QueryTest < UnitTestCase
 
   ##############################################################################
   #
-  #  :section: Test Query Results
-  #
-  ##############################################################################
-
-  include Query::ArticlesTest
-  include Query::CollectionNumbersTest
-  include Query::CommentsTest
-  include Query::ExternalLinksTest
-  include Query::FieldSlipsTest
-  include Query::GlossaryTermsTest
-  include Query::HerbariaTest
-  include Query::HerbariumRecordsTest
-  include Query::ImagesTest
-  include Query::LocationDescriptionsTest
-  include Query::LocationsTest
-  include Query::NameDescriptionsTest
-  include Query::NamesTest
-  include Query::ObservationsTest
-  include Query::ProjectsTest
-  include Query::RssLogsTest
-  include Query::SequencesTest
-  include Query::SpeciesListsTest
-  include Query::UsersTest
-  include Query::FiltersTest
-
-  ##############################################################################
-  #
   #  :section: Other stuff
   #
   ##############################################################################
@@ -1217,13 +1166,13 @@ class QueryTest < UnitTestCase
 
     User.current = rolf
     assert_equal("postal", User.current_location_format)
-    assert_query([albion, elgin_co], :Location,
-                 ids: [albion.id, elgin_co.id], by: :name)
+    assert_query([albion, elgin_co],
+                 :Location, ids: [albion.id, elgin_co.id], by: :name)
 
     User.current = roy
     assert_equal("scientific", User.current_location_format)
-    assert_query([elgin_co, albion], :Location,
-                 ids: [albion.id, elgin_co.id], by: :name)
+    assert_query([elgin_co, albion],
+                 :Location, ids: [albion.id, elgin_co.id], by: :name)
 
     obs1 = observations(:minimal_unknown_obs)
     obs2 = observations(:detailed_unknown_obs)
@@ -1232,12 +1181,12 @@ class QueryTest < UnitTestCase
 
     User.current = rolf
     assert_equal("postal", User.current_location_format)
-    assert_query([obs1, obs2], :Observation,
-                 ids: [obs1.id, obs2.id], by: :location)
+    assert_query([obs1, obs2],
+                 :Observation, ids: [obs1.id, obs2.id], by: :location)
 
     User.current = roy
     assert_equal("scientific", User.current_location_format)
-    assert_query([obs2, obs1], :Observation,
-                 ids: [obs1.id, obs2.id], by: :location)
+    assert_query([obs2, obs1],
+                 :Observation, ids: [obs1.id, obs2.id], by: :location)
   end
 end

@@ -7,7 +7,7 @@ class Query::ExternalSites < Query::Base
 
   def parameter_declarations
     super.merge(
-      name?: :string
+      name: :string
     )
   end
 

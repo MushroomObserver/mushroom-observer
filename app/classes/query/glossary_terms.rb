@@ -7,12 +7,12 @@ class Query::GlossaryTerms < Query::Base
 
   def parameter_declarations
     super.merge(
-      created_at?: [:time],
-      updated_at?: [:time],
-      users?: [User],
-      name_has?: :string,
-      description_has?: :string,
-      pattern?: :string
+      created_at: [:time],
+      updated_at: [:time],
+      users: [User],
+      name_has: :string,
+      description_has: :string,
+      pattern: :string
     )
   end
 

@@ -7,21 +7,21 @@ class Query::Projects < Query::Base
 
   def parameter_declarations
     super.merge(
-      created_at?: [:time],
-      updated_at?: [:time],
-      users?: [User],
-      ids?: [Project],
-      with_images?: { boolean: [true] },
-      with_observations?: { boolean: [true] },
-      with_species_lists?: { boolean: [true] },
-      with_comments?: { boolean: [true] },
-      with_summary?: :boolean,
-      title_has?: :string,
-      summary_has?: :string,
-      field_slip_prefix_has?: :string,
-      comments_has?: :string,
-      member?: User,
-      pattern?: :string
+      created_at: [:time],
+      updated_at: [:time],
+      users: [User],
+      ids: [Project],
+      with_images: { boolean: [true] },
+      with_observations: { boolean: [true] },
+      with_species_lists: { boolean: [true] },
+      with_comments: { boolean: [true] },
+      with_summary: :boolean,
+      title_has: :string,
+      summary_has: :string,
+      field_slip_prefix_has: :string,
+      comments_has: :string,
+      member: User,
+      pattern: :string
     )
   end
 

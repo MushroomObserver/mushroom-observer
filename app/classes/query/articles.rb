@@ -7,12 +7,12 @@ class Query::Articles < Query::Base
 
   def parameter_declarations
     super.merge(
-      created_at?: [:time],
-      updated_at?: [:time],
-      users?: [User],
-      ids?: [Article],
-      title_has?: :string,
-      body_has?: :string
+      created_at: [:time],
+      updated_at: [:time],
+      users: [User],
+      ids: [Article],
+      title_has: :string,
+      body_has: :string
     )
   end
 
