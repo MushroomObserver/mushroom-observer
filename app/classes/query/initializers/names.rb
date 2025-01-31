@@ -141,8 +141,8 @@ module Query::Initializers::Names
 
   def initialize_name_parameters_for_name_queries
     # Much simpler form for non-observation-based name queries.
-    add_id_condition("names.id",
-                     lookup_names_by_name(params[:names], names_parameters))
+    ids = lookup_names_by_name(params[:names], names_parameters)
+    add_id_condition("names.id", ids)
   end
 
   # Copy only the names_parameters into a name_params hash we use here.
@@ -150,7 +150,7 @@ module Query::Initializers::Names
     name_params = names_parameter_declarations.dup
     name_params.transform_keys! { |k| k.to_s.chomp("?").to_sym }
     name_params.each_key { |k| name_params[k] = params[k] }
-    name_params.except(:names)
+    name_params.except(:names).compact
   end
 
   # ------------------------------------------------------------------------
