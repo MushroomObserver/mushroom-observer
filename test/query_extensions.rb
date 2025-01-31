@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-# helpers for of QueryTests and subclass tests
+# helpers for QueryTest and subclass tests
 module QueryExtensions
   def assert_query(expects, *args)
     test_ids = expects.first.is_a?(Integer)
