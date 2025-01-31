@@ -12,7 +12,7 @@ module Query::Params::Observations
       users?: [User],
       by_user?: User,
       by_editor?: User, # for coercions from name/location
-      field_slips?: [FieldSlip],
+      field_slips?: [:string],
       herbarium_records?: [HerbariumRecord],
       project_lists?: [Project],
       needs_naming?: :boolean,
