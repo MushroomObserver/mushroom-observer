@@ -28,7 +28,7 @@ module Query::Modules::Associations
     ids       = clean_id_set(lookup_locations_by_name(vals))
     cond      = "#{loc_col} IN (#{ids})"
     vals.each do |val|
-      if /\D/.match?(val)
+      if /\D/.match?(val.to_s)
         pattern = clean_pattern(val)
         cond += " OR #{where_col} LIKE '%#{pattern}%'"
       end

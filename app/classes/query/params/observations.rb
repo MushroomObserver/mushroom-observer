@@ -13,8 +13,8 @@ module Query::Params::Observations
       by_user?: User,
       by_editor?: User, # for coercions from name/location
       field_slips?: [:string],
-      herbarium_records?: [:string],
-      project_lists?: [:string],
+      herbarium_records?: [HerbariumRecord],
+      project_lists?: [Project],
       needs_naming?: :boolean,
       in_clade?: :string,
       in_region?: :string,
@@ -29,7 +29,7 @@ module Query::Params::Observations
       with_name?: :boolean,
       confidence?: [:float],
       location?: Location,
-      locations?: [:string],
+      locations?: [Location],
       user_where?: :string,
       is_collection_location?: :boolean,
       with_public_lat_lng?: :boolean,
@@ -40,11 +40,11 @@ module Query::Params::Observations
       with_comments?: { boolean: [true] },
       comments_has?: :string,
       with_sequences?: { boolean: [true] },
-      herbaria?: [:string],
+      herbaria?: [Herbarium],
       project?: Project,
-      projects?: [:string],
+      projects?: [Project],
       species_list?: SpeciesList,
-      species_lists?: [:string]
+      species_lists?: [SpeciesList]
     }
   end
 

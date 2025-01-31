@@ -11,7 +11,7 @@ class Query::CollectionNumbers < Query::Base
       updated_at?: [:time],
       users?: [User],
       observation?: Observation,
-      observations?: [:string],
+      observations?: [Observation],
       pattern?: :string,
       name?: [:string],
       number?: [:string],

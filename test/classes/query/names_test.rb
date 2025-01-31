@@ -56,11 +56,6 @@ class Query::NamesTest < UnitTestCase
                  :Name, ids: names_set)
   end
 
-  def test_name_ids_with_name_search_names
-    assert_query(names_set.map(&:id),
-                 :Name, ids: names_set.map(&:search_name))
-  end
-
   def test_name_by_user
     assert_query(Name.index_order.where(user: mary).with_correct_spelling,
                  :Name, by_user: mary)

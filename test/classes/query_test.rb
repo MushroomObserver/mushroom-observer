@@ -60,7 +60,8 @@ class QueryTest < UnitTestCase
 
     # assert_raises(RuntimeError) { Query.lookup(:Image) }
     assert_raises(RuntimeError) { Query.lookup(:Image, by_user: :bogus) }
-    assert_raises(RuntimeError) { Query.lookup(:Image, by_user: "foo") }
+    # Strings are no problem, but this is not a user
+    # assert_raises(RuntimeError) { Query.lookup(:Image, by_user: "foo") }
     assert_raises(RuntimeError) { Query.lookup(:Image, by_user: @fungi) }
     assert_equal(rolf.id,
                  Query.lookup(:Image, by_user: rolf).params[:by_user])
@@ -68,7 +69,7 @@ class QueryTest < UnitTestCase
                  Query.lookup(:Image, by_user: rolf.id).params[:by_user])
     assert_equal(rolf.id,
                  Query.lookup(:Image, by_user: rolf.id.to_s).params[:by_user])
-    assert_equal(rolf.id,
+    assert_equal(rolf.login,
                  Query.lookup(:Image, by_user: "rolf").params[:by_user])
   end
 
@@ -83,7 +84,7 @@ class QueryTest < UnitTestCase
                  Query.lookup(:Image, users: rolf.id).params[:users])
     assert_equal([rolf.id],
                  Query.lookup(:Image, users: rolf.id.to_s).params[:users])
-    assert_equal([rolf.id],
+    assert_equal([rolf.login],
                  Query.lookup(:Image, users: rolf.login).params[:users])
   end
 
@@ -93,30 +94,23 @@ class QueryTest < UnitTestCase
     # assert_raises(RuntimeError) { Query.lookup(:Name, ids: rolf) }
     assert_raises(RuntimeError) { Query.lookup(:Name, ids: "one") }
     assert_raises(RuntimeError) { Query.lookup(:Name, ids: "1,2,3") }
-    assert_equal([names(:fungi).id],
-                 Query.lookup(:Name, ids: names(:fungi).text_name).params[:ids])
+    assert_raises(RuntimeError) { Query.lookup(:Name, ids: "Fungi") }
     assert_equal([names(:fungi).id],
                  Query.lookup(:Name,
                               ids: names(:fungi).id.to_s).params[:ids])
 
     # assert_raises(RuntimeError) { Query.lookup(:User) }
     assert_equal([], Query.lookup(:User, ids: []).params[:ids])
-    assert_equal([rolf.id], Query.lookup(:User,
-                                         ids: rolf.id).params[:ids])
-    assert_equal([rolf.id, mary.id],
-                 Query.lookup(:User,
-                              ids: [rolf.id, mary.id]).params[:ids])
-    assert_equal([1, 2],
-                 Query.lookup(:User, ids: %w[1 2]).params[:ids])
-    assert_equal([rolf.id, mary.id],
-                 Query.lookup(:User,
-                              ids: [rolf.id.to_s, mary.id.to_s]).params[:ids])
+    assert_equal([rolf.id], Query.lookup(:User, ids: rolf.id).params[:ids])
+    ids = [rolf.id, mary.id]
+    assert_equal(ids, Query.lookup(:User, ids: ids).params[:ids])
+    assert_equal([1, 2], Query.lookup(:User, ids: %w[1 2]).params[:ids])
+    assert_equal(ids, Query.lookup(:User, ids: ids.map(&:to_s)).params[:ids])
     assert_equal([rolf.id], Query.lookup(:User, ids: rolf).params[:ids])
-    assert_equal([rolf.id, mary.id],
-                 Query.lookup(:User, ids: [rolf, mary]).params[:ids])
+    assert_equal(ids, Query.lookup(:User, ids: [rolf, mary]).params[:ids])
     assert_equal([rolf.id, mary.id, junk.id],
-                 Query.lookup(:User,
-                              ids: [rolf, mary.id, junk.id.to_s]).params[:ids])
+                 Query.lookup(:User, ids: [rolf, mary.id, junk.id.to_s]).
+                 params[:ids])
   end
 
   def test_validate_params_pattern

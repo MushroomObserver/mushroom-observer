@@ -45,16 +45,19 @@ class API2::NamesTest < UnitTestCase
     assert_api_results(names)
   end
 
-  def test_getting_names_text_name
+  def test_getting_names_name_with_two_versions
     names = Name.with_correct_spelling.where(text_name: "Lentinellus ursinus")
     assert_not_empty(names)
     assert_api_fail(name_get_params.merge(name: "Lentinellus ursinus"))
-    assert_api_pass(name_get_params.merge(name: "Lentinellus ursinus Kühner,
-                                                 Lentinellus ursinus Kuhner"))
+    assert_api_pass(
+      name_get_params.merge(
+        name: "Lentinellus ursinus Kühner, Lentinellus ursinus Kuhner"
+      )
+    )
     assert_api_results(names)
   end
 
-  def test_getting_names_with_synonyms
+  def test_getting_names_name_with_synonyms
     names = names(:lactarius_alpinus).synonyms.sort_by(&:id).
             reject(&:correct_spelling_id)
     assert_not_empty(names)
@@ -65,7 +68,7 @@ class API2::NamesTest < UnitTestCase
     assert_api_results(names)
   end
 
-  def test_getting_names_classification
+  def test_getting_names_name_includes_subtaxa
     names = Name.with_correct_spelling.classification_contains("Fungi").
             map do |n|
       genus = n.text_name.split.first
