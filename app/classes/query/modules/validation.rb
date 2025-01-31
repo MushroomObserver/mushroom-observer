@@ -14,17 +14,39 @@ module Query::Modules::Validation
     @params = new_params
   end
 
-  def validate_param(old_params, new_params, param, param_type)
-    val = pop_param_value(old_params, param)
-    val = validate_value(param_type, param, val) if val.present?
-    new_params[param] = val
+  def validate_param(old_params, new_params, param_sym, param_type)
+    param = param_sym.to_s.sub(/\?$/, "").to_sym
+    optional = (param != param_sym)
+    begin
+      val = pop_param_value(old_params, param)
+      val = validate_value(param_type, param, val) if val.present?
+      if !val.nil?
+        new_params[param] = val
+      elsif !optional
+        raise(
+          "Missing :#{param} parameter for #{model} query."
+        )
+      else
+        new_params[param] = nil
+      end
+    rescue MissingValue
+      unless optional
+        raise(
+          "Missing :#{param} parameter for #{model} query."
+        )
+      end
+    end
   end
+
+  class MissingValue < RuntimeError; end
 
   def pop_param_value(old_params, param)
     if old_params.key?(param)
       val = old_params[param]
     elsif old_params.key?(param.to_s)
       val = old_params[param.to_s]
+    else
+      raise(MissingValue.new)
     end
     old_params.delete(param)
     old_params.delete(param.to_s)
