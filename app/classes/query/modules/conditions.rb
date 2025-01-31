@@ -110,8 +110,6 @@ module Query::Modules::Conditions
   def add_ids_condition(table = model.table_name, ids = :ids)
     return if params[ids].nil? # [] is valid
 
-    # account for instances
-    # ids = params[ids].map { |val| val.is_a?(AbstractModel) ? val.id : val }
     set = clean_id_set(params[ids])
     @where << "#{table}.id IN (#{set})"
     self.order = "FIND_IN_SET(#{table}.id,'#{set}') ASC"
@@ -125,8 +123,6 @@ module Query::Modules::Conditions
   def add_id_condition(col, ids, *)
     return if ids.empty?
 
-    # validation accounts for instances?
-    # ids.map! { |val| val.is_a?(AbstractModel) ? val.id : val }
     set = clean_id_set(ids)
     @where << "#{col} IN (#{set})"
     add_joins(*)
@@ -135,7 +131,6 @@ module Query::Modules::Conditions
   def add_not_id_condition(col, ids, *)
     return if ids.empty?
 
-    # ids.map! { |val| val.is_a?(AbstractModel) ? val.id : val }
     set = clean_id_set(ids)
     @where << "#{col} NOT IN (#{set})"
     add_joins(*)
