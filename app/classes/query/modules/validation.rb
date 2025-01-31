@@ -166,7 +166,7 @@ module Query::Modules::Validation
     elsif could_be_record_id?(val)
       val.to_i
     elsif val.is_a?(String)
-      lookup_record_by_name(type, val).id
+      val # lookup_record_by_name(type, val).id
     else
       raise("Value for :#{arg} should be id, string or an #{type} instance, " \
             "got: #{val.inspect}")
