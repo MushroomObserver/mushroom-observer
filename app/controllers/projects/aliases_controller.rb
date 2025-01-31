@@ -92,7 +92,7 @@ module Projects
       render(
         partial: "shared/modal_form",
         locals: { title: "Modal Title", identifier: modal_identifier,
-                  form: "projects/aliases/form" }
+                  form: "projects/aliases/form", project_alias: @project_alias }
       ) and return
     end
 

@@ -53,8 +53,14 @@ module ProjectsHelper
       modal_link_to(
         "project_alias_#{id}", name,
         add_query_param(edit_project_alias_path(project_id:, id:)),
-        class: "#{tab_id(__method__.to_s)}_#{id}")
+        class: unique_class_id(id))
     end
+  end
+
+  def unique_class_id(id)
+    @@counter ||= 0
+    @@counter += 1
+    "tab_#{@@counter}_#{id}"
   end
 
   #########
