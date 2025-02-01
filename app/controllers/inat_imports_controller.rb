@@ -68,7 +68,8 @@ class InatImportsController < ApplicationController
   API_BASE = "https://api.inaturalist.org/v1"
 
   def show
-    @tracker = InatImportJobTracker.find(params[:tracker_id])
+    @tracker = InatImportJobTracker.where(params[:id]).
+               order(created_at: :asc).last
     @inat_import = InatImport.find(@tracker.inat_import)
   end
 
