@@ -6,7 +6,11 @@ module InatImports
 
     # This is only a Turbo endpoint updating the display of the status of a job.
     def show
-      return unless (@tracker = InatImportJobTracker.find(params[:id]))
+      # Trackers are created in the background and not automatically deleted
+      # when the job is done. So we need to find the last one.
+      @tracker = InatImportJobTracker.where(params[:id]).
+                 order(created_at: :asc).last
+      return unless @tracker
 
       respond_to do |format|
         format.turbo_stream do
