@@ -4,32 +4,32 @@
       tag.span(class: "font-weight-bold") do
         "#{:inat_import_tracker_status.t}: "
       end,
-      tag.span(@tracker.status,
+      tag.span(tracker.status,
                data: { inat_import_job_target: "status",
-                       status: @tracker.status }),
+                       status: tracker.status }),
 
       tag.br,
       tag.span(class: "font-weight-bold") do
         "#{:inat_import_imported.t}: "
       end,
-      tag.span(@tracker.imported_count,
+      tag.span(tracker.imported_count,
                data: { inat_import_job_target: "imported",
-                       imported: @tracker.imported_count }),
+                       imported: tracker.imported_count }),
       tag.span(class: "mr-2") do
         " #{:of.t}"
       end,
-      tag.span(@tracker.importables,
+      tag.span(tracker.importables,
           data: { inat_import_job_target: "importables",
-                  importables: @tracker.importables }),
+                  importables: tracker.importables }),
       tag.span(" #{:observations.t}"),
 
       tag.br,
       tag.span(class: "font-weight-bold") do
         "#{:inat_import_tracker_started.t}: "
       end,
-      tag.span(@tracker.created_at,
+      tag.span(tracker.created_at,
                data: { inat_import_job_target: "started",
-                       started: @tracker.created_at }),
+                       started: tracker.created_at }),
     ].safe_join
   end
 %>
