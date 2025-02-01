@@ -184,7 +184,7 @@ module Tabs
 
     # NOTE: coerced_query_tab returns an array
     def observations_coerced_query_tabs(query)
-      [coerced_location_query_tab(query),
+      [CoercedQueryTab.new(query, Location).tab,
        coerced_name_query_tab(query),
        coerced_image_query_tab(query)]
     end

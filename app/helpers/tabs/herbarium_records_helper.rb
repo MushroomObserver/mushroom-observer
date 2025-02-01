@@ -72,9 +72,9 @@ module Tabs
       # next and index from there to navigate through all the rest for this obs.
       hr_query = Query.lookup(:HerbariumRecord, observations: obs.id)
 
-      [h_r.accession_at_herbarium.t,
-       add_query_param(h_r.show_link_args, hr_query),
-       { class: "#{tab_id(__method__.to_s)}_#{h_r.id}" }]
+      ModelTab.new(h_r.accession_at_herbarium.t, h_r,
+                   add_query_param(h_r.show_link_args, hr_query),
+                   alt_title: "herbarium_record").tab
     end
 
     def new_herbarium_record_tab(obs)
@@ -102,11 +102,12 @@ module Tabs
     end
 
     def remove_herbarium_record_tab(h_r, obs)
-      [:REMOVE.t,
-       add_query_param(edit_herbarium_record_remove_observation_path(
-                         herbarium_record_id: h_r.id, observation_id: obs.id
-                       )),
-       { class: "#{tab_id(__method__.to_s)}_#{h_r.id}", icon: :remove }]
+      url = add_query_param(edit_herbarium_record_remove_observation_path(
+                              herbarium_record_id: h_r.id,
+                              observation_id: obs.id
+                            ))
+      ModelTab.new(:REMOVE.t, h_r, url,
+                   html_options: { icon: :remove }).tab
     end
   end
 end

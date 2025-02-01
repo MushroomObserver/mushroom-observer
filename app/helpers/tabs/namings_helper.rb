@@ -13,13 +13,14 @@ module Tabs
     end
 
     def edit_naming_tab(naming)
-      [:EDIT.l,
-       add_query_param(
-         edit_observation_naming_path(
-           observation_id: naming.observation_id, id: naming.id
-         )
-       ),
-       { class: "#{tab_id(__method__.to_s)}_#{naming.id}", icon: :edit }]
+      ModelTab.new(:EDIT.l,
+                   naming,
+                   add_query_param(
+                     edit_observation_naming_path(
+                       observation_id: naming.observation_id, id: naming.id
+                     )
+                   ),
+                   html_options: { icon: :edit }).tab
     end
   end
 end
