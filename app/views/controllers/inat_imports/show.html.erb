@@ -10,14 +10,14 @@
 %>
 
 <% if @inat_import.response_errors.present? %>
-<p>
-  <b><%= :ERRORS.t %>: </b>
-  <%= tag.span(id: "errors", class: "violation-highlight") do %>
-  <% @inat_import.response_errors.each_line do |error| %>
-  <%= error %></br>
-  <% end %>
-  <% end %>
-</p>
+  <p>
+    <b><%= :ERRORS.t %>: </b>
+    <%= tag.span(id: "errors", class: "violation-highlight") do %>
+      <% @inat_import.response_errors.each_line do |error| %>
+        <%= error %></br>
+      <% end %>
+    <% end %>
+  </p>
 <% end %>
 
 <%# Display refresh button if job is incomplete%>
@@ -31,8 +31,8 @@
 
 <p>
   <% if import_done?(@inat_import) %>
-  <%= link_to(:app_your_observations.l,
-                observations_path(by_user: User.current.id),
-                { class: "btn btn-default" } ) %>
+    <%= link_to(:app_your_observations.l,
+                  observations_path(by_user: User.current.id),
+                  { class: "btn btn-default" } ) %>
   <% end %>
 </p>
