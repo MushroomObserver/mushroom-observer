@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
 require("test_helper")
+require("query_extensions")
 
 # tests of Query::Articles class to be included in QueryTest
-module Query::ArticlesTest
+class Query::ArticlesTest < UnitTestCase
+  include QueryExtensions
+
   def test_article_all
     expects = Article.index_order
     assert_query(expects, :Article)

@@ -91,14 +91,14 @@
 #  found_after("yyyymmdd")
 #  found_before("yyyymmdd")
 #  found_between(start, end)
-#  of_name(name)
-#  of_name_like(string)
+#  of_names(name)
+#  of_names_like(string)
 #  with_name
 #  without_name
 #  by_user(user)
 #  with_location
 #  without_location
-#  at_location(location)
+#  at_locations(location)
 #  in_region(where)
 #  in_box(north:, south:, east:, west:) geoloc is in the box
 #  not_in_box(north:, south:, east:, west:) geoloc is outside the box
@@ -118,11 +118,11 @@
 #  with_comments
 #  without_comments
 #  comments_contain(summary)
-#  for_project(project)
-#  in_herbarium(herbarium)
+#  for_projects(project)
+#  in_herbaria(herbaria)
 #  herbarium_record_notes_contain(notes)
-#  on_species_list(species_list)
-#  on_species_list_of_project(project)
+#  on_species_lists(species_list)
+#  on_projects_species_lists(project)
 #
 #  == Instance methods
 #

@@ -13,7 +13,6 @@ class Query::Base
   include Query::Modules::Initialization
   include Query::Modules::Joining
   include Query::Modules::LookupObjects
-  include Query::Modules::LookupNames
   include Query::Modules::LowLevelQueries
   include Query::Modules::NestedQueries
   include Query::Modules::Ordering
@@ -25,13 +24,13 @@ class Query::Base
 
   def parameter_declarations
     {
-      join?: [:string],
-      tables?: [:string],
-      where?: [:string],
-      group?: :string,
-      order?: :string,
-      by?: :string,
-      title?: [:string]
+      join: [:string],
+      tables: [:string],
+      where: [:string],
+      group: :string,
+      order: :string,
+      by: :string,
+      title: [:string]
     }
   end
 

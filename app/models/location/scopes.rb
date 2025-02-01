@@ -12,6 +12,17 @@ module Location::Scopes
     scope :index_order,
           -> { order(name: :asc, id: :desc) }
 
+    scope :in_regions, lambda { |place_names|
+      place_names = [place_names].flatten
+      if place_names.length > 1
+        starting = in_region(place_names.shift)
+        place_names.reduce(starting) do |result, place_name|
+          result.or(Location.in_region(place_name))
+        end
+      else
+        in_region(place_names.first)
+      end
+    }
     scope :in_region, lambda { |place_name|
       region = Location.reverse_name_if_necessary(place_name)
 
@@ -24,12 +35,19 @@ module Location::Scopes
     }
     scope :name_contains,
           ->(phrase) { search_columns(Location[:name], phrase) }
-    scope :with_notes,
-          -> { where(Location[:notes].not_blank) }
+
+    scope :with_notes, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
+        where(Location[:notes].not_blank)
+      else
+        without_notes
+      end
+    }
     scope :without_notes,
           -> { where(Location[:notes].blank) }
     scope :notes_contain,
           ->(phrase) { search_columns(Location[:notes], phrase) }
+
     scope :search_content,
           ->(phrase) { search_columns(Location.searchable_columns, phrase) }
     # Location[:name] + descriptions, Observation[:notes] + comments
@@ -48,8 +66,13 @@ module Location::Scopes
     }
     # We do not yet support location comment queries.
 
-    scope :with_description,
-          -> { where.not(description_id: nil) }
+    scope :with_description, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
+        where.not(description_id: nil)
+      else
+        without_description
+      end
+    }
     scope :without_description,
           -> { where(description_id: nil) }
     scope :description_contains, lambda { |phrase|
@@ -57,16 +80,19 @@ module Location::Scopes
         merge(LocationDescription.search_content(phrase)).distinct
     }
     scope :with_description_created_by, lambda { |user|
-      joins(:descriptions).merge(LocationDescription.where(user: user))
+      joins(:descriptions).
+        merge(LocationDescription.where(user: user)).distinct
     }
     scope :with_description_reviewed_by, lambda { |user|
-      joins(:descriptions).merge(LocationDescription.where(reviewer: user))
+      joins(:descriptions).
+        merge(LocationDescription.where(reviewer: user)).distinct
     }
     scope :with_description_of_type, lambda { |source|
       # Check that it's a valid source type (string enum value)
       return none if Description::ALL_SOURCE_TYPES.exclude?(source)
 
-      joins(:descriptions).merge(LocationDescription.where(source_type: source))
+      joins(:descriptions).
+        merge(LocationDescription.where(source_type: source)).distinct
     }
 
     # Returns locations whose bounding box is entirely within the given box.

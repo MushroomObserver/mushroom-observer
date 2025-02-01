@@ -7,16 +7,16 @@ class Query::CollectionNumbers < Query::Base
 
   def parameter_declarations
     super.merge(
-      created_at?: [:time],
-      updated_at?: [:time],
-      users?: [User],
-      observation?: Observation,
-      observations?: [:string],
-      pattern?: :string,
-      name?: [:string],
-      number?: [:string],
-      name_has?: :string,
-      number_has?: :string
+      created_at: [:time],
+      updated_at: [:time],
+      users: [User],
+      observation: Observation,
+      observations: [Observation],
+      pattern: :string,
+      name: [:string],
+      number: [:string],
+      name_has: :string,
+      number_has: :string
     )
   end
 

@@ -10,17 +10,17 @@ class Query::NameDescriptions < Query::Base
 
   def parameter_declarations
     super.merge(
-      created_at?: [:time],
-      updated_at?: [:time],
-      ids?: [NameDescription],
-      by_user?: User,
-      by_author?: User,
-      by_editor?: User,
-      old_by?: :string,
-      users?: [User],
-      names?: [Name],
-      public?: :boolean,
-      with_descriptions?: :boolean
+      created_at: [:time],
+      updated_at: [:time],
+      ids: [NameDescription],
+      by_user: User,
+      by_author: User,
+      by_editor: User,
+      old_by: :string,
+      users: [User],
+      names: [Name],
+      public: :boolean,
+      with_descriptions: :boolean
     ).merge(name_descriptions_parameter_declarations)
   end
 
@@ -31,7 +31,7 @@ class Query::NameDescriptions < Query::Base
     add_by_user_condition
     add_desc_by_author_condition(:name)
     add_desc_by_editor_condition(:name)
-    names = lookup_names_by_name(names: params[:names])
+    names = lookup_names_by_name(params[:names])
     add_id_condition("name_descriptions.name_id", names)
     initialize_description_public_parameter(:name)
     initialize_name_descriptions_parameters

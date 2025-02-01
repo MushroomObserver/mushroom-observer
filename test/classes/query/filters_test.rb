@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
 require("test_helper")
+require("query_extensions")
 
 # tests of Filter class to be included in QueryTest
 module Query::FiltersTest
+  include QueryExtensions
+
   def test_filters
     assert_equal([:with_images, :with_specimen, :lichen, :region, :clade],
                  Query::Filter.all.map(&:sym))

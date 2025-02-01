@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module PatternSearch
-  # Base class for PatternSearch; handles everything but build_query
+  # Base class for PatternSearch; handles everything plus build_query
   class Base
     attr_accessor :errors, :parser, :flavor, :args, :query, :form_params
 

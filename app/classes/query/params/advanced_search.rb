@@ -6,11 +6,11 @@ module Query::Params::AdvancedSearch
   # But sometimes you're looking for strings that aren't ids.
   def advanced_search_parameter_declarations
     {
-      name?: :string,
-      user_where?: :string,
-      user?: :string,
-      content?: :string,
-      search_location_notes?: :boolean
+      name: :string,
+      user_where: :string,
+      user: :string,
+      content: :string,
+      search_location_notes: :boolean
     }
   end
 

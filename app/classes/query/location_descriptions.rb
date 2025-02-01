@@ -10,17 +10,17 @@ class Query::LocationDescriptions < Query::Base
 
   def parameter_declarations
     super.merge(
-      created_at?: [:time],
-      updated_at?: [:time],
-      ids?: [LocationDescription],
-      by_user?: User,
-      by_author?: User,
-      by_editor?: User,
-      old_by?: :string,
-      users?: [User],
-      locations?: [Location],
-      public?: :boolean,
-      with_descriptions?: :boolean
+      created_at: [:time],
+      updated_at: [:time],
+      ids: [LocationDescription],
+      by_user: User,
+      by_author: User,
+      by_editor: User,
+      old_by: :string,
+      users: [User],
+      locations: [Location],
+      public: :boolean,
+      with_descriptions: :boolean
     )
   end
 
