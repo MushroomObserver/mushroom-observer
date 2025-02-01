@@ -3,29 +3,32 @@
           data: { controller: "field-slip-job",
                   endpoint: inat_import_job_tracker_path(tracker.id) }) do
     [
-      tag.span(class: "font-weight-bold") do
-        "#{:inat_import_tracker_status.t}: "
+      tag.p do
+        [
+          # Status: <status>
+          tag.span(class: "font-weight-bold") do
+            "#{:inat_import_tracker_status.t}: "
+          end,
+          tag.span(tracker.status,
+                   data: { inat_import_job_target: "status",
+                           status: tracker.status }),
+          tag.br,
+          # Imported n of m observations
+          tag.span(class: "font-weight-bold") do
+                   "#{:inat_import_imported.t}: "
+          end,
+          tag.span(tracker.imported_count,
+                   data: { inat_import_job_target: "imported",
+                           imported: tracker.imported_count }),
+          tag.span(class: "mr-2") { " #{:of.t}" },
+          tag.span(tracker.importables,
+                   data: { inat_import_job_target: "importables",
+                           importables: tracker.importables }),
+          tag.span(" #{:observations.t}")
+        ].safe_join
       end,
-      tag.span(tracker.status,
-               data: { inat_import_job_target: "status",
-                       status: tracker.status }),
 
-      tag.br,
-      tag.span(class: "font-weight-bold") do
-        "#{:inat_import_imported.t}: "
-      end,
-      tag.span(tracker.imported_count,
-               data: { inat_import_job_target: "imported",
-                       imported: tracker.imported_count }),
-      tag.span(class: "mr-2") do
-        " #{:of.t}"
-      end,
-      tag.span(tracker.importables,
-          data: { inat_import_job_target: "importables",
-                  importables: tracker.importables }),
-      tag.span(" #{:observations.t}"),
-
-      tag.br,
+      # Started: yyyy-mm-dd hh:mm:ss -nnnn
       tag.span(class: "font-weight-bold") do
         "#{:inat_import_tracker_started.t}: "
       end,
