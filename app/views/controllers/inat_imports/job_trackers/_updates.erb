@@ -12,23 +12,18 @@
       tag.span(class: "font-weight-bold") do
         "#{:inat_import_imported.t}: "
       end,
-      tag.span() do
-        "n"
+      tag.span(@tracker.imported_count,
+               data: { inat_import_job_target: "imported",
+                       imported: @tracker.imported_count }),
+      tag.span(class: "mr-2") do
+        " #{:of.t}"
       end,
-      tag.span() do
-        " #{:of.t} "
-      end,
-      tag.span() do
-        "m"
-      end,
-      tag.span() do
-        "#{:observations.t}"
-      end,
+      tag.span(@tracker.importables,
+          data: { inat_import_job_target: "importables",
+                  importables: @tracker.importables }),
+      tag.span(" #{:observations.t}"),
 
       tag.br,
-      tag.span(class: "font-weight-bold") do
-        "#{:inat_import_tracker_status.t}: "
-      end,
       tag.span(class: "font-weight-bold") do
         "#{:inat_import_tracker_started.t}: "
       end,
