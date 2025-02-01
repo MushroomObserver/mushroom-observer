@@ -1,5 +1,7 @@
 <%=
-  tag.div(id: "updates") do
+  tag.div(id: "updates",
+          data: { controller: "field-slip-job",
+                  endpoint: inat_import_job_tracker_path(tracker.id) }) do
     [
       tag.span(class: "font-weight-bold") do
         "#{:inat_import_tracker_status.t}: "
