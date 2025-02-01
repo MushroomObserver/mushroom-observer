@@ -441,7 +441,7 @@ class Name < AbstractModel
   attr_accessor :misspelling
 
   SEARCHABLE_FIELDS = [
-    :text_name, :classification, :author, :citation, :notes
+    :search_name, :citation, :notes
   ].freeze
 
   # (Create should not be logged at all.  Update is already logged with more
