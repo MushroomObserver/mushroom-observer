@@ -67,7 +67,7 @@ module Query::Scopes::Names
     # a, b = b, a if a > b
     # ranks = all_ranks[a..b].map { |r| Name.ranks[r] }
     # @where << "names.`rank` IN (#{ranks.join(",")})"
-    @scopes = @scopes.with_rank_between(min, max)
+    @scopes = @scopes.rank(min, max)
     @scopes = @scopes.joins(joins) if joins
   end
 
