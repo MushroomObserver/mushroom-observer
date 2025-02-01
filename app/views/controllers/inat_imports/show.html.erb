@@ -30,16 +30,6 @@
 <% end %>
 
 <p>
-  <b><%= :inat_import_tracker_imported_count.t %>: </b>
-  <span id="imported_count"><%= @inat_import.imported_count.to_s %></span>
-</p>
-<p>
-  <b><%= :inat_import_tracker_importable_count.t %>: </b>
-  <span id="importables_count"><%= @inat_import.importables.to_s %></span>
-</p>
-<p><%= :inat_importables_explanation.t %></p>
-
-<p>
   <% if import_done?(@inat_import) %>
   <%= link_to(:app_your_observations.l,
                 observations_path(by_user: User.current.id),
