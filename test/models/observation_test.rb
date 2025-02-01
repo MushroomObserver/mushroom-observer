@@ -1447,10 +1447,12 @@ class ObservationTest < UnitTestCase
                     observations(:minimal_unknown_obs))
     assert_includes(Observation.confidence(0, 1),
                     observations(:minimal_unknown_obs))
-    assert_includes(Observation.confidence(75, 100),
+    assert_includes(Observation.confidence(2.4, 3),
                     observations(:peltigera_obs))
-    assert_equal(Observation.count, Observation.confidence(-100, 100).count)
-    assert_empty(Observation.confidence(102, 103))
+    assert_includes(Observation.confidence([2.4, 3]), # array
+                    observations(:peltigera_obs))
+    assert_equal(Observation.count, Observation.confidence(-3, 3).count)
+    assert_empty(Observation.confidence(3.1, 3.2))
   end
 
   def test_scope_without_comments

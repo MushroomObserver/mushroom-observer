@@ -124,13 +124,15 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
           ->(phrase) { search_columns(Name[:notes], phrase) }
 
     ### Module Name::Taxonomy. Rank scopes take text values, e.g. "Genus"
-    scope :with_rank,
-          ->(rank) { where(rank: ranks[rank]) if rank }
-    scope :with_rank_between, lambda { |min, max = min|
+    # Query's scope: rank at or between
+    scope :rank, lambda { |min, max = min|
+      min, max = min if min.is_a?(Array) && min.size == 2
       return with_rank(min) if min == max
 
       where(Name[:rank].in(rank_range(min, max)))
     }
+    scope :with_rank,
+          ->(rank) { where(rank: ranks[rank]) if rank }
     scope :with_rank_below, lambda { |rank|
       where(Name[:rank] < ranks[rank]) if rank
     }
