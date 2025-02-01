@@ -60,11 +60,23 @@ module Location::Scopes
       where(id: ids).distinct
     }
     # Does not search location notes, observation notes or comments on either.
+    # We do not yet support location comment queries.
     scope :pattern_search, lambda { |phrase|
       cols = Location[:name] + LocationDescription.searchable_columns
-      left_outer_joins(:descriptions).search_columns(cols, phrase)
+      joins_default_descriptions.search_columns(cols, phrase)
     }
-    # We do not yet support location comment queries.
+    # https://stackoverflow.com/a/77064711/3357635
+    # AR's assumed join condition is
+    #   `Location[:id].eq(LocationDescription[:location_id])`
+    # but we want the converse. It is a bit complicated to write a left outer
+    # join in AR that joins on a non-standard condition, so here it is:
+    scope :joins_default_descriptions, lambda {
+      joins(
+        Location.arel_table.
+        join(LocationDescription.arel_table, Arel::Nodes::OuterJoin).
+        on(Location[:description_id].eq(LocationDescription[:id])).join_sources
+      )
+    }
 
     scope :with_description, lambda { |bool = true|
       if bool.to_s.to_boolean == true

@@ -287,7 +287,7 @@ module AbstractModel::Scopes
       end
     end
 
-    # These should be defined in the model
+    # SEARCHABLE_FIELDS should be defined in the model
     def searchable_columns
       return [] unless defined?(self::SEARCHABLE_FIELDS)
 

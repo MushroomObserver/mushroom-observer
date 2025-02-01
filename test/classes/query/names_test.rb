@@ -264,39 +264,49 @@ class Query::NamesTest < UnitTestCase
     assert_query(expects, :Name, comments_has: '"messes things up"')
   end
 
-  def test_name_pattern_search
-    assert_query(
-      [],
-      :Name, pattern: "petigera" # search_name
-    )
-    assert_query(
-      [names(:petigera).id],
-      :Name, pattern: "petigera", misspellings: :either
-    )
-    assert_query(
-      [names(:peltigera).id],
-      :Name, pattern: "ye auld manual of lichenes" # citation
-    )
-    assert_query(
-      [names(:agaricus_campestras).id],
-      :Name, pattern: "prevent me" # description notes
-    )
-    assert_query(
-      [names(:suillus)],
-      :Name, pattern: "smell as sweet" # gen_desc
-    )
-    # Prove pattern search gets hits for description look_alikes
-    assert_query(
-      [names(:peltigera).id],
-      :Name, pattern: "superficially similar"
-    )
+  def test_name_pattern_search_search_name
+    # search_name
+    assert_query([], :Name, pattern: "petigera")
+    assert_query([names(:petigera).id],
+                 :Name, pattern: "petigera", misspellings: :either)
+    assert_query(Name.pattern_search("petigera").misspellings(:either),
+                 :Name, pattern: "petigera", misspellings: :either)
+  end
+
+  def test_name_pattern_search_citation
+    assert_query([names(:peltigera).id],
+                 :Name, pattern: "ye auld manual of lichenes")
+    assert_query(Name.pattern_search("ye auld manual of lichenes"),
+                 :Name, pattern: "ye auld manual of lichenes")
+  end
+
+  def test_name_pattern_search_description_notes
+    assert_query([names(:agaricus_campestras).id],
+                 :Name, pattern: "prevent me")
+    assert_query(Name.pattern_search("prevent me"),
+                 :Name, pattern: "prevent me")
+  end
+
+  def test_name_pattern_search_description_gen_desc
+    assert_query([names(:suillus)],
+                 :Name, pattern: "smell as sweet")
+    assert_query(Name.pattern_search("smell as sweet"),
+                 :Name, pattern: "smell as sweet")
+  end
+
+  # Prove pattern search gets hits for description look_alikes
+  def test_name_pattern_search_description_look_alikes
+    assert_query([names(:peltigera).id],
+                 :Name, pattern: "superficially similar")
+    assert_query(Name.pattern_search("superficially similar"),
+                 :Name, pattern: "superficially similar")
   end
 
   def test_name_advanced_search
-    assert_query([names(:macrocybe_titans).id], :Name,
-                 name: "macrocybe*titans")
-    assert_query([names(:coprinus_comatus).id], :Name,
-                 user_where: "glendale") # where
+    assert_query([names(:macrocybe_titans).id],
+                 :Name, name: "macrocybe*titans")
+    assert_query([names(:coprinus_comatus).id],
+                 :Name, user_where: "glendale") # where
     expects = Name.index_order.joins(:observations).
               where(Observation[:location_id].eq(locations(:burbank).id)).
               distinct

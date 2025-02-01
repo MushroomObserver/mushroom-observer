@@ -194,14 +194,38 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
           ->(name) { include_subtaxa_of(name).with_rank_above_genus }
 
     # A search of all searchable Name fields, concatenated.
-    scope :search_content,
-          ->(phrase) { search_columns(Name.searchable_columns, phrase) }
-    # A more comprehensive search of Name fields, plus descriptions/comments.
+    scope :search_content, lambda { |phrase|
+      cols = Name.searchable_columns + Name[:classification]
+      search_columns(cols, phrase)
+    }
+    # A more comprehensive search of Name fields, plus comments/descriptions.
     scope :search_content_and_associations, lambda { |phrase|
       fields = Name.search_content(phrase).map(&:id)
       comments = Name.comments_contain(phrase).map(&:id)
       descs = Name.description_contains(phrase).map(&:id)
       where(id: fields + comments + descs).distinct
+    }
+    # This is what's called by advanced_search
+    scope :advanced_search, lambda { |phrase|
+      fields = Name.search_columns(Name[:search_name], phrase).map(&:id)
+      comments = Name.comments_contain(phrase).map(&:id)
+      where(id: fields + comments).distinct
+    }
+    # This is what's called by pattern_search
+    scope :pattern_search, lambda { |phrase|
+      cols = Name.searchable_columns + NameDescription.searchable_columns
+      joins_default_descriptions.search_columns(cols, phrase).distinct
+    }
+    # https://stackoverflow.com/a/77064711/3357635
+    # AR's assumed join condition is `Name[:id].eq(NameDescription[:name_id])`
+    # but we want the converse. It is a bit complicated to write a left outer
+    # join in AR that joins on a non-standard condition, so here it is:
+    scope :joins_default_descriptions, lambda {
+      joins(
+        Name.arel_table.
+        join(NameDescription.arel_table, Arel::Nodes::OuterJoin).
+        on(Name[:description_id].eq(NameDescription[:id])).join_sources
+      )
     }
 
     scope :with_comments, lambda { |bool = true|
