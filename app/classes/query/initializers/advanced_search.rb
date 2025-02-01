@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module Query::Initializers::AdvancedSearch
+  # Initialized only on locations, obs, names queries - note images disabled
   def initialize_advanced_search
     name, user, location, content = google_parse_params
     make_sure_user_entered_something(name, user, location, content)
