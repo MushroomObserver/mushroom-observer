@@ -120,12 +120,12 @@ module MapHelper
   end
 
   def mapset_observation_header(set, args)
-    show, map = mapset_submap_links(set, args, :observation)
+    show, map = mapset_associated_links(set, args, :observation)
     map_point_text(:Observations.t, set.observations.length, show, map)
   end
 
   def mapset_location_header(set, args)
-    show, map = mapset_submap_links(set, args, :location)
+    show, map = mapset_associated_links(set, args, :location)
     map_point_text(:Locations.t, set.underlying_locations.length, show, map)
   end
 
@@ -133,39 +133,52 @@ module MapHelper
     label.html_safe << ": " << count.to_s << " (" << show << " | " << map << ")"
   end
 
-  def mapset_submap_links(set, args, type)
+  # Links to obs, locs or names within the current mapset, or maps of these
+  def mapset_associated_links(set, args, type)
     params = args[:query_params] || {}
     params = params.merge(mapset_box_params(set))
-    case type.to_s
-    when "observation"
-      [link_to(:show_all.t, observations_path(params: params)),
-       link_to(:map_all.t, map_observations_path(params: params))]
-    when "location"
-      [link_to(:show_all.t, locations_path(params: params)),
-       link_to(:map_all.t, map_locations_path(params: params))]
-    when "name"
-      [link_to(:show_all.t, names_path(params: params)),
-       link_to(:map_all.t, map_names_path(params: params))]
-    end
+    return unless [:observation, :location, :name].include?(type)
+
+    mapset_associated_links_for_type(type, params)
+  end
+
+  # Helper for the above
+  def mapset_associated_links_for_type(type, params)
+    query_type = type.to_s.camelize.to_sym
+    path_helper = :"#{type.to_s.pluralize}_path"
+    query = Query.lookup(query_type, **params)
+    [link_to(:show_all.t, add_query_param(send(path_helper), query)),
+     link_to(:map_all.t, add_query_param(send(:"map_#{path_helper}"), query))]
   end
 
   def mapset_observation_link(obs, args)
     params = args[:query_params] || {}
+    query = Query.lookup(:Observation, params)
     link_to("#{:Observation.t} ##{obs.id}",
-            observation_path(id: obs.id, params: params))
+            add_query_param(observation_path(id: obs.id), query))
   end
 
   def mapset_location_link(loc, args)
     params = args[:query_params] || {}
-    link_to(loc.display_name.t, location_path(id: loc.id, params: params))
+    query = Query.lookup(:Location, params)
+    link_to(loc.display_name.t,
+            add_query_param(location_path(id: loc.id), query))
   end
 
-  # These are query params for the links back to MO indexes!
+  # These are query params for the links back to MO indexes, slightly enlarged
   def mapset_box_params(set)
-    { in_box: { north: set.north,
-                south: set.south,
-                east: set.east,
-                west: set.west } }
+    { in_box: { north: tweak_up(set.north, 0.001, 90),
+                south: tweak_down(set.south, 0.001, -90),
+                east: tweak_up(set.east, 0.001, 180),
+                west: tweak_down(set.west, 0.001, -180) } }
+  end
+
+  def tweak_up(value, amount, max)
+    [max, value.to_f + amount].min
+  end
+
+  def tweak_down(value, amount, min)
+    [min, value.to_f - amount].max
   end
 
   # These are coords printed in text

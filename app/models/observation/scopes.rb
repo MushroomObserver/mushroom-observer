@@ -349,7 +349,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       box = Mappable::Box.new(**args.except(:mappable))
       return none unless box.valid?
 
-      if mappable
+      if args[:mappable]
         gps_in_box(box).or(Observation.location_center_in_box(**args))
       else # this join is necessary for the or condition
         joins(:location).gps_in_box(box).
