@@ -13,14 +13,16 @@ module Tabs
     end
 
     def edit_naming_tab(naming)
-      ModelTab.new(:EDIT.l,
-                   naming,
-                   add_query_param(
-                     edit_observation_naming_path(
-                       observation_id: naming.observation_id, id: naming.id
-                     )
-                   ),
-                   html_options: { icon: :edit }).tab
+      InternalLink::Model.new(
+        :EDIT.l,
+        naming,
+        add_query_param(
+          edit_observation_naming_path(
+            observation_id: naming.observation_id, id: naming.id
+          )
+        ),
+        html_options: { icon: :edit }
+      ).tab
     end
   end
 end

@@ -72,9 +72,9 @@ module Tabs
       # next and index from there to navigate through all the rest for this obs.
       hr_query = Query.lookup(:HerbariumRecord, observations: obs.id)
 
-      ModelTab.new(h_r.accession_at_herbarium.t, h_r,
-                   add_query_param(h_r.show_link_args, hr_query),
-                   alt_title: "herbarium_record").tab
+      InternalLink::Model.new(h_r.accession_at_herbarium.t, h_r,
+                              add_query_param(h_r.show_link_args, hr_query),
+                              alt_title: "herbarium_record").tab
     end
 
     def new_herbarium_record_tab(obs)
@@ -106,8 +106,8 @@ module Tabs
                               herbarium_record_id: h_r.id,
                               observation_id: obs.id
                             ))
-      ModelTab.new(:REMOVE.t, h_r, url,
-                   html_options: { icon: :remove }).tab
+      InternalLink::Model.new(:REMOVE.t, h_r, url,
+                              html_options: { icon: :remove }).tab
     end
   end
 end

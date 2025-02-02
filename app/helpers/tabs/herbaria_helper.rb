@@ -74,11 +74,9 @@ module Tabs
     end
 
     def new_herbarium_tab
-      ModelTab.new(:create_herbarium.l, Herbarium,
-                   add_query_param(new_herbarium_path),
-                   alt_title: "new_herbarium").tab
-      # [:create_herbarium.l, add_query_param(new_herbarium_path),
-      # { class: tab_id(__method__.to_s) }]
+      InternalLink::Model.new(:create_herbarium.l, Herbarium,
+                              add_query_param(new_herbarium_path),
+                              alt_title: "new_herbarium").tab
     end
 
     def edit_herbarium_tab(herbarium)
@@ -106,12 +104,9 @@ module Tabs
     end
 
     def nonpersonal_herbaria_index_tab
-      [:herbarium_index.t,
-       add_query_param(herbaria_path(nonpersonal: true)),
-       { class: tab_id(__method__.to_s) }]
-      ModelTab.new(:herbarium_index.t, "",
-                   add_query_param(herbaria_path(nonpersonal: true)),
-                   alt_title: "nonpersonal_herbaria_index").tab
+      InternalLink::Model.new(:herbarium_index.t, "",
+                              add_query_param(herbaria_path(nonpersonal: true)),
+                              alt_title: "nonpersonal_herbaria_index").tab
     end
 
     def labeled_nonpersonal_herbaria_index_tab

@@ -184,7 +184,7 @@ module Tabs
 
     # NOTE: coerced_query_tab returns an array
     def observations_coerced_query_tabs(query)
-      [CoercedQueryTab.new(query, Location).tab,
+      [InternalLink::CoercedQuery.new(query, Location).tab,
        coerced_name_query_tab(query),
        coerced_image_query_tab(query)]
     end
