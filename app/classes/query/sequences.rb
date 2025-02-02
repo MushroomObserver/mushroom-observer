@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class Query::Sequences < Query::Base
+  include Query::Params::Locations
   include Query::Params::Names
   include Query::Params::Observations
   include Query::Initializers::Names

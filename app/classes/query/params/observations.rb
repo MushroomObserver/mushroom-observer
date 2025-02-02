@@ -26,7 +26,7 @@ module Query::Params::Observations
   # for observations, or coercions to observations.
   def observations_parameter_declarations
     {
-      by_user: User, # repeated, check callers
+      # by_user: User, # repeated, check callers
       with_name: :boolean,
       confidence: [:float],
       location: Location,
