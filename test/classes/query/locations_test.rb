@@ -64,8 +64,8 @@ class Query::LocationsTest < UnitTestCase
   end
 
   def test_location_in_box
-    box = Mappable::Box.new(north: 35, south: 34, east: -118, west: -119)
-    expects = Location.index_order.in_box(box)
+    box = { north: 35, south: 34, east: -118, west: -119 }
+    expects = Location.index_order.in_box(**box)
     assert_query(expects, :Location, in_box: box)
   end
 

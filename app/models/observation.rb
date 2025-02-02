@@ -100,8 +100,8 @@
 #  without_location
 #  at_locations(location)
 #  in_region(where)
-#  in_box(Mappable::Box) geoloc is in the box
-#  not_in_box(Mappable::Box) geoloc is outside the box
+#  in_box(north:, south:, east:, west:) geoloc is in the box
+#  not_in_box(north:, south:, east:, west:) geoloc is outside the box
 #  is_collection_location
 #  not_collection_location
 #  with_images

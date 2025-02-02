@@ -204,21 +204,20 @@ class LocationsControllerTest < FunctionalTestCase
   end
 
   def test_index_bounding_box
-    north = south = east = west = 1
+    north = south = east = west = 0
     delta = 0.001
     login
-    box = Mappable::Box.new(north:, south:, east:, west:)
-    debugger
-    get(:index, params: { in_box: box })
+    get(:index, params: { in_box: { north: north, south: south,
+                                    east: east, west: west } })
     query = Query.find(QueryRecord.last.id)
-    debugger
+
     assert_equal(north + delta, query.params[:in_box][:north])
     assert_equal(south - delta, query.params[:in_box][:south])
     assert_equal(east + delta, query.params[:in_box][:east])
     assert_equal(west - delta, query.params[:in_box][:west])
 
-    box = Mappable::Box.new(north: 90, south: -90, east: 180, west: -180)
-    get(:index, params: { in_box: box })
+    get(:index, params: { in_box: { north: 90, south: -90,
+                                    east: 180, west: -180 } })
     query = Query.find(QueryRecord.last.id)
     assert_equal(90, query.params[:in_box][:north])
     assert_equal(-90, query.params[:in_box][:south])

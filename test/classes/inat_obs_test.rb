@@ -292,7 +292,7 @@ class InatObsTest < UnitTestCase
 
   def test_public_location
     loc = locations(:albion)
-    all_bounding_boxes = Location.contains_box(loc.bounding_box)
+    all_bounding_boxes = Location.contains_box(**loc.bounding_box)
     phony_locs = Location.where(north: 90, south: -90,
                                 west: -180, east: 180).
                  where.not(name: "Earth")

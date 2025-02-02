@@ -472,8 +472,8 @@ class Query::NamesTest < UnitTestCase
     lng = obs.lng
     expects = Name.index_order.with_correct_spelling.joins(:observations).
               where(observations: { lat: lat, lng: lng }).distinct
-    box = Mappable::Box.new(north: lat.to_f, south: lat.to_f,
-                            west: lat.to_f, east: lat.to_f)
+    box = { north: lat.to_f, south: lat.to_f,
+            west: lat.to_f, east: lat.to_f }
     assert_query(
       expects, :Name, with_observations: 1, in_box: box
     )

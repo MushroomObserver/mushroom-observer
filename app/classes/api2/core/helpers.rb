@@ -46,7 +46,7 @@ module API2::Helpers
     raise(API2::NeedAllFourEdges.new) unless all_edges(north, south, east, west)
 
     box = Mappable::Box.new(north:, south:, east:, west:)
-    return box if box.valid?
+    return box.attributes.symbolize_keys if box.valid?
 
     raise(API2::NeedAllFourEdges.new)
   end
