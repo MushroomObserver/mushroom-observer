@@ -44,31 +44,31 @@ module Tabs
     end
 
     def user_life_list_tab(user)
-      [:app_life_list.t, checklist_path(id: user.id),
-       { class: tab_id(__method__.to_s) }]
+      InternalLink::Model.new(:app_life_list.t, user,
+                              checklist_path(id: user.id)).tab
     end
 
     def user_profile_tab(user)
-      [:show_object.t(type: :profile), user_path(user.id),
-       { class: tab_id(__method__.to_s) }]
+      InternalLink::Model.new(:show_object.t(type: :profile), user,
+                              user_path(user.id)).tab
     end
 
     def user_observations_tab(user, text = nil)
       text ||= :show_user_observations_by.t(name: user.text_name)
-      [text, observations_path(by_user: user.id),
-       { class: tab_id(__method__.to_s) }]
+      InternalLink::Model.new(text, user,
+                              observations_path(by_user: user.id)).tab
     end
 
     def comments_for_user_tab(user, text = nil)
       text ||= :show_user_comments_for.t(name: user.text_name)
-      [text, comments_path(for_user: user.id),
-       { class: tab_id(__method__.to_s) }]
+      InternalLink::Model.new(text, user, comments_path(for_user: user.id)).tab
     end
 
     def email_user_question_tab(user)
-      [:show_user_email_to.t(name: user.unique_text_name),
-       new_question_for_user_path(user.id),
-       { class: tab_id(__method__.to_s), icon: :email }]
+      InternalLink::Model.new(
+        :show_user_email_to.t(name: user.unique_text_name),
+        user, new_question_for_user_path(user.id)
+      ).tab
     end
 
     def user_tabs_for_admin(user)
@@ -79,12 +79,14 @@ module Tabs
     end
 
     def admin_change_user_bonuses_tab(user)
-      [:change_user_bonuses.t, edit_admin_users_path(user.id),
-       { class: tab_id(__method__.to_s) }]
+      InternalLink::Model.new(:change_user_bonuses.t,
+                              user, edit_admin_users_path(user.id)).tab
     end
 
     def admin_destroy_user_tab(user)
-      [nil, admin_users_path(id: user.id), { button: :destroy }]
+      InternalLink::Model.new(:destroy_object.t(TYPE: User),
+                              user, admin_users_path(id: user.id),
+                              { button: :destroy }).tab
     end
 
     def users_index_sorts(admin)
