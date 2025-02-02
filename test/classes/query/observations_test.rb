@@ -223,7 +223,7 @@ class Query::ObservationsTest < UnitTestCase
 
   def test_observation_in_box
     box = Mappable::Box.new(north: 35, south: 34, east: -118, west: -119)
-    assert_query(Observation.index_order.in_box(box),
+    assert_query(Observation.index_order.in_box(box, false),
                  :Observation, in_box: box)
   end
 

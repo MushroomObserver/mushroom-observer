@@ -117,6 +117,7 @@ class LocationsController < ApplicationController
   def filtered_index_final_hook(query, display_opts)
     # Restrict to subset within a geographical region (used by map
     # if it needed to stuff multiple locations into a single marker).
+    debugger
     query = restrict_query_to_box(query)
     # Get matching *undefined* locations.
     set_matching_undefined_location_ivars(query, display_opts)

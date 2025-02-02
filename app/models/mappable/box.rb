@@ -21,6 +21,17 @@ module Mappable
     attribute :east, :float
     attribute :west, :float
 
+    validates :north, presence: true, inclusion: { in: -90..90 }
+    validates :south, presence: true, inclusion: { in: -90..90 }
+    validates :east, presence: true, inclusion: { in: -180..180 }
+    validates :west, presence: true, inclusion: { in: -180..180 }
+
+    validate(&:must_have_valid_bounds)
+
+    def must_have_valid_bounds
+      errors.add(:base, "Box must have valid boundaries.") unless valid?
+    end
+
     def valid?
       args_in_bounds? && south <= north
     end

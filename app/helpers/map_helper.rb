@@ -162,12 +162,10 @@ module MapHelper
 
   # These are query params for the links back to MO indexes!
   def mapset_box_params(set)
-    {
-      north: set.north,
-      south: set.south,
-      east: set.east,
-      west: set.west
-    }
+    { in_box: { north: set.north,
+                south: set.south,
+                east: set.east,
+                west: set.west } }
   end
 
   # These are coords printed in text

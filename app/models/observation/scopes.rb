@@ -296,9 +296,10 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
     # Pass kwargs (:north, :south, :east, :west), any order
     # Pass mappable: false to include all obs, including with vague locations.
-    scope :in_box, lambda { |box, mappable = false|
+    scope :in_box, lambda { |box, mappable = true|
+      # args[:mappable] ||= false
       # box = Mappable::Box.new(**args.except(:mappable))
-      return none unless box.valid?
+      # return none unless box.valid?
 
       if box.straddles_180_deg?
         in_box_straddling_dateline(box, mappable)
@@ -310,7 +311,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :in_box_straddling_dateline, lambda { |box, mappable = true|
       # args[:mappable] ||= true
       # box = Mappable::Box.new(**args.except(:mappable))
-      return none unless box.valid?
+      # return none unless box.valid?
 
       where(
         (Observation[:lat] >= box.south).
@@ -319,9 +320,10 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         or(Observation[:lng] <= box.east)
       ).or(Observation.location_straddling_dateline(box, mappable))
     }
-    scope :location_straddling_dateline, lambda { |box, mappable|
+    scope :location_straddling_dateline, lambda { |box, mappable = true|
+      # args[:mappable] ||= true
       # box = Mappable::Box.new(**args.except(:mappable))
-      return none unless box.valid?
+      # return none unless box.valid?
 
       if mappable
         where(
@@ -346,16 +348,26 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :in_box_regular, lambda { |box, mappable = true|
       # args[:mappable] ||= true
       # box = Mappable::Box.new(**args.except(:mappable))
-      return none unless box.valid?
+      # return none unless box.valid?
 
-      where(
-        (Observation[:lat] >= box.south).and(Observation[:lat] <= box.north).
-        and(Observation[:lng] >= box.west).and(Observation[:lng] <= box.east)
-      ).or(Observation.location_center_in_box(box, mappable))
+      if mappable
+        gps_in_box(box).or(Observation.location_center_in_box(box, true))
+      else # this join is necessary for the or condition
+        joins(:location).gps_in_box(box).
+          or(Observation.location_center_in_box(box, false))
+      end
     }
-    scope :location_center_in_box, lambda { |box, mappable|
+    scope :gps_in_box, lambda { |box|
+      where(
+        (Observation[:lat] >= box.south).
+        and(Observation[:lat] <= box.north).
+        and(Observation[:lng] >= box.west).
+        and(Observation[:lng] <= box.east)
+      )
+    }
+    scope :location_center_in_box, lambda { |box, mappable = true|
       # box = Mappable::Box.new(**args.except(:mappable))
-      return none unless box.valid?
+      # return none unless box.valid?
 
       # odd! will toss entire condition if below order is west, east
       if mappable
@@ -378,10 +390,10 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       end
     }
     # Pass kwargs (:north, :south, :east, :west), any order
-    scope :not_in_box, lambda { |box, mappable = false|
+    scope :not_in_box, lambda { |box, mappable = true|
       # args[:mappable] ||= false
       # box = Mappable::Box.new(**args.except(:mappable))
-      return Observation.all unless box.valid?
+      # return Observation.all unless box.valid?
 
       # should be in_box(**args).invert_where
       if box.straddles_180_deg?
@@ -394,7 +406,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :not_in_box_straddling_dateline, lambda { |box, _mappable|
       # args[:mappable] ||= false
       # box = Mappable::Box.new(**args.except(:mappable))
-      return Observation.all unless box.valid?
+      # return Observation.all unless box.valid?
 
       where(
         Observation[:lat].eq(nil).
@@ -406,7 +418,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :not_in_box_regular, lambda { |box, _mappable|
       # args[:mappable] ||= false
       # box = Mappable::Box.new(**args.except(:mappable))
-      return Observation.all unless box.valid?
+      # return Observation.all unless box.valid?
 
       where(
         Observation[:lat].eq(nil).

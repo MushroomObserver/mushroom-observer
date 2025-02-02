@@ -40,7 +40,6 @@ class API2
       ]
     end
 
-    # rubocop:disable Metrics/MethodLength
     def query_params
       box = parse_bounding_box!
       {
@@ -73,7 +72,6 @@ class API2
         region: parse(:string, :region, help: 1)
       }.merge(parse_names_parameters)
     end
-    # rubocop:enable Metrics/MethodLength
 
     def create_params
       parse_create_params!

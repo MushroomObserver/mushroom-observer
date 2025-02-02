@@ -300,11 +300,11 @@ class Query::ImagesTest < UnitTestCase
     expects = Image.index_order.joins(:observations).
               where(observations: { lat: lat }).
               where(observations: { lng: lng }).distinct
+    box = Mappable::Box.new(north: lat.to_f, south: lat.to_f, west: lng.to_f,
+                            east: lng.to_f)
     assert_query(
       expects,
-      :Image,
-      with_observations: 1,
-      north: lat.to_f, south: lat.to_f, west: lat.to_f, east: lat.to_f
+      :Image, with_observations: 1, in_box: box
     )
   end
 

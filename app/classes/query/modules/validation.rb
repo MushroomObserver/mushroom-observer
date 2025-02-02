@@ -74,19 +74,20 @@ module Query::Modules::Validation
     end
   end
 
+  # rubocop:disable Style/CaseLikeIf
   def scalar_validate(param, val, param_type)
-    case param_type
-    when is_a?(Symbol)
+    if param_type.is_a?(Symbol)
       send(:"validate_#{param_type}", param, val)
-    when is_a?(Class)
+    elsif param_type.is_a?(Class)
       validate_class_param(param, val, param_type)
-    when is_a?(Hash)
+    elsif param_type.is_a?(Hash)
       validate_hash_param(param, val, param_type)
     else
       raise("Invalid declaration of :#{param} for #{model} " \
             "query! (invalid type: #{param_type.class.name})")
     end
   end
+  # rubocop:enable Style/CaseLikeIf
 
   def validate_class_param(param, val, param_type)
     if param_type.respond_to?(:descends_from_active_record?)

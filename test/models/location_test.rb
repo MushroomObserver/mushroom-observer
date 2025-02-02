@@ -148,7 +148,8 @@ class LocationTest < UnitTestCase
     # and propagated to associated observations
     rey = locations(:point_reyes)
     rey_area = rey.calculate_area.round(4)
-    new_bounds = rey.bounding_box.merge(north: 38.2461)
+    new_bounds = rey.bounding_box.attributes.symbolize_keys.
+                 merge(north: 38.2461)
     box = Mappable::Box.new(**new_bounds)
     box_area = box.calculate_area.round(4)
     assert_not_equal(rey_area, box_area)
