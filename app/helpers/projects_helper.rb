@@ -57,15 +57,26 @@ module ProjectsHelper
     end
   end
 
-  def unique_class_id(id)
-    @@counter ||= 0
-    @@counter += 1
-    "tab_#{@@counter}_#{id}"
+  def new_project_alias_modal(project_id, target_id, target_type)
+    tag.span(id: "project_alias") do
+      modal_link_to(
+        "project_alias", :ADD.t,
+        add_query_param(new_project_alias_path(project_id:,
+                                               target_id:,
+                                               target_type:)),
+        class: unique_class_id(target_id) + " btn btn-default")
+    end
   end
 
   #########
 
   private
+
+  def unique_class_id(id)
+    @@counter ||= 0
+    @@counter += 1
+    "link_#{@@counter}_#{id}"
+  end
 
   def violation_latitude_header(project)
     return :form_violations_latitude_none.l unless project.location

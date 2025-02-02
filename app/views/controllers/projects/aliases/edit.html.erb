@@ -4,7 +4,7 @@
   project_id = @project_alias.project_id
 %>
 
-<h1>Editing Project Alias</h1>
+<h1><%= :project_alias_edit.l(name: @project_alias.name) %></h1>
 
 <%= render('form', project_alias: @project_alias) %>
 

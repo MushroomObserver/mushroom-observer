@@ -24,9 +24,14 @@ module Projects
 
     def new
       project_id = params.require(:project_id)
-      new_params = params.permit(:user_id, :target_type)
-      new_params[:project_id] = project_id
+      new_params = params.permit(:project_id, :target_type, :target_id,
+                                 :user_id, :location_id)
       @project_alias = ProjectAlias.new(new_params)
+
+      respond_to do |format|
+        format.turbo_stream { render_modal_project_alias_form }
+        format.html
+      end
     end
 
     def edit
@@ -91,7 +96,7 @@ module Projects
     def render_modal_project_alias_form
       render(
         partial: "shared/modal_form",
-        locals: { title: "Modal Title", identifier: modal_identifier,
+        locals: { title: modal_title, identifier: modal_identifier,
                   form: "projects/aliases/form", project_alias: @project_alias }
       ) and return
     end
@@ -102,6 +107,15 @@ module Projects
         "project_alias"
       when "edit", "update"
         "project_alias_#{@project_alias.id}"
+      end
+    end
+
+    def modal_title
+      case action_name
+      when "new", "create"
+        :project_alias_new.l
+      when "edit", "update"
+        :project_alias_edit.l(name: @project_alias.name)
       end
     end
 
