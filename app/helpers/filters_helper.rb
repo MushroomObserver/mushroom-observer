@@ -81,7 +81,7 @@ module FiltersHelper
     args = prepare_args_for_filter_field(args, field_type, component)
     # Re-add sections and model for conditional fields.
     if component == :filter_autocompleter_with_conditional_fields
-      args = args.merge(sections:, model:)
+      args = args.merge(sections:, model:, filter:)
     end
     return filter_region_with_compass_fields(**args) if field == :region
 
