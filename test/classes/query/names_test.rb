@@ -176,17 +176,16 @@ class Query::NamesTest < UnitTestCase
   end
 
   def test_name_rank_single
-    expects = Name.with_correct_spelling.with_rank("Family").index_order
+    expects = Name.with_correct_spelling.rank("Family").index_order
     assert_query(expects, :Name, rank: "Family")
   end
 
   # NOTE: Something is wrong in the fixtures between Genus and Family
   def test_name_rank_range
-    expects = Name.with_correct_spelling.
-              with_rank_between("Genus", "Kingdom").index_order
+    expects = Name.with_correct_spelling.rank("Genus", "Kingdom").index_order
     assert_query(expects, :Name, rank: %w[Genus Kingdom])
 
-    expects = Name.with_correct_spelling.with_rank("Family").index_order
+    expects = Name.with_correct_spelling.rank("Family").index_order
     assert_query(expects, :Name, rank: %w[Family Family])
   end
 

@@ -29,9 +29,9 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :found_before, lambda { |ymd_string|
       where(arel_table[:when].format("%Y-%m-%d") <= ymd_string)
     }
-    scope :found_between, lambda { |earliest, latest|
-      where(arel_table[:when].format("%Y-%m-%d") >= earliest).
-        where(arel_table[:when].format("%Y-%m-%d") <= latest)
+    scope :found_between, lambda { |early, late|
+      where(arel_table[:when].format("%Y-%m-%d") >= early).
+        where(arel_table[:when].format("%Y-%m-%d") <= late)
     }
 
     scope :is_collection_location, lambda { |bool = true|
@@ -132,9 +132,15 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :without_name,
           -> { where(name: Name.unknown) }
 
-    # confidence between min & max, in percentages
-    scope :confidence, lambda { |min, max = 100|
-      where(vote_cache: (min.to_f / (100 / 3))..(max.to_f / (100 / 3)))
+    # Filters for confidence on vote_cache scale -3.0..3.0
+    # To translate percentage to vote_cache: (val.to_f / (100 / 3))
+    scope :confidence, lambda { |min, max = nil|
+      min, max = min if min.is_a?(Array) && min.size == 2
+      if max.nil? || max == min # max may be 0
+        where(Observation[:vote_cache].gteq(min))
+      else
+        where(Observation[:vote_cache].in(min..max))
+      end
     }
     # Use this definition when running script to populate the column:
     # scope :needs_naming, lambda {

@@ -97,21 +97,18 @@ module Image::Scopes
     }
     scope :without_votes,
           -> { where(Image[:vote_cache].eq(nil)) }
-    scope :with_quality, lambda { |min, max = min|
-      if max == min
+    # quality is on a scale from 1.0 to 4.0
+    scope :quality, lambda { |min, max = nil|
+      min, max = min if min.is_a?(Array) && min.size == 2
+      if max.nil? || max == min
         where(Image[:vote_cache].gteq(min))
       else
         where(Image[:vote_cache].gteq(min).and(Image[:vote_cache].lteq(max)))
       end
     }
-    scope :with_confidence, lambda { |min, max = min|
-      if max == min
-        joins(:observations).where(Observation[:vote_cache].gteq(min)).distinct
-      else
-        joins(:observations).
-          where(Observation[:vote_cache].gteq(min).
-                and(Observation[:vote_cache].lteq(max))).distinct
-      end
+    # relates to Observation confidence, not image votes. -3.0..3.0
+    scope :confidence, lambda { |min, max = nil|
+      joins(:observations).merge(Observation.confidence(min, max))
     }
 
     scope :interactive_includes, lambda {

@@ -604,7 +604,7 @@ class PatternSearchTest < UnitTestCase
   end
 
   def test_observation_search_confidence
-    expect = Observation.confidence(90)
+    expect = Observation.confidence(3)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("confidence:90")
     assert_obj_arrays_equal(expect, x.query.results, :sort)

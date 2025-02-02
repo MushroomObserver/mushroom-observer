@@ -171,8 +171,8 @@
 #  with_synonyms
 #  without_synonyms
 #  ok_for_export
+#  rank(ranks)
 #  with_rank(rank)
-#  with_rank_between(ranks)
 #  with_rank_below(rank)
 #  with_rank_and_name_in_classification(rank, text_name)
 #  with_rank_at_or_below_genus
