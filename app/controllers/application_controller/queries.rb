@@ -289,12 +289,12 @@ module ApplicationController::Queries
 
   def tweaked_bounding_box_params
     n, s, e, w = params[:in_box].values_at(:north, :south, :east, :west)
-    Mappable::Box.new(
+    {
       north: tweak_up(n, 0.001, 90),
       south: tweak_down(s, 0.001, -90),
       east: tweak_up(e, 0.001, 180),
       west: tweak_down(w, 0.001, -180)
-    )
+    }
   end
 
   def tweak_up(value, amount, max)

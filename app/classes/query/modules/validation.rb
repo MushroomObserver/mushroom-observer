@@ -60,6 +60,14 @@ module Query::Modules::Validation
     raise("Unexpected parameter(s) '#{str}' for #{model} query.")
   end
 
+  def validate_value(param_type, param, val)
+    if param_type.is_a?(Array)
+      array_validate(param, val, param_type.first)
+    else
+      scalar_validate(param, val, param_type)
+    end
+  end
+
   def array_validate(param, val, param_type)
     case val
     when Array
@@ -105,16 +113,10 @@ module Query::Modules::Validation
     end
   end
 
-  def validate_nested_params(param, val, hash)
-    if hash.keys.length != 1
-      raise(
-        "Invalid nested param declaration for :#{param} for #{model} " \
-        "query! (wrong number of keys in hash)"
-      )
-    end
+  def validate_nested_params(_param, val, hash)
     val2 = {}
     hash.each do |key, arg_type|
-      val2[key] = scalar_validate(param[key], val, arg_type)
+      val2[key] = scalar_validate(key, val[key], arg_type)
     end
     val2
   end
@@ -312,14 +314,6 @@ module Query::Modules::Validation
   def get_cached_parameter_instance(param)
     @params_cache ||= {}
     @params_cache[param]
-  end
-
-  def validate_value(param_type, param, val)
-    if param_type.is_a?(Array)
-      array_validate(param, val, param_type.first)
-    else
-      scalar_validate(param, val, param_type)
-    end
   end
 
   def could_be_record_id?(param, val)

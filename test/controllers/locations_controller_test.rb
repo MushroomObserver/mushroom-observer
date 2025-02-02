@@ -203,7 +203,7 @@ class LocationsControllerTest < FunctionalTestCase
     end
   end
 
-  def test_index_bounding_box
+  def test_index_bounding_box_zero
     north = south = east = west = 0
     delta = 0.001
     login
@@ -211,18 +211,21 @@ class LocationsControllerTest < FunctionalTestCase
                                     east: east, west: west } })
     query = Query.find(QueryRecord.last.id)
 
-    assert_equal(north + delta, query.params[:in_box][:north])
-    assert_equal(south - delta, query.params[:in_box][:south])
-    assert_equal(east + delta, query.params[:in_box][:east])
-    assert_equal(west - delta, query.params[:in_box][:west])
+    assert_equal(north + delta, query.params.dig(:in_box, :north))
+    assert_equal(south - delta, query.params.dig(:in_box, :south))
+    assert_equal(east + delta, query.params.dig(:in_box, :east))
+    assert_equal(west - delta, query.params.dig(:in_box, :west))
+  end
 
+  def test_index_bounding_box_earth
+    login
     get(:index, params: { in_box: { north: 90, south: -90,
                                     east: 180, west: -180 } })
     query = Query.find(QueryRecord.last.id)
-    assert_equal(90, query.params[:in_box][:north])
-    assert_equal(-90, query.params[:in_box][:south])
-    assert_equal(180, query.params[:in_box][:east])
-    assert_equal(-180, query.params[:in_box][:west])
+    assert_equal(90, query.params.dig(:in_box, :north))
+    assert_equal(-90, query.params.dig(:in_box, :south))
+    assert_equal(180, query.params.dig(:in_box, :east))
+    assert_equal(-180, query.params.dig(:in_box, :west))
   end
 
   def test_index_advanced_search
