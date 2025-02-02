@@ -600,32 +600,46 @@ class LocationTest < UnitTestCase
       include?(loc), "#{loc.name} should contain its SW corner")
   end
 
+  def cal
+    locations(:california)
+  end
+
+  def missing_west_box
+    Mappable::Box.new(north: cal.north, south: cal.south, east: cal.east)
+  end
+
+  def outa_bounds_box
+    Mappable::Box.new(north: 91, south: cal.south, east: cal.east,
+                      west: cal.west)
+  end
+
+  def north_southerthan_south_box
+    Mappable::Box.new(north: cal.south - 10, south: cal.south, east: cal.east,
+                      west: cal.west)
+  end
+
   # supplements API tests
   def test_scope_in_box
     cal = locations(:california)
-    locs_in_cal_box = Location.in_box(**cal.bounding_box)
+    locs_in_cal_box = Location.in_box(cal.bounding_box)
     assert_includes(locs_in_cal_box, locations(:albion))
     assert_includes(locs_in_cal_box, cal)
 
     wrangel = locations(:east_lt_west_location)
-    locs_in_wrangel_box = Location.in_box(**wrangel.bounding_box)
+    locs_in_wrangel_box = Location.in_box(wrangel.bounding_box)
     assert_includes(locs_in_wrangel_box, wrangel)
     assert_not_includes(locs_in_wrangel_box, cal)
 
     assert_empty(
-      Location.in_box(north: cal.north, south: cal.south, east: cal.east),
+      Location.in_box(missing_west_box),
       "`scope: in_box` should be empty if an argument is missing"
     )
     assert_empty(
-      Location.in_box(
-        north: 91, south: cal.south, east: cal.east, west: cal.west
-      ),
+      Location.in_box(outa_bounds_box),
       "`scope: in_box` should be empty if an argument is out of bounds"
     )
     assert_empty(
-      Location.in_box(
-        north: cal.south - 10, south: cal.south, east: cal.east, west: cal.west
-      ),
+      Location.in_box(north_southerthan_south_box),
       "`scope: in_box` should be empty if N < S"
     )
   end
@@ -728,7 +742,7 @@ class LocationTest < UnitTestCase
 
   def do_contains_box(loc:, external_loc: nil,
                       regions: [locations(:unknown_location)])
-    containers = Location.contains_box(**loc.bounding_box)
+    containers = Location.contains_box(loc.bounding_box)
 
     assert_includes(containers, loc,
                     "Location #{loc.name} should contain itself")

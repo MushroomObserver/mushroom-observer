@@ -162,8 +162,9 @@ class API2::SequencesTest < UnitTestCase
     assert_api_pass(params.merge(confidence: "3.0"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
 
-    obses = Observation.where(lat: [34..35], lng: [-119..-118])
-    locs = Location.in_box(north: 35, south: 34, east: -118, west: -119)
+    box = Mappable::Box.new(north: 35, south: 34, east: -118, west: -119)
+    obses = Observation.in_box(box)
+    locs = Location.in_box(box)
 
     obses = (obses + locs.map(&:observations)).flatten.uniq.sort_by(&:id)
     assert_not_empty(obses)

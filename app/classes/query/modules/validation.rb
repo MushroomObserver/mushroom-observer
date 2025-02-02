@@ -75,17 +75,62 @@ module Query::Modules::Validation
   end
 
   def scalar_validate(param, val, param_type)
-    if param_type.is_a?(Symbol)
+    case param_type
+    when is_a?(Symbol)
       send(:"validate_#{param_type}", param, val)
-    elsif param_type.is_a?(Class) &&
-          param_type.respond_to?(:descends_from_active_record?)
-      validate_record_or_id_or_string(param, val, param_type)
-    elsif param_type.is_a?(Hash)
-      validate_enum(param, val, param_type)
+    when is_a?(Class)
+      validate_class_param(param, val, param_type)
+    when is_a?(Hash)
+      validate_hash_param(param, val, param_type)
     else
       raise("Invalid declaration of :#{param} for #{model} " \
             "query! (invalid type: #{param_type.class.name})")
     end
+  end
+
+  def validate_class_param(param, val, param_type)
+    if param_type.respond_to?(:descends_from_active_record?)
+      validate_record_or_id_or_string(param, val, param_type)
+    else
+      validate_poro(param, val, param_type)
+    end
+  end
+
+  def validate_hash_param(param, val, param_type)
+    if [:string, :boolean].include?(param_type.keys.first)
+      validate_enum(param, val, param_type)
+    else
+      validate_nested_params(param, val, param_type)
+    end
+  end
+
+  def validate_nested_params(param, val, hash)
+    if hash.keys.length != 1
+      raise(
+        "Invalid nested param declaration for :#{param} for #{model} " \
+        "query! (wrong number of keys in hash)"
+      )
+    end
+    val2 = {}
+    hash.each do |key, arg_type|
+      val2[key] = scalar_validate(param[key], val, arg_type)
+    end
+    val2
+  end
+
+  def validate_poro(param, val, param_type)
+    unless defined?(param_type)
+      raise(
+        "Don't know how to parse #{param_type} :#{param} for #{model} query."
+      )
+    end
+
+    return val if val.valid?
+
+    raise(
+      "Invalid #{param_type} instance passed for :#{param} for " \
+      "#{model} query."
+    )
   end
 
   def validate_enum(param, val, hash)

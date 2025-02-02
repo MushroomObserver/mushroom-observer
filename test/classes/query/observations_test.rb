@@ -221,6 +221,12 @@ class Query::ObservationsTest < UnitTestCase
                  :Observation, region: "North America")
   end
 
+  def test_observation_in_box
+    box = Mappable::Box.new(north: 35, south: 34, east: -118, west: -119)
+    assert_query(Observation.index_order.in_box(box),
+                 :Observation, in_box: box)
+  end
+
   def test_observation_of_children
     name = names(:agaricus)
     expects = Observation.index_order.

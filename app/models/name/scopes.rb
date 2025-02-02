@@ -300,9 +300,9 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
         where(observations: { location: location_ids }).distinct
     }
     # Names with Observations whose lat/lon are in a box
-    # Pass kwargs (:north, :south, :east, :west), any order
-    scope :in_box, lambda { |**args|
-      joins(:observations).merge(Observation.in_box(**args)).distinct
+    # Pass a Mappable::Box (was kwargs (:north, :south, :east, :west))
+    scope :in_box, lambda { |box|
+      joins(:observations).merge(Observation.in_box(box)).distinct
     }
 
     ### Specialized Scopes for Name::Create

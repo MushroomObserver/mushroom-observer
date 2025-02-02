@@ -109,10 +109,11 @@ class Inat
 
     # min bounding rectangle of iNat location blurred by public accuracy
     def location
-      ::Location.contains_box(north: blurred_north,
-                              south: blurred_south,
-                              east: blurred_east,
-                              west: blurred_west).
+      box = ::Mappable::Box.new(north: blurred_north,
+                                south: blurred_south,
+                                east: blurred_east,
+                                west: blurred_west)
+      ::Location.contains_box(box).
         min_by { |loc| location_box(loc).calculate_area }
     end
 

@@ -229,8 +229,9 @@ class API2::ObservationsTest < UnitTestCase
   end
 
   def test_getting_observations_in_box
-    obses = Observation.where(lat: [34..35], lng: [-119..-118])
-    locs = Location.in_box(north: 35, south: 34, east: -118, west: -119)
+    box = Mappable::Box.new(north: 35, south: 34, east: -118, west: -119)
+    locs = Location.in_box(box)
+    obses = Observation.in_box(box)
 
     obses = (obses + locs.map(&:observations)).flatten.uniq.sort_by(&:id)
     assert_not_empty(obses)

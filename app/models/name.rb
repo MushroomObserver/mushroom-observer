@@ -200,7 +200,7 @@
 #  comments_contain(summary)
 #  on_species_lists(species_list)
 #  at_location(location)
-#  in_box(north:, south:, east:, west:)
+#  in_box(Mappable::Box)
 #
 #  ==== Classification
 #  validate_classification:: Make sure +classification+ syntax is valid.

@@ -296,21 +296,20 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
     # Pass kwargs (:north, :south, :east, :west), any order
     # Pass mappable: false to include all obs, including with vague locations.
-    scope :in_box, lambda { |**args|
-      args[:mappable] ||= false
-      box = Mappable::Box.new(**args.except(:mappable))
+    scope :in_box, lambda { |box, mappable = false|
+      # box = Mappable::Box.new(**args.except(:mappable))
       return none unless box.valid?
 
       if box.straddles_180_deg?
-        in_box_straddling_dateline(**args)
+        in_box_straddling_dateline(box, mappable)
       else
-        in_box_regular(**args)
+        in_box_regular(box, mappable)
       end
     }
     # mostly a helper for in_box
-    scope :in_box_straddling_dateline, lambda { |**args|
-      args[:mappable] ||= true
-      box = Mappable::Box.new(**args.except(:mappable))
+    scope :in_box_straddling_dateline, lambda { |box, mappable = true|
+      # args[:mappable] ||= true
+      # box = Mappable::Box.new(**args.except(:mappable))
       return none unless box.valid?
 
       where(
@@ -318,13 +317,13 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         and(Observation[:lat] <= box.north).
         and(Observation[:lng] >= box.west).
         or(Observation[:lng] <= box.east)
-      ).or(Observation.location_straddling_dateline(**args))
+      ).or(Observation.location_straddling_dateline(box, mappable))
     }
-    scope :location_straddling_dateline, lambda { |**args|
-      box = Mappable::Box.new(**args.except(:mappable))
+    scope :location_straddling_dateline, lambda { |box, mappable|
+      # box = Mappable::Box.new(**args.except(:mappable))
       return none unless box.valid?
 
-      if args[:mappable]
+      if mappable
         where(
           Observation[:lat].eq(nil).
           and(Observation[:location_lat] >= box.south).
@@ -344,22 +343,22 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       end
     }
     # mostly a helper for in_box
-    scope :in_box_regular, lambda { |**args|
-      args[:mappable] ||= true
-      box = Mappable::Box.new(**args.except(:mappable))
+    scope :in_box_regular, lambda { |box, mappable = true|
+      # args[:mappable] ||= true
+      # box = Mappable::Box.new(**args.except(:mappable))
       return none unless box.valid?
 
       where(
         (Observation[:lat] >= box.south).and(Observation[:lat] <= box.north).
         and(Observation[:lng] >= box.west).and(Observation[:lng] <= box.east)
-      ).or(Observation.location_center_in_box(**args))
+      ).or(Observation.location_center_in_box(box, mappable))
     }
-    scope :location_center_in_box, lambda { |**args|
-      box = Mappable::Box.new(**args.except(:mappable))
+    scope :location_center_in_box, lambda { |box, mappable|
+      # box = Mappable::Box.new(**args.except(:mappable))
       return none unless box.valid?
 
       # odd! will toss entire condition if below order is west, east
-      if args[:mappable]
+      if mappable
         where(
           Observation[:lat].eq(nil).
           and(Observation[:location_lat] >= box.south).
@@ -379,22 +378,22 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       end
     }
     # Pass kwargs (:north, :south, :east, :west), any order
-    scope :not_in_box, lambda { |**args|
-      args[:mappable] ||= false
-      box = Mappable::Box.new(**args.except(:mappable))
+    scope :not_in_box, lambda { |box, mappable = false|
+      # args[:mappable] ||= false
+      # box = Mappable::Box.new(**args.except(:mappable))
       return Observation.all unless box.valid?
 
       # should be in_box(**args).invert_where
       if box.straddles_180_deg?
-        not_in_box_straddling_dateline(**args)
+        not_in_box_straddling_dateline(box, mappable)
       else
-        not_in_box_regular(**args)
+        not_in_box_regular(box, mappable)
       end
     }
     # helper for not_in_box
-    scope :not_in_box_straddling_dateline, lambda { |**args|
-      args[:mappable] ||= false
-      box = Mappable::Box.new(**args.except(:mappable))
+    scope :not_in_box_straddling_dateline, lambda { |box, _mappable|
+      # args[:mappable] ||= false
+      # box = Mappable::Box.new(**args.except(:mappable))
       return Observation.all unless box.valid?
 
       where(
@@ -404,9 +403,9 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       )
     }
     # helper for not_in_box
-    scope :not_in_box_regular, lambda { |**args|
-      args[:mappable] ||= false
-      box = Mappable::Box.new(**args.except(:mappable))
+    scope :not_in_box_regular, lambda { |box, _mappable|
+      # args[:mappable] ||= false
+      # box = Mappable::Box.new(**args.except(:mappable))
       return Observation.all unless box.valid?
 
       where(

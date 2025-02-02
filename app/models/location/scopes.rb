@@ -109,19 +109,19 @@ module Location::Scopes
 
     # Returns locations whose bounding box is entirely within the given box.
     # Pass kwargs (:north, :south, :east, :west), any order
-    scope :in_box, lambda { |**args|
-      box = Mappable::Box.new(**args)
+    scope :in_box, lambda { |box|
+      # box = Mappable::Box.new(**args)
       return none unless box.valid?
 
       if box.straddles_180_deg?
-        in_box_straddling_dateline(**args)
+        in_box_straddling_dateline(box)
       else
-        in_box_regular(**args)
+        in_box_regular(box)
       end
     }
     # mostly a helper for in_box
-    scope :in_box_straddling_dateline, lambda { |**args|
-      box = Mappable::Box.new(**args)
+    scope :in_box_straddling_dateline, lambda { |box|
+      # box = Mappable::Box.new(**args)
       return none unless box.valid?
 
       where((Location[:south] >= box.south).and(Location[:north] <= box.north).
@@ -130,20 +130,20 @@ module Location::Scopes
             and((Location[:east] >= box.west).or(Location[:east] <= box.east)))
     }
     # mostly a helper for in_box
-    scope :in_box_regular, lambda { |**args|
-      box = Mappable::Box.new(**args)
+    scope :in_box_regular, lambda { |box|
+      # box = Mappable::Box.new(**args)
       return none unless box.valid?
 
       where((Location[:south] >= box.south).and(Location[:north] <= box.north).
             and(Location[:west] >= box.west).and(Location[:east] <= box.east).
             and(Location[:west] <= Location[:east]))
     }
-    # Pass kwargs (:north, :south, :east, :west), any order
-    scope :not_in_box, lambda { |**args|
-      box = Mappable::Box.new(**args)
+    # Pass Mappable::Box (was kwargs (:north, :south, :east, :west), any order)
+    scope :not_in_box, lambda { |box|
+      # box = Mappable::Box.new(**args)
       return none unless box.valid?
 
-      in_box(**args).invert_where
+      in_box(box).invert_where
     }
     # Use named parameters (lat:, lng:), any order
     scope :contains_point, lambda { |**args|
@@ -170,8 +170,8 @@ module Location::Scopes
     #   w > e  | west <= east | none
     #   w > e  | west > east  | west <= w && e <= east
     #
-    scope :contains_box, lambda { |**args|
-      args => { north:, south:, east:, west: }
+    scope :contains_box, lambda { |box|
+      box.attributes => { north:, south:, east:, west: }
 
       if west <= east # w / e don't straddle 180
         where(Location[:south].lteq(south).and(Location[:north].gteq(north)).

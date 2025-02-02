@@ -36,7 +36,8 @@ class API2::LocationsTest < UnitTestCase
     assert_api_pass(params.merge(user: "rolf"))
     assert_api_results(locs)
 
-    locs = Location.in_box(north: 40, south: 39, east: -123, west: -124)
+    box = Mappable::Box.new(north: 40, south: 39, east: -123, west: -124)
+    locs = Location.in_box(box)
 
     assert_not_empty(locs)
     assert_api_fail(params.merge(south: 39, east: -123, west: -124))

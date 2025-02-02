@@ -3647,7 +3647,7 @@ class NameTest < UnitTestCase
 
   def test_scope_in_box
     cal = locations(:california)
-    names_in_cal_box = Name.in_box(**cal.bounding_box)
+    names_in_cal_box = Name.in_box(cal.bounding_box)
     # Grab a couple of Names that are unused in Observation fixtures
     names_without_observations =
       Name.where.not(id: Name.joins(:observations)).distinct.limit(2).to_a
@@ -3670,7 +3670,8 @@ class NameTest < UnitTestCase
       obs_in_cal_without_lat_lng.name,
       "Name.in_box should exclude Names whose only Observations lack lat/long"
     )
-    assert_empty(Name.in_box(north: 0.0001, south: 0, east: 0.0001, west: 0))
+    box = Mappable::Box.new(north: 0.0001, south: 0, east: 0.0001, west: 0)
+    assert_empty(Name.in_box(box))
   end
 
   def test_more_brief_authors

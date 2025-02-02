@@ -42,7 +42,7 @@ class API2
 
     # rubocop:disable Metrics/MethodLength
     def query_params
-      n, s, e, w = parse_bounding_box!
+      box = parse_bounding_box!
       {
         where: sql_id_condition,
         created_at: parse_range(:time, :created_at),
@@ -69,10 +69,7 @@ class API2
         with_notes_fields: parse_array(:string, :has_notes_field, help: 1),
         notes_has: parse(:string, :notes_has, help: 1),
         comments_has: parse(:string, :comments_has, help: 1),
-        north: n,
-        south: s,
-        east: e,
-        west: w,
+        in_box: box,
         region: parse(:string, :region, help: 1)
       }.merge(parse_names_parameters)
     end
