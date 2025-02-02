@@ -6,7 +6,8 @@ class InternalLink
     @alt_title = alt_title
     @url = url
     @html_options = html_options
-    @html_options[:class] = html_class unless @html_options.include?(:class)
+    @html_options[:class] = [@html_options[:class],
+                             html_class].compact.join(" ")
   end
 
   def tab
@@ -16,11 +17,7 @@ class InternalLink
   private
 
   def html_class
-    result = if @alt_title
-               @alt_title
-             else
-               @title
-             end.parameterize(separator: "_")
-    return result + "_link"
+    result = (@alt_title || @title).parameterize(separator: "_")
+    "#{result}_link"
   end
 end
