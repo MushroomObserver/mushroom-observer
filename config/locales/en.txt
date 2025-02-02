@@ -1194,6 +1194,7 @@
   search_term_south: south
   search_term_user: user
   search_term_west: west
+  search_term_group_pattern: "[:PATTERN]"
   search_term_group_search: "[:SEARCH]"
   search_term_group_date: "[:DATE]"
   search_term_group_quality: "[:QUALITY]"
@@ -3742,6 +3743,7 @@
   observation_term_has_comments: Has any comments?
   observation_term_is_collection_location: Mushroom was growing at the location. ("[:form_observations_is_collection_location]" is checked.)
 
+  name_term_pattern: "[:PATTERN]"
   name_term_created: Date name was first used.
   name_term_modified: Date name was last modified.
   name_term_rank: Rank or range of ranks, e.g., "genus" or "species-form".
