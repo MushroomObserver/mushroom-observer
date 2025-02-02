@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class Query::Sequences < Query::Base
+  include Query::Params::Locations
   include Query::Params::Names
   include Query::Params::Observations
   include Query::Initializers::Names
@@ -13,23 +14,24 @@ class Query::Sequences < Query::Base
   def parameter_declarations
     super.merge(sequence_parameter_declarations).
       merge(observation_parameter_declarations).
-      merge(names_parameter_declarations)
+      merge(names_parameter_declarations).
+      merge(bounding_box_parameter_declarations)
   end
 
   def sequence_parameter_declarations
     {
       created_at: [:time],
       updated_at: [:time],
-      observations: [Observation],
+      ids: [Sequence],
       users: [User],
+      observations: [Observation],
       locus: [:string],
       archive: [:string],
       accession: [:string],
       locus_has: :string,
       accession_has: :string,
       notes_has: :string,
-      pattern: :string,
-      ids: [Sequence]
+      pattern: :string
     }
   end
 
@@ -37,23 +39,19 @@ class Query::Sequences < Query::Base
     {
       obs_date: [:date],
       observers: [User],
+      with_name: :boolean,
+      confidence: [:float],
       locations: [Location],
+      is_collection_location: :boolean,
+      with_images: :boolean,
+      with_specimen: :boolean,
+      with_obs_notes: :boolean,
+      obs_notes_has: :string,
+      with_notes_fields: [:string],
       herbaria: [Herbarium],
       herbarium_records: [HerbariumRecord],
       projects: [Project],
-      species_lists: [SpeciesList],
-      confidence: [:float],
-      north: :float,
-      south: :float,
-      east: :float,
-      west: :float,
-      is_collection_location: :boolean,
-      with_images: :boolean,
-      with_name: :boolean,
-      with_specimen: :boolean,
-      with_obs_notes: :boolean,
-      with_notes_fields: [:string],
-      obs_notes_has: :string
+      species_lists: [SpeciesList]
     }
   end
 
