@@ -1,6 +1,11 @@
 <%# locals: (filter: {}, field_columns: [], model: filter.class.search_type, local: true) -%>
+<%
+form_args = { model: filter, url: { action: :create },
+              id: "#{model}_filter_form" }
+# form_args[:model] = filter if filter&:id
+%>
 
-<%= form_with(model: filter, url: { action: :create }) do |form| %>
+<%= form_with(**form_args) do |form| %>
 
   <%= tag.div(class: "row") do %>
     <% field_columns.each do |panels| %>

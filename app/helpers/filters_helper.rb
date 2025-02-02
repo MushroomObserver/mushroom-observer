@@ -124,7 +124,7 @@ module FiltersHelper
     args[:hidden_name] = filter_check_for_hidden_field_name(args)
     args = filter_prefill_or_select_values(args, field_type)
 
-    FILTER_FIELD_HELPERS[field_type][:args].merge(args.except(:model))
+    FILTER_FIELD_HELPERS[field_type][:args].merge(args.except(:model, :filter))
   end
 
   def filter_help_text(args, field_type)
