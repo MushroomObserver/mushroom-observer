@@ -1,18 +1,10 @@
 # frozen_string_literal: true
 
-module InternalLink
-  class Model
+class InternalLink
+  class Model < InternalLink
     def initialize(title, model, url, html_options: {}, alt_title: nil)
       @model = model
-      @title = title
-      @alt_title = alt_title
-      @url = url
-      @html_options = html_options
-      @html_options[:class] = html_class unless @html_options.include?(:class)
-    end
-
-    def tab
-      [@title, @url, @html_options]
+      super(title, url, html_options:, alt_title:)
     end
 
     private
