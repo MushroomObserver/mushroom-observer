@@ -171,7 +171,7 @@ module Location::Scopes
     #   w > e  | west > east  | west <= w && e <= east
     #
     scope :contains_box, lambda { |box|
-      box.attributes => { north:, south:, east:, west: }
+      box.attributes.symbolize_keys => { north:, south:, east:, west: }
 
       if west <= east # w / e don't straddle 180
         where(Location[:south].lteq(south).and(Location[:north].gteq(north)).

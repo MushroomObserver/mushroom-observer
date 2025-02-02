@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# Box represents a geographic bounding box, a rectangle on the surface of the
-# earth, with borders: north, south, east, west
+# Non-AR model Box represents a geographic bounding box, a rectangle on the
+# surface of the earth, with borders: north, south, east, west
 # Used mostly by model scopes, and for area comparisons.
 #
 #  == Instance methods
@@ -12,16 +12,14 @@
 
 module Mappable
   class Box
-    attr_reader :north, :south, :east, :west
-
-    def initialize(north: nil, south: nil, east: nil, west: nil)
-      @north = north
-      @south = south
-      @east = east
-      @west = west
-    end
-
+    include ActiveModel::Model
+    include ActiveModel::Attributes
     include Mappable::BoxMethods
+
+    attribute :north, :float
+    attribute :south, :float
+    attribute :east, :float
+    attribute :west, :float
 
     def valid?
       args_in_bounds? && south <= north
