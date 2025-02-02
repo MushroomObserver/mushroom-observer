@@ -82,7 +82,7 @@ module PatternSearch
 
     def lookup_param_name(var)
       # See if this var matches an English parameter name first.
-      return var if params[var].present?
+      return var if var == :pattern || params[var].present?
 
       # Then check if any of the translated parameter names match.
       params.each_key do |key|

@@ -7,7 +7,8 @@ require("test_helper")
 # ------------------------------------------------------------
 module Observations
   class FiltersControllerTest < FunctionalTestCase
-    def test_existing_pattern
+    def test_existing_obs_pattern
+      login("rolf")
       @request.session["pattern"] = "something"
       @request.session["search_type"] = "observation"
       get(:new)
