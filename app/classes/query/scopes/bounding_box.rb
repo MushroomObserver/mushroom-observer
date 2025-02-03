@@ -11,7 +11,7 @@ module Query::Scopes::BoundingBox
   def add_bounding_box_conditions_for_observations
     return unless (box = we_have_a_box?)
 
-    @scopes = @scopes.where(
+    @scopes = @scopes.left_outer_joins(:location).where(
       use_observation_coordinates?.
       when(true).then(Observation.in_box(**box)).
       when(false).then(Location.in_box(**box))
