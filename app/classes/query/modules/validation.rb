@@ -7,7 +7,7 @@ module Query::Modules::Validation
   def validate_params
     old_params = @params.dup.compact.symbolize_keys
     new_params = {}
-    parameter_declarations.slice(*@params.keys).each do |param, param_type|
+    parameter_declarations.slice(*old_params.keys).each do |param, param_type|
       val = old_params[param]
       val = validate_value(param_type, param, val) if val.present?
       new_params[param] = val
