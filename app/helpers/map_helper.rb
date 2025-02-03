@@ -119,12 +119,12 @@ module MapHelper
     lines.safe_join(safe_br)
   end
 
-  def mapset_observation_header(set, args)
+  def mapset_observation_header(set, args) # don't need args?
     show, map = mapset_associated_links(set, args, :observation)
     map_point_text(:Observations.t, set.observations.length, show, map)
   end
 
-  def mapset_location_header(set, args)
+  def mapset_location_header(set, args) # don't need args?
     show, map = mapset_associated_links(set, args, :location)
     map_point_text(:Locations.t, set.underlying_locations.length, show, map)
   end
@@ -134,19 +134,25 @@ module MapHelper
   end
 
   # Links to obs, locs or names within the current mapset, or maps of these
-  def mapset_associated_links(set, args, type)
-    params = args[:query_params] || {}
-    params = params.merge(mapset_box_params(set))
+  def mapset_associated_links(set, _args, type)
+    # params = args[:query_params] || {}
+    # this just gets us q.
+    # need to look up query from the QR and add in_box and resave.
+    # params = params.merge(mapset_box_params(set))
     return unless [:observation, :location, :name].include?(type)
 
-    mapset_associated_links_for_type(type, params)
+    mapset_associated_links_for_type(set, type)
   end
 
   # Helper for the above
-  def mapset_associated_links_for_type(type, params)
+  def mapset_associated_links_for_type(set, type)
     query_type = type.to_s.camelize.to_sym
     path_helper = :"#{type.to_s.pluralize}_path"
-    query = Query.lookup(query_type, **params)
+    # query = Query.lookup(query_type, **params)
+    # probably already have a query, from the index that got us here. add box
+    query = controller.find_or_create_query(
+      query_type, in_box: mapset_box_params(set)
+    )
     [link_to(:show_all.t, add_query_param(send(path_helper), query)),
      link_to(:map_all.t, add_query_param(send(:"map_#{path_helper}"), query))]
   end
