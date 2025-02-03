@@ -153,16 +153,13 @@ module MapHelper
 
   def mapset_observation_link(obs, args)
     params = args[:query_params] || {}
-    query = Query.lookup(:Observation, params)
     link_to("#{:Observation.t} ##{obs.id}",
-            add_query_param(observation_path(id: obs.id), query))
+            observation_path(id: obs.id, params: params))
   end
 
   def mapset_location_link(loc, args)
     params = args[:query_params] || {}
-    query = Query.lookup(:Location, params)
-    link_to(loc.display_name.t,
-            add_query_param(location_path(id: loc.id), query))
+    link_to(loc.display_name.t, location_path(id: loc.id, params: params))
   end
 
   # These are query params for the links back to MO indexes, slightly enlarged
