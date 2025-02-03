@@ -5,52 +5,15 @@ module Query::Modules::Validation
   attr_accessor :params, :params_cache
 
   def validate_params
-    old_params = @params.dup
+    old_params = @params.dup.compact.symbolize_keys
     new_params = {}
-    parameter_declarations.each do |param, param_type|
-      validate_param(old_params, new_params, param, param_type)
-    end
-    check_for_unexpected_params(old_params)
-    @params = new_params
-  end
-
-  def validate_param(old_params, new_params, param_sym, param_type)
-    param = param_sym.to_s.sub(/\?$/, "").to_sym
-    optional = true
-    begin
-      val = pop_param_value(old_params, param)
-      val = validate_value(param_type, param, val) if val.present?
-      if !val.nil?
-        new_params[param] = val
-      elsif !optional
-        raise(
-          "Missing :#{param} parameter for #{model} query."
-        )
-      else
-        new_params[param] = nil
-      end
-    rescue MissingValue
-      unless optional
-        raise(
-          "Missing :#{param} parameter for #{model} query."
-        )
-      end
-    end
-  end
-
-  class MissingValue < RuntimeError; end
-
-  def pop_param_value(old_params, param)
-    if old_params.key?(param)
+    parameter_declarations.slice(*@params.keys).each do |param, param_type|
       val = old_params[param]
-    elsif old_params.key?(param.to_s)
-      val = old_params[param.to_s]
-    else
-      raise(MissingValue.new)
+      val = validate_value(param_type, param, val) if val.present?
+      new_params[param] = val
     end
-    old_params.delete(param)
-    old_params.delete(param.to_s)
-    val
+    check_for_unexpected_params(old_params.except(*parameter_declarations.keys))
+    @params = new_params
   end
 
   def check_for_unexpected_params(old_params)
@@ -58,6 +21,14 @@ module Query::Modules::Validation
 
     str = old_params.keys.map(&:to_s).join("', '")
     raise("Unexpected parameter(s) '#{str}' for #{model} query.")
+  end
+
+  def validate_value(param_type, param, val)
+    if param_type.is_a?(Array)
+      array_validate(param, val, param_type.first)
+    else
+      scalar_validate(param, val, param_type)
+    end
   end
 
   def array_validate(param, val, param_type)
@@ -75,17 +46,56 @@ module Query::Modules::Validation
   end
 
   def scalar_validate(param, val, param_type)
-    if param_type.is_a?(Symbol)
+    case param_type
+    when Symbol
       send(:"validate_#{param_type}", param, val)
-    elsif param_type.is_a?(Class) &&
-          param_type.respond_to?(:descends_from_active_record?)
-      validate_record_or_id_or_string(param, val, param_type)
-    elsif param_type.is_a?(Hash)
-      validate_enum(param, val, param_type)
+    when Class
+      validate_class_param(param, val, param_type)
+    when Hash
+      validate_hash_param(param, val, param_type)
     else
       raise("Invalid declaration of :#{param} for #{model} " \
             "query! (invalid type: #{param_type.class.name})")
     end
+  end
+
+  def validate_class_param(param, val, param_type)
+    if param_type.respond_to?(:descends_from_active_record?)
+      validate_record_or_id_or_string(param, val, param_type)
+    else
+      validate_poro(param, val, param_type)
+    end
+  end
+
+  def validate_hash_param(param, val, param_type)
+    if [:string, :boolean].include?(param_type.keys.first)
+      validate_enum(param, val, param_type)
+    else
+      validate_nested_params(param, val, param_type)
+    end
+  end
+
+  def validate_nested_params(_param, val, hash)
+    val2 = {}
+    hash.each do |key, arg_type|
+      val2[key] = scalar_validate(key, val[key], arg_type)
+    end
+    val2
+  end
+
+  def validate_poro(param, val, param_type)
+    unless defined?(param_type)
+      raise(
+        "Don't know how to parse #{param_type} :#{param} for #{model} query."
+      )
+    end
+
+    return val if val.valid?
+
+    raise(
+      "Invalid #{param_type} instance passed for :#{param} for " \
+      "#{model} query."
+    )
   end
 
   def validate_enum(param, val, hash)
@@ -266,14 +276,6 @@ module Query::Modules::Validation
   def get_cached_parameter_instance(param)
     @params_cache ||= {}
     @params_cache[param]
-  end
-
-  def validate_value(param_type, param, val)
-    if param_type.is_a?(Array)
-      array_validate(param, val, param_type.first)
-    else
-      scalar_validate(param, val, param_type)
-    end
   end
 
   def could_be_record_id?(param, val)
