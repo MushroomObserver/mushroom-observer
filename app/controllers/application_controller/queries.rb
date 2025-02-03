@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 # see application_controller.rb
-# rubocop:disable Metrics/ModuleLength
 module ApplicationController::Queries
   def self.included(base)
     base.helper_method(
@@ -434,4 +433,3 @@ module ApplicationController::Queries
     { object: object, id: id, query: query }
   end
 end
-# rubocop:enable Metrics/ModuleLength
