@@ -194,6 +194,7 @@ class ObservationsController
       # Restrict to subset within a geographical region (used by map
       # if it needed to stuff multiple locations into a single marker).
       # restrict_query_to_box(query) # returns this query
+      query
     end
 
     def index_display_opts(opts, query)
