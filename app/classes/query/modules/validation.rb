@@ -7,6 +7,8 @@ module Query::Modules::Validation
   def validate_params
     old_params = @params.dup
     new_params = {}
+    # Wrong way to go about it - this is for checking required params.
+    # Just validate received params and raise if any are not in decs.
     parameter_declarations.each do |param, param_type|
       validate_param(old_params, new_params, param, param_type)
     end
@@ -82,20 +84,19 @@ module Query::Modules::Validation
     end
   end
 
-  # rubocop:disable Style/CaseLikeIf
   def scalar_validate(param, val, param_type)
-    if param_type.is_a?(Symbol)
+    case param_type
+    when Symbol
       send(:"validate_#{param_type}", param, val)
-    elsif param_type.is_a?(Class)
+    when Class
       validate_class_param(param, val, param_type)
-    elsif param_type.is_a?(Hash)
+    when Hash
       validate_hash_param(param, val, param_type)
     else
       raise("Invalid declaration of :#{param} for #{model} " \
             "query! (invalid type: #{param_type.class.name})")
     end
   end
-  # rubocop:enable Style/CaseLikeIf
 
   def validate_class_param(param, val, param_type)
     if param_type.respond_to?(:descends_from_active_record?)
