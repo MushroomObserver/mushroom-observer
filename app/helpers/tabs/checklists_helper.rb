@@ -50,8 +50,9 @@ module Tabs
     end
 
     def site_checklist_tab
-      [:site_stats_observed_taxa.t, checklist_path,
-       { class: tab_id(__method__.to_s) }]
+      InternalLink.new(
+        :site_stats_observed_taxa.t, checklist_path
+      ).tab
     end
   end
 end
