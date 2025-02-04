@@ -69,7 +69,7 @@ class QueryTest < UnitTestCase
                  Query.lookup(:Image, by_user: rolf.id).params[:by_user])
     assert_equal(rolf.id,
                  Query.lookup(:Image, by_user: rolf.id.to_s).params[:by_user])
-    assert_equal(rolf.login,
+    assert_equal(rolf.id,
                  Query.lookup(:Image, by_user: "rolf").params[:by_user])
   end
 
@@ -84,7 +84,7 @@ class QueryTest < UnitTestCase
                  Query.lookup(:Image, users: rolf.id).params[:users])
     assert_equal([rolf.id],
                  Query.lookup(:Image, users: rolf.id.to_s).params[:users])
-    assert_equal([rolf.login],
+    assert_equal([rolf.id],
                  Query.lookup(:Image, users: rolf.login).params[:users])
   end
 
@@ -167,6 +167,16 @@ class QueryTest < UnitTestCase
     assert_equal("id DESC",
                  Query.lookup(:Name, order: "id DESC").params[:order])
     assert_raises(RuntimeError) { Query.lookup(:Name, order: %w[1 2]) }
+  end
+
+  def test_validate_params_hashes
+    box = { north: 48.5798, south: 48.558, east: -123.4307, west: -123.4763 }
+    assert_equal(box, Query.lookup(:Location, in_box: box).params[:in_box])
+    assert_raises(TypeError) { Query.lookup(:Location, in_box: "one") }
+    box = { north: "with", south: 48.558, east: -123.4307, west: -123.4763 }
+    assert_raises(RuntimeError) { Query.lookup(:Location, in_box: box) }
+    box = { south: 48.558, east: -123.4307, west: -123.4763 }
+    assert_raises(RuntimeError) { Query.lookup(:Location, in_box: box) }
   end
 
   def test_initialize_helpers
