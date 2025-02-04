@@ -21,6 +21,8 @@ class InatImportJob < ApplicationJob
     log(
       "InatImportJob #{inat_import.id} started, user: #{inat_import.user_id}"
     )
+    @tracker = InatImportJobTracker.where(inat_import: @inat_import).
+               order(created_at: :asc).last
     @user = @inat_import.user
 
     access_token =
@@ -62,6 +64,7 @@ class InatImportJob < ApplicationJob
   def done
     log("Updating inat_import state to Done")
     @inat_import.update(state: "Done")
+    @tracker.update(ended_at: Time.zone.now)
     update_user_inat_username
   end
 
