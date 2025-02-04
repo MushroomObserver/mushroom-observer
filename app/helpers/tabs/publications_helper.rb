@@ -29,13 +29,11 @@ module Tabs
     end
 
     def new_publication_tab
-      [:create_publication.t, new_publication_path,
-       { class: tab_id(__method__.to_s) }]
+      InternalLink.new(:create_publication.t, new_publication_path).tab
     end
 
     def publications_index_tab
-      [:publication_index.t, publications_path,
-       { class: tab_id(__method__.to_s) }]
+      InternalLink.new(:publication_index.t, publications_path).tab
     end
 
     def publication_mod_tabs(pub)
@@ -46,12 +44,13 @@ module Tabs
     end
 
     def edit_publication_tab(pub)
-      [:EDIT.t, edit_publication_path(pub.id),
-       { class: tab_id(__method__.to_s) }]
+      InternalLink.new(:EDIT.t, edit_publication_path(pub.id)).tab
     end
 
     def destroy_publication_tab(pub)
-      [nil, pub, { button: :destroy }]
+      InternalLink::Model.new(:destroy_object.t(TYPE: Publication),
+                              pub, pub,
+                              html_options: { button: :destroy }).tab
     end
   end
 end

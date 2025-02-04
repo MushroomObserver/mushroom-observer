@@ -12,7 +12,7 @@ class InternalLink
     def html_class
       result = if @alt_title
                  @alt_title
-               elsif @title.include?(model_name)
+               elsif @title.underscore.include?(model_name)
                  @title
                else
                  "#{@title}_#{model_name}"

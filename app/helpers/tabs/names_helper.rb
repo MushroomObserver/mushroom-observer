@@ -16,13 +16,19 @@ module Tabs
     end
 
     def edit_name_tab(name)
-      [:show_name_edit_name.l, add_query_param(edit_name_path(name.id)),
-       { class: tab_id(__method__.to_s), icon: :edit }]
+      InternalLink::Model.new(
+        :show_name_edit_name.l, name,
+        add_query_param(edit_name_path(name.id)),
+        html_options: { icon: :edit }
+      ).tab
     end
 
     def new_name_tab
-      [:show_name_add_name.l, add_query_param(new_name_path),
-       { class: tab_id(__method__.to_s), icon: :add }]
+      InternalLink::Model.new(
+        :show_name_add_name.l, Name,
+        add_query_param(new_name_path),
+        html_options: { icon: :add }
+      ).tab
     end
 
     def edit_synonym_form_tab(name)
@@ -46,37 +52,50 @@ module Tabs
     end
 
     def edit_name_synonym_tab(name)
-      [:show_name_change_synonyms.l,
-       add_query_param(edit_synonyms_of_name_path(name.id)),
-       { class: tab_id(__method__.to_s), icon: :synonyms }]
+      InternalLink::Model.new(
+        :show_name_change_synonyms.l, name,
+        add_query_param(edit_synonyms_of_name_path(name.id)),
+        html_options: { icon: :synonyms }
+      ).tab
     end
 
     # Note that the "deprecate" icon appears on approved names, so it's a
     # "check" to indicate at a glance that they're approved.
     def deprecate_name_tab(name)
-      [:DEPRECATE.l,
-       add_query_param(form_to_deprecate_synonym_of_name_path(name.id)),
-       { class: tab_id(__method__.to_s), icon: :deprecate }]
+      InternalLink::Model.new(
+        :DEPRECATE.l, name,
+        add_query_param(form_to_deprecate_synonym_of_name_path(name.id)),
+        html_options: { class: tab_id(__method__.to_s), icon: :deprecate }
+      ).tab
     end
 
     # Likewise, the "approve" icon appears on deprecated names, so it's a "!"
     def approve_name_synonym_tab(name)
-      [:APPROVE.l,
-       add_query_param(form_to_approve_synonym_of_name_path(name.id)),
-       { class: tab_id(__method__.to_s), icon: :approve }]
+      InternalLink::Model.new(
+        :APPROVE.l, name,
+        add_query_param(form_to_approve_synonym_of_name_path(name.id)),
+        html_options: { icon: :approve }
+      ).tab
     end
 
     # Show name panels:
     # Nomenclature tabs
     def index_fungorum_search_page_tab
-      [:index_fungorum_search.l, index_fungorum_search_page_url,
-       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+      InternalLink.new(
+        :index_fungorum_search.l, index_fungorum_search_page_url,
+        html_options: { target: :_blank, rel: :noopener }
+      ).tab
     end
 
     def index_fungorum_record_tab(name)
-      ["[##{name.icn_id}]", index_fungorum_record_url(name.icn_id),
-       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+      InternalLink.new(
+        "[##{name.icn_id}]", index_fungorum_record_url(name.icn_id),
+        alt_title: "index_fungorum_record",
+        html_options: { target: :_blank, rel: :noopener }
+      ).tab
     end
+
+    ## In Progress
 
     def mycobank_record_tab(name)
       ["[##{name.icn_id}]", mycobank_record_url(name.icn_id),

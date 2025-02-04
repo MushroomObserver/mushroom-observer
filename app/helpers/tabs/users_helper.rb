@@ -86,7 +86,7 @@ module Tabs
     def admin_destroy_user_tab(user)
       InternalLink::Model.new(:destroy_object.t(TYPE: User),
                               user, admin_users_path(id: user.id),
-                              { button: :destroy }).tab
+                              html_options: { button: :destroy }).tab
     end
 
     def users_index_sorts(admin)

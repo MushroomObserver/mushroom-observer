@@ -38,7 +38,8 @@ module Tabs
 
       InternalLink::Model.new(
         txt.t, seq,
-        add_query_param(seq.show_link_args, sq_query)
+        add_query_param(seq.show_link_args, sq_query),
+        alt_title: :show_object.t(TYPE: Sequence)
       ).tab
     end
 
