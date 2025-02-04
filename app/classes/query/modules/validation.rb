@@ -137,15 +137,15 @@ module Query::Modules::Validation
     end
   end
 
-  def validate_integer(param, val)
-    if val.is_a?(Integer) || val.is_a?(String) && val.match(/^-?\d+$/)
-      val.to_i
-    elsif val.blank?
-      nil
-    else
-      raise("Value for :#{param} should be an integer, got: #{val.inspect}")
-    end
-  end
+  # def validate_integer(param, val)
+  #   if val.is_a?(Integer) || val.is_a?(String) && val.match(/^-?\d+$/)
+  #     val.to_i
+  #   elsif val.blank?
+  #     nil
+  #   else
+  #     raise("Value for :#{param} should be an integer, got: #{val.inspect}")
+  #   end
+  # end
 
   def validate_float(param, val)
     if val.is_a?(Integer) || val.is_a?(Float) ||
@@ -234,11 +234,6 @@ module Query::Modules::Validation
             lookup_records_by_name(param, params[param], model)
           end
     set_cached_parameter_instance(param, val)
-  end
-
-  def get_cached_parameter_instance(param)
-    @params_cache ||= {}
-    @params_cache[param]
   end
 
   # Cache the instance for later use, in case we both instantiate and
