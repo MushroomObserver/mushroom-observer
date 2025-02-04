@@ -69,6 +69,7 @@ module PatternSearch
       super
       hack_name_query
       default_to_including_synonyms_and_subtaxa
+      put_nsew_params_in_box
     end
 
     private
@@ -101,6 +102,12 @@ module PatternSearch
         !args[:include_synonyms].nil? ||
         !args[:include_all_name_proposals].nil? ||
         !args[:exclude_consensus].nil?
+    end
+
+    def put_nsew_params_in_box
+      north, south, east, west = args.values_at(:north, :south, :east, :west)
+      args[:in_box] = { north:, south:, east:, west: }
+      args.except!(:north, :south, :east, :west)
     end
   end
 end
