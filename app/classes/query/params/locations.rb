@@ -25,7 +25,8 @@ module Query::Params::Locations
       north: :float,
       south: :float,
       east: :float,
-      west: :float
+      west: :float,
+      in_box: { north: :float, south: :float, east: :float, west: :float }
     }
   end
 end

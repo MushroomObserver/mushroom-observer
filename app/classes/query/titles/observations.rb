@@ -103,6 +103,7 @@ module Query::Titles::Observations
   end
 
   def ensure_integer(val, model, method)
+    # val = val[0] if val.is_a?(Array)
     model.find(Integer(val)).send(method)
   end
 end

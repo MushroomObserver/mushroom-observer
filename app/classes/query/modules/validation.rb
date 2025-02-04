@@ -1,39 +1,46 @@
 # frozen_string_literal: true
 
 # validation of Query parameters
-module Query::Modules::Validation
+module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
   attr_accessor :params, :params_cache
 
   def validate_params
     old_params = @params.dup.compact.symbolize_keys
     new_params = {}
-    parameter_declarations.slice(*old_params.keys).each do |param, param_type|
+    permitted_params = parameter_declarations.slice(*old_params.keys)
+    permitted_params.each do |param, param_type|
       val = old_params[param]
       val = validate_value(param_type, param, val) if val.present?
       new_params[param] = val
     end
-    check_for_unexpected_params(old_params.except(*parameter_declarations.keys))
+    check_for_unexpected_params(old_params)
     @params = new_params
   end
 
   def check_for_unexpected_params(old_params)
-    return if old_params.keys.empty?
+    unexpected_params = old_params.except(*parameter_declarations.keys)
+    return if unexpected_params.keys.empty?
 
-    str = old_params.keys.map(&:to_s).join("', '")
+    str = unexpected_params.keys.map(&:to_s).join("', '")
     raise("Unexpected parameter(s) '#{str}' for #{model} query.")
   end
 
   def validate_value(param_type, param, val)
     if param_type.is_a?(Array)
-      array_validate(param, val, param_type.first)
+      array_validate(param, val, param_type.first).flatten
     else
-      scalar_validate(param, val, param_type)
+      # scalar_validate with ambiguous lookup could return an array
+      val = scalar_validate(param, val, param_type)
+      val = val.first if val.is_a?(Array)
+      val
     end
   end
 
   def array_validate(param, val, param_type)
     case val
     when Array
+      # scalar_validate with lookup could return multiple matches per val
+      # so this could return a nested array.
       val[0, MO.query_max_array].map do |val2|
         scalar_validate(param, val2, param_type)
       end
@@ -162,15 +169,12 @@ module Query::Modules::Validation
     if val.is_a?(type)
       raise("Value for :#{param} is an unsaved #{type} instance.") unless val.id
 
-      # Cache the instance for later use, in case we both instantiate and
-      # execute query in the same action.
-      @params_cache ||= {}
-      @params_cache[param] = val
+      set_cached_parameter_instance(param, val)
       val.id
     elsif could_be_record_id?(param, val)
       val.to_i
     elsif val.is_a?(String) && param != :ids
-      val
+      lookup_records_by_name(type, val, retrieve: :ids, first: false)
     else
       raise("Value for :#{param} should be id, string " \
             "or #{type} instance, got: #{val.inspect}")
@@ -178,8 +182,7 @@ module Query::Modules::Validation
   end
 
   def validate_string(param, val)
-    if val.is_a?(Integer) || val.is_a?(Float) ||
-       val.is_a?(String) || val.is_a?(Symbol)
+    if val.is_any?(Integer, Float, String, Symbol)
       val.to_s
     else
       raise("Value for :#{param} should be a string or symbol, " \
@@ -191,10 +194,7 @@ module Query::Modules::Validation
     if val.is_a?(type)
       raise("Value for :#{param} is an unsaved #{type} instance.") unless val.id
 
-      # Cache the instance for later use, in case we both instantiate and
-      # execute query in the same action.
-      @params_cache ||= {}
-      @params_cache[param] = val
+      set_cached_parameter_instance(param, val)
       val.id
     elsif could_be_record_id?(param, val)
       val.to_i
@@ -209,8 +209,7 @@ module Query::Modules::Validation
     when Name
       raise("Value for :#{param} is an unsaved Name instance.") unless val.id
 
-      @params_cache ||= {}
-      @params_cache[param] = val
+      set_cached_parameter_instance(param, val)
       val.id
     when String, Integer
       val
@@ -265,17 +264,24 @@ module Query::Modules::Validation
   end
 
   def find_cached_parameter_instance(model, param)
-    @params_cache ||= {}
-    @params_cache[param] ||= if could_be_record_id?(param, params[param])
-                               model.find(params[param])
-                             else
-                               lookup_record_by_name(model, params[param])
-                             end
+    val = if could_be_record_id?(param, params[param])
+            model.find(params[param])
+          else
+            lookup_records_by_name(model, params[param])
+          end
+    set_cached_parameter_instance(param, val)
   end
 
   def get_cached_parameter_instance(param)
     @params_cache ||= {}
     @params_cache[param]
+  end
+
+  # Cache the instance for later use, in case we both instantiate and
+  # execute query in the same action.
+  def set_cached_parameter_instance(param, val)
+    @params_cache ||= {}
+    @params_cache[param] = val
   end
 
   def could_be_record_id?(param, val)
@@ -285,11 +291,21 @@ module Query::Modules::Validation
       val.is_a?(String) && (val == "0") && (param == :user)
   end
 
-  def lookup_record_by_name(type, val)
+  def lookup_records_by_name(type, val, retrieve: :instances, first: true)
     lookup = "Lookup::#{type.name.pluralize}".constantize
-    result = lookup.new(val).instances&.first
-    raise("Couldn't find an id for : #{val.inspect}") unless result
+    raise("#{lookup} not defined for : #{val.inspect}") unless defined?(lookup)
 
-    result
+    # possible name lookup params
+    # names_params = *names_parameter_declarations.except(:names).keys
+    # lookup_params = params.slice(names_params).compact
+    # results = lookup.new(val, lookup_params).send(retrieve)
+    results = lookup.new(val).send(retrieve)
+    raise("Couldn't find an id for : #{val.inspect}") unless results
+
+    if first || results.size == 1
+      results.first
+    else
+      results
+    end
   end
 end
