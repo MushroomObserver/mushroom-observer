@@ -35,12 +35,16 @@ module Tabs
     end
 
     def edit_license_tab(license)
-      [:EDIT.t, edit_license_path(license.id),
-       { class: tab_id(__method__.to_s) }]
+      InternalLink::Model.new(
+        :EDIT.t, license, edit_license_path(license.id)
+      ).tab
     end
 
     def destroy_license_tab(license)
-      [nil, license, { button: :destroy }]
+      InternalLink::Model.new(
+        :destroy_object.t(TYPE: License), license, license,
+        html_options: { button: :destroy }
+      ).tab
     end
 
     # "Editing: Creative Commons Non-commercial v3.0 (#nnn)"  textilized
@@ -62,12 +66,15 @@ module Tabs
     private
 
     def new_license_tab
-      [:create_license_title.t, new_license_path,
-       { class: tab_id(__method__.to_s) }]
+      InternalLink::Model.new(
+        :create_license_title.t, License, new_license_path
+      ).tab
     end
 
     def licenses_index_tab
-      [:index_license.t, licenses_path, { class: tab_id(__method__.to_s) }]
+      InternalLink::Model.new(
+        :index_license.t, License, licenses_path
+      ).tab
     end
   end
 end
