@@ -172,6 +172,11 @@ class QueryTest < UnitTestCase
   def test_validate_params_hashes
     box = { north: 48.5798, south: 48.558, east: -123.4307, west: -123.4763 }
     assert_equal(box, Query.lookup(:Location, in_box: box).params[:in_box])
+    assert_raises(TypeError) { Query.lookup(:Location, in_box: "one") }
+    box = { north: "with", south: 48.558, east: -123.4307, west: -123.4763 }
+    assert_raises(RuntimeError) { Query.lookup(:Location, in_box: box) }
+    box = { south: 48.558, east: -123.4307, west: -123.4763 }
+    assert_raises(RuntimeError) { Query.lookup(:Location, in_box: box) }
   end
 
   def test_initialize_helpers
