@@ -324,12 +324,14 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
           or(Observation.cached_location_center_in_box_over_dateline(box))
       end
     }
+    # In these the box.east edge is in the w hemisphere, -180..
+    #      and the box.west edge is in the e hemisphere, ..180
     scope :gps_in_box_over_dateline, lambda { |box|
       where(
         (Observation[:lat] >= box.south).
         and(Observation[:lat] <= box.north).
-        and(Observation[:lng] <= box.west).
-        or(Observation[:lng] >= box.east)
+        and(Observation[:lng] >= box.west).
+        or(Observation[:lng] <= box.east)
       )
     }
     scope :cached_location_center_in_box_over_dateline, lambda { |box|
@@ -337,8 +339,8 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         Observation[:lat].eq(nil).
         and(Observation[:location_lat] >= box.south).
         and(Observation[:location_lat] <= box.north).
-        and(Observation[:location_lng] <= box.west).
-        or(Observation[:location_lng] >= box.east)
+        and(Observation[:location_lng] >= box.west).
+        or(Observation[:location_lng] <= box.east)
       )
     }
     scope :associated_location_center_in_box_over_dateline, lambda { |box|
@@ -347,8 +349,8 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
           Observation[:lat].eq(nil).
           and(Location[:center_lat] >= box.south).
           and(Location[:center_lat] <= box.north).
-          and(Location[:center_lng] <= box.west).
-          or(Location[:center_lng] >= box.east)
+          and(Location[:center_lng] >= box.west).
+          or(Location[:center_lng] <= box.east)
         )
     }
     # mostly a helper for in_box
