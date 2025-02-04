@@ -1272,20 +1272,56 @@ class ObservationTest < UnitTestCase
     )
   end
 
+  def nybg
+    @nybg ||= locations(:nybg_location)
+  end
+
+  def nybg_box
+    @nybg_box ||= nybg.bounding_box
+  end
+
+  def cal
+    @cal ||= locations(:california)
+  end
+
+  def cal_box
+    @cal_box ||= cal.bounding_box
+  end
+
+  def wrangel
+    @wrangel ||= locations(:east_lt_west_location)
+  end
+
+  # { north: 71.588, south: 70.759, west: 178.648, east: -177.433 }
+  def wrangel_box
+    @wrangel_box ||= wrangel.bounding_box
+  end
+
   def ecuador_box
-    { north: 1.49397, south: -5.06906, east: -75.1904, west: -92.6038 }
+    @ecuador_box ||=
+      { north: 1.49397, south: -5.06906, east: -75.1904, west: -92.6038 }
   end
 
   def tiny_box
-    { north: 0.0001, south: 0.0001, east: 0.0001, west: 0 }
+    @tiny_box ||= { north: 0.0001, south: 0.0001, east: 0.0001, west: 0 }
+  end
+
+  def missing_west_box
+    @missing_west_box ||= { north: cal.north, south: cal.south, east: cal.east }
+  end
+
+  def outta_bounds_box
+    @outta_bounds_box ||=
+      { north: 91, south: cal.south, east: cal.east, west: cal.west }
+  end
+
+  def north_souther_than_south_box
+    @north_souther_than_south_box ||= cal_box.merge(north: cal.south - 10)
   end
 
   def test_scope_in_box
-    cal = locations(:california)
-    obss_in_cal_box = Observation.in_box(**cal.bounding_box)
-    nybg = locations(:nybg_location)
-    obss_in_nybg_box = Observation.in_box(**nybg.bounding_box)
-    obss_in_ecuador_box = Observation.in_box(**ecuador_box)
+    obss_in_cal_box = Observation.in_box(**cal_box)
+    obss_in_nybg_box = Observation.in_box(**nybg_box)
     quito_obs =
       Observation.create!(
         user: users(:rolf),
@@ -1293,27 +1329,31 @@ class ObservationTest < UnitTestCase
         lng: -78.4305382,
         where: "Quito, Ecuador"
       )
-    wrangel = locations(:east_lt_west_location)
+    obss_in_ecuador_box = Observation.in_box(**ecuador_box)
+
     wrangel_obs =
       Observation.create!(
         user: users(:rolf),
         lat: (wrangel.north + wrangel.south) / 2,
-        lng: (wrangel.east + wrangel.west) / 2 + wrangel.west
+        lng: (wrangel.east + wrangel.west) / 2 + wrangel.west,
+        where: "Wrangel Island, Russia"
       )
-    obss_in_wrangel_box = Observation.in_box(**wrangel.bounding_box)
+    # lat: 34.1622 lng: -118.3521
+    unknown_lat_lng_obs = observations(:unknown_with_lat_lng)
+    minimal_unknown_obs = observations(:minimal_unknown_obs)
+    obss_in_wrangel_box = Observation.in_box(**wrangel_box)
 
+    # Tests are comparing IDs so the results are legible in the event of failure
     # boxes not straddling 180 deg
-    assert_includes(obss_in_cal_box, observations(:unknown_with_lat_lng))
-    assert_includes(obss_in_ecuador_box, quito_obs)
-    assert_not_includes(obss_in_nybg_box, observations(:unknown_with_lat_lng))
-    assert_not_includes(obss_in_cal_box,
-                        observations(:minimal_unknown_obs),
+    assert_includes(obss_in_cal_box.map(&:id), unknown_lat_lng_obs.id)
+    assert_includes(obss_in_ecuador_box.map(&:id), quito_obs.id)
+    assert_not_includes(obss_in_nybg_box.map(&:id), unknown_lat_lng_obs.id)
+    assert_not_includes(obss_in_cal_box.map(&:id), minimal_unknown_obs.id,
                         "Observation without lat/lon should not be in box")
 
     # box straddling 180 deg
-    assert_includes(obss_in_wrangel_box, wrangel_obs)
-    assert_not_includes(obss_in_wrangel_box,
-                        observations(:unknown_with_lat_lng))
+    assert_includes(obss_in_wrangel_box.map(&:id), wrangel_obs.id)
+    assert_not_includes(obss_in_wrangel_box.map(&:id), unknown_lat_lng_obs.id)
 
     assert_empty(Observation.where(lat: 0.001), "Test needs different fixture")
     assert_empty(
@@ -1324,31 +1364,24 @@ class ObservationTest < UnitTestCase
 
     # invalid arguments
     assert_empty(
-      Observation.in_box(north: cal.north, south: cal.south, east: cal.east),
+      Observation.in_box(**missing_west_box),
       "`Observation.in_box` should be empty if an argument is missing"
     )
     assert_empty(
-      Observation.in_box(
-        north: 91, south: cal.south, east: cal.east, west: cal.west
-      ),
+      Observation.in_box(**outta_bounds_box),
       "`Observation.in_box` should be empty if an argument is out of bounds"
     )
     assert_empty(
-      Observation.in_box(north: cal.south - 10,
-                         south: cal.south, east: cal.east, west: cal.west),
+      Observation.in_box(**north_souther_than_south_box),
       "`Observation.in_box` should be empty if N < S"
     )
   end
 
   def test_scope_not_in_box
-    cal = locations(:california)
-    obss_not_in_cal_box = Observation.not_in_box(**cal.bounding_box)
     obs_with_burbank_geoloc = observations(:unknown_with_lat_lng)
+    obss_not_in_cal_box = Observation.not_in_box(**cal_box)
+    obss_not_in_nybg_box = Observation.not_in_box(**nybg_box)
 
-    nybg = locations(:nybg_location)
-    obss_not_in_nybg_box = Observation.not_in_box(**nybg.bounding_box)
-
-    obss_not_in_ecuador_box = Observation.not_in_box(**ecuador_box)
     quito_obs =
       Observation.create!(
         user: users(:rolf),
@@ -1356,26 +1389,31 @@ class ObservationTest < UnitTestCase
         lng: -78.4305382,
         where: "Quito, Ecuador"
       )
+    obss_not_in_ecuador_box = Observation.not_in_box(**ecuador_box)
 
-    wrangel = locations(:east_lt_west_location)
     wrangel_obs =
       Observation.create!(
         user: users(:rolf),
         lat: (wrangel.north + wrangel.south) / 2,
-        lng: (wrangel.east + wrangel.west) / 2 + wrangel.west
+        lng: (wrangel.east + wrangel.west) / 2 + wrangel.west,
+        where: "Wrangel Island, Russia"
       )
-    obss_not_in_wrangel_box = Observation.not_in_box(**wrangel.bounding_box)
+    minimal_unknown_obs = observations(:minimal_unknown_obs)
+    obss_not_in_wrangel_box = Observation.not_in_box(**wrangel_box)
 
+    # Tests are comparing IDs so the results are legible in the event of failure
     # boxes not straddling 180 deg
-    assert_not_includes(obss_not_in_cal_box, obs_with_burbank_geoloc)
-    assert_not_includes(obss_not_in_ecuador_box, quito_obs)
-    assert_includes(obss_not_in_nybg_box, obs_with_burbank_geoloc)
-    assert_includes(obss_not_in_cal_box, observations(:minimal_unknown_obs),
+    assert_not_includes(obss_not_in_cal_box.map(&:id),
+                        obs_with_burbank_geoloc.id)
+    assert_not_includes(obss_not_in_ecuador_box.map(&:id), quito_obs.id)
+    assert_includes(obss_not_in_nybg_box.map(&:id), obs_with_burbank_geoloc.id)
+    assert_includes(obss_not_in_cal_box.map(&:id), minimal_unknown_obs.id,
                     "Observation without lat/lon should not be in box")
 
     # box straddling 180 deg
-    assert_not_includes(obss_not_in_wrangel_box, wrangel_obs)
-    assert_includes(obss_not_in_wrangel_box, obs_with_burbank_geoloc)
+    assert_not_includes(obss_not_in_wrangel_box.map(&:id), wrangel_obs.id)
+    assert_includes(obss_not_in_wrangel_box.map(&:id),
+                    obs_with_burbank_geoloc.id)
 
     assert_equal(
       Observation.count,
@@ -1387,23 +1425,17 @@ class ObservationTest < UnitTestCase
     all_observations_count = Observation.count
     assert_equal(
       all_observations_count,
-      Observation.not_in_box(
-        north: cal.north, south: cal.south, east: cal.east
-      ).count,
+      Observation.not_in_box(**missing_west_box).count,
       "All Observations should be excluded from a box with missing boundary"
     )
     assert_equal(
       all_observations_count,
-      Observation.not_in_box(
-        north: 91, south: cal.south, east: cal.east, west: cal.west
-      ).count,
+      Observation.not_in_box(**outta_bounds_box).count,
       "All Observations should be excluded from a box with an out-of-bounds arg"
     )
     assert_equal(
       all_observations_count,
-      Observation.not_in_box(
-        north: cal.south - 10, south: cal.south, east: cal.east, west: cal.west
-      ).count,
+      Observation.not_in_box(**north_souther_than_south_box).count,
       "All Observations should be excluded from box whose N < S"
     )
   end
