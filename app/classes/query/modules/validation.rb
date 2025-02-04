@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # validation of Query parameters
-module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
+module Query::Modules::Validation
   attr_accessor :params, :params_cache
 
   def validate_params
@@ -180,35 +180,6 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     else
       raise("Value for :#{param} should be a string or symbol, " \
             "got a #{val.class}: #{val.inspect}")
-    end
-  end
-
-  def validate_id(param, val, type = ActiveRecord::Base)
-    if val.is_a?(type)
-      raise("Value for :#{param} is an unsaved #{type} instance.") unless val.id
-
-      set_cached_parameter_instance(param, val)
-      val.id
-    elsif could_be_record_id?(param, val)
-      val.to_i
-    else
-      raise("Value for :#{param} should be id or #{type} instance, " \
-            "got: #{val.inspect}")
-    end
-  end
-
-  def validate_name(param, val)
-    case val
-    when Name
-      raise("Value for :#{param} is an unsaved Name instance.") unless val.id
-
-      set_cached_parameter_instance(param, val)
-      val.id
-    when String, Integer
-      val
-    else
-      raise("Value for :#{param} should be a Name, String or Integer, " \
-            "got: #{val.class}")
     end
   end
 
