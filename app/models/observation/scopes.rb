@@ -310,7 +310,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       end
     }
     # mostly a helper for in_box
-    scope :in_box_straddling_dateline, lambda { |**args|
+    scope :in_box_over_dateline, lambda { |**args|
       include_vague_locations = args[:vague] || false
       box = Mappable::Box.new(**args.except(:mappable))
       return none unless box.valid?
