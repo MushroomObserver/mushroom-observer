@@ -85,7 +85,6 @@ module Tabs
     end
 
     # description tabs:
-    # TODO: Test
     def location_show_description_tab(location)
       return unless location&.description
 
@@ -96,7 +95,6 @@ module Tabs
       ).tab
     end
 
-    # TODO: Test
     def location_edit_description_tab(location)
       return unless location&.description
 
@@ -107,7 +105,6 @@ module Tabs
       ).tab
     end
 
-    # TODO: Test
     def location_new_description_tab(location)
       InternalLink::Model.new(
         :show_name_create_description.l, location,
@@ -120,15 +117,14 @@ module Tabs
       [location_versions_tab(location)]
     end
 
-    # TODO: Test
     def location_versions_tab(location)
       InternalLink::Model.new(
         :show_location.t(location: location.display_name), location,
-        location_path(location.id)
+        location_path(location.id),
+        alt_title: :show_object.t(TYPE: Location)
       ).tab
     end
 
-    # TODO: Test
     def locations_index_tab
       InternalLink::Model.new(
         :all_objects.t(type: :location), Location,
@@ -136,11 +132,11 @@ module Tabs
       ).tab
     end
 
-    # TODO: Test
     def observations_at_location_tab(location)
       InternalLink::Model.new(
         show_obs_link_title_with_count(location), location,
         add_query_param(observations_path(location: location.id)),
+        alt_title: :show_location_observations.t,
         html_options: { icon: :observations, show_text: true }
       ).tab
     end
