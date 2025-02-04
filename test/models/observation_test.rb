@@ -1343,6 +1343,7 @@ class ObservationTest < UnitTestCase
     minimal_unknown_obs = observations(:minimal_unknown_obs)
     obss_in_wrangel_box = Observation.in_box(**wrangel_box)
 
+    # Tests are comparing IDs so the results are legible in the event of failure
     # boxes not straddling 180 deg
     assert_includes(obss_in_cal_box.map(&:id), unknown_lat_lng_obs.id)
     assert_includes(obss_in_ecuador_box.map(&:id), quito_obs.id)
@@ -1400,6 +1401,7 @@ class ObservationTest < UnitTestCase
     minimal_unknown_obs = observations(:minimal_unknown_obs)
     obss_not_in_wrangel_box = Observation.not_in_box(**wrangel_box)
 
+    # Tests are comparing IDs so the results are legible in the event of failure
     # boxes not straddling 180 deg
     assert_not_includes(obss_not_in_cal_box.map(&:id),
                         obs_with_burbank_geoloc.id)
