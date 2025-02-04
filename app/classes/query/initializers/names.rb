@@ -143,14 +143,6 @@ module Query::Initializers::Names
     add_id_condition("names.id", params[:names])
   end
 
-  # Copy only the names_parameters into a name_params hash we use here.
-  def names_parameters
-    name_params = names_parameter_declarations.dup
-    name_params.transform_keys! { |k| k.to_s.chomp("?").to_sym }
-    name_params.each_key { |k| name_params[k] = params[k] }
-    name_params.except(:names).compact
-  end
-
   # ------------------------------------------------------------------------
 
   private
