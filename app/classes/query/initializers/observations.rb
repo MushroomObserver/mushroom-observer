@@ -38,7 +38,7 @@ module Query::Initializers::Observations
     add_join(:field_slips)
     add_id_condition(
       "field_slips.id",
-      lookup_field_slips_by_name(params[:field_slips]),
+      params[:field_slips],
       :observations
     )
   end

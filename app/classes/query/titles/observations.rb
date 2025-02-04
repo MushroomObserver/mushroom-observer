@@ -88,8 +88,8 @@ module Query::Titles::Observations
     :query_title_for_user.t(type: :observation, user: str)
   end
 
-  def map_join_and_truncate(arg, model, method)
-    str = params[arg].map do |val|
+  def map_join_and_truncate(param, model, method)
+    str = params[param].map do |val|
       # Integer(val) throws ArgumentError if val is not an integer.
       # This is the most efficient way to test if a string is an
       # integer according to a very thorough and detailed blog post!
@@ -103,7 +103,7 @@ module Query::Titles::Observations
   end
 
   def ensure_integer(val, model, method)
-    # val = val[0] if val.is_a?(Array)
+    val = val.min if val.is_a?(Array)
     model.find(Integer(val)).send(method)
   end
 end

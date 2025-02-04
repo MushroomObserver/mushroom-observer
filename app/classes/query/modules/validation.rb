@@ -39,8 +39,8 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
   def array_validate(param, val, param_type)
     case val
     when Array
-      # scalar_validate with lookup could return multiple matches per val
-      # so this could return a nested array.
+      # Lookup in scalar_validate could return multiple matches per val
+      # so the returned array could contain nested arrays.
       val[0, MO.query_max_array].map do |val2|
         scalar_validate(param, val2, param_type)
       end
@@ -67,10 +67,16 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
   end
 
   def validate_class_param(param, val, param_type)
-    if param_type.respond_to?(:descends_from_active_record?)
-      validate_record_or_id_or_string(param, val, param_type)
+    # :names may come with modifier "flag" params that indicate synonyms, etc.
+    # Immediately look those up and add any new ids to the :names array.
+    if param == :names
+      validate_names_record(param, val, param_type)
+    elsif param_type.respond_to?(:descends_from_active_record?)
+      validate_record(param, val, param_type)
     else
-      validate_poro(param, val, param_type)
+      raise(
+        "Don't know how to parse #{param_type} :#{param} for #{model} query."
+      )
     end
   end
 
@@ -88,21 +94,6 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
       val2[key] = scalar_validate(key, val[key], arg_type)
     end
     val2
-  end
-
-  def validate_poro(param, val, param_type)
-    unless defined?(param_type)
-      raise(
-        "Don't know how to parse #{param_type} :#{param} for #{model} query."
-      )
-    end
-
-    return val if val.valid?
-
-    raise(
-      "Invalid #{param_type} instance passed for :#{param} for " \
-      "#{model} query."
-    )
   end
 
   def validate_enum(param, val, hash)
@@ -165,7 +156,7 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     end
   end
 
-  def validate_record_or_id_or_string(param, val, type = ActiveRecord::Base)
+  def validate_record(param, val, type = ActiveRecord::Base)
     if val.is_a?(type)
       raise("Value for :#{param} is an unsaved #{type} instance.") unless val.id
 
@@ -174,7 +165,9 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     elsif could_be_record_id?(param, val)
       val.to_i
     elsif val.is_a?(String) && param != :ids
-      lookup_records_by_name(type, val, retrieve: :ids, first: false)
+      # Lookups for each val may return more than one record, though the lookup
+      # string is generally unique. For an example, search `two_agaricus_bug`.
+      lookup_records_by_name(param, val, type, method: :ids, all: true)
     else
       raise("Value for :#{param} should be id, string " \
             "or #{type} instance, got: #{val.inspect}")
@@ -267,7 +260,7 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     val = if could_be_record_id?(param, params[param])
             model.find(params[param])
           else
-            lookup_records_by_name(model, params[param])
+            lookup_records_by_name(param, params[param], model)
           end
     set_cached_parameter_instance(param, val)
   end
@@ -291,21 +284,43 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
       val.is_a?(String) && (val == "0") && (param == :user)
   end
 
-  def lookup_records_by_name(type, val, retrieve: :instances, first: true)
-    lookup = "Lookup::#{type.name.pluralize}".constantize
-    raise("#{lookup} not defined for : #{val.inspect}") unless defined?(lookup)
+  def validate_names_record(param, val, type)
+    names_params = *names_parameter_declarations.except(:names).keys
+    lookup_params = @params.slice(*names_params).compact
+    if lookup_params.blank?
+      validate_record(param, val, type)
+    else
+      lookup_records_by_name(param, val, type,
+                             lookup_params:, method: :ids, all: true)
+    end
+  end
 
-    # possible name lookup params
-    # names_params = *names_parameter_declarations.except(:names).keys
-    # lookup_params = params.slice(names_params).compact
-    # results = lookup.new(val, lookup_params).send(retrieve)
-    results = lookup.new(val).send(retrieve)
+  def lookup_records_by_name(param, val, type, **args)
+    lookup_params = args[:lookup_params] || {}
+    method = args[:method] || :instances
+    all = args[:all] || false
+    lookup = lookup_class(param, val, type)
+
+    results = lookup.new(val, lookup_params).send(method)
     raise("Couldn't find an id for : #{val.inspect}") unless results
 
-    if first || results.size == 1
+    if !all || results.size == 1
       results.first
     else
       results
     end
+  end
+
+  def lookup_class(param, val, type)
+    # We're only validating the projects passed as the param.
+    # Projects' species_lists will be looked up later.
+    lookup = if param == :project_lists
+               Lookup::Projects
+             else
+               "Lookup::#{type.name.pluralize}".constantize
+             end
+    raise("#{lookup} not defined for : #{val.inspect}") unless defined?(lookup)
+
+    lookup
   end
 end
