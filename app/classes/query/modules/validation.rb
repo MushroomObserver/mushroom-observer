@@ -41,7 +41,7 @@ module Query::Modules::Validation
       validated = val[0, MO.query_max_array].map! do |val2|
         scalar_validate(param, val2, param_type)
       end
-      return validated unless param == :Names
+      return validated unless param == :names
 
       # :names may come with modifier "flag" params that indicate synonyms, etc.
       # Look those up only after validating the initial array, then we can add
