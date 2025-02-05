@@ -106,6 +106,9 @@ module PatternSearch
 
     def put_nsew_params_in_box
       north, south, east, west = args.values_at(:north, :south, :east, :west)
+      box = Mappable::Box.new(north:, south:, east:, west:)
+      return unless box.valid?
+
       args[:in_box] = { north:, south:, east:, west: }
       args.except!(:north, :south, :east, :west)
     end
