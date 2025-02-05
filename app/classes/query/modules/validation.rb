@@ -155,6 +155,10 @@ module Query::Modules::Validation
     end
   end
 
+  # This type of param accepts instances or ids, but has a backup possibility
+  # of lookup strings as an (expensive) last resort. The string will be sent to
+  # the appropriate `Lookup` subclass, and must identify a unique record via the
+  # column defined in the Lookup subclass.
   def validate_record(param, val, type = ActiveRecord::Base)
     if val.is_a?(type)
       raise("Value for :#{param} is an unsaved #{type} instance.") unless val.id
@@ -164,9 +168,7 @@ module Query::Modules::Validation
     elsif could_be_record_id?(param, val)
       val.to_i
     elsif val.is_a?(String) && param != :ids
-      # Lookup strings sent for each val for this type of param should be
-      # assumed to identify a unique record.
-      lookup_records_by_name(param, val, type, method: :ids, all: true)
+      lookup_record_by_name(param, val, type, method: :ids)
     else
       raise("Value for :#{param} should be id, string " \
             "or #{type} instance, got: #{val.inspect}")
@@ -230,7 +232,7 @@ module Query::Modules::Validation
     val = if could_be_record_id?(param, params[param])
             model.find(params[param])
           else
-            lookup_records_by_name(param, params[param], model)
+            lookup_record_by_name(param, params[param], model)
           end
     set_cached_parameter_instance(param, val)
   end
@@ -260,19 +262,15 @@ module Query::Modules::Validation
     val_array.flatten
   end
 
-  def lookup_records_by_name(param, val, type, **args)
+  # Requires a unique identifying string and will return [only_one_record].
+  def lookup_record_by_name(param, val, type, **args)
     method = args[:method] || :instances
-    all = args[:all] || false
     lookup = lookup_class(param, val, type)
 
     results = lookup.new(val).send(method)
     raise("Couldn't find an id for : #{val.inspect}") unless results
 
-    if !all || results.size == 1
-      results.first
-    else
-      results
-    end
+    results.first
   end
 
   def lookup_class(param, val, type)
