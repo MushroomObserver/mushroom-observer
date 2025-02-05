@@ -34,16 +34,14 @@ module Mappable
       errors.add(:base, "Box must have valid boundaries.")
     end
 
-    # Return a new box with edges expanded by delta (optional delta_lng)
-    # Useful for dealing with float rounding errors when
+    # Return a new box with edges expanded by delta multiplier applied to each
+    # dimension. Useful for dealing with float rounding errors when
     # making comparisons to edges.
-    def expand(delta_lat, delta_lng = nil)
-      delta_lng ||= delta_lat
-
-      Box.new(north: north + delta_lat,
-              south: south - delta_lat,
-              east: rectify(east + delta_lng),
-              west: rectify(west - delta_lng))
+    def expand(delta = DELTA)
+      Box.new(north: north + delta_lat(delta),
+              south: south - delta_lat(delta),
+              east: rectify(east + delta_lng(delta)),
+              west: rectify(west - delta_lng(delta)))
     end
 
     ############################################################################
