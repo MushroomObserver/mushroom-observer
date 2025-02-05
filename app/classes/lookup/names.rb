@@ -78,8 +78,8 @@ class Lookup::Names < Lookup
       when Numeric
         true
       when String
-        # Handles integers, floats, scientific notation, and negative numbers
-        item.match?(/\A-?\d*\.?\d+(?:[eE][-+]?\d+)?\z/)
+        # Handles integers only
+        item.match?(/^-?\d+$/)
       else
         false
       end
