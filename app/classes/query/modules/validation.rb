@@ -10,7 +10,7 @@ module Query::Modules::Validation
     permitted_params = parameter_declarations.slice(*old_params.keys)
     permitted_params.each do |param, param_type|
       val = old_params[param]
-      val = validate_value(param, val, param_type) if val.present?
+      val = validate_value(param_type, param, val) if val.present?
       new_params[param] = val
     end
     check_for_unexpected_params(old_params)
@@ -25,7 +25,7 @@ module Query::Modules::Validation
     raise("Unexpected parameter(s) '#{str}' for #{model} query.")
   end
 
-  def validate_value(param, val, param_type)
+  def validate_value(param_type, param, val)
     if param_type.is_a?(Array)
       array_validate(param, val, param_type.first).flatten
     else
