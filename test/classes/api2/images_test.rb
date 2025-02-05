@@ -156,6 +156,11 @@ class API2::ImagesTest < UnitTestCase
     assert_api_results([pretty_img])
   end
 
+  # FIXME: IMO this test should fail. This should be considered an invalid use
+  # of the API `name` param (which corresponds to Query `names`). `names` wants
+  # an array of ids, with lookup-by-string as a last resort. This API query
+  # should instead have been sent as two queries: a pattern search returning
+  # ids, and then a query for subtaxa via an id.
   def test_two_agaricus_bug
     name = names(:agaricus_campestris) # the only Agaricus species with images
     imgs = name.observations.map(&:images).flatten
