@@ -21,19 +21,15 @@ module Mappable
     attribute :east, :float
     attribute :west, :float
 
-    validates :north, presence: true, inclusion: { in: -90..90 }
-    validates :south, presence: true, inclusion: { in: -90..90 }
-    validates :east, presence: true, inclusion: { in: -180..180 }
-    validates :west, presence: true, inclusion: { in: -180..180 }
+    validates :north, presence: true, numericality: { in: -90..90 }
+    validates :south, presence: true, numericality: { in: -90..90 }
+    validates :east, presence: true, numericality: { in: -180..180 }
+    validates :west, presence: true, numericality: { in: -180..180 }
 
-    validate(&:must_have_valid_bounds)
+    validate(:must_have_valid_bounds)
 
     def must_have_valid_bounds
-      errors.add(:base, "Box must have valid boundaries.") unless valid?
-    end
-
-    def valid?
-      args_in_bounds? && south <= north
+      errors.add(:base, "Box must have valid boundaries.") unless south <= north
     end
 
     # Return a new box with edges expanded by delta (optional delta_lng)
@@ -51,11 +47,6 @@ module Mappable
     ############################################################################
 
     private
-
-    def args_in_bounds?
-      south&.between?(-90, 90) && north&.between?(-90, 90) &&
-        west&.between?(-180, 180) && east&.between?(-180, 180)
-    end
 
     # Return a valid longitude between -180 and 180, for `expand` method
     def rectify(lng)
