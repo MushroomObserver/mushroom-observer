@@ -135,7 +135,7 @@ module ActiveSupport
       Time.zone = "America/New_York" # rubocop:disable Rails/TimeZoneAssignment
       User.current = nil
       start_timer if false
-      clear_logs unless defined?(@@cleared_logs)
+      clear_logs unless defined?(@cleared_logs)
       Symbol.missing_tags = []
     end
 
@@ -150,13 +150,13 @@ module ActiveSupport
 
     # Record time this test started to run.
     def start_timer
-      @@times = {} unless defined?(@@times)
-      @@times[method_name] = Time.zone.now
+      @times ||= {}
+      @times[method_name] = Time.zone.now
     end
 
     # Report time this test took to run.
     def end_timer
-      ellapsed = Time.zone.now - @@times[method_name]
+      ellapsed = Time.zone.now - @times[method_name]
       puts("\rTIME: #{ellapsed}\t#{self.class.name}::#{method_name}")
     end
 
@@ -170,7 +170,7 @@ module ActiveSupport
 
         File.truncate(file, 0)
       end
-      @@cleared_logs = true
+      @cleared_logs = true
     end
   end
 end
