@@ -107,8 +107,8 @@ module MapHelper
     lines = []
     observations = set.observations
     locations = set.underlying_locations
-    lines << mapset_observation_header(set, args) if observations.length > 1
-    lines << mapset_location_header(set, args) if locations.length > 1
+    lines << mapset_observation_header(set) if observations.length > 1
+    lines << mapset_location_header(set) if locations.length > 1
     if observations.length == 1 && observations.first&.id
       lines << mapset_observation_link(observations.first, args)
     end
@@ -119,13 +119,13 @@ module MapHelper
     lines.safe_join(safe_br)
   end
 
-  def mapset_observation_header(set, args) # don't need args?
-    show, map = mapset_associated_links(set, args, :observation)
+  def mapset_observation_header(set)
+    show, map = mapset_associated_links(set, :observation)
     map_point_text(:Observations.t, set.observations.length, show, map)
   end
 
-  def mapset_location_header(set, args) # don't need args?
-    show, map = mapset_associated_links(set, args, :location)
+  def mapset_location_header(set)
+    show, map = mapset_associated_links(set, :location)
     map_point_text(:Locations.t, set.underlying_locations.length, show, map)
   end
 
@@ -134,11 +134,7 @@ module MapHelper
   end
 
   # Links to obs, locs or names within the current mapset, or maps of these
-  def mapset_associated_links(set, _args, type)
-    # params = args[:query_params] || {}
-    # this just gets us q.
-    # need to look up query from the QR and add in_box and resave.
-    # params = params.merge(mapset_box_params(set))
+  def mapset_associated_links(set, type)
     return unless [:observation, :location, :name].include?(type)
 
     mapset_associated_links_for_type(set, type)
@@ -148,7 +144,6 @@ module MapHelper
   def mapset_associated_links_for_type(set, type)
     query_type = type.to_s.camelize.to_sym
     path_helper = :"#{type.to_s.pluralize}_path"
-    # query = Query.lookup(query_type, **params)
     # probably already have a query, from the index that got us here. add box
     query = controller.find_or_create_query(
       query_type, in_box: mapset_box_params(set)
