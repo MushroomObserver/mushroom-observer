@@ -38,15 +38,15 @@ module Query::Modules::Validation
   def array_validate(param, val, param_type)
     case val
     when Array
-      val[0, MO.query_max_array].map! do |val2|
+      validated = val[0, MO.query_max_array].map! do |val2|
         scalar_validate(param, val2, param_type)
       end
-      return val unless param == :Names
+      return validated unless param == :Names
 
       # :names may come with modifier "flag" params that indicate synonyms, etc.
       # Look those up only after validating the initial array, then we can add
       # any new ids to the :names array (to avoid recursion explosions)
-      add_synonyms_and_subtaxa(val)
+      add_synonyms_and_subtaxa(validated)
     when ::API2::OrderedRange
       [scalar_validate(param, val.begin, param_type),
        scalar_validate(param, val.end, param_type)]
