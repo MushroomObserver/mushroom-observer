@@ -10,7 +10,7 @@ module Query::Modules::Validation
     permitted_params = parameter_declarations.slice(*old_params.keys)
     permitted_params.each do |param, param_type|
       val = old_params[param]
-      val = validate_value(param_type, param, val) if val.present?
+      val = validate_value(param, val, param_type) if val.present?
       new_params[param] = val
     end
     check_for_unexpected_params(old_params)
@@ -25,11 +25,10 @@ module Query::Modules::Validation
     raise("Unexpected parameter(s) '#{str}' for #{model} query.")
   end
 
-  def validate_value(param_type, param, val)
+  def validate_value(param, val, param_type)
     if param_type.is_a?(Array)
       array_validate(param, val, param_type.first).flatten
     else
-      # scalar_validate with ambiguous lookup could return an array
       val = scalar_validate(param, val, param_type)
       val = val.first if val.is_a?(Array)
       val
@@ -39,11 +38,15 @@ module Query::Modules::Validation
   def array_validate(param, val, param_type)
     case val
     when Array
-      # Lookup in scalar_validate could return multiple matches per val
-      # so the returned array could contain nested arrays.
-      val[0, MO.query_max_array].map do |val2|
+      val[0, MO.query_max_array].map! do |val2|
         scalar_validate(param, val2, param_type)
       end
+      return val unless param == :Names
+
+      # :names may come with modifier "flag" params that indicate synonyms, etc.
+      # Look those up only after validating the initial array, then we can add
+      # any new ids to the :names array (to avoid recursion explosions)
+      add_synonyms_and_subtaxa(val)
     when ::API2::OrderedRange
       [scalar_validate(param, val.begin, param_type),
        scalar_validate(param, val.end, param_type)]
@@ -67,11 +70,7 @@ module Query::Modules::Validation
   end
 
   def validate_class_param(param, val, param_type)
-    # :names may come with modifier "flag" params that indicate synonyms, etc.
-    # Immediately look those up and add any new ids to the :names array.
-    if param == :names
-      validate_names_record(param, val, param_type)
-    elsif param_type.respond_to?(:descends_from_active_record?)
+    if param_type.respond_to?(:descends_from_active_record?)
       validate_record(param, val, param_type)
     else
       raise(
@@ -165,8 +164,8 @@ module Query::Modules::Validation
     elsif could_be_record_id?(param, val)
       val.to_i
     elsif val.is_a?(String) && param != :ids
-      # Lookups for each val may return more than one record, though the lookup
-      # string is generally unique. For an example, search `two_agaricus_bug`.
+      # Lookup strings sent for each val for this type of param should be
+      # assumed to identify a unique record.
       lookup_records_by_name(param, val, type, method: :ids, all: true)
     else
       raise("Value for :#{param} should be id, string " \
@@ -250,24 +249,23 @@ module Query::Modules::Validation
       val.is_a?(String) && (val == "0") && (param == :user)
   end
 
-  def validate_names_record(param, val, type)
+  def add_synonyms_and_subtaxa(val_array)
     names_params = *names_parameter_declarations.except(:names).keys
     lookup_params = @params.slice(*names_params).compact
-    if lookup_params.blank?
-      validate_record(param, val, type)
-    else
-      lookup_records_by_name(param, val, type,
-                             lookup_params:, method: :ids, all: true)
+    return if lookup_params.blank?
+
+    val_array[0, MO.query_max_array].map! do |val2|
+      Lookup::Names.new(val2, **lookup_params).ids
     end
+    val_array.flatten
   end
 
   def lookup_records_by_name(param, val, type, **args)
-    lookup_params = args[:lookup_params] || {}
     method = args[:method] || :instances
     all = args[:all] || false
     lookup = lookup_class(param, val, type)
 
-    results = lookup.new(val, lookup_params).send(method)
+    results = lookup.new(val).send(method)
     raise("Couldn't find an id for : #{val.inspect}") unless results
 
     if !all || results.size == 1
