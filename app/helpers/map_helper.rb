@@ -170,10 +170,10 @@ module MapHelper
 
   # These are query params for the links back to MO indexes, slightly enlarged
   def mapset_box_params(set)
-    { in_box: { north: tweak_up(set.north, 0.001, 90),
-                south: tweak_down(set.south, 0.001, -90),
-                east: tweak_up(set.east, 0.001, 180),
-                west: tweak_down(set.west, 0.001, -180) } }
+    { north: tweak_up(set.north, 0.001, 90),
+      south: tweak_down(set.south, 0.001, -90),
+      east: tweak_up(set.east, 0.001, 180),
+      west: tweak_down(set.west, 0.001, -180) }
   end
 
   def tweak_up(value, amount, max)
