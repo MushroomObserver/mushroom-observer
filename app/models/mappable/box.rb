@@ -29,7 +29,9 @@ module Mappable
     validate(:must_have_valid_bounds)
 
     def must_have_valid_bounds
-      errors.add(:base, "Box must have valid boundaries.") unless south <= north
+      return if south && north && south <= north
+
+      errors.add(:base, "Box must have valid boundaries.")
     end
 
     # Return a new box with edges expanded by delta (optional delta_lng)
