@@ -4,7 +4,9 @@ import { get } from "@rails/request.js" // allows us to call `get` below
 // Updates the inat_import_job page with the current status of the import
 // Connects to data-controller="inat-import-job"
 export default class extends Controller {
-  static targets = ["started", "elapsed", "status", "imported", "importables"]
+  static targets = [
+    "started", "elapsed", "ended_at", "status", "imported", "importables"
+  ]
 
   initialize() {
     this.intervalId = null

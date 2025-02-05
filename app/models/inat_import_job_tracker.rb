@@ -13,8 +13,8 @@
 #  elapsed::      time since the tracker was created
 #
 class InatImportJobTracker < ApplicationRecord
+  delegate :ended_at, to: :import
   delegate :importables, to: :import
-
   delegate :imported_count, to: :import
 
   def status
@@ -22,12 +22,12 @@ class InatImportJobTracker < ApplicationRecord
   end
 
   def elapsed
-    to_time = if status == "Done"
-                import.ended_at
-              else
-                Time.zone.now
-              end
-    total_seconds = (to_time - created_at).to_i
+    end_time = if status == "Done"
+                 ended_at
+               else
+                 Time.zone.now
+               end
+    total_seconds = (end_time - created_at).to_i
     hours = total_seconds / 3600
     minutes = (total_seconds % 3600) / 60
     seconds = total_seconds % 60
