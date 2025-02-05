@@ -254,12 +254,12 @@ module Query::Modules::Validation
   def add_synonyms_and_subtaxa(val_array)
     names_params = *names_parameter_declarations.except(:names).keys
     lookup_params = @params.slice(*names_params).compact
-    return if lookup_params.blank?
+    return val_array if lookup_params.blank?
 
-    val_array[0, MO.query_max_array].map! do |val2|
+    new_array = val_array[0, MO.query_max_array].map do |val2|
       Lookup::Names.new(val2, **lookup_params).ids
     end
-    val_array.flatten.uniq
+    new_array.flatten.uniq
   end
 
   # Requires a unique identifying string and will return [only_one_record].
