@@ -259,7 +259,7 @@ module Query::Modules::Validation
     val_array[0, MO.query_max_array].map! do |val2|
       Lookup::Names.new(val2, **lookup_params).ids
     end
-    val_array.flatten
+    val_array.flatten.uniq
   end
 
   # Requires a unique identifying string and will return [only_one_record].
