@@ -4,21 +4,20 @@ module Mappable
   class MinimalObservation
     include ActiveModel::Model
     include ActiveModel::Attributes
-    include ActiveModel::Validations::Callbacks
     include Mappable::BoxMethods
 
     attribute :id, :integer
     attribute :lat, :float
     attribute :lng, :float
     attribute :location_id, :integer
+    attribute :location, Location
 
     validates :lat, numericality: { in: -90..90 }
     validates :lng, numericality: { in: -180..180 }
-
-    before_validation :determine_location_id_if_instance
+    validate :location_must_be_a_location
 
     def location
-      @location ||= location_id.nil? ? nil : ::Location.find(@location_id)
+      @location ||= location_id.nil? ? nil : ::Location.find(location_id)
     end
 
     def location=(loc)
@@ -45,14 +44,10 @@ module Mappable
 
     private
 
-    def determine_location_id_if_instance
-      case location_id
-      when Integer, String
-        self.location_id = location_id.to_i
-      when Location
-        @location = location_id
-        self.location_id = location_id.id
-      end
+    def location_must_be_a_location
+      return unless location.present? && !location.is_a?(Location)
+
+      errors.add(:location, "must be a Location object")
     end
   end
 end

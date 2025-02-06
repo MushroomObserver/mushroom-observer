@@ -10,7 +10,6 @@ module Observations
 
       @query = find_or_create_query(:Observation)
       apply_content_filters(@query)
-      # @query = restrict_query_to_box(@query)
 
       find_locations_matching_observations
     end
@@ -25,7 +24,8 @@ module Observations
         Mappable::MinimalObservation.new(id: @observation.id,
                                          lat: @observation.public_lat,
                                          lng: @observation.public_lng,
-                                         location_id: @observation.location)
+                                         location: @observation.location,
+                                         location_id: @observation.location_id)
       ]
     end
 
@@ -43,11 +43,14 @@ module Observations
         limit: 10_000
       }
       @observations =
-        @query.select_all(args).map do |loc|
-          loc.symbolize_keys!
-          locations[loc[:location_id].to_i] = nil if loc[:location_id].present?
-          loc[:lat] = loc[:lng] = nil if loc[:gps_hidden] == 1
-          Mappable::MinimalObservation.new(loc.except(:gps_hidden))
+        @query.select_all(args).map do |obs|
+          obs.symbolize_keys!
+          # Setting this to nil is a flag to look up the location. Because we
+          # selected obs attributes not instances, we can't call `obs.location`
+          # and we shouldn't anyway. Getting the Locations in bulk is quicker.
+          locations[obs[:location_id].to_i] = nil if obs[:location_id].present?
+          obs[:lat] = obs[:lng] = nil if obs[:gps_hidden] == 1
+          Mappable::MinimalObservation.new(obs.except(:gps_hidden))
         end
 
       eager_load_corresponding_locations(locations) unless locations.empty?
