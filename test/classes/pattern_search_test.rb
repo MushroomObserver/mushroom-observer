@@ -610,11 +610,23 @@ class PatternSearchTest < UnitTestCase
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
-  def test_observation_search_gps
+  def test_observation_search_in_box
     expect = Observation.where(lat: 34.1622, lng: -118.3521)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new(
       "west:-118.4 east:-118.3 north:34.2 south:34.1"
+    )
+    assert_obj_arrays_equal(expect, x.query.results, :sort)
+
+    # missing value
+    y = PatternSearch::Observation.new(
+      "west:-118.4 east:-118.3 north:34.2"
+    )
+    assert_raises(PatternSearch::MissingValueError) { y.build_query }
+
+    # north/south inverted, but fixed by build_query
+    z = PatternSearch::Observation.new(
+      "west:-118.4 east:-118.3 north:34.1 south:34.2"
     )
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end

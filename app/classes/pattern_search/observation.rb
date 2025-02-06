@@ -116,7 +116,7 @@ module PatternSearch
 
     def validate_box(box)
       validator = Mappable::Box.new(**box)
-      return if validator.valid?
+      return box if validator.valid?
 
       check_for_missing_box_params
       # Just fix the box if they've got it swapped
