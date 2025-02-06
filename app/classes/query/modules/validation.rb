@@ -40,7 +40,7 @@ module Query::Modules::Validation
     when Array
       validated = val[0, MO.query_max_array].map! do |val2|
         scalar_validate(param, val2, param_type)
-      end
+      end.uniq
       return validated unless param == :names
 
       # :names may come with modifier "flag" params that indicate synonyms, etc.
