@@ -5,25 +5,27 @@ module Query::Scopes::BoundingBox
   def add_bounding_box_conditions_for_locations
     return unless (box = we_have_a_box?)
 
-    @scopes = @scopes.where(Location.in_box(**box))
+    @scopes = @scopes.merge(Location.in_box(**box))
   end
 
   def add_bounding_box_conditions_for_observations
     return unless (box = we_have_a_box?)
 
-    @scopes = @scopes.left_outer_joins(:location).where(
-      use_observation_coordinates?.
-      when(true).then(Observation.in_box(**box)).
-      when(false).then(Location.in_box(**box))
-    )
-    add_join_to_locations
+    # @scopes = @scopes.left_outer_joins(:location).where(
+    #   use_observation_coordinates?.
+    #   when(true).then(Observation.in_box(**box)).
+    #   when(false).then(Location.in_box(**box))
+    # )
+    # add_join_to_locations
+    # Maybe we can lose the plausibility check.
+    @scopes = @scopes.merge(Observation.in_box(**box))
   end
 
   # ----------------------------------------------------------------------------
 
   def we_have_a_box?
-    if params.values_at(:south, :north, :west, :east).all?(&:present?)
-      params.select(:north, :south, :east, :west)
+    if (box = Mappable::Box.new(**params[:in_box]).valid?)
+      box
     else
       false
     end
