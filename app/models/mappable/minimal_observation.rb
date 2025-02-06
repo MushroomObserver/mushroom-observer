@@ -4,6 +4,7 @@ module Mappable
   class MinimalObservation
     include ActiveModel::Model
     include ActiveModel::Attributes
+    include ActiveModel::Validations::Callbacks
     include Mappable::BoxMethods
 
     attribute :id, :integer
