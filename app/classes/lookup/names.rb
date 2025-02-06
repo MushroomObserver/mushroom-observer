@@ -47,7 +47,19 @@ class Lookup::Names < Lookup
 
   # Matches for the given vals, from the db.
   def original_matches
-    @original_matches ||= @vals.map do |val|
+    @original_matches ||= if numeric_list?(@vals)
+                            numeric_matches
+                          else
+                            map_matches
+                          end
+  end
+
+  def numeric_matches
+    Name.where(id: @vals).distinct.select(*minimal_name_columns)
+  end
+
+  def map_matches
+    @vals.map do |val|
       if val.is_a?(@model)
         val
       elsif val.is_a?(AbstractModel)
@@ -58,6 +70,20 @@ class Lookup::Names < Lookup
         find_matching_names(val)
       end
     end.flatten.uniq.compact
+  end
+
+  def numeric_list?(list)
+    list.all? do |item|
+      case item
+      when Numeric
+        true
+      when String
+        # Handles integers only
+        item.match?(/^\d+$/)
+      else
+        false
+      end
+    end
   end
 
   # NOTE: Name.parse_name returns a ParsedName instance, not an Name instance.

@@ -20,8 +20,7 @@ class Query::ExternalLinks < Query::Base
     add_sort_order_to_title
     add_owner_and_time_stamp_conditions
     initialize_observations_parameter(:external_links)
-    add_id_condition("external_links.external_site_id",
-                     lookup_external_sites_by_name(params[:external_sites]))
+    add_id_condition("external_links.external_site_id", params[:external_sites])
     add_search_condition("external_links.url", params[:url])
     super
   end
