@@ -20,20 +20,11 @@
   </p>
 <% end %>
 
-<p>
-  <%# Display refresh button if job is incomplete%>
-  <% if import_incomplete?(@inat_import) %>
-       <button class="btn btn-default" onclick="location.reload();">
-         <%= :inat_import_tracker_refresh.l %>
-       </button>
-  <% else
-       results =
-         Observation.where(user: User.current, source: "mo_inat_import").
-         where(Observation[:created_at] >= (@tracker.created_at))
-       # Under construction; button below should link to index of above results
-  %>
-       <%= link_to(:app_your_observations.l,
-                   observations_path(by_user: User.current.id),
-                   { class: "btn btn-default" } ) %>
-  <% end %>
-</p>
+<%=
+  # NOTE: jdc 2025-05-05 replace with button to results
+  # (user's Obss from @tracker.started_at to now,
+  # ideally with source: InatImport)
+    link_to(:app_your_observations.l,
+            observations_path(by_user: User.current.id),
+            { class: "mt-3 btn btn-default" } )
+%>
