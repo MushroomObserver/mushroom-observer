@@ -22,10 +22,7 @@ module Query::Params::Locations
   # Used in coerced queries for obs, plus observation queries
   def bounding_box_parameter_declarations
     {
-      north: :float,
-      south: :float,
-      east: :float,
-      west: :float
+      in_box: { north: :float, south: :float, east: :float, west: :float }
     }
   end
 end

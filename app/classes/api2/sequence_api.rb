@@ -29,7 +29,7 @@ class API2
 
     # rubocop:disable Metrics/MethodLength
     def query_params
-      n, s, e, w = parse_bounding_box!
+      box = parse_bounding_box!
       {
         where: sql_id_condition,
         created_at: parse_range(:time, :created_at),
@@ -51,10 +51,7 @@ class API2
         projects: parse_array(:project, :project, as: :id),
         species_lists: parse_array(:species_list, :species_list, as: :id),
         confidence: parse(:confidence, :confidence),
-        north: n,
-        south: s,
-        east: e,
-        west: w,
+        in_box: box,
         is_collection_location: parse(:boolean, :is_collection_location,
                                       help: 1),
         with_images: parse(:boolean, :has_images),

@@ -114,13 +114,13 @@ module Location::Scopes
       return none unless box.valid?
 
       if box.straddles_180_deg?
-        in_box_straddling_dateline(**args)
+        in_box_over_dateline(**args)
       else
         in_box_regular(**args)
       end
     }
     # mostly a helper for in_box
-    scope :in_box_straddling_dateline, lambda { |**args|
+    scope :in_box_over_dateline, lambda { |**args|
       box = Mappable::Box.new(**args)
       return none unless box.valid?
 

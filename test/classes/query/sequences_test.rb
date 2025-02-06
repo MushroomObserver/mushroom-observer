@@ -69,8 +69,8 @@ class Query::SequencesTest < UnitTestCase
   end
 
   def test_uses_join_hash
-    query = Query.lookup(:Sequence,
-                         north: "90", south: "0", west: "-180", east: "-100")
+    box = { north: "90", south: "0", west: "-180", east: "-100" }
+    query = Query.lookup(:Sequence, in_box: box)
     assert_not(query.uses_join_sub([], :location))
     assert(query.uses_join_sub([:location], :location))
     assert_not(query.uses_join_sub({}, :location))

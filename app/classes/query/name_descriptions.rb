@@ -2,6 +2,7 @@
 
 class Query::NameDescriptions < Query::Base
   include Query::Params::Descriptions
+  include Query::Params::Names
   include Query::Initializers::Descriptions
 
   def model
@@ -31,8 +32,7 @@ class Query::NameDescriptions < Query::Base
     add_by_user_condition
     add_desc_by_author_condition(:name)
     add_desc_by_editor_condition(:name)
-    names = lookup_names_by_name(params[:names])
-    add_id_condition("name_descriptions.name_id", names)
+    add_id_condition("name_descriptions.name_id", params[:names])
     initialize_description_public_parameter(:name)
     initialize_name_descriptions_parameters
     super

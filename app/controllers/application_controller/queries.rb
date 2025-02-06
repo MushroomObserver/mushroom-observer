@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 # see application_controller.rb
-# rubocop:disable Metrics/ModuleLength
 module ApplicationController::Queries
   def self.included(base)
     base.helper_method(
@@ -278,30 +277,32 @@ module ApplicationController::Queries
   end
 
   # Create a new query by adding a bounding box to the given one.
-  def restrict_query_to_box(query)
-    return query if params[:north].blank?
+  # These seem to all be coming from map_helper, so let's do it there.
+  # def restrict_query_to_box(query)
+  #   return query if params[:in_box].blank?
 
-    model = query.model.to_s.to_sym
-    tweaked_params = query.params.merge(tweaked_bounding_box_params)
-    Query.lookup(model, tweaked_params)
-  end
+  #   model = query.model.to_s.to_sym
+  #   query.params[:in_box] = tweaked_bounding_box_params
+  #   Query.lookup(model, query.params)
+  # end
 
-  def tweaked_bounding_box_params
-    {
-      north: tweak_up(params[:north], 0.001, 90),
-      south: tweak_down(params[:south], 0.001, -90),
-      east: tweak_up(params[:east], 0.001, 180),
-      west: tweak_down(params[:west], 0.001, -180)
-    }
-  end
+  # def tweaked_bounding_box_params
+  #   n, s, e, w = params[:in_box].values_at(:north, :south, :east, :west)
+  #   {
+  #     north: tweak_up(n, 0.001, 90),
+  #     south: tweak_down(s, 0.001, -90),
+  #     east: tweak_up(e, 0.001, 180),
+  #     west: tweak_down(w, 0.001, -180)
+  #   }
+  # end
 
-  def tweak_up(value, amount, max)
-    [max, value.to_f + amount].min
-  end
+  # def tweak_up(value, amount, max)
+  #   [max, value.to_f + amount].min
+  # end
 
-  def tweak_down(value, amount, min)
-    [min, value.to_f - amount].max
-  end
+  # def tweak_down(value, amount, min)
+  #   [min, value.to_f - amount].max
+  # end
 
   public ##########
 
@@ -432,4 +433,3 @@ module ApplicationController::Queries
     { object: object, id: id, query: query }
   end
 end
-# rubocop:enable Metrics/ModuleLength

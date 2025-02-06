@@ -56,17 +56,21 @@ class Query::ImagesTest < UnitTestCase
   end
 
   def test_image_quality
-    expects = Image.index_order.with_quality(50)
-    assert_query(expects, :Image, quality: 50)
-    expects = Image.index_order.with_quality(30, 50)
-    assert_query(expects, :Image, quality: [30, 50])
+    expects = Image.index_order.quality(3)
+    assert_query(expects, :Image, quality: 3)
+    expects = Image.index_order.quality(3, 3.6)
+    assert_query(expects, :Image, quality: [3, 3.6])
+    expects = Image.index_order.quality([3, 3.6]) # array
+    assert_query(expects, :Image, quality: [3, 3.6])
   end
 
   def test_image_confidence
-    expects = Image.index_order.with_confidence(50)
-    assert_query(expects, :Image, confidence: 50)
-    expects = Image.index_order.with_confidence(30, 50)
-    assert_query(expects, :Image, confidence: [30, 50])
+    expects = Image.index_order.confidence(2.1)
+    assert_query(expects, :Image, confidence: 2.1)
+    expects = Image.index_order.confidence(1.2, 2.7)
+    assert_query(expects, :Image, confidence: [1.2, 2.7])
+    expects = Image.index_order.confidence([1.2, 2.7]) # array
+    assert_query(expects, :Image, confidence: [1.2, 2.7])
   end
 
   def test_image_ok_for_export
@@ -296,11 +300,10 @@ class Query::ImagesTest < UnitTestCase
     expects = Image.index_order.joins(:observations).
               where(observations: { lat: lat }).
               where(observations: { lng: lng }).distinct
+    box = { north: lat.to_f, south: lat.to_f, west: lng.to_f, east: lng.to_f }
     assert_query(
       expects,
-      :Image,
-      with_observations: 1,
-      north: lat.to_f, south: lat.to_f, west: lat.to_f, east: lat.to_f
+      :Image, with_observations: 1, in_box: box
     )
   end
 
