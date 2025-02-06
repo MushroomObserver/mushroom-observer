@@ -59,7 +59,7 @@ class Lookup::Names < Lookup
   end
 
   def map_matches
-    @original_matches ||= @vals.map do |val|
+    @vals.map do |val|
       if val.is_a?(@model)
         val
       elsif val.is_a?(AbstractModel)
@@ -79,7 +79,7 @@ class Lookup::Names < Lookup
         true
       when String
         # Handles integers only
-        item.match?(/^-?\d+$/)
+        item.match?(/^\d+$/)
       else
         false
       end
