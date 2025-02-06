@@ -628,7 +628,7 @@ class PatternSearchTest < UnitTestCase
     z = PatternSearch::Observation.new(
       "west:-118.4 east:-118.3 north:34.1 south:34.2"
     )
-    assert_obj_arrays_equal(expect, x.query.results, :sort)
+    assert_obj_arrays_equal(expect, z.query.results, :sort)
   end
 
   def test_observation_search_has_images_no
