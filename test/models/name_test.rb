@@ -3670,7 +3670,8 @@ class NameTest < UnitTestCase
       obs_in_cal_without_lat_lng.name,
       "Name.in_box should exclude Names whose only Observations lack lat/long"
     )
-    assert_empty(Name.in_box(north: 0.0001, south: 0, east: 0.0001, west: 0))
+    box = { north: 0.0001, south: 0, east: 0.0001, west: 0 }
+    assert_empty(Name.in_box(**box))
   end
 
   def test_more_brief_authors

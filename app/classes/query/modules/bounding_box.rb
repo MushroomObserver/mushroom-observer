@@ -3,16 +3,14 @@
 # Helper methods for adding location extent conditions to query.
 module Query::Modules::BoundingBox
   def add_bounding_box_conditions_for_locations
-    return unless params[:north] && params[:south] &&
-                  params[:east] && params[:west]
+    return unless params[:in_box]
 
     _, cond2 = bounding_box_conditions
     @where += cond2
   end
 
   def add_bounding_box_conditions_for_observations
-    return unless params[:north] && params[:south] &&
-                  params[:east] && params[:west]
+    return unless params[:in_box]
 
     cond1, cond2 = bounding_box_conditions
     cond0 = lat_lng_plausible
@@ -40,7 +38,7 @@ module Query::Modules::BoundingBox
   end
 
   def bounding_box_conditions
-    n, s, e, w = params.values_at(:north, :south, :east, :west)
+    n, s, e, w = params[:in_box].values_at(:north, :south, :east, :west)
     if w < e
       bounding_box_normal(n, s, e, w)
     else
