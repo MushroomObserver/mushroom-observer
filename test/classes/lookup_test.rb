@@ -108,6 +108,15 @@ class LookupTest < UnitTestCase
                                 include_subtaxa: true)
   end
 
+  def test_lookup_names_by_id
+    User.current = rolf
+
+    name1 = names(:coprinus_comatus)
+    name2 = names(:coprinus_sensu_lato)
+    assert_lookup_names_by_name([name1, name2],
+                                [name1.text_name, name2.id.to_s])
+  end
+
   def test_lookup_names_by_name_classifications
     User.current = rolf
 

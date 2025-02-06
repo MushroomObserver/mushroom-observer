@@ -33,7 +33,6 @@ module Query::Params::Observations
       user_where: :string,
       is_collection_location: :boolean,
       with_public_lat_lng: :boolean,
-      by_user: User,
       with_notes: :boolean,
       notes_has: :string,
       with_notes_fields: [:string],
