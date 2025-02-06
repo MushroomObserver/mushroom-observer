@@ -106,11 +106,32 @@ module PatternSearch
 
     def put_nsew_params_in_box
       north, south, east, west = args.values_at(:north, :south, :east, :west)
-      box = Mappable::Box.new(north:, south:, east:, west:)
-      return unless box.valid?
+      box = { north:, south:, east:, west: }
+      return if box.compact.blank?
 
-      args[:in_box] = { north:, south:, east:, west: }
+      box = validate_box(box)
+      args[:in_box] = box
       args.except!(:north, :south, :east, :west)
+    end
+
+    def validate_box(box)
+      validator = Mappable::Box.new(**box)
+      return if validator.valid?
+
+      check_for_missing_box_params
+      # Just fix the box if they've got it swapped
+      if args[:south] > args[:north]
+        box = box.merge(north: args[:south], south: args[:north])
+      end
+      box
+    end
+
+    def check_for_missing_box_params
+      [:north, :south, :east, :west].each do |term|
+        next if args[term].present?
+
+        raise(PatternSearch::MissingValueError.new(var: term))
+      end
     end
   end
 end
