@@ -25,7 +25,7 @@ class PatternSearch::ObservationTest < UnitTestCase
     # Just make sure the user is allowed to explicitly turn off synonyms and
     # subtaxa in any names query.
     x = PatternSearch::Observation.new("Foo bar include_synonyms:no " \
-                                      "include_subtaxa:no")
+                                       "include_subtaxa:no")
     assert_equal({ names: "Foo bar", include_synonyms: false,
                    include_subtaxa: false }, x.args)
   end
@@ -135,7 +135,7 @@ class PatternSearch::ObservationTest < UnitTestCase
     consensus = Observation.where(name: name)
     assert(consensus.count < expect.count)
     x = PatternSearch::Observation.new("Agaricus campestris " \
-                                      "include_all_name_proposals:yes")
+                                       "include_all_name_proposals:yes")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
