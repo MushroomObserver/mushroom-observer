@@ -43,20 +43,21 @@ module Observations
         limit: 10_000
       }
       @observations =
-        @query.select_rows(args).map do |id, lat, lng, gps_hidden, location_id|
-          locations[location_id.to_i] = nil if location_id.present?
-          lat = lng = nil if gps_hidden == 1
-          Mappable::MinimalObservation.new(id:, lat:, lng:, location_id:)
+        @query.select_all(args).map do |loc|
+          loc.symbolize_keys!
+          locations[loc[:location_id].to_i] = nil if loc[:location_id].present?
+          loc[:lat] = loc[:lng] = nil if loc[:gps_hidden] == 1
+          Mappable::MinimalObservation.new(loc.except(:gps_hidden))
         end
 
       eager_load_corresponding_locations(locations) unless locations.empty?
     end
 
     def eager_load_corresponding_locations(locations)
-      @locations = Location.where(id: locations.keys).map do |loc|
+      @locations = Location.where(id: locations.keys).
+                   select(:id, :name, :north, :south, :east, :west).map do |loc|
         locations[loc.id] = Mappable::MinimalLocation.new(
-          **loc.attributes.symbolize_keys.
-            slice(:id, :name, :north, :south, :east, :west)
+          loc.attributes.symbolize_keys
         )
       end
 
