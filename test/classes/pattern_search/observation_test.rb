@@ -3,7 +3,6 @@
 require("test_helper")
 
 class PatternSearch::ObservationTest < UnitTestCase
-
   def test_observation_search_name_hack
     # "Turkey" is not a name, and no taxa modifiers present, so no reason to
     # suspect that this is a name query.  Should leave it completely alone.
@@ -14,21 +13,21 @@ class PatternSearch::ObservationTest < UnitTestCase
     # it will include synonyms and subtaxa by default.
     x = PatternSearch::Observation.new("Agaricus")
     assert_equal({ names: "Agaricus", include_subtaxa: true,
-                  include_synonyms: true }, x.args)
+                   include_synonyms: true }, x.args)
 
     # "Turkey" is not a name, true, but user asked for synonyms to be included,
     # so they must have expected "Turkey" to be a name.  Note that it will also
     # include subtaxa by default, because that behavior was not specified.
     x = PatternSearch::Observation.new("Turkey include_synonyms:yes")
     assert_equal({ names: "Turkey", include_synonyms: true,
-                  include_subtaxa: true }, x.args)
+                   include_subtaxa: true }, x.args)
 
     # Just make sure the user is allowed to explicitly turn off synonyms and
     # subtaxa in any names query.
     x = PatternSearch::Observation.new("Foo bar include_synonyms:no " \
                                       "include_subtaxa:no")
     assert_equal({ names: "Foo bar", include_synonyms: false,
-                  include_subtaxa: false }, x.args)
+                   include_subtaxa: false }, x.args)
   end
 
   def test_observation_search
@@ -38,9 +37,9 @@ class PatternSearch::ObservationTest < UnitTestCase
     x = PatternSearch::Observation.new("Agaricus")
     assert_obj_arrays_equal(
       [observations(:agaricus_campestris_obs),
-      observations(:agaricus_campestrus_obs),
-      observations(:agaricus_campestras_obs),
-      observations(:agaricus_campestros_obs)],
+       observations(:agaricus_campestrus_obs),
+       observations(:agaricus_campestras_obs),
+       observations(:agaricus_campestros_obs)],
       x.query.results, :sort
     )
 
@@ -49,15 +48,15 @@ class PatternSearch::ObservationTest < UnitTestCase
     albion = locations(:albion)
     agaricus = names(:agaricus)
     o1 = Observation.create!(when: Date.parse("10/01/2012"),
-                            location: albion, name: agaricus, user: dick,
-                            specimen: true)
+                             location: albion, name: agaricus, user: dick,
+                             specimen: true)
     o2 = Observation.create!(when: Date.parse("30/12/2013"),
-                            location: albion, name: agaricus, user: dick,
-                            specimen: false)
+                             location: albion, name: agaricus, user: dick,
+                             specimen: false)
     assert_equal(20_120_110,
-                o1.when.year * 10_000 + o1.when.month * 100 + o1.when.day)
+                 o1.when.year * 10_000 + o1.when.month * 100 + o1.when.day)
     assert_equal(20_131_230,
-                o2.when.year * 10_000 + o2.when.month * 100 + o2.when.day)
+                 o2.when.year * 10_000 + o2.when.month * 100 + o2.when.day)
     x = PatternSearch::Observation.new("Agaricus user:dick")
     assert_obj_arrays_equal([o1, o2], x.query.results, :sort)
     x = PatternSearch::Observation.new("Agaricus user:dick has_specimen:yes")
@@ -108,7 +107,7 @@ class PatternSearch::ObservationTest < UnitTestCase
 
   def test_observation_search_name
     expect = Observation.where(name: names(:conocybe_filaris)) +
-            Observation.where(name: names(:boletus_edulis))
+             Observation.where(name: names(:boletus_edulis))
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new(
       'name:"Conocybe filaris","Boletus edulis Bull."'
@@ -333,7 +332,7 @@ class PatternSearch::ObservationTest < UnitTestCase
 
   def test_observation_search_multiple_regions
     expect = Observation.in_regions(["California, USA", "New York, USA"]).
-            reorder(id: :asc).to_a
+             reorder(id: :asc).to_a
     assert(expect.any? { |obs| obs.where.include?("California, USA") })
     assert(expect.any? { |obs| obs.where.include?("New York, USA") })
     str = 'region:"USA, California","USA, New York"'
