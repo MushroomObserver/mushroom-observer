@@ -10,25 +10,25 @@ module Mappable
     attribute :lat, :float
     attribute :lng, :float
     attribute :location_id, :integer
-    attribute :location, :array
+    attribute :location, Location
 
     validates :lat, numericality: { in: -90..90 }
     validates :lng, numericality: { in: -180..180 }
-    validate :location_must_be_a_location_array
+    validate :location_must_be_a_location
 
-    # def location
-    #   @location ||= location_id.nil? ? nil : ::Location.find(location_id)
-    # end
+    def location
+      @location ||= location_id.nil? ? nil : ::Location.find(location_id)
+    end
 
-    # def location=(loc)
-    #   if loc
-    #     @location = loc
-    #     self.location_id = loc.id
-    #   else
-    #     @location = nil
-    #     self.location_id = nil
-    #   end
-    # end
+    def location=(loc)
+      if loc
+        @location = loc
+        self.location_id = loc.id
+      else
+        @location = nil
+        self.location_id = nil
+      end
+    end
 
     def location?
       false
@@ -44,16 +44,10 @@ module Mappable
 
     private
 
-    def location_must_be_a_location_array
-      return if location.blank?
+    def location_must_be_a_location
+      return unless location.present? && !location.is_a?(Location)
 
-      location = [location] unless location.is_a?(Array)
-
-      location.each do |loc|
-        unless loc.is_a?(Location)
-          errors.add(:location, "must be a Location object")
-        end
-      end
+      errors.add(:location, "must be a Location object")
     end
   end
 end
