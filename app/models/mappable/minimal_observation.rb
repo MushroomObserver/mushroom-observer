@@ -10,7 +10,7 @@ module Mappable
     attribute :lat, :float
     attribute :lng, :float
     attribute :location_id, :integer
-    attribute :location, [Location]
+    attribute :location, :array
 
     validates :lat, numericality: { in: -90..90 }
     validates :lng, numericality: { in: -180..180 }
