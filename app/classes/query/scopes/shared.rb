@@ -17,14 +17,13 @@ module Query::Scopes::Shared
     @scopes = @scopes.joins(joins) if joins
   end
 
-  def add_time_condition(col, vals, joins)
+  def add_time_condition(col, vals)
     return unless vals
 
     earliest, latest = vals
-    # the `col` is also the name of the scope in abstract_model/scopes
-    # `:created_at` or `:updated_at`
-    @scopes = @scopes.send(col, earliest, latest, model.arel_table[col])
-    @scopes = @scopes.joins(joins) if joins
+    scope = col # `:created_at` also the scope name in abstract_model/scopes
+    table_col = model.arel_table[col] # must specify the table + col if joining
+    @scopes = @scopes.send(scope, earliest, latest, table_col)
   end
 
   def add_by_user_condition
