@@ -16,6 +16,7 @@ class InatImportJobTracker < ApplicationRecord
   delegate :ended_at, to: :import
   delegate :importables, to: :import
   delegate :imported_count, to: :import
+  delegate :response_errors, to: :import
 
   def status
     import.state
@@ -32,6 +33,14 @@ class InatImportJobTracker < ApplicationRecord
     minutes = (total_seconds % 3600) / 60
     seconds = total_seconds % 60
     format("%d:%02d:%02d", hours, minutes, seconds)
+  end
+
+  def error_caption
+    if response_errors.blank?
+      ""
+    else
+      "#{:ERRORS.t}: "
+    end
   end
 
   private

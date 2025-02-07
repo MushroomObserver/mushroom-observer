@@ -5,7 +5,8 @@ import { get } from "@rails/request.js" // allows us to call `get` below
 // Connects to data-controller="inat-import-job"
 export default class extends Controller {
   static targets = [
-    "started", "elapsed", "ended_at", "status", "imported", "importables"
+    "started", "elapsed", "ended_at", "status", "imported", "importables",
+    "error_caption", "response_errors"
   ]
 
   initialize() {

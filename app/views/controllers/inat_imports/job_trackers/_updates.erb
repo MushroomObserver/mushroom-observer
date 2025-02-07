@@ -50,6 +50,17 @@
       tag.span(tracker.ended_at,
                data: { inat_import_job_target: "ended_at",
                        ended_at: tracker.ended_at }),
+      tag.br,
+
+      tag.span(tracker.error_caption,
+               data: { inat_import_job_target: "error_caption",
+                       error_caption: tracker.error_caption },
+               class: "font-weight-bold"),
+      tag.span(tracker.response_errors,
+               data: { inat_import_job_target: "response_errors",
+                       ended_at: tracker.response_errors },
+               class: "violation-highlight"),
+      tag.br
     ].safe_join
   end
 %>

@@ -9,17 +9,6 @@
          locals: { tracker: @tracker })
 %>
 
-<% if @inat_import.response_errors.present? %>
-  <p>
-    <b><%= :ERRORS.t %>: </b>
-    <%= tag.span(id: "errors", class: "violation-highlight") do %>
-      <% @inat_import.response_errors.each_line do |error| %>
-        <%= error %></br>
-      <% end %>
-    <% end %>
-  </p>
-<% end %>
-
 <%=
   # NOTE: jdc 2025-05-05 replace with button to results
   # (user's Obss from @tracker.started_at to now,
