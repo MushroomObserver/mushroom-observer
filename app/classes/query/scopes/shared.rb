@@ -17,6 +17,7 @@ module Query::Scopes::Shared
     @scopes = @scopes.joins(joins) if joins
   end
 
+  # no callers send joins to this method
   def add_time_condition(col, vals)
     return unless vals
 
