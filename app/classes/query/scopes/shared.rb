@@ -13,12 +13,7 @@ module Query::Scopes::Shared
     return if vals.empty?
 
     earliest, latest = vals
-    @scope = if latest
-               @scope.date_between(col, earliest, latest)
-             else
-               @scope.date_after(col, earliest)
-             end
-
+    @scope = @scope.date(earliest, latest, col)
     @scopes = @scopes.joins(joins) if joins
   end
 
