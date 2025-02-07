@@ -10,7 +10,6 @@ module Observations
 
       @query = find_or_create_query(:Observation)
       apply_content_filters(@query)
-      # @query = restrict_query_to_box(@query)
 
       find_locations_matching_observations
     end
