@@ -13,7 +13,7 @@ module Query::Scopes::Shared
     return if vals.empty?
 
     earliest, latest = vals
-    @scope = @scope.date(earliest, latest, col)
+    @scopes = @scopes.date(earliest, latest, col)
     @scopes = @scopes.joins(joins) if joins
   end
 
@@ -21,12 +21,9 @@ module Query::Scopes::Shared
     return unless vals
 
     earliest, latest = vals
-    @scope = if latest
-               @scope.datetime_between(col, earliest, latest)
-             else
-               @scope.datetime_after(col, earliest)
-             end
-
+    # the `col` is also the name of the scope in abstract_model/scopes
+    # `:created_at` or `:updated_at`
+    @scopes = @scopes.send(col, earliest, latest, model.arel_table[col])
     @scopes = @scopes.joins(joins) if joins
   end
 
