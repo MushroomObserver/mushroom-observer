@@ -31,7 +31,6 @@ module Query::Modules::Validation
       result = result.uniq if positive_integers?(result)
       result
     else
-      # scalar_validate with ambiguous lookup could return an array
       val = scalar_validate(param, val, param_type)
       val = val.first if val.is_a?(Array)
       val
@@ -43,19 +42,23 @@ module Query::Modules::Validation
   end
 
   def array_validate(param, val, param_type)
-    case val
-    when Array
-      # Lookup in scalar_validate could return multiple matches per val
-      # so the returned array could contain nested arrays.
-      val[0, MO.query_max_array].map do |val2|
-        scalar_validate(param, val2, param_type)
-      end
-    when ::API2::OrderedRange
-      [scalar_validate(param, val.begin, param_type),
-       scalar_validate(param, val.end, param_type)]
-    else
-      [scalar_validate(param, val, param_type)]
-    end
+    validated = case val
+                when Array
+                  val[0, MO.query_max_array].map! do |val2|
+                    scalar_validate(param, val2, param_type)
+                  end
+                when ::API2::OrderedRange
+                  [scalar_validate(param, val.begin, param_type),
+                   scalar_validate(param, val.end, param_type)]
+                else
+                  [scalar_validate(param, val, param_type)]
+                end
+    return validated unless param == :names
+
+    # :names may come with modifier "flag" params that indicate synonyms, etc.
+    # Look those up only after validating the initial array, then we can add
+    # any new ids to the :names array (to avoid recursion explosions)
+    add_synonyms_and_subtaxa(validated)
   end
 
   def scalar_validate(param, val, param_type)
@@ -73,11 +76,7 @@ module Query::Modules::Validation
   end
 
   def validate_class_param(param, val, param_type)
-    # :names may come with modifier "flag" params that indicate synonyms, etc.
-    # Immediately look those up and add any new ids to the :names array.
-    if param == :names
-      validate_names_record(param, val, param_type)
-    elsif param_type.respond_to?(:descends_from_active_record?)
+    if param_type.respond_to?(:descends_from_active_record?)
       validate_record(param, val, param_type)
     else
       raise(
@@ -162,6 +161,10 @@ module Query::Modules::Validation
     end
   end
 
+  # This type of param accepts instances or ids, but has a backup possibility
+  # of lookup strings as an (expensive) last resort. The string will be sent to
+  # the appropriate `Lookup` subclass, and must identify a unique record via the
+  # column defined in the Lookup subclass.
   def validate_record(param, val, type = ActiveRecord::Base)
     if val.is_a?(type)
       raise("Value for :#{param} is an unsaved #{type} instance.") unless val.id
@@ -171,9 +174,7 @@ module Query::Modules::Validation
     elsif could_be_record_id?(param, val)
       val.to_i
     elsif val.is_a?(String) && param != :ids
-      # Lookups for each val may return more than one record, though the lookup
-      # string is generally unique. For an example, search `two_agaricus_bug`.
-      lookup_records_by_name(param, val, type, method: :ids, all: true)
+      lookup_record_by_name(param, val, type, method: :ids)
     else
       raise("Value for :#{param} should be id, string " \
             "or #{type} instance, got: #{val.inspect}")
@@ -237,7 +238,7 @@ module Query::Modules::Validation
     val = if could_be_record_id?(param, params[param])
             model.find(params[param])
           else
-            lookup_records_by_name(param, params[param], model)
+            lookup_record_by_name(param, params[param], model)
           end
     set_cached_parameter_instance(param, val)
   end
@@ -256,31 +257,25 @@ module Query::Modules::Validation
       val.is_a?(String) && (val == "0") && (param == :user)
   end
 
-  def validate_names_record(param, val, type)
+  def add_synonyms_and_subtaxa(val_array)
     names_params = *names_parameter_declarations.except(:names).keys
     lookup_params = @params.slice(*names_params).compact
-    if lookup_params.blank?
-      validate_record(param, val, type)
-    else
-      lookup_records_by_name(param, val, type,
-                             lookup_params:, method: :ids, all: true)
-    end
+    return val_array if lookup_params.blank?
+
+    new_array = Lookup::Names.new(val_array[0, MO.query_max_array],
+                                  **lookup_params).ids
+    new_array.flatten.uniq
   end
 
-  def lookup_records_by_name(param, val, type, **args)
-    lookup_params = args[:lookup_params] || {}
+  # Requires a unique identifying string and will return [only_one_record].
+  def lookup_record_by_name(param, val, type, **args)
     method = args[:method] || :instances
-    all = args[:all] || false
     lookup = lookup_class(param, val, type)
 
-    results = lookup.new(val, lookup_params).send(method)
+    results = lookup.new(val).send(method)
     raise("Couldn't find an id for : #{val.inspect}") unless results
 
-    if !all || results.size == 1
-      results.first
-    else
-      results
-    end
+    results.first
   end
 
   def lookup_class(param, val, type)

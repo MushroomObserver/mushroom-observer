@@ -460,30 +460,30 @@ russula_cremoricolor_author_notes_version_1:
   sort_name: Russula cremoricolor Earle
   citation: ''
 
-lentinellus_ursinus_author1_version_1:
-  name_id: <%= ActiveRecord::FixtureSet.identify(:lentinellus_ursinus_author1) %>
+dup_name_author1_version_1:
+  name_id: <%= ActiveRecord::FixtureSet.identify(:dup_name_author1) %>
   updated_at: 2008-03-19 08:35:37
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
   version: 1
   rank: <%= Name.ranks[:Species] %>
-  text_name: Lentinellus ursinus
-  author: Kühner
-  display_name: '**__Lentinellus ursinus__** Kühner'
-  search_name: Lentinellus ursinus Kühner
-  sort_name: Lentinellus ursinus Kühner
+  text_name: Agrocybe arvalis
+  author: (Fr.) Singer
+  display_name: '**__Agrocybe arvalis__** (Fr.) Singer'
+  search_name: Agrocybe arvalis (Fr.) Singer
+  sort_name: Agrocybe arvalis  (Fr.) Singer
   citation: ''
 
-lentinellus_ursinus_author2_version_1:
-  name_id: <%= ActiveRecord::FixtureSet.identify(:lentinellus_ursinus_author2) %>
+dup_name_author2_version_1:
+  name_id: <%= ActiveRecord::FixtureSet.identify(:dup_name_author2) %>
   updated_at: 2008-03-19 08:35:37
   user_id: <%= ActiveRecord::FixtureSet.identify(:rolf) %>
   version: 1
   rank: <%= Name.ranks[:Species] %>
-  text_name: Lentinellus ursinus
-  author: Kuhner
-  display_name: '**__Lentinellus ursinus__** Kuhner'
-  search_name: Lentinellus ursinus Kuhner
-  sort_name: Lentinellus ursinus Kuhner
+  text_name: Agrocybe arvalis
+  author: Pers.
+  display_name: '**__Agrocybe arvalis__** (Fr.) Heim & Romagn.'
+  search_name: Agrocybe arvalis (Fr.) Heim & Romagn.
+  sort_name: Agrocybe arvalis  (Fr.) Heim & Romagn.
   citation: ''
 
 macrocybe_pegler_version_1:
