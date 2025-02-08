@@ -15,7 +15,7 @@ class Query::NamesTest < UnitTestCase
     # SQL does not sort 'Kuhner' and 'Kühner'
     do_test_name_all(expect) if sql_collates_accents?
 
-    pair = expects.select { |x| x.text_name == "Lentinellus ursinus" }
+    pair = expects.select { |x| x.text_name == "Agrocybe arvalis" }
     a = expects.index(pair.first)
     b = expects.index(pair.last)
     expects[a], expects[b] = expects[b], expects[a]
