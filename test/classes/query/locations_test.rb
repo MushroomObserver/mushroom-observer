@@ -63,6 +63,12 @@ class Query::LocationsTest < UnitTestCase
                  :Location, notes_has: '"legal to collect" -"Salt Point"')
   end
 
+  def test_location_in_box
+    box = { north: 35, south: 34, east: -118, west: -119 }
+    expects = Location.index_order.in_box(**box)
+    assert_query(expects, :Location, in_box: box)
+  end
+
   def test_location_pattern_search
     expects = Location.reorder(id: :asc).pattern_search("California")
     assert_query(expects, :Location, pattern: "California", by: :id)

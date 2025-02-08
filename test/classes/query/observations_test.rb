@@ -221,6 +221,14 @@ class Query::ObservationsTest < UnitTestCase
                  :Observation, region: "North America")
   end
 
+  def test_observation_in_box
+    # Have to do this, otherwise columns not populated
+    Location.update_box_area_and_center_columns
+    box = { north: 35, south: 34, east: -118, west: -119 }
+    assert_query(Observation.index_order.in_box(**box),
+                 :Observation, in_box: box)
+  end
+
   def test_observation_of_children
     name = names(:agaricus)
     expects = Observation.index_order.

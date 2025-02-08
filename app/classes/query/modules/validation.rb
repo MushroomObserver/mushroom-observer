@@ -27,12 +27,18 @@ module Query::Modules::Validation
 
   def validate_value(param_type, param, val)
     if param_type.is_a?(Array)
-      array_validate(param, val, param_type.first).flatten
+      result = array_validate(param, val, param_type.first).flatten
+      result = result.uniq if positive_integers?(result)
+      result
     else
       val = scalar_validate(param, val, param_type)
       val = val.first if val.is_a?(Array)
       val
     end
+  end
+
+  def positive_integers?(list)
+    list.all? { |item| item.is_a?(Integer) && item.positive? }
   end
 
   def array_validate(param, val, param_type)
