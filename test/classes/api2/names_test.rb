@@ -51,7 +51,8 @@ class API2::NamesTest < UnitTestCase
     assert_api_fail(name_get_params.merge(name: "Agrocybe arvalis"))
     assert_api_pass(
       name_get_params.merge(
-        name: "Agrocybe arvalis (Fr.) Singer, Agrocybe arvalis (Fr.) Heim & Romagn."
+        name: "Agrocybe arvalis (Fr.) Singer, " \
+              "Agrocybe arvalis (Fr.) Heim & Romagn."
       )
     )
     assert_api_results(names)
