@@ -1,7 +1,10 @@
 <%=
   tag.div(id: "updates",
           data: { controller: "field-slip-job",
-                  endpoint: inat_import_job_tracker_path(tracker.id) }) do
+                  endpoint: inat_import_job_tracker_path(
+                    inat_import_id: tracker.inat_import,
+                    id: tracker.id
+                  ) }) do
     [
       tag.p do
         [

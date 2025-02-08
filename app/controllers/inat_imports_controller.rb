@@ -68,9 +68,8 @@ class InatImportsController < ApplicationController
   API_BASE = "https://api.inaturalist.org/v1"
 
   def show
-    @tracker = InatImportJobTracker.where(params[:id]).
-               order(created_at: :asc).last
-    @inat_import = InatImport.find(@tracker.inat_import)
+    @tracker = InatImportJobTracker.find(params[:tracker_id])
+    @inat_import = InatImport.find(params[:id])
   end
 
   def new; end
@@ -124,7 +123,7 @@ class InatImportsController < ApplicationController
     tracker = InatImportJobTracker.create(inat_import: inat_import.id)
 
     Rails.logger.info(
-      "Enqueuing InatImportJob for InatImport id: #{inat_import.id}"
+      "Enqueueing InatImportJob for InatImport id: #{inat_import.id}"
     )
     # InatImportJob.perform_now(inat_import) # uncomment for manual testing
     InatImportJob.perform_later(inat_import) # uncomment for production
