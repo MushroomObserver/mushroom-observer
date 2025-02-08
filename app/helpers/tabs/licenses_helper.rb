@@ -42,7 +42,7 @@ module Tabs
 
     def destroy_license_tab(license)
       InternalLink::Model.new(
-        :destroy_object.t(TYPE: License), license, license,
+        :DESTROY.t, license, license,
         html_options: { button: :destroy }
       ).tab
     end
