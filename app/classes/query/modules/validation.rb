@@ -42,23 +42,23 @@ module Query::Modules::Validation
   end
 
   def array_validate(param, val, param_type)
-    case val
-    when Array
-      validated = val[0, MO.query_max_array].map! do |val2|
-        scalar_validate(param, val2, param_type)
-      end.uniq
-      return validated unless param == :names
+    validated = case val
+                when Array
+                  val[0, MO.query_max_array].map! do |val2|
+                    scalar_validate(param, val2, param_type)
+                  end
+                when ::API2::OrderedRange
+                  [scalar_validate(param, val.begin, param_type),
+                   scalar_validate(param, val.end, param_type)]
+                else
+                  [scalar_validate(param, val, param_type)]
+                end
+    return validated unless param == :names
 
-      # :names may come with modifier "flag" params that indicate synonyms, etc.
-      # Look those up only after validating the initial array, then we can add
-      # any new ids to the :names array (to avoid recursion explosions)
-      add_synonyms_and_subtaxa(validated)
-    when ::API2::OrderedRange
-      [scalar_validate(param, val.begin, param_type),
-       scalar_validate(param, val.end, param_type)]
-    else
-      [scalar_validate(param, val, param_type)]
-    end
+    # :names may come with modifier "flag" params that indicate synonyms, etc.
+    # Look those up only after validating the initial array, then we can add
+    # any new ids to the :names array (to avoid recursion explosions)
+    add_synonyms_and_subtaxa(validated)
   end
 
   def scalar_validate(param, val, param_type)
@@ -262,9 +262,8 @@ module Query::Modules::Validation
     lookup_params = @params.slice(*names_params).compact
     return val_array if lookup_params.blank?
 
-    new_array = val_array[0, MO.query_max_array].map do |val2|
-      Lookup::Names.new(val2, **lookup_params).ids
-    end
+    new_array = Lookup::Names.new(val_array[0, MO.query_max_array],
+                                  **lookup_params).ids
     new_array.flatten.uniq
   end
 
