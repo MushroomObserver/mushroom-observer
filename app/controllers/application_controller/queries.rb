@@ -276,34 +276,6 @@ module ApplicationController::Queries
     result.save
   end
 
-  # Create a new query by adding a bounding box to the given one.
-  # These seem to all be coming from map_helper, so let's do it there.
-  # def restrict_query_to_box(query)
-  #   return query if params[:in_box].blank?
-
-  #   model = query.model.to_s.to_sym
-  #   query.params[:in_box] = tweaked_bounding_box_params
-  #   Query.lookup(model, query.params)
-  # end
-
-  # def tweaked_bounding_box_params
-  #   n, s, e, w = params[:in_box].values_at(:north, :south, :east, :west)
-  #   {
-  #     north: tweak_up(n, 0.001, 90),
-  #     south: tweak_down(s, 0.001, -90),
-  #     east: tweak_up(e, 0.001, 180),
-  #     west: tweak_down(w, 0.001, -180)
-  #   }
-  # end
-
-  # def tweak_up(value, amount, max)
-  #   [max, value.to_f + amount].min
-  # end
-
-  # def tweak_down(value, amount, min)
-  #   [min, value.to_f - amount].max
-  # end
-
   public ##########
 
   # Need to pass list of tags used in this action to next page if redirecting.
