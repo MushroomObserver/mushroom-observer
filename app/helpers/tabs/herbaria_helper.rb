@@ -80,39 +80,46 @@ module Tabs
     end
 
     def edit_herbarium_tab(herbarium)
-      [:edit_herbarium.l,
-       add_query_param(edit_herbarium_path(herbarium.id)),
-       { class: tab_id(__method__.to_s) }]
+      InternalLink::Model.new(
+        :edit_herbarium.l, herbarium,
+        add_query_param(edit_herbarium_path(herbarium.id))
+      ).tab
     end
 
     def destroy_herbarium_tab(herbarium)
-      [:destroy_object.t(type: :herbarium),
-       herbarium,
-       { button: :destroy, back: url_after_delete(herbarium) }]
+      InternalLink::Model.new(
+        :destroy_object.t(type: :herbarium),
+        herbarium, herbarium,
+        html_options: { button: :destroy, back: url_after_delete(herbarium) }
+      ).tab
     end
 
     def herbaria_index_tab
-      [:herbarium_index_list_all_herbaria.l,
-       herbaria_path,
-       { class: tab_id(__method__.to_s) }]
+      InternalLink::Model.new(
+        :herbarium_index_list_all_herbaria.l, Herbarium, herbaria_path
+      ).tab
     end
 
     def herbarium_return_tab(herbarium)
-      [:cancel_and_show.t(type: :herbarium),
-       add_query_param(herbarium_path(herbarium)),
-       { class: tab_id(__method__.to_s) }]
+      InternalLink::Model.new(
+        :cancel_and_show.t(type: :herbarium), herbarium,
+        add_query_param(herbarium_path(herbarium))
+      ).tab
     end
 
     def nonpersonal_herbaria_index_tab
-      InternalLink::Model.new(:herbarium_index.t, "",
-                              add_query_param(herbaria_path(nonpersonal: true)),
-                              alt_title: "nonpersonal_herbaria_index").tab
+      InternalLink.new(
+        :herbarium_index.t,
+        add_query_param(herbaria_path(nonpersonal: true)),
+        alt_title: "nonpersonal_herbaria_index"
+      ).tab
     end
 
     def labeled_nonpersonal_herbaria_index_tab
-      [:herbarium_index_nonpersonal_herbaria.l,
-       herbaria_path(nonpersonal: true),
-       { class: "nonpersonal_herbaria_index_link" }]
+      InternalLink.new(
+        :herbarium_index_nonpersonal_herbaria.l,
+        herbaria_path(nonpersonal: true)
+      ).tab
     end
   end
 end
