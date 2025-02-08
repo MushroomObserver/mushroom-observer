@@ -83,7 +83,7 @@ class InatImportsController < ApplicationController
                         importables: 0, imported_count: 0,
                         inat_ids: params[:inat_ids],
                         inat_username: params[:inat_username].strip,
-                        response_errors: "", token: "", log: [])
+                        response_errors: "", token: "", log: [], ended_at: nil)
 
     request_inat_user_authorization
   end
