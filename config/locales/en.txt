@@ -3076,6 +3076,7 @@
   inat_import_tracker_elapsed: Elapsed Time
   inat_import_tracker_ended: Ended
   inat_import_imported: Imported
+  inat_import_tracker_results: Results
   inat_import_tracker_importable_count: Number of Importable Observations
   inat_import_tracker_imported_count: Number Imported
   inat_importables_explanation: "An ??importable?? observation is an iNaturalist observation: which you created, which does not exist in MO, and whose iNat identity is a fungus or slime mold."

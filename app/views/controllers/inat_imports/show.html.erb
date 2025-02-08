@@ -10,10 +10,16 @@
 %>
 
 <%=
-  # NOTE: jdc 2025-05-05 replace with button to results
-  # (user's Obss from @tracker.started_at to now,
-  # ideally with source: InatImport)
-    link_to(:app_your_observations.l,
-            observations_path(by_user: User.current.id),
-            { class: "mt-3 btn btn-default" } )
+  # NOTE: jdc 2025-02-08 When available, replace the target with a link to
+  # the Observations imported by this InatImport. I.e. Observations:
+  # - created by @user
+  # - from @tracker.started_at -- @tracker.ended_at || time.now
+  # - ideally with source: InatImport)
+  # - ordered by created_at desc
+  link_to(
+    :inat_import_tracker_results.l,
+    observations_path(
+      pattern: "user:#{@user.id} created:#{Date.today.strftime}-#{Date.tomorrow.strftime}"),
+    { class: "mt-3 btn btn-default" }
+  )
 %>
