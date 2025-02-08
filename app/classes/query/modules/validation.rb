@@ -28,9 +28,7 @@ module Query::Modules::Validation
   def validate_value(param_type, param, val)
     if param_type.is_a?(Array)
       result = array_validate(param, val, param_type.first).flatten
-      if positive_integers?(result)
-        result = result.uniq
-      end
+      result = result.uniq if positive_integers?(result)
       result
     else
       # scalar_validate with ambiguous lookup could return an array
