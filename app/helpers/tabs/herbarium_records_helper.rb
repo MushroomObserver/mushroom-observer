@@ -78,16 +78,20 @@ module Tabs
     end
 
     def new_herbarium_record_tab(obs)
-      [:create_herbarium_record.l,
-       add_query_param(new_herbarium_record_path(observation_id: obs.id)),
-       { class: tab_id(__method__.to_s), icon: :add }]
+      InternalLink::Model.new(
+        :create_herbarium_record.l, Herbarium,
+        add_query_param(new_herbarium_record_path(observation_id: obs.id)),
+        html_options: { icon: :add }
+      ).tab
     end
 
     def edit_herbarium_record_tab(h_r, obs = nil)
       back = obs&.id || :show
-      [:edit_herbarium_record.t,
-       add_query_param(edit_herbarium_record_path(h_r.id, back: back)),
-       { class: "#{tab_id(__method__.to_s)}_#{h_r.id}", icon: :edit }]
+      InternalLink::Model.new(
+        :edit_herbarium_record.t, h_r,
+        add_query_param(edit_herbarium_record_path(h_r.id, back: back)),
+        html_options: { icon: :edit }
+      ).tab
     end
 
     def destroy_herbarium_record_tab(h_r)
@@ -96,9 +100,10 @@ module Tabs
     end
 
     def herbarium_records_index_return_tab
-      [:edit_herbarium_record_back_to_index.t,
-       herbarium_records_path(q: get_query_param),
-       { class: tab_id(__method__.to_s) }]
+      InternalLink.new(
+        :edit_herbarium_record_back_to_index.t,
+        herbarium_records_path(q: get_query_param)
+      ).tab
     end
 
     def remove_herbarium_record_tab(h_r, obs)
