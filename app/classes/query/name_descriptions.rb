@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 class Query::NameDescriptions < Query::Base
-  include Query::Params::Descriptions
-  include Query::Params::Names
+  # include Query::Params::Descriptions
+  # include Query::Params::Names
   include Query::Initializers::Descriptions
 
   def model
@@ -17,12 +17,19 @@ class Query::NameDescriptions < Query::Base
       by_user: User,
       by_author: User,
       by_editor: User,
-      old_by: :string,
+      # old_by: :string,
       users: [User],
       names: [Name],
       names_query: :query,
       public: :boolean,
-      with_descriptions: :boolean
+      with_default_desc: :boolean,
+      join_desc: { string: [:default, :any] },
+      desc_type: [{ string: Description::ALL_SOURCE_TYPES }],
+      desc_project: [Project],
+      desc_creator: [User],
+      desc_content: :string,
+      ok_for_export: :boolean
+      # with_descriptions: :boolean
     ).merge(name_descriptions_parameter_declarations)
   end
 

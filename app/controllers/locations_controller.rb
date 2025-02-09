@@ -187,8 +187,8 @@ class LocationsController < ApplicationController
 
     # These are only used to create title, which isn't used,
     # they just get in the way.
-    args.delete(:old_title)
-    args.delete(:old_by)
+    # args.delete(:old_title)
+    # args.delete(:old_by)
 
     # Create query if okay.  (Still need to tweak select and group clauses.)
     result = create_query(:Observation, args)

@@ -10,6 +10,7 @@ module Query::Params::Locations
       by_user: User,
       by_editor: User,
       users: [User],
+      in_box: { north: :float, south: :float, east: :float, west: :float },
       pattern: :string,
       regexp: :string,
       with_notes: :boolean,
@@ -25,9 +26,9 @@ module Query::Params::Locations
   end
 
   # Used in coerced queries for obs, plus observation queries
-  def bounding_box_parameter_declarations
-    {
-      in_box: { north: :float, south: :float, east: :float, west: :float }
-    }
-  end
+  # def bounding_box_parameter_declarations
+  #   {
+  #     in_box: { north: :float, south: :float, east: :float, west: :float }
+  #   }
+  # end
 end

@@ -2,8 +2,8 @@
 
 class Query::Observations < Query::Base
   include Query::Params::Observations
-  include Query::Params::Locations
-  include Query::Params::Names
+  # include Query::Params::Locations
+  # include Query::Params::Names
   include Query::Params::AdvancedSearch
   include Query::Params::Filters
   include Query::Initializers::Names
@@ -20,10 +20,10 @@ class Query::Observations < Query::Base
   def parameter_declarations
     super.merge(observations_per_se_parameter_declarations).
       merge(observations_parameter_declarations).
-      merge(bounding_box_parameter_declarations).
+      # merge(bounding_box_parameter_declarations).
       merge(content_filter_parameter_declarations(Observation)).
-      merge(names_parameter_declarations).
-      merge(naming_consensus_parameter_declarations).
+      # merge(names_parameter_declarations).
+      # merge(naming_consensus_parameter_declarations).
       merge(advanced_search_parameter_declarations)
   end
 

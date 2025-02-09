@@ -19,17 +19,25 @@ module Query::Params::Observations
       in_clade: :string,
       in_region: :string,
       pattern: :string,
-      regexp: :string # for coercions from location
-    }
-  end
+      # regexp: :string # for coercions from location
+  #   }
+  # end
 
-  # for observations, or coercions to observations.
-  def observations_parameter_declarations
-    {
+  # # for observations, or coercions to observations.
+  # def observations_parameter_declarations
+  #   {
       with_name: :boolean,
+      names: [Name],
+      include_synonyms: :boolean,
+      include_subtaxa: :boolean,
+      include_immediate_subtaxa: :boolean,
+      exclude_original_names: :boolean,
+      include_all_name_proposals: :boolean,
+      exclude_consensus: :boolean,
       confidence: [:float],
       location: Location,
       locations: [Location],
+      in_box: { north: :float, south: :float, east: :float, west: :float },
       user_where: :string,
       is_collection_location: :boolean,
       with_public_lat_lng: :boolean,
@@ -52,12 +60,12 @@ module Query::Params::Observations
     }
   end
 
-  def observations_coercion_parameter_declarations
-    {
-      old_title: :string,
-      old_by: :string,
-      date: [:date],
-      obs_ids: [Observation]
-    }
-  end
+  # def observations_coercion_parameter_declarations
+  #   {
+  #     old_title: :string,
+  #     old_by: :string,
+  #     date: [:date],
+  #     obs_ids: [Observation]
+  #   }
+  # end
 end

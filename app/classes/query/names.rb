@@ -21,7 +21,7 @@ class Query::Names < Query::Base
   end
 
   def parameter_declarations
-    names_per_se_parameter_declarations.
+    super.merge(names_per_se_parameter_declarations).
       merge(content_filter_parameter_declarations(Name)).
       merge(names_parameter_declarations).
       merge(name_descriptions_parameter_declarations). # yes in the general

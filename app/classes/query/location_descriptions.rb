@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Query::LocationDescriptions < Query::Base
-  include Query::Params::Descriptions
+  # include Query::Params::Descriptions
   include Query::Initializers::Descriptions
 
   def model
@@ -16,12 +16,12 @@ class Query::LocationDescriptions < Query::Base
       by_user: User,
       by_author: User,
       by_editor: User,
-      old_by: :string,
+      # old_by: :string,
       users: [User],
       locations: [Location],
       locations_query: :query,
-      public: :boolean,
-      with_descriptions: :boolean
+      public: :boolean
+      # with_descriptions: :boolean
     )
   end
 

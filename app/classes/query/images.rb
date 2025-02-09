@@ -20,7 +20,7 @@ class Query::Images < Query::Base
   end
 
   def parameter_declarations
-    images_per_se_parameter_declarations.
+    super.merge(images_per_se_parameter_declarations).
       merge(names_parameter_declarations).
       merge(advanced_search_parameter_declarations)
     # q_p = super.merge(images_general_parameter_declarations)
