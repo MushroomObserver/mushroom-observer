@@ -30,7 +30,11 @@ module Query::Params::Names
       pattern: :string,
       need_description: :boolean,
       with_descriptions: :boolean,
-      with_observations: { boolean: [true] }
+      with_observations: { boolean: [true] },
+      descriptions_query: :query,
+      observations_query: :query,
+      rss_logs_query: :query #,
+      # species_lists_query: :query
     }
   end
 

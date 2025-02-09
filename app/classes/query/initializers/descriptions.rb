@@ -131,21 +131,21 @@ module Query::Initializers::Descriptions
     add_search_condition(fields, params[:desc_content])
   end
 
-  def params_out_to_with_descriptions_params
-    pargs = params_plus_old_by.merge(with_descriptions: true)
-    return pargs if pargs[:ids].blank?
+  # def params_out_to_with_descriptions_params
+  #   pargs = params_plus_old_by.merge(with_descriptions: true)
+  #   return pargs if pargs[:ids].blank?
 
-    pargs[:desc_ids] = pargs.delete(:ids)
-    pargs
-  end
+  #   pargs[:desc_ids] = pargs.delete(:ids)
+  #   pargs
+  # end
 
-  def params_back_to_description_params
-    pargs = params_with_old_by_restored.except(:with_descriptions)
-    return pargs if pargs[:desc_ids].blank?
+  # def params_back_to_description_params
+  #   pargs = params_with_old_by_restored.except(:with_descriptions)
+  #   return pargs if pargs[:desc_ids].blank?
 
-    pargs[:ids] = pargs.delete(:desc_ids)
-    pargs
-  end
+  #   pargs[:ids] = pargs.delete(:desc_ids)
+  #   pargs
+  # end
 
   # --------------------------------------------------------------------------
 

@@ -3,13 +3,13 @@
 # html used in tabsets
 module Tabs
   module LocationsHelper
-    # link attribute arrays (coerced_query_tab returns array)
+    # link attribute arrays (each tab returns array)
     def locations_index_tabs(query:)
       [
         new_location_tab,
         map_locations_tab,
         location_countries_tab,
-        coerced_observation_query_tab(query)
+        related_observations_tab(:locations, query)
       ]
     end
 
@@ -124,8 +124,8 @@ module Tabs
     def location_map_tabs(query:)
       [
         locations_index_tab,
-        coerced_observation_query_tab(query),
-        coerced_location_query_tab(query)
+        related_observations_tab(:locations, query),
+        related_locations_tab(:locations, query) # index of same locations
       ]
     end
 

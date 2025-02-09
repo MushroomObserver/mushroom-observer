@@ -43,7 +43,12 @@ module Query::Params::Observations
       project: Project,
       projects: [Project],
       species_list: SpeciesList,
-      species_lists: [SpeciesList]
+      species_lists: [SpeciesList],
+      images_query: :query,
+      locations_query: :query,
+      names_query: :query,
+      rss_logs_query: :query,
+      sequences_query: :query
     }
   end
 

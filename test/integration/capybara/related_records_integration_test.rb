@@ -8,8 +8,7 @@ class RelatedRecordsIntegrationTest < CapybaraIntegrationTestCase
     login
 
     visit(observations_path(pattern: "user:#{rolf.id}"))
-    click_link("a", class: "coerced_location_query_link",
-                    text: "Show Locations")
+    click_link("a", class: "related_locations_link", text: "Show Locations")
     location = locations(:burbank)
     assert_selector("a", text: location.display_name)
     click_link(location.display_name)

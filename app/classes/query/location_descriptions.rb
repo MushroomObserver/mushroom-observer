@@ -19,6 +19,7 @@ class Query::LocationDescriptions < Query::Base
       old_by: :string,
       users: [User],
       locations: [Location],
+      locations_query: :query,
       public: :boolean,
       with_descriptions: :boolean
     )
@@ -33,13 +34,14 @@ class Query::LocationDescriptions < Query::Base
     add_desc_by_editor_condition(:location)
     add_id_condition("location_descriptions.location_id", params[:locations])
     initialize_description_public_parameter(:location)
+    add_subquery_condition(:locations, :locations)
     super
   end
 
-  def coerce_into_location_query
-    pargs = params_out_to_with_descriptions_params
-    Query.lookup(:Location, pargs)
-  end
+  # def coerce_into_location_query
+  #   pargs = params_out_to_with_descriptions_params
+  #   Query.lookup(:Location, pargs)
+  # end
 
   def self.default_order
     "name"

@@ -29,7 +29,9 @@ module Query::Params::Images
       confidence: [:float],
       ok_for_export: :boolean,
       pattern: :string,
-      with_observations: :boolean
+      with_observations: :boolean,
+      observations_query: :query,
+      species_lists_query: :query
     }
   end
 end

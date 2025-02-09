@@ -118,7 +118,7 @@ module Tabs
       links = [
         *observations_at_where_tabs(query), # maybe multiple links
         map_observations_tab(query),
-        *observations_coerced_query_tabs(query), # multiple links
+        *observations_related_query_tabs(query), # multiple links
         observations_add_to_list_tab(query),
         observations_download_as_csv_tab(query)
       ]
@@ -182,11 +182,11 @@ module Tabs
        { class: tab_id(__method__.to_s), data: { action: "links#disable" } }]
     end
 
-    # NOTE: coerced_query_tab returns an array
-    def observations_coerced_query_tabs(query)
-      [coerced_location_query_tab(query),
-       coerced_name_query_tab(query),
-       coerced_image_query_tab(query)]
+    # NOTE: each tab returns an array
+    def observations_related_query_tabs(query)
+      [related_locations_tab(:observations, query),
+       related_names_tab(:observations, query),
+       related_images_tab(:observations, query)]
     end
 
     def observations_add_to_list_tab(query)
@@ -214,8 +214,8 @@ module Tabs
     end
 
     def observation_maps_tabs(query:)
-      [coerced_observation_query_tab(query),
-       coerced_location_query_tab(query)]
+      [related_observations_tab(:observations, query), # index of the same obs
+       related_locations_tab(:observations, query)]
     end
 
     def new_inat_import_tab(query: nil)

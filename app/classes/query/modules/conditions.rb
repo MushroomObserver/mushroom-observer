@@ -135,4 +135,10 @@ module Query::Modules::Conditions
     @where << "#{col} NOT IN (#{set})"
     add_joins(*)
   end
+
+  def add_subquery_condition(association, *)
+    param = "#{association}_query"
+    @where << "#{association} IN (#{params[param].sql})"
+    add_joins(*)
+  end
 end

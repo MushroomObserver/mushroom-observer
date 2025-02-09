@@ -213,8 +213,8 @@ module Tabs
     def name_map_tabs(name:, query:)
       [
         show_object_tab(name, :name_map_about.t(name: name.display_name)),
-        coerced_location_query_tab(query),
-        coerced_observation_query_tab(query)
+        related_locations_tab(:names, query),
+        related_observations_tab(:names, query)
       ]
     end
 
@@ -238,8 +238,8 @@ module Tabs
       [
         new_name_tab,
         names_with_observations_tab(query),
-        coerced_observation_query_tab(query),
-        descriptions_of_these_names_tab(query)
+        related_observations_tab(:names, query),
+        related_descriptions_tab(query)
       ].reject(&:empty?)
     end
 
@@ -250,11 +250,12 @@ module Tabs
        { class: tab_id(__method__.to_s) }]
     end
 
-    def descriptions_of_these_names_tab(query)
-      return unless query&.coercable?(:NameDescription)
+    def related_descriptions_tab(names_query)
+      # return unless query&.coercable?(:NameDescription)
 
+      desc_query = Query.lookup(:NameDescription, names_query: names_query)
       [:show_objects.t(type: :description),
-       add_query_param(name_descriptions_index_path),
+       add_query_param(name_descriptions_index_path, desc_query),
        { class: tab_id(__method__.to_s) }]
     end
 
@@ -262,7 +263,7 @@ module Tabs
       [
         new_name_tab,
         all_names_tab(query),
-        coerced_observation_query_tab(query)
+        related_observations_tab(:names, query)
       ].reject(&:empty?)
     end
 

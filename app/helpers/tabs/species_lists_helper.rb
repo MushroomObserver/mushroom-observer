@@ -82,6 +82,46 @@ module Tabs
       [:species_list_show_destroy.t, list, { button: :destroy }]
     end
 
+    def species_list_observations_tabs(list, query)
+      [species_list_observations_tab(query),
+       species_list_observations_locations_tab(list),
+       species_list_observations_names_tab(list),
+       species_list_observations_images_tab(list),
+       species_list_observations_checklist_tab(list),
+       species_list_observations_map_tab(query)]
+    end
+
+    def species_list_observations_tab(query)
+      [:species_list_show_regular_index.t,
+       add_query_param(observations_path, query),
+       { help: :species_list_show_regular_index_help.t }]
+    end
+
+    def species_list_obs_query(list)
+      controller.create_query(:Observation, ids: list.observations)
+    end
+
+    def species_list_observations_locations_tab(list)
+      related_locations_tab(:observations, species_list_obs_query(list))
+    end
+
+    def species_list_observations_names_tab(list)
+      related_names_tab(:observations, species_list_obs_query(list))
+    end
+
+    def species_list_observations_images_tab(list)
+      related_images_tab(:observations, species_list_obs_query(list))
+    end
+
+    def species_list_observations_checklist_tab(list)
+      [:app_checklist.t, checklist_path(species_list_id: list.id)]
+    end
+
+    def species_list_observations_map_tab(query)
+      [:show_object.t(type: :map),
+       add_query_param(map_observations_path, query)]
+    end
+
     def species_list_form_new_tabs
       [name_lister_tab]
     end

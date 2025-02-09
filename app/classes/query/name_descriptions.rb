@@ -20,6 +20,7 @@ class Query::NameDescriptions < Query::Base
       old_by: :string,
       users: [User],
       names: [Name],
+      names_query: :query,
       public: :boolean,
       with_descriptions: :boolean
     ).merge(name_descriptions_parameter_declarations)
@@ -35,13 +36,14 @@ class Query::NameDescriptions < Query::Base
     add_id_condition("name_descriptions.name_id", params[:names])
     initialize_description_public_parameter(:name)
     initialize_name_descriptions_parameters
+    add_subquery_condition(:names, :names)
     super
   end
 
-  def coerce_into_name_query
-    pargs = params_out_to_with_descriptions_params
-    Query.lookup(:Name, pargs)
-  end
+  # def coerce_into_name_query
+  #   pargs = params_out_to_with_descriptions_params
+  #   Query.lookup(:Name, pargs)
+  # end
 
   def self.default_order
     "name"

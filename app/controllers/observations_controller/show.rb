@@ -77,7 +77,7 @@ module ObservationsController::Show
   # Decide if the current query can be used to create a map.
   def check_if_query_is_mappable
     query = find_query(:Observation)
-    query&.coercable?(:Location)
+    query&.params&.dig(:locations_query)
   end
 
   # Incurs a costly namings lookup if called in the partial outside show_obs

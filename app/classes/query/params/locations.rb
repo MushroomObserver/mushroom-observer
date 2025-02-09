@@ -15,7 +15,12 @@ module Query::Params::Locations
       with_notes: :boolean,
       notes_has: :string,
       with_descriptions: :boolean,
-      with_observations: :boolean
+      with_observations: :boolean,
+      descriptions_query: :query,
+      names_query: :query,
+      observations_query: :query,
+      rss_logs_query: :query,
+      species_lists_query: :query
     }
   end
 

@@ -35,6 +35,7 @@ class Query::Observations < Query::Base
     add_needs_naming_condition
     add_needs_naming_filter_conditions
     initialize_name_parameters
+    initialize_subquery_parameters
     initialize_association_parameters
     initialize_obs_record_parameters
     initialize_obs_search_parameters
@@ -55,6 +56,14 @@ class Query::Observations < Query::Base
     return if advanced_search_params.all? { |key| params[key].blank? }
 
     initialize_advanced_search
+  end
+
+  def initialize_subquery_parameters
+    add_subquery_condition(:images, { observation_images: :images })
+    add_subquery_condition(:locations, :locations)
+    add_subquery_condition(:names, :names)
+    add_subquery_condition(:rss_logs, :rss_logs)
+    add_subquery_condition(:sequences, :sequences)
   end
 
   def initialize_association_parameters
@@ -93,26 +102,26 @@ class Query::Observations < Query::Base
       ")"
   end
 
-  def coerce_into_image_query
-    do_coerce(:Image)
-  end
+  # def coerce_into_image_query
+  #   do_coerce(:Image)
+  # end
 
-  def coerce_into_location_query
-    do_coerce(:Location)
-  end
+  # def coerce_into_location_query
+  #   do_coerce(:Location)
+  # end
 
-  def coerce_into_name_query
-    do_coerce(:Name)
-  end
+  # def coerce_into_name_query
+  #   do_coerce(:Name)
+  # end
 
-  def do_coerce(new_model)
-    is_search = params[:pattern].present? ||
-                advanced_search_params.any? { |key| params[key].present? }
-    pargs = is_search ? add_old_title(params_plus_old_by) : params_plus_old_by
-    # transform :ids to :obs_ids
-    pargs = params_out_to_with_observations_params(pargs)
-    Query.lookup(new_model, pargs)
-  end
+  # def do_coerce(new_model)
+  #   is_search = params[:pattern].present? ||
+  #               advanced_search_params.any? { |key| params[key].present? }
+  #   pargs = is_search ? add_old_title(params_plus_old_by) : params_plus_old_by
+  #   # transform :ids to :obs_ids
+  #   pargs = params_out_to_with_observations_params(pargs)
+  #   Query.lookup(new_model, pargs)
+  # end
 
   def title
     default = super
