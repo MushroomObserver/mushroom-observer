@@ -37,7 +37,6 @@ module Tabs
     end
 
     # Dead code?
-    # # Components of the above AND similar links for helpers/descriptions_helper
     # def description_parent_tab(description, type)
     #   InternalLink::Model.new(
     #     :show_object.t(type: type), description,
