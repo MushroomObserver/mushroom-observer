@@ -2,13 +2,13 @@
 
 class Query::Images < Query::Base
   include Query::Params::Images
-  include Query::Params::Names
+  # include Query::Params::Names
   # include Query::Params::Locations
   # include Query::Params::Observations
   include Query::Params::AdvancedSearch
   include Query::Params::Filters
   include Query::Initializers::Images
-  include Query::Initializers::Names
+  # include Query::Initializers::Names
   # include Query::Initializers::Locations
   # include Query::Initializers::Observations
   include Query::Initializers::AdvancedSearch
@@ -21,7 +21,7 @@ class Query::Images < Query::Base
 
   def parameter_declarations
     super.merge(images_per_se_parameter_declarations).
-      merge(names_parameter_declarations).
+      # merge(names_parameter_declarations). # nope. send obs_query
       merge(advanced_search_parameter_declarations)
     # q_p = super.merge(images_general_parameter_declarations)
     # return q_p if params[:with_observations].blank?

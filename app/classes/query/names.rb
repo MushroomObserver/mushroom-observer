@@ -23,8 +23,8 @@ class Query::Names < Query::Base
   def parameter_declarations
     super.merge(names_per_se_parameter_declarations).
       merge(content_filter_parameter_declarations(Name)).
-      merge(names_parameter_declarations).
-      merge(name_descriptions_parameter_declarations). # yes in the general
+      # merge(names_parameter_declarations).
+      # merge(name_descriptions_parameter_declarations). # no. send subquery
       merge(advanced_search_parameter_declarations)
     # q_p = super.merge(names_general_parameter_declarations)
     # if params[:with_descriptions].present?
@@ -68,7 +68,7 @@ class Query::Names < Query::Base
     initialize_taxonomy_parameters
     initialize_name_record_parameters
     initialize_name_search_parameters
-    initialize_name_descriptions_parameters
+    # initialize_name_descriptions_parameters
     initialize_content_filters(Name)
     super
   end

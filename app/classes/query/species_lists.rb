@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 class Query::SpeciesLists < Query::Base
-  include Query::Params::Names
-  include Query::Initializers::Names
+  # include Query::Params::Names
+  # include Query::Initializers::Names
 
   def model
     SpeciesList
@@ -27,7 +27,7 @@ class Query::SpeciesLists < Query::Base
       with_comments: { boolean: [true] },
       comments_has: :string,
       pattern: :string
-    ).merge(names_parameter_declarations)
+    ) # .merge(names_parameter_declarations)
   end
 
   def initialize_flavor
@@ -38,7 +38,7 @@ class Query::SpeciesLists < Query::Base
     add_ids_condition
     add_by_user_condition
     add_for_project_condition(:project_species_lists)
-    initialize_name_parameters(:species_list_observations, :observations)
+    # initialize_name_parameters(:species_list_observations, :observations)
     initialize_association_parameters
     initialize_boolean_parameters
     initialize_at_where_parameter

@@ -13,9 +13,9 @@ class Query::Sequences < Query::Base
 
   def parameter_declarations
     super.merge(sequence_parameter_declarations).
-      merge(observation_parameter_declarations).
-      merge(names_parameter_declarations).
-      merge(bounding_box_parameter_declarations)
+      merge(observation_parameter_declarations)
+      # merge(names_parameter_declarations). nope. send obs_query
+      # merge(bounding_box_parameter_declarations)
   end
 
   def sequence_parameter_declarations
