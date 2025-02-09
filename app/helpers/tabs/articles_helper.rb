@@ -45,21 +45,24 @@ module Tabs
     end
 
     def new_article_tab
-      [:create_article_title.t, new_article_path,
-       { class: tab_id(__method__.to_s) }]
+      InternalLink::Model.new(:create_article_title.t, Article,
+                              new_article_path).tab
     end
 
     def edit_article_tab(article)
-      [:EDIT.t, edit_article_path(article.id),
-       { class: tab_id(__method__.to_s) }]
+      InternalLink::Model.new(:EDIT.t, article,
+                              edit_article_path(article.id)).tab
     end
 
     def destroy_article_tab(article)
-      [nil, article, { button: :destroy }]
+      InternalLink::Model.new(
+        :destroy_object.t(TYPE: Article), article, article,
+        html_options: { button: :destroy }
+      ).tab
     end
 
     def articles_index_tab
-      [:index_article.t, articles_path, { class: tab_id(__method__.to_s) }]
+      InternalLink::Model.new(:index_article.t, Article, articles_path).tab
     end
 
     # "Title (#nnn)" textilized
