@@ -12,6 +12,7 @@ module Names
       return unless @name
 
       @query = create_query(:Observation, names: @name.id)
+      @query.save
       apply_content_filters(@query)
       @observations = @query.results(include: :location, limit: 10_000).
                       select { |o| o.lat || o.location }

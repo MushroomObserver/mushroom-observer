@@ -8,7 +8,7 @@ class InternalLink
       super(:show_objects.t(type: model.type_tag),
             { controller: model.show_controller,
               action: model.index_action,
-              q: query.id.alphabetize },
+              q: query.id&.alphabetize },
             html_options:)
     end
 
