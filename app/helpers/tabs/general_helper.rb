@@ -5,11 +5,7 @@ module Tabs
     def coerced_query_tab(query, model)
       return nil unless query&.coercable?(model.name.to_sym)
 
-      InternalLink::Model.new(
-        :show_objects.t(type: model.type_tag), model,
-        add_query_param({ controller: model.show_controller,
-                          action: model.index_action }, query)
-      ).tab
+      InternalLink::CoercedQuery.new(query, model).tab
     end
 
     def coerced_observation_query_tab(query)
