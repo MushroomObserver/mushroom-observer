@@ -36,118 +36,146 @@ module Tabs
       ].compact_blank.safe_join(" | ")
     end
 
-    # Components of the above AND similar links for helpers/descriptions_helper
-    def description_parent_tab(description, type)
-      [:show_object.t(type: type),
-       add_query_param(description.parent.show_link_args),
-       { class: "#{__method__}_#{description.id}" }]
-    end
+    # Dead code?
+    # # Components of the above AND similar links for helpers/descriptions_helper
+    # def description_parent_tab(description, type)
+    #   InternalLink::Model.new(
+    #     :show_object.t(type: type), description,
+    #     add_query_param(description.parent.show_link_args)
+    #   ).tab
+    # end
 
     def create_description_tab(object, type)
-      [:show_name_create_description.t,
-       add_query_param(send(:"new_#{type}_description_path",
-                            { "#{type}_id": object.id })),
-       { class: "#{__method__}_#{object.id}", icon: :add }]
+      InternalLink::Model.new(
+        :show_name_create_description.t, "#{type.capitalize}Description",
+        add_query_param(send(:"new_#{type}_description_path",
+                             { "#{type}_id": object.id })),
+        html_options: { icon: :add }
+      ).tab
     end
 
     def edit_description_tab(description, type)
       return unless writer?(description)
 
-      [:show_description_edit.t,
-       add_query_param(send(:"edit_#{type}_description_path", description.id)),
-       { class: "#{__method__}_#{description.id}", icon: :edit }]
+      InternalLink::Model.new(
+        :show_description_edit.t, description,
+        add_query_param(send(:"edit_#{type}_description_path", description.id)),
+        html_options: { icon: :edit }
+      ).tab
     end
 
-    def destroy_description_tab(description, admin)
-      return unless admin
+    # Dead code?
+    # def destroy_description_tab(description, admin)
+    #   return unless admin
 
-      [:show_description_destroy.t, description, { button: :destroy }]
-    end
+    #   InternalLink::Model.new(
+    #     :show_description_destroy.t, description, description,
+    #     html_options: { button: :destroy }
+    #   ).tab
+    # end
 
     def clone_description_tab(description, type)
-      [:show_description_clone.t,
-       add_query_param(
-         send(:"new_#{type}_description_path",
-              { clone: description.id, "#{type}_id": description.parent_id })
-       ),
-       { help: :show_description_clone_help.l,
-         class: tab_id(__method__.to_s), icon: :clone }]
+      InternalLink::Model.new(
+        :show_description_clone.t, description,
+        add_query_param(
+          send(:"new_#{type}_description_path",
+               { clone: description.id, "#{type}_id": description.parent_id })
+        ),
+        html_options: { help: :show_description_clone_help.l, icon: :clone }
+      ).tab
     end
 
     def merge_description_tab(description, type, admin)
       return unless admin
 
-      [:show_description_merge.t,
-       add_query_param(
-         send(:"new_merge_#{type}_description_path", description.id)
-       ),
-       { help: :show_description_merge_help.l,
-         class: tab_id(__method__.to_s), icon: :merge }]
+      InternalLink::Model.new(
+        :show_description_merge.t, description,
+        add_query_param(
+          send(:"new_merge_#{type}_description_path", description.id)
+        ),
+        html_options: { help: :show_description_merge_help.l, icon: :merge }
+      ).tab
     end
 
-    def move_description_tab(description, type, admin)
-      return unless admin
+    # Dead code?
+    # def move_description_tab(description, type, admin)
+    #   return unless admin
 
-      parent_type = description.parent.type_tag.to_s
-      [:show_description_move.t,
-       add_query_param(
-         send(:"new_move_#{type}_description_path", description.id)
-       ),
-       { help: :show_description_move_help.l(parent: parent_type),
-         class: tab_id(__method__.to_s), icon: :move }]
-    end
+    #   parent_type = description.parent.type_tag.to_s
+    #   InternalLink::Model.new(
+    #     :show_description_move.t, description,
+    #     add_query_param(
+    #       send(:"new_move_#{type}_description_path", description.id)
+    #     ),
+    #     html_options: {
+    #       help: :show_description_move_help.l(parent: parent_type),
+    #       icon: :move
+    #     }
+    #   ).tab
+    # end
 
     def adjust_description_permissions_tab(description, type, admin)
       return unless admin && type == :name
 
-      [:show_description_adjust_permissions.t,
-       add_query_param(
-         send(:"edit_permissions_#{type}_description_path", description.id)
-       ),
-       { help: :show_description_adjust_permissions_help.l,
-         class: tab_id(__method__.to_s), icon: :adjust }]
+      InternalLink::Model.new(
+        :show_description_adjust_permissions.t, description,
+        add_query_param(
+          send(:"edit_permissions_#{type}_description_path", description.id)
+        ),
+        html_options: { help: :show_description_adjust_permissions_help.l,
+                        icon: :adjust }
+      ).tab
     end
 
     def make_description_default_tab(description, type)
       return unless description.public && User.current &&
                     (description.parent.description_id != description.id)
 
-      [:show_description_make_default.t,
-       add_query_param(
-         send(:"make_default_#{type}_description_path", description.id)
-       ),
-       { button: :put, help: :show_description_make_default_help.l,
-         class: tab_id(__method__.to_s), icon: :make_default }]
+      InternalLink::Model.new(
+        :show_description_make_default.t, description,
+        add_query_param(
+          send(:"make_default_#{type}_description_path", description.id)
+        ),
+        html_options: { button: :put,
+                        help: :show_description_make_default_help.l,
+                        icon: :make_default }
+      ).tab
     end
 
     def description_project_tab(description)
-      return unless (description.source_type == :project) &&
+      return unless (description.source_type == "project") &&
                     (project = description.source_object)
 
-      [:show_object.t(type: :project), add_query_param(project.show_link_args),
-       { class: tab_id(__method__.to_s) }]
+      InternalLink::Model.new(
+        :show_object.t(type: :project), description,
+        add_query_param(project.show_link_args),
+        html_options: { icon: :project }
+      ).tab
     end
 
     def publish_description_draft_tab(description, type, admin)
       return unless admin && (type == :name) &&
                     (description.source_type != :public)
 
-      [:show_description_publish.t,
-       add_query_param(
-         send(:"publish_#{type}_description_path", description.id)
-       ),
-       { button: :put, help: :show_description_publish_help.l,
-         class: tab_id(__method__.to_s), icon: :publish }]
+      InternalLink::Model.new(
+        :show_description_publish.t, description,
+        add_query_param(
+          send(:"publish_#{type}_description_path", description.id)
+        ),
+        html_options: { button: :put, help: :show_description_publish_help.l,
+                        icon: :publish }
+      ).tab
     end
 
     def new_description_for_project_tab(object, type, project)
-      [project.title,
-       add_query_param(
-         send(:"new_#{type}_description_path",
-              { project: project.id, source: "project",
-                "#{type}_id": object.id })
-       ),
-       { class: tab_id(__method__.to_s) }]
+      InternalLink::Model.new(
+        project.title, "#{type.capitalize}Description",
+        add_query_param(
+          send(:"new_#{type}_description_path",
+               { project: project.id, source: "project",
+                 "#{type}_id": object.id })
+        )
+      ).tab
     end
 
     def descriptions_index_sorts
