@@ -472,7 +472,7 @@ MushroomObserver::Application.routes.draw do
   # ----- Locations: a lot of actions  ----------------------------
   resources :locations, id: /\d+/, shallow: true do
     member do
-      put("reverse_name_order", to: "locations/reverse_name_order#update")
+      get("reverse_name_order", to: "locations/reverse_name_order#update")
       get("versions", to: "locations/versions#show", as: "version_of")
     end
     resources :descriptions, module: :locations, shallow_path: :locations,

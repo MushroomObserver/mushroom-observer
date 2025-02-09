@@ -15,7 +15,7 @@ class Query::NamesTest < UnitTestCase
     # SQL does not sort 'Kuhner' and 'Kühner'
     do_test_name_all(expect) if sql_collates_accents?
 
-    pair = expects.select { |x| x.text_name == "Lentinellus ursinus" }
+    pair = expects.select { |x| x.text_name == "Agrocybe arvalis" }
     a = expects.index(pair.first)
     b = expects.index(pair.last)
     expects[a], expects[b] = expects[b], expects[a]
@@ -176,17 +176,16 @@ class Query::NamesTest < UnitTestCase
   end
 
   def test_name_rank_single
-    expects = Name.with_correct_spelling.with_rank("Family").index_order
+    expects = Name.with_correct_spelling.rank("Family").index_order
     assert_query(expects, :Name, rank: "Family")
   end
 
   # NOTE: Something is wrong in the fixtures between Genus and Family
   def test_name_rank_range
-    expects = Name.with_correct_spelling.
-              with_rank_between("Genus", "Kingdom").index_order
+    expects = Name.with_correct_spelling.rank("Genus", "Kingdom").index_order
     assert_query(expects, :Name, rank: %w[Genus Kingdom])
 
-    expects = Name.with_correct_spelling.with_rank("Family").index_order
+    expects = Name.with_correct_spelling.rank("Family").index_order
     assert_query(expects, :Name, rank: %w[Family Family])
   end
 
@@ -264,39 +263,49 @@ class Query::NamesTest < UnitTestCase
     assert_query(expects, :Name, comments_has: '"messes things up"')
   end
 
-  def test_name_pattern_search
-    assert_query(
-      [],
-      :Name, pattern: "petigera" # search_name
-    )
-    assert_query(
-      [names(:petigera).id],
-      :Name, pattern: "petigera", misspellings: :either
-    )
-    assert_query(
-      [names(:peltigera).id],
-      :Name, pattern: "ye auld manual of lichenes" # citation
-    )
-    assert_query(
-      [names(:agaricus_campestras).id],
-      :Name, pattern: "prevent me" # description notes
-    )
-    assert_query(
-      [names(:suillus)],
-      :Name, pattern: "smell as sweet" # gen_desc
-    )
-    # Prove pattern search gets hits for description look_alikes
-    assert_query(
-      [names(:peltigera).id],
-      :Name, pattern: "superficially similar"
-    )
+  def test_name_pattern_search_search_name
+    # search_name
+    assert_query([], :Name, pattern: "petigera")
+    assert_query([names(:petigera).id],
+                 :Name, pattern: "petigera", misspellings: :either)
+    assert_query(Name.pattern_search("petigera").misspellings(:either),
+                 :Name, pattern: "petigera", misspellings: :either)
+  end
+
+  def test_name_pattern_search_citation
+    assert_query([names(:peltigera).id],
+                 :Name, pattern: "ye auld manual of lichenes")
+    assert_query(Name.pattern_search("ye auld manual of lichenes"),
+                 :Name, pattern: "ye auld manual of lichenes")
+  end
+
+  def test_name_pattern_search_description_notes
+    assert_query([names(:agaricus_campestras).id],
+                 :Name, pattern: "prevent me")
+    assert_query(Name.pattern_search("prevent me"),
+                 :Name, pattern: "prevent me")
+  end
+
+  def test_name_pattern_search_description_gen_desc
+    assert_query([names(:suillus)],
+                 :Name, pattern: "smell as sweet")
+    assert_query(Name.pattern_search("smell as sweet"),
+                 :Name, pattern: "smell as sweet")
+  end
+
+  # Prove pattern search gets hits for description look_alikes
+  def test_name_pattern_search_description_look_alikes
+    assert_query([names(:peltigera).id],
+                 :Name, pattern: "superficially similar")
+    assert_query(Name.pattern_search("superficially similar"),
+                 :Name, pattern: "superficially similar")
   end
 
   def test_name_advanced_search
-    assert_query([names(:macrocybe_titans).id], :Name,
-                 name: "macrocybe*titans")
-    assert_query([names(:coprinus_comatus).id], :Name,
-                 user_where: "glendale") # where
+    assert_query([names(:macrocybe_titans).id],
+                 :Name, name: "macrocybe*titans")
+    assert_query([names(:coprinus_comatus).id],
+                 :Name, user_where: "glendale") # where
     expects = Name.index_order.joins(:observations).
               where(Observation[:location_id].eq(locations(:burbank).id)).
               distinct
@@ -454,18 +463,19 @@ class Query::NamesTest < UnitTestCase
               where(observations: { vote_cache: 1..3 }).distinct
     assert_not_empty(expects, "'expect` is broken; it should not be empty")
     assert_query(expects, :Name, with_observations: 1, confidence: [1, 3])
+  end
 
+  def test_name_with_observations_in_box
     # north/south/east/west
     obs = observations(:unknown_with_lat_lng)
     lat = obs.lat
     lng = obs.lng
     expects = Name.index_order.with_correct_spelling.joins(:observations).
               where(observations: { lat: lat, lng: lng }).distinct
+    box = { north: lat.to_f, south: lat.to_f,
+            west: lat.to_f, east: lat.to_f }
     assert_query(
-      expects,
-      :Name,
-      with_observations: 1,
-      north: lat.to_f, south: lat.to_f, west: lat.to_f, east: lat.to_f
+      expects, :Name, with_observations: 1, in_box: box
     )
   end
 
@@ -547,6 +557,7 @@ class Query::NamesTest < UnitTestCase
     assert_query(expects, :Name, with_observations: 1, project: project2)
   end
 
+  # ORDER BY FIND_IN_SET is MySQL-specific and does not have an Arel equivalent
   def test_name_with_observations_in_set
     oids = three_amigos.join(",")
     expects = Name.with_correct_spelling.joins(:observations).
