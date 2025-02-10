@@ -14,7 +14,7 @@ class Query::Names < Query::Base
   # include Query::Initializers::Observations
   include Query::Initializers::AdvancedSearch
   include Query::Initializers::Filters
-  # include Query::Titles::Observations
+  include Query::Titles::Observations
 
   def model
     Name
@@ -23,7 +23,7 @@ class Query::Names < Query::Base
   def parameter_declarations
     super.merge(names_per_se_parameter_declarations).
       merge(content_filter_parameter_declarations(Name)).
-      # merge(names_parameter_declarations).
+      merge(names_parameter_declarations).
       # merge(name_descriptions_parameter_declarations). # no. send subquery
       merge(advanced_search_parameter_declarations)
     # q_p = super.merge(names_general_parameter_declarations)

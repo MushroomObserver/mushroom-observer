@@ -167,7 +167,7 @@ class LocationsController < ApplicationController
   # Try to turn this into a query on observations.where instead.
   # Yes, still a kludge, but a little better than tweaking SQL by hand...
   def create_query_for_obs_undefined_where_strings(query)
-    args   = query.params.dup.except(:with_observations)
+    args   = query.params.dup.except(:observations_query)
     # Location params not handled by Observation. (does handle :by_user)
     # If these are passed, we're not looking for undefined locations.
     return nil if [:by_editor, :regexp].any? { |key| args[key] }

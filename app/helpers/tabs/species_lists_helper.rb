@@ -110,7 +110,7 @@ module Tabs
     end
 
     def species_list_obs_query(list)
-      controller.create_query(:Observation, ids: list.observations)
+      controller.create_query(:Observation, ids: list.observations.map(&:id))
     end
 
     def species_list_observations_locations_tab(list)

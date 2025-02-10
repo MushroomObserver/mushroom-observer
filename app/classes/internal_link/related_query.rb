@@ -14,7 +14,7 @@ class InternalLink
     private
 
     def html_class
-      "related_#{@model.name.underscore}_query_link"
+      "related_#{@model.name.underscore.pluralize}_link"
     end
   end
 end

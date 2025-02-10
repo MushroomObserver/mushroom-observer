@@ -13,7 +13,7 @@ class Query::Locations < Query::Base
   # include Query::Initializers::Observations
   include Query::Initializers::AdvancedSearch
   include Query::Initializers::Filters
-  # include Query::Titles::Observations
+  include Query::Titles::Observations
 
   def model
     Location

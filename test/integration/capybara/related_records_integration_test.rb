@@ -23,7 +23,7 @@ class RelatedRecordsIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("a", text: :show_objects.t(type: :location))
     click_link(text: :show_objects.t(type: :location))
 
-    assert_match("Locations", page.title, "Wrong page")
+    assert_match("Location", page.title, "Wrong page")
     assert_selector("a[href*='/locations/#{location.id}']")
     assert_selector("a", class: "show_location_link_#{location.id}", count: 1)
   end
