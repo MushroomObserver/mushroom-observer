@@ -3710,4 +3710,23 @@ class NameTest < UnitTestCase
     assert_nil(Name.create(params).id)
     assert_not_nil(Name.create(params.merge(user: rolf)).id)
   end
+
+  def test_prevent_trivial_differences
+    name = names(:lactarius_subalpinus)
+    assert_not(name.author.ascii_only?,
+               "Test needs fixture whose Author has non-ASCII characters")
+    params = {
+      text_name: name.text_name,
+      author: name.author,
+      display_name: name.display_name,
+      search_name: name.search_name,
+      user: name.user
+    }.merge(
+      author: I18n.transliterate(name.author),
+      search_name: I18n.transliterate(name.search_name)
+    )
+    assert_raises(ActiveRecord::RecordInvalid) do
+      Name.create!(params)
+    end
+  end
 end

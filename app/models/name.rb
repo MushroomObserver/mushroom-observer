@@ -426,7 +426,7 @@ class Name < AbstractModel
   validate :icn_id_registrable
   validate :icn_id_unique
   validate :validate_lifeform
-  validate :check_user, :check_text_name, :check_author
+  validate :check_user, :check_text_name, :check_author, :check_search_name
 
   validate :author_ending
   validate :citation_start

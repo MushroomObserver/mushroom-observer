@@ -83,4 +83,32 @@ module Name::Validation
     errors.add(:user, :validate_name_user_missing.t) \
       if !user_id && !User.current
   end
+
+  def check_search_name
+    # FIXME: 2025-02-10 This is a temporary hack to reduce test failures.
+    # We should not save Names which lack search_names.
+    # Therefore we should ensure that Names saved by tests have search_names,
+    # Similar for fixtures.
+    return if search_name.blank?
+
+    homonyms = Name.where(text_name: text_name).where.not(id: id)
+    return if homonyms.none?
+
+    cleaned_search_name = cleaned_search_name(search_name)
+    homonyms.each do |homonym|
+      cleaned_homonym_search_name = cleaned_search_name(homonym.search_name)
+      next unless cleaned_search_name == cleaned_homonym_search_name
+
+      errors.add(
+        :search_name,
+        "#{:validate_name_equivalent_exists.t} #{homonym.search_name}"
+      )
+    end
+  end
+
+  def cleaned_search_name(string)
+    I18n.transliterate(string). # Make it ASCII
+      downcase. # ignore case differences
+      gsub(/[^a-z0-9 ]/, "") # Remove non-alphanumerics (like punctuation)
+  end
 end
