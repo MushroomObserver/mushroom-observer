@@ -82,10 +82,11 @@ class LocationsController < ApplicationController
 
   # Displays a list of all locations whose country matches the id param.
   def project
-    query = create_query(
-      :Location,
-      with_observations: true, project: Project.find(params[:project])
+    obs_query = create_query(
+      :Observation,
+      project: Project.find(params[:project])
     )
+    query = create_query(:Location, observations_query: obs_query)
     [query, { link_all_sorts: true }]
   end
 
