@@ -31,9 +31,9 @@ module Query::Params::Names
       need_description: :boolean,
       with_descriptions: :boolean,
       with_observations: { boolean: [true] },
-      descriptions_query: :query,
-      observations_query: :query,
-      rss_logs_query: :query
+      description_query: { subquery: :NameDescription },
+      observation_query: { subquery: :Observation },
+      rss_log_query: { subquery: :RssLog }
       # names: [Name],
       # include_synonyms: :boolean,
       # include_subtaxa: :boolean,
@@ -41,7 +41,6 @@ module Query::Params::Names
       # exclude_original_names: :boolean
       # include_all_name_proposals: :boolean,
       # exclude_consensus: :boolean
-      # species_lists_query: :query
     }
   end
 

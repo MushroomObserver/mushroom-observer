@@ -88,6 +88,8 @@ module Query::Modules::Validation
   def validate_hash_param(param, val, param_type)
     if [:string, :boolean].include?(param_type.keys.first)
       validate_enum(param, val, param_type)
+    elsif param_type.keys.first == :subquery
+      validate_subquery(param, val, param_type)
     else
       validate_nested_params(param, val, param_type)
     end
@@ -99,6 +101,18 @@ module Query::Modules::Validation
       val2[key] = scalar_validate(key, val[key], arg_type)
     end
     val2
+  end
+
+  def validate_subquery(param, val, hash)
+    if hash.keys.length != 1
+      raise(
+        "Invalid enum declaration for :#{param} for #{model} " \
+        "query! (wrong number of keys in hash)"
+      )
+    end
+
+    submodel = hash.values.first
+    Query.lookup(submodel, val)
   end
 
   def validate_enum(param, val, hash)

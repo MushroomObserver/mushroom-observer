@@ -59,11 +59,11 @@ class Query::Observations < Query::Base
   end
 
   def initialize_subquery_parameters
-    add_subquery_condition(:images, { observation_images: :images })
-    add_subquery_condition(:locations, :locations)
-    add_subquery_condition(:names, :names)
-    add_subquery_condition(:rss_logs, :rss_logs)
-    add_subquery_condition(:sequences, :sequences)
+    add_subquery_condition(:Image, { observation_images: :images })
+    add_subquery_condition(:Location, :locations)
+    add_subquery_condition(:Name, :names)
+    add_subquery_condition(:RssLog, :rss_logs)
+    add_subquery_condition(:Sequence, :sequences)
   end
 
   def initialize_association_parameters

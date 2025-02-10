@@ -52,11 +52,11 @@ module Query::Params::Observations
       projects: [Project],
       species_list: SpeciesList,
       species_lists: [SpeciesList],
-      images_query: :query,
-      locations_query: :query,
-      names_query: :query,
-      rss_logs_query: :query,
-      sequences_query: :query
+      image_query: { subquery: :Image },
+      location_query: { subquery: :Location },
+      name_query: { subquery: :Name },
+      rss_log_query: { subquery: :RssLog },
+      sequence_query: { subquery: :Sequence }
     }
   end
 

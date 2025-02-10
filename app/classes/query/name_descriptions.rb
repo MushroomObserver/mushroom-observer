@@ -20,7 +20,7 @@ class Query::NameDescriptions < Query::Base
       # old_by: :string,
       users: [User],
       names: [Name],
-      names_query: :query,
+      name_query: { subquery: :Name },
       public: :boolean,
       with_default_desc: :boolean,
       join_desc: { string: [:default, :any] },
@@ -43,7 +43,7 @@ class Query::NameDescriptions < Query::Base
     add_id_condition("name_descriptions.name_id", params[:names])
     initialize_description_public_parameter(:name)
     initialize_name_descriptions_parameters
-    add_subquery_condition(:names, :names)
+    add_subquery_condition(:Name, :names)
     super
   end
 

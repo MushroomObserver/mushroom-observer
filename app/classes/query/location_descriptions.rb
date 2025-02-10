@@ -19,7 +19,7 @@ class Query::LocationDescriptions < Query::Base
       # old_by: :string,
       users: [User],
       locations: [Location],
-      locations_query: :query,
+      location_query: { subquery: :Location },
       public: :boolean
       # with_descriptions: :boolean
     )
@@ -34,7 +34,7 @@ class Query::LocationDescriptions < Query::Base
     add_desc_by_editor_condition(:location)
     add_id_condition("location_descriptions.location_id", params[:locations])
     initialize_description_public_parameter(:location)
-    add_subquery_condition(:locations, :locations)
+    add_subquery_condition(:Location, :locations)
     super
   end
 

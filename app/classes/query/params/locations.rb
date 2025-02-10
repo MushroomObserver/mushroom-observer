@@ -17,11 +17,9 @@ module Query::Params::Locations
       notes_has: :string,
       with_descriptions: :boolean,
       with_observations: :boolean,
-      descriptions_query: :query,
-      names_query: :query,
-      observations_query: :query,
-      rss_logs_query: :query,
-      species_lists_query: :query
+      description_query: { subquery: :LocationDescription },
+      observation_query: { subquery: :Observation },
+      rss_log_query: { subquery: :RssLog }
     }
   end
 

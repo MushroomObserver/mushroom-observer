@@ -136,11 +136,28 @@ module Query::Modules::Conditions
     add_joins(*)
   end
 
-  def add_subquery_condition(association, *)
-    param = "#{association}_query"
+  def add_subquery_condition(
+    association,
+    *,
+    table: association.to_s.underscore.pluralize,
+    col: :id
+  )
+    param = case association
+            when :NameDescription, :LocationDescription
+              :description_query
+            else
+              :"#{association.to_s.underscore}_query"
+            end
     return if params[param].blank?
 
-    @where << "#{association} IN (#{params[param].sql})"
+    ids = params[param].result_ids.join(",")
+    return force_empty_results if ids.blank?
+
+    @where << "#{table}.#{col} IN (#{ids})"
     add_joins(*)
+  end
+
+  def force_empty_results
+    @where = ["FALSE"]
   end
 end

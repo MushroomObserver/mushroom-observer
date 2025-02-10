@@ -208,7 +208,7 @@ module Query::Initializers::Observations
   end
 
   # def params_out_to_with_observations_params(_pargs)
-  #   { with_observations: true, observations_query: self }
+  #   { with_observations: true, observation_query: self }
   #   # return pargs if pargs[:ids].blank?
 
   #   # pargs[:obs_ids] = pargs.delete(:ids)
@@ -216,7 +216,7 @@ module Query::Initializers::Observations
   # end
 
   # def params_back_to_observation_params
-  #   old_query = params[:observations_query]
+  #   old_query = params[:observation_query]
   #   pargs = old_query.params
   #   pargs[:by] = pargs[:old_by].delete if pargs[:old_by].present?
   #   pargs

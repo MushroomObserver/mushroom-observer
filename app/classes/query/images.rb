@@ -47,7 +47,7 @@ class Query::Images < Query::Base
     add_sort_order_to_title
     super
     # if params[:with_observations].present?
-    #   initialize_images_with_observations
+    initialize_images_with_observations
     # else
     initialize_images_only_parameters
     # end
@@ -60,18 +60,20 @@ class Query::Images < Query::Base
   end
 
   def initialize_subquery_parameters
-    add_subquery_condition(:observations, { observation_images: :observations })
+    add_subquery_condition(:Observation, { observation_images: :observations })
   end
 
-  # def initialize_images_with_observations
-  #   add_join(:observation_images, :observations)
-  #   initialize_obs_basic_parameters
-  #   initialize_obs_association_parameters
-  #   initialize_obs_record_parameters
-  #   initialize_obs_search_parameters
-  #   add_bounding_box_conditions_for_observations
-  #   initialize_content_filters(Observation)
-  # end
+  def initialize_images_with_observations
+    return if params[:with_observations].blank?
+
+    add_join(:observation_images, :observations)
+    # initialize_obs_basic_parameters
+    # initialize_obs_association_parameters
+    # initialize_obs_record_parameters
+    # initialize_obs_search_parameters
+    # add_bounding_box_conditions_for_observations
+    # initialize_content_filters(Observation)
+  end
 
   # def initialize_obs_association_parameters
   #   add_at_location_condition(:observations)

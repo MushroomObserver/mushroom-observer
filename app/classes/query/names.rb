@@ -88,10 +88,10 @@ class Query::Names < Query::Base
   end
 
   def initialize_subquery_parameters
-    add_subquery_condition(:descriptions, :name_descriptions)
-    add_subquery_condition(:observations, :observations)
-    add_subquery_condition(:rss_logs, :rss_logs)
-    add_subquery_condition(:sequences, observations: :sequences)
+    add_subquery_condition(:NameDescription, :name_descriptions)
+    add_subquery_condition(:Observation, :observations)
+    add_subquery_condition(:RssLog, :rss_logs)
+    add_subquery_condition(:Sequence, observations: :sequences)
   end
 
   # def initialize_names_with_descriptions

@@ -95,9 +95,9 @@ class Query::Locations < Query::Base
   end
 
   def initialize_subquery_parameters
-    add_subquery_condition(:descriptions, :location_descriptions)
-    add_subquery_condition(:observations, :observations)
-    add_subquery_condition(:rss_logs, :rss_logs)
+    add_subquery_condition(:LocationDescription, :location_descriptions)
+    add_subquery_condition(:Observation, :observations)
+    add_subquery_condition(:RssLog, :rss_logs)
   end
 
   # def initialize_obs_association_parameters
