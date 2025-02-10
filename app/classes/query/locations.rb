@@ -21,7 +21,7 @@ class Query::Locations < Query::Base
 
   def parameter_declarations
     super.merge(locations_per_se_parameter_declarations).
-      merge(bounding_box_parameter_declarations).
+      # merge(bounding_box_parameter_declarations).
       merge(content_filter_parameter_declarations(Location)).
       merge(advanced_search_parameter_declarations)
     # q_p = super.merge(locations_general_parameter_declarations)

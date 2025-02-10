@@ -138,6 +138,8 @@ module Query::Modules::Conditions
 
   def add_subquery_condition(association, *)
     param = "#{association}_query"
+    return if params[param].blank?
+
     @where << "#{association} IN (#{params[param].sql})"
     add_joins(*)
   end

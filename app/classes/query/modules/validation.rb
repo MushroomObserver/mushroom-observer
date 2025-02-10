@@ -257,9 +257,13 @@ module Query::Modules::Validation
       val.is_a?(String) && (val == "0") && (param == :user)
   end
 
+  NAMES_EXPANDER_PARAMS = [
+    :include_synonyms, :include_subtaxa, :include_immediate_subtaxa,
+    :exclude_original_names
+  ].freeze
+
   def add_synonyms_and_subtaxa(val_array)
-    names_params = *names_parameter_declarations.except(:names).keys
-    lookup_params = @params.slice(*names_params).compact
+    lookup_params = @params.slice(*NAMES_EXPANDER_PARAMS).compact
     return val_array if lookup_params.blank?
 
     new_array = Lookup::Names.new(val_array[0, MO.query_max_array],

@@ -54,7 +54,7 @@ class Query::Images < Query::Base
     add_pattern_condition
     add_img_advanced_search_conditions
     initialize_subquery_parameters
-    initialize_name_parameters(:observation_images, :observations)
+    # initialize_name_parameters(:observation_images, :observations)
     initialize_img_record_parameters
     initialize_img_vote_parameters
   end

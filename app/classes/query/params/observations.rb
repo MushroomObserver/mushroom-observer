@@ -18,14 +18,14 @@ module Query::Params::Observations
       needs_naming: :boolean,
       in_clade: :string,
       in_region: :string,
-      pattern: :string,
+      pattern: :string
       # regexp: :string # for coercions from location
-  #   }
-  # end
+    }
+  end
 
   # # for observations, or coercions to observations.
-  # def observations_parameter_declarations
-  #   {
+  def observations_parameter_declarations
+    {
       with_name: :boolean,
       names: [Name],
       include_synonyms: :boolean,

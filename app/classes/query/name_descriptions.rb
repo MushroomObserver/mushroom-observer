@@ -30,7 +30,7 @@ class Query::NameDescriptions < Query::Base
       desc_content: :string,
       ok_for_export: :boolean
       # with_descriptions: :boolean
-    ).merge(name_descriptions_parameter_declarations)
+    ) # .merge(name_descriptions_parameter_declarations)
   end
 
   def initialize_flavor

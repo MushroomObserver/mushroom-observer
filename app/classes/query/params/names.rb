@@ -33,12 +33,12 @@ module Query::Params::Names
       with_observations: { boolean: [true] },
       descriptions_query: :query,
       observations_query: :query,
-      rss_logs_query: :query,
-      names: [Name],
-      include_synonyms: :boolean,
-      include_subtaxa: :boolean,
-      include_immediate_subtaxa: :boolean,
-      exclude_original_names: :boolean
+      rss_logs_query: :query
+      # names: [Name],
+      # include_synonyms: :boolean,
+      # include_subtaxa: :boolean,
+      # include_immediate_subtaxa: :boolean,
+      # exclude_original_names: :boolean
       # include_all_name_proposals: :boolean,
       # exclude_consensus: :boolean
       # species_lists_query: :query
@@ -46,15 +46,15 @@ module Query::Params::Names
   end
 
   # Used in coerced queries for obs, plus sequence and species_list queries
-  # def names_parameter_declarations
-  #   {
-  #     names: [Name],
-  #     include_synonyms: :boolean,
-  #     include_subtaxa: :boolean,
-  #     include_immediate_subtaxa: :boolean,
-  #     exclude_original_names: :boolean
-  #   }
-  # end
+  def names_parameter_declarations
+    {
+      names: [Name],
+      include_synonyms: :boolean,
+      include_subtaxa: :boolean,
+      include_immediate_subtaxa: :boolean,
+      exclude_original_names: :boolean
+    }
+  end
 
   # def naming_consensus_parameter_declarations
   #   {

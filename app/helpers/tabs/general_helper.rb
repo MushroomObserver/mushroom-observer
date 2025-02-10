@@ -14,10 +14,12 @@ module Tabs
     }.freeze
 
     # The `model` is the index you're going to, the `type` is the join subquery
+    # Controller is needed to access the method `add_query_param` in order to
+    # add a new, non-q query param. Subquery is provisional, not the current `q`
     def related_objects_tab(model, type, current_query)
       obj_query = current_or_related_objects_query(model, type, current_query)
 
-      InternalLink::RelatedQuery.new(obj_query, model).tab
+      InternalLink::RelatedQuery.new(obj_query, model, controller).tab
     end
 
     # Links to regular indexes of the same objects can come from maps.
@@ -32,25 +34,25 @@ module Tabs
     end
 
     def related_images_tab(type, current_query)
-      return unless current_query && RELATED_TYPES[:images].include(type)
+      return unless current_query && RELATED_TYPES[:images].include?(type)
 
       related_objects_tab(Image, type, current_query)
     end
 
     def related_locations_tab(type, current_query)
-      return unless current_query && RELATED_TYPES[:locations].include(type)
+      return unless current_query && RELATED_TYPES[:locations].include?(type)
 
       related_objects_tab(Location, type, current_query)
     end
 
     def related_names_tab(type, current_query)
-      return unless current_query && RELATED_TYPES[:names].include(type)
+      return unless current_query && RELATED_TYPES[:names].include?(type)
 
       related_objects_tab(Name, type, current_query)
     end
 
     def related_observations_tab(type, current_query)
-      return unless current_query && RELATED_TYPES[:observations].include(type)
+      return unless current_query && RELATED_TYPES[:observations].include?(type)
 
       related_objects_tab(Observation, type, current_query)
     end
