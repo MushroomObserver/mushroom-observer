@@ -55,36 +55,6 @@ module Tabs
       related_objects_tab(Observation, type, current_query)
     end
 
-    # def coerced_query_tab(query, model)
-    #   return nil unless query&.coercable?(model.name.to_sym)
-
-    #   InternalLink::CoercedQuery.new(query, model).tab
-    # end
-
-    # def coerced_observation_query_tab(query)
-    #   return unless query
-
-    #   coerced_query_tab(query, Observation)
-    # end
-
-    # def coerced_location_query_tab(query)
-    #   return unless query
-
-    #   coerced_query_tab(query, Location)
-    # end
-
-    # def coerced_image_query_tab(query)
-    #   return unless query
-
-    #   coerced_query_tab(query, Image)
-    # end
-
-    # def coerced_name_query_tab(query)
-    #   return unless query
-
-    #   coerced_query_tab(query, Name)
-    # end
-
     def search_tab_for(site_symbol, search_string)
       return unless (url = external_search_urls[site_symbol])
 
