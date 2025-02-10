@@ -5,24 +5,19 @@ module Tabs
   module NamesHelper
     # assemble links for "tabset" for show_name
     def name_show_tabs(name:)
-      [
-        edit_name_tab(name),
-        new_name_tab
-        # edit_synonym_form_tab(name),
-        # approve_synonym_form_tab(name),
-        # deprecate_synonym_form_tab(name),
-        # name_tracker_form_tab(name, user)
-      ].reject(&:empty?)
+      [edit_name_tab(name), new_name_tab].reject(&:empty?)
     end
 
     def edit_name_tab(name)
-      [:show_name_edit_name.l, add_query_param(edit_name_path(name.id)),
-       { class: tab_id(__method__.to_s), icon: :edit }]
+      InternalLink::Model.new(:show_name_edit_name.l, name,
+                              add_query_param(edit_name_path(name.id)),
+                              html_options: { icon: :edit }).tab
     end
 
     def new_name_tab
-      [:show_name_add_name.l, add_query_param(new_name_path),
-       { class: tab_id(__method__.to_s), icon: :add }]
+      InternalLink::Model.new(:show_name_add_name.l, Name,
+                              add_query_param(new_name_path),
+                              html_options: { icon: :add }).tab
     end
 
     def edit_synonym_form_tab(name)
@@ -46,157 +41,182 @@ module Tabs
     end
 
     def edit_name_synonym_tab(name)
-      [:show_name_change_synonyms.l,
-       add_query_param(edit_synonyms_of_name_path(name.id)),
-       { class: tab_id(__method__.to_s), icon: :synonyms }]
+      InternalLink::Model.new(
+        :show_name_change_synonyms.l, name,
+        add_query_param(edit_synonyms_of_name_path(name.id)),
+        html_options: { icon: :synonyms }
+      ).tab
     end
 
     # Note that the "deprecate" icon appears on approved names, so it's a
     # "check" to indicate at a glance that they're approved.
     def deprecate_name_tab(name)
-      [:DEPRECATE.l,
-       add_query_param(form_to_deprecate_synonym_of_name_path(name.id)),
-       { class: tab_id(__method__.to_s), icon: :deprecate }]
+      InternalLink::Model.new(
+        :DEPRECATE.l, name,
+        add_query_param(form_to_deprecate_synonym_of_name_path(name.id)),
+        html_options: { icon: :deprecate }
+      ).tab
     end
 
     # Likewise, the "approve" icon appears on deprecated names, so it's a "!"
     def approve_name_synonym_tab(name)
-      [:APPROVE.l,
-       add_query_param(form_to_approve_synonym_of_name_path(name.id)),
-       { class: tab_id(__method__.to_s), icon: :approve }]
+      InternalLink::Model.new(
+        :APPROVE.l, name,
+        add_query_param(form_to_approve_synonym_of_name_path(name.id)),
+        html_options: { icon: :approve }
+      ).tab
     end
 
     # Show name panels:
     # Nomenclature tabs
     def index_fungorum_search_page_tab
-      [:index_fungorum_search.l, index_fungorum_search_page_url,
-       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+      InternalLink.new(:index_fungorum_search.l,
+                       index_fungorum_search_page_url,
+                       html_options: { target: :_blank, rel: :noopener }).tab
     end
 
     def index_fungorum_record_tab(name)
-      ["[##{name.icn_id}]", index_fungorum_record_url(name.icn_id),
-       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+      external_name_tab("[##{name.icn_id}]", name,
+                        index_fungorum_record_url(name.icn_id),
+                        alt_title: "index_fungorum_record")
     end
 
+    def external_name_tab(title, name, url, alt_title: nil)
+      InternalLink::Model.new(
+        title, name, url,
+        html_options: { target: :_blank, rel: :noopener },
+        alt_title:
+      ).tab
+    end
+
+    ## In Progress
+
     def mycobank_record_tab(name)
-      ["[##{name.icn_id}]", mycobank_record_url(name.icn_id),
-       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+      external_name_tab("[##{name.icn_id}]", name,
+                        mycobank_record_url(name.icn_id),
+                        alt_title: :mycobank.t)
     end
 
     def fungorum_gsd_synonymy_tab(name)
-      [:gsd_species_synonymy.l, species_fungorum_gsd_synonymy(name.icn_id),
-       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+      external_name_tab(:gsd_species_synonymy.l, name,
+                        species_fungorum_gsd_synonymy(name.icn_id))
     end
 
     def fungorum_sf_synonymy_tab(name)
-      [:sf_species_synonymy.l, species_fungorum_sf_synonymy(name.icn_id),
-       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+      external_name_tab(:sf_species_synonymy.l, name,
+                        species_fungorum_sf_synonymy(name.icn_id))
     end
 
     def mycobank_name_search_tab(name)
-      [:mycobank_search.l, mycobank_name_search_url(name),
-       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+      external_name_tab(:mycobank_search.l, name,
+                        mycobank_name_search_url(name))
     end
 
     def mycobank_basic_search_tab
-      [:mycobank_search.l, mycobank_basic_search_url,
-       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+      InternalLink.new(
+        :mycobank_search.l,
+        mycobank_basic_search_url,
+        html_options: { target: :_blank, rel: :noopener }
+      ).tab
     end
 
     # lifeform tabs:
     def edit_name_lifeform_tab(name)
-      [:EDIT.l, add_query_param(edit_lifeform_of_name_path(name.id)),
-       { class: tab_id(__method__.to_s), icon: :edit }]
+      InternalLink::Model.new(
+        :EDIT.l, name,
+        add_query_param(edit_lifeform_of_name_path(name.id)),
+        html_options: { icon: :edit }
+      ).tab
     end
 
     # description tabs:
     def name_show_description_tab(name)
       return unless name&.description
 
-      [:show_name_see_more.l,
-       add_query_param(name_description_path(name.description.id)),
-       { class: tab_id(__method__.to_s), icon: :list }]
+      InternalLink::Model.new(
+        :show_name_see_more.l, name,
+        add_query_param(name_description_path(name.description.id)),
+        html_options: { icon: :list }
+      ).tab
     end
 
     def name_edit_description_tab(name)
       return unless name&.description
 
-      [:EDIT.l, edit_name_description_path(name.description.id),
-       { class: tab_id(__method__.to_s), icon: :edit }]
+      InternalLink::Model.new(:EDIT.l, name,
+                              edit_name_description_path(name.description.id),
+                              html_options: { icon: :edit }).tab
     end
 
     def name_new_description_tab(name)
-      [:show_name_create_description.l,
-       new_name_description_path(name.id),
-       { class: tab_id(__method__.to_s), icon: :add }]
+      InternalLink::Model.new(:show_name_create_description.l, name,
+                              new_name_description_path(name.id),
+                              html_options: { icon: :add }).tab
     end
 
     # classification tabs:
     def name_edit_classification_tab(name)
-      [:EDIT.l, edit_classification_of_name_path(name.id),
-       { class: tab_id(__method__.to_s), icon: :edit }]
+      InternalLink::Model.new(:EDIT.l, name,
+                              edit_classification_of_name_path(name.id),
+                              html_options: { icon: :edit }).tab
     end
 
     def eol_name_tab(name)
-      ["EOL", name.eol_url,
-       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+      external_name_tab("EOL", name, name.eol_url)
     end
 
     def google_images_for_name_tab(name)
-      [:google_images.t,
-       format("https://images.google.com/images?q=%s", name.real_text_name),
-       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+      url = format("https://images.google.com/images?q=%s",
+                   name.real_text_name)
+      external_name_tab(:google_images.t, name, url)
     end
 
     def ascomycete_org_name_tab(name)
-      ["Ascomycete.org", ascomycete_org_name_url(name),
-       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+      external_name_tab("Ascomycete.org", name, ascomycete_org_name_url(name))
     end
 
     def gbif_name_tab(name)
-      ["GBIF", gbif_name_search_url(name),
-       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+      external_name_tab("GBIF", name, gbif_name_search_url(name))
     end
 
     def google_name_tab(name)
-      [:google_name_search.l, google_name_search_url(name),
-       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+      external_name_tab(:google_name_search.l, name,
+                        google_name_search_url(name))
     end
 
     def inat_name_tab(name)
-      ["iNaturalist", inat_name_search_url(name),
-       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+      external_name_tab("iNaturalist", name, inat_name_search_url(name))
     end
 
     def index_fungorum_name_search_tab(name)
-      [:index_fungorum_web_search.l, index_fungorum_name_web_search_url(name),
-       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+      external_name_tab(:index_fungorum_web_search.l, name,
+                        index_fungorum_name_web_search_url(name))
     end
 
     def ncbi_nucleotide_term_tab(name)
-      ["NCBI Nucleotide", ncbi_nucleotide_term_search_url(name),
-       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+      external_name_tab("NCBI Nucleotide", name,
+                        ncbi_nucleotide_term_search_url(name))
     end
 
     def mushroomexpert_name_tab(name)
-      ["MushroomExpert", mushroomexpert_name_web_search_url(name),
-       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+      external_name_tab("MushroomExpert", name,
+                        mushroomexpert_name_web_search_url(name))
     end
 
     def mycoportal_name_tab(name)
-      ["MyCoPortal", mycoportal_url(name),
-       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+      external_name_tab("MyCoPortal", name, mycoportal_url(name))
     end
 
     def wikipedia_term_tab(name)
-      ["Wikipedia", wikipedia_term_search_url(name),
-       { class: tab_id(__method__.to_s), target: :_blank, rel: :noopener }]
+      external_name_tab("Wikipedia", name, wikipedia_term_search_url(name))
     end
 
     def occurrence_map_for_name_tab(name)
-      [:show_name_distribution_map.t,
-       add_query_param(map_name_path(id: name.id)),
-       { class: tab_id(__method__.to_s), data: { action: "links#disable" } }]
+      InternalLink::Model.new(
+        :show_name_distribution_map.t, name,
+        add_query_param(map_name_path(id: name.id)),
+        html_options: { data: { action: "links#disable" } }
+      ).tab
     end
 
     # Others
@@ -219,45 +239,51 @@ module Tabs
     end
 
     def edit_name_tracker_tab(name)
-      [:show_name_email_tracking.t,
-       add_query_param(edit_tracker_of_name_path(name.id)),
-       { class: tab_id(__method__.to_s), icon: :tracking }]
+      InternalLink::Model.new(
+        :show_name_email_tracking.t, name,
+        add_query_param(edit_tracker_of_name_path(name.id)),
+        html_options: { icon: :tracking }
+      ).tab
     end
 
     def new_name_tracker_tab(name)
-      [:show_name_email_tracking.t,
-       add_query_param(new_tracker_of_name_path(name.id)),
-       { class: tab_id(__method__.to_s), icon: :tracking }]
+      InternalLink::Model.new(
+        :show_name_email_tracking.t, name,
+        add_query_param(new_tracker_of_name_path(name.id)),
+        html_options: { icon: :tracking }
+      ).tab
     end
 
     ##########################################################################
     #
     #    Index:
 
-    def names_index_tabs(query:)
-      [
-        new_name_tab,
-        names_with_observations_tab(query),
-        related_observations_tab(:names, query),
-        related_descriptions_tab(query)
-      ].reject(&:empty?)
-    end
+    # Dead code?
+    # def names_index_tabs(query:)
+    #   [
+    #     new_name_tab,
+    #     names_with_observations_tab(query),
+    #     related_observations_tab(:names, query),
+    #     related_descriptions_tab(query)
+    #   ].reject(&:empty?)
+    # end
 
-    def names_with_observations_tab(query)
-      return unless query&.params&.dig(:with_observations)
+    # def names_with_observations_tab(query)
+    #   return unless query&.params&.dig(:with_observations)
 
-      [:all_objects.t(type: :name), names_path(with_observations: true),
-       { class: tab_id(__method__.to_s) }]
-    end
+    #   InternalLink.new(
+    #     :all_objects.t(type: :name), names_path(with_observations: true)
+    #   ).tab
+    # end
 
-    def related_descriptions_tab(names_query)
-      # return unless query&.coercable?(:NameDescription)
+    # def related_descriptions_tab(names_query)
+    #   # return unless query&.coercable?(:NameDescription)
 
-      desc_query = Query.lookup(:NameDescription, names_query: names_query)
-      [:show_objects.t(type: :description),
-       add_query_param(name_descriptions_index_path, desc_query),
-       { class: tab_id(__method__.to_s) }]
-    end
+    #   desc_query = Query.lookup(:NameDescription, names_query: names_query)
+    #   [:show_objects.t(type: :description),
+    #    add_query_param(name_descriptions_index_path, desc_query),
+    #    { class: tab_id(__method__.to_s) }]
+    # end
 
     def all_names_index_tabs(query:)
       [
@@ -270,8 +296,9 @@ module Tabs
     def all_names_tab(query)
       return unless query&.params&.dig(:with_observations)
 
-      [:all_objects.t(type: :name), names_path,
-       { class: tab_id(__method__.to_s) }]
+      InternalLink.new(
+        :all_objects.t(type: :name), names_path
+      ).tab
     end
 
     def names_index_sorts(query:)
@@ -290,8 +317,9 @@ module Tabs
     end
 
     def names_index_tab
-      [:all_objects.t(type: :name), names_path,
-       { class: tab_id(__method__.to_s) }]
+      InternalLink.new(
+        :all_objects.t(type: :name), names_path
+      ).tab
     end
 
     def name_form_edit_tabs(name:)

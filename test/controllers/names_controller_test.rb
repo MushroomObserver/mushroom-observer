@@ -557,8 +557,9 @@ class NamesControllerTest < FunctionalTestCase
     get(:show, params: { id: names(:agaricus_campestris).id })
     assert_template("show")
     # Needs new queries this time.
-    # (? Up from 7 to 9 - AN 20240107) (? Now 11 - AN 20241217)
-    # Back to 9, AN 20250203
+    # (? Up from 7 to 9 - AN 20240107)
+    # Why are we making this assertion if we don't know what the
+    # value should be?
     assert_equal(9, QueryRecord.count)
 
     # Agarcius: has children taxa.

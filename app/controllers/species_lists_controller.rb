@@ -184,7 +184,10 @@ class SpeciesListsController < ApplicationController
     @canonical_url =
       "#{MO.http_domain}/species_lists/#{@species_list.id}"
     @query = create_query(:Observation, by: :name, species_list: @species_list)
+
+    # See documentation on the 'How to Use' page to understand this feature.
     store_query_in_session(@query) if params[:set_source].present?
+
     @query.need_letters = "names.sort_name"
     @pages = paginate_letters(:letter, :page, 100)
     @objects = @query.paginate(@pages, include:

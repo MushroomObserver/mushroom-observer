@@ -5,15 +5,19 @@
 module Tabs
   module ExternalLinksHelper
     def new_external_link_tab(obs:, site:)
-      [:ADD.l,
-       new_external_link_path(id: obs.id, external_site_id: site.id),
-       { class: "#{tab_id(__method__.to_s)}_#{site.id}", icon: :add }]
+      InternalLink::Model.new(
+        :ADD.l, site,
+        new_external_link_path(id: obs.id, external_site_id: site.id),
+        html_options: { icon: :add }
+      ).tab
     end
 
     def edit_external_link_tab(link:)
-      [:EDIT.l,
-       edit_external_link_path(id: link),
-       { class: "#{tab_id(__method__.to_s)}_#{link.id}", icon: :edit }]
+      InternalLink::Model.new(
+        :EDIT.l, link,
+        edit_external_link_path(id: link),
+        html_options: { icon: :edit }
+      ).tab
     end
   end
 end

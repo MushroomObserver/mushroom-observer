@@ -616,37 +616,37 @@ russula_cremoricolor_author_notes:
   created_at: 2008-03-12 20:53:40
   updated_at: 2008-03-12 20:53:40
 
-lentinellus:
+agrocybe:
   <<: *DEFAULTS
   user: rolf
-  text_name: Lentinellus
-  display_name: '**__Lentinellus__**'
-  search_name: Lentinellus
-  sort_name: Lentinellus
+  text_name: Agrocybe
+  display_name: '**__Agrocybe__**'
+  search_name: Agrocybe
+  sort_name: Agrocybe
   created_at: 2008-03-19 08:35:37
   updated_at: 2008-03-19 08:35:37
   rank: <%= Name.ranks[:Genus] %>
 
-lentinellus_ursinus_author1:
+dup_name_author1:
   <<: *DEFAULTS
   user: rolf
-  text_name: Lentinellus ursinus
-  author: Kühner
-  display_name: '**__Lentinellus ursinus__** Kühner'
-  search_name: Lentinellus ursinus Kühner
-  sort_name: Lentinellus ursinus  Kühner
+  text_name: Agrocybe arvalis
+  author: (Fr.) Singer
+  display_name: '**__Agrocybe arvalis__** (Fr.) Singer'
+  search_name: Agrocybe arvalis (Fr.) Singer
+  sort_name: Agrocybe arvalis  (Fr.) Singer
   created_at: 2008-03-19 08:35:37
   updated_at: 2008-03-19 08:35:37
   deprecated: false
 
-lentinellus_ursinus_author2:
+dup_name_author2:
   <<: *DEFAULTS
   user: rolf
-  text_name: Lentinellus ursinus
-  author: Kuhner
-  display_name: '**__Lentinellus ursinus__** Kuhner'
-  search_name: Lentinellus ursinus Kuhner
-  sort_name: Lentinellus ursinus  Kuhner
+  text_name: Agrocybe arvalis
+  author: '(Fr.) Heim & Romagn.'
+  display_name: '**__Agrocybe arvalis__** (Fr.) Heim & Romagn.'
+  search_name: Agrocybe arvalis (Fr.) Heim & Romagn.
+  sort_name: Agrocybe arvalis  (Fr.) Heim & Romagn.
   created_at: 2008-03-19 08:35:37
   updated_at: 2008-03-19 08:35:37
   deprecated: false

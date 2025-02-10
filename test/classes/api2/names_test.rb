@@ -46,12 +46,13 @@ class API2::NamesTest < UnitTestCase
   end
 
   def test_getting_names_name_with_two_versions
-    names = Name.with_correct_spelling.where(text_name: "Lentinellus ursinus")
+    names = Name.with_correct_spelling.where(text_name: "Agrocybe arvalis")
     assert_not_empty(names)
-    assert_api_fail(name_get_params.merge(name: "Lentinellus ursinus"))
+    assert_api_fail(name_get_params.merge(name: "Agrocybe arvalis"))
     assert_api_pass(
       name_get_params.merge(
-        name: "Lentinellus ursinus Kühner, Lentinellus ursinus Kuhner"
+        name: "Agrocybe arvalis (Fr.) Singer, " \
+              "Agrocybe arvalis (Fr.) Heim & Romagn."
       )
     )
     assert_api_results(names)

@@ -36,18 +36,27 @@ module Tabs
               "#{locus} - MO ##{seq.id}"
             end
 
-      [txt.t, add_query_param(seq.show_link_args, sq_query),
-       { class: "#{tab_id(__method__.to_s)}_#{seq.id}" }]
+      InternalLink::Model.new(
+        txt.t, seq,
+        add_query_param(seq.show_link_args, sq_query),
+        alt_title: :show_object.t(TYPE: Sequence)
+      ).tab
     end
 
     def sequence_archive_tab(seq)
-      [:show_observation_archive_link.t, seq.accession_url,
-       { class: "#{tab_id(__method__.to_s)}_#{seq.id}", target: "_blank" }]
+      InternalLink::Model.new(
+        :show_observation_archive_link.t, seq,
+        seq.accession_url,
+        html_options: { target: "_blank" }
+      ).tab
     end
 
     def sequence_blast_tab(seq)
-      [:show_observation_blast_link.t, seq.blast_url,
-       { class: "#{tab_id(__method__.to_s)}_#{seq.id}", target: "_blank" }]
+      InternalLink::Model.new(
+        :show_observation_blast_link.t, seq,
+        seq.blast_url,
+        html_options: { target: "_blank" }
+      ).tab
     end
 
     def sequence_mod_tabs(seq)
@@ -56,26 +65,34 @@ module Tabs
     end
 
     def edit_sequence_and_back_tab(seq)
-      [:edit_object.t(type: :sequence),
-       seq.edit_link_args.merge(back: :show),
-       { class: "edit_sequence_link" }]
+      InternalLink::Model.new(
+        :edit_object.t(type: :sequence), seq,
+        seq.edit_link_args.merge(back: :show)
+      ).tab
     end
 
     def edit_sequence_tab(seq, obs)
-      [:EDIT.t,
-       edit_sequence_path(id: seq.id, back: obs.id, q: get_query_param),
-       { class: "#{tab_id(__method__.to_s)}_#{seq.id}", icon: :edit }]
+      InternalLink::Model.new(
+        :EDIT.t, seq,
+        edit_sequence_path(id: seq.id, back: obs.id, q: get_query_param),
+        html_options: { icon: :edit }
+      ).tab
     end
 
     def new_sequence_tab(obs)
-      [:show_observation_add_sequence.t,
-       new_sequence_path(observation_id: obs.id, q: get_query_param),
-       { class: tab_id(__method__.to_s), icon: :add }]
+      InternalLink::Model.new(
+        :show_observation_add_sequence.t, Sequence,
+        new_sequence_path(observation_id: obs.id, q: get_query_param),
+        html_options: { icon: :add }
+      ).tab
     end
 
     def destroy_sequence_tab(seq)
-      [:destroy_object.t(type: :sequence), seq,
-       { button: :destroy, back: url_after_delete(seq) }]
+      InternalLink::Model.new(
+        :destroy_object.t(type: :sequence),
+        seq, seq,
+        html_options: { button: :destroy, back: url_after_delete(seq) }
+      ).tab
     end
 
     def sequences_index_sorts
