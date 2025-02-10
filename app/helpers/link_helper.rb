@@ -199,7 +199,8 @@ module LinkHelper
     chevron_left: "chevron-left",
     chevron_right: "chevron-right",
     qrcode: "qrcode",
-    mobile: "phone"
+    mobile: "phone",
+    project: "th-list"
   }.freeze
 
   # button to destroy object

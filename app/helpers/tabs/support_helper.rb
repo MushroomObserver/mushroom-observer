@@ -26,11 +26,11 @@ module Tabs
     end
 
     def support_donors_tab
-      [:donors_tab.t, support_donors_path, { class: tab_id(__method__.to_s) }]
+      InternalLink.new(:donors_tab.t, support_donors_path).tab
     end
 
     def support_donate_tab
-      [:donate_tab.t, support_donate_path, { class: tab_id(__method__.to_s) }]
+      InternalLink.new(:donate_tab.t, support_donate_path).tab
     end
 
     def support_admin_tabs
@@ -41,13 +41,11 @@ module Tabs
     end
 
     def admin_new_donation_tab
-      [:create_donation_tab.t, new_admin_donations_path,
-       { class: tab_id(__method__.to_s) }]
+      InternalLink.new(:create_donation_tab.t, new_admin_donations_path).tab
     end
 
     def admin_review_donations_tab
-      [:review_donations_tab.t, admin_review_donations_path,
-       { class: tab_id(__method__.to_s) }]
+      InternalLink.new(:review_donations_tab.t, admin_review_donations_path).tab
     end
   end
 end

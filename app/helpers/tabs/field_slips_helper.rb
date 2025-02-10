@@ -19,27 +19,34 @@ module Tabs
     end
 
     def field_slips_index_tab
-      [:field_slip_index.t, field_slips_path,
-       { class: tab_id(__method__.to_s) }]
+      InternalLink::Model.new(
+        :field_slip_index.t, FieldSlip, field_slips_path
+      ).tab
     end
 
     def new_field_slip_tab
-      [:field_slip_new.t, new_field_slip_path,
-       { class: tab_id(__method__.to_s) }]
+      InternalLink::Model.new(
+        :field_slip_new.t, FieldSlip, new_field_slip_path
+      ).tab
     end
 
     def show_field_slip_tab(field_slip)
-      [:field_slip_show.t, field_slip_path(field_slip),
-       { class: tab_id(__method__.to_s) }]
+      InternalLink::Model.new(
+        :field_slip_show.t, field_slip, field_slip_path(field_slip)
+      ).tab
     end
 
     def edit_field_slip_tab(field_slip)
-      [:field_slip_edit.t, edit_field_slip_path(field_slip),
-       { class: tab_id(__method__.to_s) }]
+      InternalLink::Model.new(
+        :field_slip_edit.t, field_slip, edit_field_slip_path(field_slip)
+      ).tab
     end
 
     def destroy_field_slip_tab(field_slip)
-      [nil, field_slip, { button: :destroy }]
+      InternalLink::Model.new(
+        :destroy_object.t(type: :field_slip), field_slip, field_slip,
+        html_options: { button: :destroy }
+      ).tab
     end
   end
 end
