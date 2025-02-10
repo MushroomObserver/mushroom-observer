@@ -17,9 +17,7 @@ module Tabs
     def related_objects_tab(model, type, current_query)
       obj_query = current_or_related_objects_query(model, type, current_query)
 
-      [:show_objects.t(type: model.type_tag),
-       add_query_param({ controller: model.show_controller,
-                         action: model.index_action }, obj_query)]
+      InternalLink::RelatedQuery.new(obj_query, model).tab
     end
 
     # Links to regular indexes of the same objects can come from maps.
@@ -36,60 +34,56 @@ module Tabs
     def related_images_tab(type, current_query)
       return unless current_query && RELATED_TYPES[:images].include(type)
 
-      tab = related_objects_tab(Image, type, current_query)
-      [*tab, { class: tab_id(__method__.to_s) }]
+      related_objects_tab(Image, type, current_query)
     end
 
     def related_locations_tab(type, current_query)
       return unless current_query && RELATED_TYPES[:locations].include(type)
 
-      tab = related_objects_tab(Location, type, current_query)
-      [*tab, { class: tab_id(__method__.to_s) }]
+      related_objects_tab(Location, type, current_query)
     end
 
     def related_names_tab(type, current_query)
       return unless current_query && RELATED_TYPES[:names].include(type)
 
-      tab = related_objects_tab(Name, type, current_query)
-      [*tab, { class: tab_id(__method__.to_s) }]
+      related_objects_tab(Name, type, current_query)
     end
 
     def related_observations_tab(type, current_query)
       return unless current_query && RELATED_TYPES[:observations].include(type)
 
-      tab = related_objects_tab(Observation, type, current_query)
-      [*tab, { class: tab_id(__method__.to_s) }]
+      related_objects_tab(Observation, type, current_query)
     end
 
-    def coerced_query_tab(query, model)
-      return nil unless query&.coercable?(model.name.to_sym)
+    # def coerced_query_tab(query, model)
+    #   return nil unless query&.coercable?(model.name.to_sym)
 
-      InternalLink::CoercedQuery.new(query, model).tab
-    end
+    #   InternalLink::CoercedQuery.new(query, model).tab
+    # end
 
-    def coerced_observation_query_tab(query)
-      return unless query
+    # def coerced_observation_query_tab(query)
+    #   return unless query
 
-      coerced_query_tab(query, Observation)
-    end
+    #   coerced_query_tab(query, Observation)
+    # end
 
-    def coerced_location_query_tab(query)
-      return unless query
+    # def coerced_location_query_tab(query)
+    #   return unless query
 
-      coerced_query_tab(query, Location)
-    end
+    #   coerced_query_tab(query, Location)
+    # end
 
-    def coerced_image_query_tab(query)
-      return unless query
+    # def coerced_image_query_tab(query)
+    #   return unless query
 
-      coerced_query_tab(query, Image)
-    end
+    #   coerced_query_tab(query, Image)
+    # end
 
-    def coerced_name_query_tab(query)
-      return unless query
+    # def coerced_name_query_tab(query)
+    #   return unless query
 
-      coerced_query_tab(query, Name)
-    end
+    #   coerced_query_tab(query, Name)
+    # end
 
     def search_tab_for(site_symbol, search_string)
       return unless (url = external_search_urls[site_symbol])
