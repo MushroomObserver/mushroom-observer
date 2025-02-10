@@ -2,38 +2,6 @@
 
 module Tabs
   module GeneralHelper
-    # def coerced_query_tab(query, model)
-    #   return nil unless query&.coercable?(model.name.to_sym)
-
-    #   [:show_objects.t(type: model.type_tag),
-    #    add_query_param({ controller: model.show_controller,
-    #                      action: model.index_action }, query)]
-    # end
-
-    # def coerced_observation_query_tab(query)
-    #   return unless query && (tab = coerced_query_tab(query, Observation))
-
-    #   [*tab, { class: tab_id(__method__.to_s) }]
-    # end
-
-    # def coerced_location_query_tab(query)
-    #   return unless query && (tab = coerced_query_tab(query, Location))
-
-    #   [*tab, { class: tab_id(__method__.to_s) }]
-    # end
-
-    # def coerced_image_query_tab(query)
-    #   return unless query && (tab = coerced_query_tab(query, Image))
-
-    #   [*tab, { class: tab_id(__method__.to_s) }]
-    # end
-
-    # def coerced_name_query_tab(query)
-    #   return unless query && (tab = coerced_query_tab(query, Name))
-
-    #   [*tab, { class: tab_id(__method__.to_s) }]
-    # end
-
     # Replacement for coercions (or "coercion"-style links to index same class)
     # Query needs to know which joins are necessary to make these conversions
     # work, so this list needs to be maintained if the Query class is updated.
@@ -90,6 +58,38 @@ module Tabs
       return unless current_query && RELATED_TYPES[:observations].include(type)
 
       tab = related_objects_tab(Observation, type, current_query)
+      [*tab, { class: tab_id(__method__.to_s) }]
+    end
+
+    def coerced_query_tab(query, model)
+      return nil unless query&.coercable?(model.name.to_sym)
+
+      [:show_objects.t(type: model.type_tag),
+       add_query_param({ controller: model.show_controller,
+                         action: model.index_action }, query)]
+    end
+
+    def coerced_observation_query_tab(query)
+      return unless query && (tab = coerced_query_tab(query, Observation))
+
+      [*tab, { class: tab_id(__method__.to_s) }]
+    end
+
+    def coerced_location_query_tab(query)
+      return unless query && (tab = coerced_query_tab(query, Location))
+
+      [*tab, { class: tab_id(__method__.to_s) }]
+    end
+
+    def coerced_image_query_tab(query)
+      return unless query && (tab = coerced_query_tab(query, Image))
+
+      [*tab, { class: tab_id(__method__.to_s) }]
+    end
+
+    def coerced_name_query_tab(query)
+      return unless query && (tab = coerced_query_tab(query, Name))
+
       [*tab, { class: tab_id(__method__.to_s) }]
     end
 
