@@ -2,7 +2,7 @@
 
 class Query::Sequences < Query::Base
   include Query::Params::Locations
-  include Query::Params::Names
+  # include Query::Params::Names
   include Query::Params::Observations
   include Query::Initializers::Names
   include Query::Initializers::Observations
@@ -13,8 +13,8 @@ class Query::Sequences < Query::Base
 
   def parameter_declarations
     super.merge(sequence_parameter_declarations).
-      merge(observation_parameter_declarations)
-      # merge(names_parameter_declarations). nope. send obs_query
+      merge(observation_parameter_declarations).
+      merge(names_parameter_declarations) # API uses this
       # merge(bounding_box_parameter_declarations)
   end
 
@@ -51,7 +51,18 @@ class Query::Sequences < Query::Base
       herbaria: [Herbarium],
       herbarium_records: [HerbariumRecord],
       projects: [Project],
-      species_lists: [SpeciesList]
+      species_lists: [SpeciesList],
+      in_box: { north: :float, south: :float, east: :float, west: :float }
+    }
+  end
+
+  def names_parameter_declarations
+    {
+      names: [Name],
+      include_synonyms: :boolean,
+      include_subtaxa: :boolean,
+      include_immediate_subtaxa: :boolean,
+      exclude_original_names: :boolean
     }
   end
 
