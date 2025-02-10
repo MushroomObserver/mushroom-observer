@@ -115,6 +115,10 @@ module Name::Taxonomy
 
   # ----------------------------------------------------------------------------
 
+  def homonyms
+    Name.where(text_name: text_name).where.not(id: id)
+  end
+
   # Returns an Array of all of this Name's ancestors, starting with its
   # immediate parent, running back to Eukarya.  It ignores misspellings.  It
   # chooses at random if there are more than one accepted parent taxa at a

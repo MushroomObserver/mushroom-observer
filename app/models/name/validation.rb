@@ -91,11 +91,11 @@ module Name::Validation
     # Similar for fixtures.
     return if search_name.blank?
 
-    homonyms = Name.where(text_name: text_name).where.not(id: id)
-    return if homonyms.none?
+    hnyms = homonyms
+    return if hnyms.none?
 
     cleaned_search_name = cleaned_search_name(search_name)
-    homonyms.each do |homonym|
+    hnyms.each do |homonym|
       cleaned_homonym_search_name = cleaned_search_name(homonym.search_name)
       next unless cleaned_search_name == cleaned_homonym_search_name
 
