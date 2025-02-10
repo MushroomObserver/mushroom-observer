@@ -6,6 +6,7 @@
 #
 #  user::            user who initiated the iNat import
 #  state::           state of the import
+#  ended_at::        when the job was Done
 #  token::           code, authenticity token, or JWT supplied by iNat
 #  inat_ids::        string of id's of iNat obss to be imported
 #  inat_username::   iNat login

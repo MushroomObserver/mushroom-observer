@@ -12,7 +12,7 @@
 # 2. create
 #      saves some user data in a InatImport instance
 #        attributes include: user, inat_ids, token, state
-#    passes things off (redirects) to iNat at the inat_authorization_url
+#    passes things off (redirects) to iNat at the INAT_AUTHORIZATION_URL
 # 3. iNat
 #    checks if MO is authorized to access iNat user's confidential data
 #      if not, asks iNat user for authorization
@@ -24,7 +24,7 @@
 #    Enqueues an InatImportJob, passing in the InatImport instance
 #    Redirects to InatImport.show (for that InatImport instance)
 #    ---------------------------------
-#    InatImport.show view:
+#    InatImport.show view: (app/views/controllers/inat_imports/show.html.erb)
 #      Includes a `#status` element which:
 #        Instantiates a Stimulus controller (inat-import-job_controller)
 #        with an endpoint of InatImportJobTracker.show
@@ -33,8 +33,8 @@
 #    Stimulus controller (inat-import-job_controller):
 #      Makes a request every second to the InatImportJobTracker.show endpoint
 #    ---------------------------------
-#    The InatImportJobTracker.show endpoint action:
-#      returns the status of the InatImport as a TurboStream response
+#    The endpoint (app/controllers/inat_imports/job_trackers_controller.rb):
+#      renders the InatImport as a TurboStream response
 #    ---------------------------------
 # 5. The InatImportJob:
 #      Uses the `code` to obtain an oauth access_token
@@ -64,12 +64,16 @@ class InatImportsController < ApplicationController
   REDIRECT_URI = Rails.configuration.redirect_uri
   # iNat's id for the MO application
   APP_ID = Rails.application.credentials.inat.id
+  # URL to obtain authorization from iNat user for access to their private data
+  INAT_AUTHORIZATION_URL =
+    "#{SITE}/oauth/authorize?client_id=#{APP_ID}" \
+    "&redirect_uri=#{REDIRECT_URI}&response_type=code".freeze
   # The iNat API. Not called here, but referenced in tests and ActiveJob
   API_BASE = "https://api.inaturalist.org/v1"
 
   def show
     @tracker = InatImportJobTracker.find(params[:tracker_id])
-    @inat_import = InatImport.find(@tracker.inat_import)
+    @inat_import = InatImport.find(params[:id])
   end
 
   def new; end
@@ -83,7 +87,7 @@ class InatImportsController < ApplicationController
                         importables: 0, imported_count: 0,
                         inat_ids: params[:inat_ids],
                         inat_username: params[:inat_username].strip,
-                        response_errors: "", token: "", log: [])
+                        response_errors: "", token: "", log: [], ended_at: nil)
 
     request_inat_user_authorization
   end
@@ -99,14 +103,7 @@ class InatImportsController < ApplicationController
   end
 
   def request_inat_user_authorization
-    redirect_to(inat_authorization_url, allow_other_host: true)
-  end
-
-  def inat_authorization_url
-    "#{SITE}/oauth/authorize" \
-    "?client_id=#{APP_ID}" \
-    "&redirect_uri=#{REDIRECT_URI}" \
-    "&response_type=code"
+    redirect_to(INAT_AUTHORIZATION_URL, allow_other_host: true)
   end
 
   # ---------------------------------
@@ -123,7 +120,7 @@ class InatImportsController < ApplicationController
     tracker = InatImportJobTracker.create(inat_import: inat_import.id)
 
     Rails.logger.info(
-      "Enqueuing InatImportJob for InatImport id: #{inat_import.id}"
+      "Enqueueing InatImportJob for InatImport id: #{inat_import.id}"
     )
     # InatImportJob.perform_now(inat_import) # uncomment for manual testing
     InatImportJob.perform_later(inat_import) # uncomment for production

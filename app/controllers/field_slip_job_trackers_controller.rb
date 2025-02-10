@@ -10,7 +10,7 @@ class FieldSlipJobTrackersController < ApplicationController
     respond_to do |format|
       format.turbo_stream do
         render(turbo_stream: turbo_stream.replace(
-          :"field_slip_job_tracker_#{@tracker.id}", # id of div to replace
+          :"field_slip_job_tracker_#{@tracker.id}", # id of row to replace
           partial: "projects/field_slips/tracker_row",
           locals: { tracker: @tracker }
         ))
