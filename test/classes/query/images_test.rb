@@ -360,7 +360,7 @@ class Query::ImagesTest < UnitTestCase
               where(observations: { location: locations(:burbank) }).
               where(observations: { is_collection_location: true }).distinct
     assert_image_obs_query(expects, location: locations(:burbank).id)
-    assert_image_obs_query(expects, location: locations(:mitrula_marsh).id)
+    assert_image_obs_query([], location: locations(:mitrula_marsh).id)
   end
 
   def test_image_with_observations_at_where
@@ -393,12 +393,8 @@ class Query::ImagesTest < UnitTestCase
   def test_image_with_observations_in_set
     obs_ids = [observations(:detailed_unknown_obs).id,
                observations(:agaricus_campestris_obs).id]
-    # There's an order_by find_in_set thing here we can't do in Arel.
-    # But luckily we can just quote the method.
-    oids = obs_ids.join(",")
     expects = Image.joins(:observations).where(observations: { id: obs_ids }).
-              reorder(Arel.sql("FIND_IN_SET(observations.id,'#{oids}')").asc,
-                      Image[:id].desc).distinct
+              index_order.distinct
     assert_image_obs_query(expects, ids: obs_ids)
     assert_image_obs_query([], ids: [observations(:minimal_unknown_obs).id])
   end
