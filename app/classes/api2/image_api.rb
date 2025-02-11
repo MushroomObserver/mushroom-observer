@@ -60,8 +60,9 @@ class API2
         with_votes: parse(:boolean, :has_votes),
         quality: parse_range(:quality, :quality),
         confidence: parse_range(:confidence, :confidence),
-        ok_for_export: parse(:boolean, :ok_for_export)
-      }.merge(parse_names_parameters)
+        ok_for_export: parse(:boolean, :ok_for_export),
+        observation_query: parse_names_parameters
+      }
     end
 
     def create_params

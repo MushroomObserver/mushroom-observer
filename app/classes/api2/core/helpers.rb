@@ -19,7 +19,7 @@ module API2::Helpers
     end
     deprecate_parameter(:synonyms_of)
     deprecate_parameter(:children_of)
-    args
+    args.compact
   end
 
   def make_sure_location_isnt_dubious!(name)

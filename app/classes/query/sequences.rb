@@ -31,7 +31,8 @@ class Query::Sequences < Query::Base
       locus_has: :string,
       accession_has: :string,
       notes_has: :string,
-      pattern: :string
+      pattern: :string,
+      observation_query: { subquery: :Observation }
     }
   end
 

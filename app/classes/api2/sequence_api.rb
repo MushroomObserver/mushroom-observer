@@ -27,9 +27,7 @@ class API2
       [:user]
     end
 
-    # rubocop:disable Metrics/MethodLength
     def query_params
-      box = parse_bounding_box!
       {
         where: sql_id_condition,
         created_at: parse_range(:time, :created_at),
@@ -41,28 +39,9 @@ class API2
         locus_has: parse(:string, :locus_has, help: 1),
         accession_has: parse(:string, :accession_has, help: 1),
         notes_has: parse(:string, :notes_has, help: 1),
-        obs_date: parse_range(:date, :obs_date, help: :obs_date),
-        observers: parse_array(:user, :observer),
-        names: parse_array(:name, :name, as: :id),
-        locations: parse_array(:location, :location, as: :id),
-        herbaria: parse_array(:herbarium, :herbarium, as: :id),
-        herbarium_records: parse_array(:herbarium_record, :herbarium_record,
-                                       as: :id),
-        projects: parse_array(:project, :project, as: :id),
-        species_lists: parse_array(:species_list, :species_list, as: :id),
-        confidence: parse(:confidence, :confidence),
-        in_box: box,
-        is_collection_location: parse(:boolean, :is_collection_location,
-                                      help: 1),
-        with_images: parse(:boolean, :has_images),
-        with_name: parse(:boolean, :has_name, help: :min_rank),
-        with_specimen: parse(:boolean, :has_specimen),
-        with_obs_notes: parse(:boolean, :has_obs_notes, help: 1),
-        with_notes_fields: parse(:string, :has_notes_field, help: 1),
-        obs_notes_has: parse(:string, :obs_notes_has, help: 1)
-      }.merge(parse_names_parameters)
+        observation_query: parse_obs_parameters
+      }
     end
-    # rubocop:enable Metrics/MethodLength
 
     def create_params
       {
@@ -90,6 +69,31 @@ class API2
       raise(MissingParameter.new(:observation)) unless params[:observation]
       raise(MissingParameter.new(:locus))       if params[:locus].blank?
       # Sequence validators handle the rest, it's too complicated to repeat.
+    end
+
+    def parse_obs_parameters
+      box = parse_bounding_box!
+      {
+        obs_date: parse_range(:date, :obs_date, help: :obs_date),
+        observers: parse_array(:user, :observer),
+        names: parse_array(:name, :name, as: :id),
+        locations: parse_array(:location, :location, as: :id),
+        herbaria: parse_array(:herbarium, :herbarium, as: :id),
+        herbarium_records: parse_array(:herbarium_record, :herbarium_record,
+                                       as: :id),
+        projects: parse_array(:project, :project, as: :id),
+        species_lists: parse_array(:species_list, :species_list, as: :id),
+        confidence: parse(:confidence, :confidence),
+        in_box: box,
+        is_collection_location: parse(:boolean, :is_collection_location,
+                                      help: 1),
+        with_images: parse(:boolean, :has_images),
+        with_name: parse(:boolean, :has_name, help: :min_rank),
+        with_specimen: parse(:boolean, :has_specimen),
+        with_obs_notes: parse(:boolean, :has_obs_notes, help: 1),
+        with_notes_fields: parse(:string, :has_notes_field, help: 1),
+        obs_notes_has: parse(:string, :obs_notes_has, help: 1),
+      }.merge(parse_names_parameters).compact
     end
   end
 end

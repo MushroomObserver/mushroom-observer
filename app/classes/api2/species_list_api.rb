@@ -45,8 +45,9 @@ class API2
         with_comments: parse(:boolean, :has_comments, limit: true),
         title_has: parse(:string, :title_has, help: 1),
         notes_has: parse(:string, :notes_has, help: 1),
-        comments_has: parse(:string, :comments_has, help: 1)
-      }.merge(parse_names_parameters)
+        comments_has: parse(:string, :comments_has, help: 1),
+        observation_query: parse_names_parameters
+      }
     end
 
     def create_params
