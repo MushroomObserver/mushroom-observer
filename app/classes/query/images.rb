@@ -19,7 +19,7 @@ class Query::Images < Query::Base
     Image
   end
 
-  def parameter_declarations
+  def self.parameter_declarations
     super.merge(images_per_se_parameter_declarations).
       # merge(names_parameter_declarations). # nope. send obs_query
       merge(advanced_search_parameter_declarations)

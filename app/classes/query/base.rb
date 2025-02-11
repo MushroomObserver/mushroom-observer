@@ -23,6 +23,10 @@ class Query::Base
   include Query::Modules::Validation
 
   def parameter_declarations
+    self.class.parameter_declarations
+  end
+
+  def self.parameter_declarations
     {
       join: [:string],
       tables: [:string],
@@ -53,5 +57,9 @@ class Query::Base
 
   def ==(other)
     serialize == other.try(&:serialize)
+  end
+
+  def self.find_subquery_param_name(type)
+    parameter_declarations.key({ subquery: type })
   end
 end

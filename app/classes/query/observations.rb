@@ -17,7 +17,7 @@ class Query::Observations < Query::Base
     Observation
   end
 
-  def parameter_declarations
+  def self.parameter_declarations
     super.merge(observations_per_se_parameter_declarations).
       merge(observations_parameter_declarations).
       # merge(bounding_box_parameter_declarations).

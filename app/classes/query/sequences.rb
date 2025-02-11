@@ -11,7 +11,7 @@ class Query::Sequences < Query::Base
     Sequence
   end
 
-  def parameter_declarations
+  def self.parameter_declarations
     super.merge(sequence_parameter_declarations) # .
       # merge(observation_parameter_declarations).
       # merge(names_parameter_declarations) # API uses this

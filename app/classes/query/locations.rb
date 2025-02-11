@@ -19,7 +19,7 @@ class Query::Locations < Query::Base
     Location
   end
 
-  def parameter_declarations
+  def self.parameter_declarations
     super.merge(locations_per_se_parameter_declarations).
       # merge(bounding_box_parameter_declarations).
       merge(content_filter_parameter_declarations(Location)).

@@ -8,7 +8,7 @@ class Query::RssLogs < Query::Base
     RssLog
   end
 
-  def parameter_declarations
+  def self.parameter_declarations
     super.merge(
       updated_at: [:time],
       type: :string,
