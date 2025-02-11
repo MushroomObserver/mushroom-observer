@@ -85,12 +85,6 @@ module Name::Validation
   end
 
   def check_search_name
-    # FIXME: 2025-02-10 This is a temporary hack to reduce test failures.
-    # We should not save Names which lack search_names.
-    # Therefore we should ensure that Names saved by tests have search_names,
-    # Similar for fixtures.
-    return if search_name.blank?
-
     hnyms = homonyms
     return if hnyms.none?
 
