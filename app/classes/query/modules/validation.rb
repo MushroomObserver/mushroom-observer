@@ -117,11 +117,15 @@ module Query::Modules::Validation
   end
 
   def add_default_subquery_conditions(submodel, val)
-    return val unless model == Location && submodel == :Observation &&
-                      val[:is_collection_location].blank?
+    return val unless needs_is_collection_location_param(submodel, val)
 
-    val[:is_collection_location] = true
-    val
+    val.merge(is_collection_location: true)
+  end
+
+  def needs_is_collection_location_param(submodel, val)
+    model == Location && submodel == :Observation &&
+      (val[:project] || val[:species_list]) &&
+      val[:is_collection_location].blank?
   end
 
   def validate_enum(param, val, hash)
