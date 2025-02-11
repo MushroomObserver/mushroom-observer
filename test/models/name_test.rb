@@ -11,8 +11,20 @@ class NameTest < UnitTestCase
     params = parse.params
     params[:rank] = force_rank if force_rank
     name = Name.new_name(params)
-    assert(name.save, "Error saving name \"#{string}\": [#{name.dump_errors}]")
-    name
+
+    # If there's already a name with this search_name, update and use it.
+    indistinct_names = Name.where(search_name: name.search_name)
+    if indistinct_names.any?
+      indistinct_name = indistinct_names.first
+      assert(indistinct_name.update(params),
+             "Error updating name \"#{string}\": [#{name.dump_errors}]")
+      indistinct_name
+    else
+
+      assert(name.save,
+             "Error saving name \"#{string}\": [#{name.dump_errors}]")
+      name
+    end
   end
 
   # Parse a string, with detailed error message.
@@ -1739,11 +1751,11 @@ class NameTest < UnitTestCase
     assert_name_arrays_equal([], pet.all_parents)
     assert_name_arrays_equal([], pet.children)
 
-    pc   = create_test_name("Petigera canina (L.) Willd.")
-    pcr  = create_test_name("Petigera canina var. rufescens (Weiss) Mudd")
-    pcri = create_test_name(
-      "Petigera canina var. rufescens f. innovans (Körber) J. W. Thomson"
-    )
+    # rubocop:disable Layout/LineLength
+    # disable cop for comparative readability
+    pc =   create_test_name("Petigera canina (L.) Willd.")
+    pcr =  create_test_name("Petigera canina var. rufescens (Weiss) Mudd")
+    pcri = create_test_name("Petigera canina var. rufescens f. innovans (Körber) J. W. Thomson")
     pcs  = create_test_name("Petigera canina var. spuria (Ach.) Schaerer")
 
     pa   = create_test_name("Petigera aphthosa (L.) Willd.")
@@ -1754,6 +1766,7 @@ class NameTest < UnitTestCase
     pp2  = create_test_name("Petigera polydactylon (Bogus) Author")
     pph  = create_test_name("Petigera polydactylon var. hymenina (Ach.) Flotow")
     ppn  = create_test_name("Petigera polydactylon var. neopolydactyla Gyelnik")
+    # rubocop:enable Layout/LineLength
 
     assert_name_arrays_equal([pa, pc, pp, pp2], pet.children, :sort)
     assert_name_arrays_equal([pcr, pcs], pc.children, :sort)
@@ -2692,6 +2705,7 @@ class NameTest < UnitTestCase
 
   # Prove that Name spaceship operator (<=>) uses sort_name to sort Names
   def test_name_spaceship_operator
+    # names ordered by how spaceship operator is expected to sort them
     names = [
       create_test_name("Agaricomycota"),
       create_test_name("Agaricomycotina"),
@@ -2705,12 +2719,16 @@ class NameTest < UnitTestCase
       create_test_name("Agaricus L."),
       create_test_name("Agaricus Øosting"),
       create_test_name("Agaricus Zzyzx"),
-      create_test_name("Agaricus Śliwa"),
       create_test_name("Agaricus Đorn"),
       create_test_name("Agaricus subgenus Dick"),
       create_test_name("Agaricus section Charlie"),
       create_test_name("Agaricus subsection Bob"),
       create_test_name("Agaricus stirps Arthur"),
+      # spaceship operator sorts Ś after {. Therefore
+      # "Agaricus  {4stirps  Arthur" sorts before
+      # "Agaricus  Śliwa" which sorts before Species and lower
+      # whose sort_name's have only one space.
+      create_test_name("Agaricus Śliwa"),
       create_test_name("Agaricus aardvark"),
       create_test_name("Agaricus aardvark group"),
       create_test_name('Agaricus "tree-beard"'),
@@ -2720,8 +2738,8 @@ class NameTest < UnitTestCase
       create_test_name("Agaricus ugliano var. danny Zoom"),
       create_test_name('Agaricus "sp-LD50"')
     ]
-    x = Name.where(id: names.first.id..names.last.id).pluck(:sort_name)
-    assert_equal(names.map(&:sort_name).sort, x.sort)
+    sort_names = names.map(&:sort_name)
+    assert_equal(sort_names, sort_names.sort)
   end
 
   # Prove that alphabetized sort_names give us names in the expected order
