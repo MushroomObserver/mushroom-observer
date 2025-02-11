@@ -266,8 +266,8 @@ class InatObsTest < UnitTestCase
 
   def test_complex_with_mo_match
     name = Name.create(
-      text_name: "Xeromphalina campanella group",
-      author: "",
+      text_name: "Xeromphalina campanella group", author: "",
+      search_name: "Xeromphalina campanella group",
       display_name: "**__Xeromphalina campanella__** group",
       rank: "Group",
       user: users(:rolf)

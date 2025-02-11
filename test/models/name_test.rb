@@ -2334,6 +2334,7 @@ class NameTest < UnitTestCase
     deprecated_name = Name.create!(
       text_name: "Lepiota rhacodes",
       author: "(Vittad.) Quél.",
+      search_name: "Lepiota rhacodes (Vittad.) Quél.",
       display_name: "__Lepiota rhacodes__ (Vittad.) Quél.",
       synonym: synonyms(:macrolepiota_rachodes_synonym),
       deprecated: true,
@@ -2351,6 +2352,7 @@ class NameTest < UnitTestCase
     deprecated_name = Name.create!(
       text_name: "Agaricus rhacodes",
       author: "Vittad.",
+      search_name: "Agaricus rhacodes Vittad.",
       display_name: "__Agaricus rhacodes__ Vittad.",
       synonym: synonyms(:chlorophyllum_rachodes_synonym),
       deprecated: true,
@@ -2582,8 +2584,9 @@ class NameTest < UnitTestCase
     # Autonym with author
     autonym = Name.create!(
       text_name: "Russula sect. Russula",
-      display_name: "**__Russula__** Pers. sect. **__Russula__**",
       author: "Pers.",
+      search_name: "Russula Pers. sect. Russula",
+      display_name: "**__Russula__** Pers. sect. **__Russula__**",
       rank: "Section",
       deprecated: false, correct_spelling: nil,
       user: users(:rolf)
@@ -3508,6 +3511,7 @@ class NameTest < UnitTestCase
     mispelled_name = Name.create!(
       text_name: "Amanita boodairy",
       author: "",
+      search_name: "Amanita boodairy",
       display_name: "__Amanita boodairy__ ",
       correct_spelling: names(:amanita_boudieri),
       deprecated: true,
@@ -3581,6 +3585,7 @@ class NameTest < UnitTestCase
   def test_scope_subtaxa_of_genus_or_below
     amanita_group = Name.create!(
       text_name: "Amanita group",
+      search_name: "Amanita group",
       display_name: "__Amanita group__",
       correct_spelling: nil,
       deprecated: false,
@@ -3590,6 +3595,7 @@ class NameTest < UnitTestCase
     amanita_sensu_lato = Name.create!(
       text_name: "Amanita",
       author: "sensu lato",
+      search_name: "Amanita sensu lato",
       display_name: "__Amanita__ sensu lato",
       correct_spelling: nil,
       deprecated: false,
@@ -3724,6 +3730,7 @@ class NameTest < UnitTestCase
     params = {
       text_name: "Whoosia whatsitii",
       author: "Blah & de Blah",
+      search_name: "Whoosia whatsitii Blah & de Blah",
       display_name: "__Whoosia whatsitii__ Blah & de Blah",
       deprecated: true,
       rank: "Species"
