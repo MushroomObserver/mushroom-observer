@@ -26,7 +26,8 @@ class Query::SpeciesLists < Query::Base
       notes_has: :string,
       with_comments: { boolean: [true] },
       comments_has: :string,
-      pattern: :string
+      pattern: :string,
+      observation_query: { subquery: :Observation }
     ) # .merge(names_parameter_declarations)
   end
 
@@ -39,6 +40,9 @@ class Query::SpeciesLists < Query::Base
     add_by_user_condition
     add_for_project_condition(:project_species_lists)
     # initialize_name_parameters(:species_list_observations, :observations)
+    add_subquery_condition(:Observation, :species_list_observations,
+                           table: :species_list_observations,
+                           col: :observation_id)
     initialize_association_parameters
     initialize_boolean_parameters
     initialize_at_where_parameter

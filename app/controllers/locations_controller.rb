@@ -82,11 +82,8 @@ class LocationsController < ApplicationController
 
   # Displays a list of all locations whose country matches the id param.
   def project
-    obs_query = create_query(
-      :Observation,
-      project: Project.find(params[:project])
-    )
-    query = create_query(:Location, observations_query: obs_query)
+    obs_query = { project: Project.find(params[:project]) }
+    query = create_query(:Location, observation_query: obs_query)
     [query, { link_all_sorts: true }]
   end
 
@@ -168,7 +165,7 @@ class LocationsController < ApplicationController
   # Try to turn this into a query on observations.where instead.
   # Yes, still a kludge, but a little better than tweaking SQL by hand...
   def create_query_for_obs_undefined_where_strings(query)
-    args   = query.params.dup.except(:observations_query)
+    args   = query.params.dup.except(:observation_query)
     # Location params not handled by Observation. (does handle :by_user)
     # If these are passed, we're not looking for undefined locations.
     return nil if [:by_editor, :regexp].any? { |key| args[key] }

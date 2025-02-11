@@ -30,6 +30,8 @@ module Query::Params::Names
       pattern: :string,
       need_description: :boolean,
       with_descriptions: :boolean,
+      with_default_desc: :boolean,
+      ok_for_export: :boolean,
       with_observations: { boolean: [true] },
       description_query: { subquery: :NameDescription },
       observation_query: { subquery: :Observation },

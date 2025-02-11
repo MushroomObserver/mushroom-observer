@@ -279,7 +279,7 @@ module Tabs
     # def related_descriptions_tab(names_query)
     #   # return unless query&.coercable?(:NameDescription)
 
-    #   desc_query = Query.lookup(:NameDescription, names_query: names_query)
+    #   desc_query = Query.lookup(:NameDescription, name_query: names_query)
     #   [:show_objects.t(type: :description),
     #    add_query_param(name_descriptions_index_path, desc_query),
     #    { class: tab_id(__method__.to_s) }]

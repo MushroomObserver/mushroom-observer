@@ -61,7 +61,7 @@ class API2
         quality: parse_range(:quality, :quality),
         confidence: parse_range(:confidence, :confidence),
         ok_for_export: parse(:boolean, :ok_for_export),
-        observation_query: parse_names_parameters
+        observation_query: parse_names_parameters.compact
       }
     end
 

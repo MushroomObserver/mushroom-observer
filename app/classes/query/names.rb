@@ -82,6 +82,7 @@ class Query::Names < Query::Base
     initialize_name_parameters_for_name_queries
     add_pattern_condition
     add_need_description_condition
+    add_with_default_description_condition
     add_name_advanced_search_conditions
     initialize_subquery_parameters
     initialize_name_association_parameters
@@ -98,20 +99,20 @@ class Query::Names < Query::Base
     return if params[:with_descriptions].blank?
 
     add_join(:name_descriptions)
-  #   initialize_with_desc_basic_parameters
+    # initialize_with_desc_basic_parameters
   end
 
   def initialize_names_with_observations
     return if params[:with_observations].blank?
 
     add_join(:observations)
-  #   initialize_obs_basic_parameters
-  #   initialize_obs_association_parameters
-  #   initialize_obs_record_parameters
-  #   initialize_obs_search_parameters
-  #   initialize_name_parameters(:observations)
-  #   add_bounding_box_conditions_for_observations
-  #   initialize_content_filters(Observation)
+    # initialize_obs_basic_parameters
+    # initialize_obs_association_parameters
+    # initialize_obs_record_parameters
+    # initialize_obs_search_parameters
+    # initialize_name_parameters(:observations)
+    # add_bounding_box_conditions_for_observations
+    # initialize_content_filters(Observation)
   end
 
   # def initialize_obs_association_parameters
@@ -127,8 +128,16 @@ class Query::Names < Query::Base
     return unless params[:need_description]
 
     add_join(:observations)
-    @where << "#{model.table_name}.description_id IS NULL"
+    @where << "names.description_id IS NULL"
     @title_tag = :query_title_needs_description.t(type: :name)
+  end
+
+  def add_with_default_description_condition
+    add_boolean_condition(
+      "names.description_id IS NOT NULL",
+      "names.description_id IS NULL",
+      params[:with_default_desc]
+    )
   end
 
   def add_pattern_condition

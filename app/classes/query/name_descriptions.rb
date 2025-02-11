@@ -22,7 +22,7 @@ class Query::NameDescriptions < Query::Base
       names: [Name],
       name_query: { subquery: :Name },
       public: :boolean,
-      with_default_desc: :boolean,
+      # with_default_desc: :boolean,
       join_desc: { string: [:default, :any] },
       desc_type: [{ string: Description::ALL_SOURCE_TYPES }],
       desc_project: [Project],
