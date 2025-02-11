@@ -14,44 +14,80 @@ class API2::ImagesTest < UnitTestCase
   #  :section: Image Requests
   # ---------------------------
 
+  def params_get(**)
+    { method: :get, action: :image }.merge(**)
+  end
+
+  def in_situ_img
+    @in_situ_img ||= images(:in_situ_image)
+  end
+
+  def turned_over_img
+    @turned_over_img ||= images(:turned_over_image)
+  end
+
+  def pretty_img
+    @pretty_img ||= images(:peltigera_image)
+  end
+
+  def noteless_img
+    @noteless_img ||= images(:rolf_profile_image)
+  end
+
   def test_getting_images
     img = Image.all.sample
-    params = { method: :get, action: :image }
-
-    assert_api_pass(params.merge(id: img.id))
+    assert_api_pass(params_get(id: img.id))
     assert_api_results([img])
+  end
 
-    assert_api_pass(params.merge(created_at: "2006"))
+  def test_getting_images_created_at
+    assert_api_pass(params_get(created_at: "2006"))
     assert_api_results(Image.where(Image[:created_at].year.eq(2006)))
+  end
 
-    assert_api_pass(params.merge(updated_at: "2006-05-22"))
+  def test_getting_images_updated_at
+    assert_api_pass(params_get(updated_at: "2006-05-22"))
     assert_api_results(Image.created_on("2006-05-22"))
+  end
 
-    assert_api_pass(params.merge(date: "2007-03"))
+  def test_getting_images_date
+    assert_api_pass(params_get(date: "2007-03"))
     assert_api_results(
       Image.where(Image[:when].year.eq(2007).and(Image[:when].month.eq(3)))
     )
+  end
 
-    assert_api_pass(params.merge(user: "#{mary.id},#{katrina.id}"))
+  def test_getting_images_user
+    assert_api_pass(params_get(user: "#{mary.id},#{katrina.id}"))
     assert_api_results(Image.where(user: [mary, katrina]))
+  end
 
+  def test_getting_images_name
     name = names(:agaricus_campestris)
     imgs = name.observations.map(&:images).flatten
     assert_not_empty(imgs)
-    assert_api_pass(params.merge(name: "Agaricus campestris"))
+    assert_api_pass(params_get(name: "Agaricus campestris"))
     assert_api_results(imgs)
+  end
 
+  def test_getting_images_include_synonyms
+    name = names(:agaricus_campestris)
+    imgs = name.observations.map(&:images).flatten
     name2 = names(:agaricus_campestros)
     synonym = Synonym.create!
     name.update!(synonym: synonym)
     name2.update!(synonym: synonym)
-    assert_api_pass(params.merge(synonyms_of: "Agaricus campestros"))
+    assert_api_pass(params_get(synonyms_of: "Agaricus campestros"))
     assert_api_results(imgs)
     assert_api_pass(
-      params.merge(name: "Agaricus campestros", include_synonyms: "yes")
+      params_get(name: "Agaricus campestros", include_synonyms: "yes")
     )
     assert_api_results(imgs)
+  end
 
+  def test_getting_images_include_subtaxa
+    name = names(:agaricus_campestris)
+    imgs = name.observations.map(&:images).flatten
     agaricus = Name.where(text_name: "Agaricus").first # (an existing autonym)
     agaricus_img = Image.create(
       # add notes to avoid breaking later, brittle assertion
@@ -61,98 +97,124 @@ class API2::ImagesTest < UnitTestCase
       name: agaricus, images: [agaricus_img], thumb_image: agaricus_img,
       user: rolf
     )
-    assert_api_pass(params.merge(children_of: "Agaricus"))
+    assert_api_pass(params_get(children_of: "Agaricus"))
     assert_api_results(imgs)
-    assert_api_pass(params.merge(name: "Agaricus", include_subtaxa: "yes"))
+    assert_api_pass(params_get(name: "Agaricus", include_subtaxa: "yes"))
     assert_api_results(imgs << agaricus_img)
     ###
+  end
 
+  def test_getting_images_location
     burbank = locations(:burbank)
     imgs = burbank.observations.map(&:images).flatten
     assert_not_empty(imgs)
-    assert_api_pass(params.merge(location: burbank.id))
+    assert_api_pass(params_get(location: burbank.id))
     assert_api_results(imgs)
+  end
 
+  def test_getting_images_observation
     obs1 = observations(:detailed_unknown_obs)
     obs2 = observations(:coprinus_comatus_obs)
     assert_not_empty(obs1.images)
     assert_not_empty(obs2.images)
-    assert_api_pass(params.merge(observation: "#{obs1.id},#{obs2.id}"))
+    assert_api_pass(params_get(observation: "#{obs1.id},#{obs2.id}"))
     assert_api_results(obs1.images + obs2.images)
+  end
 
+  def test_getting_images_project
     project = projects(:bolete_project)
     assert_not_empty(project.images)
-    assert_api_pass(params.merge(project: "Bolete Project"))
+    assert_api_pass(params_get(project: "Bolete Project"))
     assert_api_results(project.images)
+  end
 
-    img1 = images(:in_situ_image)
-    img2 = images(:turned_over_image)
+  def test_getting_images_species_list
     spl  = species_lists(:unknown_species_list)
-    assert_api_pass(params.merge(species_list: spl.title))
-    assert_api_results([img1, img2])
+    assert_api_pass(params_get(species_list: spl.title))
+    assert_api_results([in_situ_img, turned_over_img])
+  end
 
+  def test_getting_images_has_observation
     attached   = Image.select { |i| i.observations.count.positive? }
     unattached = Image.all - attached
     assert_not_empty(attached)
     assert_not_empty(unattached)
-    assert_api_pass(params.merge(has_observation: "yes"))
+    assert_api_pass(params_get(has_observation: "yes"))
     assert_api_results(attached)
     # This query doesn't work, no way to negate join.
-    # assert_api_pass(params.merge(has_observation: "no"))
+    # assert_api_pass(params_get(has_observation: "no"))
     # assert_api_results(unattached)
+  end
 
+  def test_getting_images_size
     imgs = Image.where((Image[:width] >= 1280).or(Image[:height] >= 1280))
     assert_empty(imgs)
     imgs = Image.where((Image[:width] >= 960).or(Image[:height] >= 960))
     assert_not_empty(imgs)
-    assert_api_pass(params.merge(size: "huge"))
+    assert_api_pass(params_get(size: "huge"))
     assert_api_results([])
-    assert_api_pass(params.merge(size: "large"))
+    assert_api_pass(params_get(size: "large"))
     assert_api_results(imgs)
+  end
 
-    img1.update!(content_type: "image/png")
-    assert_api_pass(params.merge(content_type: "png"))
-    assert_api_results([img1])
+  def test_getting_images_content_type
+    in_situ_img.update!(content_type: "image/png")
+    assert_api_pass(params_get(content_type: "png"))
+    assert_api_results([in_situ_img])
+  end
 
-    noteless_img = images(:rolf_profile_image)
-    assert_api_pass(params.merge(has_notes: "no"))
+  def test_getting_images_has_notes
+    assert_api_pass(params_get(has_notes: "no"))
     assert_api_results([noteless_img])
+  end
 
-    pretty_img = images(:peltigera_image)
-    assert_api_pass(params.merge(notes_has: "pretty"))
+  def test_getting_images_notes_has
+    assert_api_pass(params_get(notes_has: "pretty"))
     assert_api_results([pretty_img])
+  end
 
-    assert_api_pass(params.merge(copyright_holder_has: "Insil Choi"))
+  def test_getting_images_copyright_holder_has
+    assert_api_pass(params_get(copyright_holder_has: "Insil Choi"))
     assert_api_results(
       Image.where(Image[:copyright_holder].matches("%insil choi%"))
     )
-    assert_api_pass(params.merge(copyright_holder_has: "Nathan"))
+    assert_api_pass(params_get(copyright_holder_has: "Nathan"))
     assert_api_results(
       Image.where(Image[:copyright_holder].matches("%nathan%"))
     )
+  end
 
+  def test_getting_images_license
     pd = licenses(:publicdomain)
-    assert_api_pass(params.merge(license: pd.id))
+    assert_api_pass(params_get(license: pd.id))
     assert_api_results(Image.where(license: pd))
+  end
 
-    assert_api_pass(params.merge(has_votes: "yes"))
+  def test_getting_images_has_votes
+    assert_api_pass(params_get(has_votes: "yes"))
     assert_api_results(Image.where(Image[:vote_cache].not_eq(nil)))
-    assert_api_pass(params.merge(has_votes: "no"))
+    assert_api_pass(params_get(has_votes: "no"))
     assert_api_results(Image.where(Image[:vote_cache].eq(nil)))
+  end
 
-    assert_api_pass(params.merge(quality: "2-3"))
+  def test_getting_images_quality
+    assert_api_pass(params_get(quality: "2-3"))
     assert_api_results(Image.where(Image[:vote_cache] > 2.0))
-    assert_api_pass(params.merge(quality: "1-2"))
+    assert_api_pass(params_get(quality: "1-2"))
     assert_api_results([])
+  end
 
+  def test_getting_images_confidence
     imgs = Observation.where(Observation[:vote_cache] >= 2.0).
            map(&:images).flatten
     assert_not_empty(imgs)
-    assert_api_pass(params.merge(confidence: "2-3"))
+    assert_api_pass(params_get(confidence: "2-3"))
     assert_api_results(imgs)
+  end
 
+  def test_getting_images_ok_for_export
     pretty_img.update!(ok_for_export: false)
-    assert_api_pass(params.merge(ok_for_export: "no"))
+    assert_api_pass(params_get(ok_for_export: "no"))
     assert_api_results([pretty_img])
   end
 
