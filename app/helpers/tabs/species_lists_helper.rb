@@ -114,15 +114,15 @@ module Tabs
     end
 
     def species_list_observations_locations_tab(list)
-      related_locations_tab(:observations, species_list_obs_query(list))
+      related_locations_tab(:Observation, species_list_obs_query(list))
     end
 
     def species_list_observations_names_tab(list)
-      related_names_tab(:observations, species_list_obs_query(list))
+      related_names_tab(:Observation, species_list_obs_query(list))
     end
 
     def species_list_observations_images_tab(list)
-      related_images_tab(:observations, species_list_obs_query(list))
+      related_images_tab(:Observation, species_list_obs_query(list))
     end
 
     def species_list_observations_checklist_tab(list)

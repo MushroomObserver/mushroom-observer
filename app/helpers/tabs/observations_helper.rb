@@ -203,9 +203,9 @@ module Tabs
 
     # NOTE: each tab returns an array
     def observations_related_query_tabs(query)
-      [related_locations_tab(:observations, query),
-       related_names_tab(:observations, query),
-       related_images_tab(:observations, query)]
+      [related_locations_tab(:Observation, query),
+       related_names_tab(:Observation, query),
+       related_images_tab(:Observation, query)]
     end
 
     def observations_add_to_list_tab(query)

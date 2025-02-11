@@ -6,11 +6,11 @@ module Tabs
     # Query needs to know which joins are necessary to make these conversions
     # work, so this list needs to be maintained if the Query class is updated.
     RELATED_TYPES = {
-      # model.table_name.to_sym: [:association],
-      images: [:observation],
-      locations: [:description, :name, :observation, :rss_log],
-      names: [:description, :observation, :rss_log],
-      observations: [:image, :location, :name, :rss_log, :sequence]
+      # model.table_name.to_sym: [:Association],
+      images: [:Observation],
+      locations: [:LocationDescription, :Name, :Observation],
+      names: [:NameDescription, :Observation],
+      observations: [:Image, :Location, :Name, :Sequence]
     }.freeze
 
     # The `model` is the index you're going to, the `type` is the join subquery
@@ -26,10 +26,12 @@ module Tabs
     # If that's the case, just use the same query. Otherwise, make a new query
     # for the related model.
     def current_or_related_objects_query(model, type, current_query)
-      if model.to_s.underscore == type
+      if model.name.to_sym == type
         current_query.params
       else
-        Query.lookup(:"#{model}", "#{type}_query": current_query.params)
+        query_class = "Query::#{model.name.pluralize}".constantize
+        subquery = query_class.find_subquery_param_name(type)
+        Query.lookup(:"#{model}", "#{subquery}": current_query.params)
       end
     end
 
