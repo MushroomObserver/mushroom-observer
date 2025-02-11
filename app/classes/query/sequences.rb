@@ -78,7 +78,7 @@ class Query::Sequences < Query::Base
     add_ids_condition
     # initialize_association_parameters
     initialize_observations_parameter(:sequences)
-    add_subquery_condition(:Observation, :observations)
+    add_subquery_condition(:observation_query, :observations)
     # initialize_name_parameters(:observations)
     # initialize_observation_parameters
     initialize_exact_match_parameters

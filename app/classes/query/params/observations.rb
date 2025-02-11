@@ -51,12 +51,12 @@ module Query::Params::Observations
       project: Project,
       projects: [Project],
       species_list: SpeciesList,
-      species_lists: [SpeciesList],
-      image_query: { subquery: :Image },
-      location_query: { subquery: :Location },
-      name_query: { subquery: :Name },
-      rss_log_query: { subquery: :RssLog },
-      sequence_query: { subquery: :Sequence }
+      species_lists: [SpeciesList]
+      # image_query: { subquery: :Image },
+      # location_query: { subquery: :Location },
+      # name_query: { subquery: :Name },
+      # rss_log_query: { subquery: :RssLog },
+      # sequence_query: { subquery: :Sequence }
     }
   end
 

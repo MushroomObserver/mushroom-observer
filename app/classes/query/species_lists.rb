@@ -40,7 +40,7 @@ class Query::SpeciesLists < Query::Base
     add_by_user_condition
     add_for_project_condition(:project_species_lists)
     # initialize_name_parameters(:species_list_observations, :observations)
-    add_subquery_condition(:Observation, :species_list_observations,
+    add_subquery_condition(:observation_query, :species_list_observations,
                            table: :species_list_observations,
                            col: :observation_id)
     initialize_association_parameters

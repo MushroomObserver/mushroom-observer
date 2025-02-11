@@ -60,7 +60,8 @@ class Query::Images < Query::Base
   end
 
   def initialize_subquery_parameters
-    add_subquery_condition(:Observation, { observation_images: :observations })
+    add_subquery_condition(:observation_query,
+                           { observation_images: :observations })
   end
 
   def initialize_images_with_observations

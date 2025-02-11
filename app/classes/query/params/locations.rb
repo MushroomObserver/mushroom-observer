@@ -18,8 +18,8 @@ module Query::Params::Locations
       with_descriptions: :boolean,
       with_observations: :boolean,
       description_query: { subquery: :LocationDescription },
-      observation_query: { subquery: :Observation },
-      rss_log_query: { subquery: :RssLog }
+      observation_query: { subquery: :Observation }
+      # rss_log_query: { subquery: :RssLog }
     }
   end
 

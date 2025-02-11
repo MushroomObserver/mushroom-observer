@@ -34,7 +34,7 @@ class Query::LocationDescriptions < Query::Base
     add_desc_by_editor_condition(:location)
     add_id_condition("location_descriptions.location_id", params[:locations])
     initialize_description_public_parameter(:location)
-    add_subquery_condition(:Location, :locations)
+    add_subquery_condition(:location_query, :locations)
     super
   end
 

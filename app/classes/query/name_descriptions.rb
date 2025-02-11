@@ -43,7 +43,7 @@ class Query::NameDescriptions < Query::Base
     add_id_condition("name_descriptions.name_id", params[:names])
     initialize_description_public_parameter(:name)
     initialize_name_descriptions_parameters
-    add_subquery_condition(:Name, :names)
+    add_subquery_condition(:name_query, :names)
     super
   end
 
