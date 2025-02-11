@@ -73,9 +73,9 @@ class API2
 
     def parse_obs_parameters
       box = parse_bounding_box!
-      {
-        obs_date: parse_range(:date, :obs_date, help: :obs_date),
-        observers: parse_array(:user, :observer),
+      obs_params = {
+        date: parse_range(:date, :obs_date, help: :obs_date),
+        users: parse_array(:user, :observer),
         names: parse_array(:name, :name, as: :id),
         locations: parse_array(:location, :location, as: :id),
         herbaria: parse_array(:herbarium, :herbarium, as: :id),
@@ -90,10 +90,11 @@ class API2
         with_images: parse(:boolean, :has_images),
         with_name: parse(:boolean, :has_name, help: :min_rank),
         with_specimen: parse(:boolean, :has_specimen),
-        with_obs_notes: parse(:boolean, :has_obs_notes, help: 1),
+        with_notes: parse(:boolean, :has_obs_notes, help: 1),
         with_notes_fields: parse(:string, :has_notes_field, help: 1),
-        obs_notes_has: parse(:string, :obs_notes_has, help: 1),
-      }.merge(parse_names_parameters).compact
+        notes_has: parse(:string, :obs_notes_has, help: 1),
+      }
+      obs_params.compact.merge(parse_names_parameters)
     end
   end
 end

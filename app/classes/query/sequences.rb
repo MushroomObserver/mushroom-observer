@@ -12,9 +12,9 @@ class Query::Sequences < Query::Base
   end
 
   def parameter_declarations
-    super.merge(sequence_parameter_declarations).
-      merge(observation_parameter_declarations).
-      merge(names_parameter_declarations) # API uses this
+    super.merge(sequence_parameter_declarations) # .
+      # merge(observation_parameter_declarations).
+      # merge(names_parameter_declarations) # API uses this
       # merge(bounding_box_parameter_declarations)
   end
 
@@ -36,36 +36,36 @@ class Query::Sequences < Query::Base
     }
   end
 
-  def observation_parameter_declarations
-    {
-      obs_date: [:date],
-      observers: [User],
-      with_name: :boolean,
-      confidence: [:float],
-      locations: [Location],
-      is_collection_location: :boolean,
-      with_images: :boolean,
-      with_specimen: :boolean,
-      with_obs_notes: :boolean,
-      obs_notes_has: :string,
-      with_notes_fields: [:string],
-      herbaria: [Herbarium],
-      herbarium_records: [HerbariumRecord],
-      projects: [Project],
-      species_lists: [SpeciesList],
-      in_box: { north: :float, south: :float, east: :float, west: :float }
-    }
-  end
+  # def observation_parameter_declarations
+  #   {
+  #     obs_date: [:date],
+  #     observers: [User],
+  #     with_name: :boolean,
+  #     confidence: [:float],
+  #     locations: [Location],
+  #     is_collection_location: :boolean,
+  #     with_images: :boolean,
+  #     with_specimen: :boolean,
+  #     with_obs_notes: :boolean,
+  #     obs_notes_has: :string,
+  #     with_notes_fields: [:string],
+  #     herbaria: [Herbarium],
+  #     herbarium_records: [HerbariumRecord],
+  #     projects: [Project],
+  #     species_lists: [SpeciesList],
+  #     in_box: { north: :float, south: :float, east: :float, west: :float }
+  #   }
+  # end
 
-  def names_parameter_declarations
-    {
-      names: [Name],
-      include_synonyms: :boolean,
-      include_subtaxa: :boolean,
-      include_immediate_subtaxa: :boolean,
-      exclude_original_names: :boolean
-    }
-  end
+  # def names_parameter_declarations
+  #   {
+  #     names: [Name],
+  #     include_synonyms: :boolean,
+  #     include_subtaxa: :boolean,
+  #     include_immediate_subtaxa: :boolean,
+  #     exclude_original_names: :boolean
+  #   }
+  # end
 
   def initialize_flavor
     add_sort_order_to_title
@@ -76,13 +76,15 @@ class Query::Sequences < Query::Base
     add_owner_and_time_stamp_conditions
     add_pattern_condition
     add_ids_condition
-    initialize_association_parameters
-    initialize_name_parameters(:observations)
-    initialize_observation_parameters
+    # initialize_association_parameters
+    initialize_observations_parameter(:sequences)
+    add_subquery_condition(:Observation, :observations)
+    # initialize_name_parameters(:observations)
+    # initialize_observation_parameters
     initialize_exact_match_parameters
-    initialize_boolean_parameters
+    # initialize_boolean_parameters
     initialize_search_parameters
-    add_bounding_box_conditions_for_observations
+    # add_bounding_box_conditions_for_observations
     super
   end
 
@@ -98,26 +100,26 @@ class Query::Sequences < Query::Base
       ")"
   end
 
-  def initialize_association_parameters
-    initialize_observations_parameter(:sequences)
-    initialize_observers_parameter
-    add_where_condition(:observations, params[:locations], :observations)
-    initialize_herbaria_parameter
-    initialize_herbarium_records_parameter
-    initialize_projects_parameter
-    initialize_species_lists_parameter
-  end
+  # def initialize_association_parameters
+  #   initialize_observations_parameter(:sequences)
+  #   initialize_observers_parameter
+  #   add_where_condition(:observations, params[:locations], :observations)
+  #   initialize_herbaria_parameter
+  #   initialize_herbarium_records_parameter
+  #   initialize_projects_parameter
+  #   initialize_species_lists_parameter
+  # end
 
   # Different because it can take multiple users
-  def initialize_observers_parameter
-    add_id_condition("observations.user_id", params[:observers], :observations)
-  end
+  # def initialize_observers_parameter
+  #   add_id_condition("observations.user_id", params[:observers], :observations)
+  # end
 
-  def initialize_observation_parameters
-    initialize_obs_date_parameter(:obs_date)
-    initialize_is_collection_location_parameter
-    initialize_confidence_parameter
-  end
+  # def initialize_observation_parameters
+  #   initialize_obs_date_parameter(:obs_date)
+  #   initialize_is_collection_location_parameter
+  #   initialize_confidence_parameter
+  # end
 
   def initialize_exact_match_parameters
     add_exact_match_condition("sequences.locus", params[:locus])
@@ -125,13 +127,13 @@ class Query::Sequences < Query::Base
     add_exact_match_condition("sequences.accession", params[:accession])
   end
 
-  def initialize_boolean_parameters
-    initialize_with_images_parameter
-    initialize_with_specimen_parameter
-    initialize_with_name_parameter
-    initialize_obs_with_notes_parameter(:with_obs_notes)
-    add_with_notes_fields_condition(params[:with_notes_fields], :observations)
-  end
+  # def initialize_boolean_parameters
+  #   initialize_with_images_parameter
+  #   initialize_with_specimen_parameter
+  #   initialize_with_name_parameter
+  #   initialize_obs_with_notes_parameter(:with_obs_notes)
+  #   add_with_notes_fields_condition(params[:with_notes_fields], :observations)
+  # end
 
   def initialize_search_parameters
     add_search_condition("sequences.locus", params[:locus_has])
