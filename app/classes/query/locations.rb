@@ -56,9 +56,9 @@ class Query::Locations < Query::Base
   def initialize_flavor
     add_sort_order_to_title
     # if params[:with_descriptions].present?
-    #   initialize_locations_with_descriptions
+    initialize_locations_with_descriptions
     # elsif params[:with_observations].present?
-    #   initialize_locations_with_observations
+    initialize_locations_with_observations
     # else
     initialize_locations_only_parameters
     # end
@@ -68,20 +68,24 @@ class Query::Locations < Query::Base
     super
   end
 
-  # def initialize_locations_with_descriptions
-  #   add_join(:location_descriptions)
-  #   initialize_with_desc_basic_parameters
-  # end
+  def initialize_locations_with_descriptions
+    return if params[:with_descriptions].blank?
 
-  # def initialize_locations_with_observations
-  #   add_join(:observations)
-  #   initialize_obs_basic_parameters
-  #   initialize_name_parameters
-  #   initialize_obs_association_parameters
-  #   initialize_obs_record_parameters
-  #   initialize_obs_search_parameters
-  #   initialize_content_filters(Observation)
-  # end
+    add_join(:location_descriptions)
+    # initialize_with_desc_basic_parameters
+  end
+
+  def initialize_locations_with_observations
+    return if params[:with_observations].blank?
+
+    add_join(:observations)
+    # initialize_obs_basic_parameters
+    # initialize_name_parameters
+    # initialize_obs_association_parameters
+    # initialize_obs_record_parameters
+    # initialize_obs_search_parameters
+    # initialize_content_filters(Observation)
+  end
 
   def initialize_locations_only_parameters
     add_ids_condition

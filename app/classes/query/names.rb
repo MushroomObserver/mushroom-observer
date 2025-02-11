@@ -59,9 +59,9 @@ class Query::Names < Query::Base
   def initialize_flavor
     add_sort_order_to_title
     # if params[:with_descriptions].present?
-    #   initialize_names_with_descriptions
+    initialize_names_with_descriptions
     # elsif params[:with_observations].present?
-    #   initialize_names_with_observations
+    initialize_names_with_observations
     # else
     initialize_names_only_parameters
     # end
@@ -91,16 +91,20 @@ class Query::Names < Query::Base
     add_subquery_condition(:NameDescription, :name_descriptions)
     add_subquery_condition(:Observation, :observations)
     add_subquery_condition(:RssLog, :rss_logs)
-    add_subquery_condition(:Sequence, observations: :sequences)
+    # add_subquery_condition(:Sequence, observations: :sequences)
   end
 
-  # def initialize_names_with_descriptions
-  #   add_join(:name_descriptions)
-  #   initialize_with_desc_basic_parameters
-  # end
+  def initialize_names_with_descriptions
+    return if params[:with_descriptions].blank?
 
-  # def initialize_names_with_observations
-  #   add_join(:observations)
+    add_join(:name_descriptions)
+  #   initialize_with_desc_basic_parameters
+  end
+
+  def initialize_names_with_observations
+    return if params[:with_observations].blank?
+
+    add_join(:observations)
   #   initialize_obs_basic_parameters
   #   initialize_obs_association_parameters
   #   initialize_obs_record_parameters
@@ -108,7 +112,7 @@ class Query::Names < Query::Base
   #   initialize_name_parameters(:observations)
   #   add_bounding_box_conditions_for_observations
   #   initialize_content_filters(Observation)
-  # end
+  end
 
   # def initialize_obs_association_parameters
   #   add_at_location_condition(:observations)

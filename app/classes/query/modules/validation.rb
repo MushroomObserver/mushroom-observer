@@ -112,7 +112,16 @@ module Query::Modules::Validation
     end
 
     submodel = hash.values.first
+    val = add_default_subquery_conditions(submodel, val)
     Query.lookup(submodel, val)
+  end
+
+  def add_default_subquery_conditions(submodel, val)
+    return unless model == Location && submodel == :Observation
+    return if val[:is_collection_location].present?
+
+    val[:is_collection_location] = true
+    val
   end
 
   def validate_enum(param, val, hash)
