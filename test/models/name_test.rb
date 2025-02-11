@@ -3717,6 +3717,9 @@ class NameTest < UnitTestCase
     assert_equal("(A et al.) D et al.", name.send(:brief_author))
   end
 
+  # ----------------------------------------------------
+  #  Validations
+
   def test_user_validation
     params = {
       text_name: "Whoosia whatsitii",
@@ -3746,5 +3749,10 @@ class NameTest < UnitTestCase
     assert_raises(ActiveRecord::RecordInvalid) do
       Name.create!(params)
     end
+  end
+
+  def test_blank_search_name
+    name = names(:lactarius_subalpinus)
+    assert_not(name.update(search_name: ""))
   end
 end

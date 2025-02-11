@@ -428,6 +428,7 @@ class Name < AbstractModel
   validate :validate_lifeform
   validate :check_user, :check_text_name, :check_author, :check_search_name
 
+  validates :search_name, presence: true
   validate :author_ending
   validate :citation_start
 
