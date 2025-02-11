@@ -49,28 +49,39 @@ class Query::SequencesTest < UnitTestCase
     seq2.update(observation: observations(:detailed_unknown_obs))
     seq3.update(observation: observations(:agaricus_campestris_obs))
     seq4.update(observation: observations(:peltigera_obs))
-    assert_query([seq1, seq2], :Sequence, obs_date: %w[2006 2006])
-    assert_query([seq1, seq2], :Sequence, observers: users(:mary))
-    assert_query([seq1, seq2], :Sequence, names: "Fungi")
-    assert_query([seq4], :Sequence,
-                 names: "Petigera", include_synonyms: true)
+    assert_query([seq1, seq2],
+                 :Sequence, observation_query: { date: %w[2006 2006] })
+    assert_query([seq1, seq2],
+                 :Sequence, observation_query: { users: users(:mary) })
+    assert_query([seq1, seq2],
+                 :Sequence, observation_query: { names: "Fungi" })
+    assert_query([seq4],
+                 :Sequence, observation_query: { names: "Petigera",
+                                                 include_synonyms: true })
     expects = Sequence.index_order.joins(:observation).
               where(observations: { location: locations(:burbank) }).
               or(Sequence.index_order.joins(:observation).
                  where(Observation[:where].matches("Burbank"))).distinct
-    assert_query(expects, :Sequence, locations: "Burbank")
-    assert_query([seq2], :Sequence, projects: "Bolete Project")
-    assert_query([seq1, seq2], :Sequence,
-                 species_lists: "List of mysteries")
-    assert_query([seq4], :Sequence, confidence: "2")
+    assert_query(expects,
+                 :Sequence, observation_query: { locations: "Burbank" })
+    assert_query([seq2],
+                 :Sequence, observation_query: { projects: "Bolete Project" })
+    assert_query([seq1, seq2],
+                 :Sequence,
+                 observation_query: { species_lists: "List of mysteries" })
+    assert_query([seq4], :Sequence, observation_query: { confidence: "2" })
     # The test returns these sequences in random order, can't work.
-    # assert_query([seq1, seq2, seq3], :Sequence,
-    #              north: "90", south: "0", west: "-180", east: "-100")
+    # assert_query(
+    #   [seq1, seq2, seq3],
+    #   :Sequence, observation_query: {
+    #     in_box: { north: "90", south: "0", west: "-180", east: "-100" }
+    #   }
+    # )
   end
 
   def test_uses_join_hash
     box = { north: "90", south: "0", west: "-180", east: "-100" }
-    query = Query.lookup(:Sequence, in_box: box)
+    query = Query.lookup(:Sequence, observation_query: { in_box: box })
     assert_not(query.uses_join_sub([], :location))
     assert(query.uses_join_sub([:location], :location))
     assert_not(query.uses_join_sub({}, :location))
