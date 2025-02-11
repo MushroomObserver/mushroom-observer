@@ -410,9 +410,12 @@ class Query::LocationsTest < UnitTestCase
       index_order.distinct
   end
 
-  def test_location_with_observations_for_project
+  def test_location_with_observations_for_project_empty
     empty = projects(:empty_project)
     assert_query([], :Location, observation_query: { project: empty })
+  end
+
+  def test_location_with_observations_for_project
     pj = projects(:obs_collected_and_displayed_project)
     assert_query([observations(:collected_at_obs).location],
                  :Location, observation_query: { project: pj })

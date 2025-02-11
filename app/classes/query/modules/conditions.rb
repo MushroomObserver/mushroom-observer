@@ -136,17 +136,21 @@ module Query::Modules::Conditions
     add_joins(*)
   end
 
-  # this should send the param and derive the model
-  def add_subquery_condition(param, *, table: nil, col: :id)
+  def add_subquery_condition(param, *joins, table: nil, col: :id)
     return if params[param].blank?
 
     ids = params[param].result_ids.join(",")
-    return if ids.blank?
+    return force_empty_results if ids.blank?
 
-    model = parameter_declarations[param][:subquery]
-    table ||= model.to_s.underscore.pluralize
+    table ||= subquery_table(param)
     @where << "#{table}.#{col} IN (#{ids})"
-    add_joins(*)
+    add_joins(*joins)
+  end
+
+  # Look up a default subquery table from the parameter_declarations
+  def subquery_table(param)
+    model = parameter_declarations[param][:subquery]
+    model.to_s.underscore.pluralize
   end
 
   def force_empty_results
