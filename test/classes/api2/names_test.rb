@@ -259,7 +259,7 @@ class API2::NamesTest < UnitTestCase
     names = Name.with_correct_spelling.ok_for_export
     assert_not_empty(
       names,
-      "Test requires >1 correctly spelled Name that's ok_for_export"
+      "Test requires >=1 correctly spelled Name that's ok_for_export"
     )
     assert_api_pass(name_get_params.merge(ok_for_export: "yes"))
     assert_api_results(names)
