@@ -4,7 +4,6 @@
 class Query::Base
   include Query::Modules::ActiveRecord
   include Query::Modules::BoundingBox
-  include Query::Modules::Coercion
   include Query::Modules::Conditions
   include Query::Modules::Associations
   include Query::Modules::Datetime
