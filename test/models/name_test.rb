@@ -3739,6 +3739,32 @@ class NameTest < UnitTestCase
     assert_not_nil(Name.create(params.merge(user: rolf)).id)
   end
 
+  def test_author_ending
+    name = names(:boletus_edulis)
+    assert_match(/.$/, name.author,
+                 "Test needs name.author ending in a period")
+    assert(name.valid?, "Author ending with a period should be valid")
+
+    name = Name.new(
+      text_name: "Boletus bully",
+      author: "Bullé",
+      search_name: "Boletus edulis Bullé",
+      display_name: "**__Boletus edulis__** Bull\u00E9",
+      sort_name: "Boletus edulis  Bullé",
+      user: users(:rolf)
+    )
+    assert(name.valid?, "Author ending with a diacritical should be valid")
+
+    name = Name.new(
+      text_name: "Tuber gardneri", author: "Gilkey [as 'gardnerii']",
+      search_name: "Tuber gardneri Gilkey [as 'gardnerii']",
+      display_name: "**__Tuber gardneri__** Gilkey [as 'gardnerii']",
+      rank: "Species",
+      user: users(:rolf)
+    )
+    assert(name.invalid?, "Author ending in close bracket should be invalid")
+  end
+
   def test_prevent_trivial_differences
     name = names(:lactarius_subalpinus)
     assert_not(name.author.ascii_only?,

@@ -84,11 +84,9 @@ module Name::Validation
   end
 
   def author_ending
-    # Should not end with punctuation
-    # other than quotes, period, close paren, close bracket
-    return unless (
-      punct = %r{[\s!#%&(*+,\-/:;<=>?@\[^_{|}~]+\Z}.match(author)
-    )
+    return if author.blank?
+    # Should end only in letter, period plus optional spacing
+    return if (punct = /[\p{Alpha}\.]( *)\Z/.match(author))
 
     errors.add(:base, :name_error_field_end.t(field: :AUTHOR.t, end: punct))
   end
