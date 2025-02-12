@@ -23,7 +23,6 @@ class Query::Observations < Query::Base
       ids: [Observation],
       users: [User],
       by_user: User,
-      by_editor: User, # for coercions from name/location
       field_slips: [FieldSlip],
       herbarium_records: [HerbariumRecord],
       project_lists: [Project],
