@@ -51,10 +51,10 @@ class InternalLink
         restored_query
       elsif new_query
         new_query
-      else
-        raise("Related object query should not be blank: " \
-              "model: #{model} type: #{type} " \
-              "current_query: #{current_query.inspect}")
+      # else
+      #   raise("Related object query should not be blank: " \
+      #         "model: #{@model} type: #{@type} " \
+      #         "current_query: #{@current_query.params.inspect}")
       end
     end
 
