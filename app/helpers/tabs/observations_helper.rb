@@ -235,8 +235,8 @@ module Tabs
     end
 
     def observation_maps_tabs(query:)
-      [related_observations_tab(:observations, query), # index of the same obs
-       related_locations_tab(:observations, query)]
+      [related_observations_tab(:Observation, query), # index of the same obs
+       related_locations_tab(:Observation, query)]
     end
 
     def new_inat_import_tab(query: nil)

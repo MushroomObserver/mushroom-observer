@@ -7,9 +7,9 @@ module Tabs
     def locations_index_tabs(query:)
       [
         new_location_tab,
-        map_locations_tab,
+        map_locations_tab(query),
         location_countries_tab,
-        related_observations_tab(:locations, query)
+        related_observations_tab(:Location, query)
       ]
     end
 
@@ -30,7 +30,7 @@ module Tabs
       # links
     end
 
-    # Dead code
+    # Dead code ** KEEP for bootstrap PR
     # def location_show_heading_links(location:)
     #   links = location_show_tabs(location: location)
     #   icons = []
@@ -48,9 +48,9 @@ module Tabs
       ).tab
     end
 
-    def map_locations_tab
+    def map_locations_tab(query)
       InternalLink.new(
-        :list_place_names_map.t, add_query_param(map_locations_path)
+        :list_place_names_map.t, add_query_param(map_locations_path, query)
       ).tab
     end
 
@@ -152,8 +152,8 @@ module Tabs
     def location_map_tabs(query:)
       [
         locations_index_tab,
-        related_observations_tab(:locations, query),
-        related_locations_tab(:locations, query) # index of same locations
+        related_observations_tab(:Location, query),
+        related_locations_tab(:Location, query) # index of same locations
       ]
     end
 

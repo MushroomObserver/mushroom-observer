@@ -233,8 +233,8 @@ module Tabs
     def name_map_tabs(name:, query:)
       [
         show_object_tab(name, :name_map_about.t(name: name.display_name)),
-        related_locations_tab(:names, query),
-        related_observations_tab(:names, query)
+        related_locations_tab(:Name, query),
+        related_observations_tab(:Name, query)
       ]
     end
 
@@ -263,7 +263,7 @@ module Tabs
     #   [
     #     new_name_tab,
     #     names_with_observations_tab(query),
-    #     related_observations_tab(:names, query),
+    #     related_observations_tab(:Name, query),
     #     related_descriptions_tab(query)
     #   ].reject(&:empty?)
     # end
@@ -289,7 +289,7 @@ module Tabs
       [
         new_name_tab,
         all_names_tab(query),
-        related_observations_tab(:names, query)
+        related_observations_tab(:Name, query)
       ].reject(&:empty?)
     end
 

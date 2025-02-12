@@ -8,7 +8,7 @@ module Tabs
         [
           map_locations_tab,
           locations_index_tab,
-          related_locations_tab(:descriptions, query)
+          related_locations_tab(:LocationDescription, query)
         ]
       end
 

@@ -5,7 +5,7 @@ module Tabs
   module Names
     module DescriptionsHelper
       def name_description_index_tabs(query:)
-        [related_names_tab(:descriptions, query)]
+        [related_names_tab(:NameDescription, query)]
       end
 
       def name_description_form_new_tabs(description:)
