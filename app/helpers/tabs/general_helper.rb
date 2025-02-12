@@ -23,16 +23,28 @@ module Tabs
     end
 
     # Links to regular indexes of the same objects can come from maps.
-    # If that's the case, just use the same query. Otherwise, make a new query
-    # for the related model.
+    # and just reuse the current_query.
+    # Other links could come from an index that itself was the result of a
+    # subquery. Observations of these names -> Locations of these observations
+    # -> Map of these locations -> Observations of these locations.
+    # In this case, check for the original (obs) query nested within the params.
+    # Otherwise, make a new query for the related model.
     def current_or_related_objects_query(model, type, current_query)
+      existing_subquery = existing_subquery_param(model, type)
       if model.name.to_sym == type
         current_query.params
+      elsif current_query.params.deep_find(existing_subquery).present?
+        current_query.params[existing_subquery]
       else
         query_class = "Query::#{model.name.pluralize}".constantize
         subquery = query_class.find_subquery_param_name(type)
         Query.lookup(:"#{model}", "#{subquery}": current_query.params)
       end
+    end
+
+    def existing_subquery_param(model, type)
+      existing_query_class = "Query::#{type.to_s.pluralize}".constantize
+      existing_query_class.find_subquery_param_name(model.name.to_sym)
     end
 
     def related_images_tab(type, current_query)
