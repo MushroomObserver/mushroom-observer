@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 class InternalLink
-  # Consider a page like "Locations in Augusta County, Virginia, USA".
-  # The page may have "related links" like "Observations at these Locations"
-  # and "Names at these Locations". This class generates those filtered links
+  # A filtered index like "Locations in Augusta County, Virginia, USA" may offer
+  # "related links" like "Observations at these Locations" and
+  # "Names at these Locations". This class generates those filtered links
   # using `Query.current_or_related_query`.
   #
   # For the link "Observations [model] at these Locations [filter]", the `model`
