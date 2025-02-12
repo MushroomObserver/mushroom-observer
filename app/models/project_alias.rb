@@ -5,6 +5,7 @@ class ProjectAlias < ApplicationRecord
   belongs_to :project
 
   validates :name, presence: true
+  validates :name, uniqueness: { scope: :project_id }
 
   def location_id=(id)
     self.target_id = id

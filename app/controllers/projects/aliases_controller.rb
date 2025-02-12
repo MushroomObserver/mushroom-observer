@@ -23,7 +23,7 @@ module Projects
     end
 
     def new
-      project_id = params.require(:project_id)
+      params.require(:project_id)
       new_params = params.permit(:project_id, :target_type, :target_id,
                                  :user_id, :location_id)
       @project_alias = ProjectAlias.new(new_params)
@@ -46,6 +46,9 @@ module Projects
 
       respond_to do |format|
         if @project_alias.save
+          format.turbo_stream do
+            render_project_alias_user_change
+          end
           format.html do
             project_alias_redirect(@project_alias)
           end
@@ -59,13 +62,6 @@ module Projects
       end
     end
 
-    def render_project_alias_change
-      render(
-        partial: "projects/aliases/section_update",
-        locals: { identifier: "project_alias" }
-      ) and return
-    end
-
     def update
       respond_to do |format|
         if @project_alias.update(project_alias_params)
@@ -73,11 +69,7 @@ module Projects
             render_project_alias_change
           end
           format.html do
-            redirect_to(project_alias_path(
-                          project_id: @project_alias.project_id,
-                          id: @project_alias.id
-                        ),
-                        notice: :project_alias_updated.t)
+            redirect_to_project_alias_show
           end
           format.json { render(json: @project_alias) }
         else
@@ -102,6 +94,28 @@ module Projects
     end
 
     private
+
+    def redirect_to_project_alias_show
+      redirect_to(project_alias_path(
+                    project_id: @project_alias.project_id,
+                    id: @project_alias.id
+                  ),
+                  notice: :project_alias_updated.t)
+    end
+
+    def render_project_alias_change
+      render(
+        partial: "projects/aliases/section_update",
+        locals: { identifier: "project_alias" }
+      ) and return
+    end
+
+    def render_project_alias_user_change
+      render(
+        partial: "projects/aliases/user_update",
+        locals: { identifier: "project_alias" }
+      ) and return
+    end
 
     def render_modal_project_alias_form
       render(
