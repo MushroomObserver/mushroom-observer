@@ -32,7 +32,7 @@ module Observations
     private
 
     def find_locations_matching_observations
-      locations = {}
+      location_ids = Set[]
       columns = %w[id lat lng gps_hidden location_id].map do |x|
         "observations.#{x}"
       end
@@ -45,19 +45,20 @@ module Observations
       @observations =
         @query.select_all(args).map do |obs|
           obs.symbolize_keys!
-          # Setting this to nil is a flag to look up the location. Because we
+          # Adding this to the set is a flag to look up the location. Because we
           # selected obs attributes not instances, we can't call `obs.location`
           # and we shouldn't anyway. Getting the Locations in bulk is quicker.
-          locations[obs[:location_id].to_i] = nil if obs[:location_id].present?
+          location_ids << obs[:location_id].to_i if obs[:location_id].present?
           obs[:lat] = obs[:lng] = nil if obs[:gps_hidden] == 1
           Mappable::MinimalObservation.new(obs.except(:gps_hidden))
         end
 
-      eager_load_corresponding_locations(locations) unless locations.empty?
+      eager_load_related_locations(location_ids) unless location_ids.empty?
     end
 
-    def eager_load_corresponding_locations(locations)
-      @locations = Location.where(id: locations.keys).
+    def eager_load_related_locations(location_ids)
+      locations = {}
+      @locations = Location.where(id: location_ids).
                    select(:id, :name, :north, :south, :east, :west).map do |loc|
         locations[loc.id] = Mappable::MinimalLocation.new(
           loc.attributes.symbolize_keys
