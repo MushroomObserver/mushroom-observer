@@ -420,18 +420,19 @@ class Name < AbstractModel
     "locked"
   )
 
+  validate  :user_presence
+  validate  :text_name_length
+  validate  :author_length
+  validate  :author_ending
+  validates :search_name, presence: true
+  validate  :search_name_indistinct
+  validate  :citation_start
   validates :icn_id, numericality: { allow_nil: true,
                                      only_integer: true,
                                      greater_than_or_equal_to: 1 }
-  validate :icn_id_registrable
-  validate :icn_id_unique # calls method in order to get correct error message
-
-  validate :validate_lifeform
-  validate :check_user, :check_text_name, :check_author, :check_search_name
-
-  validates :search_name, presence: true
-  validate :author_ending
-  validate :citation_start
+  validate  :icn_id_registrable
+  validate  :icn_id_unique
+  validate  :lifeform_known
 
   before_create :inherit_stuff
   after_create :notify_webmaster

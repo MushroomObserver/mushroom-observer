@@ -58,18 +58,12 @@ module Name::Validation
 
   private
 
-  # :stopdoc:
-  def check_author
-    return if author.to_s.size <= Name.author_limit
-
-    errors.add(
-      :author,
-      "#{:validate_name_author_too_long.t} #{:MAXIMUM.t}: " \
-      "#{Name.author_limit}. #{:validate_name_use_first_author.t}."
-    )
+  def user_presence
+    errors.add(:user, :validate_name_user_missing.t) \
+      if !user_id && !User.current
   end
 
-  def check_text_name
+  def text_name_length
     return if text_name.to_s.size <= Name.text_name_limit
 
     errors.add(
@@ -79,12 +73,27 @@ module Name::Validation
     )
   end
 
-  def check_user
-    errors.add(:user, :validate_name_user_missing.t) \
-      if !user_id && !User.current
+  def author_length
+    return if author.to_s.size <= Name.author_limit
+
+    errors.add(
+      :author,
+      "#{:validate_name_author_too_long.t} #{:MAXIMUM.t}: " \
+      "#{Name.author_limit}. #{:validate_name_use_first_author.t}."
+    )
   end
 
-  def check_search_name
+  def author_ending
+    # Should not end with punctuation
+    # other than quotes, period, close paren, close bracket
+    return unless (
+      punct = %r{[\s!#%&(*+,\-/:;<=>?@\[^_{|}~]+\Z}.match(author)
+    )
+
+    errors.add(:base, :name_error_field_end.t(field: :AUTHOR.t, end: punct))
+  end
+
+  def search_name_indistinct
     hnyms = homonyms
     return if hnyms.none?
 
@@ -104,6 +113,19 @@ module Name::Validation
     I18n.transliterate(string). # Make it ASCII
       downcase. # ignore case differences
       gsub(/[^a-z0-9 ]/, "") # Remove non-alphanumerics (like punctuation)
+  end
+
+  def citation_start
+    # Should not start with punctuation other than:
+    # quotes, period, close paren, close bracket
+    # question mark (used for Textile italics)
+    # underscore (previously used for Textile italics)
+    return unless (
+      start = %r{\A[\s!#%&)*+,\-./:;<=>@\[\]^{|}~]+}.match(citation)
+    )
+
+    errors.add(:base,
+               :name_error_field_start.t(field: :CITATION.t, start: start))
   end
 
   # prevent assigning ICN registration identifier to unregistrable Name
@@ -129,28 +151,5 @@ module Name::Validation
 
   def other_names_with_same_icn_id
     Name.where(icn_id: icn_id).where.not(id: id)
-  end
-
-  def author_ending
-    # Should not end with punctuation
-    # other than quotes, period, close paren, close bracket
-    return unless (
-      punct = %r{[\s!#%&(*+,\-/:;<=>?@\[^_{|}~]+\Z}.match(author)
-    )
-
-    errors.add(:base, :name_error_field_end.t(field: :AUTHOR.t, end: punct))
-  end
-
-  def citation_start
-    # Should not start with punctuation other than:
-    # quotes, period, close paren, close bracket
-    # question mark (used for Textile italics)
-    # underscore (previously used for Textile italics)
-    return unless (
-      start = %r{\A[\s!#%&)*+,\-./:;<=>@\[\]^{|}~]+}.match(citation)
-    )
-
-    errors.add(:base,
-               :name_error_field_start.t(field: :CITATION.t, start: start))
   end
 end
