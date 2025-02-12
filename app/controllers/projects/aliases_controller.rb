@@ -59,9 +59,19 @@ module Projects
       end
     end
 
+    def render_project_alias_change
+      render(
+        partial: "projects/aliases/section_update",
+        locals: { identifier: "project_alias" }
+      ) and return
+    end
+
     def update
       respond_to do |format|
         if @project_alias.update(project_alias_params)
+          format.turbo_stream do
+            render_project_alias_change
+          end
           format.html do
             redirect_to(project_alias_path(
                           project_id: @project_alias.project_id,

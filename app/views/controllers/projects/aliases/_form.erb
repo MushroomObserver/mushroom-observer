@@ -2,9 +2,15 @@
   @container = :text
   type = (project_alias.target_type || :location).downcase.to_sym
   value = project_alias.target&.format_name || ""
+  form_args = { model: project_alias,
+                data: { controller: :autocompleter, type: } }
+  if local_assigns[:local] == true
+    form_args = form_args.merge({ local: true })
+  else
+    form_args = form_args.deep_merge({ data: { turbo: true } })
+  end
 %>
-<%= form_with(model: project_alias,
-              data: { controller: :autocompleter, type: }) do |form| %>
+<%= form_with(**form_args) do |form| %>
   <% if project_alias.errors.any? %>
     <div id="error_explanation">
       <h2><%= pluralize(project_alias.errors.count, "error") %> prohibited this project alias from being saved:</h2>

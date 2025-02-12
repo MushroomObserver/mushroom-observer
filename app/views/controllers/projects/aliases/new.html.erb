@@ -6,6 +6,6 @@
 
 <h1><%= :project_alias_new.l %></h1>
 
-<%= render('form', project_alias: @project_alias) %>
+<%= render("form", project_alias: @project_alias, local: true) %>
 
-<%= link_to('Back', project_aliases_path(project_id: @project_alias.project_id)) %>
+<%= link_to("Back", project_aliases_path(project_id: @project_alias.project_id)) %>

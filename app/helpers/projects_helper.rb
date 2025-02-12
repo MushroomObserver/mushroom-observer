@@ -48,23 +48,21 @@ module ProjectsHelper
     end
   end
 
-  def edit_project_alias_modal(project_id, name, id)
+  def edit_project_alias_link(project_id, name, id)
     tag.span(id: "project_alias_#{id}") do
       modal_link_to(
-        "project_alias_#{id}", name,
-        add_query_param(edit_project_alias_path(project_id:, id:)),
-        class: unique_class_id(id))
+        "project_alias_#{id}",
+        *edit_project_alias_tab(project_id, name, id)
+      )
     end
   end
 
-  def new_project_alias_modal(project_id, target_id, target_type)
+  def new_project_alias_link(project_id, target_id, target_type)
     tag.span(id: "project_alias") do
       modal_link_to(
-        "project_alias", :ADD.t,
-        add_query_param(new_project_alias_path(project_id:,
-                                               target_id:,
-                                               target_type:)),
-        class: unique_class_id(target_id) + " btn btn-default")
+        "project_alias",
+        *new_project_alias_tab(project_id, target_id, target_type)
+      )
     end
   end
 
@@ -72,10 +70,22 @@ module ProjectsHelper
 
   private
 
-  def unique_class_id(id)
-    @@counter ||= 0
-    @@counter += 1
-    "link_#{@@counter}_#{id}"
+  def edit_project_alias_tab(project_id, name, id)
+    InternalLink::Model.new(
+      name, ProjectAlias,
+      add_query_param(edit_project_alias_path(project_id:, id:)),
+      alt_title: :EDIT.t
+    ).tab
+  end
+
+  def new_project_alias_tab(project_id, target_id, target_type)
+    InternalLink::Model.new(
+      :ADD.t, ProjectAlias,
+      add_query_param(new_project_alias_path(project_id:,
+                                             target_id:,
+                                             target_type:)),
+      html_options: { class: "btn btn-default" }
+    ).tab
   end
 
   def violation_latitude_header(project)

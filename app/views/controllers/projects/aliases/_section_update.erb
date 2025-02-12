@@ -1,0 +1,10 @@
+<%=
+  id = "project_alias_#{@project_alias.id}"
+  turbo_stream.replace(id) do
+    edit_project_alias_link(@project_alias.project_id, @project_alias.name, @project_alias.id)
+  end
+%>
+
+<%# modals are not removed via data-controller="section-update" because the turbo elements are being replaced, not updated, so the connection is lost %>
+<%= turbo_stream.close_modal("modal_project_alias_#{@project_alias.id}") %>
+<%= turbo_stream.remove("modal_project_alias_#{@project_alias.id}") %>

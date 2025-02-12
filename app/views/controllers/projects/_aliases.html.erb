@@ -1,8 +1,8 @@
 <% project_id = project.id %>
 <% project.alias_data(user).each do |name, id| %>
-  <%= edit_project_alias_modal(project_id, name, id) %><br/>
+  <%= edit_project_alias_link(project_id, name, id) %><br/>
 <% end %>
 <% if project.alias_data(user).any? %>
   <br/>
 <% end %>
-<%= new_project_alias_modal(project_id, user.id, User) %><br/>
+<%= new_project_alias_link(project_id, user.id, User) %><br/>

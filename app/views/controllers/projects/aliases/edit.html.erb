@@ -6,7 +6,7 @@
 
 <h1><%= :project_alias_edit.l(name: @project_alias.name) %></h1>
 
-<%= render('form', project_alias: @project_alias) %>
+<%= render("form", project_alias: @project_alias, local: true) %>
 
-<%= link_to 'Show', project_alias_path(project_id:, id: @project_alias.id) %> |
-<%= link_to 'Back', project_aliases_path(project_id:) %>
+<%= link_to("Show", project_alias_path(project_id:, id: @project_alias.id)) %> |
+<%= link_to("Back", project_aliases_path(project_id:)) %>
