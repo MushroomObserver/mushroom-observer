@@ -12,14 +12,7 @@ class Query::Sequences < Query::Base
   end
 
   def self.parameter_declarations
-    super.merge(sequence_parameter_declarations) # .
-      # merge(observation_parameter_declarations).
-      # merge(names_parameter_declarations) # API uses this
-      # merge(bounding_box_parameter_declarations)
-  end
-
-  def sequence_parameter_declarations
-    {
+    super.merge(
       created_at: [:time],
       updated_at: [:time],
       ids: [Sequence],
@@ -33,6 +26,14 @@ class Query::Sequences < Query::Base
       notes_has: :string,
       pattern: :string,
       observation_query: { subquery: :Observation }
+    ) # .
+      # merge(observation_parameter_declarations).
+      # merge(names_parameter_declarations) # API uses this
+      # merge(bounding_box_parameter_declarations)
+  end
+
+  def sequence_parameter_declarations
+    {
     }
   end
 

@@ -230,11 +230,13 @@ module Tabs
       end
     end
 
+    # Note that a name map query is an observations (of name) query.
+    # "Related records" are going to be related to the observations.
     def name_map_tabs(name:, query:)
       [
         show_object_tab(name, :name_map_about.t(name: name.display_name)),
-        related_locations_tab(:Name, query),
-        related_observations_tab(:Name, query)
+        related_locations_tab(:Observation, query),
+        related_observations_tab(:Observation, query)
       ]
     end
 
