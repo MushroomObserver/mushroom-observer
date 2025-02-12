@@ -3,6 +3,7 @@
 # base class for Query searches
 class Query::Base
   include Query::Modules::ActiveRecord
+  include Query::Modules::RelatedQueries
   include Query::Modules::BoundingBox
   include Query::Modules::Conditions
   include Query::Modules::Associations
@@ -56,9 +57,5 @@ class Query::Base
 
   def ==(other)
     serialize == other.try(&:serialize)
-  end
-
-  def self.find_subquery_param_name(type)
-    parameter_declarations.key({ subquery: type })
   end
 end

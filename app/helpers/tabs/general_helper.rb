@@ -2,46 +2,6 @@
 
 module Tabs
   module GeneralHelper
-    # Replacement for coercions (or "coercion"-style links to index same class)
-    # Query needs to know which joins are necessary to make these conversions
-    # work, so this list needs to be maintained if the Query class is updated.
-    RELATED_TYPES = {
-      # model.table_name.to_sym: [:Association],
-      images: [:Observation],
-      locations: [:LocationDescription, :Name, :Observation],
-      names: [:NameDescription, :Observation],
-      observations: [:Image, :Location, :Name, :Sequence]
-    }.freeze
-
-    # The `model` is the index you're going to, the `type` is the join subquery.
-    def related_objects_tab(model, type, current_query)
-      InternalLink::RelatedQuery.new(model, type, current_query, controller).tab
-    end
-
-    def related_images_tab(type, current_query)
-      return unless current_query && RELATED_TYPES[:images].include?(type)
-
-      related_objects_tab(Image, type, current_query)
-    end
-
-    def related_locations_tab(type, current_query)
-      return unless current_query && RELATED_TYPES[:locations].include?(type)
-
-      related_objects_tab(Location, type, current_query)
-    end
-
-    def related_names_tab(type, current_query)
-      return unless current_query && RELATED_TYPES[:names].include?(type)
-
-      related_objects_tab(Name, type, current_query)
-    end
-
-    def related_observations_tab(type, current_query)
-      return unless current_query && RELATED_TYPES[:observations].include?(type)
-
-      related_objects_tab(Observation, type, current_query)
-    end
-
     def search_tab_for(site_symbol, search_string)
       return unless (url = external_search_urls[site_symbol])
 
