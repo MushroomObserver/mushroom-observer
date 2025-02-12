@@ -48,9 +48,45 @@ module ProjectsHelper
     end
   end
 
+  def edit_project_alias_link(project_id, name, id)
+    tag.span(id: "project_alias_#{id}") do
+      modal_link_to(
+        "project_alias_#{id}",
+        *edit_project_alias_tab(project_id, name, id)
+      )
+    end
+  end
+
+  def new_project_alias_link(project_id, target_id, target_type)
+    tag.span(id: "project_alias") do
+      modal_link_to(
+        "project_alias",
+        *new_project_alias_tab(project_id, target_id, target_type)
+      )
+    end
+  end
+
   #########
 
   private
+
+  def edit_project_alias_tab(project_id, name, id)
+    InternalLink::Model.new(
+      name, ProjectAlias,
+      add_query_param(edit_project_alias_path(project_id:, id:)),
+      alt_title: :EDIT.t
+    ).tab
+  end
+
+  def new_project_alias_tab(project_id, target_id, target_type)
+    InternalLink::Model.new(
+      :ADD.t, ProjectAlias,
+      add_query_param(new_project_alias_path(project_id:,
+                                             target_id:,
+                                             target_type:)),
+      html_options: { class: "btn btn-default" }
+    ).tab
+  end
 
   def violation_latitude_header(project)
     return :form_violations_latitude_none.l unless project.location

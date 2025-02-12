@@ -212,6 +212,7 @@ export default class extends Controller {
   // to refresh the primer (as with location_containing a changed lat/lng).
   //
   swap({ detail }) {
+    console.log("swap called");
     let type;
     if (this.hasSelectTarget) {
       type = this.selectTarget.value;
