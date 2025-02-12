@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 class Query::LocationDescriptions < Query::Base
-  # include Query::Params::Descriptions
   include Query::Initializers::Descriptions
 
   def model
@@ -21,7 +20,6 @@ class Query::LocationDescriptions < Query::Base
       locations: [Location],
       location_query: { subquery: :Location },
       public: :boolean
-      # with_descriptions: :boolean
     )
   end
 
@@ -37,11 +35,6 @@ class Query::LocationDescriptions < Query::Base
     add_subquery_condition(:location_query, :locations)
     super
   end
-
-  # def coerce_into_location_query
-  #   pargs = params_out_to_with_descriptions_params
-  #   Query.lookup(:Location, pargs)
-  # end
 
   def self.default_order
     "name"

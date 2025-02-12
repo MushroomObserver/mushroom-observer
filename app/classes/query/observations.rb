@@ -1,9 +1,6 @@
 # frozen_string_literal: true
 
 class Query::Observations < Query::Base
-  include Query::Params::Observations
-  # include Query::Params::Locations
-  include Query::Params::Names
   include Query::Params::AdvancedSearch
   include Query::Params::Filters
   include Query::Initializers::Names
@@ -18,12 +15,54 @@ class Query::Observations < Query::Base
   end
 
   def self.parameter_declarations
-    super.merge(observations_per_se_parameter_declarations).
-      merge(observations_parameter_declarations).
-      # merge(bounding_box_parameter_declarations).
+    super.merge(
+      date: [:date],
+      created_at: [:time],
+      updated_at: [:time],
+
+      ids: [Observation],
+      users: [User],
+      by_user: User,
+      by_editor: User, # for coercions from name/location
+      field_slips: [FieldSlip],
+      herbarium_records: [HerbariumRecord],
+      project_lists: [Project],
+      needs_naming: :boolean,
+      in_clade: :string,
+      in_region: :string,
+      pattern: :string,
+      with_name: :boolean,
+      names: [Name],
+      include_synonyms: :boolean,
+      include_subtaxa: :boolean,
+      include_immediate_subtaxa: :boolean,
+      exclude_original_names: :boolean,
+      include_all_name_proposals: :boolean,
+      exclude_consensus: :boolean,
+      confidence: [:float],
+      location: Location,
+      locations: [Location],
+      in_box: { north: :float, south: :float, east: :float, west: :float },
+      user_where: :string,
+      is_collection_location: :boolean,
+      with_public_lat_lng: :boolean,
+      with_notes: :boolean,
+      notes_has: :string,
+      with_notes_fields: [:string],
+      with_comments: { boolean: [true] },
+      comments_has: :string,
+      with_sequences: { boolean: [true] },
+      herbaria: [Herbarium],
+      project: Project,
+      projects: [Project],
+      species_list: SpeciesList,
+      species_lists: [SpeciesList],
+      image_query: { subquery: :Image },
+      location_query: { subquery: :Location },
+      name_query: { subquery: :Name },
+      sequence_query: { subquery: :Sequence }
+    ).
       merge(content_filter_parameter_declarations(Observation)).
-      merge(names_parameter_declarations).
-      # merge(naming_consensus_parameter_declarations).
       merge(advanced_search_parameter_declarations)
   end
 

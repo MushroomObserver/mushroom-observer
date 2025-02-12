@@ -73,7 +73,6 @@ module Query::Initializers::Descriptions
   # If ever generalizing, `type` should be model.parent_type
   def initialize_name_descriptions_parameters(type = "name")
     initialize_ok_for_export_parameter
-    # initialize_with_default_desc_parameter(type)
     initialize_join_desc_parameter(type)
     initialize_desc_type_parameter(type)
     # NOTE: (AN 2025) These may now be superfluous, unless they need to be
@@ -84,14 +83,6 @@ module Query::Initializers::Descriptions
     # This is a description notes content search
     initialize_desc_content_parameter(type)
   end
-
-  # def initialize_with_default_desc_parameter(type)
-  #   add_boolean_condition(
-  #     "#{type}s.description_id IS NOT NULL",
-  #     "#{type}s.description_id IS NULL",
-  #     params[:with_default_desc]
-  #   )
-  # end
 
   def initialize_join_desc_parameter(type)
     if params[:join_desc] == :default

@@ -1,16 +1,9 @@
 # frozen_string_literal: true
 
 class Query::Images < Query::Base
-  include Query::Params::Images
-  # include Query::Params::Names
-  # include Query::Params::Locations
-  # include Query::Params::Observations
   include Query::Params::AdvancedSearch
   include Query::Params::Filters
   include Query::Initializers::Images
-  # include Query::Initializers::Names
-  # include Query::Initializers::Locations
-  # include Query::Initializers::Observations
   include Query::Initializers::AdvancedSearch
   include Query::Initializers::Filters
   include Query::Titles::Observations
@@ -20,41 +13,46 @@ class Query::Images < Query::Base
   end
 
   def self.parameter_declarations
-    super.merge(images_per_se_parameter_declarations).
-      # merge(names_parameter_declarations). # nope. send obs_query
-      merge(advanced_search_parameter_declarations)
-    # q_p = super.merge(images_general_parameter_declarations)
-    # return q_p if params[:with_observations].blank?
-
-    # q_p.merge(images_with_observations_parameter_declarations)
+    super.merge(
+      created_at: [:time],
+      updated_at: [:time],
+      date: [:date],
+      ids: [Image],
+      by_user: User,
+      users: [User],
+      locations: [Location],
+      outer: :query, # for images inside observations
+      observation: Observation, # for images inside observations
+      observations: [Observation],
+      project: Project,
+      projects: [Project],
+      species_lists: [SpeciesList],
+      with_observation: { boolean: [true] },
+      # does not yet handle range of sizes. Param is minimum size.
+      size: { string: Image::ALL_SIZES - [:full_size] },
+      content_types: [{ string: Image::ALL_EXTENSIONS }],
+      with_notes: :boolean,
+      notes_has: :string,
+      copyright_holder_has: :string,
+      license: [License],
+      with_votes: :boolean,
+      quality: [:float],
+      confidence: [:float],
+      ok_for_export: :boolean,
+      pattern: :string,
+      with_observations: :boolean,
+      observation_query: { subquery: :Observation }
+    ).merge(advanced_search_parameter_declarations)
   end
-
-  # def images_general_parameter_declarations
-  #   images_per_se_parameter_declarations.
-  #     merge(names_parameter_declarations).
-  #     merge(advanced_search_parameter_declarations)
-  # end
-
-  # def images_with_observations_parameter_declarations
-  #   observations_parameter_declarations.
-  #     merge(observations_coercion_parameter_declarations).
-  #     merge(bounding_box_parameter_declarations).
-  #     merge(content_filter_parameter_declarations(Observation)).
-  #     merge(naming_consensus_parameter_declarations)
-  # end
 
   def initialize_flavor
     add_sort_order_to_title
     super
-    # if params[:with_observations].present?
     initialize_images_with_observations
-    # else
     initialize_images_only_parameters
-    # end
     add_pattern_condition
     add_img_advanced_search_conditions
     initialize_subquery_parameters
-    # initialize_name_parameters(:observation_images, :observations)
     initialize_img_record_parameters
     initialize_img_vote_parameters
   end
@@ -68,22 +66,7 @@ class Query::Images < Query::Base
     return if params[:with_observations].blank?
 
     add_join(:observation_images, :observations)
-    # initialize_obs_basic_parameters
-    # initialize_obs_association_parameters
-    # initialize_obs_record_parameters
-    # initialize_obs_search_parameters
-    # add_bounding_box_conditions_for_observations
-    # initialize_content_filters(Observation)
   end
-
-  # def initialize_obs_association_parameters
-  #   add_at_location_condition(:observations)
-  #   initialize_herbaria_parameter
-  #   initialize_projects_parameter(:project_observations)
-  #   add_for_project_condition(:project_observations,
-  #                             [:observations, :project_observations])
-  #   add_in_species_list_condition
-  # end
 
   def initialize_images_only_parameters
     add_ids_condition
@@ -133,7 +116,8 @@ class Query::Images < Query::Base
 
   def title
     default = super
-    return default if params[:with_observations].blank?
+    return default if params[:with_observations].blank? &&
+                      params[:observation_subquery].blank?
 
     with_observations_query_description || default
   end

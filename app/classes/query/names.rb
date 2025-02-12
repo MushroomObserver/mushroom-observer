@@ -2,16 +2,9 @@
 
 # base class for Query's which return Names
 class Query::Names < Query::Base
-  include Query::Params::Names
-  # include Query::Params::Descriptions
-  # include Query::Params::Locations
-  # include Query::Params::Observations
   include Query::Params::AdvancedSearch
   include Query::Params::Filters
   include Query::Initializers::Names
-  # include Query::Initializers::Descriptions
-  # include Query::Initializers::Locations
-  # include Query::Initializers::Observations
   include Query::Initializers::AdvancedSearch
   include Query::Initializers::Filters
   include Query::Titles::Observations
@@ -21,54 +14,57 @@ class Query::Names < Query::Base
   end
 
   def self.parameter_declarations
-    super.merge(names_per_se_parameter_declarations).
-      merge(content_filter_parameter_declarations(Name)).
-      merge(names_parameter_declarations).
-      # merge(name_descriptions_parameter_declarations). # no. send subquery
+    super.merge(
+      created_at: [:time],
+      updated_at: [:time],
+      ids: [Name],
+      names: [Name],
+      include_synonyms: :boolean,
+      include_subtaxa: :boolean,
+      include_immediate_subtaxa: :boolean,
+      exclude_original_names: :boolean,
+      by_user: User,
+      by_editor: User,
+      users: [User],
+      locations: [Location],
+      species_lists: [SpeciesList],
+      misspellings: { string: [:no, :either, :only] },
+      deprecated: { string: [:either, :no, :only] },
+      is_deprecated: :boolean, # api param
+      with_synonyms: :boolean,
+      rank: [{ string: Name.all_ranks }],
+      text_name_has: :string,
+      with_author: :boolean,
+      author_has: :string,
+      with_citation: :boolean,
+      citation_has: :string,
+      with_classification: :boolean,
+      classification_has: :string,
+      with_notes: :boolean,
+      notes_has: :string,
+      with_comments: { boolean: [true] },
+      comments_has: :string,
+      pattern: :string,
+      need_description: :boolean,
+      with_descriptions: :boolean,
+      with_default_desc: :boolean,
+      ok_for_export: :boolean,
+      with_observations: { boolean: [true] },
+      description_query: { subquery: :NameDescription },
+      observation_query: { subquery: :Observation },
+      rss_log_query: { subquery: :RssLog }
+    ).merge(content_filter_parameter_declarations(Name)).
       merge(advanced_search_parameter_declarations)
-    # q_p = super.merge(names_general_parameter_declarations)
-    # if params[:with_descriptions].present?
-    #   q_p.merge(names_with_descriptions_parameter_declarations)
-    # elsif params[:with_observations].present?
-    #   q_p.merge(names_with_observations_parameter_declarations)
-    # else
-    #   q_p
-    # end
   end
-
-  # def names_general_parameter_declarations
-  #   names_per_se_parameter_declarations.
-  #     merge(content_filter_parameter_declarations(Name)).
-  #     merge(names_parameter_declarations).
-  #     merge(name_descriptions_parameter_declarations). # yes in the general
-  #     merge(advanced_search_parameter_declarations)
-  # end
-
-  # def names_with_descriptions_parameter_declarations
-  #   descriptions_coercion_parameter_declarations
-  # end
-
-  # def names_with_observations_parameter_declarations
-  #   observations_parameter_declarations.
-  #     merge(observations_coercion_parameter_declarations).
-  #     merge(bounding_box_parameter_declarations).
-  #     merge(content_filter_parameter_declarations(Observation)).
-  #     merge(naming_consensus_parameter_declarations)
-  # end
 
   def initialize_flavor
     add_sort_order_to_title
-    # if params[:with_descriptions].present?
     initialize_names_with_descriptions
-    # elsif params[:with_observations].present?
     initialize_names_with_observations
-    # else
     initialize_names_only_parameters
-    # end
     initialize_taxonomy_parameters
     initialize_name_record_parameters
     initialize_name_search_parameters
-    # initialize_name_descriptions_parameters
     initialize_content_filters(Name)
     super
   end
@@ -91,38 +87,19 @@ class Query::Names < Query::Base
   def initialize_subquery_parameters
     add_subquery_condition(:description_query, :name_descriptions)
     add_subquery_condition(:observation_query, :observations)
-    # add_subquery_condition(:RssLog, :rss_logs)
-    # add_subquery_condition(:Sequence, observations: :sequences)
   end
 
   def initialize_names_with_descriptions
     return if params[:with_descriptions].blank?
 
     add_join(:name_descriptions)
-    # initialize_with_desc_basic_parameters
   end
 
   def initialize_names_with_observations
     return if params[:with_observations].blank?
 
     add_join(:observations)
-    # initialize_obs_basic_parameters
-    # initialize_obs_association_parameters
-    # initialize_obs_record_parameters
-    # initialize_obs_search_parameters
-    # initialize_name_parameters(:observations)
-    # add_bounding_box_conditions_for_observations
-    # initialize_content_filters(Observation)
   end
-
-  # def initialize_obs_association_parameters
-  #   add_at_location_condition(:observations)
-  #   project_joins = [:observations, :project_observations]
-  #   initialize_projects_parameter(:project_observations, project_joins)
-  #   add_for_project_condition(:project_observations, project_joins)
-  #   add_in_species_list_condition
-  #   initialize_herbaria_parameter
-  # end
 
   def add_need_description_condition
     return unless params[:need_description]

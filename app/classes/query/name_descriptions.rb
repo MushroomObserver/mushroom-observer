@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 class Query::NameDescriptions < Query::Base
-  # include Query::Params::Descriptions
-  # include Query::Params::Names
   include Query::Initializers::Descriptions
 
   def model
@@ -22,15 +20,13 @@ class Query::NameDescriptions < Query::Base
       names: [Name],
       name_query: { subquery: :Name },
       public: :boolean,
-      # with_default_desc: :boolean,
       join_desc: { string: [:default, :any] },
       desc_type: [{ string: Description::ALL_SOURCE_TYPES }],
       desc_project: [Project],
       desc_creator: [User],
       desc_content: :string,
       ok_for_export: :boolean
-      # with_descriptions: :boolean
-    ) # .merge(name_descriptions_parameter_declarations)
+    )
   end
 
   def initialize_flavor
@@ -46,11 +42,6 @@ class Query::NameDescriptions < Query::Base
     add_subquery_condition(:name_query, :names)
     super
   end
-
-  # def coerce_into_name_query
-  #   pargs = params_out_to_with_descriptions_params
-  #   Query.lookup(:Name, pargs)
-  # end
 
   def self.default_order
     "name"
