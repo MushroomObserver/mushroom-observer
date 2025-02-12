@@ -3743,19 +3743,37 @@ class NameTest < UnitTestCase
     name = names(:lactarius_subalpinus)
     assert_not(name.author.ascii_only?,
                "Test needs fixture whose Author has non-ASCII characters")
-    params = {
+    name_params = {
       text_name: name.text_name,
       author: name.author,
       display_name: name.display_name,
       search_name: name.search_name,
       user: name.user
-    }.merge(
-      author: I18n.transliterate(name.author),
-      search_name: I18n.transliterate(name.search_name)
+    }
+
+    new_name = Name.new(
+      name_params.merge(author: I18n.transliterate(name.author),
+                        search_name: I18n.transliterate(name.search_name))
     )
-    assert_raises(ActiveRecord::RecordInvalid) do
-      Name.create!(params)
-    end
+
+    assert(new_name.invalid?,
+           "Name differing only in diacriticals should be invalid")
+    assert(
+      new_name.errors[:search_name].any?,
+      "Name differing only in diacriticals should create error on :search_name"
+    )
+
+    new_name = Name.new(
+      name_params.merge(author: "#{name.author},",
+                        search_name: "#{name.search_name},")
+    )
+
+    assert(new_name.invalid?,
+           "Name differing only in punctuation should be invalid")
+    assert(
+      new_name.errors[:search_name].any?,
+      "Name differing only in punctuation should create error on :search_name"
+    )
   end
 
   def test_blank_search_name

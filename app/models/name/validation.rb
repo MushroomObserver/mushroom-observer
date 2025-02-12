@@ -104,7 +104,8 @@ module Name::Validation
 
       errors.add(
         :search_name,
-        "#{:validate_name_equivalent_exists.t} #{homonym.search_name}"
+        "#{:validate_name_equivalent_exists.t}: " \
+        "#{homonym.display_name.t} (#{homonym.id})"
       )
     end
   end
