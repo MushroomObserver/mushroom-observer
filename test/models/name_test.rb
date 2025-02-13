@@ -3755,6 +3755,10 @@ class NameTest < UnitTestCase
     )
     assert(name.valid?, "Author ending with a diacritical should be valid")
 
+    name = names(:xa_genus)
+    assert_blank(name.author, "Test needs name with blank author")
+    assert(name.valid?, "Authorless name should be valid")
+
     name = Name.new(
       text_name: "Tuber gardneri", author: "Gilkey [as 'gardnerii']",
       search_name: "Tuber gardneri Gilkey [as 'gardnerii']",
