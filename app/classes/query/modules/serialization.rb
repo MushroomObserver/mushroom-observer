@@ -15,10 +15,10 @@ module Query::Modules::Serialization
   module ClassMethods
     # Extract the model from the serialized params and instantiate new Query.
     def deserialize(description)
-      params = description
-      model  = params[:model]
+      params = description.symbolize_keys
+      model  = params[:model].to_sym
       params.delete(:model)
-      Query.new(model, params)
+      ::Query.new(model, params)
     end
   end
 end
