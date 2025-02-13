@@ -165,14 +165,14 @@ class ObservationTest < UnitTestCase
 
   def test_minimal_map_observation
     obs = observations(:minimal_unknown_obs)
-
-    min_map = Mappable::MinimalObservation.new(obs.id, obs.lat, obs.lng,
-                                               obs.location.id)
+    atts = obs.attributes.symbolize_keys.slice(:id, :lat, :lng, :location_id)
+    min_map = Mappable::MinimalObservation.new(atts)
     assert_objs_equal(locations(:burbank), min_map.location)
     assert_equal(locations(:burbank).id, min_map.location_id)
 
-    min_map = Mappable::MinimalObservation.new(obs.id, obs.lat, obs.lng,
-                                               obs.location)
+    # try passing the instance
+    atts = atts.except(:location_id).merge(location: obs.location)
+    min_map = Mappable::MinimalObservation.new(atts)
     assert_objs_equal(locations(:burbank), min_map.location)
     assert_equal(locations(:burbank).id, min_map.location_id)
 

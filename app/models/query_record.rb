@@ -3,8 +3,8 @@
 #  = Query Record Model
 #
 #  Query Records store the parameters of recent user queries for quicker access.
-#  For nested queries, the inner and outer queries are stored as separate
-#  query_records. Inner queries store an `outer_id` of the outer query.
+#  For certain nested queries, the inner and outer queries are stored as
+#  separate query_records. Inner queries store an `outer_id` of the outer query.
 #
 #  Used by MO's Query::Modules::ActiveRecord
 #
@@ -13,7 +13,7 @@
 #  id::             Unique numerical id.
 #  updated_at::     Date/time it was last updated.
 #  access_count::   Number of times the query record was accessed.
-#  description::    Serialized parameters of the query.
+#  description::    Serialized parameters of the query, including the model.
 #  outer_id::       `id` of outer query, when inner query of a nested query.
 #
 #  == Class methods
@@ -24,6 +24,9 @@
 class QueryRecord < ApplicationRecord
   attr_accessor :query
 
+  serialize :description, type: Hash, coder: JSON
+
+  # This method instantiates a new Query from the description.
   def query # rubocop:disable Lint/DuplicateMethods
     ::Query.deserialize(description)
   end
