@@ -806,9 +806,7 @@ class QueryTest < UnitTestCase
     obs = obs_with_imgs_ids.first
     imgs = Observation.find(obs).images.reorder(id: :asc).map(&:id)
     img = imgs.first
-    qr = QueryRecord.where(
-      QueryRecord[:description].matches_regexp("observation=##{obs}")
-    ).first
+    qr = QueryRecord.all.find { |rec| rec.description["observation"] == obs }
     q = Query.deserialize(qr.description)
     q_first_query = q.first
     q_last_query = q.last
