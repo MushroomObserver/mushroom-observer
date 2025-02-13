@@ -3748,9 +3748,9 @@ class NameTest < UnitTestCase
     name = Name.new(
       text_name: "Boletus bully",
       author: "Bullé",
-      search_name: "Boletus edulis Bullé",
-      display_name: "**__Boletus edulis__** Bull\u00E9",
-      sort_name: "Boletus edulis  Bullé",
+      search_name: "Boletus bully Bullé",
+      display_name: "**__Boletus bully__** Bull\u00E9",
+      sort_name: "Boletus bully  Bullé",
       user: users(:rolf)
     )
     assert(name.valid?, "Author ending with a diacritical should be valid")
