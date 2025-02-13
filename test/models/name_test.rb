@@ -3739,6 +3739,34 @@ class NameTest < UnitTestCase
     assert_not_nil(Name.create(params.merge(user: rolf)).id)
   end
 
+  def test_author_allowed_characters
+    name = names(:xa_genus)
+    assert_blank(name.author, "Test needs name with blank author")
+    assert(name.valid?, "Authorless name should be validated")
+
+    name = Name.new(
+      text_name: "Agaricus xanthodermus",
+      author: "🤮🤮🥶",
+      search_name: "Agaricus xanthodermus 🤮",
+      display_name: "**__Agaricus xanthodermus__** 🤮",
+      sort_name: "Agaricus xanthodermus  🤮",
+      user: users(:rolf)
+    )
+    assert(name.invalid?,
+           "Name whose author contains emoji should not be validated")
+
+    name = Name.new(
+      rank: "Genus",
+      text_name: "Rhizophydium", author: "Schenk 1858",
+      search_name: "Rhizophydium Schenk 1858",
+      display_name: "__Rhizophydium__ Schenk 1858",
+      sort_name: "Rhizophydium  Schenk 1858",
+      user: users(:rolf)
+    )
+    assert(name.invalid?,
+           "Name whose author contains integer should not be validated")
+  end
+
   def test_author_ending
     name = names(:boletus_edulis)
     assert_match(/.$/, name.author,

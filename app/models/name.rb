@@ -423,6 +423,11 @@ class Name < AbstractModel
   validate  :user_presence
   validate  :text_name_length
   validate  :author_length
+  validates :author,
+            format: {
+              with: /\A[\p{L} ().,&]*\z/, allow_nil: true,
+              message: :validate_name_author_characters.t
+            }
   validate  :author_ending
   validates :search_name, presence: true
   validate  :search_name_indistinct
