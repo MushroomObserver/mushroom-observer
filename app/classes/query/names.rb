@@ -13,7 +13,7 @@ class Query::Names < Query::Base
     Name
   end
 
-  def self.parameter_declarations
+  def self.parameter_declarations # rubocop:disable Metrics/MethodLength
     super.merge(
       created_at: [:time],
       updated_at: [:time],
@@ -51,8 +51,7 @@ class Query::Names < Query::Base
       ok_for_export: :boolean,
       with_observations: { boolean: [true] },
       description_query: { subquery: :NameDescription },
-      observation_query: { subquery: :Observation },
-      rss_log_query: { subquery: :RssLog }
+      observation_query: { subquery: :Observation }
     ).merge(content_filter_parameter_declarations(Name)).
       merge(advanced_search_parameter_declarations)
   end
@@ -159,9 +158,9 @@ class Query::Names < Query::Base
 
   def title
     default = super
-    if params[:with_observations]
+    if params[:with_observations] || params[:observation_query]
       with_observations_query_description || default
-    elsif params[:with_descriptions]
+    elsif params[:with_descriptions] || params[:description_query]
       :query_title_with_descriptions.t(type: :name) || default
     else
       default

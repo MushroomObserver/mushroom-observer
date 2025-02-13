@@ -6,7 +6,7 @@ module Query::Titles::Observations
   def with_observations_query_description
     return nil unless (description = observation_query_description)
 
-    if params[:user].blank?
+    if params.deep_find(:user).blank?
       :query_title_with_observations_filtered.t(type: model.type_tag,
                                                 subtitle: description)
     else
@@ -22,7 +22,7 @@ module Query::Titles::Observations
     # to the old flavors.
     args = [:herbaria, :locations, :names, :project, :projects,
             :project_lists, :species_list, :species_lists, :by_user,
-            :user, :users].reject { |arg| params[arg].to_s.empty? }
+            :user, :users].reject { |arg| params.deep_find(arg).to_s.empty? }
     if args.length == 1
       send(:"title_for_#{args.first}")
     else
@@ -91,7 +91,7 @@ module Query::Titles::Observations
   end
 
   def map_join_and_truncate(param, model, method)
-    str = params[param][0..(MAX_TITLE_ITEMS - 1)].map do |val|
+    str = params.deep_find(param)[0..(MAX_TITLE_ITEMS - 1)].map do |val|
       # Integer(val) throws ArgumentError if val is not an integer.
       # This is the most efficient way to test if a string is an
       # integer according to a very thorough and detailed blog post!

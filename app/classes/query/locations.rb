@@ -119,9 +119,9 @@ class Query::Locations < Query::Base
 
   def title
     default = super
-    if params[:with_observations]
+    if params[:with_observations] || params[:observation_query]
       with_observations_query_description || default
-    elsif params[:with_descriptions]
+    elsif params[:with_descriptions] || params[:description_query]
       :query_title_with_descriptions.t(type: :location) || default
     else
       default
