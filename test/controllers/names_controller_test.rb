@@ -68,10 +68,12 @@ class NamesControllerTest < FunctionalTestCase
     assert_displayed_title("Names by Popularity")
   end
 
-  def test_index_with_saved_query
+  def test_index_via_related_query
     user = dick
     query = Query.lookup_and_save(:Observation, by_user: user)
-    q = query.id.alphabetize
+    new_query = Query.current_or_related_query(:Name, :Observation, query)
+    new_query.save  # have to save here so we can send it as `q`
+    q = new_query.id.alphabetize
 
     login
     get(:index, params: { q: q })
