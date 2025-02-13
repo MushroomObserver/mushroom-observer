@@ -46,7 +46,7 @@ module Query::Modules::ActiveRecord
     # You also can't query it with QueryRecord.find_by(description: desc)
     def get_record(query)
       desc = query.serialize
-      QueryRecord.all.find { |rec| rec.description == desc } ||
+      QueryRecord.find { |rec| rec.description == desc } ||
         QueryRecord.new(
           description: desc,
           updated_at: Time.zone.now,
