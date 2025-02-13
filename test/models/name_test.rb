@@ -3746,7 +3746,7 @@ class NameTest < UnitTestCase
 
     name = Name.new(
       text_name: "Agaricus xanthodermus",
-      author: "🤮🤮🥶",
+      author: "🤮",
       search_name: "Agaricus xanthodermus 🤮",
       display_name: "**__Agaricus xanthodermus__** 🤮",
       sort_name: "Agaricus xanthodermus  🤮",
@@ -3771,7 +3771,7 @@ class NameTest < UnitTestCase
     name = names(:boletus_edulis)
     assert_match(/.$/, name.author,
                  "Test needs name.author ending in a period")
-    assert(name.valid?, "Author ending with a period should be valid")
+    assert(name.valid?, "Author ending with a period should be validated")
 
     name = Name.new(
       text_name: "Boletus bully",
@@ -3781,11 +3781,11 @@ class NameTest < UnitTestCase
       sort_name: "Boletus bully  Bullé",
       user: users(:rolf)
     )
-    assert(name.valid?, "Author ending with a diacritical should be valid")
+    assert(name.valid?, "Author ending in a diacritical should be validated")
 
     name = names(:xa_genus)
     assert_blank(name.author, "Test needs name with blank author")
-    assert(name.valid?, "Authorless name should be valid")
+    assert(name.valid?, "Authorless name should be validated")
 
     name = Name.new(
       text_name: "Tuber gardneri", author: "Gilkey [as 'gardnerii']",
@@ -3794,10 +3794,11 @@ class NameTest < UnitTestCase
       rank: "Species",
       user: users(:rolf)
     )
-    assert(name.invalid?, "Author ending in close bracket should be invalid")
+    assert(name.invalid?,
+           "Author ending in close bracket should no be validated")
   end
 
-  def test_prevent_trivial_differences
+  def test_search_name_trivial_differences
     name = names(:lactarius_subalpinus)
     assert_not(name.author.ascii_only?,
                "Test needs fixture whose Author has non-ASCII characters")
@@ -3834,7 +3835,7 @@ class NameTest < UnitTestCase
     )
   end
 
-  def test_blank_search_name
+  def test_search_name_blank
     name = names(:lactarius_subalpinus)
     assert_not(name.update(search_name: ""))
   end
