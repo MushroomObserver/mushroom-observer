@@ -113,7 +113,8 @@ module Query::Modules::Validation
 
     submodel = hash.values.first
     val = add_default_subquery_conditions(submodel, val)
-    Query.lookup(submodel, val)
+    # Call lookup to validate the subquery params; return those
+    Query.lookup(submodel, val).params
   end
 
   def add_default_subquery_conditions(submodel, val)
