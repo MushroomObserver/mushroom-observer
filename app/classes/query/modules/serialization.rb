@@ -7,8 +7,9 @@ module Query::Modules::Serialization
   end
 
   # Prepare the query params for saving to the db, adding the model.
+  # The keys are stored as strings in to_json
   def serialize
-    params.merge(model: model.name.to_sym)
+    params.merge(model: model.name).deep_transform_keys(&:to_s)
   end
 
   # Class methods.

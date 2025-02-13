@@ -42,9 +42,11 @@ module Query::Modules::ActiveRecord
       query
     end
 
+    # Matching a serialized hash is tricky. Values must match exactly.
+    # You also can't query it with QueryRecord.find_by(description: desc)
     def get_record(query)
       desc = query.serialize
-      QueryRecord.find_by(description: desc) ||
+      QueryRecord.all.find { |rec| rec.description == desc } ||
         QueryRecord.new(
           description: desc,
           updated_at: Time.zone.now,
