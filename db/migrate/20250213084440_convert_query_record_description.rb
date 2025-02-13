@@ -3,10 +3,8 @@ class ConvertQueryRecordDescription < ActiveRecord::Migration[7.2]
     QueryRecord.find_each do |record|
       str = record.instance_variable_get(:@attributes)["description"].
             value_before_type_cast
-      old_description = deserialize_params(str)
-      debugger
-      record.description = old_description
-      record.save
+      params = deserialize_params(str)
+      record.update(description: params)
     end
   end
 
