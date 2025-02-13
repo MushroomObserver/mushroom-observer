@@ -4,7 +4,8 @@ class ConvertQueryRecordDescription < ActiveRecord::Migration[7.2]
       str = record.instance_variable_get(:@attributes)["description"].
             value_before_type_cast
       old_description = deserialize(str)
-      record.description = old_description.to_json
+      debugger
+      record.description = old_description
       record.save
     end
   end
@@ -14,9 +15,7 @@ class ConvertQueryRecordDescription < ActiveRecord::Migration[7.2]
   end
 
   def deserialize(str)
-    params = deserialize_params(str)
-    model  = params[:model]
-    params.delete(:model)
+    deserialize_params(str)
   end
 
   def deserialize_params(str)
