@@ -4,7 +4,7 @@ class ConvertQueryRecordDescription < ActiveRecord::Migration[7.2]
       str = record.instance_variable_get(:@attributes)["description"].
             value_before_type_cast
       params = deserialize_params(str)
-      record.update(description: params)
+      record.update_column(:description, params)
     end
   end
 
