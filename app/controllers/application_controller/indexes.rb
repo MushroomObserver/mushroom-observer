@@ -14,7 +14,8 @@ module ApplicationController::Indexes
 
   # Get args from a param subaction, or if none given, the unfiltered_index.
   def build_index_with_query
-    index_active_params.each do |subaction|
+    current_params = index_active_params.intersection(params.keys.map(&:to_sym))
+    current_params.each do |subaction|
       next if params[subaction].blank?
 
       query, display_opts = send(index_param_method_or_default(subaction))
@@ -105,7 +106,8 @@ module ApplicationController::Indexes
   end
 
   def sorted_index_opts
-    { query_args: { by: params[:by] }, display_opts: index_display_at_id_opts }
+    { query_args: { by: params[:by] },
+      display_opts: index_display_at_id_opts }
   end
 
   # The filtered index.
