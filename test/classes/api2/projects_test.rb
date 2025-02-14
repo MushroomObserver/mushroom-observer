@@ -22,49 +22,56 @@ class API2::ProjectsTest < UnitTestCase
     @prj_sample ||= Project.all.sample
   end
 
-  def test_getting_projects
-    proj = Project.all.sample
-    assert_api_pass(params_get(id: proj.id))
-    assert_api_results([proj])
+  def test_getting_projects_id
+    assert_api_pass(params_get(id: prj_sample.id))
+    assert_api_results([prj_sample])
+  end
 
+  def test_getting_projects_created_at
     projs = Project.where(Project[:created_at].year.eq(2008))
     assert_not_empty(projs)
     assert_api_pass(params_get(created_at: "2008"))
     assert_api_results(projs)
+  end
 
+  def test_getting_projects_updated_at
     projs = Project.where(
       (Project[:updated_at].year == 2008).and(Project[:updated_at].month == 9)
     )
     assert_not_empty(projs)
     assert_api_pass(params_get(updated_at: "2008-09"))
     assert_api_results(projs)
+  end
 
+  def test_getting_projects_user
     projs = Project.where(user: dick)
     assert_not_empty(projs)
     assert_api_pass(params_get(user: "dick"))
     assert_api_results(projs)
+  end
 
+  def test_getting_projects_has_images
     projs = Project.select { |p| p.images.any? }
     assert_not_empty(projs)
     assert_api_pass(params_get(has_images: "yes"))
     assert_api_results(projs)
+  end
 
+  def test_getting_projects_has_observations
     projs = Project.select { |p| p.observations.any? }
     assert_not_empty(projs)
     assert_api_pass(params_get(has_observations: "yes"))
     assert_api_results(projs)
+  end
 
+  def test_getting_projects_has_species_lists
     projs = Project.select { |p| p.species_lists.any? }
     assert_not_empty(projs)
     assert_api_pass(params_get(has_species_lists: "yes"))
     assert_api_results(projs)
+  end
 
-    Comment.create!(user: katrina, target: proj, summary: "blah")
-    projs = Project.select { |p| p.comments.any? }
-    assert_not_empty(projs)
-    assert_api_pass(params_get(has_comments: "yes"))
-    assert_api_results(projs)
-
+  def test_getting_projects_has_summary
     with    = Project.where(Project[:summary].not_blank)
     without = Project.where(Project[:summary].blank)
     assert_not_empty(with)
@@ -73,19 +80,31 @@ class API2::ProjectsTest < UnitTestCase
     assert_api_results(with)
     assert_api_pass(params_get(has_summary: "no"))
     assert_api_results(without)
+  end
 
-    projs = Project.where(Project[:title].matches("%bolete%"))
-    assert_not_empty(projs)
-    assert_api_pass(params_get(title_has: "bolete"))
-    assert_api_results(projs)
-
+  def test_getting_projects_summary_has
     projs = Project.where(Project[:summary].matches("%article%"))
     assert_not_empty(projs)
     assert_api_pass(params_get(summary_has: "article"))
     assert_api_results(projs)
+  end
+
+  def test_getting_projects_title_has
+    projs = Project.where(Project[:title].matches("%bolete%"))
+    assert_not_empty(projs)
+    assert_api_pass(params_get(title_has: "bolete"))
+    assert_api_results(projs)
+  end
+
+  def test_getting_projects_has_comments_comments_has
+    Comment.create!(user: katrina, target: prj_sample, summary: "blah")
+    projs = Project.select { |p| p.comments.any? }
+    assert_not_empty(projs)
+    assert_api_pass(params_get(has_comments: "yes"))
+    assert_api_results(projs)
 
     assert_api_pass(params_get(comments_has: "blah"))
-    assert_api_results([proj])
+    assert_api_results([prj_sample])
   end
 
   def test_creating_projects
