@@ -10,40 +10,57 @@ class API2::SpeciesListsTest < UnitTestCase
   #  :section: SpeciesList Requests
   # ---------------------------------
 
+  def params_get(**)
+    { method: :get, action: :species_list }.merge(**)
+  end
+
+  def spl_sample
+    @spl_sample ||= SpeciesList.all.sample
+  end
+
   def test_getting_species_lists
-    params = { method: :get, action: :species_list }
+    assert_api_pass(params_get(id: spl_sample.id))
+    assert_api_results([spl_sample])
+  end
 
-    spl = SpeciesList.all.sample
-    assert_api_pass(params.merge(id: spl.id))
-    assert_api_results([spl])
-
+  def test_getting_species_lists_created_at
     spls = SpeciesList.created_on("2012-07-06")
     assert_not_empty(spls)
-    assert_api_pass(params.merge(created_at: "2012-07-06"))
+    assert_api_pass(params_get(created_at: "2012-07-06"))
     assert_api_results(spls)
+  end
 
+  def test_getting_species_lists_updated_at
     spls = SpeciesList.where(SpeciesList[:updated_at].year.eq(2008))
     assert_not_empty(spls)
-    assert_api_pass(params.merge(updated_at: "2008"))
+    assert_api_pass(params_get(updated_at: "2008"))
     assert_api_results(spls)
+  end
 
+  def test_getting_species_lists_user
     spls = SpeciesList.where(user: rolf)
     assert_not_empty(spls)
-    assert_api_pass(params.merge(user: "rolf"))
+    assert_api_pass(params_get(user: "rolf"))
     assert_api_results(spls)
+  end
 
+  def test_getting_species_lists_date
     spls = SpeciesList.where(SpeciesList[:when] >= "2006-03-01").
            where(SpeciesList[:when] <= "2006-03-02")
     assert_not_empty(spls)
-    assert_api_pass(params.merge(date: "2006-03-01-2006-03-02"))
+    assert_api_pass(params_get(date: "2006-03-01-2006-03-02"))
     assert_api_results(spls)
+  end
 
+  def test_getting_species_lists_name
     obses = Observation.where(name: names(:fungi))
     spls = obses.map(&:species_lists).flatten.uniq.sort_by(&:id)
     assert_not_empty(spls)
-    assert_api_pass(params.merge(name: "Fungi"))
+    assert_api_pass(params_get(name: "Fungi"))
     assert_api_results(spls)
+  end
 
+  def test_getting_species_lists_name_include_synonyms
     obs1 = Observation.create!(user: rolf, when: Time.zone.now,
                                where: locations(:burbank),
                                name: names(:lactarius_alpinus))
@@ -56,13 +73,15 @@ class API2::SpeciesListsTest < UnitTestCase
     obses = Observation.where(name: names(:lactarius_alpinus).synonyms)
     ssp_lists = obses.map(&:species_lists).flatten.uniq.sort_by(&:id)
     assert(ssp_lists.length > 1)
-    assert_api_pass(params.merge(synonyms_of: "Lactarius alpinus"))
+    assert_api_pass(params_get(synonyms_of: "Lactarius alpinus"))
     assert_api_results(ssp_lists)
     assert_api_pass(
-      params.merge(name: "Lactarius alpinus", include_synonyms: "yes")
+      params_get(name: "Lactarius alpinus", include_synonyms: "yes")
     )
     assert_api_results(ssp_lists)
+  end
 
+  def test_getting_species_lists_name_include_subtaxa
     assert_blank(
       Observation.where(text_name: "Agaricus"),
       "Tests won't work if there's already an Observation for genus Agaricus"
@@ -77,50 +96,62 @@ class API2::SpeciesListsTest < UnitTestCase
     )
     agaricus_obs.species_lists << agaricus_genus_list
 
-    assert_api_pass(params.merge(children_of: "Agaricus"))
+    assert_api_pass(params_get(children_of: "Agaricus"))
     assert_api_results(ssp_lists)
-    assert_api_pass(params.merge(name: "Agaricus", include_subtaxa: "yes"))
+    assert_api_pass(params_get(name: "Agaricus", include_subtaxa: "yes"))
     assert_api_results(ssp_lists << agaricus_genus_list)
+  end
 
+  def test_getting_species_lists_location
     spls = SpeciesList.where(location: locations(:no_mushrooms_location))
     assert_not_empty(spls)
-    assert_api_pass(params.merge(location: "No Mushrooms"))
+    assert_api_pass(params_get(location: "No Mushrooms"))
     assert_api_results(spls)
+  end
 
+  def test_getting_species_lists_project
     proj1 = projects(:bolete_project)
     proj2 = projects(:two_list_project)
     spls = [proj1, proj2].map(&:species_lists).flatten.uniq.sort_by(&:id)
     assert_not_empty(spls)
-    assert_api_pass(params.merge(project: "#{proj1.id}, #{proj2.id}"))
+    assert_api_pass(params_get(project: "#{proj1.id}, #{proj2.id}"))
     assert_api_results(spls)
+  end
 
+  def test_getting_species_lists_has_notes
     with    = SpeciesList.where(SpeciesList[:notes].not_blank)
     without = SpeciesList.where(SpeciesList[:notes].blank)
     assert(with.length > 1)
     assert(without.length > 1)
-    assert_api_pass(params.merge(has_notes: "yes"))
+    assert_api_pass(params_get(has_notes: "yes"))
     assert_api_results(with)
-    assert_api_pass(params.merge(has_notes: "no"))
+    assert_api_pass(params_get(has_notes: "no"))
     assert_api_results(without)
+  end
 
-    x = Comment.create(user: dick, target: spl, summary: "test",
+  def test_getting_species_lists_has_comments
+    x = Comment.create(user: dick, target: spl_sample, summary: "test",
                        comment: "double dare you to reiterate this comment!")
     x.save
-    assert_api_pass(params.merge(has_comments: "yes"))
-    assert_api_results([spl])
+    assert_api_pass(params_get(has_comments: "yes"))
+    assert_api_results([spl_sample])
 
+    assert_api_pass(params_get(comments_has: "double dare"))
+    assert_api_results([spl_sample])
+  end
+
+  def test_getting_species_lists_title_has
     spls = SpeciesList.where(SpeciesList[:title].matches("%mysteries%"))
     assert_not_empty(spls)
-    assert_api_pass(params.merge(title_has: "mysteries"))
+    assert_api_pass(params_get(title_has: "mysteries"))
     assert_api_results(spls)
+  end
 
+  def test_getting_species_lists_notes_has
     spls = SpeciesList.where(SpeciesList[:notes].matches("%skunk%"))
     assert_not_empty(spls)
-    assert_api_pass(params.merge(notes_has: "skunk"))
+    assert_api_pass(params_get(notes_has: "skunk"))
     assert_api_results(spls)
-
-    assert_api_pass(params.merge(comments_has: "double dare"))
-    assert_api_results([spl])
   end
 
   def test_creating_species_lists

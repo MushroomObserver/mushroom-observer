@@ -14,30 +14,42 @@ class API2::LocationsTest < UnitTestCase
   #  :section: Location Requests
   # ------------------------------
 
-  def test_getting_locations
-    loc = Location.all.sample
-    params = { method: :get, action: :location }
+  def params_get(**)
+    { method: :get, action: :location }.merge(**)
+  end
 
-    assert_api_pass(params.merge(id: loc.id))
-    assert_api_results([loc])
+  def loc_sample
+    @loc_sample ||= Location.all.sample
+  end
 
+  def test_getting_locations_id
+    assert_api_pass(params.merge(id: loc_sample.id))
+    assert_api_results([loc_sample])
+  end
+
+  def test_getting_locations_created_at
     locs = Location.where(Location[:created_at].year.eq(2008))
     assert_not_empty(locs)
     assert_api_pass(params.merge(created_at: "2008"))
     assert_api_results(locs)
+  end
 
+  def test_getting_locations_updated_at
     locs = Location.updated_on("2012-01-01")
     assert_not_empty(locs)
     assert_api_pass(params.merge(updated_at: "2012-01-01"))
     assert_api_results(locs)
+  end
 
+  def test_getting_locations_user
     locs = Location.where(user: rolf)
     assert_not_empty(locs)
     assert_api_pass(params.merge(user: "rolf"))
     assert_api_results(locs)
+  end
 
+  def test_getting_locations_in_box
     locs = Location.in_box(north: 40, south: 39, east: -123, west: -124)
-
     assert_not_empty(locs)
     assert_api_fail(params.merge(south: 39, east: -123, west: -124))
     assert_api_fail(params.merge(north: 40, east: -123, west: -124))

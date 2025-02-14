@@ -14,49 +14,65 @@ class API2::CollectionNumbersTest < UnitTestCase
   #  :section: Collection Number Requests
   # ---------------------------------------
 
-  def test_getting_collection_numbers
-    params = { method: :get, action: :collection_number }
+  def params_get(**)
+    { method: :get, action: :collection_number }.merge(**)
+  end
 
+  def test_getting_collection_numbers_created_at
     nums = CollectionNumber.where(CollectionNumber[:created_at].year.eq(2006))
     assert_not_empty(nums)
-    assert_api_pass(params.merge(created_at: "2006"))
+    assert_api_pass(params_get(created_at: "2006"))
     assert_api_results(nums)
+  end
 
+  def test_getting_collection_numbers_updated_at
     nums = CollectionNumber.where(CollectionNumber[:updated_at].year.eq(2005))
     assert_not_empty(nums)
-    assert_api_pass(params.merge(updated_at: "2005"))
+    assert_api_pass(params_get(updated_at: "2005"))
     assert_api_results(nums)
+  end
 
+  def test_getting_collection_numbers_user
     nums = CollectionNumber.where(user: mary)
     assert_not_empty(nums)
-    assert_api_pass(params.merge(user: "mary"))
+    assert_api_pass(params_get(user: "mary"))
     assert_api_results(nums)
+  end
 
+  def test_getting_collection_numbers_observation
     obs  = observations(:detailed_unknown_obs)
     nums = obs.collection_numbers
     assert_not_empty(nums)
-    assert_api_pass(params.merge(observation: obs.id))
+    assert_api_pass(params_get(observation: obs.id))
     assert_api_results(nums)
+  end
 
+  def test_getting_collection_numbers_collector
     nums = CollectionNumber.where(name: "Mary Newbie")
     assert_not_empty(nums)
-    assert_api_pass(params.merge(collector: "Mary Newbie"))
+    assert_api_pass(params_get(collector: "Mary Newbie"))
     assert_api_results(nums)
+  end
 
+  def test_getting_collection_numbers_collector_has
     nums = CollectionNumber.where(CollectionNumber[:name].matches("%mary%"))
     assert_not_empty(nums)
-    assert_api_pass(params.merge(collector_has: "Mary"))
+    assert_api_pass(params_get(collector_has: "Mary"))
     assert_api_results(nums)
+  end
 
+  def test_getting_collection_numbers_number
     nums = CollectionNumber.where(number: "174")
     assert_not_empty(nums)
-    assert_api_pass(params.merge(number: "174"))
+    assert_api_pass(params_get(number: "174"))
     assert_api_results(nums)
+  end
 
+  def test_getting_collection_numbers_number_has
     # nums = CollectionNumber.where("number LIKE '%17%'")
     nums = CollectionNumber.where(CollectionNumber[:number].matches("%17%"))
     assert_not_empty(nums)
-    assert_api_pass(params.merge(number_has: "17"))
+    assert_api_pass(params_get(number_has: "17"))
     assert_api_results(nums)
   end
 
