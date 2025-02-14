@@ -42,7 +42,6 @@ module Query::Modules::ActiveRecord
       query
     end
 
-    # Matching a serialized hash is tricky. Values must match exactly.
     def get_record(query)
       desc = query.serialize
       QueryRecord.find_by(description: desc) ||
