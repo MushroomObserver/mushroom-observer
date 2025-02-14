@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_02_13_084440) do
+ActiveRecord::Schema[7.2].define(version: 2024_12_09_041049) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -909,11 +909,13 @@ ActiveRecord::Schema[7.2].define(version: 2025_02_13_084440) do
     t.text "alert"
     t.boolean "email_locations_admin", default: false
     t.boolean "email_names_admin", default: false
+    t.integer "thumbnail_size", default: 1
     t.integer "image_size", default: 5
     t.string "default_rss_type", limit: 40, default: "all"
     t.integer "votes_anonymous", default: 1
     t.integer "location_format", default: 1
     t.datetime "last_activity", precision: nil
+    t.integer "hide_authors", default: 1, null: false
     t.boolean "thumbnail_maps", default: true, null: false
     t.string "auth_code", limit: 40
     t.integer "keep_filenames", default: 1, null: false
@@ -927,8 +929,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_02_13_084440) do
     t.boolean "no_emails", default: false, null: false
     t.string "inat_username"
     t.integer "original_image_quota", default: 0
-    t.integer "hide_authors"
-    t.integer "thumbnail_size"
     t.index ["login"], name: "login_index"
   end
 
