@@ -1,22 +1,27 @@
 # frozen_string_literal: true
 
-# :description is now a serialized column, so Rails does the de/serialization.
+# :description is not a serialized column; we call `to_json` for serialization.
 module Query::Modules::Serialization
   def self.included(base)
     base.extend(ClassMethods)
   end
 
-  # Prepare the query params for saving to the db, adding the model.
-  # The keys are stored as strings in to_json
+  # Prepare the query params, adding the model, for saving to the db. The
+  # :description column is accessed not just to recompose a query, but to
+  # identify existing query records that match current params. That's why the
+  # keys are sorted here before being stored as strings in to_json - because
+  # when matching a serialized hash, strings must match exactly. This is
+  # more efficient however than using a Rails-serialized column and comparing
+  # the parsed hashes (in whatever order), because when a column is serialized
+  # you can't use SQL on the column value, you have to compare parsed instances.
   def serialize
-    params.merge(model: model.name).deep_transform_keys(&:to_s)
+    params.sort.to_h.merge(model: model.name).to_json
   end
 
-  # Class methods.
   module ClassMethods
-    # Extract the model from the serialized params and instantiate new Query.
+    # Get the model from the serialized params and instantiate new Query.
     def deserialize(description)
-      params = description.symbolize_keys
+      params = JSON.parse(description).symbolize_keys
       model  = params[:model].to_sym
       params.delete(:model)
       ::Query.new(model, params)

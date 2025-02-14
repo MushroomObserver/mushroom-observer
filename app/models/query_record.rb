@@ -14,6 +14,8 @@
 #  updated_at::     Date/time it was last updated.
 #  access_count::   Number of times the query record was accessed.
 #  description::    Serialized parameters of the query, including the model.
+#                   Not using Rails serialization because we use this column to
+#                   compare queries, and SQL matching by string is faster.
 #  outer_id::       `id` of outer query, when inner query of a nested query.
 #
 #  == Class methods
@@ -23,8 +25,6 @@
 # access query records saved in the db
 class QueryRecord < ApplicationRecord
   attr_accessor :query
-
-  serialize :description, type: Hash, coder: JSON
 
   # This method instantiates a new Query from the description.
   def query # rubocop:disable Lint/DuplicateMethods
