@@ -3740,31 +3740,47 @@ class NameTest < UnitTestCase
   end
 
   def test_author_allowed_characters
-    name = names(:xa_genus)
-    assert_blank(name.author, "Test needs name with blank author")
-    assert(name.valid?, "Authorless name should be validated")
+    # start with valid Name params, author has only letters
+    valid_params = {
+      user: users(:rolf),
+      text_name: "Paradiscina", author: "Benedix", rank: "Genus",
+      search_name: "Paradiscina Benedix",
+      display_name: "**__Paradiscina__** Benedix",
+      sort_name: "Paradiscina  Benedix"
+    }
+    assert(Name.new(valid_params).valid?,
+           "Letters should be allowable in Author")
+    # ----- modify Author to prove validity of other characters
+    # A period can be part of an abbreviated Author
+    assert(Name.new(valid_params.merge({ author: "Benedix." })).valid?,
+           "Period should be allowable in Author")
+    # Contrived example to test spaces
+    assert(Name.new(valid_params.merge({ author: "Benedix Benedix" })).valid?,
+           "Space should be allowable in Author")
+    # Parens can enclose author(s) of basionym
+    assert(Name.new(valid_params.merge({ author: "(Benedix) Benedix" })).valid?,
+           "Period should be allowable in Author")
+    # Ampersand can appear when there are multiple authors
+    assert(Name.new(valid_params.merge({ author: "Benedix & Woo" })).valid?,
+           "Ampersand should be allowable in Author")
+    # Commas can separate multiple authors
+    assert(Name.new(valid_params.merge({ author: "Benedix, Woo & Zhu" })).
+      valid?, "Commas should be allowable in Author")
 
-    name = Name.new(
-      text_name: "Agaricus xanthodermus",
-      author: "🤮",
-      search_name: "Agaricus xanthodermus 🤮",
-      display_name: "**__Agaricus xanthodermus__** 🤮",
-      sort_name: "Agaricus xanthodermus  🤮",
-      user: users(:rolf)
-    )
-    assert(name.invalid?,
-           "Name whose author contains emoji should not be validated")
-
-    name = Name.new(
-      rank: "Genus",
-      text_name: "Rhizophydium", author: "Schenk 1858",
-      search_name: "Rhizophydium Schenk 1858",
-      display_name: "__Rhizophydium__ Schenk 1858",
-      sort_name: "Rhizophydium  Schenk 1858",
-      user: users(:rolf)
-    )
-    assert(name.invalid?,
-           "Name whose author contains integer should not be validated")
+    # ----- Prove that including bad character prevents validation of Name
+    # Users have added numbers manually
+    # or pasted an IF or MB line into the Name form
+    assert(Name.new(valid_params.merge({ author: "Benedix (1969)" })).
+      invalid?, "Numerals should not be allowable in Author")
+    # Users have added brackets by pasting IF or MB line into the Name form
+    # These example are contrived to separately test open  and close brackets
+    assert(Name.new(valid_params.merge({ author: "Ben[edix" })).
+      invalid?, "Open Bracket should not be allowable in Author")
+    assert(Name.new(valid_params.merge({ author: "Bene]dix" })).
+      invalid?, "Close Bracket should not be allowable in Author")
+    # Hasn't happened yet; bu waiting for ExcitedDelirium to drop the shoe
+    assert(Name.new(valid_params.merge({ author: "Benedix 🤮" })).
+      invalid?, "Emoji should not be allowable in Author")
   end
 
   def test_author_ending
