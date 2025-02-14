@@ -18,6 +18,10 @@ class API2::SequencesTest < UnitTestCase
     { method: :get, action: :sequence }.merge(**)
   end
 
+  def seq_sample
+    @seq_sample ||= Sequence.all.sample
+  end
+
   def ensure_all_obs_have_at_least_one_sequence
     Observation.find_each do |obs2|
       next if obs2.sequences.any?
@@ -27,10 +31,9 @@ class API2::SequencesTest < UnitTestCase
     end
   end
 
-  def test_getting_sequences
-    seq = Sequence.all.sample
-    assert_api_pass(params_get(id: seq.id))
-    assert_api_results([seq])
+  def test_getting_sequences_id
+    assert_api_pass(params_get(id: seq_sample.id))
+    assert_api_results([seq_sample])
   end
 
   def test_getting_sequences_created_at
