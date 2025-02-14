@@ -429,7 +429,7 @@ class Name < AbstractModel
               # prevents NoMethodError: private method `t' called for an
               # instance of Symbol
               # when CI PR Run
-              message: I18n.t(:validate_name_author_characters).t
+              message: I18n.t(:validate_name_author_characters)
             }
   validate  :author_ending
   validates :search_name, presence: true
