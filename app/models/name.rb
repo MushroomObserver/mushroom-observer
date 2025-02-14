@@ -426,7 +426,10 @@ class Name < AbstractModel
   validates :author,
             format: {
               with: /\A[\p{L} ().,&]*\z/, allow_nil: true,
-              message: :validate_name_author_characters.t
+              # prevents NoMethodError: private method `t' called for an
+              # instance of Symbol
+              # when CI PR Run
+              message: I18n.t(:validate_name_author_characters).t
             }
   validate  :author_ending
   validates :search_name, presence: true
