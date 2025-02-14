@@ -3740,7 +3740,8 @@ class NameTest < UnitTestCase
   end
 
   def test_author_allowed_characters
-    # start with valid Name params, author has only letters
+    # Start with valid Name params, author has only letters,
+    # using params which are different from fixtures to avoid conflict.
     valid_params = {
       user: users(:rolf),
       text_name: "Paradiscina", author: "Benedix", rank: "Genus",
@@ -3783,35 +3784,33 @@ class NameTest < UnitTestCase
       invalid?, "Emoji should not be allowable in Author")
   end
 
+  # Prove which characters that are allowed in author
+  # are allowed/disallowed at end
   def test_author_ending
-    name = names(:boletus_edulis)
-    assert_match(/.$/, name.author,
-                 "Test needs name.author ending in a period")
-    assert(name.valid?, "Author ending with a period should be validated")
+    # Start with valid Name params, author ending in letter,
+    # using params distinct from fixtures to avoid conflict.
+    valid_params = {
+      user: users(:rolf),
+      text_name: "Paradiscina", author: "Benedix", rank: "Genus",
+      search_name: "Paradiscina Benedix",
+      display_name: "**__Paradiscina__** Benedix",
+      sort_name: "Paradiscina  Benedix"
+    }
+    assert(Name.new(valid_params).valid?,
+           "Author ending in letter should be validated")
+    assert(Name.new(valid_params.merge({ author: "Benedix." })).valid?,
+           "Period at end of author should be allowable")
 
-    name = Name.new(
-      text_name: "Boletus bully",
-      author: "Bullé",
-      search_name: "Boletus bully Bullé",
-      display_name: "**__Boletus bully__** Bull\u00E9",
-      sort_name: "Boletus bully  Bullé",
-      user: users(:rolf)
+    # Some actually occuring cases of bad endings
+    # Emulate user pasting certain IF lines into the Name form
+    assert(
+      Name.new(valid_params.merge({ author: "Benedix," })).
+      invalid?, "Comma at end of author should not be allowable"
     )
-    assert(name.valid?, "Author ending in a diacritical should be validated")
-
-    name = names(:xa_genus)
-    assert_blank(name.author, "Test needs name with blank author")
-    assert(name.valid?, "Authorless name should be validated")
-
-    name = Name.new(
-      text_name: "Tuber gardneri", author: "Gilkey [as 'gardnerii']",
-      search_name: "Tuber gardneri Gilkey [as 'gardnerii']",
-      display_name: "**__Tuber gardneri__** Gilkey [as 'gardnerii']",
-      rank: "Species",
-      user: users(:rolf)
+    assert(
+      Name.new(valid_params.merge({ author: "Benedix [as 'Paradiscena']" })).
+      invalid?, "Bracket at end of author should not be allowable"
     )
-    assert(name.invalid?,
-           "Author ending in close bracket should no be validated")
   end
 
   def test_search_name_trivial_differences
