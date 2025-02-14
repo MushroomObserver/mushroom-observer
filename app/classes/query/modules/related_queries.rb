@@ -55,14 +55,17 @@ module Query::Modules::RelatedQueries
       end
     end
 
-    # Check the query params hash for a relevant existing query nested within.
-    # deep_find returns an array of matches
+    # Check the query params for a relevant existing query nested within.
+    # This only checks for the key name of the right subquery. It would be
+    # more work to check for hash equality, because the nested hash has the
+    # :model param too, to be easily deserialized and reconstituted.
+    # NOTE: Our custom method `deep_find` returns an array of matches.
     def restorable_query(target, current_query)
       subquery_param = current_query.class.find_subquery_param_name(target)
       restorable_query = current_query.params.deep_find(subquery_param)
       return false if restorable_query.blank?
 
-      restorable_query.first
+      lookup(target, restorable_query.first)
     end
 
     # Make a new query using the current_query as the subquery. Note that this
