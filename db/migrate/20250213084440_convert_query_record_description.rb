@@ -3,8 +3,8 @@ class ConvertQueryRecordDescription < ActiveRecord::Migration[7.2]
     QueryRecord.find_each do |record|
       str = record.instance_variable_get(:@attributes)["description"].
             value_before_type_cast
-      params = deserialize_params(str)
-      record.update_column(:description, params)
+      description = deserialize_params(str).to_json
+      record.update_column(:description, description)
     end
   end
 
