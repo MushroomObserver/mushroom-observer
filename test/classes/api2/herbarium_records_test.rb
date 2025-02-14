@@ -14,73 +14,97 @@ class API2::HerbariumRecordsTest < UnitTestCase
   #  :section: Herbarium Record Requests
   # --------------------------------------
 
-  def test_getting_herbarium_records
-    params = { method: :get, action: :herbarium_record }
+  def params_get(**)
+    { method: :get, action: :herbarium_record }.merge(**)
+  end
 
+  def test_getting_herbarium_records_created_at
     recs = HerbariumRecord.where(HerbariumRecord[:created_at].year.eq(2012))
     assert_not_empty(recs)
-    assert_api_pass(params.merge(created_at: "2012"))
+    assert_api_pass(params_get(created_at: "2012"))
     assert_api_results(recs)
+  end
 
+  def test_getting_herbarium_records_updated_at
     recs = HerbariumRecord.where(HerbariumRecord[:updated_at].year.eq(2017))
     assert_not_empty(recs)
-    assert_api_pass(params.merge(updated_at: "2017"))
+    assert_api_pass(params_get(updated_at: "2017"))
     assert_api_results(recs)
+  end
 
+  def test_getting_herbarium_records_user
     recs = HerbariumRecord.where(user: mary)
     assert_not_empty(recs)
-    assert_api_pass(params.merge(user: "mary"))
+    assert_api_pass(params_get(user: "mary"))
     assert_api_results(recs)
+  end
 
+  def test_getting_herbarium_records_herbarium
     herb = herbaria(:nybg_herbarium)
     recs = herb.herbarium_records
     assert_not_empty(recs)
-    assert_api_pass(params.merge(herbarium: "The New York Botanical Garden"))
+    assert_api_pass(params_get(herbarium: "The New York Botanical Garden"))
     assert_api_results(recs)
+  end
 
+  def test_getting_herbarium_records_observation
     obs  = observations(:detailed_unknown_obs)
     recs = obs.herbarium_records
     assert_not_empty(recs)
-    assert_api_pass(params.merge(observation: obs.id))
+    assert_api_pass(params_get(observation: obs.id))
     assert_api_results(recs)
+  end
 
+  def test_getting_herbarium_records_notes_has
     recs = HerbariumRecord.where(HerbariumRecord[:notes].matches("%dried%"))
     assert_not_empty(recs)
-    assert_api_pass(params.merge(notes_has: "dried"))
+    assert_api_pass(params_get(notes_has: "dried"))
     assert_api_results(recs)
+  end
 
+  def test_getting_herbarium_records_has_notes_no
     recs = HerbariumRecord.where(HerbariumRecord[:notes].blank)
     assert_not_empty(recs)
-    assert_api_pass(params.merge(has_notes: "no"))
+    assert_api_pass(params_get(has_notes: "no"))
     assert_api_results(recs)
+  end
 
+  def test_getting_herbarium_records_has_notes_yes
     recs = HerbariumRecord.where(HerbariumRecord[:notes].not_blank)
     assert_not_empty(recs)
-    assert_api_pass(params.merge(has_notes: "yes"))
+    assert_api_pass(params_get(has_notes: "yes"))
     assert_api_results(recs)
+  end
 
+  def test_getting_herbarium_records_initial_det
     recs = HerbariumRecord.where(initial_det: "Coprinus comatus")
     assert_not_empty(recs)
-    assert_api_pass(params.merge(initial_det: "Coprinus comatus"))
+    assert_api_pass(params_get(initial_det: "Coprinus comatus"))
     assert_api_results(recs)
+  end
 
+  def test_getting_herbarium_records_initial_det_has
     recs = HerbariumRecord.where(
       HerbariumRecord[:initial_det].matches("%coprinus%")
     )
     assert_not_empty(recs)
-    assert_api_pass(params.merge(initial_det_has: "coprinus"))
+    assert_api_pass(params_get(initial_det_has: "coprinus"))
     assert_api_results(recs)
+  end
 
+  def test_getting_herbarium_records_accession_number
     recs = HerbariumRecord.where(accession_number: "1234")
     assert_not_empty(recs)
-    assert_api_pass(params.merge(accession_number: "1234"))
+    assert_api_pass(params_get(accession_number: "1234"))
     assert_api_results(recs)
+  end
 
+  def test_getting_herbarium_records_accession_number_has
     recs = HerbariumRecord.where(
       HerbariumRecord[:accession_number].matches("%23%")
     )
     assert_not_empty(recs)
-    assert_api_pass(params.merge(accession_number_has: "23"))
+    assert_api_pass(params_get(accession_number_has: "23"))
     assert_api_results(recs)
   end
 
