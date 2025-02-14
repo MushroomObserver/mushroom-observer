@@ -14,88 +14,125 @@ class API2::SequencesTest < UnitTestCase
   #  :section: Sequence Requests
   # ------------------------------
 
-  def test_getting_sequences
-    params = { method: :get, action: :sequence }
+  def params_get(**)
+    { method: :get, action: :sequence }.merge(**)
+  end
 
-    seq = Sequence.all.sample
-    assert_api_pass(params.merge(id: seq.id))
-    assert_api_results([seq])
+  def seq_sample
+    @seq_sample ||= Sequence.all.sample
+  end
 
-    seqs = Sequence.created_on("2017-01-01")
-    assert_not_empty(seqs)
-    assert_api_pass(params.merge(created_at: "2017-01-01"))
-    assert_api_results(seqs)
-
-    seqs = Sequence.where(
-      Sequence[:updated_at].year.eq(2017).and(Sequence[:updated_at].month.eq(2))
-    )
-    assert_not_empty(seqs)
-    assert_api_pass(params.merge(updated_at: "2017-02"))
-    assert_api_results(seqs)
-
-    obs = observations(:locally_sequenced_obs)
-    obs.update!(user: mary)
-    obs.sequences.each { |s| s.update!(user: mary) }
-    seqs = Sequence.where(user: mary)
-    assert_not_empty(seqs)
-    assert_api_pass(params.merge(user: "mary"))
-    assert_api_results(seqs)
-
-    seqs = Sequence.where(locus: %w[ITS1F ITS4 ITS5])
-    assert_not_empty(seqs)
-    assert_api_pass(params.merge(locus: "its1f,its4,its5"))
-    assert_api_results(seqs)
-
-    seqs = Sequence.where(archive: %w[GenBank UNITE])
-    assert_not_empty(seqs)
-    assert_api_pass(params.merge(archive: "genbank,unite"))
-    assert_api_results(seqs)
-
-    seqs = Sequence.where(accession: "KT968605")
-    assert_not_empty(seqs)
-    assert_api_pass(params.merge(accession: "KT968605"))
-    assert_api_results(seqs)
-
-    seqs = Sequence.where(Sequence[:locus].matches("%its%"))
-    assert_not_empty(seqs)
-    assert_api_pass(params.merge(locus_has: "ITS"))
-    assert_api_results(seqs)
-
-    seqs = Sequence.where(Sequence[:accession].matches("%kt%"))
-    assert_not_empty(seqs)
-    assert_api_pass(params.merge(accession_has: "KT"))
-    assert_api_results(seqs)
-
-    seqs = Sequence.where(Sequence[:notes].matches("%formatted%"))
-    assert_not_empty(seqs)
-    assert_api_pass(params.merge(notes_has: "formatted"))
-    assert_api_results(seqs)
-
-    # Make sure all observations have at least one sequence for the rest.
+  def ensure_all_obs_have_at_least_one_sequence
     Observation.find_each do |obs2|
       next if obs2.sequences.any?
 
       Sequence.create!(observation: obs2, user: obs2.user, locus: "ITS1F",
                        archive: "GenBank", accession: "MO#{obs2.id}")
     end
+  end
 
+  def test_getting_sequences_id
+    assert_api_pass(params_get(id: seq_sample.id))
+    assert_api_results([seq_sample])
+  end
+
+  def test_getting_sequences_created_at
+    seqs = Sequence.created_on("2017-01-01")
+    assert_not_empty(seqs)
+    assert_api_pass(params_get(created_at: "2017-01-01"))
+    assert_api_results(seqs)
+  end
+
+  def test_getting_sequences_updated_at
+    seqs = Sequence.where(
+      Sequence[:updated_at].year.eq(2017).and(Sequence[:updated_at].month.eq(2))
+    )
+    assert_not_empty(seqs)
+    assert_api_pass(params_get(updated_at: "2017-02"))
+    assert_api_results(seqs)
+  end
+
+  def test_getting_sequences_user
+    obs = observations(:locally_sequenced_obs)
+    obs.update!(user: mary)
+    obs.sequences.each { |s| s.update!(user: mary) }
+    seqs = Sequence.where(user: mary)
+    assert_not_empty(seqs)
+    assert_api_pass(params_get(user: "mary"))
+    assert_api_results(seqs)
+  end
+
+  def test_getting_sequences_locus
+    seqs = Sequence.where(locus: %w[ITS1F ITS4 ITS5])
+    assert_not_empty(seqs)
+    assert_api_pass(params_get(locus: "its1f,its4,its5"))
+    assert_api_results(seqs)
+  end
+
+  def test_getting_sequences_archive
+    seqs = Sequence.where(archive: %w[GenBank UNITE])
+    assert_not_empty(seqs)
+    assert_api_pass(params_get(archive: "genbank,unite"))
+    assert_api_results(seqs)
+  end
+
+  def test_getting_sequences_accession
+    seqs = Sequence.where(accession: "KT968605")
+    assert_not_empty(seqs)
+    assert_api_pass(params_get(accession: "KT968605"))
+    assert_api_results(seqs)
+  end
+
+  def test_getting_sequences_locus_has
+    seqs = Sequence.where(Sequence[:locus].matches("%its%"))
+    assert_not_empty(seqs)
+    assert_api_pass(params_get(locus_has: "ITS"))
+    assert_api_results(seqs)
+  end
+
+  def test_getting_sequences_accession_has
+    seqs = Sequence.where(Sequence[:accession].matches("%kt%"))
+    assert_not_empty(seqs)
+    assert_api_pass(params_get(accession_has: "KT"))
+    assert_api_results(seqs)
+  end
+
+  def test_getting_sequences_notes_has
+    seqs = Sequence.where(Sequence[:notes].matches("%formatted%"))
+    assert_not_empty(seqs)
+    assert_api_pass(params_get(notes_has: "formatted"))
+    assert_api_results(seqs)
+  end
+
+  def test_getting_sequences_obs_date
+    # Make sure all observations have at least one sequence for the rest.
+    ensure_all_obs_have_at_least_one_sequence
     obses = Observation.where(
       (Observation[:when].year >= 2012).and(Observation[:when].year <= 2014)
     )
     assert_not_empty(obses)
-    assert_api_pass(params.merge(obs_date: "2012-2014"))
+    assert_api_pass(params_get(obs_date: "2012-2014"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
+  end
 
+  def test_getting_sequences_observer
+    ensure_all_obs_have_at_least_one_sequence
     obses = Observation.where(user: dick)
     assert_not_empty(obses)
-    assert_api_pass(params.merge(observer: "dick"))
+    assert_api_pass(params_get(observer: "dick"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
+  end
 
+  def test_getting_sequences_without_name
+    ensure_all_obs_have_at_least_one_sequence
     obses = Observation.without_name
     assert_not_empty(obses)
-    assert_api_pass(params.merge(name: "Fungi"))
+    assert_api_pass(params_get(name: "Fungi"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
+  end
 
+  def test_getting_sequences_of_synonyms
+    ensure_all_obs_have_at_least_one_sequence
     Observation.create!(user: rolf, when: Time.zone.now,
                         where: locations(:burbank),
                         name: names(:lactarius_alpinus))
@@ -104,13 +141,16 @@ class API2::SequencesTest < UnitTestCase
                         name: names(:lactarius_alpigenes))
     obses = Observation.where(name: names(:lactarius_alpinus).synonyms)
     assert(obses.length > 1)
-    assert_api_pass(params.merge(synonyms_of: "Lactarius alpinus"))
+    assert_api_pass(params_get(synonyms_of: "Lactarius alpinus"))
     assert_api_results(obses.map(&:sequences).flatten)
     assert_api_pass(
-      params.merge(name: "Lactarius alpinus", include_synonyms: "yes")
+      params_get(name: "Lactarius alpinus", include_synonyms: "yes")
     )
     assert_api_results(obses.map(&:sequences).flatten)
+  end
 
+  def test_getting_sequences_include_subtaxa
+    ensure_all_obs_have_at_least_one_sequence
     assert_blank(
       Observation.where(text_name: "Agaricus"),
       "Tests won't work if there's already an Observation for genus Agaricus"
@@ -123,108 +163,150 @@ class API2::SequencesTest < UnitTestCase
       observation: agaricus_obs, user: rolf, locus: "ITS", bases: "ACGT"
     )
     ssp_sequences = ssp_obs.map(&:sequences).flatten.sort_by(&:id)
-    assert_api_pass(params.merge(children_of: "Agaricus"))
+    assert_api_pass(params_get(children_of: "Agaricus"))
     assert_api_results(ssp_sequences)
-    assert_api_pass(params.merge(name: "Agaricus", include_subtaxa: "yes"))
+    assert_api_pass(params_get(name: "Agaricus", include_subtaxa: "yes"))
     assert_api_results(ssp_sequences << agaricus_sequence)
+  end
 
+  def test_getting_sequences_location
+    ensure_all_obs_have_at_least_one_sequence
     obses = Observation.at_locations(locations(:burbank))
     assert(obses.length > 1)
-    assert_api_pass(params.merge(location: 'Burbank\, California\, USA'))
+    assert_api_pass(params_get(location: 'Burbank\, California\, USA'))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
+  end
 
+  def test_getting_sequences_herbarium
+    ensure_all_obs_have_at_least_one_sequence
     obses = HerbariumRecord.where(herbarium: herbaria(:nybg_herbarium)).
             map(&:observations).flatten.sort_by(&:id)
     assert(obses.length > 1)
-    assert_api_pass(params.merge(herbarium: "The New York Botanical Garden"))
+    assert_api_pass(params_get(herbarium: "The New York Botanical Garden"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
+  end
 
+  def test_getting_sequences_herbarium_record
+    ensure_all_obs_have_at_least_one_sequence
     rec = herbarium_records(:interesting_unknown)
     obses = rec.observations.sort_by(&:id)
     assert(obses.length > 1)
-    assert_api_pass(params.merge(herbarium_record: rec.id))
+    assert_api_pass(params_get(herbarium_record: rec.id))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
+  end
 
+  def test_getting_sequences_project
+    ensure_all_obs_have_at_least_one_sequence
     proj = projects(:one_genus_two_species_project)
     obses = proj.observations.sort_by(&:id)
     assert(obses.length > 1)
-    assert_api_pass(params.merge(project: proj.id))
+    assert_api_pass(params_get(project: proj.id))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
+  end
 
+  def test_getting_sequences_species_list
+    ensure_all_obs_have_at_least_one_sequence
     spl = species_lists(:one_genus_three_species_list)
     obses = spl.observations.sort_by(&:id)
     assert(obses.length > 1)
-    assert_api_pass(params.merge(species_list: spl.id))
+    assert_api_pass(params_get(species_list: spl.id))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
+  end
 
+  def test_getting_sequences_confidence
+    ensure_all_obs_have_at_least_one_sequence
     obses = Observation.where(vote_cache: 3)
     assert(obses.length > 1)
-    assert_api_pass(params.merge(confidence: "3.0"))
+    assert_api_pass(params_get(confidence: "3.0"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
+  end
 
+  def test_getting_sequences_in_box
+    ensure_all_obs_have_at_least_one_sequence
     obses = Observation.where(lat: [34..35], lng: [-119..-118])
     locs = Location.in_box(north: 35, south: 34, east: -118, west: -119)
 
     obses = (obses + locs.map(&:observations)).flatten.uniq.sort_by(&:id)
     assert_not_empty(obses)
-    assert_api_fail(params.merge(south: 34, east: -118, west: -119))
-    assert_api_fail(params.merge(north: 35, east: -118, west: -119))
-    assert_api_fail(params.merge(north: 35, south: 34, west: -119))
-    assert_api_fail(params.merge(north: 35, south: 34, east: -118))
-    assert_api_pass(params.merge(north: 35, south: 34, east: -118, west: -119))
+    assert_api_fail(params_get(south: 34, east: -118, west: -119))
+    assert_api_fail(params_get(north: 35, east: -118, west: -119))
+    assert_api_fail(params_get(north: 35, south: 34, west: -119))
+    assert_api_fail(params_get(north: 35, south: 34, east: -118))
+    assert_api_pass(params_get(north: 35, south: 34, east: -118, west: -119))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
+  end
 
+  def test_getting_sequences_is_collection_location
+    ensure_all_obs_have_at_least_one_sequence
     obses = Observation.not_collection_location
     assert(obses.length > 1)
-    assert_api_pass(params.merge(is_collection_location: "no"))
+    assert_api_pass(params_get(is_collection_location: "no"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
+  end
 
+  def test_getting_sequences_has_images
+    ensure_all_obs_have_at_least_one_sequence
     with    = Observation.with_images
     without = Observation.without_images
     assert(with.length > 1)
     assert(without.length > 1)
-    assert_api_pass(params.merge(has_images: "yes"))
+    assert_api_pass(params_get(has_images: "yes"))
     assert_api_results(with.map(&:sequences).flatten.sort_by(&:id))
-    assert_api_pass(params.merge(has_images: "no"))
+    assert_api_pass(params_get(has_images: "no"))
     assert_api_results(without.map(&:sequences).flatten.sort_by(&:id))
+  end
 
+  def test_getting_sequences_has_name
+    ensure_all_obs_have_at_least_one_sequence
     names = Name.with_rank_at_or_below_genus
     with = Observation.where(name: names)
     without = Observation.where.not(name: names)
     assert(with.length > 1)
     assert(without.length > 1)
-    assert_api_pass(params.merge(has_name: "yes"))
+    assert_api_pass(params_get(has_name: "yes"))
     assert_api_results(with.map(&:sequences).flatten.sort_by(&:id))
-    assert_api_pass(params.merge(has_name: "no"))
+    assert_api_pass(params_get(has_name: "no"))
     assert_api_results(without.map(&:sequences).flatten.sort_by(&:id))
+  end
 
+  def test_getting_sequences_has_specimen
+    ensure_all_obs_have_at_least_one_sequence
     with    = Observation.with_specimen
     without = Observation.without_specimen
     assert(with.length > 1)
     assert(without.length > 1)
-    assert_api_pass(params.merge(has_specimen: "yes"))
+    assert_api_pass(params_get(has_specimen: "yes"))
     assert_api_results(with.map(&:sequences).flatten.sort_by(&:id))
-    assert_api_pass(params.merge(has_specimen: "no"))
+    assert_api_pass(params_get(has_specimen: "no"))
     assert_api_results(without.map(&:sequences).flatten.sort_by(&:id))
+  end
 
+  def test_getting_sequences_has_obs_notes
+    ensure_all_obs_have_at_least_one_sequence
     with = Observation.with_notes
     without = Observation.without_notes
     assert(with.length > 1)
     assert(without.length > 1)
-    assert_api_pass(params.merge(has_obs_notes: "yes"))
+    assert_api_pass(params_get(has_obs_notes: "yes"))
     assert_api_results(with.map(&:sequences).flatten.sort_by(&:id))
-    assert_api_pass(params.merge(has_obs_notes: "no"))
+    assert_api_pass(params_get(has_obs_notes: "no"))
     assert_api_results(without.map(&:sequences).flatten.sort_by(&:id))
+  end
 
+  def test_getting_sequences_has_notes_field
+    ensure_all_obs_have_at_least_one_sequence
     obses = Observation.notes_contain(":substrate:").
             reject { |o| o.notes[:substrate].blank? }
     assert(obses.length > 1)
-    assert_api_pass(params.merge(has_notes_field: "substrate"))
+    assert_api_pass(params_get(has_notes_field: "substrate"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
+  end
 
+  def test_getting_sequences_obs_notes_has
+    ensure_all_obs_have_at_least_one_sequence
     obses = Observation.notes_contain("orphan")
     assert(obses.length > 1)
-    assert_api_pass(params.merge(obs_notes_has: "orphan"))
+    assert_api_pass(params_get(obs_notes_has: "orphan"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
   end
 

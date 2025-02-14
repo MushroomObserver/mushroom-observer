@@ -14,41 +14,68 @@ class API2::CommentsTest < UnitTestCase
   #  :section: Comment Requests
   # -----------------------------
 
-  def test_getting_comments
-    params = { method: :get, action: :comment }
-    com1 = comments(:minimal_unknown_obs_comment_1)
-    com2 = comments(:minimal_unknown_obs_comment_2)
-    com3 = comments(:detailed_unknown_obs_comment)
+  def params_get(**)
+    { method: :get, action: :comment }.merge(**)
+  end
 
-    assert_api_pass(params.merge(id: com1.id))
+  def com1
+    @com1 ||= comments(:minimal_unknown_obs_comment_1)
+  end
+
+  def com2
+    @com2 ||= comments(:minimal_unknown_obs_comment_2)
+  end
+
+  def com3
+    @com3 ||= comments(:detailed_unknown_obs_comment)
+  end
+
+  def test_getting_comments_id
+    assert_api_pass(params_get(id: com1.id))
     assert_api_results([com1])
+  end
 
-    assert_api_pass(params.merge(created_at: "2006-03-02 21:16:00"))
+  def test_getting_comments_created_at
+    assert_api_pass(params_get(created_at: "2006-03-02 21:16:00"))
     assert_api_results([com2])
+  end
 
-    assert_api_pass(params.merge(updated_at: "2007-03-02 21:16:00"))
+  def test_getting_comments_updated_at
+    assert_api_pass(params_get(updated_at: "2007-03-02 21:16:00"))
     assert_api_results([com3])
+  end
 
+  def test_getting_comments_user
     expect = Comment.where(user: rolf) + Comment.where(user: dick)
-    assert_api_pass(params.merge(user: "rolf,dick"))
+    assert_api_pass(params_get(user: "rolf,dick"))
     assert_api_results(expect.sort_by(&:id))
+  end
 
+  def test_getting_comments_type
     expect = Comment.where(target_type: "Observation")
-    assert_api_pass(params.merge(type: "Observation"))
+    assert_api_pass(params_get(type: "Observation"))
     assert_api_results(expect.sort_by(&:id))
+  end
 
-    assert_api_pass(params.merge(summary_has: "complicated"))
+  def test_getting_comments_summary_has
+    assert_api_pass(params_get(summary_has: "complicated"))
     assert_api_results([com2])
+  end
 
-    assert_api_pass(params.merge(content_has: "really cool"))
+  def test_getting_comments_content_has
+    assert_api_pass(params_get(content_has: "really cool"))
     assert_api_results([com1])
+  end
 
+  def test_getting_comments_target
     obs = observations(:minimal_unknown_obs)
-    assert_api_pass(params.merge(target: "observation ##{obs.id}"))
+    assert_api_pass(params_get(target: "observation ##{obs.id}"))
     assert_api_results(obs.comments.sort_by(&:id))
+  end
 
+  def test_getting_comments_wrong_type
     # APIKeys don't have comments
-    assert_api_fail(params.merge(type: APIKey.name))
+    assert_api_fail(params_get(type: APIKey.name))
   end
 
   def test_posting_comments

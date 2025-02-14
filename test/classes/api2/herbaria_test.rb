@@ -14,40 +14,49 @@ class API2::HerbariaTest < UnitTestCase
   #  :section: Herbarium Requests
   # -------------------------------
 
-  def test_getting_herbaria
-    params = {
-      method: :get,
-      action: :herbarium
-    }
+  def params_get(**)
+    { method: :get, action: :herbarium }.merge(**)
+  end
 
+  def test_getting_herbaria_created_at
     herbs = Herbarium.created_on("2012-10-21")
     assert_not_empty(herbs)
-    assert_api_pass(params.merge(created_at: "2012-10-21"))
+    assert_api_pass(params_get(created_at: "2012-10-21"))
     assert_api_results(herbs)
+  end
 
+  def test_getting_herbaria_updated_at
     herbs = [herbaria(:nybg_herbarium)]
     assert_not_empty(herbs)
-    assert_api_pass(params.merge(updated_at: "2012-10-21 12:14"))
+    assert_api_pass(params_get(updated_at: "2012-10-21 12:14"))
     assert_api_results(herbs)
+  end
 
+  def test_getting_herbaria_code
     herbs = Herbarium.where(code: "NY")
     assert_not_empty(herbs)
-    assert_api_pass(params.merge(code: "NY"))
+    assert_api_pass(params_get(code: "NY"))
     assert_api_results(herbs)
+  end
 
+  def test_getting_herbaria_name
     herbs = Herbarium.where(Herbarium[:name].matches("%personal%"))
     assert_not_empty(herbs)
-    assert_api_pass(params.merge(name: "personal"))
+    assert_api_pass(params_get(name: "personal"))
     assert_api_results(herbs)
+  end
 
+  def test_getting_herbaria_description
     herbs = Herbarium.where(Herbarium[:description].matches("%awesome%"))
     assert_not_empty(herbs)
-    assert_api_pass(params.merge(description: "awesome"))
+    assert_api_pass(params_get(description: "awesome"))
     assert_api_results(herbs)
+  end
 
+  def test_getting_herbaria_address
     herbs = Herbarium.where(Herbarium[:mailing_address].matches("%New York%"))
     assert_not_empty(herbs)
-    assert_api_pass(params.merge(address: "New York"))
+    assert_api_pass(params_get(address: "New York"))
     assert_api_results(herbs)
   end
 end
