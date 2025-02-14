@@ -147,7 +147,7 @@ module Query::Modules::Conditions
     add_joins(*joins)
   end
 
-  # parameter_declarations tells us what kind of query these params should make.
+  # parameter_declarations tells us the model name of the subquery.
   def subquery_from_params(param)
     model = parameter_declarations[param][:subquery] # defined in each subclass
     Query.deserialize(params[param].merge(model:)) # returns a query
