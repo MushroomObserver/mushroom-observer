@@ -40,7 +40,7 @@ module Name::Lifeform
   #
   # and be confident that it will not skip "word" at the beginning or end,
   # and will not match "compoundword".
-  def validate_lifeform
+  def lifeform_known
     words = lifeform.to_s.split.sort.uniq
     self.lifeform = words.any? ? " #{words.join(" ")} " : " "
     unknown_words = words - ALL_LIFEFORMS
