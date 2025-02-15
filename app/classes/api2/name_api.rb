@@ -60,11 +60,10 @@ class API2
 
     # Pre-validate subquery params by instantiating a new Query object.
     def parse_observation_query_parameters
-      args = {
+      {
         locations: parse_array(:string, :location),
         species_lists: parse_array(:string, :species_list)
       }
-      Query.new(:Observation, **args).params
     end
 
     def create_params

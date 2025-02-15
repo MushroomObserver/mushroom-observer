@@ -49,10 +49,8 @@ class API2
       }
     end
 
-    # Pre-validate subquery params by instantiating a new Query object.
     def parse_observation_query_parameters
-      args = parse_names_parameters.compact
-      Query.new(:Observation, **args).params
+      parse_names_parameters.compact
     end
 
     def create_params

@@ -46,7 +46,7 @@ class API2
     # Pre-validate subquery params by instantiating a new Query object.
     def parse_observation_query_parameters
       box = parse_bounding_box!
-      args = {
+      {
         date: parse_range(:date, :obs_date, help: :obs_date),
         users: parse_array(:user, :observer),
         names: parse_array(:name, :name, as: :id),
@@ -67,7 +67,6 @@ class API2
         with_notes_fields: parse(:string, :has_notes_field, help: 1),
         notes_has: parse(:string, :obs_notes_has, help: 1),
       }.merge(parse_names_parameters)
-      Query.new(:Observation, **args).params
     end
 
     def create_params
