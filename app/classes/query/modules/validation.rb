@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # validation of Query parameters
-module Query::Modules::Validation
+module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
   attr_accessor :params, :params_cache
 
   def validate_params
@@ -14,7 +14,8 @@ module Query::Modules::Validation
       new_params[param] = val
     end
     check_for_unexpected_params(old_params)
-    @params = new_params
+    # Remove the expander params so names won't get expanded again.
+    @params = new_params.except!(*NAMES_EXPANDER_PARAMS)
   end
 
   def check_for_unexpected_params(old_params)
@@ -95,9 +96,9 @@ module Query::Modules::Validation
     end
   end
 
-  def validate_nested_params(_param, val, hash)
+  def validate_nested_params(_param, val, param_type)
     val2 = {}
-    hash.each do |key, arg_type|
+    param_type.each do |key, arg_type|
       val2[key] = scalar_validate(key, val[key], arg_type)
     end
     val2
@@ -105,15 +106,14 @@ module Query::Modules::Validation
 
   # Subqueries should be sent pre-validated: Query.lookup(submodel, **).params
   # Don't revalidate subquery params; it could re-expand name synonyms/children.
-  def validate_subquery(param, val, hash)
-    if hash.keys.length != 1
+  def validate_subquery(param, val, param_type)
+    if param_type.keys.length != 1
       raise(
         "Invalid enum declaration for :#{param} for #{model} " \
         "query! (wrong number of keys in hash)"
       )
     end
-
-    submodel = hash.values.first
+    submodel = param_type.values.first
     add_default_subquery_conditions(submodel, val)
   end
 
