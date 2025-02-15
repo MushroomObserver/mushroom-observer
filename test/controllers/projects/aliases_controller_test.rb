@@ -78,7 +78,7 @@ module Projects
       project_id = @project.id
       post(:create, params: {
              project_id:,
-             project_alias: { name: "", project_id: }  # Invalid params
+             project_alias: { name: "", project_id: } # Invalid params
            })
 
       assert_response(:success)
@@ -105,7 +105,7 @@ module Projects
       patch(:update, params: {
               project_id:,
               id: @project_alias.id,
-              project_alias: { name: "", project_id: }  # Invalid params
+              project_alias: { name: "", project_id: } # Invalid params
             })
 
       assert_response(:success)

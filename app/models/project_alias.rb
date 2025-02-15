@@ -12,7 +12,7 @@ class ProjectAlias < AbstractModel
   end
 
   def location_id
-    self.target_id
+    target_id
   end
 
   def user_id=(id)
@@ -20,7 +20,7 @@ class ProjectAlias < AbstractModel
   end
 
   def user_id
-    self.target_id
+    target_id
   end
 
   def target_type=(type)
