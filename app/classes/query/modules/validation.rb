@@ -103,6 +103,8 @@ module Query::Modules::Validation
     val2
   end
 
+  # Subqueries should be sent pre-validated: Query.lookup(submodel, **).params
+  # Don't revalidate subquery params; it could re-expand name synonyms/children.
   def validate_subquery(param, val, hash)
     if hash.keys.length != 1
       raise(
@@ -112,9 +114,7 @@ module Query::Modules::Validation
     end
 
     submodel = hash.values.first
-    val = add_default_subquery_conditions(submodel, val)
-    # Call lookup to validate the subquery params; return those
-    Query.lookup(submodel, val).params
+    add_default_subquery_conditions(submodel, val)
   end
 
   def add_default_subquery_conditions(submodel, val)
