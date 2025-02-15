@@ -11,14 +11,12 @@ module Projects
       @project_aliases = ProjectAlias.all
       respond_to do |format|
         format.html
-        format.json { render(json: @project_aliases) }
       end
     end
 
     def show
       respond_to do |format|
         format.html
-        format.json { render(json: @project_alias) }
       end
     end
 
@@ -53,13 +51,15 @@ module Projects
             project_alias_redirect(@project_alias)
           end
         else
-          @project_alias = ProjectAlias.new(project_id: params[:project_id])
-          format.html { render(:new) }
-          format.json do
-            render(json: @project_alias.errors, status: :unprocessable_entity)
-          end
+          flash_and_reload(format, :new)
         end
       end
+    end
+
+    def flash_and_reload(format, action)
+      @project_alias.errors.each { |err| flash_error(err.full_message) }
+      format.turbo_stream { reload_modal_project_alias_form }
+      format.html { render(action) }
     end
 
     def update
@@ -71,12 +71,8 @@ module Projects
           format.html do
             redirect_to_project_alias_show
           end
-          format.json { render(json: @project_alias) }
         else
-          format.html { render(:edit) }
-          format.json do
-            render(json: @project_alias.errors, status: :unprocessable_entity)
-          end
+          flash_and_reload(format, :edit)
         end
       end
     end
@@ -89,7 +85,6 @@ module Projects
           redirect_to(project_aliases_path(project_id:),
                       notice: :project_alias_destroyed.t)
         end
-        format.json { head(:no_content) }
       end
     end
 
@@ -123,6 +118,15 @@ module Projects
         locals: { title: modal_title, identifier: modal_identifier,
                   form: "projects/aliases/form", project_alias: @project_alias }
       ) and return
+    end
+
+    def reload_modal_project_alias_form
+      render(
+        partial: "shared/modal_form_reload",
+        locals: { identifier: modal_identifier,
+                  form: "projects/aliases/form",
+                  form_locals: { project_alias: @project_alias } }
+      ) and return true
     end
 
     def modal_identifier

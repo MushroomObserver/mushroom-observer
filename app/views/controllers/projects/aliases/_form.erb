@@ -1,4 +1,7 @@
 <%
+  if local_assigns[:form_locals]
+    project_alias = form_locals[:project_alias]
+  end
   @container = :text
   type = (project_alias.target_type || :location).downcase.to_sym
   value = project_alias.target&.format_name || ""
