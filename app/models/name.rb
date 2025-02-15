@@ -428,7 +428,7 @@ class Name < AbstractModel
   validate  :author_characters
   # Use a method because translated error message throws Error
   # when loading fixtures and/or rails lang:update
-  validate :author_ending
+  validate  :author_ending
   validates :search_name, presence: true
   validate  :search_name_indistinct
   validate  :citation_start

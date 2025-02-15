@@ -85,7 +85,7 @@ module Name::Validation
 
   def author_characters
     return if author.blank?
-    return if /\A[\p{L} ().,&]*\z/.match?(author)
+    return if /\A[\p{L} ()-.,&]*\z/.match?(author)
 
     errors.add(:author, :validate_name_author_characters.t)
   end
