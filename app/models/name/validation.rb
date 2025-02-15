@@ -83,12 +83,19 @@ module Name::Validation
     )
   end
 
+  def author_characters
+    return if author.blank?
+    return if /\A[\p{L} ().,&]*\z/.match?(author)
+
+    errors.add(:author, :validate_name_author_characters.t)
+  end
+
   def author_ending
     return if author.blank?
     # Should end only in letter, period plus optional spacing
-    return if (punct = /[\p{Alpha}\.]( *)\Z/.match(author))
+    return if /[\p{Alpha}\.]( *)\Z/.match?(author)
 
-    errors.add(:base, :name_error_field_end.t(field: :AUTHOR.t, end: punct))
+    errors.add(:author, :validate_name_author_ending.t)
   end
 
   def search_name_indistinct

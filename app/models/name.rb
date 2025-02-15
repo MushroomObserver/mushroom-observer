@@ -423,15 +423,12 @@ class Name < AbstractModel
   validate  :user_presence
   validate  :text_name_length
   validate  :author_length
-  validates :author,
-            format: {
-              with: /\A[\p{L} ().,&]*\z/, allow_nil: true,
-              # prevents NoMethodError: private method `t' called for an
-              # instance of Symbol
-              # when CI PR Run
-              message: I18n.t(:validate_name_author_characters)
-            }
-  validate  :author_ending
+  # Use a method because translated error message throws Error
+  # when loading fixtures and/or rails lang:update
+  validate  :author_characters
+  # Use a method because translated error message throws Error
+  # when loading fixtures and/or rails lang:update
+  validate :author_ending
   validates :search_name, presence: true
   validate  :search_name_indistinct
   validate  :citation_start
