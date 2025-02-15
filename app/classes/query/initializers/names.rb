@@ -134,10 +134,6 @@ module Query::Initializers::Names
     add_not_id_condition(column, params[:names], *joins)
   end
 
-  def force_empty_results
-    @where = ["FALSE"]
-  end
-
   # Much simpler form for non-observation-based name queries.
   def initialize_name_parameters_for_name_queries
     add_id_condition("names.id", params[:names])

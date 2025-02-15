@@ -5,7 +5,7 @@ module Tabs
   module ImagesHelper
     # link attribute arrays
     def images_index_tabs(query:)
-      [coerced_observation_query_tab(query)]
+      [related_observations_tab(:Image, query)]
     end
 
     # assemble links for show_image

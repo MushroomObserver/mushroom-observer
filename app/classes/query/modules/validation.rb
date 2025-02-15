@@ -5,7 +5,7 @@ module Query::Modules::Validation
   attr_accessor :params, :params_cache
 
   def validate_params
-    old_params = @params.dup.compact.symbolize_keys
+    old_params = @params.dup&.compact&.symbolize_keys || {}
     new_params = {}
     permitted_params = parameter_declarations.slice(*old_params.keys)
     permitted_params.each do |param, param_type|
@@ -88,6 +88,8 @@ module Query::Modules::Validation
   def validate_hash_param(param, val, param_type)
     if [:string, :boolean].include?(param_type.keys.first)
       validate_enum(param, val, param_type)
+    elsif param_type.keys.first == :subquery
+      validate_subquery(param, val, param_type)
     else
       validate_nested_params(param, val, param_type)
     end
@@ -99,6 +101,32 @@ module Query::Modules::Validation
       val2[key] = scalar_validate(key, val[key], arg_type)
     end
     val2
+  end
+
+  # Subqueries should be sent pre-validated: Query.lookup(submodel, **).params
+  # Don't revalidate subquery params; it could re-expand name synonyms/children.
+  def validate_subquery(param, val, hash)
+    if hash.keys.length != 1
+      raise(
+        "Invalid enum declaration for :#{param} for #{model} " \
+        "query! (wrong number of keys in hash)"
+      )
+    end
+
+    submodel = hash.values.first
+    add_default_subquery_conditions(submodel, val)
+  end
+
+  def add_default_subquery_conditions(submodel, val)
+    return val unless needs_is_collection_location_param(submodel, val)
+
+    val.merge(is_collection_location: true)
+  end
+
+  def needs_is_collection_location_param(submodel, val)
+    model == Location && submodel == :Observation &&
+      (val[:project] || val[:species_list]) &&
+      val[:is_collection_location].blank?
   end
 
   def validate_enum(param, val, hash)
@@ -257,9 +285,13 @@ module Query::Modules::Validation
       val.is_a?(String) && (val == "0") && (param == :user)
   end
 
+  NAMES_EXPANDER_PARAMS = [
+    :include_synonyms, :include_subtaxa, :include_immediate_subtaxa,
+    :exclude_original_names
+  ].freeze
+
   def add_synonyms_and_subtaxa(val_array)
-    names_params = *names_parameter_declarations.except(:names).keys
-    lookup_params = @params.slice(*names_params).compact
+    lookup_params = @params.slice(*NAMES_EXPANDER_PARAMS).compact
     return val_array if lookup_params.blank?
 
     new_array = Lookup::Names.new(val_array[0, MO.query_max_array],

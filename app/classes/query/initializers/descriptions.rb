@@ -73,7 +73,6 @@ module Query::Initializers::Descriptions
   # If ever generalizing, `type` should be model.parent_type
   def initialize_name_descriptions_parameters(type = "name")
     initialize_ok_for_export_parameter
-    initialize_with_default_desc_parameter(type)
     initialize_join_desc_parameter(type)
     initialize_desc_type_parameter(type)
     # NOTE: (AN 2025) These may now be superfluous, unless they need to be
@@ -83,14 +82,6 @@ module Query::Initializers::Descriptions
     initialize_desc_creator_parameter(type)
     # This is a description notes content search
     initialize_desc_content_parameter(type)
-  end
-
-  def initialize_with_default_desc_parameter(type)
-    add_boolean_condition(
-      "#{type}s.description_id IS NOT NULL",
-      "#{type}s.description_id IS NULL",
-      params[:with_default_desc]
-    )
   end
 
   def initialize_join_desc_parameter(type)
@@ -131,21 +122,21 @@ module Query::Initializers::Descriptions
     add_search_condition(fields, params[:desc_content])
   end
 
-  def params_out_to_with_descriptions_params
-    pargs = params_plus_old_by.merge(with_descriptions: true)
-    return pargs if pargs[:ids].blank?
+  # def params_out_to_with_descriptions_params
+  #   pargs = params_plus_old_by.merge(with_descriptions: true)
+  #   return pargs if pargs[:ids].blank?
 
-    pargs[:desc_ids] = pargs.delete(:ids)
-    pargs
-  end
+  #   pargs[:desc_ids] = pargs.delete(:ids)
+  #   pargs
+  # end
 
-  def params_back_to_description_params
-    pargs = params_with_old_by_restored.except(:with_descriptions)
-    return pargs if pargs[:desc_ids].blank?
+  # def params_back_to_description_params
+  #   pargs = params_with_old_by_restored.except(:with_descriptions)
+  #   return pargs if pargs[:desc_ids].blank?
 
-    pargs[:ids] = pargs.delete(:desc_ids)
-    pargs
-  end
+  #   pargs[:ids] = pargs.delete(:desc_ids)
+  #   pargs
+  # end
 
   # --------------------------------------------------------------------------
 

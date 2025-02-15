@@ -40,8 +40,6 @@ class API2
         is_deprecated: parse(:boolean, :is_deprecated),
         misspellings: parse_misspellings,
         with_synonyms: parse(:boolean, :has_synonyms),
-        locations: parse_array(:string, :location),
-        species_lists: parse_array(:string, :species_list),
         rank: parse(:enum, :rank, limit: Name.all_ranks),
         with_author: parse(:boolean, :has_author),
         with_citation: parse(:boolean, :has_citation),
@@ -55,8 +53,18 @@ class API2
         classification_has: parse(:string, :classification_has, help: 1),
         notes_has: parse(:string, :notes_has, help: 1),
         comments_has: parse(:string, :comments_has, help: 1),
-        ok_for_export: parse(:boolean, :ok_for_export)
+        ok_for_export: parse(:boolean, :ok_for_export),
+        observation_query: parse_observation_query_parameters.compact
       }.merge(parse_names_parameters)
+    end
+
+    # Pre-validate subquery params by instantiating a new Query object.
+    def parse_observation_query_parameters
+      args = {
+        locations: parse_array(:string, :location),
+        species_lists: parse_array(:string, :species_list)
+      }
+      Query.new(:Observation, **args).params
     end
 
     def create_params

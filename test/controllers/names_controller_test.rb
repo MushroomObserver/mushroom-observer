@@ -68,16 +68,18 @@ class NamesControllerTest < FunctionalTestCase
     assert_displayed_title("Names by Popularity")
   end
 
-  def test_index_with_saved_query
+  def test_index_via_related_query
     user = dick
     query = Query.lookup_and_save(:Observation, by_user: user)
-    q = query.id.alphabetize
+    new_query = Query.current_or_related_query(:Name, :Observation, query)
+    new_query.save  # have to save here so we can send it as `q`
+    q = new_query.id.alphabetize
 
     login
     get(:index, params: { q: q })
 
-    assert_displayed_title("Names with Observations created by #{user.name}")
-    # assert_displayed_title("Names with Matching Observations")
+    # assert_displayed_title("Names with Observations created by #{user.name}")
+    assert_displayed_title("Names with Matching Observations")
     assert_select(
       "#results a:match('href', ?)", %r{^#{names_path}/\d+},
       { count: Name.joins(:observations).with_correct_spelling.
