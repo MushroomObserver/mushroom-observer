@@ -66,7 +66,7 @@ module Projects
       respond_to do |format|
         if @project_alias.update(project_alias_params)
           format.turbo_stream do
-            render_project_alias_change
+            render_project_alias_user_change
           end
           format.html do
             redirect_to_project_alias_show
@@ -85,6 +85,9 @@ module Projects
           redirect_to(project_aliases_path(project_id:),
                       notice: :project_alias_destroyed.t)
         end
+        format.turbo_stream do
+          render_project_alias_user_change
+        end
       end
     end
 
@@ -96,13 +99,6 @@ module Projects
                     id: @project_alias.id
                   ),
                   notice: :project_alias_updated.t)
-    end
-
-    def render_project_alias_change
-      render(
-        partial: "projects/aliases/section_update",
-        locals: { identifier: "project_alias" }
-      ) and return
     end
 
     def render_project_alias_user_change

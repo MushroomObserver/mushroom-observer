@@ -1,7 +1,10 @@
 <% project_id = project.id %>
 <%= tag.div(id: "user_project_alias_#{user.id}") do %>
   <% project.alias_data(user).each do |name, id| %>
-    <%= edit_project_alias_link(project_id, name, id) %><br/>
+    <%= edit_project_alias_link(project_id, name, id) %>
+    <%= destroy_button(target: project_alias_path(project_id:, id:),
+                       icon: :delete) %>
+    <br/>
   <% end %>
   <% if project.alias_data(user).any? %>
     <br/>
