@@ -45,8 +45,14 @@ class API2
         title_has: parse(:string, :title_has, help: 1),
         notes_has: parse(:string, :notes_has, help: 1),
         comments_has: parse(:string, :comments_has, help: 1),
-        observation_query: parse_names_parameters.compact
+        observation_query: parse_observation_query_parameters.compact
       }
+    end
+
+    # Pre-validate subquery params by instantiating a new Query object.
+    def parse_observation_query_parameters
+      args = parse_names_parameters.compact
+      Query.new(:Observation, **args).params
     end
 
     def create_params

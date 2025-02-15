@@ -61,8 +61,14 @@ class API2
         quality: parse_range(:quality, :quality),
         confidence: parse_range(:confidence, :confidence),
         ok_for_export: parse(:boolean, :ok_for_export),
-        observation_query: parse_names_parameters.compact
+        observation_query: parse_observation_query_parameters.compact
       }
+    end
+
+    # Pre-validate subquery params by instantiating a new Query object.
+    def parse_observation_query_parameters
+      args = parse_names_parameters.compact
+      Query.new(:Observation, **args).params
     end
 
     def create_params

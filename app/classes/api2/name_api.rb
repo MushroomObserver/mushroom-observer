@@ -54,15 +54,17 @@ class API2
         notes_has: parse(:string, :notes_has, help: 1),
         comments_has: parse(:string, :comments_has, help: 1),
         ok_for_export: parse(:boolean, :ok_for_export),
-        observation_query: parse_observation_query_params.compact
+        observation_query: parse_observation_query_parameters.compact
       }.merge(parse_names_parameters)
     end
 
-    def parse_observation_query_params
-      {
+    # Pre-validate subquery params by instantiating a new Query object.
+    def parse_observation_query_parameters
+      args = {
         locations: parse_array(:string, :location),
         species_lists: parse_array(:string, :species_list)
       }
+      Query.new(:Observation, **args).params
     end
 
     def create_params
