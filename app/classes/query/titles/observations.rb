@@ -49,7 +49,7 @@ module Query::Titles::Observations
   end
 
   def title_for_project
-    str = ensure_integer(params[:project], Project, :title)
+    str = ensure_integer(params.deep_find(:project), Project, :title)
     :query_title_for_project.t(type: :observation, project: str)
   end
 
@@ -64,7 +64,7 @@ module Query::Titles::Observations
   end
 
   def title_for_species_list
-    str = ensure_integer(params[:species_list], SpeciesList, :title)
+    str = ensure_integer(params.deep_find(:species_list), SpeciesList, :title)
     :query_title_in_species_list.t(type: :observation, species_list: str)
   end
 
@@ -75,13 +75,13 @@ module Query::Titles::Observations
 
   # takes a user_id
   def title_for_by_user
-    str = ensure_integer(params[:by_user], User, :name)
+    str = ensure_integer(params.deep_find(:by_user), User, :name)
     :query_title_by_user.t(type: :observation, user: str)
   end
 
   # takes a search string
   def title_for_user
-    :query_title_by_user.t(type: :observation, user: params[:user])
+    :query_title_by_user.t(type: :observation, user: params.deep_find(:user))
   end
 
   # takes a list of user_ids
@@ -102,7 +102,7 @@ module Query::Titles::Observations
     end.join(", ")
     if str.length > 100
       str = "#{str[0...97]}..."
-    elsif params[param].length > MAX_TITLE_ITEMS
+    elsif params.deep_find(param).length > MAX_TITLE_ITEMS
       str += ", ..."
     end
     str
