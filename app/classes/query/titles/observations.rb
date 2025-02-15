@@ -20,9 +20,11 @@ module Query::Titles::Observations
 
     # For now just deal with simple cases which correspond more or less
     # to the old flavors.
-    args = [:herbaria, :locations, :names, :project, :projects,
-            :project_lists, :species_list, :species_lists, :by_user,
-            :user, :users].reject { |arg| params.deep_find(arg).to_s.empty? }
+    args = [
+      :herbaria, :locations, :names, :project, :projects, :project_lists,
+      :species_list, :species_lists, :by_user, :user, :users
+    ].reject { |arg| params.deep_find(arg).first.blank? }
+
     if args.length == 1
       send(:"title_for_#{args.first}")
     else
@@ -93,9 +95,6 @@ module Query::Titles::Observations
   def map_join_and_truncate(param, model, method)
     str = params.deep_find(param)[0..(MAX_TITLE_ITEMS - 1)].map do |val|
       # Integer(val) throws ArgumentError if val is not an integer.
-      # This is the most efficient way to test if a string is an
-      # integer according to a very thorough and detailed blog post!
-      # model.find(Integer(val)).send(method)
       ensure_integer(val, model, method)
     rescue ArgumentError # rubocop:disable Layout/RescueEnsureAlignment
       val
@@ -110,6 +109,8 @@ module Query::Titles::Observations
 
   def ensure_integer(val, model, method)
     val = val.min if val.is_a?(Array)
+    return val if val.is_a?(AbstractModel)
+
     model.find(Integer(val)).send(method)
   end
 end

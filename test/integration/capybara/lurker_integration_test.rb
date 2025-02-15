@@ -262,17 +262,19 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
 
     # Get a list of locations shown on map. (One defined, one undefined.)
     within("#right_tabs") { click_link("Show Locations") }
-    assert_match("Locations with Observations", page.title, "Wrong page")
+    assert_match("Locations with Matching Observations", page.title,
+                 "Wrong title")
 
     # Click on the defined location.
     click_link(text: /Burbank/)
-    assert_match("Location: Burbank, California, USA", page.title, "Wrong page")
+    assert_match("Location: Burbank, California, USA", page.title,
+                 "Wrong title")
 
     # Get a list of observations from there.  (Several so goes to index.)
     within("#location_coordinates") do
       click_link(text: :show_location_observations.l)
     end
-    assert_match("Matching Observations", page.title, "Wrong page")
+    assert_match("Matching Observations", page.title, "Wrong title")
     save_results = find_all("#results a").select do |l|
       l[:href].match(%r{^/\d+})
     end
