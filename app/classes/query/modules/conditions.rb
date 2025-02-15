@@ -139,11 +139,9 @@ module Query::Modules::Conditions
   def add_subquery_condition(param, *joins, table: nil, col: :id)
     return if params[param].blank?
 
-    ids = subquery_from_params(param).result_ids.join(",")
-    return force_empty_results if ids.blank?
-
+    sql = subquery_from_params(param).query
     table ||= subquery_table(param)
-    @where << "#{table}.#{col} IN (#{ids})"
+    @where << "#{table}.#{col} IN (#{sql})"
     add_joins(*joins)
   end
 
@@ -151,7 +149,7 @@ module Query::Modules::Conditions
   # parameter_declarations tells us the model name by subquery.
   def subquery_from_params(param)
     model = parameter_declarations[param][:subquery] # defined in each subclass
-    Query.deserialize(params[param].merge(model:).to_json) # returns a query
+    Query.new(model, params[param])
   end
 
   # Look up a default subquery table from the parameter_declarations
