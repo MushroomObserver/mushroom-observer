@@ -42,23 +42,17 @@ module Query::Modules::Validation
   end
 
   def array_validate(param, val, param_type)
-    validated = case val
-                when Array
-                  val[0, MO.query_max_array].map! do |val2|
-                    scalar_validate(param, val2, param_type)
-                  end
-                when ::API2::OrderedRange
-                  [scalar_validate(param, val.begin, param_type),
-                   scalar_validate(param, val.end, param_type)]
-                else
-                  [scalar_validate(param, val, param_type)]
-                end
-    return validated unless param == :names
-
-    # :names may come with modifier "flag" params that indicate synonyms, etc.
-    # Look those up only after validating the initial array, then we can add
-    # any new ids to the :names array (to avoid recursion explosions)
-    add_synonyms_and_subtaxa(validated)
+    case val
+    when Array
+      val[0, MO.query_max_array].map! do |val2|
+        scalar_validate(param, val2, param_type)
+      end
+    when ::API2::OrderedRange
+      [scalar_validate(param, val.begin, param_type),
+       scalar_validate(param, val.end, param_type)]
+    else
+      [scalar_validate(param, val, param_type)]
+    end
   end
 
   def scalar_validate(param, val, param_type)
@@ -253,16 +247,6 @@ module Query::Modules::Validation
       val.is_a?(String) && val.match(/^[1-9]\d*$/) ||
       # (blasted admin user has id = 0!)
       val.is_a?(String) && (val == "0") && (param == :user)
-  end
-
-  def add_synonyms_and_subtaxa(val_array)
-    names_params = *names_parameter_declarations.except(:names).keys
-    lookup_params = @params.slice(*names_params).compact
-    return val_array if lookup_params.blank?
-
-    new_array = Lookup::Names.new(val_array[0, MO.query_max_array],
-                                  **lookup_params).ids
-    new_array.flatten.uniq
   end
 
   # Requires a unique identifying string and will return [only_one_record].
