@@ -18,10 +18,10 @@ statuses = [[:ACCEPTED.l, false], [:DEPRECATED.l, true]]
     <%= help_block(:div, :form_names_detailed_help.l) %>
 
     <div class="form-inline my-3">
-    <% append = help_block(:p, :form_names_identifier_help.l) %>
-    <%= text_field_with_label(form: f, field: :icn_id,
-                              label: "#{:form_names_icn_id.l}:",
-                              size: 8, inline: true, append: append) %>
+      <% append = help_block(:p, :form_names_identifier_help.l) %>
+      <%= text_field_with_label(form: f, field: :icn_id,
+                                label: "#{:form_names_icn_id.l}:",
+                                size: 8, inline: true, append: append) %>
     </div>
 
     <div class="form-inline my-3">
