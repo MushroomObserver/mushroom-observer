@@ -98,7 +98,8 @@ class Query::Sequences < Query::Base
 
   # Different because it can take multiple users
   def initialize_observers_parameter
-    add_id_condition("observations.user_id", params[:observers], :observations)
+    ids = lookup_users_by_name(params[:observers])
+    add_id_condition("observations.user_id", ids, :observations)
   end
 
   def initialize_observation_parameters
