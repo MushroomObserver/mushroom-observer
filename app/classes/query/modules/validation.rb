@@ -83,7 +83,6 @@ module Query::Modules::Validation
       validate_enum(param, val, param_type)
     elsif param_type.keys.first == :subquery
       validate_subquery(param, val, param_type)
-      validate_nested_params(param, val, param_type)
     else
       validate_nested_params(param, val, param_type)
     end
@@ -105,6 +104,7 @@ module Query::Modules::Validation
       )
     end
     submodel = param_type.values.first
+    val = Query.new(submodel, val).params
     add_default_subquery_conditions(submodel, val)
   end
 
