@@ -155,7 +155,7 @@ module Query::Initializers::Names
   private
 
   def names_parameters
-    params.dup.intersection(*NAMES_EXPANDER_PARAMS)
+    params.dup.slice(*NAMES_EXPANDER_PARAMS).compact
   end
 
   def irreconcilable_name_parameters?
