@@ -1,6 +1,7 @@
 <%=
   tag.div(id: "updates",
           data: { controller: "inat-import-job",
+                  # status: tracker.status,
                   endpoint: inat_import_job_tracker_path(
                     inat_import_id: tracker.inat_import,
                     id: tracker.id
@@ -14,7 +15,7 @@
           end,
           tag.span(tracker.status,
                    data: { inat_import_job_target: "status",
-                           status: tracker.status }),
+                           state: tracker.status }),
           tag.br,
           # Imported n of m observations
           tag.span(class: "font-weight-bold") do
