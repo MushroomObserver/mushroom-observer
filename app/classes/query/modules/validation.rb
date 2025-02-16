@@ -161,10 +161,8 @@ module Query::Modules::Validation
     end
   end
 
-  # This type of param accepts instances or ids, but has a backup possibility
-  # of lookup strings as an (expensive) last resort. The string will be sent to
-  # the appropriate `Lookup` subclass, and must identify a unique record via the
-  # column defined in the Lookup subclass.
+  # This type of param accepts instances, ids, or strings. When the query is
+  # executed, the string will be sent to the appropriate `Lookup` subclass.
   def validate_record(param, val, type = ActiveRecord::Base)
     if val.is_a?(type)
       raise("Value for :#{param} is an unsaved #{type} instance.") unless val.id
@@ -174,7 +172,7 @@ module Query::Modules::Validation
     elsif could_be_record_id?(param, val)
       val.to_i
     elsif val.is_a?(String) && param != :ids
-      lookup_record_by_name(param, val, type, method: :ids)
+      val
     else
       raise("Value for :#{param} should be id, string " \
             "or #{type} instance, got: #{val.inspect}")
