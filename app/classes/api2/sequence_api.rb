@@ -43,7 +43,6 @@ class API2
       }
     end
 
-    # Pre-validate subquery params by instantiating a new Query object.
     def parse_observation_query_parameters
       box = parse_bounding_box!
       {

@@ -58,7 +58,6 @@ class API2
       }.merge(parse_names_parameters)
     end
 
-    # Pre-validate subquery params by instantiating a new Query object.
     def parse_observation_query_parameters
       {
         locations: parse_array(:string, :location),
