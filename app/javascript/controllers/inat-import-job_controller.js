@@ -5,8 +5,7 @@ import { get } from "@rails/request.js" // allows us to call `get` below
 // Connects to data-controller="inat-import-job"
 export default class extends Controller {
   static targets = [
-    "started", "elapsed", "ended_at", "state", "imported", "importables",
-    "error_caption", "response_errors"
+    "current"
   ]
 
   initialize() {
@@ -17,7 +16,6 @@ export default class extends Controller {
   connect() {
     // Just a "sanity check" convention, so you can tell "is this thing on?"
     this.element.dataset.stimulus = "inat-import-job-connected";
-    this.status = this.element.dataset.status
 
     this.start_timer_sending_requests()
   }
@@ -36,10 +34,11 @@ export default class extends Controller {
   }
 
   // Every second, send a get request to find out the status of the import.
+  // `status` data attribute of `currentTarget` is updated with each request.
   // NOTE: Can't call a class function from `setInterval` because it resets
   // the context of `this`
   start_timer_sending_requests() {
-    if (this.status != "Done") {
+    if (this.currentTarget.dataset.status != "Done") {
       // Set the intervalId to the interval so we can clear it later
       this.intervalId = setInterval(async () => {
         console.log("sending fetch request to " + this.endpoint_url)

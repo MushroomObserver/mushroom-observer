@@ -12,8 +12,8 @@ module InatImports
       respond_to do |format|
         format.turbo_stream do
           render(turbo_stream: turbo_stream.update(
-            :updates, # id of element to change
-            partial: "inat_imports/job_trackers/updates",
+            :"status_#{@tracker.id}", # id of element to update contents of
+            partial: "inat_imports/job_trackers/current", # current content
             locals: { tracker: @tracker }
           ))
         end
