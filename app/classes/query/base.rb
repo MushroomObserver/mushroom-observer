@@ -46,7 +46,7 @@ class Query::Base
   def initialize_flavor
     # These strings can never come direct from user, so no need to sanitize.
     # (I believe they are only used by the site stats page. -JPH 20190708)
-    self.where = params[:where] if params[:where]
+    where << params[:where] if params[:where]
     add_join(params[:join]) if params[:join]
   end
 
