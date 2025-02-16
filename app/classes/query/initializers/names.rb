@@ -147,7 +147,16 @@ module Query::Initializers::Names
 
   # ------------------------------------------------------------------------
 
+  NAMES_EXPANDER_PARAMS = [
+    :include_synonyms, :include_subtaxa, :include_immediate_subtaxa,
+    :exclude_original_names
+  ].freeze
+
   private
+
+  def names_parameters
+    params.dup.intersection(*NAMES_EXPANDER_PARAMS)
+  end
 
   def irreconcilable_name_parameters?
     params[:exclude_consensus] && !params[:include_all_name_proposals]
