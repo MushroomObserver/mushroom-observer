@@ -69,7 +69,7 @@ class QueryTest < UnitTestCase
                  Query.lookup(:Image, by_user: rolf.id).params[:by_user])
     assert_equal(rolf.id,
                  Query.lookup(:Image, by_user: rolf.id.to_s).params[:by_user])
-    assert_equal(rolf.id,
+    assert_equal(rolf.login,
                  Query.lookup(:Image, by_user: "rolf").params[:by_user])
   end
 
@@ -84,7 +84,7 @@ class QueryTest < UnitTestCase
                  Query.lookup(:Image, users: rolf.id).params[:users])
     assert_equal([rolf.id],
                  Query.lookup(:Image, users: rolf.id.to_s).params[:users])
-    assert_equal([rolf.id],
+    assert_equal([rolf.login],
                  Query.lookup(:Image, users: rolf.login).params[:users])
   end
 
