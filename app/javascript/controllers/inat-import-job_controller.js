@@ -55,15 +55,7 @@ export default class extends Controller {
         this.status = this.element.innerHTML
       }, 1000);
     } else {
-      // If the import is done, we can remove this Stimulus controller from the
-      // element and stop the timer. (NOTE: there may be other controllers.)
-      console.log("inat-import-job is done")
-      const controllers = this.element.dataset.controller.split(" ")
-      if (controllers.includes("inat-import-job")) {
-        const idx = controllers.indexOf("inat-import-job")
-        controllers.splice(idx, 1)
-        this.element.setAttribute("inat-import-job", controllers.join(" "))
-      }
+      clearInterval(this.intervalId)
     }
   }
 }
