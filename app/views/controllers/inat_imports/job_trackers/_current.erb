@@ -1,7 +1,5 @@
-<%# locals: (tracker: nil) %>
-
 <%=
-  tag.div(id: "current_status_#{tracker.id}"
+  tag.div(id: "current_status_#{tracker.id}",
           data: { inat_import_job_target: "current",
                   status: tracker.status }) do
     [
