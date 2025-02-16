@@ -19,9 +19,7 @@ module Query::Initializers::Observations
   end
 
   def initialize_obs_date_parameter(param_name = :date)
-    add_date_condition(
-      "observations.when", params[param_name], :observations
-    )
+    add_date_condition("observations.when", params[param_name], :observations)
   end
 
   def initialize_project_lists_parameter
@@ -37,7 +35,7 @@ module Query::Initializers::Observations
 
     add_join(:field_slips)
     ids = lookup_field_slips_by_name(params[:field_slips])
-    add_id_condition( "field_slips.id", ids, :observations)
+    add_id_condition("field_slips.id", ids, :observations)
   end
 
   def initialize_obs_record_parameters
