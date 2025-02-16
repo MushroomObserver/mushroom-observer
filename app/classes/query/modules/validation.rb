@@ -14,6 +14,7 @@ module Query::Modules::Validation
       new_params[param] = val
     end
     check_for_unexpected_params(old_params)
+    @params = new_params
   end
 
   def check_for_unexpected_params(old_params)
