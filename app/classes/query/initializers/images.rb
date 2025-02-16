@@ -10,7 +10,7 @@ module Query::Initializers::Images
 
   def initialize_img_association_parameters
     initialize_observations_parameter
-    add_where_condition(:observations, params[:locations],
+    add_location_string_condition(:observations, params[:locations],
                         :observation_images, :observations)
     add_for_project_condition(:project_images)
     initialize_projects_parameter(:project_images, [:project_images])

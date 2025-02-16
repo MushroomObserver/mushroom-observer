@@ -56,7 +56,7 @@ class Query::SpeciesLists < Query::Base
 
   def initialize_association_parameters
     add_at_location_condition
-    add_where_condition(:species_lists, params[:locations])
+    add_location_string_condition(:species_lists, params[:locations])
     initialize_projects_parameter(:project_species_lists,
                                   [:project_species_lists])
   end
