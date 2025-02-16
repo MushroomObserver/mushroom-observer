@@ -110,17 +110,13 @@ module Query::Initializers::Descriptions
   end
 
   def initialize_desc_project_parameter(type)
-    add_id_condition(
-      "#{type}_descriptions.project_id",
-      params[:desc_project]
-    )
+    ids = lookup_projects_by_name(params[:desc_project])
+    add_id_condition("#{type}_descriptions.project_id", ids)
   end
 
   def initialize_desc_creator_parameter(type)
-    add_id_condition(
-      "#{type}_descriptions.user_id",
-      params[:desc_creator]
-    )
+    ids = lookup_users_by_name(params[:desc_creator])
+    add_id_condition("#{type}_descriptions.user_id", ids)
   end
 
   def initialize_desc_content_parameter(type)
