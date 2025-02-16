@@ -6,16 +6,14 @@ module Query::Modules::Associations
     joins = [:observations, :observation_herbarium_records, :herbarium_records]
   )
     add_id_condition(
-      "herbarium_records.herbarium_id",
-      lookup_herbaria_by_name(params[:herbaria]),
-      *joins
+      "herbarium_records.herbarium_id", params[:herbaria], *joins
     )
   end
 
   def initialize_herbarium_records_parameter
     add_id_condition(
       "observation_herbarium_records.herbarium_record_id",
-      lookup_herbarium_records_by_name(params[:herbarium_records]),
+      params[:herbarium_records],
       :observations, :observation_herbarium_records
     )
   end
@@ -25,10 +23,10 @@ module Query::Modules::Associations
 
     loc_col   = "#{table}.location_id"
     where_col = "#{table}.where"
-    ids       = clean_id_set(lookup_locations_by_name(vals))
+    ids       = clean_id_set(vals)
     cond      = "#{loc_col} IN (#{ids})"
     vals.each do |val|
-      if /\D/.match?(val)
+      if /\D/.match?(val.to_s)
         pattern = clean_pattern(val)
         cond += " OR #{where_col} LIKE '%#{pattern}%'"
       end
@@ -82,11 +80,7 @@ module Query::Modules::Associations
 
   def initialize_projects_parameter(table = :project_observations,
                                     joins = [:observations, table])
-    add_id_condition(
-      "#{table}.project_id",
-      lookup_projects_by_name(params[:projects]),
-      *joins
-    )
+    add_id_condition("#{table}.project_id", params[:projects], *joins)
   end
 
   def add_in_species_list_condition(table = :species_list_observations,
@@ -104,10 +98,6 @@ module Query::Modules::Associations
   def initialize_species_lists_parameter(
     table = :species_list_observations, joins = [:observations, table]
   )
-    add_id_condition(
-      "#{table}.species_list_id",
-      lookup_species_lists_by_name(params[:species_lists]),
-      *joins
-    )
+    add_id_condition("#{table}.species_list_id", params[:species_lists], *joins)
   end
 end

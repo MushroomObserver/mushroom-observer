@@ -7,18 +7,18 @@ class Query::Comments < Query::Base
 
   def parameter_declarations
     super.merge(
-      created_at?: [:time],
-      updated_at?: [:time],
-      ids?: [Comment],
-      by_user?: User,
-      for_user?: User,
-      users?: [User],
-      types?: [{ string: Comment.all_type_tags }],
-      summary_has?: :string,
-      content_has?: :string,
-      pattern?: :string,
-      target?: AbstractModel,
-      type?: :string
+      created_at: [:time],
+      updated_at: [:time],
+      ids: [Comment],
+      by_user: User,
+      for_user: User,
+      users: [User],
+      types: [{ string: Comment::ALL_TYPE_TAGS }],
+      summary_has: :string,
+      content_has: :string,
+      pattern: :string,
+      target: AbstractModel,
+      type: :string
     )
   end
 
@@ -31,7 +31,7 @@ class Query::Comments < Query::Base
     add_for_target_condition
     add_pattern_condition
     add_string_enum_condition("comments.target_type", params[:types],
-                              Comment.all_type_tags)
+                              Comment::ALL_TYPE_TAGS)
     add_search_condition("comments.summary", params[:summary_has])
     add_search_condition("comments.comment", params[:content_has])
     super

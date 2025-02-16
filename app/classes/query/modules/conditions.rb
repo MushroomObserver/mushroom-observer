@@ -6,7 +6,7 @@ module Query::Modules::Conditions
   def add_owner_and_time_stamp_conditions(table = model.table_name)
     add_time_condition("#{table}.created_at", params[:created_at])
     add_time_condition("#{table}.updated_at", params[:updated_at])
-    add_id_condition("#{table}.user_id", lookup_users_by_name(params[:users]))
+    add_id_condition("#{table}.user_id", params[:users])
   end
 
   def add_by_user_condition(table = model.table_name)
@@ -38,6 +38,14 @@ module Query::Modules::Conditions
     add_search_condition(search_fields, params[:pattern])
   end
 
+  def initialize_ok_for_export_parameter
+    add_boolean_condition(
+      "#{model.table_name}.ok_for_export IS TRUE",
+      "#{model.table_name}.ok_for_export IS FALSE",
+      params[:ok_for_export]
+    )
+  end
+
   def add_boolean_condition(true_cond, false_cond, val, *)
     return if val.nil?
 
@@ -61,7 +69,7 @@ module Query::Modules::Conditions
   def add_search_condition(col, val, *)
     return if val.blank?
 
-    search = google_parse(val)
+    search = SearchParams.new(phrase: val)
     @where += google_conditions(search, col)
     add_joins(*)
   end
@@ -86,13 +94,15 @@ module Query::Modules::Conditions
     add_joins(*)
   end
 
+  # Send the whole enum Hash as `allowed`, so we can find the corresponding
+  # values of the keys. MO's enum values currently may not start at 0.
   def add_indexed_enum_condition(col, vals, allowed, *)
     return if vals.empty?
 
-    vals = vals.filter_map { |v| allowed.index_of(v.to_sym) }
+    vals = allowed.values_at(*vals)
     return if vals.empty?
 
-    @where << "#{col} IN (#{val.join(",")})"
+    @where << "#{col} IN (#{vals.join(",")})"
     add_joins(*)
   end
 

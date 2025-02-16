@@ -105,7 +105,7 @@
 #  view_owner_id::      View Observation author's ID on Obs page
 #
 #  ==== Content filter options
-#  content_filter::     Serialized Hash of ContentFilter parameters.
+#  content_filter::     Serialized Hash of Query::Filter parameters.
 #
 #  ==== Email options
 #  Send notifications if...
@@ -314,7 +314,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   scope :by_contribution, lambda {
     order(contribution: :desc, name: :asc, login: :asc)
   }
-
   # NOTE: the obs images are a separate optimized query
   scope :show_includes, lambda {
     strict_loading.includes(
@@ -322,6 +321,8 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
       :user_stats
     )
   }
+  scope :verified, -> { where.not(verified: nil) }
+  scope :unverified, -> { where(verified: nil) }
 
   # These are used by forms.
   attr_accessor :place_name
@@ -427,6 +428,31 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def format_name
     unique_text_name
+  end
+
+  def self.lookup_unique_text_name(str)
+    return nil unless str
+
+    user = nil
+    login = nil
+    if (match = str.match(/\(([^(]+)\)$/))
+      login = match[1]
+      user = find_name_match(User.where(login:), str)
+    end
+    user ||= find_name_match(User.where(login: str), str)
+    if login && !user
+      pattern = "%#{ActiveRecord::Base.sanitize_sql(login)}%"
+      user = find_name_match(User.where("login like ?", pattern), str)
+    end
+    user
+  end
+
+  def self.find_name_match(users, str)
+    return users.first if users.count == 1
+
+    users.find_each do |user|
+      return user if user.unique_text_name == str
+    end
   end
 
   # Return User's full name if present, else return login.

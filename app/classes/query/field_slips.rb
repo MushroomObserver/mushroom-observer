@@ -7,10 +7,10 @@ class Query::FieldSlips < Query::Base
 
   def parameter_declarations
     super.merge(
-      created_at?: [:time],
-      updated_at?: [:time],
-      by_user?: User,
-      project?: Project
+      created_at: [:time],
+      updated_at: [:time],
+      by_user: User,
+      project: Project
     )
   end
 

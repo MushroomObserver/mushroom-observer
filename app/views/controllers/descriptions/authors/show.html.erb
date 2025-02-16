@@ -21,6 +21,7 @@ type = @object.type_tag
 
 <p>
   <%= :review_authors_other_users.t %><br/>
+  NEED A USER COMPLETER HERE
   <% @users.each do |u|
     unless @authors.member?(u) %>
       <%= user_link(u) %>

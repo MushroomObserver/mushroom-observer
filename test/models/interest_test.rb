@@ -43,4 +43,10 @@ class InterestTest < UnitTestCase
 
     assert_equal(true, dick.watching?(names(:agaricus_campestris)))
   end
+
+  def test_polymorphic_joins
+    Interest::ALL_TYPE_TAGS.each do |type_tag|
+      assert_true(Interest.joins(type_tag))
+    end
+  end
 end

@@ -556,12 +556,12 @@ class LocationTest < UnitTestCase
   #    Explicit tests of some scopes to improve coverage
   # ----------------------------------------------------
 
-  def test_scope_name_includes
+  def test_scope_name_contains
     assert_includes(
-      Location.name_includes("Albion"),
+      Location.name_contains("Albion"),
       locations(:albion)
     )
-    assert_empty(Location.name_includes(ARBITRARY_SHA))
+    assert_empty(Location.name_contains(ARBITRARY_SHA))
   end
 
   def test_scope_in_region
@@ -600,6 +600,22 @@ class LocationTest < UnitTestCase
       include?(loc), "#{loc.name} should contain its SW corner")
   end
 
+  def cal
+    locations(:california)
+  end
+
+  def missing_west_box
+    { north: cal.north, south: cal.south, east: cal.east }
+  end
+
+  def outa_bounds_box
+    { north: 91, south: cal.south, east: cal.east, west: cal.west }
+  end
+
+  def north_southerthan_south_box
+    { north: cal.south - 10, south: cal.south, east: cal.east, west: cal.west }
+  end
+
   # supplements API tests
   def test_scope_in_box
     cal = locations(:california)
@@ -613,19 +629,15 @@ class LocationTest < UnitTestCase
     assert_not_includes(locs_in_wrangel_box, cal)
 
     assert_empty(
-      Location.in_box(north: cal.north, south: cal.south, east: cal.east),
+      Location.in_box(**missing_west_box),
       "`scope: in_box` should be empty if an argument is missing"
     )
     assert_empty(
-      Location.in_box(
-        north: 91, south: cal.south, east: cal.east, west: cal.west
-      ),
+      Location.in_box(**outa_bounds_box),
       "`scope: in_box` should be empty if an argument is out of bounds"
     )
     assert_empty(
-      Location.in_box(
-        north: cal.south - 10, south: cal.south, east: cal.east, west: cal.west
-      ),
+      Location.in_box(**north_southerthan_south_box),
       "`scope: in_box` should be empty if N < S"
     )
   end

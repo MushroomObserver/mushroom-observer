@@ -90,13 +90,24 @@ class SearchController < ApplicationController
 
       # Treat User field differently; remove angle-bracketed user name,
       # since it was included by the auto-completer only as a hint.
-      val = val.sub(/ <.*/, "") if field == :user
+      val = user_login(params[:search]) if field == :user
       query_params[field] = val
     end
   end
 
+  def user_login(params)
+    if params.include?(:user_id)
+      user = User.find_by(id: params[:user_id])
+      return user.login if user
+    end
+    user = User.lookup_unique_text_name(params[:user])
+    return user.login if user
+
+    params[:user]
+  end
+
   def add_applicable_filter_parameters(query_params, model)
-    ContentFilter.by_model(model).each do |fltr|
+    Query::Filter.by_model(model).each do |fltr|
       query_params[fltr.sym] = params.dig(:content_filter, fltr.sym)
     end
   end

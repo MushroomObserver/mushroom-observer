@@ -118,7 +118,7 @@ class Herbarium < AbstractModel
     name.t.html_to_ascii.gsub(/\W+/, " ").strip_squeeze.downcase
   end
 
-  def auto_complete_name
+  def autocomplete_name
     code.blank? ? name : "#{code} - #{name}"
   end
 

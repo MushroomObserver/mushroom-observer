@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class Query::Sequences < Query::Base
+  include Query::Params::Locations
   include Query::Params::Names
   include Query::Params::Observations
   include Query::Initializers::Names
@@ -13,47 +14,44 @@ class Query::Sequences < Query::Base
   def parameter_declarations
     super.merge(sequence_parameter_declarations).
       merge(observation_parameter_declarations).
-      merge(names_parameter_declarations)
+      merge(names_parameter_declarations).
+      merge(bounding_box_parameter_declarations)
   end
 
   def sequence_parameter_declarations
     {
-      created_at?: [:time],
-      updated_at?: [:time],
-      observations?: [Observation],
-      users?: [User],
-      locus?: [:string],
-      archive?: [:string],
-      accession?: [:string],
-      locus_has?: :string,
-      accession_has?: :string,
-      notes_has?: :string,
-      pattern?: :string,
-      ids?: [Sequence]
+      created_at: [:time],
+      updated_at: [:time],
+      ids: [Sequence],
+      users: [User],
+      observations: [Observation],
+      locus: [:string],
+      archive: [:string],
+      accession: [:string],
+      locus_has: :string,
+      accession_has: :string,
+      notes_has: :string,
+      pattern: :string
     }
   end
 
   def observation_parameter_declarations
     {
-      obs_date?: [:date],
-      observers?: [User],
-      locations?: [:string],
-      herbaria?: [:string],
-      herbarium_records?: [:string],
-      projects?: [:string],
-      species_lists?: [:string],
-      confidence?: [:float],
-      north?: :float,
-      south?: :float,
-      east?: :float,
-      west?: :float,
-      is_collection_location?: :boolean,
-      with_images?: :boolean,
-      with_name?: :boolean,
-      with_specimen?: :boolean,
-      with_obs_notes?: :boolean,
-      with_notes_fields?: [:string],
-      obs_notes_has?: :string
+      obs_date: [:date],
+      observers: [User],
+      with_name: :boolean,
+      confidence: [:float],
+      locations: [Location],
+      is_collection_location: :boolean,
+      with_images: :boolean,
+      with_specimen: :boolean,
+      with_obs_notes: :boolean,
+      obs_notes_has: :string,
+      with_notes_fields: [:string],
+      herbaria: [Herbarium],
+      herbarium_records: [HerbariumRecord],
+      projects: [Project],
+      species_lists: [SpeciesList]
     }
   end
 
@@ -100,11 +98,7 @@ class Query::Sequences < Query::Base
 
   # Different because it can take multiple users
   def initialize_observers_parameter
-    add_id_condition(
-      "observations.user_id",
-      lookup_users_by_name(params[:observers]),
-      :observations
-    )
+    add_id_condition("observations.user_id", params[:observers], :observations)
   end
 
   def initialize_observation_parameters

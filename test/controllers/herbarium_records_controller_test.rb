@@ -7,7 +7,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     {
       observation_id: observations(:strobilurus_diminutivus_obs).id,
       herbarium_record: {
-        herbarium_name: rolf.preferred_herbarium.auto_complete_name,
+        herbarium_name: rolf.preferred_herbarium.autocomplete_name,
         initial_det: "Strobilurus diminutivus det. Rolf Singer",
         accession_number: "1234567",
         notes: "Some notes about this herbarium record"
@@ -319,7 +319,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     params = {
       observation_id: obs.id,
       herbarium_record: { herbarium_name:
-                          obs.user.preferred_herbarium.auto_complete_name },
+                          obs.user.preferred_herbarium.autocomplete_name },
       q: q
     }
 
@@ -352,7 +352,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_template(:edit)
   end
 
-  def test_udpate_herbarium_record
+  def test_update_herbarium_record
     login("rolf")
     nybg_rec    = herbarium_records(:coprinus_comatus_nybg_spec)
     nybg_user   = nybg_rec.user
@@ -389,7 +389,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     params = {
       id: rec.id,
       herbarium_record: {
-        herbarium_name: rec.herbarium.auto_complete_name,
+        herbarium_name: rec.herbarium.autocomplete_name,
         initial_det: rec.initial_det,
         accession_number: rec.accession_number,
         notes: rec.notes

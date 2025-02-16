@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 module Query::Titles::Observations
+  MAX_TITLE_ITEMS = 3
+
   def with_observations_query_description
     return nil unless (description = observation_query_description)
 
@@ -88,8 +90,8 @@ module Query::Titles::Observations
     :query_title_for_user.t(type: :observation, user: str)
   end
 
-  def map_join_and_truncate(arg, model, method)
-    str = params[arg].map do |val|
+  def map_join_and_truncate(param, model, method)
+    str = params[param][0..(MAX_TITLE_ITEMS - 1)].map do |val|
       # Integer(val) throws ArgumentError if val is not an integer.
       # This is the most efficient way to test if a string is an
       # integer according to a very thorough and detailed blog post!
@@ -98,11 +100,16 @@ module Query::Titles::Observations
     rescue ArgumentError # rubocop:disable Layout/RescueEnsureAlignment
       val
     end.join(", ")
-    str = "#{str[0...97]}..." if str.length > 100
+    if str.length > 100
+      str = "#{str[0...97]}..."
+    elsif params[param].length > MAX_TITLE_ITEMS
+      str += ", ..."
+    end
     str
   end
 
   def ensure_integer(val, model, method)
+    val = val.min if val.is_a?(Array)
     model.find(Integer(val)).send(method)
   end
 end

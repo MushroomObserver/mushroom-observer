@@ -115,9 +115,10 @@ class LocationsController < ApplicationController
 
   # Hook runs before template displayed. Must return query.
   def filtered_index_final_hook(query, display_opts)
-    # Restrict to subset within a geographical region (used by map
-    # if it needed to stuff multiple locations into a single marker).
-    query = restrict_query_to_box(query)
+    # Matching undefined locations is meaningless in a box.
+    # (Undefined locations don't have a box!)
+    return query if query.params[:in_box].present?
+
     # Get matching *undefined* locations.
     set_matching_undefined_location_ivars(query, display_opts)
     query
@@ -179,7 +180,7 @@ class LocationsController < ApplicationController
     args[:by] = "where" if args[:by].blank? || (args[:by] == "name")
 
     if args[:pattern]
-      search = query.google_parse(args[:pattern])
+      search = SearchParams.new(phrase: args[:pattern])
       args[:where] += query.google_conditions(search, "observations.where")
       args.delete(:pattern)
     end

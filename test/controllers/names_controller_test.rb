@@ -557,8 +557,10 @@ class NamesControllerTest < FunctionalTestCase
     get(:show, params: { id: names(:agaricus_campestris).id })
     assert_template("show")
     # Needs new queries this time.
-    # (? Up from 7 to 9 - AN 20240107) (? Now 11 - AN 20241217)
-    assert_equal(11, QueryRecord.count)
+    # (? Up from 7 to 9 - AN 20240107)
+    # Why are we making this assertion if we don't know what the
+    # value should be?
+    assert_equal(9, QueryRecord.count)
 
     # Agarcius: has children taxa.
     get(:show, params: { id: names(:agaricus).id })
@@ -2658,7 +2660,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_equal(old_desc, new_name.description.notes)
   end
 
-  def test_update_name_merged_notes_include_notes_from_both_names
+  def test_update_name_merged_notes_contain_notes_from_both_names
     old_name = names(:hygrocybe_russocoriacea_bad_author) # has notes
     new_name = names(:russula_brevipes_author_notes)
     original_notes = new_name.notes

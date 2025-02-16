@@ -401,6 +401,7 @@ module TitleAndTabsetHelper
   #   Ruby notes: delete_suffix! returns nil if the suffix is not present.
   #   (The bang method is quicker than delete_suffix according to internet.)
   def tab_id(method_name)
+    # "generic_tab_id"
     identifier = method_name.delete_suffix!("_tab")
     identifier ? "#{identifier}_link" : method_name
   end

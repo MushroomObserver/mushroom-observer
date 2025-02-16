@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 class Query::RssLogs < Query::Base
-  include Query::Params::ContentFilters
-  include Query::Initializers::ContentFilters
+  include Query::Params::Filters
+  include Query::Initializers::Filters
 
   def model
     RssLog
@@ -10,9 +10,9 @@ class Query::RssLogs < Query::Base
 
   def parameter_declarations
     super.merge(
-      updated_at?: [:time],
-      type?: :string,
-      ids?: [RssLog]
+      updated_at: [:time],
+      type: :string,
+      ids: [RssLog]
     ).merge(content_filter_parameter_declarations(Observation)).
       merge(content_filter_parameter_declarations(Location))
   end
@@ -35,7 +35,8 @@ class Query::RssLogs < Query::Base
     return if types.include?("all")
 
     types = self.types
-    types &= RssLog.all_types
+    types &= RssLog::ALL_TYPE_TAGS.map(&:to_s)
+
     where << if types.empty?
                "FALSE"
              else

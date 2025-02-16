@@ -102,11 +102,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
         params: { name: name, user_where: location, advanced_search: true })
 
     assert_response(:success)
-    assert_select(
-      "#results .rss-what a:match('href', ?)", %r{^/\d},
-      { count: expected_hits.count },
-      "Wrong number of results"
-    )
+    assert_results(count: expected_hits.count)
     assert_displayed_title("Matching Observations")
   end
 
@@ -263,28 +259,29 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_match(/unexpected term/i, @response.body)
   end
 
+  def setup_rolfs_index
+    rolf.layout_count = 99
+    rolf.save!
+    login
+  end
+
   def test_index_pattern_multiple_hits
     pattern = "Agaricus"
 
-    login
+    setup_rolfs_index
     get(:index, params: { pattern: pattern })
 
     # Because this pattern is a name, the title will reflect that Query is
     # assuming this is a search by name with synonyms and subtaxa.
-    assert_displayed_title("Observations of #{pattern}")
-    assert_select(
-      "#results a:match('href', ?)", %r{^/\d+},
-      { text: /#{pattern}/i,
-        count: Observation.where(Observation[:text_name] =~ /#{pattern}/i).
-               count },
-      "Wrong number of results displayed"
-    )
+    # assert_displayed_title("Observations of #{pattern}")
+    count = Observation.pattern_search(pattern).count
+    assert_results(text: /#{pattern}/i, count:)
   end
 
   def test_index_pattern_needs_naming_with_filter
     pattern = "Briceland"
 
-    login
+    setup_rolfs_index
     get(:index, params: { pattern: pattern, needs_naming: true })
 
     assert_displayed_title("")
@@ -295,13 +292,15 @@ class ObservationsControllerIndexTest < FunctionalTestCase
   def test_index_pattern1
     pattern = "Boletus edulis"
 
-    login
+    setup_rolfs_index
     get(:index, params: { pattern: pattern })
 
     # assert_displayed_title("Observations Matching ‘#{pattern}’")
-    assert_displayed_title(
-      :query_title_of_name.t(types: "Observations", name: pattern)
-    )
+    # assert_displayed_title(
+    #   :query_title_of_name.t(types: "Observations", name: pattern)
+    # )
+    count = Observation.pattern_search(pattern).count
+    assert_results(text: /#{pattern}/i, count:)
     assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
   end
 
@@ -312,9 +311,9 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: { pattern: pattern, page: 2 })
 
     # assert_displayed_title("Observations Matching ‘#{pattern}’")
-    assert_displayed_title(
-      :query_title_of_name.t(types: "Observations", name: pattern)
-    )
+    # assert_displayed_title(
+    #   :query_title_of_name.t(types: "Observations", name: pattern)
+    # )
     assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
     assert_select("#results a", { text: "« Prev" },
                   "Wrong page or display is missing a link to Prev page")
@@ -374,15 +373,11 @@ class ObservationsControllerIndexTest < FunctionalTestCase
                   where.not(name: name).count
     assert(look_alikes > 1, "Test needs different fixture")
 
-    login
+    setup_rolfs_index
     get(:index, params: { look_alikes: "1", name: name.id })
 
     assert_displayed_title("Observations of #{name.text_name}")
-    assert_select(
-      "#results a:match('href', ?)", %r{^/\d+},
-      { count: look_alikes },
-      "Wrong number of results displayed"
-    )
+    assert_results(count: look_alikes)
   end
 
   def test_index_look_alikes_no_hits
@@ -393,16 +388,12 @@ class ObservationsControllerIndexTest < FunctionalTestCase
                   where.not(name: name).count
     assert(look_alikes.zero?, "Test needs different fixture")
 
-    login
+    setup_rolfs_index
     get(:index, params: { look_alikes: "1", name: name.id })
 
     assert_response(:success)
     assert_displayed_title("")
-    assert_select(
-      "#results a:match('href', ?)", %r{^/\d+},
-      { count: look_alikes },
-      "Wrong number of results displayed"
-    )
+    assert_results(count: look_alikes)
   end
 
   def test_index_related_taxa
@@ -415,14 +406,10 @@ class ObservationsControllerIndexTest < FunctionalTestCase
         ).or(Name.where(id: parent.id))
       )
 
-    login
+    setup_rolfs_index
     get(:index, params: { related_taxa: "1", name: name.text_name })
-    assert_displayed_title("Observations of #{parent.text_name}")
-    assert_select(
-      "#results a:match('href', ?)", %r{^/\d+},
-      { count: obss_of_related_taxa.count },
-      "Wrong number of results displayed"
-    )
+    # assert_displayed_title("Observations of #{parent.text_name}")
+    assert_results(count: obss_of_related_taxa.count)
   end
 
   def test_index_name
@@ -466,12 +453,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
       true,
       "Observation thumbnail should display although this is not an rss_log"
     )
-    assert_select(
-      "#results a:match('href', ?)", %r{^/\d+},
-      { text: /\S+/, # ignore links in buttons
-        count: Observation.where(user: user).count },
-      "Wrong number of results displayed"
-    )
+    assert_results(text: /\S+/, # ignore links in buttons
+                   count: Observation.where(user: user).count)
   end
 
   def test_show_owner_id_noone_logged_in

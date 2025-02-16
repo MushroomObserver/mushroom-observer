@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module Query::Initializers::AdvancedSearch
+  # Initialized only on locations, obs, names queries - note images disabled
   def initialize_advanced_search
     name, user, location, content = google_parse_params
     make_sure_user_entered_something(name, user, location, content)
@@ -13,10 +14,10 @@ module Query::Initializers::AdvancedSearch
 
   def google_parse_params
     [
-      google_parse(params[:name]),
-      google_parse(User.remove_bracketed_name(params[:user].to_s)),
-      google_parse(params[:user_where]),
-      google_parse(params[:content])
+      SearchParams.new(phrase: params[:name]),
+      SearchParams.new(phrase: User.remove_bracketed_name(params[:user].to_s)),
+      SearchParams.new(phrase: params[:user_where]),
+      SearchParams.new(phrase: params[:content])
     ]
   end
 

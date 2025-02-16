@@ -70,12 +70,18 @@ module Query::Initializers::Descriptions
     [Name, Location].include?(model) ? "_with_descriptions" : ""
   end
 
-  def initialize_description_parameters(type = model.type_tag)
+  # If ever generalizing, `type` should be model.parent_type
+  def initialize_name_descriptions_parameters(type = "name")
+    initialize_ok_for_export_parameter
     initialize_with_default_desc_parameter(type)
     initialize_join_desc_parameter(type)
     initialize_desc_type_parameter(type)
+    # NOTE: (AN 2025) These may now be superfluous, unless they need to be
+    # differentiated from Names parameters sent in the same request. I.e.,
+    # they could just use `add_for_project_condition` `add_by_user_condition`
     initialize_desc_project_parameter(type)
     initialize_desc_creator_parameter(type)
+    # This is a description notes content search
     initialize_desc_content_parameter(type)
   end
 
@@ -99,21 +105,21 @@ module Query::Initializers::Descriptions
     add_indexed_enum_condition(
       "#{type}_descriptions.source_type",
       params[:desc_type],
-      Description.all_source_types
+      "#{type}_description".classify.constantize.source_types # Hash
     )
   end
 
   def initialize_desc_project_parameter(type)
     add_id_condition(
       "#{type}_descriptions.project_id",
-      lookup_projects_by_name(params[:desc_project])
+      params[:desc_project]
     )
   end
 
   def initialize_desc_creator_parameter(type)
     add_id_condition(
       "#{type}_descriptions.user_id",
-      lookup_users_by_name(params[:desc_creator])
+      params[:desc_creator]
     )
   end
 
@@ -139,5 +145,17 @@ module Query::Initializers::Descriptions
 
     pargs[:ids] = pargs.delete(:desc_ids)
     pargs
+  end
+
+  # --------------------------------------------------------------------------
+
+  private
+
+  def any_param_desc_fields?
+    params[:join_desc] == :any ||
+      params[:desc_type].present? ||
+      params[:desc_project].present? ||
+      params[:desc_creator].present? ||
+      params[:desc_content].present?
   end
 end

@@ -40,6 +40,13 @@ module Query::Initializers::Names
     where << "names.deprecated IS TRUE"  if val == :only
   end
 
+  def initialize_is_deprecated_parameter
+    add_boolean_condition(
+      "names.deprecated IS TRUE", "names.deprecated IS FALSE",
+      params[:is_deprecated]
+    )
+  end
+
   def add_rank_condition(vals, *)
     return if vals.empty?
 
@@ -52,20 +59,6 @@ module Query::Initializers::Names
     ranks = all_ranks[a..b].map { |r| Name.ranks[r] }
     @where << "names.`rank` IN (#{ranks.join(",")})"
     add_joins(*)
-  end
-
-  def initialize_is_deprecated_parameter
-    add_boolean_condition(
-      "names.deprecated IS TRUE", "names.deprecated IS FALSE",
-      params[:is_deprecated]
-    )
-  end
-
-  def initialize_ok_for_export_parameter
-    add_boolean_condition(
-      "names.ok_for_export IS TRUE", "names.ok_for_export IS FALSE",
-      params[:ok_for_export]
-    )
   end
 
   def initialize_name_association_parameters
@@ -132,31 +125,22 @@ module Query::Initializers::Names
 
     table = params[:include_all_name_proposals] ? "namings" : "observations"
     column = "#{table}.name_id"
-    ids = lookup_names_by_name(names_parameters)
-    add_id_condition(column, ids, *joins)
+    add_id_condition(column, params[:names], *joins)
 
     add_join(:observations, :namings) if params[:include_all_name_proposals]
     return unless params[:exclude_consensus]
 
     column = "observations.name_id"
-    add_not_id_condition(column, ids, *joins)
+    add_not_id_condition(column, params[:names], *joins)
   end
 
   def force_empty_results
     @where = ["FALSE"]
   end
 
+  # Much simpler form for non-observation-based name queries.
   def initialize_name_parameters_for_name_queries
-    # Much simpler form for non-observation-based name queries.
-    add_id_condition("names.id", lookup_names_by_name(names_parameters))
-  end
-
-  # Copy only the names_parameters into a name_params hash we use here.
-  def names_parameters
-    name_params = names_parameter_declarations.dup
-    name_params.transform_keys! { |k| k.to_s.chomp("?").to_sym }
-    name_params.each_key { |k| name_params[k] = params[k] }
-    name_params
+    add_id_condition("names.id", params[:names])
   end
 
   # ------------------------------------------------------------------------
