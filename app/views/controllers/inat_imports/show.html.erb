@@ -4,9 +4,17 @@
   # add_tab_set(article_show_tabs(article: @article, user: @user))
 %>
 
-<%=
-  render(partial: "inat_imports/job_trackers/updates",
-         locals: { tracker: @tracker })
+<%= # This is the container that gets updated with whatever's in the partial.
+  tag.div(
+    id: "status_#{@tracker.id}",
+    data: { controller: "inat-import-job",
+            endpoint: inat_import_job_tracker_path(
+              inat_import_id: @tracker.inat_import,
+              id: @tracker.id
+            ) }) do
+    render(partial: "inat_imports/job_trackers/current",
+           locals: { tracker: @tracker })
+  end
 %>
 
 <%=
