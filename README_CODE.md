@@ -1,13 +1,16 @@
 Last Revised: Feb 16, 2025
 
-= MushroomObserver
+# MushroomObserver
+
+<!-- Most links are defined here for DRYness and consistency -->
+[Intro]: https://mushroomobserver.org/info/intro
 
 The following is an overview of the code for the Mushroom Observer website for
-prospective developers.  See https://mushroomobserver.org/info/intro for an
+prospective developers.  See [Intro][Intro] for an
 introduction to the website itself.
 
 
-== Ruby on Rails
+## Ruby on Rails
 
 MO is written using Ruby on Rails, or simply Rails.  This is just a set of
 three heavily interrelated Ruby packages: ActionController, ActionView, and
@@ -34,24 +37,25 @@ test
   Used by the testing framework.  All changes are thrown away between each
   test.  And various Rails inner modules are swapped out with test mock-ups.
 
-Ruby Documentation:: https://www.ruby-doc.org/core/
-Ruby Quick Ref:: https://www.zenspider.com/Languages/Ruby/QuickRef.html
-Rails Documentation:: https://api.rubyonrails.org/
-MVC Architecture:: https://en.wikipedia.org/wiki/Model-view-controller
+- Ruby Documentation:: https://www.ruby-doc.org/core/
+- Ruby Quick Ref:: https://www.zenspider.com/Languages/Ruby/QuickRef.html
+- Rails Documentation:: https://api.rubyonrails.org/
+- MVC Architecture:: https://en.wikipedia.org/wiki/Model-view-controller
 
 
-== Database
+## Database
 
 MO uses MySQL.  The current schema is <tt>db/schema.rb</tt>.  All modifications
 of the structure, such as adding tables or changing existing columns, are
 handled using the handy migrations in <tt>db/migrate</tt>.
 
+```
   rake db:migrate                          # Create or update database.
   rake db:rollback                         # Rollback last migration run.
   rake db:migrate VERSION=YYYYMMDDHHMMSS   # Rollback to previous version.
+```
 
-
-== Important Models
+## Important Models
 
 Database access is all done via subclasses of ApplicationRecord
 ("models").  Each instance of a model represents a single row in the
@@ -60,21 +64,21 @@ Observation, user/account settings in User, taxonomy in Name and
 Synonym, and so on.  These are all found in <tt>app/models</tt>.  Here
 are the major ones:
 
-User::                Users: name, email, password, prefs, etc.
-Observation::         Observations: where, when, what, notes, etc.
-Image::               Images: mostly mushrooms, but also mugshots, etc.
-Name::                Scientific name bundled with notes, citation, etc.
-Location::            Locations: lat/long/elev, notes, etc.
-Project::             Projects: observations, names, locations for an event or team effort
-SpeciesList::         Set of Observation's (*_not_* Name's).
+- User::                Users: name, email, password, prefs, etc.
+- Observation::         Observations: where, when, what, notes, etc.
+- Image::               Images: mostly mushrooms, but also mugshots, etc.
+- Name::                Scientific name bundled with notes, citation, etc.
+- Location::            Locations: lat/long/elev, notes, etc.
+- Project::             Projects: observations, names, locations for an event or team effort
+- SpeciesList::         Set of Observation's (*_not_* Name's).
 
 See the code for a complete list of models and classes used by the
 system to support our data model.
 
 
-== How to Accomplish Typical Developer Tasks
+## How to Accomplish Typical Developer Tasks
 
-=== Writing Tests
+### Writing Tests
 
 Automated testing is a critical part of developing code for Mushroom
 Observer.  We currently have over 90% test coverage across our codebase
@@ -84,9 +88,9 @@ SimpleCov tool which runs automatically whenever tests are run on local
 systems.  This automatically creates a locally browsable report that
 can be accessed starting with the file `coverage/index.html`.
 
-=== Live Website Issues
+### Live Website Issues
 
-==== Functional Bugs
+#### Functional Bugs
 
 Functional bugs in the live website should be documented with GitHub
 issues (https://github.com/MushroomObserver/mushroom-observer/issues).
@@ -109,7 +113,7 @@ In general tests should be run against the target branch (typically
 is particularly important for functional bugs to ensure that the
 original bug is well characterized by the test.
 
-==== Performance Issues
+#### Performance Issues
 
 There are two common sources of website performance issues - outside
 entities abuse the website ("attacks") and performance issues in our
@@ -136,18 +140,18 @@ iterations in a single query.  This data should then be made available
 inside the loop where it can be quickly accessed from memory rather
 than requiring full round trip to the database for each iteration.
 
-=== New Features
+### New Features
 
 For new features, it is often best to start with designing the user
 interface (UI).
 
-==== Simple Features
+#### Simple Features
 
 If the feature is embedded in an existing page, then you can often
 then fake the UI in the appropriate view and then build out the
 functionality on the backend.
 
-==== Features Requiring a New Model
+#### Features Requiring a New Model
 
 If the feature requires new pages, then often there will be some new
 database model associated with each such page.  If that's the case
@@ -182,20 +186,20 @@ Here are the steps for implementing this:
 
 1) Add a place for the New, Edit, and Delete widgets.  This may
 involve switching to a table layout.  For example see:
-    app/views/controllers/projects/locations/index.html.erb.
+`app/views/controllers/projects/locations/index.html.erb`
 
 2) Create partial for the widgets.  Note that it is important
 to have a unique id for each set of widgets on the page since
 that's what Turbo will use to update the page.  For example see:
-    app/views/controllers/projects/_aliases.html.erb
+`app/views/controllers/projects/_aliases.html.erb`
 and specifically the line:
-    <%= tag.div(id: "target_project_alias_#{target.id}") do %>
+`<%= tag.div(id: "target_project_alias_#{target.id}") do %>`
 
 3) The links for the widgets that want to render the form as
 a model should call `modal_link_to` which again cares about
 the value of the HTML id.  For example see:
 
-ProjectsHelper#edit_project_alias_link
+`ProjectsHelper#edit_project_alias_link`
 
 Note that this method also uses the MO concept of "tabs" to
 describe page links.
@@ -203,7 +207,7 @@ describe page links.
 4) The real "Turbo-ness" of this approach happens in the relevant
 controller.  See the use of `turbo_stream` in:
 
-app/controllers/projects/aliases_controller.rb
+`app/controllers/projects/aliases_controller.rb`
 
 These actions used the shared partials modal_form and
 modal_form_reload as well as an update partial to present the form as
@@ -214,7 +218,7 @@ a Turbo stream.
 
 An example update partial is:
 
-app/views/controllers/projects/aliases/_target_update.erb
+`app/views/controllers/projects/aliases/_target_update.erb`
 
 This is where unique id in step 2 is important.  Finally note the
 calls to `close_modal` and `remove` at the bottom of this file.
