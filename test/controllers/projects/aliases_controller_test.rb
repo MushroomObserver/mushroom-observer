@@ -44,7 +44,7 @@ module Projects
                  name: "Walk 2",
                  project_id: @project.id,
                  target_type: "Location",
-                 location_id: locations(:albion).id
+                 target_id: locations(:albion).id
                }
              })
       end
@@ -63,7 +63,7 @@ module Projects
                  name: "RS2",
                  project_id: @project.id,
                  target_type: "User",
-                 user_id: users(:rolf).id
+                 target_id: users(:rolf).id
                }
              })
       end

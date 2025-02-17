@@ -22,8 +22,7 @@ module Projects
 
     def new
       params.require(:project_id)
-      new_params = params.permit(:project_id, :target_type, :target_id,
-                                 :user_id, :location_id)
+      new_params = params.permit(:project_id, :target_type, :target_id)
       @project_alias = ProjectAlias.new(new_params)
 
       respond_to do |format|
@@ -156,8 +155,23 @@ module Projects
     end
 
     def project_alias_params
-      params.require(:project_alias).permit(:name, :project_id, :target_type,
-                                            :location_id, :user_id)
+      result = params.require(:project_alias).permit(:name, :project_id,
+                                                     :target_type, :target_id,
+                                                     :location_id, :user_id)
+      # Autocompleter automatically uses location_id and user_id, but
+      # doing the mapping to target_id in the model causes
+      # AbstractModel.set_user_and_autolog to try to set the user_id
+      # which it shouldn't.  So clean up the params here.
+      update_target(result, :location_id)
+      update_target(result, :user_id)
+      result
+    end
+
+    def update_target(result, field)
+      if result.include?(field)
+        result[:target_id] = result[field]
+        result.delete(field)
+      end
     end
   end
 end
