@@ -218,6 +218,14 @@ module ApplicationController::Indexes
     @error ||= :runtime_no_matches.t(type: query.model.type_tag)
     @layout = calc_layout_params if display_opts[:matrix]
     @num_results = query.num_results
+    @any_content_filters_applied = check_if_preference_filters_applied
+  end
+
+  def check_if_preference_filters_applied
+    current_params = @query.params.flatten.compact_blank.keys
+    return false unless current_params.intersect?(Query::Filter.all.map(&:sym))
+
+    true
   end
 
   ###########################################################################

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-# validation of Query parameters
+# Validation of Query parameters, but also adding user filters to params.
+# If filters have been applied, `params[:preference_filter] == true`
 module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
   attr_accessor :params, :params_cache
 
@@ -15,7 +16,9 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     end
     check_for_unexpected_params(old_params)
     @params = new_params
-    apply_content_filters(self)
+    # Runs after validation to check if filters should be overridden by params.
+    # NOTE: this is also run on each subquery during validation, below.
+    apply_preference_filters(self)
   end
 
   def check_for_unexpected_params(old_params)
@@ -26,21 +29,21 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     raise("Unexpected parameter(s) '#{str}' for #{model} query.")
   end
 
-  def apply_content_filters(query)
-    filters = users_content_filters || {}
+  # Subqueries also call this in validate_subquery for efficiency: we have
+  # them briefly as a Query object and can check class param_declarations.
+  def apply_preference_filters(query)
+    filters = users_preference_filters || {}
     # disable cop because Query::Filter is not an ActiveRecord model
     Query::Filter.all.each do |fltr| # rubocop:disable Rails/FindEach
-      apply_one_content_filter(fltr, query, filters[fltr.sym])
+      apply_one_preference_filter(fltr, query, filters[fltr.sym])
     end
   end
 
-  def users_content_filters
+  def users_preference_filters
     User.current ? User.current.content_filter : MO.default_content_filter
   end
 
-  # This only checks top-level params. Subqueries checked in validate_subquery
-  # because we have them briefly as a query and can check param_declarations.
-  def apply_one_content_filter(fltr, query, user_filter)
+  def apply_one_preference_filter(fltr, query, user_filter)
     return unless query.is_a?(Query::Base)
 
     key = fltr.sym
@@ -132,7 +135,7 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     submodel = param_type.values.first
     val = add_default_subquery_conditions(submodel, val)
     subquery = Query.new(submodel, val)
-    apply_content_filters(subquery)
+    apply_preference_filters(subquery)
     subquery.params
   end
 
