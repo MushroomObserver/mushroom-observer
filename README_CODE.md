@@ -4,11 +4,14 @@ Last Revised: Feb 16, 2025
 
 <!-- Most links are defined here for DRYness and consistency -->
 [Intro]: https://mushroomobserver.org/info/intro
+[Ruby Documentation]: https://www.ruby-doc.org/core/
+[Ruby Quick Ref]: https://www.zenspider.com/Languages/Ruby/QuickRef.html
+[Rails Documentation]: https://api.rubyonrails.org/
+[MVC Architecture]: https://en.wikipedia.org/wiki/Model-view-controller
 
 The following is an overview of the code for the Mushroom Observer website for
 prospective developers.  See [Intro][Intro] for an
 introduction to the website itself.
-
 
 ## Ruby on Rails
 
@@ -37,17 +40,16 @@ test
   Used by the testing framework.  All changes are thrown away between each
   test.  And various Rails inner modules are swapped out with test mock-ups.
 
-- Ruby Documentation:: https://www.ruby-doc.org/core/
-- Ruby Quick Ref:: https://www.zenspider.com/Languages/Ruby/QuickRef.html
-- Rails Documentation:: https://api.rubyonrails.org/
-- MVC Architecture:: https://en.wikipedia.org/wiki/Model-view-controller
-
+- [Ruby Documentation][Ruby Documentation]
+- [Ruby Quick Ref][Ruby Quick Ref]
+- [Rails Documentation][Rails Documentation]
+- [MVC Architecture][MVC Architecture]
 
 ## Database
 
-MO uses MySQL.  The current schema is <tt>db/schema.rb</tt>.  All modifications
+MO uses MySQL.  The current schema is `db/schema.rb`.  All modifications
 of the structure, such as adding tables or changing existing columns, are
-handled using the handy migrations in <tt>db/migrate</tt>.
+handled using the handy migrations in `db/migrate`.
 
 ```
   rake db:migrate                          # Create or update database.
@@ -61,20 +63,19 @@ Database access is all done via subclasses of ApplicationRecord
 ("models").  Each instance of a model represents a single row in the
 corresponding database table.  Look for observations in the class
 Observation, user/account settings in User, taxonomy in Name and
-Synonym, and so on.  These are all found in <tt>app/models</tt>.  Here
+Synonym, and so on.  These are all found in `app/models`.  Here
 are the major ones:
 
-- User::                Users: name, email, password, prefs, etc.
-- Observation::         Observations: where, when, what, notes, etc.
-- Image::               Images: mostly mushrooms, but also mugshots, etc.
-- Name::                Scientific name bundled with notes, citation, etc.
-- Location::            Locations: lat/long/elev, notes, etc.
-- Project::             Projects: observations, names, locations for an event or team effort
-- SpeciesList::         Set of Observation's (*_not_* Name's).
+- User::        Name, email, password, prefs, etc.
+- Observation:: Where, when, what, notes, etc.
+- Image::       Images mostly of mushrooms, but also mugshots, etc.
+- Name::        Scientific name bundled with notes, citation, etc.
+- Location::    Lat/long/elev, notes, etc.
+- Project::     Collection of bservations, names, locations
+- SpeciesList:: Set of Observation's (*_not_* Name's).
 
 See the code for a complete list of models and classes used by the
 system to support our data model.
-
 
 ## How to Accomplish Typical Developer Tasks
 

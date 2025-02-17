@@ -168,10 +168,10 @@ module Projects
     end
 
     def update_target(result, field)
-      if result.include?(field)
-        result[:target_id] = result[field]
-        result.delete(field)
-      end
+      return unless result.include?(field)
+
+      result[:target_id] = result[field]
+      result.delete(field)
     end
   end
 end
