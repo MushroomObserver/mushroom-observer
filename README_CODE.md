@@ -178,3 +178,45 @@ Delete actions can all be handled using buttons that are Turbo
 enabled with New and Edit leveraging Turbo to manage the object
 form through a modal.
 
+Here are the steps for implementing this:
+
+1) Add a place for the New, Edit, and Delete widgets.  This may
+involve switching to a table layout.  For example see:
+    app/views/controllers/projects/locations/index.html.erb.
+
+2) Create partial for the widgets.  Note that it is important
+to have a unique id for each set of widgets on the page since
+that's what Turbo will use to update the page.  For example see:
+    app/views/controllers/projects/_aliases.html.erb
+and specifically the line:
+    <%= tag.div(id: "target_project_alias_#{target.id}") do %>
+
+3) The links for the widgets that want to render the form as
+a model should call `modal_link_to` which again cares about
+the value of the HTML id.  For example see:
+
+ProjectsHelper#edit_project_alias_link
+
+Note that this method also uses the MO concept of "tabs" to
+describe page links.
+
+4) The real "Turbo-ness" of this approach happens in the relevant
+controller.  See the use of `turbo_stream` in:
+
+app/controllers/projects/aliases_controller.rb
+
+These actions used the shared partials modal_form and
+modal_form_reload as well as an update partial to present the form as
+a modal and to update the index page using Turbo.  For the modal form
+to work, the ERB for the form should be named `_form.erb` and not just
+`_form.html.erb` since it may be rendered either as regular HTML or as
+a Turbo stream.
+
+An example update partial is:
+
+app/views/controllers/projects/aliases/_target_update.erb
+
+This is where unique id in step 2 is important.  Finally note the
+calls to `close_modal` and `remove` at the bottom of this file.
+These are required to hide the modal after the form data has been
+processed.
