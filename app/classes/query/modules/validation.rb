@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # validation of Query parameters
-module Query::Modules::Validation
+module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
   attr_accessor :params, :params_cache
 
   def validate_params
@@ -15,6 +15,7 @@ module Query::Modules::Validation
     end
     check_for_unexpected_params(old_params)
     @params = new_params
+    apply_content_filters(self)
   end
 
   def check_for_unexpected_params(old_params)
@@ -25,6 +26,31 @@ module Query::Modules::Validation
     raise("Unexpected parameter(s) '#{str}' for #{model} query.")
   end
 
+  def apply_content_filters(query)
+    filters = users_content_filters || {}
+    # disable cop because Query::Filter is not an ActiveRecord model
+    Query::Filter.all.each do |fltr| # rubocop:disable Rails/FindEach
+      apply_one_content_filter(fltr, query, filters[fltr.sym])
+    end
+  end
+
+  def users_content_filters
+    User.current ? User.current.content_filter : MO.default_content_filter
+  end
+
+  # This only checks top-level params. Subqueries checked in validate_subquery
+  # because we have them briefly as a query and can check param_declarations.
+  def apply_one_content_filter(fltr, query, user_filter)
+    return unless query.is_a?(Query::Base)
+
+    key = fltr.sym
+    return unless query.takes_parameter?(key)
+    return if query.params.key?(key)
+    return unless fltr.on?(user_filter)
+
+    query.params[key] = validate_value(fltr.type, fltr.sym, user_filter.to_s)
+  end
+
   def validate_value(param_type, param, val)
     if param_type.is_a?(Array)
       result = array_validate(param, val, param_type.first).flatten
@@ -32,8 +58,7 @@ module Query::Modules::Validation
       result
     else
       val = scalar_validate(param, val, param_type)
-      val = val.first if val.is_a?(Array)
-      val
+      [val].flatten.first
     end
   end
 
@@ -105,8 +130,10 @@ module Query::Modules::Validation
       )
     end
     submodel = param_type.values.first
-    val = Query.new(submodel, val).params
-    add_default_subquery_conditions(submodel, val)
+    val = add_default_subquery_conditions(submodel, val)
+    subquery = Query.new(submodel, val)
+    apply_content_filters(subquery)
+    subquery.params
   end
 
   def add_default_subquery_conditions(submodel, val)

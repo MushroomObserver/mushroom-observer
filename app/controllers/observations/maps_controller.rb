@@ -9,8 +9,6 @@ module Observations
       show and return if params[:id].present?
 
       @query = find_or_create_query(:Observation)
-      apply_content_filters(@query)
-
       find_locations_matching_observations
     end
 

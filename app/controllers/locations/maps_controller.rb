@@ -9,8 +9,6 @@ module Locations
     def show
       @query = find_or_create_query(:Location)
 
-      apply_content_filters(@query)
-
       columns = %w[name north south east west].map { |x| "locations.#{x}" }
       args = { select: "DISTINCT(locations.id), #{columns.join(", ")}",
                limit: 10_000 }

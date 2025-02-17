@@ -199,37 +199,11 @@ module ApplicationController::Indexes
   private ##########
 
   def show_index_setup(query, display_opts)
-    apply_content_filters(query)
     store_location
     clear_query_in_session if session[:checklist_source] != query.id
     query_params_set(query)
     query.need_letters = display_opts[:letters] if display_opts[:letters]
     set_index_view_ivars(query, display_opts)
-  end
-
-  def apply_content_filters(query)
-    filters = users_content_filters || {}
-    @any_content_filters_applied = false
-    # disable cop because Query::Filter is not an ActiveRecord model
-    Query::Filter.all.each do |fltr| # rubocop:disable Rails/FindEach
-      apply_one_content_filter(fltr, query, filters[fltr.sym])
-    end
-  end
-
-  def apply_one_content_filter(fltr, query, user_filter)
-    key = fltr.sym
-    return unless query.takes_parameter?(key)
-    return if query.params.key?(key)
-    return unless fltr.on?(user_filter)
-
-    # This is a "private" method used by Query#validate_params.
-    # It would be better to add these parameters before the query is
-    # instantiated. Or alternatively, make query validation lazy so
-    # we can continue to add parameters up until we first ask it to
-    # execute the query.
-    query.params[key] = query.validate_value(fltr.type, fltr.sym,
-                                             user_filter.to_s)
-    @any_content_filters_applied = true
   end
 
   ###########################################################################
