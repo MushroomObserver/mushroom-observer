@@ -45,7 +45,7 @@ module Projects
       respond_to do |format|
         if @project_alias.save
           format.turbo_stream do
-            render_project_alias_user_change
+            render_project_alias_target_change
           end
           format.html do
             project_alias_redirect(@project_alias)
@@ -66,7 +66,7 @@ module Projects
       respond_to do |format|
         if @project_alias.update(project_alias_params)
           format.turbo_stream do
-            render_project_alias_user_change
+            render_project_alias_target_change
           end
           format.html do
             redirect_to_project_alias_show
@@ -86,7 +86,7 @@ module Projects
                       notice: :project_alias_destroyed.t)
         end
         format.turbo_stream do
-          render_project_alias_user_change
+          render_project_alias_target_change
         end
       end
     end
@@ -101,9 +101,9 @@ module Projects
                   notice: :project_alias_updated.t)
     end
 
-    def render_project_alias_user_change
+    def render_project_alias_target_change
       render(
-        partial: "projects/aliases/user_update",
+        partial: "projects/aliases/target_update",
         locals: { identifier: "project_alias" }
       ) and return
     end

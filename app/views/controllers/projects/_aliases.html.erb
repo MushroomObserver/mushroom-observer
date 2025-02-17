@@ -1,13 +1,13 @@
 <% project_id = project.id %>
-<%= tag.div(id: "user_project_alias_#{user.id}") do %>
-  <% project.alias_data(user).each do |name, id| %>
+<%= tag.div(id: "target_project_alias_#{target.id}") do %>
+  <% project.alias_data(target).each do |name, id| %>
     <%= edit_project_alias_link(project_id, name, id) %>
     <%= destroy_button(target: project_alias_path(project_id:, id:),
                        icon: :delete) %>
     <br/>
   <% end %>
-  <% if project.alias_data(user).any? %>
+  <% if project.alias_data(target).any? %>
     <br/>
   <% end %>
-  <%= new_project_alias_link(project_id, user.id, User) %><br/>
+  <%= new_project_alias_link(project_id, target.id, target.class) %><br/>
 <% end %>

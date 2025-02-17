@@ -1,9 +1,10 @@
 <%=
-  id = "user_project_alias_#{@project_alias.target_id}"
+  id = "target_project_alias_#{@project_alias.target_id}"
   turbo_stream.replace(id) do
     render(
       partial: "projects/aliases",
-      locals: { project: @project_alias.project, user: @project_alias.target }
+      locals: { project: @project_alias.project,
+                target: @project_alias.target }
     )
   end
 %>

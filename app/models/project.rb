@@ -507,16 +507,16 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     member?(user) || can_join?(user)
   end
 
-  def alias_data(user)
-    @user_alias_details ||= user_alias_details
-    @user_alias_details[user.id] || []
+  def alias_data(target)
+    @target_alias_details ||= target_alias_details(target.class)
+    @target_alias_details[target.id] || []
   end
 
   private ###############################
 
-  def user_alias_details
+  def target_alias_details(target_type)
     aliases.
-      where(target_type: "User").
+      where(target_type:).
       order(:name).
       group_by(&:target_id).
       transform_values do |aliases|

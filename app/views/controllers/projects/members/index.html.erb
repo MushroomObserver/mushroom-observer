@@ -48,7 +48,7 @@ action = { controller: "/projects/members", action: :create,
         </td>
         <td class="align-middle">
           <%= render(partial: "projects/aliases",
-                     locals: { project: @project, user: }) %>
+                     locals: { project: @project, target: user }) %>
         </td>
         <td class="align-middle">
           <%= @project.member_status(user) %>
