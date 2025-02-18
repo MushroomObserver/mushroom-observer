@@ -54,7 +54,7 @@ export default class extends Controller {
         // as printed by Turbo
         this.status = this.element.innerHTML
       }, 1000);
-    } else {
+    } else if (this.intervalId != null) {
       clearInterval(this.intervalId)
     }
   }
