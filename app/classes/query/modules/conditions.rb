@@ -137,13 +137,13 @@ module Query::Modules::Conditions
     add_joins(*)
   end
 
-  def add_subquery_condition(param, *joins, table: nil, col: :id)
+  def add_subquery_condition(param, *, table: nil, col: :id)
     return if params[param].blank?
 
     sql = subquery_from_params(param).query
     table ||= subquery_table(param)
     @where << "#{table}.#{col} IN (#{sql})"
-    add_joins(*joins)
+    add_joins(*)
   end
 
   # Reconstitute the query from the subparam hash, adding the model.

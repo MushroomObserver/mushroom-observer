@@ -326,7 +326,7 @@ class Query::LocationsTest < UnitTestCase
     assert_query(
       [locations(:albion), locations(:howarth_park)],
       :Location, observation_query: { names: "Macrolepiota rachodes",
-                                      include_synonyms: true },
+                                      include_synonyms: true }
     )
   end
 
@@ -426,7 +426,7 @@ class Query::LocationsTest < UnitTestCase
     assert_query([locations(:burbank).id],
                  :Location, observation_query: { ids: })
     ids = [observations(:coprinus_comatus_obs).id]
-    assert_query([], :Location, observation_query: { ids: } )
+    assert_query([], :Location, observation_query: { ids: })
   end
 
   def test_location_with_observations_in_species_list
@@ -434,7 +434,7 @@ class Query::LocationsTest < UnitTestCase
     assert_query([locations(:burbank).id],
                  :Location, observation_query: { species_list: spl })
     empty = species_lists(:first_species_list).id
-    assert_query([], :Location, observation_query: { species_list: empty } )
+    assert_query([], :Location, observation_query: { species_list: empty })
   end
 
   def test_location_with_observations_of_children

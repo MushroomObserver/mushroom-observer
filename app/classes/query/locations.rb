@@ -3,7 +3,6 @@
 class Query::Locations < Query::Base
   include Query::Params::AdvancedSearch
   include Query::Params::Filters
-  include Query::Initializers::Locations
   include Query::Initializers::AdvancedSearch
   include Query::Initializers::Filters
   include Query::Titles::Observations
@@ -62,14 +61,24 @@ class Query::Locations < Query::Base
     add_by_user_condition
     add_by_editor_condition
     initialize_location_notes_parameters
-    add_pattern_condition
     add_regexp_condition
+    add_pattern_condition
     add_advanced_search_conditions
   end
 
-  def initialize_subquery_parameters
-    add_subquery_condition(:description_query, :location_descriptions)
-    add_subquery_condition(:observation_query, :observations)
+  def initialize_location_notes_parameters
+    add_boolean_condition("LENGTH(COALESCE(locations.notes,'')) > 0",
+                          "LENGTH(COALESCE(locations.notes,'')) = 0",
+                          params[:with_notes])
+    add_search_condition("locations.notes", params[:notes_has])
+  end
+
+  def add_regexp_condition
+    return if params[:regexp].blank?
+
+    @title_tag = :query_title_regexp_search
+    regexp = escape(params[:regexp].to_s.strip_squeeze)
+    where << "locations.name REGEXP #{regexp}"
   end
 
   def add_pattern_condition
@@ -84,6 +93,11 @@ class Query::Locations < Query::Base
 
     add_join(:observations) if params[:content].present?
     initialize_advanced_search
+  end
+
+  def initialize_subquery_parameters
+    add_subquery_condition(:description_query, :location_descriptions)
+    add_subquery_condition(:observation_query, :observations)
   end
 
   def add_join_to_names

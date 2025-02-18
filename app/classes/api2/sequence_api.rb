@@ -64,7 +64,7 @@ class API2
         with_specimen: parse(:boolean, :has_specimen),
         with_notes: parse(:boolean, :has_obs_notes, help: 1),
         with_notes_fields: parse(:string, :has_notes_field, help: 1),
-        notes_has: parse(:string, :obs_notes_has, help: 1),
+        notes_has: parse(:string, :obs_notes_has, help: 1)
       }.merge(parse_names_parameters)
     end
 
