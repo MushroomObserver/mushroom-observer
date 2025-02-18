@@ -36,6 +36,8 @@ export default class extends Controller {
   }
 
   // Every second, send a get request to find out the status of the PDF.
+  // NOTE: Can't call a class function from `setInterval` because it resets
+  // the context of `this`
   start_timer_sending_requests() {
     if (this.status_id != "3") {
       // Set the intervalId to the interval so we can clear it later
@@ -45,17 +47,20 @@ export default class extends Controller {
           { responseKind: "turbo-stream" });
         if (response.ok) {
           // Turbo replaces the row in the page already
-          this.check_if_we_are_done();
         } else {
           console.log(`got a ${response.status}`);
         }
       }, 1000);
-    }
-  }
-
-  check_if_we_are_done() {
-    if (this.status_id == "3" && this.intervalId != null) {
-      clearInterval(this.intervalId)
+    } else {
+      // If the PDF is done, we can remove this Stimulus controller from the
+      // element and stop the timer. (NOTE: there may be other controllers.)
+      // console.log("field-slip-job is done")
+      const controllers = this.element.dataset.controller.split(" ")
+      if (controllers.includes("field-slip-job")) {
+        const idx = controllers.indexOf("field-slip-job")
+        controllers.splice(idx, 1)
+        this.element.setAttribute("data-controller", controllers.join(" "))
+      }
     }
   }
 }
