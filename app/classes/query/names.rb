@@ -152,10 +152,6 @@ class Query::Names < Query::Base
     "name"
   end
 
-  # def coerce_into_name_description_query
-  #   Query.lookup(:NameDescription, params_back_to_description_params)
-  # end
-
   def title
     default = super
     if params[:with_observations] || params[:observation_query]

@@ -6,8 +6,8 @@ module Query::Params::Filters
   end
 
   module ClassMethods
-    # Currently, these are
-    # :with_images, :with_specimens, :lichen, :region, :clade
+    # Get all param keys with `Query::Filter.all.map(&:sym)`.
+    # Current params [:with_images, :with_specimens, :lichen, :region, :clade]
     def content_filter_parameter_declarations(model)
       Query::Filter.by_model(model).each_with_object({}) do |fltr, decs|
         decs[fltr.sym] = fltr.type

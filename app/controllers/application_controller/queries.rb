@@ -224,7 +224,6 @@ module ApplicationController::Queries
   # and returning nil if no new query can be found.
   def find_new_query_for_model(model, old_query)
     old_query_correct_for_model(model, old_query) ||
-      # old_query_coercable_for_model(model, old_query) ||
       outer_query_correct_for_model(model, old_query) ||
       nil
   end
@@ -233,18 +232,11 @@ module ApplicationController::Queries
     old_query if !old_query || (old_query.model.to_s == model)
   end
 
-  # def old_query_coercable_for_model(model, old_query)
-  #   old_query.coerce(model)
-  # end
-
   def outer_query_correct_for_model(model, old_query)
     return unless
       (outer_query = old_query.outer) && outer_query.model.to_s == model
 
     outer_query
-    # elsif (coerced_outer_query = outer_query.coerce(model))
-    #   coerced_outer_query
-    # end
   end
 
   def save_updated_query(result)

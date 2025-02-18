@@ -916,10 +916,4 @@ class LocationsControllerTest < FunctionalTestCase
   def named_obs_query(name)
     Query.lookup(:Observation, pattern: name, by: :name)
   end
-
-  # def test_coercing_sorted_observation_query_into_location_query
-  #   @controller.
-  #     create_query_for_obs_undefined_where_strings(named_obs_query("Pasadena").
-  #     coerce(:Location))
-  # end
 end

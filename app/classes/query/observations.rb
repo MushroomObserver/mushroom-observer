@@ -100,7 +100,6 @@ class Query::Observations < Query::Base
     add_subquery_condition(:image_query, { observation_images: :images })
     add_subquery_condition(:location_query, :locations)
     add_subquery_condition(:name_query, :names)
-    # add_subquery_condition(:RssLog, :rss_logs)
     add_subquery_condition(:sequence_query, :sequences)
   end
 
@@ -139,27 +138,6 @@ class Query::Observations < Query::Base
       "observations.where" \
       ")"
   end
-
-  # def coerce_into_image_query
-  #   do_coerce(:Image)
-  # end
-
-  # def coerce_into_location_query
-  #   do_coerce(:Location)
-  # end
-
-  # def coerce_into_name_query
-  #   do_coerce(:Name)
-  # end
-
-  # def do_coerce(new_model)
-  #   is_search = params[:pattern].present? ||
-  #               advanced_search_params.any? { |key| params[key].present? }
-  #   pargs = is_search ? add_old_title(params_plus_old_by) : params_plus_old_by
-  #   # transform :ids to :obs_ids
-  #   pargs = params_out_to_with_observations_params(pargs)
-  #   Query.lookup(new_model, pargs)
-  # end
 
   def title
     default = super
