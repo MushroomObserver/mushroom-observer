@@ -92,8 +92,6 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
   def initialize_obs_record_parameters
     initialize_is_collection_location_parameter
     initialize_with_public_lat_lng_parameter
-    initialize_with_images_parameter
-    initialize_with_specimen_parameter
     initialize_with_name_parameter
     initialize_confidence_parameter
     initialize_obs_with_notes_parameter
@@ -146,6 +144,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
     )
   end
 
+  # This param is sent by advanced_search or a user content_filter
   def initialize_with_images_parameter
     add_boolean_condition(
       "observations.thumb_image_id IS NOT NULL",
@@ -155,6 +154,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
     )
   end
 
+  # This param is sent by advanced_search or a user content_filter
   def initialize_with_specimen_parameter
     add_boolean_condition(
       "observations.specimen IS TRUE",

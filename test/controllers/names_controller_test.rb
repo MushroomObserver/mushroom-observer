@@ -72,7 +72,7 @@ class NamesControllerTest < FunctionalTestCase
     user = dick
     query = Query.lookup_and_save(:Observation, by_user: user)
     new_query = Query.current_or_related_query(:Name, :Observation, query)
-    new_query.save  # have to save here so we can send it as `q`
+    new_query.save # have to save here so we can send it as `q`
     q = new_query.id.alphabetize
 
     login
