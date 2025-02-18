@@ -7,6 +7,7 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
   attr_accessor :params, :params_cache
 
   def validate_params
+    @preference_filter_applied = false
     old_params = @params.dup&.compact&.symbolize_keys || {}
     new_params = {}
     permitted_params = parameter_declarations.slice(*old_params.keys)
@@ -20,6 +21,9 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     # Runs after validation to check if filters should be overridden by params.
     # NOTE: this is also run on each subquery during validation, below.
     apply_preference_filters(self)
+    # NOTE: This param is needed to distinguish between filtering by
+    # user.content_filter vs advanced search, because they use the same params.
+    @params[:preference_filter] = true if @preference_filter_applied
   end
 
   def check_for_unexpected_params(old_params)
@@ -40,10 +44,6 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     end
   end
 
-  def users_preference_filters
-    User.current ? User.current.content_filter : MO.default_content_filter
-  end
-
   def apply_one_preference_filter(fltr, query, user_filter)
     return unless query.is_a?(Query::Base)
 
@@ -53,6 +53,11 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     return unless fltr.on?(user_filter)
 
     query.params[key] = validate_value(fltr.type, fltr.sym, user_filter.to_s)
+    @preference_filter_applied = true
+  end
+
+  def users_preference_filters
+    User.current ? User.current.content_filter : MO.default_content_filter
   end
 
   def validate_value(param_type, param, val)

@@ -11,7 +11,7 @@ module Query::Params::Filters
     def content_filter_parameter_declarations(model)
       Query::Filter.by_model(model).each_with_object({}) do |fltr, decs|
         decs[fltr.sym] = fltr.type
-      end
+      end.merge(preference_filter: { boolean: [true] })
     end
   end
 end

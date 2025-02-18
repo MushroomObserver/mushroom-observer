@@ -223,7 +223,7 @@ module ApplicationController::Indexes
 
   def check_if_preference_filters_applied
     current_params = @query.params.flatten.compact_blank.keys
-    return false unless current_params.intersect?(Query::Filter.all.map(&:sym))
+    return false unless current_params.include?(:preference_filter)
 
     true
   end
