@@ -5,8 +5,7 @@ Last Revised: Feb 18, 2025
 <!-- Most links are defined here for DRYness and consistency -->
 [Intro]: https://mushroomobserver.org/info/intro
 [Ruby Documentation]: https://www.ruby-doc.org/core/
-<!-- Zenspider seems to be broken. Is there a replacement? -->
-[Ruby Quick Ref]: https://www.zenspider.com/Languages/Ruby/QuickRef.html
+[Ruby Quick Ref]: https://www.zenspider.com/ruby/quickref.html
 [Rails Documentation]: https://api.rubyonrails.org/
 [MVC Architecture]: https://en.wikipedia.org/wiki/Model-view-controller
 [RuboCop]: https://rubocop.org/
