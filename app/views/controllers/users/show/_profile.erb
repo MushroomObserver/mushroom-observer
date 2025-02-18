@@ -63,7 +63,13 @@ footer =
       str, url, args = tab
       args ||= {}
       kwargs = merge_tab_args_with_extra_args(args, { class: "d-block" }) %>
-      <%= link_to(str, url, kwargs) %>
+      <% if args.keys.include?(:button) %>
+        <%= button_to(:destroy_object.t(type: :user), url, method: :delete,
+                      class: "d-block",
+                     ) %>
+      <% else %>
+        <%= link_to(str, url, kwargs) %>
+      <% end %>
     <% end %>
   <% end %>
 <% end %>

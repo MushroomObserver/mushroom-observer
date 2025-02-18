@@ -180,4 +180,19 @@ class UsersControllerTest < FunctionalTestCase
     get(:show, params: { id: number8.id, q: q, flow: "prev" })
     assert_redirected_to(user_path(number7.id, q: q))
   end
+
+  #   ---------------
+
+  def test_admin_show_user
+    user = users(:mary)
+
+    login("rolf")
+    make_admin
+    get(:show, params: { id: user.id })
+
+    # Prove that the page has a Delete User button
+    assert_select("form.button_to") do
+      assert_select("input[value=?]", "delete")
+    end
+  end
 end
