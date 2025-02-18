@@ -201,28 +201,4 @@ module Query::Initializers::Observations
 
     add_search_condition("observations.where", params[:user_where])
   end
-
-  # def params_out_to_with_observations_params(_pargs)
-  #   { with_observations: true, observation_query: self }
-  #   # return pargs if pargs[:ids].blank?
-
-  #   # pargs[:obs_ids] = pargs.delete(:ids)
-  #   # pargs
-  # end
-
-  # def params_back_to_observation_params
-  #   old_query = params[:observation_query]
-  #   pargs = old_query.params
-  #   pargs[:by] = pargs[:old_by].delete if pargs[:old_by].present?
-  #   pargs
-  #   # pargs = params_with_old_by_restored.except(:with_observations)
-  #   # return pargs if pargs[:obs_ids].blank?
-
-  #   # pargs[:ids] = pargs.delete(:obs_ids)
-  #   # pargs
-  # end
-
-  # def coerce_into_observation_query
-  #   Query.lookup(:Observation, params_back_to_observation_params)
-  # end
 end

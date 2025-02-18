@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
-# Validation of Query parameters, but also adding user filters to params.
-# If filters have been applied, `params[:preference_filter] == true`
+# Validation of Query parameters.
+# Also adds user content filters to params if applicable. Maybe a confusion of
+# concerns, but it's the only place where we instantiate the subquery.
 module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
   attr_accessor :params, :params_cache
 

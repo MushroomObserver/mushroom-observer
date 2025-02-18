@@ -113,10 +113,6 @@ class Query::Locations < Query::Base
     "name"
   end
 
-  # def coerce_into_location_description_query
-  #   Query.lookup(:LocationDescription, params_back_to_description_params)
-  # end
-
   def title
     default = super
     if params[:with_observations] || params[:observation_query]
