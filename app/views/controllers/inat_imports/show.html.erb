@@ -4,61 +4,30 @@
   # add_tab_set(article_show_tabs(article: @article, user: @user))
 %>
 
-<p>
-  <b><%= :inat_import_tracker_status.t %>: </b>
-  <%=
-    # Outer span calls Stimulus controller, passing in the endpoint
-    tag.span(
-      id: "status", class: "text-right",
-      data: { controller: "inat-import-job",
-              endpoint: inat_import_job_tracker_path(@inat_import, @tracker) }
-    ) do
-      # Inner span is replaced by Stimulus
-      render(partial: "inat_imports/job_trackers/updates",
-             locals: { tracker: @tracker })
-    end
-  %>
-</p>
+<%= # This is the container that gets updated with whatever's in the partial.
+  tag.div(
+    id: "status_#{@tracker.id}",
+    data: { controller: "inat-import-job",
+            endpoint: inat_import_job_tracker_path(
+              inat_import_id: @tracker.inat_import,
+              id: @tracker.id
+            ) }) do
+    render(partial: "inat_imports/job_trackers/current",
+           locals: { tracker: @tracker })
+  end
+%>
 
-<% if @inat_import.response_errors.present? %>
-<p>
-  <b><%= :ERRORS.t %>: </b>
-  <%= tag.span(id: "errors", class: "violation-highlight") do %>
-  <% @inat_import.response_errors.each_line do |error| %>
-  <%= error %></br>
-  <% end %>
-  <% end %>
-</p>
-<% end %>
-
-<p>
-  <b><%= :inat_import_tracker_started.t %>: </b>
-  <span id="started"><%= @tracker.created_at %></span>
-</p>
-
-<%# Display refresh button if job is incomplete%>
-<% if import_incomplete?(@inat_import) %>
-  <p>
-    <button class="btn btn-default" onclick="location.reload();">
-      <%= :inat_import_tracker_refresh.l %>
-    </button>
-  </p>
-<% end %>
-
-<p>
-  <b><%= :inat_import_tracker_imported_count.t %>: </b>
-  <span id="imported_count"><%= @inat_import.imported_count.to_s %></span>
-</p>
-<p>
-  <b><%= :inat_import_tracker_importable_count.t %>: </b>
-  <span id="importables_count"><%= @inat_import.importables.to_s %></span>
-</p>
-<p><%= :inat_importables_explanation.t %></p>
-
-<p>
-  <% if import_done?(@inat_import) %>
-  <%= link_to(:app_your_observations.l,
-                observations_path(by_user: User.current.id),
-                { class: "btn btn-default" } ) %>
-  <% end %>
-</p>
+<%=
+  # NOTE: jdc 2025-02-08 When available, replace the target with a link to
+  # the Observations imported by this InatImport. I.e. Observations:
+  # - created by @user
+  # - from @tracker.started_at -- @tracker.ended_at || time.now
+  # - ideally with source: InatImport)
+  # - ordered by created_at desc
+  link_to(
+    :inat_import_tracker_results.l,
+    observations_path(
+      pattern: "user:#{@user.id} created:#{Date.today.strftime}-#{Date.tomorrow.strftime}"),
+    { class: "mt-3 btn btn-default" }
+  )
+%>

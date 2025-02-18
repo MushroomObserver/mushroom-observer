@@ -360,6 +360,7 @@
   OBSERVATIONS: Observations
   observations: observations
   OBSERVATION_FIELDS: Observation Fields
+  of: of
   PAST_LOCATION: Location Change
   past_location: location change
   PAST_LOCATIONS: Location Changes
@@ -3072,10 +3073,13 @@
   inat_import_tracker: iNat Import Tracker
   inat_import_tracker_status: "[:STATUS]"
   inat_import_tracker_started: Started
+  inat_import_tracker_elapsed: Elapsed Time
+  inat_import_tracker_ended: Ended
+  inat_import_imported: Imported
+  inat_import_tracker_results: Results
   inat_import_tracker_importable_count: Number of Importable Observations
   inat_import_tracker_imported_count: Number Imported
   inat_importables_explanation: "An ??importable?? observation is an iNaturalist observation: which you created, which does not exist in MO, and whose iNat identity is a fungus or slime mold."
-  inat_import_tracker_refresh: Update results
 
   # observer/list_notifications
   list_notifications_title: Email Alerts for [user]

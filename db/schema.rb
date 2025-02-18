@@ -216,6 +216,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_02_13_084440) do
     t.integer "importables"
     t.integer "imported_count"
     t.string "response_errors"
+    t.datetime "ended_at"
   end
 
   create_table "interests", id: :integer, charset: "utf8mb3", force: :cascade do |t|
