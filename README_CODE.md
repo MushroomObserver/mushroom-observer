@@ -1,13 +1,17 @@
-Last Revised: Feb 16, 2025
+Last Revised: Feb 18, 2025
 
 # MushroomObserver
 
 <!-- Most links are defined here for DRYness and consistency -->
 [Intro]: https://mushroomobserver.org/info/intro
 [Ruby Documentation]: https://www.ruby-doc.org/core/
-[Ruby Quick Ref]: https://www.zenspider.com/Languages/Ruby/QuickRef.html
+[Ruby Quick Ref]: https://www.zenspider.com/ruby/quickref.html
 [Rails Documentation]: https://api.rubyonrails.org/
 [MVC Architecture]: https://en.wikipedia.org/wiki/Model-view-controller
+[RuboCop]: https://rubocop.org/
+[SimpleCov]: https://github.com/simplecov-ruby/simplecov
+[Stimulus]: https://stimulus.hotwired.dev/
+[Turbo]: https://turbo.hotwired.dev/
 
 The following is an overview of the code for the Mushroom Observer website for
 prospective developers.  See [Intro][Intro] for an
@@ -24,19 +28,19 @@ the "models"), then renders the result via HTML templates (the "views").
 
 Rails applications run in one of three different modes: development, production
 and test.  Each has its own entirely separate database (named appropriately
-+observer_development+, +observer_production+ and +observer_test+).
+`observer_development`, `observer_production` and `observer_test`).
 
-development
+**development:**
   Server automatically reloads any code that has been changed.  (Only modules that
-  have been required using +require_dependency+.)  Doesn't cache data the same
+  have been required using `require_dependency`.)  Doesn't cache data the same
   way as the production server does.
 
-production
+**production:**
   Need to restart the server whenever you change any code.  Some things are
   cached differently than in development, so if you see different behavior on
   the production server, start here: you might just need to reload an object.
 
-test
+**test:**
   Used by the testing framework.  All changes are thrown away between each
   test.  And various Rails inner modules are swapped out with test mock-ups.
 
@@ -52,9 +56,9 @@ of the structure, such as adding tables or changing existing columns, are
 handled using the handy migrations in `db/migrate`.
 
 ```
-  rake db:migrate                          # Create or update database.
-  rake db:rollback                         # Rollback last migration run.
-  rake db:migrate VERSION=YYYYMMDDHHMMSS   # Rollback to previous version.
+  rails db:migrate                          # Create or update database.
+  rails db:rollback                         # Rollback last migration run.
+  rails db:migrate VERSION=YYYYMMDDHHMMSS   # Rollback to previous version.
 ```
 
 ## Important Models
@@ -85,7 +89,7 @@ Automated testing is a critical part of developing code for Mushroom
 Observer.  We currently have over 90% test coverage across our codebase
 and our continuous integration system will not approve a PR if it causes a
 drop in our percent of coverage.  Developers should be familiar with the
-SimpleCov tool which runs automatically whenever tests are run on local
+[SimpleCov] tool which runs automatically whenever tests are run on local
 systems.  This automatically creates a locally browsable report that
 can be accessed starting with the file `coverage/index.html`.
 
@@ -94,7 +98,7 @@ can be accessed starting with the file `coverage/index.html`.
 #### Functional Bugs
 
 Functional bugs in the live website should be documented with GitHub
-issues (https://github.com/MushroomObserver/mushroom-observer/issues).
+issues (<https://github.com/MushroomObserver/mushroom-observer/issues>).
 The most important thing is to document the steps to reproduce the
 issue and any known workaround.  This will help others understand the
 problem and ensure that any proposed fix solves the original issue.
@@ -106,7 +110,7 @@ be important to understanding the root cause of the problem.  In
 addition, for urgent issues it may be important to find a fix first
 and write the tests after.  However, the work should not be considered
 done until there are automated tests in place that ensure the problem
-not resurface at some point in the future and that any need code is
+does not resurface at some point in the future and that any needed code is
 fully covered.
 
 In general tests should be run against the target branch (typically
@@ -122,8 +126,8 @@ code base ("performance bugs").
 
 To analyze attacks, you need to have access to the webserver logs.  We
 have a collection of tools that we use for parsing logs to detect
-issues and to block "bad actors" that are impact the website
-performance.  Please send email to webmaster@mushroomobserver.org if
+issues and to block "bad actors" that are impacting the website
+performance.  Please send email to <webmaster@mushroomobserver.org> if
 you believe that there is currently a performance issue that may be
 the result of an attack.
 
@@ -139,7 +143,7 @@ is making database queries inside a loop.  Such queries should be
 moved outside the loop and setup so it extracts the data for all the
 iterations in a single query.  This data should then be made available
 inside the loop where it can be quickly accessed from memory rather
-than requiring full round trip to the database for each iteration.
+than requiring a full round trip to the database for each iteration.
 
 ### New Features
 
@@ -162,25 +166,25 @@ the Rails scaffold generator.  E.g.,
 
 `rails generate scaffold MyModel foo:string bar:integer`
 
-This should all the files neccesary for a very simple CRUD interface
+This should create all the files neccesary for a very simple CRUD interface
 for a new model.  While this can get you started on your new feature
 very quickly, it has some caveats.  First, the default generators do
 not follow our coding conventions.  You can address some of this by
-running rubocop on all the new Ruby files.  Using the -A option will
+running [RuboCop] on all the new Ruby files.  Using the -A option will
 autocorrect most if not all of the violations.  However, note that
-rubocop does not work on our view files (ERB files).  The most common
+[RuboCop] does not work on our view files (ERB files).  The most common
 violations of our coding standards that happen in such ERB files are
 missing parentheses and single quotes rather than double quotes.
 
 Another common issue with using rails generators in our code base is
-that the result is kind of clunky requiring separate page loads for
+that the result is kind of clunky, requiring separate page loads for
 each form or button interaction.  The preferred approach for these
-types of interactions are to use Turbo and Stimulus.
+types of interactions is to use [Turbo] and [Stimulus].
 
-A common example where Turbo in particular can improve the user
-experience are index pages for new models.  The New, Edit, and
-Delete actions can all be handled using buttons that are Turbo
-enabled with New and Edit leveraging Turbo to manage the object
+A common example where [Turbo] in particular can improve the user
+experience is index pages for new models.  The New, Edit, and
+Delete actions can all be handled using buttons that are [Turbo]
+enabled with New and Edit leveraging [Turbo] to manage the object
 form through a modal.
 
 Here are the steps for implementing this:
@@ -191,10 +195,13 @@ involve switching to a table layout.  For example see:
 
 2) Create partial for the widgets.  Note that it is important
 to have a unique id for each set of widgets on the page since
-that's what Turbo will use to update the page.  For example see:
+that's what [Turbo] will use to update the page.  For example see:
 `app/views/controllers/projects/_aliases.html.erb`
 and specifically the line:
-`<%= tag.div(id: "target_project_alias_#{target.id}") do %>`
+
+```erb
+<%= tag.div(id: "target_project_alias_#{target.id}") do %>
+```
 
 3) The links for the widgets that want to render the form as a model
 should call `modal_link_to` which again cares about the value of the
@@ -202,16 +209,16 @@ HTML id.  For example see: `ProjectsHelper#edit_project_alias_link`.
 Note that this method also uses the MO concept of "tabs" to describe
 page links.
 
-4) The real "Turbo-ness" of this approach happens in the relevant
+4) The real "[Turbo]-ness" of this approach happens in the relevant
 controller.  See the use of `turbo_stream` in:
 `app/controllers/projects/aliases_controller.rb` These actions use the
 shared partials `modal_form` and `modal_form_reload` as well as an
-update partial to present the form as a modal and to update the index
-page using Turbo.  For the modal form to work, the ERB for the form
-should be named `_form.erb` and not just `_form.html.erb` since it may
-be rendered either as regular HTML or as a Turbo stream.  An example
+updated partial to present the form as a modal and to update the index
+page using [Turbo].  For the modal form to work, the ERB for the form
+should be named just `_form.erb` and not `_form.html.erb` since it may
+be rendered either as regular HTML or as a [Turbo] stream.  An example
 update partial is:
 `app/views/controllers/projects/aliases/_target_update.erb` This is
-where unique id in step 2 is important.  Finally note the calls to
+where the unique id in step 2 is important.  Finally note the calls to
 `close_modal` and `remove` at the bottom of this file.  These are
 required to hide the modal after the form data has been processed.
