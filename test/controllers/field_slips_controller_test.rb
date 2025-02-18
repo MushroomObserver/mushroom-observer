@@ -182,8 +182,8 @@ class FieldSlipsControllerTest < FunctionalTestCase
     end
     field_slip = FieldSlip.find_by(code: code)
     assert_equal(field_slip.observation.location, project_aliases(:two).target)
-    assert_equal(field_slip.observation.notes[:Field_Slip_ID_By],
-                 project_aliases(:one).target.login)
+    assert_equal(project_aliases(:one).target.textile_name,
+                 field_slip.observation.notes[:Field_Slip_ID_By])
   end
 
   test "should create field_slip and obs and redirect to show obs" do

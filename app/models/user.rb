@@ -431,6 +431,10 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     unique_text_name
   end
 
+  def textile_name
+    "_user #{login}_"
+  end
+
   def self.lookup_unique_text_name(str)
     return nil unless str
 

@@ -381,6 +381,10 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     display_name
   end
 
+  def textile_name
+    display_name
+  end
+
   # Same as +text_name+ but with id tacked on.
   def unique_text_name
     text_name + " (#{id || "?"})"
