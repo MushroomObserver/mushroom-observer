@@ -47,14 +47,17 @@ export default class extends Controller {
         if (response.ok) {
           // Turbo updates the element in the page already,
           // from the InatImport::JobTrackersController#show action
+          this.check_if_we_are_done();
         } else {
           console.log(`got a ${response.status}`);
         }
-        // Update our status variable with the current status of the import,
-        // as printed by Turbo
-        this.status = this.element.innerHTML
       }, 1000);
-    } else if (this.intervalId != null) {
+    }
+  }
+
+  check_if_we_are_done() {
+    if (this.currentTarget.dataset.status == "Done" &&
+      this.intervalId != null) {
       clearInterval(this.intervalId)
     }
   }
