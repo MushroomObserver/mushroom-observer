@@ -270,7 +270,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def is_collector?(user)
-    user && notes[:Collector] == "_user #{user.login}_"
+    user && notes[:Collector] == user.textile_name
   end
 
   def project_admin?(user = User.current)
@@ -1030,7 +1030,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     return notes[:"Collector's_name"] if notes.include?(:"Collector's_name")
     return notes[:"Collector(s)"] if notes.include?(:"Collector(s)")
 
-    "_user #{user.login}_"
+    user.textile_name
   end
 
   def field_slip_name
@@ -1043,7 +1043,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     return notes[:Field_Slip_ID_By] if notes.include?(:Field_Slip_ID_By)
 
     naming = namings.find_by(name:)
-    return "_user #{naming.user.login}_" if naming
+    return naming.user.textile_name if naming
 
     ""
   end

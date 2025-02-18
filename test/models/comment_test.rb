@@ -20,7 +20,7 @@ class CommentTest < UnitTestCase
 
   def test_user_highlighting_parsing
     do_highlight_test([], "")
-    do_highlight_test([mary], "_user #{mary.id}_")
+    do_highlight_test([mary], mary.textile_name)
     do_highlight_test([mary], "@Mary Newbie@")
     do_highlight_test([mary], "@mary foo bar")
     do_highlight_test([mary, rolf, dick], "@mary,@rolf,@dick")
