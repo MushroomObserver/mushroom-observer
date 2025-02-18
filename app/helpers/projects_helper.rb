@@ -66,6 +66,37 @@ module ProjectsHelper
     end
   end
 
+  def project_alias_headers
+    [:NAME.t, :TARGET_TYPE.t, :TARGET.t, :ACTIONS.t]
+  end
+
+  def project_alias_rows(project_aliases)
+    project_aliases.map do |project_alias|
+      project_alias_row(project_alias)
+    end
+  end
+
+  def project_alias_row(project_alias)
+    [
+      project_alias.name,
+      project_alias.target_type,
+      link_to(project_alias.target.try(:name), project_alias.target),
+      project_alias_actions(project_alias.id, project_alias.project_id)
+    ]
+  end
+
+  def project_alias_actions(id, project_id)
+    capture do
+      concat(link_to(:EDIT.t,
+                     edit_project_alias_path(project_id:, id:)))
+      concat(" ")
+      concat(link_to(:DELETE.t,
+                     project_alias_path(project_id:, id:),
+                     data: { turbo_method: :delete,
+                             turbo_confirm: :are_you_sure.t }))
+    end
+  end
+
   #########
 
   private

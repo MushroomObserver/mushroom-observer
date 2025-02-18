@@ -223,6 +223,7 @@
   # COMMON WORDS AND PHRASES
 
   # Object titles, all nouns.
+  ACTIONS: Actions
   ACTIVITY: Activity
   activity: activity
   API_KEY: API Key
@@ -405,6 +406,8 @@
   specimens: specimens
   SUPPORT: Support
   support: support
+  TARGET: Target
+  TARGET_TYPE: Target Type
   TEST_PAGES: Test Pages
   THEME: Theme
   TRANSLATION: Translation
