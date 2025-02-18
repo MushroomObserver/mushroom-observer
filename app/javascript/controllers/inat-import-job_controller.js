@@ -35,8 +35,6 @@ export default class extends Controller {
 
   // Every second, send a get request to find out the status of the import.
   // `status` data attribute of `currentTarget` is updated with each request.
-  // NOTE: Can't call a class function from `setInterval` because it resets
-  // the context of `this`
   start_timer_sending_requests() {
     if (this.currentTarget.dataset.status != "Done") {
       // Set the intervalId to the interval so we can clear it later
