@@ -191,7 +191,7 @@ class UsersControllerTest < FunctionalTestCase
     get(:show, params: { id: user.id })
 
     # Prove that the page has a Delete User button
-    assert_select("form.button_to[action *=?]", admin_users_path) do
+    assert_select("form.button_to[action =?]", admin_users_path(id: user.id)) do
       assert_select("input[value=?]", "delete")
     end
   end
