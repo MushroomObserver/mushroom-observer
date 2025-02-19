@@ -17,6 +17,7 @@ class Query::Images < Query::Base
       updated_at: [:time],
       date: [:date],
       ids: [Image],
+      id_range: [:integer],
       by_user: User,
       users: [User],
       locations: [Location],

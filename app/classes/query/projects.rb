@@ -11,6 +11,7 @@ class Query::Projects < Query::Base
       updated_at: [:time],
       users: [User],
       ids: [Project],
+      id_range: [:integer],
       with_images: { boolean: [true] },
       with_observations: { boolean: [true] },
       with_species_lists: { boolean: [true] },

@@ -19,6 +19,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
       updated_at: [:time],
 
       ids: [Observation],
+      id_range: [:integer],
       users: [User],
       by_user: User,
       field_slips: [FieldSlip],
