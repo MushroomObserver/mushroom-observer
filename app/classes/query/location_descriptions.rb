@@ -15,11 +15,10 @@ class Query::LocationDescriptions < Query::Base
       by_user: User,
       by_author: User,
       by_editor: User,
-      # old_by: :string,
       users: [User],
       locations: [Location],
-      location_query: { subquery: :Location },
-      public: :boolean
+      public: :boolean,
+      location_query: { subquery: :Location }
     )
   end
 

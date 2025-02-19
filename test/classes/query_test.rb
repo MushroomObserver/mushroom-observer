@@ -921,194 +921,193 @@ class QueryTest < UnitTestCase
   #
   ##############################################################################
 
-  # def test_basic_coerce
-  #   assert_equal(0, QueryRecord.count)
+  def test_basic_subquery_of
+    assert_equal(0, QueryRecord.count)
 
-  #   q1 = Query.lookup_and_save(:Observation, pattern: "search")
-  #   assert_equal(1, QueryRecord.count)
+    q1 = Query.lookup_and_save(:Observation, pattern: "search")
+    assert_equal(1, QueryRecord.count)
 
-  #   # Trvial coercion: from a model to the same model.
-  #   q2 = q1.coerce(:Observation)
-  #   assert_equal(q1, q2)
-  #   assert_equal(1, QueryRecord.count)
+    # Trvial coercion: from a model to the same model.
+    q2 = q1.subquery_of(:Observation)
+    assert_equal(q1, q2)
+    assert_equal(1, QueryRecord.count)
 
-  #   # No search is coercable to RssLog (yet).
-  #   q3 = q1.coerce(:RssLog)
-  #   assert_nil(q3)
-  #   assert_equal(1, QueryRecord.count)
-  # end
+    # No search is coercable to RssLog (yet).
+    q3 = q1.subquery_of(:RssLog)
+    assert_nil(q3)
+    assert_equal(1, QueryRecord.count)
+  end
 
-  # def test_observation_image_coercion
-  #   burbank = locations(:burbank)
-  #   query_a = []
+  def test_observation_subquery_of_image
+    burbank = locations(:burbank)
+    query_a = []
 
-  #   # Several observation queries can be turned into image queries.
-  #   query_a[0] = Query.lookup_and_save(:Observation, by: :id)
-  #   query_a[1] = Query.lookup_and_save(:Observation, by_user: mary.id)
-  #   query_a[2] = Query.lookup_and_save(
-  #     :Observation, species_list: species_lists(:first_species_list).id
-  #   )
-  #   query_a[3] = Query.lookup_and_save(:Observation, ids: three_amigos)
-  #   query_a[4] = Query.lookup_and_save(:Observation, user_where: "glendale")
-  #   query_a[5] = Query.lookup_and_save(:Observation, location: burbank)
-  #   query_a[6] = Query.lookup_and_save(:Observation, user_where: "california")
-  #   # removed query_a[7] which searched for "somewhere else" in the notes
-  #   # query_a[7] = Query.lookup_and_save(:Observation,
-  #   #                                    pattern: '"somewhere else"')
-  #   assert_equal(7, QueryRecord.count)
+    # Several observation queries can be turned into image queries.
+    query_a[0] = Query.lookup_and_save(:Observation, by: :id)
+    query_a[1] = Query.lookup_and_save(:Observation, by_user: mary.id)
+    query_a[2] = Query.lookup_and_save(
+      :Observation, species_list: species_lists(:first_species_list).id
+    )
+    query_a[3] = Query.lookup_and_save(:Observation, ids: three_amigos)
+    query_a[4] = Query.lookup_and_save(:Observation, user_where: "glendale")
+    query_a[5] = Query.lookup_and_save(:Observation, location: burbank)
+    query_a[6] = Query.lookup_and_save(:Observation, user_where: "california")
+    # removed query_a[7] which searched for "somewhere else" in the notes
+    # query_a[7] = Query.lookup_and_save(:Observation,
+    #                                    pattern: '"somewhere else"')
+    assert_equal(7, QueryRecord.count)
 
-  #   observation_coercion_assertions(query_a, :Image)
-  # end
+    observation_subquery_assertions(query_a, :Image)
+  end
 
-  # def test_observation_location_coercion
-  #   burbank = locations(:burbank)
-  #   query_a = []
+  def test_observation_subquery_of_location
+    burbank = locations(:burbank)
+    query_a = []
 
-  #   # Almost any query on observations should be mappable, i.e. coercable into
-  #   # a query on those observations' locations.
-  #   query_a[0] = Query.lookup_and_save(:Observation, by: :id)
-  #   query_a[1] = Query.lookup_and_save(:Observation, by_user: mary.id)
-  #   query_a[2] = Query.lookup_and_save(
-  #     :Observation, species_list: species_lists(:first_species_list).id
-  #   )
-  #   query_a[3] = Query.lookup_and_save(:Observation, ids: three_amigos)
-  #   query_a[4] = Query.lookup_and_save(:Observation, user_where: "glendale")
-  #   query_a[5] = Query.lookup_and_save(:Observation, location: burbank)
-  #   query_a[6] = Query.lookup_and_save(:Observation, user_where: "california")
-  #   # query_a[7] = Query.lookup_and_save(:Observation,
-  #   #                                    pattern: '"somewhere else"')
-  #   assert_equal(7, QueryRecord.count)
+    # Almost any query on observations should be mappable, i.e. coercable into
+    # a query on those observations' locations.
+    query_a[0] = Query.lookup_and_save(:Observation, by: :id)
+    query_a[1] = Query.lookup_and_save(:Observation, by_user: mary.id)
+    query_a[2] = Query.lookup_and_save(
+      :Observation, species_list: species_lists(:first_species_list).id
+    )
+    query_a[3] = Query.lookup_and_save(:Observation, ids: three_amigos)
+    query_a[4] = Query.lookup_and_save(:Observation, user_where: "glendale")
+    query_a[5] = Query.lookup_and_save(:Observation, location: burbank)
+    query_a[6] = Query.lookup_and_save(:Observation, user_where: "california")
+    assert_equal(7, QueryRecord.count)
 
-  #   query_b = observation_coercion_assertions(query_a, :Location)
+    query_b = observation_subquery_assertions(query_a, :Location)
 
-  #   # Now, check the parameters of those coerced queries.
-  #   assert_equal("id", query_b[0].params[:old_by])
-  #   assert_equal(mary.id, query_b[1].params[:by_user])
-  #   assert_equal(species_lists(:first_species_list).id,
-  #                query_b[2].params[:species_list])
-  #   assert_equal(three_amigos, query_b[3].params[:obs_ids])
-  #   assert_equal(2, query_b[3].params.keys.length)
-  #   assert_equal("glendale", query_b[4].params[:user_where])
-  #   assert_equal(3, query_b[4].params.keys.length)
-  #   assert_equal(burbank.id, query_b[5].params[:location])
-  #   assert_equal(2, query_b[5].params.keys.length)
-  #   assert_equal("california", query_b[6].params[:user_where])
-  #   assert_equal(3, query_b[6].params.keys.length)
-  #   # assert_equal(2, query_b[7].params.keys.length)
-  #   # assert_equal([observations(:strobilurus_diminutivus_obs).id,
-  #   #               observations(:agaricus_campestros_obs).id,
-  #   #               observations(:agaricus_campestras_obs).id,
-  #   #               observations(:agaricus_campestrus_obs).id],
-  #   #              query_b[7].params[:obs_ids])
-  #   # assert_match(/Observations.*Matching.*somewhere.*else/,
-  #   #              query_b[7].params[:old_title])
-  # end
+    # Now, check the parameters of those subqueries.
+    obs_queries = query_b.map { |que| que.params[:observation_query] }
 
-  # def test_observation_name_coercion
-  #   burbank = locations(:burbank)
-  #   query_a = []
+    assert_equal("id", obs_queries[0][:by])
+    assert_equal(mary.id, obs_queries[1][:by_user])
+    assert_equal(species_lists(:first_species_list).id,
+                 obs_queries[2][:species_list])
+    assert_equal(three_amigos, obs_queries[3][:ids])
+    assert_equal(1, obs_queries[3].keys.length)
+    assert_equal("glendale", obs_queries[4][:user_where])
+    assert_equal(1, obs_queries[4].keys.length)
+    assert_equal(burbank.id, obs_queries[5][:location])
+    assert_equal(1, obs_queries[5].keys.length)
+    assert_equal("california", obs_queries[6][:user_where])
+    assert_equal(1, obs_queries[6].keys.length)
+  end
 
-  #   # Several observation queries can be turned into name queries.
-  #   query_a[0] = Query.lookup_and_save(:Observation, by: :id)
-  #   query_a[1] = Query.lookup_and_save(:Observation, by_user: mary.id)
-  #   query_a[2] = Query.lookup_and_save(
-  #     :Observation, species_list: species_lists(:first_species_list).id
-  #   )
-  #   query_a[3] = Query.lookup_and_save(:Observation, ids: three_amigos)
-  #   # qa[4] = Query.lookup_and_save(:Observation,
-  #   #                             pattern: '"somewhere else"')
-  #   query_a[4] = Query.lookup_and_save(:Observation, user_where: "glendale")
-  #   query_a[5] = Query.lookup_and_save(:Observation, location: burbank)
-  #   query_a[6] = Query.lookup_and_save(:Observation, user_where: "california")
-  #   assert_equal(7, QueryRecord.count)
+  def test_observation_subquery_of_name
+    burbank = locations(:burbank)
+    query_a = []
 
-  #   observation_coercion_assertions(query_a, :Name)
-  # end
+    # Several observation queries can be turned into name queries.
+    query_a[0] = Query.lookup_and_save(:Observation, by: :id)
+    query_a[1] = Query.lookup_and_save(:Observation, by_user: mary.id)
+    query_a[2] = Query.lookup_and_save(
+      :Observation, species_list: species_lists(:first_species_list).id
+    )
+    query_a[3] = Query.lookup_and_save(:Observation, ids: three_amigos)
+    # qa[4] = Query.lookup_and_save(:Observation,
+    #                             pattern: '"somewhere else"')
+    query_a[4] = Query.lookup_and_save(:Observation, user_where: "glendale")
+    query_a[5] = Query.lookup_and_save(:Observation, location: burbank)
+    query_a[6] = Query.lookup_and_save(:Observation, user_where: "california")
+    assert_equal(7, QueryRecord.count)
 
-  # # General purpose repetitive assertions for coercing observation queries.
-  # # query_a is original, query_b is coerced, and query_c is coerced back.
-  # # Returns the coerced query (query_check) for further testing
-  # def observation_coercion_assertions(query_a, model)
-  #   query_b = query_c = []
-  #   len = query_a.size - 1
+    observation_subquery_assertions(query_a, :Name)
+  end
 
-  #   [*0..len].each do |i|
-  #     # Try coercing them all.
-  #     assert(query_b[i] = query_a[i].coerce(model))
+  # General purpose repetitive assertions for relating observation queries.
+  # query_a is original, query_b is related, and query_c is related back.
+  # Returns the related query (query_check) for further testing
+  def observation_subquery_assertions(query_a, model)
+    query_b = query_c = []
+    len = query_a.size - 1
 
-  #     # They should all be new records
-  #     assert(query_b[i].record.new_record?)
-  #     assert_save(query_b[i])
+    [*0..len].each do |i|
+      # Try relating them all.
+      assert(query_b[i] = query_a[i].subquery_of(model))
 
-  #     # Check the query descriptions.
-  #     assert_equal(model.to_s, query_b[i].model.to_s)
-  #     assert(query_b[i].params[:with_observations])
-  #   end
+      # They should all be new records
+      # assert(query_b[i].record.new_record?)
+      assert_save(query_b[i])
 
-  #   # The `coerce` changes query_b, so save it for later comparison.
-  #   query_check = query_b.dup
+      # Check the query descriptions.
+      assert_equal(model.to_s, query_b[i].model.to_s)
+      assert(query_b[i].params[:observation_query])
+      # When relating to locations, default param :is_collection_location added
+      assert_equal(
+        query_a[i].params,
+        query_b[i].params[:observation_query].except(:is_collection_location)
+      )
+    end
 
-  #   [*0..len].each do |i|
-  #     # Now try to coerce them back to Observation.
-  #     assert(query_c[i] = query_b[i].coerce(:Observation))
+    # The `subquery_of` changes query_b, so save it for later comparison.
+    query_check = query_b.dup
 
-  #     # They should not be new records
-  #     assert_not(query_c[i].record.new_record?)
-  #     assert_equal(query_a[i], query_c[i])
-  #   end
+    [*0..len].each do |i|
+      # Now try to relate them back to Observation.
+      assert(query_c[i] = query_b[i].subquery_of(:Observation))
+      # They should not be new records
+      # assert_not(query_c[i].record.new_record?)
+      assert_equal(query_a[i].params,
+                   query_c[i].params.except(:is_collection_location))
+    end
 
-  #   query_check
-  # end
+    query_check
+  end
 
-  # def test_location_description_coercion
-  #   ds1 = location_descriptions(:albion_desc)
-  #   ds2 = location_descriptions(:no_mushrooms_location_desc)
-  #   description_coercion_assertions(ds1, ds2, :Location)
-  # end
+  def test_location_description_subquery_of_location
+    ds1 = location_descriptions(:albion_desc)
+    ds2 = location_descriptions(:no_mushrooms_location_desc)
+    description_subquery_assertions(ds1, ds2, :Location)
+  end
 
-  # def test_name_description_coercion
-  #   ds1 = name_descriptions(:coprinus_comatus_desc)
-  #   ds2 = name_descriptions(:peltigera_desc)
-  #   description_coercion_assertions(ds1, ds2, :Name)
-  # end
+  def test_name_description_subquery_of_name
+    ds1 = name_descriptions(:coprinus_comatus_desc)
+    ds2 = name_descriptions(:peltigera_desc)
+    description_subquery_assertions(ds1, ds2, :Name)
+  end
 
-  # def description_coercion_assertions(ds1, ds2, model)
-  #   qa = qb = qc = []
+  def description_subquery_assertions(ds1, ds2, model)
+    qa = qb = qc = []
 
-  #   desc_model = :"#{model}Description"
-  #   # Several description queries can be turned into name queries and back.
-  #   qa[0] = Query.lookup_and_save(desc_model)
-  #   qa[1] = Query.lookup_and_save(desc_model, by_author: rolf.id)
-  #   qa[2] = Query.lookup_and_save(desc_model, by_editor: rolf.id)
-  #   qa[3] = Query.lookup_and_save(desc_model, by_user: rolf.id)
-  #   qa[4] = Query.lookup_and_save(desc_model, ids: [ds1.id, ds2.id])
-  #   assert_equal(5, QueryRecord.count)
+    desc_model = :"#{model}Description"
+    # These description queries can be turned into parent_type queries and back.
+    qa[0] = Query.lookup_and_save(desc_model)
+    qa[1] = Query.lookup_and_save(desc_model, by_author: rolf.id)
+    qa[2] = Query.lookup_and_save(desc_model, by_editor: rolf.id)
+    qa[3] = Query.lookup_and_save(desc_model, by_user: rolf.id)
+    qa[4] = Query.lookup_and_save(desc_model, ids: [ds1.id, ds2.id])
+    assert_equal(5, QueryRecord.count)
 
-  #   # Try coercing them into name queries.
-  #   [*0..4].each do |i|
-  #     assert(qb[i] = qa[i].coerce(model))
-  #     # They should all be new records
-  #     assert(qb[i].record.new_record?)
-  #     assert_save(qb[i])
-  #     assert_equal(model.to_s, qb[i].model.to_s)
-  #     assert(qb[i].params[:with_descriptions])
-  #   end
-  #   # Make sure they're right.
-  #   assert_equal(rolf.id, qb[1].params[:by_author])
-  #   assert_equal(rolf.id, qb[2].params[:by_editor])
-  #   assert_equal(rolf.id, qb[3].params[:by_user])
-  #   assert_equal([ds1.id, ds2.id], qb[4].params[:desc_ids])
+    # Try coercing them into parent_type queries.
+    [*0..4].each do |i|
+      assert(qb[i] = qa[i].subquery_of(model))
+      # They should all be new records
+      # assert(qb[i].record.new_record?)
+      assert_save(qb[i])
+      assert_equal(model.to_s, qb[i].model.to_s)
+      assert(qb[i].params[:description_query])
+    end
+    # Make sure they're right.
+    desc_queries = qb.map { |que| que.params[:description_query] }
 
-  #   # Try coercing them back.
-  #   # None should be new records
-  #   [*0..4].each do |i|
-  #     assert(qc[i] = qb[i].coerce(desc_model))
-  #     assert_equal(qa[i], qc[i])
-  #   end
-  # end
+    assert_equal(rolf.id, desc_queries[1][:by_author])
+    assert_equal(rolf.id, desc_queries[2][:by_editor])
+    assert_equal(rolf.id, desc_queries[3][:by_user])
+    assert_equal([ds1.id, ds2.id], desc_queries[4][:ids])
+
+    # Try coercing them back.
+    # None should be new records
+    [*0..4].each do |i|
+      assert(qc[i] = qb[i].subquery_of(desc_model))
+      assert_equal(qa[i], qc[i])
+    end
+  end
 
   # def test_rss_log_coercion
-  #   # The site index's default RssLog query should be coercable into queries on
+  #   # The site index's default RssLog query should be relatable to queries on
   #   # the member classes, so that when a user clicks on an RssLog entry in the
   #   # main index and goes to a show_object page, they can continue to browse
   #   # results via prev/next.  (Actually, it handles this better now,
@@ -1120,11 +1119,11 @@ class QueryTest < UnitTestCase
   #   q1 = Query.lookup_and_save(:RssLog)
 
   #   # Click through to an item (User is expected to fail).
-  #   q2 = q1.coerce(:Location)
-  #   q3 = q1.coerce(:Name)
-  #   q4 = q1.coerce(:Observation)
-  #   q5 = q1.coerce(:SpeciesList)
-  #   q6 = q1.coerce(:User)
+  #   q2 = q1.subquery_of(:Location)
+  #   q3 = q1.subquery_of(:Name)
+  #   q4 = q1.subquery_of(:Observation)
+  #   q5 = q1.subquery_of(:SpeciesList)
+  #   q6 = q1.subquery_of(:User)
 
   #   # Make sure they succeeded and created new queries.
   #   assert(q2)
@@ -1153,10 +1152,10 @@ class QueryTest < UnitTestCase
   #   assert_equal(:rss_log, q5.params[:by].to_sym)
   # end
 
-  # def test_coercable
-  #   assert(Query.lookup(:Observation, by: :id).coercable?(:Image))
-  #   assert_not(Query.lookup(:Herbarium, by: :id).coercable?(:Project))
-  # end
+  def test_relatable
+    assert(Query.lookup(:Observation, by: :id).relatable?(:Image))
+    assert_not(Query.lookup(:Herbarium, by: :id).relatable?(:Project))
+  end
 
   ##############################################################################
   #

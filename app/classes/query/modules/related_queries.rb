@@ -27,6 +27,14 @@ module Query::Modules::RelatedQueries
     base.extend(ClassMethods)
   end
 
+  def relatable?(target)
+    self.class.related?(target, model.name.to_sym)
+  end
+
+  def subquery_of(target)
+    self.class.current_or_related_query(target, model.name.to_sym, self)
+  end
+
   module ClassMethods
     # Query needs to know which joins are necessary to make these conversions
     # work. Need to maintain RELATED_TYPES if the Query class is updated.
@@ -37,11 +45,15 @@ module Query::Modules::RelatedQueries
     RELATED_QUERIES = {
       Image: [:Image, :Observation],
       Location: [:Location, :LocationDescription, :Name, :Observation],
+      LocationDescription: [:Location],
       Name: [:Name, :NameDescription, :Observation],
+      NameDescription: [:Name],
       Observation: [:Image, :Location, :Name, :Observation, :Sequence]
     }.freeze
 
     def related?(target, filter)
+      return false unless RELATED_QUERIES.key?(target)
+
       RELATED_QUERIES[target].include?(filter)
     end
 
@@ -62,20 +74,19 @@ module Query::Modules::RelatedQueries
     # NOTE: Our custom method `deep_find` returns an array of matches.
     def restorable_query(target, current_query)
       subquery_param = current_query.class.find_subquery_param_name(target)
-      restorable_query = current_query.params.deep_find(subquery_param)
-      return false if restorable_query.blank?
+      restorable_query_params = current_query.params.deep_find(subquery_param)
+      return false if restorable_query_params.blank?
 
-      lookup(target, restorable_query.first)
+      lookup(target, restorable_query_params.first)
     end
 
     # Make a new query using the current_query as the subquery. Note that this
     # will continue nesting queries unless a restorable query is found above.
     def new_query_with_subquery(target, filter, current_query)
       query_class = "Query::#{target.to_s.pluralize}".constantize
-      return unless (subquery = query_class.find_subquery_param_name(filter)) &&
-                    current_query.params.compact.present?
+      return unless (subquery = query_class.find_subquery_param_name(filter))
 
-      lookup(target, "#{subquery}": current_query.params)
+      lookup(target, "#{subquery}": current_query.params.compact)
     end
 
     def find_subquery_param_name(filter)
