@@ -12,7 +12,6 @@ class Query::Herbaria < Query::Base
       code: :string,
       name: :string,
       ids: [Herbarium],
-      id_range: [:integer],
       description: :string,
       address: :string,
       pattern: :string,

@@ -9,7 +9,6 @@ class Query::ExternalLinks < Query::Base
     super.merge(
       created_at: [:time],
       updated_at: [:time],
-      id_range: [:integer],
       users: [User],
       observations: [Observation],
       external_sites: [ExternalSite],
