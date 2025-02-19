@@ -10,6 +10,7 @@ class Query::Comments < Query::Base
       created_at: [:time],
       updated_at: [:time],
       ids: [Comment],
+      id_range: [:integer],
       by_user: User,
       for_user: User,
       users: [User],
