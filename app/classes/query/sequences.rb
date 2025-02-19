@@ -10,6 +10,7 @@ class Query::Sequences < Query::Base
       created_at: [:time],
       updated_at: [:time],
       ids: [Sequence],
+      id_range: [:integer],
       users: [User],
       observations: [Observation],
       locus: [:string],

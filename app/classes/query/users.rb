@@ -10,6 +10,7 @@ class Query::Users < Query::Base
       created_at: [:time],
       updated_at: [:time],
       ids: [User],
+      id_range: [:integer],
       pattern: :string,
       with_contribution: :boolean
     )

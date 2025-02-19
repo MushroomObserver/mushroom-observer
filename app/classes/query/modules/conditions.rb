@@ -137,8 +137,8 @@ module Query::Modules::Conditions
     add_joins(*)
   end
 
-  def add_id_range_condition(ids)
-    return nil unless ids
+  def add_id_range_condition
+    return unless (ids = params[:id_range])
 
     @where << ids.map do |term|
       if term.is_a?(Range)
