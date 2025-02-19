@@ -137,6 +137,19 @@ module Query::Modules::Conditions
     add_joins(*)
   end
 
+  def add_id_range_condition(ids)
+    return nil unless ids
+
+    @where << ids.map do |term|
+      if term.is_a?(Range)
+        "#{model.table_name}.id >= #{term.begin} AND " \
+        "#{model.table_name}.id <= #{term.end}"
+      else
+        "#{model.table_name}.id = #{term}"
+      end
+    end.join(" OR ")
+  end
+
   def add_subquery_condition(param, *, table: nil, col: :id)
     return if params[param].blank?
 

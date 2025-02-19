@@ -32,7 +32,7 @@ class API2
 
     def query_params
       {
-        where: sql_id_condition,
+        id_range: parse_ranges(:integer, :id),
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at),
         code: parse(:string, :code),
