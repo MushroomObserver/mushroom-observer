@@ -1,13 +1,12 @@
 # frozen_string_literal: true
 
 # Validation of Query parameters.
-# Also adds user content filters to params if applicable. Maybe a confusion of
-# concerns, but it's the only place where we instantiate the subquery.
-module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
+# Also adds default param `:is_collection_location` to observation subqueries
+# if applicable.
+module Query::Modules::Validation
   attr_accessor :params, :params_cache
 
   def validate_params
-    @preference_filter_applied = false
     old_params = @params.dup&.compact&.symbolize_keys || {}
     new_params = {}
     permitted_params = parameter_declarations.slice(*old_params.keys)
@@ -18,12 +17,6 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     end
     check_for_unexpected_params(old_params)
     @params = new_params
-    # Runs after validation to check if filters should be overridden by params.
-    # NOTE: this is also run on each subquery during validation, below.
-    apply_preference_filters(self)
-    # NOTE: This param is needed to distinguish between filtering by
-    # user.content_filter vs advanced search, because they use the same params.
-    @params[:preference_filter] = true if @preference_filter_applied
   end
 
   def check_for_unexpected_params(old_params)
@@ -32,32 +25,6 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
 
     str = unexpected_params.keys.map(&:to_s).join("', '")
     raise("Unexpected parameter(s) '#{str}' for #{model} query.")
-  end
-
-  # Subqueries also call this in validate_subquery for efficiency: we have
-  # them briefly as a Query object and can check class param_declarations.
-  def apply_preference_filters(query)
-    filters = users_preference_filters || {}
-    # disable cop because Query::Filter is not an ActiveRecord model
-    Query::Filter.all.each do |fltr| # rubocop:disable Rails/FindEach
-      apply_one_preference_filter(fltr, query, filters[fltr.sym])
-    end
-  end
-
-  def apply_one_preference_filter(fltr, query, user_filter)
-    return unless query.is_a?(Query::Base)
-
-    key = fltr.sym
-    return unless query.takes_parameter?(key)
-    return if query.params.key?(key)
-    return unless fltr.on?(user_filter)
-
-    query.params[key] = validate_value(fltr.type, fltr.sym, user_filter.to_s)
-    @preference_filter_applied = true
-  end
-
-  def users_preference_filters
-    User.current ? User.current.content_filter : MO.default_content_filter
   end
 
   def validate_value(param_type, param, val)
@@ -140,8 +107,8 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     end
     submodel = param_type.values.first
     val = add_default_subquery_conditions(submodel, val)
+    # Validate the subquery's params by creating another Query instance
     subquery = Query.new(submodel, val)
-    apply_preference_filters(subquery)
     subquery.params
   end
 
@@ -184,19 +151,19 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     val2
   end
 
+  # Disable cop because we do mean to symbols with boolean names
+  # rubocop:disable Lint/BooleanSymbol
   def validate_boolean(param, val)
     case val
-    # Disable cop because we do mean to symbols with boolean names
-    # rubocop:disable Lint/BooleanSymbol
     when :true, :yes, :on, "true", "yes", "on", "1", 1, true
       true
     when :false, :no, :off, "false", "no", "off", "0", 0, false, nil
       false
-    # rubocop:enable Lint/BooleanSymbol
     else
       raise("Value for :#{param} should be boolean, got: #{val.inspect}")
     end
   end
+  # rubocop:enable Lint/BooleanSymbol
 
   # def validate_integer(param, val)
   #   if val.is_a?(Integer) || val.is_a?(String) && val.match(/^-?\d+$/)

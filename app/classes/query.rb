@@ -278,6 +278,7 @@ class Query
     query = klass.new
     query.params = params
     query.validate_params
+    query.add_user_content_filters_to_params
     query.current = current if current
     query
   end
