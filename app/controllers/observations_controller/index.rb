@@ -58,7 +58,10 @@ class ObservationsController
     end
 
     def advanced_search_params
-      Query::Params::AdvancedSearch.advanced_search_params
+      params = Query::Observations.advanced_search_params
+      return params if params.present?
+
+      raise("Query::Observations.advanced_search_params is undefined.")
     end
 
     # Display matrix of Observations whose notes, etc. match a string pattern.

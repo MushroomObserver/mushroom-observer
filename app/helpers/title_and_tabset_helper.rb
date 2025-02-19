@@ -271,7 +271,8 @@ module TitleAndTabsetHelper
   # Add some info to the raw sorts: path, identifier, and if is current sort_by
   def assemble_sort_links(query, sorts, link_all)
     results = []
-    this_by = (query.params[:by] || query.default_order).sub(/^reverse_/, "")
+    this_by = (query.params[:by] || query.default_order).
+              to_s.sub(/^reverse_/, "")
 
     sorts.each do |by, label|
       results << sort_link(label, query, by, this_by, link_all)

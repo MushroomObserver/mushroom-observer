@@ -14,7 +14,8 @@ module ApplicationController::Indexes
 
   # Get args from a param subaction, or if none given, the unfiltered_index.
   def build_index_with_query
-    index_active_params.each do |subaction|
+    current_params = index_active_params.intersection(params.keys.map(&:to_sym))
+    current_params.each do |subaction|
       next if params[subaction].blank?
 
       query, display_opts = send(index_param_method_or_default(subaction))
@@ -105,7 +106,8 @@ module ApplicationController::Indexes
   end
 
   def sorted_index_opts
-    { query_args: { by: params[:by] }, display_opts: index_display_at_id_opts }
+    { query_args: { by: params[:by] },
+      display_opts: index_display_at_id_opts }
   end
 
   # The filtered index.
@@ -197,37 +199,11 @@ module ApplicationController::Indexes
   private ##########
 
   def show_index_setup(query, display_opts)
-    apply_content_filters(query)
     store_location
     clear_query_in_session if session[:checklist_source] != query.id
     query_params_set(query)
     query.need_letters = display_opts[:letters] if display_opts[:letters]
     set_index_view_ivars(query, display_opts)
-  end
-
-  def apply_content_filters(query)
-    filters = users_content_filters || {}
-    @any_content_filters_applied = false
-    # disable cop because Query::Filter is not an ActiveRecord model
-    Query::Filter.all.each do |fltr| # rubocop:disable Rails/FindEach
-      apply_one_content_filter(fltr, query, filters[fltr.sym])
-    end
-  end
-
-  def apply_one_content_filter(fltr, query, user_filter)
-    key = fltr.sym
-    return unless query.takes_parameter?(key)
-    return if query.params.key?(key)
-    return unless fltr.on?(user_filter)
-
-    # This is a "private" method used by Query#validate_params.
-    # It would be better to add these parameters before the query is
-    # instantiated. Or alternatively, make query validation lazy so
-    # we can continue to add parameters up until we first ask it to
-    # execute the query.
-    query.params[key] = query.validate_value(fltr.type, fltr.sym,
-                                             user_filter.to_s)
-    @any_content_filters_applied = true
   end
 
   ###########################################################################
@@ -242,6 +218,14 @@ module ApplicationController::Indexes
     @error ||= :runtime_no_matches.t(type: query.model.type_tag)
     @layout = calc_layout_params if display_opts[:matrix]
     @num_results = query.num_results
+    @any_content_filters_applied = check_if_preference_filters_applied
+  end
+
+  def check_if_preference_filters_applied
+    current_params = @query.params.flatten.compact_blank.keys
+    return false unless current_params.include?(:preference_filter)
+
+    true
   end
 
   ###########################################################################

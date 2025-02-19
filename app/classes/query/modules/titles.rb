@@ -19,6 +19,6 @@ module Query::Modules::Titles
     return unless params[:by]
 
     self.title_tag = :query_title_all_by
-    title_args[:order] = :"sort_by_#{params[:by].sub(/^reverse_/, "")}"
+    title_args[:order] = :"sort_by_#{params[:by].to_s.sub(/^reverse_/, "")}"
   end
 end

@@ -1,11 +1,14 @@
 # frozen_string_literal: true
 
-# validation of Query parameters
-module Query::Modules::Validation
+# Validation of Query parameters.
+# Also adds user content filters to params if applicable. Maybe a confusion of
+# concerns, but it's the only place where we instantiate the subquery.
+module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
   attr_accessor :params, :params_cache
 
   def validate_params
-    old_params = @params.dup.compact.symbolize_keys
+    @preference_filter_applied = false
+    old_params = @params.dup&.compact&.symbolize_keys || {}
     new_params = {}
     permitted_params = parameter_declarations.slice(*old_params.keys)
     permitted_params.each do |param, param_type|
@@ -15,6 +18,12 @@ module Query::Modules::Validation
     end
     check_for_unexpected_params(old_params)
     @params = new_params
+    # Runs after validation to check if filters should be overridden by params.
+    # NOTE: this is also run on each subquery during validation, below.
+    apply_preference_filters(self)
+    # NOTE: This param is needed to distinguish between filtering by
+    # user.content_filter vs advanced search, because they use the same params.
+    @params[:preference_filter] = true if @preference_filter_applied
   end
 
   def check_for_unexpected_params(old_params)
@@ -25,6 +34,32 @@ module Query::Modules::Validation
     raise("Unexpected parameter(s) '#{str}' for #{model} query.")
   end
 
+  # Subqueries also call this in validate_subquery for efficiency: we have
+  # them briefly as a Query object and can check class param_declarations.
+  def apply_preference_filters(query)
+    filters = users_preference_filters || {}
+    # disable cop because Query::Filter is not an ActiveRecord model
+    Query::Filter.all.each do |fltr| # rubocop:disable Rails/FindEach
+      apply_one_preference_filter(fltr, query, filters[fltr.sym])
+    end
+  end
+
+  def apply_one_preference_filter(fltr, query, user_filter)
+    return unless query.is_a?(Query::Base)
+
+    key = fltr.sym
+    return unless query.takes_parameter?(key)
+    return if query.params.key?(key)
+    return unless fltr.on?(user_filter)
+
+    query.params[key] = validate_value(fltr.type, fltr.sym, user_filter.to_s)
+    @preference_filter_applied = true
+  end
+
+  def users_preference_filters
+    User.current ? User.current.content_filter : MO.default_content_filter
+  end
+
   def validate_value(param_type, param, val)
     if param_type.is_a?(Array)
       result = array_validate(param, val, param_type.first).flatten
@@ -32,8 +67,7 @@ module Query::Modules::Validation
       result
     else
       val = scalar_validate(param, val, param_type)
-      val = val.first if val.is_a?(Array)
-      val
+      [val].flatten.first
     end
   end
 
@@ -82,17 +116,45 @@ module Query::Modules::Validation
   def validate_hash_param(param, val, param_type)
     if [:string, :boolean].include?(param_type.keys.first)
       validate_enum(param, val, param_type)
+    elsif param_type.keys.first == :subquery
+      validate_subquery(param, val, param_type)
     else
       validate_nested_params(param, val, param_type)
     end
   end
 
-  def validate_nested_params(_param, val, hash)
+  def validate_nested_params(_param, val, param_type)
     val2 = {}
-    hash.each do |key, arg_type|
+    param_type.each do |key, arg_type|
       val2[key] = scalar_validate(key, val[key], arg_type)
     end
     val2
+  end
+
+  def validate_subquery(param, val, param_type)
+    if param_type.keys.length != 1
+      raise(
+        "Invalid enum declaration for :#{param} for #{model} " \
+        "query! (wrong number of keys in hash)"
+      )
+    end
+    submodel = param_type.values.first
+    val = add_default_subquery_conditions(submodel, val)
+    subquery = Query.new(submodel, val)
+    apply_preference_filters(subquery)
+    subquery.params
+  end
+
+  def add_default_subquery_conditions(submodel, val)
+    return val unless needs_is_collection_location_param(submodel, val)
+
+    val.merge(is_collection_location: true)
+  end
+
+  def needs_is_collection_location_param(submodel, val)
+    model == Location && submodel == :Observation &&
+      (val[:project] || val[:species_list]) &&
+      val[:is_collection_location].blank?
   end
 
   def validate_enum(param, val, hash)

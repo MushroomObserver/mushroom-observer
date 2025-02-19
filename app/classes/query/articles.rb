@@ -5,7 +5,7 @@ class Query::Articles < Query::Base
     Article
   end
 
-  def parameter_declarations
+  def self.parameter_declarations
     super.merge(
       created_at: [:time],
       updated_at: [:time],

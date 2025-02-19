@@ -304,6 +304,14 @@ module Query
     Query::Base.lookup(*)
   end
 
+  def self.current_or_related_query(*)
+    Query::Base.current_or_related_query(*)
+  end
+
+  def self.related?(*)
+    Query::Base.related?(*)
+  end
+
   def default_order
     self.class.default_order
   end

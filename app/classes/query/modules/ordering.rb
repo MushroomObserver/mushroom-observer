@@ -10,7 +10,7 @@ module Query::Modules::Ordering
 
     by ||= default_order
     by = by.dup
-    reverse = !!by.sub!(/^reverse_/, "")
+    reverse = !!by.to_s.sub!(/^reverse_/, "")
     result = initialize_order_specs(by)
     self.order = reverse ? reverse_order(result) : result
   end

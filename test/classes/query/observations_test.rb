@@ -120,6 +120,20 @@ class Query::ObservationsTest < UnitTestCase
                  :Observation, with_sequences: false)
   end
 
+  def test_observation_with_images
+    assert_query(Observation.index_order.with_images(true),
+                 :Observation, with_images: true)
+    assert_query(Observation.index_order.with_images(false),
+                 :Observation, with_images: false)
+  end
+
+  def test_observation_with_specimen
+    assert_query(Observation.index_order.with_specimen(true),
+                 :Observation, with_specimen: true)
+    assert_query(Observation.index_order.with_specimen(false),
+                 :Observation, with_specimen: false)
+  end
+
   def test_observation_field_slips
     f_s = field_slips(:field_slip_one)
     assert_query([observations(:minimal_unknown_obs)],

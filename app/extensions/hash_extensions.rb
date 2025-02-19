@@ -26,6 +26,14 @@ class Hash
     result
   end
 
+  def deep_find(key, object = self, found = [])
+    found << object[key] if object.respond_to?(:key?) && object.key?(key)
+    if object.is_a?(Enumerable)
+      found << object.collect { |*a| deep_find(key, a.last) }
+    end
+    found.flatten.compact
+  end
+
   # Remove keys whose value is nil.
   def remove_nils!
     delete_if { |_k, v| v.nil? }

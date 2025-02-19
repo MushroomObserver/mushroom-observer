@@ -3,8 +3,8 @@
 # base class for Query searches
 class Query::Base
   include Query::Modules::ActiveRecord
+  include Query::Modules::RelatedQueries
   include Query::Modules::BoundingBox
-  include Query::Modules::Coercion
   include Query::Modules::Conditions
   include Query::Modules::Associations
   include Query::Modules::Datetime
@@ -23,6 +23,10 @@ class Query::Base
   include Query::Modules::Validation
 
   def parameter_declarations
+    self.class.parameter_declarations
+  end
+
+  def self.parameter_declarations
     {
       join: [:string],
       tables: [:string],
@@ -43,7 +47,7 @@ class Query::Base
     # These strings can never come direct from user, so no need to sanitize.
     # (I believe they are only used by the site stats page. -JPH 20190708)
     self.where += params[:where] if params[:where]
-    add_join(params[:join])      if params[:join]
+    add_join(params[:join]) if params[:join]
   end
 
   def default_order
