@@ -9,35 +9,6 @@ module Query::Initializers::Descriptions
     )
   end
 
-  def initialize_with_desc_basic_parameters(type = model.type_tag)
-    add_with_desc_ids_condition(type)
-    add_desc_by_user_condition(type)
-    add_desc_by_author_condition(type)
-    add_desc_by_editor_condition(type)
-  end
-
-  def add_with_desc_ids_condition(type = model.type_tag)
-    return unless params[:desc_ids]
-
-    set = clean_id_set(params[:desc_ids])
-    @where << "#{type}_descriptions.id IN (#{set})"
-    self.order = "FIND_IN_SET(#{type}_descriptions.id,'#{set}') ASC"
-
-    @title_tag = :query_title_with_descriptions.t(type: type)
-    @title_args[:descriptions] = params[:old_title] ||
-                                 :query_title_in_set.t(type: :description)
-  end
-
-  def add_desc_by_user_condition(type)
-    return unless params[:by_user]
-
-    user = find_cached_parameter_instance(User, :by_user)
-    @title_tag = :query_title_with_descriptions_by_user.t(type: type)
-    @title_args[:user] = user.legal_name
-    add_join(:"#{type}_descriptions")
-    where << "#{type}_descriptions.user_id = '#{user.id}'"
-  end
-
   def add_desc_by_author_condition(type)
     return unless params[:by_author]
 
