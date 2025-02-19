@@ -16,7 +16,6 @@ class Query::Locations < Query::Base
       created_at: [:time],
       updated_at: [:time],
       ids: [Location],
-      id_range: [:integer],
       by_user: User,
       by_editor: User,
       users: [User],

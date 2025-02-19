@@ -12,7 +12,6 @@ class Query::LocationDescriptions < Query::Base
       created_at: [:time],
       updated_at: [:time],
       ids: [LocationDescription],
-      id_range: [:integer],
       by_user: User,
       by_author: User,
       by_editor: User,
