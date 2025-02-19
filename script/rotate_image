@@ -55,26 +55,26 @@ if test "$orientation" != "1" -a "$orientation" != "" ; then
 fi
 
 # Transform image.
-wait_for "(convert|jpegresize)"
+wait_for "(magick|jpegresize)"
 case $op in
 "-90")
-  convert $orig_file -rotate 270 $orig_file.new || die "Failed to rotate $orig_file."
+  magick $orig_file -rotate 270 $orig_file.new || die "Failed to rotate $orig_file."
   mv -f $orig_file.new $orig_file               || die "Failed to move $orig_file.new into place."
   ;;
 "+90")
-  convert $orig_file -rotate 90 $orig_file.new  || die "Failed to rotate $orig_file."
+  magick $orig_file -rotate 90 $orig_file.new  || die "Failed to rotate $orig_file."
   mv -f $orig_file.new $orig_file               || die "Failed to move $orig_file.new into place."
   ;;
 "180")
-  convert $orig_file -rotate 180 $orig_file.new || die "Failed to rotate $orig_file."
+  magick $orig_file -rotate 180 $orig_file.new || die "Failed to rotate $orig_file."
   mv -f $orig_file.new $orig_file               || die "Failed to move $orig_file.new into place."
   ;;
 "-h")
-  convert $orig_file -flop $orig_file.new  || die "Failed to rotate $orig_file."
+  magick $orig_file -flop $orig_file.new  || die "Failed to rotate $orig_file."
   mv -f $orig_file.new $orig_file          || die "Failed to move $orig_file.new into place."
   ;;
 "-v")
-  convert $orig_file -flip $orig_file.new  || die "Failed to rotate $orig_file."
+  magick $orig_file -flip $orig_file.new  || die "Failed to rotate $orig_file."
   mv -f $orig_file.new $orig_file          || die "Failed to move $orig_file.new into place."
   ;;
 esac
