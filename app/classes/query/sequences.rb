@@ -65,10 +65,6 @@ class Query::Sequences < Query::Base
                          :observations)
   end
 
-  def add_join_to_locations
-    add_join(:observations, :locations!)
-  end
-
   def self.default_order
     "created_at"
   end
