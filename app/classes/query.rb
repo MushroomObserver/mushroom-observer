@@ -272,7 +272,7 @@
 #                       queries only).
 #  @params_cache::      Hash: where instances passed in via params are cached.
 #
-module Query
+class Query
   def self.new(model, params = {}, current = nil)
     klass = "Query::#{model.to_s.pluralize}".constantize
     query = klass.new
