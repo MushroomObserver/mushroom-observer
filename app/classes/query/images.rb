@@ -27,8 +27,7 @@ class Query::Images < Query::Base
       projects: [Project],
       species_lists: [SpeciesList],
       with_observation: { boolean: [true] },
-      # does not yet handle range of sizes. Param is minimum size.
-      size: { string: Image::ALL_SIZES - [:full_size] },
+      size: [{ string: Image::ALL_SIZES - [:full_size] }],
       content_types: [{ string: Image::ALL_EXTENSIONS }],
       with_notes: :boolean,
       notes_has: :string,
