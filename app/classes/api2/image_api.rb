@@ -35,6 +35,8 @@ class API2
       ]
     end
 
+    # Disable cop to keep table style alignment of multipline Hash values
+    # rubocop:disable Layout/MultilineOperationIndentation
     def query_params
       {
         where: sql_id_condition,
@@ -48,9 +50,8 @@ class API2
         species_lists: parse_array(:species_list, :species_list, as: :id),
         with_observation: parse(:boolean, :has_observation,
                                 limit: true, help: 1),
-        size: parse(
-          :enum, :size, limit: Image::ALL_SIZES - [:full_size], help: :min_size
-        ),
+        size: parse(:enum, :size,
+                    limit: Image::ALL_SIZES - [:full_size], help: :min_size),
         content_types: parse_array(:enum, :content_type,
                                    limit: Image::ALL_EXTENSIONS),
         with_notes: parse(:boolean, :has_notes),
@@ -66,19 +67,16 @@ class API2
     end
 
     def parse_observation_query_parameters
-      parse_names_parameters.compact
+      parse_names_parameters
     end
 
     def create_params
       parse_create_params!
       {
-        # Disable cop to keep table style alignment of multipline Hash values
-        # rubocop:disable Layout/MultilineOperationIndentation
         when: parse(:date, :date, help: :when_taken) || @default_date,
         notes: parse(:string, :notes, default: ""),
         copyright_holder: parse(:string, :copyright_holder, limit: 100) ||
                           user.legal_name,
-        # rubocop:enable Layout/MultilineOperationIndentation
         license: parse(:license, :license) || user.license,
         original_name: parse_original_name(:original_name),
         upload_md5sum: parse(:string, :md5sum),
@@ -97,6 +95,7 @@ class API2
         original_name: parse_original_name(:set_original_name)
       }
     end
+    # rubocop:enable Layout/MultilineOperationIndentation
 
     def validate_create_params!(_params)
       raise(MissingUpload.new) unless @upload
