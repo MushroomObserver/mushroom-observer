@@ -73,6 +73,9 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
 
+    QueuedEmail.queue = true
+    before_emails_count = QueuedEmail.count
+
     Inat::PhotoImporter.stub(:new,
                              stub_mo_photo_importer(mock_inat_response)) do
       assert_difference("Observation.count", 1,
@@ -80,6 +83,10 @@ class InatImportJobTest < ActiveJob::TestCase
         InatImportJob.perform_now(inat_import)
       end
     end
+
+    assert_equal(0, QueuedEmail.count - before_emails_count,
+                 "Import should not have sent any emails")
+    QueuedEmail.queue = false
 
     obs = Observation.last
 
