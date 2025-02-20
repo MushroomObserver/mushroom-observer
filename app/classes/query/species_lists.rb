@@ -13,7 +13,6 @@ class Query::SpeciesLists < Query::Base
       by_user: User,
       users: [User],
       ids: [SpeciesList],
-      id_range: [:integer],
       location: Location,
       locations: [Location],
       user_where: :string,

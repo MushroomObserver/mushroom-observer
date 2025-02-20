@@ -9,7 +9,7 @@ class Query::CollectionNumbers < Query::Base
     super.merge(
       created_at: [:time],
       updated_at: [:time],
-      id_range: [:integer],
+      ids: [CollectionNumber],
       users: [User],
       observation: Observation,
       observations: [Observation],

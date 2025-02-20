@@ -18,7 +18,6 @@ class Query::Names < Query::Base
       created_at: [:time],
       updated_at: [:time],
       ids: [Name],
-      id_range: [:integer],
       names: [Name],
       include_synonyms: :boolean,
       include_subtaxa: :boolean,

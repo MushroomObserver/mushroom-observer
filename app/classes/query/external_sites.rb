@@ -7,7 +7,7 @@ class Query::ExternalSites < Query::Base
 
   def self.parameter_declarations
     super.merge(
-      id_range: [:integer],
+      ids: [ExternalSite],
       name: :string
     )
   end
