@@ -27,6 +27,15 @@ class API2::ObservationsTest < UnitTestCase
     assert_api_results([obs_sample])
   end
 
+  def obs_samples
+    @obs_samples ||= Observation.all.sample(12)
+  end
+
+  def test_getting_observations_ids
+    assert_api_pass(params_get(id: obs_samples.map(&:id).join(",")))
+    assert_api_results(obs_samples)
+  end
+
   def test_getting_observations_year
     obses = Observation.where(Observation[:created_at].year.eq(2010))
     assert_not_empty(obses)

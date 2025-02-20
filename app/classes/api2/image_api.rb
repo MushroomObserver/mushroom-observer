@@ -39,7 +39,7 @@ class API2
     # rubocop:disable Layout/MultilineOperationIndentation
     def query_params
       {
-        ids: parse_array(:integer, :id),
+        ids: parse_array(:image, :id, as: :id),
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at),
         date: parse_range(:date, :date, help: :when_taken),

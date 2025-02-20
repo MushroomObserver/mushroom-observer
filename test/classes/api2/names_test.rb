@@ -24,6 +24,15 @@ class API2::NamesTest < UnitTestCase
     assert_api_results([name])
   end
 
+  def name_samples
+    @name_samples ||= Name.all.sample(12)
+  end
+
+  def test_getting_names_ids
+    assert_api_pass(params_get(id: name_samples.map(&:id).join(",")))
+    assert_api_results(name_samples)
+  end
+
   def test_getting_names_year
     names = Name.with_correct_spelling.where(Name[:created_at].year.eq(2008))
     assert_not_empty(names)

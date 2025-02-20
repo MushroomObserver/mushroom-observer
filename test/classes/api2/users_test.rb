@@ -20,6 +20,15 @@ class API2::UsersTest < UnitTestCase
     assert_api_results(User.all)
   end
 
+  def usr_samples
+    @usr_samples ||= User.all.sample(3)
+  end
+
+  def test_getting_users_ids
+    assert_api_pass(params_get(id: usr_samples.map(&:id).join(",")))
+    assert_api_results(usr_samples)
+  end
+
   def test_posting_minimal_user
     @login = "stephane"
     @name = ""
