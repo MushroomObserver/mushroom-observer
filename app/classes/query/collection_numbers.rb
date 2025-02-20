@@ -24,14 +24,19 @@ class Query::CollectionNumbers < Query::Base
   def initialize_flavor
     add_sort_order_to_title
     add_owner_and_time_stamp_conditions
+    add_ids_condition
+    add_collection_number_conditions
     add_for_observation_condition
     initialize_observations_parameter
     add_pattern_condition
+    super
+  end
+
+  def add_collection_number_conditions
     add_exact_match_condition("collection_numbers.name", params[:name])
     add_exact_match_condition("collection_numbers.number", params[:number])
     add_search_condition("collection_numbers.name", params[:name_has])
     add_search_condition("collection_numbers.number", params[:number_has])
-    super
   end
 
   def search_fields

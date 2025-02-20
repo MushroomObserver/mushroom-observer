@@ -20,6 +20,7 @@ class Query::ExternalLinks < Query::Base
   def initialize_flavor
     add_sort_order_to_title
     add_owner_and_time_stamp_conditions
+    add_ids_condition
     initialize_observations_parameter(:external_links)
     ids = lookup_external_sites_by_name(params[:external_sites])
     add_id_condition("external_links.external_site_id", ids)
