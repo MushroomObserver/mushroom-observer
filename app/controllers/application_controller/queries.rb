@@ -253,10 +253,18 @@ module ApplicationController::Queries
       !QueryRecord.exists?(id: params[:q].dealphabetize)
   end
 
-  # Create a new Query of the given model.  Pass it
-  # in all the args you would to Query#new.
-  def create_query(model_symbol, args = {})
-    Query.lookup(model_symbol, args)
+  # Create a new Query of the given model.
+  # Pass in all the query_params you would to Query#new.
+  # NOTE: This is the only action where user content filters are applied.
+  # Use this instead of Query.lookup or PatternSearch#query.
+  # (Related query links will preserve relevant filters in the subquery.)
+  def create_query(model_symbol, query_params = {})
+    add_user_content_filter_parameters(query_params, model_symbol)
+    # NOTE: This param is used by the controller to distinguish between params
+    # that have been filtered by User.current.content_filter vs advanced search,
+    # because they use the same params.
+    query_params[:preference_filter] = true if @preference_filters_applied
+    Query.lookup(model_symbol, query_params)
   end
 
   private ##########
@@ -266,6 +274,31 @@ module ApplicationController::Queries
 
     result.increment_access_count
     result.save
+  end
+
+  def add_user_content_filter_parameters(query_params, model)
+    filters = users_preference_filters || {}
+    return if filters.blank?
+
+    # disable cop because Query::Filter is not an ActiveRecord model
+    Query::Filter.all.each do |fltr| # rubocop:disable Rails/FindEach
+      apply_one_content_filter(fltr, query_params, model, filters[fltr.sym])
+    end
+  end
+
+  def apply_one_content_filter(fltr, query_params, model, user_filter)
+    query_class = "Query::#{model.to_s.pluralize}".constantize
+    key = fltr.sym
+    return unless query_class.takes_parameter?(key)
+    return if query_params.key?(key)
+    return unless fltr.on?(user_filter)
+
+    query_params[key] = user_filter.to_s
+    @preference_filters_applied = true
+  end
+
+  def users_preference_filters
+    User.current ? User.current.content_filter : MO.default_content_filter
   end
 
   public ##########

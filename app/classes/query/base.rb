@@ -21,7 +21,6 @@ class Query::Base
   include Query::Modules::Sql
   include Query::Modules::Titles
   include Query::Modules::Validation
-  include Query::Modules::Filtering
 
   def parameter_declarations
     self.class.parameter_declarations
@@ -40,6 +39,10 @@ class Query::Base
   end
 
   def takes_parameter?(key)
+    self.class.takes_parameter?(key)
+  end
+
+  def self.takes_parameter?(key)
     parameter_declarations.key?(key) ||
       parameter_declarations.key?(:"#{key}?")
   end
@@ -49,7 +52,7 @@ class Query::Base
   end
 
   def self.subquery_parameters
-    parameter_declarations.select { |key, _v| key.to_s.include?("_subquery") }
+    parameter_declarations.select { |key, _v| key.to_s.include?("_query") }
   end
 
   def initialize_flavor

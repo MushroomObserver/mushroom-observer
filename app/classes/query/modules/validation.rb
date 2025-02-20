@@ -4,7 +4,7 @@
 # Also adds default param `:is_collection_location` to observation subqueries
 # if applicable.
 module Query::Modules::Validation
-  attr_accessor :params, :params_cache
+  attr_accessor :params, :params_cache, :subqueries
 
   def validate_params
     old_params = @params.dup&.compact&.symbolize_keys || {}
@@ -98,17 +98,19 @@ module Query::Modules::Validation
     val2
   end
 
+  # Validate the subquery's params by creating another Query instance
+  # and save it in @subqueries to facilitate access
   def validate_subquery(param, val, param_type)
     if param_type.keys.length != 1
       raise(
-        "Invalid enum declaration for :#{param} for #{model} " \
+        "Invalid subquery declaration for :#{param} for #{model} " \
         "query! (wrong number of keys in hash)"
       )
     end
     submodel = param_type.values.first
     val = add_default_subquery_conditions(submodel, val)
-    # Validate the subquery's params by creating another Query instance
     subquery = Query.new(submodel, val)
+    @subqueries[param] = subquery
     subquery.params
   end
 
