@@ -1,27 +1,49 @@
 # frozen_string_literal: true
 
-##############################################################################
-#
-#  :section: Indexes
-#
-##############################################################################
-# see application_controller.rb
-# rubocop:disable Metrics/ModuleLength
-module ApplicationController::Indexes
+module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   def self.included(base)
     base.helper_method(:paginate_numbers)
   end
 
-  # Get args from a param subaction, or if none given, the unfiltered_index.
+  ##############################################################################
+  #
+  #  :section: Filterable Indexes
+  #
+  #  These methods help to assemble filtered index results (from the query) and
+  #  render the interface for the index pagination with info returned by Query.
+  #
+  #  Each controller's index may have "subactions". These are params that
+  #  trigger a method by the same name, applying a single filter to the results.
+  #  Subactions are not combinable - they all immediately execute their queries
+  #  and render, so if you want to combine params, call `create_query`.
+  #
+  #  The shared "index_active_params" are similar to subactions but handle:
+  #  (`q`) - parsing forwarded queries
+  #  (`by`) - ordering results
+  #  (`id`) - indexing at the current cursor when returning from :show
+  #  All three params can be mutually combined, but with at most one subaction.
+  #
+  #  NOTE: The current plan is to phase subactions out and make all incoming
+  #  links create a query, sent through `q`, to eliminate conflicting param
+  #  directives so we can prepare for a simple standard for permalinks.
+  #  When that's resolved, we can then expose the query params in the URL,
+  #  enabling permalinks for filtered queries. Eventually it should be easy
+  #  for developers to combine filters with Query. - AN 2025-FEB
+  #
+  ##############################################################################
+  #
+  # Assemble query and display_args from a param subaction, or unfiltered_index.
+  # All subactions call `create_query` to generate paginated results.
   def build_index_with_query
-    index_active_params.each do |subaction|
+    current_params = index_active_params.intersection(params.keys.map(&:to_sym))
+    current_params.each do |subaction|
       next if params[subaction].blank?
 
       query, display_opts = send(index_param_method_or_default(subaction))
       # Some actions may redirect instead of returning a query, such as pattern
-      # searches that resolve to a single object or get no results. So if we
-      # had the param, but got a blank query, we should bail to allow the
-      # redirect without rendering a blank index.
+      # searches when they resolve to a single object or get no results.
+      # So if we had the param, but got a blank query, we should bail to allow
+      # the redirect without rendering a blank index.
       return nil if query.blank?
 
       # If we have a query, display it.
@@ -105,7 +127,8 @@ module ApplicationController::Indexes
   end
 
   def sorted_index_opts
-    { query_args: { by: params[:by] }, display_opts: index_display_at_id_opts }
+    { query_args: { by: params[:by] },
+      display_opts: index_display_at_id_opts }
   end
 
   # The filtered index.
@@ -197,37 +220,11 @@ module ApplicationController::Indexes
   private ##########
 
   def show_index_setup(query, display_opts)
-    apply_content_filters(query)
     store_location
     clear_query_in_session if session[:checklist_source] != query.id
     query_params_set(query)
     query.need_letters = display_opts[:letters] if display_opts[:letters]
     set_index_view_ivars(query, display_opts)
-  end
-
-  def apply_content_filters(query)
-    filters = users_content_filters || {}
-    @any_content_filters_applied = false
-    # disable cop because Query::Filter is not an ActiveRecord model
-    Query::Filter.all.each do |fltr| # rubocop:disable Rails/FindEach
-      apply_one_content_filter(fltr, query, filters[fltr.sym])
-    end
-  end
-
-  def apply_one_content_filter(fltr, query, user_filter)
-    key = fltr.sym
-    return unless query.takes_parameter?(key)
-    return if query.params.key?(key)
-    return unless fltr.on?(user_filter)
-
-    # This is a "private" method used by Query#validate_params.
-    # It would be better to add these parameters before the query is
-    # instantiated. Or alternatively, make query validation lazy so
-    # we can continue to add parameters up until we first ask it to
-    # execute the query.
-    query.params[key] = query.validate_value(fltr.type, fltr.sym,
-                                             user_filter.to_s)
-    @any_content_filters_applied = true
   end
 
   ###########################################################################
@@ -242,6 +239,14 @@ module ApplicationController::Indexes
     @error ||= :runtime_no_matches.t(type: query.model.type_tag)
     @layout = calc_layout_params if display_opts[:matrix]
     @num_results = query.num_results
+    @any_content_filters_applied = check_if_preference_filters_applied
+  end
+
+  def check_if_preference_filters_applied
+    current_params = @query.params.flatten.compact_blank.keys
+    return false unless current_params.include?(:preference_filter)
+
+    true
   end
 
   ###########################################################################
@@ -480,4 +485,3 @@ module ApplicationController::Indexes
     1
   end
 end
-# rubocop:enable Metrics/ModuleLength

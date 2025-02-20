@@ -1,14 +1,11 @@
 # frozen_string_literal: true
 
 class Query::SpeciesLists < Query::Base
-  include Query::Params::Names
-  include Query::Initializers::Names
-
   def model
     SpeciesList
   end
 
-  def parameter_declarations
+  def self.parameter_declarations
     super.merge(
       created_at: [:time],
       updated_at: [:time],
@@ -26,8 +23,9 @@ class Query::SpeciesLists < Query::Base
       notes_has: :string,
       with_comments: { boolean: [true] },
       comments_has: :string,
-      pattern: :string
-    ).merge(names_parameter_declarations)
+      pattern: :string,
+      observation_query: { subquery: :Observation }
+    )
   end
 
   def initialize_flavor
@@ -38,7 +36,9 @@ class Query::SpeciesLists < Query::Base
     add_ids_condition
     add_by_user_condition
     add_for_project_condition(:project_species_lists)
-    initialize_name_parameters(:species_list_observations, :observations)
+    add_subquery_condition(:observation_query, :species_list_observations,
+                           table: :species_list_observations,
+                           col: :observation_id)
     initialize_association_parameters
     initialize_boolean_parameters
     initialize_at_where_parameter
@@ -56,7 +56,7 @@ class Query::SpeciesLists < Query::Base
 
   def initialize_association_parameters
     add_at_location_condition
-    add_where_condition(:species_lists, params[:locations])
+    add_location_string_condition(:species_lists, params[:locations])
     initialize_projects_parameter(:project_species_lists,
                                   [:project_species_lists])
   end

@@ -5,7 +5,7 @@ class Query::Herbaria < Query::Base
     Herbarium
   end
 
-  def parameter_declarations
+  def self.parameter_declarations
     super.merge(
       created_at: [:time],
       updated_at: [:time],

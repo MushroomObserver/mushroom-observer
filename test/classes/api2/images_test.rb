@@ -101,7 +101,6 @@ class API2::ImagesTest < UnitTestCase
     assert_api_results(imgs)
     assert_api_pass(params_get(name: "Agaricus", include_subtaxa: "yes"))
     assert_api_results(imgs << agaricus_img)
-    ###
   end
 
   def test_getting_images_location

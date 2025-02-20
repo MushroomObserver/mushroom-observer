@@ -9,35 +9,6 @@ module Query::Initializers::Descriptions
     )
   end
 
-  def initialize_with_desc_basic_parameters(type = model.type_tag)
-    add_with_desc_ids_condition(type)
-    add_desc_by_user_condition(type)
-    add_desc_by_author_condition(type)
-    add_desc_by_editor_condition(type)
-  end
-
-  def add_with_desc_ids_condition(type = model.type_tag)
-    return unless params[:desc_ids]
-
-    set = clean_id_set(params[:desc_ids])
-    @where << "#{type}_descriptions.id IN (#{set})"
-    self.order = "FIND_IN_SET(#{type}_descriptions.id,'#{set}') ASC"
-
-    @title_tag = :query_title_with_descriptions.t(type: type)
-    @title_args[:descriptions] = params[:old_title] ||
-                                 :query_title_in_set.t(type: :description)
-  end
-
-  def add_desc_by_user_condition(type)
-    return unless params[:by_user]
-
-    user = find_cached_parameter_instance(User, :by_user)
-    @title_tag = :query_title_with_descriptions_by_user.t(type: type)
-    @title_args[:user] = user.legal_name
-    add_join(:"#{type}_descriptions")
-    where << "#{type}_descriptions.user_id = '#{user.id}'"
-  end
-
   def add_desc_by_author_condition(type)
     return unless params[:by_author]
 
@@ -73,7 +44,6 @@ module Query::Initializers::Descriptions
   # If ever generalizing, `type` should be model.parent_type
   def initialize_name_descriptions_parameters(type = "name")
     initialize_ok_for_export_parameter
-    initialize_with_default_desc_parameter(type)
     initialize_join_desc_parameter(type)
     initialize_desc_type_parameter(type)
     # NOTE: (AN 2025) These may now be superfluous, unless they need to be
@@ -83,14 +53,6 @@ module Query::Initializers::Descriptions
     initialize_desc_creator_parameter(type)
     # This is a description notes content search
     initialize_desc_content_parameter(type)
-  end
-
-  def initialize_with_default_desc_parameter(type)
-    add_boolean_condition(
-      "#{type}s.description_id IS NOT NULL",
-      "#{type}s.description_id IS NULL",
-      params[:with_default_desc]
-    )
   end
 
   def initialize_join_desc_parameter(type)
@@ -125,22 +87,6 @@ module Query::Initializers::Descriptions
     fields = fields.map { |f| "COALESCE(#{type}_descriptions.#{f},'')" }
     fields = "CONCAT(#{fields.join(",")})"
     add_search_condition(fields, params[:desc_content])
-  end
-
-  def params_out_to_with_descriptions_params
-    pargs = params_plus_old_by.merge(with_descriptions: true)
-    return pargs if pargs[:ids].blank?
-
-    pargs[:desc_ids] = pargs.delete(:ids)
-    pargs
-  end
-
-  def params_back_to_description_params
-    pargs = params_with_old_by_restored.except(:with_descriptions)
-    return pargs if pargs[:desc_ids].blank?
-
-    pargs[:ids] = pargs.delete(:desc_ids)
-    pargs
   end
 
   # --------------------------------------------------------------------------
