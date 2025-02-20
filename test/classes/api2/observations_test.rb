@@ -28,10 +28,14 @@ class API2::ObservationsTest < UnitTestCase
   end
 
   def obs_samples
-    @obs_samples ||= Observation.all.sample(12)
+    @obs_samples ||= Observation.all.sample(12).sort
   end
 
   def test_getting_observations_ids
+    id_range = "#{obs_samples[0].id}-#{obs_samples[2].id}," \
+               "#{obs_samples[3].id}-#{obs_samples[5].id}," \
+               "#{obs_samples[6..11].map(&:id).join(",")}"
+    assert_api_fail(params_get(id: id_range))
     assert_api_pass(params_get(id: obs_samples.map(&:id).join(",")))
     assert_api_results(obs_samples)
   end
