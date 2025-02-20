@@ -206,6 +206,7 @@
 #  where::              List of WHERE clauses in query.
 #  group::              GROUP BY clause in query.
 #  order::              ORDER BY clause in query.
+#  subqueries::         Cache of subquery Query instances, used for filtering.
 #
 #  == Class Methods
 #  lookup::             Instantiate Query of given model, flavor and params.
@@ -272,11 +273,12 @@
 #                       queries only).
 #  @params_cache::      Hash: where instances passed in via params are cached.
 #
-module Query
+class Query
   def self.new(model, params = {}, current = nil)
     klass = "Query::#{model.to_s.pluralize}".constantize
     query = klass.new
     query.params = params
+    query.subqueries = {}
     query.validate_params
     query.current = current if current
     query

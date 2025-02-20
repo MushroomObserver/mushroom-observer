@@ -62,7 +62,9 @@ class NamesController < ApplicationController
       [nil, {}]
     else
       @suggest_alternate_spellings = search.query.params[:pattern]
-      [search.query, {}]
+      # Call create_query to apply user content filters
+      query = create_query(:Name, search.query.params)
+      [query, {}]
     end
   end
 

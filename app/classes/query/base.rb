@@ -39,8 +39,20 @@ class Query::Base
   end
 
   def takes_parameter?(key)
+    self.class.takes_parameter?(key)
+  end
+
+  def self.takes_parameter?(key)
     parameter_declarations.key?(key) ||
       parameter_declarations.key?(:"#{key}?")
+  end
+
+  def subquery_parameters
+    self.class.subquery_parameters
+  end
+
+  def self.subquery_parameters
+    parameter_declarations.select { |key, _v| key.to_s.include?("_query") }
   end
 
   def initialize_flavor

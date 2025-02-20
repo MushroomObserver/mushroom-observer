@@ -80,13 +80,15 @@ class ObservationsController
       return render_pattern_search_error(search) if search.errors.any?
 
       @suggest_alternate_spellings = search.query.params[:pattern]
+      # Call create_query to apply user content filters
+      query = create_query(:Observation, search.query.params)
       if params[:needs_naming]
         redirect_to(
-          identify_observations_path(q: get_query_param(search.query))
+          identify_observations_path(q: get_query_param(query))
         )
         [nil, {}]
       else
-        [search.query, {}]
+        [query, {}]
       end
     end
 
