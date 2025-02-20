@@ -1,16 +1,153 @@
 # frozen_string_literal: true
 
 # see application_controller.rb
-module ApplicationController::Queries
+module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
   def self.included(base)
     base.helper_method(
       :query_from_session, :passed_query, :query_params, :add_query_param,
       :get_query_param, :query_params_set
     )
   end
+
+  # Lookup an appropriate Query or create a default one if necessary.  If you
+  # pass in arguments, it modifies the query as necessary to ensure they are
+  # correct.  (Useful for specifying sort conditions, for example.)
+  def find_or_create_query(model_symbol, args = {})
+    map_past_bys(args)
+    model = model_symbol.to_s
+    result = existing_updated_or_default_query(model, args)
+    save_query_record_unless_bot(result)
+    result
+  end
+
+  # Lookup the given kind of Query, returning nil if it no longer exists.
+  def find_query(model = nil, update: !browser.bot?)
+    model = model.to_s if model
+    q = dealphabetize_q_param
+
+    return nil unless (query = query_record_exists(q))
+
+    result = find_new_query_for_model(model, query)
+    save_updated_query_record(result) if update && result
+    result
+  end
+
+  # Create a new Query of the given model.
+  # Pass in all the query_params you would to Query#new.
+  # NOTE: This is the only action where user content filters are applied.
+  # Use this instead of Query.lookup or PatternSearch#query.
+  # (Related query links will preserve relevant filters in the subquery.)
+  def create_query(model_symbol, query_params = {})
+    add_user_content_filter_parameters(query_params, model_symbol)
+    # NOTE: This param is used by the controller to distinguish between params
+    # that have been filtered by User.current.content_filter vs advanced search,
+    # because they use the same params.
+    query_params[:preference_filter] = true if @preference_filters_applied
+    Query.lookup(model_symbol, query_params)
+  end
+
+  private ##########
+
+  # Lookup the query and,
+  # If it exists, return it or - if its arguments need modification -
+  # a new query based on the existing one but with modified arguments.
+  # If it does not exist, resturn default query.
+  def existing_updated_or_default_query(model, args)
+    result = find_query(model, update: false)
+    if result
+      # If existing query needs updates, we need to create a new query,
+      # otherwise the modifications won't persist.
+      # Use the existing query as the template, though.
+      if query_needs_update?(args, result)
+        result = create_query(model, result.params.merge(args))
+      end
+    # If no query found, just create a default one.
+    else
+      result = create_query(model, args)
+    end
+    result
+  end
+
+  def query_needs_update?(new_args, query)
+    new_args.any? { |_arg, val| query.params[:arg] != val }
+  end
+
+  def query_record_exists(params)
+    return unless params && (query = Query.safe_find(params))
+
+    query
+  end
+
+  # Turn old query into a new query for given model,
+  # (re-using the old query if it's still correct),
+  # and returning nil if no new query can be found.
+  def find_new_query_for_model(model, old_query)
+    old_query_correct_for_model(model, old_query) ||
+      outer_query_correct_for_model(model, old_query) ||
+      nil
+  end
+
+  def old_query_correct_for_model(model, old_query)
+    old_query if !old_query || (old_query.model.to_s == model)
+  end
+
+  def outer_query_correct_for_model(model, old_query)
+    return unless
+      (outer_query = old_query.outer) && outer_query.model.to_s == model
+
+    outer_query
+  end
+
+  def save_query_record_unless_bot(result)
+    return unless result && !browser.bot?
+
+    save_updated_query_record(result)
+  end
+
+  def save_updated_query_record(result)
+    result.increment_access_count
+    result.save
+  end
+
+  def map_past_bys(args)
+    args[:by] = (BY_MAP[args[:by].to_s] || args[:by]) if args.member?(:by)
+  end
+
+  BY_MAP = {
+    "modified" => :updated_at,
+    "created" => :created_at
+  }.freeze
+
+  def add_user_content_filter_parameters(query_params, model)
+    filters = current_user_preference_filters || {}
+    return if filters.blank?
+
+    # disable cop because Query::Filter is not an ActiveRecord model
+    Query::Filter.all.each do |fltr| # rubocop:disable Rails/FindEach
+      apply_one_content_filter(fltr, query_params, model, filters[fltr.sym])
+    end
+  end
+
+  def apply_one_content_filter(fltr, query_params, model, user_filter)
+    query_class = "Query::#{model.to_s.pluralize}".constantize
+    key = fltr.sym
+    return unless query_class.takes_parameter?(key)
+    return if query_params.key?(key)
+    return unless fltr.on?(user_filter)
+
+    query_params[key] = user_filter.to_s
+    @preference_filters_applied = true
+  end
+
+  def current_user_preference_filters
+    User.current ? User.current.content_filter : MO.default_content_filter
+  end
+
+  public ##########
+
   ##############################################################################
   #
-  #  :section: Queries
+  #  :section: Query parameters and session query (session[:checklist_source])
   #
   #  The general idea is that the user executes a search or requests an index,
   #  then clicks on a result.  This takes the user to a show_object page.  This
@@ -144,29 +281,6 @@ module ApplicationController::Queries
   end
   # helper_method :query_params_set
 
-  # Lookup an appropriate Query or create a default one if necessary.  If you
-  # pass in arguments, it modifies the query as necessary to ensure they are
-  # correct.  (Useful for specifying sort conditions, for example.)
-  def find_or_create_query(model_symbol, args = {})
-    map_past_bys(args)
-    model = model_symbol.to_s
-    result = existing_updated_or_default_query(model, args)
-    save_query_unless_bot(result)
-    result
-  end
-
-  # Lookup the given kind of Query, returning nil if it no longer exists.
-  def find_query(model = nil, update: !browser.bot?)
-    model = model.to_s if model
-    q = dealphabetize_q_param
-
-    return nil unless (query = query_exists(q))
-
-    result = find_new_query_for_model(model, query)
-    save_updated_query(result) if update && result
-    result
-  end
-
   # Handle advanced_search actions with an invalid q param,
   # so that they get just one flash msg if the query has expired.
   # This method avoids a call to find_safe, which would add
@@ -178,130 +292,16 @@ module ApplicationController::Queries
     redirect_to(search_advanced_path)
   end
 
-  def map_past_bys(args)
-    args[:by] = (BY_MAP[args[:by].to_s] || args[:by]) if args.member?(:by)
-  end
-
-  BY_MAP = {
-    "modified" => :updated_at,
-    "created" => :created_at
-  }.freeze
-
-  # Lookup the query and,
-  # If it exists, return it or - if its arguments need modification -
-  # a new query based on the existing one but with modified arguments.
-  # If it does not exist, resturn default query.
-  def existing_updated_or_default_query(model, args)
-    result = find_query(model, update: false)
-    if result
-      # If existing query needs updates, we need to create a new query,
-      # otherwise the modifications won't persist.
-      # Use the existing query as the template, though.
-      if query_needs_update?(args, result)
-        result = create_query(model, result.params.merge(args))
-      end
-    # If no query found, just create a default one.
-    else
-      result = create_query(model, args)
-    end
-    result
-  end
-
   def dealphabetize_q_param
     params[:q].dealphabetize
   rescue StandardError
     nil
   end
 
-  def query_exists(params)
-    return unless params && (query = Query.safe_find(params))
-
-    query
-  end
-
-  # Turn old query into a new query for given model,
-  # (re-using the old query if it's still correct),
-  # and returning nil if no new query can be found.
-  def find_new_query_for_model(model, old_query)
-    old_query_correct_for_model(model, old_query) ||
-      outer_query_correct_for_model(model, old_query) ||
-      nil
-  end
-
-  def old_query_correct_for_model(model, old_query)
-    old_query if !old_query || (old_query.model.to_s == model)
-  end
-
-  def outer_query_correct_for_model(model, old_query)
-    return unless
-      (outer_query = old_query.outer) && outer_query.model.to_s == model
-
-    outer_query
-  end
-
-  def save_updated_query(result)
-    result.increment_access_count
-    result.save
-  end
-
-  def query_needs_update?(new_args, query)
-    new_args.any? { |_arg, val| query.params[:arg] != val }
-  end
-
   def invalid_q_param?
     params && params[:q] &&
       !QueryRecord.exists?(id: params[:q].dealphabetize)
   end
-
-  # Create a new Query of the given model.
-  # Pass in all the query_params you would to Query#new.
-  # NOTE: This is the only action where user content filters are applied.
-  # Use this instead of Query.lookup or PatternSearch#query.
-  # (Related query links will preserve relevant filters in the subquery.)
-  def create_query(model_symbol, query_params = {})
-    add_user_content_filter_parameters(query_params, model_symbol)
-    # NOTE: This param is used by the controller to distinguish between params
-    # that have been filtered by User.current.content_filter vs advanced search,
-    # because they use the same params.
-    query_params[:preference_filter] = true if @preference_filters_applied
-    Query.lookup(model_symbol, query_params)
-  end
-
-  private ##########
-
-  def save_query_unless_bot(result)
-    return unless result && !browser.bot?
-
-    result.increment_access_count
-    result.save
-  end
-
-  def add_user_content_filter_parameters(query_params, model)
-    filters = users_preference_filters || {}
-    return if filters.blank?
-
-    # disable cop because Query::Filter is not an ActiveRecord model
-    Query::Filter.all.each do |fltr| # rubocop:disable Rails/FindEach
-      apply_one_content_filter(fltr, query_params, model, filters[fltr.sym])
-    end
-  end
-
-  def apply_one_content_filter(fltr, query_params, model, user_filter)
-    query_class = "Query::#{model.to_s.pluralize}".constantize
-    key = fltr.sym
-    return unless query_class.takes_parameter?(key)
-    return if query_params.key?(key)
-    return unless fltr.on?(user_filter)
-
-    query_params[key] = user_filter.to_s
-    @preference_filters_applied = true
-  end
-
-  def users_preference_filters
-    User.current ? User.current.content_filter : MO.default_content_filter
-  end
-
-  public ##########
 
   # Need to pass list of tags used in this action to next page if redirecting.
   def redirect_to(*args)
@@ -376,7 +376,8 @@ module ApplicationController::Queries
 
   # q parameter exists, a query exists for that param, and it's an rss query
   def current_query_is_rss_log
-    return unless params[:q] && (query = query_exists(dealphabetize_q_param))
+    return unless params[:q] &&
+                  (query = query_record_exists(dealphabetize_q_param))
 
     query if query.model == RssLog
   end
