@@ -415,10 +415,13 @@ class Query::LocationsTest < UnitTestCase
     assert_query([], :Location, observation_query: { project: empty })
   end
 
+  # NOTE: is_collection_location: true is automatically added by the related
+  # query links for observations for proj/spl. Other callers must add manually.
   def test_location_with_observations_for_project
     pj = projects(:obs_collected_and_displayed_project)
     assert_query([observations(:collected_at_obs).location],
-                 :Location, observation_query: { project: pj })
+                 :Location, observation_query: { project: pj,
+                                                 is_collection_location: 1 })
   end
 
   def test_location_with_observations_in_set
@@ -432,7 +435,8 @@ class Query::LocationsTest < UnitTestCase
   def test_location_with_observations_in_species_list
     spl = species_lists(:unknown_species_list).id
     assert_query([locations(:burbank).id],
-                 :Location, observation_query: { species_list: spl })
+                 :Location, observation_query: { species_list: spl,
+                                                 is_collection_location: 1 })
     empty = species_lists(:first_species_list).id
     assert_query([], :Location, observation_query: { species_list: empty })
   end

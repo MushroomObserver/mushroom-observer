@@ -86,11 +86,26 @@ module Query::Modules::RelatedQueries
       query_class = "Query::#{target.to_s.pluralize}".constantize
       return unless (subquery = query_class.find_subquery_param_name(filter))
 
-      lookup(target, "#{subquery}": current_query.params.compact)
+      params = current_query.params.compact
+      subquery_params = add_default_subquery_conditions(target, filter, params)
+
+      lookup(target, "#{subquery}": subquery_params)
     end
 
     def find_subquery_param_name(filter)
       parameter_declarations.key({ subquery: filter })
+    end
+
+    def add_default_subquery_conditions(target, filter, params)
+      return params unless needs_is_collection_location(target, filter, params)
+
+      params.merge(is_collection_location: true)
+    end
+
+    def needs_is_collection_location(target, filter, params)
+      target == Location && filter == :Observation &&
+        (params[:project] || params[:species_list]) &&
+        params[:is_collection_location].blank?
     end
   end
 end

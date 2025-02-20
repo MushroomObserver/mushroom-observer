@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 # Validation of Query parameters.
-# Also adds default param `:is_collection_location` to observation subqueries
-# if applicable.
 module Query::Modules::Validation
   attr_accessor :params, :params_cache, :subqueries
 
@@ -108,22 +106,9 @@ module Query::Modules::Validation
       )
     end
     submodel = param_type.values.first
-    val = add_default_subquery_conditions(submodel, val)
     subquery = Query.new(submodel, val)
     @subqueries[param] = subquery
     subquery.params
-  end
-
-  def add_default_subquery_conditions(submodel, val)
-    return val unless needs_is_collection_location_param(submodel, val)
-
-    val.merge(is_collection_location: true)
-  end
-
-  def needs_is_collection_location_param(submodel, val)
-    model == Location && submodel == :Observation &&
-      (val[:project] || val[:species_list]) &&
-      val[:is_collection_location].blank?
   end
 
   def validate_enum(param, val, hash)
