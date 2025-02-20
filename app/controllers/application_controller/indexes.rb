@@ -1,18 +1,39 @@
 # frozen_string_literal: true
 
-##############################################################################
-#
-#  :section: Indexes
-#
-##############################################################################
-# see application_controller.rb
-# rubocop:disable Metrics/ModuleLength
-module ApplicationController::Indexes
+module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   def self.included(base)
     base.helper_method(:paginate_numbers)
   end
 
-  # Get args from a param subaction, or if none given, the unfiltered_index.
+  ##############################################################################
+  #
+  #  :section: Filterable Indexes
+  #
+  #  These methods help to assemble filtered index results (from the query) and
+  #  render the interface for the index pagination with info returned by Query.
+  #
+  #  Each controller's index may have "subactions". These are params that
+  #  trigger a method by the same name, applying a single filter to the results.
+  #  Subactions are not combinable - they all immediately execute their queries
+  #  and render, so if you want to combine params, call `create_query`.
+  #
+  #  The shared "index_active_params" are similar to subactions but handle:
+  #  (`q`) - parsing forwarded queries
+  #  (`by`) - ordering results
+  #  (`id`) - indexing at the current cursor when returning from :show
+  #  All three params can be mutually combined, but with at most one subaction.
+  #
+  #  NOTE: The current plan is to phase subactions out and make all incoming
+  #  links create a query, sent through `q`, to eliminate conflicting param
+  #  directives so we can prepare for a simple standard for permalinks.
+  #  When that's resolved, we can then expose the query params in the URL,
+  #  enabling permalinks for filtered queries. Eventually it should be easy
+  #  for developers to combine filters with Query. - AN 2025-FEB
+  #
+  ##############################################################################
+  #
+  # Assemble query and display_args from a param subaction, or unfiltered_index.
+  # All subactions call `create_query` to generate paginated results.
   def build_index_with_query
     current_params = index_active_params.intersection(params.keys.map(&:to_sym))
     current_params.each do |subaction|
@@ -20,9 +41,9 @@ module ApplicationController::Indexes
 
       query, display_opts = send(index_param_method_or_default(subaction))
       # Some actions may redirect instead of returning a query, such as pattern
-      # searches that resolve to a single object or get no results. So if we
-      # had the param, but got a blank query, we should bail to allow the
-      # redirect without rendering a blank index.
+      # searches when they resolve to a single object or get no results.
+      # So if we had the param, but got a blank query, we should bail to allow
+      # the redirect without rendering a blank index.
       return nil if query.blank?
 
       # If we have a query, display it.
@@ -464,4 +485,3 @@ module ApplicationController::Indexes
     1
   end
 end
-# rubocop:enable Metrics/ModuleLength

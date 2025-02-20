@@ -223,6 +223,7 @@
   # COMMON WORDS AND PHRASES
 
   # Object titles, all nouns.
+  ACTIONS: Actions
   ACTIVITY: Activity
   activity: activity
   API_KEY: API Key
@@ -360,6 +361,7 @@
   OBSERVATIONS: Observations
   observations: observations
   OBSERVATION_FIELDS: Observation Fields
+  of: of
   PAST_LOCATION: Location Change
   past_location: location change
   PAST_LOCATIONS: Location Changes
@@ -374,6 +376,8 @@
   project: project
   PROJECTS: Projects
   projects: projects
+  PROJECT_ALIAS: Project Alias
+  PROJECT_ALIASES: Project Aliases
   PUBLICATION: Publication
   publication: publication
   PUBLICATIONS: Publications
@@ -403,6 +407,8 @@
   specimens: specimens
   SUPPORT: Support
   support: support
+  TARGET: Target
+  TARGET_TYPE: Target Type
   TEST_PAGES: Test Pages
   THEME: Theme
   TRANSLATION: Translation
@@ -852,6 +858,7 @@
   list_objects: List [TYPES]
   remove_object: Remove [TYPE]
   remove_objects: Remove [TYPES]
+  update_object: Update [TYPE]
   show_all: Show All
   map_all: Map All
   show_location: Show [LOCATION]
@@ -2893,6 +2900,14 @@
   field_slips_too_many_field_slips: You have requested more than [MAX] slips.
   field_slips_one_per_page: One field slip per page. Print shops prefer this. Otherwise 6/page which works best on US letter page.
 
+  # Project Aliases
+  project_alias_created: Field slip was successfully created.
+  project_alias_destroyed: Field slip was successfully destroyed.
+  project_alias_edit: Edit Project Alias [name]
+  project_alias_new: New Project Alias
+  project_alias_type: Alias Type
+  project_alias_updated: Field slip was successfully updated.
+
   ##############################################################################
 
   # LESS POPULAR PAGES
@@ -3072,10 +3087,13 @@
   inat_import_tracker: iNat Import Tracker
   inat_import_tracker_status: "[:STATUS]"
   inat_import_tracker_started: Started
+  inat_import_tracker_elapsed: Elapsed Time
+  inat_import_tracker_ended: Ended
+  inat_import_imported: Imported
+  inat_import_tracker_results: Results
   inat_import_tracker_importable_count: Number of Importable Observations
   inat_import_tracker_imported_count: Number Imported
   inat_importables_explanation: "An ??importable?? observation is an iNaturalist observation: which you created, which does not exist in MO, and whose iNat identity is a fungus or slime mold."
-  inat_import_tracker_refresh: Update results
 
   # observer/list_notifications
   list_notifications_title: Email Alerts for [user]

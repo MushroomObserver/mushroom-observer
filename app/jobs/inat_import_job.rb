@@ -61,7 +61,7 @@ class InatImportJob < ApplicationJob
 
   def done
     log("Updating inat_import state to Done")
-    @inat_import.update(state: "Done")
+    @inat_import.update(state: "Done", ended_at: Time.zone.now)
     update_user_inat_username
   end
 

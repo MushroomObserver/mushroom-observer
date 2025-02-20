@@ -81,6 +81,8 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :project_species_lists, dependent: :destroy
   has_many :species_lists, through: :project_species_lists
 
+  has_many :aliases, class_name: "ProjectAlias", dependent: :destroy
+
   before_destroy :orphan_drafts
   validates :field_slip_prefix, uniqueness: true, allow_blank: true
   validates :field_slip_prefix,
@@ -505,7 +507,22 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     member?(user) || can_join?(user)
   end
 
+  def alias_data(target)
+    @target_alias_details ||= target_alias_details(target.class)
+    @target_alias_details[target.id] || []
+  end
+
   private ###############################
+
+  def target_alias_details(target_type)
+    aliases.
+      where(target_type:).
+      order(:name).
+      group_by(&:target_id).
+      transform_values do |aliases|
+        aliases.map { |project_alias| [project_alias.name, project_alias.id] }
+      end
+  end
 
   def obs_geoloc_outside_project_location
     observations.

@@ -216,6 +216,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_02_13_084440) do
     t.integer "importables"
     t.integer "imported_count"
     t.string "response_errors"
+    t.datetime "ended_at"
   end
 
   create_table "interests", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -556,6 +557,18 @@ ActiveRecord::Schema[7.2].define(version: 2025_02_13_084440) do
     t.integer "image_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "project_aliases", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.integer "project_id", null: false
+    t.integer "target_id", null: false
+    t.string "target_type", null: false
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name", "project_id"], name: "index_project_aliases_on_name_and_project_id", unique: true
+    t.index ["project_id"], name: "index_project_aliases_on_project_id"
+    t.index ["target_type", "target_id"], name: "index_project_aliases_on_target_type_and_target_id"
   end
 
   create_table "project_images", charset: "utf8mb3", force: :cascade do |t|
@@ -965,6 +978,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_02_13_084440) do
     t.index ["observation_id"], name: "observation_index"
   end
 
+  add_foreign_key "project_aliases", "projects"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
