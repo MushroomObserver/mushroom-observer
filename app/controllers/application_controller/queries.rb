@@ -9,34 +9,20 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
     )
   end
 
-  # Lookup an appropriate Query or create a default one if necessary.  If you
-  # pass in arguments, it modifies the query as necessary to ensure they are
-  # correct.  (Useful for specifying sort conditions, for example.)
-  def find_or_create_query(model_symbol, args = {})
-    map_past_bys(args)
-    model = model_symbol.to_s
-    result = existing_updated_or_default_query(model, args)
-    save_query_record_unless_bot(result)
-    result
-  end
-
-  # Lookup the given kind of Query, returning nil if it no longer exists.
-  def find_query(model = nil, update: !browser.bot?)
-    model = model.to_s if model
-    q = dealphabetize_q_param
-
-    return nil unless (query = query_record_exists(q))
-
-    result = find_new_query_for_model(model, query)
-    save_updated_query_record(result) if update && result
-    result
-  end
+  ##############################################################################
+  #
+  #  :section: Queries
+  #
+  #  Call these public methods to create a query for results shown on an index
+  #  action.
+  #
+  ##############################################################################
 
   # Create a new Query of the given model.
-  # Pass in all the query_params you would to Query#new.
-  # NOTE: This is the only action where user content filters are applied.
-  # Use this instead of Query.lookup or PatternSearch#query.
-  # (Related query links will preserve relevant filters in the subquery.)
+  # Prefer this instead of directly calling Query.lookup or PatternSearch#query.
+  # Takes the same query_params as Query#new or Query#lookup, but this is the
+  # only place where user content filters are applied.
+  # (Related query links will preserve content filters in the subquery.)
   def create_query(model_symbol, query_params = {})
     add_user_content_filter_parameters(query_params, model_symbol)
     # NOTE: This param is used by the controller to distinguish between params
@@ -46,6 +32,29 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
     Query.lookup(model_symbol, query_params)
   end
 
+  # Lookup an appropriate Query or create a default one if necessary.  If you
+  # pass in arguments, it modifies the query as necessary to ensure they are
+  # correct.  (Useful for specifying sort conditions, for example.)
+  def find_or_create_query(model_symbol, args = {})
+    map_past_bys(args)
+    model = model_symbol.to_s
+    found_query = existing_updated_or_default_query(model, args)
+    save_query_record_unless_bot(found_query)
+    found_query
+  end
+
+  # Lookup the given kind of Query, returning nil if it no longer exists.
+  def find_query(model = nil, update: !browser.bot?)
+    model = model.to_s if model
+    q = dealphabetize_q_param
+
+    return nil unless (query = query_record_exists(q))
+
+    found_query = find_new_query_for_model(model, query)
+    save_updated_query_record(found_query) if update && found_query
+    found_query
+  end
+
   private ##########
 
   # Lookup the query and,
@@ -53,19 +62,19 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
   # a new query based on the existing one but with modified arguments.
   # If it does not exist, resturn default query.
   def existing_updated_or_default_query(model, args)
-    result = find_query(model, update: false)
-    if result
+    query = find_query(model, update: false)
+    if query
       # If existing query needs updates, we need to create a new query,
       # otherwise the modifications won't persist.
       # Use the existing query as the template, though.
-      if query_needs_update?(args, result)
-        result = create_query(model, result.params.merge(args))
+      if query_needs_update?(args, query)
+        query = create_query(model, query.params.merge(args))
       end
     # If no query found, just create a default one.
     else
-      result = create_query(model, args)
+      query = create_query(model, args)
     end
-    result
+    query
   end
 
   def query_needs_update?(new_args, query)
@@ -98,15 +107,15 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
     outer_query
   end
 
-  def save_query_record_unless_bot(result)
-    return unless result && !browser.bot?
+  def save_query_record_unless_bot(query)
+    return unless query && !browser.bot?
 
-    save_updated_query_record(result)
+    save_updated_query_record(query)
   end
 
-  def save_updated_query_record(result)
-    result.increment_access_count
-    result.save
+  def save_updated_query_record(query)
+    query.increment_access_count
+    query.save
   end
 
   def map_past_bys(args)
