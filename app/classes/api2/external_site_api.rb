@@ -29,7 +29,7 @@ class API2
 
     def query_params
       {
-        id_range: parse_ranges(:integer, :id),
+        ids: parse_array(:integer, :id),
         name: parse(:string, :name)
       }
     end

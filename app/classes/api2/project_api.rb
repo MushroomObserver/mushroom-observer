@@ -32,7 +32,7 @@ class API2
 
     def query_params
       {
-        id_range: parse_ranges(:integer, :id),
+        ids: parse_array(:integer, :id),
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at),
         users: parse_array(:user, :user, help: :creator),
