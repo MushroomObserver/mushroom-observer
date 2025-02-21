@@ -74,7 +74,7 @@ class InatImportJobTest < ActiveJob::TestCase
                            mock_inat_response: mock_inat_response)
 
     QueuedEmail.queue = true
-    before_emails_count = QueuedEmail.count
+    before_emails_to_user = QueuedEmail.where(to_user: user).count
 
     Inat::PhotoImporter.stub(:new,
                              stub_mo_photo_importer(mock_inat_response)) do
@@ -84,7 +84,7 @@ class InatImportJobTest < ActiveJob::TestCase
       end
     end
 
-    assert_equal(0, QueuedEmail.count - before_emails_count,
+    assert_equal(before_emails_to_user, QueuedEmail.where(to_user: user).count,
                  "Import should not have sent any emails")
     QueuedEmail.queue = false
 
@@ -227,7 +227,7 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(obs.sequences.none?)
   end
 
-  # Had many identifications, 1 photo
+  # Had 1 photo; 2 identifications, 1 not by user.
   def test_import_job_obs_with_many_namings
     file_name = "tremella_mesenterica"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
