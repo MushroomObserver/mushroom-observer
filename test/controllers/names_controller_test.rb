@@ -90,7 +90,7 @@ class NamesControllerTest < FunctionalTestCase
 
   def test_index_advanced_search_multiple_hits
     search_string = "Suil"
-    query = Query.lookup_and_save(:Name, name: search_string)
+    query = Query.lookup_and_save(:Name, search_name: search_string)
 
     login
     get(:index,
@@ -108,7 +108,7 @@ class NamesControllerTest < FunctionalTestCase
 
   def test_index_advanced_search_one_hit
     search_string = "Stereum hirsutum"
-    query = Query.lookup_and_save(:Name, name: search_string)
+    query = Query.lookup_and_save(:Name, search_name: search_string)
     assert(query.results.one?,
            "Test needs a string that has exactly one hit")
 
@@ -120,11 +120,12 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def test_index_advanced_search_no_hits
-    query = Query.lookup_and_save(:Name,
-                                  name: "Don't know",
-                                  user: "myself",
-                                  content: "Long pink stem and small pink cap",
-                                  user_where: "Eastern Oklahoma")
+    query = Query.lookup_and_save(
+      :Name, search_name: "Don't know",
+             search_user: "myself",
+             search_content: "Long pink stem and small pink cap",
+             search_where: "Eastern Oklahoma"
+    )
 
     login
     get(:index,
@@ -136,11 +137,12 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def test_index_advanced_search_with_deleted_query
-    query = Query.lookup_and_save(:Name,
-                                  name: "Don't know",
-                                  user: "myself",
-                                  content: "Long pink stem and small pink cap",
-                                  user_where: "Eastern Oklahoma")
+    query = Query.lookup_and_save(
+      :Name, search_name: "Don't know",
+             search_user: "myself",
+             search_content: "Long pink stem and small pink cap",
+             search_where: "Eastern Oklahoma"
+    )
     params = @controller.query_params(query).merge(advanced_search: true)
     query.record.delete
 

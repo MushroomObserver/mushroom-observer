@@ -79,60 +79,61 @@ class Query::LocationsTest < UnitTestCase
 
   def test_location_advanced_search_name
     assert_query([locations(:burbank).id],
-                 :Location, name: "agaricus")
-    assert_query([], :Location, name: "coprinus")
+                 :Location, search_name: "agaricus")
+    assert_query([], :Location, search_name: "coprinus")
   end
 
-  def test_location_advanced_search_user_where
+  def test_location_advanced_search_where
     assert_query([locations(:burbank).id],
-                 :Location, user_where: "burbank")
+                 :Location, search_where: "burbank")
     assert_query([locations(:howarth_park).id,
                   locations(:salt_point).id],
-                 :Location, user_where: "park")
+                 :Location, search_where: "park")
   end
 
   def test_location_advanced_search_user
     expects = Location.index_order.joins(observations: :user).
               where(observations: { user: rolf }).distinct
-    assert_query(expects, :Location, user: "rolf")
+    assert_query(expects, :Location, search_user: "rolf")
 
     expects = Location.index_order.joins(observations: :user).
               where(observations: { user: dick }).distinct
-    assert_query(expects, :Location, user: "dick")
+    assert_query(expects, :Location, search_user: "dick")
   end
 
   # content in obs.notes
   def test_location_advanced_search_content_obs_notes
     assert_query(Location.advanced_search('"strange place"'),
-                 :Location, content: '"strange place"')
+                 :Location, search_content: '"strange place"')
   end
 
   # content in Obs Comment
   def test_location_advanced_search_content_obs_comments
     assert_query(
       Location.advanced_search('"a little of everything"'),
-      :Location, content: '"a little of everything"'
+      :Location, search_content: '"a little of everything"'
     )
   end
 
   def test_location_advanced_search_content_location_notes
     assert_query([],
-                 :Location, content: '"legal to collect"')
+                 :Location, search_content: '"legal to collect"')
   end
 
   def test_location_advanced_search_content_combos
     assert_query([locations(:burbank).id],
-                 :Location, name: "agaricus", content: '"lawn"')
+                 :Location, search_name: "agaricus", search_content: '"lawn"')
     assert_query([],
-                 :Location, name: "agaricus", content: '"play with"')
+                 :Location, search_name: "agaricus",
+                            search_content: '"play with"')
     # from observation and comment for same observation
     assert_query([locations(:burbank).id],
                  :Location,
-                 content: '"a little of everything" "strange place"')
+                 search_content: '"a little of everything" "strange place"')
     # from different comments, should fail
     assert_query([],
                  :Location,
-                 content: '"minimal unknown" "complicated"')
+                 search_content: '"minimal unknown" "complicated"')
   end
 
   def test_location_regexp_search
