@@ -5,7 +5,7 @@ module Tabs
   module ImagesHelper
     # link attribute arrays
     def images_index_tabs(query:)
-      [coerced_observation_query_tab(query)]
+      [related_observations_tab(:Image, query)]
     end
 
     # assemble links for show_image
@@ -51,16 +51,20 @@ module Tabs
     end
 
     def name_google_images_tab(name)
-      [:google_images.t,
-       "http://images.google.com/images?q=#{name.search_name}",
-       { target: "_blank", rel: "noopener", class: tab_id(__method__.to_s) }]
+      InternalLink.new(
+        :google_images.t,
+        "http://images.google.com/images?q=#{name.search_name}",
+        html_options: { target: "_blank", rel: "noopener" }
+      ).tab
     end
 
     def image_eol_tab(image)
       return unless (eol_url = image.eol_url)
 
-      ["EOL", eol_url, { target: "_blank", rel: "noopener",
-                         class: tab_id(__method__.to_s) }]
+      InternalLink.new(
+        "EOL", eol_url,
+        html_options: { target: "_blank", rel: "noopener" }
+      ).tab
     end
 
     def image_mod_tabs(image)
@@ -73,9 +77,10 @@ module Tabs
     end
 
     def edit_image_tab(image)
-      [:edit_object.t(type: :image),
-       add_query_param(edit_image_path(image.id)),
-       { class: tab_id(__method__.to_s) }]
+      InternalLink::Model.new(
+        :edit_object.t(type: :image), image,
+        add_query_param(edit_image_path(image.id))
+      ).tab
     end
 
     def destroy_image_tab(image)
@@ -85,9 +90,10 @@ module Tabs
     def image_commercial_inquiry_tab(image)
       return unless image.user.email_general_commercial && !image.user.no_emails
 
-      [:image_show_inquiry.t,
-       add_query_param(new_commercial_inquiry_for_image_path(image.id)),
-       { class: tab_id(__method__.to_s) }]
+      InternalLink::Model.new(
+        :image_show_inquiry.t, image,
+        add_query_param(new_commercial_inquiry_for_image_path(image.id))
+      ).tab
     end
 
     def test_add_image_report_tabs

@@ -15,7 +15,7 @@ class Query::NamesTest < UnitTestCase
     # SQL does not sort 'Kuhner' and 'Kühner'
     do_test_name_all(expect) if sql_collates_accents?
 
-    pair = expects.select { |x| x.text_name == "Lentinellus ursinus" }
+    pair = expects.select { |x| x.text_name == "Agrocybe arvalis" }
     a = expects.index(pair.first)
     b = expects.index(pair.last)
     expects[a], expects[b] = expects[b], expects[a]
@@ -332,10 +332,10 @@ class Query::NamesTest < UnitTestCase
 
   def test_name_with_descriptions_by_user
     expects = name_with_descriptions_by_user(mary)
-    assert_query(expects, :Name, with_descriptions: 1, by_user: mary)
+    assert_query(expects, :Name, description_query: { by_user: mary })
 
     expects = name_with_descriptions_by_user(dick)
-    assert_query(expects, :Name, with_descriptions: 1, by_user: dick)
+    assert_query(expects, :Name, description_query: { by_user: dick })
   end
 
   def name_with_descriptions_by_user(user)
@@ -345,13 +345,13 @@ class Query::NamesTest < UnitTestCase
 
   def test_name_with_descriptions_by_author
     expects = name_with_descriptions_by_author(rolf)
-    assert_query(expects, :Name, with_descriptions: 1, by_author: rolf)
+    assert_query(expects, :Name, description_query: { by_author: rolf })
 
     expects = name_with_descriptions_by_author(mary)
-    assert_query(expects, :Name, with_descriptions: 1, by_author: mary)
+    assert_query(expects, :Name, description_query: { by_author: mary })
 
     expects = name_with_descriptions_by_author(dick)
-    assert_query(expects, :Name, with_descriptions: 1, by_author: dick)
+    assert_query(expects, :Name, description_query: { by_author: dick })
   end
 
   def name_with_descriptions_by_author(user)
@@ -362,14 +362,14 @@ class Query::NamesTest < UnitTestCase
 
   def test_name_with_descriptions_by_editor
     expects = name_with_descriptions_by_editor(rolf)
-    assert_query(expects, :Name, with_descriptions: 1, by_editor: rolf)
+    assert_query(expects, :Name, description_query: { by_editor: rolf })
 
     expects = name_with_descriptions_by_editor(rolf)
-    assert_query(expects, :Name, with_descriptions: 1, by_editor: mary)
+    assert_query(expects, :Name, description_query: { by_editor: mary })
 
     expects = name_with_descriptions_by_editor(dick)
     assert_equal(0, expects.length)
-    assert_query(expects, :Name, with_descriptions: 1, by_editor: dick)
+    assert_query(expects, :Name, description_query: { by_editor: dick })
   end
 
   def name_with_descriptions_by_editor(user)
@@ -384,9 +384,8 @@ class Query::NamesTest < UnitTestCase
     desc3 = name_descriptions(:draft_boletus_edulis)
     name1 = names(:peltigera)
     name2 = names(:boletus_edulis)
-    assert_query([name1, name2],
-                 :Name,
-                 with_descriptions: 1, desc_ids: [desc1, desc2, desc3])
+    assert_query([name2, name1],
+                 :Name, description_query: { ids: [desc1, desc2, desc3] })
   end
 
   def test_name_with_observations
@@ -406,21 +405,21 @@ class Query::NamesTest < UnitTestCase
     created_at = observations(:california_obs).created_at
     expects = Name.index_order.with_correct_spelling.joins(:observations).
               where(Observation[:created_at] >= created_at).distinct
-    assert_query(expects, :Name, with_observations: 1, created_at: created_at)
+    assert_query(expects, :Name, observation_query: { created_at: created_at })
   end
 
   def test_name_with_observations_updated_at
     updated_at = observations(:california_obs).updated_at
     expects = Name.index_order.with_correct_spelling.joins(:observations).
               where(Observation[:updated_at] >= updated_at).distinct
-    assert_query(expects, :Name, with_observations: 1, updated_at: updated_at)
+    assert_query(expects, :Name, observation_query: { updated_at: updated_at })
   end
 
   def test_name_with_observations_date
     date = observations(:california_obs).when
     expects = Name.index_order.with_correct_spelling.joins(:observations).
               where(Observation[:when] >= date).distinct
-    assert_query(expects, :Name, with_observations: 1, date: date)
+    assert_query(expects, :Name, observation_query: { date: date })
   end
 
   ##### list/string parameters #####
@@ -429,7 +428,7 @@ class Query::NamesTest < UnitTestCase
     expects = Name.index_order.with_correct_spelling.joins(:observations).
               where(Observation[:notes].matches("%:substrate:%")).distinct
     assert_query(
-      expects, :Name, with_observations: 1, with_notes_fields: "substrate"
+      expects, :Name, observation_query: { with_notes_fields: "substrate" }
     )
   end
 
@@ -438,7 +437,7 @@ class Query::NamesTest < UnitTestCase
     expects = Name.index_order.with_correct_spelling.
               joins(observations: { herbarium_records: :herbarium }).
               where(herbaria: { name: name }).distinct
-    assert_query(expects, :Name, with_observations: 1, herbaria: name)
+    assert_query(expects, :Name, observation_query: { herbaria: name })
   end
 
   def test_name_with_observations_projects
@@ -447,13 +446,15 @@ class Query::NamesTest < UnitTestCase
               joins({ observations: :project_observations }).
               where(project_observations: { project: project }).distinct
     # project.observations.map(&:name).uniq
-    assert_query(expects, :Name, with_observations: 1, projects: project.title)
+    assert_query(
+      expects, :Name, observation_query: { projects: project.title }
+    )
   end
 
   def test_name_with_observations_users
     expects = Name.index_order.with_correct_spelling.joins(:observations).
               where(observations: { user: dick }).distinct
-    assert_query(expects, :Name, with_observations: 1, users: dick)
+    assert_query(expects, :Name, observation_query: { users: dick })
   end
 
   ##### numeric parameters #####
@@ -462,7 +463,7 @@ class Query::NamesTest < UnitTestCase
     expects = Name.index_order.with_correct_spelling.joins(:observations).
               where(observations: { vote_cache: 1..3 }).distinct
     assert_not_empty(expects, "'expect` is broken; it should not be empty")
-    assert_query(expects, :Name, with_observations: 1, confidence: [1, 3])
+    assert_query(expects, :Name, observation_query: { confidence: [1, 3] })
   end
 
   def test_name_with_observations_in_box
@@ -474,9 +475,7 @@ class Query::NamesTest < UnitTestCase
               where(observations: { lat: lat, lng: lng }).distinct
     box = { north: lat.to_f, south: lat.to_f,
             west: lat.to_f, east: lat.to_f }
-    assert_query(
-      expects, :Name, with_observations: 1, in_box: box
-    )
+    assert_query(expects, :Name, observation_query: { in_box: box })
   end
 
   ##### boolean parameters #####
@@ -484,40 +483,40 @@ class Query::NamesTest < UnitTestCase
   def test_name_with_observations_with_comments
     expects = Name.index_order.with_correct_spelling.
               joins(observations: :comments).distinct
-    assert_query(expects, :Name, with_observations: 1, with_comments: true)
+    assert_query(expects, :Name, observation_query: { with_comments: true })
   end
 
   def test_name_with_observations_with_public_lat_lng
     expects = Name.index_order.joins(:observations).
               where.not(observations: { lat: false }).distinct
     assert_query(
-      expects, :Name, with_observations: 1, with_public_lat_lng: true
+      expects, :Name, observation_query: { with_public_lat_lng: true }
     )
   end
 
   def test_name_with_observations_with_name
     expects = Name.index_order.with_correct_spelling.joins(:observations).
               where(observations: { name_id: Name.unknown }).distinct
-    assert_query(expects, :Name, with_observations: 1, with_name: false)
+    assert_query(expects, :Name, observation_query: { with_name: false })
   end
 
   def test_name_with_observations_with_notes
     expects = Name.index_order.with_correct_spelling.joins(:observations).
               where.not(observations: { notes: Observation.no_notes }).distinct
-    assert_query(expects, :Name, with_observations: 1, with_notes: true)
+    assert_query(expects, :Name, observation_query: { with_notes: true })
   end
 
   def test_name_with_observations_with_sequences
     expects = Name.index_order.with_correct_spelling.
               joins(observations: :sequences).distinct
-    assert_query(expects, :Name, with_observations: 1, with_sequences: true)
+    assert_query(expects, :Name, observation_query: { with_sequences: true })
   end
 
   def test_name_with_observations_is_collection_location
     expects = Name.index_order.with_correct_spelling.joins(:observations).
               where(observations: { is_collection_location: true }).distinct
     assert_query(
-      expects, :Name, with_observations: 1, is_collection_location: true
+      expects, :Name, observation_query: { is_collection_location: true }
     )
   end
 
@@ -525,20 +524,20 @@ class Query::NamesTest < UnitTestCase
     loc = locations(:burbank)
     expects = Name.index_order.with_correct_spelling.joins(:observations).
               where(observations: { location: loc }).distinct
-    assert_query(expects, :Name, with_observations: 1, location: loc)
+    assert_query(expects, :Name, observation_query: { location: loc })
   end
 
   def test_name_with_observations_at_where
     assert_query([names(:coprinus_comatus).id],
-                 :Name, with_observations: 1, user_where: "glendale")
+                 :Name, observation_query: { user_where: "glendale" })
   end
 
   def test_name_with_observations_by_user
     assert_query(name_with_observations_by_user(rolf),
-                 :Name, with_observations: 1, by_user: rolf)
+                 :Name, observation_query: { by_user: rolf })
     assert_query(name_with_observations_by_user(mary),
-                 :Name, with_observations: 1, by_user: mary)
-    assert_query([], :Name, with_observations: 1, by_user: users(:zero_user))
+                 :Name, observation_query: { by_user: mary })
+    assert_query([], :Name, observation_query: { by_user: users(:zero_user) })
   end
 
   def name_with_observations_by_user(user)
@@ -548,25 +547,20 @@ class Query::NamesTest < UnitTestCase
 
   def test_name_with_observations_for_project
     project = projects(:empty_project)
-    assert_query([], :Name, with_observations: 1, project: project)
+    assert_query([], :Name, observation_query: { project: project })
 
     project2 = projects(:two_img_obs_project)
     expects = Name.index_order.with_correct_spelling.
               joins({ observations: :project_observations }).
               where(project_observations: { project: project2 }).distinct
-    assert_query(expects, :Name, with_observations: 1, project: project2)
+    assert_query(expects, :Name, observation_query: { project: project2 })
   end
 
-  # ORDER BY FIND_IN_SET is MySQL-specific and does not have an Arel equivalent
   def test_name_with_observations_in_set
-    oids = three_amigos.join(",")
     expects = Name.with_correct_spelling.joins(:observations).
               where(observations: { id: three_amigos }).
-              reorder(
-                Arel.sql("FIND_IN_SET(observations.id,'#{oids}')").asc,
-                id: :desc
-              ).distinct
-    assert_query(expects, :Name, with_observations: 1, obs_ids: three_amigos)
+              index_order.distinct
+    assert_query(expects, :Name, observation_query: { ids: three_amigos })
   end
 
   def test_name_with_observations_in_species_list
@@ -574,9 +568,9 @@ class Query::NamesTest < UnitTestCase
     expects = Name.index_order.with_correct_spelling.
               joins({ observations: :species_list_observations }).
               where(species_list_observations: { species_list: spl }).uniq
-    assert_query(expects, :Name, with_observations: 1, species_list: spl)
+    assert_query(expects, :Name, observation_query: { species_list: spl })
 
     spl2 = species_lists(:first_species_list)
-    assert_query([], :Name, with_observations: 1, species_list: spl2)
+    assert_query([], :Name, observation_query: { species_list: spl2 })
   end
 end

@@ -35,23 +35,23 @@ module Tabs
     end
 
     def projects_index_tab
-      [:app_list_projects.t, projects_path,
-       { class: tab_id(__method__.to_s) }]
+      InternalLink.new(:app_list_projects.t, projects_path).tab
     end
 
     def new_project_tab
-      [:list_projects_add_project.t, add_query_param(new_project_path),
-       { class: tab_id(__method__.to_s) }]
+      InternalLink.new(:list_projects_add_project.t,
+                       add_query_param(new_project_path)).tab
     end
 
     def change_member_status_tab(project)
-      [:change_member_status_edit.t,
-       edit_project_path(project.id),
-       { class: tab_id(__method__.to_s) }]
+      InternalLink.new(:change_member_status_edit.t,
+                       edit_project_path(project.id)).tab
     end
 
     def destroy_project_tab(project)
-      [nil, project, { button: :destroy }]
+      InternalLink::Model.new(:destroy_object.t(TYPE: Project),
+                              project, project,
+                              html_options: { button: :destroy }).tab
     end
 
     # Add some alternate sorting criteria.
@@ -155,7 +155,7 @@ module Tabs
     def project_observation_buttons(project, query)
       return unless project
 
-      img_name, img_link, = coerced_image_query_tab(query)
+      img_name, img_link, = related_images_tab(:Observation, query)
       styling = { class: "btn btn-default btn-lg my-3 mr-3" }
       buttons = [link_to(:show_object.t(type: :map),
                          map_observations_path(q: get_query_param(query)),

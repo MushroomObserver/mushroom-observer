@@ -6,7 +6,8 @@ module Query::Modules::Conditions
   def add_owner_and_time_stamp_conditions(table = model.table_name)
     add_time_condition("#{table}.created_at", params[:created_at])
     add_time_condition("#{table}.updated_at", params[:updated_at])
-    add_id_condition("#{table}.user_id", params[:users])
+    ids = lookup_users_by_name(params[:users])
+    add_id_condition("#{table}.user_id", ids)
   end
 
   def add_by_user_condition(table = model.table_name)
@@ -134,5 +135,31 @@ module Query::Modules::Conditions
     set = clean_id_set(ids)
     @where << "#{col} NOT IN (#{set})"
     add_joins(*)
+  end
+
+  def add_subquery_condition(param, *, table: nil, col: :id)
+    return if params[param].blank?
+
+    sql = subquery_from_params(param).query
+    table ||= subquery_table(param)
+    @where << "#{table}.#{col} IN (#{sql})"
+    add_joins(*)
+  end
+
+  # Reconstitute the query from the subparam hash, adding the model.
+  # parameter_declarations tells us the model name by subquery.
+  def subquery_from_params(param)
+    model = parameter_declarations[param][:subquery] # defined in each subclass
+    Query.new(model, params[param])
+  end
+
+  # Look up a default subquery table from the parameter_declarations
+  def subquery_table(param)
+    model = parameter_declarations[param][:subquery]
+    model.to_s.underscore.pluralize
+  end
+
+  def force_empty_results
+    @where = ["FALSE"]
   end
 end

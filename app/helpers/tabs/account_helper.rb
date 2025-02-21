@@ -37,34 +37,28 @@ module Tabs
     end
 
     def account_edit_preferences_tab
-      [:prefs_link.t, edit_account_preferences_path,
-       { class: tab_id(__method__.to_s) }]
+      InternalLink.new(:prefs_link.t, edit_account_preferences_path).tab
     end
 
     def account_edit_profile_tab
-      [:profile_link.t, edit_account_profile_path,
-       { class: tab_id(__method__.to_s) }]
+      InternalLink.new(:profile_link.t, edit_account_profile_path).tab
     end
 
     def account_bulk_license_updater_tab
-      [:bulk_license_link.t, images_edit_licenses_path,
-       { class: tab_id(__method__.to_s) }]
+      InternalLink.new(:bulk_license_link.t, images_edit_licenses_path).tab
     end
 
     def account_show_notifications_tab
-      [:show_user_your_notifications.t, interests_path,
-       { class: tab_id(__method__.to_s) }]
+      InternalLink.new(:show_user_your_notifications.t, interests_path).tab
     end
 
     def account_show_api_keys_tab
-      [:account_api_keys_link.t, account_api_keys_path,
-       { class: tab_id(__method__.to_s) }]
+      InternalLink.new(:account_api_keys_link.t, account_api_keys_path).tab
     end
 
     def account_change_image_vote_anonymity_tab
-      [:prefs_change_image_vote_anonymity.t,
-       images_edit_vote_anonymity_path,
-       { class: tab_id(__method__.to_s) }]
+      InternalLink.new(:prefs_change_image_vote_anonymity.t,
+                       images_edit_vote_anonymity_path).tab
     end
   end
 end

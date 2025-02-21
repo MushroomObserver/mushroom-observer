@@ -14,44 +14,45 @@ class API2::NamesTest < UnitTestCase
   #  :section: Name Requests
   # --------------------------
 
-  def name_get_params
-    @name_get_params ||= { method: :get, action: :name }
+  def params_get(**)
+    { method: :get, action: :name }.merge(**)
   end
 
   def test_getting_names
     name = Name.with_correct_spelling.sample
-    assert_api_pass(name_get_params.merge(id: name.id))
+    assert_api_pass(params_get(id: name.id))
     assert_api_results([name])
   end
 
   def test_getting_names_year
     names = Name.with_correct_spelling.where(Name[:created_at].year.eq(2008))
     assert_not_empty(names)
-    assert_api_pass(name_get_params.merge(created_at: "2008"))
+    assert_api_pass(params_get(created_at: "2008"))
     assert_api_results(names)
   end
 
   def test_getting_names_date
     names = Name.with_correct_spelling.updated_on("2008-09-05")
     assert_not_empty(names)
-    assert_api_pass(name_get_params.merge(updated_at: "2008-09-05"))
+    assert_api_pass(params_get(updated_at: "2008-09-05"))
     assert_api_results(names)
   end
 
   def test_getting_names_user
     names = Name.with_correct_spelling.where(user: mary)
     assert_not_empty(names)
-    assert_api_pass(name_get_params.merge(user: "mary"))
+    assert_api_pass(params_get(user: "mary"))
     assert_api_results(names)
   end
 
   def test_getting_names_name_with_two_versions
-    names = Name.with_correct_spelling.where(text_name: "Lentinellus ursinus")
+    names = Name.with_correct_spelling.where(text_name: "Agrocybe arvalis")
     assert_not_empty(names)
-    assert_api_fail(name_get_params.merge(name: "Lentinellus ursinus"))
+    assert_api_fail(params_get(name: "Agrocybe arvalis"))
     assert_api_pass(
-      name_get_params.merge(
-        name: "Lentinellus ursinus Kühner, Lentinellus ursinus Kuhner"
+      params_get(
+        name: "Agrocybe arvalis (Fr.) Singer, " \
+              "Agrocybe arvalis (Fr.) Heim & Romagn."
       )
     )
     assert_api_results(names)
@@ -61,10 +62,10 @@ class API2::NamesTest < UnitTestCase
     names = names(:lactarius_alpinus).synonyms.sort_by(&:id).
             reject(&:correct_spelling_id)
     assert_not_empty(names)
-    assert_api_pass(name_get_params.merge(synonyms_of: "Lactarius alpinus"))
+    assert_api_pass(params_get(synonyms_of: "Lactarius alpinus"))
     assert_api_results(names)
-    assert_api_pass(name_get_params.merge(name: "Lactarius alpinus",
-                                          include_synonyms: "yes"))
+    assert_api_pass(params_get(name: "Lactarius alpinus",
+                               include_synonyms: "yes"))
     assert_api_results(names)
   end
 
@@ -75,17 +76,16 @@ class API2::NamesTest < UnitTestCase
       Name.where(Name[:text_name].matches("#{genus} %")) + [n]
     end.flatten.uniq.sort_by(&:id)
     assert_not_empty(names)
-    assert_api_pass(name_get_params.merge(children_of: "Fungi"))
+    assert_api_pass(params_get(children_of: "Fungi"))
     assert_api_results(names)
-    assert_api_pass(name_get_params.merge(name: "Fungi",
-                                          include_subtaxa: "yes"))
+    assert_api_pass(params_get(name: "Fungi", include_subtaxa: "yes"))
     assert_api_results(names << names(:fungi))
   end
 
   def test_getting_names_deprecated
     names = Name.with_correct_spelling.deprecated
     assert_not_empty(names)
-    assert_api_pass(name_get_params.merge(is_deprecated: "true"))
+    assert_api_pass(params_get(is_deprecated: "true"))
     assert_api_results(names)
   end
 
@@ -96,16 +96,13 @@ class API2::NamesTest < UnitTestCase
     assert_not_empty(names)
     assert_not_empty(goods)
     assert_not_empty(bads)
-    assert_api_pass(name_get_params.merge(updated_at: "20091012",
-                                          misspellings: :either))
+    assert_api_pass(params_get(updated_at: "20091012", misspellings: :either))
     assert_api_results(names)
-    assert_api_pass(name_get_params.merge(updated_at: "20091012",
-                                          misspellings: :only))
+    assert_api_pass(params_get(updated_at: "20091012", misspellings: :only))
     assert_api_results(bads)
-    assert_api_pass(name_get_params.merge(updated_at: "20091012",
-                                          misspellings: :no))
+    assert_api_pass(params_get(updated_at: "20091012", misspellings: :no))
     assert_api_results(goods)
-    assert_api_pass(name_get_params.merge(updated_at: "20091012"))
+    assert_api_pass(params_get(updated_at: "20091012"))
     assert_api_results(goods)
   end
 
@@ -114,9 +111,9 @@ class API2::NamesTest < UnitTestCase
     with    = Name.with_correct_spelling.with_synonyms
     assert_not_empty(without)
     assert_not_empty(with)
-    assert_api_pass(name_get_params.merge(has_synonyms: "no"))
+    assert_api_pass(params_get(has_synonyms: "no"))
     assert_api_results(without)
-    assert_api_pass(name_get_params.merge(has_synonyms: "true"))
+    assert_api_pass(params_get(has_synonyms: "true"))
     assert_api_results(with)
   end
 
@@ -126,7 +123,7 @@ class API2::NamesTest < UnitTestCase
             flatten.uniq.sort_by(&:id).
             reject(&:correct_spelling_id)
     assert_not_empty(names)
-    assert_api_pass(name_get_params.merge(location: loc.id))
+    assert_api_pass(params_get(location: loc.id))
     assert_api_results(names)
   end
 
@@ -136,14 +133,14 @@ class API2::NamesTest < UnitTestCase
             flatten.uniq.sort_by(&:id).
             reject(&:correct_spelling_id)
     assert_not_empty(names)
-    assert_api_pass(name_get_params.merge(species_list: spl.id))
+    assert_api_pass(params_get(species_list: spl.id))
     assert_api_results(names)
   end
 
   def test_getting_names_with_rank
     names = Name.with_correct_spelling.with_rank("Variety")
     assert_not_empty(names)
-    assert_api_pass(name_get_params.merge(rank: "variety"))
+    assert_api_pass(params_get(rank: "variety"))
     assert_api_results(names)
   end
 
@@ -152,9 +149,9 @@ class API2::NamesTest < UnitTestCase
     without = Name.with_correct_spelling.without_author
     assert_not_empty(with)
     assert_not_empty(without)
-    assert_api_pass(name_get_params.merge(has_author: "yes"))
+    assert_api_pass(params_get(has_author: "yes"))
     assert_api_results(with)
-    assert_api_pass(name_get_params.merge(has_author: "no"))
+    assert_api_pass(params_get(has_author: "no"))
     assert_api_results(without)
   end
 
@@ -163,9 +160,9 @@ class API2::NamesTest < UnitTestCase
     without = Name.with_correct_spelling.without_citation
     assert_not_empty(with)
     assert_not_empty(without)
-    assert_api_pass(name_get_params.merge(has_citation: "yes"))
+    assert_api_pass(params_get(has_citation: "yes"))
     assert_api_results(with)
-    assert_api_pass(name_get_params.merge(has_citation: "no"))
+    assert_api_pass(params_get(has_citation: "no"))
     assert_api_results(without)
   end
 
@@ -174,9 +171,9 @@ class API2::NamesTest < UnitTestCase
     without = Name.with_correct_spelling.without_classification
     assert_not_empty(with)
     assert_not_empty(without)
-    assert_api_pass(name_get_params.merge(has_classification: "yes"))
+    assert_api_pass(params_get(has_classification: "yes"))
     assert_api_results(with)
-    assert_api_pass(name_get_params.merge(has_classification: "no"))
+    assert_api_pass(params_get(has_classification: "no"))
     assert_api_results(without)
   end
 
@@ -185,9 +182,9 @@ class API2::NamesTest < UnitTestCase
     without = Name.with_correct_spelling.without_notes
     assert_not_empty(with)
     assert_not_empty(without)
-    assert_api_pass(name_get_params.merge(has_notes: "yes"))
+    assert_api_pass(params_get(has_notes: "yes"))
     assert_api_results(with)
-    assert_api_pass(name_get_params.merge(has_notes: "no"))
+    assert_api_pass(params_get(has_notes: "no"))
     assert_api_results(without)
   end
 
@@ -195,7 +192,7 @@ class API2::NamesTest < UnitTestCase
     names = Comment.where(target_type: "Name").map(&:target).
             uniq.sort_by(&:id).reject(&:correct_spelling_id)
     assert_not_empty(names)
-    assert_api_pass(name_get_params.merge(has_comments: "yes"))
+    assert_api_pass(params_get(has_comments: "yes"))
     assert_api_results(names)
   end
 
@@ -204,44 +201,44 @@ class API2::NamesTest < UnitTestCase
     without = Name.with_correct_spelling.without_description
     assert_not_empty(with)
     assert_not_empty(without)
-    assert_api_pass(name_get_params.merge(has_description: "yes"))
+    assert_api_pass(params_get(has_description: "yes"))
     assert_api_results(with)
-    assert_api_pass(name_get_params.merge(has_description: "no"))
+    assert_api_pass(params_get(has_description: "no"))
     assert_api_results(without)
   end
 
   def test_getting_names_text_name_contains
     names = Name.with_correct_spelling.text_name_contains("bunny")
     assert_not_empty(names)
-    assert_api_pass(name_get_params.merge(text_name_has: "bunny"))
+    assert_api_pass(params_get(text_name_has: "bunny"))
     assert_api_results(names)
   end
 
   def test_getting_names_author_contains
     names = Name.with_correct_spelling.author_contains("peck")
     assert_not_empty(names)
-    assert_api_pass(name_get_params.merge(author_has: "peck"))
+    assert_api_pass(params_get(author_has: "peck"))
     assert_api_results(names)
   end
 
   def test_getting_names_citation_contains
     names = Name.with_correct_spelling.citation_contains("lichenes")
     assert_not_empty(names)
-    assert_api_pass(name_get_params.merge(citation_has: "lichenes"))
+    assert_api_pass(params_get(citation_has: "lichenes"))
     assert_api_results(names)
   end
 
   def test_getting_names_classification_contains
     names = Name.with_correct_spelling.classification_contains("lecanorales")
     assert_not_empty(names)
-    assert_api_pass(name_get_params.merge(classification_has: "lecanorales"))
+    assert_api_pass(params_get(classification_has: "lecanorales"))
     assert_api_results(names)
   end
 
   def test_getting_names_notes_contain
     names = Name.with_correct_spelling.notes_contain("known")
     assert_not_empty(names)
-    assert_api_pass(name_get_params.merge(notes_has: "known"))
+    assert_api_pass(params_get(notes_has: "known"))
     assert_api_results(names)
   end
 
@@ -250,7 +247,7 @@ class API2::NamesTest < UnitTestCase
       Comment[:target_type].eq("name").and(Comment[:comment].matches("%mess%"))
     ).map(&:target).uniq.sort_by(&:id).reject(&:correct_spelling_id)
     assert_not_empty(names)
-    assert_api_pass(name_get_params.merge(comments_has: "mess"))
+    assert_api_pass(params_get(comments_has: "mess"))
     assert_api_results(names)
   end
 
@@ -258,7 +255,7 @@ class API2::NamesTest < UnitTestCase
     Name.with_correct_spelling.sample.update!(ok_for_export: true)
     names = Name.with_correct_spelling.ok_for_export
     assert_not_empty(names)
-    assert_api_pass(name_get_params.merge(ok_for_export: "yes"))
+    assert_api_pass(params_get(ok_for_export: "yes"))
     assert_api_results(names)
   end
 

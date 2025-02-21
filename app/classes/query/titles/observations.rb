@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 module Query::Titles::Observations
+  MAX_TITLE_ITEMS = 3
+
   def with_observations_query_description
     return nil unless (description = observation_query_description)
 
-    if params[:user].blank?
+    if params.deep_find(:user).blank?
       :query_title_with_observations_filtered.t(type: model.type_tag,
                                                 subtitle: description)
     else
@@ -18,9 +20,11 @@ module Query::Titles::Observations
 
     # For now just deal with simple cases which correspond more or less
     # to the old flavors.
-    args = [:herbaria, :locations, :names, :project, :projects,
-            :project_lists, :species_list, :species_lists, :by_user,
-            :user, :users].reject { |arg| params[arg].to_s.empty? }
+    args = [
+      :herbaria, :locations, :names, :project, :projects, :project_lists,
+      :species_list, :species_lists, :by_user, :user, :users
+    ].reject { |arg| params.deep_find(arg).first.blank? }
+
     if args.length == 1
       send(:"title_for_#{args.first}")
     else
@@ -47,7 +51,7 @@ module Query::Titles::Observations
   end
 
   def title_for_project
-    str = ensure_integer(params[:project], Project, :title)
+    str = ensure_integer(params.deep_find(:project), Project, :title)
     :query_title_for_project.t(type: :observation, project: str)
   end
 
@@ -62,7 +66,7 @@ module Query::Titles::Observations
   end
 
   def title_for_species_list
-    str = ensure_integer(params[:species_list], SpeciesList, :title)
+    str = ensure_integer(params.deep_find(:species_list), SpeciesList, :title)
     :query_title_in_species_list.t(type: :observation, species_list: str)
   end
 
@@ -73,13 +77,13 @@ module Query::Titles::Observations
 
   # takes a user_id
   def title_for_by_user
-    str = ensure_integer(params[:by_user], User, :name)
+    str = ensure_integer(params.deep_find(:by_user), User, :name)
     :query_title_by_user.t(type: :observation, user: str)
   end
 
   # takes a search string
   def title_for_user
-    :query_title_by_user.t(type: :observation, user: params[:user])
+    :query_title_by_user.t(type: :observation, user: params.deep_find(:user))
   end
 
   # takes a list of user_ids
@@ -89,21 +93,24 @@ module Query::Titles::Observations
   end
 
   def map_join_and_truncate(param, model, method)
-    str = params[param].map do |val|
+    str = params.deep_find(param)[0..(MAX_TITLE_ITEMS - 1)].map do |val|
       # Integer(val) throws ArgumentError if val is not an integer.
-      # This is the most efficient way to test if a string is an
-      # integer according to a very thorough and detailed blog post!
-      # model.find(Integer(val)).send(method)
       ensure_integer(val, model, method)
     rescue ArgumentError # rubocop:disable Layout/RescueEnsureAlignment
       val
     end.join(", ")
-    str = "#{str[0...97]}..." if str.length > 100
+    if str.length > 100
+      str = "#{str[0...97]}..."
+    elsif params.deep_find(param).length > MAX_TITLE_ITEMS
+      str += ", ..."
+    end
     str
   end
 
   def ensure_integer(val, model, method)
     val = val.min if val.is_a?(Array)
+    return val if val.is_a?(AbstractModel)
+
     model.find(Integer(val)).send(method)
   end
 end

@@ -5,27 +5,24 @@ module Query::Modules::Associations
   def initialize_herbaria_parameter(
     joins = [:observations, :observation_herbarium_records, :herbarium_records]
   )
-    add_id_condition(
-      "herbarium_records.herbarium_id", params[:herbaria], *joins
-    )
+    ids = lookup_herbaria_by_name(params[:herbaria])
+    add_id_condition("herbarium_records.herbarium_id", ids, *joins)
   end
 
   def initialize_herbarium_records_parameter
-    add_id_condition(
-      "observation_herbarium_records.herbarium_record_id",
-      params[:herbarium_records],
-      :observations, :observation_herbarium_records
-    )
+    ids = lookup_herbarium_records_by_name(params[:herbarium_records])
+    add_id_condition("observation_herbarium_records.herbarium_record_id", ids,
+                     :observations, :observation_herbarium_records)
   end
 
-  def add_where_condition(table, vals, *)
+  def add_location_string_condition(table, vals, *)
     return if vals.empty?
 
     loc_col   = "#{table}.location_id"
     where_col = "#{table}.where"
-    ids       = clean_id_set(vals)
+    ids       = clean_id_set(lookup_locations_by_name(vals))
     cond      = "#{loc_col} IN (#{ids})"
-    vals.each do |val|
+    [vals].flatten.each do |val|
       if /\D/.match?(val.to_s)
         pattern = clean_pattern(val)
         cond += " OR #{where_col} LIKE '%#{pattern}%'"
@@ -80,7 +77,8 @@ module Query::Modules::Associations
 
   def initialize_projects_parameter(table = :project_observations,
                                     joins = [:observations, table])
-    add_id_condition("#{table}.project_id", params[:projects], *joins)
+    ids = lookup_projects_by_name(params[:projects])
+    add_id_condition("#{table}.project_id", ids, *joins)
   end
 
   def add_in_species_list_condition(table = :species_list_observations,
@@ -98,6 +96,7 @@ module Query::Modules::Associations
   def initialize_species_lists_parameter(
     table = :species_list_observations, joins = [:observations, table]
   )
-    add_id_condition("#{table}.species_list_id", params[:species_lists], *joins)
+    ids = lookup_species_lists_by_name(params[:species_lists])
+    add_id_condition("#{table}.species_list_id", ids, *joins)
   end
 end

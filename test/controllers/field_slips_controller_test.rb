@@ -165,6 +165,27 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_redirected_to new_observation_url(field_code: code)
   end
 
+  test "should create field_slip using aliases" do
+    login(@field_slip.user.login)
+    code = "Z#{@field_slip.code}"
+    assert_difference("FieldSlip.count") do
+      post(:create,
+           params: {
+             commit: :field_slip_quick_create_obs.t,
+             field_slip: {
+               code: code,
+               project_id: projects(:eol_project).id,
+               field_slip_id_by: project_aliases(:one).name,
+               location: project_aliases(:two).name
+             }
+           })
+    end
+    field_slip = FieldSlip.find_by(code: code)
+    assert_equal(field_slip.observation.location, project_aliases(:two).target)
+    assert_equal(project_aliases(:one).target.textile_name,
+                 field_slip.observation.notes[:Field_Slip_ID_By])
+  end
+
   test "should create field_slip and obs and redirect to show obs" do
     login(@field_slip.user.login)
     code = "Z#{@field_slip.code}"
