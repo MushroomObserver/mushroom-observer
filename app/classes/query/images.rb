@@ -20,7 +20,6 @@ class Query::Images < Query::Base
       by_user: User,
       users: [User],
       locations: [Location],
-      outer: :query, # for images inside observations
       observation: Observation, # for images inside observations
       observations: [Observation],
       project: Project,

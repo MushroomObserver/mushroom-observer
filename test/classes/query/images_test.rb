@@ -116,12 +116,10 @@ class Query::ImagesTest < UnitTestCase
     obs = observations(:detailed_unknown_obs)
     assert_equal(2, obs.images.length)
     expects = obs.images.sort_by(&:id)
-    assert_query(expects, :Image,
-                 observation: obs, outer: 1) # (outer is only used by prev/next)
+    assert_query(expects, :Image, observations: obs)
     obs = observations(:minimal_unknown_obs)
     assert_equal(0, obs.images.length)
-    assert_query(obs.images, :Image,
-                 observation: obs, outer: 1) # (outer is only used by prev/next)
+    assert_query(obs.images, :Image, observations: obs)
   end
 
   def test_image_for_project

@@ -199,8 +199,8 @@ class ImagesController < ApplicationController
     return unless obs.present? && obs.to_s.match(/^\d+$/) && !browser.bot?
 
     obs_query = find_or_create_query(:Observation)
-    obs_query.current = obs
-    img_query = create_query(:Image, observation: obs, outer: obs_query)
+    img_query = create_query(:Image, observation_query: obs_query.params,
+                                     group: "observation_images.observation_id")
     query_params_set(img_query)
   end
 
