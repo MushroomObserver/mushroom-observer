@@ -60,7 +60,7 @@ class SpeciesListsController < ApplicationController
     )
     return unless user
 
-    query = create_query(:SpeciesList, by_user: user, by: :date)
+    query = create_query(:SpeciesList, by_users: user, by: :date)
     [query, {}]
   end
 
@@ -69,7 +69,7 @@ class SpeciesListsController < ApplicationController
     project = find_or_goto_index(Project, params[:project].to_s)
     return unless project
 
-    query = create_query(:SpeciesList, project: project)
+    query = create_query(:SpeciesList, projects: project)
     [query, { always_index: true }]
   end
 

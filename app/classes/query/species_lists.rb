@@ -10,13 +10,10 @@ class Query::SpeciesLists < Query::Base
       created_at: [:time],
       updated_at: [:time],
       date: [:date],
-      by_user: User,
-      by_users: [User],
       ids: [SpeciesList],
-      location: Location,
+      by_users: [User],
       locations: [Location],
       user_where: :string,
-      project: Project,
       projects: [Project],
       title_has: :string,
       with_notes: :boolean,
@@ -34,8 +31,6 @@ class Query::SpeciesLists < Query::Base
     add_date_condition("species_lists.when", params[:date])
     add_pattern_condition
     add_ids_condition
-    add_by_user_condition
-    add_for_project_condition(:project_species_lists)
     add_subquery_condition(:observation_query, :species_list_observations,
                            table: :species_list_observations,
                            col: :observation_id)
@@ -55,7 +50,6 @@ class Query::SpeciesLists < Query::Base
   end
 
   def initialize_association_parameters
-    add_at_location_condition
     add_locations_condition(:species_lists, params[:locations])
     initialize_projects_parameter(:project_species_lists,
                                   [:project_species_lists])
