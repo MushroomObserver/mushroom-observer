@@ -16,6 +16,11 @@ module Query::Modules::Associations
     user
   end
 
+  def initialize_users_parameter(table = model.table_name)
+    ids = lookup_users_by_name(params.deep_find(:by_users))
+    add_id_condition("#{table}.user_id", ids, title_method: :set_by_user_title)
+  end
+
   def add_by_editor_condition(type = model.type_tag)
     return unless params[:by_editor]
 

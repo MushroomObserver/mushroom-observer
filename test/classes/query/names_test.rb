@@ -330,10 +330,10 @@ class Query::NamesTest < UnitTestCase
 
   def test_name_with_descriptions_by_user
     expects = name_with_descriptions_by_user(mary)
-    assert_query(expects, :Name, description_query: { by_user: mary })
+    assert_query(expects, :Name, description_query: { by_users: mary })
 
     expects = name_with_descriptions_by_user(dick)
-    assert_query(expects, :Name, description_query: { by_user: dick })
+    assert_query(expects, :Name, description_query: { by_users: dick })
   end
 
   def name_with_descriptions_by_user(user)
@@ -535,7 +535,7 @@ class Query::NamesTest < UnitTestCase
                  :Name, observation_query: { by_users: rolf })
     assert_query(name_with_observations_by_user(mary),
                  :Name, observation_query: { by_users: mary })
-    assert_query([], :Name, observation_query: { by_usesr: users(:zero_user) })
+    assert_query([], :Name, observation_query: { by_users: users(:zero_user) })
   end
 
   def name_with_observations_by_user(user)
@@ -565,7 +565,7 @@ class Query::NamesTest < UnitTestCase
     spl = species_lists(:unknown_species_list)
     expects = Name.index_order.with_correct_spelling.
               joins({ observations: :species_list_observations }).
-              where(species_list_observations: { species_lists: spl }).uniq
+              where(species_list_observations: { species_list: spl }).uniq
     assert_query(expects, :Name, observation_query: { species_lists: spl })
 
     spl2 = species_lists(:first_species_list)

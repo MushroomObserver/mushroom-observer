@@ -149,9 +149,9 @@ class Query::LocationsTest < UnitTestCase
   def test_location_with_descriptions_by_user
     expects = Location.joins(:descriptions).
               where(descriptions: { user: rolf }).index_order.distinct
-    assert_query(expects, :Location, description_query: { by_user: rolf })
+    assert_query(expects, :Location, description_query: { by_users: rolf })
 
-    assert_query([], :Location, description_query: { by_user: mary })
+    assert_query([], :Location, description_query: { by_users: mary })
   end
 
   def test_location_with_descriptions_by_author

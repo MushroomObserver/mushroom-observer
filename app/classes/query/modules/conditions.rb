@@ -6,8 +6,7 @@ module Query::Modules::Conditions
   def add_owner_and_time_stamp_conditions(table = model.table_name)
     add_time_condition("#{table}.created_at", params[:created_at])
     add_time_condition("#{table}.updated_at", params[:updated_at])
-    ids = lookup_users_by_name(params[:by_users])
-    add_id_condition("#{table}.user_id", ids, title_method: :set_by_user_title)
+    initialize_users_parameter
   end
 
   def add_pattern_condition

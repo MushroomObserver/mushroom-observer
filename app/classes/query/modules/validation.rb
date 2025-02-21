@@ -262,9 +262,12 @@ module Query::Modules::Validation
   # can be deleted.
   def take_param_or_pluralized_param(param)
     return params[param] if params[param]
-    return if (plural = params[param.to_s.pluralize.to_sym]).blank?
 
-    [plural].flatten.first
+    plural = param.to_s.pluralize.to_sym
+    return params.deep_find(plural).first if plural == :by_users
+    return if params[plural].blank?
+
+    [params[plural]].flatten.first
   end
 
   # Cache the instance for later use, in case we both instantiate and
