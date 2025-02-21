@@ -40,7 +40,6 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
       location: Location,
       locations: [Location],
       in_box: { north: :float, south: :float, east: :float, west: :float },
-      user_where: :string,
       is_collection_location: :boolean,
       with_public_lat_lng: :boolean,
       with_notes: :boolean,
@@ -278,7 +277,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
     )
     return if model == Observation
 
-    add_search_condition("observations.where", params[:user_where])
+    add_search_condition("observations.where", params[:search_where])
   end
 
   def add_pattern_condition

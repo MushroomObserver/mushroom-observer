@@ -83,7 +83,8 @@ module Query::Titles::Observations
 
   # takes a search string
   def title_for_user
-    :query_title_by_user.t(type: :observation, user: params.deep_find(:user))
+    user = params.deep_find(:search_user)
+    :query_title_by_user.t(type: :observation, user:)
   end
 
   # takes a list of user_ids

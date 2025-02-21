@@ -14,10 +14,12 @@ module Query::Initializers::AdvancedSearch
 
   def google_parse_params
     [
-      SearchParams.new(phrase: params[:name]),
-      SearchParams.new(phrase: User.remove_bracketed_name(params[:user].to_s)),
-      SearchParams.new(phrase: params[:user_where]),
-      SearchParams.new(phrase: params[:content])
+      SearchParams.new(phrase: params[:search_name]),
+      SearchParams.new(
+        phrase: User.remove_bracketed_name(params[:search_user].to_s)
+      ),
+      SearchParams.new(phrase: params[:search_where]),
+      SearchParams.new(phrase: params[:search_content])
     ]
   end
 

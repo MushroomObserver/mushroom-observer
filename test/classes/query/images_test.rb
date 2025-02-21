@@ -136,42 +136,42 @@ class Query::ImagesTest < UnitTestCase
     # expects = [] # [images(:agaricus_campestris_image).id]
     expects = Image.index_order.joins(observations: :name).
               where(Name[:search_name].matches("%Agaricus%")).distinct
-    assert_query(expects, :Image, name: "Agaricus")
+    assert_query(expects, :Image, search_name: "Agaricus")
   end
 
-  def test_image_advanced_search_user_where
+  def test_image_advanced_search_where
     expects = Image.index_order.joins(:observations).
               where(Observation[:where].matches("%burbank%")).
               where(observations: { is_collection_location: true }).distinct
-    assert_query(expects, :Image, user_where: "burbank")
+    assert_query(expects, :Image, search_where: "burbank")
 
     assert_query([images(:connected_coprinus_comatus_image).id],
-                 :Image, user_where: "glendale")
+                 :Image, search_where: "glendale")
   end
 
   def test_image_advanced_search_user
     expects = Image.index_order.joins(observations: :user).
               where(observations: { user: mary }).distinct.
               order(Image[:created_at].desc, Image[:id].desc)
-    assert_query(expects, :Image, user: "mary")
+    assert_query(expects, :Image, search_user: "mary")
   end
 
   def test_image_advanced_search_content
     assert_query(Image.index_order.
                  advanced_search("little"),
-                 :Image, content: "little")
+                 :Image, search_content: "little")
     assert_query(Image.index_order.
                  advanced_search("fruiting"),
-                 :Image, content: "fruiting")
+                 :Image, search_content: "fruiting")
   end
 
   def test_image_advanced_search_combos
     assert_query([],
-                 :Image, name: "agaricus", user_where: "glendale")
+                 :Image, search_name: "agaricus", search_where: "glendale")
     assert_query([images(:agaricus_campestris_image).id],
-                 :Image, name: "agaricus", user_where: "burbank")
+                 :Image, search_name: "agaricus", search_where: "burbank")
     assert_query([images(:turned_over_image).id, images(:in_situ_image).id],
-                 :Image, content: "little", user_where: "burbank")
+                 :Image, search_content: "little", search_where: "burbank")
   end
 
   def test_image_pattern_search_name
@@ -367,8 +367,8 @@ class Query::ImagesTest < UnitTestCase
 
   def test_image_with_observations_at_where
     expects = [images(:connected_coprinus_comatus_image).id]
-    assert_image_obs_query(expects, user_where: "glendale")
-    assert_image_obs_query([], user_where: "snazzle")
+    assert_image_obs_query(expects, search_where: "glendale")
+    assert_image_obs_query([], search_where: "snazzle")
   end
 
   def test_image_with_observations_by_user
