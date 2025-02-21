@@ -11,7 +11,6 @@ class Query::CollectionNumbers < Query::Base
       updated_at: [:time],
       ids: [CollectionNumber],
       users: [User],
-      observation: Observation,
       observations: [Observation],
       pattern: :string,
       name: [:string],
@@ -26,7 +25,6 @@ class Query::CollectionNumbers < Query::Base
     add_owner_and_time_stamp_conditions
     add_ids_condition
     add_collection_number_conditions
-    add_for_observation_condition
     initialize_observations_parameter
     add_pattern_condition
     super

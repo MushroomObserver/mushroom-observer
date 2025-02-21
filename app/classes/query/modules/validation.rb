@@ -245,7 +245,7 @@ module Query::Modules::Validation
   def find_cached_parameter_instance(model, param)
     val = if could_be_record_id?(param, params[param])
             model.find(params[param])
-          else
+          elsif params[param].present?
             lookup_record_by_name(param, params[param], model)
           end
     set_cached_parameter_instance(param, val)

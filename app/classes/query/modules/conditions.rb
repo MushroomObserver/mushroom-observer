@@ -121,11 +121,16 @@ module Query::Modules::Conditions
     #   :query_title_in_set.t(type: table.singularize.to_sym)
   end
 
-  def add_id_condition(col, ids, *)
+  def add_id_condition(col, ids, title_method = nil, *)
     return if ids.empty?
 
     set = clean_id_set(ids)
-    @where << "#{col} IN (#{set})"
+    if set.size == 1
+      send(title_method) if title_method && set.first.present?
+      @where << "#{col} = '#{set.first}'"
+    else
+      @where << "#{col} IN (#{set})"
+    end
     add_joins(*)
   end
 

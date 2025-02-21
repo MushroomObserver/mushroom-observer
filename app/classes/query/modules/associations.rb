@@ -51,17 +51,24 @@ module Query::Modules::Associations
   )
     return if params[:observation].blank?
 
+    obs = set_for_observation_title
+    where << "#{table}.observation_id = '#{obs.id}'"
+    add_join(*joins)
+  end
+
+  def set_for_observation_title
     obs = find_cached_parameter_instance(Observation, :observation)
     @title_tag = :query_title_for_observation
     @title_args[:observation] = obs.unique_format_name
-    where << "#{table}.observation_id = '#{obs.id}'"
-    add_join(*joins)
+    obs
   end
 
   def initialize_observations_parameter(
     table = :"observation_#{model.table_name}", joins = [table]
   )
-    add_id_condition("#{table}.observation_id", params[:observations], *joins)
+    add_id_condition(
+      "#{table}.observation_id", params[:observations],
+      :set_for_observation_title, *joins)
   end
 
   def add_for_project_condition(table = model.table_name, joins = [table])
