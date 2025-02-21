@@ -40,6 +40,15 @@ class API2::ImagesTest < UnitTestCase
     assert_api_results([img])
   end
 
+  def img_samples
+    @img_samples ||= Image.all.sample(12)
+  end
+
+  def test_getting_images_ids
+    assert_api_pass(params_get(id: img_samples.map(&:id).join(",")))
+    assert_api_results(img_samples)
+  end
+
   def test_getting_images_created_at
     assert_api_pass(params_get(created_at: "2006"))
     assert_api_results(Image.where(Image[:created_at].year.eq(2006)))

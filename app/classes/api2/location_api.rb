@@ -32,7 +32,7 @@ class API2
     def query_params
       box = parse_bounding_box!
       {
-        where: sql_id_condition,
+        ids: parse_array(:location, :id, as: :id),
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at),
         users: parse_array(:user, :user, help: :first_user),

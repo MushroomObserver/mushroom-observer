@@ -63,7 +63,12 @@ footer =
       str, url, args = tab
       args ||= {}
       kwargs = merge_tab_args_with_extra_args(args, { class: "d-block" }) %>
-      <%= link_to(str, url, kwargs) %>
+      <% if args.any?([:button, :destroy]) %>
+        <%= destroy_button(target: admin_users_path(id: @show_user.id),
+                           name: str) %>
+      <% else %>
+        <%= link_to(str, url, kwargs) %>
+      <% end %>
     <% end %>
   <% end %>
 <% end %>

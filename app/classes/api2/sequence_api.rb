@@ -29,7 +29,7 @@ class API2
 
     def query_params
       {
-        where: sql_id_condition,
+        ids: parse_array(:sequence, :id, as: :id),
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at),
         users: parse_array(:user, :user, help: :creator),
