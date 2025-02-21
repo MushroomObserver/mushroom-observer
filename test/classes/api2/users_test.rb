@@ -14,10 +14,22 @@ class API2::UsersTest < UnitTestCase
   #  :section: User Requests
   # --------------------------
 
+  def params_get(**)
+    { method: :get, action: :user }.merge(**)
+  end
+
   def test_getting_users
-    params = { method: :get, action: :user }
-    assert_api_pass(params.merge(detail: :low))
+    assert_api_pass(params_get(detail: :low))
     assert_api_results(User.all)
+  end
+
+  def usr_samples
+    @usr_samples ||= User.all.sample(3)
+  end
+
+  def test_getting_users_ids
+    assert_api_pass(params_get(id: usr_samples.map(&:id).join(",")))
+    assert_api_results(usr_samples)
   end
 
   def test_posting_minimal_user
