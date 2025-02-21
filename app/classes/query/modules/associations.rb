@@ -17,7 +17,7 @@ module Query::Modules::Associations
   end
 
   def initialize_users_parameter(table = model.table_name)
-    ids = lookup_users_by_name(params.deep_find(:by_users))
+    ids = lookup_users_by_name(params[:by_users])
     add_id_condition("#{table}.user_id", ids, title_method: :set_by_user_title)
   end
 

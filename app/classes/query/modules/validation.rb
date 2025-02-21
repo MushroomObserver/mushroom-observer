@@ -264,7 +264,6 @@ module Query::Modules::Validation
     return params[param] if params[param]
 
     plural = param.to_s.pluralize.to_sym
-    return params.deep_find(plural).first if plural == :by_users
     return if params[plural].blank?
 
     [params[plural]].flatten.first
