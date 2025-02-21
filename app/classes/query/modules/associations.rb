@@ -15,13 +15,15 @@ module Query::Modules::Associations
                      :observations, :observation_herbarium_records)
   end
 
-  def add_location_string_condition(table, vals, *)
+  # This adds conditions both by id via lookup, and pattern match.
+  def add_locations_condition(table, vals, *)
     return if vals.empty?
 
     loc_col   = "#{table}.location_id"
     where_col = "#{table}.where"
     ids       = clean_id_set(lookup_locations_by_name(vals))
     cond      = "#{loc_col} IN (#{ids})"
+
     [vals].flatten.each do |val|
       if /\D/.match?(val.to_s)
         pattern = clean_pattern(val)
@@ -32,12 +34,18 @@ module Query::Modules::Associations
     add_joins(*)
   end
 
+  # TO BE REMOVED in favor of locations handler
   def add_at_location_condition(table = model.table_name)
     return unless params[:location]
 
-    location = find_cached_parameter_instance(Location, :location)
-    title_args[:location] = location.title_display_name
+    location = set_at_location_title
     @where << "#{table}.location_id = '#{location.id}'"
+  end
+
+  def set_at_location_title
+    location = find_cached_parameter_instance(Location, :location)
+    @title_args[:location] = location.title_display_name
+    location
   end
 
   def add_is_collection_location_condition_for_locations
@@ -46,6 +54,7 @@ module Query::Modules::Associations
     where << "observations.is_collection_location IS TRUE"
   end
 
+  # TO BE REMOVED
   def add_for_observation_condition(
     table = :"observation_#{model.table_name}", joins = [table]
   )
@@ -56,6 +65,9 @@ module Query::Modules::Associations
     add_join(*joins)
   end
 
+  # Possible issue: the second arg below is the param name.
+  # We're using it for both single and plural params.
+  # It could work anyway, but the param names may soon be plural.
   def set_for_observation_title
     obs = find_cached_parameter_instance(Observation, :observation)
     @title_tag = :query_title_for_observation
@@ -66,44 +78,56 @@ module Query::Modules::Associations
   def initialize_observations_parameter(
     table = :"observation_#{model.table_name}", joins = [table]
   )
-    add_id_condition(
-      "#{table}.observation_id", params[:observations],
-      :set_for_observation_title, *joins)
+    add_id_condition("#{table}.observation_id", params[:observations],
+                     :set_for_observation_title, *joins)
   end
 
+  # TO BE REMOVED
   def add_for_project_condition(table = model.table_name, joins = [table])
     return if params[:project].blank?
 
+    project = set_for_project_title
+    where << "#{table}.project_id = '#{project.id}'"
+    add_is_collection_location_condition_for_locations
+    add_join(*joins)
+  end
+
+  def set_for_project_title
     project = find_cached_parameter_instance(Project, :project)
     @title_tag = :query_title_for_project
     @title_args[:project] = project.title
-    where << "#{table}.project_id = '#{params[:project]}'"
-    add_is_collection_location_condition_for_locations
-    add_join(*joins)
+    project
   end
 
   def initialize_projects_parameter(table = :project_observations,
                                     joins = [:observations, table])
     ids = lookup_projects_by_name(params[:projects])
-    add_id_condition("#{table}.project_id", ids, *joins)
+    add_id_condition("#{table}.project_id", ids, :set_for_project_title, *joins)
   end
 
+  # TO BE REMOVED
   def add_in_species_list_condition(table = :species_list_observations,
                                     joins = [:observations, table])
     return if params[:species_list].blank?
 
-    spl = find_cached_parameter_instance(SpeciesList, :species_list)
-    @title_tag = :query_title_in_species_list
-    @title_args[:species_list] = spl.format_name
+    spl = set_in_species_list_title
     where << "#{table}.species_list_id = '#{spl.id}'"
     add_is_collection_location_condition_for_locations
     add_join(*joins)
+  end
+
+  def set_in_species_list_title
+    spl = find_cached_parameter_instance(SpeciesList, :species_list)
+    @title_tag = :query_title_in_species_list
+    @title_args[:species_list] = spl.format_name
+    spl
   end
 
   def initialize_species_lists_parameter(
     table = :species_list_observations, joins = [:observations, table]
   )
     ids = lookup_species_lists_by_name(params[:species_lists])
-    add_id_condition("#{table}.species_list_id", ids, *joins)
+    add_id_condition("#{table}.species_list_id", ids,
+                     :set_in_species_list_title, *joins)
   end
 end

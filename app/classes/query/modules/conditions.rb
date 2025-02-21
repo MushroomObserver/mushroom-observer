@@ -124,11 +124,11 @@ module Query::Modules::Conditions
   def add_id_condition(col, ids, title_method = nil, *)
     return if ids.empty?
 
-    set = clean_id_set(ids)
-    if set.size == 1
-      send(title_method) if title_method && set.first.present?
-      @where << "#{col} = '#{set.first}'"
+    if ids.size == 1
+      send(title_method) if title_method && ids.first.present?
+      @where << "#{col} = '#{ids.first}'"
     else
+      set = clean_id_set(ids) # this produces a joined string!
       @where << "#{col} IN (#{set})"
     end
     add_joins(*)

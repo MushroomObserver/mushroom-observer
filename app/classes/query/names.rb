@@ -149,8 +149,7 @@ class Query::Names < Query::Base
 
   def initialize_name_association_parameters
     add_id_condition("observations.id", params[:observations], :observations)
-    add_location_string_condition(:observations, params[:locations],
-                                  :observations)
+    add_locations_condition(:observations, params[:locations], :observations)
     initialize_species_lists_parameter
   end
 
