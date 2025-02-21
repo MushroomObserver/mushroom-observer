@@ -50,7 +50,7 @@ class SearchControllerTest < FunctionalTestCase
       search: {
         model: "observation",
         search_user: users(:rolf).unique_text_name,
-        # user_id: users(:rolf).id
+        search_user_id: users(:rolf).id
       },
       content_filter: {
         with_images: "",
@@ -62,7 +62,8 @@ class SearchControllerTest < FunctionalTestCase
     }
     get(:advanced, params: params)
     query = QueryRecord.last.query
-    assert_redirected_to(observations_path(q: QueryRecord.last.id.alphabetize))
+    q = QueryRecord.last.id.alphabetize
+    assert_redirected_to(root_path(advanced_search: 1, q:))
     assert_true(query.num_results.positive?)
     assert_equal("", query.params[:with_images])
     assert_true(query.params[:with_specimen])
