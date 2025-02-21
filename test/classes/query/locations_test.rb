@@ -397,12 +397,12 @@ class Query::LocationsTest < UnitTestCase
 
   def test_location_with_observations_by_user
     expects = location_with_observations_by_user(rolf)
-    assert_query(expects, :Location, observation_query: { by_user: rolf.id })
+    assert_query(expects, :Location, observation_query: { by_users: rolf.id })
 
     zero_user = users(:zero_user)
     expects = location_with_observations_by_user(zero_user)
     assert_equal(0, expects.length)
-    assert_query(expects, :Location, observation_query: { by_user: zero_user })
+    assert_query(expects, :Location, observation_query: { by_users: zero_user })
   end
 
   def location_with_observations_by_user(user)
@@ -412,7 +412,7 @@ class Query::LocationsTest < UnitTestCase
 
   def test_location_with_observations_for_project_empty
     empty = projects(:empty_project)
-    assert_query([], :Location, observation_query: { project: empty })
+    assert_query([], :Location, observation_query: { projects: empty })
   end
 
   # NOTE: is_collection_location: true is automatically added by the related
@@ -420,7 +420,7 @@ class Query::LocationsTest < UnitTestCase
   def test_location_with_observations_for_project
     pj = projects(:obs_collected_and_displayed_project)
     assert_query([observations(:collected_at_obs).location],
-                 :Location, observation_query: { project: pj,
+                 :Location, observation_query: { projects: pj,
                                                  is_collection_location: 1 })
   end
 

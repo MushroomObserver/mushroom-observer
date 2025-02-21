@@ -522,7 +522,7 @@ class Query::NamesTest < UnitTestCase
     loc = locations(:burbank)
     expects = Name.index_order.with_correct_spelling.joins(:observations).
               where(observations: { location: loc }).distinct
-    assert_query(expects, :Name, observation_query: { location: loc })
+    assert_query(expects, :Name, observation_query: { locations: loc })
   end
 
   def test_name_with_observations_at_where
@@ -532,10 +532,10 @@ class Query::NamesTest < UnitTestCase
 
   def test_name_with_observations_by_user
     assert_query(name_with_observations_by_user(rolf),
-                 :Name, observation_query: { by_user: rolf })
+                 :Name, observation_query: { by_users: rolf })
     assert_query(name_with_observations_by_user(mary),
-                 :Name, observation_query: { by_user: mary })
-    assert_query([], :Name, observation_query: { by_user: users(:zero_user) })
+                 :Name, observation_query: { by_users: mary })
+    assert_query([], :Name, observation_query: { by_usesr: users(:zero_user) })
   end
 
   def name_with_observations_by_user(user)
@@ -545,13 +545,13 @@ class Query::NamesTest < UnitTestCase
 
   def test_name_with_observations_for_project
     project = projects(:empty_project)
-    assert_query([], :Name, observation_query: { project: project })
+    assert_query([], :Name, observation_query: { projects: project })
 
     project2 = projects(:two_img_obs_project)
     expects = Name.index_order.with_correct_spelling.
               joins({ observations: :project_observations }).
               where(project_observations: { project: project2 }).distinct
-    assert_query(expects, :Name, observation_query: { project: project2 })
+    assert_query(expects, :Name, observation_query: { projects: project2 })
   end
 
   def test_name_with_observations_in_set

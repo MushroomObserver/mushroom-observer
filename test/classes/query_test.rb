@@ -963,14 +963,14 @@ class QueryTest < UnitTestCase
     obs_queries = query_b.map { |que| que.params[:observation_query] }
 
     assert_equal("id", obs_queries[0][:by])
-    assert_equal(mary.id, obs_queries[1][:by_user])
+    assert_equal(mary.id, obs_queries[1][:by_users])
     assert_equal(species_lists(:first_species_list).id,
-                 obs_queries[2][:species_list])
+                 obs_queries[2][:species_lists])
     assert_equal(three_amigos, obs_queries[3][:ids])
     assert_equal(1, obs_queries[3].keys.length)
     assert_equal("glendale", obs_queries[4][:user_where])
     assert_equal(1, obs_queries[4].keys.length)
-    assert_equal(burbank.id, obs_queries[5][:location])
+    assert_equal(burbank.id, obs_queries[5][:locations])
     assert_equal(1, obs_queries[5].keys.length)
     assert_equal("california", obs_queries[6][:user_where])
     assert_equal(1, obs_queries[6].keys.length)
@@ -1057,7 +1057,7 @@ class QueryTest < UnitTestCase
     qa[0] = Query.lookup_and_save(desc_model)
     qa[1] = Query.lookup_and_save(desc_model, by_author: rolf.id)
     qa[2] = Query.lookup_and_save(desc_model, by_editor: rolf.id)
-    qa[3] = Query.lookup_and_save(desc_model, by_user: rolf.id)
+    qa[3] = Query.lookup_and_save(desc_model, by_users: rolf.id)
     qa[4] = Query.lookup_and_save(desc_model, ids: [ds1.id, ds2.id])
     assert_equal(5, QueryRecord.count)
 
@@ -1075,7 +1075,7 @@ class QueryTest < UnitTestCase
 
     assert_equal(rolf.id, desc_queries[1][:by_author])
     assert_equal(rolf.id, desc_queries[2][:by_editor])
-    assert_equal(rolf.id, desc_queries[3][:by_user])
+    assert_equal(rolf.id, desc_queries[3][:by_users])
     assert_equal([ds1.id, ds2.id], desc_queries[4][:ids])
 
     # Try coercing them back.
