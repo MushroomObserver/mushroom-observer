@@ -55,24 +55,6 @@ class QueryTest < UnitTestCase
     assert_raises(RuntimeError) { Query.lookup(:Name, misspellings: 123) }
   end
 
-  def test_validate_params_instances_by_user
-    @fungi = names(:fungi)
-
-    # assert_raises(RuntimeError) { Query.lookup(:Image) }
-    assert_raises(RuntimeError) { Query.lookup(:Image, by_user: :bogus) }
-    # Strings are no problem, but this is not a user
-    # assert_raises(RuntimeError) { Query.lookup(:Image, by_user: "foo") }
-    assert_raises(RuntimeError) { Query.lookup(:Image, by_user: @fungi) }
-    assert_equal(rolf.id,
-                 Query.lookup(:Image, by_user: rolf).params[:by_user])
-    assert_equal(rolf.id,
-                 Query.lookup(:Image, by_user: rolf.id).params[:by_user])
-    assert_equal(rolf.id,
-                 Query.lookup(:Image, by_user: rolf.id.to_s).params[:by_user])
-    assert_equal(rolf.login,
-                 Query.lookup(:Image, by_user: "rolf").params[:by_user])
-  end
-
   def test_validate_params_instances_users
     @fungi = names(:fungi)
 

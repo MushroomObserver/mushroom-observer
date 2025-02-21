@@ -98,11 +98,11 @@ class Query::ImagesTest < UnitTestCase
 
   def test_image_by_user
     expects = Image.index_order.where(user_id: rolf.id).distinct
-    assert_query(expects, :Image, by_user: rolf)
+    assert_query(expects, :Image, by_users: rolf)
     expects = Image.index_order.where(user_id: mary.id).distinct
-    assert_query(expects, :Image, by_user: mary)
+    assert_query(expects, :Image, by_users: mary)
     expects = Image.index_order.where(user_id: dick.id).distinct
-    assert_query(expects, :Image, by_user: dick)
+    assert_query(expects, :Image, by_users: dick)
   end
 
   def test_image_in_set
@@ -116,20 +116,20 @@ class Query::ImagesTest < UnitTestCase
     obs = observations(:detailed_unknown_obs)
     assert_equal(2, obs.images.length)
     expects = obs.images.sort_by(&:id)
-    assert_query(expects, :Image,
-                 observation: obs, outer: 1) # (outer is only used by prev/next)
+    assert_query(expects, # (outer is only used by prev/next)
+                 :Image, observation: obs, outer: 1)
     obs = observations(:minimal_unknown_obs)
     assert_equal(0, obs.images.length)
-    assert_query(obs.images, :Image,
-                 observation: obs, outer: 1) # (outer is only used by prev/next)
+    assert_query(obs.images, # (outer is only used by prev/next)
+                 :Image, observation: obs, outer: 1)
   end
 
   def test_image_for_project
     project = projects(:bolete_project)
     expects = Image.index_order.joins(:project_images).
               where(project_images: { project: project }).reorder(id: :asc)
-    assert_query(expects, :Image, project: project, by: :id)
-    assert_query([], :Image, project: projects(:empty_project))
+    assert_query(expects, :Image, projects: project, by: :id)
+    assert_query([], :Image, projects: projects(:empty_project))
   end
 
   def test_image_advanced_search_name

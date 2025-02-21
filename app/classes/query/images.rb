@@ -17,13 +17,11 @@ class Query::Images < Query::Base
       updated_at: [:time],
       date: [:date],
       ids: [Image],
-      by_user: User,
       by_users: [User],
       locations: [Location],
       outer: :query, # for images inside observations
       observation: Observation, # for images inside observations
       observations: [Observation],
-      project: Project,
       projects: [Project],
       species_lists: [SpeciesList],
       with_observation: { boolean: [true] },
