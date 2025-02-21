@@ -23,9 +23,8 @@ class Query::Names < Query::Base
       include_subtaxa: :boolean,
       include_immediate_subtaxa: :boolean,
       exclude_original_names: :boolean,
-      by_user: User,
-      by_editor: User,
       by_users: [User],
+      by_editor: User,
       locations: [Location],
       species_lists: [SpeciesList],
       misspellings: { string: [:no, :either, :only] },
@@ -71,7 +70,6 @@ class Query::Names < Query::Base
   def initialize_names_only_parameters
     add_ids_condition
     add_owner_and_time_stamp_conditions
-    add_by_user_condition
     add_by_editor_condition
     initialize_name_comments_and_notes_parameters
     initialize_name_parameters_for_name_queries

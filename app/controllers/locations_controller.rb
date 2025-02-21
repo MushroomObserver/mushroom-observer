@@ -96,7 +96,7 @@ class LocationsController < ApplicationController
     )
     return unless user
 
-    query = create_query(:Location, by_user: user)
+    query = create_query(:Location, by_users: user)
     [query, { link_all_sorts: true }]
   end
 

@@ -78,8 +78,7 @@ class QueryTest < UnitTestCase
     assert_raises(RuntimeError) { Query.lookup(:Name, ids: "1,2,3") }
     assert_raises(RuntimeError) { Query.lookup(:Name, ids: "Fungi") }
     assert_equal([names(:fungi).id],
-                 Query.lookup(:Name,
-                              ids: names(:fungi).id.to_s).params[:ids])
+                 Query.lookup(:Name, ids: names(:fungi).id.to_s).params[:ids])
 
     # assert_raises(RuntimeError) { Query.lookup(:User) }
     assert_equal([], Query.lookup(:User, ids: []).params[:ids])
@@ -134,8 +133,7 @@ class QueryTest < UnitTestCase
     assert_equal(["foo = bar"],
                  Query.lookup(:Name, where: "foo = bar").params[:where])
     assert_equal(["foo = bar", "id in (1,2,3)"],
-                 Query.lookup(:Name,
-                              where: ["foo = bar", "id in (1,2,3)"]).
+                 Query.lookup(:Name, where: ["foo = bar", "id in (1,2,3)"]).
                  params[:where])
   end
 

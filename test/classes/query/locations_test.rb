@@ -16,8 +16,8 @@ class Query::LocationsTest < UnitTestCase
 
   def test_location_by_user
     assert_query(Location.reorder(id: :asc).where(user: rolf).distinct,
-                 :Location, by_user: rolf, by: :id)
-    assert_query([], :Location, by_user: users(:zero_user))
+                 :Location, by_users: rolf, by: :id)
+    assert_query([], :Location, by_users: users(:zero_user))
   end
 
   def test_location_by_editor

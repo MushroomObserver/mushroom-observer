@@ -24,7 +24,6 @@ class Query::Comments < Query::Base
   def initialize_flavor
     add_sort_order_to_title
     add_owner_and_time_stamp_conditions
-    add_by_user_condition
     add_ids_condition
     add_for_user_condition
     add_for_target_condition

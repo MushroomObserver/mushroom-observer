@@ -68,7 +68,6 @@ class Query::Images < Query::Base
     add_ids_condition
     add_img_inside_observation_conditions
     add_owner_and_time_stamp_conditions
-    add_by_user_condition
     add_date_condition("images.when", params[:date])
     add_join(:observation_images) if params[:with_observation]
     initialize_img_notes_parameters
@@ -86,7 +85,6 @@ class Query::Images < Query::Base
     initialize_observations_parameter
     add_locations_condition(:observations, params[:locations],
                             :observation_images, :observations)
-    add_for_project_condition(:project_images)
     initialize_projects_parameter(:project_images, [:project_images])
     initialize_species_lists_parameter(
       :species_list_observations,

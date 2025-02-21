@@ -47,25 +47,23 @@ class Query::NamesTest < UnitTestCase
   end
 
   def test_name_ids_with_name_ids
-    assert_query(names_set.map(&:id),
-                 :Name, ids: names_set.map(&:id))
+    assert_query(names_set.map(&:id), :Name, ids: names_set.map(&:id))
   end
 
   def test_name_ids_with_name_instances
-    assert_query(names_set.map(&:id),
-                 :Name, ids: names_set)
+    assert_query(names_set.map(&:id), :Name, ids: names_set)
   end
 
   def test_name_by_user
     assert_query(Name.index_order.where(user: mary).with_correct_spelling,
-                 :Name, by_user: mary)
+                 :Name, by_users: mary)
     assert_query(Name.index_order.where(user: mary).with_correct_spelling,
-                 :Name, by_user: "mary")
+                 :Name, by_users: "mary")
     assert_query(Name.index_order.where(user: dick).with_correct_spelling,
-                 :Name, by_user: dick)
+                 :Name, by_users: dick)
     assert_query(Name.index_order.where(user: rolf).with_correct_spelling,
-                 :Name, by_user: rolf)
-    assert_query([], :Name, by_user: users(:zero_user))
+                 :Name, by_users: rolf)
+    assert_query([], :Name, by_users: users(:zero_user))
   end
 
   def test_name_by_editor
@@ -313,10 +311,10 @@ class Query::NamesTest < UnitTestCase
     expects = Name.index_order.joins(:observations).
               where(Observation[:user_id].eq(rolf.id)).distinct
     assert_query(expects, :Name, user: "rolf")
-    assert_query([names(:coprinus_comatus).id], :Name,
-                 content: "second fruiting") # notes
-    assert_query([names(:fungi).id], :Name,
-                 content: '"a little of everything"') # comment
+    assert_query([names(:coprinus_comatus).id],
+                 :Name, content: "second fruiting") # notes
+    assert_query([names(:fungi).id],
+                 :Name, content: '"a little of everything"') # comment
   end
 
   def test_name_need_description
