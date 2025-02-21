@@ -31,7 +31,6 @@ class ObservationsController
 
     # Displays matrix of advanced search results.
     def advanced_search
-      debugger
       query = advanced_search_query
       # Have to check this here because we're not running the query yet.
       raise(:runtime_no_conditions.l) unless query.params.any?
