@@ -397,28 +397,28 @@ class Query::ObservationsTest < UnitTestCase
 
   def test_observation_advanced_search_name
     assert_query([observations(:strobilurus_diminutivus_obs).id],
-                 :Observation, name: "diminutivus")
+                 :Observation, search_name: "diminutivus")
   end
 
   def test_observation_advanced_search_where
     assert_query([observations(:coprinus_comatus_obs).id],
-                 :Observation, user_where: "glendale") # where
+                 :Observation, search_where: "glendale") # where
     expects = Observation.reorder(id: :asc).
               where(location: locations(:burbank)).distinct
-    assert_query(expects, :Observation,
-                 user_where: "burbank", by: :id) # location
+    assert_query(expects,
+                 :Observation, search_where: "burbank", by: :id) # location
   end
 
   def test_observation_advanced_search_user
     expects = Observation.reorder(id: :asc).where(user: rolf.id).distinct
-    assert_query(expects, :Observation, user: "rolf", by: :id)
+    assert_query(expects, :Observation, search_user: "rolf", by: :id)
   end
 
   def test_observation_advanced_search_content
     assert_query(Observation.advanced_search("second fruiting"),
-                 :Observation, content: "second fruiting") # notes
+                 :Observation, search_content: "second fruiting") # notes
     assert_query(Observation.advanced_search("agaricus"),
-                 :Observation, content: "agaricus") # comment
+                 :Observation, search_content: "agaricus") # comment
   end
 
   def test_observation_date

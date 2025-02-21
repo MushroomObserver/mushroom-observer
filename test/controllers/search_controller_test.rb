@@ -11,11 +11,11 @@ class SearchControllerTest < FunctionalTestCase
         :advanced,
         params: {
           search: {
-            name: "Don't know",
-            user: "myself",
+            search_name: "Don't know",
+            search_user: "myself",
             model: model.name.underscore,
-            content: "Long pink stem and small pink cap",
-            user_where: "Eastern Oklahoma"
+            search_content: "Long pink stem and small pink cap",
+            search_where: "Eastern Oklahoma"
           },
           commit: "Search"
         }
@@ -49,7 +49,7 @@ class SearchControllerTest < FunctionalTestCase
     params = {
       search: {
         model: "observation",
-        user: users(:rolf).unique_text_name,
+        search_user: users(:rolf).unique_text_name,
         user_id: users(:rolf).id
       },
       content_filter: {

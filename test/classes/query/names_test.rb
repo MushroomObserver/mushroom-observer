@@ -303,20 +303,20 @@ class Query::NamesTest < UnitTestCase
 
   def test_name_advanced_search
     assert_query([names(:macrocybe_titans).id],
-                 :Name, name: "macrocybe*titans")
+                 :Name, search_name: "macrocybe*titans")
     assert_query([names(:coprinus_comatus).id],
-                 :Name, user_where: "glendale") # where
+                 :Name, search_where: "glendale") # where
     expects = Name.index_order.joins(:observations).
               where(Observation[:location_id].eq(locations(:burbank).id)).
               distinct
-    assert_query(expects, :Name, user_where: "burbank") # location
+    assert_query(expects, :Name, search_where: "burbank") # location
     expects = Name.index_order.joins(:observations).
               where(Observation[:user_id].eq(rolf.id)).distinct
-    assert_query(expects, :Name, user: "rolf")
+    assert_query(expects, :Name, search_user: "rolf")
     assert_query([names(:coprinus_comatus).id], :Name,
-                 content: "second fruiting") # notes
+                 search_content: "second fruiting") # notes
     assert_query([names(:fungi).id], :Name,
-                 content: '"a little of everything"') # comment
+                 search_content: '"a little of everything"') # comment
   end
 
   def test_name_need_description
