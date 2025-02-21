@@ -99,7 +99,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     login
     get(:index,
-        params: { name: name, user_where: location, advanced_search: true })
+        params: { search_name: name, search_where: location,
+                  advanced_search: true })
 
     assert_response(:success)
     assert_results(count: expected_hits.count)
@@ -109,7 +110,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
   def test_index_advanced_search_name_one_hit
     obs = observations(:strobilurus_diminutivus_obs)
     search_string = obs.text_name
-    query = Query.lookup_and_save(:Observation, name: search_string)
+    query = Query.lookup_and_save(:Observation, search_name: search_string)
     assert(query.results.one?,
            "Test needs a string that has exactly one hit")
 
@@ -122,11 +123,12 @@ class ObservationsControllerIndexTest < FunctionalTestCase
   end
 
   def test_index_advanced_search_no_hits
-    query = Query.lookup_and_save(:Observation,
-                                  name: "Don't know",
-                                  user: "myself",
-                                  content: "Long pink stem and small pink cap",
-                                  user_where: "Eastern Oklahoma")
+    query = Query.lookup_and_save(
+      :Observation, search_name: "Don't know",
+                    search_user: "myself",
+                    search_content: "Long pink stem and small pink cap",
+                    search_where: "Eastern Oklahoma"
+    )
 
     login
     get(:index,
@@ -143,8 +145,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index,
         params: {
           advanced_search: true,
-          name: "Fungi",
-          user_where: "String in notes"
+          search_name: "Fungi",
+          search_where: "String in notes"
           # Deliberately omit search_location_notes: 1
         })
 
@@ -165,8 +167,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
       :index,
       params: {
         advanced_search: true,
-        name: "Fungi",
-        user_where: '"String in notes"',
+        search_name: "Fungi",
+        search_where: '"String in notes"',
         search_location_notes: 1
       }
     )
@@ -195,8 +197,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index,
         params: {
           advanced_search: true,
-          name: "Fungi",
-          user_where: "String in notes"
+          search_name: "Fungi",
+          search_where: "String in notes"
           # Deliberately omit search_location_notes: 1
         })
 
@@ -225,8 +227,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index,
         params: {
           advanced_search: true,
-          name: "Fungi",
-          user_where: '"String in notes"',
+          search_name: "Fungi",
+          search_where: '"String in notes"',
           search_location_notes: 1
         })
 

@@ -529,7 +529,7 @@ class Query::NamesTest < UnitTestCase
 
   def test_name_with_observations_at_where
     assert_query([names(:coprinus_comatus).id],
-                 :Name, observation_query: { user_where: "glendale" })
+                 :Name, observation_query: { search_where: "glendale" })
   end
 
   def test_name_with_observations_by_user

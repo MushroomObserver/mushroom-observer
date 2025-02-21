@@ -43,8 +43,7 @@ class Query::Base
   end
 
   def self.takes_parameter?(key)
-    parameter_declarations.key?(key) ||
-      parameter_declarations.key?(:"#{key}?")
+    parameter_declarations.key?(key)
   end
 
   def subquery_parameters

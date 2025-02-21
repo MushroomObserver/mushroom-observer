@@ -367,8 +367,8 @@ class Query::ImagesTest < UnitTestCase
 
   def test_image_with_observations_at_where
     expects = [images(:connected_coprinus_comatus_image).id]
-    assert_image_obs_query(expects, user_where: "glendale")
-    assert_image_obs_query([], user_where: "snazzle")
+    assert_image_obs_query(expects, search_where: "glendale")
+    assert_image_obs_query([], search_where: "snazzle")
   end
 
   def test_image_with_observations_by_user
