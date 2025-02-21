@@ -2,6 +2,33 @@
 
 # Helper methods for turning Query parameters into SQL conditions.
 module Query::Modules::Associations
+  def add_by_user_condition(table = model.table_name)
+    return if params[:by_user].blank?
+
+    user = set_by_user_title
+    where << "#{table}.user_id = '#{user.id}'"
+  end
+
+  def set_by_user_title
+    user = find_cached_parameter_instance(User, :by_user)
+    @title_tag = :query_title_by_user
+    @title_args[:user] = user.legal_name
+    user
+  end
+
+  def add_by_editor_condition(type = model.type_tag)
+    return unless params[:by_editor]
+
+    user = find_cached_parameter_instance(User, :by_editor)
+    @title_tag = :query_title_by_editor
+    @title_args[:user] = user.legal_name
+    @title_args[:type] = type
+    version_table = :"#{type}_versions"
+    add_join(version_table)
+    where << "#{version_table}.user_id = '#{user.id}'"
+    where << "#{type}s.user_id != '#{user.id}'"
+  end
+
   def initialize_herbaria_parameter(
     joins = [:observations, :observation_herbarium_records, :herbarium_records]
   )
@@ -79,7 +106,7 @@ module Query::Modules::Associations
     table = :"observation_#{model.table_name}", joins = [table]
   )
     add_id_condition("#{table}.observation_id", params[:observations],
-                     :set_for_observation_title, *joins)
+                     *joins, title_method: :set_for_observation_title)
   end
 
   # TO BE REMOVED
@@ -102,7 +129,8 @@ module Query::Modules::Associations
   def initialize_projects_parameter(table = :project_observations,
                                     joins = [:observations, table])
     ids = lookup_projects_by_name(params[:projects])
-    add_id_condition("#{table}.project_id", ids, :set_for_project_title, *joins)
+    add_id_condition("#{table}.project_id", ids,
+                     *joins, title_method: :set_for_project_title)
   end
 
   # TO BE REMOVED
@@ -128,6 +156,6 @@ module Query::Modules::Associations
   )
     ids = lookup_species_lists_by_name(params[:species_lists])
     add_id_condition("#{table}.species_list_id", ids,
-                     :set_in_species_list_title, *joins)
+                     *joins, title_method: :set_in_species_list_title)
   end
 end

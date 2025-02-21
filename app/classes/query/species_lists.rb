@@ -11,7 +11,7 @@ class Query::SpeciesLists < Query::Base
       updated_at: [:time],
       date: [:date],
       by_user: User,
-      users: [User],
+      by_users: [User],
       ids: [SpeciesList],
       location: Location,
       locations: [Location],

@@ -18,7 +18,7 @@ class Query::Locations < Query::Base
       ids: [Location],
       by_user: User,
       by_editor: User,
-      users: [User],
+      by_users: [User],
       in_box: { north: :float, south: :float, east: :float, west: :float },
       pattern: :string,
       regexp: :string,

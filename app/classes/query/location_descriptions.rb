@@ -15,7 +15,7 @@ class Query::LocationDescriptions < Query::Base
       by_user: User,
       by_author: User,
       by_editor: User,
-      users: [User],
+      by_users: [User],
       locations: [Location],
       public: :boolean,
       location_query: { subquery: :Location }

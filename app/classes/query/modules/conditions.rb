@@ -6,30 +6,8 @@ module Query::Modules::Conditions
   def add_owner_and_time_stamp_conditions(table = model.table_name)
     add_time_condition("#{table}.created_at", params[:created_at])
     add_time_condition("#{table}.updated_at", params[:updated_at])
-    ids = lookup_users_by_name(params[:users])
-    add_id_condition("#{table}.user_id", ids)
-  end
-
-  def add_by_user_condition(table = model.table_name)
-    return if params[:by_user].blank?
-
-    user = find_cached_parameter_instance(User, :by_user)
-    @title_tag = :query_title_by_user
-    @title_args[:user] = user.legal_name
-    where << "#{table}.user_id = '#{user.id}'"
-  end
-
-  def add_by_editor_condition(type = model.type_tag)
-    return unless params[:by_editor]
-
-    user = find_cached_parameter_instance(User, :by_editor)
-    @title_tag = :query_title_by_editor
-    @title_args[:user] = user.legal_name
-    @title_args[:type] = type
-    version_table = :"#{type}_versions"
-    add_join(version_table)
-    where << "#{version_table}.user_id = '#{user.id}'"
-    where << "#{type}s.user_id != '#{user.id}'"
+    ids = lookup_users_by_name(params[:by_users])
+    add_id_condition("#{table}.user_id", ids, title_method: :set_by_user_title)
   end
 
   def add_pattern_condition
@@ -121,7 +99,7 @@ module Query::Modules::Conditions
     #   :query_title_in_set.t(type: table.singularize.to_sym)
   end
 
-  def add_id_condition(col, ids, title_method = nil, *)
+  def add_id_condition(col, ids, *, title_method: nil)
     return if ids.empty?
 
     if ids.size == 1

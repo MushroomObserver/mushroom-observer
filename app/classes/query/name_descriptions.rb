@@ -15,7 +15,7 @@ class Query::NameDescriptions < Query::Base
       by_user: User,
       by_author: User,
       by_editor: User,
-      users: [User],
+      by_users: [User],
       names: [Name],
       public: :boolean,
       join_desc: { string: [:default, :any] },

@@ -25,7 +25,7 @@ class Query::Names < Query::Base
       exclude_original_names: :boolean,
       by_user: User,
       by_editor: User,
-      users: [User],
+      by_users: [User],
       locations: [Location],
       species_lists: [SpeciesList],
       misspellings: { string: [:no, :either, :only] },

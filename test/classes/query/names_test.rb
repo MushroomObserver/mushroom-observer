@@ -79,33 +79,33 @@ class Query::NamesTest < UnitTestCase
   def test_name_users_login
     # single
     expects = Name.where(user: users(:rolf)).index_order
-    assert_query(expects, :Name, users: users(:rolf).login)
+    assert_query(expects, :Name, by_users: users(:rolf).login)
     # array
     users = [users(:rolf), users(:mary)]
     expects = Name.where(user: users).index_order
-    assert_query(expects, :Name, users: users.map(&:login))
+    assert_query(expects, :Name, by_users: users.map(&:login))
   end
 
   def test_name_users_id
     # single
     users = users(:rolf).id
     expects = Name.where(user: users).index_order
-    assert_query(expects, :Name, users: users)
+    assert_query(expects, :Name, by_users: users)
     # array
     users = [users(:rolf), users(:mary)].map(&:id)
     expects = Name.where(user: users).index_order
-    assert_query(expects, :Name, users: users)
+    assert_query(expects, :Name, by_users: users)
   end
 
   def test_name_users_instance
     # single
     users = users(:rolf)
     expects = Name.where(user: users).index_order
-    assert_query(expects, :Name, users: users)
+    assert_query(expects, :Name, by_users: users)
     # array
     users = [users(:rolf), users(:mary)]
     expects = Name.where(user: users).index_order
-    assert_query(expects, :Name, users: users)
+    assert_query(expects, :Name, by_users: users)
   end
 
   # Takes region strings or ids, but not instances
@@ -454,7 +454,7 @@ class Query::NamesTest < UnitTestCase
   def test_name_with_observations_users
     expects = Name.index_order.with_correct_spelling.joins(:observations).
               where(observations: { user: dick }).distinct
-    assert_query(expects, :Name, observation_query: { users: dick })
+    assert_query(expects, :Name, observation_query: { by_users: dick })
   end
 
   ##### numeric parameters #####

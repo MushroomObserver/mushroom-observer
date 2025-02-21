@@ -76,16 +76,16 @@ class QueryTest < UnitTestCase
   def test_validate_params_instances_users
     @fungi = names(:fungi)
 
-    assert_raises(RuntimeError) { Query.lookup(:Image, users: :bogus) }
-    assert_raises(RuntimeError) { Query.lookup(:Image, users: @fungi) }
+    assert_raises(RuntimeError) { Query.lookup(:Image, by_users: :bogus) }
+    assert_raises(RuntimeError) { Query.lookup(:Image, by_users: @fungi) }
     assert_equal([rolf.id],
-                 Query.lookup(:Image, users: rolf).params[:users])
+                 Query.lookup(:Image, by_users: rolf).params[:by_users])
     assert_equal([rolf.id],
-                 Query.lookup(:Image, users: rolf.id).params[:users])
+                 Query.lookup(:Image, by_users: rolf.id).params[:by_users])
     assert_equal([rolf.id],
-                 Query.lookup(:Image, users: rolf.id.to_s).params[:users])
+                 Query.lookup(:Image, by_users: rolf.id.to_s).params[:by_users])
     assert_equal([rolf.login],
-                 Query.lookup(:Image, users: rolf.login).params[:users])
+                 Query.lookup(:Image, by_users: rolf.login).params[:by_users])
   end
 
   def test_validate_params_ids

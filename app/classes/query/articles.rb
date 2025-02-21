@@ -9,7 +9,7 @@ class Query::Articles < Query::Base
     super.merge(
       created_at: [:time],
       updated_at: [:time],
-      users: [User],
+      by_users: [User],
       ids: [Article],
       title_has: :string,
       body_has: :string

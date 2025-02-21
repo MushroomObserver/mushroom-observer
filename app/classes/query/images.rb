@@ -18,7 +18,7 @@ class Query::Images < Query::Base
       date: [:date],
       ids: [Image],
       by_user: User,
-      users: [User],
+      by_users: [User],
       locations: [Location],
       outer: :query, # for images inside observations
       observation: Observation, # for images inside observations

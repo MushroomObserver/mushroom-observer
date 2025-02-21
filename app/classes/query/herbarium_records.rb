@@ -10,7 +10,7 @@ class Query::HerbariumRecords < Query::Base
       created_at: [:time],
       updated_at: [:time],
       ids: [HerbariumRecord],
-      users: [User],
+      by_users: [User],
       herbaria: [Herbarium],
       herbarium: Herbarium,
       observation: Observation,

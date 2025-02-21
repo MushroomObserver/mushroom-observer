@@ -12,7 +12,7 @@ class Query::Comments < Query::Base
       ids: [Comment],
       by_user: User,
       for_user: User,
-      users: [User],
+      by_users: [User],
       types: [{ string: Comment::ALL_TYPE_TAGS }],
       summary_has: :string,
       content_has: :string,

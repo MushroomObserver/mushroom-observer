@@ -334,7 +334,7 @@ class Query::LocationsTest < UnitTestCase
     assert_query(
       Location.index_order.joins(:observations).
       where(observations: { user: dick }).distinct,
-      :Location, observation_query: { users: dick }
+      :Location, observation_query: { by_users: dick }
     )
   end
 

@@ -288,7 +288,7 @@ class Query::ImagesTest < UnitTestCase
     expects = Image.index_order.joins(:observations).
               where(observations: { user: dick }).distinct
     assert_not_empty(expects, "'expect` is broken; it should not be empty")
-    assert_image_obs_query(expects, users: dick)
+    assert_image_obs_query(expects, by_users: dick)
   end
 
   ##### numeric parameters #####
