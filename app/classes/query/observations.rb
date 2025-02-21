@@ -20,7 +20,6 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
 
       ids: [Observation],
       by_users: [User],
-      by_user: User,
       field_slips: [FieldSlip],
       herbarium_records: [HerbariumRecord],
       project_lists: [Project],
@@ -37,7 +36,6 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
       include_all_name_proposals: :boolean,
       exclude_consensus: :boolean,
       confidence: [:float],
-      location: Location,
       locations: [Location],
       in_box: { north: :float, south: :float, east: :float, west: :float },
       user_where: :string,
@@ -50,9 +48,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
       comments_has: :string,
       with_sequences: { boolean: [true] },
       herbaria: [Herbarium],
-      project: Project,
       projects: [Project],
-      species_list: SpeciesList,
       species_lists: [SpeciesList],
       image_query: { subquery: :Image },
       location_query: { subquery: :Location },
@@ -85,7 +81,6 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
     ids_param = model == Observation ? :ids : :obs_ids
     add_ids_condition("observations", ids_param)
     add_owner_and_time_stamp_conditions("observations")
-    add_by_user_condition("observations")
     initialize_obs_date_parameter(:date)
   end
 
@@ -102,13 +97,10 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
 
   def initialize_association_parameters
     add_locations_condition(:observations, params[:locations])
-    add_at_location_condition
     initialize_herbaria_parameter
     initialize_herbarium_records_parameter
-    add_for_project_condition(:project_observations)
     initialize_projects_parameter(:project_observations)
     initialize_project_lists_parameter
-    add_in_species_list_condition
     initialize_species_lists_parameter
     initialize_field_slips_parameter
   end

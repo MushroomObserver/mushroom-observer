@@ -183,7 +183,7 @@ class SpeciesListsController < ApplicationController
   def init_ivars_for_show
     @canonical_url =
       "#{MO.http_domain}/species_lists/#{@species_list.id}"
-    @query = create_query(:Observation, by: :name, species_list: @species_list)
+    @query = create_query(:Observation, by: :name, species_lists: @species_list)
 
     # See documentation on the 'How to Use' page to understand this feature.
     store_query_in_session(@query) if params[:set_source].present?

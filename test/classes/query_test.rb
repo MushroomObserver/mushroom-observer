@@ -924,13 +924,13 @@ class QueryTest < UnitTestCase
 
     # Several observation queries can be turned into image queries.
     query_a[0] = Query.lookup_and_save(:Observation, by: :id)
-    query_a[1] = Query.lookup_and_save(:Observation, by_user: mary.id)
+    query_a[1] = Query.lookup_and_save(:Observation, by_users: mary.id)
     query_a[2] = Query.lookup_and_save(
       :Observation, species_list: species_lists(:first_species_list).id
     )
     query_a[3] = Query.lookup_and_save(:Observation, ids: three_amigos)
     query_a[4] = Query.lookup_and_save(:Observation, user_where: "glendale")
-    query_a[5] = Query.lookup_and_save(:Observation, location: burbank)
+    query_a[5] = Query.lookup_and_save(:Observation, locations: burbank)
     query_a[6] = Query.lookup_and_save(:Observation, user_where: "california")
     # removed query_a[7] which searched for "somewhere else" in the notes
     # query_a[7] = Query.lookup_and_save(:Observation,
@@ -947,13 +947,13 @@ class QueryTest < UnitTestCase
     # Almost any query on observations should be mappable, i.e. coercable into
     # a query on those observations' locations.
     query_a[0] = Query.lookup_and_save(:Observation, by: :id)
-    query_a[1] = Query.lookup_and_save(:Observation, by_user: mary.id)
+    query_a[1] = Query.lookup_and_save(:Observation, by_users: mary.id)
     query_a[2] = Query.lookup_and_save(
       :Observation, species_list: species_lists(:first_species_list).id
     )
     query_a[3] = Query.lookup_and_save(:Observation, ids: three_amigos)
     query_a[4] = Query.lookup_and_save(:Observation, user_where: "glendale")
-    query_a[5] = Query.lookup_and_save(:Observation, location: burbank)
+    query_a[5] = Query.lookup_and_save(:Observation, locations: burbank)
     query_a[6] = Query.lookup_and_save(:Observation, user_where: "california")
     assert_equal(7, QueryRecord.count)
 
@@ -982,7 +982,7 @@ class QueryTest < UnitTestCase
 
     # Several observation queries can be turned into name queries.
     query_a[0] = Query.lookup_and_save(:Observation, by: :id)
-    query_a[1] = Query.lookup_and_save(:Observation, by_user: mary.id)
+    query_a[1] = Query.lookup_and_save(:Observation, by_users: mary.id)
     query_a[2] = Query.lookup_and_save(
       :Observation, species_list: species_lists(:first_species_list).id
     )
@@ -990,7 +990,7 @@ class QueryTest < UnitTestCase
     # qa[4] = Query.lookup_and_save(:Observation,
     #                             pattern: '"somewhere else"')
     query_a[4] = Query.lookup_and_save(:Observation, user_where: "glendale")
-    query_a[5] = Query.lookup_and_save(:Observation, location: burbank)
+    query_a[5] = Query.lookup_and_save(:Observation, locations: burbank)
     query_a[6] = Query.lookup_and_save(:Observation, user_where: "california")
     assert_equal(7, QueryRecord.count)
 
