@@ -3760,10 +3760,12 @@ class NameTest < UnitTestCase
            "Space should be allowable in Author")
     # Parens can enclose author(s) of basionym
     assert(Name.new(valid_params.merge({ author: "(Benedix) Benedix" })).valid?,
-           "Period should be allowable in Author")
+           "Parens should be allowable in Author")
     # Ampersand can appear when there are multiple authors
     assert(Name.new(valid_params.merge({ author: "Benedix & Woo" })).valid?,
            "Ampersand should be allowable in Author")
+    assert(Name.new(valid_params.merge({ author: "Ben-edix" })).valid?,
+           "Hyphen should be allowable in Author")
     # Commas can separate multiple authors
     assert(Name.new(valid_params.merge({ author: "Benedix, Woo & Zhu" })).
       valid?, "Commas should be allowable in Author")
@@ -3776,9 +3778,9 @@ class NameTest < UnitTestCase
     # Users have added brackets by pasting IF or MB line into the Name form
     # These example are contrived to separately test open  and close brackets
     assert(Name.new(valid_params.merge({ author: "Ben[edix" })).
-      invalid?, "Open Bracket should not be allowable in Author")
+      invalid?, "Open square bracket should not be allowable in Author")
     assert(Name.new(valid_params.merge({ author: "Bene]dix" })).
-      invalid?, "Close Bracket should not be allowable in Author")
+      invalid?, "Close square bracket should not be allowable in Author")
     # Hasn't happened yet; bu waiting for ExcitedDelirium to drop the shoe
     assert(Name.new(valid_params.merge({ author: "Benedix 🤮" })).
       invalid?, "Emoji should not be allowable in Author")
@@ -3809,7 +3811,7 @@ class NameTest < UnitTestCase
     )
     assert(
       Name.new(valid_params.merge({ author: "Benedix [as 'Paradiscena']" })).
-      invalid?, "Bracket at end of author should not be allowable"
+      invalid?, "Square bracket at end of author should not be allowable"
     )
   end
 
