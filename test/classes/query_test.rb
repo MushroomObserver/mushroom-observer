@@ -926,7 +926,7 @@ class QueryTest < UnitTestCase
     query_a[0] = Query.lookup_and_save(:Observation, by: :id)
     query_a[1] = Query.lookup_and_save(:Observation, by_users: mary.id)
     query_a[2] = Query.lookup_and_save(
-      :Observation, species_list: species_lists(:first_species_list).id
+      :Observation, species_lists: species_lists(:first_species_list).id
     )
     query_a[3] = Query.lookup_and_save(:Observation, ids: three_amigos)
     query_a[4] = Query.lookup_and_save(:Observation, user_where: "glendale")
@@ -949,7 +949,7 @@ class QueryTest < UnitTestCase
     query_a[0] = Query.lookup_and_save(:Observation, by: :id)
     query_a[1] = Query.lookup_and_save(:Observation, by_users: mary.id)
     query_a[2] = Query.lookup_and_save(
-      :Observation, species_list: species_lists(:first_species_list).id
+      :Observation, species_lists: species_lists(:first_species_list).id
     )
     query_a[3] = Query.lookup_and_save(:Observation, ids: three_amigos)
     query_a[4] = Query.lookup_and_save(:Observation, user_where: "glendale")
@@ -984,7 +984,7 @@ class QueryTest < UnitTestCase
     query_a[0] = Query.lookup_and_save(:Observation, by: :id)
     query_a[1] = Query.lookup_and_save(:Observation, by_users: mary.id)
     query_a[2] = Query.lookup_and_save(
-      :Observation, species_list: species_lists(:first_species_list).id
+      :Observation, species_lists: species_lists(:first_species_list).id
     )
     query_a[3] = Query.lookup_and_save(:Observation, ids: three_amigos)
     # qa[4] = Query.lookup_and_save(:Observation,

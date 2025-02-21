@@ -565,10 +565,10 @@ class Query::NamesTest < UnitTestCase
     spl = species_lists(:unknown_species_list)
     expects = Name.index_order.with_correct_spelling.
               joins({ observations: :species_list_observations }).
-              where(species_list_observations: { species_list: spl }).uniq
-    assert_query(expects, :Name, observation_query: { species_list: spl })
+              where(species_list_observations: { species_lists: spl }).uniq
+    assert_query(expects, :Name, observation_query: { species_lists: spl })
 
     spl2 = species_lists(:first_species_list)
-    assert_query([], :Name, observation_query: { species_list: spl2 })
+    assert_query([], :Name, observation_query: { species_lists: spl2 })
   end
 end

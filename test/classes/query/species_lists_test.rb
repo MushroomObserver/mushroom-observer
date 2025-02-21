@@ -27,7 +27,7 @@ class Query::SpeciesListsTest < UnitTestCase
               index_order.distinct
     assert_query(expects, :SpeciesList, locations: locations(:burbank))
     assert_query(
-      [], :SpeciesList, location: locations(:unused_location)
+      [], :SpeciesList, locations: locations(:unused_location)
     )
   end
 

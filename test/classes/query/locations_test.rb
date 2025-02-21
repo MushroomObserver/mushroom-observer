@@ -435,10 +435,10 @@ class Query::LocationsTest < UnitTestCase
   def test_location_with_observations_in_species_list
     spl = species_lists(:unknown_species_list).id
     assert_query([locations(:burbank).id],
-                 :Location, observation_query: { species_list: spl,
+                 :Location, observation_query: { species_lists: spl,
                                                  is_collection_location: 1 })
     empty = species_lists(:first_species_list).id
-    assert_query([], :Location, observation_query: { species_list: empty })
+    assert_query([], :Location, observation_query: { species_lists: empty })
   end
 
   def test_location_with_observations_of_children
