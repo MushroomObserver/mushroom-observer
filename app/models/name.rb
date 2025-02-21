@@ -420,16 +420,24 @@ class Name < AbstractModel
     "locked"
   )
 
+  validate  :user_presence
+  validate  :text_name_length
+  validate  :author_length
+  # Use a method because translated error message throws Error
+  # when loading fixtures and/or rails lang:update
+  validate  :author_characters
+  # Use a method because translated error message throws Error
+  # when loading fixtures and/or rails lang:update
+  validate  :author_ending
+  validates :search_name, presence: true
+  validate  :search_name_indistinct
+  validate  :citation_start
   validates :icn_id, numericality: { allow_nil: true,
                                      only_integer: true,
                                      greater_than_or_equal_to: 1 }
-  validate :icn_id_registrable
-  validate :icn_id_unique
-  validate :validate_lifeform
-  validate :check_user, :check_text_name, :check_author
-
-  validate :author_ending
-  validate :citation_start
+  validate  :icn_id_registrable
+  validate  :icn_id_unique
+  validate  :lifeform_known
 
   before_create :inherit_stuff
   after_create :notify_webmaster
@@ -504,57 +512,5 @@ class Name < AbstractModel
     names = description_needed.limit(100).map(&:id)
 
     ::Query.lookup(:Name, ids: names, title: :needed_descriptions_title.l)
-  end
-
-  ##############################################################################
-
-  private
-
-  # prevent assigning ICN registration identifier to unregistrable Name
-  def icn_id_registrable
-    return if icn_id.blank? || registrable?
-
-    errors.add(:base, :name_error_unregistrable.t(
-                        rank: rank.to_s, name: real_search_name
-                      ))
-  end
-
-  # Require icn_id to be unique
-  # Use validation method (rather than :validates_uniqueness_of)
-  # to get correct error message.
-  def icn_id_unique
-    return if icn_id.nil?
-    return if (conflicting_name = other_names_with_same_icn_id.first).blank?
-
-    errors.add(:base, :name_error_icn_id_in_use.t(
-                        number: icn_id, name: conflicting_name.real_search_name
-                      ))
-  end
-
-  def other_names_with_same_icn_id
-    Name.where(icn_id: icn_id).where.not(id: id)
-  end
-
-  def author_ending
-    # Should not end with punctuation
-    # other than quotes, period, close paren, close bracket
-    return unless (
-      punct = %r{[\s!#%&(*+,\-/:;<=>?@\[^_{|}~]+\Z}.match(author)
-    )
-
-    errors.add(:base, :name_error_field_end.t(field: :AUTHOR.t, end: punct))
-  end
-
-  def citation_start
-    # Should not start with punctuation other than:
-    # quotes, period, close paren, close bracket
-    # question mark (used for Textile italics)
-    # underscore (previously used for Textile italics)
-    return unless (
-      start = %r{\A[\s!#%&)*+,\-./:;<=>@\[\]^{|}~]+}.match(citation)
-    )
-
-    errors.add(:base,
-               :name_error_field_start.t(field: :CITATION.t, start: start))
   end
 end
