@@ -25,7 +25,7 @@ class API2::NamesTest < UnitTestCase
   end
 
   def name_samples
-    @name_samples ||= Name.all.sample(12)
+    @name_samples ||= Name.with_correct_spelling.sample(12)
   end
 
   def test_getting_names_ids
