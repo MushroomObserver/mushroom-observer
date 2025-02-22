@@ -56,6 +56,10 @@ class InatImportJobTest < ActiveJob::TestCase
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
     user = users(:rolf)
     inat_import = create_inat_import(inat_response: mock_inat_response)
+    # You can import only your own observations.
+    # So adjust importing user's inat_username to be the Inat login
+    # of the iNat user who made the iNat observation
+    user.update(inat_username: inat_import.inat_username)
 
     # Add objects which are not included in fixtures
     name = Name.create(
@@ -84,21 +88,16 @@ class InatImportJobTest < ActiveJob::TestCase
       end
     end
 
-    assert_equal(before_emails_to_user, QueuedEmail.where(to_user: user).count,
-                 "Should not have sent any emails to importing user")
-    QueuedEmail.queue = false
-
     obs = Observation.last
-    standard_assertions(obs: obs, name: name, loc: loc)
+    standard_assertions(obs: obs, user: user, name: name, loc: loc)
 
+    # This iNat obs has only 1 suggested ID.
+    # The suggester is the person who made the iNat observation.
     proposed_name = obs.namings.first
-    inat_manager = User.find_by(login: "MO Webmaster")
-    assert_equal(inat_manager, proposed_name.user,
-                 "Name should be proposed by #{inat_manager.login}")
     used_references = 2
     assert(
       proposed_name.reasons.key?(used_references),
-      "Proposed Name reason should be #{:naming_reason_label_2.l}" # rubocop:disable Naming/VariableNumber
+      "Proposed consensus Name reason should be #{:naming_reason_label_2.l}" # rubocop:disable Naming/VariableNumber
     )
     proposed_name_notes = proposed_name[:reasons][used_references]
     suggesting_inat_user = JSON.parse(mock_inat_response)["results"].
@@ -115,6 +114,12 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_equal(0, obs.images.length, "Obs should not have images")
     assert_match(/Observation Fields: none/, obs.comments.first.comment,
                  "Missing 'none' for Observation Fields")
+
+    assert_equal(
+      before_emails_to_user, QueuedEmail.where(to_user: user).count,
+      "Should not have sent any emails to importing user for this obs"
+    )
+    QueuedEmail.queue = false
   end
 
   def test_import_job_suggestion_by_mo_user
@@ -873,7 +878,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
   # -------- Standard Test assertions
 
-  def standard_assertions(obs:, name: nil, loc: nil)
+  def standard_assertions(obs:, user: inat_manager, name: nil, loc: nil)
     assert_not_nil(obs.rss_log, "Failed to log Observation")
     assert_equal("mo_inat_import", obs.source)
     assert_equal(loc, obs.location) if loc
@@ -890,12 +895,13 @@ class InatImportJobTest < ActiveJob::TestCase
     if name
       assert_equal(name, obs.name, "Wrong consensus id")
 
-      assert_equal(name, obs.name)
       namings = obs.namings
       naming = namings.find_by(name: name)
       assert(naming.present?, "Missing Naming for MO consensus ID")
-      assert_equal(inat_manager, naming.user,
-                   "Namings should belong to inat_manager")
+      assert_equal(
+        user, naming.user,
+        "Consensus Naming for this MO obs should be by #{user.login}"
+      )
       vote = Vote.find_by(naming: naming, user: naming.user)
       assert(vote.present?, "Naming is missing a Vote")
       assert_equal(Vote::MAXIMUM_VOTE, vote.value,
@@ -903,7 +909,7 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     view = ObservationView.
-           find_by(observation_id: obs.id, user_id: inat_manager.id)
+           find_by(observation_id: obs.id, user_id: user.id)
     assert(view.present?, "Failed to create ObservationView")
 
     assert(obs.comments.any?, "Imported iNat should have >= 1 Comment")
@@ -928,6 +934,14 @@ class InatImportJobTest < ActiveJob::TestCase
         "Initial Commment (#{:inat_data_comment.l}) is missing #{caption}"
       )
     end
+  end
+
+  def assert_naming(obs:, name:, user:)
+    namings = obs.namings
+    naming = namings.find_by(name: name)
+    assert(naming.present?, "Naming for MO consensus ID")
+    assert_equal(user, naming.user,
+                 "Namings should belong to inat_manager")
   end
 
   # -------- Other
