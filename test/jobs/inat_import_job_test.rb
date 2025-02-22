@@ -85,11 +85,10 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     assert_equal(before_emails_to_user, QueuedEmail.where(to_user: user).count,
-                 "Import should not have sent any emails")
+                 "Should not have sent any emails to importing user")
     QueuedEmail.queue = false
 
     obs = Observation.last
-
     standard_assertions(obs: obs, name: name, loc: loc)
 
     proposed_name = obs.namings.first
@@ -914,8 +913,8 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(obs_comments.where(Comment[:summary] =~ /iNat Data/).present?,
            "Missing Initial Commment (#{:inat_data_comment.l})")
     assert_equal(
-      inat_manager, obs_comments.first.user,
-      "Comment user should be webmaster (vs user who imported iNat Obs)"
+      obs.user, obs_comments.first.user,
+      "Comment user should be user who creates the MO Observation"
     )
     inat_data_comment = obs_comments.first.comment
     [
