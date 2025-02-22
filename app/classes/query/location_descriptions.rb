@@ -12,10 +12,9 @@ class Query::LocationDescriptions < Query::Base
       created_at: [:time],
       updated_at: [:time],
       ids: [LocationDescription],
-      by_user: User,
+      by_users: [User],
       by_author: User,
       by_editor: User,
-      users: [User],
       locations: [Location],
       public: :boolean,
       location_query: { subquery: :Location }
@@ -26,7 +25,6 @@ class Query::LocationDescriptions < Query::Base
     add_sort_order_to_title
     add_ids_condition
     add_owner_and_time_stamp_conditions
-    add_by_user_condition
     add_desc_by_author_condition(:location)
     add_desc_by_editor_condition(:location)
     ids = lookup_locations_by_name(params[:locations])

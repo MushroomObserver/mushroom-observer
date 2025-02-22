@@ -14,11 +14,11 @@ class Query::FieldSlipsTest < UnitTestCase
 
   def test_field_slip_by_user
     expects = FieldSlip.index_order.by_user(mary)
-    assert_query(expects, :FieldSlip, by_user: mary)
+    assert_query(expects, :FieldSlip, by_users: mary)
   end
 
   def test_field_slip_for_project
     expects = FieldSlip.index_order.where(project: projects(:eol_project))
-    assert_query(expects, :FieldSlip, project: projects(:eol_project))
+    assert_query(expects, :FieldSlip, projects: projects(:eol_project))
   end
 end

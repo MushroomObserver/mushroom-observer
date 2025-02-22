@@ -51,7 +51,7 @@ class CommentsController < ApplicationController
     )
     return unless user
 
-    query = create_query(:Comment, by_user: user)
+    query = create_query(:Comment, by_users: user)
     [query, {}]
   end
 

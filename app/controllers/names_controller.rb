@@ -100,7 +100,7 @@ class NamesController < ApplicationController
     )
     return unless user
 
-    query = create_query(:Name, by_user: user)
+    query = create_query(:Name, by_users: user)
     [query, {}]
   end
 

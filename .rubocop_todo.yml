@@ -12,13 +12,6 @@ Layout/EmptyLineAfterMagicComment:
   Exclude:
     - 'config/initializers/permissions_policy.rb'
 
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: AllowForAlignment, AllowBeforeTrailingComments, ForceEqualSignAlignment.
-Layout/ExtraSpacing:
-  Exclude:
-    - 'test/classes/api2/images_test.rb'
-
 # Offense count: 10
 # This cop supports safe autocorrection (--autocorrect).
 # Configuration parameters: Max, AllowHeredoc, AllowURI, URISchemes, IgnoreCopDirectives, AllowedPatterns, SplitStrings.
@@ -348,12 +341,14 @@ Metrics/CyclomaticComplexity:
     - 'app/classes/api2/parsers/time_parser.rb'
     - 'app/classes/autocomplete/by_word.rb'
     - 'app/classes/checklist.rb'
+    - 'app/classes/mappable/box.rb'
     - 'app/classes/mappable/collapsible_collection_of_objects.rb'
     - 'app/classes/mappable/map_set.rb'
     - 'app/classes/pattern_search/term.rb'
     - 'app/classes/pattern_search/term/dates.rb'
     - 'app/classes/query/modules/datetime.rb'
     - 'app/classes/query/modules/joining.rb'
+    - 'app/classes/query/modules/serialization.rb'
     - 'app/classes/query/modules/sql.rb'
     - 'app/classes/site_data.rb'
     - 'app/classes/tree.rb'
@@ -449,10 +444,11 @@ Metrics/ModuleLength:
     - 'app/models/language_exporter.rb'
     - 'app/models/name/parse.rb'
 
-# Offense count: 6
+# Offense count: 7
 # Configuration parameters: Max, CountKeywordArgs, MaxOptionalParameters.
 Metrics/ParameterLists:
   Exclude:
+    - 'app/classes/mappable/minimal_location.rb'
     - 'app/models/queued_email/name_change.rb'
     - 'script/mushroom_mapper.rb'
     - 'test/controller_extensions.rb'
@@ -547,7 +543,7 @@ Naming/HeredocDelimiterNaming:
     - 'script/refresh_name_lister_cache'
 
 # Offense count: 27
-# Configuration parameters: NamePrefix, ForbiddenPrefixes, AllowedMethods, MethodDefinitionMacros, UseSorbetSigs.
+# Configuration parameters: NamePrefix, ForbiddenPrefixes, AllowedMethods, MethodDefinitionMacros.
 # NamePrefix: is_, has_, have_
 # ForbiddenPrefixes: is_, has_, have_
 # AllowedMethods: is_a?
@@ -817,12 +813,13 @@ Style/KeywordArgumentsMerging:
   Exclude:
     - 'test/classes/box_test.rb'
 
-# Offense count: 10
+# Offense count: 11
 # This cop supports unsafe autocorrection (--autocorrect-all).
 Style/MapIntoArray:
   Exclude:
     - 'app/extensions/symbol_extensions.rb'
     - 'app/helpers/descriptions_helper.rb'
+    - 'app/helpers/tabs/locations_helper.rb'
     - 'app/helpers/title_and_tabset_helper.rb'
     - 'app/helpers/user_stats_helper.rb'
     - 'app/models/name/spelling.rb'
@@ -890,18 +887,15 @@ Style/RedundantLineContinuation:
   Exclude:
     - 'app/models/user.rb'
 
-# Offense count: 13
+# Offense count: 9
 # This cop supports safe autocorrection (--autocorrect).
 Style/RedundantParentheses:
   Exclude:
-    - 'app/classes/eol_data.rb'
     - 'app/classes/query/modules/joining.rb'
     - 'app/controllers/api2_controller.rb'
     - 'app/controllers/application_controller.rb'
     - 'app/controllers/concerns/descriptions/permissions.rb'
-    - 'app/extensions/extensions.rb'
     - 'app/helpers/title_and_tabset_helper.rb'
-    - 'app/models/location/scopes.rb'
     - 'app/models/name.rb'
     - 'test/controller_extensions.rb'
 

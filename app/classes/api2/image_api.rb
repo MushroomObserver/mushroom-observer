@@ -43,7 +43,7 @@ class API2
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at),
         date: parse_range(:date, :date, help: :when_taken),
-        users: parse_array(:user, :user, help: :uploader),
+        by_users: parse_array(:user, :user, help: :uploader),
         locations: parse_array(:location, :location, as: :id),
         observations: parse_array(:observation, :observation, as: :id),
         projects: parse_array(:project, :project, as: :id),

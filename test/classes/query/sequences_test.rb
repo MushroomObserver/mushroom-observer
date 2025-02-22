@@ -52,7 +52,7 @@ class Query::SequencesTest < UnitTestCase
     assert_query([seq1, seq2],
                  :Sequence, observation_query: { date: %w[2006 2006] })
     assert_query([seq1, seq2],
-                 :Sequence, observation_query: { users: users(:mary) })
+                 :Sequence, observation_query: { by_users: users(:mary) })
     assert_query([seq1, seq2],
                  :Sequence, observation_query: { names: "Fungi" })
     assert_query([seq4],

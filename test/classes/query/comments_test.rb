@@ -14,7 +14,7 @@ class Query::CommentsTest < UnitTestCase
 
   def test_comment_by_user
     expects = Comment.index_order.where(user_id: mary.id).distinct
-    assert_query(expects, :Comment, by_user: mary)
+    assert_query(expects, :Comment, by_users: mary)
   end
 
   def test_comment_for_target

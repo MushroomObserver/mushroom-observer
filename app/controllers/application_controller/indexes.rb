@@ -429,7 +429,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   # arg::    Name of parameter to use.  (default is 'letter')
   #
   #   # In controller:
-  #   query  = create_query(:Name, :user => params[:id].to_s)
+  #   query  = create_query(:Name, :by_users => params[:id].to_s)
   #   query.need_letters('names.display_name')
   #   @pages = paginate_letters(:letter, :page, 50)
   #   @names = query.paginate(@pages)
@@ -455,7 +455,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   # num_per_page::  Number of results per page.  (default is 50)
   #
   #   # In controller:
-  #   query    = create_query(:Name, :user => params[:id].to_s)
+  #   query    = create_query(:Name, :by_users => params[:id].to_s)
   #   @numbers = paginate_numbers(:page, 50)
   #   @names   = query.paginate(@numbers)
   #

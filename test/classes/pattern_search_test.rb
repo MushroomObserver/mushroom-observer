@@ -412,8 +412,9 @@ class PatternSearchTest < UnitTestCase
     )
     I18n.with_locale(:fr) do
       x = PatternSearch::Observation.new("")
-      assert_equal([:users, :parse_list_of_users], x.lookup_param(:user))
-      assert_equal([:users, :parse_list_of_users], x.lookup_param(:utilisateur))
+      assert_equal([:by_users, :parse_list_of_users], x.lookup_param(:user))
+      assert_equal([:by_users, :parse_list_of_users],
+                   x.lookup_param(:utilisateur))
     end
   end
 end

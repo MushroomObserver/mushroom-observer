@@ -275,7 +275,7 @@ class ImagesControllerTest < FunctionalTestCase
     image = Image.find(rolfs_favorite_image_id)
 
     # Create simple index.
-    query = Query.lookup_and_save(:Image, by_user: rolf)
+    query = Query.lookup_and_save(:Image, by_users: rolf)
     ids = query.result_ids
     assert(ids.length > 3)
     rolfs_index = ids.index(rolfs_favorite_image_id)
@@ -483,7 +483,7 @@ class ImagesControllerTest < FunctionalTestCase
     next_image = user.images.reorder(created_at: :asc).first
     obs = image.observations.reorder(created_at: :asc).first
     assert(obs.images.member?(image))
-    query = Query.lookup_and_save(:Image, by_user: user)
+    query = Query.lookup_and_save(:Image, by_users: user)
     q = query.id.alphabetize
     params = { id: image.id, q: q }
 

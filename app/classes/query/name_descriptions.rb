@@ -12,10 +12,9 @@ class Query::NameDescriptions < Query::Base
       created_at: [:time],
       updated_at: [:time],
       ids: [NameDescription],
-      by_user: User,
+      by_users: [User],
       by_author: User,
       by_editor: User,
-      users: [User],
       names: [Name],
       public: :boolean,
       join_desc: { string: [:default, :any] },
@@ -32,7 +31,6 @@ class Query::NameDescriptions < Query::Base
     add_sort_order_to_title
     add_ids_condition
     add_owner_and_time_stamp_conditions
-    add_by_user_condition
     add_desc_by_author_condition(:name)
     add_desc_by_editor_condition(:name)
     ids = lookup_names_by_name(params[:names])

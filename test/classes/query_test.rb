@@ -55,37 +55,19 @@ class QueryTest < UnitTestCase
     assert_raises(RuntimeError) { Query.lookup(:Name, misspellings: 123) }
   end
 
-  def test_validate_params_instances_by_user
-    @fungi = names(:fungi)
-
-    # assert_raises(RuntimeError) { Query.lookup(:Image) }
-    assert_raises(RuntimeError) { Query.lookup(:Image, by_user: :bogus) }
-    # Strings are no problem, but this is not a user
-    # assert_raises(RuntimeError) { Query.lookup(:Image, by_user: "foo") }
-    assert_raises(RuntimeError) { Query.lookup(:Image, by_user: @fungi) }
-    assert_equal(rolf.id,
-                 Query.lookup(:Image, by_user: rolf).params[:by_user])
-    assert_equal(rolf.id,
-                 Query.lookup(:Image, by_user: rolf.id).params[:by_user])
-    assert_equal(rolf.id,
-                 Query.lookup(:Image, by_user: rolf.id.to_s).params[:by_user])
-    assert_equal(rolf.login,
-                 Query.lookup(:Image, by_user: "rolf").params[:by_user])
-  end
-
   def test_validate_params_instances_users
     @fungi = names(:fungi)
 
-    assert_raises(RuntimeError) { Query.lookup(:Image, users: :bogus) }
-    assert_raises(RuntimeError) { Query.lookup(:Image, users: @fungi) }
+    assert_raises(RuntimeError) { Query.lookup(:Image, by_users: :bogus) }
+    assert_raises(RuntimeError) { Query.lookup(:Image, by_users: @fungi) }
     assert_equal([rolf.id],
-                 Query.lookup(:Image, users: rolf).params[:users])
+                 Query.lookup(:Image, by_users: rolf).params[:by_users])
     assert_equal([rolf.id],
-                 Query.lookup(:Image, users: rolf.id).params[:users])
+                 Query.lookup(:Image, by_users: rolf.id).params[:by_users])
     assert_equal([rolf.id],
-                 Query.lookup(:Image, users: rolf.id.to_s).params[:users])
+                 Query.lookup(:Image, by_users: rolf.id.to_s).params[:by_users])
     assert_equal([rolf.login],
-                 Query.lookup(:Image, users: rolf.login).params[:users])
+                 Query.lookup(:Image, by_users: rolf.login).params[:by_users])
   end
 
   def test_validate_params_ids
@@ -96,8 +78,7 @@ class QueryTest < UnitTestCase
     assert_raises(RuntimeError) { Query.lookup(:Name, ids: "1,2,3") }
     assert_raises(RuntimeError) { Query.lookup(:Name, ids: "Fungi") }
     assert_equal([names(:fungi).id],
-                 Query.lookup(:Name,
-                              ids: names(:fungi).id.to_s).params[:ids])
+                 Query.lookup(:Name, ids: names(:fungi).id.to_s).params[:ids])
 
     # assert_raises(RuntimeError) { Query.lookup(:User) }
     assert_equal([], Query.lookup(:User, ids: []).params[:ids])
@@ -152,8 +133,7 @@ class QueryTest < UnitTestCase
     assert_equal(["foo = bar"],
                  Query.lookup(:Name, where: "foo = bar").params[:where])
     assert_equal(["foo = bar", "id in (1,2,3)"],
-                 Query.lookup(:Name,
-                              where: ["foo = bar", "id in (1,2,3)"]).
+                 Query.lookup(:Name, where: ["foo = bar", "id in (1,2,3)"]).
                  params[:where])
   end
 
@@ -944,13 +924,13 @@ class QueryTest < UnitTestCase
 
     # Several observation queries can be turned into image queries.
     query_a[0] = Query.lookup_and_save(:Observation, by: :id)
-    query_a[1] = Query.lookup_and_save(:Observation, by_user: mary.id)
+    query_a[1] = Query.lookup_and_save(:Observation, by_users: mary.id)
     query_a[2] = Query.lookup_and_save(
-      :Observation, species_list: species_lists(:first_species_list).id
+      :Observation, species_lists: species_lists(:first_species_list).id
     )
     query_a[3] = Query.lookup_and_save(:Observation, ids: three_amigos)
     query_a[4] = Query.lookup_and_save(:Observation, search_where: "glendale")
-    query_a[5] = Query.lookup_and_save(:Observation, location: burbank)
+    query_a[5] = Query.lookup_and_save(:Observation, locations: burbank)
     query_a[6] = Query.lookup_and_save(:Observation, search_where: "california")
     # removed query_a[7] which searched for "somewhere else" in the notes
     # query_a[7] = Query.lookup_and_save(:Observation,
@@ -967,13 +947,13 @@ class QueryTest < UnitTestCase
     # Almost any query on observations should be mappable, i.e. coercable into
     # a query on those observations' locations.
     query_a[0] = Query.lookup_and_save(:Observation, by: :id)
-    query_a[1] = Query.lookup_and_save(:Observation, by_user: mary.id)
+    query_a[1] = Query.lookup_and_save(:Observation, by_users: mary.id)
     query_a[2] = Query.lookup_and_save(
-      :Observation, species_list: species_lists(:first_species_list).id
+      :Observation, species_lists: species_lists(:first_species_list).id
     )
     query_a[3] = Query.lookup_and_save(:Observation, ids: three_amigos)
     query_a[4] = Query.lookup_and_save(:Observation, search_where: "glendale")
-    query_a[5] = Query.lookup_and_save(:Observation, location: burbank)
+    query_a[5] = Query.lookup_and_save(:Observation, locations: burbank)
     query_a[6] = Query.lookup_and_save(:Observation, search_where: "california")
     assert_equal(7, QueryRecord.count)
 
@@ -983,14 +963,14 @@ class QueryTest < UnitTestCase
     obs_queries = query_b.map { |que| que.params[:observation_query] }
 
     assert_equal("id", obs_queries[0][:by])
-    assert_equal(mary.id, obs_queries[1][:by_user])
-    assert_equal(species_lists(:first_species_list).id,
-                 obs_queries[2][:species_list])
+    assert_equal([mary.id], obs_queries[1][:by_users])
+    assert_equal([species_lists(:first_species_list).id],
+                 obs_queries[2][:species_lists])
     assert_equal(three_amigos, obs_queries[3][:ids])
     assert_equal(1, obs_queries[3].keys.length)
     assert_equal("glendale", obs_queries[4][:search_where])
     assert_equal(1, obs_queries[4].keys.length)
-    assert_equal(burbank.id, obs_queries[5][:location])
+    assert_equal([burbank.id], obs_queries[5][:locations])
     assert_equal(1, obs_queries[5].keys.length)
     assert_equal("california", obs_queries[6][:search_where])
     assert_equal(1, obs_queries[6].keys.length)
@@ -1002,15 +982,15 @@ class QueryTest < UnitTestCase
 
     # Several observation queries can be turned into name queries.
     query_a[0] = Query.lookup_and_save(:Observation, by: :id)
-    query_a[1] = Query.lookup_and_save(:Observation, by_user: mary.id)
+    query_a[1] = Query.lookup_and_save(:Observation, by_users: mary.id)
     query_a[2] = Query.lookup_and_save(
-      :Observation, species_list: species_lists(:first_species_list).id
+      :Observation, species_lists: species_lists(:first_species_list).id
     )
     query_a[3] = Query.lookup_and_save(:Observation, ids: three_amigos)
     # qa[4] = Query.lookup_and_save(:Observation,
     #                             pattern: '"somewhere else"')
     query_a[4] = Query.lookup_and_save(:Observation, search_where: "glendale")
-    query_a[5] = Query.lookup_and_save(:Observation, location: burbank)
+    query_a[5] = Query.lookup_and_save(:Observation, locations: burbank)
     query_a[6] = Query.lookup_and_save(:Observation, search_where: "california")
     assert_equal(7, QueryRecord.count)
 
@@ -1077,7 +1057,7 @@ class QueryTest < UnitTestCase
     qa[0] = Query.lookup_and_save(desc_model)
     qa[1] = Query.lookup_and_save(desc_model, by_author: rolf.id)
     qa[2] = Query.lookup_and_save(desc_model, by_editor: rolf.id)
-    qa[3] = Query.lookup_and_save(desc_model, by_user: rolf.id)
+    qa[3] = Query.lookup_and_save(desc_model, by_users: rolf.id)
     qa[4] = Query.lookup_and_save(desc_model, ids: [ds1.id, ds2.id])
     assert_equal(5, QueryRecord.count)
 
@@ -1095,7 +1075,7 @@ class QueryTest < UnitTestCase
 
     assert_equal(rolf.id, desc_queries[1][:by_author])
     assert_equal(rolf.id, desc_queries[2][:by_editor])
-    assert_equal(rolf.id, desc_queries[3][:by_user])
+    assert_equal([rolf.id], desc_queries[3][:by_users])
     assert_equal([ds1.id, ds2.id], desc_queries[4][:ids])
 
     # Try coercing them back.
