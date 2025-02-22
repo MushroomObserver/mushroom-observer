@@ -778,9 +778,11 @@ class LocationsControllerTest < FunctionalTestCase
     past_descs_to_go = 0
 
     # Cannot use fixture here -- in these classes
-    # fixtures with location `alibion` break API2Test#test_patching_locations
+    # fixtures with location `albion` break API2Test#test_patching_locations
     herbarium = Herbarium.create(name: "Herbarium to move", location: to_go)
     project = Project.create(title: "Project to move", location: to_go)
+    project_alias = ProjectAlias.create(project:, name: "ALB", target: to_go,
+                                        target_type: "Location")
 
     make_admin("rolf")
     put(:update, params: params)
@@ -794,6 +796,7 @@ class LocationsControllerTest < FunctionalTestCase
                  LocationDescription::Version.count)
     assert_equal(to_stay, herbarium.reload.location)
     assert_equal(to_stay, project.reload.location)
+    assert_equal(to_stay, project_alias.reload.target)
     assert_match(old_notes, to_stay.reload.notes,
                  "Location.notes should include pre-merger notes")
   end
