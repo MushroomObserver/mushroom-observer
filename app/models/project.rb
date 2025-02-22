@@ -93,7 +93,8 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   scope :index_order, -> { order(updated_at: :desc, id: :desc) }
 
   scope :with_members, lambda { |members|
-    joins(:project_members).where(project_members: { user: members })
+    joins(user_group: :user_group_users).
+      merge(UserGroupUser.where(user: members))
   }
 
   scope :show_includes, lambda {

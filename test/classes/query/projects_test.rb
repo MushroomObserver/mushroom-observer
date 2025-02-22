@@ -26,7 +26,10 @@ class Query::ProjectsTest < UnitTestCase
   def test_project_members
     assert_query(Project.index_order.with_members(rolf),
                  :Project, members: [rolf])
-    assert_query([], :Project, members: [])
+    assert_query(Project.index_order.with_members(mary),
+                 :Project, members: [mary])
+    assert_query(Project.index_order.with_members(dick),
+                 :Project, members: [dick])
   end
 
   def test_project_pattern_search
