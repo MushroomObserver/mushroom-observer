@@ -2,11 +2,9 @@
 
 # Helper methods for turning Query parameters into SQL conditions.
 module Query::Modules::Associations
-  def add_by_user_condition(table = model.table_name)
-    return if params[:by_user].blank?
-
-    user = set_by_user_title
-    where << "#{table}.user_id = '#{user.id}'"
+  def initialize_users_parameter(table = model.table_name)
+    ids = lookup_users_by_name(params[:by_users])
+    add_id_condition("#{table}.user_id", ids, title_method: :set_by_user_title)
   end
 
   def set_by_user_title
@@ -14,11 +12,6 @@ module Query::Modules::Associations
     @title_tag = :query_title_by_user
     @title_args[:user] = user.legal_name
     user
-  end
-
-  def initialize_users_parameter(table = model.table_name)
-    ids = lookup_users_by_name(params[:by_users])
-    add_id_condition("#{table}.user_id", ids, title_method: :set_by_user_title)
   end
 
   def add_by_editor_condition(type = model.type_tag)
@@ -47,8 +40,8 @@ module Query::Modules::Associations
                      :observations, :observation_herbarium_records)
   end
 
-  # This adds conditions both by id via lookup, and pattern match.
-  def add_locations_condition(table, vals, *)
+  # This adds conditions both matching location ids, and where strings.
+  def initialize_locations_parameter(table, vals, *)
     return if vals.empty?
 
     loc_col   = "#{table}.location_id"
@@ -64,14 +57,7 @@ module Query::Modules::Associations
     end
     @where << cond
     add_joins(*)
-  end
-
-  # TO BE REMOVED in favor of locations handler
-  def add_at_location_condition(table = model.table_name)
-    return unless params[:location]
-
-    location = set_at_location_title
-    @where << "#{table}.location_id = '#{location.id}'"
+    set_at_location_title if [vals].flatten.size == 1
   end
 
   def set_at_location_title
@@ -114,16 +100,6 @@ module Query::Modules::Associations
                      *joins, title_method: :set_for_observation_title)
   end
 
-  # TO BE REMOVED
-  def add_for_project_condition(table = model.table_name, joins = [table])
-    return if params[:project].blank?
-
-    project = set_for_project_title
-    where << "#{table}.project_id = '#{project.id}'"
-    add_is_collection_location_condition_for_locations
-    add_join(*joins)
-  end
-
   def set_for_project_title
     project = find_cached_parameter_instance(Project, :project)
     @title_tag = :query_title_for_project
@@ -136,17 +112,6 @@ module Query::Modules::Associations
     ids = lookup_projects_by_name(params[:projects])
     add_id_condition("#{table}.project_id", ids,
                      *joins, title_method: :set_for_project_title)
-  end
-
-  # TO BE REMOVED
-  def add_in_species_list_condition(table = :species_list_observations,
-                                    joins = [:observations, table])
-    return if params[:species_list].blank?
-
-    spl = set_in_species_list_title
-    where << "#{table}.species_list_id = '#{spl.id}'"
-    add_is_collection_location_condition_for_locations
-    add_join(*joins)
   end
 
   def set_in_species_list_title

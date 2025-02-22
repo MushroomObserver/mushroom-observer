@@ -50,7 +50,7 @@ class Query::SpeciesLists < Query::Base
   end
 
   def initialize_association_parameters
-    add_locations_condition(:species_lists, params[:locations])
+    initialize_locations_parameter(:species_lists, params[:locations])
     initialize_projects_parameter(:project_species_lists,
                                   [:project_species_lists])
   end
