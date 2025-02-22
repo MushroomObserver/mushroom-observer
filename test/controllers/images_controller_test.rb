@@ -209,13 +209,14 @@ class ImagesControllerTest < FunctionalTestCase
     a_campestris = observations(:agaricus_campestris_obs) # 1 image
     c_comatus =    observations(:coprinus_comatus_obs)    # 1 image
 
+    set = [det_unknown, min_unknown, a_campestris, c_comatus].sort_by(&:id)
     # query 1 (outer)
-    outer = Query.lookup_and_save(
-      :Observation, ids: [det_unknown, min_unknown, a_campestris, c_comatus])
+    outer = Query.lookup_and_save(:Observation, ids: set)
     # query 2 (inner for first obs)
     inner = Query.lookup_and_save(
       :Image, observation_query: outer.params,
-              group: "observation_images.observation_id"
+              group: "observation_images.observation_id",
+              order: "observation_images.observation_id"
     )
 
     # Make sure the outer query is working right first.
@@ -244,12 +245,12 @@ class ImagesControllerTest < FunctionalTestCase
     # care that outer query has changed, inner query remembers where it
     # was when inner query was created.)
     assert(new_inner = inner.next)
-    assert_not_equal(inner, new_inner)
+    assert_equal(inner, new_inner)
     assert_equal(images(:agaricus_campestris_image).id, new_inner.current_id)
     new_inner.save # query 3 (inner for third obs)
     save_query = new_inner
     assert(new_new_inner = new_inner.next)
-    assert_not_equal(new_inner, new_new_inner)
+    assert_equal(new_inner, new_new_inner)
     assert_equal(images(:connected_coprinus_comatus_image).id,
                  new_new_inner.current_id)
     new_new_inner.save # query 4 (inner for fourth obs)
@@ -333,7 +334,7 @@ class ImagesControllerTest < FunctionalTestCase
     # it was when inner query was created.)
     inner.current_id = images(:agaricus_campestris_image).id
     assert(new_inner = inner.prev)
-    assert_not_equal(inner, new_inner)
+    assert_equal(inner, new_inner)
     assert_equal(observations(:detailed_unknown_obs).images.
                  reorder(created_at: :asc).second.id,
                  new_inner.current_id)
