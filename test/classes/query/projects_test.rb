@@ -18,9 +18,18 @@ class Query::ProjectsTest < UnitTestCase
   end
 
   def test_project_in_set
-    assert_query([projects(:eol_project).id], :Project,
-                 ids: [projects(:eol_project).id])
+    assert_query([projects(:eol_project).id],
+                 :Project, ids: [projects(:eol_project).id])
     assert_query([], :Project, ids: [])
+  end
+
+  def test_project_members
+    assert_query(Project.index_order.with_members(rolf),
+                 :Project, members: [rolf])
+    assert_query(Project.index_order.with_members(mary),
+                 :Project, members: [mary])
+    assert_query(Project.index_order.with_members(dick),
+                 :Project, members: [dick])
   end
 
   def test_project_pattern_search

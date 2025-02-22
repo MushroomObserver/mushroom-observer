@@ -22,7 +22,7 @@ module FieldSlipsController::Index
       project = find_or_goto_index(Project, params[:project].to_s)
     )
 
-    query = create_query(:FieldSlip, project:)
+    query = create_query(:FieldSlip, projects: project)
     @project = project
     [query, { always_index: true }]
   end
@@ -31,7 +31,7 @@ module FieldSlipsController::Index
   def by_user
     return unless (user = find_or_goto_index(User, params[:by_user]))
 
-    query = create_query(:FieldSlip, by_user: user)
+    query = create_query(:FieldSlip, by_users: user)
     [query, {}]
   end
 

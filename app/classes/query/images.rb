@@ -17,13 +17,11 @@ class Query::Images < Query::Base
       updated_at: [:time],
       date: [:date],
       ids: [Image],
-      by_user: User,
-      users: [User],
+      by_users: [User],
       locations: [Location],
       outer: :query, # for images inside observations
       observation: Observation, # for images inside observations
       observations: [Observation],
-      project: Project,
       projects: [Project],
       species_lists: [SpeciesList],
       with_observation: { boolean: [true] },
@@ -70,7 +68,6 @@ class Query::Images < Query::Base
     add_ids_condition
     add_img_inside_observation_conditions
     add_owner_and_time_stamp_conditions
-    add_by_user_condition
     add_date_condition("images.when", params[:date])
     add_join(:observation_images) if params[:with_observation]
     initialize_img_notes_parameters
@@ -86,9 +83,8 @@ class Query::Images < Query::Base
 
   def initialize_img_association_parameters
     initialize_observations_parameter
-    add_location_string_condition(:observations, params[:locations],
-                                  :observation_images, :observations)
-    add_for_project_condition(:project_images)
+    initialize_locations_parameter(:observations, params[:locations],
+                                   :observation_images, :observations)
     initialize_projects_parameter(:project_images, [:project_images])
     initialize_species_lists_parameter(
       :species_list_observations,

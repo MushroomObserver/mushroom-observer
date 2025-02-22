@@ -141,7 +141,7 @@ class ObservationsController
     def by_user
       return unless (user = find_or_goto_index(User, params[:by_user]))
 
-      query = create_query(:Observation, by_user: user)
+      query = create_query(:Observation, by_users: user)
       [query, {}]
     end
 
@@ -151,7 +151,7 @@ class ObservationsController
         location = find_or_goto_index(Location, params[:location].to_s)
       )
 
-      query = create_query(:Observation, location: location)
+      query = create_query(:Observation, locations: location)
       [query, {}]
     end
 
@@ -178,7 +178,7 @@ class ObservationsController
         project = find_or_goto_index(Project, params[:project].to_s)
       )
 
-      query = create_query(:Observation, project:)
+      query = create_query(:Observation, projects: project)
       @project = project
       [query, { always_index: true }]
     end
@@ -189,7 +189,7 @@ class ObservationsController
         spl = find_or_goto_index(SpeciesList, params[:species_list].to_s)
       )
 
-      query = create_query(:Observation, species_list: spl)
+      query = create_query(:Observation, species_lists: spl)
       [query, { always_index: true }]
     end
 

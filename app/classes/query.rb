@@ -31,7 +31,7 @@
 #
 #  Get observations created by @user:
 #
-#    query = Query.lookup(:Observation, users: [@user])
+#    query = Query.lookup(:Observation, by_users: [@user])
 #
 #  You may further tweak a query after it's been created:
 #

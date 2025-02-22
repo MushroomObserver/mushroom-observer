@@ -485,7 +485,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login
     get(:index, params: params)
 
-    assert_displayed_title("Matching Observations")
+    assert_displayed_title("Observations from #{location.display_name}")
   end
 
   def test_index_location_without_observations
