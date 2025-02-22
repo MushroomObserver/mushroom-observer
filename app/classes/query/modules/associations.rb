@@ -100,13 +100,6 @@ module Query::Modules::Associations
                      *joins, title_method: :set_for_observation_title)
   end
 
-  def set_for_project_title
-    project = find_cached_parameter_instance(Project, :project)
-    @title_tag = :query_title_for_project
-    @title_args[:project] = project.title
-    project
-  end
-
   def initialize_projects_parameter(table = :project_observations,
                                     joins = [:observations, table])
     ids = lookup_projects_by_name(params[:projects])
@@ -114,11 +107,11 @@ module Query::Modules::Associations
                      *joins, title_method: :set_for_project_title)
   end
 
-  def set_in_species_list_title
-    spl = find_cached_parameter_instance(SpeciesList, :species_list)
-    @title_tag = :query_title_in_species_list
-    @title_args[:species_list] = spl.format_name
-    spl
+  def set_for_project_title
+    project = find_cached_parameter_instance(Project, :project)
+    @title_tag = :query_title_for_project
+    @title_args[:project] = project.title
+    project
   end
 
   def initialize_species_lists_parameter(
@@ -127,5 +120,12 @@ module Query::Modules::Associations
     ids = lookup_species_lists_by_name(params[:species_lists])
     add_id_condition("#{table}.species_list_id", ids,
                      *joins, title_method: :set_in_species_list_title)
+  end
+
+  def set_in_species_list_title
+    spl = find_cached_parameter_instance(SpeciesList, :species_list)
+    @title_tag = :query_title_in_species_list
+    @title_args[:species_list] = spl.format_name
+    spl
   end
 end
