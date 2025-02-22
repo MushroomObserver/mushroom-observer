@@ -180,7 +180,7 @@ group :test, :development do
   #  - Update any extension used here
   #  - Use highest available .codeclimate.yml rubocop channel
   #    https://github.com/codeclimate/codeclimate-rubocop/branches/all?utf8=%E2%9C%93&query=channel%2Frubocop
-  gem("rubocop", require: false)
+  gem("rubocop", "1.71.2", require: false)
   gem("rubocop-performance")
   gem("rubocop-rails")
   gem("rubocop-thread_safety", require: false)
