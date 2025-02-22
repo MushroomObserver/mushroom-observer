@@ -30,7 +30,7 @@ module Observations
 
     def test_map_observations_hidden_gps
       obs = observations(:unknown_with_lat_lng)
-      query = Query.lookup_and_save(:Observation, by_user: mary.id)
+      query = Query.lookup_and_save(:Observation, by_users: mary.id)
       assert(query.result_ids.include?(obs.id))
 
       login("rolf") # a user who does not own obs

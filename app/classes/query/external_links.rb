@@ -10,7 +10,7 @@ class Query::ExternalLinks < Query::Base
       created_at: [:time],
       updated_at: [:time],
       ids: [ExternalLink],
-      users: [User],
+      by_users: [User],
       observations: [Observation],
       external_sites: [ExternalSite],
       url: :string

@@ -16,8 +16,8 @@ class Query::LocationsTest < UnitTestCase
 
   def test_location_by_user
     assert_query(Location.reorder(id: :asc).where(user: rolf).distinct,
-                 :Location, by_user: rolf, by: :id)
-    assert_query([], :Location, by_user: users(:zero_user))
+                 :Location, by_users: rolf, by: :id)
+    assert_query([], :Location, by_users: users(:zero_user))
   end
 
   def test_location_by_editor
@@ -150,9 +150,9 @@ class Query::LocationsTest < UnitTestCase
   def test_location_with_descriptions_by_user
     expects = Location.joins(:descriptions).
               where(descriptions: { user: rolf }).index_order.distinct
-    assert_query(expects, :Location, description_query: { by_user: rolf })
+    assert_query(expects, :Location, description_query: { by_users: rolf })
 
-    assert_query([], :Location, description_query: { by_user: mary })
+    assert_query([], :Location, description_query: { by_users: mary })
   end
 
   def test_location_with_descriptions_by_author
@@ -335,7 +335,7 @@ class Query::LocationsTest < UnitTestCase
     assert_query(
       Location.index_order.joins(:observations).
       where(observations: { user: dick }).distinct,
-      :Location, observation_query: { users: dick }
+      :Location, observation_query: { by_users: dick }
     )
   end
 
@@ -398,12 +398,12 @@ class Query::LocationsTest < UnitTestCase
 
   def test_location_with_observations_by_user
     expects = location_with_observations_by_user(rolf)
-    assert_query(expects, :Location, observation_query: { by_user: rolf.id })
+    assert_query(expects, :Location, observation_query: { by_users: rolf.id })
 
     zero_user = users(:zero_user)
     expects = location_with_observations_by_user(zero_user)
     assert_equal(0, expects.length)
-    assert_query(expects, :Location, observation_query: { by_user: zero_user })
+    assert_query(expects, :Location, observation_query: { by_users: zero_user })
   end
 
   def location_with_observations_by_user(user)
@@ -413,7 +413,7 @@ class Query::LocationsTest < UnitTestCase
 
   def test_location_with_observations_for_project_empty
     empty = projects(:empty_project)
-    assert_query([], :Location, observation_query: { project: empty })
+    assert_query([], :Location, observation_query: { projects: empty })
   end
 
   # NOTE: is_collection_location: true is automatically added by the related
@@ -421,7 +421,7 @@ class Query::LocationsTest < UnitTestCase
   def test_location_with_observations_for_project
     pj = projects(:obs_collected_and_displayed_project)
     assert_query([observations(:collected_at_obs).location],
-                 :Location, observation_query: { project: pj,
+                 :Location, observation_query: { projects: pj,
                                                  is_collection_location: 1 })
   end
 
@@ -436,10 +436,10 @@ class Query::LocationsTest < UnitTestCase
   def test_location_with_observations_in_species_list
     spl = species_lists(:unknown_species_list).id
     assert_query([locations(:burbank).id],
-                 :Location, observation_query: { species_list: spl,
+                 :Location, observation_query: { species_lists: spl,
                                                  is_collection_location: 1 })
     empty = species_lists(:first_species_list).id
-    assert_query([], :Location, observation_query: { species_list: empty })
+    assert_query([], :Location, observation_query: { species_lists: empty })
   end
 
   def test_location_with_observations_of_children

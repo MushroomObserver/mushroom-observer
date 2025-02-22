@@ -35,7 +35,7 @@ class API2
         ids: parse_array(:project, :id, as: :id),
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at),
-        users: parse_array(:user, :user, help: :creator),
+        by_users: parse_array(:user, :user, help: :creator),
         with_images: parse(:boolean, :has_images, limit: true),
         with_observations: parse(:boolean, :has_observations, limit: true),
         with_species_lists: parse(:boolean, :has_species_lists, limit: true),

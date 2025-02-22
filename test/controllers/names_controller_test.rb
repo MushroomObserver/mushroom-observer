@@ -70,7 +70,7 @@ class NamesControllerTest < FunctionalTestCase
 
   def test_index_via_related_query
     user = dick
-    query = Query.lookup_and_save(:Observation, by_user: user)
+    query = Query.lookup_and_save(:Observation, by_users: user)
     new_query = Query.current_or_related_query(:Name, :Observation, query)
     new_query.save # have to save here so we can send it as `q`
     q = new_query.id.alphabetize

@@ -35,7 +35,7 @@ class API2
         ids: parse_array(:location, :id, as: :id),
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at),
-        users: parse_array(:user, :user, help: :first_user),
+        by_users: parse_array(:user, :user, help: :first_user),
         in_box: box
       }
     end

@@ -9,16 +9,16 @@ class Query::FieldSlips < Query::Base
     super.merge(
       created_at: [:time],
       updated_at: [:time],
-      by_user: User,
-      project: Project
+      by_users: [User],
+      projects: [Project]
     )
   end
 
   def initialize_flavor
     add_sort_order_to_title
     add_owner_and_time_stamp_conditions
-    add_by_user_condition
-    add_for_project_condition
+    initialize_projects_parameter(:field_slips, nil)
+
     super
   end
 

@@ -98,11 +98,11 @@ class Query::ImagesTest < UnitTestCase
 
   def test_image_by_user
     expects = Image.index_order.where(user_id: rolf.id).distinct
-    assert_query(expects, :Image, by_user: rolf)
+    assert_query(expects, :Image, by_users: rolf)
     expects = Image.index_order.where(user_id: mary.id).distinct
-    assert_query(expects, :Image, by_user: mary)
+    assert_query(expects, :Image, by_users: mary)
     expects = Image.index_order.where(user_id: dick.id).distinct
-    assert_query(expects, :Image, by_user: dick)
+    assert_query(expects, :Image, by_users: dick)
   end
 
   def test_image_in_set
@@ -126,8 +126,8 @@ class Query::ImagesTest < UnitTestCase
     project = projects(:bolete_project)
     expects = Image.index_order.joins(:project_images).
               where(project_images: { project: project }).reorder(id: :asc)
-    assert_query(expects, :Image, project: project, by: :id)
-    assert_query([], :Image, project: projects(:empty_project))
+    assert_query(expects, :Image, projects: project, by: :id)
+    assert_query([], :Image, projects: projects(:empty_project))
   end
 
   def test_image_advanced_search_name
@@ -286,7 +286,7 @@ class Query::ImagesTest < UnitTestCase
     expects = Image.index_order.joins(:observations).
               where(observations: { user: dick }).distinct
     assert_not_empty(expects, "'expect` is broken; it should not be empty")
-    assert_image_obs_query(expects, users: dick)
+    assert_image_obs_query(expects, by_users: dick)
   end
 
   ##### numeric parameters #####
@@ -359,8 +359,8 @@ class Query::ImagesTest < UnitTestCase
     expects = Image.index_order.joins(observations: :location).
               where(observations: { location: locations(:burbank) }).
               where(observations: { is_collection_location: true }).distinct
-    assert_image_obs_query(expects, location: locations(:burbank).id)
-    assert_image_obs_query([], location: locations(:mitrula_marsh).id)
+    assert_image_obs_query(expects, locations: locations(:burbank).id)
+    assert_image_obs_query([], locations: locations(:mitrula_marsh).id)
   end
 
   def test_image_with_observations_at_where
@@ -371,12 +371,12 @@ class Query::ImagesTest < UnitTestCase
 
   def test_image_with_observations_by_user
     expects = image_with_observations_by_user(rolf).to_a
-    assert_image_obs_query(expects, by_user: rolf)
+    assert_image_obs_query(expects, by_users: rolf)
 
     expects = image_with_observations_by_user(mary).to_a
-    assert_image_obs_query(expects, by_user: mary)
+    assert_image_obs_query(expects, by_users: mary)
 
-    assert_image_obs_query([], by_user: users(:zero_user))
+    assert_image_obs_query([], by_users: users(:zero_user))
   end
 
   def image_with_observations_by_user(user)
@@ -385,9 +385,9 @@ class Query::ImagesTest < UnitTestCase
   end
 
   def test_image_with_observations_for_project
-    assert_image_obs_query([], project: projects(:empty_project))
+    assert_image_obs_query([], projects: projects(:empty_project))
     expects = observations(:two_img_obs).images.index_order.distinct
-    assert_image_obs_query(expects, project: projects(:two_img_obs_project))
+    assert_image_obs_query(expects, projects: projects(:two_img_obs_project))
   end
 
   def test_image_with_observations_in_set
