@@ -49,7 +49,7 @@ class API2
         projects: parse_array(:project, :project, as: :id),
         species_lists: parse_array(:species_list, :species_list, as: :id),
         has_observation: parse(:boolean, :has_observation,
-                                limit: true, help: 1),
+                               limit: true, help: 1),
         size: parse(:enum, :size,
                     limit: Image::ALL_SIZES - [:full_size], help: :min_size),
         content_types: parse_array(:enum, :content_type,

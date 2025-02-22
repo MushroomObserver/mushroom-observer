@@ -43,7 +43,9 @@ class UpdateUserContentFilter
 
       hsh = content_filter # the value is a serialized hash, already parsed here
       hsh[:has_images] = hsh.delete(:with_images) if hsh.key?(:with_images)
-      hsh[:has_specimen] = hsh.delete(:with_specimen) if hsh.key?(:with_specimen)
+      if hsh.key?(:with_specimen)
+        hsh[:has_specimen] = hsh.delete(:with_specimen)
+      end
       entries << { id: user_id, content_filter: hsh }
     end
     entries

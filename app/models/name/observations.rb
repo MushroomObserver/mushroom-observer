@@ -46,7 +46,7 @@ class Name
       @all
     end
 
-    def has_images
+    def has_images # rubocop:disable Naming/PredicateName
       of_taxon_this_name.reject { |obs| obs&.thumb_image_id.nil? }
     end
 
