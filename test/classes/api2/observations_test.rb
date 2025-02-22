@@ -161,8 +161,8 @@ class API2::ObservationsTest < UnitTestCase
     assert_api_results(obses)
   end
 
-  def test_getting_observations_with_images
-    with    = Observation.with_images
+  def test_getting_observations_has_images
+    with    = Observation.has_images
     without = Observation.without_images
     assert(with.length > 1)
     assert(without.length > 1)
@@ -186,7 +186,7 @@ class API2::ObservationsTest < UnitTestCase
     assert_api_results(without)
   end
 
-  def test_getting_observations_with_comments
+  def test_getting_observations_has_comments
     obses = Comment.where(target_type: "Observation").
             map(&:target).uniq.sort_by(&:id)
     assert(obses.length > 1)
@@ -194,8 +194,8 @@ class API2::ObservationsTest < UnitTestCase
     assert_api_results(obses)
   end
 
-  def test_getting_observations_with_specimen
-    with    = Observation.with_specimen
+  def test_getting_observations_has_specimen
+    with    = Observation.has_specimen
     without = Observation.without_specimen
     assert(with.length > 1)
     assert(without.length > 1)
@@ -205,13 +205,13 @@ class API2::ObservationsTest < UnitTestCase
     assert_api_results(without)
   end
 
-  def test_getting_observations_with_notes
+  def test_getting_observations_has_notes
     # no_notes = Observation.no_notes_persisted
     # with = Observation.where("notes != ?", no_notes)
     # without = Observation.where("notes = ?", no_notes)
     # Nimmo note: Observation.no_notes_persisted is just no_notes.to_yaml
     # Observation.no_notes, not the above, works for comparison in Arel here.
-    with = Observation.with_notes
+    with = Observation.has_notes
     without = Observation.without_notes
     assert(with.length > 1)
     assert(without.length > 1)
@@ -495,7 +495,7 @@ class API2::ObservationsTest < UnitTestCase
     assert_objs_equal(locations(:burbank), obs.location)
   end
 
-  def test_post_observation_with_specimen
+  def test_post_observation_has_specimen
     params = {
       method: :post,
       action: :observation,

@@ -218,35 +218,35 @@ class PatternSearch::ObservationTest < UnitTestCase
   end
 
   def test_observation_search_has_images_no
-    expect = Observation.with_images(false)
+    expect = Observation.has_images(false)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_images:no")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_has_images_yes
-    expect = Observation.with_images(true)
+    expect = Observation.has_images(true)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_images:yes")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_has_specimen_no
-    expect = Observation.with_specimen(false)
+    expect = Observation.has_specimen(false)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_specimen:no")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_has_specimen_yes
-    expect = Observation.with_specimen
+    expect = Observation.has_specimen
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_specimen:yes")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_has_sequence
-    expect = Observation.with_sequences
+    expect = Observation.has_sequences
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_sequence:yes")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
@@ -278,35 +278,35 @@ class PatternSearch::ObservationTest < UnitTestCase
   end
 
   def test_observation_search_has_name_no
-    expect = Observation.with_name(false)
+    expect = Observation.has_name(false)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_name:no")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_has_name_yes
-    expect = Observation.with_name
+    expect = Observation.has_name
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_name:yes")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_has_notes_no
-    expect = Observation.with_notes(false)
+    expect = Observation.has_notes(false)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_notes:no")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_has_notes_yes
-    expect = Observation.with_notes
+    expect = Observation.has_notes
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_notes:yes")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_has_comments_yes
-    expect = Observation.with_comments
+    expect = Observation.has_comments
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("has_comments:yes")
     assert_obj_arrays_equal(expect, x.query.results, :sort)

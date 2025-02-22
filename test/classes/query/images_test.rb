@@ -26,11 +26,11 @@ class Query::ImagesTest < UnitTestCase
     assert_query(expects, :Image, content_types: %w[raw])
   end
 
-  def test_image_with_notes
-    expects = Image.index_order.with_notes
-    assert_query(expects, :Image, with_notes: true)
+  def test_image_has_notes
+    expects = Image.index_order.has_notes
+    assert_query(expects, :Image, has_notes: true)
     expects = Image.index_order.without_notes
-    assert_query(expects, :Image, with_notes: false)
+    assert_query(expects, :Image, has_notes: false)
   end
 
   def test_image_notes_has
@@ -50,11 +50,11 @@ class Query::ImagesTest < UnitTestCase
     assert_query(expects, :Image, license: License.preferred)
   end
 
-  def test_image_with_votes
-    expects = Image.index_order.with_votes
-    assert_query(expects, :Image, with_votes: true)
+  def test_image_has_votes
+    expects = Image.index_order.has_votes
+    assert_query(expects, :Image, has_votes: true)
     expects = Image.index_order.without_votes
-    assert_query(expects, :Image, with_votes: false)
+    assert_query(expects, :Image, has_votes: false)
   end
 
   def test_image_quality
@@ -204,10 +204,10 @@ class Query::ImagesTest < UnitTestCase
                  :Image, pattern: "DSCN8835") # original filename
   end
 
-  def test_image_with_observations
+  def test_image_has_observations
     expects = Image.index_order.includes(:observations).
               where.not(observations: { thumb_image: nil }).distinct
-    assert_query(expects, :Image, with_observations: true)
+    assert_query(expects, :Image, has_observations: true)
   end
 
   # Prove that :with_observations param of Image Query works with each
@@ -256,7 +256,7 @@ class Query::ImagesTest < UnitTestCase
     assert_image_obs_query(expects, comments_has: "give")
   end
 
-  def test_image_with_observations_with_notes_fields
+  def test_image_with_observations_has_notes_fields
     obs = observations(:substrate_notes_obs) # obs has notes substrate: field
     # give it some images
     obs.images = [images(:conic_image), images(:convex_image)]
@@ -264,7 +264,7 @@ class Query::ImagesTest < UnitTestCase
     expects = Image.index_order.joins(:observations).
               where(Observation[:notes].matches("%:substrate:%")).uniq
     assert_not_empty(expects, "'expects` is broken; it should not be empty")
-    assert_image_obs_query(expects, with_notes_fields: "substrate")
+    assert_image_obs_query(expects, has_notes_fields: "substrate")
   end
 
   def test_image_with_observations_herbaria
@@ -315,39 +315,39 @@ class Query::ImagesTest < UnitTestCase
 
   ##### boolean parameters #####
 
-  def test_image_with_observations_with_comments
+  def test_image_with_observations_has_comments
     expects = Image.index_order.joins(observations: :comments).distinct
     assert_not_empty(expects, "'expect` is broken; it should not be empty")
-    assert_image_obs_query(expects, with_comments: true)
+    assert_image_obs_query(expects, has_comments: true)
   end
 
-  def test_image_with_observations_with_public_lat_lng
+  def test_image_with_observations_has_public_lat_lng
     give_geolocated_observation_some_images
 
     expects = Image.index_order.joins(:observations).
               where.not(observations: { lat: false }).distinct
     assert_not_empty(expects, "'expect` is broken; it should not be empty")
-    assert_image_obs_query(expects, with_public_lat_lng: true)
+    assert_image_obs_query(expects, has_public_lat_lng: true)
   end
 
-  def test_image_with_observations_with_name
+  def test_image_with_observations_has_name
     expects = Image.index_order.joins(:observations).
               where(observations: { name_id: Name.unknown }).distinct
     assert_not_empty(expects, "'expect` is broken; it should not be empty")
-    assert_image_obs_query(expects, with_name: false)
+    assert_image_obs_query(expects, has_name: false)
   end
 
-  def test_image_with_observations_with_notes
+  def test_image_with_observations_has_notes
     expects = Image.index_order.joins(:observations).
               where.not(observations: { notes: Observation.no_notes }).distinct
     assert_not_empty(expects, "'expect` is broken; it should not be empty")
-    assert_image_obs_query(expects, with_notes: true)
+    assert_image_obs_query(expects, has_notes: true)
   end
 
-  def test_image_with_observations_with_sequences
+  def test_image_with_observations_has_sequences
     expects = Image.index_order.joins(observations: :sequences).distinct
     assert_not_empty(expects, "'expect` is broken; it should not be empty")
-    assert_image_obs_query(expects, with_sequences: true)
+    assert_image_obs_query(expects, has_sequences: true)
   end
 
   def test_image_with_observations_is_collection_location

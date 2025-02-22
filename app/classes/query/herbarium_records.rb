@@ -16,7 +16,7 @@ class Query::HerbariumRecords < Query::Base
       observation: Observation,
       observations: [Observation],
       pattern: :string,
-      with_notes: :boolean,
+      has_notes: :boolean,
       initial_det: [:string],
       accession_number: [:string],
       notes_has: :string,
@@ -56,7 +56,7 @@ class Query::HerbariumRecords < Query::Base
   def initialize_boolean_parameters
     add_boolean_condition("COALESCE(herbarium_records.notes,'') != ''",
                           "COALESCE(herbarium_records.notes,'') = ''",
-                          params[:with_notes])
+                          params[:has_notes])
   end
 
   def initialize_exact_match_parameters

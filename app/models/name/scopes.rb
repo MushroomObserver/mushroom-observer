@@ -55,7 +55,7 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
     scope :not_deprecated,
           -> { where(deprecated: false) }
 
-    scope :with_synonyms, lambda { |bool = true|
+    scope :has_synonyms, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         where.not(synonym_id: nil)
       else
@@ -75,7 +75,7 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
     scope :not_ok_for_export,
           -> { where(ok_for_export: false) }
 
-    scope :with_classification, lambda { |bool = true|
+    scope :has_classification, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         where(Name[:classification].not_blank)
       else
@@ -87,7 +87,7 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
     scope :classification_contains,
           ->(phrase) { search_columns(Name[:classification], phrase) }
 
-    scope :with_author, lambda { |bool = true|
+    scope :has_author, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         where(Name[:author].not_blank)
       else
@@ -99,7 +99,7 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
     scope :author_contains,
           ->(phrase) { search_columns(Name[:author], phrase) }
 
-    scope :with_citation, lambda { |bool = true|
+    scope :has_citation, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         where(Name[:citation].not_blank)
       else
@@ -111,7 +111,7 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
     scope :citation_contains,
           ->(phrase) { search_columns(Name[:citation], phrase) }
 
-    scope :with_notes, lambda { |bool = true|
+    scope :has_notes, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         where(Name[:notes].not_blank)
       else
@@ -230,7 +230,7 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
       )
     }
 
-    scope :with_comments, lambda { |bool = true|
+    scope :has_comments, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         joins(:comments).distinct
       else
@@ -238,7 +238,7 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
       end
     }
     scope :without_comments,
-          -> { where.not(id: Name.with_comments) }
+          -> { where.not(id: Name.has_comments) }
     scope :comments_contain, lambda { |phrase|
       joins(:comments).merge(Comment.search_content(phrase)).distinct
     }

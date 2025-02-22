@@ -49,7 +49,7 @@ class PatternSearch::NameTest < UnitTestCase
     x = PatternSearch::Name.new("has_synonyms:no")
     assert_name_arrays_equal(expect, x.query.results, :sort)
 
-    expect = Name.with_synonyms.with_correct_spelling
+    expect = Name.has_synonyms.with_correct_spelling
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_synonyms:yes")
     assert_name_arrays_equal(expect, x.query.results, :sort)
@@ -102,7 +102,7 @@ class PatternSearch::NameTest < UnitTestCase
     x = PatternSearch::Name.new("has_author:no")
     assert_name_arrays_equal(expect, x.query.results, :sort)
 
-    expect = Name.with_correct_spelling.with_author
+    expect = Name.with_correct_spelling.has_author
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_author:yes")
     assert_name_arrays_equal(expect, x.query.results, :sort)
@@ -114,7 +114,7 @@ class PatternSearch::NameTest < UnitTestCase
     x = PatternSearch::Name.new("has_citation:no")
     assert_name_arrays_equal(expect, x.query.results, :sort)
 
-    expect = Name.with_correct_spelling.with_citation
+    expect = Name.with_correct_spelling.has_citation
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_citation:yes")
     assert_name_arrays_equal(expect, x.query.results, :sort)
@@ -126,7 +126,7 @@ class PatternSearch::NameTest < UnitTestCase
     x = PatternSearch::Name.new("has_classification:no")
     assert_name_arrays_equal(expect, x.query.results, :sort)
 
-    expect = Name.with_correct_spelling.with_classification
+    expect = Name.with_correct_spelling.has_classification
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_classification:yes")
     assert_name_arrays_equal(expect, x.query.results, :sort)
@@ -138,14 +138,14 @@ class PatternSearch::NameTest < UnitTestCase
     x = PatternSearch::Name.new("has_notes:no")
     assert_name_arrays_equal(expect, x.query.results, :sort)
 
-    expect = Name.with_correct_spelling.with_notes
+    expect = Name.with_correct_spelling.has_notes
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_notes:yes")
     assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_has_comments
-    expect = Name.with_correct_spelling.with_comments
+    expect = Name.with_correct_spelling.has_comments
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_comments:yes")
     assert_name_arrays_equal(expect, x.query.results, :sort)

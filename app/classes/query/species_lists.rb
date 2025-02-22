@@ -16,9 +16,9 @@ class Query::SpeciesLists < Query::Base
       search_where: :string,
       projects: [Project],
       title_has: :string,
-      with_notes: :boolean,
+      has_notes: :boolean,
       notes_has: :string,
-      with_comments: { boolean: [true] },
+      has_comments: { boolean: [true] },
       comments_has: :string,
       pattern: :string,
       observation_query: { subquery: :Observation }
@@ -59,9 +59,9 @@ class Query::SpeciesLists < Query::Base
     add_boolean_condition(
       "LENGTH(COALESCE(species_lists.notes,'')) > 0",
       "LENGTH(COALESCE(species_lists.notes,'')) = 0",
-      params[:with_notes]
+      params[:has_notes]
     )
-    add_join(:comments) if params[:with_comments]
+    add_join(:comments) if params[:has_comments]
   end
 
   def initialize_at_where_parameter

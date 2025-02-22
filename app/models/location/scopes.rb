@@ -36,7 +36,7 @@ module Location::Scopes
     scope :name_contains,
           ->(phrase) { search_columns(Location[:name], phrase) }
 
-    scope :with_notes, lambda { |bool = true|
+    scope :has_notes, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         where(Location[:notes].not_blank)
       else
@@ -190,7 +190,7 @@ module Location::Scopes
                 and(Location[:west] <= west).and(Location[:east] >= east)))
       end
     }
-    scope :with_observations,
+    scope :has_observations,
           -> { joins(:observations).distinct }
 
     scope :show_includes, lambda {

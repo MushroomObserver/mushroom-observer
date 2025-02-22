@@ -44,7 +44,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :not_collection_location,
           -> { where(is_collection_location: false) }
 
-    scope :with_images, lambda { |bool = true|
+    scope :has_images, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         where.not(thumb_image: nil)
       else
@@ -54,7 +54,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :without_images,
           -> { where(thumb_image: nil) }
 
-    scope :with_notes, lambda { |bool = true|
+    scope :has_notes, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         where.not(notes: no_notes)
       else
@@ -66,9 +66,9 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :notes_contain,
           ->(phrase) { search_columns(Observation[:notes], phrase) }
 
-    scope :with_notes_field,
+    scope :has_notes_field,
           ->(field) { where(Observation[:notes].matches("%:#{field}:%")) }
-    scope :with_notes_fields, lambda { |fields|
+    scope :has_notes_fields, lambda { |fields|
       return if fields.empty?
 
       fields.map! { |field| notes_field_presence_condition(field) }
@@ -122,7 +122,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :not_lichens,
           -> { where(Observation[:lifeform].does_not_match("% lichen %")) }
 
-    scope :with_name, lambda { |bool = true|
+    scope :has_name, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         where.not(name: Name.unknown)
       else
@@ -440,7 +440,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       joins(:location).where(Location[:box_area].gt(args[:area])).distinct
     }
 
-    scope :with_comments, lambda { |bool = true|
+    scope :has_comments, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         joins(:comments).distinct
       else
@@ -448,12 +448,12 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       end
     }
     scope :without_comments,
-          -> { where.not(id: Observation.with_comments) }
+          -> { where.not(id: Observation.has_comments) }
     scope :comments_contain, lambda { |phrase|
       joins(:comments).merge(Comment.search_content(phrase)).distinct
     }
 
-    scope :with_specimen, lambda { |bool = true|
+    scope :has_specimen, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         where(specimen: true)
       else
@@ -463,7 +463,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :without_specimen,
           -> { where(specimen: false) }
 
-    scope :with_sequences, lambda { |bool = true|
+    scope :has_sequences, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         joins(:sequences).distinct
       else
@@ -472,7 +472,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
     # much faster than `missing(:sequences)` which uses left outer join.
     scope :without_sequences,
-          -> { where.not(id: with_sequences) }
+          -> { where.not(id: has_sequences) }
 
     # For activerecord subqueries, no need to pre-map the primary key (id)
     # but Lookup has to return something. Ids are cheapest.

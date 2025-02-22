@@ -30,25 +30,25 @@ class Query::Names < Query::Base
       misspellings: { string: [:no, :either, :only] },
       deprecated: { string: [:either, :no, :only] },
       is_deprecated: :boolean, # api param
-      with_synonyms: :boolean,
+      has_synonyms: :boolean,
       rank: [{ string: Name.all_ranks }],
       text_name_has: :string,
-      with_author: :boolean,
+      has_author: :boolean,
       author_has: :string,
-      with_citation: :boolean,
+      has_citation: :boolean,
       citation_has: :string,
-      with_classification: :boolean,
+      has_classification: :boolean,
       classification_has: :string,
-      with_notes: :boolean,
+      has_notes: :boolean,
       notes_has: :string,
-      with_comments: { boolean: [true] },
+      has_comments: { boolean: [true] },
       comments_has: :string,
       pattern: :string,
       need_description: :boolean,
-      with_descriptions: :boolean,
-      with_default_desc: :boolean,
+      has_descriptions: :boolean,
+      has_default_desc: :boolean,
       ok_for_export: :boolean,
-      with_observations: { boolean: [true] },
+      has_observations: { boolean: [true] },
       description_query: { subquery: :NameDescription },
       observation_query: { subquery: :Observation }
     ).merge(content_filter_parameter_declarations(Name)).
@@ -57,8 +57,8 @@ class Query::Names < Query::Base
 
   def initialize_flavor
     add_sort_order_to_title
-    initialize_names_with_descriptions
-    initialize_names_with_observations
+    initialize_names_has_descriptions
+    initialize_names_has_observations
     initialize_names_only_parameters
     initialize_taxonomy_parameters
     initialize_name_record_parameters
@@ -75,7 +75,7 @@ class Query::Names < Query::Base
     initialize_name_parameters_for_name_queries
     add_pattern_condition
     add_need_description_condition
-    add_with_default_description_condition
+    add_has_default_description_condition
     add_name_advanced_search_conditions
     initialize_subquery_parameters
     initialize_name_association_parameters
@@ -85,9 +85,9 @@ class Query::Names < Query::Base
     add_boolean_condition(
       "LENGTH(COALESCE(names.notes,'')) > 0",
       "LENGTH(COALESCE(names.notes,'')) = 0",
-      params[:with_notes]
+      params[:has_notes]
     )
-    add_join(:comments) if params[:with_comments]
+    add_join(:comments) if params[:has_comments]
     add_search_condition(
       "names.notes",
       params[:notes_has]
@@ -154,21 +154,21 @@ class Query::Names < Query::Base
   end
 
   def initialize_name_record_parameters
-    initialize_with_synonyms_parameter
-    initialize_with_author_parameter
-    initialize_with_citation_parameter
-    initialize_with_classification_parameter
-    add_join(:observations) if params[:with_observations]
+    initialize_has_synonyms_parameter
+    initialize_has_author_parameter
+    initialize_has_citation_parameter
+    initialize_has_classification_parameter
+    add_join(:observations) if params[:has_observations]
   end
 
-  def initialize_with_synonyms_parameter
+  def initialize_has_synonyms_parameter
     add_boolean_condition(
       "names.synonym_id IS NOT NULL", "names.synonym_id IS NULL",
-      params[:with_synonyms]
+      params[:has_synonyms]
     )
   end
 
-  def initialize_with_author_parameter
+  def initialize_has_author_parameter
     add_boolean_condition(
       "LENGTH(COALESCE(names.author,'')) > 0",
       "LENGTH(COALESCE(names.author,'')) = 0",
@@ -176,19 +176,19 @@ class Query::Names < Query::Base
     )
   end
 
-  def initialize_with_citation_parameter
+  def initialize_has_citation_parameter
     add_boolean_condition(
       "LENGTH(COALESCE(names.citation,'')) > 0",
       "LENGTH(COALESCE(names.citation,'')) = 0",
-      params[:with_citation]
+      params[:has_citation]
     )
   end
 
-  def initialize_with_classification_parameter
+  def initialize_has_classification_parameter
     add_boolean_condition(
       "LENGTH(COALESCE(names.classification,'')) > 0",
       "LENGTH(COALESCE(names.classification,'')) = 0",
-      params[:with_classification]
+      params[:has_classification]
     )
   end
 
@@ -211,14 +211,14 @@ class Query::Names < Query::Base
     add_subquery_condition(:observation_query, :observations)
   end
 
-  def initialize_names_with_descriptions
-    return if params[:with_descriptions].blank?
+  def initialize_names_has_descriptions
+    return if params[:has_descriptions].blank?
 
     add_join(:name_descriptions)
   end
 
-  def initialize_names_with_observations
-    return if params[:with_observations].blank?
+  def initialize_names_has_observations
+    return if params[:has_observations].blank?
 
     add_join(:observations)
   end
@@ -231,11 +231,11 @@ class Query::Names < Query::Base
     @title_tag = :query_title_needs_description.t(type: :name)
   end
 
-  def add_with_default_description_condition
+  def add_has_default_description_condition
     add_boolean_condition(
       "names.description_id IS NOT NULL",
       "names.description_id IS NULL",
-      params[:with_default_desc]
+      params[:has_default_desc]
     )
   end
 
@@ -277,9 +277,9 @@ class Query::Names < Query::Base
 
   def title
     default = super
-    if params[:with_observations] || params[:observation_query]
+    if params[:has_observations] || params[:observation_query]
       with_observations_query_description || default
-    elsif params[:with_descriptions] || params[:description_query]
+    elsif params[:has_descriptions] || params[:description_query]
       :query_title_with_descriptions.t(type: :name) || default
     else
       default

@@ -46,7 +46,7 @@ module Image::Scopes
       end
     }
 
-    scope :with_notes, lambda { |bool = true|
+    scope :has_notes, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         where(Image[:notes].coalesce("").length.gt(0))
       else
@@ -88,7 +88,7 @@ module Image::Scopes
       joins(observations: :name).search_columns(cols, phrase).distinct
     }
 
-    scope :with_votes, lambda { |bool = true|
+    scope :has_votes, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         where(Image[:vote_cache].not_eq(nil))
       else

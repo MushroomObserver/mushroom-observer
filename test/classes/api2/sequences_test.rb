@@ -246,7 +246,7 @@ class API2::SequencesTest < UnitTestCase
 
   def test_getting_sequences_has_images
     ensure_all_obs_have_at_least_one_sequence
-    with    = Observation.with_images
+    with    = Observation.has_images
     without = Observation.without_images
     assert(with.length > 1)
     assert(without.length > 1)
@@ -271,7 +271,7 @@ class API2::SequencesTest < UnitTestCase
 
   def test_getting_sequences_has_specimen
     ensure_all_obs_have_at_least_one_sequence
-    with    = Observation.with_specimen
+    with    = Observation.has_specimen
     without = Observation.without_specimen
     assert(with.length > 1)
     assert(without.length > 1)
@@ -283,7 +283,7 @@ class API2::SequencesTest < UnitTestCase
 
   def test_getting_sequences_has_obs_notes
     ensure_all_obs_have_at_least_one_sequence
-    with = Observation.with_notes
+    with = Observation.has_notes
     without = Observation.without_notes
     assert(with.length > 1)
     assert(without.length > 1)

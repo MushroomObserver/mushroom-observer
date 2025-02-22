@@ -21,7 +21,7 @@ class NamesController < ApplicationController
 
   # ApplicationController uses this to dispatch #index to a private method
   def index_active_params
-    [:advanced_search, :pattern, :with_observations, :with_descriptions,
+    [:advanced_search, :pattern, :has_observations, :has_descriptions,
      :need_description, :by_user, :by_editor, :by, :q, :id].freeze
   end
 
@@ -69,15 +69,15 @@ class NamesController < ApplicationController
   end
 
   # Display list of names that have observations.
-  def with_observations
-    query = create_query(:Name, with_observations: 1)
+  def has_observations
+    query = create_query(:Name, has_observations: 1)
     [query, {}]
   end
 
   # Display list of names with descriptions that have authors.
-  def with_descriptions
-    @with_descriptions = true # signals to add desc info to name list
-    query = create_query(:Name, with_descriptions: 1)
+  def has_descriptions
+    @has_descriptions = true # signals to add desc info to name list
+    query = create_query(:Name, has_descriptions: 1)
     [query, {}]
   end
 

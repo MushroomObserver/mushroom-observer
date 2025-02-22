@@ -93,7 +93,7 @@
 #  found_between(start, end)
 #  of_names(name)
 #  of_names_like(string)
-#  with_name
+#  has_name
 #  without_name
 #  by_user(user)
 #  with_location
@@ -104,18 +104,18 @@
 #  not_in_box(north:, south:, east:, west:) geoloc is outside the box
 #  is_collection_location
 #  not_collection_location
-#  with_images
+#  has_images
 #  without_images
-#  with_notes
+#  has_notes
 #  without_notes
 #  has_notes_field(field)
 #  notes_contain(note)
-#  with_specimen
+#  has_specimen
 #  without_specimen
-#  with_sequences
+#  has_sequences
 #  without_sequences
 #  confidence (min %, max %)
-#  with_comments
+#  has_comments
 #  without_comments
 #  comments_contain(summary)
 #  for_projects(project)
