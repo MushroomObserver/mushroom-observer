@@ -157,7 +157,7 @@ class ObservationsController
 
     # Display matrix of Observations whose "where" matches a string.
     # NOTE: To consolidate flavors in Query, we're passing the possible
-    # `user_where` param from the advanced search form straight through to
+    # `search_where` param from the advanced search form straight through to
     # Query's obs advanced search class, which searches two tables (obs and
     # loc) for the fuzzy match.
     # Here we are passing the front end's `where` to the similar Query

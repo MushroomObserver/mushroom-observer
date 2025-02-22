@@ -75,10 +75,11 @@ class ImagesControllerTest < FunctionalTestCase
   def test_index_advanced_search_multiple_hits
     obs = observations(:fungi_obs)
     assert(obs.images.many?)
-    query = Query.lookup_and_save(:Image,
-                                  name: obs.text_name,
-                                  user: obs.user.name,
-                                  user_where: obs.where)
+    query = Query.lookup_and_save(
+      :Image, search_name: obs.text_name,
+              search_user: obs.user.name,
+              search_where: obs.where
+    )
     assert(query.results.many?)
 
     login
@@ -94,7 +95,7 @@ class ImagesControllerTest < FunctionalTestCase
 
   def test_index_advanced_search_one_hit
     image = images(:connected_coprinus_comatus_image)
-    query = Query.lookup_and_save(:Image, name: "Coprinus comatus")
+    query = Query.lookup_and_save(:Image, search_name: "Coprinus comatus")
     assert(query.results.one?)
 
     login
@@ -106,11 +107,12 @@ class ImagesControllerTest < FunctionalTestCase
   end
 
   def test_index_advanced_search_no_hits
-    query = Query.lookup_and_save(:Image,
-                                  name: "Don't know",
-                                  user: "myself",
-                                  content: "Long pink stem and small pink cap",
-                                  user_where: "Eastern Oklahoma")
+    query = Query.lookup_and_save(
+      :Image, search_name: "Don't know",
+              search_user: "myself",
+              search_content: "Long pink stem and small pink cap",
+              search_where: "Eastern Oklahoma"
+    )
     assert(query.results.count.zero?)
 
     login

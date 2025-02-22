@@ -32,9 +32,9 @@ class Query::SpeciesListsTest < UnitTestCase
   end
 
   def test_species_list_at_where
-    assert_query([], :SpeciesList, user_where: "nowhere")
+    assert_query([], :SpeciesList, search_where: "nowhere")
     assert_query([species_lists(:where_no_mushrooms_list)],
-                 :SpeciesList, user_where: "no mushrooms")
+                 :SpeciesList, search_where: "no mushrooms")
   end
 
   def test_species_list_by_rss_log

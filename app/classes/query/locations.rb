@@ -91,7 +91,7 @@ class Query::Locations < Query::Base
   def add_advanced_search_conditions
     return if advanced_search_params.all? { |key| params[key].blank? }
 
-    add_join(:observations) if params[:content].present?
+    add_join(:observations) if params[:search_content].present?
     initialize_advanced_search
   end
 

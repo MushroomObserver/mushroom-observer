@@ -169,7 +169,7 @@ class Query::Images < Query::Base
   # Perform content search as an observation query, then
   # coerce into images.
   def handle_img_content_search!
-    return false if params[:content].blank?
+    return false if params[:search_content].blank?
 
     self.executor = lambda do |args|
       execute_img_content_search(args)

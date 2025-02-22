@@ -15,7 +15,7 @@ class Query::SpeciesLists < Query::Base
       ids: [SpeciesList],
       location: Location,
       locations: [Location],
-      user_where: :string,
+      search_where: :string,
       project: Project,
       projects: [Project],
       title_has: :string,
@@ -71,9 +71,9 @@ class Query::SpeciesLists < Query::Base
   end
 
   def initialize_at_where_parameter
-    return unless params[:user_where]
+    return unless params[:search_where]
 
-    location_str = params[:user_where]
+    location_str = params[:search_where]
     title_args[:where] = location_str
     where << "species_lists.where LIKE '%#{clean_pattern(location_str)}%'"
   end
@@ -98,7 +98,7 @@ class Query::SpeciesLists < Query::Base
 
   # Only instance methods have access to params.
   def default_order
-    if params[:user_where].present? || params[:location].present?
+    if params[:search_where].present? || params[:location].present?
       "name"
     else
       "title"

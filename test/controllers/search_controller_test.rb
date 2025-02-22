@@ -11,11 +11,11 @@ class SearchControllerTest < FunctionalTestCase
         :advanced,
         params: {
           search: {
-            name: "Don't know",
-            user: "myself",
+            search_name: "Don't know",
+            search_user: "myself",
             model: model.name.underscore,
-            content: "Long pink stem and small pink cap",
-            user_where: "Eastern Oklahoma"
+            search_content: "Long pink stem and small pink cap",
+            search_where: "Eastern Oklahoma"
           },
           commit: "Search"
         }
@@ -49,8 +49,8 @@ class SearchControllerTest < FunctionalTestCase
     params = {
       search: {
         model: "observation",
-        user: users(:rolf).unique_text_name,
-        user_id: users(:rolf).id
+        search_user: users(:rolf).unique_text_name,
+        search_user_id: users(:rolf).id
       },
       content_filter: {
         with_images: "",
@@ -62,6 +62,8 @@ class SearchControllerTest < FunctionalTestCase
     }
     get(:advanced, params: params)
     query = QueryRecord.last.query
+    q = QueryRecord.last.id.alphabetize
+    assert_redirected_to(root_path(advanced_search: 1, q:))
     assert_true(query.num_results.positive?)
     assert_equal("", query.params[:with_images])
     assert_true(query.params[:with_specimen])
