@@ -2,10 +2,21 @@
 
 module Query::Modules::Ordering
   def initialize_order
+    # Let callers explicitly send in an order statement.
+    # This is sanitized but not validated.
+    if params[:order].present?
+      self.order = escape(params[:order])
+      return
+    end
+
+    initialize_by_param
+  end
+
+  # Let queries define custom order spec in "order", but have explicitly
+  # passed-in "by" parameter take precedence. If neither `order` nor `by` is
+  # given, then fall back on the "default_order" finally.
+  def initialize_by_param
     by = params[:by]
-    # Let queries define custom order spec in "order", but have explicitly
-    # passed-in "by" parameter take precedence.  If neither is given, then
-    # fall back on the "default_order" finally.
     return unless by || order.blank?
 
     by ||= default_order

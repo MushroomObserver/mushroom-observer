@@ -18,6 +18,7 @@ module Query::Modules::Initialization
     @executor    = nil
     initialize_title
     initialize_flavor
+    initialize_group
     initialize_order
   end
 
@@ -117,5 +118,12 @@ module Query::Modules::Initialization
                 else
                   []
                 end
+  end
+
+  # params[:group] is sanitized here, but it is not validated.
+  def initialize_group
+    return if params[:group].blank?
+
+    self.group = escape(params[:group])
   end
 end
