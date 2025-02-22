@@ -84,7 +84,7 @@ class Query::Images < Query::Base
   def initialize_img_association_parameters
     initialize_observations_parameter
     initialize_locations_parameter(:observations, params[:locations],
-                            :observation_images, :observations)
+                                   :observation_images, :observations)
     initialize_projects_parameter(:project_images, [:project_images])
     initialize_species_lists_parameter(
       :species_list_observations,
