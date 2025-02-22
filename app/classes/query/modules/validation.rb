@@ -5,7 +5,7 @@ module Query::Modules::Validation
   attr_accessor :params, :params_cache, :subqueries
 
   def validate_params
-    old_params = @params.dup&.compact&.symbolize_keys || {}
+    old_params = @params.dup&.compact&.deep_symbolize_keys || {}
     new_params = {}
     permitted_params = parameter_declarations.slice(*old_params.keys)
     permitted_params.each do |param, param_type|
