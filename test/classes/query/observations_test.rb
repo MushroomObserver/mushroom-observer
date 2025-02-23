@@ -60,9 +60,9 @@ class Query::ObservationsTest < UnitTestCase
   end
 
   def test_observation_has_public_lat_lng
-    assert_query(Observation.index_order.with_public_geolocation(true),
+    assert_query(Observation.index_order.has_public_lat_lng(true),
                  :Observation, has_public_lat_lng: true)
-    assert_query(Observation.index_order.with_public_geolocation(false),
+    assert_query(Observation.index_order.has_public_lat_lng(false),
                  :Observation, has_public_lat_lng: false)
   end
 
@@ -81,11 +81,11 @@ class Query::ObservationsTest < UnitTestCase
   end
 
   def test_observation_notes_has
-    assert_query(Observation.index_order.notes_contain("strange place"),
+    assert_query(Observation.index_order.notes_has("strange place"),
                  :Observation, notes_has: "strange place")
-    assert_query(Observation.index_order.notes_contain("From"),
+    assert_query(Observation.index_order.notes_has("From"),
                  :Observation, notes_has: "From")
-    assert_query(Observation.index_order.notes_contain("Growing"),
+    assert_query(Observation.index_order.notes_has("Growing"),
                  :Observation, notes_has: "Growing")
   end
 
@@ -106,10 +106,10 @@ class Query::ObservationsTest < UnitTestCase
   end
 
   def test_observation_comments_has
-    assert_query(Observation.index_order.comments_contain("comment"),
+    assert_query(Observation.index_order.comments_has("comment"),
                  :Observation, comments_has: "comment")
     assert_query(Observation.index_order.
-                 comments_contain("Agaricus campestris"),
+                 comments_has("Agaricus campestris"),
                  :Observation, comments_has: "Agaricus campestris")
   end
 

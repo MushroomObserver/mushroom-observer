@@ -55,9 +55,9 @@ module Image::Scopes
     }
     scope :has_no_notes,
           -> { where(Image[:notes].coalesce("").length.eq(0)) }
-    scope :notes_contain,
+    scope :notes_has,
           ->(phrase) { search_columns(Image[:notes], phrase) }
-    scope :copyright_holder_contains,
+    scope :copyright_holder_has,
           ->(phrase) { search_columns(Image[:copyright_holder], phrase) }
     scope :with_license,
           ->(license) { where(license: license) }

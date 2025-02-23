@@ -1834,7 +1834,7 @@ class NameTest < UnitTestCase
   def test_ancestors_3
     # Make sure only Ascomycetes through Peltigera have
     # Ascomycota in their classification at first.
-    assert_equal(4, Name.classification_contains("Ascomycota").count)
+    assert_equal(4, Name.classification_has("Ascomycota").count)
 
     kng = names(:fungi)
     phy = names(:ascomycota)
@@ -3422,67 +3422,67 @@ class NameTest < UnitTestCase
   #    Explicit tests of some scopes to improve coverage
   # ----------------------------------------------------
 
-  def test_scope_description_contains
+  def test_scope_description_has
     assert_equal(
       [names(:suillus)],
-      Name.description_contains("by any other name would smell as sweet").to_a
+      Name.description_has("by any other name would smell as sweet").to_a
     )
-    assert_equal(0, Name.description_contains(ARBITRARY_SHA).count)
+    assert_equal(0, Name.description_has(ARBITRARY_SHA).count)
   end
 
-  def test_scope_with_description_in_project
+  def test_scope_has_description_in_project
     assert_includes(
-      Name.with_description_in_project(projects(:bolete_project)),
+      Name.has_description_in_project(projects(:bolete_project)),
       names(:boletus_edulis)
     )
     assert_not_includes(
-      Name.with_description_in_project(projects(:bolete_project)),
+      Name.has_description_in_project(projects(:bolete_project)),
       names(:peltigera)
     )
   end
 
-  def test_scope_with_description_created_by
+  def test_scope_has_description_created_by
     name = names(:coprinus_comatus)
     description = name_descriptions(:draft_coprinus_comatus)
     assert_not_equal(name.user, description.user)
 
     assert_includes(
-      Name.with_description_created_by(description.user),
+      Name.has_description_created_by(description.user),
       name
     )
     assert_not_includes(
-      Name.with_description_created_by(users(:zero_user)),
+      Name.has_description_created_by(users(:zero_user)),
       names(:peltigera)
     )
   end
 
-  def test_scope_with_description_reviewed_by
+  def test_scope_has_description_reviewed_by
     assert_includes(
-      Name.with_description_reviewed_by(users(:rolf)),
+      Name.has_description_reviewed_by(users(:rolf)),
       names(:peltigera)
     )
     assert_not_includes(
-      Name.with_description_reviewed_by(users(:dick)),
+      Name.has_description_reviewed_by(users(:dick)),
       names(:peltigera)
     )
   end
 
-  def test_scope_with_description_of_type
+  def test_scope_has_description_of_type
     assert_includes(
-      Name.with_description_of_type("public"),
+      Name.has_description_of_type("public"),
       names(:peltigera)
     )
     assert_includes(
-      Name.with_description_of_type("user"),
+      Name.has_description_of_type("user"),
       names(:peltigera)
     )
     assert_not_includes(
-      Name.with_description_of_type("foreign"),
+      Name.has_description_of_type("foreign"),
       names(:peltigera)
     )
-    assert_empty(Name.with_description_of_type("spam"))
+    assert_empty(Name.has_description_of_type("spam"))
     assert_kind_of(
-      ActiveRecord::Relation, Name.with_description_of_type("spam")
+      ActiveRecord::Relation, Name.has_description_of_type("spam")
     )
   end
 
@@ -3603,11 +3603,11 @@ class NameTest < UnitTestCase
     assert_not_includes(Name.without_comments, names(:fungi))
   end
 
-  def test_scope_comments_contain
-    assert_includes(Name.comments_contain("do not change"), names(:fungi))
-    assert_empty(Name.comments_contain(ARBITRARY_SHA))
+  def test_scope_comments_has
+    assert_includes(Name.comments_has("do not change"), names(:fungi))
+    assert_empty(Name.comments_has(ARBITRARY_SHA))
     assert_empty(
-      Name.comments_contain(comments(:detailed_unknown_obs_comment).summary)
+      Name.comments_has(comments(:detailed_unknown_obs_comment).summary)
     )
   end
 

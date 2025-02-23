@@ -63,7 +63,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
     scope :has_no_notes,
           -> { where(notes: no_notes) }
-    scope :notes_contain,
+    scope :notes_has,
           ->(phrase) { search_columns(Observation[:notes], phrase) }
 
     scope :has_notes_field,
@@ -87,8 +87,8 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # The "advanced search" scope for "content". Unexpectedly, merge/or is
     # faster than concatting the Obs and Comment columns together.
     scope :advanced_search, lambda { |phrase|
-      comments = Observation.comments_contain(phrase).map(&:id)
-      notes_contain(phrase).distinct.
+      comments = Observation.comments_has(phrase).map(&:id)
+      notes_has(phrase).distinct.
         or(Observation.where(id: comments).distinct)
     }
     # Checks Name[:search_name], which includes the author
@@ -101,14 +101,14 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # More comprehensive search of Observation fields + Name.search_name,
     # (plus comments ?).
     # scope :search_content_and_associations, lambda { |phrase|
-    #   ids = Name.search_name_contains(phrase).
+    #   ids = Name.search_name_has(phrase).
     #         includes(:observations).map(&:observations).flatten.uniq
     #   ids += Observation.search_content_except_notes(phrase).map(&:id)
-    #   ids += Observation.comments_contain(phrase).map(&:id)
+    #   ids += Observation.comments_has(phrase).map(&:id)
     #   where(id: ids).distinct
     # }
     def self.name_search_name_observation_ids(phrase)
-      Name.search_name_contains(phrase).
+      Name.search_name_has(phrase).
         includes(:observations).map(&:observations).flatten.uniq
     end
 
@@ -225,7 +225,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       end
     }
     scope :of_names_like,
-          ->(name) { where(name: Name.text_name_contains(name)) }
+          ->(name) { where(name: Name.text_name_has(name)) }
     scope :in_clade, lambda { |val|
       # parse_name_and_rank defined below
       text_name, rank = parse_name_and_rank(val)
@@ -251,22 +251,22 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
           -> { where.not(location: nil).or(where.not(lat: nil)) }
     scope :unmappable,
           -> { where(location: nil).and(where(lat: nil)) }
-    scope :with_location,
+    scope :has_location,
           -> { where.not(location: nil) }
-    scope :without_location,
+    scope :has_no_location,
           -> { where(location: nil) }
-    scope :with_geolocation,
+    scope :has_geolocation,
           -> { where.not(lat: nil) }
-    scope :without_geolocation,
+    scope :has_no_geolocation,
           -> { where(lat: nil) }
-    scope :with_public_geolocation, lambda { |bool = true|
+    scope :has_public_lat_lng, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         where(gps_hidden: false).where.not(lat: nil)
       else
-        without_public_geolocation
+        has_no_public_lat_lng
       end
     }
-    scope :without_public_geolocation,
+    scope :has_no_public_lat_lng,
           -> { where(gps_hidden: true).or(where(lat: nil)) }
 
     scope :at_locations, lambda { |locations|
@@ -449,7 +449,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
     scope :has_no_comments,
           -> { where.not(id: Observation.has_comments) }
-    scope :comments_contain, lambda { |phrase|
+    scope :comments_has, lambda { |phrase|
       joins(:comments).merge(Comment.search_content(phrase)).distinct
     }
 
@@ -506,7 +506,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       joins(observation_herbarium_records: :herbarium_record).
         where(herbarium_records: { herbarium: h_ids }).distinct
     }
-    scope :herbarium_record_notes_contain, lambda { |phrase|
+    scope :herbarium_record_notes_has, lambda { |phrase|
       joins(:herbarium_records).
         search_columns(HerbariumRecord[:notes], phrase).distinct
     }

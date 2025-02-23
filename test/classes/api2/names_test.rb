@@ -79,7 +79,7 @@ class API2::NamesTest < UnitTestCase
   end
 
   def test_getting_names_name_includes_subtaxa
-    names = Name.with_correct_spelling.classification_contains("Fungi").
+    names = Name.with_correct_spelling.classification_has("Fungi").
             map do |n|
       genus = n.text_name.split.first
       Name.where(Name[:text_name].matches("#{genus} %")) + [n]
@@ -205,9 +205,9 @@ class API2::NamesTest < UnitTestCase
     assert_api_results(names)
   end
 
-  def test_getting_names_with_description
-    with    = Name.with_correct_spelling.with_description
-    without = Name.with_correct_spelling.without_description
+  def test_getting_names_has_description
+    with    = Name.with_correct_spelling.has_description
+    without = Name.with_correct_spelling.has_no_description
     assert_not_empty(with)
     assert_not_empty(without)
     assert_api_pass(params_get(has_description: "yes"))
@@ -216,42 +216,42 @@ class API2::NamesTest < UnitTestCase
     assert_api_results(without)
   end
 
-  def test_getting_names_text_name_contains
-    names = Name.with_correct_spelling.text_name_contains("bunny")
+  def test_getting_names_text_name_has
+    names = Name.with_correct_spelling.text_name_has("bunny")
     assert_not_empty(names)
     assert_api_pass(params_get(text_name_has: "bunny"))
     assert_api_results(names)
   end
 
-  def test_getting_names_author_contains
-    names = Name.with_correct_spelling.author_contains("peck")
+  def test_getting_names_author_has
+    names = Name.with_correct_spelling.author_has("peck")
     assert_not_empty(names)
     assert_api_pass(params_get(author_has: "peck"))
     assert_api_results(names)
   end
 
-  def test_getting_names_citation_contains
-    names = Name.with_correct_spelling.citation_contains("lichenes")
+  def test_getting_names_citation_has
+    names = Name.with_correct_spelling.citation_has("lichenes")
     assert_not_empty(names)
     assert_api_pass(params_get(citation_has: "lichenes"))
     assert_api_results(names)
   end
 
-  def test_getting_names_classification_contains
-    names = Name.with_correct_spelling.classification_contains("lecanorales")
+  def test_getting_names_classification_has
+    names = Name.with_correct_spelling.classification_has("lecanorales")
     assert_not_empty(names)
     assert_api_pass(params_get(classification_has: "lecanorales"))
     assert_api_results(names)
   end
 
-  def test_getting_names_notes_contain
-    names = Name.with_correct_spelling.notes_contain("known")
+  def test_getting_names_notes_has
+    names = Name.with_correct_spelling.notes_has("known")
     assert_not_empty(names)
     assert_api_pass(params_get(notes_has: "known"))
     assert_api_results(names)
   end
 
-  def test_getting_names_comment_contains
+  def test_getting_names_comment_has
     names = Comment.where(
       Comment[:target_type].eq("name").and(Comment[:comment].matches("%mess%"))
     ).map(&:target).uniq.sort_by(&:id).reject(&:correct_spelling_id)

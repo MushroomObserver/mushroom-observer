@@ -1494,16 +1494,16 @@ class ObservationTest < UnitTestCase
                         observations(:minimal_unknown_obs))
   end
 
-  def test_scope_herbarium_record_notes_contain
+  def test_scope_herbarium_record_notes_has
     obss_with_hr_notes =
-      Observation.herbarium_record_notes_contain("cleaned & dried at 115°")
+      Observation.herbarium_record_notes_has("cleaned & dried at 115°")
     assert_includes(obss_with_hr_notes,
                     observations(:minimal_unknown_obs))
     assert_includes(obss_with_hr_notes,
                     observations(:detailed_unknown_obs))
     assert_not_includes(obss_with_hr_notes,
                         observations(:imageless_unvouchered_obs))
-    assert_empty(Observation.herbarium_record_notes_contain("ARBITRARY_SHA"))
+    assert_empty(Observation.herbarium_record_notes_has("ARBITRARY_SHA"))
   end
 
   def test_source_credit

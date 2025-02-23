@@ -152,7 +152,7 @@ class PatternSearch::NameTest < UnitTestCase
   end
 
   def test_name_search_has_description
-    expect = Name.with_correct_spelling.reorder(id: :asc).with_description
+    expect = Name.with_correct_spelling.reorder(id: :asc).has_description
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_description:yes")
     assert_name_arrays_equal(expect, x.query.results, :sort)
@@ -164,28 +164,28 @@ class PatternSearch::NameTest < UnitTestCase
   end
 
   def test_name_search_author
-    expect = Name.with_correct_spelling.author_contains("Vittad")
+    expect = Name.with_correct_spelling.author_has("Vittad")
     assert_not_empty(expect)
     x = PatternSearch::Name.new("author:vittad")
     assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_citation
-    expect = Name.with_correct_spelling.citation_contains("lichenes")
+    expect = Name.with_correct_spelling.citation_has("lichenes")
     assert_not_empty(expect)
     x = PatternSearch::Name.new("citation:lichenes")
     assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_classification
-    expect = Name.with_correct_spelling.classification_contains("ascomycota")
+    expect = Name.with_correct_spelling.classification_has("ascomycota")
     assert_not_empty(expect)
     x = PatternSearch::Name.new("classification:Ascomycota")
     assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_notes
-    expect = Name.with_correct_spelling.notes_contain("lichen")
+    expect = Name.with_correct_spelling.notes_has("lichen")
     assert_not_empty(expect)
     x = PatternSearch::Name.new("notes:lichen")
     assert_name_arrays_equal(expect, x.query.results, :sort)

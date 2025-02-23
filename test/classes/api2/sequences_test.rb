@@ -295,7 +295,7 @@ class API2::SequencesTest < UnitTestCase
 
   def test_getting_sequences_has_notes_field
     ensure_all_obs_have_at_least_one_sequence
-    obses = Observation.notes_contain(":substrate:").
+    obses = Observation.notes_has(":substrate:").
             reject { |o| o.notes[:substrate].blank? }
     assert(obses.length > 1)
     assert_api_pass(params_get(has_notes_field: "substrate"))
@@ -304,7 +304,7 @@ class API2::SequencesTest < UnitTestCase
 
   def test_getting_sequences_obs_notes_has
     ensure_all_obs_have_at_least_one_sequence
-    obses = Observation.notes_contain("orphan")
+    obses = Observation.notes_has("orphan")
     assert(obses.length > 1)
     assert_api_pass(params_get(obs_notes_has: "orphan"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))

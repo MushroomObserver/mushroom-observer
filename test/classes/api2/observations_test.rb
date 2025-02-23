@@ -221,20 +221,20 @@ class API2::ObservationsTest < UnitTestCase
     assert_api_results(without)
   end
 
-  def test_getting_observations_notes_contain
-    obses = Observation.notes_contain(":substrate:").
+  def test_getting_observations_notes_has
+    obses = Observation.notes_has(":substrate:").
             reject { |o| o.notes[:substrate].blank? }
     assert(obses.length > 1)
     assert_api_pass(params_get(has_notes_field: "substrate"))
     assert_api_results(obses)
 
-    obses = Observation.notes_contain("orphan")
+    obses = Observation.notes_has("orphan")
     assert(obses.length > 1)
     assert_api_pass(params_get(notes_has: "orphan"))
     assert_api_results(obses)
   end
 
-  def test_getting_observations_comments_contain
+  def test_getting_observations_comments_has
     obses = Comment.where(
       Comment[:summary].concat(Comment[:comment]).matches("%let's%")
     ).map(&:target).uniq.sort_by(&:id)

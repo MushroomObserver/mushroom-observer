@@ -168,14 +168,14 @@ class PatternSearch::ObservationTest < UnitTestCase
   end
 
   def test_observation_search_notes
-    expect = Observation.notes_contain("somewhere else")
+    expect = Observation.notes_has("somewhere else")
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new('notes:"somewhere else"')
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_comments
-    expect = Observation.comments_contain("complicated")
+    expect = Observation.comments_has("complicated")
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("comments:complicated")
     assert_obj_arrays_equal(expect, x.query.results, :sort)

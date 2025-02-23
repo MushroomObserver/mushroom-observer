@@ -189,7 +189,7 @@ class Query::NamesTest < UnitTestCase
 
   def test_name_text_name_has
     expects = Name.with_correct_spelling.
-              text_name_contains("Agaricus").index_order
+              text_name_has("Agaricus").index_order
     assert_query(expects, :Name, text_name_has: "Agaricus")
   end
 
@@ -201,7 +201,7 @@ class Query::NamesTest < UnitTestCase
   end
 
   def test_name_author_has
-    expects = Name.with_correct_spelling.author_contains("Pers.").index_order
+    expects = Name.with_correct_spelling.author_has("Pers.").index_order
     assert_query(expects, :Name, author_has: "Pers.")
   end
 
@@ -214,7 +214,7 @@ class Query::NamesTest < UnitTestCase
 
   def test_name_citation_has
     expects = Name.with_correct_spelling.
-              citation_contains("Lichenes").index_order
+              citation_has("Lichenes").index_order
     assert_query(expects, :Name, citation_has: "Lichenes")
   end
 
@@ -227,7 +227,7 @@ class Query::NamesTest < UnitTestCase
 
   def test_name_classification_has
     expects = Name.with_correct_spelling.
-              classification_contains("Tremellales").index_order
+              classification_has("Tremellales").index_order
     assert_query(expects, :Name, classification_has: "Tremellales")
   end
 
@@ -240,7 +240,7 @@ class Query::NamesTest < UnitTestCase
 
   def test_name_notes_has
     expects = Name.with_correct_spelling.
-              notes_contain('"at least one"').index_order
+              notes_has('"at least one"').index_order
     assert_query(expects, :Name, notes_has: '"at least one"')
   end
 
@@ -257,7 +257,7 @@ class Query::NamesTest < UnitTestCase
 
   def test_name_comments_has
     expects = Name.with_correct_spelling.
-              comments_contain('"messes things up"').index_order
+              comments_has('"messes things up"').index_order
     assert_query(expects, :Name, comments_has: '"messes things up"')
   end
 

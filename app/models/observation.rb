@@ -96,7 +96,7 @@
 #  has_name
 #  has_no_name
 #  by_user(user)
-#  with_location
+#  has_location
 #  has_no_location
 #  at_locations(location)
 #  in_region(where)
@@ -109,7 +109,7 @@
 #  has_notes
 #  has_no_notes
 #  has_notes_field(field)
-#  notes_contain(note)
+#  notes_has(note)
 #  has_specimen
 #  has_no_specimen
 #  has_sequences
@@ -117,10 +117,10 @@
 #  confidence (min %, max %)
 #  has_comments
 #  has_no_comments
-#  comments_contain(summary)
+#  comments_has(summary)
 #  for_projects(project)
 #  in_herbaria(herbaria)
-#  herbarium_record_notes_contain(notes)
+#  herbarium_record_notes_has(notes)
 #  on_species_lists(species_list)
 #  on_projects_species_lists(project)
 #

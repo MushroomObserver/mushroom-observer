@@ -172,7 +172,7 @@ class Query::Names < Query::Base
     add_boolean_condition(
       "LENGTH(COALESCE(names.author,'')) > 0",
       "LENGTH(COALESCE(names.author,'')) = 0",
-      params[:with_author]
+      params[:has_author]
     )
   end
 

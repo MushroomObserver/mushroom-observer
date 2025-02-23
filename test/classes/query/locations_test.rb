@@ -55,10 +55,10 @@ class Query::LocationsTest < UnitTestCase
   end
 
   def test_location_notes_has
-    expects = Location.index_order.notes_contain('"should persist"')
+    expects = Location.index_order.notes_has('"should persist"')
     assert_query(expects, :Location, notes_has: '"should persist"')
     expects = Location.index_order.
-              notes_contain('"legal to collect" -"Salt Point"')
+              notes_has('"legal to collect" -"Salt Point"')
     assert_query(expects,
                  :Location, notes_has: '"legal to collect" -"Salt Point"')
   end

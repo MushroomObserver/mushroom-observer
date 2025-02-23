@@ -34,9 +34,9 @@ class Query::ImagesTest < UnitTestCase
   end
 
   def test_image_notes_has
-    expects = Image.index_order.notes_contain('"looked like"')
+    expects = Image.index_order.notes_has('"looked like"')
     assert_query(expects, :Image, notes_has: '"looked like"')
-    expects = Image.index_order.notes_contain("illustration -convex")
+    expects = Image.index_order.notes_has("illustration -convex")
     assert_query(expects, :Image, notes_has: "illustration -convex")
   end
 
