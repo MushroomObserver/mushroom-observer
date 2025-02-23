@@ -72,15 +72,11 @@ module Query::Modules::Associations
     where << "observations.is_collection_location IS TRUE"
   end
 
-  # TO BE REMOVED
-  def add_for_observation_condition(
+  def initialize_observations_parameter(
     table = :"observation_#{model.table_name}", joins = [table]
   )
-    return if params[:observation].blank?
-
-    obs = set_for_observation_title
-    where << "#{table}.observation_id = '#{obs.id}'"
-    add_join(*joins)
+    add_id_condition("#{table}.observation_id", params[:observations],
+                     *joins, title_method: :set_for_observation_title)
   end
 
   # Possible issue: the second arg below is the param name.
@@ -91,13 +87,6 @@ module Query::Modules::Associations
     @title_tag = :query_title_for_observation
     @title_args[:observation] = obs.unique_format_name
     obs
-  end
-
-  def initialize_observations_parameter(
-    table = :"observation_#{model.table_name}", joins = [table]
-  )
-    add_id_condition("#{table}.observation_id", params[:observations],
-                     *joins, title_method: :set_for_observation_title)
   end
 
   def initialize_projects_parameter(table = :project_observations,
