@@ -3598,9 +3598,9 @@ class NameTest < UnitTestCase
     )
   end
 
-  def test_scope_without_comments
-    assert_includes(Name.without_comments, names(:bugs_bunny_one))
-    assert_not_includes(Name.without_comments, names(:fungi))
+  def test_scope_has_no_comments
+    assert_includes(Name.has_no_comments, names(:bugs_bunny_one))
+    assert_not_includes(Name.has_no_comments, names(:fungi))
   end
 
   def test_scope_comments_has
