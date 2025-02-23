@@ -146,7 +146,9 @@ class Query::Names < Query::Base
   end
 
   def initialize_name_association_parameters
-    add_key_condition("observations.id", params[:observations], :observations)
+    add_association_condition(
+      "observations.id", params[:observations], :observations
+    )
     initialize_locations_parameter(
       :observations, params[:locations], :observations
     )

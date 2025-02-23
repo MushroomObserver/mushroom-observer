@@ -97,7 +97,7 @@ module Query::Modules::Conditions
   end
 
   # table_col = foreign key of an association, e.g. `observations.location_id`
-  def add_key_condition(table_col, ids, *, title_method: nil)
+  def add_association_condition(table_col, ids, *, title_method: nil)
     return if ids.empty?
 
     if ids.size == 1
@@ -110,7 +110,7 @@ module Query::Modules::Conditions
     add_joins(*)
   end
 
-  def add_key_not_condition(col, ids, *)
+  def add_not_associated_condition(col, ids, *)
     return if ids.empty?
 
     set = clean_id_set(ids)

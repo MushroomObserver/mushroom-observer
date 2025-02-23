@@ -28,7 +28,7 @@ class Query::LocationDescriptions < Query::Base
     add_desc_by_author_condition(:location)
     add_desc_by_editor_condition(:location)
     ids = lookup_locations_by_name(params[:locations])
-    add_key_condition("location_descriptions.location_id", ids)
+    add_association_condition("location_descriptions.location_id", ids)
     initialize_description_public_parameter(:location)
     add_subquery_condition(:location_query, :locations)
     super

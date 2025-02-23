@@ -124,7 +124,7 @@ class Query::Images < Query::Base
       :species_list_observations,
       [:observation_images, :observations, :species_list_observations]
     )
-    add_key_condition("images.license_id", params[:license])
+    add_association_condition("images.license_id", params[:license])
   end
 
   def initialize_image_vote_parameters

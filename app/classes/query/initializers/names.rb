@@ -6,18 +6,18 @@ module Query::Initializers::Names
 
     table = params[:include_all_name_proposals] ? "namings" : "observations"
     ids = lookup_names_by_name(params[:names], names_parameters)
-    add_key_condition("#{table}.name_id", ids, *joins)
+    add_association_condition("#{table}.name_id", ids, *joins)
 
     add_join(:observations, :namings) if params[:include_all_name_proposals]
     return unless params[:exclude_consensus]
 
-    add_key_not_condition("observations.name_id", ids, *joins)
+    add_not_associated_condition("observations.name_id", ids, *joins)
   end
 
   # Much simpler form for non-observation-based name queries.
   def initialize_name_parameters_for_name_queries
     ids = lookup_names_by_name(params[:names], names_parameters)
-    add_key_condition("names.id", ids)
+    add_association_condition("names.id", ids)
   end
 
   # ------------------------------------------------------------------------

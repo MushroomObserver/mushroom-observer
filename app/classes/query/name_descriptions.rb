@@ -34,7 +34,7 @@ class Query::NameDescriptions < Query::Base
     add_desc_by_author_condition(:name)
     add_desc_by_editor_condition(:name)
     ids = lookup_names_by_name(params[:names])
-    add_key_condition("name_descriptions.name_id", ids)
+    add_association_condition("name_descriptions.name_id", ids)
     initialize_description_public_parameter(:name)
     initialize_name_descriptions_parameters
     add_subquery_condition(:name_query, :names)

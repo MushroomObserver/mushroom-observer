@@ -43,7 +43,7 @@ class Query::Projects < Query::Base
     # add_join(:"user_group_users.members")
     # where << "user_group_users.user_id = '#{params[:member]}'"
     ids = lookup_users_by_name(params[:members])
-    add_key_condition(
+    add_association_condition(
       "user_group_users.user_id", ids, :"user_group_users.members"
     )
   end

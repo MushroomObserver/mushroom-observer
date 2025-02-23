@@ -294,8 +294,8 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
 
   def initialize_project_lists_parameter
     ids = lookup_lists_for_projects_by_name(params[:project_lists])
-    add_key_condition("species_list_observations.species_list_id", ids,
-                      :observations, :species_list_observations)
+    add_association_condition("species_list_observations.species_list_id", ids,
+                              :observations, :species_list_observations)
   end
 
   def initialize_field_slips_parameter
@@ -303,7 +303,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
 
     add_join(:field_slips)
     ids = lookup_field_slips_by_name(params[:field_slips])
-    add_key_condition("field_slips.id", ids, :observations)
+    add_association_condition("field_slips.id", ids, :observations)
   end
 
   def add_join_to_names
