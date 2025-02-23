@@ -390,6 +390,7 @@ class QueryTest < UnitTestCase
     # defaults
     query = Query.new(:Name)
     assert(query.query)
+    assert_equal(query.default_order, "name")
     assert_equal(clean(query.order), "names.sort_name ASC")
 
     query = Query.new(:Name, order: "names.id ASC")
