@@ -7,7 +7,7 @@ class Query::Filter
     def initialize
       super(
         sym: :region,
-        name: :REGION.t,
+        name: :REGION,
         models: [Observation, Location]
       )
     end

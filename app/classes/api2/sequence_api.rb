@@ -32,7 +32,7 @@ class API2
         ids: parse_array(:sequence, :id, as: :id),
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at),
-        users: parse_array(:user, :user, help: :creator),
+        by_users: parse_array(:user, :user, help: :creator),
         locus: parse_array(:string, :locus),
         archive: parse_array(:archive, :archive),
         accession: parse_array(:string, :accession),
@@ -47,7 +47,7 @@ class API2
       box = parse_bounding_box!
       {
         date: parse_range(:date, :obs_date, help: :obs_date),
-        users: parse_array(:user, :observer),
+        by_users: parse_array(:user, :observer),
         names: parse_array(:name, :name, as: :id),
         locations: parse_array(:location, :location, as: :id),
         herbaria: parse_array(:herbarium, :herbarium, as: :id),

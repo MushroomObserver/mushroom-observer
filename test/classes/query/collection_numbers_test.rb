@@ -14,8 +14,8 @@ class Query::CollectionNumbersTest < UnitTestCase
 
   def test_collection_number_for_observation
     obs = observations(:detailed_unknown_obs)
-    expects = CollectionNumber.index_order.for_observation(obs)
-    assert_query(expects, :CollectionNumber, observation: obs.id)
+    expects = CollectionNumber.index_order.for_observations(obs)
+    assert_query(expects, :CollectionNumber, observations: obs.id)
   end
 
   def test_collection_number_pattern_search

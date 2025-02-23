@@ -26,8 +26,8 @@ module Observations
       # make a query, and test that the query results match obs scope
       aga_obs = Observation.needs_naming_and_not_reviewed_by_user(mary).
                 in_clade("Agaricales")
-      query = Query.lookup_and_save(:Observation,
-                                    needs_naming: true, in_clade: "Agaricales")
+      query = Query.lookup_and_save(:Observation, needs_naming: true,
+                                                  in_clade: "Agaricales")
 
       # # get(:index, params: { q: QueryRecord.last.id.alphabetize })
       assert_equal(query.num_results, aga_obs.count)
@@ -38,8 +38,8 @@ module Observations
 
       bol_obs = Observation.needs_naming_and_not_reviewed_by_user(mary).
                 in_clade("Boletus")
-      query = Query.lookup_and_save(:Observation,
-                                    needs_naming: true, in_clade: "Boletus")
+      query = Query.lookup_and_save(:Observation, needs_naming: true,
+                                                  in_clade: "Boletus")
       assert_equal(query.num_results, bol_obs.count)
 
       # REGION
@@ -47,18 +47,18 @@ module Observations
       # start with continent
       sam_obs = Observation.needs_naming_and_not_reviewed_by_user(mary).
                 in_region("South America")
-      query = Query.lookup_and_save(:Observation,
-                                    needs_naming: true,
-                                    in_region: "South America")
+      query = Query.lookup_and_save(
+        :Observation, needs_naming: true, in_region: "South America"
+      )
       assert_equal(query.num_results, sam_obs.count)
 
       cal_obs = Observation.needs_naming_and_not_reviewed_by_user(mary).
                 in_region("California, USA")
       # remember the original count, will change
       cal_obs_count = cal_obs.count
-      query = Query.lookup_and_save(:Observation,
-                                    needs_naming: true,
-                                    in_region: "California, USA")
+      query = Query.lookup_and_save(
+        :Observation, needs_naming: true, in_region: "California, USA"
+      )
       assert_equal(query.num_results, cal_obs_count)
 
       get(:index,

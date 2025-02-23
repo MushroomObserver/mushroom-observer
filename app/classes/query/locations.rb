@@ -16,9 +16,8 @@ class Query::Locations < Query::Base
       created_at: [:time],
       updated_at: [:time],
       ids: [Location],
-      by_user: User,
+      by_users: [User],
       by_editor: User,
-      users: [User],
       in_box: { north: :float, south: :float, east: :float, west: :float },
       pattern: :string,
       regexp: :string,
@@ -58,7 +57,6 @@ class Query::Locations < Query::Base
   def initialize_locations_only_parameters
     add_ids_condition
     add_owner_and_time_stamp_conditions
-    add_by_user_condition
     add_by_editor_condition
     initialize_location_notes_parameters
     add_regexp_condition
@@ -91,7 +89,7 @@ class Query::Locations < Query::Base
   def add_advanced_search_conditions
     return if advanced_search_params.all? { |key| params[key].blank? }
 
-    add_join(:observations) if params[:content].present?
+    add_join(:observations) if params[:search_content].present?
     initialize_advanced_search
   end
 

@@ -275,7 +275,8 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     within("#location_coordinates") do
       click_link(text: :show_location_observations.l)
     end
-    assert_match("Matching Observations", page.title, "Wrong title")
+    assert_match("Observations from Burbank, California, USA",
+                 page.title, "Wrong title")
     save_results = find_all("#results a").select do |l|
       l[:href].match(%r{^/\d+})
     end

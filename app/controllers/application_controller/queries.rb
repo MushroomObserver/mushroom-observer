@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # see application_controller.rb
-module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
+module ApplicationController::Queries
   def self.included(base)
     base.helper_method(
       :query_from_session, :passed_query, :query_params, :add_query_param,
@@ -55,6 +55,11 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
     found_query
   end
 
+  BY_MAP = {
+    "modified" => :updated_at,
+    "created" => :created_at
+  }.freeze
+
   private ##########
 
   # Lookup the query and,
@@ -91,20 +96,11 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
   # (re-using the old query if it's still correct),
   # and returning nil if no new query can be found.
   def find_new_query_for_model(model, old_query)
-    old_query_correct_for_model(model, old_query) ||
-      outer_query_correct_for_model(model, old_query) ||
-      nil
+    old_query_correct_for_model(model, old_query) || nil
   end
 
   def old_query_correct_for_model(model, old_query)
     old_query if !old_query || (old_query.model.to_s == model)
-  end
-
-  def outer_query_correct_for_model(model, old_query)
-    return unless
-      (outer_query = old_query.outer) && outer_query.model.to_s == model
-
-    outer_query
   end
 
   def save_query_record_unless_bot(query)
@@ -121,11 +117,6 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
   def map_past_bys(args)
     args[:by] = (BY_MAP[args[:by].to_s] || args[:by]) if args.member?(:by)
   end
-
-  BY_MAP = {
-    "modified" => :updated_at,
-    "created" => :created_at
-  }.freeze
 
   def add_user_content_filter_parameters(query_params, model)
     filters = current_user_preference_filters || {}

@@ -5,7 +5,7 @@ class Query::Filter
     def initialize
       super(
         sym: :with_images,
-        name: :IMAGES.t,
+        name: :IMAGES,
         models: [Observation],
         on_vals: %w[yes no],
         prefs_vals: ["yes"],

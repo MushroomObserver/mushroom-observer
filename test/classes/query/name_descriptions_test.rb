@@ -17,18 +17,18 @@ class Query::NameDescriptionsTest < UnitTestCase
 
     assert_query(all_descs, :NameDescription, by: :id)
     assert_query(all_pelt_descs, :NameDescription, by: :id, names: pelt)
-    assert_query(public_pelt_descs, :NameDescription,
-                 by: :id, names: pelt, public: "yes")
+    assert_query(public_pelt_descs,
+                 :NameDescription, by: :id, names: pelt, public: "yes")
   end
 
   def test_name_description_by_user
     expects = NameDescription.where(user: mary).order(:id)
-    assert_query(expects, :NameDescription, by_user: mary, by: :id)
+    assert_query(expects, :NameDescription, by_users: mary, by: :id)
 
     expects = NameDescription.where(user: katrina).order(:id)
-    assert_query(expects, :NameDescription, by_user: katrina, by: :id)
+    assert_query(expects, :NameDescription, by_users: katrina, by: :id)
 
-    assert_query([], :NameDescription, by_user: junk, by: :id)
+    assert_query([], :NameDescription, by_users: junk, by: :id)
   end
 
   def test_name_description_by_author
@@ -61,8 +61,7 @@ class Query::NameDescriptionsTest < UnitTestCase
     assert_query(NameDescription.all,
                  :NameDescription, ids: NameDescription.select(:id).to_a)
     assert_query([NameDescription.first.id],
-                 :NameDescription,
-                 ids: [rolf.id, NameDescription.first.id])
+                 :NameDescription, ids: [rolf.id, NameDescription.first.id])
   end
 
   def test_name_description_with_default_desc

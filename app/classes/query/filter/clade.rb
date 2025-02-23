@@ -7,7 +7,7 @@ class Query::Filter
     def initialize
       super(
         sym: :clade,
-        name: :CLADE.t,
+        name: :CLADE,
         models: [Observation, Name]
       )
     end

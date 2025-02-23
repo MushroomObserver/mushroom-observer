@@ -9,7 +9,7 @@ class Query::GlossaryTerms < Query::Base
     super.merge(
       created_at: [:time],
       updated_at: [:time],
-      users: [User],
+      by_users: [User],
       name_has: :string,
       description_has: :string,
       pattern: :string

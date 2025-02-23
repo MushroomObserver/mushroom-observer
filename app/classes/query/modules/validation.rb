@@ -5,7 +5,7 @@ module Query::Modules::Validation
   attr_accessor :params, :params_cache, :subqueries
 
   def validate_params
-    old_params = @params.dup&.compact&.symbolize_keys || {}
+    old_params = @params.dup&.compact&.deep_symbolize_keys || {}
     new_params = {}
     permitted_params = parameter_declarations.slice(*old_params.keys)
     permitted_params.each do |param, param_type|
@@ -229,33 +229,51 @@ module Query::Modules::Validation
     end
   end
 
-  def validate_query(param, val)
-    case val
-    when Query::Base
-      val.record.id
-    when Integer
-      val
-    else
-      raise(
-        "Value for :#{param} should be a Query class, got: #{val.inspect}"
-      )
-    end
-  end
+  # def validate_query(param, val)
+  #   case val
+  #   when Query::Base
+  #     val.record.id
+  #   when Integer
+  #     val
+  #   else
+  #     raise(
+  #       "Value for :#{param} should be a Query class, got: #{val.inspect}"
+  #     )
+  #   end
+  # end
 
   def find_cached_parameter_instance(model, param)
-    val = if could_be_record_id?(param, params[param])
-            model.find(params[param])
-          else
-            lookup_record_by_name(param, params[param], model)
-          end
-    set_cached_parameter_instance(param, val)
+    return @params_cache[param] if @params_cache && @params_cache[param]
+
+    val = take_param_or_pluralized_param(param)
+    instance = if could_be_record_id?(param, val)
+                 model.find(val)
+               elsif val.present?
+                 lookup_record_by_name(param, val, model)
+               end
+    set_cached_parameter_instance(param, instance)
+  end
+
+  # This is intended as a temporary cheat while we're consolidating singular
+  # and plural params, like :observation/:observations. We're starting to route
+  # single ids through the plural param, so we want to be able to handle them
+  # as singles, which here means caching instances. The goal is to end up with
+  # only plural params that can also handle singles, at which point this method
+  # can be deleted.
+  def take_param_or_pluralized_param(param)
+    return params[param] if params[param]
+
+    plural = param.to_s.pluralize.to_sym
+    return if params[plural].blank?
+
+    [params[plural]].flatten.first
   end
 
   # Cache the instance for later use, in case we both instantiate and
   # execute query in the same action.
-  def set_cached_parameter_instance(param, val)
+  def set_cached_parameter_instance(param, instance)
     @params_cache ||= {}
-    @params_cache[param] = val
+    @params_cache[param] = instance
   end
 
   def could_be_record_id?(param, val)

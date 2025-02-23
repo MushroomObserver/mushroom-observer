@@ -98,11 +98,11 @@ class Query::ImagesTest < UnitTestCase
 
   def test_image_by_user
     expects = Image.index_order.where(user_id: rolf.id).distinct
-    assert_query(expects, :Image, by_user: rolf)
+    assert_query(expects, :Image, by_users: rolf)
     expects = Image.index_order.where(user_id: mary.id).distinct
-    assert_query(expects, :Image, by_user: mary)
+    assert_query(expects, :Image, by_users: mary)
     expects = Image.index_order.where(user_id: dick.id).distinct
-    assert_query(expects, :Image, by_user: dick)
+    assert_query(expects, :Image, by_users: dick)
   end
 
   def test_image_in_set
@@ -115,63 +115,61 @@ class Query::ImagesTest < UnitTestCase
   def test_image_inside_observation
     obs = observations(:detailed_unknown_obs)
     assert_equal(2, obs.images.length)
-    expects = obs.images.sort_by(&:id)
-    assert_query(expects, :Image,
-                 observation: obs, outer: 1) # (outer is only used by prev/next)
+    expects = obs.images.sort_by(&:id).reverse
+    assert_query(expects, :Image, observations: obs)
     obs = observations(:minimal_unknown_obs)
     assert_equal(0, obs.images.length)
-    assert_query(obs.images, :Image,
-                 observation: obs, outer: 1) # (outer is only used by prev/next)
+    assert_query(obs.images, :Image, observations: obs)
   end
 
   def test_image_for_project
     project = projects(:bolete_project)
     expects = Image.index_order.joins(:project_images).
               where(project_images: { project: project }).reorder(id: :asc)
-    assert_query(expects, :Image, project: project, by: :id)
-    assert_query([], :Image, project: projects(:empty_project))
+    assert_query(expects, :Image, projects: project, by: :id)
+    assert_query([], :Image, projects: projects(:empty_project))
   end
 
   def test_image_advanced_search_name
     # expects = [] # [images(:agaricus_campestris_image).id]
     expects = Image.index_order.joins(observations: :name).
               where(Name[:search_name].matches("%Agaricus%")).distinct
-    assert_query(expects, :Image, name: "Agaricus")
+    assert_query(expects, :Image, search_name: "Agaricus")
   end
 
-  def test_image_advanced_search_user_where
+  def test_image_advanced_search_where
     expects = Image.index_order.joins(:observations).
               where(Observation[:where].matches("%burbank%")).
               where(observations: { is_collection_location: true }).distinct
-    assert_query(expects, :Image, user_where: "burbank")
+    assert_query(expects, :Image, search_where: "burbank")
 
     assert_query([images(:connected_coprinus_comatus_image).id],
-                 :Image, user_where: "glendale")
+                 :Image, search_where: "glendale")
   end
 
   def test_image_advanced_search_user
     expects = Image.index_order.joins(observations: :user).
               where(observations: { user: mary }).distinct.
               order(Image[:created_at].desc, Image[:id].desc)
-    assert_query(expects, :Image, user: "mary")
+    assert_query(expects, :Image, search_user: "mary")
   end
 
   def test_image_advanced_search_content
     assert_query(Image.index_order.
                  advanced_search("little"),
-                 :Image, content: "little")
+                 :Image, search_content: "little")
     assert_query(Image.index_order.
                  advanced_search("fruiting"),
-                 :Image, content: "fruiting")
+                 :Image, search_content: "fruiting")
   end
 
   def test_image_advanced_search_combos
     assert_query([],
-                 :Image, name: "agaricus", user_where: "glendale")
+                 :Image, search_name: "agaricus", search_where: "glendale")
     assert_query([images(:agaricus_campestris_image).id],
-                 :Image, name: "agaricus", user_where: "burbank")
+                 :Image, search_name: "agaricus", search_where: "burbank")
     assert_query([images(:turned_over_image).id, images(:in_situ_image).id],
-                 :Image, content: "little", user_where: "burbank")
+                 :Image, search_content: "little", search_where: "burbank")
   end
 
   def test_image_pattern_search_name
@@ -288,7 +286,7 @@ class Query::ImagesTest < UnitTestCase
     expects = Image.index_order.joins(:observations).
               where(observations: { user: dick }).distinct
     assert_not_empty(expects, "'expect` is broken; it should not be empty")
-    assert_image_obs_query(expects, users: dick)
+    assert_image_obs_query(expects, by_users: dick)
   end
 
   ##### numeric parameters #####
@@ -361,24 +359,24 @@ class Query::ImagesTest < UnitTestCase
     expects = Image.index_order.joins(observations: :location).
               where(observations: { location: locations(:burbank) }).
               where(observations: { is_collection_location: true }).distinct
-    assert_image_obs_query(expects, location: locations(:burbank).id)
-    assert_image_obs_query([], location: locations(:mitrula_marsh).id)
+    assert_image_obs_query(expects, locations: locations(:burbank).id)
+    assert_image_obs_query([], locations: locations(:mitrula_marsh).id)
   end
 
   def test_image_with_observations_at_where
     expects = [images(:connected_coprinus_comatus_image).id]
-    assert_image_obs_query(expects, user_where: "glendale")
-    assert_image_obs_query([], user_where: "snazzle")
+    assert_image_obs_query(expects, search_where: "glendale")
+    assert_image_obs_query([], search_where: "snazzle")
   end
 
   def test_image_with_observations_by_user
     expects = image_with_observations_by_user(rolf).to_a
-    assert_image_obs_query(expects, by_user: rolf)
+    assert_image_obs_query(expects, by_users: rolf)
 
     expects = image_with_observations_by_user(mary).to_a
-    assert_image_obs_query(expects, by_user: mary)
+    assert_image_obs_query(expects, by_users: mary)
 
-    assert_image_obs_query([], by_user: users(:zero_user))
+    assert_image_obs_query([], by_users: users(:zero_user))
   end
 
   def image_with_observations_by_user(user)
@@ -387,9 +385,9 @@ class Query::ImagesTest < UnitTestCase
   end
 
   def test_image_with_observations_for_project
-    assert_image_obs_query([], project: projects(:empty_project))
+    assert_image_obs_query([], projects: projects(:empty_project))
     expects = observations(:two_img_obs).images.index_order.distinct
-    assert_image_obs_query(expects, project: projects(:two_img_obs_project))
+    assert_image_obs_query(expects, projects: projects(:two_img_obs_project))
   end
 
   def test_image_with_observations_in_set

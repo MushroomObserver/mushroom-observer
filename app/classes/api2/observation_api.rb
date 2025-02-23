@@ -47,7 +47,7 @@ class API2
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at),
         date: parse_range(:date, :date, help: :when_seen),
-        users: parse_array(:user, :user, help: :observer),
+        by_users: parse_array(:user, :user, help: :observer),
         names: parse_array(:name, :name, as: :id),
         locations: parse_array(:location, :location, as: :id),
         herbaria: parse_array(:herbarium, :herbarium, as: :id),

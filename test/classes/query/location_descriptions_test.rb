@@ -18,19 +18,20 @@ class Query::LocationDescriptionsTest < UnitTestCase
     assert(public_gualala_descs.length < all_gualala_descs.length)
 
     assert_query(all_descs, :LocationDescription, by: :id)
-    assert_query(all_gualala_descs, :LocationDescription,
-                 by: :id, locations: gualala)
-    assert_query(public_gualala_descs, :LocationDescription,
-                 by: :id, locations: gualala, public: "yes")
+    assert_query(all_gualala_descs,
+                 :LocationDescription, by: :id, locations: gualala)
+    assert_query(public_gualala_descs,
+                 :LocationDescription, by: :id, locations: gualala,
+                                       public: "yes")
   end
 
   def test_location_description_by_user
     expects = LocationDescription.where(user: rolf).to_a
-    assert_query(expects, :LocationDescription, by_user: rolf)
+    assert_query(expects, :LocationDescription, by_users: rolf)
 
     expects = LocationDescription.where(user: mary).to_a
     assert_equal(0, expects.length)
-    assert_query(expects, :LocationDescription, by_user: mary)
+    assert_query(expects, :LocationDescription, by_users: mary)
   end
 
   def test_location_description_by_author

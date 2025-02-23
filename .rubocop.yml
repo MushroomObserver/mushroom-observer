@@ -3,11 +3,6 @@ inherit_mode:
   merge:
     - Exclude
 
-# NOTE: 20250219 jdc
-# 1. Use `require:` because CodeClimate does not support `plugins:`
-# Example: https://codeclimate.com/github/MushroomObserver/mushroom-observer/builds/11148
-# 2. Temporarily use `plugins:` when running `rubocop --auto-gen-config`
-# 3. If CodeClimate adds a channel > rubocop-1-56-3, try restoring `plugins:`
 require:
   - rubocop-performance
   - rubocop-rails

@@ -23,9 +23,8 @@ class Query::Names < Query::Base
       include_subtaxa: :boolean,
       include_immediate_subtaxa: :boolean,
       exclude_original_names: :boolean,
-      by_user: User,
+      by_users: [User],
       by_editor: User,
-      users: [User],
       locations: [Location],
       species_lists: [SpeciesList],
       misspellings: { string: [:no, :either, :only] },
@@ -71,7 +70,6 @@ class Query::Names < Query::Base
   def initialize_names_only_parameters
     add_ids_condition
     add_owner_and_time_stamp_conditions
-    add_by_user_condition
     add_by_editor_condition
     initialize_name_comments_and_notes_parameters
     initialize_name_parameters_for_name_queries
@@ -149,8 +147,9 @@ class Query::Names < Query::Base
 
   def initialize_name_association_parameters
     add_id_condition("observations.id", params[:observations], :observations)
-    add_location_string_condition(:observations, params[:locations],
-                                  :observations)
+    initialize_locations_parameter(
+      :observations, params[:locations], :observations
+    )
     initialize_species_lists_parameter
   end
 
@@ -203,7 +202,7 @@ class Query::Names < Query::Base
   def add_name_advanced_search_conditions
     return if advanced_search_params.all? { |key| params[key].blank? }
 
-    add_join(:observations) if params[:content].present?
+    add_join(:observations) if params[:search_content].present?
     initialize_advanced_search
   end
 
