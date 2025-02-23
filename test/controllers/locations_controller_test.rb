@@ -232,7 +232,7 @@ class LocationsControllerTest < FunctionalTestCase
 
   def test_index_advanced_search
     query = Query.lookup_and_save(:Location, search_where: "California")
-    matches = Location.name_contains("California")
+    matches = Location.name_has("California")
 
     login
     get(:index,

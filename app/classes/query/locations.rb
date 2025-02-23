@@ -21,10 +21,10 @@ class Query::Locations < Query::Base
       in_box: { north: :float, south: :float, east: :float, west: :float },
       pattern: :string,
       regexp: :string,
-      with_notes: :boolean,
+      has_notes: :boolean,
       notes_has: :string,
-      with_descriptions: :boolean,
-      with_observations: :boolean,
+      has_descriptions: :boolean,
+      has_observations: :boolean,
       description_query: { subquery: :LocationDescription },
       observation_query: { subquery: :Observation }
     ).merge(content_filter_parameter_declarations(Location)).
@@ -33,8 +33,8 @@ class Query::Locations < Query::Base
 
   def initialize_flavor
     add_sort_order_to_title
-    initialize_locations_with_descriptions
-    initialize_locations_with_observations
+    initialize_locations_has_descriptions
+    initialize_locations_has_observations
     initialize_locations_only_parameters
     add_bounding_box_conditions_for_locations
     initialize_subquery_parameters
@@ -42,14 +42,14 @@ class Query::Locations < Query::Base
     super
   end
 
-  def initialize_locations_with_descriptions
-    return if params[:with_descriptions].blank?
+  def initialize_locations_has_descriptions
+    return if params[:has_descriptions].blank?
 
     add_join(:location_descriptions)
   end
 
-  def initialize_locations_with_observations
-    return if params[:with_observations].blank?
+  def initialize_locations_has_observations
+    return if params[:has_observations].blank?
 
     add_join(:observations)
   end
@@ -67,7 +67,7 @@ class Query::Locations < Query::Base
   def initialize_location_notes_parameters
     add_boolean_condition("LENGTH(COALESCE(locations.notes,'')) > 0",
                           "LENGTH(COALESCE(locations.notes,'')) = 0",
-                          params[:with_notes])
+                          params[:has_notes])
     add_search_condition("locations.notes", params[:notes_has])
   end
 
@@ -127,9 +127,9 @@ class Query::Locations < Query::Base
 
   def title
     default = super
-    if params[:with_observations] || params[:observation_query]
+    if params[:has_observations] || params[:observation_query]
       with_observations_query_description || default
-    elsif params[:with_descriptions] || params[:description_query]
+    elsif params[:has_descriptions] || params[:description_query]
       :query_title_with_descriptions.t(type: :location) || default
     else
       default

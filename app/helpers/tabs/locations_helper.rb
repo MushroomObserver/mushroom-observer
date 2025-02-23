@@ -142,7 +142,7 @@ module Tabs
     end
 
     def location_map_title(query:)
-      if query&.params&.dig(:with_observations) ||
+      if query&.params&.dig(:has_observations) ||
          query&.params&.dig(:observation_query)
         :map_locations_title.t(locations: query.title)
       else

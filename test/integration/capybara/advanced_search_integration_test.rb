@@ -15,8 +15,8 @@ class AdvancedSearchIntegrationTest < CapybaraIntegrationTestCase
     fill_in("search_search_name", with: names(:fungi).text_name)
     fill_in("search_search_where",
             with: locations(:falmouth).display_name)
-    assert_checked_field("content_filter_with_images_")
-    assert_checked_field("content_filter_with_specimen_")
+    assert_checked_field("content_filter_has_images_")
+    assert_checked_field("content_filter_has_specimen_")
     within("#advanced_search_form") do
       click_commit
     end

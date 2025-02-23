@@ -33,19 +33,19 @@ module Location::Scopes
         where(Location[:name].matches("%#{region}"))
       end
     }
-    scope :name_contains,
+    scope :name_has,
           ->(phrase) { search_columns(Location[:name], phrase) }
 
-    scope :with_notes, lambda { |bool = true|
+    scope :has_notes, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         where(Location[:notes].not_blank)
       else
-        without_notes
+        has_no_notes
       end
     }
-    scope :without_notes,
+    scope :has_no_notes,
           -> { where(Location[:notes].blank) }
-    scope :notes_contain,
+    scope :notes_has,
           ->(phrase) { search_columns(Location[:notes], phrase) }
 
     scope :search_content,
@@ -53,8 +53,8 @@ module Location::Scopes
     # Location[:name] + descriptions, Observation[:notes] + comments
     # Does not search location notes or location comments.
     scope :advanced_search, lambda { |phrase|
-      ids = Location.name_contains(phrase).map(&:id)
-      ids += Location.description_contains(phrase).map(&:id)
+      ids = Location.name_has(phrase).map(&:id)
+      ids += Location.description_has(phrase).map(&:id)
       ids += Observation.advanced_search(phrase).
              includes(:location).map(&:location).flatten.uniq
       where(id: ids).distinct
@@ -78,28 +78,28 @@ module Location::Scopes
       )
     }
 
-    scope :with_description, lambda { |bool = true|
+    scope :has_description, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         where.not(description_id: nil)
       else
-        without_description
+        has_no_description
       end
     }
-    scope :without_description,
+    scope :has_no_description,
           -> { where(description_id: nil) }
-    scope :description_contains, lambda { |phrase|
+    scope :description_has, lambda { |phrase|
       joins(:descriptions).
         merge(LocationDescription.search_content(phrase)).distinct
     }
-    scope :with_description_created_by, lambda { |user|
+    scope :has_description_created_by, lambda { |user|
       joins(:descriptions).
         merge(LocationDescription.where(user: user)).distinct
     }
-    scope :with_description_reviewed_by, lambda { |user|
+    scope :has_description_reviewed_by, lambda { |user|
       joins(:descriptions).
         merge(LocationDescription.where(reviewer: user)).distinct
     }
-    scope :with_description_of_type, lambda { |source|
+    scope :has_description_of_type, lambda { |source|
       # Check that it's a valid source type (string enum value)
       return none if Description::ALL_SOURCE_TYPES.exclude?(source)
 
@@ -190,7 +190,7 @@ module Location::Scopes
                 and(Location[:west] <= west).and(Location[:east] >= east)))
       end
     }
-    scope :with_observations,
+    scope :has_observations,
           -> { joins(:observations).distinct }
 
     scope :show_includes, lambda {

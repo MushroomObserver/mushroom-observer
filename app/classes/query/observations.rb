@@ -24,7 +24,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
       in_clade: :string,
       in_region: :string,
       pattern: :string,
-      with_name: :boolean,
+      has_name: :boolean,
       names: [Name],
       include_synonyms: :boolean,
       include_subtaxa: :boolean,
@@ -36,13 +36,13 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
       locations: [Location],
       in_box: { north: :float, south: :float, east: :float, west: :float },
       is_collection_location: :boolean,
-      with_public_lat_lng: :boolean,
-      with_notes: :boolean,
+      has_public_lat_lng: :boolean,
+      has_notes: :boolean,
       notes_has: :string,
-      with_notes_fields: [:string],
-      with_comments: { boolean: [true] },
+      has_notes_fields: [:string],
+      has_comments: { boolean: [true] },
       comments_has: :string,
-      with_sequences: { boolean: [true] },
+      has_sequences: { boolean: [true] },
       field_slips: [FieldSlip],
       herbaria: [Herbarium],
       herbarium_records: [HerbariumRecord],
@@ -85,13 +85,13 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
 
   def initialize_obs_record_parameters
     initialize_is_collection_location_parameter
-    initialize_with_public_lat_lng_parameter
-    initialize_with_name_parameter
+    initialize_has_public_lat_lng_parameter
+    initialize_has_name_parameter
     initialize_confidence_parameter
-    initialize_obs_with_notes_parameter
-    add_with_notes_fields_condition(params[:with_notes_fields])
-    add_join(:observations, :comments) if params[:with_comments]
-    add_join(:observations, :sequences) if params[:with_sequences]
+    initialize_obs_has_notes_parameter
+    add_has_notes_fields_condition(params[:has_notes_fields])
+    add_join(:observations, :comments) if params[:has_comments]
+    add_join(:observations, :sequences) if params[:has_sequences]
   end
 
   def initialize_association_parameters
@@ -126,42 +126,42 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
     )
   end
 
-  def initialize_with_public_lat_lng_parameter
+  def initialize_has_public_lat_lng_parameter
     add_boolean_condition(
       "observations.lat IS NOT NULL AND observations.gps_hidden IS FALSE",
       "observations.lat IS NULL OR observations.gps_hidden IS TRUE",
-      params[:with_public_lat_lng],
+      params[:has_public_lat_lng],
       :observations
     )
   end
 
   # This param is sent by advanced_search or a user content_filter
-  def initialize_with_images_parameter
+  def initialize_has_images_parameter
     add_boolean_condition(
       "observations.thumb_image_id IS NOT NULL",
       "observations.thumb_image_id IS NULL",
-      params[:with_images],
+      params[:has_images],
       :observations
     )
   end
 
   # This param is sent by advanced_search or a user content_filter
-  def initialize_with_specimen_parameter
+  def initialize_has_specimen_parameter
     add_boolean_condition(
       "observations.specimen IS TRUE",
       "observations.specimen IS FALSE",
-      params[:with_specimen],
+      params[:has_specimen],
       :observations
     )
   end
 
-  def initialize_with_name_parameter
+  def initialize_has_name_parameter
     genus = Name.ranks[:Genus]
     group = Name.ranks[:Group]
     add_boolean_condition(
       "names.`rank` <= #{genus} or names.`rank` = #{group}",
       "names.`rank` > #{genus} and names.`rank` < #{group}",
-      params[:with_name],
+      params[:has_name],
       :observations, :names
     )
   end
@@ -172,7 +172,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
     )
   end
 
-  def initialize_obs_with_notes_parameter(param_name = :with_notes)
+  def initialize_obs_has_notes_parameter(param_name = :has_notes)
     add_boolean_condition(
       "observations.notes != #{escape(Observation.no_notes_persisted)}",
       "observations.notes  = #{escape(Observation.no_notes_persisted)}",
@@ -181,7 +181,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
     )
   end
 
-  def add_with_notes_fields_condition(fields, *)
+  def add_has_notes_fields_condition(fields, *)
     return if fields.empty?
 
     conds = fields.map { |field| notes_field_presence_condition(field) }

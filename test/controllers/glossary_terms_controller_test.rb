@@ -418,7 +418,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_not(GlossaryTerm.exists?(term.id), "Failed to destroy GlossaryTerm")
   end
 
-  def test_destroy_term_with_images
+  def test_destroy_term_has_images
     term = glossary_terms(:unused_thumb_and_used_image_glossary_term)
     unused_image = term.thumb_image
     used_image = term.other_images.first

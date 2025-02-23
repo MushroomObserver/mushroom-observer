@@ -21,7 +21,7 @@ class CommentsControllerTest < FunctionalTestCase
     assert_displayed_title("Comments by #{by.capitalize}")
   end
 
-  def test_index_target_with_comments
+  def test_index_target_has_comments
     target = observations(:minimal_unknown_obs)
     params = { type: target.class.name, target: target.id }
     comments = Comment.where(target_type: target.class.name, target: target)
