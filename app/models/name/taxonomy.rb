@@ -606,7 +606,7 @@ module Name::Taxonomy
     # This is meant to be run nightly to ensure that all the classification
     # caches are up to date.  It only pays attention to genera or higher.
     def refresh_classification_caches(dry_run: false)
-      query = Name.with_description_classification_differing
+      query = Name.has_description_classification_differing
       msgs = query.map do |name|
         "Classification for #{name.search_name} didn't match description."
       end

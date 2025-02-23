@@ -35,7 +35,7 @@ flash_error(@error) if @error && @objects.empty?
           concat(tag.span(name.display_name.html_safe.t, class: "display-name"))
           concat(tag.span(counts[name.id], class: "badge")) if counts[name.id]
         end %>
-        <% if @with_descriptions %>
+        <% if @has_descriptions %>
           <% if (desc = name.description)%>
             <span><%= desc.authors.map(&:login).join(", ") %></span>
             <span><%= desc.note_status.map(&:to_s).join("/") %></span>

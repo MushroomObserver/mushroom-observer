@@ -166,11 +166,11 @@ class Query::NamesTest < UnitTestCase
     assert_query(expects, :Name, is_deprecated: false)
   end
 
-  def test_name_with_synonyms
-    expects = Name.with_correct_spelling.with_synonyms.index_order
-    assert_query(expects, :Name, with_synonyms: true)
-    expects = Name.with_correct_spelling.without_synonyms.index_order
-    assert_query(expects, :Name, with_synonyms: false)
+  def test_name_has_synonyms
+    expects = Name.with_correct_spelling.has_synonyms.index_order
+    assert_query(expects, :Name, has_synonyms: true)
+    expects = Name.with_correct_spelling.has_no_synonyms.index_order
+    assert_query(expects, :Name, has_synonyms: false)
   end
 
   def test_name_rank_single
@@ -189,75 +189,75 @@ class Query::NamesTest < UnitTestCase
 
   def test_name_text_name_has
     expects = Name.with_correct_spelling.
-              text_name_contains("Agaricus").index_order
+              text_name_has("Agaricus").index_order
     assert_query(expects, :Name, text_name_has: "Agaricus")
   end
 
-  def test_name_with_author
-    expects = Name.with_correct_spelling.with_author.index_order
-    assert_query(expects, :Name, with_author: true)
-    expects = Name.with_correct_spelling.without_author.index_order
-    assert_query(expects, :Name, with_author: false)
+  def test_name_has_author
+    expects = Name.with_correct_spelling.has_author.index_order
+    assert_query(expects, :Name, has_author: true)
+    expects = Name.with_correct_spelling.has_no_author.index_order
+    assert_query(expects, :Name, has_author: false)
   end
 
   def test_name_author_has
-    expects = Name.with_correct_spelling.author_contains("Pers.").index_order
+    expects = Name.with_correct_spelling.author_has("Pers.").index_order
     assert_query(expects, :Name, author_has: "Pers.")
   end
 
-  def test_name_with_citation
-    expects = Name.with_correct_spelling.with_citation.index_order
-    assert_query(expects, :Name, with_citation: true)
-    expects = Name.with_correct_spelling.without_citation.index_order
-    assert_query(expects, :Name, with_citation: false)
+  def test_name_has_citation
+    expects = Name.with_correct_spelling.has_citation.index_order
+    assert_query(expects, :Name, has_citation: true)
+    expects = Name.with_correct_spelling.has_no_citation.index_order
+    assert_query(expects, :Name, has_citation: false)
   end
 
   def test_name_citation_has
     expects = Name.with_correct_spelling.
-              citation_contains("Lichenes").index_order
+              citation_has("Lichenes").index_order
     assert_query(expects, :Name, citation_has: "Lichenes")
   end
 
-  def test_name_with_classification
-    expects = Name.with_correct_spelling.with_classification.index_order
-    assert_query(expects, :Name, with_classification: true)
-    expects = Name.with_correct_spelling.without_classification.index_order
-    assert_query(expects, :Name, with_classification: false)
+  def test_name_has_classification
+    expects = Name.with_correct_spelling.has_classification.index_order
+    assert_query(expects, :Name, has_classification: true)
+    expects = Name.with_correct_spelling.has_no_classification.index_order
+    assert_query(expects, :Name, has_classification: false)
   end
 
   def test_name_classification_has
     expects = Name.with_correct_spelling.
-              classification_contains("Tremellales").index_order
+              classification_has("Tremellales").index_order
     assert_query(expects, :Name, classification_has: "Tremellales")
   end
 
-  def test_name_with_notes
-    expects = Name.with_correct_spelling.with_notes.index_order
-    assert_query(expects, :Name, with_notes: true)
-    expects = Name.with_correct_spelling.without_notes.index_order
-    assert_query(expects, :Name, with_notes: false)
+  def test_name_has_notes
+    expects = Name.with_correct_spelling.has_notes.index_order
+    assert_query(expects, :Name, has_notes: true)
+    expects = Name.with_correct_spelling.has_no_notes.index_order
+    assert_query(expects, :Name, has_notes: false)
   end
 
   def test_name_notes_has
     expects = Name.with_correct_spelling.
-              notes_contain('"at least one"').index_order
+              notes_has('"at least one"').index_order
     assert_query(expects, :Name, notes_has: '"at least one"')
   end
 
-  def test_name_with_comments_true
-    expects = Name.with_correct_spelling.with_comments.index_order
-    assert_query(expects, :Name, with_comments: true)
+  def test_name_has_comments_true
+    expects = Name.with_correct_spelling.has_comments.index_order
+    assert_query(expects, :Name, has_comments: true)
   end
 
   # Note that this is not a withOUT comments condition
-  def test_name_with_comments_false
+  def test_name_has_comments_false
     expects = Name.with_correct_spelling.index_order
-    assert_query(expects, :Name, with_comments: false)
+    assert_query(expects, :Name, has_comments: false)
   end
 
   def test_name_comments_has
     expects = Name.with_correct_spelling.
-              comments_contain('"messes things up"').index_order
+              comments_has('"messes things up"').index_order
     assert_query(expects, :Name, comments_has: '"messes things up"')
   end
 
@@ -322,61 +322,61 @@ class Query::NamesTest < UnitTestCase
     assert_query(expects, :Name, need_description: 1)
   end
 
-  def test_name_with_descriptions
+  def test_name_has_descriptions
     expects = Name.index_order.with_correct_spelling.
               joins(:descriptions).distinct
-    assert_query(expects, :Name, with_descriptions: 1)
+    assert_query(expects, :Name, has_descriptions: 1)
   end
 
-  def test_name_with_descriptions_by_user
-    expects = name_with_descriptions_by_user(mary)
+  def test_name_has_descriptions_by_user
+    expects = name_has_descriptions_by_user(mary)
     assert_query(expects, :Name, description_query: { by_users: mary })
 
-    expects = name_with_descriptions_by_user(dick)
+    expects = name_has_descriptions_by_user(dick)
     assert_query(expects, :Name, description_query: { by_users: dick })
   end
 
-  def name_with_descriptions_by_user(user)
+  def name_has_descriptions_by_user(user)
     Name.with_correct_spelling.joins(:descriptions).
       where(name_descriptions: { user: user }).index_order.distinct
   end
 
-  def test_name_with_descriptions_by_author
-    expects = name_with_descriptions_by_author(rolf)
+  def test_name_has_descriptions_by_author
+    expects = name_has_descriptions_by_author(rolf)
     assert_query(expects, :Name, description_query: { by_author: rolf })
 
-    expects = name_with_descriptions_by_author(mary)
+    expects = name_has_descriptions_by_author(mary)
     assert_query(expects, :Name, description_query: { by_author: mary })
 
-    expects = name_with_descriptions_by_author(dick)
+    expects = name_has_descriptions_by_author(dick)
     assert_query(expects, :Name, description_query: { by_author: dick })
   end
 
-  def name_with_descriptions_by_author(user)
+  def name_has_descriptions_by_author(user)
     Name.with_correct_spelling.
       joins(descriptions: :name_description_authors).
       where(name_description_authors: { user: user }).index_order.distinct
   end
 
-  def test_name_with_descriptions_by_editor
-    expects = name_with_descriptions_by_editor(rolf)
+  def test_name_has_descriptions_by_editor
+    expects = name_has_descriptions_by_editor(rolf)
     assert_query(expects, :Name, description_query: { by_editor: rolf })
 
-    expects = name_with_descriptions_by_editor(rolf)
+    expects = name_has_descriptions_by_editor(rolf)
     assert_query(expects, :Name, description_query: { by_editor: mary })
 
-    expects = name_with_descriptions_by_editor(dick)
+    expects = name_has_descriptions_by_editor(dick)
     assert_equal(0, expects.length)
     assert_query(expects, :Name, description_query: { by_editor: dick })
   end
 
-  def name_with_descriptions_by_editor(user)
+  def name_has_descriptions_by_editor(user)
     Name.with_correct_spelling.
       joins(descriptions: :name_description_editors).
       where(name_description_editors: { user: user }).index_order.distinct
   end
 
-  def test_name_with_descriptions_in_set
+  def test_name_has_descriptions_in_set
     desc1 = name_descriptions(:peltigera_desc)
     desc2 = name_descriptions(:peltigera_alt_desc)
     desc3 = name_descriptions(:draft_boletus_edulis)
@@ -386,15 +386,15 @@ class Query::NamesTest < UnitTestCase
                  :Name, description_query: { ids: [desc1, desc2, desc3] })
   end
 
-  def test_name_with_observations
+  def test_name_has_observations
     expects = Name.with_correct_spelling.joins(:observations).
               select(:name).distinct.pluck(:name_id).sort
-    assert_query(expects, :Name, with_observations: 1, by: :id)
+    assert_query(expects, :Name, has_observations: 1, by: :id)
   end
 
-  # Prove that :with_observations param of Name Query works with each
+  # Prove that :has_observations param of Name Query works with each
   # parameter P for which (a) there's no other test of P for
-  # Name, OR (b) P behaves differently in :with_observations than in
+  # Name, OR (b) P behaves differently in :has_observations than in
   # all other params of Name Query's.
 
   ##### date/time parameters #####
@@ -422,11 +422,11 @@ class Query::NamesTest < UnitTestCase
 
   ##### list/string parameters #####
 
-  def test_name_with_observations_with_notes_fields
+  def test_name_with_observations_has_notes_fields
     expects = Name.index_order.with_correct_spelling.joins(:observations).
               where(Observation[:notes].matches("%:substrate:%")).distinct
     assert_query(
-      expects, :Name, observation_query: { with_notes_fields: "substrate" }
+      expects, :Name, observation_query: { has_notes_fields: "substrate" }
     )
   end
 
@@ -478,36 +478,36 @@ class Query::NamesTest < UnitTestCase
 
   ##### boolean parameters #####
 
-  def test_name_with_observations_with_comments
+  def test_name_with_observations_has_comments
     expects = Name.index_order.with_correct_spelling.
               joins(observations: :comments).distinct
-    assert_query(expects, :Name, observation_query: { with_comments: true })
+    assert_query(expects, :Name, observation_query: { has_comments: true })
   end
 
-  def test_name_with_observations_with_public_lat_lng
+  def test_name_with_observations_has_public_lat_lng
     expects = Name.index_order.joins(:observations).
               where.not(observations: { lat: false }).distinct
     assert_query(
-      expects, :Name, observation_query: { with_public_lat_lng: true }
+      expects, :Name, observation_query: { has_public_lat_lng: true }
     )
   end
 
   def test_name_with_observations_with_name
     expects = Name.index_order.with_correct_spelling.joins(:observations).
               where(observations: { name_id: Name.unknown }).distinct
-    assert_query(expects, :Name, observation_query: { with_name: false })
+    assert_query(expects, :Name, observation_query: { has_name: false })
   end
 
-  def test_name_with_observations_with_notes
+  def test_name_with_observations_has_notes
     expects = Name.index_order.with_correct_spelling.joins(:observations).
               where.not(observations: { notes: Observation.no_notes }).distinct
-    assert_query(expects, :Name, observation_query: { with_notes: true })
+    assert_query(expects, :Name, observation_query: { has_notes: true })
   end
 
-  def test_name_with_observations_with_sequences
+  def test_name_with_observations_has_sequences
     expects = Name.index_order.with_correct_spelling.
               joins(observations: :sequences).distinct
-    assert_query(expects, :Name, observation_query: { with_sequences: true })
+    assert_query(expects, :Name, observation_query: { has_sequences: true })
   end
 
   def test_name_with_observations_is_collection_location

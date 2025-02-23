@@ -12,7 +12,7 @@ module Query::Initializers::Descriptions
   def add_desc_by_author_condition(type)
     return unless params[:by_author]
 
-    # Change this conditional to check for :with_descriptions param
+    # Change this conditional to check for :has_descriptions param
     with_desc = with_desc_string
     user = find_cached_parameter_instance(User, :by_author)
     @title_tag = :"query_title#{with_desc}_by_author".t(
@@ -26,7 +26,7 @@ module Query::Initializers::Descriptions
   def add_desc_by_editor_condition(type)
     return unless params[:by_editor]
 
-    # Change this conditional to check for :with_descriptions param
+    # Change this conditional to check for :has_descriptions param
     with_desc = with_desc_string
     user = find_cached_parameter_instance(User, :by_editor)
     @title_tag = :"query_title#{with_desc}_by_editor".t(
@@ -38,7 +38,7 @@ module Query::Initializers::Descriptions
   end
 
   def with_desc_string
-    [Name, Location].include?(model) ? "_with_descriptions" : ""
+    [Name, Location].include?(model) ? "_has_descriptions" : ""
   end
 
   # If ever generalizing, `type` should be model.parent_type
@@ -73,12 +73,12 @@ module Query::Initializers::Descriptions
 
   def initialize_desc_project_parameter(type)
     ids = lookup_projects_by_name(params[:desc_project])
-    add_id_condition("#{type}_descriptions.project_id", ids)
+    add_association_condition("#{type}_descriptions.project_id", ids)
   end
 
   def initialize_desc_creator_parameter(type)
     ids = lookup_users_by_name(params[:desc_creator])
-    add_id_condition("#{type}_descriptions.user_id", ids)
+    add_association_condition("#{type}_descriptions.user_id", ids)
   end
 
   def initialize_desc_content_parameter(type)

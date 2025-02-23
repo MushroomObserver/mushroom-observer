@@ -29,7 +29,7 @@ class HerbariumRecordsController < ApplicationController
   def herbarium
     store_location
     query = create_query(:HerbariumRecord,
-                         herbarium: params[:herbarium].to_s,
+                         herbaria: params[:herbarium].to_s,
                          by: :herbarium_label)
     [query, { always_index: true }]
   end
@@ -38,7 +38,7 @@ class HerbariumRecordsController < ApplicationController
     @observation = Observation.find(params[:observation])
     store_location
     query = create_query(:HerbariumRecord,
-                         observation: params[:observation].to_s,
+                         observations: params[:observation].to_s,
                          by: :herbarium_label)
     [query, { always_index: true }]
   end

@@ -230,7 +230,7 @@ class PatternSearchTest < UnitTestCase
     x.vals = ids.map(&:to_s)
     assert_equal(ids, x.parse_list_of_locations)
     x.vals = ["*California, USA"]
-    expect = Location.name_contains("California, USA").map(&:id).sort
+    expect = Location.name_has("California, USA").map(&:id).sort
     assert_operator(expect.count, :>, 1)
     assert_equal(expect, x.parse_list_of_locations.sort)
     x.vals = ["USA, California*"]

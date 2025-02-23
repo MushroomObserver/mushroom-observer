@@ -21,7 +21,7 @@ class Query::RssLogs < Query::Base
     add_sort_order_to_title
     add_time_condition("rss_logs.updated_at", params[:updated_at])
     initialize_type_parameter
-    add_ids_condition
+    add_id_in_set_condition
     initialize_content_filters_for_rss_log(Observation)
     initialize_content_filters_for_rss_log(Location)
     super

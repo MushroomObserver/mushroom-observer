@@ -161,9 +161,9 @@ class API2::ObservationsTest < UnitTestCase
     assert_api_results(obses)
   end
 
-  def test_getting_observations_with_images
-    with    = Observation.with_images
-    without = Observation.without_images
+  def test_getting_observations_has_images
+    with    = Observation.has_images
+    without = Observation.has_no_images
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params_get(has_images: "yes"))
@@ -186,7 +186,7 @@ class API2::ObservationsTest < UnitTestCase
     assert_api_results(without)
   end
 
-  def test_getting_observations_with_comments
+  def test_getting_observations_has_comments
     obses = Comment.where(target_type: "Observation").
             map(&:target).uniq.sort_by(&:id)
     assert(obses.length > 1)
@@ -194,9 +194,9 @@ class API2::ObservationsTest < UnitTestCase
     assert_api_results(obses)
   end
 
-  def test_getting_observations_with_specimen
-    with    = Observation.with_specimen
-    without = Observation.without_specimen
+  def test_getting_observations_has_specimen
+    with    = Observation.has_specimen
+    without = Observation.has_no_specimen
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params_get(has_specimen: "yes"))
@@ -205,14 +205,14 @@ class API2::ObservationsTest < UnitTestCase
     assert_api_results(without)
   end
 
-  def test_getting_observations_with_notes
+  def test_getting_observations_has_notes
     # no_notes = Observation.no_notes_persisted
     # with = Observation.where("notes != ?", no_notes)
     # without = Observation.where("notes = ?", no_notes)
     # Nimmo note: Observation.no_notes_persisted is just no_notes.to_yaml
     # Observation.no_notes, not the above, works for comparison in Arel here.
-    with = Observation.with_notes
-    without = Observation.without_notes
+    with = Observation.has_notes
+    without = Observation.has_no_notes
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params_get(has_notes: "yes"))
@@ -221,20 +221,20 @@ class API2::ObservationsTest < UnitTestCase
     assert_api_results(without)
   end
 
-  def test_getting_observations_notes_contain
-    obses = Observation.notes_contain(":substrate:").
+  def test_getting_observations_notes_has
+    obses = Observation.notes_has(":substrate:").
             reject { |o| o.notes[:substrate].blank? }
     assert(obses.length > 1)
     assert_api_pass(params_get(has_notes_field: "substrate"))
     assert_api_results(obses)
 
-    obses = Observation.notes_contain("orphan")
+    obses = Observation.notes_has("orphan")
     assert(obses.length > 1)
     assert_api_pass(params_get(notes_has: "orphan"))
     assert_api_results(obses)
   end
 
-  def test_getting_observations_comments_contain
+  def test_getting_observations_comments_has
     obses = Comment.where(
       Comment[:summary].concat(Comment[:comment]).matches("%let's%")
     ).map(&:target).uniq.sort_by(&:id)
@@ -495,7 +495,7 @@ class API2::ObservationsTest < UnitTestCase
     assert_objs_equal(locations(:burbank), obs.location)
   end
 
-  def test_post_observation_with_specimen
+  def test_post_observation_has_specimen
     params = {
       method: :post,
       action: :observation,

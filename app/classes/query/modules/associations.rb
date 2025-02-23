@@ -4,7 +4,9 @@
 module Query::Modules::Associations
   def initialize_users_parameter(table = model.table_name)
     ids = lookup_users_by_name(params[:by_users])
-    add_id_condition("#{table}.user_id", ids, title_method: :set_by_user_title)
+    add_association_condition(
+      "#{table}.user_id", ids, title_method: :set_by_user_title
+    )
   end
 
   def set_by_user_title
@@ -31,13 +33,23 @@ module Query::Modules::Associations
     joins = [:observations, :observation_herbarium_records, :herbarium_records]
   )
     ids = lookup_herbaria_by_name(params[:herbaria])
-    add_id_condition("herbarium_records.herbarium_id", ids, *joins)
+    add_association_condition("herbarium_records.herbarium_id", ids, *joins,
+                              title_method: :set_herbarium_title)
+  end
+
+  def set_herbarium_title
+    herbarium = find_cached_parameter_instance(Herbarium, :herbarium)
+    @title_tag = :query_title_in_herbarium
+    @title_args[:herbarium] = herbarium.name
+    herbarium
   end
 
   def initialize_herbarium_records_parameter
     ids = lookup_herbarium_records_by_name(params[:herbarium_records])
-    add_id_condition("observation_herbarium_records.herbarium_record_id", ids,
-                     :observations, :observation_herbarium_records)
+    add_association_condition(
+      "observation_herbarium_records.herbarium_record_id", ids,
+      :observations, :observation_herbarium_records
+    )
   end
 
   # This adds conditions both matching location ids, and where strings.
@@ -72,15 +84,11 @@ module Query::Modules::Associations
     where << "observations.is_collection_location IS TRUE"
   end
 
-  # TO BE REMOVED
-  def add_for_observation_condition(
+  def initialize_observations_parameter(
     table = :"observation_#{model.table_name}", joins = [table]
   )
-    return if params[:observation].blank?
-
-    obs = set_for_observation_title
-    where << "#{table}.observation_id = '#{obs.id}'"
-    add_join(*joins)
+    add_association_condition("#{table}.observation_id", params[:observations],
+                              *joins, title_method: :set_for_observation_title)
   end
 
   # Possible issue: the second arg below is the param name.
@@ -93,18 +101,11 @@ module Query::Modules::Associations
     obs
   end
 
-  def initialize_observations_parameter(
-    table = :"observation_#{model.table_name}", joins = [table]
-  )
-    add_id_condition("#{table}.observation_id", params[:observations],
-                     *joins, title_method: :set_for_observation_title)
-  end
-
   def initialize_projects_parameter(table = :project_observations,
                                     joins = [:observations, table])
     ids = lookup_projects_by_name(params[:projects])
-    add_id_condition("#{table}.project_id", ids,
-                     *joins, title_method: :set_for_project_title)
+    add_association_condition("#{table}.project_id", ids,
+                              *joins, title_method: :set_for_project_title)
   end
 
   def set_for_project_title
@@ -118,8 +119,8 @@ module Query::Modules::Associations
     table = :species_list_observations, joins = [:observations, table]
   )
     ids = lookup_species_lists_by_name(params[:species_lists])
-    add_id_condition("#{table}.species_list_id", ids,
-                     *joins, title_method: :set_in_species_list_title)
+    add_association_condition("#{table}.species_list_id", ids,
+                              *joins, title_method: :set_in_species_list_title)
   end
 
   def set_in_species_list_title

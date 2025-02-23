@@ -15,13 +15,13 @@ class Query::HerbariumRecordsTest < UnitTestCase
   def test_herbarium_record_for_observation
     obs = observations(:coprinus_comatus_obs)
     expects = HerbariumRecord.index_order.for_observation(obs)
-    assert_query(expects, :HerbariumRecord, observation: obs.id)
+    assert_query(expects, :HerbariumRecord, observations: obs.id)
   end
 
   def test_herbarium_record_in_herbarium
     nybg = herbaria(:nybg_herbarium)
     expects = HerbariumRecord.index_order.where(herbarium: nybg)
-    assert_query(expects, :HerbariumRecord, herbarium: nybg.id)
+    assert_query(expects, :HerbariumRecord, herbaria: nybg.id)
   end
 
   def test_herbarium_record_pattern_search_notes
@@ -30,8 +30,7 @@ class Query::HerbariumRecordsTest < UnitTestCase
   end
 
   def test_herbarium_record_pattern_search_not_findable
-    assert_query([], :HerbariumRecord,
-                 pattern: "no herbarium record has this")
+    assert_query([], :HerbariumRecord, pattern: "no herbarium record has this")
   end
 
   def test_herbarium_record_pattern_search_initial_det
