@@ -12,8 +12,6 @@ class Query::HerbariumRecords < Query::Base
       ids: [HerbariumRecord],
       by_users: [User],
       herbaria: [Herbarium],
-      herbarium: Herbarium,
-      observation: Observation,
       observations: [Observation],
       pattern: :string,
       with_notes: :boolean,
@@ -40,17 +38,7 @@ class Query::HerbariumRecords < Query::Base
   def initialize_association_parameters
     add_in_herbarium_condition
     initialize_herbaria_parameter([])
-    add_for_observation_condition
     initialize_observations_parameter
-  end
-
-  def add_in_herbarium_condition
-    return if params[:herbarium].blank?
-
-    herbarium = find_cached_parameter_instance(Herbarium, :herbarium)
-    @title_tag = :query_title_in_herbarium
-    @title_args[:herbarium] = herbarium.name
-    where << "herbarium_records.herbarium_id = '#{herbarium.id}'"
   end
 
   def initialize_boolean_parameters
