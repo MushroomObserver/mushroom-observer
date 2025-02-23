@@ -10,6 +10,7 @@ class Banner < ApplicationRecord
 
   def test_version
     x = format("Style/RedundantFormat offense added in RuboCop 1.72")
+    y = "#{x} line added to avoid useless assignment Offense in line 12"
 
     "x".match?(/#{%w[Lint ArrayLiteralInRegexp added in RuboCop 1.71]}/)
 
