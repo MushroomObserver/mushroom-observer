@@ -68,7 +68,7 @@ class Query::Names < Query::Base
   end
 
   def initialize_names_only_parameters
-    add_ids_condition
+    add_id_in_set_condition
     add_owner_and_time_stamp_conditions
     add_by_editor_condition
     initialize_name_comments_and_notes_parameters
@@ -146,7 +146,9 @@ class Query::Names < Query::Base
   end
 
   def initialize_name_association_parameters
-    add_id_condition("observations.id", params[:observations], :observations)
+    add_association_condition(
+      "observations.id", params[:observations], :observations
+    )
     initialize_locations_parameter(
       :observations, params[:locations], :observations
     )

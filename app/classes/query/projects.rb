@@ -31,7 +31,7 @@ class Query::Projects < Query::Base
     initialize_association_parameters
     initialize_boolean_parameters
     initialize_search_parameters
-    add_ids_condition
+    add_id_in_set_condition
     add_pattern_condition
     super
   end
@@ -43,8 +43,9 @@ class Query::Projects < Query::Base
     # add_join(:"user_group_users.members")
     # where << "user_group_users.user_id = '#{params[:member]}'"
     ids = lookup_users_by_name(params[:members])
-    add_id_condition("user_group_users.user_id", ids,
-                     :"user_group_users.members")
+    add_association_condition(
+      "user_group_users.user_id", ids, :"user_group_users.members"
+    )
   end
 
   def initialize_boolean_parameters

@@ -31,7 +31,7 @@ class Query::Sequences < Query::Base
     # some sequences because of this.
     add_owner_and_time_stamp_conditions
     add_pattern_condition
-    add_ids_condition
+    add_id_in_set_condition
     initialize_observations_parameter(:sequences)
     add_subquery_condition(:observation_query, :observations)
     initialize_exact_match_parameters

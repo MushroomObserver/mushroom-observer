@@ -14,7 +14,7 @@ class Query::Base
   include Query::Modules::Joining
   include Query::Modules::LookupObjects
   include Query::Modules::LowLevelQueries
-  include Query::Modules::NestedQueries
+  # include Query::Modules::NestedQueries
   include Query::Modules::Ordering
   include Query::Modules::SequenceOperators
   include Query::Modules::Serialization
@@ -33,6 +33,7 @@ class Query::Base
       where: [:string],
       group: :string,
       order: :string,
+      selects: :string,
       by: :string,
       title: [:string]
     }
