@@ -16,6 +16,13 @@ end
                            names: @data.num_taxa) %>
 </div>
 
+<% if @location %>
+  <h4>
+    <%= :checklist_for.t %>
+    <%= location_link(nil, @location) %>
+  </h4>
+<% end %>
+
 <%= panel_block(inner_class: "checklist") do %>
   <ul class="list-unstyled">
     <% @data.taxa.each do |taxon| %>
