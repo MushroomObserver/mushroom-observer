@@ -10,11 +10,12 @@ class Banner < ApplicationRecord
 
   def test_version
     # rubocop:disable Lint/UselessAssignment
+    x = "Lint/RedundantTypeConversion RuboCop 1.72".to_s
 
     "x".match?(/#{%w[Lint ArrayLiteralInRegexp added in RuboCop 1.71]}/)
 
     x = 1
-    if x = "Lint/LiteralAssignmentInCondition RuboCop 1.59"
+    if x = y # Lint/LiteralAssignmentInCondition RuboCop 1.59
       do_something
     end
 
