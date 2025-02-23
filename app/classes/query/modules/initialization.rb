@@ -122,20 +122,20 @@ module Query::Modules::Initialization
                 end
   end
 
-  # params[:group] is sanitized here, but it is not validated.
+  # params[:group] is not sanitized or validated.
   def initialize_group
     return if params[:group].blank?
 
-    self.group = escape(params[:group])
+    self.group = params[:group]
   end
 
-  # params[:selects] is sanitized here, but it is not validated.
+  # params[:selects] is not sanitized or validated.
   def initialize_selects
     if params[:selects].blank?
       @selects = "DISTINCT #{model.table_name}.id"
       return
     end
 
-    self.selects = escape(params[:selects])
+    self.selects = params[:selects]
   end
 end

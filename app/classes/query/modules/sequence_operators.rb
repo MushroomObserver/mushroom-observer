@@ -17,7 +17,7 @@ module Query::Modules::SequenceOperators
 
   # Current place in results, instantiated.  (Returns nil if not set yet.)
   def current(*)
-    @current_id ? instantiate([@current_id], *).first : nil
+    @current_id ? instantiate_results([@current_id], *).first : nil
   end
 
   # Set current place in results; takes instance or id (String or Integer).

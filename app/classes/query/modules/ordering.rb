@@ -3,9 +3,9 @@
 module Query::Modules::Ordering
   def initialize_order
     # Let callers explicitly send in an order statement.
-    # This is sanitized but not validated.
+    # This is not sanitized or validated.
     if params[:order].present?
-      self.order = escape(params[:order])
+      self.order = params[:order]
       return
     end
 

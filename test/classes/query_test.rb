@@ -375,6 +375,39 @@ class QueryTest < UnitTestCase
     )
   end
 
+  def test_query_params_selects
+    # defaults
+    query = Query.new(:Name)
+    assert(query.query)
+    assert_equal(clean(query.selects), "DISTINCT names.id")
+
+    query = Query.new(:Name, selects: "DISTINCT names.text_name")
+    assert(query.query)
+    assert_equal(clean(query.selects), "DISTINCT names.text_name")
+  end
+
+  def test_query_params_order
+    # defaults
+    query = Query.new(:Name)
+    assert(query.query)
+    assert_equal(clean(query.order), "names.sort_name ASC")
+
+    query = Query.new(:Name, order: "names.id ASC")
+    assert(query.query)
+    assert_equal(clean(query.order), "names.id ASC")
+  end
+
+  def test_query_params_group
+    # defaults
+    query = Query.new(:Observation)
+    assert(query.query)
+    assert_equal(clean(query.group), "")
+
+    query = Query.new(:Observation, group: "observations.name_id")
+    assert(query.query)
+    assert_equal(clean(query.group), "observations.name_id")
+  end
+
   def test_join_conditions
     query = Query.lookup(:Name)
     query.initialize_query
@@ -600,19 +633,19 @@ class QueryTest < UnitTestCase
     query = Query.lookup(:Observation)
     ids = query.result_ids
 
-    first = query.instantiate([ids[0]]).first
+    first = query.instantiate_results([ids[0]]).first
     assert_not(first.images.loaded?)
 
-    first = query.instantiate([ids[0]], include: :images).first
+    first = query.instantiate_results([ids[0]], include: :images).first
     assert_not(first.images.loaded?)
 
     # Have to test it on a different one, because first is now cached.
-    second = query.instantiate([ids[1]], include: :images).first
+    second = query.instantiate_results([ids[1]], include: :images).first
     assert(second.images.loaded?)
 
     # Or we can clear out the cache and it will work...
     query.clear_cache
-    first = query.instantiate([ids[0]], include: :images).first
+    first = query.instantiate_results([ids[0]], include: :images).first
     assert(first.images.loaded?)
   end
 
