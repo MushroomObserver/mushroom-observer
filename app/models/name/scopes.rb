@@ -59,10 +59,10 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
       if bool.to_s.to_boolean == true
         where.not(synonym_id: nil)
       else
-        without_synonyms
+        has_no_synonyms
       end
     }
-    scope :without_synonyms,
+    scope :has_no_synonyms,
           -> { where(synonym_id: nil) }
 
     scope :ok_for_export, lambda { |bool = true|
@@ -79,10 +79,10 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
       if bool.to_s.to_boolean == true
         where(Name[:classification].not_blank)
       else
-        without_classification
+        has_no_classification
       end
     }
-    scope :without_classification,
+    scope :has_no_classification,
           -> { where(Name[:classification].blank) }
     scope :classification_contains,
           ->(phrase) { search_columns(Name[:classification], phrase) }
@@ -91,10 +91,10 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
       if bool.to_s.to_boolean == true
         where(Name[:author].not_blank)
       else
-        without_author
+        has_no_author
       end
     }
-    scope :without_author,
+    scope :has_no_author,
           -> { where(Name[:author].blank) }
     scope :author_contains,
           ->(phrase) { search_columns(Name[:author], phrase) }
@@ -103,10 +103,10 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
       if bool.to_s.to_boolean == true
         where(Name[:citation].not_blank)
       else
-        without_citation
+        has_no_citation
       end
     }
-    scope :without_citation,
+    scope :has_no_citation,
           -> { where(Name[:citation].blank) }
     scope :citation_contains,
           ->(phrase) { search_columns(Name[:citation], phrase) }
@@ -115,10 +115,10 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
       if bool.to_s.to_boolean == true
         where(Name[:notes].not_blank)
       else
-        without_notes
+        has_no_notes
       end
     }
-    scope :without_notes,
+    scope :has_no_notes,
           -> { where(Name[:notes].blank) }
     scope :notes_contain,
           ->(phrase) { search_columns(Name[:notes], phrase) }
@@ -234,10 +234,10 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
       if bool.to_s.to_boolean == true
         joins(:comments).distinct
       else
-        without_comments
+        has_no_comments
       end
     }
-    scope :without_comments,
+    scope :has_no_comments,
           -> { where.not(id: Name.has_comments) }
     scope :comments_contain, lambda { |phrase|
       joins(:comments).merge(Comment.search_content(phrase)).distinct
@@ -247,7 +247,7 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
       if bool.to_s.to_boolean == true
         where.not(description_id: nil)
       else
-        without_description
+        has_no_description
       end
     }
     scope :without_description,
@@ -256,7 +256,7 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
     # In the template, order scope `description_needed` by most frequently used:
     #   Name.description_needed.group(:name_id).reorder(Arel.star.count.desc)
     scope :description_needed,
-          -> { without_description.joins(:observations).distinct }
+          -> { has_no_description.joins(:observations).distinct }
     scope :description_contains, lambda { |phrase|
       joins(:descriptions).
         merge(NameDescription.search_content(phrase)).distinct

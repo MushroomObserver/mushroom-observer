@@ -163,7 +163,7 @@ class API2::ObservationsTest < UnitTestCase
 
   def test_getting_observations_has_images
     with    = Observation.has_images
-    without = Observation.without_images
+    without = Observation.has_no_images
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params_get(has_images: "yes"))
@@ -196,7 +196,7 @@ class API2::ObservationsTest < UnitTestCase
 
   def test_getting_observations_has_specimen
     with    = Observation.has_specimen
-    without = Observation.without_specimen
+    without = Observation.has_no_specimen
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params_get(has_specimen: "yes"))
@@ -212,7 +212,7 @@ class API2::ObservationsTest < UnitTestCase
     # Nimmo note: Observation.no_notes_persisted is just no_notes.to_yaml
     # Observation.no_notes, not the above, works for comparison in Arel here.
     with = Observation.has_notes
-    without = Observation.without_notes
+    without = Observation.has_no_notes
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params_get(has_notes: "yes"))

@@ -116,7 +116,7 @@ class API2::NamesTest < UnitTestCase
   end
 
   def test_getting_names_with_without_synonyms
-    without = Name.without_synonyms
+    without = Name.has_no_synonyms
     with    = Name.with_correct_spelling.has_synonyms
     assert_not_empty(without)
     assert_not_empty(with)
@@ -155,7 +155,7 @@ class API2::NamesTest < UnitTestCase
 
   def test_getting_names_has_author
     with    = Name.with_correct_spelling.has_author
-    without = Name.with_correct_spelling.without_author
+    without = Name.with_correct_spelling.has_no_author
     assert_not_empty(with)
     assert_not_empty(without)
     assert_api_pass(params_get(has_author: "yes"))
@@ -166,7 +166,7 @@ class API2::NamesTest < UnitTestCase
 
   def test_getting_names_has_citation
     with    = Name.with_correct_spelling.has_citation
-    without = Name.with_correct_spelling.without_citation
+    without = Name.with_correct_spelling.has_no_citation
     assert_not_empty(with)
     assert_not_empty(without)
     assert_api_pass(params_get(has_citation: "yes"))
@@ -177,7 +177,7 @@ class API2::NamesTest < UnitTestCase
 
   def test_getting_names_has_classification
     with    = Name.with_correct_spelling.has_classification
-    without = Name.with_correct_spelling.without_classification
+    without = Name.with_correct_spelling.has_no_classification
     assert_not_empty(with)
     assert_not_empty(without)
     assert_api_pass(params_get(has_classification: "yes"))
@@ -188,7 +188,7 @@ class API2::NamesTest < UnitTestCase
 
   def test_getting_names_has_notes
     with    = Name.with_correct_spelling.has_notes
-    without = Name.with_correct_spelling.without_notes
+    without = Name.with_correct_spelling.has_no_notes
     assert_not_empty(with)
     assert_not_empty(without)
     assert_api_pass(params_get(has_notes: "yes"))

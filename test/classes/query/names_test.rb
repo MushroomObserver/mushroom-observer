@@ -169,7 +169,7 @@ class Query::NamesTest < UnitTestCase
   def test_name_has_synonyms
     expects = Name.with_correct_spelling.has_synonyms.index_order
     assert_query(expects, :Name, has_synonyms: true)
-    expects = Name.with_correct_spelling.without_synonyms.index_order
+    expects = Name.with_correct_spelling.has_no_synonyms.index_order
     assert_query(expects, :Name, has_synonyms: false)
   end
 
@@ -196,7 +196,7 @@ class Query::NamesTest < UnitTestCase
   def test_name_has_author
     expects = Name.with_correct_spelling.has_author.index_order
     assert_query(expects, :Name, has_author: true)
-    expects = Name.with_correct_spelling.without_author.index_order
+    expects = Name.with_correct_spelling.has_no_author.index_order
     assert_query(expects, :Name, has_author: false)
   end
 
@@ -208,7 +208,7 @@ class Query::NamesTest < UnitTestCase
   def test_name_has_citation
     expects = Name.with_correct_spelling.has_citation.index_order
     assert_query(expects, :Name, has_citation: true)
-    expects = Name.with_correct_spelling.without_citation.index_order
+    expects = Name.with_correct_spelling.has_no_citation.index_order
     assert_query(expects, :Name, has_citation: false)
   end
 
@@ -221,7 +221,7 @@ class Query::NamesTest < UnitTestCase
   def test_name_has_classification
     expects = Name.with_correct_spelling.has_classification.index_order
     assert_query(expects, :Name, has_classification: true)
-    expects = Name.with_correct_spelling.without_classification.index_order
+    expects = Name.with_correct_spelling.has_no_classification.index_order
     assert_query(expects, :Name, has_classification: false)
   end
 
@@ -234,7 +234,7 @@ class Query::NamesTest < UnitTestCase
   def test_name_has_notes
     expects = Name.with_correct_spelling.has_notes.index_order
     assert_query(expects, :Name, has_notes: true)
-    expects = Name.with_correct_spelling.without_notes.index_order
+    expects = Name.with_correct_spelling.has_no_notes.index_order
     assert_query(expects, :Name, has_notes: false)
   end
 

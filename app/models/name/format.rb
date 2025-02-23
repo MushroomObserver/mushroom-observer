@@ -57,7 +57,7 @@ module Name::Format
   # display_name less author
   # This depends on display_name having markup around name proper
   # Otherwise, it might delete author if that were part of the name proper
-  def display_name_without_authors
+  def display_name_has_no_authors
     if rank == "Group"
       # Remove author and preceding space at end
       display_name.sub(/ #{Regexp.quote(author)}$/, "")

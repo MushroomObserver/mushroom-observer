@@ -44,7 +44,7 @@ class PatternSearch::NameTest < UnitTestCase
   end
 
   def test_name_search_has_synonyms
-    expect = Name.without_synonyms
+    expect = Name.has_no_synonyms
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_synonyms:no")
     assert_name_arrays_equal(expect, x.query.results, :sort)
@@ -97,7 +97,7 @@ class PatternSearch::NameTest < UnitTestCase
   end
 
   def test_name_search_has_author
-    expect = Name.with_correct_spelling.without_author
+    expect = Name.with_correct_spelling.has_no_author
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_author:no")
     assert_name_arrays_equal(expect, x.query.results, :sort)
@@ -109,7 +109,7 @@ class PatternSearch::NameTest < UnitTestCase
   end
 
   def test_name_search_has_citation
-    expect = Name.with_correct_spelling.without_citation
+    expect = Name.with_correct_spelling.has_no_citation
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_citation:no")
     assert_name_arrays_equal(expect, x.query.results, :sort)
@@ -121,7 +121,7 @@ class PatternSearch::NameTest < UnitTestCase
   end
 
   def test_name_search_has_classification
-    expect = Name.with_correct_spelling.without_classification
+    expect = Name.with_correct_spelling.has_no_classification
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_classification:no")
     assert_name_arrays_equal(expect, x.query.results, :sort)
@@ -133,7 +133,7 @@ class PatternSearch::NameTest < UnitTestCase
   end
 
   def test_name_search_has_notes
-    expect = Name.with_correct_spelling.without_notes
+    expect = Name.with_correct_spelling.has_no_notes
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_notes:no")
     assert_name_arrays_equal(expect, x.query.results, :sort)
@@ -157,7 +157,7 @@ class PatternSearch::NameTest < UnitTestCase
     x = PatternSearch::Name.new("has_description:yes")
     assert_name_arrays_equal(expect, x.query.results, :sort)
 
-    expect = Name.with_correct_spelling.reorder(id: :asc).without_description
+    expect = Name.with_correct_spelling.reorder(id: :asc).has_no_description
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_description:no")
     assert_name_arrays_equal(expect, x.query.results, :sort)

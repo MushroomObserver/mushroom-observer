@@ -50,7 +50,7 @@ class Query::LocationsTest < UnitTestCase
   def test_location_has_notes
     expects = Location.index_order.has_notes
     assert_query(expects, :Location, has_notes: true)
-    expects = Location.index_order.without_notes
+    expects = Location.index_order.has_no_notes
     assert_query(expects, :Location, has_notes: false)
   end
 

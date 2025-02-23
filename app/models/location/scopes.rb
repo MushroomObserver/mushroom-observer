@@ -40,10 +40,10 @@ module Location::Scopes
       if bool.to_s.to_boolean == true
         where(Location[:notes].not_blank)
       else
-        without_notes
+        has_no_notes
       end
     }
-    scope :without_notes,
+    scope :has_no_notes,
           -> { where(Location[:notes].blank) }
     scope :notes_contain,
           ->(phrase) { search_columns(Location[:notes], phrase) }
@@ -82,10 +82,10 @@ module Location::Scopes
       if bool.to_s.to_boolean == true
         where.not(description_id: nil)
       else
-        without_description
+        has_no_description
       end
     }
-    scope :without_description,
+    scope :has_no_description,
           -> { where(description_id: nil) }
     scope :description_contains, lambda { |phrase|
       joins(:descriptions).

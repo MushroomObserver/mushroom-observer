@@ -29,7 +29,7 @@ class Query::ImagesTest < UnitTestCase
   def test_image_has_notes
     expects = Image.index_order.has_notes
     assert_query(expects, :Image, has_notes: true)
-    expects = Image.index_order.without_notes
+    expects = Image.index_order.has_no_notes
     assert_query(expects, :Image, has_notes: false)
   end
 
@@ -53,7 +53,7 @@ class Query::ImagesTest < UnitTestCase
   def test_image_has_votes
     expects = Image.index_order.has_votes
     assert_query(expects, :Image, has_votes: true)
-    expects = Image.index_order.without_votes
+    expects = Image.index_order.has_no_votes
     assert_query(expects, :Image, has_votes: false)
   end
 
