@@ -28,7 +28,7 @@ class Query::HerbariumRecords < Query::Base
   def initialize_flavor
     add_sort_order_to_title
     add_owner_and_time_stamp_conditions
-    add_ids_condition
+    add_id_in_set_condition
     add_pattern_condition
     initialize_association_parameters
     initialize_boolean_parameters

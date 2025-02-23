@@ -29,12 +29,12 @@ class Query::NameDescriptions < Query::Base
 
   def initialize_flavor
     add_sort_order_to_title
-    add_ids_condition
+    add_id_in_set_condition
     add_owner_and_time_stamp_conditions
     add_desc_by_author_condition(:name)
     add_desc_by_editor_condition(:name)
     ids = lookup_names_by_name(params[:names])
-    add_id_condition("name_descriptions.name_id", ids)
+    add_key_condition("name_descriptions.name_id", ids)
     initialize_description_public_parameter(:name)
     initialize_name_descriptions_parameters
     add_subquery_condition(:name_query, :names)

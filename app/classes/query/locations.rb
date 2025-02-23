@@ -55,7 +55,7 @@ class Query::Locations < Query::Base
   end
 
   def initialize_locations_only_parameters
-    add_ids_condition
+    add_id_in_set_condition
     add_owner_and_time_stamp_conditions
     add_by_editor_condition
     initialize_location_notes_parameters
