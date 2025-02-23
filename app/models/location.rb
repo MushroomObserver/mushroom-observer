@@ -724,10 +724,12 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     end
 
     # Move over any interest in the old name.
-    Interest.where(target_type: "Location",
-                   target_id: old_loc.id).find_each do |int|
-      int.target = self
-      int.save
+    [Interest, ProjectAlias].each do |klass|
+      klass.where(target_type: "Location",
+                  target_id: old_loc.id).find_each do |obj|
+        obj.target = self
+        obj.save
+      end
     end
 
     add_note(explain_merge(old_loc))
