@@ -65,9 +65,7 @@ module Query::Modules::ActiveRecord
 
   delegate :id, to: :record
 
-  def save
-    record.save
-  end
+  delegate :save, to: :record
 
   def increment_access_count
     record.access_count += 1

@@ -769,8 +769,10 @@ class QueryTest < UnitTestCase
   #   # Following tests if results contain all inners_outer_obs_ids -- in order.
   #   # (Works because each is: (a) sorted, and (b) has no duplicate entries.
   #   missing_obs_ids = inners_obs_ids - results
-  #   assert_empty(missing_obs_ids,
-  #                "inner1.outer results missing observations #{missing_obs_ids}")
+  #   assert_empty(
+  #     missing_obs_ids,
+  #     "inner1.outer results missing observations #{missing_obs_ids}"
+  #   )
 
   #   q.current_id = results[1]
   #   assert_equal(q, q.first)
@@ -794,8 +796,10 @@ class QueryTest < UnitTestCase
   #   q_last_query = q.last
   #   q.current_id = img
 
-  #   assert_nil(q.prev,
-  #              "Result for obs #{obs}, image #{q.current_id} is not the first")
+  #   assert_nil(
+  #     q.prev,
+  #     "Result for obs #{obs}, image #{q.current_id} is not the first"
+  #   )
 
   #   ### Use next to step forward through the other results, ###
   #   # checking for the right query, observation, and image
