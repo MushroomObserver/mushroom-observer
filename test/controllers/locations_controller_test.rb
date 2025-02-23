@@ -231,7 +231,7 @@ class LocationsControllerTest < FunctionalTestCase
   # end
 
   def test_index_advanced_search
-    query = Query.lookup_and_save(:Location, user_where: "California")
+    query = Query.lookup_and_save(:Location, search_where: "California")
     matches = Location.name_contains("California")
 
     login
@@ -915,11 +915,5 @@ class LocationsControllerTest < FunctionalTestCase
 
   def named_obs_query(name)
     Query.lookup(:Observation, pattern: name, by: :name)
-  end
-
-  def test_coercing_sorted_observation_query_into_location_query
-    @controller.
-      coerce_query_for_undefined_locations(named_obs_query("Pasadena").
-      coerce(:Location))
   end
 end

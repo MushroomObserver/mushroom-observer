@@ -5,7 +5,7 @@ class Query::Herbaria < Query::Base
     Herbarium
   end
 
-  def parameter_declarations
+  def self.parameter_declarations
     super.merge(
       created_at: [:time],
       updated_at: [:time],
@@ -28,7 +28,7 @@ class Query::Herbaria < Query::Base
     add_search_condition("herbaria.name", params[:name])
     add_search_condition("herbaria.description", params[:description])
     add_search_condition("herbaria.mailing_address", params[:address])
-    add_ids_condition
+    add_id_in_set_condition
     add_pattern_condition
     add_nonpersonal_condition
     super

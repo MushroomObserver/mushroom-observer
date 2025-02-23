@@ -10,6 +10,14 @@ module Observations
       assert_template(:index)
     end
 
+    # Tests validation of nested params passed into Query
+    def test_map_obs_by_pattern_user_in_box
+      login
+      pattern = "user%3A123+north%3A42.3201+south%3A36.8186+" \
+                "east%3A-119.19399999999999+west%3A-123.27900000000001"
+      get(:index, params: { pattern: })
+    end
+
     # NOTE: the assigns(:observations) are Mappable::MinimalObservations!
     def test_map_observation_hidden_gps
       obs = observations(:unknown_with_lat_lng)
@@ -30,7 +38,7 @@ module Observations
 
     def test_map_observations_hidden_gps
       obs = observations(:unknown_with_lat_lng)
-      query = Query.lookup_and_save(:Observation, by_user: mary.id)
+      query = Query.lookup_and_save(:Observation, by_users: mary.id)
       assert(query.result_ids.include?(obs.id))
 
       login("rolf") # a user who does not own obs

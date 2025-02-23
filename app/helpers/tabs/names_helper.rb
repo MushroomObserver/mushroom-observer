@@ -230,11 +230,13 @@ module Tabs
       end
     end
 
+    # Note that a name map query is an observations (of name) query.
+    # "Related records" are going to be related to the observations.
     def name_map_tabs(name:, query:)
       [
         show_object_tab(name, :name_map_about.t(name: name.display_name)),
-        coerced_location_query_tab(query),
-        coerced_observation_query_tab(query)
+        related_locations_tab(:Observation, query),
+        related_observations_tab(:Observation, query)
       ]
     end
 
@@ -263,8 +265,8 @@ module Tabs
     #   [
     #     new_name_tab,
     #     names_with_observations_tab(query),
-    #     coerced_observation_query_tab(query),
-    #     descriptions_of_these_names_tab(query)
+    #     related_observations_tab(:Name, query),
+    #     related_descriptions_tab(query)
     #   ].reject(&:empty?)
     # end
 
@@ -276,20 +278,20 @@ module Tabs
     #   ).tab
     # end
 
-    # def descriptions_of_these_names_tab(query)
-    #   return unless query&.coercable?(:NameDescription)
+    # def related_descriptions_tab(names_query)
+    #   # return unless query&.coercable?(:NameDescription)
 
-    #   InternalLink.new(
-    #     :show_objects.t(type: :description),
-    #     add_query_param(name_descriptions_index_path)
-    #   ).tab
+    #   desc_query = Query.lookup(:NameDescription, name_query: names_query)
+    #   [:show_objects.t(type: :description),
+    #    add_query_param(name_descriptions_index_path, desc_query),
+    #    { class: tab_id(__method__.to_s) }]
     # end
 
     def all_names_index_tabs(query:)
       [
         new_name_tab,
         all_names_tab(query),
-        coerced_observation_query_tab(query)
+        related_observations_tab(:Name, query)
       ].reject(&:empty?)
     end
 

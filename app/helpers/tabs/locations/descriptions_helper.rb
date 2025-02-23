@@ -6,9 +6,9 @@ module Tabs
     module DescriptionsHelper
       def location_description_index_tabs(query:)
         [
-          map_locations_tab,
+          map_locations_tab(query),
           locations_index_tab,
-          coerced_location_query_tab(query)
+          related_locations_tab(:LocationDescription, query)
         ]
       end
 

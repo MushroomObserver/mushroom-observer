@@ -5,7 +5,7 @@ class Query::Filter
     def initialize
       super(
         sym: :with_specimen,
-        name: :SPECIMEN.t,
+        name: :SPECIMEN,
         models: [Observation],
         on_vals: %w[yes no],
         prefs_vals: ["yes"],

@@ -6,7 +6,7 @@ class Query::Filter
     def initialize
       super(
         sym: :lichen,
-        name: :LICHEN.t,
+        name: :LICHEN,
         models: [Observation, Name],
         on_vals: %w[no yes],
         prefs_vals: %w[no yes],

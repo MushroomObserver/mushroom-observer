@@ -5,11 +5,11 @@ class Query::GlossaryTerms < Query::Base
     ::GlossaryTerm
   end
 
-  def parameter_declarations
+  def self.parameter_declarations
     super.merge(
       created_at: [:time],
       updated_at: [:time],
-      users: [User],
+      by_users: [User],
       name_has: :string,
       description_has: :string,
       pattern: :string

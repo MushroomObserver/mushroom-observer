@@ -7,7 +7,7 @@ module Observations
     def test_download_observation_index
       obs = Observation.reorder(id: :asc).where(user: mary)
       assert(obs.length >= 4)
-      query = Query.lookup_and_save(:Observation, by_user: mary.id)
+      query = Query.lookup_and_save(:Observation, by_users: mary.id)
 
       # Add herbarium_record to fourth obs for testing purposes.
       login("mary")
@@ -167,8 +167,7 @@ module Observations
     end
 
     def test_download_too_many_observations_reasonable_query
-      query = Query.lookup_and_save(:Observation,
-                                    location: locations(:albion))
+      query = Query.lookup_and_save(:Observation, locations: locations(:albion))
       login("mary")
 
       MO.stub(:max_downloads, Observation.count - 1) do
@@ -192,7 +191,7 @@ module Observations
 
     def test_print_labels
       login
-      query = Query.lookup_and_save(:Observation, by_user: mary.id)
+      query = Query.lookup_and_save(:Observation, by_users: mary.id)
       assert_operator(query.num_results, :>=, 4)
       get(:print_labels, params: { q: query.id.alphabetize })
       # \pard is paragraph command in rtf, one paragraph per result
@@ -213,8 +212,9 @@ module Observations
 
     def test_project_labels
       login("roy")
-      query = Query.lookup_and_save(:Observation,
-                                    project: projects(:open_membership_project))
+      query = Query.lookup_and_save(
+        :Observation, projects: projects(:open_membership_project)
+      )
       get(:print_labels, params: { q: query.id.alphabetize })
       trusted_hidden = observations(:trusted_hidden)
       untrusted_hidden = observations(:untrusted_hidden)
@@ -232,7 +232,7 @@ module Observations
 
     def test_print_labels_query_nil
       login
-      query = Query.lookup_and_save(:Observation, by_user: mary.id)
+      query = Query.lookup_and_save(:Observation, by_users: mary.id)
 
       # simulate passing a query param, but that query doesn't exist
       @controller.stub(:find_query, nil) do

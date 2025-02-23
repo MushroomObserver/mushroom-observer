@@ -84,26 +84,26 @@ class SearchController < ApplicationController
   # NOTE: The autocompleters for name, location, and user all make the ids
   # available now, so this could be a lot more efficient.
   def add_filled_in_text_fields(query_params)
-    [:content, :user_where, :name, :user].each do |field|
+    [:search_content, :search_where, :search_name, :search_user].each do |field|
       val = params[:search][field].to_s
       next if val.blank?
 
       # Treat User field differently; remove angle-bracketed user name,
       # since it was included by the auto-completer only as a hint.
-      val = user_login(params[:search]) if field == :user
+      val = user_login(params[:search]) if field == :search_user
       query_params[field] = val
     end
   end
 
   def user_login(params)
-    if params.include?(:user_id)
-      user = User.find_by(id: params[:user_id])
+    if params.include?(:search_user_id)
+      user = User.find_by(id: params[:search_user_id])
       return user.login if user
     end
-    user = User.lookup_unique_text_name(params[:user])
+    user = User.lookup_unique_text_name(params[:search_user])
     return user.login if user
 
-    params[:user]
+    params[:search_user]
   end
 
   def add_applicable_filter_parameters(query_params, model)

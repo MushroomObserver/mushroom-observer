@@ -131,7 +131,7 @@ module Tabs
       links = [
         *observations_at_where_tabs(query), # maybe multiple links
         map_observations_tab(query),
-        *observations_coerced_query_tabs(query), # multiple links
+        *observations_related_query_tabs(query), # multiple links
         observations_add_to_list_tab(query),
         observations_download_as_csv_tab(query)
       ]
@@ -165,10 +165,10 @@ module Tabs
       ).tab
     end
 
-    # Hack to use the :locations param if it's present and the :user_where
+    # Hack to use the :locations param if it's present and the :search_where
     # param is missing.
     def where_param(query_params)
-      query_params[:user_where] || params[:where]
+      query_params[:search_where] || params[:where]
     end
 
     def assign_undefined_location_tab(query)
@@ -201,11 +201,11 @@ module Tabs
       ).tab
     end
 
-    # NOTE: coerced_query_tab returns an array
-    def observations_coerced_query_tabs(query)
-      [InternalLink::CoercedQuery.new(query, Location).tab,
-       InternalLink::CoercedQuery.new(query, Name).tab,
-       InternalLink::CoercedQuery.new(query, Image).tab]
+    # NOTE: each tab returns an array
+    def observations_related_query_tabs(query)
+      [related_locations_tab(:Observation, query),
+       related_names_tab(:Observation, query),
+       related_images_tab(:Observation, query)]
     end
 
     def observations_add_to_list_tab(query)
@@ -235,8 +235,8 @@ module Tabs
     end
 
     def observation_maps_tabs(query:)
-      [coerced_observation_query_tab(query),
-       coerced_location_query_tab(query)]
+      [related_observations_tab(:Observation, query), # index of the same obs
+       related_locations_tab(:Observation, query)]
     end
 
     def new_inat_import_tab(query: nil)

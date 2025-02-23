@@ -33,10 +33,10 @@ class API2
 
     def query_params
       {
-        where: sql_id_condition,
+        ids: parse_array(:herbarium_record, :id, as: :id),
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at),
-        users: parse_array(:user, :user, help: :creator),
+        by_users: parse_array(:user, :user, help: :creator),
         herbaria: parse_array(:herbarium, :herbarium, as: :id),
         observations: parse_array(:observation, :observation, as: :id),
         with_notes: parse(:boolean, :has_notes),
