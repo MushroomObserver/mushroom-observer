@@ -30,7 +30,7 @@ class Query::SpeciesLists < Query::Base
     add_owner_and_time_stamp_conditions
     add_date_condition("species_lists.when", params[:date])
     add_pattern_condition
-    add_ids_condition
+    add_id_in_set_condition
     add_subquery_condition(:observation_query, :species_list_observations,
                            table: :species_list_observations,
                            col: :observation_id)

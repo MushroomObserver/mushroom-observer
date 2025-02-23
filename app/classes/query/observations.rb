@@ -78,7 +78,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
 
   def initialize_obs_basic_parameters
     ids_param = model == Observation ? :ids : :obs_ids
-    add_ids_condition("observations", ids_param)
+    add_id_in_set_condition("observations", ids_param)
     add_owner_and_time_stamp_conditions("observations")
     initialize_obs_date_parameter(:date)
   end
@@ -106,7 +106,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
 
   # This is just to allow the additional location conditions
   # to be added FOR coerced queries.
-  def add_ids_condition(table = model.table_name, ids = :ids)
+  def add_id_in_set_condition(table = model.table_name, ids = :ids)
     super
     return if model != Observation
 
@@ -293,11 +293,9 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
   end
 
   def initialize_project_lists_parameter
-    add_id_condition(
-      "species_list_observations.species_list_id",
-      lookup_lists_for_projects_by_name(params[:project_lists]),
-      :observations, :species_list_observations
-    )
+    ids = lookup_lists_for_projects_by_name(params[:project_lists])
+    add_association_condition("species_list_observations.species_list_id", ids,
+                              :observations, :species_list_observations)
   end
 
   def initialize_field_slips_parameter
@@ -305,7 +303,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
 
     add_join(:field_slips)
     ids = lookup_field_slips_by_name(params[:field_slips])
-    add_id_condition("field_slips.id", ids, :observations)
+    add_association_condition("field_slips.id", ids, :observations)
   end
 
   def add_join_to_names

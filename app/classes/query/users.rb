@@ -19,7 +19,7 @@ class Query::Users < Query::Base
     add_sort_order_to_title
     add_time_condition("users.created_at", params[:created_at])
     add_time_condition("users.updated_at", params[:updated_at])
-    add_ids_condition
+    add_id_in_set_condition
     add_pattern_condition
     add_contribution_condition
     super

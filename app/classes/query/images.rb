@@ -49,7 +49,7 @@ class Query::Images < Query::Base
   end
 
   def initialize_image_parameters
-    add_ids_condition
+    add_id_in_set_condition
     add_owner_and_time_stamp_conditions
     add_date_condition("images.when", params[:date])
     initialize_img_notes_parameters
@@ -124,7 +124,7 @@ class Query::Images < Query::Base
       :species_list_observations,
       [:observation_images, :observations, :species_list_observations]
     )
-    add_id_condition("images.license_id", params[:license])
+    add_association_condition("images.license_id", params[:license])
   end
 
   def initialize_image_vote_parameters
