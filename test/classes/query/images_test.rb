@@ -41,7 +41,7 @@ class Query::ImagesTest < UnitTestCase
   end
 
   def test_image_copyright_holder_has
-    expects = Image.index_order.copyright_holder_contains('"Insil Choi"')
+    expects = Image.index_order.copyright_holder_has('"Insil Choi"')
     assert_query(expects, :Image, copyright_holder_has: '"Insil Choi"')
   end
 
