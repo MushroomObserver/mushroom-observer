@@ -2,8 +2,8 @@
 
 # Helper methods for turning Query parameters into AR conditions.
 module Query::Scopes::Associations
+  # joins = [:observations, :observation_herbarium_records, :herbarium_records]
   def initialize_herbaria_parameter(
-    # joins = [:observations, :observation_herbarium_records, :herbarium_records]
     joins = { observations:
               { observation_herbarium_records: :herbarium_record } }
   )
