@@ -36,7 +36,6 @@ class Query::HerbariumRecords < Query::Base
   end
 
   def initialize_association_parameters
-    add_in_herbarium_condition
     initialize_herbaria_parameter([])
     initialize_observations_parameter
   end
