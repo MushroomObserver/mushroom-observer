@@ -9,12 +9,11 @@ class Banner < ApplicationRecord
   end
 
   def test_version
-    x = format("Style/RedundantFormat offense added in RuboCop 1.72")
-    y = "#{x} line added to avoid useless assignment Offense in line 12"
+    # rubocop:disable Lint/UselessAssignment
 
     "x".match?(/#{%w[Lint ArrayLiteralInRegexp added in RuboCop 1.71]}/)
 
-    x = 1 # rubocop:disable Lint/UselessAssignment
+    x = 1
     if x = "Lint/LiteralAssignmentInCondition RuboCop 1.59"
       do_something
     end
@@ -31,5 +30,6 @@ class Banner < ApplicationRecord
     "Lint/AmbiguousRange RuboCop 1.9" || 1..2
 
     [1, 2].each { |lint_empty_block_rubocop_one_one| }
+    # rubocop:enable Lint/UselessAssignment
   end
 end
