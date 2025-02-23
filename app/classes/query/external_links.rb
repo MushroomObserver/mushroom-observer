@@ -5,11 +5,12 @@ class Query::ExternalLinks < Query::Base
     ExternalLink
   end
 
-  def parameter_declarations
+  def self.parameter_declarations
     super.merge(
       created_at: [:time],
       updated_at: [:time],
-      users: [User],
+      ids: [ExternalLink],
+      by_users: [User],
       observations: [Observation],
       external_sites: [ExternalSite],
       url: :string
@@ -19,8 +20,10 @@ class Query::ExternalLinks < Query::Base
   def initialize_flavor
     add_sort_order_to_title
     add_owner_and_time_stamp_conditions
+    add_ids_condition
     initialize_observations_parameter(:external_links)
-    add_id_condition("external_links.external_site_id", params[:external_sites])
+    ids = lookup_external_sites_by_name(params[:external_sites])
+    add_id_condition("external_links.external_site_id", ids)
     add_search_condition("external_links.url", params[:url])
     super
   end

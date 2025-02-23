@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-# validation of Query parameters
+# Validation of Query parameters.
 module Query::Modules::Validation
-  attr_accessor :params, :params_cache
+  attr_accessor :params, :params_cache, :subqueries
 
   def validate_params
-    old_params = @params.dup.compact.symbolize_keys
+    old_params = @params.dup&.compact&.deep_symbolize_keys || {}
     new_params = {}
     permitted_params = parameter_declarations.slice(*old_params.keys)
     permitted_params.each do |param, param_type|
@@ -27,21 +27,23 @@ module Query::Modules::Validation
 
   def validate_value(param_type, param, val)
     if param_type.is_a?(Array)
-      array_validate(param, val, param_type.first).flatten
+      result = array_validate(param, val, param_type.first).flatten
+      result = result.uniq if positive_integers?(result)
+      result
     else
-      # scalar_validate with ambiguous lookup could return an array
       val = scalar_validate(param, val, param_type)
-      val = val.first if val.is_a?(Array)
-      val
+      [val].flatten.first
     end
+  end
+
+  def positive_integers?(list)
+    list.all? { |item| item.is_a?(Integer) && item.positive? }
   end
 
   def array_validate(param, val, param_type)
     case val
     when Array
-      # Lookup in scalar_validate could return multiple matches per val
-      # so the returned array could contain nested arrays.
-      val[0, MO.query_max_array].map do |val2|
+      val[0, MO.query_max_array].map! do |val2|
         scalar_validate(param, val2, param_type)
       end
     when ::API2::OrderedRange
@@ -67,11 +69,7 @@ module Query::Modules::Validation
   end
 
   def validate_class_param(param, val, param_type)
-    # :names may come with modifier "flag" params that indicate synonyms, etc.
-    # Immediately look those up and add any new ids to the :names array.
-    if param == :names
-      validate_names_record(param, val, param_type)
-    elsif param_type.respond_to?(:descends_from_active_record?)
+    if param_type.respond_to?(:descends_from_active_record?)
       validate_record(param, val, param_type)
     else
       raise(
@@ -83,17 +81,34 @@ module Query::Modules::Validation
   def validate_hash_param(param, val, param_type)
     if [:string, :boolean].include?(param_type.keys.first)
       validate_enum(param, val, param_type)
+    elsif param_type.keys.first == :subquery
+      validate_subquery(param, val, param_type)
     else
       validate_nested_params(param, val, param_type)
     end
   end
 
-  def validate_nested_params(_param, val, hash)
+  def validate_nested_params(_param, val, param_type)
     val2 = {}
-    hash.each do |key, arg_type|
+    param_type.each do |key, arg_type|
       val2[key] = scalar_validate(key, val[key], arg_type)
     end
     val2
+  end
+
+  # Validate the subquery's params by creating another Query instance
+  # and save it in @subqueries to facilitate access
+  def validate_subquery(param, val, param_type)
+    if param_type.keys.length != 1
+      raise(
+        "Invalid subquery declaration for :#{param} for #{model} " \
+        "query! (wrong number of keys in hash)"
+      )
+    end
+    submodel = param_type.values.first
+    subquery = Query.new(submodel, val)
+    @subqueries[param] = subquery
+    subquery.params
   end
 
   def validate_enum(param, val, hash)
@@ -123,19 +138,19 @@ module Query::Modules::Validation
     val2
   end
 
+  # Disable cop because we do mean to symbols with boolean names
+  # rubocop:disable Lint/BooleanSymbol
   def validate_boolean(param, val)
     case val
-    # Disable cop because we do mean to symbols with boolean names
-    # rubocop:disable Lint/BooleanSymbol
     when :true, :yes, :on, "true", "yes", "on", "1", 1, true
       true
     when :false, :no, :off, "false", "no", "off", "0", 0, false, nil
       false
-    # rubocop:enable Lint/BooleanSymbol
     else
       raise("Value for :#{param} should be boolean, got: #{val.inspect}")
     end
   end
+  # rubocop:enable Lint/BooleanSymbol
 
   # def validate_integer(param, val)
   #   if val.is_a?(Integer) || val.is_a?(String) && val.match(/^-?\d+$/)
@@ -156,6 +171,8 @@ module Query::Modules::Validation
     end
   end
 
+  # This type of param accepts instances, ids, or strings. When the query is
+  # executed, the string will be sent to the appropriate `Lookup` subclass.
   def validate_record(param, val, type = ActiveRecord::Base)
     if val.is_a?(type)
       raise("Value for :#{param} is an unsaved #{type} instance.") unless val.id
@@ -165,9 +182,7 @@ module Query::Modules::Validation
     elsif could_be_record_id?(param, val)
       val.to_i
     elsif val.is_a?(String) && param != :ids
-      # Lookups for each val may return more than one record, though the lookup
-      # string is generally unique. For an example, search `two_agaricus_bug`.
-      lookup_records_by_name(param, val, type, method: :ids, all: true)
+      val
     else
       raise("Value for :#{param} should be id, string " \
             "or #{type} instance, got: #{val.inspect}")
@@ -214,33 +229,51 @@ module Query::Modules::Validation
     end
   end
 
-  def validate_query(param, val)
-    case val
-    when Query::Base
-      val.record.id
-    when Integer
-      val
-    else
-      raise(
-        "Value for :#{param} should be a Query class, got: #{val.inspect}"
-      )
-    end
-  end
+  # def validate_query(param, val)
+  #   case val
+  #   when Query::Base
+  #     val.record.id
+  #   when Integer
+  #     val
+  #   else
+  #     raise(
+  #       "Value for :#{param} should be a Query class, got: #{val.inspect}"
+  #     )
+  #   end
+  # end
 
   def find_cached_parameter_instance(model, param)
-    val = if could_be_record_id?(param, params[param])
-            model.find(params[param])
-          else
-            lookup_records_by_name(param, params[param], model)
-          end
-    set_cached_parameter_instance(param, val)
+    return @params_cache[param] if @params_cache && @params_cache[param]
+
+    val = take_param_or_pluralized_param(param)
+    instance = if could_be_record_id?(param, val)
+                 model.find(val)
+               elsif val.present?
+                 lookup_record_by_name(param, val, model)
+               end
+    set_cached_parameter_instance(param, instance)
+  end
+
+  # This is intended as a temporary cheat while we're consolidating singular
+  # and plural params, like :observation/:observations. We're starting to route
+  # single ids through the plural param, so we want to be able to handle them
+  # as singles, which here means caching instances. The goal is to end up with
+  # only plural params that can also handle singles, at which point this method
+  # can be deleted.
+  def take_param_or_pluralized_param(param)
+    return params[param] if params[param]
+
+    plural = param.to_s.pluralize.to_sym
+    return if params[plural].blank?
+
+    [params[plural]].flatten.first
   end
 
   # Cache the instance for later use, in case we both instantiate and
   # execute query in the same action.
-  def set_cached_parameter_instance(param, val)
+  def set_cached_parameter_instance(param, instance)
     @params_cache ||= {}
-    @params_cache[param] = val
+    @params_cache[param] = instance
   end
 
   def could_be_record_id?(param, val)
@@ -250,31 +283,15 @@ module Query::Modules::Validation
       val.is_a?(String) && (val == "0") && (param == :user)
   end
 
-  def validate_names_record(param, val, type)
-    names_params = *names_parameter_declarations.except(:names).keys
-    lookup_params = @params.slice(*names_params).compact
-    if lookup_params.blank?
-      validate_record(param, val, type)
-    else
-      lookup_records_by_name(param, val, type,
-                             lookup_params:, method: :ids, all: true)
-    end
-  end
-
-  def lookup_records_by_name(param, val, type, **args)
-    lookup_params = args[:lookup_params] || {}
+  # Requires a unique identifying string and will return [only_one_record].
+  def lookup_record_by_name(param, val, type, **args)
     method = args[:method] || :instances
-    all = args[:all] || false
     lookup = lookup_class(param, val, type)
 
-    results = lookup.new(val, lookup_params).send(method)
+    results = lookup.new(val).send(method)
     raise("Couldn't find an id for : #{val.inspect}") unless results
 
-    if !all || results.size == 1
-      results.first
-    else
-      results
-    end
+    results.first
   end
 
   def lookup_class(param, val, type)

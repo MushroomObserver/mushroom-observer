@@ -5,14 +5,13 @@ class Query::Comments < Query::Base
     Comment
   end
 
-  def parameter_declarations
+  def self.parameter_declarations
     super.merge(
       created_at: [:time],
       updated_at: [:time],
       ids: [Comment],
-      by_user: User,
+      by_users: [User],
       for_user: User,
-      users: [User],
       types: [{ string: Comment::ALL_TYPE_TAGS }],
       summary_has: :string,
       content_has: :string,
@@ -25,7 +24,6 @@ class Query::Comments < Query::Base
   def initialize_flavor
     add_sort_order_to_title
     add_owner_and_time_stamp_conditions
-    add_by_user_condition
     add_ids_condition
     add_for_user_condition
     add_for_target_condition

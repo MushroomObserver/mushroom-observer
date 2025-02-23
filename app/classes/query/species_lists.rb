@@ -1,33 +1,28 @@
 # frozen_string_literal: true
 
 class Query::SpeciesLists < Query::Base
-  include Query::Params::Names
-  include Query::Initializers::Names
-
   def model
     SpeciesList
   end
 
-  def parameter_declarations
+  def self.parameter_declarations
     super.merge(
       created_at: [:time],
       updated_at: [:time],
       date: [:date],
-      by_user: User,
-      users: [User],
       ids: [SpeciesList],
-      location: Location,
+      by_users: [User],
       locations: [Location],
-      user_where: :string,
-      project: Project,
+      search_where: :string,
       projects: [Project],
       title_has: :string,
       with_notes: :boolean,
       notes_has: :string,
       with_comments: { boolean: [true] },
       comments_has: :string,
-      pattern: :string
-    ).merge(names_parameter_declarations)
+      pattern: :string,
+      observation_query: { subquery: :Observation }
+    )
   end
 
   def initialize_flavor
@@ -36,9 +31,9 @@ class Query::SpeciesLists < Query::Base
     add_date_condition("species_lists.when", params[:date])
     add_pattern_condition
     add_ids_condition
-    add_by_user_condition
-    add_for_project_condition(:project_species_lists)
-    initialize_name_parameters(:species_list_observations, :observations)
+    add_subquery_condition(:observation_query, :species_list_observations,
+                           table: :species_list_observations,
+                           col: :observation_id)
     initialize_association_parameters
     initialize_boolean_parameters
     initialize_at_where_parameter
@@ -55,8 +50,7 @@ class Query::SpeciesLists < Query::Base
   end
 
   def initialize_association_parameters
-    add_at_location_condition
-    add_where_condition(:species_lists, params[:locations])
+    initialize_locations_parameter(:species_lists, params[:locations])
     initialize_projects_parameter(:project_species_lists,
                                   [:project_species_lists])
   end
@@ -71,9 +65,9 @@ class Query::SpeciesLists < Query::Base
   end
 
   def initialize_at_where_parameter
-    return unless params[:user_where]
+    return unless params[:search_where]
 
-    location_str = params[:user_where]
+    location_str = params[:search_where]
     title_args[:where] = location_str
     where << "species_lists.where LIKE '%#{clean_pattern(location_str)}%'"
   end
@@ -98,7 +92,7 @@ class Query::SpeciesLists < Query::Base
 
   # Only instance methods have access to params.
   def default_order
-    if params[:user_where].present? || params[:location].present?
+    if params[:search_where].present? || params[:location].present?
       "name"
     else
       "title"

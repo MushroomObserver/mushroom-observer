@@ -3,13 +3,13 @@
 # html used in tabsets
 module Tabs
   module LocationsHelper
-    # link attribute arrays (coerced_query_tab returns array)
+    # link attribute arrays (each tab returns array)
     def locations_index_tabs(query:)
       [
         new_location_tab,
-        map_locations_tab,
+        map_locations_tab(query),
         location_countries_tab,
-        coerced_observation_query_tab(query)
+        related_observations_tab(:Location, query)
       ]
     end
 
@@ -30,66 +30,87 @@ module Tabs
       # links
     end
 
-    def location_show_heading_links(location:)
-      links = location_show_tabs(location: location)
-      icons = []
-      links.each do |link|
-        icons << icon_link_to(*link)
-      end
-      icons
-    end
+    # Dead code ** KEEP for bootstrap PR
+    # def location_show_heading_links(location:)
+    #   links = location_show_tabs(location: location)
+    #   icons = []
+    #   links.each do |link|
+    #     icons << icon_link_to(*link)
+    #   end
+    #   icons
+    # end
 
     def new_location_tab
-      [:show_location_create.t, add_query_param(new_location_path),
-       { class: tab_id(__method__.to_s), icon: :add }]
+      InternalLink::Model.new(
+        :show_location_create.t, Location,
+        add_query_param(new_location_path),
+        html_options: { icon: :add }
+      ).tab
     end
 
-    def map_locations_tab
-      [:list_place_names_map.t, add_query_param(map_locations_path),
-       { class: tab_id(__method__.to_s) }]
+    def map_locations_tab(query)
+      InternalLink.new(
+        :list_place_names_map.t, add_query_param(map_locations_path, query)
+      ).tab
     end
 
     def location_countries_tab
-      [:list_countries.t, location_countries_path,
-       { class: tab_id(__method__.to_s) }]
+      InternalLink.new(
+        :list_countries.t, location_countries_path
+      ).tab
     end
 
     def edit_location_tab(location)
-      [:show_location_edit.t,
-       add_query_param(edit_location_path(location.id)),
-       { class: tab_id(__method__.to_s), icon: :edit }]
+      InternalLink::Model.new(
+        :show_location_edit.t, location,
+        add_query_param(edit_location_path(location.id)),
+        html_options: { icon: :edit }
+      ).tab
     end
 
-    def destroy_location_tab(location)
-      [:show_location_destroy.t, location, { button: :destroy }]
-    end
+    # Dead code
+    # def destroy_location_tab(location)
+    #   InternalLink::Model.new(
+    #     :show_location_destroy.t, location, location,
+    #     html_options: { button: :destroy }
+    #   ).tab
+    # end
 
     def location_reverse_order_tab(location)
-      [:show_location_reverse.t,
-       add_query_param(reverse_name_order_location_path(location.id)),
-       { class: tab_id(__method__.to_s), icon: :back }]
+      InternalLink::Model.new(
+        :show_location_reverse.t, location,
+        add_query_param(reverse_name_order_location_path(location.id)),
+        html_options: { icon: :back }
+      ).tab
     end
 
     # description tabs:
     def location_show_description_tab(location)
       return unless location&.description
 
-      [:show_name_see_more.l,
-       add_query_param(location_description_path(location.description.id)),
-       { class: tab_id(__method__.to_s), icon: :list }]
+      InternalLink::Model.new(
+        :show_name_see_more.l, location,
+        add_query_param(location_description_path(location.description.id)),
+        html_options: { icon: :list }
+      ).tab
     end
 
     def location_edit_description_tab(location)
       return unless location&.description
 
-      [:EDIT.l, edit_location_description_path(location.description.id),
-       { class: tab_id(__method__.to_s), icon: :edit }]
+      InternalLink::Model.new(
+        :EDIT.l, location,
+        edit_location_description_path(location.description.id),
+        html_options: { icon: :edit }
+      ).tab
     end
 
     def location_new_description_tab(location)
-      [:show_name_create_description.l,
-       new_location_description_path(location.id),
-       { class: tab_id(__method__.to_s), icon: :add }]
+      InternalLink::Model.new(
+        :show_name_create_description.l, location,
+        new_location_description_path(location.id),
+        html_options: { icon: :add }
+      ).tab
     end
 
     def location_version_tabs(location:)
@@ -97,24 +118,32 @@ module Tabs
     end
 
     def location_versions_tab(location)
-      [:show_location.t(location: location.display_name),
-       location_path(location.id),
-       { class: tab_id(__method__.to_s) }]
+      InternalLink::Model.new(
+        :show_location.t(location: location.display_name), location,
+        location_path(location.id),
+        alt_title: :show_object.t(TYPE: Location)
+      ).tab
     end
 
     def locations_index_tab
-      [:all_objects.t(type: :location), locations_path,
-       { class: tab_id(__method__.to_s) }]
+      InternalLink::Model.new(
+        :all_objects.t(type: :location), Location,
+        locations_path
+      ).tab
     end
 
     def observations_at_location_tab(location)
-      [show_obs_link_title_with_count(location),
-       add_query_param(observations_path(location: location.id)),
-       { class: tab_id(__method__.to_s), icon: :observations, show_text: true }]
+      InternalLink::Model.new(
+        show_obs_link_title_with_count(location), location,
+        add_query_param(observations_path(location: location.id)),
+        alt_title: :show_location_observations.t,
+        html_options: { icon: :observations, show_text: true }
+      ).tab
     end
 
     def location_map_title(query:)
-      if query&.params&.dig(:with_observations)
+      if query&.params&.dig(:with_observations) ||
+         query&.params&.dig(:observation_query)
         :map_locations_title.t(locations: query.title)
       else
         :map_locations_global_map.t
@@ -124,8 +153,8 @@ module Tabs
     def location_map_tabs(query:)
       [
         locations_index_tab,
-        coerced_observation_query_tab(query),
-        coerced_location_query_tab(query)
+        related_observations_tab(:Location, query),
+        related_locations_tab(:Location, query) # index of same locations
       ]
     end
 

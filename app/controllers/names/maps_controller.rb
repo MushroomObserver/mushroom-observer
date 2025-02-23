@@ -11,8 +11,8 @@ module Names
       @name = find_or_goto_index(Name, params[:id].to_s)
       return unless @name
 
-      @query = create_query(:Observation, names: @name.id)
-      apply_content_filters(@query)
+      @query = find_or_create_query(:Observation, names: @name.id)
+      @any_content_filters_applied = check_if_preference_filters_applied
       @observations = @query.results(include: :location, limit: 10_000).
                       select { |o| o.lat || o.location }
     end

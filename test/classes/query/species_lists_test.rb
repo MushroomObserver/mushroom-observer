@@ -25,41 +25,41 @@ class Query::SpeciesListsTest < UnitTestCase
   def test_species_list_at_location
     expects = SpeciesList.where(location: locations(:burbank)).
               index_order.distinct
-    assert_query(expects, :SpeciesList, location: locations(:burbank))
+    assert_query(expects, :SpeciesList, locations: locations(:burbank))
     assert_query(
-      [], :SpeciesList, location: locations(:unused_location)
+      [], :SpeciesList, locations: locations(:unused_location)
     )
   end
 
   def test_species_list_at_where
-    assert_query([], :SpeciesList, user_where: "nowhere")
+    assert_query([], :SpeciesList, search_where: "nowhere")
     assert_query([species_lists(:where_no_mushrooms_list)],
-                 :SpeciesList, user_where: "no mushrooms")
+                 :SpeciesList, search_where: "no mushrooms")
   end
 
   def test_species_list_by_rss_log
     assert_query(SpeciesList.order_by_rss_log, :SpeciesList, by: :rss_log)
   end
 
-  def test_species_list_by_user
+  def test_species_list_by_users
     expects = SpeciesList.where(user: mary).index_order.distinct
-    assert_query(expects, :SpeciesList, by_user: mary)
-    assert_query([], :SpeciesList, by_user: dick)
+    assert_query(expects, :SpeciesList, by_users: mary)
+    assert_query([], :SpeciesList, by_users: dick)
   end
 
   def test_species_list_by_user_sort_by_id
     expects = SpeciesList.where(user: rolf).reorder(id: :asc).uniq
-    assert_query(expects, :SpeciesList, by_user: rolf, by: :id)
+    assert_query(expects, :SpeciesList, by_users: rolf, by: :id)
   end
 
-  def test_species_list_for_project
+  def test_species_list_for_projects
     assert_query([],
-                 :SpeciesList, project: projects(:empty_project))
+                 :SpeciesList, projects: projects(:empty_project))
     assert_query(projects(:bolete_project).species_lists,
-                 :SpeciesList, project: projects(:bolete_project))
+                 :SpeciesList, projects: projects(:bolete_project))
     assert_query(
       projects(:two_list_project).species_lists,
-      :SpeciesList, project: projects(:two_list_project)
+      :SpeciesList, projects: projects(:two_list_project)
     )
   end
 

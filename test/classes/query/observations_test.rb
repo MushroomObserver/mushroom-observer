@@ -44,12 +44,12 @@ class Query::ObservationsTest < UnitTestCase
 
   def test_observation_by_user
     expects = Observation.reorder(id: :asc).where(user: rolf.id).to_a
-    assert_query(expects, :Observation, by_user: rolf, by: :id)
+    assert_query(expects, :Observation, by_users: rolf, by: :id)
     expects = Observation.reorder(id: :asc).where(user: mary.id).to_a
-    assert_query(expects, :Observation, by_user: mary, by: :id)
+    assert_query(expects, :Observation, by_users: mary, by: :id)
     expects = Observation.reorder(id: :asc).where(user: dick.id).to_a
-    assert_query(expects, :Observation, by_user: dick, by: :id)
-    assert_query([], :Observation, by_user: junk, by: :id)
+    assert_query(expects, :Observation, by_users: dick, by: :id)
+    assert_query([], :Observation, by_users: junk, by: :id)
   end
 
   def test_observation_confidence
@@ -120,6 +120,20 @@ class Query::ObservationsTest < UnitTestCase
                  :Observation, with_sequences: false)
   end
 
+  def test_observation_with_images
+    assert_query(Observation.index_order.with_images(true),
+                 :Observation, with_images: true)
+    assert_query(Observation.index_order.with_images(false),
+                 :Observation, with_images: false)
+  end
+
+  def test_observation_with_specimen
+    assert_query(Observation.index_order.with_specimen(true),
+                 :Observation, with_specimen: true)
+    assert_query(Observation.index_order.with_specimen(false),
+                 :Observation, with_specimen: false)
+  end
+
   def test_observation_field_slips
     f_s = field_slips(:field_slip_one)
     assert_query([observations(:minimal_unknown_obs)],
@@ -163,21 +177,21 @@ class Query::ObservationsTest < UnitTestCase
   def test_observation_at_locations
     expects = Observation.index_order.
               at_locations(locations(:burbank)).distinct
-    assert_query(expects, :Observation, location: locations(:burbank))
+    assert_query(expects, :Observation, locations: locations(:burbank))
   end
 
   def test_observation_for_projects
     assert_query([],
-                 :Observation, project: projects(:empty_project))
+                 :Observation, projects: projects(:empty_project))
     project = projects(:bolete_project)
-    assert_query(project.observations, :Observation, project: project)
+    assert_query(project.observations, :Observation, projects: project)
     assert_query(Observation.index_order.for_projects(project.title),
-                 :Observation, project: project)
+                 :Observation, projects: project)
   end
 
   def test_observation_for_project_projects_equivalence
     qu1 = Query.lookup_and_save(:Observation,
-                                project: projects(:bolete_project))
+                                projects: projects(:bolete_project))
     qu2 = Query.lookup_and_save(:Observation,
                                 projects: projects(:bolete_project).id.to_s)
     assert_equal(qu1.results, qu2.results)
@@ -188,9 +202,9 @@ class Query::ObservationsTest < UnitTestCase
     # These two are identical, so should be disambiguated by reverse_id.
     assert_query([observations(:detailed_unknown_obs).id,
                   observations(:minimal_unknown_obs).id],
-                 :Observation, species_list: spl.id)
+                 :Observation, species_lists: spl.id)
     assert_query(Observation.index_order.on_species_lists(spl),
-                 :Observation, species_list: spl.id)
+                 :Observation, species_lists: spl.id)
     # check the other param!
     assert_query(Observation.index_order.on_species_lists(spl),
                  :Observation, species_lists: spl.id)
@@ -383,28 +397,28 @@ class Query::ObservationsTest < UnitTestCase
 
   def test_observation_advanced_search_name
     assert_query([observations(:strobilurus_diminutivus_obs).id],
-                 :Observation, name: "diminutivus")
+                 :Observation, search_name: "diminutivus")
   end
 
   def test_observation_advanced_search_where
     assert_query([observations(:coprinus_comatus_obs).id],
-                 :Observation, user_where: "glendale") # where
+                 :Observation, search_where: "glendale") # where
     expects = Observation.reorder(id: :asc).
               where(location: locations(:burbank)).distinct
-    assert_query(expects, :Observation,
-                 user_where: "burbank", by: :id) # location
+    assert_query(expects,
+                 :Observation, search_where: "burbank", by: :id) # location
   end
 
   def test_observation_advanced_search_user
     expects = Observation.reorder(id: :asc).where(user: rolf.id).distinct
-    assert_query(expects, :Observation, user: "rolf", by: :id)
+    assert_query(expects, :Observation, search_user: "rolf", by: :id)
   end
 
   def test_observation_advanced_search_content
     assert_query(Observation.advanced_search("second fruiting"),
-                 :Observation, content: "second fruiting") # notes
+                 :Observation, search_content: "second fruiting") # notes
     assert_query(Observation.advanced_search("agaricus"),
-                 :Observation, content: "agaricus") # comment
+                 :Observation, search_content: "agaricus") # comment
   end
 
   def test_observation_date

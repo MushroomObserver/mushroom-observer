@@ -257,22 +257,26 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
 
   def test_obs_at_location
     login
+    nam = names(:fungi)
     # Start at distribution map for Fungi.
-    visit("/names/#{names(:fungi).id}/map")
+    visit("/names/#{nam.id}/map")
 
     # Get a list of locations shown on map. (One defined, one undefined.)
     within("#right_tabs") { click_link("Show Locations") }
-    assert_match("Locations with Observations", page.title, "Wrong page")
+    assert_match("Locations with Observations of #{nam.text_name}", page.title,
+                 "Wrong title")
 
     # Click on the defined location.
     click_link(text: /Burbank/)
-    assert_match("Location: Burbank, California, USA", page.title, "Wrong page")
+    assert_match("Location: Burbank, California, USA", page.title,
+                 "Wrong title")
 
     # Get a list of observations from there.  (Several so goes to index.)
     within("#location_coordinates") do
       click_link(text: :show_location_observations.l)
     end
-    assert_match("Matching Observations", page.title, "Wrong page")
+    assert_match("Observations from Burbank, California, USA",
+                 page.title, "Wrong title")
     save_results = find_all("#results a").select do |l|
       l[:href].match(%r{^/\d+})
     end

@@ -62,7 +62,9 @@ class NamesController < ApplicationController
       [nil, {}]
     else
       @suggest_alternate_spellings = search.query.params[:pattern]
-      [search.query, {}]
+      # Call create_query to apply user content filters
+      query = create_query(:Name, search.query.params)
+      [query, {}]
     end
   end
 
@@ -83,10 +85,12 @@ class NamesController < ApplicationController
   # NOTE: all this extra info and help will be lost if user re-sorts.
   def need_description
     @help = :needed_descriptions_help
-    query = create_query(:Name,
-                         need_description: 1,
-                         group: "observations.name_id",
-                         order: "count(*) DESC")
+    query = create_query(
+      :Name, need_description: 1,
+             selects: "DISTINCT names.id, count(observations.name_id)",
+             group: "names.id",
+             order: "count(observations.name_id) DESC"
+    )
     [query, { num_per_page: 100 }]
   end
 
@@ -98,7 +102,7 @@ class NamesController < ApplicationController
     )
     return unless user
 
-    query = create_query(:Name, by_user: user)
+    query = create_query(:Name, by_users: user)
     [query, {}]
   end
 

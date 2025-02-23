@@ -5,11 +5,12 @@ class Query::HerbariumRecords < Query::Base
     HerbariumRecord
   end
 
-  def parameter_declarations
+  def self.parameter_declarations
     super.merge(
       created_at: [:time],
       updated_at: [:time],
-      users: [User],
+      ids: [HerbariumRecord],
+      by_users: [User],
       herbaria: [Herbarium],
       herbarium: Herbarium,
       observation: Observation,
@@ -27,6 +28,7 @@ class Query::HerbariumRecords < Query::Base
   def initialize_flavor
     add_sort_order_to_title
     add_owner_and_time_stamp_conditions
+    add_ids_condition
     add_pattern_condition
     initialize_association_parameters
     initialize_boolean_parameters

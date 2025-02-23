@@ -31,7 +31,7 @@
 #
 #  Get observations created by @user:
 #
-#    query = Query.lookup(:Observation, users: [@user])
+#    query = Query.lookup(:Observation, by_users: [@user])
 #
 #  You may further tweak a query after it's been created:
 #
@@ -206,6 +206,7 @@
 #  where::              List of WHERE clauses in query.
 #  group::              GROUP BY clause in query.
 #  order::              ORDER BY clause in query.
+#  subqueries::         Cache of subquery Query instances, used for filtering.
 #
 #  == Class Methods
 #  lookup::             Instantiate Query of given model, flavor and params.
@@ -272,13 +273,15 @@
 #                       queries only).
 #  @params_cache::      Hash: where instances passed in via params are cached.
 #
-module Query
+class Query
   def self.new(model, params = {}, current = nil)
     klass = "Query::#{model.to_s.pluralize}".constantize
     query = klass.new
     query.params = params
+    query.subqueries = {}
     query.validate_params
     query.current = current if current
+    # query.initialize_query # if you want the attributes right away
     query
   end
 
@@ -302,6 +305,14 @@ module Query
 
   def self.lookup(*)
     Query::Base.lookup(*)
+  end
+
+  def self.current_or_related_query(*)
+    Query::Base.current_or_related_query(*)
+  end
+
+  def self.related?(*)
+    Query::Base.related?(*)
   end
 
   def default_order

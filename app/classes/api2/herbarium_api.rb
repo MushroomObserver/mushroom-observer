@@ -32,7 +32,7 @@ class API2
 
     def query_params
       {
-        where: sql_id_condition,
+        ids: parse_array(:herbarium, :id, as: :id),
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at),
         code: parse(:string, :code),

@@ -188,4 +188,13 @@ module ApplicationHelper
 
     query.result_ids[idx + 1] || query.result_ids[idx - 1]
   end
+
+  def form_submit_text(obj)
+    obj_name = obj.class.model_name.singular.upcase.to_sym.t
+    if obj.new_record?
+      :create_object.t(TYPE: obj_name)
+    else
+      :update_object.t(TYPE: obj_name)
+    end
+  end
 end

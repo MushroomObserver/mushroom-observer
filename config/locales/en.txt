@@ -223,6 +223,7 @@
   # COMMON WORDS AND PHRASES
 
   # Object titles, all nouns.
+  ACTIONS: Actions
   ACTIVITY: Activity
   activity: activity
   API_KEY: API Key
@@ -360,6 +361,7 @@
   OBSERVATIONS: Observations
   observations: observations
   OBSERVATION_FIELDS: Observation Fields
+  of: of
   PAST_LOCATION: Location Change
   past_location: location change
   PAST_LOCATIONS: Location Changes
@@ -374,6 +376,8 @@
   project: project
   PROJECTS: Projects
   projects: projects
+  PROJECT_ALIAS: Project Alias
+  PROJECT_ALIASES: Project Aliases
   PUBLICATION: Publication
   publication: publication
   PUBLICATIONS: Publications
@@ -403,6 +407,8 @@
   specimens: specimens
   SUPPORT: Support
   support: support
+  TARGET: Target
+  TARGET_TYPE: Target Type
   TEST_PAGES: Test Pages
   THEME: Theme
   TRANSLATION: Translation
@@ -859,6 +865,7 @@
   list_objects: List [TYPES]
   remove_object: Remove [TYPE]
   remove_objects: Remove [TYPES]
+  update_object: Update [TYPE]
   show_all: Show All
   map_all: Map All
   show_location: Show [LOCATION]
@@ -2911,6 +2918,14 @@
   field_slips_too_many_field_slips: You have requested more than [MAX] slips.
   field_slips_one_per_page: One field slip per page. Print shops prefer this. Otherwise 6/page which works best on US letter page.
 
+  # Project Aliases
+  project_alias_created: Field slip was successfully created.
+  project_alias_destroyed: Field slip was successfully destroyed.
+  project_alias_edit: Edit Project Alias [name]
+  project_alias_new: New Project Alias
+  project_alias_type: Alias Type
+  project_alias_updated: Field slip was successfully updated.
+
   ##############################################################################
 
   # LESS POPULAR PAGES
@@ -3090,10 +3105,13 @@
   inat_import_tracker: iNat Import Tracker
   inat_import_tracker_status: "[:STATUS]"
   inat_import_tracker_started: Started
+  inat_import_tracker_elapsed: Elapsed Time
+  inat_import_tracker_ended: Ended
+  inat_import_imported: Imported
+  inat_import_tracker_results: Results
   inat_import_tracker_importable_count: Number of Importable Observations
   inat_import_tracker_imported_count: Number Imported
   inat_importables_explanation: "An ??importable?? observation is an iNaturalist observation: which you created, which does not exist in MO, and whose iNat identity is a fungus or slime mold."
-  inat_import_tracker_refresh: Update results
 
   # observer/list_notifications
   list_notifications_title: Email Alerts for [user]
@@ -4436,105 +4454,6 @@
   query_title_with_observations_of_name: "[TYPES] with [:query_title_of_name(type=:observation)]"
   query_title_with_observations_of_name_synonym: "[TYPES] with [:query_title_of_name_synonym(type=:observation)]"
   query_title_with_observations_of_name_nonconsensus: "[TYPES] with [:query_title_of_name_nonconsensus(type=:observation)]"
-
-  # Brief description of each query flavor.
-  query_help_comment_all: all comments
-  query_help_comment_by_user: comments created by a given user
-  query_help_comment_in_set: comments in a given set
-  query_help_comment_for_object: comments about a given object
-  query_help_comment_for_user: comments sent to a given user
-  query_help_comment_pattern_search: comments matching a search string
-  query_help_herbarium_record_in_herbarium: records in a given fungarium
-  query_help_herbarium_record_for_observation: records for a given observation
-  query_help_image_advanced_search: images of observations matching advanced search criteria
-  query_help_image_all: all images
-  query_help_image_by_user: images created by a given user
-  query_help_image_in_set: images in a given set
-  query_help_image_inside_observation: images belonging to an outer observation query
-  query_help_image_pattern_search: images matching a search_string
-  query_help_image_with_observations: images of observations
-  query_help_image_with_observations_at_location: images of observations at a defined location
-  query_help_image_with_observations_at_where: images of observations at an undefined location
-  query_help_image_with_observations_by_user: images of observations by a given user
-  query_help_image_with_observations_in_set: images of observations in a given set
-  query_help_image_with_observations_in_species_list: images of observations in a given species list
-  query_help_image_with_observations_of_children: images of observations of children a given name
-  query_help_image_with_observations_of_name: images of observations of a given name
-  query_help_location_advanced_search: locations of observations matching advanced search criteria
-  query_help_location_all: all locations
-  query_help_location_by_user: locations created by a given user
-  query_help_location_by_editor: locations modified by a given user
-  query_help_location_by_rss_log: locations with recent activity
-  query_help_location_in_set: locations in a given set
-  query_help_location_pattern_search: locations matching a search string
-  query_help_location_with_descriptions: locations with descriptions
-  query_help_location_with_descriptions_by_author: locations with descriptions authored by a given user
-  query_help_location_with_descriptions_by_editor: locations with descriptions edited by a given user
-  query_help_location_with_descriptions_by_user: locations with descriptions created by a given user
-  query_help_location_with_descriptions_in_set: locations with descriptions in a given set
-  query_help_location_with_observations: locations of observations
-  query_help_location_with_observations_by_user: locations of observations by a given user
-  query_help_location_with_observations_in_set: locations of observations in a given set
-  query_help_location_with_observations_in_species_list: locations of observations in a given species list
-  query_help_location_with_observations_of_children: locations of observations of children of a given name
-  query_help_location_with_observations_of_name: locations of observations of a given name
-  query_help_location_description_all: all location descriptions
-  query_help_location_description_by_author: location descriptions that list given user as an author
-  query_help_location_description_by_editor: location descriptions that list given user as an editor
-  query_help_location_description_by_user: location descriptions created by a given user
-  query_help_location_description_in_set: location descriptions in a given set
-  query_help_name_advanced_search: names of observations matching advanced search criteria
-  query_help_name_all: all names
-  query_help_name_by_user: names created by a given user
-  query_help_name_by_editor: names modified by a given user
-  query_help_name_by_rss_log: names with recent activity
-  query_help_name_in_set: names in a given set
-  query_help_name_of_children: names of children of a name
-  query_help_name_of_parents: names of parents of a name
-  query_help_name_pattern_search: names matching a search string
-  query_help_name_with_descriptions: names with descriptions
-  query_help_name_with_descriptions_by_author: names with descriptions authored by a given user
-  query_help_name_with_descriptions_by_editor: names with descriptions edited by a given user
-  query_help_name_with_descriptions_by_user: names with descriptions created by a given user
-  query_help_name_with_descriptions_in_set: names with descriptions in a given set
-  query_help_name_with_observations: names of observations, alphabetically
-  query_help_name_with_observations_at_location: names of observations at a defined location
-  query_help_name_with_observations_at_where: names of observations at an undefined location
-  query_help_name_with_observations_by_user: names of observations by a given user
-  query_help_name_with_observations_in_set: names of observations in a given set
-  query_help_name_with_observations_in_species_list: names of observations in a given species list
-  query_help_name_description_all: all name descriptions
-  query_help_name_description_by_author: name descriptions that list a given user as an author
-  query_help_name_description_by_editor: name descriptions that list a given user as an editor
-  query_help_name_description_by_user: name descriptions created by a given user
-  query_help_name_description_in_set: name descriptions in a given set
-  query_help_observation_advanced_search: observations matching advanced search criteria
-  query_help_observation_all: all observations
-  query_help_observation_at_location: observations at a defined location
-  query_help_observation_at_where: observations at an undefined location
-  query_help_observation_by_rss_log: observations with recent activity
-  query_help_observation_by_user: observations created by a given user
-  query_help_observation_in_set: observations in a given set
-  query_help_observation_in_species_list: observations in a given species list
-  query_help_observation_of_children: observations of children of a given name
-  query_help_observation_of_name: observations of a given name
-  query_help_observation_pattern_search: observations matching a search string
-  query_help_project_all: all projects
-  query_help_project_by_rss_log: projects with recent activity
-  query_help_project_in_set: projects in a given set
-  query_help_project_pattern_search: projects matching a search string
-  query_help_rss_log_all: all recent activity logs
-  query_help_rss_log_in_set: activity logs in a given set
-  query_help_species_list_all: all species lists
-  query_help_species_list_at_location: species lists at a defined location
-  query_help_species_list_at_where: species lists at an undefined location
-  query_help_species_list_by_rss_log: species lists with recent activity
-  query_help_species_list_by_user: species lists created by a given user
-  query_help_species_list_in_set: species lists in a given set
-  query_help_species_list_pattern_search: species lists matching a search string
-  query_help_user_all: all users
-  query_help_user_in_set: users in a given set
-  query_help_user_pattern_search: users matching a search string
 
   # Sorting criteria.
   sort_by_accession_number: "[:herbarium_record_accession_number]"

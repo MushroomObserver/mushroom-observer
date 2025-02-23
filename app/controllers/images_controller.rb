@@ -73,7 +73,7 @@ class ImagesController < ApplicationController
     )
     return unless user
 
-    query = create_query(:Image, by_user: user)
+    query = create_query(:Image, by_users: user)
     [query, {}]
   end
 
@@ -82,7 +82,7 @@ class ImagesController < ApplicationController
     project = find_or_goto_index(Project, params[:project].to_s)
     return unless project
 
-    query = create_query(:Image, project: project)
+    query = create_query(:Image, projects: project)
     [query, { always_index: true }]
   end
 
@@ -194,13 +194,13 @@ class ImagesController < ApplicationController
 
   def set_image_query_params
     obs = params[:obs]
-    # The outer search on observation won't be saved for robots, so no sense
-    # in bothering with any of this.
     return unless obs.present? && obs.to_s.match(/^\d+$/) && !browser.bot?
 
-    obs_query = find_or_create_query(:Observation)
-    obs_query.current = obs
-    img_query = create_query(:Image, observation: obs, outer: obs_query)
+    # This is for setting up images within the current obs query.
+    # May try this after switch to AR, it's too hard to do with SQL. - AN 202502
+    # obs_query = find_or_create_query(:Observation)
+    # img_query = create_query(:Image, observation_query: obs_query.params)
+    img_query = create_query(:Image, observations: obs)
     query_params_set(img_query)
   end
 

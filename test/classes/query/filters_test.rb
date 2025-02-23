@@ -3,8 +3,8 @@
 require("test_helper")
 require("query_extensions")
 
-# tests of Filter class to be included in QueryTest
-module Query::FiltersTest
+# tests of Query::Filter class
+class Query::FiltersTest < UnitTestCase
   include QueryExtensions
 
   def test_filters
@@ -71,5 +71,12 @@ module Query::FiltersTest
     assert_query(names, :Name, clade: "Agaricales")
     obs = Observation.in_clade("Agaricales").index_order.distinct
     assert_query(obs, :Observation, clade: "Agaricales")
+  end
+
+  def test_filtering_content_with_subquery
+    expects_names = Name.joins(:observations).
+                    merge(Observation.with_specimen).index_order.uniq
+    assert_query(expects_names,
+                 :Name, observation_query: { with_specimen: "yes" })
   end
 end

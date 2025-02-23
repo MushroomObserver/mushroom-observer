@@ -21,7 +21,6 @@ module Query::Modules::ActiveRecord
       query = Query.deserialize(record.description)
       record.query = query
       query.record = record
-      query.outer_id = record.outer_id
       QueryRecord.cleanup
       query
     end
@@ -37,7 +36,6 @@ module Query::Modules::ActiveRecord
       record = get_record(query)
       record.query = query
       query.record = record
-      query.outer_id = record.outer_id
       QueryRecord.cleanup
       query
     end
@@ -67,10 +65,7 @@ module Query::Modules::ActiveRecord
 
   delegate :id, to: :record
 
-  def save
-    record.outer_id = outer_id
-    record.save
-  end
+  delegate :save, to: :record
 
   def increment_access_count
     record.access_count += 1

@@ -26,7 +26,7 @@ module PatternSearch
       project: [:projects, :parse_list_of_projects],
       project_lists: [:project_lists, :parse_list_of_projects],
       region: [:region, :parse_list_of_strings],
-      user: [:users, :parse_list_of_users],
+      user: [:by_users, :parse_list_of_users],
       field_slip: [:field_slips, :parse_list_of_strings],
 
       # numeric

@@ -11,14 +11,14 @@ class CollectionNumbersControllerTest < FunctionalTestCase
   end
 
   def test_index_with_query
-    query = Query.lookup_and_save(:CollectionNumber, users: rolf)
+    query = Query.lookup_and_save(:CollectionNumber, by_users: rolf)
     assert_operator(query.num_results, :>, 1)
 
     login
     get(:index, params: { q: query.record.id.alphabetize })
 
     assert_response(:success)
-    assert_displayed_title("Collection Number Index")
+    assert_displayed_title("Collection Numbers created by Rolf Singer")
     # In results, expect 1 row per collection_number.
     assert_select("#results tr", query.num_results)
   end
@@ -135,7 +135,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
   end
 
   def test_next_and_prev_collection_number
-    query = Query.lookup_and_save(:CollectionNumber, users: rolf)
+    query = Query.lookup_and_save(:CollectionNumber, by_users: rolf)
     assert_operator(query.num_results, :>, 1)
     number1 = query.results[0]
     number2 = query.results[1]

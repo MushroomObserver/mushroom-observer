@@ -80,12 +80,11 @@ class LocationsController < ApplicationController
     [query, { link_all_sorts: true }]
   end
 
-  # Displays a list of all locations whose country matches the id param.
+  # Displays a list of locations of obs whose project matches the param.
   def project
-    query = create_query(
-      :Location,
-      with_observations: true, project: Project.find(params[:project])
-    )
+    obs_query = create_query(:Observation,
+                             projects: Project.find(params[:project]))
+    query = create_query(:Location, observation_query: obs_query.params)
     [query, { link_all_sorts: true }]
   end
 
@@ -97,7 +96,7 @@ class LocationsController < ApplicationController
     )
     return unless user
 
-    query = create_query(:Location, by_user: user)
+    query = create_query(:Location, by_users: user)
     [query, { link_all_sorts: true }]
   end
 
@@ -115,10 +114,6 @@ class LocationsController < ApplicationController
 
   # Hook runs before template displayed. Must return query.
   def filtered_index_final_hook(query, display_opts)
-    # Restrict to subset within a geographical region (used by map
-    # if it needed to stuff multiple locations into a single marker).
-    # query = restrict_query_to_box(query)
-    # Already restricted in map_helper.
     # Matching undefined locations is meaningless in a box.
     # (Undefined locations don't have a box!)
     return query if query.params[:in_box].present?
@@ -134,7 +129,7 @@ class LocationsController < ApplicationController
   end
 
   def set_matching_undefined_location_ivars(query, display_opts)
-    unless (query2 = coerce_query_for_undefined_locations(query))
+    unless (query2 = create_query_for_obs_undefined_where_strings(query))
       @undef_pages = nil
       @undef_data = nil
       return false
@@ -170,8 +165,8 @@ class LocationsController < ApplicationController
 
   # Try to turn this into a query on observations.where instead.
   # Yes, still a kludge, but a little better than tweaking SQL by hand...
-  def coerce_query_for_undefined_locations(query)
-    args   = query.params.dup.except(:with_observations)
+  def create_query_for_obs_undefined_where_strings(query)
+    args   = query.params.dup.except(:observation_query)
     # Location params not handled by Observation. (does handle :by_user)
     # If these are passed, we're not looking for undefined locations.
     return nil if [:by_editor, :regexp].any? { |key| args[key] }
@@ -191,8 +186,8 @@ class LocationsController < ApplicationController
 
     # These are only used to create title, which isn't used,
     # they just get in the way.
-    args.delete(:old_title)
-    args.delete(:old_by)
+    # args.delete(:old_title)
+    # args.delete(:old_by)
 
     # Create query if okay.  (Still need to tweak select and group clauses.)
     result = create_query(:Observation, args)

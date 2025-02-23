@@ -5,12 +5,13 @@ class Query::Projects < Query::Base
     Project
   end
 
-  def parameter_declarations
+  def self.parameter_declarations
     super.merge(
       created_at: [:time],
       updated_at: [:time],
-      users: [User],
       ids: [Project],
+      by_users: [User],
+      members: [User],
       with_images: { boolean: [true] },
       with_observations: { boolean: [true] },
       with_species_lists: { boolean: [true] },
@@ -20,7 +21,6 @@ class Query::Projects < Query::Base
       summary_has: :string,
       field_slip_prefix_has: :string,
       comments_has: :string,
-      member: User,
       pattern: :string
     )
   end
@@ -38,10 +38,13 @@ class Query::Projects < Query::Base
 
   def initialize_association_parameters
     # No need to add join unless we're applying this condition.
-    return unless params[:member]
+    return unless params[:members]
 
-    add_join(:"user_group_users.members")
-    where << "user_group_users.user_id = '#{params[:member]}'"
+    # add_join(:"user_group_users.members")
+    # where << "user_group_users.user_id = '#{params[:member]}'"
+    ids = lookup_users_by_name(params[:members])
+    add_id_condition("user_group_users.user_id", ids,
+                     :"user_group_users.members")
   end
 
   def initialize_boolean_parameters

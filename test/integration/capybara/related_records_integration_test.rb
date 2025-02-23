@@ -8,8 +8,7 @@ class RelatedRecordsIntegrationTest < CapybaraIntegrationTestCase
     login
 
     visit(observations_path(pattern: "user:#{rolf.id}"))
-    click_link("a", class: "coerced_location_query_link",
-                    text: "Show Locations")
+    click_link("a", class: "related_locations_link", text: "Show Locations")
     location = locations(:burbank)
     assert_selector("a", text: location.display_name)
     click_link(location.display_name)
@@ -18,13 +17,14 @@ class RelatedRecordsIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("a", text: :show_location_observations.t)
     click_link(text: :show_location_observations.l)
 
-    assert_match("Matching Observations", page.title, "Wrong page")
+    assert_match("Observations from #{location.display_name}",
+                 page.title, "Wrong page")
     results = find_all("#results .matrix-box")
     assert_equal(location.observations.size, results.size)
     assert_selector("a", text: :show_objects.t(type: :location))
     click_link(text: :show_objects.t(type: :location))
 
-    assert_match("Locations", page.title, "Wrong page")
+    assert_match("Location", page.title, "Wrong page")
     assert_selector("a[href*='/locations/#{location.id}']")
     assert_selector("a", class: "show_location_link_#{location.id}", count: 1)
   end

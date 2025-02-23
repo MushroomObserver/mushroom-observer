@@ -33,20 +33,24 @@ class API2
 
     def query_params
       {
-        where: sql_id_condition,
+        ids: parse_array(:species_list, :id, as: :id),
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at),
         date: parse_range(:date, :date, help: :any_date),
-        users: parse_array(:user, :user, help: :creator),
-        names: parse_array(:name, :name, as: :id),
+        by_users: parse_array(:user, :user, help: :creator),
         locations: parse_array(:location, :location, as: :id),
         projects: parse_array(:project, :project, as: :id),
         with_notes: parse(:boolean, :has_notes),
         with_comments: parse(:boolean, :has_comments, limit: true),
         title_has: parse(:string, :title_has, help: 1),
         notes_has: parse(:string, :notes_has, help: 1),
-        comments_has: parse(:string, :comments_has, help: 1)
-      }.merge(parse_names_parameters)
+        comments_has: parse(:string, :comments_has, help: 1),
+        observation_query: parse_observation_query_parameters.compact
+      }
+    end
+
+    def parse_observation_query_parameters
+      parse_names_parameters.compact
     end
 
     def create_params
