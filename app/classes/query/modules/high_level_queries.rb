@@ -16,7 +16,7 @@
 #  Add additional arguments to the three "global" Arrays immediately below:
 #
 #  RESULTS_ARGS::       Args passed to +select_values+ via +result_ids+.
-#  INSTANTIATE_ARGS::   Args passed to +model.all+ via +instantiate+.
+#  INSTANTIATE_ARGS::   Args passed to +model.all+ via +instantiate_results+.
 #
 ##############################################################################
 
@@ -27,8 +27,8 @@ module Query::Modules::HighLevelQueries
   # through into +select_values+.)
   RESULTS_ARGS = [:join, :where, :limit, :group].freeze
 
-  # Args accepted by +instantiate+ (and +paginate+ and +results+ since they
-  # call +instantiate+, too).
+  # Args accepted by +instantiate_results+ (and +paginate+ and +results+ since
+  # theycall +instantiate_results+, too).
   INSTANTIATE_ARGS = [:include].freeze
 
   # Number of results the query returns.
@@ -60,7 +60,7 @@ module Query::Modules::HighLevelQueries
   # Array of all results, instantiated.
   def results(args = {})
     instantiate_args, results_args = split_args(args, INSTANTIATE_ARGS)
-    instantiate(result_ids(results_args), instantiate_args)
+    instantiate_results(result_ids(results_args), instantiate_args)
   end
 
   # Let caller supply results if they happen to have them.  *NOTE*: These had
@@ -119,14 +119,14 @@ module Query::Modules::HighLevelQueries
   # Returns a subset of the results (as ActiveRecord instances).
   # (Takes args for +instantiate+.)
   def paginate(paginator, args = {})
-    instantiate(paginate_ids(paginator), args)
+    instantiate_results(paginate_ids(paginator), args)
   end
 
   # Instantiate a set of records given as an Array of ids.  Returns a list of
   # ActiveRecord instances in the same order as given.  Optional arguments:
   # +include+:: Tables to eager load (see argument of same name in
   #             ActiveRecord::Base#find for syntax).
-  def instantiate(ids, args = {})
+  def instantiate_results(ids, args = {})
     expect_args(:instantiate, args, INSTANTIATE_ARGS)
     @results ||= {}
     ids.map!(&:to_i)

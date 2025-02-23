@@ -281,6 +281,7 @@ class Query
     query.subqueries = {}
     query.validate_params
     query.current = current if current
+    # query.initialize_query # if you want the attributes right away
     query
   end
 

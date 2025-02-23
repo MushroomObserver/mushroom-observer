@@ -18,13 +18,6 @@ class Query::Images < Query::Base
       date: [:date],
       ids: [Image],
       by_users: [User],
-      locations: [Location],
-      outer: :query, # for images inside observations
-      observation: Observation, # for images inside observations
-      observations: [Observation],
-      projects: [Project],
-      species_lists: [SpeciesList],
-      with_observation: { boolean: [true] },
       size: [{ string: Image::ALL_SIZES - [:full_size] }],
       content_types: [{ string: Image::ALL_EXTENSIONS }],
       with_notes: :boolean,
@@ -36,6 +29,10 @@ class Query::Images < Query::Base
       confidence: [:float],
       ok_for_export: :boolean,
       pattern: :string,
+      locations: [Location],
+      observations: [Observation],
+      projects: [Project],
+      species_lists: [SpeciesList],
       with_observations: :boolean,
       observation_query: { subquery: :Observation }
     ).merge(advanced_search_parameter_declarations)
@@ -44,34 +41,23 @@ class Query::Images < Query::Base
   def initialize_flavor
     add_sort_order_to_title
     super
-    initialize_images_with_observations
-    initialize_images_only_parameters
+    initialize_image_parameters
+    initialize_image_association_parameters
+    initialize_subquery_parameters
     add_pattern_condition
     add_img_advanced_search_conditions
-    initialize_subquery_parameters
-    initialize_img_record_parameters
-    initialize_img_vote_parameters
   end
 
-  def initialize_subquery_parameters
-    add_subquery_condition(:observation_query,
-                           { observation_images: :observations })
-  end
-
-  def initialize_images_with_observations
-    return if params[:with_observations].blank?
-
-    add_join(:observation_images, :observations)
-  end
-
-  def initialize_images_only_parameters
+  def initialize_image_parameters
     add_ids_condition
-    add_img_inside_observation_conditions
     add_owner_and_time_stamp_conditions
     add_date_condition("images.when", params[:date])
-    add_join(:observation_images) if params[:with_observation]
     initialize_img_notes_parameters
-    initialize_img_association_parameters
+    add_search_condition("images.copyright_holder",
+                         params[:copyright_holder_has])
+    add_image_size_condition(params[:size])
+    add_image_type_condition(params[:content_types])
+    initialize_ok_for_export_parameter
   end
 
   def initialize_img_notes_parameters
@@ -79,26 +65,6 @@ class Query::Images < Query::Base
                           "LENGTH(COALESCE(images.notes,'')) = 0",
                           params[:with_notes])
     add_search_condition("images.notes", params[:notes_has])
-  end
-
-  def initialize_img_association_parameters
-    initialize_observations_parameter
-    initialize_locations_parameter(:observations, params[:locations],
-                                   :observation_images, :observations)
-    initialize_projects_parameter(:project_images, [:project_images])
-    initialize_species_lists_parameter(
-      :species_list_observations,
-      [:observation_images, :observations, :species_list_observations]
-    )
-    add_id_condition("images.license_id", params[:license])
-  end
-
-  def initialize_img_record_parameters
-    add_search_condition("images.copyright_holder",
-                         params[:copyright_holder_has])
-    add_image_size_condition(params[:size])
-    add_image_type_condition(params[:content_types])
-    initialize_ok_for_export_parameter
   end
 
   def add_image_size_condition(vals, *)
@@ -146,13 +112,39 @@ class Query::Images < Query::Base
     [types, mimes, other]
   end
 
-  def initialize_img_vote_parameters
+  def initialize_image_association_parameters
+    add_join(:observation_images) if params[:with_observation]
+    initialize_images_with_observations
+    initialize_observations_parameter
+    initialize_image_vote_parameters
+    initialize_locations_parameter(:observations, params[:locations],
+                                   :observation_images, :observations)
+    initialize_projects_parameter(:project_images, [:project_images])
+    initialize_species_lists_parameter(
+      :species_list_observations,
+      [:observation_images, :observations, :species_list_observations]
+    )
+    add_id_condition("images.license_id", params[:license])
+  end
+
+  def initialize_image_vote_parameters
     add_boolean_condition("images.vote_cache IS NOT NULL",
                           "images.vote_cache IS NULL",
                           params[:with_votes])
     add_range_condition("images.vote_cache", params[:quality])
     add_range_condition("observations.vote_cache", params[:confidence],
                         :observation_images, :observations)
+  end
+
+  def initialize_subquery_parameters
+    add_subquery_condition(:observation_query,
+                           { observation_images: :observations })
+  end
+
+  def initialize_images_with_observations
+    return if params[:with_observations].blank?
+
+    add_join(:observation_images, :observations)
   end
 
   def add_img_advanced_search_conditions
@@ -185,33 +177,6 @@ class Query::Images < Query::Base
     extend_join(args2) << :observation_images
     extend_where(args2) << "observation_images.observation_id IN (#{ids})"
     model.connection.select_rows(query(args2))
-  end
-
-  def add_img_inside_observation_conditions
-    return unless params[:observation] && params[:outer]
-
-    obs = find_cached_parameter_instance(Observation, :observation)
-    @title_args[:observation] = obs.unique_format_name
-    imgs = image_set(obs)
-    where << "images.id IN (#{imgs})"
-    self.order = "FIND_IN_SET(images.id,'#{imgs}') ASC"
-    self.outer_id = params[:outer]
-    skip_observations_with_no_images
-  end
-
-  def image_set(obs)
-    ids = []
-    ids << obs.thumb_image_id if obs.thumb_image_id
-    ids += obs.image_ids - [obs.thumb_image_id]
-    clean_id_set(ids)
-  end
-
-  # Tell outer query to skip observations with no images!
-  def skip_observations_with_no_images
-    self.tweak_outer_query = lambda do |outer|
-      extend_where(outer.params) <<
-        "observations.thumb_image_id IS NOT NULL"
-    end
   end
 
   def add_pattern_condition
