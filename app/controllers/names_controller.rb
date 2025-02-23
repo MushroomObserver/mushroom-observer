@@ -87,7 +87,6 @@ class NamesController < ApplicationController
     @help = :needed_descriptions_help
     query = create_query(:Name,
                          need_description: 1,
-                         group: "observations.name_id",
                          order: "count(*) DESC")
     [query, { num_per_page: 100 }]
   end

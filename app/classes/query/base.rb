@@ -33,6 +33,7 @@ class Query::Base
       where: [:string],
       group: :string,
       order: :string,
+      selects: :string,
       by: :string,
       title: [:string]
     }

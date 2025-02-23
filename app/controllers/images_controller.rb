@@ -194,12 +194,10 @@ class ImagesController < ApplicationController
 
   def set_image_query_params
     obs = params[:obs]
-    # Disabling outer search for now. This only pages through images of one obs.
-    # AN 2022-02
-    # The outer search on observation won't be saved for robots, so no sense
-    # in bothering with any of this.
     return unless obs.present? && obs.to_s.match(/^\d+$/) && !browser.bot?
 
+    # This is for setting up images within the current obs query.
+    # May try this after switch to AR, it's too hard to do with SQL. - AN 202502
     # obs_query = find_or_create_query(:Observation)
     # img_query = create_query(:Image, observation_query: obs_query.params)
     img_query = create_query(:Image, observations: obs)

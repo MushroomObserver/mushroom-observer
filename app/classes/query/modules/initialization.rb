@@ -2,7 +2,7 @@
 
 # Helper methods for turning Query parameters into SQL conditions.
 module Query::Modules::Initialization
-  attr_accessor :join, :tables, :where, :group, :order, :executor
+  attr_accessor :join, :tables, :where, :group, :order, :selects, :executor
 
   def initialized?
     @initialized ? true : false
@@ -15,11 +15,13 @@ module Query::Modules::Initialization
     @where       = []
     @group       = ""
     @order       = ""
+    @selects     = ""
     @executor    = nil
     initialize_title
     initialize_flavor
     initialize_group
     initialize_order
+    initialize_selects
   end
 
   # Make a value safe for SQL.
@@ -125,5 +127,15 @@ module Query::Modules::Initialization
     return if params[:group].blank?
 
     self.group = escape(params[:group])
+  end
+
+  # params[:selects] is sanitized here, but it is not validated.
+  def initialize_selects
+    if params[:selects].blank?
+      @selects = "DISTINCT #{model.table_name}.id"
+      return
+    end
+
+    self.selects = escape(params[:selects])
   end
 end

@@ -4,7 +4,7 @@
 #
 #  Query Records store the parameters of recent user queries for quicker access.
 #  For certain nested queries, the inner and outer queries are stored as
-#  separate query_records. Inner queries store an `outer_id` of the outer query.
+#  separate query_records.
 #
 #  Used by MO's Query::Modules::ActiveRecord
 #
@@ -16,7 +16,6 @@
 #  description::    Serialized parameters of the query, including the model.
 #                   Not using Rails serialization because we use this column to
 #                   compare queries, and SQL matching by string is faster.
-#  outer_id::       `id` of outer query, when inner query of a nested query.
 #
 #  == Class methods
 #

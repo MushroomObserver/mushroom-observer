@@ -33,9 +33,9 @@ module Query::Modules::SequenceOperators
   end
 
   # Move to first place.
-  def first(skip_outer = false)
+  def first
     new_self = self
-    new_self = outer_first if !skip_outer && outer?
+    # new_self = outer_first if !skip_outer && outer?
     id = new_self.select_value(limit: "1").to_i
     if id.positive?
       if new_self == self
@@ -61,20 +61,8 @@ module Query::Modules::SequenceOperators
       else
         new_self.current_id = result_ids[index - 1]
       end
-    elsif outer?
-      new_self = prev_inner(new_self)
     else
       new_self = nil
-    end
-    new_self
-  end
-
-  def prev_inner(new_self)
-    while (new_self = new_self.outer_prev)
-      if (new_new_self = new_self.last(:skip_outer))
-        new_self = new_new_self
-        break
-      end
     end
     new_self
   end
@@ -91,28 +79,15 @@ module Query::Modules::SequenceOperators
       else
         new_self.current_id = result_ids[index + 1]
       end
-    elsif outer?
-      new_self = next_inner(new_self)
     else
       new_self = nil
     end
     new_self
   end
 
-  def next_inner(new_self)
-    while (new_self = new_self.outer_next)
-      if (new_new_self = new_self.first(:skip_outer))
-        new_self = new_new_self
-        break
-      end
-    end
-    new_self
-  end
-
   # Move to last place.
-  def last(skip_outer = false)
+  def last
     new_self = self
-    new_self = outer_last if !skip_outer && outer?
     id = new_self.select_value(order: :reverse, limit: "1").to_i
     if id.positive?
       if new_self == self
