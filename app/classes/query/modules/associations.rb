@@ -33,7 +33,15 @@ module Query::Modules::Associations
     joins = [:observations, :observation_herbarium_records, :herbarium_records]
   )
     ids = lookup_herbaria_by_name(params[:herbaria])
-    add_association_condition("herbarium_records.herbarium_id", ids, *joins)
+    add_association_condition("herbarium_records.herbarium_id", ids, *joins,
+                              title_method: :set_herbarium_title)
+  end
+
+  def set_herbarium_title
+    herbarium = find_cached_parameter_instance(Herbarium, :herbarium)
+    @title_tag = :query_title_in_herbarium
+    @title_args[:herbarium] = herbarium.name
+    herbarium
   end
 
   def initialize_herbarium_records_parameter
