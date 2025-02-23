@@ -85,9 +85,12 @@ class NamesController < ApplicationController
   # NOTE: all this extra info and help will be lost if user re-sorts.
   def need_description
     @help = :needed_descriptions_help
-    query = create_query(:Name,
-                         need_description: 1,
-                         order: "count(*) DESC")
+    query = create_query(
+      :Name, need_description: 1,
+             selects: "DISTINCT names.id, count(observations.name_id)",
+             group: "names.id",
+             order: "count(observations.name_id) DESC"
+    )
     [query, { num_per_page: 100 }]
   end
 
