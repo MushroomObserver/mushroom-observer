@@ -243,7 +243,6 @@ GEM
     libv8-node (18.19.0.0-x86_64-darwin)
     libv8-node (18.19.0.0-x86_64-linux)
     libv8-node (18.19.0.0-x86_64-linux-musl)
-    lint_roller (1.1.0)
     logger (1.6.6)
     loofah (2.24.0)
       crass (~> 1.0.2)
@@ -403,10 +402,9 @@ GEM
       rqrcode_core (~> 1.0)
     rqrcode_core (1.2.0)
     rtf (0.3.3)
-    rubocop (1.72.2)
+    rubocop (1.71.2)
       json (~> 2.3)
-      language_server-protocol (~> 3.17.0.2)
-      lint_roller (~> 1.1.0)
+      language_server-protocol (>= 3.17.0)
       parallel (~> 1.10)
       parser (>= 3.3.0.2)
       rainbow (>= 2.2.2, < 4.0)
@@ -416,16 +414,14 @@ GEM
       unicode-display_width (>= 2.4.0, < 4.0)
     rubocop-ast (1.38.0)
       parser (>= 3.3.1.0)
-    rubocop-performance (1.24.0)
-      lint_roller (~> 1.1)
-      rubocop (>= 1.72.1, < 2.0)
-      rubocop-ast (>= 1.38.0, < 2.0)
-    rubocop-rails (2.30.1)
+    rubocop-performance (1.23.1)
+      rubocop (>= 1.48.1, < 2.0)
+      rubocop-ast (>= 1.31.1, < 2.0)
+    rubocop-rails (2.29.1)
       activesupport (>= 4.2.0)
-      lint_roller (~> 1.1)
       rack (>= 1.1)
-      rubocop (>= 1.72.1, < 2.0)
-      rubocop-ast (>= 1.38.0, < 2.0)
+      rubocop (>= 1.52.0, < 2.0)
+      rubocop-ast (>= 1.31.1, < 2.0)
     rubocop-thread_safety (0.6.0)
       rubocop (>= 1.48.1)
     ruby-progressbar (1.13.0)
@@ -596,7 +592,7 @@ DEPENDENCIES
   rest-client
   rqrcode
   rtf
-  rubocop
+  rubocop (= 1.71.2)
   rubocop-performance
   rubocop-rails
   rubocop-thread_safety

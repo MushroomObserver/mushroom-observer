@@ -90,7 +90,7 @@ module Query::Modules::Conditions
 
     set = clean_id_set(params[ids])
     @where << "#{table}.id IN (#{set})"
-    self.order = "FIND_IN_SET(#{table}.id,'#{set}') ASC"
+    @order = "FIND_IN_SET(#{table}.id,'#{set}') ASC"
 
     @title_tag = :query_title_in_set.t(type: table.singularize.to_sym)
     # @title_args[:by] = :query_sorted_by.t(field: :original_name)

@@ -229,18 +229,18 @@ module Query::Modules::Validation
     end
   end
 
-  def validate_query(param, val)
-    case val
-    when Query::Base
-      val.record.id
-    when Integer
-      val
-    else
-      raise(
-        "Value for :#{param} should be a Query class, got: #{val.inspect}"
-      )
-    end
-  end
+  # def validate_query(param, val)
+  #   case val
+  #   when Query::Base
+  #     val.record.id
+  #   when Integer
+  #     val
+  #   else
+  #     raise(
+  #       "Value for :#{param} should be a Query class, got: #{val.inspect}"
+  #     )
+  #   end
+  # end
 
   def find_cached_parameter_instance(model, param)
     return @params_cache[param] if @params_cache && @params_cache[param]
