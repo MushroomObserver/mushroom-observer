@@ -1,0 +1,237 @@
+# Configuration shared by .rubocop.yml and .codeclimate.yml
+# via inheritance from this file
+# https://docs.rubocop.org/rubocop/1.72/configuration.html#inheritance
+
+AllCops:
+  NewCops: enable
+  ########################### Excluded files ###################################
+  # Completely ignore the following
+  Exclude:
+    - .codeclimate.yml
+    - app/assets/javascripts/bootstrap.js
+    - app/assets/javascripts/jquery.js
+    - app/assets/javascripts/jstz.js
+    - app/assets/javascripts/lightbox.js
+    - "db/**/*"
+    - "log/**/*"
+    - public/design_test/jquery-1.5.2.min.js
+    # We need not check these scripts, and some of them cause Rubocop errors
+    - "script/old/**/*"
+    # not Ruby
+    - script/perf_monitor
+    - "tmp/**/*"
+
+# ------------------------------------------------------------------------------
+
+########### Individual cops for which MO uses a non-default configuration
+
+Gemspec:
+  # Not relevent (MO is not a gem)
+  Enabled: false
+
+Layout/BeginEndAlignment:
+  # Rubocop default: start_of_line
+  # which aligns "end" with **start of the line** that includes "begin"
+  # MO: align with "begin". This is how we've almost always done it.
+  # And it's consistent with Layout/EndAlignment for other keywords.
+  EnforcedStyleAlignWith: begin
+Layout/DotPosition:
+  # Rubocop default: leading
+  EnforcedStyle: trailing
+Layout/HashAlignment:
+  # Repeat the Rubocop default because Codeclimate ignores it as of 2019-07-09
+  EnforcedColonStyle: key
+Layout/LineEndStringConcatenationIndentation:
+  # We most consistently align the start of the continued line
+  # with the start of the string on the previous line.
+  # This does not correspond to any available EnforcedStyle.
+  Enabled: false
+Layout/LineLength:
+  # RuboCop default: 120
+  # Use 80 instead because some developers have smaller screens
+  Max: 80
+Layout/MultilineMethodParameterLineBreaks:
+  # Makes Each param in a multi-line method definition start on a separate line.
+  # RuboCop default: true
+  # Cop seems like overkill; MO has many relevant methods with >1 param per line
+  Enabled: false
+
+Lint/AmbiguousOperatorPrecedence:
+  # We do this only in rare cases; Always doing it would add uneeded clutter
+  Enabled: false
+Lint/NonAtomicFileOperation:
+  # Disable until I understand the cop's implications - jdc 2022-07-14
+  # https://docs.rubocop.org/rubocop/1.31/cops_lint.html#lintnonatomicfileoperation
+  Enabled: false
+
+Metrics/AbcSize:
+  # This Cop makes less sense in tests, we regularly ignore it.
+  Exclude:
+    - "test//**/*"
+Metrics/BlockLength:
+  # This Cop makes less sense in tests, we regularly ignore it.
+  Exclude:
+    - "test//**/*"
+Metrics/ClassLength:
+  # Rubocop default: 100
+  # Relaxed metric based on actual practice
+  Max: 250
+  Exclude:
+    # This Cop makes less sense in tests, we regularly ignore it.
+    - "test//**/*"
+Metrics/CyclomaticComplexity:
+  # This Cop makes less sense in tests, we regularly ignore it.
+  Exclude:
+    - "test//**/*"
+Metrics/MethodLength:
+  # Rubocop default: 10
+  # Relaxed metric based on Codeclimate's default .rubocop.yml
+  Max: 30
+  # This Cop makes less sense in tests, we regularly ignore it.
+  Exclude:
+    - "test//**/*"
+Metrics/ModuleLength:
+  # Rubocop default: 100
+  # Relaxed metric based on Codeclimate's default .rubocop.yml
+  Max: 250
+  # This Cop makes less sense in tests, we regularly ignore it.
+  Exclude:
+    - "test//**/*"
+Metrics/PerceivedComplexity:
+  # This Cop makes less sense in tests, we regularly ignore it.
+  Exclude:
+    - "test//**/*"
+
+Naming/BlockForwarding:
+  # In Ruby 3.1, anonymous block forwarding has been added.
+  # This cop identifies places where `do_something(&block)`
+  # can be replaced by `do_something(&)`.
+  # Default is `anonymous`
+  # Keeping it `explicit` until we're ready to switch.
+  EnforcedStyle: explicit
+
+Performance/Casecmp:
+  # This cop does not work with Unicode in Ruby 2.4
+  Enabled: false
+Performance/RegexpMatch:
+  # Autocorrect changes "something.match(regexp)" to "something.match?(regexp)".
+  # The latter throws an error when something is not a Regexp, String or Symbol
+  #   Example: undefined method `match?' for nil:NilClass
+  # So manually correct to: regexp.match?(something)
+  AutoCorrect: false
+Performance/StringInclude:
+  # "This cop’s offenses are not safe to auto-correct if a receiver is nil."
+  Enabled: false
+
+Rails/ActionOrder:
+  # Allow `edit` after `create`
+  # See https://github.com/MushroomObserver/mushroom-observer/pull/1241#issuecomment-1364636450
+  ExpectedOrder:
+    - index
+    - show
+    - new
+    # - edit
+    - create
+    - update
+    - destroy
+Rails/DynamicFindBy:
+  # Make autocorrect saf(er) by whitelisting our find_by methods
+  AllowedMethods: find_by_sql, find_by_code_with_wildcards, find_by_name_with_wildcards, find_by_name_or_reverse_name, find_by_scientific_name_with_wildcards, find_by_title_with_wildcards, find_by_title_with_wildcards
+  AutoCorrect: true
+Rails/RedundantPresenceValidationOnBelongsTo: # new in 2.13
+  # Cop gives false positives
+  # Perhaps because we don't load Rails defaults in config, and also don't have
+  # config.active_record.belongs_to_required_by_default
+  # See also https://github.com/MushroomObserver/mushroom-observer/issues/1072
+  Enabled: false
+Rails/RenderInline:
+  # https://github.com/MushroomObserver/mushroom-observer/pull/1079#discussion_r917332451
+  Exclude:
+    - "app/controllers/ajax_controller/**/*"
+Rails/WhereExists:
+  # Can be unsafe depending on eager_load vs pre_load
+  # https://docs.rubocop.org/rubocop-rails/cops_rails.html#railswhereexists
+  Enabled: false
+
+Style/AccessorGrouping:
+  # https://github.com/MushroomObserver/mushroom-observer/pull/988
+  Enabled: false
+  # The following are Exclude in case we re-enable the cop
+  # Exclude files that individually comment accessors
+  # else Rubocop concatenates the accessors and comments on a single line.
+  # Disabling Style/AccessorGrouping around the accessors doesn't
+  # work in this context because Rubocop v1.30.0 generates a
+  # Style/EmptyLinesAroundAttributeAccessor offense
+  # See https://github.com/rubocop/rubocop/issues/10693
+  Exclude:
+    - "app/classes/country_counter.rb"
+    - "app/classes/mo_paginator.rb"
+Style/AsciiComments:
+  # Allow non-ascii characters in comments; we need to use accented chars
+  Enabled: false
+Style/ClassAndModuleChildren:
+  # Allow nested or compact module declaration
+  Enabled: false
+Style/DateTime:
+  # Repeat the RuboCop default because CodeClimate silently overrides it
+  # Is this still true? JDC 2020-08-17
+  Enabled: false
+Style/Documentation:
+  # We often ignore this and bare-bones comments add nothing useful.
+  # And see Martin, Clean Code, ch. 4
+  #   (Redundant Comments and Mandated Comments are Bad Comments)
+  Enabled: false
+Style/DoubleNegation:
+  # Rubocop default: true
+  # Allow double bang. In the rare places we do this, its use is justified.
+  Enabled: false
+Style/EmptyHeredoc:
+  # Empty Heredoc is usedful as a placeholder in script/refresh_sitemap
+  Exclude:
+    - script/refresh_sitemap
+Style/FormatStringToken:
+  # It doesn't seem like we gain much by doing this.
+  Enabled: false
+  # The commented-out lines below are in case we re-enable the cop
+  # # This doesn't work for redirect in config/routes.rb.
+  # AllowedMethods:
+  # - "redirect"
+Style/HashSyntax:
+  # Ruby 3.1 supports a new JS-like shorthand hash key/val assignment
+  # as long as key names and value variable names are the same.
+  # e.g. { foo: } is evaluated like { foo: foo }
+  # https://dev.to/baweaver/ruby-3-1-shorthand-hash-syntax-first-impressions-19op
+  # This setting allows for a transition while we get used to the new style.
+  # AN 2022-10-09
+  EnforcedShorthandSyntax: either
+Style/MethodCallWithArgsParentheses:
+  # MO uses parentheses (except for some macro-style methods)
+  Enabled: true
+Style/PercentLiteralDelimiters:
+  # Repeat the RuboCop defaults because Codeclimate silently overrides them
+  # Is that still true? JDC 2020-08-17?
+  PreferredDelimiters:
+    default: "()"
+    "%i": "[]"
+    "%I": "[]"
+    "%r": "{}"
+    "%w": "[]"
+    "%W": "[]"
+Style/RaiseArgs:
+  # Rubocop defaiult: exploded
+  # I can't figure out how to get exploded to work with API.
+  EnforcedStyle: compact
+Style/StringLiterals:
+  # Rubocop default: single_quotes
+  EnforcedStyle: double_quotes
+Style/StringLiteralsInInterpolation:
+  # Rubocop default: single_quotes
+  EnforcedStyle: double_quotes
+Style/SymbolArray:
+  # Rubocop default: percent. Ex: %i[foo bar baz]
+  # MO uses plain brackets. Ex: [:foo, :bar, :baz]
+  EnforcedStyle: brackets
+
+Rails/SkipsModelValidations:
+  # We skip validations all the time. I'm tired of disabling this cop. (JPH )
+  Enabled: false
