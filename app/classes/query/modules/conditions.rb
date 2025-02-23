@@ -84,34 +84,33 @@ module Query::Modules::Conditions
     add_joins(*)
   end
 
-  # Generalized so the param can be :obs_ids or :desc_ids
-  def add_ids_condition(table = model.table_name, ids = :ids)
+  # The method that all classes use for queries of their own ids.
+  # Can accept an empty array of ids and respond accordingly.
+  def add_id_in_set_condition(table = model.table_name, ids = :ids)
     return if params[ids].nil? # [] is valid
 
     set = clean_id_set(params[ids])
     @where << "#{table}.id IN (#{set})"
-    @order = "FIND_IN_SET(#{table}.id,'#{set}') ASC"
+    @order = "FIND_IN_SET(#{table}.id,'#{set}') ASC" unless params[:order]
 
     @title_tag = :query_title_in_set.t(type: table.singularize.to_sym)
-    # @title_args[:by] = :query_sorted_by.t(field: :original_name)
-    # @title_args[:descriptions] =
-    #   :query_title_in_set.t(type: table.singularize.to_sym)
   end
 
-  def add_id_condition(col, ids, *, title_method: nil)
+  # table_col = foreign key of an association, e.g. `observations.location_id`
+  def add_association_condition(table_col, ids, *, title_method: nil)
     return if ids.empty?
 
     if ids.size == 1
       send(title_method) if title_method && ids.first.present?
-      @where << "#{col} = '#{ids.first}'"
+      @where << "#{table_col} = '#{ids.first}'"
     else
       set = clean_id_set(ids) # this produces a joined string!
-      @where << "#{col} IN (#{set})"
+      @where << "#{table_col} IN (#{set})"
     end
     add_joins(*)
   end
 
-  def add_not_id_condition(col, ids, *)
+  def add_not_associated_condition(col, ids, *)
     return if ids.empty?
 
     set = clean_id_set(ids)
