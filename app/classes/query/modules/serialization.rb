@@ -20,7 +20,7 @@ module Query::Modules::Serialization
 
   module ClassMethods
     # Get the model from the serialized params and instantiate new Query.
-    def rebuild(description)
+    def rebuild_from_description(description)
       model  = params[:model].to_sym
       params = deserialize(description)
       ::Query.new(model, params)

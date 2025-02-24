@@ -18,7 +18,7 @@ module Query::Modules::ActiveRecord
 
     def find(id)
       record = QueryRecord.find(id)
-      query = Query.rebuild(record.description)
+      query = Query.rebuild_from_description(record.description)
       record.query = query
       query.record = record
       QueryRecord.cleanup

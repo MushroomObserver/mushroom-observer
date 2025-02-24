@@ -287,6 +287,10 @@ class Query
 
   # Delegate all these to Query::Base class.
 
+  def self.rebuild_from_description(*)
+    Query::Base.rebuild_from_description(*)
+  end
+
   def self.deserialize(*)
     Query::Base.deserialize(*)
   end

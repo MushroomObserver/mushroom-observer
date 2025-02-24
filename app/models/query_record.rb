@@ -27,7 +27,7 @@ class QueryRecord < ApplicationRecord
 
   # This method instantiates a new Query from the description.
   def query # rubocop:disable Lint/DuplicateMethods
-    ::Query.rebuild(description)
+    ::Query.rebuild_from_description(description)
   end
 
   # Only keep states around for a day.
