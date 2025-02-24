@@ -2,6 +2,7 @@
 
 # base class for Query searches
 class Query::Base
+  include Query::Modules::ClassMethods
   include Query::Modules::ActiveRecord
   include Query::Modules::RelatedQueries
   include Query::Modules::BoundingBox
@@ -14,7 +15,6 @@ class Query::Base
   include Query::Modules::Joining
   include Query::Modules::LookupObjects
   include Query::Modules::LowLevelQueries
-  # include Query::Modules::NestedQueries
   include Query::Modules::Ordering
   include Query::Modules::SequenceOperators
   include Query::Modules::Serialization
