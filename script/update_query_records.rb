@@ -49,7 +49,7 @@ class UpdateQueryRecords
       if hsh.key?(:with_specimen)
         hsh[:has_specimen] = hsh.delete(:with_specimen)
       end
-      entries << { id: query_record_id, description: Query.serialize(hsh) }
+      entries << { id: query_record_id, description: hsh.to_json }
     end
     entries
   end
