@@ -211,9 +211,9 @@ class NamesControllerTest < FunctionalTestCase
     end
   end
 
-  def test_index_with_observations
+  def test_index_has_observations
     login
-    get(:index, params: { with_observations: true })
+    get(:index, params: { has_observations: true })
 
     assert_response(:success)
     assert_displayed_title(/Names.*Observations/)
@@ -228,7 +228,7 @@ class NamesControllerTest < FunctionalTestCase
                   "right `tabs` should have a link to All Names")
   end
 
-  def test_index_with_observations_by_letter
+  def test_index_has_observations_by_letter
     letter = "A"
     names = Name.joins(:observations).
             with_correct_spelling. # website seems to behave this way
@@ -236,7 +236,7 @@ class NamesControllerTest < FunctionalTestCase
     assert(names.many?, "Test needs different letter")
 
     login
-    get(:index, params: { with_observations: true, letter: letter })
+    get(:index, params: { has_observations: true, letter: letter })
 
     assert_response(:success)
     assert_displayed_title(/Names.*Observations/)
@@ -246,9 +246,9 @@ class NamesControllerTest < FunctionalTestCase
     end
   end
 
-  def test_index_with_descriptions
+  def test_index_has_descriptions
     login
-    get(:index, params: { with_descriptions: true })
+    get(:index, params: { has_descriptions: true })
 
     assert_response(:success)
     assert_displayed_title("Names with Descriptions")
@@ -2416,7 +2416,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_not(Name.exists?(old_name.id))
   end
 
-  def test_update_name_merge_author_with_notes
+  def test_update_name_merge_author_has_notes
     bad_name = names(:hygrocybe_russocoriacea_bad_author)
     bad_id = bad_name.id
     bad_notes = bad_name.notes
@@ -2689,7 +2689,7 @@ class NamesControllerTest < FunctionalTestCase
 
   # Test merging two names, only one with observations.  Should work either
   # direction, but always keeping the name with observations.
-  def test_update_name_merge_one_with_observations
+  def test_update_name_merge_one_has_observations
     old_name = names(:mergeable_no_notes) # mergeable, ergo no observation
     assert(old_name.observations.none?, "Test needs a different fixture.")
     new_name = names(:coprinus_comatus) # has observations
@@ -2715,7 +2715,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_not(Name.exists?(old_name.id))
   end
 
-  def test_update_name_merge_one_with_observations_other_direction
+  def test_update_name_merge_one_has_observations_other_direction
     old_name = names(:coprinus_comatus) # has observations
     assert(old_name.observations.any?, "Test needs a different fixture.")
     new_name = names(:mergeable_no_notes) # mergeable, ergo no observations
@@ -2771,7 +2771,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_equal(old_notes, other_desc.notes)
   end
 
-  def test_edit_name_both_with_notes_and_namings
+  def test_edit_name_both_has_notes_and_namings
     old_name = names(:agaricus_campestros)
     new_name = names(:agaricus_campestras)
     new_versions = new_name.versions.size

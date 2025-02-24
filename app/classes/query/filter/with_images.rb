@@ -4,7 +4,7 @@ class Query::Filter
   class WithImages < BooleanFilter
     def initialize
       super(
-        sym: :with_images,
+        sym: :has_images,
         name: :IMAGES,
         models: [Observation],
         on_vals: %w[yes no],

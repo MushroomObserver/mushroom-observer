@@ -983,7 +983,7 @@ class ObservationTest < UnitTestCase
                  "Pasadena, California, USA (34.1622°N 118.3521°W)")
   end
 
-  def test_place_name_and_coordinates_without_values
+  def test_place_name_and_coordinates_has_no_values
     obs = observations(:unknown_with_no_naming)
     assert_equal(obs.place_name_and_coordinates, "Who knows where")
   end
@@ -1447,28 +1447,28 @@ class ObservationTest < UnitTestCase
                         observations(:displayed_at_obs))
   end
 
-  def test_scope_with_notes_field
-    assert_includes(Observation.with_notes_field("substrate"),
+  def test_scope_has_notes_field
+    assert_includes(Observation.has_notes_field("substrate"),
                     observations(:substrate_notes_obs))
     obs_substrate_in_plain_text =
       Observation.create!(notes: "The substrate is wood",
                           user: users(:rolf))
-    assert_not_includes(Observation.with_notes_field("substrate"),
+    assert_not_includes(Observation.has_notes_field("substrate"),
                         obs_substrate_in_plain_text)
-    assert_empty(Observation.with_notes_field(ARBITRARY_SHA))
+    assert_empty(Observation.has_notes_field(ARBITRARY_SHA))
   end
 
-  def test_scope_with_sequences
-    assert_includes(Observation.with_sequences,
+  def test_scope_has_sequences
+    assert_includes(Observation.has_sequences,
                     observations(:genbanked_obs))
-    assert_not_includes(Observation.with_sequences,
+    assert_not_includes(Observation.has_sequences,
                         observations(:minimal_unknown_obs))
   end
 
-  def test_scope_without_sequences
-    assert_includes(Observation.without_sequences,
+  def test_scope_has_no_sequences
+    assert_includes(Observation.has_no_sequences,
                     observations(:minimal_unknown_obs))
-    assert_not_includes(Observation.without_sequences,
+    assert_not_includes(Observation.has_no_sequences,
                         observations(:genbanked_obs))
   end
 
@@ -1487,23 +1487,23 @@ class ObservationTest < UnitTestCase
     assert_empty(Observation.confidence(3.1, 3.2))
   end
 
-  def test_scope_without_comments
-    assert_includes(Observation.without_comments,
+  def test_scope_has_no_comments
+    assert_includes(Observation.has_no_comments,
                     observations(:unlisted_rolf_obs))
-    assert_not_includes(Observation.without_comments,
+    assert_not_includes(Observation.has_no_comments,
                         observations(:minimal_unknown_obs))
   end
 
-  def test_scope_herbarium_record_notes_contain
+  def test_scope_herbarium_record_notes_has
     obss_with_hr_notes =
-      Observation.herbarium_record_notes_contain("cleaned & dried at 115°")
+      Observation.herbarium_record_notes_has("cleaned & dried at 115°")
     assert_includes(obss_with_hr_notes,
                     observations(:minimal_unknown_obs))
     assert_includes(obss_with_hr_notes,
                     observations(:detailed_unknown_obs))
     assert_not_includes(obss_with_hr_notes,
                         observations(:imageless_unvouchered_obs))
-    assert_empty(Observation.herbarium_record_notes_contain("ARBITRARY_SHA"))
+    assert_empty(Observation.herbarium_record_notes_has("ARBITRARY_SHA"))
   end
 
   def test_source_credit

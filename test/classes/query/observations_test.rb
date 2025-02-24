@@ -59,11 +59,11 @@ class Query::ObservationsTest < UnitTestCase
                  :Observation, confidence: [100])
   end
 
-  def test_observation_with_public_lat_lng
-    assert_query(Observation.index_order.with_public_geolocation(true),
-                 :Observation, with_public_lat_lng: true)
-    assert_query(Observation.index_order.with_public_geolocation(false),
-                 :Observation, with_public_lat_lng: false)
+  def test_observation_has_public_lat_lng
+    assert_query(Observation.index_order.has_public_lat_lng(true),
+                 :Observation, has_public_lat_lng: true)
+    assert_query(Observation.index_order.has_public_lat_lng(false),
+                 :Observation, has_public_lat_lng: false)
   end
 
   def test_observation_is_collection_location
@@ -73,65 +73,65 @@ class Query::ObservationsTest < UnitTestCase
                  :Observation, is_collection_location: false)
   end
 
-  def test_observation_with_notes
-    assert_query(Observation.index_order.with_notes(true),
-                 :Observation, with_notes: true)
-    assert_query(Observation.index_order.with_notes(false),
-                 :Observation, with_notes: false)
+  def test_observation_has_notes
+    assert_query(Observation.index_order.has_notes(true),
+                 :Observation, has_notes: true)
+    assert_query(Observation.index_order.has_notes(false),
+                 :Observation, has_notes: false)
   end
 
   def test_observation_notes_has
-    assert_query(Observation.index_order.notes_contain("strange place"),
+    assert_query(Observation.index_order.notes_has("strange place"),
                  :Observation, notes_has: "strange place")
-    assert_query(Observation.index_order.notes_contain("From"),
+    assert_query(Observation.index_order.notes_has("From"),
                  :Observation, notes_has: "From")
-    assert_query(Observation.index_order.notes_contain("Growing"),
+    assert_query(Observation.index_order.notes_has("Growing"),
                  :Observation, notes_has: "Growing")
   end
 
-  def test_observation_with_notes_fields
+  def test_observation_has_notes_fields
     # the single version
-    assert_query(Observation.index_order.with_notes_field("substrate"),
-                 :Observation, with_notes_fields: "substrate")
+    assert_query(Observation.index_order.has_notes_field("substrate"),
+                 :Observation, has_notes_fields: "substrate")
     assert_query(Observation.index_order.
-                 with_notes_fields(%w[substrate cap]),
-                 :Observation, with_notes_fields: %w[substrate cap])
+                 has_notes_fields(%w[substrate cap]),
+                 :Observation, has_notes_fields: %w[substrate cap])
   end
 
-  def test_observation_with_comments
-    assert_query(Observation.index_order.with_comments(true),
-                 :Observation, with_comments: true)
+  def test_observation_has_comments
+    assert_query(Observation.index_order.has_comments(true),
+                 :Observation, has_comments: true)
     assert_query(Observation.index_order,
-                 :Observation, with_comments: false)
+                 :Observation, has_comments: false)
   end
 
   def test_observation_comments_has
-    assert_query(Observation.index_order.comments_contain("comment"),
+    assert_query(Observation.index_order.comments_has("comment"),
                  :Observation, comments_has: "comment")
     assert_query(Observation.index_order.
-                 comments_contain("Agaricus campestris"),
+                 comments_has("Agaricus campestris"),
                  :Observation, comments_has: "Agaricus campestris")
   end
 
-  def test_observation_with_sequences
-    assert_query(Observation.index_order.with_sequences(true),
-                 :Observation, with_sequences: true)
+  def test_observation_has_sequences
+    assert_query(Observation.index_order.has_sequences(true),
+                 :Observation, has_sequences: true)
     assert_query(Observation.index_order,
-                 :Observation, with_sequences: false)
+                 :Observation, has_sequences: false)
   end
 
-  def test_observation_with_images
-    assert_query(Observation.index_order.with_images(true),
-                 :Observation, with_images: true)
-    assert_query(Observation.index_order.with_images(false),
-                 :Observation, with_images: false)
+  def test_observation_has_images
+    assert_query(Observation.index_order.has_images(true),
+                 :Observation, has_images: true)
+    assert_query(Observation.index_order.has_images(false),
+                 :Observation, has_images: false)
   end
 
-  def test_observation_with_specimen
-    assert_query(Observation.index_order.with_specimen(true),
-                 :Observation, with_specimen: true)
-    assert_query(Observation.index_order.with_specimen(false),
-                 :Observation, with_specimen: false)
+  def test_observation_has_specimen
+    assert_query(Observation.index_order.has_specimen(true),
+                 :Observation, has_specimen: true)
+    assert_query(Observation.index_order.has_specimen(false),
+                 :Observation, has_specimen: false)
   end
 
   def test_observation_field_slips

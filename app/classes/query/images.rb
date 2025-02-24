@@ -20,11 +20,11 @@ class Query::Images < Query::Base
       by_users: [User],
       size: [{ string: Image::ALL_SIZES - [:full_size] }],
       content_types: [{ string: Image::ALL_EXTENSIONS }],
-      with_notes: :boolean,
+      has_notes: :boolean,
       notes_has: :string,
       copyright_holder_has: :string,
       license: [License],
-      with_votes: :boolean,
+      has_votes: :boolean,
       quality: [:float],
       confidence: [:float],
       ok_for_export: :boolean,
@@ -33,7 +33,7 @@ class Query::Images < Query::Base
       observations: [Observation],
       projects: [Project],
       species_lists: [SpeciesList],
-      with_observations: :boolean,
+      has_observations: :boolean,
       observation_query: { subquery: :Observation }
     ).merge(advanced_search_parameter_declarations)
   end
@@ -63,7 +63,7 @@ class Query::Images < Query::Base
   def initialize_img_notes_parameters
     add_boolean_condition("LENGTH(COALESCE(images.notes,'')) > 0",
                           "LENGTH(COALESCE(images.notes,'')) = 0",
-                          params[:with_notes])
+                          params[:has_notes])
     add_search_condition("images.notes", params[:notes_has])
   end
 
@@ -113,7 +113,7 @@ class Query::Images < Query::Base
   end
 
   def initialize_image_association_parameters
-    add_join(:observation_images) if params[:with_observation]
+    add_join(:observation_images) if params[:has_observations]
     initialize_images_with_observations
     initialize_observations_parameter
     initialize_image_vote_parameters
@@ -130,7 +130,7 @@ class Query::Images < Query::Base
   def initialize_image_vote_parameters
     add_boolean_condition("images.vote_cache IS NOT NULL",
                           "images.vote_cache IS NULL",
-                          params[:with_votes])
+                          params[:has_votes])
     add_range_condition("images.vote_cache", params[:quality])
     add_range_condition("observations.vote_cache", params[:confidence],
                         :observation_images, :observations)
@@ -142,7 +142,7 @@ class Query::Images < Query::Base
   end
 
   def initialize_images_with_observations
-    return if params[:with_observations].blank?
+    return if params[:has_observations].blank?
 
     add_join(:observation_images, :observations)
   end
@@ -216,7 +216,7 @@ class Query::Images < Query::Base
 
   def title
     default = super
-    return default if params[:with_observations].blank? &&
+    return default if params[:has_observations].blank? &&
                       params[:observation_subquery].blank?
 
     with_observations_query_description || default
