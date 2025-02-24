@@ -93,34 +93,34 @@
 #  found_between(start, end)
 #  of_names(name)
 #  of_names_like(string)
-#  with_name
-#  without_name
+#  has_name
+#  has_no_name
 #  by_user(user)
-#  with_location
-#  without_location
+#  has_location
+#  has_no_location
 #  at_locations(location)
 #  in_region(where)
 #  in_box(north:, south:, east:, west:) geoloc is in the box
 #  not_in_box(north:, south:, east:, west:) geoloc is outside the box
 #  is_collection_location
 #  not_collection_location
-#  with_images
-#  without_images
-#  with_notes
-#  without_notes
+#  has_images
+#  has_no_images
+#  has_notes
+#  has_no_notes
 #  has_notes_field(field)
-#  notes_contain(note)
-#  with_specimen
-#  without_specimen
-#  with_sequences
-#  without_sequences
+#  notes_has(note)
+#  has_specimen
+#  has_no_specimen
+#  has_sequences
+#  has_no_sequences
 #  confidence (min %, max %)
-#  with_comments
-#  without_comments
-#  comments_contain(summary)
+#  has_comments
+#  has_no_comments
+#  comments_has(summary)
 #  for_projects(project)
 #  in_herbaria(herbaria)
-#  herbarium_record_notes_contain(notes)
+#  herbarium_record_notes_has(notes)
 #  on_species_lists(species_list)
 #  on_projects_species_lists(project)
 #
@@ -353,7 +353,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     # Need to repeat `needs_naming:false` even though AR will optimize it out
     # and it'll only appear once in the resulting WHERE condition. Go figure.
     query = Observation.
-            where(needs_naming: false).without_confident_name.
+            where(needs_naming: false).has_no_confident_name.
             or(where(needs_naming: false).with_name_above_genus)
     msgs = query.map do |obs|
       "Observation #{obs.id}, #{obs.text_name}, needs a name."

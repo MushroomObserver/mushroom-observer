@@ -64,11 +64,11 @@ class Query::NameDescriptionsTest < UnitTestCase
                  :NameDescription, ids: [rolf.id, NameDescription.first.id])
   end
 
-  def test_name_description_with_default_desc
+  def test_name_description_has_default_desc
     assert_query(NameDescription.is_default.index_order,
-                 :NameDescription, name_query: { with_default_desc: 1 })
+                 :NameDescription, name_query: { has_default_desc: 1 })
     assert_query(NameDescription.is_not_default.index_order,
-                 :NameDescription, name_query: { with_default_desc: 0 })
+                 :NameDescription, name_query: { has_default_desc: 0 })
   end
 
   def test_name_description_desc_type_user

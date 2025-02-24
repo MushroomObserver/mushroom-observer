@@ -44,31 +44,31 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :not_collection_location,
           -> { where(is_collection_location: false) }
 
-    scope :with_images, lambda { |bool = true|
+    scope :has_images, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         where.not(thumb_image: nil)
       else
-        without_images
+        has_no_images
       end
     }
-    scope :without_images,
+    scope :has_no_images,
           -> { where(thumb_image: nil) }
 
-    scope :with_notes, lambda { |bool = true|
+    scope :has_notes, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         where.not(notes: no_notes)
       else
-        without_notes
+        has_no_notes
       end
     }
-    scope :without_notes,
+    scope :has_no_notes,
           -> { where(notes: no_notes) }
-    scope :notes_contain,
+    scope :notes_has,
           ->(phrase) { search_columns(Observation[:notes], phrase) }
 
-    scope :with_notes_field,
+    scope :has_notes_field,
           ->(field) { where(Observation[:notes].matches("%:#{field}:%")) }
-    scope :with_notes_fields, lambda { |fields|
+    scope :has_notes_fields, lambda { |fields|
       return if fields.empty?
 
       fields.map! { |field| notes_field_presence_condition(field) }
@@ -87,8 +87,8 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # The "advanced search" scope for "content". Unexpectedly, merge/or is
     # faster than concatting the Obs and Comment columns together.
     scope :advanced_search, lambda { |phrase|
-      comments = Observation.comments_contain(phrase).map(&:id)
-      notes_contain(phrase).distinct.
+      comments = Observation.comments_has(phrase).map(&:id)
+      notes_has(phrase).distinct.
         or(Observation.where(id: comments).distinct)
     }
     # Checks Name[:search_name], which includes the author
@@ -101,14 +101,14 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # More comprehensive search of Observation fields + Name.search_name,
     # (plus comments ?).
     # scope :search_content_and_associations, lambda { |phrase|
-    #   ids = Name.search_name_contains(phrase).
+    #   ids = Name.search_name_has(phrase).
     #         includes(:observations).map(&:observations).flatten.uniq
     #   ids += Observation.search_content_except_notes(phrase).map(&:id)
-    #   ids += Observation.comments_contain(phrase).map(&:id)
+    #   ids += Observation.comments_has(phrase).map(&:id)
     #   where(id: ids).distinct
     # }
     def self.name_search_name_observation_ids(phrase)
-      Name.search_name_contains(phrase).
+      Name.search_name_has(phrase).
         includes(:observations).map(&:observations).flatten.uniq
     end
 
@@ -122,14 +122,14 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :not_lichens,
           -> { where(Observation[:lifeform].does_not_match("% lichen %")) }
 
-    scope :with_name, lambda { |bool = true|
+    scope :has_name, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         where.not(name: Name.unknown)
       else
-        without_name
+        has_no_name
       end
     }
-    scope :without_name,
+    scope :has_no_name,
           -> { where(name: Name.unknown) }
 
     # Filters for confidence on vote_cache scale -3.0..3.0
@@ -144,13 +144,13 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
     # Use this definition when running script to populate the column:
     # scope :needs_naming, lambda {
-    #   with_name_above_genus.or(without_confident_name)
+    #   with_name_above_genus.or(has_no_confident_name)
     # }
     scope :needs_naming,
           -> { where(needs_naming: true) }
     scope :with_name_above_genus,
           -> { where(name_id: Name.with_rank_above_genus) }
-    scope :without_confident_name,
+    scope :has_no_confident_name,
           -> { where(vote_cache: ..0) }
     scope :with_name_correctly_spelled, lambda { |bool = true|
       if bool.to_s.to_boolean == true
@@ -225,7 +225,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       end
     }
     scope :of_names_like,
-          ->(name) { where(name: Name.text_name_contains(name)) }
+          ->(name) { where(name: Name.text_name_has(name)) }
     scope :in_clade, lambda { |val|
       # parse_name_and_rank defined below
       text_name, rank = parse_name_and_rank(val)
@@ -251,22 +251,22 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
           -> { where.not(location: nil).or(where.not(lat: nil)) }
     scope :unmappable,
           -> { where(location: nil).and(where(lat: nil)) }
-    scope :with_location,
+    scope :has_location,
           -> { where.not(location: nil) }
-    scope :without_location,
+    scope :has_no_location,
           -> { where(location: nil) }
-    scope :with_geolocation,
+    scope :has_geolocation,
           -> { where.not(lat: nil) }
-    scope :without_geolocation,
+    scope :has_no_geolocation,
           -> { where(lat: nil) }
-    scope :with_public_geolocation, lambda { |bool = true|
+    scope :has_public_lat_lng, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         where(gps_hidden: false).where.not(lat: nil)
       else
-        without_public_geolocation
+        has_no_public_lat_lng
       end
     }
-    scope :without_public_geolocation,
+    scope :has_no_public_lat_lng,
           -> { where(gps_hidden: true).or(where(lat: nil)) }
 
     scope :at_locations, lambda { |locations|
@@ -440,39 +440,39 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       joins(:location).where(Location[:box_area].gt(args[:area])).distinct
     }
 
-    scope :with_comments, lambda { |bool = true|
+    scope :has_comments, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         joins(:comments).distinct
       else
-        without_comments
+        has_no_comments
       end
     }
-    scope :without_comments,
-          -> { where.not(id: Observation.with_comments) }
-    scope :comments_contain, lambda { |phrase|
+    scope :has_no_comments,
+          -> { where.not(id: Observation.has_comments) }
+    scope :comments_has, lambda { |phrase|
       joins(:comments).merge(Comment.search_content(phrase)).distinct
     }
 
-    scope :with_specimen, lambda { |bool = true|
+    scope :has_specimen, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         where(specimen: true)
       else
-        without_specimen
+        has_no_specimen
       end
     }
-    scope :without_specimen,
+    scope :has_no_specimen,
           -> { where(specimen: false) }
 
-    scope :with_sequences, lambda { |bool = true|
+    scope :has_sequences, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         joins(:sequences).distinct
       else
-        without_sequences
+        has_no_sequences
       end
     }
     # much faster than `missing(:sequences)` which uses left outer join.
-    scope :without_sequences,
-          -> { where.not(id: with_sequences) }
+    scope :has_no_sequences,
+          -> { where.not(id: has_sequences) }
 
     # For activerecord subqueries, no need to pre-map the primary key (id)
     # but Lookup has to return something. Ids are cheapest.
@@ -506,7 +506,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       joins(observation_herbarium_records: :herbarium_record).
         where(herbarium_records: { herbarium: h_ids }).distinct
     }
-    scope :herbarium_record_notes_contain, lambda { |phrase|
+    scope :herbarium_record_notes_has, lambda { |phrase|
       joins(:herbarium_records).
         search_columns(HerbariumRecord[:notes], phrase).distinct
     }

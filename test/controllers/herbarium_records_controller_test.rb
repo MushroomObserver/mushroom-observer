@@ -141,7 +141,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_template("shared/_matrix_box")
   end
 
-  def test_show_herbarium_record_with_notes
+  def test_show_herbarium_record_has_notes
     herbarium_record = herbarium_records(:interesting_unknown)
     assert(herbarium_record)
     login

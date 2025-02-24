@@ -46,18 +46,18 @@ module Image::Scopes
       end
     }
 
-    scope :with_notes, lambda { |bool = true|
+    scope :has_notes, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         where(Image[:notes].coalesce("").length.gt(0))
       else
-        without_notes
+        has_no_notes
       end
     }
-    scope :without_notes,
+    scope :has_no_notes,
           -> { where(Image[:notes].coalesce("").length.eq(0)) }
-    scope :notes_contain,
+    scope :notes_has,
           ->(phrase) { search_columns(Image[:notes], phrase) }
-    scope :copyright_holder_contains,
+    scope :copyright_holder_has,
           ->(phrase) { search_columns(Image[:copyright_holder], phrase) }
     scope :with_license,
           ->(license) { where(license: license) }
@@ -88,14 +88,14 @@ module Image::Scopes
       joins(observations: :name).search_columns(cols, phrase).distinct
     }
 
-    scope :with_votes, lambda { |bool = true|
+    scope :has_votes, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         where(Image[:vote_cache].not_eq(nil))
       else
-        without_votes
+        has_no_votes
       end
     }
-    scope :without_votes,
+    scope :has_no_votes,
           -> { where(Image[:vote_cache].eq(nil)) }
     # quality is on a scale from 1.0 to 4.0
     scope :quality, lambda { |min, max = nil|

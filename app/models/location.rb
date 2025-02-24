@@ -46,7 +46,7 @@
 #  updated_after("yyyymmdd")
 #  updated_before("yyyymmdd")
 #  updated_between(start, end)
-#  name_contains(place_name)
+#  name_has(place_name)
 #  in_region(place_name)
 #  in_box(north:, south:, east:, west:)
 #

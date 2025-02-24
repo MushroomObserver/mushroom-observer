@@ -202,7 +202,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_flash_warning
   end
 
-  def test_create_observation_with_specimen_and_collector_but_no_number
+  def test_create_observation_has_specimen_and_collector_but_no_number
     generic_construct_observation(
       { observation: { specimen: "1" },
         collection_number: { name: "Rolf Singer", number: "" },

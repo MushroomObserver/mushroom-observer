@@ -10,7 +10,7 @@ class Name
   # separately counted to show the number of results for each variant,
   # without intitiating any other queries.
   class Observations
-    # attr_reader :with_images, :of_taxon_this_name, :of_taxon_other_names
+    # attr_reader :has_images, :of_taxon_this_name, :of_taxon_other_names
 
     def initialize(name)
       @name = name
@@ -46,12 +46,12 @@ class Name
       @all
     end
 
-    def with_images
+    def has_images # rubocop:disable Naming/PredicateName
       of_taxon_this_name.reject { |obs| obs&.thumb_image_id.nil? }
     end
 
     def best_images
-      image_ids = with_images.take(6).map(&:thumb_image_id)
+      image_ids = has_images.take(6).map(&:thumb_image_id)
       # One new lookup for the images. Order these by image votes
       Image.interactive_includes.where(id: image_ids).order(vote_cache: :desc)
     end
