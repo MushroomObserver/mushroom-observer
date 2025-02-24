@@ -78,12 +78,6 @@ module Query::Modules::Associations
     location
   end
 
-  def add_is_collection_location_condition_for_locations
-    return unless model == Location
-
-    where << "observations.is_collection_location IS TRUE"
-  end
-
   def initialize_observations_parameter(
     table = :"observation_#{model.table_name}", joins = [table]
   )

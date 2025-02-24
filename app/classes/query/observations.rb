@@ -77,8 +77,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
   end
 
   def initialize_obs_basic_parameters
-    ids_param = model == Observation ? :ids : :obs_ids
-    add_id_in_set_condition("observations", ids_param)
+    add_id_in_set_condition
     add_owner_and_time_stamp_conditions("observations")
     initialize_obs_date_parameter(:date)
   end
@@ -102,15 +101,6 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
     initialize_project_lists_parameter
     initialize_species_lists_parameter
     initialize_field_slips_parameter
-  end
-
-  # This is just to allow the additional location conditions
-  # to be added FOR coerced queries.
-  def add_id_in_set_condition(table = model.table_name, ids = :ids)
-    super
-    return if model != Observation
-
-    add_is_collection_location_condition_for_locations
   end
 
   def initialize_obs_date_parameter(param_name = :date)

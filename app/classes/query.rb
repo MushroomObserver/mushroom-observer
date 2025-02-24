@@ -210,7 +210,7 @@
 #
 #  == Class Methods
 #  lookup::             Instantiate Query of given model, flavor and params.
-#  deserialize::        Instantiate Query described by a string.
+#  rebuild_from_description:: Instantiate Query described by a string.
 #
 #  ==Instance Methods
 #  serialize::          Returns string which describes the Query completely.
@@ -248,18 +248,6 @@
 #  paginate_ids::       Array of subset of results, just ids.
 #  clear_cache::        Clear results cache.
 #
-#  ==== Outer queries
-#  outer::              Outer Query (if nested).
-#  outer?::             Is this Query nested?
-#  get_outer_current_id::  Get outer Query's current id.
-#  outer_first::        Call +first+ on outer Query.
-#  outer_prev::         Call +prev+ on outer Query.
-#  outer_next::         Call +next+ on outer Query.
-#  outer_last::         Call +last+ on outer Query.
-#  new_inner::          Create new inner Query based the given outer Query.
-#  new_inner_if_necessary::
-#                       Create new inner Query if the outer Query has changed.
-#
 #  == Internal Variables
 #
 #  ==== Instance Variables
@@ -274,6 +262,8 @@
 #  @params_cache::      Hash: where instances passed in via params are cached.
 #
 class Query
+  include Query::Modules::ClassMethods
+
   def self.new(model, params = {}, current = nil)
     klass = "Query::#{model.to_s.pluralize}".constantize
     query = klass.new
@@ -283,36 +273,6 @@ class Query
     query.current = current if current
     # query.initialize_query # if you want the attributes right away
     query
-  end
-
-  # Delegate all these to Query::Base class.
-
-  def self.deserialize(*)
-    Query::Base.deserialize(*)
-  end
-
-  def self.safe_find(*)
-    Query::Base.safe_find(*)
-  end
-
-  def self.find(*)
-    Query::Base.find(*)
-  end
-
-  def self.lookup_and_save(*)
-    Query::Base.lookup_and_save(*)
-  end
-
-  def self.lookup(*)
-    Query::Base.lookup(*)
-  end
-
-  def self.current_or_related_query(*)
-    Query::Base.current_or_related_query(*)
-  end
-
-  def self.related?(*)
-    Query::Base.related?(*)
   end
 
   def default_order
