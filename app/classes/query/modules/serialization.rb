@@ -15,16 +15,24 @@ module Query::Modules::Serialization
   # the parsed hashes (in whatever order), because when a column is serialized
   # you can't use SQL on the column value, you have to compare parsed instances.
   def serialize
-    params.sort.to_h.merge(model: model.name).to_json
+    self.class.serialize
   end
 
   module ClassMethods
     # Get the model from the serialized params and instantiate new Query.
+    def rebuild(description)
+      model  = params[:model].to_sym
+      params = deserialize(description)
+      ::Query.new(model, params)
+    end
+
     def deserialize(description)
       params = JSON.parse(description).symbolize_keys
-      model  = params[:model].to_sym
       params.delete(:model)
-      ::Query.new(model, params)
+    end
+
+    def serialize
+      params.sort.to_h.merge(model: model.name).to_json
     end
   end
 end
