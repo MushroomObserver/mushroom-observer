@@ -60,7 +60,7 @@ module Query::Scopes::Associations
     # @where << cond
     @scopes = @scopes.where(conditions)
     # add_joins(*)
-    @scopes = @scopes.joins(joins) if joins
+    @scopes = @scopes.joins(**joins) if joins
   end
 
   def chain_location_string_conditions(conditions, table, vals)
@@ -101,7 +101,7 @@ module Query::Scopes::Associations
     # where << "#{table}.observation_id = '#{obs.id}'"
     @scopes = @scopes.where(table[:observation_id].eq(obs.id))
     # add_join(*joins)
-    @scopes = @scopes.joins(joins) if joins
+    @scopes = @scopes.joins(**joins) if joins
 
     @title_tag = :query_title_for_observation
     @title_args[:observation] = obs.unique_format_name
@@ -129,7 +129,7 @@ module Query::Scopes::Associations
     @scopes = @scopes.where(table[:project_id].eq(project.id))
     add_is_collection_location_condition_for_locations
     # add_join(*joins)
-    @scopes = @scopes.joins(joins) if joins
+    @scopes = @scopes.joins(**joins) if joins
 
     @title_tag = :query_title_for_project
     @title_args[:project] = project.title
@@ -158,7 +158,7 @@ module Query::Scopes::Associations
     @scopes = @scopes.where(table[:species_list_id].eq(spl.id))
     add_is_collection_location_condition_for_locations
     # add_join(*joins)
-    @scopes = @scopes.joins(joins) if joins
+    @scopes = @scopes.joins(**joins) if joins
 
     @title_tag = :query_title_in_species_list
     @title_args[:species_list] = spl.format_name

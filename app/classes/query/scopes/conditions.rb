@@ -14,7 +14,7 @@ module Query::Scopes::Conditions
 
     earliest, latest = vals
     @scopes = @scopes.date(earliest, latest, col)
-    @scopes = @scopes.joins(joins) if joins
+    @scopes = @scopes.joins(**joins) if joins
   end
 
   # no callers send joins to this method
@@ -31,7 +31,7 @@ module Query::Scopes::Conditions
     return if val.nil?
 
     @scopes = @scopes.send(:where, (val ? true_cond : false_cond))
-    @scopes = @scopes.joins(joins) if joins
+    @scopes = @scopes.joins(**joins) if joins
   end
 
   # Like boolean, but less verbose. When the column itself is boolean
@@ -74,8 +74,12 @@ module Query::Scopes::Conditions
 
     vals = [vals] unless vals.is_a?(Array)
     vals = vals.map { |v| escape(v.downcase) }
-    @scopes = @scopes.where(table_column.downcase.in(*vals))
-    @scopes = @scopes.joins(joins) if joins
+    @scopes = if vals.length == 1
+                @scopes.where(table_column.downcase.eq(vals.first))
+              else
+                @scopes.where(table_column.downcase.in(*vals))
+              end
+    @scopes = @scopes.joins(**joins) if joins
   end
 
   def add_range_condition(table_column, val, joins)
@@ -84,7 +88,7 @@ module Query::Scopes::Conditions
     min, max = val
     @scopes = @scopes.where(table_column.gteq(min)) if min.present?
     @scopes = @scopes.where(table_column.lteq(max)) if max.present?
-    @scopes = @scopes.joins(joins) if joins
+    @scopes = @scopes.joins(**joins) if joins
   end
 
   def add_string_enum_condition(table_column, vals, allowed, joins)
@@ -94,7 +98,7 @@ module Query::Scopes::Conditions
     return if vals.empty?
 
     @scopes = @scopes.where(table_column.in(*vals))
-    @scopes = @scopes.joins(joins) if joins
+    @scopes = @scopes.joins(**joins) if joins
   end
 
   # Send the whole enum Hash as `allowed`, so we can find the corresponding
@@ -106,42 +110,49 @@ module Query::Scopes::Conditions
     return if vals.empty?
 
     @scopes = @scopes.where(table_column.in(*vals))
-    @scopes = @scopes.joins(joins) if joins
+    @scopes = @scopes.joins(**joins) if joins
   end
 
+  # The method that all classes use for queries of their own ids.
   # Simply an id in set condition for the current table's :id column. No joins.
-  # NOTE: this `reorder` seems backwards but the `&` builds the FIND_IN_SET
+  # Can accept an empty array of ids and respond accordingly.
+  #
+  # NOTE: `reorder(set & col)` seems backwards but builds the FIND_IN_SET
   # SQL correctly. Note the set comes first, and gets "quoted" in the SQL.
   #
   #   builds: "FIND_IN_SET(#{table}.id,'#{set}') ASC"
   #
   # rubocop:disable Metrics/AbcSize
-  def add_ids_condition(table = model, ids_param = :ids)
-    return if params[ids_param].nil? # [] is valid
+  def add_id_in_set_condition
+    return if params[:ids].nil? # [] is valid
 
-    set = clean_id_set(params[ids_param])
-    @scopes = @scopes.where(table[:id].in(set)).
+    set = clean_id_set(params[:ids])
+    @scopes = @scopes.where(model[:id].in(set)).
               reorder(Arel::Nodes.build_quoted(set.join(",")) & table[:id])
-    @title_tag = :query_title_in_set.t(type: table.singularize.to_sym)
+    @title_tag = :query_title_in_set.t(type: model.type_tag)
   end
   # rubocop:enable Metrics/AbcSize
 
-  # Generalized so the model and column name can be sent as params
-  # e.g. (Observation[:location_id], ids) or (Location[:description_id], ids)
-  def add_id_condition(table_column, ids, joins)
+  # table_col = foreign key of an association, e.g. `observations.location_id`
+  def add_association_condition(table_column, ids, joins, title_method: nil)
     return if ids.empty?
 
-    set = clean_id_set(ids)
-    @scopes = @scopes.where(table_column.in(set))
-    @scopes = @scopes.joins(joins) if joins
+    if ids.size == 1
+      send(title_method) if title_method && ids.first.present?
+      @scopes = @scopes.where(table_column.eq(ids.first))
+    else
+      set = clean_id_set(ids)
+      @scopes = @scopes.where(table_column.in(set))
+    end
+    @scopes = @scopes.joins(**joins) if joins
   end
 
-  def add_not_id_condition(table_column, ids, joins)
+  def add_not_associated_condition(table_column, ids, joins)
     return if ids.empty?
 
     set = clean_id_set(ids)
     @scopes = @scopes.where(table_column.not_in(set))
-    @scopes = @scopes.joins(joins) if joins
+    @scopes = @scopes.joins(**joins) if joins
   end
 
   # Put together a list of ids for use in a "id IN (1,2,...)" condition.
@@ -160,6 +171,22 @@ module Query::Scopes::Conditions
     ids.map(&:to_i).uniq[0, MO.query_max_array]
   end
 
+  # Switch callers to not send model and column
+  def add_subquery_condition(param, joins)
+    return if params[param].blank?
+
+    subquery = subquery_from_params(param).query
+    @scopes = @scopes.merge(subquery)
+    @scopes = @scopes.joins(**joins) if joins
+  end
+
+  # Reconstitute the query from the subparam hash, adding the model.
+  # model_name is defined on the subquery param
+  def subquery_from_params(param)
+    model_name = parameter_declarations[param][:subquery]
+    Query.new(model_name, params[param])
+  end
+
   # AR: `search_fields` should be defined in the Query class as either
   # model.arel_table[:column] or a concatenation of columns in parentheses.
   # e.g. Observation[:notes] or (Observation[:notes] + Observation[:name])
@@ -169,5 +196,9 @@ module Query::Scopes::Conditions
 
     @title_tag = :query_title_pattern_search
     search_columns(search_fields, params[:pattern])
+  end
+
+  def force_empty_results
+    @scopes = @scopes.none
   end
 end

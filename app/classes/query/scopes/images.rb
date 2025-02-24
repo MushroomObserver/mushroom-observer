@@ -34,14 +34,14 @@ module Query::Scopes::Images
 
     min, max = vals
     @scopes = @scopes.merge(Image.with_sizes(min, max))
-    @scopes = @scopes.joins(joins) if joins
+    @scopes = @scopes.joins(**joins) if joins
   end
 
   def add_image_type_condition(vals, joins)
     return if vals.empty?
 
     @scopes = @scopes.merge(Image.with_content_types(vals))
-    @scopes = @scopes.joins(joins) if joins
+    @scopes = @scopes.joins(**joins) if joins
   end
 
   def initialize_img_vote_parameters

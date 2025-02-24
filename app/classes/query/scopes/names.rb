@@ -68,7 +68,7 @@ module Query::Scopes::Names
     # ranks = all_ranks[a..b].map { |r| Name.ranks[r] }
     # @where << "names.`rank` IN (#{ranks.join(",")})"
     @scopes = @scopes.rank(min, max)
-    @scopes = @scopes.joins(joins) if joins
+    @scopes = @scopes.joins(**joins) if joins
   end
 
   def initialize_is_deprecated_parameter
@@ -160,10 +160,10 @@ module Query::Scopes::Names
     add_not_id_condition(Observation[:name_id], ids, joins)
   end
 
-  def force_empty_results
+  # def force_empty_results
     # @where = ["FALSE"]
-    @scopes = @scopes.none
-  end
+    # @scopes = @scopes.none
+  # end
 
   def initialize_name_parameters_for_name_queries
     # Much simpler form for non-observation-based name queries.

@@ -193,7 +193,7 @@ module Query::Scopes::Observations
               else
                 @scopes.merge(Observation.with_notes_fields(fields))
               end
-    @scopes = @scopes.joins(joins) if joins
+    @scopes = @scopes.joins(**joins) if joins
   end
 
   def initialize_obs_search_parameters
