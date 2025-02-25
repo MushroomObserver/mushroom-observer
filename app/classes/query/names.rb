@@ -58,7 +58,6 @@ class Query::Names < Query::Base
     add_sort_order_to_title
     initialize_name_basic_parameters
     initialize_name_record_parameters
-    add_name_advanced_search_conditions
     initialize_subquery_parameters
     initialize_name_association_parameters
     initialize_content_filters(Name)
@@ -73,7 +72,7 @@ class Query::Names < Query::Base
 
   def initialize_name_record_parameters
     initialize_related_names_parameters
-    initialize_name_field_search_parameters
+    initialize_name_column_search_parameters
     initialize_has_synonyms_parameter
     initialize_has_author_parameter
     initialize_has_citation_parameter
@@ -81,6 +80,7 @@ class Query::Names < Query::Base
     initialize_taxonomy_parameters
     initialize_name_notes_parameters
     add_pattern_condition
+    add_name_advanced_search_conditions
   end
 
   # Much simpler form for non-observation-based name queries.
@@ -89,7 +89,7 @@ class Query::Names < Query::Base
     add_association_condition("names.id", ids)
   end
 
-  def initialize_name_field_search_parameters
+  def initialize_name_column_search_parameters
     add_search_condition("names.text_name", params[:text_name_has])
     add_search_condition("names.author", params[:author_has])
     add_search_condition("names.citation", params[:citation_has])

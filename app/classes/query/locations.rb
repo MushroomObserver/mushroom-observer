@@ -32,13 +32,13 @@ class Query::Locations < Query::Base
   end
 
   def initialize_flavor
+    add_sort_order_to_title
     initialize_location_parameters
     add_bounding_box_conditions_for_locations
     initialize_locations_has_descriptions
     initialize_locations_has_observations
     initialize_subquery_parameters
     initialize_content_filters(Location)
-    add_sort_order_to_title
     super
   end
 

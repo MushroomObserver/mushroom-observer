@@ -18,7 +18,6 @@ class Query::FieldSlips < Query::Base
     add_sort_order_to_title
     add_owner_and_time_stamp_conditions
     initialize_projects_parameter(:field_slips, nil)
-
     super
   end
 

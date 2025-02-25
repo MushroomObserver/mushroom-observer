@@ -62,17 +62,11 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
     add_sort_order_to_title
     initialize_obs_basic_parameters
     initialize_obs_record_parameters
-    add_pattern_condition
-    add_advanced_search_conditions
-    add_needs_naming_condition
-    add_needs_naming_filter_conditions
-    initialize_names_and_related_names_parameters
     initialize_subquery_parameters
     initialize_association_parameters
-    initialize_obs_search_parameters
-    initialize_confidence_parameter
-    add_bounding_box_conditions_for_observations
     initialize_content_filters(Observation)
+    add_pattern_condition
+    add_advanced_search_conditions
     super
   end
 
@@ -85,15 +79,19 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
   def initialize_obs_record_parameters
     initialize_is_collection_location_parameter
     initialize_has_public_lat_lng_parameter
-    initialize_has_name_parameter
-    initialize_confidence_parameter
-    initialize_obs_has_notes_parameter
+    add_bounding_box_conditions_for_observations
+    initialize_has_notes_parameter
+    initialize_notes_has_parameter
     add_has_notes_fields_condition(params[:has_notes_fields])
-    add_join(:observations, :comments) if params[:has_comments]
-    add_join(:observations, :sequences) if params[:has_sequences]
+    initialize_has_name_parameter
+    initialize_names_and_related_names_parameters
+    add_needs_naming_condition
+    add_needs_naming_filter_conditions
+    initialize_confidence_parameter
   end
 
   def initialize_association_parameters
+    intialize_comments_has_parameter
     initialize_locations_parameter(:observations, params[:locations])
     initialize_herbaria_parameter
     initialize_herbarium_records_parameter
@@ -101,6 +99,8 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
     initialize_project_lists_parameter
     initialize_species_lists_parameter
     initialize_field_slips_parameter
+    add_join(:observations, :comments) if params[:has_comments]
+    add_join(:observations, :sequences) if params[:has_sequences]
   end
 
   def initialize_obs_date_parameter(param_name = :date)
@@ -145,30 +145,17 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
     )
   end
 
-  def initialize_has_name_parameter
-    genus = Name.ranks[:Genus]
-    group = Name.ranks[:Group]
-    add_boolean_condition(
-      "names.`rank` <= #{genus} or names.`rank` = #{group}",
-      "names.`rank` > #{genus} and names.`rank` < #{group}",
-      params[:has_name],
-      :observations, :names
-    )
-  end
-
-  def initialize_confidence_parameter
-    add_range_condition(
-      "observations.vote_cache", params[:confidence], :observations
-    )
-  end
-
-  def initialize_obs_has_notes_parameter(param_name = :has_notes)
+  def initialize_has_notes_parameter(param_name = :has_notes)
     add_boolean_condition(
       "observations.notes != #{escape(Observation.no_notes_persisted)}",
       "observations.notes  = #{escape(Observation.no_notes_persisted)}",
       params[param_name],
       :observations
     )
+  end
+
+  def initialize_notes_has_parameter
+    add_search_condition("observations.notes", params[:notes_has])
   end
 
   def add_has_notes_fields_condition(fields, *)
@@ -189,14 +176,32 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
     "observations.notes like \"%#{pat}%\""
   end
 
+  def initialize_comments_has_parameter
+    add_search_condition(
+      "CONCAT(comments.summary,COALESCE(comments.comment,''))",
+      params[:comments_has], :observations, :comments
+    )
+  end
+
+  def initialize_has_name_parameter
+    genus = Name.ranks[:Genus]
+    group = Name.ranks[:Group]
+    add_boolean_condition(
+      "names.`rank` <= #{genus} or names.`rank` = #{group}",
+      "names.`rank` > #{genus} and names.`rank` < #{group}",
+      params[:has_name],
+      :observations, :names
+    )
+  end
+
   def add_needs_naming_condition
     return unless params[:needs_naming]
 
     user = User.current_id
     # 15x faster to use this AR scope to assemble the IDs vs using
     # SQL SELECT DISTINCT
-    where << Observation.needs_naming_and_not_reviewed_by_user(user).
-             to_sql.gsub(/^.*?WHERE/, "")
+    @where << Observation.needs_naming_and_not_reviewed_by_user(user).
+              to_sql.gsub(/^.*?WHERE/, "")
   end
 
   def add_needs_naming_filter_conditions
@@ -233,6 +238,12 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
     [val, Name.guess_rank(val) || "Genus"]
   end
 
+  def initialize_confidence_parameter
+    add_range_condition(
+      "observations.vote_cache", params[:confidence], :observations
+    )
+  end
+
   # from content_filter/region.rb, but simpler.
   # includes region itself (i.e., no comma before region in 2nd regex)
   def add_location_in_region_condition
@@ -249,17 +260,6 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
         "observations.where LIKE #{escape("%#{region}")}"
       end
     where << conds
-  end
-
-  def initialize_obs_search_parameters
-    add_search_condition("observations.notes", params[:notes_has])
-    add_search_condition(
-      "CONCAT(comments.summary,COALESCE(comments.comment,''))",
-      params[:comments_has], :observations, :comments
-    )
-    return if model == Observation
-
-    add_search_condition("observations.where", params[:search_where])
   end
 
   def add_pattern_condition
