@@ -29,8 +29,8 @@ class Query::Herbaria < Query::Base
     add_search_condition("herbaria.description", params[:description])
     add_search_condition("herbaria.mailing_address", params[:address])
     add_id_in_set_condition
-    add_pattern_condition
     add_nonpersonal_condition
+    add_pattern_condition
     super
   end
   # rubocop:enable Metrics/AbcSize

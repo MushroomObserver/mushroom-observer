@@ -152,7 +152,7 @@ module GeneralExtensions
     assert(expect == actual, msg)
   end
 
-  # Assert that two User instances are equal.
+  # Assert that two instances are equal.
   def assert_objs_equal(expect, got, *msg)
     assert_equal(fixture_label(expect), fixture_label(got), *msg)
   end
