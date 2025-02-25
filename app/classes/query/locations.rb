@@ -32,29 +32,17 @@ class Query::Locations < Query::Base
   end
 
   def initialize_flavor
-    add_sort_order_to_title
+    initialize_location_parameters
+    add_bounding_box_conditions_for_locations
     initialize_locations_has_descriptions
     initialize_locations_has_observations
-    initialize_locations_only_parameters
-    add_bounding_box_conditions_for_locations
     initialize_subquery_parameters
     initialize_content_filters(Location)
+    add_sort_order_to_title
     super
   end
 
-  def initialize_locations_has_descriptions
-    return if params[:has_descriptions].blank?
-
-    add_join(:location_descriptions)
-  end
-
-  def initialize_locations_has_observations
-    return if params[:has_observations].blank?
-
-    add_join(:observations)
-  end
-
-  def initialize_locations_only_parameters
+  def initialize_location_parameters
     add_id_in_set_condition
     add_owner_and_time_stamp_conditions
     add_by_editor_condition
@@ -96,6 +84,18 @@ class Query::Locations < Query::Base
   def initialize_subquery_parameters
     add_subquery_condition(:description_query, :location_descriptions)
     add_subquery_condition(:observation_query, :observations)
+  end
+
+  def initialize_locations_has_descriptions
+    return if params[:has_descriptions].blank?
+
+    add_join(:location_descriptions)
+  end
+
+  def initialize_locations_has_observations
+    return if params[:has_observations].blank?
+
+    add_join(:observations)
   end
 
   def add_join_to_names

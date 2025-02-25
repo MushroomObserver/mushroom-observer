@@ -66,7 +66,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
     add_advanced_search_conditions
     add_needs_naming_condition
     add_needs_naming_filter_conditions
-    initialize_name_parameters
+    initialize_names_and_related_names_parameters
     initialize_subquery_parameters
     initialize_association_parameters
     initialize_obs_search_parameters

@@ -57,36 +57,86 @@ class Query::Names < Query::Base
 
   def initialize_flavor
     add_sort_order_to_title
-    initialize_names_has_descriptions
-    initialize_names_has_observations
-    initialize_names_only_parameters
-    initialize_taxonomy_parameters
+    initialize_name_basic_parameters
     initialize_name_record_parameters
-    initialize_name_search_parameters
+    add_name_advanced_search_conditions
+    initialize_subquery_parameters
+    initialize_name_association_parameters
     initialize_content_filters(Name)
     super
   end
 
-  def initialize_names_only_parameters
+  def initialize_name_basic_parameters
     add_id_in_set_condition
     add_owner_and_time_stamp_conditions
     add_by_editor_condition
-    initialize_name_comments_and_notes_parameters
-    initialize_name_parameters_for_name_queries
-    add_pattern_condition
-    add_need_description_condition
-    add_has_default_description_condition
-    add_name_advanced_search_conditions
-    initialize_subquery_parameters
-    initialize_name_association_parameters
   end
 
-  def initialize_name_comments_and_notes_parameters
+  def initialize_name_record_parameters
+    initialize_related_names_parameters
+    initialize_name_field_search_parameters
+    initialize_has_synonyms_parameter
+    initialize_has_author_parameter
+    initialize_has_citation_parameter
+    initialize_has_classification_parameter
+    initialize_taxonomy_parameters
+    initialize_name_notes_parameters
+    add_pattern_condition
+  end
+
+  # Much simpler form for non-observation-based name queries.
+  def initialize_related_names_parameters
+    ids = lookup_names_by_name(params[:names], related_names_parameters)
+    add_association_condition("names.id", ids)
+  end
+
+  def initialize_name_field_search_parameters
+    add_search_condition("names.text_name", params[:text_name_has])
+    add_search_condition("names.author", params[:author_has])
+    add_search_condition("names.citation", params[:citation_has])
+    add_search_condition("names.classification", params[:classification_has])
+  end
+
+  def initialize_has_synonyms_parameter
+    add_boolean_condition(
+      "names.synonym_id IS NOT NULL", "names.synonym_id IS NULL",
+      params[:has_synonyms]
+    )
+  end
+
+  def initialize_has_author_parameter
+    add_boolean_condition(
+      "LENGTH(COALESCE(names.author,'')) > 0",
+      "LENGTH(COALESCE(names.author,'')) = 0",
+      params[:has_author]
+    )
+  end
+
+  def initialize_has_citation_parameter
+    add_boolean_condition(
+      "LENGTH(COALESCE(names.citation,'')) > 0",
+      "LENGTH(COALESCE(names.citation,'')) = 0",
+      params[:has_citation]
+    )
+  end
+
+  def initialize_has_classification_parameter
+    add_boolean_condition(
+      "LENGTH(COALESCE(names.classification,'')) > 0",
+      "LENGTH(COALESCE(names.classification,'')) = 0",
+      params[:has_classification]
+    )
+  end
+
+  def initialize_name_notes_parameters
     add_boolean_condition(
       "LENGTH(COALESCE(names.notes,'')) > 0",
       "LENGTH(COALESCE(names.notes,'')) = 0",
       params[:has_notes]
     )
+  end
+
+  def initialize_name_comments_parameters
     add_join(:comments) if params[:has_comments]
     add_search_condition(
       "names.notes",
@@ -102,8 +152,8 @@ class Query::Names < Query::Base
   def initialize_taxonomy_parameters
     initialize_misspellings_parameter
     initialize_deprecated_parameter
-    add_rank_condition(params[:rank])
     initialize_is_deprecated_parameter
+    add_rank_condition(params[:rank])
     initialize_ok_for_export_parameter
   end
 
@@ -146,6 +196,11 @@ class Query::Names < Query::Base
   end
 
   def initialize_name_association_parameters
+    initialize_name_comments_parameters
+    add_need_description_condition
+    add_has_default_description_condition
+    initialize_names_has_descriptions
+    initialize_names_has_observations
     add_association_condition(
       "observations.id", params[:observations], :observations
     )
@@ -153,52 +208,6 @@ class Query::Names < Query::Base
       :observations, params[:locations], :observations
     )
     initialize_species_lists_parameter
-  end
-
-  def initialize_name_record_parameters
-    initialize_has_synonyms_parameter
-    initialize_has_author_parameter
-    initialize_has_citation_parameter
-    initialize_has_classification_parameter
-    add_join(:observations) if params[:has_observations]
-  end
-
-  def initialize_has_synonyms_parameter
-    add_boolean_condition(
-      "names.synonym_id IS NOT NULL", "names.synonym_id IS NULL",
-      params[:has_synonyms]
-    )
-  end
-
-  def initialize_has_author_parameter
-    add_boolean_condition(
-      "LENGTH(COALESCE(names.author,'')) > 0",
-      "LENGTH(COALESCE(names.author,'')) = 0",
-      params[:has_author]
-    )
-  end
-
-  def initialize_has_citation_parameter
-    add_boolean_condition(
-      "LENGTH(COALESCE(names.citation,'')) > 0",
-      "LENGTH(COALESCE(names.citation,'')) = 0",
-      params[:has_citation]
-    )
-  end
-
-  def initialize_has_classification_parameter
-    add_boolean_condition(
-      "LENGTH(COALESCE(names.classification,'')) > 0",
-      "LENGTH(COALESCE(names.classification,'')) = 0",
-      params[:has_classification]
-    )
-  end
-
-  def initialize_name_search_parameters
-    add_search_condition("names.text_name", params[:text_name_has])
-    add_search_condition("names.author", params[:author_has])
-    add_search_condition("names.citation", params[:citation_has])
-    add_search_condition("names.classification", params[:classification_has])
   end
 
   def add_name_advanced_search_conditions
