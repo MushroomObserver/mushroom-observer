@@ -250,11 +250,10 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
     }
     scope :has_no_description,
           -> { where(description_id: nil) }
-    # Names needing descriptions
-    # In the template, order scope `description_needed` by most frequently used:
-    #   Name.description_needed.group(:name_id).reorder(Arel.star.count.desc)
-    scope :description_needed,
-          -> { has_no_description.joins(:observations).distinct }
+    scope :need_description, lambda {
+      has_description(false).joins(:observations).distinct.
+        group(:name_id).order(Observation[:name_id].count.desc, Name[:id].desc)
+    }
     scope :description_has, lambda { |phrase|
       joins(:descriptions).
         merge(NameDescription.search_content(phrase)).distinct

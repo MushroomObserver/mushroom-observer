@@ -230,6 +230,9 @@ class Query::Names < Query::Base
 
     add_join(:observations)
     @where << "names.description_id IS NULL"
+    @selects = "DISTINCT names.id, count(observations.name_id)"
+    @group = "observations.name_id"
+    @order = "count(observations.name_id) DESC"
     @title_tag = :query_title_needs_description.t(type: :name)
   end
 

@@ -318,7 +318,7 @@ class Query::NamesTest < UnitTestCase
   end
 
   def test_name_need_description
-    expects = Name.with_correct_spelling.index_order.description_needed.distinct
+    expects = Name.with_correct_spelling.need_description
     assert_query(expects, :Name, need_description: 1)
   end
 
