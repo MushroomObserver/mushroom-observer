@@ -17,7 +17,7 @@ module Query::Scopes::Images
       SpeciesListObservation,
       { observation_images: { observations: :species_list_observations } }
     )
-    add_id_condition(Image[:license_id], params[:license])
+    add_association_condition(Image[:license_id], params[:license])
   end
 
   def initialize_img_record_parameters

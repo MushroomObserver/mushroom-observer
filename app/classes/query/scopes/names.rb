@@ -77,7 +77,7 @@ module Query::Scopes::Names
   end
 
   def initialize_name_association_parameters
-    add_id_condition(Observation[:id], params[:observations], :observations)
+    add_association_condition(Observation[:id], params[:observations], :observations)
     add_observation_location_condition(
       Observation, params[:locations], :observations
     )
@@ -149,7 +149,7 @@ module Query::Scopes::Names
     table = params[:include_all_name_proposals] ? Naming : Observation
     table_column = table[:name_id]
     ids = lookup_names_by_name(names_parameters)
-    add_id_condition(table_column, ids, joins)
+    add_association_condition(table_column, ids, joins)
 
     if params[:include_all_name_proposals]
       # add_join(:observations, :namings)
@@ -157,17 +157,12 @@ module Query::Scopes::Names
     end
     return unless params[:exclude_consensus]
 
-    add_not_id_condition(Observation[:name_id], ids, joins)
+    add_not_associated_condition(Observation[:name_id], ids, joins)
   end
-
-  # def force_empty_results
-    # @where = ["FALSE"]
-    # @scopes = @scopes.none
-  # end
 
   def initialize_name_parameters_for_name_queries
     # Much simpler form for non-observation-based name queries.
-    add_id_condition(Name[:id], lookup_names_by_name(names_parameters))
+    add_association_condition(Name[:id], lookup_names_by_name(names_parameters))
   end
 
   # Copy only the names_parameters into a name_params hash we use here.

@@ -24,7 +24,7 @@ module Query::Scopes::Observations
   end
 
   def initialize_project_lists_parameter
-    add_id_condition(
+    add_association_condition(
       # "species_list_observations.species_list_id",
       SpeciesListObservation[:species_list_id],
       lookup_lists_for_projects_by_name(params[:project_lists]),
