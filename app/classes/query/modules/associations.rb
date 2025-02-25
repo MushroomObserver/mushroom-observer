@@ -11,6 +11,8 @@ module Query::Modules::Associations
 
   def set_by_user_title
     user = find_cached_parameter_instance(User, :by_user)
+    return unless user
+
     @title_tag = :query_title_by_user
     @title_args[:user] = user.legal_name
     user
@@ -39,6 +41,8 @@ module Query::Modules::Associations
 
   def set_herbarium_title
     herbarium = find_cached_parameter_instance(Herbarium, :herbarium)
+    return unless herbarium
+
     @title_tag = :query_title_in_herbarium
     @title_args[:herbarium] = herbarium.name
     herbarium
@@ -74,6 +78,8 @@ module Query::Modules::Associations
 
   def set_at_location_title
     location = find_cached_parameter_instance(Location, :location)
+    return unless location
+
     @title_args[:location] = location.title_display_name
     location
   end
@@ -90,6 +96,8 @@ module Query::Modules::Associations
   # It could work anyway, but the param names may soon be plural.
   def set_for_observation_title
     obs = find_cached_parameter_instance(Observation, :observation)
+    return unless obs
+
     @title_tag = :query_title_for_observation
     @title_args[:observation] = obs.unique_format_name
     obs
@@ -104,6 +112,8 @@ module Query::Modules::Associations
 
   def set_for_project_title
     project = find_cached_parameter_instance(Project, :project)
+    return unless project
+
     @title_tag = :query_title_for_project
     @title_args[:project] = project.title
     project
@@ -119,6 +129,8 @@ module Query::Modules::Associations
 
   def set_in_species_list_title
     spl = find_cached_parameter_instance(SpeciesList, :species_list)
+    return unless spl
+
     @title_tag = :query_title_in_species_list
     @title_args[:species_list] = spl.format_name
     spl
