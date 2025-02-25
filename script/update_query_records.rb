@@ -28,7 +28,7 @@ abort(<<HELP) if ARGV.length != 1
 HELP
 
 class UpdateQueryRecords
-  def self.update_query_records(dry_run)
+  def self.update_query_records(dry_run:)
     dry_run = dry_run.to_boolean
     entries = updatable_query_records
     QueryRecord.upsert_all(entries) unless dry_run
@@ -43,8 +43,8 @@ class UpdateQueryRecords
     QueryRecord.pluck(:id, :description).each do |query_record_id, description|
       next if description.blank?
 
-      # the value is a serialized hash, already parsed here
-      hsh = Query.deserialize(description)
+      # the value is a serialized hash, parsed here
+      hsh = JSON.parse(description).deep_symbolize_keys
       hsh[:has_images] = hsh.delete(:with_images) if hsh.key?(:with_images)
       if hsh.key?(:with_specimen)
         hsh[:has_specimen] = hsh.delete(:with_specimen)
@@ -56,4 +56,4 @@ class UpdateQueryRecords
 end
 
 # This runs the first function with the first variable supplied to the script
-UpdateQueryRecords.update_query_records(ARGV[0])
+UpdateQueryRecords.update_query_records(dry_run: ARGV[0])
