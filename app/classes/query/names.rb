@@ -18,7 +18,7 @@ class Query::Names < Query::Base
       created_at: [:time],
       updated_at: [:time],
       ids: [Name],
-      names: [Name],
+      names: [Name], # potentially modified by the next four params
       include_synonyms: :boolean,
       include_subtaxa: :boolean,
       include_immediate_subtaxa: :boolean,
@@ -28,8 +28,7 @@ class Query::Names < Query::Base
       locations: [Location],
       species_lists: [SpeciesList],
       misspellings: { string: [:no, :either, :only] },
-      deprecated: { string: [:either, :no, :only] },
-      is_deprecated: :boolean, # api param
+      is_deprecated: :boolean,
       has_synonyms: :boolean,
       rank: [{ string: Name.all_ranks }],
       text_name_has: :string,
@@ -43,13 +42,13 @@ class Query::Names < Query::Base
       notes_has: :string,
       has_comments: { boolean: [true] },
       comments_has: :string,
+      ok_for_export: :boolean,
       pattern: :string,
       need_description: :boolean,
       has_descriptions: :boolean,
       has_default_desc: :boolean,
-      ok_for_export: :boolean,
-      has_observations: { boolean: [true] },
       description_query: { subquery: :NameDescription },
+      has_observations: { boolean: [true] },
       observation_query: { subquery: :Observation }
     ).merge(content_filter_parameter_declarations(Name)).
       merge(advanced_search_parameter_declarations)
@@ -57,110 +56,44 @@ class Query::Names < Query::Base
 
   def initialize_flavor
     add_sort_order_to_title
-    initialize_names_has_descriptions
-    initialize_names_has_observations
-    initialize_names_only_parameters
-    initialize_taxonomy_parameters
+    initialize_name_basic_parameters
     initialize_name_record_parameters
-    initialize_name_search_parameters
+    initialize_subquery_parameters
+    initialize_name_association_parameters
     initialize_content_filters(Name)
     super
   end
 
-  def initialize_names_only_parameters
+  def initialize_name_basic_parameters
     add_id_in_set_condition
     add_owner_and_time_stamp_conditions
     add_by_editor_condition
-    initialize_name_comments_and_notes_parameters
-    initialize_name_parameters_for_name_queries
-    add_pattern_condition
-    add_need_description_condition
-    add_has_default_description_condition
-    add_name_advanced_search_conditions
-    initialize_subquery_parameters
-    initialize_name_association_parameters
-  end
-
-  def initialize_name_comments_and_notes_parameters
-    add_boolean_condition(
-      "LENGTH(COALESCE(names.notes,'')) > 0",
-      "LENGTH(COALESCE(names.notes,'')) = 0",
-      params[:has_notes]
-    )
-    add_join(:comments) if params[:has_comments]
-    add_search_condition(
-      "names.notes",
-      params[:notes_has]
-    )
-    add_search_condition(
-      "CONCAT(comments.summary,COALESCE(comments.comment,''))",
-      params[:comments_has],
-      :comments
-    )
-  end
-
-  def initialize_taxonomy_parameters
-    initialize_misspellings_parameter
-    initialize_deprecated_parameter
-    add_rank_condition(params[:rank])
-    initialize_is_deprecated_parameter
-    initialize_ok_for_export_parameter
-  end
-
-  def initialize_misspellings_parameter
-    val = params[:misspellings] || :no
-    where << "names.correct_spelling_id IS NULL"     if val == :no
-    where << "names.correct_spelling_id IS NOT NULL" if val == :only
-  end
-
-  # Not sure how these two are different!
-  def initialize_deprecated_parameter
-    val = params[:deprecated] || :either
-    where << "names.deprecated IS FALSE" if val == :no
-    where << "names.deprecated IS TRUE"  if val == :only
-  end
-
-  def initialize_is_deprecated_parameter
-    add_boolean_condition(
-      "names.deprecated IS TRUE", "names.deprecated IS FALSE",
-      params[:is_deprecated]
-    )
-  end
-
-  def add_rank_condition(vals, *)
-    return if vals.empty?
-
-    ranks = parse_rank_parameter(vals)
-    @where << "names.`rank` IN (#{ranks.join(",")})"
-    add_joins(*)
-  end
-
-  def parse_rank_parameter(vals)
-    min, max = vals
-    max ||= min
-    all_ranks = Name.all_ranks
-    a = all_ranks.index(min) || 0
-    b = all_ranks.index(max) || (all_ranks.length - 1)
-    a, b = b, a if a > b
-    all_ranks[a..b].map { |r| Name.ranks[r] }
-  end
-
-  def initialize_name_association_parameters
-    add_association_condition(
-      "observations.id", params[:observations], :observations
-    )
-    initialize_locations_parameter(
-      :observations, params[:locations], :observations
-    )
-    initialize_species_lists_parameter
   end
 
   def initialize_name_record_parameters
+    initialize_related_names_parameters
+    initialize_name_column_search_parameters
     initialize_has_synonyms_parameter
     initialize_has_author_parameter
     initialize_has_citation_parameter
     initialize_has_classification_parameter
-    add_join(:observations) if params[:has_observations]
+    initialize_taxonomy_parameters
+    initialize_name_notes_parameters
+    add_pattern_condition
+    add_name_advanced_search_conditions
+  end
+
+  # Much simpler form for non-observation-based name queries.
+  def initialize_related_names_parameters
+    ids = lookup_names_by_name(params[:names], related_names_parameters)
+    add_association_condition("names.id", ids)
+  end
+
+  def initialize_name_column_search_parameters
+    add_search_condition("names.text_name", params[:text_name_has])
+    add_search_condition("names.author", params[:author_has])
+    add_search_condition("names.citation", params[:citation_has])
+    add_search_condition("names.classification", params[:classification_has])
   end
 
   def initialize_has_synonyms_parameter
@@ -194,11 +127,78 @@ class Query::Names < Query::Base
     )
   end
 
-  def initialize_name_search_parameters
-    add_search_condition("names.text_name", params[:text_name_has])
-    add_search_condition("names.author", params[:author_has])
-    add_search_condition("names.citation", params[:citation_has])
-    add_search_condition("names.classification", params[:classification_has])
+  def initialize_name_notes_parameters
+    add_boolean_condition(
+      "LENGTH(COALESCE(names.notes,'')) > 0",
+      "LENGTH(COALESCE(names.notes,'')) = 0",
+      params[:has_notes]
+    )
+  end
+
+  def initialize_name_comments_parameters
+    add_join(:comments) if params[:has_comments]
+    add_search_condition(
+      "names.notes",
+      params[:notes_has]
+    )
+    add_search_condition(
+      "CONCAT(comments.summary,COALESCE(comments.comment,''))",
+      params[:comments_has],
+      :comments
+    )
+  end
+
+  def initialize_taxonomy_parameters
+    initialize_misspellings_parameter
+    initialize_is_deprecated_parameter
+    add_rank_condition(params[:rank])
+    initialize_ok_for_export_parameter
+  end
+
+  def initialize_misspellings_parameter
+    val = params[:misspellings] || :no
+    where << "names.correct_spelling_id IS NULL"     if val == :no
+    where << "names.correct_spelling_id IS NOT NULL" if val == :only
+  end
+
+  def initialize_is_deprecated_parameter
+    add_boolean_condition(
+      "names.deprecated IS TRUE", "names.deprecated IS FALSE",
+      params[:is_deprecated]
+    )
+  end
+
+  def add_rank_condition(vals, *)
+    return if vals.empty?
+
+    ranks = parse_rank_parameter(vals)
+    @where << "names.`rank` IN (#{ranks.join(",")})"
+    add_joins(*)
+  end
+
+  def parse_rank_parameter(vals)
+    min, max = vals
+    max ||= min
+    all_ranks = Name.all_ranks
+    a = all_ranks.index(min) || 0
+    b = all_ranks.index(max) || (all_ranks.length - 1)
+    a, b = b, a if a > b
+    all_ranks[a..b].map { |r| Name.ranks[r] }
+  end
+
+  def initialize_name_association_parameters
+    initialize_name_comments_parameters
+    add_need_description_condition
+    add_has_default_description_condition
+    initialize_names_has_descriptions
+    initialize_names_has_observations
+    add_association_condition(
+      "observations.id", params[:observations], :observations
+    )
+    initialize_locations_parameter(
+      :observations, params[:locations], :observations
+    )
+    initialize_species_lists_parameter
   end
 
   def add_name_advanced_search_conditions
@@ -230,6 +230,9 @@ class Query::Names < Query::Base
 
     add_join(:observations)
     @where << "names.description_id IS NULL"
+    @selects = "DISTINCT names.id, count(observations.name_id)"
+    @group = "observations.name_id"
+    @order = "count(observations.name_id) DESC"
     @title_tag = :query_title_needs_description.t(type: :name)
   end
 

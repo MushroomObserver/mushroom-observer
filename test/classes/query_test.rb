@@ -33,7 +33,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_validate_params
-    assert_raises(RuntimeError) { Query.lookup(:Name, xxx: true) }
+    # Should ignore params it doesn't recognize
+    # assert_raises(RuntimeError) { Query.lookup(:Name, xxx: true) }
     assert_raises(RuntimeError) { Query.lookup(:Name, by: [1, 2, 3]) }
     assert_raises(RuntimeError) { Query.lookup(:Name, by: true) }
     assert_equal("id", Query.lookup(:Name, by: :id).params[:by])

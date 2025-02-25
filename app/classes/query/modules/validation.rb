@@ -13,17 +13,17 @@ module Query::Modules::Validation
       val = validate_value(param_type, param, val) if val.present?
       new_params[param] = val
     end
-    check_for_unexpected_params(old_params)
+    # check_for_unexpected_params(old_params)
     @params = new_params
   end
 
-  def check_for_unexpected_params(old_params)
-    unexpected_params = old_params.except(*parameter_declarations.keys)
-    return if unexpected_params.keys.empty?
+  # def check_for_unexpected_params(old_params)
+  #   unexpected_params = old_params.except(*parameter_declarations.keys)
+  #   return if unexpected_params.keys.empty?
 
-    str = unexpected_params.keys.map(&:to_s).join("', '")
-    raise("Unexpected parameter(s) '#{str}' for #{model} query.")
-  end
+  #   str = unexpected_params.keys.map(&:to_s).join("', '")
+  #   raise("Unexpected parameter(s) '#{str}' for #{model} query.")
+  # end
 
   def validate_value(param_type, param, val)
     if param_type.is_a?(Array)

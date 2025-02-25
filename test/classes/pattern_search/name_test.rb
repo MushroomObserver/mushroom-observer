@@ -55,8 +55,8 @@ class PatternSearch::NameTest < UnitTestCase
     assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
-  def test_name_search_deprecated
-    expect = Name.deprecated.with_correct_spelling
+  def test_name_search_is_deprecated
+    expect = Name.is_deprecated.with_correct_spelling
     assert_not_empty(expect)
     x = PatternSearch::Name.new("deprecated:yes")
     assert_name_arrays_equal(expect, x.query.results, :sort)

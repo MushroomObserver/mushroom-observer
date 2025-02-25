@@ -1,23 +1,17 @@
 # frozen_string_literal: true
 
 module Query::Initializers::Names
-  def initialize_name_parameters(*joins)
-    return force_empty_results if irreconcilable_name_parameters?
+  def initialize_names_and_related_names_parameters(*joins)
+    return force_empty_results if irreconcilable_names_parameters?
 
     table = params[:include_all_name_proposals] ? "namings" : "observations"
-    ids = lookup_names_by_name(params[:names], names_parameters)
+    ids = lookup_names_by_name(params[:names], related_names_parameters)
     add_association_condition("#{table}.name_id", ids, *joins)
 
     add_join(:observations, :namings) if params[:include_all_name_proposals]
     return unless params[:exclude_consensus]
 
     add_not_associated_condition("observations.name_id", ids, *joins)
-  end
-
-  # Much simpler form for non-observation-based name queries.
-  def initialize_name_parameters_for_name_queries
-    ids = lookup_names_by_name(params[:names], names_parameters)
-    add_association_condition("names.id", ids)
   end
 
   # ------------------------------------------------------------------------
@@ -29,11 +23,11 @@ module Query::Initializers::Names
 
   private
 
-  def names_parameters
+  def related_names_parameters
     params.dup.slice(*NAMES_EXPANDER_PARAMS).compact
   end
 
-  def irreconcilable_name_parameters?
+  def irreconcilable_names_parameters?
     params[:exclude_consensus] && !params[:include_all_name_proposals]
   end
 end
