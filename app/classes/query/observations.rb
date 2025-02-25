@@ -37,6 +37,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
       in_box: { north: :float, south: :float, east: :float, west: :float },
       is_collection_location: :boolean,
       has_public_lat_lng: :boolean,
+      location_undefined: { boolean: [true] },
       has_notes: :boolean,
       notes_has: :string,
       has_notes_fields: [:string],
