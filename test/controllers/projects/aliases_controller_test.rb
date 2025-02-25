@@ -17,14 +17,17 @@ module Projects
       assert_response(:success)
       assert_not_nil(assigns(:project_aliases))
       assert_select("li.nav-item") do
-        assert_select("a.nav-link.active[href='/projects/#{@project.id}/aliases']",
-                      text: /Project Aliases/)
+        assert_select(
+          "a.nav-link.active[href='/projects/#{@project.id}/aliases']",
+          text: /Project Aliases/
+        )
       end
     end
 
     def test_index_has_correct_location_names
       login("roy")
-      location = ProjectAlias.find_by(target_type: "Location", project: @project).target
+      location = ProjectAlias.find_by(target_type: "Location",
+                                      project: @project).target
       assert_not_equal(location.name, location.display_name)
       get(:index, params: { project_id: @project.id })
       assert_response(:success)
