@@ -18,7 +18,7 @@ class Query::Names < Query::Base
       created_at: [:time],
       updated_at: [:time],
       ids: [Name],
-      names: [Name],
+      names: [Name], # potentially modified by the next four params
       include_synonyms: :boolean,
       include_subtaxa: :boolean,
       include_immediate_subtaxa: :boolean,
@@ -28,8 +28,7 @@ class Query::Names < Query::Base
       locations: [Location],
       species_lists: [SpeciesList],
       misspellings: { string: [:no, :either, :only] },
-      deprecated: { string: [:either, :no, :only] },
-      is_deprecated: :boolean, # api param
+      is_deprecated: :boolean,
       has_synonyms: :boolean,
       rank: [{ string: Name.all_ranks }],
       text_name_has: :string,
