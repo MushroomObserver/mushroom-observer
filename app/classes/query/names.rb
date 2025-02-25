@@ -42,13 +42,13 @@ class Query::Names < Query::Base
       notes_has: :string,
       has_comments: { boolean: [true] },
       comments_has: :string,
+      ok_for_export: :boolean,
       pattern: :string,
       need_description: :boolean,
       has_descriptions: :boolean,
       has_default_desc: :boolean,
-      ok_for_export: :boolean,
-      has_observations: { boolean: [true] },
       description_query: { subquery: :NameDescription },
+      has_observations: { boolean: [true] },
       observation_query: { subquery: :Observation }
     ).merge(content_filter_parameter_declarations(Name)).
       merge(advanced_search_parameter_declarations)
