@@ -91,7 +91,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
   end
 
   def initialize_association_parameters
-    intialize_comments_has_parameter
+    initialize_comments_has_parameter
     initialize_locations_parameter(:observations, params[:locations])
     initialize_herbaria_parameter
     initialize_herbarium_records_parameter
