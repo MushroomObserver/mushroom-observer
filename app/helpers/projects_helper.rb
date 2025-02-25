@@ -80,7 +80,7 @@ module ProjectsHelper
     [
       project_alias.name,
       project_alias.target_type,
-      link_to(project_alias.target.try(:name), project_alias.target),
+      link_to(project_alias.target.try(:format_name), project_alias.target),
       project_alias_actions(project_alias.id, project_alias.project_id)
     ]
   end
