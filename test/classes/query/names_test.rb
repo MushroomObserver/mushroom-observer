@@ -150,19 +150,19 @@ class Query::NamesTest < UnitTestCase
     )
   end
 
-  def test_name_deprecated_only
-    expects = Name.with_correct_spelling.deprecated.index_order
-    assert_query(expects, :Name, deprecated: :only)
-    expects = Name.with_correct_spelling.not_deprecated.index_order
-    assert_query(expects, :Name, deprecated: :no)
-    expects = Name.with_correct_spelling.index_order
-    assert_query(expects, :Name, deprecated: :either)
-  end
+  # def test_name_deprecated_only
+  #   expects = Name.with_correct_spelling.deprecated.index_order
+  #   assert_query(expects, :Name, deprecated: :only)
+  #   expects = Name.with_correct_spelling.not_deprecated.index_order
+  #   assert_query(expects, :Name, deprecated: :no)
+  #   expects = Name.with_correct_spelling.index_order
+  #   assert_query(expects, :Name, deprecated: :either)
+  # end
 
   def test_name_is_deprecated
-    expects = Name.with_correct_spelling.deprecated.index_order
+    expects = Name.with_correct_spelling.is_deprecated.index_order
     assert_query(expects, :Name, is_deprecated: true)
-    expects = Name.with_correct_spelling.not_deprecated.index_order
+    expects = Name.with_correct_spelling.is_deprecated(false).index_order
     assert_query(expects, :Name, is_deprecated: false)
   end
 

@@ -43,13 +43,11 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
     scope :not_lichens,
           -> { where(Name[:lifeform].does_not_match("% lichen %")) }
 
-    scope :deprecated, lambda { |boolish = :only|
-      # if :either, returns all
-      case boolish.to_sym
-      when :no
-        not_deprecated
-      when :only
+    scope :is_deprecated, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
         where(deprecated: true)
+      else
+        not_deprecated
       end
     }
     scope :not_deprecated,

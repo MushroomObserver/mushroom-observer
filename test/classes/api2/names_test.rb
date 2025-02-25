@@ -91,8 +91,8 @@ class API2::NamesTest < UnitTestCase
     assert_api_results(names << names(:fungi))
   end
 
-  def test_getting_names_deprecated
-    names = Name.with_correct_spelling.deprecated
+  def test_getting_names_is_deprecated
+    names = Name.with_correct_spelling.is_deprecated
     assert_not_empty(names)
     assert_api_pass(params_get(is_deprecated: "true"))
     assert_api_results(names)

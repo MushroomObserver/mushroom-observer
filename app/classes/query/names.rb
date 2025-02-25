@@ -151,7 +151,6 @@ class Query::Names < Query::Base
 
   def initialize_taxonomy_parameters
     initialize_misspellings_parameter
-    initialize_deprecated_parameter
     initialize_is_deprecated_parameter
     add_rank_condition(params[:rank])
     initialize_ok_for_export_parameter
@@ -161,13 +160,6 @@ class Query::Names < Query::Base
     val = params[:misspellings] || :no
     where << "names.correct_spelling_id IS NULL"     if val == :no
     where << "names.correct_spelling_id IS NOT NULL" if val == :only
-  end
-
-  # Not sure how these two are different!
-  def initialize_deprecated_parameter
-    val = params[:deprecated] || :either
-    where << "names.deprecated IS FALSE" if val == :no
-    where << "names.deprecated IS TRUE"  if val == :only
   end
 
   def initialize_is_deprecated_parameter
