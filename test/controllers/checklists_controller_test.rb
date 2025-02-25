@@ -66,7 +66,11 @@ class ChecklistsControllerTest < FunctionalTestCase
     get(:show, params: { project_id: project.id, location_id: location.id })
     assert_match(/\(1\)/, @response.body)
     assert_match("location%3A#{location.id}", @response.body)
-
+    assert_match(/#{:checklist_for.t}/, @response.body)
+    assert_select("li.nav-item") do
+      assert_select("a.nav-link.active[href='/projects/#{project.id}/locations']",
+                    text: /Locations/)
+      end
     prove_checklist_content(expect)
   end
 
