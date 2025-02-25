@@ -1,6 +1,66 @@
 # frozen_string_literal: true
 
-module Query::Scopes::Images
+# base class for Queries which return Names
+class Query::ScopeClasses::Images < Query::BaseAR
+  include Query::Params::AdvancedSearch
+  include Query::Params::Filters
+  include Query::ScopeInitializers::AdvancedSearch
+  include Query::ScopeInitializers::Filters
+  include Query::Titles::Observations
+
+  def model
+    Image
+  end
+
+  def self.parameter_declarations
+    super.merge(
+      created_at: [:time],
+      updated_at: [:time],
+      date: [:date],
+      ids: [Image],
+      by_users: [User],
+      size: [{ string: Image::ALL_SIZES - [:full_size] }],
+      content_types: [{ string: Image::ALL_EXTENSIONS }],
+      has_notes: :boolean,
+      notes_has: :string,
+      copyright_holder_has: :string,
+      license: [License],
+      has_votes: :boolean,
+      quality: [:float],
+      confidence: [:float],
+      ok_for_export: :boolean,
+      pattern: :string,
+      locations: [Location],
+      observations: [Observation],
+      projects: [Project],
+      species_lists: [SpeciesList],
+      has_observations: :boolean,
+      observation_query: { subquery: :Observation }
+    ).merge(advanced_search_parameter_declarations)
+  end
+
+  def initialize_flavor
+    add_sort_order_to_title
+    super
+    initialize_image_parameters
+    initialize_image_association_parameters
+    initialize_subquery_parameters
+    add_pattern_condition
+    add_img_advanced_search_conditions
+  end
+
+  def initialize_image_parameters
+    add_id_in_set_condition
+    add_owner_and_time_stamp_conditions
+    add_date_condition("images.when", params[:date])
+    initialize_img_notes_parameters
+    add_search_condition("images.copyright_holder",
+                         params[:copyright_holder_has])
+    add_image_size_condition(params[:size])
+    add_image_type_condition(params[:content_types])
+    initialize_ok_for_export_parameter
+  end
+
   def initialize_img_notes_parameters
     add_coalesced_presence_condition(Image[:notes], params[:with_notes])
     add_search_condition(Image[:notes], params[:notes_has])

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Query::Scopes::AdvancedSearch
+module Query::ScopeInitializers::AdvancedSearch
   def initialize_advanced_search
     # All of these params could be given - multiple filters possible
     name, user, location, content = google_parse_params

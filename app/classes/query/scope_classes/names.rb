@@ -1,6 +1,86 @@
 # frozen_string_literal: true
 
-module Query::Scopes::Names
+# base class for Queries which return Names
+class Query::ScopeClasses::Names < Query::BaseAR
+  include Query::Params::AdvancedSearch
+  include Query::Params::Filters
+  include Query::ScopeInitializers::Names
+  include Query::ScopeInitializers::AdvancedSearch
+  include Query::ScopeInitializers::Filters
+  include Query::Titles::Observations
+
+  def model
+    Name
+  end
+
+  def self.parameter_declarations # rubocop:disable Metrics/MethodLength
+    super.merge(
+      created_at: [:time],
+      updated_at: [:time],
+      ids: [Name],
+      names: [Name],
+      include_synonyms: :boolean,
+      include_subtaxa: :boolean,
+      include_immediate_subtaxa: :boolean,
+      exclude_original_names: :boolean,
+      by_users: [User],
+      by_editor: User,
+      locations: [Location],
+      species_lists: [SpeciesList],
+      misspellings: { string: [:no, :either, :only] },
+      deprecated: { string: [:either, :no, :only] },
+      is_deprecated: :boolean, # api param
+      has_synonyms: :boolean,
+      rank: [{ string: Name.all_ranks }],
+      text_name_has: :string,
+      has_author: :boolean,
+      author_has: :string,
+      has_citation: :boolean,
+      citation_has: :string,
+      has_classification: :boolean,
+      classification_has: :string,
+      has_notes: :boolean,
+      notes_has: :string,
+      has_comments: { boolean: [true] },
+      comments_has: :string,
+      pattern: :string,
+      need_description: :boolean,
+      has_descriptions: :boolean,
+      has_default_desc: :boolean,
+      ok_for_export: :boolean,
+      has_observations: { boolean: [true] },
+      description_query: { subquery: :NameDescription },
+      observation_query: { subquery: :Observation }
+    ).merge(content_filter_parameter_declarations(Name)).
+      merge(advanced_search_parameter_declarations)
+  end
+
+  def initialize_flavor
+    add_sort_order_to_title
+    initialize_names_has_descriptions
+    initialize_names_has_observations
+    initialize_names_only_parameters
+    initialize_taxonomy_parameters
+    initialize_name_record_parameters
+    initialize_name_search_parameters
+    initialize_content_filters(Name)
+    super
+  end
+
+  def initialize_names_only_parameters
+    add_id_in_set_condition
+    add_owner_and_time_stamp_conditions
+    add_by_editor_condition
+    initialize_name_comments_and_notes_parameters
+    initialize_name_parameters_for_name_queries
+    add_pattern_condition
+    add_need_description_condition
+    add_has_default_description_condition
+    add_name_advanced_search_conditions
+    initialize_subquery_parameters
+    initialize_name_association_parameters
+  end
+
   def initialize_name_comments_and_notes_parameters
     initialize_name_notes_parameters
     initialize_name_comments_parameters
@@ -21,8 +101,8 @@ module Query::Scopes::Names
   end
 
   def initialize_name_comments_parameters
-    # add_join(:comments) if params[:with_comments]
-    @scopes = @scopes.joins(:comments) if params[:with_comments]
+    # add_join(:comments) if params[:has_comments]
+    @scopes = @scopes.joins(:comments) if params[:has_comments]
     add_search_condition(
       # "CONCAT(comments.summary,COALESCE(comments.comment,''))",
       Comment[:summary] + Comment[:comment].coalesce(""),
@@ -56,6 +136,11 @@ module Query::Scopes::Names
     @scopes = @scopes.deprecated if val == :only
   end
 
+  def initialize_is_deprecated_parameter
+    # "names.deprecated IS TRUE", "names.deprecated IS FALSE",
+    add_boolean_column_condition(Name[:deprecated], params[:is_deprecated])
+  end
+
   def add_rank_condition(vals, joins)
     return if vals.to_s.empty?
 
@@ -71,13 +156,10 @@ module Query::Scopes::Names
     @scopes = @scopes.joins(**joins) if joins
   end
 
-  def initialize_is_deprecated_parameter
-    # "names.deprecated IS TRUE", "names.deprecated IS FALSE",
-    add_boolean_column_condition(Name[:deprecated], params[:is_deprecated])
-  end
-
   def initialize_name_association_parameters
-    add_association_condition(Observation[:id], params[:observations], :observations)
+    add_association_condition(
+      Observation[:id], params[:observations], :observations
+    )
     add_observation_location_condition(
       Observation, params[:locations], :observations
     )
@@ -141,43 +223,5 @@ module Query::Scopes::Names
 
     add_join_to_observations if params[:content].present?
     initialize_advanced_search
-  end
-
-  def initialize_name_parameters(joins)
-    return force_empty_results if irreconcilable_name_parameters?
-
-    table = params[:include_all_name_proposals] ? Naming : Observation
-    table_column = table[:name_id]
-    ids = lookup_names_by_name(names_parameters)
-    add_association_condition(table_column, ids, joins)
-
-    if params[:include_all_name_proposals]
-      # add_join(:observations, :namings)
-      @scopes = @scopes.joins(observations: :namings)
-    end
-    return unless params[:exclude_consensus]
-
-    add_not_associated_condition(Observation[:name_id], ids, joins)
-  end
-
-  def initialize_name_parameters_for_name_queries
-    # Much simpler form for non-observation-based name queries.
-    add_association_condition(Name[:id], lookup_names_by_name(names_parameters))
-  end
-
-  # Copy only the names_parameters into a name_params hash we use here.
-  def names_parameters
-    name_params = names_parameter_declarations.dup
-    name_params.transform_keys! { |k| k.to_s.chomp("?").to_sym }
-    name_params.each_key { |k| name_params[k] = params[k] }
-    name_params
-  end
-
-  # ------------------------------------------------------------------------
-
-  private
-
-  def irreconcilable_name_parameters?
-    params[:exclude_consensus] && !params[:include_all_name_proposals]
   end
 end

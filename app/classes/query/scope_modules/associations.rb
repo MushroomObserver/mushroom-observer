@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Helper methods for turning Query parameters into AR conditions.
-module Query::Scopes::Associations
+module Query::ScopeModules::Associations
   def initialize_users_parameter
     ids = lookup_users_by_name(params[:by_users])
     add_association_condition(:user_id, ids, title_method: :set_by_user_title)

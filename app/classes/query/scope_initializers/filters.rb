@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Query::Scopes::Filters
+module Query::ScopeInitializers::Filters
   def initialize_content_filters_for_rss_log(model)
     conditions = content_filter_scope_conditions(model)
     return unless conditions.any?

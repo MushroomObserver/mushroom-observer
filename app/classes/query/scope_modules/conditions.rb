@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Helper methods for turning Query parameters into AR conditions.
-module Query::Scopes::Conditions
+module Query::ScopeModules::Conditions
   # Just because these three are used over and over again.
   def add_owner_and_time_stamp_conditions
     add_time_condition(:created_at, params[:created_at])

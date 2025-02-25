@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Helper methods for adding location extent conditions to query.
-module Query::Scopes::BoundingBox
+module Query::ScopeModules::BoundingBox
   def add_bounding_box_conditions_for_locations
     return unless (box = we_have_a_box?)
 

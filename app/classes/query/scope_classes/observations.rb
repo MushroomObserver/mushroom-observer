@@ -1,59 +1,112 @@
 # frozen_string_literal: true
 
-module Query::Scopes::Observations
+# base class for Queries which return Names
+class Query::ScopeClasses::Observations < Query::BaseAR
+  include Query::Params::AdvancedSearch
+  include Query::Params::Filters
+  include Query::ScopeInitializers::Names
+  include Query::ScopeInitializers::Filters
+  include Query::ScopeInitializers::AdvancedSearch
+  include Query::Titles::Observations
+
+  def model
+    Observation
+  end
+
+  def self.parameter_declarations # rubocop:disable Metrics/MethodLength
+    super.merge(
+      date: [:date],
+      created_at: [:time],
+      updated_at: [:time],
+
+      ids: [Observation],
+      by_users: [User],
+      needs_naming: :boolean,
+      in_clade: :string,
+      in_region: :string,
+      pattern: :string,
+      has_name: :boolean,
+      names: [Name],
+      include_synonyms: :boolean,
+      include_subtaxa: :boolean,
+      include_immediate_subtaxa: :boolean,
+      exclude_original_names: :boolean,
+      include_all_name_proposals: :boolean,
+      exclude_consensus: :boolean,
+      confidence: [:float],
+      locations: [Location],
+      in_box: { north: :float, south: :float, east: :float, west: :float },
+      is_collection_location: :boolean,
+      has_public_lat_lng: :boolean,
+      has_notes: :boolean,
+      notes_has: :string,
+      has_notes_fields: [:string],
+      has_comments: { boolean: [true] },
+      comments_has: :string,
+      has_sequences: { boolean: [true] },
+      field_slips: [FieldSlip],
+      herbaria: [Herbarium],
+      herbarium_records: [HerbariumRecord],
+      projects: [Project],
+      project_lists: [Project],
+      species_lists: [SpeciesList],
+      image_query: { subquery: :Image },
+      location_query: { subquery: :Location },
+      name_query: { subquery: :Name },
+      sequence_query: { subquery: :Sequence }
+    ).
+      merge(content_filter_parameter_declarations(Observation)).
+      merge(advanced_search_parameter_declarations)
+  end
+
+  def initialize_flavor
+    add_sort_order_to_title
+    initialize_obs_basic_parameters
+    initialize_obs_record_parameters
+    add_pattern_condition
+    add_advanced_search_conditions
+    add_needs_naming_condition
+    add_needs_naming_filter_conditions
+    initialize_name_parameters
+    initialize_subquery_parameters
+    initialize_association_parameters
+    initialize_obs_search_parameters
+    initialize_confidence_parameter
+    add_bounding_box_conditions_for_observations
+    initialize_content_filters(Observation)
+    super
+  end
+
   def initialize_obs_basic_parameters
-    ids_param = model == Observation ? :ids : :obs_ids
-    add_ids_condition(Observation, ids_param)
-    add_owner_and_time_stamp_conditions
-    add_by_user_condition
+    add_id_in_set_condition
+    add_owner_and_time_stamp_conditions("observations")
     initialize_obs_date_parameter(:date)
   end
 
-  # This is just to allow the additional location conditions
-  # to be added FOR coerced queries.
-  def add_ids_condition(table = model.table_name, ids_param = :ids)
-    super
-    return if model != Observation
+  def initialize_obs_record_parameters
+    initialize_is_collection_location_parameter
+    initialize_has_public_lat_lng_parameter
+    initialize_has_name_parameter
+    initialize_confidence_parameter
+    initialize_obs_has_notes_parameter
+    add_has_notes_fields_condition(params[:has_notes_fields])
+    @scopes = @scopes.joins(observations: :comments) if params[:with_comments]
+    @scopes = @scopes.joins(observations: :sequences) if params[:with_sequences]
+  end
 
-    add_is_collection_location_condition_for_locations
+  def initialize_association_parameters
+    initialize_locations_parameter(:observations, params[:locations])
+    initialize_herbaria_parameter
+    initialize_herbarium_records_parameter
+    initialize_projects_parameter(:project_observations)
+    initialize_project_lists_parameter
+    initialize_species_lists_parameter
+    initialize_field_slips_parameter
   end
 
   def initialize_obs_date_parameter(param_name = :date)
     add_join_to_observations
     add_date_condition(Observation[:when], params[param_name])
-  end
-
-  def initialize_project_lists_parameter
-    add_association_condition(
-      # "species_list_observations.species_list_id",
-      SpeciesListObservation[:species_list_id],
-      lookup_lists_for_projects_by_name(params[:project_lists]),
-      joins_through_observations_if_necessary(:species_list_observations)
-    )
-  end
-
-  def initialize_field_slips_parameter
-    return unless params[:field_slips]
-
-    # add_join(:field_slips)
-    @scopes = @scopes.joins(:field_slips)
-    add_join_to_observations
-    add_exact_match_condition(
-      # "field_slips.code",
-      FieldSlip[:code],
-      params[:field_slips]
-    )
-  end
-
-  def initialize_obs_record_parameters
-    initialize_is_collection_location_parameter
-    initialize_with_public_lat_lng_parameter
-    initialize_with_name_parameter
-    initialize_confidence_parameter
-    initialize_obs_with_notes_parameter
-    add_with_notes_fields_condition(params[:with_notes_fields])
-    @scopes = @scopes.joins(observations: :comments) if params[:with_comments]
-    @scopes = @scopes.joins(observations: :sequences) if params[:with_sequences]
   end
 
   def initialize_is_collection_location_parameter
@@ -230,7 +283,25 @@ module Query::Scopes::Observations
     pargs
   end
 
-  def coerce_into_observation_query
-    Query.lookup(:Observation, params_back_to_observation_params)
+  def initialize_project_lists_parameter
+    ids = lookup_lists_for_projects_by_name(params[:project_lists])
+    add_association_condition(
+      # "species_list_observations.species_list_id",
+      SpeciesListObservation[:species_list_id], ids,
+      joins_through_observations_if_necessary(:species_list_observations)
+    )
+  end
+
+  def initialize_field_slips_parameter
+    return unless params[:field_slips]
+
+    # add_join(:field_slips)
+    @scopes = @scopes.joins(:field_slips)
+    add_join_to_observations
+    add_exact_match_condition(
+      # "field_slips.code",
+      FieldSlip[:code],
+      params[:field_slips]
+    )
   end
 end

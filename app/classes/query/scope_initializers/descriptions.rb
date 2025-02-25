@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Query::Scopes::Descriptions
+module Query::ScopeInitializers::Descriptions
   def initialize_description_public_parameter(type)
     add_boolean_condition(
       # "#{type}_descriptions.public IS TRUE",
