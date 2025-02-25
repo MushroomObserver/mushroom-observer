@@ -22,7 +22,7 @@ class ContributorsController < ApplicationController
   end
 
   def unfiltered_index_opts
-    super.merge(query_args: { with_contribution: true })
+    super.merge(query_args: { has_contribution: true })
   end
 
   # Show selected list, based on current Query.
@@ -30,7 +30,7 @@ class ContributorsController < ApplicationController
   # (Linked from show template, next to "prev" and "next"... or will be.)
   def sorted_index_opts
     sorted_by = params[:by] || default_sort_order
-    super.merge(query_args: { with_contribution: true, by: sorted_by })
+    super.merge(query_args: { has_contribution: true, by: sorted_by })
   end
 
   def index_display_opts(opts, _query)

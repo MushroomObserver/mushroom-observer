@@ -11,7 +11,7 @@ class Query::Users < Query::Base
       updated_at: [:time],
       ids: [User],
       pattern: :string,
-      with_contribution: :boolean
+      has_contribution: :boolean
     )
   end
 
@@ -26,7 +26,7 @@ class Query::Users < Query::Base
   end
 
   def add_contribution_condition
-    return unless params[:with_contribution].to_s == "true"
+    return unless params[:has_contribution].to_s == "true"
 
     @title_tag = :query_title_with_contribution
     where << "users.contribution > 0"
