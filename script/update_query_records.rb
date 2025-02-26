@@ -38,13 +38,15 @@ class UpdateQueryRecords
     p(msgs.join(" "))
   end
 
-  def self.updatable_query_records
+  def self.updatable_query_records # rubocop:disable Metrics/AbcSize
     entries = []
     QueryRecord.pluck(:id, :description).each do |query_record_id, description|
       next if description.blank?
 
       # the value is a serialized hash, parsed here
       hsh = JSON.parse(description).deep_symbolize_keys
+      next unless hsh.key?(:with_images) || hsh.key?(:with_specimen)
+
       hsh[:has_images] = hsh.delete(:with_images) if hsh.key?(:with_images)
       if hsh.key?(:with_specimen)
         hsh[:has_specimen] = hsh.delete(:with_specimen)

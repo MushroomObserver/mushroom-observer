@@ -40,12 +40,12 @@ class Query::Images < Query::Base
 
   def initialize_flavor
     add_sort_order_to_title
-    super
     initialize_image_parameters
     initialize_image_association_parameters
     initialize_subquery_parameters
     add_pattern_condition
     add_img_advanced_search_conditions
+    super
   end
 
   def initialize_image_parameters

@@ -19,9 +19,9 @@ class Query::GlossaryTerms < Query::Base
   def initialize_flavor
     add_sort_order_to_title
     add_owner_and_time_stamp_conditions
-    add_pattern_condition
     add_search_condition("glossary_terms.name", params[:name_has])
     add_search_condition("glossary_terms.description", params[:description_has])
+    add_pattern_condition
     super
   end
 
