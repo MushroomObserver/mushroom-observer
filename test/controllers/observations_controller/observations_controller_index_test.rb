@@ -91,6 +91,17 @@ class ObservationsControllerIndexTest < FunctionalTestCase
                   "Wrong page or display is missing a link to Prev page")
   end
 
+  # In response to a bug seen in the wild where this request
+  # threw an error
+  def test_index_undefined_location
+    params = { where: "Oakfield%2C+Halifax%2C+Nova+Scotia%2C+Canada" }
+
+    login
+    get(:index, params: params)
+
+    assert_response(:success)
+  end
+
   def test_index_advanced_search_name_and_location_multiple_hits
     name = "Agaricus"
     location = "California"
