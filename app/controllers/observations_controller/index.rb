@@ -103,30 +103,26 @@ class ObservationsController
     # Displays matrix of Observations with the given name proposed but not
     # actually that name.
     def look_alikes
-      query = create_query(:Observation,
-                           names: [params[:name]],
-                           include_synonyms: true,
-                           include_all_name_proposals: true,
-                           exclude_consensus: true,
-                           by: :confidence)
+      query = create_query(:Observation, names: [params[:name]],
+                                         include_synonyms: true,
+                                         include_all_name_proposals: true,
+                                         exclude_consensus: true,
+                                         by: :confidence)
       [query, {}]
     end
 
     # Displays matrix of Observations of subtaxa of the parent of given name.
     def related_taxa
-      query = create_query(:Observation,
-                           names: parents(params[:name]),
-                           include_subtaxa: true,
-                           by: :confidence)
+      query = create_query(:Observation, names: parents(params[:name]),
+                                         include_subtaxa: true, by: :confidence)
       [query, {}]
     end
 
     # Displays matrix of Observations with the given text_name (or search_name).
     def name
-      query = create_query(:Observation,
-                           names: [params[:name]],
-                           include_synonyms: true,
-                           by: :confidence)
+      query = create_query(:Observation, names: [params[:name]],
+                                         include_synonyms: true,
+                                         by: :confidence)
       [query, {}]
     end
 
