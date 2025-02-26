@@ -104,6 +104,8 @@ module AbstractModel::Scopes
         date_between(early, late, col)
       end
     }
+    scope :on_date,
+          ->(date, col = :when) { date_compare(nil, date, col) }
     scope :date_after,
           ->(date, col = :when) { date_compare(:gt, date, col) }
     scope :date_before,
@@ -138,10 +140,11 @@ module AbstractModel::Scopes
         where(arel_table[col].month.send(:"#{dir}eq", val))
       end
     }
-    # Compare only the year
+    # Compare full date, or only the year.
+    # date_condition_formatted fills out min/max dates for year or year-month.
     scope :date_compare_year, lambda { |dir, val, col|
       date = date_condition_formatted(dir, val)
-      where(arel_table[col].send(dir, date))
+      where(arel_table[col].send(:"#{dir}eq", date))
     }
     # Compare only the month and day, any year (i.e. "season")
     scope :date_compare_month_and_day, lambda { |dir, val, col|

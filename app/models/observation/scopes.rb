@@ -19,19 +19,19 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :by_activity,
           -> { order_by_rss_log }
 
-    # Extra timestamp scopes for when Observation found:
+    # Extra timestamp scopes for when Observation found.
+    # These are mostly aliases for `date` scopes.
     scope :found_on, lambda { |ymd_string|
-      where(arel_table[:when].format("%Y-%m-%d").eq(ymd_string))
+      on_date(ymd_string)
     }
     scope :found_after, lambda { |ymd_string|
-      where(arel_table[:when].format("%Y-%m-%d") >= ymd_string)
+      date(ymd_string)
     }
     scope :found_before, lambda { |ymd_string|
-      where(arel_table[:when].format("%Y-%m-%d") <= ymd_string)
+      date_before(ymd_string)
     }
     scope :found_between, lambda { |early, late|
-      where(arel_table[:when].format("%Y-%m-%d") >= early).
-        where(arel_table[:when].format("%Y-%m-%d") <= late)
+      date(early, late)
     }
 
     scope :is_collection_location, lambda { |bool = true|
@@ -152,26 +152,25 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
           -> { where(name_id: Name.with_rank_above_genus) }
     scope :has_no_confident_name,
           -> { where(vote_cache: ..0) }
-    scope :with_name_correctly_spelled, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
-        joins({ namings: :name }).
-          where(names: { correct_spelling: nil }).distinct
-      else
-        with_misspelled_name
-      end
-    }
-    scope :with_misspelled_name, lambda {
-      joins({ namings: :name }).
-        where.not(names: { correct_spelling: nil }).distinct
-    }
+    # scope :with_name_correctly_spelled, lambda { |bool = true|
+    #   if bool.to_s.to_boolean == true
+    #     joins({ namings: :name }).
+    #       where(names: { correct_spelling: nil }).distinct
+    #   else
+    #     with_misspelled_name
+    #   end
+    # }
+    # scope :with_misspelled_name, lambda {
+    #   joins({ namings: :name }).
+    #     where.not(names: { correct_spelling: nil }).distinct
+    # }
 
     scope :with_vote_by_user, lambda { |user|
       user_id = user.is_a?(Integer) ? user : user&.id
       joins(:votes).where(votes: { user_id: user_id })
     }
     scope :without_vote_by_user, lambda { |user|
-      user_id = user.is_a?(Integer) ? user : user&.id
-      where.not(id: Vote.where(user_id: user_id))
+      where.not(id: Observation.with_vote_by_user(user))
     }
     scope :reviewed_by_user, lambda { |user|
       user_id = user.is_a?(Integer) ? user : user&.id
@@ -251,12 +250,22 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
           -> { where.not(location: nil).or(where.not(lat: nil)) }
     scope :unmappable,
           -> { where(location: nil).and(where(lat: nil)) }
-    scope :has_location,
-          -> { where.not(location: nil) }
+    scope :has_location, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
+        where.not(location: nil)
+      else
+        has_no_location
+      end
+    }
     scope :has_no_location,
           -> { where(location: nil) }
-    scope :has_geolocation,
-          -> { where.not(lat: nil) }
+    scope :has_geolocation, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
+        where.not(lat: nil)
+      else
+        has_no_geolocation
+      end
+    }
     scope :has_no_geolocation,
           -> { where(lat: nil) }
     scope :has_public_lat_lng, lambda { |bool = true|
@@ -268,6 +277,11 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
     scope :has_no_public_lat_lng,
           -> { where(gps_hidden: true).or(where(lat: nil)) }
+
+    scope :location_undefined, lambda {
+      has_no_location.where.not(where: nil).group(:where).
+        order(Observation[:where].count.desc, Observation[:id].desc)
+    }
 
     scope :at_locations, lambda { |locations|
       location_ids = Lookup::Locations.new(locations).ids

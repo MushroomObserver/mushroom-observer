@@ -48,21 +48,20 @@ module Observations
     def clade(term)
       # return unless (clade = Name.find_by(text_name: term))
 
-      query = create_query(:Observation,
-                           needs_naming: true, by: :rss_log, in_clade: term)
+      query = create_query(:Observation, needs_naming: true, in_clade: term,
+                                         by: :rss_log)
       [query, {}]
     end
 
     def region(term)
-      query = create_query(:Observation,
-                           needs_naming: true, by: :rss_log, in_region: term)
+      query = create_query(:Observation, needs_naming: true, in_region: term,
+                                         by: :rss_log)
       [query, {}]
     end
 
     # def user_filter(term)
-    #   query = create_query(:Observation,
-    #                        needs_naming: true, by: :rss_log,
-    #                        by_user: params[:user])
+    #   query = create_query(:Observation, needs_naming: true, by_users: term,
+    #                                      by: :rss_log)
     #   [query, {}]
     # end
 
