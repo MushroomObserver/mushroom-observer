@@ -1133,7 +1133,7 @@ class ObservationTest < UnitTestCase
   #  Scopes: Tests of scopes not completely covered elsewhere
   # ----------------------------------------------------------
 
-  def four_hundred_years_ago
+  def long_ago
     (Time.zone.today - 400.years).strftime("%Y-%m-%d")
   end
 
@@ -1153,23 +1153,23 @@ class ObservationTest < UnitTestCase
 
   def test_scope_found_after
     assert_equal(Observation.count,
-                 Observation.found_after(four_hundred_years_ago).count)
+                 Observation.found_after(long_ago).count)
     assert_empty(Observation.found_after(two_centuries_from_now))
   end
 
   def test_scope_found_before
     assert_equal(Observation.count,
                  Observation.found_before(two_centuries_from_now).count)
-    assert_empty(Observation.found_before(four_hundred_years_ago))
+    assert_empty(Observation.found_before(long_ago))
   end
 
   def test_scope_found_between
     assert_equal(
       Observation.count,
-      Observation.found_between(start_of_time, two_centuries_from_now).count
+      Observation.found_between(long_ago, two_centuries_from_now).count
     )
     assert_empty(
-      Observation.found_between(two_centuries_from_now, start_of_time)
+      Observation.found_between(two_centuries_from_now, long_ago)
     )
   end
 
