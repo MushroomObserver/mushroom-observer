@@ -37,7 +37,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
       in_box: { north: :float, south: :float, east: :float, west: :float },
       is_collection_location: :boolean,
       has_public_lat_lng: :boolean,
-      locations_undefined: { boolean: [true] },
+      location_undefined: { boolean: [true] },
       has_notes: :boolean,
       notes_has: :string,
       has_notes_fields: [:string],
@@ -93,7 +93,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
 
   def initialize_association_parameters # rubocop:disable Metrics/AbcSize
     initialize_locations_parameter(:observations, params[:locations])
-    initialize_locations_undefined_parameter
+    initialize_location_undefined_parameter
     initialize_herbaria_parameter
     initialize_herbarium_records_parameter
     initialize_projects_parameter(:project_observations)
@@ -277,8 +277,8 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
     add_subquery_condition(:sequence_query, :sequences)
   end
 
-  def initialize_locations_undefined_parameter
-    return unless params[:locations_undefined]
+  def initialize_location_undefined_parameter
+    return unless params[:location_undefined]
     return if params[:regexp] || params[:by_editor]
 
     @where << "observations.location_id IS NULL"

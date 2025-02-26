@@ -1133,8 +1133,8 @@ class ObservationTest < UnitTestCase
   #  Scopes: Tests of scopes not completely covered elsewhere
   # ----------------------------------------------------------
 
-  def start_of_time
-    Date.jd(0).strftime("%Y-%m-%d")
+  def four_hundred_years_ago
+    (Time.zone.today - 400.years).strftime("%Y-%m-%d")
   end
 
   def a_century_from_now
@@ -1147,20 +1147,20 @@ class ObservationTest < UnitTestCase
 
   def test_scope_found_on
     obs = observations(:minimal_unknown_obs)
-    assert_includes(Observation.found_on(obs.when), obs)
+    assert_includes(Observation.found_on(obs.when.to_s), obs)
     assert_empty(Observation.found_on(two_centuries_from_now))
   end
 
   def test_scope_found_after
     assert_equal(Observation.count,
-                 Observation.found_after(start_of_time).count)
+                 Observation.found_after(four_hundred_years_ago).count)
     assert_empty(Observation.found_after(two_centuries_from_now))
   end
 
   def test_scope_found_before
     assert_equal(Observation.count,
                  Observation.found_before(two_centuries_from_now).count)
-    assert_empty(Observation.found_before(start_of_time))
+    assert_empty(Observation.found_before(four_hundred_years_ago))
   end
 
   def test_scope_found_between
@@ -1269,6 +1269,17 @@ class ObservationTest < UnitTestCase
       tremella_obs,
       "Observations of look-alikes of <Name> should include " \
       "Observations of other Names for which <Name> was proposed"
+    )
+  end
+
+  def test_scope_location_undefined
+    results = Observation.location_undefined
+    top_undefined = "Briceland, California, USA"
+    # results.count gives counts of each result
+    assert_equal(top_undefined, results.first.where)
+    assert_equal(
+      results.count.first[1],
+      Observation.where(where: top_undefined).has_no_location.count
     )
   end
 

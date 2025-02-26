@@ -179,7 +179,7 @@ class LocationsController < ApplicationController
     end
 
     # Create query if okay.  (Still need to tweak select and group clauses.)
-    result = create_query(:Observation, args.merge(locations_undefined: true))
+    result = create_query(:Observation, args.merge(location_undefined: true))
 
     # Also make sure it doesn't reference locations anywhere.  This would
     # presumably be the result of customization of one of the above.

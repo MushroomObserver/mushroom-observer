@@ -19,19 +19,19 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :by_activity,
           -> { order_by_rss_log }
 
-    # Extra timestamp scopes for when Observation found:
+    # Extra timestamp scopes for when Observation found.
+    # These are mostly aliases for `date` scopes.
     scope :found_on, lambda { |ymd_string|
-      where(arel_table[:when].format("%Y-%m-%d").eq(ymd_string))
+      on_date(ymd_string)
     }
     scope :found_after, lambda { |ymd_string|
-      where(arel_table[:when].format("%Y-%m-%d") >= ymd_string)
+      date(ymd_string)
     }
     scope :found_before, lambda { |ymd_string|
-      where(arel_table[:when].format("%Y-%m-%d") <= ymd_string)
+      date_before(ymd_string)
     }
     scope :found_between, lambda { |early, late|
-      where(arel_table[:when].format("%Y-%m-%d") >= early).
-        where(arel_table[:when].format("%Y-%m-%d") <= late)
+      date(early, late)
     }
 
     scope :is_collection_location, lambda { |bool = true|
@@ -278,7 +278,8 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
     scope :has_no_public_lat_lng,
           -> { where(gps_hidden: true).or(where(lat: nil)) }
-    scope :locations_undefined, lambda {
+
+    scope :location_undefined, lambda {
       has_no_location.where.not(where: nil).group(:where).
         order(Observation[:where].count.desc, Observation[:id].desc)
     }
