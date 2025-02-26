@@ -176,7 +176,7 @@ class Query::Images < Query::Base
     args2 = args.dup
     extend_join(args2) << :observation_images
     extend_where(args2) << "observation_images.observation_id IN (#{ids})"
-    model.connection.select_rows(query(args2))
+    model.connection.select_rows(sql(args2))
   end
 
   def add_pattern_condition

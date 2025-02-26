@@ -10,7 +10,7 @@ module Query::Modules::LowLevelQueries
     else
       select = args[:select] || "DISTINCT #{model.table_name}.id"
       args = args.merge(select: "COUNT(#{select})")
-      model.connection.select_value(query(args)).to_i
+      model.connection.select_value(sql(args)).to_i
     end
   end
 
@@ -20,7 +20,7 @@ module Query::Modules::LowLevelQueries
     if executor
       executor.call(args).first.first
     else
-      model.connection.select_value(query(args))
+      model.connection.select_value(sql(args))
     end
   end
 
@@ -30,7 +30,7 @@ module Query::Modules::LowLevelQueries
     if executor
       executor.call(args).map(&:first)
     else
-      model.connection.select_values(query(args))
+      model.connection.select_values(sql(args))
     end
   end
 
@@ -40,7 +40,7 @@ module Query::Modules::LowLevelQueries
     if executor
       executor.call(args)
     else
-      model.connection.select_rows(query(args))
+      model.connection.select_rows(sql(args))
     end
   end
 
@@ -50,7 +50,7 @@ module Query::Modules::LowLevelQueries
     if executor
       executor.call(args).first
     else
-      model.connection.select_one(query(args))
+      model.connection.select_one(sql(args))
     end
   end
 
@@ -59,7 +59,7 @@ module Query::Modules::LowLevelQueries
     initialize_query unless initialized?
     raise("This query doesn't support low-level access!") if executor
 
-    model.connection.select_all(query(args)).to_a
+    model.connection.select_all(sql(args)).to_a
   end
 
   # Call model.find_by_sql.
@@ -67,7 +67,7 @@ module Query::Modules::LowLevelQueries
     initialize_query unless initialized?
     raise("This query doesn't support low-level access!") if executor
 
-    model.find_by_sql(query_all(args))
+    model.find_by_sql(sql_select_all_columns(args))
   end
 
   # Return an Array of tables used in this query (Symbol's).

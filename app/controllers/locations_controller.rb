@@ -181,9 +181,9 @@ class LocationsController < ApplicationController
     # Create query if okay.  (Still need to tweak select and group clauses.)
     result = create_query(:Observation, args.merge(location_undefined: true))
 
-    # Also make sure it doesn't reference locations anywhere.  This would
+    # Also make sure the sql doesn't reference locations anywhere.  This would
     # presumably be the result of customization of one of the above.
-    result = nil if /\Wlocations\./.match?(result.query)
+    result = nil if /\Wlocations\./.match?(result.sql)
 
     result
   end
