@@ -251,12 +251,22 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
           -> { where.not(location: nil).or(where.not(lat: nil)) }
     scope :unmappable,
           -> { where(location: nil).and(where(lat: nil)) }
-    scope :has_location,
-          -> { where.not(location: nil) }
+    scope :has_location, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
+        where.not(location: nil)
+      else
+        has_no_location
+      end
+    }
     scope :has_no_location,
           -> { where(location: nil) }
-    scope :has_geolocation,
-          -> { where.not(lat: nil) }
+    scope :has_geolocation, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
+        where.not(lat: nil)
+      else
+        has_no_geolocation
+      end
+    }
     scope :has_no_geolocation,
           -> { where(lat: nil) }
     scope :has_public_lat_lng, lambda { |bool = true|
@@ -268,6 +278,10 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
     scope :has_no_public_lat_lng,
           -> { where(gps_hidden: true).or(where(lat: nil)) }
+    scope :locations_undefined, lambda {
+      has_no_location.where.not(where: nil).group(:where).
+        order(Observation[:where].count.desc, Observation[:id].desc)
+    }
 
     scope :at_locations, lambda { |locations|
       location_ids = Lookup::Locations.new(locations).ids

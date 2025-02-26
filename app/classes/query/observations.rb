@@ -284,6 +284,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
     @where << "observations.location_id IS NULL"
     @where << "observations.where IS NOT NULL"
     @group = "observations.where"
+    @order = "COUNT(observations.where)"
   end
 
   def initialize_project_lists_parameter
