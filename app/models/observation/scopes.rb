@@ -152,26 +152,25 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
           -> { where(name_id: Name.with_rank_above_genus) }
     scope :has_no_confident_name,
           -> { where(vote_cache: ..0) }
-    scope :with_name_correctly_spelled, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
-        joins({ namings: :name }).
-          where(names: { correct_spelling: nil }).distinct
-      else
-        with_misspelled_name
-      end
-    }
-    scope :with_misspelled_name, lambda {
-      joins({ namings: :name }).
-        where.not(names: { correct_spelling: nil }).distinct
-    }
+    # scope :with_name_correctly_spelled, lambda { |bool = true|
+    #   if bool.to_s.to_boolean == true
+    #     joins({ namings: :name }).
+    #       where(names: { correct_spelling: nil }).distinct
+    #   else
+    #     with_misspelled_name
+    #   end
+    # }
+    # scope :with_misspelled_name, lambda {
+    #   joins({ namings: :name }).
+    #     where.not(names: { correct_spelling: nil }).distinct
+    # }
 
     scope :with_vote_by_user, lambda { |user|
       user_id = user.is_a?(Integer) ? user : user&.id
       joins(:votes).where(votes: { user_id: user_id })
     }
     scope :without_vote_by_user, lambda { |user|
-      user_id = user.is_a?(Integer) ? user : user&.id
-      where.not(id: Vote.where(user_id: user_id))
+      where.not(id: Observation.with_vote_by_user(user))
     }
     scope :reviewed_by_user, lambda { |user|
       user_id = user.is_a?(Integer) ? user : user&.id

@@ -1183,6 +1183,12 @@ class ObservationTest < UnitTestCase
                         observations(:peltigera_obs))
   end
 
+  def test_scope_without_vote_by_user
+    obs = Observation.without_vote_by_user(users(:rolf))
+    assert_not_includes(obs, observations(:coprinus_comatus_obs))
+    assert_includes(obs, observations(:peltigera_obs))
+  end
+
   # There are no observation views in the fixtures
   def test_scope_reviewed_by_user
     ObservationView.create({ observation_id: observations(:fungi_obs).id,
@@ -1269,6 +1275,48 @@ class ObservationTest < UnitTestCase
       tremella_obs,
       "Observations of look-alikes of <Name> should include " \
       "Observations of other Names for which <Name> was proposed"
+    )
+  end
+
+  def test_scope_has_location
+    loc = Observation.where(location_id: locations(:nybg_location)).first
+    no_loc = Observation.where(location_id: nil).first
+    assert_includes(
+      Observation.has_location, loc,
+      "Observations has_location should include obs at defined location."
+    )
+    assert_not_includes(
+      Observation.has_location, no_loc,
+      "Observations has_location should not include obs with no location."
+    )
+    assert_includes(
+      Observation.has_location(false), no_loc,
+      "Observations has_location(false) should include obs with no location."
+    )
+    assert_not_includes(
+      Observation.has_location(false), loc,
+      "Observations has_location(false) should not include obs with location."
+    )
+  end
+
+  def test_scope_has_geolocation
+    geoloc = Observation.where.not(lat: nil).first
+    no_geoloc = Observation.where(lat: nil).first
+    assert_includes(
+      Observation.has_geolocation, geoloc,
+      "Observations has_geolocation should include obs with latitude."
+    )
+    assert_not_includes(
+      Observation.has_geolocation, no_geoloc,
+      "Observations has_geolocation should not include obs with no latitude."
+    )
+    assert_includes(
+      Observation.has_geolocation(false), no_geoloc,
+      "Observations has_geolocation(false) should include obs with no latitude."
+    )
+    assert_not_includes(
+      Observation.has_geolocation(false), geoloc,
+      "Observations has_geolocation(false) should not include obs with latitude."
     )
   end
 
