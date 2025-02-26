@@ -367,12 +367,12 @@ class QueryTest < UnitTestCase
       "WHERE one = two AND foo LIKE bar " \
       "GROUP BY blah.id ORDER BY names.id ASC LIMIT 10, 10",
       clean(query.sql(select: "names.*",
-                        join: [:observations, :"users.reviewer"],
-                        tables: :images,
-                        where: ["one = two", "foo LIKE bar"],
-                        group: "blah.id",
-                        order: "names.id ASC",
-                        limit: "10, 10"))
+                      join: [:observations, :"users.reviewer"],
+                      tables: :images,
+                      where: ["one = two", "foo LIKE bar"],
+                      group: "blah.id",
+                      order: "names.id ASC",
+                      limit: "10, 10"))
     )
   end
 
