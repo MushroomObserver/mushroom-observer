@@ -37,7 +37,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
       in_box: { north: :float, south: :float, east: :float, west: :float },
       is_collection_location: :boolean,
       has_public_lat_lng: :boolean,
-      location_undefined: { boolean: [true] },
+      locations_undefined: { boolean: [true] },
       has_notes: :boolean,
       notes_has: :string,
       has_notes_fields: [:string],
@@ -91,9 +91,9 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
     initialize_confidence_parameter
   end
 
-  def initialize_association_parameters
-    initialize_comments_has_parameter
+  def initialize_association_parameters # rubocop:disable Metrics/AbcSize
     initialize_locations_parameter(:observations, params[:locations])
+    initialize_locations_undefined_parameter
     initialize_herbaria_parameter
     initialize_herbarium_records_parameter
     initialize_projects_parameter(:project_observations)
@@ -101,6 +101,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
     initialize_species_lists_parameter
     initialize_field_slips_parameter
     add_join(:observations, :comments) if params[:has_comments]
+    initialize_comments_has_parameter
     add_join(:observations, :sequences) if params[:has_sequences]
   end
 
@@ -177,13 +178,6 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
     "observations.notes like \"%#{pat}%\""
   end
 
-  def initialize_comments_has_parameter
-    add_search_condition(
-      "CONCAT(comments.summary,COALESCE(comments.comment,''))",
-      params[:comments_has], :observations, :comments
-    )
-  end
-
   def initialize_has_name_parameter
     genus = Name.ranks[:Genus]
     group = Name.ranks[:Group]
@@ -207,8 +201,8 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
 
   def add_needs_naming_filter_conditions
     # additional filters, note these are the same as content filters.
-    add_name_in_clade_condition
-    add_location_in_region_condition
+    initialize_in_clade_parameter
+    initialize_in_region_parameter
     # add_by_user_condition
   end
 
@@ -217,7 +211,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
   # observations against observations.classification. Some inefficiency
   # here comes from having to parse the name from a string.
   # NOTE: Write an in_clade autocompleter that passes the name_id as val
-  def add_name_in_clade_condition
+  def initialize_in_clade_parameter
     return unless params[:in_clade]
 
     val = params[:in_clade]
@@ -247,7 +241,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
 
   # from content_filter/region.rb, but simpler.
   # includes region itself (i.e., no comma before region in 2nd regex)
-  def add_location_in_region_condition
+  def initialize_in_region_parameter
     return unless params[:in_region]
 
     region = params[:in_region]
@@ -283,6 +277,15 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
     add_subquery_condition(:sequence_query, :sequences)
   end
 
+  def initialize_locations_undefined_parameter
+    return unless params[:locations_undefined]
+    return if params[:regexp] || params[:by_editor]
+
+    @where << "observations.location_id IS NULL"
+    @where << "observations.where IS NOT NULL"
+    @group = "observations.where"
+  end
+
   def initialize_project_lists_parameter
     ids = lookup_lists_for_projects_by_name(params[:project_lists])
     add_association_condition("species_list_observations.species_list_id", ids,
@@ -295,6 +298,13 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
     add_join(:field_slips)
     ids = lookup_field_slips_by_name(params[:field_slips])
     add_association_condition("field_slips.id", ids, :observations)
+  end
+
+  def initialize_comments_has_parameter
+    add_search_condition(
+      "CONCAT(comments.summary,COALESCE(comments.comment,''))",
+      params[:comments_has], :observations, :comments
+    )
   end
 
   def add_join_to_names

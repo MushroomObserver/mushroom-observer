@@ -136,23 +136,18 @@ class LocationsController < ApplicationController
     end
 
     @undef_location_format = User.current_location_format
-    select_args = {
-      group: "observations.where",
-      select: "observations.where AS w, COUNT(observations.id) AS c"
-    }
     if display_opts[:link_all_sorts]
-      select_args[:order] = "c DESC"
       # (This tells it to say "by name" and "by frequency" by the subtitles.
       # If user has explicitly selected the order, then this is disabled.)
       @default_orders = true
     end
     @undef_pages = paginate_letters(:letter2, :page2,
                                     display_opts[:num_per_page] || 50)
-    @undef_data = query2.select_rows(select_args)
-    @undef_pages.used_letters = @undef_data.map { |row| row[0][0, 1] }.uniq
+    @undef_data = query2.paginate(@undef_pages)
+    @undef_pages.used_letters = @undef_data.map { |obs| obs[:where][0, 1] }.uniq
     if (letter = params[:letter2].to_s.downcase) != ""
-      @undef_data = @undef_data.select do |row|
-        row[0][0, 1].downcase == letter
+      @undef_data = @undef_data.select do |obs|
+        obs[:where][0, 1].downcase == letter
       end
     end
     @undef_pages.num_total = @undef_data.length
@@ -172,8 +167,7 @@ class LocationsController < ApplicationController
     return nil if [:by_editor, :regexp].any? { |key| args[key] }
 
     # Select only observations with undefined location.
-    args[:where] = [args[:where]].compact unless args[:where].is_a?(Array)
-    args[:where] << "observations.location_id IS NULL"
+    args[:where] = [args[:where]].flatten.compact
 
     # "By name" means something different to observation.
     args[:by] = "where" if args[:by].blank? || (args[:by] == "name")
@@ -184,13 +178,8 @@ class LocationsController < ApplicationController
       args.delete(:pattern)
     end
 
-    # These are only used to create title, which isn't used,
-    # they just get in the way.
-    # args.delete(:old_title)
-    # args.delete(:old_by)
-
     # Create query if okay.  (Still need to tweak select and group clauses.)
-    result = create_query(:Observation, args)
+    result = create_query(:Observation, args.merge(locations_undefined: true))
 
     # Also make sure it doesn't reference locations anywhere.  This would
     # presumably be the result of customization of one of the above.
