@@ -1316,7 +1316,7 @@ class ObservationTest < UnitTestCase
     )
     assert_not_includes(
       Observation.has_geolocation(false), geoloc,
-      "Observations has_geolocation(false) should not include obs with latitude."
+      "Observations has_geolocation(false) shouldn't include obs with latitude."
     )
   end
 
