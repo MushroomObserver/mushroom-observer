@@ -335,9 +335,9 @@ class SequencesControllerTest < FunctionalTestCase
     get(:edit, params: { id: sequence.id })
 
     assert_response(:success)
-    assert_select("select#sequence_archive",
+    assert_select("select#sequence_archive", true,
                   "Edit form is missing the selected Archive") do
-      assert_select("option[selected]", text: "GenBank")
+      assert_select("option[selected]", text: sequence.archive)
     end
   end
 
