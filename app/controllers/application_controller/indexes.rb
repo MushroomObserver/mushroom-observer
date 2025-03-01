@@ -289,7 +289,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   # (The other place is from the template to the `matrix_box` helper, which
   # actually caches the HTML.)
   def find_objects(query, display_opts)
-    logger.warn("QUERY starting: #{query.query.inspect}")
+    logger.warn("QUERY starting: #{query.sql.inspect}")
     @timer_start = Time.current
 
     # Instantiate correct subset, with or without includes.

@@ -138,13 +138,13 @@ module AbstractModel::Scopes
         date_between(early, late, table_col)
       end
     }
-    scope :date_after, lambda { |date, table_col = arel_table[:when]|
-      date_compare(:gt, date, table_col)
-    }
-    scope :date_before, lambda { |date, table_col = arel_table[:when]|
-      date_compare(:lt, date, table_col)
-    }
-    scope :date_between, lambda { |early, late, table_col = arel_table[:when]|
+    scope :on_date,
+          ->(date, col = :when) { date_compare(nil, date, col) }
+    scope :date_after,
+          ->(date, col = :when) { date_compare(:gt, date, col) }
+    scope :date_before,
+          ->(date, col = :when) { date_compare(:lt, date, col) }
+    scope :date_between, lambda { |early, late, col = :when|
       # do not correct early > late, which means something different here
       if wrapped_date?(early, late)
         date_in_period_wrapping_new_year(early, late, table_col)
@@ -174,10 +174,11 @@ module AbstractModel::Scopes
         where(table_col.month.send(:"#{dir}eq", val))
       end
     }
-    # Compare only the year
-    scope :date_compare_year, lambda { |dir, val, table_col|
+    # Compare full date, or only the year.
+    # date_condition_formatted fills out min/max dates for year or year-month.
+    scope :date_compare_year, lambda { |dir, val, col|
       date = date_condition_formatted(dir, val)
-      where(table_col.send(dir, date))
+      where(arel_table[col].send(:"#{dir}eq", date))
     }
     # Compare only the month and day, any year (i.e. "season")
     scope :date_compare_month_and_day, lambda { |dir, val, table_col|

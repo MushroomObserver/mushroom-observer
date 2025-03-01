@@ -304,59 +304,59 @@ class QueryTest < UnitTestCase
 
     assert_equal(
       "SELECT DISTINCT names.id FROM `names`",
-      clean(query.query)
+      clean(query.sql)
     )
     assert_equal(
       "SELECT foo bar FROM `names`",
-      clean(query.query(select: "foo bar"))
+      clean(query.sql(select: "foo bar"))
     )
     assert_equal(
       "SELECT DISTINCT names.id FROM `names` " \
       "JOIN `rss_logs` ON names.rss_log_id = rss_logs.id",
-      clean(query.query(join: :rss_logs))
+      clean(query.sql(join: :rss_logs))
     )
     assert_equal(
       "SELECT DISTINCT names.id FROM `names` " \
       "JOIN `observations` ON observations.name_id = names.id " \
       "JOIN `rss_logs` ON observations.rss_log_id = rss_logs.id",
-      clean(query.query(join: { observations: :rss_logs }))
+      clean(query.sql(join: { observations: :rss_logs }))
     )
     assert_equal(
       "SELECT DISTINCT names.id FROM `names`, `rss_logs`",
-      clean(query.query(tables: :rss_logs))
+      clean(query.sql(tables: :rss_logs))
     )
     assert_equal(
       "SELECT DISTINCT names.id FROM `names`, `images`, `comments`",
-      clean(query.query(tables: [:images, :comments]))
+      clean(query.sql(tables: [:images, :comments]))
     )
     assert_equal(
       "SELECT DISTINCT names.id FROM `names` WHERE shazam!",
-      clean(query.query(where: "shazam!"))
+      clean(query.sql(where: "shazam!"))
     )
     assert_equal(
       "SELECT DISTINCT names.id FROM `names` WHERE foo AND bar",
-      clean(query.query(where: %w[foo bar]))
+      clean(query.sql(where: %w[foo bar]))
     )
     assert_equal(
       "SELECT DISTINCT names.id FROM `names` WHERE foo AND bar",
-      clean(query.query(where: %w[foo bar]))
+      clean(query.sql(where: %w[foo bar]))
     )
     assert_equal(
       "SELECT DISTINCT names.id FROM `names` GROUP BY blah blah blah",
-      clean(query.query(group: "blah blah blah"))
+      clean(query.sql(group: "blah blah blah"))
     )
     assert_equal(
       "SELECT DISTINCT names.id FROM `names` ORDER BY foo, bar, names.id DESC",
       # (tacks on 'id DESC' for disambiguation)
-      clean(query.query(order: "foo, bar"))
+      clean(query.sql(order: "foo, bar"))
     )
     assert_equal(
       "SELECT DISTINCT names.id FROM `names` ORDER BY comments.id ASC",
-      clean(query.query(order: "comments.id ASC")) # (sees id in there already)
+      clean(query.sql(order: "comments.id ASC")) # (sees id in there already)
     )
     assert_equal(
       "SELECT DISTINCT names.id FROM `names` LIMIT 10",
-      clean(query.query(limit: 10))
+      clean(query.sql(limit: 10))
     )
 
     # Now, all together...
@@ -366,47 +366,47 @@ class QueryTest < UnitTestCase
       "JOIN `users` ON names.reviewer_id = users.id " \
       "WHERE one = two AND foo LIKE bar " \
       "GROUP BY blah.id ORDER BY names.id ASC LIMIT 10, 10",
-      clean(query.query(select: "names.*",
-                        join: [:observations, :"users.reviewer"],
-                        tables: :images,
-                        where: ["one = two", "foo LIKE bar"],
-                        group: "blah.id",
-                        order: "names.id ASC",
-                        limit: "10, 10"))
+      clean(query.sql(select: "names.*",
+                      join: [:observations, :"users.reviewer"],
+                      tables: :images,
+                      where: ["one = two", "foo LIKE bar"],
+                      group: "blah.id",
+                      order: "names.id ASC",
+                      limit: "10, 10"))
     )
   end
 
   def test_query_params_selects
     # defaults
     query = Query.new(:Name)
-    assert(query.query)
+    assert(query.sql)
     assert_equal(clean(query.selects), "DISTINCT names.id")
 
     query = Query.new(:Name, selects: "DISTINCT names.text_name")
-    assert(query.query)
+    assert(query.sql)
     assert_equal(clean(query.selects), "DISTINCT names.text_name")
   end
 
   def test_query_params_order
     # defaults
     query = Query.new(:Name)
-    assert(query.query)
+    assert(query.sql)
     assert_equal(query.default_order, "name")
     assert_equal(clean(query.order), "names.sort_name ASC")
 
     query = Query.new(:Name, order: "names.id ASC")
-    assert(query.query)
+    assert(query.sql)
     assert_equal(clean(query.order), "names.id ASC")
   end
 
   def test_query_params_group
     # defaults
     query = Query.new(:Observation)
-    assert(query.query)
+    assert(query.sql)
     assert_equal(clean(query.group), "")
 
     query = Query.new(:Observation, group: "observations.name_id")
-    assert(query.query)
+    assert(query.sql)
     assert_equal(clean(query.group), "observations.name_id")
   end
 
@@ -421,7 +421,7 @@ class QueryTest < UnitTestCase
     #   names => observations => comments
     #   names => observations => observation_images => images
     #   names => users (as reviewer)
-    sql = query.query(
+    sql = query.sql(
       join: [
         {
           observations: [
@@ -462,13 +462,13 @@ class QueryTest < UnitTestCase
     query = Query.lookup(:Observation)
     query.initialize_query
     query.join << :rss_logs
-    assert_match(/observations.rss_log_id = rss_logs.id/, query.query)
+    assert_match(/observations.rss_log_id = rss_logs.id/, query.sql)
 
     # And use rss_logs.observation_id = observations.id the other way.
     query = Query.lookup(:RssLog)
     query.initialize_query
     query.join << :observations
-    assert_match(/rss_logs.observation_id = observations.id/, query.query)
+    assert_match(/rss_logs.observation_id = observations.id/, query.sql)
   end
 
   def test_low_levels
@@ -958,7 +958,7 @@ class QueryTest < UnitTestCase
 
   def test_whiny_nil_in_map_locations
     query = Query.lookup(:User, ids: [rolf.id, 1000, mary.id])
-    query.query
+    query.sql
     assert_equal(2, query.results.length)
   end
 

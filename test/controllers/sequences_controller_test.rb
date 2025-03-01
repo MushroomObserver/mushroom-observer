@@ -325,6 +325,22 @@ class SequencesControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
+  def test_edit_deposited_sequence
+    sequence = sequences(:deposited_sequence)
+    obs      = sequence.observation
+    observer = obs.user
+
+    # Prove Observation's creator can edit Sequence
+    login(observer.login)
+    get(:edit, params: { id: sequence.id })
+
+    assert_response(:success)
+    assert_select("select#sequence_archive", true,
+                  "Edit form is missing the selected Archive") do
+      assert_select("option[selected]", text: sequence.archive)
+    end
+  end
+
   def test_edit_by_admin
     sequence = sequences(:local_sequence)
 
