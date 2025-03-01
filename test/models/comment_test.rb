@@ -158,4 +158,16 @@ class CommentTest < UnitTestCase
       assert_true(Comment.joins(type_tag))
     end
   end
+
+  def test_scope_for_target
+    obss = Observation.has_comments
+    assert(obss.size > 1)
+    obs1 = obss.first
+    obs2 = obss.last
+    assert_not_equal(obs1.id, obs2.id)
+    assert_equal(obs1.id, Comment.for_target(obs1.id).first.target_id)
+    assert_equal(obs1.id, Comment.for_target(obs1).first.target_id)
+    assert_equal(obs2.id, Comment.for_target(obs2.id).first.target_id)
+    assert_equal(obs2.id, Comment.for_target(obs2).first.target_id)
+  end
 end
