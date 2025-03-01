@@ -9,7 +9,7 @@ module Query::Scopes::Ordering
     return unless by || order.blank?
 
     by ||= default_order
-    by = by.dup
+    by = by.dup.to_s
     reverse = !!by.sub!(/^reverse_/, "")
     initialize_order_specs(by)
     @scopes = @scopes.reverse_order if reverse

@@ -135,7 +135,7 @@ module Query::ScopeModules::Conditions
 
   # table_col = foreign key of an association, e.g. `observations.location_id`
   def add_association_condition(table_column, ids, joins, title_method: nil)
-    return if ids.empty?
+    return if [ids].flatten.empty?
 
     if ids.size == 1
       send(title_method) if title_method && ids.first.present?
@@ -195,7 +195,23 @@ module Query::ScopeModules::Conditions
     return if params[:pattern].blank?
 
     @title_tag = :query_title_pattern_search
-    search_columns(search_fields, params[:pattern])
+    @scopes = @scopes.search_columns(search_fields, params[:pattern])
+  end
+
+  # Depends on param having same name as column, and search is on current table.
+  def add_simple_search_condition(col)
+    return if (val = params[:"#{col}_has"]).blank?
+
+    @scopes = @scopes.search_columns(model.arel_table[col], val)
+  end
+
+  # Depends on param having same name as column.
+  # Note that search_columns calls SearchParams.new, so we can just fwd val
+  def add_search_condition(table_col, param, joins)
+    return if (val = params[param]).blank?
+
+    @scopes = @scopes.search_columns(table_col, val)
+    @scopes = @scopes.joins(**joins) if joins
   end
 
   def force_empty_results
