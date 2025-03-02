@@ -38,7 +38,7 @@ class API2
         by_users: parse_array(:user, :user, help: :creator),
         observations: parse_array(:observation, :observation),
         external_sites: parse_array(:external_site, :external_site),
-        url: parse(:string, :url)
+        url_has: parse(:string, :url)
       }
     end
 

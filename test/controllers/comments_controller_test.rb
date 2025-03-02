@@ -29,7 +29,9 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:index, params: params)
     assert_select(".comment", count: comments.size)
-    assert_displayed_title("Comments on #{target.id}")
+    assert_displayed_title(
+      "Comments on #{target.unique_format_name.t.as_displayed}"
+    )
   end
 
   def test_index_target_valid_target_without_comments

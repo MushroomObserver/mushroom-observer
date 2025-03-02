@@ -13,7 +13,7 @@ class Query::ExternalLinks < Query::Base
       by_users: [User],
       observations: [Observation],
       external_sites: [ExternalSite],
-      url: :string
+      url_has: :string
     )
   end
 
@@ -24,7 +24,7 @@ class Query::ExternalLinks < Query::Base
     initialize_observations_parameter(:external_links)
     ids = lookup_external_sites_by_name(params[:external_sites])
     add_association_condition("external_links.external_site_id", ids)
-    add_search_condition("external_links.url", params[:url])
+    add_search_condition("external_links.url", params[:url_has])
     super
   end
 
