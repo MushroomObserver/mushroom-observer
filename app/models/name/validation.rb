@@ -83,23 +83,6 @@ module Name::Validation
     )
   end
 
-  def author_characters
-    return if author.blank?
-    # Allow only: letters, spaces, parens, hyphens, periods, commas,
-    # ampersands, square brackets
-    return if /\A[\p{L} ()-.,&\[\]]*\z/.match?(author)
-
-    errors.add(:author, :validate_name_author_characters.t)
-  end
-
-  def author_ending
-    return if author.blank?
-    # Should end only in letter, period plus optional spacing
-    return if /[\p{Alpha}\.]( *)\Z/.match?(author)
-
-    errors.add(:author, :validate_name_author_ending.t)
-  end
-
   def search_name_indistinct
     hnyms = homonyms
     return if hnyms.none?

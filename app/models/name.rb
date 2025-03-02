@@ -423,12 +423,12 @@ class Name < AbstractModel
   validate  :user_presence
   validate  :text_name_length
   validate  :author_length
-  # Use a method because translated error message throws Error
-  # when loading fixtures and/or rails lang:update
-  validate  :author_characters
-  # Use a method because translated error message throws Error
-  # when loading fixtures and/or rails lang:update
-  validate  :author_ending
+  validates :author, allow_blank: true,
+                     format: { with: /\A[\p{L} ()-.,&\[\]]*\z/,
+                               message: :validate_name_author_characters.t }
+  validates :author, allow_blank: true,
+                     format: { with: /[\p{Alpha}\.]( *)\Z/,
+                               message: :validate_name_author_ending.t }
   validates :search_name, presence: true
   validate  :search_name_indistinct
   validate  :citation_start
