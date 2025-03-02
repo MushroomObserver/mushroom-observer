@@ -38,7 +38,7 @@ class API2
         code_has: parse(:string, :code),
         name_has: parse(:string, :name),
         description_has: parse(:string, :description),
-        address_has: parse(:string, :address, help: :mailing_address)
+        mailing_address_has: parse(:string, :address, help: :mailing_address)
       }
     end
 

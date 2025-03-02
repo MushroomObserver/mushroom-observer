@@ -13,7 +13,7 @@ class Query::Herbaria < Query::Base
       code_has: :string,
       name_has: :string,
       description_has: :string,
-      address_has: :string,
+      mailing_address_has: :string,
       pattern: :string,
       nonpersonal: :boolean
     )
@@ -27,7 +27,8 @@ class Query::Herbaria < Query::Base
     add_search_condition("herbaria.code", params[:code_has])
     add_search_condition("herbaria.name", params[:name_has])
     add_search_condition("herbaria.description", params[:description_has])
-    add_search_condition("herbaria.mailing_address", params[:address_has])
+    add_search_condition("herbaria.mailing_address",
+                         params[:mailing_address_has])
     add_id_in_set_condition
     add_nonpersonal_condition
     add_pattern_condition
