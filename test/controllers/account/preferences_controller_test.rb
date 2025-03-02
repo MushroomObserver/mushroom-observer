@@ -269,7 +269,6 @@ module Account
       [
         :comments_owner,
         :comments_response,
-        :comments_all,
         :observations_consensus,
         :observations_naming,
         :observations_all,
