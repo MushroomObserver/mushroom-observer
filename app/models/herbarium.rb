@@ -65,8 +65,26 @@ class Herbarium < AbstractModel
 
   scope :index_order,
         -> { order(name: :asc, id: :desc) }
+
   scope :nonpersonal,
         -> { where(personal_user_id: nil) }
+
+  scope :code,
+        ->(codes) { search_columns(Herbarium[:code], codes) }
+  scope :name,
+        ->(names) { search_columns(Herbarium[:name], names) }
+  scope :description,
+        ->(phrase) { search_columns(Herbarium[:description], phrase) }
+  scope :mailing_address,
+        ->(phrase) { search_columns(Herbarium[:mailing_address], phrase) }
+
+  scope :pattern_search, lambda { |phrase|
+    cols = (Herbarium[:code] + Herbarium[:name] +
+            Herbarium[:description].coalesce("") +
+            Herbarium[:mailing_address].coalesce(""))
+    search_columns(cols, phrase).distinct
+  }
+
 
   def self.mcp_collections
     @mcp_collections ||=

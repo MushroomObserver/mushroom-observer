@@ -28,9 +28,10 @@ class Query::ScopeClasses::HerbariumRecords < Query::BaseAR
     add_owner_and_time_stamp_conditions
     add_id_in_set_condition
     initialize_association_parameters
-    initialize_boolean_parameters
-    initialize_exact_match_parameters
-    initialize_search_parameters
+    initialize_has_notes_parameter
+    initialize_notes_has_parameter
+    initialize_initial_det_parameter
+    initialize_accession_number_parameter
     add_pattern_condition
     super
   end
@@ -40,25 +41,28 @@ class Query::ScopeClasses::HerbariumRecords < Query::BaseAR
     initialize_observations_parameter
   end
 
-  def initialize_boolean_parameters
-    add_boolean_condition(
-      HerbariumRecord[:notes].coalesce("").not_eq(nil),
-      HerbariumRecord[:notes].coalesce("").eq(nil),
-      params[:has_notes]
-    )
+  def initialize_has_notes_parameter
+    return unless params[:has_notes]
+
+    @scopes = @scopes.has_notes(params[:has_notes])
   end
 
-  def initialize_exact_match_parameters
-    add_exact_match_condition(HerbariumRecord[:initial_det],
-                              params[:initial_det])
-    add_exact_match_condition(HerbariumRecord[:accession_number],
-                              params[:accession_number])
+  def initialize_notes_has_parameter
+    return unless params[:notes_has]
+
+    @scopes = @scopes.notes_has(params[:notes_has])
   end
 
-  def initialize_search_parameters
-    add_simple_search_condition(:notes_has)
-    add_simple_search_condition(:initial_det)
-    add_simple_search_condition(:accession_number)
+  def initialize_initial_det_parameter
+    return unless params[:initial_det]
+
+    @scopes = @scopes.initial_det(params[:initial_det])
+  end
+
+  def initialize_accession_number_parameter
+    return unless params[:accession_number]
+
+    @scopes = @scopes.accession_number(params[:accession_number])
   end
 
   def search_fields

@@ -76,8 +76,7 @@ module Query::ScopeModules::Conditions
   def add_exact_match_condition(table_column, vals, joins)
     return if vals.blank?
 
-    vals = [vals] unless vals.is_a?(Array)
-    vals = vals.map { |v| escape(v.downcase) }
+    vals = [vals].flatten.map { |v| escape(v.downcase) }
     @scopes = if vals.length == 1
                 @scopes.where(table_column.downcase.eq(vals.first))
               else

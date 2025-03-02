@@ -65,6 +65,21 @@ class HerbariumRecord < AbstractModel
     joins(:observation_herbarium_records).
       where(observation_herbarium_records: { observation: obs })
   }
+  scope :has_notes,
+        ->(bool = true) { notes_condition(HerbariumRecord[:notes], bool:) }
+  scope :has_no_notes,
+        -> { where(HerbariumRecord[:notes].coalesce("").length.eq(0)) }
+  scope :notes_has,
+        ->(phrase) { search_columns(HerbariumRecord[:notes], phrase) }
+
+  scope :initial_det, lambda { |val|
+    exact_match_condition(HerbariumRecord[:initial_det], val).
+      or(search_columns(HerbariumRecord[:initial_det], val))
+  }
+  scope :accession_number, lambda { |val|
+    exact_match_condition(HerbariumRecord[:accession_number], val).
+      or(search_columns(HerbariumRecord[:accession_number], val))
+  }
 
   def herbarium_label
     if initial_det.blank?
