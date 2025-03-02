@@ -1956,11 +1956,11 @@ class NameTest < UnitTestCase
     assert_equal(0, desc.editors.length)
     assert_nil(desc.reviewer_id)
 
-    # email types:  author  editor  review  all     interest
-    # 1 Rolf:       x       x       x       .       .
-    # 2 Mary:       x       .       .       .       .
-    # 3 Dick:       .       .       .       .       .
-    # 4 Katrina:    x       x       x       .       .
+    # email types:  author  editor  review  interest
+    # 1 Rolf:       x       x       x       .
+    # 2 Mary:       x       .       .       .
+    # 3 Dick:       .       .       .       .
+    # 4 Katrina:    x       x       x       .
     # Authors: --        editors: --         reviewer: -- (unreviewed)
     # Rolf erases notes: notify Katrina (all), Rolf becomes editor.
     User.current = rolf
@@ -1981,11 +1981,11 @@ class NameTest < UnitTestCase
     assert_equal(rolf, desc.editors.first)
     assert_equal(0, QueuedEmail.count)
 
-    # email types:  author  editor  review  all     interest
-    # 1 Rolf:       x       x       x       .       .
-    # 2 Mary:       x       .       .       .       .
-    # 3 Dick:       .       .       .       .       .
-    # 4 Katrina:    x       x       x       .       .
+    # email types:  author  editor  review  interest
+    # 1 Rolf:       x       x       x       .
+    # 2 Mary:       x       .       .       .
+    # 3 Dick:       .       .       .       .
+    # 4 Katrina:    x       x       x       .
     # Authors: --        editors: Rolf       reviewer: -- (unreviewed)
     # Mary writes gen_desc: notify Rolf (editor), Mary becomes author.
     User.current = mary
@@ -2015,11 +2015,11 @@ class NameTest < UnitTestCase
     rolf.email_names_editor = false
     rolf.save
 
-    # email types:  author  editor  review  all     interest
-    # 1 Rolf:       x       .       x       .       .
-    # 2 Mary:       x       .       .       .       .
-    # 3 Dick:       .       .       .       .       .
-    # 4 Katrina:    x       x       x       .       .
+    # email types:  author  editor  review  interest
+    # 1 Rolf:       x       .       x       .
+    # 2 Mary:       x       .       .       .
+    # 3 Dick:       .       .       .       .
+    # 4 Katrina:    x       x       x       .
     # Authors: Mary      editors: Rolf       reviewer: -- (unreviewed)
     # Dick changes uses: notify Mary (author); Dick becomes editor.
     User.current = dick
@@ -2050,11 +2050,11 @@ class NameTest < UnitTestCase
     mary.email_names_author = false
     mary.save
 
-    # email types:  author  editor  review  all     interest
-    # 1 Rolf:       x       .       x       .       .
-    # 2 Mary:       .       .       .       .       .
-    # 3 Dick:       .       .       .       .       .
-    # 4 Katrina:    x       x       x       .       .
+    # email types:  author  editor  review  interest
+    # 1 Rolf:       x       .       x       .
+    # 2 Mary:       .       .       .       .
+    # 3 Dick:       .       .       .       .
+    # 4 Katrina:    x       x       x       .
     # Authors: Mary,Katrina   editors: Rolf,Dick   reviewer: -- (unreviewed)
     # Rolf reviews name: notify Katrina (author), Rolf becomes reviewer.
     User.current = rolf
@@ -2082,11 +2082,11 @@ class NameTest < UnitTestCase
     # Have Katrina express disinterest.
     Interest.create(target: name, user: katrina, state: false)
 
-    # email types:  author  editor  review  all     interest
-    # 1 Rolf:       x       .       x       .       .
-    # 2 Mary:       .       .       .       .       .
-    # 3 Dick:       .       .       .       .       .
-    # 4 Katrina:    x       x       x       .       no
+    # email types:  author  editor  review  interest
+    # 1 Rolf:       x       .       x       .
+    # 2 Mary:       .       .       .       .
+    # 3 Dick:       .       .       .       .
+    # 4 Katrina:    x       x       x       no
     # Authors: Mary,Katrina   editors: Rolf,Dick   reviewer: Rolf (inaccurate)
     # Dick changes look-alikes: notify Rolf (reviewer), clear review status
     User.current = dick
@@ -2121,11 +2121,11 @@ class NameTest < UnitTestCase
     # Mary expresses interest.
     Interest.create(target: name, user: mary, state: true)
 
-    # email types:  author  editor  review  all     interest
-    # 1 Rolf:       x       .       x       .       .
-    # 2 Mary:       .       .       .       .       yes
-    # 3 Dick:       .       .       .       .       .
-    # 4 Katrina:    x       x       x       .       no
+    # email types:  author  editor  review  interest
+    # 1 Rolf:       x       .       x       .
+    # 2 Mary:       .       .       .       yes
+    # 3 Dick:       .       .       .       .
+    # 4 Katrina:    x       x       x       no
     # Authors: Mary,Katrina   editors: Rolf,Dick   reviewer: Rolf (unreviewed)
     # Rolf changes 'uses': notify Mary (interest).
     User.current = rolf

@@ -198,10 +198,10 @@ class LocationTest < UnitTestCase
     assert_equal(0, desc.authors.length)
     assert_equal(0, desc.editors.length)
 
-    # email types:  author  editor  all     interest
-    # 1 Rolf:       x       .       .       .
-    # 2 Mary:       x       .       .       .
-    # 3 Dick:       x       .       x       .
+    # email types:  author  editor  interest
+    # 1 Rolf:       x       .       .
+    # 2 Mary:       x       .       .
+    # 3 Dick:       x       .       .
     # Authors: --   editors: --
     # Rolf changes notes: notify Dick (all); Rolf becomes editor.
     User.current = rolf
@@ -214,10 +214,10 @@ class LocationTest < UnitTestCase
     assert_equal(rolf, desc.editors.first)
     assert_equal(0, QueuedEmail.count)
 
-    # email types:  author  editor  all     interest
-    # 1 Rolf:       x       .       .       .
-    # 2 Mary:       x       .       .       .
-    # 3 Dick:       x       .       .       .
+    # email types:  author  editor  interest
+    # 1 Rolf:       x       .       .
+    # 2 Mary:       x       .       .
+    # 3 Dick:       x       .       .
     # Authors: --   editors: Rolf
     # Mary writes notes: no emails; Mary becomes author.
     User.current = mary
@@ -231,10 +231,10 @@ class LocationTest < UnitTestCase
     assert_equal(rolf, desc.editors.first)
     assert_equal(0, QueuedEmail.count)
 
-    # email types:  author  editor  all     interest
-    # 1 Rolf:       x       .       .       .
-    # 2 Mary:       x       .       .       .
-    # 3 Dick:       x       .       .       .
+    # email types:  author  editor  interest
+    # 1 Rolf:       x       .       .
+    # 2 Mary:       x       .       .
+    # 3 Dick:       x       .       .
     # Authors: Mary   editors: Rolf
     # Now when Rolf changes the notes Mary should get notified.
     User.current = rolf
@@ -263,10 +263,10 @@ class LocationTest < UnitTestCase
     mary.email_locations_author = false
     mary.save
 
-    # email types:  author  editor  all     interest
-    # 1 Rolf:       x       .       .       .
-    # 2 Mary:       .       .       .       .
-    # 3 Dick:       x       .       .       .
+    # email types:  author  editor  interest
+    # 1 Rolf:       x       .       .
+    # 2 Mary:       .       .       .
+    # 3 Dick:       x       .       .
     # Authors: Mary   editors: Rolf
     # Have Dick change it to make sure rolf doesn't get an email as he is just
     # an editor and he has opted out of such notifications.
@@ -291,10 +291,10 @@ class LocationTest < UnitTestCase
     dick.email_locations_editor = true
     dick.save
 
-    # email types:  author  editor  all     interest
-    # 1 Rolf:       x       x       .       .
-    # 2 Mary:       .       x       .       .
-    # 3 Dick:       x       x       .       .
+    # email types:  author  editor  interest
+    # 1 Rolf:       x       x       .
+    # 2 Mary:       .       x       .
+    # 3 Dick:       x       x       .
     # Authors: Mary   editors: Rolf, Dick
     User.current = dick
     desc.reload
@@ -323,10 +323,10 @@ class LocationTest < UnitTestCase
     Interest.create(target: loc, user: mary, state: true)
     Interest.create(target: loc, user: dick, state: true)
 
-    # email types:  author  editor  all     interest
-    # 1 Rolf:       x       x       .       no
-    # 2 Mary:       .       x       .       yes
-    # 3 Dick:       x       x       .       yes
+    # email types:  author  editor  interest
+    # 1 Rolf:       x       x       no
+    # 2 Mary:       .       x       yes
+    # 3 Dick:       x       x       yes
     # Authors: Mary   editors: Rolf, Dick
     User.current = dick
     loc.reload
