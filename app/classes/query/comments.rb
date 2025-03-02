@@ -49,7 +49,7 @@ class Query::Comments < Query::Base
 
     target = target_instance
     @title_tag = :query_title_for_target
-    @title_args[:object] = target.unique_format_name
+    @title_args[:target] = target.unique_format_name
     where << "comments.target_id = '#{target.id}'"
     where << "comments.target_type = '#{target.class.name}'"
   end
