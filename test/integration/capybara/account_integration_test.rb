@@ -440,7 +440,6 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
       uncheck("user_email_locations_admin")
       uncheck("user_email_locations_author")
       uncheck("user_email_locations_editor")
-      check("user_email_locations_all")
 
       uncheck("user_email_general_commercial")
       uncheck("user_email_general_feature")
@@ -453,7 +452,6 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
     mary.reload
     assert_equal(mary.email_html, false)
     assert_equal(mary.email_comments_owner, false)
-    assert_equal(mary.email_locations_all, true)
     assert_equal(mary.email_general_question, false)
     assert_equal(mary.email_general_feature, false)
   end

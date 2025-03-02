@@ -135,7 +135,6 @@ module Account
         [:email_general_question, :boolean],
         [:email_html, :boolean],
         [:email_locations_admin, :boolean],
-        [:email_locations_all, :boolean],
         [:email_locations_author, :boolean],
         [:email_locations_editor, :boolean],
         [:email_names_admin, :boolean],

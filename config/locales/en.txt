@@ -2067,7 +2067,6 @@
   prefs_email_comments_owner: someone comments on my observations, names, etc.
   prefs_email_comments_response: someone posts responses to my comments.
   prefs_email_locations: "[:Location] Email"
-  prefs_email_locations_all: anyone changes any location.
   prefs_email_locations_admin: someone changes a location I administrate.
   prefs_email_locations_author: someone changes a location I'm author on.
   prefs_email_locations_editor: someone changes a location I've edited.
@@ -3161,7 +3160,6 @@
   no_email_locations_admin_note: You will no longer receive email notifications when other [:users] make changes to location descriptions you administrate.
   no_email_locations_author_note: You will no longer receive email notifications when other [:users] make changes to [:locations] you have created.
   no_email_locations_editor_note: You will no longer receive email notifications when other [:users] make changes to [:locations] you have edited.
-  no_email_locations_all_note: You will no longer receive email notifications about all location changes.
   no_email_general_feature_note: Automated email about new features has been disabled for your account.
   no_email_general_commercial_note: Other [:users] of the [:app_title] website can no longer send you commercial inquiries about your [:images].
   no_email_general_question_note: Other [:users] of the [:app_title] website can no longer send you questions about your [:observations].
@@ -3176,7 +3174,6 @@
   no_email_locations_admin_success: Admin location change notifications disabled for [name].
   no_email_locations_author_success: Author location change notifications disabled for [name].
   no_email_locations_editor_success: Editor location change notifications disabled for [name].
-  no_email_locations_all_success: All location change notifications disabled for [name].
   no_email_general_feature_success: Automated feature email disabled for [name].
   no_email_general_commercial_success: Commercial inquiries disabled for [name].
   no_email_general_question_success: Question email disabled for [name].

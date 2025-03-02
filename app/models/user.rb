@@ -118,7 +118,6 @@
 #  email_names_reviewer::         ...someone changes a Name I've reviewed.
 #  email_locations_author::       ...someone changes a Location I've authored.
 #  email_locations_editor::       ...someone changes a Location I've edited.
-#  email_locations_all::          ...anyone changes a Location.
 #  email_general_feature::        ...you announce new features.
 #  email_general_commercial::     ...someone sends me a commercial inquiry.
 #  email_general_question::       ...someone sends me a general question.
