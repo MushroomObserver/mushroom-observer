@@ -13,7 +13,7 @@ class Query::ScopeClasses::ExternalLinks < Query::BaseAR
       by_users: [User],
       observations: [Observation],
       external_sites: [ExternalSite],
-      url: :string
+      url_has: :string
     )
   end
 

@@ -4,9 +4,13 @@
 module Query::ScopeModules::Conditions
   # Just because these three are used over and over again.
   def add_owner_and_time_stamp_conditions
+    add_time_stamp_conditions
+    initialize_users_parameter
+  end
+
+  def add_time_stamp_conditions
     add_time_condition(:created_at, params[:created_at])
     add_time_condition(:updated_at, params[:updated_at])
-    initialize_users_parameter
   end
 
   def add_date_condition(col, vals, joins)
