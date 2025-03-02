@@ -14,8 +14,6 @@ class Query::HerbariaTest < UnitTestCase
 
   def test_herbarium_by_records
     expects = Herbarium.left_outer_joins(:herbarium_records).group(:id).
-              # Wrap known safe argument in Arel
-              # to prevent "Dangerous query method" Deprecation Warning
               order(HerbariumRecord[:id].count.desc, Herbarium[:id].desc)
     assert_query(expects, :Herbarium, by: :records)
   end
