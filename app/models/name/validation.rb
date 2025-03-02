@@ -85,7 +85,9 @@ module Name::Validation
 
   def author_characters
     return if author.blank?
-    return if /\A[\p{L} ()-.,&]*\z/.match?(author)
+    # Allow only: letters, spaces, parens, hyphens, periods, commas,
+    # ampersands, square brackets
+    return if /\A[\p{L} ()-.,&\[\]]*\z/.match?(author)
 
     errors.add(:author, :validate_name_author_characters.t)
   end

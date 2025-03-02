@@ -3769,6 +3769,11 @@ class NameTest < UnitTestCase
     # Commas can separate multiple authors
     assert(Name.new(valid_params.merge({ author: "Benedix, Woo & Zhu" })).
       valid?, "Commas should be allowable in Author")
+    # MycoBank allows square brackets in author to show correction. Ex:
+    # Xylaria symploci Pande, Waingankar, Punekar & Ran[a]dive
+    # https://www.mycobank.org/page/Name%20details%20page/field/Mycobank%20%23/585173
+    assert(Name.new(valid_params.merge({ author: "Ben[e]dix" })).
+     valid?, "Square brackets should be allowable in Author")
 
     # ----- Prove that including bad character prevents validation of Name
     # Users have added numbers manually
@@ -3776,12 +3781,7 @@ class NameTest < UnitTestCase
     assert(Name.new(valid_params.merge({ author: "Benedix (1969)" })).
       invalid?, "Numerals should not be allowable in Author")
     # Users have added brackets by pasting IF or MB line into the Name form
-    # These example are contrived to separately test open  and close brackets
-    assert(Name.new(valid_params.merge({ author: "Ben[edix" })).
-      invalid?, "Open square bracket should not be allowable in Author")
-    assert(Name.new(valid_params.merge({ author: "Bene]dix" })).
-      invalid?, "Close square bracket should not be allowable in Author")
-    # Hasn't happened yet; bu waiting for ExcitedDelirium to drop the shoe
+    # Hasn't happened yet; but waiting for ExcitedDelirium to drop the shoe
     assert(Name.new(valid_params.merge({ author: "Benedix 🤮" })).
       invalid?, "Emoji should not be allowable in Author")
   end
