@@ -420,20 +420,16 @@ class Name < AbstractModel
     "locked"
   )
 
-  validate  :user_presence
-  validate  :text_name_length
-  validate  :author_length
   validates :author, allow_blank: true,
-                     # Must contain only: letters, spaces, parens, hyphens,
+                     # Contains only: letters, spaces, parens, hyphens,
                      # periods, commas, ampersands, square brackets
                      format: { with: /\A[\p{L} ()-.,&\[\]]*\z/,
                                message: :validate_name_author_characters.t }
   validates :author, allow_blank: true,
-                     # Must end only in letter, period plus any spaces
+                     # Ends only in letter, period plus any spaces
                      format: { with: /[\p{Alpha}\.]( *)\Z/,
                                message: :validate_name_author_ending.t }
-  validates :search_name, presence: true
-  validate  :search_name_indistinct
+  validate  :author_length
   validate  :citation_start
   validates :icn_id, numericality: { allow_nil: true,
                                      only_integer: true,
@@ -441,6 +437,10 @@ class Name < AbstractModel
   validate  :icn_id_registrable
   validate  :icn_id_unique
   validate  :lifeform_known
+  validates :search_name, presence: true
+  validate  :search_name_indistinct
+  validate  :text_name_length
+  validate  :user_presence
 
   before_create :inherit_stuff
   after_create :notify_webmaster
