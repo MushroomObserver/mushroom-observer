@@ -116,7 +116,6 @@
 #  email_names_author::           ...someone changes a Name I've authored.
 #  email_names_editor::           ...someone changes a Name I've edited.
 #  email_names_reviewer::         ...someone changes a Name I've reviewed.
-#  email_names_all::              ...anyone changes a Name.
 #  email_locations_author::       ...someone changes a Location I've authored.
 #  email_locations_editor::       ...someone changes a Location I've edited.
 #  email_locations_all::          ...anyone changes a Location.

@@ -21,7 +21,6 @@ module Account
       email_locations_author: "1",
       email_locations_editor: "",
       email_names_admin: "1",
-      email_names_all: "",
       email_names_author: "1",
       email_names_editor: "",
       email_names_reviewer: "1",
@@ -100,7 +99,6 @@ module Account
       assert_input_value(:user_email_locations_author, "1")
       assert_input_value(:user_email_locations_editor, "")
       assert_input_value(:user_email_names_admin, "1")
-      assert_input_value(:user_email_names_all, "")
       assert_input_value(:user_email_names_author, "1")
       assert_input_value(:user_email_names_editor, "")
       assert_input_value(:user_email_names_reviewer, "1")
@@ -150,7 +148,6 @@ module Account
       assert_equal(true, user.email_locations_author)
       assert_equal(false, user.email_locations_editor)
       assert_equal(true, user.email_names_admin)
-      assert_equal(false, user.email_names_all)
       assert_equal(true, user.email_names_author)
       assert_equal(false, user.email_names_editor)
       assert_equal(true, user.email_names_reviewer)
@@ -271,7 +268,6 @@ module Account
         :names_author,
         :names_editor,
         :names_reviewer,
-        :names_all,
         :locations_author,
         :locations_editor,
         :locations_all,

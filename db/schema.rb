@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_03_02_095924) do
+ActiveRecord::Schema[7.2].define(version: 2025_03_02_103749) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -906,7 +906,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_03_02_095924) do
     t.boolean "email_names_author", default: true, null: false
     t.boolean "email_names_editor", default: false, null: false
     t.boolean "email_names_reviewer", default: true, null: false
-    t.boolean "email_names_all", default: false, null: false
     t.boolean "email_locations_author", default: true, null: false
     t.boolean "email_locations_editor", default: false, null: false
     t.boolean "email_locations_all", default: false, null: false

@@ -139,7 +139,6 @@ module Account
         [:email_locations_author, :boolean],
         [:email_locations_editor, :boolean],
         [:email_names_admin, :boolean],
-        [:email_names_all, :boolean],
         [:email_names_author, :boolean],
         [:email_names_editor, :boolean],
         [:email_names_reviewer, :boolean],

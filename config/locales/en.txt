@@ -2075,7 +2075,6 @@
   prefs_email_observations_consensus: consensus name changes for one of my observations.
   prefs_email_observations_naming: someone proposes a name for one of my observations.
   prefs_email_names: "[:Name] Email"
-  prefs_email_names_all: anyone changes any name.
   prefs_email_names_admin: someone changes a name I administrate.
   prefs_email_names_author: someone changes a name I'm author on.
   prefs_email_names_editor: someone changes a name I've edited.
@@ -3159,7 +3158,6 @@
   no_email_names_author_note: You will no longer receive email notifications when other [:users] make changes to descriptions you have written.
   no_email_names_editor_note: You will no longer receive email notifications when other [:users] make changes to descriptions you have edited.
   no_email_names_reviewer_note: You will no longer receive email notifications when other [:users] make changes to descriptions you have reviewed.
-  no_email_names_all_note: You will no longer receive email notifications about all name changes.
   no_email_locations_admin_note: You will no longer receive email notifications when other [:users] make changes to location descriptions you administrate.
   no_email_locations_author_note: You will no longer receive email notifications when other [:users] make changes to [:locations] you have created.
   no_email_locations_editor_note: You will no longer receive email notifications when other [:users] make changes to [:locations] you have edited.
@@ -3175,7 +3173,6 @@
   no_email_names_author_success: Author name change notifications disabled for [name].
   no_email_names_editor_success: Editor name change notifications disabled for [name].
   no_email_names_reviewer_success: Reviewer name change notifications disabled for [name].
-  no_email_names_all_success: All name change notifications disabled for [name].
   no_email_locations_admin_success: Admin location change notifications disabled for [name].
   no_email_locations_author_success: Author location change notifications disabled for [name].
   no_email_locations_editor_success: Editor location change notifications disabled for [name].

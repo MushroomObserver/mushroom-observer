@@ -1916,28 +1916,24 @@ class NameTest < UnitTestCase
     rolf.email_names_author   = true
     rolf.email_names_editor   = true
     rolf.email_names_reviewer = true
-    rolf.email_names_all      = false
     rolf.save
 
     mary.email_names_admin    = false
     mary.email_names_author   = true
     mary.email_names_editor   = false
     mary.email_names_reviewer = false
-    mary.email_names_all      = false
     mary.save
 
     dick.email_names_admin    = false
     dick.email_names_author   = false
     dick.email_names_editor   = false
     dick.email_names_reviewer = false
-    dick.email_names_all      = false
     dick.save
 
     katrina.email_names_admin    = false
     katrina.email_names_author   = true
     katrina.email_names_editor   = true
     katrina.email_names_reviewer = true
-    katrina.email_names_all      = true
     katrina.save
 
     # Start with no reviewers, editors or authors.
@@ -1964,7 +1960,7 @@ class NameTest < UnitTestCase
     # 1 Rolf:       x       x       x       .       .
     # 2 Mary:       x       .       .       .       .
     # 3 Dick:       .       .       .       .       .
-    # 4 Katrina:    x       x       x       x       .
+    # 4 Katrina:    x       x       x       .       .
     # Authors: --        editors: --         reviewer: -- (unreviewed)
     # Rolf erases notes: notify Katrina (all), Rolf becomes editor.
     User.current = rolf
@@ -1983,22 +1979,7 @@ class NameTest < UnitTestCase
     assert_equal(1, desc.editors.length)
     assert_nil(desc.reviewer_id)
     assert_equal(rolf, desc.editors.first)
-    assert_equal(1, QueuedEmail.count)
-    assert_email(0,
-                 flavor: "QueuedEmail::NameChange",
-                 from: rolf,
-                 to: katrina,
-                 name: name.id,
-                 description: desc.id,
-                 old_name_version: name.version,
-                 new_name_version: name.version,
-                 old_description_version: desc.version - 1,
-                 new_description_version: desc.version,
-                 review_status: "no_change")
-
-    # Katrina wisely reconsiders requesting notifications of all name changes.
-    katrina.email_names_all = false
-    katrina.save
+    assert_equal(0, QueuedEmail.count)
 
     # email types:  author  editor  review  all     interest
     # 1 Rolf:       x       x       x       .       .
@@ -2017,8 +1998,8 @@ class NameTest < UnitTestCase
     assert_nil(desc.reviewer_id)
     assert_equal(mary, desc.authors.first)
     assert_equal(rolf, desc.editors.first)
-    assert_equal(2, QueuedEmail.count)
-    assert_email(1,
+    assert_equal(1, QueuedEmail.count)
+    assert_email(0,
                  flavor: "QueuedEmail::NameChange",
                  from: mary,
                  to: rolf,
@@ -2051,8 +2032,8 @@ class NameTest < UnitTestCase
     assert_nil(desc.reviewer_id)
     assert_equal(mary, desc.authors.first)
     assert_equal([rolf.id, dick.id].sort, desc.editors.map(&:id).sort)
-    assert_equal(3, QueuedEmail.count)
-    assert_email(2,
+    assert_equal(2, QueuedEmail.count)
+    assert_email(1,
                  flavor: "QueuedEmail::NameChange",
                  from: dick,
                  to: mary,
@@ -2085,8 +2066,8 @@ class NameTest < UnitTestCase
     assert_equal(rolf.id, desc.reviewer_id)
     assert_equal([mary.id, katrina.id].sort, desc.authors.map(&:id).sort)
     assert_equal([rolf.id, dick.id].sort, desc.editors.map(&:id).sort)
-    assert_equal(4, QueuedEmail.count)
-    assert_email(3,
+    assert_equal(3, QueuedEmail.count)
+    assert_email(2,
                  flavor: "QueuedEmail::NameChange",
                  from: rolf,
                  to: katrina,
@@ -2124,8 +2105,8 @@ class NameTest < UnitTestCase
     assert_nil(desc.reviewer_id)
     assert_equal([mary.id, katrina.id].sort, desc.authors.map(&:id).sort)
     assert_equal([rolf.id, dick.id].sort, desc.editors.map(&:id).sort)
-    assert_equal(5, QueuedEmail.count)
-    assert_email(4,
+    assert_equal(4, QueuedEmail.count)
+    assert_email(3,
                  flavor: "QueuedEmail::NameChange",
                  from: dick,
                  to: rolf,
@@ -2158,8 +2139,8 @@ class NameTest < UnitTestCase
     assert_nil(desc.reviewer_id)
     assert_equal([mary.id, katrina.id].sort, desc.authors.map(&:id).sort)
     assert_equal([rolf.id, dick.id].sort, desc.editors.map(&:id).sort)
-    assert_equal(6, QueuedEmail.count)
-    assert_email(5,
+    assert_equal(5, QueuedEmail.count)
+    assert_email(4,
                  flavor: "QueuedEmail::NameChange",
                  from: rolf,
                  to: mary,
