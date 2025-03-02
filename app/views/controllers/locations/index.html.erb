@@ -50,17 +50,21 @@ flash_error(@error) if @error && @known_pages.empty? && @undef_pages.empty?
       </div>
       <%= paginate_block(@undef_pages, { html_id: "locations_undefined" }) do %>
         <div class="list-group">
-          <% @undef_data.each do |location_name, count| %>
+          <% @undef_data.each do |obs, count| 
+            location_name = obs[:where] %>
             <div class="list-group-item">
               <%= location_link(location_name, nil, count) %>
-              <%= link_to(
+              <%= 
+              link_to(
                 :list_place_names_merge.t,
                 matching_locations_for_observations_path(where: location_name)
-              ) %>
+              ) 
+              %>
             </div>
           <% end %>
         </div>
       <% end %>
     <% end %>
   </div>
-</div><!--.row-->
+</div>
+<!--.row-->

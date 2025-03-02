@@ -17,18 +17,18 @@ class Query::NameDescriptionsTest < UnitTestCase
 
     assert_query(all_descs, :NameDescription, by: :id)
     assert_query(all_pelt_descs, :NameDescription, by: :id, names: pelt)
-    assert_query(public_pelt_descs, :NameDescription,
-                 by: :id, names: pelt, public: "yes")
+    assert_query(public_pelt_descs,
+                 :NameDescription, by: :id, names: pelt, public: "yes")
   end
 
   def test_name_description_by_user
     expects = NameDescription.where(user: mary).order(:id)
-    assert_query(expects, :NameDescription, by_user: mary, by: :id)
+    assert_query(expects, :NameDescription, by_users: mary, by: :id)
 
     expects = NameDescription.where(user: katrina).order(:id)
-    assert_query(expects, :NameDescription, by_user: katrina, by: :id)
+    assert_query(expects, :NameDescription, by_users: katrina, by: :id)
 
-    assert_query([], :NameDescription, by_user: junk, by: :id)
+    assert_query([], :NameDescription, by_users: junk, by: :id)
   end
 
   def test_name_description_by_author
@@ -61,45 +61,37 @@ class Query::NameDescriptionsTest < UnitTestCase
     assert_query(NameDescription.all,
                  :NameDescription, ids: NameDescription.select(:id).to_a)
     assert_query([NameDescription.first.id],
-                 :NameDescription,
-                 ids: [rolf.id, NameDescription.first.id])
+                 :NameDescription, ids: [rolf.id, NameDescription.first.id])
   end
 
-  def test_name_description_with_default_desc
+  def test_name_description_has_default_desc
     assert_query(NameDescription.is_default.index_order,
-                 :NameDescription, with_default_desc: 1)
+                 :NameDescription, name_query: { has_default_desc: 1 })
     assert_query(NameDescription.is_not_default.index_order,
-                 :NameDescription, with_default_desc: 0)
+                 :NameDescription, name_query: { has_default_desc: 0 })
   end
 
-  def test_name_description_desc_type_user
+  def test_name_description_type_user
     assert_query(NameDescription.where(source_type: 5).index_order,
-                 :NameDescription, desc_type: "user")
+                 :NameDescription, type: "user")
   end
 
-  def test_name_description_desc_type_project
+  def test_name_description_type_project
     assert_query(NameDescription.where(source_type: 3).index_order,
-                 :NameDescription, desc_type: "project")
+                 :NameDescription, type: "project")
   end
 
-  def test_name_description_desc_project
+  def test_name_description_projects
     assert_query(NameDescription.
                  where(project: projects(:eol_project)).index_order,
-                 :NameDescription, desc_project: projects(:eol_project).id)
-  end
-
-  def test_name_description_desc_creator
-    assert_query(NameDescription.where(user: rolf).index_order,
-                 :NameDescription, desc_creator: rolf.id)
-    assert_query(NameDescription.where(user: mary).index_order,
-                 :NameDescription, desc_creator: mary.id)
+                 :NameDescription, projects: projects(:eol_project).id)
   end
 
   # waiting on a new AbstractModel scope for searches,
   # plus a specific NameDescription scope coalescing the fields.
-  def test_name_description_desc_content
+  def test_name_description_content_has
     assert_query(NameDescription.search_content('"some notes"').index_order,
-                 :NameDescription, desc_content: '"some notes"')
+                 :NameDescription, content_has: '"some notes"')
   end
 
   def test_name_description_ok_for_export

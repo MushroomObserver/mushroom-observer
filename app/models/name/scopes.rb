@@ -28,9 +28,9 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
           -> { where.not(correct_spelling_id: nil) }
     scope :with_self_referential_misspelling,
           -> { where(Name[:correct_spelling_id].eq(Name[:id])) }
-    scope :text_name_contains,
+    scope :text_name_has,
           ->(phrase) { search_columns(Name[:text_name], phrase) }
-    scope :search_name_contains,
+    scope :search_name_has,
           ->(phrase) { search_columns(Name[:search_name], phrase) }
 
     scope :of_lichens, lambda { |bool = true|
@@ -43,26 +43,24 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
     scope :not_lichens,
           -> { where(Name[:lifeform].does_not_match("% lichen %")) }
 
-    scope :deprecated, lambda { |boolish = :only|
-      # if :either, returns all
-      case boolish.to_sym
-      when :no
-        not_deprecated
-      when :only
+    scope :is_deprecated, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
         where(deprecated: true)
+      else
+        not_deprecated
       end
     }
     scope :not_deprecated,
           -> { where(deprecated: false) }
 
-    scope :with_synonyms, lambda { |bool = true|
+    scope :has_synonyms, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         where.not(synonym_id: nil)
       else
-        without_synonyms
+        has_no_synonyms
       end
     }
-    scope :without_synonyms,
+    scope :has_no_synonyms,
           -> { where(synonym_id: nil) }
 
     scope :ok_for_export, lambda { |bool = true|
@@ -75,52 +73,52 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
     scope :not_ok_for_export,
           -> { where(ok_for_export: false) }
 
-    scope :with_classification, lambda { |bool = true|
+    scope :has_classification, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         where(Name[:classification].not_blank)
       else
-        without_classification
+        has_no_classification
       end
     }
-    scope :without_classification,
+    scope :has_no_classification,
           -> { where(Name[:classification].blank) }
-    scope :classification_contains,
+    scope :classification_has,
           ->(phrase) { search_columns(Name[:classification], phrase) }
 
-    scope :with_author, lambda { |bool = true|
+    scope :has_author, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         where(Name[:author].not_blank)
       else
-        without_author
+        has_no_author
       end
     }
-    scope :without_author,
+    scope :has_no_author,
           -> { where(Name[:author].blank) }
-    scope :author_contains,
+    scope :author_has,
           ->(phrase) { search_columns(Name[:author], phrase) }
 
-    scope :with_citation, lambda { |bool = true|
+    scope :has_citation, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         where(Name[:citation].not_blank)
       else
-        without_citation
+        has_no_citation
       end
     }
-    scope :without_citation,
+    scope :has_no_citation,
           -> { where(Name[:citation].blank) }
-    scope :citation_contains,
+    scope :citation_has,
           ->(phrase) { search_columns(Name[:citation], phrase) }
 
-    scope :with_notes, lambda { |bool = true|
+    scope :has_notes, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         where(Name[:notes].not_blank)
       else
-        without_notes
+        has_no_notes
       end
     }
-    scope :without_notes,
+    scope :has_no_notes,
           -> { where(Name[:notes].blank) }
-    scope :notes_contain,
+    scope :notes_has,
           ->(phrase) { search_columns(Name[:notes], phrase) }
 
     ### Module Name::Taxonomy. Rank scopes take text values, e.g. "Genus"
@@ -147,7 +145,7 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
         where(Name[:rank].not_eq(ranks[:Group]))
     }
     scope :subtaxa_of_genus_or_below, lambda { |text_name|
-      # Note the space " " difference from :text_name_contains scope
+      # Note the space " " difference from :text_name_has scope
       with_correct_spelling.where(Name[:text_name].matches("#{text_name} %"))
     }
     scope :subtaxa_of, lambda { |name, exclude_original = true|
@@ -203,14 +201,14 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
     # A more comprehensive search of Name fields, plus comments/descriptions.
     scope :search_content_and_associations, lambda { |phrase|
       fields = Name.search_content(phrase).map(&:id)
-      comments = Name.comments_contain(phrase).map(&:id)
-      descs = Name.description_contains(phrase).map(&:id)
+      comments = Name.comments_has(phrase).map(&:id)
+      descs = Name.description_has(phrase).map(&:id)
       where(id: fields + comments + descs).distinct
     }
     # This is what's called by advanced_search
     scope :advanced_search, lambda { |phrase|
       fields = Name.search_columns(Name[:search_name], phrase).map(&:id)
-      comments = Name.comments_contain(phrase).map(&:id)
+      comments = Name.comments_has(phrase).map(&:id)
       where(id: fields + comments).distinct
     }
     # This is what's called by pattern_search
@@ -230,57 +228,56 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
       )
     }
 
-    scope :with_comments, lambda { |bool = true|
+    scope :has_comments, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         joins(:comments).distinct
       else
-        without_comments
+        has_no_comments
       end
     }
-    scope :without_comments,
-          -> { where.not(id: Name.with_comments) }
-    scope :comments_contain, lambda { |phrase|
+    scope :has_no_comments,
+          -> { where.not(id: Name.has_comments) }
+    scope :comments_has, lambda { |phrase|
       joins(:comments).merge(Comment.search_content(phrase)).distinct
     }
 
-    scope :with_description, lambda { |bool = true|
+    scope :has_description, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         where.not(description_id: nil)
       else
-        without_description
+        has_no_description
       end
     }
-    scope :without_description,
+    scope :has_no_description,
           -> { where(description_id: nil) }
-    # Names needing descriptions
-    # In the template, order scope `description_needed` by most frequently used:
-    #   Name.description_needed.group(:name_id).reorder(Arel.star.count.desc)
-    scope :description_needed,
-          -> { without_description.joins(:observations).distinct }
-    scope :description_contains, lambda { |phrase|
+    scope :need_description, lambda {
+      has_description(false).joins(:observations).distinct.
+        group(:name_id).order(Observation[:name_id].count.desc, Name[:id].desc)
+    }
+    scope :description_has, lambda { |phrase|
       joins(:descriptions).
         merge(NameDescription.search_content(phrase)).distinct
     }
-    scope :with_description_in_project, lambda { |project|
+    scope :has_description_in_project, lambda { |project|
       joins(descriptions: :project).
         merge(NameDescription.where(project: project)).distinct
     }
-    scope :with_description_created_by, lambda { |user|
+    scope :has_description_created_by, lambda { |user|
       joins(:descriptions).
         merge(NameDescription.where(user: user)).distinct
     }
-    scope :with_description_reviewed_by, lambda { |user|
+    scope :has_description_reviewed_by, lambda { |user|
       joins(:descriptions).
         merge(NameDescription.where(reviewer: user)).distinct
     }
-    scope :with_description_of_type, lambda { |source|
+    scope :has_description_of_type, lambda { |source|
       # Check that it's a valid source type (string enum value)
       return none if Description::ALL_SOURCE_TYPES.exclude?(source)
 
       joins(:descriptions).
         merge(NameDescription.where(source_type: source)).distinct
     }
-    scope :with_description_classification_differing, lambda {
+    scope :has_description_classification_differing, lambda {
       joins(:description).
         where(rank: 0..Name.ranks[:Genus]).
         where(NameDescription[:classification].not_eq(Name[:classification])).

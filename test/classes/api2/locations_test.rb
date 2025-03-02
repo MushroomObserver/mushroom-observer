@@ -27,6 +27,15 @@ class API2::LocationsTest < UnitTestCase
     assert_api_results([loc_sample])
   end
 
+  def loc_samples
+    @loc_samples ||= Location.all.sample(12)
+  end
+
+  def test_getting_locations_ids
+    assert_api_pass(params_get(id: loc_samples.map(&:id).join(",")))
+    assert_api_results(loc_samples)
+  end
+
   def test_getting_locations_created_at
     locs = Location.where(Location[:created_at].year.eq(2008))
     assert_not_empty(locs)

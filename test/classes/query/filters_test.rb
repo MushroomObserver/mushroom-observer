@@ -3,12 +3,12 @@
 require("test_helper")
 require("query_extensions")
 
-# tests of Filter class to be included in QueryTest
-module Query::FiltersTest
+# tests of Query::Filter class
+class Query::FiltersTest < UnitTestCase
   include QueryExtensions
 
   def test_filters
-    assert_equal([:with_images, :with_specimen, :lichen, :region, :clade],
+    assert_equal([:has_images, :has_specimen, :lichen, :region, :clade],
                  Query::Filter.all.map(&:sym))
     assert_equal([:region],
                  Query::Filter.by_model(Location).map(&:sym))
@@ -17,25 +17,25 @@ module Query::FiltersTest
   end
 
   def test_find
-    fltr = Query::Filter.find(:with_images)
+    fltr = Query::Filter.find(:has_images)
     assert_not_nil(fltr)
-    assert_equal(:with_images, fltr.sym)
+    assert_equal(:has_images, fltr.sym)
   end
 
-  def test_filtering_content_with_images
-    expects = Observation.with_images.index_order.uniq
-    assert_query(expects, :Observation, with_images: "yes")
+  def test_filtering_content_has_images
+    expects = Observation.has_images.index_order.uniq
+    assert_query(expects, :Observation, has_images: "yes")
 
-    expects = Observation.without_images.index_order.uniq
-    assert_query(expects, :Observation, with_images: "no")
+    expects = Observation.has_no_images.index_order.uniq
+    assert_query(expects, :Observation, has_images: "no")
   end
 
-  def test_filtering_content_with_specimen
-    expects = Observation.with_specimen.index_order.uniq
-    assert_query(expects, :Observation, with_specimen: "yes")
+  def test_filtering_content_has_specimen
+    expects = Observation.has_specimen.index_order.uniq
+    assert_query(expects, :Observation, has_specimen: "yes")
 
-    expects = Observation.without_specimen.index_order.uniq
-    assert_query(expects, :Observation, with_specimen: "no")
+    expects = Observation.has_no_specimen.index_order.uniq
+    assert_query(expects, :Observation, has_specimen: "no")
   end
 
   def test_filtering_content_with_lichen
@@ -71,5 +71,12 @@ module Query::FiltersTest
     assert_query(names, :Name, clade: "Agaricales")
     obs = Observation.in_clade("Agaricales").index_order.distinct
     assert_query(obs, :Observation, clade: "Agaricales")
+  end
+
+  def test_filtering_content_with_subquery
+    expects_names = Name.joins(:observations).
+                    merge(Observation.has_specimen).index_order.uniq
+    assert_query(expects_names,
+                 :Name, observation_query: { has_specimen: "yes" })
   end
 end

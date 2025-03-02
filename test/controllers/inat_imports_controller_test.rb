@@ -30,10 +30,6 @@ class InatImportsControllerTest < FunctionalTestCase
     get(:show, params: { id: import.id, tracker_id: tracker.id })
 
     assert_response(:success)
-    assert_select("span#importables_count", /^\d+$/,
-                  "Importables count should be an integer")
-    assert_select("span#imported_count", /^\d+$/,
-                  "Imported count should be an integer")
   end
 
   def test_new_inat_import

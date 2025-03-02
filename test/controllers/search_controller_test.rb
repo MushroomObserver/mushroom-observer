@@ -11,11 +11,11 @@ class SearchControllerTest < FunctionalTestCase
         :advanced,
         params: {
           search: {
-            name: "Don't know",
-            user: "myself",
+            search_name: "Don't know",
+            search_user: "myself",
             model: model.name.underscore,
-            content: "Long pink stem and small pink cap",
-            user_where: "Eastern Oklahoma"
+            search_content: "Long pink stem and small pink cap",
+            search_where: "Eastern Oklahoma"
           },
           commit: "Search"
         }
@@ -34,12 +34,12 @@ class SearchControllerTest < FunctionalTestCase
     login
     # Make sure all the right buttons and fields are present.
     get(:advanced)
-    assert_select("input[type=radio]#content_filter_with_images_yes")
-    assert_select("input[type=radio]#content_filter_with_images_no")
-    assert_select("input[type=radio]#content_filter_with_images_")
-    assert_select("input[type=radio]#content_filter_with_specimen_yes")
-    assert_select("input[type=radio]#content_filter_with_specimen_no")
-    assert_select("input[type=radio]#content_filter_with_specimen_")
+    assert_select("input[type=radio]#content_filter_has_images_yes")
+    assert_select("input[type=radio]#content_filter_has_images_no")
+    assert_select("input[type=radio]#content_filter_has_images_")
+    assert_select("input[type=radio]#content_filter_has_specimen_yes")
+    assert_select("input[type=radio]#content_filter_has_specimen_no")
+    assert_select("input[type=radio]#content_filter_has_specimen_")
     assert_select("input[type=radio]#content_filter_lichen_yes")
     assert_select("input[type=radio]#content_filter_lichen_no")
     assert_select("input[type=radio]#content_filter_lichen_")
@@ -49,12 +49,12 @@ class SearchControllerTest < FunctionalTestCase
     params = {
       search: {
         model: "observation",
-        user: users(:rolf).unique_text_name,
-        user_id: users(:rolf).id
+        search_user: users(:rolf).unique_text_name,
+        search_user_id: users(:rolf).id
       },
       content_filter: {
-        with_images: "",
-        with_specimen: "yes",
+        has_images: "",
+        has_specimen: "yes",
         lichen: "no",
         region: "California",
         clade: ""
@@ -62,9 +62,11 @@ class SearchControllerTest < FunctionalTestCase
     }
     get(:advanced, params: params)
     query = QueryRecord.last.query
+    q = QueryRecord.last.id.alphabetize
+    assert_redirected_to(root_path(advanced_search: 1, q:))
     assert_true(query.num_results.positive?)
-    assert_equal("", query.params[:with_images])
-    assert_true(query.params[:with_specimen])
+    assert_equal("", query.params[:has_images])
+    assert_true(query.params[:has_specimen])
     assert_false(query.params[:lichen])
     assert_equal(["California"], query.params[:region])
     assert_equal("", query.params[:clade])

@@ -14,10 +14,12 @@ module Query::Initializers::AdvancedSearch
 
   def google_parse_params
     [
-      SearchParams.new(phrase: params[:name]),
-      SearchParams.new(phrase: User.remove_bracketed_name(params[:user].to_s)),
-      SearchParams.new(phrase: params[:user_where]),
-      SearchParams.new(phrase: params[:content])
+      SearchParams.new(phrase: params[:search_name]),
+      SearchParams.new(
+        phrase: User.remove_bracketed_name(params[:search_user].to_s)
+      ),
+      SearchParams.new(phrase: params[:search_where]),
+      SearchParams.new(phrase: params[:search_content])
     ]
   end
 
@@ -63,7 +65,7 @@ module Query::Initializers::AdvancedSearch
     args2 = args.dup
     extend_where(args2)
     args2[:where] += google_conditions(content, content_field_one)
-    model.connection.select_rows(query(args2))
+    model.connection.select_rows(sql(args2))
   end
 
   def content_search_two(content, args)
@@ -71,7 +73,7 @@ module Query::Initializers::AdvancedSearch
     extend_where(args2)
     extend_join(args2) << content_join_spec
     args2[:where] += google_conditions(content, content_field_two)
-    model.connection.select_rows(query(args2))
+    model.connection.select_rows(sql(args2))
   end
 
   def name_field

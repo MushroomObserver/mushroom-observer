@@ -10,8 +10,8 @@ class Query::ExternalLinksTest < UnitTestCase
   def test_external_link_all
     assert_query(ExternalLink.all.sort_by(&:url), :ExternalLink)
     assert_query(ExternalLink.where(user: users(:mary)).sort_by(&:url),
-                 :ExternalLink, users: users(:mary))
-    assert_query([], :ExternalLink, users: users(:dick))
+                 :ExternalLink, by_users: users(:mary))
+    assert_query([], :ExternalLink, by_users: users(:dick))
     obs = observations(:coprinus_comatus_obs)
     assert_query(obs.external_links.sort_by(&:url),
                  :ExternalLink, observations: obs)
@@ -24,6 +24,6 @@ class Query::ExternalLinksTest < UnitTestCase
     assert_query(site.external_links.sort_by(&:url),
                  :ExternalLink, external_sites: site)
     assert_query(site.external_links.sort_by(&:url),
-                 :ExternalLink, url: "iNaturalist")
+                 :ExternalLink, url_has: "iNaturalist")
   end
 end

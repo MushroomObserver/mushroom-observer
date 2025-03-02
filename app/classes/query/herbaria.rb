@@ -5,15 +5,15 @@ class Query::Herbaria < Query::Base
     Herbarium
   end
 
-  def parameter_declarations
+  def self.parameter_declarations
     super.merge(
       created_at: [:time],
       updated_at: [:time],
-      code: :string,
-      name: :string,
       ids: [Herbarium],
-      description: :string,
-      address: :string,
+      code_has: :string,
+      name_has: :string,
+      description_has: :string,
+      mailing_address_has: :string,
       pattern: :string,
       nonpersonal: :boolean
     )
@@ -24,13 +24,14 @@ class Query::Herbaria < Query::Base
     add_sort_order_to_title
     add_time_condition("herbaria.created_at", params[:created_at])
     add_time_condition("herbaria.updated_at", params[:updated_at])
-    add_search_condition("herbaria.code", params[:code])
-    add_search_condition("herbaria.name", params[:name])
-    add_search_condition("herbaria.description", params[:description])
-    add_search_condition("herbaria.mailing_address", params[:address])
-    add_ids_condition
-    add_pattern_condition
+    add_search_condition("herbaria.code", params[:code_has])
+    add_search_condition("herbaria.name", params[:name_has])
+    add_search_condition("herbaria.description", params[:description_has])
+    add_search_condition("herbaria.mailing_address",
+                         params[:mailing_address_has])
+    add_id_in_set_condition
     add_nonpersonal_condition
+    add_pattern_condition
     super
   end
   # rubocop:enable Metrics/AbcSize

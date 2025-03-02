@@ -20,7 +20,7 @@ class CommentTest < UnitTestCase
 
   def test_user_highlighting_parsing
     do_highlight_test([], "")
-    do_highlight_test([mary], "_user #{mary.id}_")
+    do_highlight_test([mary], mary.textile_name)
     do_highlight_test([mary], "@Mary Newbie@")
     do_highlight_test([mary], "@mary foo bar")
     do_highlight_test([mary, rolf, dick], "@mary,@rolf,@dick")
@@ -157,5 +157,17 @@ class CommentTest < UnitTestCase
     Comment::ALL_TYPE_TAGS.each do |type_tag|
       assert_true(Comment.joins(type_tag))
     end
+  end
+
+  def test_scope_for_target
+    obss = Observation.has_comments
+    assert(obss.size > 1)
+    obs1 = obss.first
+    obs2 = obss.last
+    assert_not_equal(obs1.id, obs2.id)
+    assert_equal(obs1.id, Comment.for_target(obs1.id).first.target_id)
+    assert_equal(obs1.id, Comment.for_target(obs1).first.target_id)
+    assert_equal(obs2.id, Comment.for_target(obs2.id).first.target_id)
+    assert_equal(obs2.id, Comment.for_target(obs2).first.target_id)
   end
 end

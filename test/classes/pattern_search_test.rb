@@ -230,7 +230,7 @@ class PatternSearchTest < UnitTestCase
     x.vals = ids.map(&:to_s)
     assert_equal(ids, x.parse_list_of_locations)
     x.vals = ["*California, USA"]
-    expect = Location.name_contains("California, USA").map(&:id).sort
+    expect = Location.name_has("California, USA").map(&:id).sort
     assert_operator(expect.count, :>, 1)
     assert_equal(expect, x.parse_list_of_locations.sort)
     x.vals = ["USA, California*"]
@@ -412,8 +412,9 @@ class PatternSearchTest < UnitTestCase
     )
     I18n.with_locale(:fr) do
       x = PatternSearch::Observation.new("")
-      assert_equal([:users, :parse_list_of_users], x.lookup_param(:user))
-      assert_equal([:users, :parse_list_of_users], x.lookup_param(:utilisateur))
+      assert_equal([:by_users, :parse_list_of_users], x.lookup_param(:user))
+      assert_equal([:by_users, :parse_list_of_users],
+                   x.lookup_param(:utilisateur))
     end
   end
 end

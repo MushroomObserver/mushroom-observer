@@ -4,8 +4,8 @@ class Query::Filter
   class WithSpecimen < BooleanFilter
     def initialize
       super(
-        sym: :with_specimen,
-        name: :SPECIMEN.t,
+        sym: :has_specimen,
+        name: :SPECIMEN,
         models: [Observation],
         on_vals: %w[yes no],
         prefs_vals: ["yes"],

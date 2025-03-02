@@ -5,22 +5,22 @@ class Query::Projects < Query::Base
     Project
   end
 
-  def parameter_declarations
+  def self.parameter_declarations
     super.merge(
       created_at: [:time],
       updated_at: [:time],
-      users: [User],
       ids: [Project],
-      with_images: { boolean: [true] },
-      with_observations: { boolean: [true] },
-      with_species_lists: { boolean: [true] },
-      with_comments: { boolean: [true] },
-      with_summary: :boolean,
+      by_users: [User],
+      members: [User],
+      has_images: { boolean: [true] },
+      has_observations: { boolean: [true] },
+      has_species_lists: { boolean: [true] },
+      has_comments: { boolean: [true] },
+      has_summary: :boolean,
       title_has: :string,
       summary_has: :string,
       field_slip_prefix_has: :string,
       comments_has: :string,
-      member: User,
       pattern: :string
     )
   end
@@ -31,28 +31,32 @@ class Query::Projects < Query::Base
     initialize_association_parameters
     initialize_boolean_parameters
     initialize_search_parameters
-    add_ids_condition
+    add_id_in_set_condition
     add_pattern_condition
     super
   end
 
   def initialize_association_parameters
     # No need to add join unless we're applying this condition.
-    return unless params[:member]
+    return unless params[:members]
 
-    add_join(:"user_group_users.members")
-    where << "user_group_users.user_id = '#{params[:member]}'"
+    # add_join(:"user_group_users.members")
+    # where << "user_group_users.user_id = '#{params[:member]}'"
+    ids = lookup_users_by_name(params[:members])
+    add_association_condition(
+      "user_group_users.user_id", ids, :"user_group_users.members"
+    )
   end
 
   def initialize_boolean_parameters
-    add_join(:project_images) if params[:with_images]
-    add_join(:project_observations) if params[:with_observations]
-    add_join(:project_species_lists) if params[:with_species_lists]
-    add_join(:comments) if params[:with_comments]
+    add_join(:project_images) if params[:has_images]
+    add_join(:project_observations) if params[:has_observations]
+    add_join(:project_species_lists) if params[:has_species_lists]
+    add_join(:comments) if params[:has_comments]
     add_boolean_condition(
       "LENGTH(COALESCE(projects.summary,'')) > 0",
       "LENGTH(COALESCE(projects.summary,'')) = 0",
-      params[:with_summary]
+      params[:has_summary]
     )
   end
 

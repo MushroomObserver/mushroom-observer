@@ -5,15 +5,17 @@ class Query::ExternalSites < Query::Base
     ExternalSite
   end
 
-  def parameter_declarations
+  def self.parameter_declarations
     super.merge(
-      name: :string
+      ids: [ExternalSite],
+      name_has: :string
     )
   end
 
   def initialize_flavor
     add_sort_order_to_title
-    add_search_condition("external_sites.name", params[:name])
+    add_id_in_set_condition
+    add_search_condition("external_sites.name", params[:name_has])
     super
   end
 

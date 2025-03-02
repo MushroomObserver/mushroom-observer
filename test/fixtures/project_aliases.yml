@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  target: rolf
+  target_type: User
+  name: RS
+  project: eol_project
+
+two:
+  target: albion
+  target_type: Location
+  name: Walk 1
+  project: eol_project

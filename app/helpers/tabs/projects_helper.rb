@@ -119,6 +119,8 @@ module Tabs
       tabs << build_tab("#{project.user_group.users.count} #{:MEMBERS.l}",
                         project_members_path(project.id),
                         "members")
+      tabs << build_tab("#{project.aliases.length} #{:PROJECT_ALIASES.l}",
+                        project_aliases_path(project_id: project.id), "aliases")
       tabs << violations_tab(project) if project.constraints?
 
       content_for(:project_tabs) do
@@ -130,32 +132,34 @@ module Tabs
       tabs = []
       if project.observations.any?
         tabs << build_tab("#{project.observations.length} #{:OBSERVATIONS.l}",
-                          observations_path(project: project.id),
+                          observations_path(project:),
                           "observations")
         tabs << build_tab("#{project.name_count} #{:NAMES.l}",
-                          checklist_path(project_id: project.id),
-                          "checklists")
+                          checklist_path(project_id: project.id), "checklists")
         tabs << build_tab("#{project.location_count} #{:LOCATIONS.l}",
                           project_locations_path(project_id: project.id),
                           "locations")
       end
       if project.field_slip_prefix
         tabs << build_tab("#{project.field_slips.length} #{:FIELD_SLIPS.l}",
-                          field_slips_path(project: project.id),
-                          "field_slips")
+                          field_slips_path(project:), "field_slips")
       end
       tabs
     end
 
     # Helper method to determine active tab
     def active_tab?(tab_name)
-      controller_name == tab_name
+      current_tab = controller_name
+      if current_tab == "checklists" && params.include?("location_id")
+        current_tab = "locations"
+      end
+      current_tab == tab_name
     end
 
     def project_observation_buttons(project, query)
       return unless project
 
-      img_name, img_link, = coerced_image_query_tab(query)
+      img_name, img_link, = related_images_tab(:Observation, query)
       styling = { class: "btn btn-default btn-lg my-3 mr-3" }
       buttons = [link_to(:show_object.t(type: :map),
                          map_observations_path(q: get_query_param(query)),

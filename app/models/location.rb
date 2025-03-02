@@ -46,7 +46,7 @@
 #  updated_after("yyyymmdd")
 #  updated_before("yyyymmdd")
 #  updated_between(start, end)
-#  name_contains(place_name)
+#  name_has(place_name)
 #  in_region(place_name)
 #  in_box(north:, south:, east:, west:)
 #
@@ -107,6 +107,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
   has_many :observations
   has_many :projects
+  has_many :project_aliases, as: :target, dependent: :destroy
   has_many :species_lists
   has_many :herbaria     # should be at most one, but nothing preventing more
   has_many :users        # via profile location
@@ -377,6 +378,10 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Alias for +display_name+ for compatibility with Name and other models.
   def format_name
+    display_name
+  end
+
+  def textile_name
     display_name
   end
 
@@ -719,10 +724,12 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     end
 
     # Move over any interest in the old name.
-    Interest.where(target_type: "Location",
-                   target_id: old_loc.id).find_each do |int|
-      int.target = self
-      int.save
+    [Interest, ProjectAlias].each do |klass|
+      klass.where(target_type: "Location",
+                  target_id: old_loc.id).find_each do |obj|
+        obj.target = self
+        obj.save
+      end
     end
 
     add_note(explain_merge(old_loc))

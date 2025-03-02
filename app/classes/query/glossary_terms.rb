@@ -5,11 +5,11 @@ class Query::GlossaryTerms < Query::Base
     ::GlossaryTerm
   end
 
-  def parameter_declarations
+  def self.parameter_declarations
     super.merge(
       created_at: [:time],
       updated_at: [:time],
-      users: [User],
+      by_users: [User],
       name_has: :string,
       description_has: :string,
       pattern: :string
@@ -19,9 +19,9 @@ class Query::GlossaryTerms < Query::Base
   def initialize_flavor
     add_sort_order_to_title
     add_owner_and_time_stamp_conditions
-    add_pattern_condition
     add_search_condition("glossary_terms.name", params[:name_has])
     add_search_condition("glossary_terms.description", params[:description_has])
+    add_pattern_condition
     super
   end
 

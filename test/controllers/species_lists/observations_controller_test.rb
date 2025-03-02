@@ -5,7 +5,7 @@ require("test_helper")
 module SpeciesLists
   class ObservationsControllerTest < FunctionalTestCase
     def test_add_remove_observations
-      query = Query.lookup(:Observation, users: users(:mary))
+      query = Query.lookup(:Observation, by_users: users(:mary))
       assert(query.num_results > 1)
       params = @controller.query_params(query) ## .merge(species_list: "")
 
@@ -24,7 +24,7 @@ module SpeciesLists
     end
 
     def test_post_add_remove_observations
-      query = Query.lookup(:Observation, users: users(:mary))
+      query = Query.lookup(:Observation, by_users: users(:mary))
       assert(query.num_results > 1)
       params = @controller.query_params(query)
 

@@ -29,8 +29,8 @@ class API2
 
     def query_params
       {
-        where: sql_id_condition,
-        name: parse(:string, :name)
+        ids: parse_array(:external_site, :id, as: :id),
+        name_has: parse(:string, :name)
       }
     end
 

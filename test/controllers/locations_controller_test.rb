@@ -231,8 +231,8 @@ class LocationsControllerTest < FunctionalTestCase
   # end
 
   def test_index_advanced_search
-    query = Query.lookup_and_save(:Location, user_where: "California")
-    matches = Location.name_contains("California")
+    query = Query.lookup_and_save(:Location, search_where: "California")
+    matches = Location.name_has("California")
 
     login
     get(:index,
@@ -778,9 +778,11 @@ class LocationsControllerTest < FunctionalTestCase
     past_descs_to_go = 0
 
     # Cannot use fixture here -- in these classes
-    # fixtures with location `alibion` break API2Test#test_patching_locations
+    # fixtures with location `albion` break API2Test#test_patching_locations
     herbarium = Herbarium.create(name: "Herbarium to move", location: to_go)
     project = Project.create(title: "Project to move", location: to_go)
+    project_alias = ProjectAlias.create(project:, name: "ALB", target: to_go,
+                                        target_type: "Location")
 
     make_admin("rolf")
     put(:update, params: params)
@@ -794,6 +796,7 @@ class LocationsControllerTest < FunctionalTestCase
                  LocationDescription::Version.count)
     assert_equal(to_stay, herbarium.reload.location)
     assert_equal(to_stay, project.reload.location)
+    assert_equal(to_stay, project_alias.reload.target)
     assert_match(old_notes, to_stay.reload.notes,
                  "Location.notes should include pre-merger notes")
   end
@@ -915,11 +918,5 @@ class LocationsControllerTest < FunctionalTestCase
 
   def named_obs_query(name)
     Query.lookup(:Observation, pattern: name, by: :name)
-  end
-
-  def test_coercing_sorted_observation_query_into_location_query
-    @controller.
-      coerce_query_for_undefined_locations(named_obs_query("Pasadena").
-      coerce(:Location))
   end
 end

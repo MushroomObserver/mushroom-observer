@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-#  link_to_coerced_query        # link to query coerced into different model
 #  link_with_query              # link_to with query params
 #  destroy_button               # button to destroy object
 #  post_button                  # button to post to a path
@@ -44,15 +43,6 @@ module LinkHelper
     content = block ? capture(&block) : text
 
     active_link_to(add_query_param(link), **) { content }
-  end
-
-  # Take a query which can be coerced into a different model, and create a link
-  # to the results of that coerced query.  Return +nil+ if not coercable.
-  def link_to_coerced_query(query, model)
-    tab = coerced_query_tab(query, model)
-    return nil unless tab
-
-    link_to(*tab)
   end
 
   # Link should be to a controller action that renders the form in the modal.

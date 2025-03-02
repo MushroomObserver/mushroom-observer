@@ -5,13 +5,13 @@ class Query::Users < Query::Base
     User
   end
 
-  def parameter_declarations
+  def self.parameter_declarations
     super.merge(
       created_at: [:time],
       updated_at: [:time],
       ids: [User],
       pattern: :string,
-      with_contribution: :boolean
+      has_contribution: :boolean
     )
   end
 
@@ -19,14 +19,14 @@ class Query::Users < Query::Base
     add_sort_order_to_title
     add_time_condition("users.created_at", params[:created_at])
     add_time_condition("users.updated_at", params[:updated_at])
-    add_ids_condition
+    add_id_in_set_condition
     add_pattern_condition
     add_contribution_condition
     super
   end
 
   def add_contribution_condition
-    return unless params[:with_contribution].to_s == "true"
+    return unless params[:has_contribution].to_s == "true"
 
     @title_tag = :query_title_with_contribution
     where << "users.contribution > 0"

@@ -21,7 +21,7 @@ class NamesController < ApplicationController
 
   # ApplicationController uses this to dispatch #index to a private method
   def index_active_params
-    [:advanced_search, :pattern, :with_observations, :with_descriptions,
+    [:advanced_search, :pattern, :has_observations, :has_descriptions,
      :need_description, :by_user, :by_editor, :by, :q, :id].freeze
   end
 
@@ -62,31 +62,33 @@ class NamesController < ApplicationController
       [nil, {}]
     else
       @suggest_alternate_spellings = search.query.params[:pattern]
-      [search.query, {}]
+      # Call create_query to apply user content filters
+      query = create_query(:Name, search.query.params)
+      [query, {}]
     end
   end
 
+  # Disabling the cop because subaction methods are going away soon
+  # rubocop:disable Naming/PredicateName
   # Display list of names that have observations.
-  def with_observations
-    query = create_query(:Name, with_observations: 1)
+  def has_observations
+    query = create_query(:Name, has_observations: 1)
     [query, {}]
   end
 
   # Display list of names with descriptions that have authors.
-  def with_descriptions
-    @with_descriptions = true # signals to add desc info to name list
-    query = create_query(:Name, with_descriptions: 1)
+  def has_descriptions
+    @has_descriptions = true # signals to add desc info to name list
+    query = create_query(:Name, has_descriptions: 1)
     [query, {}]
   end
+  # rubocop:enable Naming/PredicateName
 
   # Display list of the most popular 100 names that don't have descriptions.
   # NOTE: all this extra info and help will be lost if user re-sorts.
   def need_description
     @help = :needed_descriptions_help
-    query = create_query(:Name,
-                         need_description: 1,
-                         group: "observations.name_id",
-                         order: "count(*) DESC")
+    query = create_query(:Name, need_description: 1)
     [query, { num_per_page: 100 }]
   end
 
@@ -98,7 +100,7 @@ class NamesController < ApplicationController
     )
     return unless user
 
-    query = create_query(:Name, by_user: user)
+    query = create_query(:Name, by_users: user)
     [query, {}]
   end
 

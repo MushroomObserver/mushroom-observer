@@ -44,12 +44,12 @@ class Query::ObservationsTest < UnitTestCase
 
   def test_observation_by_user
     expects = Observation.reorder(id: :asc).where(user: rolf.id).to_a
-    assert_query(expects, :Observation, by_user: rolf, by: :id)
+    assert_query(expects, :Observation, by_users: rolf, by: :id)
     expects = Observation.reorder(id: :asc).where(user: mary.id).to_a
-    assert_query(expects, :Observation, by_user: mary, by: :id)
+    assert_query(expects, :Observation, by_users: mary, by: :id)
     expects = Observation.reorder(id: :asc).where(user: dick.id).to_a
-    assert_query(expects, :Observation, by_user: dick, by: :id)
-    assert_query([], :Observation, by_user: junk, by: :id)
+    assert_query(expects, :Observation, by_users: dick, by: :id)
+    assert_query([], :Observation, by_users: junk, by: :id)
   end
 
   def test_observation_confidence
@@ -59,11 +59,11 @@ class Query::ObservationsTest < UnitTestCase
                  :Observation, confidence: [100])
   end
 
-  def test_observation_with_public_lat_lng
-    assert_query(Observation.index_order.with_public_geolocation(true),
-                 :Observation, with_public_lat_lng: true)
-    assert_query(Observation.index_order.with_public_geolocation(false),
-                 :Observation, with_public_lat_lng: false)
+  def test_observation_has_public_lat_lng
+    assert_query(Observation.index_order.has_public_lat_lng(true),
+                 :Observation, has_public_lat_lng: true)
+    assert_query(Observation.index_order.has_public_lat_lng(false),
+                 :Observation, has_public_lat_lng: false)
   end
 
   def test_observation_is_collection_location
@@ -73,51 +73,65 @@ class Query::ObservationsTest < UnitTestCase
                  :Observation, is_collection_location: false)
   end
 
-  def test_observation_with_notes
-    assert_query(Observation.index_order.with_notes(true),
-                 :Observation, with_notes: true)
-    assert_query(Observation.index_order.with_notes(false),
-                 :Observation, with_notes: false)
+  def test_observation_has_notes
+    assert_query(Observation.index_order.has_notes(true),
+                 :Observation, has_notes: true)
+    assert_query(Observation.index_order.has_notes(false),
+                 :Observation, has_notes: false)
   end
 
   def test_observation_notes_has
-    assert_query(Observation.index_order.notes_contain("strange place"),
+    assert_query(Observation.index_order.notes_has("strange place"),
                  :Observation, notes_has: "strange place")
-    assert_query(Observation.index_order.notes_contain("From"),
+    assert_query(Observation.index_order.notes_has("From"),
                  :Observation, notes_has: "From")
-    assert_query(Observation.index_order.notes_contain("Growing"),
+    assert_query(Observation.index_order.notes_has("Growing"),
                  :Observation, notes_has: "Growing")
   end
 
-  def test_observation_with_notes_fields
+  def test_observation_has_notes_fields
     # the single version
-    assert_query(Observation.index_order.with_notes_field("substrate"),
-                 :Observation, with_notes_fields: "substrate")
+    assert_query(Observation.index_order.has_notes_field("substrate"),
+                 :Observation, has_notes_fields: "substrate")
     assert_query(Observation.index_order.
-                 with_notes_fields(%w[substrate cap]),
-                 :Observation, with_notes_fields: %w[substrate cap])
+                 has_notes_fields(%w[substrate cap]),
+                 :Observation, has_notes_fields: %w[substrate cap])
   end
 
-  def test_observation_with_comments
-    assert_query(Observation.index_order.with_comments(true),
-                 :Observation, with_comments: true)
+  def test_observation_has_comments
+    assert_query(Observation.index_order.has_comments(true),
+                 :Observation, has_comments: true)
     assert_query(Observation.index_order,
-                 :Observation, with_comments: false)
+                 :Observation, has_comments: false)
   end
 
   def test_observation_comments_has
-    assert_query(Observation.index_order.comments_contain("comment"),
+    assert_query(Observation.index_order.comments_has("comment"),
                  :Observation, comments_has: "comment")
     assert_query(Observation.index_order.
-                 comments_contain("Agaricus campestris"),
+                 comments_has("Agaricus campestris"),
                  :Observation, comments_has: "Agaricus campestris")
   end
 
-  def test_observation_with_sequences
-    assert_query(Observation.index_order.with_sequences(true),
-                 :Observation, with_sequences: true)
+  def test_observation_has_sequences
+    assert_query(Observation.index_order.has_sequences(true),
+                 :Observation, has_sequences: true)
     assert_query(Observation.index_order,
-                 :Observation, with_sequences: false)
+                 :Observation, has_sequences: false)
+  end
+
+  def test_observation_has_images
+    assert_query(Observation.index_order.has_images(true),
+                 :Observation, has_images: true)
+    assert_query(Observation.index_order.has_images(false),
+                 :Observation, has_images: false)
+  end
+
+  def test_observation_has_specimen
+    assert_query(Observation.index_order.has_specimen(true),
+                 :Observation, has_specimen: true)
+    assert_query(Observation.index_order.has_specimen(false),
+                 :Observation, has_specimen: false)
   end
 
   def test_observation_field_slips
@@ -163,21 +177,21 @@ class Query::ObservationsTest < UnitTestCase
   def test_observation_at_locations
     expects = Observation.index_order.
               at_locations(locations(:burbank)).distinct
-    assert_query(expects, :Observation, location: locations(:burbank))
+    assert_query(expects, :Observation, locations: locations(:burbank))
   end
 
   def test_observation_for_projects
     assert_query([],
-                 :Observation, project: projects(:empty_project))
+                 :Observation, projects: projects(:empty_project))
     project = projects(:bolete_project)
-    assert_query(project.observations, :Observation, project: project)
+    assert_query(project.observations, :Observation, projects: project)
     assert_query(Observation.index_order.for_projects(project.title),
-                 :Observation, project: project)
+                 :Observation, projects: project)
   end
 
   def test_observation_for_project_projects_equivalence
     qu1 = Query.lookup_and_save(:Observation,
-                                project: projects(:bolete_project))
+                                projects: projects(:bolete_project))
     qu2 = Query.lookup_and_save(:Observation,
                                 projects: projects(:bolete_project).id.to_s)
     assert_equal(qu1.results, qu2.results)
@@ -188,9 +202,9 @@ class Query::ObservationsTest < UnitTestCase
     # These two are identical, so should be disambiguated by reverse_id.
     assert_query([observations(:detailed_unknown_obs).id,
                   observations(:minimal_unknown_obs).id],
-                 :Observation, species_list: spl.id)
+                 :Observation, species_lists: spl.id)
     assert_query(Observation.index_order.on_species_lists(spl),
-                 :Observation, species_list: spl.id)
+                 :Observation, species_lists: spl.id)
     # check the other param!
     assert_query(Observation.index_order.on_species_lists(spl),
                  :Observation, species_lists: spl.id)
@@ -383,28 +397,28 @@ class Query::ObservationsTest < UnitTestCase
 
   def test_observation_advanced_search_name
     assert_query([observations(:strobilurus_diminutivus_obs).id],
-                 :Observation, name: "diminutivus")
+                 :Observation, search_name: "diminutivus")
   end
 
   def test_observation_advanced_search_where
     assert_query([observations(:coprinus_comatus_obs).id],
-                 :Observation, user_where: "glendale") # where
+                 :Observation, search_where: "glendale") # where
     expects = Observation.reorder(id: :asc).
               where(location: locations(:burbank)).distinct
-    assert_query(expects, :Observation,
-                 user_where: "burbank", by: :id) # location
+    assert_query(expects,
+                 :Observation, search_where: "burbank", by: :id) # location
   end
 
   def test_observation_advanced_search_user
     expects = Observation.reorder(id: :asc).where(user: rolf.id).distinct
-    assert_query(expects, :Observation, user: "rolf", by: :id)
+    assert_query(expects, :Observation, search_user: "rolf", by: :id)
   end
 
   def test_observation_advanced_search_content
     assert_query(Observation.advanced_search("second fruiting"),
-                 :Observation, content: "second fruiting") # notes
+                 :Observation, search_content: "second fruiting") # notes
     assert_query(Observation.advanced_search("agaricus"),
-                 :Observation, content: "agaricus") # comment
+                 :Observation, search_content: "agaricus") # comment
   end
 
   def test_observation_date

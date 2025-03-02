@@ -58,7 +58,10 @@ class ObservationsController
     end
 
     def advanced_search_params
-      Query::Params::AdvancedSearch.advanced_search_params
+      params = Query::Observations.advanced_search_params
+      return params if params.present?
+
+      raise("Query::Observations.advanced_search_params is undefined.")
     end
 
     # Display matrix of Observations whose notes, etc. match a string pattern.
@@ -77,13 +80,15 @@ class ObservationsController
       return render_pattern_search_error(search) if search.errors.any?
 
       @suggest_alternate_spellings = search.query.params[:pattern]
+      # Call create_query to apply user content filters
+      query = create_query(:Observation, search.query.params)
       if params[:needs_naming]
         redirect_to(
-          identify_observations_path(q: get_query_param(search.query))
+          identify_observations_path(q: get_query_param(query))
         )
         [nil, {}]
       else
-        [search.query, {}]
+        [query, {}]
       end
     end
 
@@ -98,30 +103,26 @@ class ObservationsController
     # Displays matrix of Observations with the given name proposed but not
     # actually that name.
     def look_alikes
-      query = create_query(:Observation,
-                           names: [params[:name]],
-                           include_synonyms: true,
-                           include_all_name_proposals: true,
-                           exclude_consensus: true,
-                           by: :confidence)
+      query = create_query(:Observation, names: [params[:name]],
+                                         include_synonyms: true,
+                                         include_all_name_proposals: true,
+                                         exclude_consensus: true,
+                                         by: :confidence)
       [query, {}]
     end
 
     # Displays matrix of Observations of subtaxa of the parent of given name.
     def related_taxa
-      query = create_query(:Observation,
-                           names: parents(params[:name]),
-                           include_subtaxa: true,
-                           by: :confidence)
+      query = create_query(:Observation, names: parents(params[:name]),
+                                         include_subtaxa: true, by: :confidence)
       [query, {}]
     end
 
     # Displays matrix of Observations with the given text_name (or search_name).
     def name
-      query = create_query(:Observation,
-                           names: [params[:name]],
-                           include_synonyms: true,
-                           by: :confidence)
+      query = create_query(:Observation, names: [params[:name]],
+                                         include_synonyms: true,
+                                         by: :confidence)
       [query, {}]
     end
 
@@ -136,7 +137,7 @@ class ObservationsController
     def by_user
       return unless (user = find_or_goto_index(User, params[:by_user]))
 
-      query = create_query(:Observation, by_user: user)
+      query = create_query(:Observation, by_users: user)
       [query, {}]
     end
 
@@ -146,13 +147,13 @@ class ObservationsController
         location = find_or_goto_index(Location, params[:location].to_s)
       )
 
-      query = create_query(:Observation, location: location)
+      query = create_query(:Observation, locations: location)
       [query, {}]
     end
 
     # Display matrix of Observations whose "where" matches a string.
     # NOTE: To consolidate flavors in Query, we're passing the possible
-    # `user_where` param from the advanced search form straight through to
+    # `search_where` param from the advanced search form straight through to
     # Query's obs advanced search class, which searches two tables (obs and
     # loc) for the fuzzy match.
     # Here we are passing the front end's `where` to the similar Query
@@ -173,7 +174,7 @@ class ObservationsController
         project = find_or_goto_index(Project, params[:project].to_s)
       )
 
-      query = create_query(:Observation, project:)
+      query = create_query(:Observation, projects: project)
       @project = project
       [query, { always_index: true }]
     end
@@ -184,7 +185,7 @@ class ObservationsController
         spl = find_or_goto_index(SpeciesList, params[:species_list].to_s)
       )
 
-      query = create_query(:Observation, species_list: spl)
+      query = create_query(:Observation, species_lists: spl)
       [query, { always_index: true }]
     end
 
