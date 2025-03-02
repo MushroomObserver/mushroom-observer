@@ -19,5 +19,5 @@
   <%= @project_alias.target.try(:format_name) %>
 </p>
 
-<%= link_to('Edit', edit_project_alias_path(project_id:, id: @project_alias.id)) %> |
-<%= link_to('Back', project_aliases_path) %>
+<%= link_to(:EDIT.t, edit_project_alias_path(project_id:, id: @project_alias.id)) %> |
+<%= link_to(:BACK.t, project_aliases_path) %>
