@@ -118,6 +118,23 @@ module Projects
                            ))
     end
 
+    def test_create_with_invalid_user_login
+      term = "No Such User"
+      assert_difference("ProjectAlias.count", 0) do
+        post(:create, params: {
+               project_id: @project.id,
+               project_alias: {
+                 name: "RS2",
+                 project_id: @project.id,
+                 target_type: "User",
+                 term:
+               }
+             })
+      end
+
+      assert_flash_text(:project_alias_no_match.t(target_type: "User", term:))
+    end
+
     def test_create_renders_new_template_with_invalid_params
       project_id = @project.id
       post(:create, params: {

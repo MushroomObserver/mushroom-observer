@@ -23,11 +23,12 @@ class ProjectAlias < AbstractModel
     return nil if target_id
 
     if target_type == "User"
-      return nil if (self.target = User.find_by(login: term))
-
-      "Unable to find user matching '#{term}'"
-    else
-      "Unable to find location matching '#{term}'"
+      user = User.find_by(login: term)
+      if user
+        self.target = user
+        return nil
+      end
     end
+    :project_alias_no_match.t(target_type:, term:)
   end
 end
