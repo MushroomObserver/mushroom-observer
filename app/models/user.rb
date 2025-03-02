@@ -113,7 +113,6 @@
 #  email_comments_response::      ...someone responds to my Comment.
 #  email_observations_consensus:: ...consensus changes on my Observation.
 #  email_observations_naming::    ...someone proposes a Name for my Observation.
-#  email_observations_all::       ...anyone changes an Observation.
 #  email_names_author::           ...someone changes a Name I've authored.
 #  email_names_editor::           ...someone changes a Name I've edited.
 #  email_names_reviewer::         ...someone changes a Name I've reviewed.

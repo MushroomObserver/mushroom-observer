@@ -25,7 +25,6 @@ module Account
       email_names_author: "1",
       email_names_editor: "",
       email_names_reviewer: "1",
-      email_observations_all: "",
       email_observations_consensus: "1",
       email_observations_naming: "1",
       hide_authors: "above_species",
@@ -105,7 +104,6 @@ module Account
       assert_input_value(:user_email_names_author, "1")
       assert_input_value(:user_email_names_editor, "")
       assert_input_value(:user_email_names_reviewer, "1")
-      assert_input_value(:user_email_observations_all, "")
       assert_input_value(:user_email_observations_consensus, "1")
       assert_input_value(:user_email_observations_naming, "1")
       assert_input_value(:user_hide_authors, "above_species")
@@ -156,7 +154,6 @@ module Account
       assert_equal(true, user.email_names_author)
       assert_equal(false, user.email_names_editor)
       assert_equal(true, user.email_names_reviewer)
-      assert_equal(false, user.email_observations_all)
       assert_equal(true, user.email_observations_consensus)
       assert_equal(true, user.email_observations_naming)
       assert_equal("above_species", user.hide_authors)
@@ -271,7 +268,6 @@ module Account
         :comments_response,
         :observations_consensus,
         :observations_naming,
-        :observations_all,
         :names_author,
         :names_editor,
         :names_reviewer,

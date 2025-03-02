@@ -2072,7 +2072,6 @@
   prefs_email_locations_author: someone changes a location I'm author on.
   prefs_email_locations_editor: someone changes a location I've edited.
   prefs_email_observations: "[:Observation] Email"
-  prefs_email_observations_all: anything happens to any observation.
   prefs_email_observations_consensus: consensus name changes for one of my observations.
   prefs_email_observations_naming: someone proposes a name for one of my observations.
   prefs_email_names: "[:Name] Email"
@@ -3156,7 +3155,6 @@
   no_email_comments_response_note: You will no longer receive email notifications when other [:users] of the [:app_title] website post responses to your [:comments].
   no_email_observations_consensus_note: You will no longer receive email notifications when the names of your [:observations] change.
   no_email_observations_naming_note: You will no longer receive email notifications when other [:users] of the [:app_title] website propose names for your [:observations].
-  no_email_observations_all_note: You will no longer receive email notifications whenenver [:observations] change.
   no_email_names_admin_note: You will no longer receive email notifications when other [:users] make changes to name descriptions you administrate.
   no_email_names_author_note: You will no longer receive email notifications when other [:users] make changes to descriptions you have written.
   no_email_names_editor_note: You will no longer receive email notifications when other [:users] make changes to descriptions you have edited.
@@ -3173,7 +3171,6 @@
   no_email_comments_response_success: "[:comment] response notifications disabled for [name]."
   no_email_observations_consensus_success: Consensus change notifications disabled for [name].
   no_email_observations_naming_success: Name proposal notifications disabled for [name].
-  no_email_observations_all_success: "[:observation] notifications disabled for [name]."
   no_email_names_admin_success: Admin name change notifications disabled for [name].
   no_email_names_author_success: Author name change notifications disabled for [name].
   no_email_names_editor_success: Editor name change notifications disabled for [name].

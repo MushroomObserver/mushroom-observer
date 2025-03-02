@@ -431,7 +431,6 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
 
       uncheck("user_email_observations_consensus")
       uncheck("user_email_observations_naming")
-      check("user_email_observations_all")
 
       uncheck("user_email_names_admin")
       uncheck("user_email_names_author")
@@ -455,7 +454,6 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
     mary.reload
     assert_equal(mary.email_html, false)
     assert_equal(mary.email_comments_owner, false)
-    assert_equal(mary.email_observations_all, true)
     assert_equal(mary.email_locations_all, true)
     assert_equal(mary.email_names_all, true)
     assert_equal(mary.email_general_question, false)

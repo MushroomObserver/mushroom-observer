@@ -143,7 +143,6 @@ module Account
         [:email_names_author, :boolean],
         [:email_names_editor, :boolean],
         [:email_names_reviewer, :boolean],
-        [:email_observations_all, :boolean],
         [:email_observations_consensus, :boolean],
         [:email_observations_naming, :boolean],
         [:email, :string],

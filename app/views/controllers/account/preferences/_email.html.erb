@@ -25,9 +25,6 @@
                          prefs: true) %>
 <%= check_box_with_label(form: f, field: :email_observations_naming,
                          prefs: true) %>
-<%= check_box_with_label(form: f, field: :email_observations_all,
-                         prefs: true) %>
-
 <div class="mt-4">
   <%= :prefs_email_names.t %>:
   <%= help_note(:span, ["(", :prefs_email_please_notify.t, ")"].safe_join) %>
