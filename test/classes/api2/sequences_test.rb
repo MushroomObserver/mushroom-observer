@@ -284,7 +284,7 @@ class API2::SequencesTest < UnitTestCase
   def test_getting_sequences_has_obs_notes
     ensure_all_obs_have_at_least_one_sequence
     with = Observation.has_notes
-    without = Observation.has_no_notes
+    without = Observation.has_notes(false)
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params_get(has_obs_notes: "yes"))

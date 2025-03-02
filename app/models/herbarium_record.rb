@@ -67,8 +67,6 @@ class HerbariumRecord < AbstractModel
   }
   scope :has_notes,
         ->(bool = true) { notes_condition(HerbariumRecord[:notes], bool:) }
-  scope :has_no_notes,
-        -> { where(HerbariumRecord[:notes].coalesce("").length.eq(0)) }
   scope :notes_has,
         ->(phrase) { search_columns(HerbariumRecord[:notes], phrase) }
 

@@ -188,7 +188,7 @@ class API2::NamesTest < UnitTestCase
 
   def test_getting_names_has_notes
     with    = Name.with_correct_spelling.has_notes
-    without = Name.with_correct_spelling.has_no_notes
+    without = Name.with_correct_spelling.has_notes(false)
     assert_not_empty(with)
     assert_not_empty(without)
     assert_api_pass(params_get(has_notes: "yes"))

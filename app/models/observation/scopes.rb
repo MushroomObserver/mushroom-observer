@@ -58,11 +58,9 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       if bool.to_s.to_boolean == true
         where.not(notes: no_notes)
       else
-        has_no_notes
+        where(notes: no_notes)
       end
     }
-    scope :has_no_notes,
-          -> { where(notes: no_notes) }
     scope :notes_has,
           ->(phrase) { search_columns(Observation[:notes], phrase) }
 

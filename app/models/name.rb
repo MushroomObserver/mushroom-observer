@@ -193,7 +193,6 @@
 #  has_no_citation
 #  citation_has(citation)
 #  has_notes
-#  has_no_notes
 #  notes_has(notes)
 #  has_comments
 #  has_no_comments

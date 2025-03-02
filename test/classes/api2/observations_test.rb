@@ -212,7 +212,7 @@ class API2::ObservationsTest < UnitTestCase
     # Nimmo note: Observation.no_notes_persisted is just no_notes.to_yaml
     # Observation.no_notes, not the above, works for comparison in Arel here.
     with = Observation.has_notes
-    without = Observation.has_no_notes
+    without = Observation.has_notes(false)
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params_get(has_notes: "yes"))

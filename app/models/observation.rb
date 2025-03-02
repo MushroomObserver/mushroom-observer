@@ -107,7 +107,6 @@
 #  has_images
 #  has_no_images
 #  has_notes
-#  has_no_notes
 #  has_notes_field(field)
 #  notes_has(note)
 #  has_specimen

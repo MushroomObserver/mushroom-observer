@@ -46,15 +46,8 @@ module Image::Scopes
       end
     }
 
-    scope :has_notes, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
-        where(Image[:notes].coalesce("").length.gt(0))
-      else
-        has_no_notes
-      end
-    }
-    scope :has_no_notes,
-          -> { where(Image[:notes].coalesce("").length.eq(0)) }
+    scope :has_notes,
+          ->(bool = true) { notes_condition(Image[:notes], bool:) }
     scope :notes_has,
           ->(phrase) { search_columns(Image[:notes], phrase) }
     scope :copyright_holder_has,

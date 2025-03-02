@@ -234,7 +234,7 @@ class Query::NamesTest < UnitTestCase
   def test_name_has_notes
     expects = Name.with_correct_spelling.has_notes.index_order
     assert_query(expects, :Name, has_notes: true)
-    expects = Name.with_correct_spelling.has_no_notes.index_order
+    expects = Name.with_correct_spelling.has_notes(false).index_order
     assert_query(expects, :Name, has_notes: false)
   end
 
