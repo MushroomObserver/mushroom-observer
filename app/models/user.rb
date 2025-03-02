@@ -111,7 +111,6 @@
 #  Send notifications if...
 #  email_comments_owner::         ...someone comments on object I own.
 #  email_comments_response::      ...someone responds to my Comment.
-#  email_comments_all::           ...anyone comments on anything.
 #  email_observations_consensus:: ...consensus changes on my Observation.
 #  email_observations_naming::    ...someone proposes a Name for my Observation.
 #  email_observations_all::       ...anyone changes an Observation.

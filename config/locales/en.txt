@@ -2064,7 +2064,6 @@
   prefs_email_general_questions: someone wants to send me a question about my observations, etc.
   prefs_email_general_question: "[:prefs_email_general_questions]"
   prefs_email_comments: "[:Comment] Email"
-  prefs_email_comments_all: anyone comments on anything.
   prefs_email_comments_owner: someone comments on my observations, names, etc.
   prefs_email_comments_response: someone posts responses to my comments.
   prefs_email_locations: "[:Location] Email"
@@ -3155,7 +3154,6 @@
   no_email_some_maybe_queued: "Note: For the next few minutes you may continue to receive emails that have already been queued."
   no_email_comments_owner_note: You will no longer receive email notifications when other [:users] of the [:app_title] website post [:comments] about your [:observations], names, etc.
   no_email_comments_response_note: You will no longer receive email notifications when other [:users] of the [:app_title] website post responses to your [:comments].
-  no_email_comments_all_note: You will no longer receive email notifications of all [:comments].
   no_email_observations_consensus_note: You will no longer receive email notifications when the names of your [:observations] change.
   no_email_observations_naming_note: You will no longer receive email notifications when other [:users] of the [:app_title] website propose names for your [:observations].
   no_email_observations_all_note: You will no longer receive email notifications whenenver [:observations] change.
@@ -3173,7 +3171,6 @@
   no_email_general_question_note: Other [:users] of the [:app_title] website can no longer send you questions about your [:observations].
   no_email_comments_owner_success: "[:comment] notifications disabled for [name]."
   no_email_comments_response_success: "[:comment] response notifications disabled for [name]."
-  no_email_comments_all_success: "[:comment] notifications disabled for [name]."
   no_email_observations_consensus_success: Consensus change notifications disabled for [name].
   no_email_observations_naming_success: Name proposal notifications disabled for [name].
   no_email_observations_all_success: "[:observation] notifications disabled for [name]."

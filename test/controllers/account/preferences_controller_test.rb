@@ -10,7 +10,6 @@ module Account
       password: "new_password",
       password_confirmation: "new_password",
       email: "new@email.com",
-      email_comments_all: "",
       email_comments_owner: "1",
       email_comments_response: "1",
       email_general_commercial: "1",
@@ -91,7 +90,6 @@ module Account
       assert_input_value(:user_password, "")
       assert_input_value(:user_password_confirmation, "")
       assert_input_value(:user_email, "new@email.com")
-      assert_input_value(:user_email_comments_all, "")
       assert_input_value(:user_email_comments_owner, "1")
       assert_input_value(:user_email_comments_response, "1")
       assert_input_value(:user_email_general_commercial, "1")
@@ -143,7 +141,6 @@ module Account
       assert_flash_text(:runtime_prefs_success.t)
       user = rolf.reload
       assert_equal("new@email.com", user.email)
-      assert_equal(false, user.email_comments_all)
       assert_equal(true, user.email_comments_owner)
       assert_equal(true, user.email_comments_response)
       assert_equal(true, user.email_general_commercial)

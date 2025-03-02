@@ -128,7 +128,6 @@ module Account
     # Used by update_prefs_from_form
     def prefs_types # rubocop:disable Metrics/MethodLength
       [
-        [:email_comments_all, :boolean],
         [:email_comments_owner, :boolean],
         [:email_comments_response, :boolean],
         [:email_general_commercial, :boolean],
