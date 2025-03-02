@@ -130,12 +130,12 @@ module AbstractModel::Scopes
     # `Sequence.arel_table[:when]` if it's a joined query. If not, you can omit
     # the table_col param. On MO so far, all date columns are named :when.
     #
-    scope :date, lambda { |early, late = early, table_col = arel_table[:when]|
+    scope :date, lambda { |early, late = early, col = :when|
       early, late = early if early.is_a?(Array) && early.size == 2
       if late == early
-        date_after(early, table_col)
+        date_after(early, col)
       else
-        date_between(early, late, table_col)
+        date_between(early, late, col)
       end
     }
     scope :on_date,
@@ -147,31 +147,31 @@ module AbstractModel::Scopes
     scope :date_between, lambda { |early, late, col = :when|
       # do not correct early > late, which means something different here
       if wrapped_date?(early, late)
-        date_in_period_wrapping_new_year(early, late, table_col)
+        date_in_period_wrapping_new_year(early, late, col)
       else
-        date_after(early, table_col).date_before(late, table_col)
+        date_after(early, col).date_before(late, col)
       end
     }
     # Scope for objects whose date is in a certain period of the year that
     # overlaps the new year, defined by a range of months or mm-dd
-    scope :date_in_period_wrapping_new_year, lambda { |early, late, table_col|
+    scope :date_in_period_wrapping_new_year, lambda { |early, late, col|
       m1, d1 = early.to_s.split("-")
       m2, d2 = late.to_s.split("-")
       where(
-        table_col.month.gt(m1).
-        or(table_col.month.lt(m2)).
-        or(table_col.month.eq(m1).and(table_col.day.gteq(d1))).
-        or(table_col.month.eq(m2).and(table_col.day.lteq(d2)))
+        arel_table[col].month.gt(m1).
+        or(arel_table[col].month.lt(m2)).
+        or(arel_table[col].month.eq(m1).and(arel_table[col].day.gteq(d1))).
+        or(arel_table[col].month.eq(m2).and(arel_table[col].day.lteq(d2)))
       )
     }
     # NOTE: all three conditions validate numeric format
-    scope :date_compare, lambda { |dir, val, table_col|
+    scope :date_compare, lambda { |dir, val, col|
       if starts_with_year?(val)
-        date_compare_year(dir, val, table_col)
+        date_compare_year(dir, val, col)
       elsif month_and_day?(val)
-        date_compare_month_and_day(dir, val, table_col)
+        date_compare_month_and_day(dir, val, col)
       elsif month_only?(val)
-        where(table_col.month.send(:"#{dir}eq", val))
+        where(arel_table[col].month.send(:"#{dir}eq", val))
       end
     }
     # Compare full date, or only the year.
@@ -181,13 +181,13 @@ module AbstractModel::Scopes
       where(arel_table[col].send(:"#{dir}eq", date))
     }
     # Compare only the month and day, any year (i.e. "season")
-    scope :date_compare_month_and_day, lambda { |dir, val, table_col|
+    scope :date_compare_month_and_day, lambda { |dir, val, col|
       m, d = val.split("-")
       where(
-        table_col.month.send(dir, m).
+        arel_table[col].month.send(dir, m).
         or(
-          table_col.month.eq(m).
-          and(table_col.day.send(:"#{dir}eq", d))
+          arel_table[col].month.eq(m).
+          and(arel_table[col].day.send(:"#{dir}eq", d))
         )
       )
     }
