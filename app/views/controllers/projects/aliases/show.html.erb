@@ -5,19 +5,19 @@
 %>
 
 <p>
-  <strong>Name:</strong>
+  <span class="font-weight-bold">Name:</span>
   <%= @project_alias.name %>
 </p>
 
 <p>
-  <strong>Target Type:</strong>
+  <span class="font-weight-bold">Target Type:</span>
   <%= @project_alias.target_type %>
 </p>
 
 <p>
-  <strong>Target:</strong>
+  <span class="font-weight-bold">Target:</span>
   <%= @project_alias.target.try(:format_name) %>
 </p>
 
-<%= link_to 'Edit', edit_project_alias_path(project_id:, id: @project_alias.id) %> |
-<%= link_to 'Back', project_aliases_path %>
+<%= link_to('Edit', edit_project_alias_path(project_id:, id: @project_alias.id)) %> |
+<%= link_to('Back', project_aliases_path) %>
