@@ -13,8 +13,22 @@ class ProjectAlias < AbstractModel
 
   validates :name, presence: true
   validates :name, uniqueness: { scope: :project_id }
+  validates :target, presence: true
 
   def target_type=(type)
     self[:target_type] = type.capitalize
+  end
+
+  def verify_target(term)
+    return nil if target_id
+
+    if target_type == "User"
+      user = User.find_by(login: term)
+      if user
+        self.target = user
+        return nil
+      end
+    end
+    :project_alias_no_match.t(target_type:, term:)
   end
 end
