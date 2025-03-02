@@ -17,11 +17,9 @@ class Query::NameDescriptions < Query::Base
       by_editor: User,
       names: [Name],
       public: :boolean,
-      join_desc: { string: [:default, :any] },
-      desc_type: [{ string: Description::ALL_SOURCE_TYPES }],
-      desc_project: [Project],
-      desc_creator: [User],
-      desc_content: :string,
+      type: [{ string: Description::ALL_SOURCE_TYPES }],
+      projects: [Project],
+      content_has: :string,
       ok_for_export: :boolean,
       name_query: { subquery: :Name }
     )
