@@ -424,9 +424,12 @@ class Name < AbstractModel
   validate  :text_name_length
   validate  :author_length
   validates :author, allow_blank: true,
+                     # Must contain only: letters, spaces, parens, hyphens,
+                     # periods, commas, ampersands, square brackets
                      format: { with: /\A[\p{L} ()-.,&\[\]]*\z/,
                                message: :validate_name_author_characters.t }
   validates :author, allow_blank: true,
+                     # Must end only in letter, period plus any spaces
                      format: { with: /[\p{Alpha}\.]( *)\Z/,
                                message: :validate_name_author_ending.t }
   validates :search_name, presence: true
