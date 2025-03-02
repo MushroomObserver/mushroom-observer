@@ -505,12 +505,4 @@ class Name < AbstractModel
     Hash[*Observation.group(:name_id).where(name: names).
          pluck(:name_id, Arel.star.count).to_a.flatten]
   end
-
-  # For NameController#needed_descriptions
-  # Returns a list of the most popular 100 names that don't have descriptions.
-  def self.descriptions_needed
-    names = description_needed.limit(100).map(&:id)
-
-    ::Query.lookup(:Name, ids: names, title: :needed_descriptions_title.l)
-  end
 end
