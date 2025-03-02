@@ -51,26 +51,23 @@ class Query::ScopeClasses::Comments < Query::BaseAR
     target = target_instance
     @title_tag = :query_title_for_target
     @title_args[:object] = target.unique_format_name
-    where << "comments.target_id = '#{target.id}'"
-    where << "comments.target_type = '#{target.class.name}'"
+    @scopes = @scopes.for_target(target.id)
   end
 
   def target_instance
-    unless (type = Comment.safe_model_from_name(params[:type]))
-      raise("The model #{params[:type].inspect} does not support comments!")
+    type_param = params.dig(:target, :type)
+    unless (type = Comment.safe_model_from_name(type_param))
+      raise("The model #{type_param.inspect} does not support comments!")
     end
 
-    find_cached_parameter_instance(type, :target)
+    type.safe_find(params.dig(:target, :id))
   end
 
   def search_fields
-    "CONCAT(" \
-      "comments.summary," \
-      "COALESCE(comments.comment,'')" \
-      ")"
+    (Comment[:summary] + Comment[:comment].coalesce(""))
   end
 
   def self.default_order
-    "created_at"
+    :created_at
   end
 end
