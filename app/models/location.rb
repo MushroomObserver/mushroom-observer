@@ -828,11 +828,6 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
       end
     end
 
-    # Tell masochists who want to know about all location changes.
-    User.where(email_locations_all: true).find_each do |user|
-      recipients.push(user)
-    end
-
     # Send to people who have registered interest.
     # Also remove everyone who has explicitly said they are NOT interested.
     interests.each do |interest|

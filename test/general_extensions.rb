@@ -236,7 +236,6 @@ module GeneralExtensions
   #   )
   #
   def assert_email(offset, args)
-    # email = QueuedEmail.find(:first, :offset => n)
     email = QueuedEmail.offset(offset).first
     assert(email)
     args.each_key do |arg|

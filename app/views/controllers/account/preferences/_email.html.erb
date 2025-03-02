@@ -15,7 +15,6 @@
 <%= check_box_with_label(form: f, field: :email_comments_owner, prefs: true) %>
 <%= check_box_with_label(form: f, field: :email_comments_response,
                          prefs: true) %>
-<%= check_box_with_label(form: f, field: :email_comments_all, prefs: true) %>
 
 <div class="mt-4">
   <%= :prefs_email_observations.t %>:
@@ -26,9 +25,6 @@
                          prefs: true) %>
 <%= check_box_with_label(form: f, field: :email_observations_naming,
                          prefs: true) %>
-<%= check_box_with_label(form: f, field: :email_observations_all,
-                         prefs: true) %>
-
 <div class="mt-4">
   <%= :prefs_email_names.t %>:
   <%= help_note(:span, ["(", :prefs_email_please_notify.t, ")"].safe_join) %>
@@ -38,7 +34,6 @@
 <%= check_box_with_label(form: f, field: :email_names_author, prefs: true) %>
 <%= check_box_with_label(form: f, field: :email_names_editor, prefs: true) %>
 <%= check_box_with_label(form: f, field: :email_names_reviewer, prefs: true) %>
-<%= check_box_with_label(form: f, field: :email_names_all, prefs: true) %>
 
 <div class="mt-4">
   <%= :prefs_email_locations.t %>:
@@ -50,7 +45,6 @@
                          prefs: true) %>
 <%= check_box_with_label(form: f, field: :email_locations_editor,
                          prefs: true) %>
-<%= check_box_with_label(form: f, field: :email_locations_all, prefs: true) %>
 
 <div class="mt-4">
   <%= :prefs_email_general.t %>:

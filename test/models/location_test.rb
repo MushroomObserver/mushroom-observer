@@ -183,28 +183,25 @@ class LocationTest < UnitTestCase
     rolf.email_locations_admin  = false
     rolf.email_locations_author = true
     rolf.email_locations_editor = false
-    rolf.email_locations_all    = false
     rolf.save
 
     mary.email_locations_admin  = false
     mary.email_locations_author = true
     mary.email_locations_editor = false
-    mary.email_locations_all    = false
     mary.save
 
     dick.email_locations_admin  = false
     dick.email_locations_author = true
     dick.email_locations_editor = false
-    dick.email_locations_all    = true
     dick.save
 
     assert_equal(0, desc.authors.length)
     assert_equal(0, desc.editors.length)
 
-    # email types:  author  editor  all     interest
-    # 1 Rolf:       x       .       .       .
-    # 2 Mary:       x       .       .       .
-    # 3 Dick:       x       .       x       .
+    # email types:  author  editor  interest
+    # 1 Rolf:       x       .       .
+    # 2 Mary:       x       .       .
+    # 3 Dick:       x       .       .
     # Authors: --   editors: --
     # Rolf changes notes: notify Dick (all); Rolf becomes editor.
     User.current = rolf
@@ -215,30 +212,12 @@ class LocationTest < UnitTestCase
     assert_equal(0, desc.authors.length)
     assert_equal(1, desc.editors.length)
     assert_equal(rolf, desc.editors.first)
-    assert_equal(1, QueuedEmail.count)
-    assert_email(0,
-                 flavor: "QueuedEmail::LocationChange",
-                 from: rolf,
-                 to: dick,
-                 location: loc.id,
-                 description: desc.id,
-                 old_location_version: loc.version,
-                 new_location_version: loc.version,
-                 old_description_version: desc.version - 1,
-                 new_description_version: desc.version)
+    assert_equal(0, QueuedEmail.count)
 
-    # Dick wisely reconsiders getting emails for every location change.
-    # Have Mary opt in for all temporarily just to make sure she doesn't
-    # send herself emails when she changes things.
-    dick.email_locations_all = false
-    dick.save
-    mary.email_locations_all = true
-    mary.save
-
-    # email types:  author  editor  all     interest
-    # 1 Rolf:       x       .       .       .
-    # 2 Mary:       x       .       x       .
-    # 3 Dick:       x       .       .       .
+    # email types:  author  editor  interest
+    # 1 Rolf:       x       .       .
+    # 2 Mary:       x       .       .
+    # 3 Dick:       x       .       .
     # Authors: --   editors: Rolf
     # Mary writes notes: no emails; Mary becomes author.
     User.current = mary
@@ -250,16 +229,12 @@ class LocationTest < UnitTestCase
     assert_equal(1, desc.editors.length)
     assert_equal(mary, desc.authors.first)
     assert_equal(rolf, desc.editors.first)
-    assert_equal(1, QueuedEmail.count)
+    assert_equal(0, QueuedEmail.count)
 
-    # Have Mary opt back out.
-    mary.email_locations_all = false
-    mary.save
-
-    # email types:  author  editor  all     interest
-    # 1 Rolf:       x       .       .       .
-    # 2 Mary:       x       .       .       .
-    # 3 Dick:       x       .       .       .
+    # email types:  author  editor  interest
+    # 1 Rolf:       x       .       .
+    # 2 Mary:       x       .       .
+    # 3 Dick:       x       .       .
     # Authors: Mary   editors: Rolf
     # Now when Rolf changes the notes Mary should get notified.
     User.current = rolf
@@ -271,8 +246,8 @@ class LocationTest < UnitTestCase
     assert_equal(mary, desc.authors.first)
     assert_equal(rolf, desc.editors.first)
     assert_equal(description_version + 3, desc.version)
-    assert_equal(2, QueuedEmail.count)
-    assert_email(1,
+    assert_equal(1, QueuedEmail.count)
+    assert_email(0,
                  flavor: "QueuedEmail::LocationChange",
                  from: rolf,
                  to: mary,
@@ -288,10 +263,10 @@ class LocationTest < UnitTestCase
     mary.email_locations_author = false
     mary.save
 
-    # email types:  author  editor  all     interest
-    # 1 Rolf:       x       .       .       .
-    # 2 Mary:       .       .       .       .
-    # 3 Dick:       x       .       .       .
+    # email types:  author  editor  interest
+    # 1 Rolf:       x       .       .
+    # 2 Mary:       .       .       .
+    # 3 Dick:       x       .       .
     # Authors: Mary   editors: Rolf
     # Have Dick change it to make sure rolf doesn't get an email as he is just
     # an editor and he has opted out of such notifications.
@@ -304,7 +279,7 @@ class LocationTest < UnitTestCase
     assert_equal(2, desc.editors.length)
     assert_equal(mary, desc.authors.first)
     assert_equal([rolf.id, dick.id].sort, desc.editors.map(&:id).sort)
-    assert_equal(2, QueuedEmail.count)
+    assert_equal(1, QueuedEmail.count)
 
     # Have everyone request editor-notifications and have Dick change it again.
     # Only Rolf should get notified since Mary is an author, not an editor, and
@@ -316,10 +291,10 @@ class LocationTest < UnitTestCase
     dick.email_locations_editor = true
     dick.save
 
-    # email types:  author  editor  all     interest
-    # 1 Rolf:       x       x       .       .
-    # 2 Mary:       .       x       .       .
-    # 3 Dick:       x       x       .       .
+    # email types:  author  editor  interest
+    # 1 Rolf:       x       x       .
+    # 2 Mary:       .       x       .
+    # 3 Dick:       x       x       .
     # Authors: Mary   editors: Rolf, Dick
     User.current = dick
     desc.reload
@@ -330,8 +305,8 @@ class LocationTest < UnitTestCase
     assert_equal(2, desc.editors.length)
     assert_equal(mary, desc.authors.first)
     assert_user_arrays_equal([rolf, dick], desc.editors)
-    assert_equal(3, QueuedEmail.count)
-    assert_email(2,
+    assert_equal(2, QueuedEmail.count)
+    assert_email(1,
                  flavor: "QueuedEmail::LocationChange",
                  from: dick,
                  to: rolf,
@@ -348,10 +323,10 @@ class LocationTest < UnitTestCase
     Interest.create(target: loc, user: mary, state: true)
     Interest.create(target: loc, user: dick, state: true)
 
-    # email types:  author  editor  all     interest
-    # 1 Rolf:       x       x       .       no
-    # 2 Mary:       .       x       .       yes
-    # 3 Dick:       x       x       .       yes
+    # email types:  author  editor  interest
+    # 1 Rolf:       x       x       no
+    # 2 Mary:       .       x       yes
+    # 3 Dick:       x       x       yes
     # Authors: Mary   editors: Rolf, Dick
     User.current = dick
     loc.reload
@@ -363,7 +338,7 @@ class LocationTest < UnitTestCase
     assert_equal(2, desc.editors.length)
     assert_equal(mary, desc.authors.first)
     assert_user_arrays_equal([rolf, dick], desc.editors)
-    assert_email(3,
+    assert_email(2,
                  flavor: "QueuedEmail::LocationChange",
                  from: dick,
                  to: mary,
@@ -373,7 +348,7 @@ class LocationTest < UnitTestCase
                  new_location_version: loc.version,
                  old_description_version: desc.version,
                  new_description_version: desc.version)
-    assert_equal(4, QueuedEmail.count)
+    assert_equal(3, QueuedEmail.count)
     QueuedEmail.queue = false
   end
 

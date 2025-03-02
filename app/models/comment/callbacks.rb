@@ -16,7 +16,6 @@ module Comment::Callbacks
 
     recipients = []
     add_owners_and_authors!(recipients)
-    add_users_interested_in_all_comments!(recipients)
     add_users_with_other_comments!(recipients)
     add_users_with_namings!(recipients)
     add_highlighted_users!(recipients, "#{summary}\n#{comment}")
@@ -48,10 +47,6 @@ module Comment::Callbacks
   def add_owners_and_authors!(users)
     users.concat(owners_and_authors.
                  select(&:email_comments_owner))
-  end
-
-  def add_users_interested_in_all_comments!(users)
-    users.concat(User.where(email_comments_all: true))
   end
 
   def add_users_with_other_comments!(users)
