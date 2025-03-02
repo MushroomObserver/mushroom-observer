@@ -95,9 +95,26 @@ module Projects
              })
       end
 
-      assert_redirected_to(project_alias_path(
-                             project_id: ProjectAlias.last.project_id,
-                             id: ProjectAlias.last.id
+      assert_redirected_to(project_aliases_path(
+                             project_id: ProjectAlias.last.project_id
+                           ))
+    end
+
+    def test_create_with_valid_user_login
+      assert_difference("ProjectAlias.count") do
+        post(:create, params: {
+               project_id: @project.id,
+               project_alias: {
+                 name: "RS2",
+                 project_id: @project.id,
+                 target_type: "User",
+                 term: users(:rolf).login
+               }
+             })
+      end
+
+      assert_redirected_to(project_aliases_path(
+                             project_id: ProjectAlias.last.project_id
                            ))
     end
 
@@ -120,9 +137,8 @@ module Projects
               project_alias: { name: "Updated Name", project_id: }
             })
 
-      assert_redirected_to(project_alias_path(
-                             project_id: @project_alias.project_id,
-                             id: @project_alias.id
+      assert_redirected_to(project_aliases_path(
+                             project_id: @project_alias.project_id
                            ))
       assert_equal("Updated Name", @project_alias.reload.name)
     end

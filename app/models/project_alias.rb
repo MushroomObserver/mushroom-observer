@@ -13,8 +13,21 @@ class ProjectAlias < AbstractModel
 
   validates :name, presence: true
   validates :name, uniqueness: { scope: :project_id }
+  validates :target, presence: true
 
   def target_type=(type)
     self[:target_type] = type.capitalize
+  end
+
+  def verify_target(term)
+    return nil if target_id
+
+    if target_type == "User"
+      return nil if (self.target = User.find_by(login: term))
+
+      "Unable to find user matching '#{term}'"
+    else
+      "Unable to find location matching '#{term}'"
+    end
   end
 end

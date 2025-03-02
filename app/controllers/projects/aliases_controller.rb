@@ -8,7 +8,7 @@ module Projects
 
     def index
       @project = Project.find(params[:project_id])
-      @project_aliases = ProjectAlias.all
+      @project_aliases = ProjectAlias.where(project: @project).order(name: :asc)
       respond_to do |format|
         format.html
       end
@@ -40,22 +40,23 @@ module Projects
 
     def create
       @project_alias = ProjectAlias.new(project_alias_params)
-
+      err = @project_alias.verify_target(params[:project_alias][:term])
       respond_to do |format|
-        if @project_alias.save
+        if err.nil? && @project_alias.save
           format.turbo_stream do
-            render_project_alias_target_change
+            render_project_alias_target_change(@project_alias.project)
           end
           format.html do
-            project_alias_redirect(@project_alias)
+            project_aliases_redirect(@project_alias.project_id)
           end
         else
-          flash_and_reload(format, :new)
+          flash_and_reload(format, :new, error: err)
         end
       end
     end
 
-    def flash_and_reload(format, action)
+    def flash_and_reload(format, action, error: false)
+      flash_error(error) if error
       @project_alias.errors.each { |err| flash_error(err.full_message) }
       format.turbo_stream { reload_modal_project_alias_form }
       format.html { render(action) }
@@ -65,10 +66,10 @@ module Projects
       respond_to do |format|
         if @project_alias.update(project_alias_params)
           format.turbo_stream do
-            render_project_alias_target_change
+            render_project_alias_target_change(@project_alias.project)
           end
           format.html do
-            redirect_to_project_alias_show
+            redirect_to_project_aliases
           end
         else
           flash_and_reload(format, :edit)
@@ -77,33 +78,33 @@ module Projects
     end
 
     def destroy
-      project_id = @project_alias.project_id
+      project = @project_alias.project
       @project_alias.destroy
       respond_to do |format|
         format.html do
-          redirect_to(project_aliases_path(project_id:),
+          redirect_to(project_aliases_path(project_id: project&.id),
                       notice: :project_alias_destroyed.t)
         end
         format.turbo_stream do
-          render_project_alias_target_change
+          render_project_alias_target_change(project)
         end
       end
     end
 
     private
 
-    def redirect_to_project_alias_show
-      redirect_to(project_alias_path(
-                    project_id: @project_alias.project_id,
-                    id: @project_alias.id
+    def redirect_to_project_aliases
+      redirect_to(project_aliases_path(
+                    project_id: @project_alias.project_id
                   ),
                   notice: :project_alias_updated.t)
     end
 
-    def render_project_alias_target_change
+    def render_project_alias_target_change(project)
+      project_aliases = project.aliases.order(name: :asc)
       render(
         partial: "projects/aliases/target_update",
-        locals: { identifier: "project_alias" }
+        locals: { identifier: "project_alias", project_aliases: }
       ) and return
     end
 
@@ -142,11 +143,8 @@ module Projects
       end
     end
 
-    def project_alias_redirect(project_alias)
-      redirect_to(project_alias_path(
-                    project_id: project_alias.project_id,
-                    id: project_alias.id
-                  ),
+    def project_aliases_redirect(project_id)
+      redirect_to(project_aliases_path(project_id:),
                   notice: :project_alias_created.t)
     end
 

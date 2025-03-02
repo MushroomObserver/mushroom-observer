@@ -16,7 +16,7 @@
 
 <p>
   <strong>Target:</strong>
-  <%= @project_alias.target.try(:name) %>
+  <%= @project_alias.target.try(:format_name) %>
 </p>
 
 <%= link_to 'Edit', edit_project_alias_path(project_id:, id: @project_alias.id) %> |
