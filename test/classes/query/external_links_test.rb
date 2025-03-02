@@ -24,6 +24,6 @@ class Query::ExternalLinksTest < UnitTestCase
     assert_query(site.external_links.sort_by(&:url),
                  :ExternalLink, external_sites: site)
     assert_query(site.external_links.sort_by(&:url),
-                 :ExternalLink, url: "iNaturalist")
+                 :ExternalLink, url_has: "iNaturalist")
   end
 end

@@ -137,10 +137,7 @@ class Query::Names < Query::Base
 
   def initialize_name_comments_parameters
     add_join(:comments) if params[:has_comments]
-    add_search_condition(
-      "names.notes",
-      params[:notes_has]
-    )
+    add_search_condition("names.notes", params[:notes_has])
     add_search_condition(
       "CONCAT(comments.summary,COALESCE(comments.comment,''))",
       params[:comments_has],
