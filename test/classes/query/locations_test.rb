@@ -35,15 +35,17 @@ class Query::LocationsTest < UnitTestCase
     assert_query(expects.to_a, :Location, by: :rss_log)
   end
 
-  LOCATION_SET = [
-    locations(:gualala).id,
-    locations(:albion).id,
-    locations(:burbank).id,
-    locations(:elgin_co).id
-  ].freeze
+  def location_set
+    [
+      locations(:gualala).id,
+      locations(:albion).id,
+      locations(:burbank).id,
+      locations(:elgin_co).id
+    ].freeze
+  end
 
   def test_location_in_set
-    assert_query(LOCATION_SET, :Location, id_in_set: LOCATION_SET)
+    assert_query(location_set, :Location, id_in_set: location_set)
   end
 
   def test_location_has_notes
