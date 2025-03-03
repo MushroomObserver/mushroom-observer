@@ -36,20 +36,22 @@ class Query::NamesTest < UnitTestCase
     assert_query(expects, :Name, by: :rss_log)
   end
 
-  NAMES_SET = [
-    names(:fungi),
-    names(:coprinus_comatus),
-    names(:conocybe_filaris),
-    names(:lepiota_rhacodes),
-    names(:lactarius_subalpinus)
-  ].freeze
+  def names_set
+    [
+      names(:fungi),
+      names(:coprinus_comatus),
+      names(:conocybe_filaris),
+      names(:lepiota_rhacodes),
+      names(:lactarius_subalpinus)
+    ].freeze
+  end
 
   def test_name_ids_with_name_ids
-    assert_query(NAMES_SET.map(&:id), :Name, id_in_set: NAMES_SET.map(&:id))
+    assert_query(names_set.map(&:id), :Name, id_in_set: names_set.map(&:id))
   end
 
   def test_name_ids_with_name_instances
-    assert_query(NAMES_SET.map(&:id), :Name, id_in_set: NAMES_SET)
+    assert_query(names_set.map(&:id), :Name, id_in_set: names_set)
   end
 
   def test_name_by_user
