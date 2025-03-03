@@ -11,8 +11,20 @@ class NameTest < UnitTestCase
     params = parse.params
     params[:rank] = force_rank if force_rank
     name = Name.new_name(params)
-    assert(name.save, "Error saving name \"#{string}\": [#{name.dump_errors}]")
-    name
+
+    # If there's already a name with this search_name, update and use it.
+    indistinct_names = Name.where(search_name: name.search_name)
+    if indistinct_names.any?
+      indistinct_name = indistinct_names.first
+      assert(indistinct_name.update(params),
+             "Error updating name \"#{string}\": [#{name.dump_errors}]")
+      indistinct_name
+    else
+
+      assert(name.save,
+             "Error saving name \"#{string}\": [#{name.dump_errors}]")
+      name
+    end
   end
 
   # Parse a string, with detailed error message.
@@ -1739,11 +1751,11 @@ class NameTest < UnitTestCase
     assert_name_arrays_equal([], pet.all_parents)
     assert_name_arrays_equal([], pet.children)
 
-    pc   = create_test_name("Petigera canina (L.) Willd.")
-    pcr  = create_test_name("Petigera canina var. rufescens (Weiss) Mudd")
-    pcri = create_test_name(
-      "Petigera canina var. rufescens f. innovans (Körber) J. W. Thomson"
-    )
+    # rubocop:disable Layout/LineLength
+    # disable cop for comparative readability
+    pc =   create_test_name("Petigera canina (L.) Willd.")
+    pcr =  create_test_name("Petigera canina var. rufescens (Weiss) Mudd")
+    pcri = create_test_name("Petigera canina var. rufescens f. innovans (Körber) J. W. Thomson")
     pcs  = create_test_name("Petigera canina var. spuria (Ach.) Schaerer")
 
     pa   = create_test_name("Petigera aphthosa (L.) Willd.")
@@ -1754,6 +1766,7 @@ class NameTest < UnitTestCase
     pp2  = create_test_name("Petigera polydactylon (Bogus) Author")
     pph  = create_test_name("Petigera polydactylon var. hymenina (Ach.) Flotow")
     ppn  = create_test_name("Petigera polydactylon var. neopolydactyla Gyelnik")
+    # rubocop:enable Layout/LineLength
 
     assert_name_arrays_equal([pa, pc, pp, pp2], pet.children, :sort)
     assert_name_arrays_equal([pcr, pcs], pc.children, :sort)
@@ -2321,6 +2334,7 @@ class NameTest < UnitTestCase
     deprecated_name = Name.create!(
       text_name: "Lepiota rhacodes",
       author: "(Vittad.) Quél.",
+      search_name: "Lepiota rhacodes (Vittad.) Quél.",
       display_name: "__Lepiota rhacodes__ (Vittad.) Quél.",
       synonym: synonyms(:macrolepiota_rachodes_synonym),
       deprecated: true,
@@ -2338,6 +2352,7 @@ class NameTest < UnitTestCase
     deprecated_name = Name.create!(
       text_name: "Agaricus rhacodes",
       author: "Vittad.",
+      search_name: "Agaricus rhacodes Vittad.",
       display_name: "__Agaricus rhacodes__ Vittad.",
       synonym: synonyms(:chlorophyllum_rachodes_synonym),
       deprecated: true,
@@ -2569,8 +2584,9 @@ class NameTest < UnitTestCase
     # Autonym with author
     autonym = Name.create!(
       text_name: "Russula sect. Russula",
-      display_name: "**__Russula__** Pers. sect. **__Russula__**",
       author: "Pers.",
+      search_name: "Russula Pers. sect. Russula",
+      display_name: "**__Russula__** Pers. sect. **__Russula__**",
       rank: "Section",
       deprecated: false, correct_spelling: nil,
       user: users(:rolf)
@@ -2692,6 +2708,7 @@ class NameTest < UnitTestCase
 
   # Prove that Name spaceship operator (<=>) uses sort_name to sort Names
   def test_name_spaceship_operator
+    # names ordered by how spaceship operator is expected to sort them
     names = [
       create_test_name("Agaricomycota"),
       create_test_name("Agaricomycotina"),
@@ -2705,12 +2722,16 @@ class NameTest < UnitTestCase
       create_test_name("Agaricus L."),
       create_test_name("Agaricus Øosting"),
       create_test_name("Agaricus Zzyzx"),
-      create_test_name("Agaricus Śliwa"),
       create_test_name("Agaricus Đorn"),
       create_test_name("Agaricus subgenus Dick"),
       create_test_name("Agaricus section Charlie"),
       create_test_name("Agaricus subsection Bob"),
       create_test_name("Agaricus stirps Arthur"),
+      # spaceship operator sorts Ś after {. Therefore
+      # "Agaricus  {4stirps  Arthur" sorts before
+      # "Agaricus  Śliwa" which sorts before Species and lower
+      # whose sort_name's have only one space.
+      create_test_name("Agaricus Śliwa"),
       create_test_name("Agaricus aardvark"),
       create_test_name("Agaricus aardvark group"),
       create_test_name('Agaricus "tree-beard"'),
@@ -2720,8 +2741,8 @@ class NameTest < UnitTestCase
       create_test_name("Agaricus ugliano var. danny Zoom"),
       create_test_name('Agaricus "sp-LD50"')
     ]
-    x = Name.where(id: names.first.id..names.last.id).pluck(:sort_name)
-    assert_equal(names.map(&:sort_name).sort, x.sort)
+    sort_names = names.map(&:sort_name)
+    assert_equal(sort_names, sort_names.sort)
   end
 
   # Prove that alphabetized sort_names give us names in the expected order
@@ -3490,6 +3511,7 @@ class NameTest < UnitTestCase
     mispelled_name = Name.create!(
       text_name: "Amanita boodairy",
       author: "",
+      search_name: "Amanita boodairy",
       display_name: "__Amanita boodairy__ ",
       correct_spelling: names(:amanita_boudieri),
       deprecated: true,
@@ -3563,6 +3585,7 @@ class NameTest < UnitTestCase
   def test_scope_subtaxa_of_genus_or_below
     amanita_group = Name.create!(
       text_name: "Amanita group",
+      search_name: "Amanita group",
       display_name: "__Amanita group__",
       correct_spelling: nil,
       deprecated: false,
@@ -3572,6 +3595,7 @@ class NameTest < UnitTestCase
     amanita_sensu_lato = Name.create!(
       text_name: "Amanita",
       author: "sensu lato",
+      search_name: "Amanita sensu lato",
       display_name: "__Amanita__ sensu lato",
       correct_spelling: nil,
       deprecated: false,
@@ -3699,15 +3723,137 @@ class NameTest < UnitTestCase
     assert_equal("(A et al.) D et al.", name.send(:brief_author))
   end
 
+  # ----------------------------------------------------
+  #  Validations
+
   def test_user_validation
     params = {
       text_name: "Whoosia whatsitii",
       author: "Blah & de Blah",
+      search_name: "Whoosia whatsitii Blah & de Blah",
       display_name: "__Whoosia whatsitii__ Blah & de Blah",
       deprecated: true,
       rank: "Species"
     }
     assert_nil(Name.create(params).id)
     assert_not_nil(Name.create(params.merge(user: rolf)).id)
+  end
+
+  def test_author_allowed_characters
+    # Start with valid Name params, author has only letters,
+    # using params which are different from fixtures to avoid conflict.
+    valid_params = {
+      user: users(:rolf),
+      text_name: "Paradiscina", author: "Benedix", rank: "Genus",
+      search_name: "Paradiscina Benedix",
+      display_name: "**__Paradiscina__** Benedix",
+      sort_name: "Paradiscina  Benedix"
+    }
+    assert(Name.new(valid_params).valid?,
+           "Letters should be allowable in Author")
+    # ----- modify Author to prove validity of other characters
+    # A period can be part of an abbreviated Author
+    assert(Name.new(valid_params.merge({ author: "Benedix." })).valid?,
+           "Period should be allowable in Author")
+    # Contrived example to test spaces
+    assert(Name.new(valid_params.merge({ author: "Benedix Benedix" })).valid?,
+           "Space should be allowable in Author")
+    # Parens can enclose author(s) of basionym
+    assert(Name.new(valid_params.merge({ author: "(Benedix) Benedix" })).valid?,
+           "Parens should be allowable in Author")
+    # Ampersand can appear when there are multiple authors
+    assert(Name.new(valid_params.merge({ author: "Benedix & Woo" })).valid?,
+           "Ampersand should be allowable in Author")
+    assert(Name.new(valid_params.merge({ author: "Ben-edix" })).valid?,
+           "Hyphen should be allowable in Author")
+    # Commas can separate multiple authors
+    assert(Name.new(valid_params.merge({ author: "Benedix, Woo & Zhu" })).
+      valid?, "Commas should be allowable in Author")
+    # MycoBank allows square brackets in author to show correction. Ex:
+    # Xylaria symploci Pande, Waingankar, Punekar & Ran[a]dive
+    # https://www.mycobank.org/page/Name%20details%20page/field/Mycobank%20%23/585173
+    assert(Name.new(valid_params.merge({ author: "Ben[e]dix" })).
+     valid?, "Square brackets should be allowable in Author")
+
+    # ----- Prove that including bad character prevents validation of Name
+    # Users have added numbers manually
+    # or pasted an IF or MB line into the Name form
+    assert(Name.new(valid_params.merge({ author: "Benedix (1969)" })).
+      invalid?, "Numerals should not be allowable in Author")
+    # Users have added brackets by pasting IF or MB line into the Name form
+    # Hasn't happened yet; but waiting for ExcitedDelirium to drop the shoe
+    assert(Name.new(valid_params.merge({ author: "Benedix 🤮" })).
+      invalid?, "Emoji should not be allowable in Author")
+  end
+
+  # Prove which characters that are allowed in author
+  # are allowed/disallowed at end
+  def test_author_ending
+    # Start with valid Name params, author ending in letter,
+    # using params distinct from fixtures to avoid conflict.
+    valid_params = {
+      user: users(:rolf),
+      text_name: "Paradiscina", author: "Benedix", rank: "Genus",
+      search_name: "Paradiscina Benedix",
+      display_name: "**__Paradiscina__** Benedix",
+      sort_name: "Paradiscina  Benedix"
+    }
+    assert(Name.new(valid_params).valid?,
+           "Author ending in letter should be validated")
+    assert(Name.new(valid_params.merge({ author: "Benedix." })).valid?,
+           "Period at end of author should be allowable")
+
+    # Some actually occuring cases of bad endings
+    # Emulate user pasting certain IF lines into the Name form
+    assert(
+      Name.new(valid_params.merge({ author: "Benedix," })).
+      invalid?, "Comma at end of author should not be allowable"
+    )
+    assert(
+      Name.new(valid_params.merge({ author: "Benedix [as 'Paradiscena']" })).
+      invalid?, "Square bracket at end of author should not be allowable"
+    )
+  end
+
+  def test_search_name_trivial_differences
+    name = names(:lactarius_subalpinus)
+    assert_not(name.author.ascii_only?,
+               "Test needs fixture whose Author has non-ASCII characters")
+    name_params = {
+      text_name: name.text_name,
+      author: name.author,
+      display_name: name.display_name,
+      search_name: name.search_name,
+      user: name.user
+    }
+
+    new_name = Name.new(
+      name_params.merge(author: I18n.transliterate(name.author),
+                        search_name: I18n.transliterate(name.search_name))
+    )
+
+    assert(new_name.invalid?,
+           "Name differing only in diacriticals should be invalid")
+    assert(
+      new_name.errors[:search_name].any?,
+      "Name differing only in diacriticals should create error on :search_name"
+    )
+
+    new_name = Name.new(
+      name_params.merge(author: "#{name.author},",
+                        search_name: "#{name.search_name},")
+    )
+
+    assert(new_name.invalid?,
+           "Name differing only in punctuation should be invalid")
+    assert(
+      new_name.errors[:search_name].any?,
+      "Name differing only in punctuation should create error on :search_name"
+    )
+  end
+
+  def test_search_name_blank
+    name = names(:lactarius_subalpinus)
+    assert_not(name.update(search_name: ""))
   end
 end
