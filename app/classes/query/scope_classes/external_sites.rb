@@ -19,6 +19,14 @@ class Query::ScopeClasses::ExternalSites < Query::BaseAR
     super
   end
 
+  def initialize_matching_scope_parameters
+    [:name_has].each do |param|
+      next unless params[param]
+
+      @scopes = @scopes.send(param, params[param])
+    end
+  end
+
   def self.default_order
     :name
   end

@@ -19,8 +19,8 @@ class ExternalSite < AbstractModel
   validates :name,    presence: true, length: { maximum: 100 },
                       uniqueness: { case_sensitive: false }
 
-  scope :name,
-        ->(names) { search_columns(ExternalSite[:name], names) }
+  scope :name_has,
+        ->(str) { search_columns(ExternalSite[:name], str) }
 
   def member?(user)
     user.in_group?(project.user_group)

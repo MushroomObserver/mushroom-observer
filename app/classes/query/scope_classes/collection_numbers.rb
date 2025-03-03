@@ -13,8 +13,8 @@ class Query::ScopeClasses::CollectionNumbers < Query::BaseAR
       by_users: [User],
       observations: [Observation],
       pattern: :string,
-      name: [:string],
-      number: [:string],
+      names: [:string],
+      numbers: [:string],
       name_has: :string,
       number_has: :string
     )
@@ -24,17 +24,19 @@ class Query::ScopeClasses::CollectionNumbers < Query::BaseAR
     add_sort_order_to_title
     add_owner_and_time_stamp_conditions
     add_id_in_set_condition
-    add_collection_number_conditions
+    initialize_matching_scope_parameters
+    initialize_number_parameter
     initialize_observations_parameter
     add_pattern_condition
     super
   end
 
-  def add_collection_number_conditions
-    add_exact_match_condition(CollectionNumber[:name], params[:name])
-    add_exact_match_condition(CollectionNumber[:number], params[:number])
-    add_simple_search_condition(:name)
-    add_simple_search_condition(:number)
+  def initialize_matching_scope_parameters
+    [:names, :name_has, :numbers, :number_has, :observations].each do |param|
+      next unless params[param]
+
+      @scopes = @scopes.send(param, params[param])
+    end
   end
 
   def search_fields

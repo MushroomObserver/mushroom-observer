@@ -19,7 +19,7 @@ module AbstractModel::Scopes
         reorder(RssLog[:updated_at].desc, model.arel_table[:id].desc).distinct
     }
 
-    scope :by_user,
+    scope :by_users,
           ->(user) { where(user: user) }
     scope :by_editor, lambda { |user|
       version_table = :"#{type_tag}_versions"

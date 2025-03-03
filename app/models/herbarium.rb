@@ -69,14 +69,14 @@ class Herbarium < AbstractModel
   scope :nonpersonal,
         -> { where(personal_user_id: nil) }
 
-  scope :code,
-        ->(codes) { search_columns(Herbarium[:code], codes) }
-  scope :name,
-        ->(names) { search_columns(Herbarium[:name], names) }
-  scope :description,
-        ->(phrase) { search_columns(Herbarium[:description], phrase) }
-  scope :mailing_address,
-        ->(phrase) { search_columns(Herbarium[:mailing_address], phrase) }
+  scope :code_has,
+        ->(str) { search_columns(Herbarium[:code], str) }
+  scope :name_has,
+        ->(str) { search_columns(Herbarium[:name], str) }
+  scope :description_has,
+        ->(str) { search_columns(Herbarium[:description], str) }
+  scope :mailing_address_has,
+        ->(str) { search_columns(Herbarium[:mailing_address], str) }
 
   scope :pattern_search, lambda { |phrase|
     cols = (Herbarium[:code] + Herbarium[:name] +

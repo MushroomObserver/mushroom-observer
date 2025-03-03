@@ -41,19 +41,20 @@ class Query::ScopeClasses::Images < Query::BaseAR
 
   def initialize_flavor
     add_sort_order_to_title
-    super
     initialize_image_parameters
     initialize_image_association_parameters
     initialize_subquery_parameters
     add_pattern_condition
     add_img_advanced_search_conditions
+    super
   end
 
   def initialize_image_parameters
     add_id_in_set_condition
     add_owner_and_time_stamp_conditions
-    add_date_condition("images.when", params[:date])
-    initialize_img_notes_parameters
+    intialize_date_condition
+    initialize_has_notes_parameter
+    initialize_notes_has_parameter
     add_search_condition("images.copyright_holder",
                          params[:copyright_holder_has])
     add_image_size_condition(params[:size])
@@ -61,9 +62,22 @@ class Query::ScopeClasses::Images < Query::BaseAR
     initialize_ok_for_export_parameter
   end
 
-  def initialize_img_notes_parameters
-    add_coalesced_presence_condition(Image[:notes], params[:with_notes])
-    add_search_condition(Image[:notes], params[:notes_has])
+  def initialize_date_condition
+    return unless params[:date]
+
+    @scopes = @scopes.date(params[:date])
+  end
+
+  def initialize_has_notes_parameter
+    return unless params[:has_notes]
+
+    @scopes = @scopes.has_notes(params[:has_notes])
+  end
+
+  def initialize_notes_has_parameter
+    return unless params[:notes_has]
+
+    @scopes = @scopes.notes_has(params[:notes_has])
   end
 
   def initialize_img_association_parameters

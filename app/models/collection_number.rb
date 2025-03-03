@@ -60,20 +60,20 @@ class CollectionNumber < AbstractModel
 
   scope :index_order, -> { order(name: :asc, number: :asc) }
 
-  scope :for_observations, lambda { |obs|
+  scope :observations, lambda { |obs|
     joins(:observation_collection_numbers).
       where(observation_collection_numbers: { observation: obs })
   }
 
-  scope :name, lambda { |names|
-    exact_match_condition(CollectionNumber[:name], names).
-      or(search_columns(CollectionNumber[:name], names))
-  }
+  scope :names,
+        ->(names) { exact_match_condition(CollectionNumber[:name], names) }
+  scope :name_has,
+        ->(str) { search_columns(CollectionNumber[:name], str) }
 
-  scope :number, lambda { |numbers|
-    exact_match_condition(CollectionNumber[:number], numbers).
-      or(search_columns(CollectionNumber[:number], numbers))
-  }
+  scope :numbers,
+        ->(nums) { exact_match_condition(CollectionNumber[:number], nums) }
+  scope :number_has,
+        ->(str) { search_columns(CollectionNumber[:number], str) }
 
   scope :pattern_search, lambda { |phrase|
     cols = (CollectionNumber[:name] + CollectionNumber[:number])

@@ -22,14 +22,20 @@ class Query::ScopeClasses::Herbaria < Query::BaseAR
   def initialize_flavor
     add_sort_order_to_title
     add_time_stamp_conditions
-    add_simple_search_condition(:code)
-    add_simple_search_condition(:name)
-    add_simple_search_condition(:description)
-    add_simple_search_condition(:mailing_address)
     add_id_in_set_condition
+    initialize_matching_scope_parameters
     add_nonpersonal_condition
     add_pattern_condition
     super
+  end
+
+  def initialize_matching_scope_parameters
+    [:code_has, :name_has, :description_has,
+     :mailing_address_has].each do |param|
+      next unless params[param]
+
+      @scopes = @scopes.send(param, params[param])
+    end
   end
 
   def add_nonpersonal_condition

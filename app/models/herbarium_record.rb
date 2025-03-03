@@ -68,16 +68,19 @@ class HerbariumRecord < AbstractModel
   scope :has_notes,
         ->(bool = true) { notes_condition(HerbariumRecord[:notes], bool:) }
   scope :notes_has,
-        ->(phrase) { search_columns(HerbariumRecord[:notes], phrase) }
+        ->(str) { search_columns(HerbariumRecord[:notes], str) }
 
-  scope :initial_det, lambda { |val|
-    exact_match_condition(HerbariumRecord[:initial_det], val).
-      or(search_columns(HerbariumRecord[:initial_det], val))
+  scope :initial_dets, lambda { |val|
+    exact_match_condition(HerbariumRecord[:initial_det], val)
   }
-  scope :accession_number, lambda { |val|
-    exact_match_condition(HerbariumRecord[:accession_number], val).
-      or(search_columns(HerbariumRecord[:accession_number], val))
+  scope :initial_det_has,
+        ->(str) { search_columns(HerbariumRecord[:initial_det], str) }
+
+  scope :accession_numbers, lambda { |val|
+    exact_match_condition(HerbariumRecord[:accession_number], val)
   }
+  scope :accession_number_has,
+        ->(str) { search_columns(HerbariumRecord[:accession_number], str) }
 
   def herbarium_label
     if initial_det.blank?

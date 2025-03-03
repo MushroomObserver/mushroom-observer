@@ -45,10 +45,10 @@ class GlossaryTerm < AbstractModel
 
   scope :index_order, -> { order(name: :asc, id: :desc) }
 
-  scope :name,
-        ->(names) { search_columns(GlossaryTerm[:name], names) }
-  scope :description,
-        ->(phrase) { search_columns(GlossaryTerm[:description], phrase) }
+  scope :name_has,
+        ->(str) { search_columns(GlossaryTerm[:name], str) }
+  scope :description_has,
+        ->(str) { search_columns(GlossaryTerm[:description], str) }
 
   scope :pattern_search, lambda { |phrase|
     cols = (GlossaryTerm[:name] + GlossaryTerm[:description].coalesce(""))
