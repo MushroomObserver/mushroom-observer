@@ -731,11 +731,13 @@ class QueryTest < UnitTestCase
     assert_equal(1, QueryRecord.count)
   end
 
-  THREE_AMIGOS = [
-    observations(:detailed_unknown_obs).id,
-    observations(:agaricus_campestris_obs).id,
-    observations(:agaricus_campestras_obs).id
-  ].freeze
+  def three_amigos
+    [
+      observations(:detailed_unknown_obs).id,
+      observations(:agaricus_campestris_obs).id,
+      observations(:agaricus_campestras_obs).id
+    ].freeze
+  end
 
   def test_observation_subquery_of_image
     burbank = locations(:burbank)
@@ -747,7 +749,7 @@ class QueryTest < UnitTestCase
     query_a[2] = Query.lookup_and_save(
       :Observation, species_lists: species_lists(:first_species_list).id
     )
-    query_a[3] = Query.lookup_and_save(:Observation, ids: THREE_AMIGOS)
+    query_a[3] = Query.lookup_and_save(:Observation, ids: three_amigos)
     query_a[4] = Query.lookup_and_save(:Observation, search_where: "glendale")
     query_a[5] = Query.lookup_and_save(:Observation, locations: burbank)
     query_a[6] = Query.lookup_and_save(:Observation, search_where: "california")
@@ -770,7 +772,7 @@ class QueryTest < UnitTestCase
     query_a[2] = Query.lookup_and_save(
       :Observation, species_lists: species_lists(:first_species_list).id
     )
-    query_a[3] = Query.lookup_and_save(:Observation, ids: THREE_AMIGOS)
+    query_a[3] = Query.lookup_and_save(:Observation, ids: three_amigos)
     query_a[4] = Query.lookup_and_save(:Observation, search_where: "glendale")
     query_a[5] = Query.lookup_and_save(:Observation, locations: burbank)
     query_a[6] = Query.lookup_and_save(:Observation, search_where: "california")
@@ -785,7 +787,7 @@ class QueryTest < UnitTestCase
     assert_equal([mary.id], obs_queries[1][:by_users])
     assert_equal([species_lists(:first_species_list).id],
                  obs_queries[2][:species_lists])
-    assert_equal(THREE_AMIGOS, obs_queries[3][:ids])
+    assert_equal(three_amigos, obs_queries[3][:ids])
     assert_equal(1, obs_queries[3].keys.length)
     assert_equal("glendale", obs_queries[4][:search_where])
     assert_equal(1, obs_queries[4].keys.length)
@@ -805,7 +807,7 @@ class QueryTest < UnitTestCase
     query_a[2] = Query.lookup_and_save(
       :Observation, species_lists: species_lists(:first_species_list).id
     )
-    query_a[3] = Query.lookup_and_save(:Observation, ids: THREE_AMIGOS)
+    query_a[3] = Query.lookup_and_save(:Observation, ids: three_amigos)
     # qa[4] = Query.lookup_and_save(:Observation,
     #                             pattern: '"somewhere else"')
     query_a[4] = Query.lookup_and_save(:Observation, search_where: "glendale")

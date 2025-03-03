@@ -416,19 +416,21 @@ class Query::ImagesTest < UnitTestCase
     assert_image_obs_query(expects, **params)
   end
 
-  SORTED_BY_NAME_SET = [
-    images(:turned_over_image).id,
-    images(:connected_coprinus_comatus_image).id,
-    images(:disconnected_coprinus_comatus_image).id,
-    images(:in_situ_image).id,
-    images(:commercial_inquiry_image).id,
-    images(:agaricus_campestris_image).id
-  ].freeze
+  def sorted_by_name_set
+    [
+      images(:turned_over_image).id,
+      images(:connected_coprinus_comatus_image).id,
+      images(:disconnected_coprinus_comatus_image).id,
+      images(:in_situ_image).id,
+      images(:commercial_inquiry_image).id,
+      images(:agaricus_campestris_image).id
+    ].freeze
+  end
 
   def test_image_sorted_by_original_name
     assert_query(
-      SORTED_BY_NAME_SET,
-      :Image, id_in_set: SORTED_BY_NAME_SET, by: :original_name
+      sorted_by_name_set,
+      :Image, id_in_set: sorted_by_name_set, by: :original_name
     )
   end
 
