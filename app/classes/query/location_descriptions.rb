@@ -11,7 +11,7 @@ class Query::LocationDescriptions < Query::Base
     super.merge(
       created_at: [:time],
       updated_at: [:time],
-      ids: [LocationDescription],
+      id_in_set: [LocationDescription],
       by_users: [User],
       by_author: User,
       by_editor: User,

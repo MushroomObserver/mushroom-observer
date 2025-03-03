@@ -56,12 +56,15 @@ class Query::NameDescriptionsTest < UnitTestCase
   end
 
   def test_name_description_in_set
-    assert_query([],
-                 :NameDescription, ids: rolf.id)
-    assert_query(NameDescription.all,
-                 :NameDescription, ids: NameDescription.select(:id).to_a)
-    assert_query([NameDescription.first.id],
-                 :NameDescription, ids: [rolf.id, NameDescription.first.id])
+    assert_query([], :NameDescription, id_in_set: rolf.id)
+    assert_query(
+      NameDescription.all,
+      :NameDescription, id_in_set: NameDescription.select(:id).to_a
+    )
+    assert_query(
+      [NameDescription.first.id],
+      :NameDescription, id_in_set: [rolf.id, NameDescription.first.id]
+      )
   end
 
   def test_name_description_has_default_desc

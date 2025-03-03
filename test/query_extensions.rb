@@ -25,9 +25,9 @@ module QueryExtensions
     str.gsub(/\s+/, " ").strip
   end
 
-  def three_amigos
-    [observations(:detailed_unknown_obs).id,
-     observations(:agaricus_campestris_obs).id,
-     observations(:agaricus_campestras_obs).id]
-  end
+  THREE_AMIGOS = [
+    observations(:detailed_unknown_obs).id,
+    observations(:agaricus_campestris_obs).id,
+    observations(:agaricus_campestras_obs).id
+  ].freeze
 end

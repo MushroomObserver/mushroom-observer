@@ -36,22 +36,20 @@ class Query::NamesTest < UnitTestCase
     assert_query(expects, :Name, by: :rss_log)
   end
 
-  def names_set
-    [
-      names(:fungi),
-      names(:coprinus_comatus),
-      names(:conocybe_filaris),
-      names(:lepiota_rhacodes),
-      names(:lactarius_subalpinus)
-    ]
-  end
+  NAMES_SET = [
+    names(:fungi),
+    names(:coprinus_comatus),
+    names(:conocybe_filaris),
+    names(:lepiota_rhacodes),
+    names(:lactarius_subalpinus)
+  ].freeze
 
   def test_name_ids_with_name_ids
-    assert_query(names_set.map(&:id), :Name, ids: names_set.map(&:id))
+    assert_query(NAMES_SET.map(&:id), :Name, id_in_set: NAMES_SET.map(&:id))
   end
 
   def test_name_ids_with_name_instances
-    assert_query(names_set.map(&:id), :Name, ids: names_set)
+    assert_query(NAMES_SET.map(&:id), :Name, id_in_set: NAMES_SET)
   end
 
   def test_name_by_user
@@ -383,7 +381,7 @@ class Query::NamesTest < UnitTestCase
     name1 = names(:peltigera)
     name2 = names(:boletus_edulis)
     assert_query([name2, name1],
-                 :Name, description_query: { ids: [desc1, desc2, desc3] })
+                 :Name, description_query: { id_in_set: [desc1, desc2, desc3] })
   end
 
   def test_name_has_observations
@@ -556,9 +554,9 @@ class Query::NamesTest < UnitTestCase
 
   def test_name_with_observations_in_set
     expects = Name.with_correct_spelling.joins(:observations).
-              where(observations: { id: three_amigos }).
+              where(observations: { id: THREE_AMIGOS }).
               index_order.distinct
-    assert_query(expects, :Name, observation_query: { ids: three_amigos })
+    assert_query(expects, :Name, observation_query: { id_in_set: THREE_AMIGOS })
   end
 
   def test_name_with_observations_in_species_list

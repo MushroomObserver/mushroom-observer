@@ -9,7 +9,7 @@ class Query::Users < Query::Base
     super.merge(
       created_at: [:time],
       updated_at: [:time],
-      ids: [User],
+      id_in_set: [User],
       pattern: :string,
       has_contribution: :boolean
     )

@@ -23,7 +23,7 @@ class Query::HerbariaTest < UnitTestCase
       herbaria(:dick_herbarium),
       herbaria(:nybg_herbarium)
     ]
-    assert_query(expects, :Herbarium, ids: expects)
+    assert_query(expects, :Herbarium, id_in_set: expects)
   end
 
   def test_herbarium_pattern_search

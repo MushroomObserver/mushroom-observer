@@ -17,7 +17,7 @@ class Query::Names < Query::Base
     super.merge(
       created_at: [:time],
       updated_at: [:time],
-      ids: [Name],
+      id_in_set: [Name],
       names: [Name], # potentially modified by the next four params
       include_synonyms: :boolean,
       include_subtaxa: :boolean,

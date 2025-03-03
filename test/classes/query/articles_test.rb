@@ -17,8 +17,8 @@ class Query::ArticlesTest < UnitTestCase
   end
 
   def test_article_in_set
-    assert_query([articles(:premier_article).id], :Article,
-                 ids: [articles(:premier_article).id])
-    assert_query([], :Article, ids: [])
+    assert_query([articles(:premier_article).id],
+                 :Article, id_in_set: [articles(:premier_article).id])
+    assert_query([], :Article, id_in_set: [])
   end
 end

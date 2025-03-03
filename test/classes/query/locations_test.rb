@@ -35,16 +35,15 @@ class Query::LocationsTest < UnitTestCase
     assert_query(expects.to_a, :Location, by: :rss_log)
   end
 
+  LOCATION_SET = [
+    locations(:gualala).id,
+    locations(:albion).id,
+    locations(:burbank).id,
+    locations(:elgin_co).id
+  ].freeze
+
   def test_location_in_set
-    assert_query([locations(:gualala).id,
-                  locations(:albion).id,
-                  locations(:burbank).id,
-                  locations(:elgin_co).id],
-                 :Location,
-                 ids: [locations(:gualala).id,
-                       locations(:albion).id,
-                       locations(:burbank).id,
-                       locations(:elgin_co).id])
+    assert_query(LOCATION_SET, :Location, id_in_set: LOCATION_SET)
   end
 
   def test_location_has_notes
@@ -181,13 +180,13 @@ class Query::LocationsTest < UnitTestCase
            location_descriptions(:no_mushrooms_location_desc).id]
     assert_query(
       [locations(:albion), locations(:no_mushrooms_location)],
-      :Location, description_query: { ids: ids }
+      :Location, description_query: { id_in_set: ids }
     )
     ids = [location_descriptions(:albion_desc).id, rolf.id]
     assert_query([locations(:albion)], :Location,
-                 description_query: { ids: ids })
+                 description_query: { id_in_set: ids })
     assert_query([],
-                 :Location, description_query: { ids: [rolf.id] })
+                 :Location, description_query: { id_in_set: [rolf.id] })
   end
 
   def test_location_has_observations
@@ -428,9 +427,9 @@ class Query::LocationsTest < UnitTestCase
   def test_location_with_observations_in_set
     ids = [observations(:minimal_unknown_obs).id]
     assert_query([locations(:burbank).id],
-                 :Location, observation_query: { ids: })
+                 :Location, observation_query: { id_in_set: ids })
     ids = [observations(:coprinus_comatus_obs).id]
-    assert_query([], :Location, observation_query: { ids: })
+    assert_query([], :Location, observation_query: { id_in_set: ids })
   end
 
   def test_location_with_observations_in_species_list

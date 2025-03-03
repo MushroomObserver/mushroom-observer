@@ -77,14 +77,17 @@ class Query::LocationDescriptionsTest < UnitTestCase
   end
 
   def test_location_description_in_set
-    assert_query([],
-                 :LocationDescription,
-                 ids: rolf.id)
-    assert_query(LocationDescription.all,
-                 :LocationDescription,
-                 ids: LocationDescription.select(:id).to_a)
-    assert_query([location_descriptions(:albion_desc).id],
-                 :LocationDescription,
-                 ids: [rolf.id, location_descriptions(:albion_desc).id])
+    assert_query(
+      [], :LocationDescription, id_in_set: rolf.id
+    )
+    assert_query(
+      LocationDescription.all,
+      :LocationDescription, id_in_set: LocationDescription.select(:id).to_a
+    )
+    assert_query(
+      [location_descriptions(:albion_desc).id],
+      :LocationDescription, id_in_set: [rolf.id,
+                                        location_descriptions(:albion_desc).id]
+    )
   end
 end
