@@ -18,9 +18,7 @@ class Query::ScopeClasses::GlossaryTerms < Query::BaseAR
 
   def initialize_flavor
     add_sort_order_to_title
-    add_owner_and_time_stamp_conditions
-    add_simple_search_condition(:name)
-    add_simple_search_condition(:description)
+    initialize_parameter_set(parameter_declarations.keys)
     add_pattern_condition
     super
   end

@@ -3,6 +3,15 @@
 # Helper methods for turning Query parameters into AR conditions.
 module Query::ScopeModules::Conditions
   # Just because these three are used over and over again.
+  def initialize_parameter_set(param_array)
+    param_array.each do |param|
+      next if (param == :ids_in_set && params[param].nil?) ||
+              (param != :ids_in_set && params[param].blank?)
+
+      @scopes = @scopes.send(param, params[param])
+    end
+  end
+
   def add_owner_and_time_stamp_conditions
     add_time_stamp_conditions
     initialize_users_parameter
@@ -125,16 +134,14 @@ module Query::ScopeModules::Conditions
   #
   #   builds: "FIND_IN_SET(#{table}.id,'#{set}') ASC"
   #
-  # rubocop:disable Metrics/AbcSize
   def add_id_in_set_condition
     return if params[:ids].nil? # [] is valid
 
-    set = clean_id_set(params[:ids])
-    @scopes = @scopes.where(model[:id].in(set)).
-              reorder(Arel::Nodes.build_quoted(set.join(",")) & table[:id])
+    # set = clean_id_set(params[:ids])
+    # @scopes = @scopes.where(model[:id].in(set)).
+    #           reorder(Arel::Nodes.build_quoted(set.join(",")) & table[:id])
     @title_tag = :query_title_in_set.t(type: model.type_tag)
   end
-  # rubocop:enable Metrics/AbcSize
 
   # table_col = foreign key of an association, e.g. `observations.location_id`
   def add_association_condition(table_column, ids, joins, title_method: nil)

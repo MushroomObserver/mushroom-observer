@@ -7,24 +7,15 @@ class Query::ScopeClasses::ExternalSites < Query::BaseAR
 
   def self.parameter_declarations
     super.merge(
-      ids: [ExternalSite],
+      id_in_set: [ExternalSite],
       name_has: :string
     )
   end
 
   def initialize_flavor
     add_sort_order_to_title
-    add_id_in_set_condition
-    add_simple_search_condition(:name)
+    initialize_parameter_set(parameter_declarations.keys)
     super
-  end
-
-  def initialize_matching_scope_parameters
-    [:name_has].each do |param|
-      next unless params[param]
-
-      @scopes = @scopes.send(param, params[param])
-    end
   end
 
   def self.default_order
