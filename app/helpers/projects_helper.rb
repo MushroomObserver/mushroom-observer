@@ -71,10 +71,14 @@ module ProjectsHelper
   end
 
   def project_alias_rows(project_aliases)
-    project_aliases.map do |project_alias|
+    project_aliases.includes(:target).map do |project_alias|
       project_alias_row(project_alias)
     end
   end
+
+  #########
+
+  private
 
   def project_alias_row(project_alias)
     [
@@ -90,16 +94,9 @@ module ProjectsHelper
       concat(link_to(:EDIT.t,
                      edit_project_alias_path(project_id:, id:)))
       concat(" ")
-      concat(link_to(:DELETE.t,
-                     project_alias_path(project_id:, id:),
-                     data: { turbo_method: :delete,
-                             turbo_confirm: :are_you_sure.t }))
+      concat(destroy_button(target: project_alias_path(project_id:, id:)))
     end
   end
-
-  #########
-
-  private
 
   def edit_project_alias_tab(project_id, name, id)
     InternalLink::Model.new(

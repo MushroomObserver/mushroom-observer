@@ -2908,6 +2908,7 @@
   project_alias_new: New Project Alias
   project_alias_type: Alias Type
   project_alias_updated: Field slip was successfully updated.
+  project_alias_no_match: Unable to find [target_type] matching '[term]'
 
   ##############################################################################
 
