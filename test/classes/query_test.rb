@@ -731,6 +731,12 @@ class QueryTest < UnitTestCase
     assert_equal(1, QueryRecord.count)
   end
 
+  THREE_AMIGOS = [
+    observations(:detailed_unknown_obs).id,
+    observations(:agaricus_campestris_obs).id,
+    observations(:agaricus_campestras_obs).id
+  ].freeze
+
   def test_observation_subquery_of_image
     burbank = locations(:burbank)
     query_a = []

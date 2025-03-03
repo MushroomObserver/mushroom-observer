@@ -552,6 +552,12 @@ class Query::NamesTest < UnitTestCase
     assert_query(expects, :Name, observation_query: { projects: project2 })
   end
 
+  THREE_AMIGOS = [
+    observations(:detailed_unknown_obs).id,
+    observations(:agaricus_campestris_obs).id,
+    observations(:agaricus_campestras_obs).id
+  ].freeze
+
   def test_name_with_observations_in_set
     expects = Name.with_correct_spelling.joins(:observations).
               where(observations: { id: THREE_AMIGOS }).
