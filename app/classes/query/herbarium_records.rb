@@ -48,9 +48,9 @@ class Query::HerbariumRecords < Query::Base
 
   def initialize_exact_match_parameters
     add_exact_match_condition("herbarium_records.initial_det",
-                              params[:initial_det])
+                              params[:initial_dets])
     add_exact_match_condition("herbarium_records.accession_number",
-                              params[:accession_number])
+                              params[:accession_numbers])
   end
 
   def initialize_search_parameters
