@@ -139,7 +139,8 @@ class Comment < AbstractModel
   after_create :notify_users
   after_create :oil_and_water
 
-  scope :index_order, -> { order(created_at: :desc, id: :desc) }
+  scope :index_order,
+        -> { order(created_at: :desc, id: :desc) }
 
   # This scope starts with a `where`, and chains subsequent `where` clauses
   # with `or`. So, rather than separately assembling `target_ids`, that would

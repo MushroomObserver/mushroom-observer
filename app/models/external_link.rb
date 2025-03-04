@@ -34,14 +34,14 @@ class ExternalLink < AbstractModel
   validates :url, presence: true, length: { maximum: 100 }
   validate  :check_url_syntax
 
+  scope :index_order,
+        -> { order(url: :desc, id: :desc) }
   scope :observations,
         ->(ids) { where(observation_id: ids) }
-
   scope :external_sites, lambda { |sites|
     ids = lookup_external_sites_by_name(sites)
     where(external_site_id: ids)
   }
-
   scope :url_has,
         ->(phrase) { search_columns(ExternalLink[:url], phrase) }
 
