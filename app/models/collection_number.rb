@@ -65,8 +65,18 @@ class CollectionNumber < AbstractModel
       where(observation_collection_numbers: { observation: obs })
   }
 
+  scope :names,
+        ->(names) { exact_match_condition(CollectionNumber[:name], names) }
+  scope :name_has,
+        ->(str) { search_columns(CollectionNumber[:name], str) }
+
+  scope :numbers,
+        ->(nums) { exact_match_condition(CollectionNumber[:number], nums) }
+  scope :number_has,
+        ->(str) { search_columns(CollectionNumber[:number], str) }
+
   scope :pattern, lambda { |phrase|
-    cols = CollectionNumber.searchable_columns
+    cols = (CollectionNumber[:name] + CollectionNumber[:number])
     search_columns(cols, phrase).distinct
   }
 
