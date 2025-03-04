@@ -91,10 +91,10 @@ jobs:
     #     GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
     #     REPORT_PATH: brakeman.json
 
-      # https://github.com/marketplace/actions/brakeman-linter-in-action
+    # https://github.com/marketplace/actions/brakeman-linter-in-action
       - name: brakeman report
         run: |
-          brakeman -f json > tmp/brakeman.json || exit 0
+          brakeman -f json > tmp/brakeman.html || exit 0
       - name: Brakeman
         uses: nhattan/brakeman-linter-action@v2.0.0
         env:
