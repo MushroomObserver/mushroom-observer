@@ -8,13 +8,6 @@ class FieldSlip < AbstractModel
   belongs_to :project
   belongs_to :user
 
-  scope :index_order, -> { order(code: :asc, created_at: :desc, id: :desc) }
-
-  scope :projects, lambda { |projects|
-    project_ids = Lookup::Projects.new(projects).ids
-    where(project: project_ids).distinct
-  }
-
   validates :code, uniqueness: true
   validates :code, presence: true
   validate do |field_slip|
@@ -22,6 +15,14 @@ class FieldSlip < AbstractModel
       errors.add(:code, :format, message: :field_slip_code_format_error.t)
     end
   end
+
+  scope :index_order,
+        -> { order(code: :asc, created_at: :desc, id: :desc) }
+
+  scope :projects, lambda { |projects|
+    project_ids = Lookup::Projects.new(projects).ids
+    where(project: project_ids).distinct
+  }
 
   def code=(val)
     code = val.upcase
