@@ -4,6 +4,8 @@ class APIKey < AbstractModel
   belongs_to :user
   before_create :provide_defaults
 
+  scope :index_order, -> { order(created_at: :desc, id: :desc) }
+
   scope :notes_has,
         ->(phrase) { search_columns(APIKey[:notes], phrase) }
 
