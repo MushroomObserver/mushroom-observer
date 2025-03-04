@@ -53,18 +53,21 @@ class Query::HerbariumRecordsTest < UnitTestCase
 
   def test_herbarium_record_accession_numbers
     expects = [herbarium_records(:interesting_unknown)]
-    assert_query(expects, :HerbariumRecord, accession_numbers: "1234")
-    expects = HerbariumRecord.index_order.accession_numbers("1234")
-    assert_query(expects, :HerbariumRecord, accession_numbers: "1234")
+    scope = HerbariumRecord.index_order.accession_numbers("1234")
+    assert_query_scope(expects, scope,
+                       :HerbariumRecord, accession_numbers: "1234")
+
     expects = [herbarium_records(:coprinus_comatus_nybg_spec)]
-    assert_query(expects, :HerbariumRecord, accession_numbers: "4321")
-    expects = HerbariumRecord.index_order.accession_numbers(4321)
-    assert_query(expects, :HerbariumRecord, accession_numbers: 4321)
+    scope = HerbariumRecord.index_order.accession_numbers(4321)
+    assert_query_scope(expects,  scope,
+                       :HerbariumRecord, accession_numbers: "4321")
   end
 
   def test_herbarium_record_accession_number_has
     expects = [herbarium_records(:coprinus_comatus_rolf_spec)]
-    assert_query(expects, :HerbariumRecord, accession_number_has: "Rolf")
+    scope = HerbariumRecord.index_order.accession_number_has("Rolf")
+    assert_query_scope(expects, scope,
+                       :HerbariumRecord, accession_number_has: "Rolf")
   end
 
   def test_herbarium_record_pattern_search_notes
