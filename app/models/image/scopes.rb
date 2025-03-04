@@ -76,7 +76,7 @@ module Image::Scopes
       search_content(phrase).distinct.or(Image.where(id: obs_imgs).distinct)
     }
     # Excludes images without observations!
-    scope :pattern_search, lambda { |phrase|
+    scope :pattern, lambda { |phrase|
       cols = Image.searchable_columns + Observation[:where] + Name[:search_name]
       joins(observations: :name).search_columns(cols, phrase).distinct
     }

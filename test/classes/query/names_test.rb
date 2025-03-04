@@ -266,28 +266,28 @@ class Query::NamesTest < UnitTestCase
     assert_query([], :Name, pattern: "petigera")
     assert_query([names(:petigera).id],
                  :Name, pattern: "petigera", misspellings: :either)
-    assert_query(Name.pattern_search("petigera").misspellings(:either),
+    assert_query(Name.pattern("petigera").misspellings(:either),
                  :Name, pattern: "petigera", misspellings: :either)
   end
 
   def test_name_pattern_search_citation
     assert_query([names(:peltigera).id],
                  :Name, pattern: "ye auld manual of lichenes")
-    assert_query(Name.pattern_search("ye auld manual of lichenes"),
+    assert_query(Name.pattern("ye auld manual of lichenes"),
                  :Name, pattern: "ye auld manual of lichenes")
   end
 
   def test_name_pattern_search_description_notes
     assert_query([names(:agaricus_campestras).id],
                  :Name, pattern: "prevent me")
-    assert_query(Name.pattern_search("prevent me"),
+    assert_query(Name.pattern("prevent me"),
                  :Name, pattern: "prevent me")
   end
 
   def test_name_pattern_search_description_gen_desc
     assert_query([names(:suillus)],
                  :Name, pattern: "smell as sweet")
-    assert_query(Name.pattern_search("smell as sweet"),
+    assert_query(Name.pattern("smell as sweet"),
                  :Name, pattern: "smell as sweet")
   end
 
@@ -295,7 +295,7 @@ class Query::NamesTest < UnitTestCase
   def test_name_pattern_search_description_look_alikes
     assert_query([names(:peltigera).id],
                  :Name, pattern: "superficially similar")
-    assert_query(Name.pattern_search("superficially similar"),
+    assert_query(Name.pattern("superficially similar"),
                  :Name, pattern: "superficially similar")
   end
 

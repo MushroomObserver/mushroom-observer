@@ -205,7 +205,7 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
       where(id: fields + comments).distinct
     }
     # This is what's called by pattern_search
-    scope :pattern_search, lambda { |phrase|
+    scope :pattern, lambda { |phrase|
       cols = Name.searchable_columns + NameDescription.searchable_columns
       joins_default_descriptions.search_columns(cols, phrase).distinct
     }

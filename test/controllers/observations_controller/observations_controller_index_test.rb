@@ -287,7 +287,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     # Because this pattern is a name, the title will reflect that Query is
     # assuming this is a search by name with synonyms and subtaxa.
     # assert_displayed_title("Observations of #{pattern}")
-    count = Observation.pattern_search(pattern).count
+    count = Observation.pattern(pattern).count
     assert_results(text: /#{pattern}/i, count:)
   end
 
@@ -312,7 +312,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     # assert_displayed_title(
     #   :query_title_of_name.t(types: "Observations", name: pattern)
     # )
-    count = Observation.pattern_search(pattern).count
+    count = Observation.pattern(pattern).count
     assert_results(text: /#{pattern}/i, count:)
     assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
   end
