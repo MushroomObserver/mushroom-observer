@@ -64,7 +64,7 @@ class Query::NameDescriptionsTest < UnitTestCase
     assert_query(
       [NameDescription.first.id],
       :NameDescription, id_in_set: [rolf.id, NameDescription.first.id]
-      )
+    )
   end
 
   def test_name_description_has_default_desc
