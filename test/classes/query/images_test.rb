@@ -13,9 +13,9 @@ class Query::ImagesTest < UnitTestCase
   end
 
   def test_image_size
-    expects = Image.index_order.with_sizes(:thumbnail)
+    expects = Image.index_order.size(:thumbnail)
     assert_query(expects, :Image, size: :thumbnail)
-    expects = Image.index_order.with_sizes(:thumbnail, :medium)
+    expects = Image.index_order.size(:thumbnail, :medium)
     assert_query(expects, :Image, size: [:thumbnail, :medium])
   end
 

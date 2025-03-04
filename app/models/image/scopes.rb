@@ -11,7 +11,7 @@ module Image::Scopes
     scope :index_order,
           -> { order(created_at: :desc, id: :desc) }
 
-    scope :with_sizes, lambda { |min, max = min|
+    scope :size, lambda { |min, max = min|
       if max == min
         with_min_size(min)
       else
