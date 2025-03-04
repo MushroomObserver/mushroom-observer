@@ -32,11 +32,12 @@ class Query::CommentsTest < UnitTestCase
   end
 
   def test_comment_in_set
-    assert_query([comments(:detailed_unknown_obs_comment).id,
-                  comments(:minimal_unknown_obs_comment_1).id],
-                 :Comment,
-                 ids: [comments(:detailed_unknown_obs_comment).id,
-                       comments(:minimal_unknown_obs_comment_1).id])
+    assert_query(
+      [comments(:detailed_unknown_obs_comment).id,
+       comments(:minimal_unknown_obs_comment_1).id],
+      :Comment, id_in_set: [comments(:detailed_unknown_obs_comment).id,
+                            comments(:minimal_unknown_obs_comment_1).id]
+    )
   end
 
   def test_comment_pattern_search

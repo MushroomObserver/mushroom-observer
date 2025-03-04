@@ -329,7 +329,7 @@ module Tabs
     # for show_obs - query is for a single obs label
     def print_labels_button(obs)
       name = :download_observations_print_labels.l
-      query = Query.lookup(Observation, ids: [obs.id])
+      query = Query.lookup(Observation, id_in_set: [obs.id])
       path = add_query_param(observations_downloads_path(commit: name), query)
 
       post_button(name: name, path: path, icon: :print,

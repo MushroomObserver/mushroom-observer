@@ -66,7 +66,7 @@ class Query::SpeciesListsTest < UnitTestCase
   def test_species_list_in_set
     list_set_ids = [species_lists(:first_species_list).id,
                     species_lists(:unknown_species_list).id]
-    assert_query(list_set_ids, :SpeciesList, ids: list_set_ids)
+    assert_query(list_set_ids, :SpeciesList, id_in_set: list_set_ids)
   end
 
   def test_species_list_pattern_search

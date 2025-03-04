@@ -9,7 +9,7 @@ class Query::Projects < Query::Base
     super.merge(
       created_at: [:time],
       updated_at: [:time],
-      ids: [Project],
+      id_in_set: [Project],
       by_users: [User],
       members: [User],
       has_images: { boolean: [true] },

@@ -12,7 +12,7 @@ class Query::RssLogs < Query::Base
     super.merge(
       updated_at: [:time],
       type: :string,
-      ids: [RssLog]
+      id_in_set: [RssLog]
     ).merge(content_filter_parameter_declarations(Observation)).
       merge(content_filter_parameter_declarations(Location))
   end

@@ -18,13 +18,14 @@ class Query::UsersTest < UnitTestCase
   end
 
   def test_user_in_set
-    assert_query([rolf.id, mary.id, junk.id],
-                 :User, ids: [junk.id, mary.id, rolf.id], by: :reverse_name)
+    assert_query(
+      [rolf.id, mary.id, junk.id],
+      :User, id_in_set: [junk.id, mary.id, rolf.id], by: :reverse_name
+    )
   end
 
   def test_user_pattern_search_nonexistent
-    assert_query([],
-                 :User, pattern: "nonexistent pattern")
+    assert_query([], :User, pattern: "nonexistent pattern")
   end
 
   def test_user_pattern_search_login

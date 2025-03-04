@@ -109,7 +109,7 @@ class Query::ImagesTest < UnitTestCase
     ids = [images(:turned_over_image).id,
            images(:agaricus_campestris_image).id,
            images(:disconnected_coprinus_comatus_image).id]
-    assert_query(ids, :Image, ids: ids)
+    assert_query(ids, :Image, id_in_set: ids)
   end
 
   def test_image_inside_observation
@@ -395,8 +395,10 @@ class Query::ImagesTest < UnitTestCase
                observations(:agaricus_campestris_obs).id]
     expects = Image.joins(:observations).where(observations: { id: obs_ids }).
               index_order.distinct
-    assert_image_obs_query(expects, ids: obs_ids)
-    assert_image_obs_query([], ids: [observations(:minimal_unknown_obs).id])
+    assert_image_obs_query(expects, id_in_set: obs_ids)
+    assert_image_obs_query(
+      [], id_in_set: [observations(:minimal_unknown_obs).id]
+    )
   end
 
   def test_image_with_observations_in_species_list
@@ -414,21 +416,22 @@ class Query::ImagesTest < UnitTestCase
     assert_image_obs_query(expects, **params)
   end
 
+  def sorted_by_name_set
+    [
+      images(:turned_over_image).id,
+      images(:connected_coprinus_comatus_image).id,
+      images(:disconnected_coprinus_comatus_image).id,
+      images(:in_situ_image).id,
+      images(:commercial_inquiry_image).id,
+      images(:agaricus_campestris_image).id
+    ].freeze
+  end
+
   def test_image_sorted_by_original_name
-    assert_query([images(:turned_over_image).id,
-                  images(:connected_coprinus_comatus_image).id,
-                  images(:disconnected_coprinus_comatus_image).id,
-                  images(:in_situ_image).id,
-                  images(:commercial_inquiry_image).id,
-                  images(:agaricus_campestris_image).id],
-                 :Image,
-                 ids: [images(:in_situ_image).id,
-                       images(:turned_over_image).id,
-                       images(:commercial_inquiry_image).id,
-                       images(:disconnected_coprinus_comatus_image).id,
-                       images(:connected_coprinus_comatus_image).id,
-                       images(:agaricus_campestris_image).id],
-                 by: :original_name)
+    assert_query(
+      sorted_by_name_set,
+      :Image, id_in_set: sorted_by_name_set, by: :original_name
+    )
   end
 
   def test_image_with_observations_of_name

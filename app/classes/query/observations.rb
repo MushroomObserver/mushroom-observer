@@ -18,7 +18,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
       created_at: [:time],
       updated_at: [:time],
 
-      ids: [Observation],
+      id_in_set: [Observation],
       by_users: [User],
       needs_naming: :boolean,
       in_clade: :string,

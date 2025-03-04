@@ -9,7 +9,7 @@ class Query::Herbaria < Query::Base
     super.merge(
       created_at: [:time],
       updated_at: [:time],
-      ids: [Herbarium],
+      id_in_set: [Herbarium],
       code_has: :string,
       name_has: :string,
       description_has: :string,

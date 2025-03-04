@@ -214,7 +214,7 @@ class ImagesControllerTest < FunctionalTestCase
   #   set = [det_unknown, min_unknown, a_campestris, c_comatus].
   #         sort_by(&:id)
   #   # query 1 (outer)
-  #   outer = Query.lookup_and_save(:Observation, ids: set)
+  #   outer = Query.lookup_and_save(:Observation, id_in_set: set)
   #   # query 2 (inner for first obs)
   #   inner = Query.lookup_and_save(:Image, observation_query: outer.params)
 
@@ -303,10 +303,8 @@ class ImagesControllerTest < FunctionalTestCase
   #   min_unknown =  observations(:minimal_unknown_obs).id
   #   a_campestris = observations(:agaricus_campestris_obs).id
   #   c_comatus =    observations(:coprinus_comatus_obs).id
-
-  #   outer = Query.lookup_and_save(
-  #     :Observation, ids: [det_unknown, min_unknown, a_campestris, c_comatus]
-  #   )
+  #   set = [det_unknown, min_unknown, a_campestris, c_comatus]
+  #   outer = Query.lookup_and_save(:Observation, id_in_set: set)
   #   inner = Query.lookup_and_save(
   #     :Image, observation_query: outer.params,
   #             group: "observation_images.observation_id"
