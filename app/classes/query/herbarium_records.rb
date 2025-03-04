@@ -11,15 +11,15 @@ class Query::HerbariumRecords < Query::Base
       updated_at: [:time],
       id_in_set: [HerbariumRecord],
       by_users: [User],
+      has_notes: :boolean,
+      notes_has: :string,
+      initial_dets: [:string],
+      initial_det_has: :string,
+      accession_numbers: [:string],
+      accession_number_has: :string,
       herbaria: [Herbarium],
       observations: [Observation],
-      pattern: :string,
-      has_notes: :boolean,
-      initial_det: [:string],
-      accession_number: [:string],
-      notes_has: :string,
-      initial_det_has: :string,
-      accession_number_has: :string
+      pattern: :string
     )
   end
 

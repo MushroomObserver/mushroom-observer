@@ -26,7 +26,12 @@ class Article < AbstractModel
   belongs_to :user
   belongs_to :rss_log
 
-  scope :index_order, -> { order(created_at: :desc, id: :desc) }
+  scope :index_order,
+        -> { order(created_at: :desc, id: :desc) }
+  scope :title_has,
+        ->(phrase) { search_columns(Article[:title], phrase) }
+  scope :body_has,
+        ->(phrase) { search_columns(Article[:body], phrase) }
 
   # Automatically log standard events.
   self.autolog_events = [:created!, :updated!, :destroyed!]

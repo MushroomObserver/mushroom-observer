@@ -98,7 +98,7 @@ class CommentsController < ApplicationController
       opts[:letters] = "users.login"
     end
 
-    @full_detail = query.params[:for_target].present?
+    @full_detail = query.params[:target].present?
 
     opts
   end

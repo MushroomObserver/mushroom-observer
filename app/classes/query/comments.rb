@@ -12,11 +12,11 @@ class Query::Comments < Query::Base
       id_in_set: [Comment],
       by_users: [User],
       for_user: User,
+      target: { id: AbstractModel, type: :string },
       types: [{ string: Comment::ALL_TYPE_TAGS }],
       summary_has: :string,
       content_has: :string,
-      pattern: :string,
-      target: { id: AbstractModel, type: :string }
+      pattern: :string
     )
   end
 

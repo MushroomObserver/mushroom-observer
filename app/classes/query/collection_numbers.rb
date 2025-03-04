@@ -13,8 +13,8 @@ class Query::CollectionNumbers < Query::Base
       by_users: [User],
       observations: [Observation],
       pattern: :string,
-      name: [:string],
-      number: [:string],
+      names: [:string],
+      numbers: [:string],
       name_has: :string,
       number_has: :string
     )
@@ -31,8 +31,8 @@ class Query::CollectionNumbers < Query::Base
   end
 
   def add_collection_number_conditions
-    add_exact_match_condition("collection_numbers.name", params[:name])
-    add_exact_match_condition("collection_numbers.number", params[:number])
+    add_exact_match_condition("collection_numbers.name", params[:names])
+    add_exact_match_condition("collection_numbers.number", params[:numbers])
     add_search_condition("collection_numbers.name", params[:name_has])
     add_search_condition("collection_numbers.number", params[:number_has])
   end

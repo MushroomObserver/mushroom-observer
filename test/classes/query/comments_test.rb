@@ -21,6 +21,8 @@ class Query::CommentsTest < UnitTestCase
     obs = observations(:minimal_unknown_obs)
     expects = Comment.index_order.where(target_id: obs.id).distinct
     assert_query(expects, :Comment, target: { id: obs, type: :Observation })
+    expects = Comment.index_order.target(obs).distinct
+    assert_query(expects, :Comment, target: { id: obs, type: :Observation })
   end
 
   def test_comment_for_user
@@ -45,5 +47,17 @@ class Query::CommentsTest < UnitTestCase
               where(Comment[:summary].matches("%unknown%").
                     or(Comment[:comment].matches("%unknown%"))).uniq
     assert_query(expects, :Comment, pattern: "unknown")
+    expects = Comment.pattern("unknown").index_order
+    assert_query(expects, :Comment, pattern: "unknown")
+  end
+
+  def test_comment_summary_has
+    expects = Comment.summary_has("Let's").index_order
+    assert_query(expects, :Comment, summary_has: "Let's")
+  end
+
+  def test_comment_content_has
+    expects = Comment.content_has("really cool").index_order
+    assert_query(expects, :Comment, content_has: "really cool")
   end
 end

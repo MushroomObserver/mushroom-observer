@@ -37,8 +37,8 @@ class API2
         updated_at: parse_range(:time, :updated_at),
         by_users: parse_array(:user, :user, help: :creator),
         observations: parse_array(:observation, :observation, as: :id),
-        name: parse(:string, :collector, help: 1),
-        number: parse(:string, :number, help: 1),
+        names: parse(:string, :collector, help: 1),
+        numbers: parse(:string, :number, help: 1),
         name_has: parse(:string, :collector_has, help: 1),
         number_has: parse(:string, :number_has, help: 1)
       }
