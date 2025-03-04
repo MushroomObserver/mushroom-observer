@@ -39,8 +39,8 @@ class Query::ExternalLinksTest < UnitTestCase
   def test_external_link_url_has
     site = external_sites(:inaturalist)
     assert_query(site.external_links.sort_by(&:url),
-                 :ExternalLink, url_has: "iNaturalist")
-    expects = ExternalLink.url_has("iNaturalist").index_order
-    assert_query(expects, :ExternalLink, url_has: site)
+                 :ExternalLink, url_has: "inaturalist.org")
+    expects = ExternalLink.url_has("inaturalist.org").index_order
+    assert_query(expects, :ExternalLink, url_has: "inaturalist.org")
   end
 end
