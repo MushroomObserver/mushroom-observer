@@ -75,7 +75,7 @@ class CollectionNumber < AbstractModel
   scope :number_has,
         ->(str) { search_columns(CollectionNumber[:number], str) }
 
-  scope :pattern_search, lambda { |phrase|
+  scope :pattern, lambda { |phrase|
     cols = (CollectionNumber[:name] + CollectionNumber[:number])
     search_columns(cols, phrase).distinct
   }
