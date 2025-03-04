@@ -20,16 +20,16 @@ class Query::ImagesTest < UnitTestCase
   end
 
   def test_image_content_types
-    expects = Image.index_order.with_content_types(%w[jpg gif png])
+    expects = Image.index_order.content_types(%w[jpg gif png])
     assert_query(expects, :Image, content_types: %w[jpg gif png])
-    expects = Image.index_order.with_content_types(%w[raw])
+    expects = Image.index_order.content_types(%w[raw])
     assert_query(expects, :Image, content_types: %w[raw])
   end
 
   def test_image_has_notes
     expects = Image.index_order.has_notes
     assert_query(expects, :Image, has_notes: true)
-    expects = Image.index_order.has_no_notes
+    expects = Image.index_order.has_notes(false)
     assert_query(expects, :Image, has_notes: false)
   end
 
@@ -46,14 +46,14 @@ class Query::ImagesTest < UnitTestCase
   end
 
   def test_image_license
-    expects = Image.index_order.with_license(License.preferred)
+    expects = Image.index_order.license(License.preferred)
     assert_query(expects, :Image, license: License.preferred)
   end
 
   def test_image_has_votes
     expects = Image.index_order.has_votes
     assert_query(expects, :Image, has_votes: true)
-    expects = Image.index_order.has_no_votes
+    expects = Image.index_order.has_votes(false)
     assert_query(expects, :Image, has_votes: false)
   end
 
@@ -78,7 +78,7 @@ class Query::ImagesTest < UnitTestCase
   def test_image_ok_for_export
     expects = Image.index_order.ok_for_export
     assert_query(expects, :Image, ok_for_export: true)
-    expects = Image.index_order.not_ok_for_export
+    expects = Image.index_order.ok_for_export(false)
     assert_query(expects, :Image, ok_for_export: false)
   end
 
