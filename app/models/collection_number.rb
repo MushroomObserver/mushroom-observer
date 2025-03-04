@@ -60,7 +60,7 @@ class CollectionNumber < AbstractModel
 
   scope :index_order, -> { order(name: :asc, number: :asc) }
 
-  scope :for_observations, lambda { |obs|
+  scope :observations, lambda { |obs|
     joins(:observation_collection_numbers).
       where(observation_collection_numbers: { observation: obs })
   }
