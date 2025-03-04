@@ -19,7 +19,7 @@ class Query::ScopeClasses::Images < Query::BaseAR
       date: [:date],
       id_in_set: [Image],
       by_users: [User],
-      size: [{ string: Image::ALL_SIZES - [:full_size] }],
+      sizes: [{ string: Image::ALL_SIZES - [:full_size] }],
       content_types: [{ string: Image::ALL_EXTENSIONS }],
       has_notes: :boolean,
       notes_has: :string,
