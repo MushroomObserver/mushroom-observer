@@ -13,16 +13,16 @@ module Image::Scopes
 
     scope :size, lambda { |min, max = min|
       if max == min
-        with_min_size(min)
+        min_size(min)
       else
-        with_min_size(min).with_max_size(max)
+        min_size(min).max_size(max)
       end
     }
-    scope :with_min_size, lambda { |min|
+    scope :min_size, lambda { |min|
       size = Image::ALL_SIZES_INDEX[min.to_sym]
       where(Image[:width].gteq(size).or(Image[:height].gteq(size)))
     }
-    scope :with_max_size, lambda { |max|
+    scope :max_size, lambda { |max|
       size = Image::ALL_SIZES_INDEX[max.to_sym]
       where(Image[:width].lt(size).or(Image[:height].lt(size)))
     }
