@@ -18,6 +18,10 @@ module Name::Format
     str
   end
 
+  def html_name
+    display_name.t.gsub("&#8216;", "'").gsub("&#8217;", "'").html_safe
+  end
+
   # Alias for +display_name+ to be consistent with other objects.
   def format_name
     display_name
