@@ -25,9 +25,17 @@ class Query::CollectionNumbersTest < UnitTestCase
               sort_by(&:format_name)
     assert_query(expects, :CollectionNumber, pattern: "Singer")
 
+    expects = CollectionNumber.pattern("Singer").index_order.
+              sort_by(&:format_name)
+    assert_query(expects, :CollectionNumber, pattern: "Singer")
+
     expects = CollectionNumber.index_order.
               where(CollectionNumber[:name].matches("%123a%").
                     or(CollectionNumber[:number].matches("%123a%"))).
+              sort_by(&:format_name)
+    assert_query(expects, :CollectionNumber, pattern: "123a")
+
+    expects = CollectionNumber.pattern("123a").index_order.
               sort_by(&:format_name)
     assert_query(expects, :CollectionNumber, pattern: "123a")
   end
