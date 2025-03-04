@@ -40,6 +40,8 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
     # First attempt at creating a list.
     login!(dick)
     visit("/species_lists/new")
+    assert_selector("body.species_lists__new")
+
     member_notes = "Member notes."
     within("#species_list_form") do
       assert_field("list_members", text: "")
@@ -70,6 +72,7 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("#ambiguous_names", text: /Suillus.*White/)
 
     # Fix the ambiguous names: should be good now.
+    # list_members is an autocompleter!
     within("#species_list_form") do
       assert_equal(list.split("\r\n").sort,
                    find("#list_members").text.split("\r ").sort)
@@ -92,18 +95,21 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
       "Suillus E.B. White",
       "Amanita baccata sensu Arora",
       "Caloplaca arnoldii subsp. obliterate"
-    ].sort, obs.map(&:name).map(&:search_name).sort)
+    ].sort, obs.map { |o| o.name.search_name }.sort)
     assert_equal("List Title", spl.title)
     assert_equal(albion, spl.location)
     assert_equal("List notes.", spl.notes.strip)
-    assert_equal(albion, obs.last.location)
+    obs_last = obs.last
+    assert_equal(albion, obs_last.location)
     assert_equal(member_notes,
-                 obs.last.notes[Observation.other_notes_key].strip)
-    assert_true(obs.last.is_collection_location)
-    assert_true(obs.last.specimen)
+                 obs_last.notes[Observation.other_notes_key].strip)
+    assert_true(obs_last.is_collection_location)
+    assert_true(obs_last.specimen)
 
     # Try making some edits, too.
     first(:link, href: /#{edit_species_list_path(spl.id)}/).click
+    assert_selector("body.species_lists__edit")
+
     new_member_notes = "New member notes."
     within("#species_list_form") do
       assert_field("list_members", text: "")
@@ -150,18 +156,19 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
       "Caloplaca arnoldii subsp. obliterate",
       "Agaricus nova",
       "Amanita baccata sensu Borealis"
-    ].sort, obs.map(&:name).map(&:search_name).sort)
+    ].sort, obs.map { |o| o.name.search_name }.sort)
     assert_equal("Something New", spl.title)
     assert_equal(new_location, spl.where)
     assert_nil(spl.location)
     assert_equal("New list notes.", spl.notes.strip)
-    assert_nil(obs.last.location)
-    assert_equal(new_location, obs.last.where)
-    assert_nil(obs.last.location)
+    obs_last = obs.last
+    assert_nil(obs_last.location)
+    assert_equal(new_location, obs_last.where)
+    assert_nil(obs_last.location)
     assert_equal(new_member_notes,
-                 obs.last.notes[Observation.other_notes_key].strip)
-    assert_false(obs.last.is_collection_location)
-    assert_false(obs.last.specimen)
+                 obs_last.notes[Observation.other_notes_key].strip)
+    assert_false(obs_last.is_collection_location)
+    assert_false(obs_last.specimen)
 
     # Should have chained us into create_location.  Define this location
     # and make sure it updates both the observations and the list.
@@ -185,12 +192,13 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
     assert_equal(newer_location_reverse, loc.display_name)
     spl.reload
     obs = spl.observations
+    obs_last = obs.last
     assert_equal(loc.name, spl.where)
     assert_equal(loc, spl.location)
-    assert_equal(loc.name, obs.last.where)
-    assert_equal(loc, obs.last.location)
+    assert_equal(loc.name, obs_last.where)
+    assert_equal(loc, obs_last.location)
 
-    # Try adding a comment, just for kicks.
+    # Try adding a comment, just for kicks. This will hit HTML, not Turbo
     click_link(href: /#{new_comment_path}/)
     assert_selector("body.comments__new")
     assert_selector("#title", text: /#{spl.title}/)
@@ -205,5 +213,19 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("#title", text: /#{spl.title}/)
     assert_selector(".comment", text: /Slartibartfast/)
     assert_selector(".comment", text: /Steatopygia/)
+  end
+
+  def test_add_remove_from_another_list
+    spl = species_lists(:unknown_species_list)
+
+    login
+    visit(species_list_path(spl))
+    click_on(:species_list_show_add_remove_from_another_list.l)
+
+    assert_match(
+      edit_species_list_observations_path, current_path,
+      "Clicking #{:species_list_show_add_remove_from_another_list.l} " \
+      "should go to #{:species_list_add_remove_title.l}"
+    )
   end
 end

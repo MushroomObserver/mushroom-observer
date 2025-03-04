@@ -80,6 +80,8 @@
 ############################################################################
 
 class AbstractModel < ApplicationRecord
+  include Scopes
+
   self.abstract_class = true
 
   def self.acts_like_model?
@@ -99,39 +101,6 @@ class AbstractModel < ApplicationRecord
   def type_tag
     self.class.name.underscore.to_sym
   end
-
-  ##############################################################################
-  #
-  #  :section: Scopes
-  #
-  ##############################################################################
-
-  scope :created_on, lambda { |ymd_string|
-    where(arel_table[:created_at].format("%Y-%m-%d") == ymd_string)
-  }
-  scope :created_after, lambda { |ymd_string|
-    where(arel_table[:created_at].format("%Y-%m-%d") >= ymd_string)
-  }
-  scope :created_before, lambda { |ymd_string|
-    where(arel_table[:created_at].format("%Y-%m-%d") <= ymd_string)
-  }
-  scope :created_between, lambda { |earliest, latest|
-    where(arel_table[:created_at].format("%Y-%m-%d") >= earliest).
-      where(arel_table[:created_at].format("%Y-%m-%d") <= latest)
-  }
-  scope :updated_on, lambda { |ymd_string|
-    where(arel_table[:updated_at].format("%Y-%m-%d") == ymd_string)
-  }
-  scope :updated_after, lambda { |ymd_string|
-    where(arel_table[:updated_at].format("%Y-%m-%d") >= ymd_string)
-  }
-  scope :updated_before, lambda { |ymd_string|
-    where(arel_table[:updated_at].format("%Y-%m-%d") <= ymd_string)
-  }
-  scope :updated_between, lambda { |earliest, latest|
-    where(arel_table[:updated_at].format("%Y-%m-%d") >= earliest).
-      where(arel_table[:updated_at].format("%Y-%m-%d") <= latest)
-  }
 
   ##############################################################################
   #
@@ -156,14 +125,32 @@ class AbstractModel < ApplicationRecord
     nil
   end
 
+  # At minimum this list should include all objects that can have
+  # comments since this gets used by the Comment show page.
+  NAME_TO_TYPE = {
+    "Location" => "Location",
+    "location_description" => "LocationDescription",
+    "LocationDescription" => "LocationDescription",
+    "Name" => "Name",
+    "name_description" => "NameDescription",
+    "NameDescription" => "NameDescription",
+    "NameTracker" => "NameTracker",
+    "Observation" => "Observation",
+    "Project" => "Project",
+    "SpeciesList" => "SpeciesList"
+  }.freeze
+
   # Look up an object given type and id.
   #
   #   # Look up the object a comment is attached to.
   #   # (Note that in this case this is equivalent to "self.object"!)
   #   obj = Comment.find_object(self.object_type, self.object_id)
   #
-  def self.find_object(type, id)
-    type.classify.constantize.find(id.to_i)
+  def self.find_object(type_name, id)
+    type = NAME_TO_TYPE[type_name]
+    raise(NameError) unless type
+
+    type.constantize.find(id.to_i)
   rescue NameError, ActiveRecord::RecordNotFound
     nil
   end
@@ -188,7 +175,7 @@ class AbstractModel < ApplicationRecord
   #   Project.find_by_title_with_wildcards("FunDiS *")
   #
   def self.find_using_wildcards(col, str)
-    return send("find_by_#{col}", str) unless str.include?("*")
+    return send(:"find_by_#{col}", str) unless str.include?("*")
 
     safe_col = connection.quote_column_name(col)
     matches = where("#{safe_col} LIKE ?", str.tr("*", "%"))
@@ -212,17 +199,17 @@ class AbstractModel < ApplicationRecord
   end
 
   # This is called just after an object is created.
-  # 1) It passes off to SiteData, where it will decide whether this affects a
+  # 1) It passes off to UserStats, where it will decide whether this affects a
   #    user's contribution score, and if so update it appropriately.
   # 2) It finishes attaching the new RssLog if one exists.
   after_create :update_contribution
   def update_contribution
-    SiteData.update_contribution(:add, self)
+    UserStats.update_contribution(:add, self)
     attach_rss_log_final_step if has_rss_log?
   end
 
   # This is called just before an object's changes are saved.
-  # 1) It passes off to SiteData, where it will decide whether this affects a
+  # 1) It passes off to UserStats, where it will decide whether this affects a
   #    user's contribution score, and if so update it appropriately.
   # 2) It updates 'updated_at' whenever a record changes.
   # 3) It saves a message to the RssLog.
@@ -231,7 +218,7 @@ class AbstractModel < ApplicationRecord
   # either of these things.
   before_update :do_log_update
   def do_log_update
-    SiteData.update_contribution(:chg, self)
+    UserStats.update_contribution(:chg, self)
     autolog_updated if has_rss_log? && !@save_without_our_callbacks
   end
 
@@ -241,13 +228,13 @@ class AbstractModel < ApplicationRecord
   # end
 
   # This is called just before an object is destroyed.
-  # 1) It passes off to SiteData, where it will decide whether this affects a
+  # 1) It passes off to UserStats, where it will decide whether this affects a
   #    user's contribution score, and if so update it appropriately.
   # 2) It orphans the old RssLog if it had one.
   # 3) It also saves the id in case we needed to know what the id was later on.
   before_destroy :do_log_destroy
   def do_log_destroy
-    SiteData.update_contribution(:del, self)
+    UserStats.update_contribution(:del, self)
     autolog_destroyed if has_rss_log? && rss_log.present?
     @id_was = id
   end
@@ -677,9 +664,9 @@ class AbstractModel < ApplicationRecord
   #   # Log destruction of an Observation (can be destroyed already I think).
   #   orphan_log(:log_observation_destroyed)
   #
-  def orphan_log(*args)
+  def orphan_log(*)
     rss_log = init_rss_log(orphan: true)
-    rss_log.orphan(format_name, *args)
+    rss_log.orphan(format_name, *)
   end
 
   # Callback that logs creation.
@@ -703,14 +690,14 @@ class AbstractModel < ApplicationRecord
 
     if autolog_events.include?(event)
       touch = false
-    elsif autolog_events.include?("#{event}!".to_sym)
+    elsif autolog_events.include?(:"#{event}!")
       touch = true
     else
       return
     end
 
     type = type_tag
-    msg = "log_#{type}_#{event}".to_sym
+    msg = :"log_#{type}_#{event}"
     orphan ? orphan_log(msg, touch: touch) : log(msg, touch: touch)
   end
 
@@ -722,7 +709,7 @@ class AbstractModel < ApplicationRecord
 
     rss_log = RssLog.new
     rss_log.created_at = created_at unless new_record?
-    rss_log.send("#{type_tag}_id=", id) if id && !orphan
+    rss_log.send(:"#{type_tag}_id=", id) if id && !orphan
     rss_log.save
     attach_rss_log_first_step(rss_log) unless orphan
     rss_log
@@ -739,15 +726,15 @@ class AbstractModel < ApplicationRecord
 
   # Fill in reverse-lookup id in RssLog after creating new record.
   def attach_rss_log_final_step
-    return unless rss_log && (rss_log.send("#{type_tag}_id") != id)
+    return unless rss_log && (rss_log.send(:"#{type_tag}_id") != id)
 
-    rss_log.send("#{type_tag}_id=", id)
+    rss_log.send(:"#{type_tag}_id=", id)
     rss_log.save
   end
 
   # Add a note to the notes field with paragraph break between different notes.
   def add_note(note)
-    self.notes = notes.present? ? "\n\n#{note}" : note
+    self.notes = notes.present? ? "#{notes}\n\n#{note}" : note
     save
   end
 

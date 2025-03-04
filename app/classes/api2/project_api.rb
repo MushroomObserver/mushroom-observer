@@ -3,24 +3,39 @@
 class API2
   # API for Project
   class ProjectAPI < ModelAPI
-    self.model = Project
+    def model
+      Project
+    end
 
-    self.high_detail_page_length = 100
-    self.low_detail_page_length  = 1000
-    self.put_page_length         = 1000
-    self.delete_page_length      = 1000
+    def high_detail_page_length
+      100
+    end
 
-    self.high_detail_includes = [
-      { comments: :user },
-      :user
-    ]
+    def low_detail_page_length
+      1000
+    end
+
+    def put_page_length
+      1000
+    end
+
+    def delete_page_length
+      1000
+    end
+
+    def high_detail_includes
+      [
+        { comments: :user },
+        :user
+      ]
+    end
 
     def query_params
       {
-        where: sql_id_condition,
+        id_in_set: parse_array(:project, :id, as: :id),
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at),
-        users: parse_array(:user, :user, help: :creator),
+        by_users: parse_array(:user, :user, help: :creator),
         has_images: parse(:boolean, :has_images, limit: true),
         has_observations: parse(:boolean, :has_observations, limit: true),
         has_species_lists: parse(:boolean, :has_species_lists, limit: true),
@@ -28,6 +43,7 @@ class API2
         has_summary: parse(:boolean, :has_summary),
         title_has: parse(:string, :title_has, help: 1),
         summary_has: parse(:string, :summary_has, help: 1),
+        field_slip_prefix_has: parse(:string, :field_slip_prefix_has, help: 1),
         comments_has: parse(:string, :comments_has, help: 1)
       }
     end
@@ -37,6 +53,7 @@ class API2
       {
         title: parse(:string, :title, limit: 100),
         summary: parse(:string, :summary, default: ""),
+        field_slip_prefix: parse(:string, :field_slip_prefix, default: ""),
         user: @user
       }
     end
@@ -45,7 +62,8 @@ class API2
       parse_update_params
       {
         title: parse(:string, :set_title, limit: 100, not_blank: true),
-        summary: parse(:string, :set_summary)
+        summary: parse(:string, :set_summary),
+        field_slip_prefix: parse(:string, :set_field_slip_prefix)
       }
     end
 

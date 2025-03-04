@@ -15,6 +15,9 @@ ActionMailer::Base.raise_delivery_errors = false
 
 #  Base class for mailers for each type of email
 class ApplicationMailer < ActionMailer::Base
+  # Allow folder organization in the app/views folder
+  append_view_path Rails.root.join("app/views/mailers")
+
   # Use native Ruby URI::MailTo class
   def self.valid_email_address?(address)
     address.to_s.match?(URI::MailTo::EMAIL_REGEXP)
@@ -86,7 +89,7 @@ class ApplicationMailer < ActionMailer::Base
   def to_address(user)
     # I just want to be extra certain that we don't accidentally send email
     # to anyone who has opted out of all email.
-    return nil if user.is_a?(User) && user.no_emails
+    return nil if user.is_a?(::User) && user.no_emails
 
     address = calc_email(user)
     return nil unless ApplicationMailer.valid_email_address?(address)

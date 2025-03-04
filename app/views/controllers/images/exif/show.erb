@@ -1,0 +1,13 @@
+<%
+add_page_title(:exif_data_for_image.t(image: @image.id))
+add_tab_set(images_exif_show_tabs(image: @image))
+@container = :text
+%>
+
+<%=
+if @status
+  render(partial: "images/exif/data", locals: { data: @data })
+else
+  render(plain: @result, status: :internal_server_error)
+end
+%>

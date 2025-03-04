@@ -9,15 +9,17 @@
 # Do not add a Name starting with U or Z.
 #   AjaxControllerTest#test_auto_complete_name expects 0 Names starting with U.
 #   NameControllerTest pagination tests expect 0 Names staring with Z.
+# Do not add Ascomycetes
+#   This breaks NameTest#test_ancestors_3
 # Do not use the following as part of Names
 #   Lactarius   -- Breaks NameControllerTest#test_edit_name_deprecated
 #   Strobilurus -- Break NameControllerTest#test_edit_name_add_author
 #   Verpa -- See :suggested_by_verpa_authored below.
 # Adding almost any Name will break ScriptTest#test_refresh_name_lister_cache.
-#   Fix this by updating mushroom-observer/test/reports/name_list_data.js
+#   Fix this by updating test/reports/name_list_data.js
 #   Suggestion: whenever adding a Name, run:
-#     $ rake test test/models/script_test.rb test_refresh_name_lister_cache
-#     If that fails, update name_list_data.js from the Actual results
+#     rails t test/models/script_test.rb -n test_refresh_name_lister_cache
+#     If that fails, update test/reports/name_list_data.js from the Actual results
 
 DEFAULTS: &DEFAULTS
   author:         ""
@@ -73,6 +75,18 @@ coprinus_comatus:
   updated_at: 2007-02-27 20:48:00
   classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
   icn_id: 148667
+  deprecated: false
+
+coprinus_sensu_lato:
+  <<: *DEFAULTS
+  text_name: Coprinus
+  author: sensu lato
+  display_name: '**__Coprinus__** sensu lato'
+  search_name: Coprinus sensu lato
+  sort_name: Coprinus  sensu lato
+  rank: <%= Name.ranks[:Genus] %>
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\nOrder: _Agaricales_"
+  deprecated: false
 
 stereum:
   <<: *DEFAULTS
@@ -602,38 +616,40 @@ russula_cremoricolor_author_notes:
   created_at: 2008-03-12 20:53:40
   updated_at: 2008-03-12 20:53:40
 
-lentinellus:
+agrocybe:
   <<: *DEFAULTS
   user: rolf
-  text_name: Lentinellus
-  display_name: '**__Lentinellus__**'
-  search_name: Lentinellus
-  sort_name: Lentinellus
+  text_name: Agrocybe
+  display_name: '**__Agrocybe__**'
+  search_name: Agrocybe
+  sort_name: Agrocybe
   created_at: 2008-03-19 08:35:37
   updated_at: 2008-03-19 08:35:37
   rank: <%= Name.ranks[:Genus] %>
 
-lentinellus_ursinus_author1:
+dup_name_author1:
   <<: *DEFAULTS
   user: rolf
-  text_name: Lentinellus ursinus
-  author: Kühner
-  display_name: '**__Lentinellus ursinus__** Kühner'
-  search_name: Lentinellus ursinus Kühner
-  sort_name: Lentinellus ursinus  Kühner
+  text_name: Agrocybe arvalis
+  author: (Fr.) Singer
+  display_name: '**__Agrocybe arvalis__** (Fr.) Singer'
+  search_name: Agrocybe arvalis (Fr.) Singer
+  sort_name: Agrocybe arvalis  (Fr.) Singer
   created_at: 2008-03-19 08:35:37
   updated_at: 2008-03-19 08:35:37
+  deprecated: false
 
-lentinellus_ursinus_author2:
+dup_name_author2:
   <<: *DEFAULTS
   user: rolf
-  text_name: Lentinellus ursinus
-  author: Kuhner
-  display_name: '**__Lentinellus ursinus__** Kuhner'
-  search_name: Lentinellus ursinus Kuhner
-  sort_name: Lentinellus ursinus  Kuhner
+  text_name: Agrocybe arvalis
+  author: '(Fr.) Heim & Romagn.'
+  display_name: '**__Agrocybe arvalis__** (Fr.) Heim & Romagn.'
+  search_name: Agrocybe arvalis (Fr.) Heim & Romagn.
+  sort_name: Agrocybe arvalis  (Fr.) Heim & Romagn.
   created_at: 2008-03-19 08:35:37
   updated_at: 2008-03-19 08:35:37
+  deprecated: false
 
 macrocybe:
   <<: *DEFAULTS
@@ -654,8 +670,8 @@ macrocybe_pegler:
   text_name: Macrocybe
   author: '(H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone'
   display_name: '**__Macrocybe__** (H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone'
-  search_name: Macrocybe
-  sort_name: Macrocybe
+  search_name: 'Macrocybe (H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone'
+  sort_name: 'Macrocybe  (H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone'
   created_at: 2008-09-05 22:30:00
   updated_at: 2008-09-05 22:30:00
 
@@ -774,6 +790,7 @@ tremella:
   sort_name: Tremella  Pers.
   created_at: 2010-10-18 21:30:01
   updated_at: 2010-10-18 21:30:01
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Tremellomycetes_\r\nOrder: _Tremellales_\r\nFamily: _Tremellaceae_"
   lifeform: " lichenicolous "
 
 tremella_mesenterica:
@@ -786,6 +803,7 @@ tremella_mesenterica:
   sort_name: Tremella mesenterica  Retz.
   created_at: 2010-10-12 21:30:01
   updated_at: 2010-10-12 21:30:01
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Tremellomycetes_\r\nOrder: _Tremellales_\r\nFamily: _Tremellaceae_\r\nFamily: _Tremella_"
   lifeform: " lichenicolous "
 
 tremella_justpublished:
@@ -799,7 +817,17 @@ tremella_justpublished:
   notes: A Tremella not known to be a lichen
   created_at: 2010-12-18 21:30:01
   updated_at: 2010-12-18 21:30:01
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Tremellomycetes_\r\nOrder: _Tremellales_\r\nFamily: _Tremellaceae_\r\nFamily: _Tremella_"
   lifeform: " lichenicolous "
+
+tremella_celata:
+  <<: *DEFAULTS
+  text_name: Tremella celata
+  display_name: '**__Tremella celata__**'
+  search_name: Tremella celata
+  sort_name: Tremella celata
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Tremellomycetes_\r\nOrder: _Tremellales_\r\nFamily: _Tremellaceae_\r\nFamily: _Tremella_"
+  lifeform: " " # initially blank for testing lifeform prpogation
 
 hygrocybe:
   <<: *DEFAULTS
@@ -1258,3 +1286,31 @@ sect_agaricus:
   display_name: "**__Agaricus__** sect. **__Agaricus__**"
   sort_name:    "Agaricus  {2sect.  !Agaricus"
   classification: "Domain: _Eukarya_\r\nKingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nOrder: _Agaricales_\r\nFamily: _Agaricaceae_"
+
+lycoperdon_perlatum:
+  <<: *DEFAULTS
+  text_name: Lycoperdon perlatum
+  display_name: '**__Lycoperdon perlatum__**'
+  search_name: Lycoperdon perlatum
+  sort_name: Lycoperdon perlatum
+  created_at: 2023-11-14 20:00:00
+  updated_at: 2023-11-14 20:00:00
+  rank: <%= Name.ranks[:Species] %>
+
+pasaria:
+  <<: *DEFAULTS
+  text_name: Pasaria
+  display_name: '**__Pasaria__**'
+  search_name: Pasaria
+  sort_name: Pasaria
+  rank: <%= Name.ranks[:Genus] %>
+  classification: "" # to test if inherit link exists
+
+somion_unicolor:
+  <<: *DEFAULTS
+  text_name: Somion unicolor
+  author: '(Fr.) Spirin & Miettinen'
+  display_name: '**__Somion unicolor__** (Fr.) Spirin & Miettinen'
+  search_name: Somion unicolor (Fr.) Spirin & Miettinen
+  sort_name: Somion unicolor (Fr.)  Spirin & Miettinen
+  rank: <%= Name.ranks[:Species] %>

@@ -28,7 +28,7 @@
 #        :number       => params[:page],
 #        :num_per_page => 100,
 #      )
-#      query = Query.lookup(:Model, :flavor)
+#      query = Query.lookup(:Model)
 #      @results = query.paginate(@pages)
 #    end
 #
@@ -41,7 +41,7 @@
 #        :number       => params[:page],
 #        :num_per_page => 100,
 #      )
-#      query = Query.lookup(:Model, :flavor)
+#      query = Query.lookup(:Model)
 #      @results = query.paginate(@pages)
 #    end
 #
@@ -111,7 +111,7 @@ class MOPaginator
   # Create and initialize new instance.
   def initialize(args = {})
     args.each do |key, val|
-      send("#{key}=", val)
+      send(:"#{key}=", val)
     end
     @number ||= 1
     @num_per_page ||= 100

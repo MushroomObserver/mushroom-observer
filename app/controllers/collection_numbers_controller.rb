@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 # Controls viewing and modifying collection numbers.
+# rubocop:disable Metrics/ClassLength
 class CollectionNumbersController < ApplicationController
   before_action :login_required
   before_action :pass_query_params, only: [
@@ -10,20 +11,44 @@ class CollectionNumbersController < ApplicationController
     :show, :new, :create, :edit, :update
   ]
 
-  # Used by ApplicationController to dispatch #index to a private method
-  @index_subaction_param_keys = [
-    :pattern,
-    :observation_id,
-    :by,
-    :q,
-    :id
-  ].freeze
+  ##############################################################################
+  # INDEX
+  #
+  def index
+    store_location
+    build_index_with_query
+  end
 
-  @index_subaction_dispatch_table = {
-    by: :index_query_results,
-    q: :index_query_results,
-    id: :index_query_results
-  }.freeze
+  private
+
+  def default_sort_order
+    nil # [:name, :number]
+  end
+
+  def index_active_params
+    [:pattern, :observation, :by, :q, :id].freeze
+  end
+
+  # Display list of CollectionNumbers for an Observation
+  def observation
+    @observation = Observation.find(params[:observation])
+    store_location
+    query = create_query(
+      :CollectionNumber, observations: params[:observation].to_s
+    )
+    [query, { always_index: true }]
+  end
+
+  def index_display_opts(opts, _query)
+    {
+      letters: "collection_numbers.name",
+      num_per_page: 100
+    }.merge(opts)
+  end
+
+  public
+
+  ##############################################################################
 
   def show
     case params[:flow]
@@ -47,10 +72,8 @@ class CollectionNumbersController < ApplicationController
     @collection_number = CollectionNumber.new(name: @user.legal_name)
 
     respond_to do |format|
+      format.turbo_stream { render_modal_collection_number_form }
       format.html
-      format.js do
-        render(layout: false)
-      end
     end
   end
 
@@ -72,10 +95,8 @@ class CollectionNumbersController < ApplicationController
     return unless make_sure_can_edit!(@collection_number)
 
     respond_to do |format|
+      format.turbo_stream { render_modal_collection_number_form }
       format.html
-      format.js do
-        render(layout: false)
-      end
     end
   end
 
@@ -96,80 +117,12 @@ class CollectionNumbersController < ApplicationController
 
     @collection_number.destroy
     respond_to do |format|
-      format.js
-      format.html do
-        redirect_with_query(action: :index)
-      end
+      format.turbo_stream { render_collection_numbers_section_update }
+      format.html { redirect_with_query(action: :index) }
     end
   end
-
-  ##############################################################################
 
   private
-
-  def default_index_subaction
-    list_all
-  end
-
-  # Show list of collection_numbers.
-  def list_all
-    store_location
-    query = create_query(:CollectionNumber, :all)
-    show_selected_collection_numbers(query)
-  end
-
-  # Displays matrix of selected CollectionNumber's (based on current Query).
-  def index_query_results
-    query = find_or_create_query(:CollectionNumber, by: params[:by])
-    show_selected_collection_numbers(query, id: params[:id].to_s,
-                                            always_index: true)
-  end
-
-  # Display list of CollectionNumbers whose text matches a string pattern.
-  def pattern
-    pat = params[:pattern].to_s
-    if pat.match?(/^\d+$/) &&
-       (collection_number = CollectionNumber.safe_find(pat))
-      redirect_to(action: :show, id: collection_number.id)
-    else
-      query = create_query(:CollectionNumber, :pattern_search, pattern: pat)
-      show_selected_collection_numbers(query)
-    end
-  end
-
-  # Display list of CollectionNumbers for an Observation
-  def observation_id
-    store_location
-    query = create_query(:CollectionNumber, :for_observation,
-                         observation: params[:observation_id].to_s)
-    @links = [
-      [:show_object.l(type: :observation),
-       observation_path(params[:observation_id])],
-      [:create_collection_number.l,
-       new_collection_number_path(id: params[:observation_id])]
-    ]
-    show_selected_collection_numbers(query, always_index: true)
-  end
-
-  def show_selected_collection_numbers(query, args = {})
-    args = {
-      action: :index,
-      letters: "collection_numbers.name",
-      num_per_page: 100
-    }.merge(args)
-
-    @links ||= []
-
-    # Add some alternate sorting criteria.
-    args[:sorting_links] = [
-      ["name",       :sort_by_name.t],
-      ["number",     :sort_by_number.t],
-      ["created_at", :sort_by_created_at.t],
-      ["updated_at", :sort_by_updated_at.t]
-    ]
-
-    show_index_of_objects(query, args)
-  end
 
   def set_ivars_for_new
     @layout = calc_layout_params
@@ -181,6 +134,7 @@ class CollectionNumbersController < ApplicationController
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
   end
 
+  # create
   def create_collection_number
     @collection_number =
       CollectionNumber.new(permitted_collection_number_params)
@@ -194,6 +148,7 @@ class CollectionNumbersController < ApplicationController
     end
   end
 
+  # create, update
   def flash_error_and_reload_if_form_has_errors
     redirect_params = case action_name # this is a rails var
                       when "create"
@@ -213,15 +168,15 @@ class CollectionNumbersController < ApplicationController
         format.html do
           redirect_to(redirect_params) and return true
         end
-        format.js do
-          render(partial: "form_reload",
-                 locals: { action: action_name.to_sym }) and return true
+        format.turbo_stream do
+          reload_collection_number_modal_form_and_flash
         end
       end
     end
     false
   end
 
+  # create
   def save_collection_number_and_update_associations
     @collection_number.save
     @collection_number.add_observation(@observation)
@@ -232,10 +187,13 @@ class CollectionNumbersController < ApplicationController
       format.html do
         redirect_to_back_object_or_object(@back_object, @collection_number)
       end
-      format.js # updates the observation. @back_object is set already
+      format.turbo_stream do
+        render_collection_numbers_section_update
+      end
     end
   end
 
+  # create
   def flash_collection_number_already_used_and_return
     flash_warning(:edit_collection_number_already_used.t) if
       @other_number.observations.any?
@@ -244,6 +202,7 @@ class CollectionNumbersController < ApplicationController
     show_flash_and_send_back
   end
 
+  # update
   def update_collection_number
     old_format_name = @collection_number.format_name
     @collection_number.attributes = permitted_collection_number_params
@@ -257,6 +216,7 @@ class CollectionNumbersController < ApplicationController
     end
   end
 
+  # update
   def update_collection_number_and_associations(old_format_name)
     @collection_number.save
     @collection_number.change_corresponding_herbarium_records(old_format_name)
@@ -266,11 +226,16 @@ class CollectionNumbersController < ApplicationController
       format.html do
         redirect_to_back_object_or_object(@back_object, @collection_number)
       end
-      @observation = @back_object # if we're here, we're on an obs page
-      format.js # updates the page
+      format.turbo_stream do
+        # if we're here, we're on an obs page.
+        # back_object should be the obs, sent via :back param from the link
+        @observation = @back_object
+        render_collection_numbers_section_update
+      end
     end
   end
 
+  # update
   def flash_numbers_merged_and_update_associations(old_format_name)
     flash_warning(
       :edit_collection_numbers_merged.t(
@@ -312,7 +277,7 @@ class CollectionNumbersController < ApplicationController
   def normalize_parameters
     [:name, :number].each do |arg|
       val = @collection_number.send(arg).to_s.strip_html.strip_squeeze
-      @collection_number.send("#{arg}=", val)
+      @collection_number.send(:"#{arg}=", val)
     end
   end
 
@@ -333,7 +298,7 @@ class CollectionNumbersController < ApplicationController
       @back_object = Observation.safe_find(@back)
       return if @back_object
 
-      @back_object = if @collection_number.observations.count == 1
+      @back_object = if @collection_number.observations.one?
                        @collection_number.observations.first
                      else
                        @collection_number
@@ -347,10 +312,56 @@ class CollectionNumbersController < ApplicationController
         redirect_to_back_object_or_object(@back_object, @collection_number) and
           return
       end
-      format.js do
-        # renders the flash in the modal via js
-        render(partial: "shared/update_modal_flash") and return
+      # renders the flash in the modal, but not sure it's necessary
+      # to have a response here. are they getting sent back?
+      format.turbo_stream do
+        render(partial: "shared/modal_flash_update",
+               locals: { identifier: modal_identifier }) and return
       end
     end
   end
+
+  def render_modal_collection_number_form
+    render(
+      partial: "shared/modal_form",
+      locals: { title: modal_title, identifier: modal_identifier,
+                form: "collection_numbers/form" }
+    ) and return
+  end
+
+  def modal_identifier
+    case action_name
+    when "new", "create"
+      "collection_number"
+    when "edit", "update"
+      "collection_number_#{@collection_number.id}"
+    end
+  end
+
+  def modal_title
+    case action_name
+    when "new", "create"
+      helpers.collection_number_form_new_title
+    when "edit", "update"
+      helpers.collection_number_form_edit_title(c_n: @collection_number)
+    end
+  end
+
+  # ivar @observation used in the partial
+  def render_collection_numbers_section_update
+    render(
+      partial: "observations/show/section_update",
+      locals: { identifier: "collection_numbers" }
+    ) and return
+  end
+
+  # this updates both the form and the flash
+  def reload_collection_number_modal_form_and_flash
+    render(
+      partial: "shared/modal_form_reload",
+      locals: { identifier: modal_identifier,
+                form: "collection_numbers/form" }
+    ) and return true
+  end
 end
+# rubocop:enable Metrics/ClassLength

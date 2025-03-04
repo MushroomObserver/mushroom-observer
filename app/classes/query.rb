@@ -8,25 +8,22 @@
 #  are dyamically joined with any number of additional tables, as required by
 #  sorting and selection conditions.
 #
-#  Queries are specified by a model and flavor.  The model specifies which kind
-#  of objects are being requested, e.g. :Name or :Observation.  The flavor
-#  summarizes the type of search, e.g. :all or :at_location.  Only certain
-#  flavors are allowed for a given model.  For example, it makes no sense to
-#  request comments sorted by name since they have no name.
+#  Queries are specified by a model.  The model specifies which kind
+#  of objects are being requested, e.g. :Name or :Observation.
 #
 #  Each model has a default search flavor (:default), which is used by the prev
 #  and next actions when the specified query no longer exists.  For example, if
 #  you click on an observation from the main index, prev and next travserse the
-#  results of an :Observation :by_rss_log query.  If the user comes back a day
-#  later, this query will have been culled by the garbage collector (see
+#  results of an :Observation :all by: :rss_log query.  If the user comes back
+#  a day later, this query will have been culled by the garbage collector (see
 #  below), so prev and next need to be able to create a default query on the
 #  fly.  In this case it may be :Observation :all (see default_flavors array
 #  below).
 #
 #  In addition, some queries require additional parameters.  For example,
 #  :Comment :for_user requires a user_id (it retrieves comments posted on a
-#  given user's observations).  These parameters are saved along-side the model
-#  and flavor, and together the three fully-specify a query so that it may be
+#  given user's observations).  These parameters are saved along-side the model,
+#  and together these fully specify a query so that it may be
 #  recreated and executed at a later time, even potentially by another user
 #  (e.g., if users share links that have query specs embedded in them).
 #
@@ -34,7 +31,7 @@
 #
 #  Get observations created by @user:
 #
-#    query = Query.lookup(:Observation, :all, users: [@user])
+#    query = Query.lookup(:Observation, by_users: [@user])
 #
 #  You may further tweak a query after it's been created:
 #
@@ -115,70 +112,6 @@
 #      puts "There are no matching images!"
 #    end
 #
-#  == Nested Queries
-#
-#  Queries are allowed to be nested inside other queries.  This is a tricky,
-#  nasty bit of chicanery that allows us to do things like step through all of
-#  the images of the results of an observation search.
-#
-#  The critical problem here is that in a nested query like this, the results
-#  are no longer guaranteed to be unique.  This is a problem because the
-#  sequence operators rely on being able to find out where it is in the results
-#  based on the result id.  If that result occurs more than once, this
-#  reverse-lookup is no longer well-defined (ambiguous).
-#
-#  Instead, each inner query (images for a single observation in the example
-#  above) lives only for a single result of the outer query.  If you query the
-#  results of the inner query, you only get the results for the current outer
-#  result (only the images for a single observation).
-#
-#  The sequence operators, however, know how to communicate with the outer
-#  query, so inner.next will step right off the end of the present inner query,
-#  request outer.next, and go to the first result of the new inner query.
-#
-#  The unfortunate side-effect of this behavior is that inner.next has to
-#  replace the inner query.  This would invalidate any urls that refer to the
-#  old inner query.  Instead we have inner.next return a *clone* of the old
-#  inner query if it needs to change it.
-#
-#  This is how it should work: (this code would be in a controller, with access
-#  to the handy helper method ApplicationController#find_or_create_query)
-#
-#    # The setup all happens in observations/show:
-#    outer = find_or_create_query(:Observation)
-#    inner = create_query(:Image, :inside_observation, outer: outer,
-#                         observation: @observation)
-#    inner.results each do |image|
-#      link_to(image,
-#        add_query_param({ action: :show, id: image.id }, inner))
-#    end
-#
-#    # Now show_image can be oblivous:
-#    query = find_or_create_query(:Image)
-#    link_to("Prev",
-#      add_query_param({ action: :show, flow: :prev, id: image.id }, query))
-#    link_to("Next",
-#      add_query_param({ action: :show, flow: :next, id: image.id }, query))
-#    link_to("Back",
-#      add_query_param({ action: :show, id: image.id, query))
-#
-#    # And this is how prev and next work:
-#    query = find_or_create_query(:Image, current: params[:id].to_s)
-#    if new_query = query.next
-#      redirect_to(
-#        add_query_param({ action: :show, id: new_query.current_id },
-#                        new_query)
-#      )
-#    else
-#      flash_error 'No more images!'
-#    end
-#
-#  *NOTE*: The inner query knows about the outer query.  So, when show_image
-#  links back to observations/show (see above), and observations/show looks up
-#  the inner query, even though the inner query is an image query, it should
-#  still know to use the outer query.  (Normally, observations/show would throw
-#  away any non-observation-based query it is passed.)
-#
 #  == Caching
 #
 #  It caches results, and result_ids.  Any of results, result_ids, num_results,
@@ -200,8 +133,6 @@
 #
 #  == Attributes
 #  model::              Class of model results belong to.
-#  flavor::             Type of query (Symbol).
-#  outer::              Outer Query (if nested).
 #  params::             Hash of parameters used to create query.
 #  current::            Current location in query (for sequence operators).
 #  join::               Tree of tables used in query.
@@ -209,16 +140,25 @@
 #  where::              List of WHERE clauses in query.
 #  group::              GROUP BY clause in query.
 #  order::              ORDER BY clause in query.
+#  selects::            SELECT clause in query.
+#  subqueries::         Cache of subquery Query instances, used for filtering.
 #
 #  == Class Methods
 #  lookup::             Instantiate Query of given model, flavor and params.
-#  deserialize::        Instantiate Query described by a string.
+#  lookup_and_save::    Ditto, plus save the QueryRecord
+#  find::               Find a QueryRecord id and reinstantiate a Query from it.
+#  safe_find::          Same as above, with rescue.
+#  rebuild_from_description:: Instantiate Query described by description string.
+#  related?::           Can a query of this model be converted to a subquery
+#                       filtering results of another model?
+#  current_or_related_query:: Convert queries from one model to another; can be
+#                             called recursively. To avoid repetitive recursion,
+#                             it checks for a nested query that may be for the
+#                             intended target model.
 #
 #  ==Instance Methods
 #  serialize::          Returns string which describes the Query completely.
 #  initialized?::       Has this query been initialized?
-#  coerce::             Coerce a query for one model into a query for another.
-#  coercable?::         Check if +coerce+ will work (but don't actually do it).
 #
 #  ==== Sequence operators
 #  first::              Go to first result.
@@ -250,18 +190,6 @@
 #  paginate_ids::       Array of subset of results, just ids.
 #  clear_cache::        Clear results cache.
 #
-#  ==== Outer queries
-#  outer::              Outer Query (if nested).
-#  outer?::             Is this Query nested?
-#  get_outer_current_id::  Get outer Query's current id.
-#  outer_first::        Call +first+ on outer Query.
-#  outer_prev::         Call +prev+ on outer Query.
-#  outer_next::         Call +next+ on outer Query.
-#  outer_last::         Call +last+ on outer Query.
-#  new_inner::          Create new inner Query based the given outer Query.
-#  new_inner_if_necessary::
-#                       Create new inner Query if the outer Query has changed.
-#
 #  == Internal Variables
 #
 #  ==== Instance Variables
@@ -275,36 +203,23 @@
 #                       queries only).
 #  @params_cache::      Hash: where instances passed in via params are cached.
 #
-module Query
-  def self.new(model, flavor = :all, params = {}, current = nil)
-    klass = "Query::#{model}#{flavor.to_s.camelize}".constantize
+#  NOTE: The Query::Model classes do not inherit from this class.
+#        They inherit from Query::Base.
+#        This class is simply a convenience delegator for class methods that
+#        need to be called from outside Query, like `Query.lookup`
+#
+class Query
+  include Query::Modules::ClassMethods
+
+  def self.new(model, params = {}, current = nil)
+    klass = "Query::#{model.to_s.pluralize}".constantize
     query = klass.new
     query.params = params
+    query.subqueries = {}
     query.validate_params
     query.current = current if current
+    # query.initialize_query # if you want the attributes right away
     query
-  end
-
-  # Delegate all these to Query::Base class.
-
-  def self.deserialize(*args)
-    Query::Base.deserialize(*args)
-  end
-
-  def self.safe_find(*args)
-    Query::Base.safe_find(*args)
-  end
-
-  def self.find(*args)
-    Query::Base.find(*args)
-  end
-
-  def self.lookup_and_save(*args)
-    Query::Base.lookup_and_save(*args)
-  end
-
-  def self.lookup(*args)
-    Query::Base.lookup(*args)
   end
 
   def default_order

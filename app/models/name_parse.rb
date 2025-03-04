@@ -5,7 +5,7 @@
 #
 #  This class is used by NameSorter and a few controllers (e.g.
 #  NameController, SpeciesListController) to help parse lists of names, such as
-#  in bulk_name_edit, create/edit_species_list, and change_synonyms.  It splits
+#  in create/edit_species_list, and change_synonyms.  It splits
 #  each line up into a name and an optional synonym:
 #
 #    Species name

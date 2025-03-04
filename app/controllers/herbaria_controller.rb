@@ -7,8 +7,8 @@
 # edit (get)
 # index (get)                      (default) list query results
 # index (get, pattern: present)    list Herbaria matching a string pattern
-# index (get, flavor: nonpersonal) list institutional Herbaria registered in IH
-# index (get, flavor: all)         list all Herbaria
+# index (get, nonpersonal: true)   list institutional Herbaria registered in IH
+# index (get)                       list all Herbaria
 # new (get)
 # show (get)                       show one herbarium
 # show { flow: :prev } (get)       show next herbarium in search results
@@ -31,9 +31,9 @@
 # edit_herbarium (get)              edit (get)
 # edit_herbarium (post)             update (patch)
 # herbarium_search (get)            index (get, pattern: present)
-# index (get)                       index (get, flavor: nonpersonal)
+# index (get)                       index (get, nonpersonal: true)
 # index_herbarium (get)             index (get) - lists query results
-# list_herbaria (get)               index (get, flavor: all) - all herbaria
+# list_herbaria (get)               index (get) - all herbaria
 # *merge_herbaria (get)             Herbaria::Merges#create (post)
 # *next_herbarium (get)             show { flow: :next } (get))
 # *prev_herbarium (get)             show { flow: :prev } (get)
@@ -45,8 +45,9 @@
 # See https://tinyurl.com/ynapvpt7
 
 # View and modify Herbaria (displayed as "Fungaria")
-# rubocop:disable Metrics/ClassLength
-class HerbariaController < ApplicationController
+class HerbariaController < ApplicationController # rubocop:disable Metrics/ClassLength
+  include ::Locationable
+
   before_action :login_required
   # only: [:create, :destroy, :edit, :new, :update]
   before_action :store_location, only: [:create, :edit, :new, :show, :update]
@@ -55,33 +56,61 @@ class HerbariaController < ApplicationController
   ]
   before_action :keep_track_of_referrer, only: [:destroy, :edit, :new]
 
-  # ---------- Actions to Display data (index, show, etc.) ---------------------
+  ##############################################################################
+  # INDEX
 
   # Display list of selected herbaria, based on params
   #   params[:pattern].present? - Herbaria based on Pattern Search
-  #   [:flavor] == "all" - all Herbaria, regardless of query
-  #   [:flavor] == "nonpersonal" - all nonpersonal (institutional) Herbaria
-  #   default - Herbaria based on current Query (Sort links land on this action)
+  #   [:nonpersonal].blank? - all Herbaria, regardless of query
+  #   [:nonpersonal].present? - all nonpersonal (institutional) Herbaria
+  #   sorted_index - Herbaria based on current Query
+  #                         (Sort links land on this action)
+  #
   def index
-    return patterned_index if params[:pattern].present?
-
-    case params[:flavor]
-    when "all" # List all herbaria
-      show_selected_herbaria(
-        create_query(:Herbarium, :all, by: :name), always_index: true
-      )
-    when "nonpersonal" # List institutional Herbaria
-      store_location
-      show_selected_herbaria(
-        create_query(:Herbarium, :nonpersonal, by: :code_then_name),
-        always_index: true
-      )
-    else # default List herbaria resulting from query
-      show_selected_herbaria(find_or_create_query(:Herbarium, by: params[:by]),
-                             id: params[:id].to_s, always_index: true)
-    end
+    set_merge_ivar if params[:merge]
+    build_index_with_query
   end
 
+  private
+
+  # If user clicks "merge" on an herbarium, it reloads the page and asks
+  # them to click on the destination herbarium to merge it with.
+  def set_merge_ivar
+    @merge = Herbarium.safe_find(params[:merge])
+  end
+
+  def default_sort_order
+    :name
+  end
+
+  def index_active_params
+    [:pattern, :nonpersonal, :by, :q, :id].freeze
+  end
+
+  # Show selected list, based on current Query.
+  # (Linked from show template, next to "prev" and "next"... or will be.)
+  # Passes explicit :by param to affect title (only).
+  def sorted_index_opts
+    sorted_by = params[:by] || default_sort_order
+    super.merge(query_args: { by: sorted_by })
+  end
+
+  def nonpersonal
+    store_location
+    query = create_query(:Herbarium, nonpersonal: true, by: :code_then_name)
+    [query, { always_index: true }]
+  end
+
+  def index_display_opts(opts, _query)
+    { letters: "herbaria.name",
+      num_per_page: 100,
+      include: [:curators, :herbarium_records, :personal_user] }.merge(opts)
+  end
+
+  public
+
+  ##############################################################################
+  #
   # Display a single herbarium, based on :flow params
   # :flow is added in _prev_next_page partial, ApplicationHelper#link_next
   def show
@@ -100,16 +129,59 @@ class HerbariaController < ApplicationController
 
   def new
     @herbarium = Herbarium.new
+    respond_to do |format|
+      format.turbo_stream { render_modal_herbarium_form }
+      format.html
+    end
   end
 
   def edit
     @herbarium = find_or_goto_index(Herbarium, params[:id])
-    return unless @herbarium
-    return unless make_sure_can_edit!
+    return unless @herbarium && make_sure_can_edit!
 
+    set_up_herbarium_for_edit
+    respond_to do |format|
+      format.turbo_stream { render_modal_herbarium_form }
+      format.html
+    end
+  end
+
+  def set_up_herbarium_for_edit
     @herbarium.place_name         = @herbarium.location.try(&:name)
     @herbarium.personal           = @herbarium.personal_user_id.present?
     @herbarium.personal_user_name = @herbarium.personal_user.try(&:login)
+  end
+
+  def render_modal_herbarium_form
+    render(partial: "shared/modal_form",
+           locals: { title: modal_title, action: modal_form_action,
+                     identifier: modal_identifier, local: false,
+                     form: "herbaria/form" }) and return
+  end
+
+  def modal_identifier
+    case action_name
+    when "new", "create"
+      "herbarium"
+    when "edit", "update"
+      "herbarium_#{@herbarium.id}"
+    end
+  end
+
+  def modal_title
+    case action_name
+    when "new", "create"
+      :create_herbarium_title.l
+    when "edit", "update"
+      :edit_herbarium_title.l
+    end
+  end
+
+  def modal_form_action
+    case action_name
+    when "new", "create" then :create
+    when "edit", "update" then :update
+    end
   end
 
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
@@ -117,7 +189,9 @@ class HerbariaController < ApplicationController
   def create
     @herbarium = Herbarium.new(herbarium_params)
     normalize_parameters
-    return render(:new) unless validate_herbarium!
+    create_location_object_if_new(@herbarium)
+    try_to_save_location_if_new(@herbarium)
+    return render(:new) unless validate_herbarium! && !@any_errors
 
     @herbarium.save
     @herbarium.add_curator(@user) if @herbarium.personal_user
@@ -131,7 +205,9 @@ class HerbariaController < ApplicationController
 
     @herbarium.attributes = herbarium_params
     normalize_parameters
-    return unless validate_herbarium!
+    create_location_object_if_new(@herbarium)
+    try_to_save_location_if_new(@herbarium)
+    return unless validate_herbarium! && !@any_errors
 
     @herbarium.save
     redirect_to_create_location_or_referrer_or_show_location
@@ -156,66 +232,6 @@ class HerbariaController < ApplicationController
 
   include Herbaria::SharedPrivateMethods
 
-  # ---------- Index -----------------------------------------------------------
-
-  def patterned_index
-    pattern = params[:pattern].to_s
-    if pattern.match?(/^\d+$/) && (herbarium = Herbarium.safe_find(pattern))
-      redirect_to(herbarium_path(herbarium.id))
-    else
-      show_selected_herbaria(
-        create_query(:Herbarium, :pattern_search, pattern: pattern)
-      )
-    end
-  end
-
-  def show_selected_herbaria(query, args = {})
-    args = show_index_args(args)
-
-    # Clean up display by removing user-related stuff from nonpersonal index.
-    if query.flavor == :nonpersonal
-      args[:sorting_links].reject! { |x| x[0] == "user" }
-      @no_user_column = true
-    end
-
-    # If user clicks "merge" on an herbarium, it reloads the page and asks
-    # them to click on the destination herbarium to merge it with.
-    @merge = Herbarium.safe_find(params[:merge])
-    @links = right_tab_links(query, @links)
-    show_index_of_objects(query, args)
-  end
-
-  def show_index_args(args)
-    { # default args
-      letters: "herbaria.name",
-      num_per_page: 100,
-      include: [:curators, :herbarium_records, :personal_user]
-    }.merge(args,
-            template: "/herbaria/index", # render with this template
-            # Add some alternate sorting criteria.
-            sorting_links: [["records",     :sort_by_records.t],
-                            ["user",        :sort_by_user.t],
-                            ["code",        :sort_by_code.t],
-                            ["name",        :sort_by_name.t],
-                            ["created_at",  :sort_by_created_at.t],
-                            ["updated_at",  :sort_by_updated_at.t]])
-  end
-
-  def right_tab_links(query, links)
-    links ||= []
-    unless query.flavor == :all
-      links << [:herbarium_index_list_all_herbaria.l,
-                herbaria_path(flavor: :all), { id: "all_herbaria_link" }]
-    end
-    unless query.flavor == :nonpersonal
-      links << [:herbarium_index_nonpersonal_herbaria.l,
-                herbaria_path(flavor: :nonpersonal),
-                { id: "all_nonpersonal_herbaria_link" }]
-    end
-    links << [:create_herbarium.l, new_herbarium_path,
-              { id: "new_herbarium_link" }]
-  end
-
   def make_sure_can_edit!
     return true if in_admin_mode? || @herbarium.can_edit?
 
@@ -225,10 +241,11 @@ class HerbariaController < ApplicationController
   end
 
   def normalize_parameters
-    [:name, :code, :email, :place_name, :mailing_address].each do |arg|
-      val = @herbarium.send(arg).to_s.strip_html.strip_squeeze
-      @herbarium.send("#{arg}=", val)
-    end
+    [:name, :code, :email, :place_name, :mailing_address].
+      each do |arg|
+        val = @herbarium.send(arg).to_s.strip_html.strip_squeeze
+        @herbarium.send(:"#{arg}=", val)
+      end
     @herbarium.description = @herbarium.description.to_s.strip
     @herbarium.code = "" if @herbarium.personal_user_id
   end
@@ -295,6 +312,10 @@ class HerbariaController < ApplicationController
     flash_notice(
       :edit_herbarium_successfully_made_personal.t(user: user.login)
     )
+    update_personal_herbarium(user)
+  end
+
+  def update_personal_herbarium(user)
     @herbarium.curators.clear
     @herbarium.add_curator(user)
     @herbarium.personal_user_id = user.id
@@ -339,14 +360,14 @@ class HerbariaController < ApplicationController
   end
 
   def notify_admins_of_new_herbarium
-    WebmasterMailer.build(
+    QueuedEmail::Webmaster.create_email(
       sender_email: @user.email,
       subject: "New Herbarium",
       content: "User created a new herbarium:\n" \
                "Name: #{@herbarium.name} (#{@herbarium.code})\n" \
                "User: #{@user.id}, #{@user.login}, #{@user.name}\n" \
                "Obj: #{@herbarium.show_url}\n"
-    ).deliver_now
+    )
   end
 
   def user_can_destroy_herbarium?
@@ -356,7 +377,7 @@ class HerbariaController < ApplicationController
 
   def redirect_to_create_location_or_referrer_or_show_location
     redirect_to_create_location || redirect_to_referrer ||
-      redirect_with_query(herbarium_path(@herbarium))
+      show_modal_flash_or_show_herbarium
   end
 
   def redirect_to_create_location
@@ -369,12 +390,39 @@ class HerbariaController < ApplicationController
     true
   end
 
+  # this updates both the form and the flash
+  def reload_herbarium_modal_form_and_flash
+    render(
+      partial: "shared/modal_form_reload",
+      locals: { identifier: modal_identifier, form: "herbaria/form" }
+    ) and return true
+  end
+
+  # What to do if the save succeeds
+  def show_modal_flash_or_show_herbarium
+    respond_to do |format|
+      format.html do
+        redirect_with_query(herbarium_path(@herbarium)) and return
+      end
+      format.turbo_stream do
+        # Context here is the obs form.
+        flash_notice(
+          :runtime_created_name.t(type: :herbarium, value: @herbarium.name)
+        )
+        flash_notice(
+          :runtime_added_to.t(type: :herbarium, name: :observation)
+        )
+        render(partial: "herbaria/update_observation") and return
+      end
+    end
+  end
+
   def herbarium_params
     return {} unless params[:herbarium]
 
     params.require(:herbarium).
-      permit(:name, :code, :email, :mailing_address, :description,
+      permit(:name, :code, :email, :mailing_address,
+             :description, :location_id,
              :place_name, :personal, :personal_user_name)
   end
 end
-# rubocop:enable Metrics/ClassLength

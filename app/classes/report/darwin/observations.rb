@@ -6,7 +6,9 @@ module Report
     class Observations < Report::CSV
       attr_accessor :ids, :taxon_set
 
-      self.separator = "\t"
+      def self.separator
+        "\t"
+      end
 
       def initialize(args)
         super(args)
@@ -71,7 +73,7 @@ module Report
           row.county,
           row.locality,
           row.best_lat,
-          row.best_long,
+          row.best_lng,
           row.best_low,
           row.best_high,
           clean_value(row.obs_notes)

@@ -10,7 +10,6 @@ module Account
       password: "new_password",
       password_confirmation: "new_password",
       email: "new@email.com",
-      email_comments_all: "",
       email_comments_owner: "1",
       email_comments_response: "1",
       email_general_commercial: "1",
@@ -18,15 +17,12 @@ module Account
       email_general_question: "1",
       email_html: "1",
       email_locations_admin: "1",
-      email_locations_all: "",
       email_locations_author: "1",
       email_locations_editor: "",
       email_names_admin: "1",
-      email_names_all: "",
       email_names_author: "1",
       email_names_editor: "",
       email_names_reviewer: "1",
-      email_observations_all: "",
       email_observations_consensus: "1",
       email_observations_naming: "1",
       hide_authors: "above_species",
@@ -56,7 +52,7 @@ module Account
 
       # First make sure it can serve the form to start with.
       requires_login("edit")
-      Language.all.each do |lang|
+      Language.find_each do |lang|
         assert_select("option[value=#{lang.locale}]", { count: 1 },
                       "#{lang.locale} language option missing")
       end
@@ -91,7 +87,6 @@ module Account
       assert_input_value(:user_password, "")
       assert_input_value(:user_password_confirmation, "")
       assert_input_value(:user_email, "new@email.com")
-      assert_input_value(:user_email_comments_all, "")
       assert_input_value(:user_email_comments_owner, "1")
       assert_input_value(:user_email_comments_response, "1")
       assert_input_value(:user_email_general_commercial, "1")
@@ -99,15 +94,12 @@ module Account
       assert_input_value(:user_email_general_question, "1")
       assert_input_value(:user_email_html, "1")
       assert_input_value(:user_email_locations_admin, "1")
-      assert_input_value(:user_email_locations_all, "")
       assert_input_value(:user_email_locations_author, "1")
       assert_input_value(:user_email_locations_editor, "")
       assert_input_value(:user_email_names_admin, "1")
-      assert_input_value(:user_email_names_all, "")
       assert_input_value(:user_email_names_author, "1")
       assert_input_value(:user_email_names_editor, "")
       assert_input_value(:user_email_names_reviewer, "1")
-      assert_input_value(:user_email_observations_all, "")
       assert_input_value(:user_email_observations_consensus, "1")
       assert_input_value(:user_email_observations_naming, "1")
       assert_input_value(:user_hide_authors, "above_species")
@@ -143,7 +135,6 @@ module Account
       assert_flash_text(:runtime_prefs_success.t)
       user = rolf.reload
       assert_equal("new@email.com", user.email)
-      assert_equal(false, user.email_comments_all)
       assert_equal(true, user.email_comments_owner)
       assert_equal(true, user.email_comments_response)
       assert_equal(true, user.email_general_commercial)
@@ -151,15 +142,12 @@ module Account
       assert_equal(true, user.email_general_question)
       assert_equal(true, user.email_html)
       assert_equal(true, user.email_locations_admin)
-      assert_equal(false, user.email_locations_all)
       assert_equal(true, user.email_locations_author)
       assert_equal(false, user.email_locations_editor)
       assert_equal(true, user.email_names_admin)
-      assert_equal(false, user.email_names_all)
       assert_equal(true, user.email_names_author)
       assert_equal(false, user.email_names_editor)
       assert_equal(true, user.email_names_reviewer)
-      assert_equal(false, user.email_observations_all)
       assert_equal(true, user.email_observations_consensus)
       assert_equal(true, user.email_observations_naming)
       assert_equal("above_species", user.hide_authors)
@@ -262,21 +250,23 @@ module Account
       assert_equal("California, USA", user.reload.content_filter[:region])
     end
 
+    def test_has_bulk_license_updater
+      login
+      get(:edit)
+      assert_match(images_edit_licenses_path, response.body)
+    end
+
     def test_no_email_hooks
       [
         :comments_owner,
         :comments_response,
-        :comments_all,
         :observations_consensus,
         :observations_naming,
-        :observations_all,
         :names_author,
         :names_editor,
         :names_reviewer,
-        :names_all,
         :locations_author,
         :locations_editor,
-        :locations_all,
         :general_feature,
         :general_commercial,
         :general_question
@@ -288,7 +278,20 @@ module Account
           require_user: :index,
           result: "no_email"
         )
-        assert_not(rolf.reload.send("email_#{type}"))
+        assert_not(rolf.reload.send(:"email_#{type}"))
+      end
+    end
+
+    def test_no_email_failed_save
+      login("rolf")
+      user = users(:rolf)
+      user.stub(:save, false) do
+        User.stub(:safe_find, user) do
+          get(:no_email, params: { id: rolf.id, type: :comments_owner })
+
+          assert_true(rolf.reload.email_comments_owner,
+                      "Preferences should be unchanged when user.save fails")
+        end
       end
     end
   end

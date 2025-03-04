@@ -5,7 +5,7 @@ class API2
     # Parse lat/longs and altitudes for API.
     class CoordinateParser < Base
       def parse(type, str)
-        Location.send("parse_#{type}", str) ||
+        Location.send(:"parse_#{type}", str) ||
           raise(BadParameterValue.new(str, type))
       end
 

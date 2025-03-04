@@ -1,0 +1,27 @@
+<%
+id = @show_user.id
+complete_name = @show_user.unique_text_name
+name = @show_user.login
+add_page_title(:show_user_about.t(user: complete_name))
+add_pager_for(@show_user)
+add_tab_set(user_show_tabs)
+
+@container = :full
+%>
+
+<div class="row">
+
+  <div class="col-xs-12 col-lg-5">
+    <%= render(partial: "users/show/profile") %>
+    <% if @show_user.contribution > 0 %>
+      <%= render(partial: "users/show/user_stats", locals: { name: name }) %>
+    <% end %>
+  </div>
+
+  <div class="col-xs-12 col-lg-7">
+    <%= render(partial: "users/show/best_images", locals: { name: name }) %>
+  </div>
+
+</div><!--.row-->
+
+

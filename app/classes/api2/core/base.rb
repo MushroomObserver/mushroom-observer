@@ -67,8 +67,6 @@
 #
 #  These are some useful callbacks to fine-tune things:
 #
-#    query_flavor     Allows you to choose a Query flavor other than "all".
-#
 #    validate_create_params!(params) Called in POST after query_params.
 #    validate_update_params!(params) Called in PATCH after update_params.
 #
@@ -172,7 +170,7 @@
 #
 #    class SizeParser < EnumParser
 #      def initialize(api, key, args)
-#        args[:limit] = Image.all_sizes
+#        args[:limit] = Image::ALL_SIZES
 #        super
 #      end
 #    end
@@ -249,7 +247,8 @@ module API2::Base
     self.params = params
     self.action = params[:action]
     self.errors = []
-    initializers.each { |x| instance_exec(&x) }
+    initialize_parameters
+    initialize_results
   end
 
   def handle_version

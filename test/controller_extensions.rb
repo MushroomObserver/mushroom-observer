@@ -104,8 +104,8 @@ module ControllerExtensions
   #   # Make sure only logged-in users get to see this page.
   #   requires_login(:edit, id: 1)
   #
-  def requires_login(page, *args)
-    either_requires_either(:get, page, nil, *args)
+  def requires_login(page, *)
+    either_requires_either(:get, page, nil, *)
   end
 
   # Send POST request to a page that should require login.
@@ -113,16 +113,16 @@ module ControllerExtensions
   #   # Make sure only logged-in users get to post this page.
   #   put_requires_login(:update, id: 1)
   #
-  def post_requires_login(page, *args)
-    either_requires_either(:post, page, nil, *args)
+  def post_requires_login(page, *)
+    either_requires_either(:post, page, nil, *)
   end
 
-  def put_requires_login(page, *args)
-    either_requires_either(:put, page, nil, *args)
+  def put_requires_login(page, *)
+    either_requires_either(:put, page, nil, *)
   end
 
-  def patch_requires_login(page, *args)
-    either_requires_either(:patch, page, nil, *args)
+  def patch_requires_login(page, *)
+    either_requires_either(:patch, page, nil, *)
   end
 
   # Send GET request to a page that should require a specific user.
@@ -132,8 +132,8 @@ module ControllerExtensions
   #   requires_user(:review_authors, :show, id: 1)
   #   requires_user(:review_authors, [:location, :show], id: 1)
   #
-  def requires_user(*args)
-    either_requires_either(:get, *args)
+  def requires_user(*)
+    either_requires_either(:get, *)
   end
 
   # Send POST request to a page that should require login.
@@ -144,20 +144,20 @@ module ControllerExtensions
   #   post_requires_user(:update, [:observations, :show],
   #                      notes: 'new notes')
   #
-  def post_requires_user(*args)
-    either_requires_either(:post, *args)
+  def post_requires_user(*)
+    either_requires_either(:post, *)
   end
 
-  def put_requires_user(*args)
-    either_requires_either(:put, *args)
+  def put_requires_user(*)
+    either_requires_either(:put, *)
   end
 
-  def patch_requires_user(*args)
-    either_requires_either(:patch, *args)
+  def patch_requires_user(*)
+    either_requires_either(:patch, *)
   end
 
-  def delete_requires_user(*args)
-    either_requires_either(:delete, *args)
+  def delete_requires_user(*)
+    either_requires_either(:delete, *)
   end
 
   # Helper used by the blah_requires_blah methods.
@@ -416,6 +416,10 @@ module ControllerExtensions
       assert_response(result, "Wrong user (#{alt_user}): ")
     end
 
+    # Clear flash messages incurred from any of those login attempts
+    @controller.instance_variable_set(:@last_notice, nil)
+    session[:notice] = nil
+
     # Finally, login correct user and let it do its thing.
     login(user, password)
     send(method, action, params: params)
@@ -642,5 +646,13 @@ module ControllerExtensions
       id = klass.notes_part_id(key.to_s.tr(" ", "_"))
       assert_textarea_value(id, val)
     end
+  end
+
+  # Assert index results. This measures <a> tags that link to an ID
+  def assert_results(**attributes)
+    assert_select(
+      "#results .rss-what a:match('href', ?)", %r{^/\d+}, attributes,
+      "Wrong number of results displayed"
+    )
   end
 end

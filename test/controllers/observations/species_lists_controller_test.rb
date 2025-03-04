@@ -93,16 +93,16 @@ module Observations
     end
 
     def test_manage_species_list_with_projects
-      proj = projects(:bolete_project)
-      spl1 = species_lists(:unknown_species_list)
+      proj = projects(:lone_wolf_project)
+      spl1 = species_lists(:lone_wolf_list)
       spl2 = species_lists(:first_species_list)
       spl3 = species_lists(:another_species_list)
-      spl2.user = dick
+      spl2.user = lone_wolf
       spl2.save
       spl2.reload
-      obs1 = observations(:detailed_unknown_obs)
+      obs1 = observations(:wolf_fart)
       obs2 = observations(:coprinus_comatus_obs)
-      assert_obj_arrays_equal([dick], proj.user_group.users)
+      assert_obj_arrays_equal([lone_wolf], proj.user_group.users)
       assert_obj_arrays_equal([proj], spl1.projects)
       assert_obj_arrays_equal([], spl2.projects)
       assert_obj_arrays_equal([], spl3.projects)
@@ -110,11 +110,11 @@ module Observations
       assert_false(spl1.observations.include?(obs2))
       assert_obj_arrays_equal([], spl2.observations)
       assert_obj_arrays_equal([], spl3.observations)
-      assert_users_equal(mary, spl1.user)
-      assert_users_equal(dick, spl2.user)
+      assert_users_equal(lone_wolf, spl1.user)
+      assert_users_equal(lone_wolf, spl2.user)
       assert_users_equal(rolf, spl3.user)
 
-      login("dick")
+      login("lone_wolf")
       get(:edit, params: { id: obs1.id })
       assert_select("form[action=?]",
                     observation_species_list_path(id: obs1.id,

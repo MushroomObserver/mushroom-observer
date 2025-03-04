@@ -92,19 +92,23 @@ class Description < AbstractModel
   end
 
   def parent_id
-    send("#{parent_type}_id")
+    send(:"#{parent_type}_id")
   end
 
   def parent=(val)
-    send("#{parent_type}=", val)
+    send(:"#{parent_type}=", val)
   end
 
   def parent_id=(val)
-    send("#{parent_type}_id=", val)
+    send(:"#{parent_type}_id=", val)
   end
 
   # Return parent's class name in lowercase, e.g. 'name' or 'location'.
   def parent_type
+    type_tag.to_s.sub("_description", "")
+  end
+
+  def self.parent_type
     type_tag.to_s.sub("_description", "")
   end
 
@@ -207,7 +211,7 @@ class Description < AbstractModel
   #
   def all_notes=(notes)
     self.class.all_note_fields.each do |field|
-      send("#{field}=", notes[field])
+      send(:"#{field}=", notes[field])
     end
   end
 
@@ -233,6 +237,10 @@ class Description < AbstractModel
   #
   ##############################################################################
 
+  # Return an Array of source type Strings, e.g. "public", "project", etc.
+  # as would `NameDescription.source_types.keys`. However, the below order is
+  # different. It is a preferred order, and is how these will be listed in
+  # the show_name descriptions panel, list_descriptions.
   ALL_SOURCE_TYPES = [
     "public",    # Public ones created by any user.
     "foreign",   # Foreign "public" description(s) written on another server.
@@ -246,21 +254,6 @@ class Description < AbstractModel
     "source",    # Derived from another source, e.g. another website or book.
     "user"       # Created by an individual user.
   ].freeze
-
-  # Return an Array of source type Strings, e.g. "public", "project", etc.
-  # Note, this is the order they will be listed in show_name descriptions
-  # panel, list_descriptions.
-  def self.all_source_types
-    ALL_SOURCE_TYPES
-    # NOTE: Why not keep this simple and just load them in order of the enums?
-    # source_types.map do |name, _integer|
-    #   name
-    # end
-  end
-
-  def self.basic_source_types
-    BASIC_SOURCE_TYPES
-  end
 
   # Retreive object representing the source (if applicable).  Presently, this
   # only works for Project drafts and User's personal descriptions.  All others
@@ -276,8 +269,7 @@ class Description < AbstractModel
 
   # Does this Description belong to a given Project?
   def belongs_to_project?(project)
-    (source_type == "project") &&
-      (project_id == project.id)
+    (source_type == "project") && (project_id == project.id)
   end
 
   ##############################################################################
@@ -288,7 +280,7 @@ class Description < AbstractModel
 
   # Name of the join table used to keep admin groups.
   def self.admins_join_table
-    "#{table_name.singularize}_admins".to_sym
+    :"#{table_name.singularize}_admins"
   end
 
   # Wrapper around class method of same name
@@ -298,7 +290,7 @@ class Description < AbstractModel
 
   # Name of the join table used to keep writer groups.
   def self.writers_join_table
-    "#{table_name.singularize}_writers".to_sym
+    :"#{table_name.singularize}_writers"
   end
 
   # Wrapper around class method of same name
@@ -308,7 +300,7 @@ class Description < AbstractModel
 
   # Name of the join table used to keep reader groups.
   def self.readers_join_table
-    "#{table_name.singularize}_readers".to_sym
+    :"#{table_name.singularize}_readers"
   end
 
   # Wrapper around class method of same name
@@ -446,7 +438,7 @@ class Description < AbstractModel
 
   # Name of the join table used to keep authors.
   def self.authors_join_table
-    "#{table_name.singularize}_authors".to_sym
+    :"#{table_name.singularize}_authors"
   end
 
   # Wrapper around class method of same name
@@ -456,7 +448,7 @@ class Description < AbstractModel
 
   # Name of the join table used to keep editors.
   def self.editors_join_table
-    "#{table_name.singularize}_editors".to_sym
+    :"#{table_name.singularize}_editors"
   end
 
   # Wrapper around class method of same name
@@ -479,11 +471,11 @@ class Description < AbstractModel
     return if authors.member?(user)
 
     authors.push(user)
-    SiteData.update_contribution(:add, authors_join_table, user.id)
+    UserStats.update_contribution(:add, authors_join_table, user.id)
     return unless editors.member?(user)
 
     editors.delete(user)
-    SiteData.update_contribution(:del, editors_join_table, user.id)
+    UserStats.update_contribution(:del, editors_join_table, user.id)
   end
 
   # Demote a User to "editor".  Saves User if changed.  Returns nothing.
@@ -491,12 +483,12 @@ class Description < AbstractModel
     return unless authors.member?(user)
 
     authors.delete(user)
-    SiteData.update_contribution(:del, authors_join_table, user.id)
+    UserStats.update_contribution(:del, authors_join_table, user.id)
 
     return unless !editors.member?(user) && user_made_a_change?(user)
 
     editors.push(user)
-    SiteData.update_contribution(:add, editors_join_table, user.id)
+    UserStats.update_contribution(:add, editors_join_table, user.id)
   end
 
   # Add a user on as an "editor".
@@ -504,7 +496,7 @@ class Description < AbstractModel
     return unless !authors.member?(user) && !editors.member?(user)
 
     editors.push(user)
-    SiteData.update_contribution(:add, editors_join_table, user.id)
+    UserStats.update_contribution(:add, editors_join_table, user.id)
   end
 
   ##############################################################################
@@ -528,10 +520,10 @@ class Description < AbstractModel
   def update_users_and_parent
     # Update editors' and authors' contributions.
     authors.each do |user|
-      SiteData.update_contribution(:del, authors_join_table, user.id)
+      UserStats.update_contribution(:del, authors_join_table, user.id)
     end
     editors.each do |user|
-      SiteData.update_contribution(:del, editors_join_table, user.id)
+      UserStats.update_contribution(:del, editors_join_table, user.id)
     end
 
     return unless parent.description_id == id

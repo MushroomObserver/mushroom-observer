@@ -9,58 +9,58 @@ module Observations
       show and return if params[:id].present?
 
       @query = find_or_create_query(:Observation)
-      apply_content_filters(@query)
-      @title = :map_locations_title.t(locations: @query.title)
-      @query = restrict_query_to_box(@query)
-      @timer_start = Time.current
-
+      @any_content_filters_applied = check_if_preference_filters_applied
       find_locations_matching_observations
-
-      @num_results = @observations.count
-      @timer_end = Time.current
-      render(template: "observations/maps/index")
     end
 
     # Show map of one observation by id.
     def show
       pass_query_params
-      obs = find_or_goto_index(Observation, params[:id].to_s)
-      return unless obs
+      @observation = find_or_goto_index(Observation, params[:id].to_s)
+      return unless @observation
 
-      @title = :map_observation_title.t(id: obs.id)
       @observations = [
-        MinimalMapObservation.new(obs.id, obs.public_lat, obs.public_long,
-                                  obs.location)
+        Mappable::MinimalObservation.new(id: @observation.id,
+                                         lat: @observation.public_lat,
+                                         lng: @observation.public_lng,
+                                         location: @observation.location,
+                                         location_id: @observation.location_id)
       ]
-      render(template: "observations/maps/index")
     end
 
     private
 
     def find_locations_matching_observations
-      locations = {}
-      columns = %w[id lat long gps_hidden location_id].map do |x|
+      location_ids = Set[]
+      columns = %w[id lat lng gps_hidden location_id].map do |x|
         "observations.#{x}"
       end
       args = {
         select: columns.join(", "),
         where: "observations.lat IS NOT NULL OR " \
-                "observations.location_id IS NOT NULL"
+                "observations.location_id IS NOT NULL",
+        limit: 10_000
       }
       @observations =
-        @query.select_rows(args).map do |id, lat, long, gps_hidden, loc_id|
-          locations[loc_id.to_i] = nil if loc_id.present?
-          lat = long = nil if gps_hidden == 1
-          MinimalMapObservation.new(id, lat, long, loc_id)
+        @query.select_all(args).map do |obs|
+          obs.symbolize_keys!
+          # Adding this to the set is a flag to look up the location. Because we
+          # selected obs attributes not instances, we can't call `obs.location`
+          # and we shouldn't anyway. Getting the Locations in bulk is quicker.
+          location_ids << obs[:location_id].to_i if obs[:location_id].present?
+          obs[:lat] = obs[:lng] = nil if obs[:gps_hidden] == 1
+          Mappable::MinimalObservation.new(obs.except(:gps_hidden))
         end
 
-      eager_load_corresponding_locations(locations) unless locations.empty?
+      eager_load_related_locations(location_ids) unless location_ids.empty?
     end
 
-    def eager_load_corresponding_locations(locations)
-      @locations = Location.where(id: locations.keys).map do |loc|
-        locations[loc.id] = MinimalMapLocation.new(
-          loc.id, loc.name, loc.north, loc.south, loc.east, loc.west
+    def eager_load_related_locations(location_ids)
+      locations = {}
+      @locations = Location.where(id: location_ids).
+                   select(:id, :name, :north, :south, :east, :west).map do |loc|
+        locations[loc.id] = Mappable::MinimalLocation.new(
+          loc.attributes.symbolize_keys
         )
       end
 

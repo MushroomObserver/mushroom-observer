@@ -61,9 +61,9 @@ class UsersControllerTest < FunctionalTestCase
                                params: { pattern: unmatched_pattern })
     assert_template("users/index")
 
-    assert_equal(
+    assert_match(
       :title_for_user_search.t,
-      @controller.instance_variable_get(:@title),
+      css_select("title").text,
       "metadata <title> tag incorrect"
     )
     assert_empty(css_select("#sorts"),
@@ -85,10 +85,10 @@ class UsersControllerTest < FunctionalTestCase
 
     assert_template(:show)
     assert_select(
-      "a[href = '#{location_descriptions_path}?by_author=#{user.id}']"
+      "a[href = '#{location_descriptions_index_path}?by_author=#{user.id}']"
     )
     assert_select(
-      "a[href = '#{name_descriptions_path}?by_author=#{user.id}']"
+      "a[href = '#{name_descriptions_index_path}?by_author=#{user.id}']"
     )
     assert_select(
       "a:match('href', ?)",
@@ -102,6 +102,12 @@ class UsersControllerTest < FunctionalTestCase
       false,
       "Links should not use the same value for id and another param"
     )
+  end
+
+  def test_show_nonexistent_user
+    login
+    get(:show, params: { id: "123456789" })
+    assert_redirected_to({ action: :index })
   end
 
   #   ---------------
@@ -140,7 +146,7 @@ class UsersControllerTest < FunctionalTestCase
   end
 
   #   ---------------------
-  #    show_selected_users
+  #    show_selected users
   #   ---------------------
 
   # The unfiltered user :index is admin-only, but selected/searched users
@@ -152,7 +158,7 @@ class UsersControllerTest < FunctionalTestCase
   end
 
   def test_show_next
-    query = Query.lookup_and_save(:User, :all)
+    query = Query.lookup_and_save(:User)
     assert_operator(query.num_results, :>, 1)
     number8 = query.results[7]
     number9 = query.results[8]
@@ -164,7 +170,7 @@ class UsersControllerTest < FunctionalTestCase
   end
 
   def test_show_prev
-    query = Query.lookup_and_save(:User, :all)
+    query = Query.lookup_and_save(:User)
     assert_operator(query.num_results, :>, 1)
     number8 = query.results[7]
     number7 = query.results[6]
@@ -173,5 +179,20 @@ class UsersControllerTest < FunctionalTestCase
     login
     get(:show, params: { id: number8.id, q: q, flow: "prev" })
     assert_redirected_to(user_path(number7.id, q: q))
+  end
+
+  #   ---------------
+
+  def test_admin_show_user
+    user = users(:mary)
+
+    login("rolf")
+    make_admin
+    get(:show, params: { id: user.id })
+
+    # Prove that the page has a Delete User button
+    assert_select("form.button_to[action =?]", admin_users_path(id: user.id)) do
+      assert_select("input[value=?]", "delete")
+    end
   end
 end

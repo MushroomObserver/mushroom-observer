@@ -3,7 +3,6 @@
 module SpeciesLists
   class DownloadsController < ApplicationController
     before_action :login_required
-    before_action :disable_link_prefetching
     before_action :pass_query_params, except: [:print_labels]
 
     ############################################################################
@@ -41,8 +40,7 @@ module SpeciesLists
     private
 
     def lookup_species_list_query(list)
-      Query.lookup_and_save(:Observation, :in_species_list,
-                            species_list: list)
+      Query.lookup_and_save(:Observation, species_lists: list)
     end
 
     # Used by download.

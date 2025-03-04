@@ -15,19 +15,25 @@ alias cls='clear'
 alias del='rm -f'
 alias mv='mv -i'
 alias cp='cp -i'
+alias ga='git add'
+alias gb='git branch'
+alias gc='git commit'
+alias gd='git diff'
+alias gk='git checkout'
+alias gs='git status'
 alias grep='grep -s'
+alias lu='script/lookup_user'
 function pfind {
   find $2 -type f -exec egrep -H $1 \{} \;
 }
 
 alias mo='cd /var/web/mo'
 
-alias uni='service unicorn'
+alias uni='/etc/init.d/unicorn'
+alias deploy='script/deploy.sh'
 
-alias mosql='mysql -u mo -h xxx -p"xxx" mo_production'
+alias mosql='mysql --defaults-extra-file=/var/web/mo/config/mysql-production.cnf'
 
 function mosqle {
-  mysql -u mo -h xxx -p"xxx" mo_production -e "source $1"
+  mysql --defaults-extra-file=/var/web/mo/config/mysql-production.cnf -e "source $1"
 }
-
-alias moserver='rails s -b 0.0.0.0'

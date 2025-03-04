@@ -13,7 +13,7 @@ and this is why...
 
 Here are some handy links:
 
-Make sender an author: https://mushroomobserver.org/authors/review_authors/<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_desc) %>?type=name_description&add=<%= ActiveRecord::FixtureSet.identify(:katrina) %>
+Make sender an author: https://mushroomobserver.org/descriptions/authors/<%= ActiveRecord::FixtureSet.identify(:coprinus_comatus_desc) %>?type=name_description&add=<%= ActiveRecord::FixtureSet.identify(:katrina) %>
 Show user's profile: https://mushroomobserver.org/users/484233936
 Latest changes at Mushroom Observer: https://mushroomobserver.org
 

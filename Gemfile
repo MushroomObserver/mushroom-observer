@@ -2,14 +2,14 @@
 
 ruby(File.read(".ruby-version").strip)
 
-# In Ruby, 3.0, the SortedSet class has been extracted from the set library.
+# As of Ruby 3.0, the SortedSet class has been extracted from the set library.
 # You must use the sorted_set gem or other alternatives
 gem("sorted_set")
 
 source("https://rubygems.org")
 
 # To bundle edge Rails instead: gem "rails", github: "rails/rails"
-# gem("rails", "~> 6.1")
+# gem("rails", "~> 7.2.2.1")
 
 # To skip loading parts of Rails, bundle the constituent gems separately.
 # NOTE: Remember to require the classes also, in config/application.rb
@@ -19,38 +19,60 @@ source("https://rubygems.org")
 # Convenience group for updating rails constituents with one command
 # Usage: bundle update --group==rails
 group :rails do
-  # gem("actioncable", "~> 6.1")
-  # gem("actionmailbox", "~> 6.1")
-  gem("actionmailer", "~> 6.1")
-  gem("actionpack", "~> 6.1")
-  # gem("actiontext", "~> 6.1")
-  gem("actionview", "~> 6.1")
-  gem("activejob", "~> 6.1")
-  gem("activemodel", "~> 6.1")
-  gem("activerecord", "~> 6.1")
-  # gem("activestorage", "~> 6.1")
-  gem("activesupport", "~> 6.1")
+  gem("actioncable", "~> 7.2.2.1")
+  # gem("actionmailbox", "~> 7.2.2.1")
+  gem("actionmailer", "~> 7.2.2.1")
+  gem("actionpack", "~> 7.2.2.1")
+  # gem("actiontext", "~> 7.2.2.1")
+  gem("actionview", "~> 7.2.2.1")
+  gem("activejob", "~> 7.2.2.1")
+  gem("activemodel", "~> 7.2.2.1")
+  gem("activerecord", "~> 7.2.2.1")
+  # gem("activestorage", "~> 7.2.2.1")
+  gem("activesupport", "~> 7.2.2.1")
   gem("bundler")
-  gem("railties", "~> 6.1")
-  gem("sprockets-rails")
+  gem("railties", "~> 7.2.2.1")
 end
 
-# Security fix updates via Dependabot
-# CVE-2021-41817 regex denial of service vulnerability
-gem("date", ">= 3.2.1")
-# CVE-2022-23476
-gem("nokogiri", ">= 1.13.10")
-# CVE-2022-23515
-gem("loofah", ">= 2.19.1")
-# CVE-2022-23518
-gem("rails-html-sanitizer", ">= 1.4.4")
+# Use trilogy as db connector
+# See https://github.com/trilogy-libraries/trilogy/tree/main/contrib/ruby
+gem("trilogy")
 
-# Use mysql2 as db connector
-# See https://github.com/brianmario/mysql2
-gem("mysql2")
+# solid_cache for cache store db
+gem("solid_cache")
+# add locale to cache key
+gem("cache_with_locale")
+# solid_queue for jobs
+gem("solid_queue")
+# https://github.com/rails/mission_control-jobs
+# Rails-based frontend to Active Job adapters for monitoring jobs
+gem("mission_control-jobs")
 
-# Use sqlite3 as the database for Active Record
-# gem("sqlite3")
+# sprockets for asset compilation and versioning
+gem("sprockets-rails")
+# Fix a version problem betw stimulus and sprockets. (not sprockets-rails)
+# Delete this dependency declaration if the issue gets resolved:
+# https://github.com/hotwired/stimulus-rails/issues/108
+gem("sprockets", "~>4.2.1")
+# Compile SCSS for stylesheets
+gem("dartsass-sprockets")
+# Use bootstrap style generator
+gem("bootstrap-sass")
+# Use Terser as compressor for JavaScript assets
+gem("terser")
+
+# importmap for js module handling
+gem("importmap-rails")
+# stimulus for simpler, more maintainable js
+gem("stimulus-rails")
+# requestjs for simpler js requests from stimulus
+gem("requestjs-rails")
+# turbo for partial page updates
+gem("turbo-rails")
+# redis for combining actioncable broadcasts with turbo_stream
+gem("redis", "~> 4.0")
+# minimal two way bridge between the V8 JavaScript engine and Ruby
+gem("mini_racer")
 
 # Add Arel helpers for more concise query syntax in Arel
 # https://github.com/camertron/arel-helpers
@@ -58,43 +80,16 @@ gem("arel-helpers")
 # https://github.com/Faveod/arel-extensions
 gem("arel_extensions")
 
-# Use bootstrap style generator
-gem("bootstrap-sass")
+# Provide abstract base class for classes that depend upon method_missing
+gem("blankslate")
 
-# Use SCSS for stylesheets
-gem("sassc-rails")
-
-# Use jquery as the JavaScript library
-gem("jquery-rails")
-
-# Use therubyracer as JavaScript runtime for ExecJS
-# See https://github.com/sstephenson/execjs#readme for more supported runtimes
-# gem("therubyracer", platforms: :ruby)
-
-# Use mini_racer as a substitute for therubyracer
-# If having trouble installing this gem in Vagrant:
-# gem update --system
-# bundler update
-gem("mini_racer")
-
-# Use CoffeeScript for .js.coffee assets and views
-gem("coffee-rails")
-
-# Use Uglifier as compressor for JavaScript assets
-gem("uglifier")
-
-# Turbolinks makes following links in your web application faster.
-# Read more: https://github.com/rails/turbolinks
-# gem("turbolinks")
-
-# Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
-gem("jbuilder")
+# Simple version models and tables for classes
+# Use our own fork, which stores enum attrs as integers in the db
+gem("mo_acts_as_versioned", ">= 0.6.6",
+    git: "https://github.com/MushroomObserver/acts_as_versioned")
 
 # Use ActiveModel has_secure_password
-gem("bcrypt", "~> 3.1.7")
-
-# Use unicorn as the app server
-gem("unicorn")
+gem("bcrypt")
 
 # Use Capistrano for deployment
 # gem("capistrano", group: :development)
@@ -102,46 +97,31 @@ gem("unicorn")
 # Use i18n for internationalization
 gem("i18n")
 
-# Enable Textile markup language. See http://redcloth.org/
-gem("RedCloth")
-
-# Provide abstract base class for classes that depend upon method_missing
-gem("blankslate")
-
 # Detect which browser is used
 gem("browser")
 
+# Enable Textile markup language. See https://github.com/jgarber/redcloth,
+# https://textile-lang.com/doc/insertions-and-deletions
+gem("RedCloth")
 # Create Rich Text Format documents
 gem("rtf")
 
+# Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
+gem("jbuilder")
 # Enable remote procedure calls over HTTP (used in MO API)
 gem("xmlrpc")
 
 # Get image sizes from a file
 gem("fastimage")
-
-# Simple versioning
-# Use our own fork, which stores enum attrs as integers in the db
-gem("mo_acts_as_versioned", ">= 0.6.6",
-    git: "https://github.com/MushroomObserver/acts_as_versioned/")
-
-# Slick Slider for Image Carousel
-# See https://github.com/kenwheeler/slick/
-#     https://github.com/bodrovis/jquery-slick-rails
-gem("jquery-slick-rails")
-
-# email generation, parsing and sending
-gem("mail")
-# Action Mailbox depends on net/smtp, but not included with Ruby 3.1
-# temporarily add until the mail gem includes it as a dependancy.
-gem("net-smtp", require: false)
-
-# These seem to be required by unicorn -> zeitwerk
-gem("net-imap")
-gem("net-pop")
-
 # for detecting file type of uploaded images
 gem("mimemagic")
+
+# Gems used for iNat import
+gem("oauth2")
+gem("rest-client")
+
+# Read original images from google cloud storage
+gem "google-cloud-storage"
 
 # for creating zip files
 # RubyZip 3.0 is coming!
@@ -162,97 +142,28 @@ gem("mimemagic")
 # version 2.3.0.
 gem("rubyzip", "~> 2.3.0")
 
-# to handle frontend requests from different port, e.g. dev GraphQL client
-gem("rack-cors")
+# QR code generator
+gem("rqrcode")
 
-########## GraphQL API ########################################
+# PDF generation support.  prawn-svg is supposed to come before prawn.
+gem("prawn-svg")
 
-# GraphQL-Ruby
-# https://github.com/rmosolgo/graphql-ruby
-gem("graphql")
-#
-# Note: Some of the following gems are experimental at this point 1/22
-#
-# Debug future changes in GraphQL API
-# Takes two GraphQL schemas and outputs a list of changes between versions
-# gem("graphql-schema_comparator")
-#
-# Authorization gem
-# Action Policy is an authorization library for your GraphQL Ruby application
-# gem("action_policy-graphql")
-#
-# Pagination & Connection gems
-#
-# Additional implementations of cursor-based paginations for GraphQL Ruby.
-# Extends classes of graphql-ruby
-# Use with GraphQL::Connections::Stable
-# https://github.com/bibendi/graphql-connections
-gem("graphql-connections")
-#
-# Allows cursor pagination through an ActiveRecord relation.
-# Supports ordering by any column, ascending or descending.
-# Use with the RailsCursorPagination::Paginator class.
-# https://github.com/xing/rails_cursor_pagination
-# gem("rails_cursor_pagination")
-#
-# Implements page-based pagination returning collection and pagination metadata.
-# It works with kaminari or other pagination tools implementing similar methods.
-# https://github.com/RenoFi/graphql-pagination
-# gem("graphql-pagination")
-# gem("kaminari-activerecord")
-#
-# Dataloading gems
-# Note that dataloader comes shipped with graphql gem as of 1.12
-# It's also experimental. Below are some alternatives
-# https://evilmartians.com/chronicles/how-to-graphql-with-ruby-rails-active-record-and-no-n-plus-one
-#
-# Provides an executor for the graphql gem which allows queries to be batched.
-# Defined in loaders/record_loader.rb RecordLoader < GraphQL::Batch::Loader
-# Used in queries and resolvers like
-# def product(id:) RecordLoader.for(Product).load(id)
-# def products(ids:) RecordLoader.for(Product).load_many(ids)
-# https://github.com/Shopify/graphql-batch
-gem("graphql-batch")
-#
-# Brings association lazy load functionality to your Rails applications
-# Use like User.lazy_preload(:posts).limit(10)
-# https://github.com/DmitryTsepelev/ar_lazy_preload
-# gem("ar_lazy_preload")
-#
-# (Similar to graphql-batch and maybe ar_lazy_preload. Maybe better?)
-# Provides a generic lazy batching mechanism to avoid N+1 DB queries,
-# HTTP queries, etc.
-# https://github.com/exAspArk/batch-loader
-# https://github.com/exAspArk/batch-loader#alternatives
-# gem("batch-loader")
-#
-# (Similar to ar_lazy_preload)
-# Old add-on to graphql-ruby that allows your field resolvers to minimize N+1
-# SELECTS issued by ActiveRecord. Possibly overlaps above ar_lazy_preload
-# https://github.com/nettofarah/graphql-query-resolver
-# gem("graphql-query-resolver")
-#
-# Caching gems
-#
-# Persisted Queries. Backend will cache all the queries, while frontend will
-# send the full query only when it's not found at the backend storage.
-# Use with apollo persisted queries
-# https://github.com/DmitryTsepelev/graphql-ruby-persisted_queries
-# gem("graphql-persisted_queries")
-#
-# Cache response fragments: you can mark any field as cached
-# https://github.com/DmitryTsepelev/graphql-ruby-fragment_cache
-# gem("graphql-fragment_cache")
-#
-# Need to cache and instrument your GraphQL code in Ruby? Look no further!
-# https://github.com/chatterbugapp/cacheql
-# gem("cacheql")
-#
+# And now prawn in a separate 'section' to make rubocop happy.
+gem("prawn")
+gem("prawn-manual_builder")
+
+# csv generation support
+gem("csv")
+
+# Use puma as the app server, also available for system tests
+# To use Webrick locally, run `bundle config set --local without 'production'`
+# https://stackoverflow.com/a/23125762/3357635
+gem("puma")
 
 ########## Development, Testing, and Analysis ##################################
 group :test, :development do
   # https://github.com/ruby/debug
-  gem("debug", ">= 1.0.0")
+  gem("debug")
 
   # Use built-in Ruby coverage to generate html coverage file
   gem("simplecov", require: false)
@@ -269,31 +180,18 @@ group :test, :development do
   #  - Update any extension used here
   #  - Use highest available .codeclimate.yml rubocop channel
   #    https://github.com/codeclimate/codeclimate-rubocop/branches/all?utf8=%E2%9C%93&query=channel%2Frubocop
-  gem("rubocop", require: false)
+  gem("rubocop", "1.71.2", require: false)
   gem("rubocop-performance")
   gem("rubocop-rails")
-  # Rubocop extension for enforcing graphql-ruby best practices.
-  # You need to tell RuboCop to load the GraphQL extension. rubocop.yml
-  # require:
-  #  - rubocop-other-extension
-  #  - rubocop-graphql
-  # http://github.com/DmitryTsepelev/rubocop-graphql
-  gem("rubocop-graphql", require: false)
-
-  # GraphiQL for GraphQL development
-  # Makes an IDE available to test graphql queries at '/graphiql/'
-  # Until current changes are released, need to use this Github version:
-  gem("graphiql-rails", github: "rmosolgo/graphiql-rails", ref: "6b34eb1")
+  gem("rubocop-thread_safety", require: false)
 end
 
 group :test do
   # Use capybara to simulate user-browser interaction
-  gem("capybara", "~> 3.37", ">= 3.37.1")
+  gem("capybara")
+  # Use cuprite to run the browser in Capybara tests
+  gem("cuprite")
 
-  # Use selenium to execute javascript in Capybara tests
-  gem("selenium-webdriver")
-  # keeps selenium drivers updated
-  gem("webdrivers")
   # Selenium recommends Database Cleaner for cleaning db between tests.
   # Maybe needed after JS db transactions, because they run in a separate thread
   # from the test server. https://github.com/DatabaseCleaner/database_cleaner
@@ -302,9 +200,6 @@ group :test do
   # allows test results to be reported back to test runner IDE's
   gem("minitest")
   gem("minitest-reporters")
-
-  # Mocking and stubbing in Ruby
-  gem("mocha")
 
   # restore `assigns` and `assert_template` to tests
   gem("rails-controller-testing")
@@ -327,13 +222,10 @@ group :development do
 
   # Use Rails DB to browse database at http://localhost:3000/rails/db/
   # gem("rails_db", "~> 2.5.0", path: "../local_gems/rails_db")
-
-  # Additional generators for input types, search objects, and mutations
-  # gem("graphql-rails-generators")
 end
 
 group :production do
   # New Relic for application and other monitoring
   # https://newrelic.com/
-  gem("newrelic_rpm")
+  # gem("newrelic_rpm")
 end

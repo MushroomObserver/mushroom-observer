@@ -1,0 +1,27 @@
+This are notes on running the current machine learning model for MO.
+
+The current model was created by Alan Celestino in 2020.  It uses an
+older version of fast.ai.  We expect to upgrade it soon with a new model
+and a more consistent deployment strategy.
+
+For now, the model runs on images.mushroomobserver.org.  To run it sudo to mo
+and run:
+
+mo> conda activate classifier
+
+If this fails (typically because Anaconda package hasn't been created), try:
+
+mo> conda create -n classifier python
+mo> conda activate classifier
+
+Once the above is working, run:
+
+mo> cd ~acelestino/mushroom_api
+mo> python api.py &
+
+If this fails (typically complaining about not being able to find flask), try:
+
+mo> conda install -c fastai -c pytorch -c anaconda -c conda-forge fastai anaconda pillow flask flask-restful
+mo> python api.py &
+
+You can now exit the shell.

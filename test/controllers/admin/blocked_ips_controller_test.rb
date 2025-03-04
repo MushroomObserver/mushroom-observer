@@ -5,6 +5,7 @@ require("test_helper")
 module Admin
   class BlockedIpsControllerTest < FunctionalTestCase
     def test_blocked_ips
+      ActiveSupport.to_time_preserves_timezone = true
       new_ip = "5.4.3.2"
       IpStats.remove_blocked_ips([new_ip])
       # make sure there is an API key logged to test that part of view
@@ -43,6 +44,15 @@ module Admin
       assert(time < File.mtime(MO.blocked_ips_file))
       IpStats.reset!
       assert_false(IpStats.blocked?(new_ip))
+
+      time = 1.minute.ago
+      File.utime(time.to_time, time.to_time, MO.blocked_ips_file)
+      patch(:update, params: { add_bad: " #{new_ip} " })
+      assert_no_flash
+      assert(time < File.mtime(MO.blocked_ips_file))
+      IpStats.reset!
+      assert_true(IpStats.blocked?(new_ip),
+                  "It should ignore leading & trailing spaces in ip addr")
     end
   end
 end

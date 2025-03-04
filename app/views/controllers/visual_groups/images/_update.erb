@@ -1,0 +1,7 @@
+<%=
+turbo_stream.replace("visual_group_status_links_#{image_id}") do
+  visual_group_status_links(
+    visual_group: visual_group, image_id: image_id, status: status
+  )
+end
+%>

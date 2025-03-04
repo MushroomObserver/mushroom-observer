@@ -50,14 +50,12 @@ class SpeciesListsControllerTest < FunctionalTestCase
   def assert_create_species_list
     assert_template("new")
     assert_template("shared/_form_list_feedback")
-    assert_template("shared/_textilize_help")
     assert_template("species_lists/_form")
   end
 
   def assert_edit_species_list
     assert_template("edit")
     assert_template("shared/_form_list_feedback")
-    assert_template("shared/_textilize_help")
     assert_template("species_lists/_form")
   end
 
@@ -82,7 +80,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_obj_arrays_equal([], @spl1.projects)
     assert_obj_arrays_equal([@proj2], @spl2.projects)
     assert_obj_arrays_equal([rolf, mary, katrina], @proj1.user_group.users)
-    assert_obj_arrays_equal([dick], @proj2.user_group.users)
+    assert_obj_arrays_equal([mary, dick], @proj2.user_group.users)
   end
 
   def obs_params(obs, vote)
@@ -91,7 +89,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
       place_name: obs.place_name,
       notes: obs.notes,
       lat: obs.lat,
-      long: obs.long,
+      lng: obs.lng,
       alt: obs.alt,
       is_collection_location: obs.is_collection_location ? "1" : "0",
       specimen: obs.specimen ? "1" : "0",
@@ -113,17 +111,22 @@ class SpeciesListsControllerTest < FunctionalTestCase
     )
   end
 
+  # These tests for titles were never returning the actual sorted results!
+  # The params "created" and "modified" do not even work.
+  # The incorrect query (often blank) simply got the "right" title.
   def test_index_sorted_by_user
     by = "user"
 
     login
     get(:index, params: { by: by })
 
+    assert_equal(SpeciesList.order_by_user.map(&:user_id),
+                 assigns(:objects).map(&:user_id))
     assert_displayed_title("Species Lists by #{by.capitalize}")
   end
 
-  def test_index_sorted_by_time_modifed
-    by = "modified"
+  def test_index_sorted_by_updated_at
+    by = "updated_at"
 
     login
     get(:index, params: { by: by })
@@ -132,8 +135,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_displayed_title("Species Lists by Time Last Modified")
   end
 
-  def test_index_sorted_by_date_created
-    by = "created"
+  def test_index_sorted_by_created_at
+    by = "created_at"
 
     login
     get(:index, params: { by: by })
@@ -245,16 +248,16 @@ class SpeciesListsControllerTest < FunctionalTestCase
     project = projects(:bolete_project)
 
     login
-    get(:index, params: { for_project: project.id })
+    get(:index, params: { project: project.id })
 
-    assert_displayed_title("Species Lists attached to #{project.title}")
+    assert_displayed_title("Species Lists for #{project.title}")
   end
 
   def test_index_for_project_with_no_lists
     project = projects(:empty_project)
 
     login
-    get(:index, params: { for_project: project.id })
+    get(:index, params: { project: project.id })
 
     assert_response(:success)
     assert_displayed_title("")
@@ -265,7 +268,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     project = observations(:minimal_unknown_obs)
 
     login
-    get(:index, params: { for_project: project.id })
+    get(:index, params: { project: project.id })
 
     assert_response(:redirect)
     assert_redirected_to(projects_path)
@@ -274,20 +277,43 @@ class SpeciesListsControllerTest < FunctionalTestCase
     )
   end
 
-  def test_show_species_list
-    sl_id = species_lists(:first_species_list).id
+  def test_show_species_list_non_owner_logged_in
+    list = species_lists(:unknown_species_list)
+    observations = list.observations
+    assert(observations.any?,
+           "Need SpeciesList fixture that has >= 1 Observation")
+    assert_not_equal(rolf, list.user)
 
-    # Show same list with non-owner logged in.
-    login("mary")
-    get(:show, params: { id: sl_id })
+    login(rolf.login)
+    get(:show, params: { id: list.id })
+
     assert_template(:show)
     assert_template("comments/_comments_for_object")
+    assert_select(
+      "form:match('action', ?)",
+      %r{/observations/\d+/species_lists/#{list.id}/remove},
+      { count: 0 },
+      "Non owner should not get buttons to remove Observations from List"
+    )
+  end
 
-    # Show non-empty list with owner logged in.
-    get(:show,
-        params: { id: species_lists(:unknown_species_list).id })
+  def test_show_species_list_owner_logged_in
+    list = species_lists(:unknown_species_list)
+    observations = list.observations
+    assert(observations.any?,
+           "Need SpeciesList fixture that has >= 1 Observation")
+
+    login(list.user.login)
+    get(:show, params: { id: list.id })
+
     assert_template(:show)
     assert_template("comments/_comments_for_object")
+    assert_select(
+      "form:match('action', ?)",
+      %r{/observations/\d+/species_lists/#{list.id}/remove},
+      { count: observations.size },
+      "Species List owner should get 1 Remove button per Observation"
+    )
   end
 
   def test_show_species_lists_attached_to_projects
@@ -317,7 +343,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     proj = projects(:bolete_project)
     assert_equal(mary.id, spl.user_id)            # owned by mary
     assert(spl.projects.include?(proj))           # owned by bolete project
-    assert_equal([dick.id],
+    assert_equal([mary.id, dick.id],
                  proj.user_group.users.map(&:id)) # dick is only project member
 
     login("rolf")
@@ -348,7 +374,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
   def test_show_flow
     login
-    query = Query.lookup_and_save(:SpeciesList, :all, by: "reverse_user")
+    query = Query.lookup_and_save(:SpeciesList, by: "reverse_user")
     query_params = @controller.query_params(query)
     get(:index, params: query_params)
     assert_template(:index)
@@ -442,7 +468,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert(obs.vote_cache > 2)
     assert_equal(Observation.no_notes, obs.notes)
     assert_nil(obs.lat)
-    assert_nil(obs.long)
+    assert_nil(obs.lng)
     assert_nil(obs.alt)
     assert_equal(false, obs.is_collection_location)
     assert_equal(false, obs.specimen)
@@ -784,7 +810,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
         vote: Vote.minimum_vote,
         notes: { Observation.other_notes_key => "member notes" },
         lat: "12 34 56 N",
-        long: "78 9 12 W",
+        lng: "78 9 12 W",
         alt: "345 ft",
         is_collection_location: "1",
         specimen: "1"
@@ -810,7 +836,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_equal([Observation.other_notes_key], obs.notes.keys)
     assert_equal(obs.notes[Observation.other_notes_key], "member notes")
     assert_equal(12.5822, obs.lat)
-    assert_equal(-78.1533, obs.long)
+    assert_equal(-78.1533, obs.lng)
     assert_equal(105, obs.alt)
     assert_equal(true, obs.is_collection_location)
     assert_equal(true, obs.specimen)
@@ -1217,7 +1243,10 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     login("mary")
     get(:new)
-    assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
+    assert_project_checks(@proj1.id => :unchecked, @proj2.id => :unchecked)
+    post(:create,
+         params: { project: { "id_#{@proj1.id}" => "1" } })
+    assert_project_checks(@proj1.id => :checked, @proj2.id => :unchecked)
 
     login("dick")
     get(:new)
@@ -1235,9 +1264,6 @@ class SpeciesListsControllerTest < FunctionalTestCase
     @proj1.add_observation(obs)
     get(:new)
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
-    post(:create,
-         params: { project: { "id_#{@proj1.id}" => "0" } })
-    assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
   end
 
   def test_project_checkboxes_in_edit_species_list_form
@@ -1289,8 +1315,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
     # as defaults for future observations.
     obs1.notes = obs2.notes = { Observation.other_notes_key => "test notes" }
     obs1.lat   = obs2.lat   = "12.3456"
-    obs1.long  = obs2.long  = "-76.5432"
-    obs1.alt   = obs2.alt   = "789"
+    obs1.lng = obs2.lng = "-76.5432"
+    obs1.alt = obs2.alt = "789"
     obs1.is_collection_location = false
     obs2.is_collection_location = false
     obs1.specimen = true
@@ -1304,9 +1330,9 @@ class SpeciesListsControllerTest < FunctionalTestCase
       klass: SpeciesList,
       expect_areas: { Observation.other_notes_key => "test notes" }
     )
-    assert_input_value(:member_lat,   "12.3456")
-    assert_input_value(:member_long,  "-76.5432")
-    assert_input_value(:member_alt,   "789")
+    assert_input_value(:member_lat, "12.3456")
+    assert_input_value(:member_lng, "-76.5432")
+    assert_input_value(:member_alt, "789")
     assert_checkbox_state(:member_is_collection_location, false)
     assert_checkbox_state(:member_specimen, true)
 
@@ -1314,8 +1340,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
     # standard defaults from create_observation, instead.
     obs1.notes = "different notes"
     obs1.lat   = "-12.3456"
-    obs1.long  = "76.5432"
-    obs1.alt   = "123"
+    obs1.lng = "76.5432"
+    obs1.alt = "123"
     obs1.is_collection_location = true
     obs1.specimen = false
     obs1.save!
@@ -1327,7 +1353,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
       expect_areas: { Observation.other_notes_key => "" }
     )
     assert_input_value(:member_lat, "")
-    assert_input_value(:member_long, "")
+    assert_input_value(:member_lng, "")
     assert_input_value(:member_alt, "")
     assert_checkbox_state(:member_is_collection_location, true)
     assert_checkbox_state(:member_specimen, false)
@@ -1363,10 +1389,10 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login("rolf")
     spl1 = species_lists(:unknown_species_list)
     spl2 = species_lists(:one_genus_three_species_list)
-    query1 = Query.lookup_and_save(:Observation, :in_species_list,
-                                   species_list: spl1.id, by: :name)
-    query2 = Query.lookup_and_save(:Observation, :in_species_list,
-                                   species_list: spl2.id, by: :name)
+    query1 = Query.lookup_and_save(:Observation,
+                                   species_lists: spl1.id, by: :name)
+    query2 = Query.lookup_and_save(:Observation,
+                                   species_lists: spl2.id, by: :name)
 
     # make sure the "Set Source" link is on the page somewhere
     get(:show, params: { id: spl1.id })

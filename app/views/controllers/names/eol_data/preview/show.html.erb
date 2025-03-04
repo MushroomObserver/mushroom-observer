@@ -1,0 +1,16 @@
+<%
+add_page_title(:eol_preview_title.t)
+%>
+
+<%= :eol_preview_explanation.tp %>
+
+<% odd_or_even = 0
+@names.select(&:ok_for_export).each do |name|
+  odd_or_even = 1 - odd_or_even %>
+  <div class="ListLine<%= odd_or_even %> py-10px">
+      <%= name.display_name.t %>
+  </div>
+<% end %>
+<p>
+  <%= :eol_preview_name_count.t(count: @names.length) %><br/>
+</p>

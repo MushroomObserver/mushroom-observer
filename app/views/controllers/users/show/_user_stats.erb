@@ -1,0 +1,52 @@
+<%
+rows = user_stats_rows(@user_stats)
+paths = user_stats_link_paths(@show_user)
+total = 0
+%>
+
+<%= panel_block(heading: :show_user_title.t(user: name),
+                id: "user_stats") do %>
+
+  <table class="table table-condensed bg-none mb-0">
+    <% rows.each do |row|
+      field = row[:field]
+      label = row[:label]
+      count = row[:count]
+      weight = row[:weight]
+      count_text = weight ? "#{count} * #{weight}" : count
+      points = row[:points]
+      url = paths[field]
+      link = url ? link_to(label, url) : label
+      total += points.to_i
+      if !count %>
+        <tr>
+          <td colspan="2"><%= label %></td>
+          <td><%= weight ? "=" : "" %></td>
+          <td align="right"><%= points %></td>
+        </tr>
+      <% elsif !label.blank? %>
+        <tr>
+          <td><%= link %></td>
+          <td><%= count_text %></td>
+          <td><%= weight ? "=" : "" %></td>
+          <td align="right"><%= points %></td>
+        </tr>
+      <% end %>
+    <% end %>
+
+    <% if total > 0 %>
+      <tr>
+        <td colspan="4">
+          <hr/>
+        </td>
+      </tr>
+      <tr>
+        <td><%= :show_user_total.t %></td>
+        <td></td>
+        <td>=</td>
+        <td align="right"><%= total %></td>
+      </tr>
+    <% end %>
+  </table>
+
+<% end %>

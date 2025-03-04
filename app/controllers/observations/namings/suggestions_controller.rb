@@ -4,10 +4,11 @@
 module Observations::Namings
   class SuggestionsController < ApplicationController
     before_action :login_required
-    before_action :disable_link_prefetching
 
     def show
       @observation = load_for_show_observation_or_goto_index(params[:id])
+      consensus    = Observation::NamingConsensus.new(@observation)
+      @owner_name  = consensus.owner_preference
       @suggestions = Suggestion.analyze(JSON.parse(params[:names].to_s))
     end
   end

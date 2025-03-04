@@ -1,0 +1,17 @@
+<%
+add_page_title("MO Maintenance")
+%>
+
+<p>Sorry, this action no longer seems to exist...</p>
+
+<% if false %>
+  <% @users.each do |key, value| %>
+    <%= "#{key}: #{value}"%><br/>
+  <% end %>
+  <br/>
+
+  <% @data.each do |datum| %>
+    <%= link_to(datum[:name].t, name_path(datum[:id])) %>
+    <%= datum[:login] %><br/>
+  <% end %>
+<% end %>

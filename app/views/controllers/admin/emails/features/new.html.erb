@@ -1,0 +1,19 @@
+<%
+add_page_title("Email Features")
+%>
+
+<%= form_with(url: admin_emails_feature_path,
+              scope: :feature_email) do |f| %>
+
+  <%= content_tag(:p, "Sending to #{@users.length} users.") %>
+
+  <%= text_area_with_label(form: f, field: :content,
+                           label: "Feature Email:", rows: 20,
+                           data: { autofocus: true }) %>
+
+  <%= submit_button(form: f, button: :SEND.l, center: true) %>
+
+  <div class="form-group">
+    <%= "#{:USERS.l}:" + (@users.map { |u| u.login }).safe_join(", ") %>
+  </div>
+<% end %>

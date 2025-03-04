@@ -59,6 +59,7 @@ class Language < AbstractModel
   # This is used by the app layout, so must cause mimimal database load.
   def top_contributors(num = 10)
     TranslationString.
+      # includes([:user]).
       where(language: self).where.not(user_id: 0).
       group(:user_id).
       order(TranslationString[:id].count).
@@ -79,7 +80,7 @@ class Language < AbstractModel
   end
 
   private_class_method def self.get_user_translation_contributions_overall(user)
-    v = Arel::Table.new(:translation_strings_versions)
+    v = Arel::Table.new(:translation_string_versions)
     TranslationString::Version.
       where(user_id: user.id).
       group(:translation_string_id).
@@ -97,8 +98,9 @@ class Language < AbstractModel
   end
 
   def get_user_translation_contributions(user)
-    v = Arel::Table.new(:translation_strings_versions)
+    v = Arel::Table.new(:translation_string_versions)
     TranslationString.
+      # includes([:user, :versions]).
       joins(:versions).
       where(language_id: id).
       where(v[:user_id].eq(user.id)).

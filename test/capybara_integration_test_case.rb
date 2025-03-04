@@ -1,13 +1,5 @@
 # frozen_string_literal: true
 
-# Allow simuluation of user-browser interaction with capybara
-require("capybara/rails")
-require("capybara/minitest")
-require("webdrivers/geckodriver")
-
-require("database_cleaner/active_record")
-DatabaseCleaner.strategy = :transaction
-
 #  = Capybara Integration Test Case
 #
 #  The test case class that all Capybara integration tests currently derive
@@ -30,16 +22,17 @@ DatabaseCleaner.strategy = :transaction
 #
 #        # Create two sessions: think "browser" - each session represents the
 #        # actions of a single user in one or more tabs of a single browser.
+#        # Note this works differently for system tests: no Session.new
 #        rolf_session = Capybara::Session.new(:rack_test, Rails.application)
-#        using_session(rolf_session) { login_user('rolf') }
+#        using_session(rolf_session) { login!(rolf) }
 #        mary_session = Capybara::Session.new(:rack_test, Rails.application)
-#        using_session(mary_session) { login_user('mary') }
+#        using_session(mary_session) { login!(mary) }
 #
 #        # Have Rolf do some stuff.
-#        using_session(rolf) { visit('/edit_rolfs_stuff') }
+#        using_session(rolf_session) { visit('/edit_rolfs_stuff') }
 #
 #        # Have Mary do stuff.
-#        using_session(mary) { visit('/edit_rolfs_stuff') }
+#        using_session(mary_session) { visit('/edit_rolfs_stuff') }
 #        mary.assert_redirect
 #
 #        # You can also create anonymous sessions.
@@ -69,6 +62,12 @@ DatabaseCleaner.strategy = :transaction
 #
 ################################################################################
 
+# Allow simuluation of user-browser interaction with capybara
+require("capybara/rails")
+require("capybara/minitest")
+
+# require("database_cleaner/active_record")
+
 class CapybaraIntegrationTestCase < ActionDispatch::IntegrationTest
   # Make the Capybara DSL available in these integration tests
   include Capybara::DSL
@@ -80,19 +79,6 @@ class CapybaraIntegrationTestCase < ActionDispatch::IntegrationTest
   include CapybaraSessionExtensions
   include CapybaraMacros
 
-  # Javascript tests use this
-  Capybara.register_driver(:firefox_headless) do |app|
-    options = ::Selenium::WebDriver::Firefox::Options.new
-    options.args << "--headless"
-
-    Capybara::Selenium::Driver.new(app, browser: :firefox, options: options)
-  end
-
-  # In case using screenshot
-  # Capybara::Screenshot.register_driver(:firefox_headless) do |driver, path|
-  #   driver.browser.save_screenshot(path)
-  # end
-
   # Important to allow integration tests test the CSRF stuff to avoid unpleasant
   # surprises in production mode.
   def setup
@@ -102,28 +88,26 @@ class CapybaraIntegrationTestCase < ActionDispatch::IntegrationTest
     # Capybara.reset_sessions!
 
     # needed for selenium
-    Capybara.server = :webrick
-
-    # Webdrivers.logger.level = :debug
-    # TODO: Move this, it gets called tooo often
-    # Webdrivers::Geckodriver.update
+    Capybara.server = :puma
 
     # https://stackoverflow.com/questions/15675125/database-cleaner-not-working-in-minitest-rails
-    DatabaseCleaner.start
+    # DatabaseCleaner.strategy = :transaction
+    # DatabaseCleaner.start
 
     # Treat Rails html requests as coming from non-robots.
     # If it's a bot, controllers often do not serve the expected content.
     # The requester looks like a bot to the `browser` gem because the User Agent
     # in the request is blank. I don't see an easy way to change that. -JDC
-    Browser::Bot.any_instance.stubs(:bot?).returns(false)
+    MO.bot_enabled = false
   end
 
   def teardown
     Capybara.reset_sessions!
-    Capybara.use_default_driver
+    # Capybara.use_default_driver
 
-    DatabaseCleaner.clean
+    # DatabaseCleaner.clean
 
     ApplicationController.allow_forgery_protection = false
+    MO.bot_enabled = true
   end
 end

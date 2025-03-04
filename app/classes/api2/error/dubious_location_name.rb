@@ -2,10 +2,10 @@
 
 class API2
   # Location name is "dubious".
-  class DubiousLocationName < Error
+  class DubiousLocationName < FatalError
     def initialize(reasons)
       super()
-      args.merge!(reasons: reasons.join("; ").gsub(/\.;/, ";"))
+      args.merge!(reasons: reasons.join("; ").gsub(".;", ";"))
     end
   end
 end

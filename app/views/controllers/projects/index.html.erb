@@ -1,0 +1,16 @@
+<%
+add_index_title(@query, no_hits: :list_projects_title.t)
+add_tab_set(projects_index_tabs)
+add_sorter(@query, projects_index_sorts)
+
+flash_error(@error) if @error && @objects.empty?
+%>
+
+<!-- list the projects -->
+<%= paginate_block(@pages) do %>
+  <div class="list-group">
+    <%= render(partial: "projects/object", collection: @objects) %>
+  </div>
+<% end %>
+
+

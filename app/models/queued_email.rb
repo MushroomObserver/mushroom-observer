@@ -223,24 +223,18 @@ class QueuedEmail < AbstractModel
     return true unless RunLevel.is_normal?
 
     log_msg = "SEND #{flavor} " \
-      "from=#{begin
-                user.login
-              rescue StandardError
-                "nil"
-              end} " \
-      "to=#{begin
-              to_user.login
-            rescue StandardError
-              "nil"
-            end} " +
-              queued_email_integers.map { |x| "#{x.key}=#{x.value}" }.
-              join(" ") +
-              queued_email_strings.map { |x| "#{x.key}=\"#{x.value}\"" }.
-              join(" ")
+      "from=#{user&.login || "nil"} " \
+      "to=#{to_user&.login || "nil"} " +
+              queued_email_integers.map { |x|
+                "#{x.key}=#{x.value}"
+              }.join(" ") +
+              queued_email_strings.map do |x|
+                "#{x.key}=\"#{x.value}\""
+              end.join(" ")
     self.class.debug_log(log_msg)
     current_locale = I18n.locale
     result = false
-    if user == to_user
+    if user.present? && user == to_user
       unless Rails.env.test?
         raise("Skipping email with same sender and recipient: #{user.email}\n")
       end
@@ -277,7 +271,7 @@ class QueuedEmail < AbstractModel
   def dump
     result = ""
     result += "#{id}: from => #{user&.login}, "
-    result += "to => #{to_user.login}, flavor => #{flavor}, "
+    result += "to => #{to_user&.login}, flavor => #{flavor}, "
     result += "queued => #{queued}\n"
     queued_email_integers.each { |i| result += "\t#{i.key} => #{i.value}\n" }
     queued_email_strings.each { |i| result += "\t#{i.key} => #{i.value}\n" }

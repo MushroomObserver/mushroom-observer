@@ -2,6 +2,6 @@
 
 class API2
   # Request requires valid APIKey.
-  class MustAuthenticate < Error
+  class MustAuthenticate < FatalError
   end
 end

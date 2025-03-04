@@ -1,0 +1,23 @@
+<%
+add_page_title(:edit_classification_title.t(name: @name.display_name))
+
+add_tab_set(name_forms_return_tabs(name: @name))
+
+rank = rank_as_lower_string(@name.rank)
+action = { controller: "/names/classification", action: :update,
+            id: @name.id, q: get_query_param }
+@container = :text
+%>
+
+<%= form_with(url: action, method: :put) do |f| %>
+
+  <%= text_area_with_label(
+        form: f, field: :classification, rows: 10, value: @name.classification,
+        between: help_block(:p, :form_names_classification_help.t(rank: rank)),
+        label: "#{:form_names_classification.t}:",
+        data: { autofocus: true }
+      ) %>
+
+  <%= submit_button(form: f, button: :SAVE.t, center: true) %>
+
+<% end %>

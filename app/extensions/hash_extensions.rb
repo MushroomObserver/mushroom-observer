@@ -26,16 +26,24 @@ class Hash
     result
   end
 
+  def deep_find(key, object = self, found = [])
+    found << object[key] if object.respond_to?(:key?) && object.key?(key)
+    if object.is_a?(Enumerable)
+      found << object.collect { |*a| deep_find(key, a.last) }
+    end
+    found.flatten.compact
+  end
+
   # Remove keys whose value is nil.
   def remove_nils!
     delete_if { |_k, v| v.nil? }
   end
 
-  def add_leaf(*args)
-    Tree.add_leaf(self, *args)
+  def add_leaf(*)
+    Tree.add_leaf(self, *)
   end
 
-  def has_node?(*args)
-    Tree.has_node?(self, *args)
+  def has_node?(*)
+    Tree.has_node?(self, *)
   end
 end

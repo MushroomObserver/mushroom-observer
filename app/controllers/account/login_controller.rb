@@ -9,10 +9,6 @@ module Account
       :email_new_password,
       :new_password_request
     ]
-    before_action :disable_link_prefetching, except: [
-      :new,
-      :create
-    ]
 
     # the login form
     def new
@@ -75,9 +71,9 @@ module Account
     private
 
     def normalize_login_params
-      @login = param_lookup([:user, :login]).to_s.strip
-      @password = param_lookup([:user, :password]).to_s.strip
-      @remember = param_lookup([:user, :remember_me]) == "1"
+      @login = params.dig(:user, :login).to_s.strip
+      @password = params.dig(:user, :password).to_s.strip
+      @remember = params.dig(:user, :remember_me) == "1"
     end
 
     def login_success(user)
@@ -103,7 +99,7 @@ module Account
       if @new_user.save
         flash_notice(:runtime_email_new_password_success.tp +
                      :email_spam_notice.tp)
-        PasswordMailer.build(@new_user, password).deliver_now
+        QueuedEmail::Password.create_email(@new_user, password)
         render("account/login/new")
       else
         flash_object_errors(@new_user)

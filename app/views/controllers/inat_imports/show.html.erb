@@ -1,0 +1,33 @@
+<%
+  @container = :wide
+  add_page_title(:inat_import_tracker.t)
+  # add_tab_set(article_show_tabs(article: @article, user: @user))
+%>
+
+<%= # This is the container that gets updated with whatever's in the partial.
+  tag.div(
+    id: "status_#{@tracker.id}",
+    data: { controller: "inat-import-job",
+            endpoint: inat_import_job_tracker_path(
+              inat_import_id: @tracker.inat_import,
+              id: @tracker.id
+            ) }) do
+    render(partial: "inat_imports/job_trackers/current",
+           locals: { tracker: @tracker })
+  end
+%>
+
+<%=
+  # NOTE: jdc 2025-02-08 When available, replace the target with a link to
+  # the Observations imported by this InatImport. I.e. Observations:
+  # - created by @user
+  # - from @tracker.started_at -- @tracker.ended_at || time.now
+  # - ideally with source: InatImport)
+  # - ordered by created_at desc
+  link_to(
+    :inat_import_tracker_results.l,
+    observations_path(
+      pattern: "user:#{@user.id} created:#{Date.today.strftime}-#{Date.tomorrow.strftime}"),
+    { class: "mt-3 btn btn-default" }
+  )
+%>

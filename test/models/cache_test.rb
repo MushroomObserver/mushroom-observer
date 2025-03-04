@@ -4,14 +4,14 @@ require("test_helper")
 # Test cached columns in names and observations table.
 class CacheTest < UnitTestCase
   # Prove that changing a location name will update observations.where for
-  # all the attached observations without changing the updated_at field.
+  # all the attached observations AND change the updated_at field.
   def test_changing_location_name
     loc = locations(:burbank)
     assert_not_empty(loc.observations)
     first_updated_at = loc.observations.first.updated_at
     loc.update(name: "Truman, California, USA")
     assert(loc.observations.all? { |o| o.where == loc.name })
-    assert_equal(first_updated_at, loc.observations.first.updated_at)
+    assert_not_equal(first_updated_at, loc.observations.first.updated_at)
   end
 
   # Prove that changing a name's lifeform will update observations.lifeform for
@@ -26,7 +26,7 @@ class CacheTest < UnitTestCase
   end
 
   # Prove that changing a name will update observations.text_name for
-  # all the attached observations without changing the updated_at field.
+  # all the attached observations AND change the updated_at field.
   def test_changing_text_name
     name = names(:stereum_hirsutum)
     assert_not_empty(name.observations)
@@ -34,7 +34,7 @@ class CacheTest < UnitTestCase
     name.change_text_name("Stereum blah", "Foo", "Species")
     name.save
     assert(name.observations.all? { |o| o.text_name == name.text_name })
-    assert_equal(first_updated_at, name.observations.first.updated_at)
+    assert_not_equal(first_updated_at, name.observations.first.updated_at)
   end
 
   # Prove that changing a name's classification will update
@@ -47,7 +47,7 @@ class CacheTest < UnitTestCase
     assert_not_empty(name.observations)
     name_updated_at = name.updated_at
     first_updated_at = name.observations.first.updated_at
-    new_str = desc.classification.sub(/Ascomycota/, "Basidiomycota")
+    new_str = desc.classification.sub("Ascomycota", "Basidiomycota")
     desc.update(classification: new_str)
     assert_equal(new_str, name.reload.classification)
     assert(name.observations.all? { |o| o.classification == new_str })
@@ -63,10 +63,11 @@ class CacheTest < UnitTestCase
     old_name = obs.name
     naming   = obs.namings.find { |n| n.name != old_name }
     new_name = naming.name
+    consensus = ::Observation::NamingConsensus.new(obs)
     assert_not_equal("", new_name.lifeform.to_s)
     assert_not_equal("", new_name.classification.to_s)
     naming.votes.each do |vote|
-      obs.change_vote(naming, Vote.maximum_vote, vote.user)
+      consensus.change_vote(naming, Vote.maximum_vote, vote.user)
     end
     assert_names_equal(new_name, obs.reload.name)
     assert_equal(new_name.lifeform, obs.lifeform)
@@ -79,18 +80,18 @@ class CacheTest < UnitTestCase
   def test_propagate_classification
     name = names(:agaricus)
     saved_obs_updated_ats =
-      Observation.of_name("Agaricus", include_subtaxa: 1).map(&:updated_at)
+      Observation.of_names("Agaricus", include_subtaxa: 1).map(&:updated_at)
     new_classification = names(:peltigera).classification
 
     name.update(classification: new_classification)
     name.propagate_classification
 
-    Observation.of_name("Agaricus", include_subtaxa: 1).each do |obs|
+    Observation.of_names("Agaricus", include_subtaxa: 1).each do |obs|
       assert_equal(new_classification, obs.classification)
     end
     assert_equal(
       saved_obs_updated_ats,
-      Observation.of_name("Agaricus", include_subtaxa: 1).map(&:updated_at)
+      Observation.of_names("Agaricus", include_subtaxa: 1).map(&:updated_at)
     )
   end
 
@@ -101,11 +102,11 @@ class CacheTest < UnitTestCase
     saved_name_updated_ats = Name.subtaxa_of_genus_or_below("Agaricus").
                              map(&:updated_at)
     saved_obs_updated_ats =
-      Observation.of_name("Agaricus", include_subtaxa: 1).map(&:updated_at)
+      Observation.of_names("Agaricus", include_subtaxa: 1).map(&:updated_at)
 
     name.propagate_add_lifeform("lichen")
 
-    Observation.of_name("Agaricus", include_subtaxa: 1).each do |obs|
+    Observation.of_names("Agaricus", include_subtaxa: 1).each do |obs|
       assert_true(obs.lifeform.include?(" lichen "))
     end
     assert_equal(
@@ -123,12 +124,12 @@ class CacheTest < UnitTestCase
 
     name.propagate_remove_lifeform("lichen")
 
-    Observation.of_name("Agaricus", include_subtaxa: 1).each do |obs|
+    Observation.of_names("Agaricus", include_subtaxa: 1).each do |obs|
       assert_false(obs.lifeform.include?(" lichen "))
     end
     assert_equal(
       saved_obs_updated_ats,
-      Observation.of_name("Agaricus", include_subtaxa: 1).map(&:updated_at)
+      Observation.of_names("Agaricus", include_subtaxa: 1).map(&:updated_at)
     )
 
     Name.subtaxa_of_genus_or_below("Agaricus").each do |nam|

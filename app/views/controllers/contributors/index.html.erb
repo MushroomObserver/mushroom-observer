@@ -1,0 +1,16 @@
+<%
+@container = :double
+add_page_title(:users_by_contribution_title.t)
+add_tab_set(contributors_index_tabs)
+%>
+
+<div class="row">
+  <div class="col-md-8 col-lg-6">
+    <%= render(partial: "contributors/legend") %>
+  </div>
+</div><!--.row-->
+
+<%= paginate_block(@pages) do %>
+  <%= matrix_table(partial: "contributors/contributor",
+                   objects: @objects, as: :user) %>
+<% end %>

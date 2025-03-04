@@ -26,6 +26,13 @@ MushroomObserver::Application.configure do
   config.water_users = []
   config.oil_users   = []
 
+  # REDIRECT_URI (Callback URL)
+  # iNat calls this after iNat user authorizes MO to access their data.
+  # Must match the redirect_uri in the iNat application settings for iNat's
+  # MushroomObserver Test app https://www.inaturalist.org/oauth/applications/851
+  config.redirect_uri =
+    "http://localhost:3000/inat_imports/authorization_response"
+
   # ----------------------------
   #  Rails configuration.
   # ----------------------------
@@ -51,14 +58,20 @@ MushroomObserver::Application.configure do
     "Cache-Control" => "public, max-age=3600"
   }
 
-  # Show full error reports and disable caching
-  config.consider_all_requests_local       = true
-  config.action_controller.perform_caching = false
+  # Show full error reports and disable caching.
+  config.consider_all_requests_local = true
+  # config.action_controller.perform_caching = false
 
-  # Raise exceptions instead of rendering exception templates
-  config.action_dispatch.show_exceptions = false
+  # Use a different cache store in test.
+  config.cache_store = :null_store
 
-  # Disable request forgery protection in test environment
+  # Render exception templates for rescuable exceptions and raise for other
+  # exceptions.
+  # config.action_dispatch.show_exceptions = :rescuable
+  # Raise exceptions instead of rendering exception templates.
+  config.action_dispatch.show_exceptions = :none
+
+  # Disable request forgery protection in test environment.
   config.action_controller.allow_forgery_protection = false
 
   # Tell Action Mailer not to deliver emails to the real world.
@@ -74,44 +87,62 @@ MushroomObserver::Application.configure do
   # Allow YAML deserializer to deserialize symbols
   # https://groups.google.com/g/rubyonrails-security/c/MmFO3LYQE8U?pli=1
   config.active_record.yaml_column_permitted_classes = [Symbol]
+  # If test server is running puma for action cable,
+  # ensure that test database is shared between threads
+  # config.active_record.shared_connection = true
 
-  # Print deprecation notices to the stderr
+  # Debugging strict loading - either :log, or :error out the page
+  # config.active_record.action_on_strict_loading_violation = :error
+
+  # Print deprecation notices to the stderr.
   config.active_support.deprecation = :stderr
 
-  # Raises error for missing translations
+  # Raises error for missing translations.
   # config.action_view.raise_on_missing_translations = true
 
-  # Compile and combine assets, but don't compress or add digests to names.
+  # Compile and combine assets, and add digests to names, but don't compress.
   config.assets.compile = true
+  config.assets.digest = true
   config.assets.compress = false
   config.assets.debug = false
-  config.assets.digest = false
 
-  # To control the debugger turing testing
+  # To control the debugger turing testing.
   config.activate_debugger = false
 
-  # Enable stdout logger
+  # Enable stdout logger.
   config.logger = Logger.new($stdout)
 
-  # Set log level
+  # Set log level.
   config.log_level = :ERROR
+
+  # Raise error when a before_action's only/except options reference missing
+  # actions
+  config.action_controller.raise_on_missing_callback_actions = true
 
   # config.action_dispatch.show_exceptions = false
 
   config.active_support.test_order = :random
 
+  config.bot_enabled = true
+
+  config.active_job.queue_adapter = :test
+
   # ----------------------------
   #  Bullet configuration.
   # ----------------------------
 
-  config.after_initialize do
-    Bullet.enable = true
-    Bullet.raise = true # Show message by raising errors.
-    Bullet.stacktrace_includes = []
-    Bullet.stacktrace_excludes = []
-    Bullet.unused_eager_loading_enable = false
-    # Bullet.add_safelist(type: :n_plus_one_query, class_name: "Post",
-    #                     association: :comments)
+  if defined?(Bullet)
+    config.after_initialize do
+      Bullet.enable = true
+      Bullet.raise = true # Show message by raising errors.
+      Bullet.stacktrace_includes = []
+      Bullet.stacktrace_excludes = []
+      Bullet.unused_eager_loading_enable = false
+      # Bullet.add_safelist(type: :n_plus_one_query, class_name: "Post",
+      #                     association: :comments)
+      Bullet.add_safelist(type: :counter_cache, class_name: "Name",
+                          association: :observations)
+    end
   end
 end
 

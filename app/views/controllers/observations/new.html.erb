@@ -1,0 +1,8 @@
+<%
+add_page_title(:create_observation_title.t)
+
+add_tab_set(observation_form_new_tabs)
+@container = :wide
+%>
+
+<%= render(partial: "observations/form", locals: { action: :create }) %>

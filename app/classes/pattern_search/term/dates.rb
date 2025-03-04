@@ -76,13 +76,14 @@ module PatternSearch
       def parse_date_word!(val, english, tag, unit, num)
         translation = Regexp.escape(:"search_value_#{tag}".l).
                       sub(/\bN\b/, '\d+')
+        # This bit of cleverness runs until there's nothing in line 1 to `sub!`
         1 while val.to_s.sub!(/(^|-)(#{english}|#{translation})(-|$)/) do |word|
           first = word.sub!(/-$/, "")
           last  = word.sub!(/^-/, "")
           num2  = num == "N" ? word.to_i : num
-          date  = Date.current - num2.send("#{unit}s")
-          left  = format_date(date.send("beginning_of_#{unit}")) unless last
-          right = format_date(date.send("end_of_#{unit}")) unless first
+          date  = Date.current - num2.send(:"#{unit}s")
+          left  = format_date(date.send(:"beginning_of_#{unit}")) unless last
+          right = format_date(date.send(:"end_of_#{unit}")) unless first
           [left, right].map(&:to_s).join("-")
         end
       end

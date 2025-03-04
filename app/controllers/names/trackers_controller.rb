@@ -7,7 +7,6 @@ module Names
   class TrackersController < ApplicationController
     before_action :pass_query_params
     before_action :login_required
-    before_action :disable_link_prefetching
 
     # Form accessible from show_name that lets a user setup a tracker
     # with notifications for a name.
@@ -34,7 +33,7 @@ module Names
       return unless find_name!
 
       find_name_tracker
-      submit_tracking_form_udpate
+      submit_tracking_form_update
     end
 
     private
@@ -66,7 +65,7 @@ module Names
       redirect_to(name_path(@name.id, q: get_query_param))
     end
 
-    def submit_tracking_form_udpate
+    def submit_tracking_form_update
       case params[:commit]
       when :UPDATE.l
         create_or_update_name_tracker_and_interest(@name.id)
@@ -77,9 +76,9 @@ module Names
     end
 
     def create_or_update_name_tracker_and_interest(name_id)
-      @note_template = param_lookup([:name_tracker, :note_template])
+      @note_template = params.dig(:name_tracker, :note_template)
       note_template_enabled =
-        param_lookup([:name_tracker, :note_template_enabled]) == "1"
+        params.dig(:name_tracker, :note_template_enabled) == "1"
       @note_template = nil if @note_template.blank? || !note_template_enabled
       if @name_tracker.nil?
         create_name_tracker_interest_and_flash(name_id)
@@ -126,14 +125,14 @@ module Names
 
       user = name_tracker.user
       name = name_tracker.name
-      WebmasterMailer.build(
+      QueuedEmail::Webmaster.create_email(
         sender_email: user.email,
         subject: "New Name Tracker with Template",
         content: "User: ##{user.id} / #{user.login} / #{user.email}\n" \
                  "Name: ##{name.id} / #{name.search_name}\n" \
                  "Note: [[#{name_tracker.note_template}]]\n\n" \
                  "#{MO.http_domain}/names/trackers/#{name_tracker.id}/approve"
-      ).deliver_now
+      )
 
       # Let the user know that the note_template feature requires approval.
       flash_notice(:email_tracking_awaiting_approval.t)

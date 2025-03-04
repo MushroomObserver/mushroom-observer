@@ -8,7 +8,7 @@
 #
 #  == Version
 #
-#  Changes are kept in the "locations_versions" table using
+#  Changes are kept in the "location_versions" table using
 #  ActiveRecord::Acts::Versioned.
 #
 #  == Attributes
@@ -27,12 +27,13 @@
 #  high::         (V) Maximum elevation in meters, e.g. 100
 #  low::          (V) Minimum elevation in meters, e.g. 0
 #  notes::        (V) Arbitrary extra notes supplied by User.
+#  hidden::       (V) Should observation with this location be hidden
+#  box_area::     (-) Area of the box in square kilometers.
 #
 #  ('V' indicates that this attribute is versioned in past_locations table.)
 #
 #  == Class methods
 #
-#  primer::             List of User's latest Locations to prime auto-completer.
 #  clean_name::         Clean a name before doing searches on it.
 #
 #  == Scopes
@@ -45,9 +46,9 @@
 #  updated_after("yyyymmdd")
 #  updated_before("yyyymmdd")
 #  updated_between(start, end)
-#  name_includes(place_name)
+#  name_has(place_name)
 #  in_region(place_name)
-#  in_box(n,s,e,w)
+#  in_box(north:, south:, east:, west:)
 #
 #  == Instance methods
 #
@@ -67,6 +68,7 @@
 #  parse_latitude::     Validate and parse latitude from a string.
 #  parse_longitude::    Validate and parse longitude from a string.
 #  parse_altitude::     Validate and parse altitude from a string.
+#  found_here?::        Was the given obs found here?
 #
 #  ==== Name methods
 #  display_name::       +name+ reformated based on user's preference.
@@ -89,9 +91,10 @@
 #  notify_users::       After save: send email notification.
 #
 ################################################################################
-#
-class Location < AbstractModel
+class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   require "acts_as_versioned"
+
+  include Scopes
 
   belongs_to :description, class_name: "LocationDescription" # (main one)
   belongs_to :rss_log
@@ -103,12 +106,13 @@ class Location < AbstractModel
   has_many :comments,  as: :target, dependent: :destroy, inverse_of: :target
   has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
   has_many :observations
+  has_many :projects
+  has_many :project_aliases, as: :target, dependent: :destroy
   has_many :species_lists
   has_many :herbaria     # should be at most one, but nothing preventing more
   has_many :users        # via profile location
 
   acts_as_versioned(
-    table_name: "locations_versions",
     if_changed: %w[
       name
       north
@@ -118,6 +122,9 @@ class Location < AbstractModel
       high
       low
       notes
+      box_area
+      center_lat
+      center_lng
     ]
   )
   non_versioned_columns.push(
@@ -128,11 +135,17 @@ class Location < AbstractModel
     "ok_for_export",
     "rss_log_id",
     "description_id",
-    "locked"
+    "locked",
+    "hidden"
   )
 
+  before_save :calculate_box_area_and_center
   before_update :update_observation_cache
   after_update :notify_users
+
+  SEARCHABLE_FIELDS = [
+    :name, :notes
+  ].freeze
 
   # Automatically log standard events.  Merge will already log the destruction
   # as a merge and orphan the log.
@@ -145,51 +158,62 @@ class Location < AbstractModel
        Location::Version.where(
          location_id: ver.location_id, user_id: ver.user_id
        ).count.zero?
-      SiteData.update_contribution(:add, :locations_versions)
+      UserStats.update_contribution(:add, :location_versions)
     end
   end
 
-  # NOTE: To improve Coveralls display, do not use one-line stabby lambda scopes
-  scope :name_includes,
-        ->(place_name) { where(Location[:name].matches("%#{place_name}%")) }
-  scope :in_region,
-        ->(place_name) { where(Location[:name].matches("%#{place_name}")) }
-  scope :in_box, # Use named parameters (n, s, e, w), any order
-        lambda { |**args|
-          box = Box.new(
-            north: args[:n], south: args[:s], east: args[:e], west: args[:w]
-          )
-          return none unless box.valid?
+  # On save, calculate bounding box area for the `box_area` column, plus the
+  # `center_lat` and `center_lng` values. If box_area is below a threshold, also
+  # copy the values to the observation `location_lat` `location_lng` columns, or
+  # null the obs values if not. This callback can handle API updates.
+  def calculate_box_area_and_center
+    return unless north_changed? || east_changed? ||
+                  south_changed? || west_changed?
 
-          # expand box by epsilon to create leeway for Float rounding
-          # Fixes a bug where Califoria fixture was not in a box
-          # defined by the fixture's north, south, east, west
-          expanded_box = box.expand(0.00001)
+    self.box_area = calculate_area
+    self.center_lat = calculate_lat
+    self.center_lng = calculate_lng
+    update_observation_center_columns
+  end
 
-          if box.straddles_180_deg?
-            where(
-              (Location[:south] >= expanded_box.south).
-                and(Location[:north] <= expanded_box.north).
-              # Location[:west] between w & 180 OR between 180 and e
-              and((Location[:west] >= expanded_box.west).
-                or(Location[:west] <= expanded_box.east)).
-              and((Location[:east] >= expanded_box.west).
-                or(Location[:east] <= expanded_box.east))
-            )
-          else
-            where(
-              (Location[:south] >= expanded_box.south).
-                and(Location[:north] <= expanded_box.north).
-              and(Location[:west] >= expanded_box.west).
-                and(Location[:east] <= expanded_box.east).
-              and(Location[:west] <= Location[:east])
-            )
-          end
-        }
+  # Now that the box_area and center columns are set on this location, cache or
+  # update the center columns of this location's observations.
+  def update_observation_center_columns
+    if box_area <= MO.obs_location_max_area
+      observations.update_all(location_lat: center_lat,
+                              location_lng: center_lng)
+    else
+      observations.update_all(location_lat: nil, location_lng: nil)
+    end
+  end
+
+  # Can populate columns after migration, or be run as part of a recurring job.
+  def self.update_box_area_and_center_columns
+    # update the locations
+    loc_updated = update_all(update_center_and_area_sql)
+    # give center points to associated observations in batches by location_id
+    obs_centered = Observation.
+                   in_box_of_max_area.group(:location_id).update_all(
+                     location_lat: Location[:center_lat],
+                     location_lng: Location[:center_lng]
+                   )
+    # null center points where area is above the threshold
+    obs_center_nulled = Observation.
+                        in_box_gt_max_area.group(:location_id).update_all(
+                          location_lat: nil, location_lng: nil
+                        )
+    # Return counts
+    [loc_updated, obs_centered, obs_center_nulled]
+  end
 
   # Let attached observations update their cache if these fields changed.
+  # Also touch updated_at to expire obs fragment caches
   def update_observation_cache
-    Observation.update_cache("location", "where", id, name) if name_changed?
+    return unless name_changed?
+
+    Observation.where(location_id: id).update_all(
+      { where: name, updated_at: Time.zone.now }
+    )
   end
 
   ##############################################################################
@@ -198,7 +222,7 @@ class Location < AbstractModel
   #
   ##############################################################################
 
-  include BoxMethods
+  include Mappable::BoxMethods
 
   LXXXITUDE_REGEX = /^\s*
        (-?\d+(?:\.\d+)?) \s* (?:°|°|o|d|deg|,\s)? \s*
@@ -255,7 +279,7 @@ class Location < AbstractModel
 
   # Useful if invalid lat/longs cause crash, e.g., in mapping code.
   # New: Ensure box has nonzero size or make_editable_map fails.
-  def force_valid_lat_longs!
+  def force_valid_lat_lngs!
     self.north = Location.parse_latitude(north) || 45
     self.south = Location.parse_latitude(south) || -45
     self.east = Location.parse_longitude(east) || 90
@@ -268,6 +292,22 @@ class Location < AbstractModel
     self.south = center_lat - 0.0001
     self.east = center_lon + 0.0001
     self.west = center_lon - 0.0001
+  end
+
+  def found_here?(obs)
+    return true if obs.location == self
+    return contains?(obs.lat, obs.lng) if obs.lat && obs.lng
+
+    loc = obs.location
+    return false unless loc
+
+    # contains? is now a method of Mappable::BoxMethods
+    contains?(loc.north, loc.west) && contains?(loc.south, loc.east)
+  end
+
+  # Returns a hash representing the location's bounding box
+  def bounding_box
+    attributes.symbolize_keys.slice(:north, :south, :west, :east)
   end
 
   ##############################################################################
@@ -311,6 +351,12 @@ class Location < AbstractModel
     false
   end
 
+  # Abbreviated description of the location for shorter query titles.
+  # Just the location without locality, region, country
+  def title_display_name
+    name.split(", ").first
+  end
+
   def display_name
     User.current_location_format == "scientific" ? scientific_name : name
   end
@@ -332,6 +378,10 @@ class Location < AbstractModel
 
   # Alias for +display_name+ for compatibility with Name and other models.
   def format_name
+    display_name
+  end
+
+  def textile_name
     display_name
   end
 
@@ -372,33 +422,20 @@ class Location < AbstractModel
     str.strip_squeeze.downcase
   end
 
-  # Look at the most recent Observation's the current User has posted.  Return
-  # a list of the last 100 place names used in those Observation's (either
-  # Location names or "where" strings).  This list is used to prime Location
-  # auto-completers.
-  #
-  def self.primer
-    # Temporarily disable. It rarely takes autocomplete long even on my horrible
-    # internet connection. And the primer can -- at least briefly -- have names
-    # that have been merged or changed.  That may be confusing some users. Let's
-    # try it without for a while to see if anyone complains.
-    # where = ""
-    # where = "WHERE observations.user_id = #{User.current_id}" if User.current
-    # result = connection.select_values(%(
-    #   SELECT DISTINCT IF(observations.location_id > 0,
-    #                      locations.name,
-    #                      observations.where) AS x
-    #   FROM observations
-    #   LEFT OUTER JOIN locations ON locations.id = observations.location_id
-    #   #{where}
-    #   ORDER BY observations.updated_at DESC
-    #   LIMIT 100
-    # )).sort
-    # if User.current_location_format == "scientific"
-    #   result.map! { |n| Location.reverse_name(n) }
-    # end
-    # result
-    []
+  # Cleans up a place_name (per Observation) and
+  # applies the current user's current_location_format
+  def self.normalize_place_name(place_name)
+    place_name = place_name&.strip_squeeze
+    if User.current_location_format == "scientific"
+      reverse_name(place_name)
+    else
+      place_name
+    end
+  end
+
+  # Returns any existing location that matches place_name
+  def self.place_name_to_location(place_name)
+    find_by_name(normalize_place_name(place_name))
   end
 
   # Takes a location string splits on commas, reverses the order,
@@ -431,10 +468,11 @@ class Location < AbstractModel
 
   # Looks for a matching location using either location order just to be sure
   def self.find_by_name_or_reverse_name(name)
-    Location.where(name: name).or(Location.where(scientific_name: name)).first
+    Location.where(name: name).
+      or(Location.where(scientific_name: name)).first
   end
 
-  def self.user_name(user, name)
+  def self.user_format(user, name)
     if user && (user.location_format == "scientific")
       Location.reverse_name(name)
     else
@@ -510,25 +548,25 @@ class Location < AbstractModel
     CountryCounter.new.countries_by_count
   end
 
-  @@location_cache = nil
+  def self.location_name_cache
+    Rails.cache.fetch(:location_names, expires_in: 15.minutes) do
+      (Location.pluck(:name) + Observation.pluck(:where) +
+       SpeciesList.pluck(:where)).compact.uniq
+    end
+  end
 
-  # Check if a given name (postal order) already exists as a defined
-  # or undefined location.
-  def self.location_exists(name)
+  # Check if a given place name (postal order) already exists,
+  # defined as a Location or undefined as a saved `where` string.
+  def self.location_name_exists(name)
     return false unless name
 
-    @@location_cache ||= (
-      Location.pluck(:name) +
-        Observation.where.not(where: nil).pluck(:where) +
-        SpeciesList.where.not(where: nil).pluck(:where)
-    ).uniq
-    @@location_cache.member?(name)
+    location_name_cache.member?(name)
   end
 
   # Decide if the given name is dubious for any reason
   def self.dubious_name?(name, provide_reasons = false, check_db = true)
     reasons = []
-    unless check_db && location_exists(name)
+    unless check_db && location_name_exists(name)
       reasons += check_for_empty_name(name)
       reasons += check_for_dubious_commas(name)
       reasons += check_for_bad_country_or_state(name)
@@ -678,29 +716,61 @@ class Location < AbstractModel
       obs.save
     end
 
-    # Move species lists over.
-    SpeciesList.where(location_id: old_loc.id).find_each do |spl|
-      spl.update_attribute(:location, self)
-    end
-
-    # Update any users who call this location their primary location.
-    User.where(location_id: old_loc.id).find_each do |user|
-      user.update_attribute(:location, self)
+    # change object.location without verification
+    [Herbarium, Project, SpeciesList, User].each do |klass|
+      klass.where(location_id: old_loc.id).find_each do |obj|
+        obj.update_attribute(:location, self)
+      end
     end
 
     # Move over any interest in the old name.
-    Interest.where(target_type: "Location",
-                   target_id: old_loc.id).find_each do |int|
-      int.target = self
-      int.save
+    [Interest, ProjectAlias].each do |klass|
+      klass.where(target_type: "Location",
+                  target_id: old_loc.id).find_each do |obj|
+        obj.target = self
+        obj.save
+      end
     end
 
-    # Add note to explain the merge
-    # Intentionally not translated
-    add_note("[admin - #{Time.zone.now}]: Merged with #{old_loc.name}: " \
-             "North: #{old_loc.north}, South: #{old_loc.south}, " \
-             "West: #{old_loc.west}, East: #{old_loc.east}")
+    add_note(explain_merge(old_loc))
 
+    update_location_descriptions(old_loc)
+
+    # Log the action.
+    old_loc.rss_log&.orphan(old_loc.name, :log_location_merged,
+                            this: old_loc.name, that: name)
+    old_loc.rss_log = nil
+
+    # Destroy past versions.
+    editors = []
+    old_loc.versions.each do |ver|
+      editors << ver.user_id
+      ver.destroy
+    end
+
+    # Update contributions for editors.
+    editors.delete(old_loc.user_id)
+    editors.uniq.each do |user_id|
+      UserStats.update_contribution(:del, :location_versions, user_id)
+    end
+
+    # Finally destroy the location.
+    old_loc.destroy
+  end
+
+  private
+
+  def explain_merge(old_loc)
+    # Intentionally not translated
+    <<~EXPLANATION.tr("\n", " ")
+      [admin - #{Time.zone.now}]: Merged with #{old_loc.name}
+      (was Location ##{old_loc.id}):
+      North: #{old_loc.north}, South: #{old_loc.south},
+      West: #{old_loc.west}, East: #{old_loc.east}
+    EXPLANATION
+  end
+
+  def update_location_descriptions(old_loc)
     # Merge the two "main" descriptions if it can.
     if description && old_loc.description &&
        (description.source_type == :public) &&
@@ -719,28 +789,9 @@ class Location < AbstractModel
       desc.location_id = id
       desc.save
     end
-
-    # Log the action.
-    old_loc.rss_log&.orphan(old_loc.name, :log_location_merged,
-                            this: old_loc.name, that: name)
-    old_loc.rss_log = nil
-
-    # Destroy past versions.
-    editors = []
-    old_loc.versions.each do |ver|
-      editors << ver.user_id
-      ver.destroy
-    end
-
-    # Update contributions for editors.
-    editors.delete(old_loc.user_id)
-    editors.uniq.each do |user_id|
-      SiteData.update_contribution(:del, :locations_versions, user_id)
-    end
-
-    # Finally destroy the location.
-    old_loc.destroy
   end
+
+  public
 
   ##############################################################################
   #
@@ -777,11 +828,6 @@ class Location < AbstractModel
       end
     end
 
-    # Tell masochists who want to know about all location changes.
-    User.where(email_locations_all: true).find_each do |user|
-      recipients.push(user)
-    end
-
     # Send to people who have registered interest.
     # Also remove everyone who has explicitly said they are NOT interested.
     interests.each do |interest|
@@ -807,6 +853,8 @@ class Location < AbstractModel
 
   validate :check_requirements
   def check_requirements
+    check_hidden
+
     if !north || (north > 90)
       errors.add(:north, :validate_location_north_too_high.t)
     end
@@ -837,5 +885,14 @@ class Location < AbstractModel
     elsif name.empty?
       errors.add(:name, :validate_missing.t(field: :name))
     end
+  end
+
+  def check_hidden
+    return unless hidden
+
+    self.north = north.ceil(1)
+    self.south = south.floor(1)
+    self.east = east.ceil(1)
+    self.west = west.floor(1)
   end
 end

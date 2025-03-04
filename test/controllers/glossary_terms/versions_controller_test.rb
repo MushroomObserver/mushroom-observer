@@ -10,6 +10,7 @@ module GlossaryTerms
     def test_show_past
       term = glossary_terms(:square_glossary_term)
       version = term.versions.first # oldest version
+
       login
       get(:show, params: { id: term.id, version: version.version })
 

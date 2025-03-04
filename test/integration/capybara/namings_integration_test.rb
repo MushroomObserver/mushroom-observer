@@ -26,7 +26,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
     login(namer, session: namer_session)
     assert_false(namer_session.has_link?(class: /edit_naming/))
     assert_false(namer_session.has_selector?(class: /destroy_naming_link_/))
-    namer_session.click_link(class: "propose-naming-button")
+    namer_session.first(class: "propose-naming-link").click
 
     # naming = namer_session.create_name(obs, text_name)
     namer_session.assert_selector("body.namings__new")
@@ -37,7 +37,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
     # (Make sure there is a tab to go back to observations/show.)
     assert_true(namer_session.has_link?(href: "/#{obs.id}"))
 
-    namer_session.within("#naming_form") do |form|
+    namer_session.within("#obs_#{obs.id}_naming_form") do |form|
       assert_true(form.has_field?("naming_name", text: ""))
       assert_true(form.has_field?("naming_vote_value", text: ""))
       assert_true(form.has_unchecked_field?("naming_reasons_1_check"))
@@ -46,11 +46,14 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
       assert_true(form.has_unchecked_field?("naming_reasons_4_check"))
       form.first("input[type='submit']").click
     end
-    namer_session.assert_selector("body.namings__create")
-    # (I don't care so long as it says something.)
-    assert_flash_text(/\S/, session: namer_session)
 
-    namer_session.within("#naming_form") do |form|
+    namer_session.assert_selector("body.namings__create")
+    assert_flash_text(:form_naming_what_missing.l, session: namer_session)
+    namer_session.
+      # see https://github.com/MushroomObserver/mushroom-observer/issues/1796
+      assert_no_selector("#flash_notices", text: :SEE_MESSAGE_BELOW.l)
+
+    namer_session.within("#obs_#{obs.id}_naming_form") do |form|
       form.fill_in("naming_name", with: text_name)
       form.first("input[type='submit']").click
     end
@@ -60,7 +63,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
                   text: /MO does not recognize the name.*#{text_name}/
                 ))
 
-    namer_session.within("#naming_form") do |form|
+    namer_session.within("#obs_#{obs.id}_naming_form") do |form|
       assert_true(form.has_field?("naming_name", with: text_name))
       assert_true(form.has_unchecked_field?("naming_reasons_1_check"))
       assert_true(form.has_unchecked_field?("naming_reasons_2_check"))
@@ -94,7 +97,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
     reason = "Test reason."
     namer_session.click_link(class: /edit_naming_link_#{naming.id}/)
     namer_session.assert_selector("body.namings__edit")
-    namer_session.within("#naming_form") do |form|
+    namer_session.within("#obs_#{obs.id}_naming_#{naming.id}_form") do |form|
       assert_true(form.has_field?("naming_name", with: text_name))
       assert_true(form.has_checked_field?("naming_reasons_1_check"))
       form.uncheck("naming_reasons_1_check")
@@ -121,7 +124,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
 
     namer_session.click_link(class: /edit_naming_link_#{naming.id}/)
     namer_session.assert_selector("body.namings__edit")
-    namer_session.within("#naming_form") do |form|
+    namer_session.within("#obs_#{obs.id}_naming_#{naming.id}_form") do |form|
       assert_true(
         form.has_field?("naming_name", with: "#{text_name} #{author}")
       )
@@ -138,13 +141,13 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
     assert_not_equal(namer_session.driver.request.cookies["mo_user"],
                      voter_session.driver.request.cookies["mo_user"])
     # Note that this only tests non-JS vote submission.
-    # Most users will have their vote sent via AJAX from naming_vote_ajax.js
+    # Most users will have their vote sent Turbo from naming-vote_controller.js
     # voter_session.vote_on_name(obs, naming)
     voter_session.visit("/#{obs.id}")
-    voter_session.within("#naming_vote_#{naming.id}") do |form|
-      assert_true(form.has_select?("vote_value", selected: nil))
-      form.select("I'd Call It That", from: "vote_value")
-      assert_true(form.has_select?("vote_value",
+    voter_session.within("#naming_vote_form_#{naming.id}") do |form|
+      assert_true(form.has_select?("vote_value_#{naming.id}", selected: nil))
+      form.select("I'd Call It That", from: "vote_value_#{naming.id}")
+      assert_true(form.has_select?("vote_value_#{naming.id}",
                                    selected: "I'd Call It That"))
       form.first("input[type='submit']").click
     end
@@ -158,9 +161,10 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
 
     # voter_session.change_mind(obs, naming)
     voter_session.visit("/#{obs.id}")
-    voter_session.within("#naming_vote_#{naming.id}") do |form|
-      form.select("As If!", from: "vote_value")
-      assert_true(form.has_select?("vote_value", selected: "As If!"))
+    voter_session.within("#naming_vote_form_#{naming.id}") do |form|
+      form.select("As If!", from: "vote_value_#{naming.id}")
+      assert_true(form.has_select?("vote_value_#{naming.id}",
+                                   selected: "As If!"))
       form.first("input[type='submit']").click
     end
 

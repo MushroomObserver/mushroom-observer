@@ -61,7 +61,7 @@ class CollectionNumbers::RemoveObservationsControllerTest < FunctionalTestCase
   def test_remove_observation_redirect
     obs   = observations(:detailed_unknown_obs)
     nums  = obs.collection_numbers
-    query = Query.lookup_and_save(:CollectionNumber, :all)
+    query = Query.lookup_and_save(:CollectionNumber)
     q     = query.id.alphabetize
     login(obs.user.login)
     assert_operator(nums.length, :>, 1)

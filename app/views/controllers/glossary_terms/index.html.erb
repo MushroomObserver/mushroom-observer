@@ -1,0 +1,18 @@
+<%
+add_page_title(:glossary_term_index_title.t)
+add_tab_set(glossary_term_index_tabs) if User.current
+@container = :text_image
+%>
+
+<%=
+  tag.div(
+    link_to(:glossary_term_index_documentation.tp,
+    "https://github.com/MushroomObserver/mushroom-observer/blob/main/doc/glossary.md"),
+    class: "container-text"
+  )
+%>
+<%= paginate_block(@pages) do %>
+  <div class="list-group">
+    <%= render(partial: "glossary_terms/object", collection: @objects) %>
+  </div>
+<% end %>

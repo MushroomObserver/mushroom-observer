@@ -1,0 +1,38 @@
+<%
+# :manage_species_lists
+add_page_title(
+  :species_list_manage_title.t(name: @observation.unique_format_name)
+)
+
+add_tab_set(observation_list_tabs(obs: @observation))
+
+obs_lists = []
+other_lists = []
+@all_lists.each do |list|
+  if list.observations.member?(@observation)
+    obs_lists << list
+  else
+    other_lists << list
+  end
+end
+%>
+
+<% if obs_lists.any? %>
+  <p><%= :species_list_manage_belongs_to.t %>:</p>
+  <table class="table-striped table-manage-species-lists">
+    <% obs_lists.each do |species_list| %>
+      <%= render(partial: "observations/species_lists/remove",
+                 locals: { species_list: species_list }) %>
+    <% end %>
+  </table>
+<% end %>
+
+<% if other_lists.any? %>
+  <p class="mt-3"><%= :species_list_manage_doesnt_contain.t %>:</p>
+  <table class="table-striped table-manage-species-lists">
+    <% other_lists.each do |species_list| %>
+      <%= render(partial: "observations/species_lists/add",
+                 locals: { species_list: species_list }) %>
+    <% end %>
+  </table>
+<% end %>

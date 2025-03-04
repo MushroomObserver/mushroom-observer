@@ -16,7 +16,7 @@
 #  Add additional arguments to the three "global" Arrays immediately below:
 #
 #  RESULTS_ARGS::       Args passed to +select_values+ via +result_ids+.
-#  INSTANTIATE_ARGS::   Args passed to +model.all+ via +instantiate+.
+#  INSTANTIATE_ARGS::   Args passed to +model.all+ via +instantiate_results+.
 #
 ##############################################################################
 
@@ -27,13 +27,13 @@ module Query::Modules::HighLevelQueries
   # through into +select_values+.)
   RESULTS_ARGS = [:join, :where, :limit, :group].freeze
 
-  # Args accepted by +instantiate+ (and +paginate+ and +results+ since they
-  # call +instantiate+, too).
+  # Args accepted by +instantiate_results+ (and +paginate+ and +results+ since
+  # theycall +instantiate_results+, too).
   INSTANTIATE_ARGS = [:include].freeze
 
   # Number of results the query returns.
   def num_results(_args = {})
-    @num_results ||= result_ids&.count || 0
+    @num_results ||= result_ids&.size || 0
   end
 
   # Array of all results, just ids.
@@ -60,14 +60,14 @@ module Query::Modules::HighLevelQueries
   # Array of all results, instantiated.
   def results(args = {})
     instantiate_args, results_args = split_args(args, INSTANTIATE_ARGS)
-    instantiate(result_ids(results_args), instantiate_args)
+    instantiate_results(result_ids(results_args), instantiate_args)
   end
 
   # Let caller supply results if they happen to have them.  *NOTE*: These had
   # better all be valid instances of +model+ -- no error checking is done!!
   def results=(list)
     @result_ids = list.map(&:id)
-    @num_results = list.count
+    @num_results = list.size
     @results = list.each_with_object({}) do |obj, map|
       map[obj.id] ||= obj
     end
@@ -78,7 +78,7 @@ module Query::Modules::HighLevelQueries
   # better all be valid Integer ids -- no error checking is done!!
   def result_ids=(list)
     @result_ids = list
-    @num_results = list.count
+    @num_results = list.size
   end
 
   # Get index of a given record / id in the results.
@@ -112,21 +112,21 @@ module Query::Modules::HighLevelQueries
         ids = ids.select { |id| @letters[id] == letter }
       end
     end
-    paginator.num_total = ids.count
+    paginator.num_total = ids.size
     ids[paginator.from..paginator.to] || []
   end
 
   # Returns a subset of the results (as ActiveRecord instances).
   # (Takes args for +instantiate+.)
   def paginate(paginator, args = {})
-    instantiate(paginate_ids(paginator), args)
+    instantiate_results(paginate_ids(paginator), args)
   end
 
   # Instantiate a set of records given as an Array of ids.  Returns a list of
   # ActiveRecord instances in the same order as given.  Optional arguments:
   # +include+:: Tables to eager load (see argument of same name in
   #             ActiveRecord::Base#find for syntax).
-  def instantiate(ids, args = {})
+  def instantiate_results(ids, args = {})
     expect_args(:instantiate, args, INSTANTIATE_ARGS)
     @results ||= {}
     ids.map!(&:to_i)

@@ -15,7 +15,7 @@ module Admin
     before_action :login_required
 
     # The route to turn admin mode on or off. Takes params.
-    def show
+    def create
       if params[:turn_on]
         session[:admin] = true if @user&.admin && !in_admin_mode?
       elsif params[:turn_off]
@@ -35,6 +35,9 @@ module Admin
     # Stores the admin's session[:user_id] as session[:real_user_id]
     def update
       @id = params[:id].to_s
+      # autocomplete returns "nathan <Nathan Wilson>" - we only want the login
+      @id = @id.split(" <")[0].strip if @id.is_a?(String) && @id.exclude?("@")
+
       new_user = find_user_by_id_login_or_email(@id)
       if new_user.blank? && @id.present?
         flash_error("Couldn't find \"#{@id}\".  Play again?")

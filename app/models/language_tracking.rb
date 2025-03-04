@@ -43,8 +43,8 @@ module LanguageTracking
     @@tags_used = {}
     return unless (seed_tags = load_tags(last_page))
 
-    seed_tags.each do |tag|
-      @@tags_used[tag] = true
+    seed_tags.each do |ttag|
+      @@tags_used[ttag] = true
     end
   end
 
@@ -56,8 +56,8 @@ module LanguageTracking
     !!@@tags_used
   end
 
-  def note_usage_of_tag(tag)
-    @@tags_used[tag.to_s] = true if @@tags_used
+  def note_usage_of_tag(ttag)
+    @@tags_used[ttag.to_s] = true if @@tags_used
   end
 
   def tags_used
@@ -68,8 +68,8 @@ module LanguageTracking
     name = String.random(16)
     file = tag_file(name)
     File.open(file, "w:utf-8") do |fh|
-      tags_used.each do |tag|
-        fh.puts(tag)
+      tags_used.each do |ttag|
+        fh.puts(ttag)
       end
     end
     periodically_clean_up

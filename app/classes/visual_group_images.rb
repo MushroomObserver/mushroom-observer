@@ -1,20 +1,21 @@
 # frozen_string_literal: true
 
 class VisualGroupImages
-  VOTE_LIMIT = 1.5
+  # VOTE_LIMIT = 1.5
 
   attr_accessor :query
 
-  def initialize(name, included, count = nil)
+  # status should be one of [:included, :excluded, :any, :reviewed]
+  def initialize(visual_group, name, status, count = nil)
     self.query = tables[:observation_images]
-    add_joins(included)
-    add_project
-    add_conditions(name, included)
+    add_joins(status)
+    add_project(status)
+    add_conditions(visual_group, name, status)
     add_order_and_limit(count)
   end
 
   def vals
-    VisualGroup.connection.select_rows(query.to_sql)
+    VisualGroup.connection.select_rows(query.to_sql).uniq
   end
 
   private
@@ -33,15 +34,11 @@ class VisualGroupImages
     }
   end
 
-  def add_joins(included)
-    join_type = if included.nil?
-                  Arel::Nodes::OuterJoin
-                else
-                  Arel::Nodes::InnerJoin
-                end
-    join_table(:visual_group_images, :image_id,
-               attribute(:observation_images, :image_id),
-               join_type)
+  def add_joins(status)
+    unless status == :any
+      join_table(:visual_group_images, :image_id,
+                 attribute(:observation_images, :image_id))
+    end
     join_table(:observations, :id,
                attribute(:observation_images, :observation_id))
     join_table(:names, :id, attribute(:observations, :name_id))
@@ -58,15 +55,27 @@ class VisualGroupImages
     tables[table_name][field]
   end
 
-  def add_project
+  def add_project(status)
+    included = if [:any, :reviewed].include?(status)
+                 "NULL"
+               else
+                 attribute(:visual_group_images, :included)
+               end
     query.project(attribute(:observation_images, :image_id),
-                  attribute(:visual_group_images, :included),
+                  included,
                   attribute(:observations, :vote_cache))
   end
 
-  def add_conditions(name, included)
+  def add_conditions(visual_group, name, status)
     query.where(attribute(:names, :text_name).eq(name))
-    query.where(attribute(:observations, :vote_cache).gteq(VOTE_LIMIT))
-    query.where(attribute(:visual_group_images, :included).eq(included))
+    # query.where(attribute(:observations, :vote_cache).gteq(VOTE_LIMIT))
+    return if status == :any
+
+    query.where(attribute(:visual_group_images,
+                          :visual_group_id).eq(visual_group.id))
+    return if status == :reviewed
+
+    query.where(attribute(:visual_group_images,
+                          :included).eq(status == :included))
   end
 end

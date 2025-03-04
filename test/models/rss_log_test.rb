@@ -8,7 +8,7 @@ class RssLogTest < UnitTestCase
   # normalized.
   # See https://www.pivotaltracker.com/story/show/174685402
   def test_url_for_normalized_controllers
-    normalized_rss_log_types.each do |type|
+    RssLog::ALL_TYPE_TAGS.each do |type|
       rss_log = create_rss_log(type)
       id = rss_log.target_id
 
@@ -77,14 +77,8 @@ class RssLogTest < UnitTestCase
 
   # ---------- helpers ---------------------------------------------------------
 
-  def normalized_rss_log_types
-    RssLog.all_types.each_with_object([]) do |type, ary|
-      ary << type if model(type).controller_normalized?
-    end
-  end
-
   def model(type)
-    type.camelize.constantize
+    type.to_s.camelize.constantize
   end
 
   # rss_log factory
@@ -92,7 +86,7 @@ class RssLogTest < UnitTestCase
     # Target must have id; use an existing object to avoid hitting db
     target = model(type).first
     rss_log = RssLog.new
-    rss_log["#{type}_id".to_sym] = target.id
+    rss_log[:"#{type}_id"] = target.id
     rss_log.updated_at = Time.zone.now
     rss_log
   end

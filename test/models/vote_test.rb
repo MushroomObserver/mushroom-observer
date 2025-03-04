@@ -76,4 +76,13 @@ class VoteTest < UnitTestCase
                     votes(:coprinus_comatus_other_naming_rolf_vote))
     assert_not_includes(votes_by_rolf, votes(:amateur_vote))
   end
+
+  def test_update_observation_views_reviewed_column
+    assert_equal(0, ObservationView.all.size)
+    Vote.update_observation_views_reviewed_column
+    assert_equal(Vote.all.size, ObservationView.all.size)
+    ObservationView.find_each do |ov|
+      assert_equal(true, ov.reviewed)
+    end
+  end
 end

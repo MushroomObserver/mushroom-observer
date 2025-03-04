@@ -99,17 +99,26 @@ class SpeciesList < AbstractModel
 
   attr_accessor :data
 
+  scope :index_order, -> { order(title: :asc, id: :desc) }
+
+  scope :show_includes, lambda {
+    strict_loading.includes(
+      { comments: :user },
+      { observations: :namings }
+    )
+  }
+
   # Automatically (but silently) log destruction.
   self.autolog_events = [:destroyed]
 
   # Callback that updates User contribution when adding Observation's.
   def add_obs_callback(_obs)
-    SiteData.update_contribution(:add, :species_list_entries, user_id)
+    UserStats.update_contribution(:add, :species_list_entries, user_id)
   end
 
   # Callback that updates User contribution when removing Observation's.
   def remove_obs_callback(_obs)
-    SiteData.update_contribution(:del, :species_list_entries, user_id)
+    UserStats.update_contribution(:del, :species_list_entries, user_id)
   end
 
   def self.find_by_title_with_wildcards(str)
@@ -118,7 +127,7 @@ class SpeciesList < AbstractModel
 
   def clear
     num = observations.count
-    SiteData.update_contribution(:del, :species_list_entries, user_id, num)
+    UserStats.update_contribution(:del, :species_list_entries, user_id, num)
 
     # "observations.delete_all" is very similar, however it requires loading
     # all of the observations (and not just their ids).  Note also that we
@@ -321,19 +330,20 @@ class SpeciesList < AbstractModel
   #     :vote                   => Vote.maximum_vote,
   #     :notes                  => '',
   #     :lat                    => nil,
-  #     :long                   => nil,
+  #     :lng                    => nil,
   #     :alt                    => nil,
   #     :is_collection_location => true,
   #     :specimen               => false
   #   )
   #
+  # rubocop:disable Metrics/MethodLength
   def construct_observation(name, args = {})
     raise("missing or invalid name: #{name.inspect}") unless name.is_a?(Name)
 
     args[:user] ||= User.current
     args[:when] ||= self.when
     args[:vote] ||= Vote.maximum_vote
-    args[:notes] ||= ""
+    args[:notes] ||= {}
     args[:projects] ||= projects
     if !args[:where] && !args[:location]
       args[:where]    = location ? location.name : where
@@ -350,7 +360,7 @@ class SpeciesList < AbstractModel
       name: name,
       notes: args[:notes],
       lat: args[:lat],
-      long: args[:long],
+      lng: args[:lng],
       alt: args[:alt],
       is_collection_location: args[:is_collection_location],
       specimen: args[:specimen]
@@ -366,11 +376,13 @@ class SpeciesList < AbstractModel
     )
 
     if args[:vote] && (args[:vote].to_i != 0)
-      obs.change_vote(naming, args[:vote], args[:user])
+      consensus = ::Observation::NamingConsensus.new(obs)
+      consensus.change_vote(naming, args[:vote], args[:user])
     end
 
     observations << obs
   end
+  # rubocop:enable Metrics/MethodLength
 
   ##############################################################################
   #

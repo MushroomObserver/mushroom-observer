@@ -5,7 +5,7 @@
 #
 #  This class is used by a few controllers (e.g.  NameController,
 #  SpeciesListController) to help parse lists of names, such as in
-#  bulk_name_edit, create/edit_species_list, and change_synonyms.  It uses
+#  create/edit_species_list, and change_synonyms.  It uses
 #  NameParse to parse individual lines, then gathers unrecognized names,
 #  deprecated names, accepted names, etc.
 #

@@ -1,66 +1,28 @@
 # frozen_string_literal: true
 
+# rubocop:disable Metrics/ClassLength
 class NamesController < ApplicationController
-  # disable cop because index is defined in ApplicationController
-  # rubocop:disable Rails/LexicallyScopedActionFilter
   before_action :store_location, except: [:index]
   before_action :pass_query_params, except: [:index]
-  # rubocop:enable Rails/LexicallyScopedActionFilter
   before_action :login_required
-  before_action :disable_link_prefetching, except: [
-    :show,
-    :new,
-    :create,
-    :edit,
-    :update
-  ]
 
   ##############################################################################
+  # INDEX
   #
-  # index::
-
-  # ApplicationController uses this to dispatch #index to a private method
-  @index_subaction_param_keys = [
-    :advanced_search,
-    :pattern,
-    :with_observations,
-    :with_descriptions,
-    :need_descriptions,
-    :by_user,
-    :by_editor,
-    :by,
-    :q,
-    :id
-  ].freeze
-
-  @index_subaction_dispatch_table = {
-    by: :index_query_results,
-    q: :index_query_results,
-    id: :index_query_results
-  }.freeze
-
-  ###################################
-
-  private # private methods used by #index
-
-  def default_index_subaction
-    list_all
+  def index
+    build_index_with_query
   end
 
-  # Display list of all (correctly-spelled) names in the database.
-  def list_all
-    query = create_query(:Name, :all, by: default_sort_order)
-    show_selected_names(query)
-  end
+  private
 
   def default_sort_order
-    ::Query::NameBase.default_order
+    ::Query::Names.default_order # :name
   end
 
-  # Display list of names in last index/search query.
-  def index_query_results
-    query = find_or_create_query(:Name, by: params[:by])
-    show_selected_names(query, id: params[:id].to_s, always_index: true)
+  # ApplicationController uses this to dispatch #index to a private method
+  def index_active_params
+    [:advanced_search, :pattern, :has_observations, :has_descriptions,
+     :need_description, :by_user, :by_editor, :by, :q, :id].freeze
   end
 
   # Displays list of advanced search results.
@@ -68,10 +30,14 @@ class NamesController < ApplicationController
     return if handle_advanced_search_invalid_q_param?
 
     query = find_query(:Name)
-    show_selected_names(query)
+    # Have to check this here because we're not running the query yet.
+    raise(:runtime_no_conditions.l) unless query.params.any?
+
+    [query, {}]
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
     redirect_to(search_advanced_path)
+    [nil, {}]
   end
 
   # Display list of names that match a string.
@@ -80,6 +46,7 @@ class NamesController < ApplicationController
     if pattern.match?(/^\d+$/) &&
        (name = Name.safe_find(pattern))
       redirect_to(name_path(name.id))
+      [nil, {}]
     else
       show_non_id_pattern_results(pattern)
     end
@@ -92,30 +59,37 @@ class NamesController < ApplicationController
         flash_error(error.to_s)
       end
       render("names/index")
+      [nil, {}]
     else
       @suggest_alternate_spellings = search.query.params[:pattern]
-      show_selected_names(search.query)
+      # Call create_query to apply user content filters
+      query = create_query(:Name, search.query.params)
+      [query, {}]
     end
   end
 
+  # Disabling the cop because subaction methods are going away soon
+  # rubocop:disable Naming/PredicateName
   # Display list of names that have observations.
-  def with_observations
-    query = create_query(:Name, :with_observations)
-    show_selected_names(query)
+  def has_observations
+    query = create_query(:Name, has_observations: 1)
+    [query, {}]
   end
 
   # Display list of names with descriptions that have authors.
-  def with_descriptions
-    query = create_query(:Name, :with_descriptions)
-    show_selected_names(query)
+  def has_descriptions
+    @has_descriptions = true # signals to add desc info to name list
+    query = create_query(:Name, has_descriptions: 1)
+    [query, {}]
   end
+  # rubocop:enable Naming/PredicateName
 
   # Display list of the most popular 100 names that don't have descriptions.
   # NOTE: all this extra info and help will be lost if user re-sorts.
-  def need_descriptions
+  def need_description
     @help = :needed_descriptions_help
-    query = Name.descriptions_needed
-    show_selected_names(query, num_per_page: 100)
+    query = create_query(:Name, need_description: 1)
+    [query, { num_per_page: 100 }]
   end
 
   # Display list of names that a given user is author on.
@@ -126,8 +100,8 @@ class NamesController < ApplicationController
     )
     return unless user
 
-    query = create_query(:Name, :by_user, user: user)
-    show_selected_names(query)
+    query = create_query(:Name, by_users: user)
+    [query, {}]
   end
 
   # Display list of names that a given user is editor on.
@@ -138,51 +112,22 @@ class NamesController < ApplicationController
     )
     return unless user
 
-    query = create_query(:Name, :by_editor, user: user)
-    show_selected_names(query)
+    query = create_query(:Name, by_editor: user)
+    [query, {}]
   end
 
-  # Show selected search results as a list with 'index' template.
-  def show_selected_names(query, args = {})
+  # Hook runs before template displayed. Must return query.
+  def filtered_index_final_hook(query, _display_opts)
     store_query_in_session(query)
-    args = add_default_index_args(query, args)
-
-    # Add some extra fields to the index for authored_names.
-    if query.flavor == :with_descriptions
-      show_index_of_objects(query, args) do |name|
-        if (desc = name.description)
-          [desc.authors.map(&:login).join(", "),
-           desc.note_status.map(&:to_s).join("/"),
-           :"review_#{desc.review_status}".t]
-        else
-          []
-        end
-      end
-    else
-      # NOTE: if show_selected_name is called with a block
-      # it will *not* get passed to show_index_of_objects.
-      show_index_of_objects(query, args)
-    end
+    query
   end
 
-  def add_default_index_args(query, args)
-    args = {
-      controller: "/names",
-      action: "index",
+  def index_display_opts(opts, _query)
+    {
       letters: "names.sort_name",
-      num_per_page: (/^[a-z]/i.match?(params[:letter].to_s) ? 500 : 50)
-    }.merge(args)
-
-    # Add some alternate sorting criteria.
-    args[:sorting_links] = [
-      ["name", :sort_by_name.t],
-      ["created_at", :sort_by_created_at.t],
-      [(query.flavor == :by_rss_log ? "rss_log" : "updated_at"),
-       :sort_by_updated_at.t],
-      ["num_views", :sort_by_num_views.t]
-    ]
-
-    args
+      num_per_page: (/^[a-z]/i.match?(params[:letter].to_s) ? 500 : 50),
+      include: [:description]
+    }.merge(opts)
   end
 
   ###################################
@@ -198,7 +143,7 @@ class NamesController < ApplicationController
       @test_pagination_args = { anchor: params[:test_anchor] }
     end
 
-    show_selected_names(query, num_per_page: params[:num_per_page].to_i)
+    filtered_index(query, num_per_page: params[:num_per_page].to_i)
   end
 
   ##############################################################################
@@ -236,44 +181,96 @@ class NamesController < ApplicationController
   private
 
   def find_name!
-    @name = find_or_goto_index(Name, params[:id].to_s)
+    @name = Name.show_includes.safe_find(params[:id]) ||
+            flash_error_and_goto_index(Name, params[:id])
   end
 
+  # Possible sources of extra db lookups in partials
+
+  # carousel:
+  #   @best_images
+  # best_description:
+  #   @best_description
+  # comments:
+  #   comments_for_object
+  # observations_menu:
+  #   @has_subtaxa
+  #   @subtaxa_query
+  # nomenclature:
+  #   approved_synonyms, deprecated_synonyms = name.sort_synonyms
+  # classification:
+  #   approved_name = @name.approved_name
+  #   parents = approved_name.all_parents
+  #   @first_child
+  #   @children_query
+  #   The entire name::synonymy module may be a candidate for a PORO
+  # lifeform:
+  #   @first_child
+  # notes:
+  # descriptions:
+  #   description_links = list_descriptions(object: @name, type: :name)
+  # projects:
+  #   @projects
+
   def init_related_query_ivars
+    @versions = @name.versions
+    @has_subtaxa = 0
+    # Query for names of subtaxa, used in special query link
+    # Note this is only creating a schematic of a query, used in the link.
+
     # Create query for immediate children.
-    @children_query = create_query(:Name, :all,
+    @children_query = create_query(:Name,
                                    names: @name.id,
                                    include_immediate_subtaxa: true,
                                    exclude_original_names: true)
+    # @first_child runs @children_query to check for immediate children.
+    # Used in classification and lifeform.
+    # Potentially refactor to reduce duplicate queries:
+
+    # First query: Names including immediate subtaxa.
+    # Instead of running @children_query here, consider altering the original
+    # show query to include_immediate_subtaxa (would need to write a complicated
+    # scope, but it's outlined in app/classes/query/modules/lookup_names.rb).
+    # Could select @name from those results using the original name.id, then
+    # select@first_child from the rest.
+    @first_child = @children_query.results(limit: 1).first
+
+    # Possible query: Synonyms of name? Incompatible with first query.
+    # Maybe use to find approved_synonyms, deprecated_synonyms, misspellings.
+    # — Nope. Hardly causes any load time.
+
+    # Second query: Observations of name including (all) subtaxa.
+    # This is only used for the link to "observations of this name's subtaxa".
+    # We also query for obs (with images) below, so we could maybe refactor to
+    # get Observation.of_names(name.id).include_subtaxa.order(:vote_cache).
+    # Then, select those of original name with thumb_image_id for @best_images,
+    # and select_count all (excluding obs of original name) to get @has_subtaxa.
+    # Would need to write include_subtaxa scope, as above.
     if @name.at_or_below_genus?
-      @subtaxa_query = create_query(:Observation, :all,
+      @subtaxa_query = create_query(:Observation,
                                     names: @name.id,
                                     include_subtaxa: true,
                                     exclude_original_names: true,
                                     by: :confidence)
+      # Determine if relevant and count the results of running the query if so.
+      # Don't run if there aren't any children.
+      @has_subtaxa = @first_child ? @subtaxa_query.select_count : 0
     end
 
-    # Create search queries for observation lists.
-    @consensus_query = create_query(:Observation, :all,
-                                    names: @name.id, by: :confidence)
+    # NOTE: `_observation_menu` makes many select_count queries like this!
+    # That is where most of the heavy loading is. Check helpers/show_name_helper
+    #
+    # Third query (maybe combine with second)
+    @obss = Name::Observations.new(@name)
+    # This initiates a query for the images of only the most confident obs
+    @best_images = @obss.best_images
 
-    @obs_with_images_query = create_query(:Observation, :all,
-                                          names: @name.id,
-                                          has_images: true,
-                                          by: :confidence)
-
-    # Determine which queries actually have results and instantiate the ones
-    # we'll use.
+    # This seems like it queries the NameDescription table.
+    # Would be better to eager load descriptions and derive @best_description
+    # from them. Can also derive @projects from this.
     @best_description = @name.best_brief_description
-    @first_four       = @obs_with_images_query.results(
-      limit: 4,
-      include: {
-        thumb_image: [:image_votes, :license, :user]
-      }
-    )
-    @first_child      = @children_query.results(limit: 1).first
-    @first_consensus  = @consensus_query.results(limit: 1).first
-    @has_subtaxa      = @subtaxa_query.select_count if @subtaxa_query
+    # Save a lookup in comments_for_object
+    @comments = @name.comments&.sort_by(&:created_at)&.reverse
   end
 
   def init_projects_ivar
@@ -394,7 +391,7 @@ class NamesController < ApplicationController
   def update_name
     @parse = parse_name
     if !minor_change? && @name.dependents? && !in_admin_mode?
-      redirect_with_query(emails_name_change_request_path(
+      redirect_with_query(new_admin_emails_name_change_requests_path(
                             name_id: @name.id,
                             # Auricularia Bull. [#17132]
                             new_name_with_icn_id: "#{@parse.search_name} " \
@@ -446,9 +443,9 @@ class NamesController < ApplicationController
 
   def redirect_to_approve_or_deprecate
     if params[:name][:deprecated].to_s == "true"
-      redirect_with_query(deprecate_name_synonym_form_path(@name.id))
+      redirect_with_query(form_to_deprecate_synonym_of_name_path(@name.id))
     else
-      redirect_with_query(approve_name_synonym_form_path(@name.id))
+      redirect_with_query(form_to_approve_synonym_of_name_path(@name.id))
     end
   end
 
@@ -564,11 +561,11 @@ class NamesController < ApplicationController
 
   def email_admin_name_change
     content = email_name_change_content
-    WebmasterMailer.build(
+    QueuedEmail::Webmaster.create_email(
       sender_email: @user.email,
       subject: "Nontrivial Name Change",
       content: content
-    ).deliver_now
+    )
     NamesControllerTest.report_email(content) if Rails.env.test?
   end
 
@@ -596,7 +593,7 @@ class NamesController < ApplicationController
       perform_merge_names(new_name)
       redirect_to_show_name
     else
-      redirect_with_query(emails_merge_request_path(
+      redirect_with_query(new_admin_emails_merge_requests_path(
                             type: :Name, old_id: @name.id, new_id: new_name.id
                           ))
     end
@@ -666,11 +663,11 @@ class NamesController < ApplicationController
       show_url: "#{MO.http_domain}/names/#{@name.id}",
       edit_url: "#{MO.http_domain}/names/#{@name.id}/edit"
     )
-    WebmasterMailer.build(
+    QueuedEmail::Webmaster.create_email(
       sender_email: @user.email,
       subject: "Merger identifier conflict",
       content: content
-    ).deliver_now
+    )
     NamesControllerTest.report_email(content) if Rails.env.test?
   end
 
@@ -681,3 +678,4 @@ class NamesController < ApplicationController
     params.permit(name: [:author, :citation, :icn_id, :locked, :notes, :rank])
   end
 end
+# rubocop:enable Metrics/ClassLength

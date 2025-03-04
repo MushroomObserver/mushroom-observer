@@ -5,7 +5,7 @@ require("test_helper")
 class CommentsControllerTest < FunctionalTestCase
   # Test of index, with tests arranged as follows:
   # default subaction; then
-  # other subactions in order of @index_subaction_param_keys
+  # other subactions in order of index_active_params
   def test_index
     login
     get(:index)
@@ -21,7 +21,7 @@ class CommentsControllerTest < FunctionalTestCase
     assert_displayed_title("Comments by #{by.capitalize}")
   end
 
-  def test_index_target_with_comments
+  def test_index_target_has_comments
     target = observations(:minimal_unknown_obs)
     params = { type: target.class.name, target: target.id }
     comments = Comment.where(target_type: target.class.name, target: target)
@@ -29,7 +29,9 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:index, params: params)
     assert_select(".comment", count: comments.size)
-    assert_displayed_title("Comments on #{target.id}")
+    assert_displayed_title(
+      "Comments on #{target.unique_format_name.t.as_displayed}"
+    )
   end
 
   def test_index_target_valid_target_without_comments
@@ -188,6 +190,12 @@ class CommentsControllerTest < FunctionalTestCase
     obs_id = observations(:minimal_unknown_obs).id
     requires_login(:new, target: obs_id, type: "Observation")
     assert_form_action(action: :create, target: obs_id, type: "Observation")
+  end
+
+  def test_add_comment_to_project
+    project_id = projects(:eol_project).id
+    requires_login(:new, target: project_id, type: "Project")
+    assert_form_action(action: :create, target: project_id, type: "Project")
   end
 
   def test_add_comment_no_id

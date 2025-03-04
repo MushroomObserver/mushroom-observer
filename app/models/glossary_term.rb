@@ -31,7 +31,6 @@ class GlossaryTerm < AbstractModel
 
   ALL_TERM_FIELDS = [:name, :description].freeze
   acts_as_versioned(
-    table_name: "glossary_terms_versions",
     if_changed: ALL_TERM_FIELDS,
     association_options: { dependent: :nullify }
   )
@@ -39,9 +38,31 @@ class GlossaryTerm < AbstractModel
     "thumb_image_id",
     "created_at",
     "updated_at",
-    "rss_log_id"
+    "rss_log_id",
+    "locked"
   )
   versioned_class.before_save { |x| x.user_id = User.current_id }
+
+  scope :index_order, -> { order(name: :asc, id: :desc) }
+
+  scope :show_includes, lambda {
+    strict_loading.includes(
+      :glossary_term_images,
+      { images: [:copyright_changes,
+                 :glossary_terms,
+                 :image_votes,
+                 :observations,
+                 :profile_users,
+                 :project_images,
+                 :thumb_glossary_terms,
+                 :thumb_observations,
+                 :visual_group_images] },
+      { thumb_image: :image_votes },
+      :rss_log,
+      :user,
+      :versions
+    )
+  }
 
   # Automatically log standard events.
   self.autolog_events = [:created!, :updated!, :destroyed!]

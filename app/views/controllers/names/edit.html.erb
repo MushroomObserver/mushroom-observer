@@ -1,0 +1,8 @@
+<%
+add_page_title(:edit_name_title.t(name: @name.display_name))
+add_tab_set(name_form_edit_tabs(name: @name))
+action = { controller: "/names", action: :update, id: @name.id }
+%>
+
+<%= render(partial: "names/form",
+           locals: { action: action, button: :SAVE_EDITS.l }) %>

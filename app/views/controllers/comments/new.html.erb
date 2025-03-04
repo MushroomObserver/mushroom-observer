@@ -1,0 +1,20 @@
+<%
+@container = :full
+add_page_title(comment_form_new_title(target: @target))
+add_tab_set(comment_form_new_tabs(target: @target))
+%>
+
+<div class="row">
+  <div class="col-xs-12 col-sm-8">
+    <%= render(partial: "comments/form",
+               locals: { action: :create, local: true }) %>
+    <%= render(partial: "comments/object", object: @target) %>
+  </div>
+
+  <% if @target.is_a?(Observation) %>
+    <div class="col-xs-12 col-sm-4">
+      <%= render(partial: "observations/show/images",
+                 locals: { obs: @target, thumb_size_control: false }) %>
+    </div>
+  <% end %>
+</div><!--.row-->

@@ -4,13 +4,12 @@
 module Names
   class ClassificationController < ApplicationController
     before_action :login_required
-    before_action :disable_link_prefetching
 
     # Form
     def edit
       store_location
       pass_query_params
-      return unless find_name!
+      nil unless find_name!
     end
 
     # PUT callback
@@ -30,7 +29,7 @@ module Names
     private
 
     def render_edit
-      render(:edit, location: edit_name_classification_path(@name))
+      render(:edit, location: edit_classification_of_name_path(@name))
     end
 
     include Names::Classification::SharedPrivateMethods

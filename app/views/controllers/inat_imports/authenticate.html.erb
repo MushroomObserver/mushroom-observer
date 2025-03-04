@@ -1,0 +1,6 @@
+<%
+  add_page_title("iNat Authorization")
+%>
+iNat user
+<%= @params["code"] ? "ALLOWED" : "DENIED" %>
+the request to Authorize MushroomObserver to use User's iNat account.

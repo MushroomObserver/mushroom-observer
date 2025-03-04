@@ -46,19 +46,20 @@ module CapybaraSessionExtensions
             remember_me = true, session: self)
     login = login.login if login.is_a?(User) # get the right user field
     session.visit("/account/login/new")
+    session.assert_selector("body.login__new")
 
     session.within("#account_login_form") do
       session.fill_in("user_login", with: login)
       session.fill_in("user_password", with: password)
-      session.check("user_remember_me") if remember_me == true
+      session.uncheck("user_remember_me") if remember_me == false
 
       session.first(:button, type: "submit").click
     end
   end
 
   # Login the given user, testing to make sure it was successful.
-  def login!(user, *args, **kwargs)
-    login(user, *args, **kwargs)
+  def login!(user, *, **kwargs)
+    login(user, *, **kwargs)
     session = kwargs[:session] || self
     assert_flash_success(session: session)
     user = User.find_by(login: user) if user.is_a?(String)
@@ -164,6 +165,37 @@ module CapybaraSessionExtensions
     session.first(:button, type: "submit").click
   end
 
+  # This is a mess, but this button is very finicky
+  def click_attach_file(filename, session: self)
+    label = session.first(".file-field")
+    session.scroll_to(label, align: :center)
+    session.attach_file("select_images_button",
+                        Rails.root.join("test/images/#{filename}"),
+                        make_visible: true)
+  end
+
+  # # Cuprite: must scroll to the button or you can't click?
+  # def scroll_and_click_commit(session: self)
+  #   button = session.first(:button, type: "submit")
+  #   session.scroll_to(button, align: :center)
+  #   button.click
+  # end
+
+  # def scroll_and_click_button(locator, *options)
+  #   session = self
+
+  #   button = session.find_button(locator, *options)
+  #   session.scroll_to(button, align: :center)
+  #   button.click
+  # end
+
+  # def scroll_and_check(locator, **options)
+  #   session = options[:session] || self
+  #   label = session.find("label[for='#{locator}']")
+  #   session.scroll_to(label, align: :center)
+  #   label.click
+  # end
+
   # def string_value_is_number?(string)
   #   Float(string, exception: false)
   # end
@@ -205,6 +237,9 @@ module CapybaraSessionExtensions
           form.uncheck(key)
         elsif change[:type] == :radio
           form.choose(change[:value])
+        elsif change[:type] == :autocompleter
+          form.fill_in(key, with: change[:value])
+          form.assert_field(key, with: change[:value])
         elsif change[:type] == :text
           form.fill_in(key, with: change[:value])
         end

@@ -1,0 +1,9 @@
+<%= turbo_stream.replace('str_' + @tag) {
+  # What the index would print if it were now translated
+  tag.span(h(@new_str), class: "translated text-muted translation-updated",
+                        id: "str_#{@tag}")
+} %>
+
+<%= turbo_stream.replace("translation_versions") do
+  render(partial: "translations/versions", layout: false)
+end %>

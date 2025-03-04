@@ -5,7 +5,7 @@
 #
 #  == Version
 #
-#  Changes are kept in the "location_descriptions_versions" table using
+#  Changes are kept in the "location_description_versions" table using
 #  ActiveRecord::Acts::Versioned.
 #
 #  == Attributes
@@ -29,7 +29,7 @@
 #  refs::             (V) References
 #
 #  ('V' indicates that this attribute is versioned in
-#  location_descriptions_versions table.)
+#  location_description_versions table.)
 #
 #  == Class Methods
 #
@@ -50,16 +50,12 @@
 class LocationDescription < Description
   require "acts_as_versioned"
 
-  # enum definitions for use by simple_enum gem
+  include Description::Scopes
+
   # Do not change the integer associated with a value
-  enum source_type:
-       {
-         public: 1,
-         foreign: 2,
-         project: 3,
-         source: 4,
-         user: 5
-       }, _suffix: :source
+  enum :source_type,
+       { public: 1, foreign: 2, project: 3, source: 4, user: 5 },
+       suffix: :source, instance_methods: false
 
   belongs_to :license
   belongs_to :location
@@ -89,10 +85,23 @@ class LocationDescription < Description
   has_many :editors, through: :location_description_editors,
                      source: :user
 
+  scope :show_includes, lambda {
+    strict_loading.includes(
+      :authors,
+      { comments: :user },
+      :editors,
+      :interests,
+      { location: [:descriptions, :interests, :rss_log] },
+      :project,
+      :user,
+      :versions
+    )
+  }
+
   ALL_NOTE_FIELDS = [:gen_desc, :ecology, :species, :notes, :refs].freeze
+  SEARCHABLE_FIELDS = ALL_NOTE_FIELDS
 
   acts_as_versioned(
-    table_name: "location_descriptions_versions",
     if_changed: ALL_NOTE_FIELDS,
     association_options: { dependent: :nullify }
   )
@@ -154,11 +163,6 @@ class LocationDescription < Description
     # Tell editors of the change.
     editors.each do |user|
       recipients.push(user) if user.email_locations_editor
-    end
-
-    # Tell masochists who want to know about all location changes.
-    User.where(email_locations_all: true).find_each do |user|
-      recipients.push(user)
     end
 
     # Send to people who have registered interest.

@@ -12,7 +12,7 @@
 #  tp::                 Textilize with paragraphs (no obj links).
 #  tpl::                Textilize with paragraphs and obj links.
 #  tp_nodiv::           Textilize with paragraphs (no obj links, without div).
-#  tpl_nodiv::          Textilize with paragraphs and obj links, without div).
+#  tl_for_api::         Textilize with obj links and paragraphs when needed
 #  ---
 #  gsub!::              Gobal replace in place.
 #  to_ascii::           Convert string from UTF-8 to plain ASCII.
@@ -21,10 +21,14 @@
 #  truncate_html::      Truncate an HTML string to N display characters.
 #  html_to_ascii::      Convert HTML into plain text.
 #  gsub_html_special_chars:: auxiliary to html_to_ascii
-#  unescape_html::
-#  as_displayed::
-#  break_name::
-#  small_author::
+#  unescape_html::      Render special encoded characters as regular characters
+#  as_displayed::       Render everything humanly legible, for integration tests
+#  id_of_nested_field:: Rails generates `observation_notes` for the ID of a
+#                       nested field like `observation[notes]`
+#  ---
+#  break_name::         Break a taxon name at the author
+#  small_author::       Wrap the author in a <small> span
+#  ---
 #  nowrap::             Surround HTML string inside '<nowrap>' span.
 #  strip_squeeze::      Strip and squeeze spaces.
 #  rand_char::          Pick a single random character from the string.
@@ -33,7 +37,9 @@
 #  is_nonascii_character?:: Does string start with non-ASCII character?
 #  percent_match::      Measure how closely this String matches another String.
 #  unindent::           Remove indentation (e.g., from here docs).
+#  ---
 #  md5sum::             Calculate MD5 sum.
+#  to_boolean::         Evaluates and returns a Boolean.
 #
 ################################################################################
 
@@ -385,30 +391,38 @@ class String
   ### Textile-related methods ###
 
   def t(sanitize = true)
-    Textile.textilize_without_paragraph_safe(self, false, sanitize)
+    Textile.textilize_without_paragraph_safe(self, do_object_links: false,
+                                                   sanitize: sanitize)
   end
 
   def tl(sanitize = true)
-    Textile.textilize_without_paragraph_safe(self, true, sanitize)
+    Textile.textilize_without_paragraph_safe(self, do_object_links: true,
+                                                   sanitize: sanitize)
   end
 
   # Textilize string, wrapped in a <div>, making it all safe for output
   def tp(sanitize = true)
-    Textile.textile_div_safe { Textile.textilize(self, false, sanitize) }
+    Textile.textile_div_safe do
+      Textile.textilize(self, do_object_links: false, sanitize: sanitize)
+    end
   end
 
   # Textilize string (with links), wrapped in a <div>,
   # making it all safe for output
   def tpl(sanitize = true)
-    Textile.textile_div_safe { Textile.textilize(self, true, sanitize) }
+    Textile.textile_div_safe do
+      Textile.textilize(self, do_object_links: true, sanitize: sanitize)
+    end
   end
 
   def tp_nodiv(sanitize = true)
-    Textile.textilize_safe(self, false, sanitize)
+    Textile.textilize_safe(self, do_object_links: false, sanitize: sanitize)
   end
 
-  def tpl_nodiv(sanitize = true)
-    Textile.textilize_safe(self, true, sanitize)
+  def tl_for_api(sanitize = true)
+    return tl(sanitize) unless include?("\n")
+
+    Textile.textilize_safe(self, do_object_links: true, sanitize: sanitize)
   end
 
   ### String transformations ###
@@ -443,7 +457,7 @@ class String
   # TODO: Use the rails method "j" for this
   def escape_js_string
     gsub(/(["\\])/, '\\\1').
-      gsub(/\n/, '\\n')
+      gsub("\n", '\\n')
   end
 
   # Remove HTML tags (not entities) from string.  Used to make sure title is
@@ -536,6 +550,13 @@ class String
     strip_html.unescape_html.strip_squeeze
   end
 
+  # Rails generates an id for a nested field like "foo[bar]" that's snake_case
+  # - no brackets. This gets you that string. (used in forms_helper)
+  # `chomp("_")` is to remove trailing underscores
+  def id_of_nested_field
+    gsub(/[\[\]]+/, "_").chomp("_")
+  end
+
   # Insert a line break between the scientific name and the author
   # (for styling taxonomic names legibly)
   def break_name
@@ -587,6 +608,15 @@ class String
   #
   def strip_squeeze
     strip.squeeze(" ")
+  end
+
+  # Sort of like strip_squeeze, but removes Textile's line breaks in the middle
+  # of the string (not leading/trailing space). Raw Textile strings may contain
+  # "\r\n"... Textile's .tpl turns "\r\n\r\n" into a closing/opening "</p><p>"
+  # and a single "\r\n" into "<br />\n"
+  # This gets rid of them both. Turns all newlines into single spaces.
+  def wring_out_textile
+    gsub("\r\n", " ").squeeze(" ")
   end
 
   # Generate a string of random characters of length +len+.  By default it
@@ -650,6 +680,12 @@ class String
     dup.force_encoding("binary")[0].ord < 128
   end
 
+  # Clean a pattern for use in LIKE condition. Takes and returns a String.
+  # This is a replacement for Query's method `clean_pattern`
+  def clean_pattern
+    gsub(/[%'"\\]/) { |x| "\\#{x}" }.tr("*", "%")
+  end
+
   # Returns percentage match between +self+ and +other+, where 1.0 means the two
   # strings are equal, and 0.0 means every character is different.
   def percent_match(other)
@@ -705,5 +741,9 @@ class String
   #
   def print_thing(thing)
     print("#{self}: #{thing.class}: #{thing}\n")
+  end
+
+  def to_boolean
+    ActiveRecord::Type::Boolean.new.cast(self)
   end
 end

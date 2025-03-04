@@ -1,278 +1,309 @@
 # frozen_string_literal: true
 
-module Query
-  module Modules
-    # validation of Query parameters
-    module Validation
-      attr_accessor :params, :params_cache
+# Validation of Query parameters.
+module Query::Modules::Validation
+  attr_accessor :params, :params_cache, :subqueries
 
-      def required_parameters
-        keys = parameter_declarations.keys
-        keys.select! { |x| x.to_s[-1] == "?" }
-        keys.sort_by(&:to_s)
-      end
-
-      def validate_params
-        old_args = @params.dup
-        new_args = {}
-        parameter_declarations.each do |arg, arg_type|
-          validate_param(old_args, new_args, arg, arg_type)
-        end
-        check_for_unexpected_params(old_args)
-        @params = new_args
-      end
-
-      def validate_param(old_args, new_args, arg, arg_type)
-        arg_sym = arg.to_s.sub(/\?$/, "").to_sym
-        optional = (arg != arg_sym)
-        begin
-          val = pop_param_value(old_args, arg_sym)
-          val = validate_value(arg_type, arg_sym, val) if val.present?
-          if !val.nil?
-            new_args[arg_sym] = val
-          elsif !optional
-            raise(
-              "Missing :#{arg_sym} parameter for #{model} :#{flavor} query."
-            )
-          else
-            new_args[arg_sym] = nil
-          end
-        rescue MissingValue
-          unless optional
-            raise(
-              "Missing :#{arg_sym} parameter for #{model} :#{flavor} query."
-            )
-          end
-        end
-      end
-
-      class MissingValue < RuntimeError; end
-
-      def pop_param_value(args, arg)
-        if args.key?(arg)
-          val = args[arg]
-        elsif args.key?(arg.to_s)
-          val = args[arg.to_s]
-        else
-          raise(MissingValue.new)
-        end
-        args.delete(arg)
-        args.delete(arg.to_s)
-        val
-      end
-
-      def check_for_unexpected_params(old_args)
-        return if old_args.keys.empty?
-
-        str = old_args.keys.map(&:to_s).join("', '")
-        raise("Unexpected parameter(s) '#{str}' for #{model} :#{flavor} query.")
-      end
-
-      def array_validate(arg, val, arg_type)
-        case val
-        when Array
-          val[0, MO.query_max_array].map do |val2|
-            scalar_validate(arg, val2, arg_type)
-          end
-        when ::API2::OrderedRange
-          [scalar_validate(arg, val.begin, arg_type),
-           scalar_validate(arg, val.end, arg_type)]
-        else
-          [scalar_validate(arg, val, arg_type)]
-        end
-      end
-
-      def scalar_validate(arg, val, arg_type)
-        if arg_type.is_a?(Symbol)
-          send("validate_#{arg_type}", arg, val)
-        elsif arg_type.is_a?(Class) &&
-              arg_type.respond_to?(:descends_from_active_record?)
-          validate_id(arg, val, arg_type)
-        elsif arg_type.is_a?(Hash)
-          validate_enum(arg, val, arg_type)
-        else
-          raise("Invalid declaration of :#{arg} for #{model} :#{flavor} " \
-                "query! (invalid type: #{arg_type.class.name})")
-        end
-      end
-
-      def validate_enum(arg, val, hash)
-        if hash.keys.length != 1
-          raise(
-            "Invalid enum declaration for :#{arg} for #{model} :#{flavor} " \
-            "query! (wrong number of keys in hash)"
-          )
-        end
-
-        arg_type = hash.keys.first
-        set = hash.values.first
-        unless set.is_a?(Array)
-          raise(
-            "Invalid enum declaration for :#{arg} for #{model} :#{flavor} " \
-            "query! (expected value to be an array of allowed values)"
-          )
-        end
-
-        val2 = scalar_validate(arg, val, arg_type)
-        if (arg_type == :string) && set.include?(val2.to_sym)
-          val2 = val2.to_sym
-        elsif set.exclude?(val2)
-          raise("Value for :#{arg} should be one of the following: " \
-                "#{set.inspect}.")
-        end
-        val2
-      end
-
-      def validate_boolean(arg, val)
-        case val
-        # Disable cop because we do mean to symbols with boolean names
-        # rubocop:disable Lint/BooleanSymbol
-        when :true, :yes, :on, "true", "yes", "on", "1", 1, true
-          true
-        when :false, :no, :off, "false", "no", "off", "0", 0, false, nil
-          false
-        # rubocop:enable Lint/BooleanSymbol
-        else
-          raise("Value for :#{arg} should be boolean, got: #{val.inspect}")
-        end
-      end
-
-      def validate_integer(arg, val)
-        if val.is_a?(Integer) ||
-           val.is_a?(String) && val.match(/^-?\d+$/)
-          val.to_i
-        elsif val.blank?
-          nil
-        else
-          raise("Value for :#{arg} should be an integer, got: #{val.inspect}")
-        end
-      end
-
-      def validate_float(arg, val)
-        if val.is_a?(Integer) ||
-           val.is_a?(Float) ||
-           (val.is_a?(String) && val.match(/^-?(\d+(\.\d+)?|\.\d+)$/))
-          val.to_f
-        else
-          raise("Value for :#{arg} should be a float, got: #{val.inspect}")
-        end
-      end
-
-      def validate_string(arg, val)
-        if val.is_a?(Integer) ||
-           val.is_a?(Float) ||
-           val.is_a?(String) ||
-           val.is_a?(Symbol)
-          val.to_s
-        else
-          raise("Value for :#{arg} should be a string or symbol, " \
-                "got a #{val.class}: #{val.inspect}")
-        end
-      end
-
-      def validate_id(arg, val, type = ActiveRecord::Base)
-        if val.is_a?(type)
-          unless val.id
-            raise("Value for :#{arg} is an unsaved #{type} instance.")
-          end
-
-          # Cache the instance for later use, in case we both instantiate and
-          # execute query in the same action.
-          @params_cache ||= {}
-          @params_cache[arg] = val
-          val.id
-        elsif could_be_record_id?(val)
-          val.to_i
-        else
-          raise("Value for :#{arg} should be id or an #{type} instance, " \
-                "got: #{val.inspect}")
-        end
-      end
-
-      def validate_name(arg, val)
-        case val
-        when Name
-          raise("Value for :#{arg} is an unsaved Name instance.") unless val.id
-
-          @params_cache ||= {}
-          @params_cache[arg] = val
-          val.id
-        when String, Integer
-          val
-        else
-          raise("Value for :#{arg} should be a Name, String or Integer, " \
-                "got: #{val.class}")
-        end
-      end
-
-      def validate_date(arg, val)
-        if val.acts_like?(:date)
-          format("%04d-%02d-%02d", val.year, val.mon, val.day)
-        elsif /^\d\d\d\d(-\d\d?){0,2}$/i.match?(val.to_s) ||
-              /^\d\d?(-\d\d?)?$/i.match?(val.to_s)
-          val
-        elsif val.blank? || val.to_s == "0"
-          nil
-        else
-          raise("Value for :#{arg} should be a date (YYYY-MM-DD or MM-DD), " \
-                "got: #{val.inspect}")
-        end
-      end
-
-      def validate_time(arg, val)
-        if val.acts_like?(:time)
-          val = val.utc
-          format("%04d-%02d-%02d-%02d-%02d-%02d",
-                 val.year, val.mon, val.day, val.hour, val.min, val.sec)
-        elsif /^\d\d\d\d(-\d\d?){0,5}$/i.match?(val.to_s)
-          val
-        elsif val.blank? || val.to_s == "0"
-          nil
-        else
-          raise(
-            "Value for :#{arg} should be a UTC time (YYYY-MM-DD-HH-MM-SS), " \
-            "got: #{val.class.name}::#{val.inspect}"
-          )
-        end
-      end
-
-      def validate_query(arg, val)
-        case val
-        when Query::Base
-          val.record.id
-        when Integer
-          val
-        else
-          raise(
-            "Value for :#{arg} should be a Query class, got: #{val.inspect}"
-          )
-        end
-      end
-
-      def find_cached_parameter_instance(model, arg)
-        @params_cache ||= {}
-        @params_cache[arg] ||= model.find(params[arg])
-      end
-
-      def get_cached_parameter_instance(arg)
-        @params_cache ||= {}
-        @params_cache[arg]
-      end
-
-      def validate_value(arg_type, arg_sym, val)
-        if arg_type.is_a?(Array)
-          array_validate(arg_sym, val, arg_type.first)
-        else
-          scalar_validate(arg_sym, val, arg_type)
-        end
-      end
-
-      def could_be_record_id?(val)
-        val.is_a?(Integer) ||
-          val.is_a?(String) && val.match(/^[1-9]\d*$/) ||
-          # (blasted admin user has id = 0!)
-          val.is_a?(String) && (val == "0") && (arg == :user)
-      end
+  def validate_params
+    old_params = @params.dup&.compact&.deep_symbolize_keys || {}
+    new_params = {}
+    permitted_params = parameter_declarations.slice(*old_params.keys)
+    permitted_params.each do |param, param_type|
+      val = old_params[param]
+      val = validate_value(param_type, param, val) if val.present?
+      new_params[param] = val
     end
+    # check_for_unexpected_params(old_params)
+    @params = new_params
+  end
+
+  # def check_for_unexpected_params(old_params)
+  #   unexpected_params = old_params.except(*parameter_declarations.keys)
+  #   return if unexpected_params.keys.empty?
+
+  #   str = unexpected_params.keys.map(&:to_s).join("', '")
+  #   raise("Unexpected parameter(s) '#{str}' for #{model} query.")
+  # end
+
+  def validate_value(param_type, param, val)
+    if param_type.is_a?(Array)
+      result = array_validate(param, val, param_type.first).flatten
+      result = result.uniq if positive_integers?(result)
+      result
+    else
+      val = scalar_validate(param, val, param_type)
+      [val].flatten.first
+    end
+  end
+
+  def positive_integers?(list)
+    list.all? { |item| item.is_a?(Integer) && item.positive? }
+  end
+
+  def array_validate(param, val, param_type)
+    case val
+    when Array
+      val[0, MO.query_max_array].map! do |val2|
+        scalar_validate(param, val2, param_type)
+      end
+    when ::API2::OrderedRange
+      [scalar_validate(param, val.begin, param_type),
+       scalar_validate(param, val.end, param_type)]
+    else
+      [scalar_validate(param, val, param_type)]
+    end
+  end
+
+  def scalar_validate(param, val, param_type)
+    case param_type
+    when Symbol
+      send(:"validate_#{param_type}", param, val)
+    when Class
+      validate_class_param(param, val, param_type)
+    when Hash
+      validate_hash_param(param, val, param_type)
+    else
+      raise("Invalid declaration of :#{param} for #{model} " \
+            "query! (invalid type: #{param_type.class.name})")
+    end
+  end
+
+  def validate_class_param(param, val, param_type)
+    if param_type.respond_to?(:descends_from_active_record?)
+      validate_record(param, val, param_type)
+    else
+      raise(
+        "Don't know how to parse #{param_type} :#{param} for #{model} query."
+      )
+    end
+  end
+
+  def validate_hash_param(param, val, param_type)
+    if [:string, :boolean].include?(param_type.keys.first)
+      validate_enum(param, val, param_type)
+    elsif param_type.keys.first == :subquery
+      validate_subquery(param, val, param_type)
+    else
+      validate_nested_params(param, val, param_type)
+    end
+  end
+
+  def validate_nested_params(_param, val, param_type)
+    val2 = {}
+    param_type.each do |key, arg_type|
+      val2[key] = scalar_validate(key, val[key], arg_type)
+    end
+    val2
+  end
+
+  # Validate the subquery's params by creating another Query instance
+  # and save it in @subqueries to facilitate access
+  def validate_subquery(param, val, param_type)
+    if param_type.keys.length != 1
+      raise(
+        "Invalid subquery declaration for :#{param} for #{model} " \
+        "query! (wrong number of keys in hash)"
+      )
+    end
+    submodel = param_type.values.first
+    subquery = Query.new(submodel, val)
+    @subqueries[param] = subquery
+    subquery.params
+  end
+
+  def validate_enum(param, val, hash)
+    if hash.keys.length != 1
+      raise(
+        "Invalid enum declaration for :#{param} for #{model} " \
+        "query! (wrong number of keys in hash)"
+      )
+    end
+
+    arg_type = hash.keys.first
+    set = hash.values.first
+    unless set.is_a?(Array)
+      raise(
+        "Invalid enum declaration for :#{param} for #{model} " \
+        "query! (expected value to be an array of allowed values)"
+      )
+    end
+
+    val2 = scalar_validate(param, val, arg_type)
+    if (arg_type == :string) && set.include?(val2.to_sym)
+      val2 = val2.to_sym
+    elsif set.exclude?(val2)
+      raise("Value for :#{param} should be one of the following: " \
+            "#{set.inspect}.")
+    end
+    val2
+  end
+
+  # Disable cop because we do mean to symbols with boolean names
+  # rubocop:disable Lint/BooleanSymbol
+  def validate_boolean(param, val)
+    case val
+    when :true, :yes, :on, "true", "yes", "on", "1", 1, true
+      true
+    when :false, :no, :off, "false", "no", "off", "0", 0, false, nil
+      false
+    else
+      raise("Value for :#{param} should be boolean, got: #{val.inspect}")
+    end
+  end
+  # rubocop:enable Lint/BooleanSymbol
+
+  # def validate_integer(param, val)
+  #   if val.is_a?(Integer) || val.is_a?(String) && val.match(/^-?\d+$/)
+  #     val.to_i
+  #   elsif val.blank?
+  #     nil
+  #   else
+  #     raise("Value for :#{param} should be an integer, got: #{val.inspect}")
+  #   end
+  # end
+
+  def validate_float(param, val)
+    if val.is_a?(Integer) || val.is_a?(Float) ||
+       (val.is_a?(String) && val.match(/^-?(\d+(\.\d+)?|\.\d+)$/))
+      val.to_f
+    else
+      raise("Value for :#{param} should be a float, got: #{val.inspect}")
+    end
+  end
+
+  # This type of param accepts instances, ids, or strings. When the query is
+  # executed, the string will be sent to the appropriate `Lookup` subclass.
+  def validate_record(param, val, type = ActiveRecord::Base)
+    if val.is_a?(type)
+      raise("Value for :#{param} is an unsaved #{type} instance.") unless val.id
+
+      set_cached_parameter_instance(param, val)
+      val.id
+    elsif could_be_record_id?(param, val)
+      val.to_i
+    elsif val.is_a?(String) && param != :id_in_set
+      val
+    else
+      raise("Value for :#{param} should be id, string " \
+            "or #{type} instance, got: #{val.inspect}")
+    end
+  end
+
+  def validate_string(param, val)
+    if val.is_any?(Integer, Float, String, Symbol)
+      val.to_s
+    else
+      raise("Value for :#{param} should be a string or symbol, " \
+            "got a #{val.class}: #{val.inspect}")
+    end
+  end
+
+  def validate_date(param, val)
+    if val.acts_like?(:date)
+      format("%04d-%02d-%02d", val.year, val.mon, val.day)
+    elsif /^\d\d\d\d(-\d\d?){0,2}$/i.match?(val.to_s) ||
+          /^\d\d?(-\d\d?)?$/i.match?(val.to_s)
+      val
+    elsif val.blank? || val.to_s == "0"
+      nil
+    else
+      raise("Value for :#{param} should be a date (YYYY-MM-DD or MM-DD), " \
+            "got: #{val.inspect}")
+    end
+  end
+
+  def validate_time(param, val)
+    if val.acts_like?(:time)
+      val = val.utc
+      format("%04d-%02d-%02d-%02d-%02d-%02d",
+             val.year, val.mon, val.day, val.hour, val.min, val.sec)
+    elsif /^\d\d\d\d(-\d\d?){0,5}$/i.match?(val.to_s)
+      val
+    elsif val.blank? || val.to_s == "0"
+      nil
+    else
+      raise(
+        "Value for :#{param} should be a UTC time (YYYY-MM-DD-HH-MM-SS), " \
+        "got: #{val.class.name}::#{val.inspect}"
+      )
+    end
+  end
+
+  # def validate_query(param, val)
+  #   case val
+  #   when Query::Base
+  #     val.record.id
+  #   when Integer
+  #     val
+  #   else
+  #     raise(
+  #       "Value for :#{param} should be a Query class, got: #{val.inspect}"
+  #     )
+  #   end
+  # end
+
+  def find_cached_parameter_instance(model, param)
+    return @params_cache[param] if @params_cache && @params_cache[param]
+
+    val = take_param_or_pluralized_param(param)
+    instance = if could_be_record_id?(param, val)
+                 model.find(val)
+               elsif val.present?
+                 lookup_record_by_name(param, val, model)
+               end
+    set_cached_parameter_instance(param, instance)
+  end
+
+  # This is intended as a temporary cheat while we're consolidating singular
+  # and plural params, like :observation/:observations. We're starting to route
+  # single ids through the plural param, so we want to be able to handle them
+  # as singles, which here means caching instances. The goal is to end up with
+  # only plural params that can also handle singles, at which point this method
+  # can be deleted.
+  def take_param_or_pluralized_param(param)
+    return params[param] if params[param]
+
+    plural = param.to_s.pluralize.to_sym
+    return if params[plural].blank?
+
+    [params[plural]].flatten.first
+  end
+
+  # Cache the instance for later use, in case we both instantiate and
+  # execute query in the same action.
+  def set_cached_parameter_instance(param, instance)
+    @params_cache ||= {}
+    @params_cache[param] = instance
+  end
+
+  def could_be_record_id?(param, val)
+    val.is_a?(Integer) ||
+      val.is_a?(String) && val.match(/^[1-9]\d*$/) ||
+      # (blasted admin user has id = 0!)
+      val.is_a?(String) && (val == "0") && (param == :user)
+  end
+
+  # Requires a unique identifying string and will return [only_one_record].
+  def lookup_record_by_name(param, val, type, **args)
+    method = args[:method] || :instances
+    lookup = lookup_class(param, val, type)
+
+    results = lookup.new(val).send(method)
+    raise("Couldn't find an id for : #{val.inspect}") unless results
+
+    results.first
+  end
+
+  def lookup_class(param, val, type)
+    # We're only validating the projects passed as the param.
+    # Projects' species_lists will be looked up later.
+    lookup = if param == :project_lists
+               Lookup::Projects
+             else
+               "Lookup::#{type.name.pluralize}".constantize
+             end
+    raise("#{lookup} not defined for : #{val.inspect}") unless defined?(lookup)
+
+    lookup
   end
 end

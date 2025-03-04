@@ -1,0 +1,14 @@
+<%
+add_page_title(:image_reuse_title.t(name: @object.unique_format_name))
+
+add_tab_set(glossary_term_image_form_tabs(term: @object))
+@container = :full
+
+form_action = { controller: "/glossary_terms/images",
+                action: :attach,
+                id: @object.id,
+                q: get_query_param }
+%>
+
+<%= render(partial: "shared/images_to_reuse",
+           locals: { form_action: form_action }) %>

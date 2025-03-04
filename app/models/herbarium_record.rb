@@ -36,6 +36,7 @@
 #  herbarium_label::  Initial determination + accession number.
 #  format_name::      Same as herbarium_label.
 #  accession_at_herbarium:: Format as "spec #nnnn @ Herbarium".
+#  mcp_url::          URL for corresponding MycoPortal record
 #
 #  == Callbacks
 #
@@ -56,6 +57,15 @@ class HerbariumRecord < AbstractModel
   before_update :log_update
   before_destroy :log_destroy
 
+  scope :index_order, lambda {
+    order(initial_det: :asc, accession_number: :asc, id: :desc)
+  }
+
+  scope :for_observation, lambda { |obs|
+    joins(:observation_herbarium_records).
+      where(observation_herbarium_records: { observation: obs })
+  }
+
   def herbarium_label
     if initial_det.blank?
       accession_number
@@ -72,6 +82,10 @@ class HerbariumRecord < AbstractModel
     "__#{accession_number}__ @ #{herbarium.try(&:format_name)}"
   end
 
+  def mcp_url
+    herbarium.mcp_url(accession_number)
+  end
+
   # Can a given user edit this HerbariumRecord?
   def can_edit?(user = User.current)
     self.user == user || herbarium&.curator?(user)
@@ -86,8 +100,7 @@ class HerbariumRecord < AbstractModel
     recipients.each do |recipient|
       next if recipient.no_emails
 
-      email_klass = QueuedEmail::AddHerbariumRecordNotCurator
-      email_klass.create_email(sender, recipient, self)
+      QueuedEmail::AddRecordToHerbarium.create_email(sender, recipient, self)
     end
   end
 

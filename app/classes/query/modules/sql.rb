@@ -5,16 +5,16 @@ module Query::Modules::Sql
 
   # Build query for <tt>model.find_by_sql</tt> -- i.e. one that returns all
   # fields from the table in question, instead just the id.
-  def query_all(args = {})
-    query(args.merge(select: "DISTINCT #{model.table_name}.*"))
+  def sql_select_all_columns(args = {})
+    sql(args.merge(select: "DISTINCT #{model.table_name}.*"))
   end
 
   # Build query, allowing the caller to override/augment the standard
   # parameters.
-  def query(args = {})
+  def sql(args = {})
     initialize_query unless initialized?
 
-    our_select  = args[:select] || "DISTINCT #{model.table_name}.id"
+    our_select  = args[:select] || selects
     our_join    = join.dup
     our_join += args[:join] if args[:join].is_a?(Array)
     our_join << args[:join] if args[:join].is_a?(Hash)

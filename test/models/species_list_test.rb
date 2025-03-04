@@ -51,11 +51,11 @@ class SpeciesListTest < UnitTestCase
   def test_construct_observation
     spl = species_lists(:first_species_list)
     assert_users_equal(rolf, spl.user)
-    proj = projects(:bolete_project)
+    proj = projects(:lone_wolf_project)
     proj.add_species_list(spl)
-    assert_obj_arrays_equal([dick], proj.user_group.users)
-    User.current = dick
-    name = Name.first
+    assert_obj_arrays_equal([lone_wolf], proj.user_group.users)
+    User.current = lone_wolf
+    name = Name.reorder(id: :asc).first
 
     # Test defaults first.
     now = Time.zone.now
@@ -66,14 +66,14 @@ class SpeciesListTest < UnitTestCase
     assert_objs_equal(o, spl.observations.last)
     assert(o.created_at >= 1.minute.ago)
     assert(o.updated_at >= 1.minute.ago)
-    assert_users_equal(dick, o.user)
+    assert_users_equal(lone_wolf, o.user)
     assert_obj_arrays_equal([proj], o.projects)
     assert_equal(spl.when, o.when)
     assert_equal(spl.where, o.where)
     assert_equal(spl.location, o.location)
-    assert_equal("", o.notes)
+    assert_equal({}, o.notes)
     assert_nil(o.alt)
-    assert_nil(o.long)
+    assert_nil(o.lng)
     assert_nil(o.alt)
     assert_true(o.is_collection_location)
     assert_false(o.specimen)
@@ -81,12 +81,12 @@ class SpeciesListTest < UnitTestCase
     assert_obj_arrays_equal([n], o.namings)
     assert(n.created_at <= now + 1.second)
     assert(n.updated_at <= now + 1.second)
-    assert_users_equal(dick, n.user)
+    assert_users_equal(lone_wolf, n.user)
     assert_names_equal(name, n.name)
     assert_obj_arrays_equal([v], n.votes)
     assert(v.created_at <= now + 1.second)
     assert(v.updated_at <= now + 1.second)
-    assert_users_equal(dick, v.user)
+    assert_users_equal(lone_wolf, v.user)
     assert_equal(Vote.maximum_vote, v.value)
 
     # Now override everything.
@@ -96,9 +96,9 @@ class SpeciesListTest < UnitTestCase
       projects: [],
       when: "2012-01-13",
       where: "Undefined Location",
-      notes: "notes",
+      notes: { Other: "notes" },
       lat: " 12deg 34min N ",
-      long: " 123 45 W ",
+      lng: " 123 45 W ",
       alt: " 123.45 ft ",
       is_collection_location: false,
       specimen: true,
@@ -113,9 +113,9 @@ class SpeciesListTest < UnitTestCase
     assert_equal("2012-01-13", o.when.web_date)
     assert_equal("Undefined Location", o.where)
     assert_nil(o.location)
-    assert_equal("notes", o.notes)
+    assert_equal({ Other: "notes" }, o.notes)
     assert_equal(12.5667, o.lat.round(4))
-    assert_equal(-123.75, o.long.round(4))
+    assert_equal(-123.75, o.lng.round(4))
     assert_equal(38, o.alt.round(4))
     assert_false(o.is_collection_location)
     assert_true(o.specimen)

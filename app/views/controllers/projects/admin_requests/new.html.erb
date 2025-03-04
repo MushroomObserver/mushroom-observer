@@ -1,0 +1,21 @@
+<%
+  add_page_title(:admin_request_title.t(title: @project.title))
+  action = { controller: "/projects/admin_requests", action: :create,
+             project_id: @project.id }
+%>
+
+<%= form_with(scope: :email, url: action,
+              id: "project_admin_request_form") do |f| %>
+
+  <%= :admin_request_note.tp %>
+
+  <%= text_field_with_label(form: f, field: :subject,
+                            label: :request_subject.t + ":",
+                            data: { autofocus: true }) %>
+
+  <%= text_area_with_label(form: f, field: :content, rows: 5,
+                           label: :request_message.t + ":") %>
+
+  <%= submit_button(form: f, button: :SEND.l, center: true) %>
+
+<% end %>

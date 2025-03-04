@@ -1,0 +1,17 @@
+<%
+# NOTE: Move to observations/images/reuse
+#       Observations::ImagesController#reuse
+# Partial should be in shared
+add_page_title(:image_reuse_title.t(name: @observation.unique_format_name))
+
+add_tab_set(observation_images_reuse_tabs(obs: @observation))
+@container = :full
+# Use a path here:
+form_action = { controller: "/observations/images",
+                action: :attach,
+                id: @observation.id,
+                q: get_query_param }
+%>
+
+<%= render(partial: "shared/images_to_reuse",
+           locals: { form_action: form_action }) %>

@@ -119,7 +119,13 @@ class API2ControllerTest < FunctionalTestCase
   end
 
   def do_basic_get_request_for_model(model, *args)
-    expected_object = args.empty? ? model.first : model.where(*args).first
+    # Some models have a default_scope sort order applied.
+    # Reorder our expects preventatively to match API2's order.
+    expected_object = if args.empty?
+                        model.reorder(id: :asc).first
+                      else
+                        model.reorder(id: :asc).where(*args).first
+                      end
     response_formats = [:xml, :json]
     [:none, :low, :high].each do |detail|
       response_formats.each do |format|
@@ -150,7 +156,7 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal(1, obs.namings.length)
     assert_equal(1, obs.votes.length)
     assert_nil(obs.lat)
-    assert_nil(obs.long)
+    assert_nil(obs.lng)
     assert_nil(obs.alt)
     assert_equal(false, obs.specimen)
     assert_equal(true, obs.is_collection_location)
@@ -161,6 +167,25 @@ class API2ControllerTest < FunctionalTestCase
     assert_nil(obs.thumb_image)
     assert_obj_arrays_equal([], obs.projects)
     assert_obj_arrays_equal([], obs.species_lists)
+  end
+
+  def test_post_observation_with_code
+    params = { api_key: api_keys(:rolfs_api_key).key, location: "Earth",
+               code: "EOL-135" }
+    post(:observations, params: params)
+    assert_no_api_errors
+    obs = Observation.last
+    assert(obs.field_slips[0].project.observations.include?(obs))
+  end
+
+  def test_post_observation_joins_project
+    params = { api_key: api_keys(:rolfs_api_key).key, location: "Earth",
+               code: "OPEN-135" }
+    post(:observations, params: params)
+    assert_no_api_errors
+    obs = Observation.last
+    project = Project.find_by(field_slip_prefix: "OPEN")
+    assert(project.member?(obs.user))
   end
 
   def test_post_maximal_observation
@@ -179,6 +204,7 @@ class API2ControllerTest < FunctionalTestCase
       images: "#{images(:in_situ_image).id}, #{images(:turned_over_image).id}",
       thumbnail: images(:turned_over_image).id.to_s,
       projects: "EOL Project",
+      code: "EOL-13579",
       species_lists: "Another Species List"
     }
     post(:observations, params: params)
@@ -193,14 +219,15 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal(1, obs.votes.length)
     assert_equal(2.0, obs.votes.first.value)
     assert_equal(34.5678, obs.lat)
-    assert_equal(-123.4567, obs.long)
+    assert_equal(-123.4567, obs.lng)
     assert_equal(376, obs.alt)
     assert_equal(true, obs.specimen)
     assert_equal(true, obs.is_collection_location)
     assert_equal({ Observation.other_notes_key =>
                    "These are notes.\nThey look like this." }, obs.notes)
     assert_obj_arrays_equal([images(:in_situ_image),
-                             images(:turned_over_image)], obs.images)
+                             images(:turned_over_image)],
+                            obs.images.reorder(id: :asc))
     assert_objs_equal(images(:turned_over_image), obs.thumb_image)
     assert_obj_arrays_equal([projects(:eol_project)], obs.projects)
     assert_obj_arrays_equal([species_lists(:another_species_list)],
@@ -351,10 +378,14 @@ class API2ControllerTest < FunctionalTestCase
               nil
             end
     assert_not_equal("", key.to_s)
-    assert_equal(CGI.escapeHTML("<p>New API2 Key</p>"), notes.to_s)
+    assert_equal(CGI.escapeHTML("New API2 Key"), notes.to_s)
   end
 
+  # NOTE: Checking ActionMailer::Base.deliveries works here only because
+  #       QueuedEmail.queue == false.
+  #       The mail is sent via QueuedEmail but delivered immediately.
   def test_post_api_key
+    QueuedEmail.queue = false
     email_count = ActionMailer::Base.deliveries.size
 
     rolfs_key = api_keys(:rolfs_api_key)
@@ -412,7 +443,7 @@ class API2ControllerTest < FunctionalTestCase
   end
 
   def test_get_observation_with_gps_hidden
-    obs = observations(:unknown_with_lat_long)
+    obs = observations(:unknown_with_lat_lng)
     get(:observations, params: { id: obs.id, detail: :high, format: :json })
     assert_match(/34.1622|118.3521/, @response.body)
     get(:observations, params: { id: obs.id, detail: :high, format: :xml })

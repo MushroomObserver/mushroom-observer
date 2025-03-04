@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require("test_helper")
-require("set")
 
 module Names::Descriptions
   class MergesControllerTest < FunctionalTestCase
@@ -23,8 +22,8 @@ module Names::Descriptions
     def test_form_permissions
       # login rolf, and try to access.
       login("rolf")
-      get(:new, params: { id: "bogus" })
-      assert_redirected_to(name_descriptions_path)
+      # get(:new, params: { id: "bogus" }) # Will not work, must be integer
+      # assert_redirected_to(name_descriptions_index_path)
 
       get(:new, params: { id: rolf_desc.id })
       assert_response(:success)

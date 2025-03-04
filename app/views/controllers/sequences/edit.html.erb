@@ -1,0 +1,30 @@
+<%
+@container = :wide
+add_page_title(sequence_form_edit_title(seq: @sequence))
+add_tab_set(sequence_form_tabs(obj: @back_object))
+
+obs = @sequence.observation
+%>
+
+<div class="row">
+  <div class="col-xs-12 col-sm-7">
+    <%= render(partial: "sequences/observation_title",
+               locals: { observation: obs }) %>
+    <%= render(partial: "sequences/form", locals: { local: true }) %>
+
+    <div class="small">
+      <span class="font-weight-bold"><%= :CREATED_BY.t %>:</span>
+      <%= user_link(@sequence.user) %>
+    </div>
+
+    <%= show_object_footer(@sequence) %>
+  </div>
+
+  <div class="col-xs-12 col-sm-5">
+    <ul class="row list-unstyled">
+      <%= render(partial: "shared/matrix_box",
+                 locals: { object: obs.rss_log || obs,
+                           columns: "col-xs-12" }) %>
+    </ul>
+  </div>
+</div><!--.row-->

@@ -86,6 +86,10 @@ module GeneralExtensions
     users(:roy)
   end
 
+  def lone_wolf
+    users(:lone_wolf)
+  end
+
   def use_test_locales(&block)
     Language.alt_locales_path("config/test_locales", &block)
     FileUtils.remove_dir(Rails.root.join("config/test_locales"), force: true)
@@ -113,7 +117,7 @@ module GeneralExtensions
   # Assert that an assertion fails.
   def assert_fail(msg = nil, &block)
     msg ||= "Expected assertion to fail."
-    assert_raises(MiniTest::Assertion, msg, &block)
+    assert_raises(Minitest::Assertion, msg, &block)
   end
 
   # Assert that something is true.
@@ -148,7 +152,7 @@ module GeneralExtensions
     assert(expect == actual, msg)
   end
 
-  # Assert that two User instances are equal.
+  # Assert that two instances are equal.
   def assert_objs_equal(expect, got, *msg)
     assert_equal(fixture_label(expect), fixture_label(got), *msg)
   end
@@ -192,24 +196,24 @@ module GeneralExtensions
   #
   #   assert_obj_arrays_equal([img1,img2], obs.images)
   #
-  def assert_obj_arrays_equal(expect, got, *args)
-    assert_arrays_equal(expect, got, *args) { |o| fixture_label(o) }
+  def assert_obj_arrays_equal(expect, got, *)
+    assert_arrays_equal(expect, got, *) { |o| fixture_label(o) }
   end
 
   # Compare two arrays of User's by comparing their logins.
   #
   #   assert_user_arrays_equal([rolf,mary], name.authors)
   #
-  def assert_user_arrays_equal(expect, got, *args)
-    assert_arrays_equal(expect, got, *args, &:login)
+  def assert_user_arrays_equal(expect, got, *)
+    assert_arrays_equal(expect, got, *, &:login)
   end
 
   # Compare two arrays of Name's by comparing their search_names.
   #
   #   assert_name_arrays_equal([old_name,new_name], old_name.synonyms)
   #
-  def assert_name_arrays_equal(expect, got, *args)
-    assert_arrays_equal(expect, got, *args, &:search_name)
+  def assert_name_arrays_equal(expect, got, *)
+    assert_arrays_equal(expect, got, *, &:search_name)
   end
 
   GPS_CLOSE_ENOUGH = 0.001
@@ -232,7 +236,6 @@ module GeneralExtensions
   #   )
   #
   def assert_email(offset, args)
-    # email = QueuedEmail.find(:first, :offset => n)
     email = QueuedEmail.offset(offset).first
     assert(email)
     args.each_key do |arg|
@@ -328,9 +331,9 @@ module GeneralExtensions
   #
   def get_xml_element(key)
     assert(@doc, "XML response is nil!")
-    key.sub(%r{^/}, "").split("/").inject(@doc) do |elem, key|
-      elem = elem.elements[/^\d+$/.match?(key) ? key.to_i : key]
-      assert(elem, "XML response missing element \"#{key}\".")
+    key.sub(%r{^/}, "").split("/").inject(@doc) do |elem, k|
+      elem = elem.elements[/^\d+$/.match?(k) ? key.to_i : k]
+      assert(elem, "XML response missing element \"#{k}\".")
       elem
     end
   end
@@ -341,9 +344,9 @@ module GeneralExtensions
   #
   def assert_xml_exists(key, msg = nil)
     assert(@doc, "XML response is nil!")
-    key.sub(%r{^/}, "").split("/").inject(@doc) do |elem, key|
-      elem = elem.elements[/^\d+$/.match?(key) ? key.to_i : key]
-      assert(nil, msg || "XML response should have \"#{key}\".") unless elem
+    key.sub(%r{^/}, "").split("/").inject(@doc) do |elem, k|
+      elem = elem.elements[/^\d+$/.match?(key) ? k.to_i : k]
+      assert(nil, msg || "XML response should have \"#{k}\".") unless elem
       elem
     end
   end
@@ -354,8 +357,8 @@ module GeneralExtensions
   #
   def assert_xml_none(key, msg = nil)
     assert(@doc, "XML response is nil!")
-    result = key.sub(%r{^/}, "").split("/").inject(@doc) do |elem, key|
-      elem = elem.elements[/^\d+$/.match?(key) ? key.to_i : key]
+    result = key.sub(%r{^/}, "").split("/").inject(@doc) do |elem, k|
+      elem = elem.elements[/^\d+$/.match?(key) ? k.to_i : k]
       return unless elem
 
       elem
@@ -439,11 +442,11 @@ module GeneralExtensions
   #
   ##############################################################################
 
-  def assert_displayed_title(expect)
+  def assert_displayed_title(expect, msg = "Wrong page or title")
     if expect.is_a?(Regexp)
-      assert_match(expect, css_select("#title").text, "Wrong page or title")
+      assert_match(expect, css_select("#title").text, msg)
     else
-      assert_equal(expect, css_select("#title").text, "Wrong page or title")
+      assert_equal(expect, css_select("#title").text, msg)
     end
   end
 
@@ -524,7 +527,7 @@ module GeneralExtensions
     template.split("\n").each do |line|
       next unless line.include?("IGNORE")
 
-      pattern = Regexp.escape(line).gsub(/IGNORE/, ".*")
+      pattern = Regexp.escape(line).gsub("IGNORE", ".*")
       str.sub!(/^#{pattern}$/, line)
     end
     str == template

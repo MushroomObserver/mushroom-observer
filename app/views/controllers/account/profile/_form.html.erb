@@ -1,0 +1,36 @@
+<%
+file_field_label =
+  (@user.image_id ? :profile_image_change.t : :profile_image_create.t) + ":"
+file_field_between =
+  ["(33%)", link_to(:profile_image_reuse.t,
+                    account_profile_select_image_path,
+                    class: "mx-2")].safe_join
+%>
+
+<%= form_with(model: @user, url: account_profile_path,
+              html: { multipart: true }, id: "account_profile_form") do |f| %>
+
+  <%= submit_button(form: f, button: :profile_button.l, center: true) %>
+
+  <%= text_field_with_label(form: f, field: :name,
+                            label: :profile_name.t + ":") %>
+
+  <%= autocompleter_field(
+    form: f, field: :place_name, type: :location,
+    label: :profile_location.t + ":", between: "(33%)"
+  ) %>
+
+  <%= text_area_with_label(form: f, field: :notes,
+                           label: :profile_notes.t + ":",
+                           rows: 10, between: "(33%)") %>
+
+  <%= render(partial: "shared/image_upload_fields",
+             locals: { file_field_label:, file_field_between: }) %>
+
+  <%= text_area_with_label(form: f, field: :mailing_address,
+                           label: :profile_mailing_address.t + ":",
+                           rows: 5) %>
+
+  <%= submit_button(form: f, button: :profile_button.l, center: true) %>
+
+<% end %>

@@ -13,78 +13,262 @@ module ObservationsHelper
   #   Observation nnn: Ccc ddd Author(s) (Site ID) (Aaa bbb)
   # Observer preference shown, consensus not deprecated:
   #   Observation nnn: Aaa bbb Author(s) (Site ID)
+  #
+  # NOTE: Must pass owner naming, or it will be recalculated on every obs.
   def show_obs_title(obs:, owner_naming: nil)
-    capture do
-      concat(:show_observation_header.t)
-      concat(" #{obs.id || "?"}: ")
-      concat(obs_title_consensus_id(name: obs.name, owner_naming: owner_naming))
+    [
+      obs_title_id(obs),
+      obs_title_consensus_name_link(name: obs.name, owner_naming: owner_naming)
+    ].safe_join(" ")
+  end
+
+  def obs_title_id(obs)
+    tag.span(class: "smaller") do
+      [:show_observation_header.t, tag.span("#{obs.id || "?"}:")].safe_join(" ")
     end
+  end
+
+  # name portion of Observation title
+  def obs_title_consensus_name_link(name:, owner_naming: nil)
+    if name.deprecated &&
+       (prefer_name = name.best_preferred_synonym).present?
+      obs_title_with_preferred_synonym_link(name, prefer_name)
+    else
+      obs_title_name_link(name, owner_naming)
+    end
+  end
+
+  def obs_title_with_preferred_synonym_link(name, prefer_name)
+    [
+      link_to_display_name_brief_authors(
+        name, class: "obs_consensus_deprecated_synonym_link_#{name.id}"
+      ),
+      # Differentiate deprecated consensus from preferred name
+      obs_consensus_id_flag,
+      obs_title_preferred_synonym(prefer_name)
+    ].safe_join(" ")
+  end
+
+  def obs_title_preferred_synonym(prefer_name)
+    tag.span(class: "smaller") do
+      [
+        "(",
+        link_to_display_name_without_authors(
+          prefer_name, class: "obs_preferred_synonym_link_#{prefer_name.id}"
+        ),
+        ")"
+      ].safe_join
+    end
+  end
+
+  def obs_title_name_link(name, owner_naming)
+    text = [
+      link_to_display_name_brief_authors(
+        name, class: "obs_consensus_naming_link_#{name.id}"
+      )
+    ]
+    # Differentiate this Name from Observer Preference
+    text << obs_consensus_id_flag if owner_naming
+    text.safe_join(" ")
+  end
+
+  def obs_consensus_id_flag
+    tag.span("(#{:show_observation_site_id.t})", class: "smaller")
   end
 
   ##### Portion of page title that includes user's naming preference #########
 
   # Observer Preference: Hydnum repandum
-  def owner_naming_line(obs)
+  def owner_naming_line(owner_name)
     return unless User.current&.view_owner_id
 
-    capture do
-      concat(:show_observation_owner_id.t + ": ")
-      concat(owner_favorite_or_explanation(obs).t)
-    end
+    [
+      "#{:show_observation_owner_id.t}:",
+      owner_favorite_or_explanation(owner_name).t
+    ].safe_join(" ")
   end
 
-  # gathers the user's @votes indexed by naming
-  def gather_users_votes(obs, user = nil)
-    return [] unless user
-
-    obs.namings.each_with_object({}) do |naming, votes|
-      votes[naming.id] =
-        naming.votes.find { |vote| vote.user_id == user.id } ||
-        Vote.new(value: 0)
-    end
-  end
-
-  private
-
-  # name portion of Observation title
-  def obs_title_consensus_id(name:, owner_naming: nil)
-    if name.deprecated &&
-       (current_name = name.best_preferred_synonym).present?
-      capture do
-        concat(link_to_display_name_brief_authors(name))
-        # Differentiate deprecated consensus from preferred name
-        concat(" (#{:show_observation_site_id.t})")
-        concat(" ") # concat space separately, else `.t` strips it
-        concat("(")
-        concat(link_to_display_name_without_authors(current_name))
-        concat(")")
-      end
-    else
-      capture do
-        concat(link_to_display_name_brief_authors(name))
-        # Differentiate this Name from Observer Preference
-        concat(" (#{:show_observation_site_id.t})") if owner_naming
-      end
-    end
-  end
-
-  def owner_favorite_or_explanation(obs)
-    if (name = obs.owner_preference)
-      link_to_display_name_brief_authors(name)
+  def owner_favorite_or_explanation(owner_name)
+    if owner_name
+      link_to_display_name_brief_authors(
+        owner_name, class: "obs_owner_naming_link_#{owner_name.id}"
+      )
     else
       :show_observation_no_clear_preference
     end
   end
 
-  public
-
-  def link_to_display_name_brief_authors(name)
+  def link_to_display_name_brief_authors(name, **)
     link_to(name.display_name_brief_authors.t,
-            name_path(id: name.id))
+            name_path(id: name.id), **)
   end
 
-  def link_to_display_name_without_authors(name)
+  def link_to_display_name_without_authors(name, **)
     link_to(name.display_name_without_authors.t,
-            name_path(id: name.id))
+            name_path(id: name.id), **)
+  end
+
+  def observation_details_inat(obs:)
+    return nil if obs.inat_id.blank?
+
+    inat_link_desc =
+      if obs.source == "mo_inat_import"
+        :show_observation_details_inat_import.t(
+          date: obs.created_at.strftime("%Y-%m-%d")
+        )
+      else
+        :show_observation_details_inat_export.t
+      end
+
+    tag.p(id: "inat_id") do
+      [
+        "#{inat_link_desc} ",
+        link_to("#{:inat.t} ##{obs.inat_id}",
+                "https://inaturalist.org/observations/#{obs.inat_id}")
+      ].safe_join(" ")
+    end
+  end
+
+  def observation_map_coordinates(obs:)
+    if obs.location
+      loc = obs.location
+      n = ((90.0 - loc.north) / 1.80).round(4)
+      s = ((90.0 - loc.south) / 1.80).round(4)
+      e = ((180.0 + loc.east) / 3.60).round(4)
+      w = ((180.0 + loc.west) / 3.60).round(4)
+    end
+
+    lat, long = if obs.lat && obs.lng
+                  [obs.public_lat, obs.public_lng]
+                elsif obs.location
+                  obs.location.center
+                end
+    if lat && long
+      x = ((180.0 + long) / 3.60).round(4)
+      y = ((90.0 - lat) / 1.80).round(4)
+    end
+
+    [n, s, e, w, lat, long, x, y]
+  end
+
+  def observation_show_image_links(obs:)
+    return "" unless check_permission(obs)
+
+    icon_link_with_query(*reuse_images_for_observation_tab(obs))
+  end
+
+  # The following sections of the observation_details partial are also needed as
+  # part of the lightbox caption, so that was called on the obs_index as a
+  # sub-partial. Here they're converted to helpers to speed up loading of index
+  def observation_details_when_where_who(obs:)
+    [
+      observation_details_when(obs: obs),
+      observation_details_where(obs: obs),
+      observation_details_where_gps(obs: obs),
+      observation_details_who(obs: obs)
+    ].safe_join
+  end
+
+  def observation_details_when(obs:)
+    tag.p(class: "obs-when", id: "observation_when") do
+      ["#{:WHEN.t}:", tag.b(obs.when.web_date)].safe_join(" ")
+    end
+  end
+
+  def observation_details_where(obs:)
+    tag.p(class: "obs-where", id: "observation_where") do
+      [
+        "#{if obs.is_collection_location
+             :show_observation_collection_location.t
+           else
+             :show_observation_seen_at.t
+           end}:",
+        location_link(obs.where, obs.location, nil, true),
+        observation_where_vague_notice(obs: obs)
+      ].safe_join(" ")
+    end
+  end
+
+  def observation_where_vague_notice(obs:)
+    return "" unless obs.location&.vague?
+
+    title = :show_observation_vague_location.l
+    if User.current == obs.user
+      title += " #{:show_observation_improve_location.l}"
+    end
+    tag.p(class: "ml-3") { tag.em(title) }
+  end
+
+  def observation_details_where_gps(obs:)
+    return "" unless obs.lat
+
+    gps_display_link = link_to([obs.display_lat_lng.t,
+                                obs.display_alt.t,
+                                "[#{:click_for_map.t}]"].safe_join(" "),
+                               map_observation_path(id: obs.id))
+    gps_hidden_msg = tag.i("(#{:show_observation_gps_hidden.t})")
+
+    tag.p(class: "obs-where-gps", id: "observation_where_gps") do
+      # XXX Consider dropping this from indexes.
+      concat(gps_display_link) if obs.reveal_location?
+      concat(gps_hidden_msg) if obs.gps_hidden
+    end
+  end
+
+  def observation_details_who(obs:)
+    obs_user = obs.user
+    html = [
+      "#{:WHO.t}:",
+      user_link(obs_user)
+    ]
+    if obs_user != User.current && !obs_user&.no_emails &&
+       obs_user&.email_general_question
+
+      html += [
+        "[",
+        modal_link_to("observation_email", *send_observer_question_tab(obs)),
+        "]"
+      ]
+    end
+
+    tag.p(class: "obs-who", id: "observation_who") do
+      html.safe_join(" ")
+    end
+  end
+
+  def observation_details_notes(obs:)
+    notes = obs.notes
+    return "" unless notes
+    return "#{:NOTES.t}:\n#{notes[:Other]}".tpl if notes.keys == [:Other]
+
+    # This used to use
+    #
+    # notes = obs.notes_show_preformatted.sub(/^/, "#{:NOTES.t}:\n").tpl
+    #
+    # However, this fails if one of the values has a '+' sign, e.g., "+photo"
+    # because the textile interpretation ends up affecting multiple lines.
+    # This approach passes each note independently to textile.
+    tag.div(class: "obs-notes textile", id: "observation_notes") do
+      Textile.clear_textile_cache
+      Textile.register_name(obs.name)
+      concat("<p>#{:NOTES.t}:<br>".t)
+      notes.each_with_object(+"") do |(key, value), _str|
+        concat("+#{key}+: #{value}<br>".tl)
+      end
+      concat("</p>".t)
+    end
+  end
+
+  def observation_location_help
+    loc1 = "Albion, Mendocino Co., California, USA"
+    loc2 = "Hotel Parque dos Coqueiros, Aracaju, Sergipe, Brazil"
+    if User.current_location_format == "scientific"
+      loc1 = Location.reverse_name(loc1)
+      loc2 = Location.reverse_name(loc2)
+    end
+
+    [tag.div(:form_observations_where_help.t(loc1: loc1, loc2: loc2),
+             class: "mb-3"),
+     tag.div(:form_observations_locate_on_map_help.t)].safe_join
   end
 end

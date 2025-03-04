@@ -1,193 +1,146 @@
 # frozen_string_literal: true
 
-module Query
-  module Modules
-    # Helper methods for turning Query parameters into SQL conditions.
-    module Conditions
-      # Just because these three are used over and over again.
-      def add_owner_and_time_stamp_conditions(table)
-        add_time_condition("#{table}.created_at", params[:created_at])
-        add_time_condition("#{table}.updated_at", params[:updated_at])
-        add_id_condition("#{table}.user_id",
-                         lookup_users_by_name(params[:users]))
-      end
+# Helper methods for turning Query parameters into SQL conditions.
+module Query::Modules::Conditions
+  # Just because these three are used over and over again.
+  def add_owner_and_time_stamp_conditions(table = model.table_name)
+    add_time_condition("#{table}.created_at", params[:created_at])
+    add_time_condition("#{table}.updated_at", params[:updated_at])
+    initialize_users_parameter
+  end
 
-      def add_boolean_condition(true_cond, false_cond, val, *joins)
-        return if val.nil?
+  def add_pattern_condition
+    return if params[:pattern].blank?
 
-        @where << (val ? true_cond : false_cond)
-        add_joins(*joins)
-      end
+    @title_tag = :query_title_pattern_search
+    add_search_condition(search_fields, params[:pattern])
+  end
 
-      def add_exact_match_condition(col, vals, *joins)
-        return if vals.blank?
+  def initialize_ok_for_export_parameter
+    add_boolean_condition(
+      "#{model.table_name}.ok_for_export IS TRUE",
+      "#{model.table_name}.ok_for_export IS FALSE",
+      params[:ok_for_export]
+    )
+  end
 
-        vals = [vals] unless vals.is_a?(Array)
-        vals = vals.map { |v| escape(v.downcase) }
-        @where << if vals.length == 1
-                    "LOWER(#{col}) = #{vals.first}"
-                  else
-                    "LOWER(#{col}) IN (#{vals.join(", ")})"
-                  end
-        add_joins(*joins)
-      end
+  def add_boolean_condition(true_cond, false_cond, val, *)
+    return if val.nil?
 
-      def add_search_condition(col, val, *joins)
-        return if val.blank?
+    @where << (val ? true_cond : false_cond)
+    add_joins(*)
+  end
 
-        search = google_parse(val)
-        @where += google_conditions(search, col)
-        add_joins(*joins)
-      end
+  def add_exact_match_condition(col, vals, *)
+    return if vals.blank?
 
-      def add_range_condition(col, val, *joins)
-        return if val.blank?
-        return if val[0].blank? && val[1].blank?
-
-        min, max = val
-        @where << "#{col} >= #{min}" if min.present?
-        @where << "#{col} <= #{max}" if max.present?
-        add_joins(*joins)
-      end
-
-      def add_string_enum_condition(col, vals, allowed, *joins)
-        return if vals.empty?
-
-        vals = vals.map(&:to_s) & allowed.map(&:to_s)
-        return if vals.empty?
-
-        @where << "#{col} IN ('#{vals.join("','")}')"
-        add_joins(*joins)
-      end
-
-      def add_indexed_enum_condition(col, vals, allowed, *joins)
-        return if vals.empty?
-
-        vals = vals.filter_map { |v| allowed.index_of(v.to_sym) }
-        return if vals.empty?
-
-        @where << "#{col} IN (#{val.join(",")})"
-        add_joins(*joins)
-      end
-
-      def initialize_in_set_flavor(table = model.table_name)
-        set = clean_id_set(params[:ids])
-        @where << "#{table}.id IN (#{set})"
-        self.order = "FIND_IN_SET(#{table}.id,'#{set}') ASC"
-      end
-
-      def add_id_condition(col, ids, *joins)
-        return if ids.nil?
-
-        set = clean_id_set(ids)
-        @where << "#{col} IN (#{set})"
-        add_joins(*joins)
-      end
-
-      def add_not_id_condition(col, ids, *joins)
-        return if ids.nil?
-
-        set = clean_id_set(ids)
-        @where << "#{col} NOT IN (#{set})"
-        add_joins(*joins)
-      end
-
-      def add_where_condition(table, vals, *joins)
-        return if vals.empty?
-
-        loc_col   = "#{table}.location_id"
-        where_col = "#{table}.where"
-        ids       = clean_id_set(lookup_locations_by_name(vals))
-        cond      = "#{loc_col} IN (#{ids})"
-        vals.each do |val|
-          if /\D/.match?(val)
-            pattern = clean_pattern(val)
-            cond += " OR #{where_col} LIKE '%#{pattern}%'"
-          end
-        end
-        @where << cond
-        add_joins(*joins)
-      end
-
-      def add_rank_condition(vals, *joins)
-        return if vals.empty?
-
-        min, max = vals
-        max ||= min
-        all_ranks = Name.all_ranks
-        a = all_ranks.index(min) || 0
-        b = all_ranks.index(max) || (all_ranks.length - 1)
-        a, b = b, a if a > b
-        ranks = all_ranks[a..b].map { |r| Name.ranks[r] }
-        @where << "names.`rank` IN (#{ranks.join(",")})"
-        add_joins(*joins)
-      end
-
-      def add_image_size_condition(vals, *joins)
-        return if vals.empty?
-
-        min, max = vals
-        sizes = Image.all_sizes
-        pixels = Image.all_sizes_in_pixels
-        if min
-          size = pixels[sizes.index(min)]
-          @where << "images.width >= #{size} OR images.height >= #{size}"
-        end
-        if max
-          size = pixels[sizes.index(max) + 1]
-          @where << "images.width < #{size} AND images.height < #{size}"
-        end
-        add_joins(*joins)
-      end
-
-      def add_image_type_condition(vals, *joins)
-        return if vals.empty?
-
-        exts  = Image.all_extensions.map(&:to_s)
-        mimes = Image.all_content_types.map(&:to_s) - [""]
-        types = vals & exts
-        return if vals.empty?
-
-        other = types.include?("raw")
-        types -= ["raw"]
-        types = types.map { |x| mimes[exts.index(x)] }
-        str1 = "images.content_type IN ('#{types.join("','")}')"
-        str2 = "images.content_type NOT IN ('#{mimes.join("','")}')"
-        @where << if types.empty?
-                    str2
-                  elsif other
-                    "#{str1} OR #{str2}"
-                  else
-                    str1
-                  end
-        add_joins(*joins)
-      end
-
-      def add_has_notes_fields_condition(fields, *joins)
-        return if fields.empty?
-
-        conds = fields.map { |field| notes_field_presence_condition(field) }
-        @where << conds.join(" OR ")
-        add_joins(*joins)
-      end
-
-      def force_empty_results
-        @where = ["FALSE"]
-      end
-
-      ##########################################################################
-
-      private
-
-      def notes_field_presence_condition(field)
-        field = field.dup
-        pat = if field.gsub!(/(["\\])/) { '\\\1' }
-                "\":#{field}:\""
+    vals = [vals] unless vals.is_a?(Array)
+    vals = vals.map { |v| escape(v.downcase) }
+    @where << if vals.length == 1
+                "LOWER(#{col}) = #{vals.first}"
               else
-                ":#{field}:"
+                "LOWER(#{col}) IN (#{vals.join(", ")})"
               end
-        "observations.notes like \"%#{pat}%\""
-      end
+    add_joins(*)
+  end
+
+  def add_search_condition(col, val, *)
+    return if val.blank?
+
+    search = SearchParams.new(phrase: val)
+    @where += google_conditions(search, col)
+    add_joins(*)
+  end
+
+  def add_range_condition(col, val, *)
+    return if val.blank?
+    return if val[0].blank? && val[1].blank?
+
+    min, max = val
+    @where << "#{col} >= #{min}" if min.present?
+    @where << "#{col} <= #{max}" if max.present?
+    add_joins(*)
+  end
+
+  def add_string_enum_condition(col, vals, allowed, *)
+    return if vals.empty?
+
+    vals = vals.map(&:to_s) & allowed.map(&:to_s)
+    return if vals.empty?
+
+    @where << "#{col} IN ('#{vals.join("','")}')"
+    add_joins(*)
+  end
+
+  # Send the whole enum Hash as `allowed`, so we can find the corresponding
+  # values of the keys. MO's enum values currently may not start at 0.
+  def add_indexed_enum_condition(col, vals, allowed, *)
+    return if vals.empty?
+
+    vals = allowed.values_at(*vals)
+    return if vals.empty?
+
+    @where << "#{col} IN (#{vals.join(",")})"
+    add_joins(*)
+  end
+
+  # The method that all classes use for queries of their own ids.
+  # Can accept an empty array of ids and respond accordingly.
+  def add_id_in_set_condition(table = model.table_name, param = :id_in_set)
+    return if params[param].nil? # [] is valid
+
+    set = clean_id_set(params[param])
+    @where << "#{table}.id IN (#{set})"
+    @order = "FIND_IN_SET(#{table}.id,'#{set}') ASC" unless params[:order]
+
+    @title_tag = :query_title_in_set.t(type: table.singularize.to_sym)
+  end
+
+  # table_col = foreign key of an association, e.g. `observations.location_id`
+  def add_association_condition(table_col, ids, *, title_method: nil)
+    return if ids.empty?
+
+    if ids.size == 1
+      send(title_method) if title_method && ids.first.present?
+      @where << "#{table_col} = '#{ids.first}'"
+    else
+      set = clean_id_set(ids) # this produces a joined string!
+      @where << "#{table_col} IN (#{set})"
     end
+    add_joins(*)
+  end
+
+  def add_not_associated_condition(col, ids, *)
+    return if ids.empty?
+
+    set = clean_id_set(ids)
+    @where << "#{col} NOT IN (#{set})"
+    add_joins(*)
+  end
+
+  def add_subquery_condition(param, *, table: nil, col: :id)
+    return if params[param].blank?
+
+    sql = subquery_from_params(param).sql
+    table ||= subquery_table(param)
+    @where << "#{table}.#{col} IN (#{sql})"
+    add_joins(*)
+  end
+
+  # Reconstitute the query from the subparam hash, adding the model.
+  # parameter_declarations tells us the model name by subquery.
+  def subquery_from_params(param)
+    model = parameter_declarations[param][:subquery] # defined in each subclass
+    Query.new(model, params[param])
+  end
+
+  # Look up a default subquery table from the parameter_declarations
+  def subquery_table(param)
+    model = parameter_declarations[param][:subquery]
+    model.to_s.underscore.pluralize
+  end
+
+  def force_empty_results
+    @where = ["FALSE"]
   end
 end

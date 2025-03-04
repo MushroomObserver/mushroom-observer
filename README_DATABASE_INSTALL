@@ -59,11 +59,11 @@ root> apt-get install -y mysql-server mysql-client
 root> mysql -u root -p
   # Default root password is `root`
   ALTER USER 'root'@'localhost' IDENTIFIED BY '$DB_ROOT_PASSWORD';
-  create database mo_production;
-  create user 'mo'@'localhost' identified by '$DB_PASSWORD';
+  CREATE DATABASE mo_production;
+  CREATE USER 'mo'@'localhost' IDENTIFIED BY '$DB_PASSWORD';
   # set password for 'mo'@'localhost' = password('$DB_PASSWORD');
-  grant all privileges on mo_production.* to 'mo'@'localhost' with grant option;
-  exit
+  GRANT ALL PRIVILEGES ON mo_production.* TO 'mo'@'localhost' WITH GRANT OPTION;
+  EXIT
 root> scp $SNAPSHOT_PATH/checkpoint.gz .
 root> gunzip -cd checkpoint.gz | mysql -u mo -p'$DB_PASSWORD' mo_production
 
@@ -77,8 +77,8 @@ root> vi /etc/mysql/mysql.conf.d/mysqld.cnf
   # bind-address = 127.0.0.1
 root> mysql -u root -p
   # For each remote user:
-  create user 'mo'@'$WEB_SERVER' identified by '$DB_PASSWORD';
-  grant all privileges on mo_production.* to 'mo'@'$WEB_SERVER' with grant option;
+  CREATE USER 'mo'@'$WEB_SERVER' IDENTIFIED BY '$DB_PASSWORD';
+  GRANT ALL PRIVILEGES ON mo_production.* TO 'mo'@'$WEB_SERVER' WITH GRANT OPTION;
   GRANT PROCESS, SELECT, LOCK TABLES ON *.* TO 'mo'@'$WEB_SERVER';
 root> service mysql restart
 
@@ -86,7 +86,7 @@ root> service mysql restart
 remote> mysqladmin --protocol=tcp -u mo -p'$DB_PASSWORD' --host=$DB_HOST ping
 remote> vi /var/web/mo/config/database.yml
   production:
-    adapter:  mysql2
+    adapter:  trilogy
     database: mo_production
     host:     $DB_HOST
     username: mo

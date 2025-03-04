@@ -5,7 +5,7 @@
 #
 #  == Version
 #
-#  Changes are kept in the "name_descriptions_versions" table using
+#  Changes are kept in the "name_description_versions" table using
 #  ActiveRecord::Acts::Versioned.
 #
 #  == Attributes
@@ -37,7 +37,7 @@
 #  refs::             (V) References
 #
 #  ('V' indicates that this attribute is versioned in
-#  name_descriptions_versions table.)
+#  name_description_versions table.)
 #
 #  == Class Methods
 #
@@ -65,23 +65,14 @@
 class NameDescription < Description
   require "acts_as_versioned"
 
-  # enum definitions for use by simple_enum gem
+  include Description::Scopes
+
   # Do not change the integer associated with a value
-  enum review_status:
-        {
-          unreviewed: 1,
-          unvetted: 2,
-          vetted: 3,
-          inaccurate: 4
-        }
-  enum source_type:
-        {
-          public: 1,
-          foreign: 2,
-          project: 3,
-          source: 4,
-          user: 5
-        }, _suffix: :source
+  enum :review_status, { unreviewed: 1, unvetted: 2, vetted: 3, inaccurate: 4 }
+
+  enum :source_type, { public: 1, foreign: 2, project: 3, source: 4, user: 5 },
+       suffix: :source, instance_methods: false
+
   belongs_to :license
   belongs_to :name
   belongs_to :project
@@ -111,15 +102,23 @@ class NameDescription < Description
   has_many :editors, through: :name_description_editors,
                      source: :user
 
-  scope :for_eol_export,
-        lambda {
-          where(review_status: review_statuses.values_at(
-            "unvetted", "vetted"
-          )).
-            where(NameDescription[:gen_desc].not_blank).
-            where(ok_for_export: true).
-            where(public: true)
-        }
+  scope :index_order, lambda {
+    joins(:name).order(Name[:sort_name].asc, NameDescription[:created_at].asc,
+                       NameDescription[:id].desc)
+  }
+
+  scope :for_eol_export, lambda {
+    where(review_status: review_statuses.values_at(
+      "unvetted", "vetted"
+    )).
+      where(NameDescription[:gen_desc].not_blank).
+      where(ok_for_export: true).
+      where(public: true)
+  }
+
+  scope :show_includes, lambda {
+    strict_loading
+  }
 
   EOL_NOTE_FIELDS = [
     :gen_desc, :diag_desc, :distribution, :habitat, :look_alikes, :uses
@@ -127,9 +126,9 @@ class NameDescription < Description
   ALL_NOTE_FIELDS = (
     [:classification] + EOL_NOTE_FIELDS + [:refs, :notes]
   ).freeze
+  SEARCHABLE_FIELDS = ALL_NOTE_FIELDS
 
   acts_as_versioned(
-    table_name: "name_descriptions_versions",
     if_changed: ALL_NOTE_FIELDS,
     association_options: { dependent: :nullify }
   )
@@ -252,10 +251,10 @@ class NameDescription < Description
 
   # This is called after saving potential changes to a Name.  It will determine
   # if the changes are important enough to notify the authors, and do so.
+  # rubocop:disable Metrics/MethodLength
   def notify_users
-    # Even though
-    # changing review_status doesn't cause a new version to be created, I want
-    # to notify authors of that change.
+    # Even though changing review_status doesn't cause a new version to be
+    # created, I want to notify authors of that change.
     # (saved_change_to_<attribute>? is a Rails automagical method)
     if saved_version_changes? || saved_change_to_review_status?
       sender = User.current || User.admin
@@ -277,13 +276,8 @@ class NameDescription < Description
       end
 
       # Tell reviewer of the change.
-      reviewer = self.reviewer || @old_reviewer
+      reviewer ||= @old_reviewer
       recipients.push(reviewer) if reviewer&.email_names_reviewer
-
-      # Tell masochists who want to know about all name changes.
-      User.where(email_names_all: true).find_each do |user|
-        recipients.push(user)
-      end
 
       # Send to people who have registered interest.
       # Also remove everyone who has explicitly said they are NOT interested.
@@ -308,6 +302,7 @@ class NameDescription < Description
     # No longer need this.
     @old_reviewer = nil
   end
+  # rubocop:enable Metrics/MethodLength
 
   ##############################################################################
 

@@ -1,0 +1,22 @@
+<%# existing synonyms %>
+
+<% if current_synonyms.size > 1 %>
+  <%= fields_for(:existing_synonyms) do |fes| %>
+    <div class="form-group">
+      <%= content_tag(:div, "#{:form_synonyms_current_synonyms.t}:",
+                      class: "font-weight-bold my-3") %>
+      <%= help_block(:p, :form_synonyms_current_synonyms_help.t) %>
+      <% current_synonyms.each do |n| %>
+        <% if n != @name %>
+          <%= check_box_with_label(form: fes, field: n.id,
+                                   value: "1", checked: "0",
+                                   label: link_to(n.display_name.t,
+                                                 name_path(n.id))) %>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+  <hr/>
+<% end %>
+
+

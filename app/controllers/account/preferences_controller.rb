@@ -14,33 +14,27 @@ module Account
       update_password
       update_prefs_from_form
 
-      # render to get the errors to display
-      render(action: :edit) and return unless prefs_changed_successfully
-
-      update_copyright_holder(@user.legal_name_change)
-      redirect_to(action: :edit) and return
+      if prefs_changed_successfully
+        redirect_to(action: :edit)
+      else
+        render(action: :edit) # render to get the errors to display
+      end
     end
 
     # This action handles GET requests from email links.
     # It does write to the DB.
     def no_email
       user = User.safe_find(params[:id])
-      type = params[:type]
-      if user && check_permission!(user) && EMAIL_TYPES.include?(type)
-        method  = "email_#{type}="
-        prefix  = "no_email_#{type}"
-        success = "#{prefix}_success".to_sym
-        @note   = "#{prefix}_note".to_sym
-        @user.send(method, false)
-        if @user.save
-          flash_notice(success.t(name: @user.unique_text_name))
-          render(action: :no_email)
-        else
-          # Probably should write a better error message here...
-          flash_object_errors(@user)
-          redirect_to("/")
-        end
+      return redirect_to("/") unless permitted_user_with_valid_email_type?(user)
+
+      @note = email_note
+      @user.send(email_type_setter, false)
+      if @user.save
+        flash_notice(success.t(name: @user.unique_text_name))
+        render(action: :no_email)
       else
+        # Probably should write a better error message here...
+        flash_object_errors(@user)
         redirect_to("/")
       end
     end
@@ -73,7 +67,7 @@ module Account
     private
 
     def load_user_licenses
-      @licenses = License.current_names_and_ids(@user&.license)
+      @licenses = License.available_names_and_ids(@user&.license)
     end
 
     def update_password
@@ -100,28 +94,26 @@ module Account
     end
 
     def update_pref(pref, val)
-      @user.send("#{pref}=", val) if @user.send(pref) != val
+      @user.send(:"#{pref}=", val) if @user.send(pref) != val
     end
 
     def update_content_filter(pref, val)
-      filter = ContentFilter.find(pref)
+      filter = Query::Filter.find(pref)
       @user.content_filter[pref] =
-        if filter.type == :boolean && filter.prefs_vals.count == 1
+        if filter.type == :boolean && filter.prefs_vals.one?
           val == "1" ? filter.prefs_vals.first : filter.off_val
         else
           val.to_s
         end
     end
 
-    def update_copyright_holder(legal_name_change = nil)
-      return unless legal_name_change
-
-      Image.update_copyright_holder(*legal_name_change, @user)
-    end
-
     def prefs_changed_successfully
       result = false
       if !@user.changed
+        # NOTE: The next line appears to be unreachable
+        # because @user.changed is always truthy. (It's at least `[]`.)
+        # Perhaps `!@user.changed?` was intended, but it breaks tests.
+        # 2023-06-11 JDC
         flash_notice(:runtime_no_changes.t)
       elsif !@user.errors.empty? || !@user.save
         flash_object_errors(@user)
@@ -136,7 +128,6 @@ module Account
     # Used by update_prefs_from_form
     def prefs_types # rubocop:disable Metrics/MethodLength
       [
-        [:email_comments_all, :boolean],
         [:email_comments_owner, :boolean],
         [:email_comments_response, :boolean],
         [:email_general_commercial, :boolean],
@@ -144,15 +135,12 @@ module Account
         [:email_general_question, :boolean],
         [:email_html, :boolean],
         [:email_locations_admin, :boolean],
-        [:email_locations_all, :boolean],
         [:email_locations_author, :boolean],
         [:email_locations_editor, :boolean],
         [:email_names_admin, :boolean],
-        [:email_names_all, :boolean],
         [:email_names_author, :boolean],
         [:email_names_editor, :boolean],
         [:email_names_reviewer, :boolean],
-        [:email_observations_all, :boolean],
         [:email_observations_consensus, :boolean],
         [:email_observations_naming, :boolean],
         [:email, :string],
@@ -175,9 +163,33 @@ module Account
     end
 
     def content_filter_types
-      ContentFilter.all.map do |fltr|
+      Query::Filter.all.map do |fltr|
         [fltr.sym, :content_filter]
       end
+    end
+
+    def permitted_user_with_valid_email_type?(user)
+      user && check_permission!(user) && EMAIL_TYPES.include?(email_type)
+    end
+
+    def email_type_setter
+      "email_#{email_type}="
+    end
+
+    def email_msg_prefix
+      "no_email_#{email_type}"
+    end
+
+    def success
+      :"#{email_msg_prefix}_success"
+    end
+
+    def email_note
+      :"#{email_msg_prefix}_note"
+    end
+
+    def email_type
+      params[:type]
     end
   end
 end

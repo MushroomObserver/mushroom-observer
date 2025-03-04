@@ -1,0 +1,9 @@
+<%# Accepts an object and renders prev/next/index buttons. %>
+<% if object %>
+  <% type = object.type_tag %>
+  <div>
+    <%= link_prev(object) %> |
+    <%= link_with_query(:INDEX.t, object.index_link_args) %> |
+    <%= link_next(object) %>
+  </div>
+<% end %>

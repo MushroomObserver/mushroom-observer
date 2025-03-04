@@ -88,7 +88,6 @@
 #  email::              Email address.
 #  admin::              Allowed to enter admin mode?
 #  alert::              Alert message we need to display for User. (serialized)
-#  bonuses::            List of zero or more contribution bonuses. (serialized)
 #  contribution::       Contribution score (integer).
 #
 #  ==== Profile
@@ -106,23 +105,19 @@
 #  view_owner_id::      View Observation author's ID on Obs page
 #
 #  ==== Content filter options
-#  content_filter::     Serialized Hash of ContentFilter parameters.
+#  content_filter::     Serialized Hash of Query::Filter parameters.
 #
 #  ==== Email options
 #  Send notifications if...
 #  email_comments_owner::         ...someone comments on object I own.
 #  email_comments_response::      ...someone responds to my Comment.
-#  email_comments_all::           ...anyone comments on anything.
 #  email_observations_consensus:: ...consensus changes on my Observation.
 #  email_observations_naming::    ...someone proposes a Name for my Observation.
-#  email_observations_all::       ...anyone changes an Observation.
 #  email_names_author::           ...someone changes a Name I've authored.
 #  email_names_editor::           ...someone changes a Name I've edited.
 #  email_names_reviewer::         ...someone changes a Name I've reviewed.
-#  email_names_all::              ...anyone changes a Name.
 #  email_locations_author::       ...someone changes a Location I've authored.
 #  email_locations_editor::       ...someone changes a Location I've edited.
-#  email_locations_all::          ...anyone changes a Location.
 #  email_general_feature::        ...you announce new features.
 #  email_general_commercial::     ...someone sends me a commercial inquiry.
 #  email_general_question::       ...someone sends me a general question.
@@ -155,7 +150,6 @@
 #
 #  ==== Profile
 #  percent_complete::   How much of profile has User finished?
-#  sum_bonuses::        Add up all the bonuses User has earned.
 #
 #  ==== Object ownership
 #  comments::           Comment's they've posted.
@@ -191,7 +185,6 @@
 #                       or that are attached to projects they're on.
 #
 #  ==== Other Stuff
-#  primer::             Primer for auto-complete.
 #  erase_user::         Erase all references to a given User (by id).
 #  remove_image::       Ensures that this user doesn't reference this image
 #
@@ -199,70 +192,38 @@
 #  crypt_password::     Password attribute is encrypted
 #                       before object is created.
 #
-class User < AbstractModel
+class User < AbstractModel # rubocop:disable Metrics/ClassLength
   require "digest/sha1"
 
-  # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
-  # first value is the default
-  enum thumbnail_size:
-       {
-         thumbnail: 1,
-         small: 2
-       },
-       _prefix: :thumb_size,
-       _default: "thumbnail"
+  # First value is the default
+  enum :thumbnail_size, { thumbnail: 1, small: 2 },
+       prefix: :thumb_size, default: :thumbnail, instance_methods: false
 
-  enum image_size:
-       {
-         thumbnail: 1,
-         small: 2,
-         medium: 3,
-         large: 4,
-         huge: 5,
-         full_size: 6
-       },
-       _prefix: true,
-       _default: "medium"
+  enum :image_size,
+       { thumbnail: 1, small: 2, medium: 3, large: 4, huge: 5, full_size: 6 },
+       prefix: true, default: :medium, instance_methods: false
 
-  enum votes_anonymous:
-       {
-         no: 1,
-         yes: 2,
-         old: 3
-       },
-       _prefix: :votes_anon,
-       _default: "no"
+  enum :votes_anonymous, { no: 1, yes: 2, old: 3 },
+       prefix: :votes_anon, default: :no, instance_methods: false
 
-  enum location_format:
-       {
-         postal: 1,
-         scientific: 2
-       },
-       _prefix: true,
-       _default: "postal"
+  enum :location_format, { postal: 1, scientific: 2 },
+       prefix: true, default: :postal, instance_methods: false
 
-  enum hide_authors:
-       {
-         none: 1,
-         above_species: 2
-       },
-       _prefix: true,
-       _default: "none"
+  enum :hide_authors, { none: 1, above_species: 2 },
+       prefix: true, default: :none, instance_methods: false
 
-  enum keep_filenames:
-       {
-         toss: 1,
-         keep_but_hide: 2,
-         keep_and_show: 3
-       },
-       _suffix: :filenames,
-       _default: "toss"
+  enum :keep_filenames, { toss: 1, keep_but_hide: 2, keep_and_show: 3 },
+       suffix: :filenames, default: :toss, instance_methods: false
+
+  has_one :user_stats, dependent: :destroy
 
   has_many :api_keys, dependent: :destroy
   has_many :comments
   has_many :donations
   has_many :external_links
+  has_many :field_slips
+  has_many :field_slip_job_trackers
   has_many :images
   has_many :interests
   has_many :locations
@@ -273,6 +234,9 @@ class User < AbstractModel
   has_many :namings
   has_many :observations
   has_many :projects_created, class_name: "Project"
+  has_many :project_members, dependent: :destroy
+  has_many :projects, through: :project_members, source: :projects
+  has_many :project_aliases, as: :target, dependent: :destroy
   has_many :publications
   has_many :queued_emails
   has_many :sequences
@@ -316,7 +280,7 @@ class User < AbstractModel
   belongs_to :license       # user's default license
   belongs_to :location      # primary location
 
-  serialize :content_filter, Hash
+  serialize :content_filter, type: Hash, coder: YAML
 
   ##############################################################################
   #
@@ -328,6 +292,9 @@ class User < AbstractModel
   # go through +change_password+.)
   before_create :crypt_password
 
+  before_update :update_image_copyright_holder
+  before_update :expire_caches_of_associated_observations
+
   # Ensure that certain default values are symbols (rather than strings)
   # might only be an issue for test environment?
   # Probably better to instead use after_create and after_update,
@@ -338,12 +305,21 @@ class User < AbstractModel
 
   # This causes the data structures in these fields to be serialized
   # automatically with YAML and stored as plain old text strings.
-  serialize :bonuses
-  serialize :alert
+  serialize :bonuses, coder: YAML
+  serialize :alert, coder: YAML
 
   scope :by_contribution, lambda {
     order(contribution: :desc, name: :asc, login: :asc)
   }
+  # NOTE: the obs images are a separate optimized query
+  scope :show_includes, lambda {
+    strict_loading.includes(
+      :location,
+      :user_stats
+    )
+  }
+  scope :verified, -> { where.not(verified: nil) }
+  scope :unverified, -> { where(verified: nil) }
 
   # These are used by forms.
   attr_accessor :place_name
@@ -422,11 +398,6 @@ class User < AbstractModel
     "#<User #{id}: #{unique_text_name.inspect}>"
   end
 
-  # For now just special exception to keep Adolf from wasting my life.
-  def hide_specimen_stuff?
-    id == 2873
-  end
-
   ##############################################################################
   #
   #  :section: Names
@@ -456,6 +427,35 @@ class User < AbstractModel
     unique_text_name
   end
 
+  def textile_name
+    "_user #{login}_"
+  end
+
+  def self.lookup_unique_text_name(str)
+    return nil unless str
+
+    user = nil
+    login = nil
+    if (match = str.match(/\(([^(]+)\)$/))
+      login = match[1]
+      user = find_name_match(User.where(login:), str)
+    end
+    user ||= find_name_match(User.where(login: str), str)
+    if login && !user
+      pattern = "%#{ActiveRecord::Base.sanitize_sql(login)}%"
+      user = find_name_match(User.where("login like ?", pattern), str)
+    end
+    user
+  end
+
+  def self.find_name_match(users, str)
+    return users.first if users.count == 1
+
+    users.find_each do |user|
+      return user if user.unique_text_name == str
+    end
+  end
+
   # Return User's full name if present, else return login.
   #
   #   name present:  "Fred Flintstone"
@@ -481,6 +481,32 @@ class User < AbstractModel
     return nil if old_legal_name == new_legal_name
 
     [old_legal_name, new_legal_name]
+  end
+
+  # remove <user.name> from search string "#{user[:login]} <#{user[:name]}>"
+  def self.remove_bracketed_name(input)
+    previous = nil
+    while input != previous
+      previous = input
+      input = input.sub(/ *<.*>/, "")
+    end
+    input
+  end
+
+  # TODO: Move this to an ActiveJob, once we get jobs going - AN 20240220
+  # This can be fairly expensive if the user has a lot of images
+  def update_image_copyright_holder
+    return unless legal_name_change
+
+    Image.update_copyright_holder(*legal_name_change, self)
+  end
+
+  # EXPIRE CACHES OF OBS WITH CHANGED USER LOGINS
+  # "touch" the updated_at column of all observations with the changed login
+  def expire_caches_of_associated_observations
+    return unless name_changed? || login_changed?
+
+    Observation.where(user_id: id).touch_all
   end
 
   ##############################################################################
@@ -695,16 +721,6 @@ class User < AbstractModel
     result * 100 / max
   end
 
-  # Sum up all the bonuses the User has earned.
-  #
-  #   contribution += user.sum_bonuses
-  #
-  def sum_bonuses
-    return nil unless bonuses
-
-    bonuses.inject(0) { |acc, elem| acc + elem[0] }
-  end
-
   def successful_contributor?
     observations.any?
   end
@@ -736,52 +752,19 @@ class User < AbstractModel
       split(",").map(&:squish).compact_blank
   end
 
-  ##############################################################################
-  #
-  #  :section: Other
-  #
-  ##############################################################################
+  def self.cull_unverified_users(dry_run: false)
+    ids = User.where(verified: nil, created_at: ..1.month.ago).pluck(:id)
+    return [] if ids.blank?
 
-  # Get list of users to prime auto-completer.  Returns a simple Array of up to
-  # 1000 (by contribution or created within the last month) login String's
-  # (with full name in parens).
-  def self.primer
-    if !File.exist?(MO.user_primer_cache_file) ||
-       File.mtime(MO.user_primer_cache_file) < 1.day.ago
-      data = primer_data
-      write_primer_file(data)
-      data
-    else
-      read_primer_file
+    unless dry_run
+      ids.each do |id|
+        UserGroup.one_user(id)&.destroy
+      end
+      UserGroupUser.where(user_id: ids).delete_all
+      User.where(id: ids).delete_all
     end
-  end
 
-  private_class_method def self.write_primer_file(data)
-    File.open(MO.user_primer_cache_file, "w:utf-8").
-      write("#{data.join("\n")}\n")
-  end
-
-  private_class_method def self.read_primer_file
-    File.open(MO.user_primer_cache_file, "r:UTF-8").
-      readlines.map(&:chomp)
-  end
-
-  def self.primer_data
-    users = User.select(:login, :name).order(
-      orderby_last_login_if_recent.desc, User[:contribution].desc
-    ).limit(1000).pluck(:login, :name)
-
-    users.map do |login, name|
-      name.empty? ? login : "#{login} <#{name}>"
-    end.sort
-  end
-
-  private_class_method def self.orderby_last_login_if_recent
-    User[:last_login].when(
-      User[:last_login] > 1.month.ago
-    ).then(
-      User[:last_login]
-    ).else(nil)
+    ["Deleted #{ids.count} unverified user(s)."]
   end
 
   # Erase all references to a given user (by id).  Missing:
@@ -798,21 +781,21 @@ class User < AbstractModel
   PUBLIC_REFERENCES = [
     [:herbaria,                       :personal_user_id],
     [:location_descriptions,          :user_id],
-    [:location_descriptions_versions, :user_id],
+    [:location_description_versions,  :user_id],
     [:locations,                      :user_id],
-    [:locations_versions,             :user_id],
+    [:location_versions,              :user_id],
     [:name_descriptions,              :user_id],
     [:name_descriptions,              :reviewer_id],
-    [:name_descriptions_versions,     :user_id],
+    [:name_description_versions,      :user_id],
     [:names,                          :user_id],
-    [:names_versions,                 :user_id],
+    [:name_versions,                  :user_id],
     # Leave projects, because they're intertwined with descriptions too much.
     [:projects,                       :user_id],
     # Leave votes and namings, because I don't want to recalc consensuses.
     [:namings,                        :user_id],
     [:projects,                       :user_id],
     [:translation_strings,            :user_id],
-    [:translation_strings_versions,   :user_id],
+    [:translation_string_versions,    :user_id],
     [:votes,                          :user_id]
   ].freeze
 
@@ -888,7 +871,7 @@ class User < AbstractModel
     [:donations,                      :user_id],
     [:external_links,                 :user_id],
     [:glossary_terms,                 :user_id],
-    [:glossary_terms_versions,        :user_id],
+    [:glossary_term_versions,         :user_id],
     [:herbaria,                       :personal_user_id],
     [:herbarium_curators,             :user_id],
     [:herbarium_records,              :user_id],
@@ -1173,8 +1156,8 @@ class User < AbstractModel
   }
 
   def user_requirements
-    user_login_requirements
-    user_password_requirements
+    user_login_requirements if new_record? || login_changed?
+    user_password_requirements if new_record? || password_changed?
     user_other_requirements
   end
 
@@ -1188,6 +1171,7 @@ class User < AbstractModel
     end
   end
 
+  # This is a pricey lookup, avoid if not changing login
   def login_already_taken?
     other = User.find_by(login: login)
     other && other.id != id

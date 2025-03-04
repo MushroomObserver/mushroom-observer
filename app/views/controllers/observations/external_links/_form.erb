@@ -1,0 +1,29 @@
+<%
+case action_name
+when "new", "create"
+  url_params = { action: :create, id: @observation.id,
+                 external_site_id: @site.id }
+  button = :ADD.t
+when "edit", "update"
+  url_params = { action: :update, id: @external_link.id }
+  button = :UPDATE.t
+end
+form_args = {
+  model: @external_link, url: url_params, id: "external_link_form",
+  data: { turbo: true }
+}
+%>
+
+<%= form_with(**form_args) do |f| %>
+
+  <%= fields_for(:external_link) do |fel|
+    text_field_with_label(
+      form: fel, field: :url, size: 40, label: :URL.l, class: "w-100",
+      between: :required,
+      append: :show_observation_add_link_dialog.t(site: @site.name)
+    )
+  end %>
+
+  <%= submit_button(form: f, button: button, center: true) %>
+
+<% end %>

@@ -8,14 +8,6 @@
 #  css_theme
 #  container_class
 #
-#  --- links and buttons ----
-#
-#  title_tag_contents           # text to put in html header <title>
-#  link_next                    # link to next object
-#  link_prev                    # link to prev object
-#  create_links                 # convert links into list of tabs
-#  draw_tab_set
-#
 #  --------------------------
 #
 #  indent                       # in-lined white-space element of n pixels
@@ -64,83 +56,48 @@ module ApplicationHelper
     end
   end
 
-  # --------- template nav ------------------------------------------------
+  # This can be called to display flash notices either in the page or a modal.
+  # Send it an html `id` to be able to find the notices via JS later.
+  def flash_notices_html
+    return "" unless flash_notices?
 
-  # contents of the <title> in html header
-  def title_tag_contents(action_name)
-    if @title.present?
-      @title.strip_html.html_safe
-    elsif TranslationString.where(tag: "title_for_#{action_name}").present?
-      :"title_for_#{action_name}".t
+    alert_class = case flash_notice_level
+                  when 0 then "alert-success"
+                  when 1 then "alert-warning"
+                  when 2 then "alert-danger"
+                  end
+
+    notices = flash_get_notices
+    flash_clear
+
+    tag.div(notices, id: "flash_notices",
+                     class: class_names("alert mt-3", alert_class))
+  end
+
+  def render_turbo_stream_flash_messages
+    turbo_stream.replace("flash", partial: "application/app/flash_notices")
+  end
+
+  # Returns a string that indicates the current user/logged_in/admin status.
+  # Used as a simple cache key for templates that may have three
+  # possible versions of cached HTML
+  def user_status_string
+    if in_admin_mode?
+      "admin_mode"
+    elsif browser.bot?
+      "robot"
+    elsif !@user.nil?
+      "logged_in"
     else
-      action_name.tr("_", " ").titleize
+      "no_user"
     end
   end
 
-  # link to next object in query results
-  def link_next(object)
-    path = if object.class.controller_normalized?
-             if object.type_tag == :rss_log
-               send(:activity_log_path, object.id, flow: "next")
-             else
-               send("#{object.type_tag}_path", object.id, flow: "next")
-             end
-           else
-             { controller: object.show_controller,
-               action: :show, id: object.id }
-           end
-    link_with_query("#{:FORWARD.t} »", path)
-  end
-
-  # link to previous object in query results
-  def link_prev(object)
-    path = if object.class.controller_normalized?
-             if object.type_tag == :rss_log
-               send(:activity_log_path, object.id, flow: "prev")
-             else
-               send("#{object.type_tag}_path", object.id, flow: "prev")
-             end
-           else
-             { controller: object.show_controller,
-               action: :show, id: object.id }
-           end
-    link_with_query("« #{:BACK.t}", path)
-  end
-
-  # Convert @links in index views into a list of tabs for RHS tab set.
-  def create_links(links)
-    return [] unless links
-
-    links.compact.map { |str, url, args| link_to(str, url, args) }
-  end
-
-  # Short-hand to render shared tab_set partial for a given set of links.
-  def draw_tab_set(links)
-    render(partial: "layouts/content/tab_set", locals: { links: links })
-  end
-
-  def index_sorter(sorts)
-    return "" unless sorts
-
-    render(partial: "layouts/content/sorter", locals: { sorts: sorts })
+  def logged_in_status
+    User.current ? "logged_in" : "no_user"
   end
 
   # ----------------------------------------------------------------------------
-
-  # Add something to the header from within view.  This can be called as many
-  # times as necessary -- the application layout will mash them all together
-  # and stick them at the end of the <tt>&gt;head&lt;/tt> section.
-  #
-  #   <%
-  #     add_header(GMap.header)       # adds GMap general header
-  #     gmap = make_map(@locations)
-  #     add_header(finish_map(gmap))  # adds map-specific header
-  #   %>
-  #
-  def add_header(str)
-    @header ||= safe_empty
-    @header += str
-  end
 
   # Take URL that got us to this page and add one or more parameters to it.
   # Returns new URL.
@@ -230,5 +187,14 @@ module ApplicationHelper
     return nil unless idx
 
     query.result_ids[idx + 1] || query.result_ids[idx - 1]
+  end
+
+  def form_submit_text(obj)
+    obj_name = obj.class.model_name.singular.upcase.to_sym.t
+    if obj.new_record?
+      :create_object.t(TYPE: obj_name)
+    else
+      :update_object.t(TYPE: obj_name)
+    end
   end
 end

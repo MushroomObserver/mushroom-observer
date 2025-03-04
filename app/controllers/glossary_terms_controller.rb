@@ -5,13 +5,41 @@ class GlossaryTermsController < ApplicationController
   before_action :login_required, except: [:index, :show]
   before_action :store_location, except: [:create, :update, :destroy]
 
-  # ---------- Actions to Display data (index, show, etc.) ---------------------
-
+  ##############################################################################
+  # INDEX
+  #
   def index
-    return patterned_index if params[:pattern].present?
-
-    index_full
+    build_index_with_query
   end
+
+  private
+
+  def default_sort_order
+    :name
+  end
+
+  # Used by ApplicationController to dispatch #index to a private method
+  def index_active_params
+    [:pattern, :by, :q, :id].freeze
+  end
+
+  # Show selected list, based on current Query.
+  # (Linked from show template, next to "prev" and "next"... or will be.)
+  # Passes explicit :by param to affect title (only).
+  def sorted_index_opts
+    sorted_by = params[:by] || default_sort_order
+    super.merge(query_args: { by: sorted_by })
+  end
+
+  def index_display_opts(opts, _query)
+    { letters: "glossary_terms.name",
+      num_per_page: 50,
+      include: { thumb_image: :image_votes } }.merge(opts)
+  end
+
+  public
+
+  ##############################################################################
 
   def show
     return unless find_glossary_term!
@@ -19,6 +47,7 @@ class GlossaryTermsController < ApplicationController
     @canonical_url = glossary_term_url
     @layout = calc_layout_params
     @other_images = @glossary_term.other_images.order(vote_cache: :desc)
+    @versions = @glossary_term.versions
   end
 
   # ---------- Actions to Display forms -- (new, edit, etc.) -------------------
@@ -30,6 +59,10 @@ class GlossaryTermsController < ApplicationController
 
   def edit
     return unless find_glossary_term!
+    return unless @glossary_term.locked? && !in_admin_mode? # happy path
+
+    flash_error(:edit_glossary_term_not_allowed.t)
+    redirect_to(glossary_term_path(@glossary_term))
   end
 
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
@@ -50,7 +83,7 @@ class GlossaryTermsController < ApplicationController
 
     @glossary_term.attributes = params[:glossary_term].
                                 permit(:name, :description)
-    @glossary_term.user = @user
+    @glossary_term.locked = params[:glossary_term][:locked] if in_admin_mode?
 
     return reload_form("edit") unless @glossary_term.save
 
@@ -73,50 +106,14 @@ class GlossaryTermsController < ApplicationController
     end
   end
 
-  ##############################################################################
-
   private
-
-  # --------- index private methods
-
-  def patterned_index
-    pattern = params[:pattern].to_s
-    # If it matches the term ID
-    if pattern.match?(/^\d+$/) &&
-       (glossary_term = GlossaryTerm.safe_find(pattern))
-      render(:show, params: { id: glossary_term.id },
-                    location: glossary_term_path(glossary_term.id)) and return
-    else
-      show_selected_glossary_terms(
-        create_query(:GlossaryTerm, :pattern_search, pattern: pattern)
-      )
-    end
-  end
-
-  def index_full
-    query = create_query(:GlossaryTerm, :all, by: :name)
-    show_selected_glossary_terms(query)
-  end
-
-  # Show selected list of glossary_terms.
-  def show_selected_glossary_terms(query, args = {})
-    includes = @user ? { thumb_image: :image_votes } : :thumb_image
-    args = {
-      action: :index,
-      letters: "glossary_terms.name",
-      num_per_page: 50,
-      include: includes
-    }.merge(args)
-    @links ||= []
-
-    show_index_of_objects(query, args)
-  end
 
   # --------- show, create, edit private methods
 
+  # Doesn't use `find_or_goto_index` because we need the includes
   def find_glossary_term!
-    @glossary_term = find_or_goto_index(GlossaryTerm,
-                                        params[:id].to_s)
+    @glossary_term = GlossaryTerm.show_includes.safe_find(params[:id]) ||
+                     flash_error_and_goto_index(GlossaryTerm, params[:id])
   end
 
   def redirect_non_admins!
@@ -129,7 +126,7 @@ class GlossaryTermsController < ApplicationController
 
   def destroy_unused_images(images)
     images.each do |image|
-      image.destroy if image&.all_subjects&.empty?
+      image.destroy if image.reload&.all_subjects&.empty?
     end
   end
 
@@ -137,7 +134,7 @@ class GlossaryTermsController < ApplicationController
     @copyright_holder = params.dig(:upload, :copyright_holder) || @user.name
     @copyright_year = params.dig(:upload, :copyright_year)&.to_i ||
                       Time.now.utc.year
-    @licenses = License.current_names_and_ids(@user.license)
+    @licenses = License.available_names_and_ids(@user.license)
     @upload_license_id = params.dig(:upload, :license_id) || @user.license_id
   end
 
@@ -163,10 +160,10 @@ class GlossaryTermsController < ApplicationController
     return @glossary_term.save unless upload_specified?
 
     # return false if image processing fails
-    return unless (saved_image = process_upload(image_args))
+    return false unless (saved_image = process_upload(image_args))
 
     @glossary_term.add_image(saved_image)
-    return if @glossary_term.save # happy path
+    return false if @glossary_term.save # happy path
 
     # term failed, so clean up the orphaned (unassociated) image
     # and its flash notice ("Successfully uploaded image ...")

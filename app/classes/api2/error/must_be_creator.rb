@@ -2,7 +2,7 @@
 
 class API2
   # Can only update locations/names which you have created.
-  class MustBeCreator < Error
+  class MustBeCreator < FatalError
     def initialize(type)
       super()
       args.merge!(type: type)

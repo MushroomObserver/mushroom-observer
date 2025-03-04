@@ -1,0 +1,50 @@
+<%# Previous translation versions. Separate so it can be reloaded on update %>
+<%= tag.div(id: "translation_versions") do
+  done_header = false
+  user_logins = { @user.id => @user.login }
+
+  @edit_tags.each do |ttag|
+
+    if record = @translated_records[ttag]
+      user_logins[record.user_id] ||= record.user.login rescue nil
+      last_text = record.text
+      versions_to_show = []
+
+      record.versions.reverse.each do |version|
+        if version.text != last_text
+          versions_to_show << version
+          last_text = version.text
+        end
+      end
+
+      if versions_to_show.any?
+        if !done_header
+          concat(tag.hr(class: "my-5"))
+          concat(tag.h4("#{:edit_translations_old_versions.t}:",
+                        class: "mb-4 font-weight-bold"))
+          done_header = true
+        end
+
+        concat(tag.h5("#{h(ttag)}:", class: "underline mb-1"))
+        concat(tag.table(class: "table table-striped old_versions") do
+          versions_to_show.each do |version|
+            concat(tag.tr do
+              [
+                tag.td do
+                  user_id = version.user_id
+                  login = user_logins[user_id] ||=
+                    User.find(user_id).login rescue ""
+                  login.blank? ? "--" : user_link(user_id, login)
+                end,
+                tag.td(version.updated_at.web_date),
+                tag.td do
+                  tag.p(h(version.text))
+                end
+              ].safe_join
+            end)
+          end
+        end)
+      end
+    end
+  end
+end %>

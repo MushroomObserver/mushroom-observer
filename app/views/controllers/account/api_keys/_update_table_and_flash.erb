@@ -1,0 +1,7 @@
+<%= turbo_stream.replace("account_api_keys_table") do
+  render(partial: "account/api_keys/table")
+end %>
+
+<%= turbo_stream.update("page_flash") do
+  flash_notices_html
+end %>

@@ -1,8 +1,0 @@
-// Update page with results of update or create collection_number
-$('#mo_ajax_progress_caption').empty();
-$('#mo_ajax_progress').modal('hide');
-$("#observation_collection_numbers").html('<%= j render(partial: "observations/show/collection_numbers", locals: { observation: @observation.reload }, layout: false) %>');
-
-$("#page_flash").html("<%= j render(partial: 'layouts/app/flash_notices', locals: { id: 'flash_notices' }) if flash_notices? %>");
-
-$(".modal").modal('hide');

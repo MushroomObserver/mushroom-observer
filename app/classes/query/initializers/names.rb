@@ -1,67 +1,33 @@
 # frozen_string_literal: true
 
-module Query
-  module Initializers
-    # initializing methods inherited by all Query's for Names
-    module Names
-      def names_parameter_declarations
-        {
-          names?: [:string],
-          include_synonyms?: :boolean,
-          include_subtaxa?: :boolean,
-          include_immediate_subtaxa?: :boolean,
-          exclude_original_names?: :boolean
-        }
-      end
+module Query::Initializers::Names
+  def initialize_names_and_related_names_parameters(*joins)
+    return force_empty_results if irreconcilable_names_parameters?
 
-      def consensus_parameter_declarations
-        {
-          include_all_name_proposals?: :boolean,
-          exclude_consensus?: :boolean
-        }
-      end
+    table = params[:include_all_name_proposals] ? "namings" : "observations"
+    ids = lookup_names_by_name(params[:names], related_names_parameters)
+    add_association_condition("#{table}.name_id", ids, *joins)
 
-      def names_parameters
-        {
-          names: params[:names],
-          include_synonyms: params[:include_synonyms],
-          include_subtaxa: params[:include_subtaxa],
-          include_immediate_subtaxa: params[:include_immediate_subtaxa],
-          exclude_original_names: params[:exclude_original_names]
-        }
-      end
+    add_join(:observations, :namings) if params[:include_all_name_proposals]
+    return unless params[:exclude_consensus]
 
-      def initialize_name_parameters(*joins)
-        return force_empty_results if irreconcilable_name_parameters?
+    add_not_associated_condition("observations.name_id", ids, *joins)
+  end
 
-        table = if params[:include_all_name_proposals]
-                  "namings"
-                else
-                  "observations"
-                end
-        column = "#{table}.name_id"
-        ids = lookup_names_by_name(names_parameters)
-        add_id_condition(column, ids, *joins)
+  # ------------------------------------------------------------------------
 
-        add_join(:observations, :namings) if params[:include_all_name_proposals]
-        return unless params[:exclude_consensus]
+  NAMES_EXPANDER_PARAMS = [
+    :include_synonyms, :include_subtaxa, :include_immediate_subtaxa,
+    :exclude_original_names
+  ].freeze
 
-        column = "observations.name_id"
-        add_not_id_condition(column, ids, *joins)
-      end
+  private
 
-      def initialize_name_parameters_for_name_queries
-        # Much simpler form for non-observation-based name queries.
-        add_id_condition("names.id", lookup_names_by_name(names_parameters))
-      end
+  def related_names_parameters
+    params.dup.slice(*NAMES_EXPANDER_PARAMS).compact
+  end
 
-      # ------------------------------------------------------------------------
-
-      private
-
-      def irreconcilable_name_parameters?
-        params[:exclude_consensus] && !params[:include_all_name_proposals]
-      end
-    end
+  def irreconcilable_names_parameters?
+    params[:exclude_consensus] && !params[:include_all_name_proposals]
   end
 end

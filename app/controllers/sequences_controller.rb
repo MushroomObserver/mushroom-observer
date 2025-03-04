@@ -8,7 +8,7 @@
 #    destroy::  Destroy sequence
 #    edit::     Show form to edit a Sequence
 #    new::      Show form to create new Sequence for an Observation
-#    index::    List selected Sequences, based on index flavor and current Query
+#    index::    List selected Sequences, based on index and current Query
 #    show::     Display Sequence details
 #    update::   Update a Sequence
 #
@@ -22,7 +22,7 @@
 # edit_sequence (get)               edit (get)
 # *edit_sequence (post)             update (patch)
 # index_sequence (get)              index (get) -- lists query results
-# list_sequences (get)              index (get, flavor: all) -- all Sequences
+# list_sequences (get)              index (get) -- all Sequences
 # *next_sequence (get)              show { flow: :next } (get))
 # *prev_sequence (get)              show { flow: :prev } (get)
 # *observation_index (get)          n.a (unused, listed Seqs for one Obs)
@@ -38,20 +38,42 @@ class SequencesController < ApplicationController
 
   ################# Actions that show data without modifying it
 
-  # display a list of Sequences, depending on flavor & params
+  # display a list of Sequences, depending on params
   # Example:
-  #  https://mushroomobserver.org/sequences?flavor=all
+  #  https://mushroomobserver.org/sequences?all=true
   #    => displays a list of all sequences in MO
   #
+  # NOTE: #index does not handle params[:pattern] or params[:ids] because
+  # we don't offer sequence pattern search. However, the Query::Sequences
+  # class can handle a pattern param.
   def index
-    case params[:flavor]
-    when "all"
-      index_all
-    else
-      query = find_or_create_query(:Sequence, by: params[:by])
-      show_selected_sequences(query, id: params[:id].to_s, always_index: true)
-    end
+    store_location
+    build_index_with_query
   end
+
+  private
+
+  def default_sort_order
+    :created_at
+  end
+
+  def index_active_params
+    [:all, :by, :q].freeze
+  end
+
+  # This is a param handler. In this controller, people usually want sequences
+  # for an observation. If they want all sequences, use the :all param.
+  def all
+    unfiltered_index
+  end
+
+  def index_display_opts(opts, _query)
+    { include: [{ observation: :name }, :user],
+      letters: "sequences.locus",
+      num_per_page: 50 }.merge(opts)
+  end
+
+  public ####################################################################
 
   def show
     case params[:flow]
@@ -72,56 +94,41 @@ class SequencesController < ApplicationController
     # in this controller and in order to avoid an extra, non-standard route
     return if params[:observation_id].blank?
 
-    @observation = find_or_goto_index(Observation, params[:observation_id].to_s)
-    return unless @observation
+    return unless find_observation!
 
     @sequence = Sequence.new
 
     respond_to do |format|
+      format.turbo_stream { render_modal_sequence_form }
       format.html
-      format.js do
-        render(layout: false)
-      end
     end
   end
 
   def create
-    @observation = find_or_goto_index(Observation, params[:observation_id].to_s)
-    return unless @observation
+    return unless find_observation!
 
     build_sequence
   end
 
   def edit
-    @sequence = find_or_goto_index(Sequence, params[:id].to_s)
-    return unless @sequence
+    return unless find_sequence!
 
     figure_out_where_to_go_back_to
     return unless make_sure_can_edit!(@sequence)
 
     respond_to do |format|
+      format.turbo_stream { render_modal_sequence_form }
       format.html
-      format.js do
-        render(layout: false)
-      end
     end
   end
 
   def update
-    @sequence = find_or_goto_index(Sequence, params[:id].to_s)
-    return unless @sequence
+    return unless find_sequence!
 
     figure_out_where_to_go_back_to
     return unless make_sure_can_edit!(@sequence)
 
     save_edits
-
-    respond_to do |format|
-      format.html
-      format.js do
-        render(layout: false)
-      end
-    end
   end
 
   def destroy
@@ -142,35 +149,34 @@ class SequencesController < ApplicationController
 
   private
 
+  def find_observation!
+    @observation = Observation.includes(observation_includes).
+                   find_by(id: params[:observation_id]) ||
+                   flash_error_and_goto_index(
+                     Observation, params[:observation_id]
+                   )
+  end
+
+  def observation_includes
+    [:user, { thumb_image: [:image_votes, :license, :projects, :user] }]
+    # for matrix_box_carousels:
+    # [:user, { images: [:image_votes, :license, :projects, :user] }]
+  end
+
+  def find_sequence!
+    @sequence = Sequence.includes(sequence_includes).find_by(id: params[:id]) ||
+                flash_error_and_goto_index(
+                  Sequence, params[:id]
+                )
+  end
+
+  def sequence_includes
+    [{ observation: observation_matrix_box_image_includes }]
+  end
+
   def figure_out_where_to_go_back_to
     @back = params[:back]
     @back_object = @back == "show" ? @sequence : @sequence.observation
-  end
-
-  # ---------- Index -----------------------------------------------------------
-
-  def index_all
-    store_location
-    query = create_query(:Sequence, :all)
-    show_selected_sequences(query)
-  end
-
-  def show_selected_sequences(query, args = {})
-    args = { include: [{ observation: :name }, :user],
-             letters: "sequences.locus",
-             num_per_page: 50 }.merge(args)
-    @links ||= []
-    args[:sorting_links] = sequence_index_sorts
-    show_index_of_objects(query, args)
-  end
-
-  def sequence_index_sorts
-    [
-      ["created_at",  :sort_by_created_at.t],
-      ["updated_at",  :sort_by_updated_at.t],
-      ["user",        :USER.t],
-      ["observation", :OBSERVATION.t]
-    ].freeze
   end
 
   # ---------- Create, Edit ----------------------------------------------------
@@ -198,22 +204,10 @@ class SequencesController < ApplicationController
     @sequence.user = @user
     if @sequence.save
       flash_notice(:runtime_sequence_success.t(id: @sequence.id))
-      respond_to do |format|
-        format.html do
-          redirect_with_query(@observation.show_link_args)
-        end
-        format.js # updates the observation.
-      end
+      respond_to_successful_form_submit
     else
       flash_object_errors(@sequence)
-      respond_to do |format|
-        format.html do
-          render("new")
-        end
-        format.js do
-          render(partial: "shared/update_modal_flash") and return
-        end
-      end
+      respond_to_form_errors
     end
   end
 
@@ -223,40 +217,53 @@ class SequencesController < ApplicationController
     if @sequence.save
       flash_notice(:runtime_sequence_update_success.t(id: @sequence.id))
       @observation = @sequence.observation # needed for js to update obs page
-      respond_to do |format|
-        format.html do
-          redirect_with_query(@back_object.show_link_args)
-        end
-        format.js # updates the observation.
-      end
+      respond_to_successful_form_submit
     else
       flash_object_errors(@sequence)
-      respond_to do |format|
-        format.html do
-          render("edit")
-        end
-        format.js do
-          render(partial: "shared/update_modal_flash") and return
-        end
-      end
+      respond_to_form_errors
+    end
+  end
+
+  def respond_to_successful_form_submit
+    redirect_to = case action_name
+                  when "create"
+                    @observation.show_link_args
+                  when "update"
+                    @back_object.show_link_args
+                  end
+
+    respond_to do |format|
+      format.turbo_stream { render_sequences_section_update }
+      format.html { redirect_with_query(redirect_to) }
+    end
+  end
+
+  def respond_to_form_errors
+    redo_action = case action_name
+                  when "create"
+                    :new
+                  when "update"
+                    :edit
+                  end
+    respond_to do |format|
+      format.turbo_stream { render_modal_flash_update }
+      format.html { render(action: redo_action) and return }
     end
   end
 
   def show_flash_and_send_back
     respond_to do |format|
+      format.turbo_stream { render_modal_flash_update }
       format.html do
         redirect_with_query(@sequence.observation.show_link_args) and
           return
-      end
-      format.js do
-        # renders the flash in the modal via js
-        render(partial: "shared/update_modal_flash") and return
       end
     end
   end
 
   def show_flash_and_send_to_back_object
     respond_to do |format|
+      format.turbo_stream { render_sequences_section_update }
       format.html do
         if @back == "index"
           redirect_with_query(action: :index)
@@ -264,11 +271,43 @@ class SequencesController < ApplicationController
           redirect_with_query(@back_object.show_link_args)
         end
       end
-      format.js do
-        # renders the flash in the obs page via js
-        render(partial: "update_observation") and return
-      end
     end
+  end
+
+  def render_modal_sequence_form
+    render(partial: "shared/modal_form",
+           locals: { title: modal_title, identifier: modal_identifier,
+                     form: "sequences/form" }) and return
+  end
+
+  def modal_identifier
+    case action_name
+    when "new", "create"
+      "sequence"
+    when "edit", "update"
+      "sequence_#{@sequence.id}"
+    end
+  end
+
+  def modal_title
+    case action_name
+    when "new", "create"
+      helpers.sequence_form_new_title
+    when "edit", "update"
+      helpers.sequence_form_edit_title(seq: @sequence)
+    end
+  end
+
+  def render_sequences_section_update
+    render(
+      partial: "observations/show/section_update",
+      locals: { identifier: "sequences" }
+    ) and return
+  end
+
+  def render_modal_flash_update
+    render(partial: "shared/modal_flash_update",
+           locals: { identifier: modal_identifier }) and return
   end
 
   # ---------- Strong Parameters -----------------------------------------------

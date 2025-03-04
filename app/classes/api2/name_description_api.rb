@@ -3,25 +3,40 @@
 class API2
   # API for Name Description
   class NameDescriptionAPI < ModelAPI
-    self.model = NameDescription
+    def model
+      NameDescription
+    end
 
-    self.high_detail_page_length = 100
-    self.low_detail_page_length  = 100
-    self.put_page_length         = 100
-    self.delete_page_length      = 100
+    def high_detail_page_length
+      100
+    end
 
-    self.low_detail_includes = [
-      :license
-    ]
+    def low_detail_page_length
+      100
+    end
 
-    self.high_detail_includes = []
+    def put_page_length
+      100
+    end
+
+    def delete_page_length
+      100
+    end
+
+    def low_detail_includes
+      [:license]
+    end
+
+    def high_detail_includes
+      []
+    end
 
     def query_params
       {
-        where: sql_id_condition,
+        id_in_set: parse_array(:name_description, :id, as: :id),
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at),
-        users: parse_array(:user, :user, help: :first_user),
+        by_users: parse_array(:user, :user, help: :first_user),
         names: parse_array(:name, :name),
         public: true
       }

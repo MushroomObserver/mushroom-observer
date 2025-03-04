@@ -9,7 +9,7 @@ module Images
     # Tabular form that lets user change licenses of their images.  The table
     # groups all the images of a given copyright holder and license type into
     # a single row.  This lets you change all Rolf's licenses in one stroke.
-    # Linked from: account/prefs
+    # Linked from: account/preferences/edit
 
     # was #license_updater.
     def edit

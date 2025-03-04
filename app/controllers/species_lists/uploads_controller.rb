@@ -3,15 +3,14 @@
 module SpeciesLists
   class UploadsController < ApplicationController
     before_action :login_required
-    before_action :disable_link_prefetching
 
     # Form to let user add to a species_list from file.
     def new
       return unless (@species_list = find_species_list!)
 
       if check_permission!(@species_list)
-        query = create_query(:Observation, :in_species_list,
-                             by: :name, species_list: @species_list)
+        query = create_query(:Observation, species_lists: @species_list,
+                                           by: :name)
         @observation_list = query.results
       else
         redirect_to(species_list_path(@species_list))

@@ -19,7 +19,6 @@
 
 class InterestsController < ApplicationController
   before_action :login_required
-  before_action :disable_link_prefetching
   before_action :pass_query_params, except: [:index]
 
   # Show list of objects user has expressed interest in.
@@ -29,7 +28,6 @@ class InterestsController < ApplicationController
   def index
     store_location
     @container = :wide
-    @title = :list_interests_title.t
     @interests = find_relevant_interests
     @types = interest_types(@interests)
     @selected_type = params[:type].to_s
@@ -56,11 +54,10 @@ class InterestsController < ApplicationController
   def eager_load_targets(interests)
     # Props to this blog for teaching how to eager-load polymorphic relations!
     # https://thepaulo.medium.com/eager-loading-polymorphic-associations-in-ruby-on-rails-155a356c39d7
-    preloader = ActiveRecord::Associations::Preloader.new
     %w[NameTracker Observation].each do |type|
-      preloader.preload(
-        interests.select { |i| i.target_type == type },
-        target: [:name]
+      ActiveRecord::Associations::Preloader.new(
+        records: interests.select { |i| i.target_type == type },
+        associations: { target: [:name] }
       )
     end
   end

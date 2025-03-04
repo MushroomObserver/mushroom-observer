@@ -1,11 +1,5 @@
 // This theme is newer than the genus-color themes,
 // and does not use the "old_theme" defaults.
-@import "defaults";
-
-$LOGO_BORDER_COLOR:                 #DDDDDD;
-$LEFT_BAR_BORDER_COLOR:             #DDDDDD;
-$TOP_BAR_BORDER_COLOR:              #DDDDDD;
-$LIST_BORDER_COLOR:                 #DDDDDD;
-$BUTTON_HOVER_BORDER_COLOR:         #CCCCCC;
-
+@import "variables/defaults";
+@import "variables/black_on_white";
 @import "mushroom_observer";

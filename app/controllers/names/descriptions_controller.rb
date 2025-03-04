@@ -20,113 +20,69 @@ module Names
     include ::Descriptions
     include ::Names::Descriptions::SharedPrivateMethods
 
-    # disable cop because index is defined in ApplicationController
-    # rubocop:disable Rails/LexicallyScopedActionFilter
     before_action :store_location, except: [:index, :destroy]
     before_action :pass_query_params, except: [:index]
-    # rubocop:enable Rails/LexicallyScopedActionFilter
     before_action :login_required
-    before_action :disable_link_prefetching, except: [
-      :show, :new, :create, :edit, :update
-    ]
 
     ############################################################################
+    # INDEX
     #
-    #  Index
-
-    # Used by ApplicationController to dispatch #index to a private method
-    @index_subaction_param_keys = [
-      :by_author,
-      :by_editor,
-      :by,
-      :q,
-      :id
-    ].freeze
-
-    @index_subaction_dispatch_table = {
-      by: :index_query_results,
-      q: :index_query_results,
-      id: :index_query_results
-    }.freeze
-
-    #############################################
-
-    private # private methods used by #index
-
-    def default_index_subaction
-      list_all
+    def index
+      build_index_with_query
     end
 
-    # Display list of all (correctly-spelled) name_descriptions in the database.
-    def list_all
-      query = create_query(:NameDescription, :all, by: default_sort_order)
-      show_selected_name_descriptions(query)
-    end
-
-    # Display list of name descriptions in last index/search query.
-    def index_query_results
-      query = find_or_create_query(:NameDescription, by: params[:by])
-      show_selected_name_descriptions(query, id: params[:id].to_s,
-                                             always_index: true)
-    end
+    private
 
     def default_sort_order
-      ::Query::NameDescriptionBase.default_order
+      ::Query::NameDescriptions.default_order # :name
+    end
+
+    def controller_model_name
+      "NameDescription"
+    end
+
+    # Used by ApplicationController to dispatch #index to a private method
+    def index_active_params
+      [:by_author, :by_editor, :by, :q, :id].freeze
     end
 
     # Display list of name_descriptions that a given user is author on.
     def by_author
       user = find_obj_or_goto_index(
         model: User, obj_id: params[:by_author].to_s,
-        index_path: name_descriptions_path
+        index_path: name_descriptions_index_path
       )
       return unless user
 
-      query = create_query(:NameDescription, :by_author, user: user)
-      show_selected_name_descriptions(query)
+      query = create_query(:NameDescription, by_author: user)
+      [query, {}]
     end
 
     # Display list of name_descriptions that a given user is editor on.
     def by_editor
       user = find_obj_or_goto_index(
         model: User, obj_id: params[:by_editor].to_s,
-        index_path: name_descriptions_path
+        index_path: name_descriptions_index_path
       )
       return unless user
 
-      query = create_query(:NameDescription, :by_editor, user: user)
-      show_selected_name_descriptions(query)
+      query = create_query(:NameDescription, by_editor: user)
+      [query, {}]
     end
 
-    # Show selected search results as a list with ???
-    #              'names/descriptions/index' template ???
-    def show_selected_name_descriptions(query, args = {})
+    # Hook runs before template displayed. Must return query.
+    def filtered_index_final_hook(query, _display_opts)
       store_query_in_session(query)
-      @links ||= []
-      args = {
-        controller: "/names/descriptions",
-        action: :index,
-        num_per_page: 50
-      }.merge(args)
+      query
+    end
 
-      # Add some alternate sorting criteria.
-      args[:sorting_links] = [
-        ["name",        :sort_by_name.t],
-        ["created_at",  :sort_by_created_at.t],
-        ["updated_at",  :sort_by_updated_at.t],
-        ["num_views",   :sort_by_num_views.t]
-      ]
-
-      # Add "show names" link if this query can be coerced into an
-      # observation query.
-      @links << coerced_query_link(query, Name)
-
-      show_index_of_objects(query, args)
+    def index_display_opts(opts, _query)
+      { num_per_page: 50 }.merge(opts)
     end
 
     public
 
-    # --------------------------------------------------------------------------
+    ############################################################################
 
     def show
       return unless find_description!
@@ -145,6 +101,8 @@ module Names
       update_view_stats(@description)
       @canonical_url = description_canonical_url(@description)
       @projects = users_projects_which_dont_have_desc_of_this(@name)
+      @versions = @description.versions
+      @comments = @description.comments&.sort_by(&:created_at)&.reverse
     end
 
     ############################################################################
@@ -183,7 +141,7 @@ module Names
     private
 
     def find_name
-      @name = Name.find(params[:id].to_s)
+      @name = Name.find(params[:name_id].to_s)
     end
 
     def find_description_parent

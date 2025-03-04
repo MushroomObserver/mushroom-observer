@@ -5,9 +5,9 @@ require("test_helper")
 module Observations
   class DownloadsControllerTest < FunctionalTestCase
     def test_download_observation_index
-      obs = Observation.where(user: mary)
+      obs = Observation.reorder(id: :asc).where(user: mary)
       assert(obs.length >= 4)
-      query = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
+      query = Query.lookup_and_save(:Observation, by_users: mary.id)
 
       # Add herbarium_record to fourth obs for testing purposes.
       login("mary")
@@ -154,13 +154,48 @@ module Observations
       assert_response(:success)
     end
 
+    def test_download_too_many_observations
+      query = Query.lookup_and_save(:Observation)
+      login("mary")
+
+      MO.stub(:max_downloads, Observation.count - 1) do
+        get(:new, params: { q: query.id.alphabetize })
+      end
+
+      assert_redirected_to(observations_path)
+      assert_flash_error
+    end
+
+    def test_download_too_many_observations_reasonable_query
+      query = Query.lookup_and_save(:Observation, locations: locations(:albion))
+      login("mary")
+
+      MO.stub(:max_downloads, Observation.count - 1) do
+        get(:new, params: { q: query.id.alphabetize })
+      end
+
+      assert_response(:success)
+    end
+
+    def test_download_too_many_observations_admin
+      query = Query.lookup_and_save(:Observation)
+      login("mary")
+      make_admin("mary")
+
+      MO.stub(:max_downloads, Observation.count - 1) do
+        get(:new, params: { q: query.id.alphabetize })
+      end
+
+      assert_response(:success)
+    end
+
     def test_print_labels
       login
-      query = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
+      query = Query.lookup_and_save(:Observation, by_users: mary.id)
       assert_operator(query.num_results, :>=, 4)
       get(:print_labels, params: { q: query.id.alphabetize })
       # \pard is paragraph command in rtf, one paragraph per result
-      assert_equal(query.num_results, @response.body.scan(/\\pard/).size)
+      assert_equal(query.num_results, @response.body.scan("\\pard").size)
       assert_match(/314159/, @response.body) # make sure fundis id in there!
       assert_match(/Mary Newbie 174/, @response.body) # and collection number!
 
@@ -172,31 +207,41 @@ module Observations
           commit: "Print Labels"
         }
       )
-      assert_equal(query.num_results, @response.body.scan(/\\pard/).size)
+      assert_equal(query.num_results, @response.body.scan("\\pard").size)
+    end
+
+    def test_project_labels
+      login("roy")
+      query = Query.lookup_and_save(
+        :Observation, projects: projects(:open_membership_project)
+      )
+      get(:print_labels, params: { q: query.id.alphabetize })
+      trusted_hidden = observations(:trusted_hidden)
+      untrusted_hidden = observations(:untrusted_hidden)
+      assert_match(/#{trusted_hidden.lat}/, @response.body)
+      assert_no_match(/#{untrusted_hidden.lat}/, @response.body)
     end
 
     # Print labels for all observations just to be sure all cases (more or less)
     # are tested and at least not crashing.
     def test_print_labels_all
       login
-      query = Query.lookup_and_save(:Observation, :all)
+      query = Query.lookup_and_save(:Observation)
       get(:print_labels, params: { q: query.id.alphabetize })
     end
 
     def test_print_labels_query_nil
       login
-      query = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
-      # So pretend we're passing a query param, but that query doesn't exist
-      # Observations::DownloadsController.any_instance.
-      #   stubs(:find_query).returns(nil)
-      @controller.stubs(:find_query).returns(nil)
-      get(
-        :print_labels,
-        params: {
-          q: query.id.alphabetize,
-          commit: "Print Labels"
-        }
-      )
+      query = Query.lookup_and_save(:Observation, by_users: mary.id)
+
+      # simulate passing a query param, but that query doesn't exist
+      @controller.stub(:find_query, nil) do
+        get(
+          :print_labels,
+          params: { q: query.id.alphabetize, commit: "Print Labels" }
+        )
+      end
+
       assert_flash_error
     end
   end

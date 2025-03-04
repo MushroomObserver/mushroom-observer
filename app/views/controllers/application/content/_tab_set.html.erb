@@ -1,0 +1,11 @@
+<%#
+Plain tab set. Takes `links` as an array of <a> or <button> links.
+Just adds <small> and line breaks.
+%>
+
+<% links ||= [] %>
+<small>
+  <% links.reject(&:nil?).each do |link| %>
+    <%= link %>
+  <% end %>
+</small>

@@ -7,6 +7,13 @@
   }
 }
 
+// rss-log filter buttons with checkboxes
+.filter-form {
+  input[type=checkbox] {
+    vertical-align: text-top;
+  }
+}
+
 input.has-error,
 textarea.has-error,
 select.has-error {
@@ -27,7 +34,6 @@ select.has-error {
     min-height: 100%;
     font-size: 100px;
     text-align: right;
-    filter: alpha(opacity=0);
     opacity: 0;
     background: red;
     cursor: inherit;
@@ -54,7 +60,7 @@ form.button_to {
   button[type=submit]:not(.btn) {
     margin: 0;
     padding: 0;
-    -webkit-appearance: caret;
+    // -webkit-appearance: caret;
     background: none;
     border: none;
     font-size: inherit;
@@ -86,18 +92,91 @@ a.filter-only {
   }
 }
 
-.added_image_wrapper {
-  @extend .py-3;
-  border-width: 1px 0 0 0;
-  border-style: solid;
-  border-color: $btn-default-border;
-
-  &:last-child {
-    border-width: 1px 0;
-  }
-}
-
 .vote-select-container {
   max-width: 21rem;
   display: inline-block;
+}
+
+.btn.text-danger {
+  color: $brand-danger !important;
+}
+
+.name-radio {
+  label {
+    font-weight: normal;
+  }
+}
+
+form {
+  .carousel-heading {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+
+    .panel-title {
+      padding-bottom: 1.5rem;
+    }
+  }
+}
+
+// date selects: individual fields not full-width even on mobile
+.form-inline.date-selects {
+  .form-control {
+    display: inline-block;
+    width: auto;
+    vertical-align: middle;
+  }
+}
+
+.constrained-label {
+  display: none;
+}
+
+.create-label {
+  display: none;
+}
+
+.constrained {
+  .unconstrained-label {
+    display: none;
+  }
+  .constrained-label {
+    display: inline-block;
+  }
+  .create-label {
+    display: none;
+  }
+}
+
+.create {
+  .create-label {
+    display: inline-block;
+  }
+  .unconstrained-label {
+    display: none;
+  }
+  .constrained-label {
+    display: none;
+  }
+}
+
+.map-point,
+.map-location,
+.map-hide {
+  display: none;
+}
+
+.map-open {
+  .map-show {
+    display: none;
+  }
+  .map-point,
+  .map-location,
+  .map-hide {
+    display: inline-block;
+  }
+}
+
+.overflow-scroll-checklist {
+  max-height: 30rem;
+  overflow-y: auto;
 }

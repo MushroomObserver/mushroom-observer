@@ -1,0 +1,27 @@
+<%
+add_page_title(:comment_show_title.t(name: @target.unique_format_name))
+
+# Register pertinent names so that Textile knows what the "G." in "_G.
+# species_" stands for.  Include all proposed names, because there's no
+# telling which names will be referred to in the comment.  Likewise, include
+# all synonyms if commenting on taxonomy of Name.
+if @comment.target_type == "Observation"
+  @comment.target.namings.each do |naming|
+    Textile.register_name(naming.name)
+  end
+  Textile.register_name(@comment.target.name)
+elsif @comment.target_type == "Name"
+  @comment.target.synonyms.each do |name|
+    Textile.register_name(name)
+  end
+  Textile.register_name(@comment.target)
+end
+
+add_pager_for(@comment)
+add_tab_set(comment_show_tabs(comment: @comment, target: @target))
+%>
+
+<p><%= :comment_show_created_at.t %>: <%= @comment.created_at.web_time %></p>
+<p><%= :comment_show_by.t %>: <%= user_link(@comment.user) %></p>
+<p><%= :comment_show_summary.t %>: <%= (@comment.summary).tl %></p>
+<%= (:comment_show_comment.l + ": " + @comment.comment.to_s.html_safe).tpl %>

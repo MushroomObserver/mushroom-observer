@@ -3,9 +3,24 @@
 require("test_helper")
 
 class CommentTest < UnitTestCase
+  def setup
+    QueuedEmail.queue = true
+  end
+
+  def teardown
+    QueuedEmail.queue = false
+  end
+
+  def test_find_object_for_all_types
+    Comment::ALL_TYPES.each do |type|
+      assert(AbstractModel.find_object(type.to_s, type.first.id),
+             "Unable to use find_object to find #{type}")
+    end
+  end
+
   def test_user_highlighting_parsing
     do_highlight_test([], "")
-    do_highlight_test([mary], "_user #{mary.id}_")
+    do_highlight_test([mary], mary.textile_name)
     do_highlight_test([mary], "@Mary Newbie@")
     do_highlight_test([mary], "@mary foo bar")
     do_highlight_test([mary, rolf, dick], "@mary,@rolf,@dick")
@@ -13,7 +28,7 @@ class CommentTest < UnitTestCase
   end
 
   def do_highlight_test(expected, string)
-    comment = Comment.first
+    comment = Comment.reorder(created_at: :asc).first
     assert_user_arrays_equal(expected, comment.send(:highlighted_users, string))
   end
 
@@ -118,19 +133,41 @@ class CommentTest < UnitTestCase
       summary: summary,
       comment: comment
     )
-    assert_equal(chg, num_emails - old, sent_emails(old))
+    # Comments seem to not be created immediately because of broadcast job
+    sleep(1)
+    assert_equal(chg, num_emails - old, queued_emails(old))
   end
 
   def num_emails
-    ActionMailer::Base.deliveries.length
+    QueuedEmail.count
   end
 
-  def sent_emails(start)
-    return "No emails were sent" if num_emails == start
+  def queued_emails(start)
+    return "No emails were queued" if num_emails == start
 
-    strs = ActionMailer::Base.deliveries[start..-1].map do |mail|
-      "to: #{mail["to"]}, subject: #{mail["subject"]}"
+    strs = QueuedEmail.all[start..-1].map do |mail|
+      to_user = mail&.to_user_id ? User.find(mail.to_user_id)&.login : nil
+      email = mail&.id ? QueuedEmail.find(mail.id) : nil
+      "to: #{to_user}, email: #{email}"
     end
-    "These emails were sent:\n#{strs.join("\n")}"
+    "These emails were queued:\n#{strs.join("\n")}"
+  end
+
+  def test_polymorphic_joins
+    Comment::ALL_TYPE_TAGS.each do |type_tag|
+      assert_true(Comment.joins(type_tag))
+    end
+  end
+
+  def test_scope_for_target
+    obss = Observation.has_comments
+    assert(obss.size > 1)
+    obs1 = obss.first
+    obs2 = obss.last
+    assert_not_equal(obs1.id, obs2.id)
+    assert_equal(obs1.id, Comment.for_target(obs1.id).first.target_id)
+    assert_equal(obs1.id, Comment.for_target(obs1).first.target_id)
+    assert_equal(obs2.id, Comment.for_target(obs2.id).first.target_id)
+    assert_equal(obs2.id, Comment.for_target(obs2).first.target_id)
   end
 end

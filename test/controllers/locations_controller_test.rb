@@ -81,7 +81,6 @@ class LocationsControllerTest < FunctionalTestCase
       assert_template("edit")
     end
     assert_template("locations/_form")
-    assert_template("shared/_textilize_help")
     assert_equal(loc_count, Location.count)
     assert_equal(past_loc_count, Location::Version.count)
     assert_equal(desc_count, LocationDescription.count)
@@ -109,9 +108,9 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:show, params: { id: location.id })
     assert_template("show")
-    assert_template("locations/show/_location")
+    assert_template("locations/show/_notes")
     assert_template("comments/_comments_for_object")
-    assert_template("locations/descriptions/show/_location_description")
+    assert_template("locations/show/_general_description_panel")
 
     location.reload
     assert_equal(updated_at, location.updated_at)
@@ -127,9 +126,9 @@ class LocationsControllerTest < FunctionalTestCase
 
   def assert_show_location
     assert_template("locations/show")
-    assert_template("locations/show/_location")
+    assert_template("locations/show/_notes")
     assert_template("comments/_comments_for_object")
-    assert_template("locations/descriptions/show/_location_description")
+    assert_template("locations/show/_general_description_panel")
   end
 
   def test_interest_in_show_location
@@ -138,10 +137,10 @@ class LocationsControllerTest < FunctionalTestCase
     login("rolf")
     get(:show, params: { id: albion.id })
     assert_show_location
-    assert_image_link_in_html(/watch\d*.png/,
+    assert_image_link_in_html(/watch.*\.png/,
                               set_interest_path(type: "Location",
                                                 id: albion.id, state: 1))
-    assert_image_link_in_html(/ignore\d*.png/,
+    assert_image_link_in_html(/ignore.*\.png/,
                               set_interest_path(type: "Location",
                                                 id: albion.id, state: -1))
 
@@ -149,10 +148,10 @@ class LocationsControllerTest < FunctionalTestCase
     Interest.new(target: albion, user: rolf, state: true).save
     get(:show, params: { id: albion.id })
     assert_show_location
-    assert_image_link_in_html(/halfopen\d*.png/,
+    assert_image_link_in_html(/halfopen.*\.png/,
                               set_interest_path(type: "Location",
                                                 id: albion.id, state: 0))
-    assert_image_link_in_html(/ignore\d*.png/,
+    assert_image_link_in_html(/ignore.*\.png/,
                               set_interest_path(type: "Location",
                                                 id: albion.id, state: -1))
 
@@ -161,10 +160,10 @@ class LocationsControllerTest < FunctionalTestCase
     Interest.new(target: albion, user: rolf, state: false).save
     get(:show, params: { id: albion.id })
     assert_show_location
-    assert_image_link_in_html(/halfopen\d*.png/,
+    assert_image_link_in_html(/halfopen.*\.png/,
                               set_interest_path(type: "Location",
                                                 id: albion.id, state: 0))
-    assert_image_link_in_html(/watch\d*.png/,
+    assert_image_link_in_html(/watch.*\.png/,
                               set_interest_path(type: "Location",
                                                 id: albion.id, state: 1))
   end
@@ -175,7 +174,7 @@ class LocationsControllerTest < FunctionalTestCase
 
   # Tests of index, with tests arranged as follows:
   # default subaction; then
-  # other subactions in order of @index_subaction_param_keys
+  # other subactions in order of index_active_params
   # miscellaneous tests using get(:index)
   def test_index
     login
@@ -184,58 +183,78 @@ class LocationsControllerTest < FunctionalTestCase
     assert_displayed_title("Locations by Name")
   end
 
+  def test_index_project
+    project = projects(:open_membership_project)
+
+    login
+    get(:index, params: { project: project.id })
+
+    location = project.observations[0].location
+    assert_match(location.display_name, @response.body)
+  end
+
   def test_index_with_non_default_sort
-    sort_order = "num_views"
-
     login
-    get(:index, params: { by: sort_order })
 
-    assert_displayed_title("Locations by Popularity")
+    sort_orders = %w[num_views box_area]
+    sort_orders.each do |order|
+      get(:index, params: { by: order })
+      assert_displayed_title("Locations by #{:"sort_by_#{order}".l}")
+    end
   end
 
-  def test_index_bounding_box
-    north = south = east = west = 0
-    delta = 0.001
-    login
-    get(:index,
-        params: { north: north, south: south, east: east, west: west })
-    query = Query.find(QueryRecord.last.id)
+  # Makes no sense anymore. The box will have been tweaked in the link already.
+  # These params are no longer sent to the index, it's under q.
+  # def test_index_bounding_box_zero
+  #   north = south = east = west = 0
+  #   delta = 0.001
+  #   login
+  #   get(:index, params: { in_box: { north: north, south: south,
+  #                                   east: east, west: west } })
+  #   query = Query.find(QueryRecord.last.id)
 
-    assert_equal(north + delta, query.params[:north])
-    assert_equal(south - delta, query.params[:south])
-    assert_equal(east + delta, query.params[:east])
-    assert_equal(west - delta, query.params[:west])
+  #   assert_equal(north + delta, query.params.dig(:in_box, :north))
+  #   assert_equal(south - delta, query.params.dig(:in_box, :south))
+  #   assert_equal(east + delta, query.params.dig(:in_box, :east))
+  #   assert_equal(west - delta, query.params.dig(:in_box, :west))
+  # end
 
-    get(:index,
-        params: { north: 90, south: -90, east: 180, west: -180 })
-    query = Query.find(QueryRecord.last.id)
-    assert_equal(90, query.params[:north])
-    assert_equal(-90, query.params[:south])
-    assert_equal(180, query.params[:east])
-    assert_equal(-180, query.params[:west])
-  end
+  # def test_index_bounding_box_earth
+  #   login
+  #   get(:index, params: { in_box: { north: 90, south: -90,
+  #                                   east: 180, west: -180 } })
+  #   query = Query.find(QueryRecord.last.id)
+  #   assert_equal(90, query.params.dig(:in_box, :north))
+  #   assert_equal(-90, query.params.dig(:in_box, :south))
+  #   assert_equal(180, query.params.dig(:in_box, :east))
+  #   assert_equal(-180, query.params.dig(:in_box, :west))
+  # end
 
   def test_index_advanced_search
-    query = Query.lookup_and_save(:Location, :advanced_search,
-                                  location: "California")
+    query = Query.lookup_and_save(:Location, search_where: "California")
+    matches = Location.name_has("California")
+
     login
     get(:index,
         params: @controller.query_params(query).merge(advanced_search: true))
 
     assert_response(:success)
     assert_template("index")
-    assert_displayed_title("Advanced Search")
+    assert_select(
+      "#content a:match('href', ?)", %r{#{locations_path}/\d+},
+      { count: matches.count }, "Wrong number of Locations"
+    )
+    # Don't care what the title is, but good to know if it changes.
+    assert_displayed_title("Matching Locations")
   end
 
   def test_index_advanced_search_error
-    query_without_conditions = Query.lookup_and_save(
-      :Location, :advanced_search
-    )
+    query_no_conditions = Query.lookup_and_save(:Location)
 
     login
-    get(:index,
-        params: @controller.query_params(query_without_conditions).
-                            merge(advanced_search: true))
+    params = @controller.query_params(query_no_conditions).
+             merge(advanced_search: true)
+    get(:index, params:)
 
     assert_flash_error(:runtime_no_conditions.l)
     assert_redirected_to(search_advanced_path)
@@ -243,10 +262,15 @@ class LocationsControllerTest < FunctionalTestCase
 
   def test_index_pattern
     search_str = "California"
+    matches = Location.where(Location[:name].matches("%#{search_str}%"))
 
     login
     get(:index, params: { pattern: search_str })
 
+    assert_select(
+      "#content a:match('href', ?)", %r{#{locations_path}/\d+},
+      { count: matches.count }, "Wrong number of Locations"
+    )
     assert_displayed_title("Locations Matching ‘#{search_str}’")
   end
 
@@ -260,6 +284,7 @@ class LocationsControllerTest < FunctionalTestCase
 
   def test_index_country
     country = "USA"
+    matches = Location.where(Location[:name].matches("%#{country}"))
 
     login
     get(:index, params: { country: country })
@@ -269,8 +294,7 @@ class LocationsControllerTest < FunctionalTestCase
     assert_displayed_title(/^Locations Matching ‘#{country}.?’/)
     assert_select(
       "#content a:match('href', ?)", %r{#{locations_path}/\d+},
-      { count: Location.where(Location[:name].matches("%#{country}")).count },
-      "Wrong number of Locations"
+      { count: matches.count }, "Wrong number of Locations"
     )
   end
 
@@ -284,8 +308,7 @@ class LocationsControllerTest < FunctionalTestCase
     assert_displayed_title(/^Locations Matching ‘#{country}.?’/)
     assert_select(
       "#content a:match('href', ?)", /#{location_path(new_mexico)}/,
-      true,
-      "USA page should include New Mexico"
+      true, "USA page should include New Mexico"
     )
   end
 
@@ -315,12 +338,17 @@ class LocationsControllerTest < FunctionalTestCase
 
   def test_index_country_missing_country_with_apostrophe
     country = "Cote d'Ivoire"
+    matches = Location.where(Location[:name].matches("%#{country}"))
 
     login
     get(:index, params: { country: country })
 
     assert_template("index")
     assert_flash_text(:runtime_no_matches.l(type: :locations.l))
+    assert_select(
+      "#content a:match('href', ?)", %r{#{locations_path}/\d+},
+      { count: matches.count }, "Wrong number of Locations"
+    )
   end
 
   def test_index_by_user_who_created_multiple_locations
@@ -391,7 +419,7 @@ class LocationsControllerTest < FunctionalTestCase
   def test_index_by_editor_of_one_location
     user = katrina
     locs_edited_by_user = Location.joins(:versions).
-                          where.not(user: user).
+                          where.not(user_id: user.id).
                           where(versions: { user_id: user.id })
     assert(locs_edited_by_user.one?)
 
@@ -458,6 +486,12 @@ class LocationsControllerTest < FunctionalTestCase
     assert_equal(@new_pts + 10, rolf.reload.contribution)
     # Make sure it's the right Location
     assert_equal(display_name, loc.display_name)
+    # Make sure the box_area was calculated correctly
+    assert_equal(loc.box_area.round(6), loc.calculate_area.round(6))
+    # Make sure the center_lat and center_lng were calculated correctly
+    center_lat, center_lng = loc.center
+    assert_equal(loc.center_lat, center_lat)
+    assert_equal(loc.center_lng, center_lng)
 
     # find_by_name_or_reverse_name is an MO method, not a Rails finder.
     # We used to have to disable a cop for this, but that seems no longer
@@ -487,7 +521,8 @@ class LocationsControllerTest < FunctionalTestCase
     params[:location][:display_name] = " Strip  This,  Maine,  USA "
     post(:create, params: params)
     assert_response(:redirect)
-    assert_equal("Strip This, Maine, USA", Location.last.display_name)
+    assert_equal("Strip This, Maine, USA",
+                 Location.last.display_name)
   end
 
   def test_construct_location_errors
@@ -592,7 +627,7 @@ class LocationsControllerTest < FunctionalTestCase
     old_params = update_params_from_loc(loc)
     params = barton_flats_params
     params[:location][:display_name] =
-      Location.user_name(rolf, params[:location][:display_name])
+      Location.user_format(rolf, params[:location][:display_name])
     params[:id] = loc.id
     put_requires_login(:update, params)
     assert_redirected_to(location_path(loc.id))
@@ -606,6 +641,13 @@ class LocationsControllerTest < FunctionalTestCase
     loc = Location.find(loc.id)
     new_params = update_params_from_loc(loc)
     assert_not_equal(new_params, old_params)
+
+    # Make sure the box_area was calculated correctly
+    assert_equal(loc.box_area.round(6), loc.calculate_area.round(6))
+    # Make sure the center_lat and center_lng were calculated correctly
+    center_lat, center_lng = loc.center
+    assert_equal(loc.center_lat, center_lat)
+    assert_equal(loc.center_lng, center_lng)
 
     # It and the RssLog should have been updated
     assert_not_equal(updated_at, loc.updated_at)
@@ -710,7 +752,9 @@ class LocationsControllerTest < FunctionalTestCase
     desc_count = LocationDescription.count
     past_loc_count = Location::Version.count
     past_desc_count = LocationDescription::Version.count
+
     put_requires_login(:update, params)
+
     assert_redirected_to(location_path(to_go.id))
     assert_equal(loc_count - 1, Location.count)
     assert_equal(desc_count, LocationDescription.count)
@@ -722,6 +766,7 @@ class LocationsControllerTest < FunctionalTestCase
   def test_update_location_admin_merge
     to_go = locations(:albion)
     to_stay = locations(:burbank)
+    old_notes = to_stay.notes
     params = update_params_from_loc(to_go)
     params[:location][:display_name] = to_stay.display_name
 
@@ -731,6 +776,13 @@ class LocationsControllerTest < FunctionalTestCase
     past_desc_count = LocationDescription::Version.count
     past_locs_to_go = to_go.versions.length
     past_descs_to_go = 0
+
+    # Cannot use fixture here -- in these classes
+    # fixtures with location `albion` break API2Test#test_patching_locations
+    herbarium = Herbarium.create(name: "Herbarium to move", location: to_go)
+    project = Project.create(title: "Project to move", location: to_go)
+    project_alias = ProjectAlias.create(project:, name: "ALB", target: to_go,
+                                        target_type: "Location")
 
     make_admin("rolf")
     put(:update, params: params)
@@ -742,6 +794,11 @@ class LocationsControllerTest < FunctionalTestCase
     assert_equal(past_loc_count + 1 - past_locs_to_go, Location::Version.count)
     assert_equal(past_desc_count - past_descs_to_go,
                  LocationDescription::Version.count)
+    assert_equal(to_stay, herbarium.reload.location)
+    assert_equal(to_stay, project.reload.location)
+    assert_equal(to_stay, project_alias.reload.target)
+    assert_match(old_notes, to_stay.reload.notes,
+                 "Location.notes should include pre-merger notes")
   end
 
   def test_post_edit_location_locked
@@ -860,12 +917,6 @@ class LocationsControllerTest < FunctionalTestCase
   end
 
   def named_obs_query(name)
-    Query.lookup(:Observation, :pattern_search, pattern: name, by: :name)
-  end
-
-  def test_coercing_sorted_observation_query_into_location_query
-    @controller.
-      coerce_query_for_undefined_locations(named_obs_query("Pasadena").
-      coerce(:Location))
+    Query.lookup(:Observation, pattern: name, by: :name)
   end
 end

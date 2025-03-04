@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require("test_helper")
-require("set")
 
 module Locations
   class ReverseNameOrderControllerTest < FunctionalTestCase
@@ -13,7 +12,9 @@ module Locations
       # this should reverse the name
       put(:update, params: { id: mit.id })
       assert_redirected_to(location_path(mit.id))
-      assert_equal(Location.reverse_name(mit_original_name), mit.reload.name)
+      mit.reload
+      assert_equal(mit_original_name, mit.scientific_name)
+      assert_equal(Location.reverse_name(mit_original_name), mit.name)
     end
   end
 end

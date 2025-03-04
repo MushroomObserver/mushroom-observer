@@ -4,7 +4,7 @@ module Admin
   class BlockedIpsController < AdminController
     # This page allows editing of blocked ips via params
     # params[:add_okay] and params[:add_bad]
-    # GETting this page with params[:report] will show info about a chosen IP
+    # Using params[:report] will show info about a chosen IP
     def edit
       @ip = params[:report] if validate_ip!(params[:report])
       @blocked_ips = sort_by_ip(IpStats.read_blocked_ips)
@@ -14,6 +14,7 @@ module Admin
 
     # Render the page after an update
     def update
+      strip_params!
       process_blocked_ips_commands
       @blocked_ips = sort_by_ip(IpStats.read_blocked_ips)
       @okay_ips = sort_by_ip(IpStats.read_okay_ips)
@@ -23,10 +24,15 @@ module Admin
 
     private
 
-    def sort_by_ip(ips)
-      ips.sort_by do |ip|
-        ip.to_s.split(".").map { |n| n.to_i + 1000 }.map(&:to_s).join(" ")
+    def strip_params!
+      [:add_bad, :remove_bad, :add_okay, :remove_okay].each do |param|
+        params[param] = params[param].strip if params[param]
       end
+    end
+
+    def sort_by_ip(ips)
+      # convert IP addr segments to integers, sort based on those integers
+      ips.sort_by { |ip| ip.split(".").map(&:to_i) }
     end
 
     # I think this is as good as it gets: just a simple switch statement of
@@ -62,7 +68,7 @@ module Admin
     end
 
     def valid_ip_num(num)
-      num.to_i >= 0 && num.to_i < 256
+      (0..255).cover?(num.to_i)
     end
   end
 end

@@ -48,10 +48,10 @@
 #       def unique_text_name
 #       def unique_format_name
 #
-#  3) RssLog: Create association, add type to RssLog.all_types.
+#  3) RssLog: Create association, add type to RssLog::ALL_TYPE_TAGS.
 #
 #       belongs_to :model
-#       self.all_types # add "model"
+#       ALL_TYPE_TAGS # add "model"
 #
 #  4) View: Modify MatrixBoxPresenter if who/what/when/where are nonstandard.
 #
@@ -59,13 +59,6 @@
 #
 #       <%= show_object_footer(@object) %>
 #
-#  6) Add +by_rss_log+ flavor to Query for your model:
-#
-#       self.allowed_model_flavors = {
-#         :Model => [
-#           :by_rss_log, # Models with RSS logs, in RSS order.
-#         ]
-#       }
 #
 #  == Usage
 #
@@ -124,9 +117,9 @@
 #  name, name_id::      Owning Name (or nil).
 #  etc.::               (Pair of methods for each type of model.)
 #
-#  == Class methods
+#  == Class constants
 #
-#  all_types::          Object types with RssLog's (Array of Symbol's).
+#  ALL_TYPE_TAGS::          Object types with RssLog's (Array of Symbol's).
 #
 #  == Instance methods
 #
@@ -156,20 +149,25 @@ class RssLog < AbstractModel
   belongs_to :project
   belongs_to :species_list
 
+  scope :index_order, -> { order(updated_at: :desc, id: :desc) }
+
   # Maximum allowed length (in bytes) of notes column.  Actually it should be
   # 65535, I think, but let's mak sure there's a safe buffer.
   MAX_LENGTH = 65_500
 
-  # List of all object types that can have RssLog's.  (This is the order they
-  # appear on the activity log page.)
-  def self.all_types
-    %w[observation name location species_list project glossary_term article]
-  end
+  # List of all objects (Classes) that can have RssLogs.
+  # (This is the order they appear on the activity log page.)
+  ALL_TYPES = [
+    Observation, Name, Location, SpeciesList, Project, GlossaryTerm, Article
+  ].freeze
+
+  # Returns Array of type_tags (Symbols) of ALL_TYPES.
+  ALL_TYPE_TAGS = ALL_TYPES.map { |type| type.to_s.underscore.to_sym }.freeze
 
   # Returns the associated object, or nil if it's an orphan.
   def target
-    RssLog.all_types.each do |type|
-      obj = send(type.to_sym)
+    ALL_TYPE_TAGS.each do |type|
+      obj = send(type)
       return obj if obj
     end
     nil
@@ -177,8 +175,8 @@ class RssLog < AbstractModel
 
   # Returns the associated object's id, or nil if it's an orphan.
   def target_id
-    RssLog.all_types.each do |type|
-      obj_id = send("#{type}_id".to_sym)
+    ALL_TYPE_TAGS.each do |type|
+      obj_id = send(:"#{type}_id")
       return obj_id if obj_id
     end
     nil
@@ -187,16 +185,16 @@ class RssLog < AbstractModel
   # Return the type of object of the target, e.g., :observation
   # or nil if it's an orphan
   def target_type
-    RssLog.all_types.each do |type|
-      return type.to_sym if send("#{type}_id".to_sym)
+    ALL_TYPE_TAGS.each do |type|
+      return type if send(:"#{type}_id")
     end
     nil
   end
 
   # Clear association with target.
   def clear_target_id
-    RssLog.all_types.each do |type|
-      send("#{type}_id=", nil)
+    ALL_TYPE_TAGS.each do |type|
+      send(:"#{type}_id=", nil)
     end
   end
 

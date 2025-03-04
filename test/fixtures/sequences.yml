@@ -21,6 +21,7 @@ local_sequence:
 deposited_sequence:
   <<: *DEFAULTS
   accession:   KT968605
+  archive:     GenBank
   bases:       ""
   created_at:  2017-01-01 17:00:00
   updated_at:  2017-01-01 17:00:00

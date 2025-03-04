@@ -1,6 +1,13 @@
 # frozen_string_literal: true
 
 module Name::PropagateGenericClassifications
+  def can_propagate?
+    rank == "Genus" &&
+      # Name s.l. might have a broader classifications than name s.l.
+      # So prevent propagation in order to protect subtaxa classification
+      author.exclude?("sensu lato")
+  end
+
   # When we `include` a module, the way to add class methods is like this:
   def self.included(base)
     base.extend(ClassMethods)

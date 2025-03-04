@@ -1,0 +1,16 @@
+<%= form_with(url: add_query_param({ action: :create, id: @target.id }),
+              scope: :email) do |f| %>
+
+  <%= tag.p(:ask_user_question_label.t(user: @target.legal_name),
+            class: "mb-4") %>
+
+  <%= text_field_with_label(form: f, field: :subject, size: 70,
+                            label: :ask_user_question_subject.t + ":",
+                            data: { autofocus: true }) %>
+
+  <%= text_area_with_label(form: f, field: :content, rows: 10,
+                           label: :ask_user_question_message.t + ":") %>
+
+  <%= submit_button(form: f, button: :SEND.l, center: true) %>
+
+<% end %>

@@ -20,7 +20,7 @@ class ChecklistsController < ApplicationController
     @data = if user_id.present?
               user_checklist(user_id)
             elsif proj_id.present?
-              project_checklist(proj_id)
+              project_checklist(proj_id, params[:location_id])
             elsif list_id.present?
               species_list_checklist(list_id)
             else
@@ -38,10 +38,12 @@ class ChecklistsController < ApplicationController
     Checklist::ForUser.new(@show_user)
   end
 
-  def project_checklist(proj_id)
+  def project_checklist(proj_id, location_id)
     return unless (@project = find_or_goto_index(Project, proj_id))
 
-    Checklist::ForProject.new(@project)
+    @location = Location.safe_find(location_id)
+
+    Checklist::ForProject.new(@project, @location)
   end
 
   def species_list_checklist(list_id)

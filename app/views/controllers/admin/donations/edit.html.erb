@@ -1,0 +1,38 @@
+<%
+@container = :full
+add_page_title(:review_donations_title.l)
+add_tab_set(admin_donations_form_edit_tabs)
+%>
+
+<%= form_with(url: admin_donations_path,
+              id: "admin_review_donations_form", method: :patch) do |f| %>
+
+  <%= submit_button(form: f, button: :review_donations_update.l, center: true) %>
+
+  <div class="text-center">
+    <table class="table-striped table-review-donations mb-3 mt-3">
+      <thead>
+        <tr>
+          <% [:review_reviewed, :review_id, :review_who, :review_anon, :review_amount, :review_email].each do |label| %>
+            <th><%= label.t %></th>
+          <% end %>
+        </tr>
+      </thead>
+      <tbody>
+        <% @donations.each do |d| %>
+          <tr>
+            <td><%= check_box(:reviewed, d.id, checked: d.reviewed,
+                              class: "form-control") %></td>
+            <td><%= d.id %></td>
+            <td><%= d.who %></td>
+            <td><%= d.anonymous %></td>
+            <td><%= d.amount %></td>
+            <td><%= d.email %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div><!-- .text-center -->
+
+  <%= submit_button(form: f, button: :review_donations_update.l, center: true) %>
+<% end %>

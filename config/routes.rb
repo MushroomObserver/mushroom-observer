@@ -17,28 +17,13 @@
 # Note that the hash of attributes is not yet actually used.
 #
 ACTIONS = {
-  ajax: {
-    api_key: {},
-    auto_complete: {},
-    create_image_object: {},
-    export: {},
-    external_link: {},
-    geocode: {},
-    image: {},
-    location_primer: {},
-    name_primer: {},
-    multi_image_template: {},
-    old_translation: {},
-    pivotal: {},
-    test: {},
-    visual_group_status: {}
-  },
   api: {
     api_keys: {},
     collection_numbers: {},
     comments: {},
     external_links: {},
     external_sites: {},
+    field_slips: {},
     herbaria: {},
     herbarium_records: {},
     images: {},
@@ -56,6 +41,7 @@ ACTIONS = {
     comments: {},
     external_links: {},
     external_sites: {},
+    field_slips: {},
     herbaria: {},
     herbarium_records: {},
     images: {},
@@ -69,9 +55,6 @@ ACTIONS = {
     species_lists: {},
     users: {}
   },
-  pivotal: {
-    index: {}
-  },
   support: {
     confirm: {},
     donate: {},
@@ -80,17 +63,14 @@ ACTIONS = {
     letter: {},
     thanks: {},
     # Disable cop for legacy routes.
-    # The routes are to very old pages that we might get rid of.
+    # The routes are two very old pages that we might get rid of.
+    # rubocop:disable Naming/VariableNumber
     wrapup_2011: {},
     wrapup_2012: {}
+    # rubocop:enable Naming/VariableNumber
   },
   theme: {
     color_themes: {}
-  },
-  translation: {
-    edit_translations: {},
-    edit_translations_ajax_get: {},
-    edit_translations_ajax_post: {}
   }
 }.freeze
 
@@ -154,6 +134,7 @@ LOOKUP_ACTIONS = %w[
   lookup_accepted_name
   lookup_comment
   lookup_image
+  lookup_glossary_term
   lookup_location
   lookup_name
   lookup_observation
@@ -228,17 +209,7 @@ end
 
 # Disable cop until there's time to reexamine block length
 # Maybe we could define methods for logical chunks of this.
-MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
-  if Rails.env.development?
-    mount(GraphiQL::Rails::Engine, at: "/graphiql",
-                                   graphql_path: "/graphql#execute")
-  end
-
-  if Rails.env.development? || Rails.env.test?
-    # GraphQL development additions
-    post("/graphql", to: "graphql#execute")
-  end
-
+MushroomObserver::Application.routes.draw do
   # Priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
@@ -308,10 +279,10 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     get("signup", to: "/account#new") # alternate path
 
     resource :login, only: [:new, :create], controller: "login"
-    get("email_new_password", controller: "login")
+    unresourced_login_gets = %w[email_new_password test_autologin].freeze
+    unresourced_login_gets.each { |action| get(action, controller: "login") }
+    post("logout", controller: "login")
     post("new_password_request", controller: "login")
-    get("logout", controller: "login")
-    get("test_autologin", controller: "login")
 
     resource :preferences, only: [:edit, :update]
     get("no_email/:id", to: "preferences#no_email", as: "no_email")
@@ -331,47 +302,49 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     post("verify/resend_email(/:id)", to: "verifications#resend_email",
                                       as: "resend_verification_email")
 
-    resources :api_keys, only: [:index, :create, :edit, :update]
-    post("api_keys/:id/activate", to: "api_keys#activate",
-                                  as: "activate_api_key")
-    post("api_keys/remove", to: "api_keys#remove",
-                            as: "remove_api_key")
+    resources :api_keys, only: [:index, :create, :edit, :update, :destroy]
+    patch("api_keys/:id/activate", to: "api_keys#activate",
+                                   as: "activate_api_key")
   end
 
   # ----- Admin: resources and actions ------------------------------------
   namespace :admin do
     # controls turning admin mode on and off, and switching users
-    resource :session, only: [:show, :edit, :update], controller: "session",
+    resource :session, only: [:create, :edit, :update], controller: "session",
                        as: "mode"
     get("switch_users", to: "mode#edit") # alternate path
 
     resource :users, only: [:edit, :update, :destroy]
     resource :donations, only: [:new, :create, :edit, :update, :destroy]
     get("review_donations", to: "donations#edit") # alternate path
-    resource :banner, only: [:edit, :update], controller: "banner"
+    resources :banners, only: [:index, :create]
     resource :blocked_ips, only: [:edit, :update]
     resource :add_user_to_group, only: [:new, :create],
                                  controller: "add_user_to_group"
     namespace :emails do
-      resource :feature, only: [:new, :create], controller: "feature"
+      resource :features, only: [:new, :create], controller: "features"
+      resource :webmaster_questions, only: [:new, :create],
+                                     controller: "webmaster_questions"
+      resource :merge_requests, only: [:new, :create],
+                                controller: "merge_requests"
+      resource :name_change_requests, only: [:new, :create],
+                                      controller: "name_change_requests"
     end
   end
 
   # ----- Articles: standard actions --------------------------------------
   resources :articles, id: /\d+/
 
-  # ----- Authors: standard actions ------------------------------------
-  namespace :authors do
-    resource :review, only: [:show, :create, :destroy], id: /\d+/
-    resource :email_requests, only: [:new, :create]
-  end
+  # ----- Autocompleters: fetch get ------------------------------------
+  get "/autocompleters/new/:type", to: "autocompleters#new"
 
   # ----- Checklist: just the show --------------------------------------
   get "/checklist", to: "checklists#show"
 
   # ----- Collection Numbers: standard actions --------------------------------
   resources :collection_numbers do
-    resource :remove_observation, only: [:update], module: :collection_numbers
+    resource :remove_observation, only: [:edit, :update],
+                                  module: :collection_numbers
   end
 
   # ----- Comments: standard actions --------------------------------------
@@ -380,28 +353,11 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   # ----- Contributors: standard actions --------------------------------------
   resources :contributors, only: [:index]
 
-  # ----- Emails: no resources, just forms ------------------------------------
-  match("/emails/ask_observation_question(/:id)",
-        to: "emails#ask_observation_question", via: [:get, :post], id: /\d+/,
-        as: "emails_ask_observation_question")
-  match("/emails/ask_user_question(/:id)",
-        to: "emails#ask_user_question", via: [:get, :post], id: /\d+/,
-        as: "emails_ask_user_question")
-  match("/emails/ask_webmaster_question(/:id)",
-        to: "emails#ask_webmaster_question", via: [:get, :post], id: /\d+/,
-        as: "emails_ask_webmaster_question")
-  match("/emails/commercial_inquiry(/:id)",
-        to: "emails#commercial_inquiry", via: [:get, :post], id: /\d+/,
-        as: "emails_commercial_inquiry")
-  # match("/emails/features(/:id)",
-  #       to: "emails#features", via: [:get, :post], id: /\d+/,
-  #       as: "emails_features")
-  match("/emails/merge_request(/:id)",
-        to: "emails#merge_request", via: [:get, :post], id: /\d+/,
-        as: "emails_merge_request")
-  match("/emails/name_change_request(/:id)",
-        to: "emails#name_change_request", via: [:get, :post], id: /\d+/,
-        as: "emails_name_change_request")
+  # ----- Descriptions: namespaced actions -------------------------------------
+  namespace :descriptions, as: "description" do
+    resource :authors, only: [:show, :create, :destroy], id: /\d+/
+    resource :author_requests, only: [:new, :create]
+  end
 
   # ----- Export: no resources ------------------------------------
   get("/export/set_export_status(/:id)",
@@ -422,10 +378,20 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
                            as: "remove_images_from")
       put("images/detach", to: "glossary_terms/images#detach",
                            as: "detach_image_from")
+      get("versions", to: "glossary_terms/versions#show", as: "version_of")
     end
   end
-  get("glossary_terms/:id/versions", to: "glossary_terms/versions#show",
-                                     as: "glossary_term_versions")
+
+  # ----- Field Slip Records: standard actions --------------------------------
+  namespace :field_slips do
+    get("qr_reader/new", to: "qr_reader#new")
+    post("qr_reader", to: "qr_reader#create")
+  end
+  resources :field_slips
+  get("qr/:id", to: "field_slips#show", id: /.*[^\d.-].*/)
+
+  # ----- Field Slip Job Trackers: show for json -------------------------------
+  resources :field_slip_job_trackers, only: [:show]
 
   # ----- Herbaria: standard actions -------------------------------------------
   namespace :herbaria do
@@ -438,7 +404,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Herbarium Records: standard actions --------------------------------
   resources :herbarium_records do
-    resource :remove_observation, only: [:update], module: :herbarium_records
+    resource :remove_observation, only: [:edit, :update],
+                                  module: :herbarium_records
   end
 
   # ----- Images: Namespace differences are for memorable path names
@@ -458,8 +425,26 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
     member do
       put("transform", to: "images/transformations#update", as: "transform")
       get("exif", to: "images/exif#show", as: "exif")
+      put("export", to: "images/exports#update", as: "export")
+      get("emails/new", to: "images/emails#new",
+                        as: "new_commercial_inquiry_for")
+      post("emails", to: "images/emails#create",
+                     as: "send_commercial_inquiry_for")
     end
     put("/vote", to: "images/votes#update", as: "vote")
+  end
+  resources :images, only: [:show] do
+    member do
+      get("original", to: "images/originals#show")
+    end
+  end
+
+  # ----- InatImports ----------------------------
+  get("inat_imports/authorization_response",
+      to: "inat_imports#authorization_response",
+      as: "inat_import_authorization_response")
+  resources :inat_imports, only: [:show, :new, :create] do
+    resources :job_trackers, only: [:show], module: :inat_imports
   end
 
   # ----- Info: no resources, just forms and pages ----------------------------
@@ -482,8 +467,30 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/javascript/turn_javascript_nil", to: "javascript#turn_javascript_nil")
   get("/javascript/hide_thumbnail_map", to: "javascript#hide_thumbnail_map")
 
+  resources :licenses, id: /\d+/
+
   # ----- Locations: a lot of actions  ----------------------------
-  resources :locations, id: /\d+/
+  resources :locations, id: /\d+/, shallow: true do
+    member do
+      get("reverse_name_order", to: "locations/reverse_name_order#update")
+      get("versions", to: "locations/versions#show", as: "version_of")
+    end
+    resources :descriptions, module: :locations, shallow_path: :locations,
+                             shallow_prefix: "location", except: :index do
+      member do
+        put("default", to: "descriptions/defaults#update", as: "make_default")
+        get("merges/new", to: "descriptions/merges#new", as: "new_merge")
+        post("merges", to: "descriptions/merges#create", as: "merge")
+        get("moves/new", to: "descriptions/moves#new", as: "new_move")
+        post("moves", to: "descriptions/moves#create", as: "move")
+        get("versions", to: "descriptions/versions#show", as: "version_of")
+      end
+    end
+  end
+  # Unlike a resource route :index, this needs a special name and optional id.
+  # MO doesn't index descriptions by parent_id, we index `all` e.g. by_author.
+  get("locations(/:location_id)/descriptions",
+      to: "locations/descriptions#index", as: "location_descriptions_index")
   # Location Countries: show
   get("locations(/:id)/countries", to: "locations/countries#index",
                                    as: "location_countries")
@@ -491,142 +498,83 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("locations/help", to: "locations/help#show")
   # Map Locations: show
   get("locations/map", to: "locations/maps#show", as: "map_locations")
-  # Merge Locations: form and callback
-  get("locations/merges/new", to: "locations/merges#new",
-                              as: "location_merges_form")
-  post("locations/merges", to: "locations/merges#create",
-                           as: "location_merges")
-  # Add Observation (matching :where) to Location: update
-  patch("locations/add_to_location", to: "locations/observations#update",
-                                     as: "add_observation_to_location")
-  # Location Reverse name order: update
-  put("locations/:id/reverse_name_order",
-      to: "locations/reverse_name_order#update",
-      as: "location_reverse_name_order")
-  # Location Versions: show
-  get("locations/:id/versions", to: "locations/versions#show",
-                                as: "location_versions")
-
-  # like resources, but using just an :id param:
-  get("locations(/:id)/descriptions",
-      to: "locations/descriptions#index",
-      as: "location_descriptions")
-  get("locations/descriptions/:id",
-      to: "locations/descriptions#show",
-      as: "location_description")
-  get("locations/:id/descriptions/new",
-      to: "locations/descriptions#new",
-      as: "new_location_description")
-  get("locations/descriptions/:id/edit",
-      to: "locations/descriptions#edit",
-      as: "edit_location_description")
-  post("locations/:id/descriptions",
-       to: "locations/descriptions#create")
-  match("locations/descriptions/:id",
-        to: "locations/descriptions#update", via: [:put, :patch])
-  delete("locations/descriptions/:id", to: "locations/descriptions#destroy")
-
-  # Make Descripton Default: callback only:
-  put("locations/descriptions/:id/default",
-      to: "locations/descriptions/defaults#update",
-      as: "make_default_location_description")
-  # Publish Draft Location Description: callback. Not used yet.
-  # put("locations/descriptions/:id/publish",
-  #     to: "locations/descriptions/publish#update",
-  #     as: "location_description_publish")
-  # Merge Location Descriptions: form and callback:
-  get("locations/descriptions/:id/merges/new",
-      to: "locations/descriptions/merges#new",
-      as: "location_description_merges_form")
-  post("locations/descriptions/:id/merges",
-       to: "locations/descriptions/merges#create",
-       as: "location_description_merges")
-  # Move Location Descriptions: form and callback:
-  get("locations/descriptions/:id/moves/new",
-      to: "locations/descriptions/moves#new",
-      as: "location_description_moves_form")
-  post("locations/descriptions/:id/moves",
-       to: "locations/descriptions/moves#create",
-       as: "location_description_moves")
-  # Edit Location Description Permissions: form and callback. Not used yet.
-  # get("locations/descriptions/:id/permissions/edit",
-  #     to: "locations/descriptions/permissions#edit",
-  #     as: "edit_location_description_permissions")
-  # put("locations/descriptions/:id/permissions",
-  #     to: "locations/descriptions/permissions#update",
-  #     as: "location_description_permissions")
-  # Location Description Versions: show:
-  get("locations/descriptions/:id/versions",
-      to: "locations/descriptions/versions#show",
-      as: "location_description_versions")
 
   # ----- Names: a lot of actions  ----------------------------
-  resources :names, id: /\d+/
+  resources :names, id: /\d+/, shallow: true do
+    # These routes are for dealing with name attributes.
+    # They're not `resources` because they don't have their own IDs.
+    # Note that `member` routes end with the controller singular, e.g. "name"
+    member do
+      # classification
+      get("classification/edit", to: "names/classification#edit",
+                                 as: "edit_classification_of")
+      match("classification", to: "names/classification#update",
+                              via: [:put, :patch], as: "classification_of")
+      get("classification/inherit/new", to: "names/classification/inherit#new",
+                                        as: "form_to_inherit_classification_of")
+      post("classification/inherit", to: "names/classification/inherit#create",
+                                     as: "inherit_classification_of")
+      put("classification/propagate",
+          to: "names/classification/propagate#update",
+          as: "propagate_classification_of")
+      put("classification/refresh", to: "names/classification/refresh#update",
+                                    as: "refresh_classification_of")
+      # lifeforms
+      get("lifeforms/edit", to: "names/lifeforms#edit", as: "edit_lifeform_of")
+      match("lifeforms", to: "names/lifeforms#update", via: [:put, :patch],
+                         as: "lifeform_of")
+      get("lifeforms/propagate/edit", to: "names/lifeforms/propagate#edit",
+                                      as: "form_to_propagate_lifeform_of")
+      put("lifeforms/propagate", to: "names/lifeforms/propagate#update",
+                                 as: "propagate_lifeform_of")
+      # map
+      get("map", to: "names/maps#show")
+      # synonyms
+      get("synonyms/edit", to: "names/synonyms#edit", as: "edit_synonyms_of")
+      match("synonyms", to: "names/synonyms#update", via: [:put, :patch],
+                        as: "synonyms_of")
+      get("synonyms/approve/new", to: "names/synonyms/approve#new",
+                                  as: "form_to_approve_synonym_of")
+      post("synonyms/approve", to: "names/synonyms/approve#create",
+                               as: "approve_synonym_of")
+      get("synonyms/deprecate/new", to: "names/synonyms/deprecate#new",
+                                    as: "form_to_deprecate_synonym_of")
+      post("synonyms/deprecate", to: "names/synonyms/deprecate#create",
+                                 as: "deprecate_synonym_of")
+      # trackers
+      get("trackers/new", to: "names/trackers#new", as: "new_tracker_of")
+      post("trackers", to: "names/trackers#create")
+      # edit: there's no tracker id because you can only have one per name
+      get("trackers/edit", to: "names/trackers#edit", as: "edit_tracker_of")
+      match("trackers", to: "names/trackers#update", via: [:put, :patch])
+      # versions
+      get("versions", to: "names/versions#show", as: "version_of")
+    end
+    resources :descriptions, module: :names, shallow_path: :names,
+                             shallow_prefix: "name", except: :index do
+      member do
+        put("default", to: "descriptions/defaults#update", as: "make_default")
+        get("merges/new", to: "descriptions/merges#new", as: "new_merge")
+        post("merges", to: "descriptions/merges#create", as: "merge")
+        get("moves/new", to: "descriptions/moves#new", as: "new_move")
+        post("moves", to: "descriptions/moves#create", as: "move")
+        put("publish", to: "descriptions/publish#update")
+        get("permissions/edit", to: "descriptions/permissions#edit",
+                                as: "edit_permissions")
+        put("permissions", to: "descriptions/permissions#update")
+        put("review_status", to: "descriptions/review_status#update")
+        get("versions", to: "descriptions/versions#show", as: "version_of")
+      end
+    end
+  end
+  # Unlike a resource route :index, this needs a special name and optional id.
+  # MO doesn't index descriptions by parent_id, we index `all` e.g. by_author.
+  get("names(/:name_id)/descriptions",
+      to: "names/descriptions#index", as: "name_descriptions_index")
   # Test Index
   get("names/test_index", to: "names#test_index", as: "names_test_index")
-
-  # Edit Name Classification: form and callback:
-  get("names/:id/classification/edit",
-      to: "names/classification#edit",
-      as: "edit_name_classification")
-  match("names/:id/classification",
-        to: "names/classification#update", via: [:put, :patch],
-        as: "name_classification")
-  # Inherit Name Classification: form and callback:
-  get("names/:id/classification/inherit/new",
-      to: "names/classification/inherit#new",
-      as: "inherit_name_classification_form")
-  post("names/:id/classification/inherit",
-       to: "names/classification/inherit#create",
-       as: "inherit_name_classification")
-  # Propagate Name Classification: callback only:
-  put("names/:id/classification/propagate",
-      to: "names/classification/propagate#update",
-      as: "propagate_name_classification")
-  # Refresh Name Classification: callback only:
-  put("names/:id/classification/refresh",
-      to: "names/classification/refresh#update",
-      as: "refresh_name_classification")
-  # Edit Lifeforms: form and callback:
-  get("names/:id/lifeforms/edit",
-      to: "names/lifeforms#edit",
-      as: "edit_name_lifeform")
-  match("names/:id/lifeforms",
-        to: "names/lifeforms#update", via: [:put, :patch],
-        as: "name_lifeforms")
-  # Propagate Lifeforms: form and callback:
-  get("names/:id/lifeforms/propagate/edit",
-      to: "names/lifeforms/propagate#edit",
-      as: "propagate_name_lifeform_form")
-  put("names/:id/lifeforms/propagate",
-      to: "names/lifeforms/propagate#update",
-      as: "propagate_name_lifeform")
   # Names Map: show:
   get("names/map", to: "names/maps#show", as: "map_names")
-  get("names/:id/map", to: "names/maps#show", as: "map_name")
-  # Edit Name Synonyms: form and callback:
-  get("names/:id/synonyms/edit", to: "names/synonyms#edit",
-                                 as: "edit_name_synonyms")
-  match("names/:id/synonyms", to: "names/synonyms#update", via: [:put, :patch],
-                              as: "name_synonyms")
-  # Approve Name Synonyms: form and callback:
-  get("names/:id/synonyms/approve/new", to: "names/synonyms/approve#new",
-                                        as: "approve_name_synonym_form")
-  post("names/:id/synonyms/approve", to: "names/synonyms/approve#create",
-                                     as: "approve_name_synonym")
-  # Deprecate Name Synonyms: form and callback:
-  get("names/:id/synonyms/deprecate/new", to: "names/synonyms/deprecate#new",
-                                          as: "deprecate_name_synonym_form")
-  post("names/:id/synonyms/deprecate", to: "names/synonyms/deprecate#create",
-                                       as: "deprecate_name_synonym")
-  # Name Trackers: form and callback:
-  get("names/:id/trackers/new", to: "names/trackers#new",
-                                as: "new_name_tracker")
-  post("names/:id/trackers", to: "names/trackers#create")
-  # edit: there's no tracker id because you can only have one per name
-  get("names/:id/trackers/edit", to: "names/trackers#edit",
-                                 as: "edit_name_tracker")
-  match("names/:id/trackers", to: "names/trackers#update", via: [:put, :patch])
   # Approve Name Tracker: GET endpoint for admin email links
   get("names/trackers/:id/approve", to: "names/trackers/approve#new",
                                     as: "approve_name_tracker")
@@ -636,104 +584,57 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
                            as: "names_eol_preview")
   get("names/eol_expanded_review", to: "names/eol_data/expanded_review#show",
                                    as: "names_eol_expanded_review")
-  # Name Versions: show
-  get("names/:id/versions", to: "names/versions#show",
-                            as: "name_versions")
-
-  # like resources, but using just an :id param:
-  get("names(/:id)/descriptions",
-      to: "names/descriptions#index",
-      as: "name_descriptions")
-  get("names/descriptions/:id",
-      to: "names/descriptions#show",
-      as: "name_description")
-  get("names/:id/descriptions/new",
-      to: "names/descriptions#new",
-      as: "new_name_description")
-  get("names/descriptions/:id/edit",
-      to: "names/descriptions#edit",
-      as: "edit_name_description")
-  post("names/:id/descriptions",
-       to: "names/descriptions#create")
-  match("names/descriptions/:id",
-        to: "names/descriptions#update", via: [:put, :patch])
-  delete("names/descriptions/:id", to: "names/descriptions#destroy")
-
-  # Make Descripton Default: callback only:
-  put("names/descriptions/:id/default",
-      to: "names/descriptions/defaults#update",
-      as: "make_default_name_description")
-  # Publish Name Description Drafts: callback:
-  put("names/descriptions/:id/publish",
-      to: "names/descriptions/publish#update",
-      as: "name_description_publish")
-  # Merge Name Descriptions: form and callback:
-  get("names/descriptions/:id/merges/new",
-      to: "names/descriptions/merges#new",
-      as: "name_description_merges_form")
-  post("names/descriptions/:id/merges",
-       to: "names/descriptions/merges#create",
-       as: "name_description_merges")
-  # Move Name Descriptions: form and callback:
-  get("names/descriptions/:id/moves/new",
-      to: "names/descriptions/moves#new",
-      as: "name_description_moves_form")
-  post("names/descriptions/:id/moves",
-       to: "names/descriptions/moves#create",
-       as: "name_description_moves")
-  # Edit Name Description Permissions: form and callback:
-  get("names/descriptions/:id/permissions/edit",
-      to: "names/descriptions/permissions#edit",
-      as: "edit_name_description_permissions")
-  put("names/descriptions/:id/permissions",
-      to: "names/descriptions/permissions#update",
-      as: "name_description_permissions")
-  # Name Description Versions: show
-  get("names/descriptions/:id/versions",
-      to: "names/descriptions/versions#show",
-      as: "name_description_versions")
-  # Set review_status: callback only:
-  put("names/descriptions/:id/review_status",
-      to: "names/descriptions/review_status#update",
-      as: "name_description_review_status")
 
   # ----- Observations: standard actions  ----------------------------
   namespace :observations do
     resources :downloads, only: [:new, :create]
+
+    # Not under resources :observations because the obs doesn't have an id yet
+    get("images/uploads/new", to: "images/uploads#new",
+                              as: "new_image_upload_for")
+    post("images/uploads", to: "images/uploads#create",
+                           as: "upload_image_for")
   end
 
   resources :observations do
-    resources :namings, only: [:new, :create, :edit, :update, :destroy],
-                        shallow: true, controller: "observations/namings" do
-      resources :votes, only: [:update, :show], as: "naming_vote",
-                        param: :naming_id,
+    resources :namings, only: [:index, :new, :create, :edit, :update, :destroy],
+                        controller: "observations/namings" do
+      resources :votes, only: [:create, :update, :index],
                         controller: "observations/namings/votes"
     end
 
     member do
+      resources :external_links,
+                only: [:new, :create, :edit, :update, :destroy],
+                shallow: true, controller: "observations/external_links"
+
       get("map", to: "observations/maps#show")
       get("suggestions", to: "observations/namings/suggestions#show",
                          as: "naming_suggestions_for")
-      get("images/new", to: "observations/images#new",
-                        as: "new_image_for")
-      post("images", to: "observations/images#create",
-                     as: "upload_image_for")
+      get("emails/new", to: "observations/emails#new",
+                        as: "new_question_for")
+      post("emails", to: "observations/emails#create",
+                     as: "send_question_for")
       get("images/reuse", to: "observations/images#reuse",
                           as: "reuse_images_for")
       post("images/attach", to: "observations/images#attach",
                             as: "attach_image_to")
-      get("images/remove", to: "observations/images#remove",
-                           as: "remove_images_from")
-      put("images/detach", to: "observations/images#detach",
-                           as: "detach_images_from")
     end
+
     collection do
       get("map", to: "observations/maps#index")
       post("print_labels", to: "observations/downloads#print_labels",
                            as: "print_labels_for")
       get("identify", to: "observations/identify#index", as: "identify")
+      # Options for correlating an "undefined" +where+ to a Location: form
+      get("locations", to: "observations/locations#edit",
+                       as: "matching_locations_for")
+      # Assign Observation (matching :where) to a Location: update
+      patch("assign_location", to: "observations/locations#update",
+                               as: "assign_location_to")
     end
   end
+
   # NOTE: the intentional "backwards" param specificity here:
   get("/observations/:id/species_lists/edit",
       to: "observations/species_lists#edit",
@@ -753,11 +654,20 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/policy/privacy")
 
   resources :projects do
-    resources :members, only: [:new, :create, :edit, :update],
-                        controller: "projects/members", param: :candidate
     resources :admin_requests, only: [:new, :create],
                                controller: "projects/admin_requests"
+    resources :field_slips, only: [:new, :create],
+                            controller: "projects/field_slips"
+    resources :locations, only: [:index],
+                          controller: "projects/locations"
+    resources :members, only: [:new, :create, :edit, :update, :index],
+                        controller: "projects/members", param: :candidate
+    resources :aliases, controller: "projects/aliases"
+    resources :violations, only: [:index], controller: "projects/violations"
   end
+  # resourceful route won't work because it requires an additional id
+  put("/projects/:project_id/violations", to: "projects/violations#update",
+                                          as: "project_violations_update")
 
   # ----- Publications: standard actions  -------------------------------------
   resources :publications
@@ -817,25 +727,36 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
         via: [:put, :patch],
         as: "species_list_projects")
 
+  # ----- Test if server is up  -------------------------------------
+  resources :test, only: [:index], controller: "test"
+
   # ----- Test pages  -------------------------------------------
   namespace :test_pages do
     resource :flash_redirection, only: [:show], controller: "flash_redirection"
   end
 
+  # ----- Translations: standard actions  -------------------------------------
+  resources :translations, only: [:index, :edit, :update]
+
   # ----- Users: standard actions -------------------------------------------
-  resources :users, id: /\d+/, only: [:index, :show]
+  resources :users, id: /\d+/, only: [:index, :show] do
+    member do
+      get("emails/new", to: "users/emails#new",
+                        as: "new_question_for")
+      post("emails", to: "users/emails#create",
+                     as: "send_question_for")
+    end
+  end
 
   # ----- VisualModels: standard actions ------------------------------------
   resources :visual_models, id: /\d+/ do
     resources :visual_groups, id: /\d+/, shallow: true
   end
 
-  # Short-hand notation for AJAX methods.
-  # get "ajax/:action/:type/:id" => "ajax", constraints: { id: /\S.*/ }
-  ACTIONS[:ajax].each_key do |action|
-    get("ajax/#{action}/:type/:id",
-        controller: "ajax", action: action, id: /\S.*/)
-  end
+  match("/visual_groups/:visual_group_id/images/:id",
+        to: "visual_groups/images#update",
+        via: [:put, :patch],
+        as: "visual_group_image")
 
   ##############################################################################
   ###
@@ -862,17 +783,17 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # ----- Emails: legacy action redirects
   get("/observer/ask_observation_question/:id",
-      to: redirect(path: "/emails/ask_observation_question/%{id}"))
+      to: redirect(path: "/observations/%{id}/emails/new"))
   get("/observer/ask_user_question/:id",
-      to: redirect(path: "/emails/ask_user_question/%{id}"))
+      to: redirect(path: "/users/%{id}/emails/new"))
   get("/observer/ask_webmaster_question",
-      to: redirect(path: "/emails/ask_webmaster_question"))
+      to: redirect(path: "/admin/emails/webmaster_questions/new"))
   get("/observer/commercial_inquiry/:id",
-      to: redirect(path: "/emails/commercial_inquiry/%{id}"))
+      to: redirect(path: "/images/%{id}/emails/new"))
   get("/observer/email_merge_request",
-      to: redirect(path: "/emails/merge_request"))
+      to: redirect(path: "/admin/emails/merge_requests/new"))
   get("/observer/email_name_change_request",
-      to: redirect(path: "/emails/name_change_request"))
+      to: redirect(path: "/admin/emails/name_change_requests/new"))
 
   # ----- Glossary Terms: legacy action redirects
   redirect_legacy_actions(
@@ -891,11 +812,11 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
   get("/herbarium/index", to: redirect("/herbaria"))
   get("/herbarium/index_herbarium/:id", to: redirect("/herbaria?id=%{id}"))
   get("/herbarium/index_herbarium", to: redirect("/herbaria"))
-  get("/herbarium/list_herbaria", to: redirect("/herbaria?flavor=all"))
+  get("/herbarium/list_herbaria", to: redirect("/herbaria"))
   get("/herbarium/request_to_be_curator/:id",
       to: redirect("/herbaria/curator_requests/new?id=%{id}"))
   # Must be the final route in order to give the others priority
-  get("/herbarium", to: redirect("/herbaria?flavor=nonpersonal"))
+  get("/herbarium", to: redirect("/herbaria?nonpersonal=true"))
 
   # ----- Images: legacy action redirects
   redirect_legacy_actions(
@@ -951,8 +872,6 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       to: redirect("/observations?user=%{id}"))
   get("/observer/observations_at_location/:id",
       to: redirect("/observations?location=%{id}"))
-  get("/observer/observations_at_where/:id",
-      to: redirect("/observations?where=%{id}"))
   get("/observer/observations_for_project/:id",
       to: redirect("/observations?project=%{id}"))
   get("/observer/show_observation/:id",
@@ -975,7 +894,7 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
       to: redirect("/sequences/new?obs_id=%{id}"))
   get("/sequence/edit_sequence/:id", to: redirect("/sequences/%{id}/edit"))
   # ----- Sequences: nonstandard legacy action redirects
-  get("/sequence/list_sequences", to: redirect("/sequences?flavor=all"))
+  get("/sequence/list_sequences", to: redirect("/sequences?all=true"))
 
   # ----- SpeciesLists: legacy action redirects
   redirect_legacy_actions(
@@ -1008,7 +927,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # Accept non-numeric ids for the /lookups/lookup_xxx/id actions.
   LOOKUP_ACTIONS.each do |action|
-    get("/lookups/#{action}(/:id)", to: "lookups##{action}", id: /\S.*/)
+    get("/lookups/#{action}(/:id)", to: "lookups##{action}", id: /\S.*/,
+                                    as: action)
   end
 
   # declare routes for the actions in the ACTIONS hash
@@ -1016,4 +936,8 @@ MushroomObserver::Application.routes.draw do # rubocop:todo Metrics/BlockLength
 
   # routes for actions that Rails automatically creates from view templates
   MO.themes.each { |scheme| get "/theme/#{scheme}" }
+
+  # Make Mission Control Job's UI available to MO app
+  # https://github.com/rails/mission_control-jobs?tab=readme-ov-file#basic-configuration
+  mount MissionControl::Jobs::Engine, at: "/jobs"
 end

@@ -4,7 +4,6 @@
 module Names
   class LifeformsController < ApplicationController
     before_action :login_required
-    before_action :disable_link_prefetching
 
     def edit
       pass_query_params
@@ -16,7 +15,7 @@ module Names
       return unless find_name!
 
       words = Name.all_lifeforms.select do |word|
-        params["lifeform_#{word}"] == "1"
+        params.dig(:lifeform, word) == "1"
       end
       @name.update(lifeform: " #{words.join(" ")} ")
       redirect_with_query(@name.show_link_args)

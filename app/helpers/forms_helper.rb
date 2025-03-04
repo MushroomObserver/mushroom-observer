@@ -5,7 +5,8 @@
 #  date_select_opts
 
 # helpers for form tags
-module FormsHelper
+
+module FormsHelper # rubocop:disable Metrics/ModuleLength
   # Bootstrap submit button
   # <%= submit_button(form: f, button: button.t, center: true) %>
   def submit_button(**args)
@@ -13,22 +14,36 @@ module FormsHelper
       return args[:button]
     end
 
-    opts = args.except(:form, :button, :class, :center)
+    # custom text for the button while submitting
+    submits_with = args[:submits_with] || submits_default_text(args[:button])
+    data = args[:data] || {}
+
+    opts = args.except(:form, :button, :class, :center, :data, :submits_with)
     opts[:class] = "btn btn-default"
     opts[:class] += " center-block my-3" if args[:center] == true
     opts[:class] += " #{args[:class]}" if args[:class].present?
+    opts[:data] = { turbo_submits_with: submits_with }.deep_merge(data)
 
     args[:form].submit(args[:button], opts)
   end
 
+  def submits_default_text(button_text)
+    if button_text == :UPDATE.l
+      :UPDATING.l
+    else
+      :SUBMITTING.l
+    end
+  end
+
   # form-agnostic button, type=button
-  def js_button(**args)
+  def js_button(**args, &block)
+    button = block ? capture(&block) : args[:button]
     opts = args.except(:form, :button, :class, :center)
     opts[:class] = "btn btn-default"
     opts[:class] += " center-block my-3" if args[:center] == true
     opts[:class] += " #{args[:class]}" if args[:class].present?
 
-    button_tag(args[:button], type: :button, **opts)
+    button_tag(button, type: :button, **opts)
   end
 
   # Form field builders with labels, consistent styling and less template code!
@@ -71,30 +86,70 @@ module FormsHelper
   #
   def check_box_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
+    args = check_for_help_block(args)
     opts = separate_field_options_from_args(args)
 
     wrap_class = form_group_wrap_class(args, "checkbox")
 
-    content_tag(:div, class: wrap_class) do
-      args[:form].label(args[:field]) do
-        concat(args[:form].check_box(args[:field], opts))
+    tag.div(class: wrap_class) do
+      concat(args[:form].label(args[:field]) do
+        concat(args[:form].check_box(args[:field], opts,
+                                     args[:checked_value] || "1",
+                                     args[:unchecked_value] || "0"))
         concat(args[:label])
-      end
+        if args[:between].present?
+          concat(tag.div(class: "d-inline-block ml-3") { args[:between] })
+        end
+      end)
+      concat(args[:append]) if args[:append].present?
+    end
+  end
+
+  # Makes an element that looks like a bootstrap button but works as a checkbox.
+  # Only works within a .btn-group wrapper. NOTE: Different from a check_box!
+  def check_button_with_label(**args)
+    args = auto_label_if_form_is_account_prefs(args)
+    opts = separate_field_options_from_args(args)
+
+    wrap_class = form_group_wrap_class(args, "btn btn-default btn-sm")
+
+    args[:form].label(args[:field], class: wrap_class) do
+      [args[:form].check_box(args[:field], opts.merge(class: "mt-0 mr-2")),
+       args[:label]].safe_join
     end
   end
 
   # Bootstrap radio: form, field, value, label, class, checked
   def radio_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
+    args = check_for_help_block(args)
     opts = separate_field_options_from_args(args, [:value])
 
     wrap_class = form_group_wrap_class(args, "radio")
 
-    content_tag(:div, class: wrap_class) do
-      args[:form].label("#{args[:field]}_#{args[:value]}") do
+    tag.div(class: wrap_class) do
+      concat(args[:form].label("#{args[:field]}_#{args[:value]}") do
         concat(args[:form].radio_button(args[:field], args[:value], opts))
         concat(args[:label])
-      end
+        if args[:between].present?
+          concat(tag.div(class: "d-inline-block ml-3") { args[:between] })
+        end
+      end)
+      concat(args[:append]) if args[:append].present?
+    end
+  end
+
+  # Makes an element that looks like a bootstrap button but works as a radio.
+  # Only works within a .btn-group wrapper. NOTE: Different from a radio_button!
+  def radio_button_with_label(**args)
+    args = auto_label_if_form_is_account_prefs(args)
+    opts = separate_field_options_from_args(args)
+
+    wrap_class = form_group_wrap_class(args, "btn btn-default btn-sm")
+
+    args[:form].label(args[:field], class: wrap_class) do
+      [args[:form].radio_button(args[:field], opts.merge(class: "mt-0 mr-2")),
+       args[:label]].safe_join
     end
   end
 
@@ -102,16 +157,33 @@ module FormsHelper
   def text_field_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
     args = check_for_optional_or_required_note(args)
+    args = check_for_help_block(args)
     opts = separate_field_options_from_args(args)
     opts[:class] = "form-control"
 
     wrap_class = form_group_wrap_class(args)
+    wrap_data = args[:wrap_data] || {}
     label_opts = field_label_opts(args)
+    label_opts[:class] = class_names(label_opts[:class], args[:label_class])
 
-    content_tag(:div, class: wrap_class) do
-      concat(args[:form].label(args[:field], args[:label], label_opts))
-      concat(args[:between]) if args[:between].present?
-      concat(args[:form].text_field(args[:field], opts))
+    tag.div(class: wrap_class, data: wrap_data) do
+      concat(text_label_row(args, label_opts))
+      if args[:addon].present? # text addon, not interactive
+        concat(tag.div(class: "input-group") do
+          concat(args[:form].text_field(args[:field], opts))
+          concat(tag.span(args[:addon], class: "input-group-addon"))
+        end)
+      elsif args[:button].present? # button addon, interactive
+        concat(tag.div(class: "input-group") do
+          concat(args[:form].text_field(args[:field], opts))
+          concat(tag.span(class: "input-group-btn") do
+            js_button(button: args[:button], class: "btn btn-default",
+                      data: args[:button_data] || {})
+          end)
+        end)
+      else
+        concat(args[:form].text_field(args[:field], opts))
+      end
       concat(args[:append]) if args[:append].present?
     end
   end
@@ -120,18 +192,35 @@ module FormsHelper
   def text_area_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
     args = check_for_optional_or_required_note(args)
+    args = check_for_help_block(args)
     opts = separate_field_options_from_args(args)
     opts[:class] = "form-control"
     opts[:class] += " text-monospace" if args[:monospace].present?
 
     wrap_class = form_group_wrap_class(args)
+    wrap_data = args[:wrap_data] || {}
     label_opts = field_label_opts(args)
 
-    content_tag(:div, class: wrap_class) do
-      concat(args[:form].label(args[:field], args[:label], label_opts))
-      concat(args[:between]) if args[:between].present?
+    tag.div(class: wrap_class, data: wrap_data) do
+      concat(text_label_row(args, label_opts))
       concat(args[:form].text_area(args[:field], opts))
       concat(args[:append]) if args[:append].present?
+    end
+  end
+
+  # The label row for autocompleters is potentially complicated, many buttons.
+  # Content for `between` and `label_after` come right after the label on left,
+  # content for `label_end` is at the end of the same line, right justified.
+  def text_label_row(args, label_opts)
+    tag.div(class: "d-flex justify-content-between") do
+      concat(tag.div do
+        concat(args[:form].label(args[:field], args[:label], label_opts))
+        concat(args[:between]) if args[:between].present?
+        concat(args[:label_after]) if args[:label_after].present?
+      end)
+      concat(tag.div do
+        concat(args[:label_end]) if args[:label_end].present?
+      end)
     end
   end
 
@@ -139,8 +228,10 @@ module FormsHelper
   # Works for select_year but not date_select, which generates multiple selects
   def select_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
-    args = select_generate_default_options(args)
+    args = select_year_default_options(args)
+    select_opts = select_helper_opts(args)
     args = check_for_optional_or_required_note(args)
+    args = check_for_help_block(args)
 
     opts = separate_field_options_from_args(
       args, [:options, :select_opts, :start_year, :end_year]
@@ -151,35 +242,106 @@ module FormsHelper
     wrap_class = form_group_wrap_class(args)
     label_opts = field_label_opts(args)
 
-    content_tag(:div, class: wrap_class) do
+    tag.div(class: wrap_class) do
       concat(args[:form].label(args[:field], args[:label], label_opts))
       concat(args[:between]) if args[:between].present?
       concat(args[:form].select(args[:field], args[:options],
-                                args[:select_opts], opts))
+                                select_opts, opts))
       concat(args[:append]) if args[:append].present?
     end
   end
 
-  # default select_opts - also generate year options if start_year given
-  def select_generate_default_options(args)
-    args[:select_opts] ||= {}
-
+  # Generate `year` options if start_year given
+  def select_year_default_options(args)
     return args unless args[:start_year].present? && args[:end_year].present?
 
     args[:options] = args[:end_year].downto(args[:start_year])
     args
   end
 
+  # Args specific to the Rails select helper.
+  # selected: nil could mean no selected value, or a selected value of nil.
+  def select_helper_opts(args)
+    { include_blank: args[:include_blank], selected: args[:selected] }
+  end
+
+  # MO mostly uses year-input_controller to switch the year selects to
+  # text inputs, but you can pass data: { controller: "" } to get a year select.
+  # The three "selects" will always be inline, but pass inline: true to make
+  # the label and selects inline.
+  # The form label does not correspond exactly to any of the three fields, so
+  # it identifies the wrapping div. (That's also valid HTML.)
+  # https://stackoverflow.com/a/16426122/3357635
+  def date_select_with_label(**args)
+    args = check_for_optional_or_required_note(args)
+    args = check_for_help_block(args)
+    opts = separate_field_options_from_args(args, [:object, :data])
+    opts[:class] = "form-control"
+    opts[:data] = { controller: "year-input" }.merge(args[:data] || {})
+    date_opts = date_select_opts(args)
+    wrap_class = form_group_wrap_class(args)
+    selects_class = "form-inline date-selects"
+    selects_class += " d-inline-block" if args[:inline] == true
+    label_opts = { class: "mr-3" }
+    label_opts[:index] = args[:index] if args[:index].present?
+    tag.div(class: wrap_class) do
+      concat(args[:form].label(args[:field], args[:label], label_opts))
+      concat(args[:between]) if args[:between].present?
+      date_select_div(args, date_opts, opts, selects_class)
+      concat(args[:append]) if args[:append].present?
+    end
+  end
+
+  # The index arg is for multiple date_selects in a form
+  def date_select_opts(args = {})
+    field = args[:field] || :when
+    obj = args[:object] || args[:form]&.object || nil
+    start_year = args[:start_year] || 20.years.ago.year
+    end_year = args[:end_year] || Time.zone.now.year
+    selected = args[:selected] || Time.zone.today
+    # The field may not be an attribute of the object
+    if obj.present? && obj.respond_to?(field)
+      init_year = obj.try(&field.to_sym).try(&:year)
+      selected = obj.try(&field.to_sym) || Time.zone.today
+    end
+    if init_year && init_year < start_year && init_year > 1900
+      start_year = init_year
+    end
+    opts = { start_year:, end_year:, selected:,
+             include_blank: args[:include_blank], default: args[:default],
+             order: args[:order] || [:day, :month, :year] }
+    opts[:index] = args[:index] if args[:index].present?
+    opts
+  end
+
+  # If there's no form object_name, we need a name and id for the fields.
+  # Turns out you have to use a different Rails helper, select_date, for this.
+  def date_select_div(args, date_opts, opts, selects_class)
+    if args[:form].object_name.present?
+      identifier = [args[:form]&.object_name, args[:index],
+                    args[:field]].compact.join("_")
+      concat(tag.div(class: selects_class, id: identifier) do
+        concat(args[:form].date_select(args[:field], date_opts, opts))
+      end)
+    else
+      concat(tag.div(class: selects_class, id: args[:field]) do
+        concat(select_date(date_opts[:selected],
+                           date_opts.merge(prefix: args[:field]), opts))
+      end)
+    end
+  end
+
   # Bootstrap number_field
   def number_field_with_label(**args)
     args = auto_label_if_form_is_account_prefs(args)
+    args = check_for_help_block(args)
     opts = separate_field_options_from_args(args)
     opts[:class] = "form-control"
     opts[:min] ||= 1
 
     wrap_class = form_group_wrap_class(args)
 
-    content_tag(:div, class: wrap_class) do
+    tag.div(class: wrap_class) do
       concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
       concat(args[:form].number_field(args[:field], opts))
     end
@@ -187,13 +349,14 @@ module FormsHelper
 
   # Bootstrap password_field
   def password_field_with_label(**args)
+    args = check_for_help_block(args)
     opts = separate_field_options_from_args(args)
     opts[:class] = "form-control"
     opts[:value] ||= ""
 
     wrap_class = form_group_wrap_class(args)
 
-    content_tag(:div, class: wrap_class) do
+    tag.div(class: wrap_class) do
       concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
       concat(args[:form].password_field(args[:field], opts))
     end
@@ -207,7 +370,7 @@ module FormsHelper
 
   #   wrap_class = form_group_wrap_class(args)
 
-  #   content_tag(:div, class: wrap_class) do
+  #   tag.div(class: wrap_class) do
   #     concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
   #     concat(args[:form].email_field(args[:field], opts))
   #   end
@@ -221,9 +384,9 @@ module FormsHelper
 
     wrap_class = form_group_wrap_class(args)
 
-    content_tag(:div, class: wrap_class) do
+    tag.div(class: wrap_class) do
       concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
-      concat(content_tag(:p, text, class: "form-control-static"))
+      concat(tag.p(text, class: "form-control-static"))
       concat(args[:form].hidden_field(args[:field], opts))
     end
   end
@@ -237,69 +400,57 @@ module FormsHelper
 
     wrap_class = form_group_wrap_class(args)
 
-    content_tag(:div, class: wrap_class) do
+    tag.div(class: wrap_class) do
       concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
-      concat(content_tag(:p, text, opts))
+      concat(tag.p(text, **opts))
     end
   end
 
   # Bootstrap url_field
   def url_field_with_label(**args)
+    args = check_for_help_block(args)
     opts = separate_field_options_from_args(args)
     opts[:class] = "form-control"
     opts[:value] ||= ""
 
     wrap_class = form_group_wrap_class(args)
 
-    content_tag(:div, class: wrap_class) do
+    tag.div(class: wrap_class) do
       concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
       concat(args[:form].url_field(args[:field], opts))
     end
   end
 
   # Bootstrap file input field with client-side size validation.
+  # This could be redone as an input group with a "browse" button, in BS4.
   def file_field_with_label(**args)
+    args = check_for_help_block(args)
     opts = separate_field_options_from_args(args)
     input_span_class = "file-field btn btn-default"
     max_size = MO.image_upload_max_size
     max_size_in_mb = (max_size.to_f / 1024 / 1024).round
+    max_upload_msg = :validate_image_file_too_big.l(max: max_size_in_mb)
     opts = opts.merge(
-      max_upload_msg: :validate_image_file_too_big.l(max: max_size_in_mb),
-      max_upload_size: max_size
+      data: {
+        action: "change->file-input#validate", file_input_target: "input",
+        max_upload_size: max_size, max_upload_msg: max_upload_msg
+      }
     )
 
     wrap_class = form_group_wrap_class(args)
 
     # append is always :no_file_selected.t
-    content_tag(:div, class: wrap_class) do
+    tag.div(class: wrap_class, data: { controller: "file-input" }) do
       concat(args[:form].label(args[:field], args[:label], class: "mr-3"))
       concat(args[:between]) if args[:between].present?
       concat(
-        content_tag(:span, class: input_span_class) do
+        tag.span(class: input_span_class) do
           concat(:select_file.t)
           concat(args[:form].file_field(args[:field], opts))
         end
       )
-      concat(content_tag(:span, :no_file_selected.t))
+      concat(tag.span(:no_file_selected.t, data: { file_input_target: "name" }))
     end
-  end
-
-  # To be retired in favor of the above:
-  # Create stylable file input field with client-side size validation.
-  def custom_file_field(obj, attr, opts = {})
-    max_size = MO.image_upload_max_size
-    max_size_in_mb = (max_size.to_f / 1024 / 1024).round
-    file_field = file_field(
-      obj,
-      attr,
-      opts.merge(
-        max_upload_msg: :validate_image_file_too_big.l(max: max_size_in_mb),
-        max_upload_size: max_size
-      )
-    )
-    content_tag(:span, :select_file.t + file_field,
-                class: "file-field btn btn-default") +
-      content_tag(:span, :no_file_selected.t)
   end
 
   # Unused
@@ -312,14 +463,14 @@ module FormsHelper
   #   args[:inline] = true
   #   wrap_class = form_group_wrap_class(args)
 
-  #   content_tag(:div, class: wrap_class) do
+  #   tag.div(class: wrap_class) do
   #     concat(args[:form].label(args[:field], args[:label],
   #                              class: "mr-3 sr-only"))
   #     concat(
-  #       content_tag(:div, class: "input-group") do
+  #       tag.div(class: "input-group") do
   #         concat(args[:form].text_field(args[:field], opts))
   #         concat(
-  #           content_tag(:span, class: "input-group-btn") do
+  #           tag.span(class: "input-group-btn") do
   #             submit_button(form: args[:form], button: :SEARCH.l)
   #           end
   #         )
@@ -366,10 +517,38 @@ module FormsHelper
     keys = [:optional, :required].freeze
     positions.each do |pos|
       keys.each do |key|
-        args[pos] = help_note(:span, "(#{key.t})") if args[pos] == key
+        args[pos] = help_note(:span, "(#{key.l})") if args[pos] == key
       end
     end
     args
+  end
+
+  # Adds a help block to the field, with a collapse trigger beside the label.
+  def check_for_help_block(args)
+    unless args[:help].present? && args[:field].present? && args[:form].present?
+      return args
+    end
+
+    id = [
+      nested_field_id(args),
+      "help"
+    ].compact_blank.join("_")
+    args[:between] = capture do
+      concat(args[:between])
+      concat(collapse_info_trigger(id))
+    end
+    args[:append] = capture do
+      concat(args[:append])
+      concat(collapse_help_block(nil, id:) do
+        concat(args[:help])
+      end)
+    end
+    args
+  end
+
+  def nested_field_id(args)
+    [args[:form].object_name.to_s.id_of_nested_field,
+     args[:field].to_s].compact_blank.join("_")
   end
 
   # These are args that should not be passed to the field
@@ -377,20 +556,12 @@ module FormsHelper
   # be excluded separately (not here)
   def separate_field_options_from_args(args, extras = [])
     exceptions = [
-      :form, :field, :label, :class, :width, :inline, :between, :append,
-      :optional, :required, :monospace
+      :form, :field, :label, :class, :width, :inline, :between, :label_after,
+      :label_end, :append, :help, :addon, :optional, :required, :monospace,
+      :type, :wrap_data, :wrap_id, :button, :button_data, :checked_value,
+      :unchecked_value, :hidden_name
     ] + extras
 
     args.clone.except(*exceptions)
-  end
-
-  def date_select_opts(obj = nil)
-    start_year = 20.years.ago.year
-    init_value = obj.try(&:when).try(&:year)
-    start_year = init_value if init_value && init_value < start_year
-    { start_year: start_year,
-      end_year: Time.zone.now.year,
-      selected: obj.try(&:when) || Time.zone.today,
-      order: [:day, :month, :year] }
   end
 end

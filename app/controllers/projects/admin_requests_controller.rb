@@ -5,7 +5,6 @@ module Projects
   class AdminRequestsController < ApplicationController
     before_action :login_required
     before_action :pass_query_params
-    before_action :disable_link_prefetching
 
     # Form to compose email for the admins
     # Linked from: show_project
@@ -15,7 +14,7 @@ module Projects
     #   @project
     # def admin_request
     def new
-      return unless find_project!
+      nil unless find_project!
     end
 
     # Redirects back to show_project.
@@ -26,8 +25,9 @@ module Projects
       subject = params[:email][:subject]
       content = params[:email][:content]
       @project.admin_group.users.each do |receiver|
-        AdminMailer.build(sender, receiver, @project,
-                          subject, content).deliver_now
+        QueuedEmail::ProjectAdminRequest.create_email(sender, receiver,
+                                                      @project, subject,
+                                                      content)
       end
       flash_notice(:admin_request_success.t(title: @project.title))
       redirect_to(project_path(@project.id, q: get_query_param))

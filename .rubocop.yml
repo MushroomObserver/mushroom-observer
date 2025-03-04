@@ -1,4 +1,7 @@
 inherit_from: .rubocop_todo.yml
+inherit_mode:
+  merge:
+    - Exclude
 
 require:
   - rubocop-performance
@@ -178,7 +181,7 @@ Rails/WhereExists:
 Style/AccessorGrouping:
   # https://github.com/MushroomObserver/mushroom-observer/pull/988
   Enabled: false
-  # The followin Exclude in case we re-enable the cop
+  # The following are Exclude in case we re-enable the cop
   # Exclude files that individually comment accessors
   # else Rubocop concatenates the accessors and comments on a single line.
   # Disabling Style/AccessorGrouping around the accessors doesn't
@@ -187,10 +190,12 @@ Style/AccessorGrouping:
   # See https://github.com/rubocop/rubocop/issues/10693
   Exclude:
     - "app/classes/country_counter.rb"
-    - "app/classes/gmaps.rb"
     - "app/classes/mo_paginator.rb"
 Style/AsciiComments:
   # Allow non-ascii characters in comments; we need to use accented chars
+  Enabled: false
+Style/ClassAndModuleChildren:
+  # Allow nested or compact module declaration
   Enabled: false
 Style/DateTime:
   # Repeat the RuboCop default because CodeClimate silently overrides it

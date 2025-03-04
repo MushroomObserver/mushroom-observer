@@ -16,7 +16,6 @@ module Comment::Callbacks
 
     recipients = []
     add_owners_and_authors!(recipients)
-    add_users_interested_in_all_comments!(recipients)
     add_users_with_other_comments!(recipients)
     add_users_with_namings!(recipients)
     add_highlighted_users!(recipients, "#{summary}\n#{comment}")
@@ -34,11 +33,11 @@ module Comment::Callbacks
     return unless user_ids.intersect?(::MO.water_users)
     return unless user_ids.intersect?(::MO.oil_users)
 
-    ::WebmasterMailer.build(
+    QueuedEmail::Webmaster.create_email(
       sender_email: MO.noreply_email_address,
       subject: oil_and_water_subject,
       content: oil_and_water_content(user_ids)
-    ).deliver_now
+    )
   end
 
   ##########################################################################
@@ -50,10 +49,6 @@ module Comment::Callbacks
                  select(&:email_comments_owner))
   end
 
-  def add_users_interested_in_all_comments!(users)
-    users.concat(User.where(email_comments_all: true))
-  end
-
   def add_users_with_other_comments!(users)
     users.concat(users_with_other_comments.
                  select(&:email_comments_response))
@@ -62,7 +57,7 @@ module Comment::Callbacks
   def add_users_with_namings!(users)
     return unless target_type == "Observation"
 
-    users.concat(target.namings.map(&:user).uniq.
+    users.concat(target.namings.includes([:user]).map(&:user).uniq.
                  select(&:email_comments_response))
   end
 

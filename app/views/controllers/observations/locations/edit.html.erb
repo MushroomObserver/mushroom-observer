@@ -1,0 +1,29 @@
+<%
+@container = :wide
+add_page_title(
+  :list_merge_options_title.t(where: Location.user_format(@user, @where))
+)
+# NOTE: the "forms" are patch buttons.
+%>
+
+<% if @matches.any? %>
+  <div class="h4">
+    <%= :list_merge_options_near_matches.t %>
+  </div>
+  <%= paginate_block(@pages) do %>
+    <div class="list-group">
+      <% @matches.map do |location| %>
+        <div class="list-group-item">
+          <%= patch_button(name: location.display_name.t,
+                            path: assign_location_to_observations_path(
+                              where: @where, location: location
+                            ),
+                            class: "text-left",
+                            data: {
+                              turbo_confirm: :list_merge_are_you_sure.l
+                            }) %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>

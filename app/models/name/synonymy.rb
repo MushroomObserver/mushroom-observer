@@ -16,6 +16,10 @@ module Name::Synonymy
     synonyms.drop(1)
   end
 
+  def other_synonym_ids
+    synonym ? synonym.name_ids.to_a.drop(1) : []
+  end
+
   # Returns an Array of all synonym Name's including itself at front of list.
   # (This looks screwy, but I think it is the safest way to handle it.
   # Note that synonym.names does include self, but it's a different instance.

@@ -1,0 +1,37 @@
+<%
+add_page_title(:signup_title.t)
+%>
+
+<%= form_with(scope: :new_user, url: account_path,
+              id: "account_signup_form") do |f| %>
+
+  <%= text_field_with_label(form: f, field: :login,
+                            label: :signup_login.t + ":",
+                            data: { autofocus: true }) %>
+
+  <%= password_field_with_label(form: f, field: :password,
+                                label: :signup_choose_password.t + ":",
+                                value: @new_user.password) %>
+
+  <%= password_field_with_label(form: f, field: :password_confirmation,
+                                label: :signup_confirm_password.t + ":") %>
+
+  <%= text_field_with_label(form: f, field: :email,
+                            label: :signup_email_address.t + ":") %>
+
+  <%= text_field_with_label(form: f, field: :email_confirmation,
+                            label: :signup_email_confirmation.t + ":",
+                            append: help_note(:div,
+                                      [:signup_email_help.tp,
+                                       :email_spam_notice.tp].safe_join)) %>
+
+  <%= text_field_with_label(form: f, field: :name,
+                            label: :signup_name.t + ":") %>
+
+  <%= select_with_label(form: f, field: :theme,
+                        label: :signup_preferred_theme.t + ":",
+                        options: [[:theme_random.l, "NULL"]] + MO.themes) %>
+
+  <%= submit_button(form: f, button: :signup_button.l, center: true) %>
+
+<% end %>

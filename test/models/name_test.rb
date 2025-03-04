@@ -11,8 +11,20 @@ class NameTest < UnitTestCase
     params = parse.params
     params[:rank] = force_rank if force_rank
     name = Name.new_name(params)
-    assert(name.save, "Error saving name \"#{string}\": [#{name.dump_errors}]")
-    name
+
+    # If there's already a name with this search_name, update and use it.
+    indistinct_names = Name.where(search_name: name.search_name)
+    if indistinct_names.any?
+      indistinct_name = indistinct_names.first
+      assert(indistinct_name.update(params),
+             "Error updating name \"#{string}\": [#{name.dump_errors}]")
+      indistinct_name
+    else
+
+      assert(name.save,
+             "Error saving name \"#{string}\": [#{name.dump_errors}]")
+      name
+    end
   end
 
   # Parse a string, with detailed error message.
@@ -1735,15 +1747,15 @@ class NameTest < UnitTestCase
 
   def test_ancestors_2
     # use Petigera instead of Peltigera because it has no classification string
-    p = names(:petigera)
-    assert_name_arrays_equal([], p.all_parents)
-    assert_name_arrays_equal([], p.children)
+    pet = names(:petigera)
+    assert_name_arrays_equal([], pet.all_parents)
+    assert_name_arrays_equal([], pet.children)
 
-    pc   = create_test_name("Petigera canina (L.) Willd.")
-    pcr  = create_test_name("Petigera canina var. rufescens (Weiss) Mudd")
-    pcri = create_test_name(
-      "Petigera canina var. rufescens f. innovans (Körber) J. W. Thomson"
-    )
+    # rubocop:disable Layout/LineLength
+    # disable cop for comparative readability
+    pc =   create_test_name("Petigera canina (L.) Willd.")
+    pcr =  create_test_name("Petigera canina var. rufescens (Weiss) Mudd")
+    pcri = create_test_name("Petigera canina var. rufescens f. innovans (Körber) J. W. Thomson")
     pcs  = create_test_name("Petigera canina var. spuria (Ach.) Schaerer")
 
     pa   = create_test_name("Petigera aphthosa (L.) Willd.")
@@ -1754,8 +1766,9 @@ class NameTest < UnitTestCase
     pp2  = create_test_name("Petigera polydactylon (Bogus) Author")
     pph  = create_test_name("Petigera polydactylon var. hymenina (Ach.) Flotow")
     ppn  = create_test_name("Petigera polydactylon var. neopolydactyla Gyelnik")
+    # rubocop:enable Layout/LineLength
 
-    assert_name_arrays_equal([pa, pc, pp, pp2], p.children, :sort)
+    assert_name_arrays_equal([pa, pc, pp, pp2], pet.children, :sort)
     assert_name_arrays_equal([pcr, pcs], pc.children, :sort)
     assert_name_arrays_equal([pcri], pcr.children, :sort)
     assert_name_arrays_equal([pav], pa.children, :sort)
@@ -1786,36 +1799,36 @@ class NameTest < UnitTestCase
     assert_name_arrays_equal([pp], ppn.parents)
 
     # Try it again if we clear the misspelling flag.  (Still deprecated though.)
-    p.correct_spelling = nil
-    p.save
+    pet.correct_spelling = nil
+    pet.save
 
-    assert_name_arrays_equal([p], pc.all_parents, :sort)
+    assert_name_arrays_equal([pet], pc.all_parents, :sort)
     assert_name_arrays_equal([pc], pcr.all_parents, :sort)
     assert_name_arrays_equal([pcr, pc], pcri.all_parents, :sort)
     assert_name_arrays_equal([pc], pcs.all_parents, :sort)
-    assert_name_arrays_equal([p], pa.all_parents, :sort)
+    assert_name_arrays_equal([pet], pa.all_parents, :sort)
     assert_name_arrays_equal([pa], pac.all_parents, :sort)
     assert_name_arrays_equal([pa], pav.all_parents, :sort)
-    assert_name_arrays_equal([p], pp.all_parents, :sort)
-    assert_name_arrays_equal([p], pp2.all_parents, :sort)
+    assert_name_arrays_equal([pet], pp.all_parents, :sort)
+    assert_name_arrays_equal([pet], pp2.all_parents, :sort)
     assert_name_arrays_equal([pp], pph.all_parents, :sort)
     assert_name_arrays_equal([pp], ppn.all_parents, :sort)
 
-    assert_name_arrays_equal([p], pc.parents)
+    assert_name_arrays_equal([pet], pc.parents)
     assert_name_arrays_equal([pc], pcr.parents)
     assert_name_arrays_equal([pcr], pcri.parents)
     assert_name_arrays_equal([pc], pcs.parents)
-    assert_name_arrays_equal([p], pa.parents)
+    assert_name_arrays_equal([pet], pa.parents)
     assert_name_arrays_equal([pa], pac.parents)
     assert_name_arrays_equal([pa], pav.parents)
-    assert_name_arrays_equal([p], pp.parents)
+    assert_name_arrays_equal([pet], pp.parents)
     assert_name_arrays_equal([pp], pph.parents, :sort)
     assert_name_arrays_equal([pp], ppn.parents, :sort)
 
     pp2.change_deprecated(true)
     pp2.save
 
-    assert_name_arrays_equal([pa, pc, pp, pp2], p.children, :sort)
+    assert_name_arrays_equal([pa, pc, pp, pp2], pet.children, :sort)
     assert_name_arrays_equal([pp], pph.all_parents, :sort)
     assert_name_arrays_equal([pp], ppn.all_parents, :sort)
     assert_name_arrays_equal([pp], pph.parents, :sort)
@@ -1824,9 +1837,9 @@ class NameTest < UnitTestCase
     pp.change_deprecated(true)
     pp.save
 
-    assert_name_arrays_equal([pa, pc, pp, pp2], p.children, :sort)
-    assert_name_arrays_equal([pp, p], pph.all_parents, :sort)
-    assert_name_arrays_equal([pp, p], ppn.all_parents, :sort)
+    assert_name_arrays_equal([pa, pc, pp, pp2], pet.children, :sort)
+    assert_name_arrays_equal([pp, pet], pph.all_parents, :sort)
+    assert_name_arrays_equal([pp, pet], ppn.all_parents, :sort)
     assert_name_arrays_equal([pp], pph.parents, :sort)
     assert_name_arrays_equal([pp], ppn.parents, :sort)
   end
@@ -1834,7 +1847,7 @@ class NameTest < UnitTestCase
   def test_ancestors_3
     # Make sure only Ascomycetes through Peltigera have
     # Ascomycota in their classification at first.
-    assert_equal(4, Name.classification_includes("Ascomycota").count)
+    assert_equal(4, Name.classification_has("Ascomycota").count)
 
     kng = names(:fungi)
     phy = names(:ascomycota)
@@ -1916,28 +1929,24 @@ class NameTest < UnitTestCase
     rolf.email_names_author   = true
     rolf.email_names_editor   = true
     rolf.email_names_reviewer = true
-    rolf.email_names_all      = false
     rolf.save
 
     mary.email_names_admin    = false
     mary.email_names_author   = true
     mary.email_names_editor   = false
     mary.email_names_reviewer = false
-    mary.email_names_all      = false
     mary.save
 
     dick.email_names_admin    = false
     dick.email_names_author   = false
     dick.email_names_editor   = false
     dick.email_names_reviewer = false
-    dick.email_names_all      = false
     dick.save
 
     katrina.email_names_admin    = false
     katrina.email_names_author   = true
     katrina.email_names_editor   = true
     katrina.email_names_reviewer = true
-    katrina.email_names_all      = true
     katrina.save
 
     # Start with no reviewers, editors or authors.
@@ -1960,11 +1969,11 @@ class NameTest < UnitTestCase
     assert_equal(0, desc.editors.length)
     assert_nil(desc.reviewer_id)
 
-    # email types:  author  editor  review  all     interest
-    # 1 Rolf:       x       x       x       .       .
-    # 2 Mary:       x       .       .       .       .
-    # 3 Dick:       .       .       .       .       .
-    # 4 Katrina:    x       x       x       x       .
+    # email types:  author  editor  review  interest
+    # 1 Rolf:       x       x       x       .
+    # 2 Mary:       x       .       .       .
+    # 3 Dick:       .       .       .       .
+    # 4 Katrina:    x       x       x       .
     # Authors: --        editors: --         reviewer: -- (unreviewed)
     # Rolf erases notes: notify Katrina (all), Rolf becomes editor.
     User.current = rolf
@@ -1983,28 +1992,13 @@ class NameTest < UnitTestCase
     assert_equal(1, desc.editors.length)
     assert_nil(desc.reviewer_id)
     assert_equal(rolf, desc.editors.first)
-    assert_equal(1, QueuedEmail.count)
-    assert_email(0,
-                 flavor: "QueuedEmail::NameChange",
-                 from: rolf,
-                 to: katrina,
-                 name: name.id,
-                 description: desc.id,
-                 old_name_version: name.version,
-                 new_name_version: name.version,
-                 old_description_version: desc.version - 1,
-                 new_description_version: desc.version,
-                 review_status: "no_change")
+    assert_equal(0, QueuedEmail.count)
 
-    # Katrina wisely reconsiders requesting notifications of all name changes.
-    katrina.email_names_all = false
-    katrina.save
-
-    # email types:  author  editor  review  all     interest
-    # 1 Rolf:       x       x       x       .       .
-    # 2 Mary:       x       .       .       .       .
-    # 3 Dick:       .       .       .       .       .
-    # 4 Katrina:    x       x       x       .       .
+    # email types:  author  editor  review  interest
+    # 1 Rolf:       x       x       x       .
+    # 2 Mary:       x       .       .       .
+    # 3 Dick:       .       .       .       .
+    # 4 Katrina:    x       x       x       .
     # Authors: --        editors: Rolf       reviewer: -- (unreviewed)
     # Mary writes gen_desc: notify Rolf (editor), Mary becomes author.
     User.current = mary
@@ -2017,8 +2011,8 @@ class NameTest < UnitTestCase
     assert_nil(desc.reviewer_id)
     assert_equal(mary, desc.authors.first)
     assert_equal(rolf, desc.editors.first)
-    assert_equal(2, QueuedEmail.count)
-    assert_email(1,
+    assert_equal(1, QueuedEmail.count)
+    assert_email(0,
                  flavor: "QueuedEmail::NameChange",
                  from: mary,
                  to: rolf,
@@ -2034,11 +2028,11 @@ class NameTest < UnitTestCase
     rolf.email_names_editor = false
     rolf.save
 
-    # email types:  author  editor  review  all     interest
-    # 1 Rolf:       x       .       x       .       .
-    # 2 Mary:       x       .       .       .       .
-    # 3 Dick:       .       .       .       .       .
-    # 4 Katrina:    x       x       x       .       .
+    # email types:  author  editor  review  interest
+    # 1 Rolf:       x       .       x       .
+    # 2 Mary:       x       .       .       .
+    # 3 Dick:       .       .       .       .
+    # 4 Katrina:    x       x       x       .
     # Authors: Mary      editors: Rolf       reviewer: -- (unreviewed)
     # Dick changes uses: notify Mary (author); Dick becomes editor.
     User.current = dick
@@ -2051,8 +2045,8 @@ class NameTest < UnitTestCase
     assert_nil(desc.reviewer_id)
     assert_equal(mary, desc.authors.first)
     assert_equal([rolf.id, dick.id].sort, desc.editors.map(&:id).sort)
-    assert_equal(3, QueuedEmail.count)
-    assert_email(2,
+    assert_equal(2, QueuedEmail.count)
+    assert_email(1,
                  flavor: "QueuedEmail::NameChange",
                  from: dick,
                  to: mary,
@@ -2069,11 +2063,11 @@ class NameTest < UnitTestCase
     mary.email_names_author = false
     mary.save
 
-    # email types:  author  editor  review  all     interest
-    # 1 Rolf:       x       .       x       .       .
-    # 2 Mary:       .       .       .       .       .
-    # 3 Dick:       .       .       .       .       .
-    # 4 Katrina:    x       x       x       .       .
+    # email types:  author  editor  review  interest
+    # 1 Rolf:       x       .       x       .
+    # 2 Mary:       .       .       .       .
+    # 3 Dick:       .       .       .       .
+    # 4 Katrina:    x       x       x       .
     # Authors: Mary,Katrina   editors: Rolf,Dick   reviewer: -- (unreviewed)
     # Rolf reviews name: notify Katrina (author), Rolf becomes reviewer.
     User.current = rolf
@@ -2085,8 +2079,8 @@ class NameTest < UnitTestCase
     assert_equal(rolf.id, desc.reviewer_id)
     assert_equal([mary.id, katrina.id].sort, desc.authors.map(&:id).sort)
     assert_equal([rolf.id, dick.id].sort, desc.editors.map(&:id).sort)
-    assert_equal(4, QueuedEmail.count)
-    assert_email(3,
+    assert_equal(3, QueuedEmail.count)
+    assert_email(2,
                  flavor: "QueuedEmail::NameChange",
                  from: rolf,
                  to: katrina,
@@ -2101,11 +2095,11 @@ class NameTest < UnitTestCase
     # Have Katrina express disinterest.
     Interest.create(target: name, user: katrina, state: false)
 
-    # email types:  author  editor  review  all     interest
-    # 1 Rolf:       x       .       x       .       .
-    # 2 Mary:       .       .       .       .       .
-    # 3 Dick:       .       .       .       .       .
-    # 4 Katrina:    x       x       x       .       no
+    # email types:  author  editor  review  interest
+    # 1 Rolf:       x       .       x       .
+    # 2 Mary:       .       .       .       .
+    # 3 Dick:       .       .       .       .
+    # 4 Katrina:    x       x       x       no
     # Authors: Mary,Katrina   editors: Rolf,Dick   reviewer: Rolf (inaccurate)
     # Dick changes look-alikes: notify Rolf (reviewer), clear review status
     User.current = dick
@@ -2124,8 +2118,8 @@ class NameTest < UnitTestCase
     assert_nil(desc.reviewer_id)
     assert_equal([mary.id, katrina.id].sort, desc.authors.map(&:id).sort)
     assert_equal([rolf.id, dick.id].sort, desc.editors.map(&:id).sort)
-    assert_equal(5, QueuedEmail.count)
-    assert_email(4,
+    assert_equal(4, QueuedEmail.count)
+    assert_email(3,
                  flavor: "QueuedEmail::NameChange",
                  from: dick,
                  to: rolf,
@@ -2140,11 +2134,11 @@ class NameTest < UnitTestCase
     # Mary expresses interest.
     Interest.create(target: name, user: mary, state: true)
 
-    # email types:  author  editor  review  all     interest
-    # 1 Rolf:       x       .       x       .       .
-    # 2 Mary:       .       .       .       .       yes
-    # 3 Dick:       .       .       .       .       .
-    # 4 Katrina:    x       x       x       .       no
+    # email types:  author  editor  review  interest
+    # 1 Rolf:       x       .       x       .
+    # 2 Mary:       .       .       .       yes
+    # 3 Dick:       .       .       .       .
+    # 4 Katrina:    x       x       x       no
     # Authors: Mary,Katrina   editors: Rolf,Dick   reviewer: Rolf (unreviewed)
     # Rolf changes 'uses': notify Mary (interest).
     User.current = rolf
@@ -2158,8 +2152,8 @@ class NameTest < UnitTestCase
     assert_nil(desc.reviewer_id)
     assert_equal([mary.id, katrina.id].sort, desc.authors.map(&:id).sort)
     assert_equal([rolf.id, dick.id].sort, desc.editors.map(&:id).sort)
-    assert_equal(6, QueuedEmail.count)
-    assert_email(5,
+    assert_equal(5, QueuedEmail.count)
+    assert_email(4,
                  flavor: "QueuedEmail::NameChange",
                  from: rolf,
                  to: mary,
@@ -2185,20 +2179,6 @@ class NameTest < UnitTestCase
     names(:petigera).change_deprecated(false)
     assert_not(names(:petigera).is_misspelling?)
     assert_nil(names(:petigera).correct_spelling)
-
-    # Temporarily disabling the name primer.  See comments there.
-    # # Coprinus comatus should normally end up in name primer.
-    # if File.exist?(MO.name_primer_cache_file)
-    #   File.delete(MO.name_primer_cache_file)
-    # end
-    # assert_not(Name.primer.select { |n| n == "Coprinus comatus" }.empty?)
-    #
-    # # Mark it as misspelled and see that it gets removed from the primer list.
-    # names(:coprinus_comatus).correct_spelling = names(:agaricus_campestris)
-    # names(:coprinus_comatus).change_deprecated(true)
-    # names(:coprinus_comatus).save
-    # File.delete(MO.name_primer_cache_file)
-    # assert(Name.primer.select { |n| n == "Coprinus comatus" }.empty?)
   end
 
   def test_lichen
@@ -2335,6 +2315,7 @@ class NameTest < UnitTestCase
     deprecated_name = Name.create!(
       text_name: "Lepiota rhacodes",
       author: "(Vittad.) Quél.",
+      search_name: "Lepiota rhacodes (Vittad.) Quél.",
       display_name: "__Lepiota rhacodes__ (Vittad.) Quél.",
       synonym: synonyms(:macrolepiota_rachodes_synonym),
       deprecated: true,
@@ -2352,6 +2333,7 @@ class NameTest < UnitTestCase
     deprecated_name = Name.create!(
       text_name: "Agaricus rhacodes",
       author: "Vittad.",
+      search_name: "Agaricus rhacodes Vittad.",
       display_name: "__Agaricus rhacodes__ Vittad.",
       synonym: synonyms(:chlorophyllum_rachodes_synonym),
       deprecated: true,
@@ -2583,8 +2565,9 @@ class NameTest < UnitTestCase
     # Autonym with author
     autonym = Name.create!(
       text_name: "Russula sect. Russula",
-      display_name: "**__Russula__** Pers. sect. **__Russula__**",
       author: "Pers.",
+      search_name: "Russula Pers. sect. Russula",
+      display_name: "**__Russula__** Pers. sect. **__Russula__**",
       rank: "Section",
       deprecated: false, correct_spelling: nil,
       user: users(:rolf)
@@ -2668,6 +2651,22 @@ class NameTest < UnitTestCase
     assert_equal("__#{name.text_name}__ #{name.author}", name.display_name)
   end
 
+  def test_sensu_stricto
+    %w[group gr gr. gp gp. clade complex].each do |str|
+      assert_equal(Name.new(text_name: "Boletus #{str}").sensu_stricto,
+                   "Boletus",
+                   "Name s.s. should not include `#{str}`")
+      assert_equal(Name.new(text_name: "Boletus#{str}").sensu_stricto,
+                   "Boletus#{str}",
+                   "Name ss should include `#{str}` if it's part of the genus")
+    end
+
+    # start of the epithet matches a `group` abbreviation ("gr")
+    name = Name.new(text_name: "Leptonia gracilipes")
+
+    assert_equal(name.text_name, name.sensu_stricto)
+  end
+
   # --------------------------------------
 
   # Just make sure mysql is collating accents and case correctly.
@@ -2690,6 +2689,7 @@ class NameTest < UnitTestCase
 
   # Prove that Name spaceship operator (<=>) uses sort_name to sort Names
   def test_name_spaceship_operator
+    # names ordered by how spaceship operator is expected to sort them
     names = [
       create_test_name("Agaricomycota"),
       create_test_name("Agaricomycotina"),
@@ -2703,12 +2703,16 @@ class NameTest < UnitTestCase
       create_test_name("Agaricus L."),
       create_test_name("Agaricus Øosting"),
       create_test_name("Agaricus Zzyzx"),
-      create_test_name("Agaricus Śliwa"),
       create_test_name("Agaricus Đorn"),
       create_test_name("Agaricus subgenus Dick"),
       create_test_name("Agaricus section Charlie"),
       create_test_name("Agaricus subsection Bob"),
       create_test_name("Agaricus stirps Arthur"),
+      # spaceship operator sorts Ś after {. Therefore
+      # "Agaricus  {4stirps  Arthur" sorts before
+      # "Agaricus  Śliwa" which sorts before Species and lower
+      # whose sort_name's have only one space.
+      create_test_name("Agaricus Śliwa"),
       create_test_name("Agaricus aardvark"),
       create_test_name("Agaricus aardvark group"),
       create_test_name('Agaricus "tree-beard"'),
@@ -2718,8 +2722,8 @@ class NameTest < UnitTestCase
       create_test_name("Agaricus ugliano var. danny Zoom"),
       create_test_name('Agaricus "sp-LD50"')
     ]
-    x = Name.where(id: names.first.id..names.last.id).pluck(:sort_name)
-    assert_equal(names.map(&:sort_name).sort, x.sort)
+    sort_names = names.map(&:sort_name)
+    assert_equal(sort_names, sort_names.sort)
   end
 
   # Prove that alphabetized sort_names give us names in the expected order
@@ -2856,7 +2860,8 @@ class NameTest < UnitTestCase
     a1.change_deprecated(true)
     a1.save
     assert_obj_arrays_equal([a1, b1, c1],
-                            Name.names_from_synonymous_genera("Lepiota testa"))
+                            Name.names_from_synonymous_genera("Lepiota testa"),
+                            :sort)
   end
 
   def test_suggest_alternate_spelling
@@ -2871,17 +2876,17 @@ class NameTest < UnitTestCase
     assert_name_arrays_equal([genus1],
                              Name.guess_with_errors("Lecanora", 1))
     assert_name_arrays_equal([genus1, genus2],
-                             Name.guess_with_errors("Lecanoa", 1))
+                             Name.guess_with_errors("Lecanoa", 1), :sort)
     assert_name_arrays_equal([],
                              Name.guess_with_errors("Lecanroa", 1))
     assert_name_arrays_equal([genus1, genus2],
-                             Name.guess_with_errors("Lecanroa", 2))
+                             Name.guess_with_errors("Lecanroa", 2), :sort)
     assert_name_arrays_equal([genus1],
                              Name.guess_with_errors("Lecanosa", 1))
     assert_name_arrays_equal([genus1, genus2],
-                             Name.guess_with_errors("Lecanosa", 2))
+                             Name.guess_with_errors("Lecanosa", 2), :sort)
     assert_name_arrays_equal([genus1, genus2],
-                             Name.guess_with_errors("Lecanroa", 3))
+                             Name.guess_with_errors("Lecanroa", 3), :sort)
     assert_name_arrays_equal([genus1],
                              Name.guess_with_errors("Lacanora", 1))
     assert_name_arrays_equal([genus1],
@@ -2891,33 +2896,39 @@ class NameTest < UnitTestCase
     assert_name_arrays_equal([genus1],
                              Name.guess_word("", "Lacanora"))
     assert_name_arrays_equal([genus1, genus2],
-                             Name.guess_word("", "Lecanroa"))
+                             Name.guess_word("", "Lecanroa"), :sort)
 
     assert_name_arrays_equal([species1, species2],
-                             Name.guess_with_errors("Lecanora galactina", 1))
+                             Name.guess_with_errors("Lecanora galactina", 1),
+                             :sort)
     assert_name_arrays_equal([species3],
                              Name.guess_with_errors("Lecanora granti", 1))
     assert_name_arrays_equal([species3, species4],
-                             Name.guess_with_errors("Lecanora granti", 2))
+                             Name.guess_with_errors("Lecanora granti", 2),
+                             :sort)
     assert_name_arrays_equal([],
                              Name.guess_with_errors("Lecanora gran", 3))
     assert_name_arrays_equal([species3],
                              Name.guess_word("Lecanora", "granti"))
 
     assert_name_arrays_equal([names(:lecanorales), genus1],
-                             Name.suggest_alternate_spellings("Lecanora"))
+                             Name.suggest_alternate_spellings("Lecanora"),
+                             :sort)
     assert_name_arrays_equal([names(:lecanorales), genus1],
-                             Name.suggest_alternate_spellings("Lecanora\\"))
+                             Name.suggest_alternate_spellings("Lecanora\\"),
+                             :sort)
     assert_name_arrays_equal([genus1, genus2],
-                             Name.suggest_alternate_spellings("Lecanoa"))
+                             Name.suggest_alternate_spellings("Lecanoa"), :sort)
     assert_name_arrays_equal(
       [species3], Name.suggest_alternate_spellings("Lecanora granti")
     )
     assert_name_arrays_equal(
-      [species3, species4], Name.suggest_alternate_spellings("Lecanora grandi")
+      [species3, species4],
+      Name.suggest_alternate_spellings("Lecanora grandi"), :sort
     )
     assert_name_arrays_equal(
-      [species4, species5], Name.suggest_alternate_spellings("Lecanoa grandis")
+      [species4, species5],
+      Name.suggest_alternate_spellings("Lecanoa grandis"), :sort
     )
   end
 
@@ -3244,6 +3255,26 @@ class NameTest < UnitTestCase
     Name.guess_with_errors("Crepidotus applanatus(Pers.:Fr.)Kummer", 1)
   end
 
+  def test_merge_editors
+    old_name = names(:peltigera)
+    editors = old_name.versions.each_with_object([]) do |version, e|
+      e << version.user_id
+    end.uniq
+    assert(editors.many?,
+           "Test needs Name fixture edited by multiple users")
+    user = User.find(old_name.versions.second.user_id)
+    old_contribution = user.contribution
+
+    names(:lichen).merge(old_name)
+
+    assert_equal(
+      old_contribution - UserStats::ALL_FIELDS[:name_versions][:weight],
+      user.reload.contribution,
+      "Merging a Name edited by a user should reduce user's contribution " \
+      "by #{UserStats::ALL_FIELDS[:name_versions][:weight]}"
+    )
+  end
+
   def test_merge_interests
     old_name = names(:agaricus_campestros)
     interests = old_name.interests
@@ -3278,6 +3309,24 @@ class NameTest < UnitTestCase
     assert_names_equal(names(:stereum), names(:stereum_hirsutum).accepted_genus)
   end
 
+  def test_can_propagate
+    assert(names(:coprinus).can_propagate?,
+           "Genus s.s. Classifications should be propagable")
+
+    assert_false(names(:coprinus_sensu_lato).can_propagate?,
+                 "Names sensu lato Classifications should not be propagable")
+
+    [:eukarya, :fungi, :ascomycota, :ascomycetes, :agaricales, :agaricaceae,
+     :amanita_subgenus_lepidella, :sect_agaricus, :coprinus_comatus,
+     :amanita_boudieri_var_beillei, :boletus_edulis_group].
+      each do |name|
+        assert_false(
+          names(name).can_propagate?,
+          "#{names(name).rank} Classifications should not be propagable"
+        )
+      end
+  end
+
   def test_propagate_generic_classifications
     # This should result in the classification of Coprinus being copied to
     # Chlorophyllum rachodes.
@@ -3286,7 +3335,7 @@ class NameTest < UnitTestCase
     c_rachodes.merge_synonyms(c_comatus)
     c_rachodes.update(deprecated: true)
     c_comatus.update(deprecated: false)
-    wrong_class = c_rachodes.classification.sub(/Agaricaceae/, "Boletaceae")
+    wrong_class = c_rachodes.classification.sub("Agaricaceae", "Boletaceae")
     c_rachodes.update(classification: wrong_class)
     c_rachodes.reload
     c_comatus.reload
@@ -3375,67 +3424,67 @@ class NameTest < UnitTestCase
   #    Explicit tests of some scopes to improve coverage
   # ----------------------------------------------------
 
-  def test_scope_description_includes
+  def test_scope_description_has
     assert_equal(
       [names(:suillus)],
-      Name.description_includes("by any other name would smell as sweet").to_a
+      Name.description_has("by any other name would smell as sweet").to_a
     )
-    assert_equal(0, Name.description_includes(ARBITRARY_SHA).count)
+    assert_equal(0, Name.description_has(ARBITRARY_SHA).count)
   end
 
-  def test_scope_with_description_in_project
+  def test_scope_has_description_in_project
     assert_includes(
-      Name.with_description_in_project(projects(:bolete_project)),
+      Name.has_description_in_project(projects(:bolete_project)),
       names(:boletus_edulis)
     )
     assert_not_includes(
-      Name.with_description_in_project(projects(:bolete_project)),
+      Name.has_description_in_project(projects(:bolete_project)),
       names(:peltigera)
     )
   end
 
-  def test_scope_with_description_created_by
+  def test_scope_has_description_created_by
     name = names(:coprinus_comatus)
     description = name_descriptions(:draft_coprinus_comatus)
     assert_not_equal(name.user, description.user)
 
     assert_includes(
-      Name.with_description_created_by(description.user),
+      Name.has_description_created_by(description.user),
       name
     )
     assert_not_includes(
-      Name.with_description_created_by(users(:zero_user)),
+      Name.has_description_created_by(users(:zero_user)),
       names(:peltigera)
     )
   end
 
-  def test_scope_with_description_reviewed_by
+  def test_scope_has_description_reviewed_by
     assert_includes(
-      Name.with_description_reviewed_by(users(:rolf)),
+      Name.has_description_reviewed_by(users(:rolf)),
       names(:peltigera)
     )
     assert_not_includes(
-      Name.with_description_reviewed_by(users(:dick)),
+      Name.has_description_reviewed_by(users(:dick)),
       names(:peltigera)
     )
   end
 
-  def test_scope_with_description_of_type
+  def test_scope_has_description_of_type
     assert_includes(
-      Name.with_description_of_type("public"),
+      Name.has_description_of_type("public"),
       names(:peltigera)
     )
     assert_includes(
-      Name.with_description_of_type("user"),
+      Name.has_description_of_type("user"),
       names(:peltigera)
     )
     assert_not_includes(
-      Name.with_description_of_type("foreign"),
+      Name.has_description_of_type("foreign"),
       names(:peltigera)
     )
-    assert_empty(Name.with_description_of_type("spam"))
+    assert_empty(Name.has_description_of_type("spam"))
     assert_kind_of(
-      ActiveRecord::Relation, Name.with_description_of_type("spam")
+      ActiveRecord::Relation, Name.has_description_of_type("spam")
     )
   end
 
@@ -3443,6 +3492,7 @@ class NameTest < UnitTestCase
     mispelled_name = Name.create!(
       text_name: "Amanita boodairy",
       author: "",
+      search_name: "Amanita boodairy",
       display_name: "__Amanita boodairy__ ",
       correct_spelling: names(:amanita_boudieri),
       deprecated: true,
@@ -3516,6 +3566,7 @@ class NameTest < UnitTestCase
   def test_scope_subtaxa_of_genus_or_below
     amanita_group = Name.create!(
       text_name: "Amanita group",
+      search_name: "Amanita group",
       display_name: "__Amanita group__",
       correct_spelling: nil,
       deprecated: false,
@@ -3525,6 +3576,7 @@ class NameTest < UnitTestCase
     amanita_sensu_lato = Name.create!(
       text_name: "Amanita",
       author: "sensu lato",
+      search_name: "Amanita sensu lato",
       display_name: "__Amanita__ sensu lato",
       correct_spelling: nil,
       deprecated: false,
@@ -3551,57 +3603,56 @@ class NameTest < UnitTestCase
     )
   end
 
-  def test_scope_without_comments
-    assert_includes(Name.without_comments, names(:bugs_bunny_one))
-    assert_not_includes(Name.without_comments, names(:fungi))
+  def test_scope_has_no_comments
+    assert_includes(Name.has_no_comments, names(:bugs_bunny_one))
+    assert_not_includes(Name.has_no_comments, names(:fungi))
   end
 
-  def test_scope_comments_include
-    assert_includes(Name.comments_include("do not change"), names(:fungi))
-    assert_empty(Name.comments_include(ARBITRARY_SHA))
+  def test_scope_comments_has
+    assert_includes(Name.comments_has("do not change"), names(:fungi))
+    assert_empty(Name.comments_has(ARBITRARY_SHA))
     assert_empty(
-      Name.comments_include(comments(:detailed_unknown_obs_comment).summary)
+      Name.comments_has(comments(:detailed_unknown_obs_comment).summary)
     )
   end
 
-  def test_scope_on_species_list
+  def test_scope_on_species_lists
     assert_includes(
-      Name.on_species_list(species_lists(:unknown_species_list)), names(:fungi)
+      Name.on_species_lists(species_lists(:unknown_species_list)), names(:fungi)
     )
-    assert_empty(Name.on_species_list(species_lists(:first_species_list)))
+    assert_empty(Name.on_species_lists(species_lists(:first_species_list)))
   end
 
-  def test_scope_at_location
+  def test_scope_at_locations
     assert_includes(
-      Name.at_location(locations(:burbank)), # at location called with Location
+      Name.at_locations(locations(:burbank)), # at location called with Location
       names(:agaricus_campestris)
     )
     assert_includes(
-      Name.at_location(locations(:burbank).id), # at location called with id
+      Name.at_locations(locations(:burbank).id), # at location called with id
       names(:agaricus_campestris)
     )
     assert_includes(
-      Name.at_location(locations(:burbank).name), # called with string
+      Name.at_locations(locations(:burbank).name), # called with string
       names(:agaricus_campestris)
     )
     assert_includes(
-      Name.at_location(locations(:california).name), # region
+      Name.at_locations(locations(:california).name), # region
       names(:agaricus_campestris)
     )
     assert_not_includes(
-      Name.at_location(locations(:obs_default_location)),
+      Name.at_locations(locations(:obs_default_location)),
       names(:notification_but_no_observation)
     )
     assert_empty(
-      Name.at_location({}),
+      Name.at_locations({}),
       "Name.at_location should be empty if called with bad argument class"
     )
   end
 
   def test_scope_in_box
     cal = locations(:california)
-    names_in_cal_box =
-      Name.in_box(n: cal.north, s: cal.south, e: cal.east, w: cal.west)
+    names_in_cal_box = Name.in_box(**cal.bounding_box)
     # Grab a couple of Names that are unused in Observation fixtures
     names_without_observations =
       Name.where.not(id: Name.joins(:observations)).distinct.limit(2).to_a
@@ -3609,22 +3660,23 @@ class NameTest < UnitTestCase
       Observation.create!(name: names_without_observations.first,
                           location: nil,
                           lat: cal.north,
-                          long: cal.east,
+                          lng: cal.east,
                           user: rolf)
-    obs_in_cal_without_lat_long =
+    obs_in_cal_without_lat_lng =
       Observation.create!(name: names_without_observations.second,
                           location: locations(:burbank),
                           lat: nil,
-                          long: nil,
+                          lng: nil,
                           user: rolf)
 
     assert_includes(names_in_cal_box, obs_on_cal_border.name)
     assert_not_includes(
       names_in_cal_box,
-      obs_in_cal_without_lat_long.name,
+      obs_in_cal_without_lat_lng.name,
       "Name.in_box should exclude Names whose only Observations lack lat/long"
     )
-    assert_empty(Name.in_box(n: 0.0001, s: 0, e: 0.0001, w: 0))
+    box = { north: 0.0001, south: 0, east: 0.0001, west: 0 }
+    assert_empty(Name.in_box(**box))
   end
 
   def test_more_brief_authors
@@ -3652,15 +3704,137 @@ class NameTest < UnitTestCase
     assert_equal("(A et al.) D et al.", name.send(:brief_author))
   end
 
+  # ----------------------------------------------------
+  #  Validations
+
   def test_user_validation
     params = {
       text_name: "Whoosia whatsitii",
       author: "Blah & de Blah",
+      search_name: "Whoosia whatsitii Blah & de Blah",
       display_name: "__Whoosia whatsitii__ Blah & de Blah",
       deprecated: true,
       rank: "Species"
     }
     assert_nil(Name.create(params).id)
     assert_not_nil(Name.create(params.merge(user: rolf)).id)
+  end
+
+  def test_author_allowed_characters
+    # Start with valid Name params, author has only letters,
+    # using params which are different from fixtures to avoid conflict.
+    valid_params = {
+      user: users(:rolf),
+      text_name: "Paradiscina", author: "Benedix", rank: "Genus",
+      search_name: "Paradiscina Benedix",
+      display_name: "**__Paradiscina__** Benedix",
+      sort_name: "Paradiscina  Benedix"
+    }
+    assert(Name.new(valid_params).valid?,
+           "Letters should be allowable in Author")
+    # ----- modify Author to prove validity of other characters
+    # A period can be part of an abbreviated Author
+    assert(Name.new(valid_params.merge({ author: "Benedix." })).valid?,
+           "Period should be allowable in Author")
+    # Contrived example to test spaces
+    assert(Name.new(valid_params.merge({ author: "Benedix Benedix" })).valid?,
+           "Space should be allowable in Author")
+    # Parens can enclose author(s) of basionym
+    assert(Name.new(valid_params.merge({ author: "(Benedix) Benedix" })).valid?,
+           "Parens should be allowable in Author")
+    # Ampersand can appear when there are multiple authors
+    assert(Name.new(valid_params.merge({ author: "Benedix & Woo" })).valid?,
+           "Ampersand should be allowable in Author")
+    assert(Name.new(valid_params.merge({ author: "Ben-edix" })).valid?,
+           "Hyphen should be allowable in Author")
+    # Commas can separate multiple authors
+    assert(Name.new(valid_params.merge({ author: "Benedix, Woo & Zhu" })).
+      valid?, "Commas should be allowable in Author")
+    # MycoBank allows square brackets in author to show correction. Ex:
+    # Xylaria symploci Pande, Waingankar, Punekar & Ran[a]dive
+    # https://www.mycobank.org/page/Name%20details%20page/field/Mycobank%20%23/585173
+    assert(Name.new(valid_params.merge({ author: "Ben[e]dix" })).
+     valid?, "Square brackets should be allowable in Author")
+
+    # ----- Prove that including bad character prevents validation of Name
+    # Users have added numbers manually
+    # or pasted an IF or MB line into the Name form
+    assert(Name.new(valid_params.merge({ author: "Benedix (1969)" })).
+      invalid?, "Numerals should not be allowable in Author")
+    # Users have added brackets by pasting IF or MB line into the Name form
+    # Hasn't happened yet; but waiting for ExcitedDelirium to drop the shoe
+    assert(Name.new(valid_params.merge({ author: "Benedix 🤮" })).
+      invalid?, "Emoji should not be allowable in Author")
+  end
+
+  # Prove which characters that are allowed in author
+  # are allowed/disallowed at end
+  def test_author_ending
+    # Start with valid Name params, author ending in letter,
+    # using params distinct from fixtures to avoid conflict.
+    valid_params = {
+      user: users(:rolf),
+      text_name: "Paradiscina", author: "Benedix", rank: "Genus",
+      search_name: "Paradiscina Benedix",
+      display_name: "**__Paradiscina__** Benedix",
+      sort_name: "Paradiscina  Benedix"
+    }
+    assert(Name.new(valid_params).valid?,
+           "Author ending in letter should be validated")
+    assert(Name.new(valid_params.merge({ author: "Benedix." })).valid?,
+           "Period at end of author should be allowable")
+
+    # Some actually occuring cases of bad endings
+    # Emulate user pasting certain IF lines into the Name form
+    assert(
+      Name.new(valid_params.merge({ author: "Benedix," })).
+      invalid?, "Comma at end of author should not be allowable"
+    )
+    assert(
+      Name.new(valid_params.merge({ author: "Benedix [as 'Paradiscena']" })).
+      invalid?, "Square bracket at end of author should not be allowable"
+    )
+  end
+
+  def test_search_name_trivial_differences
+    name = names(:lactarius_subalpinus)
+    assert_not(name.author.ascii_only?,
+               "Test needs fixture whose Author has non-ASCII characters")
+    name_params = {
+      text_name: name.text_name,
+      author: name.author,
+      display_name: name.display_name,
+      search_name: name.search_name,
+      user: name.user
+    }
+
+    new_name = Name.new(
+      name_params.merge(author: I18n.transliterate(name.author),
+                        search_name: I18n.transliterate(name.search_name))
+    )
+
+    assert(new_name.invalid?,
+           "Name differing only in diacriticals should be invalid")
+    assert(
+      new_name.errors[:search_name].any?,
+      "Name differing only in diacriticals should create error on :search_name"
+    )
+
+    new_name = Name.new(
+      name_params.merge(author: "#{name.author},",
+                        search_name: "#{name.search_name},")
+    )
+
+    assert(new_name.invalid?,
+           "Name differing only in punctuation should be invalid")
+    assert(
+      new_name.errors[:search_name].any?,
+      "Name differing only in punctuation should create error on :search_name"
+    )
+  end
+
+  def test_search_name_blank
+    name = names(:lactarius_subalpinus)
+    assert_not(name.update(search_name: ""))
   end
 end

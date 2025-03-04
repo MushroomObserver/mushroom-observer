@@ -1,0 +1,25 @@
+<%
+  add_page_title("Test Upload Speed")
+%>
+
+<p>This page is strictly for testing image upload performance.  Images uploaded
+through this page are not saved and no database changes are made.</p>
+
+<% if @log_entry %>
+  <p>Test <%= @log_entry.id %> created: <%= @log_entry.created_at.web_time %></p>
+<% end %>
+
+<%= form_tag({action: :test_upload_image, log_id: @log_entry.id}, {multipart: true}) do %>
+  <div class="form-group form-inline">
+    <%= fields_for(:upload) do |f_u| %>
+      <% [1,2,3,4].each do |i| %>
+        <%= file_field_with_label(
+          form: f_u, field: "image#{i}".to_sym, class: "mt-3",
+          label: :image_add_image.t + " #{i}:",
+        ) %>
+      <% end %>
+    <% end %>
+  </div>
+
+  <%= submit_tag(:UPLOAD.l, class: "btn btn-default center-block mt-3") %>
+<% end %>

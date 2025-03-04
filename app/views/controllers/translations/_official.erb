@@ -1,0 +1,16 @@
+<%# Original language, current version %>
+<%= tag.div(id: "translation_official") do
+  concat(tag.h4("#{Language.official.name}:", class: "font-weight-bold"))
+
+  @edit_tags.each do |ttag|
+    if record = @official_records[ttag]
+      concat(tag.span("#{h(ttag)}:", class: "underline"))
+      concat(tag.p do
+        str = record.text.gsub(/\\n/, "\n")
+        h(str).gsub("\n", "<br/>\n")
+      end)
+    end
+  end
+
+  concat(tag.hr(class: "pb-1 pt-3"))
+end %>

@@ -4,28 +4,17 @@
 module Locations
   class MapsController < ApplicationController
     before_action :login_required
-    before_action :disable_link_prefetching
 
-    # Map results of a search or index.
+    # Map results of a search or index of Locations.
     def show
       @query = find_or_create_query(:Location)
-
-      apply_content_filters(@query)
-
-      @title = if @query.flavor == :all
-                 :map_locations_global_map.t
-               else
-                 :map_locations_title.t(locations: @query.title)
-               end
-      @query = restrict_query_to_box(@query)
-      @timer_start = Time.current
+      @any_content_filters_applied = check_if_preference_filters_applied
       columns = %w[name north south east west].map { |x| "locations.#{x}" }
-      args = { select: "DISTINCT(locations.id), #{columns.join(", ")}" }
-      @locations = @query.select_rows(args).map do |id, *the_rest|
-        MinimalMapLocation.new(id, *the_rest)
+      args = { select: "DISTINCT(locations.id), #{columns.join(", ")}",
+               limit: 10_000 }
+      @locations = @query.select_all(args).map do |loc|
+        Mappable::MinimalLocation.new(loc)
       end
-      @num_results = @locations.count
-      @timer_end = Time.current
     end
   end
 end

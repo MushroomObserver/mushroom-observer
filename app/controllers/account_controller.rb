@@ -38,9 +38,6 @@ class AccountController < ApplicationController
     :create,
     :welcome
   ]
-  before_action :disable_link_prefetching, except: [
-    :new
-  ]
 
   ##############################################################################
   #
@@ -63,14 +60,16 @@ class AccountController < ApplicationController
       return render(action: :new) unless validate_and_save_new_user!
 
       UserGroup.create_user(@new_user)
-      flash_notice("#{:runtime_signup_success.tp}#:{email_spam_notice.tp}")
-      VerifyMailer.build(@new_user).deliver_now
+      flash_notice("#{:runtime_signup_success.tp} #{:email_spam_notice.tp}")
+      email = QueuedEmail::VerifyAccount.create_email(@new_user)
+      email.destroy if email.send_email
+      UserStats.create({ user_id: @new_user.id })
     end
 
-    redirect_back_or_default(account_welcome_path)
+    redirect_back_or_default("/")
   end
 
-  # This is the welcome page for new users who just created an account.
+  # This is the welcome page for new users who just verified an account.
   def welcome; end
 
   private #################################################
@@ -131,8 +130,8 @@ class AccountController < ApplicationController
   def bogus_email?
     BOGUS_EMAILS.match?(@new_user.email) ||
       # Spammer using variations of "b.l.izk.o.ya.n201.7@gmail.com\r\n"
-      @new_user.email.remove(".").include?("blizkoyan") ||
-      @new_user.email.count(".") > 5
+      @new_user.email.to_s.remove(".").include?("blizkoyan") ||
+      @new_user.email.to_s.count(".") > 5
   end
 
   def bogus_login?
@@ -148,9 +147,25 @@ class AccountController < ApplicationController
     if theme.present?
       # I'm guessing this has something to do with spammer/hacker trying
       # to automate creation of accounts?
-      DeniedMailer.build(params[:new_user]).deliver_now
+
+      QueuedEmail::Webmaster.create_email(
+        sender_email: MO.accounts_email_address,
+        subject: "Account Denied",
+        content: denied_message(@new_user)
+      )
     end
     false
+  end
+
+  def denied_message(new_user)
+    "The request for account #{new_user.login} was denied since the theme" \
+    "was set to '#{new_user.theme}'.\n" \
+    "Here are all the fields for the request user:\n\n" \
+    "login: #{new_user.login}\n" \
+    "password: #{new_user.password}\n" \
+    "email: #{new_user.email}\n" \
+    "theme: #{new_user.theme}\n" \
+    "name: #{new_user.name}\n" \
   end
 
   def validate_and_save_new_user!

@@ -58,16 +58,11 @@ class InfoController < ApplicationController
     store_location
     @site_data = SiteData.new.get_site_data
 
-    # Add some extra stats.
-    @site_data[:observed_taxa] = Observation.distinct.count(:name_id)
-    @site_data[:listed_taxa] = Name.count
-
     # Get the last six observations whose thumbnails are highly rated.
-    query = Query.lookup(:Observation, :all,
-                         by: :updated_at,
-                         where: "images.vote_cache >= 3",
-                         join: :"images.thumb_image")
-    @observations = query.results(limit: 6,
-                                  include: { thumb_image: :image_votes })
+    # This is a pricey query any way you cut it. Limiting recency speeds it up.
+    @observations = Observation.updated_at(4.months.ago.strftime("%Y-%m-%d")).
+                    joins(:thumb_image).merge(Image.quality(3)).
+                    includes(thumb_image: :image_votes).
+                    order(updated_at: :desc).limit(6)
   end
 end

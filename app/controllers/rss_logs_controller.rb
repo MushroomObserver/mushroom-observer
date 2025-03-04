@@ -3,51 +3,85 @@
 class RssLogsController < ApplicationController
   # Uncertain these are necessary, can delete if not.
   require "find"
-  require "set"
 
   before_action :login_required, except: [
-    :index,
+    # :index,
     :rss,
     :show
   ]
-  before_action :disable_link_prefetching
 
   # Default page.  Just displays latest happenings.  The actual action is
   # buried way down toward the end of this file.
   # Displays matrix of selected RssLog's (based on current Query, if exists).
   def index
-    # POST requests with param `type` potentially show an array of types
-    # of objects. The array comes from the checkboxes in tabset
-    if params[:type].present?
-      query = find_or_create_query(:RssLog,
-                                   type: types_query_string_from_params)
-    # Previously saved query, incorporating type and other params
-    elsif params[:q].present?
-      query = find_query(:RssLog)
-      query ||= create_query(:RssLog, :all,
-                             type: @user ? @user.default_rss_type : "all")
-    # Fresh version of the index, no existing query
-    else
-      query = create_query(:RssLog, :all,
-                           type: @user ? @user.default_rss_type : "all")
-    end
-    show_selected_rss_logs(query, id: params[:id].to_s, always_index: true)
+    build_index_with_query
   end
 
   private
 
-  def types_query_string_from_params
-    types = params[:type]
-    if types.is_a?(Array)
-      if types.empty?
-        types = "none"
-      else
-        types = RssLog.all_types.intersection(types)
-        types = "all" if types.length == RssLog.all_types.length
-        types = types.map(&:to_s).join(" ") if types.is_a?(Array)
-      end
+  def default_sort_order
+    :updated_at
+  end
+
+  def unfiltered_index_opts
+    super.merge(query_args: { type: index_type_default })
+  end
+
+  def index_type_default
+    @user ? @user.default_rss_type : "all"
+  end
+
+  # ApplicationController uses this to dispatch #index to a private method
+  def index_active_params
+    [:type, :by, :q, :id].freeze
+  end
+
+  # Show selected list, based on current Query.
+  def sorted_index_opts
+    super.merge(query_args: { type: index_type_default })
+  end
+
+  # Requests with param `type` potentially show an array of types
+  # of objects. The array comes from the checkboxes in tabset
+  def type
+    query = find_or_create_query(:RssLog, type: index_type_from_params)
+    [query, index_display_at_id_opts]
+  end
+
+  # Get the types whose value == "1"
+  def index_type_from_params
+    types = ""
+    if params[:type].is_a?(ActionController::Parameters)
+      types = params[:type].select { |_key, value| value == "1" }.keys
+      types = RssLog::ALL_TYPE_TAGS.map(&:to_s).intersection(types)
+      types = "all" if types.length == RssLog::ALL_TYPE_TAGS.length
+      types = "none" if types.empty?
+    elsif params[:type].is_a?(String)
+      types = params[:type]
     end
+    types = types.map(&:to_s).join(" ") if types.is_a?(Array)
     types
+  end
+
+  # Hook runs before template displayed. Must return query.
+  def filtered_index_final_hook(query, _display_opts)
+    store_query_in_session(query)
+    query_params_set(query)
+
+    @types = query.params[:type].to_s.split.sort
+
+    # Let the user make this their default and fine tune.
+    if @user && params[:make_default] == "1"
+      @user.default_rss_type = @types.join(" ")
+      @user.save_without_our_callbacks
+    end
+
+    query
+  end
+
+  def index_display_opts(opts, _query)
+    { matrix: true, cache: true,
+      include: rss_log_includes }.merge(opts)
   end
 
   public
@@ -75,42 +109,18 @@ class RssLogsController < ApplicationController
     render_xml(layout: false)
   end
 
-  # Show selected search results as a matrix with "index" template.
-  def show_selected_rss_logs(query, args = {})
-    store_query_in_session(query)
-    query_params_set(query)
-
-    includes = {
+  # rss_logs now requires a logged in user
+  def rss_log_includes
+    {
       article: :user,
       glossary_term: :user,
       location: :user,
       name: :user,
-      observation: [:location, :name, :user,
-                    @user ? { thumb_image: :image_votes } : :thumb_image],
-      project: :user,
+      observation: [
+        :location, :name, :user, observation_matrix_box_image_includes
+      ],
+      project: [:location, :user],
       species_list: [:location, :user]
     }
-
-    args = {
-      action: :index,
-      matrix: true,
-      include: includes
-    }.merge(args)
-
-    @types = query.params[:type].to_s.split.sort
-    @links = []
-
-    # Let the user make this their default and fine tune.
-    if @user
-      if params[:make_default] == "1"
-        @user.default_rss_type = @types.join(" ")
-        @user.save_without_our_callbacks
-      elsif @user.default_rss_type.to_s.split.sort != @types
-        @links << [:rss_make_default.t,
-                   add_query_param(action: :index, make_default: 1)]
-      end
-    end
-
-    show_index_of_objects(query, args)
   end
 end

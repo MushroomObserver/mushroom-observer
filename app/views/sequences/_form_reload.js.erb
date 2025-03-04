@@ -1,9 +1,0 @@
-// What to do if create or update doesn't save
-
-// var modal_body = $("#modal_body_sequence");
-
-// replace the flash notices in the modal
-$("#modal_flash").replaceWith("<%= j render(partial: 'layouts/app/flash_notices', locals: { id: 'modal_flash' }) if flash_notices? %>");
-
-// replace the form, should show
-$("#sequence_form").replaceWith('<%= j render(partial: "sequences/form", locals: { action: @action, local: false }) %>')

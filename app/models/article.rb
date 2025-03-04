@@ -26,6 +26,8 @@ class Article < AbstractModel
   belongs_to :user
   belongs_to :rss_log
 
+  scope :index_order, -> { order(created_at: :desc, id: :desc) }
+
   # Automatically log standard events.
   self.autolog_events = [:created!, :updated!, :destroyed!]
 
@@ -70,7 +72,7 @@ class Article < AbstractModel
     #   Article write permission does not yet exist or was deleted.
     return false unless news_articles_project
 
-    news_articles_project.is_member?(user)
+    news_articles_project.member?(user)
   end
 
   # Project used to administer Article write permission.

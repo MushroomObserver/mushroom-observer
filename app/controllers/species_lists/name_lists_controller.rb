@@ -3,7 +3,6 @@
 module SpeciesLists
   class NameListsController < ApplicationController
     before_action :login_required
-    before_action :disable_link_prefetching
     before_action :require_successful_user
 
     # Specialized javascripty form for creating a list of names, at Darvin's

@@ -7,24 +7,35 @@ module Projects
     ##### Helpers (which also assert) ##########################################
     def change_member_status_helper(changer, target_user, commit, admin_before,
                                     user_before, admin_after, user_after)
-      eol_project = projects(:eol_project)
+      project = projects(:eol_project)
       assert_equal(admin_before,
-                   target_user.in_group?(eol_project.admin_group.name))
+                   target_user.in_group?(project.admin_group.name))
       assert_equal(user_before,
-                   target_user.in_group?(eol_project.user_group.name))
+                   target_user.in_group?(project.user_group.name))
+      check_project_membership(project, target_user, user_before)
       params = {
-        project_id: eol_project.id,
+        project_id: project.id,
         candidate: target_user.id,
         commit: commit.l
       }
 
       put_requires_login(:update, params, changer.login)
-      assert_redirected_to(project_path(eol_project.id))
+      assert_redirected_to(project_members_path(project.id))
       target_user = User.find(target_user.id)
       assert_equal(admin_after,
-                   target_user.in_group?(eol_project.admin_group.name))
+                   target_user.in_group?(project.admin_group.name))
       assert_equal(user_after,
-                   target_user.in_group?(eol_project.user_group.name))
+                   target_user.in_group?(project.user_group.name))
+      check_project_membership(project, target_user, user_after)
+    end
+
+    def check_project_membership(project, user, member)
+      membership = ProjectMember.find_by(project:, user:)
+      if member
+        assert_not_nil(membership)
+      else
+        assert_nil(membership)
+      end
     end
 
     # Huh? If it requires login, there ain't gonna be a form
@@ -37,6 +48,16 @@ module Projects
       requires_login(:edit, params)
       assert_form_action(action: :update,
                          candidate: mary.id, project_id: project.id)
+    end
+
+    def test_change_member_status_non_admin
+      project = projects(:eol_project)
+      params = {
+        project_id: project.id,
+        candidate: mary.id
+      }
+      requires_login(:edit, params, katrina.login)
+      assert_flash_error
     end
 
     # non-admin member -> non-admin member (should be a no-op)
@@ -118,22 +139,83 @@ module Projects
     def test_change_member_status_by_member_remove_member
       change_member_status_helper(katrina, katrina,
                                   :change_member_status_remove_member,
+                                  false, true, false, false)
+    end
+
+    def test_change_member_status_by_member_make_admin
+      change_member_status_helper(katrina, katrina,
+                                  :change_member_status_make_admin,
                                   false, true, false, true)
+    end
+
+    # untrusting member trusting
+    def test_member_trust
+      target_user = project_members(:eol_member_katrina).user
+      project = projects(:eol_project)
+      params = {
+        project_id: project.id,
+        candidate: target_user.id,
+        commit: :change_member_hidden_gps_trust.l
+      }
+      put_requires_login(:update, params, target_user.login)
+      assert_equal(
+        project.project_members.find_by(user: target_user).trust_level,
+        "hidden_gps"
+      )
+    end
+
+    # trusting member revoking trust
+    def test_member_revoke_trust
+      target_user = project_members(:eol_member_mary).user
+      project = projects(:eol_project)
+      params = {
+        project_id: project.id,
+        candidate: target_user.id,
+        commit: :change_member_status_revoke_trust.l
+      }
+      put_requires_login(:update, params, target_user.login)
+      assert_equal(
+        project.project_members.find_by(user: target_user).trust_level,
+        "no_trust"
+      )
+    end
+
+    # member allows editing
+    def test_member_allow_editing
+      target_user = project_members(:eol_member_mary).user
+      project = projects(:eol_project)
+      params = {
+        project_id: project.id,
+        candidate: target_user.id,
+        commit: :change_member_editing_trust.l
+      }
+      put_requires_login(:update, params, target_user.login)
+      assert_equal(
+        project.project_members.find_by(user: target_user).trust_level,
+        "editing"
+      )
     end
 
     # There are many other combinations that shouldn't work
     # for change_member_status, but I think the above covers the key cases
 
-    # Make sure admin can see form.
     def test_add_members
-      requires_login(:new, project_id: projects(:eol_project).id)
+      project = projects(:eol_project)
+      requires_login(:new, project_id: project.id)
+
+      assert_displayed_title("Add users to #{project.title}",
+                             "Admin should be able to see add members form")
+      assert_select("td", { text: users(:zero_user).login },
+                    "List of potential members should include verified users")
+      assert_select("td", { text: users(:unverified).login, count: 0 },
+                    "List of potential members should omit unverified users")
     end
 
     # Make sure non-admin cannot see form.
     def test_add_members_non_admin
       project_id = projects(:eol_project).id
       requires_login(:new, { project_id: project_id }, katrina.login)
-      assert_redirected_to(project_path(project_id))
+      assert_redirected_to(project_members_path(project_id))
     end
 
     # Make sure admin can add members.
@@ -147,7 +229,7 @@ module Projects
         candidate: target_user.id
       }
       post_requires_login(:create, params, mary.login)
-      assert_redirected_to(project_path(eol_project.id))
+      assert_redirected_to(project_members_path(eol_project.id))
       target_user = User.find(target_user.id)
       assert_equal(false, target_user.in_group?(eol_project.admin_group.name))
       assert_equal(true, target_user.in_group?(eol_project.user_group.name))
@@ -164,10 +246,43 @@ module Projects
         candidate: target_user.id
       }
       post_requires_login(:create, params, katrina.login)
-      assert_redirected_to(project_path(eol_project.id))
+      assert_redirected_to(project_members_path(eol_project.id))
       target_user = User.find(target_user.id)
       assert_equal(false, target_user.in_group?(eol_project.admin_group.name))
       assert_equal(false, target_user.in_group?(eol_project.user_group.name))
+    end
+
+    def test_add_self_to_open_membership_project
+      project = projects(:open_membership_project)
+      target_user = dick
+      assert_equal(false, target_user.in_group?(project.admin_group.name))
+      assert_equal(false, target_user.in_group?(project.user_group.name))
+      params = {
+        project_id: project.id,
+        candidate: target_user.id,
+        target: :project_index
+      }
+      post_requires_login(:create, params, target_user.login)
+      assert_redirected_to(project_path(project.id))
+      target_user = User.find(target_user.id)
+      assert_equal(false, target_user.in_group?(project.admin_group.name))
+      assert_equal(true, target_user.in_group?(project.user_group.name))
+    end
+
+    def test_add_someone_else_to_open_membership_project
+      project = projects(:open_membership_project)
+      target_user = dick
+      assert_equal(false, target_user.in_group?(project.admin_group.name))
+      assert_equal(false, target_user.in_group?(project.user_group.name))
+      params = {
+        project_id: project.id,
+        candidate: target_user.id
+      }
+      post_requires_login(:create, params, katrina.login)
+      assert_redirected_to(project_members_path(project.id))
+      target_user = User.find(target_user.id)
+      assert_equal(false, target_user.in_group?(project.admin_group.name))
+      assert_equal(false, target_user.in_group?(project.user_group.name))
     end
 
     def test_add_member_writein
@@ -180,7 +295,7 @@ module Projects
         candidate: "#{target_user.login} <Should Ignore This>"
       }
       post_requires_login(:create, params, mary.login)
-      assert_redirected_to(project_path(eol_project.id))
+      assert_redirected_to(project_members_path(eol_project.id))
       target_user.reload
       assert_not(target_user.in_group?(eol_project.admin_group.name))
       assert(target_user.in_group?(eol_project.user_group.name))
@@ -194,9 +309,19 @@ module Projects
         candidate: "freddymercury"
       }
       post_requires_login(:create, params, mary.login)
-      assert_redirected_to(project_path(eol_project.id))
+      assert_redirected_to(project_members_path(eol_project.id))
       assert_flash_error
       assert_equal(num_before, eol_project.reload.user_group.users.count)
+    end
+
+    def test_index
+      eol_project = projects(:eol_project)
+      login
+      get(:index, params: { project_id: eol_project.id })
+
+      member = eol_project.project_members.first
+      assert_match(member.user.name, @response.body)
+      assert_template("index")
     end
   end
 end

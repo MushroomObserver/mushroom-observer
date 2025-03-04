@@ -5,7 +5,7 @@ class VisualModelsController < ApplicationController
 
   # GET /visual_models
   def index
-    @visual_models = VisualModel.all.order(:name)
+    @visual_models = VisualModel.order(:name)
   end
 
   # GET /visual_models/1

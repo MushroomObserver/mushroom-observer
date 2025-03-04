@@ -1,0 +1,21 @@
+<%# locals: (file_field_label: "#{:IMAGE.l}:", file_field_between: nil) -%>
+
+<%= fields_for(:upload) do |f_u| %>
+  <%= file_field_with_label(form: f_u, field: :image, label: file_field_label,
+                            between: file_field_between) %>
+
+  <%= text_field_with_label(form: f_u, field: :copyright_holder, inline: true,
+                            label: "#{:image_copyright_holder.l}:") %>
+
+  <%= select_with_label(form: f_u, field: :copyright_year,
+                        label: "#{:WHEN.l}:", inline: true,
+                        start_year: 1980, end_year: Time.zone.now.year,
+                        selected: @copyright_year) %>
+
+  <%= select_with_label(form: f_u, field: :license_id, inline: true,
+                        label: "#{:LICENSE.l}:", options: @licenses,
+                        selected: @upload_license_id,
+                        append: help_block(
+                          :div, ["(", :image_copyright_warning.t, ")"].safe_join
+                        )) %>
+<% end %>

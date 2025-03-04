@@ -2,6 +2,10 @@ drop database if exists mo_development;
 create database mo_development
   DEFAULT CHARACTER SET utf8
   DEFAULT COLLATE utf8_general_ci;
+drop database if exists cache_development;
+create database cache_development
+  DEFAULT CHARACTER SET utf8
+  DEFAULT COLLATE utf8_general_ci;
 drop database if exists mo_test;
 create database mo_test
   DEFAULT CHARACTER SET utf8
@@ -30,4 +34,5 @@ use mo_test;
 drop database mo_tmp;
 
 grant all privileges on mo_development.* to 'mo'@'localhost' with grant option;
+grant all privileges on cache_development.* to 'mo'@'localhost' with grant option;
 grant all privileges on mo_test.* to 'mo'@'localhost' with grant option;

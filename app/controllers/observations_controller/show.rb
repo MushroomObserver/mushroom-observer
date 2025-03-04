@@ -17,16 +17,14 @@ module ObservationsController::Show
   #   @observation
   #   @canonical_url
   #   @mappable
-  #   @new_sites
+  #   @other_sites
   #   @votes
   def show
     pass_query_params
     store_location
-    case params[:flow]
-    when "next"
-      redirect_to_next_object(:next, Observation, params[:id]) and return
-    when "prev"
-      redirect_to_next_object(:prev, Observation, params[:id]) and return
+    if params[:flow].present?
+      redirect_to_next_object(params[:flow].to_sym, Observation, params[:id])
+      return
     end
 
     check_if_user_wants_to_make_their_votes_public
@@ -36,42 +34,18 @@ module ObservationsController::Show
     update_view_stats(@observation)
     @canonical_url = canonical_url(@observation)
     @mappable      = check_if_query_is_mappable
-    @new_sites     = external_sites_user_can_add_links_to(@observation)
+    @other_sites   = helpers.external_sites_user_can_add_links_to(@observation)
+    @consensus     = Observation::NamingConsensus.new(@observation)
+    @owner_name    = @consensus.owner_preference
     register_namings_for_textile_in_notes
+    @comments      = @observation.comments&.sort_by(&:created_at)&.reverse
+    @images        = @observation.images_sorted
   end
 
   def load_observation_for_show_observation_page
-    includes = @user ? show_obs_heavy_includes : show_obs_light_includes
-    @observation = Observation.includes(includes).find_by(id: params[:id]) ||
+    includes = @user ? "show_includes" : "not_logged_in_show_includes" # scopes
+    @observation = Observation.send(includes).safe_find(params[:id]) ||
                    flash_error_and_goto_index(Observation, params[:id])
-  end
-
-  def show_obs_light_includes
-    [
-      { comments: :user },
-      { images: [:license, :user] },
-      :location,
-      :name,
-      { namings: :name },
-      :user
-    ]
-  end
-
-  def show_obs_heavy_includes
-    [
-      :collection_numbers,
-      { comments: :user },
-      { external_links: { external_site: :project } },
-      { herbarium_records: [{ herbarium: :curators }, :user] },
-      { images: [:image_votes, :license, :projects, :user] },
-      :location,
-      :name,
-      { namings: [:name, :user, { votes: [:observation, :user] }] },
-      :projects,
-      :sequences,
-      { species_lists: :projects },
-      :user
-    ]
   end
 
   # Make it really easy for users to elect to go public with their votes.
@@ -95,7 +69,7 @@ module ObservationsController::Show
   end
 
   # Tell search engines what the "correct" URL is for this page.
-  # Used in layouts/application
+  # Used in application/app/head
   def canonical_url(obs)
     observation_url(obs.id)
   end
@@ -103,20 +77,7 @@ module ObservationsController::Show
   # Decide if the current query can be used to create a map.
   def check_if_query_is_mappable
     query = find_query(:Observation)
-    query&.coercable?(:Location)
-  end
-
-  # Get a list of external_sites which the user has permission to add
-  # external_links to (and which no external_link to exists yet).
-  def external_sites_user_can_add_links_to(obs)
-    return [] unless @user
-
-    obs_site_ids = obs.external_links.map(&:external_site_id)
-    if @user == obs.user || in_admin_mode?
-      ExternalSite.where.not(id: obs_site_ids)
-    else
-      @user.external_sites.where.not(id: obs_site_ids)
-    end
+    query&.params&.dig(:location_query)
   end
 
   # Incurs a costly namings lookup if called in the partial outside show_obs

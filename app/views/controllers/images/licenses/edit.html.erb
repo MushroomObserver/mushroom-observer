@@ -1,0 +1,64 @@
+<%
+  add_page_title(:image_updater_title.t(user: @user.login))
+  @container = :wide
+  form_action = {
+    controller: "/images/licenses",
+    action: :update
+  }
+%>
+
+<%= form_with(scope: :updates, url: form_action, method: :put) do |f| %>
+  <div class="container-text">
+    <%= :image_updater_help.tp %>
+  </div><!--.container-text-->
+
+  <table class="table-striped table-license-updater">
+    <thead>
+      <tr>
+        <th>
+          <%= :image_updater_count.t %>
+        </th>
+        <th>
+          <%= :image_updater_holder.t %>
+        </th>
+        <th>
+          <%= :image_updater_license.t %>
+        </th>
+      </tr>
+    </thead>
+
+    <% if @data.length %>
+
+      <tbody>
+        <% @data.each.with_index(1) do |datum, row|
+          # must access datum attrs by strings!
+          licenses = datum["licenses"]
+          license_id = datum["license_id"].to_i
+          copyright_holder = datum["copyright_holder"].to_s %>
+
+          <%= f.fields_for("#{row}") do |f_r| %>
+            <tr>
+              <td>
+                <%= datum["license_count"].to_s %>
+              </td>
+              <td>
+                <%= f_r.text_field(:new_holder, value: copyright_holder) +
+                    f_r.hidden_field(:old_holder, value: copyright_holder) %>
+              </td>
+              <td>
+                <%= f_r.select(:new_id,
+                               options_for_select(licenses, selected: license_id)) +
+                    f_r.hidden_field(:old_id, value: license_id) %>
+              </td>
+            </tr>
+          <% end %>
+
+        <% end %>
+      </tbody>
+
+    <% end %>
+
+  </table>
+
+  <%= submit_button(form: f, button: :image_updater_update.l, center: true) %>
+<% end %>

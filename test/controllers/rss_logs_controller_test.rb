@@ -4,6 +4,9 @@ require("test_helper")
 
 class RssLogsControllerTest < FunctionalTestCase
   def test_page_loads
+    get(:index)
+    assert_redirected_to(new_account_login_path)
+
     login
     get(:index)
     assert_template("shared/_matrix_box")
@@ -40,13 +43,17 @@ class RssLogsControllerTest < FunctionalTestCase
 
     # Show all.
     params = {}
-    params[:type] = RssLog.all_types
+    params[:type] = RssLog::ALL_TYPE_TAGS
+
     post(:index, params: params)
     assert_template(:index)
 
     # Be sure "all" loads some rss_logs!
     get(:index, params: { type: "all" })
     assert_template("shared/_matrix_box")
+
+    get(:index, params: { type: [:article, :glossary_term] })
+    assert_template(:index)
 
     get(:index, params: { type: [] })
     assert_template(:index)
@@ -79,13 +86,8 @@ class RssLogsControllerTest < FunctionalTestCase
   end
 
   def test_user_default_rss_log
-    # Prove that MO offers to make non-default log the user's default.
-    login("rolf")
-    get(:index, params: { type: :glossary_term })
-    link_text = @controller.instance_variable_get(:@links).flatten.first
-    assert_equal(:rss_make_default.l, link_text)
-
     # Prove that user can change his default rss log type.
+    login("rolf")
     get(:index, params: { type: :glossary_term, make_default: 1 })
     assert_equal("glossary_term", rolf.reload.default_rss_type)
     # Test that this actually works

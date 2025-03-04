@@ -70,8 +70,8 @@ module FlashExtensions
              "#{msg} Got the wrong flash error(s). " \
              "Expected: #{expect.inspect}.  Got: #{got.inspect}.")
     end
-    @controller.instance_variable_set(:@last_notice, nil)
-    session[:notice] = nil
+
+    clear_flash
   end
 
   # Assert that a flash was rendered or is pending with the expected text.
@@ -84,6 +84,10 @@ module FlashExtensions
       assert_equal("<p>#{expect}</p>", got, msg)
     end
 
+    clear_flash
+  end
+
+  def clear_flash
     @controller.instance_variable_set(:@last_notice, nil)
     session[:notice] = nil
   end

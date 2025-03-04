@@ -1,0 +1,18 @@
+<%# bs3
+the label is an <a> tag that filters for a single type
+%>
+
+<%=
+# tag.span(
+#   class: class_names("btn btn-default btn-sm", { active: @types == [type] }),
+#   data: { toggle: "checkbox" }
+# ) do
+check_button_with_label(form: f, field: type,
+                       checked: @types.include?(type) || @types == ['all'],
+                       label: filter_for_type(@types, type),
+                       checked_value: type,
+                       id: "type_#{type}",
+                       class: class_names("filter-checkbox my-0",
+                                          { active: @types == [type] }))
+# end
+%>

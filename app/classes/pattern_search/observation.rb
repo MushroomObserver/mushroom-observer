@@ -5,7 +5,7 @@ module PatternSearch
   class Observation < Base
     PARAMS = {
       # dates / times
-      date: [:date, :parse_date_range],
+      when: [:date, :parse_date_range],
       created: [:created_at, :parse_date_range],
       modified: [:updated_at, :parse_date_range],
 
@@ -26,7 +26,8 @@ module PatternSearch
       project: [:projects, :parse_list_of_projects],
       project_lists: [:project_lists, :parse_list_of_projects],
       region: [:region, :parse_list_of_strings],
-      user: [:users, :parse_list_of_users],
+      user: [:by_users, :parse_list_of_users],
+      field_slip: [:field_slips, :parse_list_of_strings],
 
       # numeric
       confidence: [:confidence, :parse_confidence],
@@ -38,14 +39,14 @@ module PatternSearch
 
       # booleanish
       has_comments: [:has_comments, :parse_yes],
-      has_location: [:has_location, :parse_boolean],
+      has_public_lat_lng: [:has_public_lat_lng, :parse_boolean],
       has_name: [:has_name, :parse_boolean],
       has_notes: [:has_notes, :parse_boolean],
-      images: [:has_images, :parse_boolean],
+      has_images: [:has_images, :parse_boolean],
       is_collection_location: [:is_collection_location, :parse_boolean],
       lichen: [:lichen, :parse_boolean],
-      sequence: [:has_sequences, :parse_yes],
-      specimen: [:has_specimen, :parse_boolean]
+      has_sequence: [:has_sequences, :parse_yes],
+      has_specimen: [:has_specimen, :parse_boolean]
     }.freeze
 
     def self.params
@@ -68,20 +69,18 @@ module PatternSearch
       super
       hack_name_query
       default_to_including_synonyms_and_subtaxa
+      put_nsew_params_in_box
     end
 
     private
 
     # Temporary hack to get include_subtaxa/synonyms to work.
-    # Will rip out when we do away with pattern search query flavor.
     # This converts any search that *looks like* a name search into
-    # an actual name search.
+    # an actual name search. NOTE: This affects the index title.
     def hack_name_query
-      return unless flavor == :pattern_search &&
-                    args[:names].empty? &&
+      return unless args[:pattern].present? && args[:names].empty? &&
                     (is_pattern_a_name? || any_taxa_modifiers_present?)
 
-      self.flavor = :all
       args[:names] = args[:pattern]
       args.delete(:pattern)
     end
@@ -103,6 +102,36 @@ module PatternSearch
         !args[:include_synonyms].nil? ||
         !args[:include_all_name_proposals].nil? ||
         !args[:exclude_consensus].nil?
+    end
+
+    def put_nsew_params_in_box
+      north, south, east, west = args.values_at(:north, :south, :east, :west)
+      box = { north:, south:, east:, west: }
+      return if box.compact.blank?
+
+      box = validate_box(box)
+      args[:in_box] = box
+      args.except!(:north, :south, :east, :west)
+    end
+
+    def validate_box(box)
+      validator = Mappable::Box.new(**box)
+      return box if validator.valid?
+
+      check_for_missing_box_params
+      # Just fix the box if they've got it swapped
+      if args[:south] > args[:north]
+        box = box.merge(north: args[:south], south: args[:north])
+      end
+      box
+    end
+
+    def check_for_missing_box_params
+      [:north, :south, :east, :west].each do |term|
+        next if args[term].present?
+
+        raise(PatternSearch::MissingValueError.new(var: term))
+      end
     end
   end
 end

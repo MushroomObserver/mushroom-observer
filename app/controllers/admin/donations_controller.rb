@@ -13,7 +13,7 @@ module Admin
 
     # Review donations
     def edit
-      @donations = Donation.all.order(created_at: :desc)
+      @donations = Donation.order(created_at: :desc)
       @reviewed = {}
       @donations.each do |d|
         @reviewed[d.id] = d.reviewed
@@ -22,7 +22,7 @@ module Admin
 
     def update
       update_donations(params[:reviewed])
-      @donations = Donation.all.order(created_at: :desc)
+      @donations = Donation.order(created_at: :desc)
       @reviewed = {}
       @donations.each do |d|
         @reviewed[d.id] = d.reviewed

@@ -18,10 +18,10 @@ module Images::Votes
     def edit
       @num_anonymous = ImageVote.where(user_id: @user.id).
                        where(anonymous: true).
-                       pluck(ImageVote[:id].count.as("total"))&.first
+                       pick(ImageVote[:id].count.as("total"))
       @num_public = ImageVote.where(user_id: @user.id).
                     where(anonymous: false).
-                    pluck(ImageVote[:id].count.as("total"))&.first
+                    pick(ImageVote[:id].count.as("total"))
     end
 
     def update

@@ -33,7 +33,7 @@ SimpleCov.start("rails")
 # Allow test results to be reported back to runner IDEs.
 # Enable progress bar output during the test running.
 require("minitest/reporters")
-MiniTest::Reporters.use!
+Minitest::Reporters.use!
 
 require("minitest/autorun")
 
@@ -41,15 +41,11 @@ require("minitest/autorun")
 #  disabling of internet requests.
 require("webmock/minitest")
 
-# Disable external requests while allowing localhost,
-# but also allow gem webdrivers to download the latest browser drivers.
-# These are always being updated and Selenium is pretty useless without them.
-# https://bloggie.io/@kinopyo/migrate-from-chromedriver-helper-to-webdrivers
-# https://github.com/titusfortner/webdrivers/issues/4
+# Disable external requests while allowing localhost.
 WebMock.disable_net_connect!(
   allow_localhost: true,
   allow: [
-    # "chromedriver.storage.googleapis.com", # in case we install Chrome
+    "chromedriver.storage.googleapis.com", # in case we install Chrome
     "github.com", # for Firefox
     "objects.githubusercontent.com" # for Firefox
   ]
@@ -58,9 +54,6 @@ WebMock.disable_net_connect!(
 ENV["RAILS_ENV"] ||= "test"
 require(File.expand_path("../config/environment", __dir__))
 require("rails/test_help")
-
-# Enable mocking and stubbing in Ruby (must be required after rails/test_help).
-require("mocha/minitest")
 
 %w[
   bullet_helper

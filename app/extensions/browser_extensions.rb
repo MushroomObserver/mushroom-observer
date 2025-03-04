@@ -2,11 +2,12 @@
 
 require("browser")
 
+# extensino to Browser gem. https://github.com/fnando/browser
 module Browser
-  # Prevent `browser` gem from saying that mobile DuckDuckGo browsers are bots
   class Base
     def bot?
-      bot.bot? && !device.mobile? && !duck_duck_go?
+      # Stop Browser gem from saying that mobile DuckDuckGo browsers are bots
+      bot.bot? && !device.mobile? && !duck_duck_go? && MO.bot_enabled
     end
   end
 end

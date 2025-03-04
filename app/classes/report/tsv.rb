@@ -3,10 +3,21 @@
 module Report
   # Provides rendering ability for TSV-type reports.
   class TSV < BaseTable
-    self.default_encoding = "UTF-8"
-    self.mime_type = "text/tsv"
-    self.extension = "tsv"
-    self.header = { header: :present }
+    def default_encoding
+      "UTF-8"
+    end
+
+    def mime_type
+      "text/tsv"
+    end
+
+    def extension
+      "tsv"
+    end
+
+    def header
+      { header: :present }
+    end
 
     def render
       [
