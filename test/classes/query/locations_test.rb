@@ -71,7 +71,7 @@ class Query::LocationsTest < UnitTestCase
   end
 
   def test_location_pattern_search
-    expects = Location.reorder(id: :asc).pattern_search("California")
+    expects = Location.reorder(id: :asc).pattern("California")
     assert_query(expects, :Location, pattern: "California", by: :id)
     assert_query([locations(:elgin_co).id],
                  :Location, pattern: "Canada")

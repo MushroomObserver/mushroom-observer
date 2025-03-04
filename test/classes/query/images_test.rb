@@ -173,32 +173,30 @@ class Query::ImagesTest < UnitTestCase
   end
 
   def test_image_pattern_search_name
-    assert_query(Image.index_order.pattern_search("agaricus"),
+    assert_query(Image.index_order.pattern("agaricus"),
                  :Image, pattern: "agaricus") # name
   end
 
-  def test_image_pattern_search_copyright_holder
-    assert_query(Image.index_order.pattern_search("bob dob"),
+  def test_image_pattern_copyright_holder
+    assert_query(Image.index_order.pattern("bob dob"),
                  :Image, pattern: "bob dob") # copyright holder
   end
 
-  def test_image_pattern_search_notes
+  def test_image_pattern_notes
     assert_query(
-      Image.index_order.
-      pattern_search("looked gorilla OR original"),
+      Image.index_order.pattern("looked gorilla OR original"),
       :Image, pattern: "looked gorilla OR original" # notes
     )
-    assert_query(Image.index_order.
-                 pattern_search("notes some"),
+    assert_query(Image.index_order.pattern("notes some"),
                  :Image, pattern: "notes some") # notes
     assert_query(
-      Image.index_order.pattern_search("dobbs -notes"),
+      Image.index_order.pattern("dobbs -notes"),
       :Image, pattern: "dobbs -notes" # (c), not notes
     )
   end
 
-  def test_image_pattern_search_original_filename
-    assert_query(Image.index_order.pattern_search("DSCN8835"),
+  def test_image_pattern_original_filename
+    assert_query(Image.index_order.pattern("DSCN8835"),
                  :Image, pattern: "DSCN8835") # original filename
   end
 
