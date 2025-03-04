@@ -9,7 +9,7 @@ class Query::ScopeClasses::HerbariumRecords < Query::BaseAR
     super.merge(
       created_at: [:time],
       updated_at: [:time],
-      ids: [HerbariumRecord],
+      id_in_set: [HerbariumRecord],
       by_users: [User],
       herbaria: [Herbarium],
       observations: [Observation],

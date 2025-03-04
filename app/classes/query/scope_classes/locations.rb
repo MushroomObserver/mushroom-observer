@@ -15,7 +15,7 @@ class Query::ScopeClasses::Locations < Query::BaseAR
     super.merge(
       created_at: [:time],
       updated_at: [:time],
-      ids: [Location],
+      id_in_set: [Location],
       by_users: [User],
       by_editor: User,
       in_box: { north: :float, south: :float, east: :float, west: :float },

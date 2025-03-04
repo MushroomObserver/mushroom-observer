@@ -17,7 +17,7 @@ class Query::ScopeClasses::Names < Query::BaseAR
     super.merge(
       created_at: [:time],
       updated_at: [:time],
-      ids: [Name],
+      id_in_set: [Name],
       names: [Name],
       include_synonyms: :boolean,
       include_subtaxa: :boolean,

@@ -10,7 +10,7 @@ class Query::ScopeClasses::Articles < Query::BaseAR
       created_at: [:time],
       updated_at: [:time],
       by_users: [User],
-      ids: [Article],
+      id_in_set: [Article],
       title_has: :string,
       body_has: :string
     )

@@ -17,7 +17,7 @@ class Query::ScopeClasses::Images < Query::BaseAR
       created_at: [:time],
       updated_at: [:time],
       date: [:date],
-      ids: [Image],
+      id_in_set: [Image],
       by_users: [User],
       size: [{ string: Image::ALL_SIZES - [:full_size] }],
       content_types: [{ string: Image::ALL_EXTENSIONS }],
