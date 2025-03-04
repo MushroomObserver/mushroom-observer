@@ -344,5 +344,38 @@ module AbstractModel::Scopes
     def lookup_users_by_name(vals)
       Lookup::Users.new(vals).ids
     end
+
+    def exact_match_condition(table_column, vals)
+      vals = [vals].flatten.map(&:downcase)
+      if vals.length == 1
+        where(table_column.downcase.eq(vals.first))
+      elsif vals.length > 1
+        where(table_column.downcase.in(*vals))
+      end
+    end
+
+    def presence_condition(table_column, bool: true)
+      if bool.to_s.to_boolean == true
+        where(table_column.not_eq(nil))
+      else
+        where(table_column.eq(nil))
+      end
+    end
+
+    def boolean_condition(table_column, val, bool: true)
+      if bool.to_s.to_boolean == true
+        where(table_column.eq(val))
+      else
+        where(table_column.not_eq(val))
+      end
+    end
+
+    def coalesce_presence_condition(table_column, bool: true)
+      if bool.to_s.to_boolean == true
+        where(table_column.coalesce("").length.gt(0))
+      else
+        where(table_column.coalesce("").length.eq(0))
+      end
+    end
   end
 end
