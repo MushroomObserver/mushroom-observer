@@ -346,7 +346,7 @@ module AbstractModel::Scopes
     end
 
     def exact_match_condition(table_column, vals)
-      vals = [vals].flatten.map(&:downcase)
+      vals = [vals].flatten.map { |val| val.to_s.downcase }
       if vals.length == 1
         where(table_column.downcase.eq(vals.first))
       elsif vals.length > 1
