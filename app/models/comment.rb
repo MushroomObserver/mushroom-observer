@@ -70,7 +70,10 @@
 #  updated_between(start, end)
 #  by_user(user)
 #  for_user(user)
-#  for_target(target)
+#  target(target)
+#  summary_has(phrase)
+#  content_has(phrase)
+#  pattern(phrase)
 #
 #  == Instance Methods
 #
@@ -154,7 +157,7 @@ class Comment < AbstractModel
   #
   # Basically it's iterating over all the types doing this:
   #   where(target_type: :location,
-  #        target_id: Location.where(user: user)).
+  #         target_id: Location.where(user: user)).
   #   or(where(target_type: :name,
   #            target_id: Name.where(user: user))) etc.
   scope :for_user, lambda { |user|
@@ -164,8 +167,18 @@ class Comment < AbstractModel
       scope ? scope.or(scope2) : scope2
     end
   }
-  scope :for_target,
+  scope :target,
         ->(target) { where(target: target) }
+
+  scope :summary_has,
+        ->(phrase) { search_columns(Comment[:summary], phrase) }
+  scope :content_has,
+        ->(phrase) { search_columns(Comment[:comment], phrase) }
+
+  scope :pattern, lambda { |phrase|
+    cols = (Comment[:summary] + Comment[:comment].coalesce(""))
+    search_columns(cols, phrase).distinct
+  }
 
   scope :search_content, lambda { |phrase|
     # `or` is 10-20% faster than concatenating the columns
