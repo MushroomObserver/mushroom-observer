@@ -4,6 +4,9 @@ class APIKey < AbstractModel
   belongs_to :user
   before_create :provide_defaults
 
+  scope :notes_has,
+        ->(phrase) { search_columns(APIKey[:notes], phrase) }
+
   KEY_LENGTH = 32
 
   def self.show_controller
