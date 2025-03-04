@@ -763,7 +763,7 @@ class QueryTest < UnitTestCase
     query_a[2] = Query.lookup_and_save(
       :Observation, species_lists: species_lists(:first_species_list).id
     )
-    query_a[3] = Query.lookup_and_save(:Observation, ids: three_amigos)
+    query_a[3] = Query.lookup_and_save(:Observation, id_in_set: three_amigos)
     query_a[4] = Query.lookup_and_save(:Observation, search_where: "glendale")
     query_a[5] = Query.lookup_and_save(:Observation, locations: burbank)
     query_a[6] = Query.lookup_and_save(:Observation, search_where: "california")
@@ -821,7 +821,7 @@ class QueryTest < UnitTestCase
     query_a[2] = Query.lookup_and_save(
       :Observation, species_lists: species_lists(:first_species_list).id
     )
-    query_a[3] = Query.lookup_and_save(:Observation, ids: three_amigos)
+    query_a[3] = Query.lookup_and_save(:Observation, id_in_set: three_amigos)
     # qa[4] = Query.lookup_and_save(:Observation,
     #                             pattern: '"somewhere else"')
     query_a[4] = Query.lookup_and_save(:Observation, search_where: "glendale")
