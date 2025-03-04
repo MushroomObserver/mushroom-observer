@@ -10,8 +10,9 @@ class FieldSlip < AbstractModel
 
   scope :index_order, -> { order(code: :asc, created_at: :desc, id: :desc) }
 
-  scope :for_project, lambda { |project|
-    where(project_id: project.id).distinct
+  scope :projects, lambda { |projects|
+    project_ids = Lookup::Projects.new(projects).ids
+    where(project: project_ids).distinct
   }
 
   validates :code, uniqueness: true
