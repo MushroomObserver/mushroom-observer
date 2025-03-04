@@ -18,7 +18,7 @@ class Query::Images < Query::Base
       date: [:date],
       id_in_set: [Image],
       by_users: [User],
-      size: [{ string: Image::ALL_SIZES - [:full_size] }],
+      sizes: [{ string: Image::ALL_SIZES - [:full_size] }],
       content_types: [{ string: Image::ALL_EXTENSIONS }],
       has_notes: :boolean,
       notes_has: :string,
@@ -55,7 +55,7 @@ class Query::Images < Query::Base
     initialize_img_notes_parameters
     add_search_condition("images.copyright_holder",
                          params[:copyright_holder_has])
-    add_image_size_condition(params[:size])
+    add_image_sizes_condition(params[:sizes])
     add_image_type_condition(params[:content_types])
     initialize_ok_for_export_parameter
   end
@@ -67,7 +67,7 @@ class Query::Images < Query::Base
     add_search_condition("images.notes", params[:notes_has])
   end
 
-  def add_image_size_condition(vals, *)
+  def add_image_sizes_condition(vals, *)
     return if vals.empty?
 
     min, max = vals
