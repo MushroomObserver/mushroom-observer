@@ -390,7 +390,7 @@ class Query::ObservationsTest < UnitTestCase
   end
 
   def observation_pattern_search(pattern)
-    Observation.index_order.pattern_search(pattern).distinct
+    Observation.index_order.pattern(pattern).distinct
   end
 
   def test_observation_advanced_search_name
