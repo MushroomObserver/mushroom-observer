@@ -65,6 +65,11 @@ class CollectionNumber < AbstractModel
       where(observation_collection_numbers: { observation: obs })
   }
 
+  scope :pattern, lambda { |phrase|
+    cols = CollectionNumber.searchable_columns
+    search_columns(cols, phrase).distinct
+  }
+
   def format_name
     "#{name} #{number}"
   end
