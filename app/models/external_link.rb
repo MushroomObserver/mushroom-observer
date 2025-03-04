@@ -37,10 +37,13 @@ class ExternalLink < AbstractModel
   scope :observations,
         ->(ids) { where(observation_id: ids) }
 
-  scope :external_links, lambda { |sites|
+  scope :external_sites, lambda { |sites|
     ids = lookup_external_sites_by_name(sites)
     where(external_site_id: ids)
   }
+
+  scope :url_has,
+        ->(phrase) { search_columns(ExternalLink[:url], phrase) }
 
   VALID_URL_PAT = %r{^[a-z]+://}
 
