@@ -9,7 +9,7 @@ class Query::Sequences < Query::Base
     super.merge(
       created_at: [:time],
       updated_at: [:time],
-      ids: [Sequence],
+      id_in_set: [Sequence],
       by_users: [User],
       observations: [Observation],
       locus: [:string],

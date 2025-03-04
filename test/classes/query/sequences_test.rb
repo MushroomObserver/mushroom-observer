@@ -92,7 +92,7 @@ class Query::SequencesTest < UnitTestCase
   def test_sequence_in_set
     list_set_ids = [sequences(:fasta_formatted_sequence).id,
                     sequences(:bare_formatted_sequence).id]
-    assert_query(list_set_ids, :Sequence, ids: list_set_ids)
+    assert_query(list_set_ids, :Sequence, id_in_set: list_set_ids)
   end
 
   def test_sequence_pattern_search

@@ -19,8 +19,8 @@ class Query::ProjectsTest < UnitTestCase
 
   def test_project_in_set
     assert_query([projects(:eol_project).id],
-                 :Project, ids: [projects(:eol_project).id])
-    assert_query([], :Project, ids: [])
+                 :Project, id_in_set: [projects(:eol_project).id])
+    assert_query([], :Project, id_in_set: [])
   end
 
   def test_project_members

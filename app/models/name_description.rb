@@ -279,11 +279,6 @@ class NameDescription < Description
       reviewer ||= @old_reviewer
       recipients.push(reviewer) if reviewer&.email_names_reviewer
 
-      # Tell masochists who want to know about all name changes.
-      User.where(email_names_all: true).find_each do |user|
-        recipients.push(user)
-      end
-
       # Send to people who have registered interest.
       # Also remove everyone who has explicitly said they are NOT interested.
       name.interests.each do |interest|

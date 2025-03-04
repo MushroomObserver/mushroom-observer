@@ -12,9 +12,7 @@
   # that actually changed.  If notifiable for multiple reasons, choose the
   # least restrictive -- i.e. 'all' first, then admin, editor, author, and
   # lastly reviewer.
-  email_type = if @user.email_names_all
-    "all"
-  elsif @user.watching?(new_name)
+  email_type = if @user.watching?(new_name)
     "interest"
   elsif !old_name || new_name.version != old_name.version
     @user.email_names_editor   && new_name.descriptions.any? {|d| d.editor?(@user)} ? "editor"   :

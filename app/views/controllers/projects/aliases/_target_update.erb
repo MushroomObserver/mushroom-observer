@@ -8,6 +8,15 @@
     )
   end
 %>
+<%=
+  id = "index_project_alias_table"
+  turbo_stream.replace(id) do
+    make_table(headers: project_alias_headers,
+               rows: project_alias_rows(project_aliases),
+               table_opts: { class: "table table-striped table-project-members mt-3",
+               id:})
+  end
+%>
 
 <%# modals are not removed via data-controller="section-update" because the turbo elements are being replaced, not updated, so the connection is lost %>
 <% if params[:action] == "update" %>

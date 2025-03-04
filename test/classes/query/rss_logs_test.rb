@@ -20,6 +20,6 @@ class Query::RssLogsTest < UnitTestCase
   def test_rss_log_in_set
     rsslog_set_ids = [rss_logs(:species_list_rss_log).id,
                       rss_logs(:name_rss_log).id]
-    assert_query(rsslog_set_ids, :RssLog, ids: rsslog_set_ids)
+    assert_query(rsslog_set_ids, :RssLog, id_in_set: rsslog_set_ids)
   end
 end

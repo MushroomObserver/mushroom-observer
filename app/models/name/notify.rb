@@ -23,7 +23,6 @@ module Name::Notify
     notify_authors(recipients)
     notify_editors(recipients)
     notify_reviewers(recipients)
-    notify_masochists(recipients)
     notify_interested(recipients)
 
     # Remove users who have opted out of all emails.
@@ -66,13 +65,6 @@ module Name::Notify
   def notify_reviewers(recipients)
     descriptions.map(&:reviewer).each do |user|
       recipients.push(user) if user&.email_names_reviewer
-    end
-  end
-
-  # Tell masochists who want to know about all name changes.
-  def notify_masochists(recipients)
-    User.where(email_names_all: true).find_each do |user|
-      recipients.push(user)
     end
   end
 

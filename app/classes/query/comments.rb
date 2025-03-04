@@ -9,7 +9,7 @@ class Query::Comments < Query::Base
     super.merge(
       created_at: [:time],
       updated_at: [:time],
-      ids: [Comment],
+      id_in_set: [Comment],
       by_users: [User],
       for_user: User,
       types: [{ string: Comment::ALL_TYPE_TAGS }],

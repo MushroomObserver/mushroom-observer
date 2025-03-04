@@ -18,7 +18,7 @@ class Query::ObservationsTest < UnitTestCase
     assert_query(expects, :Observation, by: :rss_log)
   end
 
-  def observations_set
+  def big_set
     [
       observations(:unknown_with_no_naming),
       observations(:minimal_unknown_obs),
@@ -29,17 +29,15 @@ class Query::ObservationsTest < UnitTestCase
       observations(:agaricus_campestras_obs),
       observations(:agaricus_campestris_obs),
       observations(:agaricus_campestrus_obs)
-    ]
+    ].freeze
   end
 
   def test_observation_ids_ids
-    assert_query(observations_set.map(&:id),
-                 :Observation, ids: observations_set.map(&:id))
+    assert_query(big_set.map(&:id), :Observation, id_in_set: big_set.map(&:id))
   end
 
   def test_observation_ids_instances
-    assert_query(observations_set.map(&:id),
-                 :Observation, ids: observations_set)
+    assert_query(big_set.map(&:id), :Observation, id_in_set: big_set)
   end
 
   def test_observation_by_user
