@@ -10,12 +10,12 @@ class Query::ScopeClasses::Herbaria < Query::BaseAR
       created_at: [:time],
       updated_at: [:time],
       id_in_set: [Herbarium],
+      nonpersonal: :boolean,
       code_has: :string,
       name_has: :string,
       description_has: :string,
       mailing_address_has: :string,
-      pattern: :string,
-      nonpersonal: :boolean
+      pattern: :string
     )
   end
 

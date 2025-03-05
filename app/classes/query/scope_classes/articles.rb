@@ -9,10 +9,10 @@ class Query::ScopeClasses::Articles < Query::BaseAR
     super.merge(
       created_at: [:time],
       updated_at: [:time],
-      by_users: [User],
       id_in_set: [Article],
       title_has: :string,
-      body_has: :string
+      body_has: :string,
+      by_users: [User]
     )
   end
 

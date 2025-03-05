@@ -10,13 +10,13 @@ class Query::ScopeClasses::CollectionNumbers < Query::BaseAR
       created_at: [:time],
       updated_at: [:time],
       id_in_set: [CollectionNumber],
-      by_users: [User],
-      observations: [Observation],
-      pattern: :string,
       names: [:string],
       numbers: [:string],
       name_has: :string,
-      number_has: :string
+      number_has: :string,
+      by_users: [User],
+      observations: [Observation],
+      pattern: :string
     )
   end
 

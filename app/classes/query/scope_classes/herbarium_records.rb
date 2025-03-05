@@ -11,15 +11,15 @@ class Query::ScopeClasses::HerbariumRecords < Query::BaseAR
       updated_at: [:time],
       id_in_set: [HerbariumRecord],
       by_users: [User],
-      herbaria: [Herbarium],
-      observations: [Observation],
-      pattern: :string,
       has_notes: :boolean,
       notes_has: :string,
       initial_dets: [:string],
       initial_det_has: :string,
       accession_numbers: [:string],
-      accession_number_has: :string
+      accession_number_has: :string,
+      herbaria: [Herbarium],
+      observations: [Observation],
+      pattern: :string
     )
   end
 

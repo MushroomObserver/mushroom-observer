@@ -29,12 +29,12 @@ class Query::ScopeClasses::Images < Query::BaseAR
       quality: [:float],
       confidence: [:float],
       ok_for_export: :boolean,
-      pattern: :string,
-      locations: [Location],
+      has_observations: :boolean,
       observations: [Observation],
+      locations: [Location],
       projects: [Project],
       species_lists: [SpeciesList],
-      has_observations: :boolean,
+      pattern: :string,
       observation_query: { subquery: :Observation }
     ).merge(advanced_search_parameter_declarations)
   end
