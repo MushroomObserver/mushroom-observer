@@ -18,7 +18,7 @@ module AbstractModel::Scopes
       joins(:rss_log).
         reorder(RssLog[:updated_at].desc, model.arel_table[:id].desc).distinct
     }
-    scope :order_by_set, lambda { |set|
+    scope :order_by_set, lambda { |*set|
       reorder(Arel::Nodes.build_quoted(set.join(",")) & arel_table[:id])
     }
 
@@ -190,7 +190,7 @@ module AbstractModel::Scopes
     # array of max of MO.query_max_array unique ids for use with Arel "in"
     #    where(<x>.in(limited_id_set(ids)))
     def limited_id_set(ids)
-      ids.map(&:to_i).uniq[0, MO.query_max_array] # [] is valid
+      [ids].flatten.map(&:to_i).uniq[0, MO.query_max_array] # [] is valid
     end
 
     # Fills out the datetime with min/max values for month, day, hour, minute,

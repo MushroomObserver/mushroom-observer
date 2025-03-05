@@ -105,11 +105,12 @@ class Query::ImagesTest < UnitTestCase
     assert_query(expects, :Image, by_users: dick)
   end
 
-  def test_image_in_set
+  def test_image_id_in_set
     ids = [images(:turned_over_image).id,
            images(:agaricus_campestris_image).id,
            images(:disconnected_coprinus_comatus_image).id]
-    assert_query(ids, :Image, id_in_set: ids)
+    scope = Image.id_in_set(ids).order(id: :desc)
+    assert_query_scope(ids, scope, :Image, id_in_set: ids)
   end
 
   def test_image_inside_observation

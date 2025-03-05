@@ -11,6 +11,12 @@ class Query::ExternalLinksTest < UnitTestCase
     assert_query(ExternalLink.all.sort_by(&:url), :ExternalLink)
   end
 
+  def test_external_link_id_in_set
+    set = ExternalLink.order(id: :asc).last(2).pluck(:id)
+    scope = ExternalLink.id_in_set(set).index_order
+    assert_query_scope(set, scope, :ExternalLink, id_in_set: set)
+  end
+
   def test_external_link_by_users
     assert_query(ExternalLink.where(user: users(:mary)).sort_by(&:url),
                  :ExternalLink, by_users: users(:mary))

@@ -18,12 +18,13 @@ class Query::HerbariaTest < UnitTestCase
     assert_query(expects, :Herbarium, by: :records)
   end
 
-  def test_herbarium_in_set
+  def test_herbarium_id_in_set
     expects = [
-      herbaria(:dick_herbarium),
-      herbaria(:nybg_herbarium)
+      herbaria(:nybg_herbarium),
+      herbaria(:dick_herbarium)
     ]
-    assert_query(expects, :Herbarium, id_in_set: expects)
+    scope = Herbarium.id_in_set(expects.pluck(:id))
+    assert_query_scope(expects, scope, :Herbarium, id_in_set: expects)
   end
 
   def test_herbarium_pattern_search

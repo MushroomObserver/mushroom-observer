@@ -12,6 +12,12 @@ class Query::CommentsTest < UnitTestCase
     assert_query(expects, :Comment)
   end
 
+  def test_comment_id_in_set
+    set = Comment.order(id: :asc).last(2).pluck(:id)
+    scope = Comment.id_in_set(set)
+    assert_query_scope(set, scope, :Comment, id_in_set: set)
+  end
+
   def test_comment_by_user
     expects = Comment.index_order.where(user_id: mary.id).distinct
     assert_query(expects, :Comment, by_users: mary)

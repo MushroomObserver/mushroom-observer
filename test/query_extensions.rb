@@ -6,7 +6,7 @@ require("test_helper")
 module QueryExtensions
   def assert_query(expects, *args)
     test_ids = expects.first.is_a?(Integer)
-    expects = expects.to_a unless expects.respond_to?(:map!)
+    expects = [expects].flatten
     query = Query.lookup(*args)
     actual = test_ids ? query.result_ids : query.results
     msg = "Query results are wrong. SQL is:\n#{query.last_query}"
@@ -24,7 +24,8 @@ module QueryExtensions
   # Assert that explicit results, scope and query agree
   def assert_query_scope(expects, scope_expects, *args)
     test_ids = expects.first.is_a?(Integer)
-    expects = expects.to_a unless expects.respond_to?(:map!)
+    expects = [expects].flatten
+    scope_expects = scope_expects.pluck(:id) if test_ids
     query = Query.lookup(*args)
     actual = test_ids ? query.result_ids : query.results
     msg1 = "Scope does not produce expects"

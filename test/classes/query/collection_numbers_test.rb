@@ -12,6 +12,12 @@ class Query::CollectionNumbersTest < UnitTestCase
     assert_query(expects, :CollectionNumber)
   end
 
+  def test_collection_number_id_in_set
+    set = CollectionNumber.last(3).pluck(:id)
+    scope = CollectionNumber.id_in_set(set).index_order
+    assert_query_scope(set, scope, :CollectionNumber, id_in_set: set)
+  end
+
   def newbie_collections
     [collection_numbers(:minimal_unknown_coll_num),
      collection_numbers(:detailed_unknown_coll_num_one)]
