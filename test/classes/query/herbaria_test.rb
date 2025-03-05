@@ -19,22 +19,40 @@ class Query::HerbariaTest < UnitTestCase
   end
 
   def test_herbarium_id_in_set
-    expects = [
-      herbaria(:nybg_herbarium),
-      herbaria(:dick_herbarium)
-    ]
+    expects = [herbaria(:nybg_herbarium), herbaria(:dick_herbarium)]
     scope = Herbarium.id_in_set(expects.pluck(:id))
     assert_query_scope(expects, scope, :Herbarium, id_in_set: expects)
   end
 
-  def test_herbarium_pattern_search
-    # [herbaria(:nybg_herbarium)]
-    expects = Herbarium.index_order.where(
-      Herbarium[:code].concat(Herbarium[:name]).
-      concat(Herbarium[:description].coalesce("")).
-      concat(Herbarium[:mailing_address].coalesce("")).matches("%awesome%")
-    ).distinct
+  def test_herbarium_code_has
+    expects = [herbaria(:field_museum)]
+    scope = Herbarium.code_has("F")
+    assert_query_scope(expects, scope, :Herbarium, code_has: "F")
+  end
 
-    assert_query(expects, :Herbarium, pattern: "awesome")
+  def test_herbarium_name_has
+    expects = [herbaria(:rolf_herbarium), herbaria(:dick_herbarium)]
+    scope = Herbarium.name_has("Herbarium")
+    assert_query_scope(expects, scope, :Herbarium, name_has: "Herbarium")
+  end
+
+  def test_herbarium_description_has
+    expects = [herbaria(:nybg_herbarium)]
+    scope = Herbarium.description_has("awesome")
+    assert_query_scope(expects, scope, :Herbarium, description_has: "awesome")
+  end
+
+  def test_herbarium_mailing_address_has
+    expects = [herbaria(:field_museum)]
+    scope = Herbarium.mailing_address_has("Chicago")
+    assert_query_scope(
+      expects, scope, :Herbarium, mailing_address_has: "Chicago"
+    )
+  end
+
+  def test_herbarium_pattern_search
+    expects = [herbaria(:nybg_herbarium)]
+    scope = Herbarium.pattern("awesome").distinct
+    assert_query_scope(expects, scope, :Herbarium, pattern: "awesome")
   end
 end
