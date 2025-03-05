@@ -215,6 +215,8 @@ class Query::ImagesTest < UnitTestCase
     expects = Image.index_order.includes(:observations).
               where.not(observations: { thumb_image: nil }).distinct
     assert_query(expects, :Image, has_observations: true)
+    expects = Image.has_observations.index_order
+    assert_query(expects, :Image, has_observations: true)
   end
 
   # Prove that :with_observations param of Image Query works with each
