@@ -16,9 +16,23 @@ class Query::ArticlesTest < UnitTestCase
     assert_query(Article.order_by_rss_log, :Article, by: :rss_log)
   end
 
-  def test_article_in_set
-    assert_query([articles(:premier_article).id],
-                 :Article, id_in_set: [articles(:premier_article).id])
+  def test_article_id_in_set
+    art = articles(:premier_article)
+    expects = [art.id]
+    scope = Article.id_in_set(art.id)
+    assert_query_scope(expects, scope, :Article, id_in_set: [art.id])
     assert_query([], :Article, id_in_set: [])
+  end
+
+  def test_article_title_has
+    expects = [articles(:premier_article)]
+    scope = Article.title_has("premier_article").index_order
+    assert_query_scope(expects, scope, :Article, title_has: "premier_article")
+  end
+
+  def test_article_body_has
+    expects = [articles(:second_article)]
+    scope = Article.body_has("second_article").index_order
+    assert_query_scope(expects, scope, :Article, body_has: "second_article")
   end
 end

@@ -21,6 +21,14 @@ module AbstractModel::Scopes
     scope :order_by_set, lambda { |set|
       reorder(Arel::Nodes.build_quoted(set.join(",")) & arel_table[:id])
     }
+    scope :order_by_set, lambda { |*set|
+      reorder(Arel::Nodes.build_quoted(set.join(",")) & arel_table[:id])
+    }
+
+    scope :id_in_set, lambda { |ids|
+      set = limited_id_set(ids) # [] is valid
+      where(arel_table[:id].in(set)).order_by_set
+    }
 
     scope :id_in_set, lambda { |ids|
       set = limited_id_set(ids) # [] is valid
@@ -224,7 +232,7 @@ module AbstractModel::Scopes
     # array of max of MO.query_max_array unique ids for use with Arel "in"
     #    where(<x>.in(limited_id_set(ids)))
     def limited_id_set(ids)
-      ids.map(&:to_i).uniq[0, MO.query_max_array] # [] is valid
+      [ids].flatten.map(&:to_i).uniq[0, MO.query_max_array] # [] is valid
     end
 
     # Fills out the datetime with min/max values for month, day, hour, minute,
@@ -393,7 +401,7 @@ module AbstractModel::Scopes
     end
 
     def exact_match_condition(table_column, vals)
-      vals = [vals].flatten.map(&:downcase)
+      vals = [vals].flatten.map { |val| val.to_s.downcase }
       if vals.length == 1
         where(table_column.downcase.eq(vals.first))
       elsif vals.length > 1
@@ -417,7 +425,7 @@ module AbstractModel::Scopes
       end
     end
 
-    def notes_condition(table_column, bool: true)
+    def coalesce_presence_condition(table_column, bool: true)
       if bool.to_s.to_boolean == true
         where(table_column.coalesce("").length.gt(0))
       else

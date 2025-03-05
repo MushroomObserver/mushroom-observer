@@ -20,5 +20,11 @@ class Query::FieldSlipsTest < UnitTestCase
   def test_field_slip_for_project
     expects = FieldSlip.index_order.where(project: projects(:eol_project))
     assert_query(expects, :FieldSlip, projects: projects(:eol_project))
+    # test scope
+    expects = FieldSlip.index_order.projects(projects(:eol_project))
+    assert_query(expects, :FieldSlip, projects: projects(:eol_project))
+    # test lookup by name
+    expects = FieldSlip.index_order.projects(projects(:eol_project).title)
+    assert_query(expects, :FieldSlip, projects: projects(:eol_project))
   end
 end
