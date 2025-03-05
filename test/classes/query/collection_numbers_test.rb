@@ -23,6 +23,13 @@ class Query::CollectionNumbersTest < UnitTestCase
      collection_numbers(:detailed_unknown_coll_num_one)]
   end
 
+  def test_collection_number_by_users
+    expects = newbie_collections <<
+              collection_numbers(:detailed_unknown_coll_num_two)
+    scope = CollectionNumber.by_users(mary).index_order
+    assert_query_scope(expects, scope, :CollectionNumber, by_users: mary)
+  end
+
   def test_collection_number_names
     expects = newbie_collections
     scope = CollectionNumber.names("Mary Newbie").index_order

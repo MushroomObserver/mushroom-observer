@@ -27,8 +27,10 @@ module AbstractModel::Scopes
       where(arel_table[:id].in(set)).order_by_set
     }
 
-    scope :by_user,
-          ->(user) { where(user: user) }
+    scope :by_users, lambda { |users|
+      ids = lookup_users_by_name(users)
+      where(user: ids)
+    }
     scope :by_editor, lambda { |user|
       version_table = :"#{type_tag}_versions"
       unless ActiveRecord::Base.connection.table_exists?(version_table)
