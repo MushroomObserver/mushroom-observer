@@ -541,7 +541,7 @@ class AbstractModelTest < UnitTestCase
       Observation.count, Observation.by_editor(rolf).count
     )
     assert_not_equal(
-      Name.by_user(rolf).count, Name.by_editor(rolf).count
+      Name.by_users(rolf).count, Name.by_editor(rolf).count
     )
   end
 end
