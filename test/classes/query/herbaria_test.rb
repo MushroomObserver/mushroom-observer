@@ -31,9 +31,9 @@ class Query::HerbariaTest < UnitTestCase
   end
 
   def test_herbarium_name_has
-    expects = [herbaria(:dick_herbarium), herbaria(:rolf_herbarium),
-               herbaria(:curatorless_herbarium)]
-    scope = Herbarium.name_has("Herbarium")
+    expects = [herbaria(:curatorless_herbarium), herbaria(:dick_herbarium),
+               herbaria(:rolf_herbarium)]
+    scope = Herbarium.name_has("Herbarium").index_order
     assert_query_scope(expects, scope, :Herbarium, name_has: "Herbarium")
   end
 
