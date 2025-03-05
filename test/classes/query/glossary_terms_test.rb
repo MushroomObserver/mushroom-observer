@@ -19,9 +19,9 @@ class Query::GlossaryTermsTest < UnitTestCase
   end
 
   def test_glossary_term_description_has
-    expects = [glossary_terms(:multiple_word_glossary_term)]
-    scope = GlossaryTerm.name_has("Emarginate")
-    assert_query_scope(expects, scope, :GlossaryTerm, name_has: "emarginate")
+    expects = [glossary_terms(:convex_glossary_term)]
+    scope = GlossaryTerm.description_has("Convex")
+    assert_query_scope(expects, scope, :GlossaryTerm, description_has: "Convex")
   end
 
   def test_glossary_term_by_users

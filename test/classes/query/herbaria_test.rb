@@ -12,6 +12,13 @@ class Query::HerbariaTest < UnitTestCase
     assert_query(expects.select(:id).distinct, :Herbarium)
   end
 
+  def test_herbarium_nonpersonal
+    expects = Herbarium.nonpersonal.index_order
+    assert_query(expects.select(:id).distinct, :Herbarium, nonpersonal: true)
+    # expects = Herbarium.nonpersonal(false).index_order
+    # assert_query(expects.select(:id).distinct, :Herbarium, nonpersonal: false)
+  end
+
   def test_herbarium_by_records
     expects = Herbarium.left_outer_joins(:herbarium_records).group(:id).
               order(HerbariumRecord[:id].count.desc, Herbarium[:id].desc)

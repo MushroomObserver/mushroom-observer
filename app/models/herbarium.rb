@@ -66,8 +66,13 @@ class Herbarium < AbstractModel
   scope :index_order,
         -> { order(name: :asc, id: :desc) }
 
-  scope :nonpersonal,
-        -> { where(personal_user_id: nil) }
+  scope :nonpersonal, lambda { |bool = true|
+    if bool.to_s.to_boolean == true
+      where(personal_user_id: nil)
+    else
+      where.not(personal_user_id: nil)
+    end
+  }
 
   scope :code_has,
         ->(str) { search_columns(Herbarium[:code], str) }

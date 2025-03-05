@@ -25,8 +25,9 @@ class Query::ExternalLinksTest < UnitTestCase
 
   def test_external_link_observations
     obs = observations(:coprinus_comatus_obs)
-    assert_query(obs.external_links.sort_by(&:url),
-                 :ExternalLink, observations: obs)
+    expects = obs.external_links.sort_by(&:url)
+    scope = ExternalLink.observations(obs).index_order
+    assert_query_scope(expects, scope, :ExternalLink, observations: obs)
     obs = observations(:detailed_unknown_obs)
     assert_query([], :ExternalLink, observations: obs)
   end
