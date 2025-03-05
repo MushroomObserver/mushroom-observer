@@ -18,6 +18,14 @@ module AbstractModel::Scopes
       joins(:rss_log).
         reorder(RssLog[:updated_at].desc, model.arel_table[:id].desc).distinct
     }
+    scope :order_by_set, lambda { |set|
+      reorder(Arel::Nodes.build_quoted(set.join(",")) & arel_table[:id])
+    }
+
+    scope :id_in_set, lambda { |ids|
+      set = limited_id_set(ids) # [] is valid
+      where(arel_table[:id].in(set)).order_by_set
+    }
 
     scope :by_user,
           ->(user) { where(user: user) }
@@ -177,8 +185,13 @@ module AbstractModel::Scopes
     }
   end
 
+  # class methods here, `self` included
   module ClassMethods
-    # class methods here, `self` included
+    # array of max of MO.query_max_array unique ids for use with Arel "in"
+    #    where(<x>.in(limited_id_set(ids)))
+    def limited_id_set(ids)
+      ids.map(&:to_i).uniq[0, MO.query_max_array] # [] is valid
+    end
 
     # Fills out the datetime with min/max values for month, day, hour, minute,
     # second, as appropriate for < > comparisons. Only year is required.
