@@ -34,16 +34,16 @@ class Query::HerbariumRecordsTest < UnitTestCase
   end
 
   def test_herbarium_record_notes_has
-    expects = HerbariumRecord.index_order.notes_has("dried")
-    assert_query(expects, :HerbariumRecord, notes_has: "dried")
+    expects = [herbarium_records(:interesting_unknown)]
+    scope = HerbariumRecord.index_order.notes_has("dried")
+    assert_query_scope(expects, scope, :HerbariumRecord, notes_has: "dried")
   end
 
   def test_herbarium_record_initial_dets
     expects = [herbarium_records(:field_museum_record)]
-    assert_query(expects, :HerbariumRecord, initial_dets: "Lichen")
-    expects = HerbariumRecord.index_order.initial_dets("Lichen")
-    assert_query(expects, :HerbariumRecord, initial_dets: "Lichen")
-    assert_query([], :HerbariumRecord, initial_dets: "lichen")
+    scope = HerbariumRecord.index_order.initial_dets("Lichen")
+    assert_query_scope(expects, scope, :HerbariumRecord, initial_dets: "Lichen")
+    assert_query_scope(expects, scope, :HerbariumRecord, initial_dets: "lichen")
   end
 
   def test_herbarium_record_initial_det_has
@@ -71,33 +71,32 @@ class Query::HerbariumRecordsTest < UnitTestCase
   end
 
   def test_herbarium_record_pattern_search_notes
-    expects = herbarium_record_pattern_search("dried")
-    assert_query(expects, :HerbariumRecord, pattern: "dried")
+    expects = [herbarium_records(:interesting_unknown)]
+    scope = HerbariumRecord.pattern("dried").index_order
+    assert_query_scope(expects, scope, :HerbariumRecord, pattern: "dried")
   end
 
   def test_herbarium_record_pattern_search_not_findable
-    assert_query([], :HerbariumRecord, pattern: "no herbarium record has this")
+    expects = []
+    scope = HerbariumRecord.pattern("no herbarium record has").index_order
+    assert_query_scope(expects, scope,
+                       :HerbariumRecord, pattern: "no herbarium record has")
   end
 
   def test_herbarium_record_pattern_search_initial_det
-    expects = herbarium_record_pattern_search("Agaricus")
-    assert_query(expects, :HerbariumRecord, pattern: "Agaricus")
+    expects = [herbarium_records(:agaricus_campestris_spec)]
+    scope = HerbariumRecord.pattern("Agaricus").index_order
+    assert_query_scope(expects, scope, :HerbariumRecord, pattern: "Agaricus")
   end
 
   def test_herbarium_record_pattern_search_accession_number
-    expects = herbarium_record_pattern_search("123a")
-    assert_query(expects, :HerbariumRecord, pattern: "123a")
+    expects = [herbarium_records(:interesting_unknown)]
+    scope = HerbariumRecord.pattern("1234").index_order
+    assert_query_scope(expects, scope, :HerbariumRecord, pattern: "1234")
   end
 
   def test_herbarium_record_pattern_search_blank
     expects = HerbariumRecord.index_order
     assert_query(expects, :HerbariumRecord, pattern: "")
-  end
-
-  def herbarium_record_pattern_search(pattern)
-    HerbariumRecord.index_order.where(
-      HerbariumRecord[:initial_det].concat(HerbariumRecord[:accession_number]).
-      concat(HerbariumRecord[:notes].coalesce("")).matches("%#{pattern}%")
-    ).distinct
   end
 end

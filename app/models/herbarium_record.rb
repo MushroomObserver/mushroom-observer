@@ -85,6 +85,13 @@ class HerbariumRecord < AbstractModel
   scope :accession_number_has,
         ->(str) { search_columns(HerbariumRecord[:accession_number], str) }
 
+  scope :pattern, lambda { |phrase|
+    cols = (HerbariumRecord[:initial_det] +
+            HerbariumRecord[:accession_number] +
+            HerbariumRecord[:notes].coalesce(""))
+    search_columns(cols, phrase).distinct
+  }
+
   def herbarium_label
     if initial_det.blank?
       accession_number
