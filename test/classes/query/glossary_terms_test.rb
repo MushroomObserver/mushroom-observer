@@ -12,21 +12,35 @@ class Query::GlossaryTermsTest < UnitTestCase
     assert_query(expects, :GlossaryTerm)
   end
 
-  def test_glossary_term_pattern_search
+  def test_glossary_term_name_has
+    expects = [glossary_terms(:multiple_word_glossary_term)]
+    scope = GlossaryTerm.name_has("Emarginate")
+    assert_query_scope(expects, scope, :GlossaryTerm, name_has: "emarginate")
+  end
+
+  def test_glossary_term_description_has
+    expects = [glossary_terms(:convex_glossary_term)]
+    scope = GlossaryTerm.description_has("Convex")
+    assert_query_scope(expects, scope, :GlossaryTerm, description_has: "Convex")
+  end
+
+  def test_glossary_term_by_users
+    expects = [glossary_terms(:multiple_word_glossary_term)]
+    scope = GlossaryTerm.by_users(mary)
+    assert_query_scope(expects, scope, :GlossaryTerm, by_users: mary)
+  end
+
+  def test_glossary_term_pattern
     assert_query([], :GlossaryTerm, pattern: "no glossary term has this")
     # name
-    expects = GlossaryTerm.index_order.
-              where(GlossaryTerm[:description].matches("%conic_glossary_term%").
-                    or(GlossaryTerm[:name].matches("%conic_glossary_term%"))).
-              distinct
-    assert_query(expects, :GlossaryTerm, pattern: "conic_glossary_term")
-    # description
-    expects = GlossaryTerm.index_order.
-              where(GlossaryTerm[:description].matches("%Description of Term%").
-                    or(GlossaryTerm[:name].matches("%Description of Term%"))).
-              distinct
+    expects = [glossary_terms(:conic_glossary_term)]
+    scope = GlossaryTerm.pattern("Cute little cone head")
+    assert_query_scope(expects, scope,
+                       :GlossaryTerm, pattern: "Cute little cone head")
+    # default description, many expects
+    expects = GlossaryTerm.pattern("Description of Term").index_order
     assert_query(expects, :GlossaryTerm, pattern: "Description of Term")
-    # blank
+    # blank == all
     expects = GlossaryTerm.index_order
     assert_query(expects, :GlossaryTerm, pattern: "")
   end

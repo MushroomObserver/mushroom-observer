@@ -18,6 +18,12 @@ class Query::HerbariumRecordsTest < UnitTestCase
     assert_query_scope(set, scope, :HerbariumRecord, id_in_set: set)
   end
 
+  def test_herbarium_record_by_users
+    expects = [herbarium_records(:fundis_record)]
+    scope = HerbariumRecord.by_users(mary.id)
+    assert_query_scope(expects, scope, :HerbariumRecord, by_users: mary)
+  end
+
   def test_herbarium_record_observations
     obs = observations(:coprinus_comatus_obs)
     expects = HerbariumRecord.index_order.observations(obs)

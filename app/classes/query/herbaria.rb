@@ -37,7 +37,7 @@ class Query::Herbaria < Query::Base
   # rubocop:enable Metrics/AbcSize
 
   def add_nonpersonal_condition
-    return if params[:nonpersonal].blank?
+    return if params[:nonpersonal].blank? # false is blank
 
     @title_tag = :query_title_nonpersonal
     where << "herbaria.personal_user_id IS NULL"

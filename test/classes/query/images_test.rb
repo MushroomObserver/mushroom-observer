@@ -82,26 +82,36 @@ class Query::ImagesTest < UnitTestCase
     assert_query(expects, :Image, ok_for_export: false)
   end
 
-  def test_image_for_observations
+  def test_image_observations
     obs = observations(:two_img_obs)
-    expects = Image.index_order.joins(:observations).
-              where(observations: { id: obs.id }).distinct
-    assert_query(expects, :Image, observations: obs)
+    scope = Image.observations(obs.id).index_order
+    assert_query(scope, :Image, observations: obs)
   end
 
-  def test_image_for_projects
+  def test_image_locations
+    locations = Location.index_order.last(3)
+    scope = Image.locations(locations).index_order
+    assert_query(scope, :Image, locations: locations)
+  end
+
+  def test_image_projects
     project = projects(:bolete_project)
-    expects = Image.index_order.joins(:projects).
-              where(projects: { id: project.id }).distinct
-    assert_query(expects, :Image, projects: [project.title])
+    scope = Image.projects(project.id).index_order
+    assert_query(scope, :Image, projects: [project.title])
   end
 
-  def test_image_by_user
-    expects = Image.index_order.where(user_id: rolf.id).distinct
+  def test_image_species_lists
+    spl = species_lists(:query_first_list)
+    scope = Image.species_lists(spl.id).index_order
+    assert_query(scope, :Image, species_lists: spl)
+  end
+
+  def test_image_by_users
+    expects = Image.by_users(rolf.id).index_order
     assert_query(expects, :Image, by_users: rolf)
-    expects = Image.index_order.where(user_id: mary.id).distinct
+    expects = Image.by_users(mary.id).index_order
     assert_query(expects, :Image, by_users: mary)
-    expects = Image.index_order.where(user_id: dick.id).distinct
+    expects = Image.by_users(dick.id).index_order
     assert_query(expects, :Image, by_users: dick)
   end
 

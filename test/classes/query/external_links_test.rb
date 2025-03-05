@@ -8,7 +8,7 @@ class Query::ExternalLinksTest < UnitTestCase
   include QueryExtensions
 
   def test_external_link_all
-    assert_query(ExternalLink.all.sort_by(&:url), :ExternalLink)
+    assert_query(ExternalLink.index_order, :ExternalLink)
   end
 
   def test_external_link_id_in_set
@@ -18,15 +18,16 @@ class Query::ExternalLinksTest < UnitTestCase
   end
 
   def test_external_link_by_users
-    assert_query(ExternalLink.where(user: users(:mary)).sort_by(&:url),
+    assert_query(ExternalLink.by_users(users(:mary)).index_order,
                  :ExternalLink, by_users: users(:mary))
     assert_query([], :ExternalLink, by_users: users(:dick))
   end
 
   def test_external_link_observations
     obs = observations(:coprinus_comatus_obs)
-    assert_query(obs.external_links.sort_by(&:url),
-                 :ExternalLink, observations: obs)
+    expects = obs.external_links.sort_by(&:url)
+    scope = ExternalLink.observations(obs).index_order
+    assert_query_scope(expects, scope, :ExternalLink, observations: obs)
     obs = observations(:detailed_unknown_obs)
     assert_query([], :ExternalLink, observations: obs)
   end

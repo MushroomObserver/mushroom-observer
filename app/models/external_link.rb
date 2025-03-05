@@ -35,15 +35,15 @@ class ExternalLink < AbstractModel
   validate  :check_url_syntax
 
   scope :index_order,
-        -> { order(url: :desc, id: :desc) }
-  scope :observations,
-        ->(ids) { where(observation_id: ids) }
+        -> { order(url: :asc, id: :desc) }
+  scope :url_has,
+        ->(phrase) { search_columns(ExternalLink[:url], phrase) }
   scope :external_sites, lambda { |sites|
     ids = lookup_external_sites_by_name(sites)
     where(external_site_id: ids)
   }
-  scope :url_has,
-        ->(phrase) { search_columns(ExternalLink[:url], phrase) }
+  scope :observations,
+        ->(ids) { where(observation_id: ids) }
 
   VALID_URL_PAT = %r{^[a-z]+://}
 

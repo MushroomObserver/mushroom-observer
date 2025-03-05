@@ -66,8 +66,13 @@ class Herbarium < AbstractModel
   scope :index_order,
         -> { order(name: :asc, id: :desc) }
 
-  scope :nonpersonal,
-        -> { where(personal_user_id: nil) }
+  scope :nonpersonal, lambda { |bool = true|
+    if bool.to_s.to_boolean == true
+      where(personal_user_id: nil)
+    else
+      where.not(personal_user_id: nil)
+    end
+  }
 
   scope :code_has,
         ->(str) { search_columns(Herbarium[:code], str) }
@@ -78,13 +83,12 @@ class Herbarium < AbstractModel
   scope :mailing_address_has,
         ->(str) { search_columns(Herbarium[:mailing_address], str) }
 
-  scope :pattern_search, lambda { |phrase|
+  scope :pattern, lambda { |phrase|
     cols = (Herbarium[:code] + Herbarium[:name] +
             Herbarium[:description].coalesce("") +
             Herbarium[:mailing_address].coalesce(""))
     search_columns(cols, phrase).distinct
   }
-
 
   def self.mcp_collections
     @mcp_collections ||=
