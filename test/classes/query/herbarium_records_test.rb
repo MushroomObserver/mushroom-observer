@@ -65,7 +65,7 @@ class Query::HerbariumRecordsTest < UnitTestCase
 
     expects = [herbarium_records(:coprinus_comatus_nybg_spec)]
     scope = HerbariumRecord.index_order.accession_numbers(4321)
-    assert_query_scope(expects,  scope,
+    assert_query_scope(expects, scope,
                        :HerbariumRecord, accession_numbers: "4321")
   end
 

@@ -13,8 +13,8 @@ class Query::CollectionNumbersTest < UnitTestCase
   end
 
   def test_collection_number_id_in_set
-    set = CollectionNumber.last(3).pluck(:id)
-    scope = CollectionNumber.id_in_set(set).index_order
+    set = CollectionNumber.order(id: :asc).last(3).pluck(:id)
+    scope = CollectionNumber.id_in_set(set)
     assert_query_scope(set, scope, :CollectionNumber, id_in_set: set)
   end
 

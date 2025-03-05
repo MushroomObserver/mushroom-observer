@@ -13,7 +13,7 @@ class Query::ExternalLinksTest < UnitTestCase
 
   def test_external_link_id_in_set
     set = ExternalLink.order(id: :asc).last(2).pluck(:id)
-    scope = ExternalLink.id_in_set(set).index_order
+    scope = ExternalLink.id_in_set(set)
     assert_query_scope(set, scope, :ExternalLink, id_in_set: set)
   end
 
