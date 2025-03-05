@@ -46,6 +46,16 @@ class GlossaryTerm < AbstractModel
   scope :index_order,
         -> { order(name: :asc, id: :desc) }
 
+  scope :name_has,
+        ->(str) { search_columns(GlossaryTerm[:name], str) }
+  scope :description_has,
+        ->(str) { search_columns(GlossaryTerm[:description], str) }
+
+  scope :pattern, lambda { |phrase|
+    cols = (GlossaryTerm[:name] + GlossaryTerm[:description].coalesce(""))
+    search_columns(cols, phrase).distinct
+  }
+
   scope :show_includes, lambda {
     strict_loading.includes(
       :glossary_term_images,
