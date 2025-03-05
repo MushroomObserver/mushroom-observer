@@ -51,7 +51,7 @@ class GlossaryTerm < AbstractModel
   scope :description_has,
         ->(str) { search_columns(GlossaryTerm[:description], str) }
 
-  scope :pattern_search, lambda { |phrase|
+  scope :pattern, lambda { |phrase|
     cols = (GlossaryTerm[:name] + GlossaryTerm[:description].coalesce(""))
     search_columns(cols, phrase).distinct
   }
