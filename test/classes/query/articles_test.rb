@@ -35,4 +35,10 @@ class Query::ArticlesTest < UnitTestCase
     scope = Article.body_has("second_article").index_order
     assert_query_scope(expects, scope, :Article, body_has: "second_article")
   end
+
+  def test_article_by_users
+    expects = [articles(:premier_article)]
+    scope = Article.by_users(rolf).index_order
+    assert_query_scope(expects, scope, :Article, by_users: rolf.id)
+  end
 end

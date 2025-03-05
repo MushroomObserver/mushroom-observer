@@ -8,7 +8,7 @@ class Query::ExternalLinksTest < UnitTestCase
   include QueryExtensions
 
   def test_external_link_all
-    assert_query(ExternalLink.all.sort_by(&:url), :ExternalLink)
+    assert_query(ExternalLink.index_order, :ExternalLink)
   end
 
   def test_external_link_id_in_set
@@ -18,7 +18,7 @@ class Query::ExternalLinksTest < UnitTestCase
   end
 
   def test_external_link_by_users
-    assert_query(ExternalLink.where(user: users(:mary)).sort_by(&:url),
+    assert_query(ExternalLink.by_users(users(:mary)).index_order,
                  :ExternalLink, by_users: users(:mary))
     assert_query([], :ExternalLink, by_users: users(:dick))
   end

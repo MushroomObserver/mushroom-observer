@@ -96,12 +96,12 @@ class Query::ImagesTest < UnitTestCase
     assert_query(expects, :Image, projects: [project.title])
   end
 
-  def test_image_by_user
-    expects = Image.index_order.where(user_id: rolf.id).distinct
+  def test_image_by_users
+    expects = Image.by_users(rolf.id).index_order
     assert_query(expects, :Image, by_users: rolf)
-    expects = Image.index_order.where(user_id: mary.id).distinct
+    expects = Image.by_users(mary.id).index_order
     assert_query(expects, :Image, by_users: mary)
-    expects = Image.index_order.where(user_id: dick.id).distinct
+    expects = Image.by_users(dick.id).index_order
     assert_query(expects, :Image, by_users: dick)
   end
 
