@@ -95,6 +95,7 @@ class Query::LocationDescriptionsTest < UnitTestCase
   def test_location_description_content_has
     expects = [location_descriptions(:albion_desc)]
     scope = LocationDescription.content_has("to play with").index_order
-    assert_query_scope(expects, scope, :Location, content_has: "to play with")
+    assert_query_scope(expects, scope,
+                       :LocationDescription, content_has: "to play with")
   end
 end

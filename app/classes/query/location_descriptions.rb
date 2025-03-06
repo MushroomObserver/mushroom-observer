@@ -31,6 +31,7 @@ class Query::LocationDescriptions < Query::Base
     ids = lookup_locations_by_name(params[:locations])
     add_association_condition("location_descriptions.location_id", ids)
     initialize_description_public_parameter(:location)
+    initialize_content_has_parameter(:location)
     add_subquery_condition(:location_query, :locations)
     super
   end
