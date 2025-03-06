@@ -219,10 +219,11 @@ class NamesController < ApplicationController
     # Note this is only creating a schematic of a query, used in the link.
 
     # Create query for immediate children.
-    @children_query = create_query(:Name,
-                                   names: @name.id,
-                                   include_immediate_subtaxa: true,
-                                   exclude_original_names: true)
+    @children_query = create_query(
+      :Name, names: { lookup: @name.id,
+                      include_immediate_subtaxa: true,
+                      exclude_original_names: true }
+    )
     # @first_child runs @children_query to check for immediate children.
     # Used in classification and lifeform.
     # Potentially refactor to reduce duplicate queries:
@@ -242,16 +243,18 @@ class NamesController < ApplicationController
     # Second query: Observations of name including (all) subtaxa.
     # This is only used for the link to "observations of this name's subtaxa".
     # We also query for obs (with images) below, so we could maybe refactor to
-    # get Observation.of_names(name.id).include_subtaxa.order(:vote_cache).
+    # get Observation.names(lookup: name.id, include_subtaxa: true).
+    #     order(:vote_cache).
     # Then, select those of original name with thumb_image_id for @best_images,
     # and select_count all (excluding obs of original name) to get @has_subtaxa.
     # Would need to write include_subtaxa scope, as above.
     if @name.at_or_below_genus?
-      @subtaxa_query = create_query(:Observation,
-                                    names: @name.id,
-                                    include_subtaxa: true,
-                                    exclude_original_names: true,
-                                    by: :confidence)
+      @subtaxa_query = create_query(
+        :Observation, names: { lookup: @name.id,
+                               include_subtaxa: true,
+                               exclude_original_names: true,
+                               by: :confidence }
+      )
       # Determine if relevant and count the results of running the query if so.
       # Don't run if there aren't any children.
       @has_subtaxa = @first_child ? @subtaxa_query.select_count : 0

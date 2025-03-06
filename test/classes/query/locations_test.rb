@@ -450,17 +450,24 @@ class Query::LocationsTest < UnitTestCase
     nam = [names(:agaricus).id]
     assert_query(
       [locations(:burbank).id],
-      :Location, observation_query: { names: nam, include_subtaxa: true }
+      :Location, observation_query: {
+        names: { lookup: nam, include_subtaxa: true }
+      }
     )
   end
 
   def test_location_with_observations_of_name
     assert_query(
       [locations(:burbank).id],
-      :Location, observation_query: { names: [names(:agaricus_campestris).id] }
+      :Location, observation_query: {
+        names: { lookup: [names(:agaricus_campestris).id] }
+      }
     )
     assert_query(
-      [], :Location, observation_query: { names: [names(:peltigera).id] }
+      [],
+      :Location, observation_query: {
+        names: { lookup: [names(:peltigera).id] }
+      }
     )
   end
 end
