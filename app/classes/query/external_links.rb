@@ -9,11 +9,11 @@ class Query::ExternalLinks < Query::Base
     super.merge(
       created_at: [:time],
       updated_at: [:time],
-      ids: [ExternalLink],
+      id_in_set: [ExternalLink],
+      url_has: :string,
       by_users: [User],
-      observations: [Observation],
       external_sites: [ExternalSite],
-      url_has: :string
+      observations: [Observation]
     )
   end
 

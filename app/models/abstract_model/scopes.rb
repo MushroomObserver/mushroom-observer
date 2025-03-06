@@ -18,9 +18,19 @@ module AbstractModel::Scopes
       joins(:rss_log).
         reorder(RssLog[:updated_at].desc, model.arel_table[:id].desc).distinct
     }
+    scope :order_by_set, lambda { |*set|
+      reorder(Arel::Nodes.build_quoted(set.join(",")) & arel_table[:id])
+    }
 
-    scope :by_user,
-          ->(user) { where(user: user) }
+    scope :id_in_set, lambda { |ids|
+      set = limited_id_set(ids) # [] is valid
+      where(arel_table[:id].in(set)).order_by_set
+    }
+
+    scope :by_users, lambda { |users|
+      ids = lookup_users_by_name(users)
+      where(user: ids)
+    }
     scope :by_editor, lambda { |user|
       version_table = :"#{type_tag}_versions"
       unless ActiveRecord::Base.connection.table_exists?(version_table)
@@ -177,8 +187,13 @@ module AbstractModel::Scopes
     }
   end
 
+  # class methods here, `self` included
   module ClassMethods
-    # class methods here, `self` included
+    # array of max of MO.query_max_array unique ids for use with Arel "in"
+    #    where(<x>.in(limited_id_set(ids)))
+    def limited_id_set(ids)
+      [ids].flatten.map(&:to_i).uniq[0, MO.query_max_array] # [] is valid
+    end
 
     # Fills out the datetime with min/max values for month, day, hour, minute,
     # second, as appropriate for < > comparisons. Only year is required.
@@ -343,6 +358,39 @@ module AbstractModel::Scopes
 
     def lookup_users_by_name(vals)
       Lookup::Users.new(vals).ids
+    end
+
+    def exact_match_condition(table_column, vals)
+      vals = [vals].flatten.map { |val| val.to_s.downcase }
+      if vals.length == 1
+        where(table_column.downcase.eq(vals.first))
+      elsif vals.length > 1
+        where(table_column.downcase.in(*vals))
+      end
+    end
+
+    def presence_condition(table_column, bool: true)
+      if bool.to_s.to_boolean == true
+        where(table_column.not_eq(nil))
+      else
+        where(table_column.eq(nil))
+      end
+    end
+
+    def boolean_condition(table_column, val, bool: true)
+      if bool.to_s.to_boolean == true
+        where(table_column.eq(val))
+      else
+        where(table_column.not_eq(val))
+      end
+    end
+
+    def coalesce_presence_condition(table_column, bool: true)
+      if bool.to_s.to_boolean == true
+        where(table_column.coalesce("").length.gt(0))
+      else
+        where(table_column.coalesce("").length.eq(0))
+      end
     end
   end
 end

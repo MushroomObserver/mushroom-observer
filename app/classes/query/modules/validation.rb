@@ -181,7 +181,7 @@ module Query::Modules::Validation
       val.id
     elsif could_be_record_id?(param, val)
       val.to_i
-    elsif val.is_a?(String) && param != :ids
+    elsif val.is_a?(String) && param != :id_in_set
       val
     else
       raise("Value for :#{param} should be id, string " \

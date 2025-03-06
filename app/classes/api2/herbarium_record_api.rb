@@ -33,15 +33,15 @@ class API2
 
     def query_params
       {
-        ids: parse_array(:herbarium_record, :id, as: :id),
+        id_in_set: parse_array(:herbarium_record, :id, as: :id),
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at),
         by_users: parse_array(:user, :user, help: :creator),
         herbaria: parse_array(:herbarium, :herbarium, as: :id),
         observations: parse_array(:observation, :observation, as: :id),
         has_notes: parse(:boolean, :has_notes),
-        initial_det: parse(:string, :initial_det, help: 1),
-        accession_number: parse(:string, :accession_number, help: 1),
+        initial_dets: parse(:string, :initial_det, help: 1),
+        accession_numbers: parse(:string, :accession_number, help: 1),
         notes_has: parse(:string, :notes_has, help: 1),
         initial_det_has: parse(:string, :initial_det_has, help: 1),
         accession_number_has: parse(:string, :accession_number_has, help: 1)

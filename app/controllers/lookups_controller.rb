@@ -253,7 +253,7 @@ class LookupsController < ApplicationController
   )
     obj = matches.first || suggestions.first
 
-    query = Query.lookup(model, ids: matches + suggestions)
+    query = Query.lookup(model, id_in_set: matches + suggestions)
     if suggestions.any?
       flash_warning(
         :runtime_suggest_multiple_alternates.t(match: id, type: model.type_tag)

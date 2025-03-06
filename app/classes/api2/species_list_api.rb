@@ -33,7 +33,7 @@ class API2
 
     def query_params
       {
-        ids: parse_array(:species_list, :id, as: :id),
+        id_in_set: parse_array(:species_list, :id, as: :id),
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at),
         date: parse_range(:date, :date, help: :any_date),

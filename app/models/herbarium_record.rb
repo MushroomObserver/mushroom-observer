@@ -57,13 +57,39 @@ class HerbariumRecord < AbstractModel
   before_update :log_update
   before_destroy :log_destroy
 
-  scope :index_order, lambda {
-    order(initial_det: :asc, accession_number: :asc, id: :desc)
-  }
+  scope :index_order,
+        -> { order(initial_det: :asc, accession_number: :asc, id: :desc) }
 
-  scope :for_observation, lambda { |obs|
+  scope :observations, lambda { |obs|
     joins(:observation_herbarium_records).
       where(observation_herbarium_records: { observation: obs })
+  }
+  scope :herbaria,
+        ->(herbaria) { where(herbarium: herbaria) }
+
+  scope :has_notes, lambda { |bool = true|
+    coalesce_presence_condition(HerbariumRecord[:notes], bool:)
+  }
+  scope :notes_has,
+        ->(str) { search_columns(HerbariumRecord[:notes], str) }
+
+  scope :initial_dets, lambda { |val|
+    exact_match_condition(HerbariumRecord[:initial_det], val)
+  }
+  scope :initial_det_has,
+        ->(str) { search_columns(HerbariumRecord[:initial_det], str) }
+
+  scope :accession_numbers, lambda { |val|
+    exact_match_condition(HerbariumRecord[:accession_number], val)
+  }
+  scope :accession_number_has,
+        ->(str) { search_columns(HerbariumRecord[:accession_number], str) }
+
+  scope :pattern, lambda { |phrase|
+    cols = (HerbariumRecord[:initial_det] +
+            HerbariumRecord[:accession_number] +
+            HerbariumRecord[:notes].coalesce(""))
+    search_columns(cols, phrase).distinct
   }
 
   def herbarium_label

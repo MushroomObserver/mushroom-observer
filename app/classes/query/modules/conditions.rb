@@ -86,10 +86,10 @@ module Query::Modules::Conditions
 
   # The method that all classes use for queries of their own ids.
   # Can accept an empty array of ids and respond accordingly.
-  def add_id_in_set_condition(table = model.table_name, ids = :ids)
-    return if params[ids].nil? # [] is valid
+  def add_id_in_set_condition(table = model.table_name, param = :id_in_set)
+    return if params[param].nil? # [] is valid
 
-    set = clean_id_set(params[ids])
+    set = clean_id_set(params[param])
     @where << "#{table}.id IN (#{set})"
     @order = "FIND_IN_SET(#{table}.id,'#{set}') ASC" unless params[:order]
 

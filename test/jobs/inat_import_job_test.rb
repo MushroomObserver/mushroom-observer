@@ -63,8 +63,8 @@ class InatImportJobTest < ActiveJob::TestCase
 
     # Add objects which are not included in fixtures
     name = Name.create(
-      text_name: "Calostoma lutescens",
-      author: "(Schweinitz) Burnap",
+      text_name: "Calostoma lutescens", author: "(Schweinitz) Burnap",
+      search_name: "Calostoma lutescens (Schweinitz) Burnap",
       display_name: "**__Calostoma lutescens__** (Schweinitz) Burnap",
       rank: "Species",
       user: user
@@ -137,8 +137,8 @@ class InatImportJobTest < ActiveJob::TestCase
 
     # Add objects which are not included in fixtures
     Name.create(
-      text_name: "Calostoma lutescens",
-      author: "(Schweinitz) Burnap",
+      text_name: "Calostoma lutescens", author: "(Schweinitz) Burnap",
+      search_name: "Calostoma lutescens (Schweinitz) Burnap",
       display_name: "**__Calostoma lutescens__** (Schweinitz) Burnap",
       rank: "Species",
       user: user
@@ -191,7 +191,8 @@ class InatImportJobTest < ActiveJob::TestCase
 
     # Add objects which are not included in fixtures
     name = Name.create(
-      text_name: "Evernia", author: "Ach.", display_name: "Evernia",
+      text_name: "Evernia", author: "Ach.", search_name: "Evernia Ach.",
+      display_name: "**__Evernia__** Ach.",
       rank: "Genus", user: user
     )
     loc = Location.create(
@@ -240,6 +241,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
     name = Name.find_or_create_by(text_name: "Tremellales",
                                   author: "Fr.",
+                                  search_name: "Tremellales Fr.",
                                   display_name: "Tremellales",
                                   rank: "Order",
                                   user: user)
@@ -270,8 +272,11 @@ class InatImportJobTest < ActiveJob::TestCase
     inat_import = create_inat_import(inat_response: mock_inat_response)
 
     name = Name.create(
-      text_name: "Lycoperdon", author: "Pers.", rank: "Genus",
-      display_name: "**__Lycoperdon__** Pers.", user: user
+      text_name: "Lycoperdon", author: "Pers.",
+      search_name: "Lycoperdon Pers.",
+      display_name: "**__Lycoperdon__** Pers.",
+      rank: "Genus",
+      user: user
     )
 
     stub_inat_interactions(inat_import: inat_import,
@@ -315,6 +320,7 @@ class InatImportJobTest < ActiveJob::TestCase
     name = Name.create(
       text_name: "Inonotus obliquus f. sterilis",
       author: "(Vanin) Balandaykin & Zmitr",
+      search_name: "Inonotus obliquus f. sterilis (Vanin) Balandaykin & Zmitr",
       display_name: "**__Inonotus obliquus__** f. **__sterilis__** " \
                     "(Vanin) Balandaykin & Zmitr.",
       rank: "Form",
@@ -345,8 +351,8 @@ class InatImportJobTest < ActiveJob::TestCase
 
     # Add objects which are not included in fixtures
     name = Name.create(
-      text_name: "Xeromphalina campanella group",
-      author: "",
+      text_name: "Xeromphalina campanella group", author: "",
+      search_name: "Xeromphalina campanella group",
       display_name: "**__Xeromphalina campanella__** group",
       rank: "Group",
       user: users(:rolf)
@@ -379,8 +385,8 @@ class InatImportJobTest < ActiveJob::TestCase
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
     inat_import = create_inat_import(inat_response: mock_inat_response)
     name = Name.create(
-      text_name: 'Arrhenia "sp-NY02"',
-      author: "S.D. Russell crypt. temp.",
+      text_name: 'Arrhenia "sp-NY02"', author: "S.D. Russell crypt. temp.",
+      search_name: 'Arrhenia "sp-NY02" S.D. Russell crypt. temp.',
       display_name: '**__Arrhenia "sp-NY02"__** S.D. Russell crypt. temp.',
       rank: "Species",
       user: inat_manager
@@ -456,8 +462,8 @@ class InatImportJobTest < ActiveJob::TestCase
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
     inat_import = create_inat_import(inat_response: mock_inat_response)
     name = Name.create(
-      text_name: 'Donadinia "sp-PNW01"',
-      author: "crypt. temp.",
+      text_name: 'Donadinia "sp-PNW01"', author: "crypt. temp.",
+      search_name: 'Donadinia "sp-PNW01" crypt. temp.',
       display_name: '**__Donadinia "sp-PNW01"__** crypt. temp.',
       rank: "Species",
       user: inat_manager

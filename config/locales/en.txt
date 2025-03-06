@@ -1662,7 +1662,7 @@
   form_names_refs: References
   form_names_text_name_help: "Unformatted taxon name <i>without</i> author info or status info. E.g.: <br>&nbsp;&nbsp; Amanita muscaria var. flavivolvata <br>For a <b>group or clade</b>, select <b>[:RANK]</b> “[:RANK_GROUP]” above, and add either “group” or “clade” at the end of <b>[:form_names_text_name]</b>. E.g.: <br>&nbsp;&nbsp; Amanita muscaria group <br>&nbsp;&nbsp; Morchella elata clade"
   form_names_author_help: "Include the author using <a href=\"https://www.iapt-taxon.org/nomen/main.php?page=art46\" target=\"_new\">ICN</a> format. <b>[:Authority]</b> may also include “sensu” and/or -- for a name that is not a <a href=\"https://mushroomobserver.org/lookups/lookup_glossary_term/legitimate+name\">legitimate name</a> -- status information. E.g.: <br/>&nbsp;&nbsp; (Singer) Jenkins <br>&nbsp;&nbsp; sensu Ginns <br/>&nbsp;&nbsp; N. Siegel & C.F. Schwarz nom. prov."
-  form_names_citation_help: Citation for the <a href=\"https://mushroomobserver.org/lookups/lookup_glossary_term/protologue\">protologue</a> of this name. Please omit the author(s) of the <a href=\"https://mushroomobserver.org/lookups/lookup_glossary_term/protologue\">protologue</a>.&nbsp;
+  form_names_citation_help: "Citation for the <a href=\"https://mushroomobserver.org/lookups/lookup_glossary_term/protologue\">protologue</a> of this name. Include the name of the journal, volume, number, the page where the protologue begins, and year.<br/> Omit “in”, title of the article, author(s).<br>&nbsp;&nbsp; Good: Brittonia 48(4): 489 (1996)<br>&nbsp;&nbsp; Bad: Halling, R.E. 1996. Notes on Collybia. V. Gymnopus section Levipedes in tropical South America with comments on Collybia. Brittonia. 48(4):487-494 <br/>"
   form_names_citation_textilize_note: Citations can be formatted using the <a href="/info/textile_sandbox" target="_new">Textile markup system</a>.
   form_names_misspelling_note: If this name is misspelt, please check the box and enter the correct spelling. *NOTE:* Please do not use this to deprecate correctly-spelled synonyms.
   form_names_classification_help: "List the higher taxa containing this [rank], one name per rank. Do not include genus or lower ranks. Example:<br/> Domain: _Eukarya_<br/> Kingdom: _Fungi_<br/> Phylum: _Basidiomycota_<br/> Class: _Agaricomycetes_<br/> Order: _Agaricales_<br/> Family: _Agaricaceae_<br/>"
@@ -2064,20 +2064,16 @@
   prefs_email_general_questions: someone wants to send me a question about my observations, etc.
   prefs_email_general_question: "[:prefs_email_general_questions]"
   prefs_email_comments: "[:Comment] Email"
-  prefs_email_comments_all: anyone comments on anything.
   prefs_email_comments_owner: someone comments on my observations, names, etc.
   prefs_email_comments_response: someone posts responses to my comments.
   prefs_email_locations: "[:Location] Email"
-  prefs_email_locations_all: anyone changes any location.
   prefs_email_locations_admin: someone changes a location I administrate.
   prefs_email_locations_author: someone changes a location I'm author on.
   prefs_email_locations_editor: someone changes a location I've edited.
   prefs_email_observations: "[:Observation] Email"
-  prefs_email_observations_all: anything happens to any observation.
   prefs_email_observations_consensus: consensus name changes for one of my observations.
   prefs_email_observations_naming: someone proposes a name for one of my observations.
   prefs_email_names: "[:Name] Email"
-  prefs_email_names_all: anyone changes any name.
   prefs_email_names_admin: someone changes a name I administrate.
   prefs_email_names_author: someone changes a name I'm author on.
   prefs_email_names_editor: someone changes a name I've edited.
@@ -3156,37 +3152,29 @@
   no_email_some_maybe_queued: "Note: For the next few minutes you may continue to receive emails that have already been queued."
   no_email_comments_owner_note: You will no longer receive email notifications when other [:users] of the [:app_title] website post [:comments] about your [:observations], names, etc.
   no_email_comments_response_note: You will no longer receive email notifications when other [:users] of the [:app_title] website post responses to your [:comments].
-  no_email_comments_all_note: You will no longer receive email notifications of all [:comments].
   no_email_observations_consensus_note: You will no longer receive email notifications when the names of your [:observations] change.
   no_email_observations_naming_note: You will no longer receive email notifications when other [:users] of the [:app_title] website propose names for your [:observations].
-  no_email_observations_all_note: You will no longer receive email notifications whenenver [:observations] change.
   no_email_names_admin_note: You will no longer receive email notifications when other [:users] make changes to name descriptions you administrate.
   no_email_names_author_note: You will no longer receive email notifications when other [:users] make changes to descriptions you have written.
   no_email_names_editor_note: You will no longer receive email notifications when other [:users] make changes to descriptions you have edited.
   no_email_names_reviewer_note: You will no longer receive email notifications when other [:users] make changes to descriptions you have reviewed.
-  no_email_names_all_note: You will no longer receive email notifications about all name changes.
   no_email_locations_admin_note: You will no longer receive email notifications when other [:users] make changes to location descriptions you administrate.
   no_email_locations_author_note: You will no longer receive email notifications when other [:users] make changes to [:locations] you have created.
   no_email_locations_editor_note: You will no longer receive email notifications when other [:users] make changes to [:locations] you have edited.
-  no_email_locations_all_note: You will no longer receive email notifications about all location changes.
   no_email_general_feature_note: Automated email about new features has been disabled for your account.
   no_email_general_commercial_note: Other [:users] of the [:app_title] website can no longer send you commercial inquiries about your [:images].
   no_email_general_question_note: Other [:users] of the [:app_title] website can no longer send you questions about your [:observations].
   no_email_comments_owner_success: "[:comment] notifications disabled for [name]."
   no_email_comments_response_success: "[:comment] response notifications disabled for [name]."
-  no_email_comments_all_success: "[:comment] notifications disabled for [name]."
   no_email_observations_consensus_success: Consensus change notifications disabled for [name].
   no_email_observations_naming_success: Name proposal notifications disabled for [name].
-  no_email_observations_all_success: "[:observation] notifications disabled for [name]."
   no_email_names_admin_success: Admin name change notifications disabled for [name].
   no_email_names_author_success: Author name change notifications disabled for [name].
   no_email_names_editor_success: Editor name change notifications disabled for [name].
   no_email_names_reviewer_success: Reviewer name change notifications disabled for [name].
-  no_email_names_all_success: All name change notifications disabled for [name].
   no_email_locations_admin_success: Admin location change notifications disabled for [name].
   no_email_locations_author_success: Author location change notifications disabled for [name].
   no_email_locations_editor_success: Editor location change notifications disabled for [name].
-  no_email_locations_all_success: All location change notifications disabled for [name].
   no_email_general_feature_success: Automated feature email disabled for [name].
   no_email_general_commercial_success: Commercial inquiries disabled for [name].
   no_email_general_question_success: Question email disabled for [name].
@@ -3904,6 +3892,9 @@
   validate_name_text_name_too_long: "[:validate_too_many_characters(field=:form_names_text_name)]"
   validate_name_use_first_author: Use the first author followed by “et al.” per <a href="https://www.iapt-taxon.org/nomen/main.php?page=art46" target="_new">ICN Recommendation 46C.2</a>
   validate_name_user_missing: "[:validate_missing(field=:user)]"
+  validate_name_author_characters: "must include only letters, spaces, and these characters: \" ( ) - . , &"
+  validate_name_author_ending: must end only in a letter or period
+  validate_name_equivalent_exists: "Equivalent Name already exists"
   validate_naming_name_missing: "[:validate_missing(field=:name)]"
   validate_naming_observation_missing: "[:validate_missing(field=:observation)]"
   validate_naming_reason_naming_missing: "[:validate_missing(field=:naming)]"

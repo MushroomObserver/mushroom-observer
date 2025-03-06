@@ -9,17 +9,17 @@ class Query::HerbariumRecords < Query::Base
     super.merge(
       created_at: [:time],
       updated_at: [:time],
-      ids: [HerbariumRecord],
+      id_in_set: [HerbariumRecord],
       by_users: [User],
+      has_notes: :boolean,
+      notes_has: :string,
+      initial_dets: [:string],
+      initial_det_has: :string,
+      accession_numbers: [:string],
+      accession_number_has: :string,
       herbaria: [Herbarium],
       observations: [Observation],
-      pattern: :string,
-      has_notes: :boolean,
-      initial_det: [:string],
-      accession_number: [:string],
-      notes_has: :string,
-      initial_det_has: :string,
-      accession_number_has: :string
+      pattern: :string
     )
   end
 
@@ -48,9 +48,9 @@ class Query::HerbariumRecords < Query::Base
 
   def initialize_exact_match_parameters
     add_exact_match_condition("herbarium_records.initial_det",
-                              params[:initial_det])
+                              params[:initial_dets])
     add_exact_match_condition("herbarium_records.accession_number",
-                              params[:accession_number])
+                              params[:accession_numbers])
   end
 
   def initialize_search_parameters

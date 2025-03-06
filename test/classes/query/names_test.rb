@@ -43,15 +43,15 @@ class Query::NamesTest < UnitTestCase
       names(:conocybe_filaris),
       names(:lepiota_rhacodes),
       names(:lactarius_subalpinus)
-    ]
+    ].freeze
   end
 
   def test_name_ids_with_name_ids
-    assert_query(names_set.map(&:id), :Name, ids: names_set.map(&:id))
+    assert_query(names_set.map(&:id), :Name, id_in_set: names_set.map(&:id))
   end
 
   def test_name_ids_with_name_instances
-    assert_query(names_set.map(&:id), :Name, ids: names_set)
+    assert_query(names_set.map(&:id), :Name, id_in_set: names_set)
   end
 
   def test_name_by_user
@@ -266,28 +266,28 @@ class Query::NamesTest < UnitTestCase
     assert_query([], :Name, pattern: "petigera")
     assert_query([names(:petigera).id],
                  :Name, pattern: "petigera", misspellings: :either)
-    assert_query(Name.pattern_search("petigera").misspellings(:either),
+    assert_query(Name.pattern("petigera").misspellings(:either),
                  :Name, pattern: "petigera", misspellings: :either)
   end
 
   def test_name_pattern_search_citation
     assert_query([names(:peltigera).id],
                  :Name, pattern: "ye auld manual of lichenes")
-    assert_query(Name.pattern_search("ye auld manual of lichenes"),
+    assert_query(Name.pattern("ye auld manual of lichenes"),
                  :Name, pattern: "ye auld manual of lichenes")
   end
 
   def test_name_pattern_search_description_notes
     assert_query([names(:agaricus_campestras).id],
                  :Name, pattern: "prevent me")
-    assert_query(Name.pattern_search("prevent me"),
+    assert_query(Name.pattern("prevent me"),
                  :Name, pattern: "prevent me")
   end
 
   def test_name_pattern_search_description_gen_desc
     assert_query([names(:suillus)],
                  :Name, pattern: "smell as sweet")
-    assert_query(Name.pattern_search("smell as sweet"),
+    assert_query(Name.pattern("smell as sweet"),
                  :Name, pattern: "smell as sweet")
   end
 
@@ -295,7 +295,7 @@ class Query::NamesTest < UnitTestCase
   def test_name_pattern_search_description_look_alikes
     assert_query([names(:peltigera).id],
                  :Name, pattern: "superficially similar")
-    assert_query(Name.pattern_search("superficially similar"),
+    assert_query(Name.pattern("superficially similar"),
                  :Name, pattern: "superficially similar")
   end
 
@@ -383,7 +383,7 @@ class Query::NamesTest < UnitTestCase
     name1 = names(:peltigera)
     name2 = names(:boletus_edulis)
     assert_query([name2, name1],
-                 :Name, description_query: { ids: [desc1, desc2, desc3] })
+                 :Name, description_query: { id_in_set: [desc1, desc2, desc3] })
   end
 
   def test_name_has_observations
@@ -554,11 +554,19 @@ class Query::NamesTest < UnitTestCase
     assert_query(expects, :Name, observation_query: { projects: project2 })
   end
 
+  def three_amigos
+    [
+      observations(:detailed_unknown_obs).id,
+      observations(:agaricus_campestris_obs).id,
+      observations(:agaricus_campestras_obs).id
+    ].freeze
+  end
+
   def test_name_with_observations_in_set
     expects = Name.with_correct_spelling.joins(:observations).
               where(observations: { id: three_amigos }).
               index_order.distinct
-    assert_query(expects, :Name, observation_query: { ids: three_amigos })
+    assert_query(expects, :Name, observation_query: { id_in_set: three_amigos })
   end
 
   def test_name_with_observations_in_species_list

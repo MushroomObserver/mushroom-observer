@@ -11,9 +11,7 @@
   # LocationDescription that actually changed.  If notifiable for multiple
   # reasons, choose the least restrictive -- i.e. 'all' first, then admin,
   # editor and lastly author.
-  email_type = if @user.email_locations_all
-    "all"
-  elsif @user.watching?(new_loc)
+  email_type = if @user.watching?(new_loc)
     "interest"
   elsif new_loc.version != old_loc.version
     @user.email_locations_editor && new_loc.descriptions.any? {|d| d.editor?(@user)} ? "editor" :

@@ -261,9 +261,11 @@ class API2::NamesTest < UnitTestCase
   end
 
   def test_getting_names_ok_for_export
-    Name.with_correct_spelling.sample.update!(ok_for_export: true)
     names = Name.with_correct_spelling.ok_for_export
-    assert_not_empty(names)
+    assert_not_empty(
+      names,
+      "Test requires >=1 correctly spelled Name that's ok_for_export"
+    )
     assert_api_pass(params_get(ok_for_export: "yes"))
     assert_api_results(names)
   end

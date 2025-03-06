@@ -93,7 +93,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
     # Checks Name[:search_name], which includes the author
     # (unlike Observation[:text_name]) and is not cached on the obs
-    scope :pattern_search, lambda { |phrase|
+    scope :pattern, lambda { |phrase|
       ids = name_search_name_observation_ids(phrase)
       ids += search_columns(Observation[:where], phrase).map(&:id)
       where(id: ids).distinct
