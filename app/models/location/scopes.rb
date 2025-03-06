@@ -60,7 +60,7 @@ module Location::Scopes
       joins_default_descriptions.search_columns(cols, phrase)
     }
     scope :regexp, lambda { |phrase|
-      where(Location[:name] =~ phrase.to_s.strip_squeeze)
+      where(Location[:name] =~ phrase.to_s.strip.squeeze(" "))
     }
     # https://stackoverflow.com/a/77064711/3357635
     # AR's assumed join condition is
@@ -75,15 +75,9 @@ module Location::Scopes
       )
     }
 
-    scope :has_description, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
-        where.not(description_id: nil)
-      else
-        has_no_description
-      end
+    scope :has_descriptions, lambda { |bool = true|
+      presence_condition(Location[:description_id], bool:)
     }
-    scope :has_no_description,
-          -> { where(description_id: nil) }
     scope :description_has, lambda { |phrase|
       joins(:descriptions).
         merge(LocationDescription.search_content(phrase)).distinct
@@ -103,6 +97,8 @@ module Location::Scopes
       joins(:descriptions).
         merge(LocationDescription.where(source_type: source)).distinct
     }
+    scope :has_observations,
+          -> { joins(:observations).distinct }
 
     # Returns locations whose bounding box is entirely within the given box.
     # Pass kwargs (:north, :south, :east, :west), any order
@@ -187,8 +183,6 @@ module Location::Scopes
                 and(Location[:west] <= west).and(Location[:east] >= east)))
       end
     }
-    scope :has_observations,
-          -> { joins(:observations).distinct }
 
     scope :show_includes, lambda {
       strict_loading.includes(

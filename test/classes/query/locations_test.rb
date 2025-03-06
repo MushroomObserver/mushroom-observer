@@ -14,8 +14,8 @@ class Query::LocationsTest < UnitTestCase
     assert_query(expects, :Location, by: :id)
   end
 
-  def test_location_by_user
-    assert_query(Location.reorder(id: :asc).where(user: rolf).distinct,
+  def test_location_by_users
+    assert_query(Location.reorder(id: :asc).by_users(rolf).distinct,
                  :Location, by_users: rolf, by: :id)
     assert_query([], :Location, by_users: users(:zero_user))
   end
@@ -26,7 +26,8 @@ class Query::LocationsTest < UnitTestCase
     loc = Location.where.not(user: mary).index_order.first
     loc.display_name = "new name"
     loc.save
-    assert_query([loc], :Location, by_editor: mary)
+    assert_query_scope([loc], Location.by_editor(mary),
+                       :Location, by_editor: mary)
     assert_query([], :Location, by_editor: dick)
   end
 
@@ -141,8 +142,7 @@ class Query::LocationsTest < UnitTestCase
   end
 
   def test_location_regexp_search
-    expects = Location.where(Location[:name].matches_regexp("California")).
-              index_order.distinct
+    expects = Location.regexp("California").index_order.distinct
     assert_query(expects, :Location, regexp: ".alifornia")
   end
 
@@ -195,7 +195,7 @@ class Query::LocationsTest < UnitTestCase
   end
 
   def test_location_has_observations
-    expects = Location.joins(:observations).index_order.distinct
+    expects = Location.has_observations.index_order.distinct
     assert_query(expects, :Location, has_observations: 1)
   end
 

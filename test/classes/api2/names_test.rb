@@ -206,8 +206,8 @@ class API2::NamesTest < UnitTestCase
   end
 
   def test_getting_names_has_description
-    with    = Name.with_correct_spelling.has_description
-    without = Name.with_correct_spelling.has_no_description
+    with    = Name.with_correct_spelling.has_descriptions
+    without = Name.with_correct_spelling.has_descriptions(false)
     assert_not_empty(with)
     assert_not_empty(without)
     assert_api_pass(params_get(has_description: "yes"))

@@ -159,7 +159,6 @@
 #  deprecated
 #  not_deprecated
 #  has_description
-#  has_no_description
 #  description_has
 #  has_description_in_project(project)
 #  has_description_created_by(user)

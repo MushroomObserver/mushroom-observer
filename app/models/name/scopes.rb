@@ -241,17 +241,11 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
       joins(:comments).merge(Comment.search_content(phrase)).distinct
     }
 
-    scope :has_description, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
-        where.not(description_id: nil)
-      else
-        has_no_description
-      end
+    scope :has_descriptions, lambda { |bool = true|
+      presence_condition(Name[:description_id], bool:)
     }
-    scope :has_no_description,
-          -> { where(description_id: nil) }
     scope :need_description, lambda {
-      has_description(false).joins(:observations).distinct.
+      has_descriptions(false).joins(:observations).distinct.
         group(:name_id).order(Observation[:name_id].count.desc, Name[:id].desc)
     }
     scope :description_has, lambda { |phrase|
