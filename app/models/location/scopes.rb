@@ -37,14 +37,8 @@ module Location::Scopes
           ->(phrase) { search_columns(Location[:name], phrase) }
 
     scope :has_notes, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
-        where(Location[:notes].not_blank)
-      else
-        has_no_notes
-      end
+      coalesce_presence_condition(Location[:notes], bool:)
     }
-    scope :has_no_notes,
-          -> { where(Location[:notes].blank) }
     scope :notes_has,
           ->(phrase) { search_columns(Location[:notes], phrase) }
 

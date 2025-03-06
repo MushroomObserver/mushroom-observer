@@ -133,7 +133,7 @@ class PatternSearch::NameTest < UnitTestCase
   end
 
   def test_name_search_has_notes
-    expect = Name.with_correct_spelling.has_no_notes
+    expect = Name.with_correct_spelling.has_notes(false)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_notes:no")
     assert_name_arrays_equal(expect, x.query.results, :sort)

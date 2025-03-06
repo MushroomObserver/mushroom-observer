@@ -18,13 +18,13 @@ module AbstractModel::Scopes
       joins(:rss_log).
         reorder(RssLog[:updated_at].desc, model.arel_table[:id].desc).distinct
     }
-    scope :order_by_set, lambda { |*set|
+    scope :order_by_set, lambda { |set|
       reorder(Arel::Nodes.build_quoted(set.join(",")) & arel_table[:id])
     }
 
     scope :id_in_set, lambda { |ids|
       set = limited_id_set(ids) # [] is valid
-      where(arel_table[:id].in(set)).order_by_set
+      where(arel_table[:id].in(set)).order_by_set(set)
     }
 
     scope :by_users, lambda { |users|
