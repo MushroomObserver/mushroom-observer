@@ -14,8 +14,8 @@ class Query::LocationsTest < UnitTestCase
     assert_query(expects, :Location, by: :id)
   end
 
-  def test_location_by_user
-    assert_query(Location.reorder(id: :asc).where(user: rolf).distinct,
+  def test_location_by_users
+    assert_query(Location.reorder(id: :asc).by_users(rolf).distinct,
                  :Location, by_users: rolf, by: :id)
     assert_query([], :Location, by_users: users(:zero_user))
   end
@@ -26,7 +26,8 @@ class Query::LocationsTest < UnitTestCase
     loc = Location.where.not(user: mary).index_order.first
     loc.display_name = "new name"
     loc.save
-    assert_query([loc], :Location, by_editor: mary)
+    assert_query_scope([loc], Location.by_editor(mary),
+                       :Location, by_editor: mary)
     assert_query([], :Location, by_editor: dick)
   end
 
@@ -45,36 +46,39 @@ class Query::LocationsTest < UnitTestCase
   end
 
   def test_location_in_set
-    assert_query(location_set, :Location, id_in_set: location_set)
+    scope = Location.id_in_set(location_set)
+    assert_query_scope(location_set, scope, :Location, id_in_set: location_set)
   end
 
   def test_location_has_notes
     expects = Location.index_order.has_notes
     assert_query(expects, :Location, has_notes: true)
-    expects = Location.index_order.has_no_notes
+    expects = Location.index_order.has_notes(false)
     assert_query(expects, :Location, has_notes: false)
   end
 
   def test_location_notes_has
-    expects = Location.index_order.notes_has('"should persist"')
-    assert_query(expects, :Location, notes_has: '"should persist"')
-    expects = Location.index_order.
-              notes_has('"legal to collect" -"Salt Point"')
-    assert_query(expects,
-                 :Location, notes_has: '"legal to collect" -"Salt Point"')
+    expects = [locations(:burbank)]
+    scope = Location.index_order.notes_has('"should persist"')
+    assert_query_scope(expects, scope, :Location, notes_has: '"should persist"')
+    expects = [locations(:point_reyes)]
+    scope = Location.index_order.notes_has('"legal to collect" -"Salt Point"')
+    assert_query_scope(expects, scope,
+                       :Location, notes_has: '"legal to collect" -"Salt Point"')
   end
 
   def test_location_in_box
+    expects = [locations(:burbank)]
     box = { north: 35, south: 34, east: -118, west: -119 }
-    expects = Location.index_order.in_box(**box)
-    assert_query(expects, :Location, in_box: box)
+    scope = Location.index_order.in_box(**box)
+    assert_query_scope(expects, scope, :Location, in_box: box)
   end
 
   def test_location_pattern_search
     expects = Location.reorder(id: :asc).pattern("California")
     assert_query(expects, :Location, pattern: "California", by: :id)
-    assert_query([locations(:elgin_co).id],
-                 :Location, pattern: "Canada")
+    assert_query_scope([locations(:elgin_co).id], Location.pattern("Canada"),
+                       :Location, pattern: "Canada")
     assert_query([], :Location, pattern: "Canada -Elgin")
   end
 
@@ -138,8 +142,7 @@ class Query::LocationsTest < UnitTestCase
   end
 
   def test_location_regexp_search
-    expects = Location.where(Location[:name].matches_regexp("California")).
-              index_order.distinct
+    expects = Location.regexp("California").index_order.distinct
     assert_query(expects, :Location, regexp: ".alifornia")
   end
 
@@ -192,7 +195,7 @@ class Query::LocationsTest < UnitTestCase
   end
 
   def test_location_has_observations
-    expects = Location.joins(:observations).index_order.distinct
+    expects = Location.has_observations.index_order.distinct
     assert_query(expects, :Location, has_observations: 1)
   end
 

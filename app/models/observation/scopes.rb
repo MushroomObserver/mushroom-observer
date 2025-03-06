@@ -54,15 +54,15 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :has_no_images,
           -> { where(thumb_image: nil) }
 
+    # Why is `no_notes` == '--- {}\n'?? This should be simpler:
+    # coalesce_presence_condition(Observation[:notes], bool:)
     scope :has_notes, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         where.not(notes: no_notes)
       else
-        has_no_notes
+        where(notes: no_notes)
       end
     }
-    scope :has_no_notes,
-          -> { where(notes: no_notes) }
     scope :notes_has,
           ->(phrase) { search_columns(Observation[:notes], phrase) }
 

@@ -37,14 +37,8 @@ module Location::Scopes
           ->(phrase) { search_columns(Location[:name], phrase) }
 
     scope :has_notes, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
-        where(Location[:notes].not_blank)
-      else
-        has_no_notes
-      end
+      coalesce_presence_condition(Location[:notes], bool:)
     }
-    scope :has_no_notes,
-          -> { where(Location[:notes].blank) }
     scope :notes_has,
           ->(phrase) { search_columns(Location[:notes], phrase) }
 
@@ -65,6 +59,9 @@ module Location::Scopes
       cols = Location[:name] + LocationDescription.searchable_columns
       joins_default_descriptions.search_columns(cols, phrase)
     }
+    scope :regexp, lambda { |phrase|
+      where(Location[:name] =~ phrase.to_s.strip.squeeze(" "))
+    }
     # https://stackoverflow.com/a/77064711/3357635
     # AR's assumed join condition is
     #   `Location[:id].eq(LocationDescription[:location_id])`
@@ -78,15 +75,9 @@ module Location::Scopes
       )
     }
 
-    scope :has_description, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
-        where.not(description_id: nil)
-      else
-        has_no_description
-      end
+    scope :has_descriptions, lambda { |bool = true|
+      presence_condition(Location[:description_id], bool:)
     }
-    scope :has_no_description,
-          -> { where(description_id: nil) }
     scope :description_has, lambda { |phrase|
       joins(:descriptions).
         merge(LocationDescription.search_content(phrase)).distinct
@@ -106,6 +97,8 @@ module Location::Scopes
       joins(:descriptions).
         merge(LocationDescription.where(source_type: source)).distinct
     }
+    scope :has_observations,
+          -> { joins(:observations).distinct }
 
     # Returns locations whose bounding box is entirely within the given box.
     # Pass kwargs (:north, :south, :east, :west), any order
@@ -190,8 +183,6 @@ module Location::Scopes
                 and(Location[:west] <= west).and(Location[:east] >= east)))
       end
     }
-    scope :has_observations,
-          -> { joins(:observations).distinct }
 
     scope :show_includes, lambda {
       strict_loading.includes(
