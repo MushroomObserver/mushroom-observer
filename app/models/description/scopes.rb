@@ -17,6 +17,9 @@ module Description::Scopes
     # scope searching notes content all fields, using a SearchParams phrase
     scope :content_has,
           ->(phrase) { search_columns(searchable_columns, phrase) }
+    # alias used by advanced_search
+    scope :search_content,
+          ->(phrase) { content_has(phrase) }
   end
 
   module ClassMethods

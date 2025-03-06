@@ -9,9 +9,9 @@ class Query::NameDescriptionsTest < UnitTestCase
 
   def test_name_description_all
     pelt = names(:peltigera)
-    all_descs = NameDescription.all.to_a
-    all_pelt_descs = NameDescription.where(name: pelt).to_a
-    public_pelt_descs = NameDescription.where(name: pelt, is_public: true).to_a
+    all_descs = NameDescription.all
+    all_pelt_descs = NameDescription.names(pelt)
+    public_pelt_descs = all_pelt_descs.is_public
     assert(all_pelt_descs.length < all_descs.length)
     assert(public_pelt_descs.length < all_pelt_descs.length)
 

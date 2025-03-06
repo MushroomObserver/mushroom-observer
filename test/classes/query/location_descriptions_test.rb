@@ -7,22 +7,23 @@ require("query_extensions")
 class Query::LocationDescriptionsTest < UnitTestCase
   include QueryExtensions
 
+  def test_location_description_all
+    assert_query(LocationDescription.all, :LocationDescription, by: :id)
+  end
+
   def test_location_description_locations
     gualala = locations(:gualala)
-    all_descs = LocationDescription.all.to_a
-    all_gualala_descs = LocationDescription.
-                        where(location: gualala).to_a
-    public_gualala_descs = LocationDescription.
-                           where(location: gualala, public: true).to_a
+    all_descs = LocationDescription.all
+    all_gualala_descs = LocationDescription.locations(gualala)
+    public_gualala_descs = all_gualala_descs.is_public
     assert(all_gualala_descs.length < all_descs.length)
     assert(public_gualala_descs.length < all_gualala_descs.length)
 
-    assert_query(all_descs, :LocationDescription, by: :id)
     assert_query(all_gualala_descs,
                  :LocationDescription, by: :id, locations: gualala)
     assert_query(public_gualala_descs,
                  :LocationDescription, by: :id, locations: gualala,
-                                       public: "yes")
+                                       is_public: "yes")
   end
 
   def test_location_description_by_user
