@@ -128,7 +128,7 @@ class NameDescription < Description
     where(source_type: types)
   }
   scope :content_has, lambda { |phrase|
-
+    search_content(phrase)
   }
   scope :ok_for_export, lambda { |bool = true|
     where(ok_for_export: bool)
