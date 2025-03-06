@@ -85,6 +85,12 @@ class LocationDescription < Description
   has_many :editors, through: :location_description_editors,
                      source: :user
 
+  scope :index_order, lambda {
+    joins(:location).order(Location[:name].asc,
+                           LocationDescription[:created_at].asc,
+                           LocationDescription[:id].desc)
+  }
+
   scope :is_public, lambda { |bool = true|
     where(public: bool)
   }
