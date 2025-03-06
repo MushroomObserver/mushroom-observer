@@ -193,11 +193,6 @@ class NameDescription < Description
     "/names/descriptions"
   end
 
-  # Eliminate when controller_normalized? goes.
-  def self.show_action
-    :show
-  end
-
   # Returns an Array of all the descriptive text fields that don't require any
   # special processing when they go to EOL.  Fields are all Symbol's.
   def self.eol_note_fields

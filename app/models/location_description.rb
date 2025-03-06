@@ -150,11 +150,6 @@ class LocationDescription < Description
     "/locations/descriptions"
   end
 
-  # Eliminate when controller_normalized? goes.
-  def self.show_action
-    :show
-  end
-
   # Returns an Array of all the descriptive text fields (Symbol's).
   def self.all_note_fields
     ALL_NOTE_FIELDS
