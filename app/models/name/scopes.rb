@@ -121,6 +121,10 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
     scope :notes_has,
           ->(phrase) { search_columns(Name[:notes], phrase) }
 
+    scope :names, lambda { |names|
+      ids = lookup_names_by_name(names)
+      where(id: ids).distinct
+    }
     ### Module Name::Taxonomy. Rank scopes take text values, e.g. "Genus"
     # Query's scope: rank at or between
     scope :rank, lambda { |min, max = min|
