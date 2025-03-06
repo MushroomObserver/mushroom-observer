@@ -85,6 +85,24 @@ class LocationDescription < Description
   has_many :editors, through: :location_description_editors,
                      source: :user
 
+  scope :is_public, lambda { |bool = true|
+    where(public: bool)
+  }
+  scope :by_author, lambda { |user|
+    ids = lookup_users_by_name(user)
+    joins(:location_description_authors).
+      where(location_description_authors: { user_id: ids })
+  }
+  scope :by_editor, lambda { |user|
+    ids = lookup_users_by_name(user)
+    joins(:location_description_editors).
+      where(location_description_editors: { user_id: ids })
+  }
+  scope :locations, lambda { |loc|
+    ids = lookup_locations_by_name(loc)
+    where(location: ids)
+  }
+
   scope :show_includes, lambda {
     strict_loading.includes(
       :authors,

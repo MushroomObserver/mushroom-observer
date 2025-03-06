@@ -11,14 +11,14 @@ class Query::NameDescriptionsTest < UnitTestCase
     pelt = names(:peltigera)
     all_descs = NameDescription.all.to_a
     all_pelt_descs = NameDescription.where(name: pelt).to_a
-    public_pelt_descs = NameDescription.where(name: pelt, public: true).to_a
+    public_pelt_descs = NameDescription.where(name: pelt, is_public: true).to_a
     assert(all_pelt_descs.length < all_descs.length)
     assert(public_pelt_descs.length < all_pelt_descs.length)
 
     assert_query(all_descs, :NameDescription, by: :id)
     assert_query(all_pelt_descs, :NameDescription, by: :id, names: pelt)
     assert_query(public_pelt_descs,
-                 :NameDescription, by: :id, names: pelt, public: "yes")
+                 :NameDescription, by: :id, names: pelt, is_public: "yes")
   end
 
   def test_name_description_by_user
@@ -59,7 +59,7 @@ class Query::NameDescriptionsTest < UnitTestCase
     assert_query([], :NameDescription, id_in_set: rolf.id)
     assert_query(
       NameDescription.all,
-      :NameDescription, id_in_set: NameDescription.select(:id).to_a
+      :NameDescription, id_in_set: NameDescription.pluck(:id)
     )
     assert_query(
       [NameDescription.first.id],
@@ -75,32 +75,31 @@ class Query::NameDescriptionsTest < UnitTestCase
   end
 
   def test_name_description_type_user
-    assert_query(NameDescription.where(source_type: 5).index_order,
-                 :NameDescription, type: "user")
+    assert_query(NameDescription.types(5).index_order,
+                 :NameDescription, types: "user")
   end
 
   def test_name_description_type_project
-    assert_query(NameDescription.where(source_type: 3).index_order,
-                 :NameDescription, type: "project")
+    assert_query(NameDescription.types(3).index_order,
+                 :NameDescription, types: "project")
   end
 
   def test_name_description_projects
-    assert_query(NameDescription.
-                 where(project: projects(:eol_project)).index_order,
+    assert_query(NameDescription.projects(projects(:eol_project)).index_order,
                  :NameDescription, projects: projects(:eol_project).id)
   end
 
   # waiting on a new AbstractModel scope for searches,
   # plus a specific NameDescription scope coalescing the fields.
   def test_name_description_content_has
-    assert_query(NameDescription.search_content('"some notes"').index_order,
+    assert_query(NameDescription.content_has('"some notes"').index_order,
                  :NameDescription, content_has: '"some notes"')
   end
 
   def test_name_description_ok_for_export
-    assert_query(NameDescription.where(ok_for_export: 1).index_order,
+    assert_query(NameDescription.ok_for_export(1).index_order,
                  :NameDescription, ok_for_export: 1)
-    assert_query(NameDescription.where(ok_for_export: 0).index_order,
+    assert_query(NameDescription.ok_for_export(0).index_order,
                  :NameDescription, ok_for_export: 0)
   end
 end

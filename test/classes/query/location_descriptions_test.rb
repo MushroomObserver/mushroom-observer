@@ -7,7 +7,7 @@ require("query_extensions")
 class Query::LocationDescriptionsTest < UnitTestCase
   include QueryExtensions
 
-  def test_location_description_all
+  def test_location_description_locations
     gualala = locations(:gualala)
     all_descs = LocationDescription.all.to_a
     all_gualala_descs = LocationDescription.

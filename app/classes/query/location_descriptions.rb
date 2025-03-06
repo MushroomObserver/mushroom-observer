@@ -12,11 +12,11 @@ class Query::LocationDescriptions < Query::Base
       created_at: [:time],
       updated_at: [:time],
       id_in_set: [LocationDescription],
+      is_public: :boolean,
       by_users: [User],
       by_author: User,
       by_editor: User,
       locations: [Location],
-      public: :boolean,
       location_query: { subquery: :Location }
     )
   end
