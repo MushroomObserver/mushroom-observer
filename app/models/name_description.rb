@@ -107,9 +107,6 @@ class NameDescription < Description
                        NameDescription[:id].desc)
   }
 
-  scope :is_public, lambda { |bool = true|
-    where(public: bool)
-  }
   scope :by_author, lambda { |user|
     ids = lookup_users_by_name(user)
     joins(:name_description_authors).
@@ -120,21 +117,20 @@ class NameDescription < Description
     joins(:name_description_editors).
       where(name_description_editors: { user_id: ids })
   }
-  scope :locations, lambda { |loc|
-    ids = lookup_locations_by_name(loc)
-    where(location: ids)
+  scope :is_public,
+        ->(bool = true) { where(public: bool) }
+  scope :types,
+        ->(types) { where(source_type: types) }
+  scope :ok_for_export,
+        ->(bool = true) { where(ok_for_export: bool) }
+  scope :names, lambda { |names|
+    ids = lookup_names_by_name(names)
+    where(name: ids)
   }
-  scope :types, lambda { |types|
-    where(source_type: types)
+  scope :projects, lambda { |projects|
+    ids = lookup_projects_by_name(projects)
+    where(project: ids)
   }
-  scope :content_has, lambda { |phrase|
-    search_content(phrase)
-  }
-  scope :ok_for_export, lambda { |bool = true|
-    where(ok_for_export: bool)
-  }
-  scope :names
-  scope :projects
 
   scope :for_eol_export, lambda {
     where(review_status: review_statuses.values_at(

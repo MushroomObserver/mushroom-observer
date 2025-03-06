@@ -256,7 +256,7 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
     }
     scope :description_has, lambda { |phrase|
       joins(:descriptions).
-        merge(NameDescription.search_content(phrase)).distinct
+        merge(NameDescription.content_has(phrase)).distinct
     }
     scope :has_description_in_project, lambda { |project|
       joins(descriptions: :project).
@@ -275,7 +275,7 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
       return none if Description::ALL_SOURCE_TYPES.exclude?(source)
 
       joins(:descriptions).
-        merge(NameDescription.where(source_type: source)).distinct
+        merge(NameDescription.types(source)).distinct
     }
     scope :has_description_classification_differing, lambda {
       joins(:description).

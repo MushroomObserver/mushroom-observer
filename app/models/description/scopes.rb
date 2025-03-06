@@ -14,8 +14,8 @@ module Description::Scopes
     scope :is_not_default, lambda {
       joins(:name).where(parent_class[:description_id].eq(nil)).distinct
     }
-    # scope searching notes content, using a SearchParams phrase
-    scope :search_content,
+    # scope searching notes content all fields, using a SearchParams phrase
+    scope :content_has,
           ->(phrase) { search_columns(searchable_columns, phrase) }
   end
 

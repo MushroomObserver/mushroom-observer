@@ -90,4 +90,8 @@ class Query::LocationDescriptionsTest < UnitTestCase
                                         location_descriptions(:albion_desc).id]
     )
   end
+
+  def test_location_description_content_has
+
+  end
 end
