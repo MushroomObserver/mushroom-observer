@@ -351,7 +351,7 @@ class Query::NamesTest < UnitTestCase
   end
 
   def test_name_has_default_description
-    scope = Name.has_default_description
+    scope = Name.index_order.has_default_description
     assert_query(scope, :Name, has_default_description: 1)
   end
 
