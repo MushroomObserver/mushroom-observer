@@ -350,6 +350,11 @@ class Query::NamesTest < UnitTestCase
     assert_query(expects, :Name, need_description: 1)
   end
 
+  def test_name_has_default_description
+    scope = Name.has_default_description
+    assert_query(scope, :Name, has_default_description: 1)
+  end
+
   def test_name_has_descriptions
     expects = Name.index_order.with_correct_spelling.
               joins(:descriptions).distinct

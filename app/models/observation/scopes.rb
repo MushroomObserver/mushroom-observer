@@ -457,11 +457,9 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       if bool.to_s.to_boolean == true
         joins(:comments).distinct
       else
-        has_no_comments
+        where.not(id: Observation.has_comments)
       end
     }
-    scope :has_no_comments,
-          -> { where.not(id: Observation.has_comments) }
     scope :comments_has, lambda { |phrase|
       joins(:comments).merge(Comment.search_content(phrase)).distinct
     }

@@ -12,6 +12,15 @@ module Name::Scopes
     scope :index_order,
           -> { order(sort_name: :asc, id: :desc) }
 
+    scope :names, lambda { |lookup:, **related_name_args|
+      ids = lookup_names_by_name(lookup, related_name_args.compact)
+      where(id: ids).with_correct_spelling.distinct
+    }
+    scope :text_name_has,
+          ->(phrase) { search_columns(Name[:text_name], phrase) }
+    scope :search_name_has,
+          ->(phrase) { search_columns(Name[:search_name], phrase) }
+
     # NOTE: with_correct_spelling is tacked on to most Name queries.
     scope :misspellings, lambda { |boolish = :no|
       # if :either, returns all
@@ -28,10 +37,6 @@ module Name::Scopes
           -> { where.not(correct_spelling_id: nil) }
     scope :with_self_referential_misspelling,
           -> { where(Name[:correct_spelling_id].eq(Name[:id])) }
-    scope :text_name_has,
-          ->(phrase) { search_columns(Name[:text_name], phrase) }
-    scope :search_name_has,
-          ->(phrase) { search_columns(Name[:search_name], phrase) }
 
     scope :of_lichens, lambda { |bool = true|
       if bool.to_s.to_boolean == true
@@ -54,11 +59,6 @@ module Name::Scopes
     scope :ok_for_export,
           ->(bool = true) { where(ok_for_export: bool) }
 
-    scope :has_classification,
-          ->(bool = true) { not_blank_condition(Name[:classification], bool:) }
-    scope :classification_has,
-          ->(phrase) { search_columns(Name[:classification], phrase) }
-
     scope :has_author,
           ->(bool = true) { not_blank_condition(Name[:author], bool:) }
     scope :author_has,
@@ -69,15 +69,16 @@ module Name::Scopes
     scope :citation_has,
           ->(phrase) { search_columns(Name[:citation], phrase) }
 
+    scope :has_classification,
+          ->(bool = true) { not_blank_condition(Name[:classification], bool:) }
+    scope :classification_has,
+          ->(phrase) { search_columns(Name[:classification], phrase) }
+
     scope :has_notes,
           ->(bool = true) { not_blank_condition(Name[:notes], bool:) }
     scope :notes_has,
           ->(phrase) { search_columns(Name[:notes], phrase) }
 
-    scope :names, lambda { |lookup:, **related_name_args|
-      ids = lookup_names_by_name(lookup, related_name_args.compact)
-      where(id: ids).with_correct_spelling.distinct
-    }
     ### Module Name::Taxonomy. Rank scopes take text values, e.g. "Genus"
     # Query's scope: rank at or between
     scope :rank, lambda { |min, max = min|
@@ -175,18 +176,22 @@ module Name::Scopes
       if bool.to_s.to_boolean == true
         joins(:comments).distinct
       else
-        has_no_comments
+        where.not(id: Name.has_comments)
       end
     }
-    scope :has_no_comments,
-          -> { where.not(id: Name.has_comments) }
     scope :comments_has, lambda { |phrase|
       joins(:comments).merge(Comment.search_content(phrase)).distinct
     }
 
+    # Query just ignores `has_descriptions(false)`, so for now we will here too.
     scope :has_descriptions, lambda { |bool = true|
-      presence_condition(Name[:description_id], bool:)
+      return all unless bool
+
+      joins(:name_descriptions)
     }
+    # This is the scope we're more likely interested in
+    scope :has_default_description,
+          ->(bool = true) { presence_condition(Name[:description_id], bool:) }
     scope :need_description, lambda {
       has_descriptions(false).joins(:observations).distinct.
         group(:name_id).order(Observation[:name_id].count.desc, Name[:id].desc)
@@ -221,6 +226,12 @@ module Name::Scopes
         where(NameDescription[:classification].not_blank).distinct
     }
 
+    # Query just ignores `has_observations(false)`, so for now we will here too.
+    scope :has_observations, lambda { |bool = true|
+      return all unless bool
+
+      joins(:observations)
+    }
     scope :on_species_lists, lambda { |species_lists|
       species_list_ids = lookup_species_lists_by_name(species_lists)
       joins(observations: :species_list_observations).

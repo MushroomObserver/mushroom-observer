@@ -46,7 +46,7 @@ class API2
         has_classification: parse(:boolean, :has_classification),
         has_notes: parse(:boolean, :has_notes),
         has_comments: parse(:boolean, :has_comments, limit: true),
-        has_default_desc: parse(:boolean, :has_description),
+        has_default_description: parse(:boolean, :has_description),
         text_name_has: parse(:string, :text_name_has, help: 1),
         author_has: parse(:string, :author_has, help: 1),
         citation_has: parse(:string, :citation_has, help: 1),
