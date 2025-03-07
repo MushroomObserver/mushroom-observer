@@ -37,7 +37,7 @@ class API2
         updated_at: parse_range(:time, :updated_at),
         by_users: parse_array(:user, :user, help: :first_user),
         names: parse_array(:name, :name, as: :id),
-        is_deprecated: parse(:boolean, :is_deprecated),
+        deprecated: parse(:boolean, :is_deprecated),
         misspellings: parse_misspellings,
         has_synonyms: parse(:boolean, :has_synonyms),
         rank: parse(:enum, :rank, limit: Name.all_ranks),

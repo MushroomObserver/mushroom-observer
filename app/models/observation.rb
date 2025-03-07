@@ -105,18 +105,14 @@
 #  is_collection_location
 #  not_collection_location
 #  has_images
-#  has_no_images
 #  has_notes
-#  has_no_notes
 #  has_notes_field(field)
 #  notes_has(note)
 #  has_specimen
-#  has_no_specimen
 #  has_sequences
 #  has_no_sequences
 #  confidence (min %, max %)
 #  has_comments
-#  has_no_comments
 #  comments_has(summary)
 #  for_projects(project)
 #  in_herbaria(herbaria)

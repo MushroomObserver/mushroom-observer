@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Name::Scopes # rubocop:disable Metrics/ModuleLength
+module Name::Scopes
   # This is using Concern so we can define the scopes in this included module.
   extend ActiveSupport::Concern
 
@@ -43,93 +43,46 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
     scope :not_lichens,
           -> { where(Name[:lifeform].does_not_match("% lichen %")) }
 
-    scope :is_deprecated, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
-        where(deprecated: true)
-      else
-        not_deprecated
-      end
-    }
+    scope :deprecated,
+          ->(bool = true) { where(deprecated: bool) }
     scope :not_deprecated,
           -> { where(deprecated: false) }
 
-    scope :has_synonyms, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
-        where.not(synonym_id: nil)
-      else
-        has_no_synonyms
-      end
-    }
-    scope :has_no_synonyms,
-          -> { where(synonym_id: nil) }
+    scope :has_synonyms,
+          ->(bool = true) { presence_condition(Name[:synonym_id], bool:) }
 
-    scope :ok_for_export, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
-        where(ok_for_export: true)
-      else
-        not_ok_for_export
-      end
-    }
-    scope :not_ok_for_export,
-          -> { where(ok_for_export: false) }
+    scope :ok_for_export,
+          ->(bool = true) { where(ok_for_export: bool) }
 
-    scope :has_classification, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
-        where(Name[:classification].not_blank)
-      else
-        has_no_classification
-      end
-    }
-    scope :has_no_classification,
-          -> { where(Name[:classification].blank) }
+    scope :has_classification,
+          ->(bool = true) { not_blank_condition(Name[:classification], bool:) }
     scope :classification_has,
           ->(phrase) { search_columns(Name[:classification], phrase) }
 
-    scope :has_author, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
-        where(Name[:author].not_blank)
-      else
-        has_no_author
-      end
-    }
-    scope :has_no_author,
-          -> { where(Name[:author].blank) }
+    scope :has_author,
+          ->(bool = true) { not_blank_condition(Name[:author], bool:) }
     scope :author_has,
           ->(phrase) { search_columns(Name[:author], phrase) }
 
-    scope :has_citation, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
-        where(Name[:citation].not_blank)
-      else
-        has_no_citation
-      end
-    }
-    scope :has_no_citation,
-          -> { where(Name[:citation].blank) }
+    scope :has_citation,
+          ->(bool = true) { not_blank_condition(Name[:citation], bool:) }
     scope :citation_has,
           ->(phrase) { search_columns(Name[:citation], phrase) }
 
-    scope :has_notes, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
-        where(Name[:notes].not_blank)
-      else
-        has_no_notes
-      end
-    }
-    scope :has_no_notes,
-          -> { where(Name[:notes].blank) }
+    scope :has_notes,
+          ->(bool = true) { not_blank_condition(Name[:notes], bool:) }
     scope :notes_has,
           ->(phrase) { search_columns(Name[:notes], phrase) }
 
     scope :names, lambda { |lookup:, **related_name_args|
       ids = lookup_names_by_name(lookup, related_name_args.compact)
-      where(id: ids).distinct
+      where(id: ids).with_correct_spelling.distinct
     }
     ### Module Name::Taxonomy. Rank scopes take text values, e.g. "Genus"
     # Query's scope: rank at or between
     scope :rank, lambda { |min, max = min|
       min, max = min if min.is_a?(Array) && min.size == 2
-      return with_rank(min) if min == max
+      return with_rank(min) if min.present? && min == max
 
       where(Name[:rank].in(rank_range(min, max)))
     }
@@ -152,23 +105,21 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
       # Note the space " " difference from :text_name_has scope
       with_correct_spelling.where(Name[:text_name].matches("#{text_name} %"))
     }
-    scope :subtaxa_of, lambda { |name, exclude_original = true|
-      name = find_by(text_name: name) if name.is_a?(String)
-      scope = if name.at_or_below_genus?
-                # Subtaxa can be determined from the text_name
-                subtaxa_of_genus_or_below(name.text_name)
-              else
-                # Need to examine the classification strings
-                with_rank_and_name_in_classification(name.rank, name.text_name)
-              end
-      scope = scope.or(Name.where(id: name.id)) unless exclude_original == true
-      scope
+    scope :subtaxa_of, lambda { |names, excl = true|
+      names(lookup: names, include_subtaxa: true, exclude_original_names: excl).
+        misspellings(:no)
     }
     # "Immediate" has a vaguer meaning at and below Genus
+    scope :include_immediate_subtaxa_of, lambda { |name|
+      name = find_by(text_name: name) if name.is_a?(String)
+      # names = [name] + immediate_subtaxa_of(name)
+      # with_correct_spelling.where(id: names.map(&:id))
+      immediate_subtaxa_of(name, false) # include original name
+    }
     scope :immediate_subtaxa_of, lambda { |name, exclude_original = true|
       name = find_by(text_name: name) if name.is_a?(String)
       scope = if ranks_above_genus.include?(name.rank)
-                subtaxa_of(name).with_rank(ranks[name.rank] - 1)
+                subtaxa_of(name).rank(ranks[name.rank] - 1)
               else
                 subtaxa_of(name)
               end
@@ -179,23 +130,11 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
     scope :include_synonyms_of, lambda { |name|
       with_correct_spelling.where(id: name.synonyms.map(&:id))
     }
-    # alias of `include_subtaxa_of`
-    scope :in_clade,
-          ->(name) { include_subtaxa_of(name) }
-    scope :include_subtaxa_of, lambda { |name|
-      name = find_by(text_name: name) if name.is_a?(String)
-      # names = [name] + subtaxa_of(name)
-      # with_correct_spelling.where(id: names.map(&:id))
-      subtaxa_of(name, false) # include original name
+    scope :in_clade, lambda { |names|
+      names(lookup: names, include_subtaxa: true).misspellings(:no)
     }
-    scope :include_immediate_subtaxa_of, lambda { |name|
-      name = find_by(text_name: name) if name.is_a?(String)
-      # names = [name] + immediate_subtaxa_of(name)
-      # with_correct_spelling.where(id: names.map(&:id))
-      immediate_subtaxa_of(name, false) # include original name
-    }
-    scope :include_subtaxa_above_genus,
-          ->(name) { include_subtaxa_of(name).with_rank_above_genus }
+    scope :in_clade_above_genus,
+          ->(name) { in_clade(name).with_rank_above_genus }
 
     # A search of all searchable Name fields, concatenated.
     scope :search_content, lambda { |phrase|

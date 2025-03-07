@@ -28,7 +28,7 @@ class Query::Names < Query::Base
       locations: [Location],
       species_lists: [SpeciesList],
       misspellings: { string: [:no, :either, :only] },
-      is_deprecated: :boolean,
+      deprecated: :boolean,
       has_synonyms: :boolean,
       rank: [{ string: Name.all_ranks }],
       text_name_has: :string,
@@ -162,7 +162,7 @@ class Query::Names < Query::Base
   def initialize_is_deprecated_parameter
     add_boolean_condition(
       "names.deprecated IS TRUE", "names.deprecated IS FALSE",
-      params[:is_deprecated]
+      params[:deprecated]
     )
   end
 

@@ -3560,7 +3560,7 @@ class NameTest < UnitTestCase
     )
   end
 
-  def test_scope_subtaxa_of_genus_or_below
+  def test_scope_names_for_subtaxa_of_genus_or_below
     amanita_group = Name.create!(
       text_name: "Amanita group",
       display_name: "__Amanita group__",
@@ -3587,13 +3587,17 @@ class NameTest < UnitTestCase
     # https://github.com/MushroomObserver/mushroom-observer/pull/1082/files#r928148711
     # https://github.com/MushroomObserver/mushroom-observer/pull/1082#issuecomment-1193235924
     assert_includes(
-      Name.subtaxa_of_genus_or_below("Amanita"), amanita_group,
-      "`subtaxa_of_genus_or_below` genus <X> should include `<X> group`"
+      Name.names(
+        lookup: "Amanita", include_subtaxa: true, exclude_original_names: true
+      ), amanita_group,
+      "`include_subtaxa` at or below genus <X> should include `<X> group`"
     )
 
     assert_not_includes(
-      Name.subtaxa_of_genus_or_below("Amanita"), amanita_sensu_lato,
-      "`subtaxa_of_genus_or_below` genus <X> should not include " \
+      Name.names(
+        lookup: "Amanita", include_subtaxa: true, exclude_original_names: true
+      ), amanita_sensu_lato,
+      "`include_subtaxa` at or below genus <X> should not include " \
       "`<X> sensu lato`"
     )
   end

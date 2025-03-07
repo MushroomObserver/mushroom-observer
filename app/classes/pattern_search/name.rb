@@ -7,7 +7,7 @@ module PatternSearch
       created: [:created_at, :parse_date_range],
       modified: [:updated_at, :parse_date_range],
 
-      deprecated: [:is_deprecated, :parse_boolean],
+      deprecated: [:deprecated, :parse_boolean],
       has_synonyms: [:has_synonyms, :parse_boolean],
       lichen: [:lichen, :parse_boolean],
       include_misspellings: [:misspellings, :parse_yes_no_both],

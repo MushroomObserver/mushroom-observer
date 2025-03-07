@@ -37,14 +37,14 @@ class PatternSearch::NameTest < UnitTestCase
   end
 
   def test_name_search_include_subtaxa
-    expect = Name.include_subtaxa_of(names(:agaricus))
+    expect = Name.names(lookup: names(:agaricus), include_subtaxa: true)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("Agaricus include_subtaxa:yes")
     assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_name_search_has_synonyms
-    expect = Name.has_no_synonyms
+    expect = Name.has_synonyms(false)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_synonyms:no")
     assert_name_arrays_equal(expect, x.query.results, :sort)
@@ -56,7 +56,7 @@ class PatternSearch::NameTest < UnitTestCase
   end
 
   def test_name_search_is_deprecated
-    expect = Name.is_deprecated.with_correct_spelling
+    expect = Name.deprecated.with_correct_spelling
     assert_not_empty(expect)
     x = PatternSearch::Name.new("deprecated:yes")
     assert_name_arrays_equal(expect, x.query.results, :sort)
@@ -97,7 +97,7 @@ class PatternSearch::NameTest < UnitTestCase
   end
 
   def test_name_search_has_author
-    expect = Name.with_correct_spelling.has_no_author
+    expect = Name.with_correct_spelling.has_author(false)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_author:no")
     assert_name_arrays_equal(expect, x.query.results, :sort)
@@ -109,7 +109,7 @@ class PatternSearch::NameTest < UnitTestCase
   end
 
   def test_name_search_has_citation
-    expect = Name.with_correct_spelling.has_no_citation
+    expect = Name.with_correct_spelling.has_citation(false)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_citation:no")
     assert_name_arrays_equal(expect, x.query.results, :sort)
@@ -121,7 +121,7 @@ class PatternSearch::NameTest < UnitTestCase
   end
 
   def test_name_search_has_classification
-    expect = Name.with_correct_spelling.has_no_classification
+    expect = Name.with_correct_spelling.has_classification(false)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_classification:no")
     assert_name_arrays_equal(expect, x.query.results, :sort)
