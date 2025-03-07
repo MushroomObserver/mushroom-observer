@@ -105,9 +105,9 @@ class ObservationsController
     def look_alikes
       query = create_query(
         :Observation, names: { lookup: [params[:name]],
-                               include_synonyms: true,
-                               include_all_name_proposals: true,
-                               exclude_consensus: true },
+                               include_synonyms: true },
+                      include_all_name_proposals: true,
+                      exclude_consensus: true,
                       by: :confidence
       )
       [query, {}]
