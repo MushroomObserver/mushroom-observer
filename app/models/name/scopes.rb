@@ -135,21 +135,21 @@ module Name::Scopes
     scope :in_clade, lambda { |names|
       names(lookup: names, include_subtaxa: true).misspellings(:no)
     }
-    scope :in_clade_above_genus,
-          ->(name) { in_clade(name).with_rank_above_genus }
+    # scope :in_clade_above_genus,
+    #       ->(name) { in_clade(name).with_rank_above_genus }
 
-    # A search of all searchable Name fields, concatenated.
-    scope :search_content, lambda { |phrase|
-      cols = Name.searchable_columns + Name[:classification]
-      search_columns(cols, phrase)
-    }
-    # A more comprehensive search of Name fields, plus comments/descriptions.
-    scope :search_content_and_associations, lambda { |phrase|
-      fields = Name.search_content(phrase).map(&:id)
-      comments = Name.comments_has(phrase).map(&:id)
-      descs = Name.description_has(phrase).map(&:id)
-      where(id: fields + comments + descs).distinct
-    }
+    # # A search of all searchable Name fields, concatenated.
+    # scope :search_content, lambda { |phrase|
+    #   cols = Name.searchable_columns + Name[:classification]
+    #   search_columns(cols, phrase)
+    # }
+    # # A more comprehensive search of Name fields, plus comments/descriptions.
+    # scope :search_content_and_associations, lambda { |phrase|
+    #   fields = Name.search_content(phrase).map(&:id)
+    #   comments = Name.comments_has(phrase).map(&:id)
+    #   descs = Name.description_has(phrase).map(&:id)
+    #   where(id: fields + comments + descs).distinct
+    # }
     # This is what's called by advanced_search
     scope :advanced_search, lambda { |phrase|
       fields = Name.search_columns(Name[:search_name], phrase).map(&:id)
