@@ -272,7 +272,8 @@ class Query::ObservationsTest < UnitTestCase
     assert_query(
       [observations(:agaricus_campestris_obs).id],
       :Observation, names: { lookup: [names(:agaricus_campestris).id],
-                             include_synonyms: false,include_all_name_proposals: false,
+                             include_synonyms: false,
+                             include_all_name_proposals: false,
                              exclude_consensus: false }
     )
 

@@ -211,7 +211,8 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       # First, lookup names, plus synonyms and subtaxa if requested
       lookup_args = args.slice(:include_synonyms,
                                :include_subtaxa,
-                               :include_immediate_subtaxa, :exclude_original_names)
+                               :include_immediate_subtaxa,
+                               :exclude_original_names)
       name_ids = Lookup::Names.new(lookup, **lookup_args).ids
 
       # Query, with possible join to Naming. Mutually exclusive options:
