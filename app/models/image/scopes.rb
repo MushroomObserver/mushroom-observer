@@ -63,13 +63,8 @@ module Image::Scopes
       end
     }
 
-    scope :has_votes, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
-        where(Image[:vote_cache].not_eq(nil))
-      else
-        where(Image[:vote_cache].eq(nil))
-      end
-    }
+    scope :has_votes,
+          ->(bool = true) { presence_condition(Image[:vote_cache], bool:) }
     # quality is on a scale from 1.0 to 4.0
     scope :quality, lambda { |min, max = nil|
       min, max = min if min.is_a?(Array) && min.size == 2
@@ -84,6 +79,13 @@ module Image::Scopes
       joins(:observations).merge(Observation.confidence(min, max))
     }
 
+    scope :has_observations, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
+        joins(:observation_images).distinct
+      else
+        where.not(id: Image.joins(:observation_images).distinct) # very slow
+      end
+    }
     scope :observations, lambda { |obs|
       joins(:observation_images).
         where(observation_images: { observation: obs })

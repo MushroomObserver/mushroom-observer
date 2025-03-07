@@ -18,11 +18,11 @@ class Query::Names < Query::Base
       created_at: [:time],
       updated_at: [:time],
       id_in_set: [Name],
-      names: [Name], # potentially modified by the next four params
-      include_synonyms: :boolean,
-      include_subtaxa: :boolean,
-      include_immediate_subtaxa: :boolean,
-      exclude_original_names: :boolean,
+      names: { lookup: [Name],
+               include_synonyms: :boolean,
+               include_subtaxa: :boolean,
+               include_immediate_subtaxa: :boolean,
+               exclude_original_names: :boolean },
       by_users: [User],
       by_editor: User,
       locations: [Location],
@@ -85,7 +85,8 @@ class Query::Names < Query::Base
 
   # Much simpler form for non-observation-based name queries.
   def initialize_related_names_parameters
-    ids = lookup_names_by_name(params[:names], related_names_parameters)
+    ids = lookup_names_by_name(params.dig(:names, :lookup),
+                               related_names_parameters)
     add_association_condition("names.id", ids)
   end
 

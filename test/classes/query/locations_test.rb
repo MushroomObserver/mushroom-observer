@@ -14,8 +14,8 @@ class Query::LocationsTest < UnitTestCase
     assert_query(expects, :Location, by: :id)
   end
 
-  def test_location_by_user
-    assert_query(Location.reorder(id: :asc).where(user: rolf).distinct,
+  def test_location_by_users
+    assert_query(Location.reorder(id: :asc).by_users(rolf).distinct,
                  :Location, by_users: rolf, by: :id)
     assert_query([], :Location, by_users: users(:zero_user))
   end
@@ -26,7 +26,8 @@ class Query::LocationsTest < UnitTestCase
     loc = Location.where.not(user: mary).index_order.first
     loc.display_name = "new name"
     loc.save
-    assert_query([loc], :Location, by_editor: mary)
+    assert_query_scope([loc], Location.by_editor(mary),
+                       :Location, by_editor: mary)
     assert_query([], :Location, by_editor: dick)
   end
 
@@ -45,7 +46,8 @@ class Query::LocationsTest < UnitTestCase
   end
 
   def test_location_in_set
-    assert_query(location_set, :Location, id_in_set: location_set)
+    scope = Location.id_in_set(location_set)
+    assert_query_scope(location_set, scope, :Location, id_in_set: location_set)
   end
 
   def test_location_has_notes
@@ -56,25 +58,27 @@ class Query::LocationsTest < UnitTestCase
   end
 
   def test_location_notes_has
-    expects = Location.index_order.notes_has('"should persist"')
-    assert_query(expects, :Location, notes_has: '"should persist"')
-    expects = Location.index_order.
-              notes_has('"legal to collect" -"Salt Point"')
-    assert_query(expects,
-                 :Location, notes_has: '"legal to collect" -"Salt Point"')
+    expects = [locations(:burbank)]
+    scope = Location.index_order.notes_has('"should persist"')
+    assert_query_scope(expects, scope, :Location, notes_has: '"should persist"')
+    expects = [locations(:point_reyes)]
+    scope = Location.index_order.notes_has('"legal to collect" -"Salt Point"')
+    assert_query_scope(expects, scope,
+                       :Location, notes_has: '"legal to collect" -"Salt Point"')
   end
 
   def test_location_in_box
+    expects = [locations(:burbank)]
     box = { north: 35, south: 34, east: -118, west: -119 }
-    expects = Location.index_order.in_box(**box)
-    assert_query(expects, :Location, in_box: box)
+    scope = Location.index_order.in_box(**box)
+    assert_query_scope(expects, scope, :Location, in_box: box)
   end
 
   def test_location_pattern_search
     expects = Location.reorder(id: :asc).pattern("California")
     assert_query(expects, :Location, pattern: "California", by: :id)
-    assert_query([locations(:elgin_co).id],
-                 :Location, pattern: "Canada")
+    assert_query_scope([locations(:elgin_co).id], Location.pattern("Canada"),
+                       :Location, pattern: "Canada")
     assert_query([], :Location, pattern: "Canada -Elgin")
   end
 
@@ -138,8 +142,7 @@ class Query::LocationsTest < UnitTestCase
   end
 
   def test_location_regexp_search
-    expects = Location.where(Location[:name].matches_regexp("California")).
-              index_order.distinct
+    expects = Location.regexp("California").index_order.distinct
     assert_query(expects, :Location, regexp: ".alifornia")
   end
 
@@ -192,7 +195,7 @@ class Query::LocationsTest < UnitTestCase
   end
 
   def test_location_has_observations
-    expects = Location.joins(:observations).index_order.distinct
+    expects = Location.has_observations.index_order.distinct
     assert_query(expects, :Location, has_observations: 1)
   end
 
@@ -225,18 +228,6 @@ class Query::LocationsTest < UnitTestCase
   end
 
   ##### list/string parameters #####
-
-  def test_location_with_observations_include_subtaxa
-    parent = names(:agaricus)
-    children = Name.index_order.
-               where(Name[:text_name].matches_regexp(parent.text_name))
-    assert_query(
-      Location.joins(:observations).
-               where(observations: { name: [parent] + children }).distinct,
-      :Location,
-      observation_query: { names: parent.text_name, include_subtaxa: true }
-    )
-  end
 
   def test_location_with_observations_comments_has
     # Create a Comment, unfortunately hitting the db because
@@ -276,14 +267,6 @@ class Query::LocationsTest < UnitTestCase
     assert_query(expects, :Location, observation_query: { herbaria: name })
   end
 
-  def test_location_with_observations_names
-    names = [names(:boletus_edulis), names(:agaricus_campestris)].
-            map(&:text_name)
-    expects = Location.joins(observations: :name).
-              where(observations: { text_name: names }).index_order.distinct
-    assert_query(expects, :Location, observation_query: { names: names })
-  end
-
   def test_location_with_observations_notes_has
     expects = Location.index_order.joins(:observations).
               where(Observation[:notes].matches("%somewhere%")).distinct
@@ -311,6 +294,29 @@ class Query::LocationsTest < UnitTestCase
     )
   end
 
+  def test_location_with_observations_names
+    names = [names(:boletus_edulis), names(:agaricus_campestris)].
+            map(&:text_name)
+    expects = Location.joins(observations: :name).
+              where(observations: { text_name: names }).index_order.distinct
+    assert_query(
+      expects, :Location, observation_query: { names: { lookup: names } }
+    )
+  end
+
+  def test_location_with_observations_include_subtaxa
+    parent = names(:agaricus)
+    children = Name.index_order.
+               where(Name[:text_name].matches_regexp(parent.text_name))
+    assert_query(
+      Location.joins(:observations).
+               where(observations: { name: [parent] + children }).distinct,
+      :Location, observation_query: {
+        names: { lookup: parent.text_name, include_subtaxa: true }
+      }
+    )
+  end
+
   def test_location_with_observations_include_synonyms
     # Create Observations of synonyms, unfortunately hitting the db, because:
     # (a) there are no Observation fixtures for a Name with a synonym_names; and
@@ -327,8 +333,34 @@ class Query::LocationsTest < UnitTestCase
     )
     assert_query(
       [locations(:albion), locations(:howarth_park)],
-      :Location, observation_query: { names: "Macrolepiota rachodes",
-                                      include_synonyms: true }
+      :Location, observation_query: {
+        names: { lookup: "Macrolepiota rachodes", include_synonyms: true }
+      }
+    )
+  end
+
+  def test_location_with_observations_of_children
+    nam = [names(:agaricus).id]
+    assert_query(
+      [locations(:burbank).id],
+      :Location, observation_query: {
+        names: { lookup: nam, include_subtaxa: true }
+      }
+    )
+  end
+
+  def test_location_with_observations_of_name
+    assert_query(
+      [locations(:burbank).id],
+      :Location, observation_query: {
+        names: { lookup: [names(:agaricus_campestris).id] }
+      }
+    )
+    assert_query(
+      [],
+      :Location, observation_query: {
+        names: { lookup: [names(:peltigera).id] }
+      }
     )
   end
 
@@ -441,23 +473,5 @@ class Query::LocationsTest < UnitTestCase
                                                  is_collection_location: 1 })
     empty = species_lists(:first_species_list).id
     assert_query([], :Location, observation_query: { species_lists: empty })
-  end
-
-  def test_location_with_observations_of_children
-    nam = [names(:agaricus).id]
-    assert_query(
-      [locations(:burbank).id],
-      :Location, observation_query: { names: nam, include_subtaxa: true }
-    )
-  end
-
-  def test_location_with_observations_of_name
-    assert_query(
-      [locations(:burbank).id],
-      :Location, observation_query: { names: [names(:agaricus_campestris).id] }
-    )
-    assert_query(
-      [], :Location, observation_query: { names: [names(:peltigera).id] }
-    )
   end
 end

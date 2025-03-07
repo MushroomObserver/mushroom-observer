@@ -114,6 +114,10 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
     scope :notes_has,
           ->(phrase) { search_columns(Name[:notes], phrase) }
 
+    scope :names, lambda { |lookup:, **related_name_args|
+      ids = lookup_names_by_name(lookup, related_name_args.compact)
+      where(id: ids).distinct
+    }
     ### Module Name::Taxonomy. Rank scopes take text values, e.g. "Genus"
     # Query's scope: rank at or between
     scope :rank, lambda { |min, max = min|
@@ -234,22 +238,16 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
       joins(:comments).merge(Comment.search_content(phrase)).distinct
     }
 
-    scope :has_description, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
-        where.not(description_id: nil)
-      else
-        has_no_description
-      end
+    scope :has_descriptions, lambda { |bool = true|
+      presence_condition(Name[:description_id], bool:)
     }
-    scope :has_no_description,
-          -> { where(description_id: nil) }
     scope :need_description, lambda {
-      has_description(false).joins(:observations).distinct.
+      has_descriptions(false).joins(:observations).distinct.
         group(:name_id).order(Observation[:name_id].count.desc, Name[:id].desc)
     }
     scope :description_has, lambda { |phrase|
       joins(:descriptions).
-        merge(NameDescription.search_content(phrase)).distinct
+        merge(NameDescription.content_has(phrase)).distinct
     }
     scope :has_description_in_project, lambda { |project|
       joins(descriptions: :project).
@@ -268,7 +266,7 @@ module Name::Scopes # rubocop:disable Metrics/ModuleLength
       return none if Description::ALL_SOURCE_TYPES.exclude?(source)
 
       joins(:descriptions).
-        merge(NameDescription.where(source_type: source)).distinct
+        merge(NameDescription.types(source)).distinct
     }
     scope :has_description_classification_differing, lambda {
       joins(:description).

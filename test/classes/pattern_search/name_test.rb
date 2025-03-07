@@ -151,13 +151,14 @@ class PatternSearch::NameTest < UnitTestCase
     assert_name_arrays_equal(expect, x.query.results, :sort)
   end
 
-  def test_name_search_has_description
-    expect = Name.with_correct_spelling.reorder(id: :asc).has_description
+  def test_name_search_has_descriptions
+    expect = Name.with_correct_spelling.reorder(id: :asc).has_descriptions
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_description:yes")
     assert_name_arrays_equal(expect, x.query.results, :sort)
 
-    expect = Name.with_correct_spelling.reorder(id: :asc).has_no_description
+    expect = Name.with_correct_spelling.has_descriptions(false).
+             reorder(id: :asc)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("has_description:no")
     assert_name_arrays_equal(expect, x.query.results, :sort)

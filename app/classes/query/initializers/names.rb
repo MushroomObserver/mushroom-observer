@@ -2,10 +2,11 @@
 
 module Query::Initializers::Names
   def initialize_names_and_related_names_parameters(*joins)
-    return force_empty_results if irreconcilable_names_parameters?
+    return force_empty_results if irreconcilable_naming_parameters?
 
     table = params[:include_all_name_proposals] ? "namings" : "observations"
-    ids = lookup_names_by_name(params[:names], related_names_parameters)
+    ids = lookup_names_by_name(params.dig(:names, :lookup),
+                               related_names_parameters)
     add_association_condition("#{table}.name_id", ids, *joins)
 
     add_join(:observations, :namings) if params[:include_all_name_proposals]
@@ -24,10 +25,12 @@ module Query::Initializers::Names
   private
 
   def related_names_parameters
-    params.dup.slice(*NAMES_EXPANDER_PARAMS).compact
+    return {} unless params[:names]
+
+    params[:names].dup.slice(*NAMES_EXPANDER_PARAMS).compact
   end
 
-  def irreconcilable_names_parameters?
+  def irreconcilable_naming_parameters?
     params[:exclude_consensus] && !params[:include_all_name_proposals]
   end
 end

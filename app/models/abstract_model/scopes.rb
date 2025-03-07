@@ -24,7 +24,7 @@ module AbstractModel::Scopes
 
     scope :id_in_set, lambda { |ids|
       set = limited_id_set(ids) # [] is valid
-      where(arel_table[:id].in(set)).order_by_set
+      where(arel_table[:id].in(set)).order_by_set(set)
     }
 
     scope :by_users, lambda { |users|

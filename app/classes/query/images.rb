@@ -29,11 +29,11 @@ class Query::Images < Query::Base
       quality: [:float],
       confidence: [:float],
       pattern: :string,
-      locations: [Location],
+      has_observations: :boolean,
       observations: [Observation],
+      locations: [Location],
       projects: [Project],
       species_lists: [SpeciesList],
-      has_observations: :boolean,
       observation_query: { subquery: :Observation }
     ).merge(advanced_search_parameter_declarations)
   end

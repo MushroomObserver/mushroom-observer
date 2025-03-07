@@ -38,7 +38,7 @@ class API2
         updated_at: parse_range(:time, :updated_at),
         by_users: parse_array(:user, :user, help: :first_user),
         locations: parse_array(:location, :location),
-        public: true
+        is_public: true
       }
     end
 

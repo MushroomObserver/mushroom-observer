@@ -5,7 +5,7 @@ module Query::Initializers::Descriptions
     add_boolean_condition(
       "#{type}_descriptions.public IS TRUE",
       "#{type}_descriptions.public IS FALSE",
-      params[:public]
+      params[:is_public]
     )
   end
 
@@ -52,7 +52,7 @@ module Query::Initializers::Descriptions
   def initialize_type_parameter(type)
     add_indexed_enum_condition(
       "#{type}_descriptions.source_type",
-      params[:type],
+      params[:types],
       "#{type}_description".classify.constantize.source_types # Hash
     )
   end
