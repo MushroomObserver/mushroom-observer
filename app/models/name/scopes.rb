@@ -26,27 +26,28 @@ module Name::Scopes
       # if :either, returns all
       case boolish.to_sym
       when :no
-        with_correct_spelling
+        where(correct_spelling_id: nil)
       when :only
-        with_incorrect_spelling
+        where.not(correct_spelling_id: nil)
       end
     }
     scope :with_correct_spelling,
-          -> { where(correct_spelling_id: nil) }
+          -> { misspellings(:no) }
     scope :with_incorrect_spelling,
-          -> { where.not(correct_spelling_id: nil) }
+          -> { misspellings(:only) }
     scope :with_self_referential_misspelling,
           -> { where(Name[:correct_spelling_id].eq(Name[:id])) }
 
-    scope :of_lichens, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
+    scope :lichen, lambda { |boolish = :yes|
+      # if false, returns all
+      boolish = :yes if boolish == true
+      case boolish.to_sym
+      when :yes
         where(Name[:lifeform].matches("%lichen%"))
-      else
-        not_lichens
+      when :no
+        where(Name[:lifeform].does_not_match("% lichen %"))
       end
     }
-    scope :not_lichens,
-          -> { where(Name[:lifeform].does_not_match("% lichen %")) }
 
     scope :deprecated,
           ->(bool = true) { where(deprecated: bool) }

@@ -357,7 +357,7 @@ class Query::NamesTest < UnitTestCase
 
   def test_name_has_descriptions
     expects = Name.index_order.with_correct_spelling.
-              joins(:descriptions).distinct
+              has_descriptions.distinct
     assert_query(expects, :Name, has_descriptions: 1)
   end
 
@@ -420,7 +420,7 @@ class Query::NamesTest < UnitTestCase
   end
 
   def test_name_has_observations
-    expects = Name.with_correct_spelling.joins(:observations).
+    expects = Name.with_correct_spelling.has_observations.
               select(:name).distinct.pluck(:name_id).sort
     assert_query(expects, :Name, has_observations: 1, by: :id)
   end

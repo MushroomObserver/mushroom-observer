@@ -113,15 +113,16 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         includes(:observations).map(&:observations).flatten.uniq
     end
 
-    scope :of_lichens, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
+    scope :lichen, lambda { |boolish = :yes|
+      # if false, returns all
+      boolish = :yes if boolish == true
+      case boolish.to_sym
+      when :yes
         where(Observation[:lifeform].matches("%lichen%"))
-      else
-        not_lichens
+      when :no
+        where(Observation[:lifeform].does_not_match("% lichen %"))
       end
     }
-    scope :not_lichens,
-          -> { where(Observation[:lifeform].does_not_match("% lichen %")) }
 
     scope :has_name, lambda { |bool = true|
       if bool.to_s.to_boolean == true

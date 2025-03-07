@@ -154,8 +154,6 @@
 #  updated_after("yyyymmdd")
 #  updated_before("yyyymmdd")
 #  updated_between(start, end)
-#  of_lichens
-#  not_lichens
 #  deprecated
 #  has_description
 #  description_has
