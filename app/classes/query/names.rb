@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # base class for Query's which return Names
-class Query::Names < Query::Base
+class Query::Names < Query::Base # rubocop:disable Metrics/ClassLength
   include Query::Params::AdvancedSearch
   include Query::Params::Filters
   include Query::Initializers::AdvancedSearch
