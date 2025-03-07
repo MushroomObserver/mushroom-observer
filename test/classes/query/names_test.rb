@@ -147,7 +147,9 @@ class Query::NamesTest < UnitTestCase
 
   def test_name_names_include_subtaxa_exclude_original
     assert_query(
-      Name.index_order.subtaxa_of(names(:agaricus)),
+      Name.index_order.names(lookup: names(:agaricus),
+                             include_subtaxa: true,
+                             exclude_original_names: true),
       :Name, names: { lookup: [names(:agaricus).id],
                       include_subtaxa: true,
                       exclude_original_names: true }
@@ -156,7 +158,9 @@ class Query::NamesTest < UnitTestCase
 
   def test_name_names_include_subtaxa_include_original
     assert_query(
-      Name.index_order.include_subtaxa_of(names(:agaricus)),
+      Name.index_order.names(lookup: names(:agaricus),
+                             include_subtaxa: true,
+                             exclude_original_names: false),
       :Name, names: { lookup: [names(:agaricus).id],
                       include_subtaxa: true,
                       exclude_original_names: false }
@@ -165,7 +169,9 @@ class Query::NamesTest < UnitTestCase
 
   def test_name_names_include_immediate_subtaxa
     assert_query(
-      Name.index_order.include_immediate_subtaxa_of(names(:agaricus)),
+      Name.index_order.names(lookup: names(:agaricus),
+                             include_immediate_subtaxa: true,
+                             exclude_original_names: false),
       :Name, names: { lookup: [names(:agaricus).id],
                       include_immediate_subtaxa: true,
                       exclude_original_names: false }
@@ -181,17 +187,17 @@ class Query::NamesTest < UnitTestCase
   #   assert_query(expects, :Name, deprecated: :either)
   # end
 
-  def test_name_is_deprecated
-    expects = Name.with_correct_spelling.is_deprecated.index_order
-    assert_query(expects, :Name, is_deprecated: true)
-    expects = Name.with_correct_spelling.is_deprecated(false).index_order
-    assert_query(expects, :Name, is_deprecated: false)
+  def test_name_deprecated
+    expects = Name.with_correct_spelling.deprecated.index_order
+    assert_query(expects, :Name, deprecated: true)
+    expects = Name.with_correct_spelling.not_deprecated.index_order
+    assert_query(expects, :Name, deprecated: false)
   end
 
   def test_name_has_synonyms
     expects = Name.with_correct_spelling.has_synonyms.index_order
     assert_query(expects, :Name, has_synonyms: true)
-    expects = Name.with_correct_spelling.has_no_synonyms.index_order
+    expects = Name.with_correct_spelling.has_synonyms(false).index_order
     assert_query(expects, :Name, has_synonyms: false)
   end
 
@@ -218,7 +224,7 @@ class Query::NamesTest < UnitTestCase
   def test_name_has_author
     expects = Name.with_correct_spelling.has_author.index_order
     assert_query(expects, :Name, has_author: true)
-    expects = Name.with_correct_spelling.has_no_author.index_order
+    expects = Name.with_correct_spelling.has_author(false).index_order
     assert_query(expects, :Name, has_author: false)
   end
 
@@ -230,7 +236,7 @@ class Query::NamesTest < UnitTestCase
   def test_name_has_citation
     expects = Name.with_correct_spelling.has_citation.index_order
     assert_query(expects, :Name, has_citation: true)
-    expects = Name.with_correct_spelling.has_no_citation.index_order
+    expects = Name.with_correct_spelling.has_citation(false).index_order
     assert_query(expects, :Name, has_citation: false)
   end
 
@@ -243,7 +249,7 @@ class Query::NamesTest < UnitTestCase
   def test_name_has_classification
     expects = Name.with_correct_spelling.has_classification.index_order
     assert_query(expects, :Name, has_classification: true)
-    expects = Name.with_correct_spelling.has_no_classification.index_order
+    expects = Name.with_correct_spelling.has_classification(false).index_order
     assert_query(expects, :Name, has_classification: false)
   end
 
@@ -344,9 +350,14 @@ class Query::NamesTest < UnitTestCase
     assert_query(expects, :Name, need_description: 1)
   end
 
+  def test_name_has_default_description
+    scope = Name.index_order.has_default_description
+    assert_query(scope, :Name, has_default_description: 1)
+  end
+
   def test_name_has_descriptions
     expects = Name.index_order.with_correct_spelling.
-              joins(:descriptions).distinct
+              has_descriptions.distinct
     assert_query(expects, :Name, has_descriptions: 1)
   end
 
@@ -409,7 +420,7 @@ class Query::NamesTest < UnitTestCase
   end
 
   def test_name_has_observations
-    expects = Name.with_correct_spelling.joins(:observations).
+    expects = Name.with_correct_spelling.has_observations.
               select(:name).distinct.pluck(:name_id).sort
     assert_query(expects, :Name, has_observations: 1, by: :id)
   end

@@ -341,12 +341,12 @@ class PatternSearch::ObservationTest < UnitTestCase
   end
 
   def test_observation_search_lichen
-    expect = Observation.of_lichens
+    expect = Observation.lichen(:yes)
     assert_not_empty(expect)
     x = PatternSearch::Observation.new("lichen:yes")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
 
-    expect = Observation.not_lichens
+    expect = Observation.lichen(:no)
     assert_not_empty(expect)
     x = PatternSearch::Observation.new("lichen:false")
     assert_obj_arrays_equal(expect, x.query.results, :sort)

@@ -419,11 +419,20 @@ module AbstractModel::Scopes
       end
     end
 
-    def coalesce_presence_condition(table_column, bool: true)
+    # Try not_blank_condition before uncommenting this
+    # def coalesce_presence_condition(table_column, bool: true)
+    #   if bool.to_s.to_boolean == true
+    #     where(table_column.coalesce("").length.gt(0))
+    #   else
+    #     where(table_column.coalesce("").length.eq(0))
+    #   end
+    # end
+
+    def not_blank_condition(table_column, bool: true)
       if bool.to_s.to_boolean == true
-        where(table_column.coalesce("").length.gt(0))
+        where(table_column.not_blank)
       else
-        where(table_column.coalesce("").length.eq(0))
+        where(table_column.blank)
       end
     end
   end

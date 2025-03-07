@@ -49,14 +49,14 @@ module Name::PropagateGenericClassifications
     end
 
     def build_accepted_names_lookup_table
-      Name.not_deprecated.where.not(synonym_id: nil).
+      Name.not_deprecated.has_synonyms.
         where(rank: 0..Name.ranks[:Genus]).
         pluck(:synonym_id, :text_name).
         to_h
     end
 
     def accepted_generic_classification_strings
-      geni = Name.not_deprecated.with_rank("Genus").
+      geni = Name.not_deprecated.rank("Genus").
              where(Name[:author].does_not_match("sensu lato%")).
              where(Name[:classification].length > 2).
              pluck(:text_name, :classification)
