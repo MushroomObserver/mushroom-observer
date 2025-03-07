@@ -67,9 +67,8 @@ class HerbariumRecord < AbstractModel
   scope :herbaria,
         ->(herbaria) { where(herbarium: herbaria) }
 
-  scope :has_notes, lambda { |bool = true|
-    coalesce_presence_condition(HerbariumRecord[:notes], bool:)
-  }
+  scope :has_notes,
+        ->(bool = true) { not_blank_condition(HerbariumRecord[:notes], bool:) }
   scope :notes_has,
         ->(str) { search_columns(HerbariumRecord[:notes], str) }
 

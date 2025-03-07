@@ -267,13 +267,7 @@ module Name::Taxonomy
   #   'Letharia vulpina var. bogus f. foobar'
   #
   def children(all: false)
-    scoped_children =
-      if at_or_below_genus?
-        Name.with_correct_spelling.subtaxa_of_genus_or_below(text_name)
-      else
-        Name.with_correct_spelling.
-          with_rank_and_name_in_classification(rank, text_name)
-      end
+    scoped_children = correctly_spelled_subtaxa
 
     return scoped_children.to_a if all
 
@@ -366,6 +360,15 @@ module Name::Taxonomy
 
   private
 
+  def correctly_spelled_subtaxa
+    if at_or_below_genus?
+      Name.with_correct_spelling.subtaxa_of_genus_or_below(text_name)
+    else
+      Name.with_correct_spelling.
+        with_rank_and_name_in_classification(rank, text_name)
+    end
+  end
+
   def approved_synonym_of_correctly_spelt_proposed_name?
     !deprecated &&
       Naming.joins(:name).where(name: other_synonyms).
@@ -373,12 +376,7 @@ module Name::Taxonomy
   end
 
   def ancestor_of_correctly_spelled_name?
-    if at_or_below_genus?
-      Name.subtaxa_of_genus_or_below(text_name).with_correct_spelling.any?
-    else
-      Name.with_correct_spelling.
-        with_rank_and_name_in_classification(rank, text_name).any?
-    end
+    correctly_spelled_subtaxa.any?
   end
 
   def correctly_spelled_ancestor_of_proposed_name?

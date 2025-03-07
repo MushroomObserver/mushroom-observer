@@ -47,7 +47,7 @@ module Image::Scopes
     }
 
     scope :has_notes,
-          ->(bool = true) { coalesce_presence_condition(Image[:notes], bool:) }
+          ->(bool = true) { not_blank_condition(Image[:notes], bool:) }
     scope :notes_has,
           ->(phrase) { search_columns(Image[:notes], phrase) }
 
@@ -55,13 +55,8 @@ module Image::Scopes
           ->(phrase) { search_columns(Image[:copyright_holder], phrase) }
     scope :license,
           ->(license) { where(license: license) }
-    scope :ok_for_export, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
-        where(ok_for_export: true)
-      else
-        where(ok_for_export: false)
-      end
-    }
+    scope :ok_for_export,
+          ->(bool = true) { where(ok_for_export: bool) }
 
     scope :has_votes,
           ->(bool = true) { presence_condition(Image[:vote_cache], bool:) }
