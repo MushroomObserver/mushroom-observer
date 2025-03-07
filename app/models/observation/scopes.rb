@@ -54,7 +54,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :has_no_images,
           -> { where(thumb_image: nil) }
 
-    # NOTE: Why does `Observation.no_notes` evaluate to '--- {}\n' ?
+    # NOTE: `Observation.no_notes` evaluates to '--- {}\n' because it's to_yaml.
     # This is unlike other models with notes. This scope could be simpler:
     #       ->(bool = true) { not_blank_condition(Observation[:notes], bool:) }
     scope :has_notes, lambda { |bool = true|
@@ -124,16 +124,6 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       end
     }
 
-    scope :has_name, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
-        where.not(name: Name.unknown)
-      else
-        has_no_name
-      end
-    }
-    scope :has_no_name,
-          -> { where(name: Name.unknown) }
-
     # Filters for confidence on vote_cache scale -3.0..3.0
     # To translate percentage to vote_cache: (val.to_f / (100 / 3))
     scope :confidence, lambda { |min, max = nil|
@@ -201,22 +191,34 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     #   ).without_vote_by_user(user).not_reviewed_by_user(user).distinct
     # }
 
+    scope :has_name, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
+        where.not(name: Name.unknown)
+      else
+        where(name: Name.unknown)
+      end
+    }
     # Accepts either a Name instance, a string, or an id as the first argument.
     #  Other args:
     #  - include_synonyms: boolean
     #  - include_subtaxa: boolean
+    #  - include_immediate_subtaxa: boolean
+    #  - exclude_original_names: boolean
     #  - include_all_name_proposals: boolean
-    #  - of_look_alikes: boolean
+    #  - exclude_consensus: boolean
     #
     scope :names, lambda { |lookup:, **args|
       # First, lookup names, plus synonyms and subtaxa if requested
-      lookup_args = args.slice(:include_synonyms, :include_subtaxa)
+      lookup_args = args.slice(:include_synonyms,
+                               :include_subtaxa,
+                               :include_immediate_subtaxa,
+                               :exclude_original_names)
       name_ids = Lookup::Names.new(lookup, **lookup_args).ids
 
       # Query, with possible join to Naming. Mutually exclusive options:
       if args[:include_all_name_proposals]
         joins(:namings).where(namings: { name_id: name_ids })
-      elsif args[:of_look_alikes]
+      elsif args[:exclude_consensus]
         joins(:namings).where(namings: { name_id: name_ids }).
           where.not(name: name_ids)
       else

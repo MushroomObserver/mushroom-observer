@@ -1255,8 +1255,8 @@ class ObservationTest < UnitTestCase
   def test_scope_of_name_of_look_alikes
     # Prove that Observations of look-alikes of <Name> include
     # Observations of other Names proposed for Observations of <Name>
-    # NOTE: `of_look_alikes` is (currently) asymmetric / noncommunative. I.e.,
-    # Observations of look-alikes of <Name> does NOT necessarily include
+    # NOTE: `exclude_consensus` is (currently) asymmetric / noncommunative.
+    # I.e., Observations of look-alikes of <Name> does NOT necessarily include
     # Observations of other Names suggested for Observations of <Name>
 
     # Ensure fixtures aren't broken before testing Observations of look-alikes
@@ -1272,7 +1272,7 @@ class ObservationTest < UnitTestCase
                  "Test needs different fixture")
     assert_includes(
       Observation.names(lookup: names(:tremella_mesenterica),
-                        of_look_alikes: true),
+                        exclude_consensus: true),
       tremella_obs,
       "Observations of look-alikes of <Name> should include " \
       "Observations of other Names for which <Name> was proposed"

@@ -102,4 +102,11 @@ class Query::NameDescriptionsTest < UnitTestCase
     assert_query(NameDescription.ok_for_export(0).index_order,
                  :NameDescription, ok_for_export: 0)
   end
+
+  def test_name_description_is_public
+    assert_query(NameDescription.is_public(1).index_order,
+                 :NameDescription, is_public: 1)
+    assert_query(NameDescription.is_public(0).index_order,
+                 :NameDescription, is_public: 0)
+  end
 end

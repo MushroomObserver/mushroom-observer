@@ -117,12 +117,14 @@ class NameDescription < Description
     joins(:name_description_editors).
       where(name_description_editors: { user_id: ids })
   }
+
   scope :is_public,
         ->(bool = true) { where(public: bool) }
   scope :types,
         ->(types) { where(source_type: types) }
   scope :ok_for_export,
         ->(bool = true) { where(ok_for_export: bool) }
+
   scope :names, lambda { |names|
     ids = lookup_names_by_name(names)
     where(name: ids)
@@ -271,8 +273,7 @@ class NameDescription < Description
 
   # This is called after saving potential changes to a Name.  It will determine
   # if the changes are important enough to notify the authors, and do so.
-  # rubocop:disable Metrics/MethodLength
-  def notify_users
+  def notify_users # rubocop:disable Metrics/MethodLength
     # Even though changing review_status doesn't cause a new version to be
     # created, I want to notify authors of that change.
     # (saved_change_to_<attribute>? is a Rails automagical method)
@@ -322,7 +323,6 @@ class NameDescription < Description
     # No longer need this.
     @old_reviewer = nil
   end
-  # rubocop:enable Metrics/MethodLength
 
   ##############################################################################
 
