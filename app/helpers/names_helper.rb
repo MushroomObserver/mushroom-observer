@@ -100,15 +100,15 @@ module NamesHelper
   # These two do joins to Namings. Unbelievably, it's faster than the above?
   def obss_other_taxa_this_taxon_proposed(name)
     Query.lookup(:Observation, names: { lookup: name.id,
-                                        include_synonyms: true },
-                               include_all_name_proposals: true,
-                               exclude_consensus: true,
+                                        include_synonyms: true,
+                                        include_all_name_proposals: true,
+                                        exclude_consensus: true },
                                by: :confidence)
   end
 
   def obss_this_name_proposed(name)
-    Query.lookup(:Observation, names: { lookup: name.id },
-                               include_all_name_proposals: true,
+    Query.lookup(:Observation, names: { lookup: name.id,
+                                        include_all_name_proposals: true },
                                by: :confidence)
   end
 
