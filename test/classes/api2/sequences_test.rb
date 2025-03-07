@@ -125,7 +125,7 @@ class API2::SequencesTest < UnitTestCase
 
   def test_getting_sequences_without_name
     ensure_all_obs_have_at_least_one_sequence
-    obses = Observation.has_no_name
+    obses = Observation.has_name(false)
     assert_not_empty(obses)
     assert_api_pass(params_get(name: "Fungi"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
