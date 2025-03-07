@@ -54,8 +54,9 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :has_no_images,
           -> { where(thumb_image: nil) }
 
-    # Why is `no_notes` == '--- {}\n'?? This should be simpler:
-    # coalesce_presence_condition(Observation[:notes], bool:)
+    # NOTE: Why does `Observation.no_notes` evaluate to '--- {}\n' ?
+    # This is unlike other models with notes. This scope could be simpler:
+    #       ->(bool = true) { not_blank_condition(Observation[:notes], bool:) }
     scope :has_notes, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         where.not(notes: no_notes)
@@ -112,15 +113,16 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         includes(:observations).map(&:observations).flatten.uniq
     end
 
-    scope :of_lichens, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
+    scope :lichen, lambda { |boolish = :yes|
+      # if false, returns all
+      boolish = :yes if boolish == true
+      case boolish.to_sym
+      when :yes
         where(Observation[:lifeform].matches("%lichen%"))
-      else
-        not_lichens
+      when :no
+        where(Observation[:lifeform].does_not_match("% lichen %"))
       end
     }
-    scope :not_lichens,
-          -> { where(Observation[:lifeform].does_not_match("% lichen %")) }
 
     scope :has_name, lambda { |bool = true|
       if bool.to_s.to_boolean == true
@@ -188,7 +190,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # Higher taxa: returns narrowed-down group of id'd obs,
     # in higher taxa under the given taxon
     # scope :needs_naming_by_taxon, lambda { |user, name|
-    #   name_plus_subtaxa = Name.include_subtaxa_of(name)
+    #   name_plus_subtaxa = Name.names(lookup: name, include_subtaxa: true)
     #   subtaxa_above_genus = name_plus_subtaxa.with_rank_above_genus
     #   lower_subtaxa = name_plus_subtaxa.with_rank_at_or_below_genus
 
@@ -456,11 +458,9 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       if bool.to_s.to_boolean == true
         joins(:comments).distinct
       else
-        has_no_comments
+        where.not(id: Observation.has_comments)
       end
     }
-    scope :has_no_comments,
-          -> { where.not(id: Observation.has_comments) }
     scope :comments_has, lambda { |phrase|
       joins(:comments).merge(Comment.search_content(phrase)).distinct
     }

@@ -1547,10 +1547,10 @@ class ObservationTest < UnitTestCase
     assert_empty(Observation.confidence(3.1, 3.2))
   end
 
-  def test_scope_has_no_comments
-    assert_includes(Observation.has_no_comments,
+  def test_scope_has_comments_false
+    assert_includes(Observation.has_comments(false),
                     observations(:unlisted_rolf_obs))
-    assert_not_includes(Observation.has_no_comments,
+    assert_not_includes(Observation.has_comments(false),
                         observations(:minimal_unknown_obs))
   end
 

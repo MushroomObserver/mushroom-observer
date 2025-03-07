@@ -24,8 +24,8 @@ class Query::Locations < Query::Base
       has_notes: :boolean,
       notes_has: :string,
       has_descriptions: :boolean,
-      description_query: { subquery: :LocationDescription },
       has_observations: :boolean,
+      description_query: { subquery: :LocationDescription },
       observation_query: { subquery: :Observation }
     ).merge(content_filter_parameter_declarations(Location)).
       merge(advanced_search_parameter_declarations)
