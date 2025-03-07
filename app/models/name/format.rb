@@ -19,7 +19,9 @@ module Name::Format
   end
 
   def html_name
+    # rubocop:disable Rails/OutputSafety
     display_name.t.gsub("&#8216;", "'").gsub("&#8217;", "'").html_safe
+    # rubocop:enable Rails/OutputSafety
   end
 
   # Alias for +display_name+ to be consistent with other objects.
