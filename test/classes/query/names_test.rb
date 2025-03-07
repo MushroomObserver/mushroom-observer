@@ -126,27 +126,49 @@ class Query::NamesTest < UnitTestCase
     assert_query(expects, :Name, species_lists: spl)
   end
 
+  def test_name_names_names
+    set = [names(:agaricus), names(:coprinus_comatus),
+           names(:macrocybe_titans)]
+    expects = [
+      names(:agaricus),
+      names(:sect_agaricus),
+      names(:agaricus_campestras),
+      names(:agaricus_campestris),
+      names(:agaricus_campestros),
+      names(:agaricus_campestrus),
+      names(:coprinus_comatus),
+      names(:macrocybe_titans)
+    ]
+    scope = Name.names(lookup: set, include_subtaxa: true).index_order
+    assert_query_scope(
+      expects, scope, :Name, names: { lookup: set, include_subtaxa: true }
+    )
+  end
+
   def test_name_names_include_subtaxa_exclude_original
     assert_query(
       Name.index_order.subtaxa_of(names(:agaricus)),
-      :Name, names: [names(:agaricus).id],
-             include_subtaxa: true, exclude_original_names: true
+      :Name, names: { lookup: [names(:agaricus).id],
+                      include_subtaxa: true,
+                      exclude_original_names: true }
     )
   end
 
   def test_name_names_include_subtaxa_include_original
     assert_query(
       Name.index_order.include_subtaxa_of(names(:agaricus)),
-      :Name, names: [names(:agaricus).id],
-             include_subtaxa: true, exclude_original_names: false
+      :Name, names: { lookup: [names(:agaricus).id],
+                      include_subtaxa: true,
+                      exclude_original_names: false }
     )
   end
 
   def test_name_names_include_immediate_subtaxa
     assert_query(
       Name.index_order.include_immediate_subtaxa_of(names(:agaricus)),
-      :Name, names: [names(:agaricus).id],
-             include_immediate_subtaxa: true, exclude_original_names: false
+      :Name, names: { lookup: [names(:agaricus).id],
+                      include_immediate_subtaxa: true,
+                      exclude_original_names: false }
     )
   end
 

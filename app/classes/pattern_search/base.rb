@@ -32,6 +32,20 @@ module PatternSearch
       end
     end
 
+    def put_names_and_modifiers_in_hash
+      modifiers = [:include_subtaxa, :include_synonyms,
+                   :include_immediate_subtaxa, :exclude_original_names]
+      lookup, include_subtaxa, include_synonyms,
+      include_immediate_subtaxa, exclude_original_names =
+        args.values_at(:names, *modifiers)
+      names = { lookup:, include_subtaxa:, include_synonyms:,
+                include_immediate_subtaxa:, exclude_original_names: }
+      return if names.compact.blank?
+
+      args[:names] = names.compact
+      args.except!(*modifiers)
+    end
+
     def help_message
       "#{:pattern_search_terms_help.l}\n#{self.class.terms_help}"
     end

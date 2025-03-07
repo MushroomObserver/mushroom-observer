@@ -423,7 +423,7 @@ class Query::ImagesTest < UnitTestCase
 
   def test_image_with_observations_of_children
     expects = [images(:agaricus_campestris_image).id]
-    params = { names: [names(:agaricus).id], include_subtaxa: true }
+    params = { names: { lookup: [names(:agaricus).id], include_subtaxa: true } }
     assert_image_obs_query(expects, **params)
   end
 
@@ -448,11 +448,18 @@ class Query::ImagesTest < UnitTestCase
   def test_image_with_observations_of_name
     expects = Image.index_order.joins(:observation_images, :observations).
               where(observations: { name: names(:fungi) }).distinct
-    assert_image_obs_query(expects, names: [names(:fungi).id])
+    assert_image_obs_query(expects, names: { lookup: [names(:fungi).id] })
+
     expects = [images(:connected_coprinus_comatus_image).id]
-    assert_image_obs_query(expects, names: [names(:coprinus_comatus).id])
+    assert_image_obs_query(
+      expects, names: { lookup: [names(:coprinus_comatus).id] }
+    )
+
     expects = [images(:agaricus_campestris_image).id]
-    assert_image_obs_query(expects, names: [names(:agaricus_campestris).id])
-    assert_image_obs_query([], names: [names(:conocybe_filaris).id])
+    assert_image_obs_query(
+      expects, names: { lookup: [names(:agaricus_campestris).id] }
+    )
+
+    assert_image_obs_query([], names: { lookup: [names(:conocybe_filaris).id] })
   end
 end

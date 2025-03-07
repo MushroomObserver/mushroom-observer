@@ -155,7 +155,7 @@ class API2::SequencesTest < UnitTestCase
       Observation.where(text_name: "Agaricus"),
       "Tests won't work if there's already an Observation for genus Agaricus"
     )
-    ssp_obs = Observation.of_names_like("Agaricus")
+    ssp_obs = Observation.names_like("Agaricus")
     assert(ssp_obs.length > 1)
     agaricus = Name.where(text_name: "Agaricus").first # (an existing autonym)
     agaricus_obs = Observation.create(name: agaricus, user: rolf)

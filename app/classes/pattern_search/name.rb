@@ -49,8 +49,13 @@ module PatternSearch
     def build_query
       super
 
-      # This converts any search that *looks like* a name search into
-      # an actual name search. NOTE: This affects the index title.
+      hack_name_query
+      put_names_and_modifiers_in_hash
+    end
+
+    # This converts any search that *looks like* a name search into
+    # an actual name search. NOTE: This affects the index title.
+    def hack_name_query
       return unless args[:include_subtaxa].present? ||
                     args[:include_synonyms].present?
 
