@@ -50,7 +50,9 @@ end
       ) %>
 
   <%= select_with_label(form: f, field: :archive, label: :ARCHIVE.t + ":",
-                        options: sequence_archive_options, include_blank: true,
+                        options: sequence_archive_options,
+                        selected: @sequence.archive,
+                        include_blank: true,
                         inline: true, class: "ml-5") %>
 
   <%= text_field_with_label(form: f, field: :accession,

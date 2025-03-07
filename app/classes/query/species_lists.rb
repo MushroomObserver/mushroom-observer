@@ -10,7 +10,7 @@ class Query::SpeciesLists < Query::Base
       created_at: [:time],
       updated_at: [:time],
       date: [:date],
-      ids: [SpeciesList],
+      id_in_set: [SpeciesList],
       by_users: [User],
       locations: [Location],
       search_where: :string,

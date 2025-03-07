@@ -11,18 +11,16 @@ class Query::NameDescriptions < Query::Base
     super.merge(
       created_at: [:time],
       updated_at: [:time],
-      ids: [NameDescription],
+      id_in_set: [NameDescription],
       by_users: [User],
       by_author: User,
       by_editor: User,
-      names: [Name],
-      public: :boolean,
-      join_desc: { string: [:default, :any] },
-      desc_type: [{ string: Description::ALL_SOURCE_TYPES }],
-      desc_project: [Project],
-      desc_creator: [User],
-      desc_content: :string,
+      is_public: :boolean,
+      types: [{ string: Description::ALL_SOURCE_TYPES }],
+      content_has: :string,
       ok_for_export: :boolean,
+      names: [Name],
+      projects: [Project],
       name_query: { subquery: :Name }
     )
   end

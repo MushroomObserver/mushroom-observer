@@ -16,24 +16,24 @@ class Query::Images < Query::Base
       created_at: [:time],
       updated_at: [:time],
       date: [:date],
-      ids: [Image],
+      id_in_set: [Image],
       by_users: [User],
-      size: [{ string: Image::ALL_SIZES - [:full_size] }],
+      sizes: [{ string: Image::ALL_SIZES - [:full_size] }],
       content_types: [{ string: Image::ALL_EXTENSIONS }],
       has_notes: :boolean,
       notes_has: :string,
       copyright_holder_has: :string,
       license: [License],
+      ok_for_export: :boolean,
       has_votes: :boolean,
       quality: [:float],
       confidence: [:float],
-      ok_for_export: :boolean,
       pattern: :string,
-      locations: [Location],
+      has_observations: :boolean,
       observations: [Observation],
+      locations: [Location],
       projects: [Project],
       species_lists: [SpeciesList],
-      has_observations: :boolean,
       observation_query: { subquery: :Observation }
     ).merge(advanced_search_parameter_declarations)
   end
@@ -55,7 +55,7 @@ class Query::Images < Query::Base
     initialize_img_notes_parameters
     add_search_condition("images.copyright_holder",
                          params[:copyright_holder_has])
-    add_image_size_condition(params[:size])
+    add_image_sizes_condition(params[:sizes])
     add_image_type_condition(params[:content_types])
     initialize_ok_for_export_parameter
   end
@@ -67,7 +67,7 @@ class Query::Images < Query::Base
     add_search_condition("images.notes", params[:notes_has])
   end
 
-  def add_image_size_condition(vals, *)
+  def add_image_sizes_condition(vals, *)
     return if vals.empty?
 
     min, max = vals
@@ -176,7 +176,7 @@ class Query::Images < Query::Base
     args2 = args.dup
     extend_join(args2) << :observation_images
     extend_where(args2) << "observation_images.observation_id IN (#{ids})"
-    model.connection.select_rows(query(args2))
+    model.connection.select_rows(sql(args2))
   end
 
   def add_pattern_condition

@@ -95,6 +95,7 @@ salt_point:
 
 gualala:
   <<: *DEFAULTS
+  description: user_public_location_desc
   created_at: 2007-12-27 06:47:00
   updated_at: 2007-12-27 06:47:00
   name: Gualala, California, USA
@@ -203,6 +204,7 @@ unused_location:
 
 no_mushrooms_location:
   <<: *DEFAULTS
+  description: no_mushrooms_location_desc
   user_id: 0
   name: No Mushrooms
   scientific_name: No Mushrooms

@@ -46,7 +46,7 @@ module Query::Titles::Observations
   end
 
   def title_for_names
-    str = map_join_and_truncate(:names, Name, :text_name)
+    str = map_join_and_truncate(:lookup, Name, :text_name)
     :query_title_of_name.t(type: :observation, name: str)
   end
 

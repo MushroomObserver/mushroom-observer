@@ -670,8 +670,8 @@ macrocybe_pegler:
   text_name: Macrocybe
   author: '(H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone'
   display_name: '**__Macrocybe__** (H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone'
-  search_name: Macrocybe
-  sort_name: Macrocybe
+  search_name: 'Macrocybe (H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone'
+  sort_name: 'Macrocybe  (H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone'
   created_at: 2008-09-05 22:30:00
   updated_at: 2008-09-05 22:30:00
 

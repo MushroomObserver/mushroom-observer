@@ -19,7 +19,21 @@ module API2::Helpers
     end
     deprecate_parameter(:synonyms_of)
     deprecate_parameter(:children_of)
-    args
+    put_names_and_modifiers_in_hash(args)
+  end
+
+  def put_names_and_modifiers_in_hash(args)
+    modifiers = [:include_subtaxa, :include_synonyms,
+                 :include_immediate_subtaxa, :exclude_original_names]
+    lookup, include_subtaxa, include_synonyms,
+    include_immediate_subtaxa, exclude_original_names =
+      args.values_at(:names, *modifiers)
+    names = { lookup:, include_subtaxa:, include_synonyms:,
+              include_immediate_subtaxa:, exclude_original_names: }
+    return {} if names.compact.blank?
+
+    args[:names] = names.compact
+    args.except!(*modifiers)
   end
 
   def make_sure_location_isnt_dubious!(name)

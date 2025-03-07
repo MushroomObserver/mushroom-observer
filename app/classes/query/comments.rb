@@ -9,15 +9,14 @@ class Query::Comments < Query::Base
     super.merge(
       created_at: [:time],
       updated_at: [:time],
-      ids: [Comment],
+      id_in_set: [Comment],
       by_users: [User],
       for_user: User,
+      target: { id: AbstractModel, type: :string },
       types: [{ string: Comment::ALL_TYPE_TAGS }],
       summary_has: :string,
       content_has: :string,
-      pattern: :string,
-      target: AbstractModel,
-      type: :string
+      pattern: :string
     )
   end
 
@@ -46,21 +45,22 @@ class Query::Comments < Query::Base
   end
 
   def add_for_target_condition
-    return if params[:target].blank? || params[:type].blank?
+    return if params[:target].blank?
 
     target = target_instance
     @title_tag = :query_title_for_target
-    @title_args[:object] = target.unique_format_name
+    @title_args[:target] = target.unique_format_name
     where << "comments.target_id = '#{target.id}'"
     where << "comments.target_type = '#{target.class.name}'"
   end
 
   def target_instance
-    unless (type = Comment.safe_model_from_name(params[:type]))
-      raise("The model #{params[:type].inspect} does not support comments!")
+    type_param = params.dig(:target, :type)
+    unless (type = Comment.safe_model_from_name(type_param))
+      raise("The model #{type_param.inspect} does not support comments!")
     end
 
-    find_cached_parameter_instance(type, :target)
+    type.safe_find(params.dig(:target, :id))
   end
 
   def search_fields

@@ -70,7 +70,10 @@
 #  updated_between(start, end)
 #  by_user(user)
 #  for_user(user)
-#  for_target(target)
+#  target(target)
+#  summary_has(phrase)
+#  content_has(phrase)
+#  pattern(phrase)
 #
 #  == Instance Methods
 #
@@ -136,7 +139,8 @@ class Comment < AbstractModel
   after_create :notify_users
   after_create :oil_and_water
 
-  scope :index_order, -> { order(created_at: :desc, id: :desc) }
+  scope :index_order,
+        -> { order(created_at: :desc, id: :desc) }
 
   # This scope starts with a `where`, and chains subsequent `where` clauses
   # with `or`. So, rather than separately assembling `target_ids`, that would
@@ -148,23 +152,34 @@ class Comment < AbstractModel
   #   end
   #   where(target_id: target_ids)
   #
-  # ...this `inject` iteration only generates one very complex sql statement,
+  # ...this `reduce` iteration only generates one very complex sql statement,
   # with inner selects, and it's faster because AR can figure out that all the
   # chained selects constitute one giant SELECT, and SQL is faster than Ruby.
   #
   # Basically it's iterating over all the types doing this:
   #   where(target_type: :location,
-  #        target_id: Location.where(user: user)).
+  #         target_id: Location.where(user: user)).
   #   or(where(target_type: :name,
   #            target_id: Name.where(user: user))) etc.
   scope :for_user, lambda { |user|
-    ALL_TYPES.inject(nil) do |scope, model|
+    ALL_TYPES.reduce(nil) do |scope, model|
       scope2 = where(target_type: model.name.underscore.to_sym,
                      target_id: model.where(user: user))
       scope ? scope.or(scope2) : scope2
     end
   }
-  scope :for_target, ->(target) { where(target: target) }
+  scope :target,
+        ->(target) { where(target: target) }
+
+  scope :summary_has,
+        ->(phrase) { search_columns(Comment[:summary], phrase) }
+  scope :content_has,
+        ->(phrase) { search_columns(Comment[:comment], phrase) }
+
+  scope :pattern, lambda { |phrase|
+    cols = (Comment[:summary] + Comment[:comment].coalesce(""))
+    search_columns(cols, phrase).distinct
+  }
 
   scope :search_content, lambda { |phrase|
     # `or` is 10-20% faster than concatenating the columns
@@ -212,7 +227,7 @@ class Comment < AbstractModel
   # Return model if params[:type] is the name of a commentable model
   # Else nil
   def self.safe_model_from_name(name)
-    ALL_TYPES.find { |m| m.name == name }
+    ALL_TYPES.find { |m| m.name == name.to_s }
   end
 
   ############################################################################

@@ -46,7 +46,7 @@ module API2Extensions
 
   def assert_api_results(expect)
     msg = "API2 results wrong.\nQuery args: #{@api.query.params.inspect}\n" \
-          "Query sql: #{@api.query.query}"
+          "Query sql: #{@api.query.sql}"
     assert_obj_arrays_equal(expect, @api.results, :sort, msg)
   end
 

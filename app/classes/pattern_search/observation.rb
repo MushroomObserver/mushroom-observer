@@ -98,6 +98,7 @@ module PatternSearch
       hack_name_query
       default_to_including_synonyms_and_subtaxa
       put_nsew_params_in_box
+      put_names_and_modifiers_in_hash
     end
 
     private

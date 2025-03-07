@@ -39,7 +39,7 @@ class API2
     # rubocop:disable Layout/MultilineOperationIndentation
     def query_params
       {
-        ids: parse_array(:image, :id, as: :id),
+        id_in_set: parse_array(:image, :id, as: :id),
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at),
         date: parse_range(:date, :date, help: :when_taken),
@@ -50,8 +50,8 @@ class API2
         species_lists: parse_array(:species_list, :species_list, as: :id),
         has_observations: parse(:boolean, :has_observation,
                                 limit: true, help: 1),
-        size: parse(:enum, :size,
-                    limit: Image::ALL_SIZES - [:full_size], help: :min_size),
+        sizes: parse(:enum, :size,
+                     limit: Image::ALL_SIZES - [:full_size], help: :min_size),
         content_types: parse_array(:enum, :content_type,
                                    limit: Image::ALL_EXTENSIONS),
         has_notes: parse(:boolean, :has_notes),

@@ -188,7 +188,7 @@ class API2::NamesTest < UnitTestCase
 
   def test_getting_names_has_notes
     with    = Name.with_correct_spelling.has_notes
-    without = Name.with_correct_spelling.has_no_notes
+    without = Name.with_correct_spelling.has_notes(false)
     assert_not_empty(with)
     assert_not_empty(without)
     assert_api_pass(params_get(has_notes: "yes"))
@@ -206,8 +206,8 @@ class API2::NamesTest < UnitTestCase
   end
 
   def test_getting_names_has_description
-    with    = Name.with_correct_spelling.has_description
-    without = Name.with_correct_spelling.has_no_description
+    with    = Name.with_correct_spelling.has_descriptions
+    without = Name.with_correct_spelling.has_descriptions(false)
     assert_not_empty(with)
     assert_not_empty(without)
     assert_api_pass(params_get(has_description: "yes"))
@@ -261,9 +261,11 @@ class API2::NamesTest < UnitTestCase
   end
 
   def test_getting_names_ok_for_export
-    Name.with_correct_spelling.sample.update!(ok_for_export: true)
     names = Name.with_correct_spelling.ok_for_export
-    assert_not_empty(names)
+    assert_not_empty(
+      names,
+      "Test requires >=1 correctly spelled Name that's ok_for_export"
+    )
     assert_api_pass(params_get(ok_for_export: "yes"))
     assert_api_results(names)
   end

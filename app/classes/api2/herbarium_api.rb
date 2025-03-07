@@ -32,13 +32,13 @@ class API2
 
     def query_params
       {
-        ids: parse_array(:herbarium, :id, as: :id),
+        id_in_set: parse_array(:herbarium, :id, as: :id),
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at),
-        code: parse(:string, :code),
-        name: parse(:string, :name),
-        description: parse(:string, :description),
-        address: parse(:string, :address, help: :mailing_address)
+        code_has: parse(:string, :code),
+        name_has: parse(:string, :name),
+        description_has: parse(:string, :description),
+        mailing_address_has: parse(:string, :address, help: :mailing_address)
       }
     end
 

@@ -172,7 +172,7 @@ module Report
 
     def plain_query
       # Sometimes the default order requires unnecessary joins!
-      query.query(order: "")
+      query.sql(order: "")
     end
 
     def add_column!(rows, vals, col)

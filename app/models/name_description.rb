@@ -107,6 +107,31 @@ class NameDescription < Description
                        NameDescription[:id].desc)
   }
 
+  scope :by_author, lambda { |user|
+    ids = lookup_users_by_name(user)
+    joins(:name_description_authors).
+      where(name_description_authors: { user_id: ids })
+  }
+  scope :by_editor, lambda { |user|
+    ids = lookup_users_by_name(user)
+    joins(:name_description_editors).
+      where(name_description_editors: { user_id: ids })
+  }
+  scope :is_public,
+        ->(bool = true) { where(public: bool) }
+  scope :types,
+        ->(types) { where(source_type: types) }
+  scope :ok_for_export,
+        ->(bool = true) { where(ok_for_export: bool) }
+  scope :names, lambda { |names|
+    ids = lookup_names_by_name(names)
+    where(name: ids)
+  }
+  scope :projects, lambda { |projects|
+    ids = lookup_projects_by_name(projects)
+    where(project: ids)
+  }
+
   scope :for_eol_export, lambda {
     where(review_status: review_statuses.values_at(
       "unvetted", "vetted"
@@ -166,11 +191,6 @@ class NameDescription < Description
   def self.show_controller
     # Not the generated default in AbstractModel, because controller namespaced.
     "/names/descriptions"
-  end
-
-  # Eliminate when controller_normalized? goes.
-  def self.show_action
-    :show
   end
 
   # Returns an Array of all the descriptive text fields that don't require any
@@ -278,11 +298,6 @@ class NameDescription < Description
       # Tell reviewer of the change.
       reviewer ||= @old_reviewer
       recipients.push(reviewer) if reviewer&.email_names_reviewer
-
-      # Tell masochists who want to know about all name changes.
-      User.where(email_names_all: true).find_each do |user|
-        recipients.push(user)
-      end
 
       # Send to people who have registered interest.
       # Also remove everyone who has explicitly said they are NOT interested.

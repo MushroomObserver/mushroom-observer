@@ -12,22 +12,22 @@ class PatternSearch::ObservationTest < UnitTestCase
     # "Agaricus" is a name, so let's assume this is a name query.  Note that
     # it will include synonyms and subtaxa by default.
     x = PatternSearch::Observation.new("Agaricus")
-    assert_equal({ names: "Agaricus", include_subtaxa: true,
-                   include_synonyms: true }, x.args)
+    assert_equal({ names: { lookup: "Agaricus", include_subtaxa: true,
+                            include_synonyms: true } }, x.args)
 
     # "Turkey" is not a name, true, but user asked for synonyms to be included,
     # so they must have expected "Turkey" to be a name.  Note that it will also
     # include subtaxa by default, because that behavior was not specified.
     x = PatternSearch::Observation.new("Turkey include_synonyms:yes")
-    assert_equal({ names: "Turkey", include_synonyms: true,
-                   include_subtaxa: true }, x.args)
+    assert_equal({ names: { lookup: "Turkey", include_synonyms: true,
+                            include_subtaxa: true } }, x.args)
 
     # Just make sure the user is allowed to explicitly turn off synonyms and
     # subtaxa in any names query.
     x = PatternSearch::Observation.new("Foo bar include_synonyms:no " \
                                        "include_subtaxa:no")
-    assert_equal({ names: "Foo bar", include_synonyms: false,
-                   include_subtaxa: false }, x.args)
+    assert_equal({ names: { lookup: "Foo bar", include_synonyms: false,
+                            include_subtaxa: false } }, x.args)
   end
 
   def test_observation_search
@@ -116,22 +116,22 @@ class PatternSearch::ObservationTest < UnitTestCase
   end
 
   def test_observation_search_include_synonyms
-    expect = Observation.of_names([names(:peltigera), names(:petigera)])
+    expect = Observation.names(lookup: [names(:peltigera), names(:petigera)])
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("Petigera include_synonyms:yes")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_include_subtaxa
-    expect = Observation.of_names(names(:agaricus), include_subtaxa: true)
+    expect = Observation.names(lookup: names(:agaricus), include_subtaxa: true)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("Agaricus include_subtaxa:yes")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_include_all_name_proposals
-    expect = Observation.of_names(names(:agaricus_campestris),
-                                  include_all_name_proposals: true)
+    expect = Observation.names(lookup: names(:agaricus_campestris),
+                               include_all_name_proposals: true)
     consensus = Observation.where(name: name)
     assert(consensus.count < expect.count)
     x = PatternSearch::Observation.new("Agaricus campestris " \

@@ -117,7 +117,7 @@ module SpeciesLists
       dup_obs = spl.observations.first
       new_obs = (Observation.all - spl.observations).first
       ids = [dup_obs.id, new_obs.id]
-      query = Query.lookup(:Observation, ids: ids)
+      query = Query.lookup(:Observation, id_in_set: ids)
       params = @controller.query_params(query).merge(
         commit: :ADD.l,
         species_list: spl.title

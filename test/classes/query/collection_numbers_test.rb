@@ -12,23 +12,62 @@ class Query::CollectionNumbersTest < UnitTestCase
     assert_query(expects, :CollectionNumber)
   end
 
-  def test_collection_number_for_observation
+  def test_collection_number_id_in_set
+    set = CollectionNumber.order(id: :asc).last(3).pluck(:id)
+    scope = CollectionNumber.id_in_set(set)
+    assert_query_scope(set, scope, :CollectionNumber, id_in_set: set)
+  end
+
+  def newbie_collections
+    [collection_numbers(:minimal_unknown_coll_num),
+     collection_numbers(:detailed_unknown_coll_num_one)]
+  end
+
+  def test_collection_number_by_users
+    expects = newbie_collections <<
+              collection_numbers(:detailed_unknown_coll_num_two)
+    scope = CollectionNumber.by_users(mary).index_order
+    assert_query_scope(expects, scope, :CollectionNumber, by_users: mary)
+  end
+
+  def test_collection_number_names
+    expects = newbie_collections
+    scope = CollectionNumber.names("Mary Newbie").index_order
+    assert_query_scope(expects, scope, :CollectionNumber, names: "Mary Newbie")
+  end
+
+  def test_collection_number_name_has
+    expects = newbie_collections
+    scope = CollectionNumber.name_has("Newbie").index_order
+    assert_query_scope(expects, scope, :CollectionNumber, name_has: "Newbie")
+  end
+
+  def test_collection_number_numbers
+    expects = [collection_numbers(:agaricus_campestris_coll_num)]
+    scope = CollectionNumber.numbers("07-123a").index_order
+    assert_query_scope(expects, scope, :CollectionNumber, numbers: "07-123a")
+  end
+
+  def test_collection_number_number_has
+    expects = [collection_numbers(:detailed_unknown_coll_num_two)]
+    scope = CollectionNumber.number_has("n").index_order
+    assert_query_scope(expects, scope, :CollectionNumber, number_has: "n")
+  end
+
+  def test_collection_number_observations
     obs = observations(:detailed_unknown_obs)
-    expects = CollectionNumber.index_order.for_observations(obs)
+    expects = CollectionNumber.index_order.observations(obs)
     assert_query(expects, :CollectionNumber, observations: obs.id)
   end
 
   def test_collection_number_pattern_search
-    expects = CollectionNumber.index_order.
-              where(CollectionNumber[:name].matches("%Singer%").
-                    or(CollectionNumber[:number].matches("%Singer%"))).
-              sort_by(&:format_name)
-    assert_query(expects, :CollectionNumber, pattern: "Singer")
+    expects = [collection_numbers(:agaricus_campestris_coll_num),
+               collection_numbers(:coprinus_comatus_coll_num)]
+    scope = CollectionNumber.pattern("Singer").sort_by(&:format_name)
+    assert_query_scope(expects, scope, :CollectionNumber, pattern: "Singer")
 
-    expects = CollectionNumber.index_order.
-              where(CollectionNumber[:name].matches("%123a%").
-                    or(CollectionNumber[:number].matches("%123a%"))).
-              sort_by(&:format_name)
-    assert_query(expects, :CollectionNumber, pattern: "123a")
+    expects = [collection_numbers(:agaricus_campestris_coll_num)]
+    scope = CollectionNumber.pattern("123a").sort_by(&:format_name)
+    assert_query_scope(expects, scope, :CollectionNumber, pattern: "123a")
   end
 end

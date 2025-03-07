@@ -91,7 +91,7 @@ module Query::Modules::Validation
   def validate_nested_params(_param, val, param_type)
     val2 = {}
     param_type.each do |key, arg_type|
-      val2[key] = scalar_validate(key, val[key], arg_type)
+      val2[key] = validate_value(arg_type, key, val[key])
     end
     val2
   end
@@ -181,7 +181,7 @@ module Query::Modules::Validation
       val.id
     elsif could_be_record_id?(param, val)
       val.to_i
-    elsif val.is_a?(String) && param != :ids
+    elsif val.is_a?(String) && param != :id_in_set
       val
     else
       raise("Value for :#{param} should be id, string " \

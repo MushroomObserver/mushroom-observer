@@ -96,7 +96,7 @@ class API2::ObservationsTest < UnitTestCase
       Observation.where(text_name: "Agaricus"),
       "Tests won't work if there's already an Observation for genus Agaricus"
     )
-    ssp_obs = Observation.of_names_like("Agaricus")
+    ssp_obs = Observation.names_like("Agaricus")
     assert(ssp_obs.length > 1)
     agaricus = Name.where(text_name: "Agaricus").first # (an existing autonym)s
     agaricus_obs = Observation.create(name: agaricus, user: rolf)
@@ -212,7 +212,7 @@ class API2::ObservationsTest < UnitTestCase
     # Nimmo note: Observation.no_notes_persisted is just no_notes.to_yaml
     # Observation.no_notes, not the above, works for comparison in Arel here.
     with = Observation.has_notes
-    without = Observation.has_no_notes
+    without = Observation.has_notes(false)
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params_get(has_notes: "yes"))

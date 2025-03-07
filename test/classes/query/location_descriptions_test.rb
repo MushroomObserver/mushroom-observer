@@ -8,21 +8,22 @@ class Query::LocationDescriptionsTest < UnitTestCase
   include QueryExtensions
 
   def test_location_description_all
+    assert_query(LocationDescription.all, :LocationDescription, by: :id)
+  end
+
+  def test_location_description_locations
     gualala = locations(:gualala)
-    all_descs = LocationDescription.all.to_a
-    all_gualala_descs = LocationDescription.
-                        where(location: gualala).to_a
-    public_gualala_descs = LocationDescription.
-                           where(location: gualala, public: true).to_a
+    all_descs = LocationDescription.all
+    all_gualala_descs = LocationDescription.locations(gualala)
+    public_gualala_descs = all_gualala_descs.is_public
     assert(all_gualala_descs.length < all_descs.length)
     assert(public_gualala_descs.length < all_gualala_descs.length)
 
-    assert_query(all_descs, :LocationDescription, by: :id)
     assert_query(all_gualala_descs,
                  :LocationDescription, by: :id, locations: gualala)
     assert_query(public_gualala_descs,
                  :LocationDescription, by: :id, locations: gualala,
-                                       public: "yes")
+                                       is_public: "yes")
   end
 
   def test_location_description_by_user
@@ -77,14 +78,24 @@ class Query::LocationDescriptionsTest < UnitTestCase
   end
 
   def test_location_description_in_set
-    assert_query([],
-                 :LocationDescription,
-                 ids: rolf.id)
-    assert_query(LocationDescription.all,
-                 :LocationDescription,
-                 ids: LocationDescription.select(:id).to_a)
-    assert_query([location_descriptions(:albion_desc).id],
-                 :LocationDescription,
-                 ids: [rolf.id, location_descriptions(:albion_desc).id])
+    assert_query(
+      [], :LocationDescription, id_in_set: rolf.id
+    )
+    assert_query(
+      LocationDescription.all,
+      :LocationDescription, id_in_set: LocationDescription.select(:id).to_a
+    )
+    assert_query(
+      [location_descriptions(:albion_desc).id],
+      :LocationDescription, id_in_set: [rolf.id,
+                                        location_descriptions(:albion_desc).id]
+    )
+  end
+
+  def test_location_description_content_has
+    expects = [location_descriptions(:albion_desc)]
+    scope = LocationDescription.content_has("to play with").index_order
+    assert_query_scope(expects, scope,
+                       :LocationDescription, content_has: "to play with")
   end
 end

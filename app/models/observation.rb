@@ -91,8 +91,8 @@
 #  found_after("yyyymmdd")
 #  found_before("yyyymmdd")
 #  found_between(start, end)
-#  of_names(name)
-#  of_names_like(string)
+#  names(name)
+#  names_like(string)
 #  has_name
 #  has_no_name
 #  by_user(user)
@@ -935,11 +935,6 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     # Send to people who have registered interest.
     interests.each do |interest|
       recipients.push(interest.user) if interest.state
-    end
-
-    # Tell masochists who want to know about all observation changes.
-    User.where(email_observations_all: true).find_each do |user|
-      recipients.push(user)
     end
 
     # Send notification to all except the person who triggered the change.

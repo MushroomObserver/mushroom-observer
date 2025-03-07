@@ -12,24 +12,24 @@ class Query::ImagesTest < UnitTestCase
     assert_query(expects, :Image)
   end
 
-  def test_image_size
-    expects = Image.index_order.with_sizes(:thumbnail)
-    assert_query(expects, :Image, size: :thumbnail)
-    expects = Image.index_order.with_sizes(:thumbnail, :medium)
-    assert_query(expects, :Image, size: [:thumbnail, :medium])
+  def test_image_sizes
+    expects = Image.index_order.sizes(:thumbnail)
+    assert_query(expects, :Image, sizes: :thumbnail)
+    expects = Image.index_order.sizes(:thumbnail, :medium)
+    assert_query(expects, :Image, sizes: [:thumbnail, :medium])
   end
 
   def test_image_content_types
-    expects = Image.index_order.with_content_types(%w[jpg gif png])
+    expects = Image.index_order.content_types(%w[jpg gif png])
     assert_query(expects, :Image, content_types: %w[jpg gif png])
-    expects = Image.index_order.with_content_types(%w[raw])
+    expects = Image.index_order.content_types(%w[raw])
     assert_query(expects, :Image, content_types: %w[raw])
   end
 
   def test_image_has_notes
     expects = Image.index_order.has_notes
     assert_query(expects, :Image, has_notes: true)
-    expects = Image.index_order.has_no_notes
+    expects = Image.index_order.has_notes(false)
     assert_query(expects, :Image, has_notes: false)
   end
 
@@ -46,14 +46,14 @@ class Query::ImagesTest < UnitTestCase
   end
 
   def test_image_license
-    expects = Image.index_order.with_license(License.preferred)
+    expects = Image.index_order.license(License.preferred)
     assert_query(expects, :Image, license: License.preferred)
   end
 
   def test_image_has_votes
     expects = Image.index_order.has_votes
     assert_query(expects, :Image, has_votes: true)
-    expects = Image.index_order.has_no_votes
+    expects = Image.index_order.has_votes(false)
     assert_query(expects, :Image, has_votes: false)
   end
 
@@ -78,38 +78,49 @@ class Query::ImagesTest < UnitTestCase
   def test_image_ok_for_export
     expects = Image.index_order.ok_for_export
     assert_query(expects, :Image, ok_for_export: true)
-    expects = Image.index_order.not_ok_for_export
+    expects = Image.index_order.ok_for_export(false)
     assert_query(expects, :Image, ok_for_export: false)
   end
 
-  def test_image_for_observations
+  def test_image_observations
     obs = observations(:two_img_obs)
-    expects = Image.index_order.joins(:observations).
-              where(observations: { id: obs.id }).distinct
-    assert_query(expects, :Image, observations: obs)
+    scope = Image.observations(obs.id).index_order
+    assert_query(scope, :Image, observations: obs)
   end
 
-  def test_image_for_projects
+  def test_image_locations
+    locations = Location.index_order.last(3)
+    scope = Image.locations(locations).index_order
+    assert_query(scope, :Image, locations: locations)
+  end
+
+  def test_image_projects
     project = projects(:bolete_project)
-    expects = Image.index_order.joins(:projects).
-              where(projects: { id: project.id }).distinct
-    assert_query(expects, :Image, projects: [project.title])
+    scope = Image.projects(project.id).index_order
+    assert_query(scope, :Image, projects: [project.title])
   end
 
-  def test_image_by_user
-    expects = Image.index_order.where(user_id: rolf.id).distinct
+  def test_image_species_lists
+    spl = species_lists(:query_first_list)
+    scope = Image.species_lists(spl.id).index_order
+    assert_query(scope, :Image, species_lists: spl)
+  end
+
+  def test_image_by_users
+    expects = Image.by_users(rolf.id).index_order
     assert_query(expects, :Image, by_users: rolf)
-    expects = Image.index_order.where(user_id: mary.id).distinct
+    expects = Image.by_users(mary.id).index_order
     assert_query(expects, :Image, by_users: mary)
-    expects = Image.index_order.where(user_id: dick.id).distinct
+    expects = Image.by_users(dick.id).index_order
     assert_query(expects, :Image, by_users: dick)
   end
 
-  def test_image_in_set
+  def test_image_id_in_set
     ids = [images(:turned_over_image).id,
            images(:agaricus_campestris_image).id,
            images(:disconnected_coprinus_comatus_image).id]
-    assert_query(ids, :Image, ids: ids)
+    scope = Image.id_in_set(ids).order(id: :desc)
+    assert_query_scope(ids, scope, :Image, id_in_set: ids)
   end
 
   def test_image_inside_observation
@@ -173,38 +184,38 @@ class Query::ImagesTest < UnitTestCase
   end
 
   def test_image_pattern_search_name
-    assert_query(Image.index_order.pattern_search("agaricus"),
+    assert_query(Image.index_order.pattern("agaricus"),
                  :Image, pattern: "agaricus") # name
   end
 
-  def test_image_pattern_search_copyright_holder
-    assert_query(Image.index_order.pattern_search("bob dob"),
+  def test_image_pattern_copyright_holder
+    assert_query(Image.index_order.pattern("bob dob"),
                  :Image, pattern: "bob dob") # copyright holder
   end
 
-  def test_image_pattern_search_notes
+  def test_image_pattern_notes
     assert_query(
-      Image.index_order.
-      pattern_search("looked gorilla OR original"),
+      Image.index_order.pattern("looked gorilla OR original"),
       :Image, pattern: "looked gorilla OR original" # notes
     )
-    assert_query(Image.index_order.
-                 pattern_search("notes some"),
+    assert_query(Image.index_order.pattern("notes some"),
                  :Image, pattern: "notes some") # notes
     assert_query(
-      Image.index_order.pattern_search("dobbs -notes"),
+      Image.index_order.pattern("dobbs -notes"),
       :Image, pattern: "dobbs -notes" # (c), not notes
     )
   end
 
-  def test_image_pattern_search_original_filename
-    assert_query(Image.index_order.pattern_search("DSCN8835"),
+  def test_image_pattern_original_filename
+    assert_query(Image.index_order.pattern("DSCN8835"),
                  :Image, pattern: "DSCN8835") # original filename
   end
 
   def test_image_has_observations
     expects = Image.index_order.includes(:observations).
               where.not(observations: { thumb_image: nil }).distinct
+    assert_query(expects, :Image, has_observations: true)
+    expects = Image.has_observations.index_order
     assert_query(expects, :Image, has_observations: true)
   end
 
@@ -395,8 +406,10 @@ class Query::ImagesTest < UnitTestCase
                observations(:agaricus_campestris_obs).id]
     expects = Image.joins(:observations).where(observations: { id: obs_ids }).
               index_order.distinct
-    assert_image_obs_query(expects, ids: obs_ids)
-    assert_image_obs_query([], ids: [observations(:minimal_unknown_obs).id])
+    assert_image_obs_query(expects, id_in_set: obs_ids)
+    assert_image_obs_query(
+      [], id_in_set: [observations(:minimal_unknown_obs).id]
+    )
   end
 
   def test_image_with_observations_in_species_list
@@ -410,35 +423,43 @@ class Query::ImagesTest < UnitTestCase
 
   def test_image_with_observations_of_children
     expects = [images(:agaricus_campestris_image).id]
-    params = { names: [names(:agaricus).id], include_subtaxa: true }
+    params = { names: { lookup: [names(:agaricus).id], include_subtaxa: true } }
     assert_image_obs_query(expects, **params)
   end
 
+  def sorted_by_name_set
+    [
+      images(:turned_over_image).id,
+      images(:connected_coprinus_comatus_image).id,
+      images(:disconnected_coprinus_comatus_image).id,
+      images(:in_situ_image).id,
+      images(:commercial_inquiry_image).id,
+      images(:agaricus_campestris_image).id
+    ].freeze
+  end
+
   def test_image_sorted_by_original_name
-    assert_query([images(:turned_over_image).id,
-                  images(:connected_coprinus_comatus_image).id,
-                  images(:disconnected_coprinus_comatus_image).id,
-                  images(:in_situ_image).id,
-                  images(:commercial_inquiry_image).id,
-                  images(:agaricus_campestris_image).id],
-                 :Image,
-                 ids: [images(:in_situ_image).id,
-                       images(:turned_over_image).id,
-                       images(:commercial_inquiry_image).id,
-                       images(:disconnected_coprinus_comatus_image).id,
-                       images(:connected_coprinus_comatus_image).id,
-                       images(:agaricus_campestris_image).id],
-                 by: :original_name)
+    assert_query(
+      sorted_by_name_set,
+      :Image, id_in_set: sorted_by_name_set, by: :original_name
+    )
   end
 
   def test_image_with_observations_of_name
     expects = Image.index_order.joins(:observation_images, :observations).
               where(observations: { name: names(:fungi) }).distinct
-    assert_image_obs_query(expects, names: [names(:fungi).id])
+    assert_image_obs_query(expects, names: { lookup: [names(:fungi).id] })
+
     expects = [images(:connected_coprinus_comatus_image).id]
-    assert_image_obs_query(expects, names: [names(:coprinus_comatus).id])
+    assert_image_obs_query(
+      expects, names: { lookup: [names(:coprinus_comatus).id] }
+    )
+
     expects = [images(:agaricus_campestris_image).id]
-    assert_image_obs_query(expects, names: [names(:agaricus_campestris).id])
-    assert_image_obs_query([], names: [names(:conocybe_filaris).id])
+    assert_image_obs_query(
+      expects, names: { lookup: [names(:agaricus_campestris).id] }
+    )
+
+    assert_image_obs_query([], names: { lookup: [names(:conocybe_filaris).id] })
   end
 end

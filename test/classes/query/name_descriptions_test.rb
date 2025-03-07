@@ -9,16 +9,16 @@ class Query::NameDescriptionsTest < UnitTestCase
 
   def test_name_description_all
     pelt = names(:peltigera)
-    all_descs = NameDescription.all.to_a
-    all_pelt_descs = NameDescription.where(name: pelt).to_a
-    public_pelt_descs = NameDescription.where(name: pelt, public: true).to_a
+    all_descs = NameDescription.all
+    all_pelt_descs = NameDescription.names(pelt)
+    public_pelt_descs = all_pelt_descs.is_public
     assert(all_pelt_descs.length < all_descs.length)
     assert(public_pelt_descs.length < all_pelt_descs.length)
 
     assert_query(all_descs, :NameDescription, by: :id)
     assert_query(all_pelt_descs, :NameDescription, by: :id, names: pelt)
     assert_query(public_pelt_descs,
-                 :NameDescription, by: :id, names: pelt, public: "yes")
+                 :NameDescription, by: :id, names: pelt, is_public: "yes")
   end
 
   def test_name_description_by_user
@@ -56,12 +56,15 @@ class Query::NameDescriptionsTest < UnitTestCase
   end
 
   def test_name_description_in_set
-    assert_query([],
-                 :NameDescription, ids: rolf.id)
-    assert_query(NameDescription.all,
-                 :NameDescription, ids: NameDescription.select(:id).to_a)
-    assert_query([NameDescription.first.id],
-                 :NameDescription, ids: [rolf.id, NameDescription.first.id])
+    assert_query([], :NameDescription, id_in_set: rolf.id)
+    assert_query(
+      NameDescription.all,
+      :NameDescription, id_in_set: NameDescription.pluck(:id)
+    )
+    assert_query(
+      [NameDescription.first.id],
+      :NameDescription, id_in_set: [rolf.id, NameDescription.first.id]
+    )
   end
 
   def test_name_description_has_default_desc
@@ -71,40 +74,32 @@ class Query::NameDescriptionsTest < UnitTestCase
                  :NameDescription, name_query: { has_default_desc: 0 })
   end
 
-  def test_name_description_desc_type_user
-    assert_query(NameDescription.where(source_type: 5).index_order,
-                 :NameDescription, desc_type: "user")
+  def test_name_description_type_user
+    assert_query(NameDescription.types(5).index_order,
+                 :NameDescription, types: "user")
   end
 
-  def test_name_description_desc_type_project
-    assert_query(NameDescription.where(source_type: 3).index_order,
-                 :NameDescription, desc_type: "project")
+  def test_name_description_type_project
+    assert_query(NameDescription.types(3).index_order,
+                 :NameDescription, types: "project")
   end
 
-  def test_name_description_desc_project
-    assert_query(NameDescription.
-                 where(project: projects(:eol_project)).index_order,
-                 :NameDescription, desc_project: projects(:eol_project).id)
-  end
-
-  def test_name_description_desc_creator
-    assert_query(NameDescription.where(user: rolf).index_order,
-                 :NameDescription, desc_creator: rolf.id)
-    assert_query(NameDescription.where(user: mary).index_order,
-                 :NameDescription, desc_creator: mary.id)
+  def test_name_description_projects
+    assert_query(NameDescription.projects(projects(:eol_project)).index_order,
+                 :NameDescription, projects: projects(:eol_project).id)
   end
 
   # waiting on a new AbstractModel scope for searches,
   # plus a specific NameDescription scope coalescing the fields.
-  def test_name_description_desc_content
-    assert_query(NameDescription.search_content('"some notes"').index_order,
-                 :NameDescription, desc_content: '"some notes"')
+  def test_name_description_content_has
+    assert_query(NameDescription.content_has('"some notes"').index_order,
+                 :NameDescription, content_has: '"some notes"')
   end
 
   def test_name_description_ok_for_export
-    assert_query(NameDescription.where(ok_for_export: 1).index_order,
+    assert_query(NameDescription.ok_for_export(1).index_order,
                  :NameDescription, ok_for_export: 1)
-    assert_query(NameDescription.where(ok_for_export: 0).index_order,
+    assert_query(NameDescription.ok_for_export(0).index_order,
                  :NameDescription, ok_for_export: 0)
   end
 end

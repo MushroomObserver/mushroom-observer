@@ -29,8 +29,8 @@ class API2
 
     def query_params
       {
-        ids: parse_array(:external_site, :id, as: :id),
-        name: parse(:string, :name)
+        id_in_set: parse_array(:external_site, :id, as: :id),
+        name_has: parse(:string, :name)
       }
     end
 
