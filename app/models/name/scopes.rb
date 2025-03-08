@@ -241,7 +241,7 @@ module Name::Scopes
         distinct
     }
     # Accepts region string, location_id, or Location instance
-    scope :at_locations, lambda { |locations|
+    scope :locations, lambda { |locations|
       location_ids = lookup_regions_by_name(locations)
       joins(:observations).
         where(observations: { location: location_ids }).distinct

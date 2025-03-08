@@ -140,7 +140,7 @@ class PatternSearch::ObservationTest < UnitTestCase
   end
 
   def test_observation_search_location
-    expect = Observation.at_locations(locations(:burbank))
+    expect = Observation.locations(locations(:burbank))
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new('location:"USA, California, Burbank"')
     assert_obj_arrays_equal(expect, x.query.results, :sort)

@@ -172,9 +172,8 @@ class Query::ObservationsTest < UnitTestCase
     assert_query(expects, :Observation, project_lists: projects.map(&:title))
   end
 
-  def test_observation_at_locations
-    expects = Observation.index_order.
-              at_locations(locations(:burbank)).distinct
+  def test_observation_locations
+    expects = Observation.index_order.locations(locations(:burbank)).distinct
     assert_query(expects, :Observation, locations: locations(:burbank))
   end
 
