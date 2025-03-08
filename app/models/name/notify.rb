@@ -9,7 +9,7 @@ module Name::Notify
 
   # Notify webmaster that a new name was created.
   def notify_webmaster
-    return if @skip_notify
+    return if skip_notify
 
     user = User.current || User.admin
     QueuedEmail::Webmaster.create_email(
@@ -22,7 +22,7 @@ module Name::Notify
   # This is called after saving potential changes to a Name.  It will determine
   # if the changes are important enough to notify the authors, and do so.
   def notify_users
-    return if @skip_notify
+    return if skip_notify
     return unless saved_version_changes?
 
     sender = User.current
