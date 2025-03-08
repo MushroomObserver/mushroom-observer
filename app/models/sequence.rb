@@ -52,16 +52,16 @@ class Sequence < AbstractModel
         ->(str) { search_columns(Sequence[:locus], str) }
   scope :archive,
         ->(archive) { where(archive:) }
-  scope :accesssion,
-        ->(accesssion) { where(accesssion:) }
+  scope :accession,
+        ->(accession) { where(accession:) }
   scope :accession_has,
-        ->(str) { search_columns(Sequence[:accesssion], str) }
+        ->(str) { search_columns(Sequence[:accession], str) }
   scope :notes_has,
         ->(str) { search_columns(Sequence[:notes], str) }
 
   scope :pattern, lambda { |phrase|
     cols = Sequence[:locus].coalesce("") + Sequence[:archive].coalesce("") +
-           Sequence[:accesssion].coalesce("") + Sequence[:notes].coalesce("")
+           Sequence[:accession].coalesce("") + Sequence[:notes].coalesce("")
     search_columns(cols, phrase)
   }
 

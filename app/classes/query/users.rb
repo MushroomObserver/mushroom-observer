@@ -10,8 +10,8 @@ class Query::Users < Query::Base
       created_at: [:time],
       updated_at: [:time],
       id_in_set: [User],
-      pattern: :string,
-      has_contribution: :boolean
+      has_contribution: :boolean,
+      pattern: :string
     )
   end
 

@@ -12,14 +12,16 @@ class Query::RssLogsTest < UnitTestCase
     assert_query(ids, :RssLog)
   end
 
-  def test_rss_log_type
-    ids = [rss_logs(:species_list_rss_log).id]
-    assert_query(ids, :RssLog, type: :species_list)
+  def test_rss_log_in_set
+    ids = [rss_logs(:species_list_rss_log).id,
+           rss_logs(:name_rss_log).id]
+    scope = RssLog.id_in_set(ids)
+    assert_query_scope(ids, scope, :RssLog, id_in_set: ids)
   end
 
-  def test_rss_log_in_set
-    rsslog_set_ids = [rss_logs(:species_list_rss_log).id,
-                      rss_logs(:name_rss_log).id]
-    assert_query(rsslog_set_ids, :RssLog, id_in_set: rsslog_set_ids)
+  def test_rss_log_type
+    ids = [rss_logs(:species_list_rss_log).id]
+    scope = RssLog.type(:species_list)
+    assert_query_scope(ids, scope, :RssLog, type: :species_list)
   end
 end

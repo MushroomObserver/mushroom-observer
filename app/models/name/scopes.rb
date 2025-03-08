@@ -159,7 +159,7 @@ module Name::Scopes
     # This is what's called by pattern_search
     scope :pattern, lambda { |phrase|
       cols = Name.searchable_columns + NameDescription.searchable_columns
-      joins_default_descriptions.search_columns(cols, phrase).distinct
+      joins_default_descriptions.search_columns(cols, phrase)
     }
     # https://stackoverflow.com/a/77064711/3357635
     # AR's assumed join condition is `Name[:id].eq(NameDescription[:name_id])`

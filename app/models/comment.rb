@@ -178,7 +178,7 @@ class Comment < AbstractModel
 
   scope :pattern, lambda { |phrase|
     cols = (Comment[:summary] + Comment[:comment].coalesce(""))
-    search_columns(cols, phrase).distinct
+    search_columns(cols, phrase)
   }
 
   scope :search_content, lambda { |phrase|
