@@ -185,6 +185,13 @@ module AbstractModel::Scopes
       conditions += search_conditions_bad(table_columns, search.bads)
       send_where_chain(conditions).distinct
     }
+
+    # Used in Name, Observation and Project so far.
+    scope :has_comments,
+          ->(bool = true) { joined_relation_condition(:comments, bool:) }
+    scope :comments_has, lambda { |phrase|
+      joins(:comments).merge(Comment.search_content(phrase)).distinct
+    }
   end
 
   # class methods here, `self` included

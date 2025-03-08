@@ -173,12 +173,6 @@ module Name::Scopes
       )
     }
 
-    scope :has_comments,
-          ->(bool = true) { joined_relation_condition(:comments, bool:) }
-    scope :comments_has, lambda { |phrase|
-      joins(:comments).merge(Comment.search_content(phrase)).distinct
-    }
-
     # Query just ignores `has_descriptions(false)`, so for now we will here too.
     scope :has_descriptions, lambda { |bool = true|
       return all unless bool

@@ -428,12 +428,6 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       joins(:location).where(Location[:box_area].gt(args[:area])).distinct
     }
 
-    scope :has_comments,
-          ->(bool = true) { joined_relation_condition(:comments, bool:) }
-    scope :comments_has, lambda { |phrase|
-      joins(:comments).merge(Comment.search_content(phrase)).distinct
-    }
-
     scope :has_specimen,
           ->(bool = true) { where(specimen: bool) }
 
