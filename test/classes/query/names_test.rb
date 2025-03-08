@@ -122,7 +122,7 @@ class Query::NamesTest < UnitTestCase
 
   def test_name_species_lists
     spl = [species_lists(:unknown_species_list).title]
-    expects = Name.on_species_lists(spl).index_order
+    expects = Name.species_lists(spl).index_order
     assert_query(expects, :Name, species_lists: spl)
   end
 

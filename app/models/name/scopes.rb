@@ -173,13 +173,8 @@ module Name::Scopes
       )
     }
 
-    scope :has_comments, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
-        joins(:comments).distinct
-      else
-        where.not(id: Name.has_comments)
-      end
-    }
+    scope :has_comments,
+          ->(bool = true) { joined_relation_condition(:comments, bool:) }
     scope :comments_has, lambda { |phrase|
       joins(:comments).merge(Comment.search_content(phrase)).distinct
     }
@@ -234,7 +229,7 @@ module Name::Scopes
 
       joins(:observations)
     }
-    scope :on_species_lists, lambda { |species_lists|
+    scope :species_lists, lambda { |species_lists|
       species_list_ids = lookup_species_lists_by_name(species_lists)
       joins(observations: :species_list_observations).
         merge(SpeciesListObservation.where(species_list: species_list_ids)).

@@ -110,11 +110,10 @@
 #  confidence (min %, max %)
 #  has_comments
 #  comments_has(summary)
-#  for_projects(project)
-#  in_herbaria(herbaria)
-#  herbarium_record_notes_has(notes)
-#  on_species_lists(species_list)
-#  on_projects_species_lists(project)
+#  projects(project)
+#  herbaria(herbaria)
+#  species_lists(species_list)
+#  project_lists(project)
 #
 #  == Instance methods
 #

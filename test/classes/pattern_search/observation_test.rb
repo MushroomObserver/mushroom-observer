@@ -139,29 +139,29 @@ class PatternSearch::ObservationTest < UnitTestCase
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
-  def test_observation_search_location
+  def test_observation_search_locations
     expect = Observation.locations(locations(:burbank))
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new('location:"USA, California, Burbank"')
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
-  def test_observation_search_project
-    expect = Observation.for_projects(projects(:bolete_project))
+  def test_observation_search_projects
+    expect = Observation.projects(projects(:bolete_project))
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new('project:"Bolete Project"')
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
   def test_observation_search_project_lists
-    expect = Observation.on_projects_species_lists(projects(:bolete_project))
+    expect = Observation.project_lists(projects(:bolete_project))
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new('project_lists:"Bolete Project"')
     assert_obj_arrays_equal(expect, x.query.results, :sort)
   end
 
-  def test_observation_search_list
-    expect = Observation.on_species_lists(species_lists(:unknown_species_list))
+  def test_observation_search_species_lists
+    expect = Observation.species_lists(species_lists(:unknown_species_list))
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new('list:"List of mysteries"')
     assert_obj_arrays_equal(expect, x.query.results, :sort)
@@ -183,7 +183,7 @@ class PatternSearch::ObservationTest < UnitTestCase
 
   def test_observation_search_field_slip
     code_val = field_slips(:field_slip_one).code
-    expect = Observation.for_field_slips(code_val)
+    expect = Observation.field_slips(code_val)
     assert(expect.count.positive?)
     x = PatternSearch::Observation.new("field_slip:#{code_val}")
     assert_obj_arrays_equal(expect, x.query.results, :sort)
@@ -313,7 +313,7 @@ class PatternSearch::ObservationTest < UnitTestCase
   end
 
   def test_observation_search_herbarium
-    expect = Observation.in_herbaria(herbaria(:nybg_herbarium))
+    expect = Observation.herbaria(herbaria(:nybg_herbarium))
     assert_not_empty(expect)
     x = PatternSearch::Observation.new(
       'herbarium:"The New York Botanical Garden"'

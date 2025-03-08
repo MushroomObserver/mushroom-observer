@@ -188,8 +188,8 @@
 #  notes_has(notes)
 #  has_comments
 #  comments_has(summary)
-#  on_species_lists(species_list)
-#  at_location(location)
+#  species_lists(species_list)
+#  locations(location)
 #  in_box(north:, south:, east:, west:)
 #
 #  ==== Classification

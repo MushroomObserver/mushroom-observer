@@ -377,6 +377,15 @@ module AbstractModel::Scopes
       end
     end
 
+    # AR cares if the relation (table) is plural or singular (has_one/many)
+    def joined_relation_condition(relation, bool: true)
+      if bool.to_s.to_boolean == true
+        joins(relation).distinct
+      else
+        where.not(id: joins(relation).distinct)
+      end
+    end
+
     def boolean_condition(table_column, val, bool: true)
       if bool.to_s.to_boolean == true
         where(table_column.eq(val))

@@ -75,11 +75,7 @@ module Image::Scopes
     }
 
     scope :has_observations, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
-        joins(:observation_images).distinct
-      else
-        where.not(id: Image.joins(:observation_images).distinct) # very slow
-      end
+      joined_relation_condition(:observation_images, bool:)
     }
     scope :observations, lambda { |obs|
       joins(:observation_images).

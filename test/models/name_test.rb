@@ -3615,11 +3615,11 @@ class NameTest < UnitTestCase
     )
   end
 
-  def test_scope_on_species_lists
+  def test_scope_species_lists
     assert_includes(
-      Name.on_species_lists(species_lists(:unknown_species_list)), names(:fungi)
+      Name.species_lists(species_lists(:unknown_species_list)), names(:fungi)
     )
-    assert_empty(Name.on_species_lists(species_lists(:first_species_list)))
+    assert_empty(Name.species_lists(species_lists(:first_species_list)))
   end
 
   def test_scope_locations

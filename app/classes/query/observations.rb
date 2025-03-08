@@ -44,6 +44,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
       pattern: :string,
       has_comments: { boolean: [true] },
       comments_has: :string,
+
       has_sequences: { boolean: [true] },
       field_slips: [FieldSlip],
       herbaria: [Herbarium],

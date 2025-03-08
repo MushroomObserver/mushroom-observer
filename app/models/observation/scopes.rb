@@ -428,13 +428,8 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       joins(:location).where(Location[:box_area].gt(args[:area])).distinct
     }
 
-    scope :has_comments, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
-        joins(:comments).distinct
-      else
-        where.not(id: Observation.has_comments)
-      end
-    }
+    scope :has_comments,
+          ->(bool = true) { joined_relation_condition(:comments, bool:) }
     scope :comments_has, lambda { |phrase|
       joins(:comments).merge(Comment.search_content(phrase)).distinct
     }
@@ -442,50 +437,40 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :has_specimen,
           ->(bool = true) { where(specimen: bool) }
 
-    scope :has_sequences, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
-        joins(:sequences).distinct
-      else
-        # much faster than `missing(:sequences)` which uses left outer join.
-        where.not(id: has_sequences)
-      end
-    }
+    scope :has_sequences,
+          ->(bool = true) { joined_relation_condition(:sequences, bool:) }
 
     # For activerecord subqueries, no need to pre-map the primary key (id)
     # but Lookup has to return something. Ids are cheapest.
-    scope :for_projects, lambda { |projects|
-      project_ids = Lookup::Projects.new(projects).ids
-      joins(:project_observations).
-        where(project_observations: { project: project_ids }).distinct
-    }
-    scope :on_species_lists, lambda { |species_lists|
-      spl_ids = Lookup::SpeciesLists.new(species_lists).ids
-      joins(:species_list_observations).
-        where(species_list_observations: { species_list: spl_ids }).distinct
-    }
-    scope :on_projects_species_lists, lambda { |projects|
-      project_ids = Lookup::Projects.new(projects).ids
-      joins(species_lists: :project_species_lists).
-        where(project_species_lists: { project: project_ids }).distinct
-    }
-    scope :for_field_slips, lambda { |codes|
+    scope :field_slips, lambda { |codes|
       fs_ids = Lookup::FieldSlips.new(codes).ids
       joins(:field_slips).where(field_slips: { id: fs_ids }).distinct
     }
-    scope :for_herbarium_records, lambda { |records|
+    scope :herbaria, lambda { |herbaria|
+      h_ids = Lookup::Herbaria.new(herbaria).ids
+      joins(observation_herbarium_records: :herbarium_record).
+        where(herbarium_records: { herbarium: h_ids }).distinct
+    }
+    scope :herbarium_records, lambda { |records|
       hr_ids = Lookup::HerbariumRecords.new(records).ids
       joins(:observation_herbarium_records).
         where(observation_herbarium_records: { herbarium_record: hr_ids }).
         distinct
     }
-    scope :in_herbaria, lambda { |herbaria|
-      h_ids = Lookup::Herbaria.new(herbaria).ids
-      joins(observation_herbarium_records: :herbarium_record).
-        where(herbarium_records: { herbarium: h_ids }).distinct
+    scope :projects, lambda { |projects|
+      project_ids = Lookup::Projects.new(projects).ids
+      joins(:project_observations).
+        where(project_observations: { project: project_ids }).distinct
     }
-    scope :herbarium_record_notes_has, lambda { |phrase|
-      joins(:herbarium_records).
-        search_columns(HerbariumRecord[:notes], phrase).distinct
+    scope :project_lists, lambda { |projects|
+      project_ids = Lookup::Projects.new(projects).ids
+      joins(species_lists: :project_species_lists).
+        where(project_species_lists: { project: project_ids }).distinct
+    }
+    scope :species_lists, lambda { |species_lists|
+      spl_ids = Lookup::SpeciesLists.new(species_lists).ids
+      joins(:species_list_observations).
+        where(species_list_observations: { species_list: spl_ids }).distinct
     }
 
     scope :show_includes, lambda {
