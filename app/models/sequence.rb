@@ -43,6 +43,27 @@ class Sequence < AbstractModel
 
   scope :index_order, -> { order(created_at: :desc, id: :desc) }
 
+  scope :observations,
+        ->(ids) { where(observation_id: ids) }
+  scope :locus,
+        ->(locus) { where(locus:) }
+  scope :locus_has,
+        ->(str) { search_columns(Sequence[:locus], str) }
+  scope :archive,
+        ->(archive) { where(archive:) }
+  scope :accesssion,
+        ->(accesssion) { where(accesssion:) }
+  scope :accession_has,
+        ->(str) { search_columns(Sequence[:accesssion], str) }
+  scope :notes_has,
+        ->(str) { search_columns(Sequence[:notes], str) }
+
+  scope :pattern, lambda { |phrase|
+    cols = Sequence[:locus].coalesce("") + Sequence[:archive].coalesce("") +
+           Sequence[:accesssion].coalesce("") + Sequence[:notes].coalesce("")
+    search_columns(cols, phrase)
+  }
+
   ##############################################################################
   #
   #  :section: Matchers
