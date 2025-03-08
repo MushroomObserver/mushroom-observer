@@ -101,6 +101,32 @@ class SpeciesList < AbstractModel
 
   scope :index_order, -> { order(title: :asc, id: :desc) }
 
+  scope :title_has,
+        ->(phrase) { search_columns(SpeciesList[:title], phrase) }
+  scope :has_notes,
+        ->(bool = true) { not_blank_condition(SpeciesList[:notes], bool:) }
+  scope :notes_has,
+        ->(phrase) { search_columns(SpeciesList[:notes], phrase) }
+  scope :search_where,
+        ->(phrase) { search_columns(SpeciesList[:where], phrase) }
+
+  scope :locations, lambda { |loc|
+    ids = lookup_locations_by_name(loc)
+    where(location_id: ids).distinct
+  }
+  scope :projects, lambda { |projects|
+    ids = lookup_projects_by_name(projects)
+    joins(:project_species_lists).
+      where(project_species_lists: { project_id: ids }).distinct
+  }
+
+  scope :pattern, lambda { |phrase|
+    cols = SpeciesList[:title] + SpeciesList[:notes].coalesce("") +
+           Location[:id].when(nil).then(SpeciesList[:where]).
+           else(Location[:name])
+    joins(:location).search_columns(cols, phrase)
+  }
+
   scope :show_includes, lambda {
     strict_loading.includes(
       { comments: :user },
