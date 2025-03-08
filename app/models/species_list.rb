@@ -81,7 +81,7 @@
 #
 ################################################################################
 #
-class SpeciesList < AbstractModel
+class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
   belongs_to :location
   belongs_to :rss_log
   belongs_to :user
@@ -99,7 +99,8 @@ class SpeciesList < AbstractModel
 
   attr_accessor :data
 
-  scope :index_order, -> { order(title: :asc, id: :desc) }
+  scope :index_order,
+        -> { order(title: :asc, id: :desc) }
 
   scope :title_has,
         ->(phrase) { search_columns(SpeciesList[:title], phrase) }
@@ -124,7 +125,7 @@ class SpeciesList < AbstractModel
     cols = SpeciesList[:title] + SpeciesList[:notes].coalesce("") +
            Location[:id].when(nil).then(SpeciesList[:where]).
            else(Location[:name])
-    joins(:location).search_columns(cols, phrase)
+    left_outer_joins(:location).search_columns(cols, phrase).distinct
   }
 
   scope :show_includes, lambda {

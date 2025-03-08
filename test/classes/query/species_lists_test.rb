@@ -22,21 +22,6 @@ class Query::SpeciesListsTest < UnitTestCase
     assert_query(expects, :SpeciesList, by: :title)
   end
 
-  def test_species_list_at_location
-    expects = SpeciesList.where(location: locations(:burbank)).
-              index_order.distinct
-    assert_query(expects, :SpeciesList, locations: locations(:burbank))
-    assert_query(
-      [], :SpeciesList, locations: locations(:unused_location)
-    )
-  end
-
-  def test_species_list_at_where
-    assert_query([], :SpeciesList, search_where: "nowhere")
-    assert_query([species_lists(:where_no_mushrooms_list)],
-                 :SpeciesList, search_where: "no mushrooms")
-  end
-
   def test_species_list_by_rss_log
     assert_query(SpeciesList.order_by_rss_log, :SpeciesList, by: :rss_log)
   end
@@ -52,21 +37,58 @@ class Query::SpeciesListsTest < UnitTestCase
     assert_query(expects, :SpeciesList, by_users: rolf, by: :id)
   end
 
-  def test_species_list_for_projects
-    assert_query([],
-                 :SpeciesList, projects: projects(:empty_project))
-    assert_query(projects(:bolete_project).species_lists,
-                 :SpeciesList, projects: projects(:bolete_project))
+  def test_species_list_locations
+    scope = SpeciesList.locations(locations(:burbank)).index_order
+    assert_query(scope, :SpeciesList, locations: locations(:burbank))
     assert_query(
-      projects(:two_list_project).species_lists,
-      :SpeciesList, projects: projects(:two_list_project)
+      [], :SpeciesList, locations: locations(:unused_location)
     )
   end
 
-  def test_species_list_in_set
-    list_set_ids = [species_lists(:first_species_list).id,
-                    species_lists(:unknown_species_list).id]
-    assert_query(list_set_ids, :SpeciesList, id_in_set: list_set_ids)
+  def test_species_list_for_projects
+    assert_query([],
+                 :SpeciesList, projects: projects(:empty_project))
+    expects = projects(:bolete_project).species_lists
+    scope = SpeciesList.projects(projects(:bolete_project))
+    assert_query_scope(expects, scope,
+                       :SpeciesList, projects: projects(:bolete_project))
+    expects = projects(:two_list_project).species_lists
+    scope = SpeciesList.projects(projects(:two_list_project))
+    assert_query_scope(expects, scope,
+                       :SpeciesList, projects: projects(:two_list_project))
+  end
+
+  def test_species_list_id_in_set
+    expects = [species_lists(:first_species_list).id,
+               species_lists(:unknown_species_list).id]
+    scope = SpeciesList.id_in_set(expects)
+    assert_query_scope(expects, scope, :SpeciesList, id_in_set: list_set_ids)
+  end
+
+  def test_species_list_title_has
+    expects = [species_lists(:first_species_list).id]
+    scope = SpeciesList.title_has("A Species List")
+    assert_query_scope(expects, scope,
+                       :SpeciesList, title_has: "A Species List")
+  end
+
+  def test_species_list_has_notes
+    scope = SpeciesList.has_notes
+    assert_query(scope, :SpeciesList, has_notes: true)
+  end
+
+  def test_species_list_notes_has
+    expects = [species_lists(:first_species_list).id,
+               species_lists(:another_species_list).id]
+    scope = SpeciesList.notes_has("Skunked")
+    assert_query_scope(expects, scope, :SpeciesList, notes_has: "Skunked")
+  end
+
+  def test_species_list_search_where
+    expects = [species_lists(:where_no_mushrooms_list).id]
+    scope = SpeciesList.search_where("No Mushrooms")
+    assert_query_scope(expects, scope,
+                       :SpeciesList, search_where: "No Mushrooms")
   end
 
   def test_species_list_pattern_search
@@ -94,10 +116,6 @@ class Query::SpeciesListsTest < UnitTestCase
   end
 
   def species_list_pattern_search(pattern)
-    SpeciesList.index_order.left_outer_joins(:location).
-      where(SpeciesList[:title].matches("%#{pattern}%").
-            or(SpeciesList[:notes].matches("%#{pattern}%")).
-            or(SpeciesList[:where].matches("%#{pattern}%")).
-            or(Location[:name].matches("%#{pattern}%"))).distinct
+    SpeciesList.pattern(pattern)
   end
 end
