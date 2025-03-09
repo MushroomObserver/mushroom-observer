@@ -750,24 +750,6 @@ Style/OptionalBooleanParameter:
     - 'test/session_extensions.rb'
     - 'test/session_form_extensions.rb'
 
-# Offense count: 9
-# This cop supports safe autocorrection (--autocorrect).
-Style/RedundantParentheses:
-  Exclude:
-    - 'app/classes/query/modules/joining.rb'
-    - 'app/controllers/api2_controller.rb'
-    - 'app/controllers/application_controller.rb'
-    - 'app/controllers/concerns/descriptions/permissions.rb'
-    - 'app/helpers/title_and_tabset_helper.rb'
-    - 'app/models/name.rb'
-    - 'test/controller_extensions.rb'
-
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-Style/RescueModifier:
-  Exclude:
-    - 'app/helpers/api_keys_helper.rb'
-
 # Offense count: 7
 # This cop supports unsafe autocorrection (--autocorrect-all).
 # Configuration parameters: ConvertCodeThatCanStartToReturnNil, AllowedMethods, MaxChainLength.
