@@ -23,5 +23,9 @@ class Query::RssLogsTest < UnitTestCase
     ids = [rss_logs(:species_list_rss_log).id]
     scope = RssLog.type(:species_list)
     assert_query_scope(ids, scope, :RssLog, type: :species_list)
+    ids = [rss_logs(:project_rss_log),
+           rss_logs(:species_list_rss_log)]
+    scope = RssLog.type("species_list project").index_order
+    assert_query_scope(ids, scope, :RssLog, type: "species_list project")
   end
 end

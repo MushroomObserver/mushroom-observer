@@ -152,13 +152,13 @@ class RssLog < AbstractModel
   scope :index_order,
         -> { order(updated_at: :desc, id: :desc) }
 
-  scope :type, lambda { |types|
-    types = types.to_s.split
+  scope :type, lambda { |str|
+    types = str.to_s.split
     types &= ALL_TYPE_TAGS.map(&:to_s)
     return none if types.empty?
 
     types.map! { |type| arel_table[:"#{type}_id"].not_eq(nil) }
-    where(or_clause(types)).distinct
+    where(or_clause(*types)).distinct
   }
 
   # Maximum allowed length (in bytes) of notes column.  Actually it should be
