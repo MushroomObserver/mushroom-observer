@@ -802,14 +802,6 @@ Style/StringConcatenation:
     - 'lib/tasks/lang.rake'
     - 'script/refresh_name_lister_cache'
 
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: EnforcedStyle, ConsistentQuotesInMultiline.
-# SupportedStyles: single_quotes, double_quotes
-Style/StringLiterals:
-  Exclude:
-    - 'app/classes/checklist.rb'
-
 # Offense count: 15
 # This cop supports safe autocorrection (--autocorrect).
 Style/SuperArguments:
