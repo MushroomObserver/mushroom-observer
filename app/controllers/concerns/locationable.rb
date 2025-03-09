@@ -45,19 +45,10 @@ module Locationable
       return false if place_name_exists?(object)
 
       # Ensure we have the minimum necessary to create a new location
-      unless object.location_id == -1 &&
-             (place_name = params.dig(object.type_tag, :place_name)).present? &&
-             (north = params.dig(:location, :north)).present? &&
-             (south = params.dig(:location, :south)).present? &&
-             (east = params.dig(:location, :east)).present? &&
-             (west = params.dig(:location, :west)).present?
-        return false
-      end
+      return false unless (attributes = location_attributes(object))
+      return false if (place_name = params.dig(object.type_tag,
+                                               :place_name)).blank?
 
-      # Ignore hidden attribute even if the obs is hidden, because saving a
-      # Location with `hidden: true` fuzzes the lat/lng bounds unpredictably.
-      attributes = { hidden: false, user_id: @user.id,
-                     north:, south:, east:, west: }
       # Add optional attributes. :notes not implemented yet.
       [:high, :low, :notes].each do |key|
         if (val = params.dig(:location, key)).present?
@@ -73,6 +64,19 @@ module Locationable
       # which figures out scientific/postal format of user input and sets
       # location `name` and `scientific_name` accordingly.
       @location.display_name = place_name
+    end
+
+    def location_attributes(object)
+      return false unless object.location_id == -1 &&
+                          (north = params.dig(:location, :north)).present? &&
+                          (south = params.dig(:location, :south)).present? &&
+                          (east = params.dig(:location, :east)).present? &&
+                          (west = params.dig(:location, :west)).present?
+
+      # Ignore hidden attribute even if the obs is hidden, because saving a
+      # Location with `hidden: true` fuzzes the lat/lng bounds unpredictably.
+      { hidden: false, user_id: @user.id,
+        north:, south:, east:, west: }
     end
 
     # Check if we somehow got a location name that exists in the db, but didn't
