@@ -47,14 +47,6 @@ Lint/RescueException:
   Exclude:
     - 'script/make_eol_xml'
 
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: AllowedMethods.
-# AllowedMethods: present?, blank?, presence, try, try!
-Lint/SafeNavigationConsistency:
-  Exclude:
-    - 'app/models/field_slip.rb'
-
 # Offense count: 3
 # Configuration parameters: AllowComments, AllowNil.
 Lint/SuppressedException:
