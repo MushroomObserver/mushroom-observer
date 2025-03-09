@@ -298,7 +298,8 @@ module TitleAndTabsetHelper
              action: query.model.index_action,
              by: by }.merge(query_params)
     identifier = "#{query.model.to_s.pluralize.underscore}_by_#{by}_link"
-    active = (!link_all && (by.to_s == this_by)) # boolean if current sort order
+    # boolean if current sort order
+    active = (!link_all && (by.to_s == this_by)) # rubocop:disable Style/RedundantParentheses
 
     [label.t, path, identifier, active]
   end

@@ -491,7 +491,7 @@ class Name < AbstractModel
   end
 
   def best_brief_description
-    (description.gen_desc.presence || description.diag_desc) if description
+    (description.gen_desc.presence || description.diag_desc) if description # rubocop:disable Style/RedundantParentheses
   end
 
   # Used by show_name.
