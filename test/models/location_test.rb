@@ -577,6 +577,16 @@ class LocationTest < UnitTestCase
     assert_empty(Location.region(ARBITRARY_SHA))
   end
 
+  def test_scope_regions
+    expects = Location.regions(["California, USA", "New York, USA"]).
+              reorder(id: :asc)
+    assert_includes(expects, locations(:nybg_location))
+    assert_includes(expects, albion)
+    assert_includes(expects, california)
+    assert_not_includes(expects, wrangel)
+    assert_not_includes(expects, perkatkun)
+  end
+
   def test_contains_edges
     loc = albion
     assert(loc.contains_lat?(loc.north), "Location should contain its N edge")
