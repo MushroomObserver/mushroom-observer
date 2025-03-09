@@ -155,7 +155,7 @@ class API2::ObservationsTest < UnitTestCase
   end
 
   def test_getting_observations_collection_location
-    obses = Observation.not_collection_location
+    obses = Observation.is_collection_location(false)
     assert(obses.length > 1)
     assert_api_pass(params_get(is_collection_location: "no"))
     assert_api_results(obses)
@@ -163,7 +163,7 @@ class API2::ObservationsTest < UnitTestCase
 
   def test_getting_observations_has_images
     with    = Observation.has_images
-    without = Observation.has_no_images
+    without = Observation.has_images(false)
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params_get(has_images: "yes"))
@@ -196,7 +196,7 @@ class API2::ObservationsTest < UnitTestCase
 
   def test_getting_observations_has_specimen
     with    = Observation.has_specimen
-    without = Observation.has_no_specimen
+    without = Observation.has_specimen(false)
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params_get(has_specimen: "yes"))

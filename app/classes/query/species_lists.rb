@@ -12,14 +12,14 @@ class Query::SpeciesLists < Query::Base
       date: [:date],
       id_in_set: [SpeciesList],
       by_users: [User],
-      locations: [Location],
-      search_where: :string,
-      projects: [Project],
       title_has: :string,
       has_notes: :boolean,
       notes_has: :string,
       has_comments: { boolean: [true] },
       comments_has: :string,
+      search_where: :string,
+      locations: [Location],
+      projects: [Project],
       pattern: :string,
       observation_query: { subquery: :Observation }
     )
