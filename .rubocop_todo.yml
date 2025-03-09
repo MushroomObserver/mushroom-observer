@@ -724,14 +724,6 @@ Style/MissingRespondToMissing:
     - 'script/update_googlebots.rb'
     - 'script/update_ip_stats.rb'
 
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: EnforcedStyle, MinBodyLength.
-# SupportedStyles: skip_modifier_ifs, always
-Style/Next:
-  Exclude:
-    - 'lib/tasks/email.rake'
-
 # Offense count: 48
 # Configuration parameters: AllowedMethods.
 # AllowedMethods: respond_to_missing?
