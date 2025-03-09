@@ -25,6 +25,8 @@ class Query::Names < Query::Base # rubocop:disable Metrics/ClassLength
                include_immediate_subtaxa: :boolean,
                exclude_original_names: :boolean },
       text_name_has: :string,
+      # clade: :string, # content_filter
+      # lichen: :boolean, # content_filter
       misspellings: { string: [:no, :either, :only] },
       deprecated: :boolean,
       has_synonyms: :boolean,

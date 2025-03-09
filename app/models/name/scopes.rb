@@ -132,11 +132,11 @@ module Name::Scopes
     scope :include_synonyms_of, lambda { |name|
       with_correct_spelling.where(id: name.synonyms.map(&:id))
     }
-    scope :in_clade, lambda { |names|
+    scope :clade, lambda { |names|
       names(lookup: names, include_subtaxa: true).misspellings(:no)
     }
-    # scope :in_clade_above_genus,
-    #       ->(name) { in_clade(name).with_rank_above_genus }
+    # scope :clade_above_genus,
+    #       ->(name) { clade(name).with_rank_above_genus }
 
     # # A search of all searchable Name fields, concatenated.
     # scope :search_content, lambda { |phrase|

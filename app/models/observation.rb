@@ -97,7 +97,7 @@
 #  by_user(user)
 #  has_location
 #  locations(location)
-#  in_region(where)
+#  region(where)
 #  in_box(north:, south:, east:, west:) geoloc is in the box
 #  not_in_box(north:, south:, east:, west:) geoloc is outside the box
 #  is_collection_location
