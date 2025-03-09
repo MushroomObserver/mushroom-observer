@@ -3,7 +3,6 @@
 # base class for Query searches
 class Query::Base
   include Query::Modules::ClassMethods
-  include Query::Modules::ActiveRecord
   include Query::Modules::BoundingBox
   include Query::Modules::Conditions
   include Query::Modules::Associations
@@ -19,6 +18,8 @@ class Query::Base
   include Query::Modules::Sql
   include Query::Modules::Titles
   include Query::Modules::Validation
+
+  attr_writer :record
 
   def parameter_declarations
     self.class.parameter_declarations
@@ -106,6 +107,22 @@ class Query::Base
   def serialize
     params.sort.to_h.merge(model: model.name).to_json
   end
+
+  def record
+    # This errors out if @record is not set since it
+    # cannot find Query.get_record.  If you copy the
+    # above definition of get_record into the same scope
+    # as this method and get rid of "Query." it works,
+    # but that is not a great solution.
+    # You can trigger the issue which is
+    # triggered if the :wolf_fart observation has
+    # second image.  See query_test.rb for more.
+    @record ||= self.class.get_record(self)
+  end
+
+  delegate :id, to: :record
+
+  delegate :save, to: :record
 
   def increment_access_count
     record.access_count += 1
