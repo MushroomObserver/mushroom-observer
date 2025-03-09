@@ -34,10 +34,6 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       date(early, late)
     }
 
-    scope :has_images, lambda { |bool = true|
-      presence_condition(Observation[:thumb_image_id], bool:)
-    }
-
     # NOTE: `Observation.no_notes` evaluates to '--- {}\n' because it's to_yaml.
     # This is unlike other models with notes. This scope could be simpler:
     #       ->(bool = true) { not_blank_condition(Observation[:notes], bool:) }
@@ -211,7 +207,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
     scope :names_like,
           ->(name) { where(name: Name.text_name_has(name)) }
-    scope :in_clade, lambda { |val|
+    scope :clade, lambda { |val|
       # parse_name_and_rank defined below
       text_name, rank = parse_name_and_rank(val)
 
@@ -257,18 +253,18 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :has_geolocation,
           ->(bool = true) { presence_condition(Observation[:lat], bool:) }
 
-    scope :in_regions, lambda { |place_names|
+    scope :regions, lambda { |place_names|
       place_names = [place_names].flatten
       if place_names.length > 1
-        starting = in_region(place_names.shift)
+        starting = region(place_names.shift)
         place_names.reduce(starting) do |result, place_name|
-          result.or(Observation.in_region(place_name))
+          result.or(Observation.region(place_name))
         end
       else
-        in_region(place_names.first)
+        region(place_names.first)
       end
     }
-    scope :in_region, lambda { |place_name|
+    scope :region, lambda { |place_name|
       region = Location.reverse_name_if_necessary(place_name)
 
       if Location.understood_continent?(region)
@@ -428,6 +424,11 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       joins(:location).where(Location[:box_area].gt(args[:area])).distinct
     }
 
+    # content filter
+    scope :has_images, lambda { |bool = true|
+      presence_condition(Observation[:thumb_image_id], bool:)
+    }
+    # content filter
     scope :has_specimen,
           ->(bool = true) { where(specimen: bool) }
 

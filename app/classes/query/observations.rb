@@ -29,14 +29,15 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
                exclude_consensus: :boolean },
       confidence: [:float],
       needs_naming: :boolean,
-      in_clade: :string,
+      # clade: :string, # content_filter
+      # lichen: :boolean, # content_filter
 
       is_collection_location: :boolean,
       has_public_lat_lng: :boolean,
       location_undefined: { boolean: [true] },
-      in_region: :string,
       locations: [Location],
       in_box: { north: :float, south: :float, east: :float, west: :float },
+      # region: :string, # content filter
 
       has_notes: :boolean,
       notes_has: :string,
@@ -44,8 +45,10 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
       pattern: :string,
       has_comments: { boolean: [true] },
       comments_has: :string,
-
       has_sequences: { boolean: [true] },
+      # has_specimen: :boolean, # content filter
+      # has_images: :boolean, # content filter
+
       field_slips: [FieldSlip],
       herbaria: [Herbarium],
       herbarium_records: [HerbariumRecord],
@@ -89,7 +92,6 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
     initialize_has_name_parameter
     initialize_names_and_related_names_parameters
     add_needs_naming_condition
-    add_needs_naming_filter_conditions
     initialize_confidence_parameter
   end
 
@@ -239,62 +241,10 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
               to_sql.gsub(/^.*?WHERE/, "")
   end
 
-  def add_needs_naming_filter_conditions
-    # additional filters, note these are the same as content filters.
-    initialize_in_clade_parameter
-    initialize_in_region_parameter
-    # add_by_user_condition
-  end
-
-  # from content_filter/clade.rb
-  # parse_name and check the already initialize_unfiltered list of
-  # observations against observations.classification. Some inefficiency
-  # here comes from having to parse the name from a string.
-  # NOTE: Write an in_clade autocompleter that passes the name_id as val
-  def initialize_in_clade_parameter
-    return unless params[:in_clade]
-
-    val = params[:in_clade]
-    name, rank = parse_name(val)
-    conds = if Name.ranks_above_genus.include?(rank)
-              "observations.text_name = '#{name}' OR " \
-              "observations.classification REGEXP '#{rank}: _#{name}_'"
-            else
-              "observations.text_name = '#{name}' OR " \
-              "observations.text_name REGEXP '^#{name} '"
-            end
-    where << conds
-  end
-
-  def parse_name(val)
-    name = Name.best_match(val)
-    return [name.text_name, name.rank] if name
-
-    [val, Name.guess_rank(val) || "Genus"]
-  end
-
   def initialize_confidence_parameter
     add_range_condition(
       "observations.vote_cache", params[:confidence], :observations
     )
-  end
-
-  # from content_filter/region.rb, but simpler.
-  # includes region itself (i.e., no comma before region in 2nd regex)
-  def initialize_in_region_parameter
-    return unless params[:in_region]
-
-    region = params[:in_region]
-    region = Location.reverse_name_if_necessary(region)
-
-    conds =
-      if Location.understood_continent?(region)
-        countries = Location.countries_in_continent(region).join("|")
-        "observations.where REGEXP #{escape(", (#{countries})$")}"
-      else
-        "observations.where LIKE #{escape("%#{region}")}"
-      end
-    where << conds
   end
 
   def add_pattern_condition

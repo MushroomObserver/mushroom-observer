@@ -25,9 +25,9 @@ module Observations
       # CLADE
       # make a query, and test that the query results match obs scope
       aga_obs = Observation.needs_naming_and_not_reviewed_by_user(mary).
-                in_clade("Agaricales")
+                clade("Agaricales")
       query = Query.lookup_and_save(:Observation, needs_naming: true,
-                                                  in_clade: "Agaricales")
+                                                  clade: "Agaricales")
 
       # # get(:index, params: { q: QueryRecord.last.id.alphabetize })
       assert_equal(query.num_results, aga_obs.count)
@@ -37,27 +37,27 @@ module Observations
       assert_select(".matrix-box", aga_obs.count)
 
       bol_obs = Observation.needs_naming_and_not_reviewed_by_user(mary).
-                in_clade("Boletus")
+                clade("Boletus")
       query = Query.lookup_and_save(:Observation, needs_naming: true,
-                                                  in_clade: "Boletus")
+                                                  clade: "Boletus")
       assert_equal(query.num_results, bol_obs.count)
 
       # REGION
       # make a query, and test that the query results match obs scope
       # start with continent
       sam_obs = Observation.needs_naming_and_not_reviewed_by_user(mary).
-                in_region("South America")
+                region("South America")
       query = Query.lookup_and_save(
-        :Observation, needs_naming: true, in_region: "South America"
+        :Observation, needs_naming: true, region: "South America"
       )
       assert_equal(query.num_results, sam_obs.count)
 
       cal_obs = Observation.needs_naming_and_not_reviewed_by_user(mary).
-                in_region("California, USA")
+                region("California, USA")
       # remember the original count, will change
       cal_obs_count = cal_obs.count
       query = Query.lookup_and_save(
-        :Observation, needs_naming: true, in_region: "California, USA"
+        :Observation, needs_naming: true, region: "California, USA"
       )
       assert_equal(query.num_results, cal_obs_count)
 
@@ -91,7 +91,7 @@ module Observations
       # Vote on the first unconfident naming and check the new obs_count
       # On the site, this happens via JS, so we'll do it directly
       new_cal_obs = Observation.needs_naming_and_not_reviewed_by_user(mary).
-                    in_region("California, USA")
+                    region("California, USA")
       # Have to check for an actual naming, because some obs have no namings,
       # and obs.name_id.present? doesn't necessarily mean there's a naming
       not_confident = new_cal_obs.where(vote_cache: ..0)

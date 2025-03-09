@@ -14,7 +14,7 @@ class Autocomplete::ForRegion < Autocomplete::ByWord
   # "scientific" format users will have the country first, so reverse words
   def rough_matches(words)
     words = Location.reverse_name(words) if reverse
-    regions = Observation.in_region(words).select(:where, :location_id)
+    regions = Observation.region(words).select(:where, :location_id)
 
     matches_array(regions)
   end
@@ -22,7 +22,7 @@ class Autocomplete::ForRegion < Autocomplete::ByWord
   # Doesn't make sense to have an exact match for a region.
   # def exact_match(words)
   #   words = Location.reverse_name(words) if reverse
-  #   region = Observation.in_region(words).select(:where, :location_id).first
+  #   region = Observation.region(words).select(:where, :location_id).first
   #   return [] unless region
 
   #   matches_array([region])
