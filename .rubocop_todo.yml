@@ -704,12 +704,6 @@ Style/HashEachMethods:
     - 'app/classes/eol_data.rb'
     - 'script/slowest_pages'
 
-# Offense count: 13
-# This cop supports safe autocorrection (--autocorrect).
-Style/KeywordArgumentsMerging:
-  Exclude:
-    - 'test/classes/box_test.rb'
-
 # Offense count: 11
 # This cop supports unsafe autocorrection (--autocorrect-all).
 Style/MapIntoArray:
