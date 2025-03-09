@@ -3,7 +3,6 @@
 class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
   include Query::Params::AdvancedSearch
   include Query::Params::Filters
-  include Query::Initializers::Names
   include Query::Initializers::Filters
   include Query::Initializers::AdvancedSearch
   include Query::Titles::Observations
@@ -20,29 +19,32 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
 
       id_in_set: [Observation],
       by_users: [User],
-      needs_naming: :boolean,
-      in_clade: :string,
-      in_region: :string,
-      pattern: :string,
       has_name: :boolean,
       names: { lookup: [Name],
                include_synonyms: :boolean,
                include_subtaxa: :boolean,
                include_immediate_subtaxa: :boolean,
-               exclude_original_names: :boolean },
-      include_all_name_proposals: :boolean,
-      exclude_consensus: :boolean,
+               exclude_original_names: :boolean,
+               include_all_name_proposals: :boolean,
+               exclude_consensus: :boolean },
       confidence: [:float],
-      locations: [Location],
-      in_box: { north: :float, south: :float, east: :float, west: :float },
+      needs_naming: :boolean,
+      in_clade: :string,
+
       is_collection_location: :boolean,
       has_public_lat_lng: :boolean,
       location_undefined: { boolean: [true] },
+      in_region: :string,
+      locations: [Location],
+      in_box: { north: :float, south: :float, east: :float, west: :float },
+
       has_notes: :boolean,
       notes_has: :string,
       has_notes_fields: [:string],
+      pattern: :string,
       has_comments: { boolean: [true] },
       comments_has: :string,
+
       has_sequences: { boolean: [true] },
       field_slips: [FieldSlip],
       herbaria: [Herbarium],
@@ -188,6 +190,44 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
       :observations, :names
     )
   end
+
+  def initialize_names_and_related_names_parameters
+    return force_empty_results if irreconcilable_naming_parameters?
+
+    table = if params.dig(:names, :include_all_name_proposals)
+              "namings"
+            else
+              "observations"
+            end
+    ids = lookup_names_by_name(params.dig(:names, :lookup),
+                               related_names_parameters)
+    add_association_condition("#{table}.name_id", ids)
+
+    if params.dig(:names, :include_all_name_proposals)
+      add_join(:observations, :namings)
+    end
+    return unless params.dig(:names, :exclude_consensus)
+
+    add_not_associated_condition("observations.name_id", ids)
+  end
+
+  NAMES_EXPANDER_PARAMS = [
+    :include_synonyms, :include_subtaxa, :include_immediate_subtaxa,
+    :exclude_original_names
+  ].freeze
+
+  def related_names_parameters
+    return {} unless params[:names]
+
+    params[:names].dup.slice(*NAMES_EXPANDER_PARAMS).compact
+  end
+
+  def irreconcilable_naming_parameters?
+    params.dig(:names, :exclude_consensus) &&
+      !params.dig(:names, :include_all_name_proposals)
+  end
+
+  # ------------------------------------------------------------------------
 
   def add_needs_naming_condition
     return unless params[:needs_naming]

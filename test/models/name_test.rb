@@ -2726,6 +2726,25 @@ class NameTest < UnitTestCase
     assert_equal(sort_names, sort_names.sort)
   end
 
+  def test_skip_notify
+    QueuedEmail.queue = true
+    User.current = users(:roy)
+    name = names(:coprinus_comatus)
+    name.skip_notify = true
+    assert_difference("QueuedEmail.count", 0) do
+      name.update(
+        Name.parse_name("Coprinus comatus  (O.F. Müll.) Persoon").params
+      )
+    end
+    name.skip_notify = false
+    assert_difference("QueuedEmail.count", 2) do
+      name.update(
+        Name.parse_name("Coprinus comatus  (O.F. Müll.) Pers.").params
+      )
+    end
+    QueuedEmail.queue = false
+  end
+
   # Prove that alphabetized sort_names give us names in the expected order
   # Differs from test_name_spaceship_operator in omitting "Agaricus Śliwa",
   # whose sort_name is after all the levels between genus and species,
@@ -3620,36 +3639,36 @@ class NameTest < UnitTestCase
     )
   end
 
-  def test_scope_on_species_lists
+  def test_scope_species_lists
     assert_includes(
-      Name.on_species_lists(species_lists(:unknown_species_list)), names(:fungi)
+      Name.species_lists(species_lists(:unknown_species_list)), names(:fungi)
     )
-    assert_empty(Name.on_species_lists(species_lists(:first_species_list)))
+    assert_empty(Name.species_lists(species_lists(:first_species_list)))
   end
 
-  def test_scope_at_locations
+  def test_scope_locations
     assert_includes(
-      Name.at_locations(locations(:burbank)), # at location called with Location
+      Name.locations(locations(:burbank)), # at location called with Location
       names(:agaricus_campestris)
     )
     assert_includes(
-      Name.at_locations(locations(:burbank).id), # at location called with id
+      Name.locations(locations(:burbank).id), # at location called with id
       names(:agaricus_campestris)
     )
     assert_includes(
-      Name.at_locations(locations(:burbank).name), # called with string
+      Name.locations(locations(:burbank).name), # called with string
       names(:agaricus_campestris)
     )
     assert_includes(
-      Name.at_locations(locations(:california).name), # region
+      Name.locations(locations(:california).name), # region
       names(:agaricus_campestris)
     )
     assert_not_includes(
-      Name.at_locations(locations(:obs_default_location)),
+      Name.locations(locations(:obs_default_location)),
       names(:notification_but_no_observation)
     )
     assert_empty(
-      Name.at_locations({}),
+      Name.locations({}),
       "Name.at_location should be empty if called with bad argument class"
     )
   end

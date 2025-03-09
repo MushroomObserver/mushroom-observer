@@ -11,8 +11,8 @@ class Query::RssLogs < Query::Base
   def self.parameter_declarations
     super.merge(
       updated_at: [:time],
-      type: :string,
-      id_in_set: [RssLog]
+      id_in_set: [RssLog],
+      type: :string
     ).merge(content_filter_parameter_declarations(Observation)).
       merge(content_filter_parameter_declarations(Location))
   end

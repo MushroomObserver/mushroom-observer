@@ -308,9 +308,16 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   serialize :bonuses, coder: YAML
   serialize :alert, coder: YAML
 
-  scope :by_contribution, lambda {
-    order(contribution: :desc, name: :asc, login: :asc)
+  scope :by_contribution,
+        -> { order(contribution: :desc, name: :asc, login: :asc) }
+  scope :has_contribution,
+        -> { where(User[:contribution].gt(0)) }
+
+  scope :pattern, lambda { |phrase|
+    cols = User[:login] + User[:name]
+    search_columns(cols, phrase)
   }
+
   # NOTE: the obs images are a separate optimized query
   scope :show_includes, lambda {
     strict_loading.includes(

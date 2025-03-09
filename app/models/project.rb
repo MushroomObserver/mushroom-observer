@@ -90,11 +90,35 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
             format: { with: /\A[A-Z0-9][A-Z0-9-]*\z/,
                       message: proc { :alphanumerics_only.t } }
 
-  scope :index_order, -> { order(updated_at: :desc, id: :desc) }
+  scope :index_order,
+        -> { order(updated_at: :desc, id: :desc) }
 
-  scope :with_members, lambda { |members|
+  scope :members, lambda { |members|
     joins(user_group: :user_group_users).
       merge(UserGroupUser.where(user: members))
+  }
+  scope :title_has,
+        ->(phrase) { search_columns(Project[:title], phrase) }
+  scope :has_summary,
+        ->(bool = true) { not_blank_condition(Project[:summary], bool:) }
+  scope :summary_has,
+        ->(phrase) { search_columns(Project[:summary], phrase) }
+  scope :field_slip_prefix_has,
+        ->(phrase) { search_columns(Project[:field_slip_prefix], phrase) }
+
+  scope :has_images,
+        ->(bool = true) { joined_relation_condition(:project_images, bool:) }
+  scope :has_observations, lambda { |bool = true|
+    joined_relation_condition(:project_observations, bool:)
+  }
+  scope :has_species_lists, lambda { |bool = true|
+    joined_relation_condition(:project_species_lists, bool:)
+  }
+
+  scope :pattern, lambda { |phrase|
+    cols = (Project[:title] + Project[:summary].coalesce("") +
+            Project[:field_slip_prefix].coalesce(""))
+    search_columns(cols, phrase).distinct
   }
 
   scope :show_includes, lambda {

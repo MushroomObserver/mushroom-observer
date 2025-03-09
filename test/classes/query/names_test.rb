@@ -110,19 +110,19 @@ class Query::NamesTest < UnitTestCase
   def test_name_locations
     locations = [locations(:salt_point), locations(:gualala)].
                 map { |x| x.id.to_s }
-    expects = Name.at_locations(locations).index_order
+    expects = Name.locations(locations).index_order
     assert_query(expects, :Name, locations: locations)
     # locations = [locations(:salt_point), locations(:gualala)]
     # assert_query(expects, :Name, locations: locations)
 
     locations = ["Sonoma Co., California, USA"]
-    expects = Name.at_locations(locations).index_order
+    expects = Name.locations(locations).index_order
     assert_query(expects, :Name, locations: locations)
   end
 
   def test_name_species_lists
     spl = [species_lists(:unknown_species_list).title]
-    expects = Name.on_species_lists(spl).index_order
+    expects = Name.species_lists(spl).index_order
     assert_query(expects, :Name, species_lists: spl)
   end
 
