@@ -718,13 +718,6 @@ Style/MapIntoArray:
     - 'app/models/vote.rb'
     - 'test/general_extensions.rb'
 
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: AllowedMethods, AllowedPatterns.
-Style/MethodCallWithoutArgsParentheses:
-  Exclude:
-    - 'lib/tasks/email.rake'
-
 # Offense count: 2
 Style/MissingRespondToMissing:
   Exclude:
