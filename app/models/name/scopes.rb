@@ -159,7 +159,7 @@ module Name::Scopes
     # This is what's called by pattern_search
     scope :pattern, lambda { |phrase|
       cols = Name.searchable_columns + NameDescription.searchable_columns
-      joins_default_descriptions.search_columns(cols, phrase).distinct
+      joins_default_descriptions.search_columns(cols, phrase)
     }
     # https://stackoverflow.com/a/77064711/3357635
     # AR's assumed join condition is `Name[:id].eq(NameDescription[:name_id])`
@@ -171,17 +171,6 @@ module Name::Scopes
         join(NameDescription.arel_table, Arel::Nodes::OuterJoin).
         on(Name[:description_id].eq(NameDescription[:id])).join_sources
       )
-    }
-
-    scope :has_comments, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
-        joins(:comments).distinct
-      else
-        where.not(id: Name.has_comments)
-      end
-    }
-    scope :comments_has, lambda { |phrase|
-      joins(:comments).merge(Comment.search_content(phrase)).distinct
     }
 
     # Query just ignores `has_descriptions(false)`, so for now we will here too.
@@ -234,14 +223,14 @@ module Name::Scopes
 
       joins(:observations)
     }
-    scope :on_species_lists, lambda { |species_lists|
+    scope :species_lists, lambda { |species_lists|
       species_list_ids = lookup_species_lists_by_name(species_lists)
       joins(observations: :species_list_observations).
         merge(SpeciesListObservation.where(species_list: species_list_ids)).
         distinct
     }
     # Accepts region string, location_id, or Location instance
-    scope :at_locations, lambda { |locations|
+    scope :locations, lambda { |locations|
       location_ids = lookup_regions_by_name(locations)
       joins(:observations).
         where(observations: { location: location_ids }).distinct

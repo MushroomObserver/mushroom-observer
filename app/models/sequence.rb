@@ -41,7 +41,29 @@ class Sequence < AbstractModel
   after_update  :log_update_sequence
   after_destroy :log_destroy_sequence
 
-  scope :index_order, -> { order(created_at: :desc, id: :desc) }
+  scope :index_order,
+        -> { order(created_at: :desc, id: :desc) }
+
+  scope :observations,
+        ->(ids) { where(observation_id: ids) }
+  scope :locus,
+        ->(locus) { where(locus:) }
+  scope :locus_has,
+        ->(str) { search_columns(Sequence[:locus], str) }
+  scope :archive,
+        ->(archive) { where(archive:) }
+  scope :accession,
+        ->(accession) { where(accession:) }
+  scope :accession_has,
+        ->(str) { search_columns(Sequence[:accession], str) }
+  scope :notes_has,
+        ->(str) { search_columns(Sequence[:notes], str) }
+
+  scope :pattern, lambda { |phrase|
+    cols = Sequence[:locus].coalesce("") + Sequence[:archive].coalesce("") +
+           Sequence[:accession].coalesce("") + Sequence[:notes].coalesce("")
+    search_columns(cols, phrase)
+  }
 
   ##############################################################################
   #

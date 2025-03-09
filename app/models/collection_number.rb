@@ -78,7 +78,7 @@ class CollectionNumber < AbstractModel
 
   scope :pattern, lambda { |phrase|
     cols = (CollectionNumber[:name] + CollectionNumber[:number])
-    search_columns(cols, phrase).distinct
+    search_columns(cols, phrase)
   }
 
   def format_name

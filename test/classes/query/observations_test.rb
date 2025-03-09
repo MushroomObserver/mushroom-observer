@@ -140,9 +140,9 @@ class Query::ObservationsTest < UnitTestCase
     assert_query([observations(:falmouth_2022_obs),
                   observations(:minimal_unknown_obs)],
                  :Observation, field_slips: [f_s.id, fs2.id])
-    assert_query(Observation.index_order.for_field_slips([f_s.code, fs2.code]),
+    assert_query(Observation.index_order.field_slips([f_s.code, fs2.code]),
                  :Observation, field_slips: [f_s.code, fs2.code])
-    assert_query(Observation.index_order.for_field_slips([f_s.id, fs2.id]),
+    assert_query(Observation.index_order.field_slips([f_s.id, fs2.id]),
                  :Observation, field_slips: [f_s.id, fs2.id])
   end
 
@@ -151,7 +151,7 @@ class Query::ObservationsTest < UnitTestCase
     assert_query([observations(:detailed_unknown_obs),
                   observations(:minimal_unknown_obs)],
                  :Observation, herbarium_records: h_r.id)
-    assert_query(Observation.index_order.for_herbarium_records(h_r),
+    assert_query(Observation.index_order.herbarium_records(h_r),
                  :Observation, herbarium_records: h_r.id)
   end
 
@@ -159,35 +159,34 @@ class Query::ObservationsTest < UnitTestCase
     herb = herbaria(:fundis_herbarium)
     assert_query([observations(:detailed_unknown_obs)],
                  :Observation, herbaria: herb.name)
-    assert_query(Observation.index_order.in_herbaria(herb.name),
+    assert_query(Observation.index_order.herbaria(herb.name),
                  :Observation, herbaria: herb.name)
     herb = herbaria(:nybg_herbarium)
-    assert_query(Observation.index_order.in_herbaria(herb.name),
+    assert_query(Observation.index_order.herbaria(herb.name),
                  :Observation, herbaria: herb.id)
   end
 
-  def test_observation_on_projects_species_lists
+  def test_observation_on_project_lists
     projects = [projects(:bolete_project), projects(:eol_project)]
-    expects = Observation.index_order.on_projects_species_lists(projects)
+    expects = Observation.index_order.project_lists(projects)
     assert_query(expects, :Observation, project_lists: projects.map(&:title))
   end
 
-  def test_observation_at_locations
-    expects = Observation.index_order.
-              at_locations(locations(:burbank)).distinct
+  def test_observation_locations
+    expects = Observation.index_order.locations(locations(:burbank)).distinct
     assert_query(expects, :Observation, locations: locations(:burbank))
   end
 
-  def test_observation_for_projects
+  def test_observation_projects
     assert_query([],
                  :Observation, projects: projects(:empty_project))
     project = projects(:bolete_project)
     assert_query(project.observations, :Observation, projects: project)
-    assert_query(Observation.index_order.for_projects(project.title),
+    assert_query(Observation.index_order.projects(project.title),
                  :Observation, projects: project)
   end
 
-  def test_observation_for_project_projects_equivalence
+  def test_observation_projects_equivalence
     qu1 = Query.lookup_and_save(:Observation,
                                 projects: projects(:bolete_project))
     qu2 = Query.lookup_and_save(:Observation,
@@ -195,19 +194,19 @@ class Query::ObservationsTest < UnitTestCase
     assert_equal(qu1.results, qu2.results)
   end
 
-  def test_observation_on_species_lists
+  def test_observation_species_lists
     spl = species_lists(:unknown_species_list)
     # These two are identical, so should be disambiguated by reverse_id.
     assert_query([observations(:detailed_unknown_obs).id,
                   observations(:minimal_unknown_obs).id],
                  :Observation, species_lists: spl.id)
-    assert_query(Observation.index_order.on_species_lists(spl),
+    assert_query(Observation.index_order.species_lists(spl),
                  :Observation, species_lists: spl.id)
     # check the other param!
-    assert_query(Observation.index_order.on_species_lists(spl),
+    assert_query(Observation.index_order.species_lists(spl),
                  :Observation, species_lists: spl.id)
     spl2 = species_lists(:one_genus_three_species_list)
-    assert_query(Observation.index_order.on_species_lists([spl, spl2]).distinct,
+    assert_query(Observation.index_order.species_lists([spl, spl2]).distinct,
                  :Observation, species_lists: [spl.title, spl2.title])
   end
 

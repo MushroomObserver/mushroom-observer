@@ -95,6 +95,7 @@ two_list_project:
   user: mary
   user_group: mary_only
   admin_group: mary_only
+  summary: Project with two lists
   species_lists: query_first_list, query_second_list
   rss_log: project_rss_log
 

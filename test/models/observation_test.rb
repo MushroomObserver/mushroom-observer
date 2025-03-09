@@ -1328,7 +1328,7 @@ class ObservationTest < UnitTestCase
     assert_equal(top_undefined, results.first.where)
     assert_equal(
       results.count.first[1],
-      Observation.where(where: top_undefined).has_no_location.count
+      Observation.where(where: top_undefined).has_location(false).count
     )
   end
 
@@ -1525,10 +1525,10 @@ class ObservationTest < UnitTestCase
                         observations(:minimal_unknown_obs))
   end
 
-  def test_scope_has_no_sequences
-    assert_includes(Observation.has_no_sequences,
+  def test_scope_has_sequences_false
+    assert_includes(Observation.has_sequences(false),
                     observations(:minimal_unknown_obs))
-    assert_not_includes(Observation.has_no_sequences,
+    assert_not_includes(Observation.has_sequences(false),
                         observations(:genbanked_obs))
   end
 
@@ -1552,18 +1552,6 @@ class ObservationTest < UnitTestCase
                     observations(:unlisted_rolf_obs))
     assert_not_includes(Observation.has_comments(false),
                         observations(:minimal_unknown_obs))
-  end
-
-  def test_scope_herbarium_record_notes_has
-    obss_with_hr_notes =
-      Observation.herbarium_record_notes_has("cleaned & dried at 115°")
-    assert_includes(obss_with_hr_notes,
-                    observations(:minimal_unknown_obs))
-    assert_includes(obss_with_hr_notes,
-                    observations(:detailed_unknown_obs))
-    assert_not_includes(obss_with_hr_notes,
-                        observations(:imageless_unvouchered_obs))
-    assert_empty(Observation.herbarium_record_notes_has("ARBITRARY_SHA"))
   end
 
   def test_source_credit

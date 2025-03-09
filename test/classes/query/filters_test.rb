@@ -26,7 +26,7 @@ class Query::FiltersTest < UnitTestCase
     expects = Observation.has_images.index_order.uniq
     assert_query(expects, :Observation, has_images: "yes")
 
-    expects = Observation.has_no_images.index_order.uniq
+    expects = Observation.has_images(false).index_order.uniq
     assert_query(expects, :Observation, has_images: "no")
   end
 
@@ -34,7 +34,7 @@ class Query::FiltersTest < UnitTestCase
     expects = Observation.has_specimen.index_order.uniq
     assert_query(expects, :Observation, has_specimen: "yes")
 
-    expects = Observation.has_no_specimen.index_order.uniq
+    expects = Observation.has_specimen(false).index_order.uniq
     assert_query(expects, :Observation, has_specimen: "no")
   end
 

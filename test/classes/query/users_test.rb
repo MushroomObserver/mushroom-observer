@@ -17,11 +17,11 @@ class Query::UsersTest < UnitTestCase
     assert_query(expects, :User, by: :login)
   end
 
-  def test_user_in_set
-    assert_query(
-      [rolf.id, mary.id, junk.id],
-      :User, id_in_set: [junk.id, mary.id, rolf.id], by: :reverse_name
-    )
+  def test_user_id_in_set
+    ids = [rolf.id, mary.id, junk.id]
+    scope = User.id_in_set(ids)
+    assert_query_scope(ids, scope,
+                       :User, id_in_set: ids.reverse, by: :reverse_name)
   end
 
   def test_user_pattern_search_nonexistent
@@ -54,8 +54,6 @@ class Query::UsersTest < UnitTestCase
   end
 
   def user_pattern_search(pattern)
-    User.where(User[:login].matches("%#{pattern}%").
-               or(User[:name].matches("%#{pattern}%"))).
-      order(name: :asc, id: :desc).uniq
+    User.pattern(pattern)
   end
 end

@@ -12,14 +12,14 @@ class Query::Projects < Query::Base
       id_in_set: [Project],
       by_users: [User],
       members: [User],
+      title_has: :string,
+      has_summary: :boolean,
+      summary_has: :string,
+      field_slip_prefix_has: :string,
       has_images: { boolean: [true] },
       has_observations: { boolean: [true] },
       has_species_lists: { boolean: [true] },
       has_comments: { boolean: [true] },
-      has_summary: :boolean,
-      title_has: :string,
-      summary_has: :string,
-      field_slip_prefix_has: :string,
       comments_has: :string,
       pattern: :string
     )
