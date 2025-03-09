@@ -137,7 +137,7 @@ class API2::ImagesTest < UnitTestCase
   end
 
   def test_getting_images_species_list
-    spl  = species_lists(:unknown_species_list)
+    spl = species_lists(:unknown_species_list)
     assert_api_pass(params_get(species_list: spl.title))
     assert_api_results([in_situ_img, turned_over_img])
   end
