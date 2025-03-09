@@ -126,6 +126,8 @@ plugins:
     # default, which can be different than what's in Gemfile.lock. See
     # docs.codeclimate.com/docs/rubocop#section-using-rubocop-s-newer-versions
     channel: rubocop-1-56-3
+    config:
+      file: .rubocop_codeclimate.yml # See NOTE in .rubocop_codeclimate.yml
 
 # scss style checker
   scss-lint:
