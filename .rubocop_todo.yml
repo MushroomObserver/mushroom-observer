@@ -750,12 +750,6 @@ Style/OptionalBooleanParameter:
     - 'test/session_extensions.rb'
     - 'test/session_form_extensions.rb'
 
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-Style/RedundantLineContinuation:
-  Exclude:
-    - 'app/models/user.rb'
-
 # Offense count: 9
 # This cop supports safe autocorrection (--autocorrect).
 Style/RedundantParentheses:
