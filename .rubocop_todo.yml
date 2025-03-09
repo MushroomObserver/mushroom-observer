@@ -55,13 +55,6 @@ Lint/SuppressedException:
     - 'script/make_eol_xml'
     - 'test/controllers/species_lists_controller_test.rb'
 
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: AutoCorrect.
-Lint/UselessAssignment:
-  Exclude:
-    - 'app/helpers/link_helper.rb'
-
 # Offense count: 8
 # This cop supports safe autocorrection (--autocorrect).
 # Configuration parameters: AutoCorrect, CheckForMethodsWithNoSideEffects.
