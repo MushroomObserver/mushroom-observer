@@ -47,7 +47,7 @@ module Image::Scopes
     }
 
     scope :has_notes,
-          ->(bool = true) { coalesce_presence_condition(Image[:notes], bool:) }
+          ->(bool = true) { not_blank_condition(Image[:notes], bool:) }
     scope :notes_has,
           ->(phrase) { search_columns(Image[:notes], phrase) }
 
@@ -55,13 +55,8 @@ module Image::Scopes
           ->(phrase) { search_columns(Image[:copyright_holder], phrase) }
     scope :license,
           ->(license) { where(license: license) }
-    scope :ok_for_export, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
-        where(ok_for_export: true)
-      else
-        where(ok_for_export: false)
-      end
-    }
+    scope :ok_for_export,
+          ->(bool = true) { where(ok_for_export: bool) }
 
     scope :has_votes,
           ->(bool = true) { presence_condition(Image[:vote_cache], bool:) }
@@ -80,11 +75,7 @@ module Image::Scopes
     }
 
     scope :has_observations, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
-        joins(:observation_images).distinct
-      else
-        where.not(id: Image.joins(:observation_images).distinct) # very slow
-      end
+      joined_relation_condition(:observation_images, bool:)
     }
     scope :observations, lambda { |obs|
       joins(:observation_images).
@@ -119,7 +110,7 @@ module Image::Scopes
     # Excludes images without observations!
     scope :pattern, lambda { |phrase|
       cols = Image.searchable_columns + Observation[:where] + Name[:search_name]
-      joins(observations: :name).search_columns(cols, phrase).distinct
+      joins(observations: :name).search_columns(cols, phrase)
     }
 
     scope :interactive_includes, lambda {

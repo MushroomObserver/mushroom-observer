@@ -96,7 +96,7 @@ class API2::ObservationsTest < UnitTestCase
       Observation.where(text_name: "Agaricus"),
       "Tests won't work if there's already an Observation for genus Agaricus"
     )
-    ssp_obs = Observation.of_names_like("Agaricus")
+    ssp_obs = Observation.names_like("Agaricus")
     assert(ssp_obs.length > 1)
     agaricus = Name.where(text_name: "Agaricus").first # (an existing autonym)s
     agaricus_obs = Observation.create(name: agaricus, user: rolf)
@@ -155,7 +155,7 @@ class API2::ObservationsTest < UnitTestCase
   end
 
   def test_getting_observations_collection_location
-    obses = Observation.not_collection_location
+    obses = Observation.is_collection_location(false)
     assert(obses.length > 1)
     assert_api_pass(params_get(is_collection_location: "no"))
     assert_api_results(obses)
@@ -163,7 +163,7 @@ class API2::ObservationsTest < UnitTestCase
 
   def test_getting_observations_has_images
     with    = Observation.has_images
-    without = Observation.has_no_images
+    without = Observation.has_images(false)
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params_get(has_images: "yes"))
@@ -196,7 +196,7 @@ class API2::ObservationsTest < UnitTestCase
 
   def test_getting_observations_has_specimen
     with    = Observation.has_specimen
-    without = Observation.has_no_specimen
+    without = Observation.has_specimen(false)
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params_get(has_specimen: "yes"))
@@ -212,7 +212,7 @@ class API2::ObservationsTest < UnitTestCase
     # Nimmo note: Observation.no_notes_persisted is just no_notes.to_yaml
     # Observation.no_notes, not the above, works for comparison in Arel here.
     with = Observation.has_notes
-    without = Observation.has_no_notes
+    without = Observation.has_notes(false)
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params_get(has_notes: "yes"))

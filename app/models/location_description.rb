@@ -85,6 +85,30 @@ class LocationDescription < Description
   has_many :editors, through: :location_description_editors,
                      source: :user
 
+  scope :index_order, lambda {
+    joins(:location).order(Location[:name].asc,
+                           LocationDescription[:created_at].asc,
+                           LocationDescription[:id].desc)
+  }
+
+  scope :is_public, lambda { |bool = true|
+    where(public: bool)
+  }
+  scope :by_author, lambda { |user|
+    ids = lookup_users_by_name(user)
+    joins(:location_description_authors).
+      where(location_description_authors: { user_id: ids })
+  }
+  scope :by_editor, lambda { |user|
+    ids = lookup_users_by_name(user)
+    joins(:location_description_editors).
+      where(location_description_editors: { user_id: ids })
+  }
+  scope :locations, lambda { |loc|
+    ids = lookup_locations_by_name(loc)
+    where(location: ids)
+  }
+
   scope :show_includes, lambda {
     strict_loading.includes(
       :authors,
@@ -130,11 +154,6 @@ class LocationDescription < Description
   def self.show_controller
     # Not the generated default in AbstractModel, because controller namespaced.
     "/locations/descriptions"
-  end
-
-  # Eliminate when controller_normalized? goes.
-  def self.show_action
-    :show
   end
 
   # Returns an Array of all the descriptive text fields (Symbol's).

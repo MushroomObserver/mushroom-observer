@@ -1,10 +1,9 @@
 # frozen_string_literal: true
 
 # base class for Query's which return Names
-class Query::Names < Query::Base
+class Query::Names < Query::Base # rubocop:disable Metrics/ClassLength
   include Query::Params::AdvancedSearch
   include Query::Params::Filters
-  include Query::Initializers::Names
   include Query::Initializers::AdvancedSearch
   include Query::Initializers::Filters
   include Query::Titles::Observations
@@ -18,20 +17,18 @@ class Query::Names < Query::Base
       created_at: [:time],
       updated_at: [:time],
       id_in_set: [Name],
-      names: [Name], # potentially modified by the next four params
-      include_synonyms: :boolean,
-      include_subtaxa: :boolean,
-      include_immediate_subtaxa: :boolean,
-      exclude_original_names: :boolean,
       by_users: [User],
       by_editor: User,
-      locations: [Location],
-      species_lists: [SpeciesList],
-      misspellings: { string: [:no, :either, :only] },
-      is_deprecated: :boolean,
-      has_synonyms: :boolean,
-      rank: [{ string: Name.all_ranks }],
+      names: { lookup: [Name],
+               include_synonyms: :boolean,
+               include_subtaxa: :boolean,
+               include_immediate_subtaxa: :boolean,
+               exclude_original_names: :boolean },
       text_name_has: :string,
+      misspellings: { string: [:no, :either, :only] },
+      deprecated: :boolean,
+      has_synonyms: :boolean,
+      ok_for_export: :boolean,
       has_author: :boolean,
       author_has: :string,
       has_citation: :boolean,
@@ -40,15 +37,17 @@ class Query::Names < Query::Base
       classification_has: :string,
       has_notes: :boolean,
       notes_has: :string,
+      rank: [{ string: Name.all_ranks }],
       has_comments: { boolean: [true] },
       comments_has: :string,
-      ok_for_export: :boolean,
       pattern: :string,
+      locations: [Location],
+      species_lists: [SpeciesList],
       need_description: :boolean,
       has_descriptions: :boolean,
-      has_default_desc: :boolean,
-      description_query: { subquery: :NameDescription },
+      has_default_description: :boolean,
       has_observations: { boolean: [true] },
+      description_query: { subquery: :NameDescription },
       observation_query: { subquery: :Observation }
     ).merge(content_filter_parameter_declarations(Name)).
       merge(advanced_search_parameter_declarations)
@@ -85,8 +84,20 @@ class Query::Names < Query::Base
 
   # Much simpler form for non-observation-based name queries.
   def initialize_related_names_parameters
-    ids = lookup_names_by_name(params[:names], related_names_parameters)
+    ids = lookup_names_by_name(params.dig(:names, :lookup),
+                               related_names_parameters)
     add_association_condition("names.id", ids)
+  end
+
+  NAMES_EXPANDER_PARAMS = [
+    :include_synonyms, :include_subtaxa, :include_immediate_subtaxa,
+    :exclude_original_names
+  ].freeze
+
+  def related_names_parameters
+    return {} unless params[:names]
+
+    params[:names].dup.slice(*NAMES_EXPANDER_PARAMS).compact
   end
 
   def initialize_name_column_search_parameters
@@ -161,7 +172,7 @@ class Query::Names < Query::Base
   def initialize_is_deprecated_parameter
     add_boolean_condition(
       "names.deprecated IS TRUE", "names.deprecated IS FALSE",
-      params[:is_deprecated]
+      params[:deprecated]
     )
   end
 
@@ -237,7 +248,7 @@ class Query::Names < Query::Base
     add_boolean_condition(
       "names.description_id IS NOT NULL",
       "names.description_id IS NULL",
-      params[:has_default_desc]
+      params[:has_default_description]
     )
   end
 

@@ -7,7 +7,7 @@ module PatternSearch
       created: [:created_at, :parse_date_range],
       modified: [:updated_at, :parse_date_range],
 
-      deprecated: [:is_deprecated, :parse_boolean],
+      deprecated: [:deprecated, :parse_boolean],
       has_synonyms: [:has_synonyms, :parse_boolean],
       lichen: [:lichen, :parse_boolean],
       include_misspellings: [:misspellings, :parse_yes_no_both],
@@ -20,7 +20,7 @@ module PatternSearch
       has_classification: [:has_classification, :parse_boolean],
       has_notes: [:has_notes, :parse_boolean],
       has_comments: [:has_comments, :parse_yes],
-      has_description: [:has_default_desc, :parse_boolean],
+      has_description: [:has_default_description, :parse_boolean],
       has_observations: [:has_observations, :parse_yes],
 
       author: [:author_has, :parse_string],
@@ -49,8 +49,13 @@ module PatternSearch
     def build_query
       super
 
-      # This converts any search that *looks like* a name search into
-      # an actual name search. NOTE: This affects the index title.
+      hack_name_query
+      put_names_and_modifiers_in_hash
+    end
+
+    # This converts any search that *looks like* a name search into
+    # an actual name search. NOTE: This affects the index title.
+    def hack_name_query
       return unless args[:include_subtaxa].present? ||
                     args[:include_synonyms].present?
 

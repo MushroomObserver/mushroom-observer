@@ -140,9 +140,9 @@ class Query::ObservationsTest < UnitTestCase
     assert_query([observations(:falmouth_2022_obs),
                   observations(:minimal_unknown_obs)],
                  :Observation, field_slips: [f_s.id, fs2.id])
-    assert_query(Observation.index_order.for_field_slips([f_s.code, fs2.code]),
+    assert_query(Observation.index_order.field_slips([f_s.code, fs2.code]),
                  :Observation, field_slips: [f_s.code, fs2.code])
-    assert_query(Observation.index_order.for_field_slips([f_s.id, fs2.id]),
+    assert_query(Observation.index_order.field_slips([f_s.id, fs2.id]),
                  :Observation, field_slips: [f_s.id, fs2.id])
   end
 
@@ -151,7 +151,7 @@ class Query::ObservationsTest < UnitTestCase
     assert_query([observations(:detailed_unknown_obs),
                   observations(:minimal_unknown_obs)],
                  :Observation, herbarium_records: h_r.id)
-    assert_query(Observation.index_order.for_herbarium_records(h_r),
+    assert_query(Observation.index_order.herbarium_records(h_r),
                  :Observation, herbarium_records: h_r.id)
   end
 
@@ -159,35 +159,34 @@ class Query::ObservationsTest < UnitTestCase
     herb = herbaria(:fundis_herbarium)
     assert_query([observations(:detailed_unknown_obs)],
                  :Observation, herbaria: herb.name)
-    assert_query(Observation.index_order.in_herbaria(herb.name),
+    assert_query(Observation.index_order.herbaria(herb.name),
                  :Observation, herbaria: herb.name)
     herb = herbaria(:nybg_herbarium)
-    assert_query(Observation.index_order.in_herbaria(herb.name),
+    assert_query(Observation.index_order.herbaria(herb.name),
                  :Observation, herbaria: herb.id)
   end
 
-  def test_observation_on_projects_species_lists
+  def test_observation_on_project_lists
     projects = [projects(:bolete_project), projects(:eol_project)]
-    expects = Observation.index_order.on_projects_species_lists(projects)
+    expects = Observation.index_order.project_lists(projects)
     assert_query(expects, :Observation, project_lists: projects.map(&:title))
   end
 
-  def test_observation_at_locations
-    expects = Observation.index_order.
-              at_locations(locations(:burbank)).distinct
+  def test_observation_locations
+    expects = Observation.index_order.locations(locations(:burbank)).distinct
     assert_query(expects, :Observation, locations: locations(:burbank))
   end
 
-  def test_observation_for_projects
+  def test_observation_projects
     assert_query([],
                  :Observation, projects: projects(:empty_project))
     project = projects(:bolete_project)
     assert_query(project.observations, :Observation, projects: project)
-    assert_query(Observation.index_order.for_projects(project.title),
+    assert_query(Observation.index_order.projects(project.title),
                  :Observation, projects: project)
   end
 
-  def test_observation_for_project_projects_equivalence
+  def test_observation_projects_equivalence
     qu1 = Query.lookup_and_save(:Observation,
                                 projects: projects(:bolete_project))
     qu2 = Query.lookup_and_save(:Observation,
@@ -195,19 +194,19 @@ class Query::ObservationsTest < UnitTestCase
     assert_equal(qu1.results, qu2.results)
   end
 
-  def test_observation_on_species_lists
+  def test_observation_species_lists
     spl = species_lists(:unknown_species_list)
     # These two are identical, so should be disambiguated by reverse_id.
     assert_query([observations(:detailed_unknown_obs).id,
                   observations(:minimal_unknown_obs).id],
                  :Observation, species_lists: spl.id)
-    assert_query(Observation.index_order.on_species_lists(spl),
+    assert_query(Observation.index_order.species_lists(spl),
                  :Observation, species_lists: spl.id)
     # check the other param!
-    assert_query(Observation.index_order.on_species_lists(spl),
+    assert_query(Observation.index_order.species_lists(spl),
                  :Observation, species_lists: spl.id)
     spl2 = species_lists(:one_genus_three_species_list)
-    assert_query(Observation.index_order.on_species_lists([spl, spl2]).distinct,
+    assert_query(Observation.index_order.species_lists([spl, spl2]).distinct,
                  :Observation, species_lists: [spl.title, spl2.title])
   end
 
@@ -244,16 +243,19 @@ class Query::ObservationsTest < UnitTestCase
   def test_observation_of_children
     name = names(:agaricus)
     expects = Observation.index_order.
-              of_names(name, include_subtaxa: true).distinct
-    assert_query(expects, :Observation, names: [name.id], include_subtaxa: true)
+              names(lookup: name, include_subtaxa: true).distinct
+    assert_query(expects, :Observation, names: { lookup: [name.id],
+                                                 include_subtaxa: true })
   end
 
-  def test_observation_of_names_with_modifiers
+  def test_observation_names_with_modifiers
     User.current = rolf
-    expects = Observation.index_order.where(name: names(:fungi)).distinct
-    assert_query(expects, :Observation, names: [names(:fungi).id])
-    assert_query([],
-                 :Observation, names: [names(:macrolepiota_rachodes).id])
+    expects = Observation.index_order.names(lookup: names(:fungi)).distinct
+    assert_query(expects, :Observation, names: { lookup: [names(:fungi).id] })
+    assert_query(
+      [],
+      :Observation, names: { lookup: [names(:macrolepiota_rachodes).id] }
+    )
 
     # test all truthy/falsy combinations of these boolean parameters:
     #  include_synonyms, include_all_name_proposals, exclude_consensus
@@ -266,86 +268,95 @@ class Query::ObservationsTest < UnitTestCase
     observations(:agaricus_campestros_obs).update(user: mary)
 
     # observations where name(s) is consensus
-    assert_query([observations(:agaricus_campestris_obs).id],
-                 :Observation,
-                 names: [names(:agaricus_campestris).id],
-                 include_synonyms: false,
-                 include_all_name_proposals: false,
-                 exclude_consensus: false)
+    assert_query(
+      [observations(:agaricus_campestris_obs).id],
+      :Observation, names: { lookup: [names(:agaricus_campestris).id],
+                             include_synonyms: false,
+                             include_all_name_proposals: false,
+                             exclude_consensus: false }
+    )
 
     # name(s) is consensus, but is not the consensus (an oxymoron)
-    assert_query([],
-                 :Observation,
-                 names: [names(:agaricus_campestris).id],
-                 include_synonyms: false,
-                 include_all_name_proposals: false,
-                 exclude_consensus: true)
+    assert_query(
+      [],
+      :Observation, names: { lookup: [names(:agaricus_campestris).id],
+                             include_synonyms: false,
+                             include_all_name_proposals: false,
+                             exclude_consensus: true }
+    )
 
     # name(s) is proposed
-    assert_query([observations(:agaricus_campestris_obs).id,
-                  observations(:coprinus_comatus_obs).id],
-                 :Observation,
-                 names: [names(:agaricus_campestris).id],
-                 include_synonyms: false,
-                 include_all_name_proposals: true,
-                 exclude_consensus: false)
+    assert_query(
+      [observations(:agaricus_campestris_obs).id,
+       observations(:coprinus_comatus_obs).id],
+      :Observation, names: { lookup: [names(:agaricus_campestris).id],
+                             include_synonyms: false,
+                             include_all_name_proposals: true,
+                             exclude_consensus: false }
+    )
 
     # name(s) is proposed, but is not the consensus
-    assert_query([observations(:coprinus_comatus_obs).id],
-                 :Observation,
-                 names: [names(:agaricus_campestris).id],
-                 include_synonyms: false,
-                 include_all_name_proposals: true,
-                 exclude_consensus: true)
+    assert_query(
+      [observations(:coprinus_comatus_obs).id],
+      :Observation, names: { lookup: [names(:agaricus_campestris).id],
+                             include_synonyms: false,
+                             include_all_name_proposals: true,
+                             exclude_consensus: true }
+    )
 
     # consensus is a synonym of name(s)
-    assert_query([observations(:agaricus_campestros_obs).id,
-                  observations(:agaricus_campestras_obs).id,
-                  observations(:agaricus_campestrus_obs).id,
-                  observations(:agaricus_campestris_obs).id],
-                 :Observation,
-                 names: [names(:agaricus_campestris).id],
-                 include_synonyms: true,
-                 include_all_name_proposals: false,
-                 exclude_consensus: false)
+    assert_query(
+      [observations(:agaricus_campestros_obs).id,
+       observations(:agaricus_campestras_obs).id,
+       observations(:agaricus_campestrus_obs).id,
+       observations(:agaricus_campestris_obs).id],
+      :Observation, names: { lookup: [names(:agaricus_campestris).id],
+                             include_synonyms: true,
+                             include_all_name_proposals: false,
+                             exclude_consensus: false }
+    )
 
     # same as above but exclude_original_names
     # conensus is a synonym of name(s) other than name(s)
-    assert_query([observations(:agaricus_campestros_obs).id,
-                  observations(:agaricus_campestras_obs).id,
-                  observations(:agaricus_campestrus_obs).id],
-                 :Observation,
-                 names: [names(:agaricus_campestris).id],
-                 include_synonyms: true,
-                 exclude_original_names: true)
+    assert_query(
+      [observations(:agaricus_campestros_obs).id,
+       observations(:agaricus_campestras_obs).id,
+       observations(:agaricus_campestrus_obs).id],
+      :Observation, names: { lookup: [names(:agaricus_campestris).id],
+                             include_synonyms: true,
+                             exclude_original_names: true }
+    )
 
     # consensus is a synonym of name(s) but not a synonym of name(s) (oxymoron)
-    assert_query([],
-                 :Observation,
-                 names: [names(:agaricus_campestras).id],
-                 include_synonyms: true,
-                 include_all_name_proposals: false,
-                 exclude_consensus: true)
+    assert_query(
+      [],
+      :Observation, names: { lookup: [names(:agaricus_campestras).id],
+                             include_synonyms: true,
+                             include_all_name_proposals: false,
+                             exclude_consensus: true }
+    )
 
     # where synonyms of names are proposed
-    assert_query([observations(:agaricus_campestros_obs).id,
-                  observations(:agaricus_campestras_obs).id,
-                  observations(:agaricus_campestrus_obs).id,
-                  observations(:agaricus_campestris_obs).id,
-                  observations(:coprinus_comatus_obs).id],
-                 :Observation,
-                 names: [names(:agaricus_campestris).id],
-                 include_synonyms: true,
-                 include_all_name_proposals: true,
-                 exclude_consensus: false)
+    assert_query(
+      [observations(:agaricus_campestros_obs).id,
+       observations(:agaricus_campestras_obs).id,
+       observations(:agaricus_campestrus_obs).id,
+       observations(:agaricus_campestris_obs).id,
+       observations(:coprinus_comatus_obs).id],
+      :Observation, names: { lookup: [names(:agaricus_campestris).id],
+                             include_synonyms: true,
+                             include_all_name_proposals: true,
+                             exclude_consensus: false }
+    )
 
     # where synonyms of name are proposed, but are not the consensus
-    assert_query([observations(:coprinus_comatus_obs).id],
-                 :Observation,
-                 names: [names(:agaricus_campestras).id],
-                 include_synonyms: true,
-                 include_all_name_proposals: true,
-                 exclude_consensus: true)
+    assert_query(
+      [observations(:coprinus_comatus_obs).id],
+      :Observation, names: { lookup: [names(:agaricus_campestras).id],
+                             include_synonyms: true,
+                             include_all_name_proposals: true,
+                             exclude_consensus: true }
+    )
 
     spl = species_lists(:first_species_list)
     spl.observations << observations(:agaricus_campestrus_obs)
@@ -354,17 +365,19 @@ class Query::ObservationsTest < UnitTestCase
     proj.observations << observations(:agaricus_campestris_obs)
     proj.observations << observations(:agaricus_campestras_obs)
 
-    assert_query([observations(:agaricus_campestros_obs).id,
-                  observations(:agaricus_campestrus_obs).id],
-                 :Observation,
-                 names: agaricus_ssp.map(&:text_name),
-                 species_lists: [spl.title])
+    assert_query(
+      [observations(:agaricus_campestros_obs).id,
+       observations(:agaricus_campestrus_obs).id],
+      :Observation, names: { lookup: agaricus_ssp.map(&:text_name) },
+                    species_lists: [spl.title]
+    )
 
-    assert_query([observations(:agaricus_campestras_obs).id,
-                  observations(:agaricus_campestris_obs).id],
-                 :Observation,
-                 names: agaricus_ssp.map(&:text_name),
-                 projects: [proj.title])
+    assert_query(
+      [observations(:agaricus_campestras_obs).id,
+       observations(:agaricus_campestris_obs).id],
+      :Observation, names: { lookup: agaricus_ssp.map(&:text_name) },
+                    projects: [proj.title]
+    )
   end
 
   # notes search disabled because it may mention other species.

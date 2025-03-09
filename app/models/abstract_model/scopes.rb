@@ -18,13 +18,13 @@ module AbstractModel::Scopes
       joins(:rss_log).
         reorder(RssLog[:updated_at].desc, model.arel_table[:id].desc).distinct
     }
-    scope :order_by_set, lambda { |*set|
+    scope :order_by_set, lambda { |set|
       reorder(Arel::Nodes.build_quoted(set.join(",")) & arel_table[:id])
     }
 
     scope :id_in_set, lambda { |ids|
       set = limited_id_set(ids) # [] is valid
-      where(arel_table[:id].in(set)).order_by_set
+      where(arel_table[:id].in(set)).order_by_set(set)
     }
 
     scope :by_users, lambda { |users|
@@ -184,6 +184,13 @@ module AbstractModel::Scopes
       conditions = search_conditions_good(table_columns, search.goods)
       conditions += search_conditions_bad(table_columns, search.bads)
       send_where_chain(conditions).distinct
+    }
+
+    # Used in Name, Observation and Project so far.
+    scope :has_comments,
+          ->(bool = true) { joined_relation_condition(:comments, bool:) }
+    scope :comments_has, lambda { |phrase|
+      joins(:comments).merge(Comment.search_content(phrase)).distinct
     }
   end
 
@@ -377,6 +384,15 @@ module AbstractModel::Scopes
       end
     end
 
+    # AR cares if the relation (table) is plural or singular (has_one/many)
+    def joined_relation_condition(relation, bool: true)
+      if bool.to_s.to_boolean == true
+        joins(relation).distinct
+      else
+        where.not(id: joins(relation).distinct)
+      end
+    end
+
     def boolean_condition(table_column, val, bool: true)
       if bool.to_s.to_boolean == true
         where(table_column.eq(val))
@@ -385,11 +401,20 @@ module AbstractModel::Scopes
       end
     end
 
-    def coalesce_presence_condition(table_column, bool: true)
+    # Try not_blank_condition before uncommenting this
+    # def coalesce_presence_condition(table_column, bool: true)
+    #   if bool.to_s.to_boolean == true
+    #     where(table_column.coalesce("").length.gt(0))
+    #   else
+    #     where(table_column.coalesce("").length.eq(0))
+    #   end
+    # end
+
+    def not_blank_condition(table_column, bool: true)
       if bool.to_s.to_boolean == true
-        where(table_column.coalesce("").length.gt(0))
+        where(table_column.not_blank)
       else
-        where(table_column.coalesce("").length.eq(0))
+        where(table_column.blank)
       end
     end
   end

@@ -26,7 +26,7 @@ class Query::FiltersTest < UnitTestCase
     expects = Observation.has_images.index_order.uniq
     assert_query(expects, :Observation, has_images: "yes")
 
-    expects = Observation.has_no_images.index_order.uniq
+    expects = Observation.has_images(false).index_order.uniq
     assert_query(expects, :Observation, has_images: "no")
   end
 
@@ -34,21 +34,21 @@ class Query::FiltersTest < UnitTestCase
     expects = Observation.has_specimen.index_order.uniq
     assert_query(expects, :Observation, has_specimen: "yes")
 
-    expects = Observation.has_no_specimen.index_order.uniq
+    expects = Observation.has_specimen(false).index_order.uniq
     assert_query(expects, :Observation, has_specimen: "no")
   end
 
   def test_filtering_content_with_lichen
-    expects_obs = Observation.of_lichens.index_order.uniq
+    expects_obs = Observation.lichen(:yes).index_order.uniq
     assert_query(expects_obs, :Observation, lichen: "yes")
-    expects_names = Name.with_correct_spelling.of_lichens.index_order.uniq
+    expects_names = Name.with_correct_spelling.lichen(:yes).index_order.uniq
     assert_query(expects_names, :Name, lichen: "yes")
   end
 
   def test_filtering_content_with_non_lichen
-    expects_obs = Observation.not_lichens.index_order.uniq
+    expects_obs = Observation.lichen(:no).index_order.uniq
     assert_query(expects_obs, :Observation, lichen: "no")
-    expects_names = Name.with_correct_spelling.not_lichens.index_order.uniq
+    expects_names = Name.with_correct_spelling.lichen(:no).index_order.uniq
     assert_query(expects_names, :Name, lichen: "no")
   end
 

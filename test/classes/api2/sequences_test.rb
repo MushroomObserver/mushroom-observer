@@ -125,7 +125,7 @@ class API2::SequencesTest < UnitTestCase
 
   def test_getting_sequences_without_name
     ensure_all_obs_have_at_least_one_sequence
-    obses = Observation.has_no_name
+    obses = Observation.has_name(false)
     assert_not_empty(obses)
     assert_api_pass(params_get(name: "Fungi"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
@@ -155,7 +155,7 @@ class API2::SequencesTest < UnitTestCase
       Observation.where(text_name: "Agaricus"),
       "Tests won't work if there's already an Observation for genus Agaricus"
     )
-    ssp_obs = Observation.of_names_like("Agaricus")
+    ssp_obs = Observation.names_like("Agaricus")
     assert(ssp_obs.length > 1)
     agaricus = Name.where(text_name: "Agaricus").first # (an existing autonym)
     agaricus_obs = Observation.create(name: agaricus, user: rolf)
@@ -171,7 +171,7 @@ class API2::SequencesTest < UnitTestCase
 
   def test_getting_sequences_location
     ensure_all_obs_have_at_least_one_sequence
-    obses = Observation.at_locations(locations(:burbank))
+    obses = Observation.locations(locations(:burbank))
     assert(obses.length > 1)
     assert_api_pass(params_get(location: 'Burbank\, California\, USA'))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
@@ -238,7 +238,7 @@ class API2::SequencesTest < UnitTestCase
 
   def test_getting_sequences_is_collection_location
     ensure_all_obs_have_at_least_one_sequence
-    obses = Observation.not_collection_location
+    obses = Observation.is_collection_location(false)
     assert(obses.length > 1)
     assert_api_pass(params_get(is_collection_location: "no"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
@@ -247,7 +247,7 @@ class API2::SequencesTest < UnitTestCase
   def test_getting_sequences_has_images
     ensure_all_obs_have_at_least_one_sequence
     with    = Observation.has_images
-    without = Observation.has_no_images
+    without = Observation.has_images(false)
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params_get(has_images: "yes"))
@@ -272,7 +272,7 @@ class API2::SequencesTest < UnitTestCase
   def test_getting_sequences_has_specimen
     ensure_all_obs_have_at_least_one_sequence
     with    = Observation.has_specimen
-    without = Observation.has_no_specimen
+    without = Observation.has_specimen(false)
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params_get(has_specimen: "yes"))
@@ -284,7 +284,7 @@ class API2::SequencesTest < UnitTestCase
   def test_getting_sequences_has_obs_notes
     ensure_all_obs_have_at_least_one_sequence
     with = Observation.has_notes
-    without = Observation.has_no_notes
+    without = Observation.has_notes(false)
     assert(with.length > 1)
     assert(without.length > 1)
     assert_api_pass(params_get(has_obs_notes: "yes"))

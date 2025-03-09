@@ -1218,10 +1218,10 @@ class ObservationTest < UnitTestCase
     )
   end
 
-  def test_scope_of_names
-    assert_includes(Observation.of_names(names(:peltigera).id),
+  def test_scope_names
+    assert_includes(Observation.names(lookup: names(:peltigera).id),
                     observations(:peltigera_obs))
-    assert_not_includes(Observation.of_names(names(:fungi)),
+    assert_not_includes(Observation.names(lookup: names(:fungi)),
                         observations(:peltigera_obs))
   end
 
@@ -1255,8 +1255,8 @@ class ObservationTest < UnitTestCase
   def test_scope_of_name_of_look_alikes
     # Prove that Observations of look-alikes of <Name> include
     # Observations of other Names proposed for Observations of <Name>
-    # NOTE: `of_look_alikes` is (currently) asymmetric / noncommunative. I.e.,
-    # Observations of look-alikes of <Name> does NOT necessarily include
+    # NOTE: `exclude_consensus` is (currently) asymmetric / noncommunative.
+    # I.e., Observations of look-alikes of <Name> does NOT necessarily include
     # Observations of other Names suggested for Observations of <Name>
 
     # Ensure fixtures aren't broken before testing Observations of look-alikes
@@ -1271,7 +1271,8 @@ class ObservationTest < UnitTestCase
                  tremella_obs,
                  "Test needs different fixture")
     assert_includes(
-      Observation.of_names(names(:tremella_mesenterica), of_look_alikes: true),
+      Observation.names(lookup: names(:tremella_mesenterica),
+                        exclude_consensus: true),
       tremella_obs,
       "Observations of look-alikes of <Name> should include " \
       "Observations of other Names for which <Name> was proposed"
@@ -1327,7 +1328,7 @@ class ObservationTest < UnitTestCase
     assert_equal(top_undefined, results.first.where)
     assert_equal(
       results.count.first[1],
-      Observation.where(where: top_undefined).has_no_location.count
+      Observation.where(where: top_undefined).has_location(false).count
     )
   end
 
@@ -1524,10 +1525,10 @@ class ObservationTest < UnitTestCase
                         observations(:minimal_unknown_obs))
   end
 
-  def test_scope_has_no_sequences
-    assert_includes(Observation.has_no_sequences,
+  def test_scope_has_sequences_false
+    assert_includes(Observation.has_sequences(false),
                     observations(:minimal_unknown_obs))
-    assert_not_includes(Observation.has_no_sequences,
+    assert_not_includes(Observation.has_sequences(false),
                         observations(:genbanked_obs))
   end
 
@@ -1546,23 +1547,11 @@ class ObservationTest < UnitTestCase
     assert_empty(Observation.confidence(3.1, 3.2))
   end
 
-  def test_scope_has_no_comments
-    assert_includes(Observation.has_no_comments,
+  def test_scope_has_comments_false
+    assert_includes(Observation.has_comments(false),
                     observations(:unlisted_rolf_obs))
-    assert_not_includes(Observation.has_no_comments,
+    assert_not_includes(Observation.has_comments(false),
                         observations(:minimal_unknown_obs))
-  end
-
-  def test_scope_herbarium_record_notes_has
-    obss_with_hr_notes =
-      Observation.herbarium_record_notes_has("cleaned & dried at 115°")
-    assert_includes(obss_with_hr_notes,
-                    observations(:minimal_unknown_obs))
-    assert_includes(obss_with_hr_notes,
-                    observations(:detailed_unknown_obs))
-    assert_not_includes(obss_with_hr_notes,
-                        observations(:imageless_unvouchered_obs))
-    assert_empty(Observation.herbarium_record_notes_has("ARBITRARY_SHA"))
   end
 
   def test_source_credit

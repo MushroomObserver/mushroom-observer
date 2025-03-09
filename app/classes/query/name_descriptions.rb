@@ -15,12 +15,12 @@ class Query::NameDescriptions < Query::Base
       by_users: [User],
       by_author: User,
       by_editor: User,
-      names: [Name],
-      public: :boolean,
-      type: [{ string: Description::ALL_SOURCE_TYPES }],
-      projects: [Project],
-      content_has: :string,
+      is_public: :boolean,
+      types: [{ string: Description::ALL_SOURCE_TYPES }],
       ok_for_export: :boolean,
+      content_has: :string,
+      names: [Name],
+      projects: [Project],
       name_query: { subquery: :Name }
     )
   end

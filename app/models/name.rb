@@ -154,12 +154,8 @@
 #  updated_after("yyyymmdd")
 #  updated_before("yyyymmdd")
 #  updated_between(start, end)
-#  of_lichens
-#  not_lichens
 #  deprecated
-#  not_deprecated
 #  has_description
-#  has_no_description
 #  description_has
 #  has_description_in_project(project)
 #  has_description_created_by(user)
@@ -169,7 +165,6 @@
 #  with_incorrect_spelling
 #  with_self_referential_misspelling
 #  has_synonyms
-#  has_no_synonyms
 #  ok_for_export
 #  rank(ranks)
 #  with_rank(rank)
@@ -180,26 +175,21 @@
 #  subtaxa_of_genus_or_below(genus)
 #  subtaxa_of(name)
 #  include_synonyms_of(name)
-#  include_subtaxa_of(name)
+#  in_clade(name)
 #  text_name_has(text_name)
 #  search_name_has(phrase)
 #  has_classification
-#  has_no_classification
 #  classification_has(classification)
 #  has_author
-#  has_no_author
 #  author_has(author)
 #  has_citation
-#  has_no_citation
 #  citation_has(citation)
 #  has_notes
-#  has_no_notes
 #  notes_has(notes)
 #  has_comments
-#  has_no_comments
 #  comments_has(summary)
-#  on_species_lists(species_list)
-#  at_location(location)
+#  species_lists(species_list)
+#  locations(location)
 #  in_box(north:, south:, east:, west:)
 #
 #  ==== Classification
