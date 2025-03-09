@@ -175,7 +175,7 @@
 #  subtaxa_of_genus_or_below(genus)
 #  subtaxa_of(name)
 #  include_synonyms_of(name)
-#  in_clade(name)
+#  clade(name)
 #  text_name_has(text_name)
 #  search_name_has(phrase)
 #  has_classification

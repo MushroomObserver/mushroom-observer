@@ -47,7 +47,7 @@
 #  updated_before("yyyymmdd")
 #  updated_between(start, end)
 #  name_has(place_name)
-#  in_region(place_name)
+#  region(place_name)
 #  in_box(north:, south:, east:, west:)
 #
 #  == Instance methods

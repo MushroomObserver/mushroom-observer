@@ -48,13 +48,13 @@ module Observations
     def clade(term)
       # return unless (clade = Name.find_by(text_name: term))
 
-      query = create_query(:Observation, needs_naming: true, in_clade: term,
+      query = create_query(:Observation, needs_naming: true, clade: term,
                                          by: :rss_log)
       [query, {}]
     end
 
     def region(term)
-      query = create_query(:Observation, needs_naming: true, in_region: term,
+      query = create_query(:Observation, needs_naming: true, region: term,
                                          by: :rss_log)
       [query, {}]
     end
