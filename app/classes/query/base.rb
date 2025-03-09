@@ -55,6 +55,14 @@ class Query::Base
     parameter_declarations.select { |key, _v| key.to_s.include?("_query") }
   end
 
+  def scope_parameters
+    self.class.scope_parameters
+  end
+
+  def self.scope_parameters
+    parameter_declarations.keys.except(*subquery_parameters)
+  end
+
   def initialize_flavor
     # These strings can never come direct from user, so no need to sanitize.
     # (I believe they are only used by the site stats page. -JPH 20190708)

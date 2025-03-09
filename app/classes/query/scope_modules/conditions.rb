@@ -3,8 +3,8 @@
 # Helper methods for turning Query parameters into AR conditions.
 module Query::ScopeModules::Conditions
   # Just because these three are used over and over again.
-  def initialize_parameter_set(param_array)
-    param_array.each do |param|
+  def initialize_parameter_set
+    scope_parameters.each do |param|
       next if (param == :ids_in_set && params[param].nil?) ||
               (param != :ids_in_set && params[param].blank?)
 
