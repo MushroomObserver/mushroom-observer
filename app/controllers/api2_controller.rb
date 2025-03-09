@@ -127,10 +127,10 @@ class API2Controller < ApplicationController
 
   def is_request_body_an_upload?
     request.content_length.positive? &&
-     request.media_type.present? &&
-     request.media_type != "application/x-www-form-urlencoded" &&
-     request.media_type != "multipart/form-data" &&
-     request.body.present?
+      request.media_type.present? &&
+      request.media_type != "application/x-www-form-urlencoded" &&
+      request.media_type != "multipart/form-data" &&
+      request.body.present?
   end
 
   def upload_from_request_body
