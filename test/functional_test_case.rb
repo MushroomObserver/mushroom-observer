@@ -20,27 +20,27 @@ class FunctionalTestCase < ActionController::TestCase # rubocop:disable Rails/Ac
   include CheckForUnsafeHtml
 
   def get(action, **args)
-    super(action, **args)
+    super
     check_for_unsafe_html!
   end
 
   def post(action, **args)
-    super(action, **args)
+    super
     check_for_unsafe_html!
   end
 
   def put(action, **args)
-    super(action, **args)
+    super
     check_for_unsafe_html!
   end
 
   def patch(action, **args)
-    super(action, **args)
+    super
     check_for_unsafe_html!
   end
 
   def delete(action, **args)
-    super(action, **args)
+    super
     check_for_unsafe_html!
   end
 end

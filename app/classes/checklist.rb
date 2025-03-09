@@ -213,7 +213,7 @@ class Checklist
     calc_checklist unless @taxa
     @counts = @observations.
               joins(:name).
-              group('names.text_name').
+              group("names.text_name").
               count
   end
 

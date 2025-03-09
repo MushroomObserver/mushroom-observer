@@ -973,7 +973,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def reload(*args)
     @vote_hash = nil
-    super(*args)
+    super
   end
 
   ##############################################################################

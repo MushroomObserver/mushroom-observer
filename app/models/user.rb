@@ -671,7 +671,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   #
   def interest_in(object)
     @interests ||= {}
-    @interests["#{object.class.name} #{object.id}"] ||= \
+    @interests["#{object.class.name} #{object.id}"] ||=
       begin
         i = Interest.where(
           user_id: id, target_type: object.class.name, target_id: object.id

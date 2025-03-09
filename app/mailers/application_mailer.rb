@@ -64,7 +64,7 @@ class ApplicationMailer < ActionMailer::Base
   end
 
   def debug_log(template, from, to, objects = {})
-    msg = + "MAIL #{template}" # create mutable string
+    msg =  "MAIL #{template}" # create mutable string
     msg << " from=#{from.id}" if from
     msg << " to=#{to.id}" if to
     objects.each do |k, v|

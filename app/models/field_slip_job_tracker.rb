@@ -11,7 +11,7 @@ class FieldSlipJobTracker < AbstractModel
 
   def self.create(*args)
     args[0][:status] = "Starting"
-    super(*args)
+    super
   end
 
   def last

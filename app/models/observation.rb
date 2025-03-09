@@ -428,7 +428,6 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       self.when = val if Date.parse(val)
     rescue ArgumentError
     end
-    val
   end
 
   def lat=(val)

@@ -6,20 +6,6 @@
 # Note that changes in the inspected code, or installation of new
 # versions of RuboCop, may require this file to be generated again.
 
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-Layout/EmptyLineAfterMagicComment:
-  Exclude:
-    - 'config/initializers/permissions_policy.rb'
-
-# Offense count: 10
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: Max, AllowHeredoc, AllowURI, URISchemes, IgnoreCopDirectives, AllowedPatterns, SplitStrings.
-# URISchemes: http, https
-Layout/LineLength:
-  Exclude:
-    - 'lib/core_extensions/action_view/log_subscriber.rb'
-
 # Offense count: 2
 # Configuration parameters: DebuggerMethods, DebuggerRequires.
 Lint/Debugger:
@@ -57,23 +43,9 @@ Lint/NonLocalExitFromIterator:
     - 'test/general_extensions.rb'
 
 # Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-Lint/RedundantCopDisableDirective:
-  Exclude:
-    - 'app/helpers/matrix_box_helper.rb'
-
-# Offense count: 1
 Lint/RescueException:
   Exclude:
     - 'script/make_eol_xml'
-
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: AllowedMethods.
-# AllowedMethods: present?, blank?, presence, try, try!
-Lint/SafeNavigationConsistency:
-  Exclude:
-    - 'app/models/field_slip.rb'
 
 # Offense count: 3
 # Configuration parameters: AllowComments, AllowNil.
@@ -82,24 +54,6 @@ Lint/SuppressedException:
     - 'app/models/observation.rb'
     - 'script/make_eol_xml'
     - 'test/controllers/species_lists_controller_test.rb'
-
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: AutoCorrect.
-Lint/UselessAssignment:
-  Exclude:
-    - 'app/helpers/link_helper.rb'
-
-# Offense count: 8
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: AutoCorrect, CheckForMethodsWithNoSideEffects.
-Lint/Void:
-  Exclude:
-    - 'app/classes/mo_paginator.rb'
-    - 'app/classes/query/modules/high_level_queries.rb'
-    - 'app/classes/query/modules/nested_queries.rb'
-    - 'app/classes/query/modules/sequence_operators.rb'
-    - 'app/models/observation.rb'
 
 # Offense count: 340
 # Configuration parameters: AllowedMethods, AllowedPatterns, CountRepeatedAttributes, Max.
@@ -591,14 +545,6 @@ Rails/Blank:
   Exclude:
     - 'app/models/image.rb'
 
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: slashes, arguments
-Rails/FilePath:
-  Exclude:
-    - 'app/models/language_exporter.rb'
-
 # Offense count: 24
 # This cop supports unsafe autocorrection (--autocorrect-all).
 # Configuration parameters: AllowedMethods, AllowedPatterns.
@@ -633,14 +579,6 @@ Rails/HasManyOrHasOneDependent:
 Rails/HelperInstanceVariable:
   Exclude:
     - 'app/helpers/application_helper.rb'
-
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: numeric, symbolic
-Rails/HttpStatus:
-  Exclude:
-    - 'test/controllers/images_controller_test.rb'
 
 # Offense count: 2
 # This cop supports unsafe autocorrection (--autocorrect-all).
@@ -766,18 +704,6 @@ Style/HashEachMethods:
     - 'app/classes/eol_data.rb'
     - 'script/slowest_pages'
 
-# Offense count: 4
-# This cop supports safe autocorrection (--autocorrect).
-Style/IfUnlessModifier:
-  Exclude:
-    - 'lib/core_extensions/action_view/log_subscriber.rb'
-
-# Offense count: 13
-# This cop supports safe autocorrection (--autocorrect).
-Style/KeywordArgumentsMerging:
-  Exclude:
-    - 'test/classes/box_test.rb'
-
 # Offense count: 11
 # This cop supports unsafe autocorrection (--autocorrect-all).
 Style/MapIntoArray:
@@ -792,26 +718,11 @@ Style/MapIntoArray:
     - 'app/models/vote.rb'
     - 'test/general_extensions.rb'
 
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: AllowedMethods, AllowedPatterns.
-Style/MethodCallWithoutArgsParentheses:
-  Exclude:
-    - 'lib/tasks/email.rake'
-
 # Offense count: 2
 Style/MissingRespondToMissing:
   Exclude:
     - 'script/update_googlebots.rb'
     - 'script/update_ip_stats.rb'
-
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: EnforcedStyle, MinBodyLength.
-# SupportedStyles: skip_modifier_ifs, always
-Style/Next:
-  Exclude:
-    - 'lib/tasks/email.rake'
 
 # Offense count: 48
 # Configuration parameters: AllowedMethods.
@@ -838,37 +749,6 @@ Style/OptionalBooleanParameter:
     - 'test/controllers/donations_controller_test_helpers.rb'
     - 'test/session_extensions.rb'
     - 'test/session_form_extensions.rb'
-
-# Offense count: 4
-# This cop supports safe autocorrection (--autocorrect).
-Style/RedundantInterpolationUnfreeze:
-  Exclude:
-    - 'app/mailers/application_mailer.rb'
-    - 'lib/core_extensions/action_view/log_subscriber.rb'
-
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-Style/RedundantLineContinuation:
-  Exclude:
-    - 'app/models/user.rb'
-
-# Offense count: 9
-# This cop supports safe autocorrection (--autocorrect).
-Style/RedundantParentheses:
-  Exclude:
-    - 'app/classes/query/modules/joining.rb'
-    - 'app/controllers/api2_controller.rb'
-    - 'app/controllers/application_controller.rb'
-    - 'app/controllers/concerns/descriptions/permissions.rb'
-    - 'app/helpers/title_and_tabset_helper.rb'
-    - 'app/models/name.rb'
-    - 'test/controller_extensions.rb'
-
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-Style/RescueModifier:
-  Exclude:
-    - 'app/helpers/api_keys_helper.rb'
 
 # Offense count: 7
 # This cop supports unsafe autocorrection (--autocorrect-all).
@@ -921,27 +801,3 @@ Style/StringConcatenation:
     - 'config/unicorn_dev.rb'
     - 'lib/tasks/lang.rake'
     - 'script/refresh_name_lister_cache'
-
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: EnforcedStyle, ConsistentQuotesInMultiline.
-# SupportedStyles: single_quotes, double_quotes
-Style/StringLiterals:
-  Exclude:
-    - 'app/classes/checklist.rb'
-
-# Offense count: 15
-# This cop supports safe autocorrection (--autocorrect).
-Style/SuperArguments:
-  Exclude:
-    - 'app/classes/api2/error/create_failed.rb'
-    - 'app/classes/api2/error/field_slip_in_use.rb'
-    - 'app/classes/report/base_table.rb'
-    - 'app/classes/report/darwin/images.rb'
-    - 'app/classes/report/darwin/observations.rb'
-    - 'app/classes/report/darwin/taxa.rb'
-    - 'app/classes/report/dwca.rb'
-    - 'app/classes/report/zip_report.rb'
-    - 'app/models/field_slip_job_tracker.rb'
-    - 'app/models/image.rb'
-    - 'test/functional_test_case.rb'
