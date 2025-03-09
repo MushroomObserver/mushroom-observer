@@ -1,10 +1,9 @@
 # frozen_string_literal: true
 
 # base class for Query's which return Names
-class Query::Names < Query::Base
+class Query::Names < Query::Base # rubocop:disable Metrics/ClassLength
   include Query::Params::AdvancedSearch
   include Query::Params::Filters
-  include Query::Initializers::Names
   include Query::Initializers::AdvancedSearch
   include Query::Initializers::Filters
   include Query::Titles::Observations
@@ -88,6 +87,17 @@ class Query::Names < Query::Base
     ids = lookup_names_by_name(params.dig(:names, :lookup),
                                related_names_parameters)
     add_association_condition("names.id", ids)
+  end
+
+  NAMES_EXPANDER_PARAMS = [
+    :include_synonyms, :include_subtaxa, :include_immediate_subtaxa,
+    :exclude_original_names
+  ].freeze
+
+  def related_names_parameters
+    return {} unless params[:names]
+
+    params[:names].dup.slice(*NAMES_EXPANDER_PARAMS).compact
   end
 
   def initialize_name_column_search_parameters

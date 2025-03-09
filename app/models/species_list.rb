@@ -81,7 +81,7 @@
 #
 ################################################################################
 #
-class SpeciesList < AbstractModel
+class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
   belongs_to :location
   belongs_to :rss_log
   belongs_to :user
@@ -99,7 +99,34 @@ class SpeciesList < AbstractModel
 
   attr_accessor :data
 
-  scope :index_order, -> { order(title: :asc, id: :desc) }
+  scope :index_order,
+        -> { order(title: :asc, id: :desc) }
+
+  scope :title_has,
+        ->(phrase) { search_columns(SpeciesList[:title], phrase) }
+  scope :has_notes,
+        ->(bool = true) { not_blank_condition(SpeciesList[:notes], bool:) }
+  scope :notes_has,
+        ->(phrase) { search_columns(SpeciesList[:notes], phrase) }
+  scope :search_where,
+        ->(phrase) { search_columns(SpeciesList[:where], phrase) }
+
+  scope :locations, lambda { |loc|
+    ids = lookup_locations_by_name(loc)
+    where(location_id: ids).distinct
+  }
+  scope :projects, lambda { |projects|
+    ids = lookup_projects_by_name(projects)
+    joins(:project_species_lists).
+      where(project_species_lists: { project_id: ids }).distinct
+  }
+
+  scope :pattern, lambda { |phrase|
+    cols = SpeciesList[:title] + SpeciesList[:notes].coalesce("") +
+           Location[:id].when(present?).then(Location[:name]).
+           else(SpeciesList[:where])
+    left_outer_joins(:location).search_columns(cols, phrase)
+  }
 
   scope :show_includes, lambda {
     strict_loading.includes(

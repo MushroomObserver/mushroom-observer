@@ -34,27 +34,11 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       date(early, late)
     }
 
-    scope :is_collection_location, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
-        where(is_collection_location: true)
-      else
-        not_collection_location
-      end
-    }
-    scope :not_collection_location,
-          -> { where(is_collection_location: false) }
-
     scope :has_images, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
-        where.not(thumb_image: nil)
-      else
-        has_no_images
-      end
+      presence_condition(Observation[:thumb_image_id], bool:)
     }
-    scope :has_no_images,
-          -> { where(thumb_image: nil) }
 
-    # NOTE: Why does `Observation.no_notes` evaluate to '--- {}\n' ?
+    # NOTE: `Observation.no_notes` evaluates to '--- {}\n' because it's to_yaml.
     # This is unlike other models with notes. This scope could be simpler:
     #       ->(bool = true) { not_blank_condition(Observation[:notes], bool:) }
     scope :has_notes, lambda { |bool = true|
@@ -124,16 +108,6 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       end
     }
 
-    scope :has_name, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
-        where.not(name: Name.unknown)
-      else
-        has_no_name
-      end
-    }
-    scope :has_no_name,
-          -> { where(name: Name.unknown) }
-
     # Filters for confidence on vote_cache scale -3.0..3.0
     # To translate percentage to vote_cache: (val.to_f / (100 / 3))
     scope :confidence, lambda { |min, max = nil|
@@ -201,22 +175,34 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     #   ).without_vote_by_user(user).not_reviewed_by_user(user).distinct
     # }
 
+    scope :has_name, lambda { |bool = true|
+      if bool.to_s.to_boolean == true
+        where.not(name: Name.unknown)
+      else
+        where(name: Name.unknown)
+      end
+    }
     # Accepts either a Name instance, a string, or an id as the first argument.
     #  Other args:
     #  - include_synonyms: boolean
     #  - include_subtaxa: boolean
+    #  - include_immediate_subtaxa: boolean
+    #  - exclude_original_names: boolean
     #  - include_all_name_proposals: boolean
-    #  - of_look_alikes: boolean
+    #  - exclude_consensus: boolean
     #
     scope :names, lambda { |lookup:, **args|
       # First, lookup names, plus synonyms and subtaxa if requested
-      lookup_args = args.slice(:include_synonyms, :include_subtaxa)
+      lookup_args = args.slice(:include_synonyms,
+                               :include_subtaxa,
+                               :include_immediate_subtaxa,
+                               :exclude_original_names)
       name_ids = Lookup::Names.new(lookup, **lookup_args).ids
 
       # Query, with possible join to Naming. Mutually exclusive options:
       if args[:include_all_name_proposals]
         joins(:namings).where(namings: { name_id: name_ids })
-      elsif args[:of_look_alikes]
+      elsif args[:exclude_consensus]
         joins(:namings).where(namings: { name_id: name_ids }).
           where.not(name: name_ids)
       else
@@ -246,47 +232,31 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       includes(:location, :projects, :species_lists).
         where(user_id: user.id).reorder(:created_at)
     }
-    scope :mappable,
-          -> { where.not(location: nil).or(where.not(lat: nil)) }
-    scope :unmappable,
-          -> { where(location: nil).and(where(lat: nil)) }
-    scope :has_location, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
-        where.not(location: nil)
-      else
-        has_no_location
-      end
-    }
-    scope :has_no_location,
-          -> { where(location: nil) }
-    scope :has_geolocation, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
-        where.not(lat: nil)
-      else
-        has_no_geolocation
-      end
-    }
-    scope :has_no_geolocation,
-          -> { where(lat: nil) }
+
+    scope :is_collection_location,
+          ->(bool = true) { where(is_collection_location: bool) }
     scope :has_public_lat_lng, lambda { |bool = true|
       if bool.to_s.to_boolean == true
         where(gps_hidden: false).where.not(lat: nil)
       else
-        has_no_public_lat_lng
+        where(gps_hidden: true).or(where(lat: nil))
       end
     }
-    scope :has_no_public_lat_lng,
-          -> { where(gps_hidden: true).or(where(lat: nil)) }
 
+    scope :has_location, lambda { |bool = true|
+      presence_condition(Observation[:location_id], bool:)
+    }
     scope :location_undefined, lambda {
-      has_no_location.where.not(where: nil).group(:where).
+      has_location(false).where.not(where: nil).group(:where).
         order(Observation[:where].count.desc, Observation[:id].desc)
     }
+    scope :mappable,
+          -> { where.not(location: nil).or(where.not(lat: nil)) }
+    scope :unmappable,
+          -> { where(location: nil).and(where(lat: nil)) }
+    scope :has_geolocation,
+          ->(bool = true) { presence_condition(Observation[:lat], bool:) }
 
-    scope :at_locations, lambda { |locations|
-      location_ids = Lookup::Locations.new(locations).ids
-      where(location: location_ids).distinct
-    }
     scope :in_regions, lambda { |place_names|
       place_names = [place_names].flatten
       if place_names.length > 1
@@ -307,6 +277,10 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       else
         where(Observation[:where].matches("%#{region}"))
       end
+    }
+    scope :locations, lambda { |locations|
+      location_ids = lookup_locations_by_name(locations)
+      where(location: location_ids).distinct
     }
     # Pass Box kwargs (:north, :south, :east, :west), any order.
     # By default this scope selects only obs either with lat/lng or with useful
@@ -454,73 +428,43 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       joins(:location).where(Location[:box_area].gt(args[:area])).distinct
     }
 
-    scope :has_comments, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
-        joins(:comments).distinct
-      else
-        where.not(id: Observation.has_comments)
-      end
-    }
-    scope :comments_has, lambda { |phrase|
-      joins(:comments).merge(Comment.search_content(phrase)).distinct
-    }
+    scope :has_specimen,
+          ->(bool = true) { where(specimen: bool) }
 
-    scope :has_specimen, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
-        where(specimen: true)
-      else
-        has_no_specimen
-      end
-    }
-    scope :has_no_specimen,
-          -> { where(specimen: false) }
-
-    scope :has_sequences, lambda { |bool = true|
-      if bool.to_s.to_boolean == true
-        joins(:sequences).distinct
-      else
-        has_no_sequences
-      end
-    }
-    # much faster than `missing(:sequences)` which uses left outer join.
-    scope :has_no_sequences,
-          -> { where.not(id: has_sequences) }
+    scope :has_sequences,
+          ->(bool = true) { joined_relation_condition(:sequences, bool:) }
 
     # For activerecord subqueries, no need to pre-map the primary key (id)
     # but Lookup has to return something. Ids are cheapest.
-    scope :for_projects, lambda { |projects|
-      project_ids = Lookup::Projects.new(projects).ids
-      joins(:project_observations).
-        where(project_observations: { project: project_ids }).distinct
-    }
-    scope :on_species_lists, lambda { |species_lists|
-      spl_ids = Lookup::SpeciesLists.new(species_lists).ids
-      joins(:species_list_observations).
-        where(species_list_observations: { species_list: spl_ids }).distinct
-    }
-    scope :on_projects_species_lists, lambda { |projects|
-      project_ids = Lookup::Projects.new(projects).ids
-      joins(species_lists: :project_species_lists).
-        where(project_species_lists: { project: project_ids }).distinct
-    }
-    scope :for_field_slips, lambda { |codes|
+    scope :field_slips, lambda { |codes|
       fs_ids = Lookup::FieldSlips.new(codes).ids
       joins(:field_slips).where(field_slips: { id: fs_ids }).distinct
     }
-    scope :for_herbarium_records, lambda { |records|
+    scope :herbaria, lambda { |herbaria|
+      h_ids = Lookup::Herbaria.new(herbaria).ids
+      joins(observation_herbarium_records: :herbarium_record).
+        where(herbarium_records: { herbarium: h_ids }).distinct
+    }
+    scope :herbarium_records, lambda { |records|
       hr_ids = Lookup::HerbariumRecords.new(records).ids
       joins(:observation_herbarium_records).
         where(observation_herbarium_records: { herbarium_record: hr_ids }).
         distinct
     }
-    scope :in_herbaria, lambda { |herbaria|
-      h_ids = Lookup::Herbaria.new(herbaria).ids
-      joins(observation_herbarium_records: :herbarium_record).
-        where(herbarium_records: { herbarium: h_ids }).distinct
+    scope :projects, lambda { |projects|
+      project_ids = Lookup::Projects.new(projects).ids
+      joins(:project_observations).
+        where(project_observations: { project: project_ids }).distinct
     }
-    scope :herbarium_record_notes_has, lambda { |phrase|
-      joins(:herbarium_records).
-        search_columns(HerbariumRecord[:notes], phrase).distinct
+    scope :project_lists, lambda { |projects|
+      project_ids = Lookup::Projects.new(projects).ids
+      joins(species_lists: :project_species_lists).
+        where(project_species_lists: { project: project_ids }).distinct
+    }
+    scope :species_lists, lambda { |species_lists|
+      spl_ids = Lookup::SpeciesLists.new(species_lists).ids
+      joins(:species_list_observations).
+        where(species_list_observations: { species_list: spl_ids }).distinct
     }
 
     scope :show_includes, lambda {

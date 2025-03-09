@@ -37,12 +37,15 @@ module PatternSearch
 
     def put_names_and_modifiers_in_hash
       modifiers = [:include_subtaxa, :include_synonyms,
-                   :include_immediate_subtaxa, :exclude_original_names]
+                   :include_immediate_subtaxa, :exclude_original_names,
+                   :include_all_name_proposals, :exclude_consensus]
       lookup, include_subtaxa, include_synonyms,
-      include_immediate_subtaxa, exclude_original_names =
+      include_immediate_subtaxa, exclude_original_names,
+      include_all_name_proposals, exclude_consensus =
         args.values_at(:names, *modifiers)
       names = { lookup:, include_subtaxa:, include_synonyms:,
-                include_immediate_subtaxa:, exclude_original_names: }
+                include_immediate_subtaxa:, exclude_original_names:,
+                include_all_name_proposals:, exclude_consensus: }
       return if names.compact.blank?
 
       args[:names] = names.compact

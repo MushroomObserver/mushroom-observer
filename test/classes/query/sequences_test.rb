@@ -12,34 +12,78 @@ class Query::SequencesTest < UnitTestCase
     assert_query(expects, :Sequence)
   end
 
+  def test_sequence_id_in_set
+    ids = [sequences(:fasta_formatted_sequence).id,
+           sequences(:bare_formatted_sequence).id]
+    scope = Sequence.id_in_set(ids).index_order
+    assert_query_scope(ids, scope, :Sequence, id_in_set: ids)
+  end
+
+  def test_sequence_locus
+    ids = [sequences(:fasta_formatted_sequence)]
+    scope = Sequence.locus("ITS1F").index_order
+    assert_query_scope(ids, scope, :Sequence, locus: "ITS1F")
+  end
+
+  def sequences_with_its_locus
+    [
+      sequences(:bare_with_numbers_sequence),
+      sequences(:bare_formatted_sequence),
+      sequences(:fasta_formatted_sequence)
+    ]
+  end
+
   def test_sequence_locus_has
-    assert_query(Sequence.where(Sequence[:locus].matches("ITS%")).
-                 index_order.distinct,
-                 :Sequence, locus_has: "ITS")
+    ids = sequences_with_its_locus.map(&:id)
+    scope = Sequence.locus_has("ITS").index_order
+    assert_query_scope(ids, scope, :Sequence, locus_has: "ITS")
   end
 
   def test_sequence_archive
-    assert_query([sequences(:alternate_archive)],
-                 :Sequence, archive: "UNITE")
+    ids = [sequences(:alternate_archive)]
+    scope = Sequence.archive("UNITE").index_order
+    assert_query_scope(ids, scope, :Sequence, archive: "UNITE")
+  end
+
+  def test_sequence_accession
+    ids = [sequences(:deposited_sequence)]
+    scope = Sequence.accession("KT968605").index_order
+    assert_query_scope(ids, scope, :Sequence, accession: "KT968605")
   end
 
   def test_sequence_accession_has
-    assert_query([sequences(:deposited_sequence)],
-                 :Sequence, accession_has: "968605")
+    ids = [sequences(:deposited_sequence)]
+    scope = Sequence.accession_has("968605").index_order
+    assert_query_scope(ids, scope, :Sequence, accession_has: "968605")
   end
 
   def test_sequence_notes_has
-    assert_query([sequences(:deposited_sequence)],
-                 :Sequence, notes_has: "deposited_sequence")
+    ids = [sequences(:deposited_sequence)]
+    scope = Sequence.notes_has("deposited_sequence").index_order
+    assert_query_scope(ids, scope, :Sequence, notes_has: "deposited_sequence")
   end
 
   def test_sequence_for_observations
     obs = observations(:locally_sequenced_obs)
-    assert_query([sequences(:local_sequence)],
-                 :Sequence, observations: [obs.id])
+    ids = [sequences(:local_sequence)]
+    scope = Sequence.observations(obs).index_order
+    assert_query_scope(ids, scope, :Sequence, observations: [obs.id])
   end
 
-  def test_sequence_filters
+  def test_sequence_pattern_search
+    assert_query([], :Sequence, pattern: "nonexistent")
+
+    ids = sequences_with_its_locus.map(&:id)
+    scope = Sequence.pattern("ITS").index_order
+    assert_query_scope(ids, scope, :Sequence, pattern: "ITS")
+
+    assert_query([sequences(:alternate_archive)],
+                 :Sequence, pattern: "UNITE")
+    assert_query([sequences(:deposited_sequence)],
+                 :Sequence, pattern: "deposited_sequence")
+  end
+
+  def test_sequence_observation_query
     sequences = Sequence.reorder(id: :asc).all
     seq1 = sequences[0]
     seq2 = sequences[1]
@@ -90,22 +134,5 @@ class Query::SequencesTest < UnitTestCase
     assert_not(query.uses_join_sub({}, :location))
     assert(query.uses_join_sub({ test: :location }, :location))
     assert(query.uses_join_sub(:location, :location))
-  end
-
-  def test_sequence_in_set
-    list_set_ids = [sequences(:fasta_formatted_sequence).id,
-                    sequences(:bare_formatted_sequence).id]
-    assert_query(list_set_ids, :Sequence, id_in_set: list_set_ids)
-  end
-
-  def test_sequence_pattern_search
-    assert_query([], :Sequence, pattern: "nonexistent")
-    assert_query(Sequence.where(Sequence[:locus].matches("ITS%")).
-                 index_order.distinct,
-                 :Sequence, pattern: "ITS")
-    assert_query([sequences(:alternate_archive)],
-                 :Sequence, pattern: "UNITE")
-    assert_query([sequences(:deposited_sequence)],
-                 :Sequence, pattern: "deposited_sequence")
   end
 end

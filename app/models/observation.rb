@@ -94,31 +94,26 @@
 #  names(name)
 #  names_like(string)
 #  has_name
-#  has_no_name
 #  by_user(user)
 #  has_location
-#  has_no_location
-#  at_locations(location)
+#  locations(location)
 #  in_region(where)
 #  in_box(north:, south:, east:, west:) geoloc is in the box
 #  not_in_box(north:, south:, east:, west:) geoloc is outside the box
 #  is_collection_location
-#  not_collection_location
 #  has_images
 #  has_notes
 #  has_notes_field(field)
 #  notes_has(note)
 #  has_specimen
 #  has_sequences
-#  has_no_sequences
 #  confidence (min %, max %)
 #  has_comments
 #  comments_has(summary)
-#  for_projects(project)
-#  in_herbaria(herbaria)
-#  herbarium_record_notes_has(notes)
-#  on_species_lists(species_list)
-#  on_projects_species_lists(project)
+#  projects(project)
+#  herbaria(herbaria)
+#  species_lists(species_list)
+#  project_lists(project)
 #
 #  == Instance methods
 #
