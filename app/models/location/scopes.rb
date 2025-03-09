@@ -12,18 +12,18 @@ module Location::Scopes
     scope :index_order,
           -> { order(name: :asc, id: :desc) }
 
-    scope :in_regions, lambda { |place_names|
+    scope :regions, lambda { |place_names|
       place_names = [place_names].flatten
       if place_names.length > 1
-        starting = in_region(place_names.shift)
+        starting = region(place_names.shift)
         place_names.reduce(starting) do |result, place_name|
-          result.or(Location.in_region(place_name))
+          result.or(Location.region(place_name))
         end
       else
-        in_region(place_names.first)
+        region(place_names.first)
       end
     }
-    scope :in_region, lambda { |place_name|
+    scope :region, lambda { |place_name|
       region = Location.reverse_name_if_necessary(place_name)
 
       if understood_continent?(region)

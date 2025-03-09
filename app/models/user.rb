@@ -1256,7 +1256,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   # i.e. the end of a location name string
   def check_content_filter_region
     return if content_filter[:region].blank?
-    return if Location.in_region(content_filter[:region]).any?
+    return if Location.region(content_filter[:region]).any?
 
     # If we're here, there are no MO locations in that region.
     errors.add(:region, :advanced_search_filter_region.t)

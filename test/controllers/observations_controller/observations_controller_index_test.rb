@@ -623,7 +623,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
   def test_index_with_region_filter
     observations_in_region =
-      Observation.reorder(id: :asc).in_region("California, USA")
+      Observation.reorder(id: :asc).region("California, USA")
 
     user = users(:californian)
     # Make sure the fixture is still okay

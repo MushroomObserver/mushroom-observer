@@ -9,6 +9,6 @@ class Lookup::Regions < Lookup
   end
 
   def lookup_method(name)
-    Location.in_region(name.to_s.clean_pattern)
+    Location.region(name.to_s.clean_pattern)
   end
 end

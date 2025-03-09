@@ -257,8 +257,8 @@ class API2::ObservationsTest < UnitTestCase
     assert_api_results(obses)
   end
 
-  def test_getting_observations_in_region
-    obses = Observation.in_region("California, USA")
+  def test_getting_observations_region
+    obses = Observation.region("California, USA")
     assert_not_empty(obses)
     assert_api_pass(params_get(region: "California, USA"))
     assert_api_results(obses)
