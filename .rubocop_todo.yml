@@ -750,13 +750,6 @@ Style/OptionalBooleanParameter:
     - 'test/session_extensions.rb'
     - 'test/session_form_extensions.rb'
 
-# Offense count: 4
-# This cop supports safe autocorrection (--autocorrect).
-Style/RedundantInterpolationUnfreeze:
-  Exclude:
-    - 'app/mailers/application_mailer.rb'
-    - 'lib/core_extensions/action_view/log_subscriber.rb'
-
 # Offense count: 1
 # This cop supports safe autocorrection (--autocorrect).
 Style/RedundantLineContinuation:

@@ -8,7 +8,7 @@ module CoreExtensions
         identifier = event.payload[:identifier] || "templates"
 
         info do
-          message = +"  Rendered collection of #{from_rails_root(identifier)}"
+          message = "  Rendered collection of #{from_rails_root(identifier)}"
           if event.payload[:layout]
             message << " within #{from_rails_root(event.payload[:layout])}"
           end
@@ -21,7 +21,7 @@ module CoreExtensions
       def render_partial(event)
         if event.payload[:cache_hit].present?
           info do
-            message = +"  Rendered " \
+            message = "  Rendered " \
               "#{from_rails_root(event.payload[:identifier])}"
             if event.payload[:layout]
               message << " within #{from_rails_root(event.payload[:layout])}"
@@ -34,7 +34,7 @@ module CoreExtensions
           end
         else
           debug do
-            message = +"  Rendered " \
+            message = "  Rendered " \
               "#{from_rails_root(event.payload[:identifier])}"
             if event.payload[:layout]
               message << " within #{from_rails_root(event.payload[:layout])}"
