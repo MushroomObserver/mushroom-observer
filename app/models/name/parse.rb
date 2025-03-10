@@ -202,14 +202,15 @@ module Name::Parse
 
   # matches to ranks that are included in the name proper
   # subspecies is not included because it's the catchall default
-  RANK_START_MATCHER = /^(f|sect|stirps|subg|subsect|v)/i
+  RANK_START_MATCHER = /^(f|sect|stirps|subg|subsect|v|sp)/i
 
   # convert rank start_match to standard form of rank
   # subspecies is not included because it's the catchall default
   STANDARD_SECONDARY_RANKS = {
     f: "f.",
     sect: "sect.",
-    stirps: "stirps",
+    sp: "sp.",
+   stirps: "stirps",
     subg: "subg.",
     subsect: "subsect.",
     v: "var."
@@ -392,9 +393,9 @@ module Name::Parse
       genus = words[0]
       epithet = words[2]
       epithet.sub!(/^"(.*)"$/, '\1')
-      name = "#{genus} \"sp-#{epithet}\""
+      name = "#{genus} sp. \"#{epithet}\""
     else
-      name.sub!(/ "sp\./i, ' "sp-')
+      name.sub!(/ "sp-/i, ' sp. "')
     end
     name
   end
@@ -533,8 +534,10 @@ module Name::Parse
     str = format_name(name, :deprecated).
           sub(/^_+/, "").
           gsub(/_+/, " "). # put genus at the top
-          sub(/ "(sp[-.])/, ' {\1'). # put "sp-1" at end
-          gsub(/"([^"]*")/, '\1'). # collate "baccata" with baccata
+          # sub(/ "(sp[-.])/, ' {\1'). # put "sp-1" at end
+          sub(/  sp.  /, ' '). # ignore sp.
+          gsub(/ "([^"]*")/) { |m| m.downcase }. # downcase prov epithets
+          gsub(/"/, ""). # Now ignore quotes
           sub(" subg. ", " {1subg. ").
           sub(" sect. ",    " {2sect. ").
           sub(" subsect. ", " {3subsect. ").
@@ -556,7 +559,7 @@ module Name::Parse
 
     if author.present?
       str += "  " + author.
-             gsub(/"([^"]*")/, '\1'). # collate "baccata" with baccata
+             gsub(/"/, ""). # Ignore quotes in author
              gsub(/[Đđ]/, "d"). # mysql isn't collating these right
              gsub(/[Øø]/, "O").
              strip
