@@ -421,10 +421,16 @@ class Query::ObservationsTest < UnitTestCase
   end
 
   def test_observation_advanced_search_content
-    assert_query(Observation.advanced_search("second fruiting"),
-                 :Observation, search_content: "second fruiting") # notes
-    assert_query(Observation.advanced_search("agaricus"),
-                 :Observation, search_content: "agaricus") # comment
+    # notes
+    expects = [observations(:coprinus_comatus_obs)]
+    scope = Observation.advanced_search("second fruiting")
+    assert_query_scope(expects, scope,
+                       :Observation, search_content: "second fruiting")
+    # comments(:minimal_unknown_obs_comment_2)
+    expects = [observations(:minimal_unknown_obs)]
+    scope = Observation.advanced_search("agaricus")
+    assert_query_scope(expects, scope,
+                       :Observation, search_content: "agaricus")
   end
 
   def test_observation_date
