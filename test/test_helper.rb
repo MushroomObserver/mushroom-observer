@@ -80,6 +80,20 @@ end
 
 I18n.enforce_available_locales = true
 
+# Function for creating a log the tests called that
+# somehow call this function.
+def trace_tests
+  regex = %r{/test/}
+  matches = caller.grep(regex)
+  return unless matches
+
+  last_match = matches.last
+  trim = last_match[last_match.index(regex) + 1..]
+  open("trace_tests.out", "a") do |f|
+    f.write("#{trim}\n")
+  end
+end
+
 module ActiveSupport
   class TestCase
     # Run tests in parallel with specified workers

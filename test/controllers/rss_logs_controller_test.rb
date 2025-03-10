@@ -123,4 +123,14 @@ class RssLogsControllerTest < FunctionalTestCase
     assert_match(activity_log_path(logs.first.id),
                  @response.header["Location"], "Redirected to wrong page")
   end
+
+  def test_missing_rss_log
+    log = RssLog.order(id: :desc).first
+    missing_id = log.id + 1
+    login
+    get(:show, params: { flow: "prev", id: missing_id })
+    assert_response(:redirect)
+    assert_match(activity_logs_path,
+                 @response.header["Location"], "Redirected to wrong page")
+  end
 end

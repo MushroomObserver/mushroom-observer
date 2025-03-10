@@ -184,11 +184,6 @@ class LocationDescription < Description
       recipients.push(user) if user.email_locations_editor
     end
 
-    # Tell masochists who want to know about all location changes.
-    User.where(email_locations_all: true).find_each do |user|
-      recipients.push(user)
-    end
-
     # Send to people who have registered interest.
     # Also remove everyone who has explicitly said they are NOT interested.
     location.interests.each do |interest|

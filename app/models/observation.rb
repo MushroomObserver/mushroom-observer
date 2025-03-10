@@ -928,11 +928,6 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       recipients.push(interest.user) if interest.state
     end
 
-    # Tell masochists who want to know about all observation changes.
-    User.where(email_observations_all: true).find_each do |user|
-      recipients.push(user)
-    end
-
     # Send notification to all except the person who triggered the change.
     recipients.uniq.each do |recipient|
       next if !recipient || recipient == sender || recipient.no_emails

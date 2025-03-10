@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_02_23_095614) do
+ActiveRecord::Schema[7.2].define(version: 2025_03_02_213447) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -901,17 +901,13 @@ ActiveRecord::Schema[7.2].define(version: 2025_02_23_095614) do
     t.string "locale", limit: 5
     t.boolean "email_comments_owner", default: true, null: false
     t.boolean "email_comments_response", default: true, null: false
-    t.boolean "email_comments_all", default: false, null: false
     t.boolean "email_observations_consensus", default: true, null: false
     t.boolean "email_observations_naming", default: true, null: false
-    t.boolean "email_observations_all", default: false, null: false
     t.boolean "email_names_author", default: true, null: false
     t.boolean "email_names_editor", default: false, null: false
     t.boolean "email_names_reviewer", default: true, null: false
-    t.boolean "email_names_all", default: false, null: false
     t.boolean "email_locations_author", default: true, null: false
     t.boolean "email_locations_editor", default: false, null: false
-    t.boolean "email_locations_all", default: false, null: false
     t.boolean "email_general_feature", default: true, null: false
     t.boolean "email_general_commercial", default: true, null: false
     t.boolean "email_general_question", default: true, null: false

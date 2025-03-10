@@ -273,7 +273,7 @@ class NameDescription < Description
 
   # This is called after saving potential changes to a Name.  It will determine
   # if the changes are important enough to notify the authors, and do so.
-  def notify_users # rubocop:disable Metrics/MethodLength
+  def notify_users
     # Even though changing review_status doesn't cause a new version to be
     # created, I want to notify authors of that change.
     # (saved_change_to_<attribute>? is a Rails automagical method)
@@ -299,11 +299,6 @@ class NameDescription < Description
       # Tell reviewer of the change.
       reviewer ||= @old_reviewer
       recipients.push(reviewer) if reviewer&.email_names_reviewer
-
-      # Tell masochists who want to know about all name changes.
-      User.where(email_names_all: true).find_each do |user|
-        recipients.push(user)
-      end
 
       # Send to people who have registered interest.
       # Also remove everyone who has explicitly said they are NOT interested.

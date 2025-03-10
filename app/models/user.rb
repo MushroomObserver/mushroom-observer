@@ -111,17 +111,13 @@
 #  Send notifications if...
 #  email_comments_owner::         ...someone comments on object I own.
 #  email_comments_response::      ...someone responds to my Comment.
-#  email_comments_all::           ...anyone comments on anything.
 #  email_observations_consensus:: ...consensus changes on my Observation.
 #  email_observations_naming::    ...someone proposes a Name for my Observation.
-#  email_observations_all::       ...anyone changes an Observation.
 #  email_names_author::           ...someone changes a Name I've authored.
 #  email_names_editor::           ...someone changes a Name I've edited.
 #  email_names_reviewer::         ...someone changes a Name I've reviewed.
-#  email_names_all::              ...anyone changes a Name.
 #  email_locations_author::       ...someone changes a Location I've authored.
 #  email_locations_editor::       ...someone changes a Location I've edited.
-#  email_locations_all::          ...anyone changes a Location.
 #  email_general_feature::        ...you announce new features.
 #  email_general_commercial::     ...someone sends me a commercial inquiry.
 #  email_general_question::       ...someone sends me a general question.
