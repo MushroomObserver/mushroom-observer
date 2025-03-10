@@ -141,47 +141,47 @@ class Query::ImagesTest < UnitTestCase
     assert_query([], :Image, projects: projects(:empty_project))
   end
 
-  def test_image_advanced_search_name
-    # expects = [] # [images(:agaricus_campestris_image).id]
-    expects = Image.index_order.joins(observations: :name).
-              where(Name[:search_name].matches("%Agaricus%")).distinct
-    assert_query(expects, :Image, search_name: "Agaricus")
-  end
+  # def test_image_advanced_search_name
+  #   # expects = [] # [images(:agaricus_campestris_image).id]
+  #   expects = Image.index_order.joins(observations: :name).
+  #             where(Name[:search_name].matches("%Agaricus%")).distinct
+  #   assert_query(expects, :Image, search_name: "Agaricus")
+  # end
 
-  def test_image_advanced_search_where
-    expects = Image.index_order.joins(:observations).
-              where(Observation[:where].matches("%burbank%")).
-              where(observations: { is_collection_location: true }).distinct
-    assert_query(expects, :Image, search_where: "burbank")
+  # def test_image_advanced_search_where
+  #   expects = Image.index_order.joins(:observations).
+  #             where(Observation[:where].matches("%burbank%")).
+  #             where(observations: { is_collection_location: true }).distinct
+  #   assert_query(expects, :Image, search_where: "burbank")
 
-    assert_query([images(:connected_coprinus_comatus_image).id],
-                 :Image, search_where: "glendale")
-  end
+  #   assert_query([images(:connected_coprinus_comatus_image).id],
+  #                :Image, search_where: "glendale")
+  # end
 
-  def test_image_advanced_search_user
-    expects = Image.index_order.joins(observations: :user).
-              where(observations: { user: mary }).distinct.
-              order(Image[:created_at].desc, Image[:id].desc)
-    assert_query(expects, :Image, search_user: "mary")
-  end
+  # def test_image_advanced_search_user
+  #   expects = Image.index_order.joins(observations: :user).
+  #             where(observations: { user: mary }).distinct.
+  #             order(Image[:created_at].desc, Image[:id].desc)
+  #   assert_query(expects, :Image, search_user: "mary")
+  # end
 
-  def test_image_advanced_search_content
-    assert_query(Image.index_order.
-                 advanced_search("little"),
-                 :Image, search_content: "little")
-    assert_query(Image.index_order.
-                 advanced_search("fruiting"),
-                 :Image, search_content: "fruiting")
-  end
+  # def test_image_advanced_search_content
+  #   assert_query(Image.index_order.
+  #                advanced_search("little"),
+  #                :Image, search_content: "little")
+  #   assert_query(Image.index_order.
+  #                advanced_search("fruiting"),
+  #                :Image, search_content: "fruiting")
+  # end
 
-  def test_image_advanced_search_combos
-    assert_query([],
-                 :Image, search_name: "agaricus", search_where: "glendale")
-    assert_query([images(:agaricus_campestris_image).id],
-                 :Image, search_name: "agaricus", search_where: "burbank")
-    assert_query([images(:turned_over_image).id, images(:in_situ_image).id],
-                 :Image, search_content: "little", search_where: "burbank")
-  end
+  # def test_image_advanced_search_combos
+  #   assert_query([],
+  #                :Image, search_name: "agaricus", search_where: "glendale")
+  #   assert_query([images(:agaricus_campestris_image).id],
+  #                :Image, search_name: "agaricus", search_where: "burbank")
+  #   assert_query([images(:turned_over_image).id, images(:in_situ_image).id],
+  #                :Image, search_content: "little", search_where: "burbank")
+  # end
 
   def test_image_pattern_search_name
     assert_query(Image.index_order.pattern("agaricus"),

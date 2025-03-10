@@ -72,76 +72,79 @@ class ImagesControllerTest < FunctionalTestCase
     assert_response(429)
   end
 
-  def test_index_advanced_search_multiple_hits
-    obs = observations(:fungi_obs)
-    assert(obs.images.many?)
-    query = Query.lookup_and_save(
-      :Image, search_name: obs.text_name,
-              search_user: obs.user.name,
-              search_where: obs.where
-    )
-    assert(query.results.many?)
+  # def test_index_advanced_search_multiple_hits
+  #   obs = observations(:fungi_obs)
+  #   assert(obs.images.many?)
+  #   query = Query.lookup_and_save(
+  #     :Image, search_name: obs.text_name,
+  #             search_user: obs.user.name,
+  #             search_where: obs.where
+  #   )
+  #   assert(query.results.many?)
 
-    login
-    get(:index,
-        params: @controller.query_params(query).merge({ advanced_search: "1" }))
+  #   login
+  #   get(:index,
+  #       params: @controller.query_params(query).
+  #       merge({ advanced_search: "1" }))
 
-    assert_response(:success)
-    assert_template("index")
-    assert_template(partial: "_matrix_box")
-    # Don't care about the title, but good to know if it changes
-    assert_displayed_title("Matching Images")
-  end
+  #   assert_response(:success)
+  #   assert_template("index")
+  #   assert_template(partial: "_matrix_box")
+  #   # Don't care about the title, but good to know if it changes
+  #   assert_displayed_title("Matching Images")
+  # end
 
-  def test_index_advanced_search_one_hit
-    image = images(:connected_coprinus_comatus_image)
-    query = Query.lookup_and_save(:Image, search_name: "Coprinus comatus")
-    assert(query.results.one?)
+  # def test_index_advanced_search_one_hit
+  #   image = images(:connected_coprinus_comatus_image)
+  #   query = Query.lookup_and_save(:Image, search_name: "Coprinus comatus")
+  #   assert(query.results.one?)
 
-    login
-    get(:index,
-        params: @controller.query_params(query).merge({ advanced_search: "1" }))
+  #   login
+  #   get(:index,
+  #       params: @controller.query_params(query).
+  #       merge({ advanced_search: "1" }))
 
-    assert_response(:redirect)
-    assert_match(image_path(image), redirect_to_url)
-  end
+  #   assert_response(:redirect)
+  #   assert_match(image_path(image), redirect_to_url)
+  # end
 
-  def test_index_advanced_search_no_hits
-    query = Query.lookup_and_save(
-      :Image, search_name: "Don't know",
-              search_user: "myself",
-              search_content: "Long pink stem and small pink cap",
-              search_where: "Eastern Oklahoma"
-    )
-    assert(query.results.count.zero?)
+  # def test_index_advanced_search_no_hits
+  #   query = Query.lookup_and_save(
+  #     :Image, search_name: "Don't know",
+  #             search_user: "myself",
+  #             search_content: "Long pink stem and small pink cap",
+  #             search_where: "Eastern Oklahoma"
+  #   )
+  #   assert(query.results.count.zero?)
 
-    login
-    get(:index,
-        params: @controller.query_params(query).merge({ advanced_search: "1" }))
+  #   login
+  #   get(:index,
+  #       params: @controller.query_params(query).
+  #       merge({ advanced_search: "1" }))
 
-    assert_flash_text(:runtime_no_matches.l(type: :images.l))
-    assert_template("index")
-  end
+  #   assert_flash_text(:runtime_no_matches.l(type: :images.l))
+  #   assert_template("index")
+  # end
 
-  def test_index_advanced_search_invalid_q_param
-    login
-    get(:index, params: { q: "xxxxx", advanced_search: true })
+  # def test_index_advanced_search_invalid_q_param
+  #   login
+  #   get(:index, params: { q: "xxxxx", advanced_search: true })
 
-    assert_flash_text(:advanced_search_bad_q_error.l)
-    assert_redirected_to(search_advanced_path)
-  end
+  #   assert_flash_text(:advanced_search_bad_q_error.l)
+  #   assert_redirected_to(search_advanced_path)
+  # end
 
-  def test_index_advanced_search_error
-    query_no_conditions = Query.lookup_and_save(:Image)
+  # def test_index_advanced_search_error
+  #   query_no_conditions = Query.lookup_and_save(:Image)
 
-    login
-    params = @controller.query_params(query_no_conditions).
-             merge({ advanced_search: true })
-    get(:index, params:)
+  #   login
+  #   params = @controller.query_params(query_no_conditions).
+  #            merge({ advanced_search: true })
+  #   get(:index, params:)
 
-    assert_flash_error(:runtime_no_conditions.l)
-    assert_redirected_to(search_advanced_path)
-  end
+  #   assert_flash_error(:runtime_no_conditions.l)
+  #   assert_redirected_to(search_advanced_path)
+  # end
 
   def test_index_pattern_text_multiple_hits
     pattern = "USA"

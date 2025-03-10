@@ -28,7 +28,8 @@ class SearchController < ApplicationController
     forward_pattern_search(type, pattern)
   end
 
-  ADVANCED_SEARCHABLE_MODELS = [Image, Location, Name, Observation].freeze
+  # Image advanced search retired in 2021
+  ADVANCED_SEARCHABLE_MODELS = [Location, Name, Observation].freeze
 
   # Advanced search form.  When it posts it just redirects to one of several
   # "foreign" search actions:
