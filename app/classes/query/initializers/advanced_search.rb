@@ -59,6 +59,10 @@ module Query::Initializers::AdvancedSearch
     self.executor = lambda do |args|
       content_search_one(content, args) | content_search_two(content, args)
     end
+    # arg1 = google_conditions(content, content_field_one)
+    # arg2 = google_conditions(content, content_field_two)
+    # @where << or_clause(arg1, arg2)
+    # add_join(content_join_spec)
   end
 
   def content_search_one(content, args)
