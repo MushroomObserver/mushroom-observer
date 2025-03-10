@@ -6,7 +6,8 @@ require("test_helper")
 class SearchControllerTest < FunctionalTestCase
   def test_advanced
     login
-    [Name, Image, Observation].each do |model|
+    # Image advanced search retired 2021
+    [Name, Observation].each do |model|
       get(
         :advanced,
         params: {
