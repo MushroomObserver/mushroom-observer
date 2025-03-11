@@ -2,7 +2,7 @@
 
 # Helper methods for turning Query parameters into AR conditions.
 module Query::ScopeModules::Conditions
-  # Just because these three are used over and over again.
+  # These also need to set title stuff currently.
   def initialize_parameter_set
     scope_parameters.each do |param|
       next if (param == :ids_in_set && params[param].nil?) ||
@@ -10,6 +10,31 @@ module Query::ScopeModules::Conditions
 
       @scopes = @scopes.send(param, params[param])
     end
+  end
+
+  # whoops, these need to know what joins to do. initialize in class
+  # def initialize_subquery_parameters
+  #   subquery_parameters.each do |param|
+  #     next if params[param].blank?
+
+  #     # ??
+  #   end
+  # end
+
+  # Switch callers to not send model and column
+  def add_subquery_condition(param, joins)
+    return if params[param].blank?
+
+    subquery = subquery_from_params(param).query
+    @scopes = @scopes.merge(subquery)
+    @scopes = @scopes.joins(**joins) if joins
+  end
+
+  # Reconstitute the query from the subparam hash, adding the model.
+  # model_name is defined on the subquery param
+  def subquery_from_params(param)
+    model_name = parameter_declarations[param][:subquery]
+    Query.new(model_name, params[param])
   end
 
   def add_owner_and_time_stamp_conditions
@@ -179,22 +204,6 @@ module Query::ScopeModules::Conditions
   #    where(<x>.in(limited_id_set(ids)))
   def limited_id_set(ids)
     ids.map(&:to_i).uniq[0, MO.query_max_array]
-  end
-
-  # Switch callers to not send model and column
-  def add_subquery_condition(param, joins)
-    return if params[param].blank?
-
-    subquery = subquery_from_params(param).query
-    @scopes = @scopes.merge(subquery)
-    @scopes = @scopes.joins(**joins) if joins
-  end
-
-  # Reconstitute the query from the subparam hash, adding the model.
-  # model_name is defined on the subquery param
-  def subquery_from_params(param)
-    model_name = parameter_declarations[param][:subquery]
-    Query.new(model_name, params[param])
   end
 
   # AR: `search_fields` should be defined in the Query class as either
