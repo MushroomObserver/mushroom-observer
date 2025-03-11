@@ -49,7 +49,7 @@ module MatrixBoxHelper
     wrap_args = args.except(:columns, :class, :id)
 
     tag.li(class: wrap_class, id: box_id, **wrap_args,
-           data: { controller: "query-results"}) do
+           data: { controller: "query-results" }) do
       capture(&block)
     end
   end
