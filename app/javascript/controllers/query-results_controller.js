@@ -14,9 +14,10 @@ export default class extends Controller {
     if (this.queryString && this.hasLinkTarget) {
       this.linkTargets.forEach((link) => {
         const url = new URL(link.href);
-        url.searchParams.set("q", this.queryString)
-        link.href = url.pathname + url.search
-        link.classList.add("query-synced")
+        url.searchParams.set("q", this.queryString);
+        // We want relative URLs, so we're not calling url.toString()
+        link.href = url.pathname + url.search;
+        link.classList.add("query-synced");
       })
     }
   }
