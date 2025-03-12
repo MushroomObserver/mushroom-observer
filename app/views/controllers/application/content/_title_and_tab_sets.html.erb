@@ -52,10 +52,9 @@ left_cols = add_right_tabs ? "col-xs-8 col-lg-7" : "col-xs-12"
     <% end %>
     <% if content_for?(:filters) || content_for?(:filter_help) || 
           content_for?(:sorter) %>
-      <%= tag.div(class: "panel panel-default p-2") do %>
-        <%= yield(:filters) -%>
-        <%= yield(:filter_help) -%>
-     <% end %>
+      <%= tag.hr(class: "my-2") %>
+      <%= yield(:filters) -%>
+      <%= yield(:filter_help) -%>
     <% end %>
     <%= yield(:owner_naming) %>
   <% end %>

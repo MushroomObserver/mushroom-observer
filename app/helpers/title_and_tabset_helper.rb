@@ -79,7 +79,7 @@ module TitleAndTabsetHelper
   # a list of ids, but it will truncate the names after 3 values.
   # NOTE: the lookup is a sort of N+1, although it's not a heavy query.
   def caption_one_filter_param(query, key, val)
-    concat(tag.div do
+    concat(tag.div(class: "small") do
       if val.is_a?(Hash)
         caption_string_for_nested_params(query, val)
       else
@@ -129,7 +129,7 @@ module TitleAndTabsetHelper
   end
 
   def caption_for_names(query)
-    map_join_and_truncate(query, :lookup, Name, :text_name)
+    tag.i(map_join_and_truncate(query, :lookup, Name, :text_name))
   end
 
   def caption_for_projects(query)
@@ -161,7 +161,7 @@ module TitleAndTabsetHelper
   def map_join_and_truncate(query, param, model, method)
     str = query.params.deep_find(param)[0..2].map do |val|
       # Integer(val) throws ArgumentError if val is not an integer.
-      get_attribute_of_instance_by_integer(val, model, method)
+      str = get_attribute_of_instance_by_integer(val, model, method)
     rescue ArgumentError # rubocop:disable Layout/RescueEnsureAlignment
       val
     end.join(", ")
