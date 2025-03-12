@@ -345,9 +345,9 @@ class Query::NamesTest < UnitTestCase
                  search_content: '"a little of everything"') # comment
   end
 
-  def test_name_need_description
-    expects = Name.with_correct_spelling.need_description
-    assert_query(expects, :Name, need_description: 1)
+  def test_name_needs_description
+    expects = Name.with_correct_spelling.needs_description
+    assert_query(expects, :Name, needs_description: 1)
   end
 
   def test_name_has_default_description
