@@ -61,7 +61,7 @@ module TitleAndTabsetHelper
             elsif query.num_results.zero? && !no_hits.nil?
               no_hits
             else
-              query.model.name.pluralize.upcase.to_sym.l
+              query.model.table_name.to_sym.l
             end
     add_page_title(title)
     add_query_filters(query)
@@ -81,6 +81,7 @@ module TitleAndTabsetHelper
   def caption_one_filter_param(query, key, val)
     concat(tag.div(class: "small") do
       if val.is_a?(Hash)
+        concat(tag.span("#{key.to_sym.l}: "))
         caption_string_for_nested_params(query, val)
       else
         val = caption_string_for_val(query, key, val)
@@ -99,8 +100,8 @@ module TitleAndTabsetHelper
       if val == true
         concat(tag.span(translation))
       else
+        concat(tag.span("#{translation}: ")) unless key == :lookup
         val = caption_string_for_val(query, key, val)
-        concat(tag.span("#{translation}: "))
         concat(tag.b(val))
       end
       concat(tag.span(", ")) if idx < len
@@ -146,7 +147,7 @@ module TitleAndTabsetHelper
 
   def caption_for_by_users(query)
     if params.deep_find(:by_users).size == 1
-      User.find(params.deep_find(:by_users).first).legal_name
+      User.find(query.params.deep_find(:by_users).first).legal_name
     else
       map_join_and_truncate(query, :by_users, User, :login)
     end
