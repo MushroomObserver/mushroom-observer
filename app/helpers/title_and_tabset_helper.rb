@@ -61,9 +61,123 @@ module TitleAndTabsetHelper
             elsif query.num_results.zero? && !no_hits.nil?
               no_hits
             else
-              query.title
+              query.model.name.pluralize.upcase.to_sym.l
             end
     add_page_title(title)
+    add_query_filters(query)
+  end
+
+  def add_query_filters(query)
+    content_for(:filters) do
+      query.params.except(:by).compact_blank.each do |key, val|
+        caption_one_filter_param(query, key, val)
+      end
+    end
+  end
+
+  # This tries to lookup legible names to param values when they are
+  # a list of ids, but it will truncate the names after 3 values.
+  # NOTE: the lookup is a sort of N+1, although it's not a heavy query.
+  def caption_one_filter_param(query, key, val)
+    concat(tag.div do
+      if val.is_a?(Hash)
+        caption_string_for_nested_params(query, val)
+      else
+        val = caption_string_for_val(query, key, val)
+        concat(tag.span("#{key.to_sym.l}: "))
+        concat(tag.b(val))
+      end
+    end)
+  end
+
+  # In the case of nested params, print them on one line separated by comma.
+  def caption_string_for_nested_params(query, hash)
+    len = hash.compact_blank.keys.size - 1
+    hash.compact_blank.each_with_index do |(key, val), idx|
+      translation_key = :"query_#{key}"
+      translation = translation_key.l
+      if val == true
+        concat(tag.span(translation))
+      else
+        val = caption_string_for_val(query, key, val)
+        concat(tag.span("#{translation}: "))
+        concat(tag.b(val))
+      end
+      concat(tag.span(", ")) if idx < len
+    end
+  end
+
+  def caption_string_for_val(query, key, val)
+    return val unless captionable_query_params.include?(key)
+
+    key = :names if key == :lookup
+    send(:"caption_for_#{key}", query)
+  end
+
+  def captionable_query_params
+    [:herbaria, :locations, :names, :projects, :project_lists,
+     :species_lists, :by_users, :search_user, :lookup].freeze
+  end
+
+  def caption_for_herbaria(query)
+    map_join_and_truncate(query, :herbaria, Herbarium, :name)
+  end
+
+  # NOTE: used in "Locations with Observations of {name}" - AN 2023
+  def caption_for_locations(query)
+    map_join_and_truncate(query, :locations, Location, :display_name)
+  end
+
+  def caption_for_names(query)
+    map_join_and_truncate(query, :lookup, Name, :text_name)
+  end
+
+  def caption_for_projects(query)
+    map_join_and_truncate(query, :projects, Project, :title)
+  end
+
+  def caption_for_project_lists(query)
+    map_join_and_truncate(query, :project_lists, Project, :title)
+  end
+
+  def caption_for_species_lists(query)
+    map_join_and_truncate(query, :species_lists, SpeciesList, :title)
+  end
+
+  def caption_for_by_users(query)
+    if params.deep_find(:by_users).size == 1
+      User.find(params.deep_find(:by_users).first).legal_name
+    else
+      map_join_and_truncate(query, :by_users, User, :login)
+    end
+  end
+
+  # takes a search string
+  def caption_for_search_user(_query)
+    params.deep_find(:search_user)
+  end
+
+  # The max number of named items is hardcoded here to 3.
+  def map_join_and_truncate(query, param, model, method)
+    str = query.params.deep_find(param)[0..2].map do |val|
+      # Integer(val) throws ArgumentError if val is not an integer.
+      get_attribute_of_instance_by_integer(val, model, method)
+    rescue ArgumentError # rubocop:disable Layout/RescueEnsureAlignment
+      val
+    end.join(", ")
+    if str.length > 100
+      str = "#{str[0...97]}..."
+    elsif query.params.deep_find(param).length > 3
+      str += ", ..."
+    end
+    str
+  end
+
+  def get_attribute_of_instance_by_integer(val, model, method)
+    val = val.min if val.is_a?(Array)
+    return val if val.is_a?(AbstractModel)
+
+    model.find(Integer(val)).send(method)
   end
 
   # Used by several indexes that can be filtered based on user prefs
