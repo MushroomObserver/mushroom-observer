@@ -208,7 +208,7 @@ module Name::Scopes
       return none if Description::ALL_SOURCE_TYPES.exclude?(source)
 
       joins(:descriptions).
-        merge(NameDescription.types(source)).distinct
+        merge(NameDescription.sources(source)).distinct
     }
     scope :has_description_classification_differing, lambda {
       joins(:description).

@@ -61,9 +61,9 @@ class CollectionNumber < AbstractModel
   scope :index_order,
         -> { order(name: :asc, number: :asc) }
 
-  scope :names,
+  scope :collectors,
         ->(names) { exact_match_condition(CollectionNumber[:name], names) }
-  scope :name_has,
+  scope :collector_has,
         ->(str) { search_columns(CollectionNumber[:name], str) }
 
   scope :numbers,

@@ -30,16 +30,18 @@ class Query::CollectionNumbersTest < UnitTestCase
     assert_query_scope(expects, scope, :CollectionNumber, by_users: mary)
   end
 
-  def test_collection_number_names
+  def test_collection_number_collectors
     expects = newbie_collections
-    scope = CollectionNumber.names("Mary Newbie").index_order
-    assert_query_scope(expects, scope, :CollectionNumber, names: "Mary Newbie")
+    scope = CollectionNumber.collectors("Mary Newbie").index_order
+    assert_query_scope(expects, scope,
+                       :CollectionNumber, collectors: "Mary Newbie")
   end
 
-  def test_collection_number_name_has
+  def test_collection_number_collector_has
     expects = newbie_collections
-    scope = CollectionNumber.name_has("Newbie").index_order
-    assert_query_scope(expects, scope, :CollectionNumber, name_has: "Newbie")
+    scope = CollectionNumber.collector_has("Newbie").index_order
+    assert_query_scope(expects, scope,
+                       :CollectionNumber, collector_has: "Newbie")
   end
 
   def test_collection_number_numbers
