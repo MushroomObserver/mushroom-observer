@@ -120,7 +120,7 @@ class NameDescription < Description
 
   scope :is_public,
         ->(bool = true) { where(public: bool) }
-  scope :source_types,
+  scope :sources,
         ->(types) { where(source_type: types) }
   scope :ok_for_export,
         ->(bool = true) { where(ok_for_export: bool) }

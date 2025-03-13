@@ -16,7 +16,7 @@ class Query::NameDescriptions < Query::Base
       by_author: User,
       by_editor: User,
       is_public: :boolean,
-      source_types: [{ string: Description::ALL_SOURCE_TYPES }],
+      sources: [{ string: Description::ALL_SOURCE_TYPES }],
       ok_for_export: :boolean,
       content_has: :string,
       names: [Name],
