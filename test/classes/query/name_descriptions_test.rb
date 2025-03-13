@@ -74,14 +74,14 @@ class Query::NameDescriptionsTest < UnitTestCase
                  :NameDescription, name_query: { has_default_description: 0 })
   end
 
-  def test_name_description_type_user
-    assert_query(NameDescription.types(5).index_order,
-                 :NameDescription, types: "user")
+  def test_name_description_source_types_user
+    assert_query(NameDescription.source_types(5).index_order,
+                 :NameDescription, source_types: "user")
   end
 
   def test_name_description_type_project
-    assert_query(NameDescription.types(3).index_order,
-                 :NameDescription, types: "project")
+    assert_query(NameDescription.source_types(3).index_order,
+                 :NameDescription, source_types: "project")
   end
 
   def test_name_description_projects
