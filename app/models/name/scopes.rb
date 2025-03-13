@@ -132,6 +132,11 @@ module Name::Scopes
     scope :include_synonyms_of, lambda { |name|
       with_correct_spelling.where(id: name.synonyms.map(&:id))
     }
+    scope :clades, lambda { |clades|
+      clades = [clades].flatten
+      clades.map! { |val| clade(val) }
+      or_clause(*clades).distinct
+    }
     scope :clade, lambda { |names|
       names(lookup: names, include_subtaxa: true).misspellings(:no)
     }

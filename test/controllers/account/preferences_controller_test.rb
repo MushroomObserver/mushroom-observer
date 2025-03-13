@@ -40,8 +40,8 @@ module Account
       has_images: "1",
       has_specimen: "1",
       lichen: "yes",
-      region: "California, USA",
-      clade: "Ascomycota"
+      regions: "California, USA",
+      clades: "Ascomycota"
     }.freeze
 
     def test_edit

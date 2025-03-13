@@ -19,7 +19,7 @@ class Query::Locations < Query::Base
       by_users: [User],
       by_editor: User,
       in_box: { north: :float, south: :float, east: :float, west: :float },
-      # region: :string, # content filter
+      # regions: [:string], # content filter
       pattern: :string,
       regexp: :string,
       has_notes: :boolean,

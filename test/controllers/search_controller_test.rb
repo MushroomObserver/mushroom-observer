@@ -57,8 +57,8 @@ class SearchControllerTest < FunctionalTestCase
         has_images: "",
         has_specimen: "yes",
         lichen: "no",
-        region: "California",
-        clade: ""
+        regions: "California",
+        clades: ""
       }
     }
     get(:advanced, params: params)

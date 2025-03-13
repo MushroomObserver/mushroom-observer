@@ -69,7 +69,7 @@ class API2
         notes_has: parse(:string, :notes_has, help: 1),
         comments_has: parse(:string, :comments_has, help: 1),
         in_box: box,
-        region: parse(:string, :region, help: 1)
+        regions: parse(:string, :region, help: 1)
       }.merge(parse_names_parameters)
     end
 

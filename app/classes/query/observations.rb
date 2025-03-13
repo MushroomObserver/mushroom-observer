@@ -29,7 +29,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
                exclude_consensus: :boolean },
       confidence: [:float],
       needs_naming: :boolean,
-      # clade: :string, # content_filter
+      # clades: [:string], # content_filter
       # lichen: :boolean, # content_filter
 
       is_collection_location: :boolean,
@@ -37,7 +37,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
       location_undefined: { boolean: [true] },
       locations: [Location],
       in_box: { north: :float, south: :float, east: :float, west: :float },
-      # region: :string, # content filter
+      # regions: [:string], # content filter
 
       has_notes: :boolean,
       notes_has: :string,

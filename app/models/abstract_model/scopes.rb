@@ -272,6 +272,18 @@ module AbstractModel::Scopes
       end
     end
 
+    # Recursively call a scope with OR on an array of vals
+    def or_scope(*vals, scope:)
+      if vals.length > 1
+        starting = send(scope, vals.shift)
+        vals.reduce(starting) do |result, val|
+          result.or(send(scope, val))
+        end
+      else
+        send(scope, vals.first)
+      end
+    end
+
     # Returns an array of AR conditions describing what a search is looking for.
     #
     # Each array member ["foo", "fah"] gets joined in a chain of AR "where"
