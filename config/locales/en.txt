@@ -4437,8 +4437,8 @@
 
   query_accession: sequence identifier
   query_accession_has: sequence identifier has
-  query_accession_number: catalog #
-  query_accession_number_has: catalog # has
+  query_accession_number: catalog number
+  query_accession_number_has: catalog number has
   query_archive: "[:archive]"
   query_author_has: author has
   query_body_has: text has

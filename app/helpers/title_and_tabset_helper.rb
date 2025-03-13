@@ -68,6 +68,8 @@ module TitleAndTabsetHelper
   end
 
   def add_query_filters(query)
+    return unless query&.params
+
     content_for(:filters) do
       tag.div(class: "small") do
         query.params.except(:by).compact_blank.each do |key, val|
