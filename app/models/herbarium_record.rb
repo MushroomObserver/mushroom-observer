@@ -72,13 +72,13 @@ class HerbariumRecord < AbstractModel
   scope :notes_has,
         ->(str) { search_columns(HerbariumRecord[:notes], str) }
 
-  scope :initial_det, lambda { |val|
+  scope :initial_dets, lambda { |val|
     exact_match_condition(HerbariumRecord[:initial_det], val)
   }
   scope :initial_det_has,
         ->(str) { search_columns(HerbariumRecord[:initial_det], str) }
 
-  scope :accession_number, lambda { |val|
+  scope :accession_numbers, lambda { |val|
     exact_match_condition(HerbariumRecord[:accession_number], val)
   }
   scope :accession_number_has,

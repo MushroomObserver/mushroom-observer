@@ -51,11 +51,11 @@ class Query::HerbariumRecordsTest < UnitTestCase
     assert_query_scope(expects, scope, :HerbariumRecord, notes_has: "dried")
   end
 
-  def test_herbarium_record_initial_det
+  def test_herbarium_record_initial_dets
     expects = [herbarium_records(:field_museum_record)]
-    scope = HerbariumRecord.index_order.initial_det("Lichen")
-    assert_query_scope(expects, scope, :HerbariumRecord, initial_det: "Lichen")
-    assert_query_scope(expects, scope, :HerbariumRecord, initial_det: "lichen")
+    scope = HerbariumRecord.index_order.initial_dets("Lichen")
+    assert_query_scope(expects, scope, :HerbariumRecord, initial_dets: "Lichen")
+    assert_query_scope(expects, scope, :HerbariumRecord, initial_dets: "lichen")
   end
 
   def test_herbarium_record_initial_det_has
@@ -63,16 +63,16 @@ class Query::HerbariumRecordsTest < UnitTestCase
     assert_query(expects, :HerbariumRecord, initial_det_has: "lichen")
   end
 
-  def test_herbarium_record_accession_number
+  def test_herbarium_record_accession_numbers
     expects = [herbarium_records(:interesting_unknown)]
-    scope = HerbariumRecord.index_order.accession_number("1234")
+    scope = HerbariumRecord.index_order.accession_numbers("1234")
     assert_query_scope(expects, scope,
-                       :HerbariumRecord, accession_number: "1234")
+                       :HerbariumRecord, accession_numbers: "1234")
 
     expects = [herbarium_records(:coprinus_comatus_nybg_spec)]
-    scope = HerbariumRecord.index_order.accession_number(4321)
+    scope = HerbariumRecord.index_order.accession_numbers(4321)
     assert_query_scope(expects, scope,
-                       :HerbariumRecord, accession_number: "4321")
+                       :HerbariumRecord, accession_numbers: "4321")
   end
 
   def test_herbarium_record_accession_number_has

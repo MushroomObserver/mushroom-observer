@@ -13,9 +13,9 @@ class Query::HerbariumRecords < Query::Base
       by_users: [User],
       has_notes: :boolean,
       notes_has: :string,
-      initial_det: [:string],
+      initial_dets: [:string],
       initial_det_has: :string,
-      accession_number: [:string],
+      accession_numbers: [:string],
       accession_number_has: :string,
       herbaria: [Herbarium],
       observations: [Observation],
@@ -48,9 +48,9 @@ class Query::HerbariumRecords < Query::Base
 
   def initialize_exact_match_parameters
     add_exact_match_condition("herbarium_records.initial_det",
-                              params[:initial_det])
+                              params[:initial_dets])
     add_exact_match_condition("herbarium_records.accession_number",
-                              params[:accession_number])
+                              params[:accession_numbers])
   end
 
   def initialize_search_parameters
