@@ -10,9 +10,9 @@ class Query::CollectionNumbers < Query::Base
       created_at: [:time],
       updated_at: [:time],
       id_in_set: [CollectionNumber],
-      names: [:string],
+      collectors: [:string],
       numbers: [:string],
-      name_has: :string,
+      collector_has: :string,
       number_has: :string,
       by_users: [User],
       observations: [Observation],
@@ -31,9 +31,9 @@ class Query::CollectionNumbers < Query::Base
   end
 
   def add_collection_number_conditions
-    add_exact_match_condition("collection_numbers.name", params[:names])
+    add_exact_match_condition("collection_numbers.name", params[:collectors])
     add_exact_match_condition("collection_numbers.number", params[:numbers])
-    add_search_condition("collection_numbers.name", params[:name_has])
+    add_search_condition("collection_numbers.name", params[:collector_has])
     add_search_condition("collection_numbers.number", params[:number_has])
   end
 
