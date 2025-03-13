@@ -4439,16 +4439,18 @@
   query_accession_has: sequence identifier has
   query_accession_number: catalog #
   query_accession_number_has: catalog # has
-  query_archive: archive
+  query_archive: "[:archive]"
   query_author_has: author has
   query_body_has: text has
-  query_by_author: author
-  query_by_editor: editor
-  query_by_users: users
+  query_by_author: "[:author]"
+  query_by_editor: "[:editor]"
+  query_by_users: "[:users]"
   query_citation_has: citation has
-  query_clade: clade
+  query_clade: "[:clade]"
   query_classification_has: classification has
   query_code_has: code has
+  query_collectors: collectors
+  query_collector_has: collector has
   query_comments_has: comments contain
   query_confidence: confidence
   query_content_has: text has
@@ -4478,11 +4480,11 @@
   query_initial_det: initial determination
   query_initial_det_has: initial determination has
   query_is_collection_location: is collection location
-  query_is_public: public
-  query_license: license
-  query_lichen: lichen
+  query_is_public: "[:public]"
+  query_license: "[:license]"
+  query_lichen: "[:lichen]"
   query_location_undefined: location undefined
-  query_locus: locus
+  query_locus: "[:locus]"
   query_locus_has: locus has
   query_mailing_address_has: address has
   query_members: members
@@ -4496,10 +4498,10 @@
   query_numbers: numbers
   query_ok_for_export: ok for export
   query_pattern: search pattern
-  query_quality: quality
-  query_rank: rank
+  query_quality: "[:quality]"
+  query_rank: "[:rank]"
   query_regexp: pattern
-  query_region: region
+  query_region: "[:region]"
   query_sizes: sizes
   query_sources: sources
   query_summary_has: summary has
@@ -4511,14 +4513,14 @@
 
   # in box
   query_in_box: in box
-  query_north: north
-  query_south: south
-  query_east: east
-  query_west: west
+  query_north: "[:north]"
+  query_south: "[:south]"
+  query_east: "[:east]"
+  query_west: "[:west]"
 
   # name queries
-  query_names: names
-  query_lookup: names
+  query_names: "[:names]"
+  query_lookup: "[:names]"
   query_include_synonyms: with synonyms
   query_include_subtaxa: with subtaxa
   query_include_immediate_subtaxa: with immediate subtaxa
@@ -4527,15 +4529,15 @@
   query_exclude_consensus: exclude consensus name
 
   # records
-  query_external_sites: sites
-  query_field_slips: field slips
-  query_herbaria: herbaria
-  query_herbarium_records: herbarium records
-  query_locations: locations
-  query_observations: observations
-  query_project_lists: project lists
-  query_projects: projects
-  query_species_lists: species lists
+  query_external_sites: "[:sites]"
+  query_field_slips: "[:field_slips]"
+  query_herbaria: "[:herbaria]"
+  query_herbarium_records: "[:herbarium_records]"
+  query_locations: "[:locations]"
+  query_observations: "[:observations]"
+  query_project_lists: "[:project_lists]"
+  query_projects: "[:projects]"
+  query_species_lists: "[:species_lists]"
 
   # subqueries
   query_image_query: of images

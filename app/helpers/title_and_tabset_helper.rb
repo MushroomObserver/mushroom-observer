@@ -61,7 +61,7 @@ module TitleAndTabsetHelper
             elsif query.num_results.zero? && !no_hits.nil?
               no_hits
             else
-              query.model.table_name.to_sym.l
+              query.model.table_name.upcase.to_sym.l
             end
     add_page_title(title)
     add_query_filters(query)
@@ -95,13 +95,13 @@ module TitleAndTabsetHelper
   # Subquery params get { curly brackets }. The new query block is
   # inside the brackets and indented.
   def caption_string_for_subquery(query, label, hash)
-    concat(tag.div("#{:"query_#{label}".l}: { "))
+    concat(tag.div("#{:"query_#{label}".l}: {"))
     concat(tag.div(class: "ml-3") do
       hash.each do |key, val|
         caption_one_filter_param(query, key, val)
       end
     end)
-    concat(tag.div(" }"))
+    concat(tag.div("}"))
   end
 
   # In the case of nested params, print them on one line separated by comma.
@@ -110,12 +110,11 @@ module TitleAndTabsetHelper
     len = hash.compact_blank.keys.size
     return if len.zero?
 
-    concat(tag.span("#{:"query_#{label}".l}: ["))
+    concat(tag.span("#{:"query_#{label}".l}: "))
     hash.compact_blank.each_with_index do |(key, val), idx|
       caption_string_for_val(query, key, val)
       concat(tag.span(", ")) if idx < len - 1
     end
-    concat(tag.span("]"))
   end
 
   def caption_string_for_val(query, key, val)
