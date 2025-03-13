@@ -132,7 +132,15 @@ module Name::Scopes
     scope :include_synonyms_of, lambda { |name|
       with_correct_spelling.where(id: name.synonyms.map(&:id))
     }
-    scope :clade, lambda { |names|
+
+    # This should really be clades/clade, but changing user prefs/filters and
+    # autocompleters is very involved, requires migration and script.
+    scope :clade, lambda { |clades|
+      clades = [clades].flatten
+      clades.map! { |val| one_clade(val) }
+      or_clause(*clades).distinct
+    }
+    scope :one_clade, lambda { |names|
       names(lookup: names, include_subtaxa: true).misspellings(:no)
     }
     # scope :clade_above_genus,
