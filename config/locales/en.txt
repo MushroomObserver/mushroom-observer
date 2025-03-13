@@ -237,6 +237,8 @@
   CHECKLISTS: Checklists
   CLADE: Clade
   clade: clade
+  CLADES: Clades
+  clades: clades
   COLLECTION_NUMBER: Collection Number
   collection_number: collection number
   COLLECTION_NUMBERS: Collection Numbers
@@ -384,6 +386,8 @@
   publications: publications
   REGION: Region
   region: region
+  REGIONS: Regions
+  regions: regions
   RSS_LOG: Activity Log
   rss_log: activity log
   RSS_LOGS: Activity Logs
@@ -4446,7 +4450,7 @@
   query_by_editor: "[:editor]"
   query_by_users: "[:users]"
   query_citation_has: citation has
-  query_clade: "[:clade]"
+  query_clades: "[:clades]"
   query_classification_has: classification has
   query_code_has: code has
   query_collectors: collectors
@@ -4501,7 +4505,7 @@
   query_quality: "[:quality]"
   query_rank: "[:rank]"
   query_regexp: pattern
-  query_region: "[:region]"
+  query_regions: "[:regions]"
   query_sizes: sizes
   query_sources: sources
   query_summary_has: summary has
