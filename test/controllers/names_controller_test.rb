@@ -263,16 +263,16 @@ class NamesControllerTest < FunctionalTestCase
     )
   end
 
-  def test_index_need_description
+  def test_index_needs_description
     login
-    get(:index, params: { need_description: true })
+    get(:index, params: { needs_description: true })
 
     assert_response(:success)
     assert_displayed_title(:query_title_needs_description.t(type: :name))
     assert_select(
       "#results a:match('href', ?)", %r{^#{names_path}/\d+},
-      # need length; count & size return a hash; need_description is grouped
-      { count: Name.with_correct_spelling.need_description.length },
+      # need length; count & size return a hash; needs_description is grouped
+      { count: Name.with_correct_spelling.needs_description.length },
       "Wrong number of (correctly spelled) Names"
     )
   end

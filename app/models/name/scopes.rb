@@ -183,7 +183,7 @@ module Name::Scopes
     scope :has_default_description,
           ->(bool = true) { presence_condition(Name[:description_id], bool:) }
     # Called by a special index page
-    scope :need_description, lambda {
+    scope :needs_description, lambda {
       has_default_description(false).joins(:observations).distinct.
         group(:name_id).order(Observation[:name_id].count.desc, Name[:id].desc)
     }
@@ -208,7 +208,7 @@ module Name::Scopes
       return none if Description::ALL_SOURCE_TYPES.exclude?(source)
 
       joins(:descriptions).
-        merge(NameDescription.types(source)).distinct
+        merge(NameDescription.sources(source)).distinct
     }
     scope :has_description_classification_differing, lambda {
       joins(:description).

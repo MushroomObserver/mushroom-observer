@@ -45,7 +45,7 @@ class Query::Names < Query::Base # rubocop:disable Metrics/ClassLength
       pattern: :string,
       locations: [Location],
       species_lists: [SpeciesList],
-      need_description: :boolean,
+      needs_description: :boolean,
       has_descriptions: :boolean,
       has_default_description: :boolean,
       has_observations: { boolean: [true] },
@@ -198,7 +198,7 @@ class Query::Names < Query::Base # rubocop:disable Metrics/ClassLength
 
   def initialize_name_association_parameters
     initialize_name_comments_parameters
-    add_need_description_condition
+    add_needs_description_condition
     add_has_default_description_condition
     initialize_names_has_descriptions
     initialize_names_has_observations
@@ -235,8 +235,8 @@ class Query::Names < Query::Base # rubocop:disable Metrics/ClassLength
     add_join(:observations)
   end
 
-  def add_need_description_condition
-    return unless params[:need_description]
+  def add_needs_description_condition
+    return unless params[:needs_description]
 
     add_join(:observations)
     @where << "names.description_id IS NULL"
