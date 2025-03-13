@@ -4435,8 +4435,10 @@
   query_date: date
   query_id_in_set: ids
 
-  query_accession: accession
-  query_accession_has: accession has
+  query_accession: sequence identifier
+  query_accession_has: sequence identifier has
+  query_accession_number: catalog #
+  query_accession_number_has: catalog # has
   query_archive: archive
   query_author_has: author has
   query_body_has: text has
@@ -4499,6 +4501,7 @@
   query_regexp: pattern
   query_region: region
   query_sizes: sizes
+  query_sources: sources
   query_summary_has: summary has
   query_target: target
   query_text_name_has: name has

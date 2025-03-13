@@ -69,46 +69,67 @@ module TitleAndTabsetHelper
 
   def add_query_filters(query)
     content_for(:filters) do
-      query.params.except(:by).compact_blank.each do |key, val|
-        caption_one_filter_param(query, key, val)
+      tag.div(class: "small") do
+        query.params.except(:by).compact_blank.each do |key, val|
+          caption_one_filter_param(query, key, val)
+        end
       end
     end
   end
 
-  # This tries to lookup legible names to param values when they are
-  # a list of ids, but it will truncate the names after 3 values.
-  # NOTE: the lookup is a sort of N+1, although it's not a heavy query.
+  # Each param could be a boolean, a val, a set of vals,
+  # a nested param with new key/vals, or a subquery.
   def caption_one_filter_param(query, key, val)
-    concat(tag.div(class: "small") do
-      if val.is_a?(Hash)
-        concat(tag.span("#{key.to_sym.l}: "))
-        caption_string_for_nested_params(query, val)
+    concat(tag.div do
+      if key.to_s.include?("_query")
+        caption_string_for_subquery(query, key, val)
+      elsif val.is_a?(Hash)
+        caption_string_for_nested_params(query, key, val)
       else
-        val = caption_string_for_val(query, key, val)
-        concat(tag.span("#{key.to_sym.l}: "))
-        concat(tag.b(val))
+        caption_string_for_val(query, key, val)
       end
     end)
   end
 
-  # In the case of nested params, print them on one line separated by comma.
-  def caption_string_for_nested_params(query, hash)
-    len = hash.compact_blank.keys.size - 1
-    hash.compact_blank.each_with_index do |(key, val), idx|
-      translation_key = :"query_#{key}"
-      translation = translation_key.l
-      if val == true
-        concat(tag.span(translation))
-      else
-        concat(tag.span("#{translation}: ")) unless key == :lookup
-        val = caption_string_for_val(query, key, val)
-        concat(tag.b(val))
+  # In the case of subqueries, treat them like a new query string.
+  # Subquery params get { curly brackets }. The new query block is
+  # inside the brackets and indented.
+  def caption_string_for_subquery(query, label, hash)
+    concat(tag.div("#{:"query_#{label}".l}: { "))
+    concat(tag.div(class: "ml-3") do
+      hash.each do |key, val|
+        caption_one_filter_param(query, key, val)
       end
-      concat(tag.span(", ")) if idx < len
+    end)
+    concat(tag.div(" }"))
+  end
+
+  # In the case of nested params, print them on one line separated by comma.
+  # Nested params get [square brackets]
+  def caption_string_for_nested_params(query, label, hash)
+    len = hash.compact_blank.keys.size
+    return if len.zero?
+
+    concat(tag.span("#{:"query_#{label}".l}: ["))
+    hash.compact_blank.each_with_index do |(key, val), idx|
+      caption_string_for_val(query, key, val)
+      concat(tag.span(", ")) if idx < len - 1
     end
+    concat(tag.span("]"))
   end
 
   def caption_string_for_val(query, key, val)
+    translation = :"query_#{key}".l
+    if val == true
+      concat(tag.span(translation))
+    else
+      concat(tag.span("#{translation}: ")) unless key == :lookup
+      val = caption_lookup_for_val(query, key, val)
+      concat(tag.b(val))
+    end
+  end
+
+  def caption_lookup_for_val(query, key, val)
     return val unless captionable_query_params.include?(key)
 
     key = :names if key == :lookup
