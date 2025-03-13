@@ -25,7 +25,7 @@ module PatternSearch
       notes: [:notes_has, :parse_string],
       project: [:projects, :parse_list_of_projects],
       project_lists: [:project_lists, :parse_list_of_projects],
-      region: [:regions, :parse_list_of_strings],
+      region: [:region, :parse_list_of_strings],
       user: [:by_users, :parse_list_of_users],
       field_slip: [:field_slips, :parse_list_of_strings],
 

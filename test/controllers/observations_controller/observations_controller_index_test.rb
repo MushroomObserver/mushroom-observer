@@ -627,7 +627,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     user = users(:californian)
     # Make sure the fixture is still okay
-    assert_equal({ regions: "California, USA" }, user.content_filter)
+    assert_equal({ region: "California, USA" }, user.content_filter)
     assert(user.layout_count >= observations_in_region.size,
            "User must be able to display search results in a single page.")
 

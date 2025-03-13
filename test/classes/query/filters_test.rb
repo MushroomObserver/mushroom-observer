@@ -53,24 +53,24 @@ class Query::FiltersTest < UnitTestCase
   end
 
   def test_filtering_content_region
-    expects = Location.regions("California, USA").index_order.uniq
-    assert_query(expects, :Location, regions: "California, USA")
-    assert_query(expects, :Location, regions: "USA, California")
+    expects = Location.region("California, USA").index_order.uniq
+    assert_query(expects, :Location, region: "California, USA")
+    assert_query(expects, :Location, region: "USA, California")
 
-    expects = Observation.regions("California, USA").index_order.uniq
-    assert_query(expects, :Observation, regions: "California, USA")
+    expects = Observation.region("California, USA").index_order.uniq
+    assert_query(expects, :Observation, region: "California, USA")
 
-    expects = Location.regions("North America").index_order.uniq
+    expects = Location.region("North America").index_order.uniq
     assert(expects.include?(locations(:albion))) # usa
     assert(expects.include?(locations(:elgin_co))) # canada
-    assert_query(expects, :Location, regions: "North America")
+    assert_query(expects, :Location, region: "North America")
   end
 
-  def test_filtering_content_clades
-    names = Name.clades("Agaricales").index_order.distinct
-    assert_query(names, :Name, clades: "Agaricales")
-    obs = Observation.clades("Agaricales").index_order.distinct
-    assert_query(obs, :Observation, clades: "Agaricales")
+  def test_filtering_content_clade
+    names = Name.clade("Agaricales").index_order.distinct
+    assert_query(names, :Name, clade: "Agaricales")
+    obs = Observation.clade("Agaricales").index_order.distinct
+    assert_query(obs, :Observation, clade: "Agaricales")
   end
 
   def test_filtering_content_with_subquery

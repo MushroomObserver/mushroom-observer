@@ -3,10 +3,10 @@
 class Query::Filter
   # Content filter to restrict observations and names to taxonomic clade/s.
   # Inheriting from StringFilter means multiple values joined by OR conditions.
-  class Clades < StringFilter
+  class Clade < StringFilter
     def initialize
       super(
-        sym: :clades,
+        sym: :clade,
         name: :CLADE,
         models: [Observation, Name]
       )

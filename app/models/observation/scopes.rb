@@ -207,12 +207,6 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
     scope :names_like,
           ->(name) { where(name: Name.text_name_has(name)) }
-
-    scope :clades, lambda { |clades|
-      clades = [clades].flatten
-      clades.map! { |val| clade(val) }
-      or_clause(*clades).distinct
-    }
     scope :clade, lambda { |val|
       # parse_name_and_rank defined below
       text_name, rank = parse_name_and_rank(val)
@@ -261,8 +255,14 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
 
     scope :regions, lambda { |place_names|
       place_names = [place_names].flatten
-      place_names.map! { |val| region(val) }
-      or_clause(*place_names).distinct
+      if place_names.length > 1
+        starting = region(place_names.shift)
+        place_names.reduce(starting) do |result, place_name|
+          result.or(Observation.region(place_name))
+        end
+      else
+        region(place_names.first)
+      end
     }
     scope :region, lambda { |place_name|
       region = Location.reverse_name_if_necessary(place_name)

@@ -46,8 +46,8 @@ class Query::Filter
       WithImages.new,
       WithSpecimen.new,
       Lichen.new,
-      Regions.new,
-      Clades.new
+      Region.new,
+      Clade.new
     ].freeze
   end
 

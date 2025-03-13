@@ -210,21 +210,21 @@ class Query::ObservationsTest < UnitTestCase
                  :Observation, species_lists: [spl.title, spl2.title])
   end
 
-  def test_observation_clades
-    assert_query(Observation.index_order.clades("Agaricales"),
-                 :Observation, clades: "Agaricales")
+  def test_observation_clade
+    assert_query(Observation.index_order.clade("Agaricales"),
+                 :Observation, clade: "Agaricales")
     assert_query(Observation.index_order.clade("Tremellales"),
-                 :Observation, clades: "Tremellales")
+                 :Observation, clade: "Tremellales")
   end
 
-  def test_observation_regions
+  def test_observation_region
     assert_query(Observation.index_order.
                  region("Sonoma Co., California, USA"),
-                 :Observation, regions: "Sonoma Co., California, USA")
+                 :Observation, region: "Sonoma Co., California, USA")
     assert_query(Observation.index_order.region("Massachusetts, USA"),
-                 :Observation, regions: "Massachusetts, USA")
+                 :Observation, region: "Massachusetts, USA")
     assert_query(Observation.index_order.region("North America"),
-                 :Observation, regions: "North America")
+                 :Observation, region: "North America")
   end
 
   def test_observation_in_box

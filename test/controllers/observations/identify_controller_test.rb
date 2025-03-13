@@ -48,7 +48,7 @@ module Observations
       sam_obs = Observation.needs_naming_and_not_reviewed_by_user(mary).
                 region("South America")
       query = Query.lookup_and_save(
-        :Observation, needs_naming: true, regions: "South America"
+        :Observation, needs_naming: true, region: "South America"
       )
       assert_equal(query.num_results, sam_obs.count)
 
@@ -57,12 +57,12 @@ module Observations
       # remember the original count, will change
       cal_obs_count = cal_obs.count
       query = Query.lookup_and_save(
-        :Observation, needs_naming: true, regions: "California, USA"
+        :Observation, needs_naming: true, region: "California, USA"
       )
       assert_equal(query.num_results, cal_obs_count)
 
       get(:index,
-          params: { filter: { type: :regions, term: "California, USA" } })
+          params: { filter: { type: :region, term: "California, USA" } })
       assert_no_flash
       assert_select(".matrix-box", cal_obs_count)
 

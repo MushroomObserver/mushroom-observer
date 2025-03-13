@@ -164,7 +164,7 @@ antilichenologist:
 
 californian:
   <<: *DEFAULTS
-  content_filter: <%= { regions: "California, USA" }.to_yaml.inspect %>
+  content_filter: <%= { region: "California, USA" }.to_yaml.inspect %>
   layout_count: 24 # >= # of California Observations
 
 unverified:
@@ -185,7 +185,7 @@ flintstone:
 nonregional:
   <<: *DEFAULTS
   email: "bogus"
-  content_filter: <%= { regions: "Massachusetts" }.to_yaml.inspect %>
+  content_filter: <%= { region: "Massachusetts" }.to_yaml.inspect %>
 
 foray_newbie:
   <<: *DEFAULTS
