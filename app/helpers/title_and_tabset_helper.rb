@@ -131,7 +131,10 @@ module TitleAndTabsetHelper
   end
 
   def caption_lookup_for_val(query, key, val)
-    return val unless captionable_query_params.include?(key)
+    unless captionable_query_params.include?(key)
+      val = val.join(", ") if val.is_a?(Array)
+      return val
+    end
 
     key = :names if key == :lookup
     send(:"caption_for_#{key}", query)
