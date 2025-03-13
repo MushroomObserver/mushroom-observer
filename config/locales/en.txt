@@ -4450,7 +4450,7 @@
   query_by_editor: "[:editor]"
   query_by_users: "[:users]"
   query_citation_has: citation has
-  query_clades: "[:clades]"
+  query_clade: "[:clades]"
   query_classification_has: classification has
   query_code_has: code has
   query_collectors: collectors
@@ -4505,7 +4505,7 @@
   query_quality: "[:quality]"
   query_rank: "[:rank]"
   query_regexp: pattern
-  query_regions: "[:regions]"
+  query_region: "[:regions]"
   query_sizes: sizes
   query_sources: sources
   query_summary_has: summary has
