@@ -4454,7 +4454,7 @@
   query_comments_has: comments contain
   query_confidence: confidence
   query_content_has: text has
-  query_content_types: types
+  query_content_types: file types
   query_copyright_holder_has: copyright holder has
   query_deprecated: deprecated
   query_description_has: description has
