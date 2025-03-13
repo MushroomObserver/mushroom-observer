@@ -166,7 +166,7 @@ module TitleAndTabsetHelper
   end
 
   def caption_for_by_users(query)
-    if params.deep_find(:by_users).size == 1
+    if query.params.deep_find(:by_users).size == 1
       User.find(query.params.deep_find(:by_users).first).legal_name
     else
       map_join_and_truncate(query, :by_users, User, :login)
@@ -174,8 +174,8 @@ module TitleAndTabsetHelper
   end
 
   # takes a search string
-  def caption_for_search_user(_query)
-    params.deep_find(:search_user)
+  def caption_for_search_user(query)
+    query.params.deep_find(:search_user)
   end
 
   # The max number of named items is hardcoded here to 3.
