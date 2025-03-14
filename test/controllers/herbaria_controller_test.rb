@@ -147,8 +147,7 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:index)
 
     assert_response(:success)
-    assert_select("#title", { text: "#{:HERBARIA.l} by Name" },
-                  "index should display #{:HERBARIA.l} by Name")
+    assert_displayed_title("Fungaria")
     Herbarium.find_each do |herbarium|
       assert_select(
         "a[href *= '#{herbarium_path(herbarium)}']", true,
@@ -164,7 +163,7 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:index, params: { by: by })
 
     assert_response(:success)
-    assert_displayed_title("Fungaria by Code")
+    assert_displayed_title("Fungaria")
   end
 
   def test_index_all_merge_source_links_presence_rolf
@@ -280,7 +279,8 @@ class HerbariaControllerTest < FunctionalTestCase
     login
     get(:index, params: { nonpersonal: true })
 
-    assert_displayed_title(:query_title_nonpersonal.l)
+    assert_displayed_title("Fungaria")
+    assert_displayed_filters("nonpersonal")
     Herbarium.where(personal_user_id: nil).find_each do |herbarium|
       assert_select(
         "a[href ^= '#{herbarium_path(herbarium)}']", true,
@@ -334,18 +334,12 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_index_reverse_records
     login
-    get(:index, params: { by: "reverse_records" })
+    by = "reverse_records"
+    get(:index, params: { by: })
 
     assert_response(:success)
-    assert_select(
-      "#title",
-      { text: "#{:HERBARIA.l} #{:by.l} #{:sort_by_records.l}" },
-      "Displayed title should be #{:HERBARIA.l} #{:by.l} #{:sort_by_records.l}"
-    )
-    assert_select(
-      "#sorts", true,
-      "Fungaria by #Records Reversed is missing sort tabs"
-    )
+    assert_displayed_title("Fungaria")
+    assert_sorted_by(by)
     Herbarium.find_each do |herbarium|
       assert_select(
         "a[href *= '#{herbarium_path(herbarium)}']", true,

@@ -450,6 +450,25 @@ module GeneralExtensions
     end
   end
 
+  def assert_displayed_filters(expect, msg = "Wrong filters")
+    assert_match(expect, css_select("#filters").text, msg)
+  end
+
+  def assert_sorted_by(by, text = /.*/, msg = "Wrong sort")
+    reverse = if by.include?("reverse")
+                by = by.delete_prefix("reverse_")
+                true
+              else
+                false
+              end
+    class_name = "#{controller_class_name}_by_#{by}_link"
+    assert_select("#sorts a.#{class_name}[disabled=disabled]", text, msg)
+    return unless reverse
+
+    assert_select("#sorts a.#{class_name}[disabled=disabled]",
+                  :sort_by_reverse.l, msg)
+  end
+
   ##############################################################################
   #
   #  :section:  File contents assertions

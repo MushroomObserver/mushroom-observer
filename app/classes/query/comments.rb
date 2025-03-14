@@ -12,7 +12,7 @@ class Query::Comments < Query::Base
       id_in_set: [Comment],
       by_users: [User],
       for_user: User,
-      target: { id: AbstractModel, type: :string },
+      target: { type: :string, id: AbstractModel },
       types: [{ string: Comment::ALL_TYPE_TAGS }],
       summary_has: :string,
       content_has: :string,

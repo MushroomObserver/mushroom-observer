@@ -4448,7 +4448,7 @@
   query_body_has: text has
   query_by_author: "[:author]"
   query_by_editor: "[:editor]"
-  query_by_users: "[:users]"
+  query_by_users: created by
   query_citation_has: citation has
   query_clade: "[:clades]"
   query_classification_has: classification has
@@ -4463,7 +4463,7 @@
   query_deprecated: deprecated
   query_description_has: description has
   query_field_slip_prefix_has: field slip prefix
-  query_for_user: for user
+  query_for_user: for
   query_has_author: with author
   query_has_citation: with citation
   query_has_classification: has classification
@@ -4509,7 +4509,6 @@
   query_sizes: sizes
   query_sources: sources
   query_summary_has: summary has
-  query_target: target
   query_text_name_has: name has
   query_title_has: title has
   query_types: types
@@ -4521,6 +4520,12 @@
   query_south: "[:south]"
   query_east: "[:east]"
   query_west: "[:west]"
+
+  # comments
+  # note there's a weird bug, "on" must be quoted or it will produce "target"
+  query_target: "on"
+  query_id: "id"
+  query_type: "type"
 
   # name queries
   query_names: "[:names]"
@@ -4568,7 +4573,7 @@
   sort_by_herbarium_name: Fungarium
   sort_by_id: ID
   sort_by_image_quality: Image Quality
-  sort_by_initial_det: Initial Determination
+  sort_by_initial_det: Taxon
   sort_by_last_login: Last Login
   sort_by_location: "[:LOCATION]"
   sort_by_login: "[:LOGIN_NAME]"
