@@ -58,7 +58,6 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   end
 
   def check_for_spider_block
-    trace_tests
     return unless !User.current && params[:page].to_i > 10
 
     Rails.logger.warn(:runtime_spiders_begone.t)
