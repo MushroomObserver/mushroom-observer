@@ -299,15 +299,14 @@ class HerbariaControllerTest < FunctionalTestCase
     end
   end
 
-  def test_index_pattern_text
+  def test_index_pattern_text_personal
     pattern = "Personal Herbarium"
 
     login
     get(:index, params: { pattern: pattern })
 
-    assert_select("#title").text.start_with?(
-      :query_title_pattern_search.l(types: :HERBARIA.l, pattern: pattern)
-    )
+    assert_displayed_title(:HERBARIA.l)
+    assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
     Herbarium.where.not(personal_user_id: nil).find_each do |herbarium|
       assert_select(
         "a[href ^= '#{herbarium_path(herbarium)}']", true,
