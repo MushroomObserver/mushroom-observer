@@ -172,7 +172,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
 
     assert_selector("#flash_notices",
                     text: :runtime_no_matches.l(type: :observations.l))
-    assert_selector("#title", text: "Observation Search")
+    assert_selector("#title", text: "Observations")
     assert_selector("#results", text: "")
     assert_selector(
       "#content a[href *= 'observations?pattern=Agaricus+campestris']",

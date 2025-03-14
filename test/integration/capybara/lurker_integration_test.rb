@@ -79,12 +79,10 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
                  page.title, "Wrong page")
 
     click_on("Projects")
-    assert_equal("#{:app_title.l}: Projects by Time Last Modified", page.title,
-                 "Wrong page")
+    assert_equal("#{:app_title.l}: Projects", page.title, "Wrong page")
 
     click_on("Comments")
-    assert_equal("#{:app_title.l}: Comments by Date Created",
-                 page.title, "Wrong page")
+    assert_equal("#{:app_title.l}: Comments", page.title, "Wrong page")
 
     click_on("Site Stats")
     assert_equal("#{:app_title.l}: Site Statistics", page.title, "Wrong page")
@@ -203,7 +201,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     # There should be no locations of that name, though.
     select("Locations", from: "search_type")
     click_button("Search")
-    assert_match("Index", page.title, "Wrong page")
+    assert_match("Locations", page.title, "Wrong page")
     assert_selector("div.alert", text: /no.*found/i)
     refute_selector("#results a[href]")
 
@@ -263,8 +261,8 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
 
     # Get a list of locations shown on map. (One defined, one undefined.)
     within("#right_tabs") { click_link("Show Locations") }
-    assert_match("Locations with Observations of #{nam.text_name}", page.title,
-                 "Wrong title")
+    assert_match("Locations", page.title, "Wrong title")
+    assert_selector("#filters", text: nam.text_name)
 
     # Click on the defined location.
     click_link(text: /Burbank/)
@@ -275,8 +273,8 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     within("#location_coordinates") do
       click_link(text: :show_location_observations.l)
     end
-    assert_match("Observations from Burbank, California, USA",
-                 page.title, "Wrong title")
+    assert_match("Observations", page.title, "Wrong title")
+    assert_selector("#filters", text: "Burbank, California, USA")
     save_results = find_all("#results a").select do |l|
       l[:href].match(%r{^/\d+})
     end

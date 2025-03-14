@@ -15,8 +15,8 @@ class AdvancedSearchIntegrationTest < CapybaraIntegrationTestCase
     fill_in("search_search_name", with: names(:fungi).text_name)
     fill_in("search_search_where",
             with: locations(:falmouth).display_name)
-    assert_checked_field("content_filter_has_images_")
-    assert_checked_field("content_filter_has_specimen_")
+    assert_checked_field("content_filter_has_images_") # i.e. "either"
+    assert_checked_field("content_filter_has_specimen_") # i.e. "either"
     within("#advanced_search_form") do
       click_commit
     end
@@ -26,7 +26,7 @@ class AdvancedSearchIntegrationTest < CapybaraIntegrationTestCase
 
     assert_equal(expected_hits.count, total_hits)
     assert_match(:OBSERVATIONS.l, page.title, "Wrong page")
-    page.find("#filters").assert_text(:query_has_images.l)
-    page.find("#filters").assert_text(:query_has_specimen.l)
+    page.find("#filters").assert_text(names(:fungi).text_name)
+    page.find("#filters").assert_text(locations(:falmouth).display_name)
   end
 end
