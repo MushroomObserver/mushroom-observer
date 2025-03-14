@@ -207,7 +207,15 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
     scope :names_like,
           ->(name) { where(name: Name.text_name_has(name)) }
-    scope :clade, lambda { |val|
+
+    # This should really be clades/clade, but changing user prefs/filters and
+    # autocompleters is very involved, requires migration and script.
+    scope :clade, lambda { |clades|
+      clades = [clades].flatten
+      clades.map! { |val| one_clade(val) }
+      or_clause(*clades).distinct
+    }
+    scope :one_clade, lambda { |val|
       # parse_name_and_rank defined below
       text_name, rank = parse_name_and_rank(val)
 
@@ -253,18 +261,14 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :has_geolocation,
           ->(bool = true) { presence_condition(Observation[:lat], bool:) }
 
-    scope :regions, lambda { |place_names|
+    # This should really be regions/region, but changing user prefs/filters and
+    # autocompleters is very involved, requires migration and script.
+    scope :region, lambda { |place_names|
       place_names = [place_names].flatten
-      if place_names.length > 1
-        starting = region(place_names.shift)
-        place_names.reduce(starting) do |result, place_name|
-          result.or(Observation.region(place_name))
-        end
-      else
-        region(place_names.first)
-      end
+      place_names.map! { |val| one_region(val) }
+      or_clause(*place_names).distinct
     }
-    scope :region, lambda { |place_name|
+    scope :one_region, lambda { |place_name|
       region = Location.reverse_name_if_necessary(place_name)
 
       if Location.understood_continent?(region)

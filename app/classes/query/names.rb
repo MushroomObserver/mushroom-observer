@@ -1,12 +1,11 @@
 # frozen_string_literal: true
 
 # base class for Query's which return Names
-class Query::Names < Query::Base # rubocop:disable Metrics/ClassLength
+class Query::Names < Query::Base
   include Query::Params::AdvancedSearch
   include Query::Params::Filters
   include Query::Initializers::AdvancedSearch
   include Query::Initializers::Filters
-  include Query::Titles::Observations
 
   def model
     Name
@@ -45,7 +44,7 @@ class Query::Names < Query::Base # rubocop:disable Metrics/ClassLength
       pattern: :string,
       locations: [Location],
       species_lists: [SpeciesList],
-      need_description: :boolean,
+      needs_description: :boolean,
       has_descriptions: :boolean,
       has_default_description: :boolean,
       has_observations: { boolean: [true] },
@@ -56,7 +55,6 @@ class Query::Names < Query::Base # rubocop:disable Metrics/ClassLength
   end
 
   def initialize_flavor
-    add_sort_order_to_title
     initialize_name_basic_parameters
     initialize_name_record_parameters
     initialize_subquery_parameters
@@ -167,8 +165,8 @@ class Query::Names < Query::Base # rubocop:disable Metrics/ClassLength
 
   def initialize_misspellings_parameter
     val = params[:misspellings] || :no
-    where << "names.correct_spelling_id IS NULL"     if val == :no
-    where << "names.correct_spelling_id IS NOT NULL" if val == :only
+    @where << "names.correct_spelling_id IS NULL"     if val == :no
+    @where << "names.correct_spelling_id IS NOT NULL" if val == :only
   end
 
   def initialize_is_deprecated_parameter
@@ -198,7 +196,7 @@ class Query::Names < Query::Base # rubocop:disable Metrics/ClassLength
 
   def initialize_name_association_parameters
     initialize_name_comments_parameters
-    add_need_description_condition
+    add_needs_description_condition
     add_has_default_description_condition
     initialize_names_has_descriptions
     initialize_names_has_observations
@@ -235,15 +233,14 @@ class Query::Names < Query::Base # rubocop:disable Metrics/ClassLength
     add_join(:observations)
   end
 
-  def add_need_description_condition
-    return unless params[:need_description]
+  def add_needs_description_condition
+    return unless params[:needs_description]
 
     add_join(:observations)
     @where << "names.description_id IS NULL"
     @selects = "DISTINCT names.id, count(observations.name_id)"
     @group = "observations.name_id"
     @order = "count(observations.name_id) DESC"
-    @title_tag = :query_title_needs_description.t(type: :name)
   end
 
   def add_has_default_description_condition
@@ -288,16 +285,5 @@ class Query::Names < Query::Base # rubocop:disable Metrics/ClassLength
 
   def self.default_order
     "name"
-  end
-
-  def title
-    default = super
-    if params[:has_observations] || params[:observation_query]
-      with_observations_query_description || default
-    elsif params[:has_descriptions] || params[:description_query]
-      :query_title_with_descriptions.t(type: :name) || default
-    else
-      default
-    end
   end
 end

@@ -13,7 +13,6 @@ class Query::ExternalSites < Query::Base
   end
 
   def initialize_flavor
-    add_sort_order_to_title
     add_id_in_set_condition
     add_search_condition("external_sites.name", params[:name_has])
     super

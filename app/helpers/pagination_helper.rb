@@ -17,7 +17,7 @@ module PaginationHelper
     letters = pagination_letters(pages, args)
     numbers = pagination_numbers(pages, args)
     body = capture(&block).to_s
-    content_tag(:div, id: html_id) do
+    tag.div(id: html_id, data: { q: get_query_param }) do
       letters + safe_br + numbers + body + numbers + safe_br + letters
     end
   end

@@ -12,7 +12,6 @@ module Query::Modules::Conditions
   def add_pattern_condition
     return if params[:pattern].blank?
 
-    @title_tag = :query_title_pattern_search
     add_search_condition(search_fields, params[:pattern])
   end
 
@@ -92,16 +91,13 @@ module Query::Modules::Conditions
     set = clean_id_set(params[param])
     @where << "#{table}.id IN (#{set})"
     @order = "FIND_IN_SET(#{table}.id,'#{set}') ASC" unless params[:order]
-
-    @title_tag = :query_title_in_set.t(type: table.singularize.to_sym)
   end
 
   # table_col = foreign key of an association, e.g. `observations.location_id`
-  def add_association_condition(table_col, ids, *, title_method: nil)
+  def add_association_condition(table_col, ids, *)
     return if ids.empty?
 
     if ids.size == 1
-      send(title_method) if title_method && ids.first.present?
       @where << "#{table_col} = '#{ids.first}'"
     else
       set = clean_id_set(ids) # this produces a joined string!
