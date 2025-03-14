@@ -20,8 +20,8 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
     click_link("Show Locations")
     click_link("Map Locations")
 
-    title = page.find("#title")
-    title.assert_text(obs.name.text_name)
+    filters = page.find("#filters")
+    filters.assert_text(obs.name.text_name)
   end
 
   def test_user_content_filter
