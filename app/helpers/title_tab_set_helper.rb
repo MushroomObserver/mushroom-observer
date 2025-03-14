@@ -4,7 +4,7 @@
 #  for building nav links (in the context of a page)
 
 #  add_tab_set(tabs)            # add content_for(:tab_set)
-#  make_links_for_tabs(tabs)    # convert tabs -> link_to's / button_to's
+#  make_tab_links(tabs)         # convert tabs -> link_to's / button_to's
 #  make_link_for_one_tab(tab)   # convert one tab into an HTML link or button
 #
 module TitleTabSetHelper
@@ -12,7 +12,7 @@ module TitleTabSetHelper
   def add_tab_set(tabs)
     return unless tabs
 
-    links = make_links_for_tabs(tabs, { class: "d-block" })
+    links = make_tab_links(tabs, { class: "d-block" })
 
     content_for(:tab_set) do
       render(partial: "application/content/tab_set", locals: { links: links })
@@ -26,18 +26,18 @@ module TitleTabSetHelper
   #   ["text", "url", { class: "edit_form_link" }],
   #   [nil, article, { button: :destroy }]
   # ]
-  # make_links_for_tabs(links) will make an array of the following HTML
+  # make_tab_links(links) will make an array of the following HTML
   #   "<a href="url" class="edit_form_link">text</a>",
   #   "<form action='destroy'>" etc via destroy_button
   #   (The above array gives default button text and class)
   #
   # Allows passing an extra_args hash to be merged with each link's args
   #
-  def make_links_for_tabs(tabs, extra_args = {})
+  def make_tab_links(tabs, extra_args = {})
     return [] unless tabs
 
     tabs.compact.map do |tab|
-      make_link_for_one_tab(tab, extra_args)
+      make_one_tab_link(tab, extra_args)
     end
   end
 
@@ -45,7 +45,7 @@ module TitleTabSetHelper
   # which HTML to return for that type of link
   # Pass extra_args hash to modify the link/button attributes
   #
-  def make_link_for_one_tab(tab, extra_args = {})
+  def make_one_tab_link(tab, extra_args = {})
     str, url, args = tab
     args ||= {}
     kwargs = merge_tab_args_with_extra_args(args, extra_args)
@@ -101,7 +101,7 @@ module TitleTabSetHelper
       role: "menuitem",
       class: "dropdown-item"
     }
-    make_links_for_tabs(tabs, extra_args)
+    make_tab_links(tabs, extra_args)
   end
 
   def dropdown_link_options(args = {})
