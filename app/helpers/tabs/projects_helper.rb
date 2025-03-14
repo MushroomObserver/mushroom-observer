@@ -57,9 +57,10 @@ module Tabs
     # Add some alternate sorting criteria.
     def projects_index_sorts
       [
-        ["name", :sort_by_title.t],
-        ["created_at",  :sort_by_created_at.t],
-        ["updated_at",  :sort_by_updated_at.t]
+        ["name", :sort_by_title.l],
+        ["created_at",  :sort_by_created_at.l],
+        ["updated_at",  :sort_by_updated_at.l],
+        ["summary", :sort_by_summary.l],
       ].freeze
     end
 
