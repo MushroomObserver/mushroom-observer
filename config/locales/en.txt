@@ -4447,7 +4447,7 @@
   query_author_has: author has
   query_body_has: text has
   query_by_author: "[:author]"
-  query_by_editor: "[:editor]"
+  query_by_editor: edited by
   query_by_users: created by
   query_citation_has: citation has
   query_clade: "[:clades]"
@@ -4504,7 +4504,7 @@
   query_pattern: search pattern
   query_quality: "[:quality]"
   query_rank: "[:rank]"
-  query_regexp: pattern
+  query_regexp: country
   query_region: "[:regions]"
   query_sizes: sizes
   query_sources: sources
@@ -4555,6 +4555,12 @@
   query_observation_query: of observations
   query_sequence_query: of sequences
   query_description_query: of descriptions
+
+  # advanced search
+  query_search_name: search taxa
+  query_search_user: search users
+  query_search_where: search where
+  query_search_content: search content
 
   # Sorting criteria.
   sort_by_accession_number: "[:herbarium_record_accession_number]"

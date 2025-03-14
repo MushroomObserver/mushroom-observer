@@ -454,7 +454,7 @@ module GeneralExtensions
     assert_match(expect, css_select("#filters").text, msg)
   end
 
-  def assert_sorted_by(by, text = /.*/, msg = "Wrong sort")
+  def assert_sorted_by(by, text = /.*/, msg = "Wrong sort for #{by}")
     reverse = if by.include?("reverse")
                 by = by.delete_prefix("reverse_")
                 true

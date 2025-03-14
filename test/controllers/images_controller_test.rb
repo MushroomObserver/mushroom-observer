@@ -22,27 +22,46 @@ class ImagesControllerTest < FunctionalTestCase
 
   def test_index_with_non_default_sort
     check_index_sorted_by("name")
+    sort_orders = %w[name user confidence image_quality]
+    sort_orders.each do |order|
+      check_index_sorted_by(order)
+    end
   end
 
-  def test_index_sorted_by_user
-    check_index_sorted_by("user")
+  def test_index_by_user
+    user = rolf
+
+    login
+    get(:index, params: { by_user: user.id })
+
+    assert_template("index")
+    assert_template(partial: "_matrix_box")
+    assert_displayed_title(:IMAGES.l)
+    assert_displayed_filters("#{:query_by_users.l}: #{user.legal_name}")
   end
 
-  def test_index_sorted_by_confidence
-    check_index_sorted_by("confidence")
+  def test_index_by_users_bad_user_id
+    bad_user_id = observations(:minimal_unknown_obs).id
+    assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
+
+    login
+    get(:index, params: { by_user: bad_user_id })
+
+    assert_flash_text(
+      :runtime_object_not_found.l(type: "user", id: bad_user_id)
+    )
+    assert_redirected_to(images_path)
   end
 
-  # def test_index_sorted_by_copyright_holder
-  #   check_index_sorted_by("copyright_holder")
-  # end
+  def test_index_projects
+    project = projects(:bolete_project)
+    login
+    get(:index, params: { project: project.id })
 
-  def test_index_sorted_by_image_quality
-    check_index_sorted_by("image_quality")
+    assert_template("index", partial: "_image")
+    assert_displayed_title(:IMAGES.l)
+    assert_displayed_filters("#{:query_projects.l}: #{project.title}")
   end
-
-  # def test_index_sorted_by_owners_quality
-  #   check_index_sorted_by("owners_quality")
-  # end
 
   def test_index_too_many_pages
     login
@@ -155,41 +174,6 @@ class ImagesControllerTest < FunctionalTestCase
     get(:index, params: { pattern: image.id })
 
     assert_redirected_to(image_path(image))
-  end
-
-  def test_index_by_user
-    user = rolf
-
-    login
-    get(:index, params: { by_user: user.id })
-
-    assert_template("index")
-    assert_template(partial: "_matrix_box")
-    assert_displayed_title(:IMAGES.l)
-    assert_displayed_filters("#{:query_by_users.l}: #{user.legal_name}")
-  end
-
-  def test_index_by_users_bad_user_id
-    bad_user_id = observations(:minimal_unknown_obs).id
-    assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
-
-    login
-    get(:index, params: { by_user: bad_user_id })
-
-    assert_flash_text(
-      :runtime_object_not_found.l(type: "user", id: bad_user_id)
-    )
-    assert_redirected_to(images_path)
-  end
-
-  def test_index_projects
-    project = projects(:bolete_project)
-    login
-    get(:index, params: { project: project.id })
-
-    assert_template("index", partial: "_image")
-    assert_displayed_title(:IMAGES.l)
-    assert_displayed_filters("#{:query_projects.l}: #{project.title}")
   end
 
   #########################################################
