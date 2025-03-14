@@ -23,7 +23,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     get(:index)
 
     assert_response(:success)
-    assert_displayed_title("Fungarium Records")
+    assert_displayed_title(:HERBARIUM_RECORDS.l)
     # In results, expect 1 row per herbarium_record
     assert_select("#results tr", HerbariumRecord.count,
                   "Wrong number of Herbarium Records")
@@ -61,8 +61,8 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     get(:index, params: { pattern: pattern })
 
     assert_response(:success)
-    assert_displayed_title("Fungarium Records")
-    assert_displayed_filters("pattern: #{pattern}")
+    assert_displayed_title(:HERBARIUM_RECORDS.l)
+    assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
     # In results, expect 1 row per herbarium_record
     assert_select("#results tr", 2)
   end
@@ -83,8 +83,8 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     login
     get(:index, params: { herbarium: herbarium.id })
 
-    assert_displayed_title("Fungarium Records")
-    assert_displayed_filters("fungaria: #{herbarium.name}")
+    assert_displayed_title(:HERBARIUM_RECORDS.l)
+    assert_displayed_filters("#{:query_herbaria.l}: #{herbarium.name}")
 
     # In results, expect 1 row per herbarium_record
     assert_select("#results tr",
@@ -97,7 +97,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     login
     get(:index, params: { herbarium: herbarium.id })
 
-    assert_displayed_title(:list_objects.l(type: :HERBARIUM_RECORDS.l))
+    assert_displayed_title(:HERBARIUM_RECORDS.l)
     assert_flash_text(:runtime_no_matches.l(type: :herbarium_records.l))
   end
 
@@ -107,8 +107,8 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     login
     get(:index, params: { observation: obs.id })
 
-    assert_displayed_title("Fungarium Records")
-    assert_displayed_filters("observations: #{obs.id}")
+    assert_displayed_title(:HERBARIUM_RECORDS.l)
+    assert_displayed_filters("#{:query_observations.l}: #{obs.id}")
     #  "Fungarium Records attached to ‘#{obs.unique_text_name}’")
     assert_select("#results tr", obs.herbarium_records.size)
   end
@@ -119,7 +119,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     obs = observations(:strobilurus_diminutivus_obs)
     get(:index, params: { observation: obs.id })
 
-    assert_displayed_title(:list_objects.l(type: :HERBARIUM_RECORDS.l))
+    assert_displayed_title(:HERBARIUM_RECORDS.l)
     assert_flash_text(:runtime_no_matches.l(type: :herbarium_records.l))
   end
 

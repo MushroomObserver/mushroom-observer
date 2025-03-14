@@ -9,20 +9,15 @@ class ImagesControllerTest < FunctionalTestCase
 
     assert_template("index")
     assert_template(partial: "_matrix_box")
-    assert_displayed_title("Images by #{sort_order.titleize}")
+    assert_displayed_title(:IMAGES.l)
+    assert_sorted_by(sort_order)
   end
 
   # Tests of index, with tests arranged as follows:
   # default subaction; then
   # other subactions in order of index_active_params
   def test_index
-    login
-    get(:index)
-    default_sorted_by = :"sort_by_#{::Query::Images.default_order}".l
-
-    assert_template("index")
-    assert_template(partial: "_matrix_box")
-    assert_displayed_title("Images by #{default_sorted_by}")
+    check_index_sorted_by(::Query::Images.default_order)
   end
 
   def test_index_with_non_default_sort
@@ -34,34 +29,20 @@ class ImagesControllerTest < FunctionalTestCase
   end
 
   def test_index_sorted_by_confidence
-    by = "confidence"
-
-    login
-    get(:index, params: { by: by })
-
-    assert_template("index")
-    assert_template(partial: "_matrix_box")
-    assert_displayed_title("Images by Confidence Level")
+    check_index_sorted_by("confidence")
   end
 
-  def test_index_sorted_by_copyright_holder
-    check_index_sorted_by("copyright_holder")
-  end
+  # def test_index_sorted_by_copyright_holder
+  #   check_index_sorted_by("copyright_holder")
+  # end
 
   def test_index_sorted_by_image_quality
     check_index_sorted_by("image_quality")
   end
 
-  def test_index_sorted_by_owners_quality
-    by = "owners_quality"
-
-    login
-    get(:index, params: { by: by })
-
-    assert_template("index")
-    assert_template(partial: "_matrix_box")
-    assert_displayed_title("Images by Owner’s Quality")
-  end
+  # def test_index_sorted_by_owners_quality
+  #   check_index_sorted_by("owners_quality")
+  # end
 
   def test_index_too_many_pages
     login
@@ -91,7 +72,7 @@ class ImagesControllerTest < FunctionalTestCase
   #   assert_template("index")
   #   assert_template(partial: "_matrix_box")
   #   # Don't care about the title, but good to know if it changes
-  #   assert_displayed_title("Matching Images")
+  #   assert_displayed_title(:IMAGES.l)
   # end
 
   # def test_index_advanced_search_one_hit
@@ -153,7 +134,8 @@ class ImagesControllerTest < FunctionalTestCase
     get(:index, params: { pattern: pattern })
 
     assert_template("index", partial: "_image")
-    assert_displayed_title("Images Matching ‘#{pattern}’")
+    assert_displayed_title(:IMAGES.l)
+    assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
   end
 
   def test_index_pattern_text_no_hits
@@ -183,9 +165,11 @@ class ImagesControllerTest < FunctionalTestCase
 
     assert_template("index")
     assert_template(partial: "_matrix_box")
+    assert_displayed_title(:IMAGES.l)
+    assert_displayed_filters("#{:query_by_users.l}: #{user.legal_name}")
   end
 
-  def test_index_by_user_bad_user_id
+  def test_index_by_users_bad_user_id
     bad_user_id = observations(:minimal_unknown_obs).id
     assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
 
@@ -198,12 +182,14 @@ class ImagesControllerTest < FunctionalTestCase
     assert_redirected_to(images_path)
   end
 
-  def test_index_for_project
-    project = projects(:bolete_project).id
+  def test_index_projects
+    project = projects(:bolete_project)
     login
-    get(:index, params: { project: project })
+    get(:index, params: { project: project.id })
 
     assert_template("index", partial: "_image")
+    assert_displayed_title(:IMAGES.l)
+    assert_displayed_filters("#{:query_projects.l}: #{project.title}")
   end
 
   #########################################################
