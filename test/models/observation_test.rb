@@ -1225,22 +1225,22 @@ class ObservationTest < UnitTestCase
                         observations(:peltigera_obs))
   end
 
-  def test_scope_in_clade
-    assert_includes(Observation.in_clade("Agaricales"),
+  def test_scope_clade
+    assert_includes(Observation.clade("Agaricales"),
                     observations(:coprinus_comatus_obs))
-    assert_not_includes(Observation.in_clade("Agaricales"),
+    assert_not_includes(Observation.clade("Agaricales"),
                         observations(:peltigera_obs))
     # test the scope can handle a genus
-    assert_includes(Observation.in_clade("Tremella"),
+    assert_includes(Observation.clade("Tremella"),
                     observations(:owner_only_favorite_ne_consensus))
-    assert_includes(Observation.in_clade("Tremella"),
+    assert_includes(Observation.clade("Tremella"),
                     observations(:sortable_obs_users_first_obs))
-    assert_includes(Observation.in_clade("Tremella"),
+    assert_includes(Observation.clade("Tremella"),
                     observations(:sortable_obs_users_second_obs))
-    assert_not_includes(Observation.in_clade("Tremella"),
+    assert_not_includes(Observation.clade("Tremella"),
                         observations(:chlorophyllum_rachodes_obs))
     # test the scope can handle a name instance
-    assert_includes(Observation.in_clade(names(:coprinus)),
+    assert_includes(Observation.clade(names(:coprinus)),
                     observations(:coprinus_comatus_obs))
   end
 

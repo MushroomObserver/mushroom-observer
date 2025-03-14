@@ -53,23 +53,23 @@ class Query::FiltersTest < UnitTestCase
   end
 
   def test_filtering_content_region
-    expects = Location.in_region("California, USA").index_order.uniq
+    expects = Location.region("California, USA").index_order.uniq
     assert_query(expects, :Location, region: "California, USA")
     assert_query(expects, :Location, region: "USA, California")
 
-    expects = Observation.in_region("California, USA").index_order.uniq
+    expects = Observation.region("California, USA").index_order.uniq
     assert_query(expects, :Observation, region: "California, USA")
 
-    expects = Location.in_region("North America").index_order.uniq
+    expects = Location.region("North America").index_order.uniq
     assert(expects.include?(locations(:albion))) # usa
     assert(expects.include?(locations(:elgin_co))) # canada
     assert_query(expects, :Location, region: "North America")
   end
 
   def test_filtering_content_clade
-    names = Name.in_clade("Agaricales").index_order.distinct
+    names = Name.clade("Agaricales").index_order.distinct
     assert_query(names, :Name, clade: "Agaricales")
-    obs = Observation.in_clade("Agaricales").index_order.distinct
+    obs = Observation.clade("Agaricales").index_order.distinct
     assert_query(obs, :Observation, clade: "Agaricales")
   end
 

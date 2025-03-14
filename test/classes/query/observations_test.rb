@@ -210,25 +210,20 @@ class Query::ObservationsTest < UnitTestCase
                  :Observation, species_lists: [spl.title, spl2.title])
   end
 
-  def test_observation_in_clade
-    assert_query(Observation.index_order.in_clade("Agaricales"),
-                 :Observation, in_clade: "Agaricales")
-    assert_query(Observation.index_order.in_clade("Tremellales"),
-                 :Observation, in_clade: "Tremellales")
+  def test_observation_clade
+    assert_query(Observation.index_order.clade("Agaricales"),
+                 :Observation, clade: "Agaricales")
+    assert_query(Observation.index_order.clade("Tremellales"),
+                 :Observation, clade: "Tremellales")
   end
 
-  def test_observation_in_region
+  def test_observation_region
     assert_query(Observation.index_order.
-                 in_region("Sonoma Co., California, USA"),
-                 :Observation, in_region: "Sonoma Co., California, USA")
-    assert_query(Observation.index_order.in_region("Massachusetts, USA"),
-                 :Observation, in_region: "Massachusetts, USA")
-    assert_query(Observation.index_order.in_region("North America"),
-                 :Observation, in_region: "North America")
-    # test equivalence of "content filter"
-    assert_query(Observation.index_order.in_region("Massachusetts, USA"),
+                 region("Sonoma Co., California, USA"),
+                 :Observation, region: "Sonoma Co., California, USA")
+    assert_query(Observation.index_order.region("Massachusetts, USA"),
                  :Observation, region: "Massachusetts, USA")
-    assert_query(Observation.index_order.in_region("North America"),
+    assert_query(Observation.index_order.region("North America"),
                  :Observation, region: "North America")
   end
 
@@ -426,10 +421,16 @@ class Query::ObservationsTest < UnitTestCase
   end
 
   def test_observation_advanced_search_content
-    assert_query(Observation.advanced_search("second fruiting"),
-                 :Observation, search_content: "second fruiting") # notes
-    assert_query(Observation.advanced_search("agaricus"),
-                 :Observation, search_content: "agaricus") # comment
+    # notes
+    expects = [observations(:coprinus_comatus_obs)]
+    scope = Observation.advanced_search("second fruiting")
+    assert_query_scope(expects, scope,
+                       :Observation, search_content: "second fruiting")
+    # comments(:minimal_unknown_obs_comment_2)
+    expects = [observations(:minimal_unknown_obs)]
+    scope = Observation.advanced_search("agaricus")
+    assert_query_scope(expects, scope,
+                       :Observation, search_content: "agaricus")
   end
 
   def test_observation_date

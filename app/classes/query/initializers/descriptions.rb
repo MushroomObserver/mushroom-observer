@@ -44,15 +44,15 @@ module Query::Initializers::Descriptions
   # If ever generalizing, `type` should be model.parent_type
   def initialize_name_descriptions_parameters(type = "name")
     initialize_ok_for_export_parameter
-    initialize_type_parameter(type)
+    initialize_sources_parameter(type)
     initialize_projects_parameter(:"#{type}_descriptions", nil)
     initialize_content_has_parameter(type)
   end
 
-  def initialize_type_parameter(type)
+  def initialize_sources_parameter(type)
     add_indexed_enum_condition(
       "#{type}_descriptions.source_type",
-      params[:types],
+      params[:sources],
       "#{type}_description".classify.constantize.source_types # Hash
     )
   end

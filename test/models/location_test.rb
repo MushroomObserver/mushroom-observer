@@ -539,17 +539,27 @@ class LocationTest < UnitTestCase
     assert_empty(Location.name_has(ARBITRARY_SHA))
   end
 
-  def test_scope_in_region
+  def test_scope_one_region
     assert_includes(
-      Location.in_region("New York, USA"),
+      Location.one_region("New York, USA"),
       locations(:nybg_location)
     )
     assert_not_includes(
-      Location.in_region("York"),
+      Location.one_region("York"),
       locations(:nybg_location),
       "Entire trailing part of Location name should match region"
     )
-    assert_empty(Location.in_region(ARBITRARY_SHA))
+    assert_empty(Location.one_region(ARBITRARY_SHA))
+  end
+
+  def test_scope_region
+    expects = Location.region(["California, USA", "New York, USA"]).
+              reorder(id: :asc)
+    assert_includes(expects, locations(:nybg_location))
+    assert_includes(expects, albion)
+    assert_includes(expects, california)
+    assert_not_includes(expects, wrangel)
+    assert_not_includes(expects, perkatkun)
   end
 
   def test_contains_edges
