@@ -356,7 +356,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     # Following gives more informative error message than
     # assert(page.has_title?("#{:app_title.l }: Activity Log"), "Wrong page")
     assert_equal(
-      "#{:app_title.l}: Observations by #{:sort_by_rss_log.l}",
+      "#{:app_title.l}: #{:OBSERVATIONS.l}", #  by #{:sort_by_rss_log.l}
       page.title, "Login failed"
     )
   end

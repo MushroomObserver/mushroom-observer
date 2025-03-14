@@ -25,7 +25,8 @@ class AdvancedSearchIntegrationTest < CapybaraIntegrationTestCase
     total_hits = all(".matrix-box", visible: :any).count
 
     assert_equal(expected_hits.count, total_hits)
-    assert_match(:query_title_all_filtered.t(type: :observation), page.title,
-                 "Wrong page")
+    assert_match(:OBSERVATIONS.l, page.title, "Wrong page")
+    page.find("#filters").assert_text(:query_has_images.l)
+    page.find("#filters").assert_text(:query_has_specimen.l)
   end
 end
