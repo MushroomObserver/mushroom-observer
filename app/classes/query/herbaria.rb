@@ -21,7 +21,6 @@ class Query::Herbaria < Query::Base
 
   # rubocop:disable Metrics/AbcSize
   def initialize_flavor
-    add_sort_order_to_title
     add_time_condition("herbaria.created_at", params[:created_at])
     add_time_condition("herbaria.updated_at", params[:updated_at])
     add_search_condition("herbaria.code", params[:code_has])
@@ -39,8 +38,7 @@ class Query::Herbaria < Query::Base
   def add_nonpersonal_condition
     return if params[:nonpersonal].blank? # false is blank
 
-    @title_tag = :query_title_nonpersonal
-    where << "herbaria.personal_user_id IS NULL"
+    @where << "herbaria.personal_user_id IS NULL"
   end
 
   def search_fields

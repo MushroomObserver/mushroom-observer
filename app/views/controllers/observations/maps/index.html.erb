@@ -1,6 +1,9 @@
 <%
 @container = :full
-add_page_title(:map_locations_title.t(locations: @query.title))
+
+add_page_title(:map_locations_title.t(
+  locations: map_join_and_truncate(@query, :locations)
+))
 add_tab_set(observation_maps_tabs(query: @query))
 
 objects = @observations

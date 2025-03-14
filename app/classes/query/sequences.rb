@@ -24,7 +24,6 @@ class Query::Sequences < Query::Base
   end
 
   def initialize_flavor
-    add_sort_order_to_title
     # Leaving out bases because some formats allow spaces and other "garbage"
     # delimiters which could interrupt the subsequence the user is searching
     # for.  Users would probably not understand why the search fails to find
