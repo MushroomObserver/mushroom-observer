@@ -4446,7 +4446,7 @@
   query_archive: "[:archive]"
   query_author_has: author has
   query_body_has: text has
-  query_by_author: "[:author]"
+  query_by_author: authored by
   query_by_editor: edited by
   query_by_users: created by
   query_citation_has: citation has

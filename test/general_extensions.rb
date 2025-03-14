@@ -462,12 +462,28 @@ module GeneralExtensions
               else
                 false
               end
-    class_name = "#{controller_class_name}_by_#{by}_link"
+    class_name = "#{adjusted_controller_class_name}_by_#{by}_link"
     assert_select("#sorts a.#{class_name}[disabled=disabled]", text, msg)
     return unless reverse
 
     assert_select("#sorts a.#{class_name}[disabled=disabled]",
                   :sort_by_reverse.l, msg)
+  end
+
+  # The controller class name for e.g. Locations::DescriptionsController is
+  # "locations/descriptions". Need to adjust these to "location_descriptions".
+  def adjusted_controller_class_name
+    return controller_class_name unless controller_class_name.include?("/")
+
+    names = controller_class_name.split("/")
+    names.map!.with_index do |namespace, idx|
+      if idx < names.size - 1
+        namespace.singularize
+      else
+        namespace
+      end
+    end
+    names.join("_")
   end
 
   ##############################################################################
