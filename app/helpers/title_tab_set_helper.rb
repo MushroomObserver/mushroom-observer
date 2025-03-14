@@ -4,15 +4,15 @@
 #  for building nav links (in the context of a page)
 
 #  add_tab_set(tabs)            # add content_for(:tab_set)
-#  create_links_to(tabs)        # convert tabs -> link_to's / button_to's
-#  create_link_to(tab)          # convert one tab into an HTML link or button
+#  make_links_for_tabs(tabs)    # convert tabs -> link_to's / button_to's
+#  make_link_for_one_tab(tab)   # convert one tab into an HTML link or button
 #
 module TitleTabSetHelper
   # Short-hand to render shared tab_set partial for a given set of tabs.
   def add_tab_set(tabs)
     return unless tabs
 
-    links = create_links_to(tabs, { class: "d-block" })
+    links = make_links_for_tabs(tabs, { class: "d-block" })
 
     content_for(:tab_set) do
       render(partial: "application/content/tab_set", locals: { links: links })
@@ -26,18 +26,18 @@ module TitleTabSetHelper
   #   ["text", "url", { class: "edit_form_link" }],
   #   [nil, article, { button: :destroy }]
   # ]
-  # create_links_to(links) will make an array of the following HTML
+  # make_links_for_tabs(links) will make an array of the following HTML
   #   "<a href="url" class="edit_form_link">text</a>",
   #   "<form action='destroy'>" etc via destroy_button
   #   (The above array gives default button text and class)
   #
   # Allows passing an extra_args hash to be merged with each link's args
   #
-  def create_links_to(tabs, extra_args = {})
+  def make_links_for_tabs(tabs, extra_args = {})
     return [] unless tabs
 
     tabs.compact.map do |tab|
-      create_link_to(tab, extra_args)
+      make_link_for_one_tab(tab, extra_args)
     end
   end
 
@@ -45,7 +45,7 @@ module TitleTabSetHelper
   # which HTML to return for that type of link
   # Pass extra_args hash to modify the link/button attributes
   #
-  def create_link_to(tab, extra_args = {})
+  def make_link_for_one_tab(tab, extra_args = {})
     str, url, args = tab
     args ||= {}
     kwargs = merge_tab_args_with_extra_args(args, extra_args)
@@ -54,6 +54,10 @@ module TitleTabSetHelper
       kwargs[:class] = kwargs[:class].gsub("d-block", "").strip
     end
 
+    crud_button_or_link(str, url, args, kwargs)
+  end
+
+  def crud_button_or_link(str, url, args, kwargs)
     case args[:button]
     when :destroy
       destroy_button(name: str, target: args[:target] || url, **kwargs)
@@ -97,7 +101,7 @@ module TitleTabSetHelper
       role: "menuitem",
       class: "dropdown-item"
     }
-    create_links_to(tabs, extra_args)
+    make_links_for_tabs(tabs, extra_args)
   end
 
   def dropdown_link_options(args = {})

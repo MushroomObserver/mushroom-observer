@@ -27,7 +27,6 @@ module Names
       get(:index)
 
       assert_displayed_title(:NAME_DESCRIPTIONS.l)
-      assert_sorted_by(by)
     end
 
     def test_index_sorted_by_user

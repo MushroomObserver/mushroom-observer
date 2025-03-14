@@ -60,7 +60,7 @@ module Tabs
         ["name", :sort_by_title.l],
         ["created_at",  :sort_by_created_at.l],
         ["updated_at",  :sort_by_updated_at.l],
-        ["summary", :sort_by_summary.l],
+        ["summary", :sort_by_summary.l]
       ].freeze
     end
 
