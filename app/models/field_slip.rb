@@ -129,6 +129,6 @@ class FieldSlip < AbstractModel
 
   def can_edit?
     user == User.current ||
-      (project&.is_admin?(User.current) && project&.trusted_by?(user))
+      (project&.is_admin?(User.current) && project.trusted_by?(user))
   end
 end

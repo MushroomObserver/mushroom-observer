@@ -313,7 +313,7 @@ module LinkHelper
   # Pass a block and a name if you want an icon with tooltip
   # NOTE: button_to with block generates a button, not an input #quirksmode
   def any_method_button(name:, path:, method: :post, **args, &block)
-    content = block ? capture(&block) : name
+    block ? capture(&block) : name
     path, identifier, icon, content = button_atts(method, path, args, name)
 
     html_options = {

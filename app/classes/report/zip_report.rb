@@ -24,7 +24,7 @@ module Report
     end
 
     def initialize(args)
-      super(args)
+      super
       self.content = []
     end
 
