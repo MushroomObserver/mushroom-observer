@@ -20,6 +20,13 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_displayed_title(:OBSERVATIONS.l)
   end
 
+  def test_index_spider_blocker
+    # login
+    get(:index, params: { page: 11 })
+
+    assert_equal(:runtime_spiders_begone.t, response.body)
+  end
+
   def test_index_sorted_by_non_default
     login
 
