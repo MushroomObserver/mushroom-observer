@@ -15,17 +15,13 @@ export default class extends Controller {
   }
 
   showFull() {
-    this.truncatedTarget.classList.remove("d-block");
-    this.truncatedTarget.classList.add("d-none");
-    this.fullTarget.classList.add("d-block");
-    this.fullTarget.classList.remove("d-none");
+    $(this.truncatedTarget).collapse('hide');
+    $(this.fullTarget).collapse('show');
   }
 
   showTruncated() {
-    this.fullTarget.classList.remove("d-block");
-    this.fullTarget.classList.add("d-none");
-    this.truncatedTarget.classList.add("d-block");
-    this.truncatedTarget.classList.remove("d-none");
+    $(this.fullTarget).collapse('hide');
+    $(this.truncatedTarget).collapse('show');
   }
 
   hideButtons() {

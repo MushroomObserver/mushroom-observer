@@ -83,7 +83,8 @@ module TitleHelper
   end
 
   def caption_truncated(query)
-    tag.div(class: "position-relative pr-3", id: "caption-truncated",
+    tag.div(class: "position-relative pr-3 collapse in",
+            id: "caption-truncated",
             data: { filter_caption_target: "truncated" }) do
       concat(caption_toggle_button(true))
       concat(caption_params(query, true))
@@ -91,7 +92,7 @@ module TitleHelper
   end
 
   def caption_full(query)
-    tag.div(class: "position-relative pr-3 d-none", id: "caption-full",
+    tag.div(class: "position-relative pr-3 collapse", id: "caption-full",
             data: { filter_caption_target: "full" }) do
       concat(caption_toggle_button(false))
       concat(caption_params(query, false))
