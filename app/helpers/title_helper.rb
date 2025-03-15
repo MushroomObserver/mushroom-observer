@@ -147,9 +147,9 @@ module TitleHelper
     end
   end
 
-  # These make more sense without the keys
-  CAPTION_IGNORE_KEYS = [:lookup, :id, :type].freeze
-
+  # The following params store IDs, but the captions are more legible
+  # if they print a relevant "name" or "title" of the record.
+  # This indexes which Lookup class to use to get the record:
   PARAM_LOOKUPS = {
     external_sites: :ExternalSites,
     field_slips: :FieldSlips,
@@ -168,7 +168,9 @@ module TitleHelper
     collectors: :Users,
     members: :Users
   }.freeze
-
+  # The captions with these sub-params make more sense without the keys:
+  CAPTION_IGNORE_KEYS = [:lookup, :id, :type].freeze
+  # Max number of values to display if truncated:
   CAPTION_TRUNCATE = 3
 
   # Tries to get a proper name for the comment target.
