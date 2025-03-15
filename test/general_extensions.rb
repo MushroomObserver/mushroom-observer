@@ -450,6 +450,42 @@ module GeneralExtensions
     end
   end
 
+  def assert_displayed_filters(expect, msg = "Wrong filters")
+    assert_match(expect, css_select("#filters").text, msg)
+  end
+
+  def assert_sorted_by(by, text = /.*/,
+                       msg = "Wrong index sort, or sort by #{by} not available")
+    reverse = if by.include?("reverse")
+                by = by.delete_prefix("reverse_")
+                true
+              else
+                false
+              end
+    class_name = "#{adjusted_controller_class_name}_by_#{by}_link"
+    assert_select("#sorts a.#{class_name}[disabled=disabled]", text, msg)
+    return unless reverse
+
+    assert_select("#sorts a.#{class_name}[disabled=disabled]",
+                  :sort_by_reverse.l, msg)
+  end
+
+  # The controller class name for e.g. Locations::DescriptionsController is
+  # "locations/descriptions". Need to adjust these to "location_descriptions".
+  def adjusted_controller_class_name
+    return controller_class_name unless controller_class_name.include?("/")
+
+    names = controller_class_name.split("/")
+    names.map!.with_index do |namespace, idx|
+      if idx < names.size - 1
+        namespace.singularize
+      else
+        namespace
+      end
+    end
+    names.join("_")
+  end
+
   ##############################################################################
   #
   #  :section:  File contents assertions

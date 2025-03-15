@@ -2,7 +2,7 @@
 if @project
   add_project_banner(@project)
 else
-  add_index_title(@query, no_hits: :FIELD_SLIPS.t)
+  add_index_title(@query)
   add_tab_set(field_slips_index_tabs)
   project_title = @query&.params_cache&.dig(:project)&.title || ""
 end

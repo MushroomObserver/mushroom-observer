@@ -19,10 +19,12 @@ module Tabs
 
     def herbarium_records_index_sorts
       [
-        ["herbarium_name",  :sort_by_herbarium_name.t],
-        ["herbarium_label", :sort_by_herbarium_label.t],
-        ["created_at",      :sort_by_created_at.t],
-        ["updated_at",      :sort_by_updated_at.t]
+        ["herbarium_name",    :sort_by_herbarium_name.t],
+        ["herbarium_label",   :sort_by_herbarium_label.t],
+        ["initial_det",       :sort_by_initial_det.t],
+        ["accession_number",  :sort_by_accession_number.t],
+        ["created_at",        :sort_by_created_at.t],
+        ["updated_at",        :sort_by_updated_at.t]
       ].freeze
     end
 

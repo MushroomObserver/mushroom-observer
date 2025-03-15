@@ -74,8 +74,8 @@ class CommentsController < ApplicationController
     return no_model unless (model = Comment.safe_model_from_name(params[:type]))
     return unless (target = find_or_goto_index(model, params[:target].to_s))
 
-    query = create_query(:Comment, target: { id: target.id,
-                                             type: target.class.name })
+    query = create_query(:Comment, target: { type: target.class.name,
+                                             id: target.id })
     [query, {}]
   end
 

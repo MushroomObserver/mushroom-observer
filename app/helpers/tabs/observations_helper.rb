@@ -39,13 +39,13 @@ module Tabs
 
     # Name panel -- generates HTML
 
-    # uses create_links_to with extra_args { class: "d-block" }
+    # uses make_tab_links with extra_args { class: "d-block" }
     # the hiccup here is that list_descriptions is already HTML, an inline list
     def name_links_on_mo(name:)
-      tabs = create_links_to(obs_related_name_tabs(name), { class: "d-block" })
+      tabs = make_tab_links(obs_related_name_tabs(name), { class: "d-block" })
       tabs += obs_name_description_tabs(name)
-      tabs += create_links_to([occurrence_map_for_name_tab(name)],
-                              { class: "d-block" })
+      tabs += make_tab_links([occurrence_map_for_name_tab(name)],
+                             { class: "d-block" })
       tabs.reject(&:empty?)
     end
 
@@ -97,8 +97,8 @@ module Tabs
     # end
 
     def name_links_web(name:)
-      tabs = create_links_to(observation_web_name_tabs(name),
-                             { class: "d-block" })
+      tabs = make_tab_links(observation_web_name_tabs(name),
+                            { class: "d-block" })
       tabs.reject(&:empty?)
     end
 

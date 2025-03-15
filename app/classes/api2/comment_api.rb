@@ -37,7 +37,7 @@ class API2
         types: parse_array(:enum, :type, limit: Comment::ALL_TYPE_TAGS),
         summary_has: parse(:string, :summary_has, help: 1),
         content_has: parse(:string, :content_has, help: 1),
-        target: @target ? { id: @target.id, type: @target.class.name } : nil
+        target: @target ? { type: @target.class.name, id: @target.id } : nil
       }
     end
 

@@ -18,7 +18,6 @@ class Query::ExternalLinks < Query::Base
   end
 
   def initialize_flavor
-    add_sort_order_to_title
     add_owner_and_time_stamp_conditions
     add_id_in_set_condition
     initialize_observations_parameter(:external_links)

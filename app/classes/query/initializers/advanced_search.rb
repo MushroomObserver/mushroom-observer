@@ -9,7 +9,6 @@ module Query::Initializers::AdvancedSearch
     add_user_condition(user)
     add_location_condition(location)
     add_content_condition(content)
-    @title_tag = :query_title_all_filtered # no longer set by flavor
   end
 
   def google_parse_params

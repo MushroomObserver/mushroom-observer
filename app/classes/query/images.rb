@@ -5,7 +5,6 @@ class Query::Images < Query::Base
   include Query::Params::Filters
   # include Query::Initializers::AdvancedSearch
   include Query::Initializers::Filters
-  include Query::Titles::Observations
 
   def model
     Image
@@ -39,7 +38,6 @@ class Query::Images < Query::Base
   end
 
   def initialize_flavor
-    add_sort_order_to_title
     initialize_image_parameters
     initialize_image_association_parameters
     initialize_subquery_parameters
@@ -212,13 +210,5 @@ class Query::Images < Query::Base
 
   def self.default_order
     "created_at"
-  end
-
-  def title
-    default = super
-    return default if params[:has_observations].blank? &&
-                      params[:observation_subquery].blank?
-
-    with_observations_query_description || default
   end
 end

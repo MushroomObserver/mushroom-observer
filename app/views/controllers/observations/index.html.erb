@@ -1,10 +1,9 @@
 <%
-  no_hits = params[:pattern].present? ? :title_for_observation_search.l : ""
   if @project
     add_project_banner(@project)
     @container = :wide
   else
-    add_index_title(@query, no_hits: no_hits) # note default above is non-nil
+    add_index_title(@query) # note default above is non-nil
     @container = :full
     add_tab_set(observations_index_tabs(query: @query)) if @objects.any?
   end

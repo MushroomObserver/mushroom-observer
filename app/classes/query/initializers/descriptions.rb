@@ -13,32 +13,18 @@ module Query::Initializers::Descriptions
     return unless params[:by_author]
 
     # Change this conditional to check for :has_descriptions param
-    with_desc = with_desc_string
     user = find_cached_parameter_instance(User, :by_author)
-    @title_tag = :"query_title#{with_desc}_by_author".t(
-      type: :"#{type}_description", user: user.legal_name
-    )
-    @title_args[:user] = user.legal_name
     add_join(:"#{type}_descriptions", :"#{type}_description_authors")
-    where << "#{type}_description_authors.user_id = '#{user.id}'"
+    @where << "#{type}_description_authors.user_id = '#{user.id}'"
   end
 
   def add_desc_by_editor_condition(type)
     return unless params[:by_editor]
 
     # Change this conditional to check for :has_descriptions param
-    with_desc = with_desc_string
     user = find_cached_parameter_instance(User, :by_editor)
-    @title_tag = :"query_title#{with_desc}_by_editor".t(
-      type: :"#{type}_description", user: user.legal_name
-    )
-    @title_args[:user] = user.legal_name
     add_join(:"#{type}_descriptions", :"#{type}_description_editors")
-    where << "#{type}_description_editors.user_id = '#{user.id}'"
-  end
-
-  def with_desc_string
-    [Name, Location].include?(model) ? "_has_descriptions" : ""
+    @where << "#{type}_description_editors.user_id = '#{user.id}'"
   end
 
   # If ever generalizing, `type` should be model.parent_type

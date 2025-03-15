@@ -5,7 +5,6 @@ class Query::Locations < Query::Base
   include Query::Params::Filters
   include Query::Initializers::AdvancedSearch
   include Query::Initializers::Filters
-  include Query::Titles::Observations
 
   def model
     Location
@@ -33,7 +32,6 @@ class Query::Locations < Query::Base
   end
 
   def initialize_flavor
-    add_sort_order_to_title
     initialize_location_parameters
     add_bounding_box_conditions_for_locations
     initialize_locations_has_descriptions
@@ -63,9 +61,8 @@ class Query::Locations < Query::Base
   def add_regexp_condition
     return if params[:regexp].blank?
 
-    @title_tag = :query_title_regexp_search
     regexp = escape(params[:regexp].to_s.strip_squeeze)
-    where << "locations.name REGEXP #{regexp}"
+    @where << "locations.name REGEXP #{regexp}"
   end
 
   def add_pattern_condition
@@ -124,16 +121,5 @@ class Query::Locations < Query::Base
 
   def self.default_order
     "name"
-  end
-
-  def title
-    default = super
-    if params[:has_observations] || params[:observation_query]
-      with_observations_query_description || default
-    elsif params[:has_descriptions] || params[:description_query]
-      :query_title_with_descriptions.t(type: :location) || default
-    else
-      default
-    end
   end
 end

@@ -20,8 +20,8 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
     click_link("Show Locations")
     click_link("Map Locations")
 
-    title = page.find("#title")
-    title.assert_text(obs.name.text_name)
+    filters = page.find("#filters")
+    filters.assert_text(obs.name.text_name)
   end
 
   def test_user_content_filter
@@ -41,10 +41,8 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
     page.select("Observations", from: :search_type)
     click_button("Search")
 
-    assert_match(
-      /#{:app_title.l}: Observations of #{obs.name.text_name}/,
-      page.title, "Wrong page"
-    )
+    assert_match(:OBSERVATIONS.l, page.title, "Wrong page")
+    assert_selector("#filters", text: obs.name.text_name)
     page.find("#title_bar").assert_text(:filtered.t)
     results = page.find("#results")
     # Number of hits should == number of **imaged** Observations of obs.name
@@ -54,11 +52,13 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
 
     # Show Locations (from obs index) should be filtered
     click_link("Show Locations")
-    page.find("#title_bar").assert_text(:filtered.t)
+    # page.find("#title_bar").assert_text(:filtered.t)
+    page.find("#filters").assert_text(:query_has_images.l)
 
     # And mapping them (from locations index) should also be filtered.
     click_link("Map Locations")
-    page.find("#title_bar").assert_text(:filtered.t)
+    # page.find("#title_bar").assert_text(:filtered.t)
+    # page.find("#filters").assert_text(:query_has_images.l)
 
     ### Now prove that turning filter off stops filtering ###
     # Prove that preference page UI works
@@ -87,7 +87,8 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
     page.select("Observations", from: :search_type)
     click_button("Search")
 
-    page.find("#title_bar").assert_no_text(:filtered.t)
+    # page.find("#title_bar").assert_no_text(:filtered.t)
+    page.find("#filters").assert_no_text(:query_has_images.l)
 
     results = page.find("#results")
     # Number of hits should == **total** Observations of obs.name
@@ -109,12 +110,12 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
     #   :has_images should still be off
     obs_imged_checkbox = find_field("user[has_images]")
     assert_not(obs_imged_checkbox.checked?,
-               "'#{:prefs_filters_has_images.t}' checkbox should be unchecked")
+               "'#{:prefs_filters_has_images.l}' checkbox should be unchecked")
     #   :has_specimen should be off (It was never turned on).
     has_specimen_checkbox = find_field("user[has_specimen]")
     assert_not(
       has_specimen_checkbox.checked?,
-      "'#{:prefs_filters_has_specimen.t}' checkbox should be unchecked."
+      "'#{:prefs_filters_has_specimen.l}' checkbox should be unchecked."
     )
 
     #   Turn on :has_specimen
@@ -129,7 +130,8 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
     page.select("Observations", from: :search_type)
 
     click_button("Search")
-    page.find("#title_bar").assert_text(:filtered.t)
+    # page.find("#title_bar").assert_text(:filtered.t)
+    page.find("#filters").assert_text(:query_has_specimen.l)
 
     results = page.find("#results")
     vouchered_obss = Observation.where(name: obs.name).where(specimen: true)

@@ -1,6 +1,6 @@
 <%
 @container = :wide
-add_index_title(@query, no_hits: :list_herbarium_records_title.t)
+add_index_title(@query)
 add_tab_set(herbarium_records_index_tabs(obs: @observation))
 add_sorter(@query, herbarium_records_index_sorts)
 
