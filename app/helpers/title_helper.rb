@@ -112,6 +112,15 @@ module TitleHelper
     end
   end
 
+  # Tries to get a proper name for the comment target.
+  def caption_lookup_comment_target_val(hash)
+    type, id = hash.values_at(:type, :id)
+    return unless type && id
+
+    lookup = "Lookup::#{type.pluralize}".constantize
+    lookup.new(id).titles.first
+  end
+
   def caption_nested_params(query, hash, len)
     hash.compact_blank.each_with_index do |(key, val), idx|
       caption_plain_param(query, key, val)
@@ -123,59 +132,42 @@ module TitleHelper
   CAPTION_IGNORE_KEYS = [:lookup, :id, :type].freeze
 
   CAPTIONABLE_QUERY_PARAMS = {
-    herbaria: Herbarium,
-    locations: Location,
-    region: Location,
-    names: Name,
-    clade: Name,
-    projects: Project,
-    project_lists: Project,
-    species_lists: SpeciesList,
-    by_users: User,
-    for_user: User,
-    by_author: User,
-    by_editor: User,
-    search_user: User,
-    lookup: Name
-  }.freeze
-
-  CAPTION_LOOKUPS = {
-    Herbarium: :name,
-    Location: :display_name,
-    Name: :text_name,
-    Observation: :unique_text_name,
-    Project: :title,
-    SpeciesList: :title,
-    User: :login
+    external_sites: :ExternalSites,
+    field_slips: :FieldSlips,
+    herbaria: :Herbariums,
+    locations: :Locations,
+    region: :Locations,
+    names: :Names,
+    clade: :Names,
+    projects: :Projects,
+    project_lists: :ProjectSpeciesLists,
+    species_lists: :SpeciesLists,
+    by_users: :Users,
+    for_user: :Users,
+    by_author: :Users,
+    by_editor: :Users,
+    collectors: :Users,
+    members: :Users,
+    lookup: :Names
   }.freeze
 
   def caption_plain_param(query, key, val)
-    translation = :"query_#{key}".l
+    label = :"query_#{key}".l
+    # Just print the label for booleans (no `true`)
     if val == true
-      concat(tag.span(translation))
+      concat(tag.span(label))
     else
-      unless CAPTION_IGNORE_KEYS.include?(key)
-        concat(tag.span("#{translation}: "))
-      end
+      concat(tag.span("#{label}: ")) unless CAPTION_IGNORE_KEYS.include?(key)
       val = caption_lookup_text_val(query, key, val)
       concat(tag.b(val))
     end
-  end
-
-  # Tries to get a proper name for the comment target.
-  def caption_lookup_comment_target_val(hash)
-    type, id = hash.values_at(:type, :id)
-    return unless type && id
-
-    method = CAPTION_LOOKUPS[type.to_sym]
-    get_attribute_of_instance_by_integer(id, type.to_s.constantize, method)
   end
 
   # NOTE: Can respond to special methods for certain keys.
   # Defaults to using the lookup method defined in CAPTIONABLE_QUERY_PARAMS
   def caption_lookup_text_val(query, key, val)
     unless CAPTIONABLE_QUERY_PARAMS.key?(key)
-      val = val.join(", ") if val.is_a?(Array)
+      val = val[0..2].join(", ") if val.is_a?(Array)
       return val
     end
 
@@ -183,39 +175,13 @@ module TitleHelper
     if respond_to?(:"caption_#{key}")
       send(:"caption_#{key}", query)
     else
-      map_join_and_truncate(query, key)
+      caption_lookup_strings_and_truncate(query, key)
     end
   end
 
   # Italicize names
   def caption_names(query)
-    tag.i(map_join_and_truncate(query, :lookup))
-  end
-
-  # Reuse the user-string method below for these four params
-  def caption_by_users(query)
-    caption_user_legal_name_or_list_of_logins(query, :by_users)
-  end
-
-  def caption_for_user(query)
-    caption_user_legal_name_or_list_of_logins(query, :for_user)
-  end
-
-  def caption_by_editor(query)
-    caption_user_legal_name_or_list_of_logins(query, :by_editor)
-  end
-
-  def caption_by_author(query)
-    caption_user_legal_name_or_list_of_logins(query, :by_author)
-  end
-
-  # Use a full name, or logins if list
-  def caption_user_legal_name_or_list_of_logins(query, key)
-    if query.params.deep_find(key).size == 1
-      User.find(query.params.deep_find(key).first).legal_name
-    else
-      map_join_and_truncate(query, key)
-    end
+    tag.i(caption_lookup_strings_and_truncate(query, :lookup))
   end
 
   # takes a search string
@@ -224,33 +190,17 @@ module TitleHelper
   end
 
   # The max number of named items is hardcoded here to 3.
-  def map_join_and_truncate(query, param)
-    model, method = caption_lookup_model_and_method(param)
-    str = query.params.deep_find(param)[0..2].map do |val|
-      # Integer(val) throws ArgumentError if val is not an integer.
-      str = get_attribute_of_instance_by_integer(val, model, method)
-    rescue ArgumentError # rubocop:disable Layout/RescueEnsureAlignment
-      val
-    end.join(", ")
+  def caption_lookup_strings_and_truncate(query, param)
+    ids = query.params.deep_find(param)
+    lookup = "Lookup::#{CAPTIONABLE_QUERY_PARAMS[param]}".constantize
+    str = lookup.new(ids[0..2]).titles.join(", ")
+
     if str.length > 100
       str = "#{str[0...97]}..."
-    elsif query.params.deep_find(param).length > 3
+    elsif ids.length > 3
       str += ", ..."
     end
     str
-  end
-
-  def caption_lookup_model_and_method(param)
-    model = CAPTIONABLE_QUERY_PARAMS[param]
-    method = CAPTION_LOOKUPS[model.name.to_sym]
-    [model, method]
-  end
-
-  def get_attribute_of_instance_by_integer(val, model, method)
-    val = val.min if val.is_a?(Array)
-    return val if val.is_a?(AbstractModel)
-
-    model.find(Integer(val)).send(method)
   end
 
   # Used by several indexes that can be filtered based on user prefs

@@ -4476,8 +4476,8 @@
   # comments
   # note there's a weird bug, "on" must be quoted or it will produce "target"
   query_target: "on"
-  query_id: "id"
   query_type: "type"
+  query_id: "id"
 
   # name queries
   query_names: "[:names]"
