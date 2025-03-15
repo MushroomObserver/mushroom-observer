@@ -71,7 +71,6 @@ module Query::Modules::HighLevelQueries
     @results = list.each_with_object({}) do |obj, map|
       map[obj.id] ||= obj
     end
-    list
   end
 
   # Let caller supply results if they happen to have them.  *NOTE*: These had

@@ -69,7 +69,7 @@ class ImagesControllerTest < FunctionalTestCase
 
     # 429 == :too_many_requests. The symbolic response code does not work.
     # Perhaps we're not loading that part of Rack. JDC 2022-08-17
-    assert_response(429)
+    assert_response(429) # rubocop:disable Rails/HttpStatus
   end
 
   # def test_index_advanced_search_multiple_hits

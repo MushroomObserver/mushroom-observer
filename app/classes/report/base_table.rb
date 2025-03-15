@@ -6,7 +6,7 @@ module Report
     attr_accessor :query
 
     def initialize(args)
-      super(args)
+      super
       self.query = args[:query]
       raise("Report initialized without query!") unless query
     end
