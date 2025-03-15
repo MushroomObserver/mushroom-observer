@@ -64,144 +64,142 @@ module TitleHelper
 
     content_for(:filters) do
       tag.div(class: "small", id: "filters") do
-        query.params.except(:by).compact_blank.each do |key, val|
-          caption_one_filter_param(query, key, val)
-        end
+        Query::Caption.new(query).caption_truncated
       end
     end
   end
 
-  # Each param could be a boolean, a val, a set of vals,
-  # a nested param with new key/vals, or a subquery.
-  def caption_one_filter_param(query, key, val)
-    concat(tag.div do
-      if key.to_s.include?("_query")
-        caption_subquery(query, key, val)
-      elsif val.is_a?(Hash)
-        caption_grouped_params(query, key, val)
-      else
-        caption_plain_param(query, key, val)
-      end
-    end)
-  end
+  # # Each param could be a boolean, a val, a set of vals,
+  # # a nested param with new key/vals, or a subquery.
+  # def caption_one_filter_param(query, key, val)
+  #   concat(tag.div do
+  #     if key.to_s.include?("_query")
+  #       caption_subquery(query, key, val)
+  #     elsif val.is_a?(Hash)
+  #       caption_grouped_params(query, key, val)
+  #     else
+  #       caption_plain_param(query, key, val)
+  #     end
+  #   end)
+  # end
 
-  # In the case of subqueries, treat them like a new query string.
-  # Subquery params get { curly brackets }. The new query block is
-  # inside the brackets and indented.
-  def caption_subquery(query, label, hash)
-    concat(tag.div("#{:"query_#{label}".l}: {"))
-    concat(tag.div(class: "ml-3") do
-      hash.each do |key, val|
-        caption_one_filter_param(query, key, val)
-      end
-    end)
-    concat(tag.div("}"))
-  end
+  # # In the case of subqueries, treat them like a new query string.
+  # # Subquery params get { curly brackets }. The new query block is
+  # # inside the brackets and indented.
+  # def caption_subquery(query, label, hash)
+  #   concat(tag.div("#{:"query_#{label}".l}: {"))
+  #   concat(tag.div(class: "ml-3") do
+  #     hash.each do |key, val|
+  #       caption_one_filter_param(query, key, val)
+  #     end
+  #   end)
+  #   concat(tag.div("}"))
+  # end
 
-  # In the case of nested params, print them on one line separated by comma.
-  def caption_grouped_params(query, label, hash)
-    len = hash.compact_blank.keys.size
-    return if len.zero?
+  # # In the case of nested params, print them on one line separated by comma.
+  # def caption_grouped_params(query, label, hash)
+  #   len = hash.compact_blank.keys.size
+  #   return if len.zero?
 
-    concat(tag.span("#{:"query_#{label}".l}: "))
-    if label == :target
-      val = caption_lookup_comment_target_val(hash)
-      concat(tag.span(val))
-    else
-      caption_nested_params(query, hash, len)
-    end
-  end
+  #   concat(tag.span("#{:"query_#{label}".l}: "))
+  #   if label == :target
+  #     val = caption_lookup_comment_target_val(hash)
+  #     concat(tag.span(val))
+  #   else
+  #     caption_nested_params(query, hash, len)
+  #   end
+  # end
 
-  # Tries to get a proper name for the comment target.
-  def caption_lookup_comment_target_val(hash)
-    type, id = hash.values_at(:type, :id)
-    return unless type && id
+  # # Tries to get a proper name for the comment target.
+  # def caption_lookup_comment_target_val(hash)
+  #   type, id = hash.values_at(:type, :id)
+  #   return unless type && id
 
-    lookup = "Lookup::#{type.pluralize}".constantize
-    lookup.new(id).titles.first
-  end
+  #   lookup = "Lookup::#{type.pluralize}".constantize
+  #   lookup.new(id).titles.first
+  # end
 
-  def caption_nested_params(query, hash, len)
-    hash.compact_blank.each_with_index do |(key, val), idx|
-      caption_plain_param(query, key, val)
-      concat(tag.span(", ")) if idx < len - 1
-    end
-  end
+  # def caption_nested_params(query, hash, len)
+  #   hash.compact_blank.each_with_index do |(key, val), idx|
+  #     caption_plain_param(query, key, val)
+  #     concat(tag.span(", ")) if idx < len - 1
+  #   end
+  # end
 
-  # These make more sense without the keys
-  CAPTION_IGNORE_KEYS = [:lookup, :id, :type].freeze
+  # # These make more sense without the keys
+  # CAPTION_IGNORE_KEYS = [:lookup, :id, :type].freeze
 
-  CAPTIONABLE_QUERY_PARAMS = {
-    external_sites: :ExternalSites,
-    field_slips: :FieldSlips,
-    herbaria: :Herbaria,
-    locations: :Locations,
-    region: :Locations,
-    names: :Names,
-    clade: :Names,
-    projects: :Projects,
-    project_lists: :ProjectSpeciesLists,
-    species_lists: :SpeciesLists,
-    by_users: :Users,
-    for_user: :Users,
-    by_author: :Users,
-    by_editor: :Users,
-    collectors: :Users,
-    members: :Users,
-    lookup: :Names
-  }.freeze
+  # CAPTIONABLE_QUERY_PARAMS = {
+  #   external_sites: :ExternalSites,
+  #   field_slips: :FieldSlips,
+  #   herbaria: :Herbaria,
+  #   locations: :Locations,
+  #   region: :Locations,
+  #   names: :Names,
+  #   clade: :Names,
+  #   projects: :Projects,
+  #   project_lists: :ProjectSpeciesLists,
+  #   species_lists: :SpeciesLists,
+  #   by_users: :Users,
+  #   for_user: :Users,
+  #   by_author: :Users,
+  #   by_editor: :Users,
+  #   collectors: :Users,
+  #   members: :Users,
+  #   lookup: :Names
+  # }.freeze
 
-  def caption_plain_param(query, key, val)
-    label = :"query_#{key}".l
-    # Just print the label for booleans (no `true`)
-    if val == true
-      concat(tag.span(label))
-    else
-      concat(tag.span("#{label}: ")) unless CAPTION_IGNORE_KEYS.include?(key)
-      val = caption_lookup_text_val(query, key, val)
-      concat(tag.b(val))
-    end
-  end
+  # def caption_plain_param(query, key, val)
+  #   label = :"query_#{key}".l
+  #   # Just print the label for booleans (no `true`)
+  #   if val == true
+  #     concat(tag.span(label))
+  #   else
+  #     concat(tag.span("#{label}: ")) unless CAPTION_IGNORE_KEYS.include?(key)
+  #     val = caption_lookup_text_val(query, key, val)
+  #     concat(tag.b(val))
+  #   end
+  # end
 
-  # NOTE: Can respond to special methods for certain keys.
-  # Defaults to using the lookup method defined in CAPTIONABLE_QUERY_PARAMS
-  def caption_lookup_text_val(query, key, val)
-    unless CAPTIONABLE_QUERY_PARAMS.key?(key)
-      val = val[0..2].join(", ") if val.is_a?(Array)
-      return val
-    end
+  # # NOTE: Can respond to special methods for certain keys.
+  # # Defaults to using the lookup method defined in CAPTIONABLE_QUERY_PARAMS
+  # def caption_lookup_text_val(query, key, val)
+  #   unless CAPTIONABLE_QUERY_PARAMS.key?(key)
+  #     val = val[0..2].join(", ") if val.is_a?(Array)
+  #     return val
+  #   end
 
-    key = :names if key == :lookup
-    if respond_to?(:"caption_#{key}")
-      send(:"caption_#{key}", query)
-    else
-      caption_lookup_strings_and_truncate(query, key)
-    end
-  end
+  #   key = :names if key == :lookup
+  #   if respond_to?(:"caption_#{key}")
+  #     send(:"caption_#{key}", query)
+  #   else
+  #     caption_lookup_strings_and_truncate(query, key)
+  #   end
+  # end
 
-  # Italicize names
-  def caption_names(query)
-    tag.i(caption_lookup_strings_and_truncate(query, :lookup))
-  end
+  # # Italicize names
+  # def caption_names(query)
+  #   tag.i(caption_lookup_strings_and_truncate(query, :lookup))
+  # end
 
-  # takes a search string
-  def caption_search_user(query)
-    query.params.deep_find(:search_user)
-  end
+  # # takes a search string
+  # def caption_search_user(query)
+  #   query.params.deep_find(:search_user)
+  # end
 
-  # The max number of named items is hardcoded here to 3.
-  def caption_lookup_strings_and_truncate(query, param)
-    ids = query.params.deep_find(param)
-    lookup = "Lookup::#{CAPTIONABLE_QUERY_PARAMS[param]}".constantize
-    str = lookup.new(ids[0..2]).titles.join(", ")
+  # # The max number of named items is hardcoded here to 3.
+  # def caption_lookup_strings_and_truncate(query, param)
+  #   ids = query.params.deep_find(param)
+  #   lookup = "Lookup::#{CAPTIONABLE_QUERY_PARAMS[param]}".constantize
+  #   str = lookup.new(ids[0..2]).titles.join(", ")
 
-    if str.length > 100
-      str = "#{str[0...97]}..."
-    elsif ids.length > 3
-      str += ", ..."
-    end
-    str
-  end
+  #   if str.length > 100
+  #     str = "#{str[0...97]}..."
+  #   elsif ids.length > 3
+  #     str += ", ..."
+  #   end
+  #   str
+  # end
 
   # Used by several indexes that can be filtered based on user prefs
   def add_filter_help(filters_applied)
