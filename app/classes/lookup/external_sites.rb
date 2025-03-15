@@ -2,7 +2,7 @@
 
 class Lookup::ExternalSites < Lookup
   MODEL = ExternalSite
-  TITLE_COLUMN = :name
+  TITLE_METHOD = :name
 
   def initialize(vals, params = {})
     super

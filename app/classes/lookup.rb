@@ -37,7 +37,7 @@
 #   (defined in subclass)
 #
 # MODEL:
-# TITLE_COLUMN:
+# TITLE_METHOD:
 #
 class Lookup
   attr_reader :vals, :params
@@ -48,7 +48,7 @@ class Lookup
     end
 
     @model = self.class::MODEL
-    @title_column = self.class::TITLE_COLUMN
+    @title_method = self.class::TITLE_METHOD
     @vals = prepare_vals(vals)
     @params = params
   end
@@ -87,7 +87,7 @@ class Lookup
   def lookup_titles
     return [] if @vals.blank?
 
-    instances.map(&:"#{@title_column}")
+    instances.map(&:"#{@title_method}")
   end
 
   def evaluate_values_as_ids

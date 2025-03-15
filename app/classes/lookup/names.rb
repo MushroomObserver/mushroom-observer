@@ -2,7 +2,7 @@
 
 class Lookup::Names < Lookup
   MODEL = Name
-  TITLE_COLUMN = :search_name
+  TITLE_METHOD = :text_name
 
   def initialize(vals, params = {})
     super
