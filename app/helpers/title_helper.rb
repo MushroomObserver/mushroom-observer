@@ -76,11 +76,11 @@ module TitleHelper
   def caption_one_filter_param(query, key, val)
     concat(tag.div do
       if key.to_s.include?("_query")
-        caption_string_for_subquery(query, key, val)
+        caption_subquery(query, key, val)
       elsif val.is_a?(Hash)
-        caption_string_for_nested_params(query, key, val)
+        caption_grouped_params(query, key, val)
       else
-        caption_string_for_val(query, key, val)
+        caption_plain_param(query, key, val)
       end
     end)
   end
@@ -88,7 +88,7 @@ module TitleHelper
   # In the case of subqueries, treat them like a new query string.
   # Subquery params get { curly brackets }. The new query block is
   # inside the brackets and indented.
-  def caption_string_for_subquery(query, label, hash)
+  def caption_subquery(query, label, hash)
     concat(tag.div("#{:"query_#{label}".l}: {"))
     concat(tag.div(class: "ml-3") do
       hash.each do |key, val|
@@ -99,8 +99,7 @@ module TitleHelper
   end
 
   # In the case of nested params, print them on one line separated by comma.
-  # Nested params get [square brackets]
-  def caption_string_for_nested_params(query, label, hash)
+  def caption_grouped_params(query, label, hash)
     len = hash.compact_blank.keys.size
     return if len.zero?
 
@@ -109,13 +108,13 @@ module TitleHelper
       val = caption_lookup_comment_target_val(hash)
       concat(tag.span(val))
     else
-      caption_val_for_nested_params(query, hash, len)
+      caption_nested_params(query, hash, len)
     end
   end
 
-  def caption_val_for_nested_params(query, hash, len)
+  def caption_nested_params(query, hash, len)
     hash.compact_blank.each_with_index do |(key, val), idx|
-      caption_string_for_val(query, key, val)
+      caption_plain_param(query, key, val)
       concat(tag.span(", ")) if idx < len - 1
     end
   end
@@ -126,7 +125,9 @@ module TitleHelper
   CAPTIONABLE_QUERY_PARAMS = {
     herbaria: Herbarium,
     locations: Location,
+    region: Location,
     names: Name,
+    clade: Name,
     projects: Project,
     project_lists: Project,
     species_lists: SpeciesList,
@@ -148,7 +149,7 @@ module TitleHelper
     User: :login
   }.freeze
 
-  def caption_string_for_val(query, key, val)
+  def caption_plain_param(query, key, val)
     translation = :"query_#{key}".l
     if val == true
       concat(tag.span(translation))
@@ -186,31 +187,12 @@ module TitleHelper
     end
   end
 
-  # def caption_herbaria(query)
-  #   map_join_and_truncate(query, :herbaria)
-  # end
-
-  # NOTE: used in "Locations with Observations of {name}" - AN 2023
-  # def caption_locations(query)
-  #   map_join_and_truncate(query, :locations)
-  # end
-
+  # Italicize names
   def caption_names(query)
     tag.i(map_join_and_truncate(query, :lookup))
   end
 
-  # def caption_projects(query)
-  #   map_join_and_truncate(query, :projects)
-  # end
-
-  # def caption_project_lists(query)
-  #   map_join_and_truncate(query, :project_lists)
-  # end
-
-  # def caption_species_lists(query)
-  #   map_join_and_truncate(query, :species_lists)
-  # end
-
+  # Reuse the user-string method below for these four params
   def caption_by_users(query)
     caption_user_legal_name_or_list_of_logins(query, :by_users)
   end
@@ -227,6 +209,7 @@ module TitleHelper
     caption_user_legal_name_or_list_of_logins(query, :by_author)
   end
 
+  # Use a full name, or logins if list
   def caption_user_legal_name_or_list_of_logins(query, key)
     if query.params.deep_find(key).size == 1
       User.find(query.params.deep_find(key).first).legal_name
