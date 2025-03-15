@@ -2,7 +2,7 @@
 
 class Lookup::FieldSlips < Lookup
   MODEL = FieldSlip
-  TITLE_COLUMN = :code
+  TITLE_METHOD = :code
 
   def initialize(vals, params = {})
     super

@@ -2,7 +2,7 @@
 
 class Lookup::Locations < Lookup
   MODEL = Location
-  TITLE_COLUMN = :name
+  TITLE_METHOD = :display_name
 
   def initialize(vals, params = {})
     super
