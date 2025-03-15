@@ -134,7 +134,7 @@ module TitleHelper
   CAPTIONABLE_QUERY_PARAMS = {
     external_sites: :ExternalSites,
     field_slips: :FieldSlips,
-    herbaria: :Herbariums,
+    herbaria: :Herbaria,
     locations: :Locations,
     region: :Locations,
     names: :Names,

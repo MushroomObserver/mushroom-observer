@@ -2,7 +2,7 @@
 
 class Lookup::Users < Lookup
   MODEL = User
-  TITLE_METHOD = :login
+  TITLE_METHOD = :name
 
   def initialize(vals, params = {})
     super
