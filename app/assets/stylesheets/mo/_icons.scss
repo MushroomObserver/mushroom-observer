@@ -14,6 +14,11 @@
   padding-left: 30px;
 }
 
+.toggle {
+  @extend .close;
+  font-size: inherit;
+}
+
 // old classes, replace
 
 .icon-addon {

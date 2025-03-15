@@ -106,7 +106,7 @@ module TitleHelper
       action = "showTruncated"
       direction = "up"
     end
-    js_button(class: "top-right btn-link close",
+    js_button(class: "top-right btn-link toggle",
               data: { filter_caption_target: action,
                       action: "filter-caption##{action}" }) do
       tag.span(class: "glyphicon glyphicon-chevron-#{direction}",
