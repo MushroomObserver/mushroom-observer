@@ -2,7 +2,7 @@
 
 class Lookup::SpeciesLists < Lookup
   MODEL = SpeciesList
-  TITLE_COLUMN = :title
+  TITLE_METHOD = :title
 
   def initialize(vals, params = {})
     super

@@ -2,7 +2,7 @@
 
 class Lookup::Herbaria < Lookup
   MODEL = Herbarium
-  TITLE_COLUMN = :name
+  TITLE_METHOD = :name
 
   def initialize(vals, params = {})
     super
