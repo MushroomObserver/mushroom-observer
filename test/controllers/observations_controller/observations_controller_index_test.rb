@@ -20,6 +20,13 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_displayed_title("Observations by #{:sort_by_rss_log.l}")
   end
 
+  def test_index_spider_blocker
+    # login
+    get(:index, params: { page: 11 })
+
+    assert_equal(:runtime_spiders_begone.t, response.body)
+  end
+
   def test_index_sorted_by_name
     by = "name"
 

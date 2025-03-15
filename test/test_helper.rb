@@ -80,8 +80,8 @@ end
 
 I18n.enforce_available_locales = true
 
-# Function for creating a log the tests called that
-# somehow call this function.
+# Function for creating a log (trace_tests.out) of the tests called
+# that somehow call this function.
 def trace_tests
   regex = %r{/test/}
   matches = caller.grep(regex)
