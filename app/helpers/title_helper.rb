@@ -63,8 +63,9 @@ module TitleHelper
     return unless query&.params
 
     content_for(:filters) do
-      tag.div(class: "small", id: "filters") do
-        caption_truncated(query)
+      tag.div(id: "filters", data: { controller: "filter-caption" }) do
+        concat(caption_truncated(query))
+        concat(caption_full(query))
       end
     end
   end
@@ -82,8 +83,42 @@ module TitleHelper
   end
 
   def caption_truncated(query)
-    query.params.except(:by).compact_blank.each do |key, val|
-      caption_one_filter_param(query, key, val, truncate: true)
+    tag.div(class: "position-relative pr-3", id: "caption-truncated",
+            data: { filter_caption_target: "truncated" }) do
+      concat(caption_toggle_button(true))
+      concat(caption_params(query, true))
+    end
+  end
+
+  def caption_full(query)
+    tag.div(class: "position-relative pr-3 d-none", id: "caption-full",
+            data: { filter_caption_target: "full" }) do
+      concat(caption_toggle_button(false))
+      concat(caption_params(query, false))
+    end
+  end
+
+  def caption_toggle_button(truncate)
+    if truncate
+      action = "showFull"
+      direction = "down"
+    else
+      action = "showTruncated"
+      direction = "up"
+    end
+    js_button(class: "top-right btn-link close",
+              data: { filter_caption_target: action,
+                      action: "filter-caption##{action}" }) do
+      tag.span(class: "glyphicon glyphicon-chevron-#{direction}",
+               aria: { hidden: true })
+    end
+  end
+
+  def caption_params(query, truncate)
+    tag.div(class: "small") do
+      query.params.except(:by).compact_blank.each do |key, val|
+        caption_one_filter_param(query, key, val, truncate:)
+      end
     end
   end
 
