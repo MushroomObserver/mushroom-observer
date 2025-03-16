@@ -331,7 +331,7 @@ class PatternSearch::ObservationTest < UnitTestCase
   end
 
   def test_observation_search_multiple_regions
-    expect = Observation.regions(["California, USA", "New York, USA"]).
+    expect = Observation.region(["California, USA", "New York, USA"]).
              reorder(id: :asc).to_a
     assert(expect.any? { |obs| obs.where.include?("California, USA") })
     assert(expect.any? { |obs| obs.where.include?("New York, USA") })

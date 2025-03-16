@@ -1,7 +1,7 @@
 <%
 @container = :full
 add_page_title(sequence_form_new_title)
-add_tab_set(sequence_form_tabs(obj: @observation))
+add_context_nav(sequence_form_tabs(obj: @observation))
 %>
 
 <div class="row">
@@ -18,4 +18,5 @@ add_tab_set(sequence_form_tabs(obj: @observation))
                            columns: "col-xs-12" }) %>
     </ul>
   </div>
-</div><!--.row-->
+</div>
+<!--.row-->

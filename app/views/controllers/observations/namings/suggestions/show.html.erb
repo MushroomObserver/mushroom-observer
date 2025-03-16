@@ -3,7 +3,7 @@
 add_page_title(show_obs_title(obs: @observation, owner_naming: @owner_naming))
 num_images = @observation.images.length
 
-add_tab_set(naming_suggestion_tabs(obs: @observation))
+add_context_nav(naming_suggestion_tabs(obs: @observation))
 @container = :double
 %>
 
@@ -14,17 +14,18 @@ add_tab_set(naming_suggestion_tabs(obs: @observation))
        @suggestions.reject(&:useless?).sort_by(&:max).reverse.each do |sugg| %>
       <% if sugg.confident? != last_level %>
         <% if last_level %>
-          </tbody></table>
-        <% end %>
-        <table class="table-namings">
-          <thead>
-            <tr>
-              <th><%= content_tag(:h3, sugg.confident? ?
+        </tbody>
+      </table>
+    <% end %>
+    <table class="table-namings">
+      <thead>
+        <tr>
+          <th><%= content_tag(:h3, sugg.confident? ?
                 :suggestions_title.t : :suggestions_title_others.t) %></th>
-              <th></th>
-            </tr>
-          </thead>
-        <tbody>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
       <% end %>
       <% last_level = sugg.confident? %>
       <tr>
@@ -33,40 +34,43 @@ add_tab_set(naming_suggestion_tabs(obs: @observation))
                               name_path(id: sugg.name.id)) %><br/>
           <% if @observation.namings.any? \
                 {|n| n.name.synonyms.include?(sugg.name)} %>
-            (<%= :suggestions_already_proposed.t %>)
-          <% else %>
-            <%= link_with_query(:suggestions_propose_name.t,
+          (<%= :suggestions_already_proposed.t %>)
+        <% else %>
+          <%= link_with_query(:suggestions_propose_name.t,
                                 new_observation_naming_path(
                                   @observation.id,
                                   name: sugg.name.search_name,
                                   ref: "AI Observer: #{sugg.max.to_f.round(2)}% confidence"
                                 ),
                                 class: "btn btn-default mt-3") %>
-            <% end %>
-            <br/><br/>
-            <b><%= :suggestions_confidence.t %>:</b><br/>
-            <% if num_images == 1 %>
-              <%= suggestion_confidence(sugg.max) %><br/>
-            <% else %>
-              <%= :suggestions_max.t %>:
-                <%= suggestion_confidence(sugg.max) %><br/>
-              <%= :suggestions_avg.t %>:
-                <%= suggestion_confidence(sugg.sum.to_f / num_images) %><br/>
-            <% end %>
-          </td>
-          <td>
-            <%= interactive_image(
+        <% end %>
+        <br/>
+        <br/>
+        <b><%= :suggestions_confidence.t %>:</b><br/>
+        <% if num_images == 1 %>
+          <%= suggestion_confidence(sugg.max) %><br/>
+        <% else %>
+          <%= :suggestions_max.t %>:
+          <%= suggestion_confidence(sugg.max) %><br/>
+          <%= :suggestions_avg.t %>:
+          <%= suggestion_confidence(sugg.sum.to_f / num_images) %><br/>
+        <% end %>
+      </td>
+      <td>
+        <%= interactive_image(
               sugg.image_obs.thumb_image,
               image_link: image_path(id: sugg.image_obs.id)
             ) if sugg.image_obs.present? %>
-        </td>
-      </tr>
-    <% end %>
-    </tbody></table>
+      </td>
+    </tr>
+  <% end %>
+</tbody>
+</table>
 
-  </div>
-  <div class="col-sm-4 float-sm-right">
-    <%= render(partial: "observations/show/images",
+</div>
+<div class="col-sm-4 float-sm-right">
+  <%= render(partial: "observations/show/images",
                locals: { obs: @observation }) %>
-  </div>
-</div><!--.row-->
+</div>
+</div>
+<!--.row-->

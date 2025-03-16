@@ -14,7 +14,6 @@ class Query::APIKeys < Query::Base
   end
 
   def initialize_flavor
-    add_sort_order_to_title
     add_time_condition("api_keys.created_at", params[:created_at])
     add_time_condition("api_keys.updated_at", params[:updated_at])
     add_search_condition("api_keys.notes", params[:notes_has])

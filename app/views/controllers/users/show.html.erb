@@ -4,7 +4,7 @@ complete_name = @show_user.unique_text_name
 name = @show_user.login
 add_page_title(:show_user_about.t(user: complete_name))
 add_pager_for(@show_user)
-add_tab_set(user_show_tabs)
+add_context_nav(user_show_tabs)
 
 @container = :full
 %>
@@ -22,6 +22,5 @@ add_tab_set(user_show_tabs)
     <%= render(partial: "users/show/best_images", locals: { name: name }) %>
   </div>
 
-</div><!--.row-->
-
-
+</div>
+<!--.row-->

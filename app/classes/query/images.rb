@@ -1,11 +1,10 @@
 # frozen_string_literal: true
 
 class Query::Images < Query::Base
-  include Query::Params::AdvancedSearch
+  # include Query::Params::AdvancedSearch
   include Query::Params::Filters
-  include Query::Initializers::AdvancedSearch
+  # include Query::Initializers::AdvancedSearch
   include Query::Initializers::Filters
-  include Query::Titles::Observations
 
   def model
     Image
@@ -35,16 +34,15 @@ class Query::Images < Query::Base
       projects: [Project],
       species_lists: [SpeciesList],
       observation_query: { subquery: :Observation }
-    ).merge(advanced_search_parameter_declarations)
+    ) # .merge(advanced_search_parameter_declarations)
   end
 
   def initialize_flavor
-    add_sort_order_to_title
     initialize_image_parameters
     initialize_image_association_parameters
     initialize_subquery_parameters
     add_pattern_condition
-    add_img_advanced_search_conditions
+    # add_img_advanced_search_conditions
     super
   end
 
@@ -147,37 +145,37 @@ class Query::Images < Query::Base
     add_join(:observation_images, :observations)
   end
 
-  def add_img_advanced_search_conditions
-    return if advanced_search_params.all? { |key| params[key].blank? }
-    return if handle_img_content_search!
+  # def add_img_advanced_search_conditions
+  #   return if advanced_search_params.all? { |key| params[key].blank? }
+  #   return if handle_img_content_search!
 
-    add_join(:observation_images, :observations)
-    initialize_advanced_search
-  end
+  #   add_join(:observation_images, :observations)
+  #   initialize_advanced_search
+  # end
 
-  # Perform content search as an observation query, then
-  # coerce into images.
-  def handle_img_content_search!
-    return false if params[:search_content].blank?
+  # # Perform content search as an observation query, then
+  # # coerce into images.
+  # def handle_img_content_search!
+  #   return false if params[:search_content].blank?
 
-    self.executor = lambda do |args|
-      execute_img_content_search(args)
-    end
-  end
+  #   self.executor = lambda do |args|
+  #     execute_img_content_search(args)
+  #   end
+  # end
 
-  def execute_img_content_search(args)
-    # [Sorry, yes, this is a mess. But I don't expect this type of search
-    # to survive much longer. Image searches are in desperate need of
-    # critical revision for performance concerns, anyway. -JPH 20210809]
-    args2 = args.except(:select, :order, :group)
-    params2 = params.except(:by)
-    ids = Query.lookup(:Observation, params2).result_ids(args2)
-    ids = clean_id_set(ids)
-    args2 = args.dup
-    extend_join(args2) << :observation_images
-    extend_where(args2) << "observation_images.observation_id IN (#{ids})"
-    model.connection.select_rows(sql(args2))
-  end
+  # def execute_img_content_search(args)
+  #   # [Sorry, yes, this is a mess. But I don't expect this type of search
+  #   # to survive much longer. Image searches are in desperate need of
+  #   # critical revision for performance concerns, anyway. -JPH 20210809]
+  #   args2 = args.except(:select, :order, :group)
+  #   params2 = params.except(:by)
+  #   ids = Query.lookup(:Observation, params2).result_ids(args2)
+  #   ids = clean_id_set(ids)
+  #   args2 = args.dup
+  #   extend_join(args2) << :observation_images
+  #   extend_where(args2) << "observation_images.observation_id IN (#{ids})"
+  #   model.connection.select_rows(sql(args2))
+  # end
 
   def add_pattern_condition
     return if params[:pattern].blank?
@@ -212,13 +210,5 @@ class Query::Images < Query::Base
 
   def self.default_order
     "created_at"
-  end
-
-  def title
-    default = super
-    return default if params[:has_observations].blank? &&
-                      params[:observation_subquery].blank?
-
-    with_observations_query_description || default
   end
 end

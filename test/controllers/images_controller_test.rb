@@ -9,58 +9,58 @@ class ImagesControllerTest < FunctionalTestCase
 
     assert_template("index")
     assert_template(partial: "_matrix_box")
-    assert_displayed_title("Images by #{sort_order.titleize}")
+    assert_displayed_title(:IMAGES.l)
+    assert_sorted_by(sort_order)
   end
 
   # Tests of index, with tests arranged as follows:
   # default subaction; then
   # other subactions in order of index_active_params
   def test_index
-    login
-    get(:index)
-    default_sorted_by = :"sort_by_#{::Query::Images.default_order}".l
-
-    assert_template("index")
-    assert_template(partial: "_matrix_box")
-    assert_displayed_title("Images by #{default_sorted_by}")
+    check_index_sorted_by(::Query::Images.default_order)
   end
 
   def test_index_with_non_default_sort
     check_index_sorted_by("name")
+    sort_orders = %w[name user confidence image_quality]
+    sort_orders.each do |order|
+      check_index_sorted_by(order)
+    end
   end
 
-  def test_index_sorted_by_user
-    check_index_sorted_by("user")
-  end
-
-  def test_index_sorted_by_confidence
-    by = "confidence"
+  def test_index_by_user
+    user = rolf
 
     login
-    get(:index, params: { by: by })
+    get(:index, params: { by_user: user.id })
 
     assert_template("index")
     assert_template(partial: "_matrix_box")
-    assert_displayed_title("Images by Confidence Level")
+    assert_displayed_title(:IMAGES.l)
+    assert_displayed_filters("#{:query_by_users.l}: #{user.legal_name}")
   end
 
-  def test_index_sorted_by_copyright_holder
-    check_index_sorted_by("copyright_holder")
-  end
-
-  def test_index_sorted_by_image_quality
-    check_index_sorted_by("image_quality")
-  end
-
-  def test_index_sorted_by_owners_quality
-    by = "owners_quality"
+  def test_index_by_users_bad_user_id
+    bad_user_id = observations(:minimal_unknown_obs).id
+    assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
 
     login
-    get(:index, params: { by: by })
+    get(:index, params: { by_user: bad_user_id })
 
-    assert_template("index")
-    assert_template(partial: "_matrix_box")
-    assert_displayed_title("Images by Owner’s Quality")
+    assert_flash_text(
+      :runtime_object_not_found.l(type: "user", id: bad_user_id)
+    )
+    assert_redirected_to(images_path)
+  end
+
+  def test_index_projects
+    project = projects(:bolete_project)
+    login
+    get(:index, params: { project: project.id })
+
+    assert_template("index", partial: "_image")
+    assert_displayed_title(:IMAGES.l)
+    assert_displayed_filters("#{:query_projects.l}: #{project.title}")
   end
 
   def test_index_too_many_pages
@@ -69,79 +69,82 @@ class ImagesControllerTest < FunctionalTestCase
 
     # 429 == :too_many_requests. The symbolic response code does not work.
     # Perhaps we're not loading that part of Rack. JDC 2022-08-17
-    assert_response(429)
+    assert_response(429) # rubocop:disable Rails/HttpStatus
   end
 
-  def test_index_advanced_search_multiple_hits
-    obs = observations(:fungi_obs)
-    assert(obs.images.many?)
-    query = Query.lookup_and_save(
-      :Image, search_name: obs.text_name,
-              search_user: obs.user.name,
-              search_where: obs.where
-    )
-    assert(query.results.many?)
+  # def test_index_advanced_search_multiple_hits
+  #   obs = observations(:fungi_obs)
+  #   assert(obs.images.many?)
+  #   query = Query.lookup_and_save(
+  #     :Image, search_name: obs.text_name,
+  #             search_user: obs.user.name,
+  #             search_where: obs.where
+  #   )
+  #   assert(query.results.many?)
 
-    login
-    get(:index,
-        params: @controller.query_params(query).merge({ advanced_search: "1" }))
+  #   login
+  #   get(:index,
+  #       params: @controller.query_params(query).
+  #       merge({ advanced_search: "1" }))
 
-    assert_response(:success)
-    assert_template("index")
-    assert_template(partial: "_matrix_box")
-    # Don't care about the title, but good to know if it changes
-    assert_displayed_title("Matching Images")
-  end
+  #   assert_response(:success)
+  #   assert_template("index")
+  #   assert_template(partial: "_matrix_box")
+  #   # Don't care about the title, but good to know if it changes
+  #   assert_displayed_title(:IMAGES.l)
+  # end
 
-  def test_index_advanced_search_one_hit
-    image = images(:connected_coprinus_comatus_image)
-    query = Query.lookup_and_save(:Image, search_name: "Coprinus comatus")
-    assert(query.results.one?)
+  # def test_index_advanced_search_one_hit
+  #   image = images(:connected_coprinus_comatus_image)
+  #   query = Query.lookup_and_save(:Image, search_name: "Coprinus comatus")
+  #   assert(query.results.one?)
 
-    login
-    get(:index,
-        params: @controller.query_params(query).merge({ advanced_search: "1" }))
+  #   login
+  #   get(:index,
+  #       params: @controller.query_params(query).
+  #       merge({ advanced_search: "1" }))
 
-    assert_response(:redirect)
-    assert_match(image_path(image), redirect_to_url)
-  end
+  #   assert_response(:redirect)
+  #   assert_match(image_path(image), redirect_to_url)
+  # end
 
-  def test_index_advanced_search_no_hits
-    query = Query.lookup_and_save(
-      :Image, search_name: "Don't know",
-              search_user: "myself",
-              search_content: "Long pink stem and small pink cap",
-              search_where: "Eastern Oklahoma"
-    )
-    assert(query.results.count.zero?)
+  # def test_index_advanced_search_no_hits
+  #   query = Query.lookup_and_save(
+  #     :Image, search_name: "Don't know",
+  #             search_user: "myself",
+  #             search_content: "Long pink stem and small pink cap",
+  #             search_where: "Eastern Oklahoma"
+  #   )
+  #   assert(query.results.count.zero?)
 
-    login
-    get(:index,
-        params: @controller.query_params(query).merge({ advanced_search: "1" }))
+  #   login
+  #   get(:index,
+  #       params: @controller.query_params(query).
+  #       merge({ advanced_search: "1" }))
 
-    assert_flash_text(:runtime_no_matches.l(type: :images.l))
-    assert_template("index")
-  end
+  #   assert_flash_text(:runtime_no_matches.l(type: :images.l))
+  #   assert_template("index")
+  # end
 
-  def test_index_advanced_search_invalid_q_param
-    login
-    get(:index, params: { q: "xxxxx", advanced_search: true })
+  # def test_index_advanced_search_invalid_q_param
+  #   login
+  #   get(:index, params: { q: "xxxxx", advanced_search: true })
 
-    assert_flash_text(:advanced_search_bad_q_error.l)
-    assert_redirected_to(search_advanced_path)
-  end
+  #   assert_flash_text(:advanced_search_bad_q_error.l)
+  #   assert_redirected_to(search_advanced_path)
+  # end
 
-  def test_index_advanced_search_error
-    query_no_conditions = Query.lookup_and_save(:Image)
+  # def test_index_advanced_search_error
+  #   query_no_conditions = Query.lookup_and_save(:Image)
 
-    login
-    params = @controller.query_params(query_no_conditions).
-             merge({ advanced_search: true })
-    get(:index, params:)
+  #   login
+  #   params = @controller.query_params(query_no_conditions).
+  #            merge({ advanced_search: true })
+  #   get(:index, params:)
 
-    assert_flash_error(:runtime_no_conditions.l)
-    assert_redirected_to(search_advanced_path)
-  end
+  #   assert_flash_error(:runtime_no_conditions.l)
+  #   assert_redirected_to(search_advanced_path)
+  # end
 
   def test_index_pattern_text_multiple_hits
     pattern = "USA"
@@ -150,7 +153,8 @@ class ImagesControllerTest < FunctionalTestCase
     get(:index, params: { pattern: pattern })
 
     assert_template("index", partial: "_image")
-    assert_displayed_title("Images Matching ‘#{pattern}’")
+    assert_displayed_title(:IMAGES.l)
+    assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
   end
 
   def test_index_pattern_text_no_hits
@@ -170,37 +174,6 @@ class ImagesControllerTest < FunctionalTestCase
     get(:index, params: { pattern: image.id })
 
     assert_redirected_to(image_path(image))
-  end
-
-  def test_index_by_user
-    user = rolf
-
-    login
-    get(:index, params: { by_user: user.id })
-
-    assert_template("index")
-    assert_template(partial: "_matrix_box")
-  end
-
-  def test_index_by_user_bad_user_id
-    bad_user_id = observations(:minimal_unknown_obs).id
-    assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
-
-    login
-    get(:index, params: { by_user: bad_user_id })
-
-    assert_flash_text(
-      :runtime_object_not_found.l(type: "user", id: bad_user_id)
-    )
-    assert_redirected_to(images_path)
-  end
-
-  def test_index_for_project
-    project = projects(:bolete_project).id
-    login
-    get(:index, params: { project: project })
-
-    assert_template("index", partial: "_image")
   end
 
   #########################################################

@@ -54,8 +54,8 @@ class NamesControllerTest < FunctionalTestCase
     login
     get(:index)
 
-    assert_displayed_title("Names by Name")
-    assert_select("#right_tabs a[href='#{names_path}']", { count: 0 },
+    assert_displayed_title(:NAMES.l)
+    assert_select("#context_nav a[href='#{names_path}']", { count: 0 },
                   "right `tabs` should not link to All Names")
   end
 
@@ -65,7 +65,8 @@ class NamesControllerTest < FunctionalTestCase
     login
     get(:index, params: { by: by })
 
-    assert_displayed_title("Names by Popularity")
+    assert_displayed_title(:NAMES.l)
+    assert_sorted_by(by)
   end
 
   def test_index_via_related_query
@@ -78,8 +79,9 @@ class NamesControllerTest < FunctionalTestCase
     login
     get(:index, params: { q: q })
 
-    assert_displayed_title("Names with Observations created by #{user.name}")
-    # assert_displayed_title("Names with Matching Observations")
+    assert_displayed_title(:NAMES.l)
+    assert_displayed_filters(:query_observation_query.l)
+    assert_displayed_filters("#{:query_by_users.l}: #{user.name}")
     assert_select(
       "#results a:match('href', ?)", %r{^#{names_path}/\d+},
       { count: Name.joins(:observations).with_correct_spelling.
@@ -103,7 +105,8 @@ class NamesControllerTest < FunctionalTestCase
                     with_correct_spelling.count },
       "Wrong number of (correctly spelled) Names"
     )
-    assert_displayed_title("Matching Names")
+    assert_displayed_title(:NAMES.l)
+    assert_displayed_filters("#{:query_search_name.l}: #{search_string}")
   end
 
   def test_index_advanced_search_one_hit
@@ -119,30 +122,27 @@ class NamesControllerTest < FunctionalTestCase
                  "Wrong page")
   end
 
-  def test_index_advanced_search_no_hits
-    query = Query.lookup_and_save(
+  def oklahoma_query
+    Query.lookup_and_save(
       :Name, search_name: "Don't know",
              search_user: "myself",
              search_content: "Long pink stem and small pink cap",
              search_where: "Eastern Oklahoma"
     )
+  end
 
+  def test_index_advanced_search_no_hits
+    query = oklahoma_query
     login
     get(:index,
         params: @controller.query_params(query).merge({ advanced_search: "1" }))
 
-    assert_select("title", { text: "#{:app_title.l}: Index" }, # metadata
-                  "Wrong page or <title>text")
+    assert_displayed_title(:NAMES.l)
     assert_flash_text(:runtime_no_matches.l(type: :names.l))
   end
 
   def test_index_advanced_search_with_deleted_query
-    query = Query.lookup_and_save(
-      :Name, search_name: "Don't know",
-             search_user: "myself",
-             search_content: "Long pink stem and small pink cap",
-             search_where: "Eastern Oklahoma"
-    )
+    query = oklahoma_query
     params = @controller.query_params(query).merge(advanced_search: true)
     query.record.delete
 
@@ -170,7 +170,8 @@ class NamesControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: pattern })
 
-    assert_displayed_title("Names Matching ‘#{pattern}’")
+    assert_displayed_title(:NAMES.l)
+    assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
     assert_select(
       "#results a:match('href', ?)", %r{^#{names_path}/\d+},
       { count: Name.where(Name[:text_name] =~ /#{pattern}/i).
@@ -216,7 +217,8 @@ class NamesControllerTest < FunctionalTestCase
     get(:index, params: { has_observations: true })
 
     assert_response(:success)
-    assert_displayed_title(/Names.*Observations/)
+    assert_displayed_title(:NAMES.l)
+    assert_displayed_filters(:query_has_observations.l)
     assert_select(
       "#results a:match('href', ?)", %r{#{names_path}/\d+},
       { count: Name.joins(:observations).
@@ -224,7 +226,7 @@ class NamesControllerTest < FunctionalTestCase
                     distinct.count },
       "Wrong number of (correctly spelled) Names"
     )
-    assert_select("#right_tabs a[href='#{names_path}']", { count: 1 },
+    assert_select("#context_nav a[href='#{names_path}']", { count: 1 },
                   "right `tabs` should have a link to All Names")
   end
 
@@ -239,7 +241,8 @@ class NamesControllerTest < FunctionalTestCase
     get(:index, params: { has_observations: true, letter: letter })
 
     assert_response(:success)
-    assert_displayed_title(/Names.*Observations/)
+    assert_displayed_title(:NAMES.l)
+    assert_displayed_filters(:query_has_observations.l)
     names.each do |name|
       assert_select("#results a[href*='/names/#{name.id}'] .display-name",
                     name.search_name)
@@ -251,7 +254,8 @@ class NamesControllerTest < FunctionalTestCase
     get(:index, params: { has_descriptions: true })
 
     assert_response(:success)
-    assert_displayed_title("Names with Descriptions")
+    assert_displayed_title(:NAMES.l)
+    assert_displayed_filters(:query_has_descriptions.l)
     assert_select("#results", { text: /not the default/ },
                   "Results should include non-default descriptions")
     assert_select(
@@ -263,16 +267,17 @@ class NamesControllerTest < FunctionalTestCase
     )
   end
 
-  def test_index_need_description
+  def test_index_needs_description
     login
-    get(:index, params: { need_description: true })
+    get(:index, params: { needs_description: true })
 
     assert_response(:success)
-    assert_displayed_title(:query_title_needs_description.t(type: :name))
+    assert_displayed_title(:NAMES.l)
+    assert_displayed_filters(:query_needs_description.l)
     assert_select(
       "#results a:match('href', ?)", %r{^#{names_path}/\d+},
-      # need length; count & size return a hash; need_description is grouped
-      { count: Name.with_correct_spelling.need_description.length },
+      # need length; count & size return a hash; needs_description is grouped
+      { count: Name.with_correct_spelling.needs_description.length },
       "Wrong number of (correctly spelled) Names"
     )
   end
@@ -283,8 +288,8 @@ class NamesControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_user: user.id })
 
-    assert_response(:success)
-    assert_displayed_title("Names created by #{user.name}")
+    assert_displayed_title(:NAMES.l)
+    assert_displayed_filters("#{:query_by_users.l}: #{user.name}")
     assert_select(
       "#results a:match('href', ?)", %r{^#{names_path}/\d+},
       { count: Name.where(user: user, correct_spelling_id: nil).count },
@@ -307,7 +312,7 @@ class NamesControllerTest < FunctionalTestCase
                  redirect_to_url)
   end
 
-  def test_index_by_user_who_created_zero_locations
+  def test_index_by_user_who_created_zero_names
     user = users(:zero_user)
 
     login
@@ -340,7 +345,8 @@ class NamesControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_editor: user })
 
-    assert_displayed_title("Names Edited by #{user.name}")
+    assert_displayed_title(:NAMES.l)
+    assert_displayed_filters("#{:query_by_editor.l}: #{user.name}")
     assert_select("#results a:match('href',?)", %r{^/names/\d+},
                   { count: names_edited_by_user.count },
                   "Wrong number of results")

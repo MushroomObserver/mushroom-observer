@@ -208,8 +208,8 @@ module ControllerExtensions
       method: method,
       action: page,
       params: params,
-      user: (params[:username] || username),
-      password: (params[:password] || password),
+      user: params[:username] || username,
+      password: params[:password] || password,
       require_login: :login,
       require_user: altpage ? [altpage].flatten : nil
     )

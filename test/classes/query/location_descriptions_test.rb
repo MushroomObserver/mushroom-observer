@@ -47,13 +47,16 @@ class Query::LocationDescriptionsTest < UnitTestCase
     desc2.add_author(mary)
     desc3.add_author(rolf)
 
-    # Using Rails instead of db; don't know how to do it with .joins & .where
     descs = LocationDescription.all
-    assert_query(descs.find_all { |d| d.authors.include?(rolf) },
-                 :LocationDescription, by_author: rolf, by: :id)
-    assert_query(descs.find_all { |d| d.authors.include?(mary) },
-                 :LocationDescription, by_author: mary)
-    assert_query([], :LocationDescription, by_author: users(:zero_user))
+    assert_query_scope(descs.find_all { |d| d.authors.include?(rolf) },
+                       LocationDescription.by_author(rolf),
+                       :LocationDescription, by_author: rolf.login, by: :id)
+    assert_query_scope(descs.find_all { |d| d.authors.include?(mary) },
+                       LocationDescription.by_author(mary),
+                       :LocationDescription, by_author: mary.login)
+    assert_query_scope([],
+                       LocationDescription.by_author(users(:zero_user)),
+                       :LocationDescription, by_author: users(:zero_user))
   end
 
   def test_location_description_by_editor
@@ -68,13 +71,16 @@ class Query::LocationDescriptionsTest < UnitTestCase
     desc2.add_editor(mary)
     desc3.add_editor(rolf)
 
-    # Using Rails instead of db; don't know how to do it with .joins & .where
     descs = LocationDescription.all
-    assert_query(descs.find_all { |d| d.editors.include?(rolf) },
-                 :LocationDescription, by_editor: rolf, by: :id)
-    assert_query(descs.find_all { |d| d.editors.include?(mary) },
-                 :LocationDescription, by_editor: mary)
-    assert_query([], :LocationDescription, by_editor: users(:zero_user))
+    assert_query_scope(descs.find_all { |d| d.editors.include?(rolf) },
+                       LocationDescription.by_editor(rolf),
+                       :LocationDescription, by_editor: rolf, by: :id)
+    assert_query_scope(descs.find_all { |d| d.editors.include?(mary) },
+                       LocationDescription.by_editor(mary),
+                       :LocationDescription, by_editor: mary)
+    assert_query_scope([],
+                       LocationDescription.by_editor(users(:zero_user)),
+                       :LocationDescription, by_editor: users(:zero_user))
   end
 
   def test_location_description_in_set

@@ -310,7 +310,7 @@ module SessionExtensions
   # Sample use:
   #   click_mo_link(label: "Show Observation")
   #   click_mo_link(href: /names/)
-  #   click_mo_link(label: "User", in: :sort_tabs)
+  #   click_mo_link(label: "User", in: :sorts)
   def click_mo_link(args = {})
     return true if try_finding_matching_anchor(args)
     return true if try_finding_matching_button(args)
@@ -378,13 +378,11 @@ module SessionExtensions
   # Restrict search to a certain section on the page.
   def section_select_spec(arg)
     case arg
-    when :left_tabs
-      "#left_tabs"
-    when :right_tabs
-      "#right_tabs"
-    when :sort_tabs
+    when :context_nav
+      "#context_nav"
+    when :sorts
       "#sorts"
-    when :left_panel
+    when :site_nav
       "#navigation"
     when :results
       "#results"

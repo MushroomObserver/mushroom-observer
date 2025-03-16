@@ -1,6 +1,6 @@
 <%
 add_page_title(comment_form_edit_title(target: @target))
-add_tab_set(comment_form_edit_tabs(comment: @comment))
+add_context_nav(comment_form_edit_tabs(comment: @comment))
 %>
 
 <%= render(partial: "comments/form",

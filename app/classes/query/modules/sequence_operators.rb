@@ -29,7 +29,6 @@ module Query::Modules::SequenceOperators
     else
       self.current_id = arg
     end
-    arg
   end
 
   # Move to first place.

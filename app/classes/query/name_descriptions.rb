@@ -16,7 +16,7 @@ class Query::NameDescriptions < Query::Base
       by_author: User,
       by_editor: User,
       is_public: :boolean,
-      types: [{ string: Description::ALL_SOURCE_TYPES }],
+      sources: [{ string: Description::ALL_SOURCE_TYPES }],
       ok_for_export: :boolean,
       content_has: :string,
       names: [Name],
@@ -26,7 +26,6 @@ class Query::NameDescriptions < Query::Base
   end
 
   def initialize_flavor
-    add_sort_order_to_title
     add_id_in_set_condition
     add_owner_and_time_stamp_conditions
     add_desc_by_author_condition(:name)

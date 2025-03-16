@@ -179,10 +179,11 @@ module Tabs
 
     def descriptions_index_sorts
       [
-        ["name",        :sort_by_name.t],
-        ["created_at",  :sort_by_created_at.t],
-        ["updated_at",  :sort_by_updated_at.t],
-        ["num_views",   :sort_by_num_views.t]
+        ["name",        :sort_by_name.l],
+        ["created_at",  :sort_by_created_at.l],
+        ["updated_at",  :sort_by_updated_at.l],
+        ["user",        :sort_by_user.l],
+        ["num_views",   :sort_by_num_views.l]
       ].freeze
     end
   end
