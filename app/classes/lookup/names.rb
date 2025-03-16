@@ -35,6 +35,14 @@ class Lookup::Names < Lookup
     ids.map { |id| Name.find(id) }
   end
 
+  # Skip misspellings in any list of returned titles --
+  # even if they're part of the actual query.
+  def lookup_titles
+    return [] if @vals.blank?
+
+    instances.select { |i| i.correct_spelling_id.nil? }.map(&:text_name)
+  end
+
   # "Original" names could turn out to be quite a few more than the given vals.
   # Memoized to avoid recalculating, or passing the value around.
   def original_names
