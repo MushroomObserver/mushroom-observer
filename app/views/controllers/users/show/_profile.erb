@@ -62,7 +62,7 @@ footer =
     <% user_profile_tabs(show_user: @show_user, user: @user).each do |tab|
       str, url, args = tab
       args ||= {}
-      kwargs = merge_tab_args_with_extra_args(args, { class: "d-block" }) %>
+      kwargs = merge_context_nav_link_args(args, { class: "d-block" }) %>
       <% if args.any?([:button, :destroy]) %>
         <%= destroy_button(target: admin_users_path(id: @show_user.id),
                            name: str) %>
