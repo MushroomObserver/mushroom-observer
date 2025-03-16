@@ -1,7 +1,7 @@
 <%
 @container = :full
 add_page_title(collection_number_form_edit_title(c_n: @collection_number))
-add_tab_set(
+add_context_nav(
   collection_number_form_edit_tabs(back: @back, c_n: @collection_number,
                                     obj: @back_object)
 )
@@ -21,4 +21,5 @@ add_tab_set(
       <% end %>
     </ul>
   </div>
-</div><!--.row-->
+</div>
+<!--.row-->

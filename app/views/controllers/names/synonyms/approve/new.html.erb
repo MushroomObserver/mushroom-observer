@@ -1,7 +1,7 @@
 <%
 add_page_title(:name_approve_title.t(name: @name.display_name))
 
-add_tab_set(name_forms_return_tabs(name: @name))
+add_context_nav(name_forms_return_tabs(name: @name))
 
 action = { controller: "/names/synonyms/approve", action: :create,
             id: @name.id }
@@ -18,14 +18,14 @@ action = { controller: "/names/synonyms/approve", action: :create,
     <% @approved_names.each do |n| %>
       <%= n.display_name.t %><br/>
     <% end %></p>
-  <% end %>
+<% end %>
 
-  <%= help_note(:div, :name_approve_deprecate_help.tp) %>
+<%= help_note(:div, :name_approve_deprecate_help.tp) %>
 
-  <%= text_area_with_label(form: f, field: :comment, inline: true,
+<%= text_area_with_label(form: f, field: :comment, inline: true,
                            label: :name_approve_comments.t + ":",
                            cols: 80, rows: 5, data: { autofocus: true }) %>
-  <%= help_note(:div,
+<%= help_note(:div,
                 :name_approve_comments_help.tp(name: @name.display_name)) %>
 
 <% end %>

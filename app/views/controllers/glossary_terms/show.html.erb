@@ -1,7 +1,7 @@
 <%
 add_page_title(:show_glossary_term_title.t(name: @glossary_term.name))
 
-add_tab_set(glossary_term_show_tabs(term: @glossary_term, user: @user))
+add_context_nav(glossary_term_show_tabs(term: @glossary_term, user: @user))
 
 @container = :wide
 %>
@@ -19,7 +19,8 @@ add_tab_set(glossary_term_show_tabs(term: @glossary_term, user: @user))
       ) %>
     </div>
   <% end %>
-</div><!--.row-->
+</div>
+<!--.row-->
 
 <div class="mb-3">
   <%= link_with_query(:show_glossary_term_reuse_image.t,
@@ -36,7 +37,8 @@ add_tab_set(glossary_term_show_tabs(term: @glossary_term, user: @user))
       end %>
     </div>
   <% end %>
-</div><!--.row-->
+</div>
+<!--.row-->
 
 <div class="mt-3">
   <%= show_previous_version(@glossary_term, @versions) %>

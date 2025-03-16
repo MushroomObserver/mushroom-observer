@@ -7,7 +7,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     login
     get(:index)
 
-    assert_displayed_title("Collection Number Index")
+    assert_displayed_title(:COLLECTION_NUMBERS.l)
   end
 
   def test_index_with_query
@@ -18,7 +18,8 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     get(:index, params: { q: query.record.id.alphabetize })
 
     assert_response(:success)
-    assert_displayed_title("Collection Numbers created by Rolf Singer")
+    assert_displayed_title(:COLLECTION_NUMBERS.l)
+    assert_displayed_filters("#{:query_by_users.l}: Rolf Singer")
     # In results, expect 1 row per collection_number.
     assert_select("#results tr", query.num_results)
   end
@@ -31,7 +32,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     get(:index, params: params)
 
     assert_response(:success)
-    assert_displayed_title("Collection Numbers by Date")
+    assert_displayed_title(:COLLECTION_NUMBERS.l)
     assert(
       collection_number_links.first[:href].
         start_with?(collection_number_path(last_number.id)),
@@ -48,11 +49,8 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     get(:index, params: { observation: obs.id })
 
     assert_no_flash
-    assert_displayed_title(
-      :query_title_for_observation.t(type: :collection_number,
-                                     observation: obs.unique_format_name.t).
-      strip_html
-    )
+    assert_displayed_title(:COLLECTION_NUMBERS.l)
+    assert_displayed_filters("#{:query_observations.l}: #{obs.id}")
   end
 
   def test_index_observation_id_with_multiple_collection_numbers
@@ -63,11 +61,8 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     get(:index, params: { observation: obs.id })
 
     assert_no_flash
-    assert_displayed_title(
-      :query_title_for_observation.t(type: :collection_number,
-                                     observation: obs.unique_format_name.t).
-      strip_html
-    )
+    assert_displayed_title(:COLLECTION_NUMBERS.l)
+    assert_displayed_filters("#{:query_observations.l}: #{obs.id}")
   end
 
   def test_index_observation_id_with_no_hits
@@ -77,7 +72,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     login
     get(:index, params: { observation: obs.id })
 
-    assert_displayed_title("List Collection Numbers")
+    assert_displayed_title(:COLLECTION_NUMBERS.l)
     assert_flash_text(/no matching collection numbers found/i)
   end
 
@@ -105,7 +100,8 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     get(:index, params: { pattern: pattern })
 
     assert_response(:success)
-    assert_displayed_title("Collection Numbers Matching ‘#{pattern}’")
+    assert_displayed_title(:COLLECTION_NUMBERS.l)
+    assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
     # Results should have 2 links per collection_number
     # a show link, and (because logged in user created the numbers)
     # an edit link

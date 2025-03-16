@@ -5,7 +5,6 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
   include Query::Params::Filters
   include Query::Initializers::Filters
   include Query::Initializers::AdvancedSearch
-  include Query::Titles::Observations
 
   def model
     Observation
@@ -65,7 +64,6 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
   end
 
   def initialize_flavor
-    add_sort_order_to_title
     initialize_obs_basic_parameters
     initialize_obs_record_parameters
     initialize_subquery_parameters
@@ -319,11 +317,6 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
       "names.search_name," \
       "observations.where" \
       ")"
-  end
-
-  def title
-    default = super
-    observation_query_description || default
   end
 
   def self.default_order

@@ -13,10 +13,10 @@ class Query::HerbariumRecords < Query::Base
       by_users: [User],
       has_notes: :boolean,
       notes_has: :string,
-      initial_dets: [:string],
+      initial_det: [:string],
       initial_det_has: :string,
-      accession_numbers: [:string],
-      accession_number_has: :string,
+      accession: [:string],
+      accession_has: :string,
       herbaria: [Herbarium],
       observations: [Observation],
       pattern: :string
@@ -24,7 +24,6 @@ class Query::HerbariumRecords < Query::Base
   end
 
   def initialize_flavor
-    add_sort_order_to_title
     add_owner_and_time_stamp_conditions
     add_id_in_set_condition
     initialize_association_parameters
@@ -48,9 +47,9 @@ class Query::HerbariumRecords < Query::Base
 
   def initialize_exact_match_parameters
     add_exact_match_condition("herbarium_records.initial_det",
-                              params[:initial_dets])
+                              params[:initial_det])
     add_exact_match_condition("herbarium_records.accession_number",
-                              params[:accession_numbers])
+                              params[:accession])
   end
 
   def initialize_search_parameters
@@ -59,7 +58,7 @@ class Query::HerbariumRecords < Query::Base
     add_search_condition("herbarium_records.initial_det",
                          params[:initial_det_has])
     add_search_condition("herbarium_records.accession_number",
-                         params[:accession_number_has])
+                         params[:accession_has])
   end
 
   def search_fields
