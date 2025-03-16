@@ -1,6 +1,6 @@
 <%
 add_page_title(:merge_descriptions_title.t(object: @description.format_name))
-add_tab_set(
+add_context_nav(
   location_description_form_permissions_tabs(description: @description)
 )
 action = { controller: "/names/descriptions/merges", action: :create,

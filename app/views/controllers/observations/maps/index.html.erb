@@ -2,7 +2,7 @@
 @container = :full
 
 add_index_title(@query, map: true)
-add_tab_set(observation_maps_tabs(query: @query))
+add_context_nav(observation_maps_tabs(query: @query))
 
 objects = @observations
 objects += @locations if @locations.any?

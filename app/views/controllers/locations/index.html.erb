@@ -1,7 +1,7 @@
 <%
 @container = :full
 add_index_title(@query)
-add_tab_set(locations_index_tabs(query: @query))
+add_context_nav(locations_index_tabs(query: @query))
 all_links = if (params[:id].present? ||
                 params[:by].present? ||
                 params[:by_user].present?)
@@ -50,21 +50,21 @@ flash_error(@error) if @error && @known_pages.empty? && @undef_pages.empty?
       </div>
       <%= paginate_block(@undef_pages, { html_id: "locations_undefined" }) do %>
         <div class="list-group">
-          <% @undef_data.each do |obs, count| 
+          <% @undef_data.each do |obs, count|
             location_name = obs[:where] %>
-            <div class="list-group-item">
-              <%= location_link(location_name, nil, count) %>
-              <%= 
+          <div class="list-group-item">
+            <%= location_link(location_name, nil, count) %>
+            <%=
               link_to(
                 :list_place_names_merge.t,
                 matching_locations_for_observations_path(where: location_name)
-              ) 
+              )
               %>
-            </div>
-          <% end %>
-        </div>
-      <% end %>
+          </div>
+        <% end %>
+      </div>
     <% end %>
-  </div>
+  <% end %>
+</div>
 </div>
 <!--.row-->

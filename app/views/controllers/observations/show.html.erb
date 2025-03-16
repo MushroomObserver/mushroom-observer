@@ -8,7 +8,7 @@ content_for(:edit_icons) do
   tag.span(obs_change_links(@observation),
            class: "h4 ml-3 d-inline-block text-nowrap")
 end
-# add_tab_set(show_observation_tabs(obs: @observation, user: @user))
+# add_context_nav(show_observation_tabs(obs: @observation, user: @user))
 
 @container = :double
 
@@ -47,7 +47,8 @@ carousel_locals = {
       <% end %>
     <% end %>
   </div>
-</div><!--.row-->
+</div>
+<!--.row-->
 
 <div class="row">
   <div class="col-xs-12 col-md-8 col-lg-7 float-sm-left">
@@ -68,6 +69,7 @@ carousel_locals = {
                  locals: obs_locals) %>
     <% end %>
   </div>
-</div><!--.row-->
+</div>
+<!--.row-->
 
 <%= show_object_footer(@observation) %>

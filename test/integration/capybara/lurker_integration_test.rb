@@ -260,7 +260,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     visit("/names/#{nam.id}/map")
 
     # Get a list of locations shown on map. (One defined, one undefined.)
-    within("#right_tabs") { click_link("Show Locations") }
+    within("#context_nav") { click_link("Show Locations") }
     assert_match("Locations", page.title, "Wrong title")
     assert_selector("#filters", text: nam.text_name)
 

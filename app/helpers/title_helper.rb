@@ -36,8 +36,6 @@ module TitleHelper
   def title_tag_contents(title, action: controller.action_name)
     if title.present?
       title.strip_html.unescape_html # removes tags and special chars
-    elsif TranslationString.where(tag: "title_for_#{action}").present?
-      :"title_for_#{action}".t
     else
       action.tr("_", " ").titleize
     end
@@ -63,211 +61,11 @@ module TitleHelper
     return unless query&.params
 
     content_for(:filters) do
-      tag.div(class: "small", id: "filters") do
-        query.params.except(:by).compact_blank.each do |key, val|
-          caption_one_filter_param(query, key, val)
-        end
+      tag.div(id: "filters", data: { controller: "filter-caption" }) do
+        concat(caption_truncated(query))
+        concat(caption_full(query))
       end
     end
-  end
-
-  # Each param could be a boolean, a val, a set of vals,
-  # a nested param with new key/vals, or a subquery.
-  def caption_one_filter_param(query, key, val)
-    concat(tag.div do
-      if key.to_s.include?("_query")
-        caption_string_for_subquery(query, key, val)
-      elsif val.is_a?(Hash)
-        caption_string_for_nested_params(query, key, val)
-      else
-        caption_string_for_val(query, key, val)
-      end
-    end)
-  end
-
-  # In the case of subqueries, treat them like a new query string.
-  # Subquery params get { curly brackets }. The new query block is
-  # inside the brackets and indented.
-  def caption_string_for_subquery(query, label, hash)
-    concat(tag.div("#{:"query_#{label}".l}: {"))
-    concat(tag.div(class: "ml-3") do
-      hash.each do |key, val|
-        caption_one_filter_param(query, key, val)
-      end
-    end)
-    concat(tag.div("}"))
-  end
-
-  # In the case of nested params, print them on one line separated by comma.
-  # Nested params get [square brackets]
-  def caption_string_for_nested_params(query, label, hash)
-    len = hash.compact_blank.keys.size
-    return if len.zero?
-
-    concat(tag.span("#{:"query_#{label}".l}: "))
-    if label == :target
-      val = caption_lookup_comment_target_val(hash)
-      concat(tag.span(val))
-    else
-      caption_val_for_nested_params(query, hash, len)
-    end
-  end
-
-  def caption_val_for_nested_params(query, hash, len)
-    hash.compact_blank.each_with_index do |(key, val), idx|
-      caption_string_for_val(query, key, val)
-      concat(tag.span(", ")) if idx < len - 1
-    end
-  end
-
-  # These make more sense without the keys
-  CAPTION_IGNORE_KEYS = [:lookup, :id, :type].freeze
-
-  CAPTIONABLE_QUERY_PARAMS = {
-    herbaria: Herbarium,
-    locations: Location,
-    names: Name,
-    projects: Project,
-    project_lists: Project,
-    species_lists: SpeciesList,
-    by_users: User,
-    for_user: User,
-    by_author: User,
-    by_editor: User,
-    search_user: User,
-    lookup: Name
-  }.freeze
-
-  CAPTION_LOOKUPS = {
-    Herbarium: :name,
-    Location: :display_name,
-    Name: :text_name,
-    Observation: :unique_text_name,
-    Project: :title,
-    SpeciesList: :title,
-    User: :login
-  }.freeze
-
-  def caption_string_for_val(query, key, val)
-    translation = :"query_#{key}".l
-    if val == true
-      concat(tag.span(translation))
-    else
-      unless CAPTION_IGNORE_KEYS.include?(key)
-        concat(tag.span("#{translation}: "))
-      end
-      val = caption_lookup_text_val(query, key, val)
-      concat(tag.b(val))
-    end
-  end
-
-  # Tries to get a proper name for the comment target.
-  def caption_lookup_comment_target_val(hash)
-    type, id = hash.values_at(:type, :id)
-    return unless type && id
-
-    method = CAPTION_LOOKUPS[type.to_sym]
-    get_attribute_of_instance_by_integer(id, type.to_s.constantize, method)
-  end
-
-  # NOTE: Can respond to special methods for certain keys.
-  # Defaults to using the lookup method defined in CAPTIONABLE_QUERY_PARAMS
-  def caption_lookup_text_val(query, key, val)
-    unless CAPTIONABLE_QUERY_PARAMS.key?(key)
-      val = val.join(", ") if val.is_a?(Array)
-      return val
-    end
-
-    key = :names if key == :lookup
-    if respond_to?(:"caption_#{key}")
-      send(:"caption_#{key}", query)
-    else
-      map_join_and_truncate(query, key)
-    end
-  end
-
-  # def caption_herbaria(query)
-  #   map_join_and_truncate(query, :herbaria)
-  # end
-
-  # NOTE: used in "Locations with Observations of {name}" - AN 2023
-  # def caption_locations(query)
-  #   map_join_and_truncate(query, :locations)
-  # end
-
-  def caption_names(query)
-    tag.i(map_join_and_truncate(query, :lookup))
-  end
-
-  # def caption_projects(query)
-  #   map_join_and_truncate(query, :projects)
-  # end
-
-  # def caption_project_lists(query)
-  #   map_join_and_truncate(query, :project_lists)
-  # end
-
-  # def caption_species_lists(query)
-  #   map_join_and_truncate(query, :species_lists)
-  # end
-
-  def caption_by_users(query)
-    caption_user_legal_name_or_list_of_logins(query, :by_users)
-  end
-
-  def caption_for_user(query)
-    caption_user_legal_name_or_list_of_logins(query, :for_user)
-  end
-
-  def caption_by_editor(query)
-    caption_user_legal_name_or_list_of_logins(query, :by_editor)
-  end
-
-  def caption_by_author(query)
-    caption_user_legal_name_or_list_of_logins(query, :by_author)
-  end
-
-  def caption_user_legal_name_or_list_of_logins(query, key)
-    if query.params.deep_find(key).size == 1
-      User.find(query.params.deep_find(key).first).legal_name
-    else
-      map_join_and_truncate(query, key)
-    end
-  end
-
-  # takes a search string
-  def caption_search_user(query)
-    query.params.deep_find(:search_user)
-  end
-
-  # The max number of named items is hardcoded here to 3.
-  def map_join_and_truncate(query, param)
-    model, method = caption_lookup_model_and_method(param)
-    str = query.params.deep_find(param)[0..2].map do |val|
-      # Integer(val) throws ArgumentError if val is not an integer.
-      str = get_attribute_of_instance_by_integer(val, model, method)
-    rescue ArgumentError # rubocop:disable Layout/RescueEnsureAlignment
-      val
-    end.join(", ")
-    if str.length > 100
-      str = "#{str[0...97]}..."
-    elsif query.params.deep_find(param).length > 3
-      str += ", ..."
-    end
-    str
-  end
-
-  def caption_lookup_model_and_method(param)
-    model = CAPTIONABLE_QUERY_PARAMS[param]
-    method = CAPTION_LOOKUPS[model.name.to_sym]
-    [model, method]
-  end
-
-  def get_attribute_of_instance_by_integer(val, model, method)
-    val = val.min if val.is_a?(Array)
-    return val if val.is_a?(AbstractModel)
-
-    model.find(Integer(val)).send(method)
   end
 
   # Used by several indexes that can be filtered based on user prefs
@@ -280,5 +78,186 @@ module TitleHelper
         title: :rss_filtered_mouseover.t, class: "filter-help"
       )
     end
+  end
+
+  def caption_truncated(query)
+    tag.div(class: "position-relative pr-3 collapse in",
+            id: "caption-truncated",
+            data: { filter_caption_target: "truncated" }) do
+      concat(caption_toggle_button(true))
+      concat(caption_params(query, true))
+    end
+  end
+
+  def caption_full(query)
+    tag.div(class: "position-relative pr-3 collapse", id: "caption-full",
+            data: { filter_caption_target: "full" }) do
+      concat(caption_toggle_button(false))
+      concat(caption_params(query, false))
+    end
+  end
+
+  def caption_toggle_button(truncate)
+    if truncate
+      action = "showFull"
+      direction = "down"
+    else
+      action = "showTruncated"
+      direction = "up"
+    end
+    js_button(class: "top-right btn-link toggle",
+              data: { filter_caption_target: action,
+                      action: "filter-caption##{action}" }) do
+      tag.span(class: "glyphicon glyphicon-chevron-#{direction}",
+               aria: { hidden: true })
+    end
+  end
+
+  def caption_params(query, truncate)
+    tag.div(class: "small") do
+      query.params.except(:by).compact_blank.each do |key, val|
+        caption_one_filter_param(query, key, val, truncate:)
+      end
+    end
+  end
+
+  # Each param could be a boolean, a val, a set of vals,
+  # a nested param with new key/vals, or a subquery.
+  def caption_one_filter_param(query, key, val, truncate: false, tag: :div)
+    concat(content_tag(tag) do
+      if key.to_s.include?("_query")
+        caption_subquery(query, key, val, truncate)
+      elsif val.is_a?(Hash)
+        caption_grouped_params(query, key, val, truncate)
+      else
+        caption_plain_param(query, key, val, truncate)
+      end
+    end)
+  end
+
+  # In the case of subqueries, treat them like a new query string.
+  # Subquery params get { curly brackets }. The new query block is
+  # inside the brackets and indented.
+  def caption_subquery(query, label, hash, truncate)
+    concat(tag.span("#{:"query_#{label}".l}: [ "))
+    hash.except(:by).each do |key, val|
+      caption_one_filter_param(query, key, val, truncate:, tag: :span)
+    end
+    concat(tag.span(" ] "))
+  end
+
+  # In the case of nested params, print them on one line separated by comma.
+  def caption_grouped_params(query, label, hash, truncate)
+    len = hash.compact_blank.keys.size
+    return if len.zero?
+
+    concat(tag.span("#{:"query_#{label}".l}: "))
+    if label == :target
+      val = lookup_comment_target_val(hash)
+      concat(tag.span(val))
+    else
+      caption_nested_params(query, hash, len, truncate)
+    end
+  end
+
+  def caption_nested_params(query, hash, len, truncate)
+    hash.compact_blank.each_with_index do |(key, val), idx|
+      caption_plain_param(query, key, val, truncate)
+      concat(tag.span(", ")) if idx < len - 1
+    end
+  end
+
+  def caption_plain_param(query, key, val, truncate)
+    label = :"query_#{key}".l
+    # Just print the label for booleans (no `true`)
+    if val == true
+      concat(tag.span(label))
+    else
+      concat(tag.span("#{label}: ")) unless CAPTION_IGNORE_KEYS.include?(key)
+      val = lookup_text_val(query, key, val, truncate)
+      concat(tag.b(val))
+    end
+  end
+
+  # The following params store IDs, but the captions are more legible
+  # if they print a relevant "name" or "title" of the record.
+  # This indexes which Lookup class to use to get the record:
+  PARAM_LOOKUPS = {
+    external_sites: :ExternalSites,
+    field_slips: :FieldSlips,
+    herbaria: :Herbaria,
+    locations: :Locations,
+    names: :Names,
+    lookup: :Names,
+    clade: :Names,
+    projects: :Projects,
+    project_lists: :ProjectSpeciesLists,
+    species_lists: :SpeciesLists,
+    by_users: :Users,
+    for_user: :Users,
+    by_author: :Users,
+    by_editor: :Users,
+    collectors: :Users,
+    members: :Users
+  }.freeze
+  # The captions with these sub-params make more sense without the keys:
+  CAPTION_IGNORE_KEYS = [:lookup, :id, :type].freeze
+  # Max number of values to display if truncated:
+  CAPTION_TRUNCATE = 3
+
+  # Tries to get a proper name for the comment target.
+  def lookup_comment_target_val(hash)
+    type, id = hash.values_at(:type, :id)
+    return unless type && id
+
+    lookup = "Lookup::#{type.pluralize}".constantize
+    lookup.new(id).titles.first
+  end
+
+  # NOTE: Can respond to special methods for certain keys.
+  # Defaults to using the lookup method defined in CAPTIONABLE_QUERY_PARAMS
+  def lookup_text_val(query, key, val, truncate)
+    return param_val_itself(val, truncate) unless PARAM_LOOKUPS.key?(key)
+
+    # Allow overrides (second param `true` means check for private methods)
+    if [:names, :lookup].include?(key)
+      tag.i(lookup_strings(query, key, truncate))
+    else
+      lookup_strings(query, key, truncate)
+    end
+  end
+
+  # For values that aren't ids, just join and maybe truncate
+  def param_val_itself(val, truncate)
+    if val.is_a?(Array)
+      val = val.first(CAPTION_TRUNCATE) if truncate
+      val = val.join(", ")
+      val += ", ..." if truncate && val.length > CAPTION_TRUNCATE
+    end
+    val
+  end
+
+  # The max number of named items is hardcoded here to 3.
+  def lookup_strings(query, param, truncate)
+    ids = query.params.deep_find(param)
+    lookups = if truncate
+                ids.first(CAPTION_TRUNCATE)
+              else
+                ids
+              end
+    lookup_class = "Lookup::#{PARAM_LOOKUPS[param]}".constantize
+    joined_vals = lookup_class.new(lookups).titles.join(", ")
+    return joined_vals unless truncate
+
+    truncate_joined_string(joined_vals, ids)
+  end
+
+  def truncate_joined_string(joined_vals, ids)
+    if joined_vals.length > 100
+      joined_vals = "#{joined_vals[0...97]}..."
+    elsif ids.length > CAPTION_TRUNCATE
+      joined_vals += ", ..."
+    end
+    joined_vals
   end
 end

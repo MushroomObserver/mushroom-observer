@@ -38,7 +38,7 @@ module LanguageExporter
 
     def locales_dir
       @locales_path = "config/locales" if @locales_path.nil?
-      "#{::Rails.root}/#{@locales_path}"
+      Rails.root.join(@locales_path.to_s).to_s
     end
 
     def locales_path=(path)

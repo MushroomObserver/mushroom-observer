@@ -1,7 +1,7 @@
 <%
 @container = :full
 add_index_title(@query, map: true)
-add_tab_set(location_map_tabs(query: @query))
+add_context_nav(location_map_tabs(query: @query))
 %>
 
 <%= make_map(

@@ -205,78 +205,81 @@ module PanelHelper
             aria: { expanded: "false", controls: id })
   end
 
-  # BOOTSTRAP TABBED CONTENT
-  #
-  # Bootstrap tablist
-  def tab_nav(**args, &block)
-    if args[:tabs]
-      content = capture do
-        args[:tabs].each do |tab|
-          concat(tab_item(tab[:name], id: tab[:id], active: tab[:active]))
-        end
-      end
-    elsif block
-      content = capture(&block).to_s
-    else
-      content = ""
-    end
-    style = args[:style] || "pills"
+  # PLEASE KEEP, this is laborious to re-write if we ever need tabbed panes
+  # # BOOTSTRAP TABBED CONTENT activated by JS
+  # # not to be confused with MO "tabs", i.e. link definition POROs
+  # #
+  # # Bootstrap tablist
+  # def tab_nav(**args, &block)
+  #   if args[:tabs]
+  #     content = capture do
+  #       args[:tabs].each do |tab|
+  #         concat(tab_item(tab[:name], id: tab[:id], active: tab[:active]))
+  #       end
+  #     end
+  #   elsif block
+  #     content = capture(&block).to_s
+  #   else
+  #     content = ""
+  #   end
+  #   style = args[:style] || "pills"
 
-    tag.ul(
-      role: "tablist",
-      class: class_names("nav nav-#{style}", args[:class]),
-      **args.except(:class, :style)
-    ) do
-      content
-    end
-  end
+  #   tag.ul(
+  #     role: "tablist",
+  #     class: class_names("nav nav-#{style}", args[:class]),
+  #     **args.except(:class, :style)
+  #   ) do
+  #     content
+  #   end
+  # end
 
-  # Bootstrap "tab" item in ul/li tablist
-  def tab_item(name, **args)
-    active = args[:active] ? "active" : nil
-    disabled = args[:disabled] ? "disabled" : nil
+  # # Bootstrap "tab" item in ul/li tablist
+  # def tab_item(name, **args)
+  #   active = args[:active] ? "active" : nil
+  #   disabled = args[:disabled] ? "disabled" : nil
 
-    tag.li(
-      role: "presentation",
-      class: class_names(active, disabled, args[:class])
-    ) do
-      tab_link(name, **args.except(:active, :disabled, :class))
-    end
-  end
+  #   tag.li(
+  #     role: "presentation",
+  #     class: class_names(active, disabled, args[:class])
+  #   ) do
+  #     tab_toggle(name, **args.except(:active, :disabled, :class))
+  #   end
+  # end
 
-  # Bootstrap tab - just the link. Use for independent tab (e.g. button).
-  def tab_link(name, **args)
-    classes = args[:button] ? "btn btn-default" : "nav-link"
+  # # Bootstrap tab - just the link that switches tabs.
+  # # Use for independent tab (e.g. button).
+  # def tab_toggle(name, **args)
+  #   classes = args[:button] ? "btn btn-default" : "nav-link"
 
-    link_to(
-      name, "##{args[:id]}-tab-pane",
-      role: "tab", id: "#{args[:id]}-tab", class: classes,
-      data: { toggle: "tab" }, aria: { controls: "#{args[:id]}-tab-pane" }
-    )
-  end
+  #   link_to(
+  #     name, "##{args[:id]}-tab-pane",
+  #     role: "tab", id: "#{args[:id]}-tab", class: classes,
+  #     data: { toggle: "tab" }, aria: { controls: "#{args[:id]}-tab-pane" }
+  #   )
+  # end
 
-  # Bootstrap tabpanel wrapper
-  def tab_content(**args, &block)
-    content = capture(&block).to_s
+  # # Bootstrap tabpanel wrapper
+  # def tab_content(**args, &block)
+  #   content = capture(&block).to_s
 
-    tag.div(class: class_names("tab-content", args[:class]),
-            **args.except(:class)) do
-      content
-    end
-  end
+  #   tag.div(class: class_names("tab-content", args[:class]),
+  #           **args.except(:class)) do
+  #     content
+  #   end
+  # end
 
-  # Bootstrap tabpanel
-  def tab_panel(**args, &block)
-    content = capture(&block).to_s
-    active = args[:active] ? "in active" : nil
+  # # Bootstrap tabpanel
+  # def tab_panel(**args, &block)
+  #   content = capture(&block).to_s
+  #   active = args[:active] ? "in active" : nil
 
-    tag.div(
-      role: "tabpanel", id: "#{args[:id]}-tab-pane",
-      class: class_names("tab-pane fade", active, args[:class]),
-      aria: { labelledby: "#{args[:id]}-tab" },
-      **args.except(:class, :id)
-    ) do
-      content
-    end
-  end
+  #   tag.div(
+  #     role: "tabpanel", id: "#{args[:id]}-tab-pane",
+  #     class: class_names("tab-pane fade", active, args[:class]),
+  #     aria: { labelledby: "#{args[:id]}-tab" },
+  #     **args.except(:class, :id)
+  #   ) do
+  #     content
+  #   end
+  # end
 end

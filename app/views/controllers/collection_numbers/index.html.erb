@@ -2,7 +2,7 @@
 @container = :wide
 # the no_hits_title.
 add_index_title(@query)
-add_tab_set(collection_numbers_index_tabs(obs: @observation))
+add_context_nav(collection_numbers_index_tabs(obs: @observation))
 add_sorter(@query, collection_numbers_index_sorts)
 
 flash_error(@error) if @error && @objects.empty?

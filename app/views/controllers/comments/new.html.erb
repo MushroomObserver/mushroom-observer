@@ -1,7 +1,7 @@
 <%
 @container = :full
 add_page_title(comment_form_new_title(target: @target))
-add_tab_set(comment_form_new_tabs(target: @target))
+add_context_nav(comment_form_new_tabs(target: @target))
 %>
 
 <div class="row">
@@ -17,4 +17,5 @@ add_tab_set(comment_form_new_tabs(target: @target))
                  locals: { obs: @target, thumb_size_control: false }) %>
     </div>
   <% end %>
-</div><!--.row-->
+</div>
+<!--.row-->

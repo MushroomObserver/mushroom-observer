@@ -126,7 +126,6 @@ class MOPaginator
     else
       @number = 1
     end
-    @number
   end
   alias page= number=
 
@@ -138,7 +137,6 @@ class MOPaginator
     else
       @letter = nil
     end
-    @letter
   end
 
   # Validate the number of results.
@@ -149,7 +147,6 @@ class MOPaginator
     else
       @num_total = 0
     end
-    @num_total
   end
   alias length= num_total=
 
@@ -157,8 +154,6 @@ class MOPaginator
   def num_per_page=(num)
     @num_per_page = num.to_i
     raise("Invalid num_per_page: #{num.inspect}") if @num_per_page < 1
-
-    @num_per_page
   end
 
   # Validate +used_letters+ array.  Force them all to uppercase, and remove

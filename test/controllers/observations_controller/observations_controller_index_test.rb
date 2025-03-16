@@ -20,6 +20,80 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_displayed_title(:OBSERVATIONS.l)
   end
 
+  def test_index_spider_blocker
+    # login
+    get(:index, params: { page: 11 })
+
+    assert_equal(:runtime_spiders_begone.t, response.body)
+  end
+
+  BUNCH_OF_NAMES = Name.take(10)
+  BUNCH_OF_REGIONS = [
+    "Connecticut, USA",
+    "Maine, USA",
+    "Massachusetts, USA",
+    "New Hampshire, USA",
+    "New Jersey, USA",
+    "New York, USA",
+    "Pennsylvania, USA",
+    "Rhode Island, USA",
+    "Vermont, USA",
+    "New Brunswick, Canada",
+    "Newfoundland and Labrador, Canada",
+    "Newfoundland, Canada",
+    "Labrador, Canada",
+    "Nova Scotia, Canada",
+    "Ontario, Canada",
+    "Prince Edward Island, Canada",
+    "Quebec, Canada"
+  ].freeze
+  SUPERLONG_REGIONS = [
+    "Across the street from C & O Restaurant, Charlottesville, Virginia, USA",
+    "Rivanna River trail at the Woolen Mills, Charlottesville, Virginia, USA"
+  ].freeze
+
+  # Taken from actual obs query params for the Northeast Rare Fungi Challenge
+  def big_obs_query_params
+    { names: { lookup: [*BUNCH_OF_NAMES.map(&:id)] }, region: BUNCH_OF_REGIONS }
+  end
+
+  def long_obs_query_params
+    { region: SUPERLONG_REGIONS }
+  end
+
+  def test_filter_caption_truncation_number_of_values
+    login
+
+    query = Query.lookup_and_save(:Observation, big_obs_query_params)
+    get(:index, params: @controller.query_params(query))
+
+    names_joined_trunc = BUNCH_OF_NAMES.first(3).map(&:text_name).join(", ")
+    names_joined_trunc += ", ..."
+    assert_select("#caption-truncated", text: /#{names_joined_trunc}/)
+
+    regions_joined_trunc = BUNCH_OF_REGIONS.first(3).join(", ")
+    regions_joined_trunc += ", ..."
+    assert_select("#caption-truncated", text: /#{regions_joined_trunc}/)
+
+    names_joined = BUNCH_OF_NAMES.map(&:text_name).join(", ")
+    assert_select("#caption-full", text: /#{names_joined}/)
+
+    regions_joined = BUNCH_OF_REGIONS.join(", ")
+    assert_select("#caption-full", text: /#{regions_joined}/)
+  end
+
+  def test_filter_caption_truncation_length_of_string
+    login
+
+    query = Query.lookup_and_save(:Observation, long_obs_query_params)
+    get(:index, params: @controller.query_params(query))
+
+    regions_joined = SUPERLONG_REGIONS.join(", ")
+    regions_joined_trunc = "#{regions_joined[0...97]}..."
+    assert_select("#caption-truncated", text: /#{regions_joined_trunc}/)
+    assert_select("#caption-full", text: /#{regions_joined}/)
+  end
+
   def test_index_sorted_by_non_default
     login
 
@@ -294,7 +368,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     count = Observation.pattern(pattern).count
     assert_results(text: /#{pattern}/i, count:)
-    assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
+    assert_not_empty(css_select('[id="context_nav"]').text, "Tabset is empty")
   end
 
   def test_index_pattern_page2
@@ -307,7 +381,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_displayed_title(:OBSERVATIONS.l)
     assert_displayed_filters("#{:query_names.l}: #{pattern}")
 
-    assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
+    assert_not_empty(css_select('[id="context_nav"]').text, "Tabset is empty")
     assert_select("#results a", { text: "« Prev" },
                   "Wrong page or display is missing a link to Prev page")
   end
@@ -318,7 +392,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login
     get(:index, params: { pattern: pattern })
 
-    assert_empty(css_select('[id="right_tabs"]').text,
+    assert_empty(css_select('[id="context_nav"]').text,
                  "RH tabset should be empty when search has no hits")
     assert_displayed_title(:OBSERVATIONS.l)
   end
@@ -537,7 +611,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
                   "Wrong page or display is missing a link to Prev page")
     assert_displayed_title(:OBSERVATIONS.l)
     assert_displayed_filters("#{:query_locations.l}: #{location.display_name}")
-    assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
+    assert_not_empty(css_select('[id="context_nav"]').text, "Tabset is empty")
   end
 
   def test_index_project

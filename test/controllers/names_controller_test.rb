@@ -55,7 +55,7 @@ class NamesControllerTest < FunctionalTestCase
     get(:index)
 
     assert_displayed_title(:NAMES.l)
-    assert_select("#right_tabs a[href='#{names_path}']", { count: 0 },
+    assert_select("#context_nav a[href='#{names_path}']", { count: 0 },
                   "right `tabs` should not link to All Names")
   end
 
@@ -226,7 +226,7 @@ class NamesControllerTest < FunctionalTestCase
                     distinct.count },
       "Wrong number of (correctly spelled) Names"
     )
-    assert_select("#right_tabs a[href='#{names_path}']", { count: 1 },
+    assert_select("#context_nav a[href='#{names_path}']", { count: 1 },
                   "right `tabs` should have a link to All Names")
   end
 
