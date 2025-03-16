@@ -77,7 +77,7 @@ class API2::HerbariumRecordsTest < UnitTestCase
   end
 
   def test_getting_herbarium_records_initial_det
-    recs = HerbariumRecord.where(initial_det: "Coprinus comatus")
+    recs = HerbariumRecord.initial_det("Coprinus comatus")
     assert_not_empty(recs)
     assert_api_pass(params_get(initial_det: "Coprinus comatus"))
     assert_api_results(recs)

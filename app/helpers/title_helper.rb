@@ -231,11 +231,12 @@ module TitleHelper
     end
   end
 
-  # For values that aren't ids
+  # For values that aren't ids, just join and maybe truncate
   def param_val_itself(val, truncate)
     if val.is_a?(Array)
       val = val.first(CAPTION_TRUNCATE) if truncate
       val = val.join(", ")
+      val += ", ..." if truncate && val.length > CAPTION_TRUNCATE
     end
     val
   end

@@ -27,6 +27,53 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_equal(:runtime_spiders_begone.t, response.body)
   end
 
+  BUNCH_OF_NAMES = Name.take(10)
+  BUNCH_OF_REGIONS = [
+    "Connecticut, USA",
+    "Maine, USA",
+    "Massachusetts, USA",
+    "New Hampshire, USA",
+    "New Jersey, USA",
+    "New York, USA",
+    "Pennsylvania, USA",
+    "Rhode Island, USA",
+    "Vermont, USA",
+    "New Brunswick, Canada",
+    "Newfoundland and Labrador, Canada",
+    "Newfoundland, Canada",
+    "Labrador, Canada",
+    "Nova Scotia, Canada",
+    "Ontario, Canada",
+    "Prince Edward Island, Canada",
+    "Quebec, Canada"
+  ].freeze
+
+  # Taken from actual obs query params for the Northeast Rare Fungi Challenge
+  def big_obs_query_params
+    { names: { lookup: [*BUNCH_OF_NAMES.map(&:id)] }, region: BUNCH_OF_REGIONS }
+  end
+
+  def test_filter_caption_truncation
+    login
+
+    query = Query.lookup_and_save(:Observation, big_obs_query_params)
+    get(:index, params: @controller.query_params(query))
+
+    names_joined_trunc = BUNCH_OF_NAMES.first(3).map(&:text_name).join(", ")
+    names_joined_trunc += ", ..."
+    assert_select("#caption-truncated", text: /#{names_joined_trunc}/)
+
+    regions_joined_trunc = BUNCH_OF_REGIONS.first(3).join(", ")
+    regions_joined_trunc += ", ..."
+    assert_select("#caption-truncated", text: /#{regions_joined_trunc}/)
+
+    names_joined = BUNCH_OF_NAMES.map(&:text_name).join(", ")
+    assert_select("#caption-full", text: /#{names_joined}/)
+
+    regions_joined = BUNCH_OF_REGIONS.join(", ")
+    assert_select("#caption-full", text: /#{regions_joined}/)
+  end
+
   def test_index_sorted_by_non_default
     login
 
