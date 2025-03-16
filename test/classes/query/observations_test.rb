@@ -243,6 +243,16 @@ class Query::ObservationsTest < UnitTestCase
                                                  include_subtaxa: true })
   end
 
+  # This test ensures we force empty results when the lookup gets no ids.
+  def test_observation_of_subtaxa_excluding_original_no_children
+    name = names(:tubaria_furfuracea)
+    assert_query(
+      [], :Observation, names: { lookup: name.id,
+                                 include_subtaxa: true,
+                                 exclude_original_names: true }
+    )
+  end
+
   def test_observation_names_with_modifiers
     User.current = rolf
     expects = Observation.index_order.names(lookup: names(:fungi)).distinct
