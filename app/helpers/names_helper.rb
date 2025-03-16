@@ -72,7 +72,7 @@ module NamesHelper
     link_to(
       title,
       add_query_param(observations_path, query),
-      data: { query_params: query.params.compact_blank.to_json }
+      data: { query_params: query.params.deep_compact_blank.to_json }
     ) + " (#{count})"
   end
 

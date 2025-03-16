@@ -86,6 +86,8 @@ class Query::Names < Query::Base
   def initialize_related_names_parameters
     ids = lookup_names_by_name(params.dig(:names, :lookup),
                                related_names_parameters)
+    return force_empty_results if ids.blank?
+
     add_association_condition("names.id", ids)
   end
 

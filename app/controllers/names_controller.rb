@@ -233,7 +233,7 @@ class NamesController < ApplicationController
     # show query to include_immediate_subtaxa (would need to write a complicated
     # scope, but it's outlined in app/classes/query/modules/lookup_names.rb).
     # Could select @name from those results using the original name.id, then
-    # select@first_child from the rest.
+    # select @first_child from the rest.
     @first_child = @children_query.results(limit: 1).first
 
     # Possible query: Synonyms of name? Incompatible with first query.

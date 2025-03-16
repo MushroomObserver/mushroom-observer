@@ -194,13 +194,11 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
   def initialize_names_and_related_names_parameters
     return force_empty_results if irreconcilable_naming_parameters?
 
-    table = if params.dig(:names, :include_all_name_proposals)
-              "namings"
-            else
-              "observations"
-            end
+    table = table_for_names
     ids = lookup_names_by_name(params.dig(:names, :lookup),
                                related_names_parameters)
+    return force_empty_results if ids.blank?
+
     add_association_condition("#{table}.name_id", ids)
 
     if params.dig(:names, :include_all_name_proposals)
@@ -209,6 +207,14 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
     return unless params.dig(:names, :exclude_consensus)
 
     add_not_associated_condition("observations.name_id", ids)
+  end
+
+  def table_for_names
+    if params.dig(:names, :include_all_name_proposals)
+      "namings"
+    else
+      "observations"
+    end
   end
 
   NAMES_EXPANDER_PARAMS = [
