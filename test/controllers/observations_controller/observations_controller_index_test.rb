@@ -47,13 +47,21 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     "Prince Edward Island, Canada",
     "Quebec, Canada"
   ].freeze
+  SUPERLONG_REGIONS = [
+    "Across the street from C & O Restaurant, Charlottesville, Virginia, USA",
+    "Rivanna River trail at the Woolen Mills, Charlottesville, Virginia, USA"
+  ]
 
   # Taken from actual obs query params for the Northeast Rare Fungi Challenge
   def big_obs_query_params
     { names: { lookup: [*BUNCH_OF_NAMES.map(&:id)] }, region: BUNCH_OF_REGIONS }
   end
 
-  def test_filter_caption_truncation
+  def long_obs_query_params
+    { region: SUPERLONG_REGIONS }
+  end
+
+  def test_filter_caption_truncation_number_of_values
     login
 
     query = Query.lookup_and_save(:Observation, big_obs_query_params)
@@ -71,6 +79,18 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_select("#caption-full", text: /#{names_joined}/)
 
     regions_joined = BUNCH_OF_REGIONS.join(", ")
+    assert_select("#caption-full", text: /#{regions_joined}/)
+  end
+
+  def test_filter_caption_truncation_length_of_string
+    login
+
+    query = Query.lookup_and_save(:Observation, long_obs_query_params)
+    get(:index, params: @controller.query_params(query))
+
+    regions_joined = SUPERLONG_REGIONS.join(", ")
+    regions_joined_trunc = "#{regions_joined[0...97]}..."
+    assert_select("#caption-truncated", text: /#{regions_joined_trunc}/)
     assert_select("#caption-full", text: /#{regions_joined}/)
   end
 
