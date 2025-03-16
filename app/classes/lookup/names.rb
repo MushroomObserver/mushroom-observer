@@ -9,12 +9,10 @@ class Lookup::Names < Lookup
   end
 
   def prepare_vals(vals)
-    if vals.blank?
-      complain_about_unused_flags!
-      return []
-    end
+    return [vals].flatten if vals.present?
 
-    [vals].flatten
+    complain_about_unused_flags!
+    []
   end
 
   def lookup_ids
