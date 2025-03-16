@@ -55,7 +55,8 @@ class Query::LocationDescriptionsTest < UnitTestCase
                        LocationDescription.by_author(mary),
                        :LocationDescription, by_author: mary.login)
     assert_query_scope([],
-                       LocationDescription.by_author(users(:zero_user)), :LocationDescription, by_author: users(:zero_user))
+                       LocationDescription.by_author(users(:zero_user)),
+                       :LocationDescription, by_author: users(:zero_user))
   end
 
   def test_location_description_by_editor
@@ -78,7 +79,8 @@ class Query::LocationDescriptionsTest < UnitTestCase
                        LocationDescription.by_editor(mary),
                        :LocationDescription, by_editor: mary)
     assert_query_scope([],
-                       LocationDescription.by_editor(users(:zero_user)), :LocationDescription, by_editor: users(:zero_user))
+                       LocationDescription.by_editor(users(:zero_user)),
+                       :LocationDescription, by_editor: users(:zero_user))
   end
 
   def test_location_description_in_set
