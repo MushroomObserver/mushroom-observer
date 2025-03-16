@@ -1,7 +1,16 @@
 # frozen_string_literal: true
 
 module PatternSearch
-  # Base class for PatternSearch; handles everything plus build_query
+  # Base class for PatternSearch; handles everything plus build_query.
+  #
+  # Remember that "args" here means the query params. Maybe instead of building
+  # the form from pattern search params, build with query params. Then we can
+  # pull the current query out of `q` and fill out the form fields reliably -
+  # even if the search originated in a long pattern search string.
+  #
+  # The challenge will be the form filler and parser, has to go to/from the
+  # query param format, including lookups to go from text vals to ids and back.
+  #
   class Base
     attr_accessor :errors, :parser, :flavor, :args, :query, :form_params
 
