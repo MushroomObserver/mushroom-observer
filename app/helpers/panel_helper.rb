@@ -205,7 +205,8 @@ module PanelHelper
             aria: { expanded: "false", controls: id })
   end
 
-  # BOOTSTRAP TABBED CONTENT
+  # BOOTSTRAP TABBED CONTENT activated by JS
+  # not to be confused with MO "tabs", i.e. link definition POROs
   #
   # Bootstrap tablist
   def tab_nav(**args, &block)
@@ -240,12 +241,13 @@ module PanelHelper
       role: "presentation",
       class: class_names(active, disabled, args[:class])
     ) do
-      tab_link(name, **args.except(:active, :disabled, :class))
+      tab_toggle(name, **args.except(:active, :disabled, :class))
     end
   end
 
-  # Bootstrap tab - just the link. Use for independent tab (e.g. button).
-  def tab_link(name, **args)
+  # Bootstrap tab - just the link that switches tabs.
+  # Use for independent tab (e.g. button).
+  def tab_toggle(name, **args)
     classes = args[:button] ? "btn btn-default" : "nav-link"
 
     link_to(

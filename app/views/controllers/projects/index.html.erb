@@ -1,6 +1,6 @@
 <%
 add_index_title(@query)
-add_tab_set(projects_index_tabs)
+add_context_nav(projects_index_tabs)
 add_sorter(@query, projects_index_sorts)
 
 flash_error(@error) if @error && @objects.empty?
@@ -12,5 +12,3 @@ flash_error(@error) if @error && @objects.empty?
     <%= render(partial: "projects/object", collection: @objects) %>
   </div>
 <% end %>
-
-

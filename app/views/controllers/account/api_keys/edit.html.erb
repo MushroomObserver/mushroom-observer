@@ -1,7 +1,7 @@
 <%
 # This edit form seems to be only for no-js users.
 add_page_title(:account_api_keys_title.t)
-add_tab_set(account_api_tabs)
+add_context_nav(account_api_tabs)
 %>
 
 <%= :account_api_keys_help.tp %>
@@ -36,5 +36,6 @@ add_tab_set(account_api_tabs)
     <%= submit_button(form: f, button: :UPDATE.l) %>
     <span style="margin-left:5em"></span>
     <%= submit_button(form: f, button: :CANCEL.l) %>
-  </div><!-- .text-center -->
+  </div>
+  <!-- .text-center -->
 <% end %>

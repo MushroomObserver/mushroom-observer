@@ -368,7 +368,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     count = Observation.pattern(pattern).count
     assert_results(text: /#{pattern}/i, count:)
-    assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
+    assert_not_empty(css_select('[id="context_nav"]').text, "Tabset is empty")
   end
 
   def test_index_pattern_page2
@@ -381,7 +381,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_displayed_title(:OBSERVATIONS.l)
     assert_displayed_filters("#{:query_names.l}: #{pattern}")
 
-    assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
+    assert_not_empty(css_select('[id="context_nav"]').text, "Tabset is empty")
     assert_select("#results a", { text: "« Prev" },
                   "Wrong page or display is missing a link to Prev page")
   end
@@ -392,7 +392,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login
     get(:index, params: { pattern: pattern })
 
-    assert_empty(css_select('[id="right_tabs"]').text,
+    assert_empty(css_select('[id="context_nav"]').text,
                  "RH tabset should be empty when search has no hits")
     assert_displayed_title(:OBSERVATIONS.l)
   end
@@ -611,7 +611,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
                   "Wrong page or display is missing a link to Prev page")
     assert_displayed_title(:OBSERVATIONS.l)
     assert_displayed_filters("#{:query_locations.l}: #{location.display_name}")
-    assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
+    assert_not_empty(css_select('[id="context_nav"]').text, "Tabset is empty")
   end
 
   def test_index_project

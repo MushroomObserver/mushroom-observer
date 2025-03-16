@@ -1,7 +1,7 @@
 <%
 @container = :text_image
 add_index_title(@query)
-add_tab_set(all_names_index_tabs(query: @query))
+add_context_nav(all_names_index_tabs(query: @query))
 add_sorter(@query, names_index_sorts(query: @query))
 
 flash_error(@error) if @error && @objects.empty?
@@ -10,14 +10,14 @@ flash_error(@error) if @error && @objects.empty?
 <% if @suggest_alternate_spellings && @objects.empty?
   names = Name.suggest_alternate_spellings(@suggest_alternate_spellings)
   if names.any? %>
-<div class="alert-warning">
-  <%= :list_observations_alternate_spellings.t %><br />
-  <ul type="none">
-    <% names.sort_by(&:sort_name).each do |name| %>
-    <%= link_to(name.display_name.t, name.show_link_args) %><br />
-    <% end %>
-  </ul>
-</div>
+  <div class="alert-warning">
+    <%= :list_observations_alternate_spellings.t %><br />
+    <ul type="none">
+      <% names.sort_by(&:sort_name).each do |name| %>
+        <%= link_to(name.display_name.t, name.show_link_args) %><br />
+      <% end %>
+    </ul>
+  </div>
 <% end %>
 <% end %>
 
@@ -26,26 +26,26 @@ flash_error(@error) if @error && @objects.empty?
 <% # Let test_index test pass args to pagination_links.
   args = @test_pagination_args || {} %>
 <%= paginate_block(@pages, args) do %>
-<% if @objects.any? %>
-<% counts = Name.count_observations(@objects) %>
+  <% if @objects.any? %>
+    <% counts = Name.count_observations(@objects) %>
 
-<div class="list-group name-index">
-  <% @objects.each do |name| %>
-  <%= link_with_query(name.show_link_args, class: "list-group-item") do
+    <div class="list-group name-index">
+      <% @objects.each do |name| %>
+        <%= link_with_query(name.show_link_args, class: "list-group-item") do
           concat(tag.span(name.display_name.html_safe.t, class: "display-name"))
           concat(tag.span(counts[name.id], class: "badge")) if counts[name.id]
         end %>
-  <% if @has_descriptions %>
-  <% if (desc = name.description)%>
-  <span><%= desc.authors.map(&:login).join(", ") %></span>
-  <span><%= desc.note_status.map(&:to_s).join("/") %></span>
-  <span><%= :"review_#{desc.review_status}".l %></span>
-  <% else %>
-  <span>--- not the default ---</span>
-  <% end %>
-  <% end %>
-  <% end %>
-</div>
+        <% if @has_descriptions %>
+          <% if (desc = name.description)%>
+            <span><%= desc.authors.map(&:login).join(", ") %></span>
+            <span><%= desc.note_status.map(&:to_s).join("/") %></span>
+            <span><%= :"review_#{desc.review_status}".l %></span>
+          <% else %>
+            <span>--- not the default ---</span>
+          <% end %>
+        <% end %>
+      <% end %>
+    </div>
 
-<% end %>
+  <% end %>
 <% end %>
