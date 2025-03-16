@@ -50,7 +50,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
   SUPERLONG_REGIONS = [
     "Across the street from C & O Restaurant, Charlottesville, Virginia, USA",
     "Rivanna River trail at the Woolen Mills, Charlottesville, Virginia, USA"
-  ]
+  ].freeze
 
   # Taken from actual obs query params for the Northeast Rare Fungi Challenge
   def big_obs_query_params
