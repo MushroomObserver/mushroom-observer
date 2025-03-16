@@ -123,8 +123,8 @@ module TitleHelper
 
   # Each param could be a boolean, a val, a set of vals,
   # a nested param with new key/vals, or a subquery.
-  def caption_one_filter_param(query, key, val, truncate: false)
-    concat(tag.div do
+  def caption_one_filter_param(query, key, val, truncate: false, tag: :div)
+    concat(content_tag(tag) do
       if key.to_s.include?("_query")
         caption_subquery(query, key, val, truncate)
       elsif val.is_a?(Hash)
@@ -139,13 +139,11 @@ module TitleHelper
   # Subquery params get { curly brackets }. The new query block is
   # inside the brackets and indented.
   def caption_subquery(query, label, hash, truncate)
-    concat(tag.div("#{:"query_#{label}".l}: {"))
-    concat(tag.div(class: "ml-3") do
-      hash.each do |key, val|
-        caption_one_filter_param(query, key, val, truncate:)
-      end
-    end)
-    concat(tag.div("}"))
+    concat(tag.span("#{:"query_#{label}".l}: [ "))
+    hash.except(:by).each do |key, val|
+      caption_one_filter_param(query, key, val, truncate:, tag: :span)
+    end
+    concat(tag.span(" ] "))
   end
 
   # In the case of nested params, print them on one line separated by comma.
