@@ -39,14 +39,14 @@ body_class = class_names(ctrlr_action, theme, location_format, logged_in)
 
           <%= render(partial: "application/top_nav") %>
 
-          <%# need to print a `#page_flash` div no matter what, so js can add %>
+          <%# need to print a `page_flash` div no matter what, so js can add %>
           <div class="container-full hidden-print" id="page_flash">
             <%= flash_notices_html %><%# calls flash_clear %>
           </div>
           <!--.container-text-->
 
           <header id="header">
-            <%= render(partial: "application/content/title_and_context_navs") %>
+            <%= render(partial: "application/content/title_and_context_nav") %>
           </header>
 
           <main id="content" class="<%= container_class %>"
