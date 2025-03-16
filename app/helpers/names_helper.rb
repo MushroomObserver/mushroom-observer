@@ -71,8 +71,8 @@ module NamesHelper
     # last_query = query.last_query.squish
     link_to(
       title,
-      add_query_param(observations_path, query)
-      # data: { count:, last_query: }
+      add_query_param(observations_path, query),
+      data: { query_params: query.params.compact_blank.to_json }
     ) + " (#{count})"
   end
 
