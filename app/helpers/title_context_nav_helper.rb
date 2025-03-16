@@ -12,7 +12,7 @@ module TitleContextNavHelper
   def add_context_nav(links)
     return unless links
 
-    nav_links = context_nav_links(links, { class: "d-block" })
+    nav_links = context_nav_links(links)
 
     content_for(:context_nav) do
       render(partial: "application/content/context_nav",

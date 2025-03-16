@@ -4,8 +4,8 @@ Just adds <small> and line breaks.
 %>
 
 <% links ||= [] %>
-<small>
+<%= tag.ul(class: "list-unstyled mb-0 small") do %>
   <% links.reject(&:nil?).each do |link| %>
-    <%= link %>
+    <%= tag.li(link) %>
   <% end %>
-</small>
+<% end %>

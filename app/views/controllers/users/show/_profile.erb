@@ -59,15 +59,11 @@ footer =
   <% end %>
 
   <%= tag.div(class: "mt-3") do %>
-    <% user_profile_tabs(show_user: @show_user, user: @user).each do |tab|
-      str, url, args = tab
-      args ||= {}
-      kwargs = merge_context_nav_link_args(args, { class: "d-block" }) %>
-      <% if args.any?([:button, :destroy]) %>
-        <%= destroy_button(target: admin_users_path(id: @show_user.id),
-                           name: str) %>
-      <% else %>
-        <%= link_to(str, url, kwargs) %>
+    <% links = user_profile_tabs(show_user: @show_user, user: @user) %>
+    <% links = context_nav_links(links) %>
+    <%= tag.ul(class: "list-unstyled mb-0") do %>
+      <% links.reject(&:nil?).each do |link| %>
+        <%= tag.li(link) %>
       <% end %>
     <% end %>
   <% end %>
