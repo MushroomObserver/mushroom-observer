@@ -13,14 +13,6 @@ class TitleHelperTest < ActionView::TestCase
     assert_equal(title, title_tag_contents(title, action: action_name))
 
     # Prove that if @title is absent,
-    # and there's an en.txt label for :title_for_action_name,
-    # then <title> contents are the translation for that label.
-    title = ""
-    action_name = "user_search"
-    assert_equal("User Search", title_tag_contents(title, action: action_name))
-
-    # Prove that if @title is absent,
-    # and no en.txt label for :title_for_action_name,
     # then <title> contents are action name humanized
     title = ""
     action_name = "blah_blah"

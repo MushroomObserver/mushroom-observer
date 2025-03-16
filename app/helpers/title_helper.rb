@@ -36,8 +36,6 @@ module TitleHelper
   def title_tag_contents(title, action: controller.action_name)
     if title.present?
       title.strip_html.unescape_html # removes tags and special chars
-    elsif TranslationString.where(tag: "title_for_#{action}").present?
-      :"title_for_#{action}".t
     else
       action.tr("_", " ").titleize
     end
