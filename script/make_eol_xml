@@ -12,10 +12,10 @@
 #
 ################################################################################
 
-require("tempfile")
-require("net/http")
-require("net/https")
-require("erb")
+require "tempfile"
+require "net/http"
+require "net/https"
+require "erb"
 
 # Following line commented out per discussion with Nathan Wilson, 2019-02-09,
 # in order to get Code Climate passing. Per Nathan, this script is pretty broken

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require("browser")
+require "browser"
 
 # extensino to Browser gem. https://github.com/fnando/browser
 module Browser

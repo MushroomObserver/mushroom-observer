@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require("test_helper")
+require "test_helper"
 
 class RssLogTest < UnitTestCase
   # Alert developer if normalization changes the path of an RssLogg'ed object

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require("application_system_test_case")
+require "application_system_test_case"
 
 class ObservationCommentSystemTest < ApplicationSystemTestCase
   # Katrina makes a comment on Rolf's observation.

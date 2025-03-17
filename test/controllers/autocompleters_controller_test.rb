@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require("test_helper")
-require("json")
+require "test_helper"
+require "json"
 
 class AutocompletersControllerTest < FunctionalTestCase
   def good_autocompleter_request(params = {})

@@ -13,9 +13,9 @@
 
 # Code to allow Coveralls exor local coverage reports.  See:
 # https://github.com/coverallsapp/github-action/issues/29#issuecomment-701934460
-require("rails")
-require("simplecov")
-require("simplecov-lcov")
+require "rails"
+require "simplecov"
+require "simplecov-lcov"
 
 if ENV["CI"] == "true"
   SimpleCov::Formatter::LcovFormatter.config do |config|
@@ -32,14 +32,14 @@ SimpleCov.start("rails")
 
 # Allow test results to be reported back to runner IDEs.
 # Enable progress bar output during the test running.
-require("minitest/reporters")
+require "minitest/reporters"
 Minitest::Reporters.use!
 
-require("minitest/autorun")
+require "minitest/autorun"
 
 # Allow stubbing and setting expectations on HTTP, and selective
 #  disabling of internet requests.
-require("webmock/minitest")
+require "webmock/minitest"
 
 # Disable external requests while allowing localhost.
 WebMock.disable_net_connect!(
@@ -53,7 +53,7 @@ WebMock.disable_net_connect!(
 
 ENV["RAILS_ENV"] ||= "test"
 require(File.expand_path("../config/environment", __dir__))
-require("rails/test_help")
+require "rails/test_help"
 
 %w[
   bullet_helper

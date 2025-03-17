@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require("test_helper")
+require "test_helper"
 
 module Herbaria
   # test of actions to request being a curator of a herbarium

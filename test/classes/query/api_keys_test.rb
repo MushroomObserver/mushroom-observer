@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require("test_helper")
-require("query_extensions")
+require "test_helper"
+require "query_extensions"
 
 # tests of Query::APIKeys class to be included in QueryTest
 class Query::APIKeysTest < UnitTestCase

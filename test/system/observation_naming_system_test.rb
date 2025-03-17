@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require("application_system_test_case")
+require "application_system_test_case"
 
 class ObservationNamingSystemTest < ApplicationSystemTestCase
   def test_add_and_edit_naming

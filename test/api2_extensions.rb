@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require("test_helper")
+require "test_helper"
 
 # helpers for API2Test and subclass tests
 module API2Extensions

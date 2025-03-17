@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require("test_helper")
+require "test_helper"
 
 class LookupTest < UnitTestCase
   def assert_lookup_objects(type, expects, vals, **)

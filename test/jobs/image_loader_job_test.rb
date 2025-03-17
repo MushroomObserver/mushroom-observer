@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require("test_helper")
+require "test_helper"
 
 # Mock classes to simulate google cloud storage objects.
 class MockStorage

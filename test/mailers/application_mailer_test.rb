@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require("test_helper")
-require("application_mailer")
+require "test_helper"
+require "application_mailer"
 
 class ApplicationMailerTest < UnitTestCase
   FIXTURES_PATH = "#{File.dirname(__FILE__)}/../application_mailer".freeze

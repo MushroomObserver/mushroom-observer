@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require("application_system_test_case")
+require "application_system_test_case"
 
 class HelpIdentifySystemTest < ApplicationSystemTestCase
   def test_identify_index_naming_and_vote_ui

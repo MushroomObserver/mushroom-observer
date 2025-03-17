@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require("test_helper")
+require "test_helper"
 
 class PatternSearch::ObservationTest < UnitTestCase
   def test_observation_search_name_hack

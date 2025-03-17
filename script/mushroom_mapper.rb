@@ -37,7 +37,7 @@
 require(File.expand_path("../config/boot.rb", __dir__))
 require(File.expand_path("../config/environment.rb", __dir__))
 
-require("json")
+require "json"
 
 JSON_FILE = Rails.public_path.join("mushroom_mapper.json").freeze
 RAW_FILE  = Rails.public_path.join("public/taxonomy.csv").freeze

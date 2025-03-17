@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require("test_helper")
+require "test_helper"
 
 # ------------------------------------------------------------
 #  Observation views - test updating the `reviewed` column

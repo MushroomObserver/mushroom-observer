@@ -48,7 +48,7 @@
 ############################################################################
 
 class LocationDescription < Description
-  require("acts_as_versioned")
+  require "acts_as_versioned"
 
   include Description::Scopes
 

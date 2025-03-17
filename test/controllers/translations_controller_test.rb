@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require("test_helper")
+require "test_helper"
 
 class TranslationsControllerTest < FunctionalTestCase
   # Only tests the index. :edit and :update only respond to js

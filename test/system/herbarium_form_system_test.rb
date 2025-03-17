@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require("application_system_test_case")
+require "application_system_test_case"
 
 class HerbariumFormSystemTest < ApplicationSystemTestCase
   def test_create_fungarium_new_location

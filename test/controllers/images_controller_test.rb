@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require("test_helper")
+require "test_helper"
 
 class ImagesControllerTest < FunctionalTestCase
   def check_index_sorted_by(sort_order)
