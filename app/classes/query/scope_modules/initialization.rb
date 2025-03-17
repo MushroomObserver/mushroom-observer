@@ -2,7 +2,7 @@
 
 # Helper methods for turning Query parameters into AR conditions.
 module Query::ScopeModules::Initialization
-  attr_accessor :scopes, :order
+  attr_accessor :scopes, :order, :last_query
 
   def initialized?
     @initialized ? true : false
@@ -12,9 +12,40 @@ module Query::ScopeModules::Initialization
     @initialized = true
     @order       = ""
     @scopes      = model
-    @last_query  = scopes.to_sql
-    initialize_flavor
+    initialize_scopes
     initialize_order
+    @last_query  = scopes.all.to_sql
+  end
+
+  def initialize_scopes
+    # These strings can never come direct from user, so no need to sanitize.
+    # (I believe they are only used by the site stats page. -JPH 20190708)
+    self.where += params[:where] if params[:where]
+    add_join(params[:join]) if params[:join]
+    initialize_parameter_set
+    initialize_subquery_parameters
+  end
+
+  def initialize_parameter_set
+    params.slice(*scope_parameters.keys).each do |param, val|
+      next if (param == :id_in_set && val.nil?) ||
+              (param != :id_in_set && val.blank?)
+
+      @scopes = @scopes.send(param, val)
+    end
+  end
+
+  # Need to add what joins to do on the parameter_declarations
+  def initialize_subquery_parameters
+    params.slice(*subquery_parameters.keys).each do |param, hash|
+      next if hash.blank?
+
+      model_name = subquery_parameters.dig(param, :subquery)
+      joins = subquery_parameters.dig(param, :joins)
+      subquery = Query.new(model_name, hash).query
+
+      @scopes = @scopes.joins(joins).merge(subquery)
+    end
   end
 
   # Make a value safe for SQL.

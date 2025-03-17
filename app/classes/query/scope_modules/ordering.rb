@@ -12,10 +12,13 @@ module Query::ScopeModules::Ordering
     by = by.dup.to_s
     reverse = !!by.sub!(/^reverse_/, "")
     initialize_order_specs(by)
+    add_order_disambiguation
     @scopes = @scopes.reverse_order if reverse
   end
 
   def initialize_order_specs(by)
+    return if params[:id_in_set].present?
+
     sorting_method = "sort_by_#{by}"
     unless ::Query::ScopeModules::Ordering.private_method_defined?(sorting_method)
       raise(
@@ -24,6 +27,12 @@ module Query::ScopeModules::Ordering
     end
 
     send(sorting_method, model)
+  end
+
+  def add_order_disambiguation
+    return if params[:id_in_set].present?
+
+    @scopes = @scopes.order(model.arel_table[:id].desc)
   end
 
   #####################
@@ -55,9 +64,7 @@ module Query::ScopeModules::Ordering
 
     # "field_slips.code ASC, field_slips.created_at DESC, " \
     # "field_slips.id DESC"
-    @scopes = @scopes.order(
-      FieldSlip[:code].asc, FieldSlip[:created_at].desc, FieldSlip[:id].desc
-    )
+    @scopes = @scopes.order(FieldSlip[:code].asc, FieldSlip[:created_at].desc)
   end
 
   def sort_by_code_then_name(_model)

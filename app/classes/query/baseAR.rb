@@ -46,37 +46,6 @@ class Query::BaseAR
     parameter_declarations.key?(key)
   end
 
-  def initialize_flavor
-    # These strings can never come direct from user, so no need to sanitize.
-    # (I believe they are only used by the site stats page. -JPH 20190708)
-    self.where += params[:where] if params[:where]
-    add_join(params[:join]) if params[:join]
-    initialize_parameter_set
-    initialize_subquery_parameters
-  end
-
-  def initialize_parameter_set
-    scope_parameters.each do |param|
-      next if (param == :ids_in_set && params[param].nil?) ||
-              (param != :ids_in_set && params[param].blank?)
-
-      @scopes = @scopes.send(param, params[param])
-    end
-  end
-
-  # Need to add what joins to do on the parameter_declarations
-  def initialize_subquery_parameters
-    subquery_parameters.each do |param, definition|
-      next if params[param].blank?
-
-      model_name = definition[:subquery]
-      joins = definition[:joins]
-      subquery = Query.new(model_name, params[param]).query
-
-      @scopes = @scopes.joins(joins).merge(subquery)
-    end
-  end
-
   def subquery_parameters
     self.class.subquery_parameters
   end
