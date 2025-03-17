@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class AutocompletersController < ApplicationController
+  require("cgi")
+
   # Requiring login here would mean "advanced search" must also require login.
   around_action :catch_ajax_errors
 

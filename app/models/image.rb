@@ -227,6 +227,10 @@
 ################################################################################
 #
 class Image < AbstractModel # rubocop:disable Metrics/ClassLength
+  require("fileutils")
+  require("net/http")
+  require("English")
+  require("open3")
   require("mimemagic")
   require("fastimage")
 

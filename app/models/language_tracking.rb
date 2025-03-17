@@ -30,6 +30,8 @@
 ################################################################################
 
 module LanguageTracking
+  require("fileutils")
+
   @@tags_used = nil
   @@last_clean = nil
 

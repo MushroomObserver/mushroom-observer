@@ -2,6 +2,9 @@
 
 # display information about, and edit, users
 class UsersController < ApplicationController
+  # These need to be moved into the files where they are actually used.
+  require("find")
+
   before_action :login_required
 
   ##############################################################################

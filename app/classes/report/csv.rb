@@ -3,6 +3,8 @@
 module Report
   # Provides rendering ability for CSV-type reports.
   class CSV < BaseTable
+    require("csv")
+
     def default_encoding
       "UTF-8"
     end
