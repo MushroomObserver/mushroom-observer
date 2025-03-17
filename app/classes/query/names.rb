@@ -84,8 +84,10 @@ class Query::Names < Query::Base
 
   # Much simpler form for non-observation-based name queries.
   def initialize_related_names_parameters
-    ids = lookup_names_by_name(params.dig(:names, :lookup),
-                               related_names_parameters)
+    names = params.dig(:names, :lookup)
+    return if names.blank?
+
+    ids = lookup_names_by_name(names, related_names_parameters)
     return force_empty_results if ids.blank?
 
     add_association_condition("names.id", ids)
