@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require("test_helper")
+require "test_helper"
 
 class FixturesTest < ActiveSupport::TestCase
   def test_observations_all_have_rss_logs

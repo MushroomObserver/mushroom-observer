@@ -66,7 +66,7 @@
 require("capybara/rails")
 require("capybara/minitest")
 
-# require "database_cleaner/active_record"
+# require("database_cleaner/active_record")
 
 class CapybaraIntegrationTestCase < ActionDispatch::IntegrationTest
   # Make the Capybara DSL available in these integration tests

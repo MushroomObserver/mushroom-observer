@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-require "autocomplete"
+require("autocomplete")
 
 # These empty classes and methods are required for the test to work.
 # rubocop:disable Lint/UselessMethodDefinition

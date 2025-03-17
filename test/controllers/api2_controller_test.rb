@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require("test_helper")
-require "rexml/document"
+require("rexml/document")
 
 class API2ControllerTest < FunctionalTestCase
   def assert_api_failed
