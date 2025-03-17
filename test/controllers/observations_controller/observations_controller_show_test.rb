@@ -688,7 +688,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
       :Observation, names: { lookup: n2.id, include_synonyms: false },
                     by: :name
     )
-    assert_equal(2, query.num_results)
+    assert_equal(1, query.num_results)
 
     # Likewise, when requesting *synonym* observations, neither n1 nor n2
     # should be included.

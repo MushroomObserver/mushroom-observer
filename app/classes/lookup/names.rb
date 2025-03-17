@@ -4,14 +4,6 @@ class Lookup::Names < Lookup
   MODEL = Name
   TITLE_METHOD = :text_name
 
-  # Currently defaults to include misspellings in the returned list of ids
-  # even when `include_synonyms: false`, unless you explicitly override by
-  # passing `include_misspellings: false` or `exclude_original_names: true`.
-  def initialize(vals, params = {})
-    params[:include_misspellings] = true if params[:include_misspellings].nil?
-    super
-  end
-
   def prepare_vals(vals)
     if vals.blank?
       complain_about_unused_flags!
@@ -110,9 +102,6 @@ class Lookup::Names < Lookup
   def add_synonyms_if_necessary(names)
     if @params[:include_synonyms]
       add_synonyms(names)
-    elsif @params[:include_misspellings] &&
-          !@params[:exclude_original_names]
-      add_other_spellings(names)
     else
       names
     end
@@ -134,7 +123,7 @@ class Lookup::Names < Lookup
     elsif @params[:include_synonyms]
       add_synonyms(names_plus_subtaxa)
     else
-      add_other_spellings(names_plus_subtaxa)
+      names_plus_subtaxa
     end
   end
 
