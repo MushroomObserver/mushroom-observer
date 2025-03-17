@@ -319,9 +319,8 @@
 #
 ###############################################################################
 class Name < AbstractModel
-  require "acts_as_versioned"
-  require "fileutils"
-  require "symbol_extensions"
+  require("acts_as_versioned")
+  require("fileutils")
 
   # modules with instance methods and maybe class methods
   include Scopes

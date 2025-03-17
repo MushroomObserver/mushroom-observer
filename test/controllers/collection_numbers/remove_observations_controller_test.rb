@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class CollectionNumbers::RemoveObservationsControllerTest < FunctionalTestCase
   def test_remove_observation
