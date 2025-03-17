@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "zip"
+require("zip")
 
 module Report
   # Provides rendering ability for ZIP-type reports.

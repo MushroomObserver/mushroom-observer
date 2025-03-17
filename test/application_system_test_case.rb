@@ -3,11 +3,11 @@
 # Set env var to run with window:
 # HEADLESS=0 rails test:system, or for a specific test:
 # HEADLESS=0 rails t test/system/your_test.rb:234 (line number, optional)
-require "test_helper"
-require "database_cleaner/active_record"
-require "capybara/cuprite"
-require "test_helpers/system/cuprite_setup"
-require "test_helpers/system/cuprite_helpers"
+require("test_helper")
+require("database_cleaner/active_record")
+require("capybara/cuprite")
+require("test_helpers/system/cuprite_setup")
+require("test_helpers/system/cuprite_helpers")
 
 class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   driven_by :mo_cuprite, using: :chromium

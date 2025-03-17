@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class UpdateBoxAreaAndCenterColumnsJobTest < ActiveJob::TestCase
   def test_update_box_area_and_center_columns

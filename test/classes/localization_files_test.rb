@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class LocalizationFilesTest < UnitTestCase
   def assert_no_missing_translations(tags, type)

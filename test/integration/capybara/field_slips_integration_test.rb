@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 # Tests relating to field_slip UI, and projects
 class FieldSlipsIntegrationTest < CapybaraIntegrationTestCase

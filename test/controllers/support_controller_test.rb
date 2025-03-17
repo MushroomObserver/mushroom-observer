@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class SupportControllerTest < FunctionalTestCase
   # NOTE: zeitwerk does not autoload the /tests directory

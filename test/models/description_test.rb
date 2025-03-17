@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class DescriptionTest < UnitTestCase
   # Make sure authors and editors are as they should be.

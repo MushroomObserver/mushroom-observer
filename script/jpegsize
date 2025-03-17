@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require "fastimage"
-require "stringio"
+require("fastimage")
+require("stringio")
 #
 #  Uses FastImage gem to read width and height of JPEG image from header.
 #  We could use ImageMagick identify to do the same thing. This script was

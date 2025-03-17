@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require "test_helper"
-require "api2_extensions"
+require("test_helper")
+require("api2_extensions")
 
 class API2::ImagesTest < UnitTestCase
   include API2Extensions

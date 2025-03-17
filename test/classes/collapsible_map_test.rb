@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class BigDecimal
   # Make this class dump out easier-to-read diagnostics when tests fail.

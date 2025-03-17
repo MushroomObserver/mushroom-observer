@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 # test mapping of iNat observation photo key/values to MO Image attributes
 class InatObsPhotoTest < UnitTestCase

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 # Tests for methods in models/name.rb and models/name/xxx.rb
 class NameTest < UnitTestCase

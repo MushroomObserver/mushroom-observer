@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class AdvancedSearchIntegrationTest < CapybaraIntegrationTestCase
   # Tests using a "by user" query of the "Show Locations" link on the obs index

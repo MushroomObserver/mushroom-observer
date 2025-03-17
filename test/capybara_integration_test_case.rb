@@ -63,8 +63,8 @@
 ################################################################################
 
 # Allow simuluation of user-browser interaction with capybara
-require "capybara/rails"
-require "capybara/minitest"
+require("capybara/rails")
+require("capybara/minitest")
 
 # require "database_cleaner/active_record"
 

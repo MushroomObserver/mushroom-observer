@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 # Test cached columns in names and observations table.
 class CacheTest < UnitTestCase
   # Prove that changing a location name will update observations.where for

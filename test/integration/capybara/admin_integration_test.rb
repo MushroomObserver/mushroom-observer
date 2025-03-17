@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class AdminIntegrationTest < CapybaraIntegrationTestCase
   def test_turn_admin_mode_on_and_off

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 # test Observation model
 class ObservationTest < UnitTestCase
   def create_new_objects

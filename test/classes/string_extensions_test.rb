@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 # test extensions to Ruby and Rails String Class
 class StringExtensionsTest < UnitTestCase

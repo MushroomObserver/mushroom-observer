@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 # test mapping iNat license_code to MO license_id
 # https://github.com/inaturalist/inaturalist/blob/main/app/models/shared/license_module.rb

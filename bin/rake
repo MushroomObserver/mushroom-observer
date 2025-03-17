@@ -2,5 +2,5 @@
 # frozen_string_literal: true
 
 require_relative("../config/boot")
-require "rake"
+require("rake")
 Rake.application.run

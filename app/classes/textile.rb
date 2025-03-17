@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require "cgi"
-require "redcloth"
+require("cgi")
+require("redcloth")
 
 #  == Textile Parser
 #
