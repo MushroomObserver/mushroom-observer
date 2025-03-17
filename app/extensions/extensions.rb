@@ -6,6 +6,6 @@
 # explicitly, too.  (Although, I believe ApplicationController is always
 # loaded, no matter what you need(?)...)
 
-(Dir[File.expand_path("*_extensions.rb", __dir__)]).each do |file|
-  require_dependency(file)
-end
+# (Dir[File.expand_path("*_extensions.rb", __dir__)]).each do |file|
+#   require_dependency(file)
+# end
