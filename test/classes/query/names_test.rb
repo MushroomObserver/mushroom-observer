@@ -160,10 +160,14 @@ class Query::NamesTest < UnitTestCase
   # This test ensures we force empty results when the lookup gets no ids.
   def test_name_of_subtaxa_excluding_original_no_children
     name = names(:tubaria_furfuracea)
-    assert_query(
-      [], :Observation, names: { lookup: name.id,
-                                 include_subtaxa: true,
-                                 exclude_original_names: true }
+    assert_query_scope(
+      [],
+      Name.index_order.names(lookup: name.id,
+                             include_subtaxa: true,
+                             exclude_original_names: true),
+      :Name, names: { lookup: name.id,
+                      include_subtaxa: true,
+                      exclude_original_names: true }
     )
   end
 
