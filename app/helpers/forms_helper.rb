@@ -97,9 +97,7 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
                                      args[:checked_value] || "1",
                                      args[:unchecked_value] || "0"))
         concat(args[:label])
-        if args[:between].present?
-          concat(tag.div(class: "d-inline-block ml-3") { args[:between] })
-        end
+        concat(args[:between]) if args[:between].present?
       end)
       concat(args[:append]) if args[:append].present?
     end
@@ -212,7 +210,12 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
   # Content for `between` and `label_after` come right after the label on left,
   # content for `label_end` is at the end of the same line, right justified.
   def text_label_row(args, label_opts)
-    tag.div(class: "d-flex justify-content-between") do
+    row_class = if args[:inline] == true
+                  "d-inline-block"
+                else
+                  "d-flex justify-content-between"
+                end
+    tag.div(class: row_class) do
       concat(tag.div do
         concat(args[:form].label(args[:field], args[:label], label_opts))
         concat(args[:between]) if args[:between].present?
@@ -302,7 +305,9 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     # The field may not be an attribute of the object
     if obj.present? && obj.respond_to?(field)
       init_year = obj.try(&field.to_sym).try(&:year)
-      selected = obj.try(&field.to_sym) || Time.zone.today
+      selected = obj.try(&field.to_sym)
+      # Keep blank fields blank on search filters
+      selected ||= Time.zone.today unless obj.is_a?(SearchFilter)
     end
     if init_year && init_year < start_year && init_year > 1900
       start_year = init_year
@@ -503,7 +508,7 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
   end
 
   def field_label_opts(args)
-    label_opts = { class: "mr-3" }
+    label_opts = {}
     label_opts[:index] = args[:index] if args[:index].present?
     label_opts
   end
@@ -517,7 +522,9 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     keys = [:optional, :required].freeze
     positions.each do |pos|
       keys.each do |key|
-        args[pos] = help_note(:span, "(#{key.l})") if args[pos] == key
+        if args[pos] == key
+          args[pos] = help_note(:span, "(#{key.l})", class: "ml-3")
+        end
       end
     end
     args
@@ -529,13 +536,20 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
       return args
     end
 
+    need_margin = args[:inline].present?
+    between_class = need_margin ? "mr-3" : ""
+
     id = [
       nested_field_id(args),
       "help"
     ].compact_blank.join("_")
     args[:between] = capture do
-      concat(args[:between])
-      concat(collapse_info_trigger(id))
+      tag.span(class: between_class) do
+        if args[:between].present?
+          concat(tag.span(class: "ml-3") { args[:between] })
+        end
+        concat(collapse_info_trigger(id, class: "ml-3"))
+      end
     end
     args[:append] = capture do
       concat(args[:append])
