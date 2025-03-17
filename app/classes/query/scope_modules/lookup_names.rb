@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Helper methods to help parsing Name instances from parameter strings.
-module Query::Scopes::LookupNames
+module Query::ScopeModules::LookupNames
   def lookup_names_by_name(args)
     unless (vals = args[:names])
       complain_about_unused_flags!(args)

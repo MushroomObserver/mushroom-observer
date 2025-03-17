@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Helper methods for turning Query parameters into AR conditions.
-module Query::Scopes::Joining
+module Query::ScopeModules::Joining
   def add_join_to_names
     return unless [Name, Observation, Image, Location].includes?(model)
 

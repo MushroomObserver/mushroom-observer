@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Helper methods for turning Query parameters into AR conditions.
-module Query::Scopes::Initialization
+module Query::ScopeModules::Initialization
   attr_accessor :tables, :scopes, :executor
 
   def initialized?

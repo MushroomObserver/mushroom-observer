@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Helper methods to help parsing object instances from parameter strings.
-module Query::Scopes::LookupObjects
+module Query::ScopeModules::LookupObjects
   def lookup_external_sites_by_name(vals)
     lookup_objects_by_name(vals) do |name|
       ExternalSite.where(name: name)

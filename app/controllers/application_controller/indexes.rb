@@ -35,6 +35,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   # Assemble query and display_args from a param subaction, or unfiltered_index.
   # All subactions call `create_query` to generate paginated results.
   def build_index_with_query
+    debugger
     current_params = index_active_params.intersection(params.keys.map(&:to_sym))
     current_params.each do |subaction|
       next if params[subaction].blank?

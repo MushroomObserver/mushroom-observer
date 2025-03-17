@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Query::Scopes::Ordering
+module Query::ScopeModules::Ordering
   def initialize_order
     by = params[:by]
     # Let queries define custom order spec in "order", but have explicitly
@@ -17,7 +17,7 @@ module Query::Scopes::Ordering
 
   def initialize_order_specs(by)
     sorting_method = "sort_by_#{by}"
-    unless ::Query::Scopes::Ordering.private_method_defined?(sorting_method)
+    unless ::Query::ScopeModules::Ordering.private_method_defined?(sorting_method)
       raise(
         "Can't figure out how to sort #{model.name.pluralize} by :#{by}."
       )

@@ -9,7 +9,7 @@ class Query::BaseAR
   # include Query::Modules::Datetime
   # include Query::Modules::GoogleSearch
   include Query::ScopeModules::HighLevelQueries
-  # include Query::Modules::Initialization
+  include Query::Modules::Initialization
   include Query::ScopeModules::Joining
   # include Query::Modules::LookupObjects
   include Query::ScopeModules::LowLevelQueries
@@ -90,7 +90,7 @@ class Query::BaseAR
   end
 
   def self.scope_parameters
-    parameter_declarations.keys.except(*subquery_parameters)
+    parameter_declarations.except(*subquery_parameters)
   end
 
   def default_order
