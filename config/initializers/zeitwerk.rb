@@ -9,6 +9,8 @@ Rails.autoloaders.main.inflector.inflect(
 Rails.autoloaders.main.ignore(
   "app/assets",
   "app/classes/api",
+  "app/extensions",
+  "app/javascripts",
   "app/views"
 )
 

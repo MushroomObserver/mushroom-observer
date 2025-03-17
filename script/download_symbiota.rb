@@ -3,7 +3,7 @@
 
 require(File.expand_path("../config/boot.rb", __dir__))
 require(File.expand_path("../config/environment.rb", __dir__))
-require(File.expand_path("../config/initializers/extensions.rb", __dir__))
+require(File.expand_path("../app/extensions/extensions.rb", __dir__))
 
 def do_report(year, do_labels = false)
   warn("Doing #{year.inspect}...")
