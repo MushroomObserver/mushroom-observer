@@ -8,12 +8,12 @@ class Query::BaseAR
   # include Query::Modules::Associations
   # include Query::Modules::Datetime
   # include Query::Modules::GoogleSearch
-  include Query::Modules::HighLevelQueries
+  include Query::ScopeModules::HighLevelQueries
   # include Query::Modules::Initialization
-  include Query::Modules::Joining
+  include Query::ScopeModules::Joining
   # include Query::Modules::LookupObjects
-  include Query::Modules::LowLevelQueries
-  include Query::Modules::Ordering
+  include Query::ScopeModules::LowLevelQueries
+  include Query::ScopeModules::Ordering
   include Query::Modules::SequenceOperators
   # include Query::Modules::Sql
   # include Query::Modules::Titles
