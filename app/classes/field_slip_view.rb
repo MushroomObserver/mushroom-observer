@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require("prawn/measurement_extensions")
+require "prawn/measurement_extensions"
 
 class FieldSlipView
   include Prawn::View

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require("rtf")
+require "rtf"
 
 # Format observations as fancy labels in RTF format.
 class Labels

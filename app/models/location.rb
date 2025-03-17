@@ -92,7 +92,7 @@
 #
 ################################################################################
 class Location < AbstractModel # rubocop:disable Metrics/ClassLength
-  require("acts_as_versioned")
+  require "acts_as_versioned"
 
   include Scopes
 

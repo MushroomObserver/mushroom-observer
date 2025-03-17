@@ -193,7 +193,7 @@
 #                       before object is created.
 #
 class User < AbstractModel # rubocop:disable Metrics/ClassLength
-  require("digest/sha1")
+  require "digest/sha1"
 
   # Do not change the integer associated with a value
   # First value is the default
