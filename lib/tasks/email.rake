@@ -11,8 +11,7 @@ namespace :email do
 
   desc "Send queued emails"
   task(send: :environment) do
-    # disable cop; `require` needs a String, not a PathName
-    require "#{Rails.root}/app/extensions/extensions.rb" # rubocop:disable Rails/FilePath
+    require_relative("../../config/initializers/extensions")
     count = 0
     # for e in QueuedEmail.find(:all) # Rails 3
     QueuedEmail.all.each do |e|
