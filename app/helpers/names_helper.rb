@@ -72,7 +72,8 @@ module NamesHelper
     link_to(
       title,
       add_query_param(observations_path, query),
-      data: { query_params: query.params.deep_compact_blank.to_json }
+      data: { query_params: query.params.deep_compact_blank.to_json,
+              query_record: query.record.id, alph: query.record.id.alphabetize }
     ) + " (#{count})"
   end
 

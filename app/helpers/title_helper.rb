@@ -61,7 +61,11 @@ module TitleHelper
     return unless query&.params
 
     content_for(:filters) do
-      tag.div(id: "filters", data: { controller: "filter-caption" }) do
+      tag.div(id: "filters",
+              data: { controller: "filter-caption",
+                      query_params: query.params.to_json,
+                      query_record: query.record.id,
+                      query_alph: query.record.id.alphabetize }) do
         concat(caption_truncated(query))
         concat(caption_full(query))
       end
@@ -245,8 +249,10 @@ module TitleHelper
               else
                 ids
               end
-    lookup_class = "Lookup::#{PARAM_LOOKUPS[param]}".constantize
-    joined_vals = lookup_class.new(lookups).titles.join(", ")
+    subclass = PARAM_LOOKUPS[param]
+    lookup = "Lookup::#{subclass}".constantize
+    joined_vals = lookup.new(lookups, include_misspellings: false).
+                  titles.join(", ")
     return joined_vals unless truncate
 
     truncate_joined_string(joined_vals, ids)
