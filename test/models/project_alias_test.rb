@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require("test_helper")
+require "test_helper"
 
 class ProjectAliasTest < ActiveSupport::TestCase
   def test_valid_user_aliases

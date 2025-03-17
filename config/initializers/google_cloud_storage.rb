@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "google/cloud/storage"
-require("json")
+require "json"
 
 file = Rails.root.join(
   "config/credentials/mo-image-archive-service-account.json"

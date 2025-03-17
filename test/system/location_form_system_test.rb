@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "application_system_test_case"
+require("application_system_test_case")
 
 class LocationFormSystemTest < ApplicationSystemTestCase
   def test_format_new_location_name

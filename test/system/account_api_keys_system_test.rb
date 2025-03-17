@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "application_system_test_case"
+require("application_system_test_case")
 
 class AccountAPIKeysSystemTest < ApplicationSystemTestCase
   def test_api_keys
