@@ -6,20 +6,6 @@ module Name::Synonymy
     deprecated ? :DEPRECATED.l : :ACCEPTED.l
   end
 
-  # Same as synonyms, but returns ids.
-  def synonym_ids
-    synonym ? synonym.name_ids.to_a : [id]
-  end
-
-  # Same as synonyms, but excludes self
-  def other_synonyms
-    synonyms.drop(1)
-  end
-
-  def other_synonym_ids
-    synonym ? synonym.name_ids.to_a.drop(1) : []
-  end
-
   # Returns an Array of all synonym Name's including itself at front of list.
   # (This looks screwy, but I think it is the safest way to handle it.
   # Note that synonym.names does include self, but it's a different instance.
@@ -27,7 +13,27 @@ module Name::Synonymy
   # not show up in self itself.  So this ensures that self itself will be
   # included at the beginning of the list of synonyms.)
   def synonyms
-    synonym ? [self] + (synonym.names.to_a - [self]) : [self]
+    return [self] unless synonym
+
+    [self] + (synonym.names - [self])
+  end
+
+  # Same as synonyms, but excludes self.
+  def other_synonyms
+    synonyms.drop(1)
+  end
+
+  # Same as synonyms, but returns ids. Resorted so current id is first.
+  def synonym_ids
+    return [id] unless synonym
+
+    [id] + (synonym.name_ids - [id])
+  end
+
+  def other_synonym_ids
+    return [] unless synonym
+
+    synonym_ids.drop(1)
   end
 
   # Returns an Array of all _approved_ Synonym Name's, potentially including

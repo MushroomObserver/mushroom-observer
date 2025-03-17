@@ -61,7 +61,11 @@ module TitleHelper
     return unless query&.params
 
     content_for(:filters) do
-      tag.div(id: "filters", data: { controller: "filter-caption" }) do
+      tag.div(id: "filters",
+              data: { controller: "filter-caption",
+                      query_params: query.params.to_json,
+                      query_record: query.record.id,
+                      query_alph: query.record.id.alphabetize }) do
         concat(caption_truncated(query))
         concat(caption_full(query))
       end
@@ -123,8 +127,8 @@ module TitleHelper
 
   # Each param could be a boolean, a val, a set of vals,
   # a nested param with new key/vals, or a subquery.
-  def caption_one_filter_param(query, key, val, truncate: false)
-    concat(tag.div do
+  def caption_one_filter_param(query, key, val, truncate: false, tag: :div)
+    concat(content_tag(tag) do
       if key.to_s.include?("_query")
         caption_subquery(query, key, val, truncate)
       elsif val.is_a?(Hash)
@@ -139,13 +143,11 @@ module TitleHelper
   # Subquery params get { curly brackets }. The new query block is
   # inside the brackets and indented.
   def caption_subquery(query, label, hash, truncate)
-    concat(tag.div("#{:"query_#{label}".l}: {"))
-    concat(tag.div(class: "ml-3") do
-      hash.each do |key, val|
-        caption_one_filter_param(query, key, val, truncate:)
-      end
-    end)
-    concat(tag.div("}"))
+    concat(tag.span("#{:"query_#{label}".l}: [ "))
+    hash.except(:by).each do |key, val|
+      caption_one_filter_param(query, key, val, truncate:, tag: :span)
+    end
+    concat(tag.span(" ] "))
   end
 
   # In the case of nested params, print them on one line separated by comma.
@@ -247,8 +249,10 @@ module TitleHelper
               else
                 ids
               end
-    lookup_class = "Lookup::#{PARAM_LOOKUPS[param]}".constantize
-    joined_vals = lookup_class.new(lookups).titles.join(", ")
+    subclass = PARAM_LOOKUPS[param]
+    lookup = "Lookup::#{subclass}".constantize
+    joined_vals = lookup.new(lookups, include_misspellings: false).
+                  titles.join(", ")
     return joined_vals unless truncate
 
     truncate_joined_string(joined_vals, ids)
