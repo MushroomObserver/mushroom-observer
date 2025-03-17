@@ -5,7 +5,7 @@ module Query::Modules::Validation
   attr_accessor :params, :params_cache, :subqueries
 
   def validate_params
-    old_params = @params.dup&.compact&.deep_symbolize_keys || {}
+    old_params = @params.dup&.deep_compact&.deep_symbolize_keys || {}
     new_params = {}
     permitted_params = parameter_declarations.slice(*old_params.keys)
     permitted_params.each do |param, param_type|
@@ -88,12 +88,13 @@ module Query::Modules::Validation
     end
   end
 
+  # For results, don't compact_blank, because sometimes we want `false`
   def validate_nested_params(_param, val, param_type)
     val2 = {}
     param_type.each do |key, arg_type|
       val2[key] = validate_value(arg_type, key, val[key])
     end
-    val2
+    val2.compact
   end
 
   # Validate the subquery's params by creating another Query instance
@@ -144,8 +145,10 @@ module Query::Modules::Validation
     case val
     when :true, :yes, :on, "true", "yes", "on", "1", 1, true
       true
-    when :false, :no, :off, "false", "no", "off", "0", 0, false, nil
+    when :false, :no, :off, "false", "no", "off", "0", 0, false
       false
+    when nil
+      nil
     else
       raise("Value for :#{param} should be boolean, got: #{val.inspect}")
     end

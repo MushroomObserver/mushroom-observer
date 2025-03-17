@@ -14,6 +14,8 @@ module Name::Scopes
 
     scope :names, lambda { |lookup:, **related_name_args|
       ids = lookup_names_by_name(lookup, related_name_args.compact)
+      return none unless ids
+
       where(id: ids).with_correct_spelling.distinct
     }
     scope :text_name_has,
