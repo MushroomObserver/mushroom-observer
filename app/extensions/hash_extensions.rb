@@ -34,7 +34,7 @@ class Hash
     found.flatten.compact
   end
 
-  # each_with_object doesn't work here in Hash
+  # rubocop is off: each_with_object doesn't work here in Hash.
   # rubocop:disable Style/EachWithObject
   def deep_compact
     reduce({}) do |new_hash, (k, v)|
@@ -45,13 +45,14 @@ class Hash
     end
   end
 
+  # Calls compact_blank on final hash in case top level params are {}.
   def deep_compact_blank
     reduce({}) do |new_hash, (k, v)|
       if v.present?
         new_hash[k] = v.is_a?(Hash) ? v.deep_compact_blank : v
       end
       new_hash
-    end
+    end.compact_blank
   end
   # rubocop:enable Style/EachWithObject
 
