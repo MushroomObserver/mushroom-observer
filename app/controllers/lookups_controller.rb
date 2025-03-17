@@ -2,7 +2,7 @@
 
 class LookupsController < ApplicationController
   # These need to be moved into the files where they are actually used.
-  require "find"
+  require("find")
 
   before_action :login_required, except: [
     :lookup_observation

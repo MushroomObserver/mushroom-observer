@@ -28,7 +28,7 @@ activate_control_app
 
 if rails_env == "production"
   on_worker_boot do
-    require "active_record"
+    require("active_record")
     begin
       ActiveRecord::Base.connection.disconnect!
     rescue StandardError

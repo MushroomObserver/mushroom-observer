@@ -12,8 +12,8 @@
 ################################################################################
 #
 class API2Controller < ApplicationController
-  require "xmlrpc/client"
-  require "api2"
+  require("xmlrpc/client")
+  require("api2")
 
   disable_filters
 
