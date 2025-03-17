@@ -22,9 +22,6 @@
 ################################################################################
 
 module LanguageExporter
-  require "extensions"
-  require "fileutils"
-
   def self.included(base)
     base.extend(ClassMethods)
   end

@@ -94,9 +94,6 @@
 #                                (filter: catches errors for integration tests)
 #
 class ApplicationController < ActionController::Base
-  require "extensions"
-  require "login_system"
-  require "csv"
   include LoginSystem
   include Authentication
   include Internationalization
