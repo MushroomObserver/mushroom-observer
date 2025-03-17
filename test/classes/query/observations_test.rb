@@ -250,7 +250,7 @@ class Query::ObservationsTest < UnitTestCase
       [],
       Observation.index_order.names(lookup: name.id,
                                     include_subtaxa: true,
-                                    exclude_original_names: true ),
+                                    exclude_original_names: true),
       :Observation, names: { lookup: name.id,
                              include_subtaxa: true,
                              exclude_original_names: true }
