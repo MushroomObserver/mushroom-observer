@@ -16,7 +16,7 @@ module AbstractModel::Scopes
     }
     scope :order_by_rss_log, lambda {
       joins(:rss_log).
-        reorder(RssLog[:updated_at].desc, arel_table[:id].desc).distinct
+        reorder(RssLog[:updated_at].desc, model.arel_table[:id].desc).distinct
     }
     scope :order_by_set, lambda { |set|
       reorder(Arel::Nodes.build_quoted(set.join(",")) & arel_table[:id])
@@ -43,103 +43,69 @@ module AbstractModel::Scopes
         where.not(user: user)
     }
 
-    # `created_at`/`updated_at` are scopes used by Query.
-    #
-    # The values we're getting in these scopes should be parseable as datetimes
-    # in Ruby. Parsing of user text values like "yesterday"/"la semana pasada"
-    # needs to be done upstream in PatternSearch.
-    #
-    # NOTE: The order of early and late datetimes does not matter in these two.
-    # They will be reversed by `datetime_between` if sent "backwards".
-    #
-    # NOTE: In AR, joined queries must specify the table when both have the same
-    # column name. Specify the table_col as `Name[:created_at]` or
-    # `Name.arel_table[:updated_at]` if it's a joined query. If not, you can
-    # omit the table_col param. The column name will be inferred from the scope.
-    #
-    scope :created_at, lambda { |early, late = early,
-                                 table_col = arel_table[:created_at]|
+    # Parsing of user text values like "yesterday"/"la semana pasada" needs to
+    # be done upstream in PatternSearch. The values we're getting in the scope
+    # should be parseable as datetimes in Ruby.
+    # The order of early and late datetimes does not matter here.
+    scope :created_at, lambda { |early, late = early|
       early, late = early if early.is_a?(Array) && early.size == 2
       if late == early
-        created_after(early, table_col)
+        created_after(early)
       else
-        created_between(early, late, table_col)
+        created_between(early, late)
       end
     }
-    scope :created_on, lambda { |ymd_string,
-                                 table_col = arel_table[:created_at]|
-      where(table_col.format("%Y-%m-%d").eq(ymd_string))
+    scope :created_on, lambda { |ymd_string|
+      where(arel_table[:created_at].format("%Y-%m-%d").eq(ymd_string))
     }
-    scope :created_after, lambda { |datetime,
-                                    table_col = arel_table[:created_at]|
-      datetime_after(datetime, table_col)
-    }
-    scope :created_before, lambda { |datetime,
-                                     table_col = arel_table[:created_at]|
-      datetime_before(datetime, table_col)
-    }
-    scope :created_between, lambda { |early, late,
-                                      table_col = arel_table[:created_at]|
-      datetime_between(early, late, table_col)
-    }
+    scope :created_after,
+          ->(datetime) { datetime_after(datetime, :created_at) }
+    scope :created_before,
+          ->(datetime) { datetime_before(datetime, :created_at) }
+    scope :created_between,
+          ->(early, late) { datetime_between(early, late, :created_at) }
 
-    scope :updated_at, lambda { |early, late = early,
-                                 table_col = arel_table[:created_at]|
+    scope :updated_at, lambda { |early, late = early|
       early, late = early if early.is_a?(Array) && early.size == 2
       if late == early
-        updated_after(early, table_col)
+        updated_after(early)
       else
-        updated_between(early, late, table_col)
+        updated_between(early, late)
       end
     }
-    scope :updated_on, lambda { |ymd_string,
-                                 table_col = arel_table[:updated_at]|
-      where(table_col.format("%Y-%m-%d").eq(ymd_string))
+    scope :updated_on, lambda { |ymd_string|
+      where(arel_table[:updated_at].format("%Y-%m-%d").eq(ymd_string))
     }
-    scope :updated_after, lambda { |datetime,
-                                    table_col = arel_table[:updated_at]|
-      datetime_after(datetime, table_col)
-    }
-    scope :updated_before, lambda { |datetime,
-                                     table_col = arel_table[:updated_at]|
-      datetime_before(datetime, table_col)
-    }
-    scope :updated_between, lambda { |early, late,
-                                      table_col = arel_table[:updated_at]|
-      datetime_between(early, late, table_col)
-    }
+    scope :updated_after,
+          ->(datetime) { datetime_after(datetime, :updated_at) }
+    scope :updated_before,
+          ->(datetime) { datetime_before(datetime, :updated_at) }
+    scope :updated_between,
+          ->(early, late) { datetime_between(early, late, :updated_at) }
 
     # Datetimes can be sent any format, any order (for between)
     scope :datetime_after,
-          ->(datetime, table_col) { datetime_compare(:gt, datetime, table_col) }
+          ->(datetime, col) { datetime_compare(:gt, datetime, col) }
     scope :datetime_before,
-          ->(datetime, table_col) { datetime_compare(:lt, datetime, table_col) }
-    scope :datetime_between, lambda { |early, late, table_col|
+          ->(datetime, col) { datetime_compare(:lt, datetime, col) }
+    scope :datetime_between, lambda { |early, late, col|
       early, late = [late, early] if early > late
-      datetime_after(early, table_col).datetime_before(late, table_col)
+      datetime_after(early, col).datetime_before(late, col)
     }
-    scope :datetime_compare, lambda { |dir, val, table_col|
+    scope :datetime_compare, lambda { |dir, val, col|
       # `datetime_condition_formatted` defined in ClassMethods below
       return unless (datetime = datetime_condition_formatted(dir, val))
 
-      where(table_col.format("%Y-%m-%d %H:%i:%s").send(dir, datetime))
+      where(arel_table[col].format("%Y-%m-%d %H:%i:%s").send(dir, datetime))
     }
 
-    # `date` is a scope used by Query.
-    #
     # NOTE: In a date (not datetime) column, we can allow searching for date
     # ranges: not just specific dates, but also dates within a seasonal range in
     # recurring years. This is possible via string parsing class methods (below)
     # because in the database, a date column already has the format("%Y-%m-%d").
-    #
-    # NOTE: In these scopes, the order of early and late matters. `early > late`
-    # can mean a date range wrapping the end/beginning of the year.
-    #
-    # NOTE: In AR, joined queries must specify the table when two have the same
-    # column name. Specify the table_col as `Sequence[:when]` or
-    # `Sequence.arel_table[:when]` if it's a joined query. If not, you can omit
-    # the table_col param. On MO so far, all date columns are named :when.
-    #
+    # NOTE: On MO so far, all date columns are named :when.
+    # In this scope, the order of early and late matter. early > late can mean
+    # a date range wrapping the end/beginning of the year.
     scope :date, lambda { |early, late = early, col = :when|
       early, late = early if early.is_a?(Array) && early.size == 2
       if late == early

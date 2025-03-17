@@ -20,7 +20,7 @@ class ExternalSite < AbstractModel
                       uniqueness: { case_sensitive: false }
 
   scope :name_has,
-        ->(str) { search_columns(ExternalSite[:name], str) }
+        ->(phrase) { search_columns(ExternalSite[:name], phrase) }
 
   def member?(user)
     user.in_group?(project.user_group)
