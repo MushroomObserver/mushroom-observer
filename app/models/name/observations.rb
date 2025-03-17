@@ -10,7 +10,7 @@ class Name
   # separately counted to show the number of results for each variant,
   # without intitiating any other queries.
   class Observations
-    # attr_reader :has_images, :of_taxon_this_name, :of_taxon_other_names
+    attr_reader :all, :name, :name_ids, :other_name_ids
 
     def initialize(name)
       @name = name

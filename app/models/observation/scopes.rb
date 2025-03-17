@@ -190,10 +190,12 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :names, lambda { |lookup:, **args|
       # First, lookup names, plus synonyms and subtaxa if requested
       lookup_args = args.slice(:include_synonyms,
+                               :include_misspellings,
                                :include_subtaxa,
                                :include_immediate_subtaxa,
                                :exclude_original_names)
       name_ids = Lookup::Names.new(lookup, **lookup_args).ids
+      return none unless name_ids
 
       # Query, with possible join to Naming. Mutually exclusive options:
       if args[:include_all_name_proposals]

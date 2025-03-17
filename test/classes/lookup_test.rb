@@ -85,8 +85,8 @@ class LookupTest < UnitTestCase
                         include_synonyms: true)
     assert_lookup_names([name3, name5],
                         ["Macrolepiota rachodes"],
-                        include_synonyms: true,
-                        exclude_original_names: true)
+                        include_synonyms: "yes", # test boolean
+                        exclude_original_names: "yes")
     assert_lookup_names([name1, name2, name3],
                         ["Macrolepiota"],
                         include_subtaxa: true)
@@ -95,8 +95,8 @@ class LookupTest < UnitTestCase
                         include_immediate_subtaxa: true)
     assert_lookup_names([name1, name2, name3, name4, name5],
                         ["Macrolepiota"],
-                        include_synonyms: true,
-                        include_subtaxa: true)
+                        include_synonyms: 1, # test boolean
+                        include_subtaxa: 1)
     assert_lookup_names([name2, name3, name4, name5],
                         ["Macrolepiota"],
                         include_synonyms: true,
@@ -138,6 +138,10 @@ class LookupTest < UnitTestCase
 
     assert_lookup_names([name2, name3], ["Peltigera"])
     assert_lookup_names([name2, name3], ["Petigera"])
+    assert_lookup_names([name2], ["Peltigera"],
+                        include_misspellings: false)
+    assert_lookup_names([name3], ["Petigera"],
+                        include_misspellings: false)
     assert_lookup_names([name1, name2, name3, name4, name5, name6, name7],
                         ["Peltigeraceae"],
                         include_subtaxa: true)
