@@ -33,6 +33,7 @@ module Query::ScopeModules::HighLevelQueries
 
   # Number of results the query returns.
   def num_results(_args = {})
+    initialize_query unless initialized?
     @num_results ||= result_ids&.size || 0
   end
 

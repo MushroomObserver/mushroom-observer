@@ -12,6 +12,7 @@ module Query::ScopeModules::Initialization
     @initialized = true
     @order       = ""
     @scopes      = model
+    @last_query  = scopes.to_sql
     initialize_flavor
     initialize_order
   end
