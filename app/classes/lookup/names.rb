@@ -7,7 +7,8 @@ class Lookup::Names < Lookup
   # Currently defaults to include misspellings in the returned list of ids
   # even when `include_synonyms: false`, unless you explicitly override by
   # passing `include_misspellings: false` or `exclude_original_names: true`.
-  def initialize(vals, params = { include_misspellings: true })
+  def initialize(vals, params = {})
+    params[:include_misspellings] = true if params[:include_misspellings].nil?
     super
   end
 
