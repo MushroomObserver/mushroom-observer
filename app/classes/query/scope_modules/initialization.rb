@@ -2,7 +2,7 @@
 
 # Helper methods for turning Query parameters into AR conditions.
 module Query::ScopeModules::Initialization
-  attr_accessor :tables, :scopes, :executor
+  attr_accessor :scopes, :order
 
   def initialized?
     @initialized ? true : false
@@ -10,10 +10,8 @@ module Query::ScopeModules::Initialization
 
   def initialize_query
     @initialized = true
-    @tables      = []
-    @scopes      = model.arel_table.all
-    @executor    = nil
-    initialize_title
+    @order       = ""
+    @scopes      = model
     initialize_flavor
     initialize_order
   end

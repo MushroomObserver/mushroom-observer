@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Query::Articles < Query::Base
+class Query::Articles < Query::BaseAR
   def model
     Article
   end
@@ -16,13 +16,13 @@ class Query::Articles < Query::Base
     )
   end
 
-  def initialize_flavor
-    add_owner_and_time_stamp_conditions
-    add_id_in_set_condition
-    add_search_condition("articles.title", params[:title_has])
-    add_search_condition("articles.body", params[:body_has])
-    super
-  end
+  # def initialize_flavor
+  #   add_owner_and_time_stamp_conditions
+  #   add_id_in_set_condition
+  #   add_search_condition("articles.title", params[:title_has])
+  #   add_search_condition("articles.body", params[:body_has])
+  #   super
+  # end
 
   def self.default_order
     "created_at"

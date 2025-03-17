@@ -9,7 +9,7 @@ class Query::BaseAR
   # include Query::Modules::Datetime
   # include Query::Modules::GoogleSearch
   include Query::ScopeModules::HighLevelQueries
-  include Query::Modules::Initialization
+  include Query::ScopeModules::Initialization
   include Query::ScopeModules::Joining
   # include Query::Modules::LookupObjects
   include Query::ScopeModules::LowLevelQueries
@@ -27,14 +27,14 @@ class Query::BaseAR
 
   def self.parameter_declarations
     {
-      join: [:string],
-      tables: [:string],
-      where: [:string],
-      group: :string,
-      order: :string,
-      selects: :string,
-      by: :string,
-      title: [:string]
+      # join: [:string],
+      # tables: [:string],
+      # where: [:string],
+      # group: :string,
+      # order: :string,
+      # selects: :string,
+      by: :string
+      # title: [:string]
     }
   end
 
@@ -90,7 +90,7 @@ class Query::BaseAR
   end
 
   def self.scope_parameters
-    parameter_declarations.except(*subquery_parameters)
+    parameter_declarations.except(*subquery_parameters).except(:by)
   end
 
   def default_order
