@@ -41,16 +41,16 @@ module Query::ScopeModules::HighLevelQueries
   def result_ids(args = {})
     initialize_query unless initialized?
     expect_args(:result_ids, args, RESULTS_ARGS)
-    includes = args[:include] || []
+    # includes = args[:include] || []
     @result_ids ||=
       if need_letters
-        ids_by_letter(includes)
+        ids_by_letter
       else
-        @scopes.includes(includes).map(&:id)
+        @scopes.map(&:id)
       end
   end
 
-  def ids_by_letter(includes)
+  def ids_by_letter
     # Include first letter of paginate-by-letter field right away; there's
     # typically no avoiding it.  This optimizes away an extra query or two.
     @letters = {}
@@ -58,9 +58,11 @@ module Query::ScopeModules::HighLevelQueries
     # select = "DISTINCT #{model.table_name}.id, LEFT(#{need_letters},4)"
     # select_rows(args.merge(select: select)).each do |id, letter|
     # I think the only arg we want here is include.
-    @scopes.includes(includes).
-      select(model[:id], need_letters[0..3]).distinct.each do |id, letter|
-      letter = letter[0, 1]
+    @scopes. # includes(includes). # Why include here?
+      select(model[:id], need_letters[0..3].as("title")).distinct.
+      map { |r| r.attributes.symbolize_keys }.each do |record|
+      id, title = record.values_at(:id, :title)
+      letter = title[0, 1]
       @letters[id] = letter.upcase if /[a-zA-Z]/.match?(letter)
       ids << id
     end

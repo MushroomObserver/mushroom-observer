@@ -41,7 +41,7 @@ class CollectionNumbersController < ApplicationController
 
   def index_display_opts(opts, _query)
     {
-      letters: "collection_numbers.name",
+      letters: CollectionNumber[:name],
       num_per_page: 100
     }.merge(opts)
   end
