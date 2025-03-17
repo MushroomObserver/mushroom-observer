@@ -45,7 +45,7 @@
 
 # MO extensions to Ruby String class
 class String
-  require("digest/md5")
+  require "digest/md5"
 
   # :stopdoc:
   unless defined? UTF_TO_ASCII

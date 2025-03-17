@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # First, load Cuprite Capybara integration
-require("capybara/cuprite")
+require "capybara/cuprite"
 
 # Then, we need to register our driver to be able to use it later
 # with #driven_by method.

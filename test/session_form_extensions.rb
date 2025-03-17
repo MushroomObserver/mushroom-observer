@@ -44,7 +44,7 @@
 
 module SessionExtensions
   class Form
-    require("session_upload")
+    require "session_upload"
 
     # Instance of the session that this form came from.
     attr_accessor :context
