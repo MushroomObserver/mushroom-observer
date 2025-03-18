@@ -31,6 +31,17 @@ class Query::CommentsTest < UnitTestCase
     assert_query(expects, :Comment, target: { type: :Observation, id: obs })
   end
 
+  def test_comment_types
+    expects = [comments(:fungi_comment)]
+    scope = Comment.types(:name)
+    assert_query_scope(expects, scope, :Comment, types: :name)
+    expects = [comments(:detailed_unknown_obs_comment),
+               comments(:minimal_unknown_obs_comment_2),
+               comments(:minimal_unknown_obs_comment_1)]
+    scope = Comment.types(:observation).index_order
+    assert_query_scope(expects, scope, :Comment, types: :observation)
+  end
+
   def test_comment_for_user
     expects = [comments(:detailed_unknown_obs_comment),
                comments(:minimal_unknown_obs_comment_2),
