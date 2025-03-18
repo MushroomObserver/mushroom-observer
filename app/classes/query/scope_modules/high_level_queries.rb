@@ -40,7 +40,7 @@ module Query::ScopeModules::HighLevelQueries
   # Array of all results, just ids.
   def result_ids(args = {})
     initialize_query unless initialized?
-    # expect_args(:result_ids, args, RESULTS_ARGS)
+    expect_args(:result_ids, args, RESULTS_ARGS)
     # includes = args[:include] || []
     @result_ids ||=
       if need_letters
