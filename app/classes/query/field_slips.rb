@@ -2,7 +2,7 @@
 
 class Query::FieldSlips < Query::BaseAR
   def model
-    FieldSlip
+    @model ||= FieldSlip
   end
 
   def self.parameter_declarations

@@ -2,7 +2,11 @@
 
 class Query::Articles < Query::BaseAR
   def model
-    Article
+    @model ||= Article
+  end
+
+  def list_by
+    @list_by ||= Article[:title]
   end
 
   def self.parameter_declarations

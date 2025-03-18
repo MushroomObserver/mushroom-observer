@@ -8,7 +8,11 @@ class Query::Names < Query::Base
   include Query::Initializers::Filters
 
   def model
-    Name
+    @model ||= Name
+  end
+
+  def list_by
+    @list_by ||= Name[:sort_name]
   end
 
   def self.parameter_declarations # rubocop:disable Metrics/MethodLength

@@ -102,7 +102,7 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   end
 
   def index_display_opts(opts, _query)
-    { letters: Herbarium[:name],
+    { letters: true,
       num_per_page: 100,
       include: [:curators, :herbarium_records, :personal_user] }.merge(opts)
   end

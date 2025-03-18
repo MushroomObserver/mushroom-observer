@@ -45,7 +45,7 @@ class HerbariumRecordsController < ApplicationController
 
   def index_display_opts(opts, _query)
     {
-      letters: HerbariumRecord[:initial_det],
+      letters: true,
       num_per_page: 100,
       include: [{ herbarium: :curators }, { observations: :name }, :user]
     }.merge(opts)

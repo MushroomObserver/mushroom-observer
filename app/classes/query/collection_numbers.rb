@@ -2,7 +2,11 @@
 
 class Query::CollectionNumbers < Query::BaseAR
   def model
-    CollectionNumber
+    @model ||= CollectionNumber
+  end
+
+  def list_by
+    @list_by ||= CollectionNumber[:name]
   end
 
   def self.parameter_declarations

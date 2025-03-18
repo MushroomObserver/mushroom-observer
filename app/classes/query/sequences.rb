@@ -2,7 +2,11 @@
 
 class Query::Sequences < Query::Base
   def model
-    Sequence
+    @model ||= Sequence
+  end
+
+  def list_by
+    @list_by ||= Sequence[:locus]
   end
 
   def self.parameter_declarations

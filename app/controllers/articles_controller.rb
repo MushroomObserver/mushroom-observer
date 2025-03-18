@@ -36,7 +36,7 @@ class ArticlesController < ApplicationController
   end
 
   def index_display_opts(opts, _query)
-    { letters: Article[:title],
+    { letters: true,
       num_per_page: 50,
       include: :user }.merge(opts)
   end

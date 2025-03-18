@@ -32,7 +32,7 @@ class GlossaryTermsController < ApplicationController
   end
 
   def index_display_opts(opts, _query)
-    { letters: GlossaryTerm[:name],
+    { letters: true,
       num_per_page: 50,
       include: { thumb_image: :image_votes } }.merge(opts)
   end

@@ -4,7 +4,7 @@ class Query::NameDescriptions < Query::Base
   include Query::Initializers::Descriptions
 
   def model
-    NameDescription
+    @model ||= NameDescription
   end
 
   def self.parameter_declarations

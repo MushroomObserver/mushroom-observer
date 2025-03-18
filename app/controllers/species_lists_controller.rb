@@ -82,14 +82,8 @@ class SpeciesListsController < ApplicationController
     return opts if %w[date created modified].include?(query.params[:by]) ||
                    query.params[:by].blank?
 
-    # Paginate by letter if sorting by user.
-    opts[:letters] =
-      if [query.params[:by]].intersect?(%w[user reverse_user])
-        "users.login"
-      else
-        "species_lists.title"
-      end
-
+    # Paginate by letter if sorting by anything else.
+    opts[:letters] = true
     opts
   end
 
@@ -188,7 +182,7 @@ class SpeciesListsController < ApplicationController
     # See documentation on the 'How to Use' page to understand this feature.
     store_query_in_session(@query) if params[:set_source].present?
 
-    @query.need_letters = "names.sort_name"
+    @query.need_letters = true
     @pages = paginate_letters(:letter, :page, 100)
     @objects = @query.paginate(@pages, include:
                   [:user, :name, :location, { thumb_image: :image_votes }])

@@ -212,13 +212,9 @@ class ObservationsController
         include: observation_index_includes
       }.merge(opts)
 
-      # Paginate by letter if sorting by user.
-      case query.params[:by]
-      when "user", "reverse_user"
-        opts[:letters] = "users.login"
-      # Paginate by letter if sorting by name.
-      when "name", "reverse_name"
-        opts[:letters] = "names.sort_name"
+      # Paginate by letter if sorting by user or name.
+      if %w[user reverse_user name reverse_name].include?(query.params[:by])
+        opts[:letters] = true
       end
 
       opts

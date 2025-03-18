@@ -2,7 +2,11 @@
 
 class Query::Projects < Query::Base
   def model
-    Project
+    @model ||= Project
+  end
+
+  def list_by
+    @list_by ||= Project[:title]
   end
 
   def self.parameter_declarations

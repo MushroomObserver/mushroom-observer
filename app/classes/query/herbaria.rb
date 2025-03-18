@@ -2,7 +2,11 @@
 
 class Query::Herbaria < Query::Base
   def model
-    Herbarium
+    @model ||= Herbarium
+  end
+
+  def list_by
+    @list_by ||= Herbarium[:name]
   end
 
   def self.parameter_declarations
