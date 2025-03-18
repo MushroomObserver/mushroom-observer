@@ -7,7 +7,16 @@ class Query::Images < Query::Base
   include Query::Initializers::Filters
 
   def model
-    Image
+    @model ||= Image
+  end
+
+  def list_by
+    @list_by ||= case params[:by].to_s
+                 when "user", "reverse_user"
+                   User[:login]
+                 when "name", "reverse_name"
+                   Name[:sort_name]
+                 end
   end
 
   def self.parameter_declarations

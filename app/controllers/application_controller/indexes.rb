@@ -438,7 +438,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   #
   #   # In controller:
   #   query  = create_query(:Name, :by_users => params[:id].to_s)
-  #   query.need_letters('names.display_name')
+  #   query.need_letters(true)
   #   @pages = paginate_letters(:letter, :page, 50)
   #   @names = query.paginate(@pages)
   #

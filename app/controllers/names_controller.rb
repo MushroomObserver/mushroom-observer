@@ -124,7 +124,7 @@ class NamesController < ApplicationController
 
   def index_display_opts(opts, _query)
     {
-      letters: "names.sort_name",
+      letters: true,
       num_per_page: (/^[a-z]/i.match?(params[:letter].to_s) ? 500 : 50),
       include: [:description]
     }.merge(opts)

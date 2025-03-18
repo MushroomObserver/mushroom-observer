@@ -4,7 +4,7 @@ class Query::LocationDescriptions < Query::Base
   include Query::Initializers::Descriptions
 
   def model
-    LocationDescription
+    @model ||= LocationDescription
   end
 
   def self.parameter_declarations

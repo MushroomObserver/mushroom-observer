@@ -7,7 +7,7 @@ class Query::Locations < Query::Base
   include Query::Initializers::Filters
 
   def model
-    Location
+    @model ||= Location
   end
 
   def self.parameter_declarations

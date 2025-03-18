@@ -2,7 +2,7 @@
 
 class Query::ExternalSites < Query::Base
   def model
-    ExternalSite
+    @model ||= ExternalSite
   end
 
   def self.parameter_declarations

@@ -2,7 +2,7 @@
 
 class Query::ExternalLinks < Query::Base
   def model
-    ExternalLink
+    @model ||= ExternalLink
   end
 
   def self.parameter_declarations
