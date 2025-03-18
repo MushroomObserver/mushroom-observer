@@ -121,6 +121,7 @@ module Query::ScopeModules::HighLevelQueries
 
   # Returns a subset of the results (as ids).
   def paginate_ids(paginator)
+    initialize_query unless initialized?
     ids = result_ids
     if need_letters
       paginator.used_letters = @letters.values.uniq
