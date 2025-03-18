@@ -34,7 +34,6 @@ module MushroomObserver
     # Custom directories with classes and modules you want to be autoloadable.
     config.autoload_paths += %W[
       #{config.root}/app/classes
-      #{config.root}/app/extensions
     ]
     config.eager_load_paths += %W[
       #{config.root}/app/classes
