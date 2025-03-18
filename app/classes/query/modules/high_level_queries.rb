@@ -92,8 +92,8 @@ module Query::Modules::HighLevelQueries
 
   # Make sure we requery if we change the letter field.
   def need_letters=(letters)
-    unless letters.is_a?(String)
-      raise("You must pass a SQL expression to 'need_letters'.")
+    unless letters.is_a?(Boolean)
+      raise("You must pass a Boolean to 'need_letters'.")
     end
 
     return if need_letters == letters
