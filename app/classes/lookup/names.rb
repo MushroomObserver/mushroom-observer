@@ -5,10 +5,7 @@ class Lookup::Names < Lookup
   TITLE_METHOD = :text_name
 
   def prepare_vals(vals)
-    if vals.blank?
-      complain_about_unused_flags!
-      return []
-    end
+    return [] if vals.blank?
 
     [vals].flatten
   end
@@ -218,17 +215,5 @@ class Lookup::Names < Lookup
   #    where(<x>.in(limited_id_set(name_ids)))
   def limited_id_set(name_ids)
     name_ids.map(&:to_i).uniq[0, MO.query_max_array]
-  end
-
-  def complain_about_unused_flags!
-    return if @params.blank?
-
-    @params.each_key { |param| complain_about_unused_flag!(param) }
-  end
-
-  def complain_about_unused_flag!(param)
-    return if @params[param].nil?
-
-    raise("Flag \"#{param}\" is invalid without \"names\" parameter.")
   end
 end
