@@ -32,11 +32,17 @@ class Query::CommentsTest < UnitTestCase
   end
 
   def test_comment_for_user
-    expects = Comment.index_order.select { |c| c.target.user == mary }
-    # expects = Comment.index_order.joins(:target).
-    #           where(targets: { user_id: mary.id }).uniq
-    assert_query(expects, :Comment, for_user: mary)
-    assert_query([], :Comment, for_user: rolf)
+    expects = [comments(:detailed_unknown_obs_comment),
+               comments(:minimal_unknown_obs_comment_2),
+               comments(:minimal_unknown_obs_comment_1)]
+    scope = Comment.for_user(mary).index_order
+    assert_query_scope(expects, scope, :Comment, for_user: mary)
+    expects = [comments(:fungi_comment)]
+    scope = Comment.for_user(rolf).index_order
+    assert_query_scope(expects, scope, :Comment, for_user: rolf)
+    expects = []
+    scope = Comment.for_user(users(:zero_user)).index_order
+    assert_query_scope(expects, scope, :Comment, for_user: users(:zero_user))
   end
 
   def test_comment_in_set
