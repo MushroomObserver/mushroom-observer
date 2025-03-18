@@ -8,8 +8,9 @@ class Query::ArticlesTest < UnitTestCase
   include QueryExtensions
 
   def test_article_all
-    expects = Article.index_order
-    assert_query(expects, :Article)
+    expects = [articles(:premier_article), articles(:second_article)]
+    scope = Article.index_order
+    assert_query_scope(expects, scope, :Article)
   end
 
   def test_article_by_rss_log

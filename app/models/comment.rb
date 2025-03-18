@@ -170,7 +170,8 @@ class Comment < AbstractModel
   }
   scope :target,
         ->(target) { where(target: target) }
-
+  scope :types,
+        ->(types) { where(target_type: types) }
   scope :summary_has,
         ->(phrase) { search_columns(Comment[:summary], phrase) }
   scope :content_has,
