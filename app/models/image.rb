@@ -1,9 +1,5 @@
 # frozen_string_literal: true
 
-# require("open3")
-# require("mimemagic")
-# require("fastimage")
-#
 #  = Image Model
 #
 #  Most images are, of course, mushrooms, but mugshots use this class, as well.

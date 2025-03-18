@@ -3,8 +3,6 @@
 require("test_helper")
 
 class AbstractModelTest < UnitTestCase
-  require "extensions"
-
   # Make sure update_view_stats updated stuff correctly (and did nothing else).
   def assert_same_but_view_stats(old_attrs, new_attrs, msg = "")
     (old_attrs.keys + new_attrs.keys).map(&:to_s).uniq.sort.each do |key|
