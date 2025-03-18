@@ -46,7 +46,7 @@ module Query::ScopeModules::HighLevelQueries
       if need_letters
         ids_by_letter
       else
-        @scopes.map(&:id)
+        @scopes.all.map(&:id)
       end
   end
 
