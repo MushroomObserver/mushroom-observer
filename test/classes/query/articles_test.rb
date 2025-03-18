@@ -18,10 +18,10 @@ class Query::ArticlesTest < UnitTestCase
   end
 
   def test_article_id_in_set
-    # art = articles(:premier_article)
-    # expects = [art.id]
-    # scope = Article.id_in_set(art.id)
-    # assert_query_scope(expects, scope, :Article, id_in_set: [art.id])
+    art = articles(:premier_article)
+    expects = [art.id]
+    scope = Article.id_in_set(art.id)
+    assert_query_scope(expects, scope, :Article, id_in_set: [art.id])
     assert_query([], :Article, id_in_set: [])
   end
 
