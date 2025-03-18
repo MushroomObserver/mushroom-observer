@@ -2,7 +2,11 @@
 
 class Query::SpeciesLists < Query::Base
   def model
-    SpeciesList
+    @model ||= SpeciesList
+  end
+
+  def list_by
+    @list_by ||= :title
   end
 
   def self.parameter_declarations

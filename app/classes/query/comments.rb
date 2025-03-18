@@ -2,7 +2,7 @@
 
 class Query::Comments < Query::Base
   def model
-    Comment
+    @model ||= Comment
   end
 
   def self.parameter_declarations

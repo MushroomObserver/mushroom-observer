@@ -2,7 +2,7 @@
 
 class Query::Users < Query::Base
   def model
-    User
+    @model ||= User
   end
 
   def self.parameter_declarations

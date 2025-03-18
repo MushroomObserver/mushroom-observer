@@ -2,7 +2,7 @@
 
 class Query::APIKeys < Query::Base
   def model
-    APIKey
+    @model ||= APIKey
   end
 
   def self.parameter_declarations

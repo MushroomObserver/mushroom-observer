@@ -7,7 +7,7 @@ class Query::Images < Query::Base
   include Query::Initializers::Filters
 
   def model
-    Image
+    @model ||= Image
   end
 
   def self.parameter_declarations

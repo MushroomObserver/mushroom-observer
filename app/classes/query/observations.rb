@@ -7,7 +7,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
   include Query::Initializers::AdvancedSearch
 
   def model
-    Observation
+    @model ||= Observation
   end
 
   def self.parameter_declarations # rubocop:disable Metrics/MethodLength

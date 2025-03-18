@@ -5,7 +5,7 @@ class Query::RssLogs < Query::Base
   include Query::Initializers::Filters
 
   def model
-    RssLog
+    @model ||= RssLog
   end
 
   def self.parameter_declarations
