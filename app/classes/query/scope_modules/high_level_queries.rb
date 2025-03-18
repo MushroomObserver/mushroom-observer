@@ -40,21 +40,21 @@ module Query::ScopeModules::HighLevelQueries
   # Array of all results, just ids.
   def result_ids(args = {})
     initialize_query unless initialized?
-    expect_args(:result_ids, args, RESULTS_ARGS)
-    includes = args[:include] || []
+    # expect_args(:result_ids, args, RESULTS_ARGS)
+    # includes = args[:include] || []
     @result_ids ||=
       if need_letters
-        ids_by_letter(includes)
+        ids_by_letter
       else
         @scopes.map(&:id)
       end
   end
 
   # Returns an array of ids for each letter that has a record present.
-  def ids_by_letter(includes)
+  def ids_by_letter
     @letters = {}
     ids = []
-    minimal_query_of_all_records(includes).each do |record|
+    minimal_query_of_all_records.each do |record|
       id, title = record.values_at(:id, :title)
       letter = title[0, 1]
       @letters[id] = letter.upcase if /[a-zA-Z]/.match?(letter)
@@ -63,12 +63,10 @@ module Query::ScopeModules::HighLevelQueries
     ids
   end
 
-  # Tries to be light about it, by selecting only certain values.
-  # `includes` in case list_by is a column in an "included" table.
-  # Note includes doesn't work. Needs to join to sort on foreign key.
-  def minimal_query_of_all_records(includes)
-    @scopes.includes(includes).
-      select(model[:id], list_by[0..3].as("title")).distinct.
+  # Tries to be light about it, by selecting only two values.
+  # `list_by` is a Model[:column] - it's checking the first four chars.
+  def minimal_query_of_all_records
+    @scopes.select(model[:id], list_by[0..3].as("title")).distinct.
       map { |record| record.attributes.symbolize_keys }
   end
 
