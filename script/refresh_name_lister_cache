@@ -18,7 +18,7 @@
 require_relative("../config/boot")
 require_relative("../config/environment")
 
-require("string_extensions")
+require_relative("../app/extensions/string")
 
 # Tired of fighting with ActionView to get it to let me use the one in
 # helpers/javascript_helper.rb, so I just copied it verbatim.
