@@ -57,9 +57,10 @@ module Query::ScopeModules::HighLevelQueries
     ids = []
     # select = "DISTINCT #{model.table_name}.id, LEFT(#{need_letters},4)"
     # select_rows(args.merge(select: select)).each do |id, letter|
-    # I think the only arg we want here is include.
+    # I think the only arg we want here is include. NO
+    # Using list_by attribute of query class now
     @scopes. # includes(includes). # Why include here?
-      select(model[:id], need_letters[0..3].as("title")).distinct.
+      select(model[:id], model[list_by][0..3].as("title")).distinct.
       map { |r| r.attributes.symbolize_keys }.each do |record|
       id, title = record.values_at(:id, :title)
       letter = title[0, 1]
@@ -103,11 +104,13 @@ module Query::ScopeModules::HighLevelQueries
   end
 
   # need_letters is the table and column name we're indexing
+  # change - to just t/f, and store the title column on the query class!
+  #
   # Make sure we requery if we change the letter field.
   def need_letters=(letters)
-    # unless letters.is_a?(String)
-    #   raise("You must pass a SQL expression to 'need_letters'.")
-    # end
+    unless letters.is_a?(Boolean)
+      raise("You must pass a Boolean to 'need_letters'.")
+    end
 
     return if need_letters == letters
 
