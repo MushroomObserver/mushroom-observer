@@ -33,7 +33,7 @@
 require_relative("../config/boot")
 require_relative("../config/environment")
 
-require "arel-helpers"
+require("arel-helpers")
 
 DOMAIN      = "https://mushroomobserver.org"
 SITEMAP_URL = "#{DOMAIN}/sitemap/NAME.xml".freeze
@@ -342,7 +342,7 @@ end
 ################################################################################
 
 # Times come out of the mysql adapter as Time objects right now.
-# Sitemaps require "yyyy:mm:ddThh:mm:ss+00:00" format.
+# Sitemaps require dates in "yyyy:mm:ddThh:mm:ss+00:00" format.
 # These functions ensure that all times are Strings in that format.
 def parse_mysql_time(time)
   format_time(time)

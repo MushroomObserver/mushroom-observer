@@ -319,7 +319,7 @@
 #
 ###############################################################################
 class Name < AbstractModel
-  require "acts_as_versioned"
+  require("acts_as_versioned")
 
   # modules with instance methods and maybe class methods
   include Scopes

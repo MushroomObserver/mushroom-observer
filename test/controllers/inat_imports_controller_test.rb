@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 # a duck type of API2::ImageAPI with enough attributes
 # to preventInatImportsController from throwing an error
