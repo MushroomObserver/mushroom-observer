@@ -135,6 +135,7 @@ module Query::ScopeModules::HighLevelQueries
   # Returns a subset of the results (as ActiveRecord instances).
   # (Takes args for +instantiate+.)
   def paginate(paginator, args = {})
+    initialize_query unless initialized?
     instantiate_results(paginate_ids(paginator), args)
   end
 
