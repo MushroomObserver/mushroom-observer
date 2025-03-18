@@ -41,33 +41,35 @@ module Query::ScopeModules::HighLevelQueries
   def result_ids(args = {})
     initialize_query unless initialized?
     expect_args(:result_ids, args, RESULTS_ARGS)
-    # includes = args[:include] || []
+    includes = args[:include] || []
     @result_ids ||=
       if need_letters
-        ids_by_letter
+        ids_by_letter(includes)
       else
         @scopes.map(&:id)
       end
   end
 
-  def ids_by_letter
-    # Include first letter of paginate-by-letter field right away; there's
-    # typically no avoiding it.  This optimizes away an extra query or two.
+  # Returns an array of ids for each letter that has a record present.
+  def ids_by_letter(includes)
     @letters = {}
     ids = []
-    # select = "DISTINCT #{model.table_name}.id, LEFT(#{need_letters},4)"
-    # select_rows(args.merge(select: select)).each do |id, letter|
-    # I think the only arg we want here is include. NO
-    # Using list_by attribute of query class now
-    @scopes. # includes(includes). # Why include here?
-      select(model[:id], model[list_by][0..3].as("title")).distinct.
-      map { |r| r.attributes.symbolize_keys }.each do |record|
+    minimal_query_of_all_records(includes).each do |record|
       id, title = record.values_at(:id, :title)
       letter = title[0, 1]
       @letters[id] = letter.upcase if /[a-zA-Z]/.match?(letter)
       ids << id
     end
     ids
+  end
+
+  # Tries to be light about it, by selecting only certain values.
+  # `includes` in case list_by is a column in an "included" table.
+  # Note includes doesn't work. Needs to join to sort on foreign key.
+  def minimal_query_of_all_records(includes)
+    @scopes.includes(includes).
+      select(model[:id], list_by[0..3].as("title")).distinct.
+      map { |record| record.attributes.symbolize_keys }
   end
 
   # Array of all results, instantiated.
