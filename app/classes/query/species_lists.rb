@@ -5,10 +5,6 @@ class Query::SpeciesLists < Query::Base
     @model ||= SpeciesList
   end
 
-  def list_by
-    @list_by ||= :title
-  end
-
   def self.parameter_declarations
     super.merge(
       created_at: [:time],
