@@ -21,7 +21,7 @@
 ################################################################################
 
 class TranslationString < AbstractModel
-  require("acts_as_versioned")
+  require "acts_as_versioned"
 
   belongs_to :language
   belongs_to :user

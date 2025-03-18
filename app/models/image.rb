@@ -1,9 +1,5 @@
 # frozen_string_literal: true
 
-# require("open3")
-# require("mimemagic")
-# require("fastimage")
-#
 #  = Image Model
 #
 #  Most images are, of course, mushrooms, but mugshots use this class, as well.
@@ -227,12 +223,12 @@
 ################################################################################
 #
 class Image < AbstractModel # rubocop:disable Metrics/ClassLength
-  require("fileutils")
-  require("net/http")
-  require("English")
-  require("open3")
-  require("mimemagic")
-  require("fastimage")
+  require "fileutils"
+  require "net/http"
+  require "English"
+  require "open3"
+  require "mimemagic"
+  require "fastimage"
 
   include Scopes
 

@@ -309,7 +309,7 @@
 #  ==== Merging
 #  merger_destructive?::     Would merger into another Name destroy data?
 #  merge::                   Merge old name into this one and remove old one.
-#  dependents?::         Does another Name depend from this Name?
+#  dependents?::             Does another Name depend from this Name?
 #
 #  == Callbacks
 #
@@ -319,8 +319,8 @@
 #
 ###############################################################################
 class Name < AbstractModel
-  require("acts_as_versioned")
-  require("fileutils")
+  require "acts_as_versioned"
+  require "fileutils"
 
   # modules with instance methods and maybe class methods
   include Scopes
