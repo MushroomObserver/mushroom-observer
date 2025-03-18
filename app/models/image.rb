@@ -223,8 +223,8 @@
 ################################################################################
 #
 class Image < AbstractModel # rubocop:disable Metrics/ClassLength
-  require "mimemagic"
-  require "fastimage"
+  require("mimemagic")
+  require("fastimage")
 
   include Scopes
 

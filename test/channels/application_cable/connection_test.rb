@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class ApplicationCable::ConnectionTest < ActionCable::Connection::TestCase
   def test_connects_with_cookies
