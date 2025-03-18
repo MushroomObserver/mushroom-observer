@@ -40,8 +40,16 @@ class Query::Comments < Query::Base
   def add_for_user_condition
     return if params[:for_user].blank?
 
-    add_join(:observations)
-    @where << "observations.user_id = '#{params[:for_user]}'"
+    user_id = [params[:for_user]].flatten.first
+    wheres = []
+    Comment::ALL_TYPE_TAGS.dup.map do |type|
+      table = type.to_s.pluralize.to_sym
+      wheres << "(comments.target_type = '#{type}') AND " \
+                "(comments.target_id IN (" \
+                "SELECT #{table}.id FROM #{table} " \
+                "WHERE #{table}.user_id = #{user_id}))"
+    end
+    @where << or_clause(*wheres)
   end
 
   def add_for_target_condition
