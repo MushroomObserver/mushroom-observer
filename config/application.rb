@@ -32,14 +32,14 @@ module MushroomObserver
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.
     # Custom directories with classes and modules you want to be autoloadable.
-    config.autoload_paths += %W[
-      #{config.root}/app/classes
-      #{config.root}/app/extensions
-    ]
-    config.eager_load_paths += %W[
-      #{config.root}/app/classes
-      #{config.root}/app/extensions
-    ]
+    # config.autoload_paths += %W[
+    #   #{config.root}/app/classes
+    #   #{config.root}/app/extensions
+    # ]
+    # config.eager_load_paths += %W[
+    #   #{config.root}/app/classes
+    #   #{config.root}/app/extensions
+    # ]
 
     # Uncomment this after migrating to all recommended default configs for 7.1
     # config/initializers/new_framework_defaults_7_1.rb
