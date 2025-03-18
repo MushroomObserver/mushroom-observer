@@ -108,7 +108,7 @@ module Query::ScopeModules::HighLevelQueries
   #
   # Make sure we requery if we change the letter field.
   def need_letters=(letters)
-    unless letters.is_a?(Boolean)
+    unless [true, false, 1, 0].include?(letters)
       raise("You must pass a Boolean to 'need_letters'.")
     end
 
