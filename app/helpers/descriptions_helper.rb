@@ -295,6 +295,18 @@ module DescriptionsHelper
     end
   end
 
+  # Wrap description title in link to show_description.
+  #
+  #   Description: <%= description_link(name.description) %>
+  #
+  def description_link(desc)
+    result = description_title(desc)
+    return result if result.match?("(#{:private.t})$")
+
+    link_with_query(result, desc.show_link_args,
+                    class: "description_link_#{desc.id}")
+  end
+
   # Create a descriptive title for a Description.  Indicates the source and
   # very rough permissions (e.g. "public", "restricted", or "private").
   def description_title(desc)

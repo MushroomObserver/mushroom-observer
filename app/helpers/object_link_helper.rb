@@ -237,18 +237,6 @@ module ObjectLinkHelper
             { class: unique_class })
   end
 
-  # Wrap description title in link to show_description.
-  #
-  #   Description: <%= description_link(name.description) %>
-  #
-  def description_link(desc)
-    result = description_title(desc)
-    return result if result.match?("(#{:private.t})$")
-
-    link_with_query(result, desc.show_link_args,
-                    class: "description_link_#{desc.id}")
-  end
-
   def observation_herbarium_record_link(obs)
     count = obs.herbarium_records.size
     if count.positive?
