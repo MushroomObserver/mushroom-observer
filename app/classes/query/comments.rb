@@ -5,6 +5,10 @@ class Query::Comments < Query::Base
     @model ||= Comment
   end
 
+  def list_by
+    @list_by ||= User[:login]
+  end
+
   def self.parameter_declarations
     super.merge(
       created_at: [:time],
