@@ -622,7 +622,7 @@ class QueryTest < UnitTestCase
 
   def paginate_test_letter_setup(number, num_per_page)
     paginate_test_setup(number, num_per_page)
-    @query.need_letters = "names.text_name"
+    @query.need_letters = true
     @letters = @names.map { |n| n.text_name[0, 1] }.uniq.sort
   end
 

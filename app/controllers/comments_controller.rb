@@ -94,9 +94,7 @@ class CommentsController < ApplicationController
     }.merge(opts)
 
     # Paginate by letter if sorting by user.
-    if (query.params[:by] == "user") || (query.params[:by] == "reverse_user")
-      opts[:letters] = "users.login"
-    end
+    opts[:letters] = true if %w[user reverse_user].include?(query.params[:by])
 
     @full_detail = query.params[:target].present?
 

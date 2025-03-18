@@ -2,11 +2,11 @@
 
 class Query::GlossaryTerms < Query::Base
   def model
-    @model ||= ::GlossaryTerm
+    @model ||= GlossaryTerm
   end
 
   def list_by
-    @list_by ||= :name
+    @list_by ||= GlossaryTerm[:name]
   end
 
   def self.parameter_declarations

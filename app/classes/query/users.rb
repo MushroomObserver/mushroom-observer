@@ -5,6 +5,15 @@ class Query::Users < Query::Base
     @model ||= User
   end
 
+  def list_by
+    @list_by ||= case params[:by]
+                 when "login", "reverse_login"
+                   User[:login]
+                 else
+                   User[:name]
+                 end
+  end
+
   def self.parameter_declarations
     super.merge(
       created_at: [:time],

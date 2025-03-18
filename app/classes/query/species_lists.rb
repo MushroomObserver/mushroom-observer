@@ -5,6 +5,15 @@ class Query::SpeciesLists < Query::Base
     @model ||= SpeciesList
   end
 
+  def list_by
+    @list_by ||= case params[:by].to_s
+                 when "user", "reverse_user"
+                   User[:login]
+                 else
+                   SpeciesList[:title]
+                 end
+  end
+
   def self.parameter_declarations
     super.merge(
       created_at: [:time],

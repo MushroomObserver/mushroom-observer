@@ -6,7 +6,7 @@ class Query::Herbaria < Query::Base
   end
 
   def list_by
-    @list_by ||= :name
+    @list_by ||= Herbarium[:name]
   end
 
   def self.parameter_declarations

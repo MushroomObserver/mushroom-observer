@@ -6,7 +6,7 @@ class Query::Projects < Query::Base
   end
 
   def list_by
-    @list_by ||= :title
+    @list_by ||= Project[:title]
   end
 
   def self.parameter_declarations

@@ -76,20 +76,12 @@ class UsersController < ApplicationController
     query
   end
 
-  def index_display_opts(opts, query)
-    opts = {
+  def index_display_opts(opts, _query)
+    {
+      letters: true,
       include: :user_groups,
       matrix: !in_admin_mode?
     }.merge(opts)
-
-    # Paginate by "correct" letter.
-    opts[:letters] = if %w[login reverse_login].include?(query.params[:by])
-                       "users.login"
-                     else
-                       "users.name"
-                     end
-
-    opts
   end
 
   public

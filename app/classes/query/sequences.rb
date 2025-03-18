@@ -6,7 +6,7 @@ class Query::Sequences < Query::Base
   end
 
   def list_by
-    @list_by ||= :locus
+    @list_by ||= Sequence[:locus]
   end
 
   def self.parameter_declarations

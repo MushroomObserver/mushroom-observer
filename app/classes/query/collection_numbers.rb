@@ -6,7 +6,7 @@ class Query::CollectionNumbers < Query::Base
   end
 
   def list_by
-    @list_by ||= :name
+    @list_by ||= CollectionNumber[:name]
   end
 
   def self.parameter_declarations

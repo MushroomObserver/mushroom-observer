@@ -6,7 +6,7 @@ class Query::Articles < Query::Base
   end
 
   def list_by
-    @list_by ||= :title
+    @list_by ||= Article[:title]
   end
 
   def self.parameter_declarations

@@ -10,6 +10,15 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
     @model ||= Observation
   end
 
+  def list_by
+    @list_by ||= case params[:by].to_s
+                 when "user", "reverse_user"
+                   User[:login]
+                 when "name", "reverse_name"
+                   Name[:sort_name]
+                 end
+  end
+
   def self.parameter_declarations # rubocop:disable Metrics/MethodLength
     super.merge(
       date: [:date],

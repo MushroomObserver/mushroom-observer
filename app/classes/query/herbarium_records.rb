@@ -6,7 +6,7 @@ class Query::HerbariumRecords < Query::Base
   end
 
   def list_by
-    @list_by ||= :initial_det
+    @list_by ||= HerbariumRecord[:initial_det]
   end
 
   def self.parameter_declarations
