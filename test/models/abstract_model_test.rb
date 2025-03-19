@@ -553,12 +553,11 @@ class AbstractModelTest < UnitTestCase
     )
   end
 
-  # Query currently parses a year as "datetime_after" Jan 01 of that year, but
-  # the scope enables this more useful parsing of "within the year".
+  # the scope enables this parsing of "within the year".
   def test_scope_created_in_year
     expects = Observation.where(Observation[:created_at].year.eq("2007")).
               index_order
-    assert_equal(expects, Observation.index_order.created_at("2007"))
+    assert_equal(expects, Observation.index_order.created_at("2007", "2007"))
   end
 
   # Ditto for month.
@@ -567,7 +566,8 @@ class AbstractModelTest < UnitTestCase
               where(Observation[:created_at].year.eq("2007").
                     and(Observation[:created_at].month.eq("08"))).
               index_order
-    assert_equal(expects, Observation.index_order.created_at("2007-08"))
+    assert_equal(expects,
+                 Observation.index_order.created_at("2007-08", "2007-08"))
   end
 
   def test_scope_by_editor

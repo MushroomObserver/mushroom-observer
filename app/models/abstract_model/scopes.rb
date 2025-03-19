@@ -114,12 +114,10 @@ module AbstractModel::Scopes
     #  DATETIME UTILITY SCOPES
     #
     # Can be used for other datetime columns, e.g. `:log_updated_at`.
-    # NOTE: MO can infer different scopes from the level of detail
-    # provided, by using a simple split("-").
     scope :datetime_at, lambda { |early, late = nil, col:|
       early, late = early if early.is_a?(Array)
       if late == early
-        datetime_in_year_or_in_month_or_on_or_at_datetime(early, col:)
+        datetime_with_levels_of_precision(early, col:)
       elsif late.present?
         datetime_between(early, late, col:)
       else
@@ -129,8 +127,8 @@ module AbstractModel::Scopes
     # NOTE: these two scopes currently only tolerate fully hyphenated formats
     # "%Y-%m-%d" and "%Y-%m-%d-%H-%M-%S". Switching to DateTime.parse might be
     # more tolerant, but it can't parse "%Y-%m-%d-%H-%M-%S", so it would require
-    # Query to send datetimes as "%Y-%m-%d %H:%M:%S". This would complicate
-    # MO's level-of-detail parsing described above.
+    # Query to send datetimes as "%Y-%m-%d %H:%M:%S". This complicates MO's
+    # level-of-detail parser datetime_with_levels_of_precision.
     scope :datetime_on, lambda { |ymd_string, col:|
       reformat = DateTime.strptime(ymd_string, "%Y-%m-%d").strftime("%Y-%m-%d")
       where(arel_table[col].format("%Y-%m-%d").eq(reformat))
@@ -246,15 +244,17 @@ module AbstractModel::Scopes
       [returns[0..2]&.join("-"), returns[3..5]&.join(":")].join(" ")
     end
 
-    # If a single "YYYY" is passed to a datetime scope, it should return
-    # records where the col value is within the year. Ditto for "YYYY-MM".
-    # If it gets a full date, though, returns records on that date.
-    # If it gets a full datetime, returns records at that exact time.
-    def datetime_in_year_or_in_month_or_on_or_at_datetime(date, col:)
+    # We infer different scopes from the level of detail provided:
+    # - If a single "YYYY" is passed to a datetime scope, it should return
+    #   records where the col value is within the year.
+    # - Ditto for "YYYY-MM" - records within that month.
+    # - If it gets a full date, it returns records on that date.
+    # - If it gets a full datetime, returns records at that exact time.
+    def datetime_with_levels_of_precision(date, col:)
       y, m, d, h = date.split("-").map!(&:to_i) # minute and second ignored here
       return unless /^\d\d\d\d/.match?(y.to_s)
-      return at_datetime(date, col:) if h.present?
-      return datetime_on(date, col:) if d.present?
+      return at_datetime(date, col:) if h.present? # precise time
+      return datetime_on(date, col:) if d.present? # within day
       return datetime_in_month(date, col:) if m.present?
 
       datetime_in_year(date, col:)
