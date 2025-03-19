@@ -483,13 +483,14 @@ module AbstractModel::Scopes
       end
     end
 
-    # def boolean_condition(table_column, val, bool: true)
-    #   if bool.to_s.to_boolean == true
-    #     where(table_column.eq(val))
-    #   else
-    #     where(table_column.not_eq(val))
-    #   end
-    # end
+    # This tolerates text values for "true" and "false"
+    def boolean_condition(table_column, bool: true)
+      if bool.to_s.to_boolean == true
+        where(table_column.eq(true))
+      else
+        where(table_column.not_eq(true))
+      end
+    end
 
     # Try not_blank_condition before uncommenting this
     # def coalesce_presence_condition(table_column, bool: true)
