@@ -205,8 +205,24 @@ class Query::NamesTest < UnitTestCase
   def test_name_deprecated
     expects = Name.with_correct_spelling.deprecated.index_order
     assert_query(expects, :Name, deprecated: true)
-    expects = Name.with_correct_spelling.not_deprecated.index_order
-    assert_query(expects, :Name, deprecated: false)
+
+    trues = [true, "true", 1, "1"]
+    trues.each do |val|
+      expects = Name.with_correct_spelling.deprecated(val).index_order
+      assert_query(expects, :Name, deprecated: true)
+
+      expects = Name.with_correct_spelling.deprecated.index_order
+      assert_query(expects, :Name, deprecated: val)
+    end
+
+    falses = [false, "false", 0, "0"]
+    falses.each do |val|
+      expects = Name.with_correct_spelling.deprecated(val).index_order
+      assert_query(expects, :Name, deprecated: false)
+
+      expects = Name.with_correct_spelling.deprecated(false).index_order
+      assert_query(expects, :Name, deprecated: val)
+    end
   end
 
   def test_name_has_synonyms
