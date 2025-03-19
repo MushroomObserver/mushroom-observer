@@ -52,7 +52,7 @@ module Name::Scopes
     }
 
     scope :deprecated,
-          ->(bool = true) { where(deprecated: bool) }
+          ->(bool = true) { boolean_condition(Name[:deprecated], bool:) }
     scope :not_deprecated,
           -> { where(deprecated: false) }
 
