@@ -18,7 +18,6 @@ module Query::ScopeInitializers::Descriptions
     add_desc_by_editor_condition(type)
   end
 
-  # rubocop:disable Metrics/AbcSize
   def add_with_desc_ids_condition(type = model.type_tag)
     return unless (set = clean_id_set(params[:desc_ids]))
 
@@ -29,12 +28,7 @@ module Query::ScopeInitializers::Descriptions
                 Arel::Nodes.build_quoted(set.join(",")) &
                 desc_model(type)[:id].asc
               )
-
-    @title_tag = :query_title_with_descriptions.t(type: type)
-    @title_args[:descriptions] = params[:old_title] ||
-                                 :query_title_in_set.t(type: :description)
   end
-  # rubocop:enable Metrics/AbcSize
 
   def add_desc_by_user_condition(type)
     return unless params[:by_user]
@@ -44,9 +38,6 @@ module Query::ScopeInitializers::Descriptions
     # where << "#{type}_descriptions.user_id = '#{user.id}'"
     @scopes = @scopes.joins(:"#{type}_descriptions").
               where(desc_model(type)[:user_id].eq(user.id))
-
-    @title_tag = :query_title_with_descriptions_by_user.t(type: type)
-    @title_args[:user] = user.legal_name
   end
 
   def add_desc_by_author_condition(type)
@@ -60,12 +51,6 @@ module Query::ScopeInitializers::Descriptions
     @scopes = @scopes.
               joins("#{type}_descriptions": :"#{type}_description_authors").
               where(desc_author_model(type)[:user_id].eq(user.id))
-
-    with_desc = with_desc_string
-    @title_tag = :"query_title#{with_desc}_by_author".t(
-      type: :"#{type}_description", user: user.legal_name
-    )
-    @title_args[:user] = user.legal_name
   end
 
   def add_desc_by_editor_condition(type)
@@ -78,12 +63,6 @@ module Query::ScopeInitializers::Descriptions
     @scopes = @scopes.
               joins("#{type}_descriptions": :"#{type}_description_editors").
               where(desc_editor_model(type)[:user_id].eq(user.id))
-
-    with_desc = with_desc_string
-    @title_tag = :"query_title#{with_desc}_by_editor".t(
-      type: :"#{type}_description", user: user.legal_name
-    )
-    @title_args[:user] = user.legal_name
   end
 
   def with_desc_string

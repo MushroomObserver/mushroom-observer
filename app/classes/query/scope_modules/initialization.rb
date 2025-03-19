@@ -2,7 +2,7 @@
 
 # Helper methods for turning Query parameters into AR conditions.
 module Query::ScopeModules::Initialization
-  attr_accessor :scopes, :order, :sql, :last_query
+  attr_accessor :scopes, :order, :last_query
 
   def initialized?
     @initialized ? true : false
@@ -14,8 +14,13 @@ module Query::ScopeModules::Initialization
     @scopes      = model
     initialize_scopes
     initialize_order
-    @sql         = scopes.all.to_sql
     @last_query  = sql
+  end
+
+  def sql
+    initialize_query unless initialized?
+
+    @sql = scopes.all.to_sql
   end
 
   def initialize_scopes
