@@ -45,6 +45,19 @@ class Query::CollectionNumbersTest < UnitTestCase
                        :CollectionNumber, created_at: [early, late])
   end
 
+  def test_collection_number_created_at_datetime
+    expects = [collection_numbers(:coprinus_comatus_coll_num)]
+    early = "2012-12-08-14-23-00"
+    late = "2012-12-08-14-23-00"
+    scope = CollectionNumber.created_at(early, late)
+    assert_query_scope(expects, scope,
+                       :CollectionNumber, created_at: [early, late])
+    # check that scope tolerates an array at first position
+    scope = CollectionNumber.created_at([early, late])
+    assert_query_scope(expects, scope,
+                       :CollectionNumber, created_at: [early, late])
+  end
+
   def test_collection_number_id_in_set
     set = CollectionNumber.order(id: :asc).last(3).pluck(:id)
     scope = CollectionNumber.id_in_set(set)
