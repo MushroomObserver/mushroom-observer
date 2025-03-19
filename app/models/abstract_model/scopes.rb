@@ -98,9 +98,9 @@ module AbstractModel::Scopes
     # needs to be done upstream in PatternSearch.
     #
     scope :created_at,
-          ->(early, late = early) { datetime_at(early, late, col: :created_at) }
+          ->(early, late = nil) { datetime_at(early, late, col: :created_at) }
     scope :updated_at,
-          ->(early, late = early) { datetime_at(early, late, col: :updated_at) }
+          ->(early, late = nil) { datetime_at(early, late, col: :updated_at) }
 
     # These scopes match records of one day only. (API parses single dates
     # differently, turning them into a range of datetimes from 00:01 to 12:00.)
@@ -110,19 +110,35 @@ module AbstractModel::Scopes
           ->(ymd_string) { datetime_on(ymd_string, col: :updated_at) }
 
     ##########################################################################
+    #
     #  DATETIME UTILITY SCOPES
     #
-    # For other datetime columns, e.g. `:log_updated_at`
-    scope :datetime_at, lambda { |early, late = early, col:|
-      early, late = early if early.is_a?(Array) && early.size == 2
+    # Can be used for other datetime columns, e.g. `:log_updated_at`.
+    # NOTE: MO can infer different scopes from the level of detail
+    # provided, by using a simple split("-").
+    scope :datetime_at, lambda { |early, late = nil, col:|
+      early, late = early if early.is_a?(Array)
       if late == early
-        datetime_in_year_or_in_month_or_after_date(early, col:)
-      else
+        datetime_in_year_or_in_month_or_on_or_at_datetime(early, col:)
+      elsif late.present?
         datetime_between(early, late, col:)
+      else
+        datetime_after(early, col:)
       end
     }
+    # NOTE: these two scopes currently only tolerate fully hyphenated formats
+    # "%Y-%m-%d" and "%Y-%m-%d-%H-%M-%S". Switching to DateTime.parse might be
+    # more tolerant, but it can't parse "%Y-%m-%d-%H-%M-%S", so it would require
+    # Query to send datetimes as "%Y-%m-%d %H:%M:%S". This would complicate
+    # MO's level-of-detail parsing described above.
     scope :datetime_on, lambda { |ymd_string, col:|
-      where(arel_table[col].format("%Y-%m-%d").eq(ymd_string))
+      reformat = DateTime.strptime(ymd_string, "%Y-%m-%d").strftime("%Y-%m-%d")
+      where(arel_table[col].format("%Y-%m-%d").eq(reformat))
+    }
+    scope :at_datetime, lambda { |ymd_string, col:|
+      reformat = DateTime.strptime(ymd_string, "%Y-%m-%d-%H-%M-%S").
+                 strftime("%Y-%m-%d-%H-%M-%S")
+      where(arel_table[col].format("%Y-%m-%d-%H-%M-%S").eq(reformat))
     }
     scope :datetime_before,
           ->(datetime, col:) { datetime_compare(:lt, datetime, col:) }
@@ -142,12 +158,12 @@ module AbstractModel::Scopes
     }
 
     # NOTE: In a date (not datetime) column, we can allow searching for date
-    # ranges: not just specific dates, but also dates within a seasonal range in
+    # ranges: not just between dates, but also dates within a seasonal range in
     # recurring years. This is possible via string parsing class methods (below)
     # because in the database, a date column already has the format("%Y-%m-%d").
+    # In this scope, the order of early and late do matter. early > late can
+    # mean a date range wrapping the end/beginning of the year.
     # NOTE: On MO so far, all date columns are named :when.
-    # In this scope, the order of early and late matter. early > late can mean
-    # a date range wrapping the end/beginning of the year.
     scope :date, lambda { |early, late = early, col: :when|
       early, late = early if early.is_a?(Array) && early.size == 2
       if late == early
@@ -158,6 +174,7 @@ module AbstractModel::Scopes
     }
 
     ##########################################################################
+    #
     #  DATE UTILITY SCOPES
     #
     scope :on_date,
@@ -219,7 +236,7 @@ module AbstractModel::Scopes
     # Fills out the datetime with min/max values for month, day, hour, minute,
     # second, as appropriate for < > comparisons. Only year is required.
     def datetime_condition_formatted(dir, val)
-      y, m, d, h, n, s = val.split("-").map!(&:to_i)
+      y, m, d, h, n, s = val.split("-").map(&:to_i)
       return unless /^\d\d\d\d/.match?(y.to_s)
 
       returns = dir == :gt ? [y, 1, 1, 0, 0, 0] : [y, 12, 31, 23, 59, 59]
@@ -231,11 +248,13 @@ module AbstractModel::Scopes
 
     # If a single "YYYY" is passed to a datetime scope, it should return
     # records where the col value is within the year. Ditto for "YYYY-MM".
-    # If it gets a full date, though, Query returns records after that date.
-    def datetime_in_year_or_in_month_or_after_date(date, col:)
-      y, m, d = date.split("-").map!(&:to_i) # times ignored here
+    # If it gets a full date, though, returns records on that date.
+    # If it gets a full datetime, returns records at that exact time.
+    def datetime_in_year_or_in_month_or_on_or_at_datetime(date, col:)
+      y, m, d, h = date.split("-").map!(&:to_i) # minute and second ignored here
       return unless /^\d\d\d\d/.match?(y.to_s)
-      return datetime_after(date, col:) if d.present?
+      return at_datetime(date, col:) if h.present?
+      return datetime_on(date, col:) if d.present?
       return datetime_in_month(date, col:) if m.present?
 
       datetime_in_year(date, col:)
