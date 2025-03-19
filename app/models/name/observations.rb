@@ -38,12 +38,12 @@ class Name
 
     # "Observations of other taxa, this taxon proposed"
     def where_taxon_proposed
-      @all.reject { |obs| obs&.name_id == @name.id }
+      @all.reject { |obs| obs&.name_id.in?(@name_ids) }
     end
 
     # "Observations of any taxon, this name proposed"
     def where_name_proposed
-      @all
+      @all.where(namings: { name_id: @name.id })
     end
 
     def has_images # rubocop:disable Naming/PredicateName
