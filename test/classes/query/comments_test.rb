@@ -25,10 +25,25 @@ class Query::CommentsTest < UnitTestCase
 
   def test_comment_for_target
     obs = observations(:minimal_unknown_obs)
-    expects = Comment.index_order.where(target_id: obs.id).distinct
-    assert_query(expects, :Comment, target: { type: :Observation, id: obs })
-    expects = Comment.index_order.target(obs).distinct
-    assert_query(expects, :Comment, target: { type: :Observation, id: obs })
+    expects = [comments(:minimal_unknown_obs_comment_2),
+               comments(:minimal_unknown_obs_comment_2)]
+    scope = Comment.index_order.target(obs).distinct
+    assert_query_scope(expects, scope,
+                       :Comment, target: { type: :Observation, id: obs.id })
+    scope = Comment.index_order.
+            target(type: "Observation", id: obs.id).distinct
+    assert_query_scope(expects, scope,
+                       :Comment, target: { type: :Observation, id: obs.id })
+  end
+
+  def test_comment_for_invalid_target
+    glo = glossary_terms(:convex_glossary_term)
+    scope = Comment.target(glo)
+    assert_query_scope([], scope,
+                       :Comment, target: { type: :GlossaryTerm, id: glo.id })
+    scope = Comment.target(type: "GlossaryTerm", id: glo.id)
+    assert_query_scope([], scope,
+                       :Comment, target: { type: :GlossaryTerm, id: glo.id })
   end
 
   def test_comment_types

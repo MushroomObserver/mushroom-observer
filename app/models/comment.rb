@@ -162,8 +162,21 @@ class Comment < AbstractModel
       scope ? scope.or(scope2) : scope2
     end
   }
-  scope :target,
-        ->(target) { where(target: target) }
+  # Pass either { type:, id: } or a commentable model instance.
+  # Scope makes sure instance exists.
+  scope :target, lambda { |target|
+    if target.is_a?(Hash) && target[:type] && target[:id]
+      type = target[:type]
+      return none unless (model = Comment.safe_model_from_name(type))
+
+      target = model.safe_find(target[:id])
+    elsif target.is_a?(AbstractModel)
+      type = target.class.name
+      return none unless Comment.safe_model_from_name(type)
+    end
+
+    where(target:)
+  }
   scope :types,
         ->(types) { where(target_type: types) }
   scope :summary_has,
