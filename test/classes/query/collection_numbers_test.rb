@@ -12,6 +12,20 @@ class Query::CollectionNumbersTest < UnitTestCase
     assert_query(expects, :CollectionNumber)
   end
 
+  def test_collection_number_created_at
+    expects = [collection_numbers(:minimal_unknown_coll_num)]
+    early = "2005-01-01"
+    late = "2005-12-31"
+    scope = CollectionNumber.created_at(early, late)
+    assert_query_scope(expects, scope,
+                       :CollectionNumber, created_at: [early, late])
+    expects = [collection_numbers(:coprinus_comatus_coll_num)]
+    date = "2012-01-01"
+    scope = CollectionNumber.created_at(date)
+    assert_query_scope(expects, scope,
+                       :CollectionNumber, created_at: date)
+  end
+
   def test_collection_number_id_in_set
     set = CollectionNumber.order(id: :asc).last(3).pluck(:id)
     scope = CollectionNumber.id_in_set(set)

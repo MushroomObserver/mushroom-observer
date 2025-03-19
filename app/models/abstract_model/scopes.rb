@@ -1,5 +1,45 @@
 # frozen_string_literal: true
 
+#  == Scopes
+#
+#  Examples:
+#    Observation.created_at("2006-09-01", "2012-09-01")
+#    Name.updated_at("2016-12-01") # returns names updated after
+#
+#  Ordering Scopes
+#
+#  order_by_user::
+#  order_by_rss_log::
+#  order_by_set::
+#
+#  Filtering scopes
+#
+#  id_in_set::
+#  by_users::
+#  by_editor::
+#  created_at::
+#  updated_at::
+#  date::
+#  has_comments::
+#  comments_has::
+#
+#  Utility Scopes
+#
+#  created_on::
+#  updated_on::
+#  datetime_at::
+#  datetime_on::
+#  datetime_in_month::
+#  datetime_in_year::
+#  datetime_after::
+#  datetime_before::
+#  datetime_between::
+#  on_date::
+#  date_after::
+#  date_before::
+#  date_between::
+#  search_columns::
+
 module AbstractModel::Scopes
   # This is using Concern so we can define the scopes in this included module.
   extend ActiveSupport::Concern
@@ -45,60 +85,60 @@ module AbstractModel::Scopes
         where.not(user: user)
     }
 
-    # Parsing of user text values like "yesterday"/"la semana pasada" needs to
-    # be done upstream in PatternSearch. The values we're getting in the scope
-    # should be parseable as datetimes in Ruby.
-    # The order of early and late datetimes does not matter here.
-    scope :created_at, lambda { |early, late = early|
+    # `created_at`/`updated_at` are versatile, and handle all Queries currently.
+    #
+    #   Value handling:
+    #   - For two datetimes, early and late can be any order.
+    #   - A single date(time) returns all records _after_ that date(time).
+    #   - A single "yyyy-mm" returns all records _within_ that year and month.
+    #   - A single "yyyy" returns all records within that year.
+    #
+    # The values we're getting in the scopes should be parseable as datetimes
+    # in Ruby. Parsing of user text values like "yesterday"/"la semana pasada"
+    # needs to be done upstream in PatternSearch.
+    #
+    scope :created_at,
+          ->(early, late = early) { datetime_at(early, late, col: :created_at) }
+    scope :updated_at,
+          ->(early, late = early) { datetime_at(early, late, col: :updated_at) }
+
+    # These scopes match records of one day only. (API parses single dates
+    # differently, turning them into a range of datetimes from 00:01 to 12:00.)
+    scope :created_on,
+          ->(ymd_string) { datetime_on(ymd_string, col: :created_at) }
+    scope :updated_on,
+          ->(ymd_string) { datetime_on(ymd_string, col: :updated_at) }
+
+    ##########################################################################
+    #  DATETIME UTILITY SCOPES
+    #
+    # For other datetime columns, e.g. `:log_updated_at`
+    scope :datetime_at, lambda { |early, late = early, col:|
       early, late = early if early.is_a?(Array) && early.size == 2
       if late == early
-        created_after(early)
+        datetime_in_year_or_in_month_or_after_date(early, col:)
       else
-        created_between(early, late)
+        datetime_between(early, late, col:)
       end
     }
-    scope :created_on, lambda { |ymd_string|
-      where(arel_table[:created_at].format("%Y-%m-%d").eq(ymd_string))
+    scope :datetime_on, lambda { |ymd_string, col:|
+      where(arel_table[col].format("%Y-%m-%d").eq(ymd_string))
     }
-    scope :created_after,
-          ->(datetime) { datetime_after(datetime, :created_at) }
-    scope :created_before,
-          ->(datetime) { datetime_before(datetime, :created_at) }
-    scope :created_between,
-          ->(early, late) { datetime_between(early, late, :created_at) }
-
-    scope :updated_at, lambda { |early, late = early|
-      early, late = early if early.is_a?(Array) && early.size == 2
-      if late == early
-        updated_after(early)
-      else
-        updated_between(early, late)
-      end
-    }
-    scope :updated_on, lambda { |ymd_string|
-      where(arel_table[:updated_at].format("%Y-%m-%d").eq(ymd_string))
-    }
-    scope :updated_after,
-          ->(datetime) { datetime_after(datetime, :updated_at) }
-    scope :updated_before,
-          ->(datetime) { datetime_before(datetime, :updated_at) }
-    scope :updated_between,
-          ->(early, late) { datetime_between(early, late, :updated_at) }
-
-    # Datetimes can be sent any format, any order (for between)
-    scope :datetime_after,
-          ->(datetime, col) { datetime_compare(:gt, datetime, col) }
     scope :datetime_before,
-          ->(datetime, col) { datetime_compare(:lt, datetime, col) }
-    scope :datetime_between, lambda { |early, late, col|
-      early, late = [late, early] if early > late
-      datetime_after(early, col).datetime_before(late, col)
-    }
-    scope :datetime_compare, lambda { |dir, val, col|
-      # `datetime_condition_formatted` defined in ClassMethods below
-      return unless (datetime = datetime_condition_formatted(dir, val))
+          ->(datetime, col:) { datetime_compare(:lt, datetime, col:) }
+    scope :datetime_in_month, lambda { |ym_string, col:|
+      year, month = ym_string.split("-")
+      return all unless year.present? && month.present?
 
-      where(arel_table[col].format("%Y-%m-%d %H:%i:%s").send(dir, datetime))
+      where(arel_table[col].year.eq(year).and(arel_table[col].month.eq(month)))
+    }
+    scope :datetime_in_year,
+          ->(year, col:) { where(arel_table[col].year.eq(year)) }
+    scope :datetime_after,
+          ->(datetime, col:) { datetime_compare(:gt, datetime, col:) }
+    scope :datetime_between, lambda { |early, late, col:|
+      early, late = [late, early] if early > late
+      datetime_after(early, col:).datetime_before(late, col:)
     }
 
     # NOTE: In a date (not datetime) column, we can allow searching for date
@@ -108,66 +148,31 @@ module AbstractModel::Scopes
     # NOTE: On MO so far, all date columns are named :when.
     # In this scope, the order of early and late matter. early > late can mean
     # a date range wrapping the end/beginning of the year.
-    scope :date, lambda { |early, late = early, col = :when|
+    scope :date, lambda { |early, late = early, col: :when|
       early, late = early if early.is_a?(Array) && early.size == 2
       if late == early
-        date_after(early, col)
+        date_after(early, col:)
       else
-        date_between(early, late, col)
+        date_between(early, late, col:)
       end
     }
+
+    ##########################################################################
+    #  DATE UTILITY SCOPES
+    #
     scope :on_date,
-          ->(date, col = :when) { date_compare(nil, date, col) }
+          ->(date, col: :when) { date_compare(nil, date, col:) }
     scope :date_after,
-          ->(date, col = :when) { date_compare(:gt, date, col) }
+          ->(date, col: :when) { date_compare(:gt, date, col:) }
     scope :date_before,
-          ->(date, col = :when) { date_compare(:lt, date, col) }
-    scope :date_between, lambda { |early, late, col = :when|
+          ->(date, col: :when) { date_compare(:lt, date, col:) }
+    scope :date_between, lambda { |early, late, col: :when|
       # do not correct early > late, which means something different here
       if wrapped_date?(early, late)
-        date_in_period_wrapping_new_year(early, late, col)
+        date_in_period_wrapping_new_year(early, late, col:)
       else
-        date_after(early, col).date_before(late, col)
+        date_after(early, col:).date_before(late, col:)
       end
-    }
-    # Scope for objects whose date is in a certain period of the year that
-    # overlaps the new year, defined by a range of months or mm-dd
-    scope :date_in_period_wrapping_new_year, lambda { |early, late, col|
-      m1, d1 = early.to_s.split("-")
-      m2, d2 = late.to_s.split("-")
-      where(
-        arel_table[col].month.gt(m1).
-        or(arel_table[col].month.lt(m2)).
-        or(arel_table[col].month.eq(m1).and(arel_table[col].day.gteq(d1))).
-        or(arel_table[col].month.eq(m2).and(arel_table[col].day.lteq(d2)))
-      )
-    }
-    # NOTE: all three conditions validate numeric format
-    scope :date_compare, lambda { |dir, val, col|
-      if starts_with_year?(val)
-        date_compare_year(dir, val, col)
-      elsif month_and_day?(val)
-        date_compare_month_and_day(dir, val, col)
-      elsif month_only?(val)
-        where(arel_table[col].month.send(:"#{dir}eq", val))
-      end
-    }
-    # Compare full date, or only the year.
-    # date_condition_formatted fills out min/max dates for year or year-month.
-    scope :date_compare_year, lambda { |dir, val, col|
-      date = date_condition_formatted(dir, val)
-      where(arel_table[col].send(:"#{dir}eq", date))
-    }
-    # Compare only the month and day, any year (i.e. "season")
-    scope :date_compare_month_and_day, lambda { |dir, val, col|
-      m, d = val.split("-")
-      where(
-        arel_table[col].month.send(dir, m).
-        or(
-          arel_table[col].month.eq(m).
-          and(arel_table[col].day.send(:"#{dir}eq", d))
-        )
-      )
     }
 
     # Search given `table_columns` for given values (both "good" and "bad").
@@ -204,6 +209,13 @@ module AbstractModel::Scopes
       [ids].flatten.map(&:to_i).uniq[0, MO.query_max_array] # [] is valid
     end
 
+    def datetime_compare(dir, val, col:)
+      # `datetime_condition_formatted` defined in ClassMethods below
+      return unless (datetime = datetime_condition_formatted(dir, val))
+
+      where(arel_table[col].send(dir, datetime))
+    end
+
     # Fills out the datetime with min/max values for month, day, hour, minute,
     # second, as appropriate for < > comparisons. Only year is required.
     def datetime_condition_formatted(dir, val)
@@ -215,6 +227,63 @@ module AbstractModel::Scopes
       returns[1, vals.length] = vals # merge these into the defaults, after year
       # reformat to "%Y-%m-%d %H:%i:%s" as expected
       [returns[0..2]&.join("-"), returns[3..5]&.join(":")].join(" ")
+    end
+
+    # If a single "YYYY" is passed to a datetime scope, it should return
+    # records where the col value is within the year. Ditto for "YYYY-MM".
+    # If it gets a full date, though, Query returns records after that date.
+    def datetime_in_year_or_in_month_or_after_date(date, col:)
+      y, m, d = date.split("-").map!(&:to_i) # times ignored here
+      return unless /^\d\d\d\d/.match?(y.to_s)
+      return datetime_after(date, col:) if d.present?
+      return datetime_in_month(date, col:) if m.present?
+
+      datetime_in_year(date, col:)
+    end
+
+    # Scope for objects whose date is in a certain period of the year that
+    # overlaps the new year, defined by a range of months or mm-dd
+    # rubocop:disable Metrics/AbcSize
+    def date_in_period_wrapping_new_year(early, late, col:)
+      m1, d1 = early.to_s.split("-")
+      m2, d2 = late.to_s.split("-")
+      where(
+        arel_table[col].month.gt(m1).
+        or(arel_table[col].month.lt(m2)).
+        or(arel_table[col].month.eq(m1).and(arel_table[col].day.gteq(d1))).
+        or(arel_table[col].month.eq(m2).and(arel_table[col].day.lteq(d2)))
+      )
+    end
+
+    # NOTE: all three conditions validate numeric format
+    def date_compare(dir, val, col:)
+      if starts_with_year?(val)
+        date_compare_year(dir, val, col:)
+      elsif month_and_day?(val)
+        date_compare_month_and_day(dir, val, col:)
+      elsif month_only?(val)
+        where(arel_table[col].month.send(:"#{dir}eq", val))
+      end
+    end
+    # rubocop:enable Metrics/AbcSize
+
+    # Compare full date, or only the year.
+    # date_condition_formatted fills out min/max dates for year or year-month.
+    def date_compare_year(dir, val, col:)
+      date = date_condition_formatted(dir, val)
+      where(arel_table[col].send(:"#{dir}eq", date))
+    end
+
+    # Compare only the month and day, any year (i.e. "season")
+    def date_compare_month_and_day(dir, val, col:)
+      m, d = val.split("-")
+      where(
+        arel_table[col].month.send(dir, m).
+        or(
+          arel_table[col].month.eq(m).
+          and(arel_table[col].day.send(:"#{dir}eq", d))
+        )
+      )
     end
 
     # Only works on month/day periods, because years where earliest > latest

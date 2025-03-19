@@ -146,14 +146,8 @@
 #  alt_ranks::               Ranks: map alternatives to our values.
 #
 #  ==== Scopes
-#  created_on("yyyymmdd")
-#  created_after("yyyymmdd")
-#  created_before("yyyymmdd")
-#  created_between(start, end)
-#  updated_on("yyyymmdd")
-#  updated_after("yyyymmdd")
-#  updated_before("yyyymmdd")
-#  updated_between(start, end)
+#  created_at("yyyy-mm-dd", "yyyy-mm-dd")
+#  updated_at("yyyy-mm-dd", "yyyy-mm-dd")
 #  deprecated
 #  has_description
 #  description_has
@@ -319,7 +313,7 @@
 #
 ###############################################################################
 class Name < AbstractModel
-  require "acts_as_versioned"
+  require("acts_as_versioned")
 
   # modules with instance methods and maybe class methods
   include Scopes

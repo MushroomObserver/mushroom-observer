@@ -7,23 +7,6 @@
 #
 #  type_tag::           Language tag, e.g., :observation, :rss_log, etc.
 #
-#  == Scopes
-#
-#  Scopes for collecting objects created (or updated) on, before, after or
-#  between a given "%Y-%m-%d" string(s).
-#
-#  Examples: Observation.created_between("2006-09-01", "2012-09-01")
-#            Name.updated_after("2016-12-01")
-#
-#  created_on::
-#  created_after::
-#  created_before::
-#  created_between::
-#  updated_on::
-#  updated_after::
-#  updated_before::
-#  updated_between::
-#
 #  ==== Extensions to "find"
 #  safe_find::          Same as <tt>find(id)</tt> but return nil if not found.
 #  find_object::        Look up an object by class name and id.

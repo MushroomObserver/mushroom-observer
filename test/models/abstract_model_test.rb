@@ -490,46 +490,66 @@ class AbstractModelTest < UnitTestCase
   end
 
   def test_scope_created_after
-    assert_equal(Observation.count,
-                 Observation.created_after(improbably_early).count)
-    assert_empty(Observation.created_after(a_century_from_now))
+    assert_equal(
+      Observation.count,
+      Observation.datetime_after(improbably_early, col: :created_at).count
+    )
+    assert_empty(
+      Observation.datetime_after(a_century_from_now, col: :created_at)
+    )
   end
 
   def test_scope_created_before
-    assert_equal(Observation.count,
-                 Observation.created_before(a_century_from_now).count)
-    assert_empty(Observation.created_before(improbably_early))
+    assert_equal(
+      Observation.count,
+      Observation.datetime_before(a_century_from_now, col: :created_at).count
+    )
+    assert_empty(
+      Observation.datetime_before(improbably_early, col: :created_at)
+    )
   end
 
   def test_scope_created_between
     assert_equal(
       Observation.count,
-      Observation.created_between(improbably_early, a_century_from_now).count
+      Observation.datetime_between(improbably_early, a_century_from_now,
+                                   col: :created_at).count
     )
     assert_empty(
-      Observation.created_between(a_century_from_now, two_centuries_from_now)
+      Observation.datetime_between(a_century_from_now, two_centuries_from_now,
+                                   col: :created_at)
     )
   end
 
   def test_scope_updated_after
-    assert_equal(Observation.count,
-                 Observation.updated_after(improbably_early).count)
-    assert_empty(Observation.updated_after(a_century_from_now))
+    assert_equal(
+      Observation.count,
+      Observation.datetime_after(improbably_early, col: :updated_at).count
+    )
+    assert_empty(
+      Observation.datetime_after(a_century_from_now, col: :updated_at)
+    )
   end
 
   def test_scope_updated_before
-    assert_equal(Observation.count,
-                 Observation.updated_before(a_century_from_now).count)
-    assert_empty(Observation.updated_before(improbably_early))
+    assert_equal(
+      Observation.count,
+      Observation.datetime_before(a_century_from_now, col: :updated_at).count
+    )
+    assert_empty(
+      Observation.datetime_before(improbably_early, col: :updated_at)
+    )
   end
 
   def test_scope_updated_between
     assert_equal(
       Observation.count,
-      Observation.updated_between(improbably_early, a_century_from_now).count
+      Observation.datetime_between(improbably_early, a_century_from_now,
+                                   col: :updated_at).count
     )
     assert_empty(
-      Observation.updated_between(a_century_from_now, two_centuries_from_now)
+      Observation.datetime_between(a_century_from_now, two_centuries_from_now,
+                                   col: :updated_at)
     )
   end
 

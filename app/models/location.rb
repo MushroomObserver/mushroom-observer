@@ -38,14 +38,8 @@
 #
 #  == Scopes
 #
-#  created_on("yyyymmdd")
-#  created_after("yyyymmdd")
-#  created_before("yyyymmdd")
-#  created_between(start, end)
-#  updated_on("yyyymmdd")
-#  updated_after("yyyymmdd")
-#  updated_before("yyyymmdd")
-#  updated_between(start, end)
+#  created_at("yyyy-mm-dd", "yyyy-mm-dd")
+#  updated_at("yyyy-mm-dd", "yyyy-mm-dd")
 #  name_has(place_name)
 #  region(place_name)
 #  in_box(north:, south:, east:, west:)
@@ -92,7 +86,7 @@
 #
 ################################################################################
 class Location < AbstractModel # rubocop:disable Metrics/ClassLength
-  require "acts_as_versioned"
+  require("acts_as_versioned")
 
   include Scopes
 
