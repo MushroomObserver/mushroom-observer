@@ -94,6 +94,10 @@ class Query::CollectionNumbersTest < UnitTestCase
     expects = [collection_numbers(:agaricus_campestris_coll_num)]
     scope = CollectionNumber.numbers("07-123a").index_order
     assert_query_scope(expects, scope, :CollectionNumber, numbers: "07-123a")
+    expects = [collection_numbers(:minimal_unknown_coll_num),
+               collection_numbers(:detailed_unknown_coll_num_one)]
+    scope = CollectionNumber.numbers(%w[173 174]).index_order
+    assert_query_scope(expects, scope, :CollectionNumber, numbers: %w[173 174])
   end
 
   def test_collection_number_number_has
