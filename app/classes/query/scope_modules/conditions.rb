@@ -2,7 +2,6 @@
 
 # Helper methods for turning Query parameters into AR conditions.
 module Query::ScopeModules::Conditions
-  # These also need to set title stuff currently.
   def initialize_parameter_set
     scope_parameters.each do |param|
       next if (param == :ids_in_set && params[param].nil?) ||
@@ -163,17 +162,15 @@ module Query::ScopeModules::Conditions
     return if params[:ids].nil? # [] is valid
 
     # set = clean_id_set(params[:ids])
-    # @scopes = @scopes.where(model[:id].in(set)).
-    #           reorder(Arel::Nodes.build_quoted(set.join(",")) & table[:id])
-    @title_tag = :query_title_in_set.t(type: model.type_tag)
+    @scopes = @scopes.where(model[:id].in(set)).
+              reorder(Arel::Nodes.build_quoted(set.join(",")) & table[:id])
   end
 
   # table_col = foreign key of an association, e.g. `observations.location_id`
-  def add_association_condition(table_column, ids, joins, title_method: nil)
+  def add_association_condition(table_column, ids, joins)
     return if [ids].flatten.empty?
 
     if ids.size == 1
-      send(title_method) if title_method && ids.first.present?
       @scopes = @scopes.where(table_column.eq(ids.first))
     else
       set = clean_id_set(ids)
@@ -213,7 +210,6 @@ module Query::ScopeModules::Conditions
   def add_pattern_condition
     return if params[:pattern].blank?
 
-    @title_tag = :query_title_pattern_search
     @scopes = @scopes.search_columns(search_fields, params[:pattern])
   end
 
