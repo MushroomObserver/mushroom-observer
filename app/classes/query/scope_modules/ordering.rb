@@ -20,7 +20,7 @@ module Query::ScopeModules::Ordering
     return if params[:id_in_set].present?
 
     sorting_method = "sort_by_#{by}"
-    unless ::Query::ScopeModules::Ordering.private_method_defined?(sorting_method)
+    unless Query::ScopeModules::Ordering.private_method_defined?(sorting_method)
       raise(
         "Can't figure out how to sort #{model.name.pluralize} by :#{by}."
       )
@@ -319,9 +319,9 @@ module Query::ScopeModules::Ordering
     # add_join(:users)
     # 'IF(users.name = "" OR users.name IS NULL, users.login, users.name) ASC'
     @scopes = @scopes.joins(:user).
-              order(User[:name].blank?.
-                    when(true).then(User[:login].asc).
-                    when(false).then(User[:name].asc))
+              order(User[:name].
+                    when(nil).then(User[:login]).when("").then(User[:login]).
+                    else(User[:name]).asc)
   end
 
   def sort_by_where(model)
