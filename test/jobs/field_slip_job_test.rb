@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 class FieldSlipJobTest < ActiveJob::TestCase
   test "it should perform" do

@@ -1,7 +1,7 @@
 <%
 @container = :double
 add_page_title(naming_form_edit_title(obs: @observation))
-add_tab_set(naming_form_edit_tabs(obs: @observation))
+add_context_nav(naming_form_edit_tabs(obs: @observation))
 %>
 
 <div class="row">
@@ -16,11 +16,14 @@ add_tab_set(naming_form_edit_tabs(obs: @observation))
                  locals: { local: true,
                            form_locals: { show_reasons: true } }) %>
     </div>
-  </div><!--.col-->
+  </div>
+  <!--.col-->
 
   <div class="col-xs-12 col-sm-4">
     <%= render(partial: "observations/show/images",
                locals: { obs: @observation,
                          thumb_size_control: false }) %>
-  </div><!--.col-->
-</div><!--.row-->
+  </div>
+  <!--.col-->
+</div>
+<!--.row-->

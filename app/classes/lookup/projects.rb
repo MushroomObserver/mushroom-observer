@@ -2,7 +2,7 @@
 
 class Lookup::Projects < Lookup
   MODEL = Project
-  TITLE_COLUMN = :title
+  TITLE_METHOD = :title
 
   def initialize(vals, params = {})
     super

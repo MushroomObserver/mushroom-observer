@@ -26,17 +26,34 @@ class Query::CommentsTest < UnitTestCase
   def test_comment_for_target
     obs = observations(:minimal_unknown_obs)
     expects = Comment.index_order.where(target_id: obs.id).distinct
-    assert_query(expects, :Comment, target: { id: obs, type: :Observation })
+    assert_query(expects, :Comment, target: { type: :Observation, id: obs })
     expects = Comment.index_order.target(obs).distinct
-    assert_query(expects, :Comment, target: { id: obs, type: :Observation })
+    assert_query(expects, :Comment, target: { type: :Observation, id: obs })
+  end
+
+  def test_comment_types
+    expects = [comments(:fungi_comment)]
+    scope = Comment.types(:name)
+    assert_query_scope(expects, scope, :Comment, types: :name)
+    expects = [comments(:detailed_unknown_obs_comment),
+               comments(:minimal_unknown_obs_comment_2),
+               comments(:minimal_unknown_obs_comment_1)]
+    scope = Comment.types(:observation).index_order
+    assert_query_scope(expects, scope, :Comment, types: :observation)
   end
 
   def test_comment_for_user
-    expects = Comment.index_order.select { |c| c.target.user == mary }
-    # expects = Comment.index_order.joins(:target).
-    #           where(targets: { user_id: mary.id }).uniq
-    assert_query(expects, :Comment, for_user: mary)
-    assert_query([], :Comment, for_user: rolf)
+    expects = [comments(:detailed_unknown_obs_comment),
+               comments(:minimal_unknown_obs_comment_2),
+               comments(:minimal_unknown_obs_comment_1)]
+    scope = Comment.for_user(mary).index_order
+    assert_query_scope(expects, scope, :Comment, for_user: mary)
+    expects = [comments(:fungi_comment)]
+    scope = Comment.for_user(rolf).index_order
+    assert_query_scope(expects, scope, :Comment, for_user: rolf)
+    expects = []
+    scope = Comment.for_user(users(:zero_user)).index_order
+    assert_query_scope(expects, scope, :Comment, for_user: users(:zero_user))
   end
 
   def test_comment_in_set

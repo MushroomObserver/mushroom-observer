@@ -74,8 +74,8 @@ class CommentsController < ApplicationController
     return no_model unless (model = Comment.safe_model_from_name(params[:type]))
     return unless (target = find_or_goto_index(model, params[:target].to_s))
 
-    query = create_query(:Comment, target: { id: target.id,
-                                             type: target.class.name })
+    query = create_query(:Comment, target: { type: target.class.name,
+                                             id: target.id })
     [query, {}]
   end
 
@@ -94,9 +94,7 @@ class CommentsController < ApplicationController
     }.merge(opts)
 
     # Paginate by letter if sorting by user.
-    if (query.params[:by] == "user") || (query.params[:by] == "reverse_user")
-      opts[:letters] = "users.login"
-    end
+    opts[:letters] = true if %w[user reverse_user].include?(query.params[:by])
 
     @full_detail = query.params[:target].present?
 

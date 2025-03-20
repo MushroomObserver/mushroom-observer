@@ -50,10 +50,13 @@ class SequencesControllerTest < FunctionalTestCase
 
   def test_index_by_observation
     login
-    get(:index, params: { by: "observation" })
+
+    by = "observation"
+    get(:index, params: { by: })
 
     assert_response(:success)
-    assert_displayed_title("Sequences by Observation")
+    assert_displayed_title(:SEQUENCES.l)
+    assert_sorted_by(by)
 
     Sequence.find_each do |sequence|
       assert_select(

@@ -45,7 +45,7 @@ module Query::Modules::HighLevelQueries
         # typically no avoiding it.  This optimizes away an extra query or two.
         @letters = {}
         ids = []
-        select = "DISTINCT #{model.table_name}.id, LEFT(#{need_letters},4)"
+        select = "DISTINCT #{model.table_name}.id, LEFT(#{list_by.to_sql},4)"
         select_rows(args.merge(select: select)).each do |id, letter|
           letter = letter[0, 1]
           @letters[id.to_i] = letter.upcase if /[a-zA-Z]/.match?(letter)
@@ -71,7 +71,6 @@ module Query::Modules::HighLevelQueries
     @results = list.each_with_object({}) do |obj, map|
       map[obj.id] ||= obj
     end
-    list
   end
 
   # Let caller supply results if they happen to have them.  *NOTE*: These had
@@ -92,8 +91,8 @@ module Query::Modules::HighLevelQueries
 
   # Make sure we requery if we change the letter field.
   def need_letters=(letters)
-    unless letters.is_a?(String)
-      raise("You must pass a SQL expression to 'need_letters'.")
+    unless [true, false, 1, 0, nil].include?(letters)
+      raise("You must pass a Boolean to 'need_letters'.")
     end
 
     return if need_letters == letters

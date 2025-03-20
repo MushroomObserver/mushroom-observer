@@ -2,7 +2,11 @@
 
 class Query::Comments < Query::Base
   def model
-    Comment
+    @model ||= Comment
+  end
+
+  def list_by
+    @list_by ||= User[:login]
   end
 
   def self.parameter_declarations
@@ -12,7 +16,7 @@ class Query::Comments < Query::Base
       id_in_set: [Comment],
       by_users: [User],
       for_user: User,
-      target: { id: AbstractModel, type: :string },
+      target: { type: :string, id: AbstractModel },
       types: [{ string: Comment::ALL_TYPE_TAGS }],
       summary_has: :string,
       content_has: :string,
@@ -21,7 +25,6 @@ class Query::Comments < Query::Base
   end
 
   def initialize_flavor
-    add_sort_order_to_title
     add_owner_and_time_stamp_conditions
     add_id_in_set_condition
     add_for_user_condition
@@ -37,21 +40,24 @@ class Query::Comments < Query::Base
   def add_for_user_condition
     return if params[:for_user].blank?
 
-    user = find_cached_parameter_instance(User, :for_user)
-    @title_tag = :query_title_for_user
-    @title_args[:user] = user.legal_name
-    add_join(:observations)
-    where << "observations.user_id = '#{params[:for_user]}'"
+    user_id = [params[:for_user]].flatten.first
+    wheres = []
+    Comment::ALL_TYPE_TAGS.dup.map do |type|
+      table = type.to_s.pluralize.to_sym
+      wheres << "(comments.target_type = '#{type}') AND " \
+                "(comments.target_id IN (" \
+                "SELECT #{table}.id FROM #{table} " \
+                "WHERE #{table}.user_id = #{user_id}))"
+    end
+    @where << or_clause(*wheres)
   end
 
   def add_for_target_condition
     return if params[:target].blank?
 
     target = target_instance
-    @title_tag = :query_title_for_target
-    @title_args[:target] = target.unique_format_name
-    where << "comments.target_id = '#{target.id}'"
-    where << "comments.target_type = '#{target.class.name}'"
+    @where << "comments.target_id = '#{target.id}'"
+    @where << "comments.target_type = '#{target.class.name}'"
   end
 
   def target_instance

@@ -153,12 +153,3 @@ french_app_contributors:
   text: Contributeurs
   updated_at: 2014-10-20
   user: rolf
-
-title_for_user_search:
-  version: 1
-  language: english
-  tag: title_for_user_search
-  text: User Search
-  updated_at: 2017-12-17 21:36:00
-  user_id: 0
-

@@ -2,7 +2,11 @@
 
 class Query::Articles < Query::Base
   def model
-    Article
+    @model ||= Article
+  end
+
+  def list_by
+    @list_by ||= Article[:title]
   end
 
   def self.parameter_declarations
@@ -17,7 +21,6 @@ class Query::Articles < Query::Base
   end
 
   def initialize_flavor
-    add_sort_order_to_title
     add_owner_and_time_stamp_conditions
     add_id_in_set_condition
     add_search_condition("articles.title", params[:title_has])

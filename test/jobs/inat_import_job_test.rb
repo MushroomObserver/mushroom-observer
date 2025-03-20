@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 # Some classes with enough attributes to stub calls to Inat::PhotoImporter
 #   (which wraps calls to the MO Image API)

@@ -1,7 +1,7 @@
 <%
 @container = :wide
 add_page_title(sequence_form_edit_title(seq: @sequence))
-add_tab_set(sequence_form_tabs(obj: @back_object))
+add_context_nav(sequence_form_tabs(obj: @back_object))
 
 obs = @sequence.observation
 %>
@@ -27,4 +27,5 @@ obs = @sequence.observation
                            columns: "col-xs-12" }) %>
     </ul>
   </div>
-</div><!--.row-->
+</div>
+<!--.row-->

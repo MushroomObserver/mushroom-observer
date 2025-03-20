@@ -5,7 +5,7 @@ class Query::RssLogs < Query::Base
   include Query::Initializers::Filters
 
   def model
-    RssLog
+    @model ||= RssLog
   end
 
   def self.parameter_declarations
@@ -18,7 +18,6 @@ class Query::RssLogs < Query::Base
   end
 
   def initialize_flavor
-    add_sort_order_to_title
     add_time_condition("rss_logs.updated_at", params[:updated_at])
     initialize_type_parameter
     add_id_in_set_condition
@@ -37,13 +36,13 @@ class Query::RssLogs < Query::Base
     types = self.types
     types &= RssLog::ALL_TYPE_TAGS.map(&:to_s)
 
-    where << if types.empty?
-               "FALSE"
-             else
-               types.map do |type|
-                 "rss_logs.#{type}_id IS NOT NULL"
-               end.join(" OR ")
-             end
+    @where << if types.empty?
+                "FALSE"
+              else
+                types.map do |type|
+                  "rss_logs.#{type}_id IS NOT NULL"
+                end.join(" OR ")
+              end
   end
 
   def self.default_order

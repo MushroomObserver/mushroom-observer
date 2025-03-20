@@ -94,9 +94,6 @@
 #                                (filter: catches errors for integration tests)
 #
 class ApplicationController < ActionController::Base
-  require "extensions"
-  require "login_system"
-  require "csv"
   include LoginSystem
   include Authentication
   include Internationalization
@@ -381,7 +378,7 @@ class ApplicationController < ActionController::Base
   helper_method :calc_layout_params
 
   def permission?(obj, error_message)
-    result = (in_admin_mode? || obj.can_edit?(@user))
+    result = (in_admin_mode? || obj.can_edit?(@user)) # rubocop:disable Style/RedundantParentheses
     flash_error(error_message) unless result
     result
   end

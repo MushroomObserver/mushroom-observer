@@ -9,58 +9,58 @@ class ImagesControllerTest < FunctionalTestCase
 
     assert_template("index")
     assert_template(partial: "_matrix_box")
-    assert_displayed_title("Images by #{sort_order.titleize}")
+    assert_displayed_title(:IMAGES.l)
+    assert_sorted_by(sort_order)
   end
 
   # Tests of index, with tests arranged as follows:
   # default subaction; then
   # other subactions in order of index_active_params
   def test_index
-    login
-    get(:index)
-    default_sorted_by = :"sort_by_#{::Query::Images.default_order}".l
-
-    assert_template("index")
-    assert_template(partial: "_matrix_box")
-    assert_displayed_title("Images by #{default_sorted_by}")
+    check_index_sorted_by(::Query::Images.default_order)
   end
 
   def test_index_with_non_default_sort
     check_index_sorted_by("name")
+    sort_orders = %w[name user confidence image_quality]
+    sort_orders.each do |order|
+      check_index_sorted_by(order)
+    end
   end
 
-  def test_index_sorted_by_user
-    check_index_sorted_by("user")
-  end
-
-  def test_index_sorted_by_confidence
-    by = "confidence"
+  def test_index_by_user
+    user = rolf
 
     login
-    get(:index, params: { by: by })
+    get(:index, params: { by_user: user.id })
 
     assert_template("index")
     assert_template(partial: "_matrix_box")
-    assert_displayed_title("Images by Confidence Level")
+    assert_displayed_title(:IMAGES.l)
+    assert_displayed_filters("#{:query_by_users.l}: #{user.legal_name}")
   end
 
-  def test_index_sorted_by_copyright_holder
-    check_index_sorted_by("copyright_holder")
-  end
-
-  def test_index_sorted_by_image_quality
-    check_index_sorted_by("image_quality")
-  end
-
-  def test_index_sorted_by_owners_quality
-    by = "owners_quality"
+  def test_index_by_users_bad_user_id
+    bad_user_id = observations(:minimal_unknown_obs).id
+    assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
 
     login
-    get(:index, params: { by: by })
+    get(:index, params: { by_user: bad_user_id })
 
-    assert_template("index")
-    assert_template(partial: "_matrix_box")
-    assert_displayed_title("Images by Owner’s Quality")
+    assert_flash_text(
+      :runtime_object_not_found.l(type: "user", id: bad_user_id)
+    )
+    assert_redirected_to(images_path)
+  end
+
+  def test_index_projects
+    project = projects(:bolete_project)
+    login
+    get(:index, params: { project: project.id })
+
+    assert_template("index", partial: "_image")
+    assert_displayed_title(:IMAGES.l)
+    assert_displayed_filters("#{:query_projects.l}: #{project.title}")
   end
 
   def test_index_too_many_pages
@@ -69,7 +69,7 @@ class ImagesControllerTest < FunctionalTestCase
 
     # 429 == :too_many_requests. The symbolic response code does not work.
     # Perhaps we're not loading that part of Rack. JDC 2022-08-17
-    assert_response(429)
+    assert_response(429) # rubocop:disable Rails/HttpStatus
   end
 
   # def test_index_advanced_search_multiple_hits
@@ -91,7 +91,7 @@ class ImagesControllerTest < FunctionalTestCase
   #   assert_template("index")
   #   assert_template(partial: "_matrix_box")
   #   # Don't care about the title, but good to know if it changes
-  #   assert_displayed_title("Matching Images")
+  #   assert_displayed_title(:IMAGES.l)
   # end
 
   # def test_index_advanced_search_one_hit
@@ -153,7 +153,8 @@ class ImagesControllerTest < FunctionalTestCase
     get(:index, params: { pattern: pattern })
 
     assert_template("index", partial: "_image")
-    assert_displayed_title("Images Matching ‘#{pattern}’")
+    assert_displayed_title(:IMAGES.l)
+    assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
   end
 
   def test_index_pattern_text_no_hits
@@ -173,37 +174,6 @@ class ImagesControllerTest < FunctionalTestCase
     get(:index, params: { pattern: image.id })
 
     assert_redirected_to(image_path(image))
-  end
-
-  def test_index_by_user
-    user = rolf
-
-    login
-    get(:index, params: { by_user: user.id })
-
-    assert_template("index")
-    assert_template(partial: "_matrix_box")
-  end
-
-  def test_index_by_user_bad_user_id
-    bad_user_id = observations(:minimal_unknown_obs).id
-    assert_empty(User.where(id: bad_user_id), "Test needs different 'bad_id'")
-
-    login
-    get(:index, params: { by_user: bad_user_id })
-
-    assert_flash_text(
-      :runtime_object_not_found.l(type: "user", id: bad_user_id)
-    )
-    assert_redirected_to(images_path)
-  end
-
-  def test_index_for_project
-    project = projects(:bolete_project).id
-    login
-    get(:index, params: { project: project })
-
-    assert_template("index", partial: "_image")
   end
 
   #########################################################

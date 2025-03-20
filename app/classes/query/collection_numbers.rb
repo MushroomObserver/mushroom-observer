@@ -2,7 +2,11 @@
 
 class Query::CollectionNumbers < Query::Base
   def model
-    CollectionNumber
+    @model ||= CollectionNumber
+  end
+
+  def list_by
+    @list_by ||= CollectionNumber[:name]
   end
 
   def self.parameter_declarations
@@ -21,7 +25,6 @@ class Query::CollectionNumbers < Query::Base
   end
 
   def initialize_flavor
-    add_sort_order_to_title
     add_owner_and_time_stamp_conditions
     add_id_in_set_condition
     add_collection_number_conditions

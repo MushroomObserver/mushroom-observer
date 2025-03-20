@@ -54,7 +54,6 @@ module MatrixBoxHelper
     end
   end
 
-  # rubocop:disable Style/ArgumentsForwarding
   def matrix_box_image(image = nil, **args)
     return unless image
 
@@ -62,7 +61,6 @@ module MatrixBoxHelper
       interactive_image(image, **args)
     end
   end
-  # rubocop:enable Style/ArgumentsForwarding
 
   # for matrix_box_carousels:
   # def matrix_box_images(presenter)

@@ -17,7 +17,6 @@ module Query::Modules::Initialization
     @order       = ""
     @selects     = ""
     @executor    = nil
-    initialize_title
     initialize_flavor
     initialize_group
     initialize_order

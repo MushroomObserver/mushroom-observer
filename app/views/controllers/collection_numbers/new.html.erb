@@ -1,7 +1,7 @@
 <%
 @container = :full
 add_page_title(collection_number_form_new_title)
-add_tab_set(collection_number_form_new_tabs(obs: @observation))
+add_context_nav(collection_number_form_new_tabs(obs: @observation))
 %>
 
 <div class="row">
@@ -16,4 +16,5 @@ add_tab_set(collection_number_form_new_tabs(obs: @observation))
                            columns: "col-xs-12" }) %>
     </ul>
   </div>
-</div><!--.row-->
+</div>
+<!--.row-->

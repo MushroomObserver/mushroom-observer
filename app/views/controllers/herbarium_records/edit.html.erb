@@ -1,7 +1,7 @@
 <%
 @container = :wide
 add_page_title(herbarium_record_form_edit_title(h_r: @herbarium_record))
-add_tab_set(herbarium_record_form_edit_tabs(back: @back,
+add_context_nav(herbarium_record_form_edit_tabs(back: @back,
                                               back_object: @back_object))
 %>
 
@@ -19,4 +19,5 @@ add_tab_set(herbarium_record_form_edit_tabs(back: @back,
       <% end %>
     </ul>
   </div>
-</div><!--.row-->
+</div>
+<!--.row-->

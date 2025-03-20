@@ -24,6 +24,8 @@ module AbstractModel::Scopes
 
     scope :id_in_set, lambda { |ids|
       set = limited_id_set(ids) # [] is valid
+      return none if set.empty?
+
       where(arel_table[:id].in(set)).order_by_set(set)
     }
 

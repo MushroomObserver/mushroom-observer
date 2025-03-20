@@ -193,9 +193,7 @@
 #                       before object is created.
 #
 class User < AbstractModel # rubocop:disable Metrics/ClassLength
-  require "digest/sha1"
-
-  # Do not change the integer associated with a value
+  # Enums: Do not change the integer associated with a value
   # First value is the default
   enum :thumbnail_size, { thumbnail: 1, small: 2 },
        prefix: :thumb_size, default: :thumbnail, instance_methods: false
@@ -671,7 +669,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   #
   def interest_in(object)
     @interests ||= {}
-    @interests["#{object.class.name} #{object.id}"] ||= \
+    @interests["#{object.class.name} #{object.id}"] ||=
       begin
         i = Interest.where(
           user_id: id, target_type: object.class.name, target_id: object.id

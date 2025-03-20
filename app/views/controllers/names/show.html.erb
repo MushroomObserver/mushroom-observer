@@ -4,7 +4,7 @@ add_page_title(:show_name_title.t(name: @name.display_name))
 Textile.register_name(@name)
 add_pager_for(@name)
 add_interest_icons(@user, @name)
-add_tab_set(name_show_tabs(name: @name))
+add_context_nav(name_show_tabs(name: @name))
 
 @container = :full
 %>
@@ -24,7 +24,8 @@ add_tab_set(name_show_tabs(name: @name))
                locals: { object: @name, comments: @comments,
                          controls: @user, limit: nil }) %>
 
-  </div><!--LEFT COLUMN-->
+  </div>
+  <!--LEFT COLUMN-->
 
   <!--RIGHT COLUMN-->
   <div class="col-xs-12 col-md-5">
@@ -65,8 +66,10 @@ add_tab_set(name_show_tabs(name: @name))
       concat(:show_name_num_notifications.t(num: @name.interests))
     end %>
 
-  </div><!--RIGHT COLUMN-->
-</div><!--.row-->
+  </div>
+  <!--RIGHT COLUMN-->
+</div>
+<!--.row-->
 
 <%=
 show_object_footer(@name, @versions)

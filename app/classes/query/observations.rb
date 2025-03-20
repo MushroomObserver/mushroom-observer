@@ -5,10 +5,18 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
   include Query::Params::Filters
   include Query::Initializers::Filters
   include Query::Initializers::AdvancedSearch
-  include Query::Titles::Observations
 
   def model
-    Observation
+    @model ||= Observation
+  end
+
+  def list_by
+    @list_by ||= case params[:by].to_s
+                 when "user", "reverse_user"
+                   User[:login]
+                 when "name", "reverse_name"
+                   Name[:sort_name]
+                 end
   end
 
   def self.parameter_declarations # rubocop:disable Metrics/MethodLength
@@ -65,7 +73,6 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
   end
 
   def initialize_flavor
-    add_sort_order_to_title
     initialize_obs_basic_parameters
     initialize_obs_record_parameters
     initialize_subquery_parameters
@@ -194,23 +201,32 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
   end
 
   def initialize_names_and_related_names_parameters
+    names = params.dig(:names, :lookup)
+    return if names.blank?
     return force_empty_results if irreconcilable_naming_parameters?
 
-    table = if params.dig(:names, :include_all_name_proposals)
-              "namings"
-            else
-              "observations"
-            end
-    ids = lookup_names_by_name(params.dig(:names, :lookup),
-                               related_names_parameters)
-    add_association_condition("#{table}.name_id", ids)
+    ids = lookup_names_by_name(names, related_names_parameters)
+    return force_empty_results if ids.blank?
 
-    if params.dig(:names, :include_all_name_proposals)
-      add_join(:observations, :namings)
-    end
+    all_proposals = params.dig(:names, :include_all_name_proposals)
+    table = table_for_names(all_proposals)
+    add_association_condition("#{table}.name_id", ids)
+    add_join(:observations, :namings) if all_proposals
+    add_exclude_consensus_condition(ids)
+  end
+
+  def add_exclude_consensus_condition(ids)
     return unless params.dig(:names, :exclude_consensus)
 
     add_not_associated_condition("observations.name_id", ids)
+  end
+
+  def table_for_names(all_proposals)
+    if all_proposals
+      "namings"
+    else
+      "observations"
+    end
   end
 
   NAMES_EXPANDER_PARAMS = [
@@ -319,11 +335,6 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
       "names.search_name," \
       "observations.where" \
       ")"
-  end
-
-  def title
-    default = super
-    observation_query_description || default
   end
 
   def self.default_order

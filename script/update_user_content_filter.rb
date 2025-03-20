@@ -4,9 +4,9 @@
 # This is a one-time script, i'm just making it nice for practice
 # call with `script/update_user_content_filter.rb "true"`
 
-require(File.expand_path("../config/boot.rb", __dir__))
-require(File.expand_path("../config/environment.rb", __dir__))
-require(File.expand_path("../app/extensions/extensions.rb", __dir__))
+require_relative("../config/boot")
+require_relative("../config/environment")
+require_relative("../config/initializers/extensions")
 
 abort(<<HELP) if ARGV.length != 1
 

@@ -17,8 +17,9 @@ class RelatedRecordsIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("a", text: :show_location_observations.t)
     click_link(text: :show_location_observations.l)
 
-    assert_match("Observations from #{location.display_name}",
-                 page.title, "Wrong page")
+    assert_match(:OBSERVATIONS.l, page.title, "Wrong page")
+    page.find("#filters").assert_text(location.display_name)
+
     results = find_all("#results .matrix-box")
     assert_equal(location.observations.size, results.size)
     assert_selector("a", text: :show_objects.t(type: :location))

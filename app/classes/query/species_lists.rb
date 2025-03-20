@@ -2,7 +2,16 @@
 
 class Query::SpeciesLists < Query::Base
   def model
-    SpeciesList
+    @model ||= SpeciesList
+  end
+
+  def list_by
+    @list_by ||= case params[:by].to_s
+                 when "user", "reverse_user"
+                   User[:login]
+                 else
+                   SpeciesList[:title]
+                 end
   end
 
   def self.parameter_declarations
@@ -26,7 +35,6 @@ class Query::SpeciesLists < Query::Base
   end
 
   def initialize_flavor
-    add_sort_order_to_title
     add_owner_and_time_stamp_conditions
     add_date_condition("species_lists.when", params[:date])
     add_pattern_condition
@@ -68,8 +76,7 @@ class Query::SpeciesLists < Query::Base
     return unless params[:search_where]
 
     location_str = params[:search_where]
-    title_args[:where] = location_str
-    where << "species_lists.where LIKE '%#{clean_pattern(location_str)}%'"
+    @where << "species_lists.where LIKE '%#{clean_pattern(location_str)}%'"
   end
 
   def initialize_search_parameters

@@ -4,7 +4,7 @@ class Query::LocationDescriptions < Query::Base
   include Query::Initializers::Descriptions
 
   def model
-    LocationDescription
+    @model ||= LocationDescription
   end
 
   def self.parameter_declarations
@@ -23,7 +23,6 @@ class Query::LocationDescriptions < Query::Base
   end
 
   def initialize_flavor
-    add_sort_order_to_title
     add_id_in_set_condition
     add_owner_and_time_stamp_conditions
     add_desc_by_author_condition(:location)

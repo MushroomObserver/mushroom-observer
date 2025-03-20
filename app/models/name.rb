@@ -309,7 +309,7 @@
 #  ==== Merging
 #  merger_destructive?::     Would merger into another Name destroy data?
 #  merge::                   Merge old name into this one and remove old one.
-#  dependents?::         Does another Name depend from this Name?
+#  dependents?::             Does another Name depend from this Name?
 #
 #  == Callbacks
 #
@@ -319,9 +319,7 @@
 #
 ###############################################################################
 class Name < AbstractModel
-  require "acts_as_versioned"
-  require "fileutils"
-  require "symbol_extensions"
+  require("acts_as_versioned")
 
   # modules with instance methods and maybe class methods
   include Scopes
@@ -491,7 +489,7 @@ class Name < AbstractModel
   end
 
   def best_brief_description
-    (description.gen_desc.presence || description.diag_desc) if description
+    (description.gen_desc.presence || description.diag_desc) if description # rubocop:disable Style/RedundantParentheses
   end
 
   # Used by show_name.

@@ -2,7 +2,16 @@
 
 class Query::Users < Query::Base
   def model
-    User
+    @model ||= User
+  end
+
+  def list_by
+    @list_by ||= case params[:by]
+                 when "login", "reverse_login"
+                   User[:login]
+                 else
+                   User[:name]
+                 end
   end
 
   def self.parameter_declarations
@@ -16,7 +25,6 @@ class Query::Users < Query::Base
   end
 
   def initialize_flavor
-    add_sort_order_to_title
     add_time_condition("users.created_at", params[:created_at])
     add_time_condition("users.updated_at", params[:updated_at])
     add_id_in_set_condition
@@ -28,7 +36,6 @@ class Query::Users < Query::Base
   def add_contribution_condition
     return unless params[:has_contribution].to_s == "true"
 
-    @title_tag = :query_title_with_contribution
     where << "users.contribution > 0"
   end
 

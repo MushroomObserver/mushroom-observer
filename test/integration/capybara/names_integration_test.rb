@@ -103,7 +103,8 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     click_button("Search")
 
     assert_no_selector("#content div.alert-warning")
-    assert_selector("#title", text: "Names Matching ‘#{corrected_pattern}’")
+    assert_selector("#title", text: :NAMES.l)
+    assert_selector("#filters", text: corrected_pattern)
   end
 
   def test_lifeform_edit

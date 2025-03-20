@@ -11,7 +11,7 @@ module Report
       end
 
       def initialize(args)
-        super(args)
+        super
         self.observations = args[:observations]
       end
 
