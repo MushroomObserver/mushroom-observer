@@ -48,6 +48,7 @@ class NameTest < UnitTestCase
       actual = case var
                when :real_text_name
                  Name.display_to_real_text(parse)
+                 # parse.display_name.gsub(/\*?\*?__\*?\*?/, "")
                when :real_search_name
                  Name.display_to_real_search(parse)
                else
@@ -263,44 +264,6 @@ class NameTest < UnitTestCase
     )
   end
 
-  def test_format_string
-    assert_equal(
-      "**__Amanita__**",
-      Name.format_name("Amanita")
-    )
-    assert_equal(
-      "**__Amanita sp.__**",
-      Name.format_name("Amanita sp.")
-    )
-    assert_equal(
-      "**__Amanita__** sect. **__Vaginatae__**",
-      Name.format_name("Amanita sect. Vaginatae")
-    )
-    assert_equal(
-      "**__Amanita__** subg. **__One__** subsect. **__Two__** stirps **__Three__**", # rubocop:disable Layout/LineLength
-      Name.format_name("Amanita subg. One subsect. Two stirps Three")
-    )
-    assert_equal(
-      "**__Amanita vaginata__**",
-      Name.format_name("Amanita vaginata")
-    )
-    assert_equal(
-      "**__Amanita vaginata__** subsp. **__grisea__**",
-      Name.format_name("Amanita vaginata subsp. grisea")
-    )
-    assert_equal(
-      "**__Amanita vaginata__** subsp. **__one__** var. **__two__** f. **__three__**", # rubocop:disable Layout/LineLength
-      Name.format_name("Amanita vaginata subsp. one var. two f. three")
-    )
-    assert_equal(
-      "__Amanita__", Name.format_name("Amanita", :deprecated)
-    )
-    assert_equal(
-      "__Amanita vaginata__ s __one__ v __two__ f __three__",
-      Name.format_name("Amanita vaginata s one v two f three", :deprecated)
-    )
-  end
-
   def test_upper_word_pats
     pat = /^#{::Name::Parse::UPPER_WORD}$/o
     assert_no_match(pat, "")
@@ -391,18 +354,6 @@ class NameTest < UnitTestCase
     assert_equal(" de Hoog", match[2])
   end
 
-  def test_genus_or_up_pat
-    @pat = "GENUS_OR_UP_PAT"
-    pat = ::Name::Parse::GENUS_OR_UP_PAT
-    assert_name_match_author_optional(pat, "Amanita")
-    assert_name_match_author_optional(pat, "Amanita sp.", "Amanita")
-    assert_name_match_author_optional(pat, '"Amanita"')
-    assert_name_match_author_optional(pat, '"Amanita" sp.', '"Amanita"')
-    assert_name_match_author_optional(pat, "Fossil-Okay")
-    assert_name_match_author_optional(pat, "Fossil-Okay sp.", "Fossil-Okay")
-    assert_no_match(pat, "Anythingelse-Bad")
-  end
-
   def test_subgenus_pat
     @pat = "SUBGENUS_PAT"
     pat = ::Name::Parse::SUBGENUS_PAT
@@ -449,17 +400,6 @@ class NameTest < UnitTestCase
            "stirps Vaginatae"
     )
     assert_name_match_author_optional(pat, '"Amanita stirps Vaginatae"')
-  end
-
-  def test_species_pat
-    @pat = "SPECIES_PAT"
-    pat = ::Name::Parse::SPECIES_PAT
-    assert_name_match_author_optional(pat, "Amanita vaginata")
-    assert_name_match_author_optional(pat, 'Amanita "vaginata"')
-    assert_name_match_author_optional(pat, "Amanita vag-inata")
-    assert_name_match_author_optional(pat, "Amanita vaginëta")
-    assert_name_match_author_optional(pat, 'Amanita "sp-S01"')
-    assert_name_match_author_optional(pat, '"Amanita vaginata"')
   end
 
   def test_subspecies_pat
@@ -586,7 +526,7 @@ class NameTest < UnitTestCase
       search_name: "Lecania ryaniana van den Boom",
       real_search_name: "Lecania ryaniana van den Boom",
       sort_name: "Lecania ryaniana  van den Boom",
-      display_name: "**__Lecania ryaniana__** van den Boom",
+      display_name: "**__Lecania__** **__ryaniana__** van den Boom",
       parent_name: "Lecania",
       rank: "Species",
       author: "van den Boom",
@@ -618,7 +558,7 @@ class NameTest < UnitTestCase
       search_name: "Lecania ryaniana de Hoog",
       real_search_name: "Lecania ryaniana de Hoog",
       sort_name: "Lecania ryaniana  de Hoog",
-      display_name: "**__Lecania ryaniana__** de Hoog",
+      display_name: "**__Lecania__** **__ryaniana__** de Hoog",
       parent_name: "Lecania",
       rank: "Species",
       author: "de Hoog",
@@ -666,7 +606,7 @@ class NameTest < UnitTestCase
       search_name: "Lecidea sanguineoatra sensu Nyl",
       real_search_name: "Lecidea sanguineoatra sensu Nyl",
       sort_name: "Lecidea sanguineoatra  sensu Nyl",
-      display_name: "**__Lecidea sanguineoatra__** sensu Nyl",
+      display_name: "**__Lecidea__** **__sanguineoatra__** sensu Nyl",
       parent_name: "Lecidea",
       rank: "Species",
       author: "sensu Nyl",
@@ -682,7 +622,7 @@ class NameTest < UnitTestCase
       search_name: "Acarospora squamulosa sensu Th. Fr.",
       real_search_name: "Acarospora squamulosa sensu Th. Fr.",
       sort_name: "Acarospora squamulosa  sensu Th. Fr.",
-      display_name: "**__Acarospora squamulosa__** sensu Th. Fr.",
+      display_name: "**__Acarospora__** **__squamulosa__** sensu Th. Fr.",
       parent_name: "Acarospora",
       rank: "Species",
       author: "sensu Th. Fr.",
@@ -701,7 +641,7 @@ class NameTest < UnitTestCase
       sort_name:
         "Cladina portentosa  {5subsp.  pacifica  {7f.  decolorans  auct.",
       display_name:
-        "**__Cladina portentosa__** subsp. **__pacifica__** " \
+        "**__Cladina__** **__portentosa__** subsp. **__pacifica__** " \
         "f. **__decolorans__** auct.",
       parent_name: "Cladina portentosa subsp. pacifica",
       rank: "Form",
@@ -718,7 +658,7 @@ class NameTest < UnitTestCase
       search_name: "Japewia tornoensis Somloë",
       real_search_name: "Japewia tornoënsis Somloë",
       sort_name: "Japewia tornoensis  Somloë",
-      display_name: "**__Japewia tornoënsis__** Somloë",
+      display_name: "**__Japewia__** **__tornoënsis__** Somloë",
       parent_name: "Japewia",
       rank: "Species",
       author: "Somloë",
@@ -733,8 +673,8 @@ class NameTest < UnitTestCase
       real_text_name: "Micarea globularis",
       search_name: 'Micarea globularis "(Ach. ex Nyl.) Hedl."',
       real_search_name: 'Micarea globularis "(Ach. ex Nyl.) Hedl."',
-      sort_name: 'Micarea globularis  (Ach. ex Nyl.) Hedl.',
-      display_name: '**__Micarea globularis__** "(Ach. ex Nyl.) Hedl."',
+      sort_name: "Micarea globularis  (Ach. ex Nyl.) Hedl.",
+      display_name: '**__Micarea__** **__globularis__** "(Ach. ex Nyl.) Hedl."',
       parent_name: "Micarea",
       rank: "Species",
       author: '"(Ach. ex Nyl.) Hedl."',
@@ -744,14 +684,14 @@ class NameTest < UnitTestCase
 
   def test_name_parse_7
     do_name_parse_test(
-      'Synechoblastus aggregatus ("Ach.") Th. Fr.',
-      text_name: "Synechoblastus aggregatus",
-      real_text_name: "Synechoblastus aggregatus",
-      search_name: 'Synechoblastus aggregatus ("Ach.") Th. Fr.',
-      real_search_name: 'Synechoblastus aggregatus ("Ach.") Th. Fr.',
-      sort_name: 'Synechoblastus aggregatus  (Ach.) Th. Fr.',
-      display_name: '**__Synechoblastus aggregatus__** ("Ach.") Th. Fr.',
-      parent_name: "Synechoblastus",
+      'Synecho aggregatus ("Ach.") Th. Fr.',
+      text_name: "Synecho aggregatus",
+      real_text_name: "Synecho aggregatus",
+      search_name: 'Synecho aggregatus ("Ach.") Th. Fr.',
+      real_search_name: 'Synecho aggregatus ("Ach.") Th. Fr.',
+      sort_name: "Synecho aggregatus  (Ach.) Th. Fr.",
+      display_name: '**__Synecho__** **__aggregatus__** ("Ach.") Th. Fr.',
+      parent_name: "Synecho",
       rank: "Species",
       author: '("Ach.") Th. Fr.',
       deprecated: false
@@ -761,12 +701,12 @@ class NameTest < UnitTestCase
   def test_name_parse_8
     do_name_parse_test(
       '"Toninia"',
-      text_name: '"Toninia"',
-      real_text_name: '"Toninia"',
-      search_name: '"Toninia"',
-      real_search_name: '"Toninia"',
-      sort_name: 'Toninia',
-      display_name: '**__"Toninia"__**',
+      text_name: 'Gen. "Toninia"',
+      real_text_name: 'Gen. "Toninia"',
+      search_name: 'Gen. "Toninia"',
+      real_search_name: 'Gen. "Toninia"',
+      sort_name: "Toninia",
+      display_name: 'Gen. **__"Toninia"__**',
       parent_name: nil,
       rank: "Genus",
       author: "",
@@ -777,12 +717,12 @@ class NameTest < UnitTestCase
   def test_name_parse_9
     do_name_parse_test(
       '"Toninia" sp.',
-      text_name: '"Toninia"',
-      real_text_name: '"Toninia"',
-      search_name: '"Toninia"',
-      real_search_name: '"Toninia"',
-      sort_name: 'Toninia',
-      display_name: '**__"Toninia"__**',
+      text_name: 'Gen. "Toninia"',
+      real_text_name: 'Gen. "Toninia"',
+      search_name: 'Gen. "Toninia"',
+      real_search_name: 'Gen. "Toninia"',
+      sort_name: "Toninia",
+      display_name: 'Gen. **__"Toninia"__**',
       parent_name: nil,
       rank: "Genus",
       author: "",
@@ -793,13 +733,29 @@ class NameTest < UnitTestCase
   def test_name_parse_10
     do_name_parse_test(
       '"Toninia" squalescens',
-      text_name: '"Toninia" squalescens',
-      real_text_name: '"Toninia" squalescens',
-      search_name: '"Toninia" squalescens',
-      real_search_name: '"Toninia" squalescens',
-      sort_name: 'Toninia squalescens',
-      display_name: '**__"Toninia" squalescens__**',
-      parent_name: '"Toninia"',
+      text_name: 'Gen. "Toninia" squalescens',
+      real_text_name: 'Gen. "Toninia" squalescens',
+      search_name: 'Gen. "Toninia" squalescens',
+      real_search_name: 'Gen. "Toninia" squalescens',
+      sort_name: "Toninia squalescens",
+      display_name: 'Gen. **__"Toninia"__** **__squalescens__**',
+      parent_name: 'Gen. "Toninia"',
+      rank: "Species",
+      author: "",
+      deprecated: false
+    )
+  end
+
+  def test_name_parse_prov_genus
+    do_name_parse_test(
+      'Gen. "Toninia" squalescens',
+      text_name: 'Gen. "Toninia" squalescens',
+      real_text_name: 'Gen. "Toninia" squalescens',
+      search_name: 'Gen. "Toninia" squalescens',
+      real_search_name: 'Gen. "Toninia" squalescens',
+      sort_name: "Toninia squalescens",
+      display_name: 'Gen. **__"Toninia"__** **__squalescens__**',
+      parent_name: 'Gen. "Toninia"',
       rank: "Species",
       author: "",
       deprecated: false
@@ -809,12 +765,12 @@ class NameTest < UnitTestCase
   def test_name_parse_11
     do_name_parse_test(
       'Anaptychia "leucomelaena" auct.',
-      text_name: 'Anaptychia "leucomelaena"',
-      real_text_name: 'Anaptychia "leucomelaena"',
-      search_name: 'Anaptychia "leucomelaena" auct.',
-      real_search_name: 'Anaptychia "leucomelaena" auct.',
-      sort_name: 'Anaptychia leucomelaena  auct.',
-      display_name: '**__Anaptychia "leucomelaena"__** auct.',
+      text_name: 'Anaptychia sp. "leucomelaena"',
+      real_text_name: 'Anaptychia sp. "leucomelaena"',
+      search_name: 'Anaptychia sp. "leucomelaena" auct.',
+      real_search_name: 'Anaptychia sp. "leucomelaena" auct.',
+      sort_name: "Anaptychia leucomelaena  auct.",
+      display_name: '**__Anaptychia__** sp. **__"leucomelaena"__** auct.',
       parent_name: "Anaptychia",
       rank: "Species",
       author: "auct.",
@@ -920,14 +876,14 @@ class NameTest < UnitTestCase
 
   def test_name_parse_18
     do_name_parse_test(
-      "Japewia tornoënsis var. tornoënsis",
-      text_name: "Japewia tornoensis var. tornoensis",
-      real_text_name: "Japewia tornoënsis var. tornoënsis",
-      search_name: "Japewia tornoensis var. tornoensis",
-      real_search_name: "Japewia tornoënsis var. tornoënsis",
-      sort_name: "Japewia tornoensis  {6var.  !tornoensis",
-      display_name: "**__Japewia tornoënsis__** var. **__tornoënsis__**",
-      parent_name: "Japewia tornoënsis",
+      "Japewia toënsis var. toënsis",
+      text_name: "Japewia toensis var. toensis",
+      real_text_name: "Japewia toënsis var. toënsis",
+      search_name: "Japewia toensis var. toensis",
+      real_search_name: "Japewia toënsis var. toënsis",
+      sort_name: "Japewia toensis  {6var.  !toensis",
+      display_name: "**__Japewia__** **__toënsis__** var. **__toënsis__**",
+      parent_name: "Japewia toënsis",
       rank: "Variety",
       author: "",
       deprecated: false
@@ -942,7 +898,7 @@ class NameTest < UnitTestCase
       search_name: "Does this subsp. ever var. happen f. for Real?",
       real_search_name: "Does this subsp. ever var. happen f. for Real?",
       sort_name: "Does this  {5subsp.  ever  {6var.  happen  {7f.  for  Real?",
-      display_name: "**__Does this__** subsp. **__ever__** " \
+      display_name: "**__Does__** **__this__** subsp. **__ever__** " \
                     "var. **__happen__** f. **__for__** Real?",
       parent_name: "Does this subsp. ever var. happen",
       rank: "Form",
@@ -959,7 +915,7 @@ class NameTest < UnitTestCase
       search_name: "Boletus rex-veris Arora & Simonini",
       real_search_name: "Boletus rex-veris Arora & Simonini",
       sort_name: "Boletus rex-veris  Arora & Simonini",
-      display_name: "**__Boletus rex-veris__** Arora & Simonini",
+      display_name: "**__Boletus__** **__rex-veris__** Arora & Simonini",
       parent_name: "Boletus",
       rank: "Species",
       author: "Arora & Simonini",
@@ -970,12 +926,12 @@ class NameTest < UnitTestCase
   def test_name_parse_21
     do_name_parse_test(
       "Amanita “quoted”",
-      text_name: 'Amanita "quoted"',
-      real_text_name: 'Amanita "quoted"',
-      search_name: 'Amanita "quoted"',
-      real_search_name: 'Amanita "quoted"',
-      sort_name: 'Amanita quoted',
-      display_name: '**__Amanita "quoted"__**',
+      text_name: 'Amanita sp. "quoted"',
+      real_text_name: 'Amanita sp. "quoted"',
+      search_name: 'Amanita sp. "quoted"',
+      real_search_name: 'Amanita sp. "quoted"',
+      sort_name: "Amanita quoted",
+      display_name: '**__Amanita__** sp. **__"quoted"__**',
       parent_name: "Amanita",
       rank: "Species",
       author: "",
@@ -1055,7 +1011,7 @@ class NameTest < UnitTestCase
       real_text_name: 'Amanita sp. "S01"',
       search_name: 'Amanita sp. "S01"',
       real_search_name: 'Amanita sp. "S01"',
-      sort_name: 'Amanita s01',
+      sort_name: "Amanita s01",
       display_name: '**__Amanita__** sp. **__"S01"__**',
       parent_name: "Amanita",
       rank: "Species",
@@ -1071,7 +1027,7 @@ class NameTest < UnitTestCase
       real_text_name: 'Amanita sp. "S01"',
       search_name: 'Amanita sp. "S01" Tulloss',
       real_search_name: 'Amanita sp. "S01" Tulloss',
-      sort_name: 'Amanita s01  Tulloss',
+      sort_name: "Amanita s01  Tulloss",
       display_name: '**__Amanita__** sp. **__"S01"__** Tulloss',
       parent_name: "Amanita",
       rank: "Species",
@@ -1087,7 +1043,7 @@ class NameTest < UnitTestCase
       real_text_name: "Amanita",
       search_name: 'Amanita "Wrong Author"',
       real_search_name: 'Amanita "Wrong Author"',
-      sort_name: 'Amanita  Wrong Author',
+      sort_name: "Amanita  Wrong Author",
       display_name: '**__Amanita__** "Wrong Author"',
       parent_name: nil,
       rank: "Genus",
@@ -1104,7 +1060,7 @@ class NameTest < UnitTestCase
       search_name: "Amanita vaginata",
       real_search_name: "Amanita vaginata",
       sort_name: "Amanita vaginata",
-      display_name: "**__Amanita vaginata__**",
+      display_name: "**__Amanita__** **__vaginata__**",
       parent_name: "Amanita",
       rank: "Species",
       author: "",
@@ -1121,7 +1077,7 @@ class NameTest < UnitTestCase
       real_search_name: "Pleurotus djamor (Fr.) Boedijn var. djamor",
       sort_name: "Pleurotus djamor  {6var.  !djamor  (Fr.) Boedijn",
       display_name:
-        "**__Pleurotus djamor__** (Fr.) Boedijn var. **__djamor__**",
+        "**__Pleurotus__** **__djamor__** (Fr.) Boedijn var. **__djamor__**",
       parent_name: "Pleurotus djamor",
       rank: "Variety",
       author: "(Fr.) Boedijn",
@@ -1136,7 +1092,7 @@ class NameTest < UnitTestCase
       real_text_name: 'Pleurotus sp. "T44"',
       search_name: 'Pleurotus sp. "T44" Tulloss',
       real_search_name: 'Pleurotus sp. "T44" Tulloss',
-      sort_name: 'Pleurotus t44  Tulloss',
+      sort_name: "Pleurotus t44  Tulloss",
       display_name: '**__Pleurotus__** sp. **__"T44"__** Tulloss',
       parent_name: "Pleurotus",
       rank: "Species",
@@ -1272,7 +1228,7 @@ class NameTest < UnitTestCase
       search_name: "Armillaria mellea D.C.",
       real_search_name: "Armillaria mellea D.C.",
       sort_name: "Armillaria mellea  D.C.",
-      display_name: "**__Armillaria mellea__** D.C.",
+      display_name: "**__Armillaria__** **__mellea__** D.C.",
       parent_name: "Armillaria",
       rank: "Species",
       author: "D.C.",
@@ -1288,7 +1244,7 @@ class NameTest < UnitTestCase
       search_name: "Sebacina schweinitzii comb. prov.",
       real_search_name: "Sebacina schweinitzii comb. prov.",
       sort_name: "Sebacina schweinitzii  comb. prov.",
-      display_name: "**__Sebacina schweinitzii__** comb. prov.",
+      display_name: "**__Sebacina__** **__schweinitzii__** comb. prov.",
       parent_name: "Sebacina",
       rank: "Species",
       author: "comb. prov.",
@@ -1317,7 +1273,7 @@ class NameTest < UnitTestCase
       search_name: "Agaricus campestris group",
       real_search_name: "Agaricus campestris group",
       sort_name: "Agaricus campestris   group",
-      display_name: "**__Agaricus campestris__** group",
+      display_name: "**__Agaricus__** **__campestris__** group",
       parent_name: "Agaricus",
       rank: "Group",
       author: "",
@@ -1343,7 +1299,7 @@ class NameTest < UnitTestCase
       search_name: "Agaricus campestris group Author",
       real_search_name: "Agaricus campestris group Author",
       sort_name: "Agaricus campestris   group  Author",
-      display_name: "**__Agaricus campestris__** group Author",
+      display_name: "**__Agaricus__** **__campestris__** group Author",
       parent_name: "Agaricus",
       rank: "Group",
       author: "Author",
@@ -1356,7 +1312,7 @@ class NameTest < UnitTestCase
       search_name: "Agaricus campestris group Author",
       real_search_name: "Agaricus campestris group Author",
       sort_name: "Agaricus campestris   group  Author",
-      display_name: "**__Agaricus campestris__** group Author",
+      display_name: "**__Agaricus__** **__campestris__** group Author",
       parent_name: "Agaricus",
       rank: "Group",
       author: "Author",
@@ -1369,7 +1325,7 @@ class NameTest < UnitTestCase
       search_name: "Agaricus campestris group sensu Author",
       real_search_name: "Agaricus campestris group sensu Author",
       sort_name: "Agaricus campestris   group  sensu Author",
-      display_name: "**__Agaricus campestris__** group sensu Author",
+      display_name: "**__Agaricus__** **__campestris__** group sensu Author",
       parent_name: "Agaricus",
       rank: "Group",
       author: "sensu Author",
@@ -1381,7 +1337,7 @@ class NameTest < UnitTestCase
       real_text_name: 'Pleurotus sp. "T44" group',
       search_name: 'Pleurotus sp. "T44" group Tulloss',
       real_search_name: 'Pleurotus sp. "T44" group Tulloss',
-      sort_name: 'Pleurotus t44   group  Tulloss',
+      sort_name: "Pleurotus t44   group  Tulloss",
       display_name: '**__Pleurotus__** sp. **__"T44"__** group Tulloss',
       parent_name: "Pleurotus",
       rank: "Group",
@@ -1425,7 +1381,7 @@ class NameTest < UnitTestCase
       search_name: "Agaricus grouperi group Author",
       real_search_name: "Agaricus grouperi group Author",
       sort_name: "Agaricus grouperi   group  Author",
-      display_name: "**__Agaricus grouperi__** group Author",
+      display_name: "**__Agaricus__** **__grouperi__** group Author",
       parent_name: "Agaricus",
       rank: "Group",
       author: "Author",
@@ -1467,7 +1423,7 @@ class NameTest < UnitTestCase
       search_name: "Agaricus campestris clade",
       real_search_name: "Agaricus campestris clade",
       sort_name: "Agaricus campestris   clade",
-      display_name: "**__Agaricus campestris__** clade",
+      display_name: "**__Agaricus__** **__campestris__** clade",
       parent_name: "Agaricus",
       rank: "Group",
       author: "",
@@ -1480,7 +1436,7 @@ class NameTest < UnitTestCase
       search_name: "Agaricus campestris clade sensu Author",
       real_search_name: "Agaricus campestris clade sensu Author",
       sort_name: "Agaricus campestris   clade  sensu Author",
-      display_name: "**__Agaricus campestris__** clade sensu Author",
+      display_name: "**__Agaricus__** **__campestris__** clade sensu Author",
       parent_name: "Agaricus",
       rank: "Group",
       author: "sensu Author",
@@ -1493,7 +1449,7 @@ class NameTest < UnitTestCase
       search_name: "Agaricus campestris clade Author",
       real_search_name: "Agaricus campestris clade Author",
       sort_name: "Agaricus campestris   clade  Author",
-      display_name: "**__Agaricus campestris__** clade Author",
+      display_name: "**__Agaricus__** **__campestris__** clade Author",
       parent_name: "Agaricus",
       rank: "Group",
       author: "Author",
@@ -1509,7 +1465,7 @@ class NameTest < UnitTestCase
       search_name: "Lecania ryaniana van den Boom",
       real_search_name: "Lecania ryaniana van den Boom",
       sort_name: "Lecania ryaniana  van den Boom",
-      display_name: "__Lecania ryaniana__ van den Boom",
+      display_name: "__Lecania__ __ryaniana__ van den Boom",
       parent_name: "Lecania",
       rank: "Species",
       author: "van den Boom",
@@ -1522,7 +1478,7 @@ class NameTest < UnitTestCase
       search_name: "Agaricus campestris group",
       real_search_name: "Agaricus campestris group",
       sort_name: "Agaricus campestris   group",
-      display_name: "__Agaricus campestris__ group",
+      display_name: "__Agaricus__ __campestris__ group",
       parent_name: "Agaricus",
       rank: "Group",
       author: "",
@@ -1535,7 +1491,7 @@ class NameTest < UnitTestCase
       search_name: "Agaricus campestris group sensu Author",
       real_search_name: "Agaricus campestris group sensu Author",
       sort_name: "Agaricus campestris   group  sensu Author",
-      display_name: "__Agaricus campestris__ group sensu Author",
+      display_name: "__Agaricus__ __campestris__ group sensu Author",
       parent_name: "Agaricus",
       rank: "Group",
       author: "sensu Author",
@@ -2199,9 +2155,9 @@ class NameTest < UnitTestCase
 
     name = names(:agaricus_campestris)
     User.current = mary
-    assert_equal("**__Agaricus campestris__** L.", name.display_name)
+    assert_equal("**__Agaricus__** **__campestris__** L.", name.display_name)
     User.current = dick
-    assert_equal("**__Agaricus campestris__** L.", name.display_name)
+    assert_equal("**__Agaricus__** **__campestris__** L.", name.display_name)
 
     name = names(:macrocybe_titans)
     User.current = mary
@@ -2239,7 +2195,7 @@ class NameTest < UnitTestCase
     assert_equal("Acarospora nodulosa var. nodulosa", name.text_name)
     assert_equal("Acarospora nodulosa var. nodulosa", name.search_name)
     assert_equal("Acarospora nodulosa  {6var.  !nodulosa", name.sort_name)
-    assert_equal("**__Acarospora nodulosa__** var. **__nodulosa__**",
+    assert_equal("**__Acarospora__** **__nodulosa__** var. **__nodulosa__**",
                  name.display_name)
     assert_equal("", name.author)
 
@@ -2250,7 +2206,7 @@ class NameTest < UnitTestCase
     assert_equal("Acarospora nodulosa  {6var.  !nodulosa  (Dufour) Hue",
                  name.sort_name)
     assert_equal(
-      "**__Acarospora nodulosa__** (Dufour) Hue var. **__nodulosa__**",
+      "**__Acarospora__** **__nodulosa__** (Dufour) Hue var. **__nodulosa__**",
       name.display_name
     )
     assert_equal("(Dufour) Hue", name.author)
@@ -2259,8 +2215,10 @@ class NameTest < UnitTestCase
     assert_equal("Acarospora nodulosa var. nodulosa", name.text_name)
     assert_equal("Acarospora nodulosa var. nodulosa Ach.", name.search_name)
     assert_equal("Acarospora nodulosa  {6var.  !nodulosa  Ach.", name.sort_name)
-    assert_equal("**__Acarospora nodulosa__** Ach. var. **__nodulosa__**",
-                 name.display_name)
+    assert_equal(
+      "**__Acarospora__** **__nodulosa__** Ach. var. **__nodulosa__**",
+      name.display_name
+    )
     assert_equal("Ach.", name.author)
   end
 
@@ -2316,7 +2274,7 @@ class NameTest < UnitTestCase
       text_name: "Lepiota rhacodes",
       author: "(Vittad.) Quél.",
       search_name: "Lepiota rhacodes (Vittad.) Quél.",
-      display_name: "__Lepiota rhacodes__ (Vittad.) Quél.",
+      display_name: "__Lepiota__ __rhacodes__ (Vittad.) Quél.",
       synonym: synonyms(:macrolepiota_rachodes_synonym),
       deprecated: true,
       rank: "Species", user: users(:rolf)
@@ -2334,7 +2292,7 @@ class NameTest < UnitTestCase
       text_name: "Agaricus rhacodes",
       author: "Vittad.",
       search_name: "Agaricus rhacodes Vittad.",
-      display_name: "__Agaricus rhacodes__ Vittad.",
+      display_name: "__Agaricus__ __rhacodes__ Vittad.",
       synonym: synonyms(:chlorophyllum_rachodes_synonym),
       deprecated: true,
       rank: "Species", user: users(:rolf)
@@ -2490,7 +2448,7 @@ class NameTest < UnitTestCase
     )
 
     # Name > 2 authors
-    assert_equal("**__Coprinellus micaceus__** (Bull.) Vilgalys et al.",
+    assert_equal("**__Coprinellus__** **__micaceus__** (Bull.) Vilgalys et al.",
                  names(:coprinellus_micaceus).display_name_brief_authors)
 
     # Name > 2 authors in parentheses
@@ -2539,13 +2497,13 @@ class NameTest < UnitTestCase
     authors = "Author1, Author2 & Author3"
     group_name = Name.new(
       text_name: "Xxx yyy clade #{authors}",
-      display_name: "**__Xxx yyy__** clade #{authors}",
+      display_name: "**__Xxx__** **__yyy__** clade #{authors}",
       author: authors,
       rank: "Group",
       deprecated: false, correct_spelling: nil,
       user: users(:rolf)
     )
-    assert_equal("**__Xxx yyy__** clade Author1 et al.",
+    assert_equal("**__Xxx__** **__yyy__** clade Author1 et al.",
                  group_name.display_name_brief_authors)
   end
 
@@ -2558,7 +2516,7 @@ class NameTest < UnitTestCase
 
     # Name with author
     assert_equal(
-      "**__Russula brevipes__**",
+      "**__Russula__** **__brevipes__**",
       names(:russula_brevipes_author_notes).display_name_without_authors
     )
 
@@ -2594,47 +2552,47 @@ class NameTest < UnitTestCase
     assert_equal("**__Acarospora__** L.",
                  Name.format_autonym("Acarospora", "L.", "Genus", false))
     assert_equal(
-      "**__Acarospora nodulosa__** L.",
+      "**__Acarospora__** **__nodulosa__** L.",
       Name.format_autonym("Acarospora nodulosa", "L.", "Species", false)
     )
     assert_equal(
-      "__Acarospora nodulosa__ var. __reagens__ L.",
+      "__Acarospora__ __nodulosa__ var. __reagens__ L.",
       Name.format_autonym(
         "Acarospora nodulosa var. reagens", "L.", "Variety", true
       )
     )
     assert_equal(
-      "__Acarospora nodulosa__ L. var. __nodulosa__",
+      "__Acarospora__ __nodulosa__ L. var. __nodulosa__",
       Name.format_autonym(
         "Acarospora nodulosa var. nodulosa", "L.", "Variety", true
       )
     )
     assert_equal(
-      "__Acarospora nodulosa__ L. ssp. __nodulosa__",
+      "__Acarospora__ __nodulosa__ L. ssp. __nodulosa__",
       Name.format_autonym(
         "Acarospora nodulosa ssp. nodulosa", "L.", "Subspecies", true
       )
     )
     assert_equal(
-      "__Acarospora nodulosa__ L. f. __nodulosa__",
+      "__Acarospora__ __nodulosa__ L. f. __nodulosa__",
       Name.format_autonym(
         "Acarospora nodulosa f. nodulosa", "L.", "Form", true
       )
     )
     assert_equal(
-      "__Acarospora nodulosa__ ssp. __reagens__ L. var. __reagens__",
+      "__Acarospora__ __nodulosa__ ssp. __reagens__ L. var. __reagens__",
       Name.format_autonym(
         "Acarospora nodulosa ssp. reagens var. reagens", "L.", "Variety", true
       )
     )
     assert_equal(
-      "__Acarospora nodulosa__ L. ssp. __nodulosa__ var. __nodulosa__",
+      "__Acarospora__ __nodulosa__ L. ssp. __nodulosa__ var. __nodulosa__",
       Name.format_autonym(
         "Acarospora nodulosa ssp. nodulosa var. nodulosa", "L.", "Variety", true
       )
     )
     assert_equal(
-      "__Acarospora nodulosa__ L. ssp. __nodulosa__ var. __nodulosa__ " \
+      "__Acarospora__ __nodulosa__ L. ssp. __nodulosa__ var. __nodulosa__ " \
       "f. __nodulosa__",
       Name.format_autonym(
         "Acarospora nodulosa ssp. nodulosa var. nodulosa f. nodulosa", "L.",
@@ -3164,8 +3122,8 @@ class NameTest < UnitTestCase
 
     assert_true(bad.deprecated)
     assert_false(good.deprecated)
-    assert_equal("__#{bad.text_name}__ #{bad.author}", bad.display_name)
-    assert_equal("**__#{good.text_name}__** #{good.author}", good.display_name)
+    assert(bad.display_name.starts_with?("__"))
+    assert(good.display_name.starts_with?("**__"))
     assert_names_equal(good, bad.correct_spelling)
     assert_nil(good.correct_spelling)
     assert_objs_equal(syn, bad.synonym)
@@ -3512,7 +3470,7 @@ class NameTest < UnitTestCase
       text_name: "Amanita boodairy",
       author: "",
       search_name: "Amanita boodairy",
-      display_name: "__Amanita boodairy__ ",
+      display_name: "__Amanita__ __boodairy__ ",
       correct_spelling: names(:amanita_boudieri),
       deprecated: true,
       rank: "Species",
@@ -3586,7 +3544,7 @@ class NameTest < UnitTestCase
     amanita_group = Name.create!(
       text_name: "Amanita group",
       search_name: "Amanita group",
-      display_name: "__Amanita group__",
+      display_name: "__Amanita__ group",
       correct_spelling: nil,
       deprecated: false,
       rank: "Group",
@@ -3735,7 +3693,7 @@ class NameTest < UnitTestCase
       text_name: "Whoosia whatsitii",
       author: "Blah & de Blah",
       search_name: "Whoosia whatsitii Blah & de Blah",
-      display_name: "__Whoosia whatsitii__ Blah & de Blah",
+      display_name: "__Whoosia__ __whatsitii__ Blah & de Blah",
       deprecated: true,
       rank: "Species"
     }

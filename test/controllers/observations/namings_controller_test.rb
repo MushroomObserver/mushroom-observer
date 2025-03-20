@@ -553,8 +553,8 @@ module Observations
       login("dick")
       post(:create, params: params)
       assert_response(:redirect)
-      assert(name = Name.find_by(text_name: 'Foo "bar"'))
-      assert_equal('Foo "bar" Author', name.search_name)
+      assert(name = Name.find_by(text_name: 'Foo sp. "bar"'))
+      assert_equal('Foo sp. "bar" Author', name.search_name)
     end
 
     # Rolf can destroy his naming if Mary deletes her vote on it.

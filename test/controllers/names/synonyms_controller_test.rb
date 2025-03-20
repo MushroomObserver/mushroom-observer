@@ -27,7 +27,8 @@ module Names
 
       add_name = names(:lepiota_rhacodes)
       assert_not(add_name.deprecated)
-      assert_equal("**__Lepiota rhacodes__** Vittad.", add_name.display_name)
+      assert_equal("**__Lepiota__** **__rhacodes__** Vittad.",
+                   add_name.display_name)
       assert_nil(add_name.synonym_id)
       add_past_name_count = add_name.versions.length
       add_name_version = add_name.version
@@ -41,7 +42,7 @@ module Names
       assert_redirected_to(name_path(selected_name.id))
 
       assert(add_name.reload.deprecated)
-      assert_equal("__Lepiota rhacodes__ Vittad.", add_name.display_name)
+      assert_equal("__Lepiota__ __rhacodes__ Vittad.", add_name.display_name)
       # past name should have been created
       assert_equal(add_past_name_count + 1, add_name.versions.length)
       assert(add_name.versions.latest.deprecated)
