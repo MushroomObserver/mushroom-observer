@@ -455,6 +455,9 @@ class Query::ObservationsTest < UnitTestCase
     # single date should return after
     assert_query(Observation.index_order.date("2011-05-12"),
                  :Observation, date: "2011-05-12")
+    # single date within array should also return after
+    assert_query(Observation.index_order.date(["2011-05-12"]),
+                 :Observation, date: "2011-05-12")
     # year should return after
     assert_query(Observation.index_order.date("2005"),
                  :Observation, date: "2005")
@@ -466,6 +469,9 @@ class Query::ObservationsTest < UnitTestCase
                  :Observation, date: %w[2005 2009])
     # in a month range, any year
     assert_query(Observation.index_order.date("05", "12"),
+                 :Observation, date: %w[05 12])
+    # in a month range, any year, within array
+    assert_query(Observation.index_order.date(%w[05 12]),
                  :Observation, date: %w[05 12])
     # in a date range, any year
     assert_query(Observation.index_order.date("02-22", "08-22"),
