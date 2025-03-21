@@ -24,6 +24,10 @@ class Query::Comments < Query::BaseAR
     )
   end
 
+  def self.default_order
+    "created_at"
+  end
+
   # def initialize_flavor
   #   add_owner_and_time_stamp_conditions
   #   add_id_in_set_condition
@@ -75,8 +79,4 @@ class Query::Comments < Query::BaseAR
   #     "COALESCE(comments.comment,'')" \
   #     ")"
   # end
-
-  def self.default_order
-    "created_at"
-  end
 end

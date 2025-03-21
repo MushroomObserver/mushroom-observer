@@ -3,8 +3,8 @@
 class Query::Observations < Query::BaseAR
   include Query::Params::AdvancedSearch
   include Query::Params::Filters
-  include Query::Initializers::Filters
-  include Query::Initializers::AdvancedSearch
+  # include Query::Initializers::Filters
+  # include Query::Initializers::AdvancedSearch
 
   def model
     @model ||= Observation
@@ -70,6 +70,10 @@ class Query::Observations < Query::BaseAR
     ).
       merge(content_filter_parameter_declarations(Observation)).
       merge(advanced_search_parameter_declarations)
+  end
+
+  def self.default_order
+    "date"
   end
 
   # def initialize_flavor
@@ -336,8 +340,4 @@ class Query::Observations < Query::BaseAR
   #     "observations.where" \
   #     ")"
   # end
-
-  def self.default_order
-    "date"
-  end
 end

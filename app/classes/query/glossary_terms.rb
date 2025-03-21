@@ -20,6 +20,10 @@ class Query::GlossaryTerms < Query::BaseAR
     )
   end
 
+  def self.default_order
+    "name"
+  end
+
   # def initialize_flavor
   #   add_owner_and_time_stamp_conditions
   #   add_search_condition("glossary_terms.name", params[:name_has])
@@ -34,8 +38,4 @@ class Query::GlossaryTerms < Query::BaseAR
   #     "COALESCE(glossary_terms.description,'')" \
   #     ")"
   # end
-
-  def self.default_order
-    "name"
-  end
 end

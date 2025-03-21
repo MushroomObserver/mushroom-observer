@@ -20,6 +20,10 @@ class Query::Articles < Query::BaseAR
     )
   end
 
+  def self.default_order
+    "created_at"
+  end
+
   # def initialize_flavor
   #   add_owner_and_time_stamp_conditions
   #   add_id_in_set_condition
@@ -27,8 +31,4 @@ class Query::Articles < Query::BaseAR
   #   add_search_condition("articles.body", params[:body_has])
   #   super
   # end
-
-  def self.default_order
-    "created_at"
-  end
 end

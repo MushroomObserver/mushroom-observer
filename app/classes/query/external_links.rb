@@ -17,6 +17,10 @@ class Query::ExternalLinks < Query::BaseAR
     )
   end
 
+  def self.default_order
+    "url"
+  end
+
   # def initialize_flavor
   #   add_owner_and_time_stamp_conditions
   #   add_id_in_set_condition
@@ -26,8 +30,4 @@ class Query::ExternalLinks < Query::BaseAR
   #   add_search_condition("external_links.url", params[:url_has])
   #   super
   # end
-
-  def self.default_order
-    "url"
-  end
 end

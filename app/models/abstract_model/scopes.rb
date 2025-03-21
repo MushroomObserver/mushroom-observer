@@ -501,6 +501,7 @@ module AbstractModel::Scopes
     #   end
     # end
 
+    # this actually produces coalesce("").length.gt(0)
     def not_blank_condition(table_column, bool: true)
       if bool.to_s.to_boolean == true
         where(table_column.not_blank)

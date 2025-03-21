@@ -46,6 +46,10 @@ class Query::Images < Query::BaseAR
     ) # .merge(advanced_search_parameter_declarations)
   end
 
+  def self.default_order
+    "created_at"
+  end
+
   # def initialize_flavor
   #   initialize_image_parameters
   #   initialize_image_association_parameters
@@ -216,8 +220,4 @@ class Query::Images < Query::BaseAR
   # def add_join_to_locations
   #   add_join(:observations, :locations!)
   # end
-
-  def self.default_order
-    "created_at"
-  end
 end

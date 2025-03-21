@@ -24,6 +24,10 @@ class Query::CollectionNumbers < Query::BaseAR
     )
   end
 
+  def self.default_order
+    "name_and_number"
+  end
+
   # def initialize_flavor
   #   add_owner_and_time_stamp_conditions
   #   add_id_in_set_condition
@@ -46,8 +50,4 @@ class Query::CollectionNumbers < Query::BaseAR
   #     "collection_numbers.number" \
   #     ")"
   # end
-
-  def self.default_order
-    "name_and_number"
-  end
 end
