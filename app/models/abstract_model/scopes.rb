@@ -251,13 +251,13 @@ module AbstractModel::Scopes
     }
     scope :search_where, lambda { |phrase|
       scope = all
-      if klass == Location
-        fields = Location[:name]
-      else
-        scope = scope.joins(:observations)
-        fields = Observation[:where]
-      end
-      scope.search_columns(fields, phrase)
+      field = if klass == Location
+                Location[:name]
+              else
+                Observation[:where]
+              end
+      scope = scope.joins(:observations) if klass != Observation
+      scope.search_columns(field, phrase)
     }
 
     # Used in Name, Observation and Project so far.
