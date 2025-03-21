@@ -208,14 +208,15 @@ module AbstractModel::Scopes
       send_where_chain(conditions).distinct
     }
 
-    #############################################################################
+    ############################################################################
+    #
     # ADVANCED SEARCH SCOPES
     #
     # Search Content
     # Could do left outer join from observations to comments, but it
     # takes longer.  Instead, break it into two queries, one without
     # comments, and another with inner join on comments.
-    # `klass` refers to the model of an ActiveRecord_Relation
+    # NOTE: `klass` refers to the model of an ActiveRecord_Relation
     scope :search_content, lambda { |phrase|
       if klass == Observation
         obs_joins = nil
