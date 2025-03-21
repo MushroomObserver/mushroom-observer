@@ -248,20 +248,13 @@ module AbstractModel::Scopes
       phrase = User.remove_bracketed_name(phrase)
       joins(:user).search_columns((User[:login] + User[:name]), phrase)
     }
-    # FIXME: adv search form needs to nest these two params
-    scope :search_where, lambda { |phrase:, search_notes: false|
+    scope :search_where, lambda { |phrase|
       scope = all
       if klass == Location
         fields = Location[:name]
       else
-        scope = scope.joins(:observations).left_outer_joins(:locations)
-        if search_notes
-          fields = Location[:id].
-                   when(true).then((Location[:name] + Location[:notes])).
-                   when(false).then(Observation[:where])
-        else
-          fields = Observation[:where]
-        end
+        scope = scope.joins(:observations)
+        fields = Observation[:where]
       end
       scope.search_columns(fields, phrase)
     }
