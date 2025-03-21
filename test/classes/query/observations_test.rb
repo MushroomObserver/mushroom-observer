@@ -437,12 +437,12 @@ class Query::ObservationsTest < UnitTestCase
   def test_observation_advanced_search_content
     # notes
     expects = [observations(:coprinus_comatus_obs)]
-    scope = Observation.advanced_search("second fruiting")
+    scope = Observation.search_content("second fruiting")
     assert_query_scope(expects, scope,
                        :Observation, search_content: "second fruiting")
     # comments(:minimal_unknown_obs_comment_2)
     expects = [observations(:minimal_unknown_obs)]
-    scope = Observation.advanced_search("agaricus")
+    scope = Observation.search_content("agaricus")
     assert_query_scope(expects, scope,
                        :Observation, search_content: "agaricus")
   end

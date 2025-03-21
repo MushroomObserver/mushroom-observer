@@ -208,6 +208,57 @@ module AbstractModel::Scopes
       send_where_chain(conditions).distinct
     }
 
+    #############################################################################
+    # ADVANCED SEARCH SCOPES
+    #
+    # Search Content
+    # Could do left outer join from observations to comments, but it
+    # takes longer.  Instead, break it into two queries, one without
+    # comments, and another with inner join on comments.
+    # `klass` refers to the model of an ActiveRecord_Relation
+    scope :search_content, lambda { |phrase|
+      if klass == Observation
+        obs_joins = nil
+        comment_joins = :comments
+      else
+        obs_joins = :observations
+        comment_joins = { observations: :comments }
+      end
+      ids = joins(obs_joins).
+            search_columns(Observation[:notes], phrase).distinct.map(&:id)
+      ids += joins(comment_joins).
+             search_columns(
+               (Observation[:notes] + Comment[:summary] + Comment[:comment]),
+               phrase
+             ).distinct.map(&:id)
+      where(id: ids).distinct
+    }
+    scope :search_name, lambda { |phrase|
+      joins = case klass
+              when Name
+                nil
+              when Observation
+                :name
+              else
+                { observations: :name }
+              end
+      joins(joins).search_columns(Name[:search_name], phrase)
+    }
+    scope :search_user, lambda { |phrase|
+      phrase = User.remove_bracketed_name(phrase)
+      joins(:user).search_columns((User[:login] + User[:name]), phrase)
+    }
+    scope :search_where, lambda { |phrase|
+      scope = all
+      if klass == Location
+        fields = Location[:name]
+      else
+        scope = scope.joins(:observations)
+        fields = Observation[:where]
+      end
+      scope.search_columns(fields, phrase)
+    }
+
     # Used in Name, Observation and Project so far.
     scope :has_comments,
           ->(bool = true) { joined_relation_condition(:comments, bool:) }
@@ -501,6 +552,7 @@ module AbstractModel::Scopes
     #   end
     # end
 
+    # this actually produces coalesce("").length.gt(0)
     def not_blank_condition(table_column, bool: true)
       if bool.to_s.to_boolean == true
         where(table_column.not_blank)
