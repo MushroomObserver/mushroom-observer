@@ -44,7 +44,11 @@ module Query::ScopeModules::Initialization
       next if (param == :id_in_set && val.nil?) ||
               (param != :id_in_set && skippables.include?(val.to_s))
 
-      @scopes = @scopes.send(param, val)
+      @scopes = if val.is_a?(Hash)
+                  @scopes.send(param, **val)
+                else
+                  @scopes.send(param, val)
+                end
     end
   end
 
