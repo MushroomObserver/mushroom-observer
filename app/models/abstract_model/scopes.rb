@@ -280,7 +280,7 @@ module AbstractModel::Scopes
       # `datetime_condition_formatted` defined in ClassMethods below
       return unless (datetime = datetime_condition_formatted(dir, val))
 
-      where(arel_table[col].send(dir, datetime))
+      where(arel_table[col].send(:"#{dir}eq", datetime))
     end
 
     # Fills out the datetime with min/max values for month, day, hour, minute,
