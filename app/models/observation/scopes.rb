@@ -101,7 +101,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # Filters for confidence on vote_cache scale -3.0..3.0
     # To translate percentage to vote_cache: (val.to_f / (100 / 3))
     scope :confidence, lambda { |min, max = nil|
-      min, max = min if min.is_a?(Array) && min.size == 2
+      min, max = min if min.is_a?(Array)
       if max.nil? || max == min # max may be 0
         where(Observation[:vote_cache].gteq(min))
       else
