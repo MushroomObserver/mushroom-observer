@@ -84,9 +84,9 @@ module Name::Scopes
 
     ### Module Name::Taxonomy. Rank scopes take text values, e.g. "Genus"
     # Query's scope: rank at or between
-    scope :rank, lambda { |min, max = min|
-      min, max = min if min.is_a?(Array) && min.size == 2
-      return with_rank(min) if min.present? && min == max
+    scope :rank, lambda { |min, max = nil|
+      min, max = min if min.is_a?(Array)
+      return with_rank(min) if min.present? && max.blank?
 
       where(Name[:rank].in(rank_range(min, max)))
     }

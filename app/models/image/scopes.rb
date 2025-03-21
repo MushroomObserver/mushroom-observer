@@ -62,7 +62,7 @@ module Image::Scopes
           ->(bool = true) { presence_condition(Image[:vote_cache], bool:) }
     # quality is on a scale from 1.0 to 4.0
     scope :quality, lambda { |min, max = nil|
-      min, max = min if min.is_a?(Array) && min.size == 2
+      min, max = min if min.is_a?(Array)
       if max.nil? || max == min
         where(Image[:vote_cache].gteq(min))
       else
