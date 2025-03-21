@@ -139,7 +139,7 @@ module AbstractModel::Scopes
       where(arel_table[col].format("%Y-%m-%d-%H-%M-%S").eq(reformat))
     }
     scope :datetime_before,
-          ->(datetime, col:) { datetime_compare(:lt, datetime, col:) }
+          ->(datetime, col:) { datetime_compare(:lteq, datetime, col:) }
     scope :datetime_in_month, lambda { |ym_string, col:|
       year, month = ym_string.split("-")
       return all unless year.present? && month.present?
@@ -149,7 +149,7 @@ module AbstractModel::Scopes
     scope :datetime_in_year,
           ->(year, col:) { where(arel_table[col].year.eq(year)) }
     scope :datetime_after,
-          ->(datetime, col:) { datetime_compare(:gt, datetime, col:) }
+          ->(datetime, col:) { datetime_compare(:gteq, datetime, col:) }
     scope :datetime_between, lambda { |early, late, col:|
       early, late = [late, early] if early > late
       datetime_after(early, col:).datetime_before(late, col:)
@@ -178,9 +178,9 @@ module AbstractModel::Scopes
     scope :on_date,
           ->(date, col: :when) { date_compare(nil, date, col:) }
     scope :date_after,
-          ->(date, col: :when) { date_compare(:gt, date, col:) }
+          ->(date, col: :when) { date_compare(:gteq, date, col:) }
     scope :date_before,
-          ->(date, col: :when) { date_compare(:lt, date, col:) }
+          ->(date, col: :when) { date_compare(:lteq, date, col:) }
     scope :date_between, lambda { |early, late, col: :when|
       # do not correct early > late, which means something different here
       if wrapped_date?(early, late)
