@@ -153,6 +153,8 @@ module Name::Scopes
     #   cols = Name.searchable_columns + Name[:classification]
     #   search_columns(cols, phrase)
     # }
+    # scope :search_name,
+    #       ->(phrase) { search_columns(Name[:search_name], phrase) }
     # # A more comprehensive search of Name fields, plus comments/descriptions.
     # scope :search_content_and_associations, lambda { |phrase|
     #   fields = Name.search_content(phrase).map(&:id)
