@@ -162,7 +162,7 @@ module AbstractModel::Scopes
     # In this scope, the order of early and late do matter. early > late can
     # mean a date range wrapping the end/beginning of the year.
     # NOTE: On MO so far, all date columns are named :when.
-    scope :date, lambda { |early, late = early, col: :when|
+    scope :date, lambda { |early, late = nil, col: :when|
       early, late = early if early.is_a?(Array)
       if late.blank?
         date_after(early, col:)
