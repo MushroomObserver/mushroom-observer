@@ -166,15 +166,14 @@ class LocationsController < ApplicationController
     # If these are passed, we're not looking for undefined locations.
     return nil if [:by_editor, :regexp].any? { |key| args[key] }
 
-    # Select only observations with undefined location.
-    args[:where] = [args[:where]].flatten.compact
+    # # Select only observations with undefined location.
+    # args[:where] = [args[:where]].flatten.compact
 
     # "By name" means something different to observation.
     args[:by] = "where" if args[:by].blank? || (args[:by] == "name")
 
     if args[:pattern]
-      search = SearchParams.new(phrase: args[:pattern])
-      args[:where] += query.google_conditions(search, "observations.where")
+      args[:search_where] += SearchParams.new(phrase: args[:pattern])
       args.delete(:pattern)
     end
 
