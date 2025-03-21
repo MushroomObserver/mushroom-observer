@@ -246,7 +246,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :has_location, lambda { |bool = true|
       presence_condition(Observation[:location_id], bool:)
     }
-    scope :location_undefined, lambda {
+    scope :location_undefined, lambda { |_bool = true|
       has_location(false).where.not(where: nil).group(:where).
         order(Observation[:where].count.desc, Observation[:id].desc)
     }
