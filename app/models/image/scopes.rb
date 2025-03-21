@@ -96,17 +96,19 @@ module Image::Scopes
         where(species_list_observations: { species_list_id: ids })
     }
 
+    # FOR FUTURE REFERENCE
     # A search of all Image SEARCHABLE_FIELDS, concatenated.
-    scope :search_content,
-          ->(phrase) { search_columns(Image.searchable_columns, phrase) }
+    # scope :search_content,
+    #       ->(phrase) { search_columns(Image.searchable_columns, phrase) }
     # Grabbing image ids from the Observation.includes is waay faster than
     # a 3x join from images to observation_images to observations to comments.
     # Does not check Name[:search_name] (author)
-    scope :advanced_search, lambda { |phrase|
-      obs_imgs = Observation.advanced_search(phrase).
-                 includes(:images).map(&:images).flatten.uniq
-      search_content(phrase).distinct.or(Image.where(id: obs_imgs).distinct)
-    }
+    # scope :advanced_search, lambda { |phrase|
+    #   obs_imgs = Observation.advanced_search(phrase).
+    #              includes(:images).map(&:images).flatten.uniq
+    #   search_content(phrase).distinct.or(Image.where(id: obs_imgs).distinct)
+    # }
+
     # Excludes images without observations!
     scope :pattern, lambda { |phrase|
       cols = Image.searchable_columns + Observation[:where] + Name[:search_name]

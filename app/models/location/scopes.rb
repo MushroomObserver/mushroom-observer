@@ -37,19 +37,6 @@ module Location::Scopes
     scope :notes_has,
           ->(phrase) { search_columns(Location[:notes], phrase) }
 
-    # scope :search_content,
-    #       ->(phrase) { search_columns(Location.searchable_columns, phrase) }
-    # scope :search_where,
-    #       ->(phrase) { search_columns(Location[:name], phrase) }
-    # Location[:name] + descriptions, Observation[:notes] + comments
-    # Does not search location notes or location comments.
-    scope :advanced_search, lambda { |phrase|
-      ids = Location.name_has(phrase).map(&:id)
-      ids += Location.description_has(phrase).map(&:id)
-      ids += Observation.advanced_search(phrase).
-             includes(:location).map(&:location).flatten.uniq
-      where(id: ids).distinct
-    }
     # Does not search location notes, observation notes or comments on either.
     # We do not yet support location comment queries.
     scope :pattern, lambda { |phrase|

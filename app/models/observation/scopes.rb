@@ -58,19 +58,14 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       where(conditions)
     }
 
-    # Observation SEARCHABLE_FIELDS :text_name, :where and :notes (currently)
-    # scope :search_content, lambda { |phrase|
-    #   ids = name_search_name_observation_ids(phrase)
-    #   ids += search_columns(Observation.searchable_columns, phrase).map(&:id)
-    #   where(id: ids).distinct
-    # }
+    # FOR FUTURE REFERENCE
     # The "advanced search" scope for "content". Unexpectedly, merge/or is
     # faster than concatting the Obs and Comment columns together.
-    scope :advanced_search, lambda { |phrase|
-      comments = Observation.comments_has(phrase).map(&:id)
-      notes_has(phrase).distinct.
-        or(Observation.where(id: comments).distinct)
-    }
+    # scope :advanced_search, lambda { |phrase|
+    #   comments = Observation.comments_has(phrase).map(&:id)
+    #   notes_has(phrase).distinct.
+    #     or(Observation.where(id: comments).distinct)
+    # }
     # Checks Name[:search_name], which includes the author
     # (unlike Observation[:text_name]) and is not cached on the obs
     scope :pattern, lambda { |phrase|
