@@ -23,6 +23,12 @@ module Query::ScopeModules::Initialization
     @sql = scopes.all.to_sql
   end
 
+  def query
+    initialize_query unless initialized?
+
+    @query = scopes.all
+  end
+
   def initialize_scopes
     # These strings can never come direct from user, so no need to sanitize.
     # (I believe they are only used by the site stats page. -JPH 20190708)
@@ -48,7 +54,7 @@ module Query::ScopeModules::Initialization
 
       model_name = subquery_parameters.dig(param, :subquery)
       joins = subquery_parameters.dig(param, :joins)
-      subquery = Query.new(model_name, hash).query
+      subquery = Query.new(model_name, **hash).query
 
       @scopes = @scopes.joins(joins).merge(subquery)
     end
