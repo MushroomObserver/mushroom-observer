@@ -113,7 +113,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     #   with_name_above_genus.or(has_no_confident_name)
     # }
     scope :needs_naming,
-          -> { where(needs_naming: true) }
+          ->(bool = true) { where(needs_naming: bool) }
     scope :with_name_above_genus,
           -> { where(name_id: Name.with_rank_above_genus) }
     scope :has_no_confident_name,
