@@ -55,8 +55,8 @@ module Query::ScopeModules::Ordering
   def sort_by_code(_model)
     # where << "herbaria.code != ''"
     # "herbaria.code ASC"
-    @scopes = @scopes.where(Herbaria[:code].not_eq(nil)).
-              order(Herbaria[:code].asc)
+    @scopes = @scopes.where(Herbarium[:code].not_eq(nil)).
+              order(Herbarium[:code].asc)
   end
 
   def sort_by_code_then_date(_model)
@@ -70,9 +70,10 @@ module Query::ScopeModules::Ordering
   def sort_by_code_then_name(_model)
     # "IF(herbaria.code = '', '~', herbaria.code) ASC, herbaria.name ASC"
     @scopes = @scopes.order(
-      Herbaria[:code].eq(nil).
-        when(true).then(Arel::Nodes.build_quoted("~").asc, Herbaria[:name].asc).
-        when(false).then(Herbaria[:code].asc, Herbaria[:name].asc)
+      Herbarium[:code].eq(nil).
+        when(true).
+          then(Arel::Nodes.build_quoted("~").asc, Herbarium[:name].asc).
+        when(false).then(Herbarium[:code].asc, Herbarium[:name].asc)
     )
   end
 
@@ -130,7 +131,7 @@ module Query::ScopeModules::Ordering
 
     # add_join(:herbaria)
     # "herbaria.name ASC"
-    @scopes = @scopes.joins(:herbarium).order(Herbaria[:name].asc)
+    @scopes = @scopes.joins(:herbarium).order(Herbarium[:name].asc)
   end
 
   # (for testing)
