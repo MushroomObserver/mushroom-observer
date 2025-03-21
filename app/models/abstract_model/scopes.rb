@@ -208,7 +208,8 @@ module AbstractModel::Scopes
       send_where_chain(conditions).distinct
     }
 
-    #############################################################################
+    ############################################################################
+    #
     # ADVANCED SEARCH SCOPES
     #
     # Search Content
