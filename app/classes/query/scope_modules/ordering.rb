@@ -315,7 +315,6 @@ module Query::ScopeModules::Ordering
   end
 
   def sort_by_user(_model)
-    debugger
     # add_join(:users)
     # 'IF(users.name = "" OR users.name IS NULL, users.login, users.name) ASC'
     @scopes = @scopes.joins(:user).
