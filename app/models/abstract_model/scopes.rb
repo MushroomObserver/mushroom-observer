@@ -218,7 +218,7 @@ module AbstractModel::Scopes
     # comments, and another with inner join on comments.
     # NOTE: `klass` refers to the model of an ActiveRecord_Relation
     scope :search_content, lambda { |phrase|
-      if klass == Observation
+      if klass.name == "Observation"
         obs_joins = nil
         comment_joins = :comments
       else
@@ -235,10 +235,10 @@ module AbstractModel::Scopes
       where(id: ids).distinct
     }
     scope :search_name, lambda { |phrase|
-      joins = case klass
-              when Name
+      joins = case klass.name
+              when "Name"
                 nil
-              when Observation
+              when "Observation"
                 :name
               else
                 { observations: :name }
@@ -251,7 +251,7 @@ module AbstractModel::Scopes
     }
     scope :search_where, lambda { |phrase|
       scope = all
-      field = if klass == Location
+      field = if klass.name == "Location"
                 Location[:name]
               else
                 Observation[:where]
