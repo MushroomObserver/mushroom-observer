@@ -257,7 +257,11 @@ class NamesController < ApplicationController
       )
       # Determine if relevant and count the results of running the query if so.
       # Don't run if there aren't any children.
-      @has_subtaxa = @first_child ? @subtaxa_query.select_count : 0
+      @has_subtaxa = if @first_child
+                       @subtaxa_query.query.select(Arel.star.count)
+                     else
+                       0
+                     end
     end
 
     # NOTE: `_observation_menu` makes many select_count queries like this!

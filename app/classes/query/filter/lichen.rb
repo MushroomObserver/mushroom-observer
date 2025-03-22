@@ -27,6 +27,14 @@ class Query::Filter
       end
     end
 
+    def scope_conditions(model, val)
+      if show_only_lichens?(val)
+        model.arel_table[:lifeform].matches(val)
+      else
+        model.arel_table[:lifeform].does_not_match(val)
+      end
+    end
+
     def show_only_lichens?(val)
       ["yes", true].include?(val)
     end

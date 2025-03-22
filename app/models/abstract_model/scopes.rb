@@ -162,9 +162,9 @@ module AbstractModel::Scopes
     # In this scope, the order of early and late do matter. early > late can
     # mean a date range wrapping the end/beginning of the year.
     # NOTE: On MO so far, all date columns are named :when.
-    scope :date, lambda { |early, late = early, col: :when|
-      early, late = early if early.is_a?(Array) && early.size == 2
-      if late == early
+    scope :date, lambda { |early, late = nil, col: :when|
+      early, late = early if early.is_a?(Array)
+      if late.blank?
         date_after(early, col:)
       else
         date_between(early, late, col:)
@@ -208,6 +208,58 @@ module AbstractModel::Scopes
       send_where_chain(conditions).distinct
     }
 
+    ############################################################################
+    #
+    # ADVANCED SEARCH SCOPES
+    #
+    # Search Content
+    # Could do left outer join from observations to comments, but it
+    # takes longer.  Instead, break it into two queries, one without
+    # comments, and another with inner join on comments.
+    # NOTE: `klass` refers to the model of an ActiveRecord_Relation
+    scope :search_content, lambda { |phrase|
+      if klass.name == "Observation"
+        obs_joins = nil
+        comment_joins = :comments
+      else
+        obs_joins = :observations
+        comment_joins = { observations: :comments }
+      end
+      ids = joins(obs_joins).
+            search_columns(Observation[:notes], phrase).distinct.map(&:id)
+      ids += joins(comment_joins).
+             search_columns(
+               (Observation[:notes] + Comment[:summary] + Comment[:comment]),
+               phrase
+             ).distinct.map(&:id)
+      where(id: ids).distinct
+    }
+    scope :search_name, lambda { |phrase|
+      joins = case klass.name
+              when "Name"
+                nil
+              when "Observation"
+                :name
+              else
+                { observations: :name }
+              end
+      joins(joins).search_columns(Name[:search_name], phrase)
+    }
+    scope :search_user, lambda { |phrase|
+      phrase = User.remove_bracketed_name(phrase)
+      joins(:user).search_columns((User[:login] + User[:name]), phrase)
+    }
+    scope :search_where, lambda { |phrase|
+      scope = all
+      field = if klass.name == "Location"
+                Location[:name]
+              else
+                Observation[:where]
+              end
+      scope = scope.joins(:observations) if klass != Observation
+      scope.search_columns(field, phrase)
+    }
+
     # Used in Name, Observation and Project so far.
     scope :has_comments,
           ->(bool = true) { joined_relation_condition(:comments, bool:) }
@@ -228,7 +280,7 @@ module AbstractModel::Scopes
       # `datetime_condition_formatted` defined in ClassMethods below
       return unless (datetime = datetime_condition_formatted(dir, val))
 
-      where(arel_table[col].send(dir, datetime))
+      where(arel_table[col].send(:"#{dir}eq", datetime))
     end
 
     # Fills out the datetime with min/max values for month, day, hour, minute,
@@ -501,6 +553,7 @@ module AbstractModel::Scopes
     #   end
     # end
 
+    # this actually produces coalesce("").length.gt(0)
     def not_blank_condition(table_column, bool: true)
       if bool.to_s.to_boolean == true
         where(table_column.not_blank)

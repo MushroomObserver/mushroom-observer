@@ -108,14 +108,14 @@ class Query::LocationsTest < UnitTestCase
 
   # content in obs.notes
   def test_location_advanced_search_content_obs_notes
-    assert_query(Location.advanced_search('"strange place"'),
+    assert_query(Location.search_content('"strange place"'),
                  :Location, search_content: '"strange place"')
   end
 
   # content in Obs Comment
   def test_location_advanced_search_content_obs_comments
     assert_query(
-      Location.advanced_search('"a little of everything"'),
+      Location.search_content('"a little of everything"'),
       :Location, search_content: '"a little of everything"'
     )
   end

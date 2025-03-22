@@ -86,9 +86,6 @@ module Query::Initializers::AdvancedSearch
   def location_field
     if model == Location
       "locations.name"
-    elsif params[:search_location_notes]
-      "IF(locations.id,CONCAT(locations.name,locations.notes)," \
-      "observations.where)"
     else
       "observations.where"
     end

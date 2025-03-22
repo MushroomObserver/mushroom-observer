@@ -84,9 +84,9 @@ module Name::Scopes
 
     ### Module Name::Taxonomy. Rank scopes take text values, e.g. "Genus"
     # Query's scope: rank at or between
-    scope :rank, lambda { |min, max = min|
-      min, max = min if min.is_a?(Array) && min.size == 2
-      return with_rank(min) if min.present? && min == max
+    scope :rank, lambda { |min, max = nil|
+      min, max = min if min.is_a?(Array)
+      return with_rank(min) if min.present? && max.blank?
 
       where(Name[:rank].in(rank_range(min, max)))
     }
@@ -153,6 +153,8 @@ module Name::Scopes
     #   cols = Name.searchable_columns + Name[:classification]
     #   search_columns(cols, phrase)
     # }
+    # scope :search_name,
+    #       ->(phrase) { search_columns(Name[:search_name], phrase) }
     # # A more comprehensive search of Name fields, plus comments/descriptions.
     # scope :search_content_and_associations, lambda { |phrase|
     #   fields = Name.search_content(phrase).map(&:id)

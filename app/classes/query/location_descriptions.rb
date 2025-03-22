@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-class Query::LocationDescriptions < Query::Base
-  include Query::Initializers::Descriptions
+class Query::LocationDescriptions < Query::BaseAR
+  # include Query::Initializers::Descriptions
 
   def model
     @model ||= LocationDescription
@@ -18,24 +18,24 @@ class Query::LocationDescriptions < Query::Base
       by_author: User,
       by_editor: User,
       locations: [Location],
-      location_query: { subquery: :Location }
+      location_query: { subquery: :Location, joins: :location }
     )
-  end
-
-  def initialize_flavor
-    add_id_in_set_condition
-    add_owner_and_time_stamp_conditions
-    add_desc_by_author_condition(:location)
-    add_desc_by_editor_condition(:location)
-    ids = lookup_locations_by_name(params[:locations])
-    add_association_condition("location_descriptions.location_id", ids)
-    initialize_description_public_parameter(:location)
-    initialize_content_has_parameter(:location)
-    add_subquery_condition(:location_query, :locations)
-    super
   end
 
   def self.default_order
     "name"
   end
+
+  # def initialize_flavor
+  #   add_id_in_set_condition
+  #   add_owner_and_time_stamp_conditions
+  #   add_desc_by_author_condition(:location)
+  #   add_desc_by_editor_condition(:location)
+  #   ids = lookup_locations_by_name(params[:locations])
+  #   add_association_condition("location_descriptions.location_id", ids)
+  #   initialize_description_public_parameter(:location)
+  #   initialize_content_has_parameter(:location)
+  #   add_subquery_condition(:location_query, :locations)
+  #   super
+  # end
 end

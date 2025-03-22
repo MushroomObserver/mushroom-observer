@@ -4501,7 +4501,6 @@
   query_search_user: search users
   query_search_where: search where
   query_search_content: search content
-  query_search_location_notes: search location notes
   query_preference_filter: preference filter
 
   # Sorting criteria.
