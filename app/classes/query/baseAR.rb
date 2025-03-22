@@ -51,8 +51,9 @@ class Query::BaseAR
   end
 
   def self.subquery_parameters
-    @subquery_parameters =
-      parameter_declarations.select { |key, _v| key.to_s.include?("_query") }
+    @subquery_parameters = parameter_declarations.select do |key, _v|
+      key.to_s.include?("_query")
+    end
   end
 
   def scope_parameters
@@ -60,8 +61,8 @@ class Query::BaseAR
   end
 
   def self.scope_parameters
-    @scope_parameters =
-      parameter_declarations.except(*subquery_parameters.keys).except(:by)
+    excepts = subquery_parameters.keys + [:by, :preference_filter]
+    @scope_parameters = parameter_declarations.except(*excepts)
   end
 
   # A "current_or_related_query" may be called for links:
