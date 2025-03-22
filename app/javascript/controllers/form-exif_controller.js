@@ -9,9 +9,10 @@ const internalConfig = {
   }
 }
 
-// This controller needs to be on the whole form, to enable the large drop area.
-// (formerly "observation_images" section of the form)
-// Connects to data-controller="form-exif"
+// The "form-exif" controller works together with the "form-images" controller
+// to read the EXIF image data from an uploaded image during record creation UX.
+// This controller needs to be on the whole form, to enable the large drop area
+// (formerly the "observation_images" section of the form).
 export default class extends Controller {
   static targets = ["carousel", "item", "useExifBtn",
     "collapseFields", "collapseCheck"]
@@ -119,15 +120,8 @@ export default class extends Controller {
       _use_exif_button = itemElement.querySelector('.use_exif_btn');
     _exif_date.dataset.found = 'false';
 
-    // Image Date Logic
-    if (exif_data.DateTimeOriginal) {
-      // we found the date taken, let's parse it down.
-      // returns an array of [YYYY,MM,DD]
-      const _date_taken_array =
-        exif_data.DateTimeOriginal.description.substring(' ', 10).
-          split(':').reverse(),
-        _exifSimpleDate = this.SimpleDate(..._date_taken_array);
-
+    const _exifSimpleDate = this.parseExifDate(exif_data);
+    if (_exifSimpleDate) {
       this.imageDate(itemElement, _exifSimpleDate);
 
       // shows the exif date by the photo
@@ -141,6 +135,57 @@ export default class extends Controller {
       // Use observation date
       this.imageDate(itemElement, this.observationDate());
     }
+  }
+
+  // EXIF date parsing logic
+  // Confusingly, cameras seem to ignore the EXIF standard and use multiple
+  // date field name conventions, and multiple datetime formats.
+  // So we don't know what we'll get. For example:
+  // exif_data["DateTimeDigitized", "DateTimeOriginal"] - legit, first preferred
+  // exif_data["ICC Profile Date"] - incorrect per the standard, but we've
+  // gotten it before. Also note the different date/time separators:
+  //   {description: "2025-03-09T16:46:41.560", or "2025:03:09 16:46:41.560"
+  //    value: "2025-03-09T16:46:41.560"}, any format
+  parseExifDate(exif_data) {
+    const _known_field_names = ["DateTimeDigitized", "DateTimeOriginal",
+      "ICC Profile Date"];
+    const _fieldName = _known_field_names.find((fieldName) =>
+      exif_data[fieldName]["description"].length > 0
+    );
+    const _dateTime = exif_data[_fieldName]["description"]
+    if (!_dateTime) {
+      console.log(
+        "Couldn't find a recognizable EXIF date field: " +
+        JSON.stringify(exif_data)
+      );
+      return false;
+    }
+    const _separator = _dateTime.includes(" ") ? " " : "T";
+    if (!_separator) {
+      console.log(
+        "Couldn't recognize a date/time separator in the EXIF date field: " +
+        _dateTime
+      );
+      return false;
+    }
+    const _date = _dateTime.substring(_separator, 10),
+      _date_separator = _date.includes(":") ? ":" : "-";
+    if (!_date_separator) {
+      console.log(
+        "Didn't recognize the date digit separator in the EXIF date field: " +
+        _dateTime
+      );
+      return false;
+    }
+    const _date_taken_array = _date.split(_date_separator).reverse();
+    if (_date_taken_array.length !== 3) {
+      console.log(
+        "The EXIF date field: doesn't seem to have a year, month and day: " +
+        _dateTime
+      );
+      return false
+    }
+    return this.SimpleDate(..._date_taken_array);
   }
 
   // Click callback so .exif_date will set the image date if clicked
