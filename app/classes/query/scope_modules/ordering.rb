@@ -25,7 +25,6 @@ module Query::ScopeModules::Ordering
         "Can't figure out how to sort #{model.name.pluralize} by :#{by}."
       )
     end
-
     send(sorting_method, model)
   end
 
@@ -71,9 +70,8 @@ module Query::ScopeModules::Ordering
     # "IF(herbaria.code = '', '~', herbaria.code) ASC, herbaria.name ASC"
     @scopes = @scopes.order(
       Herbarium[:code].eq(nil).
-        when(true).
-          then(Arel::Nodes.build_quoted("~").asc, Herbarium[:name].asc).
-        when(false).then(Herbarium[:code].asc, Herbarium[:name].asc)
+        when(true).then(Arel::Nodes.build_quoted("~")).
+        when(false).then(Herbarium[:code]).asc, Herbarium[:name].asc
     )
   end
 
@@ -317,6 +315,7 @@ module Query::ScopeModules::Ordering
   end
 
   def sort_by_user(_model)
+    debugger
     # add_join(:users)
     # 'IF(users.name = "" OR users.name IS NULL, users.login, users.name) ASC'
     @scopes = @scopes.joins(:user).
