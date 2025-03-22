@@ -122,8 +122,8 @@ module Query::ScopeModules::Ordering
 
     # "herbarium_records.initial_det ASC, " \
     # "herbarium_records.accession_number ASC"
-    @scopes = @scopes.order(HerbariumRecords[:initial_det].asc,
-                            HerbariumRecords[:accession_number].asc)
+    @scopes = @scopes.order(HerbariumRecord[:initial_det].asc,
+                            HerbariumRecord[:accession_number].asc)
   end
 
   def sort_by_herbarium_name(_model)
