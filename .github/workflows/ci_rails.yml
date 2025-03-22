@@ -77,6 +77,11 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: ./coverage/lcov/lcov.info
 
+      # See Rails 8 default
+      # https://github.com/rails/rails/blob/4a78dcb326e57b5035c4df322e31875bfa74ae23/.github/workflows/rubocop.yml#L1
+      - name: Run RuboCop
+        run: bundle exec rubocop --parallel
+
     # https://github.com/devmasx/brakeman-linter-action
     # Temporarily disable brakeman in CI because it causes an error
     # See https://github.com/MushroomObserver/mushroom-observer/issues/1514
