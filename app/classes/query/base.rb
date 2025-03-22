@@ -20,9 +20,7 @@ class Query::Base
 
   attr_writer :record
 
-  def parameter_declarations
-    self.class.parameter_declarations
-  end
+  delegate :parameter_declarations, to: :class
 
   def self.parameter_declarations
     {
@@ -37,9 +35,7 @@ class Query::Base
     }
   end
 
-  def takes_parameter?(key)
-    self.class.takes_parameter?(key)
-  end
+  delegate :takes_parameter?, to: :class
 
   def self.takes_parameter?(key)
     parameter_declarations.key?(key)
@@ -52,9 +48,7 @@ class Query::Base
     add_join(params[:join]) if params[:join]
   end
 
-  def subquery_parameters
-    self.class.subquery_parameters
-  end
+  delegate :subquery_parameters, to: :class
 
   def self.subquery_parameters
     parameter_declarations.select { |key, _v| key.to_s.include?("_query") }

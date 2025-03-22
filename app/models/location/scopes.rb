@@ -136,7 +136,7 @@ module Location::Scopes
     # Use named parameters (lat:, lng:), any order
     scope :contains_point, lambda { |**args|
       args => { lat:, lng: }
-      where((Location[:south]).lteq(lat).and((Location[:north]).gteq(lat)).
+      where(Location[:south].lteq(lat).and(Location[:north].gteq(lat)).
             and(Location[:west].lteq(lng).and(Location[:east].gteq(lng)).
                 or(Location[:west].gteq(lng).and(Location[:east].lteq(lng)))))
     }
