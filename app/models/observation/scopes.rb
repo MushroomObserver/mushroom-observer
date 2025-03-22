@@ -90,7 +90,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :lichen, lambda { |boolish = :yes|
       # if false, returns all
       boolish = :yes if boolish == true
-      case boolish.to_sym
+      case boolish.to_s.to_sym
       when :yes
         where(Observation[:lifeform].matches("%lichen%"))
       when :no
