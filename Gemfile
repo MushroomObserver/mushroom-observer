@@ -176,7 +176,7 @@ group :test, :development do
 
   # Use rubocop and extensions for code quality control
   # https://docs.rubocop.org/rubocop/extensions.html#cop-extensions
-  gem("rubocop", "1.71.2", require: false)
+  gem("rubocop", require: false)
   gem("rubocop-performance")
   gem("rubocop-rails")
   gem("rubocop-thread_safety", require: false)
