@@ -53,17 +53,13 @@ module PatternSearch
       PARAMS
     end
 
-    def params
-      self.class.params
-    end
+    delegate :params, to: :class
 
     def self.model
       ::Observation
     end
 
-    def model
-      self.class.model
-    end
+    delegate :model, to: :class
 
     def build_query
       super

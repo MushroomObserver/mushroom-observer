@@ -426,9 +426,7 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
     "#{notes_area_id_prefix}#{part.tr(" ", "_")}"
   end
 
-  def notes_part_id(part)
-    SpeciesList.notes_part_id(part)
-  end
+  delegate :notes_part_id, to: :SpeciesList
 
   # prefix for id of textarea
   def self.notes_area_id_prefix

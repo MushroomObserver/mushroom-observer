@@ -222,7 +222,5 @@ class Query
     query
   end
 
-  def default_order
-    self.class.default_order
-  end
+  delegate :default_order, to: :class
 end

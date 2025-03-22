@@ -41,7 +41,7 @@ module APIKeysHelper
     user.api_keys.sort_by do |key|
       last_use = begin
                    (Time.zone.now - key.last_used)
-                 rescue
+                 rescue StandardError
                    0
                  end
       [-key.num_uses, last_use, key.id]
