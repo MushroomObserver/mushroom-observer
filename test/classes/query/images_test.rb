@@ -293,13 +293,6 @@ class Query::ImagesTest < UnitTestCase
     assert_image_obs_query(expects, projects: [project.title])
   end
 
-  def test_image_with_observations_users
-    expects = Image.index_order.joins(:observations).
-              where(observations: { user: dick }).distinct
-    assert_not_empty(expects, "'expect` is broken; it should not be empty")
-    assert_image_obs_query(expects, by_users: dick)
-  end
-
   ##### numeric parameters #####
 
   def test_image_with_observations_bounding_box
@@ -380,19 +373,19 @@ class Query::ImagesTest < UnitTestCase
     assert_image_obs_query([], search_where: "snazzle")
   end
 
-  def test_image_with_observations_by_user
-    expects = image_with_observations_by_user(rolf).to_a
-    assert_image_obs_query(expects, by_users: rolf)
-
-    expects = image_with_observations_by_user(mary).to_a
-    assert_image_obs_query(expects, by_users: mary)
+  def test_image_with_observations_by_users
+    assert_image_with_observations_by_user(dick)
+    assert_image_with_observations_by_user(rolf)
+    assert_image_with_observations_by_user(mary)
 
     assert_image_obs_query([], by_users: users(:zero_user))
   end
 
-  def image_with_observations_by_user(user)
-    Image.index_order.joins(:observations).
-      where(observations: { user: user }).distinct
+  def assert_image_with_observations_by_user(user)
+    expects = Image.index_order.joins(:observations).
+              where(observations: { user: user }).distinct
+    assert_not_empty(expects, "'expect` is broken; it should not be empty")
+    assert_image_obs_query(expects, by_users: user)
   end
 
   def test_image_with_observations_for_project

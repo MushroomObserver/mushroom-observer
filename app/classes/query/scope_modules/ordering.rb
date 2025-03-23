@@ -7,6 +7,7 @@ module Query::ScopeModules::Ordering
     # passed-in "by" parameter take precedence.  If neither is given, then
     # fall back on the "default_order" finally.
     return unless by || order.blank?
+    return if by == "none"
 
     by ||= default_order
     by = by.dup.to_s
@@ -39,9 +40,6 @@ module Query::ScopeModules::Ordering
   private
 
   ####### methods dispatched from initialize_order_specs
-
-  # This is for subqueries, so they don't affect outer order.
-  def sort_by_none(_model); end
 
   def sort_by_accession_number(model)
     return unless model == HerbariumRecord
