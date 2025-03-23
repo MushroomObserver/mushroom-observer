@@ -61,7 +61,7 @@ module Query::ScopeModules::Initialization
       joins = subquery_parameters.dig(param, :joins)
       subquery = Query.new(model_name, **hash).query
 
-      @scopes = @scopes.joins(joins).merge(subquery)
+      @scopes = @scopes.joins(joins).merge(subquery).distinct
     end
   end
 
