@@ -768,5 +768,4 @@ Style/SlicingWithRange:
 # Configuration parameters: Mode.
 Style/StringConcatenation:
   Exclude:
-    - 'lib/tasks/lang.rake'
     - 'script/refresh_name_lister_cache'
