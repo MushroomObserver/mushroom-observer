@@ -35,9 +35,9 @@ class QueryTest < UnitTestCase
   def test_validate_params
     # Should ignore params it doesn't recognize
     # assert_raises(RuntimeError) { Query.lookup(:Name, xxx: true) }
-    assert_raises(RuntimeError) { Query.lookup(:Name, by: [1, 2, 3]) }
-    assert_raises(RuntimeError) { Query.lookup(:Name, by: true) }
-    assert_equal("id", Query.lookup(:Name, by: :id).params[:by])
+    assert_raises(RuntimeError) { Query.lookup(:Name, order_by: [1, 2, 3]) }
+    assert_raises(RuntimeError) { Query.lookup(:Name, order_by: true) }
+    assert_equal("id", Query.lookup(:Name, order_by: :id).params[:order_by])
 
     assert_equal(
       :either,
@@ -261,7 +261,7 @@ class QueryTest < UnitTestCase
     assert_equal(2, QueryRecord.count)
 
     # New because params are different from q1.
-    q3 = Query.lookup_and_save(:Observation, by: :id)
+    q3 = Query.lookup_and_save(:Observation, order_by: :id)
     assert_equal(3, QueryRecord.count)
 
     # Not new because it is explicitly defaulted before validate.
@@ -270,7 +270,7 @@ class QueryTest < UnitTestCase
     assert_equal(q1, q4, QueryRecord.count)
 
     # Ditto default.
-    q5 = Query.lookup_and_save(:Observation, by: :id)
+    q5 = Query.lookup_and_save(:Observation, order_by: :id)
     assert_equal(3, QueryRecord.count)
     assert_equal(q3, q5, QueryRecord.count)
 
@@ -279,17 +279,17 @@ class QueryTest < UnitTestCase
     assert_equal(4, QueryRecord.count)
 
     # Old pattern but new order.
-    Query.lookup_and_save(:Observation, pattern: "blah", by: :date)
+    Query.lookup_and_save(:Observation, pattern: "blah", order_by: :date)
     assert_equal(5, QueryRecord.count)
 
-    # Identical, even though :by is explicitly set in one.
+    # Identical, even though :order_by is explicitly set in one.
     Query.lookup_and_save(:Observation, pattern: "blah")
     assert_equal(5, QueryRecord.count)
 
     # Identical query, but new query because order given explicitly.  Order is
     # not given default until query is initialized, thus default not stored in
     # params, so lookup doesn't know about it.
-    Query.lookup_and_save(:Observation, by: :date)
+    Query.lookup_and_save(:Observation, order_by: :date)
     assert_equal(6, QueryRecord.count)
 
     # Just a sanity check.
@@ -486,7 +486,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_low_levels
-    query = Query.lookup(:Name, misspellings: :either, by: :id)
+    query = Query.lookup(:Name, misspellings: :either, order_by: :id)
 
     @fungi = names(:fungi)
     @agaricus = names(:agaricus)
@@ -537,13 +537,13 @@ class QueryTest < UnitTestCase
   end
 
   def test_tables_used
-    query = Query.lookup(:Observation, by: :id)
+    query = Query.lookup(:Observation, order_by: :id)
     assert_equal([:observations], query.tables_used)
 
-    query = Query.lookup(:Observation, by: :name)
+    query = Query.lookup(:Observation, order_by: :name)
     assert_equal([:names, :observations], query.tables_used)
 
-    query = Query.lookup(:Image, by: :name)
+    query = Query.lookup(:Image, order_by: :name)
 
     assert_equal([:images, :names, :observation_images, :observations],
                  query.tables_used)
@@ -555,7 +555,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_results
-    query = Query.lookup(:User, by: :id)
+    query = Query.lookup(:User, order_by: :id)
 
     assert_equal(
       Set.new,
@@ -588,7 +588,7 @@ class QueryTest < UnitTestCase
     @names = Name.reorder(id: :asc).order(:id)
     @pages = MOPaginator.new(number: number,
                              num_per_page: num_per_page)
-    @query = Query.lookup(:Name, misspellings: :either, by: :id)
+    @query = Query.lookup(:Name, misspellings: :either, order_by: :id)
   end
 
   def paginate_test(number, num_per_page, expected_nths)
@@ -694,7 +694,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_next_and_prev
-    query = Query.lookup(:Name, misspellings: :either, by: :id)
+    query = Query.lookup(:Name, misspellings: :either, order_by: :id)
     @names = Name.reorder(id: :asc)
 
     query.current = @names[2]
@@ -758,7 +758,7 @@ class QueryTest < UnitTestCase
     query_a = []
 
     # Several observation queries can be turned into image queries.
-    query_a[0] = Query.lookup_and_save(:Observation, by: :id)
+    query_a[0] = Query.lookup_and_save(:Observation, order_by: :id)
     query_a[1] = Query.lookup_and_save(:Observation, by_users: mary.id)
     query_a[2] = Query.lookup_and_save(
       :Observation, species_lists: species_lists(:first_species_list).id
@@ -781,7 +781,7 @@ class QueryTest < UnitTestCase
 
     # Almost any query on observations should be mappable, i.e. coercable into
     # a query on those observations' locations.
-    query_a[0] = Query.lookup_and_save(:Observation, by: :id)
+    query_a[0] = Query.lookup_and_save(:Observation, order_by: :id)
     query_a[1] = Query.lookup_and_save(:Observation, by_users: mary.id)
     query_a[2] = Query.lookup_and_save(
       :Observation, species_lists: species_lists(:first_species_list).id
@@ -797,7 +797,7 @@ class QueryTest < UnitTestCase
     # Now, check the parameters of those subqueries.
     obs_queries = query_b.map { |que| que.params[:observation_query] }
 
-    assert_equal("id", obs_queries[0][:by])
+    assert_equal("id", obs_queries[0][:order_by])
     assert_equal([mary.id], obs_queries[1][:by_users])
     assert_equal([species_lists(:first_species_list).id],
                  obs_queries[2][:species_lists])
@@ -816,7 +816,7 @@ class QueryTest < UnitTestCase
     query_a = []
 
     # Several observation queries can be turned into name queries.
-    query_a[0] = Query.lookup_and_save(:Observation, by: :id)
+    query_a[0] = Query.lookup_and_save(:Observation, order_by: :id)
     query_a[1] = Query.lookup_and_save(:Observation, by_users: mary.id)
     query_a[2] = Query.lookup_and_save(
       :Observation, species_lists: species_lists(:first_species_list).id
@@ -961,15 +961,15 @@ class QueryTest < UnitTestCase
   #   assert_equal("Observation", q4.model.to_s)
   #   assert_equal("SpeciesList", q5.model.to_s)
 
-  #   assert_equal(:rss_log, q2.params[:by].to_sym)
-  #   assert_equal(:rss_log, q3.params[:by].to_sym)
-  #   assert_equal(:rss_log, q4.params[:by].to_sym)
-  #   assert_equal(:rss_log, q5.params[:by].to_sym)
+  #   assert_equal(:rss_log, q2.params[:order_by].to_sym)
+  #   assert_equal(:rss_log, q3.params[:order_by].to_sym)
+  #   assert_equal(:rss_log, q4.params[:order_by].to_sym)
+  #   assert_equal(:rss_log, q5.params[:order_by].to_sym)
   # end
 
   def test_relatable
-    assert(Query.lookup(:Observation, by: :id).relatable?(:Image))
-    assert_not(Query.lookup(:Herbarium, by: :id).relatable?(:Project))
+    assert(Query.lookup(:Observation, order_by: :id).relatable?(:Image))
+    assert_not(Query.lookup(:Herbarium, order_by: :id).relatable?(:Project))
   end
 
   ##############################################################################
@@ -991,12 +991,12 @@ class QueryTest < UnitTestCase
     User.current = rolf
     assert_equal("postal", User.current_location_format)
     assert_query([albion, elgin_co],
-                 :Location, id_in_set: [albion.id, elgin_co.id], by: :name)
+                 :Location, id_in_set: [albion.id, elgin_co.id], order_by: :name)
 
     User.current = roy
     assert_equal("scientific", User.current_location_format)
     assert_query([elgin_co, albion],
-                 :Location, id_in_set: [albion.id, elgin_co.id], by: :name)
+                 :Location, id_in_set: [albion.id, elgin_co.id], order_by: :name)
 
     obs1 = observations(:minimal_unknown_obs)
     obs2 = observations(:detailed_unknown_obs)
@@ -1006,11 +1006,11 @@ class QueryTest < UnitTestCase
     User.current = rolf
     assert_equal("postal", User.current_location_format)
     assert_query([obs1, obs2],
-                 :Observation, id_in_set: [obs1.id, obs2.id], by: :location)
+                 :Observation, id_in_set: [obs1.id, obs2.id], order_by: :location)
 
     User.current = roy
     assert_equal("scientific", User.current_location_format)
     assert_query([obs2, obs1],
-                 :Observation, id_in_set: [obs1.id, obs2.id], by: :location)
+                 :Observation, id_in_set: [obs1.id, obs2.id], order_by: :location)
   end
 end

@@ -14,14 +14,14 @@ class Query::UsersTest < UnitTestCase
 
   def test_user_all_by_login
     expects = User.order(login: :asc, id: :desc).to_a
-    assert_query(expects, :User, by: :login)
+    assert_query(expects, :User, order_by: :login)
   end
 
   def test_user_id_in_set
     ids = [rolf.id, mary.id, junk.id]
     scope = User.id_in_set(ids)
     assert_query_scope(ids, scope,
-                       :User, id_in_set: ids.reverse, by: :reverse_name)
+                       :User, id_in_set: ids.reverse, order_by: :reverse_name)
   end
 
   def test_user_pattern_search_nonexistent
@@ -50,7 +50,7 @@ class Query::UsersTest < UnitTestCase
     # (Differs from searches on other Classes or by other sort orders)
     expects = User.left_outer_joins(:location).
               order(Location[:name].asc, User[:id].desc).uniq
-    assert_query(expects, :User, pattern: "", by: "location")
+    assert_query(expects, :User, pattern: "", order_by: "location")
   end
 
   def user_pattern_search(pattern)

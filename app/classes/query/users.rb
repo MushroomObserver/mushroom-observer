@@ -6,7 +6,7 @@ class Query::Users < Query::Base
   end
 
   def list_by
-    @list_by ||= case params[:by]
+    @list_by ||= case params[:order_by]
                  when "login", "reverse_login"
                    User[:login]
                  else

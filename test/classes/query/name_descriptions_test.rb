@@ -15,30 +15,30 @@ class Query::NameDescriptionsTest < UnitTestCase
     assert(all_pelt_descs.length < all_descs.length)
     assert(public_pelt_descs.length < all_pelt_descs.length)
 
-    assert_query(all_descs, :NameDescription, by: :id)
-    assert_query(all_pelt_descs, :NameDescription, by: :id, names: pelt)
+    assert_query(all_descs, :NameDescription, order_by: :id)
+    assert_query(all_pelt_descs, :NameDescription, order_by: :id, names: pelt)
     assert_query(public_pelt_descs,
-                 :NameDescription, by: :id, names: pelt, is_public: "yes")
+                 :NameDescription, order_by: :id, names: pelt, is_public: "yes")
   end
 
   def test_name_description_by_user
     expects = NameDescription.where(user: mary).order(:id)
-    assert_query(expects, :NameDescription, by_users: mary, by: :id)
+    assert_query(expects, :NameDescription, by_users: mary, order_by: :id)
 
     expects = NameDescription.where(user: katrina).order(:id)
-    assert_query(expects, :NameDescription, by_users: katrina, by: :id)
+    assert_query(expects, :NameDescription, by_users: katrina, order_by: :id)
 
-    assert_query([], :NameDescription, by_users: junk, by: :id)
+    assert_query([], :NameDescription, by_users: junk, order_by: :id)
   end
 
   def test_name_description_by_author
     expects = NameDescription.joins(:name_description_authors).
               where(name_description_authors: { user_id: rolf }).order(:id)
-    assert_query(expects, :NameDescription, by_author: rolf, by: :id)
+    assert_query(expects, :NameDescription, by_author: rolf, order_by: :id)
 
     expects = NameDescription.joins(:name_description_authors).
               where(name_description_authors: { user_id: mary }).order(:id)
-    assert_query(expects, :NameDescription, by_author: mary, by: :id)
+    assert_query(expects, :NameDescription, by_author: mary, order_by: :id)
 
     assert_query([], :NameDescription, by_author: junk)
   end

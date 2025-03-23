@@ -115,7 +115,9 @@ module ApplicationController::Queries
   end
 
   def map_past_bys(args)
-    args[:by] = (BY_MAP[args[:by].to_s] || args[:by]) if args.member?(:by)
+    return unless args.member?(:order_by)
+
+    args[:order_by] = (BY_MAP[args[:order_by].to_s] || args[:order_by])
   end
 
   def add_user_content_filter_parameters(query_params, model)

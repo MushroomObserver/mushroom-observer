@@ -17,7 +17,7 @@ module Observations
 
     # override the default? maybe no longer necessary
     def unfiltered_index_opts
-      super.merge(query_args: { needs_naming: true, by: :rss_log })
+      super.merge(query_args: { needs_naming: true, order_by: :rss_log })
     end
 
     def index_active_params
@@ -49,19 +49,19 @@ module Observations
       # return unless (clade = Name.find_by(text_name: term))
 
       query = create_query(:Observation, needs_naming: true, clade: term,
-                                         by: :rss_log)
+                                         order_by: :rss_log)
       [query, {}]
     end
 
     def region(term)
       query = create_query(:Observation, needs_naming: true, region: term,
-                                         by: :rss_log)
+                                         order_by: :rss_log)
       [query, {}]
     end
 
     # def user_filter(term)
     #   query = create_query(:Observation, needs_naming: true, by_users: term,
-    #                                      by: :rss_log)
+    #                                      order_by: :rss_log)
     #   [query, {}]
     # end
 

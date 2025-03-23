@@ -11,12 +11,12 @@ class Query::LocationsTest < UnitTestCase
     expects = Location.index_order
     assert_query(expects, :Location)
     expects = Location.reorder(id: :asc)
-    assert_query(expects, :Location, by: :id)
+    assert_query(expects, :Location, order_by: :id)
   end
 
   def test_location_by_users
     assert_query(Location.reorder(id: :asc).by_users(rolf).distinct,
-                 :Location, by_users: rolf, by: :id)
+                 :Location, by_users: rolf, order_by: :id)
     assert_query([], :Location, by_users: users(:zero_user))
   end
 
@@ -33,7 +33,7 @@ class Query::LocationsTest < UnitTestCase
 
   def test_location_by_rss_log
     expects = Location.order_by_rss_log
-    assert_query(expects.to_a, :Location, by: :rss_log)
+    assert_query(expects.to_a, :Location, order_by: :rss_log)
   end
 
   def location_set
@@ -76,7 +76,7 @@ class Query::LocationsTest < UnitTestCase
 
   def test_location_pattern_search
     expects = Location.reorder(id: :asc).pattern("California")
-    assert_query(expects, :Location, pattern: "California", by: :id)
+    assert_query(expects, :Location, pattern: "California", order_by: :id)
     assert_query_scope([locations(:elgin_co).id], Location.pattern("Canada"),
                        :Location, pattern: "Canada")
     assert_query([], :Location, pattern: "Canada -Elgin")

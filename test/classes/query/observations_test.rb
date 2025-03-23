@@ -15,7 +15,7 @@ class Query::ObservationsTest < UnitTestCase
   # Overwrites scope `order_by_rss_log` in abstract_model
   def test_observation_by_rss_log
     expects = Observation.order_by_rss_log
-    assert_query(expects, :Observation, by: :rss_log)
+    assert_query(expects, :Observation, order_by: :rss_log)
   end
 
   def big_set
@@ -42,12 +42,12 @@ class Query::ObservationsTest < UnitTestCase
 
   def test_observation_by_user
     expects = Observation.reorder(id: :asc).where(user: rolf.id).to_a
-    assert_query(expects, :Observation, by_users: rolf, by: :id)
+    assert_query(expects, :Observation, by_users: rolf, order_by: :id)
     expects = Observation.reorder(id: :asc).where(user: mary.id).to_a
-    assert_query(expects, :Observation, by_users: mary, by: :id)
+    assert_query(expects, :Observation, by_users: mary, order_by: :id)
     expects = Observation.reorder(id: :asc).where(user: dick.id).to_a
-    assert_query(expects, :Observation, by_users: dick, by: :id)
-    assert_query([], :Observation, by_users: junk, by: :id)
+    assert_query(expects, :Observation, by_users: dick, order_by: :id)
+    assert_query([], :Observation, by_users: junk, order_by: :id)
   end
 
   def test_observation_confidence
@@ -426,12 +426,12 @@ class Query::ObservationsTest < UnitTestCase
     expects = Observation.reorder(id: :asc).
               where(location: locations(:burbank)).distinct
     assert_query(expects,
-                 :Observation, search_where: "burbank", by: :id) # location
+                 :Observation, search_where: "burbank", order_by: :id) # location
   end
 
   def test_observation_advanced_search_user
     expects = Observation.reorder(id: :asc).where(user: rolf.id).distinct
-    assert_query(expects, :Observation, search_user: "rolf", by: :id)
+    assert_query(expects, :Observation, search_user: "rolf", order_by: :id)
   end
 
   def test_observation_advanced_search_content

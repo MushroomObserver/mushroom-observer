@@ -14,7 +14,7 @@ class Query::ProjectsTest < UnitTestCase
 
   def test_project_by_rss_log
     expects = Project.order_by_rss_log
-    assert_query(expects, :Project, by: :rss_log)
+    assert_query(expects, :Project, order_by: :rss_log)
   end
 
   def test_project_in_set

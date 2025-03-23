@@ -38,7 +38,7 @@ class API2
     def build_query
       params = query_params
       params.remove_nils!
-      params[:by] = :id
+      params[:order_by] = :id
       Query.lookup(model.name.to_sym, params)
     rescue RuntimeError => e
       raise(QueryError.new(e))

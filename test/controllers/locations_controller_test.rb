@@ -895,6 +895,6 @@ class LocationsControllerTest < FunctionalTestCase
   end
 
   def named_obs_query(name)
-    Query.lookup(:Observation, pattern: name, by: :name)
+    Query.lookup(:Observation, pattern: name, order_by: :name)
   end
 end

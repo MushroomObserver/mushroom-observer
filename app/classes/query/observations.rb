@@ -11,7 +11,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
   end
 
   def list_by
-    @list_by ||= case params[:by].to_s
+    @list_by ||= case params[:order_by].to_s
                  when "user", "reverse_user"
                    User[:login]
                  when "name", "reverse_name"
