@@ -494,16 +494,16 @@ module SpeciesLists
 
       any_changes = false
       Project.where(id: User.current.projects_member.map(&:id)).
-        includes(:species_lists).each do |project|
-        before = spl.projects.include?(project)
-        after = checks["id_#{project.id}"] == "1"
-        next if before == after
+        includes(:species_lists).find_each do |project|
+          before = spl.projects.include?(project)
+          after = checks["id_#{project.id}"] == "1"
+          next if before == after
 
-        change_project_species_lists(
-          project: project, spl: spl, change: (after ? :add : :remove)
-        )
-        any_changes = true
-      end
+          change_project_species_lists(
+            project: project, spl: spl, change: (after ? :add : :remove)
+          )
+          any_changes = true
+        end
 
       flash_notice(:species_list_show_manage_observations_too.t) if any_changes
     end

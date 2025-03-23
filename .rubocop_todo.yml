@@ -547,7 +547,6 @@ Rails/Blank:
 # AllowedMethods: order, limit, select, lock
 Rails/FindEach:
   Exclude:
-    - 'app/controllers/species_lists/shared_private_methods.rb'
     - 'lib/tasks/cache.rake'
     - 'lib/tasks/email.rake'
     - 'lib/tasks/lang.rake'
