@@ -304,20 +304,17 @@ module SpeciesLists
     end
 
     def checklist_from_name_query(query)
-      query.select_rows(
-        select: "DISTINCT names.display_name, names.id",
-        limit: 1000
-      )
+      query.query.select(Name[:display_name], Name[:id]).distinct.limit(1000)
     end
 
+    # Seems really inefficient.
+    # The obs table should be altered so it has both these values - AN 202503
     def checklist_from_observation_query(query)
-      query.select_rows(
-        select: "DISTINCT names.display_name, names.id",
-        join: :names,
-        limit: 1000
-      )
+      query.query.joins(:name).
+        select(Name[:display_name], Name[:id]).distinct.limit(1000)
     end
 
+    # Grossly inefficient. We should not offer this query to users. - AN 202503
     def checklist_from_image_query(query)
       query.select_rows(
         select: "DISTINCT names.display_name, names.id",
