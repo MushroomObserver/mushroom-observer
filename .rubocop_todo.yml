@@ -768,7 +768,6 @@ Style/SlicingWithRange:
 # Configuration parameters: Mode.
 Style/StringConcatenation:
   Exclude:
-    - 'app/helpers/descriptions_helper.rb'
     - 'app/helpers/suggestions_helper.rb'
     - 'app/helpers/versions_helper.rb'
     - 'app/models/comment/callbacks.rb'
