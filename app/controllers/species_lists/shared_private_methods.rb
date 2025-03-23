@@ -307,8 +307,8 @@ module SpeciesLists
       query.query.select(Name[:display_name], Name[:id]).distinct.limit(1000)
     end
 
-    # Seems really inefficient. Only reason for join is __Name formatting__.
-    # The obs table should be altered so it has both these values - AN 202503
+    # Only reason for ther join is to get the __Name formatting__.
+    # The obs table could be altered so it has both these values - AN 202503
     def checklist_from_observation_query(query)
       query.query.joins(:name).
         select(Name[:display_name], Name[:id]).distinct.limit(1000)
