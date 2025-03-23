@@ -547,7 +547,6 @@ Rails/Blank:
 # AllowedMethods: order, limit, select, lock
 Rails/FindEach:
   Exclude:
-    - 'lib/tasks/visual_model.rake'
     - 'script/bulk_name_change'
     - 'script/check_enum_values'
     - 'script/refresh_sitemap'
