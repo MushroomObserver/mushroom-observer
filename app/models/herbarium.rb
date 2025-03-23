@@ -107,9 +107,7 @@ class Herbarium < AbstractModel
   end
 
   # wrap the class method
-  def mcp_collections
-    self.class.mcp_collections
-  end
+  delegate :mcp_collections, to: :class
 
   def can_edit?(user = User.current)
     if personal_user_id

@@ -89,7 +89,7 @@ module ApplicationController::Internationalization
   # Until we get rid of reliance on @js, this is a surrogate for
   # testing if the client's JS is enabled and sufficiently fully-featured.
   def js_enabled?(time_zone)
-    time_zone.present? ? true : Rails.env.test?
+    time_zone.present? || Rails.env.test?
   end
 
   # Return Array of the browser's requested locales (HTTP_ACCEPT_LANGUAGE).

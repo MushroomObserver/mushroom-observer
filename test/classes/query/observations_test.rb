@@ -503,9 +503,12 @@ class Query::ObservationsTest < UnitTestCase
     # single date should return after
     assert_query(Observation.index_order.send(col, "2011-05-12"),
                  :Observation, "#{col}": "2011-05-12")
-    # year should return after
-    assert_query(Observation.index_order.send(col, "2005"),
+    # year should return after 01/01
+    assert_query(Observation.index_order.send(col, "2005-01-01"),
                  :Observation, "#{col}": "2005")
+    # month should return after 01
+    assert_query(Observation.index_order.send(col, "2007-05-01"),
+                 :Observation, "#{col}": "2007-05")
     # years should return between
     assert_query(Observation.index_order.send(col, "2005", "2009"),
                  :Observation, "#{col}": %w[2005 2009])

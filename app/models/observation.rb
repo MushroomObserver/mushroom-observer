@@ -79,14 +79,8 @@
 #
 #  ==== Scopes
 #
-#  created_on("yyyymmdd")
-#  created_after("yyyymmdd")
-#  created_before("yyyymmdd")
-#  created_between(start, end)
-#  updated_on("yyyymmdd")
-#  updated_after("yyyymmdd")
-#  updated_before("yyyymmdd")
-#  updated_between(start, end)
+#  created_at("yyyy-mm-dd", "yyyy-mm-dd")
+#  updated_at("yyyy-mm-dd", "yyyy-mm-dd")
 #  found_on("yyyymmdd")
 #  found_after("yyyymmdd")
 #  found_before("yyyymmdd")
@@ -582,9 +576,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # convenience wrapper around class method of same name
-  def other_notes_key
-    Observation.other_notes_key
-  end
+  delegate :other_notes_key, to: :Observation
 
   # other_notes_key as a String
   # Makes it easy to combine with notes_template
@@ -592,9 +584,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     other_notes_key.to_s
   end
 
-  def other_notes_part
-    Observation.other_notes_part
-  end
+  delegate :other_notes_part, to: :Observation
 
   def other_notes
     notes ? notes[other_notes_key] : nil
@@ -610,9 +600,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     "#{notes_area_id_prefix}#{part.tr(" ", "_")}"
   end
 
-  def notes_part_id(part)
-    Observation.notes_part_id(part)
-  end
+  delegate :notes_part_id, to: :Observation
 
   # prefix for id of textarea
   def self.notes_area_id_prefix

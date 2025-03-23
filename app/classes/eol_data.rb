@@ -123,7 +123,7 @@ class EolData
 
   def most_desirable_name(names)
     most_desirable = names[0]
-    (names[1..]).each do |new_name|
+    names[1..].each do |new_name|
       most_desirable = most_desirable.more_popular(new_name)
     end
     most_desirable

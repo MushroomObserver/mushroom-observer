@@ -16,7 +16,5 @@ class Inat
     @inat = RestClient.get("#{API_BASE}#{operation}", headers)
   end
 
-  def body
-    @inat.body
-  end
+  delegate :body, to: :@inat
 end
