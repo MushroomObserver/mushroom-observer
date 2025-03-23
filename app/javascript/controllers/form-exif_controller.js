@@ -138,7 +138,7 @@ export default class extends Controller {
   }
 
   // EXIF date parsing logic
-  // Confusingly, some cameras seem to incorrectly implement the EXIF standard 
+  // Confusingly, some cameras seem to incorrectly implement the EXIF standard
   // using other date field name conventions, and non-standard datetime formats.
   // So we can't be too sure what we'll get. For example:
   // exif_data["DateTimeDigitized", "DateTimeOriginal"] - legit, first preferred
@@ -146,7 +146,7 @@ export default class extends Controller {
   // in photos with no other datetime data where it seemed to be a created date.
   // Note the difference in date/time separators:
   //   {description: "2025:03:09 16:46:41.560", correct for EXIF
-  //    value: "2025-03-09T16:46:41.560"}, non-standard
+  //    value: "2025-03-09T16:46:41.560"}, ISO, incorrect for EXIF
   parseExifDate(exif_data) {
     const _known_field_names = ["DateTimeDigitized", "DateTimeOriginal",
       "ICC Profile Date"];
