@@ -768,7 +768,6 @@ Style/SlicingWithRange:
 # Configuration parameters: Mode.
 Style/StringConcatenation:
   Exclude:
-    - 'app/models/interest.rb'
     - 'app/models/language_exporter.rb'
     - 'app/models/name/parse.rb'
     - 'app/models/rss_log.rb'
