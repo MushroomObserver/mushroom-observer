@@ -307,37 +307,28 @@ module SpeciesLists
       query.query.select(Name[:display_name], Name[:id]).distinct.limit(1000)
     end
 
-    # Seems really inefficient.
+    # Seems really inefficient. Only reason for join is __Name formatting__.
     # The obs table should be altered so it has both these values - AN 202503
     def checklist_from_observation_query(query)
       query.query.joins(:name).
         select(Name[:display_name], Name[:id]).distinct.limit(1000)
     end
 
-    # Grossly inefficient. We should not offer this query to users. - AN 202503
+    # Grossly inefficient. We should not offer this option to users. - AN 202503
     def checklist_from_image_query(query)
-      query.select_rows(
-        select: "DISTINCT names.display_name, names.id",
-        join: { observation_images: { observations: :names } },
-        limit: 1000
-      )
+      query.query.joins(observation_images: { observations: :name }).
+        select(Name[:display_name], Name[:id]).distinct.limit(1000)
     end
 
     def checklist_from_location_query(query)
-      query.select_rows(
-        select: "DISTINCT names.display_name, names.id",
-        join: { observations: :names },
-        limit: 1000
-      )
+      query.query.joins(observations: :name).
+        select(Name[:display_name], Name[:id]).distinct.limit(1000)
     end
 
     def checklist_from_rss_log_query(query)
-      query.select_rows(
-        select: "DISTINCT names.display_name, names.id",
-        join: { observations: :names },
-        where: "rss_logs.observation_id > 0",
-        limit: 1000
-      )
+      query.query.joins(observations: :name).
+        where(RssLog[:observation_id].gt(0)).
+        select(Name[:display_name], Name[:id]).distinct.limit(1000)
     end
 
     def init_name_vars_for_create
