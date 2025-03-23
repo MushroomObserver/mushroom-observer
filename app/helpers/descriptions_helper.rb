@@ -180,7 +180,7 @@ module DescriptionsHelper
   def show_name_description_latest_review(desc)
     tag.span(class: "help-note") do
       # disable cop -- lh side is a safe buffer, not a string
-      indent + "(" + :show_name_latest_review.t(  # rubocop:disable Style/StringConcatenation
+      indent + "(" + :show_name_latest_review.t( # rubocop:disable Style/StringConcatenation
         date: desc.last_review ? desc.last_review.web_time : :UNKNOWN.l,
         user: user_link(desc.reviewer, desc.reviewer.login)
       ) + ")"
