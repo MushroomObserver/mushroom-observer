@@ -175,7 +175,7 @@ module LanguageExporter
   end
 
   def write_localization_file(data)
-    temp_file = localization_file + "." + Process.pid.to_s
+    temp_file = "#{localization_file}.#{Process.pid}"
     File.open(temp_file, "w:utf-8") do |fh|
       fh << { locale => { MO.locale_namespace => data } }.to_yaml
     end
@@ -193,7 +193,7 @@ module LanguageExporter
   end
 
   def write_export_file_lines(output_lines)
-    temp_file = export_file + "." + Process.pid.to_s
+    temp_file = "#{export_file}.#{Process.pid}"
     File.open(temp_file, "w:utf-8") do |fh|
       output_lines.each do |line|
         fh.write(line)
@@ -278,7 +278,7 @@ module LanguageExporter
     elsif val == ""
       val = '""'
     end
-    val + "\n"
+    "#{val}\n"
   end
 
   def format_multiline_string(val)
