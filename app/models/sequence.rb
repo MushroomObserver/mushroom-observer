@@ -152,9 +152,7 @@ class Sequence < AbstractModel
   end
 
   # convenience wrapper around class method of same name
-  def blast_url_prefix
-    Sequence.blast_url_prefix
-  end
+  delegate :blast_url_prefix, to: :Sequence
 
   # Just the nucleotide codes: no description, no digits, no whitespace
   def bases_nucleotides
