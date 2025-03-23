@@ -547,7 +547,6 @@ Rails/Blank:
 # AllowedMethods: order, limit, select, lock
 Rails/FindEach:
   Exclude:
-    - 'lib/tasks/email.rake'
     - 'lib/tasks/lang.rake'
     - 'lib/tasks/visual_model.rake'
     - 'script/bulk_name_change'
