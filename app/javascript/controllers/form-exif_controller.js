@@ -142,8 +142,9 @@ export default class extends Controller {
   // using other date field name conventions, and non-standard datetime formats.
   // So we can't be too sure what we'll get. For example:
   // exif_data["DateTimeDigitized", "DateTimeOriginal"] - legit, first preferred
-  // exif_data["ICC Profile Date"] - incorrect per the standard, but we've
-  // gotten it before. Also note these different date/time separators:
+  // exif_data["ICC Profile Date"] - incorrect per the standard, but encountered
+  // in photos with no other datetime data where it seemed to be a created date.
+  // Note the difference in date/time separators:
   //   {description: "2025:03:09 16:46:41.560", correct for EXIF
   //    value: "2025-03-09T16:46:41.560"}, non-standard
   parseExifDate(exif_data) {
