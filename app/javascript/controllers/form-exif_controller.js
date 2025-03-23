@@ -153,8 +153,16 @@ export default class extends Controller {
     const _known_field_names = ["DateTimeDigitized", "DateTimeOriginal",
       "ICC Profile Date"];
     const _fieldName = _known_field_names.find((fieldName) =>
-      exif_data[fieldName]["description"].length > 0
+      exif_data?.hasOwnProperty(fieldName) &&
+      exif_data[fieldName].hasOwnProperty("description")
     );
+    if (!_fieldName) {
+      console.log(
+        "Couldn't recognize a dateTime field in the EXIF data: " +
+        JSON.stringify(exif_data)
+      );
+      return false;
+    }
     const _dateTime = exif_data[_fieldName]["description"]
     if (!_dateTime) {
       console.log(
