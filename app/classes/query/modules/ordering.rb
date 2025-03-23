@@ -32,7 +32,7 @@ module Query::Modules::Ordering
       sorting_method
     )
       raise(
-        "Can't figure out how to order #{model.name.pluralize} by :#{order_by}."
+        "Can't figure out how to sort #{model.name.pluralize} by :#{order_by}."
       )
     end
 

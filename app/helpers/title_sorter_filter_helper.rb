@@ -64,7 +64,7 @@ module TitleSorterFilterHelper
   def sort_link(label, query, by, this_by, link_all)
     path = { controller: query.model.show_controller,
              action: query.model.index_action,
-             order_by: by }.merge(query_params)
+             by: by }.merge(query_params)
     identifier = "#{query.model.to_s.pluralize.underscore}_by_#{by}_link"
     active = !link_all && (by.to_s == this_by) # boolean if current sort order
 
