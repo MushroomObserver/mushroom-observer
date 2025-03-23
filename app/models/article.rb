@@ -67,9 +67,7 @@ class Article < AbstractModel
   end
 
   # wrapper around class method of same name
-  def can_edit?(user)
-    Article.can_edit?(user)
-  end
+  delegate :can_edit?, to: :Article
 
   # Can the user create, edit, or delete Articles?
   def self.can_edit?(user)
