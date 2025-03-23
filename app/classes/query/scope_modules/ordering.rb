@@ -40,6 +40,9 @@ module Query::ScopeModules::Ordering
 
   ####### methods dispatched from initialize_order_specs
 
+  # This is for subqueries, so they don't affect outer order.
+  def sort_by_none(_model); end
+
   def sort_by_accession_number(model)
     return unless model == HerbariumRecord
 

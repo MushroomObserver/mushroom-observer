@@ -52,14 +52,16 @@ module Query::ScopeModules::Initialization
     end
   end
 
-  # Need to add what joins to do on the parameter_declarations
+  # Need to add what joins to do on the parameter_declarations.
+  # Must pass `by: :none` to remove subquery ordering, because if not present
+  # the default inner order will be chained before the outer query ordering
   def initialize_subquery_parameters
     params.slice(*subquery_parameters.keys).each do |param, hash|
       next if hash.blank?
 
       model_name = subquery_parameters.dig(param, :subquery)
       joins = subquery_parameters.dig(param, :joins)
-      subquery = Query.new(model_name, **hash).query
+      subquery = Query.new(model_name, **hash, by: :none).query
 
       @scopes = @scopes.joins(joins).merge(subquery).distinct
     end
