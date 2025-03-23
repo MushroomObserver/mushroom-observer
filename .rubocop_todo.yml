@@ -547,7 +547,6 @@ Rails/Blank:
 # AllowedMethods: order, limit, select, lock
 Rails/FindEach:
   Exclude:
-    - 'script/check_enum_values'
     - 'script/refresh_sitemap'
 
 # Offense count: 45
