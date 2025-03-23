@@ -319,18 +319,14 @@ module DescriptionsHelper
 
   # Source type options for description forms.
   def source_type_options_all
-    options = []
-    Description::ALL_SOURCE_TYPES.each do |type|
-      options << [:"form_description_source_#{type}".l, type]
+    Description::ALL_SOURCE_TYPES.map do |type|
+      [:"form_description_source_#{type}".l, type]
     end
-    options
   end
 
   def source_type_options_basic
-    options = []
-    Description::BASIC_SOURCE_TYPES.each do |type|
-      options << [:"form_description_source_#{type}".l, type]
+    Description::BASIC_SOURCE_TYPES.map do |type|
+      [:"form_description_source_#{type}".l, type]
     end
-    options
   end
 end

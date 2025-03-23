@@ -679,7 +679,6 @@ Style/HashEachMethods:
 # This cop supports unsafe autocorrection (--autocorrect-all).
 Style/MapIntoArray:
   Exclude:
-    - 'app/helpers/descriptions_helper.rb'
     - 'app/helpers/user_stats_helper.rb'
     - 'app/models/name/spelling.rb'
     - 'app/models/queued_email.rb'
