@@ -57,6 +57,7 @@ module VersionsHelper
   end
 
   def current_version_html(obj)
+    # disable cop because concatentation outputs a string, not a safe_buffer
     :VERSION.t + ": " + obj.version.to_s + safe_br # rubocop:disable Style/StringConcatenation
   end
 
