@@ -768,7 +768,6 @@ Style/SlicingWithRange:
 # Configuration parameters: Mode.
 Style/StringConcatenation:
   Exclude:
-    - 'app/models/name/parse.rb'
     - 'app/models/rss_log.rb'
     - 'config/unicorn.rb'
     - 'config/unicorn_dev.rb'

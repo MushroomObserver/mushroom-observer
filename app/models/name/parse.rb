@@ -462,7 +462,7 @@ module Name::Parse
         format_name(words[-1], deprecated)
       ].join(" ")
     else
-      format_name(name, deprecated) + " " + author
+      "#{format_name(name, deprecated)} #{author}"
     end
   end
 
@@ -508,7 +508,7 @@ module Name::Parse
     words = str.split
     if words.length.even?
       genus = words.shift
-      words[0] = genus + " " + words[0]
+      words[0] = "#{genus} #{words[0]}"
     end
     i = words.length - 1
     while i >= 0
