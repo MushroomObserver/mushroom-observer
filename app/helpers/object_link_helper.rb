@@ -221,7 +221,9 @@ module ObjectLinkHelper
 
     title = users.size > 1 ? title.to_s.pluralize.to_sym.t : title.t
     links = users.map { |u| user_link(u, u.legal_name) }
-    "#{title}: " + links.safe_join(", ")
+    # interpolating would require inefficient #sanitize
+    # or dangerous #html_safe
+    title + ": " + links.safe_join(", ") # rubocop:disable Style/StringConcatenation
   end
 
   # Wrap object's name in link to the object, return nil if no object
