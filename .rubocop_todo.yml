@@ -534,13 +534,6 @@ Naming/VariableNumber:
     - 'test/models/observation_test.rb'
     - 'test/system/observation_naming_system_test.rb'
 
-# Offense count: 1
-# This cop supports unsafe autocorrection (--autocorrect-all).
-# Configuration parameters: NilOrEmpty, NotPresent, UnlessPresent.
-Rails/Blank:
-  Exclude:
-    - 'app/models/image.rb'
-
 # Offense count: 24
 # This cop supports unsafe autocorrection (--autocorrect-all).
 # Configuration parameters: AllowedMethods, AllowedPatterns.
