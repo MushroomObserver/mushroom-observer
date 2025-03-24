@@ -144,14 +144,8 @@ export default class extends Controller {
   // For example, note the difference in date/time separators for EXIF and ISO:
   //   {description: "2025:03:09 16:46:41.560", correct for EXIF
   //    value: "2025-03-09T16:46:41.560"}, ISO, incorrect for EXIF
-  // Then, there's the field name question. "DateTimeDigitized" and
-  // "DateTimeOriginal" are legit, and we try them first. "ICC Profile Date"
-  // should be the date the camera color profile was added. It's clearly
-  // incorrect per the standard, but we encountered it in one person's photos
-  // with no other datetimes, where it varied and seemed to be a created date.
   parseExifDate(exif_data) {
-    const _known_field_names = ["DateTimeDigitized", "DateTimeOriginal",
-      "ICC Profile Date"];
+    const _known_field_names = ["DateTimeDigitized", "DateTimeOriginal"];
     const _fieldName = _known_field_names.find((fieldName) =>
       exif_data?.hasOwnProperty(fieldName) &&
       exif_data[fieldName].hasOwnProperty("description")
