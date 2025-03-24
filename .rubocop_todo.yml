@@ -603,14 +603,6 @@ Rails/RedundantActiveRecordAllMethod:
     - 'lib/tasks/email.rake'
     - 'script/check_links.rb'
 
-# Offense count: 4
-# This cop supports unsafe autocorrection (--autocorrect-all).
-# Configuration parameters: Include.
-# Include: spec/controllers/**/*.rb, spec/requests/**/*.rb, test/controllers/**/*.rb, test/integration/**/*.rb
-Rails/ResponseParsedBody:
-  Exclude:
-    - 'test/controllers/api2_controller_test.rb'
-
 # Offense count: 1
 # This cop supports unsafe autocorrection (--autocorrect-all).
 Rails/RootPathnameMethods:
