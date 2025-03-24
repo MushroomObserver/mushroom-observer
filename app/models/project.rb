@@ -90,7 +90,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
             format: { with: /\A[A-Z0-9][A-Z0-9-]*\z/,
                       message: proc { :alphanumerics_only.t } }
 
-  scope :index_order,
+  scope :order_by_default,
         -> { order(updated_at: :desc, id: :desc) }
 
   scope :members, lambda { |members|

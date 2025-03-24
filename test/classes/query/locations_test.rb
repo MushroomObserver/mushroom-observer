@@ -8,7 +8,7 @@ class Query::LocationsTest < UnitTestCase
   include QueryExtensions
 
   def test_location_all
-    expects = Location.index_order
+    expects = Location.order_by_default
     assert_query(expects, :Location)
     expects = Location.reorder(id: :asc)
     assert_query(expects, :Location, order_by: :id)
@@ -23,7 +23,7 @@ class Query::LocationsTest < UnitTestCase
   def test_location_by_editor
     assert_query([], :Location, by_editor: rolf)
     User.current = mary
-    loc = Location.where.not(user: mary).index_order.first
+    loc = Location.where.not(user: mary).order_by_default.first
     loc.display_name = "new name"
     loc.save
     assert_query_scope([loc], Location.by_editor(mary),
@@ -51,18 +51,19 @@ class Query::LocationsTest < UnitTestCase
   end
 
   def test_location_has_notes
-    expects = Location.index_order.has_notes
+    expects = Location.order_by_default.has_notes
     assert_query(expects, :Location, has_notes: true)
-    expects = Location.index_order.has_notes(false)
+    expects = Location.order_by_default.has_notes(false)
     assert_query(expects, :Location, has_notes: false)
   end
 
   def test_location_notes_has
     expects = [locations(:burbank)]
-    scope = Location.index_order.notes_has('"should persist"')
+    scope = Location.order_by_default.notes_has('"should persist"')
     assert_query_scope(expects, scope, :Location, notes_has: '"should persist"')
     expects = [locations(:point_reyes)]
-    scope = Location.index_order.notes_has('"legal to collect" -"Salt Point"')
+    scope = Location.order_by_default.
+            notes_has('"legal to collect" -"Salt Point"')
     assert_query_scope(expects, scope,
                        :Location, notes_has: '"legal to collect" -"Salt Point"')
   end
@@ -70,7 +71,7 @@ class Query::LocationsTest < UnitTestCase
   def test_location_in_box
     expects = [locations(:burbank)]
     box = { north: 35, south: 34, east: -118, west: -119 }
-    scope = Location.index_order.in_box(**box)
+    scope = Location.order_by_default.in_box(**box)
     assert_query_scope(expects, scope, :Location, in_box: box)
   end
 
@@ -100,14 +101,14 @@ class Query::LocationsTest < UnitTestCase
   end
 
   def test_location_advanced_search_user
-    expects = Location.index_order.joins(observations: :user).
+    expects = Location.order_by_default.joins(observations: :user).
               where(observations: { user: rolf }).distinct
-    scope = Location.index_order.search_user("rolf")
+    scope = Location.order_by_default.search_user("rolf")
     assert_query_scope(expects, scope, :Location, search_user: "rolf")
 
-    expects = Location.index_order.joins(observations: :user).
+    expects = Location.order_by_default.joins(observations: :user).
               where(observations: { user: dick }).distinct
-    scope = Location.index_order.search_user("dick")
+    scope = Location.order_by_default.search_user("dick")
     assert_query_scope(expects, scope, :Location, search_user: "dick")
   end
 
@@ -147,18 +148,18 @@ class Query::LocationsTest < UnitTestCase
   end
 
   def test_location_regexp_search
-    expects = Location.regexp("California").index_order.distinct
+    expects = Location.regexp("California").order_by_default.distinct
     assert_query(expects, :Location, regexp: ".alifornia")
   end
 
   def test_location_has_descriptions
-    expects = Location.joins(:descriptions).index_order.distinct
+    expects = Location.joins(:descriptions).order_by_default.distinct
     assert_query(expects, :Location, has_descriptions: 1)
   end
 
   def test_location_has_descriptions_by_user
     expects = Location.joins(:descriptions).
-              where(descriptions: { user: rolf }).index_order.distinct
+              where(descriptions: { user: rolf }).order_by_default.distinct
     assert_query(expects, :Location, description_query: { by_users: rolf })
 
     assert_query([], :Location, description_query: { by_users: mary })
@@ -167,7 +168,7 @@ class Query::LocationsTest < UnitTestCase
   def test_location_has_descriptions_by_author
     expects = Location.joins(descriptions: :location_description_authors).
               where(location_description_authors: { user: rolf }).
-              index_order.distinct
+              order_by_default.distinct
     assert_query(expects, :Location, description_query: { by_author: rolf })
     assert_query([], :Location, description_query: { by_author: mary })
   end
@@ -181,7 +182,7 @@ class Query::LocationsTest < UnitTestCase
 
     expects = Location.joins(descriptions: :location_description_editors).
               where(location_description_editors: { user: mary }).
-              index_order.distinct
+              order_by_default.distinct
     assert_query(expects, :Location, description_query: { by_editor: mary })
   end
 
@@ -200,7 +201,7 @@ class Query::LocationsTest < UnitTestCase
   end
 
   def test_location_has_observations
-    expects = Location.has_observations.index_order.distinct
+    expects = Location.has_observations.order_by_default.distinct
     assert_query(expects, :Location, has_observations: 1)
   end
 
@@ -213,21 +214,21 @@ class Query::LocationsTest < UnitTestCase
 
   def test_location_with_observations_created_at
     created_at = observations(:california_obs).created_at
-    expects = Location.index_order.joins(:observations).
+    expects = Location.order_by_default.joins(:observations).
               where(Observation[:created_at] >= created_at).distinct
     assert_query(expects, :Location, observation_query: { created_at: })
   end
 
   def test_location_with_observations_updated_at
     updated_at = observations(:california_obs).updated_at
-    expects = Location.index_order.joins(:observations).
+    expects = Location.order_by_default.joins(:observations).
               where(Observation[:updated_at] >= updated_at).distinct
     assert_query(expects, :Location, observation_query: { updated_at: })
   end
 
   def test_location_with_observations_date
     date = observations(:california_obs).when
-    expects = Location.index_order.joins(:observations).
+    expects = Location.order_by_default.joins(:observations).
               where(Observation[:when] >= date).distinct
     assert_query(expects, :Location, observation_query: { date: })
   end
@@ -247,10 +248,10 @@ class Query::LocationsTest < UnitTestCase
       target: observations(:vouchered_obs)
     )
     assert_query(
-      Location.index_order.joins(observations: :comments).
+      Location.order_by_default.joins(observations: :comments).
                where(Comment[:summary].matches("%cool%")).
                or(
-                 Location.index_order.joins(observations: :comments).
+                 Location.order_by_default.joins(observations: :comments).
                           where(Comment[:comment].matches("%cool%"))
                ).distinct,
       :Location, observation_query: { comments_has: "cool" }
@@ -259,7 +260,7 @@ class Query::LocationsTest < UnitTestCase
 
   def test_location_with_observations_has_notes_fields
     assert_query(
-      Location.index_order.joins(:observations).
+      Location.order_by_default.joins(:observations).
                where(Observation[:notes].matches("%:substrate:%")).distinct,
       :Location, observation_query: { has_notes_fields: "substrate" }
     )
@@ -268,12 +269,12 @@ class Query::LocationsTest < UnitTestCase
   def test_location_with_observations_herbaria
     name = "The New York Botanical Garden"
     expects = Location.joins(observations: { herbarium_records: :herbarium }).
-              where(herbaria: { name: name }).index_order.distinct
+              where(herbaria: { name: name }).order_by_default.distinct
     assert_query(expects, :Location, observation_query: { herbaria: name })
   end
 
   def test_location_with_observations_notes_has
-    expects = Location.index_order.joins(:observations).
+    expects = Location.order_by_default.joins(:observations).
               where(Observation[:notes].matches("%somewhere%")).distinct
     assert_query(
       expects, :Location, observation_query: { notes_has: "somewhere" }
@@ -293,7 +294,7 @@ class Query::LocationsTest < UnitTestCase
   def test_location_with_observations_projects
     project = projects(:bolete_project)
     assert_query(
-      Location.index_order.joins(observations: :projects).
+      Location.order_by_default.joins(observations: :projects).
                where(projects: { title: project.title }).distinct,
       :Location, observation_query: { projects: project.title }
     )
@@ -303,7 +304,8 @@ class Query::LocationsTest < UnitTestCase
     names = [names(:boletus_edulis), names(:agaricus_campestris)].
             map(&:text_name)
     expects = Location.joins(observations: :name).
-              where(observations: { text_name: names }).index_order.distinct
+              where(observations: { text_name: names }).
+              order_by_default.distinct
     assert_query(
       expects, :Location, observation_query: { names: { lookup: names } }
     )
@@ -311,7 +313,7 @@ class Query::LocationsTest < UnitTestCase
 
   def test_location_with_observations_include_subtaxa
     parent = names(:agaricus)
-    children = Name.index_order.
+    children = Name.order_by_default.
                where(Name[:text_name].matches_regexp(parent.text_name))
     assert_query(
       Location.joins(:observations).
@@ -371,7 +373,7 @@ class Query::LocationsTest < UnitTestCase
 
   def test_location_with_observations_users
     assert_query(
-      Location.index_order.joins(:observations).
+      Location.order_by_default.joins(:observations).
       where(observations: { user: dick }).distinct,
       :Location, observation_query: { by_users: dick }
     )
@@ -383,9 +385,9 @@ class Query::LocationsTest < UnitTestCase
     # Create Observations with both vote_cache and location, because:
     # (a) there aren't Observation fixtures like that, and
     # (b) tests are brittle, so adding or modifying a fixture will break them.
-    obses = Observation.index_order.where(vote_cache: 1..3)
+    obses = Observation.order_by_default.where(vote_cache: 1..3)
     obses.each { |obs| obs.update!(location: locations(:albion)) }
-    expects = Location.index_order.joins(:observations).
+    expects = Location.order_by_default.joins(:observations).
               where(observations: { vote_cache: 1..3 }).distinct
     assert_not_empty(expects, "'expect` is broken; it should not be empty")
     assert_query(expects,
@@ -395,7 +397,7 @@ class Query::LocationsTest < UnitTestCase
   ##### boolean parameters #####
   def test_location_with_observations_has_comments
     assert_query(
-      Location.index_order.joins(observations: :comments).distinct,
+      Location.order_by_default.joins(observations: :comments).distinct,
       :Location, observation_query: { has_comments: true }
     )
   end
@@ -403,31 +405,32 @@ class Query::LocationsTest < UnitTestCase
   def test_location_with_observations_has_public_lat_lng
     assert_query(
       Location.joins(:observations).where(observations: { gps_hidden: false }).
-               where.not(observations: { lat: false }).index_order.distinct,
+               where.not(observations: { lat: false }).
+               order_by_default.distinct,
       :Location, observation_query: { has_public_lat_lng: true }
     )
   end
 
   def test_location_with_observations_has_name
-    expects = Location.index_order.joins(:observations).
+    expects = Location.order_by_default.joins(:observations).
               where(observations: { name: Name.unknown }).distinct
     assert_query(expects, :Location, observation_query: { has_name: false })
   end
 
   def test_location_with_observations_has_notes
-    expects = Location.index_order.joins(:observations).
+    expects = Location.order_by_default.joins(:observations).
               where.not(observations: { notes: Observation.no_notes }).distinct
     assert_query(expects, :Location, observation_query: { has_notes: true })
   end
 
   def test_location_with_observations_has_sequences
-    expects = Location.index_order.joins(observations: :sequences).distinct
+    expects = Location.order_by_default.joins(observations: :sequences).distinct
     assert_query(expects,
                  :Location, observation_query: { has_sequences: true })
   end
 
   def test_location_with_observations_is_collection_location
-    expects = Location.index_order.joins(:observations).
+    expects = Location.order_by_default.joins(:observations).
               where(observations: { is_collection_location: true }).distinct
     assert_query(
       expects, :Location, observation_query: { is_collection_location: true }
@@ -446,7 +449,7 @@ class Query::LocationsTest < UnitTestCase
 
   def location_with_observations_by_user(user)
     Location.joins(:observations).where(observations: { user: user }).
-      index_order.distinct
+      order_by_default.distinct
   end
 
   def test_location_with_observations_for_project_empty

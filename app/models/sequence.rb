@@ -41,7 +41,7 @@ class Sequence < AbstractModel
   after_update  :log_update_sequence
   after_destroy :log_destroy_sequence
 
-  scope :index_order,
+  scope :order_by_default,
         -> { order(created_at: :desc, id: :desc) }
 
   scope :observations,

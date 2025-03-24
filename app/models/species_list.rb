@@ -99,7 +99,7 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
 
   attr_accessor :data
 
-  scope :index_order,
+  scope :order_by_default,
         -> { order(title: :asc, id: :desc) }
 
   scope :title_has,

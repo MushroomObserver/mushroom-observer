@@ -9,7 +9,7 @@ module Name::Scopes
   # always show as covered.
   included do # rubocop:disable Metrics/BlockLength
     # default ordering for index queries
-    scope :index_order,
+    scope :order_by_default,
           -> { order(sort_name: :asc, id: :desc) }
 
     scope :names, lambda { |lookup:, **related_name_args|

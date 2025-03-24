@@ -9,7 +9,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
   # always show as covered.
   included do # rubocop:disable Metrics/BlockLength
     # default ordering for index queries
-    scope :index_order,
+    scope :order_by_default,
           -> { order(when: :desc, id: :desc) }
     # overwrite the one in abstract_model, because we have it cached on a column
     scope :order_by_rss_log, lambda {

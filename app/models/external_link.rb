@@ -34,7 +34,7 @@ class ExternalLink < AbstractModel
   validates :url, presence: true, length: { maximum: 100 }
   validate  :check_url_syntax
 
-  scope :index_order,
+  scope :order_by_default,
         -> { order(url: :asc, id: :desc) }
   scope :url_has,
         ->(phrase) { search_columns(ExternalLink[:url], phrase) }
