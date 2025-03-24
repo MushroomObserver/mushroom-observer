@@ -304,7 +304,7 @@ module Tabs
     end
 
     def names_index_sorts(query:)
-      rss_log = query&.params&.dig(:by) == :rss_log
+      rss_log = query&.params&.dig(:order_by) == :rss_log
       [
         ["name", :sort_by_name.t],
         ["created_at", :sort_by_created_at.t],

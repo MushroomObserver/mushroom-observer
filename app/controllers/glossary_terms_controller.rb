@@ -28,7 +28,7 @@ class GlossaryTermsController < ApplicationController
   # Passes explicit :by param to affect title (only).
   def sorted_index_opts
     sorted_by = params[:by] || default_sort_order
-    super.merge(query_args: { by: sorted_by })
+    super.merge(query_args: { order_by: sorted_by })
   end
 
   def index_display_opts(opts, _query)

@@ -294,8 +294,6 @@ module SpeciesLists
         checklist_from_name_query(query)
       when "Observation"
         checklist_from_observation_query(query)
-      when "Image"
-        checklist_from_image_query(query)
       when "Location"
         checklist_from_location_query(query)
       when "RssLog"
@@ -311,12 +309,6 @@ module SpeciesLists
     # The obs table could be altered so it has both these values - AN 202503
     def checklist_from_observation_query(query)
       query.query.joins(:name).
-        select(Name[:display_name], Name[:id]).distinct.limit(1000)
-    end
-
-    # Grossly inefficient. We should not offer this option to users. - AN 202503
-    def checklist_from_image_query(query)
-      query.query.joins(observation_images: { observations: :name }).
         select(Name[:display_name], Name[:id]).distinct.limit(1000)
     end
 

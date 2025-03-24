@@ -27,7 +27,5 @@ module Query::Params::AdvancedSearch
     end
   end
 
-  def advanced_search_params
-    self.class.advanced_search_params
-  end
+  delegate :advanced_search_params, to: :class
 end

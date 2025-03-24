@@ -654,7 +654,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     o_chron = Observation.reorder(created_at: :desc, id: :desc)
     login
     # need to save a query here to get :next in a non-standard order
-    Query.lookup_and_save(:Observation, by: :created_at)
+    Query.lookup_and_save(:Observation, order_by: :created_at)
     qr = QueryRecord.last.id.alphabetize
 
     get(:show, params: { id: o_chron.fourth.id, flow: :next, q: qr })
@@ -681,28 +681,28 @@ class ObservationsControllerShowTest < FunctionalTestCase
     o3 = n3.observations.first
     o4 = n4.observations.first
 
-    # When requesting non-synonym observations of n2, it should include n1,
-    # since an observation of n1 was clearly intended to be an observation of
+    # When requesting non-synonym observations of n2.  Does not include
+    # n1 even though n1 was clearly intended to be an observation of
     # n2.
     query = Query.lookup_and_save(
       :Observation, names: { lookup: n2.id, include_synonyms: false },
-                    by: :name
+                    order_by: :name
     )
-    assert_equal(2, query.num_results)
+    assert_equal(1, query.num_results)
 
     # Likewise, when requesting *synonym* observations, neither n1 nor n2
     # should be included.
     query = Query.lookup_and_save(
       :Observation, names: { lookup: n2.id, include_synonyms: true,
                              exclude_original_names: true },
-                    by: :name
+                    order_by: :name
     )
     assert_equal(2, query.num_results)
 
     # But for our prev/next test, lets do the all-inclusive query.
     query = Query.lookup_and_save(
       :Observation, names: { lookup: n2.id, include_synonyms: true },
-                    by: :name
+                    order_by: :name
     )
     assert_equal(4, query.num_results)
     qp = @controller.query_params(query)

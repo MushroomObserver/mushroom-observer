@@ -14,16 +14,21 @@ class Query::SpeciesListsTest < UnitTestCase
 
   def test_species_list_sort_by_user
     ids = SpeciesList.order_by_user.to_a
-    assert_query(ids, :SpeciesList, by: :user)
+    assert_query(ids, :SpeciesList, order_by: :user)
   end
 
   def test_species_list_sort_by_title
     ids = SpeciesList.order(:title).to_a
-    assert_query(ids, :SpeciesList, by: :title)
+    assert_query(ids, :SpeciesList, order_by: :title)
+  end
+
+  def test_species_list_sort_by_where
+    ids = SpeciesList.order(where: :asc, id: :desc).to_a
+    assert_query(ids, :SpeciesList, order_by: :where)
   end
 
   def test_species_list_by_rss_log
-    assert_query(SpeciesList.order_by_rss_log, :SpeciesList, by: :rss_log)
+    assert_query(SpeciesList.order_by_rss_log, :SpeciesList, order_by: :rss_log)
   end
 
   def test_species_list_by_users
@@ -34,7 +39,7 @@ class Query::SpeciesListsTest < UnitTestCase
 
   def test_species_list_by_user_sort_by_id
     ids = SpeciesList.where(user: rolf).reorder(id: :asc).uniq
-    assert_query(ids, :SpeciesList, by_users: rolf, by: :id)
+    assert_query(ids, :SpeciesList, by_users: rolf, order_by: :id)
   end
 
   def test_species_list_locations

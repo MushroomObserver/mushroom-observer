@@ -175,7 +175,7 @@ module PatternSearch
       raise(BadFloatError.new(var: var, val: val, min: min, max: max)) \
         unless /^-?(\d+(\.\d+)?|\.\d+)$/.match?(val.to_s)
       raise(BadFloatError.new(var: var, val: val, min: min, max: max)) \
-        unless val.to_f >= min && val.to_f <= max
+        unless val.to_f.between?(min, max)
 
       val.to_f
     end

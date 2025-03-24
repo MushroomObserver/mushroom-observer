@@ -23,9 +23,7 @@ module Report
       ","
     end
 
-    def separator
-      self.class.separator
-    end
+    delegate :separator, to: :class
 
     def render
       ::CSV.generate(col_sep: separator) do |csv|

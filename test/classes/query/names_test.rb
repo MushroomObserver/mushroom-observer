@@ -33,7 +33,7 @@ class Query::NamesTest < UnitTestCase
 
   def test_name_by_rss_log
     expects = Name.order_by_rss_log
-    assert_query(expects, :Name, by: :rss_log)
+    assert_query(expects, :Name, order_by: :rss_log)
   end
 
   def names_set
@@ -71,7 +71,7 @@ class Query::NamesTest < UnitTestCase
     assert_query([], :Name, by_editor: mary)
     expects = Name.reorder(id: :asc).
               with_correct_spelling.by_editor(dick).distinct
-    assert_query(expects, :Name, by_editor: dick, by: :id)
+    assert_query(expects, :Name, by_editor: dick, order_by: :id)
   end
 
   def test_name_users_login
@@ -358,22 +358,37 @@ class Query::NamesTest < UnitTestCase
                  :Name, pattern: "superficially similar")
   end
 
-  def test_name_advanced_search
-    assert_query([names(:macrocybe_titans).id],
-                 :Name, search_name: "macrocybe*titans")
-    assert_query([names(:coprinus_comatus).id],
-                 :Name, search_where: "glendale") # where
+  def test_name_advanced_search_name
+    assert_query_scope([names(:macrocybe_titans).id],
+                       Name.search_name("macrocybe*titans"),
+                       :Name, search_name: "macrocybe*titans")
+  end
+
+  def test_name_advanced_search_where
+    assert_query_scope([names(:coprinus_comatus).id],
+                       Name.search_where("glendale"),
+                       :Name, search_where: "glendale")
     expects = Name.index_order.joins(:observations).
               where(Observation[:location_id].eq(locations(:burbank).id)).
               distinct
-    assert_query(expects, :Name, search_where: "burbank") # location
+    scope = Name.index_order.search_where("burbank")
+    assert_query_scope(expects, scope, :Name, search_where: "burbank")
+  end
+
+  def test_name_advanced_search_user
     expects = Name.index_order.joins(:observations).
               where(Observation[:user_id].eq(rolf.id)).distinct
-    assert_query(expects, :Name, search_user: "rolf")
-    assert_query([names(:coprinus_comatus).id], :Name,
-                 search_content: "second fruiting") # notes
-    assert_query([names(:fungi).id], :Name,
-                 search_content: '"a little of everything"') # comment
+    scope = Name.index_order.search_user("rolf")
+    assert_query_scope(expects, scope, :Name, search_user: "rolf")
+  end
+
+  def test_name_advanced_search_content
+    assert_query_scope([names(:coprinus_comatus).id], # notes
+                       Name.search_content("second fruiting"),
+                       :Name, search_content: "second fruiting")
+    assert_query_scope([names(:fungi).id], # comment
+                       Name.search_content('"a little of everything"'),
+                       :Name, search_content: '"a little of everything"')
   end
 
   def test_name_needs_description
@@ -453,7 +468,7 @@ class Query::NamesTest < UnitTestCase
   def test_name_has_observations
     expects = Name.with_correct_spelling.has_observations.
               select(:name).distinct.pluck(:name_id).sort
-    assert_query(expects, :Name, has_observations: 1, by: :id)
+    assert_query(expects, :Name, has_observations: 1, order_by: :id)
   end
 
   # Prove that :has_observations param of Name Query works with each

@@ -247,16 +247,35 @@ module AbstractModel::Scopes
     }
     scope :search_user, lambda { |phrase|
       phrase = User.remove_bracketed_name(phrase)
-      joins(:user).search_columns((User[:login] + User[:name]), phrase)
+      scope = all
+      scope = case klass.name
+              when "Observation"
+                scope.joins(:user)
+              when "Name", "Location"
+                scope.joins(observations: :user)
+              else
+                scope
+              end
+      scope.search_columns((User[:login] + User[:name]), phrase)
     }
     scope :search_where, lambda { |phrase|
       scope = all
+      scope = case klass.name
+              when "Observation"
+                scope.left_outer_joins(:location)
+              when "Name"
+                scope.joins(
+                  :observations,
+                  Observation.left_outer_joins(:location).arel.join_sources
+                )
+              when "Location"
+                scope
+              end
       field = if klass.name == "Location"
                 Location[:name]
               else
                 Observation[:where]
               end
-      scope = scope.joins(:observations) if klass != Observation
       scope.search_columns(field, phrase)
     }
 

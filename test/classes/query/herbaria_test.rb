@@ -22,7 +22,7 @@ class Query::HerbariaTest < UnitTestCase
   def test_herbarium_by_records
     expects = Herbarium.left_outer_joins(:herbarium_records).group(:id).
               order(HerbariumRecord[:id].count.desc, Herbarium[:id].desc)
-    assert_query(expects, :Herbarium, by: :records)
+    assert_query(expects, :Herbarium, order_by: :records)
   end
 
   def test_herbarium_id_in_set
