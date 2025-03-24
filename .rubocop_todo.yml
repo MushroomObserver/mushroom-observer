@@ -582,7 +582,6 @@ Rails/HelperInstanceVariable:
 # Include: app/**/*.rb, config/**/*.rb, db/**/*.rb, lib/**/*.rb
 Rails/Output:
   Exclude:
-    - 'app/extensions/string.rb'
     - 'app/models/language_exporter.rb'
 
 # Offense count: 7
