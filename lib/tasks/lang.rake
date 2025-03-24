@@ -78,7 +78,7 @@ namespace :lang do
   task setup: [:environment, :login, :verbose, :safe_mode]
 
   desc "Log in user for import tasks."
-  task(:login) do
+  task(login: :environment) do
     User.current = if ENV.include?("user_name")
                      User.find_by(login: ENV["user_name"])
                    elsif ENV.include?("user_id")
@@ -87,17 +87,17 @@ namespace :lang do
   end
 
   desc "Log in admin for import tasks."
-  task(:login_admin) do
+  task(login_admin: :environment) do
     User.current = User.find(0)
   end
 
   desc 'Turn off verbosity if include "silent=yes".'
-  task(:verbose) do
+  task(verbose: :environment) do
     Language.verbose = true unless ENV.include?("silent")
   end
 
   desc 'Turn on safe mode if include "safe=yes".'
-  task(:safe_mode) do
+  task(safe_mode: :environment) do
     if ENV.include?("safe")
       Language.safe_mode = true
       puts("*** SAFE MODE ***")
