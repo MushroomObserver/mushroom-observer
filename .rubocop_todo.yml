@@ -679,7 +679,6 @@ Style/HashEachMethods:
 # This cop supports unsafe autocorrection (--autocorrect-all).
 Style/MapIntoArray:
   Exclude:
-    - 'app/models/vote.rb'
     - 'test/general_extensions.rb'
 
 # Offense count: 2
