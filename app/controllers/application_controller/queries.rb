@@ -55,10 +55,7 @@ module ApplicationController::Queries
     found_query
   end
 
-  BY_MAP = {
-    "modified" => :updated_at,
-    "created" => :created_at
-  }.freeze
+  BY_MAP = { "modified" => :updated_at, "created" => :created_at }.freeze
 
   private ##########
 

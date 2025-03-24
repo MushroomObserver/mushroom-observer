@@ -50,7 +50,8 @@ class Query::LocationDescriptionsTest < UnitTestCase
     descs = LocationDescription.all
     assert_query_scope(descs.find_all { |d| d.authors.include?(rolf) },
                        LocationDescription.by_author(rolf),
-                       :LocationDescription, by_author: rolf.login, order_by: :id)
+                       :LocationDescription, by_author: rolf.login,
+                                             order_by: :id)
     assert_query_scope(descs.find_all { |d| d.authors.include?(mary) },
                        LocationDescription.by_author(mary),
                        :LocationDescription, by_author: mary.login)

@@ -104,7 +104,9 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   def unfiltered_index
     return unless unfiltered_index_permitted?
 
-    args = { order_by: default_sort_order }.merge(unfiltered_index_opts[:query_args])
+    args = { order_by: default_sort_order }.merge(
+      unfiltered_index_opts[:query_args]
+    )
     query = create_query(controller_model_name.to_sym, **args)
 
     [query, unfiltered_index_opts[:display_opts]]

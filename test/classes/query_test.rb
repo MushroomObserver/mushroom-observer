@@ -991,12 +991,14 @@ class QueryTest < UnitTestCase
     User.current = rolf
     assert_equal("postal", User.current_location_format)
     assert_query([albion, elgin_co],
-                 :Location, id_in_set: [albion.id, elgin_co.id], order_by: :name)
+                 :Location, id_in_set: [albion.id, elgin_co.id],
+                            order_by: :name)
 
     User.current = roy
     assert_equal("scientific", User.current_location_format)
     assert_query([elgin_co, albion],
-                 :Location, id_in_set: [albion.id, elgin_co.id], order_by: :name)
+                 :Location, id_in_set: [albion.id, elgin_co.id],
+                            order_by: :name)
 
     obs1 = observations(:minimal_unknown_obs)
     obs2 = observations(:detailed_unknown_obs)
@@ -1006,11 +1008,13 @@ class QueryTest < UnitTestCase
     User.current = rolf
     assert_equal("postal", User.current_location_format)
     assert_query([obs1, obs2],
-                 :Observation, id_in_set: [obs1.id, obs2.id], order_by: :location)
+                 :Observation, id_in_set: [obs1.id, obs2.id],
+                               order_by: :location)
 
     User.current = roy
     assert_equal("scientific", User.current_location_format)
     assert_query([obs2, obs1],
-                 :Observation, id_in_set: [obs1.id, obs2.id], order_by: :location)
+                 :Observation, id_in_set: [obs1.id, obs2.id],
+                               order_by: :location)
   end
 end

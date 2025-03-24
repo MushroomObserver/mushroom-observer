@@ -425,8 +425,8 @@ class Query::ObservationsTest < UnitTestCase
                  :Observation, search_where: "glendale") # where
     expects = Observation.reorder(id: :asc).
               where(location: locations(:burbank)).distinct
-    assert_query(expects,
-                 :Observation, search_where: "burbank", order_by: :id) # location
+    assert_query(expects, # location
+                 :Observation, search_where: "burbank", order_by: :id)
   end
 
   def test_observation_advanced_search_user
