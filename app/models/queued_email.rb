@@ -396,12 +396,10 @@ class QueuedEmail < AbstractModel
     @strings = {}
     queued_email_strings.each { |qs| @strings[qs.key.to_s] = qs.value.to_s }
     if return_dict
-      result = @strings
+      @strings
     else
-      result = []
-      keys.each { |key| result.push(@strings[key.to_s]) }
+      keys.map { |key| @strings[key.to_s] }
     end
-    result
   end
 
   # -----------------------------------------------
