@@ -2,17 +2,17 @@
 
 module Query::ScopeModules::Ordering
   def initialize_order
-    by = params[:by]
+    by = params[:order_by]
     # Let queries define custom order spec in "order", but have explicitly
     # passed-in "by" parameter take precedence.  If neither is given, then
     # fall back on the "default_order" finally.
     return unless by || order.blank?
     return if by == "none"
 
-    by ||= default_order
-    by = by.dup.to_s
-    reverse = !!by.sub!(/^reverse_/, "")
-    initialize_order_specs(by)
+    order_by ||= default_order
+    order_by = order_by.dup.to_s
+    reverse = order_by.sub!(/^reverse_/, "")
+    initialize_order_specs(order_by)
     add_order_disambiguation
     @scopes = @scopes.reverse_order if reverse
   end
@@ -20,10 +20,10 @@ module Query::ScopeModules::Ordering
   def initialize_order_specs(by)
     return if params[:id_in_set].present?
 
-    sorting_method = "sort_by_#{by}"
+    sorting_method = "order_by_#{order_by}"
     unless Query::ScopeModules::Ordering.private_method_defined?(sorting_method)
       raise(
-        "Can't figure out how to sort #{model.name.pluralize} by :#{by}."
+        "Can't figure out how to sort #{model.name.pluralize} by :#{order_by}."
       )
     end
     send(sorting_method, model)
@@ -41,25 +41,25 @@ module Query::ScopeModules::Ordering
 
   ####### methods dispatched from initialize_order_specs
 
-  def sort_by_accession_number(model)
+  def order_by_accession_number(model)
     return unless model == HerbariumRecord
 
     @scopes = @scopes.order(HerbariumRecord[:accession_number].asc)
   end
 
-  def sort_by_box_area(_model)
+  def order_by_box_area(_model)
     # "locations.box_area DESC"
     @scopes = @scopes.order(Location[:box_area].desc)
   end
 
-  def sort_by_code(_model)
+  def order_by_code(_model)
     # where << "herbaria.code != ''"
     # "herbaria.code ASC"
     @scopes = @scopes.where(Herbarium[:code].not_eq(nil)).
               order(Herbarium[:code].asc)
   end
 
-  def sort_by_code_then_date(_model)
+  def order_by_code_then_date(_model)
     return unless model == FieldSlip
 
     # "field_slips.code ASC, field_slips.created_at DESC, " \
@@ -67,7 +67,7 @@ module Query::ScopeModules::Ordering
     @scopes = @scopes.order(FieldSlip[:code].asc, FieldSlip[:created_at].desc)
   end
 
-  def sort_by_code_then_name(_model)
+  def order_by_code_then_name(_model)
     # "IF(herbaria.code = '', '~', herbaria.code) ASC, herbaria.name ASC"
     @scopes = @scopes.order(
       Herbarium[:code].eq(nil).
@@ -76,7 +76,7 @@ module Query::ScopeModules::Ordering
     )
   end
 
-  def sort_by_confidence(model)
+  def order_by_confidence(model)
     return unless [Image, Observation].include?(model)
 
     # add_join(:observation_images, :observations) if model == Image
@@ -85,28 +85,28 @@ module Query::ScopeModules::Ordering
     @scopes = @scopes.order(Observation[:vote_cache].desc)
   end
 
-  def sort_by_contribution(model)
+  def order_by_contribution(model)
     return unless model == User
 
     # "users.contribution DESC" if model == User
     @scopes = @scopes.order(User[:contribution].desc)
   end
 
-  def sort_by_copyright_holder(model)
+  def order_by_copyright_holder(model)
     return unless model.column_names.include?("copyright_holder")
 
     # "#{model.table_name}.copyright_holder ASC"
     @scopes = @scopes.order(model.arel_table[:copyright_holder].asc)
   end
 
-  def sort_by_created_at(model)
+  def order_by_created_at(model)
     return unless model.column_names.include?("created_at")
 
     # "#{model.table_name}.created_at DESC"
     @scopes = @scopes.order(model.arel_table[:created_at].desc)
   end
 
-  def sort_by_date(model)
+  def order_by_date(model)
     if model.column_names.include?("when")
       # "#{model.table_name}.when DESC"
       @scopes = @scopes.order(model.arel_table[:when].desc)
@@ -116,7 +116,7 @@ module Query::ScopeModules::Ordering
     end
   end
 
-  def sort_by_herbarium_label(_model)
+  def order_by_herbarium_label(_model)
     return unless model == HerbariumRecord
 
     # "herbarium_records.initial_det ASC, " \
@@ -125,7 +125,7 @@ module Query::ScopeModules::Ordering
                             HerbariumRecord[:accession_number].asc)
   end
 
-  def sort_by_herbarium_name(_model)
+  def order_by_herbarium_name(_model)
     return unless model == HerbariumRecord
 
     # add_join(:herbaria)
@@ -134,33 +134,33 @@ module Query::ScopeModules::Ordering
   end
 
   # (for testing)
-  def sort_by_id(model)
+  def order_by_id(model)
     # "#{model.table_name}.id ASC"
     @scopes = @scopes.order(model.arel_table[:id].asc)
   end
 
-  def sort_by_image_quality(model)
+  def order_by_image_quality(model)
     return unless model == Image
 
     # "images.vote_cache DESC" if model == Image
     @scopes = @scopes.order(Image[:vote_cache].desc)
   end
 
-  def sort_by_initial_det(model)
+  def order_by_initial_det(model)
     return unless model == HerbariumRecord
 
     # "#{model.table_name}.initial_det ASC"
     @scopes = @scopes.order(HerbariumRecord[:initial_det].asc)
   end
 
-  def sort_by_last_login(model)
+  def order_by_last_login(model)
     return unless model == User
 
     # "#{model.table_name}.last_login DESC"
     @scopes = @scopes.order(User[:last_login].desc)
   end
 
-  def sort_by_location(model)
+  def order_by_location(model)
     return unless model.column_names.include?("location_id")
 
     # Join Users with null locations, else join records with locations
@@ -171,28 +171,28 @@ module Query::ScopeModules::Ordering
                 # add_join(:locations)
                 @scopes.joins(:location)
               end
-    sort_locations_by_name
+    order_locations_by_name
   end
 
-  def sort_by_login(model)
+  def order_by_login(model)
     return unless model == User
 
     # "#{model.table_name}.login ASC" if model.column_names.include?("login")
     @scopes = @scopes.order(User[:login].asc)
   end
 
-  def sort_by_name(model)
-    sort_by_name_method = "sort_#{model.name.underscore.pluralize}_by_name"
+  def order_by_name(model)
+    order_by_name_method = "order_#{model.name.underscore.pluralize}_by_name"
     if ::Query::Modules::Ordering.private_method_defined?(
-      sort_by_name_method
+      order_by_name_method
     )
-      send(sort_by_name_method)
+      send(order_by_name_method)
     else
-      sort_other_models_by_name(model)
+      order_other_models_by_name(model)
     end
   end
 
-  def sort_by_name_and_number(_model)
+  def order_by_name_and_number(_model)
     return unless model == CollectionNumber
 
     # "collection_numbers.name ASC, collection_numbers.number ASC"
@@ -200,28 +200,28 @@ module Query::ScopeModules::Ordering
                             CollectionNumber[:number].asc)
   end
 
-  def sort_by_num_views(model)
+  def order_by_num_views(model)
     return unless model.column_names.include?("num_views")
 
     # "#{model.table_name}.num_views DESC"
     @scopes = @scopes.order(model.arel_table[:num_views].desc)
   end
 
-  def sort_by_observation(model)
+  def order_by_observation(model)
     return unless model.column_names.include?("observation_id")
 
     # "observation_id DESC" if model.column_names.include?("observation_id")
     @scopes = @scopes.order(Observation[:id].desc)
   end
 
-  def sort_by_original_name(model)
+  def order_by_original_name(model)
     return unless model == Image
 
     # "images.original_name ASC" if model == Image
     @scopes = @scopes.order(Image[:original_name].asc)
   end
 
-  def sort_by_owners_quality(model)
+  def order_by_owners_quality(model)
     return unless model == Image
 
     # add_join(:image_votes)
@@ -233,7 +233,7 @@ module Query::ScopeModules::Ordering
   end
 
   # rubocop:disable Metrics/AbcSize
-  def sort_by_owners_thumbnail_quality(model)
+  def order_by_owners_thumbnail_quality(model)
     return unless model == Observation
 
     # add_join(:"images.thumb_image", :image_votes)
@@ -251,7 +251,7 @@ module Query::ScopeModules::Ordering
   end
   # rubocop:enable Metrics/AbcSize
 
-  def sort_by_records(_model)
+  def order_by_records(_model)
     return unless model == Herbarium
 
     # outer_join needed to show herbaria with no records
@@ -262,7 +262,7 @@ module Query::ScopeModules::Ordering
               group(Herbarium[:id]).order(HerbariumRecord[:id].count.desc)
   end
 
-  def sort_by_rss_log(model)
+  def order_by_rss_log(model)
     return unless model.column_names.include?("rss_log_id")
 
     # use cached column if exists, and don't join
@@ -277,14 +277,14 @@ module Query::ScopeModules::Ordering
               end
   end
 
-  def sort_by_summary(model)
+  def order_by_summary(model)
     return unless model.column_names.include?("summary")
 
     # "#{model.table_name}.summary ASC"
     @scopes = @scopes.order(model.arel_table[:summary].asc)
   end
 
-  def sort_by_thumbnail_quality(model)
+  def order_by_thumbnail_quality(model)
     return unless model == Observation
 
     # add_join(:"images.thumb_image")
@@ -294,28 +294,28 @@ module Query::ScopeModules::Ordering
               order(Image[:vote_cache].desc, Observation[:vote_cache].desc)
   end
 
-  def sort_by_title(model)
+  def order_by_title(model)
     return unless model.column_names.include?("title")
 
     # "#{model.table_name}.title ASC" if model.column_names.include?("title")
     @scopes = @scopes.order(model.arel_table[:title].asc)
   end
 
-  def sort_by_updated_at(model)
+  def order_by_updated_at(model)
     return unless model.column_names.include?("updated_at")
 
     # "#{model.table_name}.updated_at DESC"
     @scopes = @scopes.order(model.arel_table[:updated_at].desc)
   end
 
-  def sort_by_url(model)
+  def order_by_url(model)
     return unless model == ExternalLink
 
     # "external_links.url ASC" if model == ExternalLink
     @scopes = @scopes.order(ExternalLink[:url].asc)
   end
 
-  def sort_by_user(_model)
+  def order_by_user(_model)
     # add_join(:users)
     # 'IF(users.name = "" OR users.name IS NULL, users.login, users.name) ASC'
     @scopes = @scopes.joins(:user).
@@ -324,16 +324,16 @@ module Query::ScopeModules::Ordering
                     else(User[:name]).asc)
   end
 
-  def sort_by_where(model)
+  def order_by_where(model)
     return unless model.column_names.include?("where")
 
     # "#{model.table_name}.where ASC" if model.column_names.include?("where")
     @scopes = @scopes.order(model.arel_table[:where].asc)
   end
 
-  ####### methods dispatched from sort_by_name
+  ####### methods dispatched from order_by_name
 
-  def sort_images_by_name
+  def order_images_by_name
     # add_join(:observation_images, :observations)
     # add_join(:observations, :names)
     # self.group = "images.id"
@@ -343,14 +343,14 @@ module Query::ScopeModules::Ordering
               order(Name[:sort_name].min.asc, Image[:when].desc)
   end
 
-  def sort_location_descriptions_by_name
+  def order_location_descriptions_by_name
     # add_join(:locations)
     # "locations.name ASC, location_descriptions.created_at ASC"
     @scopes = @scopes.joins(:location).
               order(Location[:name].asc, LocationDescription[:created_at].asc)
   end
 
-  def sort_locations_by_name
+  def order_locations_by_name
     @scopes = if User.current_location_format == "scientific"
                 # "locations.scientific_name ASC"
                 @scopes.order(Location[:scientific_name].asc)
@@ -360,26 +360,26 @@ module Query::ScopeModules::Ordering
               end
   end
 
-  def sort_name_descriptions_by_name
+  def order_name_descriptions_by_name
     # add_join(:names)
     # "names.sort_name ASC, name_descriptions.created_at ASC"
     @scopes = @scopes.joins(:name).
               order(Name[:sort_name].asc, NameDescription[:created_at].asc)
   end
 
-  def sort_names_by_name
+  def order_names_by_name
     # "names.sort_name ASC"
     @scopes = @scopes.order(Name[:sort_name].asc)
   end
 
-  def sort_observations_by_name
+  def order_observations_by_name
     # add_join(:names)
     # "names.sort_name ASC, observations.when DESC"
     @scopes = @scopes.joins(:name).
               order(Name[:sort_name].asc, Observation[:when].desc)
   end
 
-  def sort_other_models_by_name(model)
+  def order_other_models_by_name(model)
     if model.column_names.include?("name")
       # "#{model.table_name}.name ASC"
       @scopes = @scopes.order(model.arel_table[:name].asc)

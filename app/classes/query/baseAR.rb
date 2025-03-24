@@ -33,7 +33,7 @@ class Query::BaseAR
       # group: :string,
       # order: :string,
       # selects: :string,
-      by: :string
+      order_by: :string
       # title: [:string]
     }
   end
@@ -61,7 +61,7 @@ class Query::BaseAR
   end
 
   def self.scope_parameters
-    excepts = subquery_parameters.keys + [:by, :preference_filter]
+    excepts = subquery_parameters.keys + [:order_by, :preference_filter]
     @scope_parameters = parameter_declarations.except(*excepts)
   end
 
