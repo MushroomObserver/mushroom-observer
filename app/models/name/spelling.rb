@@ -55,7 +55,7 @@ module Name::Spelling
     def parent_if_parent_deprecated(str)
       result = nil
       names = find_or_create_name_and_parents(str)
-      if names.any? && names.last && names.last.deprecated
+      if names.any? && names.last&.deprecated
         names.reverse_each do |name|
           return name if name.id
         end

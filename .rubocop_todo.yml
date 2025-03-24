@@ -732,7 +732,6 @@ Style/OptionalBooleanParameter:
 # AllowedMethods: present?, blank?, presence, try, try!
 Style/SafeNavigation:
   Exclude:
-    - 'app/models/name/spelling.rb'
     - 'app/models/observation/naming_consensus.rb'
 
 # Offense count: 3
