@@ -746,12 +746,6 @@ Style/SafeNavigationChainLength:
     - 'app/controllers/locations_controller.rb'
     - 'app/models/location.rb'
 
-# Offense count: 6
-# This cop supports unsafe autocorrection (--autocorrect-all).
-Style/SlicingWithRange:
-  Exclude:
-    - 'test/models/comment_test.rb'
-
 # Offense count: 32
 # This cop supports unsafe autocorrection (--autocorrect-all).
 # Configuration parameters: Mode.
