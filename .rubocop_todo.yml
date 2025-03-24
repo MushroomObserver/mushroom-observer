@@ -634,14 +634,6 @@ Style/FileNull:
   Exclude:
     - 'test/models/queued_email_test.rb'
 
-# Offense count: 2
-# This cop supports unsafe autocorrection (--autocorrect-all).
-# Configuration parameters: AllowedReceivers.
-# AllowedReceivers: Thread.current
-Style/HashEachMethods:
-  Exclude:
-    - 'script/slowest_pages'
-
 # Offense count: 9
 # This cop supports unsafe autocorrection (--autocorrect-all).
 Style/MapIntoArray:
