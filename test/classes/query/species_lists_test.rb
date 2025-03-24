@@ -22,6 +22,11 @@ class Query::SpeciesListsTest < UnitTestCase
     assert_query(ids, :SpeciesList, order_by: :title)
   end
 
+  def test_species_list_sort_by_where
+    ids = SpeciesList.order(where: :asc, id: :desc).to_a
+    assert_query(ids, :SpeciesList, order_by: :where)
+  end
+
   def test_species_list_by_rss_log
     assert_query(SpeciesList.order_by_rss_log, :SpeciesList, order_by: :rss_log)
   end
