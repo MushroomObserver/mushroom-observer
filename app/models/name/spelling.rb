@@ -111,8 +111,14 @@ module Name::Spelling
     ############################################################################
 
     # Guess correct name of partial string.
-    # This method should be private.
-    # See https://www.pivotaltracker.com/story/show/176098819
+    # NOTE: jdc 20250324 (copied from pivotaltracker)
+    # guess_word and guess_with_errors should be private.
+    # They were intended to be private
+    # and had been placed after a call to private.
+    # But that call was ineffective, so it was removed.
+    # https://docs.rubocop.org/rubocop/1.0/cops_lint.html#lintuselessaccessmodifier
+    # Furthermore, they can't be privatized because they are tested directly.
+    # So the tests should be fixed first.
     def guess_word(prefix, word)
       str = "#{prefix} #{word}"
       results = guess_with_errors(str, 1)
@@ -122,8 +128,6 @@ module Name::Spelling
     end
 
     # Look up name replacing n letters at a time with a star.
-    # This method should be private.
-    # See https://www.pivotaltracker.com/story/show/176098819
     def guess_with_errors(name, count)
       patterns = []
 
@@ -144,7 +148,7 @@ module Name::Spelling
               sub = ""
               sub += word[0..(j - 1)] if j.positive?
               sub += "%"
-              sub += word[(j + count)..-1] if j + count < word.length
+              sub += word[(j + count)..] if j + count < word.length
               patterns << guess_pattern(words, i, sub)
             end
           end

@@ -750,7 +750,6 @@ Style/SafeNavigationChainLength:
 # This cop supports unsafe autocorrection (--autocorrect-all).
 Style/SlicingWithRange:
   Exclude:
-    - 'app/models/name/spelling.rb'
     - 'app/models/name_parse.rb'
     - 'test/models/comment_test.rb'
 
