@@ -83,39 +83,44 @@ class Query::LocationsTest < UnitTestCase
   end
 
   def test_location_advanced_search_name
-    assert_query([locations(:burbank).id],
-                 :Location, search_name: "agaricus")
+    assert_query_scope([locations(:burbank).id],
+                       Location.search_name("agaricus"),
+                       :Location, search_name: "agaricus")
     assert_query([], :Location, search_name: "coprinus")
   end
 
   def test_location_advanced_search_where
-    assert_query([locations(:burbank).id],
-                 :Location, search_where: "burbank")
-    assert_query([locations(:howarth_park).id,
-                  locations(:salt_point).id],
-                 :Location, search_where: "park")
+    assert_query_scope([locations(:burbank).id],
+                       Location.search_where("burbank"),
+                       :Location, search_where: "burbank")
+    assert_query_scope([locations(:howarth_park).id,
+                        locations(:salt_point).id],
+                       Location.search_where("park"),
+                       :Location, search_where: "park")
   end
 
   def test_location_advanced_search_user
     expects = Location.index_order.joins(observations: :user).
               where(observations: { user: rolf }).distinct
-    assert_query(expects, :Location, search_user: "rolf")
+    scope = Location.index_order.search_user("rolf")
+    assert_query_scope(expects, scope, :Location, search_user: "rolf")
 
     expects = Location.index_order.joins(observations: :user).
               where(observations: { user: dick }).distinct
-    assert_query(expects, :Location, search_user: "dick")
+    scope = Location.index_order.search_user("dick")
+    assert_query_scope(expects, scope, :Location, search_user: "dick")
   end
 
   # content in obs.notes
   def test_location_advanced_search_content_obs_notes
-    assert_query(Location.advanced_search('"strange place"'),
+    assert_query(Location.search_content('"strange place"'),
                  :Location, search_content: '"strange place"')
   end
 
   # content in Obs Comment
   def test_location_advanced_search_content_obs_comments
     assert_query(
-      Location.advanced_search('"a little of everything"'),
+      Location.search_content('"a little of everything"'),
       :Location, search_content: '"a little of everything"'
     )
   end

@@ -416,33 +416,38 @@ class Query::ObservationsTest < UnitTestCase
   end
 
   def test_observation_advanced_search_name
-    assert_query([observations(:strobilurus_diminutivus_obs).id],
-                 :Observation, search_name: "diminutivus")
+    assert_query_scope([observations(:strobilurus_diminutivus_obs).id],
+                       Observation.search_name("diminutivus"),
+                       :Observation, search_name: "diminutivus")
   end
 
   def test_observation_advanced_search_where
-    assert_query([observations(:coprinus_comatus_obs).id],
-                 :Observation, search_where: "glendale") # where
-    expects = Observation.reorder(id: :asc).
-              where(location: locations(:burbank)).distinct
-    assert_query(expects,
-                 :Observation, search_where: "burbank", by: :id) # location
+    assert_query_scope([observations(:coprinus_comatus_obs).id], # where
+                       Observation.search_where("glendale"),
+                       :Observation, search_where: "glendale")
+    expects = Observation.order(id: :asc).
+              where(location: locations(:burbank)).distinct # location
+    scope = Observation.search_where("burbank").order(id: :asc)
+    assert_query_scope(expects, scope,
+                       :Observation, search_where: "burbank", by: :id)
   end
 
   def test_observation_advanced_search_user
-    expects = Observation.reorder(id: :asc).where(user: rolf.id).distinct
-    assert_query(expects, :Observation, search_user: "rolf", by: :id)
+    expects = Observation.order(id: :asc).where(user: rolf.id).distinct
+    scope = Observation.search_user("rolf").order(id: :asc)
+    assert_query_scope(expects, scope,
+                       :Observation, search_user: "rolf", by: :id)
   end
 
   def test_observation_advanced_search_content
     # notes
     expects = [observations(:coprinus_comatus_obs)]
-    scope = Observation.advanced_search("second fruiting")
+    scope = Observation.search_content("second fruiting")
     assert_query_scope(expects, scope,
                        :Observation, search_content: "second fruiting")
     # comments(:minimal_unknown_obs_comment_2)
     expects = [observations(:minimal_unknown_obs)]
-    scope = Observation.advanced_search("agaricus")
+    scope = Observation.search_content("agaricus")
     assert_query_scope(expects, scope,
                        :Observation, search_content: "agaricus")
   end
@@ -455,6 +460,9 @@ class Query::ObservationsTest < UnitTestCase
     # single date should return after
     assert_query(Observation.index_order.date("2011-05-12"),
                  :Observation, date: "2011-05-12")
+    # single date within array should also return after
+    assert_query(Observation.index_order.date(["2011-05-12"]),
+                 :Observation, date: "2011-05-12")
     # year should return after
     assert_query(Observation.index_order.date("2005"),
                  :Observation, date: "2005")
@@ -466,6 +474,9 @@ class Query::ObservationsTest < UnitTestCase
                  :Observation, date: %w[2005 2009])
     # in a month range, any year
     assert_query(Observation.index_order.date("05", "12"),
+                 :Observation, date: %w[05 12])
+    # in a month range, any year, within array
+    assert_query(Observation.index_order.date(%w[05 12]),
                  :Observation, date: %w[05 12])
     # in a date range, any year
     assert_query(Observation.index_order.date("02-22", "08-22"),

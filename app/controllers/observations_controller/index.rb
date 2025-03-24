@@ -45,8 +45,7 @@ class ObservationsController
 
     def advanced_search_query
       if any_advanced_search_params_present?
-        params_plus_flags = advanced_search_params << :search_location_notes
-        search = params.permit(*params_plus_flags).to_h
+        search = params.permit(*advanced_search_params).to_h
         create_query(:Observation, search)
       elsif handle_advanced_search_invalid_q_param?
         nil
