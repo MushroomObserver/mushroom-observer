@@ -35,7 +35,7 @@ module Name::Spelling
         results = guess_word("", words.first)
         (2..num).each do |i|
           next unless results.any?
-          next unless (i & 1).zero?
+          next unless i.even?
 
           prefixes = results.map(&:text_name).uniq
           results = []

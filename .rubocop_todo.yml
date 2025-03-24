@@ -591,12 +591,6 @@ Security/Eval:
   Exclude:
     - 'script/config.rb'
 
-# Offense count: 1
-# This cop supports unsafe autocorrection (--autocorrect-all).
-Style/BitwisePredicate:
-  Exclude:
-    - 'app/models/name/spelling.rb'
-
 # Offense count: 63
 Style/ClassVars:
   Exclude:
