@@ -398,7 +398,6 @@ class QueuedEmail < AbstractModel
     else
       keys.map { |key| @strings[key.to_s] }
     end
-    result
   end
 
   # -----------------------------------------------
