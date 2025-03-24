@@ -591,7 +591,6 @@ Rails/OutputSafety:
 # AllowedReceivers: ActionMailer::Preview, ActiveSupport::TimeZone
 Rails/RedundantActiveRecordAllMethod:
   Exclude:
-    - 'lib/tasks/email.rake'
     - 'script/check_links.rb'
 
 # Offense count: 1
