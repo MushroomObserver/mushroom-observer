@@ -672,7 +672,6 @@ Style/ClassVars:
 # This cop supports unsafe autocorrection (--autocorrect-all).
 Style/CombinableLoops:
   Exclude:
-    - 'script/check_enum_values'
     - 'script/mushroom_mapper.rb'
 
 # Offense count: 1
