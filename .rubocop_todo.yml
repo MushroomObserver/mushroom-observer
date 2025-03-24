@@ -640,7 +640,6 @@ Style/FileNull:
 # AllowedReceivers: Thread.current
 Style/HashEachMethods:
   Exclude:
-    - 'app/classes/eol_data.rb'
     - 'script/slowest_pages'
 
 # Offense count: 9
