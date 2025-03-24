@@ -25,7 +25,7 @@ class QueuedEmailTest < UnitTestCase
     email = QueuedEmail::NameChange.new(user: rolf, to_user: mary)
     email.stub(:deliver_email, raises_exception) do
       original_stderr = $stderr.clone
-      $stderr.reopen(File.new("/dev/null", "w"))
+      $stderr.reopen(File.new(File::NULL, "w"))
       assert_not(email.send_email)
       $stderr.reopen(original_stderr)
     end

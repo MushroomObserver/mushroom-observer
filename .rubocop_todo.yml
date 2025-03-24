@@ -609,12 +609,6 @@ Style/ClassVars:
     - 'test/language_extensions.rb'
     - 'test/test_helper.rb'
 
-# Offense count: 1
-# This cop supports unsafe autocorrection (--autocorrect-all).
-Style/FileNull:
-  Exclude:
-    - 'test/models/queued_email_test.rb'
-
 # Offense count: 9
 # This cop supports unsafe autocorrection (--autocorrect-all).
 Style/MapIntoArray:
