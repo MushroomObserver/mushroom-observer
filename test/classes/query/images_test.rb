@@ -137,7 +137,7 @@ class Query::ImagesTest < UnitTestCase
     project = projects(:bolete_project)
     expects = Image.index_order.joins(:project_images).
               where(project_images: { project: project }).reorder(id: :asc)
-    assert_query(expects, :Image, projects: project, by: :id)
+    assert_query(expects, :Image, projects: project, order_by: :id)
     assert_query([], :Image, projects: projects(:empty_project))
   end
 
@@ -441,7 +441,7 @@ class Query::ImagesTest < UnitTestCase
   def test_image_sorted_by_original_name
     assert_query(
       sorted_by_name_set,
-      :Image, id_in_set: sorted_by_name_set, by: :original_name
+      :Image, id_in_set: sorted_by_name_set, order_by: :original_name
     )
   end
 

@@ -265,7 +265,7 @@ MushroomObserver::Application.routes.draw do
   #     resources :products
   #   end
 
-  # Default page "/" is /observations ordered by: :rss_log
+  # Default page "/" is /observations ordered order_by: :rss_log
   root "observations#index"
 
   # Route /123 to /observations/123.

@@ -253,7 +253,7 @@ class NamesController < ApplicationController
         :Observation, names: { lookup: @name.id,
                                include_subtaxa: true,
                                exclude_original_names: true,
-                               by: :confidence }
+                               order_by: :confidence }
       )
       # Determine if relevant and count the results of running the query if so.
       # Don't run if there aren't any children.

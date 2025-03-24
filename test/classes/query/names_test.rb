@@ -33,7 +33,7 @@ class Query::NamesTest < UnitTestCase
 
   def test_name_by_rss_log
     expects = Name.order_by_rss_log
-    assert_query(expects, :Name, by: :rss_log)
+    assert_query(expects, :Name, order_by: :rss_log)
   end
 
   def names_set
@@ -71,7 +71,7 @@ class Query::NamesTest < UnitTestCase
     assert_query([], :Name, by_editor: mary)
     expects = Name.reorder(id: :asc).
               with_correct_spelling.by_editor(dick).distinct
-    assert_query(expects, :Name, by_editor: dick, by: :id)
+    assert_query(expects, :Name, by_editor: dick, order_by: :id)
   end
 
   def test_name_users_login
@@ -468,7 +468,7 @@ class Query::NamesTest < UnitTestCase
   def test_name_has_observations
     expects = Name.with_correct_spelling.has_observations.
               select(:name).distinct.pluck(:name_id).sort
-    assert_query(expects, :Name, has_observations: 1, by: :id)
+    assert_query(expects, :Name, has_observations: 1, order_by: :id)
   end
 
   # Prove that :has_observations param of Name Query works with each

@@ -8,7 +8,7 @@ class Query::LocationDescriptionsTest < UnitTestCase
   include QueryExtensions
 
   def test_location_description_all
-    assert_query(LocationDescription.all, :LocationDescription, by: :id)
+    assert_query(LocationDescription.all, :LocationDescription, order_by: :id)
   end
 
   def test_location_description_locations
@@ -20,9 +20,9 @@ class Query::LocationDescriptionsTest < UnitTestCase
     assert(public_gualala_descs.length < all_gualala_descs.length)
 
     assert_query(all_gualala_descs,
-                 :LocationDescription, by: :id, locations: gualala)
+                 :LocationDescription, order_by: :id, locations: gualala)
     assert_query(public_gualala_descs,
-                 :LocationDescription, by: :id, locations: gualala,
+                 :LocationDescription, order_by: :id, locations: gualala,
                                        is_public: "yes")
   end
 
@@ -50,7 +50,8 @@ class Query::LocationDescriptionsTest < UnitTestCase
     descs = LocationDescription.all
     assert_query_scope(descs.find_all { |d| d.authors.include?(rolf) },
                        LocationDescription.by_author(rolf),
-                       :LocationDescription, by_author: rolf.login, by: :id)
+                       :LocationDescription, by_author: rolf.login,
+                                             order_by: :id)
     assert_query_scope(descs.find_all { |d| d.authors.include?(mary) },
                        LocationDescription.by_author(mary),
                        :LocationDescription, by_author: mary.login)
@@ -74,7 +75,7 @@ class Query::LocationDescriptionsTest < UnitTestCase
     descs = LocationDescription.all
     assert_query_scope(descs.find_all { |d| d.editors.include?(rolf) },
                        LocationDescription.by_editor(rolf),
-                       :LocationDescription, by_editor: rolf, by: :id)
+                       :LocationDescription, by_editor: rolf, order_by: :id)
     assert_query_scope(descs.find_all { |d| d.editors.include?(mary) },
                        LocationDescription.by_editor(mary),
                        :LocationDescription, by_editor: mary)
