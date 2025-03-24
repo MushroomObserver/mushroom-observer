@@ -61,7 +61,7 @@ class Query::LocationDescriptionsTest < UnitTestCase
   end
 
   def test_location_description_order_by_default
-    loc1, loc2, loc3 = Location.index_order
+    loc1, loc2, loc3 = Location.order_by_default
     desc1 =
       loc1.description ||= LocationDescription.create!(location_id: loc1.id)
     desc2 =
