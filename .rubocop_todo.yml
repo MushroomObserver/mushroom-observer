@@ -592,12 +592,6 @@ Rails/RootPathnameMethods:
     - 'config/initializers/monkey_patches.rb'
 
 # Offense count: 2
-# This cop supports unsafe autocorrection (--autocorrect-all).
-Rails/SelectMap:
-  Exclude:
-    - 'test/controllers/species_lists/observations_controller_test.rb'
-
-# Offense count: 2
 # Configuration parameters: Include.
 # Include: app/models/**/*.rb
 Rails/UniqueValidationWithoutIndex:
