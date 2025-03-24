@@ -675,12 +675,6 @@ Style/HashEachMethods:
     - 'app/classes/eol_data.rb'
     - 'script/slowest_pages'
 
-# Offense count: 9
-# This cop supports unsafe autocorrection (--autocorrect-all).
-Style/MapIntoArray:
-  Exclude:
-    - 'test/general_extensions.rb'
-
 # Offense count: 2
 Style/MissingRespondToMissing:
   Exclude:
