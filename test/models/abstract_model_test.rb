@@ -556,8 +556,8 @@ class AbstractModelTest < UnitTestCase
   # the scope enables this parsing of "within the year".
   def test_scope_created_in_year
     expects = Observation.where(Observation[:created_at].year.eq("2007")).
-              index_order
-    assert_equal(expects, Observation.index_order.created_at("2007", "2007"))
+              order_by_default
+    assert_equal(expects, Observation.order_by_default.created_at("2007", "2007"))
   end
 
   # Ditto for month.
@@ -565,9 +565,9 @@ class AbstractModelTest < UnitTestCase
     expects = Observation.
               where(Observation[:created_at].year.eq("2007").
                     and(Observation[:created_at].month.eq("08"))).
-              index_order
+              order_by_default
     assert_equal(expects,
-                 Observation.index_order.created_at("2007-08", "2007-08"))
+                 Observation.order_by_default.created_at("2007-08", "2007-08"))
   end
 
   def test_scope_by_editor

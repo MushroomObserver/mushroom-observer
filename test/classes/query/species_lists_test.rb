@@ -8,7 +8,7 @@ class Query::SpeciesListsTest < UnitTestCase
   include QueryExtensions
 
   def test_species_list_all
-    ids = SpeciesList.index_order
+    ids = SpeciesList.order_by_default
     assert_query(ids, :SpeciesList)
   end
 
@@ -32,7 +32,7 @@ class Query::SpeciesListsTest < UnitTestCase
   end
 
   def test_species_list_by_users
-    ids = SpeciesList.by_users(mary).index_order
+    ids = SpeciesList.by_users(mary).order_by_default
     assert_query(ids, :SpeciesList, by_users: mary)
     assert_query([], :SpeciesList, by_users: dick)
   end
@@ -43,7 +43,7 @@ class Query::SpeciesListsTest < UnitTestCase
   end
 
   def test_species_list_locations
-    scope = SpeciesList.locations(locations(:burbank)).index_order
+    scope = SpeciesList.locations(locations(:burbank)).order_by_default
     assert_query(scope, :SpeciesList, locations: locations(:burbank))
     assert_query(
       [], :SpeciesList, locations: locations(:unused_location)
@@ -54,11 +54,11 @@ class Query::SpeciesListsTest < UnitTestCase
     assert_query([],
                  :SpeciesList, projects: projects(:empty_project))
     ids = projects(:bolete_project).species_lists
-    scope = SpeciesList.projects(projects(:bolete_project)).index_order
+    scope = SpeciesList.projects(projects(:bolete_project)).order_by_default
     assert_query_scope(ids, scope,
                        :SpeciesList, projects: projects(:bolete_project))
     ids = projects(:two_list_project).species_lists
-    scope = SpeciesList.projects(projects(:two_list_project)).index_order
+    scope = SpeciesList.projects(projects(:two_list_project)).order_by_default
     assert_query_scope(ids, scope,
                        :SpeciesList, projects: projects(:two_list_project))
   end
@@ -66,32 +66,32 @@ class Query::SpeciesListsTest < UnitTestCase
   def test_species_list_id_in_set
     ids = [species_lists(:first_species_list).id,
            species_lists(:unknown_species_list).id]
-    scope = SpeciesList.id_in_set(ids).index_order
+    scope = SpeciesList.id_in_set(ids).order_by_default
     assert_query_scope(ids, scope, :SpeciesList, id_in_set: ids)
   end
 
   def test_species_list_title_has
     ids = [species_lists(:first_species_list).id,
            species_lists(:another_species_list).id]
-    scope = SpeciesList.title_has("A Species List").index_order
+    scope = SpeciesList.title_has("A Species List").order_by_default
     assert_query_scope(ids, scope, :SpeciesList, title_has: "A Species List")
   end
 
   def test_species_list_has_notes
-    scope = SpeciesList.has_notes.index_order
+    scope = SpeciesList.has_notes.order_by_default
     assert_query(scope, :SpeciesList, has_notes: true)
   end
 
   def test_species_list_notes_has
     ids = [species_lists(:first_species_list).id,
            species_lists(:another_species_list).id]
-    scope = SpeciesList.notes_has("Skunked").index_order
+    scope = SpeciesList.notes_has("Skunked").order_by_default
     assert_query_scope(ids, scope, :SpeciesList, notes_has: "Skunked")
   end
 
   def test_species_list_search_where
     ids = [species_lists(:where_no_mushrooms_list).id]
-    scope = SpeciesList.search_where("No Mushrooms").index_order
+    scope = SpeciesList.search_where("No Mushrooms").order_by_default
     assert_query_scope(ids, scope, :SpeciesList, search_where: "No Mushrooms")
   end
 
@@ -114,11 +114,11 @@ class Query::SpeciesListsTest < UnitTestCase
     expects = species_list_pattern_search(pattern)
     assert_query(expects, :SpeciesList, pattern: pattern)
 
-    expects = SpeciesList.index_order
+    expects = SpeciesList.order_by_default
     assert_query(expects, :SpeciesList, pattern: "")
   end
 
   def species_list_pattern_search(pattern)
-    SpeciesList.pattern(pattern).index_order
+    SpeciesList.pattern(pattern).order_by_default
   end
 end

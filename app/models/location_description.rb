@@ -85,7 +85,7 @@ class LocationDescription < Description
   has_many :editors, through: :location_description_editors,
                      source: :user
 
-  scope :index_order, lambda {
+  scope :order_by_default, lambda {
     joins(:location).order(Location[:name].asc,
                            LocationDescription[:created_at].asc,
                            LocationDescription[:id].desc)

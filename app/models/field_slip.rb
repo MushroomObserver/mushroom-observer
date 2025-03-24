@@ -16,7 +16,7 @@ class FieldSlip < AbstractModel
     end
   end
 
-  scope :index_order,
+  scope :order_by_default,
         -> { order(code: :asc, created_at: :desc, id: :desc) }
 
   scope :projects, lambda { |projects|

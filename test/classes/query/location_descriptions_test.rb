@@ -36,7 +36,7 @@ class Query::LocationDescriptionsTest < UnitTestCase
   end
 
   def test_location_description_by_author
-    loc1, loc2, loc3 = Location.all.index_order
+    loc1, loc2, loc3 = Location.all.order_by_default
     desc1 =
       loc1.description ||= LocationDescription.create!(location_id: loc1.id)
     desc2 =
@@ -60,7 +60,7 @@ class Query::LocationDescriptionsTest < UnitTestCase
                        :LocationDescription, by_author: users(:zero_user))
   end
 
-  def test_location_description_by_editor
+  def test_location_description_order_by_default
     loc1, loc2, loc3 = Location.index_order
     desc1 =
       loc1.description ||= LocationDescription.create!(location_id: loc1.id)
@@ -100,7 +100,7 @@ class Query::LocationDescriptionsTest < UnitTestCase
   end
 
   def test_location_description_content_has
-    expects = [location_descriptions(:albion_desc)]
+    expects = [location_descriptions(:albion_desc)]order_by_default
     scope = LocationDescription.content_has("to play with").index_order
     assert_query_scope(expects, scope,
                        :LocationDescription, content_has: "to play with")

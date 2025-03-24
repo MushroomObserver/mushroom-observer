@@ -9,7 +9,7 @@ module Location::Scopes
   # always show as covered.
   included do # rubocop:disable Metrics/BlockLength
     # default ordering for index queries
-    scope :index_order,
+    scope :order_by_default,
           -> { order(name: :asc, id: :desc) }
 
     # This should really be regions/region, but changing user prefs/filters and

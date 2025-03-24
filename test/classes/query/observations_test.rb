@@ -8,7 +8,7 @@ class Query::ObservationsTest < UnitTestCase
   include QueryExtensions
 
   def test_observation_all
-    expects = Observation.index_order
+    expects = Observation.order_by_default
     assert_query(expects, :Observation)
   end
 
@@ -51,84 +51,84 @@ class Query::ObservationsTest < UnitTestCase
   end
 
   def test_observation_confidence
-    assert_query(Observation.index_order.confidence(50, 70),
+    assert_query(Observation.order_by_default.confidence(50, 70),
                  :Observation, confidence: [50, 70])
-    assert_query(Observation.index_order.confidence(100),
+    assert_query(Observation.order_by_default.confidence(100),
                  :Observation, confidence: [100])
   end
 
   def test_observation_has_public_lat_lng
-    assert_query(Observation.index_order.has_public_lat_lng(true),
+    assert_query(Observation.order_by_default.has_public_lat_lng(true),
                  :Observation, has_public_lat_lng: true)
-    assert_query(Observation.index_order.has_public_lat_lng(false),
+    assert_query(Observation.order_by_default.has_public_lat_lng(false),
                  :Observation, has_public_lat_lng: false)
   end
 
   def test_observation_is_collection_location
-    assert_query(Observation.index_order.is_collection_location(true),
+    assert_query(Observation.order_by_default.is_collection_location(true),
                  :Observation, is_collection_location: true)
-    assert_query(Observation.index_order.is_collection_location(false),
+    assert_query(Observation.order_by_default.is_collection_location(false),
                  :Observation, is_collection_location: false)
   end
 
   def test_observation_has_notes
-    assert_query(Observation.index_order.has_notes(true),
+    assert_query(Observation.order_by_default.has_notes(true),
                  :Observation, has_notes: true)
-    assert_query(Observation.index_order.has_notes(false),
+    assert_query(Observation.order_by_default.has_notes(false),
                  :Observation, has_notes: false)
   end
 
   def test_observation_notes_has
-    assert_query(Observation.index_order.notes_has("strange place"),
+    assert_query(Observation.order_by_default.notes_has("strange place"),
                  :Observation, notes_has: "strange place")
-    assert_query(Observation.index_order.notes_has("From"),
+    assert_query(Observation.order_by_default.notes_has("From"),
                  :Observation, notes_has: "From")
-    assert_query(Observation.index_order.notes_has("Growing"),
+    assert_query(Observation.order_by_default.notes_has("Growing"),
                  :Observation, notes_has: "Growing")
   end
 
   def test_observation_has_notes_fields
     # the single version
-    assert_query(Observation.index_order.has_notes_field("substrate"),
+    assert_query(Observation.order_by_default.has_notes_field("substrate"),
                  :Observation, has_notes_fields: "substrate")
-    assert_query(Observation.index_order.
+    assert_query(Observation.order_by_default.
                  has_notes_fields(%w[substrate cap]),
                  :Observation, has_notes_fields: %w[substrate cap])
   end
 
   def test_observation_has_comments
-    assert_query(Observation.index_order.has_comments(true),
+    assert_query(Observation.order_by_default.has_comments(true),
                  :Observation, has_comments: true)
-    assert_query(Observation.index_order,
+    assert_query(Observation.order_by_default,
                  :Observation, has_comments: false)
   end
 
   def test_observation_comments_has
-    assert_query(Observation.index_order.comments_has("comment"),
+    assert_query(Observation.order_by_default.comments_has("comment"),
                  :Observation, comments_has: "comment")
-    assert_query(Observation.index_order.
+    assert_query(Observation.order_by_default.
                  comments_has("Agaricus campestris"),
                  :Observation, comments_has: "Agaricus campestris")
   end
 
   def test_observation_has_sequences
-    assert_query(Observation.index_order.has_sequences(true),
+    assert_query(Observation.order_by_default.has_sequences(true),
                  :Observation, has_sequences: true)
-    assert_query(Observation.index_order,
+    assert_query(Observation.order_by_default,
                  :Observation, has_sequences: false)
   end
 
   def test_observation_has_images
-    assert_query(Observation.index_order.has_images(true),
+    assert_query(Observation.order_by_default.has_images(true),
                  :Observation, has_images: true)
-    assert_query(Observation.index_order.has_images(false),
+    assert_query(Observation.order_by_default.has_images(false),
                  :Observation, has_images: false)
   end
 
   def test_observation_has_specimen
-    assert_query(Observation.index_order.has_specimen(true),
+    assert_query(Observation.order_by_default.has_specimen(true),
                  :Observation, has_specimen: true)
-    assert_query(Observation.index_order.has_specimen(false),
+    assert_query(Observation.order_by_default.has_specimen(false),
                  :Observation, has_specimen: false)
   end
 
@@ -140,9 +140,9 @@ class Query::ObservationsTest < UnitTestCase
     assert_query([observations(:falmouth_2022_obs),
                   observations(:minimal_unknown_obs)],
                  :Observation, field_slips: [f_s.id, fs2.id])
-    assert_query(Observation.index_order.field_slips([f_s.code, fs2.code]),
+    assert_query(Observation.order_by_default.field_slips([f_s.code, fs2.code]),
                  :Observation, field_slips: [f_s.code, fs2.code])
-    assert_query(Observation.index_order.field_slips([f_s.id, fs2.id]),
+    assert_query(Observation.order_by_default.field_slips([f_s.id, fs2.id]),
                  :Observation, field_slips: [f_s.id, fs2.id])
   end
 
@@ -151,7 +151,7 @@ class Query::ObservationsTest < UnitTestCase
     assert_query([observations(:detailed_unknown_obs),
                   observations(:minimal_unknown_obs)],
                  :Observation, herbarium_records: h_r.id)
-    assert_query(Observation.index_order.herbarium_records(h_r),
+    assert_query(Observation.order_by_default.herbarium_records(h_r),
                  :Observation, herbarium_records: h_r.id)
   end
 
@@ -159,21 +159,21 @@ class Query::ObservationsTest < UnitTestCase
     herb = herbaria(:fundis_herbarium)
     assert_query([observations(:detailed_unknown_obs)],
                  :Observation, herbaria: herb.name)
-    assert_query(Observation.index_order.herbaria(herb.name),
+    assert_query(Observation.order_by_default.herbaria(herb.name),
                  :Observation, herbaria: herb.name)
     herb = herbaria(:nybg_herbarium)
-    assert_query(Observation.index_order.herbaria(herb.name),
+    assert_query(Observation.order_by_default.herbaria(herb.name),
                  :Observation, herbaria: herb.id)
   end
 
   def test_observation_on_project_lists
     projects = [projects(:bolete_project), projects(:eol_project)]
-    expects = Observation.index_order.project_lists(projects)
+    expects = Observation.order_by_default.project_lists(projects)
     assert_query(expects, :Observation, project_lists: projects.map(&:title))
   end
 
   def test_observation_locations
-    expects = Observation.index_order.locations(locations(:burbank)).distinct
+    expects = Observation.order_by_default.locations(locations(:burbank)).distinct
     assert_query(expects, :Observation, locations: locations(:burbank))
   end
 
@@ -182,7 +182,7 @@ class Query::ObservationsTest < UnitTestCase
                  :Observation, projects: projects(:empty_project))
     project = projects(:bolete_project)
     assert_query(project.observations, :Observation, projects: project)
-    assert_query(Observation.index_order.projects(project.title),
+    assert_query(Observation.order_by_default.projects(project.title),
                  :Observation, projects: project)
   end
 
@@ -200,30 +200,30 @@ class Query::ObservationsTest < UnitTestCase
     assert_query([observations(:detailed_unknown_obs).id,
                   observations(:minimal_unknown_obs).id],
                  :Observation, species_lists: spl.id)
-    assert_query(Observation.index_order.species_lists(spl),
+    assert_query(Observation.order_by_default.species_lists(spl),
                  :Observation, species_lists: spl.id)
     # check the other param!
-    assert_query(Observation.index_order.species_lists(spl),
+    assert_query(Observation.order_by_default.species_lists(spl),
                  :Observation, species_lists: spl.id)
     spl2 = species_lists(:one_genus_three_species_list)
-    assert_query(Observation.index_order.species_lists([spl, spl2]).distinct,
+    assert_query(Observation.order_by_default.species_lists([spl, spl2]).distinct,
                  :Observation, species_lists: [spl.title, spl2.title])
   end
 
   def test_observation_clade
-    assert_query(Observation.index_order.clade("Agaricales"),
+    assert_query(Observation.order_by_default.clade("Agaricales"),
                  :Observation, clade: "Agaricales")
-    assert_query(Observation.index_order.clade("Tremellales"),
+    assert_query(Observation.order_by_default.clade("Tremellales"),
                  :Observation, clade: "Tremellales")
   end
 
   def test_observation_region
-    assert_query(Observation.index_order.
+    assert_query(Observation.order_by_default.
                  region("Sonoma Co., California, USA"),
                  :Observation, region: "Sonoma Co., California, USA")
-    assert_query(Observation.index_order.region("Massachusetts, USA"),
+    assert_query(Observation.order_by_default.region("Massachusetts, USA"),
                  :Observation, region: "Massachusetts, USA")
-    assert_query(Observation.index_order.region("North America"),
+    assert_query(Observation.order_by_default.region("North America"),
                  :Observation, region: "North America")
   end
 
@@ -231,13 +231,13 @@ class Query::ObservationsTest < UnitTestCase
     # Have to do this, otherwise columns not populated
     Location.update_box_area_and_center_columns
     box = { north: 35, south: 34, east: -118, west: -119 }
-    assert_query(Observation.index_order.in_box(**box),
+    assert_query(Observation.order_by_default.in_box(**box),
                  :Observation, in_box: box)
   end
 
   def test_observation_of_children
     name = names(:agaricus)
-    expects = Observation.index_order.
+    expects = Observation.order_by_default.
               names(lookup: name, include_subtaxa: true).distinct
     assert_query(expects, :Observation, names: { lookup: [name.id],
                                                  include_subtaxa: true })
@@ -248,7 +248,7 @@ class Query::ObservationsTest < UnitTestCase
     name = names(:tubaria_furfuracea)
     assert_query_scope(
       [],
-      Observation.index_order.names(lookup: name.id,
+      Observation.order_by_default.names(lookup: name.id,
                                     include_subtaxa: true,
                                     exclude_original_names: true),
       :Observation, names: { lookup: name.id,
@@ -259,7 +259,7 @@ class Query::ObservationsTest < UnitTestCase
 
   def test_observation_names_with_modifiers
     User.current = rolf
-    expects = Observation.index_order.names(lookup: names(:fungi)).distinct
+    expects = Observation.order_by_default.names(lookup: names(:fungi)).distinct
     assert_query(expects, :Observation, names: { lookup: [names(:fungi).id] })
     assert_query(
       [],
@@ -268,7 +268,7 @@ class Query::ObservationsTest < UnitTestCase
 
     # test all truthy/falsy combinations of these boolean parameters:
     #  include_synonyms, include_all_name_proposals, exclude_consensus
-    names = Name.index_order.
+    names = Name.order_by_default.
             where(Name[:text_name].matches("Agaricus camp%")).to_a
     agaricus_ssp = names.clone
     name = names.pop
@@ -412,7 +412,7 @@ class Query::ObservationsTest < UnitTestCase
   end
 
   def observation_pattern_search(pattern)
-    Observation.index_order.pattern(pattern).distinct
+    Observation.order_by_default.pattern(pattern).distinct
   end
 
   def test_observation_advanced_search_name
@@ -454,44 +454,44 @@ class Query::ObservationsTest < UnitTestCase
 
   def test_observation_date
     # blank should return all
-    assert_query(Observation.index_order, :Observation, date: nil)
+    assert_query(Observation.order_by_default, :Observation, date: nil)
     # impossible dates should return none
     assert_query([], :Observation, date: %w[1550 1551])
     # single date should return after
-    assert_query(Observation.index_order.date("2011-05-12"),
+    assert_query(Observation.order_by_default.date("2011-05-12"),
                  :Observation, date: "2011-05-12")
     # single date within array should also return after
-    assert_query(Observation.index_order.date(["2011-05-12"]),
+    assert_query(Observation.order_by_default.date(["2011-05-12"]),
                  :Observation, date: "2011-05-12")
     # year should return after
-    assert_query(Observation.index_order.date("2005"),
+    assert_query(Observation.order_by_default.date("2005"),
                  :Observation, date: "2005")
     # years should return between
-    assert_query(Observation.index_order.date("2005", "2009"),
+    assert_query(Observation.order_by_default.date("2005", "2009"),
                  :Observation, date: %w[2005 2009])
     # test scope accepts array values
-    assert_query(Observation.index_order.date(%w[2005 2009]),
+    assert_query(Observation.order_by_default.date(%w[2005 2009]),
                  :Observation, date: %w[2005 2009])
     # in a month range, any year
-    assert_query(Observation.index_order.date("05", "12"),
+    assert_query(Observation.order_by_default.date("05", "12"),
                  :Observation, date: %w[05 12])
     # in a month range, any year, within array
-    assert_query(Observation.index_order.date(%w[05 12]),
+    assert_query(Observation.order_by_default.date(%w[05 12]),
                  :Observation, date: %w[05 12])
     # in a date range, any year
-    assert_query(Observation.index_order.date("02-22", "08-22"),
+    assert_query(Observation.order_by_default.date("02-22", "08-22"),
                  :Observation, date: %w[02-22 08-22])
     # period wraps around the new year
-    assert_query(Observation.index_order.date("08-22", "02-22"),
+    assert_query(Observation.order_by_default.date("08-22", "02-22"),
                  :Observation, date: %w[08-22 02-22])
     # full dates
-    assert_query(Observation.index_order.date("2009-08-22", "2009-10-20"),
+    assert_query(Observation.order_by_default.date("2009-08-22", "2009-10-20"),
                  :Observation, date: %w[2009-08-22 2009-10-20])
     # date wraps around the new year
-    assert_query(Observation.index_order.date("2015-08-22", "2016-02-22"),
+    assert_query(Observation.order_by_default.date("2015-08-22", "2016-02-22"),
                  :Observation, date: %w[2015-08-22 2016-02-22])
     # as array
-    assert_query(Observation.index_order.date(%w[2015-08-22 2016-02-22]),
+    assert_query(Observation.order_by_default.date(%w[2015-08-22 2016-02-22]),
                  :Observation, date: %w[2015-08-22 2016-02-22])
   end
 
@@ -505,40 +505,40 @@ class Query::ObservationsTest < UnitTestCase
 
   def do_datetime_test(col)
     # blank should return all
-    assert_query(Observation.index_order, :Observation, "#{col}": nil)
+    assert_query(Observation.order_by_default, :Observation, "#{col}": nil)
     # impossible dates should return none
     assert_query([], :Observation, "#{col}": %w[2000 2001])
     # single datetime should return after
-    assert_query(Observation.index_order.send(col, "2011-05-12-12-59-57"),
+    assert_query(Observation.order_by_default.send(col, "2011-05-12-12-59-57"),
                  :Observation, "#{col}": "2011-05-12-12-59-57")
     # single date should return after
-    assert_query(Observation.index_order.send(col, "2011-05-12"),
+    assert_query(Observation.order_by_default.send(col, "2011-05-12"),
                  :Observation, "#{col}": "2011-05-12")
     # year should return after 01/01
-    assert_query(Observation.index_order.send(col, "2005-01-01"),
+    assert_query(Observation.order_by_default.send(col, "2005-01-01"),
                  :Observation, "#{col}": "2005")
     # month should return after 01
-    assert_query(Observation.index_order.send(col, "2007-05-01"),
+    assert_query(Observation.order_by_default.send(col, "2007-05-01"),
                  :Observation, "#{col}": "2007-05")
     # years should return between
-    assert_query(Observation.index_order.send(col, "2005", "2009"),
+    assert_query(Observation.order_by_default.send(col, "2005", "2009"),
                  :Observation, "#{col}": %w[2005 2009])
     # test scope accepts array values
-    assert_query(Observation.index_order.send(col, %w[2005 2009]),
+    assert_query(Observation.order_by_default.send(col, %w[2005 2009]),
                  :Observation, "#{col}": %w[2005 2009])
     # test that reversed value order works in scope
-    assert_query(Observation.index_order.send(col, %w[2009 2005]),
+    assert_query(Observation.order_by_default.send(col, %w[2009 2005]),
                  :Observation, "#{col}": %w[2005 2009])
     # full dates
-    assert_query(Observation.index_order.send(col, "2009-08-22", "2009-10-20"),
+    assert_query(Observation.order_by_default.send(col, "2009-08-22", "2009-10-20"),
                  :Observation, "#{col}": %w[2009-08-22 2009-10-20])
     # full datetimes
-    assert_query(Observation.index_order.
+    assert_query(Observation.order_by_default.
                  send(col, "2009-08-22-03-04-22", "2009-10-20-03-04-22"),
                  :Observation,
                  "#{col}": %w[2009-08-22-03-04-22 2009-10-20-03-04-22])
     # as array
-    assert_query(Observation.index_order.
+    assert_query(Observation.order_by_default.
                  send(col, %w[2009-08-22-03-04-22 2009-10-20-03-04-22]),
                  :Observation,
                  "#{col}": %w[2009-08-22-03-04-22 2009-10-20-03-04-22])
