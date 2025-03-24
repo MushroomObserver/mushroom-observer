@@ -14,7 +14,11 @@ def update
       changed = check_name("search_name", name, parse) || changed
       changed = check_name("display_name", name, parse) || changed
       changed = check_name("sort_name", name, parse) || changed
-      name.save if changed
+      if changed && !name.save
+        name.errors.each do |err|
+          puts(err.full_message)
+        end
+      end
     else
       puts("BAD PARSE: #{name.id},#{name.search_name}")
     end
