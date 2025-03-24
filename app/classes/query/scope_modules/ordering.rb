@@ -17,7 +17,7 @@ module Query::ScopeModules::Ordering
     @scopes = @scopes.reverse_order if reverse
   end
 
-  def initialize_order_specs(by)
+  def initialize_order_specs(order_by)
     return if params[:id_in_set].present?
 
     sorting_method = "order_by_#{order_by}"
