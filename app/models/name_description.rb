@@ -102,7 +102,7 @@ class NameDescription < Description
   has_many :editors, through: :name_description_editors,
                      source: :user
 
-  scope :index_order, lambda {
+  scope :order_by_default, lambda {
     joins(:name).order(Name[:sort_name].asc, NameDescription[:created_at].asc,
                        NameDescription[:id].desc)
   }

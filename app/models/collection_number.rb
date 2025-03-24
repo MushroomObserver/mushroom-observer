@@ -58,7 +58,7 @@ class CollectionNumber < AbstractModel
   before_update :log_update
   before_destroy :log_destroy
 
-  scope :index_order,
+  scope :order_by_default,
         -> { order(name: :asc, number: :asc) }
 
   scope :collectors,

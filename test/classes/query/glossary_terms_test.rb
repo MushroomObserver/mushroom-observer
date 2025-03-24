@@ -8,7 +8,7 @@ class Query::GlossaryTermsTest < UnitTestCase
   include QueryExtensions
 
   def test_glossary_term_all
-    expects = GlossaryTerm.index_order
+    expects = GlossaryTerm.order_by_default
     assert_query(expects, :GlossaryTerm)
   end
 
@@ -38,10 +38,10 @@ class Query::GlossaryTermsTest < UnitTestCase
     assert_query_scope(expects, scope,
                        :GlossaryTerm, pattern: "Cute little cone head")
     # default description, many expects
-    expects = GlossaryTerm.pattern("Description of Term").index_order
+    expects = GlossaryTerm.pattern("Description of Term").order_by_default
     assert_query(expects, :GlossaryTerm, pattern: "Description of Term")
     # blank == all
-    expects = GlossaryTerm.index_order
+    expects = GlossaryTerm.order_by_default
     assert_query(expects, :GlossaryTerm, pattern: "")
   end
 end

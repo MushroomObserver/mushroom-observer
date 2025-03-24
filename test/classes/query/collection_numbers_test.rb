@@ -8,7 +8,7 @@ class Query::CollectionNumbersTest < UnitTestCase
   include QueryExtensions
 
   def test_collection_number_all
-    expects = CollectionNumber.index_order
+    expects = CollectionNumber.order_by_default
     assert_query(expects, :CollectionNumber)
   end
 
@@ -72,43 +72,43 @@ class Query::CollectionNumbersTest < UnitTestCase
   def test_collection_number_by_users
     expects = newbie_collections <<
               collection_numbers(:detailed_unknown_coll_num_two)
-    scope = CollectionNumber.by_users(mary).index_order
+    scope = CollectionNumber.by_users(mary).order_by_default
     assert_query_scope(expects, scope, :CollectionNumber, by_users: mary)
   end
 
   def test_collection_number_collectors
     expects = newbie_collections
-    scope = CollectionNumber.collectors("Mary Newbie").index_order
+    scope = CollectionNumber.collectors("Mary Newbie").order_by_default
     assert_query_scope(expects, scope,
                        :CollectionNumber, collectors: "Mary Newbie")
   end
 
   def test_collection_number_collector_has
     expects = newbie_collections
-    scope = CollectionNumber.collector_has("Newbie").index_order
+    scope = CollectionNumber.collector_has("Newbie").order_by_default
     assert_query_scope(expects, scope,
                        :CollectionNumber, collector_has: "Newbie")
   end
 
   def test_collection_number_numbers
     expects = [collection_numbers(:agaricus_campestris_coll_num)]
-    scope = CollectionNumber.numbers("07-123a").index_order
+    scope = CollectionNumber.numbers("07-123a").order_by_default
     assert_query_scope(expects, scope, :CollectionNumber, numbers: "07-123a")
     expects = [collection_numbers(:minimal_unknown_coll_num),
                collection_numbers(:detailed_unknown_coll_num_one)]
-    scope = CollectionNumber.numbers(%w[173 174]).index_order
+    scope = CollectionNumber.numbers(%w[173 174]).order_by_default
     assert_query_scope(expects, scope, :CollectionNumber, numbers: %w[173 174])
   end
 
   def test_collection_number_number_has
     expects = [collection_numbers(:detailed_unknown_coll_num_two)]
-    scope = CollectionNumber.number_has("n").index_order
+    scope = CollectionNumber.number_has("n").order_by_default
     assert_query_scope(expects, scope, :CollectionNumber, number_has: "n")
   end
 
   def test_collection_number_observations
     obs = observations(:detailed_unknown_obs)
-    expects = CollectionNumber.index_order.observations(obs)
+    expects = CollectionNumber.order_by_default.observations(obs)
     assert_query(expects, :CollectionNumber, observations: obs.id)
   end
 

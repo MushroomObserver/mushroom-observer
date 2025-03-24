@@ -8,7 +8,7 @@ module Image::Scopes
   # Two line stabby lambdas are OK, it's just the declaration line that will
   # always show as covered.
   included do # rubocop:disable Metrics/BlockLength
-    scope :index_order,
+    scope :order_by_default,
           -> { order(created_at: :desc, id: :desc) }
 
     scope :sizes, lambda { |min, max = min|

@@ -8,7 +8,7 @@ class Query::ProjectsTest < UnitTestCase
   include QueryExtensions
 
   def test_project_all
-    expects = Project.index_order
+    expects = Project.order_by_default
     assert_query(expects, :Project)
   end
 
@@ -24,11 +24,11 @@ class Query::ProjectsTest < UnitTestCase
   end
 
   def test_project_members
-    assert_query(Project.index_order.members(rolf),
+    assert_query(Project.order_by_default.members(rolf),
                  :Project, members: [rolf])
-    assert_query(Project.index_order.members(mary),
+    assert_query(Project.order_by_default.members(mary),
                  :Project, members: [mary])
-    assert_query(Project.index_order.members(dick),
+    assert_query(Project.order_by_default.members(dick),
                  :Project, members: [dick])
   end
 
@@ -43,9 +43,9 @@ class Query::ProjectsTest < UnitTestCase
                projects(:two_list_project), projects(:lone_wolf_project),
                projects(:open_membership_project), projects(:bolete_project),
                projects(:eol_project)]
-    scope = Project.has_summary.index_order
+    scope = Project.has_summary.order_by_default
     assert_query_scope(expects, scope, :Project, has_summary: "yes")
-    scope = Project.has_summary(false).index_order
+    scope = Project.has_summary(false).order_by_default
     assert_query(scope, :Project, has_summary: "no")
   end
 
@@ -57,7 +57,7 @@ class Query::ProjectsTest < UnitTestCase
 
   def test_project_field_slip_prefix_has
     expects = [projects(:eol_project)]
-    scope = Project.field_slip_prefix_has("EOL").index_order
+    scope = Project.field_slip_prefix_has("EOL").order_by_default
     assert_query_scope(expects, scope, :Project, field_slip_prefix_has: "EOL")
   end
 
@@ -77,23 +77,23 @@ class Query::ProjectsTest < UnitTestCase
     scope = project_pattern_search("CURR")
     assert_query_scope(expects, scope, :Project, pattern: "CURR")
 
-    expects = Project.index_order
+    expects = Project.order_by_default
     assert_query(expects, :Project, pattern: "")
   end
 
   def project_pattern_search(pattern)
-    Project.pattern(pattern).index_order.distinct
+    Project.pattern(pattern).order_by_default.distinct
   end
 
   # These next four only handle a `true` condition
   def test_project_has_images
     expects = [projects(:lone_wolf_project), projects(:bolete_project)]
-    scope = Project.has_images.index_order
+    scope = Project.has_images.order_by_default
     assert_query_scope(expects, scope, :Project, has_images: true)
   end
 
   def test_project_has_observations
-    scope = Project.has_observations.index_order
+    scope = Project.has_observations.order_by_default
     assert_query(scope, :Project, has_observations: true)
   end
 
@@ -101,13 +101,13 @@ class Query::ProjectsTest < UnitTestCase
     expects = [projects(:two_list_project), projects(:lone_wolf_project),
                projects(:open_membership_project), projects(:bolete_project),
                projects(:eol_project)]
-    scope = Project.has_species_lists.index_order
+    scope = Project.has_species_lists.order_by_default
     assert_query_scope(expects, scope, :Project, has_species_lists: "yes")
   end
 
   def test_project_has_comments
     expects = []
-    scope = Project.has_comments.index_order
+    scope = Project.has_comments.order_by_default
     assert_query_scope(expects, scope, :Project, has_comments: "yes")
   end
 end
