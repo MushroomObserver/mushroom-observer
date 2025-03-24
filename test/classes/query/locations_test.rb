@@ -62,7 +62,8 @@ class Query::LocationsTest < UnitTestCase
     scope = Location.order_by_default.notes_has('"should persist"')
     assert_query_scope(expects, scope, :Location, notes_has: '"should persist"')
     expects = [locations(:point_reyes)]
-    scope = Location.order_by_default.notes_has('"legal to collect" -"Salt Point"')
+    scope = Location.order_by_default.
+            notes_has('"legal to collect" -"Salt Point"')
     assert_query_scope(expects, scope,
                        :Location, notes_has: '"legal to collect" -"Salt Point"')
   end
@@ -303,7 +304,8 @@ class Query::LocationsTest < UnitTestCase
     names = [names(:boletus_edulis), names(:agaricus_campestris)].
             map(&:text_name)
     expects = Location.joins(observations: :name).
-              where(observations: { text_name: names }).order_by_default.distinct
+              where(observations: { text_name: names }).
+              order_by_default.distinct
     assert_query(
       expects, :Location, observation_query: { names: { lookup: names } }
     )
@@ -403,7 +405,8 @@ class Query::LocationsTest < UnitTestCase
   def test_location_with_observations_has_public_lat_lng
     assert_query(
       Location.joins(:observations).where(observations: { gps_hidden: false }).
-               where.not(observations: { lat: false }).order_by_default.distinct,
+               where.not(observations: { lat: false }).
+               order_by_default.distinct,
       :Location, observation_query: { has_public_lat_lng: true }
     )
   end

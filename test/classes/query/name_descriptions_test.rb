@@ -85,7 +85,8 @@ class Query::NameDescriptionsTest < UnitTestCase
   end
 
   def test_name_description_projects
-    assert_query(NameDescription.projects(projects(:eol_project)).order_by_default,
+    assert_query(NameDescription.projects(projects(:eol_project)).
+                 order_by_default,
                  :NameDescription, projects: projects(:eol_project).id)
   end
 

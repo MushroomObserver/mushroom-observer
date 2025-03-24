@@ -41,7 +41,8 @@ class Query::FiltersTest < UnitTestCase
   def test_filtering_content_with_lichen
     expects_obs = Observation.lichen(:yes).order_by_default.uniq
     assert_query(expects_obs, :Observation, lichen: "yes")
-    expects_names = Name.with_correct_spelling.lichen(:yes).order_by_default.uniq
+    expects_names = Name.with_correct_spelling.lichen(:yes).
+                    order_by_default.uniq
     assert_query(expects_names, :Name, lichen: "yes")
   end
 

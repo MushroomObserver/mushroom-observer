@@ -104,7 +104,8 @@ class LookupTest < UnitTestCase
                         exclude_original_names: true)
 
     name5.update(synonym_id: nil)
-    name5 = Name.where(text_name: "Pseudolepiota rachodes").order_by_default.first
+    name5 = Name.where(text_name: "Pseudolepiota rachodes").
+            order_by_default.first
     assert_lookup_names([name1, name2, name3, name4, name5],
                         ["Macrolepiota"],
                         include_synonyms: true,
@@ -170,7 +171,8 @@ class LookupTest < UnitTestCase
     name2.update(classification: name1.classification)
     name2.save
 
-    children = Name.order_by_default.where(Name[:text_name].matches("Lactarius %"))
+    children = Name.order_by_default.
+               where(Name[:text_name].matches("Lactarius %"))
 
     assert_lookup_names([name1] + children,
                         ["Lactarius"],

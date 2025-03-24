@@ -100,8 +100,8 @@ class Query::LocationDescriptionsTest < UnitTestCase
   end
 
   def test_location_description_content_has
-    expects = [location_descriptions(:albion_desc)]order_by_default
-    scope = LocationDescription.content_has("to play with").index_order
+    expects = [location_descriptions(:albion_desc)]
+    scope = LocationDescription.content_has("to play with").order_by_default
     assert_query_scope(expects, scope,
                        :LocationDescription, content_has: "to play with")
   end

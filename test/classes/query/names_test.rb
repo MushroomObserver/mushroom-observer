@@ -149,8 +149,8 @@ class Query::NamesTest < UnitTestCase
     name = names(:agaricus)
     assert_query(
       Name.order_by_default.names(lookup: name.id,
-                             include_subtaxa: true,
-                             exclude_original_names: true),
+                                  include_subtaxa: true,
+                                  exclude_original_names: true),
       :Name, names: { lookup: [name.id],
                       include_subtaxa: true,
                       exclude_original_names: true }
@@ -163,8 +163,8 @@ class Query::NamesTest < UnitTestCase
     assert_query_scope(
       [],
       Name.order_by_default.names(lookup: name.id,
-                             include_subtaxa: true,
-                             exclude_original_names: true),
+                                  include_subtaxa: true,
+                                  exclude_original_names: true),
       :Name, names: { lookup: name.id,
                       include_subtaxa: true,
                       exclude_original_names: true }
@@ -174,8 +174,8 @@ class Query::NamesTest < UnitTestCase
   def test_name_names_include_subtaxa_include_original
     assert_query(
       Name.order_by_default.names(lookup: names(:agaricus),
-                             include_subtaxa: true,
-                             exclude_original_names: false),
+                                  include_subtaxa: true,
+                                  exclude_original_names: false),
       :Name, names: { lookup: [names(:agaricus).id],
                       include_subtaxa: true,
                       exclude_original_names: false }
@@ -185,8 +185,8 @@ class Query::NamesTest < UnitTestCase
   def test_name_names_include_immediate_subtaxa
     assert_query(
       Name.order_by_default.names(lookup: names(:agaricus),
-                             include_immediate_subtaxa: true,
-                             exclude_original_names: false),
+                                  include_immediate_subtaxa: true,
+                                  exclude_original_names: false),
       :Name, names: { lookup: [names(:agaricus).id],
                       include_immediate_subtaxa: true,
                       exclude_original_names: false }
@@ -239,7 +239,8 @@ class Query::NamesTest < UnitTestCase
 
   # NOTE: Something is wrong in the fixtures between Genus and Family
   def test_name_rank_range
-    expects = Name.with_correct_spelling.rank("Genus", "Kingdom").order_by_default
+    expects = Name.with_correct_spelling.rank("Genus", "Kingdom").
+              order_by_default
     assert_query(expects, :Name, rank: %w[Genus Kingdom])
 
     expects = Name.with_correct_spelling.rank("Family").order_by_default
@@ -280,7 +281,8 @@ class Query::NamesTest < UnitTestCase
   def test_name_has_classification
     expects = Name.with_correct_spelling.has_classification.order_by_default
     assert_query(expects, :Name, has_classification: true)
-    expects = Name.with_correct_spelling.has_classification(false).order_by_default
+    expects = Name.with_correct_spelling.has_classification(false).
+              order_by_default
     assert_query(expects, :Name, has_classification: false)
   end
 

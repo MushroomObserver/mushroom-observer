@@ -173,7 +173,7 @@ class Query::ObservationsTest < UnitTestCase
   end
 
   def test_observation_locations
-    expects = Observation.order_by_default.locations(locations(:burbank)).distinct
+    expects = Observation.order_by_default.locations(locations(:burbank))
     assert_query(expects, :Observation, locations: locations(:burbank))
   end
 
@@ -206,7 +206,7 @@ class Query::ObservationsTest < UnitTestCase
     assert_query(Observation.order_by_default.species_lists(spl),
                  :Observation, species_lists: spl.id)
     spl2 = species_lists(:one_genus_three_species_list)
-    assert_query(Observation.order_by_default.species_lists([spl, spl2]).distinct,
+    assert_query(Observation.order_by_default.species_lists([spl, spl2]),
                  :Observation, species_lists: [spl.title, spl2.title])
   end
 
@@ -249,8 +249,8 @@ class Query::ObservationsTest < UnitTestCase
     assert_query_scope(
       [],
       Observation.order_by_default.names(lookup: name.id,
-                                    include_subtaxa: true,
-                                    exclude_original_names: true),
+                                         include_subtaxa: true,
+                                         exclude_original_names: true),
       :Observation, names: { lookup: name.id,
                              include_subtaxa: true,
                              exclude_original_names: true }
@@ -530,7 +530,8 @@ class Query::ObservationsTest < UnitTestCase
     assert_query(Observation.order_by_default.send(col, %w[2009 2005]),
                  :Observation, "#{col}": %w[2005 2009])
     # full dates
-    assert_query(Observation.order_by_default.send(col, "2009-08-22", "2009-10-20"),
+    assert_query(Observation.order_by_default.
+                 send(col, "2009-08-22", "2009-10-20"),
                  :Observation, "#{col}": %w[2009-08-22 2009-10-20])
     # full datetimes
     assert_query(Observation.order_by_default.
