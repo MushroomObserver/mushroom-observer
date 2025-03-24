@@ -557,7 +557,8 @@ class AbstractModelTest < UnitTestCase
   def test_scope_created_in_year
     expects = Observation.where(Observation[:created_at].year.eq("2007")).
               order_by_default
-    assert_equal(expects, Observation.order_by_default.created_at("2007", "2007"))
+    assert_equal(expects,
+                 Observation.order_by_default.created_at("2007", "2007"))
   end
 
   # Ditto for month.
