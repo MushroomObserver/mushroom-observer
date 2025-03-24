@@ -726,14 +726,6 @@ Style/OptionalBooleanParameter:
     - 'test/session_extensions.rb'
     - 'test/session_form_extensions.rb'
 
-# Offense count: 5
-# This cop supports unsafe autocorrection (--autocorrect-all).
-# Configuration parameters: ConvertCodeThatCanStartToReturnNil, AllowedMethods, MaxChainLength.
-# AllowedMethods: present?, blank?, presence, try, try!
-Style/SafeNavigation:
-  Exclude:
-    - 'app/models/observation/naming_consensus.rb'
-
 # Offense count: 3
 # Configuration parameters: Max.
 Style/SafeNavigationChainLength:
