@@ -732,7 +732,6 @@ Style/OptionalBooleanParameter:
 # AllowedMethods: present?, blank?, presence, try, try!
 Style/SafeNavigation:
   Exclude:
-    - 'app/controllers/account/profile_controller.rb'
     - 'app/controllers/names/eol_data_controller.rb'
     - 'app/models/name/create.rb'
     - 'app/models/name/spelling.rb'
