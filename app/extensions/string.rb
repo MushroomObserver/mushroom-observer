@@ -739,10 +739,6 @@ class String
 
   ### Misc Utilities ###
   #
-  def print_thing(thing)
-    print("#{self}: #{thing.class}: #{thing}\n")
-  end
-
   def to_boolean
     ActiveRecord::Type::Boolean.new.cast(self)
   end
