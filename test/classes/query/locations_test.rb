@@ -108,7 +108,7 @@ class Query::LocationsTest < UnitTestCase
     expects = Location.index_order.joins(observations: :user).
               where(observations: { user: dick }).distinct
     scope = Location.index_order.search_user("dick")
-    assert_query(expects, scope, :Location, search_user: "dick")
+    assert_query_scope(expects, scope, :Location, search_user: "dick")
   end
 
   # content in obs.notes
