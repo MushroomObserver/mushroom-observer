@@ -578,12 +578,6 @@ Rails/OutputSafety:
     - 'app/helpers/namings_helper.rb'
     - 'config/application.rb'
 
-# Offense count: 1
-# This cop supports unsafe autocorrection (--autocorrect-all).
-Rails/RootPathnameMethods:
-  Exclude:
-    - 'config/initializers/monkey_patches.rb'
-
 # Offense count: 2
 # Configuration parameters: Include.
 # Include: app/models/**/*.rb
