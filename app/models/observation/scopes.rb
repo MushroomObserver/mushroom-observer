@@ -46,7 +46,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :has_notes_field,
           ->(field) { where(Observation[:notes].matches("%:#{field}:%")) }
     scope :has_notes_fields, lambda { |fields|
-      return if fields.empty?
+      return if (fields = [fields].flatten).empty?
 
       fields.map! { |field| notes_field_presence_condition(field) }
       conditions = fields.shift
