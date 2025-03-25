@@ -46,36 +46,50 @@ class Query::NameDescriptionsTest < UnitTestCase
   def test_name_description_by_editor
     expects = NameDescription.joins(:name_description_editors).
               where(name_description_editors: { user_id: rolf }).order(:id)
-    assert_query(expects, :NameDescription, by_editor: rolf)
+    scope = NameDescription.by_editor(rolf)
+    assert_query_scope(expects, scope, :NameDescription, by_editor: rolf)
 
     expects = NameDescription.joins(:name_description_editors).
               where(name_description_editors: { user_id: mary }).order(:id)
-    assert_query(expects, :NameDescription, by_editor: mary)
+    scope = NameDescription.by_editor(mary)
+    assert_query_scope(expects, scope, :NameDescription, by_editor: mary)
 
     assert_query([], :NameDescription, by_editor: dick)
   end
 
   def test_name_description_in_set
     assert_query([], :NameDescription, id_in_set: rolf.id)
-    assert_query(
-      NameDescription.all,
-      :NameDescription, id_in_set: NameDescription.pluck(:id)
+    set = NameDescription.order_by_default.limit(3).map(&:id)
+    assert_query_scope(
+      set, NameDescription.id_in_set(set),
+      :NameDescription, id_in_set: set
     )
-    assert_query(
-      [NameDescription.first.id],
-      :NameDescription, id_in_set: [rolf.id, NameDescription.first.id]
+    set = [NameDescription.first.id]
+    assert_query_scope(
+      set, NameDescription.id_in_set(set),
+      :NameDescription, id_in_set: set
     )
   end
 
   def test_name_description_has_default_description
-    assert_query(NameDescription.is_default.order_by_default,
-                 :NameDescription, name_query: { has_default_description: 1 })
-    assert_query(NameDescription.is_not_default.order_by_default,
-                 :NameDescription, name_query: { has_default_description: 0 })
+    expects = NameDescription.is_default.order_by_default
+    scope = NameDescription.joins(:name).distinct.
+            merge(Name.has_default_description).order_by_default
+    assert_query_scope(
+      expects, scope,
+      :NameDescription, name_query: { has_default_description: 1 }
+    )
+    expects = NameDescription.is_not_default.order_by_default
+    scope = NameDescription.joins(:name).distinct.
+            merge(Name.has_default_description(false)).order_by_default
+    assert_query_scope(
+      expects, scope,
+      :NameDescription, name_query: { has_default_description: 0 }
+    )
   end
 
   def test_name_description_desc_sources_user
-    assert_query(NameDescription.sources(5).order_by_default,
+    assert_query(NameDescription.sources("user").order_by_default,
                  :NameDescription, sources: "user")
   end
 
@@ -85,9 +99,9 @@ class Query::NameDescriptionsTest < UnitTestCase
   end
 
   def test_name_description_projects
-    assert_query(NameDescription.projects(projects(:eol_project)).
-                 order_by_default,
-                 :NameDescription, projects: projects(:eol_project).id)
+    project = projects(:eol_project).id
+    assert_query(NameDescription.projects(project).order_by_default,
+                 :NameDescription, projects: project)
   end
 
   # waiting on a new AbstractModel scope for searches,
