@@ -6,12 +6,6 @@
 #    Observation.created_at("2006-09-01", "2012-09-01")
 #    Name.updated_at("2016-12-01") # returns names updated after
 #
-#  Ordering Scopes
-#
-#  order_by_user::
-#  order_by_rss_log::
-#  order_by_set::
-#
 #  Filtering scopes
 #
 #  id_in_set::
@@ -48,22 +42,8 @@ module AbstractModel::Scopes
   # Two line stabby lambdas are OK, it's just the declaration line that will
   # always show as covered.
   included do # rubocop:disable Metrics/BlockLength
-    scope :order_by_user, lambda {
-      joins(:user).
-        reorder(User[:name].when(nil).then(User[:login]).
-                when("").then(User[:login]).
-                else(User[:name]).asc, id: :desc).distinct
-    }
-    scope :order_by_rss_log, lambda {
-      joins(:rss_log).
-        reorder(RssLog[:updated_at].desc, model.arel_table[:id].desc).distinct
-    }
-    scope :order_by_set, lambda { |set|
-      reorder(Arel::Nodes.build_quoted(set.join(",")) & arel_table[:id])
-    }
-
     scope :id_in_set, lambda { |ids|
-      set = limited_id_set(ids) # [] is valid
+      set = limited_id_set(ids) # [] is valid and should return none
       return none if set.empty?
 
       where(arel_table[:id].in(set)).order_by_set(set)
