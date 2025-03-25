@@ -44,7 +44,7 @@ module Location::Scopes
       joins_default_descriptions.search_columns(cols, phrase)
     }
     scope :regexp, lambda { |phrase|
-      where(Location[:name] =~ phrase.to_s.strip.squeeze(" "))
+      where(Location[:name] =~ phrase.to_s.strip.squeeze(" ")).distinct
     }
     # https://stackoverflow.com/a/77064711/3357635
     # AR's assumed join condition is
