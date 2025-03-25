@@ -9,19 +9,21 @@ class Query::HerbariaTest < UnitTestCase
 
   def test_herbarium_all
     expects = Herbarium.order_by_default
-    assert_query(expects.select(:id).distinct, :Herbarium)
+    assert_query(expects, :Herbarium)
   end
 
   def test_herbarium_nonpersonal
     expects = Herbarium.nonpersonal.order_by_default
-    assert_query(expects.select(:id).distinct, :Herbarium, nonpersonal: true)
+    assert_query(expects, :Herbarium, nonpersonal: true)
+    # Currently nonpersonal(false) is not parsed by Query, maybe intentionally.
+    # It seems to me this param should be reversed to `personal`, and the
+    # default index behavior adjusted, but that requires some focus. - AN 202503
     # expects = Herbarium.nonpersonal(false).order_by_default
     # assert_query(expects.select(:id).distinct, :Herbarium, nonpersonal: false)
   end
 
   def test_herbarium_by_records
-    expects = Herbarium.left_outer_joins(:herbarium_records).group(:id).
-              order(HerbariumRecord[:id].count.desc, Herbarium[:id].desc)
+    expects = Herbarium.order_by(:records)
     assert_query(expects, :Herbarium, order_by: :records)
   end
 
@@ -60,7 +62,7 @@ class Query::HerbariaTest < UnitTestCase
 
   def test_herbarium_pattern_search
     expects = [herbaria(:nybg_herbarium)]
-    scope = Herbarium.pattern("awesome").distinct
+    scope = Herbarium.pattern("awesome")
     assert_query_scope(expects, scope, :Herbarium, pattern: "awesome")
   end
 end
