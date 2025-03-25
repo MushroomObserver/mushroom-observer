@@ -13,7 +13,7 @@ class Query::ProjectsTest < UnitTestCase
   end
 
   def test_project_by_rss_log
-    expects = Project.order_by_rss_log
+    expects = Project.order_by(:rss_log)
     assert_query(expects, :Project, order_by: :rss_log)
   end
 

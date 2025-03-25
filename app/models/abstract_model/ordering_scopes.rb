@@ -26,9 +26,13 @@ module AbstractModel::OrderingScopes
       method ||= :default
       method = method.dup.to_s
       reverse = method.sub!(/^reverse_/, "")
-      scope = order_initialize(method)
-      scope = order_disambiguate(scope)
+      scope = :"order_by_#{method}"
+      return all unless respond_to?(scope)
+
+      scope = send(scope)
       scope = scope.reverse_order if reverse
+      # Disambiguate grouped result order by adding an order by :id
+      scope = scope.order(arel_table[:id].desc)
       scope
     }
 
@@ -385,9 +389,9 @@ module AbstractModel::OrderingScopes
     # Could theoretically work if order_in_set runs last and calls `reorder`
     def order_initialize(method)
       scope = :"order_by_#{method}"
-      return all unless klass.respond_to?(scope)
+      return all unless respond_to?(scope)
 
-      scope
+      send(scope)
     end
 
     # Disambiguate order (by adding order(id: :desc). Useful when other

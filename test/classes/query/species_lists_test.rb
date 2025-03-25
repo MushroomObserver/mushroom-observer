@@ -13,8 +13,10 @@ class Query::SpeciesListsTest < UnitTestCase
   end
 
   def test_species_list_sort_by_user
-    ids = SpeciesList.order_by_user.to_a
+    ids = SpeciesList.order_by(:user).to_a
     assert_query(ids, :SpeciesList, order_by: :user)
+    ids = SpeciesList.order_by(:reverse_user).to_a
+    assert_query(ids, :SpeciesList, order_by: :reverse_user)
   end
 
   def test_species_list_sort_by_title
