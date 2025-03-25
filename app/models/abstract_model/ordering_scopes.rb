@@ -4,9 +4,8 @@
 #
 #  Ordering Scopes
 #
-#  order_by_user::
-#  order_by_rss_log::
-#  order_by_set::
+#  order_by(method)::   Dispatcher for Query's :order_by param.
+#  order_by_set::       Special order called by the :id_in_set scope
 #
 module AbstractModel::OrderingScopes
   # This is using Concern so we can define the scopes in this included module.
@@ -15,83 +14,52 @@ module AbstractModel::OrderingScopes
   # NOTE: To improve Coveralls display, avoid one-line stabby lambda scopes.
   # Two line stabby lambdas are OK, it's just the declaration line that will
   # always show as covered.
-  included do # rubocop: Metrics/BlockLength
-    # Dispatcher for Query's :order_by param, with (method) arg.
-    # Example: create_query(:Observation, order_by: :created_at)
-    # ...order_by dispatches to a scope called `:order_by_created_at`.
-    # If no such scope exists, it simply orders by id: :desc (:asc if reverse).
+  included do
+    # Dispatcher for Query's :order_by param. Expects a (method) arg.
+    # Example:
+    #   create_query(:Observation, order_by: :created_at)
     #
-    # IMPORTANT: USE THIS SCOPE in the app. Private methods do not include
-    # the last step, `order(id: :desc)`, disambigating within grouped results.
+    # ...dispatches to a private method called `:order_by_created_at`,
+    # which is basically just a scope. If no method by that name exists,
+    # this will only add `order(id: :desc)` (:asc if reverse).
+    #
+    # IMPORTANT: USE THIS SCOPE whenever possible in the app and tests.
+    # The private methods called by it do not include the last step that
+    # resolves order predictably within grouped results.
     scope :order_by, lambda { |method|
       return all if method.to_sym == :none
 
-      method ||= :default
+      method ||= :default # :order_by_default must be defined for each model
       method = method.dup.to_s
       reverse = method.sub!(/^reverse_/, "")
       scope = :"order_by_#{method}";
-      return all unless respond_to?(scope)
+      return all unless model.private_methods(false).include?(scope)
 
-      scope = send(scope)
+      # Call `scoping` with `model` here, because the private class methods
+      # below are otherwise inaccessible to a `scope` proc.
+      scope = scoping { model.send(scope) }
       scope = scope.reverse_order if reverse
-      # Disambiguate grouped result order by adding an order by :id
+      # Order grouped results from other scopes by adding order(id: :desc). If
+      # this `:desc` is contrary to a previous order_by(:id) it will be ignored.
       scope = scope.order(arel_table[:id].desc)
       scope
     }
 
-    # Must run last after any other scopes, because this resets the order
+    # Special ordering for the scope :id_in_set
+    # Should run last after any other scopes, because it needs to reset order
     scope :order_by_set, lambda { |set|
       reorder(Arel::Nodes.build_quoted(set.join(",")) & arel_table[:id])
     }
-
-    # private_class_method :order_by_accession_number
-    # private_class_method :order_by_box_area
-    # private_class_method :order_by_code
-    # private_class_method :order_by_code_then_date
-    # private_class_method :order_by_code_then_name
-    # private_class_method :order_by_confidence
-    # private_class_method :order_by_contribution
-    # private_class_method :order_by_copyright_holder
-    # private_class_method :order_by_created_at
-    # private_class_method :order_by_date
-    # private_class_method :order_by_herbarium_label
-    # private_class_method :order_by_herbarium_name
-    # private_class_method :order_by_id
-    # private_class_method :order_by_image_quality
-    # private_class_method :order_by_initial_det
-    # private_class_method :order_by_last_login
-    # private_class_method :order_by_location
-    # private_class_method :order_by_login
-    # private_class_method :order_by_name
-    # private_class_method :order_by_name_and_number
-    # private_class_method :order_by_num_views
-    # private_class_method :order_by_observation
-    # private_class_method :order_by_original_name
-    # private_class_method :order_by_owners_quality
-    # private_class_method :order_by_owners_thumbnail_quality
-    # private_class_method :order_by_records
-    # private_class_method :order_by_rss_log
-    # private_class_method :order_by_summary
-    # private_class_method :order_by_thumbnail_quality
-    # private_class_method :order_by_title
-    # private_class_method :order_by_updated_at
-    # private_class_method :order_by_url
-    # private_class_method :order_by_user
-    # private_class_method :order_by_where
-    # private_class_method :order_images_by_name
-    # private_class_method :order_location_descriptions_by_name
-    # private_class_method :order_locations_by_name
-    # private_class_method :order_name_descriptions_by_name
-    # private_class_method :order_names_by_name
-    # private_class_method :order_observations_by_name
-    # private_class_method :order_other_models_by_name
   end
 
   # class methods here, `self` included
   module ClassMethods
-    # NOTE: DO NOT CALL THESE SCOPES DIRECTLY unless you need them without the
-    # disambiguating `order(id: :desc)` that is added by `order_by` above.
-    # I tried to make these private but could not figure it out.
+    private
+
+    # NOTE: For predictable results, DO NOT CALL THESE METHODS DIRECTLY
+    # unless for some reason you need scopes without the ambiguity-resolving
+    # secondary order added above, `order(id: :desc)`.
+    #
     def order_by_accession_number
       return all unless self == HerbariumRecord
 

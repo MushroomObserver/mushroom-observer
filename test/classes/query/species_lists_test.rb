@@ -41,7 +41,7 @@ class Query::SpeciesListsTest < UnitTestCase
   end
 
   def test_species_list_by_user_order_by_id
-    ids = SpeciesList.where(user: rolf).order_by(:id).uniq
+    ids = SpeciesList.by_users(rolf).distinct.order_by(:id)
     assert_query(ids, :SpeciesList, by_users: rolf, order_by: :id)
   end
 
