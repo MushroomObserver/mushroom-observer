@@ -10,6 +10,9 @@ class Query::CollectionNumbersTest < UnitTestCase
   def test_collection_number_all
     expects = CollectionNumber.order_by_default
     assert_query(expects, :CollectionNumber)
+    # This is the default order, but let's test it independently
+    expects = CollectionNumber.order_by(:name_and_number)
+    assert_query(expects, :CollectionNumber, order_by: :name_and_number)
   end
 
   def test_collection_number_created_at_range
@@ -115,11 +118,11 @@ class Query::CollectionNumbersTest < UnitTestCase
   def test_collection_number_pattern_search
     expects = [collection_numbers(:agaricus_campestris_coll_num),
                collection_numbers(:coprinus_comatus_coll_num)]
-    scope = CollectionNumber.pattern("Singer").sort_by(&:format_name)
+    scope = CollectionNumber.pattern("Singer").order_by_default
     assert_query_scope(expects, scope, :CollectionNumber, pattern: "Singer")
 
     expects = [collection_numbers(:agaricus_campestris_coll_num)]
-    scope = CollectionNumber.pattern("123a").sort_by(&:format_name)
+    scope = CollectionNumber.pattern("123a").order_by_default
     assert_query_scope(expects, scope, :CollectionNumber, pattern: "123a")
   end
 end
