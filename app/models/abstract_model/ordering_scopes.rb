@@ -35,7 +35,7 @@ module AbstractModel::OrderingScopes
       scope = :"order_by_#{method}";
       return all unless model.private_methods(false).include?(scope)
 
-      # Call `scoping` with `model` here, because the private class methods
+      # Calls `scoping` with `model` here, because the private class methods
       # below are otherwise inaccessible to a `scope` proc.
       scope = scoping { model.send(scope) }
       scope = scope.reverse_order if reverse
@@ -45,7 +45,7 @@ module AbstractModel::OrderingScopes
       scope
     }
 
-    # Special ordering for the scope :id_in_set
+    # Special ordering for the scope :id_in_set, requires arg `set` of ids.
     # Should run last after any other scopes, because it needs to reset order
     scope :order_by_set, lambda { |set|
       reorder(Arel::Nodes.build_quoted(set.join(",")) & arel_table[:id])
