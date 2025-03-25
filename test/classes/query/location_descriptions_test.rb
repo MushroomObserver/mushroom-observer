@@ -14,16 +14,15 @@ class Query::LocationDescriptionsTest < UnitTestCase
   def test_location_description_locations
     gualala = locations(:gualala)
     all_descs = LocationDescription.all
-    all_gualala_descs = LocationDescription.locations(gualala)
+    all_gualala_descs = LocationDescription.locations(gualala).order_by_default
     public_gualala_descs = all_gualala_descs.is_public
     assert(all_gualala_descs.length < all_descs.length)
     assert(public_gualala_descs.length < all_gualala_descs.length)
 
     assert_query(all_gualala_descs,
-                 :LocationDescription, order_by: :id, locations: gualala)
+                 :LocationDescription, locations: gualala)
     assert_query(public_gualala_descs,
-                 :LocationDescription, order_by: :id, locations: gualala,
-                                       is_public: "yes")
+                 :LocationDescription, locations: gualala, is_public: "yes")
   end
 
   def test_location_description_by_user
@@ -36,7 +35,7 @@ class Query::LocationDescriptionsTest < UnitTestCase
   end
 
   def test_location_description_by_author
-    loc1, loc2, loc3 = Location.all.order_by_default
+    loc1, loc2, loc3 = Location.order_by_default
     desc1 =
       loc1.description ||= LocationDescription.create!(location_id: loc1.id)
     desc2 =
@@ -88,12 +87,14 @@ class Query::LocationDescriptionsTest < UnitTestCase
     assert_query(
       [], :LocationDescription, id_in_set: rolf.id
     )
-    assert_query(
-      LocationDescription.all,
-      :LocationDescription, id_in_set: LocationDescription.select(:id).to_a
+    set = LocationDescription.order_by_default.limit(3).map(&:id)
+    assert_query_scope(
+      set, LocationDescription.id_in_set(set),
+      :LocationDescription, id_in_set: set
     )
-    assert_query(
-      [location_descriptions(:albion_desc).id],
+    set = [location_descriptions(:albion_desc).id]
+    assert_query_scope(
+      set, LocationDescription.id_in_set(set),
       :LocationDescription, id_in_set: [rolf.id,
                                         location_descriptions(:albion_desc).id]
     )
