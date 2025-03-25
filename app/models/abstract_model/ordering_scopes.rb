@@ -20,6 +20,9 @@ module AbstractModel::OrderingScopes
     # Example: create_query(:Observation, order_by: :created_at)
     # ...order_by dispatches to a scope called `:order_by_created_at`.
     # If no such scope exists, it simply orders by id: :desc (:asc if reverse).
+    #
+    # IMPORTANT: USE THIS SCOPE in the app. Private methods do not include
+    # the last step, `order(id: :desc)`, disambigating within grouped results.
     scope :order_by, lambda { |method|
       return all if method.to_sym == :none
 
@@ -36,357 +39,56 @@ module AbstractModel::OrderingScopes
       scope
     }
 
-    scope :order_by_accession_number, lambda {
-      return all unless klass == HerbariumRecord
-
-      order(HerbariumRecord[:accession_number].asc)
-    }
-
-    scope :order_by_box_area, lambda {
-      # "locations.box_area DESC"
-      order(Location[:box_area].desc)
-    }
-
-    scope :order_by_code, lambda {
-      # where << "herbaria.code != ''"
-      # "herbaria.code ASC"
-      where(Herbarium[:code].not_eq(nil)).order(Herbarium[:code].asc)
-    }
-
-    scope :order_by_code_then_date, lambda {
-      return all unless klass == FieldSlip
-
-      # "field_slips.code ASC, field_slips.created_at DESC, " \
-      # "field_slips.id DESC"
-      order(FieldSlip[:code].asc, FieldSlip[:created_at].desc)
-    }
-
-    scope :order_by_code_then_name, lambda {
-      # "IF(herbaria.code = '', '~', herbaria.code) ASC, herbaria.name ASC"
-      order(
-        Herbarium[:code].eq(nil).
-          when(true).then(Arel::Nodes.build_quoted("~")).
-          when(false).then(Herbarium[:code]).asc, Herbarium[:name].asc
-      )
-    }
-
-    scope :order_by_confidence, lambda {
-      return all unless [Image, Observation].include?(klass)
-
-      # add_join(:observation_images, :observations) if klass == Image
-      joins(observation_images: :observation) if klass == Image
-      # "observations.vote_cache DESC"
-      order(Observation[:vote_cache].desc)
-    }
-
-    scope :order_by_contribution, lambda {
-      return all unless klass == User
-
-      # "users.contribution DESC" if klass == User
-      order(User[:contribution].desc)
-    }
-
-    scope :order_by_copyright_holder, lambda {
-      return all unless klass.column_names.include?("copyright_holder")
-
-      # "#{klass.table_name}.copyright_holder ASC"
-      order(arel_table[:copyright_holder].asc)
-    }
-
-    scope :order_by_created_at, lambda {
-      return all unless klass.column_names.include?("created_at")
-
-      # "#{klass.table_name}.created_at DESC"
-      order(arel_table[:created_at].desc)
-    }
-
-    scope :order_by_date, lambda {
-      if klass.column_names.include?("when")
-        # "#{klass.table_name}.when DESC"
-        order(arel_table[:when].desc)
-      elsif klass.column_names.include?("created_at")
-        # "#{klass.table_name}.created_at DESC"
-        order(arel_table[:created_at].desc)
-      end
-    }
-
-    scope :order_by_herbarium_label, lambda {
-      return all unless klass == HerbariumRecord
-
-      # "herbarium_records.initial_det ASC, " \
-      # "herbarium_records.accession_number ASC"
-      order(HerbariumRecord[:initial_det].asc,
-            HerbariumRecord[:accession_number].asc)
-    }
-
-    scope :order_by_herbarium_name, lambda {
-      return all unless klass == HerbariumRecord
-
-      # add_join(:herbaria)
-      # "herbaria.name ASC"
-      joins(:herbarium).order(Herbarium[:name].asc)
-    }
-
-    # (for testing)
-    scope :order_by_id, lambda {
-      # "#{klass.table_name}.id ASC"
-      order(arel_table[:id].asc)
-    }
-
-    scope :order_by_image_quality, lambda {
-      return all unless klass == Image
-
-      # "images.vote_cache DESC" if klass == Image
-      order(Image[:vote_cache].desc)
-    }
-
-    scope :order_by_initial_det, lambda {
-      return all unless klass == HerbariumRecord
-
-      # "#{klass.table_name}.initial_det ASC"
-      order(HerbariumRecord[:initial_det].asc)
-    }
-
-    scope :order_by_last_login, lambda {
-      return all unless klass == User
-
-      # "#{klass.table_name}.last_login DESC"
-      order(User[:last_login].desc)
-    }
-
-    scope :order_by_location, lambda {
-      return all unless klass.column_names.include?("location_id")
-
-      # Join Users with null locations, else join records with locations
-      scope = if klass == User
-                # add_join(:locations!)
-                left_outer_joins(:location)
-              else
-                # add_join(:locations)
-                joins(:location)
-              end
-      scope.order_locations_by_name
-    }
-
-    scope :order_by_login, lambda {
-      return all unless klass == User
-
-      # "#{klass.table_name}.login ASC" if klass.column_names.include?("login")
-      order(User[:login].asc)
-    }
-
-    # Could refactor so this is just `order_by_name` by class inheritance.
-    # NOTE: scope `order_by_location` calls `order_locations_by_name` above,
-    # so the latter should stay here. To avoid method duplication, we could
-    # just have scope `Location.order_by_name` call `order_locations_by_name`.
-    scope :order_by_name, lambda {
-      order_by_name_method = "order_#{klass.name.underscore.pluralize}_by_name"
-      if klass.respond_to?(order_by_name_method)
-        send(order_by_name_method)
-      else
-        order_other_models_by_name(klass)
-      end
-    }
-
-    scope :order_by_name_and_number, lambda {
-      return all unless klass == CollectionNumber
-
-      # "collection_numbers.name ASC, collection_numbers.number ASC"
-      order(CollectionNumber[:name].asc, CollectionNumber[:number].asc)
-    }
-
-    scope :order_by_num_views, lambda {
-      return all unless klass.column_names.include?("num_views")
-
-      # "#{klass.table_name}.num_views DESC"
-      order(arel_table[:num_views].desc)
-    }
-
-    scope :order_by_observation, lambda {
-      return all unless klass.column_names.include?("observation_id")
-
-      # "observation_id DESC" if klass.column_names.include?("observation_id")
-      order(Observation[:id].desc)
-    }
-
-    scope :order_by_original_name, lambda {
-      return all unless klass == Image
-
-      # "images.original_name ASC" if klass == Image
-      order(Image[:original_name].asc)
-    }
-
-    scope :order_by_owners_quality, lambda {
-      return all unless klass == Image
-
-      # add_join(:image_votes)
-      # where << "image_votes.user_id = images.user_id"
-      # "image_votes.value DESC"
-      joins(:image_votes).where(ImageVote[:user_id].eq(Image[:user_id])).
-        order(ImageVote[:value].desc)
-    }
-
-    scope :order_by_owners_thumbnail_quality, lambda {
-      return all unless klass == Observation
-
-      # add_join(:"images.thumb_image", :image_votes)
-      # where << "images.user_id = observations.user_id"
-      # where << "image_votes.user_id = observations.user_id"
-      # "image_votes.value DESC, " \
-      # "images.vote_cache DESC, " \
-      # "observations.vote_cache DESC"
-      joins(images: :image_votes).
-        where(Observation[:thumb_image_id].eq(Image[:id])).
-        where(Image[:user_id].eq(Observation[:user_id])).
-        where(ImageVote[:user_id].eq(Observation[:user_id])).
-        order(ImageVote[:value].desc, Image[:vote_cache].desc,
-              Observation[:vote_cache].desc)
-    }
-
-    scope :order_by_records, lambda {
-      return all unless klass == Herbarium
-
-      # outer_join needed to show herbaria with no records
-      # add_join(:herbarium_records!)
-      # self.group = "herbaria.id"
-      # "count(herbarium_records.id) DESC"
-      left_outer_joins(:herbarium_records).group(Herbarium[:id]).
-        order(HerbariumRecord[:id].count.desc)
-    }
-
-    scope :order_by_rss_log, lambda {
-      return all unless klass.column_names.include?("rss_log_id")
-
-      # use cached column if exists, and don't join
-      # calling index method should include rss_logs
-      if klass.column_names.include?("log_updated_at")
-        # "#{klass.table_name}.log_updated_at DESC"
-        order(arel_table[:log_updated_at].desc)
-      else
-        # add_join(:rss_logs)
-        # "rss_logs.updated_at DESC"
-        joins(:rss_log).order(RssLog[:updated_at].desc)
-      end
-    }
-
-    scope :order_by_summary, lambda {
-      return all unless klass.column_names.include?("summary")
-
-      # "#{klass.table_name}.summary ASC"
-      order(arel_table[:summary].asc)
-    }
-
-    scope :order_by_thumbnail_quality, lambda {
-      return all unless klass == Observation
-
-      # add_join(:"images.thumb_image")
-      # "images.vote_cache DESC, observations.vote_cache DESC"
-      joins(:images).where(Observation[:thumb_image_id].eq(Image[:id])).
-        order(Image[:vote_cache].desc, Observation[:vote_cache].desc)
-    }
-
-    scope :order_by_title, lambda {
-      return all unless klass.column_names.include?("title")
-
-      # "#{klass.table_name}.title ASC" if klass.column_names.include?("title")
-      order(arel_table[:title].asc)
-    }
-
-    scope :order_by_updated_at, lambda {
-      return all unless klass.column_names.include?("updated_at")
-
-      # "#{klass.table_name}.updated_at DESC"
-      order(arel_table[:updated_at].desc)
-    }
-
-    scope :order_by_url, lambda {
-      return all unless klass == ExternalLink
-
-      # "external_links.url ASC" if klass == ExternalLink
-      order(ExternalLink[:url].asc)
-    }
-
-    scope :order_by_user, lambda {
-      # add_join(:users)
-      # 'IF(users.name = "" OR users.name IS NULL, users.login, users.name) ASC'
-      joins(:user).order(
-        User[:name].when(nil).then(User[:login]).when("").then(User[:login]).
-        else(User[:name]).asc
-      )
-    }
-
-    scope :order_by_where, lambda {
-      return all unless klass.column_names.include?("where")
-
-      # "#{klass.table_name}.where ASC" if klass.column_names.include?("where")
-      order(arel_table[:where].asc)
-    }
-
-    ####### methods dispatched from order_by_name
-
-    scope :order_images_by_name, lambda {
-      # add_join(:observation_images, :observations)
-      # add_join(:observations, :names)
-      # self.group = "images.id"
-      # "MIN(names.sort_name) ASC, images.when DESC"
-      joins(observation_images: { observation: :name }).
-        group(Image[:id]).order(Name[:sort_name].min.asc, Image[:when].desc)
-    }
-
-    scope :order_location_descriptions_by_name, lambda {
-      # add_join(:locations)
-      # "locations.name ASC, location_descriptions.created_at ASC"
-      joins(:location).
-        order(Location[:name].asc, LocationDescription[:created_at].asc)
-    }
-
-    scope :order_locations_by_name, lambda {
-      if User.current_location_format == "scientific"
-        # "locations.scientific_name ASC"
-        order(Location[:scientific_name].asc)
-      else
-        # "locations.name ASC"
-        order(Location[:name].asc)
-      end
-    }
-
-    scope :order_name_descriptions_by_name, lambda {
-      # add_join(:names)
-      # "names.sort_name ASC, name_descriptions.created_at ASC"
-      joins(:name).order(Name[:sort_name].asc, NameDescription[:created_at].asc)
-    }
-
-    scope :order_names_by_name, lambda {
-      # "names.sort_name ASC"
-      order(Name[:sort_name].asc)
-    }
-
-    scope :order_observations_by_name, lambda {
-      # add_join(:names)
-      # "names.sort_name ASC, observations.when DESC"
-      joins(:name).order(Name[:sort_name].asc, Observation[:when].desc)
-    }
-
-    scope :order_other_models_by_name, lambda {
-      if klass.column_names.include?("name")
-        # "#{klass.table_name}.name ASC"
-        order(arel_table[:name].asc)
-      elsif klass.column_names.include?("title")
-        # "#{klass.table_name}.title ASC"
-        order(arel_table[:title].asc)
-      end
-    }
-
+    # Must run last after any other scopes, because this resets the order
     scope :order_by_set, lambda { |set|
       reorder(Arel::Nodes.build_quoted(set.join(",")) & arel_table[:id])
     }
+
+    private_class_method :order_by_accession_number
+    private_class_method :order_by_box_area
+    private_class_method :order_by_code
+    private_class_method :order_by_code_then_date
+    private_class_method :order_by_code_then_name
+    private_class_method :order_by_confidence
+    private_class_method :order_by_contribution
+    private_class_method :order_by_copyright_holder
+    private_class_method :order_by_created_at
+    private_class_method :order_by_date
+    private_class_method :order_by_herbarium_label
+    private_class_method :order_by_herbarium_name
+    private_class_method :order_by_id
+    private_class_method :order_by_image_quality
+    private_class_method :order_by_initial_det
+    private_class_method :order_by_last_login
+    private_class_method :order_by_location
+    private_class_method :order_by_login
+    private_class_method :order_by_name
+    private_class_method :order_by_name_and_number
+    private_class_method :order_by_num_views
+    private_class_method :order_by_observation
+    private_class_method :order_by_original_name
+    private_class_method :order_by_owners_quality
+    private_class_method :order_by_owners_thumbnail_quality
+    private_class_method :order_by_records
+    private_class_method :order_by_rss_log
+    private_class_method :order_by_summary
+    private_class_method :order_by_thumbnail_quality
+    private_class_method :order_by_title
+    private_class_method :order_by_updated_at
+    private_class_method :order_by_url
+    private_class_method :order_by_user
+    private_class_method :order_by_where
+    private_class_method :order_images_by_name
+    private_class_method :order_location_descriptions_by_name
+    private_class_method :order_locations_by_name
+    private_class_method :order_name_descriptions_by_name
+    private_class_method :order_names_by_name
+    private_class_method :order_observations_by_name
+    private_class_method :order_other_models_by_name
   end
 
   # class methods here, `self` included
   module ClassMethods
-    # Should not run if order_by_set is anywhere in the scope chain, because it
-    # will mess with the order.
-    # Could theoretically work if order_in_set runs last and calls `reorder`
     def order_initialize(method)
       scope = :"order_by_#{method}"
       return all unless respond_to?(scope)
@@ -400,6 +102,280 @@ module AbstractModel::OrderingScopes
     # equivalent to calling them together: `order(some_column: :asc, id: :desc)`
     def order_disambiguate(scope)
       scope.order(arel_table[:id].desc)
+    end
+
+    def order_by_accession_number
+      return all unless self == HerbariumRecord
+
+      order(HerbariumRecord[:accession_number].asc)
+    end
+
+    def order_by_box_area
+      order(Location[:box_area].desc)
+    end
+
+    def order_by_code
+      where(Herbarium[:code].not_eq(nil)).order(Herbarium[:code].asc)
+    end
+
+    def order_by_code_then_date
+      return all unless self == FieldSlip
+
+      order(FieldSlip[:code].asc, FieldSlip[:created_at].desc)
+    end
+
+    def order_by_code_then_name
+      order(
+        Herbarium[:code].eq(nil).
+          when(true).then(Arel::Nodes.build_quoted("~")).
+          when(false).then(Herbarium[:code]).asc, Herbarium[:name].asc
+      )
+    end
+
+    def order_by_confidence
+      return all unless [Image, Observation].include?(self)
+
+      joins(observation_images: :observation) if self == Image
+      order(Observation[:vote_cache].desc)
+    end
+
+    def order_by_contribution
+      return all unless self == User
+
+      order(User[:contribution].desc)
+    end
+
+    def order_by_copyright_holder
+      return all unless column_names.include?("copyright_holder")
+
+      order(arel_table[:copyright_holder].asc)
+    end
+
+    def order_by_created_at
+      return all unless column_names.include?("created_at")
+
+      order(arel_table[:created_at].desc)
+    end
+
+    def order_by_date
+      if column_names.include?("when")
+        order(arel_table[:when].desc)
+      elsif column_names.include?("created_at")
+        order(arel_table[:created_at].desc)
+      end
+    end
+
+    def order_by_herbarium_label
+      return all unless self == HerbariumRecord
+
+      order(HerbariumRecord[:initial_det].asc,
+            HerbariumRecord[:accession_number].asc)
+    end
+
+    def order_by_herbarium_name
+      return all unless self == HerbariumRecord
+
+      joins(:herbarium).order(Herbarium[:name].asc)
+    end
+
+    # (for testing)
+    def order_by_id
+      order(arel_table[:id].asc)
+    end
+
+    def order_by_image_quality
+      return all unless self == Image
+
+      order(Image[:vote_cache].desc)
+    end
+
+    def order_by_initial_det
+      return all unless self == HerbariumRecord
+
+      order(HerbariumRecord[:initial_det].asc)
+    end
+
+    def order_by_last_login
+      return all unless self == User
+
+      order(User[:last_login].desc)
+    end
+
+    def order_by_location
+      return all unless column_names.include?("location_id")
+
+      # Join Users with null locations, else join records with locations
+      scope = if self == User
+                left_outer_joins(:location)
+              else
+                joins(:location)
+              end
+      scope.order_locations_by_name
+    end
+
+    def order_by_login
+      return all unless self == User
+
+      order(User[:login].asc)
+    end
+
+    # Could refactor so this is just `order_by_name` by class inheritance.
+    # NOTE: scope `order_by_location` calls `order_locations_by_name` above,
+    # so the latter should stay here. To avoid method duplication, we could
+    # just have scope `Location.order_by_name` call `order_locations_by_name`.
+    def order_by_name
+      order_by_name_method = "order_#{name.underscore.pluralize}_by_name"
+      if respond_to?(order_by_name_method)
+        send(order_by_name_method)
+      else
+        order_other_models_by_name(self)
+      end
+    end
+
+    def order_by_name_and_number
+      return all unless self == CollectionNumber
+
+      order(CollectionNumber[:name].asc, CollectionNumber[:number].asc)
+    end
+
+    def order_by_num_views
+      return all unless column_names.include?("num_views")
+
+      order(arel_table[:num_views].desc)
+    end
+
+    def order_by_observation
+      return all unless column_names.include?("observation_id")
+
+      order(Observation[:id].desc)
+    end
+
+    def order_by_original_name
+      return all unless self == Image
+
+      order(Image[:original_name].asc)
+    end
+
+    def order_by_owners_quality
+      return all unless self == Image
+
+      joins(:image_votes).where(ImageVote[:user_id].eq(Image[:user_id])).
+        order(ImageVote[:value].desc)
+    end
+
+    def order_by_owners_thumbnail_quality # rubocop:disable Metrics/AbcSize
+      return all unless self == Observation
+
+      joins(images: :image_votes).
+        where(Observation[:thumb_image_id].eq(Image[:id])).
+        where(Image[:user_id].eq(Observation[:user_id])).
+        where(ImageVote[:user_id].eq(Observation[:user_id])).
+        order(ImageVote[:value].desc, Image[:vote_cache].desc,
+              Observation[:vote_cache].desc)
+    end
+
+    def order_by_records
+      return all unless self == Herbarium
+
+      # outer_join needed to show herbaria with no records
+      left_outer_joins(:herbarium_records).group(Herbarium[:id]).
+        order(HerbariumRecord[:id].count.desc)
+    end
+
+    def order_by_rss_log
+      return all unless column_names.include?("rss_log_id")
+
+      # use cached column if exists, and don't join
+      # calling index method should include rss_logs
+      if column_names.include?("log_updated_at")
+        order(arel_table[:log_updated_at].desc)
+      else
+        joins(:rss_log).order(RssLog[:updated_at].desc)
+      end
+    end
+
+    def order_by_summary
+      return all unless column_names.include?("summary")
+
+      order(arel_table[:summary].asc)
+    end
+
+    def order_by_thumbnail_quality
+      return all unless self == Observation
+
+      joins(:images).where(Observation[:thumb_image_id].eq(Image[:id])).
+        order(Image[:vote_cache].desc, Observation[:vote_cache].desc)
+    end
+
+    def order_by_title
+      return all unless column_names.include?("title")
+
+      order(arel_table[:title].asc)
+    end
+
+    def order_by_updated_at
+      return all unless column_names.include?("updated_at")
+
+      order(arel_table[:updated_at].desc)
+    end
+
+    def order_by_url
+      return all unless self == ExternalLink
+
+      order(ExternalLink[:url].asc)
+    end
+
+    def order_by_user
+      joins(:user).order(
+        User[:name].when(nil).then(User[:login]).when("").then(User[:login]).
+        else(User[:name]).asc
+      )
+    end
+
+    def order_by_where
+      return all unless column_names.include?("where")
+
+      order(arel_table[:where].asc)
+    end
+
+    ####### methods dispatched from order_by_name
+
+    def order_images_by_name
+      joins(observation_images: { observation: :name }).
+        group(Image[:id]).order(Name[:sort_name].min.asc, Image[:when].desc)
+    end
+
+    def order_location_descriptions_by_name
+      joins(:location).
+        order(Location[:name].asc, LocationDescription[:created_at].asc)
+    end
+
+    def order_locations_by_name
+      if User.current_location_format == "scientific"
+        order(Location[:scientific_name].asc)
+      else
+        order(Location[:name].asc)
+      end
+    end
+
+    def order_name_descriptions_by_name
+      joins(:name).order(Name[:sort_name].asc, NameDescription[:created_at].asc)
+    end
+
+    def order_names_by_name
+      order(Name[:sort_name].asc)
+    end
+
+    def order_observations_by_name
+      joins(:name).order(Name[:sort_name].asc, Observation[:when].desc)
+    end
+
+    def order_other_models_by_name
+      if column_names.include?("name")
+        order(arel_table[:name].asc)
+      elsif column_names.include?("title")
+        order(arel_table[:title].asc)
+      end
     end
   end
 end
