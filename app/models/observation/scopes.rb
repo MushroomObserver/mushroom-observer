@@ -11,13 +11,9 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # default ordering for index queries
     scope :order_by_default,
           -> { order(when: :desc, id: :desc) }
-    # overwrite the one in abstract_model, because we have it cached on a column
-    scope :order_by_rss_log, lambda {
-      where.not(rss_log: nil).reorder(log_updated_at: :desc, id: :desc).distinct
-    }
     # The order used on the home page
     scope :by_activity,
-          -> { order_by_rss_log }
+          -> { order_by(:rss_log) }
 
     # Extra timestamp scopes for when Observation found.
     # These are mostly aliases for `date` scopes.

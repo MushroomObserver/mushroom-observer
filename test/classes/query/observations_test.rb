@@ -12,9 +12,8 @@ class Query::ObservationsTest < UnitTestCase
     assert_query(expects, :Observation)
   end
 
-  # Overwrites scope `order_by_rss_log` in abstract_model
   def test_observation_by_rss_log
-    expects = Observation.order_by_rss_log
+    expects = Observation.order_by(:rss_log)
     assert_query(expects, :Observation, order_by: :rss_log)
   end
 

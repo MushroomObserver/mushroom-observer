@@ -15,7 +15,7 @@ module AbstractModel::OrderingScopes
   # NOTE: To improve Coveralls display, avoid one-line stabby lambda scopes.
   # Two line stabby lambdas are OK, it's just the declaration line that will
   # always show as covered.
-  included do # rubocop:disable Metrics/BlockLength
+  included do # rubocop: Metrics/BlockLength
     # Dispatcher for Query's :order_by param, with (method) arg.
     # Example: create_query(:Observation, order_by: :created_at)
     # ...order_by dispatches to a scope called `:order_by_created_at`.
@@ -29,7 +29,7 @@ module AbstractModel::OrderingScopes
       method ||= :default
       method = method.dup.to_s
       reverse = method.sub!(/^reverse_/, "")
-      scope = :"order_by_#{method}"
+      scope = :"order_by_#{method}";
       return all unless respond_to?(scope)
 
       scope = send(scope)
@@ -44,66 +44,54 @@ module AbstractModel::OrderingScopes
       reorder(Arel::Nodes.build_quoted(set.join(",")) & arel_table[:id])
     }
 
-    private_class_method :order_by_accession_number
-    private_class_method :order_by_box_area
-    private_class_method :order_by_code
-    private_class_method :order_by_code_then_date
-    private_class_method :order_by_code_then_name
-    private_class_method :order_by_confidence
-    private_class_method :order_by_contribution
-    private_class_method :order_by_copyright_holder
-    private_class_method :order_by_created_at
-    private_class_method :order_by_date
-    private_class_method :order_by_herbarium_label
-    private_class_method :order_by_herbarium_name
-    private_class_method :order_by_id
-    private_class_method :order_by_image_quality
-    private_class_method :order_by_initial_det
-    private_class_method :order_by_last_login
-    private_class_method :order_by_location
-    private_class_method :order_by_login
-    private_class_method :order_by_name
-    private_class_method :order_by_name_and_number
-    private_class_method :order_by_num_views
-    private_class_method :order_by_observation
-    private_class_method :order_by_original_name
-    private_class_method :order_by_owners_quality
-    private_class_method :order_by_owners_thumbnail_quality
-    private_class_method :order_by_records
-    private_class_method :order_by_rss_log
-    private_class_method :order_by_summary
-    private_class_method :order_by_thumbnail_quality
-    private_class_method :order_by_title
-    private_class_method :order_by_updated_at
-    private_class_method :order_by_url
-    private_class_method :order_by_user
-    private_class_method :order_by_where
-    private_class_method :order_images_by_name
-    private_class_method :order_location_descriptions_by_name
-    private_class_method :order_locations_by_name
-    private_class_method :order_name_descriptions_by_name
-    private_class_method :order_names_by_name
-    private_class_method :order_observations_by_name
-    private_class_method :order_other_models_by_name
+    # private_class_method :order_by_accession_number
+    # private_class_method :order_by_box_area
+    # private_class_method :order_by_code
+    # private_class_method :order_by_code_then_date
+    # private_class_method :order_by_code_then_name
+    # private_class_method :order_by_confidence
+    # private_class_method :order_by_contribution
+    # private_class_method :order_by_copyright_holder
+    # private_class_method :order_by_created_at
+    # private_class_method :order_by_date
+    # private_class_method :order_by_herbarium_label
+    # private_class_method :order_by_herbarium_name
+    # private_class_method :order_by_id
+    # private_class_method :order_by_image_quality
+    # private_class_method :order_by_initial_det
+    # private_class_method :order_by_last_login
+    # private_class_method :order_by_location
+    # private_class_method :order_by_login
+    # private_class_method :order_by_name
+    # private_class_method :order_by_name_and_number
+    # private_class_method :order_by_num_views
+    # private_class_method :order_by_observation
+    # private_class_method :order_by_original_name
+    # private_class_method :order_by_owners_quality
+    # private_class_method :order_by_owners_thumbnail_quality
+    # private_class_method :order_by_records
+    # private_class_method :order_by_rss_log
+    # private_class_method :order_by_summary
+    # private_class_method :order_by_thumbnail_quality
+    # private_class_method :order_by_title
+    # private_class_method :order_by_updated_at
+    # private_class_method :order_by_url
+    # private_class_method :order_by_user
+    # private_class_method :order_by_where
+    # private_class_method :order_images_by_name
+    # private_class_method :order_location_descriptions_by_name
+    # private_class_method :order_locations_by_name
+    # private_class_method :order_name_descriptions_by_name
+    # private_class_method :order_names_by_name
+    # private_class_method :order_observations_by_name
+    # private_class_method :order_other_models_by_name
   end
 
   # class methods here, `self` included
   module ClassMethods
-    def order_initialize(method)
-      scope = :"order_by_#{method}"
-      return all unless respond_to?(scope)
-
-      send(scope)
-    end
-
-    # Disambiguate order (by adding order(id: :desc). Useful when other
-    # ordering scopes return groups of records. In AR, chained orders take
-    # precedence in order of the chain, so if this is last (except in_set) it is
-    # equivalent to calling them together: `order(some_column: :asc, id: :desc)`
-    def order_disambiguate(scope)
-      scope.order(arel_table[:id].desc)
-    end
-
+    # NOTE: DO NOT CALL THESE SCOPES DIRECTLY unless you need them without the
+    # disambiguating `order(id: :desc)` that is added by `order_by` above.
+    # I tried to make these private but could not figure it out.
     def order_by_accession_number
       return all unless self == HerbariumRecord
 

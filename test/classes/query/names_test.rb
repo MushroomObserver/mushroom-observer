@@ -32,7 +32,7 @@ class Query::NamesTest < UnitTestCase
   end
 
   def test_name_by_rss_log
-    expects = Name.order_by_rss_log
+    expects = Name.order_by(:rss_log)
     assert_query(expects, :Name, order_by: :rss_log)
   end
 

@@ -32,7 +32,7 @@ class Query::LocationsTest < UnitTestCase
   end
 
   def test_location_by_rss_log
-    expects = Location.order_by_rss_log
+    expects = Location.order_by(:rss_log)
     assert_query(expects.to_a, :Location, order_by: :rss_log)
   end
 
