@@ -45,7 +45,7 @@ module AbstractModel::OrderingScopes
       scope
     }
 
-    # Special ordering for the scope :id_in_set, requires arg `set` of ids.
+    # Special ordering for the scope `:id_in_set`, requires arg `set` of ids.
     # Should run last after any other scopes, because it needs to reset order
     scope :order_by_set, lambda { |set|
       reorder(Arel::Nodes.build_quoted(set.join(",")) & arel_table[:id])
