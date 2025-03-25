@@ -366,7 +366,6 @@ module Name::Parse
               end
       name = match[index + 1]
       author = match[index + 2].to_s
-      # debugger if rank == "Species"
       name = standardize_sp_nov_variants(name) if rank == "Species"
       (name, author, rank) = fix_autonym(name, author, rank)
       name = standardize_name(name)
@@ -429,7 +428,6 @@ module Name::Parse
   # Standardize various ways of writing sp. nov.  Convert to: Amanita sp. "T44"
   def standardize_sp_nov_variants(name)
     names = split_name(name)
-    # debugger
     if names.length == 2
       split_name(name)
       names[1].sub!(/^"sp-/i, 'sp. "')
@@ -524,6 +522,8 @@ module Name::Parse
   def standardize_subname(subname)
     if /^#{ANY_RANK_ABBR} /o.match?(subname)
       match = /^([^\.\s]+)\.? (.+)$/.match(subname)
+      raise(RankMessedUp.new) unless match
+
       rank = standardize_subrank(match[1])
       term = match[2]
       term = "\"#{term}\"" if rank == "sp." && term[0] != '"'
@@ -534,7 +534,6 @@ module Name::Parse
 
   def standardize_subrank(rank)
     match = RANK_START_MATCHER.match(rank)
-    # debugger
     return STANDARD_SECONDARY_RANKS[match[1].downcase.to_sym] if match
 
     rank
