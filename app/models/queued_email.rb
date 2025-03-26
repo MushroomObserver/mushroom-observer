@@ -372,12 +372,10 @@ class QueuedEmail < AbstractModel
       @integers[qi.key.to_s] = qi.value.to_i
     end
     if return_dict
-      result = @integers
+      @integers
     else
-      result = []
-      keys.each { |key| result.push(@integers[key.to_s]) }
+      keys.map { |key| @integers[key.to_s] }
     end
-    result
   end
 
   # Get strings for an Array of keys.  Returns either an Array of results in
@@ -396,12 +394,10 @@ class QueuedEmail < AbstractModel
     @strings = {}
     queued_email_strings.each { |qs| @strings[qs.key.to_s] = qs.value.to_s }
     if return_dict
-      result = @strings
+      @strings
     else
-      result = []
-      keys.each { |key| result.push(@strings[key.to_s]) }
+      keys.map { |key| @strings[key.to_s] }
     end
-    result
   end
 
   # -----------------------------------------------

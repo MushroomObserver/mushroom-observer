@@ -21,7 +21,7 @@ def define_tasks(action, verbose, verbose_method, description)
 
   desc(description.gsub("XXX", "unofficial").gsub("(S)", "s"))
   task(unofficial: :setup) do
-    Language.unofficial.each do |lang|
+    Language.unofficial.find_each do |lang|
       lang.verbose(verbose + " " + lang.send(verbose_method))
       lang.send(action)
     end
@@ -29,7 +29,7 @@ def define_tasks(action, verbose, verbose_method, description)
 
   desc(description.gsub("XXX", "all").gsub("(S)", "s"))
   task(all: :setup) do
-    Language.all.each do |lang|
+    Language.find_each do |lang|
       lang.verbose(verbose + " " + lang.send(verbose_method))
       lang.send(action)
     end

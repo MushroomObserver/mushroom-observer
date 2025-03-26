@@ -293,11 +293,9 @@ class Vote < AbstractModel
   # private class methods
 
   def self.translate_menu(menu)
-    result = []
-    menu.each do |k, v|
-      result << [(k.is_a?(Symbol) ? k.l : k.to_s), v]
+    menu.map do |k, v|
+      [(k.is_a?(Symbol) ? k.l : k.to_s), v]
     end
-    result
   end
 
   private_class_method :translate_menu

@@ -109,7 +109,7 @@ end
 
 def delete_visual_group(model, name)
   Rails.logger.info { "Deleting VisualGroup for '#{name}'" }
-  VisualGroup.where(visual_model: model, name: name).each(&:destroy)
+  VisualGroup.where(visual_model: model, name: name).find_each(&:destroy)
 end
 
 def merge_visual_groups(model, groups)
@@ -122,7 +122,7 @@ def merge_visual_groups(model, groups)
   return unless target_group
 
   names.each do |name|
-    VisualGroup.where(visual_model: model, name: name).each do |group|
+    VisualGroup.where(visual_model: model, name: name).find_each do |group|
       next if target_group == group
 
       Rails.logger.info { "Merging '#{name}'" }

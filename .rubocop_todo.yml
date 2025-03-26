@@ -541,21 +541,6 @@ Rails/Blank:
   Exclude:
     - 'app/models/image.rb'
 
-# Offense count: 24
-# This cop supports unsafe autocorrection (--autocorrect-all).
-# Configuration parameters: AllowedMethods, AllowedPatterns.
-# AllowedMethods: order, limit, select, lock
-Rails/FindEach:
-  Exclude:
-    - 'app/controllers/species_lists/shared_private_methods.rb'
-    - 'lib/tasks/cache.rake'
-    - 'lib/tasks/email.rake'
-    - 'lib/tasks/lang.rake'
-    - 'lib/tasks/visual_model.rake'
-    - 'script/bulk_name_change'
-    - 'script/check_enum_values'
-    - 'script/refresh_sitemap'
-
 # Offense count: 45
 # Configuration parameters: Include.
 # Include: app/models/**/*.rb
@@ -689,18 +674,6 @@ Style/HashEachMethods:
   Exclude:
     - 'app/classes/eol_data.rb'
     - 'script/slowest_pages'
-
-# Offense count: 9
-# This cop supports unsafe autocorrection (--autocorrect-all).
-Style/MapIntoArray:
-  Exclude:
-    - 'app/extensions/symbol.rb'
-    - 'app/helpers/descriptions_helper.rb'
-    - 'app/helpers/user_stats_helper.rb'
-    - 'app/models/name/spelling.rb'
-    - 'app/models/queued_email.rb'
-    - 'app/models/vote.rb'
-    - 'test/general_extensions.rb'
 
 # Offense count: 2
 Style/MissingRespondToMissing:

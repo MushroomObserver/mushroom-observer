@@ -138,9 +138,8 @@ class Symbol
     else
       @@missing_tags << self if defined?(@@missing_tags)
       if args.any?
-        pairs = []
-        args.each do |k, v|
-          pairs << "#{k}=#{v.inspect}"
+        pairs = args.map do |k, v|
+          "#{k}=#{v.inspect}"
         end
         args_str = "(#{pairs.join(",")})"
       else
