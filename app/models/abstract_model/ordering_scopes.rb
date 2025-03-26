@@ -160,13 +160,13 @@ module AbstractModel::OrderingScopes
     def order_by_location
       return all unless column_names.include?("location_id")
 
+      scope = order_locations_by_name
       # Join Users with null locations, else join records with locations
-      scope = if self == User
-                left_outer_joins(:location)
-              else
-                joins(:location)
-              end
-      scope.order_locations_by_name
+      if self == User
+        scope.left_outer_joins(:location)
+      else
+        scope.joins(:location)
+      end
     end
 
     def order_by_login
@@ -181,10 +181,10 @@ module AbstractModel::OrderingScopes
     # just have scope `Location.order_by_name` call `order_locations_by_name`.
     def order_by_name
       order_by_name_method = "order_#{name.underscore.pluralize}_by_name"
-      if respond_to?(order_by_name_method)
+      if private_methods(false).include?(order_by_name_method)
         send(order_by_name_method)
       else
-        order_other_models_by_name(self)
+        order_other_models_by_name
       end
     end
 

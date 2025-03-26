@@ -8,12 +8,12 @@ class Query::UsersTest < UnitTestCase
   include QueryExtensions
 
   def test_user_all_by_name
-    expects = User.order(name: :asc, id: :desc).to_a
+    expects = User.order_by(:name)
     assert_query(expects, :User)
   end
 
   def test_user_all_by_login
-    expects = User.order(login: :asc, id: :desc).to_a
+    expects = User.order_by(:login)
     assert_query(expects, :User, order_by: :login)
   end
 
@@ -50,7 +50,8 @@ class Query::UsersTest < UnitTestCase
     # (Differs from searches on other Classes or by other sort orders)
     expects = User.left_outer_joins(:location).
               order(Location[:name].asc, User[:id].desc).uniq
-    assert_query(expects, :User, pattern: "", order_by: "location")
+    scope = User.pattern("").order_by(:location)
+    assert_query_scope(expects, scope, :User, pattern: "", order_by: :location)
   end
 
   def user_pattern_search(pattern)
