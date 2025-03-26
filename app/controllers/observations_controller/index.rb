@@ -21,7 +21,7 @@ class ObservationsController
 
     # Note all other filters of the obs index are sorted by date.
     def unfiltered_index_opts
-      super.merge(query_args: { by: :rss_log })
+      super.merge(query_args: { order_by: :rss_log })
     end
 
     # Searches come 1st because they may have the other params
@@ -45,8 +45,7 @@ class ObservationsController
 
     def advanced_search_query
       if any_advanced_search_params_present?
-        params_plus_flags = advanced_search_params << :search_location_notes
-        search = params.permit(*params_plus_flags).to_h
+        search = params.permit(*advanced_search_params).to_h
         create_query(:Observation, search)
       elsif handle_advanced_search_invalid_q_param?
         nil
@@ -110,7 +109,7 @@ class ObservationsController
                                include_synonyms: true,
                                include_all_name_proposals: true,
                                exclude_consensus: true },
-                      by: :confidence
+                      order_by: :confidence
       )
       [query, {}]
     end
@@ -120,7 +119,7 @@ class ObservationsController
       query = create_query(
         :Observation, names: { lookup: parents(params[:name]),
                                include_subtaxa: true },
-                      by: :confidence
+                      order_by: :confidence
       )
       [query, {}]
     end
@@ -130,7 +129,7 @@ class ObservationsController
       query = create_query(
         :Observation, names: { lookup: [params[:name]],
                                include_synonyms: true },
-                      by: :confidence
+                      order_by: :confidence
       )
       [query, {}]
     end
@@ -213,7 +212,9 @@ class ObservationsController
       }.merge(opts)
 
       # Paginate by letter if sorting by user or name.
-      if %w[user reverse_user name reverse_name].include?(query.params[:by])
+      if %w[user reverse_user name reverse_name].include?(
+        query.params[:order_by]
+      )
         opts[:letters] = true
       end
 

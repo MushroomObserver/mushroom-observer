@@ -30,7 +30,7 @@ class ContributorsController < ApplicationController
   # (Linked from show template, next to "prev" and "next"... or will be.)
   def sorted_index_opts
     sorted_by = params[:by] || default_sort_order
-    super.merge(query_args: { has_contribution: true, by: sorted_by })
+    super.merge(query_args: { has_contribution: true, order_by: sorted_by })
   end
 
   def index_display_opts(opts, _query)

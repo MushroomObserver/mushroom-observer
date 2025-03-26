@@ -70,7 +70,7 @@ class NameParse
     equal_pos = @line_str.index("=")
     if equal_pos
       @name = @line_str[0..equal_pos - 1].strip
-      @synonym = @line_str[equal_pos + 1..-1].strip
+      @synonym = @line_str[equal_pos + 1..].strip
       @synonym_comment = nil
       if (match = COMMENT_PAT.match(@synonym))
         @synonym = match[1]
@@ -113,7 +113,7 @@ class NameParse
     space_pos = str.index(" ")
     if space_pos
       rank = str[0..space_pos - 1]
-      result = [rank, str[space_pos..-1].strip] if Name.all_ranks.member?(rank)
+      result = [rank, str[space_pos..].strip] if Name.all_ranks.member?(rank)
     end
     result
   end

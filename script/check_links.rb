@@ -39,7 +39,7 @@ table = ARGV[0]
 column = ARGV[1]
 
 model = table.classify.constantize
-model.all.pluck("id", column).each do |id, val|
+model.pluck("id", column).each do |id, val|
   find_links(val).each { |link| test_link!(id, link) } if val.present?
 end
 

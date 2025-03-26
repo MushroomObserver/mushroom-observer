@@ -396,7 +396,7 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def pagination_query_params
-    query = Query.lookup_and_save(:Name, by: :name)
+    query = Query.lookup_and_save(:Name, order_by: :name)
     @controller.query_params(query)
   end
 

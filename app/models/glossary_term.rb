@@ -43,7 +43,7 @@ class GlossaryTerm < AbstractModel
   )
   versioned_class.before_save { |x| x.user_id = User.current_id }
 
-  scope :index_order,
+  scope :order_by_default,
         -> { order(name: :asc, id: :desc) }
 
   scope :name_has,

@@ -11,7 +11,7 @@ class Query::Images < Query::Base
   end
 
   def list_by
-    @list_by ||= case params[:by].to_s
+    @list_by ||= case params[:order_by].to_s
                  when "user", "reverse_user"
                    User[:login]
                  when "name", "reverse_name"
@@ -177,7 +177,7 @@ class Query::Images < Query::Base
   #   # to survive much longer. Image searches are in desperate need of
   #   # critical revision for performance concerns, anyway. -JPH 20210809]
   #   args2 = args.except(:select, :order, :group)
-  #   params2 = params.except(:by)
+  #   params2 = params.except(:order_by)
   #   ids = Query.lookup(:Observation, params2).result_ids(args2)
   #   ids = clean_id_set(ids)
   #   args2 = args.dup

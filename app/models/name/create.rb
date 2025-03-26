@@ -84,7 +84,7 @@ module Name::Create
       if parsed_name.parent_name
         result = find_or_create_name_and_parents(parsed_name.parent_name)
       end
-      deprecate = result.any? && result.last && result.last.deprecated
+      deprecate = result.any? && result.last&.deprecated
       result << find_or_create_parsed_name(parsed_name, deprecate)
     end
     result

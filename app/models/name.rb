@@ -404,9 +404,9 @@ class Name < AbstractModel
   )
 
   validates :author, allow_blank: true,
-                     # Contains only: letters, spaces, parens, hyphens,
-                     # periods, commas, ampersands, square brackets
-                     format: { with: /\A[\p{L} ()-.,&\[\]]*\z/,
+                     # Contains only: letters, space, parens, hyphen,
+                     # period, comma, ampersand, square brackets, single quote
+                     format: { with: /\A[\p{L} ()-.,&\[\]']*\z/,
                                message: :validate_name_author_characters.t }
   validates :author, allow_blank: true,
                      # Ends only in letter, period plus any spaces

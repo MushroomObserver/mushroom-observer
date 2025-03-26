@@ -149,7 +149,7 @@ class RssLog < AbstractModel
   belongs_to :project
   belongs_to :species_list
 
-  scope :index_order,
+  scope :order_by_default,
         -> { order(updated_at: :desc, id: :desc) }
 
   scope :type, lambda { |str|

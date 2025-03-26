@@ -39,7 +39,7 @@ module TitleSorterFilterHelper
 
   # Add some info to the raw sorts: path, identifier, and if is current sort_by
   def assemble_sort_links(query, sorts, link_all)
-    this_by = (query.params[:by] || query.default_order).
+    this_by = (query.params[:order_by] || query.default_order).
               to_s.sub(/^reverse_/, "")
 
     sort_links = sorts.map do |by, label|
@@ -52,7 +52,7 @@ module TitleSorterFilterHelper
   end
 
   def reverse_by(query, this_by)
-    if query.params[:by].to_s.start_with?("reverse_")
+    if query.params[:order_by].to_s.start_with?("reverse_")
       this_by
     else
       "reverse_#{this_by}"
