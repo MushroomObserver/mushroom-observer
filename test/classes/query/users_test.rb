@@ -34,6 +34,11 @@ class Query::UsersTest < UnitTestCase
                        :User, id_in_set: ids.reverse, order_by: :reverse_name)
   end
 
+  def test_user_has_contribution
+    expects = User.has_contribution
+    assert_query(expects, :User, has_contribution: true)
+  end
+
   def test_user_pattern_search_nonexistent
     assert_query([], :User, pattern: "nonexistent pattern")
   end

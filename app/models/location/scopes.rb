@@ -62,25 +62,6 @@ module Location::Scopes
     scope :has_descriptions, lambda { |bool = true|
       presence_condition(Location[:description_id], bool:)
     }
-    scope :description_has, lambda { |phrase|
-      joins(:descriptions).
-        merge(LocationDescription.search_content(phrase)).distinct
-    }
-    scope :has_description_created_by, lambda { |user|
-      joins(:descriptions).
-        merge(LocationDescription.where(user: user)).distinct
-    }
-    scope :has_description_reviewed_by, lambda { |user|
-      joins(:descriptions).
-        merge(LocationDescription.where(reviewer: user)).distinct
-    }
-    scope :has_description_of_type, lambda { |source|
-      # Check that it's a valid source type (string enum value)
-      return none if Description::ALL_SOURCE_TYPES.exclude?(source)
-
-      joins(:descriptions).
-        merge(LocationDescription.where(source_type: source)).distinct
-    }
     scope :has_observations,
           -> { joins(:observations).distinct }
 

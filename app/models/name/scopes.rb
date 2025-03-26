@@ -1,5 +1,41 @@
 # frozen_string_literal: true
 
+#  ==== Scopes
+#  created_at("yyyy-mm-dd", "yyyy-mm-dd")
+#  updated_at("yyyy-mm-dd", "yyyy-mm-dd")
+#  deprecated
+#  has_description
+#  with_correct_spelling
+#  with_incorrect_spelling
+#  with_self_referential_misspelling
+#  has_synonyms
+#  ok_for_export
+#  rank(ranks)
+#  with_rank(rank)
+#  with_rank_below(rank)
+#  with_rank_and_name_in_classification(rank, text_name)
+#  with_rank_at_or_below_genus
+#  with_rank_above_genus
+#  subtaxa_of_genus_or_below(genus)
+#  subtaxa_of(name)
+#  include_synonyms_of(name)
+#  clade(name)
+#  text_name_has(text_name)
+#  search_name_has(phrase)
+#  has_classification
+#  classification_has(classification)
+#  has_author
+#  author_has(author)
+#  has_citation
+#  citation_has(citation)
+#  has_notes
+#  notes_has(notes)
+#  has_comments
+#  comments_has(summary)
+#  species_lists(species_list)
+#  locations(location)
+#  in_box(north:, south:, east:, west:)
+#
 module Name::Scopes
   # This is using Concern so we can define the scopes in this included module.
   extend ActiveSupport::Concern
@@ -157,7 +193,7 @@ module Name::Scopes
     # scope :search_content_and_associations, lambda { |phrase|
     #   fields = Name.search_content(phrase).map(&:id)
     #   comments = Name.comments_has(phrase).map(&:id)
-    #   descs = Name.description_has(phrase).map(&:id)
+    #   descs = Name.description_query(content_has: phrase).map(&:id)
     #   where(id: fields + comments + descs).distinct
     # }
     # This is what's called by advanced_search
@@ -197,29 +233,7 @@ module Name::Scopes
       has_default_description(false).joins(:observations).distinct.
         group(:name_id).order(Observation[:name_id].count.desc, Name[:id].desc)
     }
-    scope :description_has, lambda { |phrase|
-      joins(:descriptions).
-        merge(NameDescription.content_has(phrase)).distinct
-    }
-    scope :has_description_in_project, lambda { |project|
-      joins(descriptions: :project).
-        merge(NameDescription.where(project: project)).distinct
-    }
-    scope :has_description_created_by, lambda { |user|
-      joins(:descriptions).
-        merge(NameDescription.where(user: user)).distinct
-    }
-    scope :has_description_reviewed_by, lambda { |user|
-      joins(:descriptions).
-        merge(NameDescription.where(reviewer: user)).distinct
-    }
-    scope :has_description_of_type, lambda { |source|
-      # Check that it's a valid source type (string enum value)
-      return none if Description::ALL_SOURCE_TYPES.exclude?(source)
-
-      joins(:descriptions).
-        merge(NameDescription.sources(source)).distinct
-    }
+    # used by Name::Taxonomy
     scope :has_description_classification_differing, lambda {
       joins(:description).
         where(rank: 0..Name.ranks[:Genus]).

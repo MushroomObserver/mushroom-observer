@@ -80,7 +80,9 @@ class Query::HerbariumRecordsTest < UnitTestCase
 
   def test_herbarium_record_initial_det_has
     expects = [herbarium_records(:field_museum_record)]
-    assert_query(expects, :HerbariumRecord, initial_det_has: "lichen")
+    scope = HerbariumRecord.initial_det_has("lichen").order_by_default
+    assert_query_scope(expects, scope,
+                       :HerbariumRecord, initial_det_has: "lichen")
   end
 
   def test_herbarium_record_accession

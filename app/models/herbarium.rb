@@ -69,8 +69,9 @@ class Herbarium < AbstractModel
   scope :nonpersonal, lambda { |bool = true|
     if bool.to_s.to_boolean == true
       where(personal_user_id: nil)
-    else
-      where.not(personal_user_id: nil)
+      # Currently `false` is not parsed by Query, possibly intentionally.
+      # else
+      #   where.not(personal_user_id: nil)
     end
   }
 
