@@ -178,7 +178,8 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     #  - exclude_consensus: boolean
     #
     scope :names, lambda { |lookup:, **args|
-      if !args[:include_all_name_proposals] && args[:exclude_consensus]
+      if args[:include_all_name_proposals] == false &&
+         args[:exclude_consensus] == true
         return none
       end
 
@@ -196,6 +197,8 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       if args[:include_all_name_proposals]
         scope = scope.joins(:namings).where(namings: { name_id: name_ids })
         scope = scope.where.not(name_id: name_ids) if args[:exclude_consensus]
+      elsif args[:exclude_consensus]
+        scope = scope.joins(:namings).where(namings: { name_id: name_ids })
       else
         scope = scope.where(name_id: name_ids)
       end

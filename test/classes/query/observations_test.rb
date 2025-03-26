@@ -268,19 +268,20 @@ class Query::ObservationsTest < UnitTestCase
     )
   end
 
-  def test_observation_names_with_modifiers
-    User.current = rolf
-    expects = Observation.names(lookup: names(:fungi)).distinct.order_by_default
+  def test_observation_names_with_no_modifiers
     params = { lookup: [names(:fungi).id] }
     scope = Observation.names(**params).order_by_default
-    assert_query_scope(expects, scope, :Observation, names: params)
+    assert_query(scope, :Observation, names: params)
     assert_query(
       [],
       :Observation, names: { lookup: [names(:macrolepiota_rachodes).id] }
     )
+  end
 
-    # test all truthy/falsy combinations of these boolean parameters:
-    #  include_synonyms, include_all_name_proposals, exclude_consensus
+  # Setup for all truthy/falsy combinations of these boolean parameters:
+  #   include_synonyms, include_all_name_proposals, exclude_consensus
+  # Returns the agaricus synonyms needed by some tests
+  def setup_observation_names_agaricus_synonymns
     names = Name.where(Name[:text_name].matches("Agaricus camp%")).
             order_by_default.to_a
     agaricus_ssp = names.clone
@@ -288,8 +289,11 @@ class Query::ObservationsTest < UnitTestCase
     names.each { |n| name.merge_synonyms(n) }
     observations(:agaricus_campestras_obs).update(user: mary)
     observations(:agaricus_campestros_obs).update(user: mary)
+    agaricus_ssp
+  end
 
-    # observations where name(s) is consensus
+  def test_observation_names_is_consensus
+    setup_observation_names_agaricus_synonymns
     params = { lookup: [names(:agaricus_campestris).id],
                include_synonyms: false,
                include_all_name_proposals: false,
@@ -299,8 +303,10 @@ class Query::ObservationsTest < UnitTestCase
       [observations(:agaricus_campestris_obs).id], scope,
       :Observation, names: params
     )
+  end
 
-    # name(s) is consensus, but is not the consensus (an oxymoron)
+  def test_observation_names_is_consensus_exclude_consensus
+    setup_observation_names_agaricus_synonymns
     params = { lookup: [names(:agaricus_campestris).id],
                include_synonyms: false,
                include_all_name_proposals: false,
@@ -309,8 +315,10 @@ class Query::ObservationsTest < UnitTestCase
     assert_query_scope(
       [], scope, :Observation, names: params
     )
+  end
 
-    # name(s) is proposed
+  def test_observation_names_is_proposed
+    setup_observation_names_agaricus_synonymns
     params = { lookup: [names(:agaricus_campestris).id],
                include_synonyms: false,
                include_all_name_proposals: true,
@@ -322,8 +330,10 @@ class Query::ObservationsTest < UnitTestCase
       scope,
       :Observation, names: params
     )
+  end
 
-    # name(s) is proposed, but is not the consensus
+  def test_observation_names_is_proposed_but_not_consensus
+    setup_observation_names_agaricus_synonymns
     params = { lookup: [names(:agaricus_campestris).id],
                include_synonyms: false,
                include_all_name_proposals: true,
@@ -334,8 +344,10 @@ class Query::ObservationsTest < UnitTestCase
       scope,
       :Observation, names: params
     )
+  end
 
-    # consensus is a synonym of name(s)
+  def test_observation_names_consensus_is_synonym_of_name
+    setup_observation_names_agaricus_synonymns
     params = { lookup: [names(:agaricus_campestris).id],
                include_synonyms: true,
                include_all_name_proposals: false,
@@ -349,9 +361,10 @@ class Query::ObservationsTest < UnitTestCase
       scope,
       :Observation, names: params
     )
+  end
 
-    # same as above but exclude_original_names
-    # conensus is a synonym of name(s) other than name(s)
+  def test_observation_names_consensus_is_synonym_of_name_other_than_name
+    setup_observation_names_agaricus_synonymns
     params = { lookup: [names(:agaricus_campestris).id],
                include_synonyms: true,
                exclude_original_names: true }
@@ -363,8 +376,10 @@ class Query::ObservationsTest < UnitTestCase
       scope,
       :Observation, names: params
     )
+  end
 
-    # consensus is a synonym of name(s) but not a synonym of name(s) (oxymoron)
+  def test_observation_names_consensus_is_synonym_of_name_but_not_proposed
+    setup_observation_names_agaricus_synonymns
     params = { lookup: [names(:agaricus_campestras).id],
                include_synonyms: true,
                include_all_name_proposals: false,
@@ -375,8 +390,10 @@ class Query::ObservationsTest < UnitTestCase
       scope,
       :Observation, names: params
     )
+  end
 
-    # where synonyms of names are proposed
+  def test_observation_names_synonym_of_name_is_proposed
+    setup_observation_names_agaricus_synonymns
     params = { lookup: [names(:agaricus_campestris).id],
                include_synonyms: true,
                include_all_name_proposals: true,
@@ -391,8 +408,10 @@ class Query::ObservationsTest < UnitTestCase
       scope,
       :Observation, names: params
     )
+  end
 
-    # where synonyms of name are proposed, but are not the consensus
+  def test_observation_names_synonym_of_name_is_proposed_but_not_consensus
+    setup_observation_names_agaricus_synonymns
     params = { lookup: [names(:agaricus_campestras).id],
                include_synonyms: true,
                include_all_name_proposals: true,
@@ -403,7 +422,10 @@ class Query::ObservationsTest < UnitTestCase
       scope,
       :Observation, names: params
     )
+  end
 
+  def test_observation_names_in_species_lists_and_projects
+    agaricus_ssp = setup_observation_names_agaricus_synonymns
     spl = species_lists(:first_species_list)
     spl.observations << observations(:agaricus_campestrus_obs)
     spl.observations << observations(:agaricus_campestros_obs)
