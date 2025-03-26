@@ -25,14 +25,14 @@ module AbstractModel::OrderingScopes
     #
     # IMPORTANT: USE THIS SCOPE whenever possible in the app and tests.
     # The private methods called by it do not include the last step that
-    # resolves order predictably within grouped results.
+    # resolves order within grouped results consistently.
     scope :order_by, lambda { |method|
       return all if method.to_sym == :none
 
       method ||= :default # :order_by_default must be defined for each model
       method = method.dup.to_s
       reverse = method.sub!(/^reverse_/, "")
-      scope = :"order_by_#{method}";
+      scope = :"order_by_#{method}"
       return all unless model.private_methods(false).include?(scope)
 
       # Calls `scoping` with `model` here, because the private class methods
@@ -45,7 +45,7 @@ module AbstractModel::OrderingScopes
       scope
     }
 
-    # Special ordering for the scope `:id_in_set`, requires arg `set` of ids.
+    # Special ordering for scope `:id_in_set`, requires arg for `set` of ids.
     # Should run last after any other scopes, because it needs to reset order
     scope :order_by_set, lambda { |set|
       reorder(Arel::Nodes.build_quoted(set.join(",")) & arel_table[:id])
