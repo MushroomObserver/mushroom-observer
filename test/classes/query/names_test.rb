@@ -133,6 +133,7 @@ class Query::NamesTest < UnitTestCase
   def test_name_names_names
     set = [names(:agaricus), names(:coprinus_comatus),
            names(:macrocybe_titans)]
+    params = { lookup: set, include_subtaxa: true }
     expects = [
       names(:agaricus),
       names(:sect_agaricus),
@@ -143,57 +144,54 @@ class Query::NamesTest < UnitTestCase
       names(:coprinus_comatus),
       names(:macrocybe_titans)
     ]
-    scope = Name.names(lookup: set, include_subtaxa: true).order_by_default
     assert_query_scope(
-      expects, scope, :Name, names: { lookup: set, include_subtaxa: true }
+      expects,
+      Name.names(**params).order_by_default,
+      :Name, names: params
     )
   end
 
   def test_name_names_include_subtaxa_exclude_original
     name = names(:agaricus)
+    params = { lookup: [name.id],
+               include_subtaxa: true,
+               exclude_original_names: true }
     assert_query(
-      Name.names(lookup: name.id,
-                 include_subtaxa: true,
-                 exclude_original_names: true).order_by_default,
-      :Name, names: { lookup: [name.id],
-                      include_subtaxa: true,
-                      exclude_original_names: true }
+      Name.names(**params).order_by_default,
+      :Name, names: params
     )
   end
 
   # This test ensures we force empty results when the lookup gets no ids.
   def test_name_of_subtaxa_excluding_original_no_children
     name = names(:tubaria_furfuracea)
+    params = { lookup: name.id,
+               include_subtaxa: true,
+               exclude_original_names: true }
     assert_query_scope(
       [],
-      Name.names(lookup: name.id,
-                 include_subtaxa: true,
-                 exclude_original_names: true).order_by_default,
-      :Name, names: { lookup: name.id,
-                      include_subtaxa: true,
-                      exclude_original_names: true }
+      Name.names(**params).order_by_default,
+      :Name, names: params
     )
   end
 
   def test_name_names_include_subtaxa_include_original
+    params = { lookup: [names(:agaricus).id],
+               include_subtaxa: true,
+               exclude_original_names: false }
     assert_query(
-      Name.names(lookup: names(:agaricus),
-                 include_subtaxa: true,
-                 exclude_original_names: false).order_by_default,
-      :Name, names: { lookup: [names(:agaricus).id],
-                      include_subtaxa: true,
-                      exclude_original_names: false }
+      Name.names(**params).order_by_default,
+      :Name, names: params
     )
   end
 
   def test_name_names_include_immediate_subtaxa
+    params = { lookup: [names(:agaricus).id],
+               include_immediate_subtaxa: true,
+               exclude_original_names: false }
     assert_query(
-      Name.names(lookup: names(:agaricus),
-                 include_immediate_subtaxa: true,
-                 exclude_original_names: false).order_by_default,
-      :Name, names: { lookup: [names(:agaricus).id],
-                      include_immediate_subtaxa: true,
-                      exclude_original_names: false }
+      Name.names(**params).order_by_default,
+      :Name, names: params
     )
   end
 
