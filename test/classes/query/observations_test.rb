@@ -96,11 +96,14 @@ class Query::ObservationsTest < UnitTestCase
 
   def test_observation_has_notes_fields
     # the single version
-    assert_query(Observation.has_notes_field("substrate").order_by_default,
-                 :Observation, has_notes_fields: "substrate")
-    assert_query(Observation.order_by_default.
-                 has_notes_fields(%w[substrate cap]),
-                 :Observation, has_notes_fields: %w[substrate cap])
+    assert_query(
+      Observation.has_notes_field("substrate").order_by_default,
+      :Observation, has_notes_fields: "substrate"
+    )
+    assert_query(
+      Observation.has_notes_fields(%w[substrate cap]).order_by_default,
+      :Observation, has_notes_fields: %w[substrate cap]
+    )
   end
 
   def test_observation_has_comments
@@ -111,11 +114,14 @@ class Query::ObservationsTest < UnitTestCase
   end
 
   def test_observation_comments_has
-    assert_query(Observation.comments_has("comment").order_by_default,
-                 :Observation, comments_has: "comment")
-    assert_query(Observation.order_by_default.
-                 comments_has("Agaricus campestris"),
-                 :Observation, comments_has: "Agaricus campestris")
+    assert_query(
+      Observation.comments_has("comment").order_by_default,
+      :Observation, comments_has: "comment"
+    )
+    assert_query(
+      Observation.comments_has("Agaricus campestris").order_by_default,
+      :Observation, comments_has: "Agaricus campestris"
+    )
   end
 
   def test_observation_has_sequences
@@ -147,19 +153,18 @@ class Query::ObservationsTest < UnitTestCase
     assert_query([observations(:falmouth_2022_obs),
                   observations(:minimal_unknown_obs)],
                  :Observation, field_slips: [f_s.id, fs2.id])
-    assert_query(Observation.order_by_default.field_slips([f_s.code, fs2.code]),
+    assert_query(Observation.field_slips([f_s.code, fs2.code]).order_by_default,
                  :Observation, field_slips: [f_s.code, fs2.code])
-    assert_query(Observation.order_by_default.field_slips([f_s.id, fs2.id]),
+    assert_query(Observation.field_slips([f_s.id, fs2.id]).order_by_default,
                  :Observation, field_slips: [f_s.id, fs2.id])
   end
 
   def test_observation_herbarium_records
     h_r = herbarium_records(:interesting_unknown)
-    assert_query([observations(:detailed_unknown_obs),
-                  observations(:minimal_unknown_obs)],
-                 :Observation, herbarium_records: h_r.id)
-    assert_query(Observation.herbarium_records(h_r).order_by_default,
-                 :Observation, herbarium_records: h_r.id)
+    assert_query_scope([observations(:detailed_unknown_obs),
+                        observations(:minimal_unknown_obs)],
+                       Observation.herbarium_records(h_r).order_by_default,
+                       :Observation, herbarium_records: h_r.id)
   end
 
   def test_observation_herbaria
@@ -175,12 +180,12 @@ class Query::ObservationsTest < UnitTestCase
 
   def test_observation_on_project_lists
     projects = [projects(:bolete_project), projects(:eol_project)]
-    expects = Observation.order_by_default.project_lists(projects)
+    expects = Observation.project_lists(projects).order_by_default
     assert_query(expects, :Observation, project_lists: projects.map(&:title))
   end
 
   def test_observation_locations
-    expects = Observation.order_by_default.locations(locations(:burbank))
+    expects = Observation.locations(locations(:burbank)).order_by_default
     assert_query(expects, :Observation, locations: locations(:burbank))
   end
 
@@ -213,7 +218,7 @@ class Query::ObservationsTest < UnitTestCase
     assert_query(Observation.species_lists(spl).order_by_default,
                  :Observation, species_lists: spl.id)
     spl2 = species_lists(:one_genus_three_species_list)
-    assert_query(Observation.order_by_default.species_lists([spl, spl2]),
+    assert_query(Observation.species_lists([spl, spl2]).order_by_default,
                  :Observation, species_lists: [spl.title, spl2.title])
   end
 
@@ -225,10 +230,10 @@ class Query::ObservationsTest < UnitTestCase
   end
 
   def test_observation_region
-    assert_query(Observation.order_by_default.
-                 region("Sonoma Co., California, USA"),
+    assert_query(Observation.
+                 region("Sonoma Co., California, USA").order_by_default,
                  :Observation, region: "Sonoma Co., California, USA")
-    assert_query(Observation.order_by_default.region("Massachusetts, USA"),
+    assert_query(Observation.region("Massachusetts, USA").order_by_default,
                  :Observation, region: "Massachusetts, USA")
     assert_query(Observation.region("North America").order_by_default,
                  :Observation, region: "North America")
@@ -244,10 +249,9 @@ class Query::ObservationsTest < UnitTestCase
 
   def test_observation_of_children
     name = names(:agaricus)
-    expects = Observation.order_by_default.
-              names(lookup: name, include_subtaxa: true).distinct
-    assert_query(expects, :Observation, names: { lookup: [name.id],
-                                                 include_subtaxa: true })
+    params = { lookup: name.id, include_subtaxa: true }
+    expects = Observation.names(**params).order_by_default
+    assert_query(expects, :Observation, names: params)
   end
 
   # This test ensures we force empty results when the lookup gets no ids.

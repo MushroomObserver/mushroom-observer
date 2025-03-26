@@ -199,7 +199,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       else
         scope = scope.where(name_id: name_ids)
       end
-      scope
+      scope.distinct
     }
     scope :names_like,
           ->(name) { where(name: Name.text_name_has(name)) }
