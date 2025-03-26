@@ -11,13 +11,9 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # default ordering for index queries
     scope :order_by_default,
           -> { order(when: :desc, id: :desc) }
-    # overwrite the one in abstract_model, because we have it cached on a column
-    scope :order_by_rss_log, lambda {
-      where.not(rss_log: nil).reorder(log_updated_at: :desc, id: :desc).distinct
-    }
     # The order used on the home page
     scope :by_activity,
-          -> { order_by_rss_log }
+          -> { order_by(:rss_log) }
 
     # Extra timestamp scopes for when Observation found.
     # These are mostly aliases for `date` scopes.
@@ -50,7 +46,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :has_notes_field,
           ->(field) { where(Observation[:notes].matches("%:#{field}:%")) }
     scope :has_notes_fields, lambda { |fields|
-      return if fields.empty?
+      return if (fields = [fields].flatten).empty?
 
       fields.map! { |field| notes_field_presence_condition(field) }
       conditions = fields.shift
@@ -182,7 +178,12 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     #  - exclude_consensus: boolean
     #
     scope :names, lambda { |lookup:, **args|
-      # First, lookup names, plus synonyms and subtaxa if requested
+      if args[:include_all_name_proposals] == false &&
+         args[:exclude_consensus] == true
+        return none
+      end
+
+      # Next, lookup names, plus synonyms and subtaxa if requested
       lookup_args = args.slice(:include_synonyms,
                                :include_misspellings,
                                :include_subtaxa,
@@ -191,15 +192,15 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       name_ids = Lookup::Names.new(lookup, **lookup_args).ids
       return none unless name_ids
 
+      scope = all
       # Query, with possible join to Naming. Mutually exclusive options:
-      if args[:include_all_name_proposals]
-        joins(:namings).where(namings: { name_id: name_ids })
-      elsif args[:exclude_consensus]
-        joins(:namings).where(namings: { name_id: name_ids }).
-          where.not(name: name_ids)
+      if args[:include_all_name_proposals] || args[:exclude_consensus]
+        scope = scope.joins(:namings).where(namings: { name_id: name_ids })
+        scope = scope.where.not(name_id: name_ids) if args[:exclude_consensus]
       else
-        where(name_id: name_ids)
+        scope = scope.where(name_id: name_ids)
       end
+      scope.distinct
     }
     scope :names_like,
           ->(name) { where(name: Name.text_name_has(name)) }

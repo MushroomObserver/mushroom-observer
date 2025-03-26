@@ -35,7 +35,7 @@ module Query::Modules::Sql
     # Tack id at end of order to disambiguate the order.
     # (I despise programs that render random results!)
     if our_order.present? &&
-       !our_order.match(/.id( |$)/)
+       !our_order.match(/\.id( |$)/)
       our_order += ", #{model.table_name}.id DESC"
     end
 
