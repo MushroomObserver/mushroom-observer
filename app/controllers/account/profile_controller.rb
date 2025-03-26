@@ -14,7 +14,7 @@ module Account
       else
         @copyright_holder  = @user.legal_name
         @copyright_year    = Time.zone.now.year
-        @upload_license_id = @user.license ? @user.license.id : nil
+        @upload_license_id = @user&.license&.id
       end
     end
 

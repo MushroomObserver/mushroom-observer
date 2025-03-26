@@ -138,7 +138,7 @@ class API2ControllerTest < FunctionalTestCase
 
   def test_num_of_pages
     get(:observations, params: { detail: :high, format: :json })
-    json = JSON.parse(response.body)
+    json = response.parsed_body
     assert_equal((Observation.count / 100.0).ceil, json["number_of_pages"],
                  "Number of pages was not correctly calculated.")
   end
@@ -282,7 +282,7 @@ class API2ControllerTest < FunctionalTestCase
     end
     assert_no_api_errors
     assert_equal(count + 1, Image.count)
-    json = JSON.parse(response.body)
+    json = response.parsed_body
     checksum_returned = json["results"][0]["md5sum"].to_s
     assert_equal(checksum, checksum_returned, "Didn't get the right checksum.")
   end
@@ -484,7 +484,7 @@ class API2ControllerTest < FunctionalTestCase
 
     params[:format] = :json
     get(:observations, params: params.merge(api_key: rolfs_key.key))
-    json = JSON.parse(response.body)
+    json = response.parsed_body
     votes = json["results"][0]["votes"]
     assert_equal(
       "rolf",
@@ -496,7 +496,7 @@ class API2ControllerTest < FunctionalTestCase
     )
 
     get(:observations, params: params.merge(api_key: marys_key.key))
-    json = JSON.parse(response.body)
+    json = response.parsed_body
     votes = json["results"][0]["votes"]
     assert_equal(
       :anonymous.l,

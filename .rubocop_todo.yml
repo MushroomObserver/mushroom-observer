@@ -534,13 +534,6 @@ Naming/VariableNumber:
     - 'test/models/observation_test.rb'
     - 'test/system/observation_naming_system_test.rb'
 
-# Offense count: 1
-# This cop supports unsafe autocorrection (--autocorrect-all).
-# Configuration parameters: NilOrEmpty, NotPresent, UnlessPresent.
-Rails/Blank:
-  Exclude:
-    - 'app/models/image.rb'
-
 # Offense count: 24
 # This cop supports unsafe autocorrection (--autocorrect-all).
 # Configuration parameters: AllowedMethods, AllowedPatterns.
@@ -576,15 +569,6 @@ Rails/HelperInstanceVariable:
   Exclude:
     - 'app/helpers/application_helper.rb'
 
-# Offense count: 2
-# This cop supports unsafe autocorrection (--autocorrect-all).
-# Configuration parameters: Include.
-# Include: app/**/*.rb, config/**/*.rb, db/**/*.rb, lib/**/*.rb
-Rails/Output:
-  Exclude:
-    - 'app/extensions/string.rb'
-    - 'app/models/language_exporter.rb'
-
 # Offense count: 7
 Rails/OutputSafety:
   Exclude:
@@ -593,43 +577,6 @@ Rails/OutputSafety:
     - 'app/helpers/map_helper.rb'
     - 'app/helpers/namings_helper.rb'
     - 'config/application.rb'
-
-# Offense count: 4
-# This cop supports unsafe autocorrection (--autocorrect-all).
-# Configuration parameters: Include.
-# Include: **/Rakefile, **/*.rake
-Rails/RakeEnvironment:
-  Exclude:
-    - 'lib/tasks/lang.rake'
-
-# Offense count: 2
-# This cop supports unsafe autocorrection (--autocorrect-all).
-# Configuration parameters: AllowedReceivers.
-# AllowedReceivers: ActionMailer::Preview, ActiveSupport::TimeZone
-Rails/RedundantActiveRecordAllMethod:
-  Exclude:
-    - 'lib/tasks/email.rake'
-    - 'script/check_links.rb'
-
-# Offense count: 4
-# This cop supports unsafe autocorrection (--autocorrect-all).
-# Configuration parameters: Include.
-# Include: spec/controllers/**/*.rb, spec/requests/**/*.rb, test/controllers/**/*.rb, test/integration/**/*.rb
-Rails/ResponseParsedBody:
-  Exclude:
-    - 'test/controllers/api2_controller_test.rb'
-
-# Offense count: 1
-# This cop supports unsafe autocorrection (--autocorrect-all).
-Rails/RootPathnameMethods:
-  Exclude:
-    - 'config/initializers/monkey_patches.rb'
-
-# Offense count: 2
-# This cop supports unsafe autocorrection (--autocorrect-all).
-Rails/SelectMap:
-  Exclude:
-    - 'test/controllers/species_lists/observations_controller_test.rb'
 
 # Offense count: 2
 # Configuration parameters: Include.
@@ -643,12 +590,6 @@ Rails/UniqueValidationWithoutIndex:
 Security/Eval:
   Exclude:
     - 'script/config.rb'
-
-# Offense count: 1
-# This cop supports unsafe autocorrection (--autocorrect-all).
-Style/BitwisePredicate:
-  Exclude:
-    - 'app/models/name/spelling.rb'
 
 # Offense count: 63
 Style/ClassVars:
@@ -667,28 +608,6 @@ Style/ClassVars:
     - 'test/general_extensions.rb'
     - 'test/language_extensions.rb'
     - 'test/test_helper.rb'
-
-# Offense count: 7
-# This cop supports unsafe autocorrection (--autocorrect-all).
-Style/CombinableLoops:
-  Exclude:
-    - 'script/check_enum_values'
-    - 'script/mushroom_mapper.rb'
-
-# Offense count: 1
-# This cop supports unsafe autocorrection (--autocorrect-all).
-Style/FileNull:
-  Exclude:
-    - 'test/models/queued_email_test.rb'
-
-# Offense count: 2
-# This cop supports unsafe autocorrection (--autocorrect-all).
-# Configuration parameters: AllowedReceivers.
-# AllowedReceivers: Thread.current
-Style/HashEachMethods:
-  Exclude:
-    - 'app/classes/eol_data.rb'
-    - 'script/slowest_pages'
 
 # Offense count: 9
 # This cop supports unsafe autocorrection (--autocorrect-all).
@@ -733,18 +652,6 @@ Style/OptionalBooleanParameter:
     - 'test/session_extensions.rb'
     - 'test/session_form_extensions.rb'
 
-# Offense count: 5
-# This cop supports unsafe autocorrection (--autocorrect-all).
-# Configuration parameters: ConvertCodeThatCanStartToReturnNil, AllowedMethods, MaxChainLength.
-# AllowedMethods: present?, blank?, presence, try, try!
-Style/SafeNavigation:
-  Exclude:
-    - 'app/controllers/account/profile_controller.rb'
-    - 'app/controllers/names/eol_data_controller.rb'
-    - 'app/models/name/create.rb'
-    - 'app/models/name/spelling.rb'
-    - 'app/models/observation/naming_consensus.rb'
-
 # Offense count: 3
 # Configuration parameters: Max.
 Style/SafeNavigationChainLength:
@@ -752,16 +659,6 @@ Style/SafeNavigationChainLength:
     - 'app/classes/report/darwin/observations.rb'
     - 'app/controllers/locations_controller.rb'
     - 'app/models/location.rb'
-
-# Offense count: 6
-# This cop supports unsafe autocorrection (--autocorrect-all).
-Style/SlicingWithRange:
-  Exclude:
-    - 'app/classes/pattern_search/term.rb'
-    - 'app/models/location.rb'
-    - 'app/models/name/spelling.rb'
-    - 'app/models/name_parse.rb'
-    - 'test/models/comment_test.rb'
 
 # Offense count: 32
 # This cop supports unsafe autocorrection (--autocorrect-all).
