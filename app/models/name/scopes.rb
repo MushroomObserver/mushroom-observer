@@ -231,7 +231,7 @@ module Name::Scopes
     scope :has_observations, lambda { |bool = true|
       return all unless bool
 
-      joins(:observations)
+      joins(:observations).distinct
     }
     scope :species_lists, lambda { |species_lists|
       species_list_ids = lookup_species_lists_by_name(species_lists)

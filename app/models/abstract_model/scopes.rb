@@ -62,7 +62,7 @@ module AbstractModel::Scopes
       user_id = user.is_a?(Integer) ? user : user&.id
 
       joins(:versions).where("#{version_table}": { user_id: user_id }).
-        where.not(user: user)
+        where.not(user: user).distinct
     }
 
     # `created_at`/`updated_at` are versatile, and handle all Queries currently.

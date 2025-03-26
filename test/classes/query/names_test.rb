@@ -47,62 +47,60 @@ class Query::NamesTest < UnitTestCase
   end
 
   def test_name_ids_with_name_ids
-    assert_query(names_set.map(&:id), :Name, id_in_set: names_set.map(&:id))
+    set = names_set.map(&:id)
+    scope = Name.id_in_set(set)
+    assert_query_scope(set, scope, :Name, id_in_set: names_set.map(&:id))
   end
 
-  def test_name_ids_with_name_instances
-    assert_query(names_set.map(&:id), :Name, id_in_set: names_set)
-  end
-
-  def test_name_by_user
-    assert_query(Name.order_by_default.where(user: mary).with_correct_spelling,
-                 :Name, by_users: mary)
-    assert_query(Name.order_by_default.where(user: mary).with_correct_spelling,
-                 :Name, by_users: "mary")
-    assert_query(Name.order_by_default.where(user: dick).with_correct_spelling,
-                 :Name, by_users: dick)
-    assert_query(Name.order_by_default.where(user: rolf).with_correct_spelling,
-                 :Name, by_users: rolf)
+  # `with_correct_spelling` temporarily necessary because scopes don't have
+  def test_name_by_users
+    users = [mary, dick, rolf]
+    users.each do |user|
+      expects = Name.where(user:).with_correct_spelling.order_by_default
+      scope = Name.by_users(user).with_correct_spelling.order_by_default
+      assert_query_scope(expects, scope, :Name, by_users: user)
+      scope = Name.by_users(user.login).with_correct_spelling.order_by_default
+      assert_query_scope(expects, scope, :Name, by_users: user.login)
+    end
     assert_query([], :Name, by_users: users(:zero_user))
   end
 
   def test_name_by_editor
     assert_query([], :Name, by_editor: rolf)
     assert_query([], :Name, by_editor: mary)
-    expects = Name.reorder(id: :asc).
-              with_correct_spelling.by_editor(dick).distinct
+    expects = Name.with_correct_spelling.by_editor(dick).order_by(:id)
     assert_query(expects, :Name, by_editor: dick, order_by: :id)
   end
 
   def test_name_users_login
     # single
-    expects = Name.where(user: users(:rolf)).order_by_default
+    expects = Name.by_users(users(:rolf).login).order_by_default
     assert_query(expects, :Name, by_users: users(:rolf).login)
     # array
-    users = [users(:rolf), users(:mary)]
-    expects = Name.where(user: users).order_by_default
-    assert_query(expects, :Name, by_users: users.map(&:login))
+    users = [users(:rolf), users(:mary)].map(&:login)
+    expects = Name.by_users(users).order_by_default
+    assert_query(expects, :Name, by_users: users)
   end
 
   def test_name_users_id
     # single
     users = users(:rolf).id
-    expects = Name.where(user: users).order_by_default
+    expects = Name.by_users(users).order_by_default
     assert_query(expects, :Name, by_users: users)
     # array
     users = [users(:rolf), users(:mary)].map(&:id)
-    expects = Name.where(user: users).order_by_default
+    expects = Name.by_users(users).order_by_default
     assert_query(expects, :Name, by_users: users)
   end
 
   def test_name_users_instance
     # single
     users = users(:rolf)
-    expects = Name.where(user: users).order_by_default
+    expects = Name.by_users(users).order_by_default
     assert_query(expects, :Name, by_users: users)
     # array
     users = [users(:rolf), users(:mary)]
-    expects = Name.where(user: users).order_by_default
+    expects = Name.by_users(users).order_by_default
     assert_query(expects, :Name, by_users: users)
   end
 
@@ -148,9 +146,9 @@ class Query::NamesTest < UnitTestCase
   def test_name_names_include_subtaxa_exclude_original
     name = names(:agaricus)
     assert_query(
-      Name.order_by_default.names(lookup: name.id,
-                                  include_subtaxa: true,
-                                  exclude_original_names: true),
+      Name.names(lookup: name.id,
+                 include_subtaxa: true,
+                 exclude_original_names: true).order_by_default,
       :Name, names: { lookup: [name.id],
                       include_subtaxa: true,
                       exclude_original_names: true }
@@ -162,9 +160,9 @@ class Query::NamesTest < UnitTestCase
     name = names(:tubaria_furfuracea)
     assert_query_scope(
       [],
-      Name.order_by_default.names(lookup: name.id,
-                                  include_subtaxa: true,
-                                  exclude_original_names: true),
+      Name.names(lookup: name.id,
+                 include_subtaxa: true,
+                 exclude_original_names: true).order_by_default,
       :Name, names: { lookup: name.id,
                       include_subtaxa: true,
                       exclude_original_names: true }
@@ -173,9 +171,9 @@ class Query::NamesTest < UnitTestCase
 
   def test_name_names_include_subtaxa_include_original
     assert_query(
-      Name.order_by_default.names(lookup: names(:agaricus),
-                                  include_subtaxa: true,
-                                  exclude_original_names: false),
+      Name.names(lookup: names(:agaricus),
+                 include_subtaxa: true,
+                 exclude_original_names: false).order_by_default,
       :Name, names: { lookup: [names(:agaricus).id],
                       include_subtaxa: true,
                       exclude_original_names: false }
@@ -184,9 +182,9 @@ class Query::NamesTest < UnitTestCase
 
   def test_name_names_include_immediate_subtaxa
     assert_query(
-      Name.order_by_default.names(lookup: names(:agaricus),
-                                  include_immediate_subtaxa: true,
-                                  exclude_original_names: false),
+      Name.names(lookup: names(:agaricus),
+                 include_immediate_subtaxa: true,
+                 exclude_original_names: false).order_by_default,
       :Name, names: { lookup: [names(:agaricus).id],
                       include_immediate_subtaxa: true,
                       exclude_original_names: false }
@@ -310,7 +308,7 @@ class Query::NamesTest < UnitTestCase
     assert_query(expects, :Name, has_comments: true)
   end
 
-  # Note that this is not a withOUT comments condition
+  # Note that this is NOT a without comments condition
   def test_name_has_comments_false
     expects = Name.with_correct_spelling.order_by_default
     assert_query(expects, :Name, has_comments: false)
@@ -325,39 +323,45 @@ class Query::NamesTest < UnitTestCase
   def test_name_pattern_search_search_name
     # search_name
     assert_query([], :Name, pattern: "petigera")
-    assert_query([names(:petigera).id],
-                 :Name, pattern: "petigera", misspellings: :either)
-    assert_query(Name.pattern("petigera").misspellings(:either),
-                 :Name, pattern: "petigera", misspellings: :either)
+    expects = [names(:petigera).id]
+    scope = Name.pattern("petigera").misspellings(:either)
+    assert_query_scope(
+      expects, scope,
+      :Name, pattern: "petigera", misspellings: :either
+    )
   end
 
   def test_name_pattern_search_citation
-    assert_query([names(:peltigera).id],
-                 :Name, pattern: "ye auld manual of lichenes")
-    assert_query(Name.pattern("ye auld manual of lichenes"),
-                 :Name, pattern: "ye auld manual of lichenes")
+    expects = [names(:peltigera).id]
+    scope = Name.pattern("ye auld manual of lichenes")
+    assert_query_scope(
+      expects, scope, :Name, pattern: "ye auld manual of lichenes"
+    )
   end
 
   def test_name_pattern_search_description_notes
-    assert_query([names(:agaricus_campestras).id],
-                 :Name, pattern: "prevent me")
-    assert_query(Name.pattern("prevent me"),
-                 :Name, pattern: "prevent me")
+    expects = [names(:agaricus_campestras).id]
+    scope = Name.pattern("prevent me")
+    assert_query_scope(
+      expects, scope, :Name, pattern: "prevent me"
+    )
   end
 
   def test_name_pattern_search_description_gen_desc
-    assert_query([names(:suillus)],
-                 :Name, pattern: "smell as sweet")
-    assert_query(Name.pattern("smell as sweet"),
-                 :Name, pattern: "smell as sweet")
+    expects = [names(:suillus).id]
+    scope = Name.pattern("smell as sweet")
+    assert_query_scope(
+      expects, scope, :Name, pattern: "smell as sweet"
+    )
   end
 
   # Prove pattern search gets hits for description look_alikes
   def test_name_pattern_search_description_look_alikes
-    assert_query([names(:peltigera).id],
-                 :Name, pattern: "superficially similar")
-    assert_query(Name.pattern("superficially similar"),
-                 :Name, pattern: "superficially similar")
+    expects = [names(:peltigera).id]
+    scope = Name.pattern("superficially similar")
+    assert_query_scope(
+      expects, scope, :Name, pattern: "superficially similar"
+    )
   end
 
   def test_name_advanced_search_name
@@ -409,230 +413,280 @@ class Query::NamesTest < UnitTestCase
     assert_query(expects, :Name, has_descriptions: 1)
   end
 
-  def test_name_has_descriptions_by_user
-    expects = name_has_descriptions_by_user(mary)
-    assert_query(expects, :Name, description_query: { by_users: mary })
-
-    expects = name_has_descriptions_by_user(dick)
-    assert_query(expects, :Name, description_query: { by_users: dick })
+  def test_name_with_description_subquery_by_users
+    users = [mary, dick]
+    users.each do |user|
+      expects = Name.with_correct_spelling.joins(:descriptions).distinct.
+                where(name_descriptions: { user: user }).order_by_default
+      scope = Name.joins(:descriptions).distinct.
+              merge(NameDescription.by_users(user)).order_by_default
+      assert_query_scope(expects, scope,
+                         :Name, description_query: { by_users: user })
+    end
   end
 
-  def name_has_descriptions_by_user(user)
-    Name.with_correct_spelling.joins(:descriptions).
-      where(name_descriptions: { user: user }).order_by_default.distinct
+  def test_name_with_description_subquery_by_author
+    authors = [rolf, mary, dick]
+    authors.each do |author|
+      expects = Name.with_correct_spelling.
+                joins(descriptions: :name_description_authors).distinct.
+                where(name_description_authors: { user: author }).
+                order_by_default
+      scope = Name.joins(:descriptions).distinct.
+              merge(NameDescription.by_author(author)).order_by_default
+      assert_query_scope(expects, scope,
+                         :Name, description_query: { by_author: author })
+    end
   end
 
-  def test_name_has_descriptions_by_author
-    expects = name_has_descriptions_by_author(rolf)
-    assert_query(expects, :Name, description_query: { by_author: rolf })
+  def test_name_with_description_subquery_by_editor
+    editors = [rolf, mary, dick]
+    editors.each do |editor|
+      expects = Name.with_correct_spelling.
+                joins(descriptions: :name_description_editors).distinct.
+                where(name_description_editors: { user: editor }).
+                order_by_default
+      scope = Name.joins(:descriptions).distinct.
+              merge(NameDescription.by_editor(editor)).order_by_default
 
-    expects = name_has_descriptions_by_author(mary)
-    assert_query(expects, :Name, description_query: { by_author: mary })
-
-    expects = name_has_descriptions_by_author(dick)
-    assert_query(expects, :Name, description_query: { by_author: dick })
+      assert_equal(0, expects.length) if editor == dick
+      assert_query_scope(expects, scope,
+                         :Name, description_query: { by_editor: editor })
+    end
   end
 
-  def name_has_descriptions_by_author(user)
-    Name.with_correct_spelling.
-      joins(descriptions: :name_description_authors).
-      where(name_description_authors: { user: user }).order_by_default.distinct
-  end
-
-  def test_name_has_descriptions_by_editor
-    expects = name_has_descriptions_by_editor(rolf)
-    assert_query(expects, :Name, description_query: { by_editor: rolf })
-
-    expects = name_has_descriptions_by_editor(rolf)
-    assert_query(expects, :Name, description_query: { by_editor: mary })
-
-    expects = name_has_descriptions_by_editor(dick)
-    assert_equal(0, expects.length)
-    assert_query(expects, :Name, description_query: { by_editor: dick })
-  end
-
-  def name_has_descriptions_by_editor(user)
-    Name.with_correct_spelling.
-      joins(descriptions: :name_description_editors).
-      where(name_description_editors: { user: user }).order_by_default.distinct
-  end
-
-  def test_name_has_descriptions_in_set
+  def test_name_with_description_subquery_in_set
     desc1 = name_descriptions(:peltigera_desc)
     desc2 = name_descriptions(:peltigera_alt_desc)
     desc3 = name_descriptions(:draft_boletus_edulis)
     name1 = names(:peltigera)
     name2 = names(:boletus_edulis)
-    assert_query([name2, name1],
-                 :Name, description_query: { id_in_set: [desc1, desc2, desc3] })
+    expects = [name2, name1]
+    set = [desc1, desc2, desc3].map(&:id)
+    scope = Name.joins(:descriptions).distinct.
+            merge(NameDescription.id_in_set(set).reorder("")).order_by_default
+    assert_query_scope(expects, scope,
+                       :Name, description_query: { id_in_set: set })
   end
 
   def test_name_has_observations
     expects = Name.with_correct_spelling.has_observations.
               select(:name).distinct.pluck(:name_id).sort
-    assert_query(expects, :Name, has_observations: 1, order_by: :id)
+    scope = Name.with_correct_spelling.has_observations.order_by(:id)
+    assert_query_scope(expects, scope,
+                       :Name, has_observations: 1, order_by: :id)
   end
-
-  # Prove that :has_observations param of Name Query works with each
-  # parameter P for which (a) there's no other test of P for
-  # Name, OR (b) P behaves differently in :has_observations than in
-  # all other params of Name Query's.
 
   ##### date/time parameters #####
 
-  def test_name_with_observations_created_at
-    created_at = observations(:california_obs).created_at
-    expects = Name.order_by_default.with_correct_spelling.joins(:observations).
-              where(Observation[:created_at] >= created_at).distinct
-    assert_query(expects, :Name, observation_query: { created_at: created_at })
+  def test_name_with_observation_subquery_created_at
+    created_at = observations(:california_obs).created_at.as_json[0..9]
+    expects = Name.with_correct_spelling.joins(:observations).distinct.
+              where(Observation[:created_at] >= created_at).order_by_default
+    scope = Name.with_correct_spelling.joins(:observations).distinct.
+            merge(Observation.created_at(created_at)).order_by_default
+    assert_query_scope(expects, scope,
+                       :Name, observation_query: { created_at: created_at })
   end
 
-  def test_name_with_observations_updated_at
-    updated_at = observations(:california_obs).updated_at
-    expects = Name.order_by_default.with_correct_spelling.joins(:observations).
-              where(Observation[:updated_at] >= updated_at).distinct
-    assert_query(expects, :Name, observation_query: { updated_at: updated_at })
+  def test_name_with_observation_subquery_updated_at
+    updated_at = observations(:california_obs).updated_at.as_json[0..9]
+    expects = Name.with_correct_spelling.joins(:observations).distinct.
+              where(Observation[:updated_at] >= updated_at).order_by_default
+    scope = Name.with_correct_spelling.joins(:observations).distinct.
+            merge(Observation.updated_at(updated_at)).order_by_default
+    assert_query_scope(expects, scope,
+                       :Name, observation_query: { updated_at: updated_at })
   end
 
-  def test_name_with_observations_date
-    date = observations(:california_obs).when
-    expects = Name.order_by_default.with_correct_spelling.joins(:observations).
-              where(Observation[:when] >= date).distinct
-    assert_query(expects, :Name, observation_query: { date: date })
+  def test_name_with_observation_subquery_date
+    date = observations(:california_obs).when.as_json
+    expects = Name.with_correct_spelling.joins(:observations).distinct.
+              where(Observation[:when] >= date).order_by_default
+    scope = Name.with_correct_spelling.joins(:observations).distinct.
+            merge(Observation.date(date)).order_by_default
+    assert_query_scope(expects, scope,
+                       :Name, observation_query: { date: date })
   end
 
   ##### list/string parameters #####
 
-  def test_name_with_observations_has_notes_fields
-    expects = Name.order_by_default.with_correct_spelling.joins(:observations).
-              where(Observation[:notes].matches("%:substrate:%")).distinct
-    assert_query(
-      expects, :Name, observation_query: { has_notes_fields: "substrate" }
+  def test_name_with_observation_subquery_has_notes_fields
+    expects = Name.with_correct_spelling.joins(:observations).distinct.
+              where(Observation[:notes].matches("%:substrate:%")).
+              order_by_default
+    scope = Name.with_correct_spelling.joins(:observations).distinct.
+            merge(Observation.has_notes_fields("substrate")).order_by_default
+    assert_query_scope(
+      expects, scope,
+      :Name, observation_query: { has_notes_fields: "substrate" }
     )
   end
 
-  def test_name_with_observations_herbaria
+  def test_name_with_observation_subquery_herbaria
     name = "The New York Botanical Garden"
     expects = Name.order_by_default.with_correct_spelling.
               joins(observations: { herbarium_records: :herbarium }).
               where(herbaria: { name: name }).distinct
-    assert_query(expects, :Name, observation_query: { herbaria: name })
-  end
-
-  def test_name_with_observations_projects
-    project = projects(:bolete_project)
-    expects = Name.order_by_default.with_correct_spelling.
-              joins({ observations: :project_observations }).
-              where(project_observations: { project: project }).distinct
-    # project.observations.map(&:name).uniq
-    assert_query(
-      expects, :Name, observation_query: { projects: project.title }
-    )
-  end
-
-  def test_name_with_observations_users
-    expects = Name.order_by_default.with_correct_spelling.joins(:observations).
-              where(observations: { user: dick }).distinct
-    assert_query(expects, :Name, observation_query: { by_users: dick })
+    scope = Name.with_correct_spelling.joins(:observations).distinct.
+            merge(Observation.herbaria(name)).order_by_default
+    assert_query_scope(expects, scope,
+                       :Name, observation_query: { herbaria: name })
   end
 
   ##### numeric parameters #####
 
-  def test_name_with_observations_confidence
-    expects = Name.order_by_default.with_correct_spelling.joins(:observations).
-              where(observations: { vote_cache: 1..3 }).distinct
+  def test_name_with_observation_subquery_confidence
+    expects = Name.with_correct_spelling.joins(:observations).distinct.
+              where(observations: { vote_cache: 1..3 }).order_by_default
     assert_not_empty(expects, "'expect` is broken; it should not be empty")
-    assert_query(expects, :Name, observation_query: { confidence: [1, 3] })
+    scope = Name.with_correct_spelling.joins(:observations).distinct.
+            merge(Observation.confidence([1, 3])).order_by_default
+    assert_query_scope(expects, scope,
+                       :Name, observation_query: { confidence: [1, 3] })
   end
 
-  def test_name_with_observations_in_box
+  def test_name_with_observation_subquery_in_box
     # north/south/east/west
     obs = observations(:unknown_with_lat_lng)
     lat = obs.lat
     lng = obs.lng
-    expects = Name.order_by_default.with_correct_spelling.joins(:observations).
-              where(observations: { lat: lat, lng: lng }).distinct
+    expects = Name.with_correct_spelling.joins(:observations).distinct.
+              where(observations: { lat:, lng: }).order_by_default
     box = { north: lat.to_f, south: lat.to_f,
-            west: lat.to_f, east: lat.to_f }
-    assert_query(expects, :Name, observation_query: { in_box: box })
+            west: lng.to_f, east: lng.to_f }
+    scope = Name.with_correct_spelling.joins(:observations).distinct.
+            merge(Observation.in_box(**box)).order_by_default
+    assert_query_scope(expects, scope,
+                       :Name, observation_query: { in_box: box })
   end
 
   ##### boolean parameters #####
 
-  def test_name_with_observations_has_comments
-    expects = Name.order_by_default.with_correct_spelling.
-              joins(observations: :comments).distinct
-    assert_query(expects, :Name, observation_query: { has_comments: true })
+  def test_name_with_observation_subquery_has_comments
+    expects = Name.with_correct_spelling.
+              joins(observations: :comments).distinct.order_by_default
+    scope = Name.with_correct_spelling.joins(:observations).distinct.
+            merge(Observation.has_comments).order_by_default
+    assert_query_scope(expects, scope,
+                       :Name, observation_query: { has_comments: true })
   end
 
-  def test_name_with_observations_has_public_lat_lng
-    expects = Name.order_by_default.joins(:observations).
-              where.not(observations: { lat: false }).distinct
-    assert_query(
-      expects, :Name, observation_query: { has_public_lat_lng: true }
+  def test_name_with_observation_subquery_has_public_lat_lng
+    expects = Name.with_correct_spelling.joins(:observations).distinct.
+              where.not(observations: { lat: false }).order_by_default
+    scope = Name.with_correct_spelling.joins(:observations).distinct.
+            merge(Observation.has_public_lat_lng).order_by_default
+    assert_query_scope(
+      expects, scope, :Name, observation_query: { has_public_lat_lng: true }
     )
   end
 
-  def test_name_with_observations_with_name
+  def test_name_with_observation_subquery_has_name_false
     expects = Name.order_by_default.with_correct_spelling.joins(:observations).
               where(observations: { name_id: Name.unknown }).distinct
-    assert_query(expects, :Name, observation_query: { has_name: false })
-  end
-
-  def test_name_with_observations_has_notes
-    expects = Name.order_by_default.with_correct_spelling.joins(:observations).
-              where.not(observations: { notes: Observation.no_notes }).distinct
-    assert_query(expects, :Name, observation_query: { has_notes: true })
-  end
-
-  def test_name_with_observations_has_sequences
-    expects = Name.order_by_default.with_correct_spelling.
-              joins(observations: :sequences).distinct
-    assert_query(expects, :Name, observation_query: { has_sequences: true })
-  end
-
-  def test_name_with_observations_is_collection_location
-    expects = Name.order_by_default.with_correct_spelling.joins(:observations).
-              where(observations: { is_collection_location: true }).distinct
-    assert_query(
-      expects, :Name, observation_query: { is_collection_location: true }
+    scope = Name.with_correct_spelling.joins(:observations).distinct.
+            merge(Observation.has_name(false)).order_by_default
+    assert_query_scope(
+      expects, scope, :Name, observation_query: { has_name: false }
     )
   end
 
-  def test_name_with_observations_at_location
+  def test_name_with_observation_subquery_has_notes
+    expects = Name.order_by_default.with_correct_spelling.joins(:observations).
+              where.not(observations: { notes: Observation.no_notes }).distinct
+    scope = Name.with_correct_spelling.joins(:observations).distinct.
+            merge(Observation.has_notes).order_by_default
+    assert_query_scope(
+      expects, scope, :Name, observation_query: { has_notes: true }
+    )
+  end
+
+  def test_name_with_observation_subquery_has_sequences
+    expects = Name.order_by_default.with_correct_spelling.
+              joins(observations: :sequences).distinct
+    scope = Name.with_correct_spelling.joins(:observations).distinct.
+            merge(Observation.has_sequences).order_by_default
+    assert_query_scope(
+      expects, scope, :Name, observation_query: { has_sequences: true }
+    )
+  end
+
+  def test_name_with_observation_subquery_is_collection_location
+    expects = Name.order_by_default.with_correct_spelling.joins(:observations).
+              where(observations: { is_collection_location: true }).distinct
+    scope = Name.with_correct_spelling.joins(:observations).distinct.
+            merge(Observation.is_collection_location).order_by_default
+    assert_query_scope(
+      expects, scope, :Name, observation_query: { is_collection_location: true }
+    )
+  end
+
+  def test_name_with_observation_subquery_locations
     loc = locations(:burbank)
     expects = Name.order_by_default.with_correct_spelling.joins(:observations).
               where(observations: { location: loc }).distinct
-    assert_query(expects, :Name, observation_query: { locations: loc })
+    scope = Name.with_correct_spelling.joins(:observations).distinct.
+            merge(Observation.locations(loc)).order_by_default
+    assert_query_scope(
+      expects, scope, :Name, observation_query: { locations: loc }
+    )
   end
 
-  def test_name_with_observations_at_where
-    assert_query([names(:coprinus_comatus).id],
-                 :Name, observation_query: { search_where: "glendale" })
+  def test_name_with_observation_subquery_search_where
+    expects = [names(:coprinus_comatus).id]
+    scope = Name.with_correct_spelling.joins(:observations).distinct.
+            merge(Observation.search_where("glendale")).order_by_default
+    assert_query_scope(
+      expects, scope, :Name, observation_query: { search_where: "glendale" }
+    )
   end
 
-  def test_name_with_observations_by_user
-    assert_query(name_with_observations_by_user(rolf),
-                 :Name, observation_query: { by_users: rolf })
-    assert_query(name_with_observations_by_user(mary),
-                 :Name, observation_query: { by_users: mary })
+  def test_name_with_observation_subquery_by_users
+    users = [rolf, mary, dick]
+    users.each do |user|
+      expects = Name.with_correct_spelling.joins(:observations).distinct.
+                where(observations: { user: user }).order_by_default
+      scope = Name.with_correct_spelling.joins(:observations).distinct.
+              merge(Observation.by_users(user)).order_by_default
+      assert_query_scope(expects, scope,
+                         :Name, observation_query: { by_users: user })
+    end
     assert_query([], :Name, observation_query: { by_users: users(:zero_user) })
   end
 
-  def name_with_observations_by_user(user)
-    Name.order_by_default.with_correct_spelling.joins(:observations).
-      where(observations: { user: user }).distinct
+  def test_name_with_observation_subquery_projects
+    projects = [projects(:empty_project),
+                projects(:two_img_obs_project),
+                projects(:bolete_project)]
+    projects.each do |pj|
+      expects = pj.observations.map(&:name).uniq
+      assert_equal(expects, []) if pj == projects(:empty_project)
+      scope = Name.with_correct_spelling.joins(:observations).distinct.
+              merge(Observation.projects(pj)).order_by_default
+      assert_query_scope(
+        expects, scope, :Name, observation_query: { projects: pj }
+      )
+    end
   end
 
-  def test_name_with_observations_for_project
-    project = projects(:empty_project)
-    assert_query([], :Name, observation_query: { projects: project })
-
-    project2 = projects(:two_img_obs_project)
+  def test_name_with_observation_subquery_species_lists
+    spl = species_lists(:unknown_species_list)
     expects = Name.order_by_default.with_correct_spelling.
-              joins({ observations: :project_observations }).
-              where(project_observations: { project: project2 }).distinct
-    assert_query(expects, :Name, observation_query: { projects: project2 })
+              joins({ observations: :species_list_observations }).
+              where(species_list_observations: { species_list: spl }).uniq
+    scope = Name.with_correct_spelling.joins(:observations).distinct.
+            merge(Observation.species_lists(spl)).order_by_default
+    assert_query_scope(
+      expects, scope, :Name, observation_query: { species_lists: spl }
+    )
+
+    spl2 = species_lists(:first_species_list)
+    scope = Name.with_correct_spelling.joins(:observations).distinct.
+            merge(Observation.species_lists(spl2)).order_by_default
+    assert_query_scope(
+      [], scope, :Name, observation_query: { species_lists: spl2 }
+    )
   end
 
   def three_amigos
@@ -643,21 +697,15 @@ class Query::NamesTest < UnitTestCase
     ].freeze
   end
 
-  def test_name_with_observations_in_set
-    expects = Name.with_correct_spelling.joins(:observations).
+  def test_name_with_observation_subquery_in_set
+    expects = Name.with_correct_spelling.joins(:observations).distinct.
               where(observations: { id: three_amigos }).
-              order_by_default.distinct
-    assert_query(expects, :Name, observation_query: { id_in_set: three_amigos })
-  end
-
-  def test_name_with_observations_in_species_list
-    spl = species_lists(:unknown_species_list)
-    expects = Name.order_by_default.with_correct_spelling.
-              joins({ observations: :species_list_observations }).
-              where(species_list_observations: { species_list: spl }).uniq
-    assert_query(expects, :Name, observation_query: { species_lists: spl })
-
-    spl2 = species_lists(:first_species_list)
-    assert_query([], :Name, observation_query: { species_lists: spl2 })
+              order_by_default
+    scope = Name.with_correct_spelling.joins(:observations).distinct.
+            merge(Observation.id_in_set(three_amigos).reorder("")).
+            order_by_default
+    assert_query_scope(
+      expects, scope, :Name, observation_query: { id_in_set: three_amigos }
+    )
   end
 end
