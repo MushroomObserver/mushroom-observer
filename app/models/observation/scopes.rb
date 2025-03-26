@@ -194,11 +194,9 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
 
       scope = all
       # Query, with possible join to Naming. Mutually exclusive options:
-      if args[:include_all_name_proposals]
+      if args[:include_all_name_proposals] || args[:exclude_consensus]
         scope = scope.joins(:namings).where(namings: { name_id: name_ids })
         scope = scope.where.not(name_id: name_ids) if args[:exclude_consensus]
-      elsif args[:exclude_consensus]
-        scope = scope.joins(:namings).where(namings: { name_id: name_ids })
       else
         scope = scope.where(name_id: name_ids)
       end
