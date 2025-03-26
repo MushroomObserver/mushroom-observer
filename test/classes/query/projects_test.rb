@@ -18,17 +18,19 @@ class Query::ProjectsTest < UnitTestCase
   end
 
   def test_project_in_set
-    assert_query([projects(:eol_project).id],
-                 :Project, id_in_set: [projects(:eol_project).id])
+    set = [projects(:eol_project).id]
+    assert_query_scope(set,
+                       Project.id_in_set(set).order_by_default,
+                       :Project, id_in_set: set)
     assert_query([], :Project, id_in_set: [])
   end
 
   def test_project_members
-    assert_query(Project.order_by_default.members(rolf),
+    assert_query(Project.members(rolf).order_by_default,
                  :Project, members: [rolf])
-    assert_query(Project.order_by_default.members(mary),
+    assert_query(Project.members(mary).order_by_default,
                  :Project, members: [mary])
-    assert_query(Project.order_by_default.members(dick),
+    assert_query(Project.members(dick).order_by_default,
                  :Project, members: [dick])
   end
 
