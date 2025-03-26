@@ -124,9 +124,8 @@ class Name
       return unless old_name.has_notes? && (old_name.notes != notes)
 
       notes << "\n\n" if has_notes?
-      self.notes += "These notes come from #{old_name.format_name} " \
-                    "when it was merged with this name:\n\n #{old_name.notes}"
-
+      self.notes = "#{notes || ''}These notes come from #{old_name.format_name} " \
+                   "when it was merged with this name:\n\n #{old_name.notes}"
       log(:log_name_updated, touch: true)
       save
     end
