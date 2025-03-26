@@ -46,13 +46,13 @@ class Query::NamesTest < UnitTestCase
     ].freeze
   end
 
-  def test_name_ids_with_name_ids
+  def test_name_id_in_set_with_ids
     set = names_set.map(&:id)
     scope = Name.id_in_set(set)
     assert_query_scope(set, scope, :Name, id_in_set: names_set.map(&:id))
   end
 
-  def test_name_ids_with_name_instances
+  def test_name_id_in_set_with_instances
     set = names_set.map(&:id)
     scope = Name.id_in_set(names_set)
     assert_query_scope(set, scope, :Name, id_in_set: names_set)
