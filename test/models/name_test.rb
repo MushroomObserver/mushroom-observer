@@ -3455,7 +3455,18 @@ class NameTest < UnitTestCase
       user: users(:rolf)
     )
 
-    subtaxa_of_amanita = Name.subtaxa_of(names(:amanita))
+    amanita = names(:amanita)
+    subtaxa_of_amanita = Name.subtaxa_of(amanita).order_by_default
+    immediate_subtaxa_of_amanita = Name.immediate_subtaxa_of(amanita).
+                                   order_by_default
+    include_immediate_subtaxa = Name.include_immediate_subtaxa_of(amanita).
+                                order_by_default
+
+    # Immediate subtaxa of a genus should include everything below the genus.
+    assert_equal(subtaxa_of_amanita.map(&:id),
+                 immediate_subtaxa_of_amanita.map(&:id))
+    assert_equal([amanita.id] + subtaxa_of_amanita.map(&:id),
+                 include_immediate_subtaxa.map(&:id))
 
     assert_includes(
       subtaxa_of_amanita, names(:amanita_subgenus_lepidella),

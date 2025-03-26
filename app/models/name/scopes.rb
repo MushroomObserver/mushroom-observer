@@ -151,19 +151,27 @@ module Name::Scopes
     }
     # "Immediate" has a vaguer meaning at and below Genus
     scope :include_immediate_subtaxa_of, lambda { |name|
+      # This should be equivalent, but it misses subtaxa with rank: "Variety".
+      # (Changed to accept plural names.)
+      # immediate_subtaxa_of(names, false)
       name = find_by(text_name: name) if name.is_a?(String)
-      # names = [name] + immediate_subtaxa_of(name)
-      # with_correct_spelling.where(id: names.map(&:id))
       immediate_subtaxa_of(name, false) # include original name
     }
     scope :immediate_subtaxa_of, lambda { |name, exclude_original = true|
+      # This should be equivalent, but it misses subtaxa with rank: "Variety".
+      # (Changed to accept plural names.)
+      # names(lookup: names, include_immediate_subtaxa: true,
+      #       exclude_original_names: exclude_original)
       name = find_by(text_name: name) if name.is_a?(String)
       scope = if ranks_above_genus.include?(name.rank)
                 subtaxa_of(name).rank(ranks[name.rank] - 1)
               else
                 subtaxa_of(name)
               end
-      scope = scope.or(Name.where(id: name.id)) unless exclude_original == true
+      unless exclude_original == true
+        # Add `distinct` to balance `or` clause: subtaxa_of calls `distinct`
+        scope = scope.or(Name.where(id: name.id).distinct)
+      end
       scope
     }
     ### Pattern Search
