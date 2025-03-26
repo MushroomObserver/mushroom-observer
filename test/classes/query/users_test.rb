@@ -35,7 +35,7 @@ class Query::UsersTest < UnitTestCase
   end
 
   def test_user_has_contribution
-    expects = User.has_contribution
+    expects = User.has_contribution.order_by_default
     assert_query(expects, :User, has_contribution: true)
   end
 
