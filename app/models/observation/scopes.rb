@@ -9,7 +9,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
   # always show as covered.
   included do # rubocop:disable Metrics/BlockLength
     # default ordering for index queries
-    scope :index_order,
+    scope :order_by_default,
           -> { order(when: :desc, id: :desc) }
     # overwrite the one in abstract_model, because we have it cached on a column
     scope :order_by_rss_log, lambda {
@@ -58,20 +58,14 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       where(conditions)
     }
 
-    # Observation SEARCHABLE_FIELDS :text_name, :where and :notes (currently)
-    # NOTE: Must search Name[:search_name], not ideal
-    scope :search_content, lambda { |phrase|
-      ids = name_search_name_observation_ids(phrase)
-      ids += search_columns(Observation.searchable_columns, phrase).map(&:id)
-      where(id: ids).distinct
-    }
+    # FOR FUTURE REFERENCE
     # The "advanced search" scope for "content". Unexpectedly, merge/or is
     # faster than concatting the Obs and Comment columns together.
-    scope :advanced_search, lambda { |phrase|
-      comments = Observation.comments_has(phrase).map(&:id)
-      notes_has(phrase).distinct.
-        or(Observation.where(id: comments).distinct)
-    }
+    # scope :advanced_search, lambda { |phrase|
+    #   comments = Observation.comments_has(phrase).map(&:id)
+    #   notes_has(phrase).distinct.
+    #     or(Observation.where(id: comments).distinct)
+    # }
     # Checks Name[:search_name], which includes the author
     # (unlike Observation[:text_name]) and is not cached on the obs
     scope :pattern, lambda { |phrase|
@@ -96,7 +90,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :lichen, lambda { |boolish = :yes|
       # if false, returns all
       boolish = :yes if boolish == true
-      case boolish.to_sym
+      case boolish.to_s.to_sym
       when :yes
         where(Observation[:lifeform].matches("%lichen%"))
       when :no
@@ -107,7 +101,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # Filters for confidence on vote_cache scale -3.0..3.0
     # To translate percentage to vote_cache: (val.to_f / (100 / 3))
     scope :confidence, lambda { |min, max = nil|
-      min, max = min if min.is_a?(Array) && min.size == 2
+      min, max = min if min.is_a?(Array)
       if max.nil? || max == min # max may be 0
         where(Observation[:vote_cache].gteq(min))
       else
@@ -119,7 +113,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     #   with_name_above_genus.or(has_no_confident_name)
     # }
     scope :needs_naming,
-          -> { where(needs_naming: true) }
+          ->(bool = true) { where(needs_naming: bool) }
     scope :with_name_above_genus,
           -> { where(name_id: Name.with_rank_above_genus) }
     scope :has_no_confident_name,
@@ -252,7 +246,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :has_location, lambda { |bool = true|
       presence_condition(Observation[:location_id], bool:)
     }
-    scope :location_undefined, lambda {
+    scope :location_undefined, lambda { |_bool = true|
       has_location(false).where.not(where: nil).group(:where).
         order(Observation[:where].count.desc, Observation[:id].desc)
     }

@@ -63,7 +63,7 @@ class Herbarium < AbstractModel
   # Used by create/edit form.
   attr_accessor :place_name, :personal, :personal_user_name
 
-  scope :index_order,
+  scope :order_by_default,
         -> { order(name: :asc, id: :desc) }
 
   scope :nonpersonal, lambda { |bool = true|

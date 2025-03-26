@@ -362,7 +362,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
   def test_show_flow
     login
-    query = Query.lookup_and_save(:SpeciesList, by: "reverse_user")
+    query = Query.lookup_and_save(:SpeciesList, order_by: "reverse_user")
     query_params = @controller.query_params(query)
     get(:index, params: query_params)
     assert_template(:index)
@@ -1378,9 +1378,9 @@ class SpeciesListsControllerTest < FunctionalTestCase
     spl1 = species_lists(:unknown_species_list)
     spl2 = species_lists(:one_genus_three_species_list)
     query1 = Query.lookup_and_save(:Observation,
-                                   species_lists: spl1.id, by: :name)
+                                   species_lists: spl1.id, order_by: :name)
     query2 = Query.lookup_and_save(:Observation,
-                                   species_lists: spl2.id, by: :name)
+                                   species_lists: spl2.id, order_by: :name)
 
     # make sure the "Set Source" link is on the page somewhere
     get(:show, params: { id: spl1.id })

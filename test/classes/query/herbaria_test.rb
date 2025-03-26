@@ -8,21 +8,21 @@ class Query::HerbariaTest < UnitTestCase
   include QueryExtensions
 
   def test_herbarium_all
-    expects = Herbarium.index_order
+    expects = Herbarium.order_by_default
     assert_query(expects.select(:id).distinct, :Herbarium)
   end
 
   def test_herbarium_nonpersonal
-    expects = Herbarium.nonpersonal.index_order
+    expects = Herbarium.nonpersonal.order_by_default
     assert_query(expects.select(:id).distinct, :Herbarium, nonpersonal: true)
-    # expects = Herbarium.nonpersonal(false).index_order
+    # expects = Herbarium.nonpersonal(false).order_by_default
     # assert_query(expects.select(:id).distinct, :Herbarium, nonpersonal: false)
   end
 
   def test_herbarium_by_records
     expects = Herbarium.left_outer_joins(:herbarium_records).group(:id).
               order(HerbariumRecord[:id].count.desc, Herbarium[:id].desc)
-    assert_query(expects, :Herbarium, by: :records)
+    assert_query(expects, :Herbarium, order_by: :records)
   end
 
   def test_herbarium_id_in_set
@@ -40,7 +40,7 @@ class Query::HerbariaTest < UnitTestCase
   def test_herbarium_name_has
     expects = [herbaria(:curatorless_herbarium), herbaria(:dick_herbarium),
                herbaria(:rolf_herbarium)]
-    scope = Herbarium.name_has("Herbarium").index_order
+    scope = Herbarium.name_has("Herbarium").order_by_default
     assert_query_scope(expects, scope, :Herbarium, name_has: "Herbarium")
   end
 

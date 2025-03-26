@@ -8,20 +8,20 @@ class Query::SequencesTest < UnitTestCase
   include QueryExtensions
 
   def test_sequence_all
-    expects = Sequence.index_order
+    expects = Sequence.order_by_default
     assert_query(expects, :Sequence)
   end
 
   def test_sequence_id_in_set
     ids = [sequences(:fasta_formatted_sequence).id,
            sequences(:bare_formatted_sequence).id]
-    scope = Sequence.id_in_set(ids).index_order
+    scope = Sequence.id_in_set(ids).order_by_default
     assert_query_scope(ids, scope, :Sequence, id_in_set: ids)
   end
 
   def test_sequence_locus
     ids = [sequences(:fasta_formatted_sequence)]
-    scope = Sequence.locus("ITS1F").index_order
+    scope = Sequence.locus("ITS1F").order_by_default
     assert_query_scope(ids, scope, :Sequence, locus: "ITS1F")
   end
 
@@ -35,38 +35,38 @@ class Query::SequencesTest < UnitTestCase
 
   def test_sequence_locus_has
     ids = sequences_with_its_locus.map(&:id)
-    scope = Sequence.locus_has("ITS").index_order
+    scope = Sequence.locus_has("ITS").order_by_default
     assert_query_scope(ids, scope, :Sequence, locus_has: "ITS")
   end
 
   def test_sequence_archive
     ids = [sequences(:alternate_archive)]
-    scope = Sequence.archive("UNITE").index_order
+    scope = Sequence.archive("UNITE").order_by_default
     assert_query_scope(ids, scope, :Sequence, archive: "UNITE")
   end
 
   def test_sequence_accession
     ids = [sequences(:deposited_sequence)]
-    scope = Sequence.accession("KT968605").index_order
+    scope = Sequence.accession("KT968605").order_by_default
     assert_query_scope(ids, scope, :Sequence, accession: "KT968605")
   end
 
   def test_sequence_accession_has
     ids = [sequences(:deposited_sequence)]
-    scope = Sequence.accession_has("968605").index_order
+    scope = Sequence.accession_has("968605").order_by_default
     assert_query_scope(ids, scope, :Sequence, accession_has: "968605")
   end
 
   def test_sequence_notes_has
     ids = [sequences(:deposited_sequence)]
-    scope = Sequence.notes_has("deposited_sequence").index_order
+    scope = Sequence.notes_has("deposited_sequence").order_by_default
     assert_query_scope(ids, scope, :Sequence, notes_has: "deposited_sequence")
   end
 
   def test_sequence_for_observations
     obs = observations(:locally_sequenced_obs)
     ids = [sequences(:local_sequence)]
-    scope = Sequence.observations(obs).index_order
+    scope = Sequence.observations(obs).order_by_default
     assert_query_scope(ids, scope, :Sequence, observations: [obs.id])
   end
 
@@ -74,7 +74,7 @@ class Query::SequencesTest < UnitTestCase
     assert_query([], :Sequence, pattern: "nonexistent")
 
     ids = sequences_with_its_locus.map(&:id)
-    scope = Sequence.pattern("ITS").index_order
+    scope = Sequence.pattern("ITS").order_by_default
     assert_query_scope(ids, scope, :Sequence, pattern: "ITS")
 
     assert_query([sequences(:alternate_archive)],
@@ -104,9 +104,9 @@ class Query::SequencesTest < UnitTestCase
         names: { lookup: "Petigera", include_synonyms: true }
       }
     )
-    expects = Sequence.index_order.joins(:observation).
+    expects = Sequence.order_by_default.joins(:observation).
               where(observations: { location: locations(:burbank) }).
-              or(Sequence.index_order.joins(:observation).
+              or(Sequence.order_by_default.joins(:observation).
                  where(Observation[:where].matches("Burbank"))).distinct
     assert_query(expects,
                  :Sequence, observation_query: { locations: "Burbank" })

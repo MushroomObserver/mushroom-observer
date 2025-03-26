@@ -30,7 +30,7 @@ class Query::Base
       group: :string,
       order: :string,
       selects: :string,
-      by: :string,
+      order_by: :string,
       title: [:string]
     }
   end

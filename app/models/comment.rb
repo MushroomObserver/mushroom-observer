@@ -133,7 +133,7 @@ class Comment < AbstractModel
   after_create :notify_users
   after_create :oil_and_water
 
-  scope :index_order,
+  scope :order_by_default,
         -> { order(created_at: :desc, id: :desc) }
 
   # This scope starts with a `where`, and chains subsequent `where` clauses
