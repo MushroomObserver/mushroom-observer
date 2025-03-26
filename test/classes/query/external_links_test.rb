@@ -11,6 +11,11 @@ class Query::ExternalLinksTest < UnitTestCase
     assert_query(ExternalLink.order_by_default, :ExternalLink)
   end
 
+  def test_external_link_order_by_url
+    expects = ExternalLink.order_by(:url)
+    assert_query(expects, :ExternalLink, order_by: :url)
+  end
+
   def test_external_link_id_in_set
     set = ExternalLink.order(id: :asc).last(2).pluck(:id)
     scope = ExternalLink.id_in_set(set)
@@ -18,8 +23,8 @@ class Query::ExternalLinksTest < UnitTestCase
   end
 
   def test_external_link_by_users
-    assert_query(ExternalLink.by_users(users(:mary)).order_by_default,
-                 :ExternalLink, by_users: users(:mary))
+    scope = ExternalLink.by_users(users(:mary)).order_by_default
+    assert_query(scope, :ExternalLink, by_users: users(:mary))
     assert_query([], :ExternalLink, by_users: users(:dick))
   end
 
@@ -33,14 +38,13 @@ class Query::ExternalLinksTest < UnitTestCase
   end
 
   def test_external_link_external_sites
-    site = external_sites(:mycoportal)
-    assert_query(site.external_links.sort_by(&:url),
-                 :ExternalLink, external_sites: site)
-    site = external_sites(:inaturalist)
-    assert_query(site.external_links.sort_by(&:url),
-                 :ExternalLink, external_sites: site)
-    expects = ExternalLink.external_sites(site).order_by_default
-    assert_query(expects, :ExternalLink, external_sites: site)
+    sites = [external_sites(:mycoportal),
+             external_sites(:inaturalist)]
+    sites.each do |site|
+      expects = site.external_links.sort_by(&:url)
+      scope = ExternalLink.external_sites(site).order_by_default
+      assert_query_scope(expects, scope, :ExternalLink, external_sites: site)
+    end
   end
 
   def test_external_link_url_has
