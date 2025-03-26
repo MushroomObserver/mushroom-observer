@@ -178,7 +178,11 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     #  - exclude_consensus: boolean
     #
     scope :names, lambda { |lookup:, **args|
-      # First, lookup names, plus synonyms and subtaxa if requested
+      if !args[:include_all_name_proposals] && args[:exclude_consensus]
+        return none
+      end
+
+      # Next, lookup names, plus synonyms and subtaxa if requested
       lookup_args = args.slice(:include_synonyms,
                                :include_misspellings,
                                :include_subtaxa,
@@ -187,15 +191,15 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       name_ids = Lookup::Names.new(lookup, **lookup_args).ids
       return none unless name_ids
 
+      scope = all
       # Query, with possible join to Naming. Mutually exclusive options:
       if args[:include_all_name_proposals]
-        joins(:namings).where(namings: { name_id: name_ids })
-      elsif args[:exclude_consensus]
-        joins(:namings).where(namings: { name_id: name_ids }).
-          where.not(name: name_ids)
+        scope = scope.joins(:namings).where(namings: { name_id: name_ids })
+        scope = scope.where.not(name_id: name_ids) if args[:exclude_consensus]
       else
-        where(name_id: name_ids)
+        scope = scope.where(name_id: name_ids)
       end
+      scope
     }
     scope :names_like,
           ->(name) { where(name: Name.text_name_has(name)) }
