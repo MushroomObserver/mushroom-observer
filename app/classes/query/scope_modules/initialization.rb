@@ -35,6 +35,7 @@ module Query::ScopeModules::Initialization
     self.where += params[:where] if params[:where]
     add_join(params[:join]) if params[:join]
     initialize_parameter_set
+    filter_misspellings_for_name_queries
     initialize_subquery_parameters
   end
 
@@ -50,6 +51,13 @@ module Query::ScopeModules::Initialization
                   @scopes.send(param, val)
                 end
     end
+  end
+
+  def filter_misspellings_for_name_queries
+    return unless model == Name
+    return if params[:misspellings].present
+
+    @scopes = @scopes.with_correct_spelling
   end
 
   # Need to add what joins to do on the parameter_declarations.
