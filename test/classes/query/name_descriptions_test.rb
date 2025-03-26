@@ -21,6 +21,11 @@ class Query::NameDescriptionsTest < UnitTestCase
                  :NameDescription, order_by: :id, names: pelt, is_public: "yes")
   end
 
+  def test_name_description_order_by_name
+    expects = NameDescription.order_by(:name)
+    assert_query(expects, :NameDescription, order_by: :name)
+  end
+
   def test_name_description_by_user
     expects = NameDescription.where(user: mary).order(:id)
     assert_query(expects, :NameDescription, by_users: mary, order_by: :id)

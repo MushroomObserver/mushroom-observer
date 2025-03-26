@@ -12,9 +12,19 @@ class Query::UsersTest < UnitTestCase
     assert_query(expects, :User)
   end
 
-  def test_user_all_by_login
+  def test_user_order_by_login
     expects = User.order_by(:login)
     assert_query(expects, :User, order_by: :login)
+  end
+
+  def test_user_order_by_contribution
+    expects = User.order_by(:contribution)
+    assert_query(expects, :User, order_by: :contribution)
+  end
+
+  def test_user_order_by_last_login
+    expects = User.order_by(:last_login)
+    assert_query(expects, :User, order_by: :last_login)
   end
 
   def test_user_id_in_set

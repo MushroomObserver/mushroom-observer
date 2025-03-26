@@ -12,6 +12,41 @@ class Query::ImagesTest < UnitTestCase
     assert_query(expects, :Image)
   end
 
+  def test_image_order_by_confidence
+    expects = Image.order_by(:confidence)
+    assert_query(expects, :Image, order_by: :confidence)
+  end
+
+  def test_image_order_by_copyright_holder
+    expects = Image.order_by(:copyright_holder)
+    assert_query(expects, :Image, order_by: :copyright_holder)
+  end
+
+  def test_image_order_by_created_at
+    expects = Image.order_by(:created_at)
+    assert_query(expects, :Image, order_by: :created_at)
+  end
+
+  def test_image_order_by_image_quality
+    expects = Image.order_by(:image_quality)
+    assert_query(expects, :Image, order_by: :image_quality)
+  end
+
+  def test_image_order_by_name
+    expects = Image.order_by(:name)
+    assert_query(expects, :Image, order_by: :name)
+  end
+
+  def test_image_order_by_original_name
+    expects = Image.order_by(:original_name)
+    assert_query(expects, :Image, order_by: :original_name)
+  end
+
+  def test_image_order_by_owners_quality
+    expects = Image.order_by(:owners_quality)
+    assert_query(expects, :Image, order_by: :owners_quality)
+  end
+
   def test_image_sizes
     expects = Image.sizes(:thumbnail).order_by_default
     assert_query(expects, :Image, sizes: :thumbnail)

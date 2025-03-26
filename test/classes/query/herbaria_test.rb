@@ -12,6 +12,26 @@ class Query::HerbariaTest < UnitTestCase
     assert_query(expects, :Herbarium)
   end
 
+  def test_herbarium_order_by_records
+    expects = Herbarium.order_by(:records)
+    assert_query(expects, :Herbarium, order_by: :records)
+  end
+
+  def test_herbarium_order_by_code
+    expects = Herbarium.order_by(:code)
+    assert_query(expects, :Herbarium, order_by: :code)
+  end
+
+  def test_herbarium_order_by_code_then_name
+    expects = Herbarium.order_by(:code_then_name)
+    assert_query(expects, :Herbarium, order_by: :code_then_name)
+  end
+
+  def test_herbarium_order_by_name
+    expects = Herbarium.order_by(:name)
+    assert_query(expects, :Herbarium, order_by: :name)
+  end
+
   def test_herbarium_nonpersonal
     expects = Herbarium.nonpersonal.order_by_default
     assert_query(expects, :Herbarium, nonpersonal: true)
@@ -20,11 +40,6 @@ class Query::HerbariaTest < UnitTestCase
     # default index behavior adjusted, but that requires some focus. - AN 202503
     # expects = Herbarium.nonpersonal(false).order_by_default
     # assert_query(expects.select(:id).distinct, :Herbarium, nonpersonal: false)
-  end
-
-  def test_herbarium_by_records
-    expects = Herbarium.order_by(:records)
-    assert_query(expects, :Herbarium, order_by: :records)
   end
 
   def test_herbarium_id_in_set

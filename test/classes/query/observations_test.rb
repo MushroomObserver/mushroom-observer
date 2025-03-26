@@ -12,9 +12,54 @@ class Query::ObservationsTest < UnitTestCase
     assert_query(expects, :Observation)
   end
 
-  def test_observation_by_rss_log
+  def test_observation_order_by_confidence
+    expects = Observation.order_by(:confidence)
+    assert_query(expects, :Observation, order_by: :confidence)
+  end
+
+  def test_observation_order_by_created_at
+    expects = Observation.order_by(:created_at)
+    assert_query(expects, :Observation, order_by: :created_at)
+  end
+
+  def test_observation_order_by_date
+    expects = Observation.order_by(:date)
+    assert_query(expects, :Observation, order_by: :date)
+  end
+
+  def test_observation_order_by_location
+    expects = Observation.order_by(:location)
+    assert_query(expects, :Observation, order_by: :location)
+  end
+
+  def test_observation_order_by_name
+    expects = Observation.order_by(:name)
+    assert_query(expects, :Observation, order_by: :name)
+  end
+
+  def test_observation_order_by_num_views
+    expects = Observation.order_by(:num_views)
+    assert_query(expects, :Observation, order_by: :num_views)
+  end
+
+  def test_image_order_by_owners_thumbnail_quality
+    expects = Observation.order_by(:owners_thumbnail_quality)
+    assert_query(expects, :Observation, order_by: :owners_thumbnail_quality)
+  end
+
+  def test_observation_order_by_rss_log
     expects = Observation.order_by(:rss_log)
     assert_query(expects, :Observation, order_by: :rss_log)
+  end
+
+  def test_image_order_by_thumbnail_quality
+    expects = Observation.order_by(:thumbnail_quality)
+    assert_query(expects, :Observation, order_by: :thumbnail_quality)
+  end
+
+  def test_observation_order_by_updated_at
+    expects = Observation.order_by(:updated_at)
+    assert_query(expects, :Observation, order_by: :updated_at)
   end
 
   def big_set

@@ -31,7 +31,12 @@ class Query::NamesTest < UnitTestCase
     assert_query(expect_bad.to_a, :Name, misspellings: :only)
   end
 
-  def test_name_by_rss_log
+  def test_name_order_by_name
+    expects = Name.order_by(:name)
+    assert_query(expects, :Name, order_by: :name)
+  end
+
+  def test_name_order_by_rss_log
     expects = Name.order_by(:rss_log)
     assert_query(expects, :Name, order_by: :rss_log)
   end

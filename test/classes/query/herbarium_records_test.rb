@@ -12,6 +12,26 @@ class Query::HerbariumRecordsTest < UnitTestCase
     assert_query(expects, :HerbariumRecord)
   end
 
+  def test_herbarium_record_order_by_accession_number
+    expects = HerbariumRecord.order_by(:accession_number)
+    assert_query(expects, :HerbariumRecord, order_by: :accession_number)
+  end
+
+  def test_herbarium_record_order_by_herbarium_label
+    expects = HerbariumRecord.order_by(:herbarium_label)
+    assert_query(expects, :HerbariumRecord, order_by: :herbarium_label)
+  end
+
+  def test_herbarium_record_order_by_herbarium_name
+    expects = HerbariumRecord.order_by(:herbarium_name)
+    assert_query(expects, :HerbariumRecord, order_by: :herbarium_name)
+  end
+
+  def test_herbarium_record_order_by_initial_det
+    expects = HerbariumRecord.order_by(:initial_det)
+    assert_query(expects, :HerbariumRecord, order_by: :initial_det)
+  end
+
   def test_herbarium_record_id_in_set
     set = HerbariumRecord.order_by(:id).last(3).pluck(:id)
     scope = HerbariumRecord.id_in_set(set)

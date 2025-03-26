@@ -8,30 +8,43 @@ class Query::SpeciesListsTest < UnitTestCase
   include QueryExtensions
 
   def test_species_list_all
-    ids = SpeciesList.order_by_default
-    assert_query(ids, :SpeciesList)
+    expects = SpeciesList.order_by_default
+    assert_query(expects, :SpeciesList)
+  end
+
+  def test_species_list_order_by_name
+    expects = SpeciesList.order_by(:name)
+    assert_query(expects, :SpeciesList, order_by: :name)
+  end
+
+  def test_species_list_order_by_reverse_name
+    expects = SpeciesList.order_by(:reverse_name)
+    assert_query(expects, :SpeciesList, order_by: :reverse_name)
   end
 
   def test_species_list_order_by_user
-    ids = SpeciesList.order_by(:user).to_a
-    assert_query(ids, :SpeciesList, order_by: :user)
-    ids = SpeciesList.order_by(:reverse_user).to_a
-    assert_query(ids, :SpeciesList, order_by: :reverse_user)
+    expects = SpeciesList.order_by(:user).to_a
+    assert_query(expects, :SpeciesList, order_by: :user)
+  end
+
+  def test_species_list_order_by_reverse_user
+    expects = SpeciesList.order_by(:reverse_user).to_a
+    assert_query(expects, :SpeciesList, order_by: :reverse_user)
   end
 
   def test_species_list_order_by_title
-    ids = SpeciesList.order_by(:title).to_a
-    assert_query(ids, :SpeciesList, order_by: :title)
+    expects = SpeciesList.order_by(:title).to_a
+    assert_query(expects, :SpeciesList, order_by: :title)
   end
 
   def test_species_list_order_by_where
-    ids = SpeciesList.order_by(:where).to_a
-    assert_query(ids, :SpeciesList, order_by: :where)
+    expects = SpeciesList.order_by(:where).to_a
+    assert_query(expects, :SpeciesList, order_by: :where)
   end
 
   def test_species_list_order_by_rss_log
-    assert_query(SpeciesList.order_by(:rss_log),
-                 :SpeciesList, order_by: :rss_log)
+    expects = SpeciesList.order_by(:rss_log).to_a
+    assert_query(expects, :SpeciesList, order_by: :rss_log)
   end
 
   def test_species_list_by_users

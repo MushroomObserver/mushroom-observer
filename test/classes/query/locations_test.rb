@@ -10,8 +10,21 @@ class Query::LocationsTest < UnitTestCase
   def test_location_all
     expects = Location.order_by_default
     assert_query(expects, :Location)
-    expects = Location.reorder(id: :asc)
+  end
+
+  def test_location_order_by_box_area
+    expects = Location.order_by(:box_area)
+    assert_query(expects, :Location, order_by: :box_area)
+  end
+
+  def test_location_order_by_id
+    expects = Location.order_by(:id)
     assert_query(expects, :Location, order_by: :id)
+  end
+
+  def test_location_order_by_name
+    expects = Location.order_by(:name)
+    assert_query(expects, :Location, order_by: :name)
   end
 
   def test_location_by_users

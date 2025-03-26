@@ -83,7 +83,12 @@ class Query::LocationDescriptionsTest < UnitTestCase
                        :LocationDescription, by_editor: users(:zero_user))
   end
 
-  def test_location_description_in_set
+  def test_location_description_order_by_name
+    expects = LocationDescription.order_by(:name)
+    assert_query(expects, :LocationDescription, order_by: :name)
+  end
+
+  def test_location_description_id_in_set
     assert_query(
       [], :LocationDescription, id_in_set: rolf.id
     )

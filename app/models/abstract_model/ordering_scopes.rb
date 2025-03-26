@@ -18,6 +18,8 @@ module AbstractModel::OrderingScopes
     # Dispatcher for Query's :order_by param. Expects a (method) arg.
     # Example:
     #   create_query(:Observation, order_by: :created_at)
+    # or:
+    #   Observation.order_by(:created_at)
     #
     # ...dispatches to a private method called `:order_by_created_at`,
     # which is basically just a scope. If no method by that name exists,
@@ -71,7 +73,7 @@ module AbstractModel::OrderingScopes
     end
 
     def order_by_code
-      where(Herbarium[:code].not_eq(nil)).order(Herbarium[:code].asc)
+      where(Herbarium[:code].not_eq("")).order(Herbarium[:code].asc)
     end
 
     def order_by_code_then_date
@@ -82,7 +84,7 @@ module AbstractModel::OrderingScopes
 
     def order_by_code_then_name
       order(
-        Herbarium[:code].eq(nil).
+        Herbarium[:code].eq("").
           when(true).then(Arel::Nodes.build_quoted("~")).
           when(false).then(Herbarium[:code]).asc, Herbarium[:name].asc
       )
@@ -91,8 +93,11 @@ module AbstractModel::OrderingScopes
     def order_by_confidence
       return all unless [Image, Observation].include?(self)
 
-      joins(observation_images: :observation) if self == Image
-      order(Observation[:vote_cache].desc)
+      scope = all
+      if self == Image
+        scope = scope.joins(observation_images: :observation).distinct
+      end
+      scope.order(Observation[:vote_cache].desc)
     end
 
     def order_by_contribution
@@ -131,7 +136,7 @@ module AbstractModel::OrderingScopes
     def order_by_herbarium_name
       return all unless self == HerbariumRecord
 
-      joins(:herbarium).order(Herbarium[:name].asc)
+      joins(:herbarium).distinct.order(Herbarium[:name].asc)
     end
 
     # (for testing)
@@ -163,9 +168,9 @@ module AbstractModel::OrderingScopes
       scope = order_locations_by_name
       # Join Users with null locations, else join records with locations
       if self == User
-        scope.left_outer_joins(:location)
+        scope.left_outer_joins(:location).distinct
       else
-        scope.joins(:location)
+        scope.joins(:location).distinct
       end
     end
 
@@ -180,7 +185,7 @@ module AbstractModel::OrderingScopes
     # so the latter should stay here. To avoid method duplication, we could
     # just have scope `Location.order_by_name` call `order_locations_by_name`.
     def order_by_name
-      order_by_name_method = "order_#{name.underscore.pluralize}_by_name"
+      order_by_name_method = :"order_#{name.underscore.pluralize}_by_name"
       if private_methods(false).include?(order_by_name_method)
         send(order_by_name_method)
       else
@@ -203,7 +208,7 @@ module AbstractModel::OrderingScopes
     def order_by_observation
       return all unless column_names.include?("observation_id")
 
-      order(Observation[:id].desc)
+      order(arel_table[:observation_id].desc)
     end
 
     def order_by_original_name
@@ -216,13 +221,13 @@ module AbstractModel::OrderingScopes
       return all unless self == Image
 
       joins(:image_votes).where(ImageVote[:user_id].eq(Image[:user_id])).
-        order(ImageVote[:value].desc)
+        distinct.order(ImageVote[:value].desc)
     end
 
     def order_by_owners_thumbnail_quality # rubocop:disable Metrics/AbcSize
       return all unless self == Observation
 
-      joins(images: :image_votes).
+      joins(images: :image_votes).distinct.
         where(Observation[:thumb_image_id].eq(Image[:id])).
         where(Image[:user_id].eq(Observation[:user_id])).
         where(ImageVote[:user_id].eq(Observation[:user_id])).
@@ -234,7 +239,7 @@ module AbstractModel::OrderingScopes
       return all unless self == Herbarium
 
       # outer_join needed to show herbaria with no records
-      left_outer_joins(:herbarium_records).group(Herbarium[:id]).
+      left_outer_joins(:herbarium_records).group(Herbarium[:id]).distinct.
         order(HerbariumRecord[:id].count.desc)
     end
 
@@ -246,7 +251,7 @@ module AbstractModel::OrderingScopes
       if column_names.include?("log_updated_at")
         order(arel_table[:log_updated_at].desc)
       else
-        joins(:rss_log).order(RssLog[:updated_at].desc)
+        joins(:rss_log).order(RssLog[:updated_at].desc).distinct
       end
     end
 
@@ -260,7 +265,7 @@ module AbstractModel::OrderingScopes
       return all unless self == Observation
 
       joins(:images).where(Observation[:thumb_image_id].eq(Image[:id])).
-        order(Image[:vote_cache].desc, Observation[:vote_cache].desc)
+        distinct.order(Image[:vote_cache].desc, Observation[:vote_cache].desc)
     end
 
     def order_by_title
@@ -282,7 +287,7 @@ module AbstractModel::OrderingScopes
     end
 
     def order_by_user
-      joins(:user).order(
+      joins(:user).distinct.order(
         User[:name].when(nil).then(User[:login]).when("").then(User[:login]).
         else(User[:name]).asc
       )
@@ -297,12 +302,13 @@ module AbstractModel::OrderingScopes
     ####### methods dispatched from order_by_name
 
     def order_images_by_name
-      joins(observation_images: { observation: :name }).
-        group(Image[:id]).order(Name[:sort_name].min.asc, Image[:when].desc)
+      joins(observation_images: { observation: :name }).distinct.
+        group(Image[:id]).
+        order(Arel.sql("MIN(`names`.`sort_name`) ASC"), Image[:when].desc)
     end
 
     def order_location_descriptions_by_name
-      joins(:location).
+      joins(:location).distinct.
         order(Location[:name].asc, LocationDescription[:created_at].asc)
     end
 
@@ -315,15 +321,16 @@ module AbstractModel::OrderingScopes
     end
 
     def order_name_descriptions_by_name
-      joins(:name).order(Name[:sort_name].asc, NameDescription[:created_at].asc)
+      joins(:name).distinct.
+        order(Name[:sort_name].asc, NameDescription[:created_at].asc)
     end
 
     def order_names_by_name
-      order(Name[:sort_name].asc)
+      with_correct_spelling.order(Name[:sort_name].asc)
     end
 
     def order_observations_by_name
-      joins(:name).order(Name[:sort_name].asc, Observation[:when].desc)
+      joins(:name).distinct.order(Name[:sort_name].asc, Observation[:when].desc)
     end
 
     def order_other_models_by_name

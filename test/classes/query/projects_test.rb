@@ -12,9 +12,19 @@ class Query::ProjectsTest < UnitTestCase
     assert_query(expects, :Project)
   end
 
-  def test_project_by_rss_log
+  def test_project_order_by_name
+    expects = Project.order_by(:name)
+    assert_query(expects, :Project, order_by: :name)
+  end
+
+  def test_project_order_by_rss_log
     expects = Project.order_by(:rss_log)
     assert_query(expects, :Project, order_by: :rss_log)
+  end
+
+  def test_project_order_by_summary
+    expects = Project.order_by(:summary)
+    assert_query(expects, :Project, order_by: :summary)
   end
 
   def test_project_in_set

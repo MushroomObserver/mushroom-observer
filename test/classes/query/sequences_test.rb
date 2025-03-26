@@ -12,6 +12,11 @@ class Query::SequencesTest < UnitTestCase
     assert_query(expects, :Sequence)
   end
 
+  def test_sequence_order_by_observation
+    expects = Sequence.order_by(:observation)
+    assert_query(expects, :Sequence, order_by: :observation)
+  end
+
   def test_sequence_id_in_set
     ids = [sequences(:fasta_formatted_sequence).id,
            sequences(:bare_formatted_sequence).id]
