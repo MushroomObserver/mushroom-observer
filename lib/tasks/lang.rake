@@ -81,7 +81,7 @@ namespace :lang do
   # See https://github.com/MushroomObserver/mushroom-observer/pull/2838/commits/fcf75b4c57ac7c6f0a3046c870236ceeda50e50f#r2011104991
   # rubocop:disable Rails/RakeEnvironment
   desc "Log in user for import tasks."
-  task(login) do
+  task(:login) do
     User.current = if ENV.include?("user_name")
                      User.find_by(login: ENV["user_name"])
                    elsif ENV.include?("user_id")
@@ -90,17 +90,17 @@ namespace :lang do
   end
 
   desc "Log in admin for import tasks."
-  task(login_admin) do
+  task(:login_admin) do
     User.current = User.find(0)
   end
 
   desc 'Turn off verbosity if include "silent=yes".'
-  task(verbose) do
+  task(:verbose) do
     Language.verbose = true unless ENV.include?("silent")
   end
 
   desc 'Turn on safe mode if include "safe=yes".'
-  task(safe_mode) do
+  task(:safe_mode) do
     if ENV.include?("safe")
       Language.safe_mode = true
       puts("*** SAFE MODE ***")
