@@ -272,7 +272,9 @@ module AbstractModel::Scopes
     # array of max of MO.query_max_array unique ids for use with Arel "in"
     #    where(<x>.in(limited_id_set(ids)))
     def limited_id_set(ids)
-      [ids].flatten.map(&:to_i).uniq[0, MO.query_max_array] # [] is valid
+      ids = [ids].flatten
+      ids.map!(&:id) if ids.first.is_a?(AbstractModel)
+      ids.map(&:to_i).uniq[0, MO.query_max_array] # [] is valid
     end
 
     def datetime_compare(dir, val, col:)

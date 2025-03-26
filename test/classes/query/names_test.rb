@@ -52,6 +52,12 @@ class Query::NamesTest < UnitTestCase
     assert_query_scope(set, scope, :Name, id_in_set: names_set.map(&:id))
   end
 
+  def test_name_ids_with_name_instances
+    set = names_set.map(&:id)
+    scope = Name.id_in_set(names_set)
+    assert_query_scope(set, scope, :Name, id_in_set: names_set)
+  end
+
   # `with_correct_spelling` temporarily necessary because scopes don't have
   def test_name_by_users
     users = [mary, dick, rolf]
