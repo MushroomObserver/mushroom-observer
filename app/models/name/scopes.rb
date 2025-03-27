@@ -230,7 +230,7 @@ module Name::Scopes
     }
 
     # Query just ignores `has_descriptions(false)`, so for now we will here too.
-    scope :has_descriptions, lambda { |bool = true|
+    scope :has_descriptions, lambda { |bool = nil|
       return all unless bool
 
       joins(:descriptions)
