@@ -76,13 +76,12 @@ module Name::Scopes
     scope :with_self_referential_misspelling,
           -> { where(Name[:correct_spelling_id].eq(Name[:id])) }
 
-    scope :lichen, lambda { |boolish = :yes|
-      # if false, returns all
-      boolish = :yes if boolish == true
-      case boolish.to_sym
-      when :yes
+    # Query parses "yes" and "no", "on" and "off" to boolean. nil ignored.
+    scope :lichen, lambda { |bool = true|
+      case bool
+      when true
         where(Name[:lifeform].matches("%lichen%"))
-      when :no
+      when false
         where(Name[:lifeform].does_not_match("% lichen %"))
       end
     }
