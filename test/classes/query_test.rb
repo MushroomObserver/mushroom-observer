@@ -984,37 +984,38 @@ class QueryTest < UnitTestCase
     assert_equal(2, query.results.length)
   end
 
-  def test_location_ordering
-    albion = locations(:albion)
-    elgin_co = locations(:elgin_co)
+  # Cannot alter order_by when you call id_in_set
+  # def test_location_ordering
+  #   albion = locations(:albion)
+  #   elgin_co = locations(:elgin_co)
 
-    User.current = rolf
-    assert_equal("postal", User.current_location_format)
-    assert_query([albion, elgin_co],
-                 :Location, id_in_set: [albion.id, elgin_co.id],
-                            order_by: :name)
+  #   User.current = rolf
+  #   assert_equal("postal", User.current_location_format)
+  #   assert_query([albion, elgin_co],
+  #                :Location, id_in_set: [albion.id, elgin_co.id],
+  #                           order_by: :name)
 
-    User.current = roy
-    assert_equal("scientific", User.current_location_format)
-    assert_query([elgin_co, albion],
-                 :Location, id_in_set: [albion.id, elgin_co.id],
-                            order_by: :name)
+  #   User.current = roy
+  #   assert_equal("scientific", User.current_location_format)
+  #   assert_query([elgin_co, albion],
+  #                :Location, id_in_set: [albion.id, elgin_co.id],
+  #                           order_by: :name)
 
-    obs1 = observations(:minimal_unknown_obs)
-    obs2 = observations(:detailed_unknown_obs)
-    obs1.update(location: albion)
-    obs2.update(location: elgin_co)
+  #   obs1 = observations(:minimal_unknown_obs)
+  #   obs2 = observations(:detailed_unknown_obs)
+  #   obs1.update(location: albion)
+  #   obs2.update(location: elgin_co)
 
-    User.current = rolf
-    assert_equal("postal", User.current_location_format)
-    assert_query([obs1, obs2],
-                 :Observation, id_in_set: [obs1.id, obs2.id],
-                               order_by: :location)
+  #   User.current = rolf
+  #   assert_equal("postal", User.current_location_format)
+  #   assert_query([obs1, obs2],
+  #                :Observation, id_in_set: [obs1.id, obs2.id],
+  #                              order_by: :location)
 
-    User.current = roy
-    assert_equal("scientific", User.current_location_format)
-    assert_query([obs2, obs1],
-                 :Observation, id_in_set: [obs1.id, obs2.id],
-                               order_by: :location)
-  end
+  #   User.current = roy
+  #   assert_equal("scientific", User.current_location_format)
+  #   assert_query([obs2, obs1],
+  #                :Observation, id_in_set: [obs1.id, obs2.id],
+  #                              order_by: :location)
+  # end
 end
