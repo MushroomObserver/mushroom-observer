@@ -65,6 +65,10 @@ class Sequence < AbstractModel
     search_columns(cols, phrase)
   }
 
+  scope :observation_query, lambda { |hash|
+    joins(:observation).subquery(:Observation, hash)
+  }
+
   ##############################################################################
   #
   #  :section: Matchers
