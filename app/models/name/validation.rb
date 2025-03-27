@@ -83,6 +83,10 @@ module Name::Validation
     )
   end
 
+  def normalize_author_characters!
+    author.unicode_normalize!(:nfc)
+  end
+
   def search_name_indistinct
     hnyms = homonyms
     return if hnyms.none?
