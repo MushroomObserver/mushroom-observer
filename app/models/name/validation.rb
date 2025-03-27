@@ -84,7 +84,7 @@ module Name::Validation
   end
 
   def normalize_author_characters!
-    author.unicode_normalize!(:nfc)
+    author&.unicode_normalize!(:nfc)
   end
 
   def search_name_indistinct
