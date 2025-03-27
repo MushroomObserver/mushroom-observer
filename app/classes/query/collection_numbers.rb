@@ -25,29 +25,6 @@ class Query::CollectionNumbers < Query::BaseAR
   end
 
   def self.default_order
-    "name_and_number"
+    :name_and_number
   end
-
-  # def initialize_flavor
-  #   add_owner_and_time_stamp_conditions
-  #   add_id_in_set_condition
-  #   add_collection_number_conditions
-  #   initialize_observations_parameter
-  #   add_pattern_condition
-  #   super
-  # end
-
-  # def add_collection_number_conditions
-  #   add_exact_match_condition("collection_numbers.name", params[:collectors])
-  #   add_exact_match_condition("collection_numbers.number", params[:numbers])
-  #   add_search_condition("collection_numbers.name", params[:collector_has])
-  #   add_search_condition("collection_numbers.number", params[:number_has])
-  # end
-
-  # def search_fields
-  #   "CONCAT(" \
-  #     "collection_numbers.name," \
-  #     "collection_numbers.number" \
-  #     ")"
-  # end
 end

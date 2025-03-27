@@ -13,12 +13,6 @@ class Query::ExternalSites < Query::BaseAR
   end
 
   def self.default_order
-    "name"
+    :name
   end
-
-  # def initialize_flavor
-  #   add_id_in_set_condition
-  #   add_search_condition("external_sites.name", params[:name_has])
-  #   super
-  # end
 end

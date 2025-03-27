@@ -18,34 +18,6 @@ class Query::RssLogs < Query::BaseAR
   end
 
   def self.default_order
-    "updated_at"
+    :updated_at
   end
-
-  # def initialize_flavor
-  #   add_time_condition("rss_logs.updated_at", params[:updated_at])
-  #   initialize_type_parameter
-  #   add_id_in_set_condition
-  #   initialize_content_filters_for_rss_log(Observation)
-  #   initialize_content_filters_for_rss_log(Location)
-  #   super
-  # end
-
-  # def types
-  #   @types ||= (params[:type] || "all").to_s.split
-  # end
-
-  # def initialize_type_parameter
-  #   return if types.include?("all")
-
-  #   types = self.types
-  #   types &= RssLog::ALL_TYPE_TAGS.map(&:to_s)
-
-  #   @where << if types.empty?
-  #               "FALSE"
-  #             else
-  #               types.map do |type|
-  #                 "rss_logs.#{type}_id IS NOT NULL"
-  #               end.join(" OR ")
-  #             end
-  # end
 end

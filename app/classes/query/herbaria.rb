@@ -24,35 +24,6 @@ class Query::Herbaria < Query::BaseAR
   end
 
   def self.default_order
-    "name"
+    :name
   end
-
-  # def initialize_flavor
-  #   add_time_condition("herbaria.created_at", params[:created_at])
-  #   add_time_condition("herbaria.updated_at", params[:updated_at])
-  #   add_search_condition("herbaria.code", params[:code_has])
-  #   add_search_condition("herbaria.name", params[:name_has])
-  #   add_search_condition("herbaria.description", params[:description_has])
-  #   add_search_condition("herbaria.mailing_address",
-  #                        params[:mailing_address_has])
-  #   add_id_in_set_condition
-  #   add_nonpersonal_condition
-  #   add_pattern_condition
-  #   super
-  # end
-
-  # def add_nonpersonal_condition
-  #   return if params[:nonpersonal].blank? # false is blank
-
-  #   @where << "herbaria.personal_user_id IS NULL"
-  # end
-
-  # def search_fields
-  #   "CONCAT(" \
-  #     "herbaria.code," \
-  #     "herbaria.name," \
-  #     "COALESCE(herbaria.description,'')," \
-  #     "COALESCE(herbaria.mailing_address,'')" \
-  #     ")"
-  # end
 end

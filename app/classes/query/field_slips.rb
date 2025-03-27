@@ -15,12 +15,6 @@ class Query::FieldSlips < Query::BaseAR
   end
 
   def self.default_order
-    "code_then_date"
+    :code_then_date
   end
-
-  # def initialize_flavor
-  #   add_owner_and_time_stamp_conditions
-  #   initialize_projects_parameter(:field_slips, nil)
-  #   super
-  # end
 end
