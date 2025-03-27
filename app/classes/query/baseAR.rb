@@ -52,7 +52,8 @@ class Query::BaseAR
 
   def self.scope_parameters
     excepts = [:id_in_set, :preference_filter]
-    @scope_parameters = parameter_declarations.except(*excepts) + [:id_in_set]
+    @scope_parameters = parameter_declarations.except(*excepts).keys +
+                        [:id_in_set]
   end
 
   # A "current_or_related_query" may be called for links:
