@@ -39,10 +39,10 @@ module Query::ScopeModules::Initialization
   end
 
   def initialize_parameter_set
-    skippables = ["[]", "{}", ""].freeze # we need to keep false values!
+    skippable_vals = ["[]", "{}", ""].freeze # we need to keep false values!
     params.slice(*scope_parameters).each do |param, val|
-      next if (param == :id_in_set && val.nil?) || # keep empty array for this!
-              (param != :id_in_set && skippables.include?(val.to_s))
+      next if (param != :id_in_set && skippable_vals.include?(val.to_s)) ||
+              (param == :id_in_set && val.nil?) # keep empty array for this!
 
       @scopes = if val.is_a?(Hash)
                   @scopes.send(param, **val)
