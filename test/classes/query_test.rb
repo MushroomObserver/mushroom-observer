@@ -587,7 +587,7 @@ class QueryTest < UnitTestCase
   def paginate_test_setup(number, num_per_page)
     @names = Name.reorder(id: :asc).order(:id)
     @pagination_data = MOPaginator.new(number: number,
-                             num_per_page: num_per_page)
+                                       num_per_page: num_per_page)
     @query = Query.lookup(:Name, misspellings: :either, order_by: :id)
   end
 
@@ -610,7 +610,8 @@ class QueryTest < UnitTestCase
       end
     )
     assert_equal(@names.size, @pagination_data.num_total)
-    assert_name_arrays_equal(@names[from_nth..to_nth], @query.paginate(@pagination_data))
+    assert_name_arrays_equal(@names[from_nth..to_nth],
+                             @query.paginate(@pagination_data))
   end
 
   def test_paginate_start

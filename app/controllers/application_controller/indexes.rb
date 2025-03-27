@@ -272,7 +272,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     @pagination_data =
       if display_opts[:letters]
         pagination_data_letters(display_opts[:letter_arg] || :letter,
-                          number_arg, num_per_page(display_opts))
+                                number_arg, num_per_page(display_opts))
       else
         pagination_data_numbers(number_arg, num_per_page(display_opts))
       end
@@ -449,8 +449,9 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   #   <%= pagination_nav_letters(@pagination_data) %>
   #   <%= pagination_nav_numbers(@pagination_data) %>
   #
-  def pagination_data_letters(letter_arg = :letter, number_arg = :page,
-                        num_per_page = 50)
+  def pagination_data_letters(letter_arg = :letter,
+                              number_arg = :page,
+                              num_per_page = 50)
     MOPaginator.new(
       letter_arg: letter_arg,
       number_arg: number_arg,
