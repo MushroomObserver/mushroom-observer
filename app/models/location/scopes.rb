@@ -59,7 +59,7 @@ module Location::Scopes
       )
     }
 
-    scope :has_descriptions, lambda { |bool = nil|
+    scope :has_descriptions, lambda { |bool = true|
       return all unless bool
 
       presence_condition(Location[:description_id], bool:)

@@ -308,8 +308,12 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
 
   scope :order_by_default,
         -> { order(name: :asc, id: :desc) }
-  scope :has_contribution,
-        -> { where(User[:contribution].gt(0)) }
+
+  scope :has_contribution, lambda { |bool = true|
+    return all unless bool
+
+    where(User[:contribution].gt(0))
+  }
 
   scope :pattern, lambda { |phrase|
     cols = User[:login] + User[:name]

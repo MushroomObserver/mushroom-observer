@@ -260,8 +260,12 @@ module AbstractModel::Scopes
     }
 
     # Used in Name, Observation and Project so far.
-    scope :has_comments,
-          ->(bool = true) { joined_relation_condition(:comments, bool:) }
+    # Ignores false.
+    scope :has_comments, lambda { |bool = true|
+      return all unless bool
+
+      joined_relation_condition(:comments, bool:)
+    }
     scope :comments_has, lambda { |phrase|
       joins(:comments).merge(Comment.search_content(phrase)).distinct
     }

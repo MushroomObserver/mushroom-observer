@@ -30,8 +30,7 @@ class Query::UsersTest < UnitTestCase
   def test_user_id_in_set
     ids = [rolf.id, mary.id, junk.id]
     scope = User.id_in_set(ids)
-    assert_query_scope(ids, scope,
-                       :User, id_in_set: ids.reverse, order_by: :reverse_name)
+    assert_query_scope(ids, scope, :User, id_in_set: ids)
   end
 
   def test_user_has_contribution
