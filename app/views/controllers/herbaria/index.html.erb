@@ -16,7 +16,8 @@ nonpersonal = (@query&.params&.dig(:nonpersonal))
   <!--.container-text-->
 <% end %>
 
-<%= paginate_block(@pages) do %>
+<%= pagination_nav_block(@pagination_data) do %>
+
   <% if @objects.any? %>
     <table class="table-striped table-herbarium mt-3">
       <thead>

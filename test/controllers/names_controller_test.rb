@@ -401,7 +401,7 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   # None of our standard tests ever actually renders pagination_links
-  # or pagination_letters.  This tests all the above.
+  # or pagination_nav_letters.  This tests all the above.
   def test_pagination_page1
     # Straightforward index of all names, showing first 10.
     query_params = pagination_query_params

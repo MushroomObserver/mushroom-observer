@@ -23,18 +23,18 @@
 #
 #    # In your Rails controller:
 #    def index
-#      @pages = MOPaginator.new(
+#      @pagination_data = MOPaginator.new(
 #        :number_arg   => :page,
 #        :number       => params[:page],
 #        :num_per_page => 100,
 #      )
 #      query = Query.lookup(:Model)
-#      @results = query.paginate(@pages)
+#      @results = query.paginate(@pagination_data)
 #    end
 #
 #    # This paginates by letter and number:
 #    def index_by_letter
-#      @pages = MOPaginator.new(
+#      @pagination_data = MOPaginator.new(
 #        :letter_arg   => :letter,
 #        :number_arg   => :page,
 #        :letter       => params[:letter],
@@ -42,18 +42,18 @@
 #        :num_per_page => 100,
 #      )
 #      query = Query.lookup(:Model)
-#      @results = query.paginate(@pages)
+#      @results = query.paginate(@pagination_data)
 #    end
 #
 #    # This is how you might use it without Query:
 #    def custom_index
 #      @results = Model.find(...)
-#      @pages.num_total = @results.length
-#      @subset = @results[@pages.from..@pages.to]
+#      @pagination_data.num_total = @results.length
+#      @subset = @results[@pagination_data.from..@pagination_data.to]
 #    end
 #
 #    # Use the same code in your view template for either case:
-#    <%= paginate_block(@pages) do %>
+#    <%= pagination_nav_block(@pagination_data) do %>
 #      <% for object in @results
 #        <%= link_to(object.name, action: "show_object", id: object.id) %><br/>
 #      <% end %>

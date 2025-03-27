@@ -586,7 +586,7 @@ class QueryTest < UnitTestCase
 
   def paginate_test_setup(number, num_per_page)
     @names = Name.reorder(id: :asc).order(:id)
-    @pages = MOPaginator.new(number: number,
+    @pagination_data = MOPaginator.new(number: number,
                              num_per_page: num_per_page)
     @query = Query.lookup(:Name, misspellings: :either, order_by: :id)
   end
@@ -605,10 +605,12 @@ class QueryTest < UnitTestCase
 
     assert_equal(
       expected_nths,
-      @query.paginate_ids(@pages).map { |id| name_ids.index(id) + 1 }
+      @query.paginate_ids(@pagination_data).map do |id|
+        name_ids.index(id) + 1
+      end
     )
-    assert_equal(@names.size, @pages.num_total)
-    assert_name_arrays_equal(@names[from_nth..to_nth], @query.paginate(@pages))
+    assert_equal(@names.size, @pagination_data.num_total)
+    assert_name_arrays_equal(@names[from_nth..to_nth], @query.paginate(@pagination_data))
   end
 
   def test_paginate_start
@@ -629,20 +631,18 @@ class QueryTest < UnitTestCase
   def test_paginate_need_letters
     paginate_test_letter_setup(1, 4)
     paginate_assertions(1, 4, [1, 2, 3, 4])
-    assert_equal(@letters, @pages.used_letters.sort)
+    assert_equal(@letters, @pagination_data.used_letters.sort)
   end
 
   def test_paginate_ells
     paginate_test_letter_setup(2, 3)
-    @pages = MOPaginator.new(number: 2,
-                             num_per_page: 3,
-                             letter: "L")
+    @pagination_data = MOPaginator.new(number: 2, num_per_page: 3, letter: "L")
     # Make sure we have a bunch of Lactarii, Leptiotas, etc.
     @ells = @names.select { |n| n.text_name[0, 1] == "L" }
     assert(@ells.length >= 9)
-    assert_equal(@ells[3..5].map(&:id), @query.paginate_ids(@pages))
-    assert_equal(@letters, @pages.used_letters.sort)
-    assert_name_arrays_equal(@ells[3..5], @query.paginate(@pages))
+    assert_equal(@ells[3..5].map(&:id), @query.paginate_ids(@pagination_data))
+    assert_equal(@letters, @pagination_data.used_letters.sort)
+    assert_name_arrays_equal(@ells[3..5], @query.paginate(@pagination_data))
   end
 
   def test_eager_instantiator

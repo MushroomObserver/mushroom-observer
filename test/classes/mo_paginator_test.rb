@@ -4,129 +4,129 @@ require("test_helper")
 
 class MOPaginatorTest < UnitTestCase
   def test_basic
-    pages = MOPaginator.new
+    page_data = MOPaginator.new
 
-    assert_nil(pages.letter_arg)
-    assert_nil(pages.number_arg)
-    assert_nil(pages.page_arg)
-    assert_nil(pages.letter)
-    assert_equal(1,   pages.number)
-    assert_equal(1,   pages.page)
-    assert_equal(0,   pages.num_total)
-    assert_equal(0,   pages.length)
-    assert_equal(100, pages.num_per_page)
-    assert_nil(pages.used_letters)
+    assert_nil(page_data.letter_arg)
+    assert_nil(page_data.number_arg)
+    assert_nil(page_data.page_arg)
+    assert_nil(page_data.letter)
+    assert_equal(1,   page_data.number)
+    assert_equal(1,   page_data.page)
+    assert_equal(0,   page_data.num_total)
+    assert_equal(0,   page_data.length)
+    assert_equal(100, page_data.num_per_page)
+    assert_nil(page_data.used_letters)
 
-    pages.letter_arg = nil
-    assert_nil(pages.letter_arg)
-    pages.letter_arg = "l"
-    assert_equal("l", pages.letter_arg)
-    pages.letter_arg = :letter
-    assert_equal(:letter, pages.letter_arg)
-    pages.letter_arg = ["anything"]
-    assert_equal(["anything"], pages.letter_arg)
+    page_data.letter_arg = nil
+    assert_nil(page_data.letter_arg)
+    page_data.letter_arg = "l"
+    assert_equal("l", page_data.letter_arg)
+    page_data.letter_arg = :letter
+    assert_equal(:letter, page_data.letter_arg)
+    page_data.letter_arg = ["anything"]
+    assert_equal(["anything"], page_data.letter_arg)
 
-    pages.number_arg = nil
-    assert_nil(pages.number_arg)
-    pages.number_arg = "l"
-    assert_equal("l", pages.number_arg)
-    pages.number_arg = :number
-    assert_equal(:number, pages.number_arg)
-    pages.number_arg = ["anything"]
-    assert_equal(["anything"], pages.number_arg)
+    page_data.number_arg = nil
+    assert_nil(page_data.number_arg)
+    page_data.number_arg = "l"
+    assert_equal("l", page_data.number_arg)
+    page_data.number_arg = :number
+    assert_equal(:number, page_data.number_arg)
+    page_data.number_arg = ["anything"]
+    assert_equal(["anything"], page_data.number_arg)
 
-    pages.letter = nil
-    assert_nil(pages.letter)
-    pages.letter = 32
-    assert_nil(pages.letter)
-    pages.letter = " "
-    assert_nil(pages.letter)
-    pages.letter = "Q"
-    assert_equal("Q", pages.letter)
-    pages.letter = "z"
-    assert_equal("Z", pages.letter)
-    pages.letter = :x
-    assert_equal("X", pages.letter)
+    page_data.letter = nil
+    assert_nil(page_data.letter)
+    page_data.letter = 32
+    assert_nil(page_data.letter)
+    page_data.letter = " "
+    assert_nil(page_data.letter)
+    page_data.letter = "Q"
+    assert_equal("Q", page_data.letter)
+    page_data.letter = "z"
+    assert_equal("Z", page_data.letter)
+    page_data.letter = :x
+    assert_equal("X", page_data.letter)
 
-    pages.page = nil
-    assert_equal(1, pages.page)
-    pages.page = -1
-    assert_equal(1, pages.page)
-    pages.page = 0
-    assert_equal(1, pages.page)
-    pages.page = 3
-    assert_equal(3, pages.page)
-    pages.page = "3"
-    assert_equal(3, pages.page)
-    pages.page = "letter"
-    assert_equal(1, pages.page)
+    page_data.page = nil
+    assert_equal(1, page_data.page)
+    page_data.page = -1
+    assert_equal(1, page_data.page)
+    page_data.page = 0
+    assert_equal(1, page_data.page)
+    page_data.page = 3
+    assert_equal(3, page_data.page)
+    page_data.page = "3"
+    assert_equal(3, page_data.page)
+    page_data.page = "letter"
+    assert_equal(1, page_data.page)
 
-    pages.num_total = 0
-    assert_equal(0, pages.num_total)
-    pages.num_total = -1
-    assert_equal(0, pages.num_total)
-    pages.num_total = 10
-    assert_equal(10, pages.num_total)
-    pages.num_total = nil
-    assert_equal(0, pages.num_total)
-    pages.num_total = "str"
-    assert_equal(0, pages.num_total)
+    page_data.num_total = 0
+    assert_equal(0, page_data.num_total)
+    page_data.num_total = -1
+    assert_equal(0, page_data.num_total)
+    page_data.num_total = 10
+    assert_equal(10, page_data.num_total)
+    page_data.num_total = nil
+    assert_equal(0, page_data.num_total)
+    page_data.num_total = "str"
+    assert_equal(0, page_data.num_total)
 
-    pages.num_per_page = 10
-    assert_equal(10, pages.num_per_page)
-    assert_raises(RuntimeError) { pages.num_per_page = nil }
-    assert_raises(RuntimeError) { pages.num_per_page = -1 }
-    assert_raises(RuntimeError) { pages.num_per_page = 0 }
-    assert_raises(RuntimeError) { pages.num_per_page = "str" }
+    page_data.num_per_page = 10
+    assert_equal(10, page_data.num_per_page)
+    assert_raises(RuntimeError) { page_data.num_per_page = nil }
+    assert_raises(RuntimeError) { page_data.num_per_page = -1 }
+    assert_raises(RuntimeError) { page_data.num_per_page = 0 }
+    assert_raises(RuntimeError) { page_data.num_per_page = "str" }
 
-    pages.used_letters = []
-    assert_equal([], pages.used_letters)
-    pages.used_letters = [1, 2, 3]
-    assert_equal([], pages.used_letters)
-    pages.used_letters = ["a", :b, :C, "D"]
-    assert_equal(%w[A B C D], pages.used_letters)
-    pages.used_letters = [:b, :a, :b, :a, 1]
-    assert_equal(%w[A B], pages.used_letters)
+    page_data.used_letters = []
+    assert_equal([], page_data.used_letters)
+    page_data.used_letters = [1, 2, 3]
+    assert_equal([], page_data.used_letters)
+    page_data.used_letters = ["a", :b, :C, "D"]
+    assert_equal(%w[A B C D], page_data.used_letters)
+    page_data.used_letters = [:b, :a, :b, :a, 1]
+    assert_equal(%w[A B], page_data.used_letters)
   end
 
   def test_from_and_to
-    pages = MOPaginator.new
-    pages.num_per_page = 20
+    page_data = MOPaginator.new
+    page_data.num_per_page = 20
 
-    pages.num_total = 50
-    assert_equal(3, pages.num_pages)
-    pages.num_total = 40
-    assert_equal(2, pages.num_pages)
-    pages.num_total = 41
-    assert_equal(3, pages.num_pages)
-    pages.num_total = 39
-    assert_equal(2, pages.num_pages)
-    pages.num_total = 0
-    assert_equal(0, pages.num_pages)
-    pages.num_total = 1
-    assert_equal(1, pages.num_pages)
+    page_data.num_total = 50
+    assert_equal(3, page_data.num_pages)
+    page_data.num_total = 40
+    assert_equal(2, page_data.num_pages)
+    page_data.num_total = 41
+    assert_equal(3, page_data.num_pages)
+    page_data.num_total = 39
+    assert_equal(2, page_data.num_pages)
+    page_data.num_total = 0
+    assert_equal(0, page_data.num_pages)
+    page_data.num_total = 1
+    assert_equal(1, page_data.num_pages)
 
-    pages.num_total = 100
-    pages.page = 1
-    assert_equal(0..19, pages.from..pages.to)
-    pages.page = 1
-    assert_equal(0..19, pages.from_to)
-    pages.page = 2
-    assert_equal(20..39, pages.from..pages.to)
-    pages.page = 2
-    assert_equal(20..39, pages.from_to)
+    page_data.num_total = 100
+    page_data.page = 1
+    assert_equal(0..19, page_data.from..page_data.to)
+    page_data.page = 1
+    assert_equal(0..19, page_data.from_to)
+    page_data.page = 2
+    assert_equal(20..39, page_data.from..page_data.to)
+    page_data.page = 2
+    assert_equal(20..39, page_data.from_to)
 
-    pages.show_index(0)
-    assert_equal(1, pages.page)
-    pages.show_index(1)
-    assert_equal(1, pages.page)
-    pages.show_index(19)
-    assert_equal(1, pages.page)
-    pages.show_index(20)
-    assert_equal(2, pages.page)
-    pages.show_index(39)
-    assert_equal(2, pages.page)
-    pages.show_index(40)
-    assert_equal(3, pages.page)
+    page_data.show_index(0)
+    assert_equal(1, page_data.page)
+    page_data.show_index(1)
+    assert_equal(1, page_data.page)
+    page_data.show_index(19)
+    assert_equal(1, page_data.page)
+    page_data.show_index(20)
+    assert_equal(2, page_data.page)
+    page_data.show_index(39)
+    assert_equal(2, page_data.page)
+    page_data.show_index(40)
+    assert_equal(3, page_data.page)
   end
 end

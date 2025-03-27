@@ -10,7 +10,8 @@ flash_error(@error) if @error && @objects.empty?
   <%# render(partial: "observations/identify/form_identify_filter") %>
 </div>
 
-<%= paginate_block(@pages) do %>
+<%= pagination_nav_block(@pagination_data) do %>
+
   <%= matrix_table(objects: @objects, identify: true, cached: true) %>
 <% end %>
 

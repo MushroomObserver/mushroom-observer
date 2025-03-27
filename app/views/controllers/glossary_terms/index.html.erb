@@ -11,7 +11,8 @@ add_context_nav(glossary_term_index_tabs) if User.current
     class: "container-text"
   )
 %>
-<%= paginate_block(@pages) do %>
+<%= pagination_nav_block(@pagination_data) do %>
+
   <div class="list-group">
     <%= render(partial: "glossary_terms/object", collection: @objects) %>
   </div>

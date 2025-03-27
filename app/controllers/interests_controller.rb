@@ -24,7 +24,7 @@ class InterestsController < ApplicationController
   # Show list of objects user has expressed interest in.
   # Linked from: left-hand panel
   # Inputs: params[:page], params[:type]
-  # Outputs: @interests, @types, @pages, @selected_type
+  # Outputs: @interests, @types, @pagination_data, @selected_type
   def index
     store_location
     @container = :wide
@@ -33,7 +33,7 @@ class InterestsController < ApplicationController
     @selected_type = params[:type].to_s
     @interests = filter_interests_by_type(@interests, @selected_type) \
       if @selected_type.present?
-    @pages = paginate_interests!
+    @pagination_data = paginate_interests!
   end
 
   private
@@ -71,10 +71,10 @@ class InterestsController < ApplicationController
   end
 
   def paginate_interests!
-    pages = paginate_numbers(:page, 100)
-    pages.num_total = @interests.length
-    @interests = @interests[pages.from..pages.to]
-    pages
+    pagination_data = pagination_data_numbers(:page, 100)
+    pagination_data.num_total = @interests.length
+    @interests = @interests[pagination_data.from..pagination_data.to]
+    pagination_data
   end
 
   public
