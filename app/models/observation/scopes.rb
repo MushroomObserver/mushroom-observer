@@ -466,6 +466,19 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         where(species_list_observations: { species_list: spl_ids }).distinct
     }
 
+    scope :image_query, lambda { |hash|
+      joins(:images).subquery(:Image, hash)
+    }
+    scope :location_query, lambda { |hash|
+      joins(:location).subquery(:Location, hash)
+    }
+    scope :name_query, lambda { |hash|
+      joins(:name).subquery(:Name, hash)
+    }
+    scope :sequence_query, lambda { |hash|
+      joins(:sequences).subquery(:Sequence, hash)
+    }
+
     scope :show_includes, lambda {
       strict_loading.includes(
         :collection_numbers,
