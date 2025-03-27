@@ -30,7 +30,7 @@ class Query::SpeciesLists < Query::BaseAR
       locations: [Location],
       projects: [Project],
       pattern: :string,
-      observation_query: { subquery: :Observation, joins: :observations }
+      observation_query: { subquery: :Observation }
     )
   end
 

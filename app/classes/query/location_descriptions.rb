@@ -18,7 +18,7 @@ class Query::LocationDescriptions < Query::BaseAR
       by_author: User,
       by_editor: User,
       locations: [Location],
-      location_query: { subquery: :Location, joins: :location }
+      location_query: { subquery: :Location }
     )
   end
 

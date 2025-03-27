@@ -42,7 +42,7 @@ class Query::Images < Query::BaseAR
       locations: [Location],
       projects: [Project],
       species_lists: [SpeciesList],
-      observation_query: { subquery: :Observation, joins: :observations }
+      observation_query: { subquery: :Observation }
     ) # .merge(advanced_search_parameter_declarations)
   end
 

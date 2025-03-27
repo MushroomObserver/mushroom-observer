@@ -21,7 +21,7 @@ class Query::NameDescriptions < Query::BaseAR
       content_has: :string,
       names: [Name],
       projects: [Project],
-      name_query: { subquery: :Name, joins: :name }
+      name_query: { subquery: :Name }
     )
   end
 

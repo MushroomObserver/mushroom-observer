@@ -46,22 +46,12 @@ class Query::BaseAR
     parameter_declarations.key?(key)
   end
 
-  def subquery_parameters
-    self.class.subquery_parameters
-  end
-
-  def self.subquery_parameters
-    @subquery_parameters = parameter_declarations.select do |key, _v|
-      key.to_s.include?("_query")
-    end
-  end
-
   def scope_parameters
     self.class.scope_parameters
   end
 
   def self.scope_parameters
-    excepts = subquery_parameters.keys + [:id_in_set, :preference_filter]
+    excepts = [:id_in_set, :preference_filter]
     @scope_parameters = parameter_declarations.except(*excepts) + [:id_in_set]
   end
 

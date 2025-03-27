@@ -52,8 +52,8 @@ class Query::Names < Query::BaseAR
       has_descriptions: :boolean,
       has_default_description: :boolean,
       has_observations: { boolean: [true] },
-      description_query: { subquery: :NameDescription, joins: :descriptions },
-      observation_query: { subquery: :Observation, joins: :observations }
+      description_query: { subquery: :NameDescription },
+      observation_query: { subquery: :Observation }
     ).merge(content_filter_parameter_declarations(Name)).
       merge(advanced_search_parameter_declarations)
   end

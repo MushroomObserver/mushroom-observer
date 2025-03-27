@@ -63,10 +63,10 @@ class Query::Observations < Query::BaseAR
       projects: [Project],
       project_lists: [Project],
       species_lists: [SpeciesList],
-      image_query: { subquery: :Image, joins: { observation_images: :images } },
-      location_query: { subquery: :Location, joins: :location },
-      name_query: { subquery: :Name, joins: :name },
-      sequence_query: { subquery: :Sequence, joins: :sequences }
+      image_query: { subquery: :Image },
+      location_query: { subquery: :Location },
+      name_query: { subquery: :Name },
+      sequence_query: { subquery: :Sequence }
     ).
       merge(content_filter_parameter_declarations(Observation)).
       merge(advanced_search_parameter_declarations)

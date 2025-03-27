@@ -25,9 +25,8 @@ class Query::Locations < Query::BaseAR
       notes_has: :string,
       has_descriptions: :boolean,
       has_observations: :boolean,
-      description_query: { subquery: :LocationDescription,
-                           joins: :descriptions },
-      observation_query: { subquery: :Observation, joins: :observations }
+      description_query: { subquery: :LocationDescription },
+      observation_query: { subquery: :Observation }
     ).merge(content_filter_parameter_declarations(Location)).
       merge(advanced_search_parameter_declarations)
   end

@@ -23,7 +23,7 @@ class Query::Sequences < Query::BaseAR
       accession_has: :string,
       notes_has: :string,
       pattern: :string,
-      observation_query: { subquery: :Observation, joins: :observation }
+      observation_query: { subquery: :Observation }
     )
   end
 
