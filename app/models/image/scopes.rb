@@ -116,10 +116,6 @@ module Image::Scopes
       joins(observations: :name).search_columns(cols, phrase)
     }
 
-    scope :observation_query, lambda { |hash|
-      joins(:observations).subquery(:Observation, hash)
-    }
-
     scope :interactive_includes, lambda {
       strict_loading.includes(
         :image_votes, :license, :projects, :user

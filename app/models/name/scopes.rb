@@ -300,14 +300,6 @@ module Name::Scopes
           where(author: [parsed_name.author, ""])
       end
     }
-
-    scope :description_query, lambda { |hash|
-      joins(:descriptions).subquery(:NameDescription, hash)
-    }
-    scope :observation_query, lambda { |hash|
-      joins(:observations).subquery(:Observation, hash)
-    }
-
     scope :show_includes, lambda {
       strict_loading.includes(
         { comments: :user },

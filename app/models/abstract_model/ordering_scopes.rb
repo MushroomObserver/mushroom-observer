@@ -338,6 +338,8 @@ module AbstractModel::OrderingScopes
         order(arel_table[:name].asc)
       elsif column_names.include?("title")
         order(arel_table[:title].asc)
+      else
+        order_by_default
       end
     end
   end

@@ -128,10 +128,6 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
     left_outer_joins(:location).search_columns(cols, phrase)
   }
 
-  scope :observation_query, lambda { |hash|
-    joins(:observations).subquery(:Observation, hash)
-  }
-
   scope :show_includes, lambda {
     strict_loading.includes(
       { comments: :user },

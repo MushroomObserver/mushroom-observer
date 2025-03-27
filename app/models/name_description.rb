@@ -143,10 +143,6 @@ class NameDescription < Description
       where(public: true)
   }
 
-  scope :name_query, lambda { |hash|
-    joins(:name).subquery(:Name, hash)
-  }
-
   scope :show_includes, lambda {
     strict_loading
   }
