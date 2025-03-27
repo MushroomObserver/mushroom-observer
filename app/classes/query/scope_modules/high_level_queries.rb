@@ -46,7 +46,7 @@ module Query::ScopeModules::HighLevelQueries
       if need_letters
         ids_by_letter
       else
-        @scopes.all.map(&:id)
+        @scopes.ids
       end
   end
 
@@ -67,7 +67,7 @@ module Query::ScopeModules::HighLevelQueries
   # `list_by` is a Model[:column] - it's checking the first four chars.
   def minimal_query_of_all_records
     @scopes.select(model[:id], list_by[0..3].as("title")).distinct.
-      map { |record| record.attributes.symbolize_keys }
+      select_all
   end
 
   # Array of all results, instantiated.
