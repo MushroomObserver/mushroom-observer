@@ -65,9 +65,8 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # Checks Name[:search_name], which includes the author
     # (unlike Observation[:text_name]) and is not cached on the obs
     scope :pattern, lambda { |phrase|
-      ids = name_search_name_observation_ids(phrase)
-      ids += search_columns(Observation[:where], phrase).map(&:id)
-      where(id: ids).distinct
+      joins(:name).distinct.
+        search_columns((Observation[:where] + Name[:search_name]), phrase)
     }
     # More comprehensive search of Observation fields + Name.search_name,
     # (plus comments ?).
@@ -78,10 +77,6 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     #   ids += Observation.comments_has(phrase).map(&:id)
     #   where(id: ids).distinct
     # }
-    def self.name_search_name_observation_ids(phrase)
-      Name.search_name_has(phrase).
-        includes(:observations).map(&:observations).flatten.uniq
-    end
 
     # Query parses "yes" and "no", "on" and "off" to boolean. nil ignored.
     scope :lichen, lambda { |bool = true|
