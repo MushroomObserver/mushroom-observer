@@ -433,8 +433,11 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :has_specimen,
           ->(bool = true) { where(specimen: bool) }
 
-    scope :has_sequences,
-          ->(bool = true) { joined_relation_condition(:sequences, bool:) }
+    scope :has_sequences, lambda { |bool = true|
+      return all unless bool
+
+      joined_relation_condition(:sequences, bool:)
+    }
 
     # For activerecord subqueries, no need to pre-map the primary key (id)
     # but Lookup has to return something. Ids are cheapest.
