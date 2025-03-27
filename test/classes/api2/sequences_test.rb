@@ -223,7 +223,10 @@ class API2::SequencesTest < UnitTestCase
 
   def test_getting_sequences_in_box
     ensure_all_obs_have_at_least_one_sequence
-    obses = Observation.in_box(north: 35, south: 34, east: -118, west: -119)
+    obses = Observation.where(lat: [34..35], lng: [-119..-118])
+    locs = Location.in_box(north: 35, south: 34, east: -118, west: -119)
+
+    obses = (obses + locs.map(&:observations)).flatten.uniq.sort_by(&:id)
     assert_not_empty(obses)
     assert_api_fail(params_get(south: 34, east: -118, west: -119))
     assert_api_fail(params_get(north: 35, east: -118, west: -119))
