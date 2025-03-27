@@ -53,8 +53,7 @@ module Query::ScopeModules::Initialization
   end
 
   def filter_misspellings_for_name_queries
-    return unless model == Name
-    return if params[:misspellings].present?
+    return if model != Name || !params[:misspellings].nil?
 
     @scopes = @scopes.with_correct_spelling
   end
