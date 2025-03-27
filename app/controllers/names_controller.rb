@@ -258,7 +258,7 @@ class NamesController < ApplicationController
       # Determine if relevant and count the results of running the query if so.
       # Don't run if there aren't any children.
       @has_subtaxa = if @first_child
-                       @subtaxa_query.query.select(Arel.star.count)
+                       @subtaxa_query.result_ids.count
                      else
                        0
                      end
