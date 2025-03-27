@@ -14,7 +14,7 @@ class Query::BaseAR
   # include Query::Modules::LookupObjects
   include Query::ScopeModules::LowLevelQueries
   include Query::ScopeModules::Ordering
-  include Query::Modules::SequenceOperators
+  include Query::ScopeModules::SequenceOperators
   # include Query::Modules::Sql
   # include Query::Modules::Titles
   include Query::Modules::Validation
