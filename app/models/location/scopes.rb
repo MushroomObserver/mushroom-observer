@@ -149,6 +149,13 @@ module Location::Scopes
       end
     }
 
+    scope :description_query, lambda { |hash|
+      joins(:descriptions).subquery(:LocationDescription, hash)
+    }
+    scope :observation_query, lambda { |hash|
+      joins(:observations).subquery(:Observation, hash)
+    }
+
     scope :show_includes, lambda {
       strict_loading.includes(
         { comments: :user },

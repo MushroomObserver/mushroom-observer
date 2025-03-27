@@ -145,7 +145,7 @@ class CommentTest < UnitTestCase
   def queued_emails(start)
     return "No emails were queued" if num_emails == start
 
-    strs = QueuedEmail.all[start..-1].map do |mail|
+    strs = QueuedEmail.all[start..].map do |mail|
       to_user = mail&.to_user_id ? User.find(mail.to_user_id)&.login : nil
       email = mail&.id ? QueuedEmail.find(mail.id) : nil
       "to: #{to_user}, email: #{email}"

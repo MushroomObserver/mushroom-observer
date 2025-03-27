@@ -662,7 +662,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # to the :image field.  Returns true if the file is successfully saved.
   def save_to_temp_file
     result = true
-    unless upload_temp_file.present?
+    if upload_temp_file.blank?
 
       # Image is supplied in a input stream.  This can happen in a variety of
       # cases, including during testing, and also when the image comes in as

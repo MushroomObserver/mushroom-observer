@@ -3720,6 +3720,8 @@ class NameTest < UnitTestCase
     # Commas can separate multiple authors
     assert(Name.new(valid_params.merge({ author: "Benedix, Woo & Zhu" })).
       valid?, "Commas should be allowable in Author")
+    assert(Name.new(valid_params.merge({ author: "B'enedix" })).
+      valid?, "Single quote should be allowable in Author")
     # MycoBank allows square brackets in author to show correction. Ex:
     # Xylaria symploci Pande, Waingankar, Punekar & Ran[a]dive
     # https://www.mycobank.org/page/Name%20details%20page/field/Mycobank%20%23/585173
