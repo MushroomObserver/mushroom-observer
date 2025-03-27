@@ -59,7 +59,7 @@ module Query::ScopeInitializers::AdvancedSearch
     # self.executor = lambda do |args|
     #   content_search_one(content, args) | content_search_two(content, args)
     # end
-    # FIXME: This seems like it should do an `or`?
+    # HMMM: This seems like it should do an `or`?
     @scopes = @scopes.search_columns(content_field_no_comments, content)
     add_join_to_searchable_observation_content
     @scopes = @scopes.search_columns(content_field_with_comments, content)
