@@ -73,14 +73,14 @@
 #
 #    # In controller:
 #    query = create_query(:Name)
-#    @pages = paginate_numbers
-#    @names = query.paginate(@pages)
+#    @pagination_data = number_pagination_data
+#    @names = query.paginate(@pagination_data)
 #
 #    # Or if you want to paginate by letter first, then page number:
 #    query = create_query(:Name)
 #    query.need_letters = 'names.sort_name'
-#    @pages = paginate_letters
-#    @names = query.paginate(@pages)
+#    @pagination_data = letter_pagination_data
+#    @names = query.paginate(@pagination_data)
 #
 #  == Sequence Operators
 #

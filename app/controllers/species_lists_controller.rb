@@ -187,8 +187,8 @@ class SpeciesListsController < ApplicationController
     store_query_in_session(@query) if params[:set_source].present?
 
     @query.need_letters = true
-    @pages = paginate_letters(:letter, :page, 100)
-    @objects = @query.paginate(@pages, include:
+    @pagination_data = letter_pagination_data(:letter, :page, 100)
+    @objects = @query.paginate(@pagination_data, include:
                   [:user, :name, :location, { thumb_image: :image_votes }])
     # Save a lookup in comments_for_object
     @comments = @species_list.comments&.sort_by(&:created_at)&.reverse
