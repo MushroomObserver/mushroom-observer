@@ -46,7 +46,7 @@ module Name::Scopes
   included do # rubocop:disable Metrics/BlockLength
     # default ordering for index queries
     scope :order_by_default,
-          -> { order(sort_name: :asc, id: :desc) }
+          -> { order_by(::Query::Names.default_order) }
 
     scope :names, lambda { |lookup:, **related_name_args|
       ids = lookup_names_by_name(lookup, related_name_args.compact)
@@ -67,6 +67,8 @@ module Name::Scopes
         where(correct_spelling_id: nil)
       when :only
         where.not(correct_spelling_id: nil)
+      when :either
+        all
       end
     }
     scope :with_correct_spelling,

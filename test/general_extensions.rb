@@ -454,6 +454,36 @@ module GeneralExtensions
     assert_match(expect, css_select("#filters").text, msg)
   end
 
+  def check_index_sorting
+    login
+    index_sorts.each do |sort_order|
+      check_index_sorted_by(sort_order, do_login: false)
+    end
+  end
+
+  def check_index_sorted_by(sort_order, do_login: true)
+    login if do_login
+    get(:index, params: { by: sort_order })
+
+    assert_template("index")
+    assert_sorted_by(sort_order.to_s)
+  end
+
+  def index_sorts
+    helper = case (name = @controller.controller_name)
+             when "contributors"
+               "users"
+             else
+               name
+             end
+    sorts_helper_method = :"#{helper}_index_sorts"
+    originals = @controller.helpers.send(sorts_helper_method).dup
+    originals.map! { |key, _label| key.to_sym }
+    originals.delete(:id)
+    reverses = originals.dup.map! { |key| :"reverse_#{key}" }
+    originals + reverses
+  end
+
   def assert_sorted_by(by, text = /.*/,
                        msg = "Wrong index sort, or sort by #{by} not available")
     reverse = if by.include?("reverse")

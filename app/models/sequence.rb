@@ -42,7 +42,7 @@ class Sequence < AbstractModel
   after_destroy :log_destroy_sequence
 
   scope :order_by_default,
-        -> { order(created_at: :desc, id: :desc) }
+        -> { order_by(::Query::Sequences.default_order) }
 
   scope :observations,
         ->(ids) { where(observation_id: ids) }

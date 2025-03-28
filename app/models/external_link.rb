@@ -35,7 +35,7 @@ class ExternalLink < AbstractModel
   validate  :check_url_syntax
 
   scope :order_by_default,
-        -> { order(url: :asc, id: :desc) }
+        -> { order_by(::Query::ExternalLinks.default_order) }
   scope :url_has,
         ->(phrase) { search_columns(ExternalLink[:url], phrase) }
   scope :external_sites, lambda { |sites|

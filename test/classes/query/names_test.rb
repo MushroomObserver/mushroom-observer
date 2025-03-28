@@ -32,7 +32,7 @@ class Query::NamesTest < UnitTestCase
   end
 
   def test_name_order_by_name
-    expects = Name.order_by(:name)
+    expects = Name.order_by(:name).with_correct_spelling
     assert_query(expects, :Name, order_by: :name)
   end
 

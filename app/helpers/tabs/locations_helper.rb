@@ -154,7 +154,7 @@ module Tabs
     end
 
     # Add some alternate sorting criteria.
-    def location_index_sorts(query:)
+    def locations_index_sorts(query: nil)
       rss_log = query&.params&.dig(:order_by) == :rss_log
       [
         ["name", :sort_by_name.t],

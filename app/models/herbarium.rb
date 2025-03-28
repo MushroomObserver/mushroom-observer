@@ -64,7 +64,7 @@ class Herbarium < AbstractModel
   attr_accessor :place_name, :personal, :personal_user_name
 
   scope :order_by_default,
-        -> { order(name: :asc, id: :desc) }
+        -> { order_by(::Query::Herbaria.default_order) }
 
   scope :nonpersonal, lambda { |bool = true|
     if bool.to_s.to_boolean == true

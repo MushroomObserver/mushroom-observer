@@ -89,7 +89,7 @@ module Tabs
                               html_options: { button: :destroy }).tab
     end
 
-    def users_index_sorts(admin)
+    def users_index_sorts(admin: false)
       return admin_users_index_sorts if admin
 
       regular_user_index_sorts

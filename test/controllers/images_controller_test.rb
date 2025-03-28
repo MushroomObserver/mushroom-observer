@@ -3,29 +3,17 @@
 require("test_helper")
 
 class ImagesControllerTest < FunctionalTestCase
-  def check_index_sorted_by(sort_order)
-    login
-    get(:index, params: { by: sort_order })
-
-    assert_template("index")
-    assert_template(partial: "_matrix_box")
-    assert_displayed_title(:IMAGES.l)
-    assert_sorted_by(sort_order)
-  end
-
   # Tests of index, with tests arranged as follows:
   # default subaction; then
   # other subactions in order of index_active_params
-  def test_index
-    check_index_sorted_by(::Query::Images.default_order)
+  def test_index_order
+    check_index_sorted_by(::Query::Images.default_order) # :created_at
+    assert_template(partial: "_matrix_box")
+    assert_displayed_title(:IMAGES.l)
   end
 
   def test_index_with_non_default_sort
-    check_index_sorted_by("name")
-    sort_orders = %w[name user confidence image_quality]
-    sort_orders.each do |order|
-      check_index_sorted_by(order)
-    end
+    check_index_sorting
   end
 
   def test_index_by_user

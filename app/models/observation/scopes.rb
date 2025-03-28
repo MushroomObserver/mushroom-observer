@@ -10,7 +10,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
   included do # rubocop:disable Metrics/BlockLength
     # default ordering for index queries
     scope :order_by_default,
-          -> { order(when: :desc, id: :desc) }
+          -> { order_by(::Query::Observations.default_order) }
     # The order used on the home page
     scope :by_activity,
           -> { order_by(:rss_log) }
