@@ -511,7 +511,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
       if OK_PREFIXES.member?(s)
         count += 1
       else
-        trimmed = tokens[count..-1].join(" ")
+        trimmed = tokens[count..].join(" ")
         return trimmed if understood_places.member?(trimmed)
       end
     end

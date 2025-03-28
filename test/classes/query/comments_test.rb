@@ -73,21 +73,18 @@ class Query::CommentsTest < UnitTestCase
   end
 
   def test_comment_in_set
-    assert_query(
-      [comments(:detailed_unknown_obs_comment).id,
-       comments(:minimal_unknown_obs_comment_1).id],
-      :Comment, id_in_set: [comments(:detailed_unknown_obs_comment).id,
-                            comments(:minimal_unknown_obs_comment_1).id]
-    )
+    set = [comments(:detailed_unknown_obs_comment).id,
+           comments(:minimal_unknown_obs_comment_1).id]
+    scope = Comment.id_in_set(set)
+    assert_query_scope(set, scope, :Comment, id_in_set: set)
   end
 
   def test_comment_pattern_search
-    expects = Comment.order_by_default.
+    expects = Comment.order_by_default.distinct.
               where(Comment[:summary].matches("%unknown%").
-                    or(Comment[:comment].matches("%unknown%"))).uniq
-    assert_query(expects, :Comment, pattern: "unknown")
-    expects = Comment.pattern("unknown").order_by_default
-    assert_query(expects, :Comment, pattern: "unknown")
+                    or(Comment[:comment].matches("%unknown%")))
+    scope = Comment.pattern("unknown").order_by_default
+    assert_query_scope(expects, scope, :Comment, pattern: "unknown")
   end
 
   def test_comment_summary_has

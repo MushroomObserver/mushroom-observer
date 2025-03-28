@@ -40,6 +40,6 @@
 <% end %>
 <% end %>
 
-<%= paginate_block(@pages) do %>
+<%= pagination_nav(@pagination_data) do %>
   <%= matrix_table(objects: @objects, cached: true) %>
 <% end %>

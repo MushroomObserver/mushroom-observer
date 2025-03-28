@@ -14,7 +14,7 @@ class Query::ArticlesTest < UnitTestCase
   end
 
   def test_article_by_rss_log
-    assert_query(Article.order_by_rss_log, :Article, order_by: :rss_log)
+    assert_query(Article.order_by(:rss_log), :Article, order_by: :rss_log)
   end
 
   def test_article_id_in_set

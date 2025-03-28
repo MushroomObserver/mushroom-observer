@@ -77,6 +77,9 @@ namespace :lang do
   desc "Setup environment for language tasks."
   task setup: [:environment, :login, :verbose, :safe_mode]
 
+  # Disable cop out of caution; our translation stuff is kind of wonky
+  # See https://github.com/MushroomObserver/mushroom-observer/pull/2838/commits/fcf75b4c57ac7c6f0a3046c870236ceeda50e50f#r2011104991
+  # rubocop:disable Rails/RakeEnvironment
   desc "Log in user for import tasks."
   task(:login) do
     User.current = if ENV.include?("user_name")
@@ -103,4 +106,5 @@ namespace :lang do
       puts("*** SAFE MODE ***")
     end
   end
+  # rubocop:enable Rails/RakeEnvironment
 end

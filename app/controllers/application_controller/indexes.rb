@@ -2,7 +2,7 @@
 
 module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   def self.included(base)
-    base.helper_method(:paginate_numbers)
+    base.helper_method(:number_pagination_data)
   end
 
   ##############################################################################
@@ -204,10 +204,10 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   # always_index::  Always show index, even if only one result.
   #
   # Side-effects: (sets/uses the following instance variables for the view)
-  # @title::        Provides default title.
+  # @title::                  Provides default title.
   # @layout::
-  # @pages::        Paginator instance.
-  # @objects::      Array of objects to be shown.
+  # @pagination_data::        PaginationData instance.
+  # @objects::                Array of objects to be shown.
   #
   # Other side-effects:
   # store_location::          Sets this as the +redirect_back_or_default+
@@ -269,12 +269,13 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
 
   def calc_pages_and_objects(query, display_opts)
     number_arg = display_opts[:number_arg] || :page
-    @pages = if display_opts[:letters]
-               paginate_letters(display_opts[:letter_arg] || :letter,
-                                number_arg, num_per_page(display_opts))
-             else
-               paginate_numbers(number_arg, num_per_page(display_opts))
-             end
+    @pagination_data =
+      if display_opts[:letters]
+        letter_pagination_data(display_opts[:letter_arg] || :letter,
+                               number_arg, num_per_page(display_opts))
+      else
+        number_pagination_data(number_arg, num_per_page(display_opts))
+      end
     skip_if_coming_back(query, display_opts)
     find_objects(query, display_opts)
   end
@@ -287,9 +288,9 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
 
   def skip_if_coming_back(query, display_opts)
     if display_opts[:id].present? &&
-       params[@pages.letter_arg].blank? &&
-       params[@pages.number_arg].blank?
-      @pages.show_index(query.index(display_opts[:id]))
+       params[@pagination_data.letter_arg].blank? &&
+       params[@pagination_data.number_arg].blank?
+      @pagination_data.index_at(query.index(display_opts[:id]))
     end
   end
 
@@ -318,7 +319,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     if caching
       objects_with_only_needed_eager_loads(query, include)
     else
-      query.paginate(@pages, include: include)
+      query.paginate(@pagination_data, include: include)
     end
   end
 
@@ -327,7 +328,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     # Not currently caching on user.
     # user = User.current ? "logged_in" : "no_user"
     locale = I18n.locale
-    objects_simple = query.paginate(@pages)
+    objects_simple = query.paginate(@pagination_data)
 
     # If temporarily disabling cached matrix boxes: eager load everything
     # ids_to_eager_load = objects_simple
@@ -434,23 +435,24 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
 
   public ##########
 
-  # Initialize Paginator object.  This now does very little thanks to the new
-  # Query model.
+  # Initialize PaginationData object for pagination by letter.
+  # This now does very little thanks to the new Query model.
   # arg::    Name of parameter to use.  (default is 'letter')
   #
   #   # In controller:
   #   query  = create_query(:Name, :by_users => params[:id].to_s)
   #   query.need_letters(true)
-  #   @pages = paginate_letters(:letter, :page, 50)
-  #   @names = query.paginate(@pages)
+  #   @pagination_data = letter_pagination_data(:letter, :page, 50)
+  #   @names = query.paginate(@pagination_data)
   #
   #   # In view:
-  #   <%= pagination_letters(@pages) %>
-  #   <%= pagination_numbers(@pages) %>
+  #   <%= letter_pagination_nav(@pagination_data) %>
+  #   <%= number_pagination_nav(@pagination_data) %>
   #
-  def paginate_letters(letter_arg = :letter, number_arg = :page,
-                       num_per_page = 50)
-    MOPaginator.new(
+  def letter_pagination_data(letter_arg = :letter,
+                             number_arg = :page,
+                             num_per_page = 50)
+    PaginationData.new(
       letter_arg: letter_arg,
       number_arg: number_arg,
       letter: paginator_letter(letter_arg),
@@ -459,27 +461,28 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     )
   end
 
-  # Initialize Paginator object.  This now does very little thanks to
-  # the new Query model.
+  # Initialize regular PaginationData object.
+  # This now does very little thanks to the new Query model.
+  #
   # arg::           Name of parameter to use.  (default is 'page')
   # num_per_page::  Number of results per page.  (default is 50)
   #
   #   # In controller:
   #   query    = create_query(:Name, :by_users => params[:id].to_s)
-  #   @numbers = paginate_numbers(:page, 50)
+  #   @numbers = number_pagination_data(:page, 50)
   #   @names   = query.paginate(@numbers)
   #
   #   # In view:
-  #   <%= pagination_numbers(@numbers) %>
+  #   <%= number_pagination_nav(@numbers) %>
   #
-  def paginate_numbers(arg = :page, num_per_page = 50)
-    MOPaginator.new(
+  def number_pagination_data(arg = :page, num_per_page = 50)
+    PaginationData.new(
       number_arg: arg,
       number: paginator_number(arg),
       num_per_page: num_per_page
     )
   end
-  # helper_method :paginate_numbers
+  # helper_method :number_pagination_data
 
   private ##########
 
