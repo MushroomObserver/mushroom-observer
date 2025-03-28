@@ -190,14 +190,14 @@ class InatImportJob < ApplicationJob
     # Ensure this Name wins consensus_calc ties
     # by creating this naming and vote first
     name = @observation.name
-    user =
+    naming_user =
       if suggested?(name) &&
          (suggester = User.find_by(inat_username: suggester(suggestion(name))))
         suggester
       else
         @user
       end
-    add_naming_with_vote(name: @observation.name, user: user)
+    add_naming_with_vote(name: @observation.name, user: naming_user)
     @observation.log(:log_observation_created)
   end
 
@@ -263,7 +263,8 @@ class InatImportJob < ApplicationJob
       # Imaage attributes to potentially update manually
       # t.boolean "gps_stripped", default: false, null: false
       image.update(
-        # These throw errors if done as API params above
+        # NOTE: jdc 20250328 This throw errors if done via API params above
+        # because api key owner is webmaster, rather than the importing user
         user_id: @user.id,
         when: @observation.when,
         original_name: photo.original_name
