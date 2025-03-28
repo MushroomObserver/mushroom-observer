@@ -204,10 +204,10 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   # always_index::  Always show index, even if only one result.
   #
   # Side-effects: (sets/uses the following instance variables for the view)
-  # @title::        Provides default title.
+  # @title::                  Provides default title.
   # @layout::
-  # @pagination_data::        Paginator instance.
-  # @objects::      Array of objects to be shown.
+  # @pagination_data::        PaginationData instance.
+  # @objects::                Array of objects to be shown.
   #
   # Other side-effects:
   # store_location::          Sets this as the +redirect_back_or_default+
@@ -290,7 +290,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     if display_opts[:id].present? &&
        params[@pagination_data.letter_arg].blank? &&
        params[@pagination_data.number_arg].blank?
-      @pagination_data.show_index(query.index(display_opts[:id]))
+      @pagination_data.index_at(query.index(display_opts[:id]))
     end
   end
 
@@ -435,8 +435,8 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
 
   public ##########
 
-  # Initialize Paginator object.  This now does very little thanks to the new
-  # Query model.
+  # Initialize PaginationData object for pagination by letter.
+  # This now does very little thanks to the new Query model.
   # arg::    Name of parameter to use.  (default is 'letter')
   #
   #   # In controller:
@@ -461,8 +461,9 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     )
   end
 
-  # Initialize Paginator object.  This now does very little thanks to
-  # the new Query model.
+  # Initialize regular PaginationData object.
+  # This now does very little thanks to the new Query model.
+  #
   # arg::           Name of parameter to use.  (default is 'page')
   # num_per_page::  Number of results per page.  (default is 50)
   #

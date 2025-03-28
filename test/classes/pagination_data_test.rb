@@ -116,17 +116,17 @@ class PaginationDataTest < UnitTestCase
     page_data.page = 2
     assert_equal(20..39, page_data.from_to)
 
-    page_data.show_index(0)
+    page_data.index_at(0)
     assert_equal(1, page_data.page)
-    page_data.show_index(1)
+    page_data.index_at(1)
     assert_equal(1, page_data.page)
-    page_data.show_index(19)
+    page_data.index_at(19)
     assert_equal(1, page_data.page)
-    page_data.show_index(20)
+    page_data.index_at(20)
     assert_equal(2, page_data.page)
-    page_data.show_index(39)
+    page_data.index_at(39)
     assert_equal(2, page_data.page)
-    page_data.show_index(40)
+    page_data.index_at(40)
     assert_equal(3, page_data.page)
   end
 end

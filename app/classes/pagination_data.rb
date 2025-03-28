@@ -75,7 +75,7 @@
 #
 #  == Instance Methods
 #
-#  show_index::     Set page number so that it's showing the given result.
+#  index_at::       Set page number so that it's showing the given result.
 #  num_pages::      Calculate number of pages of results available.
 #  from::           Index of the first result in selected page.
 #  to::             Index of the last result in selected page.
@@ -188,9 +188,9 @@ class PaginationData
     from..to
   end
 
-  # Set page number so that it shows the given result (given by index, with
-  # zero being the first result).
-  def show_index(index)
+  # Set page number so that it shows the given result
+  # (given by index, with zero being the first result).
+  def index_at(index)
     self.number = (index.to_f / num_per_page).floor + 1
   end
 end
