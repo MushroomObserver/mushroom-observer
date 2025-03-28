@@ -34,8 +34,7 @@ end
   <% end %>
 <% end %>
 
-<%= pagination_nav_block(@pagination_data) do %>
-
+<%= pagination_nav(@pagination_data) do %>
   <div class="list-group">
     <%= render(partial: "field_slips/object", collection: @objects) %>
   </div>

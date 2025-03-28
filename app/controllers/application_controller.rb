@@ -76,8 +76,8 @@
 #                           redirecting on failure.
 #  goto_index::             Redirect to a reasonable fallback (index) page
 #                           in case of error.
-#  pagination_data_letters::       Paginate an Array by letter.
-#  pagination_data_numbers::       Paginate an Array normally.
+#  letter_pagination_data::       Paginate an Array by letter.
+#  number_pagination_data::       Paginate an Array normally.
 #
 #  ==== Memory usage
 #  extra_gc::               (filter: calls <tt>ObjectSpace.garbage_collect</tt>)

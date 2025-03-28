@@ -2,7 +2,7 @@
 
 module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   def self.included(base)
-    base.helper_method(:pagination_data_numbers)
+    base.helper_method(:number_pagination_data)
   end
 
   ##############################################################################
@@ -271,10 +271,10 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     number_arg = display_opts[:number_arg] || :page
     @pagination_data =
       if display_opts[:letters]
-        pagination_data_letters(display_opts[:letter_arg] || :letter,
-                                number_arg, num_per_page(display_opts))
+        letter_pagination_data(display_opts[:letter_arg] || :letter,
+                               number_arg, num_per_page(display_opts))
       else
-        pagination_data_numbers(number_arg, num_per_page(display_opts))
+        number_pagination_data(number_arg, num_per_page(display_opts))
       end
     skip_if_coming_back(query, display_opts)
     find_objects(query, display_opts)
@@ -442,14 +442,14 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   #   # In controller:
   #   query  = create_query(:Name, :by_users => params[:id].to_s)
   #   query.need_letters(true)
-  #   @pagination_data = pagination_data_letters(:letter, :page, 50)
+  #   @pagination_data = letter_pagination_data(:letter, :page, 50)
   #   @names = query.paginate(@pagination_data)
   #
   #   # In view:
-  #   <%= pagination_nav_letters(@pagination_data) %>
-  #   <%= pagination_nav_numbers(@pagination_data) %>
+  #   <%= letter_pagination_nav(@pagination_data) %>
+  #   <%= number_pagination_nav(@pagination_data) %>
   #
-  def pagination_data_letters(letter_arg = :letter,
+  def letter_pagination_data(letter_arg = :letter,
                               number_arg = :page,
                               num_per_page = 50)
     MOPaginator.new(
@@ -468,20 +468,20 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   #
   #   # In controller:
   #   query    = create_query(:Name, :by_users => params[:id].to_s)
-  #   @numbers = pagination_data_numbers(:page, 50)
+  #   @numbers = number_pagination_data(:page, 50)
   #   @names   = query.paginate(@numbers)
   #
   #   # In view:
-  #   <%= pagination_nav_numbers(@numbers) %>
+  #   <%= number_pagination_nav(@numbers) %>
   #
-  def pagination_data_numbers(arg = :page, num_per_page = 50)
+  def number_pagination_data(arg = :page, num_per_page = 50)
     MOPaginator.new(
       number_arg: arg,
       number: paginator_number(arg),
       num_per_page: num_per_page
     )
   end
-  # helper_method :pagination_data_numbers
+  # helper_method :number_pagination_data
 
   private ##########
 

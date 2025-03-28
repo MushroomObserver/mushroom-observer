@@ -11,8 +11,7 @@ add_context_nav(contributors_index_tabs)
 </div>
 <!--.row-->
 
-<%= pagination_nav_block(@pagination_data) do %>
-
+<%= pagination_nav(@pagination_data) do %>
   <%= matrix_table(partial: "contributors/contributor",
                    objects: @objects, as: :user) %>
 <% end %>

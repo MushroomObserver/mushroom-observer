@@ -7,8 +7,7 @@ flash_error(@error) if @error && @objects.empty?
 %>
 
 <!-- list the projects -->
-<%= pagination_nav_block(@pagination_data) do %>
-
+<%= pagination_nav(@pagination_data) do %>
   <div class="list-group">
     <%= render(partial: "projects/object", collection: @objects) %>
   </div>

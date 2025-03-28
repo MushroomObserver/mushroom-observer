@@ -97,7 +97,7 @@ module Observations
     end
 
     def paginate_locations!
-      pages = pagination_data_numbers(:page, 100)
+      pages = number_pagination_data(:page, 100)
       pages.num_total = @matches.length
       @matches = @matches[pages.from..pages.to]
       pages

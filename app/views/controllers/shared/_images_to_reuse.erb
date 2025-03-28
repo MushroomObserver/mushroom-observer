@@ -8,11 +8,10 @@
 # application_controller.rb
 query = query_images_to_reuse(@all_users, @user)
 @layout = calc_layout_params
-@pagination_data = pagination_data_numbers(:page, @layout["count"])
+@pagination_data = number_pagination_data(:page, @layout["count"])
+
 @objects = query.paginate(@pagination_data,
 include: [:user, { observations: :name }])
-
-
 %>
 <%= form_with(url: form_action, method: :post) do |f| %>
 
@@ -39,7 +38,8 @@ include: [:user, { observations: :name }])
 <% end %>
 
 <% # Note this uses a specialized matrix box here, not the matrix_box partial. %>
-<%= pagination_nav_block(@pagination_data) do %>
+<%= pagination_nav(@pagination_data) do %>
+
 
   <%= matrix_table do %>
 

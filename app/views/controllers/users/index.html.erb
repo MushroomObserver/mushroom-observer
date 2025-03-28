@@ -16,8 +16,7 @@ flash_error(@error) if @error && @objects.empty?
         padding: 3px 5px 3px 5px
       }
     </style>
-    <%= pagination_nav_block(@pagination_data) do %>
-
+    <%= pagination_nav(@pagination_data) do %>
       <table align="center" class="table table-striped permissions" cellspacing="2">
         <thead>
           <tr>
@@ -54,7 +53,8 @@ flash_error(@error) if @error && @objects.empty?
   #  Normal version.
   # ----------------------------
   else %>
-    <%= pagination_nav_block(@pagination_data) do %>
+    <%= pagination_nav(@pagination_data) do %>
+
 
       <%= matrix_table(objects: @objects) %>
     <% end %>

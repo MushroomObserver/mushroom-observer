@@ -71,7 +71,7 @@ class InterestsController < ApplicationController
   end
 
   def paginate_interests!
-    pagination_data = pagination_data_numbers(:page, 100)
+    pagination_data = number_pagination_data(:page, 100)
     pagination_data.num_total = @interests.length
     @interests = @interests[pagination_data.from..pagination_data.to]
     pagination_data

@@ -30,8 +30,7 @@ add_context_nav(species_list_show_tabs(list: @species_list, query: @query))
 <% if @pagination_data.any?
   query_params_set(@query) %>
 
-<%= pagination_nav_block(@pagination_data) do %>
-
+<%= pagination_nav(@pagination_data) do %>
   <div class="list-group">
 
     <div class="list-group-item default">

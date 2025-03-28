@@ -6,16 +6,16 @@ module PaginationNavHelper
 
   # Wrap a block in pagination links.  Includes letters if appropriate.
   #
-  #   <%= pagination_nav_block(@pagination_data) do %>
+  #   <%= pagination_nav(@pagination_data) do %>
   #     <% @objects.each do |object| %>
   #       <% object_link(object) %><br/>
   #     <% end %>
   #   <% end %>
   #
-  def pagination_nav_block(pages, args = {}, &block)
+  def pagination_nav(pages, args = {}, &block)
     html_id = args[:html_id] ||= "results"
-    letters = pagination_nav_letters(pages, args)
-    numbers = pagination_nav_numbers(pages, args)
+    letters = letter_pagination_nav(pages, args)
+    numbers = number_pagination_nav(pages, args)
     body = capture(&block).to_s
     tag.div(id: html_id, data: { q: get_query_param }) do
       letters + safe_br + numbers + body + numbers + safe_br + letters
@@ -27,15 +27,15 @@ module PaginationNavHelper
   #   # In controller:
   #   def action
   #     query = create_query(:Name)
-  #     @pagination_data = pagination_data_letters(:letter, :page, 50)
+  #     @pagination_data = letter_pagination_data(:letter, :page, 50)
   #     @names = query.paginate(@pagination_data)
   #   end
   #
   #   # In view:
-  #   <%= pagination_nav_letters(@pagination_data) %>
-  #   <%= pagination_nav_numbers(@pagination_data) %>
+  #   <%= letter_pagination_nav(@pagination_data) %>
+  #   <%= number_pagination_nav(@pagination_data) %>
   #
-  def pagination_nav_letters(pages, args = {}) # rubocop:disable Metrics/AbcSize
+  def letter_pagination_nav(pages, args = {}) # rubocop:disable Metrics/AbcSize
     return safe_empty unless need_letter_pagination_links?(pages)
 
     args = args.dup
@@ -60,21 +60,21 @@ module PaginationNavHelper
   end
 
   # Insert numbered pagination links.
-  # (See also pagination_nav_letters above.)
+  # (See also letter_pagination_nav above.)
   #
   #   # In controller:
   #   def action
   #     query = create_query(:Name)
-  #     @pagination_data = pagination_data_numbers(:page, 50)
+  #     @pagination_data = number_pagination_data(:page, 50)
   #     @names = query.paginate(@pagination_data)
   #   end
   #
   #   # In view: (it is wrapped in 'pagination' div already)
-  #   <%= pagination_nav_numbers(@pagination_data) %>
+  #   <%= number_pagination_nav(@pagination_data) %>
   #
   # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity
   # rubocop:disable Metrics/PerceivedComplexity
-  def pagination_nav_numbers(pages, args = {})
+  def number_pagination_nav(pages, args = {})
     result = safe_empty
     if pages && pages.num_pages > 1
       params = args[:params] ||= {}
@@ -92,12 +92,12 @@ module PaginationNavHelper
       to = this + size
 
       list_args = { num:, arg:, args:, this:, size:, from:, to: }
-      result = pagination_nav_numbers_list(list_args)
+      result = number_pagination_nav_list(list_args)
     end
     result
   end
 
-  def pagination_nav_numbers_list(list_args)
+  def number_pagination_nav_list(list_args)
     list_args => { num:, arg:, args:, this:, size:, from:, to: }
     result = []
     pstr = "« #{:PREV.t}"
@@ -121,7 +121,7 @@ module PaginationNavHelper
   # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity
   # rubocop:enable Metrics/PerceivedComplexity
 
-  # Render a single pagination link for pagination_data_numbers above.
+  # Render a single pagination link for number_pagination_data above.
   def pagination_link(label, page, arg, args)
     params = args[:params] || {}
     params[arg] = page
