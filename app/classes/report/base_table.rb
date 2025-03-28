@@ -44,6 +44,10 @@ module Report
       )
     end
 
+    def without_location_selects
+      observation_selects + user_selects + name_selects + blanks_for_location
+    end
+
     def rows_with_location
       Observation.connection.select_rows(
         query.query.joins(:user, :location, :name).
@@ -52,55 +56,8 @@ module Report
       )
     end
 
-    def without_location_selects
-      observation_selects + user_selects + name_selects + blanks_for_location
-    end
-
-    def blanks_for_location
-      [
-        Arel::Nodes.build_quoted("").as("location_id"),
-        Observation[:where],
-        Arel::Nodes.build_quoted("").as("location_north"),
-        Arel::Nodes.build_quoted("").as("location_south"),
-        Arel::Nodes.build_quoted("").as("location_east"),
-        Arel::Nodes.build_quoted("").as("location_west"),
-        Arel::Nodes.build_quoted("").as("location_high"),
-        Arel::Nodes.build_quoted("").as("location_low")
-      ].freeze
-    end
-
     def with_location_selects
       observation_selects + user_selects + name_selects + location_selects
-    end
-
-    def location_selects
-      [
-        Location[:id],
-        Location[:name],
-        Location[:north],
-        Location[:south],
-        Location[:east],
-        Location[:west],
-        Location[:high],
-        Location[:low]
-      ].freeze
-    end
-
-    def name_selects
-      [
-        Name[:id],
-        Name[:text_name],
-        Name[:author],
-        Name[:rank]
-      ].freeze
-    end
-
-    def user_selects
-      [
-        User[:id],
-        User[:login],
-        User[:name]
-      ].freeze
     end
 
     def observation_selects
@@ -123,6 +80,49 @@ module Report
       Arel.sql("IF(observations.gps_hidden AND " \
         "observations.user_id != #{User.current_id || -1}, " \
         "NULL, observations.#{col})")
+    end
+
+    def user_selects
+      [
+        User[:id],
+        User[:login],
+        User[:name]
+      ].freeze
+    end
+
+    def name_selects
+      [
+        Name[:id],
+        Name[:text_name],
+        Name[:author],
+        Name[:rank]
+      ].freeze
+    end
+
+    def blanks_for_location
+      [
+        Arel::Nodes.build_quoted("").as("location_id"),
+        Observation[:where],
+        Arel::Nodes.build_quoted("").as("location_north"),
+        Arel::Nodes.build_quoted("").as("location_south"),
+        Arel::Nodes.build_quoted("").as("location_east"),
+        Arel::Nodes.build_quoted("").as("location_west"),
+        Arel::Nodes.build_quoted("").as("location_high"),
+        Arel::Nodes.build_quoted("").as("location_low")
+      ].freeze
+    end
+
+    def location_selects
+      [
+        Location[:id],
+        Location[:name],
+        Location[:north],
+        Location[:south],
+        Location[:east],
+        Location[:west],
+        Location[:high],
+        Location[:low]
+      ].freeze
     end
 
     def add_herbarium_labels!(rows, col)
