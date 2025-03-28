@@ -34,10 +34,13 @@ class VisualGroupsController < ApplicationController
   end
 
   def setup_pagination
-    @pages = MOPaginator.new(number_arg: :page, number: params[:page],
-                             num_per_page: calc_layout_params["count"])
-    @pages.num_total = @vals.length
-    @subset = @vals[@pages.from..@pages.to]
+    @pagination_data = PaginationData.new(
+      number_arg: :page,
+      number: params[:page],
+      num_per_page: calc_layout_params["count"]
+    )
+    @pagination_data.num_total = @vals.length
+    @subset = @vals[@pagination_data.from..@pagination_data.to]
   end
 
   def status_from_params(params)

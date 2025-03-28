@@ -13,10 +13,9 @@ def update
       changed = check_name("text_name", name, parse)
       changed = check_name("search_name", name, parse) || changed
       changed = check_name("display_name", name, parse) || changed
-      changed = check_name("sort_name", name, parse) || changed
-      name.save if changed
+      check_name("sort_name", name, parse) || changed
     else
-      puts("BAD PARSE: #{name.id},#{name.search_name}")
+      puts("#{name.id},#{name.search_name},ERROR,#{name.created_at},BAD PARSE")
     end
   end
 end
@@ -27,7 +26,13 @@ def check_name(method, name, parse)
   return false if old_value == new_value
 
   name.send(:"#{method}=", new_value)
-  puts("#{name.id},#{method},#{old_value},#{new_value},#{name.created_at}")
+  return true if name.save
+
+  errs = name.errors.map do |err|
+    "\"#{err.full_message.strip}\""
+  end
+  puts("#{name.id},#{method},\"#{old_value}\",\"#{new_value}\"," \
+       "#{name.created_at},#{errs.join(",")}")
   true
 end
 

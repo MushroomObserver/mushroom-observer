@@ -141,8 +141,8 @@ class LocationsController < ApplicationController
       # If user has explicitly selected the order, then this is disabled.)
       @default_orders = true
     end
-    @undef_pages = paginate_letters(:letter2, :page2,
-                                    display_opts[:num_per_page] || 50)
+    @undef_pages = letter_pagination_data(:letter2, :page2,
+                                          display_opts[:num_per_page] || 50)
     @undef_data = query2.paginate(@undef_pages)
     @undef_pages.used_letters = @undef_data.map { |obs| obs[:where][0, 1] }.uniq
     if (letter = params[:letter2].to_s.downcase) != ""
