@@ -43,7 +43,7 @@ module Report
       #   where: "observations.location_id IS NULL",
       #   order: "observations.id ASC"
       # )
-      query.query.joins(:user, :location, :name).
+      query.query.joins(:user, :name).
         where(location_id: nil).select(without_location_selects).
         reorder(Observation[:id].asc).pluck
     end
@@ -178,7 +178,7 @@ module Report
 
     def plain_query
       # Sometimes the default order requires unnecessary joins!
-      query.sql(order: "")
+      query.query.reorder("").to_sql
     end
 
     def add_column!(rows, vals, col)
