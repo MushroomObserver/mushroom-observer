@@ -450,8 +450,8 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   #   <%= number_pagination_nav(@pagination_data) %>
   #
   def letter_pagination_data(letter_arg = :letter,
-                              number_arg = :page,
-                              num_per_page = 50)
+                             number_arg = :page,
+                             num_per_page = 50)
     PaginationData.new(
       letter_arg: letter_arg,
       number_arg: number_arg,
