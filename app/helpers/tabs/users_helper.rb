@@ -20,6 +20,12 @@ module Tabs
       links
     end
 
+    def users_index_sorts(admin: false)
+      return admin_users_index_sorts if admin
+
+      regular_users_index_sorts
+    end
+
     #########################################################
 
     private
@@ -89,13 +95,7 @@ module Tabs
                               html_options: { button: :destroy }).tab
     end
 
-    def users_index_sorts(admin: false)
-      return admin_users_index_sorts if admin
-
-      regular_user_index_sorts
-    end
-
-    def regular_user_index_sorts
+    def regular_users_index_sorts
       [
         ["login",         :sort_by_login.t],
         ["name",          :sort_by_name.t],
