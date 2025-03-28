@@ -263,7 +263,7 @@ class InatImportJob < ApplicationJob
       # Imaage attributes to potentially update manually
       # t.boolean "gps_stripped", default: false, null: false
       image.update(
-        # NOTE: jdc 20250328 This throw errors if done via API params above
+        # NOTE: jdc 20250328 This throws errors if done via API params above
         # because api key owner is webmaster, rather than the importing user
         user_id: @user.id,
         when: @observation.when,
