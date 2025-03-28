@@ -23,7 +23,7 @@
 #
 #    # In your Rails controller:
 #    def index
-#      @pagination_data = MOPaginator.new(
+#      @pagination_data = PaginationData.new(
 #        :number_arg   => :page,
 #        :number       => params[:page],
 #        :num_per_page => 100,
@@ -34,7 +34,7 @@
 #
 #    # This paginates by letter and number:
 #    def index_by_letter
-#      @pagination_data = MOPaginator.new(
+#      @pagination_data = PaginationData.new(
 #        :letter_arg   => :letter,
 #        :number_arg   => :page,
 #        :letter       => params[:letter],
@@ -83,7 +83,7 @@
 #
 ################################################################################
 #
-class MOPaginator
+class PaginationData
   attr_accessor :letter_arg    # Name of parameter to use for letter (if any).
   attr_accessor :number_arg    # Name of parameter to use for page number.
   attr_reader :letter        # Current letter (if any).

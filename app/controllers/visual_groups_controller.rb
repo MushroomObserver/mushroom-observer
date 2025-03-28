@@ -34,7 +34,7 @@ class VisualGroupsController < ApplicationController
   end
 
   def setup_pagination
-    @pagination_data = MOPaginator.new(
+    @pagination_data = PaginationData.new(
       number_arg: :page,
       number: params[:page],
       num_per_page: calc_layout_params["count"]

@@ -452,7 +452,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   def letter_pagination_data(letter_arg = :letter,
                               number_arg = :page,
                               num_per_page = 50)
-    MOPaginator.new(
+    PaginationData.new(
       letter_arg: letter_arg,
       number_arg: number_arg,
       letter: paginator_letter(letter_arg),
@@ -475,7 +475,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   #   <%= number_pagination_nav(@numbers) %>
   #
   def number_pagination_data(arg = :page, num_per_page = 50)
-    MOPaginator.new(
+    PaginationData.new(
       number_arg: arg,
       number: paginator_number(arg),
       num_per_page: num_per_page

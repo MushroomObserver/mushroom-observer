@@ -2,9 +2,9 @@
 
 require("test_helper")
 
-class MOPaginatorTest < UnitTestCase
+class PaginationDataTest < UnitTestCase
   def test_basic
-    page_data = MOPaginator.new
+    page_data = PaginationData.new
 
     assert_nil(page_data.letter_arg)
     assert_nil(page_data.number_arg)
@@ -90,7 +90,7 @@ class MOPaginatorTest < UnitTestCase
   end
 
   def test_from_and_to
-    page_data = MOPaginator.new
+    page_data = PaginationData.new
     page_data.num_per_page = 20
 
     page_data.num_total = 50

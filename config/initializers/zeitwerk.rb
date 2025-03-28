@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 Rails.autoloaders.main.inflector.inflect(
-  { "mo_paginator" => "MOPaginator",
-    "gmap" => "GMap",
+  { "gmap" => "GMap",
     "verify_api_key_email" => "VerifyAPIKeyMailer" }
 )
 
