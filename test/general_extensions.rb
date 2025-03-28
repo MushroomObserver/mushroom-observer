@@ -469,6 +469,8 @@ module GeneralExtensions
     assert_sorted_by(sort_order.to_s)
   end
 
+  # Depends on consistently named helper methods like "users_index_sorts"
+  # otherwise returns empty array.
   def index_sorts
     helper = case (name = @controller.controller_name)
              when "contributors"
@@ -477,6 +479,10 @@ module GeneralExtensions
                name
              end
     sorts_helper_method = :"#{helper}_index_sorts"
+    helpers_defined = @controller.helpers.respond_to?(sorts_helper_method)
+    assert(helpers_defined, "#{sorts_helper_method} not defined in helpers")
+    return [] unless helpers_defined
+
     originals = @controller.helpers.send(sorts_helper_method).dup
     originals.map! { |key, _label| key.to_sym }
     originals.delete(:id)
