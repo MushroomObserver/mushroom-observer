@@ -195,7 +195,7 @@ class InatImportJob < ApplicationJob
          (suggester = User.find_by(inat_username: suggester(suggestion(name))))
         suggester
       else
-        @inat_manager
+        @user
       end
     add_naming_with_vote(name: @observation.name, user: user)
     @observation.log(:log_observation_created)
@@ -298,7 +298,7 @@ class InatImportJob < ApplicationJob
     Observation::NamingConsensus.new(@observation).calc_consensus
   end
 
-  def add_naming_with_vote(name:, user: @inat_manager,
+  def add_naming_with_vote(name:, user: @user,
                            value: Vote::MAXIMUM_VOTE)
     used_references = 2
     explanation = used_references_explanation(name)
@@ -362,7 +362,7 @@ class InatImportJob < ApplicationJob
 
     if naming.nil?
       add_naming_with_vote(name: @observation.name,
-                           user: @inat_manager, value: Vote::MAXIMUM_VOTE)
+                           user: @user, value: Vote::MAXIMUM_VOTE)
     else
       vote = Vote.find_by(naming: naming, observation: @observation)
       vote.update(value: Vote::MAXIMUM_VOTE)
