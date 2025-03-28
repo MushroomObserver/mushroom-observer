@@ -587,7 +587,7 @@ class QueryTest < UnitTestCase
   def paginate_test_setup(number, num_per_page)
     @names = Name.reorder(id: :asc).order(:id)
     @pagination_data = PaginationData.new(number: number,
-                                       num_per_page: num_per_page)
+                                          num_per_page: num_per_page)
     @query = Query.lookup(:Name, misspellings: :either, order_by: :id)
   end
 
@@ -637,7 +637,8 @@ class QueryTest < UnitTestCase
 
   def test_paginate_ells
     paginate_test_letter_setup(2, 3)
-    @pagination_data = PaginationData.new(number: 2, num_per_page: 3, letter: "L")
+    @pagination_data = PaginationData.new(number: 2, num_per_page: 3,
+                                          letter: "L")
     # Make sure we have a bunch of Lactarii, Leptiotas, etc.
     @ells = @names.select { |n| n.text_name[0, 1] == "L" }
     assert(@ells.length >= 9)
