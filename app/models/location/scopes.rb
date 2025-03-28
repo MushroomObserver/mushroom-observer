@@ -10,7 +10,7 @@ module Location::Scopes
   included do # rubocop:disable Metrics/BlockLength
     # default ordering for index queries
     scope :order_by_default,
-          -> { order(name: :asc, id: :desc) }
+          -> { order_by(::Query::Locations.default_order) }
 
     # This should really be regions/region, but changing user prefs/filters and
     # autocompleters is very involved, requires migration and script.

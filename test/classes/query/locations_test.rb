@@ -27,6 +27,11 @@ class Query::LocationsTest < UnitTestCase
     assert_query(expects, :Location, order_by: :name)
   end
 
+  def test_location_order_by_num_views
+    expects = Location.order_by(:num_views)
+    assert_query(expects, :Location, order_by: :num_views)
+  end
+
   def test_location_by_users
     assert_query(Location.reorder(id: :asc).by_users(rolf).distinct,
                  :Location, by_users: rolf, order_by: :id)

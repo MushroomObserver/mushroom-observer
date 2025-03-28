@@ -9,11 +9,11 @@ module Observations
       build_index_with_query
     end
 
-    private
-
     def controller_model_name
       "Observation"
     end
+
+    private
 
     # override the default? maybe no longer necessary
     def unfiltered_index_opts

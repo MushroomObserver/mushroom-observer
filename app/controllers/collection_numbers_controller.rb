@@ -22,7 +22,7 @@ class CollectionNumbersController < ApplicationController
   private
 
   def default_sort_order
-    nil # [:name, :number]
+    nil # Query::CollectionNumbers.default_order
   end
 
   def index_active_params

@@ -9,7 +9,7 @@ module Image::Scopes
   # always show as covered.
   included do # rubocop:disable Metrics/BlockLength
     scope :order_by_default,
-          -> { order(created_at: :desc, id: :desc) }
+          -> { order_by(::Query::Images.default_order) }
 
     scope :sizes, lambda { |min, max = nil|
       min, max = min if min.is_a?(Array)

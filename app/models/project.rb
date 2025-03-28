@@ -91,7 +91,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
                       message: proc { :alphanumerics_only.t } }
 
   scope :order_by_default,
-        -> { order(updated_at: :desc, id: :desc) }
+        -> { order_by(::Query::Projects.default_order) }
 
   scope :members, lambda { |members|
     joins(user_group: :user_group_users).

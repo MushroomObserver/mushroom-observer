@@ -31,14 +31,14 @@ module Names
       build_index_with_query
     end
 
+    def controller_model_name
+      "NameDescription"
+    end
+
     private
 
     def default_sort_order
       ::Query::NameDescriptions.default_order # :name
-    end
-
-    def controller_model_name
-      "NameDescription"
     end
 
     # Used by ApplicationController to dispatch #index to a private method

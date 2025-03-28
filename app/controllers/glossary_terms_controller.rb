@@ -15,7 +15,7 @@ class GlossaryTermsController < ApplicationController
   private
 
   def default_sort_order
-    :name
+    ::Query::GlossaryTerms.default_order # :name
   end
 
   # Used by ApplicationController to dispatch #index to a private method

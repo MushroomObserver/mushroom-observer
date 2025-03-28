@@ -17,7 +17,7 @@ class FieldSlip < AbstractModel
   end
 
   scope :order_by_default,
-        -> { order(code: :asc, created_at: :desc, id: :desc) }
+        -> { order_by(::Query::FieldSlips.default_order) }
 
   scope :projects, lambda { |projects|
     project_ids = Lookup::Projects.new(projects).ids

@@ -9,7 +9,7 @@ module FieldSlipsController::Index
   private
 
   def default_sort_order
-    :date
+    ::Query::FieldSlips.default_order # :date
   end
 
   def index_active_params
