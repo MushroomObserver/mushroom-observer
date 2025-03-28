@@ -172,8 +172,9 @@ class LocationsController < ApplicationController
     # "By name" means something different to observation.
     args[:by] = "where" if args[:by].blank? || (args[:by] == "name")
 
+    args[:search_where] ||= ""
     if args[:pattern]
-      args[:search_where] += SearchParams.new(phrase: args[:pattern])
+      args[:search_where] += args[:pattern]
       args.delete(:pattern)
     end
 
