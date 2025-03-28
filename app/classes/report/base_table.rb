@@ -37,166 +37,44 @@ module Report
     end
 
     def rows_without_location
-      # query.select_rows(
-      #   select: without_location_selects.join(","),
-      #   join: [:users, :names],
-      #   where: "observations.location_id IS NULL",
-      #   order: "observations.id ASC"
-      # )
-      fred = query.query.joins(:user, :name).
+      Observation.connection.select_rows(
+        query.query.joins(:user, :name).
         where(location_id: nil).select(without_location_selects).
-        reorder(Observation[:id].asc).pluck
-      debugger
-      fred
-      # SELECT `observations`.`id`,
-      #        `observations`.`when`,
-      #        IF(observations.gps_hidden AND observations.user_id != -1,
-      #           NULL, observations.lat),
-      #        IF(observations.gps_hidden AND observations.user_id != -1,
-      #           NULL, observations.lng),
-      #        `observations`.`alt`,
-      #        `observations`.`specimen`,
-      #        `observations`.`is_collection_location`,
-      #        `observations`.`vote_cache`,
-      #        `observations`.`thumb_image_id`,
-      #        `observations`.`notes`,
-      #        `observations`.`updated_at`,
-      #        `users`.`id`,
-      #        `users`.`login`,
-      #        `users`.`name`,
-      #        `names`.`id`,
-      #        `names`.`text_name`,
-      #        `names`.`author`,
-      #        `names`.`rank`,
-      #        \"\",
-      #        `observations`.`where`
-      # FROM `observations`
-      # INNER JOIN `users` ON `users`.`id` = `observations`.`user_id`
-      # INNER JOIN `names` ON `names`.`id` = `observations`.`name_id`
-      # WHERE `observations`.`location_id` IS NULL
-      # ORDER BY `observations`.`id` ASC
-      # (ruby) fred.first here, 29 vals
-      # [98434105,
-      #  Fri, 04 Apr 2014 00:05:03.000000000 EDT -04:00,
-      #  Fri, 15 Sep 2023 00:05:03.000000000 EDT -04:00,
-      #  Thu, 07 Jun 2012,
-      #  430653790,
-      #  false,
-      #  {},
-      #  nil,
-      #  456981406,
-      #  nil,
-      #  true,
-      #  0.0,
-      #  0,
-      #  nil,
-      #  488320040,
-      #  nil,
-      #  nil,
-      #  "Briceland, California, USA",
-      #  nil,
-      #  " lichen ",
-      #  "Petigera",
-      #  "",
-      #  false,
-      #  nil,
-      #  Fri, 04 Apr 2014 00:05:03.000000000 EDT -04:00,
-      #  true,
-      #  nil,
-      #  nil,
-      #  nil]
-
-      # (ruby) fred.first on main, 26 vals
-      # [31426256,
-      #  Sun, 24 Jun 2007,
-      #  nil,
-      #  nil,
-      #  nil,
-      #  0,
-      #  1,
-      #  0.0,
-      #  nil,
-      #  "---\n:Other: From somewhere else\n",
-      #  2007-06-24 09:00:01 UTC,
-      #  241228755,
-      #  "rolf",
-      #  "Rolf Singer",
-      #  561573041,
-      #  "Agaricus campestras",
-      #  "L.",
-      #  4,
-      #  547147019,
-      #  "Burbank, California, USA",
-      #  34.22,
-      #  34.15,
-      #  -118.29,
-      #  -118.37,
-      #  294.0,
-      #  148.0]
+        reorder(Observation[:id].asc)
+      )
     end
 
     def rows_with_location
-      # query.select_rows(
-      #   select: with_location_selects.join(","),
-      #   join: [:users, :locations, :names],
-      #   order: "observations.id ASC"
-      # )
-      Observation.merge(query.query).joins(:user, :location, :name).
+      Observation.connection.select_rows(
+        query.query.joins(:user, :location, :name).
         select(with_location_selects).
-        reorder(Observation[:id].asc).pluck
+        reorder(Observation[:id].asc)
+      )
     end
 
-    def without_location_selects # rubocop:disable Metrics/AbcSize
+    def without_location_selects
+      observation_selects + user_selects + name_selects + blanks_for_location
+    end
+
+    def blanks_for_location
       [
-        Observation[:id],
-        Observation[:when],
-        public_latlng_spec(:lat),
-        public_latlng_spec(:lng),
-        Observation[:alt],
-        Observation[:specimen],
-        Observation[:is_collection_location],
-        Observation[:vote_cache],
-        Observation[:thumb_image_id],
-        Observation[:notes],
-        Observation[:updated_at],
-        User[:id],
-        User[:login],
-        User[:name],
-        Name[:id],
-        Name[:text_name],
-        Name[:author],
-        Name[:rank],
-        '""',
+        Arel::Nodes.build_quoted("").as("location_id"),
         Observation[:where],
-        '""',
-        '""',
-        '""',
-        '""',
-        '""',
-        '""'
-      ]
+        Arel::Nodes.build_quoted("").as("location_north"),
+        Arel::Nodes.build_quoted("").as("location_south"),
+        Arel::Nodes.build_quoted("").as("location_east"),
+        Arel::Nodes.build_quoted("").as("location_west"),
+        Arel::Nodes.build_quoted("").as("location_high"),
+        Arel::Nodes.build_quoted("").as("location_low")
+      ].freeze
     end
 
-    def with_location_selects # rubocop:disable Metrics/AbcSize
+    def with_location_selects
+      observation_selects + user_selects + name_selects + location_selects
+    end
+
+    def location_selects
       [
-        Observation[:id],
-        Observation[:when],
-        public_latlng_spec(:lat),
-        public_latlng_spec(:lng),
-        Observation[:alt],
-        Observation[:specimen],
-        Observation[:is_collection_location],
-        Observation[:vote_cache],
-        Observation[:thumb_image_id],
-        Observation[:notes],
-        Observation[:updated_at],
-        User[:id],
-        User[:login],
-        User[:name],
-        Name[:id],
-        Name[:text_name],
-        Name[:author],
-        Name[:rank],
         Location[:id],
         Location[:name],
         Location[:north],
@@ -205,7 +83,40 @@ module Report
         Location[:west],
         Location[:high],
         Location[:low]
-      ]
+      ].freeze
+    end
+
+    def name_selects
+      [
+        Name[:id],
+        Name[:text_name],
+        Name[:author],
+        Name[:rank]
+      ].freeze
+    end
+
+    def user_selects
+      [
+        User[:id],
+        User[:login],
+        User[:name]
+      ].freeze
+    end
+
+    def observation_selects
+      [
+        Observation[:id],
+        Observation[:when],
+        public_latlng_spec(:lat),
+        public_latlng_spec(:lng),
+        Observation[:alt],
+        Observation[:specimen],
+        Observation[:is_collection_location],
+        Observation[:vote_cache],
+        Observation[:thumb_image_id],
+        Observation[:notes],
+        Observation[:updated_at]
+      ].freeze
     end
 
     def public_latlng_spec(col)
