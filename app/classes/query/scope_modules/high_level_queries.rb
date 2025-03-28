@@ -120,24 +120,24 @@ module Query::ScopeModules::HighLevelQueries
   end
 
   # Returns a subset of the results (as ids).
-  def paginate_ids(paginator)
+  def paginate_ids(pagination_data)
     initialize_query unless initialized?
     ids = result_ids
     if need_letters
-      paginator.used_letters = @letters.values.uniq
-      if (letter = paginator.letter)
+      pagination_data.used_letters = @letters.values.uniq
+      if (letter = pagination_data.letter)
         ids = ids.select { |id| @letters[id] == letter }
       end
     end
-    paginator.num_total = ids.size
-    ids[paginator.from..paginator.to] || []
+    pagination_data.num_total = ids.size
+    ids[pagination_data.from..pagination_data.to] || []
   end
 
   # Returns a subset of the results (as ActiveRecord instances).
   # (Takes args for +instantiate+.)
-  def paginate(paginator, args = {})
+  def paginate(pagination_data, args = {})
     initialize_query unless initialized?
-    instantiate_results(paginate_ids(paginator), args)
+    instantiate_results(paginate_ids(pagination_data), args)
   end
 
   # Instantiate a set of records given as an Array of ids.  Returns a list of
