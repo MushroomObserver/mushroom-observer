@@ -57,7 +57,8 @@ module VersionsHelper
   end
 
   def current_version_html(obj)
-    :VERSION.t + ": " + obj.version.to_s + safe_br
+    # disable cop because interpolation outputs a string, not a safe_buffer
+    :VERSION.t + ": " + obj.version.to_s + safe_br # rubocop:disable Style/StringConcatenation
   end
 
   def build_version_table(obj, versions, args)

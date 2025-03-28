@@ -56,12 +56,12 @@ species = Name.connection.select_all(%(
 seen = {}
 genera = genera.map do |rec|
   n, d = rec.values_at("n", "d")
-  val = d.to_i == 1 ? n : n + "*"
+  val = d.to_i == 1 ? n : "#{n}*"
   seen[val] = true
   val
 end.uniq
 genera.reject! do |n|
-  seen[n + "*"]
+  seen["#{n}*"]
 end
 
 # How many times is each name used?

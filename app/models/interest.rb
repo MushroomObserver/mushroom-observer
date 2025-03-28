@@ -95,9 +95,9 @@ class Interest < AbstractModel
   def summary
     return target.summary if target && (target_type == "NameTracker")
 
-    (state ? :WATCHING.l : :IGNORING.l) + " " +
-      target_type.underscore.to_sym.l + ": " +
-      (target ? target.unique_format_name : "--")
+    "#{state ? :WATCHING.l : :IGNORING.l} " \
+    "#{target_type.underscore.to_sym.l}: " \
+    "#{target ? target.unique_format_name : "--"}"
   end
   alias text_name summary
 

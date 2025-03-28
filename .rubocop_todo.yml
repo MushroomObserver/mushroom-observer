@@ -660,23 +660,12 @@ Style/SafeNavigationChainLength:
     - 'app/controllers/locations_controller.rb'
     - 'app/models/location.rb'
 
-# Offense count: 32
+# Offense count: 6
 # This cop supports unsafe autocorrection (--autocorrect-all).
-# Configuration parameters: Mode.
-Style/StringConcatenation:
+Style/SlicingWithRange:
   Exclude:
-    - 'app/classes/labels.rb'
-    - 'app/extensions/string.rb'
-    - 'app/helpers/application_helper.rb'
-    - 'app/helpers/descriptions_helper.rb'
-    - 'app/helpers/suggestions_helper.rb'
-    - 'app/helpers/versions_helper.rb'
-    - 'app/models/comment/callbacks.rb'
-    - 'app/models/interest.rb'
-    - 'app/models/language_exporter.rb'
-    - 'app/models/name/parse.rb'
-    - 'app/models/rss_log.rb'
-    - 'config/unicorn.rb'
-    - 'config/unicorn_dev.rb'
-    - 'lib/tasks/lang.rake'
-    - 'script/refresh_name_lister_cache'
+    - 'app/classes/pattern_search/term.rb'
+    - 'app/models/location.rb'
+    - 'app/models/name/spelling.rb'
+    - 'app/models/name_parse.rb'
+    - 'test/models/comment_test.rb'

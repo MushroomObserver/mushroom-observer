@@ -496,7 +496,7 @@ class String
       elsif str.sub!(/^[^<>]+/, "")
         part = Regexp.last_match(0)
         if part.length > max
-          result += part[0, max - 1].to_s + "..."
+          result += "#{part[0, max - 1]}..."
           break
         elsif part
           max -= part.length
