@@ -43,9 +43,96 @@ module Report
       #   where: "observations.location_id IS NULL",
       #   order: "observations.id ASC"
       # )
-      query.query.joins(:user, :name).
+      fred = query.query.joins(:user, :name).
         where(location_id: nil).select(without_location_selects).
         reorder(Observation[:id].asc).pluck
+      debugger
+      fred
+      # SELECT `observations`.`id`,
+      #        `observations`.`when`,
+      #        IF(observations.gps_hidden AND observations.user_id != -1,
+      #           NULL, observations.lat),
+      #        IF(observations.gps_hidden AND observations.user_id != -1,
+      #           NULL, observations.lng),
+      #        `observations`.`alt`,
+      #        `observations`.`specimen`,
+      #        `observations`.`is_collection_location`,
+      #        `observations`.`vote_cache`,
+      #        `observations`.`thumb_image_id`,
+      #        `observations`.`notes`,
+      #        `observations`.`updated_at`,
+      #        `users`.`id`,
+      #        `users`.`login`,
+      #        `users`.`name`,
+      #        `names`.`id`,
+      #        `names`.`text_name`,
+      #        `names`.`author`,
+      #        `names`.`rank`,
+      #        \"\",
+      #        `observations`.`where`
+      # FROM `observations`
+      # INNER JOIN `users` ON `users`.`id` = `observations`.`user_id`
+      # INNER JOIN `names` ON `names`.`id` = `observations`.`name_id`
+      # WHERE `observations`.`location_id` IS NULL
+      # ORDER BY `observations`.`id` ASC
+      # (ruby) fred.first here, 29 vals
+      # [98434105,
+      #  Fri, 04 Apr 2014 00:05:03.000000000 EDT -04:00,
+      #  Fri, 15 Sep 2023 00:05:03.000000000 EDT -04:00,
+      #  Thu, 07 Jun 2012,
+      #  430653790,
+      #  false,
+      #  {},
+      #  nil,
+      #  456981406,
+      #  nil,
+      #  true,
+      #  0.0,
+      #  0,
+      #  nil,
+      #  488320040,
+      #  nil,
+      #  nil,
+      #  "Briceland, California, USA",
+      #  nil,
+      #  " lichen ",
+      #  "Petigera",
+      #  "",
+      #  false,
+      #  nil,
+      #  Fri, 04 Apr 2014 00:05:03.000000000 EDT -04:00,
+      #  true,
+      #  nil,
+      #  nil,
+      #  nil]
+
+      # (ruby) fred.first on main, 26 vals
+      # [31426256,
+      #  Sun, 24 Jun 2007,
+      #  nil,
+      #  nil,
+      #  nil,
+      #  0,
+      #  1,
+      #  0.0,
+      #  nil,
+      #  "---\n:Other: From somewhere else\n",
+      #  2007-06-24 09:00:01 UTC,
+      #  241228755,
+      #  "rolf",
+      #  "Rolf Singer",
+      #  561573041,
+      #  "Agaricus campestras",
+      #  "L.",
+      #  4,
+      #  547147019,
+      #  "Burbank, California, USA",
+      #  34.22,
+      #  34.15,
+      #  -118.29,
+      #  -118.37,
+      #  294.0,
+      #  148.0]
     end
 
     def rows_with_location
@@ -54,12 +141,12 @@ module Report
       #   join: [:users, :locations, :names],
       #   order: "observations.id ASC"
       # )
-      query.query.joins(:user, :location, :name).
-        where(location_id: nil).select(without_location_selects).
+      Observation.merge(query.query).joins(:user, :location, :name).
+        select(with_location_selects).
         reorder(Observation[:id].asc).pluck
     end
 
-    def without_location_selects
+    def without_location_selects # rubocop:disable Metrics/AbcSize
       [
         Observation[:id],
         Observation[:when],
@@ -90,7 +177,7 @@ module Report
       ]
     end
 
-    def with_location_selects
+    def with_location_selects # rubocop:disable Metrics/AbcSize
       [
         Observation[:id],
         Observation[:when],
