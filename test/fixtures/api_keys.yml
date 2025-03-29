@@ -30,11 +30,22 @@ rolfs_mo_app_api_key:
   key: aSDfkljJsdfglkDJSwEarLKjkerADGl
   notes: MO App
 
-# Used to access MO API during iNat imports
+rolf_inat_api_key:
+  user: rolf
+  key: for_testing_inat_jobs
+  notes: inat import # required to find the user's key for inat jobs
+  verified: 2025-03-29 13:45:00
+
+dick_inat_api_key:
+  user: dick
+  key: for_testing_inat_jobs
+  notes: inat import # required to find the user's key for inat jobs
+  verified: 2025-03-29 14:25:00
+
 inat_manager_mo_app_api_key:
   user: webmaster
-  key: for_testing_purposes_only
-  notes: inat import
+  key: for_testing_inat_jobs
+  notes: inat import # required to find the user's key for inat jobs
   verified: 2024-06-28 12:25:00
 
 # The next 3 fixtures are used to test whether sql collates accented letters.
