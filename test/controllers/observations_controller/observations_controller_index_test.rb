@@ -94,15 +94,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_select("#caption-full", text: /#{regions_joined}/)
   end
 
-  def test_index_sorted_by_non_default
-    login
-
-    sort_orders = %w[name user]
-    sort_orders.each do |order|
-      get(:index, params: { by: order })
-      assert_displayed_title(:OBSERVATIONS.l)
-      assert_sorted_by(order)
-    end
+  def test_index_with_non_default_sort
+    check_index_sorting
   end
 
   def test_index_sorted_by_invalid_order
@@ -110,11 +103,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     login
 
-    exception = assert_raise(RuntimeError) do
-      get(:index, params: { by: by })
-    end
-    assert_equal("Can't figure out how to sort Observations by :#{by}.",
-                 exception.message)
+    get(:index, params: { by: by })
+    assert_flash_text("Can't figure out how to sort Observations by :#{by}.")
   end
 
   def test_index_with_id
@@ -312,7 +302,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     pattern = "Briceland"
 
     setup_rolfs_index
-    get(:index, params: { pattern: pattern, needs_naming: true })
+    get(:index, params: { pattern: pattern, needs_naming: rolf })
 
     assert_match(/^#{identify_observations_url}/, redirect_to_url,
                  "Wrong page. Should redirect to #{:obs_needing_id.l}")
@@ -385,7 +375,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     pattern = { error: "" }
 
     login
-    get(:index, params: { pattern: pattern, needs_naming: true })
+    get(:index, params: { pattern: pattern, needs_naming: rolf })
 
     assert_redirected_to(
       identify_observations_path,

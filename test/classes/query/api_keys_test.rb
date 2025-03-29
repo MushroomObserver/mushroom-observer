@@ -8,7 +8,7 @@ class Query::APIKeysTest < UnitTestCase
   include QueryExtensions
 
   def test_api_key_all
-    expects = APIKey.all.order_by_default
+    expects = APIKey.order_by_default
     assert_query(expects, :APIKey)
   end
 

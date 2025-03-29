@@ -4,7 +4,7 @@
 # NOTE: this uses ids not classes for identifiers, change this
 module Tabs
   module HerbariaHelper
-    def herbaria_index_tabs(query:)
+    def herbaria_index_tabs(query: nil)
       links ||= []
       links << if query&.params&.dig(:nonpersonal)
                  herbaria_index_tab
@@ -14,7 +14,7 @@ module Tabs
       links << new_herbarium_tab
     end
 
-    def herbaria_index_sorts(query:)
+    def herbaria_index_sorts(query: nil)
       if query&.params&.dig(:nonpersonal)
         return nonpersonal_herbaria_index_sorts
       end

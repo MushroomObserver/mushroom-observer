@@ -922,7 +922,7 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(obs_comments.where(Comment[:summary] =~ /iNat Data/).present?,
            "Missing Initial Commment (#{:inat_data_comment.l})")
     assert_equal(
-      obs.user, obs_comments.first.user,
+      user, obs_comments.first.user,
       "Comment user should be user who creates the MO Observation"
     )
     inat_data_comment = obs_comments.first.comment

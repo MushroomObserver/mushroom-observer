@@ -34,7 +34,7 @@ class UsersController < ApplicationController
   end
 
   def default_sort_order
-    :name
+    ::Query::Users.default_order # :name
   end
 
   # Used by ApplicationController to dispatch #index to a private method

@@ -80,7 +80,7 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   end
 
   def default_sort_order
-    :name
+    ::Query::Herbaria.default_order # :name
   end
 
   def index_active_params

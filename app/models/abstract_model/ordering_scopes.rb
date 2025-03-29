@@ -33,7 +33,7 @@ module AbstractModel::OrderingScopes
 
       method ||= :default # :order_by_default must be defined for each model
       method = method.dup.to_s
-      reverse = method.sub!(/^reverse_/, "")
+      reverse = method.sub!(/^reverse_/, "") # sub! returns boolean
       scope = :"order_by_#{method}"
       return all unless model.private_methods(false).include?(scope)
 
@@ -326,7 +326,7 @@ module AbstractModel::OrderingScopes
     end
 
     def order_names_by_name
-      with_correct_spelling.order(Name[:sort_name].asc)
+      order(Name[:sort_name].asc)
     end
 
     def order_observations_by_name
@@ -338,6 +338,8 @@ module AbstractModel::OrderingScopes
         order(arel_table[:name].asc)
       elsif column_names.include?("title")
         order(arel_table[:title].asc)
+      else
+        order_by_default
       end
     end
   end
