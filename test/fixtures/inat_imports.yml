@@ -15,3 +15,8 @@ rolf_inat_import:
   <<: *DEFAULTS
   user: rolf
   inat_username: rolf_inat_username
+
+dick_inat_import:
+  <<: *DEFAULTS
+  user: dick
+  inat_username: dick_inat_username
