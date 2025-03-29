@@ -7,7 +7,7 @@ require("query_extensions")
 class Query::RssLogsTest < UnitTestCase
   include QueryExtensions
 
-  def test_rss_log_all
+  def test_rss_log_default_index
     ids = RssLog.order_by_default
     assert_query(ids, :RssLog)
   end
@@ -19,10 +19,19 @@ class Query::RssLogsTest < UnitTestCase
     assert_query_scope(ids, scope, :RssLog, id_in_set: ids)
   end
 
-  def test_rss_log_type
+  def test_rss_log_type_all
+    ids = RssLog.order_by_default
+    scope = RssLog.type(:all).order_by_default
+    assert_query_scope(ids, scope, :RssLog, type: :all)
+  end
+
+  def test_rss_log_type_species_list
     ids = [rss_logs(:species_list_rss_log).id]
     scope = RssLog.type(:species_list)
     assert_query_scope(ids, scope, :RssLog, type: :species_list)
+  end
+
+  def test_rss_log_type_species_list_project
     ids = [rss_logs(:project_rss_log),
            rss_logs(:species_list_rss_log)]
     scope = RssLog.type("species_list project").order_by_default
