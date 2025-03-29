@@ -56,8 +56,8 @@ module Name::Scopes
     }
     scope :text_name_has,
           ->(phrase) { search_columns(Name[:text_name], phrase) }
-    scope :search_name_has,
-          ->(phrase) { search_columns(Name[:search_name], phrase) }
+    # scope :search_name_has,
+    #       ->(phrase) { search_columns(Name[:search_name], phrase) }
 
     # NOTE: with_correct_spelling is tacked on to most Name queries.
     scope :misspellings, lambda { |boolish = :no|
@@ -206,11 +206,11 @@ module Name::Scopes
     #   where(id: fields + comments + descs).distinct
     # }
     # This is what's called by advanced_search
-    scope :advanced_search, lambda { |phrase|
-      fields = Name.search_columns(Name[:search_name], phrase).map(&:id)
-      comments = Name.comments_has(phrase).map(&:id)
-      where(id: fields + comments).distinct
-    }
+    # scope :advanced_search, lambda { |phrase|
+    #   fields = Name.search_columns(Name[:search_name], phrase).map(&:id)
+    #   comments = Name.comments_has(phrase).map(&:id)
+    #   where(id: fields + comments).distinct
+    # }
     # This is what's called by pattern_search
     scope :pattern, lambda { |phrase|
       cols = Name.searchable_columns + NameDescription.searchable_columns
