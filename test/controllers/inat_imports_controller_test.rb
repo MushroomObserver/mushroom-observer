@@ -183,11 +183,11 @@ class InatImportsControllerTest < FunctionalTestCase
   end
 
   def test_create_strip_inat_username
-    user = users(:dick)
+    user = users(:mary)
     assert(APIKey.where(user: user, notes: MO_API_KEY_NOTES).none?,
            "Test needs user fixture without an MO API key for iNat imports")
-    inat_username = " #{user.name} "
-    inat_import = inat_imports(:dick_inat_import)
+    inat_username = " #{user.name} " # simulate typing extra spaces
+    inat_import = inat_imports(:mary_inat_import)
     assert_equal("Unstarted", inat_import.state,
                  "Need a Unstarted inat_import fixture")
 

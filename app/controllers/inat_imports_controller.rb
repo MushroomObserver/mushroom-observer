@@ -83,7 +83,7 @@ class InatImportsController < ApplicationController
   def create
     return reload_form unless params_valid?
 
-    assure_user_own_inat_import_api_key
+    assure_user_has_inat_import_api_key
     @inat_import = InatImport.find_or_create_by(user: @user)
     @inat_import.update(state: "Authorizing",
                         import_all: params[:all],
@@ -104,7 +104,7 @@ class InatImportsController < ApplicationController
     render(:new)
   end
 
-  def assure_user_own_inat_import_api_key
+  def assure_user_has_inat_import_api_key
     return if APIKey.find_by(user: @user, notes: MO_API_KEY_NOTES)
 
     APIKey.create(user: @user, notes: MO_API_KEY_NOTES)
