@@ -437,7 +437,7 @@ class InatImportJobTest < ActiveJob::TestCase
     proposed_name = obs.namings.first
     assert_equal(@default_user,
                  proposed_name.user,
-                 "Name should be proposed by #{inat_manager.login}")
+                 "Name should be proposed by importing user")
     used_references = 2
     assert(
       proposed_name.reasons.key?(used_references),
@@ -944,14 +944,10 @@ class InatImportJobTest < ActiveJob::TestCase
     naming = namings.find_by(name: name)
     assert(naming.present?, "Naming for MO consensus ID")
     assert_equal(user, naming.user,
-                 "Namings should belong to inat_manager")
+                 "Naming should belong to #{user.login}")
   end
 
   # -------- Other
-
-  def inat_manager
-    User.find_by(login: "MO Webmaster")
-  end
 
   # Hack to turn results with many pages into results with one page
   # By ignoring all pages but the first
