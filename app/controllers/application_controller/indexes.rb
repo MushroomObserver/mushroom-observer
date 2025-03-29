@@ -139,19 +139,22 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
 
   # This only deals with :by passed in url params.
   def sorted_index_opts
-    order_by = params[:by]
-    scope = :"order_by_#{order_by.sub(/^reverse_/, "")}"
-
-    unless AbstractModel.private_methods(false).include?(scope)
-      model = controller_model_name.pluralize
-      flash_error(
-        "Can't figure out how to sort #{model} by :#{order_by}."
-      )
-      order_by = default_sort_order
-    end
-
-    { query_args: { order_by: },
+    { query_args: { order_by: order_by_or_flash_if_unknown },
       display_opts: index_display_at_id_opts }
+  end
+
+  def order_by_or_flash_if_unknown
+    order_by = params[:by]
+    return nil if order_by.blank?
+
+    scope = :"order_by_#{order_by.to_s.sub(/^reverse_/, "")}"
+    return order_by if AbstractModel.private_methods(false).include?(scope)
+
+    flash_error(
+      "Can't figure out how to sort #{controller_model_name.pluralize} " \
+      "by :#{order_by}."
+    )
+    default_sort_order
   end
 
   # The filtered index.
