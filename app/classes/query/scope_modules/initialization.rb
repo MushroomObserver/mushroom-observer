@@ -13,8 +13,8 @@ module Query::ScopeModules::Initialization
     @order       = ""
     @scopes      = model
     initialize_scopes
-    initialize_order
-    @last_query  = sql
+    # initialize_order
+    @last_query = sql
   end
 
   def sql
