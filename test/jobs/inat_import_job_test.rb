@@ -949,6 +949,10 @@ class InatImportJobTest < ActiveJob::TestCase
 
   # -------- Other
 
+  def inat_manager
+    User.find_by(login: "MO Webmaster")
+  end
+
   # Hack to turn results with many pages into results with one page
   # By ignoring all pages but the first
   def limited_to_first_page(mock_search_result)
