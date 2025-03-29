@@ -104,12 +104,12 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   def unfiltered_index
     return unless unfiltered_index_permitted?
 
-    args = { order_by: default_sort_order }.merge(
-      unfiltered_index_opts[:query_args]
-    )
+    # Get once, otherwise accessing the hash may rerun some logic twice.
+    index_opts = unfiltered_index_opts
+    args = { order_by: default_sort_order }.merge(index_opts[:query_args])
     query = create_query(controller_model_name.to_sym, **args)
 
-    [query, unfiltered_index_opts[:display_opts]]
+    [query, index_opts[:display_opts]]
   end
 
   # Can be overridden to prevent the unfiltered index from being called.
@@ -117,19 +117,21 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     true
   end
 
-  # Defaults for the unfiltered index. Controllers may pass their own opts.
+  # Defaults for the unfiltered index; controllers may override with other opts.
   def unfiltered_index_opts
-    { query_args: {}, display_opts: {} }
+    { query_args: {}, display_opts: {} }.freeze
   end
 
   # This handles the index if you pass any of the basic params.
   def sorted_index
     return unless sorted_index_permitted?
 
+    # Get once, otherwise accessing the hash reruns logic and may flash twice.
+    index_opts = sorted_index_opts
     query = find_or_create_query(controller_model_name.to_sym,
-                                 **sorted_index_opts[:query_args])
+                                 **index_opts[:query_args])
 
-    [query, sorted_index_opts[:display_opts]]
+    [query, index_opts[:display_opts]]
   end
 
   def sorted_index_permitted?
@@ -137,8 +139,22 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   end
 
   def sorted_index_opts
-    { query_args: { order_by: params[:by] },
-      display_opts: index_display_at_id_opts }
+    { query_args: { order_by: order_by_or_flash_if_unknown },
+      display_opts: index_display_at_id_opts }.freeze
+  end
+
+  def order_by_or_flash_if_unknown
+    order_by = params[:by]
+    return nil if order_by.blank?
+
+    scope = :"order_by_#{order_by.to_s.sub(/^reverse_/, "")}"
+    return order_by if AbstractModel.private_methods(false).include?(scope)
+
+    flash_error(
+      "Can't figure out how to sort #{controller_model_name.pluralize} " \
+      "by :#{order_by}."
+    )
+    default_sort_order
   end
 
   # The filtered index.
