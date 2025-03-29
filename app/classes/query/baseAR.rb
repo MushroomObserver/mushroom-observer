@@ -56,6 +56,17 @@ class Query::BaseAR
                         [:id_in_set]
   end
 
+  def content_filter_parameters
+    self.class.content_filter_parameters
+  end
+
+  def self.content_filter_parameters
+    filters = Query::Filter.all
+    @content_filter_parameters ||= filters.each_with_object({}) do |f, p|
+      p[f.sym] = f.type
+    end.freeze
+  end
+
   # A "current_or_related_query" may be called for links:
   # (1) for a new query on a related target model, using the current_query as
   #     the filtering subquery.

@@ -163,6 +163,18 @@ class RssLog < AbstractModel
     where(or_clause(*types)).distinct
   }
 
+  # for content filters.
+  # possibly needs left outer joins?
+  scope :observation_query, lambda { |hash|
+    joins(:observation).subquery(:Observation, hash)
+  }
+  scope :location_query, lambda { |hash|
+    joins(:location).subquery(:Location, hash)
+  }
+  scope :name_query, lambda { |hash|
+    joins(:name).subquery(:Name, hash)
+  }
+
   # Maximum allowed length (in bytes) of notes column.  Actually it should be
   # 65535, I think, but let's mak sure there's a safe buffer.
   MAX_LENGTH = 65_500
