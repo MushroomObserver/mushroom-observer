@@ -302,7 +302,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     pattern = "Briceland"
 
     setup_rolfs_index
-    get(:index, params: { pattern: pattern, needs_naming: true })
+    get(:index, params: { pattern: pattern, needs_naming: rolf })
 
     assert_match(/^#{identify_observations_url}/, redirect_to_url,
                  "Wrong page. Should redirect to #{:obs_needing_id.l}")
@@ -375,7 +375,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     pattern = { error: "" }
 
     login
-    get(:index, params: { pattern: pattern, needs_naming: true })
+    get(:index, params: { pattern: pattern, needs_naming: rolf })
 
     assert_redirected_to(
       identify_observations_path,
