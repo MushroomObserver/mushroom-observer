@@ -290,7 +290,7 @@ class InatImportJob < ApplicationJob
       original_name: photo.original_name }
   end
 
-   def update_names_and_proposals
+  def update_names_and_proposals
     adjust_consensus_name_naming # also adds naming for provisionals
 
     Observation::NamingConsensus.new(@observation).calc_consensus
