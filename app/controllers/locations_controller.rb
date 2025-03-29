@@ -135,7 +135,7 @@ class LocationsController < ApplicationController
       return false
     end
 
-    @undef_location_format = User.current_location_format
+    @undef_location_format = @user.location_format
     if display_opts[:link_all_sorts]
       # (This tells it to say "by name" and "by frequency" by the subtitles.
       # If user has explicitly selected the order, then this is disabled.)
@@ -170,9 +170,8 @@ class LocationsController < ApplicationController
     # args[:where] = [args[:where]].flatten.compact
 
     # "By name" means something different to observation.
-    if ["name", "box_area", ""].include?(args[:order_by])
-      args[:order_by] = "where"
-    end
+    nosorts = ["name", "box_area", "reverse_name", "reverse_box_area", ""]
+    args[:order_by] = "where" if nosorts.include?(args[:order_by])
 
     args[:search_where] ||= ""
     if args[:pattern]
