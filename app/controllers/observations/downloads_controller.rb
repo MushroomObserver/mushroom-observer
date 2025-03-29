@@ -54,7 +54,7 @@ module Observations
 
     def create_and_render_report
       report = create_report(
-        query: @query, format: @format, encoding: @encoding
+        query: @query, format: @format, encoding: @encoding, user: @user
       )
       render_report(report)
     end
