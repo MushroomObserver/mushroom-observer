@@ -26,7 +26,6 @@ class InatImportJob < ApplicationJob
     ensure_importing_own_observations(api_token)
     @inat_import.update(token: api_token, state: "Importing")
     import_requested_observations
-
   rescue StandardError => e
     log("Error occurred: #{e.message}")
     @inat_import.add_response_error(e)
