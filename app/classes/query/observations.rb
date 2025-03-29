@@ -36,7 +36,7 @@ class Query::Observations < Query::BaseAR
                include_all_name_proposals: :boolean,
                exclude_consensus: :boolean },
       confidence: [:float],
-      needs_naming: :boolean,
+      needs_naming: User,
       # clade: :string, # content_filter
       # lichen: :boolean, # content_filter
 
