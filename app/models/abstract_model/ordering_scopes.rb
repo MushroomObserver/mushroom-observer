@@ -326,7 +326,7 @@ module AbstractModel::OrderingScopes
     end
 
     def order_names_by_name
-      with_correct_spelling.order(Name[:sort_name].asc)
+      order(Name[:sort_name].asc)
     end
 
     def order_observations_by_name
@@ -338,6 +338,8 @@ module AbstractModel::OrderingScopes
         order(arel_table[:name].asc)
       elsif column_names.include?("title")
         order(arel_table[:title].asc)
+      else
+        order_by_default
       end
     end
   end

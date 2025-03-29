@@ -94,15 +94,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_select("#caption-full", text: /#{regions_joined}/)
   end
 
-  def test_index_sorted_by_non_default
-    login
-
-    sort_orders = %w[name user]
-    sort_orders.each do |order|
-      get(:index, params: { by: order })
-      assert_displayed_title(:OBSERVATIONS.l)
-      assert_sorted_by(order)
-    end
+  def test_index_with_non_default_sort
+    check_index_sorting
   end
 
   def test_index_sorted_by_invalid_order

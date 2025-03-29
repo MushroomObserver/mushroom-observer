@@ -1,7 +1,7 @@
 <%
 @container = :full
 add_index_title(@query)
-add_sorter(@query, users_index_sorts(in_admin_mode?))
+add_sorter(@query, users_index_sorts(admin: in_admin_mode?))
 
 flash_error(@error) if @error && @objects.empty?
 %>

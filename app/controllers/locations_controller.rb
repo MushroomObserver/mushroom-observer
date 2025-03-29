@@ -170,7 +170,9 @@ class LocationsController < ApplicationController
     args[:where] = [args[:where]].flatten.compact
 
     # "By name" means something different to observation.
-    args[:by] = "where" if args[:by].blank? || (args[:by] == "name")
+    if ["name", "box_area", ""].include?(args[:order_by])
+      args[:order_by] = "where"
+    end
 
     if args[:pattern]
       search = SearchParams.new(phrase: args[:pattern])

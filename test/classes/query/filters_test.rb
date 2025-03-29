@@ -38,18 +38,24 @@ class Query::FiltersTest < UnitTestCase
     assert_query(expects, :Observation, has_specimen: "no")
   end
 
-  def test_filtering_content_with_lichen
-    expects_obs = Observation.lichen(:yes).order_by_default
+  def test_filtering_observations_with_lichen
+    expects_obs = Observation.lichen(true).order_by_default
     assert_query(expects_obs, :Observation, lichen: "yes")
-    expects_names = Name.with_correct_spelling.lichen(:yes).
+  end
+
+  def test_filtering_names_with_lichen
+    expects_names = Name.with_correct_spelling.lichen(true).
                     order_by_default
     assert_query(expects_names, :Name, lichen: "yes")
   end
 
-  def test_filtering_content_with_non_lichen
-    expects_obs = Observation.lichen(:no).order_by_default
+  def test_filtering_observations_with_non_lichen
+    expects_obs = Observation.lichen(false).order_by_default
     assert_query(expects_obs, :Observation, lichen: "no")
-    expects_names = Name.with_correct_spelling.lichen(:no).order_by_default
+  end
+
+  def test_filtering_names_with_non_lichen
+    expects_names = Name.with_correct_spelling.lichen(false).order_by_default
     assert_query(expects_names, :Name, lichen: "no")
   end
 

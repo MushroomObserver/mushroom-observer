@@ -10,7 +10,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
   included do # rubocop:disable Metrics/BlockLength
     # default ordering for index queries
     scope :order_by_default,
-          -> { order(when: :desc, id: :desc) }
+          -> { order_by(::Query::Observations.default_order) }
     # The order used on the home page
     scope :by_activity,
           -> { order_by(:rss_log) }
@@ -65,9 +65,8 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # Checks Name[:search_name], which includes the author
     # (unlike Observation[:text_name]) and is not cached on the obs
     scope :pattern, lambda { |phrase|
-      ids = name_search_name_observation_ids(phrase)
-      ids += search_columns(Observation[:where], phrase).map(&:id)
-      where(id: ids).distinct
+      joins(:name).distinct.
+        search_columns((Observation[:where] + Name[:search_name]), phrase)
     }
     # More comprehensive search of Observation fields + Name.search_name,
     # (plus comments ?).
@@ -78,18 +77,13 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     #   ids += Observation.comments_has(phrase).map(&:id)
     #   where(id: ids).distinct
     # }
-    def self.name_search_name_observation_ids(phrase)
-      Name.search_name_has(phrase).
-        includes(:observations).map(&:observations).flatten.uniq
-    end
 
-    scope :lichen, lambda { |boolish = :yes|
-      # if false, returns all
-      boolish = :yes if boolish == true
-      case boolish.to_s.to_sym
-      when :yes
+    # Query parses "yes" and "no", "on" and "off" to boolean. nil ignored.
+    scope :lichen, lambda { |bool = true|
+      case bool
+      when true
         where(Observation[:lifeform].matches("%lichen%"))
-      when :no
+      when false
         where(Observation[:lifeform].does_not_match("% lichen %"))
       end
     }
@@ -433,8 +427,11 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :has_specimen,
           ->(bool = true) { where(specimen: bool) }
 
-    scope :has_sequences,
-          ->(bool = true) { joined_relation_condition(:sequences, bool:) }
+    scope :has_sequences, lambda { |bool = true|
+      return all unless bool
+
+      joined_relation_condition(:sequences, bool:)
+    }
 
     # For activerecord subqueries, no need to pre-map the primary key (id)
     # but Lookup has to return something. Ids are cheapest.

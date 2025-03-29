@@ -150,7 +150,7 @@ class RssLog < AbstractModel
   belongs_to :species_list
 
   scope :order_by_default,
-        -> { order(updated_at: :desc, id: :desc) }
+        -> { order_by(::Query::RssLogs.default_order) }
 
   scope :type, lambda { |str|
     types = str.to_s.split

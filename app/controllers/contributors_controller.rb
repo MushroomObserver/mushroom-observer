@@ -11,14 +11,14 @@ class ContributorsController < ApplicationController
     build_index_with_query
   end
 
-  private
-
   def controller_model_name
     "User"
   end
 
+  private
+
   def default_sort_order
-    :contribution
+    ::Query::Users.default_order # :contribution
   end
 
   def unfiltered_index_opts

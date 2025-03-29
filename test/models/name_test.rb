@@ -3573,10 +3573,11 @@ class NameTest < UnitTestCase
     )
   end
 
-  def test_scope_has_comments_false
-    assert_includes(Name.has_comments(false), names(:bugs_bunny_one))
-    assert_not_includes(Name.has_comments(false), names(:fungi))
-  end
+  # Currently Query ignores false, so scope does too.
+  # def test_scope_has_comments_false
+  #   assert_includes(Name.has_comments(false), names(:bugs_bunny_one))
+  #   assert_not_includes(Name.has_comments(false), names(:fungi))
+  # end
 
   def test_scope_comments_has
     assert_includes(Name.comments_has("do not change"), names(:fungi))

@@ -85,12 +85,12 @@ class PatternSearch::NameTest < UnitTestCase
   end
 
   def test_name_search_lichen
-    expect = Name.with_correct_spelling.lichen(:yes)
+    expect = Name.with_correct_spelling.lichen(true)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("lichen:yes")
     assert_name_arrays_equal(expect, x.query.results, :sort)
 
-    expect = Name.with_correct_spelling.lichen(:no)
+    expect = Name.with_correct_spelling.lichen(false)
     assert_not_empty(expect)
     x = PatternSearch::Name.new("lichen:no")
     assert_name_arrays_equal(expect, x.query.results, :sort)

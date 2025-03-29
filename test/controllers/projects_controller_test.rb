@@ -161,14 +161,7 @@ class ProjectsControllerTest < FunctionalTestCase
   end
 
   def test_index_with_non_default_sort
-    login
-
-    sort_orders = %w[created_at summary]
-    sort_orders.each do |order|
-      get(:index, params: { by: order })
-      assert_displayed_title(:PROJECTS.l)
-      assert_sorted_by(order)
-    end
+    check_index_sorting
   end
 
   def test_index_member
