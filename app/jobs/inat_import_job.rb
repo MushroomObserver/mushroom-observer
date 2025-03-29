@@ -378,11 +378,7 @@ class InatImportJob < ApplicationJob
                  archive: sequence[:archive],
                  accession: sequence[:accession],
                  notes: sequence[:notes] }
-      api = API2.execute(params)
-      next if api.errors.any?
-
-      seq = api.results.first
-      seq.update(user: @user)
+      API2.execute(params)
     end
   end
 
