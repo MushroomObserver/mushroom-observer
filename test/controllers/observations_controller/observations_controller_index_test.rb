@@ -103,11 +103,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     login
 
-    exception = assert_raise(RuntimeError) do
-      get(:index, params: { by: by })
-    end
-    assert_equal("Can't figure out how to sort Observations by :#{by}.",
-                 exception.message)
+    get(:index, params: { by: by })
+    assert_flash_text("Can't figure out how to sort Observations by :#{by}.")
   end
 
   def test_index_with_id
