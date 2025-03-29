@@ -187,6 +187,12 @@ class LocationsControllerTest < FunctionalTestCase
     check_index_sorting
   end
 
+  def test_index_sorted_by_scientific_name
+    login("roy")
+
+    check_index_sorted_by(:name, do_login: false)
+  end
+
   def test_index_project
     project = projects(:open_membership_project)
 

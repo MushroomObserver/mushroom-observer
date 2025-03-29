@@ -3726,9 +3726,14 @@ class NameTest < UnitTestCase
     # MycoBank allows square brackets in author to show correction. Ex:
     # Xylaria symploci Pande, Waingankar, Punekar & Ran[a]dive
     # https://www.mycobank.org/page/Name%20details%20page/field/Mycobank%20%23/585173
-    assert(Name.new(valid_params.merge({ author: "Ben[e]dix" })).
-     valid?, "Square brackets should be allowable in Author")
-
+    assert(Name.new(valid_params.merge({ author: "Ben[e]dix" })).valid?,
+           "Square brackets should be allowable in Author")
+    author = "V. Kučera".unicode_normalize
+    assert(Name.new(valid_params.merge({ author: author })).valid?,
+           "Composed Unicode chars should be allowable in author")
+    author = "V. Kučera".unicode_normalize(:nfd)
+    assert(Name.new(valid_params.merge({ author: author })).valid?,
+           "author with uncomposed Unicode chars should pass validation")
     # ----- Prove that including bad character prevents validation of Name
     # Users have added numbers manually
     # or pasted an IF or MB line into the Name form
@@ -3742,7 +3747,7 @@ class NameTest < UnitTestCase
 
   # Prove which characters that are allowed in author
   # are allowed/disallowed at end
-  def test_author_ending
+  def test_author_allowed_ending
     # Start with valid Name params, author ending in letter,
     # using params distinct from fixtures to avoid conflict.
     valid_params = {
@@ -3754,6 +3759,13 @@ class NameTest < UnitTestCase
     }
     assert(Name.new(valid_params).valid?,
            "Author ending in letter should be validated")
+    author = "Lizoň".unicode_normalize
+    assert(Name.new(valid_params.merge({ author: author })).valid?,
+           "Author ending in composed unicode char should pass validation")
+    author = "Lizoň".unicode_normalize(:nfd)
+    assert(Name.new(valid_params.merge({ author: author })).valid?,
+           "Author ending in uncomposed unicode char should pass validation")
+
     assert(Name.new(valid_params.merge({ author: "Benedix." })).valid?,
            "Period at end of author should be allowable")
 
