@@ -137,7 +137,18 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   end
 
   def sorted_index_opts
-    { query_args: { order_by: params[:by] },
+    order_by = params[:by]
+    scope = :"order_by_#{order_by.sub(/^reverse_/, "")}"
+
+    unless AbstractModel.private_methods(false).include?(scope)
+      model = controller_model_name.pluralize
+      flash_error(
+        "Can't figure out how to sort #{model} by :#{order_by}."
+      )
+      order_by = default_sort_order
+    end
+
+    { query_args: { order_by: },
       display_opts: index_display_at_id_opts }
   end
 
