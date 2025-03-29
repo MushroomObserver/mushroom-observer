@@ -12,9 +12,6 @@ class RssLogsControllerTest < FunctionalTestCase
     assert_template("shared/_matrix_box")
     assert_link_in_html(:app_intro.t, info_intro_path)
 
-    get(:index)
-    assert_template("shared/_matrix_box")
-
     get(:rss)
     assert_template(:rss)
 

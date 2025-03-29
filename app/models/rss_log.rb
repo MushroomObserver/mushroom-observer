@@ -152,8 +152,10 @@ class RssLog < AbstractModel
   scope :order_by_default,
         -> { order_by(::Query::RssLogs.default_order) }
 
-  scope :type, lambda { |str|
-    types = str.to_s.split
+  scope :type, lambda { |types|
+    return all if types.to_s == "all"
+
+    types = types.to_s.split unless types.is_a?(Array)
     types &= ALL_TYPE_TAGS.map(&:to_s)
     return none if types.empty?
 
