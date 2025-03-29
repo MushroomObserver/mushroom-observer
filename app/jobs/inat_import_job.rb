@@ -349,6 +349,7 @@ class InatImportJob < ApplicationJob
       find { |id| id[:taxon][:name] == name.text_name }
   end
 
+  # iNat login of the iNat user who suggested the id on iNat
   def suggester(suggestion)
     suggestion[:user][:login]
   end
