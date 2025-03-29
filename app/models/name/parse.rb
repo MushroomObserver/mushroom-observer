@@ -224,6 +224,7 @@ module Name::Parse
   STANDARD_SECONDARY_RANKS = {
     f: "f.",
     sect: "sect.",
+    section: "sect.",
     sp: "sp.",
     stirps: "stirps",
     subg: "subg.",
