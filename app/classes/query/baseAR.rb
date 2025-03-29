@@ -21,10 +21,6 @@ class Query::BaseAR
 
   attr_writer :record
 
-  def parameter_declarations
-    self.class.parameter_declarations
-  end
-
   def self.parameter_declarations
     {
       # join: [:string],
@@ -38,17 +34,13 @@ class Query::BaseAR
     }
   end
 
-  def takes_parameter?(key)
-    self.class.takes_parameter?(key)
-  end
+  delegate :parameter_declarations, to: :class
 
   def self.takes_parameter?(key)
     parameter_declarations.key?(key)
   end
 
-  def scope_parameters
-    self.class.scope_parameters
-  end
+  delegate :takes_parameter?, to: :class
 
   def self.scope_parameters
     excepts = [:id_in_set, :preference_filter]
@@ -56,9 +48,7 @@ class Query::BaseAR
                         [:id_in_set]
   end
 
-  def content_filter_parameters
-    self.class.content_filter_parameters
-  end
+  delegate :scope_parameters, to: :class
 
   def self.content_filter_parameters
     filters = Query::Filter.all
@@ -66,6 +56,8 @@ class Query::BaseAR
       p[f.sym] = f.type
     end.freeze
   end
+
+  delegate :content_filter_parameters, to: :class
 
   # A "current_or_related_query" may be called for links:
   # (1) for a new query on a related target model, using the current_query as

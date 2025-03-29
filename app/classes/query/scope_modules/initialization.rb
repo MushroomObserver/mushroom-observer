@@ -32,8 +32,8 @@ module Query::ScopeModules::Initialization
   def initialize_scopes
     # `where`/`join` strings never come from user, so no need to sanitize.
     # (I believe they are only used by the site stats page. -JPH 20190708)
-    self.where += params[:where] if params[:where]
-    add_join(params[:join]) if params[:join]
+    # self.where += params[:where] if params[:where]
+    # add_join(params[:join]) if params[:join]
     send_content_filters_to_rss_log_subqueries
     initialize_parameter_set
     filter_misspellings_for_name_queries
