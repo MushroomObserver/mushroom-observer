@@ -13,6 +13,7 @@ class InatImportJob < ApplicationJob
   ICONIC_TAXA = "Fungi,Protozoa"
   # This string + date is added to description of iNat observation
   IMPORTED_BY_MO = "Imported by Mushroom Observer"
+  MO_API_KEY_NOTES = InatImportsController::MO_API_KEY_NOTES
 
   queue_as :default
 
@@ -22,6 +23,7 @@ class InatImportJob < ApplicationJob
       "InatImportJob #{inat_import.id} started, user: #{inat_import.user_id}"
     )
     @user = @inat_import.user
+    @user_api_key = APIKey.find_by(user: @user, notes: MO_API_KEY_NOTES).key
 
     access_token =
       use_auth_code_to_obtain_oauth_access_token(@inat_import.token)
@@ -195,7 +197,7 @@ class InatImportJob < ApplicationJob
          (suggester = User.find_by(inat_username: suggester(suggestion(name))))
         suggester
       else
-        @inat_manager
+        @user
       end
     add_naming_with_vote(name: @observation.name, user: user)
     @observation.log(:log_observation_created)
@@ -241,7 +243,7 @@ class InatImportJob < ApplicationJob
 
   def add_provisional_name(prov_name)
     params = { method: :post, action: :name,
-               api_key: inat_manager_key.key,
+               api_key: @user_api_key,
                name: "#{prov_name} crypt. temp.",
                rank: "Species" }
     api = API2.execute(params)
@@ -274,7 +276,7 @@ class InatImportJob < ApplicationJob
 
   def photo_importer_params(photo)
     { method: :post, action: :image,
-      api_key: inat_manager_key.key,
+      api_key: @user_api_key,
       upload_url: photo.url,
 
       copyright_holder: photo.copyright_holder,
@@ -372,7 +374,7 @@ class InatImportJob < ApplicationJob
   def add_inat_sequences
     @inat_obs.sequences.each do |sequence|
       params = { action: :sequence, method: :post,
-                 api_key: inat_manager_key.key,
+                 api_key: @user_api_key,
                  observation: @observation.id,
                  locus: sequence[:locus],
                  bases: sequence[:bases],

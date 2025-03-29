@@ -36,6 +36,7 @@ class InatImportJobTest < ActiveJob::TestCase
   # Prevent stubs from persisting between test methods because
   # the same request (/users/me) needs diffferent responses
   def setup
+    @default_user = users(:rolf)
     @stubs = []
   end
 
@@ -54,12 +55,12 @@ class InatImportJobTest < ActiveJob::TestCase
   def test_import_job_basic_obs
     file_name = "calostoma_lutescens"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    user = users(:rolf)
+
     inat_import = create_inat_import(inat_response: mock_inat_response)
     # You can import only your own observations.
     # So adjust importing user's inat_username to be the Inat login
     # of the iNat user who made the iNat observation
-    user.update(inat_username: inat_import.inat_username)
+    @default_user.update(inat_username: inat_import.inat_username)
 
     # Add objects which are not included in fixtures
     name = Name.create(
@@ -67,9 +68,9 @@ class InatImportJobTest < ActiveJob::TestCase
       search_name: "Calostoma lutescens (Schweinitz) Burnap",
       display_name: "**__Calostoma lutescens__** (Schweinitz) Burnap",
       rank: "Species",
-      user: user
+      user: @default_user
     )
-    loc = Location.create(user: user,
+    loc = Location.create(user: @default_user,
                           name: "Sevier Co., Tennessee, USA",
                           north: 36.043571, south: 35.561849,
                           east: -83.253046, west: -83.794123)
@@ -78,7 +79,7 @@ class InatImportJobTest < ActiveJob::TestCase
                            mock_inat_response: mock_inat_response)
 
     QueuedEmail.queue = true
-    before_emails_to_user = QueuedEmail.where(to_user: user).count
+    before_emails_to_user = QueuedEmail.where(to_user: @default_user).count
 
     Inat::PhotoImporter.stub(:new,
                              stub_mo_photo_importer(mock_inat_response)) do
@@ -89,7 +90,7 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     obs = Observation.last
-    standard_assertions(obs: obs, user: user, name: name, loc: loc)
+    standard_assertions(obs: obs, name: name, loc: loc)
 
     # This iNat obs has only 1 suggested ID.
     # The suggester is the person who made the iNat observation.
@@ -116,7 +117,7 @@ class InatImportJobTest < ActiveJob::TestCase
                  "Missing 'none' for Observation Fields")
 
     assert_equal(
-      before_emails_to_user, QueuedEmail.where(to_user: user).count,
+      before_emails_to_user, QueuedEmail.where(to_user: @default_user).count,
       "Should not have sent any emails to importing user for this obs"
     )
     QueuedEmail.queue = false
@@ -186,17 +187,16 @@ class InatImportJobTest < ActiveJob::TestCase
   def import_job_obs_with_one_photo
     file_name = "evernia"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    user = users(:rolf)
     inat_import = create_inat_import(inat_response: mock_inat_response)
 
     # Add objects which are not included in fixtures
     name = Name.create(
       text_name: "Evernia", author: "Ach.", search_name: "Evernia Ach.",
       display_name: "**__Evernia__** Ach.",
-      rank: "Genus", user: user
+      rank: "Genus", user: @default_user
     )
     loc = Location.create(
-      user: user,
+      user: @default_user,
       name: "Troutdale, Multnomah Co., Oregon, USA",
       north: 45.5609, south: 45.5064,
       east: -122.367, west: -122.431
@@ -236,7 +236,6 @@ class InatImportJobTest < ActiveJob::TestCase
   def test_import_job_obs_with_many_namings
     file_name = "tremella_mesenterica"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    user = users(:rolf)
     inat_import = create_inat_import(inat_response: mock_inat_response)
 
     name = Name.find_or_create_by(text_name: "Tremellales",
@@ -244,7 +243,7 @@ class InatImportJobTest < ActiveJob::TestCase
                                   search_name: "Tremellales Fr.",
                                   display_name: "Tremellales",
                                   rank: "Order",
-                                  user: user)
+                                  user: @default_user)
 
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
@@ -268,7 +267,6 @@ class InatImportJobTest < ActiveJob::TestCase
   def test_import_job_obs_with_sequence_and_multiple_ids
     file_name = "lycoperdon"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    user = users(:rolf)
     inat_import = create_inat_import(inat_response: mock_inat_response)
 
     name = Name.create(
@@ -276,7 +274,7 @@ class InatImportJobTest < ActiveJob::TestCase
       search_name: "Lycoperdon Pers.",
       display_name: "**__Lycoperdon__** Pers.",
       rank: "Genus",
-      user: user
+      user: @default_user
     )
 
     stub_inat_interactions(inat_import: inat_import,
@@ -295,7 +293,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
     assert(obs.images.any?, "Obs should have images")
     assert(obs.sequences.one?, "Obs should have a sequence")
-    assert_equal(user, obs.sequences.first.user,
+    assert_equal(@default_user, obs.sequences.first.user,
                  "Sequences should belong to the user who imported the obs")
 
     ids = JSON.parse(mock_inat_response)["results"].first["identifications"]
@@ -324,7 +322,7 @@ class InatImportJobTest < ActiveJob::TestCase
       display_name: "**__Inonotus obliquus__** f. **__sterilis__** " \
                     "(Vanin) Balandaykin & Zmitr.",
       rank: "Form",
-      user: users(:rolf)
+      user: @default_user
     )
 
     stub_inat_interactions(inat_import: inat_import,
@@ -348,14 +346,13 @@ class InatImportJobTest < ActiveJob::TestCase
     file_name = "xeromphalina_campanella_complex"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
     inat_import = create_inat_import(inat_response: mock_inat_response)
-
     # Add objects which are not included in fixtures
     name = Name.create(
       text_name: "Xeromphalina campanella group", author: "",
       search_name: "Xeromphalina campanella group",
       display_name: "**__Xeromphalina campanella__** group",
       rank: "Group",
-      user: users(:rolf)
+      user: @default_user
     )
 
     stub_inat_interactions(inat_import: inat_import,
@@ -389,7 +386,7 @@ class InatImportJobTest < ActiveJob::TestCase
       search_name: 'Arrhenia "sp-NY02" S.D. Russell crypt. temp.',
       display_name: '**__Arrhenia "sp-NY02"__** S.D. Russell crypt. temp.',
       rank: "Species",
-      user: inat_manager
+      user: @default_user
     )
 
     stub_inat_interactions(inat_import: inat_import,
@@ -438,7 +435,8 @@ class InatImportJobTest < ActiveJob::TestCase
     standard_assertions(obs: obs, name: name)
 
     proposed_name = obs.namings.first
-    assert_equal(inat_manager, proposed_name.user,
+    assert_equal(@default_user,
+                 proposed_name.user,
                  "Name should be proposed by #{inat_manager.login}")
     used_references = 2
     assert(
@@ -466,7 +464,7 @@ class InatImportJobTest < ActiveJob::TestCase
       search_name: 'Donadinia "sp-PNW01" crypt. temp.',
       display_name: '**__Donadinia "sp-PNW01"__** crypt. temp.',
       rank: "Species",
-      user: inat_manager
+      user: @default_user
     )
 
     stub_inat_interactions(inat_import: inat_import,
@@ -522,8 +520,7 @@ class InatImportJobTest < ActiveJob::TestCase
   end
 
   def test_import_update_inat_username_if_job_succeeds
-    user = users(:rolf)
-    assert_empty(user.inat_username,
+    assert_empty(@default_user.inat_username,
                  "Test needs user fixture without an iNat username")
 
     file_name = "zero_results"
@@ -538,14 +535,14 @@ class InatImportJobTest < ActiveJob::TestCase
       InatImportJob.perform_now(inat_import)
     end
 
-    assert_equal(inat_import.inat_username, user.reload.inat_username,
+    assert_equal(inat_import.inat_username, @default_user.reload.inat_username,
                  "Failed to update user's inat_username")
   end
 
   def test_import_multiple
     file_name = "listed_ids"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    inat_import = InatImport.create(user: users(:rolf),
+    inat_import = InatImport.create(user: @default_user,
                                     inat_ids: "231104466,195434438",
                                     token: "MockCode",
                                     inat_username: "anything")
@@ -576,7 +573,7 @@ class InatImportJobTest < ActiveJob::TestCase
   def test_import_all
     file_name = "import_all"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    inat_import = InatImport.create(user: users(:rolf),
+    inat_import = InatImport.create(user: @default_user,
                                     inat_ids: "",
                                     import_all: true,
                                     token: "MockCode",
@@ -679,7 +676,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
   # The InatImport object which is created in InatImportController#create
   # and recovered in InatImportController#authorization_response
-  def create_inat_import(user: users(:rolf),
+  def create_inat_import(user: @default_user,
                          inat_response: mock_inat_response)
     InatImport.create(
       user: user, token: "MockCode",
@@ -884,7 +881,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
   # -------- Standard Test assertions
 
-  def standard_assertions(obs:, user: inat_manager, name: nil, loc: nil)
+  def standard_assertions(obs:, user: @default_user, name: nil, loc: nil)
     assert_not_nil(obs.rss_log, "Failed to log Observation")
     assert_equal("mo_inat_import", obs.source)
     assert_equal(loc, obs.location) if loc
