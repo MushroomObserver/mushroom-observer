@@ -290,16 +290,7 @@ class InatImportJob < ApplicationJob
       original_name: photo.original_name }
   end
 
-  # Key for managing iNat imports; avoids requiring each user to have own key.
-  # NOTE: Can this be done more elegantly via enviroment variable?
-  # It now relies on duplicating the following in the live db & fixtures:
-  # User with login: MO Webmaster, API_key with `notes: "inat import"`
-  # 2024-06-18 jdc
-  def inat_manager_key
-    APIKey.where(user: @inat_manager, notes: "inat import").first
-  end
-
-  def update_names_and_proposals
+   def update_names_and_proposals
     adjust_consensus_name_naming # also adds naming for provisionals
 
     Observation::NamingConsensus.new(@observation).calc_consensus
