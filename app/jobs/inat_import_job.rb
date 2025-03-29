@@ -18,12 +18,7 @@ class InatImportJob < ApplicationJob
   queue_as :default
 
   def perform(inat_import)
-    @inat_import = inat_import
-    log(
-      "InatImportJob #{inat_import.id} started, user: #{inat_import.user_id}"
-    )
-    @user = @inat_import.user
-    @user_api_key = APIKey.find_by(user: @user, notes: MO_API_KEY_NOTES).key
+    create_ivars(inat_import)
 
     access_token =
       use_auth_code_to_obtain_oauth_access_token(@inat_import.token)
@@ -31,6 +26,7 @@ class InatImportJob < ApplicationJob
     ensure_importing_own_observations(api_token)
     @inat_import.update(token: api_token, state: "Importing")
     import_requested_observations
+
   rescue StandardError => e
     log("Error occurred: #{e.message}")
     @inat_import.add_response_error(e)
@@ -39,6 +35,15 @@ class InatImportJob < ApplicationJob
   end
 
   private
+
+  def create_ivars(inat_import)
+    @inat_import = inat_import
+    log(
+      "InatImportJob #{inat_import.id} started, user: #{inat_import.user_id}"
+    )
+    @user = @inat_import.user
+    @user_api_key = APIKey.find_by(user: @user, notes: MO_API_KEY_NOTES).key
+  end
 
   # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
   def use_auth_code_to_obtain_oauth_access_token(auth_code)
