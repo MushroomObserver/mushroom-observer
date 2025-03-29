@@ -64,8 +64,9 @@ module Query::ScopeModules::HighLevelQueries
   end
 
   # Tries to be light about it, by selecting only two values.
-  # `list_by` is a `Model[:column]` - it's checking the first four chars.
+  # `list_by` expects `Model[:column]` - it's checking the first four chars.
   def minimal_query_of_all_records
+    # Arel.sql("LEFT(#{list_by.to_sql},4)")
     @scopes.select(model[:id], list_by[0..3].as("title")).distinct # .
     # map { |record| record.attributes.symbolize_keys }
   end
