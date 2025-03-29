@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Query::ExternalSites < Query::Base
+class Query::ExternalSites < Query::BaseAR
   def model
     @model ||= ExternalSite
   end
@@ -12,13 +12,7 @@ class Query::ExternalSites < Query::Base
     )
   end
 
-  def initialize_flavor
-    add_id_in_set_condition
-    add_search_condition("external_sites.name", params[:name_has])
-    super
-  end
-
   def self.default_order
-    "name"
+    :name
   end
 end

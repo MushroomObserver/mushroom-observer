@@ -138,6 +138,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     true
   end
 
+  # This only deals with :by passed in url params.
   def sorted_index_opts
     { query_args: { order_by: order_by_or_flash_if_unknown },
       display_opts: index_display_at_id_opts }.freeze

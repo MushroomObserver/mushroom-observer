@@ -54,6 +54,14 @@ class Query::Base
     parameter_declarations.select { |key, _v| key.to_s.include?("_query") }
   end
 
+  def scope_parameters
+    self.class.scope_parameters
+  end
+
+  def self.scope_parameters
+    parameter_declarations.keys.except(*subquery_parameters)
+  end
+
   # A "current_or_related_query" may be called for links:
   # (1) for a new query on a related target model, using the current_query as
   #     the filtering subquery.

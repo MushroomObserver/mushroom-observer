@@ -9,11 +9,12 @@ module Locations
     def show
       @query = find_or_create_query(:Location)
       @any_content_filters_applied = check_if_preference_filters_applied
-      columns = %w[name north south east west].map { |x| "locations.#{x}" }
-      args = { select: "DISTINCT(locations.id), #{columns.join(", ")}",
-               limit: 10_000 }
-      @locations = @query.select_all(args).map do |loc|
-        Mappable::MinimalLocation.new(loc)
+      columns = [:id, :name, :north, :south, :east, :west].map do |col|
+        Location[col]
+      end
+      @locations = @query.query.select(*columns).distinct.
+                   limit(MO.query_max_array).map do |loc|
+        Mappable::MinimalLocation.new(loc.attributes.symbolize_keys)
       end
     end
   end

@@ -100,11 +100,9 @@ module Query::Modules::Validation
   # Validate the subquery's params by creating another Query instance
   # and save it in @subqueries to facilitate access
   def validate_subquery(param, val, param_type)
-    if param_type.keys.length != 1
-      raise(
-        "Invalid subquery declaration for :#{param} for #{model} " \
-        "query! (wrong number of keys in hash)"
-      )
+    unless param_type.key?(:subquery)
+      str = "Invalid subquery declaration for :#{param} for #{model} query."
+      raise(str)
     end
     submodel = param_type.values.first
     subquery = Query.new(submodel, val)

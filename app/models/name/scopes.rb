@@ -198,6 +198,8 @@ module Name::Scopes
     #   cols = Name.searchable_columns + Name[:classification]
     #   search_columns(cols, phrase)
     # }
+    # scope :search_name,
+    #       ->(phrase) { search_columns(Name[:search_name], phrase) }
     # # A more comprehensive search of Name fields, plus comments/descriptions.
     # scope :search_content_and_associations, lambda { |phrase|
     #   fields = Name.search_content(phrase).map(&:id)
@@ -300,6 +302,14 @@ module Name::Scopes
           where(author: [parsed_name.author, ""])
       end
     }
+
+    scope :description_query, lambda { |hash|
+      joins(:descriptions).subquery(:NameDescription, hash)
+    }
+    scope :observation_query, lambda { |hash|
+      joins(:observations).subquery(:Observation, hash)
+    }
+
     scope :show_includes, lambda {
       strict_loading.includes(
         { comments: :user },

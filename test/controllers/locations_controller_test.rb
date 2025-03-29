@@ -187,6 +187,10 @@ class LocationsControllerTest < FunctionalTestCase
     check_index_sorting
   end
 
+  def test_index_sorted_by_box_area
+    check_index_sorted_by(:reverse_box_area, do_login: true)
+  end
+
   def test_index_sorted_by_scientific_name
     login("roy")
 

@@ -118,6 +118,13 @@ module AbstractModel::OrderingScopes
       order(arel_table[:created_at].desc)
     end
 
+    def order_by_curator
+      joins(:curators).distinct.order(
+        User[:name].when(nil).then(User[:login]).when("").then(User[:login]).
+        else(User[:name]).asc
+      )
+    end
+
     def order_by_date
       if column_names.include?("when")
         order(arel_table[:when].desc)

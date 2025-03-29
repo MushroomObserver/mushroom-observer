@@ -32,25 +32,22 @@ module Observations
 
     def find_locations_matching_observations
       location_ids = Set[]
-      columns = %w[id lat lng gps_hidden location_id].map do |x|
-        "observations.#{x}"
+      columns = [:id, :lat, :lng, :gps_hidden, :location_id].map do |col|
+        Observation[col]
       end
-      args = {
-        select: columns.join(", "),
-        where: "observations.lat IS NOT NULL OR " \
-                "observations.location_id IS NOT NULL",
-        limit: 10_000
-      }
-      @observations =
-        @query.select_all(args).map do |obs|
-          obs.symbolize_keys!
-          # Adding this to the set is a flag to look up the location. Because we
-          # selected obs attributes not instances, we can't call `obs.location`
-          # and we shouldn't anyway. Getting the Locations in bulk is quicker.
-          location_ids << obs[:location_id].to_i if obs[:location_id].present?
-          obs[:lat] = obs[:lng] = nil if obs[:gps_hidden] == 1
-          Mappable::MinimalObservation.new(obs.except(:gps_hidden))
-        end
+      minimal_obs_query = @query.query.
+                          where(Observation[:lat].not_eq(nil).
+                                or(Observation[:location_id].not_eq(nil))).
+                          limit(MO.query_max_array).select(*columns)
+      @observations = minimal_obs_query.map do |obs|
+        obs = obs.attributes.symbolize_keys!
+        # Adding this to the set is a flag to look up the location. Because we
+        # selected obs attributes not instances, we can't call `obs.location`
+        # and we shouldn't anyway. Getting the Locations in bulk is quicker.
+        location_ids << obs[:location_id].to_i if obs[:location_id].present?
+        obs[:lat] = obs[:lng] = nil if obs[:gps_hidden].to_s.to_boolean == true
+        Mappable::MinimalObservation.new(obs.except(:gps_hidden))
+      end
 
       eager_load_related_locations(location_ids) unless location_ids.empty?
     end

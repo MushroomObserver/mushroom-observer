@@ -37,88 +37,92 @@ module Report
     end
 
     def rows_without_location
-      query.select_rows(
-        select: without_location_selects.join(","),
-        join: [:users, :names],
-        where: "observations.location_id IS NULL",
-        order: "observations.id ASC"
-      )
-    end
-
-    def rows_with_location
-      query.select_rows(
-        select: with_location_selects.join(","),
-        join: [:users, :locations, :names],
-        order: "observations.id ASC"
+      Observation.connection.select_rows(
+        query.query.joins(:user, :name).
+        where(location_id: nil).select(without_location_selects).
+        reorder(Observation[:id].asc)
       )
     end
 
     def without_location_selects
-      [
-        "observations.id",
-        "observations.when",
-        public_latlng_spec(:lat),
-        public_latlng_spec(:lng),
-        "observations.alt",
-        "observations.specimen",
-        "observations.is_collection_location",
-        "observations.vote_cache",
-        "observations.thumb_image_id",
-        "observations.notes",
-        "observations.updated_at",
-        "users.id",
-        "users.login",
-        "users.name",
-        "names.id",
-        "names.text_name",
-        "names.author",
-        "names.`rank`",
-        '""',
-        "observations.where",
-        '""',
-        '""',
-        '""',
-        '""',
-        '""',
-        '""'
-      ]
+      observation_selects + user_selects + name_selects + blanks_for_location
+    end
+
+    def rows_with_location
+      Observation.connection.select_rows(
+        query.query.joins(:user, :location, :name).
+        select(with_location_selects).
+        reorder(Observation[:id].asc)
+      )
     end
 
     def with_location_selects
+      observation_selects + user_selects + name_selects + location_selects
+    end
+
+    def observation_selects
       [
-        "observations.id",
-        "observations.when",
+        Observation[:id],
+        Observation[:when],
         public_latlng_spec(:lat),
         public_latlng_spec(:lng),
-        "observations.alt",
-        "observations.specimen",
-        "observations.is_collection_location",
-        "observations.vote_cache",
-        "observations.thumb_image_id",
-        "observations.notes",
-        "observations.updated_at",
-        "users.id",
-        "users.login",
-        "users.name",
-        "names.id",
-        "names.text_name",
-        "names.author",
-        "names.`rank`",
-        "locations.id",
-        "locations.name",
-        "locations.north",
-        "locations.south",
-        "locations.east",
-        "locations.west",
-        "locations.high",
-        "locations.low"
-      ]
+        Observation[:alt],
+        Observation[:specimen],
+        Observation[:is_collection_location],
+        Observation[:vote_cache],
+        Observation[:thumb_image_id],
+        Observation[:notes],
+        Observation[:updated_at]
+      ].freeze
     end
 
     def public_latlng_spec(col)
-      "IF(observations.gps_hidden AND " \
+      Arel.sql("IF(observations.gps_hidden AND " \
         "observations.user_id != #{User.current_id || -1}, " \
-        "NULL, observations.#{col})"
+        "NULL, observations.#{col})")
+    end
+
+    def user_selects
+      [
+        User[:id],
+        User[:login],
+        User[:name]
+      ].freeze
+    end
+
+    def name_selects
+      [
+        Name[:id],
+        Name[:text_name],
+        Name[:author],
+        Name[:rank]
+      ].freeze
+    end
+
+    def blanks_for_location
+      [
+        Arel::Nodes.build_quoted("").as("location_id"),
+        Observation[:where],
+        Arel::Nodes.build_quoted("").as("location_north"),
+        Arel::Nodes.build_quoted("").as("location_south"),
+        Arel::Nodes.build_quoted("").as("location_east"),
+        Arel::Nodes.build_quoted("").as("location_west"),
+        Arel::Nodes.build_quoted("").as("location_high"),
+        Arel::Nodes.build_quoted("").as("location_low")
+      ].freeze
+    end
+
+    def location_selects
+      [
+        Location[:id],
+        Location[:name],
+        Location[:north],
+        Location[:south],
+        Location[:east],
+        Location[:west],
+        Location[:high],
+        Location[:low]
+      ].freeze
     end
 
     def add_herbarium_labels!(rows, col)
@@ -172,7 +176,7 @@ module Report
 
     def plain_query
       # Sometimes the default order requires unnecessary joins!
-      query.sql(order: "")
+      query.query.reorder("").to_sql
     end
 
     def add_column!(rows, vals, col)

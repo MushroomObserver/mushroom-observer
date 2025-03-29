@@ -106,6 +106,10 @@ class LocationDescription < Description
     where(location: ids)
   }
 
+  scope :location_query, lambda { |hash|
+    joins(:location).subquery(:Location, hash)
+  }
+
   scope :show_includes, lambda {
     strict_loading.includes(
       :authors,

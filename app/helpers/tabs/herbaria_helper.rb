@@ -25,7 +25,7 @@ module Tabs
     def full_herbaria_index_sorts
       [
         ["records",     :sort_by_records.t],
-        ["user",        :sort_by_user.t],
+        ["curator",     :sort_by_curator.t],
         ["code",        :sort_by_code.t],
         ["name",        :sort_by_name.t],
         ["created_at",  :sort_by_created_at.t],
