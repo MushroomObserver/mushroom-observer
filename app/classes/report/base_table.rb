@@ -117,7 +117,7 @@ module Report
 
     def public_latlng_spec(col)
       "IF(observations.gps_hidden AND " \
-        "observations.user_id != #{User.current_id || -1}, " \
+        "observations.user_id != #{user&.id || -1}, " \
         "NULL, observations.#{col})"
     end
 
