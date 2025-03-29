@@ -20,6 +20,7 @@ class InatImportsControllerTest < FunctionalTestCase
   SITE = InatImportsController::SITE
   REDIRECT_URI = InatImportsController::REDIRECT_URI
   API_BASE = InatImportsController::API_BASE
+  MO_API_KEY_NOTES = InatImportsController::MO_API_KEY_NOTES
 
   def test_show
     import = inat_imports(:rolf_inat_import)
@@ -183,6 +184,8 @@ class InatImportsControllerTest < FunctionalTestCase
 
   def test_create_strip_inat_username
     user = users(:rolf)
+    assert(APIKey.where(user: user, notes: MO_API_KEY_NOTES).none?,
+           "Test needs user fixture without an MO API key for iNat imports")
     inat_username = " rolf "
     inat_import = inat_imports(:rolf_inat_import)
     assert_equal("Unstarted", inat_import.state,
@@ -200,6 +203,8 @@ class InatImportsControllerTest < FunctionalTestCase
                      consent: 1 })
     end
 
+    assert(APIKey.where(user: user, notes: MO_API_KEY_NOTES).one?,
+           "MO should create user API key for iNat imports if user had none")
     assert_response(:redirect)
     assert_equal(
       "rolf", inat_import.reload.inat_username,

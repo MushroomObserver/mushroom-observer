@@ -70,6 +70,8 @@ class InatImportsController < ApplicationController
     "&redirect_uri=#{REDIRECT_URI}&response_type=code".freeze
   # The iNat API. Not called here, but referenced in tests and ActiveJob
   API_BASE = "https://api.inaturalist.org/v1"
+  # notes for MO API Key used in iNat imports
+  MO_API_KEY_NOTES = "inat import"
 
   def show
     @tracker = InatImportJobTracker.find(params[:tracker_id])
@@ -81,14 +83,16 @@ class InatImportsController < ApplicationController
   def create
     return reload_form unless params_valid?
 
-    @inat_import = InatImport.find_or_create_by(user: User.current)
+    @user = User.current
+    assure_user_has_api_key_for_inat_import
+
+    @inat_import = InatImport.find_or_create_by(user: @user)
     @inat_import.update(state: "Authorizing",
                         import_all: params[:all],
                         importables: 0, imported_count: 0,
                         inat_ids: params[:inat_ids],
                         inat_username: params[:inat_username].strip,
                         response_errors: "", token: "", log: [], ended_at: nil)
-
     request_inat_user_authorization
   end
 
@@ -100,6 +104,12 @@ class InatImportsController < ApplicationController
     @inat_ids = params[:inat_ids]
     @inat_username = params[:inat_username]
     render(:new)
+  end
+
+  def assure_user_has_api_key_for_inat_import
+    return if APIKey.find_by(user: @user, notes: MO_API_KEY_NOTES)
+
+    APIKey.create(user: @user, notes: MO_API_KEY_NOTES)
   end
 
   def request_inat_user_authorization
