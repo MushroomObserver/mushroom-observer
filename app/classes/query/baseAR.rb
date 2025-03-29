@@ -10,10 +10,10 @@ class Query::BaseAR
   # include Query::Modules::GoogleSearch
   include Query::ScopeModules::HighLevelQueries
   include Query::ScopeModules::Initialization
-  include Query::ScopeModules::Joining
+  # include Query::ScopeModules::Joining
   # include Query::Modules::LookupObjects
-  include Query::ScopeModules::LowLevelQueries
-  include Query::ScopeModules::Ordering
+  # include Query::ScopeModules::LowLevelQueries
+  # include Query::ScopeModules::Ordering
   include Query::ScopeModules::SequenceOperators
   # include Query::Modules::Sql
   # include Query::Modules::Titles

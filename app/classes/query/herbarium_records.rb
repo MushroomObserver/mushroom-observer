@@ -5,8 +5,8 @@ class Query::HerbariumRecords < Query::BaseAR
     @model ||= HerbariumRecord
   end
 
-  def list_by
-    @list_by ||= HerbariumRecord[:initial_det]
+  def alphabetical_by
+    @alphabetical_by ||= HerbariumRecord[:initial_det]
   end
 
   def self.parameter_declarations

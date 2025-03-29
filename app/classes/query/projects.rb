@@ -5,8 +5,8 @@ class Query::Projects < Query::BaseAR
     @model ||= Project
   end
 
-  def list_by
-    @list_by ||= Project[:title]
+  def alphabetical_by
+    @alphabetical_by ||= Project[:title]
   end
 
   def self.parameter_declarations

@@ -5,8 +5,8 @@ class Query::Users < Query::BaseAR
     @model ||= User
   end
 
-  def list_by
-    @list_by ||= case params[:order_by]
+  def alphabetical_by
+    @alphabetical_by ||= case params[:order_by]
                  when "login", "reverse_login"
                    User[:login]
                  else

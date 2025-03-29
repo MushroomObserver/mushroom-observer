@@ -5,8 +5,8 @@ class Query::SpeciesLists < Query::BaseAR
     @model ||= SpeciesList
   end
 
-  def list_by
-    @list_by ||= case params[:order_by].to_s
+  def alphabetical_by
+    @alphabetical_by ||= case params[:order_by].to_s
                  when "user", "reverse_user"
                    User[:login]
                  else

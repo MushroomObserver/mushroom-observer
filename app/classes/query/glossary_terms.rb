@@ -5,8 +5,8 @@ class Query::GlossaryTerms < Query::BaseAR
     @model ||= GlossaryTerm
   end
 
-  def list_by
-    @list_by ||= GlossaryTerm[:name]
+  def alphabetical_by
+    @alphabetical_by ||= GlossaryTerm[:name]
   end
 
   def self.parameter_declarations

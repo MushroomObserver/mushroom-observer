@@ -5,8 +5,8 @@ class Query::Sequences < Query::BaseAR
     @model ||= Sequence
   end
 
-  def list_by
-    @list_by ||= Sequence[:locus]
+  def alphabetical_by
+    @alphabetical_by ||= Sequence[:locus]
   end
 
   def self.parameter_declarations

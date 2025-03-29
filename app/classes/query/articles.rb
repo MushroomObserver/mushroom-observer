@@ -5,8 +5,8 @@ class Query::Articles < Query::BaseAR
     @model ||= Article
   end
 
-  def list_by
-    @list_by ||= Article[:title]
+  def alphabetical_by
+    @alphabetical_by ||= Article[:title]
   end
 
   def self.parameter_declarations

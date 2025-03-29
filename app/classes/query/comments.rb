@@ -5,8 +5,8 @@ class Query::Comments < Query::BaseAR
     @model ||= Comment
   end
 
-  def list_by
-    @list_by ||= User[:login]
+  def alphabetical_by
+    @alphabetical_by ||= User[:login]
   end
 
   def self.parameter_declarations

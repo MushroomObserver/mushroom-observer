@@ -11,8 +11,8 @@ class Query::Names < Query::BaseAR
     @model ||= Name
   end
 
-  def list_by
-    @list_by ||= Name[:sort_name]
+  def alphabetical_by
+    @alphabetical_by ||= Name[:sort_name]
   end
 
   def self.parameter_declarations # rubocop:disable Metrics/MethodLength
