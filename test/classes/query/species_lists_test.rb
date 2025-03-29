@@ -8,27 +8,43 @@ class Query::SpeciesListsTest < UnitTestCase
   include QueryExtensions
 
   def test_species_list_all
-    ids = SpeciesList.order_by_default
-    assert_query(ids, :SpeciesList)
+    expects = SpeciesList.order_by_default
+    assert_query(expects, :SpeciesList)
   end
 
-  def test_species_list_sort_by_user
-    ids = SpeciesList.order_by_user.to_a
-    assert_query(ids, :SpeciesList, order_by: :user)
+  def test_species_list_order_by_name
+    expects = SpeciesList.order_by(:name)
+    assert_query(expects, :SpeciesList, order_by: :name)
   end
 
-  def test_species_list_sort_by_title
-    ids = SpeciesList.order(:title).to_a
-    assert_query(ids, :SpeciesList, order_by: :title)
+  def test_species_list_order_by_reverse_name
+    expects = SpeciesList.order_by(:reverse_name)
+    assert_query(expects, :SpeciesList, order_by: :reverse_name)
   end
 
-  def test_species_list_sort_by_where
-    ids = SpeciesList.order(where: :asc, id: :desc).to_a
-    assert_query(ids, :SpeciesList, order_by: :where)
+  def test_species_list_order_by_user
+    expects = SpeciesList.order_by(:user).to_a
+    assert_query(expects, :SpeciesList, order_by: :user)
   end
 
-  def test_species_list_by_rss_log
-    assert_query(SpeciesList.order_by_rss_log, :SpeciesList, order_by: :rss_log)
+  def test_species_list_order_by_reverse_user
+    expects = SpeciesList.order_by(:reverse_user).to_a
+    assert_query(expects, :SpeciesList, order_by: :reverse_user)
+  end
+
+  def test_species_list_order_by_title
+    expects = SpeciesList.order_by(:title).to_a
+    assert_query(expects, :SpeciesList, order_by: :title)
+  end
+
+  def test_species_list_order_by_where
+    expects = SpeciesList.order_by(:where).to_a
+    assert_query(expects, :SpeciesList, order_by: :where)
+  end
+
+  def test_species_list_order_by_rss_log
+    expects = SpeciesList.order_by(:rss_log).to_a
+    assert_query(expects, :SpeciesList, order_by: :rss_log)
   end
 
   def test_species_list_by_users
@@ -37,8 +53,8 @@ class Query::SpeciesListsTest < UnitTestCase
     assert_query([], :SpeciesList, by_users: dick)
   end
 
-  def test_species_list_by_user_sort_by_id
-    ids = SpeciesList.where(user: rolf).reorder(id: :asc).uniq
+  def test_species_list_by_user_order_by_id
+    ids = SpeciesList.by_users(rolf).distinct.order_by(:id)
     assert_query(ids, :SpeciesList, by_users: rolf, order_by: :id)
   end
 

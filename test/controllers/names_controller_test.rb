@@ -401,7 +401,7 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   # None of our standard tests ever actually renders pagination_links
-  # or pagination_letters.  This tests all the above.
+  # or letter_pagination_nav.  This tests all the above.
   def test_pagination_page1
     # Straightforward index of all names, showing first 10.
     query_params = pagination_query_params
@@ -2694,6 +2694,29 @@ class NamesControllerTest < FunctionalTestCase
 
     assert_match(original_notes, new_name.reload.notes)
     assert_match(old_name_notes, new_name.notes)
+  end
+
+  def test_update_name_merge_notes_into_nil_notes
+    old_name = names(:hygrocybe_russocoriacea_bad_author) # has notes
+    new_name = names(:russula_brevipes_author_notes)
+    new_name.update(notes: nil) # simulate survivor having nil notes
+    old_name_notes = old_name.notes
+    params = {
+      id: old_name.id,
+      name: {
+        text_name: new_name.text_name,
+        author: new_name.author,
+        rank: new_name.rank,
+        citation: new_name.citation,
+        notes: old_name.notes,
+        deprecated: (old_name.deprecated ? "true" : "false")
+      }
+    }
+
+    login("rolf")
+    put(:update, params: params)
+
+    assert_match(old_name_notes, new_name.reload.notes)
   end
 
   # Test merging two names, only one with observations.  Should work either

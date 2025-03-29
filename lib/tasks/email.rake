@@ -4,9 +4,9 @@ namespace :email do
   desc "List queued emails"
   task(list: :environment) do
     print "#{MO.http_domain}, #{Rails.env}\n"
-    QueuedEmail.all.includes(:queued_email_integers,
-                             :queued_email_note,
-                             :queued_email_strings, :user).each(&:dump)
+    QueuedEmail.includes(:queued_email_integers,
+                         :queued_email_note,
+                         :queued_email_strings, :user).each(&:dump)
   end
 
   desc "Send queued emails"

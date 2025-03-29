@@ -64,6 +64,7 @@
 
 class AbstractModel < ApplicationRecord
   include Scopes
+  include OrderingScopes
 
   self.abstract_class = true
 

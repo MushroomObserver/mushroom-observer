@@ -31,7 +31,8 @@ def check_name(method, name, parse)
   errs = name.errors.map do |err|
     "\"#{err.full_message.strip}\""
   end
-  puts("#{name.id},#{method},\"#{old_value}\",\"#{new_value}\",#{name.created_at},#{errs.join(',')}")
+  puts("#{name.id},#{method},\"#{old_value}\",\"#{new_value}\"," \
+       "#{name.created_at},#{errs.join(",")}")
   true
 end
 

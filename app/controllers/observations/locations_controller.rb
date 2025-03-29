@@ -47,7 +47,7 @@ module Observations
       # and we're also assuming "postal" order when splitting the string.
       @where = params[:where].to_s
       @matches = locations_matching_where
-      @pages = paginate_locations!
+      @pagination_data = paginate_locations!
     end
 
     # Adds the Observation's associated with obs.where == params[:where]
@@ -97,7 +97,7 @@ module Observations
     end
 
     def paginate_locations!
-      pages = paginate_numbers(:page, 100)
+      pages = number_pagination_data(:page, 100)
       pages.num_total = @matches.length
       @matches = @matches[pages.from..pages.to]
       pages

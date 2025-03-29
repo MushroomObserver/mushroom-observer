@@ -120,7 +120,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     by = "user"
     get(:index, params: { by: by })
 
-    assert_equal(SpeciesList.order_by_user.map(&:user_id),
+    assert_equal(SpeciesList.order_by(:user).map(&:user_id),
                  assigns(:objects).map(&:user_id))
     assert_displayed_title(:SPECIES_LISTS.l)
     assert_sorted_by(by)

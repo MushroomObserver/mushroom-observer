@@ -54,7 +54,8 @@ module LanguageExporter
   end
 
   def verbose(msg)
-    puts(msg) if Language.verbose
+    # Cop disabled; seems like we want to print the message, not just log it.
+    puts(msg) if Language.verbose # rubocop:disable Rails/Output
   end
 
   delegate :safe_mode, to: :Language

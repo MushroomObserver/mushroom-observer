@@ -306,8 +306,8 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   serialize :bonuses, coder: YAML
   serialize :alert, coder: YAML
 
-  scope :by_contribution,
-        -> { order(contribution: :desc, name: :asc, login: :asc) }
+  scope :order_by_default,
+        -> { order(name: :asc, id: :desc) }
   scope :has_contribution,
         -> { where(User[:contribution].gt(0)) }
 
