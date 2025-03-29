@@ -30,13 +30,58 @@ module Query::ScopeModules::Initialization
   end
 
   def initialize_scopes
-    # These strings can never come direct from user, so no need to sanitize.
+    # `where`/`join` strings never come from user, so no need to sanitize.
     # (I believe they are only used by the site stats page. -JPH 20190708)
     self.where += params[:where] if params[:where]
     add_join(params[:join]) if params[:join]
     send_content_filters_to_rss_log_subqueries
     initialize_parameter_set
     filter_misspellings_for_name_queries
+  end
+
+  # In the case of RssLogs, pack any content filter params into subqueries.
+  # (Content filters may add params to RssLog queries that RssLog scopes
+  # can't handle, because they're intended for one or more related subqueries.)
+  # Some params may go into more than one subquery if >1 `type` requested.
+  def send_content_filters_to_rss_log_subqueries
+    return if model != RssLog || !content_filters_present
+
+    rss_logs_current_types.each do |model|
+      subquery_params = content_filter_subquery_params(model)
+      if subquery_params.present?
+        @scopes = @scopes.send(:"#{model.name.downcase}_query",
+                               **subquery_params)
+      end
+    end
+  end
+
+  # Current types requested on the RssLog page. Defaults to :all.
+  def rss_logs_current_types
+    types = [:observation, :name, :location]
+    active_types = case params[:type]
+                   when nil, "", :all, "all"
+                     types
+                   when Array
+                     params[:type]
+                   when String
+                     params[:type].split
+                   end
+    active_types.map { |type| type.to_s.camelize.constantize }
+  end
+
+  # Use Query::Filter.by_model to find any filters relevant to a model.
+  def content_filter_subquery_params(model)
+    Query::Filter.by_model(model).
+      each_with_object({}) do |fltr, subquery_params|
+        next if (val = params[fltr.sym]).to_s == ""
+
+        subquery_params[fltr.sym] = val
+      end
+  end
+
+  def content_filters_present
+    @content_filters_present ||=
+      params.slice(*content_filter_parameters.keys).compact.present?
   end
 
   def initialize_parameter_set
@@ -53,9 +98,9 @@ module Query::ScopeModules::Initialization
     end
   end
 
-  # Content filters may add params to RssLog queries that RssLog scopes can't
-  # handle, because they're intended for one or more related subqueries.
-  # Remove these from the scope builder after building the needed subqueries.
+  # Generally, these are the `scope_parameters` defined in Query::Base.
+  # But for RssLogs, remove any content filters from the scope builder
+  # since they're already handled in subqueries above.
   def sendable_params
     sendable = params.slice(*scope_parameters)
     return sendable unless model == RssLog
@@ -63,49 +108,11 @@ module Query::ScopeModules::Initialization
     sendable.except(*content_filter_parameters.keys)
   end
 
+  # Most name queries are filtered to remove misspellings.
   def filter_misspellings_for_name_queries
     return if model != Name || !params[:misspellings].nil?
 
     @scopes = @scopes.with_correct_spelling
-  end
-
-  def send_content_filters_to_rss_log_subqueries
-    return if model != RssLog || !content_filters_present
-
-    rss_logs_current_types.each do |model|
-      subquery_params = content_filter_subquery_params(model)
-      if subquery_params.present?
-        @scopes = @scopes.send(:"#{model.name.downcase}_query",
-                               **subquery_params)
-      end
-    end
-  end
-
-  def rss_logs_current_types
-    types = [:observation, :name, :location]
-    active_types = case params[:type]
-                   when nil, "", :all, "all"
-                     types
-                   when Array
-                     params[:type]
-                   when String
-                     params[:type].split
-                   end
-    active_types.map { |type| type.to_s.camelize.constantize }
-  end
-
-  def content_filter_subquery_params(model)
-    Query::Filter.by_model(model).
-      each_with_object({}) do |fltr, subquery_params|
-        next if (val = params[fltr.sym]).to_s == ""
-
-        subquery_params[fltr.sym] = val
-      end
-  end
-
-  def content_filters_present
-    @content_filters_present ||=
-      params.slice(*content_filter_parameters.keys).compact.present?
   end
 
   # Make a value safe for SQL.
