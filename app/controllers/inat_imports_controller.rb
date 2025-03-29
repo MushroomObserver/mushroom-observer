@@ -83,7 +83,6 @@ class InatImportsController < ApplicationController
   def create
     return reload_form unless params_valid?
 
-    @user = User.current
     assure_user_own_inat_import_api_key
     @inat_import = InatImport.find_or_create_by(user: @user)
     @inat_import.update(state: "Authorizing",
