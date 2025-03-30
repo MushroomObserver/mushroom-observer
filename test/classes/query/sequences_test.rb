@@ -141,8 +141,8 @@ class Query::SequencesTest < UnitTestCase
     Location.update_box_area_and_center_columns
 
     # order_by_default seems to return random order here
-    scope = Sequence.observation_query(
-      in_box: { north: "90", south: "0", west: "-180", east: "-100" }
+    scope = Sequence.joins(:observation).merge(
+      Observation.in_box(north: "90", south: "0", west: "-180", east: "-100")
     ).order_by(:id)
     assert_query_scope(
       [seq1, seq2, seq3], scope,
