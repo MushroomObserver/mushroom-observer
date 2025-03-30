@@ -119,7 +119,6 @@ class InatImportJob < ApplicationJob
   end
 
   def import_requested_observations
-    @inat_manager = User.find_by(login: "MO Webmaster")
     inat_ids = inat_id_list
     return log("No observations requested") if @inat_import[:import_all].
                                                blank? && inat_ids.blank?
