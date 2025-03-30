@@ -10,10 +10,8 @@ module Query::ScopeModules::Initialization
 
   def initialize_query
     @initialized = true
-    # @order       = ""
     @scopes      = model
     initialize_scopes
-    # initialize_order
     @last_query = sql
   end
 

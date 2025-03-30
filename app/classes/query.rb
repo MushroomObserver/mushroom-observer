@@ -3,29 +3,42 @@
 #
 #  = Query Model
 #
-#  This model encapsulates a database query that looks up one or more objects
-#  of a given type that match certain conditions in a certain order.  Queries
-#  are dyamically joined with any number of additional tables, as required by
-#  sorting and selection conditions.
+#  This class encapsulates a hash of params that can produce an ActiveRecord
+#  statement for a database query, that looks up one or more objects of a
+#  given type, matching certain conditions in a certain order.
 #
 #  Queries are specified by a model.  The model specifies which kind
-#  of objects are being requested, e.g. :Name or :Observation.
+#  of objects are being requested, e.g. :Name or :Observation. They are
+#  dyamically joined with any number of additional tables, as required by
+#  sorting and selection conditions.
 #
-#  Each model has a default search flavor (:default), which is used by the prev
+#  To filter query results, you can send additional parameters.  For example,
+#  create_query(:Comment for_user: user.id) retrieves comments posted on a
+#  given user's observations.  Query saves the parameters alongside the model,
+#  and together these fully specify a query that may be recreated and
+#  executed at a later time, even potentially by another user (e.g., if users
+#  share links that have query specs embedded in them). They can be serialized
+#  and printed as a permalink, or carried along in the session while the user
+#  is navigating around related records.
+#
+#  `initialize_query` is the internal method that translates the params and
+#  their values to ActiveRecord scopes with the same names, without executing
+#  the query. (Scopes are independent of Query, and need to be defined on each
+#  model.) Only the public accessors like `results` actually load the database
+#  records for the current page of results.
+#
+#  Query also keeps track of "where you are in the query".  Browsing through
+#  filtered results, if you visit a "show" page, you can continue navigating
+#  through the same results via the "next" and "prev" links on the show page,
+#  within the same query — as if you were paging through results in the index.
+#
+#  Each model has a default search order (:default), which is used by the prev
 #  and next actions when the specified query no longer exists.  For example, if
 #  you click on an observation from the main index, prev and next travserse the
 #  results of an :Observation order_by: :rss_log query.  If the user comes back
 #  a day later, this query will have been culled by the garbage collector (see
 #  below), so prev and next need to be able to create a default query on the
-#  fly.  In this case it may be :Observation :all (see default_flavors array
-#  below).
-#
-#  In addition, some queries require additional parameters.  For example,
-#  :Comment :for_user requires a user_id (it retrieves comments posted on a
-#  given user's observations).  These parameters are saved along-side the model,
-#  and together these fully specify a query so that it may be
-#  recreated and executed at a later time, even potentially by another user
-#  (e.g., if users share links that have query specs embedded in them).
+#  fly.
 #
 #  == Example Usage
 #
@@ -46,17 +59,6 @@
 #    ids         = query.result_ids
 #    instances   = query.results
 #
-#  You also have access to lower-level operations:
-#
-#    ids   = query.select_values(where: 'names.display_name LIKE "A%"')
-#    ids   = query.select_values(order: 'names.sort_name ASC')
-#    names = query.select_values(select: 'names.display_name')
-#
-#    # This is the most efficient way to make Query work with ActiveRecord:
-#    # This lets you customize the query, then automatically tells it to select
-#    # all the fields ActiveRecord::Base#find_by_sql needs.
-#    names = query.find_by_sql(where: ...)
-#
 #  Sequence operators let you use the query as a pseudo-iterator:  (Note, these
 #  are somewhat more subtle than shown here, as nested queries may require the
 #  creation of new query instances.  See the section on nested queries below.)
@@ -69,7 +71,7 @@
 #    first = query.current if query.first
 #    last  = query.current if query.last
 #
-#  Finally, Query's know how to work with Paginator's:
+#  Finally, Query's know how to work with PaginationData:
 #
 #    # In controller:
 #    query = create_query(:Name)
@@ -125,22 +127,13 @@
 #  result_ids.  No attempt is made to reduce the query.  TODO - we might be
 #  able to if we can turn the ORDER clause into an upper/lower bound.
 #
-#  The first and last sequence operators ignore result_ids (TODO - no need to
-#  ignore if not nested or if outer is already at end).  However, they are able
-#  to execute optimized queries that return only the first or last result.
-#
-#  None of the low-level queries are cached in any way.
+#  The first and last sequence operators ignore result_ids.  However, they are
+#  able to execute optimized queries that return only the first or last result.
 #
 #  == Attributes
 #  model::              Class of model results belong to.
 #  params::             Hash of parameters used to create query.
 #  current::            Current location in query (for sequence operators).
-#  join::               Tree of tables used in query.
-#  tables::             Extra tables which have been joined explicitly.
-#  where::              List of WHERE clauses in query.
-#  group::              GROUP BY clause in query.
-#  order::              ORDER BY clause in query.
-#  selects::            SELECT clause in query.
 #  subqueries::         Cache of subquery Query instances, used for filtering.
 #
 #  == Class Methods
@@ -149,16 +142,18 @@
 #  find::               Find a QueryRecord id and reinstantiate a Query from it.
 #  safe_find::          Same as above, with rescue.
 #  rebuild_from_description:: Instantiate Query described by description string.
-#  related?::           Can a query of this model be converted to a subquery
-#                       filtering results of another model?
+#  related?::                 Can a query of this model be converted to a
+#                             subquery filtering results of another model?
 #  current_or_related_query:: Convert queries from one model to another; can be
 #                             called recursively. To avoid repetitive recursion,
 #                             it checks for a nested query that may be for the
 #                             intended target model.
 #
-#  ==Instance Methods
-#  serialize::          Returns string which describes the Query completely.
+#  == Instance Methods
 #  initialized?::       Has this query been initialized?
+#  serialize::          Returns string which describes the Query completely.
+#  sql::                Returns scopes.to_sql for comparison and tests.
+#  query::              scopes.all, the ActiveRecord statement of the query.
 #
 #  ==== Sequence operators
 #  first::              Go to first result.
@@ -167,21 +162,11 @@
 #  last::               Go to last result.
 #  reset::              Go back to original result.
 #
-#  ==== Low Level Query Operations
-#  query::              Build SQL query.
-#  query_all::          Build SQL query for ActiveRecord::Base#find_by_sql.
-#  select_count::       Execute query after wrapping select clause in COUNT().
-#  select_value::       Call model.connection.select_value.
-#  select_values::      Call model.connection.select_values.
-#  select_rows::        Call model.connection.select_rows.
-#  select_one::         Call model.connection.select_one.
-#  select_all::         Call model.connection.select_all.
-#  find_by_sql::        Call model.find_by_sql.
-#  tables_used::        Array of tables used in query (Symbol's).
-#  uses_table?::        Does the query use this table?
-#  uses_join?::         Does the query use this join clause?
+#  ==== Result accessors
 #
-#  ==== High Level Query Operations
+#  NOTE: Calling most of these will `initialize_query`,
+#        i.e., instantiate the requested page of query results.
+#
 #  num_results::        Number of results the query returns.
 #  results::            Array of all results, instantiated.
 #  result_ids::         Array of all results, just ids.
@@ -194,19 +179,19 @@
 #
 #  ==== Instance Variables
 #  @initialized::       Boolean: has +initialize_query+ been called yet?
+#  @scopes::            Chain of scopes, called on params during initialization.
 #  @current_id::        Integer: current place in results.
 #  @save_current_id::   Integer: saved copy of +@current_id+ for +reset+.
 #  @result_ids::        Array of Integer: all results.
 #  @results::           Hash: maps ids to instantiated records.
 #  @letters::           Cache of first-letters (if +need_letters given).
-#  @outer::             AbstractQuery: cached copy of outer query (nested
-#                       queries only).
 #  @params_cache::      Hash: where instances passed in via params are cached.
+#  @last_query::        Alias for `sql`.
 #
 #  NOTE: The Query::Model classes do not inherit from this class.
-#        They inherit from Query::Base.
-#        This class is simply a convenience delegator for class methods that
-#        need to be called from outside Query, like `Query.lookup`
+#        They inherit from Query::Base, which does not inherit from this either.
+#        This class is simply a convenience delegator/accessor for class
+#        methods that may be called from outside Query, like `Query.lookup`
 #
 class Query
   include Query::Modules::ClassMethods
