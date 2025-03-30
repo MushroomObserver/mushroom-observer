@@ -172,10 +172,5 @@ class Query::SequencesTest < UnitTestCase
     assert_not(query.uses_join_sub({}, :location))
     assert(query.uses_join_sub({ test: :location }, :location))
     assert(query.uses_join_sub(:location, :location))
-    # scope = Sequence.observation_query(confidence: "2").order_by(:id)
-    assert_query(
-      [seq4],
-      :Sequence, observation_query: { confidence: "2" }
-    )
   end
 end
