@@ -1358,6 +1358,93 @@ class NamesControllerTest < FunctionalTestCase
     assert(Name.find_by(text_name: "Pleurotus"))
   end
 
+  def test_create_prov_sp_quoted_epithet_with_space
+    # Based onhttps://www.inaturalist.org/observations/137770340
+    user = users(:rolf)
+    text_name = 'Hygrocybe "constrictospora PNW08"'
+    params = {
+      user: user,
+      name: {
+        text_name: text_name,
+        author: "",
+        rank: "Species",
+        deprecated: "false"
+      }
+    }
+
+    assert_difference("Name.count", 1, "Failed to create Name") do
+      post(:create, params: params)
+    end
+
+    assert_response(:success)
+    name = Name.order(created_at: :desc).last
+    assert_equal("Species", name.rank)
+    assert_equal('Hygrocybe sp. "constrictospora-PNW09"', name.text_name)
+    assert_equal('Hygrocybe sp. "constrictospora-PNW09"', name.search_name)
+    assert_equal('**__Hygrocybe__** sp. **__"constrictospora-PNW09"__**',
+                 name.display_name)
+    asser_equal("Hygrocybe constrictospora-pnw09", name.sort_name)
+  end
+
+  def test_create_prov_sp_capitalized_unquoted_undashed_epithet
+    # Based on https://www.inaturalist.org/observations/212320801
+    user = users(:rolf)
+    text_name = "Donadinia PNW01"
+    params = {
+      user: user,
+      name: {
+        text_name: text_name,
+        author: "",
+        rank: "Species",
+        deprecated: "false"
+      }
+    }
+
+    login(user.login)
+    assert_difference("Name.count", 1, "Failed to create Name") do
+      post(:create, params: params)
+    end
+
+    assert_response(:success)
+    name = Name.order(created_at: :asc).last
+    assert_equal("Species", name.rank)
+    assert_equal('Donadina sp. "PNW01"', name.text_name)
+    assert_equal('Donadina sp. "PNW01"', name.search_name)
+    assert_equal('**__Donadina__** sp. **__"PNW01"__**', name.display_name)
+    assert_equal("Donadina pnw01", name.sort_name)
+  end
+
+  def test_create_prov_genus_numerical
+    # https://www.inaturalist.org/observations/143452821
+    # NOTE jdc2025-03-30
+    # This is a guess about what the result should be.
+    # YMMV
+    user = users(:rolf)
+    text_name = "Hemimycena3"
+    params = {
+      user: user,
+      name: {
+        text_name: text_name,
+        author: "",
+        rank: "Genus",
+        deprecated: "false"
+      }
+    }
+
+    login(user.login)
+    assert_difference("Name.count", 1, "Failed to create Name") do
+      post(:create, params: params)
+    end
+
+    assert_response(:success)
+    name = Name.order(created_at: :asc).last
+    assert_equal("Genus", name.rank)
+    assert_equal('Hemimycena gen. "3"', name.text_name)
+    assert_equal('Hemimycena gen. "3"', name.search_name)
+    assert_equal('**__Hemimycena__** gen. **__"3"__**', name.display_name)
+    assert_equal("Hemimycena 3", name.sort_name)
+  end
+
   # ----------------------------
   #  Edit name -- without merge
   # ----------------------------
