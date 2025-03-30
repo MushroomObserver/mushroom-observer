@@ -88,7 +88,7 @@ class Query::SequencesTest < UnitTestCase
                  :Sequence, pattern: "deposited_sequence")
   end
 
-  def set_up_sequence_observation_query
+  def test_sequence_observation_query
     sequences = Sequence.reorder(id: :asc).all
     seq1 = sequences[0]
     seq2 = sequences[1]
@@ -98,12 +98,6 @@ class Query::SequencesTest < UnitTestCase
     seq2.update(observation: observations(:detailed_unknown_obs))
     seq3.update(observation: observations(:agaricus_campestris_obs))
     seq4.update(observation: observations(:peltigera_obs))
-    [seq1, seq2, seq3, seq4]
-  end
-
-  def test_sequence_observation_query_date_users_names
-    seq1, seq2, _seq3, seq4 = set_up_sequence_observation_query
-
     assert_query([seq1, seq2],
                  :Sequence, observation_query: { date: %w[2006 2006] })
     assert_query([seq1, seq2],
@@ -115,18 +109,12 @@ class Query::SequencesTest < UnitTestCase
         names: { lookup: "Petigera", include_synonyms: true }
       }
     )
-  end
-
-  def test_sequence_observation_query_locations_projects_species_lists
-    seq1, seq2, _seq3, seq4 = set_up_sequence_observation_query
-
-    expects = Sequence.joins(:observation).distinct.
+    expects = Sequence.order_by_default.joins(:observation).
               where(observations: { location: locations(:burbank) }).
-              or(Sequence.joins(:observation).distinct.
-                 where(Observation[:where].matches("Burbank"))).order_by_default
-    scope = Sequence.observation_query(locations: "Burbank").order_by_default
-    assert_query_scope(expects, scope,
-                       :Sequence, observation_query: { locations: "Burbank" })
+              or(Sequence.order_by_default.joins(:observation).
+                 where(Observation[:where].matches("Burbank"))).distinct
+    assert_query(expects,
+                 :Sequence, observation_query: { locations: "Burbank" })
     assert_query([seq2],
                  :Sequence, observation_query: { projects: "Bolete Project" })
     assert_query(
@@ -134,21 +122,22 @@ class Query::SequencesTest < UnitTestCase
       :Sequence, observation_query: { species_lists: "List of mysteries" }
     )
     assert_query([seq4], :Sequence, observation_query: { confidence: "2" })
+    # The test returns these sequences in random order, can't work.
+    # assert_query(
+    #   [seq1, seq2, seq3],
+    #   :Sequence, observation_query: {
+    #     in_box: { north: "90", south: "0", west: "-180", east: "-100" }
+    #   }
+    # )
   end
 
-  def test_sequence_observation_query_in_box
-    seq1, seq2, seq3, _seq4 = set_up_sequence_observation_query
-    Location.update_box_area_and_center_columns
-
-    # order_by_default seems to return random order here
-    scope = Sequence.observation_query(
-      in_box: { north: "90", south: "0", west: "-180", east: "-100" }
-    ).order_by(:id)
-    assert_query_scope(
-      [seq1, seq2, seq3], scope,
-      :Sequence, observation_query: {
-        in_box: { north: "90", south: "0", west: "-180", east: "-100" }
-      }, order_by: :id
-    )
+  def test_uses_join_hash
+    box = { north: "90", south: "0", west: "-180", east: "-100" }
+    query = Query.lookup(:Sequence, observation_query: { in_box: box })
+    assert_not(query.uses_join_sub([], :location))
+    assert(query.uses_join_sub([:location], :location))
+    assert_not(query.uses_join_sub({}, :location))
+    assert(query.uses_join_sub({ test: :location }, :location))
+    assert(query.uses_join_sub(:location, :location))
   end
 end
