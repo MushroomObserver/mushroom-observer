@@ -11,7 +11,10 @@ class Query::ScopeModules::Validator < ActiveModel::Validator
   end
 
   def validate(params)
-    debugger
-    params.validation_errors.blank?
+    return if params.validation_errors.blank?
+
+    [params.validation_errors].flatten.each do |msg|
+      params.errors.add(:base, msg)
+    end
   end
 end
