@@ -278,7 +278,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # mostly a helper for in_box
     scope :in_box_over_dateline, lambda { |**args|
       include_vague_locations = args[:vague] || false
-      box = Mappable::Box.new(**args.except(:vague))
+      box = Mappable::Box.new(**args.except(:mappable))
       return none unless box.valid?
 
       if include_vague_locations
@@ -322,7 +322,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # mostly a helper for in_box
     scope :in_box_regular, lambda { |**args|
       include_vague_locations = args[:vague] || false
-      box = Mappable::Box.new(**args.except(:vague))
+      box = Mappable::Box.new(**args.except(:mappable))
       return none unless box.valid?
 
       if include_vague_locations
@@ -363,7 +363,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
     # Pass kwargs (:north, :south, :east, :west), any order
     scope :not_in_box, lambda { |**args|
-      box = Mappable::Box.new(**args.except(:vague))
+      box = Mappable::Box.new(**args.except(:mappable))
       return Observation.all unless box.valid?
 
       # should be in_box(**args).invert_where
@@ -375,7 +375,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
     # helper for not_in_box
     scope :not_in_box_over_dateline, lambda { |**args|
-      box = Mappable::Box.new(**args.except(:vague))
+      box = Mappable::Box.new(**args.except(:mappable))
       return Observation.all unless box.valid?
 
       where(
@@ -386,7 +386,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
     # helper for not_in_box
     scope :not_in_box_regular, lambda { |**args|
-      box = Mappable::Box.new(**args.except(:vague))
+      box = Mappable::Box.new(**args.except(:mappable))
       return Observation.all unless box.valid?
 
       where(
