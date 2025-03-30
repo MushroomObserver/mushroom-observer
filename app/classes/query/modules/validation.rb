@@ -2,7 +2,7 @@
 
 # Validation of Query parameters.
 module Query::Modules::Validation
-  attr_accessor :params, :params_cache, :subqueries
+  attr_accessor :params, :params_cache, :subqueries, :valid, :validation_errors
 
   def validate_params
     old_params = @params.dup&.deep_compact&.deep_symbolize_keys || {}
