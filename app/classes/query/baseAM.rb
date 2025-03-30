@@ -15,15 +15,15 @@ class Query::BaseAM
   validates_with Query::ScopeModules::Validator # , options
 
   # "clean up" and reassign attributes before validation
-  before_validation :pre_clean_params
+  before_validation :clean_params
 
   # attr_accessor :params, :params_cache, :subqueries
-  attr_reader :validation_errors
+  attr_reader :validation_errors # set by validate_params
   attr_writer :record
 
-  def pre_clean_params
+  def clean_params
     validate_params
-    assign_attributes(**@params)
+    assign_attributes(**@params) # eventually should be done in validate_params
   end
 
   def self.parameter_declarations
@@ -32,6 +32,8 @@ class Query::BaseAM
 
   delegate :parameter_declarations, to: :class
 
+  # can use has_attribute? here.
+  # only called in ApplicationController::Queries#apply_one_content_filter
   def self.takes_parameter?(key)
     parameter_declarations.key?(key)
   end
@@ -84,7 +86,8 @@ class Query::BaseAM
   # the parsed hashes (in whatever order), because when a column is serialized
   # you can't use SQL on the column value, you have to compare parsed instances.
   def serialize
-    params.sort.to_h.merge(model: model.name).to_json
+    # params.sort.to_h.merge(model: model.name).to_json
+    attributes.compact.sort.to_h.merge(model: model.name).to_json
   end
 
   def record
