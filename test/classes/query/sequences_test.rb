@@ -88,6 +88,7 @@ class Query::SequencesTest < UnitTestCase
                  :Sequence, pattern: "deposited_sequence")
   end
 
+  # order_by_default seems to return random order here
   def set_up_sequence_observation_query
     sequences = Sequence.reorder(id: :asc).all
     seq1 = sequences[0]
@@ -118,29 +119,40 @@ class Query::SequencesTest < UnitTestCase
   end
 
   def test_sequence_observation_query_locations_projects_species_lists
-    seq1, seq2, _seq3, seq4 = set_up_sequence_observation_query
+    seq1, seq2, seq3, seq4 = set_up_sequence_observation_query
 
-    expects = Sequence.joins(:observation).distinct.
-              where(observations: { location: locations(:burbank) }).
-              or(Sequence.joins(:observation).distinct.
-                 where(Observation[:where].matches("Burbank"))).order_by_default
-    scope = Sequence.observation_query(locations: "Burbank").order_by_default
-    assert_query_scope(expects, scope,
-                       :Sequence, observation_query: { locations: "Burbank" })
-    assert_query([seq2],
-                 :Sequence, observation_query: { projects: "Bolete Project" })
+    scope = Sequence.joins(:observation).distinct.
+            where(observations: { location: locations(:burbank) }).
+            or(Sequence.joins(:observation).distinct.
+                where(Observation[:where].matches("Burbank"))).order_by(:id)
+    # scope = Sequence.observation_query(locations: "Burbank").order_by(:id)
+    assert_query_scope(
+      [seq1, seq2, seq3], scope,
+      :Sequence, observation_query: { locations: "Burbank" }, order_by: :id
+    )
+    # scope = Sequence.observation_query(projects: "Bolete Project").
+    #         order_by(:id)
+    assert_query(
+      [seq2],
+      :Sequence, observation_query: { projects: "Bolete Project" }
+    )
+    # scope = Sequence.observation_query(species_lists: "List of mysteries").
+    #         order_by(:id)
     assert_query(
       [seq1, seq2],
       :Sequence, observation_query: { species_lists: "List of mysteries" }
     )
-    assert_query([seq4], :Sequence, observation_query: { confidence: "2" })
+    # scope = Sequence.observation_query(confidence: "2").order_by(:id)
+    assert_query(
+      [seq4],
+      :Sequence, observation_query: { confidence: "2" }
+    )
   end
 
   def test_sequence_observation_query_in_box
     seq1, seq2, seq3, _seq4 = set_up_sequence_observation_query
     Location.update_box_area_and_center_columns
 
-    # order_by_default seems to return random order here
     scope = Sequence.joins(:observation).merge(
       Observation.in_box(north: "90", south: "0", west: "-180", east: "-100")
     ).order_by(:id)
