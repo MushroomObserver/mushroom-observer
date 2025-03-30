@@ -10,17 +10,21 @@ module Query::Modules::Initialization
 
   def initialize_query
     @initialized = true
-    @join        = []
-    @tables      = []
-    @where       = []
-    @group       = ""
-    @order       = ""
-    @selects     = ""
-    @executor    = nil
+    initialize_non_nil_ivars
+    @executor = nil
     initialize_flavor
     initialize_group
     initialize_order
     initialize_selects
+  end
+
+  def initialize_non_nil_ivars
+    @join        ||= []
+    @tables      ||= []
+    @where       ||= []
+    @group       ||= ""
+    @order       ||= ""
+    @selects     ||= ""
   end
 
   # Make a value safe for SQL.

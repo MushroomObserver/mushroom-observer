@@ -33,6 +33,7 @@ class Query::Base
     validate_params
     # eventually should be done in validate_params
     assign_attributes(**@params) if @params.present?
+    initialize_non_nil_ivars
   end
 
   delegate :parameter_declarations, to: :class

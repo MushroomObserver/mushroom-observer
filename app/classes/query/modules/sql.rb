@@ -15,21 +15,21 @@ module Query::Modules::Sql
     initialize_query unless initialized?
 
     our_select  = args[:select] || selects
-    our_join    = join.dup
+    our_join    = @join.dup
     our_join += args[:join] if args[:join].is_a?(Array)
     our_join << args[:join] if args[:join].is_a?(Hash)
     our_join << args[:join] if args[:join].is_a?(Symbol)
-    our_tables = tables.dup
+    our_tables = @tables.dup
     our_tables += args[:tables] if args[:tables].is_a?(Array)
     our_tables << args[:tables] if args[:tables].is_a?(Symbol)
     our_from    = calc_from_clause(our_join, our_tables)
-    our_where   = where.dup
+    our_where   = @where.dup
     our_where += args[:where] if args[:where].is_a?(Array)
     our_where << args[:where] if args[:where].is_a?(String)
     our_where = calc_where_clause(our_where)
-    our_group = args[:group] || group
-    our_order = args[:order] || order
-    our_order = reverse_order(order) if our_order == :reverse
+    our_group = args[:group] || @group
+    our_order = args[:order] || @order
+    our_order = reverse_order(@order) if our_order == :reverse
     our_limit = args[:limit]
 
     # Tack id at end of order to disambiguate the order.
@@ -53,7 +53,7 @@ module Query::Modules::Sql
   end
 
   # Format list of conditions for WHERE clause.
-  def calc_where_clause(our_where = where)
+  def calc_where_clause(our_where = @where)
     ands = our_where.uniq.map do |x|
       # Make half-assed attempt to cut down on proliferating parens...
       if x.match(/^\(.*\)$/) || !x.match(/ or /i)
@@ -66,7 +66,7 @@ module Query::Modules::Sql
   end
 
   # Extract and format list of tables names from join tree for FROM clause.
-  def calc_from_clause(our_join = join, our_tables = tables)
+  def calc_from_clause(our_join = @join, our_tables = @tables)
     implicits = [model.table_name] + our_tables
     result = implicits.uniq.map { |x| "`#{x}`" }.join(", ")
     if our_join
@@ -79,14 +79,14 @@ module Query::Modules::Sql
   # Extract a complete list of tables being used by this query.  (Combines
   # this table (+model.table_name+) with tables from +join+ with custom-joined
   # tables from +tables+.)
-  def table_list(our_join = join, our_tables = tables)
+  def table_list(our_join = @join, our_tables = @tables)
     flatten_joins([model.table_name] + our_join + our_tables, false).uniq
   end
 
   # Flatten join "tree" into a simple Array of Strings.  Set +keep_qualifiers+
   # to +false+ to tell it to remove the ".column" qualifiers on ambiguous
   # table join specs.
-  def flatten_joins(arg = join, keep_qualifiers = true)
+  def flatten_joins(arg = @join, keep_qualifiers = true)
     result = []
     case arg
     when Hash
