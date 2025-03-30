@@ -21,13 +21,9 @@ module Projects
       build_index_with_query
     end
 
-    private
-
     def controller_model_name
       "Project"
     end
-
-    public
 
     def update
       unless (@project = find_or_goto_index(Project, params[:project_id]))

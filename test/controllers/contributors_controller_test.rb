@@ -18,4 +18,8 @@ class ContributorsControllerTest < FunctionalTestCase
     get(:index, params: { id: users(:rolf).id })
     assert_template("contributors/_contributor")
   end
+
+  def test_index_with_non_default_sort
+    check_index_sorting
+  end
 end

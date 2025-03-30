@@ -28,6 +28,10 @@ class ImagesController < ApplicationController
     build_index_with_query
   end
 
+  def default_sort_order
+    ::Query::Images.default_order # :created_at
+  end
+
   private
 
   # Don't show the index if they're asking too much.
@@ -54,10 +58,6 @@ class ImagesController < ApplicationController
         And please stop hammering our server!
       TOO_MANY_RESULTS
     )
-  end
-
-  def default_sort_order
-    ::Query::Images.default_order # :created_at
   end
 
   # ApplicationController uses this table to dispatch #index to a private method

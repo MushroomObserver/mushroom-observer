@@ -20,7 +20,7 @@ class ExternalSite < AbstractModel
                       uniqueness: { case_sensitive: false }
 
   scope :order_by_default,
-        -> { order(name: :asc, id: :desc) }
+        -> { order_by(::Query::ExternalSites.default_order) }
   scope :name_has,
         ->(phrase) { search_columns(ExternalSite[:name], phrase) }
 

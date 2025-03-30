@@ -60,13 +60,7 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def test_index_with_non_default_sort
-    by = "num_views"
-
-    login
-    get(:index, params: { by: by })
-
-    assert_displayed_title(:NAMES.l)
-    assert_sorted_by(by)
+    check_index_sorting
   end
 
   def test_index_via_related_query

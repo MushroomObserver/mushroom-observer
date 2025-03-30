@@ -126,15 +126,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_sorted_by(by)
   end
 
-  def test_index_sorted_by_non_default
-    login
-
-    sort_orders = %w[created_at updated_at title]
-    sort_orders.each do |order|
-      get(:index, params: { by: order })
-      assert_displayed_title(:SPECIES_LISTS.l)
-      assert_sorted_by(order)
-    end
+  def test_index_with_non_default_sort
+    check_index_sorting
   end
 
   def test_index_with_id_and_sorted_by_title

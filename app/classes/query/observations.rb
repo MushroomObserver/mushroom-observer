@@ -36,7 +36,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
                include_all_name_proposals: :boolean,
                exclude_consensus: :boolean },
       confidence: [:float],
-      needs_naming: :boolean,
+      needs_naming: User,
       # clade: :string, # content_filter
       # lichen: :boolean, # content_filter
 
@@ -254,11 +254,10 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
   def add_needs_naming_condition
     return unless params[:needs_naming]
 
-    user = User.current_id
+    user = lookup_users_by_name(params[:needs_naming]).first
     # 15x faster to use this AR scope to assemble the IDs vs using
     # SQL SELECT DISTINCT
-    @where << Observation.needs_naming_and_not_reviewed_by_user(user).
-              to_sql.gsub(/^.*?WHERE/, "")
+    @where << Observation.needs_naming(user).to_sql.gsub(/^.*?WHERE/, "")
   end
 
   def initialize_confidence_parameter

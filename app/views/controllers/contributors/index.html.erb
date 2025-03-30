@@ -2,9 +2,10 @@
 @container = :double
 add_page_title(:users_by_contribution_title.t)
 add_context_nav(contributors_index_tabs)
+add_sorter(@query, users_index_sorts(admin: false))
 %>
 
-<div class="row">
+<div class="row my-3">
   <div class="col-md-8 col-lg-6">
     <%= render(partial: "contributors/legend") %>
   </div>
