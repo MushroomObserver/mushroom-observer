@@ -3,8 +3,6 @@
 class Query::Locations < Query::BaseAR
   include Query::Params::AdvancedSearch
   include Query::Params::Filters
-  # include Query::Initializers::AdvancedSearch
-  # include Query::Initializers::Filters
 
   def model
     @model ||= Location

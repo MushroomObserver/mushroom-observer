@@ -5,7 +5,6 @@ class Query::BaseAR
   include Query::Modules::ClassMethods
   include Query::ScopeModules::HighLevelQueries
   include Query::ScopeModules::Initialization
-  # include Query::ScopeModules::Ordering
   include Query::ScopeModules::SequenceOperators
   include Query::Modules::Validation
 

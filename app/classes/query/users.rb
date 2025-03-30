@@ -6,12 +6,12 @@ class Query::Users < Query::BaseAR
   end
 
   def alphabetical_by
-    @alphabetical_by ||= case params[:order_by]
-                 when "login", "reverse_login"
-                   User[:login]
-                 else
-                   User[:name]
-                 end
+    @alphabetical_by ||= case params[:order_by].to_s
+                         when "login", "reverse_login"
+                           User[:login]
+                         else
+                           User[:name]
+                         end
   end
 
   def self.parameter_declarations

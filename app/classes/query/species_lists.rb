@@ -7,11 +7,11 @@ class Query::SpeciesLists < Query::BaseAR
 
   def alphabetical_by
     @alphabetical_by ||= case params[:order_by].to_s
-                 when "user", "reverse_user"
-                   User[:login]
-                 else
-                   SpeciesList[:title]
-                 end
+                         when "user", "reverse_user"
+                           User[:login]
+                         else
+                           SpeciesList[:title]
+                         end
   end
 
   def self.parameter_declarations

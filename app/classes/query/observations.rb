@@ -3,8 +3,6 @@
 class Query::Observations < Query::BaseAR
   include Query::Params::AdvancedSearch
   include Query::Params::Filters
-  # include Query::Initializers::Filters
-  # include Query::Initializers::AdvancedSearch
 
   def model
     @model ||= Observation
@@ -12,11 +10,11 @@ class Query::Observations < Query::BaseAR
 
   def alphabetical_by
     @alphabetical_by ||= case params[:order_by].to_s
-                 when "user", "reverse_user"
-                   User[:login]
-                 when "name", "reverse_name"
-                   Name[:sort_name]
-                 end
+                         when "user", "reverse_user"
+                           User[:login]
+                         when "name", "reverse_name"
+                           Name[:sort_name]
+                         end
   end
 
   def self.parameter_declarations # rubocop:disable Metrics/MethodLength
