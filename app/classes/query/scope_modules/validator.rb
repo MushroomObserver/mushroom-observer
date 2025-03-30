@@ -2,17 +2,16 @@
 
 # Validation of Query parameters.
 class Query::ScopeModules::Validator < ActiveModel::Validator
-  def initialize(options={})
+  def initialize(options = {})
     super
+    options[:class].attr_accessor(:validation_errors)
     # debugger
-    # options[:class].attr_accessor(:params, :params_cache, :subqueries)
     # @parameter_declarations = options[:parameter_declarations]
-    @validation_errors = options[:validation_errors]
+    # @validation_errors = options[:validation_errors]
   end
 
-  def validate(_record)
-    return false if @validation_errors
-
-    true
+  def validate(params)
+    debugger
+    params.validation_errors.blank?
   end
 end

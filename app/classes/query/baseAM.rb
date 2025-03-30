@@ -12,14 +12,18 @@ class Query::BaseAM
   include Query::ScopeModules::SequenceOperators
   include Query::Modules::Validation
 
-  validates_with Query::ScopeModules::Validator, validation_errors: nil
-  before_validation :fred_thing # this is the cleaning step
+  validates_with Query::ScopeModules::Validator # , options
+
+  # "clean up" and reassign attributes before validation
+  before_validation :pre_clean_params
 
   # attr_accessor :params, :params_cache, :subqueries
+  attr_reader :validation_errors
   attr_writer :record
 
-  def fred_thing
-    debugger
+  def pre_clean_params
+    validate_params
+    assign_attributes(**@params)
   end
 
   def self.parameter_declarations
