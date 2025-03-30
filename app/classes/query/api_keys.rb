@@ -1,6 +1,12 @@
 # frozen_string_literal: true
 
-class Query::APIKeys < Query::BaseAR
+class Query::APIKeys < Query::BaseAM
+  # Declare the parameters as attributes of type `query_param`
+  parameter_declarations.each_key do |param_name|
+    puts param_name
+    attribute param_name, :query_param
+  end
+
   def model
     @model ||= APIKey
   end

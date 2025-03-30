@@ -198,6 +198,23 @@ class Query
 
   def self.new(model, params = {}, current = nil)
     klass = "Query::#{model.to_s.pluralize}".constantize
+    case klass.new
+    when Query::BaseAR
+      new_ar(klass, params, current)
+    when Query::BaseAM
+      new_am(klass, params, current)
+    end
+  end
+
+  def self.new_am(klass, params, current)
+    query = klass.new(params)
+    query.params = query.attributes
+    query.subqueries = {}
+    query.current = current if current
+    query
+  end
+
+  def self.new_ar(klass, params, current)
     query = klass.new
     query.params = params
     query.subqueries = {}
