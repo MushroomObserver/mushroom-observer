@@ -23,6 +23,11 @@ class Query::Herbaria < Query::Base
     )
   end
 
+  # Declare the parameters as attributes of type `query_param`
+  parameter_declarations.each_key do |param_name|
+    attribute param_name, :query_param
+  end
+
   # rubocop:disable Metrics/AbcSize
   def initialize_flavor
     add_time_condition("herbaria.created_at", params[:created_at])

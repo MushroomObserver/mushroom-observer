@@ -46,6 +46,11 @@ class Query::Images < Query::Base
     ) # .merge(advanced_search_parameter_declarations)
   end
 
+  # Declare the parameters as attributes of type `query_param`
+  parameter_declarations.each_key do |param_name|
+    attribute param_name, :query_param
+  end
+
   def initialize_flavor
     initialize_image_parameters
     initialize_image_association_parameters

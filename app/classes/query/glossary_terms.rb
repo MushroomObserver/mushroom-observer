@@ -20,6 +20,11 @@ class Query::GlossaryTerms < Query::Base
     )
   end
 
+  # Declare the parameters as attributes of type `query_param`
+  parameter_declarations.each_key do |param_name|
+    attribute param_name, :query_param
+  end
+
   def initialize_flavor
     add_owner_and_time_stamp_conditions
     add_search_condition("glossary_terms.name", params[:name_has])

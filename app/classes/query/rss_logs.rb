@@ -17,6 +17,11 @@ class Query::RssLogs < Query::Base
       merge(content_filter_parameter_declarations(Location))
   end
 
+  # Declare the parameters as attributes of type `query_param`
+  parameter_declarations.each_key do |param_name|
+    attribute param_name, :query_param
+  end
+
   def initialize_flavor
     add_time_condition("rss_logs.updated_at", params[:updated_at])
     initialize_type_parameter
