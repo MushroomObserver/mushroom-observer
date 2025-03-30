@@ -1,14 +1,6 @@
 # frozen_string_literal: true
 
-class Query::GlossaryTerms < Query::BaseAR
-  def model
-    @model ||= GlossaryTerm
-  end
-
-  def alphabetical_by
-    @alphabetical_by ||= GlossaryTerm[:name]
-  end
-
+class Query::GlossaryTerms < Query::BaseAM
   def self.parameter_declarations
     super.merge(
       created_at: [:time],
@@ -18,6 +10,19 @@ class Query::GlossaryTerms < Query::BaseAR
       description_has: :string,
       pattern: :string
     )
+  end
+
+  # Declare the parameters as attributes of type `query_param`
+  parameter_declarations.each_key do |param_name|
+    attribute param_name, :query_param
+  end
+
+  def model
+    @model ||= GlossaryTerm
+  end
+
+  def alphabetical_by
+    @alphabetical_by ||= GlossaryTerm[:name]
   end
 
   def self.default_order

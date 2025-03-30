@@ -1,14 +1,6 @@
 # frozen_string_literal: true
 
-class Query::Projects < Query::BaseAR
-  def model
-    @model ||= Project
-  end
-
-  def alphabetical_by
-    @alphabetical_by ||= Project[:title]
-  end
-
+class Query::Projects < Query::BaseAM
   def self.parameter_declarations
     super.merge(
       created_at: [:time],
@@ -27,6 +19,19 @@ class Query::Projects < Query::BaseAR
       comments_has: :string,
       pattern: :string
     )
+  end
+
+  # Declare the parameters as attributes of type `query_param`
+  parameter_declarations.each_key do |param_name|
+    attribute param_name, :query_param
+  end
+
+  def model
+    @model ||= Project
+  end
+
+  def alphabetical_by
+    @alphabetical_by ||= Project[:title]
   end
 
   def self.default_order

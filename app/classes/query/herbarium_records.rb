@@ -1,14 +1,6 @@
 # frozen_string_literal: true
 
-class Query::HerbariumRecords < Query::BaseAR
-  def model
-    @model ||= HerbariumRecord
-  end
-
-  def alphabetical_by
-    @alphabetical_by ||= HerbariumRecord[:initial_det]
-  end
-
+class Query::HerbariumRecords < Query::BaseAM
   def self.parameter_declarations
     super.merge(
       created_at: [:time],
@@ -25,6 +17,19 @@ class Query::HerbariumRecords < Query::BaseAR
       observations: [Observation],
       pattern: :string
     )
+  end
+
+  # Declare the parameters as attributes of type `query_param`
+  parameter_declarations.each_key do |param_name|
+    attribute param_name, :query_param
+  end
+
+  def model
+    @model ||= HerbariumRecord
+  end
+
+  def alphabetical_by
+    @alphabetical_by ||= HerbariumRecord[:initial_det]
   end
 
   def self.default_order

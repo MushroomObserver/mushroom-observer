@@ -18,12 +18,13 @@ class Query::BaseAM
   before_validation :clean_params
 
   # attr_accessor :params, :params_cache, :subqueries
-  attr_reader :validation_errors # set by validate_params
+  # attr_reader :validation_errors # set by validate_params
   attr_writer :record
 
   def clean_params
     validate_params
-    assign_attributes(**@params) # eventually should be done in validate_params
+    # eventually should be done in validate_params
+    assign_attributes(**@params) if @params.present?
   end
 
   def self.parameter_declarations

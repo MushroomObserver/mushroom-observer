@@ -1,14 +1,6 @@
 # frozen_string_literal: true
 
-class Query::Herbaria < Query::BaseAR
-  def model
-    @model ||= Herbarium
-  end
-
-  def alphabetical_by
-    @alphabetical_by ||= Herbarium[:name]
-  end
-
+class Query::Herbaria < Query::BaseAM
   def self.parameter_declarations
     super.merge(
       created_at: [:time],
@@ -21,6 +13,19 @@ class Query::Herbaria < Query::BaseAR
       pattern: :string,
       nonpersonal: :boolean
     )
+  end
+
+  # Declare the parameters as attributes of type `query_param`
+  parameter_declarations.each_key do |param_name|
+    attribute param_name, :query_param
+  end
+
+  def model
+    @model ||= Herbarium
+  end
+
+  def alphabetical_by
+    @alphabetical_by ||= Herbarium[:name]
   end
 
   def self.default_order

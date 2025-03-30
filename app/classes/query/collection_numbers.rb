@@ -1,14 +1,6 @@
 # frozen_string_literal: true
 
-class Query::CollectionNumbers < Query::BaseAR
-  def model
-    @model ||= CollectionNumber
-  end
-
-  def alphabetical_by
-    @alphabetical_by ||= CollectionNumber[:name]
-  end
-
+class Query::CollectionNumbers < Query::BaseAM
   def self.parameter_declarations
     super.merge(
       created_at: [:time],
@@ -22,6 +14,19 @@ class Query::CollectionNumbers < Query::BaseAR
       observations: [Observation],
       pattern: :string
     )
+  end
+
+  # Declare the parameters as attributes of type `query_param`
+  parameter_declarations.each_key do |param_name|
+    attribute param_name, :query_param
+  end
+
+  def model
+    @model ||= CollectionNumber
+  end
+
+  def alphabetical_by
+    @alphabetical_by ||= CollectionNumber[:name]
   end
 
   def self.default_order

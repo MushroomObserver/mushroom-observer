@@ -1,12 +1,8 @@
 # frozen_string_literal: true
 
-class Query::Locations < Query::BaseAR
+class Query::Locations < Query::BaseAM
   include Query::Params::AdvancedSearch
   include Query::Params::Filters
-
-  def model
-    @model ||= Location
-  end
 
   def self.parameter_declarations
     super.merge(
@@ -27,6 +23,15 @@ class Query::Locations < Query::BaseAR
       observation_query: { subquery: :Observation }
     ).merge(content_filter_parameter_declarations(Location)).
       merge(advanced_search_parameter_declarations)
+  end
+
+  # Declare the parameters as attributes of type `query_param`
+  parameter_declarations.each_key do |param_name|
+    attribute param_name, :query_param
+  end
+
+  def model
+    @model ||= Location
   end
 
   def self.default_order

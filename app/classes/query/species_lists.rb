@@ -1,19 +1,6 @@
 # frozen_string_literal: true
 
-class Query::SpeciesLists < Query::BaseAR
-  def model
-    @model ||= SpeciesList
-  end
-
-  def alphabetical_by
-    @alphabetical_by ||= case params[:order_by].to_s
-                         when "user", "reverse_user"
-                           User[:login]
-                         else
-                           SpeciesList[:title]
-                         end
-  end
-
+class Query::SpeciesLists < Query::BaseAM
   def self.parameter_declarations
     super.merge(
       created_at: [:time],
@@ -32,6 +19,24 @@ class Query::SpeciesLists < Query::BaseAR
       pattern: :string,
       observation_query: { subquery: :Observation }
     )
+  end
+
+  # Declare the parameters as attributes of type `query_param`
+  parameter_declarations.each_key do |param_name|
+    attribute param_name, :query_param
+  end
+
+  def model
+    @model ||= SpeciesList
+  end
+
+  def alphabetical_by
+    @alphabetical_by ||= case params[:order_by].to_s
+                         when "user", "reverse_user"
+                           User[:login]
+                         else
+                           SpeciesList[:title]
+                         end
   end
 
   def self.default_order

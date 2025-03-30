@@ -1,17 +1,9 @@
 # frozen_string_literal: true
 
 # base class for Query's which return Names
-class Query::Names < Query::BaseAR
+class Query::Names < Query::BaseAM
   include Query::Params::AdvancedSearch
   include Query::Params::Filters
-
-  def model
-    @model ||= Name
-  end
-
-  def alphabetical_by
-    @alphabetical_by ||= Name[:sort_name]
-  end
 
   def self.parameter_declarations # rubocop:disable Metrics/MethodLength
     super.merge(
@@ -54,6 +46,19 @@ class Query::Names < Query::BaseAR
       observation_query: { subquery: :Observation }
     ).merge(content_filter_parameter_declarations(Name)).
       merge(advanced_search_parameter_declarations)
+  end
+
+  # Declare the parameters as attributes of type `query_param`
+  parameter_declarations.each_key do |param_name|
+    attribute param_name, :query_param
+  end
+
+  def model
+    @model ||= Name
+  end
+
+  def alphabetical_by
+    @alphabetical_by ||= Name[:sort_name]
   end
 
   def self.default_order

@@ -2,7 +2,7 @@
 
 # Validation of Query parameters.
 module Query::Modules::Validation
-  attr_accessor :params, :params_cache, :subqueries, :validation_errors
+  attr_accessor :params, :params_cache, :subqueries, :valid, :validation_errors
 
   def validate_params
     # @validation_errors ||= "foo"
@@ -221,19 +221,6 @@ module Query::Modules::Validation
       )
     end
   end
-
-  # def validate_query(param, val)
-  #   case val
-  #   when Query::Base
-  #     val.record.id
-  #   when Integer
-  #     val
-  #   else
-  #     raise(
-  #       "Value for :#{param} should be a Query class, got: #{val.inspect}"
-  #     )
-  #   end
-  # end
 
   def find_cached_parameter_instance(model, param)
     return @params_cache[param] if @params_cache && @params_cache[param]

@@ -1,21 +1,8 @@
 # frozen_string_literal: true
 
-class Query::Observations < Query::BaseAR
+class Query::Observations < Query::BaseAM
   include Query::Params::AdvancedSearch
   include Query::Params::Filters
-
-  def model
-    @model ||= Observation
-  end
-
-  def alphabetical_by
-    @alphabetical_by ||= case params[:order_by].to_s
-                         when "user", "reverse_user"
-                           User[:login]
-                         when "name", "reverse_name"
-                           Name[:sort_name]
-                         end
-  end
 
   def self.parameter_declarations # rubocop:disable Metrics/MethodLength
     super.merge(
@@ -68,6 +55,24 @@ class Query::Observations < Query::BaseAR
     ).
       merge(content_filter_parameter_declarations(Observation)).
       merge(advanced_search_parameter_declarations)
+  end
+
+  # Declare the parameters as attributes of type `query_param`
+  parameter_declarations.each_key do |param_name|
+    attribute param_name, :query_param
+  end
+
+  def model
+    @model ||= Observation
+  end
+
+  def alphabetical_by
+    @alphabetical_by ||= case params[:order_by].to_s
+                         when "user", "reverse_user"
+                           User[:login]
+                         when "name", "reverse_name"
+                           Name[:sort_name]
+                         end
   end
 
   def self.default_order

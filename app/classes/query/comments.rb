@@ -1,14 +1,6 @@
 # frozen_string_literal: true
 
-class Query::Comments < Query::BaseAR
-  def model
-    @model ||= Comment
-  end
-
-  def alphabetical_by
-    @alphabetical_by ||= User[:login]
-  end
-
+class Query::Comments < Query::BaseAM
   def self.parameter_declarations
     super.merge(
       created_at: [:time],
@@ -22,6 +14,19 @@ class Query::Comments < Query::BaseAR
       content_has: :string,
       pattern: :string
     )
+  end
+
+  # Declare the parameters as attributes of type `query_param`
+  parameter_declarations.each_key do |param_name|
+    attribute param_name, :query_param
+  end
+
+  def model
+    @model ||= Comment
+  end
+
+  def alphabetical_by
+    @alphabetical_by ||= User[:login]
   end
 
   def self.default_order

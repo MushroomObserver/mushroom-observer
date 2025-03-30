@@ -211,6 +211,7 @@ class Query
     query.params = query.attributes
     query.subqueries = {}
     query.current = current if current
+    query.valid = query.valid? # reinitializes params after cleaning/validation
     query
   end
 
