@@ -7,7 +7,7 @@ class Query::BaseAM
   include ActiveModel::Validations::Callbacks
 
   include Query::Modules::ClassMethods
-  include Query::ScopeModules::HighLevelQueries
+  include Query::ScopeModules::ResultAccessors
   include Query::ScopeModules::Initialization
   include Query::ScopeModules::SequenceOperators
   include Query::Modules::Validation

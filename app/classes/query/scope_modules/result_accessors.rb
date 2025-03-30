@@ -2,7 +2,7 @@
 
 ##############################################################################
 #
-#  :section: High-Level Queries
+#  :section: ResultAccessors
 #
 #  Note that most of these methods accept a few optional arguments.  For
 #  example, all methods that return instantiated results accept +:include+
@@ -20,7 +20,7 @@
 #
 ##############################################################################
 
-module Query::ScopeModules::HighLevelQueries
+module Query::ScopeModules::ResultAccessors
   attr_reader :need_letters
 
   # Args accepted by +results+, +result_ids+, +num_results+.  (These are passed
@@ -122,14 +122,17 @@ module Query::ScopeModules::HighLevelQueries
   def paginate_ids(pagination_data)
     initialize_query unless initialized?
     ids = result_ids
-    if need_letters
-      pagination_data.used_letters = @letters.values.uniq
-      if (letter = pagination_data.letter)
-        ids = ids.select { |id| @letters[id] == letter }
-      end
-    end
+    ids, pagination_data = ids_for_letter(ids, pagination_data) if need_letters
     pagination_data.num_total = ids.size
     ids[pagination_data.from..pagination_data.to] || []
+  end
+
+  def ids_for_letter(ids, pagination_data)
+    pagination_data.used_letters = @letters.values.uniq
+    if (letter = pagination_data.letter)
+      ids = ids.select { |id| @letters[id] == letter }
+    end
+    [ids, pagination_data]
   end
 
   # Returns a subset of the results (as ActiveRecord instances).
