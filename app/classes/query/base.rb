@@ -2,6 +2,10 @@
 
 # base class for Query searches
 class Query::Base
+  include ActiveModel::API
+  include ActiveModel::Attributes
+  include ActiveModel::Validations::Callbacks
+
   include Query::Modules::ClassMethods
   include Query::Modules::BoundingBox
   include Query::Modules::Conditions
@@ -17,6 +21,11 @@ class Query::Base
   include Query::Modules::SequenceOperators
   include Query::Modules::Sql
   include Query::Modules::Validation
+
+  validates_with Query::ScopeModules::Validator # , options
+
+  # "clean up" and reassign attributes before validation
+  before_validation :clean_params
 
   attr_writer :record
 
