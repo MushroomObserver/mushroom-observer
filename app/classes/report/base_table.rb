@@ -125,58 +125,58 @@ module Report
       ].freeze
     end
 
+    # "+" is the required Arel Extensions syntax for SQL CONCAT
+    # rubocop:disable Style/StringConcatenation
     def add_herbarium_labels!(rows, col)
-      vals = HerbariumRecord.connection.select_rows(%(
-        SELECT ho.observation_id,
-          CONCAT(h.initial_det, ": ", h.accession_number)
-        FROM herbarium_records h
-        JOIN observation_herbarium_records ho ON ho.herbarium_record_id = h.id
-        JOIN (#{plain_query}) AS ids ON ids.id = ho.observation_id
-      ))
+      vals = HerbariumRecord.joins(:observations).
+             merge(plain_query).
+             select(ObservationHerbariumRecord[:observation_id],
+                    (HerbariumRecord[:initial_det] + ": " +
+                     HerbariumRecord[:accession_number])).
+             map { |rec| rec.attributes.values[0..1] }
       add_column!(rows, vals, col)
     end
+    # rubocop:enable Style/StringConcatenation
 
+    # rubocop:disable Metrics/AbcSize
     def add_herbarium_accession_numbers!(rows, col)
-      vals = HerbariumRecord.connection.select_rows(%(
-        SELECT ho.observation_id,
-          GROUP_CONCAT(DISTINCT CONCAT(h.code, "\t", hr.accession_number)
-                       SEPARATOR "\n")
-        FROM observation_herbarium_records ho
-        JOIN herbarium_records hr ON hr.id = ho.herbarium_record_id
-        JOIN herbaria h ON h.id = hr.herbarium_id
-        JOIN (#{plain_query}) AS ids ON ids.id = ho.observation_id
-        WHERE h.code != ""
-        GROUP BY ho.observation_id
-      ))
+      gpc = 'GROUP_CONCAT(DISTINCT CONCAT(herbaria.code, "\t", ' \
+            'herbarium_records.accession_number) SEPARATOR "\n")'
+      vals = ObservationHerbariumRecord.joins(herbarium_record: :herbarium).
+             where.not(Herbarium[:code].eq("")).
+             merge(plain_query).
+             group(ObservationHerbariumRecord[:observation_id]).
+             select(ObservationHerbariumRecord[:observation_id], Arel.sql(gpc)).
+             map { |rec| rec.attributes.values[0..1] }
       add_column!(rows, vals, col)
     end
+    # rubocop:enable Metrics/AbcSize
 
     def add_collector_ids!(rows, col)
-      vals = CollectionNumber.connection.select_rows(%(
-        SELECT co.observation_id,
-          GROUP_CONCAT(DISTINCT CONCAT(c.id, "\t", c.name, "\t", c.number)
-                       SEPARATOR "\n")
-        FROM collection_numbers c
-        JOIN observation_collection_numbers co
-          ON co.collection_number_id = c.id
-        JOIN (#{plain_query}) AS ids ON ids.id = co.observation_id
-        GROUP BY co.observation_id
-      ))
+      gpc = 'GROUP_CONCAT(DISTINCT CONCAT(collection_numbers.id, "\t", ' \
+            'collection_numbers.name, "\t", collection_numbers.number) ' \
+            'SEPARATOR "\n")'
+      vals = CollectionNumber.joins(:observation_collection_numbers).
+             merge(plain_query).
+             group(ObservationCollectionNumber[:observation_id]).
+             select(ObservationCollectionNumber[:observation_id],
+                    Arel.sql(gpc)).
+             map { |rec| rec.attributes.values[0..1] }
       add_column!(rows, vals, col)
     end
 
     def add_image_ids!(rows, col)
-      vals = Image.connection.select_rows(%(
-        SELECT io.observation_id, io.image_id
-        FROM observation_images io
-        JOIN (#{plain_query}) AS ids ON ids.id = io.observation_id
-      ))
+      vals = ObservationImage.joins(:observation).
+             merge(plain_query).
+             select(ObservationImage[:observation_id],
+                    ObservationImage[:image_id]).
+             map { |rec| rec.attributes.values[0..1] }
       add_column!(rows, vals, col)
     end
 
     def plain_query
       # Sometimes the default order requires unnecessary joins!
-      query.query.reorder("").to_sql
+      query.query.reorder("")
     end
 
     def add_column!(rows, vals, col)
