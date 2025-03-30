@@ -142,7 +142,7 @@ module Report
     def add_herbarium_accession_numbers!(rows, col)
       gpc = 'GROUP_CONCAT(DISTINCT CONCAT(herbaria.code, "\t", ' \
             'herbarium_records.accession_number) SEPARATOR "\n")'
-      vals = ObservationHerbariumRecord.joins(herbarium_record: :herbarium).
+      vals = Herbarium.joins(herbarium_records: :observations).
              where.not(Herbarium[:code].eq("")).
              merge(plain_query).
              group(ObservationHerbariumRecord[:observation_id]).
@@ -156,7 +156,7 @@ module Report
       gpc = 'GROUP_CONCAT(DISTINCT CONCAT(collection_numbers.id, "\t", ' \
             'collection_numbers.name, "\t", collection_numbers.number) ' \
             'SEPARATOR "\n")'
-      vals = CollectionNumber.joins(:observation_collection_numbers).
+      vals = CollectionNumber.joins(:observations).
              merge(plain_query).
              group(ObservationCollectionNumber[:observation_id]).
              select(ObservationCollectionNumber[:observation_id],
@@ -166,7 +166,7 @@ module Report
     end
 
     def add_image_ids!(rows, col)
-      vals = ObservationImage.joins(:observation).
+      vals = Image.joins(:observations).
              merge(plain_query).
              select(ObservationImage[:observation_id],
                     ObservationImage[:image_id]).
