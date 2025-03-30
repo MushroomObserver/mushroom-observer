@@ -208,7 +208,7 @@ class Query
 
   def self.new_am(klass, params, current)
     query = klass.new(params)
-    query.params = query.attributes
+    query.params = query.attributes # initialize params for cleaning/validation
     query.subqueries = {}
     query.current = current if current
     query.valid = query.valid? # reinitializes params after cleaning/validation
