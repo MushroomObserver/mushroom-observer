@@ -22,12 +22,18 @@ class Query::Base
   include Query::Modules::Sql
   include Query::Modules::Validation
 
-  validates_with Query::ScopeModules::Validator # , options
+  validates_with Query::Modules::Validator # , options
 
   # "clean up" and reassign attributes before validation
   before_validation :clean_params
 
   attr_writer :record
+
+  def clean_params
+    validate_params
+    # eventually should be done in validate_params
+    assign_attributes(**@params) if @params.present?
+  end
 
   delegate :parameter_declarations, to: :class
 
