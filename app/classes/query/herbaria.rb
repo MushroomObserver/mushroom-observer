@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Query::Herbaria < Query::BaseAM
+class Query::Herbaria < Query::BaseNew
   def self.parameter_declarations
     super.merge(
       created_at: [:time],

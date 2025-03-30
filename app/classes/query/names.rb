@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # base class for Query's which return Names
-class Query::Names < Query::BaseAM
+class Query::Names < Query::BaseNew
   include Query::Params::AdvancedSearch
   include Query::Params::Filters
 

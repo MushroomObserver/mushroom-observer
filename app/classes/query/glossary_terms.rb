@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Query::GlossaryTerms < Query::BaseAM
+class Query::GlossaryTerms < Query::BaseNew
   def self.parameter_declarations
     super.merge(
       created_at: [:time],

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Query::ExternalLinks < Query::BaseAM
+class Query::ExternalLinks < Query::BaseNew
   def self.parameter_declarations
     super.merge(
       created_at: [:time],

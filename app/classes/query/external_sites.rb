@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Query::ExternalSites < Query::BaseAM
+class Query::ExternalSites < Query::BaseNew
   def self.parameter_declarations
     super.merge(
       id_in_set: [ExternalSite],

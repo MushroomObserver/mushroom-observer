@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Query::Locations < Query::BaseAM
+class Query::Locations < Query::BaseNew
   include Query::Params::AdvancedSearch
   include Query::Params::Filters
 

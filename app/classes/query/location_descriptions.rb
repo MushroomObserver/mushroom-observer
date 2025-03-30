@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Query::LocationDescriptions < Query::BaseAM
+class Query::LocationDescriptions < Query::BaseNew
   def self.parameter_declarations
     super.merge(
       created_at: [:time],

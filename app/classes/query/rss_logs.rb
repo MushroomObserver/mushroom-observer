@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Query::RssLogs < Query::BaseAM
+class Query::RssLogs < Query::BaseNew
   include Query::Params::Filters
 
   def self.parameter_declarations

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # base class for Query searches
-class Query::BaseAM
+class Query::BaseNew
   include ActiveModel::API
   include ActiveModel::Attributes
   include ActiveModel::Validations::Callbacks
