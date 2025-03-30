@@ -2,7 +2,7 @@
 
 # Helper methods for turning Query parameters into AR conditions.
 module Query::ScopeModules::Initialization
-  attr_accessor :scopes, :order, :last_query
+  attr_accessor :scopes, :last_query
 
   def initialized?
     @initialized ? true : false
@@ -10,7 +10,7 @@ module Query::ScopeModules::Initialization
 
   def initialize_query
     @initialized = true
-    @order       = ""
+    # @order       = ""
     @scopes      = model
     initialize_scopes
     # initialize_order
@@ -30,23 +30,57 @@ module Query::ScopeModules::Initialization
   end
 
   def initialize_scopes
-    # `where`/`join` strings never come from user, so no need to sanitize.
-    # (I believe they are only used by the site stats page. -JPH 20190708)
-    # self.where += params[:where] if params[:where]
-    # add_join(params[:join]) if params[:join]
-    send_content_filters_to_rss_log_subqueries
     initialize_parameter_set
     filter_misspellings_for_name_queries
+    send_rss_log_content_filters_to_subqueries
+    add_default_order_if_none_specified
   end
 
-  # In the case of RssLogs, pack any content filter params into subqueries.
+  def initialize_parameter_set
+    sendable_params.each do |param, val|
+      next if (param != :id_in_set && skippable_values.include?(val.to_s)) ||
+              (param == :id_in_set && val.nil?) # keep empty array
+
+      @scopes = if val.is_a?(Hash)
+                  @scopes.send(param, **val)
+                else
+                  @scopes.send(param, val)
+                end
+    end
+  end
+
+  # We don't `compact` sendable_params, in order to keep empty arrays for
+  # `:id_in_set`. We also do want `false` values, so we can't check `blank?`
+  def skippable_values
+    @skippable_values = ["[]", "{}", "", nil].freeze
+  end
+
+  # For RssLogs, remove any content filter params before passing to scopes
+  # since they're already handled in subqueries above.
+  # Otherwise, these are the `scope_parameters` defined in Query::Base.
+  def sendable_params
+    sendable = params.slice(*scope_parameters)
+    return sendable unless model == RssLog
+
+    sendable.except(*content_filter_parameters.keys)
+  end
+
+  # Most name queries are filtered to remove misspellings.
+  def filter_misspellings_for_name_queries
+    return if model != Name || !params[:misspellings].nil?
+
+    @scopes = @scopes.with_correct_spelling
+  end
+
+  # In the case of RssLogs, send any content filter params to subqueries.
   # (Content filters may add params to RssLog queries that RssLog scopes
-  # can't handle, because they're intended for one or more related subqueries.)
+  # can't handle, because they're intended for one or more related models.)
   # Some params may go into more than one subquery if >1 `type` requested.
-  def send_content_filters_to_rss_log_subqueries
+  # This needs to run first
+  def send_rss_log_content_filters_to_subqueries
     return if model != RssLog || !content_filters_present
 
-    rss_logs_current_types.each do |model|
+    rss_logs_requested_types.each do |model|
       subquery_params = content_filter_subquery_params(model)
       if subquery_params.present?
         @scopes = @scopes.send(:"#{model.name.downcase}_query",
@@ -56,7 +90,7 @@ module Query::ScopeModules::Initialization
   end
 
   # Current types requested on the RssLog page. Defaults to :all.
-  def rss_logs_current_types
+  def rss_logs_requested_types
     types = [:observation, :name, :location]
     active_types = case params[:type]
                    when nil, "", :all, "all"
@@ -84,35 +118,10 @@ module Query::ScopeModules::Initialization
       params.slice(*content_filter_parameters.keys).compact.present?
   end
 
-  def initialize_parameter_set
-    skippable_vals = ["[]", "{}", "", nil].freeze # keep false values
-    sendable_params.each do |param, val|
-      next if (param != :id_in_set && skippable_vals.include?(val.to_s)) ||
-              (param == :id_in_set && val.nil?) # keep empty array
+  def add_default_order_if_none_specified
+    return if params[:order_by].present?
 
-      @scopes = if val.is_a?(Hash)
-                  @scopes.send(param, **val)
-                else
-                  @scopes.send(param, val)
-                end
-    end
-  end
-
-  # Generally, these are the `scope_parameters` defined in Query::Base.
-  # But for RssLogs, remove any content filters from the scope builder
-  # since they're already handled in subqueries above.
-  def sendable_params
-    sendable = params.slice(*scope_parameters)
-    return sendable unless model == RssLog
-
-    sendable.except(*content_filter_parameters.keys)
-  end
-
-  # Most name queries are filtered to remove misspellings.
-  def filter_misspellings_for_name_queries
-    return if model != Name || !params[:misspellings].nil?
-
-    @scopes = @scopes.with_correct_spelling
+    @scopes = @scopes.order_by_default
   end
 
   # Make a value safe for SQL.

@@ -3,35 +3,16 @@
 # base class for Query searches
 class Query::BaseAR
   include Query::Modules::ClassMethods
-  # include Query::Modules::BoundingBox
-  # include Query::Modules::Conditions
-  # include Query::Modules::Associations
-  # include Query::Modules::Datetime
-  # include Query::Modules::GoogleSearch
   include Query::ScopeModules::HighLevelQueries
   include Query::ScopeModules::Initialization
-  # include Query::ScopeModules::Joining
-  # include Query::Modules::LookupObjects
-  # include Query::ScopeModules::LowLevelQueries
   # include Query::ScopeModules::Ordering
   include Query::ScopeModules::SequenceOperators
-  # include Query::Modules::Sql
-  # include Query::Modules::Titles
   include Query::Modules::Validation
 
   attr_writer :record
 
   def self.parameter_declarations
-    {
-      # join: [:string],
-      # tables: [:string],
-      # where: [:string],
-      # group: :string,
-      # order: :string,
-      # selects: :string,
-      order_by: :string
-      # title: [:string]
-    }
+    { order_by: :string }
   end
 
   delegate :parameter_declarations, to: :class
@@ -59,22 +40,7 @@ class Query::BaseAR
 
   delegate :content_filter_parameters, to: :class
 
-  # A "current_or_related_query" may be called for links:
-  # (1) for a new query on a related target model, using the current_query as
-  #     the filtering subquery.
-  # (2) from an index that itself was the result of a subquery.
-  #     For example, if you follow links in the current UI from:
-  #       [target model] of these [filtering model]
-  #       Observations of these names -> (that's a plain obs query)
-  #       Locations of these observations -> (location query with obs_subquery)
-  #       Map of these locations -> (loc, obs_subquery)
-  #       Names at these locations -> (name, obs_subquery, obs have the loc)
-  #       Observations of these names -> (obs query)
-  #     Note that the last index is really the original query, so to prevent
-  #     recursive subquery nesting, we always want check for the currently
-  #     needed (sub)query nested within the params.
-  # (3) from maps to indexes of the same objects. Returns the current_query.
-  #
+  # Can the current class be called as a subquery of the target Query class?
   def relatable?(target)
     self.class.related?(target, model.name.to_sym)
   end
@@ -92,10 +58,10 @@ class Query::BaseAR
     serialize == other.try(&:serialize)
   end
 
-  # NOTE: QueryRecord[:description] is not a serialized column; we call
-  # `to_json` here for serialization.
-  # Prepare the query params, adding the model, for saving to the db. The
-  # :description column is accessed not just to recompose a query, but to
+  # NOTE: QueryRecord[:description] is not a Rails-serialized column; we call
+  # `to_json` here to serializate it ourselves.
+  # Prepares the query params, adding the model, for saving to a QueryRecord.
+  # The :description column is accessed not just to recompose a query, but to
   # identify existing query records that match current params. That's why the
   # keys are sorted here before being stored as strings in to_json - because
   # when matching a serialized hash, strings must match exactly. This is
