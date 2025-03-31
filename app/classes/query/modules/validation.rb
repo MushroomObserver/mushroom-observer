@@ -119,8 +119,8 @@ module Query::Modules::Validation
     end
 
     val2 = scalar_validate(param, val, arg_type)
-    if (arg_type == :string) && set.include?(val2.to_sym)
-      val2 = val2.to_sym
+    if (arg_type == :string) && set.include?(val2.to_s.to_sym)
+      val2 = val2.to_s.to_sym
     elsif set.exclude?(val2)
       @validation_errors <<
         "Value for :#{param} should be one of the following: #{set.inspect}."
