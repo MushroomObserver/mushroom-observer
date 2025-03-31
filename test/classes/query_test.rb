@@ -57,11 +57,44 @@ class QueryTest < UnitTestCase
     assert_validation_errors(Query.lookup(:Name, misspellings: 123))
   end
 
-  def test_validate_params_instances_users
-    @fungi = names(:fungi)
+  def test_validate_params_boolean
+    assert_equal(
+      true,
+      Query.lookup(:Name, has_synonyms: "true").params[:has_synonyms]
+    )
+    assert_validation_errors(Query.lookup(:Name, has_synonyms: "bogus"))
+  end
 
+  def test_validate_params_date
+    assert_equal(
+      ["2021-01-06"],
+      Query.lookup(:Observation, date: "Jan 06, 2021").params[:date]
+    )
+    assert_equal(
+      [nil],
+      Query.lookup(:Observation, date: "0").params[:date]
+    )
+    assert_validation_errors(Query.lookup(:Observation, date: "fi"))
+  end
+
+  def test_validate_params_datetime
+    assert_equal(
+      ["2021-01-06-00-00-00"],
+      Query.lookup(:Observation, created_at: "Jan 06, 2021").params[:created_at]
+    )
+    assert_equal(
+      [nil],
+      Query.lookup(:Observation, created_at: "0").params[:created_at]
+    )
+    assert_validation_errors(Query.lookup(:Observation, date: "fi"))
+  end
+
+  def test_validate_params_instances_users
+    fungi = names(:fungi)
+    license = License.first
+    assert_validation_errors(Query.lookup(:Image, by_users: license))
     assert_validation_errors(Query.lookup(:Image, by_users: :bogus))
-    assert_validation_errors(Query.lookup(:Image, by_users: @fungi))
+    assert_validation_errors(Query.lookup(:Image, by_users: fungi))
     assert_equal([rolf.id],
                  Query.lookup(:Image, by_users: rolf).params[:by_users])
     assert_equal([rolf.id],
@@ -70,12 +103,15 @@ class QueryTest < UnitTestCase
                  Query.lookup(:Image, by_users: rolf.id.to_s).params[:by_users])
     assert_equal([rolf.login],
                  Query.lookup(:Image, by_users: rolf.login).params[:by_users])
+
+    brand_new = User.new(name: "Not in db", login: "evanescent")
+    assert_validation_errors(Query.lookup(:Image, by_users: brand_new))
   end
 
   def test_validate_params_id_in_set
     # Oops, this query is generic,
     # doesn't know to require Name instances here.
-    # assert_raises(RuntimeError) { Query.lookup(:Name, id_in_set: rolf) }
+    # assert_validation_errors(Query.lookup(:Name, id_in_set: rolf))
     assert_validation_errors(Query.lookup(:Image, id_in_set: "one"))
     assert_validation_errors(Query.lookup(:Image, id_in_set: "1,2,3"))
     assert_validation_errors(Query.lookup(:Image, id_in_set: "Fungi"))
