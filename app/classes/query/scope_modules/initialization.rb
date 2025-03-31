@@ -67,6 +67,7 @@ module Query::ScopeModules::Initialization
   end
 
   # Most name queries are filtered to remove misspellings.
+  # This filters misspellings only if the param was not passed.
   def filter_misspellings_for_name_queries
     return if model != Name || !params[:misspellings].nil?
 
