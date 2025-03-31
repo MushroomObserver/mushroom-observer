@@ -33,6 +33,7 @@ class QueryTest < UnitTestCase
   end
 
   def assert_validation_errors(query)
+    assert_false(query.valid)
     assert_not_empty(query.validation_errors)
   end
 
