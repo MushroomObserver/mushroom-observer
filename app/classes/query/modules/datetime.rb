@@ -44,9 +44,9 @@ module Query::Modules::Datetime
     if /^\d\d\d\d/.match?(val.to_s)
       y, m, d = val.split("-")
       where << format("#{col} #{dir}= '%04d-%02d-%02d'",
-                       y.to_i,
-                       (m || (min ? 1 : 12)).to_i,
-                       (d || (min ? 1 : 31)).to_i)
+                      y.to_i,
+                      (m || (min ? 1 : 12)).to_i,
+                      (d || (min ? 1 : 31)).to_i)
     elsif /-/.match?(val.to_s)
       m, d = val.split("-")
       where << "MONTH(#{col}) #{dir} #{m} OR " \
