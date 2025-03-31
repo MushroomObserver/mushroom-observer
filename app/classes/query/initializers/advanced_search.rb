@@ -31,21 +31,21 @@ module Query::Initializers::AdvancedSearch
   def add_name_condition(name)
     return if name.blank?
 
-    @where += google_conditions(name, name_field)
+    self.where += google_conditions(name, name_field)
     add_join_to_names
   end
 
   def add_user_condition(user)
     return if user.blank?
 
-    @where += google_conditions(user, user_field)
+    self.where += google_conditions(user, user_field)
     add_join_to_users
   end
 
   def add_location_condition(location)
     return if location.blank?
 
-    @where += google_conditions(location, location_field)
+    self.where += google_conditions(location, location_field)
     add_join_to_locations
   end
 

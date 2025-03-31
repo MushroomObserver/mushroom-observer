@@ -18,13 +18,21 @@ module Query::Modules::Initialization
     initialize_selects
   end
 
+  # Re-establish these internal param defaults so we can work with them.
+  # Attributes null out these values.
   def initialize_non_nil_ivars
-    @join        ||= []
-    @tables      ||= []
-    @where       ||= []
-    @group       ||= ""
-    @order       ||= ""
-    @selects     ||= ""
+    defaults = {
+      "join" => [],
+      "tables" => [],
+      "where" => [],
+      "group" => "",
+      "order" => "",
+      "selects" => ""
+    }
+    self.attributes =
+      defaults.merge!(attributes) do |_key, old_val, new_val|
+        new_val.nil? ? old_val : new_val
+      end
   end
 
   # Make a value safe for SQL.
@@ -35,7 +43,7 @@ module Query::Modules::Initialization
   # Put together a list of ids for use in a "id IN (1,2,...)" condition.
   #
   #   set = clean_id_set(name.children)
-  #   @where << "names.id IN (#{set})"
+  #   where << "names.id IN (#{set})"
   #
   def clean_id_set(ids)
     set = limited_id_set(ids).map(&:to_s).join(",")
@@ -85,16 +93,16 @@ module Query::Modules::Initialization
   #     => join << {:observations => {:names => :descriptions}}
   #
   def add_join(*)
-    @join.add_leaf(*)
+    join.add_leaf(*)
   end
 
   # Same as add_join but can provide chain of more than two tables.
   def add_joins(*args)
     if args.length == 1
-      @join.add_leaf(args[0])
+      join.add_leaf(args[0])
     elsif args.length > 1
       while args.length > 1
-        @join.add_leaf(args[0], args[1])
+        join.add_leaf(args[0], args[1])
         args.shift
       end
     end
@@ -135,7 +143,7 @@ module Query::Modules::Initialization
   # params[:selects] is not sanitized or validated.
   def initialize_selects
     if params[:selects].blank?
-      @selects = "DISTINCT #{model.table_name}.id"
+      self.selects = "DISTINCT #{model.table_name}.id"
       return
     end
 

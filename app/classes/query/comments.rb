@@ -54,15 +54,15 @@ class Query::Comments < Query::Base
                 "SELECT #{table}.id FROM #{table} " \
                 "WHERE #{table}.user_id = #{user_id}))"
     end
-    @where << or_clause(*wheres)
+    where << or_clause(*wheres)
   end
 
   def add_for_target_condition
     return if params[:target].blank?
 
     target = target_instance
-    @where << "comments.target_id = '#{target.id}'"
-    @where << "comments.target_type = '#{target.class.name}'"
+    where << "comments.target_id = '#{target.id}'"
+    where << "comments.target_type = '#{target.class.name}'"
   end
 
   def target_instance

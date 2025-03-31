@@ -87,11 +87,11 @@ class Query::Images < Query::Base
     pixels = Image::ALL_SIZES_IN_PIXELS
     if min
       size = pixels[sizes.index(min)]
-      @where << "images.width >= #{size} OR images.height >= #{size}"
+      where << "images.width >= #{size} OR images.height >= #{size}"
     end
     if max
       size = pixels[sizes.index(max) + 1]
-      @where << "images.width < #{size} AND images.height < #{size}"
+      where << "images.width < #{size} AND images.height < #{size}"
     end
     add_joins(*)
   end
@@ -102,13 +102,13 @@ class Query::Images < Query::Base
     types, mimes, other = parse_image_type_vals(vals)
     str1 = "images.content_type IN ('#{types.join("','")}')"
     str2 = "images.content_type NOT IN ('#{mimes.join("','")}')"
-    @where << if types.empty?
-                str2
-              elsif other
-                "#{str1} OR #{str2}"
-              else
-                str1
-              end
+    where << if types.empty?
+               str2
+             elsif other
+               "#{str1} OR #{str2}"
+             else
+               str1
+             end
     add_joins(*)
   end
 

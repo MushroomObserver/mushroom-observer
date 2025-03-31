@@ -33,7 +33,7 @@ module Query::Modules::Datetime
   def add_wrapped_date_condition(col, vals)
     m1, d1 = vals[0].to_s.split("-")
     m2, d2 = vals[1].to_s.split("-")
-    @where << "MONTH(#{col}) > #{m1} OR " \
+    where << "MONTH(#{col}) > #{m1} OR " \
               "MONTH(#{col}) < #{m2} OR " \
               "(MONTH(#{col}) = #{m1} AND DAY(#{col}) >= #{d1}) OR " \
               "(MONTH(#{col}) = #{m2} AND DAY(#{col}) <= #{d2})"
@@ -43,17 +43,17 @@ module Query::Modules::Datetime
     dir = min ? ">" : "<"
     if /^\d\d\d\d/.match?(val.to_s)
       y, m, d = val.split("-")
-      @where << format("#{col} #{dir}= '%04d-%02d-%02d'",
+      where << format("#{col} #{dir}= '%04d-%02d-%02d'",
                        y.to_i,
                        (m || (min ? 1 : 12)).to_i,
                        (d || (min ? 1 : 31)).to_i)
     elsif /-/.match?(val.to_s)
       m, d = val.split("-")
-      @where << "MONTH(#{col}) #{dir} #{m} OR " \
+      where << "MONTH(#{col}) #{dir} #{m} OR " \
                 "(MONTH(#{col}) = #{m} AND " \
                 "DAY(#{col}) #{dir}= #{d})"
     elsif val.present?
-      @where << "MONTH(#{col}) #{dir}= #{val}"
+      where << "MONTH(#{col}) #{dir}= #{val}"
     end
   end
 
@@ -64,7 +64,7 @@ module Query::Modules::Datetime
     return if val.blank?
 
     y, m, d, h, n, s = val.split("-")
-    @where << format(
+    where << format(
       "#{col} #{min ? ">" : "<"}= #{DATE_FORMAT}",
       y.to_i,
       (m || (min ? 1 : 12)).to_i,

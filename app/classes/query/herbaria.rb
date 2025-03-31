@@ -47,7 +47,7 @@ class Query::Herbaria < Query::Base
   def add_nonpersonal_condition
     return if params[:nonpersonal].blank? # false is blank
 
-    @where << "herbaria.personal_user_id IS NULL"
+    where << "herbaria.personal_user_id IS NULL"
   end
 
   def search_fields

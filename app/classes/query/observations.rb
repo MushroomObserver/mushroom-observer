@@ -180,7 +180,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
     return if fields.empty?
 
     conds = fields.map { |field| notes_field_presence_condition(field) }
-    @where << conds.join(" OR ")
+    where << conds.join(" OR ")
     add_joins(*)
   end
 
@@ -196,7 +196,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
 
   def initialize_has_name_parameter
     genus = Name.ranks[:Genus]
-    group = Name.ranks[:Group]
+    self.group = Name.ranks[:Group]
     add_boolean_condition(
       "names.`rank` <= #{genus} or names.`rank` = #{group}",
       "names.`rank` > #{genus} and names.`rank` < #{group}",
@@ -262,7 +262,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
     user = lookup_users_by_name(params[:needs_naming]).first
     # 15x faster to use this AR scope to assemble the IDs vs using
     # SQL SELECT DISTINCT
-    @where << Observation.needs_naming(user).to_sql.gsub(/^.*?WHERE/, "")
+    where << Observation.needs_naming(user).to_sql.gsub(/^.*?WHERE/, "")
   end
 
   def initialize_confidence_parameter
@@ -295,10 +295,10 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
     return unless params[:location_undefined]
     return if params[:regexp] || params[:by_editor]
 
-    @where << "observations.location_id IS NULL"
-    @where << "observations.where IS NOT NULL"
-    @group = "observations.where"
-    @order = "COUNT(observations.where)"
+    where << "observations.location_id IS NULL"
+    where << "observations.where IS NOT NULL"
+    self.group = "observations.where"
+    self.order = "COUNT(observations.where)"
   end
 
   def initialize_project_lists_parameter

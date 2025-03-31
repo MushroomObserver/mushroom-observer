@@ -81,7 +81,7 @@ class Query::SpeciesLists < Query::Base
     return unless params[:search_where]
 
     location_str = params[:search_where]
-    @where << "species_lists.where LIKE '%#{clean_pattern(location_str)}%'"
+    where << "species_lists.where LIKE '%#{clean_pattern(location_str)}%'"
   end
 
   def initialize_search_parameters

@@ -178,8 +178,8 @@ class Query::Names < Query::Base
 
   def initialize_misspellings_parameter
     val = params[:misspellings] || :no
-    @where << "names.correct_spelling_id IS NULL"     if val == :no
-    @where << "names.correct_spelling_id IS NOT NULL" if val == :only
+    where << "names.correct_spelling_id IS NULL"     if val == :no
+    where << "names.correct_spelling_id IS NOT NULL" if val == :only
   end
 
   def initialize_is_deprecated_parameter
@@ -193,7 +193,7 @@ class Query::Names < Query::Base
     return if vals.empty?
 
     ranks = parse_rank_parameter(vals)
-    @where << "names.`rank` IN (#{ranks.join(",")})"
+    where << "names.`rank` IN (#{ranks.join(",")})"
     add_joins(*)
   end
 
@@ -250,10 +250,10 @@ class Query::Names < Query::Base
     return unless params[:needs_description]
 
     add_join(:observations)
-    @where << "names.description_id IS NULL"
-    @selects = "DISTINCT names.id, count(observations.name_id)"
-    @group = "observations.name_id"
-    @order = "count(observations.name_id) DESC"
+    where << "names.description_id IS NULL"
+    self.selects = "DISTINCT names.id, count(observations.name_id)"
+    self.group = "observations.name_id"
+    self.order = "count(observations.name_id) DESC"
   end
 
   def add_has_default_description_condition
