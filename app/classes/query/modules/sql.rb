@@ -14,7 +14,7 @@ module Query::Modules::Sql
   def sql(args = {})
     initialize_query unless initialized?
 
-    our_select  = args[:select] || selects
+    our_select  = args[:select] || @selects
     our_join    = @join.dup
     our_join += args[:join] if args[:join].is_a?(Array)
     our_join << args[:join] if args[:join].is_a?(Hash)
