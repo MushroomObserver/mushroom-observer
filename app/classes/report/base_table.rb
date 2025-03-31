@@ -36,6 +36,8 @@ module Report
       rows_with_location + rows_without_location
     end
 
+    private
+
     def rows_without_location
       Observation.connection.select_rows(
         query.query.joins(:user, :name).
