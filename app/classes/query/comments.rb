@@ -24,6 +24,11 @@ class Query::Comments < Query::Base
     )
   end
 
+  # Declare the parameters as attributes of type `query_param`
+  parameter_declarations.each_key do |param_name|
+    attribute param_name, :query_param
+  end
+
   def initialize_flavor
     add_owner_and_time_stamp_conditions
     add_id_in_set_condition
@@ -49,15 +54,15 @@ class Query::Comments < Query::Base
                 "SELECT #{table}.id FROM #{table} " \
                 "WHERE #{table}.user_id = #{user_id}))"
     end
-    @where << or_clause(*wheres)
+    where << or_clause(*wheres)
   end
 
   def add_for_target_condition
     return if params[:target].blank?
 
     target = target_instance
-    @where << "comments.target_id = '#{target.id}'"
-    @where << "comments.target_type = '#{target.class.name}'"
+    where << "comments.target_id = '#{target.id}'"
+    where << "comments.target_type = '#{target.class.name}'"
   end
 
   def target_instance

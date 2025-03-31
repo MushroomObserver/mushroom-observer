@@ -12,6 +12,11 @@ class Query::ExternalSites < Query::Base
     )
   end
 
+  # Declare the parameters as attributes of type `query_param`
+  parameter_declarations.each_key do |param_name|
+    attribute param_name, :query_param
+  end
+
   def initialize_flavor
     add_id_in_set_condition
     add_search_condition("external_sites.name", params[:name_has])

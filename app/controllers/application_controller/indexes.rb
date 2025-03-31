@@ -251,11 +251,18 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     query_params_set(query)
     query.need_letters = display_opts[:letters] if display_opts[:letters]
     set_index_view_ivars(query, display_opts)
+    flash_query_validation_errors(query)
   end
 
   ###########################################################################
   #
   # INDEX VIEW METHODS - MOVE VIEW CODE TO HELPERS
+
+  def flash_query_validation_errors(query)
+    return if query.valid || query.validation_errors.empty?
+
+    flash_warning(query.validation_errors.join("\n"))
+  end
 
   # Set some ivars used in all index views.
   # Makes @query available to the :index template for query-dependent tabs

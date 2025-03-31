@@ -55,7 +55,7 @@ module Query::Initializers::AdvancedSearch
     # Cannot do left outer join from observations to comments, because it
     # will never return.  Instead, break it into two queries, one without
     # comments, and another with inner join on comments.
-    self.executor = lambda do |args|
+    @executor = lambda do |args|
       content_search_one(content, args) | content_search_two(content, args)
     end
   end

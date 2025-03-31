@@ -15,8 +15,8 @@ module Query::Modules::Associations
     user = find_cached_parameter_instance(User, :by_editor)
     version_table = :"#{type}_versions"
     add_join(version_table)
-    @where << "#{version_table}.user_id = '#{user.id}'"
-    @where << "#{type}s.user_id != '#{user.id}'"
+    where << "#{version_table}.user_id = '#{user.id}'"
+    where << "#{type}s.user_id != '#{user.id}'"
   end
 
   def initialize_herbaria_parameter(
@@ -49,7 +49,7 @@ module Query::Modules::Associations
         cond += " OR #{where_col} LIKE '%#{pattern}%'"
       end
     end
-    @where << cond
+    where << cond
     add_joins(*)
   end
 

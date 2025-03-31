@@ -32,11 +32,16 @@ class QueryTest < UnitTestCase
     assert_equal(0, query3.record.access_count)
   end
 
-  def test_validate_params
+  def assert_validation_errors(query)
+    assert_false(query.valid)
+    assert_not_empty(query.validation_errors)
+  end
+
+  def test_validate_params_one
     # Should ignore params it doesn't recognize
-    # assert_raises(RuntimeError) { Query.lookup(:Name, xxx: true) }
-    assert_raises(RuntimeError) { Query.lookup(:Name, order_by: [1, 2, 3]) }
-    assert_raises(RuntimeError) { Query.lookup(:Name, order_by: true) }
+    assert_equal(Query.lookup(:Name, xxx: true), Query.lookup(:Name))
+    assert_validation_errors(Query.lookup(:Name, order_by: [1, 2, 3]))
+    assert_validation_errors(Query.lookup(:Name, order_by: true))
     assert_equal("id", Query.lookup(:Name, order_by: :id).params[:order_by])
 
     assert_equal(
@@ -47,20 +52,49 @@ class QueryTest < UnitTestCase
       :either,
       Query.lookup(:Name, misspellings: "either").params[:misspellings]
     )
-    assert_raises(RuntimeError) do
-      Query.lookup(:Name, misspellings: "bogus")
-    end
-    assert_raises(RuntimeError) do
-      Query.lookup(:Name, misspellings: true)
-    end
-    assert_raises(RuntimeError) { Query.lookup(:Name, misspellings: 123) }
+    assert_validation_errors(Query.lookup(:Name, misspellings: "bogus"))
+    assert_validation_errors(Query.lookup(:Name, misspellings: true))
+    assert_validation_errors(Query.lookup(:Name, misspellings: 123))
+  end
+
+  def test_validate_params_boolean
+    assert_equal(
+      true,
+      Query.lookup(:Name, has_synonyms: "true").params[:has_synonyms]
+    )
+    assert_validation_errors(Query.lookup(:Name, has_synonyms: "bogus"))
+  end
+
+  def test_validate_params_date
+    assert_equal(
+      ["2021-01-06"],
+      Query.lookup(:Observation, date: "Jan 06, 2021").params[:date]
+    )
+    assert_equal(
+      [nil],
+      Query.lookup(:Observation, date: "0").params[:date]
+    )
+    assert_validation_errors(Query.lookup(:Observation, date: "fi"))
+  end
+
+  def test_validate_params_datetime
+    assert_equal(
+      ["2021-01-06-00-00-00"],
+      Query.lookup(:Observation, created_at: "Jan 06, 2021").params[:created_at]
+    )
+    assert_equal(
+      [nil],
+      Query.lookup(:Observation, created_at: "0").params[:created_at]
+    )
+    assert_validation_errors(Query.lookup(:Observation, date: "fi"))
   end
 
   def test_validate_params_instances_users
-    @fungi = names(:fungi)
-
-    assert_raises(RuntimeError) { Query.lookup(:Image, by_users: :bogus) }
-    assert_raises(RuntimeError) { Query.lookup(:Image, by_users: @fungi) }
+    fungi = names(:fungi)
+    license = License.first
+    assert_validation_errors(Query.lookup(:Image, by_users: license))
+    assert_validation_errors(Query.lookup(:Image, by_users: :bogus))
+    assert_validation_errors(Query.lookup(:Image, by_users: fungi))
     assert_equal([rolf.id],
                  Query.lookup(:Image, by_users: rolf).params[:by_users])
     assert_equal([rolf.id],
@@ -69,15 +103,18 @@ class QueryTest < UnitTestCase
                  Query.lookup(:Image, by_users: rolf.id.to_s).params[:by_users])
     assert_equal([rolf.login],
                  Query.lookup(:Image, by_users: rolf.login).params[:by_users])
+
+    brand_new = User.new(name: "Not in db", login: "evanescent")
+    assert_validation_errors(Query.lookup(:Image, by_users: brand_new))
   end
 
   def test_validate_params_id_in_set
     # Oops, this query is generic,
     # doesn't know to require Name instances here.
-    # assert_raises(RuntimeError) { Query.lookup(:Name, id_in_set: rolf) }
-    assert_raises(RuntimeError) { Query.lookup(:Name, id_in_set: "one") }
-    assert_raises(RuntimeError) { Query.lookup(:Name, id_in_set: "1,2,3") }
-    assert_raises(RuntimeError) { Query.lookup(:Name, id_in_set: "Fungi") }
+    # assert_validation_errors(Query.lookup(:Name, id_in_set: rolf))
+    assert_validation_errors(Query.lookup(:Image, id_in_set: "one"))
+    assert_validation_errors(Query.lookup(:Image, id_in_set: "1,2,3"))
+    assert_validation_errors(Query.lookup(:Image, id_in_set: "Fungi"))
     assert_equal(
       [names(:fungi).id],
       Query.lookup(:Name, id_in_set: names(:fungi).id.to_s).params[:id_in_set]
@@ -110,16 +147,9 @@ class QueryTest < UnitTestCase
   end
 
   def test_validate_params_pattern
-    # assert_raises(RuntimeError) { Query.lookup(:Name) }
-    assert_raises(RuntimeError) do
-      Query.lookup(:Name, pattern: true)
-    end
-    assert_raises(RuntimeError) do
-      Query.lookup(:Name, pattern: [1, 2, 3])
-    end
-    assert_raises(RuntimeError) do
-      Query.lookup(:Name, pattern: rolf)
-    end
+    assert_validation_errors(Query.lookup(:Name, pattern: true))
+    assert_validation_errors(Query.lookup(:Name, pattern: [1, 2, 3]))
+    assert_validation_errors(Query.lookup(:Name, pattern: rolf))
     assert_equal("123",
                  Query.lookup(:Name, pattern: 123).params[:pattern])
     assert_equal("rolf",
@@ -155,13 +185,13 @@ class QueryTest < UnitTestCase
   def test_validate_params_group
     assert_equal("names.id",
                  Query.lookup(:Name, group: "names.id").params[:group])
-    assert_raises(RuntimeError) { Query.lookup(:Name, group: %w[1 2]) }
+    assert_validation_errors(Query.lookup(:Name, group: %w[1 2]))
   end
 
   def test_validate_params_order
     assert_equal("id DESC",
                  Query.lookup(:Name, order: "id DESC").params[:order])
-    assert_raises(RuntimeError) { Query.lookup(:Name, order: %w[1 2]) }
+    assert_validation_errors(Query.lookup(:Name, order: %w[1 2]))
   end
 
   def test_validate_params_hashes
@@ -169,9 +199,9 @@ class QueryTest < UnitTestCase
     assert_equal(box, Query.lookup(:Location, in_box: box).params[:in_box])
     assert_raises(TypeError) { Query.lookup(:Location, in_box: "one") }
     box = { north: "with", south: 48.558, east: -123.4307, west: -123.4763 }
-    assert_raises(RuntimeError) { Query.lookup(:Location, in_box: box) }
+    assert_validation_errors(Query.lookup(:Location, in_box: box))
     box = { south: 48.558, east: -123.4307, west: -123.4763 }
-    assert_raises(RuntimeError) { Query.lookup(:Location, in_box: box) }
+    assert_validation_errors(Query.lookup(:Location, in_box: box))
   end
 
   def test_initialize_helpers

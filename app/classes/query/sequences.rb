@@ -27,6 +27,11 @@ class Query::Sequences < Query::Base
     )
   end
 
+  # Declare the parameters as attributes of type `query_param`
+  parameter_declarations.each_key do |param_name|
+    attribute param_name, :query_param
+  end
+
   def initialize_flavor
     # Leaving out bases because some formats allow spaces and other "garbage"
     # delimiters which could interrupt the subsequence the user is searching

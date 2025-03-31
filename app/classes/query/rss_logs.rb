@@ -17,6 +17,11 @@ class Query::RssLogs < Query::Base
       merge(content_filter_parameter_declarations(Location))
   end
 
+  # Declare the parameters as attributes of type `query_param`
+  parameter_declarations.each_key do |param_name|
+    attribute param_name, :query_param
+  end
+
   def initialize_flavor
     add_time_condition("rss_logs.updated_at", params[:updated_at])
     initialize_type_parameter
@@ -36,13 +41,13 @@ class Query::RssLogs < Query::Base
     types = self.types
     types &= RssLog::ALL_TYPE_TAGS.map(&:to_s)
 
-    @where << if types.empty?
-                "FALSE"
-              else
-                types.map do |type|
-                  "rss_logs.#{type}_id IS NOT NULL"
-                end.join(" OR ")
-              end
+    where << if types.empty?
+               "FALSE"
+             else
+               types.map do |type|
+                 "rss_logs.#{type}_id IS NOT NULL"
+               end.join(" OR ")
+             end
   end
 
   def self.default_order
