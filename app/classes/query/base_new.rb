@@ -25,14 +25,15 @@ class Query::BaseNew
 
   delegate :parameter_declarations, to: :class
 
-  # can use has_attribute? here.
-  # only called in ApplicationController::Queries#apply_one_content_filter
+  # Could use has_attribute? here, but it doesn't exist yet for ActiveModel.
+  # Only called in ApplicationController::Queries#apply_one_content_filter
   def self.takes_parameter?(key)
     parameter_declarations.key?(key)
   end
 
   delegate :takes_parameter?, to: :class
 
+  # :id_in_set must be moved to the last position so it can reorder results.
   def self.scope_parameters
     excepts = [:id_in_set, :preference_filter]
     @scope_parameters = parameter_declarations.except(*excepts).keys +
@@ -78,15 +79,15 @@ class Query::BaseNew
   # more efficient however than using a Rails-serialized column and comparing
   # the parsed hashes (in whatever order), because when a column is serialized
   # you can't use SQL on the column value, you have to compare parsed instances.
+  # was params.sort.to_h.merge(model: model.name).to_json
   def serialize
-    # params.sort.to_h.merge(model: model.name).to_json
     attributes.compact.sort.to_h.merge(model: model.name).to_json
   end
 
   def record
     # This errors out if @record is not set since it
     # cannot find Query.get_record.  If you copy the
-    # above definition of get_record into the same scope
+    # definition of get_record into the same scope
     # as this method and get rid of "Query." it works,
     # but that is not a great solution.
     # You can trigger the issue which is

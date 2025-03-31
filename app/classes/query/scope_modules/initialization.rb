@@ -18,7 +18,7 @@ module Query::ScopeModules::Initialization
   def sql
     initialize_query unless initialized?
 
-    @sql = scopes.all.to_sql
+    @sql = query.to_sql
   end
 
   def query
@@ -80,7 +80,7 @@ module Query::ScopeModules::Initialization
   def send_rss_log_content_filters_to_subqueries
     return if model != RssLog || !content_filters_present
 
-    rss_logs_requested_types.each do |model|
+    rss_logs_requested_filterable_types.each do |model|
       subquery_params = content_filter_subquery_params(model)
       if subquery_params.present?
         @scopes = @scopes.send(:"#{model.name.downcase}_query",
@@ -89,8 +89,9 @@ module Query::ScopeModules::Initialization
     end
   end
 
-  # Current types requested on the RssLog page. Defaults to :all.
-  def rss_logs_requested_types
+  # Current types requested on the RssLog page that can have content filters
+  # applied. Defaults to :all.
+  def rss_logs_requested_filterable_types
     types = [:observation, :name, :location]
     active_types = case params[:type]
                    when nil, "", :all, "all"
