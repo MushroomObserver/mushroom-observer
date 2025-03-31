@@ -778,7 +778,7 @@ class NameTest < UnitTestCase
     )
   end
 
-  def test_name_parse_11a
+  def test_name_parse_prov_sp
     do_name_parse_test(
       'Anap sp. "luna" S. Russ crypt. temp.',
       text_name: 'Anap sp. "luna"',
@@ -788,6 +788,38 @@ class NameTest < UnitTestCase
       sort_name: "Anap luna  S. Russ crypt. temp.",
       display_name: '**__Anap__** sp. **__"luna"__** S. Russ crypt. temp.',
       parent_name: "Anap",
+      rank: "Species",
+      author: "S. Russ crypt. temp.",
+      deprecated: false
+    )
+  end
+
+  def test_name_parse_prov_gen
+    do_name_parse_test(
+      'Gen. "Snap" luna S. Russ crypt. temp.',
+      text_name: 'Gen. "Snap" luna',
+      real_text_name: 'Gen. "Snap" luna',
+      search_name: 'Gen. "Snap" luna S. Russ crypt. temp.',
+      real_search_name: 'Gen. "Snap" luna S. Russ crypt. temp.',
+      sort_name: "Snap luna  S. Russ crypt. temp.",
+      display_name: 'Gen. **__"Snap"__** **__luna__** S. Russ crypt. temp.',
+      parent_name: 'Gen. "Snap"',
+      rank: "Species",
+      author: "S. Russ crypt. temp.",
+      deprecated: false
+    )
+  end
+
+  def test_name_parse_prov_gen_sp
+    do_name_parse_test(
+      'Gen. "Snap" sp. "luna" S. Russ crypt. temp.',
+      text_name: 'Gen. "Snap" sp. "luna"',
+      real_text_name: 'Gen. "Snap" sp. "luna"',
+      search_name: 'Gen. "Snap" sp. "luna" S. Russ crypt. temp.',
+      real_search_name: 'Gen. "Snap" sp. "luna" S. Russ crypt. temp.',
+      sort_name: "Snap luna  S. Russ crypt. temp.",
+      display_name: 'Gen. **__"Snap"__** sp. **__"luna"__** S. Russ crypt. temp.',
+      parent_name: 'Gen. "Snap"',
       rank: "Species",
       author: "S. Russ crypt. temp.",
       deprecated: false
