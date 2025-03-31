@@ -105,9 +105,9 @@ class InatImportsController < ApplicationController
   end
 
   def assure_user_has_inat_import_api_key
-    return if APIKey.find_by(user: @user, notes: MO_API_KEY_NOTES)
-
-    APIKey.create(user: @user, notes: MO_API_KEY_NOTES)
+    key = APIKey.find_by(user: @user, notes: MO_API_KEY_NOTES)
+    key = APIKey.create(user: @user, notes: MO_API_KEY_NOTES) if key.nil?
+    key.verify! if key.verified.nil?
   end
 
   def request_inat_user_authorization

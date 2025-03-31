@@ -203,8 +203,11 @@ class InatImportsControllerTest < FunctionalTestCase
                      consent: 1 })
     end
 
-    assert(APIKey.where(user: user, notes: MO_API_KEY_NOTES).one?,
-           "MO should create user API key for iNat imports if user had none")
+    assert(
+      APIKey.where(user: user, notes: MO_API_KEY_NOTES).
+             where.not(verified: nil).one?,
+      "MO should assure user has personal verified API key for iNat imports"
+    )
     assert_response(:redirect)
     assert_equal(
       user.name, inat_import.reload.inat_username,
