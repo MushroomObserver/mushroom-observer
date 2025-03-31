@@ -26,6 +26,7 @@ class ArticlesControllerTest < FunctionalTestCase
     query = Query.lookup(:Article, id_in_set: [article.id])
     params = @controller.query_params(query)
     get(:index, params: params)
+    assert_no_flash
 
     assert_select("#content a:match('href',?)", %r{/articles/\d+},
                   { count: 1 },
@@ -34,6 +35,13 @@ class ArticlesControllerTest < FunctionalTestCase
       "a[href *= '#{article_path(article.id)}']", true,
       "filtered Article Index missing link to #{article.title} (##{article.id})"
     )
+  end
+
+  def test_index_query_validation_errors
+    query = Query.lookup(:Article, id_in_set: "one")
+    params = @controller.query_params(query)
+    get(:index, params: params)
+    assert_flash_error
   end
 
   def test_index_links_to_create
