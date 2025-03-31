@@ -5,9 +5,12 @@ module Report
   # that the current user is allowed to see if
   # they are an admin for a project that another user trusts
   class ProjectTweaker
-    def initialize
+    attr_accessor :user
+
+    def initialize(args)
+      self.user = args[:user] || nil
       @vals = {}
-      ProjectLatLngs.new.vals.each do |row|
+      ProjectLatLngs.new(user:).vals.each do |row|
         @vals[row[0]] = [row[1], row[2]]
       end
     end

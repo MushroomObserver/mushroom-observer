@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Validation of Query parameters, plus substitution of ids for instances.
-module Query::Modules::Validation
+module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
   attr_accessor :params, :params_cache, :subqueries, :valid, :validation_errors
 
   def clean_and_validate_params
