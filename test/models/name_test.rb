@@ -666,6 +666,22 @@ class NameTest < UnitTestCase
     )
   end
 
+  def test_name_parse_5a
+    do_name_parse_test(
+      "Japewia tornoënsis Somloë".unicode_normalize(:nfd),
+      text_name: "Japewia tornoensis",
+      real_text_name: "Japewia tornoënsis",
+      search_name: "Japewia tornoensis Somloë",
+      real_search_name: "Japewia tornoënsis Somloë",
+      sort_name: "Japewia tornoensis  Somloë",
+      display_name: "**__Japewia__** **__tornoënsis__** Somloë",
+      parent_name: "Japewia",
+      rank: "Species",
+      author: "Somloë",
+      deprecated: false
+    )
+  end
+
   def test_name_parse_6
     do_name_parse_test(
       'Micarea globularis "(Ach. ex Nyl.) Hedl."',

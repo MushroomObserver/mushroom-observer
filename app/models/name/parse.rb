@@ -576,6 +576,7 @@ module Name::Parse
   end
 
   def clean_incoming_string(str)
+    str = str.unicode_normalize(:nfc) if str.encoding == Encoding::UTF_8
     str.to_s.
       gsub(/“|”/, '"'). # let RedCloth format quotes
       gsub(/‘|’/, "'").
