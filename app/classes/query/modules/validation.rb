@@ -220,16 +220,16 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     end
   end
 
-  # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
   def validate_date(param, val)
     if val.blank? || val.to_s == "0"
       nil
+    elsif val.acts_like?(:date)
+      format_date(val)
     elsif /^\d\d\d\d(-\d\d?){0,2}$/i.match?(val.to_s) ||
           /^\d\d?(-\d\d?)?$/i.match?(val.to_s)
       val
-    elsif val.acts_like?(:date) || (val2 = parse_date(val)).acts_like?(:date)
-      val2 ||= val
-      format("%04d-%02d-%02d", val2.year, val2.mon, val2.day)
+    elsif (val2 = parse_date(val)).acts_like?(:date)
+      format_date(val2)
     else
       @validation_errors <<
         "Value for :#{param} should be a date (YYYY-MM-DD or MM-DD), " \
@@ -237,7 +237,6 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
       nil
     end
   end
-  # rubocop:enable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
   def parse_date(val)
     Date.parse(val)
@@ -245,16 +244,19 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     nil
   end
 
+  def format_date(val)
+    format("%04d-%02d-%02d", val.year, val.mon, val.day)
+  end
+
   def validate_time(param, val)
     if val.blank? || val.to_s == "0"
       nil
+    elsif val.acts_like?(:time)
+      format_time(val)
     elsif /^\d\d\d\d(-\d\d?){0,5}$/i.match?(val.to_s)
       val
-    elsif val.acts_like?(:time) || (val2 = parse_time(val)).acts_like?(:time)
-      val2 ||= val
-      val2 = val2.utc
-      format("%04d-%02d-%02d-%02d-%02d-%02d",
-             val2.year, val2.mon, val2.day, val2.hour, val2.min, val2.sec)
+    elsif (val2 = parse_time(val)).acts_like?(:time)
+      format_time(val2)
     else
       @validation_errors <<
         "Value for :#{param} should be a UTC time (YYYY-MM-DD-HH-MM-SS), " \
@@ -267,6 +269,11 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     DateTime.parse(val)
   rescue ArgumentError
     nil
+  end
+
+  def format_time(val)
+    format("%04d-%02d-%02d-%02d-%02d-%02d",
+           val.year, val.mon, val.day, val.hour, val.min, val.sec)
   end
 
   def find_cached_parameter_instance(model, param)
