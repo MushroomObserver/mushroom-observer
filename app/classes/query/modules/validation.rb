@@ -204,7 +204,7 @@ module Query::Modules::Validation
     return val unless param == :id_in_set
 
     @validation_errors <<
-      "Value for :#{param} should be an array of ids " \
+      "Value for :id_in_set should be an array of ids " \
       "or #{type} instances, got: '#{val}'."
     nil
   end
@@ -221,13 +221,13 @@ module Query::Modules::Validation
   end
 
   def validate_date(param, val)
-    if val.acts_like?(:date)
-      format("%04d-%02d-%02d", val.year, val.mon, val.day)
+    if val.blank? || val.to_s == "0"
+      nil
     elsif /^\d\d\d\d(-\d\d?){0,2}$/i.match?(val.to_s) ||
           /^\d\d?(-\d\d?)?$/i.match?(val.to_s)
       val
-    elsif val.blank? || val.to_s == "0"
-      nil
+    elsif (val2 = parse_date(val)).acts_like?(:date)
+      format("%04d-%02d-%02d", val2.year, val2.mon, val2.day)
     else
       @validation_errors <<
         "Value for :#{param} should be a date (YYYY-MM-DD or MM-DD), " \
@@ -236,21 +236,33 @@ module Query::Modules::Validation
     end
   end
 
+  def parse_date(val)
+    Date.parse(val)
+  rescue Date::Error
+    nil
+  end
+
   def validate_time(param, val)
-    if val.acts_like?(:time)
-      val = val.utc
-      format("%04d-%02d-%02d-%02d-%02d-%02d",
-             val.year, val.mon, val.day, val.hour, val.min, val.sec)
+    if val.blank? || val.to_s == "0"
+      nil
     elsif /^\d\d\d\d(-\d\d?){0,5}$/i.match?(val.to_s)
       val
-    elsif val.blank? || val.to_s == "0"
-      nil
+    elsif (val2 = parse_time(val)).acts_like?(:time)
+      val2 = val2.utc
+      format("%04d-%02d-%02d-%02d-%02d-%02d",
+             val2.year, val2.mon, val2.day, val2.hour, val2.min, val2.sec)
     else
       @validation_errors <<
         "Value for :#{param} should be a UTC time (YYYY-MM-DD-HH-MM-SS), " \
         "got: #{val.class.name}::#{val}."
       nil
     end
+  end
+
+  def parse_time(val)
+    DateTime.parse(val)
+  rescue ArgumentError
+    nil
   end
 
   def find_cached_parameter_instance(model, param)
