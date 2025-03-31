@@ -224,6 +224,8 @@ class InatImportJobTest < ActiveJob::TestCase
     inat_photo = JSON.parse(mock_inat_response)["results"].
                  first["observation_photos"].first
     imported_img = obs.images.first
+    assert_equal(@default_user, imported_img.user,
+                 "Image should belong to importing user")
     assert_equal(
       "iNat photo_id: #{inat_photo["photo_id"]}, uuid: #{inat_photo["uuid"]}",
       imported_img.original_name
