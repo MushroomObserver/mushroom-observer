@@ -58,6 +58,7 @@ module Query::Modules::Validation
       @validation_errors <<
         "Invalid declaration of :#{param} for #{model} " \
         "query! (invalid type: #{param_type.class.name})"
+      nil
     end
   end
 
@@ -67,6 +68,7 @@ module Query::Modules::Validation
     else
       @validation_errors <<
         "Don't know how to parse #{param_type} :#{param} for #{model} query."
+      nil
     end
   end
 
@@ -96,6 +98,7 @@ module Query::Modules::Validation
       @validation_errors <<
         "Invalid subquery declaration for :#{param} for #{model} " \
         "query! (wrong number of keys in hash)"
+      return nil
     end
     submodel = param_type.values.first
     subquery = Query.new(submodel, val)
@@ -108,6 +111,7 @@ module Query::Modules::Validation
       @validation_errors <<
         "Invalid enum declaration for :#{param} for #{model} " \
         "query! (wrong number of keys in hash)"
+      return nil
     end
 
     arg_type = hash.keys.first
@@ -116,6 +120,7 @@ module Query::Modules::Validation
       @validation_errors <<
         "Invalid enum declaration for :#{param} for #{model} " \
         "query! (expected value to be an array of allowed values)"
+      return nil
     end
 
     val2 = scalar_validate(param, val, arg_type)
@@ -124,6 +129,7 @@ module Query::Modules::Validation
     elsif set.exclude?(val2)
       @validation_errors <<
         "Value for :#{param} should be one of the following: #{set.inspect}."
+      val2 = nil
     end
     val2
   end
@@ -140,7 +146,8 @@ module Query::Modules::Validation
       nil
     else
       @validation_errors <<
-        "Value for :#{param} should be boolean, got: #{val.inspect}"
+        "Value for :#{param} should be boolean, got: #{val}."
+      nil
     end
   end
   # rubocop:enable Lint/BooleanSymbol
@@ -162,7 +169,8 @@ module Query::Modules::Validation
       val.to_f
     else
       @validation_errors <<
-        "Value for :#{param} should be a float, got: #{val.inspect}"
+        "Value for :#{param} should be a float, got: #{val.inspect}."
+      nil
     end
   end
 
@@ -173,19 +181,30 @@ module Query::Modules::Validation
       unless val.id
         @validation_errors <<
           "Value for :#{param} is an unsaved #{type} instance."
+        return nil
       end
 
       set_cached_parameter_instance(param, val)
       val.id
     elsif could_be_record_id?(param, val)
       val.to_i
-    elsif val.is_a?(String) && param != :id_in_set
-      val
+    elsif val.is_a?(String)
+      validate_string_for_record(param, val, type)
     else
       @validation_errors <<
         "Value for :#{param} should be id, string " \
-        "or #{type} instance, got: #{val.inspect}"
+        "or #{type} instance, got: #{val.inspect}."
+      nil
     end
+  end
+
+  def validate_string_for_record(param, val, type)
+    return val unless param == :id_in_set
+
+    @validation_errors <<
+      "Value for :#{param} should be an array of ids " \
+      "or #{type} instances, got: '#{val}'."
+    nil
   end
 
   def validate_string(param, val)
@@ -194,7 +213,8 @@ module Query::Modules::Validation
     else
       @validation_errors <<
         "Value for :#{param} should be a string or symbol, " \
-        "got a #{val.class}: #{val.inspect}"
+        "got a #{val.class}: #{val.inspect}."
+      nil
     end
   end
 
@@ -209,7 +229,8 @@ module Query::Modules::Validation
     else
       @validation_errors <<
         "Value for :#{param} should be a date (YYYY-MM-DD or MM-DD), " \
-        "got: #{val.inspect}"
+        "got: #{val}."
+      nil
     end
   end
 
@@ -225,7 +246,8 @@ module Query::Modules::Validation
     else
       @validation_errors <<
         "Value for :#{param} should be a UTC time (YYYY-MM-DD-HH-MM-SS), " \
-        "got: #{val.class.name}::#{val.inspect}"
+        "got: #{val.class.name}::#{val}."
+      nil
     end
   end
 
@@ -262,7 +284,7 @@ module Query::Modules::Validation
 
     results = lookup.new(val).send(method)
     unless results
-      @validation_errors << "Couldn't find an id for : #{val.inspect}"
+      @validation_errors << "Couldn't find an id for : #{val.inspect}."
     end
 
     results.first
@@ -277,7 +299,7 @@ module Query::Modules::Validation
                "Lookup::#{type.name.pluralize}".constantize
              end
     unless defined?(lookup)
-      @validation_errors << "#{lookup} not defined for : #{val.inspect}"
+      @validation_errors << "#{lookup} not defined for : #{val.inspect}."
     end
     lookup
   end
