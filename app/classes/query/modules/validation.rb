@@ -13,17 +13,8 @@ module Query::Modules::Validation
       val = validate_value(param_type, param, val) if val.present?
       new_params[param] = val
     end
-    # check_for_unexpected_params(old_params)
     @params = new_params
   end
-
-  # def check_for_unexpected_params(old_params)
-  #   unexpected_params = old_params.except(*parameter_declarations.keys)
-  #   return if unexpected_params.keys.empty?
-
-  #   str = unexpected_params.keys.map(&:to_s).join("', '")
-  #   raise("Unexpected parameter(s) '#{str}' for #{model} query.")
-  # end
 
   def validate_value(param_type, param, val)
     if param_type.is_a?(Array)
@@ -231,19 +222,6 @@ module Query::Modules::Validation
       )
     end
   end
-
-  # def validate_query(param, val)
-  #   case val
-  #   when Query::Base
-  #     val.record.id
-  #   when Integer
-  #     val
-  #   else
-  #     raise(
-  #       "Value for :#{param} should be a Query class, got: #{val.inspect}"
-  #     )
-  #   end
-  # end
 
   def find_cached_parameter_instance(model, param)
     return @params_cache[param] if @params_cache && @params_cache[param]
