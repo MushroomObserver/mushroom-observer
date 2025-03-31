@@ -45,7 +45,8 @@ module Query::Modules::HighLevelQueries
         # typically no avoiding it.  This optimizes away an extra query or two.
         @letters = {}
         ids = []
-        select = "DISTINCT #{model.table_name}.id, LEFT(#{alphabetical_by.to_sql},4)"
+        select = "DISTINCT #{model.table_name}.id, " \
+                 "LEFT(#{alphabetical_by.to_sql},4)"
         select_rows(args.merge(select: select)).each do |id, letter|
           letter = letter[0, 1]
           @letters[id.to_i] = letter.upcase if /[a-zA-Z]/.match?(letter)

@@ -64,9 +64,7 @@ class Query::Base
     parameter_declarations.select { |key, _v| key.to_s.include?("_query") }
   end
 
-  def scope_parameters
-    self.class.scope_parameters
-  end
+  delegate :scope_parameters, to: :class
 
   def self.scope_parameters
     parameter_declarations.keys.except(*subquery_parameters)
