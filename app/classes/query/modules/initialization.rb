@@ -10,8 +10,8 @@ module Query::Modules::Initialization
 
   def initialize_query
     @initialized = true
-    initialize_non_nil_ivars
-    @executor = nil
+    initialize_non_nil_defaults
+    self.executor = nil
     initialize_flavor
     initialize_group
     initialize_order
@@ -20,7 +20,7 @@ module Query::Modules::Initialization
 
   # Re-establish these internal param defaults so we can work with them.
   # Attributes null out these values.
-  def initialize_non_nil_ivars
+  def initialize_non_nil_defaults
     defaults = {
       "join" => [],
       "tables" => [],

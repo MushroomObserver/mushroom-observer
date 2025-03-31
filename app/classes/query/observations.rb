@@ -196,7 +196,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
 
   def initialize_has_name_parameter
     genus = Name.ranks[:Genus]
-    self.group = Name.ranks[:Group]
+    group = Name.ranks[:Group]
     add_boolean_condition(
       "names.`rank` <= #{genus} or names.`rank` = #{group}",
       "names.`rank` > #{genus} and names.`rank` < #{group}",
