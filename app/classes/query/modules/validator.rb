@@ -5,9 +5,6 @@ class Query::Modules::Validator < ActiveModel::Validator
   def initialize(options = {})
     super
     options[:class].attr_accessor(:validation_errors)
-    # debugger
-    # @parameter_declarations = options[:parameter_declarations]
-    # @validation_errors = options[:validation_errors]
   end
 
   def validate(params)
