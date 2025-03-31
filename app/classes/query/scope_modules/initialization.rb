@@ -74,7 +74,6 @@ module Query::ScopeModules::Initialization
   # (Content filters may add params to RssLog queries that RssLog scopes
   # can't handle, because they're intended for one or more related models.)
   # Some params may go into more than one subquery if >1 `type` requested.
-  # This needs to run first
   def send_rss_log_content_filters_to_subqueries
     return if model != RssLog || !content_filters_present
 
