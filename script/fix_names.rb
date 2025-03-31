@@ -13,7 +13,8 @@ def update
       changed = check_name("text_name", name, parse)
       changed = check_name("search_name", name, parse) || changed
       changed = check_name("display_name", name, parse) || changed
-      check_name("sort_name", name, parse) || changed
+      changed = check_name("sort_name", name, parse) || changed
+      sleep(0.5) if changed
     else
       puts("#{name.id},#{name.search_name},ERROR,#{name.created_at},BAD PARSE")
     end
