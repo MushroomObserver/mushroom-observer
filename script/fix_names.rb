@@ -4,21 +4,32 @@
 # Ensure that name.sort_name is consistent with
 # Name.parse(name.search_name).sort_name
 
+NAME_METHODS = %w[
+  text_name
+  search_name
+  display_name
+  sort_name
+].freeze
+
 def update
   Name.find_each do |name|
     name.skip_notify = true
     parse = Name.parse_name(name.search_name, deprecated: name.deprecated,
                                               rank: name.rank)
     if parse
-      changed = check_name("text_name", name, parse)
-      changed = check_name("search_name", name, parse) || changed
-      changed = check_name("display_name", name, parse) || changed
-      changed = check_name("sort_name", name, parse) || changed
-      sleep(0.5) if changed
+      sleep(0.5) if check_names(name, parse)
     else
       puts("#{name.id},#{name.search_name},ERROR,#{name.created_at},BAD PARSE")
     end
   end
+end
+
+def check_names(name, parse)
+  changed = false
+  NAME_METHODS.each do |method|
+    changed = check_name(method, name, parse) || changed
+  end
+  changed
 end
 
 def check_name(method, name, parse)

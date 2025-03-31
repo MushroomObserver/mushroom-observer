@@ -812,16 +812,16 @@ class NameTest < UnitTestCase
 
   def test_name_parse_prov_gen_sp
     do_name_parse_test(
-      'Gen. "Snap" sp. "luna" S. Russ crypt. temp.',
+      'Gen. "Snap" sp. "luna" Russ crypt. temp.',
       text_name: 'Gen. "Snap" sp. "luna"',
       real_text_name: 'Gen. "Snap" sp. "luna"',
-      search_name: 'Gen. "Snap" sp. "luna" S. Russ crypt. temp.',
-      real_search_name: 'Gen. "Snap" sp. "luna" S. Russ crypt. temp.',
-      sort_name: "Snap luna  S. Russ crypt. temp.",
-      display_name: 'Gen. **__"Snap"__** sp. **__"luna"__** S. Russ crypt. temp.',
+      search_name: 'Gen. "Snap" sp. "luna" Russ crypt. temp.',
+      real_search_name: 'Gen. "Snap" sp. "luna" Russ crypt. temp.',
+      sort_name: "Snap luna  Russ crypt. temp.",
+      display_name: 'Gen. **__"Snap"__** sp. **__"luna"__** Russ crypt. temp.',
       parent_name: 'Gen. "Snap"',
       rank: "Species",
-      author: "S. Russ crypt. temp.",
+      author: "Russ crypt. temp.",
       deprecated: false
     )
   end
