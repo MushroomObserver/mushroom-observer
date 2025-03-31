@@ -18,9 +18,9 @@
   :rss, activity_logs_rss_path, { title: :app_rss.l }
 ) %>
 <title><%= :app_title.l%>: <%= yield(:document_title) %></title>
-<link rel="SHORTCUT ICON" href="/favicon.ico?20220116"/>
+<%= render("application/app/favicons") %>
 <% if @canonical_url %>
-<link href="<%= escape_once(@canonical_url) %>" rel="canonical"/>
+  <%= tag.link(href: "#{escape_once(@canonical_url)}" rel:"canonical") %>
 <% end %>
 <%= csrf_meta_tag %>
 <meta property="og:image" content="https://mushroomobserver.org/images/facebook_icon.png"/>
