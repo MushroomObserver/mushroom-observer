@@ -19,6 +19,7 @@ class CommentsControllerTest < FunctionalTestCase
     get(:index, params: { by: by })
 
     assert_displayed_title(:COMMENTS.l)
+    assert_sorted_by(by)
   end
 
   def test_index_target_has_comments
