@@ -25,7 +25,7 @@ module Report
     end
 
     def formatted_rows
-      tweaker = ProjectTweaker.new
+      tweaker = ProjectTweaker.new(user:)
       rows = all_rows.map { |row| Row.new(tweaker.tweak(row)) }
       rows = sort_before(rows)
       extend_data!(rows)
@@ -78,7 +78,7 @@ module Report
 
     def public_latlng_spec(col)
       Arel.sql("IF(observations.gps_hidden AND " \
-        "observations.user_id != #{User.current_id || -1}, " \
+        "observations.user_id != #{user&.id || -1}, " \
         "NULL, observations.#{col})")
     end
 

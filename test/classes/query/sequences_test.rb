@@ -160,4 +160,14 @@ class Query::SequencesTest < UnitTestCase
       }, order_by: :id
     )
   end
+
+  def test_uses_join_hash
+    box = { north: "90", south: "0", west: "-180", east: "-100" }
+    query = Query.lookup(:Sequence, observation_query: { in_box: box })
+    assert_not(query.uses_join_sub([], :location))
+    assert(query.uses_join_sub([:location], :location))
+    assert_not(query.uses_join_sub({}, :location))
+    assert(query.uses_join_sub({ test: :location }, :location))
+    assert(query.uses_join_sub(:location, :location))
+  end
 end
