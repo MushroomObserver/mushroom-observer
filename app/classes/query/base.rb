@@ -24,17 +24,11 @@ class Query::Base
 
   validates_with Query::Modules::Validator # , options
 
-  # "clean up" and reassign attributes before validation
-  before_validation :clean_params
+  # "clean up" params, store any @validation_errors,
+  # and reassign attributes, restoring blank defaults, before validation
+  before_validation :clean_and_validate_params
 
   attr_writer :record
-
-  def clean_params
-    validate_params
-    # eventually should be done in validate_params
-    assign_attributes(**params) if params.present?
-    initialize_non_nil_defaults
-  end
 
   delegate :parameter_declarations, to: :class
 

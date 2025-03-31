@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-# Validation of Query parameters.
+# Validation of Query parameters, plus substitution of ids for instances.
 module Query::Modules::Validation
   attr_accessor :params, :params_cache, :subqueries, :valid, :validation_errors
 
-  def validate_params
+  def clean_and_validate_params
     @validation_errors = []
     old_params = @params.dup&.deep_compact&.deep_symbolize_keys || {}
     new_params = {}
@@ -15,6 +15,8 @@ module Query::Modules::Validation
       new_params[param] = val
     end
     @params = new_params
+    assign_attributes(**@params) if @params.present?
+    initialize_non_nil_defaults
   end
 
   def validate_value(param_type, param, val)
