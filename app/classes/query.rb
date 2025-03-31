@@ -213,7 +213,8 @@ class Query
 
   def self.new(model, params = {}, current = nil)
     klass = "Query::#{model.to_s.pluralize}".constantize
-    query = klass.new(params)
+    # Ignore undefined params:
+    query = klass.new(params.slice(*klass.parameter_declarations.keys))
     query.params = query.attributes # initialize params for cleaning/validation
     query.subqueries = {}
     query.current = current if current
