@@ -15,7 +15,7 @@ module RssLog::Scopes
       return all if types.to_s == "all"
 
       types = types.to_s.split unless types.is_a?(Array)
-      types &= ALL_TYPE_TAGS.map(&:to_s)
+      types &= ::RssLog::ALL_TYPE_TAGS.map(&:to_s)
       return none if types.empty?
 
       types.map! { |type| arel_table[:"#{type}_id"].not_eq(nil) }
