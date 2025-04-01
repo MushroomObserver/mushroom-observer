@@ -122,17 +122,17 @@ class ImagesControllerTest < FunctionalTestCase
   #   assert_redirected_to(search_advanced_path)
   # end
 
-  # def test_index_advanced_search_error
-  #   query_no_conditions = Query.lookup_and_save(:Image)
+  def test_index_advanced_search_error
+    query_no_conditions = Query.lookup_and_save(:Image)
 
-  #   login
-  #   params = @controller.query_params(query_no_conditions).
-  #            merge({ advanced_search: true })
-  #   get(:index, params:)
+    login
+    params = @controller.query_params(query_no_conditions).
+             merge({ advanced_search: true })
+    get(:index, params:)
 
-  #   assert_flash_error(:runtime_no_conditions.l)
-  #   assert_redirected_to(search_advanced_path)
-  # end
+    assert_flash_error(:runtime_no_conditions.l)
+    assert_redirected_to(search_advanced_path)
+  end
 
   def test_index_pattern_text_multiple_hits
     pattern = "USA"
