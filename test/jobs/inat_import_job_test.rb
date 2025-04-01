@@ -828,8 +828,8 @@ class InatImportJobTest < ActiveJob::TestCase
     results = JSON.parse(mock_inat_response)["results"]
     # NOTE: This simply insures that ImageAPI is called the right # of times.
     # It does NOT attach the right # of photos or even the correct photo.
-    results.each do |observation|
-      observation["observation_photos"].each do
+    results.each do |inat_obs|
+      inat_obs["observation_photos"].each do
         mock_photo_importer.expect(
           :api, # nil,
           MockImageAPI.new(errors: [], results: [img])
