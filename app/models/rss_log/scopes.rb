@@ -34,6 +34,17 @@ module RssLog::Scopes
     scope :content_filters, lambda { |params|
       return all if params.blank?
 
+      # Call `scoping` with `model.send(:method)` here, because the private
+      # class methods below are otherwise inaccessible to a `scope` proc.
+      scoping { model.send(:filtering_statements, params) }
+    }
+  end
+
+  module ClassMethods
+    private
+
+    # class methods here, `self` included
+    def filtering_statements(params)
       scope = all
       # `type` here is a model
       filterable_types_in_current_query(params).each do |type|
@@ -49,29 +60,11 @@ module RssLog::Scopes
                 or(RssLog.merge(filter_conditions_for_type(type, type_filters)))
       end
       scope
-    }
-  end
-
-  module ClassMethods
-    # class methods here, `self` included
-    def self.filtering_statements(params)
-      # `type` here is a model (var name `model` unavailable)
-      filterable_types_in_current_query(params).map do |type|
-        type_filters = active_filters_for_model(params, type)
-        next if type_filters.blank?
-
-        # Join association is singular for all RssLog associations
-        association = type.name.underscore
-        # Returns "logs that are not of this type, or if they are, then filtered"
-        left_outer_joins(:"#{association}").
-          where("#{association}_id": nil).distinct.
-          or(RssLog.merge(filter_conditions_for_type(type, type_filters)))
-      end
     end
 
     # Types requested in the current RssLog query that may have content filters
     # applied. Defaults to :all. Returns an array of model classes.
-    def self.filterable_types_in_current_query(params)
+    def filterable_types_in_current_query(params)
       filterable_types = [:observation, :name, :location]
       active_types = case params[:type]
                      when nil, "", :all, "all"
@@ -86,7 +79,7 @@ module RssLog::Scopes
 
     # Find any active filters relevant to a model, using Query::Filter.by_model.
     # Returns a hash of only the relevant params.
-    def self.active_filters_for_model(params, model)
+    def active_filters_for_model(params, model)
       ::Query::Filter.by_model(model).
         each_with_object({}) do |fltr, filter_params|
           next if (val = params[fltr.sym]).to_s == ""
@@ -96,7 +89,7 @@ module RssLog::Scopes
     end
 
     # Build a scope statement for one type (model).
-    def self.filter_conditions_for_type(type, type_filters)
+    def filter_conditions_for_type(type, type_filters)
       # Condense all filters into an array of AR scope statements
       conditions_for_type = type_filters.reduce([]) do |conds, (k, v)|
         conds << type.send(k, v).distinct

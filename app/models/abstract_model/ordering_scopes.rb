@@ -37,8 +37,8 @@ module AbstractModel::OrderingScopes
       scope = :"order_by_#{method}"
       return all unless model.private_methods(false).include?(scope)
 
-      # Calls `scoping` with `model` here, because the private class methods
-      # below are otherwise inaccessible to a `scope` proc.
+      # Call `scoping` with `model.send(:method)` here, because the private
+      # class methods below are otherwise inaccessible to a `scope` proc.
       scope = scoping { model.send(scope) }
       scope = scope.reverse_order if reverse
       # Order grouped results from other scopes by adding order(id: :desc). If
