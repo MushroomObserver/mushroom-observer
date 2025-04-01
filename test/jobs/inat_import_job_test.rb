@@ -370,7 +370,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
     obs = Observation.last
     standard_assertions(obs: obs, name: name)
-    assert_equal(1, obs.images.length, "Obs should have 1 image")
+    assert_equal(2, obs.images.length, "Obs should have 2 images")
     assert(obs.sequences.none?)
   end
 
