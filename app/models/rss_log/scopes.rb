@@ -54,10 +54,10 @@ module RssLog::Scopes
         # Join association is singular for all RssLog associations
         association = type.name.underscore
         # "logs that are not of this type, or if they are, then filtered"
-        scope = scope.
-                left_outer_joins(:"#{association}").
-                where("#{association}_id": nil).distinct.
-                or(RssLog.merge(filter_conditions_for_type(type, type_filters)))
+        scope = scope.left_outer_joins(:"#{association}").distinct.
+                where("#{association}_id": nil).or(
+                  RssLog.merge(filter_conditions_for_type(type, type_filters))
+                )
       end
       scope
     end
