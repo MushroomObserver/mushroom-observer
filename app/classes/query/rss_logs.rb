@@ -14,7 +14,8 @@ class Query::RssLogs < Query::Base
       id_in_set: [RssLog],
       type: :string
     ).merge(content_filter_parameter_declarations(Observation)).
-      merge(content_filter_parameter_declarations(Location))
+      merge(content_filter_parameter_declarations(Location)).
+      merge(content_filter_parameter_declarations(Name))
   end
 
   # Declare the parameters as attributes of type `query_param`
@@ -28,6 +29,7 @@ class Query::RssLogs < Query::Base
     add_id_in_set_condition
     initialize_content_filters_for_rss_log(Observation)
     initialize_content_filters_for_rss_log(Location)
+    initialize_content_filters_for_rss_log(Name)
     super
   end
 

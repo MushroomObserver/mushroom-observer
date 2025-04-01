@@ -141,6 +141,8 @@
 #  None.
 #
 class RssLog < AbstractModel
+  include RssLog::Scopes
+
   belongs_to :article
   belongs_to :glossary_term
   belongs_to :location
@@ -148,20 +150,6 @@ class RssLog < AbstractModel
   belongs_to :observation
   belongs_to :project
   belongs_to :species_list
-
-  scope :order_by_default,
-        -> { order_by(::Query::RssLogs.default_order) }
-
-  scope :type, lambda { |types|
-    return all if types.to_s == "all"
-
-    types = types.to_s.split unless types.is_a?(Array)
-    types &= ALL_TYPE_TAGS.map(&:to_s)
-    return none if types.empty?
-
-    types.map! { |type| arel_table[:"#{type}_id"].not_eq(nil) }
-    where(or_clause(*types)).distinct
-  }
 
   # Maximum allowed length (in bytes) of notes column.  Actually it should be
   # 65535, I think, but let's mak sure there's a safe buffer.
