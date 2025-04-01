@@ -259,34 +259,23 @@ class InatImportJob < ApplicationJob
   def add_inat_images(inat_obs_photos)
     inat_obs_photos.each do |obs_photo|
       photo = Inat::ObsPhoto.new(obs_photo)
-      api = Inat::PhotoImporter.new(photo_importer_params(photo)).api
-
-      # NOTE: Error handling? 2024-06-19 jdc.
-      # https://github.com/MushroomObserver/mushroom-observer/issues/2382
-      image = Image.find(api.results.first.id)
-
-      # Imaage attributes to potentially update manually
-      # t.boolean "gps_stripped", default: false, null: false
-      image.update(
-        # NOTE: jdc 20250328 This throws errors if done via API params above
-        # because api key owner is webmaster, rather than the importing user
-        user_id: @user.id,
-        when: @observation.when,
-        original_name: photo.original_name
-      )
-      @observation.add_image(image)
+      Inat::PhotoImporter.new(photo_importer_params(photo)).api
     end
   end
 
   def photo_importer_params(photo)
-    { method: :post, action: :image,
+    {
+      method: :post,
+      action: :image,
       api_key: @user_api_key,
-      upload_url: photo.url,
 
+      upload_url: photo.url,
+      notes: photo.notes,
       copyright_holder: photo.copyright_holder,
       license: photo.license_id,
-      notes: photo.notes,
-      original_name: photo.original_name }
+      original_name: photo.original_name,
+      observations: @observation.id
+    }
   end
 
   def update_names_and_proposals
