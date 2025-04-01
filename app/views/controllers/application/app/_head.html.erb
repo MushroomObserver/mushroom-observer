@@ -20,7 +20,7 @@
 <title><%= :app_title.l%>: <%= yield(:document_title) %></title>
 <%= render("application/app/favicons") %>
 <% if @canonical_url %>
-  <%= tag.link(href: "#{escape_once(@canonical_url)}" rel:"canonical") %>
+  <link href="<%= escape_once(@canonical_url) %>" rel="canonical"/>
 <% end %>
 <%= csrf_meta_tag %>
 <meta property="og:image" content="https://mushroomobserver.org/images/facebook_icon.png"/>
