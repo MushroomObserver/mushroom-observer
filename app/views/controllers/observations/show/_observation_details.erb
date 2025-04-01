@@ -1,5 +1,6 @@
 <%
 # The basic info of the observation. Sections get updated by JS
+show_links = user && (obs.external_links.any? || sites.any?)
 %>
 
 <%= panel_block(id: "observation_details",
@@ -7,7 +8,7 @@
                 heading_links: obs_details_links(obs),
                 class: "name-section") do %>
 
-  <%= observation_details_inat(obs: @observation) %>
+  <%= observation_details_inat(obs: obs) %>
 
   <%= observation_details_when_where_who(obs: obs) %>
 
@@ -40,17 +41,22 @@
     end
   end %>
 
-  <% if @user %>
+  <% if user %>
     <%= render(partial: "observations/show/collection_numbers",
-              locals: { obs: obs }) %>
+               locals: { obs:, user: }) %>
 
     <%= render(partial: "observations/show/herbarium_records",
-              locals: { obs: obs }) %>
+               locals: { obs:, user: }) %>
 
     <%= render(partial: "observations/show/sequences",
-              locals: { obs: obs }) %>
+               locals: { obs:, user: }) %>
   <% end %>
 
   <%= observation_details_notes(obs: obs) %>
+
+  <% if user && show_links %>
+    <%= render(partial: "observations/show/external_links",
+               locals: { obs:, user:, sites: }) %>
+  <% end %>
 
 <% end %>
