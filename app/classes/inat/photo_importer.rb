@@ -4,7 +4,6 @@
 # This facilitates stubbing the call
 class Inat
   class PhotoImporter
-    # This attribute facilitates debugging, but is not used in the code
     attr_reader :api
 
     def initialize(params)
