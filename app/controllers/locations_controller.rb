@@ -51,12 +51,13 @@ class LocationsController < ApplicationController
 
     query = find_query(:Location)
     # Have to check this here because we're not running the query yet.
-    raise(:runtime_no_conditions.l) unless query.params.any?
+    raise(:runtime_no_conditions.l) unless query&.params&.any?
 
     [query, { link_all_sorts: true }]
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
     redirect_to(search_advanced_path)
+    [nil, {}]
   end
 
   # Displays a list of locations matching a given string.
