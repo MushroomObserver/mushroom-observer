@@ -140,7 +140,7 @@
 #
 #  None.
 #
-class RssLog < AbstractModel
+class RssLog < AbstractModel # rubocop:disable Metrics/ClassLength
   belongs_to :article
   belongs_to :glossary_term
   belongs_to :location
@@ -163,17 +163,99 @@ class RssLog < AbstractModel
     where(or_clause(*types)).distinct
   }
 
-  # for content filters.
-  # possibly needs left outer joins?
-  scope :observation_query, lambda { |hash|
-    joins(:observation).subquery(:Observation, hash)
+  # Apply content filters to all types of RssLog requested in the current Query.
+  # NOTE: One content filter may apply to two or more types (e.g. `:region`
+  # applies to both Observations and Locations), so we need to build a query
+  # where each type of RssLog is filtered separately.
+  #
+  # Query itself calls this scope because it has all the current query params,
+  # and because Query::Filter knows what all the possible filter params are.
+  # We probably wouldn't call this scope elsewhere, except from a test.
+  #
+  # For reference:
+  # Query.new(:RssLog, region: "Canada", has_specimen: true).to_sql
+  #
+  # SELECT DISTINCT rss_logs.id
+  # FROM `rss_logs`
+  # LEFT OUTER JOIN `observations` ON rss_logs.observation_id = observations.id
+  # LEFT OUTER JOIN `locations` ON rss_logs.location_id = locations.id
+  # WHERE (observations.id IS NULL OR
+  #        ((observations.specimen IS TRUE AND
+  #          CONCAT(', ', observations.where) LIKE '%, Canada')))
+  # AND (locations.id IS NULL OR
+  #      (CONCAT(', ', locations.name) LIKE '%, Canada')))
+  # ORDER BY rss_logs.updated_at DESC, rss_logs.id DESC
+  #
+  scope :content_filters, lambda { |params|
+    return all if params.blank?
+
+    scope = all
+    # `type` here is a model
+    filterable_types_in_current_query(params).each do |type|
+      type_filters = active_filters_for_model(params, type)
+      next if type_filters.blank?
+
+      # Join association is singular for all RssLog associations
+      association = type.name.underscore
+      # Returns "logs that are not of this type, or if they are, then filtered"
+      scope = scope.
+              left_outer_joins(:"#{association}").
+              where("#{association}_id": nil).distinct.
+              or(RssLog.merge(filter_conditions_for_type(type, type_filters)))
+    end
+    scope
   }
-  scope :location_query, lambda { |hash|
-    joins(:location).subquery(:Location, hash)
-  }
-  scope :name_query, lambda { |hash|
-    joins(:name).subquery(:Name, hash)
-  }
+
+  def self.filtering_statements(params)
+    # `type` here is a model (var name `model` unavailable)
+    filterable_types_in_current_query(params).map do |type|
+      type_filters = active_filters_for_model(params, type)
+      next if type_filters.blank?
+
+      # Join association is singular for all RssLog associations
+      association = type.name.underscore
+      # Returns "logs that are not of this type, or if they are, then filtered"
+      left_outer_joins(:"#{association}").
+        where("#{association}_id": nil).distinct.
+        or(RssLog.merge(filter_conditions_for_type(type, type_filters)))
+    end
+  end
+
+  # Types requested in the current RssLog query that may have content filters
+  # applied. Defaults to :all. Returns an array of model classes.
+  def self.filterable_types_in_current_query(params)
+    filterable_types = [:observation, :name, :location]
+    active_types = case params[:type]
+                   when nil, "", :all, "all"
+                     filterable_types
+                   when Array
+                     params[:type]
+                   when String
+                     params[:type].split
+                   end
+    active_types.map { |type| type.to_s.camelize.constantize }
+  end
+
+  # Find any active filters relevant to a model, using Query::Filter.by_model.
+  # Returns a hash of only the relevant params.
+  def self.active_filters_for_model(params, model)
+    ::Query::Filter.by_model(model).
+      each_with_object({}) do |fltr, filter_params|
+        next if (val = params[fltr.sym]).to_s == ""
+
+        filter_params[fltr.sym] = val
+      end
+  end
+
+  # Build a scope statement for one type (model).
+  def self.filter_conditions_for_type(type, type_filters)
+    # Condense all filters into an array of AR scope statements
+    conditions_for_type = type_filters.reduce([]) do |conds, (k, v)|
+      conds << type.send(k, v).distinct
+    end
+    # Join the array of conditions by `and`.
+    and_clause(*conditions_for_type).distinct
+  end
 
   # Maximum allowed length (in bytes) of notes column.  Actually it should be
   # 65535, I think, but let's mak sure there's a safe buffer.

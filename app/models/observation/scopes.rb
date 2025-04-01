@@ -244,7 +244,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :region, lambda { |place_names|
       place_names = [place_names].flatten
       place_names.map! { |val| one_region(val) }
-      or_clause(*place_names)
+      or_clause(*place_names).distinct
     }
     scope :one_region, lambda { |place_name|
       region = Location.reverse_name_if_necessary(place_name)
@@ -258,7 +258,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
     scope :locations, lambda { |locations|
       location_ids = lookup_locations_by_name(locations)
-      where(location: location_ids)
+      where(location: location_ids).distinct
     }
     # Pass Box kwargs (:north, :south, :east, :west), any order.
     # By default this scope selects only obs either with lat/lng or with useful
@@ -451,19 +451,6 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       spl_ids = Lookup::SpeciesLists.new(species_lists).ids
       joins(:species_list_observations).
         where(species_list_observations: { species_list: spl_ids }).distinct
-    }
-
-    scope :image_query, lambda { |hash|
-      joins(:images).subquery(:Image, hash)
-    }
-    scope :location_query, lambda { |hash|
-      joins(:location).subquery(:Location, hash)
-    }
-    scope :name_query, lambda { |hash|
-      joins(:name).subquery(:Name, hash)
-    }
-    scope :sequence_query, lambda { |hash|
-      joins(:sequences).subquery(:Sequence, hash)
     }
 
     scope :show_includes, lambda {
