@@ -27,4 +27,15 @@ class ExternalSite < AbstractModel
   def member?(user)
     user.in_group?(project.user_group)
   end
+
+  def self.sites_user_can_add_links_to(user, obs, admin: false)
+    return [] unless obs
+
+    obs_site_ids = obs&.external_links&.map(&:external_site_id)
+    if (user == obs.user) || admin
+      where.not(id: obs_site_ids)
+    else
+      user.external_sites.where.not(id: obs_site_ids)
+    end
+  end
 end
