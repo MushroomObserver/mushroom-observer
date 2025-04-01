@@ -1,3 +1,5 @@
+<%# locals: (obs: nil, consensus: nil, user: nil, sites: nil) %>
+
 <%
 # The basic info of the observation. Sections get updated by JS
 show_links = user && (obs.external_links.any? || sites.any?)
@@ -52,11 +54,11 @@ show_links = user && (obs.external_links.any? || sites.any?)
                locals: { obs:, user: }) %>
   <% end %>
 
-  <%= observation_details_notes(obs: obs) %>
-
-  <% if user && show_links %>
+  <% if show_links %>
     <%= render(partial: "observations/show/external_links",
                locals: { obs:, user:, sites: }) %>
   <% end %>
+
+  <%= observation_details_notes(obs: obs) %>
 
 <% end %>
