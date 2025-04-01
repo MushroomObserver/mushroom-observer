@@ -78,14 +78,32 @@ module Query::ScopeModules::Initialization
   def send_rss_log_content_filters_to_subqueries
     return if model != RssLog || !content_filters_present
 
-    rss_logs_requested_filterable_types.each do |model|
-      subquery_params = content_filter_subquery_params(model)
-      if subquery_params.present?
-        @scopes = @scopes.send(:"#{model.name.downcase}_query",
-                               **subquery_params)
+    rss_logs_requested_filterable_types.each do |type|
+      subquery_params = content_filter_subquery_params(type)
+      next if subquery_params.blank?
+
+      model_conditions = subquery_params.reduce([]) do |conds, (k, v)|
+        conds << type.send(k, v)
       end
+      association = type.name.underscore
+      debugger
+      @scopes = @scopes.left_outer_joins(:"#{association}").
+                where("#{association}_id": nil).
+                or(RssLog.merge(and_clause(*model_conditions)))
     end
   end
+
+  # Query.new(:RssLog, region: "Canada", has_specimen: true).to_sql
+  # SELECT DISTINCT rss_logs.id
+  # FROM `rss_logs`
+  # LEFT OUTER JOIN `observations` ON rss_logs.observation_id = observations.id
+  # LEFT OUTER JOIN `locations` ON rss_logs.location_id = locations.id
+  # WHERE (observations.id IS NULL OR
+  #        ((observations.specimen IS TRUE AND
+  #          CONCAT(', ', observations.where) LIKE '%, Canada')))
+  # AND (locations.id IS NULL OR
+  #      (CONCAT(', ', locations.name) LIKE '%, Canada')))
+  # ORDER BY rss_logs.updated_at DESC, rss_logs.id DESC
 
   # Current types requested on the RssLog page that can have content filters
   # applied. Defaults to :all.
@@ -127,5 +145,28 @@ module Query::ScopeModules::Initialization
   #    where(<x>.in(limited_id_set(ids)))
   def limited_id_set(ids)
     ids.map(&:to_i).uniq[0, MO.query_max_array]
+  end
+
+  # FIXME put these in a module that we can include in scopes and here
+  # Combine args into one parenthesized condition by ANDing them.
+  def and_clause(*args)
+    if args.length > 1
+      # "(#{args.join(" AND ")})"
+      starting = args.shift
+      args.reduce(starting) { |result, arg| result.and(arg) }
+    else
+      args.first
+    end
+  end
+
+  # Combine args into one parenthesized condition by ORing them.
+  def or_clause(*args)
+    if args.length > 1
+      # "(#{args.join(" OR ")})"
+      starting = args.shift
+      args.reduce(starting) { |result, arg| result.or(arg) }
+    else
+      args.first
+    end
   end
 end

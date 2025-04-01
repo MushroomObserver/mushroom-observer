@@ -37,4 +37,34 @@ class Query::RssLogsTest < UnitTestCase
     scope = RssLog.type("species_list project").order_by_default
     assert_query_scope(ids, scope, :RssLog, type: "species_list project")
   end
+
+  def test_rss_log_content_filter_has_specimen
+    ids = [
+      rss_logs(:peltigera_mary_obs_rss_log),
+      rss_logs(:peltigera_obs_rss_log),
+      rss_logs(:amateur_obs_rss_log),
+      rss_logs(:coprinus_comatus_obs_rss_log),
+      rss_logs(:detailed_unknown_obs_rss_log),
+      rss_logs(:vouchered_obs_rss_log),
+      rss_logs(:vouchered_imged_obs_rss_log)
+    ].map(&:id)
+    scope = RssLog.joins(:observation).
+            merge(Observation.has_specimen).order_by_default
+    assert_query_scope(ids, scope, :RssLog, has_specimen: true)
+  end
+
+  def test_rss_log_content_filter_region
+    ids = [
+      rss_logs(:peltigera_mary_obs_rss_log),
+      rss_logs(:peltigera_obs_rss_log),
+      rss_logs(:amateur_obs_rss_log),
+      rss_logs(:coprinus_comatus_obs_rss_log),
+      rss_logs(:detailed_unknown_obs_rss_log),
+      rss_logs(:vouchered_obs_rss_log),
+      rss_logs(:vouchered_imged_obs_rss_log)
+    ].map(&:id)
+    scope = RssLog.joins(:observation).
+            merge(Observation.region("Canada")).order_by_default
+    assert_query_scope(ids, scope, :RssLog, region: "California, USA")
+  end
 end

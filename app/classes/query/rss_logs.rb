@@ -9,7 +9,8 @@ class Query::RssLogs < Query::BaseNew
       id_in_set: [RssLog],
       type: :string
     ).merge(content_filter_parameter_declarations(Observation)).
-      merge(content_filter_parameter_declarations(Location))
+      merge(content_filter_parameter_declarations(Location)) # .
+      # merge(content_filter_parameter_declarations(Name))
   end
 
   # Declare the parameters as attributes of type `query_param`

@@ -244,7 +244,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :region, lambda { |place_names|
       place_names = [place_names].flatten
       place_names.map! { |val| one_region(val) }
-      or_clause(*place_names).distinct
+      or_clause(*place_names)
     }
     scope :one_region, lambda { |place_name|
       region = Location.reverse_name_if_necessary(place_name)
@@ -258,7 +258,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
     scope :locations, lambda { |locations|
       location_ids = lookup_locations_by_name(locations)
-      where(location: location_ids).distinct
+      where(location: location_ids)
     }
     # Pass Box kwargs (:north, :south, :east, :west), any order.
     # By default this scope selects only obs either with lat/lng or with useful
