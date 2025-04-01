@@ -28,14 +28,16 @@ class ExternalSite < AbstractModel
     user.in_group?(project.user_group)
   end
 
+  # Either the observer, an admin, or a member of a project for a specific site
+  # can add an external link. We only permit one link per external site per obs.
   def self.sites_user_can_add_links_to(user, obs, admin: false)
-    return [] unless obs
+    return [] unless obs && user
 
-    obs_site_ids = obs&.external_links&.map(&:external_site_id)
+    obs_site_ids = obs.external_links.map(&:external_site_id)
     if (user == obs.user) || admin
       where.not(id: obs_site_ids)
     else
-      user.external_sites.where.not(id: obs_site_ids)
+      where(project: user.projects_member).where.not(id: obs_site_ids)
     end
   end
 end
