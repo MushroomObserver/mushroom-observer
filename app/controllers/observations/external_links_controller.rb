@@ -21,7 +21,6 @@ module Observations
 
     def create
       @url = params.dig(:external_link, :url).to_s
-      debugger
       set_ivars_for_new
       check_external_link_permission!(@observation, @site)
       create_external_link
