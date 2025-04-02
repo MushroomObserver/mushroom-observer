@@ -12,7 +12,7 @@ module Observations
       url  = "https://valid.url"
       params = {
         id: obs.id,
-        external_link: { external_site: site, url: url }
+        external_link: { external_site_id: site, url: url }
       }
       [obs, obs2, site, url, params]
     end

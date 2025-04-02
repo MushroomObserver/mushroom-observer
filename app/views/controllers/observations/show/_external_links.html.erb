@@ -1,4 +1,4 @@
-<%# locals: (obs: nil, consensus: nil, user: nil, sites: nil) %>
+<%# locals: (obs: nil, consensus: nil, user: nil, sites: []) %>
 
 <%=
 tag.div(
@@ -10,15 +10,10 @@ tag.div(
     tag.div do
       concat("#{:EXTERNAL_LINKS.l}: ")
       concat(
-        sites.sort_by(&:name).map do |site|
-          [ # any html helper has to be safe_joined separately
-            "#{site.name}: ",
-            "[",
-            modal_link_to("external_link",
-                          *new_external_link_tab(obs: obs, site: site)),
-            "] "
-          ].safe_join("")
-        end.safe_join
+        [ "[",
+          modal_link_to("external_link", *new_external_link_tab(obs: obs)),
+          "] "
+        ].safe_join("")
       ) if sites.any?
     end,
 

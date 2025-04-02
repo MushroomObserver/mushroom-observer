@@ -9,10 +9,9 @@ module Observations
       set_ivars_for_new
       @external_link = ExternalLink.new(
         user: @user,
-        observation: @observation,
-        external_site: @site,
+        observation: @observation
       )
-      check_external_link_permission!(@observation, @site)
+      check_external_link_permission!(@observation)
       respond_to do |format|
         format.turbo_stream { render_modal_external_link_form }
         format.html
@@ -20,8 +19,9 @@ module Observations
     end
 
     def create
-      @url = params.dig(:external_link, :url).to_s
       set_ivars_for_new
+      @url = params.dig(:external_link, :url).to_s
+      @site = ExternalSite.find(params.dig(:external_link, :external_site_id))
       check_external_link_permission!(@observation, @site)
       create_external_link
     end
@@ -36,9 +36,8 @@ module Observations
     end
 
     def update
-      @url = params.dig(:external_link, :url).to_s
-
       set_ivars_for_edit
+      @url = params.dig(:external_link, :url).to_s
       check_external_link_permission!(@external_link)
       update_external_link
     end
@@ -53,7 +52,10 @@ module Observations
 
     def set_ivars_for_new
       @observation = Observation.find(params[:id].to_s)
-      @site = ExternalSite.find(params.dig(:external_link, :external_site_id))
+      @sites = ExternalSite.sites_user_can_add_links_to(
+        @user, @observation, admin: in_admin_mode?
+      )
+      # @site = ExternalSite.find(params.dig(:external_link, :external_site_id))
       @back_object = @observation
     end
 
@@ -177,7 +179,7 @@ module Observations
     def modal_title
       case action_name
       when "new", "create"
-        :show_observation_add_link.t(site: "MycoPortal")
+        :show_observation_add_link.l
       when "edit", "update"
         :edit_object.t(type: :external_link)
       end
@@ -185,12 +187,14 @@ module Observations
 
     def render_external_links_section_update
       # need to reset this in case they can now add sites
+      @observation = @observation.reload
       @other_sites = ExternalSite.sites_user_can_add_links_to(
         @user, @observation, admin: in_admin_mode?
       )
       render(
         partial: "observations/show/section_update",
-        locals: { identifier: "external_links" }
+        locals: { identifier: "external_links",
+                  obs: @observation, sites: @other_sites }
       ) and return
     end
 
