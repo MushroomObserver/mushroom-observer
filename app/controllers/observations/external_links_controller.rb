@@ -7,6 +7,11 @@ module Observations
 
     def new
       set_ivars_for_new
+      @external_link = ExternalLink.new(
+        user: @user,
+        observation: @observation,
+        external_site: @site,
+      )
       check_external_link_permission!(@observation, @site)
       respond_to do |format|
         format.turbo_stream { render_modal_external_link_form }
@@ -16,7 +21,7 @@ module Observations
 
     def create
       @url = params.dig(:external_link, :url).to_s
-
+      debugger
       set_ivars_for_new
       check_external_link_permission!(@observation, @site)
       create_external_link
@@ -49,7 +54,7 @@ module Observations
 
     def set_ivars_for_new
       @observation = Observation.find(params[:id].to_s)
-      @site = ExternalSite.find(params.dig(:external_link, :external_site).to_s)
+      @site = ExternalSite.find(params.dig(:external_link, :external_site_id))
       @back_object = @observation
     end
 
@@ -66,7 +71,7 @@ module Observations
         obs  = link.observation
         site = link.external_site
       end
-      return true if obs.user == @user || site.member?(@user) || @user.admin
+      return true if obs&.user == @user || site&.member?(@user) || @user.admin
 
       flash_error("Permission denied.")
       false
@@ -136,6 +141,21 @@ module Observations
       @external_link.destroy!
 
       flash_success_and_return
+    end
+
+    def show_flash_and_send_back
+      respond_to do |format|
+        format.html do
+          redirect_to(permanent_observation_path(@observation)) and
+            return
+        end
+        # renders the flash in the modal, but not sure it's necessary
+        # to have a response here. are they getting sent back?
+        format.turbo_stream do
+          render(partial: "shared/modal_flash_update",
+                 locals: { identifier: modal_identifier }) and return
+        end
+      end
     end
 
     def render_modal_external_link_form

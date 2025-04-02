@@ -7,7 +7,9 @@ module Tabs
     def new_external_link_tab(obs:, site:)
       InternalLink::Model.new(
         :ADD.l, site,
-        new_external_link_path(id: obs.id, external_site_id: site.id),
+        new_external_link_path(
+          id: obs.id, external_link: { external_site_id: site.id }
+        ),
         html_options: { icon: :add }
       ).tab
     end

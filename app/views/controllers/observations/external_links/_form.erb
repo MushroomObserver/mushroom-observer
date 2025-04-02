@@ -26,6 +26,9 @@ end
       between: :required,
       append: :show_observation_add_link_dialog.t(site: @site.name)
     ) %>
+  <%= f.hidden_field(:user_id, value: @user.id) %>
+  <%= f.hidden_field(:observation_id, value: @observation.id) %>
+  <%= f.hidden_field(:external_site_id, value: @site.id) %>
 
   <%= submit_button(form: f, button: button, center: true) %>
 
