@@ -540,7 +540,7 @@ class ObservationTest < UnitTestCase
                  from: rolf,
                  to: katrina,
                  observation: 0,
-                 note: "**__Coprinus comatus__** (O.F. Müll.) Pers. " \
+                 note: "**__Coprinus__** **__comatus__** (O.F. Müll.) Pers. " \
                        "(#{observations(:coprinus_comatus_obs).id})")
     QueuedEmail.queue = false
   end
