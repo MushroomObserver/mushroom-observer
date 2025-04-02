@@ -2,7 +2,7 @@
 
 ##############################################################################
 #
-#  :section: ResultAccessors
+#  :section: Results
 #
 #  Note that most of these methods accept a few optional arguments.  For
 #  example, all methods that return instantiated results accept +:include+
@@ -20,7 +20,7 @@
 #
 ##############################################################################
 
-module Query::ScopeModules::ResultAccessors
+module Query::ScopeModules::Results
   attr_reader :need_letters
 
   # Args accepted by +results+, +result_ids+, +num_results+.  (These are passed

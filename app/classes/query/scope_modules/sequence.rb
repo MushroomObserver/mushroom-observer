@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # methods for moving forward/back up/down in Query results
-module Query::ScopeModules::SequenceOperators
+module Query::ScopeModules::Sequence
   # Current place in results, as an id.  (Returns nil if not set yet.)
   attr_reader :current_id
 
