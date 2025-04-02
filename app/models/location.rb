@@ -38,14 +38,8 @@
 #
 #  == Scopes
 #
-#  created_on("yyyymmdd")
-#  created_after("yyyymmdd")
-#  created_before("yyyymmdd")
-#  created_between(start, end)
-#  updated_on("yyyymmdd")
-#  updated_after("yyyymmdd")
-#  updated_before("yyyymmdd")
-#  updated_between(start, end)
+#  created_at("yyyy-mm-dd", "yyyy-mm-dd")
+#  updated_at("yyyy-mm-dd", "yyyy-mm-dd")
 #  name_has(place_name)
 #  region(place_name)
 #  in_box(north:, south:, east:, west:)
@@ -92,7 +86,7 @@
 #
 ################################################################################
 class Location < AbstractModel # rubocop:disable Metrics/ClassLength
-  require "acts_as_versioned"
+  require("acts_as_versioned")
 
   include Scopes
 
@@ -246,7 +240,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
               match[1].to_f - match[2].to_f / 60 - match[3].to_f / 3600
             end
       val = -val if match[4] == direction2
-      result = val.round(4) if val >= -max_degrees && val <= max_degrees
+      result = val.round(4) if val.between?(-max_degrees, max_degrees)
     end
     result
   end
@@ -517,7 +511,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
       if OK_PREFIXES.member?(s)
         count += 1
       else
-        trimmed = tokens[count..-1].join(" ")
+        trimmed = tokens[count..].join(" ")
         return trimmed if understood_places.member?(trimmed)
       end
     end

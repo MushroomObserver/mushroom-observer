@@ -5,7 +5,7 @@
 # NOTE: Glossary terms are attached to one or more images via the glue table
 # glossary_term_images.  This table includes the thumbnail!!!!
 class GlossaryTerm < AbstractModel
-  require "acts_as_versioned"
+  require("acts_as_versioned")
 
   belongs_to(:thumb_image,
              class_name: "Image",
@@ -43,8 +43,8 @@ class GlossaryTerm < AbstractModel
   )
   versioned_class.before_save { |x| x.user_id = User.current_id }
 
-  scope :index_order,
-        -> { order(name: :asc, id: :desc) }
+  scope :order_by_default,
+        -> { order_by(::Query::GlossaryTerms.default_order) }
 
   scope :name_has,
         ->(str) { search_columns(GlossaryTerm[:name], str) }

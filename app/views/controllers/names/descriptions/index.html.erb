@@ -5,7 +5,7 @@ add_sorter(@query, descriptions_index_sorts)
 flash_error(@error) if @error && @objects.empty?
 %>
 
-<%= paginate_block(@pages) do %>
+<%= pagination_nav(@pagination_data) do %>
   <% if @objects.any? %>
     <table class="table table-striped">
       <% (@objects || []).each do |desc| %>

@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# Advanced search is really something like this:
+# "Observation Search, or Locations or Names of Observations Search"
+# It returns results by joining to observations and filtering the observations.
 module Query::Params::AdvancedSearch
   def self.included(base)
     base.extend(ClassMethods)
@@ -14,18 +17,15 @@ module Query::Params::AdvancedSearch
         search_name: :string,
         search_where: :string,
         search_user: :string,
-        search_content: :string,
-        search_location_notes: :boolean
-      }
+        search_content: :string
+      }.freeze
     end
 
     # These are the ones that if present, are definitive of advanced_search.
     def advanced_search_params
-      [:search_name, :search_user, :search_where, :search_content]
+      advanced_search_parameter_declarations.keys.freeze
     end
   end
 
-  def advanced_search_params
-    self.class.advanced_search_params
-  end
+  delegate :advanced_search_params, to: :class
 end

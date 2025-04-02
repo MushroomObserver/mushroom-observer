@@ -126,6 +126,10 @@
   font-size: larger !important;
 }
 
+.text-left {
+  text-align: left !important;
+}
+
 .text-center {
   text-align: center !important;
 }
@@ -484,6 +488,10 @@
 
 .text-nowrap {
   white-space: nowrap !important;
+}
+
+.text-wrap {
+  white-space: normal !important;
 }
 
 .overflow-visible {

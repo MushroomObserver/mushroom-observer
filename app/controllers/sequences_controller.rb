@@ -54,7 +54,7 @@ class SequencesController < ApplicationController
   private
 
   def default_sort_order
-    :created_at
+    ::Query::Sequences.default_order # :created_at
   end
 
   def index_active_params
@@ -68,8 +68,8 @@ class SequencesController < ApplicationController
   end
 
   def index_display_opts(opts, _query)
-    { include: [{ observation: :name }, :user],
-      letters: "sequences.locus",
+    { letters: true,
+      include: [{ observation: :name }, :user],
       num_per_page: 50 }.merge(opts)
   end
 

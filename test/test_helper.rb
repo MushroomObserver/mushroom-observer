@@ -52,7 +52,7 @@ WebMock.disable_net_connect!(
 )
 
 ENV["RAILS_ENV"] ||= "test"
-require(File.expand_path("../config/environment", __dir__))
+require_relative("../config/environment")
 require("rails/test_help")
 
 %w[
@@ -148,7 +148,6 @@ module ActiveSupport
       # Disable cop; there's no block in which to limit the time zone change
       Time.zone = "America/New_York" # rubocop:disable Rails/TimeZoneAssignment
       User.current = nil
-      start_timer if false
       clear_logs unless defined?(@@cleared_logs)
       Symbol.missing_tags = []
     end
@@ -159,7 +158,6 @@ module ActiveSupport
       assert_equal([], Symbol.missing_tags, "Language tag(s) are missing.")
       FileUtils.rm_rf(MO.local_image_files)
       UserGroup.clear_cache_for_unit_tests
-      stop_timer if false
     end
 
     # Record time this test started to run.

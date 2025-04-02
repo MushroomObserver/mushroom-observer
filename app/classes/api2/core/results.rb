@@ -37,7 +37,7 @@ module API2::Results
   end
 
   def paginator
-    @paginator ||= ::MOPaginator.new(
+    @paginator ||= ::PaginationData.new(
       number: page_number,
       num_per_page: page_length
     )

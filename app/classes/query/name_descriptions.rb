@@ -4,7 +4,7 @@ class Query::NameDescriptions < Query::Base
   include Query::Initializers::Descriptions
 
   def model
-    NameDescription
+    @model ||= NameDescription
   end
 
   def self.parameter_declarations
@@ -23,6 +23,11 @@ class Query::NameDescriptions < Query::Base
       projects: [Project],
       name_query: { subquery: :Name }
     )
+  end
+
+  # Declare the parameters as attributes of type `query_param`
+  parameter_declarations.each_key do |param_name|
+    attribute param_name, :query_param
   end
 
   def initialize_flavor

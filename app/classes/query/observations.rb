@@ -7,7 +7,16 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
   include Query::Initializers::AdvancedSearch
 
   def model
-    Observation
+    @model ||= Observation
+  end
+
+  def list_by
+    @list_by ||= case params[:order_by].to_s
+                 when "user", "reverse_user"
+                   User[:login]
+                 when "name", "reverse_name"
+                   Name[:sort_name]
+                 end
   end
 
   def self.parameter_declarations # rubocop:disable Metrics/MethodLength
@@ -27,7 +36,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
                include_all_name_proposals: :boolean,
                exclude_consensus: :boolean },
       confidence: [:float],
-      needs_naming: :boolean,
+      needs_naming: User,
       # clade: :string, # content_filter
       # lichen: :boolean, # content_filter
 
@@ -61,6 +70,11 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
     ).
       merge(content_filter_parameter_declarations(Observation)).
       merge(advanced_search_parameter_declarations)
+  end
+
+  # Declare the parameters as attributes of type `query_param`
+  parameter_declarations.each_key do |param_name|
+    attribute param_name, :query_param
   end
 
   def initialize_flavor
@@ -166,7 +180,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
     return if fields.empty?
 
     conds = fields.map { |field| notes_field_presence_condition(field) }
-    @where << conds.join(" OR ")
+    where << conds.join(" OR ")
     add_joins(*)
   end
 
@@ -192,23 +206,36 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
   end
 
   def initialize_names_and_related_names_parameters
+    names = params.dig(:names, :lookup)
+    return if names.blank?
     return force_empty_results if irreconcilable_naming_parameters?
 
-    table = if params.dig(:names, :include_all_name_proposals)
-              "namings"
-            else
-              "observations"
-            end
-    ids = lookup_names_by_name(params.dig(:names, :lookup),
-                               related_names_parameters)
-    add_association_condition("#{table}.name_id", ids)
+    ids = lookup_names_by_name(names, related_names_parameters)
+    return force_empty_results if ids.blank?
 
-    if params.dig(:names, :include_all_name_proposals)
-      add_join(:observations, :namings)
-    end
+    table = table_for_names(all_proposals)
+    add_association_condition("#{table}.name_id", ids)
+    add_join(:observations, :namings) if all_proposals
+    add_exclude_consensus_condition(ids)
+  end
+
+  def all_proposals
+    @all_proposals ||= params.dig(:names, :include_all_name_proposals) ||
+                       params.dig(:names, :exclude_consensus)
+  end
+
+  def add_exclude_consensus_condition(ids)
     return unless params.dig(:names, :exclude_consensus)
 
     add_not_associated_condition("observations.name_id", ids)
+  end
+
+  def table_for_names(all_proposals)
+    if all_proposals
+      "namings"
+    else
+      "observations"
+    end
   end
 
   NAMES_EXPANDER_PARAMS = [
@@ -224,7 +251,7 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
 
   def irreconcilable_naming_parameters?
     params.dig(:names, :exclude_consensus) &&
-      !params.dig(:names, :include_all_name_proposals)
+      (params.dig(:names, :include_all_name_proposals) == false)
   end
 
   # ------------------------------------------------------------------------
@@ -232,11 +259,10 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
   def add_needs_naming_condition
     return unless params[:needs_naming]
 
-    user = User.current_id
+    user = lookup_users_by_name(params[:needs_naming]).first
     # 15x faster to use this AR scope to assemble the IDs vs using
     # SQL SELECT DISTINCT
-    @where << Observation.needs_naming_and_not_reviewed_by_user(user).
-              to_sql.gsub(/^.*?WHERE/, "")
+    where << Observation.needs_naming(user).to_sql.gsub(/^.*?WHERE/, "")
   end
 
   def initialize_confidence_parameter
@@ -269,10 +295,10 @@ class Query::Observations < Query::Base # rubocop:disable Metrics/ClassLength
     return unless params[:location_undefined]
     return if params[:regexp] || params[:by_editor]
 
-    @where << "observations.location_id IS NULL"
-    @where << "observations.where IS NOT NULL"
-    @group = "observations.where"
-    @order = "COUNT(observations.where)"
+    where << "observations.location_id IS NULL"
+    where << "observations.where IS NOT NULL"
+    self.group = "observations.where"
+    self.order = "COUNT(observations.where)"
   end
 
   def initialize_project_lists_parameter

@@ -2,7 +2,11 @@
 
 class Query::Projects < Query::Base
   def model
-    Project
+    @model ||= Project
+  end
+
+  def list_by
+    @list_by ||= Project[:title]
   end
 
   def self.parameter_declarations
@@ -23,6 +27,11 @@ class Query::Projects < Query::Base
       comments_has: :string,
       pattern: :string
     )
+  end
+
+  # Declare the parameters as attributes of type `query_param`
+  parameter_declarations.each_key do |param_name|
+    attribute param_name, :query_param
   end
 
   def initialize_flavor

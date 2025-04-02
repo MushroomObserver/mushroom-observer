@@ -2,7 +2,7 @@
 
 class Query::APIKeys < Query::Base
   def model
-    APIKey
+    @model ||= APIKey
   end
 
   def self.parameter_declarations
@@ -11,6 +11,11 @@ class Query::APIKeys < Query::Base
       updated_at: [:time],
       notes_has: :string
     )
+  end
+
+  # Declare the parameters as attributes of type `query_param`
+  parameter_declarations.each_key do |param_name|
+    attribute param_name, :query_param
   end
 
   def initialize_flavor

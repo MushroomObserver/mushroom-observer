@@ -3443,70 +3443,6 @@ class NameTest < UnitTestCase
   #    Explicit tests of some scopes to improve coverage
   # ----------------------------------------------------
 
-  def test_scope_description_has
-    assert_equal(
-      [names(:suillus)],
-      Name.description_has("by any other name would smell as sweet").to_a
-    )
-    assert_equal(0, Name.description_has(ARBITRARY_SHA).count)
-  end
-
-  def test_scope_has_description_in_project
-    assert_includes(
-      Name.has_description_in_project(projects(:bolete_project)),
-      names(:boletus_edulis)
-    )
-    assert_not_includes(
-      Name.has_description_in_project(projects(:bolete_project)),
-      names(:peltigera)
-    )
-  end
-
-  def test_scope_has_description_created_by
-    name = names(:coprinus_comatus)
-    description = name_descriptions(:draft_coprinus_comatus)
-    assert_not_equal(name.user, description.user)
-
-    assert_includes(
-      Name.has_description_created_by(description.user),
-      name
-    )
-    assert_not_includes(
-      Name.has_description_created_by(users(:zero_user)),
-      names(:peltigera)
-    )
-  end
-
-  def test_scope_has_description_reviewed_by
-    assert_includes(
-      Name.has_description_reviewed_by(users(:rolf)),
-      names(:peltigera)
-    )
-    assert_not_includes(
-      Name.has_description_reviewed_by(users(:dick)),
-      names(:peltigera)
-    )
-  end
-
-  def test_scope_has_description_of_type
-    assert_includes(
-      Name.has_description_of_type("public"),
-      names(:peltigera)
-    )
-    assert_includes(
-      Name.has_description_of_type("user"),
-      names(:peltigera)
-    )
-    assert_not_includes(
-      Name.has_description_of_type("foreign"),
-      names(:peltigera)
-    )
-    assert_empty(Name.has_description_of_type("spam"))
-    assert_kind_of(
-      ActiveRecord::Relation, Name.has_description_of_type("spam")
-    )
-  end
-
   def test_scope_subtaxa_of
     mispelled_name = Name.create!(
       text_name: "Amanita boodairy",
@@ -3519,7 +3455,18 @@ class NameTest < UnitTestCase
       user: users(:rolf)
     )
 
-    subtaxa_of_amanita = Name.subtaxa_of(names(:amanita))
+    amanita = names(:amanita)
+    subtaxa_of_amanita = Name.subtaxa_of(amanita).order_by_default
+    immediate_subtaxa_of_amanita = Name.immediate_subtaxa_of(amanita).
+                                   order_by_default
+    include_immediate_subtaxa = Name.include_immediate_subtaxa_of(amanita).
+                                order_by_default
+
+    # Immediate subtaxa of a genus should include everything below the genus.
+    assert_equal(subtaxa_of_amanita.map(&:id),
+                 immediate_subtaxa_of_amanita.map(&:id))
+    assert_equal([amanita.id] + subtaxa_of_amanita.map(&:id),
+                 include_immediate_subtaxa.map(&:id))
 
     assert_includes(
       subtaxa_of_amanita, names(:amanita_subgenus_lepidella),
@@ -3626,10 +3573,11 @@ class NameTest < UnitTestCase
     )
   end
 
-  def test_scope_has_comments_false
-    assert_includes(Name.has_comments(false), names(:bugs_bunny_one))
-    assert_not_includes(Name.has_comments(false), names(:fungi))
-  end
+  # Currently Query ignores false, so scope does too.
+  # def test_scope_has_comments_false
+  #   assert_includes(Name.has_comments(false), names(:bugs_bunny_one))
+  #   assert_not_includes(Name.has_comments(false), names(:fungi))
+  # end
 
   def test_scope_comments_has
     assert_includes(Name.comments_has("do not change"), names(:fungi))
@@ -3773,12 +3721,19 @@ class NameTest < UnitTestCase
     # Commas can separate multiple authors
     assert(Name.new(valid_params.merge({ author: "Benedix, Woo & Zhu" })).
       valid?, "Commas should be allowable in Author")
+    assert(Name.new(valid_params.merge({ author: "B'enedix" })).
+      valid?, "Single quote should be allowable in Author")
     # MycoBank allows square brackets in author to show correction. Ex:
     # Xylaria symploci Pande, Waingankar, Punekar & Ran[a]dive
     # https://www.mycobank.org/page/Name%20details%20page/field/Mycobank%20%23/585173
-    assert(Name.new(valid_params.merge({ author: "Ben[e]dix" })).
-     valid?, "Square brackets should be allowable in Author")
-
+    assert(Name.new(valid_params.merge({ author: "Ben[e]dix" })).valid?,
+           "Square brackets should be allowable in Author")
+    author = "V. Kučera".unicode_normalize
+    assert(Name.new(valid_params.merge({ author: author })).valid?,
+           "Composed Unicode chars should be allowable in author")
+    author = "V. Kučera".unicode_normalize(:nfd)
+    assert(Name.new(valid_params.merge({ author: author })).valid?,
+           "author with uncomposed Unicode chars should pass validation")
     # ----- Prove that including bad character prevents validation of Name
     # Users have added numbers manually
     # or pasted an IF or MB line into the Name form
@@ -3792,7 +3747,7 @@ class NameTest < UnitTestCase
 
   # Prove which characters that are allowed in author
   # are allowed/disallowed at end
-  def test_author_ending
+  def test_author_allowed_ending
     # Start with valid Name params, author ending in letter,
     # using params distinct from fixtures to avoid conflict.
     valid_params = {
@@ -3804,6 +3759,13 @@ class NameTest < UnitTestCase
     }
     assert(Name.new(valid_params).valid?,
            "Author ending in letter should be validated")
+    author = "Lizoň".unicode_normalize
+    assert(Name.new(valid_params.merge({ author: author })).valid?,
+           "Author ending in composed unicode char should pass validation")
+    author = "Lizoň".unicode_normalize(:nfd)
+    assert(Name.new(valid_params.merge({ author: author })).valid?,
+           "Author ending in uncomposed unicode char should pass validation")
+
     assert(Name.new(valid_params.merge({ author: "Benedix." })).valid?,
            "Period at end of author should be allowable")
 

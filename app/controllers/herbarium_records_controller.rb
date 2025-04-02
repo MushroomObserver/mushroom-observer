@@ -30,7 +30,7 @@ class HerbariumRecordsController < ApplicationController
     store_location
     query = create_query(:HerbariumRecord,
                          herbaria: params[:herbarium].to_s,
-                         by: :herbarium_label)
+                         order_by: :herbarium_label)
     [query, { always_index: true }]
   end
 
@@ -39,13 +39,13 @@ class HerbariumRecordsController < ApplicationController
     store_location
     query = create_query(:HerbariumRecord,
                          observations: params[:observation].to_s,
-                         by: :herbarium_label)
+                         order_by: :herbarium_label)
     [query, { always_index: true }]
   end
 
   def index_display_opts(opts, _query)
     {
-      letters: "herbarium_records.initial_det",
+      letters: true,
       num_per_page: 100,
       include: [{ herbarium: :curators }, { observations: :name }, :user]
     }.merge(opts)

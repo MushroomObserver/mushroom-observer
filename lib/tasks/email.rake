@@ -4,17 +4,14 @@ namespace :email do
   desc "List queued emails"
   task(list: :environment) do
     print "#{MO.http_domain}, #{Rails.env}\n"
-    QueuedEmail.all.includes(:queued_email_integers,
-                             :queued_email_note,
-                             :queued_email_strings, :user).each(&:dump)
+    QueuedEmail.includes(:queued_email_integers,
+                         :queued_email_note,
+                         :queued_email_strings, :user).each(&:dump)
   end
 
   desc "Send queued emails"
   task(send: :environment) do
-    # disable cop; `require` needs a String, not a PathName
-    require "#{Rails.root}/app/extensions/extensions.rb" # rubocop:disable Rails/FilePath
     count = 0
-    # for e in QueuedEmail.find(:all) # Rails 3
     QueuedEmail.all.each do |e|
       now = Time.zone.now
       # Has it been queued (and unchanged) for MO.email_queue_delay or more.

@@ -4,10 +4,11 @@
 # can see due to their being a project admin for a project
 # that another user trusts.
 class ProjectLatLngs
-  attr_accessor :query
+  attr_accessor :query, :user
 
-  def initialize
+  def initialize(args)
     self.query = tables[:observations]
+    self.user = args[:user] || nil
     add_joins
     add_project
     add_conditions
@@ -64,6 +65,6 @@ class ProjectLatLngs
                                                      :user_id)))
     query.where(attribute(:project_members, :trust_level).not_eq(1))
     query.where(attribute(:observations, :gps_hidden).eq(1))
-    query.where(attribute(:user_group_users, :user_id).eq(User.current_id))
+    query.where(attribute(:user_group_users, :user_id).eq(user&.id))
   end
 end

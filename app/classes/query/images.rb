@@ -7,7 +7,16 @@ class Query::Images < Query::Base
   include Query::Initializers::Filters
 
   def model
-    Image
+    @model ||= Image
+  end
+
+  def list_by
+    @list_by ||= case params[:order_by].to_s
+                 when "user", "reverse_user"
+                   User[:login]
+                 when "name", "reverse_name"
+                   Name[:sort_name]
+                 end
   end
 
   def self.parameter_declarations
@@ -35,6 +44,11 @@ class Query::Images < Query::Base
       species_lists: [SpeciesList],
       observation_query: { subquery: :Observation }
     ) # .merge(advanced_search_parameter_declarations)
+  end
+
+  # Declare the parameters as attributes of type `query_param`
+  parameter_declarations.each_key do |param_name|
+    attribute param_name, :query_param
   end
 
   def initialize_flavor
@@ -73,11 +87,11 @@ class Query::Images < Query::Base
     pixels = Image::ALL_SIZES_IN_PIXELS
     if min
       size = pixels[sizes.index(min)]
-      @where << "images.width >= #{size} OR images.height >= #{size}"
+      where << "images.width >= #{size} OR images.height >= #{size}"
     end
     if max
       size = pixels[sizes.index(max) + 1]
-      @where << "images.width < #{size} AND images.height < #{size}"
+      where << "images.width < #{size} AND images.height < #{size}"
     end
     add_joins(*)
   end
@@ -88,13 +102,13 @@ class Query::Images < Query::Base
     types, mimes, other = parse_image_type_vals(vals)
     str1 = "images.content_type IN ('#{types.join("','")}')"
     str2 = "images.content_type NOT IN ('#{mimes.join("','")}')"
-    @where << if types.empty?
-                str2
-              elsif other
-                "#{str1} OR #{str2}"
-              else
-                str1
-              end
+    where << if types.empty?
+               str2
+             elsif other
+               "#{str1} OR #{str2}"
+             else
+               str1
+             end
     add_joins(*)
   end
 
@@ -168,7 +182,7 @@ class Query::Images < Query::Base
   #   # to survive much longer. Image searches are in desperate need of
   #   # critical revision for performance concerns, anyway. -JPH 20210809]
   #   args2 = args.except(:select, :order, :group)
-  #   params2 = params.except(:by)
+  #   params2 = params.except(:order_by)
   #   ids = Query.lookup(:Observation, params2).result_ids(args2)
   #   ids = clean_id_set(ids)
   #   args2 = args.dup

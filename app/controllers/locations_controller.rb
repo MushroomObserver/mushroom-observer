@@ -51,12 +51,13 @@ class LocationsController < ApplicationController
 
     query = find_query(:Location)
     # Have to check this here because we're not running the query yet.
-    raise(:runtime_no_conditions.l) unless query.params.any?
+    raise(:runtime_no_conditions.l) unless query&.params&.any?
 
     [query, { link_all_sorts: true }]
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
     redirect_to(search_advanced_path)
+    [nil, {}]
   end
 
   # Displays a list of locations matching a given string.
@@ -141,8 +142,8 @@ class LocationsController < ApplicationController
       # If user has explicitly selected the order, then this is disabled.)
       @default_orders = true
     end
-    @undef_pages = paginate_letters(:letter2, :page2,
-                                    display_opts[:num_per_page] || 50)
+    @undef_pages = letter_pagination_data(:letter2, :page2,
+                                          display_opts[:num_per_page] || 50)
     @undef_data = query2.paginate(@undef_pages)
     @undef_pages.used_letters = @undef_data.map { |obs| obs[:where][0, 1] }.uniq
     if (letter = params[:letter2].to_s.downcase) != ""
@@ -170,7 +171,9 @@ class LocationsController < ApplicationController
     args[:where] = [args[:where]].flatten.compact
 
     # "By name" means something different to observation.
-    args[:by] = "where" if args[:by].blank? || (args[:by] == "name")
+    if ["name", "box_area", ""].include?(args[:order_by])
+      args[:order_by] = "where"
+    end
 
     if args[:pattern]
       search = SearchParams.new(phrase: args[:pattern])

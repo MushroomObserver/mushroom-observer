@@ -7,11 +7,11 @@ module Query::Initializers::Filters
 
     table = model.table_name
     add_join(:"#{table}!") # "!" means left outer join
-    @where << "#{table}.id IS NULL OR (#{and_clause(*conds)})"
+    where << "#{table}.id IS NULL OR (#{and_clause(*conds)})"
   end
 
   def initialize_content_filters(model)
-    @where += content_filter_sql_conds(model)
+    self.where += content_filter_sql_conds(model)
   end
 
   def content_filter_sql_conds(model)

@@ -2,7 +2,7 @@
 
 module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   def self.included(base)
-    base.helper_method(:paginate_numbers)
+    base.helper_method(:number_pagination_data)
   end
 
   ##############################################################################
@@ -104,10 +104,12 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   def unfiltered_index
     return unless unfiltered_index_permitted?
 
-    args = { by: default_sort_order }.merge(unfiltered_index_opts[:query_args])
+    # Get once, otherwise accessing the hash may rerun some logic twice.
+    index_opts = unfiltered_index_opts
+    args = { order_by: default_sort_order }.merge(index_opts[:query_args])
     query = create_query(controller_model_name.to_sym, **args)
 
-    [query, unfiltered_index_opts[:display_opts]]
+    [query, index_opts[:display_opts]]
   end
 
   # Can be overridden to prevent the unfiltered index from being called.
@@ -115,28 +117,45 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     true
   end
 
-  # Defaults for the unfiltered index. Controllers may pass their own opts.
+  # Defaults for the unfiltered index; controllers may override with other opts.
   def unfiltered_index_opts
-    { query_args: {}, display_opts: {} }
+    { query_args: {}, display_opts: {} }.freeze
   end
 
   # This handles the index if you pass any of the basic params.
   def sorted_index
     return unless sorted_index_permitted?
 
+    # Get once, otherwise accessing the hash reruns logic and may flash twice.
+    index_opts = sorted_index_opts
     query = find_or_create_query(controller_model_name.to_sym,
-                                 **sorted_index_opts[:query_args])
+                                 **index_opts[:query_args])
 
-    [query, sorted_index_opts[:display_opts]]
+    [query, index_opts[:display_opts]]
   end
 
   def sorted_index_permitted?
     true
   end
 
+  # This only deals with :by passed in url params.
   def sorted_index_opts
-    { query_args: { by: params[:by] },
-      display_opts: index_display_at_id_opts }
+    { query_args: { order_by: order_by_or_flash_if_unknown },
+      display_opts: index_display_at_id_opts }.freeze
+  end
+
+  def order_by_or_flash_if_unknown
+    order_by = params[:by]
+    return nil if order_by.blank?
+
+    scope = :"order_by_#{order_by.to_s.sub(/^reverse_/, "")}"
+    return order_by if AbstractModel.private_methods(false).include?(scope)
+
+    flash_error(
+      "Can't figure out how to sort #{controller_model_name.pluralize} " \
+      "by :#{order_by}."
+    )
+    default_sort_order
   end
 
   # The filtered index.
@@ -202,10 +221,10 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   # always_index::  Always show index, even if only one result.
   #
   # Side-effects: (sets/uses the following instance variables for the view)
-  # @title::        Provides default title.
+  # @title::                  Provides default title.
   # @layout::
-  # @pages::        Paginator instance.
-  # @objects::      Array of objects to be shown.
+  # @pagination_data::        PaginationData instance.
+  # @objects::                Array of objects to be shown.
   #
   # Other side-effects:
   # store_location::          Sets this as the +redirect_back_or_default+
@@ -233,11 +252,18 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     query_params_set(query)
     query.need_letters = display_opts[:letters] if display_opts[:letters]
     set_index_view_ivars(query, display_opts)
+    flash_query_validation_errors(query)
   end
 
   ###########################################################################
   #
   # INDEX VIEW METHODS - MOVE VIEW CODE TO HELPERS
+
+  def flash_query_validation_errors(query)
+    return if query.valid || query.validation_errors.empty?
+
+    flash_warning(query.validation_errors.join("\n"))
+  end
 
   # Set some ivars used in all index views.
   # Makes @query available to the :index template for query-dependent tabs
@@ -267,12 +293,13 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
 
   def calc_pages_and_objects(query, display_opts)
     number_arg = display_opts[:number_arg] || :page
-    @pages = if display_opts[:letters]
-               paginate_letters(display_opts[:letter_arg] || :letter,
-                                number_arg, num_per_page(display_opts))
-             else
-               paginate_numbers(number_arg, num_per_page(display_opts))
-             end
+    @pagination_data =
+      if display_opts[:letters]
+        letter_pagination_data(display_opts[:letter_arg] || :letter,
+                               number_arg, num_per_page(display_opts))
+      else
+        number_pagination_data(number_arg, num_per_page(display_opts))
+      end
     skip_if_coming_back(query, display_opts)
     find_objects(query, display_opts)
   end
@@ -285,9 +312,9 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
 
   def skip_if_coming_back(query, display_opts)
     if display_opts[:id].present? &&
-       params[@pages.letter_arg].blank? &&
-       params[@pages.number_arg].blank?
-      @pages.show_index(query.index(display_opts[:id]))
+       params[@pagination_data.letter_arg].blank? &&
+       params[@pagination_data.number_arg].blank?
+      @pagination_data.index_at(query.index(display_opts[:id]))
     end
   end
 
@@ -316,7 +343,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     if caching
       objects_with_only_needed_eager_loads(query, include)
     else
-      query.paginate(@pages, include: include)
+      query.paginate(@pagination_data, include: include)
     end
   end
 
@@ -325,7 +352,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     # Not currently caching on user.
     # user = User.current ? "logged_in" : "no_user"
     locale = I18n.locale
-    objects_simple = query.paginate(@pages)
+    objects_simple = query.paginate(@pagination_data)
 
     # If temporarily disabling cached matrix boxes: eager load everything
     # ids_to_eager_load = objects_simple
@@ -432,23 +459,24 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
 
   public ##########
 
-  # Initialize Paginator object.  This now does very little thanks to the new
-  # Query model.
+  # Initialize PaginationData object for pagination by letter.
+  # This now does very little thanks to the new Query model.
   # arg::    Name of parameter to use.  (default is 'letter')
   #
   #   # In controller:
   #   query  = create_query(:Name, :by_users => params[:id].to_s)
-  #   query.need_letters('names.display_name')
-  #   @pages = paginate_letters(:letter, :page, 50)
-  #   @names = query.paginate(@pages)
+  #   query.need_letters(true)
+  #   @pagination_data = letter_pagination_data(:letter, :page, 50)
+  #   @names = query.paginate(@pagination_data)
   #
   #   # In view:
-  #   <%= pagination_letters(@pages) %>
-  #   <%= pagination_numbers(@pages) %>
+  #   <%= letter_pagination_nav(@pagination_data) %>
+  #   <%= number_pagination_nav(@pagination_data) %>
   #
-  def paginate_letters(letter_arg = :letter, number_arg = :page,
-                       num_per_page = 50)
-    MOPaginator.new(
+  def letter_pagination_data(letter_arg = :letter,
+                             number_arg = :page,
+                             num_per_page = 50)
+    PaginationData.new(
       letter_arg: letter_arg,
       number_arg: number_arg,
       letter: paginator_letter(letter_arg),
@@ -457,27 +485,28 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     )
   end
 
-  # Initialize Paginator object.  This now does very little thanks to
-  # the new Query model.
+  # Initialize regular PaginationData object.
+  # This now does very little thanks to the new Query model.
+  #
   # arg::           Name of parameter to use.  (default is 'page')
   # num_per_page::  Number of results per page.  (default is 50)
   #
   #   # In controller:
   #   query    = create_query(:Name, :by_users => params[:id].to_s)
-  #   @numbers = paginate_numbers(:page, 50)
+  #   @numbers = number_pagination_data(:page, 50)
   #   @names   = query.paginate(@numbers)
   #
   #   # In view:
-  #   <%= pagination_numbers(@numbers) %>
+  #   <%= number_pagination_nav(@numbers) %>
   #
-  def paginate_numbers(arg = :page, num_per_page = 50)
-    MOPaginator.new(
+  def number_pagination_data(arg = :page, num_per_page = 50)
+    PaginationData.new(
       number_arg: arg,
       number: paginator_number(arg),
       num_per_page: num_per_page
     )
   end
-  # helper_method :paginate_numbers
+  # helper_method :number_pagination_data
 
   private ##########
 

@@ -7,23 +7,6 @@
 #
 #  type_tag::           Language tag, e.g., :observation, :rss_log, etc.
 #
-#  == Scopes
-#
-#  Scopes for collecting objects created (or updated) on, before, after or
-#  between a given "%Y-%m-%d" string(s).
-#
-#  Examples: Observation.created_between("2006-09-01", "2012-09-01")
-#            Name.updated_after("2016-12-01")
-#
-#  created_on::
-#  created_after::
-#  created_before::
-#  created_between::
-#  updated_on::
-#  updated_after::
-#  updated_before::
-#  updated_between::
-#
 #  ==== Extensions to "find"
 #  safe_find::          Same as <tt>find(id)</tt> but return nil if not found.
 #  find_object::        Look up an object by class name and id.
@@ -81,6 +64,7 @@
 
 class AbstractModel < ApplicationRecord
   include Scopes
+  include OrderingScopes
 
   self.abstract_class = true
 
@@ -377,9 +361,7 @@ class AbstractModel < ApplicationRecord
     "/#{name.pluralize.underscore}" # Rails standard for most controllers
   end
 
-  def show_controller
-    self.class.show_controller
-  end
+  delegate :show_controller, to: :class
 
   # Has controller been normalized to Rails 6.0 standards:
   #  plural controller name, CRUD action names standardized if they exist
@@ -416,9 +398,7 @@ class AbstractModel < ApplicationRecord
     :index
   end
 
-  def index_action
-    self.class.index_action
-  end
+  delegate :index_action, to: :class
 
   # Return the link_to args of the "index_<object>" action
   # (the index, indexed to a particular id)
@@ -448,9 +428,7 @@ class AbstractModel < ApplicationRecord
     :show
   end
 
-  def show_action
-    self.class.show_action
-  end
+  delegate :show_action, to: :class
 
   # Return the URL of the "show_<object>" action (as a string)
   #
@@ -500,9 +478,7 @@ class AbstractModel < ApplicationRecord
     ":eol#{name}"
   end
 
-  def eol_predicate
-    self.class.eol_predicate
-  end
+  delegate :eol_predicate, to: :class
 
   ##############################################################################
   #
@@ -524,9 +500,7 @@ class AbstractModel < ApplicationRecord
     :edit
   end
 
-  def edit_action
-    self.class.edit_action
-  end
+  delegate :edit_action, to: :class
 
   # Return the URL of the "edit_<object>" action
   #
@@ -578,9 +552,7 @@ class AbstractModel < ApplicationRecord
     :destroy
   end
 
-  def destroy_action
-    self.class.destroy_action
-  end
+  delegate :destroy_action, to: :class
 
   # Return the URL of the "destroy_<object>" action.
   # For CRUD, must pass method: :delete or use destroy_button helper

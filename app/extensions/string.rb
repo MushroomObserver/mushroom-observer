@@ -45,7 +45,7 @@
 
 # MO extensions to Ruby String class
 class String
-  require "digest/md5"
+  require("digest/md5")
 
   # :stopdoc:
   unless defined? UTF_TO_ASCII
@@ -738,9 +738,10 @@ class String
   end
 
   ### Misc Utilities ###
-  #
+
+  # Disable cop because it seems like we really want to priint, not just log
   def print_thing(thing)
-    print("#{self}: #{thing.class}: #{thing}\n")
+    print("#{self}: #{thing.class}: #{thing}\n") # rubocop:disable Rails/Output
   end
 
   def to_boolean

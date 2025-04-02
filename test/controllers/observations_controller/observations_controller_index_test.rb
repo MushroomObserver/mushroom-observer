@@ -94,15 +94,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_select("#caption-full", text: /#{regions_joined}/)
   end
 
-  def test_index_sorted_by_non_default
-    login
-
-    sort_orders = %w[name user]
-    sort_orders.each do |order|
-      get(:index, params: { by: order })
-      assert_displayed_title(:OBSERVATIONS.l)
-      assert_sorted_by(order)
-    end
+  def test_index_with_non_default_sort
+    check_index_sorting
   end
 
   def test_index_sorted_by_invalid_order
@@ -110,11 +103,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     login
 
-    exception = assert_raise(RuntimeError) do
-      get(:index, params: { by: by })
-    end
-    assert_equal("Can't figure out how to sort Observations by :#{by}.",
-                 exception.message)
+    get(:index, params: { by: by })
+    assert_flash_text("Can't figure out how to sort Observations by :#{by}.")
   end
 
   def test_index_with_id
@@ -226,40 +216,24 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     {
       advanced_search: true,
       search_name: "Fungi",
-      search_where: "String in notes",
-      search_location_notes: 1
+      search_where: "String in notes"
     }.freeze
   end
 
   def test_index_advanced_search_notes1
     login
-    get(:index, params: advanced_search_params.except(:search_location_notes))
-
-    assert_response(:success)
-    assert_select(
-      "#results a", false,
-      "There should be no results when string is missing from notes, " \
-      "and search_location_notes param is missing"
-    )
-    assert_flash_text(:runtime_no_matches.l(type: :observations.l))
-    assert_displayed_title(:OBSERVATIONS.l)
-  end
-
-  def test_index_advanced_search_notes2
-    login
-    # Include notes, but notes don't have string yet!
     get(:index, params: advanced_search_params)
 
     assert_response(:success)
     assert_select(
       "#results a", false,
-      "There should be no results when string is missing from notes, " \
-      "even if search_location_notes param is true"
+      "There should be no results when string is missing from notes."
     )
     assert_flash_text(:runtime_no_matches.l(type: :observations.l))
     assert_displayed_title(:OBSERVATIONS.l)
   end
 
+  # We currently no longer allow searching location notes.
   def test_index_advanced_search_notes3
     # Add string to notes, make sure it is actually added.
     login("rolf")
@@ -270,37 +244,15 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert(loc.notes.to_s.include?("String in notes"))
 
     login
-    # Forget to include notes again.
-    get(:index, params: advanced_search_params.except(:search_location_notes))
+    get(:index, params: advanced_search_params)
 
     assert_response(:success)
     assert_select(
       "#results a", false,
-      "There should be no results when notes include search string, " \
-      "if search_location_notes param is missing"
+      "There should be no results even when notes include search string."
     )
     assert_flash_text(:runtime_no_matches.l(type: :observations.l))
     assert_displayed_title(:OBSERVATIONS.l)
-  end
-
-  def test_index_advanced_search_notes4
-    # Add string to notes, make sure it is actually added.
-    login("rolf")
-    loc = locations(:burbank)
-    loc.notes = "blah blah blahString in notesblah blah blah"
-    loc.save
-    loc.reload
-    assert(loc.notes.to_s.include?("String in notes"))
-
-    login
-    # Now it should finally find the three unknowns at Burbank because Burbank
-    # has the magic string in its notes, and we're looking for it.
-    get(:index, params: advanced_search_params)
-
-    assert_response(:success)
-
-    results = @controller.instance_variable_get(:@objects)
-    assert_equal(3, results.length)
   end
 
   def test_index_advanced_search_error
@@ -350,7 +302,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     pattern = "Briceland"
 
     setup_rolfs_index
-    get(:index, params: { pattern: pattern, needs_naming: true })
+    get(:index, params: { pattern: pattern, needs_naming: rolf })
 
     assert_match(/^#{identify_observations_url}/, redirect_to_url,
                  "Wrong page. Should redirect to #{:obs_needing_id.l}")
@@ -423,7 +375,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     pattern = { error: "" }
 
     login
-    get(:index, params: { pattern: pattern, needs_naming: true })
+    get(:index, params: { pattern: pattern, needs_naming: rolf })
 
     assert_redirected_to(
       identify_observations_path,

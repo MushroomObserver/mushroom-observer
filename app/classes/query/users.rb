@@ -2,7 +2,16 @@
 
 class Query::Users < Query::Base
   def model
-    User
+    @model ||= User
+  end
+
+  def list_by
+    @list_by ||= case params[:order_by]
+                 when "login", "reverse_login"
+                   User[:login]
+                 else
+                   User[:name]
+                 end
   end
 
   def self.parameter_declarations
@@ -13,6 +22,11 @@ class Query::Users < Query::Base
       has_contribution: :boolean,
       pattern: :string
     )
+  end
+
+  # Declare the parameters as attributes of type `query_param`
+  parameter_declarations.each_key do |param_name|
+    attribute param_name, :query_param
   end
 
   def initialize_flavor

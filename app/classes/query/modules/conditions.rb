@@ -26,7 +26,7 @@ module Query::Modules::Conditions
   def add_boolean_condition(true_cond, false_cond, val, *)
     return if val.nil?
 
-    @where << (val ? true_cond : false_cond)
+    where << (val ? true_cond : false_cond)
     add_joins(*)
   end
 
@@ -35,11 +35,11 @@ module Query::Modules::Conditions
 
     vals = [vals] unless vals.is_a?(Array)
     vals = vals.map { |v| escape(v.downcase) }
-    @where << if vals.length == 1
-                "LOWER(#{col}) = #{vals.first}"
-              else
-                "LOWER(#{col}) IN (#{vals.join(", ")})"
-              end
+    where << if vals.length == 1
+               "LOWER(#{col}) = #{vals.first}"
+             else
+               "LOWER(#{col}) IN (#{vals.join(", ")})"
+             end
     add_joins(*)
   end
 
@@ -47,7 +47,7 @@ module Query::Modules::Conditions
     return if val.blank?
 
     search = SearchParams.new(phrase: val)
-    @where += google_conditions(search, col)
+    self.where += google_conditions(search, col)
     add_joins(*)
   end
 
@@ -56,8 +56,8 @@ module Query::Modules::Conditions
     return if val[0].blank? && val[1].blank?
 
     min, max = val
-    @where << "#{col} >= #{min}" if min.present?
-    @where << "#{col} <= #{max}" if max.present?
+    where << "#{col} >= #{min}" if min.present?
+    where << "#{col} <= #{max}" if max.present?
     add_joins(*)
   end
 
@@ -67,7 +67,7 @@ module Query::Modules::Conditions
     vals = vals.map(&:to_s) & allowed.map(&:to_s)
     return if vals.empty?
 
-    @where << "#{col} IN ('#{vals.join("','")}')"
+    where << "#{col} IN ('#{vals.join("','")}')"
     add_joins(*)
   end
 
@@ -79,7 +79,7 @@ module Query::Modules::Conditions
     vals = allowed.values_at(*vals)
     return if vals.empty?
 
-    @where << "#{col} IN (#{vals.join(",")})"
+    where << "#{col} IN (#{vals.join(",")})"
     add_joins(*)
   end
 
@@ -89,8 +89,8 @@ module Query::Modules::Conditions
     return if params[param].nil? # [] is valid
 
     set = clean_id_set(params[param])
-    @where << "#{table}.id IN (#{set})"
-    @order = "FIND_IN_SET(#{table}.id,'#{set}') ASC" unless params[:order]
+    where << "#{table}.id IN (#{set})"
+    self.order = "FIND_IN_SET(#{table}.id,'#{set}') ASC" unless params[:order]
   end
 
   # table_col = foreign key of an association, e.g. `observations.location_id`
@@ -98,10 +98,10 @@ module Query::Modules::Conditions
     return if ids.empty?
 
     if ids.size == 1
-      @where << "#{table_col} = '#{ids.first}'"
+      where << "#{table_col} = '#{ids.first}'"
     else
       set = clean_id_set(ids) # this produces a joined string!
-      @where << "#{table_col} IN (#{set})"
+      where << "#{table_col} IN (#{set})"
     end
     add_joins(*)
   end
@@ -110,7 +110,7 @@ module Query::Modules::Conditions
     return if ids.empty?
 
     set = clean_id_set(ids)
-    @where << "#{col} NOT IN (#{set})"
+    where << "#{col} NOT IN (#{set})"
     add_joins(*)
   end
 
@@ -119,7 +119,7 @@ module Query::Modules::Conditions
 
     sql = subquery_from_params(param).sql
     table ||= subquery_table(param)
-    @where << "#{table}.#{col} IN (#{sql})"
+    where << "#{table}.#{col} IN (#{sql})"
     add_joins(*)
   end
 
@@ -137,6 +137,6 @@ module Query::Modules::Conditions
   end
 
   def force_empty_results
-    @where = ["FALSE"]
+    self.where = ["FALSE"]
   end
 end

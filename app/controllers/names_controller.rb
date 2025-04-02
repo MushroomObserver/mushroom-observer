@@ -30,8 +30,8 @@ class NamesController < ApplicationController
     return if handle_advanced_search_invalid_q_param?
 
     query = find_query(:Name)
-    # Have to check this here because we're not running the query yet.
-    raise(:runtime_no_conditions.l) unless query.params.any?
+    # Would have to check this here because we're not running the query yet.
+    raise(:runtime_no_conditions.l) unless query&.params&.any?
 
     [query, {}]
   rescue StandardError => e
@@ -124,7 +124,7 @@ class NamesController < ApplicationController
 
   def index_display_opts(opts, _query)
     {
-      letters: "names.sort_name",
+      letters: true,
       num_per_page: (/^[a-z]/i.match?(params[:letter].to_s) ? 500 : 50),
       include: [:description]
     }.merge(opts)
@@ -233,7 +233,7 @@ class NamesController < ApplicationController
     # show query to include_immediate_subtaxa (would need to write a complicated
     # scope, but it's outlined in app/classes/query/modules/lookup_names.rb).
     # Could select @name from those results using the original name.id, then
-    # select@first_child from the rest.
+    # select @first_child from the rest.
     @first_child = @children_query.results(limit: 1).first
 
     # Possible query: Synonyms of name? Incompatible with first query.
@@ -253,7 +253,7 @@ class NamesController < ApplicationController
         :Observation, names: { lookup: @name.id,
                                include_subtaxa: true,
                                exclude_original_names: true,
-                               by: :confidence }
+                               order_by: :confidence }
       )
       # Determine if relevant and count the results of running the query if so.
       # Don't run if there aren't any children.

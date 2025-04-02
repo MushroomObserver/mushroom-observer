@@ -23,18 +23,18 @@
 #
 #    # In your Rails controller:
 #    def index
-#      @pages = MOPaginator.new(
+#      @pagination_data = PaginationData.new(
 #        :number_arg   => :page,
 #        :number       => params[:page],
 #        :num_per_page => 100,
 #      )
 #      query = Query.lookup(:Model)
-#      @results = query.paginate(@pages)
+#      @results = query.paginate(@pagination_data)
 #    end
 #
 #    # This paginates by letter and number:
 #    def index_by_letter
-#      @pages = MOPaginator.new(
+#      @pagination_data = PaginationData.new(
 #        :letter_arg   => :letter,
 #        :number_arg   => :page,
 #        :letter       => params[:letter],
@@ -42,18 +42,18 @@
 #        :num_per_page => 100,
 #      )
 #      query = Query.lookup(:Model)
-#      @results = query.paginate(@pages)
+#      @results = query.paginate(@pagination_data)
 #    end
 #
 #    # This is how you might use it without Query:
 #    def custom_index
 #      @results = Model.find(...)
-#      @pages.num_total = @results.length
-#      @subset = @results[@pages.from..@pages.to]
+#      @pagination_data.num_total = @results.length
+#      @subset = @results[@pagination_data.from..@pagination_data.to]
 #    end
 #
 #    # Use the same code in your view template for either case:
-#    <%= paginate_block(@pages) do %>
+#    <%= pagination_nav(@pagination_data) do %>
 #      <% for object in @results
 #        <%= link_to(object.name, action: "show_object", id: object.id) %><br/>
 #      <% end %>
@@ -75,7 +75,7 @@
 #
 #  == Instance Methods
 #
-#  show_index::     Set page number so that it's showing the given result.
+#  index_at::       Set page number so that it's showing the given result.
 #  num_pages::      Calculate number of pages of results available.
 #  from::           Index of the first result in selected page.
 #  to::             Index of the last result in selected page.
@@ -83,7 +83,7 @@
 #
 ################################################################################
 #
-class MOPaginator
+class PaginationData
   attr_accessor :letter_arg    # Name of parameter to use for letter (if any).
   attr_accessor :number_arg    # Name of parameter to use for page number.
   attr_reader :letter        # Current letter (if any).
@@ -188,9 +188,9 @@ class MOPaginator
     from..to
   end
 
-  # Set page number so that it shows the given result (given by index, with
-  # zero being the first result).
-  def show_index(index)
+  # Set page number so that it shows the given result
+  # (given by index, with zero being the first result).
+  def index_at(index)
     self.number = (index.to_f / num_per_page).floor + 1
   end
 end

@@ -8,7 +8,11 @@ class Query::Names < Query::Base
   include Query::Initializers::Filters
 
   def model
-    Name
+    @model ||= Name
+  end
+
+  def list_by
+    @list_by ||= Name[:sort_name]
   end
 
   def self.parameter_declarations # rubocop:disable Metrics/MethodLength
@@ -54,6 +58,11 @@ class Query::Names < Query::Base
       merge(advanced_search_parameter_declarations)
   end
 
+  # Declare the parameters as attributes of type `query_param`
+  parameter_declarations.each_key do |param_name|
+    attribute param_name, :query_param
+  end
+
   def initialize_flavor
     initialize_name_basic_parameters
     initialize_name_record_parameters
@@ -84,8 +93,12 @@ class Query::Names < Query::Base
 
   # Much simpler form for non-observation-based name queries.
   def initialize_related_names_parameters
-    ids = lookup_names_by_name(params.dig(:names, :lookup),
-                               related_names_parameters)
+    names = params.dig(:names, :lookup)
+    return if names.blank?
+
+    ids = lookup_names_by_name(names, related_names_parameters)
+    return force_empty_results if ids.blank?
+
     add_association_condition("names.id", ids)
   end
 
@@ -165,8 +178,8 @@ class Query::Names < Query::Base
 
   def initialize_misspellings_parameter
     val = params[:misspellings] || :no
-    @where << "names.correct_spelling_id IS NULL"     if val == :no
-    @where << "names.correct_spelling_id IS NOT NULL" if val == :only
+    where << "names.correct_spelling_id IS NULL"     if val == :no
+    where << "names.correct_spelling_id IS NOT NULL" if val == :only
   end
 
   def initialize_is_deprecated_parameter
@@ -180,7 +193,7 @@ class Query::Names < Query::Base
     return if vals.empty?
 
     ranks = parse_rank_parameter(vals)
-    @where << "names.`rank` IN (#{ranks.join(",")})"
+    where << "names.`rank` IN (#{ranks.join(",")})"
     add_joins(*)
   end
 
@@ -237,10 +250,10 @@ class Query::Names < Query::Base
     return unless params[:needs_description]
 
     add_join(:observations)
-    @where << "names.description_id IS NULL"
-    @selects = "DISTINCT names.id, count(observations.name_id)"
-    @group = "observations.name_id"
-    @order = "count(observations.name_id) DESC"
+    where << "names.description_id IS NULL"
+    self.selects = "DISTINCT names.id, count(observations.name_id)"
+    self.group = "observations.name_id"
+    self.order = "count(observations.name_id) DESC"
   end
 
   def add_has_default_description_condition

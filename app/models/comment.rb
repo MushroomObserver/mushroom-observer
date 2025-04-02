@@ -60,14 +60,8 @@
 #
 #  ==== Scopes
 #
-#  created_on("yyyymmdd")
-#  created_after("yyyymmdd")
-#  created_before("yyyymmdd")
-#  created_between(start, end)
-#  updated_on("yyyymmdd")
-#  updated_after("yyyymmdd")
-#  updated_before("yyyymmdd")
-#  updated_between(start, end)
+#  created_at("yyyy-mm-dd", "yyyy-mm-dd")
+#  updated_at("yyyy-mm-dd", "yyyy-mm-dd")
 #  by_user(user)
 #  for_user(user)
 #  target(target)
@@ -139,8 +133,8 @@ class Comment < AbstractModel
   after_create :notify_users
   after_create :oil_and_water
 
-  scope :index_order,
-        -> { order(created_at: :desc, id: :desc) }
+  scope :order_by_default,
+        -> { order_by(::Query::Comments.default_order) }
 
   # This scope starts with a `where`, and chains subsequent `where` clauses
   # with `or`. So, rather than separately assembling `target_ids`, that would
@@ -168,9 +162,23 @@ class Comment < AbstractModel
       scope ? scope.or(scope2) : scope2
     end
   }
-  scope :target,
-        ->(target) { where(target: target) }
+  # Pass either { type:, id: } or a commentable model instance.
+  # Scope makes sure instance exists.
+  scope :target, lambda { |target|
+    if target.is_a?(Hash) && target[:type] && target[:id]
+      type = target[:type]
+      return none unless (model = Comment.safe_model_from_name(type))
 
+      target = model.safe_find(target[:id])
+    elsif target.is_a?(AbstractModel)
+      type = target.class.name
+      return none unless Comment.safe_model_from_name(type)
+    end
+
+    where(target:)
+  }
+  scope :types,
+        ->(types) { where(target_type: types) }
   scope :summary_has,
         ->(phrase) { search_columns(Comment[:summary], phrase) }
   scope :content_has,

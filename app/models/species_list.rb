@@ -99,8 +99,8 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
 
   attr_accessor :data
 
-  scope :index_order,
-        -> { order(title: :asc, id: :desc) }
+  scope :order_by_default,
+        -> { order_by(::Query::SpeciesLists.default_order) }
 
   scope :title_has,
         ->(phrase) { search_columns(SpeciesList[:title], phrase) }
@@ -426,9 +426,7 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
     "#{notes_area_id_prefix}#{part.tr(" ", "_")}"
   end
 
-  def notes_part_id(part)
-    SpeciesList.notes_part_id(part)
-  end
+  delegate :notes_part_id, to: :SpeciesList
 
   # prefix for id of textarea
   def self.notes_area_id_prefix

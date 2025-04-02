@@ -1,10 +1,6 @@
 # frozen_string_literal: true
 
-class Query::CollectionNumbers < Query::Base
-  def model
-    CollectionNumber
-  end
-
+class Query::CollectionNumbers < Query::BaseNew
   def self.parameter_declarations
     super.merge(
       created_at: [:time],
@@ -20,30 +16,20 @@ class Query::CollectionNumbers < Query::Base
     )
   end
 
-  def initialize_flavor
-    add_owner_and_time_stamp_conditions
-    add_id_in_set_condition
-    add_collection_number_conditions
-    initialize_observations_parameter
-    add_pattern_condition
-    super
+  # Declare the parameters as attributes of type `query_param`
+  parameter_declarations.each_key do |param_name|
+    attribute param_name, :query_param
   end
 
-  def add_collection_number_conditions
-    add_exact_match_condition("collection_numbers.name", params[:collectors])
-    add_exact_match_condition("collection_numbers.number", params[:numbers])
-    add_search_condition("collection_numbers.name", params[:collector_has])
-    add_search_condition("collection_numbers.number", params[:number_has])
+  def model
+    @model ||= CollectionNumber
   end
 
-  def search_fields
-    "CONCAT(" \
-      "collection_numbers.name," \
-      "collection_numbers.number" \
-      ")"
+  def alphabetical_by
+    @alphabetical_by ||= CollectionNumber[:name]
   end
 
   def self.default_order
-    "name_and_number"
+    :name_and_number
   end
 end
