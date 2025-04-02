@@ -30,12 +30,9 @@ module Query::ScopeModules::Initialization
   def initialize_scopes
     initialize_parameter_set
     filter_misspellings_for_name_queries
-    send_rss_log_content_filters_to_subqueries
+    apply_rss_log_content_filters
     add_default_order_if_none_specified
   end
-
-  # For transition only
-  def initialize_non_nil_defaults; end
 
   def initialize_parameter_set
     sendable_params.each do |param, val|
@@ -74,51 +71,22 @@ module Query::ScopeModules::Initialization
     @scopes = @scopes.with_correct_spelling
   end
 
-  # In the case of RssLogs, send any content filter params to subqueries.
-  # (Content filters may add params to RssLog queries that RssLog scopes
-  # can't handle, because they're intended for one or more related models.)
-  # Some params may go into more than one subquery if >1 `type` requested.
-  def send_rss_log_content_filters_to_subqueries
-    return if model != RssLog || !content_filters_present
+  ##############################################################################
 
-    rss_logs_requested_filterable_types.each do |model|
-      subquery_params = content_filter_subquery_params(model)
-      if subquery_params.present?
-        @scopes = @scopes.send(:"#{model.name.downcase}_query",
-                               **subquery_params)
-      end
-    end
+  # In the case of RssLogs with content filters, we handle building the scope
+  # in Query, because it's the only place where we know which "types" of
+  # log were requested, and because one content filter may apply to two types.
+  def apply_rss_log_content_filters
+    return unless model == RssLog && active_filters.present?
+
+    @scopes = @scopes.content_filters(params)
   end
 
-  # Current types requested on the RssLog page that can have content filters
-  # applied. Defaults to :all.
-  def rss_logs_requested_filterable_types
-    types = [:observation, :name, :location]
-    active_types = case params[:type]
-                   when nil, "", :all, "all"
-                     types
-                   when Array
-                     params[:type]
-                   when String
-                     params[:type].split
-                   end
-    active_types.map { |type| type.to_s.camelize.constantize }
+  def active_filters
+    @active_filters ||= params.slice(*content_filter_parameters.keys).compact
   end
 
-  # Use Query::Filter.by_model to find any filters relevant to a model.
-  def content_filter_subquery_params(model)
-    Query::Filter.by_model(model).
-      each_with_object({}) do |fltr, subquery_params|
-        next if (val = params[fltr.sym]).to_s == ""
-
-        subquery_params[fltr.sym] = val
-      end
-  end
-
-  def content_filters_present
-    @content_filters_present ||=
-      params.slice(*content_filter_parameters.keys).compact.present?
-  end
+  ##############################################################################
 
   def add_default_order_if_none_specified
     return if params[:order_by].present?
