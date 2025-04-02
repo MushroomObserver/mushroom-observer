@@ -7,9 +7,9 @@ class Query::BaseNew
   include ActiveModel::Validations::Callbacks
 
   include Query::Modules::ClassMethods
-  include Query::ScopeModules::ResultAccessors
   include Query::ScopeModules::Initialization
-  include Query::ScopeModules::SequenceOperators
+  include Query::ScopeModules::Results
+  include Query::ScopeModules::Sequence
   include Query::Modules::Validation
 
   validates_with Query::Modules::Validator
