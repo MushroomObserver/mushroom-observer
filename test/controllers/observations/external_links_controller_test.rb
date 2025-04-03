@@ -9,7 +9,7 @@ module Observations
       obs  = observations(:agaricus_campestris_obs) # owned by rolf
       obs2 = observations(:agaricus_campestrus_obs) # owned by rolf
       site = ExternalSite.first
-      url  = "https://valid.url"
+      url  = "#{site.base_url}234236523"
       params = {
         id: obs.id,
         external_link: { external_site_id: site, url: url }
@@ -37,6 +37,7 @@ module Observations
     def test_add_external_link_owner
       obs, _obs2, site, url, params = setup_create_test
       login("rolf")
+      stub_request(:any, /mycoportal/)
       post(:create, params:)
       assert_redirected_to(permanent_observation_path(obs.id))
       assert_flash_success
@@ -52,8 +53,43 @@ module Observations
       login("mary")
       params2 = params.dup
       params2[:external_link][:url] = "bad_url"
+      stub_request(:any, /bad_url/) # be sure it errors regardless of response
       post(:create, params: params2)
       assert_flash_error
+    end
+
+    # bad url
+    def test_add_external_link_404_response
+      _obs, _obs2, _site, _url, params = setup_create_test
+      login("mary")
+      params2 = params.dup
+      params2[:external_link][:url] = "bad_url"
+      stub_request(:any, /bad_url/).
+        to_return(status: 404, body: "", headers: {})
+      post(:create, params: params2)
+      assert_flash_error
+    end
+
+    def test_add_external_link_good_url_no_scheme
+      _obs, _obs2, _site, url, params = setup_create_test
+      login("mary")
+      params2 = params.dup
+      params2[:external_link][:url] = url.delete_prefix("https://")
+      stub_request(:any, /mycoportal/)
+      post(:create, params: params2)
+      assert_flash_success
+      assert_equal(url, ExternalLink.last.url)
+    end
+
+    def test_add_external_link_good_url_no_www
+      _obs, _obs2, _site, url, params = setup_create_test
+      login("mary")
+      params2 = params.dup
+      params2[:external_link][:url] = url.delete_prefix("https://www.")
+      stub_request(:any, /mycoportal/)
+      post(:create, params: params2)
+      assert_flash_success
+      assert_equal(url, ExternalLink.last.url)
     end
 
     # mary can because she's a member of the external site's project
@@ -62,6 +98,7 @@ module Observations
       login("mary")
       params2 = params.dup
       params2[:id] = obs2.id
+      stub_request(:any, /mycoportal/)
       post(:create, params: params2)
       assert_redirected_to(permanent_observation_path(obs2.id))
       assert_flash_success
@@ -74,34 +111,39 @@ module Observations
     def test_edit_external_link
       # obs owned by rolf, mary created link and is member of site's project
       link    = ExternalLink.first
-      new_url = "http://another.valid.url"
+      new_url = "#{link.external_site.base_url}different_number"
       params = {
         id: link.id,
         external_link: { url: new_url }
       }
 
       # not logged in
+      stub_request(:any, /inaturalist/)
       put(:update, params:)
       assert_redirected_to(new_account_login_path)
 
       # dick doesn't have permission
       login("dick")
+      stub_request(:any, /inaturalist/)
       put(:update, params:)
       assert_flash_error
 
       # mary can
       login("mary")
+      stub_request(:any, /inaturalist/)
       put(:update, params:)
       assert_equal(new_url, link.reload.url)
       assert_flash_success
 
       # rolf can, too
       login("rolf")
+      stub_request(:any, /inaturalist/)
       put(:update, params:)
       assert_flash_success
 
       # bad url
       params[:external_link][:url] = "bad_url"
+      stub_request(:any, /bad_url/)
       put(:update, params:)
       assert_flash_error
     end
