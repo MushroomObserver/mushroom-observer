@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_03_02_213447) do
+ActiveRecord::Schema[7.2].define(version: 2025_04_03_174427) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -30,7 +30,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_03_02_213447) do
     t.datetime "updated_at", precision: nil, null: false
   end
 
-  create_table "banners", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "banners", charset: "utf8mb3", force: :cascade do |t|
     t.text "message"
     t.integer "version"
     t.datetime "created_at", null: false
@@ -90,6 +90,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_03_02_213447) do
   create_table "external_sites", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.string "name", limit: 100
     t.integer "project_id"
+    t.string "base_url", null: false
   end
 
   create_table "field_slip_job_trackers", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -559,7 +560,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_03_02_213447) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "project_aliases", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "project_aliases", charset: "utf8mb3", force: :cascade do |t|
     t.integer "project_id", null: false
     t.integer "target_id", null: false
     t.string "target_type", null: false
@@ -917,13 +918,11 @@ ActiveRecord::Schema[7.2].define(version: 2025_03_02_213447) do
     t.text "alert"
     t.boolean "email_locations_admin", default: false
     t.boolean "email_names_admin", default: false
-    t.integer "thumbnail_size", default: 1
     t.integer "image_size", default: 5
     t.string "default_rss_type", limit: 40, default: "all"
     t.integer "votes_anonymous", default: 1
     t.integer "location_format", default: 1
     t.datetime "last_activity", precision: nil
-    t.integer "hide_authors", default: 1, null: false
     t.boolean "thumbnail_maps", default: true, null: false
     t.string "auth_code", limit: 40
     t.integer "keep_filenames", default: 1, null: false
@@ -937,6 +936,8 @@ ActiveRecord::Schema[7.2].define(version: 2025_03_02_213447) do
     t.boolean "no_emails", default: false, null: false
     t.string "inat_username"
     t.integer "original_image_quota", default: 0
+    t.integer "hide_authors"
+    t.integer "thumbnail_size"
     t.index ["login"], name: "login_index"
   end
 
