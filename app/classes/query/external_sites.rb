@@ -1,10 +1,6 @@
 # frozen_string_literal: true
 
-class Query::ExternalSites < Query::Base
-  def model
-    @model ||= ExternalSite
-  end
-
+class Query::ExternalSites < Query::BaseNew
   def self.parameter_declarations
     super.merge(
       id_in_set: [ExternalSite],
@@ -17,13 +13,11 @@ class Query::ExternalSites < Query::Base
     attribute param_name, :query_param
   end
 
-  def initialize_flavor
-    add_id_in_set_condition
-    add_search_condition("external_sites.name", params[:name_has])
-    super
+  def model
+    @model ||= ExternalSite
   end
 
   def self.default_order
-    "name"
+    :name
   end
 end
