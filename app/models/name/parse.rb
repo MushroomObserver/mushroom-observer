@@ -363,13 +363,8 @@ module Name::Parse
   def parse_below_genus(str, deprecated, rank, pattern)
     results = nil
     if (match = pattern.match(str))
-      index = if match[1].nil? || match[1][-1] == " "
-                1
-              else
-                0
-              end
-      name = match[index + 1].tr('"', "'")
-      author = match[index + 2].to_s
+      name = match[2].tr('"', "'")
+      author = match[3].to_s
       name = standardize_sp_nov_variants(name) if rank == "Species"
       (name, author, rank) = fix_autonym(name, author, rank)
       name = standardize_name(name)
@@ -432,14 +427,12 @@ module Name::Parse
   # Standardize various ways of writing sp. nov.  Convert to: Amanita sp. "T44"
   def standardize_sp_nov_variants(name)
     names = split_name(name)
-    if names.length == 2
-      split_name(name)
-      names[1].sub!(/^'sp-/i, "sp. '")
-      names[1].sub!(/^'/, "sp. '")
-      names.join(" ").strip
-    else
-      name
-    end
+    return name if names.length != 2
+
+    split_name(name)
+    names[1].sub!(/^'sp-/i, "sp. '")
+    names[1].sub!(/^'/, "sp. '")
+    names.join(" ").strip
   end
 
   def split_name(name)
@@ -538,9 +531,9 @@ module Name::Parse
 
   def standardize_subrank(rank)
     match = RANK_START_MATCHER.match(rank)
-    return STANDARD_SECONDARY_RANKS[match[1].downcase.to_sym] if match
+    return rank unless match
 
-    rank
+    STANDARD_SECONDARY_RANKS[match[1].downcase.to_sym]
   end
 
   def standardize_author(str)
