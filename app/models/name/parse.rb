@@ -428,11 +428,12 @@ module Name::Parse
 
   # Standardize various ways of writing sp. nov.  Convert to: Amanita sp. "T44"
   def standardize_sp_nov_variants(name)
+    name.gsub!(/"/, "'")
     names = split_name(name)
     if names.length == 2
       split_name(name)
-      names[1].sub!(/^"sp-/i, 'sp. "')
-      names[1].sub!(/^"/, 'sp. "')
+      names[1].sub!(/^'sp-/i, "sp. '")
+      names[1].sub!(/^'/, "sp. '")
       names.join(" ").strip
     else
       name
@@ -513,7 +514,7 @@ module Name::Parse
 
   def standardize_name(name)
     subnames = split_name(name)
-    subnames[0] = "Gen. #{subnames[0]}" if subnames[0][0] == '"'
+    subnames[0] = "Gen. #{subnames[0]}" if subnames[0][0] == "'"
     1.upto(subnames.length - 1) do |i|
       subnames[i] = standardize_subname(subnames[i])
     end
@@ -527,7 +528,7 @@ module Name::Parse
 
       rank = standardize_subrank(match[1])
       term = match[2]
-      term = "\"#{term}\"" if rank == "sp." && term[0] != '"'
+      term = "'#{term}'" if rank == "sp." && term[0] != "'"
       return "#{rank} #{term}" if match
     end
     subname
@@ -590,11 +591,10 @@ module Name::Parse
     str = format_name(name, :deprecated).
           sub(/_+$/, " "). # put genus at the top
           gsub(/_+/, "").
-          # sub(/ "(sp[-.])/, ' {\1'). # put "sp-1" at end
           sub(/ sp. /, " "). # ignore sp.
           sub(/^[A-Z][a-z]+\. /, ""). # ignore leading ranks like Gen.
-          gsub(/ "([^"]*")/, &:downcase). # downcase prov epithets
-          delete('"'). # Now ignore quotes
+          gsub(/ '([^']*')/, &:downcase). # downcase prov epithets
+          delete("'"). # Now ignore quotes
           sub(" subg. ", "  {1subg.  ").
           sub(" sect. ",    "  {2sect.  ").
           sub(" subsect. ", "  {3subsect.  ").

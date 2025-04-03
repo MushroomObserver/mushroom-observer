@@ -781,12 +781,12 @@ class NameTest < UnitTestCase
   def test_name_parse_11
     do_name_parse_test(
       'Anaptychia "leucomelaena" auct.',
-      text_name: 'Anaptychia sp. "leucomelaena"',
-      real_text_name: 'Anaptychia sp. "leucomelaena"',
-      search_name: 'Anaptychia sp. "leucomelaena" auct.',
-      real_search_name: 'Anaptychia sp. "leucomelaena" auct.',
+      text_name: "Anaptychia sp. 'leucomelaena'",
+      real_text_name: "Anaptychia sp. 'leucomelaena'",
+      search_name: "Anaptychia sp. 'leucomelaena' auct.",
+      real_search_name: "Anaptychia sp. 'leucomelaena' auct.",
       sort_name: "Anaptychia leucomelaena  auct.",
-      display_name: '**__Anaptychia__** sp. **__"leucomelaena"__** auct.',
+      display_name: "**__Anaptychia__** sp. **__'leucomelaena'__** auct.",
       parent_name: "Anaptychia",
       rank: "Species",
       author: "auct.",
