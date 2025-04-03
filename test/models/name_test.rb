@@ -717,12 +717,12 @@ class NameTest < UnitTestCase
   def test_name_parse_8
     do_name_parse_test(
       '"Toninia"',
-      text_name: 'Gen. "Toninia"',
-      real_text_name: 'Gen. "Toninia"',
-      search_name: 'Gen. "Toninia"',
-      real_search_name: 'Gen. "Toninia"',
-      sort_name: "Toninia",
-      display_name: 'Gen. **__"Toninia"__**',
+      text_name: "Gen. 'Toninia'",
+      real_text_name: "Gen. 'Toninia'",
+      search_name: "Gen. 'Toninia'",
+      real_search_name: "Gen. 'Toninia'",
+      sort_name: 'Toninia',
+      display_name: "Gen. **__'Toninia'__**",
       parent_name: nil,
       rank: "Genus",
       author: "",
@@ -732,13 +732,13 @@ class NameTest < UnitTestCase
 
   def test_name_parse_9
     do_name_parse_test(
-      '"Toninia" sp.',
-      text_name: 'Gen. "Toninia"',
-      real_text_name: 'Gen. "Toninia"',
-      search_name: 'Gen. "Toninia"',
-      real_search_name: 'Gen. "Toninia"',
-      sort_name: "Toninia",
-      display_name: 'Gen. **__"Toninia"__**',
+      "'Toninia' sp.",
+      text_name: "Gen. 'Toninia'",
+      real_text_name: "Gen. 'Toninia'",
+      search_name: "Gen. 'Toninia'",
+      real_search_name: "Gen. 'Toninia'",
+      sort_name: 'Toninia',
+      display_name: "Gen. **__'Toninia'__**",
       parent_name: nil,
       rank: "Genus",
       author: "",
@@ -748,14 +748,14 @@ class NameTest < UnitTestCase
 
   def test_name_parse_10
     do_name_parse_test(
-      '"Toninia" squalescens',
-      text_name: 'Gen. "Toninia" squalescens',
-      real_text_name: 'Gen. "Toninia" squalescens',
-      search_name: 'Gen. "Toninia" squalescens',
-      real_search_name: 'Gen. "Toninia" squalescens',
+      "'Toninia' squalescens",
+      text_name: "Gen. 'Toninia' squalescens",
+      real_text_name: "Gen. 'Toninia' squalescens",
+      search_name: "Gen. 'Toninia' squalescens",
+      real_search_name: "Gen. 'Toninia' squalescens",
       sort_name: "Toninia squalescens",
-      display_name: 'Gen. **__"Toninia"__** **__squalescens__**',
-      parent_name: 'Gen. "Toninia"',
+      display_name: "Gen. **__'Toninia'__** **__squalescens__**",
+      parent_name: "Gen. 'Toninia'",
       rank: "Species",
       author: "",
       deprecated: false
@@ -764,14 +764,14 @@ class NameTest < UnitTestCase
 
   def test_name_parse_prov_genus
     do_name_parse_test(
-      'Gen. "Toninia" squalescens',
-      text_name: 'Gen. "Toninia" squalescens',
-      real_text_name: 'Gen. "Toninia" squalescens',
-      search_name: 'Gen. "Toninia" squalescens',
-      real_search_name: 'Gen. "Toninia" squalescens',
+      "Gen. 'Toninia' squalescens",
+      text_name: "Gen. 'Toninia' squalescens",
+      real_text_name: "Gen. 'Toninia' squalescens",
+      search_name: "Gen. 'Toninia' squalescens",
+      real_search_name: "Gen. 'Toninia' squalescens",
       sort_name: "Toninia squalescens",
-      display_name: 'Gen. **__"Toninia"__** **__squalescens__**',
-      parent_name: 'Gen. "Toninia"',
+      display_name: "Gen. **__'Toninia'__** **__squalescens__**",
+      parent_name: "Gen. 'Toninia'",
       rank: "Species",
       author: "",
       deprecated: false

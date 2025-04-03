@@ -316,16 +316,17 @@ module Name::Parse
   end
 
   def standardize_text_name(name, rank)
-    result = name
-    if name[0].starts_with?('"')
+    result = name.gsub('"', "'")
+    if result[0] == "'"
       prefix = PROV_RANKS.key(rank)
-      result = "#{prefix} #{name}" if prefix
+      result = "#{prefix} #{result}" if prefix
     end
     result.tr("ë", "e")
   end
 
   def parse_genus_or_up(str, deprecated = false, rank = "Genus")
     results = nil
+    # debugger if rank == "Genus"
     if (match = GENUS_OR_UP_PAT.match(str))
       prov_rank = match[1]
       name = match[2]
@@ -359,7 +360,6 @@ module Name::Parse
 
   def parse_below_genus(str, deprecated, rank, pattern)
     results = nil
-    # debugger if rank == "Species"
     if (match = pattern.match(str))
       index = if match[1].nil? || match[1][-1] == " "
                 1
