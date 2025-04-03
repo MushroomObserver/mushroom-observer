@@ -105,11 +105,11 @@ module Name::Parse
   ANY_RANK_ABBR   = / #{ANY_SUBG_ABBR} | #{SP_ABBR} | #{ANY_SSP_ABBR} /x
 
   UPPER_WORD = /
-                [A-Z][a-zë-]*[a-zë] | "[A-Z][a-zë\-.]*[a-zë]"
+                [A-Z][a-zë-]*[a-zë] | '[A-Z][a-zë\-.]*[a-zë]'
   /x
   LOWER_WORD = /
     (?!(?:sensu|van|de)\b) [a-z][a-zë-]*[a-zë] |
-    (?:sp\. \s)?"[a-z][\wë\-.]*[\wë]" /x
+    (?:sp\. \s)?['"][a-z][\wë\-.]*[\wë]['"] /x
   BINOMIAL   = / #{UPPER_WORD} \s #{LOWER_WORD} /x
   LOWER_WORD_OR_SP_NOV = / (?! sp\s|sp$|species) #{LOWER_WORD} |
                            sp\.\s\S*\d\S* /x
@@ -122,7 +122,7 @@ module Name::Parse
     #{ANY_AUTHOR_ABBR} |
     van\s | d[eu]\s |
     [A-ZÀÁÂÃÄÅÆÇĐÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞČŚŠ(] |
-    "[^a-z\s]
+    '[^a-z\s]
   /x
 
   # AUTHOR_PAT is separate from, and can't include GENUS_OR_UP_TAXON, etc.
@@ -131,17 +131,17 @@ module Name::Parse
   # Then the other parsers have a much easier job.
   AUTHOR_PAT =
     /^
-      ( "?
+      ( ['"]?
         #{UPPER_WORD}
         (?:
             # >= 1 of (rank Epithet)
             \s     #{ANY_SUBG_ABBR} \s #{UPPER_WORD}
-            (?: \s #{ANY_SUBG_ABBR} \s #{UPPER_WORD} )* "?
+            (?: \s #{ANY_SUBG_ABBR} \s #{UPPER_WORD} )* ['"]?
           |
             \s (?! #{AUTHOR_START} | #{ANY_SUBG_ABBR} ) #{LOWER_WORD}
-            (?: \s #{ANY_SSP_ABBR} \s #{LOWER_WORD} )* "?
+            (?: \s #{ANY_SSP_ABBR} \s #{LOWER_WORD} )* ['"]?
           |
-            "? \s #{SP_ABBR}
+            ['"]? \s #{SP_ABBR}
         )?
       )
       ( \s (?! #{ANY_NAME_ABBR} \s ) #{AUTHOR_START}.* )
@@ -153,18 +153,18 @@ module Name::Parse
   PROV_RANK_PREFIX = /[A-Z][a-z]+\.\ /x
 
   # Taxa without authors (for use by GROUP PAT)
-  GENUS_OR_UP_TAXON = /(#{PROV_RANK_PREFIX})?("? (?:Fossil-)? #{UPPER_WORD} "?) (?: \s #{SP_ABBR} )?/x # ([A-Z][a-z]+\. )?
-  SUBGENUS_TAXON    = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD}) "?)/x
-  SECTION_TAXON     = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
-                       (?: #{SECT_ABBR} \s #{UPPER_WORD}) "?)/x
-  SUBSECTION_TAXON  = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
+  GENUS_OR_UP_TAXON = /(#{PROV_RANK_PREFIX})?(['"]? (?:Fossil-)? #{UPPER_WORD} ['"]?) (?: \s #{SP_ABBR} )?/x # ([A-Z][a-z]+\. )?
+  SUBGENUS_TAXON    = /(['"]? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD}) ['"]?)/x
+  SECTION_TAXON     = /(['"]? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{SECT_ABBR} \s #{UPPER_WORD}) ['"]?)/x
+  SUBSECTION_TAXON  = /(['"]? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
                        (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)?
-                       (?: #{SUBSECT_ABBR} \s #{UPPER_WORD}) "?)/x
-  STIRPS_TAXON      = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{SUBSECT_ABBR} \s #{UPPER_WORD}) ['"]?)/x
+  STIRPS_TAXON      = /(['"]? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
                        (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)?
                        (?: #{SUBSECT_ABBR} \s #{UPPER_WORD} \s)?
-                       (?: #{STIRPS_ABBR} \s #{UPPER_WORD}) "?)/x
-  SPECIES_TAXON     = /(#{PROV_RANK_PREFIX})?("? #{UPPER_WORD} \s #{LOWER_WORD_OR_SP_NOV} "?)/x
+                       (?: #{STIRPS_ABBR} \s #{UPPER_WORD}) ['"]?)/x
+  SPECIES_TAXON     = /(#{PROV_RANK_PREFIX})?(['"]? #{UPPER_WORD} \s #{LOWER_WORD_OR_SP_NOV} ['"]?)/x
   # rubocop:enable Layout/LineLength
 
   GENUS_OR_UP_PAT = /^ #{GENUS_OR_UP_TAXON} (\s #{AUTHOR_START}.*)? $/x
@@ -173,16 +173,16 @@ module Name::Parse
   SUBSECTION_PAT  = /^ #{SUBSECTION_TAXON}  (\s #{AUTHOR_START}.*)? $/x
   STIRPS_PAT      = /^ #{STIRPS_TAXON}      (\s #{AUTHOR_START}.*)? $/x
   SPECIES_PAT     = /^ #{SPECIES_TAXON}     (\s #{AUTHOR_START}.*)? $/x
-  SUBSPECIES_PAT  = /^ ("? #{BINOMIAL} (?: \s #{SSP_ABBR} \s #{LOWER_WORD}) "?)
+  SUBSPECIES_PAT  = /^ (['"]? #{BINOMIAL} (?: \s #{SSP_ABBR} \s #{LOWER_WORD}) ['"]?)
                        (\s #{AUTHOR_START}.*)?
                    $/x
-  VARIETY_PAT     = /^ ("? #{BINOMIAL} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
-                         (?: \s #{VAR_ABBR} \s #{LOWER_WORD}) "?)
+  VARIETY_PAT     = /^ (['"]? #{BINOMIAL} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
+                         (?: \s #{VAR_ABBR} \s #{LOWER_WORD}) ['"]?)
                        (\s #{AUTHOR_START}.*)?
                    $/x
-  FORM_PAT        = /^ ("? #{BINOMIAL} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
+  FORM_PAT        = /^ (['"]? #{BINOMIAL} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
                          (?: \s #{VAR_ABBR} \s #{LOWER_WORD})?
-                         (?: \s #{F_ABBR} \s #{LOWER_WORD}) "?)
+                         (?: \s #{F_ABBR} \s #{LOWER_WORD}) ['"]?)
                        (\s #{AUTHOR_START}.*)?
                    $/x
 
@@ -193,12 +193,12 @@ module Name::Parse
                         #{SUBSECTION_TAXON}  |
                         #{STIRPS_TAXON}      |
                         #{SPECIES_TAXON}     |
-                        (?: "? #{UPPER_WORD} # infra-species taxa
+                        (?: ['"]? #{UPPER_WORD} # infra-species taxa
                           (?: \s #{LOWER_WORD}
                             (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
                             (?: \s #{VAR_ABBR} \s #{LOWER_WORD})?
                             (?: \s #{F_ABBR}   \s #{LOWER_WORD})?
-                          )? "?
+                          )? ['"]?
                         )
                       )
                       (

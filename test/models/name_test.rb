@@ -989,13 +989,13 @@ class NameTest < UnitTestCase
 
   def test_name_parse_21
     do_name_parse_test(
-      "Amanita “quoted”",
-      text_name: 'Amanita sp. "quoted"',
-      real_text_name: 'Amanita sp. "quoted"',
-      search_name: 'Amanita sp. "quoted"',
-      real_search_name: 'Amanita sp. "quoted"',
+      "Amanita 'quoted'",
+      text_name: "Amanita sp. 'quoted'",
+      real_text_name: "Amanita sp. 'quoted'",
+      search_name: "Amanita sp. 'quoted'",
+      real_search_name: "Amanita sp. 'quoted'",
       sort_name: "Amanita quoted",
-      display_name: '**__Amanita__** sp. **__"quoted"__**',
+      display_name: "**__Amanita__** sp. **__'quoted'__**",
       parent_name: "Amanita",
       rank: "Species",
       author: "",
