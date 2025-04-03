@@ -51,7 +51,6 @@ class FormatURL
     @url = URI.parse(url)
     @base_url = URI.parse(base_url)
     @scheme = scheme
-    @url.scheme = @base_url.scheme || @scheme
     @url_only = @base_url.host.blank?
     @url_exists = url_exists?(@url.to_s)
   end
@@ -85,7 +84,7 @@ class FormatURL
   # Enforce scheme for incoming urls. Guards against scheme missing, which
   # causes `url_exists?` to return false
   def add_enforced_scheme_if_missing(url, scheme)
-    url = url.delete_prefix("http://").
+    url = url.to_s.delete_prefix("http://").
           delete_prefix("https://").
           delete_prefix("ftp://")
     "#{scheme}://#{url}"
@@ -94,8 +93,12 @@ class FormatURL
   # Goes after any redirect and makes sure we can access the redirected URL
   # Returns false if http code starts with 4 - error on our side.
   # Calls URI.parse(url) again here because we may need to reparse a redirect
-  def url_exists?(url)
+  def url_exists?(url) # rubocop:disable Metrics/AbcSize
+    return false if url.to_s == ""
+
     url = URI.parse(url)
+    return false if url.host.blank?
+
     request = format_request(url)
     path = url.path if url.path.present?
     response = request.request_head(path || "/")
