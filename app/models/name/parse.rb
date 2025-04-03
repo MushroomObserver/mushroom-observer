@@ -105,7 +105,7 @@ module Name::Parse
   ANY_RANK_ABBR   = / #{ANY_SUBG_ABBR} | #{SP_ABBR} | #{ANY_SSP_ABBR} /x
 
   UPPER_WORD = /
-                [A-Z][a-zë-]*[a-zë] | '[A-Z][a-zë\-.]*[a-zë]'
+                [A-Z][a-zë-]*[a-zë] | ['"][A-Z][a-zë\-.]*[a-zë]['"]
   /x
   LOWER_WORD = /
     (?!(?:sensu|van|de)\b) [a-z][a-zë-]*[a-zë] |
@@ -122,7 +122,7 @@ module Name::Parse
     #{ANY_AUTHOR_ABBR} |
     van\s | d[eu]\s |
     [A-ZÀÁÂÃÄÅÆÇĐÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞČŚŠ(] |
-    '[^a-z\s]
+    ['"][^a-z\s]
   /x
 
   # AUTHOR_PAT is separate from, and can't include GENUS_OR_UP_TAXON, etc.
@@ -359,6 +359,7 @@ module Name::Parse
 
   def parse_below_genus(str, deprecated, rank, pattern)
     results = nil
+    # debugger if rank == "Species"
     if (match = pattern.match(str))
       index = if match[1].nil? || match[1][-1] == " "
                 1

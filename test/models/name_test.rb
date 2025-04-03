@@ -796,13 +796,13 @@ class NameTest < UnitTestCase
 
   def test_name_parse_prov_sp
     do_name_parse_test(
-      'Anap sp. "luna" S. Russ crypt. temp.',
-      text_name: 'Anap sp. "luna"',
-      real_text_name: 'Anap sp. "luna"',
-      search_name: 'Anap sp. "luna" S. Russ crypt. temp.',
-      real_search_name: 'Anap sp. "luna" S. Russ crypt. temp.',
+      "Anap sp. 'luna' S. Russ crypt. temp.",
+      text_name: "Anap sp. 'luna'",
+      real_text_name: "Anap sp. 'luna'",
+      search_name: "Anap sp. 'luna' S. Russ crypt. temp.",
+      real_search_name: "Anap sp. 'luna' S. Russ crypt. temp.",
       sort_name: "Anap luna  S. Russ crypt. temp.",
-      display_name: '**__Anap__** sp. **__"luna"__** S. Russ crypt. temp.',
+      display_name: "**__Anap__** sp. **__'luna'__** S. Russ crypt. temp.",
       parent_name: "Anap",
       rank: "Species",
       author: "S. Russ crypt. temp.",
@@ -813,13 +813,13 @@ class NameTest < UnitTestCase
   def test_name_parse_prov_gen
     do_name_parse_test(
       'Gen. "Snap" luna S. Russ crypt. temp.',
-      text_name: 'Gen. "Snap" luna',
-      real_text_name: 'Gen. "Snap" luna',
-      search_name: 'Gen. "Snap" luna S. Russ crypt. temp.',
-      real_search_name: 'Gen. "Snap" luna S. Russ crypt. temp.',
+      text_name: "Gen. 'Snap' luna",
+      real_text_name: "Gen. 'Snap' luna",
+      search_name: "Gen. 'Snap' luna S. Russ crypt. temp.",
+      real_search_name: "Gen. 'Snap' luna S. Russ crypt. temp.",
       sort_name: "Snap luna  S. Russ crypt. temp.",
-      display_name: 'Gen. **__"Snap"__** **__luna__** S. Russ crypt. temp.',
-      parent_name: 'Gen. "Snap"',
+      display_name: "Gen. **__'Snap'__** **__luna__** S. Russ crypt. temp.",
+      parent_name: "Gen. 'Snap'",
       rank: "Species",
       author: "S. Russ crypt. temp.",
       deprecated: false
@@ -828,14 +828,14 @@ class NameTest < UnitTestCase
 
   def test_name_parse_prov_gen_sp
     do_name_parse_test(
-      'Gen. "Snap" sp. "luna" Russ crypt. temp.',
-      text_name: 'Gen. "Snap" sp. "luna"',
-      real_text_name: 'Gen. "Snap" sp. "luna"',
-      search_name: 'Gen. "Snap" sp. "luna" Russ crypt. temp.',
-      real_search_name: 'Gen. "Snap" sp. "luna" Russ crypt. temp.',
+      "Gen. 'Snap' sp. 'luna' Russ crypt. temp.",
+      text_name: "Gen. 'Snap' sp. 'luna'",
+      real_text_name: "Gen. 'Snap' sp. 'luna'",
+      search_name: "Gen. 'Snap' sp. 'luna' Russ crypt. temp.",
+      real_search_name: "Gen. 'Snap' sp. 'luna' Russ crypt. temp.",
       sort_name: "Snap luna  Russ crypt. temp.",
-      display_name: 'Gen. **__"Snap"__** sp. **__"luna"__** Russ crypt. temp.',
-      parent_name: 'Gen. "Snap"',
+      display_name: "Gen. **__'Snap'__** sp. **__'luna'__** Russ crypt. temp.",
+      parent_name: "Gen. 'Snap'",
       rank: "Species",
       author: "Russ crypt. temp.",
       deprecated: false
@@ -1070,13 +1070,13 @@ class NameTest < UnitTestCase
 
   def test_name_parse_27
     do_name_parse_test(
-      'Amanita "sp-S01"',
-      text_name: 'Amanita sp. "S01"',
-      real_text_name: 'Amanita sp. "S01"',
-      search_name: 'Amanita sp. "S01"',
-      real_search_name: 'Amanita sp. "S01"',
+      "Amanita 'sp-S01'",
+      text_name: "Amanita sp. 'S01'",
+      real_text_name: "Amanita sp. 'S01'",
+      search_name: "Amanita sp. 'S01'",
+      real_search_name: "Amanita sp. 'S01'",
       sort_name: "Amanita s01",
-      display_name: '**__Amanita__** sp. **__"S01"__**',
+      display_name: "**__Amanita__** sp. **__'S01'__**",
       parent_name: "Amanita",
       rank: "Species",
       author: "",
@@ -1086,13 +1086,13 @@ class NameTest < UnitTestCase
 
   def test_name_parse_28
     do_name_parse_test(
-      'Amanita "sp-S01" Tulloss',
-      text_name: 'Amanita sp. "S01"',
-      real_text_name: 'Amanita sp. "S01"',
-      search_name: 'Amanita sp. "S01" Tulloss',
-      real_search_name: 'Amanita sp. "S01" Tulloss',
+      "Amanita 'sp-S01' Tulloss",
+      text_name: "Amanita sp. 'S01'",
+      real_text_name: "Amanita sp. 'S01'",
+      search_name: "Amanita sp. 'S01' Tulloss",
+      real_search_name: "Amanita sp. 'S01' Tulloss",
       sort_name: "Amanita s01  Tulloss",
-      display_name: '**__Amanita__** sp. **__"S01"__** Tulloss',
+      display_name: "**__Amanita__** sp. **__'S01'__** Tulloss",
       parent_name: "Amanita",
       rank: "Species",
       author: "Tulloss",
@@ -1152,12 +1152,12 @@ class NameTest < UnitTestCase
   def test_name_parse_33
     do_name_parse_test(
       "Pleurotus sp. T44 Tulloss",
-      text_name: 'Pleurotus sp. "T44"',
-      real_text_name: 'Pleurotus sp. "T44"',
-      search_name: 'Pleurotus sp. "T44" Tulloss',
-      real_search_name: 'Pleurotus sp. "T44" Tulloss',
+      text_name: "Pleurotus sp. 'T44'",
+      real_text_name: "Pleurotus sp. 'T44'",
+      search_name: "Pleurotus sp. 'T44' Tulloss",
+      real_search_name: "Pleurotus sp. 'T44' Tulloss",
       sort_name: "Pleurotus t44  Tulloss",
-      display_name: '**__Pleurotus__** sp. **__"T44"__** Tulloss',
+      display_name: "**__Pleurotus__** sp. **__'T44'__** Tulloss",
       parent_name: "Pleurotus",
       rank: "Species",
       author: "Tulloss",
@@ -1397,12 +1397,12 @@ class NameTest < UnitTestCase
     )
     do_name_parse_test( # species with Tulloss form of sp. nov.
       "Pleurotus sp. T44 group Tulloss",
-      text_name: 'Pleurotus sp. "T44" group',
-      real_text_name: 'Pleurotus sp. "T44" group',
-      search_name: 'Pleurotus sp. "T44" group Tulloss',
-      real_search_name: 'Pleurotus sp. "T44" group Tulloss',
+      text_name: "Pleurotus sp. 'T44' group",
+      real_text_name: "Pleurotus sp. 'T44' group",
+      search_name: "Pleurotus sp. 'T44' group Tulloss",
+      real_search_name: "Pleurotus sp. 'T44' group Tulloss",
       sort_name: "Pleurotus t44   group  Tulloss",
-      display_name: '**__Pleurotus__** sp. **__"T44"__** group Tulloss',
+      display_name: "**__Pleurotus__** sp. **__'T44'__** group Tulloss",
       parent_name: "Pleurotus",
       rank: "Group",
       author: "Tulloss",
