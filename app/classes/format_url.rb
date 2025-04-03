@@ -100,7 +100,7 @@ class FormatURL
   end
 
   def nothing_funny?(url)
-    !url.match?(/[[:space:]]+/)
+    url && !url.match?(/[[:space:]]+/)
   end
 
   def host_and_path_match?
