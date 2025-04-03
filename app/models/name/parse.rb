@@ -173,7 +173,8 @@ module Name::Parse
   SUBSECTION_PAT  = /^ #{SUBSECTION_TAXON}  (\s #{AUTHOR_START}.*)? $/x
   STIRPS_PAT      = /^ #{STIRPS_TAXON}      (\s #{AUTHOR_START}.*)? $/x
   SPECIES_PAT     = /^ #{SPECIES_TAXON}     (\s #{AUTHOR_START}.*)? $/x
-  SUBSPECIES_PAT  = /^ (['"]? #{BINOMIAL} (?: \s #{SSP_ABBR} \s #{LOWER_WORD}) ['"]?)
+  SUBSPECIES_PAT  = /^ (['"]? #{BINOMIAL} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})
+                        ['"]?)
                        (\s #{AUTHOR_START}.*)?
                    $/x
   VARIETY_PAT     = /^ (['"]? #{BINOMIAL} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
@@ -316,7 +317,7 @@ module Name::Parse
   end
 
   def standardize_text_name(name, rank)
-    result = name.gsub('"', "'")
+    result = name.tr('"', "'")
     if result[0] == "'"
       prefix = PROV_RANKS.key(rank)
       result = "#{prefix} #{result}" if prefix
@@ -429,7 +430,7 @@ module Name::Parse
 
   # Standardize various ways of writing sp. nov.  Convert to: Amanita sp. "T44"
   def standardize_sp_nov_variants(name)
-    name.gsub!(/"/, "'")
+    name.tr!('"', "'")
     names = split_name(name)
     if names.length == 2
       split_name(name)

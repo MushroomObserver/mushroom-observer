@@ -933,74 +933,74 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     post(:create, params: params)
     # assert_template(controller: :observations, action: expected_page)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal('Gen. "One"', assigns(:observation).name.text_name)
-    assert_equal('Gen. "One"', assigns(:observation).name.search_name)
+    assert_equal("Gen. 'One'", assigns(:observation).name.text_name)
+    assert_equal("Gen. 'One'", assigns(:observation).name.search_name)
 
-    params[:naming][:name] = '"Two" sp'
-    params[:approved_name] = '"Two" sp'
+    params[:naming][:name] = "'Two' sp"
+    params[:approved_name] = "'Two' sp"
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal('Gen. "Two"', assigns(:observation).name.text_name)
-    assert_equal('Gen. "Two"', assigns(:observation).name.search_name)
+    assert_equal("Gen. 'Two'", assigns(:observation).name.text_name)
+    assert_equal("Gen. 'Two'", assigns(:observation).name.search_name)
 
-    params[:naming][:name] = 'Gen. "Three" sp.'
-    params[:approved_name] = 'Gen. "Three" sp.'
+    params[:naming][:name] = "Gen. 'Three' sp."
+    params[:approved_name] = "Gen. 'Three' sp."
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal('Gen. "Three"', assigns(:observation).name.text_name)
-    assert_equal('Gen. "Three"', assigns(:observation).name.search_name)
+    assert_equal("Gen. 'Three'", assigns(:observation).name.text_name)
+    assert_equal("Gen. 'Three'", assigns(:observation).name.search_name)
 
-    params[:naming][:name] = '"One"'
+    params[:naming][:name] = "'One'"
     params[:approved_name] = nil
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal('Gen. "One"', assigns(:observation).name.text_name)
+    assert_equal("Gen. 'One'", assigns(:observation).name.text_name)
 
-    params[:naming][:name] = '"One" sp'
+    params[:naming][:name] = "'One' sp"
     params[:approved_name] = nil
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal('Gen. "One"', assigns(:observation).name.text_name)
+    assert_equal("Gen. 'One'", assigns(:observation).name.text_name)
 
-    params[:naming][:name] = '"One" sp.'
+    params[:naming][:name] = "'One' sp."
     params[:approved_name] = nil
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal('Gen. "One"', assigns(:observation).name.text_name)
+    assert_equal("Gen. 'One'", assigns(:observation).name.text_name)
 
     # Can we create species under the quoted genus?
-    params[:naming][:name] = '"One" foo'
-    params[:approved_name] = '"One" foo'
+    params[:naming][:name] = "'One' foo"
+    params[:approved_name] = "'One' foo"
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal('Gen. "One" foo', assigns(:observation).name.text_name)
+    assert_equal("Gen. 'One' foo", assigns(:observation).name.text_name)
 
-    params[:naming][:name] = '"One" "bar"'
-    params[:approved_name] = '"One" "bar"'
+    params[:naming][:name] = "'One' 'bar'"
+    params[:approved_name] = "'One' 'bar'"
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal('Gen. "One" sp. "bar"', assigns(:observation).name.text_name)
+    assert_equal("Gen. 'One' sp. 'bar'", assigns(:observation).name.text_name)
 
-    params[:naming][:name] = '"One" Author'
-    params[:approved_name] = '"One" Author'
+    params[:naming][:name] = "'One' Author"
+    params[:approved_name] = "'One' Author"
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal('Gen. "One"', assigns(:observation).name.text_name)
-    assert_equal('Gen. "One" Author', assigns(:observation).name.search_name)
+    assert_equal("Gen. 'One'", assigns(:observation).name.text_name)
+    assert_equal("Gen. 'One' Author", assigns(:observation).name.search_name)
 
-    params[:naming][:name] = '"One" sp Author'
+    params[:naming][:name] = "'One' sp Author"
     params[:approved_name] = nil
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal('Gen. "One"', assigns(:observation).name.text_name)
-    assert_equal('Gen. "One" Author', assigns(:observation).name.search_name)
+    assert_equal("Gen. 'One'", assigns(:observation).name.text_name)
+    assert_equal("Gen. 'One' Author", assigns(:observation).name.search_name)
 
-    params[:naming][:name] = '"One" sp. Author'
+    params[:naming][:name] = "'One' sp. Author"
     params[:approved_name] = nil
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal('Gen. "One"', assigns(:observation).name.text_name)
-    assert_equal('Gen. "One" Author', assigns(:observation).name.search_name)
+    assert_equal("Gen. 'One'", assigns(:observation).name.text_name)
+    assert_equal("Gen. 'One' Author", assigns(:observation).name.search_name)
   end
 
   def test_create_observation_strip_images

@@ -544,7 +544,7 @@ module Observations
     # "Genus species (With) Author" was recognized even if "Genus species"
     # was already in the database.
     def test_create_name_with_quotes
-      name = 'Foo "bar" Author'
+      name = "Foo 'bar' Author"
       params = {
         observation_id: observations(:coprinus_comatus_obs).id,
         naming: { name: name },
@@ -553,8 +553,8 @@ module Observations
       login("dick")
       post(:create, params: params)
       assert_response(:redirect)
-      assert(name = Name.find_by(text_name: 'Foo sp. "bar"'))
-      assert_equal('Foo sp. "bar" Author', name.search_name)
+      assert(new_name = Name.find_by(text_name: "Foo sp. 'bar'"))
+      assert_equal("Foo sp. 'bar' Author", new_name.search_name)
     end
 
     # Rolf can destroy his naming if Mary deletes her vote on it.
