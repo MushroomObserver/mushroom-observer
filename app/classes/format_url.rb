@@ -47,24 +47,25 @@ class FormatURL
   attr_reader :url, :base_url, :url_only, :url_exists, :errors
 
   def initialize(url = "", base_url = "", scheme: "https")
-    url = add_enforced_scheme_if_missing(url, scheme)
+    @original_url = url
+    url = add_enforced_scheme_if_missing(scheme)
     @url = URI.parse(url)
-    @base_url = URI.parse(base_url)
+    @base_url = URI.parse(space_check(base_url))
     @scheme = scheme
     @url_only = @base_url.host.blank?
     @url_exists = url_exists?(@url.to_s)
   end
 
   def valid?
-    unless (@url.is_a?(URI::HTTPS) || @url.is_a?(URI::HTTP)) &&
+    unless nothing_funny?(@original_url) &&
+           (@url.is_a?(URI::HTTPS) || @url.is_a?(URI::HTTP)) &&
            @url.host && @url_exists
       return false
     end
     return true if @url_only
 
     # Check the URL pattern against the base_url provided.
-    @url.host.delete_prefix("www.") == @base_url.host.delete_prefix("www.") &&
-      @url.path.match?(@base_url.path)
+    host_and_path_match?
   end
 
   # Call with path_only: true to strip any query segments,
@@ -81,13 +82,30 @@ class FormatURL
 
   private
 
+  def space_check(url)
+    return url if nothing_funny?(url)
+
+    ""
+  end
+
   # Enforce scheme for incoming urls. Guards against scheme missing, which
   # causes `url_exists?` to return false
-  def add_enforced_scheme_if_missing(url, scheme)
-    url = url.to_s.delete_prefix("http://").
+  def add_enforced_scheme_if_missing(scheme)
+    return "" unless nothing_funny?(@original_url)
+
+    url = @original_url.to_s.delete_prefix("http://").
           delete_prefix("https://").
           delete_prefix("ftp://")
     "#{scheme}://#{url}"
+  end
+
+  def nothing_funny?(url)
+    !url.match?(/[[:space:]]+/)
+  end
+
+  def host_and_path_match?
+    @url.host.delete_prefix("www.") == @base_url.host.delete_prefix("www.") &&
+      @url.path.match?(@base_url.path)
   end
 
   # Goes after any redirect and makes sure we can access the redirected URL

@@ -53,7 +53,7 @@ class ExternalLink < AbstractModel
   end
 
   def format_url_for_external_site
-    return false unless (base_url = external_site.base_url)
+    return false unless (base_url = external_site&.base_url)
 
     test_url = FormatURL.new(url, base_url)
     return false unless test_url.valid?
