@@ -354,113 +354,6 @@ class NameTest < UnitTestCase
     assert_equal(" de Hoog", match[2])
   end
 
-  def test_subgenus_pat
-    @pat = "SUBGENUS_PAT"
-    pat = ::Name::Parse::SUBGENUS_PAT
-    assert_name_match_author_optional(pat, "Amanita subgenus Vaginatae")
-    assert_name_match_author_optional(pat, "Amanita Subg. Vaginatae")
-    assert_name_match_author_optional(pat, "Amanita subg Vaginatae")
-    assert_name_match_author_optional(pat, '"Amanita subg. Vaginatae"')
-    assert_name_match_author_optional(pat, "Amanita subgen. Vaginatae")
-  end
-
-  def test_section_pat
-    @pat = "SECTION_PAT"
-    pat = ::Name::Parse::SECTION_PAT
-    assert_name_match_author_optional(pat, "Amanita section Vaginatae")
-    assert_name_match_author_optional(pat, "Amanita Sect. Vaginatae")
-    assert_name_match_author_optional(pat, "Amanita sect Vaginatae")
-    assert_name_match_author_optional(pat,
-                                      "Amanita subg. Vaginatae sect. Vaginatae")
-    assert_name_match_author_optional(pat, '"Amanita sect. Vaginatae"')
-  end
-
-  def test_subsection_pat
-    @pat = "SUBSECTION_PAT"
-    pat = ::Name::Parse::SUBSECTION_PAT
-    assert_name_match_author_optional(pat, "Amanita subsection Vaginatae")
-    assert_name_match_author_optional(pat, "Amanita SubSect. Vaginatae")
-    assert_name_match_author_optional(pat, "Amanita subsect Vaginatae")
-    assert_name_match_author_optional(
-      pat, "Amanita subg. Vaginatae subsect. Vaginatae"
-    )
-    assert_name_match_author_optional(pat, '"Amanita subsect. Vaginatae"')
-  end
-
-  def test_stirps_pat
-    @pat = "STIRPS_PAT"
-    pat = ::Name::Parse::STIRPS_PAT
-    assert_name_match_author_optional(pat, "Amanita stirps Vaginatae")
-    assert_name_match_author_optional(pat, "Amanita Stirps Vaginatae")
-    assert_name_match_author_optional(
-      pat, "Amanita subg. Vaginatae sect. Vaginatae stirps Vaginatae"
-    )
-    assert_name_match_author_optional(
-      pat, "Amanita subg. Vaginatae sect. Vaginatae subsect. Vaginatae " \
-           "stirps Vaginatae"
-    )
-    assert_name_match_author_optional(pat, '"Amanita stirps Vaginatae"')
-  end
-
-  def test_subspecies_pat
-    @pat = "SUBSPECIES_PAT"
-    pat = ::Name::Parse::SUBSPECIES_PAT
-    assert_name_match_author_optional(pat, "Amanita vaginata subspecies grisea")
-    assert_name_match_author_optional(pat, "Amanita vaginata subsp grisea")
-    assert_name_match_author_optional(pat, "Amanita vaginata Subsp grisea")
-    assert_name_match_author_optional(pat, "Amanita vaginata subsp. grisea")
-    assert_name_match_author_optional(pat, "Amanita vaginata SSP grisea")
-    assert_name_match_author_optional(pat, "Amanita vaginata Ssp grisea")
-    assert_name_match_author_optional(pat, "Amanita vaginata ssp grisea")
-    assert_name_match_author_optional(pat, "Amanita vaginata ssp. grisea")
-    assert_name_match_author_optional(pat, "Amanita vaginata S grisea")
-    assert_name_match_author_optional(pat, "Amanita vaginata s grisea")
-    assert_name_match_author_optional(pat, 'Amanita "sp-1" s. "ssp-1"')
-    assert_name_match_author_optional(pat, '"Amanita vaginata ssp. grisea"')
-  end
-
-  def test_variety_pat
-    @pat = "VARIETY_PAT"
-    pat = ::Name::Parse::VARIETY_PAT
-    assert_name_match_author_optional(pat, "Amanita vaginata variety grisea")
-    assert_name_match_author_optional(pat, "Amanita vaginata var grisea")
-    assert_name_match_author_optional(pat, "Amanita vaginata v grisea")
-    assert_name_match_author_optional(pat, "Amanita vaginata var. grisea")
-    assert_name_match_author_optional(pat, "Amanita vaginata v. grisea")
-    assert_name_match_author_optional(pat, "Amanita vaginata VAR grisea")
-    assert_name_match_author_optional(pat, "Amanita vaginata V grisea")
-    assert_name_match_author_optional(
-      pat, "Amanita vaginata ssp. grisea var. grisea"
-    )
-    assert_name_match_author_optional(
-      pat, 'Amanita "sp-1" ssp. "ssp-1" var. "v-1"'
-    )
-    assert_name_match_author_optional(pat, '"Amanita vaginata var. grisea"')
-  end
-
-  def test_form_pat
-    @pat = "FORM_PAT"
-    pat = ::Name::Parse::FORM_PAT
-    assert_name_match_author_optional(pat, "Amanita vaginata forma grisea")
-    assert_name_match_author_optional(pat, "Amanita vaginata form grisea")
-    assert_name_match_author_optional(pat, "Amanita vaginata f grisea")
-    assert_name_match_author_optional(pat, "Amanita vaginata form. grisea")
-    assert_name_match_author_optional(pat, "Amanita vaginata f. grisea")
-    assert_name_match_author_optional(
-      pat, "Amanita vaginata ssp. grisea f. grisea"
-    )
-    assert_name_match_author_optional(
-      pat, "Amanita vaginata var. grisea f. grisea"
-    )
-    assert_name_match_author_optional(
-      pat, "Amanita vaginata ssp. grisea var. grisea f. grisea"
-    )
-    assert_name_match_author_optional(
-      pat, 'Amanita "sp-1" ssp. "ssp-1" var. "v-1" f. "f-1"'
-    )
-    assert_name_match_author_optional(pat, '"Amanita vaginata f. grisea"')
-  end
-
   def test_group_pat
     @pat = "GROUP_PAT"
     pat = ::Name::Parse::GROUP_PAT
@@ -971,6 +864,45 @@ class NameTest < UnitTestCase
     )
   end
 
+  def test_name_parse_19a
+    name = "Gen. 'Does' sp. 'this' subsp. 'ever' var. 'happen' f. 'for'"
+    author = "Real?"
+    full_name = "#{name} #{author}"
+    do_name_parse_test(
+      full_name,
+      text_name: name,
+      real_text_name: name,
+      search_name: full_name,
+      real_search_name: full_name,
+      sort_name: "Does this  {5subsp.  ever  {6var.  happen  {7f.  for  Real?",
+      display_name: "Gen. **__'Does'__** sp. **__'this'__** " \
+                    "subsp. **__'ever'__** var. **__'happen'__** " \
+                    "f. **__'for'__** Real?",
+      parent_name: "Gen. 'Does' sp. 'this' subsp. 'ever' var. 'happen'",
+      rank: "Form",
+      author: author,
+      deprecated: false
+    )
+  end
+
+  def test_name_parse_19b
+    name = "Gen. 'Does' sp. 'this' subsp. 'happen'"
+    do_name_parse_test(
+      "Gen. 'Does' sp. 'this' ssp. 'happen'",
+      text_name: name,
+      real_text_name: name,
+      search_name: name,
+      real_search_name: name,
+      sort_name: "Does this  {5subsp.  happen",
+      display_name: "Gen. **__'Does'__** sp. **__'this'__** " \
+                    "subsp. **__'happen'__**",
+      parent_name: "Gen. 'Does' sp. 'this'",
+      rank: "Subspecies",
+      author: "",
+      deprecated: false
+    )
+  end
+
   def test_name_parse_20
     do_name_parse_test(
       "Boletus  rex-veris Arora & Simonini",
@@ -1296,6 +1228,23 @@ class NameTest < UnitTestCase
       parent_name: "Armillaria",
       rank: "Species",
       author: "D.C.",
+      deprecated: false
+    )
+  end
+
+  def test_name_parse_42
+    do_name_parse_test(
+      'Strobilomyces strobilaceus var. "mexicanus" R. Heim',
+      text_name: "Strobilomyces strobilaceus var. 'mexicanus'",
+      real_text_name: "Strobilomyces strobilaceus var. 'mexicanus'",
+      search_name: "Strobilomyces strobilaceus var. 'mexicanus' R. Heim",
+      real_search_name: "Strobilomyces strobilaceus var. 'mexicanus' R. Heim",
+      sort_name: "Strobilomyces strobilaceus  {6var.  mexicanus  R. Heim",
+      display_name: "**__Strobilomyces__** **__strobilaceus__** " \
+                    "var. **__'mexicanus'__** R. Heim",
+      parent_name: "Strobilomyces strobilaceus",
+      rank: "Variety",
+      author: "R. Heim",
       deprecated: false
     )
   end

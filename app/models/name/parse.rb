@@ -154,13 +154,13 @@ module Name::Parse
 
   # Taxa without authors (for use by GROUP PAT)
   GENUS_OR_UP_TAXON = /(#{PROV_RANK_PREFIX})?(['"]? (?:Fossil-)? #{UPPER_WORD} ['"]?) (?: \s #{SP_ABBR} )?/x # ([A-Z][a-z]+\. )?
-  SUBGENUS_TAXON    = /(['"]? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD}) ['"]?)/x
-  SECTION_TAXON     = /(['"]? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
+  SUBGENUS_TAXON    = /(#{PROV_RANK_PREFIX})?(['"]? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD}) ['"]?)/x
+  SECTION_TAXON     = /(#{PROV_RANK_PREFIX})?(['"]? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
                        (?: #{SECT_ABBR} \s #{UPPER_WORD}) ['"]?)/x
-  SUBSECTION_TAXON  = /(['"]? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
+  SUBSECTION_TAXON  = /(#{PROV_RANK_PREFIX})?(['"]? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
                        (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)?
                        (?: #{SUBSECT_ABBR} \s #{UPPER_WORD}) ['"]?)/x
-  STIRPS_TAXON      = /(['"]? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
+  STIRPS_TAXON      = /(#{PROV_RANK_PREFIX})?(['"]? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
                        (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)?
                        (?: #{SUBSECT_ABBR} \s #{UPPER_WORD} \s)?
                        (?: #{STIRPS_ABBR} \s #{UPPER_WORD}) ['"]?)/x
@@ -173,15 +173,17 @@ module Name::Parse
   SUBSECTION_PAT  = /^ #{SUBSECTION_TAXON}  (\s #{AUTHOR_START}.*)? $/x
   STIRPS_PAT      = /^ #{STIRPS_TAXON}      (\s #{AUTHOR_START}.*)? $/x
   SPECIES_PAT     = /^ #{SPECIES_TAXON}     (\s #{AUTHOR_START}.*)? $/x
-  SUBSPECIES_PAT  = /^ (['"]? #{BINOMIAL} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})
-                        ['"]?)
+  SUBSPECIES_PAT  = /^ (#{PROV_RANK_PREFIX})?(['"]? #{BINOMIAL}
+                       (?: \s #{SSP_ABBR} \s #{LOWER_WORD}) ['"]?)
                        (\s #{AUTHOR_START}.*)?
                    $/x
-  VARIETY_PAT     = /^ (['"]? #{BINOMIAL} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
-                         (?: \s #{VAR_ABBR} \s #{LOWER_WORD}) ['"]?)
+  VARIETY_PAT     = /^ (#{PROV_RANK_PREFIX})?(['"]? #{BINOMIAL}
+                       (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
+                       (?: \s #{VAR_ABBR} \s #{LOWER_WORD}) ['"]?)
                        (\s #{AUTHOR_START}.*)?
                    $/x
-  FORM_PAT        = /^ (['"]? #{BINOMIAL} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
+  FORM_PAT        = /^ (#{PROV_RANK_PREFIX})?(['"]? #{BINOMIAL}
+                         (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
                          (?: \s #{VAR_ABBR} \s #{LOWER_WORD})?
                          (?: \s #{F_ABBR} \s #{LOWER_WORD}) ['"]?)
                        (\s #{AUTHOR_START}.*)?
@@ -194,7 +196,7 @@ module Name::Parse
                         #{SUBSECTION_TAXON}  |
                         #{STIRPS_TAXON}      |
                         #{SPECIES_TAXON}     |
-                        (?: ['"]? #{UPPER_WORD} # infra-species taxa
+                        (?: (?: #{PROV_RANK_PREFIX})?['"]? #{UPPER_WORD}
                           (?: \s #{LOWER_WORD}
                             (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
                             (?: \s #{VAR_ABBR} \s #{LOWER_WORD})?
@@ -327,7 +329,6 @@ module Name::Parse
 
   def parse_genus_or_up(str, deprecated = false, rank = "Genus")
     results = nil
-    # debugger if rank == "Genus"
     if (match = GENUS_OR_UP_PAT.match(str))
       prov_rank = match[1]
       name = match[2]
@@ -367,7 +368,7 @@ module Name::Parse
               else
                 0
               end
-      name = match[index + 1]
+      name = match[index + 1].tr('"', "'")
       author = match[index + 2].to_s
       name = standardize_sp_nov_variants(name) if rank == "Species"
       (name, author, rank) = fix_autonym(name, author, rank)
@@ -430,7 +431,6 @@ module Name::Parse
 
   # Standardize various ways of writing sp. nov.  Convert to: Amanita sp. "T44"
   def standardize_sp_nov_variants(name)
-    name.tr!('"', "'")
     names = split_name(name)
     if names.length == 2
       split_name(name)
