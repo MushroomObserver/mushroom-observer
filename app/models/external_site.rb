@@ -16,13 +16,30 @@ class ExternalSite < AbstractModel
   has_many   :observations, through: :external_links
 
   validates :project, presence: true
-  validates :name,    presence: true, length: { maximum: 100 },
-                      uniqueness: { case_sensitive: false }
+  validates :name, presence: true, length: { maximum: 100 },
+                   uniqueness: { case_sensitive: false }
+  validates :base_url, presence: true, uniqueness: { case_sensitive: false }
+  validate  :check_url_syntax
+  before_validation :format_base_url
 
   scope :order_by_default,
         -> { order_by(::Query::ExternalSites.default_order) }
   scope :name_has,
         ->(phrase) { search_columns(ExternalSite[:name], phrase) }
+
+  def check_url_syntax
+    return if format_base_url
+
+    errors.add(:base_url, :validate_invalid_url.t)
+  end
+
+  def format_base_url
+    test_url = FormatURL.new(base_url)
+    return false unless test_url.valid?
+
+    self.base_url = test_url.formatted
+    base_url
+  end
 
   def member?(user)
     user.in_group?(project.user_group)
