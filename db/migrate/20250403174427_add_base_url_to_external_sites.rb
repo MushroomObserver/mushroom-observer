@@ -4,14 +4,9 @@ class AddBaseURLToExternalSites < ActiveRecord::Migration[7.2]
     ExternalSite.find(1).update(
       base_url: "https://www.mycoportal.org/portal/collections/"
     )
-    ExternalSite.create(
-      name: "iNaturalist",
-      base_url: "https://www.inaturalist.org/observations/"
-    )
   end
 
   def down
-    ExternalSite.find_by(name: "iNaturalist").destroy
     remove_column :external_sites, :base_url
   end
 end
