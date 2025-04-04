@@ -20,7 +20,7 @@ class API2::ExternalLinksTest < UnitTestCase
     link2 = external_links(:coprinus_comatus_obs_inaturalist_link)
     link3 = ExternalLink.create!(user: rolf, observation: other_obs,
                                  external_site: link1.external_site,
-                                 url: "http://nowhere.com")
+                                 url: "#{link1.external_site.base_url}876876")
     params = { method: :get, action: :external_link }
 
     assert_api_pass(params.merge(id: link2.id))
@@ -53,13 +53,15 @@ class API2::ExternalLinksTest < UnitTestCase
     katys_obs = observations(:amateur_obs)
     marys_key = api_keys(:marys_api_key)
     rolfs_key = api_keys(:rolfs_api_key)
+    site = external_sites(:mycoportal)
+    base_url = site.base_url
     params = {
       method: :post,
       action: :external_link,
       api_key: rolfs_key.key,
       observation: rolfs_obs.id,
-      external_site: external_sites(:mycoportal).id,
-      url: "http://blah.blah"
+      external_site: site.id,
+      url: "#{base_url}blah"
     }
     assert_api_pass(params)
     assert_api_fail(params.except(:api_key))
@@ -80,8 +82,10 @@ class API2::ExternalLinksTest < UnitTestCase
     link = external_links(:coprinus_comatus_obs_mycoportal_link)
     assert_users_equal(mary, link.user)
     assert_users_equal(rolf, link.observation.user)
-    assert_false(link.external_site.project.member?(dick))
-    new_url = "http://something.else"
+    assert_false(link.external_site&.project&.member?(dick))
+    site = external_sites(:mycoportal)
+    base_url = site.base_url
+    new_url = "#{base_url}something_else"
     params = {
       method: :patch,
       action: :external_link,
@@ -99,7 +103,8 @@ class API2::ExternalLinksTest < UnitTestCase
     assert_api_pass(params.merge(set_url: "#{new_url}2"))
     assert_equal("#{new_url}2", link.reload.url)
     @api_key.update!(user: dick)
-    link.external_site.project.user_group.users << dick
+    user_group = link.external_site&.project&.user_group
+    user_group.users << dick if user_group
     assert_api_pass(params.merge(set_url: "#{new_url}3"))
     assert_equal("#{new_url}3", link.reload.url)
   end
@@ -108,7 +113,8 @@ class API2::ExternalLinksTest < UnitTestCase
     link = external_links(:coprinus_comatus_obs_mycoportal_link)
     assert_users_equal(mary, link.user)
     assert_users_equal(rolf, link.observation.user)
-    assert_false(link.external_site.project.member?(dick))
+    assert_false(link.external_site&.project&.member?(dick))
+    site = link.external_site
     params = {
       method: :delete,
       action: :external_link,
@@ -118,7 +124,7 @@ class API2::ExternalLinksTest < UnitTestCase
     recreate_params = {
       user: mary,
       observation: link.observation,
-      external_site: link.external_site,
+      external_site: site,
       url: link.url
     }
     @api_key.update!(user: dick)
@@ -132,7 +138,8 @@ class API2::ExternalLinksTest < UnitTestCase
     assert_nil(ExternalLink.safe_find(link.id))
     link = ExternalLink.create!(recreate_params)
     @api_key.update!(user: dick)
-    link.external_site.project.user_group.users << dick
+    user_group = link.external_site&.project&.user_group
+    user_group.users << dick if user_group
     assert_api_pass(params.merge(id: link.id))
     assert_nil(ExternalLink.safe_find(link.id))
   end
