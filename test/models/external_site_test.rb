@@ -26,7 +26,7 @@ class ExternalSiteTest < UnitTestCase
   def test_create_external_site_missing_attributes
     site = ExternalSite.create
     assert_not_empty(site.errors[:name])
-    assert_not_empty(site.errors[:project])
+    assert_not_empty(site.errors[:base_url])
   end
 
   def test_create_external_site_name_too_long
