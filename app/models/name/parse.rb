@@ -610,7 +610,8 @@ module Name::Parse
     1 while str.sub!(/(^| )([A-Za-z-]+) (.*) \2( |$)/, '\1\2 \3 !\2\4')
 
     if author.present?
-      str += "  " + author.
+      # Disable cop because interpolation causes test failures
+      str += "  " + author. # rubocop:disable Style/StringConcatenation
              delete('"'). # Ignore quotes in author
              gsub(/[Đđ]/, "d"). # mysql isn't collating these right
              gsub(/[Øø]/, "O").
