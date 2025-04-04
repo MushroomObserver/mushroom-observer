@@ -10,7 +10,7 @@ module SpeciesLists
 
       if check_permission!(@species_list)
         query = create_query(:Observation, species_lists: @species_list,
-                                           by: :name)
+                                           order_by: :name)
         @observation_list = query.results
       else
         redirect_to(species_list_path(@species_list))

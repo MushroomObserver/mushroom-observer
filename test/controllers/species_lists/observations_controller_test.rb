@@ -110,10 +110,10 @@ module SpeciesLists
     def test_post_add_remove_double_observations
       spl = species_lists(:unknown_species_list)
       old_obs_list =
-        SpeciesListObservation.select(:observation_id).
+        SpeciesListObservation.
         where(species_list: spl.id).
         order(observation_id: :asc).
-        map(&:observation_id)
+        pluck(:observation_id)
       dup_obs = spl.observations.first
       new_obs = (Observation.all - spl.observations).first
       ids = [dup_obs.id, new_obs.id]
@@ -127,10 +127,10 @@ module SpeciesLists
       assert_response(:redirect)
       assert_flash_success
       new_obs_list =
-        SpeciesListObservation.select(:observation_id).
+        SpeciesListObservation.
         where(species_list: spl.id).
         order(observation_id: :asc).
-        map(&:observation_id)
+        pluck(:observation_id)
       assert_equal(new_obs_list.length, old_obs_list.length + 1)
       assert_equal((new_obs_list - old_obs_list).first, new_obs.id)
     end

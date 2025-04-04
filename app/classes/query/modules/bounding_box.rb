@@ -6,7 +6,7 @@ module Query::Modules::BoundingBox
     return unless params[:in_box]
 
     _, cond2 = bounding_box_conditions
-    @where += cond2
+    self.where += cond2
   end
 
   def add_bounding_box_conditions_for_observations
@@ -16,7 +16,7 @@ module Query::Modules::BoundingBox
     cond0 = lat_lng_plausible
     cond1 = cond1.join(" AND ")
     cond2 = cond2.join(" AND ")
-    @where << "IF(locations.id IS NULL OR #{cond0}, #{cond1}, #{cond2})"
+    where << "IF(locations.id IS NULL OR #{cond0}, #{cond1}, #{cond2})"
     add_join_to_locations
   end
 

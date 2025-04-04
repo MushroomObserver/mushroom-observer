@@ -496,7 +496,7 @@ class String
       elsif str.sub!(/^[^<>]+/, "")
         part = Regexp.last_match(0)
         if part.length > max
-          result += part[0, max - 1].to_s + "..."
+          result += "#{part[0, max - 1]}..."
           break
         elsif part
           max -= part.length
@@ -738,9 +738,10 @@ class String
   end
 
   ### Misc Utilities ###
-  #
+
+  # Disable cop because it seems like we really want to priint, not just log
   def print_thing(thing)
-    print("#{self}: #{thing.class}: #{thing}\n")
+    print("#{self}: #{thing.class}: #{thing}\n") # rubocop:disable Rails/Output
   end
 
   def to_boolean

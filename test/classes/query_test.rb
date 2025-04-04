@@ -32,12 +32,17 @@ class QueryTest < UnitTestCase
     assert_equal(0, query3.record.access_count)
   end
 
-  def test_validate_params
+  def assert_validation_errors(query)
+    assert_false(query.valid)
+    assert_not_empty(query.validation_errors)
+  end
+
+  def test_validate_params_one
     # Should ignore params it doesn't recognize
-    # assert_raises(RuntimeError) { Query.lookup(:Name, xxx: true) }
-    assert_raises(RuntimeError) { Query.lookup(:Name, by: [1, 2, 3]) }
-    assert_raises(RuntimeError) { Query.lookup(:Name, by: true) }
-    assert_equal("id", Query.lookup(:Name, by: :id).params[:by])
+    assert_equal(Query.lookup(:Name, xxx: true), Query.lookup(:Name))
+    assert_validation_errors(Query.lookup(:Name, order_by: [1, 2, 3]))
+    assert_validation_errors(Query.lookup(:Name, order_by: true))
+    assert_equal("id", Query.lookup(:Name, order_by: :id).params[:order_by])
 
     assert_equal(
       :either,
@@ -47,20 +52,49 @@ class QueryTest < UnitTestCase
       :either,
       Query.lookup(:Name, misspellings: "either").params[:misspellings]
     )
-    assert_raises(RuntimeError) do
-      Query.lookup(:Name, misspellings: "bogus")
-    end
-    assert_raises(RuntimeError) do
-      Query.lookup(:Name, misspellings: true)
-    end
-    assert_raises(RuntimeError) { Query.lookup(:Name, misspellings: 123) }
+    assert_validation_errors(Query.lookup(:Name, misspellings: "bogus"))
+    assert_validation_errors(Query.lookup(:Name, misspellings: true))
+    assert_validation_errors(Query.lookup(:Name, misspellings: 123))
+  end
+
+  def test_validate_params_boolean
+    assert_equal(
+      true,
+      Query.lookup(:Name, has_synonyms: "true").params[:has_synonyms]
+    )
+    assert_validation_errors(Query.lookup(:Name, has_synonyms: "bogus"))
+  end
+
+  def test_validate_params_date
+    assert_equal(
+      ["2021-01-06"],
+      Query.lookup(:Observation, date: "Jan 06, 2021").params[:date]
+    )
+    assert_equal(
+      [nil],
+      Query.lookup(:Observation, date: "0").params[:date]
+    )
+    assert_validation_errors(Query.lookup(:Observation, date: "fi"))
+  end
+
+  def test_validate_params_datetime
+    assert_equal(
+      ["2021-01-06-00-00-00"],
+      Query.lookup(:Observation, created_at: "Jan 06, 2021").params[:created_at]
+    )
+    assert_equal(
+      [nil],
+      Query.lookup(:Observation, created_at: "0").params[:created_at]
+    )
+    assert_validation_errors(Query.lookup(:Observation, date: "fi"))
   end
 
   def test_validate_params_instances_users
-    @fungi = names(:fungi)
-
-    assert_raises(RuntimeError) { Query.lookup(:Image, by_users: :bogus) }
-    assert_raises(RuntimeError) { Query.lookup(:Image, by_users: @fungi) }
+    fungi = names(:fungi)
+    license = License.first
+    assert_validation_errors(Query.lookup(:Image, by_users: license))
+    assert_validation_errors(Query.lookup(:Image, by_users: :bogus))
+    assert_validation_errors(Query.lookup(:Image, by_users: fungi))
     assert_equal([rolf.id],
                  Query.lookup(:Image, by_users: rolf).params[:by_users])
     assert_equal([rolf.id],
@@ -69,15 +103,18 @@ class QueryTest < UnitTestCase
                  Query.lookup(:Image, by_users: rolf.id.to_s).params[:by_users])
     assert_equal([rolf.login],
                  Query.lookup(:Image, by_users: rolf.login).params[:by_users])
+
+    brand_new = User.new(name: "Not in db", login: "evanescent")
+    assert_validation_errors(Query.lookup(:Image, by_users: brand_new))
   end
 
   def test_validate_params_id_in_set
     # Oops, this query is generic,
     # doesn't know to require Name instances here.
-    # assert_raises(RuntimeError) { Query.lookup(:Name, id_in_set: rolf) }
-    assert_raises(RuntimeError) { Query.lookup(:Name, id_in_set: "one") }
-    assert_raises(RuntimeError) { Query.lookup(:Name, id_in_set: "1,2,3") }
-    assert_raises(RuntimeError) { Query.lookup(:Name, id_in_set: "Fungi") }
+    # assert_validation_errors(Query.lookup(:Name, id_in_set: rolf))
+    assert_validation_errors(Query.lookup(:Image, id_in_set: "one"))
+    assert_validation_errors(Query.lookup(:Image, id_in_set: "1,2,3"))
+    assert_validation_errors(Query.lookup(:Image, id_in_set: "Fungi"))
     assert_equal(
       [names(:fungi).id],
       Query.lookup(:Name, id_in_set: names(:fungi).id.to_s).params[:id_in_set]
@@ -110,16 +147,9 @@ class QueryTest < UnitTestCase
   end
 
   def test_validate_params_pattern
-    # assert_raises(RuntimeError) { Query.lookup(:Name) }
-    assert_raises(RuntimeError) do
-      Query.lookup(:Name, pattern: true)
-    end
-    assert_raises(RuntimeError) do
-      Query.lookup(:Name, pattern: [1, 2, 3])
-    end
-    assert_raises(RuntimeError) do
-      Query.lookup(:Name, pattern: rolf)
-    end
+    assert_validation_errors(Query.lookup(:Name, pattern: true))
+    assert_validation_errors(Query.lookup(:Name, pattern: [1, 2, 3]))
+    assert_validation_errors(Query.lookup(:Name, pattern: rolf))
     assert_equal("123",
                  Query.lookup(:Name, pattern: 123).params[:pattern])
     assert_equal("rolf",
@@ -155,13 +185,13 @@ class QueryTest < UnitTestCase
   def test_validate_params_group
     assert_equal("names.id",
                  Query.lookup(:Name, group: "names.id").params[:group])
-    assert_raises(RuntimeError) { Query.lookup(:Name, group: %w[1 2]) }
+    assert_validation_errors(Query.lookup(:Name, group: %w[1 2]))
   end
 
   def test_validate_params_order
     assert_equal("id DESC",
                  Query.lookup(:Name, order: "id DESC").params[:order])
-    assert_raises(RuntimeError) { Query.lookup(:Name, order: %w[1 2]) }
+    assert_validation_errors(Query.lookup(:Name, order: %w[1 2]))
   end
 
   def test_validate_params_hashes
@@ -169,9 +199,9 @@ class QueryTest < UnitTestCase
     assert_equal(box, Query.lookup(:Location, in_box: box).params[:in_box])
     assert_raises(TypeError) { Query.lookup(:Location, in_box: "one") }
     box = { north: "with", south: 48.558, east: -123.4307, west: -123.4763 }
-    assert_raises(RuntimeError) { Query.lookup(:Location, in_box: box) }
+    assert_validation_errors(Query.lookup(:Location, in_box: box))
     box = { south: 48.558, east: -123.4307, west: -123.4763 }
-    assert_raises(RuntimeError) { Query.lookup(:Location, in_box: box) }
+    assert_validation_errors(Query.lookup(:Location, in_box: box))
   end
 
   def test_initialize_helpers
@@ -261,7 +291,7 @@ class QueryTest < UnitTestCase
     assert_equal(2, QueryRecord.count)
 
     # New because params are different from q1.
-    q3 = Query.lookup_and_save(:Observation, by: :id)
+    q3 = Query.lookup_and_save(:Observation, order_by: :id)
     assert_equal(3, QueryRecord.count)
 
     # Not new because it is explicitly defaulted before validate.
@@ -270,7 +300,7 @@ class QueryTest < UnitTestCase
     assert_equal(q1, q4, QueryRecord.count)
 
     # Ditto default.
-    q5 = Query.lookup_and_save(:Observation, by: :id)
+    q5 = Query.lookup_and_save(:Observation, order_by: :id)
     assert_equal(3, QueryRecord.count)
     assert_equal(q3, q5, QueryRecord.count)
 
@@ -279,17 +309,17 @@ class QueryTest < UnitTestCase
     assert_equal(4, QueryRecord.count)
 
     # Old pattern but new order.
-    Query.lookup_and_save(:Observation, pattern: "blah", by: :date)
+    Query.lookup_and_save(:Observation, pattern: "blah", order_by: :date)
     assert_equal(5, QueryRecord.count)
 
-    # Identical, even though :by is explicitly set in one.
+    # Identical, even though :order_by is explicitly set in one.
     Query.lookup_and_save(:Observation, pattern: "blah")
     assert_equal(5, QueryRecord.count)
 
     # Identical query, but new query because order given explicitly.  Order is
     # not given default until query is initialized, thus default not stored in
     # params, so lookup doesn't know about it.
-    Query.lookup_and_save(:Observation, by: :date)
+    Query.lookup_and_save(:Observation, order_by: :date)
     assert_equal(6, QueryRecord.count)
 
     # Just a sanity check.
@@ -486,7 +516,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_low_levels
-    query = Query.lookup(:Name, misspellings: :either, by: :id)
+    query = Query.lookup(:Name, misspellings: :either, order_by: :id)
 
     @fungi = names(:fungi)
     @agaricus = names(:agaricus)
@@ -537,13 +567,13 @@ class QueryTest < UnitTestCase
   end
 
   def test_tables_used
-    query = Query.lookup(:Observation, by: :id)
+    query = Query.lookup(:Observation, order_by: :id)
     assert_equal([:observations], query.tables_used)
 
-    query = Query.lookup(:Observation, by: :name)
+    query = Query.lookup(:Observation, order_by: :name)
     assert_equal([:names, :observations], query.tables_used)
 
-    query = Query.lookup(:Image, by: :name)
+    query = Query.lookup(:Image, order_by: :name)
 
     assert_equal([:images, :names, :observation_images, :observations],
                  query.tables_used)
@@ -555,7 +585,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_results
-    query = Query.lookup(:User, by: :id)
+    query = Query.lookup(:User, order_by: :id)
 
     assert_equal(
       Set.new,
@@ -586,9 +616,9 @@ class QueryTest < UnitTestCase
 
   def paginate_test_setup(number, num_per_page)
     @names = Name.reorder(id: :asc).order(:id)
-    @pages = MOPaginator.new(number: number,
-                             num_per_page: num_per_page)
-    @query = Query.lookup(:Name, misspellings: :either, by: :id)
+    @pagination_data = PaginationData.new(number: number,
+                                          num_per_page: num_per_page)
+    @query = Query.lookup(:Name, misspellings: :either, order_by: :id)
   end
 
   def paginate_test(number, num_per_page, expected_nths)
@@ -605,10 +635,13 @@ class QueryTest < UnitTestCase
 
     assert_equal(
       expected_nths,
-      @query.paginate_ids(@pages).map { |id| name_ids.index(id) + 1 }
+      @query.paginate_ids(@pagination_data).map do |id|
+        name_ids.index(id) + 1
+      end
     )
-    assert_equal(@names.size, @pages.num_total)
-    assert_name_arrays_equal(@names[from_nth..to_nth], @query.paginate(@pages))
+    assert_equal(@names.size, @pagination_data.num_total)
+    assert_name_arrays_equal(@names[from_nth..to_nth],
+                             @query.paginate(@pagination_data))
   end
 
   def test_paginate_start
@@ -629,20 +662,19 @@ class QueryTest < UnitTestCase
   def test_paginate_need_letters
     paginate_test_letter_setup(1, 4)
     paginate_assertions(1, 4, [1, 2, 3, 4])
-    assert_equal(@letters, @pages.used_letters.sort)
+    assert_equal(@letters, @pagination_data.used_letters.sort)
   end
 
   def test_paginate_ells
     paginate_test_letter_setup(2, 3)
-    @pages = MOPaginator.new(number: 2,
-                             num_per_page: 3,
-                             letter: "L")
+    @pagination_data = PaginationData.new(number: 2, num_per_page: 3,
+                                          letter: "L")
     # Make sure we have a bunch of Lactarii, Leptiotas, etc.
     @ells = @names.select { |n| n.text_name[0, 1] == "L" }
     assert(@ells.length >= 9)
-    assert_equal(@ells[3..5].map(&:id), @query.paginate_ids(@pages))
-    assert_equal(@letters, @pages.used_letters.sort)
-    assert_name_arrays_equal(@ells[3..5], @query.paginate(@pages))
+    assert_equal(@ells[3..5].map(&:id), @query.paginate_ids(@pagination_data))
+    assert_equal(@letters, @pagination_data.used_letters.sort)
+    assert_name_arrays_equal(@ells[3..5], @query.paginate(@pagination_data))
   end
 
   def test_eager_instantiator
@@ -694,7 +726,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_next_and_prev
-    query = Query.lookup(:Name, misspellings: :either, by: :id)
+    query = Query.lookup(:Name, misspellings: :either, order_by: :id)
     @names = Name.reorder(id: :asc)
 
     query.current = @names[2]
@@ -758,7 +790,7 @@ class QueryTest < UnitTestCase
     query_a = []
 
     # Several observation queries can be turned into image queries.
-    query_a[0] = Query.lookup_and_save(:Observation, by: :id)
+    query_a[0] = Query.lookup_and_save(:Observation, order_by: :id)
     query_a[1] = Query.lookup_and_save(:Observation, by_users: mary.id)
     query_a[2] = Query.lookup_and_save(
       :Observation, species_lists: species_lists(:first_species_list).id
@@ -781,7 +813,7 @@ class QueryTest < UnitTestCase
 
     # Almost any query on observations should be mappable, i.e. coercable into
     # a query on those observations' locations.
-    query_a[0] = Query.lookup_and_save(:Observation, by: :id)
+    query_a[0] = Query.lookup_and_save(:Observation, order_by: :id)
     query_a[1] = Query.lookup_and_save(:Observation, by_users: mary.id)
     query_a[2] = Query.lookup_and_save(
       :Observation, species_lists: species_lists(:first_species_list).id
@@ -797,7 +829,7 @@ class QueryTest < UnitTestCase
     # Now, check the parameters of those subqueries.
     obs_queries = query_b.map { |que| que.params[:observation_query] }
 
-    assert_equal("id", obs_queries[0][:by])
+    assert_equal("id", obs_queries[0][:order_by])
     assert_equal([mary.id], obs_queries[1][:by_users])
     assert_equal([species_lists(:first_species_list).id],
                  obs_queries[2][:species_lists])
@@ -816,7 +848,7 @@ class QueryTest < UnitTestCase
     query_a = []
 
     # Several observation queries can be turned into name queries.
-    query_a[0] = Query.lookup_and_save(:Observation, by: :id)
+    query_a[0] = Query.lookup_and_save(:Observation, order_by: :id)
     query_a[1] = Query.lookup_and_save(:Observation, by_users: mary.id)
     query_a[2] = Query.lookup_and_save(
       :Observation, species_lists: species_lists(:first_species_list).id
@@ -961,15 +993,15 @@ class QueryTest < UnitTestCase
   #   assert_equal("Observation", q4.model.to_s)
   #   assert_equal("SpeciesList", q5.model.to_s)
 
-  #   assert_equal(:rss_log, q2.params[:by].to_sym)
-  #   assert_equal(:rss_log, q3.params[:by].to_sym)
-  #   assert_equal(:rss_log, q4.params[:by].to_sym)
-  #   assert_equal(:rss_log, q5.params[:by].to_sym)
+  #   assert_equal(:rss_log, q2.params[:order_by].to_sym)
+  #   assert_equal(:rss_log, q3.params[:order_by].to_sym)
+  #   assert_equal(:rss_log, q4.params[:order_by].to_sym)
+  #   assert_equal(:rss_log, q5.params[:order_by].to_sym)
   # end
 
   def test_relatable
-    assert(Query.lookup(:Observation, by: :id).relatable?(:Image))
-    assert_not(Query.lookup(:Herbarium, by: :id).relatable?(:Project))
+    assert(Query.lookup(:Observation, order_by: :id).relatable?(:Image))
+    assert_not(Query.lookup(:Herbarium, order_by: :id).relatable?(:Project))
   end
 
   ##############################################################################
@@ -991,12 +1023,14 @@ class QueryTest < UnitTestCase
     User.current = rolf
     assert_equal("postal", User.current_location_format)
     assert_query([albion, elgin_co],
-                 :Location, id_in_set: [albion.id, elgin_co.id], by: :name)
+                 :Location, id_in_set: [albion.id, elgin_co.id],
+                            order_by: :name)
 
     User.current = roy
     assert_equal("scientific", User.current_location_format)
     assert_query([elgin_co, albion],
-                 :Location, id_in_set: [albion.id, elgin_co.id], by: :name)
+                 :Location, id_in_set: [albion.id, elgin_co.id],
+                            order_by: :name)
 
     obs1 = observations(:minimal_unknown_obs)
     obs2 = observations(:detailed_unknown_obs)
@@ -1006,11 +1040,13 @@ class QueryTest < UnitTestCase
     User.current = rolf
     assert_equal("postal", User.current_location_format)
     assert_query([obs1, obs2],
-                 :Observation, id_in_set: [obs1.id, obs2.id], by: :location)
+                 :Observation, id_in_set: [obs1.id, obs2.id],
+                               order_by: :location)
 
     User.current = roy
     assert_equal("scientific", User.current_location_format)
     assert_query([obs2, obs1],
-                 :Observation, id_in_set: [obs1.id, obs2.id], by: :location)
+                 :Observation, id_in_set: [obs1.id, obs2.id],
+                               order_by: :location)
   end
 end

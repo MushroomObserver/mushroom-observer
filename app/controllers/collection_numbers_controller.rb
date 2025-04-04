@@ -22,7 +22,7 @@ class CollectionNumbersController < ApplicationController
   private
 
   def default_sort_order
-    nil # [:name, :number]
+    nil # Query::CollectionNumbers.default_order
   end
 
   def index_active_params
@@ -65,8 +65,6 @@ class CollectionNumbersController < ApplicationController
   def new
     set_ivars_for_new
     return unless @observation
-
-    @back_object = @observation
     return unless make_sure_can_edit!(@observation)
 
     @collection_number = CollectionNumber.new(name: @user.legal_name)
@@ -80,8 +78,6 @@ class CollectionNumbersController < ApplicationController
   def create
     set_ivars_for_new
     return unless @observation
-
-    @back_object = @observation
     return unless make_sure_can_edit!(@observation)
 
     create_collection_number # response handled here
@@ -127,6 +123,7 @@ class CollectionNumbersController < ApplicationController
   def set_ivars_for_new
     @layout = calc_layout_params
     @observation = find_or_goto_index(Observation, params[:observation_id])
+    @back_object = @observation
   end
 
   def set_ivars_for_edit

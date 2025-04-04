@@ -4,7 +4,7 @@ add_sorter(@query, species_lists_index_sorts(query: @query))
 flash_error(@error) if @error && @objects.empty?
 %>
 
-<%= paginate_block(@pages) do %>
+<%= pagination_nav(@pagination_data) do %>
   <% if @objects.any? %>
     <div class="list-group">
       <% @objects.each do |species_list| %>
@@ -24,3 +24,4 @@ flash_error(@error) if @error && @objects.empty?
     </div>
   <% end %>
 <% end %>
+

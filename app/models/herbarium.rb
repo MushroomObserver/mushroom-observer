@@ -63,14 +63,15 @@ class Herbarium < AbstractModel
   # Used by create/edit form.
   attr_accessor :place_name, :personal, :personal_user_name
 
-  scope :index_order,
-        -> { order(name: :asc, id: :desc) }
+  scope :order_by_default,
+        -> { order_by(::Query::Herbaria.default_order) }
 
   scope :nonpersonal, lambda { |bool = true|
     if bool.to_s.to_boolean == true
       where(personal_user_id: nil)
-    else
-      where.not(personal_user_id: nil)
+      # Currently `false` is not parsed by Query, possibly intentionally.
+      # else
+      #   where.not(personal_user_id: nil)
     end
   }
 

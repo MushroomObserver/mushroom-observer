@@ -1,5 +1,41 @@
 # frozen_string_literal: true
 
+#  ==== Scopes
+#  created_at("yyyy-mm-dd", "yyyy-mm-dd")
+#  updated_at("yyyy-mm-dd", "yyyy-mm-dd")
+#  deprecated
+#  has_description
+#  with_correct_spelling
+#  with_incorrect_spelling
+#  with_self_referential_misspelling
+#  has_synonyms
+#  ok_for_export
+#  rank(ranks)
+#  with_rank(rank)
+#  with_rank_below(rank)
+#  with_rank_and_name_in_classification(rank, text_name)
+#  with_rank_at_or_below_genus
+#  with_rank_above_genus
+#  subtaxa_of_genus_or_below(genus)
+#  subtaxa_of(name)
+#  include_synonyms_of(name)
+#  clade(name)
+#  text_name_has(text_name)
+#  search_name_has(phrase)
+#  has_classification
+#  classification_has(classification)
+#  has_author
+#  author_has(author)
+#  has_citation
+#  citation_has(citation)
+#  has_notes
+#  notes_has(notes)
+#  has_comments
+#  comments_has(summary)
+#  species_lists(species_list)
+#  locations(location)
+#  in_box(north:, south:, east:, west:)
+#
 module Name::Scopes
   # This is using Concern so we can define the scopes in this included module.
   extend ActiveSupport::Concern
@@ -9,8 +45,8 @@ module Name::Scopes
   # always show as covered.
   included do # rubocop:disable Metrics/BlockLength
     # default ordering for index queries
-    scope :index_order,
-          -> { order(sort_name: :asc, id: :desc) }
+    scope :order_by_default,
+          -> { order_by(::Query::Names.default_order) }
 
     scope :names, lambda { |lookup:, **related_name_args|
       ids = lookup_names_by_name(lookup, related_name_args.compact)
@@ -20,8 +56,8 @@ module Name::Scopes
     }
     scope :text_name_has,
           ->(phrase) { search_columns(Name[:text_name], phrase) }
-    scope :search_name_has,
-          ->(phrase) { search_columns(Name[:search_name], phrase) }
+    # scope :search_name_has,
+    #       ->(phrase) { search_columns(Name[:search_name], phrase) }
 
     # NOTE: with_correct_spelling is tacked on to most Name queries.
     scope :misspellings, lambda { |boolish = :no|
@@ -31,6 +67,8 @@ module Name::Scopes
         where(correct_spelling_id: nil)
       when :only
         where.not(correct_spelling_id: nil)
+      when :either
+        all
       end
     }
     scope :with_correct_spelling,
@@ -40,13 +78,12 @@ module Name::Scopes
     scope :with_self_referential_misspelling,
           -> { where(Name[:correct_spelling_id].eq(Name[:id])) }
 
-    scope :lichen, lambda { |boolish = :yes|
-      # if false, returns all
-      boolish = :yes if boolish == true
-      case boolish.to_sym
-      when :yes
+    # Query parses "yes" and "no", "on" and "off" to boolean. nil ignored.
+    scope :lichen, lambda { |bool = true|
+      case bool
+      when true
         where(Name[:lifeform].matches("%lichen%"))
-      when :no
+      when false
         where(Name[:lifeform].does_not_match("% lichen %"))
       end
     }
@@ -84,9 +121,9 @@ module Name::Scopes
 
     ### Module Name::Taxonomy. Rank scopes take text values, e.g. "Genus"
     # Query's scope: rank at or between
-    scope :rank, lambda { |min, max = min|
-      min, max = min if min.is_a?(Array) && min.size == 2
-      return with_rank(min) if min.present? && min == max
+    scope :rank, lambda { |min, max = nil|
+      min, max = min if min.is_a?(Array)
+      return with_rank(min) if min.present? && max.blank?
 
       where(Name[:rank].in(rank_range(min, max)))
     }
@@ -115,19 +152,27 @@ module Name::Scopes
     }
     # "Immediate" has a vaguer meaning at and below Genus
     scope :include_immediate_subtaxa_of, lambda { |name|
+      # This should be equivalent, but it misses subtaxa with rank: "Variety".
+      # (Changed to accept plural names.)
+      # immediate_subtaxa_of(names, false)
       name = find_by(text_name: name) if name.is_a?(String)
-      # names = [name] + immediate_subtaxa_of(name)
-      # with_correct_spelling.where(id: names.map(&:id))
       immediate_subtaxa_of(name, false) # include original name
     }
     scope :immediate_subtaxa_of, lambda { |name, exclude_original = true|
+      # This should be equivalent, but it misses subtaxa with rank: "Variety".
+      # (Changed to accept plural names.)
+      # names(lookup: names, include_immediate_subtaxa: true,
+      #       exclude_original_names: exclude_original)
       name = find_by(text_name: name) if name.is_a?(String)
       scope = if ranks_above_genus.include?(name.rank)
                 subtaxa_of(name).rank(ranks[name.rank] - 1)
               else
                 subtaxa_of(name)
               end
-      scope = scope.or(Name.where(id: name.id)) unless exclude_original == true
+      unless exclude_original == true
+        # Add `distinct` to balance `or` clause: subtaxa_of calls `distinct`
+        scope = scope.or(Name.where(id: name.id).distinct)
+      end
       scope
     }
     ### Pattern Search
@@ -157,15 +202,15 @@ module Name::Scopes
     # scope :search_content_and_associations, lambda { |phrase|
     #   fields = Name.search_content(phrase).map(&:id)
     #   comments = Name.comments_has(phrase).map(&:id)
-    #   descs = Name.description_has(phrase).map(&:id)
+    #   descs = Name.description_query(content_has: phrase).map(&:id)
     #   where(id: fields + comments + descs).distinct
     # }
     # This is what's called by advanced_search
-    scope :advanced_search, lambda { |phrase|
-      fields = Name.search_columns(Name[:search_name], phrase).map(&:id)
-      comments = Name.comments_has(phrase).map(&:id)
-      where(id: fields + comments).distinct
-    }
+    # scope :advanced_search, lambda { |phrase|
+    #   fields = Name.search_columns(Name[:search_name], phrase).map(&:id)
+    #   comments = Name.comments_has(phrase).map(&:id)
+    #   where(id: fields + comments).distinct
+    # }
     # This is what's called by pattern_search
     scope :pattern, lambda { |phrase|
       cols = Name.searchable_columns + NameDescription.searchable_columns
@@ -187,39 +232,19 @@ module Name::Scopes
     scope :has_descriptions, lambda { |bool = true|
       return all unless bool
 
-      joins(:descriptions)
+      joins(:descriptions).distinct
     }
     # This is the scope we're more likely interested in
     scope :has_default_description,
           ->(bool = true) { presence_condition(Name[:description_id], bool:) }
     # Called by a special index page
-    scope :needs_description, lambda {
+    scope :needs_description, lambda { |bool = true|
+      return all unless bool
+
       has_default_description(false).joins(:observations).distinct.
         group(:name_id).order(Observation[:name_id].count.desc, Name[:id].desc)
     }
-    scope :description_has, lambda { |phrase|
-      joins(:descriptions).
-        merge(NameDescription.content_has(phrase)).distinct
-    }
-    scope :has_description_in_project, lambda { |project|
-      joins(descriptions: :project).
-        merge(NameDescription.where(project: project)).distinct
-    }
-    scope :has_description_created_by, lambda { |user|
-      joins(:descriptions).
-        merge(NameDescription.where(user: user)).distinct
-    }
-    scope :has_description_reviewed_by, lambda { |user|
-      joins(:descriptions).
-        merge(NameDescription.where(reviewer: user)).distinct
-    }
-    scope :has_description_of_type, lambda { |source|
-      # Check that it's a valid source type (string enum value)
-      return none if Description::ALL_SOURCE_TYPES.exclude?(source)
-
-      joins(:descriptions).
-        merge(NameDescription.sources(source)).distinct
-    }
+    # used by Name::Taxonomy
     scope :has_description_classification_differing, lambda {
       joins(:description).
         where(rank: 0..Name.ranks[:Genus]).
@@ -231,7 +256,7 @@ module Name::Scopes
     scope :has_observations, lambda { |bool = true|
       return all unless bool
 
-      joins(:observations)
+      joins(:observations).distinct
     }
     scope :species_lists, lambda { |species_lists|
       species_list_ids = lookup_species_lists_by_name(species_lists)

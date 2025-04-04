@@ -34,7 +34,7 @@ class UsersController < ApplicationController
   end
 
   def default_sort_order
-    :name
+    ::Query::Users.default_order # :name
   end
 
   # Used by ApplicationController to dispatch #index to a private method
@@ -128,13 +128,13 @@ class UsersController < ApplicationController
     # First check the user's observation thumbnails for their own favorites
     image_includes = { thumb_image: [:image_votes, :projects, :license, :user] }
     @query = Query.lookup(:Observation, by_users: @show_user,
-                                        by: :owners_thumbnail_quality)
+                                        order_by: :owners_thumbnail_quality)
     observations = @query.results(limit: 6, include: image_includes)
 
     # If not enough, check for other people's favorites
     if (MAX_THUMBS - observations.length).positive?
       @query = Query.lookup(:Observation, by_users: @show_user,
-                                          by: :thumbnail_quality)
+                                          order_by: :thumbnail_quality)
       other_users_favorites = @query.results(limit: MAX_THUMBS,
                                              include: image_includes)
       observations = observations.union(other_users_favorites).take(MAX_THUMBS)

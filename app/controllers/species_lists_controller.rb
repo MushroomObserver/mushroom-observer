@@ -36,7 +36,7 @@ class SpeciesListsController < ApplicationController
   end
 
   def unfiltered_index_opts
-    super.merge(query_args: { by: :date })
+    super.merge(query_args: { order_by: :date })
   end
 
   # Used by ApplicationController to dispatch #index to a private method
@@ -49,7 +49,7 @@ class SpeciesListsController < ApplicationController
   # Passes explicit :by param to affect title (only).
   def sorted_index_opts
     sorted_by = params[:by] || :date
-    super.merge(query_args: { by: sorted_by })
+    super.merge(query_args: { order_by: sorted_by })
   end
 
   # Display list of user's species_lists, sorted by date.
@@ -60,7 +60,7 @@ class SpeciesListsController < ApplicationController
     )
     return unless user
 
-    query = create_query(:SpeciesList, by_users: user, by: :date)
+    query = create_query(:SpeciesList, by_users: user, order_by: :date)
     [query, {}]
   end
 
@@ -79,8 +79,10 @@ class SpeciesListsController < ApplicationController
       include: [:location, :user]
     }.merge(opts)
 
-    return opts if %w[date created modified].include?(query.params[:by]) ||
-                   query.params[:by].blank?
+    if %w[date created modified].include?(query.params[:order_by]) ||
+       query.params[:order_by].blank?
+      return opts
+    end
 
     # Paginate by letter if sorting by anything else.
     opts[:letters] = true
@@ -177,14 +179,16 @@ class SpeciesListsController < ApplicationController
   def init_ivars_for_show
     @canonical_url =
       "#{MO.http_domain}/species_lists/#{@species_list.id}"
-    @query = create_query(:Observation, by: :name, species_lists: @species_list)
+    @query = create_query(
+      :Observation, order_by: :name, species_lists: @species_list
+    )
 
     # See documentation on the 'How to Use' page to understand this feature.
     store_query_in_session(@query) if params[:set_source].present?
 
     @query.need_letters = true
-    @pages = paginate_letters(:letter, :page, 100)
-    @objects = @query.paginate(@pages, include:
+    @pagination_data = letter_pagination_data(:letter, :page, 100)
+    @objects = @query.paginate(@pagination_data, include:
                   [:user, :name, :location, { thumb_image: :image_votes }])
     # Save a lookup in comments_for_object
     @comments = @species_list.comments&.sort_by(&:created_at)&.reverse

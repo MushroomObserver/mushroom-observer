@@ -99,8 +99,8 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
 
   attr_accessor :data
 
-  scope :index_order,
-        -> { order(title: :asc, id: :desc) }
+  scope :order_by_default,
+        -> { order_by(::Query::SpeciesLists.default_order) }
 
   scope :title_has,
         ->(phrase) { search_columns(SpeciesList[:title], phrase) }

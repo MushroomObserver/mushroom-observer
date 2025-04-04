@@ -26,8 +26,8 @@ class Article < AbstractModel
   belongs_to :user
   belongs_to :rss_log
 
-  scope :index_order,
-        -> { order(created_at: :desc, id: :desc) }
+  scope :order_by_default,
+        -> { order_by(::Query::Articles.default_order) }
   scope :title_has,
         ->(phrase) { search_columns(Article[:title], phrase) }
   scope :body_has,

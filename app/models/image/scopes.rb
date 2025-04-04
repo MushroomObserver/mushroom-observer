@@ -8,14 +8,15 @@ module Image::Scopes
   # Two line stabby lambdas are OK, it's just the declaration line that will
   # always show as covered.
   included do # rubocop:disable Metrics/BlockLength
-    scope :index_order,
-          -> { order(created_at: :desc, id: :desc) }
+    scope :order_by_default,
+          -> { order_by(::Query::Images.default_order) }
 
-    scope :sizes, lambda { |min, max = min|
-      if max == min
-        min_size(min)
-      else
+    scope :sizes, lambda { |min, max = nil|
+      min, max = min if min.is_a?(Array)
+      if max
         min_size(min).max_size(max)
+      else
+        min_size(min)
       end
     }
     scope :min_size, lambda { |min|
@@ -62,7 +63,7 @@ module Image::Scopes
           ->(bool = true) { presence_condition(Image[:vote_cache], bool:) }
     # quality is on a scale from 1.0 to 4.0
     scope :quality, lambda { |min, max = nil|
-      min, max = min if min.is_a?(Array) && min.size == 2
+      min, max = min if min.is_a?(Array)
       if max.nil? || max == min
         where(Image[:vote_cache].gteq(min))
       else
@@ -96,17 +97,19 @@ module Image::Scopes
         where(species_list_observations: { species_list_id: ids })
     }
 
+    # FOR FUTURE REFERENCE
     # A search of all Image SEARCHABLE_FIELDS, concatenated.
-    scope :search_content,
-          ->(phrase) { search_columns(Image.searchable_columns, phrase) }
+    # scope :search_content,
+    #       ->(phrase) { search_columns(Image.searchable_columns, phrase) }
     # Grabbing image ids from the Observation.includes is waay faster than
     # a 3x join from images to observation_images to observations to comments.
     # Does not check Name[:search_name] (author)
-    scope :advanced_search, lambda { |phrase|
-      obs_imgs = Observation.advanced_search(phrase).
-                 includes(:images).map(&:images).flatten.uniq
-      search_content(phrase).distinct.or(Image.where(id: obs_imgs).distinct)
-    }
+    # scope :advanced_search, lambda { |phrase|
+    #   obs_imgs = Observation.advanced_search(phrase).
+    #              includes(:images).map(&:images).flatten.uniq
+    #   search_content(phrase).distinct.or(Image.where(id: obs_imgs).distinct)
+    # }
+
     # Excludes images without observations!
     scope :pattern, lambda { |phrase|
       cols = Image.searchable_columns + Observation[:where] + Name[:search_name]

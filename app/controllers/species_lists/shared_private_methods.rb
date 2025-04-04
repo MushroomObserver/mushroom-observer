@@ -294,8 +294,6 @@ module SpeciesLists
         checklist_from_name_query(query)
       when "Observation"
         checklist_from_observation_query(query)
-      when "Image"
-        checklist_from_image_query(query)
       when "Location"
         checklist_from_location_query(query)
       when "RssLog"
@@ -314,14 +312,6 @@ module SpeciesLists
       query.select_rows(
         select: "DISTINCT names.display_name, names.id",
         join: :names,
-        limit: 1000
-      )
-    end
-
-    def checklist_from_image_query(query)
-      query.select_rows(
-        select: "DISTINCT names.display_name, names.id",
-        join: { observation_images: { observations: :names } },
         limit: 1000
       )
     end

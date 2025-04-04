@@ -8,8 +8,13 @@ class Query::FieldSlipsTest < UnitTestCase
   include QueryExtensions
 
   def test_field_slip_all
-    expects = FieldSlip.index_order
+    expects = FieldSlip.order_by_default
     assert_query(expects, :FieldSlip)
+  end
+
+  def test_field_slip_order_by_code_then_date
+    expects = FieldSlip.order_by(:code_then_date)
+    assert_query(expects, :FieldSlip, order_by: :code_then_date)
   end
 
   def mary_field_slips
@@ -19,7 +24,7 @@ class Query::FieldSlipsTest < UnitTestCase
 
   def test_field_slip_by_users
     expects = mary_field_slips
-    scope = FieldSlip.by_users(mary).index_order
+    scope = FieldSlip.by_users(mary).order_by_default
     assert_query_scope(expects, scope, :FieldSlip, by_users: mary)
   end
 
@@ -29,11 +34,11 @@ class Query::FieldSlipsTest < UnitTestCase
 
   def test_field_slip_for_project
     expects = eol_field_slips
-    scope = FieldSlip.projects(projects(:eol_project)).index_order
+    scope = FieldSlip.projects(projects(:eol_project)).order_by_default
     assert_query_scope(expects, scope,
                        :FieldSlip, projects: projects(:eol_project))
     # test lookup by name
-    expects = FieldSlip.projects(projects(:eol_project).title).index_order
+    expects = FieldSlip.projects(projects(:eol_project).title).order_by_default
     assert_query(expects, :FieldSlip, projects: projects(:eol_project))
   end
 end

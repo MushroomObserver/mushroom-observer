@@ -540,7 +540,7 @@ class ObservationTest < UnitTestCase
                  from: rolf,
                  to: katrina,
                  observation: 0,
-                 note: "**__Coprinus comatus__** (O.F. Müll.) Pers. " \
+                 note: "**__Coprinus__** **__comatus__** (O.F. Müll.) Pers. " \
                        "(#{observations(:coprinus_comatus_obs).id})")
     QueuedEmail.queue = false
   end
@@ -1200,20 +1200,20 @@ class ObservationTest < UnitTestCase
                         observations(:peltigera_obs))
   end
 
-  def test_scope_needs_naming
-    assert_includes(Observation.needs_naming,
+  def test_scope_needs_naming_generally
+    assert_includes(Observation.needs_naming_generally,
                     observations(:fungi_obs))
-    assert_not_includes(Observation.needs_naming,
+    assert_not_includes(Observation.needs_naming_generally,
                         observations(:peltigera_obs))
   end
 
-  def test_scope_needs_naming_and_not_reviewed_by_user
+  def test_scope_needs_naming
     assert_includes(
-      Observation.needs_naming_and_not_reviewed_by_user(users(:rolf)),
+      Observation.needs_naming(users(:rolf)),
       observations(:fungi_obs)
     )
     assert_not_includes(
-      Observation.needs_naming_and_not_reviewed_by_user(users(:rolf)),
+      Observation.needs_naming(users(:rolf)),
       observations(:peltigera_obs)
     )
   end
@@ -1525,12 +1525,13 @@ class ObservationTest < UnitTestCase
                         observations(:minimal_unknown_obs))
   end
 
-  def test_scope_has_sequences_false
-    assert_includes(Observation.has_sequences(false),
-                    observations(:minimal_unknown_obs))
-    assert_not_includes(Observation.has_sequences(false),
-                        observations(:genbanked_obs))
-  end
+  # Currently Query ignores false, so scope does too.
+  # def test_scope_has_sequences_false
+  #   assert_includes(Observation.has_sequences(false),
+  #                   observations(:minimal_unknown_obs))
+  #   assert_not_includes(Observation.has_sequences(false),
+  #                       observations(:genbanked_obs))
+  # end
 
   def test_scope_confidence
     assert_includes(Observation.confidence(0, 0),
@@ -1547,12 +1548,13 @@ class ObservationTest < UnitTestCase
     assert_empty(Observation.confidence(3.1, 3.2))
   end
 
-  def test_scope_has_comments_false
-    assert_includes(Observation.has_comments(false),
-                    observations(:unlisted_rolf_obs))
-    assert_not_includes(Observation.has_comments(false),
-                        observations(:minimal_unknown_obs))
-  end
+  # Currently Query ignores false, so scope does too.
+  # def test_scope_has_comments_false
+  #   assert_includes(Observation.has_comments(false),
+  #                   observations(:unlisted_rolf_obs))
+  #   assert_not_includes(Observation.has_comments(false),
+  #                       observations(:minimal_unknown_obs))
+  # end
 
   def test_source_credit
     obs = observations(:coprinus_comatus_obs)

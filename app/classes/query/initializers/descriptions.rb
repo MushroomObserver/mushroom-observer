@@ -15,7 +15,7 @@ module Query::Initializers::Descriptions
     # Change this conditional to check for :has_descriptions param
     user = find_cached_parameter_instance(User, :by_author)
     add_join(:"#{type}_descriptions", :"#{type}_description_authors")
-    @where << "#{type}_description_authors.user_id = '#{user.id}'"
+    where << "#{type}_description_authors.user_id = '#{user.id}'"
   end
 
   def add_desc_by_editor_condition(type)
@@ -24,7 +24,7 @@ module Query::Initializers::Descriptions
     # Change this conditional to check for :has_descriptions param
     user = find_cached_parameter_instance(User, :by_editor)
     add_join(:"#{type}_descriptions", :"#{type}_description_editors")
-    @where << "#{type}_description_editors.user_id = '#{user.id}'"
+    where << "#{type}_description_editors.user_id = '#{user.id}'"
   end
 
   # If ever generalizing, `type` should be model.parent_type

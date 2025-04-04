@@ -8,22 +8,21 @@ class Query::LocationDescriptionsTest < UnitTestCase
   include QueryExtensions
 
   def test_location_description_all
-    assert_query(LocationDescription.all, :LocationDescription, by: :id)
+    assert_query(LocationDescription.all, :LocationDescription, order_by: :id)
   end
 
   def test_location_description_locations
     gualala = locations(:gualala)
     all_descs = LocationDescription.all
-    all_gualala_descs = LocationDescription.locations(gualala)
+    all_gualala_descs = LocationDescription.locations(gualala).order_by_default
     public_gualala_descs = all_gualala_descs.is_public
     assert(all_gualala_descs.length < all_descs.length)
     assert(public_gualala_descs.length < all_gualala_descs.length)
 
     assert_query(all_gualala_descs,
-                 :LocationDescription, by: :id, locations: gualala)
+                 :LocationDescription, locations: gualala)
     assert_query(public_gualala_descs,
-                 :LocationDescription, by: :id, locations: gualala,
-                                       is_public: "yes")
+                 :LocationDescription, locations: gualala, is_public: "yes")
   end
 
   def test_location_description_by_user
@@ -36,7 +35,7 @@ class Query::LocationDescriptionsTest < UnitTestCase
   end
 
   def test_location_description_by_author
-    loc1, loc2, loc3 = Location.all.index_order
+    loc1, loc2, loc3 = Location.order_by_default
     desc1 =
       loc1.description ||= LocationDescription.create!(location_id: loc1.id)
     desc2 =
@@ -50,7 +49,8 @@ class Query::LocationDescriptionsTest < UnitTestCase
     descs = LocationDescription.all
     assert_query_scope(descs.find_all { |d| d.authors.include?(rolf) },
                        LocationDescription.by_author(rolf),
-                       :LocationDescription, by_author: rolf.login, by: :id)
+                       :LocationDescription, by_author: rolf.login,
+                                             order_by: :id)
     assert_query_scope(descs.find_all { |d| d.authors.include?(mary) },
                        LocationDescription.by_author(mary),
                        :LocationDescription, by_author: mary.login)
@@ -59,8 +59,8 @@ class Query::LocationDescriptionsTest < UnitTestCase
                        :LocationDescription, by_author: users(:zero_user))
   end
 
-  def test_location_description_by_editor
-    loc1, loc2, loc3 = Location.index_order
+  def test_location_description_order_by_default
+    loc1, loc2, loc3 = Location.order_by_default
     desc1 =
       loc1.description ||= LocationDescription.create!(location_id: loc1.id)
     desc2 =
@@ -74,7 +74,7 @@ class Query::LocationDescriptionsTest < UnitTestCase
     descs = LocationDescription.all
     assert_query_scope(descs.find_all { |d| d.editors.include?(rolf) },
                        LocationDescription.by_editor(rolf),
-                       :LocationDescription, by_editor: rolf, by: :id)
+                       :LocationDescription, by_editor: rolf, order_by: :id)
     assert_query_scope(descs.find_all { |d| d.editors.include?(mary) },
                        LocationDescription.by_editor(mary),
                        :LocationDescription, by_editor: mary)
@@ -83,16 +83,23 @@ class Query::LocationDescriptionsTest < UnitTestCase
                        :LocationDescription, by_editor: users(:zero_user))
   end
 
-  def test_location_description_in_set
+  def test_location_description_order_by_name
+    expects = LocationDescription.order_by(:name)
+    assert_query(expects, :LocationDescription, order_by: :name)
+  end
+
+  def test_location_description_id_in_set
     assert_query(
       [], :LocationDescription, id_in_set: rolf.id
     )
-    assert_query(
-      LocationDescription.all,
-      :LocationDescription, id_in_set: LocationDescription.select(:id).to_a
+    set = LocationDescription.order_by_default.limit(3).map(&:id)
+    assert_query_scope(
+      set, LocationDescription.id_in_set(set),
+      :LocationDescription, id_in_set: set
     )
-    assert_query(
-      [location_descriptions(:albion_desc).id],
+    set = [location_descriptions(:albion_desc).id]
+    assert_query_scope(
+      set, LocationDescription.id_in_set(set),
       :LocationDescription, id_in_set: [rolf.id,
                                         location_descriptions(:albion_desc).id]
     )
@@ -100,7 +107,7 @@ class Query::LocationDescriptionsTest < UnitTestCase
 
   def test_location_description_content_has
     expects = [location_descriptions(:albion_desc)]
-    scope = LocationDescription.content_has("to play with").index_order
+    scope = LocationDescription.content_has("to play with").order_by_default
     assert_query_scope(expects, scope,
                        :LocationDescription, content_has: "to play with")
   end

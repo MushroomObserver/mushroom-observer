@@ -6,12 +6,6 @@
 #    Observation.created_at("2006-09-01", "2012-09-01")
 #    Name.updated_at("2016-12-01") # returns names updated after
 #
-#  Ordering Scopes
-#
-#  order_by_user::
-#  order_by_rss_log::
-#  order_by_set::
-#
 #  Filtering scopes
 #
 #  id_in_set::
@@ -48,22 +42,8 @@ module AbstractModel::Scopes
   # Two line stabby lambdas are OK, it's just the declaration line that will
   # always show as covered.
   included do # rubocop:disable Metrics/BlockLength
-    scope :order_by_user, lambda {
-      joins(:user).
-        reorder(User[:name].when(nil).then(User[:login]).
-                when("").then(User[:login]).
-                else(User[:name]).asc, id: :desc).distinct
-    }
-    scope :order_by_rss_log, lambda {
-      joins(:rss_log).
-        reorder(RssLog[:updated_at].desc, model.arel_table[:id].desc).distinct
-    }
-    scope :order_by_set, lambda { |set|
-      reorder(Arel::Nodes.build_quoted(set.join(",")) & arel_table[:id])
-    }
-
     scope :id_in_set, lambda { |ids|
-      set = limited_id_set(ids) # [] is valid
+      set = limited_id_set(ids) # [] is valid and should return none
       return none if set.empty?
 
       where(arel_table[:id].in(set)).order_by_set(set)
@@ -82,7 +62,7 @@ module AbstractModel::Scopes
       user_id = user.is_a?(Integer) ? user : user&.id
 
       joins(:versions).where("#{version_table}": { user_id: user_id }).
-        where.not(user: user)
+        where.not(user: user).distinct
     }
 
     # `created_at`/`updated_at` are versatile, and handle all Queries currently.
@@ -162,9 +142,9 @@ module AbstractModel::Scopes
     # In this scope, the order of early and late do matter. early > late can
     # mean a date range wrapping the end/beginning of the year.
     # NOTE: On MO so far, all date columns are named :when.
-    scope :date, lambda { |early, late = early, col: :when|
-      early, late = early if early.is_a?(Array) && early.size == 2
-      if late == early
+    scope :date, lambda { |early, late = nil, col: :when|
+      early, late = early if early.is_a?(Array)
+      if late.blank?
         date_after(early, col:)
       else
         date_between(early, late, col:)
@@ -208,9 +188,84 @@ module AbstractModel::Scopes
       send_where_chain(conditions).distinct
     }
 
+    ############################################################################
+    #
+    # ADVANCED SEARCH SCOPES
+    #
+    # Search Content
+    # Could do left outer join from observations to comments, but it
+    # takes longer.  Instead, break it into two queries, one without
+    # comments, and another with inner join on comments.
+    # NOTE: `klass` refers to the model of an ActiveRecord_Relation
+    scope :search_content, lambda { |phrase|
+      if klass.name == "Observation"
+        obs_joins = nil
+        comment_joins = :comments
+      else
+        obs_joins = :observations
+        comment_joins = { observations: :comments }
+      end
+      ids = joins(obs_joins).
+            search_columns(Observation[:notes], phrase).distinct.map(&:id)
+      ids += joins(comment_joins).
+             search_columns(
+               (Observation[:notes] + Comment[:summary] + Comment[:comment]),
+               phrase
+             ).distinct.map(&:id)
+      where(id: ids).distinct
+    }
+    scope :search_name, lambda { |phrase|
+      joins = case klass.name
+              when "Name"
+                nil
+              when "Observation"
+                :name
+              else
+                { observations: :name }
+              end
+      joins(joins).search_columns(Name[:search_name], phrase)
+    }
+    scope :search_user, lambda { |phrase|
+      phrase = User.remove_bracketed_name(phrase)
+      scope = all
+      scope = case klass.name
+              when "Observation"
+                scope.joins(:user)
+              when "Name", "Location"
+                scope.joins(observations: :user)
+              else
+                scope
+              end
+      scope.search_columns((User[:login] + User[:name]), phrase)
+    }
+    scope :search_where, lambda { |phrase|
+      scope = all
+      scope = case klass.name
+              when "Observation"
+                scope.left_outer_joins(:location)
+              when "Name"
+                scope.joins(
+                  :observations,
+                  Observation.left_outer_joins(:location).arel.join_sources
+                )
+              when "Location"
+                scope
+              end
+      field = if klass.name == "Location"
+                Location[:name]
+              else
+                Observation[:where]
+              end
+      scope.search_columns(field, phrase)
+    }
+
     # Used in Name, Observation and Project so far.
-    scope :has_comments,
-          ->(bool = true) { joined_relation_condition(:comments, bool:) }
+    # Ignores false.
+    scope :has_comments, lambda { |bool = true|
+      return all unless bool
+
+      joined_relation_condition(:comments, bool:)
+    }
     scope :comments_has, lambda { |phrase|
       joins(:comments).merge(Comment.search_content(phrase)).distinct
     }
@@ -221,14 +276,16 @@ module AbstractModel::Scopes
     # array of max of MO.query_max_array unique ids for use with Arel "in"
     #    where(<x>.in(limited_id_set(ids)))
     def limited_id_set(ids)
-      [ids].flatten.map(&:to_i).uniq[0, MO.query_max_array] # [] is valid
+      ids = [ids].flatten
+      ids.map!(&:id) if ids.first.is_a?(AbstractModel)
+      ids.map(&:to_i).uniq[0, MO.query_max_array] # [] is valid
     end
 
     def datetime_compare(dir, val, col:)
       # `datetime_condition_formatted` defined in ClassMethods below
       return unless (datetime = datetime_condition_formatted(dir, val))
 
-      where(arel_table[col].send(dir, datetime))
+      where(arel_table[col].send(:"#{dir}eq", datetime))
     end
 
     # Fills out the datetime with min/max values for month, day, hour, minute,
@@ -501,6 +558,7 @@ module AbstractModel::Scopes
     #   end
     # end
 
+    # this actually produces coalesce("").length.gt(0)
     def not_blank_condition(table_column, bool: true)
       if bool.to_s.to_boolean == true
         where(table_column.not_blank)

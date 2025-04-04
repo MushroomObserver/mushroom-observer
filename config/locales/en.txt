@@ -250,6 +250,8 @@
   comments: comments
   CONSTRAINTS: Constraints
   CONTRIBUTORS: Contributors
+  CURATOR: Curator
+  CURATORS: Curators
   DESCRIPTION: Description
   description: description
   DESCRIPTIONS: Descriptions
@@ -2325,8 +2327,8 @@
   show_observation_view_notifications: View Notifications
   show_observation_hide_map: Hide thumbnail map.
   show_observation_thumbnail_map_hidden: Thumbnail map hidden.  To re-enable this feature, go to your "[:app_preferences]":/account/preferences/edit page.
-  show_observation_add_link: Create [site] link
-  show_observation_add_link_dialog: "Enter a link here to this observation on [site]. Use the full URL, including \"https://\":"
+  show_observation_add_link: Add an external link
+  show_observation_add_link_dialog: "Enter a link here to this observation on another website. Use the full URL, including \"https://\":"
   show_observation_no_collection_numbers: No [:collection_numbers]
   show_observation_remove_collection_number: Remove collection number from this observation
   show_observation_no_herbarium_records: No [:herbarium_records]
@@ -3896,7 +3898,8 @@
   validate_name_text_name_too_long: "[:validate_too_many_characters(field=:form_names_text_name)]"
   validate_name_use_first_author: Use the first author followed by “et al.” per <a href="https://www.iapt-taxon.org/nomen/main.php?page=art46" target="_new">ICN Recommendation 46C.2</a>
   validate_name_user_missing: "[:validate_missing(field=:user)]"
-  validate_name_author_characters: "must include only letters, spaces, and these characters: \" ( ) - . , &"
+  # html entity stops Textile from turning apostrophe into a left single quote
+  validate_name_author_characters: "must include only letters, spaces, and these characters: &apos; \" ( ) - . , &"
   validate_name_author_ending: must end only in a letter or period
   validate_name_equivalent_exists: "Equivalent Name already exists"
   validate_naming_name_missing: "[:validate_missing(field=:name)]"
@@ -4501,7 +4504,6 @@
   query_search_user: search users
   query_search_where: search where
   query_search_content: search content
-  query_search_location_notes: search location notes
   query_preference_filter: preference filter
 
   # Sorting criteria.
@@ -4514,6 +4516,7 @@
   sort_by_contribution: Contribution
   sort_by_copyright_holder: "[:COPYRIGHT_HOLDER]"
   sort_by_created_at: Date Created
+  sort_by_curator: "[:CURATOR]"
   sort_by_date: "[:DATE]"
   sort_by_filename: File Name
   sort_by_header: "Sort by:"

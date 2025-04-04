@@ -80,7 +80,7 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   end
 
   def default_sort_order
-    :name
+    ::Query::Herbaria.default_order # :name
   end
 
   def index_active_params
@@ -92,12 +92,14 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   # Passes explicit :by param to affect title (only).
   def sorted_index_opts
     sorted_by = params[:by] || default_sort_order
-    super.merge(query_args: { by: sorted_by })
+    super.merge(query_args: { order_by: sorted_by })
   end
 
   def nonpersonal
     store_location
-    query = create_query(:Herbarium, nonpersonal: true, by: :code_then_name)
+    query = create_query(
+      :Herbarium, nonpersonal: true, order_by: :code_then_name
+    )
     [query, { always_index: true }]
   end
 

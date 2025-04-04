@@ -131,7 +131,7 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_index
     set = [nybg, herbaria(:rolf_herbarium)]
-    query = Query.lookup_and_save(:Herbarium, by: :name, id_in_set: set)
+    query = Query.lookup_and_save(:Herbarium, order_by: :name, id_in_set: set)
     login("zero") # Does not own any herbarium in set
     get(:index, params: { q: query.record.id.alphabetize })
 
@@ -157,15 +157,8 @@ class HerbariaControllerTest < FunctionalTestCase
     end
   end
 
-  def test_index_by_code
-    by = "code"
-
-    login
-    get(:index, params: { by: by })
-
-    assert_response(:success)
-    assert_displayed_title(:HERBARIA.l)
-    assert_sorted_by(by)
+  def test_index_with_non_default_sort
+    check_index_sorting
   end
 
   def test_index_all_merge_source_links_presence_rolf

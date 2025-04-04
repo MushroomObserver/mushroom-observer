@@ -90,8 +90,8 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
             format: { with: /\A[A-Z0-9][A-Z0-9-]*\z/,
                       message: proc { :alphanumerics_only.t } }
 
-  scope :index_order,
-        -> { order(updated_at: :desc, id: :desc) }
+  scope :order_by_default,
+        -> { order_by(::Query::Projects.default_order) }
 
   scope :members, lambda { |members|
     joins(user_group: :user_group_users).

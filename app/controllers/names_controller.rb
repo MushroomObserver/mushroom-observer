@@ -30,8 +30,8 @@ class NamesController < ApplicationController
     return if handle_advanced_search_invalid_q_param?
 
     query = find_query(:Name)
-    # Have to check this here because we're not running the query yet.
-    raise(:runtime_no_conditions.l) unless query.params.any?
+    # Would have to check this here because we're not running the query yet.
+    raise(:runtime_no_conditions.l) unless query&.params&.any?
 
     [query, {}]
   rescue StandardError => e
@@ -253,7 +253,7 @@ class NamesController < ApplicationController
         :Observation, names: { lookup: @name.id,
                                include_subtaxa: true,
                                exclude_original_names: true,
-                               by: :confidence }
+                               order_by: :confidence }
       )
       # Determine if relevant and count the results of running the query if so.
       # Don't run if there aren't any children.

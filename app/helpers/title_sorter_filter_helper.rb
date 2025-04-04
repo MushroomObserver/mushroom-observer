@@ -39,20 +39,20 @@ module TitleSorterFilterHelper
 
   # Add some info to the raw sorts: path, identifier, and if is current sort_by
   def assemble_sort_links(query, sorts, link_all)
-    this_by = (query.params[:by] || query.default_order).
+    this_by = (query.params[:order_by] || query.default_order).
               to_s.sub(/^reverse_/, "")
 
     sort_links = sorts.map do |by, label|
-      sort_link(label, query, by, this_by, link_all)
+      sort_link(label, by, this_by, link_all)
     end
 
     # Add a "reverse" button.
-    sort_links << sort_link(:sort_by_reverse.t, query,
+    sort_links << sort_link(:sort_by_reverse.t,
                             reverse_by(query, this_by), this_by, link_all)
   end
 
   def reverse_by(query, this_by)
-    if query.params[:by].to_s.start_with?("reverse_")
+    if query.params[:order_by].to_s.start_with?("reverse_")
       this_by
     else
       "reverse_#{this_by}"
@@ -61,14 +61,26 @@ module TitleSorterFilterHelper
 
   # The final product of `assemble_sort_links`: an array of attributes
   # [text, action, identifier, active]
-  def sort_link(label, query, by, this_by, link_all)
-    path = { controller: query.model.show_controller,
-             action: query.model.index_action,
+  def sort_link(label, by, this_by, link_all)
+    model = controller.controller_model_name
+    ctlr = controller.controller_name
+    helper_name = sort_link_helper_name(model, ctlr)
+    # path = send(:"#{helper_name}_path", q: get_query_param)
+    path = { controller: ctlr,
+             action: :index,
              by: by }.merge(query_params)
-    identifier = "#{query.model.to_s.pluralize.underscore}_by_#{by}_link"
+    # identifier = "#{query.model.to_s.pluralize.underscore}_by_#{by}_link"
+    identifier = "#{helper_name}_by_#{by}_link"
     active = !link_all && (by.to_s == this_by) # boolean if current sort order
 
     [label.t, path, identifier, active]
+  end
+
+  # Most controllers should have controller_model_name defined
+  def sort_link_helper_name(model, ctlr)
+    return ctlr unless model && ctlr != "contributors"
+
+    model.underscore.pluralize
   end
 
   # type_filters, currently only used in RssLogsController#index

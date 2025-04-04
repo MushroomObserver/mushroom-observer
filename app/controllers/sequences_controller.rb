@@ -54,7 +54,7 @@ class SequencesController < ApplicationController
   private
 
   def default_sort_order
-    :created_at
+    ::Query::Sequences.default_order # :created_at
   end
 
   def index_active_params

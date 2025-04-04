@@ -14,7 +14,7 @@
 #  Each model has a default search flavor (:default), which is used by the prev
 #  and next actions when the specified query no longer exists.  For example, if
 #  you click on an observation from the main index, prev and next travserse the
-#  results of an :Observation :all by: :rss_log query.  If the user comes back
+#  results of an :Observation order_by: :rss_log query.  If the user comes back
 #  a day later, this query will have been culled by the garbage collector (see
 #  below), so prev and next need to be able to create a default query on the
 #  fly.  In this case it may be :Observation :all (see default_flavors array
@@ -73,14 +73,14 @@
 #
 #    # In controller:
 #    query = create_query(:Name)
-#    @pages = paginate_numbers
-#    @names = query.paginate(@pages)
+#    @pagination_data = number_pagination_data
+#    @names = query.paginate(@pagination_data)
 #
 #    # Or if you want to paginate by letter first, then page number:
 #    query = create_query(:Name)
 #    query.need_letters = 'names.sort_name'
-#    @pages = paginate_letters
-#    @names = query.paginate(@pages)
+#    @pagination_data = letter_pagination_data
+#    @names = query.paginate(@pagination_data)
 #
 #  == Sequence Operators
 #
@@ -213,11 +213,12 @@ class Query
 
   def self.new(model, params = {}, current = nil)
     klass = "Query::#{model.to_s.pluralize}".constantize
-    query = klass.new
-    query.params = params
+    # Just ignore undeclared params:
+    query = klass.new(params.slice(*klass.parameter_declarations.keys))
+    query.params = query.attributes # initialize params for cleaning/validation
     query.subqueries = {}
-    query.validate_params
     query.current = current if current
+    query.valid = query.valid? # reinitializes params after cleaning/validation
     # query.initialize_query # if you want the attributes right away
     query
   end

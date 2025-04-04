@@ -183,6 +183,16 @@ class LocationsControllerTest < FunctionalTestCase
     assert_displayed_title(:LOCATIONS.l)
   end
 
+  def test_index_with_non_default_sort
+    check_index_sorting
+  end
+
+  def test_index_sorted_by_scientific_name
+    login("roy")
+
+    check_index_sorted_by(:name, do_login: false)
+  end
+
   def test_index_project
     project = projects(:open_membership_project)
 
@@ -191,17 +201,6 @@ class LocationsControllerTest < FunctionalTestCase
 
     location = project.observations[0].location
     assert_match(location.display_name, @response.body)
-  end
-
-  def test_index_with_non_default_sort
-    login
-
-    sort_orders = %w[num_views box_area]
-    sort_orders.each do |order|
-      get(:index, params: { by: order })
-      assert_displayed_title(:LOCATIONS.l)
-      assert_sorted_by(order)
-    end
   end
 
   def test_index_advanced_search
@@ -895,6 +894,6 @@ class LocationsControllerTest < FunctionalTestCase
   end
 
   def named_obs_query(name)
-    Query.lookup(:Observation, pattern: name, by: :name)
+    Query.lookup(:Observation, pattern: name, order_by: :name)
   end
 end

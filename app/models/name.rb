@@ -145,47 +145,6 @@
 #  ranks_below_species::     Ranks: below "Species".
 #  alt_ranks::               Ranks: map alternatives to our values.
 #
-#  ==== Scopes
-#  created_at("yyyy-mm-dd", "yyyy-mm-dd")
-#  updated_at("yyyy-mm-dd", "yyyy-mm-dd")
-#  deprecated
-#  has_description
-#  description_has
-#  has_description_in_project(project)
-#  has_description_created_by(user)
-#  has_description_reviewed_by(user)
-#  has_description_of_type(source_type)
-#  with_correct_spelling
-#  with_incorrect_spelling
-#  with_self_referential_misspelling
-#  has_synonyms
-#  ok_for_export
-#  rank(ranks)
-#  with_rank(rank)
-#  with_rank_below(rank)
-#  with_rank_and_name_in_classification(rank, text_name)
-#  with_rank_at_or_below_genus
-#  with_rank_above_genus
-#  subtaxa_of_genus_or_below(genus)
-#  subtaxa_of(name)
-#  include_synonyms_of(name)
-#  clade(name)
-#  text_name_has(text_name)
-#  search_name_has(phrase)
-#  has_classification
-#  classification_has(classification)
-#  has_author
-#  author_has(author)
-#  has_citation
-#  citation_has(citation)
-#  has_notes
-#  notes_has(notes)
-#  has_comments
-#  comments_has(summary)
-#  species_lists(species_list)
-#  locations(location)
-#  in_box(north:, south:, east:, west:)
-#
 #  ==== Classification
 #  validate_classification:: Make sure +classification+ syntax is valid.
 #  parse_classification::    Parse +classification+ string.
@@ -403,10 +362,12 @@ class Name < AbstractModel
     "locked"
   )
 
+  before_validation :normalize_author_characters!
+
   validates :author, allow_blank: true,
-                     # Contains only: letters, spaces, parens, hyphens,
-                     # periods, commas, ampersands, square brackets
-                     format: { with: /\A[\p{L} ()-.,&\[\]]*\z/,
+                     # Contains only: letters, space, parens, hyphen,
+                     # period, comma, ampersand, square brackets, single quote
+                     format: { with: /\A[\p{Alpha} ()-.,&\[\]']*\z/,
                                message: :validate_name_author_characters.t }
   validates :author, allow_blank: true,
                      # Ends only in letter, period plus any spaces

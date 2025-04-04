@@ -4,7 +4,9 @@ add_page_title(:list_interests_title.t)
 flash_error(@error) if @error && !@interests.any?(&:target)
 %>
 
-<% if @selected_type || @types.length > 1 && @pages.num_total > 1 %>
+<% if @selected_type ||
+      @types.length > 1 && @pagination_data.num_total > 1 %>
+
   <div class="btn-group pb-1 hidden-xs text-nowrap mt-5">
     <%= content_tag(:span, :rss_show.t, class: "btn btn-default btn-sm disabled") %>
 
@@ -24,7 +26,7 @@ flash_error(@error) if @error && !@interests.any?(&:target)
   </div>
 <% end %>
 
-<%= paginate_block(@pages) do %>
+<%= pagination_nav(@pagination_data) do %>
   <% if @interests.any?(&:target) %>
     <table class="table table-striped">
       <% @interests.select(&:target).each do |item|

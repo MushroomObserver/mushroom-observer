@@ -6,7 +6,7 @@ class Query::SpeciesLists < Query::Base
   end
 
   def list_by
-    @list_by ||= case params[:by].to_s
+    @list_by ||= case params[:order_by].to_s
                  when "user", "reverse_user"
                    User[:login]
                  else
@@ -32,6 +32,11 @@ class Query::SpeciesLists < Query::Base
       pattern: :string,
       observation_query: { subquery: :Observation }
     )
+  end
+
+  # Declare the parameters as attributes of type `query_param`
+  parameter_declarations.each_key do |param_name|
+    attribute param_name, :query_param
   end
 
   def initialize_flavor
@@ -76,7 +81,7 @@ class Query::SpeciesLists < Query::Base
     return unless params[:search_where]
 
     location_str = params[:search_where]
-    @where << "species_lists.where LIKE '%#{clean_pattern(location_str)}%'"
+    where << "species_lists.where LIKE '%#{clean_pattern(location_str)}%'"
   end
 
   def initialize_search_parameters
