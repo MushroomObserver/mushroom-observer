@@ -417,9 +417,8 @@ module GeneralExtensions
   def dump_xml(exp, indent = "")
     print("#{indent}#{e.name}")
     if exp.has_attributes?
-      attrs = []
-      exp.attributes.each do |a, v|
-        attrs << "#{a}=#{v}"
+      attrs = exp.attributes.map do |a, v|
+        "#{a}=#{v}"
       end
       print("(#{attrs.join(" ")})")
     end
