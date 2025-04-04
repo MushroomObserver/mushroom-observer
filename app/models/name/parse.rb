@@ -105,11 +105,11 @@ module Name::Parse
   ANY_RANK_ABBR   = / #{ANY_SUBG_ABBR} | #{SP_ABBR} | #{ANY_SSP_ABBR} /x
 
   UPPER_WORD = /
-                [A-Z][a-zë-]*[a-zë] | "[A-Z][a-zë\-.]*[a-zë]"
+                [A-Z][a-zë-]*[a-zë] | ['"][A-Z][a-zë\-.]*[a-zë]['"]
   /x
   LOWER_WORD = /
     (?!(?:sensu|van|de)\b) [a-z][a-zë-]*[a-zë] |
-    (?:sp\. \s)?"[a-z][\wë\-.]*[\wë]" /x
+    (?:sp\. \s)?['"][a-z][\wë\-.]*[\wë]['"] /x
   BINOMIAL   = / #{UPPER_WORD} \s #{LOWER_WORD} /x
   LOWER_WORD_OR_SP_NOV = / (?! sp\s|sp$|species) #{LOWER_WORD} |
                            sp\.\s\S*\d\S* /x
@@ -122,7 +122,7 @@ module Name::Parse
     #{ANY_AUTHOR_ABBR} |
     van\s | d[eu]\s |
     [A-ZÀÁÂÃÄÅÆÇĐÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞČŚŠ(] |
-    "[^a-z\s]
+    ['"][^a-z\s]
   /x
 
   # AUTHOR_PAT is separate from, and can't include GENUS_OR_UP_TAXON, etc.
@@ -131,17 +131,17 @@ module Name::Parse
   # Then the other parsers have a much easier job.
   AUTHOR_PAT =
     /^
-      ( "?
+      ( ['"]?
         #{UPPER_WORD}
         (?:
             # >= 1 of (rank Epithet)
             \s     #{ANY_SUBG_ABBR} \s #{UPPER_WORD}
-            (?: \s #{ANY_SUBG_ABBR} \s #{UPPER_WORD} )* "?
+            (?: \s #{ANY_SUBG_ABBR} \s #{UPPER_WORD} )* ['"]?
           |
             \s (?! #{AUTHOR_START} | #{ANY_SUBG_ABBR} ) #{LOWER_WORD}
-            (?: \s #{ANY_SSP_ABBR} \s #{LOWER_WORD} )* "?
+            (?: \s #{ANY_SSP_ABBR} \s #{LOWER_WORD} )* ['"]?
           |
-            "? \s #{SP_ABBR}
+            ['"]? \s #{SP_ABBR}
         )?
       )
       ( \s (?! #{ANY_NAME_ABBR} \s ) #{AUTHOR_START}.* )
@@ -153,18 +153,18 @@ module Name::Parse
   PROV_RANK_PREFIX = /[A-Z][a-z]+\.\ /x
 
   # Taxa without authors (for use by GROUP PAT)
-  GENUS_OR_UP_TAXON = /(#{PROV_RANK_PREFIX})?("? (?:Fossil-)? #{UPPER_WORD} "?) (?: \s #{SP_ABBR} )?/x # ([A-Z][a-z]+\. )?
-  SUBGENUS_TAXON    = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD}) "?)/x
-  SECTION_TAXON     = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
-                       (?: #{SECT_ABBR} \s #{UPPER_WORD}) "?)/x
-  SUBSECTION_TAXON  = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
+  GENUS_OR_UP_TAXON = /(#{PROV_RANK_PREFIX})?(['"]? (?:Fossil-)? #{UPPER_WORD} ['"]?) (?: \s #{SP_ABBR} )?/x # ([A-Z][a-z]+\. )?
+  SUBGENUS_TAXON    = /(#{PROV_RANK_PREFIX})?(['"]? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD}) ['"]?)/x
+  SECTION_TAXON     = /(#{PROV_RANK_PREFIX})?(['"]? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{SECT_ABBR} \s #{UPPER_WORD}) ['"]?)/x
+  SUBSECTION_TAXON  = /(#{PROV_RANK_PREFIX})?(['"]? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
                        (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)?
-                       (?: #{SUBSECT_ABBR} \s #{UPPER_WORD}) "?)/x
-  STIRPS_TAXON      = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{SUBSECT_ABBR} \s #{UPPER_WORD}) ['"]?)/x
+  STIRPS_TAXON      = /(#{PROV_RANK_PREFIX})?(['"]? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
                        (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)?
                        (?: #{SUBSECT_ABBR} \s #{UPPER_WORD} \s)?
-                       (?: #{STIRPS_ABBR} \s #{UPPER_WORD}) "?)/x
-  SPECIES_TAXON     = /(#{PROV_RANK_PREFIX})?("? #{UPPER_WORD} \s #{LOWER_WORD_OR_SP_NOV} "?)/x
+                       (?: #{STIRPS_ABBR} \s #{UPPER_WORD}) ['"]?)/x
+  SPECIES_TAXON     = /(#{PROV_RANK_PREFIX})?(['"]? #{UPPER_WORD} \s #{LOWER_WORD_OR_SP_NOV} ['"]?)/x
   # rubocop:enable Layout/LineLength
 
   GENUS_OR_UP_PAT = /^ #{GENUS_OR_UP_TAXON} (\s #{AUTHOR_START}.*)? $/x
@@ -173,16 +173,19 @@ module Name::Parse
   SUBSECTION_PAT  = /^ #{SUBSECTION_TAXON}  (\s #{AUTHOR_START}.*)? $/x
   STIRPS_PAT      = /^ #{STIRPS_TAXON}      (\s #{AUTHOR_START}.*)? $/x
   SPECIES_PAT     = /^ #{SPECIES_TAXON}     (\s #{AUTHOR_START}.*)? $/x
-  SUBSPECIES_PAT  = /^ ("? #{BINOMIAL} (?: \s #{SSP_ABBR} \s #{LOWER_WORD}) "?)
+  SUBSPECIES_PAT  = /^ (#{PROV_RANK_PREFIX})?(['"]? #{BINOMIAL}
+                       (?: \s #{SSP_ABBR} \s #{LOWER_WORD}) ['"]?)
                        (\s #{AUTHOR_START}.*)?
                    $/x
-  VARIETY_PAT     = /^ ("? #{BINOMIAL} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
-                         (?: \s #{VAR_ABBR} \s #{LOWER_WORD}) "?)
+  VARIETY_PAT     = /^ (#{PROV_RANK_PREFIX})?(['"]? #{BINOMIAL}
+                       (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
+                       (?: \s #{VAR_ABBR} \s #{LOWER_WORD}) ['"]?)
                        (\s #{AUTHOR_START}.*)?
                    $/x
-  FORM_PAT        = /^ ("? #{BINOMIAL} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
+  FORM_PAT        = /^ (#{PROV_RANK_PREFIX})?(['"]? #{BINOMIAL}
+                         (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
                          (?: \s #{VAR_ABBR} \s #{LOWER_WORD})?
-                         (?: \s #{F_ABBR} \s #{LOWER_WORD}) "?)
+                         (?: \s #{F_ABBR} \s #{LOWER_WORD}) ['"]?)
                        (\s #{AUTHOR_START}.*)?
                    $/x
 
@@ -193,12 +196,12 @@ module Name::Parse
                         #{SUBSECTION_TAXON}  |
                         #{STIRPS_TAXON}      |
                         #{SPECIES_TAXON}     |
-                        (?: "? #{UPPER_WORD} # infra-species taxa
+                        (?: (?: #{PROV_RANK_PREFIX})?['"]? #{UPPER_WORD}
                           (?: \s #{LOWER_WORD}
                             (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
                             (?: \s #{VAR_ABBR} \s #{LOWER_WORD})?
                             (?: \s #{F_ABBR}   \s #{LOWER_WORD})?
-                          )? "?
+                          )? ['"]?
                         )
                       )
                       (
@@ -316,10 +319,10 @@ module Name::Parse
   end
 
   def standardize_text_name(name, rank)
-    result = name
-    if name[0].starts_with?('"')
+    result = name.tr('"', "'")
+    if result[0] == "'"
       prefix = PROV_RANKS.key(rank)
-      result = "#{prefix} #{name}" if prefix
+      result = "#{prefix} #{result}" if prefix
     end
     result.tr("ë", "e")
   end
@@ -360,13 +363,8 @@ module Name::Parse
   def parse_below_genus(str, deprecated, rank, pattern)
     results = nil
     if (match = pattern.match(str))
-      index = if match[1].nil? || match[1][-1] == " "
-                1
-              else
-                0
-              end
-      name = match[index + 1]
-      author = match[index + 2].to_s
+      name = match[2].tr('"', "'")
+      author = match[3].to_s
       name = standardize_sp_nov_variants(name) if rank == "Species"
       (name, author, rank) = fix_autonym(name, author, rank)
       name = standardize_name(name)
@@ -429,14 +427,12 @@ module Name::Parse
   # Standardize various ways of writing sp. nov.  Convert to: Amanita sp. "T44"
   def standardize_sp_nov_variants(name)
     names = split_name(name)
-    if names.length == 2
-      split_name(name)
-      names[1].sub!(/^"sp-/i, 'sp. "')
-      names[1].sub!(/^"/, 'sp. "')
-      names.join(" ").strip
-    else
-      name
-    end
+    return name if names.length != 2
+
+    split_name(name)
+    names[1].sub!(/^'sp-/i, "sp. '")
+    names[1].sub!(/^'/, "sp. '")
+    names.join(" ").strip
   end
 
   def split_name(name)
@@ -513,7 +509,7 @@ module Name::Parse
 
   def standardize_name(name)
     subnames = split_name(name)
-    subnames[0] = "Gen. #{subnames[0]}" if subnames[0][0] == '"'
+    subnames[0] = "Gen. #{subnames[0]}" if subnames[0][0] == "'"
     1.upto(subnames.length - 1) do |i|
       subnames[i] = standardize_subname(subnames[i])
     end
@@ -527,7 +523,7 @@ module Name::Parse
 
       rank = standardize_subrank(match[1])
       term = match[2]
-      term = "\"#{term}\"" if rank == "sp." && term[0] != '"'
+      term = "'#{term}'" if rank == "sp." && term[0] != "'"
       return "#{rank} #{term}" if match
     end
     subname
@@ -535,9 +531,9 @@ module Name::Parse
 
   def standardize_subrank(rank)
     match = RANK_START_MATCHER.match(rank)
-    return STANDARD_SECONDARY_RANKS[match[1].downcase.to_sym] if match
+    return rank unless match
 
-    rank
+    STANDARD_SECONDARY_RANKS[match[1].downcase.to_sym]
   end
 
   def standardize_author(str)
@@ -590,11 +586,10 @@ module Name::Parse
     str = format_name(name, :deprecated).
           sub(/_+$/, " "). # put genus at the top
           gsub(/_+/, "").
-          # sub(/ "(sp[-.])/, ' {\1'). # put "sp-1" at end
           sub(/ sp. /, " "). # ignore sp.
           sub(/^[A-Z][a-z]+\. /, ""). # ignore leading ranks like Gen.
-          gsub(/ "([^"]*")/, &:downcase). # downcase prov epithets
-          delete('"'). # Now ignore quotes
+          gsub(/ '([^']*')/, &:downcase). # downcase prov epithets
+          delete("'"). # Now ignore quotes
           sub(" subg. ", "  {1subg.  ").
           sub(" sect. ",    "  {2sect.  ").
           sub(" subsect. ", "  {3subsect.  ").

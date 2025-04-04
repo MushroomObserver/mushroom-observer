@@ -1173,10 +1173,10 @@ class SpeciesListsControllerTest < FunctionalTestCase
         "Psalliota",
         "Chlorophyllum Author",
         "Lepiota Author",
-        'Gen. "One"',
-        'Gen. "Two"',
-        'Gen. "Three"',
-        'Agaricus sp. "blah"'
+        "Gen. 'One'",
+        "Gen. 'Two'",
+        "Gen. 'Three'",
+        "Agaricus sp. 'blah'"
       ].sort,
       assigns(:species_list).observations.map { |x| x.name.search_name }.sort
     )
@@ -1185,10 +1185,10 @@ class SpeciesListsControllerTest < FunctionalTestCase
       "Fungi",
       "Agaricus sp",
       "Psalliota sp.",
-      '"One"',
-      '"Two" sp',
-      '"Three" sp.',
-      'Agaricus "blah"',
+      "'One'",
+      "'Two' sp",
+      "'Three' sp.",
+      "Agaricus 'blah'",
       "Chlorophyllum Author",
       "Lepiota sp Author",
       "Lepiota sp. Author"
@@ -1206,10 +1206,10 @@ class SpeciesListsControllerTest < FunctionalTestCase
         "Chlorophyllum Author",
         "Lepiota Author",
         "Lepiota Author",
-        'Gen. "One"',
-        'Gen. "Two"',
-        'Gen. "Three"',
-        'Agaricus sp. "blah"'
+        "Gen. 'One'",
+        "Gen. 'Two'",
+        "Gen. 'Three'",
+        "Agaricus sp. 'blah'"
       ].sort,
       assigns(:species_list).observations.map { |x| x.name.search_name }.sort
     )
