@@ -594,13 +594,6 @@ Style/ClassVars:
     - 'test/language_extensions.rb'
     - 'test/test_helper.rb'
 
-# Offense count: 7
-# This cop supports unsafe autocorrection (--autocorrect-all).
-Style/CombinableLoops:
-  Exclude:
-    - 'script/check_enum_values'
-    - 'script/mushroom_mapper.rb'
-
 # Offense count: 1
 # This cop supports unsafe autocorrection (--autocorrect-all).
 Style/FileNull:
