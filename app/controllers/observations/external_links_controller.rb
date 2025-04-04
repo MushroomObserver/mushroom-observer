@@ -7,99 +7,159 @@ module Observations
 
     def new
       set_ivars_for_new
-      check_link_permission!(@observation, @site)
-      render_modal_external_link_form
+      @external_link = ExternalLink.new(
+        user: @user,
+        observation: @observation
+      )
+      check_external_link_permission!(@observation)
+      respond_to do |format|
+        format.turbo_stream { render_modal_external_link_form }
+        format.html
+      end
     end
 
     def create
-      url = params.dig(:external_link, :url).to_s
-
       set_ivars_for_new
-      check_link_permission!(@observation, @site)
-      create_link(@observation, @site, url)
+      @url = params.dig(:external_link, :url).to_s
+      @site = ExternalSite.find(params.dig(:external_link, :external_site_id))
+      check_external_link_permission!(@observation, @site)
+      create_external_link
     end
 
     def edit
       set_ivars_for_edit
-      check_link_permission!(@external_link)
-      render_modal_external_link_form
+      check_external_link_permission!(@external_link)
+      respond_to do |format|
+        format.turbo_stream { render_modal_external_link_form }
+        format.html
+      end
     end
 
     def update
-      url = params.dig(:external_link, :url).to_s
-
       set_ivars_for_edit
-      check_link_permission!(@external_link)
-      update_link(@external_link, url)
+      @url = params.dig(:external_link, :url).to_s
+      check_external_link_permission!(@external_link)
+      update_external_link
     end
 
     def destroy
       set_ivars_for_edit
-      check_link_permission!(@external_link)
-      remove_link(@external_link)
+      check_external_link_permission!(@external_link)
+      remove_external_link
     end
 
     private
 
     def set_ivars_for_new
       @observation = Observation.find(params[:id].to_s)
-      @site = ExternalSite.find(params[:external_site_id].to_s)
+      @sites = ExternalSite.sites_user_can_add_links_to(
+        @user, @observation, admin: in_admin_mode?
+      )
+      @base_urls = {} # used as placeholders in the url field
+      @sites.each { |site| @base_urls[site.name] = site.base_url }
+
+      # @site = ExternalSite.find(params.dig(:external_link, :external_site_id))
+      @back_object = @observation
     end
 
     def set_ivars_for_edit
       @external_link = ExternalLink.find(params[:id].to_s)
       @observation = Observation.find(@external_link.observation_id)
       @site = ExternalSite.find(@external_link.external_site_id)
+      @back_object = @observation
     end
 
-    def check_link_permission!(obs, site = nil)
+    def check_external_link_permission!(obs, site = nil)
       if obs.is_a?(ExternalLink)
         link = obs
         obs  = link.observation
         site = link.external_site
       end
-      return if obs.user == @user || site.member?(@user) || @user.admin
+      return true if obs&.user == @user || site&.member?(@user) || @user.admin
 
-      raise("Permission denied.")
+      flash_error("Permission denied.")
+      false
     end
 
-    def create_link(obs, site, url)
-      link = ExternalLink.create(
+    def create_external_link
+      @external_link = ExternalLink.create(
         user: @user,
-        observation: obs,
-        external_site: site,
-        url: url
+        observation: @observation,
+        external_site: @site,
+        url: @url
       )
 
-      if link.errors.any?
-        flash_error(link.formatted_errors.join("\n").strip_html)
-        reload_external_link_modal_form_and_flash
+      if @external_link.errors.any?
+        flash_error_and_reload
       else
-        flash_notice(
-          :runtime_added_to.t(type: :external_link, name: :observation)
-        )
-        render_external_links_section_update
+        flash_success_and_return
       end
     end
 
-    def update_link(link, url)
-      link.update(url: url)
+    def flash_error_and_reload
+      redirect_params = case action_name # this is a rails var
+                        when "create"
+                          { action: :new }
+                        when "update"
+                          { action: :edit }
+                        end
+      redirect_params = redirect_params.merge({ back: @back }) if @back.present?
 
-      if link.errors.any?
-        flash_error(link.formatted_errors.join("\n").strip_html)
-        reload_external_link_modal_form_and_flash
-      else
-        flash_notice(:runtime_updated_at.t(type: :external_link))
-        render_external_links_section_update
+      flash_error(@external_link.formatted_errors.join("\n").strip_html)
+      respond_to do |format|
+        format.turbo_stream { reload_external_link_modal_form_and_flash }
+        format.html { redirect_to(redirect_params) and return true }
       end
     end
 
-    def remove_link(link)
-      id = link.id
-      link.destroy!
+    def flash_success_and_return
+      message = case action_name # this is a rails var
+                when "create"
+                  :runtime_added_to.t(type: :external_link, name: :observation)
+                when "update"
+                  :runtime_updated_at.t(type: :external_link)
+                when "destroy"
+                  :runtime_destroyed_id.t(type: :external_link, value: @id)
+                end
+      flash_notice(message)
+      respond_to do |format|
+        format.turbo_stream { render_external_links_section_update }
+        format.html do
+          redirect_to(permanent_observation_path(@observation))
+        end
+      end
+    end
 
-      flash_notice(:runtime_destroyed_id.t(type: :external_link, value: id))
-      render_external_links_section_update
+    def update_external_link
+      @external_link.update(url: @url)
+
+      if @external_link.errors.any?
+        flash_error_and_reload
+      else
+        flash_success_and_return
+      end
+    end
+
+    def remove_external_link
+      @id = @external_link.id
+      @external_link.destroy!
+
+      flash_success_and_return
+    end
+
+    def show_flash_and_send_back
+      respond_to do |format|
+        format.html do
+          redirect_to(permanent_observation_path(@observation)) and
+            return
+        end
+        # renders the flash in the modal, but not sure it's necessary
+        # to have a response here. are they getting sent back?
+        format.turbo_stream do
+          render(partial: "shared/modal_flash_update",
+                 locals: { identifier: modal_identifier }) and return
+        end
+      end
     end
 
     def render_modal_external_link_form
@@ -122,7 +182,7 @@ module Observations
     def modal_title
       case action_name
       when "new", "create"
-        :show_observation_add_link.t(site: "MycoPortal")
+        :show_observation_add_link.l
       when "edit", "update"
         :edit_object.t(type: :external_link)
       end
@@ -130,10 +190,14 @@ module Observations
 
     def render_external_links_section_update
       # need to reset this in case they can now add sites
-      @other_sites = helpers.external_sites_user_can_add_links_to(@observation)
+      @observation = @observation.reload
+      @other_sites = ExternalSite.sites_user_can_add_links_to(
+        @user, @observation, admin: in_admin_mode?
+      )
       render(
         partial: "observations/show/section_update",
-        locals: { identifier: "external_links" }
+        locals: { identifier: "external_links",
+                  obs: @observation, sites: @other_sites }
       ) and return
     end
 
