@@ -594,21 +594,6 @@ Style/ClassVars:
     - 'test/language_extensions.rb'
     - 'test/test_helper.rb'
 
-# Offense count: 1
-# This cop supports unsafe autocorrection (--autocorrect-all).
-Style/FileNull:
-  Exclude:
-    - 'test/models/queued_email_test.rb'
-
-# Offense count: 2
-# This cop supports unsafe autocorrection (--autocorrect-all).
-# Configuration parameters: AllowedReceivers.
-# AllowedReceivers: Thread.current
-Style/HashEachMethods:
-  Exclude:
-    - 'app/classes/eol_data.rb'
-    - 'script/slowest_pages'
-
 # Offense count: 2
 Style/MissingRespondToMissing:
   Exclude:
