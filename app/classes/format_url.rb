@@ -118,7 +118,7 @@ class FormatURL
 
     url = URI.parse(url)
     return false if url.host.blank?
-    return true if ENV.fetch("RAILS_ENV") == "test"
+    return true if ENV["RAILS_ENV"] == "test"
 
     request = format_request(url)
     path = url.path if url.path.present?
