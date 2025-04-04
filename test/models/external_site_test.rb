@@ -4,7 +4,6 @@ require("test_helper")
 
 class ExternalSiteTest < UnitTestCase
   def test_create_external_site_valid
-    stub_request(:any, /genbank/)
     site = ExternalSite.create!(
       name: "GenBank",
       project: Project.first,
@@ -14,7 +13,6 @@ class ExternalSiteTest < UnitTestCase
     assert_empty(site.errors)
     assert_equal("https://genbank.org", site.reload.base_url)
 
-    stub_request(:any, /genbank/)
     assert_raises("Name has already been taken") do
       ExternalSite.create!(
         name: "genbank",
@@ -51,7 +49,6 @@ class ExternalSiteTest < UnitTestCase
 
   def test_external_site_uniqueness
     site1 = ExternalSite.first
-    stub_request(:any, site1.base_url)
     site2 = ExternalSite.create(
       name: site1.name,
       project: site1.project,
@@ -59,7 +56,6 @@ class ExternalSiteTest < UnitTestCase
     )
     assert_not_empty(site2.errors)
 
-    stub_request(:any, site1.base_url)
     site3 = ExternalSite.create(
       name: "#{site1.name} two",
       project: site1.project,
@@ -67,7 +63,6 @@ class ExternalSiteTest < UnitTestCase
     )
     assert_not_empty(site3.errors)
 
-    stub_request(:any, "https://different.url")
     site4 = ExternalSite.create(
       name: "#{site1.name} two",
       project: site1.project,

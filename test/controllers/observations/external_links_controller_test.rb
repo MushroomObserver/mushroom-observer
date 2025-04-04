@@ -37,7 +37,6 @@ module Observations
     def test_add_external_link_owner
       obs, _obs2, site, url, params = setup_create_test
       login("rolf")
-      stub_request(:any, /mycoportal/)
       post(:create, params:)
       assert_redirected_to(permanent_observation_path(obs.id))
       assert_flash_success
@@ -53,7 +52,6 @@ module Observations
       login("mary")
       params2 = params.dup
       params2[:external_link][:url] = "bad_url"
-      stub_request(:any, /bad_url/) # be sure it errors regardless of response
       post(:create, params: params2)
       assert_flash_error
     end
@@ -75,7 +73,6 @@ module Observations
       login("mary")
       params2 = params.dup
       params2[:external_link][:url] = url.delete_prefix("https://")
-      stub_request(:any, /mycoportal/)
       post(:create, params: params2)
       assert_flash_success
       assert_equal(url, ExternalLink.last.url)
@@ -86,7 +83,6 @@ module Observations
       login("mary")
       params2 = params.dup
       params2[:external_link][:url] = url.delete_prefix("https://www.")
-      stub_request(:any, /mycoportal/)
       post(:create, params: params2)
       assert_flash_success
       assert_equal(url, ExternalLink.last.url)
@@ -98,7 +94,6 @@ module Observations
       login("mary")
       params2 = params.dup
       params2[:id] = obs2.id
-      stub_request(:any, /mycoportal/)
       post(:create, params: params2)
       assert_redirected_to(permanent_observation_path(obs2.id))
       assert_flash_success
@@ -118,32 +113,27 @@ module Observations
       }
 
       # not logged in
-      stub_request(:any, /inaturalist/)
       put(:update, params:)
       assert_redirected_to(new_account_login_path)
 
       # dick doesn't have permission
       login("dick")
-      stub_request(:any, /inaturalist/)
       put(:update, params:)
       assert_flash_error
 
       # mary can
       login("mary")
-      stub_request(:any, /inaturalist/)
       put(:update, params:)
       assert_equal(new_url, link.reload.url)
       assert_flash_success
 
       # rolf can, too
       login("rolf")
-      stub_request(:any, /inaturalist/)
       put(:update, params:)
       assert_flash_success
 
       # bad url
       params[:external_link][:url] = "bad_url"
-      stub_request(:any, /bad_url/)
       put(:update, params:)
       assert_flash_error
     end

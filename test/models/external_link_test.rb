@@ -7,7 +7,6 @@ class ExternalLinkTest < UnitTestCase
     site = ExternalSite.first
     base_url = site.base_url
 
-    stub_request(:any, /#{base_url}/)
     link = ExternalLink.create!(
       user: mary,
       observation: Observation.first,
@@ -30,17 +29,14 @@ class ExternalLinkTest < UnitTestCase
     site = ExternalSite.first
     base_url = site.base_url
 
-    stub_request(:any, /#{base_url}/)
     link = ExternalLink.create(url: "#{base_url}#{"toolong" * 100}",
                                external_site: site)
     assert_not_empty(link.errors[:url])
 
-    stub_request(:any, /#{base_url}/)
     link = ExternalLink.create(url: "#{base_url}invalid url",
                                external_site: site)
     assert_not_empty(link.errors[:url])
 
-    stub_request(:any, /#{base_url}/)
     link = ExternalLink.create(url: "#{base_url}url", external_site: site)
     assert_empty(link.errors[:url])
   end
@@ -54,7 +50,6 @@ class ExternalLinkTest < UnitTestCase
     assert_not_equal(link1.observation.id, another_obs.id)
 
     # same observation
-    stub_request(:any, /#{base_url}/)
     link2 = ExternalLink.create(
       user: mary,
       observation: link1.observation,
@@ -64,7 +59,6 @@ class ExternalLinkTest < UnitTestCase
     assert_not_empty(link2.errors)
 
     # different observation
-    stub_request(:any, /#{base_url}/)
     link3 = ExternalLink.create(
       user: mary,
       observation: another_obs,

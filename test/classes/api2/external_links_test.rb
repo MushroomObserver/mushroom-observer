@@ -18,7 +18,6 @@ class API2::ExternalLinksTest < UnitTestCase
     other_obs = observations(:agaricus_campestris_obs)
     link1 = external_links(:coprinus_comatus_obs_mycoportal_link)
     link2 = external_links(:coprinus_comatus_obs_inaturalist_link)
-    stub_request(:any, /mycoportal/)
     link3 = ExternalLink.create!(user: rolf, observation: other_obs,
                                  external_site: link1.external_site,
                                  url: "#{link1.external_site.base_url}876876")
@@ -64,7 +63,6 @@ class API2::ExternalLinksTest < UnitTestCase
       external_site: site.id,
       url: "#{base_url}blah"
     }
-    stub_request(:any, /#{base_url}/)
     assert_api_pass(params)
     assert_api_fail(params.except(:api_key))
     assert_api_fail(params.except(:observation))
@@ -73,7 +71,6 @@ class API2::ExternalLinksTest < UnitTestCase
     assert_api_fail(params.merge(api_key: "spammer"))
     assert_api_fail(params.merge(observation: "spammer"))
     assert_api_fail(params.merge(external_site: "spammer"))
-    stub_request(:any, /spammer/)
     assert_api_fail(params.merge(url: "spammer"))
     assert_api_fail(params.merge(observation: marys_obs.id))
     assert_api_fail(params.merge(api_key: marys_key.key)) # already exists!
@@ -97,22 +94,17 @@ class API2::ExternalLinksTest < UnitTestCase
       set_url: new_url
     }
     @api_key.update!(user: dick)
-    stub_request(:any, /#{base_url}/)
     assert_api_fail(params)
     @api_key.update!(user: rolf)
-    stub_request(:any, /#{base_url}/)
     assert_api_fail(params.merge(set_url: ""))
-    stub_request(:any, /#{base_url}/)
     assert_api_pass(params)
     assert_equal(new_url, link.reload.url)
     @api_key.update!(user: mary)
-    stub_request(:any, /#{base_url}/)
     assert_api_pass(params.merge(set_url: "#{new_url}2"))
     assert_equal("#{new_url}2", link.reload.url)
     @api_key.update!(user: dick)
     user_group = link.external_site&.project&.user_group
     user_group.users << dick if user_group
-    stub_request(:any, /#{base_url}/)
     assert_api_pass(params.merge(set_url: "#{new_url}3"))
     assert_equal("#{new_url}3", link.reload.url)
   end
@@ -122,6 +114,7 @@ class API2::ExternalLinksTest < UnitTestCase
     assert_users_equal(mary, link.user)
     assert_users_equal(rolf, link.observation.user)
     assert_false(link.external_site&.project&.member?(dick))
+    site = link.external_site
     params = {
       method: :delete,
       action: :external_link,
@@ -131,7 +124,7 @@ class API2::ExternalLinksTest < UnitTestCase
     recreate_params = {
       user: mary,
       observation: link.observation,
-      external_site: link.external_site,
+      external_site: site,
       url: link.url
     }
     @api_key.update!(user: dick)
