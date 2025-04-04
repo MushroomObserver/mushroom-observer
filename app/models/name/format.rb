@@ -136,14 +136,11 @@ module Name::Format
 
   module ClassMethods
     def display_to_real_text(name)
-      name.display_name.gsub(/ ^\*?\*?__ | __\*?\*?[^_*]*$ /x, "").
+      name.display_name.gsub(/(_\*?\*?)[^_*]*$/, '\1'). # Remove trailing author
         gsub(/__\*?\*? [^_*]* \s (#{Name::Parse::ANY_NAME_ABBR}) \s \*?\*?__/ox,
-             ' \1 ').
-        # (this part should be unnecessary)
-        # Because "group" was removed by the 1st gsub above,
-        # tack it back on (if it was part of display_name)
-        gsub(/__\*?\*? [^_*]* \*?\*?__/x, " ").
-        concat(group_suffix(name))
+             ' \1 '). # Remove internal author
+        gsub(/\*?\*?__\*?\*?/, ""). # Remove textile ornamentation
+        concat(group_suffix(name)) # Readd group suffix
     end
 
     def display_to_real_search(name)

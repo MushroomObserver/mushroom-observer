@@ -14,7 +14,7 @@ else
   turbo_stream.replace(id) do
     render(
       partial: partial,
-      locals: { obs: @observation },
+      locals: local_assigns.except(:identifier),
       layout: false
     )
   end

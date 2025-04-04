@@ -10,7 +10,7 @@ module Location::Scopes
   included do # rubocop:disable Metrics/BlockLength
     # default ordering for index queries
     scope :order_by_default,
-          -> { order(name: :asc, id: :desc) }
+          -> { order_by(::Query::Locations.default_order) }
 
     # This should really be regions/region, but changing user prefs/filters and
     # autocompleters is very involved, requires migration and script.
@@ -44,7 +44,7 @@ module Location::Scopes
       joins_default_descriptions.search_columns(cols, phrase)
     }
     scope :regexp, lambda { |phrase|
-      where(Location[:name] =~ phrase.to_s.strip.squeeze(" "))
+      where(Location[:name] =~ phrase.to_s.strip.squeeze(" ")).distinct
     }
     # https://stackoverflow.com/a/77064711/3357635
     # AR's assumed join condition is
@@ -60,26 +60,9 @@ module Location::Scopes
     }
 
     scope :has_descriptions, lambda { |bool = true|
-      presence_condition(Location[:description_id], bool:)
-    }
-    scope :description_has, lambda { |phrase|
-      joins(:descriptions).
-        merge(LocationDescription.search_content(phrase)).distinct
-    }
-    scope :has_description_created_by, lambda { |user|
-      joins(:descriptions).
-        merge(LocationDescription.where(user: user)).distinct
-    }
-    scope :has_description_reviewed_by, lambda { |user|
-      joins(:descriptions).
-        merge(LocationDescription.where(reviewer: user)).distinct
-    }
-    scope :has_description_of_type, lambda { |source|
-      # Check that it's a valid source type (string enum value)
-      return none if Description::ALL_SOURCE_TYPES.exclude?(source)
+      return all unless bool
 
-      joins(:descriptions).
-        merge(LocationDescription.where(source_type: source)).distinct
+      presence_condition(Location[:description_id], bool:)
     }
     scope :has_observations,
           -> { joins(:observations).distinct }

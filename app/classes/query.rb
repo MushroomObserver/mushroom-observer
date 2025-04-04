@@ -73,14 +73,14 @@
 #
 #    # In controller:
 #    query = create_query(:Name)
-#    @pages = paginate_numbers
-#    @names = query.paginate(@pages)
+#    @pagination_data = number_pagination_data
+#    @names = query.paginate(@pagination_data)
 #
 #    # Or if you want to paginate by letter first, then page number:
 #    query = create_query(:Name)
 #    query.need_letters = 'names.sort_name'
-#    @pages = paginate_letters
-#    @names = query.paginate(@pages)
+#    @pagination_data = letter_pagination_data
+#    @names = query.paginate(@pagination_data)
 #
 #  == Sequence Operators
 #
@@ -213,11 +213,12 @@ class Query
 
   def self.new(model, params = {}, current = nil)
     klass = "Query::#{model.to_s.pluralize}".constantize
-    query = klass.new
-    query.params = params
+    # Just ignore undeclared params:
+    query = klass.new(params.slice(*klass.parameter_declarations.keys))
+    query.params = query.attributes # initialize params for cleaning/validation
     query.subqueries = {}
-    query.validate_params
     query.current = current if current
+    query.valid = query.valid? # reinitializes params after cleaning/validation
     # query.initialize_query # if you want the attributes right away
     query
   end

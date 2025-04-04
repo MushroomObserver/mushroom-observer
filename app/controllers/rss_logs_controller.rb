@@ -17,7 +17,7 @@ class RssLogsController < ApplicationController
   private
 
   def default_sort_order
-    :updated_at
+    ::Query::RssLogs.default_order # :updated_at
   end
 
   def unfiltered_index_opts

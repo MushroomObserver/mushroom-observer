@@ -12,6 +12,11 @@ class Query::FieldSlipsTest < UnitTestCase
     assert_query(expects, :FieldSlip)
   end
 
+  def test_field_slip_order_by_code_then_date
+    expects = FieldSlip.order_by(:code_then_date)
+    assert_query(expects, :FieldSlip, order_by: :code_then_date)
+  end
+
   def mary_field_slips
     [field_slips(:field_slip_one), field_slips(:field_slip_two),
      field_slips(:field_slip_no_obs)]

@@ -10,8 +10,26 @@ class Query::LocationsTest < UnitTestCase
   def test_location_all
     expects = Location.order_by_default
     assert_query(expects, :Location)
-    expects = Location.reorder(id: :asc)
+  end
+
+  def test_location_order_by_box_area
+    expects = Location.order_by(:box_area)
+    assert_query(expects, :Location, order_by: :box_area)
+  end
+
+  def test_location_order_by_id
+    expects = Location.order_by(:id)
     assert_query(expects, :Location, order_by: :id)
+  end
+
+  def test_location_order_by_name
+    expects = Location.order_by(:name)
+    assert_query(expects, :Location, order_by: :name)
+  end
+
+  def test_location_order_by_num_views
+    expects = Location.order_by(:num_views)
+    assert_query(expects, :Location, order_by: :num_views)
   end
 
   def test_location_by_users
@@ -32,7 +50,7 @@ class Query::LocationsTest < UnitTestCase
   end
 
   def test_location_by_rss_log
-    expects = Location.order_by_rss_log
+    expects = Location.order_by(:rss_log)
     assert_query(expects.to_a, :Location, order_by: :rss_log)
   end
 
@@ -51,19 +69,19 @@ class Query::LocationsTest < UnitTestCase
   end
 
   def test_location_has_notes
-    expects = Location.order_by_default.has_notes
+    expects = Location.has_notes.order_by_default
     assert_query(expects, :Location, has_notes: true)
-    expects = Location.order_by_default.has_notes(false)
+    expects = Location.has_notes(false).order_by_default
     assert_query(expects, :Location, has_notes: false)
   end
 
   def test_location_notes_has
     expects = [locations(:burbank)]
-    scope = Location.order_by_default.notes_has('"should persist"')
+    scope = Location.notes_has('"should persist"').order_by_default
     assert_query_scope(expects, scope, :Location, notes_has: '"should persist"')
     expects = [locations(:point_reyes)]
-    scope = Location.order_by_default.
-            notes_has('"legal to collect" -"Salt Point"')
+    scope = Location.notes_has('"legal to collect" -"Salt Point"').
+            order_by_default
     assert_query_scope(expects, scope,
                        :Location, notes_has: '"legal to collect" -"Salt Point"')
   end
@@ -71,7 +89,7 @@ class Query::LocationsTest < UnitTestCase
   def test_location_in_box
     expects = [locations(:burbank)]
     box = { north: 35, south: 34, east: -118, west: -119 }
-    scope = Location.order_by_default.in_box(**box)
+    scope = Location.in_box(**box).order_by_default
     assert_query_scope(expects, scope, :Location, in_box: box)
   end
 
@@ -101,14 +119,14 @@ class Query::LocationsTest < UnitTestCase
   end
 
   def test_location_advanced_search_user
-    expects = Location.order_by_default.joins(observations: :user).
-              where(observations: { user: rolf }).distinct
-    scope = Location.order_by_default.search_user("rolf")
+    expects = Location.joins(observations: :user).distinct.
+              where(observations: { user: rolf }).order_by_default
+    scope = Location.search_user("rolf").order_by_default
     assert_query_scope(expects, scope, :Location, search_user: "rolf")
 
-    expects = Location.order_by_default.joins(observations: :user).
-              where(observations: { user: dick }).distinct
-    scope = Location.order_by_default.search_user("dick")
+    expects = Location.joins(observations: :user).distinct.
+              where(observations: { user: dick }).order_by_default
+    scope = Location.search_user("dick").order_by_default
     assert_query_scope(expects, scope, :Location, search_user: "dick")
   end
 
@@ -148,19 +166,20 @@ class Query::LocationsTest < UnitTestCase
   end
 
   def test_location_regexp_search
-    expects = Location.regexp("California").order_by_default.distinct
+    expects = Location.regexp("California").order_by_default
     assert_query(expects, :Location, regexp: ".alifornia")
   end
 
   def test_location_has_descriptions
     expects = Location.joins(:descriptions).order_by_default.distinct
-    assert_query(expects, :Location, has_descriptions: 1)
+    scope = Location.has_descriptions.order_by_default
+    assert_query_scope(expects, scope, :Location, has_descriptions: 1)
   end
 
   def test_location_has_descriptions_by_user
-    expects = Location.joins(:descriptions).
-              where(descriptions: { user: rolf }).order_by_default.distinct
-    assert_query(expects, :Location, description_query: { by_users: rolf })
+    scope = Location.joins(:descriptions).distinct.
+            merge(LocationDescription.by_users(rolf)).order_by_default
+    assert_query(scope, :Location, description_query: { by_users: rolf })
 
     assert_query([], :Location, description_query: { by_users: mary })
   end
@@ -169,7 +188,10 @@ class Query::LocationsTest < UnitTestCase
     expects = Location.joins(descriptions: :location_description_authors).
               where(location_description_authors: { user: rolf }).
               order_by_default.distinct
-    assert_query(expects, :Location, description_query: { by_author: rolf })
+    scope = Location.joins(:descriptions).distinct.
+            merge(LocationDescription.by_author(rolf)).order_by_default
+    assert_query_scope(expects, scope,
+                       :Location, description_query: { by_author: rolf })
     assert_query([], :Location, description_query: { by_author: mary })
   end
 
@@ -183,25 +205,30 @@ class Query::LocationsTest < UnitTestCase
     expects = Location.joins(descriptions: :location_description_editors).
               where(location_description_editors: { user: mary }).
               order_by_default.distinct
-    assert_query(expects, :Location, description_query: { by_editor: mary })
+    scope = Location.joins(:descriptions).distinct.
+            merge(LocationDescription.by_editor(mary)).order_by_default
+    assert_query_scope(expects, scope,
+                       :Location, description_query: { by_editor: mary })
   end
 
   def test_location_has_descriptions_in_set
     ids = [location_descriptions(:albion_desc).id,
            location_descriptions(:no_mushrooms_location_desc).id]
-    assert_query(
+    assert_query_scope(
       [locations(:albion), locations(:no_mushrooms_location)],
+      Location.joins(:descriptions).distinct.
+      merge(LocationDescription.id_in_set(ids)).order_by_default,
       :Location, description_query: { id_in_set: ids }
     )
     ids = [location_descriptions(:albion_desc).id, rolf.id]
-    assert_query([locations(:albion)], :Location,
-                 description_query: { id_in_set: ids })
+    assert_query([locations(:albion)],
+                 :Location, description_query: { id_in_set: ids })
     assert_query([],
                  :Location, description_query: { id_in_set: [rolf.id] })
   end
 
   def test_location_has_observations
-    expects = Location.has_observations.order_by_default.distinct
+    expects = Location.has_observations.order_by_default
     assert_query(expects, :Location, has_observations: 1)
   end
 
@@ -213,23 +240,23 @@ class Query::LocationsTest < UnitTestCase
   ##### date/time parameters #####
 
   def test_location_with_observations_created_at
-    created_at = observations(:california_obs).created_at
-    expects = Location.order_by_default.joins(:observations).
-              where(Observation[:created_at] >= created_at).distinct
+    created_at = observations(:california_obs).created_at.as_json[0..9]
+    expects = Location.joins(:observations).distinct.
+              merge(Observation.created_at(created_at)).order_by_default
     assert_query(expects, :Location, observation_query: { created_at: })
   end
 
   def test_location_with_observations_updated_at
-    updated_at = observations(:california_obs).updated_at
-    expects = Location.order_by_default.joins(:observations).
-              where(Observation[:updated_at] >= updated_at).distinct
+    updated_at = observations(:california_obs).updated_at.as_json[0..9]
+    expects = Location.joins(:observations).distinct.
+              merge(Observation.updated_at(updated_at)).order_by_default
     assert_query(expects, :Location, observation_query: { updated_at: })
   end
 
   def test_location_with_observations_date
-    date = observations(:california_obs).when
-    expects = Location.order_by_default.joins(:observations).
-              where(Observation[:when] >= date).distinct
+    date = observations(:california_obs).when.as_json
+    expects = Location.joins(:observations).distinct.
+              merge(Observation.date(date)).order_by_default
     assert_query(expects, :Location, observation_query: { date: })
   end
 
@@ -247,35 +274,37 @@ class Query::LocationsTest < UnitTestCase
       target_type: Observation,
       target: observations(:vouchered_obs)
     )
-    assert_query(
-      Location.order_by_default.joins(observations: :comments).
-               where(Comment[:summary].matches("%cool%")).
-               or(
-                 Location.order_by_default.joins(observations: :comments).
-                          where(Comment[:comment].matches("%cool%"))
-               ).distinct,
+    expects = Location.joins(observations: :comments).distinct.
+              where(Comment[:summary].matches("%cool%")).or(
+                Location.joins(observations: :comments).distinct.
+                where(Comment[:comment].matches("%cool%"))
+              ).order_by_default
+    scope = Location.joins(:observations).distinct.
+            merge(Observation.comments_has("cool")).order_by_default
+    assert_query_scope(
+      expects, scope,
       :Location, observation_query: { comments_has: "cool" }
     )
   end
 
   def test_location_with_observations_has_notes_fields
+    expects = Location.joins(:observations).distinct.
+              merge(Observation.has_notes_fields("substrate")).order_by_default
     assert_query(
-      Location.order_by_default.joins(:observations).
-               where(Observation[:notes].matches("%:substrate:%")).distinct,
-      :Location, observation_query: { has_notes_fields: "substrate" }
+      expects, :Location, observation_query: { has_notes_fields: "substrate" }
     )
   end
 
   def test_location_with_observations_herbaria
     name = "The New York Botanical Garden"
     expects = Location.joins(observations: { herbarium_records: :herbarium }).
-              where(herbaria: { name: name }).order_by_default.distinct
+              distinct.merge(Observation.herbaria(name)).order_by_default
     assert_query(expects, :Location, observation_query: { herbaria: name })
   end
 
   def test_location_with_observations_notes_has
-    expects = Location.order_by_default.joins(:observations).
-              where(Observation[:notes].matches("%somewhere%")).distinct
+    expects = Location.order_by_default.joins(:observations).distinct.
+              merge(Observation.notes_has("somewhere"))
     assert_query(
       expects, :Location, observation_query: { notes_has: "somewhere" }
     )
@@ -294,8 +323,8 @@ class Query::LocationsTest < UnitTestCase
   def test_location_with_observations_projects
     project = projects(:bolete_project)
     assert_query(
-      Location.order_by_default.joins(observations: :projects).
-               where(projects: { title: project.title }).distinct,
+      Location.joins(observations: :projects).distinct.
+      merge(Observation.projects(project.title)).order_by_default,
       :Location, observation_query: { projects: project.title }
     )
   end
@@ -303,9 +332,8 @@ class Query::LocationsTest < UnitTestCase
   def test_location_with_observations_names
     names = [names(:boletus_edulis), names(:agaricus_campestris)].
             map(&:text_name)
-    expects = Location.joins(observations: :name).
-              where(observations: { text_name: names }).
-              order_by_default.distinct
+    expects = Location.joins(observations: :name).distinct.
+              merge(Observation.names(lookup: names)).order_by_default
     assert_query(
       expects, :Location, observation_query: { names: { lookup: names } }
     )
@@ -315,9 +343,13 @@ class Query::LocationsTest < UnitTestCase
     parent = names(:agaricus)
     children = Name.order_by_default.
                where(Name[:text_name].matches_regexp(parent.text_name))
-    assert_query(
-      Location.joins(:observations).
-               where(observations: { name: [parent] + children }).distinct,
+    expects = Location.joins(:observations).distinct.
+              where(observations: { name: [parent] + children })
+    scope = Location.joins(:observations).distinct.
+            merge(Observation.names(lookup: parent, include_subtaxa: true))
+
+    assert_query_scope(
+      expects, scope,
       :Location, observation_query: {
         names: { lookup: parent.text_name, include_subtaxa: true }
       }
@@ -328,28 +360,38 @@ class Query::LocationsTest < UnitTestCase
     # Create Observations of synonyms, unfortunately hitting the db, because:
     # (a) there are no Observation fixtures for a Name with a synonym_names; and
     # (b) tests are brittle, so adding an Observation fixture will break them.
+    name = names(:macrolepiota_rachodes)
     Observation.create(
       location: locations(:albion),
-      name: names(:macrolepiota_rachodes),
+      name:,
       user: rolf
     )
     Observation.create(
       location: locations(:howarth_park),
-      name: names(:macrolepiota_rhacodes),
+      name:,
       user: rolf
     )
-    assert_query(
-      [locations(:albion), locations(:howarth_park)],
+    scope = Location.joins(:observations).distinct.
+            merge(Observation.names(lookup: name.text_name,
+                                    include_subtaxa: true)).
+            order_by_default
+
+    assert_query_scope(
+      [locations(:albion), locations(:howarth_park)], scope,
       :Location, observation_query: {
-        names: { lookup: "Macrolepiota rachodes", include_synonyms: true }
+        names: { lookup: name.text_name, include_synonyms: true }
       }
     )
   end
 
   def test_location_with_observations_of_children
     nam = [names(:agaricus).id]
-    assert_query(
-      [locations(:burbank).id],
+    scope = Location.joins(:observations).distinct.
+            merge(Observation.names(lookup: nam, include_subtaxa: true)).
+            order_by_default
+
+    assert_query_scope(
+      [locations(:burbank).id], scope,
       :Location, observation_query: {
         names: { lookup: nam, include_subtaxa: true }
       }
@@ -357,11 +399,12 @@ class Query::LocationsTest < UnitTestCase
   end
 
   def test_location_with_observations_of_name
-    assert_query(
+    name = names(:agaricus_campestris)
+    assert_query_scope(
       [locations(:burbank).id],
-      :Location, observation_query: {
-        names: { lookup: [names(:agaricus_campestris).id] }
-      }
+      Location.joins(:observations).distinct.
+      merge(Observation.names(lookup: name.id)),
+      :Location, observation_query: { names: { lookup: [name.id] } }
     )
     assert_query(
       [],
@@ -371,7 +414,7 @@ class Query::LocationsTest < UnitTestCase
     )
   end
 
-  def test_location_with_observations_users
+  def test_location_with_observations_by_users
     assert_query(
       Location.order_by_default.joins(:observations).
       where(observations: { user: dick }).distinct,
@@ -387,8 +430,8 @@ class Query::LocationsTest < UnitTestCase
     # (b) tests are brittle, so adding or modifying a fixture will break them.
     obses = Observation.order_by_default.where(vote_cache: 1..3)
     obses.each { |obs| obs.update!(location: locations(:albion)) }
-    expects = Location.order_by_default.joins(:observations).
-              where(observations: { vote_cache: 1..3 }).distinct
+    expects = Location.joins(:observations).distinct.
+              merge(Observation.confidence([1.0, 3.0])).order_by_default
     assert_not_empty(expects, "'expect` is broken; it should not be empty")
     assert_query(expects,
                  :Location, observation_query: { confidence: [1.0, 3.0] })
@@ -396,44 +439,64 @@ class Query::LocationsTest < UnitTestCase
 
   ##### boolean parameters #####
   def test_location_with_observations_has_comments
-    assert_query(
-      Location.order_by_default.joins(observations: :comments).distinct,
+    expects = Location.joins(observations: :comments).distinct.order_by_default
+    scope = Location.joins(:observations).distinct.
+            merge(Observation.has_comments).order_by_default
+    assert_query_scope(
+      expects, scope,
       :Location, observation_query: { has_comments: true }
     )
   end
 
   def test_location_with_observations_has_public_lat_lng
-    assert_query(
-      Location.joins(:observations).where(observations: { gps_hidden: false }).
-               where.not(observations: { lat: false }).
-               order_by_default.distinct,
+    expects = Location.joins(:observations).distinct.
+              where(observations: { gps_hidden: false }).
+              where.not(observations: { lat: false }).order_by_default
+    scope = Location.joins(:observations).distinct.
+            merge(Observation.has_public_lat_lng).order_by_default
+    assert_query_scope(
+      expects, scope,
       :Location, observation_query: { has_public_lat_lng: true }
     )
   end
 
-  def test_location_with_observations_has_name
+  def test_location_with_observations_has_name_false
     expects = Location.order_by_default.joins(:observations).
               where(observations: { name: Name.unknown }).distinct
-    assert_query(expects, :Location, observation_query: { has_name: false })
+    scope = Location.joins(:observations).distinct.
+            merge(Observation.has_name(false)).order_by_default
+    assert_query_scope(
+      expects, scope, :Location, observation_query: { has_name: false }
+    )
   end
 
   def test_location_with_observations_has_notes
     expects = Location.order_by_default.joins(:observations).
               where.not(observations: { notes: Observation.no_notes }).distinct
-    assert_query(expects, :Location, observation_query: { has_notes: true })
+    scope = Location.joins(:observations).distinct.
+            merge(Observation.has_notes).order_by_default
+    assert_query_scope(
+      expects, scope, :Location, observation_query: { has_notes: true }
+    )
   end
 
   def test_location_with_observations_has_sequences
     expects = Location.order_by_default.joins(observations: :sequences).distinct
-    assert_query(expects,
-                 :Location, observation_query: { has_sequences: true })
+    scope = Location.joins(:observations).distinct.
+            merge(Observation.has_sequences).order_by_default
+    assert_query_scope(
+      expects, scope, :Location, observation_query: { has_sequences: true }
+    )
   end
 
   def test_location_with_observations_is_collection_location
     expects = Location.order_by_default.joins(:observations).
               where(observations: { is_collection_location: true }).distinct
-    assert_query(
-      expects, :Location, observation_query: { is_collection_location: true }
+    scope = Location.joins(:observations).distinct.
+            merge(Observation.is_collection_location).order_by_default
+    assert_query_scope(
+      expects, scope,
+      :Location, observation_query: { is_collection_location: true }
     )
   end
 
@@ -448,8 +511,8 @@ class Query::LocationsTest < UnitTestCase
   end
 
   def location_with_observations_by_user(user)
-    Location.joins(:observations).where(observations: { user: user }).
-      order_by_default.distinct
+    Location.joins(:observations).distinct.
+      merge(Observation.by_users(user)).order_by_default
   end
 
   def test_location_with_observations_for_project_empty
@@ -461,25 +524,40 @@ class Query::LocationsTest < UnitTestCase
   # query links for observations for proj/spl. Other callers must add manually.
   def test_location_with_observations_for_project
     pj = projects(:obs_collected_and_displayed_project)
-    assert_query([observations(:collected_at_obs).location],
-                 :Location, observation_query: { projects: pj,
-                                                 is_collection_location: 1 })
-  end
-
-  def test_location_with_observations_in_set
-    ids = [observations(:minimal_unknown_obs).id]
-    assert_query([locations(:burbank).id],
-                 :Location, observation_query: { id_in_set: ids })
-    ids = [observations(:coprinus_comatus_obs).id]
-    assert_query([], :Location, observation_query: { id_in_set: ids })
+    expects = [observations(:collected_at_obs).location]
+    scope = Location.joins(:observations).distinct.
+            merge(Observation.projects(pj).is_collection_location).
+            order_by_default
+    assert_query_scope(
+      expects, scope,
+      :Location, observation_query: { projects: pj, is_collection_location: 1 }
+    )
   end
 
   def test_location_with_observations_in_species_list
     spl = species_lists(:unknown_species_list).id
-    assert_query([locations(:burbank).id],
-                 :Location, observation_query: { species_lists: spl,
-                                                 is_collection_location: 1 })
+    expects = [locations(:burbank).id]
+    scope = Location.joins(:observations).distinct.
+            merge(Observation.species_lists(spl).is_collection_location).
+            order_by_default
+    assert_query_scope(
+      expects, scope,
+      :Location, observation_query: { species_lists: spl,
+                                      is_collection_location: 1 }
+    )
     empty = species_lists(:first_species_list).id
     assert_query([], :Location, observation_query: { species_lists: empty })
+  end
+
+  def test_location_with_observations_in_set
+    ids = [observations(:minimal_unknown_obs).id]
+    expects = [locations(:burbank).id]
+    scope = Location.joins(:observations).distinct.
+            merge(Observation.id_in_set(ids))
+    assert_query_scope(
+      expects, scope, :Location, observation_query: { id_in_set: ids }
+    )
+    ids = [observations(:coprinus_comatus_obs).id]
+    assert_query([], :Location, observation_query: { id_in_set: ids })
   end
 end

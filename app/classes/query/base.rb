@@ -2,6 +2,10 @@
 
 # base class for Query searches
 class Query::Base
+  include ActiveModel::API
+  include ActiveModel::Attributes
+  include ActiveModel::Validations::Callbacks
+
   include Query::Modules::ClassMethods
   include Query::Modules::BoundingBox
   include Query::Modules::Conditions
@@ -18,9 +22,13 @@ class Query::Base
   include Query::Modules::Sql
   include Query::Modules::Validation
 
-  attr_writer :record
+  validates_with Query::Modules::Validator
 
-  delegate :parameter_declarations, to: :class
+  # "clean up" params, store any @validation_errors,
+  # and reassign attributes, restoring blank defaults, before validation
+  before_validation :clean_and_validate_params
+
+  attr_writer :record
 
   def self.parameter_declarations
     {
@@ -35,23 +43,19 @@ class Query::Base
     }
   end
 
-  delegate :takes_parameter?, to: :class
+  delegate :parameter_declarations, to: :class
 
   def self.takes_parameter?(key)
     parameter_declarations.key?(key)
   end
+
+  delegate :takes_parameter?, to: :class
 
   def initialize_flavor
     # These strings can never come direct from user, so no need to sanitize.
     # (I believe they are only used by the site stats page. -JPH 20190708)
     self.where += params[:where] if params[:where]
     add_join(params[:join]) if params[:join]
-  end
-
-  delegate :subquery_parameters, to: :class
-
-  def self.subquery_parameters
-    parameter_declarations.select { |key, _v| key.to_s.include?("_query") }
   end
 
   # A "current_or_related_query" may be called for links:

@@ -31,6 +31,11 @@ class Query::Locations < Query::Base
       merge(advanced_search_parameter_declarations)
   end
 
+  # Declare the parameters as attributes of type `query_param`
+  parameter_declarations.each_key do |param_name|
+    attribute param_name, :query_param
+  end
+
   def initialize_flavor
     initialize_location_parameters
     add_bounding_box_conditions_for_locations
@@ -62,7 +67,7 @@ class Query::Locations < Query::Base
     return if params[:regexp].blank?
 
     regexp = escape(params[:regexp].to_s.strip_squeeze)
-    @where << "locations.name REGEXP #{regexp}"
+    where << "locations.name REGEXP #{regexp}"
   end
 
   def add_pattern_condition

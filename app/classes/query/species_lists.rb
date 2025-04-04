@@ -34,6 +34,11 @@ class Query::SpeciesLists < Query::Base
     )
   end
 
+  # Declare the parameters as attributes of type `query_param`
+  parameter_declarations.each_key do |param_name|
+    attribute param_name, :query_param
+  end
+
   def initialize_flavor
     add_owner_and_time_stamp_conditions
     add_date_condition("species_lists.when", params[:date])
@@ -76,7 +81,7 @@ class Query::SpeciesLists < Query::Base
     return unless params[:search_where]
 
     location_str = params[:search_where]
-    @where << "species_lists.where LIKE '%#{clean_pattern(location_str)}%'"
+    where << "species_lists.where LIKE '%#{clean_pattern(location_str)}%'"
   end
 
   def initialize_search_parameters
