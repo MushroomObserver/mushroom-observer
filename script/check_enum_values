@@ -6,7 +6,7 @@ require_relative("../config/environment")
 
 LocationDescription.
   find_each { |x| puts "LocationDescription #{x.id} #{x.source_type.inspect}" }
-NameDescription.find_byeach do |x|
+NameDescription.find_each do |x|
   puts "NameDescription #{x.id} #{x.review_status.inspect}"
   puts "NameDescription #{x.id} #{x.source_type.inspect}"
 end
