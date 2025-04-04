@@ -12,7 +12,6 @@ NameDescription.find_each do |x|
 end
 Name.find_each { |x| puts "Name #{x.id} #{x.rank.inspect}" }
 Name::Version.find_each { |x| puts "Name::Version #{x.id} #{x.rank.inspect}" }
-Query.find_each { |x| puts "Query #{x.id} #{x.model_symbol.inspect}" }
 User.find_each do |x|
   puts "User #{x.id} #{x.thumbnail_size.inspect}"
   puts "User #{x.id} #{x.image_size.inspect}"
