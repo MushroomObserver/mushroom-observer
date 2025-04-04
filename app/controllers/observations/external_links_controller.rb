@@ -55,6 +55,9 @@ module Observations
       @sites = ExternalSite.sites_user_can_add_links_to(
         @user, @observation, admin: in_admin_mode?
       )
+      @base_urls = {} # used as placeholders in the url field
+      @sites.each { |site| @base_urls[site.name] = site.base_url }
+
       # @site = ExternalSite.find(params.dig(:external_link, :external_site_id))
       @back_object = @observation
     end

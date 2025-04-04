@@ -12,6 +12,7 @@ class ExternalSiteTest < UnitTestCase
     )
     assert_not_nil(site)
     assert_empty(site.errors)
+    assert_equal("https://genbank.org", site.reload.base_url)
 
     stub_request(:any, /genbank/)
     assert_raises("Name has already been taken") do
