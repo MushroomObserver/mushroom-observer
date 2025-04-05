@@ -79,9 +79,9 @@ module Report
     end
 
     def public_latlng_spec(col)
-      Arel.sql("IF(observations.gps_hidden AND " \
-        "observations.user_id != #{user&.id || -1}, " \
-        "NULL, observations.#{col})")
+      Observation[:gps_hidden].eq(true).
+        and(Observation[:user_id].not_eq(user&.id || -1)).
+        when(true).then(nil).else(Observation[col])
     end
 
     def user_selects
