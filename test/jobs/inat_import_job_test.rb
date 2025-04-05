@@ -461,13 +461,8 @@ class InatImportJobTest < ActiveJob::TestCase
     file_name = "donadinia_PNW01"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
     inat_import = create_inat_import(inat_response: mock_inat_response)
-    name = Name.create(
-      text_name: 'Donadinia "sp-PNW01"', author: "crypt. temp.",
-      search_name: 'Donadinia "sp-PNW01" crypt. temp.',
-      display_name: '**__Donadinia "sp-PNW01"__** crypt. temp.',
-      rank: "Species",
-      user: @default_user
-    )
+    assert(Name.where(Name[:text_name] =~ /Donadinia/).none?,
+           "Test requires that MO not yet have `Donadinia` Names")
 
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
@@ -481,6 +476,18 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     obs = Observation.last
+
+    new_names = Name.where(Name[:text_name] =~ /Donadinia/)
+    assert_equal(2, new_names.count,
+                 "Failed to new sp. (nom. prov.) and its genus")
+    new_names.each do |new_name|
+      assert_equal(
+        @default_user, new_name.user,
+        "#{new_name.text_name} author should be #{@default_user.login}"
+      )
+    end
+    name = new_names.find_by(rank: "Species")
+
     standard_assertions(obs: obs, name: name)
 
     assert(obs.images.any?, "Obs should have images")
