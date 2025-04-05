@@ -411,7 +411,8 @@ class HerbariumRecordsController < ApplicationController
   def render_herbarium_records_section_update
     render(
       partial: "observations/show/section_update",
-      locals: { identifier: "herbarium_records" }
+      locals: { identifier: "herbarium_records",
+                obs: @observation, user: @user }
     ) and return
   end
 
