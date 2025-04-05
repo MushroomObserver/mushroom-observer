@@ -479,7 +479,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
     new_names = Name.where(Name[:text_name] =~ /Donadinia/)
     assert_equal(2, new_names.count,
-                 "Failed to new sp. (nom. prov.) and its genus")
+                 "Failed to create new sp. (nom. prov.) and its genus")
     new_names.each do |new_name|
       assert_equal(
         @default_user, new_name.user,
