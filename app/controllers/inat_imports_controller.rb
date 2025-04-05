@@ -61,8 +61,10 @@ class InatImportsController < ApplicationController
   # Site for authorization and authentication requests
   SITE = "https://www.inaturalist.org"
   # iNat calls this after iNat user authorizes MO to access their data.
+  # Different in production vs. test & development
   REDIRECT_URI = Rails.configuration.redirect_uri
   # iNat's id for the MO application
+  # Different in production vs. test & development
   APP_ID = Rails.application.credentials.inat.id
   # URL to obtain authorization from iNat user for access to their private data
   INAT_AUTHORIZATION_URL =

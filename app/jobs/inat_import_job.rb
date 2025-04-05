@@ -2,6 +2,7 @@
 
 class InatImportJob < ApplicationJob
   # iNat's id for the MO application
+  # Different in production vs. test & development
   APP_ID = InatImportsController::APP_ID
   # site for authorization, authentication
   SITE = InatImportsController::SITE
@@ -19,7 +20,6 @@ class InatImportJob < ApplicationJob
 
   def perform(inat_import)
     create_ivars(inat_import)
-
     access_token =
       use_auth_code_to_obtain_oauth_access_token(@inat_import.token)
     api_token = trade_access_token_for_jwt_api_token(access_token)
@@ -46,6 +46,7 @@ class InatImportJob < ApplicationJob
 
   # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
   def use_auth_code_to_obtain_oauth_access_token(auth_code)
+    debugger
     log("Obtaining OAuth access token")
     payload = { client_id: APP_ID,
                 client_secret: Rails.application.credentials.inat.secret,
