@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Query::Herbaria < Query::BaseNew
+class Query::Herbaria < Query::Base
   def self.parameter_declarations
     super.merge(
       created_at: [:time],
@@ -15,7 +15,8 @@ class Query::Herbaria < Query::BaseNew
     )
   end
 
-  # Declare the parameters as attributes of type `query_param`
+  # Declare the parameters as model attributes, of custom type `query_param`
+
   parameter_declarations.each_key do |param_name|
     attribute param_name, :query_param
   end

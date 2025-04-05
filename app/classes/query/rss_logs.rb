@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Query::RssLogs < Query::BaseNew
+class Query::RssLogs < Query::Base
   include Query::Params::Filters
 
   def self.parameter_declarations
@@ -13,7 +13,8 @@ class Query::RssLogs < Query::BaseNew
       merge(content_filter_parameter_declarations(Name))
   end
 
-  # Declare the parameters as attributes of type `query_param`
+  # Declare the parameters as model attributes, of custom type `query_param`
+
   parameter_declarations.each_key do |param_name|
     attribute param_name, :query_param
   end
