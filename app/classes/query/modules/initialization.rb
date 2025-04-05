@@ -27,22 +27,25 @@
 #
 #  Observation.gps_hidden(true)
 #
+#    Note that `query.scope` does not return instantiated records.
+#    It just gives you the complete scope chain for the current Query that you
+#    can call, continue chaining, select from, get first(15), etc.
+#
+#  query.scope.limit(15) == Observation.gps_hidden(true).limit(15)
+#  query.scope.where(user: 252) == Observation.gps_hidden(true).where(user: 252)
+#
+#    Possible confusion: if you call a scope in the console, you will note
+#    that `rails console` DOES instantiate the results. But rest assured
+#    this does not happen in live code; an ActiveRecord scope is a "handler"
+#    that is as inert as passing around an SQL string. It doesn't fire a
+#    database query until you execute it or assign it to a variable,
+#    like `results = Observation.all` or `results = query.scope`.
 #
 #  METHODS:
 #
 #  initialized?::     Has the Query instance been initialized?
 #  initialize_query:: Send the params to AR model scopes.
-#  scope::            All the scopes, chained together. Note that this does
-#                     not return instantiated records. It just gives you a
-#                     complete scope chain for the current Query that you can
-#                     call, select from, get first(15), etc.
-#
-#                     What can be confusing is that if you call a scope in the
-#                     console, you will note that `rails console` DOES
-#                     instantiate the results. But rest assured this does not
-#                     happen in live code. Scopes are a "handler" that are as
-#                     inert as passing around an SQL string. It doesn't fire
-#                     until you execute it.
+#  scope::            The whole scope chain defined by the instance attributes.
 #  sql                Returns the SQL string that the scopes generate from AR.
 #                     Same as calling `query.scope.to_sql`.
 #
