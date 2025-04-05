@@ -1,7 +1,25 @@
 # frozen_string_literal: true
 
-# methods for moving forward/back up/down in Query results
-module Query::ScopeModules::Sequence
+##############################################################################
+#
+#  :section: Sequence
+#
+#  Methods for moving forward/back up/down within Query results.
+#  Used on show pages of individual records.
+#
+#  current_id=::  Set current place in results by id.
+#  current=::     Same as above, but accepts record instances.
+#  current(*)     Current place in results, with record instantiated.
+#  reset::        Reset current place in results to place last set (via above).
+#  current::      Move to the current place
+#  first::        Move to the first record in the set, as sorted.
+#  previous::
+#  next::
+#  last::
+#
+###############################################################################
+
+module Query::Modules::Sequence
   # Current place in results, as an id.  (Returns nil if not set yet.)
   attr_reader :current_id
 

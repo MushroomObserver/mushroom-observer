@@ -20,7 +20,7 @@
 #
 ##############################################################################
 
-module Query::ScopeModules::Results
+module Query::Modules::Results
   attr_reader :need_letters
 
   # Args accepted by +results+, +result_ids+, +num_results+.  (These are passed
