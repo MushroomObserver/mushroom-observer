@@ -114,87 +114,22 @@
 #      puts "There are no matching images!"
 #    end
 #
-#  == Caching
+#  == Attributes of all Query instances:
 #
-#  It caches results, and result_ids.  Any of results, result_ids, num_results,
-#  or paginate populates result_ids, however results are only instantiated as
-#  necessary.  (I found that requesting all the ids was not significantly
-#  slower than requesting the count, while calling _both_ was nearly twice as
-#  long as just one.  So, there was no reason to optimize the query if you only
-#  want the number of results.)
-#
-#  The next and prev sequence operators always grab the entire set of
-#  result_ids.  No attempt is made to reduce the query.  TODO - we might be
-#  able to if we can turn the ORDER clause into an upper/lower bound.
-#
-#  The first and last sequence operators ignore result_ids.  However, they are
-#  able to execute optimized queries that return only the first or last result.
-#
-#  == Attributes
 #  model::              Class of model results belong to.
 #  params::             Hash of parameters used to create query.
 #  current::            Current location in query (for sequence operators).
 #  subqueries::         Cache of subquery Query instances, used for filtering.
 #
-#  == Class Methods
-#  lookup::             Instantiate Query of given model, flavor and params.
-#  lookup_and_save::    Ditto, plus save the QueryRecord
-#  find::               Find a QueryRecord id and reinstantiate a Query from it.
-#  safe_find::          Same as above, with rescue.
-#  rebuild_from_description:: Instantiate Query described by description string.
-#  related?::                 Can a query of this model be converted to a
-#                             subquery filtering results of another model?
-#  current_or_related_query:: Convert queries from one model to another; can be
-#                             called recursively. To avoid repetitive recursion,
-#                             it checks for a nested query that may be for the
-#                             intended target model.
 #
-#  == Instance Methods
-#  initialized?::       Has this query been initialized?
-#  serialize::          Returns string which describes the Query completely.
-#  sql::                Returns scopes.to_sql for comparison and tests.
-#  query::              scopes.all, the ActiveRecord statement of the query.
-#
-#  ==== Sequence operators
-#  first::              Go to first result.
-#  prev::               Go to previous result.
-#  next::               Go to next result.
-#  last::               Go to last result.
-#  reset::              Go back to original result.
-#
-#  ==== Result accessors
-#
-#  NOTE: Calling most of these will `initialize_query`,
-#        i.e., instantiate the requested page of query results.
-#
-#  num_results::        Number of results the query returns.
-#  results::            Array of all results, instantiated.
-#  result_ids::         Array of all results, just ids.
-#  index::              Index of a given id or object in the results.
-#  paginate::           Array of subset of results, instantiated.
-#  paginate_ids::       Array of subset of results, just ids.
-#  clear_cache::        Clear results cache.
-#
-#  == Internal Variables
-#
-#  ==== Instance Variables
-#  @initialized::       Boolean: has +initialize_query+ been called yet?
-#  @scopes::            Chain of scopes, called on params during initialization.
-#  @current_id::        Integer: current place in results.
-#  @save_current_id::   Integer: saved copy of +@current_id+ for +reset+.
-#  @result_ids::        Array of Integer: all results.
-#  @results::           Hash: maps ids to instantiated records.
-#  @letters::           Cache of first-letters (if +need_letters given).
-#  @params_cache::      Hash: where instances passed in via params are cached.
-#  @last_query::        Alias for `sql`.
-#
-#  NOTE: The Query::Model classes do not inherit from this class.
-#        They inherit from Query::Base, which does not inherit from this either.
-#        This class is simply a convenience delegator/accessor for class
-#        methods that may be called from outside Query, like `Query.lookup`
+#  NOTE: The `Query::#{Model}` classes do not inherit from this class. They
+#        inherit from `Query::Base`, which does not inherit from this either.
+#        `Query` is simply a convenience delegator/accessor for class methods
+#        that may be called from outside Query, like `Query.lookup`
 #
 class Query
-  include Query::Modules::ClassMethods
+  include Query::Modules::QueryRecords
+  include Query::Modules::Subqueries
 
   def self.new(model, params = {}, current = nil)
     klass = "Query::#{model.to_s.pluralize}".constantize

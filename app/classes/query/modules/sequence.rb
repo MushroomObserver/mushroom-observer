@@ -7,6 +7,15 @@
 #  Methods for moving forward/back up/down within Query results.
 #  Used on show pages of individual records.
 #
+#  NOTE: The next and prev sequence operators always grab the entire set of
+#  result_ids.  No attempt is made to reduce the query.  TODO - we might be
+#  able to if we can turn the ORDER clause into an upper/lower bound.
+#
+#  The first and last sequence operators ignore result_ids.  However, they are
+#  able to execute optimized queries that return only the first or last result.
+#
+#  Methods:
+#
 #  current_id=::  Set current place in results by id.
 #  current=::     Same as above, but accepts record instances.
 #  current(*)     Current place in results, with record instantiated.

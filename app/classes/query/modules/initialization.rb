@@ -21,15 +21,18 @@
 #    This gives you `query` as a Query instance with validated `params`
 #    you can inspect at `query.params`. To use the query, though, you'd call
 #
-#  query.query
+#  query.scope
 #
-#    This is the same as calling `Observation.gps_hidden(true)`.
+#    This is the same as calling:
+#
+#  Observation.gps_hidden(true)
+#
 #
 #  METHODS:
 #
 #  initialized?::     Has the Query instance been initialized?
 #  initialize_query:: Send the params to AR model scopes.
-#  query::            All the scopes, chained together. Note that this does
+#  scope::            All the scopes, chained together. Note that this does
 #                     not return instantiated records. It just gives you a
 #                     complete scope chain for the current Query that you can
 #                     call, select from, get first(15), etc.
@@ -41,15 +44,14 @@
 #                     inert as passing around an SQL string. It doesn't fire
 #                     until you execute it.
 #  sql                Returns the SQL string that the scopes generate from AR.
-#                     Same as calling `query.query.to_sql`.
-#  last_query         Alias for `sql`.
+#                     Same as calling `query.scope.to_sql`.
 #
 #  Private methods explained below.
 #
 ###############################################################################
 
 module Query::Modules::Initialization
-  attr_accessor :scopes, :last_query
+  attr_accessor :scopes
 
   def initialized?
     @initialized ? true : false
@@ -59,19 +61,18 @@ module Query::Modules::Initialization
     @initialized = true
     @scopes      = model
     initialize_scopes
-    @last_query = sql
   end
 
   def sql
     initialize_query unless initialized?
 
-    @sql = query.to_sql
+    @sql = scope.to_sql
   end
 
-  def query
+  def scope
     initialize_query unless initialized?
 
-    @query = scopes.all
+    @scope = scopes.all
   end
 
   private

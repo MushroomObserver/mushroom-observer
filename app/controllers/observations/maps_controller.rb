@@ -35,7 +35,7 @@ module Observations
       columns = [:id, :lat, :lng, :gps_hidden, :location_id].map do |col|
         Observation[col]
       end
-      minimal_obs_query = @query.query.
+      minimal_obs_query = @query.scope.
                           where(Observation[:lat].not_eq(nil).
                                 or(Observation[:location_id].not_eq(nil))).
                           limit(MO.query_max_array).select(*columns)

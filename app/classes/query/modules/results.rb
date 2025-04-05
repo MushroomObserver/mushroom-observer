@@ -4,14 +4,24 @@
 #
 #  :section: Results
 #
-#  Note that most of these methods accept a few optional arguments.  For
-#  example, all methods that return instantiated results accept +:include+
-#  which is passed in to <tt>model.all</tt>.
+#  Caching note:
+#  Query caches results, and result_ids.  Any of results, result_ids,
+#  num_results, or paginate populates result_ids, however result records are
+#  only instantiated as necessary. (Jason found that requesting all the ids was
+#  not significantly slower than requesting the count, while calling _both_ was
+#  nearly twice as long as just one.  So, there was no reason to optimize the
+#  query if you only want the number of results.)
 #
-#  join::           Add extra join clause(s) to query.
-#  where::          Add extra condition(s) to query.
-#  limit::          Put a limit on the number of results from the raw query.
-#  include::        Eager-load these associations when instantiating results.
+#  NOTE: Calling most of these will `initialize_query`,
+#        i.e., instantiate the requested page of query results.
+#
+#  num_results::        Number of results the query returns.
+#  results::            Array of all results, instantiated.
+#  result_ids::         Array of all results, just ids.
+#  index::              Index of a given id or object in the results.
+#  paginate::           Array of subset of results, instantiated.
+#  paginate_ids::       Array of subset of results, just ids.
+#  clear_cache::        Clear results cache.
 #
 #  Add additional arguments to the three "global" Arrays immediately below:
 #

@@ -303,23 +303,23 @@ module SpeciesLists
     end
 
     def checklist_from_name_query(query)
-      query.query.select(Name[:display_name], Name[:id]).distinct.limit(1000)
+      query.scope.select(Name[:display_name], Name[:id]).distinct.limit(1000)
     end
 
     # Only reason for ther join is to get the __Name formatting__.
     # The obs table could be altered so it has both these values - AN 202503
     def checklist_from_observation_query(query)
-      query.query.joins(:name).
+      query.scope.joins(:name).
         select(Name[:display_name], Name[:id]).distinct.limit(1000)
     end
 
     def checklist_from_location_query(query)
-      query.query.joins(observations: :name).
+      query.scope.joins(observations: :name).
         select(Name[:display_name], Name[:id]).distinct.limit(1000)
     end
 
     def checklist_from_rss_log_query(query)
-      query.query.joins(observations: :name).
+      query.scope.joins(observations: :name).
         where(RssLog[:observation_id].gt(0)).
         select(Name[:display_name], Name[:id]).distinct.limit(1000)
     end

@@ -40,7 +40,7 @@ module Report
 
     def rows_without_location
       Observation.connection.select_rows(
-        query.query.joins(:user, :name).
+        query.scope.joins(:user, :name).
         where(location_id: nil).select(without_location_selects).
         reorder(Observation[:id].asc)
       )
@@ -52,7 +52,7 @@ module Report
 
     def rows_with_location
       Observation.connection.select_rows(
-        query.query.joins(:user, :location, :name).
+        query.scope.joins(:user, :location, :name).
         select(with_location_selects).
         reorder(Observation[:id].asc)
       )
@@ -178,7 +178,7 @@ module Report
 
     def plain_query
       # Sometimes the default order requires unnecessary joins!
-      query.query.reorder("")
+      query.scope.reorder("")
     end
 
     def add_column!(rows, vals, col)

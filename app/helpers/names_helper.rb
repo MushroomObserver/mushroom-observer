@@ -66,9 +66,9 @@ module NamesHelper
 
     query.save
     # Debugging: we need to execute the query first by counting `num_results`,
-    # then we can get the actual SQL it executed via `last_query`:
+    # then we can get the actual SQL it executed via `sql`:
     # count = query.num_results
-    # last_query = query.last_query.squish
+    # last_query = query.sql.squish
     link_to(
       title,
       add_query_param(observations_path, query),
