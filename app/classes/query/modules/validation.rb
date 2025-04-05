@@ -129,7 +129,7 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
       val2 = val2.to_s.to_sym
     elsif set.exclude?(val2)
       @validation_errors <<
-        "Value for :#{param} should be one of the following: #{set.inspect}."
+        :query_validation_param_not_in_set.t(param:, set: set.inspect)
       val2 = nil
     end
     val2
@@ -146,8 +146,7 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     when nil
       nil
     else
-      @validation_errors <<
-        "Value for :#{param} should be boolean, got: #{val}."
+      @validation_errors << :query_validation_boolean.t(param:, val:)
       nil
     end
   end
@@ -169,8 +168,7 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
        (val.is_a?(String) && val.match(/^-?(\d+(\.\d+)?|\.\d+)$/))
       val.to_f
     else
-      @validation_errors <<
-        "Value for :#{param} should be a float, got: #{val.inspect}."
+      @validation_errors << :query_validation_float.t(param:, val: val.inspect)
       nil
     end
   end
@@ -180,8 +178,7 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
   def validate_record(param, val, type = ActiveRecord::Base)
     if val.is_a?(type)
       unless val.id
-        @validation_errors <<
-          "Value for :#{param} is an unsaved #{type} instance."
+        @validation_errors << :query_validation_record_unsaved.t(param:, type:)
         return nil
       end
 
@@ -193,8 +190,7 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
       validate_string_for_record(param, val, type)
     else
       @validation_errors <<
-        "Value for :#{param} should be id, string " \
-        "or #{type} instance, got: #{val.inspect}."
+        :query_validation_record.t(param:, type:, val: val.inspect)
       nil
     end
   end
@@ -202,9 +198,7 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
   def validate_string_for_record(param, val, type)
     return val unless param == :id_in_set
 
-    @validation_errors <<
-      "Value for :id_in_set should be an array of ids " \
-      "or #{type} instances, got: '#{val}'."
+    @validation_errors << :query_validation_id_in_set.t(type:, val:)
     nil
   end
 
@@ -213,8 +207,7 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
       val.to_s
     else
       @validation_errors <<
-        "Value for :#{param} should be a string or symbol, " \
-        "got a #{val.class}: #{val.inspect}."
+        :query_validation_string.t(param:, class: val.class, val: val.inspect)
       nil
     end
   end
@@ -230,9 +223,7 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     elsif (val2 = parse_date(val)).acts_like?(:date)
       format_date(val2)
     else
-      @validation_errors <<
-        "Value for :#{param} should be a date (YYYY-MM-DD or MM-DD), " \
-        "got: #{val}."
+      @validation_errors << :query_validation_date.t(param:, val:)
       nil
     end
   end
@@ -258,8 +249,7 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
       format_time(val2)
     else
       @validation_errors <<
-        "Value for :#{param} should be a UTC time (YYYY-MM-DD-HH-MM-SS), " \
-        "got: #{val.class.name}::#{val}."
+        :query_validation_time.t(param:, class: val.class.name, val:)
       nil
     end
   end
@@ -308,7 +298,7 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
 
     results = lookup.new(val).send(method)
     unless results
-      @validation_errors << "Couldn't find an id for : #{val.inspect}."
+      @validation_errors << :query_validation_lookup_id.t(val: val.inspect)
     end
 
     results.first
@@ -317,13 +307,15 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
   def lookup_class(param, val, type)
     # We're only validating the projects passed as the param.
     # Projects' species_lists will be looked up later.
+    type = type.name.pluralize
     lookup = if param == :project_lists
                Lookup::Projects
              else
-               "Lookup::#{type.name.pluralize}".constantize
+               "Lookup::#{type}".constantize
              end
     unless defined?(lookup)
-      @validation_errors << "#{lookup} not defined for : #{val.inspect}."
+      @validation_errors <<
+        :query_validation_lookup.t(type:, val: val.inspect)
     end
     lookup
   end
