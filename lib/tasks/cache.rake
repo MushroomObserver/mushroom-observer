@@ -16,7 +16,7 @@ namespace :cache do
   desc "Recalculate vote caches for observations and namings"
   task(refresh_votes: :environment) do
     print "Refreshing naming.vote_cache...\n"
-    Naming.all.each do |n|
+    Naming.find_each do |n|
       print "##{n.id}\r"
       o = Observation.naming_includes.find(n.observation_id)
       Observation::NamingConsensus.new(o).calc_vote_table
@@ -141,7 +141,7 @@ namespace :cache do
 
     users = {}
     # for n in Name.find(:all) # Rails 3
-    Name.all.each do |n|
+    Name.find_each do |n|
       user_ids = []
       author_id = nil
       last_version = 0

@@ -6,7 +6,7 @@
 #
 #    api = API2.execute(method: "GET", action: :observation, id: 12345)
 #    unless api.errors.any?
-#      render_results(api.results)
+#      render_api_results(api.results)
 #    else
 #      render_errors(api.errors)
 #    end

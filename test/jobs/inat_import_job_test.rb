@@ -430,7 +430,7 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     obs = Observation.last
-    name = Name.find_by(text_name: 'Arrhenia "sp-NY02"')
+    name = Name.find_by(text_name: "Arrhenia sp. 'NY02'")
     assert(name.present?, "Failed to create provisional name")
     assert(name.rss_log_id.present?,
            "Failed to log creation of provisional name")

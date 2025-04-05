@@ -273,6 +273,12 @@ module AbstractModel::Scopes
 
   # class methods here, `self` included
   module ClassMethods
+    # Utility for all subqueries, which are defined on the model
+    def subquery(model_name, params)
+      subquery = Query.new(model_name, **params).query.reorder("")
+      merge(subquery).distinct
+    end
+
     # array of max of MO.query_max_array unique ids for use with Arel "in"
     #    where(<x>.in(limited_id_set(ids)))
     def limited_id_set(ids)

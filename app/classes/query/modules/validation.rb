@@ -16,7 +16,6 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     end
     @params = new_params
     assign_attributes(**@params) if @params.present?
-    initialize_non_nil_defaults
   end
 
   def validate_value(param_type, param, val)

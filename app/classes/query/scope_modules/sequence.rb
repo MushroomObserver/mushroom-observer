@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # methods for moving forward/back up/down in Query results
-module Query::Modules::SequenceOperators
+module Query::ScopeModules::Sequence
   # Current place in results, as an id.  (Returns nil if not set yet.)
   attr_reader :current_id
 
@@ -34,7 +34,7 @@ module Query::Modules::SequenceOperators
   # Move to first place.
   def first
     new_self = self
-    id = new_self.select_value(limit: "1").to_i
+    id = new_self.result_ids.first
     if id.positive?
       @current_id = id
     else
@@ -74,7 +74,7 @@ module Query::Modules::SequenceOperators
   # Move to last place.
   def last
     new_self = self
-    id = new_self.select_value(order: :reverse, limit: "1").to_i
+    id = new_self.result_ids.last
     if id.positive?
       @current_id = id
     else

@@ -1,14 +1,6 @@
 # frozen_string_literal: true
 
-class Query::Articles < Query::Base
-  def model
-    @model ||= Article
-  end
-
-  def list_by
-    @list_by ||= Article[:title]
-  end
-
+class Query::Articles < Query::BaseNew
   def self.parameter_declarations
     super.merge(
       created_at: [:time],
@@ -25,15 +17,15 @@ class Query::Articles < Query::Base
     attribute param_name, :query_param
   end
 
-  def initialize_flavor
-    add_owner_and_time_stamp_conditions
-    add_id_in_set_condition
-    add_search_condition("articles.title", params[:title_has])
-    add_search_condition("articles.body", params[:body_has])
-    super
+  def model
+    @model ||= Article
+  end
+
+  def alphabetical_by
+    @alphabetical_by ||= Article[:title]
   end
 
   def self.default_order
-    "created_at"
+    :created_at
   end
 end
