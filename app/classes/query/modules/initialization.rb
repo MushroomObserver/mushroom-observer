@@ -1,6 +1,53 @@
 # frozen_string_literal: true
 
-# Helper methods for turning Query parameters into AR conditions.
+##############################################################################
+#
+#  :section: Initialization
+#
+#  Helper methods for turning Query parameters into AR conditions.
+#
+#  Query.new basically accepts a hash of params, validates them and turns them
+#  into attributes describing analogous AR scopes, but does not create the
+#  scope chain yet.
+#
+#  To get the results for an :index page or for pagination, the methods in
+#  `Query::Modules::Results` need to call `initialize_query`, which makes the
+#  scope chain of the Query instance accessible via `#query`.
+#
+#  Example:
+#
+#  query = Query.new(:Observation, gps_hidden: true)
+#
+#    This gives you `query` as a Query instance with validated `params`
+#    you can inspect at `query.params`. To use the query, though, you'd call
+#
+#  query.query
+#
+#    This is the same as calling `Observation.gps_hidden(true)`.
+#
+#  METHODS:
+#
+#  initialized?::     Has the Query instance been initialized?
+#  initialize_query:: Send the params to AR model scopes.
+#  query::            All the scopes, chained together. Note that this does
+#                     not return instantiated records. It just gives you a
+#                     complete scope chain for the current Query that you can
+#                     call, select from, get first(15), etc.
+#
+#                     What can be confusing is that if you call a scope in the
+#                     console, you will note that `rails console` DOES
+#                     instantiate the results. But rest assured this does not
+#                     happen in live code. Scopes are a "handler" that are as
+#                     inert as passing around an SQL string. It doesn't fire
+#                     until you execute it.
+#  sql                Returns the SQL string that the scopes generate from AR.
+#                     Same as calling `query.query.to_sql`.
+#  last_query         Alias for `sql`.
+#
+#  Private methods explained below.
+#
+###############################################################################
+
 module Query::Modules::Initialization
   attr_accessor :scopes, :last_query
 
@@ -26,6 +73,8 @@ module Query::Modules::Initialization
 
     @query = scopes.all
   end
+
+  private
 
   def initialize_scopes
     initialize_parameter_set
