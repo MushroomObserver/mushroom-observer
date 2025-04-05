@@ -46,7 +46,7 @@
 #  initialized?::     Has the Query instance been initialized?
 #  initialize_query:: Send the params to AR model scopes.
 #  scope::            The whole scope chain defined by the instance attributes.
-#  sql                Returns the SQL string that the scopes generate from AR.
+#  sql::              Returns the SQL string that the scopes generate from AR.
 #                     Same as calling `query.scope.to_sql`.
 #
 #  Private methods explained below.
