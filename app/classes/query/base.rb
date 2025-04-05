@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
 # base class for Query searches
-class Query::BaseNew
+class Query::Base
   include ActiveModel::API
   include ActiveModel::Attributes
   include ActiveModel::Validations::Callbacks
 
   include Query::Modules::ClassMethods
-  include Query::ScopeModules::Initialization
-  include Query::ScopeModules::Results
-  include Query::ScopeModules::Sequence
+  include Query::Modules::Initialization
+  include Query::Modules::Results
+  include Query::Modules::Sequence
   include Query::Modules::Validation
 
   validates_with Query::Modules::Validator
