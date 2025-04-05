@@ -8,7 +8,7 @@
 #  Used on show pages of individual records.
 #
 #  NOTE: The next and prev sequence operators always grab the entire set of
-#  result_ids.  No attempt is made to reduce the query.  TODO - we might be
+#  result_ids.  No attempt is made to reduce the query.  NOTE: we might be
 #  able to if we can turn the ORDER clause into an upper/lower bound.
 #
 #  The first and last sequence operators ignore result_ids.  However, they are
