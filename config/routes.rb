@@ -142,14 +142,13 @@ end
 
 # Get an array of API endpoints for all versions of API.
 def api_endpoints
-  API_ACTIONS.keys.select { |controller| controller.to_s.start_with?("api") }.
-    flat_map do |controller|
-      API_ACTIONS[controller].keys.map { |action| [controller, action] }
-    end
+  API_ACTIONS.keys.flat_map do |controller|
+    API_ACTIONS[controller].keys.map { |action| [controller, action] }
+  end
 end
 
 # declare routes for the actions in the ACTIONS hash
-def route_actions_hash
+def route_api_actions
   API_ACTIONS.each do |controller, actions|
     # Default action for any controller is "index".
     get(controller.to_s => "#{controller}#index")
@@ -692,8 +691,8 @@ MushroomObserver::Application.routes.draw do
 
   # rubocop:disable Naming/VariableNumber
   namespace :support, controller: "support" do
-    get :confirm
-    get :donate
+    post :confirm, to: "support#confirm"
+    post :donate, to: "support#donate"
     get :donors
     get :governance
     get :letter
@@ -854,7 +853,7 @@ MushroomObserver::Application.routes.draw do
   end
 
   # declare routes for the actions in the ACTIONS hash, does not include CRUD
-  route_actions_hash
+  route_api_actions
 
   # Add support for PATCH and DELETE requests for API.
   api_endpoints.each do |controller, action|
