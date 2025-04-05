@@ -307,14 +307,15 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
   def lookup_class(param, val, type)
     # We're only validating the projects passed as the param.
     # Projects' species_lists will be looked up later.
+    type = type.name.pluralize
     lookup = if param == :project_lists
                Lookup::Projects
              else
-               "Lookup::#{type.name.pluralize}".constantize
+               "Lookup::#{type}".constantize
              end
     unless defined?(lookup)
       @validation_errors <<
-        :query_validation_lookup.t(lookup:, val: val.inspect)
+        :query_validation_lookup.t(type:, val: val.inspect)
     end
     lookup
   end

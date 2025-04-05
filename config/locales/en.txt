@@ -4377,17 +4377,17 @@
   api_help_when_taken: when photo taken
 
   # Query validation.
-  query_validation_param_not_in_set: "Value for :[param] should be one of the following: [set]."
-  query_validation_boolean: "Value for :[param] should be boolean, got: [val]."
-  query_validation_float: "Value for :[param] should be a float, got: [val]."
-  query_validation_record_unsaved: "Value for :[param] is an unsaved [type] instance."
-  query_validation_record: "Value for :[param] should be id, string or [type] instance, got: [val]."
-  query_validation_id_in_set: "Value for :id_in_set should be an array of ids or [type] instances, got: [val]."
-  query_validation_string: "Value for :#{param} should be a string or symbol, got a [class]: [val]."
-  query_validation_date: "Value for :[param] should be a date (YYYY-MM-DD or MM-DD), got: [val]."
-  query_validation_time: "Value for :[param] should be a UTC time (YYYY-MM-DD-HH-MM-SS), got: [class]: [val]."
+  query_validation_param_not_in_set: "Value for ':#{param}' should be one of the following: [set]."
+  query_validation_boolean: "Value for ':#{param}' should be boolean, got: [val]."
+  query_validation_float: "Value for ':#{param}' should be a float, got: [val]."
+  query_validation_record_unsaved: "Value for ':#{param}' is an unsaved :[type] instance."
+  query_validation_record: "Value for ':#{param}' should be id, string or :[type] instance, got: [val]."
+  query_validation_id_in_set: "Value for :id_in_set should be an array of ids or :[type] instances, got: [val]."
+  query_validation_string: "Value for ':#{param}' should be a string or symbol, got a :[class] : [val]."
+  query_validation_date: "Value for ':#{param}' should be a date (YYYY-MM-DD or MM-DD), got: [val]."
+  query_validation_time: "Value for ':#{param}' should be a UTC time (YYYY-MM-DD-HH-MM-SS), got: :[class] : [val]."
   query_validation_lookup_id: "Couldn't find an id for: [val]."
-  query_validation_lookup: "[lookup] not defined for: [val]."
+  query_validation_lookup: "Couldn't look up :[type] by: [val]."
 
   # Query filters.
   query_created_at: created
