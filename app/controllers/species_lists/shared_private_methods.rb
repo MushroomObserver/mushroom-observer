@@ -289,48 +289,39 @@ module SpeciesLists
     def calc_checklist(query = nil)
       return unless query ||= query_from_session
 
-      case query.model.name
-      when "Name"
-        checklist_from_name_query(query)
-      when "Observation"
-        checklist_from_observation_query(query)
-      when "Location"
-        checklist_from_location_query(query)
-      when "RssLog"
-        checklist_from_rss_log_query(query)
-      end
+      results = case query.model.name
+                when "Name"
+                  checklist_from_name_query(query)
+                when "Observation"
+                  checklist_from_observation_query(query)
+                when "Location"
+                  checklist_from_location_query(query)
+                when "RssLog"
+                  checklist_from_rss_log_query(query)
+                end
+      results.pluck(Name[:display_name], Name[:id])
     end
 
     def checklist_from_name_query(query)
-      query.select_rows(
-        select: "DISTINCT names.display_name, names.id",
-        limit: 1000
-      )
+      query.query.select(Name[:display_name], Name[:id]).distinct.limit(1000)
     end
 
+    # Only reason for ther join is to get the __Name formatting__.
+    # The obs table could be altered so it has both these values - AN 202503
     def checklist_from_observation_query(query)
-      query.select_rows(
-        select: "DISTINCT names.display_name, names.id",
-        join: :names,
-        limit: 1000
-      )
+      query.query.joins(:name).
+        select(Name[:display_name], Name[:id]).distinct.limit(1000)
     end
 
     def checklist_from_location_query(query)
-      query.select_rows(
-        select: "DISTINCT names.display_name, names.id",
-        join: { observations: :names },
-        limit: 1000
-      )
+      query.query.joins(observations: :name).
+        select(Name[:display_name], Name[:id]).distinct.limit(1000)
     end
 
     def checklist_from_rss_log_query(query)
-      query.select_rows(
-        select: "DISTINCT names.display_name, names.id",
-        join: { observations: :names },
-        where: "rss_logs.observation_id > 0",
-        limit: 1000
-      )
+      query.query.joins(observations: :name).
+        where(RssLog[:observation_id].gt(0)).
+        select(Name[:display_name], Name[:id]).distinct.limit(1000)
     end
 
     def init_name_vars_for_create

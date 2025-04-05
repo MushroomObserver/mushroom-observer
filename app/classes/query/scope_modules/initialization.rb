@@ -34,9 +34,6 @@ module Query::ScopeModules::Initialization
     add_default_order_if_none_specified
   end
 
-  # For transition only
-  def initialize_non_nil_defaults; end
-
   def initialize_parameter_set
     sendable_params.each do |param, val|
       next if (param != :id_in_set && skippable_values.include?(val.to_s)) ||
