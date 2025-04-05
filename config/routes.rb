@@ -16,7 +16,7 @@
 #
 # Note that the hash of attributes is not yet actually used.
 #
-ACTIONS = {
+API_ACTIONS = {
   api: {
     api_keys: {},
     collection_numbers: {},
@@ -54,23 +54,6 @@ ACTIONS = {
     sequences: {},
     species_lists: {},
     users: {}
-  },
-  support: {
-    confirm: {},
-    donate: {},
-    donors: {},
-    governance: {},
-    letter: {},
-    thanks: {},
-    # Disable cop for legacy routes.
-    # The routes are two very old pages that we might get rid of.
-    # rubocop:disable Naming/VariableNumber
-    wrapup_2011: {},
-    wrapup_2012: {}
-    # rubocop:enable Naming/VariableNumber
-  },
-  theme: {
-    color_themes: {}
   }
 }.freeze
 
@@ -79,26 +62,6 @@ ACTIONS = {
 # -------------------------------------------------------
 
 ACTION_REDIRECTS = {
-  create: {
-    from: "/%<old_controller>s/create_%<model>s",
-    to: "/%<new_controller>s/new",
-    via: [:get, :post]
-  },
-  edit: {
-    from: "/%<old_controller>s/edit_%<model>s/:id",
-    to: "/%<new_controller>s/%<id>s/edit",
-    via: [:get, :post]
-  },
-  destroy: {
-    from: "/%<old_controller>s/destroy_%<model>s/:id",
-    to: "/%<new_controller>s/%<id>s",
-    via: [:patch, :post, :put]
-  },
-  controller: {
-    from: "/%<old_controller>s",
-    to: "/%<new_controller>s",
-    via: [:get]
-  },
   index: {
     from: "/%<old_controller>s/index_%<model>s",
     to: "/%<new_controller>s",
@@ -123,7 +86,7 @@ ACTION_REDIRECTS = {
 
 # legacy actions that translate to standard CRUD actions
 LEGACY_CRUD_ACTIONS = [
-  :create, :edit, :destroy, :controller, :index, :list, :show
+  :index, :list, :show
 ].freeze
 
 # Array of "lookup_xxx" actions: these are all entry points mostly for
@@ -179,15 +142,15 @@ end
 
 # Get an array of API endpoints for all versions of API.
 def api_endpoints
-  ACTIONS.keys.select { |controller| controller.to_s.start_with?("api") }.
+  API_ACTIONS.keys.select { |controller| controller.to_s.start_with?("api") }.
     flat_map do |controller|
-      ACTIONS[controller].keys.map { |action| [controller, action] }
+      API_ACTIONS[controller].keys.map { |action| [controller, action] }
     end
 end
 
 # declare routes for the actions in the ACTIONS hash
 def route_actions_hash
-  ACTIONS.each do |controller, actions|
+  API_ACTIONS.each do |controller, actions|
     # Default action for any controller is "index".
     get(controller.to_s => "#{controller}#index")
 
@@ -727,6 +690,23 @@ MushroomObserver::Application.routes.draw do
         via: [:put, :patch],
         as: "species_list_projects")
 
+  # rubocop:disable Naming/VariableNumber
+  namespace :support, controller: "support" do
+    get :confirm
+    get :donate
+    get :donors
+    get :governance
+    get :letter
+    get :thanks
+    get :wrapup_2011
+    get :wrapup_2012
+  end
+  # rubocop:enable Naming/VariableNumber
+
+  namespace :themes, controller: "themes" do
+    get :color_themes
+  end
+
   # ----- Test if server is up  -------------------------------------
   resources :test, only: [:index], controller: "test"
 
@@ -766,39 +746,23 @@ MushroomObserver::Application.routes.draw do
   ###
   ### Note: Only public, bookmarkable GET routes, or routes appearing inside
   ### translation strings, need to be redirected.
-  ### Form actions do not need redirections. The live site's forms will POST
-  ### or PUT to current action routes.
 
   # ----- Articles: legacy action redirects
   redirect_legacy_actions(
-    old_controller: "article", actions: [:controller, :show, :list, :index]
+    old_controller: "article", actions: [:show, :list, :index]
   )
-
-  # ----- Authors: legacy action redirects
-  get("/observer/author_request", to: redirect("/authors/email_request"))
-  get("/observer/review_authors", to: redirect("/authors/review"))
 
   # ----- Checklist: legacy action redirects
   get("/observer/checklist", to: redirect("/checklist"))
 
   # ----- Emails: legacy action redirects
-  get("/observer/ask_observation_question/:id",
-      to: redirect(path: "/observations/%{id}/emails/new"))
-  get("/observer/ask_user_question/:id",
-      to: redirect(path: "/users/%{id}/emails/new"))
   get("/observer/ask_webmaster_question",
       to: redirect(path: "/admin/emails/webmaster_questions/new"))
-  get("/observer/commercial_inquiry/:id",
-      to: redirect(path: "/images/%{id}/emails/new"))
-  get("/observer/email_merge_request",
-      to: redirect(path: "/admin/emails/merge_requests/new"))
-  get("/observer/email_name_change_request",
-      to: redirect(path: "/admin/emails/name_change_requests/new"))
 
   # ----- Glossary Terms: legacy action redirects
   redirect_legacy_actions(
     old_controller: "glossary", new_controller: "glossary_terms",
-    actions: [:controller, :show, :list, :index]
+    actions: [:show, :list, :index]
   )
 
   # ----- Herbaria: legacy action redirects
@@ -808,13 +772,10 @@ MushroomObserver::Application.routes.draw do
   )
 
   # ----- Herbaria: nonstandard legacy action redirects
-  get("/herbarium/herbarium_search", to: redirect("/herbaria"))
   get("/herbarium/index", to: redirect("/herbaria"))
   get("/herbarium/index_herbarium/:id", to: redirect("/herbaria?id=%{id}"))
   get("/herbarium/index_herbarium", to: redirect("/herbaria"))
   get("/herbarium/list_herbaria", to: redirect("/herbaria"))
-  get("/herbarium/request_to_be_curator/:id",
-      to: redirect("/herbaria/curator_requests/new?id=%{id}"))
   # Must be the final route in order to give the others priority
   get("/herbarium", to: redirect("/herbaria?nonpersonal=true"))
 
@@ -835,11 +796,6 @@ MushroomObserver::Application.routes.draw do
   get("/observer/how_to_use", to: redirect("/info/how_to_use"))
   get("/observer/intro", to: redirect("/info/intro"))
   get("/observer/news", to: redirect("/info/news"))
-  get("/observer/search_bar_help", to: redirect("/info/search_bar_help"))
-  get("/observer/show_site_stats", to: redirect("/info/site_stats"))
-  get("/observer/textile", to: redirect("/info/textile_sandbox"))
-  get("/observer/textile_sandbox", to: redirect("/info/textile_sandbox"))
-  get("/observer/translators_note", to: redirect("/info/translators_note"))
 
   # ----- Names: legacy action redirects -----------------------------------
   get("name/eol", to: redirect("names/eol_data#show"))
@@ -850,30 +806,10 @@ MushroomObserver::Application.routes.draw do
   get("/observer/lookup_name(/:id)", to: "lookups#lookup_name", id: /\S.*/)
 
   # ----- Observations: legacy action redirects ----------------------------
-  get("/observer/create_observation", to: redirect("/observations/new"))
   get("/observer/observation_search", to: redirect(path: "/observations"))
   get("/observer/advanced_search", to: redirect("/observations"))
-  get("/observer/index_observation/:id", to: redirect("/observations?id=%{id}"))
   get("/observer/index_observation", to: redirect("/observations"))
   get("/observer/list_observations", to: redirect("/observations"))
-  get("/observer/map_observation/:id", to: redirect("/observations/%{id}/map"))
-  get("/observer/map_observations", to: redirect("/observations/map"))
-  get("/observer/next_observation/:id",
-      to: redirect("/observations/%{id}?flow=next"))
-  get("/observer/prev_observation/:id",
-      to: redirect("/observations/%{id}?flow=prev"))
-  get("/observer/observations_of_look_alikes/:id",
-      to: redirect("/observations?name=%{id}&look_alikes=1"))
-  get("/observer/observations_of_related_taxa/:id",
-      to: redirect("/observations?name=%{id}&related_taxa=1"))
-  get("/observer/observations_of_name/:id",
-      to: redirect("/observations?name=%{id}"))
-  get("/observer/observations_by_user/:id",
-      to: redirect("/observations?user=%{id}"))
-  get("/observer/observations_at_location/:id",
-      to: redirect("/observations?location=%{id}"))
-  get("/observer/observations_for_project/:id",
-      to: redirect("/observations?project=%{id}"))
   get("/observer/show_observation/:id",
       to: redirect("/observations/%{id}"))
 
@@ -890,9 +826,6 @@ MushroomObserver::Application.routes.draw do
     old_controller: "sequence", new_controller: "sequences",
     actions: [:show, :index]
   )
-  get("/sequence/create_sequence/:id",
-      to: redirect("/sequences/new?obs_id=%{id}"))
-  get("/sequence/edit_sequence/:id", to: redirect("/sequences/%{id}/edit"))
   # ----- Sequences: nonstandard legacy action redirects
   get("/sequence/list_sequences", to: redirect("/sequences?all=true"))
 
@@ -909,21 +842,10 @@ MushroomObserver::Application.routes.draw do
   get("/observer/users_by_contribution", to: redirect(path: "/contributors"))
   get("/observer/users_by_name", to: redirect("/users?by=name"))
   get("/observer/show_user/:id", to: redirect("/users/%{id}"))
-  get("/observer/change_user_bonuses/:id", to: redirect("/users/%{id}/edit"))
-
-  # ----- Search: legacy action redirects ---------------------------------
-  get("/observer/pattern_search", to: redirect("/search/pattern"))
-  get("/observer/advanced_search_form", to: redirect("/search/advanced"))
 
   ###
   ###
   ### END OF LEGACY ACTION REDIRECTS #####################################
-
-  # Add support for PATCH and DELETE requests for API.
-  api_endpoints.each do |controller, action|
-    delete("#{controller}/#{action}", controller: controller, action: action)
-    patch("#{controller}/#{action}", controller: controller, action: action)
-  end
 
   # Accept non-numeric ids for the /lookups/lookup_xxx/id actions.
   LOOKUP_ACTIONS.each do |action|
@@ -931,8 +853,14 @@ MushroomObserver::Application.routes.draw do
                                     as: action)
   end
 
-  # declare routes for the actions in the ACTIONS hash
+  # declare routes for the actions in the ACTIONS hash, does not include CRUD
   route_actions_hash
+
+  # Add support for PATCH and DELETE requests for API.
+  api_endpoints.each do |controller, action|
+    patch("#{controller}/#{action}", controller: controller, action: action)
+    delete("#{controller}/#{action}", controller: controller, action: action)
+  end
 
   # routes for actions that Rails automatically creates from view templates
   MO.themes.each { |scheme| get "/theme/#{scheme}" }
