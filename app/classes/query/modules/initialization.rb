@@ -16,23 +16,26 @@
 #
 #  Example:
 #
-#  query = Query.new(:Observation, gps_hidden: true)
+#  query = Query.new(:Observation, has_public_lat_lng: true)
 #
 #    This gives you `query` as a Query instance with validated `params`
-#    you can inspect at `query.params`. To use the query, though, you'd call
+#    you can inspect at `query.params`, `{ has_public_lat_lng: true }`
+#
+#    To use the query, though, you'd call:
 #
 #  query.scope
 #
 #    This is the same as calling:
 #
-#  Observation.gps_hidden(true)
+#  Observation.has_public_lat_lng(true)
 #
 #    Note that `query.scope` does not return instantiated records.
 #    It just gives you the complete scope chain for the current Query that you
 #    can call, continue chaining, select from, get first(15), etc.
 #
-#  query.scope.limit(15) == Observation.gps_hidden(true).limit(15)
-#  query.scope.where(user: 252) == Observation.gps_hidden(true).where(user: 252)
+#  query.scope.limit(15) == Observation.has_public_lat_lng(true).limit(15)
+#  query.scope.where(user: 252) == Observation.has_public_lat_lng(true).
+#                                  where(user: 252)
 #
 #    Possible confusion: if you call a scope in the console, you will note
 #    that `rails console` DOES instantiate the results. But rest assured
