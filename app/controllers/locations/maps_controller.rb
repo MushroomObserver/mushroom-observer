@@ -12,7 +12,7 @@ module Locations
       columns = [:id, :name, :north, :south, :east, :west].map do |col|
         Location[col]
       end
-      @locations = @query.query.select(*columns).distinct.
+      @locations = @query.scope.select(*columns).distinct.
                    limit(MO.query_max_array).map do |loc|
         Mappable::MinimalLocation.new(loc.attributes.symbolize_keys)
       end

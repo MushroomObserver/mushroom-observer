@@ -1,15 +1,29 @@
 # frozen_string_literal: true
 
-# base class for Query searches
-class Query::BaseNew
+#  == Class and Instance Methods
+#  parameter_declarations::
+#  takes_parameter?::
+#  scope_parameters::
+#  content_filter_parameters::
+#  default_order::
+#
+#  == Instance Methods
+#  relatable?::               Can a query of this model be converted to a
+#                             subquery filtering results of another model?
+#  subquery_of?(target)::
+#  serialize::          Returns string which describes the Query completely.
+#  record::
+#
+class Query::Base
   include ActiveModel::API
   include ActiveModel::Attributes
   include ActiveModel::Validations::Callbacks
 
-  include Query::Modules::ClassMethods
-  include Query::ScopeModules::Initialization
-  include Query::ScopeModules::Results
-  include Query::ScopeModules::Sequence
+  include Query::Modules::QueryRecords
+  include Query::Modules::Subqueries
+  include Query::Modules::Initialization
+  include Query::Modules::Results
+  include Query::Modules::Sequence
   include Query::Modules::Validation
 
   validates_with Query::Modules::Validator

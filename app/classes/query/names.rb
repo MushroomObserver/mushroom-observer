@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # base class for Query's which return Names
-class Query::Names < Query::BaseNew
+class Query::Names < Query::Base
   include Query::Params::AdvancedSearch
   include Query::Params::Filters
 
@@ -48,7 +48,8 @@ class Query::Names < Query::BaseNew
       merge(advanced_search_parameter_declarations)
   end
 
-  # Declare the parameters as attributes of type `query_param`
+  # Declare the parameters as model attributes, of custom type `query_param`
+
   parameter_declarations.each_key do |param_name|
     attribute param_name, :query_param
   end

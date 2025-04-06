@@ -275,7 +275,7 @@ module AbstractModel::Scopes
   module ClassMethods
     # Utility for all subqueries, which are defined on the model
     def subquery(model_name, params)
-      subquery = Query.new(model_name, **params).query.reorder("")
+      subquery = Query.new(model_name, **params).scope.reorder("")
       merge(subquery).distinct
     end
 
