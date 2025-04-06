@@ -52,22 +52,17 @@ class CollectionNumbers::RemoveObservationsControllerTest < FunctionalTestCase
     assert_obj_arrays_equal([num2], obs2.reload.collection_numbers)
   end
 
-  # Removing num from last obs destroys it.
-  def test_removing_actually_destroys_when_no_other_associations
-    obs1, _obs2, num1, _num2 = setup_test_fixtures
+  def test_removing_destroys_only_when_appropriate
+    obs1, obs2, num1, num2 = setup_test_fixtures
 
     login("rolf")
+    # Removing num from last obs destroys it.
     patch(:update, params: { collection_number_id: num1.id,
                              observation_id: obs1.id })
     assert_empty(obs1.reload.collection_numbers)
     assert_nil(CollectionNumber.safe_find(num1.id))
-  end
 
-  # Removing num from one of two obs does not destroy it.
-  def test_removing_from_obs_does_not_destroy_when_belongs_to_two_obs
-    obs1, obs2, _num1, num2 = setup_test_fixtures
-
-    login("rolf")
+    # Removing num from one of two obs does not destroy it.
     num2.add_observation(obs1)
     assert_obj_arrays_equal([num2], obs1.reload.collection_numbers)
     assert_obj_arrays_equal([num2], obs2.reload.collection_numbers)
@@ -76,12 +71,8 @@ class CollectionNumbers::RemoveObservationsControllerTest < FunctionalTestCase
     assert_obj_arrays_equal([num2], obs1.reload.collection_numbers)
     assert_empty(obs2.reload.collection_numbers)
     assert_not_nil(CollectionNumber.safe_find(num2.id))
-  end
 
-  # Finally make sure admin has permission.
-  def test_admin_can_remove
-    obs1, _obs2, _num1, num2 = setup_test_fixtures
-
+    # Finally make sure admin has permission.
     make_admin("mary")
     patch(:update, params: { collection_number_id: num2.id,
                              observation_id: obs1.id })
@@ -107,11 +98,18 @@ class CollectionNumbers::RemoveObservationsControllerTest < FunctionalTestCase
   def test_turbo_remove_collection_number
     obs1, _obs2, num1, _num2 = setup_test_fixtures
 
-    login("rolf")
+    # non-owner cannot
+    login("mary")
     params = { collection_number_id: num1.id,
                observation_id: obs1.id }
     patch(:update, params: params,
                    format: :turbo_stream)
     assert_obj_arrays_equal([num1], obs1.reload.collection_numbers)
+
+    # owner can
+    login("rolf")
+    patch(:update, params: params,
+                   format: :turbo_stream)
+    assert_empty(obs1.reload.collection_numbers)
   end
 end
