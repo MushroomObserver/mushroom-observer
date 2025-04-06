@@ -179,8 +179,10 @@ class SequencesControllerTest < FunctionalTestCase
                   bases: ITS_BASES }
     }
     login
-    assert_difference("Sequence.count", 1) { post(:create, params: params,
-                                                  format: :turbo_stream) }
+    assert_difference("Sequence.count", 1) do
+      post(:create, params: params,
+                    format: :turbo_stream)
+    end
   end
 
   def test_create_non_repo_sequence
