@@ -4,20 +4,47 @@
 # Ensure that name.sort_name is consistent with
 # Name.parse(name.search_name).sort_name
 
-def update
-  Name.find_each do |name|
-    name.skip_notify = true
-    parse = Name.parse_name(name.search_name, deprecated: name.deprecated,
-                                              rank: name.rank)
-    if parse
-      changed = check_name("text_name", name, parse)
-      changed = check_name("search_name", name, parse) || changed
-      changed = check_name("display_name", name, parse) || changed
-      check_name("sort_name", name, parse) || changed
-    else
-      puts("#{name.id},#{name.search_name},ERROR,#{name.created_at},BAD PARSE")
-    end
+NAME_METHODS = %w[
+  text_name
+  search_name
+  display_name
+  sort_name
+].freeze
+
+def update(controller)
+  last_id = controller.start
+  Name.where(id: controller.start..).
+    order(id: :asc).limit(controller.count).find_each do |name|
+    process_name(name, controller.sleep_time)
+    last_id = name.id
   end
+  puts("Last ID: #{last_id}")
+end
+
+def process_name(name, sleep_time)
+  name.skip_notify = true
+  parse = Name.parse_name(name.search_name, deprecated: name.deprecated,
+                                            rank: name.rank)
+  if parse
+    check_parse(name, parse, sleep_time)
+  else
+    puts("#{name.id},#{name.search_name},ERROR,#{name.created_at},BAD PARSE")
+  end
+end
+
+def check_parse(name, parse, sleep_time)
+  return unless check_names(name, parse)
+
+  puts("Updated #{name.id}")
+  sleep(sleep_time)
+end
+
+def check_names(name, parse)
+  changed = false
+  NAME_METHODS.each do |method|
+    changed = check_name(method, name, parse) || changed
+  end
+  changed
 end
 
 def check_name(method, name, parse)
@@ -36,4 +63,17 @@ def check_name(method, name, parse)
   true
 end
 
-update
+class Controller
+  attr_accessor :start
+  attr_accessor :count
+  attr_accessor :sleep_time
+
+  def initialize(args)
+    @start = args[0].to_i
+    @count = args[1].to_i
+    @sleep_time = args[2].to_f
+  end
+end
+
+controller = Controller.new(ARGV)
+update(controller)

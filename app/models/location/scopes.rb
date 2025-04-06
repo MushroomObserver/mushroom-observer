@@ -59,13 +59,17 @@ module Location::Scopes
       )
     }
 
+    # Query currently ignores "false" in both these cases
     scope :has_descriptions, lambda { |bool = true|
       return all unless bool
 
       presence_condition(Location[:description_id], bool:)
     }
-    scope :has_observations,
-          -> { joins(:observations).distinct }
+    scope :has_observations, lambda { |bool = true|
+      return all unless bool
+
+      joins(:observations).distinct
+    }
 
     # Returns locations whose bounding box is entirely within the given box.
     # Pass kwargs (:north, :south, :east, :west), any order
@@ -149,6 +153,13 @@ module Location::Scopes
               or(Location[:west].gt(Location[:east]).
                 and(Location[:west] <= west).and(Location[:east] >= east)))
       end
+    }
+
+    scope :description_query, lambda { |hash|
+      joins(:descriptions).subquery(:LocationDescription, hash)
+    }
+    scope :observation_query, lambda { |hash|
+      joins(:observations).subquery(:Observation, hash)
     }
 
     scope :show_includes, lambda {

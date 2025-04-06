@@ -65,8 +65,6 @@ class CollectionNumbersController < ApplicationController
   def new
     set_ivars_for_new
     return unless @observation
-
-    @back_object = @observation
     return unless make_sure_can_edit!(@observation)
 
     @collection_number = CollectionNumber.new(name: @user.legal_name)
@@ -80,8 +78,6 @@ class CollectionNumbersController < ApplicationController
   def create
     set_ivars_for_new
     return unless @observation
-
-    @back_object = @observation
     return unless make_sure_can_edit!(@observation)
 
     create_collection_number # response handled here
@@ -127,6 +123,7 @@ class CollectionNumbersController < ApplicationController
   def set_ivars_for_new
     @layout = calc_layout_params
     @observation = find_or_goto_index(Observation, params[:observation_id])
+    @back_object = @observation
   end
 
   def set_ivars_for_edit
@@ -351,7 +348,8 @@ class CollectionNumbersController < ApplicationController
   def render_collection_numbers_section_update
     render(
       partial: "observations/show/section_update",
-      locals: { identifier: "collection_numbers" }
+      locals: { identifier: "collection_numbers",
+                obs: @observation, user: @user }
     ) and return
   end
 

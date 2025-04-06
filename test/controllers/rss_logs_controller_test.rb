@@ -94,13 +94,38 @@ class RssLogsControllerTest < FunctionalTestCase
   end
 
   # Prove that user content_filter works on rss_log
-  def test_rss_log_with_content_filter
+  def test_rss_log_has_specimen_content_filter
     login(users(:vouchered_only_user).name)
     get(:index, params: { type: :observation })
     results = @controller.instance_variable_get(:@objects)
 
     assert(results.exclude?(rss_logs(:imged_unvouchered_obs_rss_log)))
     assert(results.include?(rss_logs(:detailed_unknown_obs_rss_log)))
+  end
+
+  def test_rss_log_lichen_content_filter
+    login(users(:lichenologist).name)
+    get(:index, params: { type: :observation })
+    results = @controller.instance_variable_get(:@objects)
+
+    assert(results.exclude?(rss_logs(:imged_unvouchered_obs_rss_log)))
+    assert(results.include?(rss_logs(:peltigera_obs_rss_log)))
+
+    login(users(:antilichenologist).name)
+    get(:index, params: { type: :observation })
+    results = @controller.instance_variable_get(:@objects)
+
+    assert(results.exclude?(rss_logs(:peltigera_obs_rss_log)))
+    assert(results.include?(rss_logs(:stereum_hirsutum_2_rss_log)))
+  end
+
+  def test_rss_log_region_content_filter
+    login(users(:californian).name)
+    get(:index, params: { type: :observation })
+    results = @controller.instance_variable_get(:@objects)
+
+    assert(results.exclude?(rss_logs(:unknown_with_no_naming_rss_log)))
+    assert(results.include?(rss_logs(:minimal_unknown_obs_rss_log)))
   end
 
   def test_next_and_prev_rss_log

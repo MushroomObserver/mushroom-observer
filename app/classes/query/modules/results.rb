@@ -2,16 +2,26 @@
 
 ##############################################################################
 #
-#  :section: High-Level Queries
+#  :section: Results
 #
-#  Note that most of these methods accept a few optional arguments.  For
-#  example, all methods that return instantiated results accept +:include+
-#  which is passed in to <tt>model.all</tt>.
+#  Caching note:
+#  Query caches results, and result_ids.  Any of results, result_ids,
+#  num_results, or paginate populates result_ids, however result records are
+#  only instantiated as necessary. (Jason found that requesting all the ids was
+#  not significantly slower than requesting the count, while calling _both_ was
+#  nearly twice as long as just one.  So, there was no reason to optimize the
+#  query if you only want the number of results.)
 #
-#  join::           Add extra join clause(s) to query.
-#  where::          Add extra condition(s) to query.
-#  limit::          Put a limit on the number of results from the raw query.
-#  include::        Eager-load these associations when instantiating results.
+#  NOTE: Calling most of these will `initialize_query`,
+#        i.e., instantiate the requested page of query results.
+#
+#  num_results::        Number of results the query returns.
+#  results::            Array of all results, instantiated.
+#  result_ids::         Array of all results, just ids.
+#  index::              Index of a given id or object in the results.
+#  paginate::           Array of subset of results, instantiated.
+#  paginate_ids::       Array of subset of results, just ids.
+#  clear_cache::        Clear results cache.
 #
 #  Add additional arguments to the three "global" Arrays immediately below:
 #
@@ -20,12 +30,12 @@
 #
 ##############################################################################
 
-module Query::Modules::HighLevelQueries
-  attr_accessor :need_letters
+module Query::Modules::Results
+  attr_reader :need_letters
 
   # Args accepted by +results+, +result_ids+, +num_results+.  (These are passed
   # through into +select_values+.)
-  RESULTS_ARGS = [:join, :where, :limit, :group].freeze
+  RESULTS_ARGS = [:limit].freeze
 
   # Args accepted by +instantiate_results+ (and +paginate+ and +results+ since
   # theycall +instantiate_results+, too).
@@ -33,32 +43,45 @@ module Query::Modules::HighLevelQueries
 
   # Number of results the query returns.
   def num_results(_args = {})
+    initialize_query unless initialized?
     @num_results ||= result_ids&.size || 0
   end
 
   # Array of all results, just ids.
   def result_ids(args = {})
+    initialize_query unless initialized?
     expect_args(:result_ids, args, RESULTS_ARGS)
+    # includes = args[:include] || []
     @result_ids ||=
       if need_letters
-        # Include first letter of paginate-by-letter field right away; there's
-        # typically no avoiding it.  This optimizes away an extra query or two.
-        @letters = {}
-        ids = []
-        select = "DISTINCT #{model.table_name}.id, LEFT(#{list_by.to_sql},4)"
-        select_rows(args.merge(select: select)).each do |id, letter|
-          letter = letter[0, 1]
-          @letters[id.to_i] = letter.upcase if /[a-zA-Z]/.match?(letter)
-          ids << id.to_i
-        end
-        ids
+        ids_by_letter
       else
-        select_values(args).map(&:to_i)
+        @scopes.ids
       end
+  end
+
+  # Returns an array of ids for each letter that has a record present.
+  def ids_by_letter
+    @letters = {}
+    ids = []
+    minimal_query_of_all_records.each do |record|
+      id, title = record.values_at(:id, :title)
+      letter = title[0, 1]
+      @letters[id] = letter.upcase if /[a-zA-Z]/.match?(letter)
+      ids << id
+    end
+    ids
+  end
+
+  # Tries to be light about it, by selecting only two values.
+  # `alphabetical_by` is a `Model[:column]` - checks the first four chars.
+  def minimal_query_of_all_records
+    @scopes.select(model[:id], alphabetical_by[0..3].as("title")).distinct
   end
 
   # Array of all results, instantiated.
   def results(args = {})
+    initialize_query unless initialized?
     instantiate_args, results_args = split_args(args, INSTANTIATE_ARGS)
     instantiate_results(result_ids(results_args), instantiate_args)
   end
@@ -89,9 +112,12 @@ module Query::Modules::HighLevelQueries
     end
   end
 
+  # need_letters is the table and column name we're indexing
+  # change - to just t/f, and store the title column on the query class!
+  #
   # Make sure we requery if we change the letter field.
   def need_letters=(letters)
-    unless [true, false, 1, 0, nil].include?(letters)
+    unless [true, false, 1, 0].include?(letters)
       raise("You must pass a Boolean to 'need_letters'.")
     end
 
@@ -103,22 +129,27 @@ module Query::Modules::HighLevelQueries
   end
 
   # Returns a subset of the results (as ids).
-  def paginate_ids(paginator)
+  def paginate_ids(pagination_data)
+    initialize_query unless initialized?
     ids = result_ids
-    if need_letters
-      paginator.used_letters = @letters.values.uniq
-      if (letter = paginator.letter)
-        ids = ids.select { |id| @letters[id] == letter }
-      end
+    ids, pagination_data = ids_for_letter(ids, pagination_data) if need_letters
+    pagination_data.num_total = ids.size
+    ids[pagination_data.from..pagination_data.to] || []
+  end
+
+  def ids_for_letter(ids, pagination_data)
+    pagination_data.used_letters = @letters.values.uniq
+    if (letter = pagination_data.letter)
+      ids = ids.select { |id| @letters[id] == letter }
     end
-    paginator.num_total = ids.size
-    ids[paginator.from..paginator.to] || []
+    [ids, pagination_data]
   end
 
   # Returns a subset of the results (as ActiveRecord instances).
   # (Takes args for +instantiate+.)
-  def paginate(paginator, args = {})
-    instantiate_results(paginate_ids(paginator), args)
+  def paginate(pagination_data, args = {})
+    initialize_query unless initialized?
+    instantiate_results(paginate_ids(pagination_data), args)
   end
 
   # Instantiate a set of records given as an Array of ids.  Returns a list of

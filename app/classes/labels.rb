@@ -38,7 +38,7 @@ class Labels
   end
 
   def body
-    File.read(MO.label_rtf_header_file) + format_observations + "}"
+    "#{File.read(MO.label_rtf_header_file)}#{format_observations}}"
   end
 
   # --------------------

@@ -224,11 +224,10 @@ class ReportTest < UnitTestCase
     ]
     do_csv_test(Report::Fundis, obs, expect, &:id)
 
-    User.current = mary
     expect[11] = "34.1622"
     expect[12] = "-118.3521"
     expect[13] = nil
-    do_csv_test(Report::Fundis, obs, expect, &:id)
+    do_csv_test(Report::Fundis, obs, expect, user: users(:mary), &:id)
   end
 
   def test_raw
@@ -529,9 +528,8 @@ class ReportTest < UnitTestCase
     assert_nil(table[idx + 1][LAT_INDEX])
     assert_nil(table[idx + 1][LONG_INDEX])
 
-    # User.current must be project admin for query to work.
-    User.current = users(:roy)
-    body = report_body(report_type, query)
+    # user must be project admin for query to work.
+    body = report_body(report_type, query, user: users(:roy))
     table = CSV.parse(body, col_sep: report_type.separator)
     idx = query.results.sort_by(&:id).index(obs)
     assert_equal(obs.lat.to_s, table[idx + 1][LAT_INDEX])
@@ -540,17 +538,17 @@ class ReportTest < UnitTestCase
 
   private
 
-  def do_csv_test(report_type, obs, expect, &block)
+  def do_csv_test(report_type, obs, expect, user: nil, &block)
     query = Query.lookup(:Observation)
-    body = report_body(report_type, query)
+    body = report_body(report_type, query, user:)
     table = CSV.parse(body, col_sep: report_type.separator)
     assert_equal(query.num_results + 1, table.count)
     idx = query.results.sort_by(&block).index(obs)
     assert_equal(expect, table[idx + 1])
   end
 
-  def report_body(report_type, query)
-    report = report_type.new(query: query)
+  def report_body(report_type, query, user: nil)
+    report = report_type.new(query:, user:)
     assert_not_empty(report.filename)
     body = report.body
     assert_not_empty(body)

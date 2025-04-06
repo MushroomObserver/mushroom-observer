@@ -37,8 +37,8 @@ module AbstractModel::OrderingScopes
       scope = :"order_by_#{method}"
       return all unless model.private_methods(false).include?(scope)
 
-      # Calls `scoping` with `model` here, because the private class methods
-      # below are otherwise inaccessible to a `scope` proc.
+      # Call `scoping` with `model.send(:method)` here, because the private
+      # class methods below are otherwise inaccessible to a `scope` proc.
       scope = scoping { model.send(scope) }
       scope = scope.reverse_order if reverse
       # Order grouped results from other scopes by adding order(id: :desc). If
@@ -116,6 +116,13 @@ module AbstractModel::OrderingScopes
       return all unless column_names.include?("created_at")
 
       order(arel_table[:created_at].desc)
+    end
+
+    def order_by_curator
+      joins(:curators).distinct.order(
+        User[:name].when(nil).then(User[:login]).when("").then(User[:login]).
+        else(User[:name]).asc
+      )
     end
 
     def order_by_date

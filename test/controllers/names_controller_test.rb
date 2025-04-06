@@ -1411,7 +1411,8 @@ class NamesControllerTest < FunctionalTestCase
     assert_redirected_to(name_path(name.id))
     assert_equal(10, rolf.reload.contribution)
     assert_equal("(Fr.) Kühner", name.reload.author)
-    assert_equal("**__Conocybe filaris__** (Fr.) Kühner", name.display_name)
+    assert_equal("**__Conocybe__** **__filaris__** (Fr.) Kühner",
+                 name.display_name)
     assert_equal("Conocybe filaris (Fr.) Kühner", name.search_name)
     assert_equal("__Le Genera Galera__, 139. 1935.", name.citation)
     assert_equal(rolf, name.user)
@@ -1776,7 +1777,8 @@ class NamesControllerTest < FunctionalTestCase
     name = names.last
     assert_equal("Xanthoparmelia coloradoensis", name.text_name)
     assert_equal("Xanthoparmelia coloradoensis", name.search_name)
-    assert_equal("**__Xanthoparmelia coloradoensis__**", name.display_name)
+    assert_equal("**__Xanthoparmelia__** **__coloradoensis__**",
+                 name.display_name)
 
     get(:edit, params: { id: name.id })
     assert_input_value("name_text_name", "Xanthoparmelia coloradoensis")
@@ -1800,7 +1802,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_equal("Xanthoparmelia coloradoensis", name.text_name)
     assert_equal("Xanthoparmelia coloradoensis (Gyelnik) Hale",
                  name.search_name)
-    assert_equal("**__Xanthoparmelia coloradoënsis__** (Gyelnik) Hale",
+    assert_equal("**__Xanthoparmelia__** **__coloradoënsis__** (Gyelnik) Hale",
                  name.display_name)
 
     get(:edit, params: { id: name.id })
@@ -1816,17 +1818,18 @@ class NamesControllerTest < FunctionalTestCase
     name.reload
     assert_equal("Xanthoparmelia coloradoensis", name.text_name)
     assert_equal("Xanthoparmelia coloradoensis", name.search_name)
-    assert_equal("**__Xanthoparmelia coloradoensis__**", name.display_name)
+    assert_equal("**__Xanthoparmelia__** **__coloradoensis__**",
+                 name.display_name)
   end
 
   def test_edit_name_fixing_variety
     login("katrina")
     name = Name.create!(
       text_name: "Pleurotus djamor",
-      search_name: "Pleurotus djamor (Fr.) Boedijn var. djamor",
-      sort_name: "Pleurotus djamor (Fr.) Boedijn var. djamor",
-      display_name: "**__Pleurotus djamor__** (Fr.) Boedijn var. djamor",
-      author: "(Fr.) Boedijn var. djamor",
+      search_name: "Pleurotus djamor (Fr.) Boi var. djamor",
+      sort_name: "Pleurotus djamor (Fr.) Boi var. djamor",
+      display_name: "**__Pleurotus__** **__djamor__** (Fr.) Boi var. djamor",
+      author: "(Fr.) Boi var. djamor",
       rank: "Species",
       deprecated: false,
       correct_spelling: nil
@@ -1834,7 +1837,7 @@ class NamesControllerTest < FunctionalTestCase
     params = {
       id: name.id,
       name: {
-        text_name: "Pleurotus djamor var. djamor (Fr.) Boedijn",
+        text_name: "Pleurotus djamor var. djamor (Fr.) Boi",
         author: "",
         rank: "Variety",
         deprecated: "false"
@@ -1848,8 +1851,8 @@ class NamesControllerTest < FunctionalTestCase
     name.reload
     assert_equal("Variety", name.rank)
     assert_equal("Pleurotus djamor var. djamor", name.text_name)
-    assert_equal("Pleurotus djamor var. djamor (Fr.) Boedijn", name.search_name)
-    assert_equal("(Fr.) Boedijn", name.author)
+    assert_equal("Pleurotus djamor var. djamor (Fr.) Boi", name.search_name)
+    assert_equal("(Fr.) Boi", name.author)
     # In the bug in the wild, it was failing to create the parents.
     assert(Name.find_by(text_name: "Pleurotus djamor"))
     assert(Name.find_by(text_name: "Pleurotus"))
@@ -1861,7 +1864,7 @@ class NamesControllerTest < FunctionalTestCase
       text_name: "Lepiota echinatae",
       search_name: "Lepiota echinatae Group",
       sort_name: "Lepiota echinatae Group",
-      display_name: "**__Lepiota echinatae__** Group",
+      display_name: "**__Lepiota__** **__echinatae__** Group",
       author: "Group",
       rank: "Species",
       deprecated: false,
@@ -1885,7 +1888,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_equal("Group", name.rank)
     assert_equal("Lepiota echinatae group", name.text_name)
     assert_equal("Lepiota echinatae group", name.search_name)
-    assert_equal("**__Lepiota echinatae__** group", name.display_name)
+    assert_equal("**__Lepiota__** **__echinatae__** group", name.display_name)
     assert_equal("", name.author)
   end
 
@@ -1895,7 +1898,7 @@ class NamesControllerTest < FunctionalTestCase
       text_name: "Ganoderma applanatum",
       search_name: "Ganoderma applanatum",
       sort_name: "Ganoderma applanatum",
-      display_name: "__Ganoderma applanatum__",
+      display_name: "__Ganoderma__ __applanatum__",
       author: "",
       rank: "Species",
       deprecated: true,

@@ -813,8 +813,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
   end
 
   def do_external_sites_test(expect, user, obs)
-    User.current = user
-    actual = @controller.helpers.external_sites_user_can_add_links_to(obs)
+    actual = ExternalSite.sites_user_can_add_links_to(user, obs)
     assert_equal(expect.map(&:name), actual.map(&:name))
   end
 

@@ -35,12 +35,13 @@ class ObservationsController
     def advanced_search
       query = advanced_search_query
       # Have to check this here because we're not running the query yet.
-      raise(:runtime_no_conditions.l) unless query.params.any?
+      raise(:runtime_no_conditions.l) unless query&.params&.any?
 
       [query, {}]
     rescue StandardError => e
       flash_error(e.to_s) if e.present?
       redirect_to(search_advanced_path)
+      [nil, {}]
     end
 
     def advanced_search_query

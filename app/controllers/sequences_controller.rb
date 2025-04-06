@@ -301,7 +301,7 @@ class SequencesController < ApplicationController
   def render_sequences_section_update
     render(
       partial: "observations/show/section_update",
-      locals: { identifier: "sequences" }
+      locals: { identifier: "sequences", obs: @observation, user: @user }
     ) and return
   end
 

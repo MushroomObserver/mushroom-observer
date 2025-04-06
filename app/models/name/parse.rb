@@ -38,6 +38,19 @@ module Name::Parse
   F_ABBR       = / forma | form\.? | fo\.? | f\.?          /xi
   GROUP_ABBR   = / group | gr\.? | gp\.? | clade | complex /xi
 
+  PROV_RANKS = {
+    "Gen." => "Genus",
+    "Fam." => "Family",
+    "Ord." => "Order",
+    "Cl." => "Class",
+    "Phy." => "Plylum"
+  }.freeze
+
+  RANKS_BELOW_GENUS = ["subg.", "subgen.", "subgenus",
+                       "sect.", "sect",
+                       "subsect.", "subsect", "stirps", "sp.",
+                       "subsp.", "ssp.", "var.", "var", "v.", "f."].freeze
+
   # Match text_name to rank
   TEXT_NAME_MATCHERS = [
     RankMatcher.new("Group",      / (group|clade|complex)$/),
@@ -89,13 +102,14 @@ module Name::Parse
   ANY_AUTHOR_ABBR = / (?: #{AUCT_ABBR} | #{INED_ABBR} | #{NOM_ABBR} |
                           #{COMB_ABBR} | #{SENSU_ABBR} | #{CRYPT_ABBR} )
                       (?:\s|$) /x
+  ANY_RANK_ABBR   = / #{ANY_SUBG_ABBR} | #{SP_ABBR} | #{ANY_SSP_ABBR} /x
 
   UPPER_WORD = /
-                [A-Z][a-zë-]*[a-zë] | "[A-Z][a-zë\-.]*[a-zë]"
+                [A-Z][a-zë-]*[a-zë] | ['"][A-Z][a-zë\-.]*[a-zë]['"]
   /x
   LOWER_WORD = /
-    (?!(?:sensu|van|de)\b) [a-z][a-zë-]*[a-zë] | "[a-z][\wë\-.]*[\wë]"
-    /x
+    (?!(?:sensu|van|de)\b) [a-z][a-zë-]*[a-zë] |
+    (?:sp\. \s)?['"][a-z][\wë\-.]*[\wë]['"] /x
   BINOMIAL   = / #{UPPER_WORD} \s #{LOWER_WORD} /x
   LOWER_WORD_OR_SP_NOV = / (?! sp\s|sp$|species) #{LOWER_WORD} |
                            sp\.\s\S*\d\S* /x
@@ -108,7 +122,7 @@ module Name::Parse
     #{ANY_AUTHOR_ABBR} |
     van\s | d[eu]\s |
     [A-ZÀÁÂÃÄÅÆÇĐÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞČŚŠ(] |
-    "[^a-z\s]
+    ['"][^a-z\s]
   /x
 
   # AUTHOR_PAT is separate from, and can't include GENUS_OR_UP_TAXON, etc.
@@ -117,17 +131,17 @@ module Name::Parse
   # Then the other parsers have a much easier job.
   AUTHOR_PAT =
     /^
-      ( "?
+      ( ['"]?
         #{UPPER_WORD}
         (?:
             # >= 1 of (rank Epithet)
             \s     #{ANY_SUBG_ABBR} \s #{UPPER_WORD}
-            (?: \s #{ANY_SUBG_ABBR} \s #{UPPER_WORD} )* "?
+            (?: \s #{ANY_SUBG_ABBR} \s #{UPPER_WORD} )* ['"]?
           |
             \s (?! #{AUTHOR_START} | #{ANY_SUBG_ABBR} ) #{LOWER_WORD}
-            (?: \s #{ANY_SSP_ABBR} \s #{LOWER_WORD} )* "?
+            (?: \s #{ANY_SSP_ABBR} \s #{LOWER_WORD} )* ['"]?
           |
-            "? \s #{SP_ABBR}
+            ['"]? \s #{SP_ABBR}
         )?
       )
       ( \s (?! #{ANY_NAME_ABBR} \s ) #{AUTHOR_START}.* )
@@ -136,19 +150,21 @@ module Name::Parse
   # Disable cop to allow alignment and easier comparison of regexps
   # rubocop:disable Layout/LineLength
 
+  PROV_RANK_PREFIX = /[A-Z][a-z]+\.\ /x
+
   # Taxa without authors (for use by GROUP PAT)
-  GENUS_OR_UP_TAXON = /("? (?:Fossil-)? #{UPPER_WORD} "?) (?: \s #{SP_ABBR} )?/x
-  SUBGENUS_TAXON    = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD}) "?)/x
-  SECTION_TAXON     = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
-                       (?: #{SECT_ABBR} \s #{UPPER_WORD}) "?)/x
-  SUBSECTION_TAXON  = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
+  GENUS_OR_UP_TAXON = /(#{PROV_RANK_PREFIX})?(['"]? (?:Fossil-)? #{UPPER_WORD} ['"]?) (?: \s #{SP_ABBR} )?/x # ([A-Z][a-z]+\. )?
+  SUBGENUS_TAXON    = /(#{PROV_RANK_PREFIX})?(['"]? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD}) ['"]?)/x
+  SECTION_TAXON     = /(#{PROV_RANK_PREFIX})?(['"]? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{SECT_ABBR} \s #{UPPER_WORD}) ['"]?)/x
+  SUBSECTION_TAXON  = /(#{PROV_RANK_PREFIX})?(['"]? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
                        (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)?
-                       (?: #{SUBSECT_ABBR} \s #{UPPER_WORD}) "?)/x
-  STIRPS_TAXON      = /("? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
+                       (?: #{SUBSECT_ABBR} \s #{UPPER_WORD}) ['"]?)/x
+  STIRPS_TAXON      = /(#{PROV_RANK_PREFIX})?(['"]? #{UPPER_WORD} \s (?: #{SUBG_ABBR} \s #{UPPER_WORD} \s)?
                        (?: #{SECT_ABBR} \s #{UPPER_WORD} \s)?
                        (?: #{SUBSECT_ABBR} \s #{UPPER_WORD} \s)?
-                       (?: #{STIRPS_ABBR} \s #{UPPER_WORD}) "?)/x
-  SPECIES_TAXON     = /("? #{UPPER_WORD} \s #{LOWER_WORD_OR_SP_NOV} "?)/x
+                       (?: #{STIRPS_ABBR} \s #{UPPER_WORD}) ['"]?)/x
+  SPECIES_TAXON     = /(#{PROV_RANK_PREFIX})?(['"]? #{UPPER_WORD} \s #{LOWER_WORD_OR_SP_NOV} ['"]?)/x
   # rubocop:enable Layout/LineLength
 
   GENUS_OR_UP_PAT = /^ #{GENUS_OR_UP_TAXON} (\s #{AUTHOR_START}.*)? $/x
@@ -157,16 +173,19 @@ module Name::Parse
   SUBSECTION_PAT  = /^ #{SUBSECTION_TAXON}  (\s #{AUTHOR_START}.*)? $/x
   STIRPS_PAT      = /^ #{STIRPS_TAXON}      (\s #{AUTHOR_START}.*)? $/x
   SPECIES_PAT     = /^ #{SPECIES_TAXON}     (\s #{AUTHOR_START}.*)? $/x
-  SUBSPECIES_PAT  = /^ ("? #{BINOMIAL} (?: \s #{SSP_ABBR} \s #{LOWER_WORD}) "?)
+  SUBSPECIES_PAT  = /^ (#{PROV_RANK_PREFIX})?(['"]? #{BINOMIAL}
+                       (?: \s #{SSP_ABBR} \s #{LOWER_WORD}) ['"]?)
                        (\s #{AUTHOR_START}.*)?
                    $/x
-  VARIETY_PAT     = /^ ("? #{BINOMIAL} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
-                         (?: \s #{VAR_ABBR} \s #{LOWER_WORD}) "?)
+  VARIETY_PAT     = /^ (#{PROV_RANK_PREFIX})?(['"]? #{BINOMIAL}
+                       (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
+                       (?: \s #{VAR_ABBR} \s #{LOWER_WORD}) ['"]?)
                        (\s #{AUTHOR_START}.*)?
                    $/x
-  FORM_PAT        = /^ ("? #{BINOMIAL} (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
+  FORM_PAT        = /^ (#{PROV_RANK_PREFIX})?(['"]? #{BINOMIAL}
+                         (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
                          (?: \s #{VAR_ABBR} \s #{LOWER_WORD})?
-                         (?: \s #{F_ABBR} \s #{LOWER_WORD}) "?)
+                         (?: \s #{F_ABBR} \s #{LOWER_WORD}) ['"]?)
                        (\s #{AUTHOR_START}.*)?
                    $/x
 
@@ -177,12 +196,12 @@ module Name::Parse
                         #{SUBSECTION_TAXON}  |
                         #{STIRPS_TAXON}      |
                         #{SPECIES_TAXON}     |
-                        (?: "? #{UPPER_WORD} # infra-species taxa
+                        (?: (?: #{PROV_RANK_PREFIX})?['"]? #{UPPER_WORD}
                           (?: \s #{LOWER_WORD}
                             (?: \s #{SSP_ABBR} \s #{LOWER_WORD})?
                             (?: \s #{VAR_ABBR} \s #{LOWER_WORD})?
                             (?: \s #{F_ABBR}   \s #{LOWER_WORD})?
-                          )? "?
+                          )? ['"]?
                         )
                       )
                       (
@@ -201,18 +220,22 @@ module Name::Parse
   GROUP_CHUNK     = /\s (?<group_wd>#{GROUP_ABBR}) \b/x
 
   # matches to ranks that are included in the name proper
-  # subspecies is not included because it's the catchall default
-  RANK_START_MATCHER = /^(f|sect|stirps|subg|subsect|v)/i
+  RANK_START_MATCHER = /^(f|sect|stirps|subg|subsect|v|sp|ssp|subsp|s)/i
 
   # convert rank start_match to standard form of rank
   # subspecies is not included because it's the catchall default
   STANDARD_SECONDARY_RANKS = {
     f: "f.",
     sect: "sect.",
+    section: "sect.",
+    sp: "sp.",
     stirps: "stirps",
     subg: "subg.",
     subsect: "subsect.",
-    v: "var."
+    v: "var.",
+    s: "subsp.",
+    ssp: "subsp.",
+    subsp: "subsp."
   }.freeze
 
   class RankMessedUp < ::StandardError
@@ -234,7 +257,10 @@ module Name::Parse
   end
 
   # Guess rank of +text_name+.
-  def guess_rank(text_name)
+  def guess_rank(text_name, prov_rank = "")
+    rank = prov_rank&.strip
+    return PROV_RANKS[rank] if PROV_RANKS.include?(rank)
+
     TEXT_NAME_MATCHERS.find { |m| m.match?(text_name) }.rank
   end
 
@@ -292,20 +318,33 @@ module Name::Parse
     GROUP_CHUNK.match(str)[:group_wd]
   end
 
+  def standardize_text_name(name, rank)
+    result = name.tr('"', "'")
+    if result[0] == "'"
+      prefix = PROV_RANKS.key(rank)
+      result = "#{prefix} #{result}" if prefix
+    end
+    result.tr("ë", "e")
+  end
+
   def parse_genus_or_up(str, deprecated = false, rank = "Genus")
     results = nil
     if (match = GENUS_OR_UP_PAT.match(str))
-      name = match[1]
-      author = match[2]
-      rank = guess_rank(name) unless Name.ranks_above_genus.include?(rank)
+      prov_rank = match[1]
+      name = match[2]
+      author = match[3]
+      unless Name.ranks_above_genus.include?(rank)
+        rank = guess_rank(name,
+                          prov_rank)
+      end
       (name, author, rank) = fix_autonym(name, author, rank)
       author = standardize_author(author)
       author2 = author.blank? ? "" : " #{author}"
-      text_name = name.tr("ë", "e")
+      text_name = standardize_text_name(name, rank)
       parent_name = if Name.ranks_below_genus.include?(rank)
                       name.sub(LAST_PART, "")
                     end
-      display_name = format_autonym(name, author, rank, deprecated)
+      display_name = format_autonym(text_name, author, rank, deprecated)
       results = ParsedName.new(
         text_name: text_name,
         search_name: text_name + author2,
@@ -324,8 +363,8 @@ module Name::Parse
   def parse_below_genus(str, deprecated, rank, pattern)
     results = nil
     if (match = pattern.match(str))
-      name = match[1]
-      author = match[2].to_s
+      name = match[2].tr('"', "'")
+      author = match[3].to_s
       name = standardize_sp_nov_variants(name) if rank == "Species"
       (name, author, rank) = fix_autonym(name, author, rank)
       name = standardize_name(name)
@@ -385,18 +424,33 @@ module Name::Parse
     RANK_FROM_ABBREV_MATCHERS.find { |matcher| matcher.match?(str) }.rank
   end
 
-  # Standardize various ways of writing sp. nov.  Convert to: Amanita "sp-T44"
+  # Standardize various ways of writing sp. nov.  Convert to: Amanita sp. "T44"
   def standardize_sp_nov_variants(name)
+    names = split_name(name)
+    return name if names.length != 2
+
+    split_name(name)
+    names[1].sub!(/^'sp-/i, "sp. '")
+    names[1].sub!(/^'/, "sp. '")
+    names.join(" ").strip
+  end
+
+  def split_name(name)
+    result = []
     words = name.split
-    if words.length > 2
-      genus = words[0]
-      epithet = words[2]
-      epithet.sub!(/^"(.*)"$/, '\1')
-      name = "#{genus} \"sp-#{epithet}\""
-    else
-      name.sub!(/ "sp\./i, ' "sp-')
+    result.append(take_name(words)) while words.length.positive?
+    result
+  end
+
+  def take_name(words)
+    result = words.shift
+    unless PROV_RANKS.include?(result) ||
+           /^#{ANY_RANK_ABBR}$/o.match?(result.downcase)
+      return result
     end
-    name
+
+    result = result.downcase if ANY_RANK_ABBR.match?(result.downcase)
+    "#{result} #{words.shift}"
   end
 
   # Fix common error: Amanita vaginatae Author var. vaginatae
@@ -427,60 +481,59 @@ module Name::Parse
     end
   end
 
+  def find_autonyms(names)
+    return [] if names.empty?
+
+    last_name = names.last
+    nym = last_name.split[-1]
+    (names.length - 1).downto(0) do |i|
+      return i + 1 unless nym == names[i].split[-1]
+    end
+    0
+  end
+
   # Format a name ranked below genus, moving the author to before the var.
   # in natural varieties such as
   # "__Acarospora nodulosa__ (Dufour) Hue var. __nodulosa__".
   def format_autonym(name, author, _rank, deprecated)
-    words = name.split
-    if author.blank?
-      format_name(name, deprecated)
-    elsif words[-7] == words[-1]
-      [
-        format_name(words[0..-7].join(" "), deprecated),
-        author,
-        words[-6],
-        format_name(words[-5], deprecated),
-        words[-4],
-        format_name(words[-3], deprecated),
-        words[-2],
-        format_name(words[-1], deprecated)
-      ].join(" ")
-    elsif words[-5] == words[-1]
-      [
-        format_name(words[0..-5].join(" "), deprecated),
-        author,
-        words[-4],
-        format_name(words[-3], deprecated),
-        words[-2],
-        format_name(words[-1], deprecated)
-      ].join(" ")
-    elsif words[-3] == words[-1]
-      [
-        format_name(words[0..-3].join(" "), deprecated),
-        author,
-        words[-2],
-        format_name(words[-1], deprecated)
-      ].join(" ")
-    else
-      format_name(name, deprecated) + " " + author
-    end
+    return format_name(name, deprecated) if author.blank?
+
+    names = split_name(name)
+    index = find_autonyms(names)
+    [
+      format_name(names[..index].join(" "), deprecated),
+      author,
+      format_name(names[index + 1..].join(" ").strip, deprecated)
+    ].join(" ").strip
   end
 
-  def standardize_name(str)
-    words = str.split
-    # every other word, starting next-from-last, is an abbreviation
-    i = words.length - 2
-    while i.positive?
-      words[i] = if (match_start_of_rank =
-                       RANK_START_MATCHER.match(words[i]))
-                   start_of_rank = match_start_of_rank[0]
-                   STANDARD_SECONDARY_RANKS[start_of_rank.downcase.to_sym]
-                 else
-                   "subsp."
-                 end
-      i -= 2
+  def standardize_name(name)
+    subnames = split_name(name)
+    subnames[0] = "Gen. #{subnames[0]}" if subnames[0][0] == "'"
+    1.upto(subnames.length - 1) do |i|
+      subnames[i] = standardize_subname(subnames[i])
     end
-    words.join(" ")
+    subnames.join(" ").strip
+  end
+
+  def standardize_subname(subname)
+    if /^#{ANY_RANK_ABBR} /o.match?(subname)
+      match = /^([^\.\s]+)\.? (.+)$/.match(subname)
+      raise(RankMessedUp.new) unless match
+
+      rank = standardize_subrank(match[1])
+      term = match[2]
+      term = "'#{term}'" if rank == "sp." && term[0] != "'"
+      return "#{rank} #{term}" if match
+    end
+    subname
+  end
+
+  def standardize_subrank(rank)
+    match = RANK_START_MATCHER.match(rank)
+    return rank unless match
+
+    STANDARD_SECONDARY_RANKS[match[1].downcase.to_sym]
   end
 
   def standardize_author(str)
@@ -505,21 +558,21 @@ module Name::Parse
   # Add italics and boldface markup to a standardized name (without author).
   def format_name(str, deprecated = false)
     boldness = deprecated ? "" : "**"
-    words = str.split
-    if words.length.even?
-      genus = words.shift
-      words[0] = genus + " " + words[0]
+    raw_names = split_name(str)
+    result_names = []
+    raw_names.each do |name|
+      if name.index(" ")
+        name.sub!(" ", " #{boldness}__")
+      else
+        name = "#{boldness}__#{name}"
+      end
+      result_names.append("#{name}__#{boldness}")
     end
-    i = words.length - 1
-    while i >= 0
-      words[i] = "#{boldness}__#{words[i]}__#{boldness}"
-      i -= 2
-    end
-
-    words.join(" ")
+    result_names.join(" ")
   end
 
   def clean_incoming_string(str)
+    str = str.unicode_normalize(:nfc) if str.encoding == Encoding::UTF_8
     str.to_s.
       gsub(/“|”/, '"'). # let RedCloth format quotes
       gsub(/‘|’/, "'").
@@ -531,17 +584,19 @@ module Name::Parse
   # Adjust +search_name+ string to collate correctly. Pass in +search_name+.
   def format_sort_name(name, author)
     str = format_name(name, :deprecated).
-          sub(/^_+/, "").
-          gsub(/_+/, " "). # put genus at the top
-          sub(/ "(sp[-.])/, ' {\1'). # put "sp-1" at end
-          gsub(/"([^"]*")/, '\1'). # collate "baccata" with baccata
-          sub(" subg. ", " {1subg. ").
-          sub(" sect. ",    " {2sect. ").
-          sub(" subsect. ", " {3subsect. ").
-          sub(" stirps ",   " {4stirps ").
-          sub(" subsp. ",   " {5subsp. ").
-          sub(" var. ",     " {6var. ").
-          sub(" f. ", " {7f. ").
+          sub(/_+$/, " "). # put genus at the top
+          gsub(/_+/, "").
+          sub(/ sp. /, " "). # ignore sp.
+          sub(/^[A-Z][a-z]+\. /, ""). # ignore leading ranks like Gen.
+          gsub(/ '([^']*')/, &:downcase). # downcase prov epithets
+          delete("'"). # Now ignore quotes
+          sub(" subg. ", "  {1subg.  ").
+          sub(" sect. ",    "  {2sect.  ").
+          sub(" subsect. ", "  {3subsect.  ").
+          sub(" stirps ",   "  {4stirps  ").
+          sub(" subsp. ",   "  {5subsp.  ").
+          sub(" var. ",     "  {6var.  ").
+          sub(" f. ", "  {7f.  ").
           strip.
           sub(/(^\S+)aceae$/,        '\1!7').
           sub(/(^\S+)ineae$/,        '\1!6').
@@ -555,8 +610,9 @@ module Name::Parse
     1 while str.sub!(/(^| )([A-Za-z-]+) (.*) \2( |$)/, '\1\2 \3 !\2\4')
 
     if author.present?
-      str += "  " + author.
-             gsub(/"([^"]*")/, '\1'). # collate "baccata" with baccata
+      # Disable cop because interpolation causes test failures
+      str += "  " + author. # rubocop:disable Style/StringConcatenation
+             delete('"'). # Ignore quotes in author
              gsub(/[Đđ]/, "d"). # mysql isn't collating these right
              gsub(/[Øø]/, "O").
              strip
