@@ -95,7 +95,7 @@ class CollectionNumbers::RemoveObservationsControllerTest < FunctionalTestCase
     assert_redirected_to(observation_path(id: obs.id, q: q))
   end
 
-  def test_turbo_remove_collection_number
+  def test_turbo_remove_collection_number_non_owner
     obs1, _obs2, num1, _num2 = setup_test_fixtures
 
     # non-owner cannot
@@ -105,9 +105,15 @@ class CollectionNumbers::RemoveObservationsControllerTest < FunctionalTestCase
     patch(:update, params: params,
                    format: :turbo_stream)
     assert_obj_arrays_equal([num1], obs1.reload.collection_numbers)
+  end
+
+  def test_turbo_remove_collection_number_owner
+    obs1, _obs2, num1, _num2 = setup_test_fixtures
 
     # owner can
     login("rolf")
+    params = { collection_number_id: num1.id,
+               observation_id: obs1.id }
     patch(:update, params: params,
                    format: :turbo_stream)
     assert_empty(obs1.reload.collection_numbers)

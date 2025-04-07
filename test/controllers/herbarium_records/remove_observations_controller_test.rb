@@ -94,7 +94,7 @@ class HerbariumRecords::RemoveObservationsControllerTest < FunctionalTestCase
     assert_redirected_to(observation_path(id: obs.id, q: q))
   end
 
-  def test_turbo_remove_herbarium_record
+  def test_turbo_remove_herbarium_record_non_owner
     obs1, _obs2, rec1, _rec2 = setup_test_fixtures
 
     # non-owner cannot
@@ -104,9 +104,15 @@ class HerbariumRecords::RemoveObservationsControllerTest < FunctionalTestCase
     patch(:update, params: params,
                    format: :turbo_stream)
     assert_true(obs1.reload.herbarium_records.include?(rec1))
+  end
+
+  def test_turbo_remove_herbarium_record_owner
+    obs1, _obs2, rec1, _rec2 = setup_test_fixtures
 
     # owner can
     login("rolf")
+    params = { herbarium_record_id: rec1.id,
+               observation_id: obs1.id }
     patch(:update, params: params,
                    format: :turbo_stream)
     assert_empty(obs1.reload.herbarium_records)
