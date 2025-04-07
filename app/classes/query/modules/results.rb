@@ -73,9 +73,9 @@ module Query::Modules::Results
   end
 
   # Tries to be light about it, by selecting only two values.
-  # NOTE: `select(:id, :title)` returns instances with the selected attributes.
-  # We have to call `connection.select_rows` to return simple arrays.
-  # `alphabetical_by` is defined in each letter-sortable Query class and
+  # NOTE: `select(:id, :title)` returns instances having only these attributes -
+  # too heavy. We have to call `connection.select_rows` to return simple arrays.
+  # NOTE: `alphabetical_by` is defined in each letter-sortable Query class and
   # returns a `Model[:column]`. We check the first four chars of that column.
   def minimal_query_of_all_records
     model.connection.select_rows(
