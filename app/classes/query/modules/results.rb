@@ -76,7 +76,9 @@ module Query::Modules::Results
   # Tries to be light about it, by selecting only two values.
   # `alphabetical_by` is a `Model[:column]` - checks the first four chars.
   def minimal_query_of_all_records
-    @scopes.select(model[:id], alphabetical_by[0..3].as("title")).distinct
+    model.select_rows(
+      @scopes.select(model[:id], alphabetical_by[0..3].as("title")).distinct
+    )
   end
 
   # Array of all results, instantiated.
