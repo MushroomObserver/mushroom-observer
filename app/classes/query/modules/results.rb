@@ -64,8 +64,7 @@ module Query::Modules::Results
   def ids_by_letter
     @letters = {}
     ids = []
-    minimal_query_of_all_records.each do |record|
-      id, title = record.values_at(:id, :title)
+    minimal_query_of_all_records.each do |id, title|
       letter = title[0, 1]
       @letters[id] = letter.upcase if /[a-zA-Z]/.match?(letter)
       ids << id
@@ -74,7 +73,10 @@ module Query::Modules::Results
   end
 
   # Tries to be light about it, by selecting only two values.
-  # `alphabetical_by` is a `Model[:column]` - checks the first four chars.
+  # NOTE: `select(:id, :title)` returns instances with the selected attributes.
+  # We have to call `connection.select_rows` to return simple arrays.
+  # `alphabetical_by` is defined in each letter-sortable Query class and
+  # returns a `Model[:column]`. We check the first four chars of that column.
   def minimal_query_of_all_records
     model.connection.select_rows(
       @scopes.select(model[:id], alphabetical_by[0..3].as("title")).distinct
