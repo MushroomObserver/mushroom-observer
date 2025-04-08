@@ -57,8 +57,8 @@ class HerbariumRecord < AbstractModel
   before_update :log_update
   before_destroy :log_destroy
 
-  scope :index_order,
-        -> { order(initial_det: :asc, accession_number: :asc, id: :desc) }
+  scope :order_by_default,
+        -> { order_by(::Query::HerbariumRecords.default_order) }
 
   scope :observations, lambda { |obs|
     joins(:observation_herbarium_records).
@@ -72,16 +72,16 @@ class HerbariumRecord < AbstractModel
   scope :notes_has,
         ->(str) { search_columns(HerbariumRecord[:notes], str) }
 
-  scope :initial_dets, lambda { |val|
+  scope :initial_det, lambda { |val|
     exact_match_condition(HerbariumRecord[:initial_det], val)
   }
   scope :initial_det_has,
         ->(str) { search_columns(HerbariumRecord[:initial_det], str) }
 
-  scope :accession_numbers, lambda { |val|
+  scope :accession, lambda { |val|
     exact_match_condition(HerbariumRecord[:accession_number], val)
   }
-  scope :accession_number_has,
+  scope :accession_has,
         ->(str) { search_columns(HerbariumRecord[:accession_number], str) }
 
   scope :pattern, lambda { |phrase|

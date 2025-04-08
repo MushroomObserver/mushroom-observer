@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require("test_helper")
 
 # Some classes with enough attributes to stub calls to Inat::PhotoImporter
 #   (which wraps calls to the MO Image API)
@@ -430,7 +430,7 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     obs = Observation.last
-    name = Name.find_by(text_name: 'Arrhenia "sp-NY02"')
+    name = Name.find_by(text_name: "Arrhenia sp. 'NY02'")
     assert(name.present?, "Failed to create provisional name")
     assert(name.rss_log_id.present?,
            "Failed to log creation of provisional name")
@@ -438,8 +438,9 @@ class InatImportJobTest < ActiveJob::TestCase
     standard_assertions(obs: obs, name: name)
 
     proposed_name = obs.namings.first
-    assert_equal(inat_manager, proposed_name.user,
-                 "Name should be proposed by #{inat_manager.login}")
+    proposer = obs.user
+    assert_equal(proposer, proposed_name.user,
+                 "Name should be proposed by #{proposer.login}")
     used_references = 2
     assert(
       proposed_name.reasons.key?(used_references),
@@ -884,7 +885,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
   # -------- Standard Test assertions
 
-  def standard_assertions(obs:, user: inat_manager, name: nil, loc: nil)
+  def standard_assertions(obs:, user: obs.user, name: nil, loc: nil)
     assert_not_nil(obs.rss_log, "Failed to log Observation")
     assert_equal("mo_inat_import", obs.source)
     assert_equal(loc, obs.location) if loc
@@ -925,7 +926,7 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(obs_comments.where(Comment[:summary] =~ /iNat Data/).present?,
            "Missing Initial Commment (#{:inat_data_comment.l})")
     assert_equal(
-      obs.user, obs_comments.first.user,
+      user, obs_comments.first.user,
       "Comment user should be user who creates the MO Observation"
     )
     inat_data_comment = obs_comments.first.comment

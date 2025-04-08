@@ -35,9 +35,9 @@
 #
 ################################################################################
 
-require(File.expand_path("../config/boot.rb", __dir__))
-require(File.expand_path("../config/environment.rb", __dir__))
-require(File.expand_path("../app/extensions/extensions.rb", __dir__))
+require_relative("../config/boot")
+require_relative("../config/environment")
+require_relative("../config/initializers/extensions")
 require("optparse")
 
 def parse_options
@@ -231,7 +231,7 @@ end
 
 parse_options
 $stdout.sync = true
-Observation.where(name: @old_name).each do |obs|
+Observation.where(name: @old_name).find_each do |obs|
   process_observation(obs)
 end
 exit(0)

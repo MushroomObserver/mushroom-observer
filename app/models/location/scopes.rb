@@ -9,21 +9,17 @@ module Location::Scopes
   # always show as covered.
   included do # rubocop:disable Metrics/BlockLength
     # default ordering for index queries
-    scope :index_order,
-          -> { order(name: :asc, id: :desc) }
+    scope :order_by_default,
+          -> { order_by(::Query::Locations.default_order) }
 
-    scope :in_regions, lambda { |place_names|
+    # This should really be regions/region, but changing user prefs/filters and
+    # autocompleters is very involved, requires migration and script.
+    scope :region, lambda { |place_names|
       place_names = [place_names].flatten
-      if place_names.length > 1
-        starting = in_region(place_names.shift)
-        place_names.reduce(starting) do |result, place_name|
-          result.or(Location.in_region(place_name))
-        end
-      else
-        in_region(place_names.first)
-      end
+      place_names.map! { |val| one_region(val) }
+      or_clause(*place_names).distinct
     }
-    scope :in_region, lambda { |place_name|
+    scope :one_region, lambda { |place_name|
       region = Location.reverse_name_if_necessary(place_name)
 
       if understood_continent?(region)
@@ -41,17 +37,6 @@ module Location::Scopes
     scope :notes_has,
           ->(phrase) { search_columns(Location[:notes], phrase) }
 
-    scope :search_content,
-          ->(phrase) { search_columns(Location.searchable_columns, phrase) }
-    # Location[:name] + descriptions, Observation[:notes] + comments
-    # Does not search location notes or location comments.
-    scope :advanced_search, lambda { |phrase|
-      ids = Location.name_has(phrase).map(&:id)
-      ids += Location.description_has(phrase).map(&:id)
-      ids += Observation.advanced_search(phrase).
-             includes(:location).map(&:location).flatten.uniq
-      where(id: ids).distinct
-    }
     # Does not search location notes, observation notes or comments on either.
     # We do not yet support location comment queries.
     scope :pattern, lambda { |phrase|
@@ -59,7 +44,7 @@ module Location::Scopes
       joins_default_descriptions.search_columns(cols, phrase)
     }
     scope :regexp, lambda { |phrase|
-      where(Location[:name] =~ phrase.to_s.strip.squeeze(" "))
+      where(Location[:name] =~ phrase.to_s.strip.squeeze(" ")).distinct
     }
     # https://stackoverflow.com/a/77064711/3357635
     # AR's assumed join condition is
@@ -74,30 +59,17 @@ module Location::Scopes
       )
     }
 
+    # Query currently ignores "false" in both these cases
     scope :has_descriptions, lambda { |bool = true|
+      return all unless bool
+
       presence_condition(Location[:description_id], bool:)
     }
-    scope :description_has, lambda { |phrase|
-      joins(:descriptions).
-        merge(LocationDescription.search_content(phrase)).distinct
-    }
-    scope :has_description_created_by, lambda { |user|
-      joins(:descriptions).
-        merge(LocationDescription.where(user: user)).distinct
-    }
-    scope :has_description_reviewed_by, lambda { |user|
-      joins(:descriptions).
-        merge(LocationDescription.where(reviewer: user)).distinct
-    }
-    scope :has_description_of_type, lambda { |source|
-      # Check that it's a valid source type (string enum value)
-      return none if Description::ALL_SOURCE_TYPES.exclude?(source)
+    scope :has_observations, lambda { |bool = true|
+      return all unless bool
 
-      joins(:descriptions).
-        merge(LocationDescription.where(source_type: source)).distinct
+      joins(:observations).distinct
     }
-    scope :has_observations,
-          -> { joins(:observations).distinct }
 
     # Returns locations whose bounding box is entirely within the given box.
     # Pass kwargs (:north, :south, :east, :west), any order
@@ -140,7 +112,7 @@ module Location::Scopes
     # Use named parameters (lat:, lng:), any order
     scope :contains_point, lambda { |**args|
       args => { lat:, lng: }
-      where((Location[:south]).lteq(lat).and((Location[:north]).gteq(lat)).
+      where(Location[:south].lteq(lat).and(Location[:north].gteq(lat)).
             and(Location[:west].lteq(lng).and(Location[:east].gteq(lng)).
                 or(Location[:west].gteq(lng).and(Location[:east].lteq(lng)))))
     }
@@ -181,6 +153,13 @@ module Location::Scopes
               or(Location[:west].gt(Location[:east]).
                 and(Location[:west] <= west).and(Location[:east] >= east)))
       end
+    }
+
+    scope :description_query, lambda { |hash|
+      joins(:descriptions).subquery(:LocationDescription, hash)
+    }
+    scope :observation_query, lambda { |hash|
+      joins(:observations).subquery(:Observation, hash)
     }
 
     scope :show_includes, lambda {

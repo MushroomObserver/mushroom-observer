@@ -2,13 +2,13 @@
 
 class Lookup::Regions < Lookup
   MODEL = Location
-  TITLE_COLUMN = :name
+  TITLE_METHOD = :name
 
   def initialize(vals, params = {})
     super
   end
 
   def lookup_method(name)
-    Location.in_region(name.to_s.clean_pattern)
+    Location.region(name.to_s.clean_pattern)
   end
 end

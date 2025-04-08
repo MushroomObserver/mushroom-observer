@@ -9,15 +9,11 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
   # always show as covered.
   included do # rubocop:disable Metrics/BlockLength
     # default ordering for index queries
-    scope :index_order,
-          -> { order(when: :desc, id: :desc) }
-    # overwrite the one in abstract_model, because we have it cached on a column
-    scope :order_by_rss_log, lambda {
-      where.not(rss_log: nil).reorder(log_updated_at: :desc, id: :desc).distinct
-    }
+    scope :order_by_default,
+          -> { order_by(::Query::Observations.default_order) }
     # The order used on the home page
     scope :by_activity,
-          -> { order_by_rss_log }
+          -> { order_by(:rss_log) }
 
     # Extra timestamp scopes for when Observation found.
     # These are mostly aliases for `date` scopes.
@@ -32,10 +28,6 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
     scope :found_between, lambda { |early, late|
       date(early, late)
-    }
-
-    scope :has_images, lambda { |bool = true|
-      presence_condition(Observation[:thumb_image_id], bool:)
     }
 
     # NOTE: `Observation.no_notes` evaluates to '--- {}\n' because it's to_yaml.
@@ -54,7 +46,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :has_notes_field,
           ->(field) { where(Observation[:notes].matches("%:#{field}:%")) }
     scope :has_notes_fields, lambda { |fields|
-      return if fields.empty?
+      return if (fields = [fields].flatten).empty?
 
       fields.map! { |field| notes_field_presence_condition(field) }
       conditions = fields.shift
@@ -62,26 +54,19 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       where(conditions)
     }
 
-    # Observation SEARCHABLE_FIELDS :text_name, :where and :notes (currently)
-    # NOTE: Must search Name[:search_name], not ideal
-    scope :search_content, lambda { |phrase|
-      ids = name_search_name_observation_ids(phrase)
-      ids += search_columns(Observation.searchable_columns, phrase).map(&:id)
-      where(id: ids).distinct
-    }
+    # FOR FUTURE REFERENCE
     # The "advanced search" scope for "content". Unexpectedly, merge/or is
     # faster than concatting the Obs and Comment columns together.
-    scope :advanced_search, lambda { |phrase|
-      comments = Observation.comments_has(phrase).map(&:id)
-      notes_has(phrase).distinct.
-        or(Observation.where(id: comments).distinct)
-    }
+    # scope :advanced_search, lambda { |phrase|
+    #   comments = Observation.comments_has(phrase).map(&:id)
+    #   notes_has(phrase).distinct.
+    #     or(Observation.where(id: comments).distinct)
+    # }
     # Checks Name[:search_name], which includes the author
     # (unlike Observation[:text_name]) and is not cached on the obs
     scope :pattern, lambda { |phrase|
-      ids = name_search_name_observation_ids(phrase)
-      ids += search_columns(Observation[:where], phrase).map(&:id)
-      where(id: ids).distinct
+      joins(:name).distinct.
+        search_columns((Observation[:where] + Name[:search_name]), phrase)
     }
     # More comprehensive search of Observation fields + Name.search_name,
     # (plus comments ?).
@@ -92,18 +77,13 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     #   ids += Observation.comments_has(phrase).map(&:id)
     #   where(id: ids).distinct
     # }
-    def self.name_search_name_observation_ids(phrase)
-      Name.search_name_has(phrase).
-        includes(:observations).map(&:observations).flatten.uniq
-    end
 
-    scope :lichen, lambda { |boolish = :yes|
-      # if false, returns all
-      boolish = :yes if boolish == true
-      case boolish.to_sym
-      when :yes
+    # Query parses "yes" and "no", "on" and "off" to boolean. nil ignored.
+    scope :lichen, lambda { |bool = true|
+      case bool
+      when true
         where(Observation[:lifeform].matches("%lichen%"))
-      when :no
+      when false
         where(Observation[:lifeform].does_not_match("% lichen %"))
       end
     }
@@ -111,36 +91,26 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # Filters for confidence on vote_cache scale -3.0..3.0
     # To translate percentage to vote_cache: (val.to_f / (100 / 3))
     scope :confidence, lambda { |min, max = nil|
-      min, max = min if min.is_a?(Array) && min.size == 2
+      min, max = min if min.is_a?(Array)
       if max.nil? || max == min # max may be 0
         where(Observation[:vote_cache].gteq(min))
       else
         where(Observation[:vote_cache].in(min..max))
       end
     }
+    scope :needs_naming, lambda { |user|
+      needs_naming_generally.not_reviewed_by_user(user).distinct
+    }
+    scope :needs_naming_generally,
+          ->(bool = true) { where(needs_naming: bool) }
     # Use this definition when running script to populate the column:
-    # scope :needs_naming, lambda {
+    # scope :has_no_confident_species_name, lambda {
     #   with_name_above_genus.or(has_no_confident_name)
     # }
-    scope :needs_naming,
-          -> { where(needs_naming: true) }
     scope :with_name_above_genus,
           -> { where(name_id: Name.with_rank_above_genus) }
     scope :has_no_confident_name,
           -> { where(vote_cache: ..0) }
-    # scope :with_name_correctly_spelled, lambda { |bool = true|
-    #   if bool.to_s.to_boolean == true
-    #     joins({ namings: :name }).
-    #       where(names: { correct_spelling: nil }).distinct
-    #   else
-    #     with_misspelled_name
-    #   end
-    # }
-    # scope :with_misspelled_name, lambda {
-    #   joins({ namings: :name }).
-    #     where.not(names: { correct_spelling: nil }).distinct
-    # }
-
     scope :with_vote_by_user, lambda { |user|
       user_id = user.is_a?(Integer) ? user : user&.id
       joins(:votes).where(votes: { user_id: user_id })
@@ -157,9 +127,6 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       user_id = user.is_a?(Integer) ? user : user&.id
       where.not(id: ObservationView.where(user_id: user_id, reviewed: 1).
                     select(:observation_id))
-    }
-    scope :needs_naming_and_not_reviewed_by_user, lambda { |user|
-      needs_naming.not_reviewed_by_user(user).distinct
     }
     # Higher taxa: returns narrowed-down group of id'd obs,
     # in higher taxa under the given taxon
@@ -192,26 +159,41 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     #  - exclude_consensus: boolean
     #
     scope :names, lambda { |lookup:, **args|
-      # First, lookup names, plus synonyms and subtaxa if requested
+      if args[:include_all_name_proposals] == false &&
+         args[:exclude_consensus] == true
+        return none
+      end
+
+      # Next, lookup names, plus synonyms and subtaxa if requested
       lookup_args = args.slice(:include_synonyms,
+                               :include_misspellings,
                                :include_subtaxa,
                                :include_immediate_subtaxa,
                                :exclude_original_names)
       name_ids = Lookup::Names.new(lookup, **lookup_args).ids
+      return none unless name_ids
 
+      scope = all
       # Query, with possible join to Naming. Mutually exclusive options:
-      if args[:include_all_name_proposals]
-        joins(:namings).where(namings: { name_id: name_ids })
-      elsif args[:exclude_consensus]
-        joins(:namings).where(namings: { name_id: name_ids }).
-          where.not(name: name_ids)
+      if args[:include_all_name_proposals] || args[:exclude_consensus]
+        scope = scope.joins(:namings).where(namings: { name_id: name_ids })
+        scope = scope.where.not(name_id: name_ids) if args[:exclude_consensus]
       else
-        where(name_id: name_ids)
+        scope = scope.where(name_id: name_ids)
       end
+      scope.distinct
     }
     scope :names_like,
           ->(name) { where(name: Name.text_name_has(name)) }
-    scope :in_clade, lambda { |val|
+
+    # This should really be clades/clade, but changing user prefs/filters and
+    # autocompleters is very involved, requires migration and script.
+    scope :clade, lambda { |clades|
+      clades = [clades].flatten
+      clades.map! { |val| one_clade(val) }
+      or_clause(*clades).distinct
+    }
+    scope :one_clade, lambda { |val|
       # parse_name_and_rank defined below
       text_name, rank = parse_name_and_rank(val)
 
@@ -246,7 +228,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :has_location, lambda { |bool = true|
       presence_condition(Observation[:location_id], bool:)
     }
-    scope :location_undefined, lambda {
+    scope :location_undefined, lambda { |_bool = true|
       has_location(false).where.not(where: nil).group(:where).
         order(Observation[:where].count.desc, Observation[:id].desc)
     }
@@ -257,18 +239,14 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     scope :has_geolocation,
           ->(bool = true) { presence_condition(Observation[:lat], bool:) }
 
-    scope :in_regions, lambda { |place_names|
+    # This should really be regions/region, but changing user prefs/filters and
+    # autocompleters is very involved, requires migration and script.
+    scope :region, lambda { |place_names|
       place_names = [place_names].flatten
-      if place_names.length > 1
-        starting = in_region(place_names.shift)
-        place_names.reduce(starting) do |result, place_name|
-          result.or(Observation.in_region(place_name))
-        end
-      else
-        in_region(place_names.first)
-      end
+      place_names.map! { |val| one_region(val) }
+      or_clause(*place_names).distinct
     }
-    scope :in_region, lambda { |place_name|
+    scope :one_region, lambda { |place_name|
       region = Location.reverse_name_if_necessary(place_name)
 
       if Location.understood_continent?(region)
@@ -300,7 +278,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # mostly a helper for in_box
     scope :in_box_over_dateline, lambda { |**args|
       include_vague_locations = args[:vague] || false
-      box = Mappable::Box.new(**args.except(:mappable))
+      box = Mappable::Box.new(**args.except(:vague))
       return none unless box.valid?
 
       if include_vague_locations
@@ -344,7 +322,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # mostly a helper for in_box
     scope :in_box_regular, lambda { |**args|
       include_vague_locations = args[:vague] || false
-      box = Mappable::Box.new(**args.except(:mappable))
+      box = Mappable::Box.new(**args.except(:vague))
       return none unless box.valid?
 
       if include_vague_locations
@@ -385,7 +363,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
     # Pass kwargs (:north, :south, :east, :west), any order
     scope :not_in_box, lambda { |**args|
-      box = Mappable::Box.new(**args.except(:mappable))
+      box = Mappable::Box.new(**args.except(:vague))
       return Observation.all unless box.valid?
 
       # should be in_box(**args).invert_where
@@ -397,7 +375,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
     # helper for not_in_box
     scope :not_in_box_over_dateline, lambda { |**args|
-      box = Mappable::Box.new(**args.except(:mappable))
+      box = Mappable::Box.new(**args.except(:vague))
       return Observation.all unless box.valid?
 
       where(
@@ -408,7 +386,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
     # helper for not_in_box
     scope :not_in_box_regular, lambda { |**args|
-      box = Mappable::Box.new(**args.except(:mappable))
+      box = Mappable::Box.new(**args.except(:vague))
       return Observation.all unless box.valid?
 
       where(
@@ -428,11 +406,19 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       joins(:location).where(Location[:box_area].gt(args[:area])).distinct
     }
 
+    # content filter
+    scope :has_images, lambda { |bool = true|
+      presence_condition(Observation[:thumb_image_id], bool:)
+    }
+    # content filter
     scope :has_specimen,
           ->(bool = true) { where(specimen: bool) }
 
-    scope :has_sequences,
-          ->(bool = true) { joined_relation_condition(:sequences, bool:) }
+    scope :has_sequences, lambda { |bool = true|
+      return all unless bool
+
+      joined_relation_condition(:sequences, bool:)
+    }
 
     # For activerecord subqueries, no need to pre-map the primary key (id)
     # but Lookup has to return something. Ids are cheapest.

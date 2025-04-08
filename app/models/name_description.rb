@@ -63,7 +63,7 @@
 ############################################################################
 
 class NameDescription < Description
-  require "acts_as_versioned"
+  require("acts_as_versioned")
 
   include Description::Scopes
 
@@ -102,10 +102,8 @@ class NameDescription < Description
   has_many :editors, through: :name_description_editors,
                      source: :user
 
-  scope :index_order, lambda {
-    joins(:name).order(Name[:sort_name].asc, NameDescription[:created_at].asc,
-                       NameDescription[:id].desc)
-  }
+  scope :order_by_default,
+        -> { order_by(::Query::NameDescriptions.default_order) }
 
   scope :by_author, lambda { |user|
     ids = lookup_users_by_name(user)
@@ -120,7 +118,7 @@ class NameDescription < Description
 
   scope :is_public,
         ->(bool = true) { where(public: bool) }
-  scope :types,
+  scope :sources,
         ->(types) { where(source_type: types) }
   scope :ok_for_export,
         ->(bool = true) { where(ok_for_export: bool) }
@@ -141,6 +139,10 @@ class NameDescription < Description
       where(NameDescription[:gen_desc].not_blank).
       where(ok_for_export: true).
       where(public: true)
+  }
+
+  scope :name_query, lambda { |hash|
+    joins(:name).subquery(:Name, hash)
   }
 
   scope :show_includes, lambda {

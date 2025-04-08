@@ -76,8 +76,8 @@
 #                           redirecting on failure.
 #  goto_index::             Redirect to a reasonable fallback (index) page
 #                           in case of error.
-#  paginate_letters::       Paginate an Array by letter.
-#  paginate_numbers::       Paginate an Array normally.
+#  letter_pagination_data::       Paginate an Array by letter.
+#  number_pagination_data::       Paginate an Array normally.
 #
 #  ==== Memory usage
 #  extra_gc::               (filter: calls <tt>ObjectSpace.garbage_collect</tt>)
@@ -94,9 +94,6 @@
 #                                (filter: catches errors for integration tests)
 #
 class ApplicationController < ActionController::Base
-  require "extensions"
-  require "login_system"
-  require "csv"
   include LoginSystem
   include Authentication
   include Internationalization
@@ -381,7 +378,7 @@ class ApplicationController < ActionController::Base
   helper_method :calc_layout_params
 
   def permission?(obj, error_message)
-    result = (in_admin_mode? || obj.can_edit?(@user))
+    result = (in_admin_mode? || obj.can_edit?(@user)) # rubocop:disable Style/RedundantParentheses
     flash_error(error_message) unless result
     result
   end
@@ -407,9 +404,9 @@ class ApplicationController < ActionController::Base
   end
 
   def query_images_to_reuse(all_users, user)
-    return create_query(:Image, by: :updated_at) if all_users || !user
+    return create_query(:Image, order_by: :updated_at) if all_users || !user
 
-    create_query(:Image, by_users: user, by: :updated_at)
+    create_query(:Image, by_users: user, order_by: :updated_at)
   end
   helper_method :query_images_to_reuse
 

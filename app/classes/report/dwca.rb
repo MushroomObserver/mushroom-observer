@@ -6,7 +6,7 @@ module Report
     attr_accessor :images, :observations
 
     def initialize(args)
-      super(args)
+      super
       self.observations = Darwin::Observations.new(args)
       args[:observations] = observations
       self.images = Darwin::Images.new(args)

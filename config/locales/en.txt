@@ -237,6 +237,8 @@
   CHECKLISTS: Checklists
   CLADE: Clade
   clade: clade
+  CLADES: Clades
+  clades: clades
   COLLECTION_NUMBER: Collection Number
   collection_number: collection number
   COLLECTION_NUMBERS: Collection Numbers
@@ -248,6 +250,8 @@
   comments: comments
   CONSTRAINTS: Constraints
   CONTRIBUTORS: Contributors
+  CURATOR: Curator
+  CURATORS: Curators
   DESCRIPTION: Description
   description: description
   DESCRIPTIONS: Descriptions
@@ -384,6 +388,8 @@
   publications: publications
   REGION: Region
   region: region
+  REGIONS: Regions
+  regions: regions
   RSS_LOG: Activity Log
   rss_log: activity log
   RSS_LOGS: Activity Logs
@@ -2321,8 +2327,8 @@
   show_observation_view_notifications: View Notifications
   show_observation_hide_map: Hide thumbnail map.
   show_observation_thumbnail_map_hidden: Thumbnail map hidden.  To re-enable this feature, go to your "[:app_preferences]":/account/preferences/edit page.
-  show_observation_add_link: Create [site] link
-  show_observation_add_link_dialog: "Enter a link here to this observation on [site]. Use the full URL, including \"https://\":"
+  show_observation_add_link: Add an external link
+  show_observation_add_link_dialog: "Enter a link here to this observation on another website. Use the full URL, including \"https://\":"
   show_observation_no_collection_numbers: No [:collection_numbers]
   show_observation_remove_collection_number: Remove collection number from this observation
   show_observation_no_herbarium_records: No [:herbarium_records]
@@ -3892,7 +3898,8 @@
   validate_name_text_name_too_long: "[:validate_too_many_characters(field=:form_names_text_name)]"
   validate_name_use_first_author: Use the first author followed by “et al.” per <a href="https://www.iapt-taxon.org/nomen/main.php?page=art46" target="_new">ICN Recommendation 46C.2</a>
   validate_name_user_missing: "[:validate_missing(field=:user)]"
-  validate_name_author_characters: "must include only letters, spaces, and these characters: \" ( ) - . , &"
+  # html entity stops Textile from turning apostrophe into a left single quote
+  validate_name_author_characters: "must include only letters, spaces, and these characters: &apos; \" ( ) - . , &"
   validate_name_author_ending: must end only in a letter or period
   validate_name_equivalent_exists: "Equivalent Name already exists"
   validate_naming_name_missing: "[:validate_missing(field=:name)]"
@@ -3993,6 +4000,7 @@
   runtime_removed_id_from: "Successfully removed [type] #[value] from [name]."
   runtime_removed_name: Successfully removed [type] '[value]'.
   runtime_removed_name_from: Successfully removed [type] '[value]' from [name].
+  runtime_spiders_begone: Spiders Begone!  Please login to access this page.
   runtime_updated_at: Successfully updated [type].
   runtime_updated_id: "Successfully updated [type] #[value]."
   runtime_updated_name: Successfully updated [type] '[value]'.
@@ -4213,19 +4221,6 @@
   # Advanced search error messages
   advanced_search_bad_q_error: Search expired or cannot be found. Please re-enter search criteria.
 
-  # content for html header title tag,
-  # used when there are no hits for a list or search
-  title_for_comment_search: Comment Search
-  title_for_herbarium_search: Fungarium Search
-  title_for_herbarium_record_search: Fungarium Record Search
-  title_for_image_search: Image Search
-  title_for_location_search: Location Search
-  title_for_name_search: Name Search
-  title_for_observation_search: Observation Search
-  title_for_project_search: Project Search
-  title_for_species_list_search: Species List Search
-  title_for_user_search: User Search
-
   ##############################################################################
 
   # LESS IMPORTANT ENUMERATED SETS OF VALUES
@@ -4381,53 +4376,148 @@
   api_help_when_seen: when seen
   api_help_when_taken: when photo taken
 
-  # Query titles.
-  query_title_advanced_search: "[:app_advanced_search]"
-  query_title_all: "[TYPE] Index"
-  query_title_all_by: "[TYPES] by [ORDER]"
-  query_title_all_filtered: Matching [TYPES]
-  query_title_at_location: "[TYPES] from [LOCATION]"
-  query_title_at_where: "[TYPES] from '[USER_WHERE]'"
-  query_title_by_author: "[TYPES] Authored by [USER]"
-  query_title_by_editor: "[TYPES] Edited by [USER]"
-  query_title_by_rss_log: "[TYPES] in Activity Log"
-  query_title_by_user: "[TYPES] created by [USER]"
-  query_title_for_observation: "[TYPES] for [OBSERVATION]"
-  query_title_for_project: "[TYPES] for [PROJECT]"
-  query_title_in_lists_for_project: "[TYPES] in lists for [PROJECT]"
-  query_title_for_target: "[TYPES] on [TARGET]"
-  query_title_for_user: "[TYPES] for [USER]"
-  query_title_in_herbarium: "[TYPES] in [HERBARIUM]"
-  query_title_in_set: Selected [TYPES]
-  query_title_in_species_list: "[TYPES] in [SPECIES_LIST]"
-  query_title_inside_observation: "[TYPES] of [OBSERVATION]"
-  query_title_needs_id: "[OBSERVATIONS] needing identification for [USER]"
-  query_title_needs_description: "[TYPES] needing descriptions"
-  query_title_nonpersonal: List of Institutional Fungaria
-  query_title_of_children: Lower Taxa under [NAME]
-  query_title_of_name: "[TYPES] of [NAME]"
-  query_title_of_name_synonym: "[TYPES] of Synonyms of [NAME]"
-  query_title_of_name_nonconsensus: "[TYPES] That Might Be [NAME]"
-  query_title_of_parents: Higher Taxa Containing [NAME]
-  query_title_pattern_search: "[TYPES] Matching '[pattern]'"
-  query_title_regexp_search: "[TYPES] Matching '[regexp]'"
-  query_title_with_descriptions: "[TYPES] with [:DESCRIPTIONS]"
-  query_title_with_descriptions_by_author: "[TYPES] with [:query_title_by_author(type=:description)]"
-  query_title_with_descriptions_by_editor: "[TYPES] with [:query_title_by_editor(type=:description)]"
-  query_title_with_descriptions_by_user: "[TYPES] with [:query_title_by_user(type=:description)]"
-  query_title_with_descriptions_in_set: "[TYPES] with [descriptions]"
-  query_title_with_observations: "[TYPES] with [:OBSERVATIONS]"
-  query_title_with_observations_at_location: "[TYPES] with [:query_title_at_location(type=:observation)]"
-  query_title_with_observations_at_where: "[TYPES] with [:query_title_at_where(type=:observation)]"
-  query_title_with_observations_by_user: "[TYPES] with [:query_title_by_user(type=:observation)]"
-  query_title_with_observations_filtered: "[TYPES] with [SUBTITLE]"
-  query_title_with_observations_for_project: "[TYPES] with [:query_title_for_project(type=:observation)]"
-  query_title_with_observations_in_set: "[TYPES] for [observations]"
-  query_title_with_observations_in_species_list: "[TYPES] with [:query_title_in_species_list(type=:observation)]"
-  query_title_with_observations_of_children: "[TYPES] with [:query_title_of_children(type=:observation)]"
-  query_title_with_observations_of_name: "[TYPES] with [:query_title_of_name(type=:observation)]"
-  query_title_with_observations_of_name_synonym: "[TYPES] with [:query_title_of_name_synonym(type=:observation)]"
-  query_title_with_observations_of_name_nonconsensus: "[TYPES] with [:query_title_of_name_nonconsensus(type=:observation)]"
+  # Query validation.
+  query_validation_param_not_in_set: "Value for ':#{param}' should be one of the following: [set]."
+  query_validation_boolean: "Value for ':#{param}' should be boolean, got: [val]."
+  query_validation_float: "Value for ':#{param}' should be a float, got: [val]."
+  query_validation_record_unsaved: "Value for ':#{param}' is an unsaved :[type] instance."
+  query_validation_record: "Value for ':#{param}' should be id, string or :[type] instance, got: [val]."
+  query_validation_id_in_set: "Value for :id_in_set should be an array of ids or :[type] instances, got: [val]."
+  query_validation_string: "Value for ':#{param}' should be a string or symbol, got a :[class] : [val]."
+  query_validation_date: "Value for ':#{param}' should be a date (YYYY-MM-DD or MM-DD), got: [val]."
+  query_validation_time: "Value for ':#{param}' should be a UTC time (YYYY-MM-DD-HH-MM-SS), got: :[class] : [val]."
+  query_validation_lookup_id: "Couldn't find an id for: [val]."
+  query_validation_lookup: "Couldn't look up :[type] by: [val]."
+
+  # Query filters.
+  query_created_at: created
+  query_updated_at: modified
+  query_date: date
+  query_id_in_set: ids
+
+  query_accession: sequence identifier
+  query_accession_has: sequence identifier has
+  query_accession_number: catalog number
+  query_accession_number_has: catalog number has
+  query_archive: "[:archive]"
+  query_author_has: author has
+  query_body_has: text has
+  query_by_author: authored by
+  query_by_editor: edited by
+  query_by_users: created by
+  query_citation_has: citation has
+  query_clade: "[:clades]"
+  query_classification_has: classification has
+  query_code_has: code has
+  query_collectors: collectors
+  query_collector_has: collector has
+  query_comments_has: comments contain
+  query_confidence: confidence
+  query_content_has: text has
+  query_content_types: file types
+  query_copyright_holder_has: copyright holder has
+  query_deprecated: deprecated
+  query_description_has: description has
+  query_field_slip_prefix_has: field slip prefix
+  query_for_user: for
+  query_has_author: with author
+  query_has_citation: with citation
+  query_has_classification: has classification
+  query_has_comments: with comments
+  query_has_default_description: with default description
+  query_has_descriptions: with descriptions
+  query_has_images: with images
+  query_has_notes: with notes
+  query_has_notes_fields: with notes fields
+  query_has_observations: with observations
+  query_has_public_lat_lng: public geolocation
+  query_has_sequences: with sequences
+  query_has_species_lists: with species lists
+  query_has_specimen: with specimen
+  query_has_summary: with summary
+  query_has_synonyms: with synonyms
+  query_has_votes: with votes
+  query_initial_det: initial determination
+  query_initial_det_has: initial determination has
+  query_is_collection_location: is collection location
+  query_is_public: "[:public]"
+  query_license: "[:license]"
+  query_lichen: "[:lichen]"
+  query_location_undefined: location undefined
+  query_locus: "[:locus]"
+  query_locus_has: locus has
+  query_mailing_address_has: address has
+  query_members: members
+  query_misspellings: misspellings
+  query_name_has: name has
+  query_needs_description: needs description
+  query_needs_naming: needs naming
+  query_nonpersonal: nonpersonal
+  query_notes_has: notes has
+  query_number_has: number has
+  query_numbers: numbers
+  query_ok_for_export: ok for export
+  query_pattern: search pattern
+  query_quality: "[:quality]"
+  query_rank: "[:rank]"
+  query_regexp: country
+  query_region: "[:regions]"
+  query_sizes: sizes
+  query_sources: sources
+  query_summary_has: summary has
+  query_text_name_has: name has
+  query_title_has: title has
+  query_types: types
+  query_url_has: url has
+
+  # in box
+  query_in_box: in box
+  query_north: "[:north]"
+  query_south: "[:south]"
+  query_east: "[:east]"
+  query_west: "[:west]"
+
+  # comments
+  # note there's a weird bug, "on" must be quoted or it will produce "target"
+  query_target: "on"
+  query_type: "type"
+  query_id: "id"
+
+  # name queries
+  query_names: "[:names]"
+  query_lookup: "[:names]"
+  query_include_synonyms: with synonyms
+  query_include_subtaxa: with subtaxa
+  query_include_immediate_subtaxa: with immediate subtaxa
+  query_exclude_original_names: exclude original names
+  query_include_all_name_proposals: include all proposed names
+  query_exclude_consensus: exclude consensus name
+
+  # records
+  query_external_sites: "[:sites]"
+  query_field_slips: "[:field_slips]"
+  query_herbaria: "[:herbaria]"
+  query_herbarium_records: "[:herbarium_records]"
+  query_locations: "[:locations]"
+  query_observations: "[:observations]"
+  query_project_lists: "[:project_lists]"
+  query_projects: "[:projects]"
+  query_species_lists: "[:species_lists]"
+
+  # subqueries
+  query_image_query: of images
+  query_location_query: of locations
+  query_name_query: of names
+  query_observation_query: of observations
+  query_sequence_query: of sequences
+  query_description_query: of descriptions
+
+  # advanced search
+  query_search_name: search taxa
+  query_search_user: search users
+  query_search_where: search where
+  query_search_content: search content
+  query_preference_filter: preference filter
 
   # Sorting criteria.
   sort_by_accession_number: "[:herbarium_record_accession_number]"
@@ -4439,6 +4529,7 @@
   sort_by_contribution: Contribution
   sort_by_copyright_holder: "[:COPYRIGHT_HOLDER]"
   sort_by_created_at: Date Created
+  sort_by_curator: "[:CURATOR]"
   sort_by_date: "[:DATE]"
   sort_by_filename: File Name
   sort_by_header: "Sort by:"
@@ -4446,7 +4537,7 @@
   sort_by_herbarium_name: Fungarium
   sort_by_id: ID
   sort_by_image_quality: Image Quality
-  sort_by_initial_det: Initial Determination
+  sort_by_initial_det: Taxon
   sort_by_last_login: Last Login
   sort_by_location: "[:LOCATION]"
   sort_by_login: "[:LOGIN_NAME]"

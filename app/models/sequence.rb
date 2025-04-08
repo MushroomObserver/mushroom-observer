@@ -41,8 +41,8 @@ class Sequence < AbstractModel
   after_update  :log_update_sequence
   after_destroy :log_destroy_sequence
 
-  scope :index_order,
-        -> { order(created_at: :desc, id: :desc) }
+  scope :order_by_default,
+        -> { order_by(::Query::Sequences.default_order) }
 
   scope :observations,
         ->(ids) { where(observation_id: ids) }
@@ -63,6 +63,10 @@ class Sequence < AbstractModel
     cols = Sequence[:locus].coalesce("") + Sequence[:archive].coalesce("") +
            Sequence[:accession].coalesce("") + Sequence[:notes].coalesce("")
     search_columns(cols, phrase)
+  }
+
+  scope :observation_query, lambda { |hash|
+    joins(:observation).subquery(:Observation, hash)
   }
 
   ##############################################################################
@@ -152,9 +156,7 @@ class Sequence < AbstractModel
   end
 
   # convenience wrapper around class method of same name
-  def blast_url_prefix
-    Sequence.blast_url_prefix
-  end
+  delegate :blast_url_prefix, to: :Sequence
 
   # Just the nucleotide codes: no description, no digits, no whitespace
   def bases_nucleotides

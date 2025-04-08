@@ -16,8 +16,8 @@ class FieldSlip < AbstractModel
     end
   end
 
-  scope :index_order,
-        -> { order(code: :asc, created_at: :desc, id: :desc) }
+  scope :order_by_default,
+        -> { order_by(::Query::FieldSlips.default_order) }
 
   scope :projects, lambda { |projects|
     project_ids = Lookup::Projects.new(projects).ids
@@ -129,6 +129,6 @@ class FieldSlip < AbstractModel
 
   def can_edit?
     user == User.current ||
-      (project&.is_admin?(User.current) && project&.trusted_by?(user))
+      (project&.is_admin?(User.current) && project.trusted_by?(user))
   end
 end

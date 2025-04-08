@@ -48,12 +48,19 @@ class SequencesControllerTest < FunctionalTestCase
     end
   end
 
+  def test_index_with_non_default_sort
+    check_index_sorting
+  end
+
   def test_index_by_observation
     login
-    get(:index, params: { by: "observation" })
+
+    by = "observation"
+    get(:index, params: { by: })
 
     assert_response(:success)
-    assert_displayed_title("Sequences by Observation")
+    assert_displayed_title(:SEQUENCES.l)
+    assert_sorted_by(by)
 
     Sequence.find_each do |sequence|
       assert_select(
@@ -163,6 +170,19 @@ class SequencesControllerTest < FunctionalTestCase
     assert_flash_success
     assert(obs.rss_log.notes.include?("log_sequence_added"),
            "Failed to include Sequence added in RssLog for Observation")
+  end
+
+  def test_turbo_create
+    params = {
+      observation_id: observations(:detailed_unknown_obs).id,
+      sequence: { locus: "ITS",
+                  bases: ITS_BASES }
+    }
+    login
+    assert_difference("Sequence.count", 1) do
+      post(:create, params: params,
+                    format: :turbo_stream)
+    end
   end
 
   def test_create_non_repo_sequence

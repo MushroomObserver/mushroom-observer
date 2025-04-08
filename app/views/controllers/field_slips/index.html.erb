@@ -2,8 +2,8 @@
 if @project
   add_project_banner(@project)
 else
-  add_index_title(@query, no_hits: :FIELD_SLIPS.t)
-  add_tab_set(field_slips_index_tabs)
+  add_index_title(@query)
+  add_context_nav(field_slips_index_tabs)
   project_title = @query&.params_cache&.dig(:project)&.title || ""
 end
 @container = :wide
@@ -34,8 +34,8 @@ end
   <% end %>
 <% end %>
 
-<%= paginate_block(@pages) do %>
-<div class="list-group">
-  <%= render(partial: "field_slips/object", collection: @objects) %>
-</div>
+<%= pagination_nav(@pagination_data) do %>
+  <div class="list-group">
+    <%= render(partial: "field_slips/object", collection: @objects) %>
+  </div>
 <% end %>

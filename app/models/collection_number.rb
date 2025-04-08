@@ -58,12 +58,12 @@ class CollectionNumber < AbstractModel
   before_update :log_update
   before_destroy :log_destroy
 
-  scope :index_order,
-        -> { order(name: :asc, number: :asc) }
+  scope :order_by_default,
+        -> { order_by(::Query::CollectionNumbers.default_order) }
 
-  scope :names,
+  scope :collectors,
         ->(names) { exact_match_condition(CollectionNumber[:name], names) }
-  scope :name_has,
+  scope :collector_has,
         ->(str) { search_columns(CollectionNumber[:name], str) }
 
   scope :numbers,

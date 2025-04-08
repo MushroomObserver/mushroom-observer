@@ -17,25 +17,85 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index)
 
     assert_template("shared/_matrix_box")
-    assert_displayed_title("Observations by #{:sort_by_rss_log.l}")
+    assert_displayed_title(:OBSERVATIONS.l)
   end
 
-  def test_index_sorted_by_name
-    by = "name"
+  def test_index_spider_blocker
+    # login
+    get(:index, params: { page: 11 })
 
-    login
-    get(:index, params: { by: by })
-
-    assert_displayed_title("Observations by #{by.capitalize}")
+    assert_equal(:runtime_spiders_begone.t, response.body)
   end
 
-  def test_index_sorted_by_user
-    by = "user"
+  BUNCH_OF_NAMES = Name.take(10)
+  BUNCH_OF_REGIONS = [
+    "Connecticut, USA",
+    "Maine, USA",
+    "Massachusetts, USA",
+    "New Hampshire, USA",
+    "New Jersey, USA",
+    "New York, USA",
+    "Pennsylvania, USA",
+    "Rhode Island, USA",
+    "Vermont, USA",
+    "New Brunswick, Canada",
+    "Newfoundland and Labrador, Canada",
+    "Newfoundland, Canada",
+    "Labrador, Canada",
+    "Nova Scotia, Canada",
+    "Ontario, Canada",
+    "Prince Edward Island, Canada",
+    "Quebec, Canada"
+  ].freeze
+  SUPERLONG_REGIONS = [
+    "Across the street from C & O Restaurant, Charlottesville, Virginia, USA",
+    "Rivanna River trail at the Woolen Mills, Charlottesville, Virginia, USA"
+  ].freeze
 
+  # Taken from actual obs query params for the Northeast Rare Fungi Challenge
+  def big_obs_query_params
+    { names: { lookup: [*BUNCH_OF_NAMES.map(&:id)] }, region: BUNCH_OF_REGIONS }
+  end
+
+  def long_obs_query_params
+    { region: SUPERLONG_REGIONS }
+  end
+
+  def test_filter_caption_truncation_number_of_values
     login
-    get(:index, params: { by: by })
 
-    assert_displayed_title("Observations by #{by.capitalize}")
+    query = Query.lookup_and_save(:Observation, big_obs_query_params)
+    get(:index, params: @controller.query_params(query))
+
+    names_joined_trunc = BUNCH_OF_NAMES.first(3).map(&:text_name).join(", ")
+    names_joined_trunc += ", ..."
+    assert_select("#caption-truncated", text: /#{names_joined_trunc}/)
+
+    regions_joined_trunc = BUNCH_OF_REGIONS.first(3).join(", ")
+    regions_joined_trunc += ", ..."
+    assert_select("#caption-truncated", text: /#{regions_joined_trunc}/)
+
+    names_joined = BUNCH_OF_NAMES.map(&:text_name).join(", ")
+    assert_select("#caption-full", text: /#{names_joined}/)
+
+    regions_joined = BUNCH_OF_REGIONS.join(", ")
+    assert_select("#caption-full", text: /#{regions_joined}/)
+  end
+
+  def test_filter_caption_truncation_length_of_string
+    login
+
+    query = Query.lookup_and_save(:Observation, long_obs_query_params)
+    get(:index, params: @controller.query_params(query))
+
+    regions_joined = SUPERLONG_REGIONS.join(", ")
+    regions_joined_trunc = "#{regions_joined[0...97]}..."
+    assert_select("#caption-truncated", text: /#{regions_joined_trunc}/)
+    assert_select("#caption-full", text: /#{regions_joined}/)
+  end
+
+  def test_index_with_non_default_sort
+    check_index_sorting
   end
 
   def test_index_sorted_by_invalid_order
@@ -43,11 +103,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     login
 
-    exception = assert_raise(RuntimeError) do
-      get(:index, params: { by: by })
-    end
-    assert_equal("Can't figure out how to sort Observations by :#{by}.",
-                 exception.message)
+    get(:index, params: { by: by })
+    assert_flash_text("Can't figure out how to sort Observations by :#{by}.")
   end
 
   def test_index_with_id
@@ -57,7 +114,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: { id: obs.id })
 
     assert_template("shared/_matrix_box")
-    # assert_displayed_title("Observation Index")
+    assert_displayed_title(:OBSERVATIONS.l)
     assert_select("body.observations__index", true)
     assert_select(
       "#results .rss-heading a[href ^= '/#{obs.id}'] .rss-name",
@@ -77,7 +134,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login
     get(:index, params: params)
 
-    assert_displayed_title("Observations by #{:sort_by_rss_log.l}")
+    assert_displayed_title(:OBSERVATIONS.l)
   end
 
   def test_index_useless_param_page2
@@ -86,7 +143,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login
     get(:index, params: params)
 
-    assert_displayed_title("Observations by #{:sort_by_rss_log.l}")
+    assert_displayed_title(:OBSERVATIONS.l)
     assert_select("#results a", { text: "« Prev" },
                   "Wrong page or display is missing a link to Prev page")
   end
@@ -115,7 +172,9 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     assert_response(:success)
     assert_results(count: expected_hits.count)
-    assert_displayed_title("Matching Observations")
+    assert_displayed_title(:OBSERVATIONS.l)
+    assert_displayed_filters("#{:query_search_name.l}: #{name}")
+    assert_displayed_filters("#{:query_search_where.l}: #{location}")
   end
 
   def test_index_advanced_search_name_one_hit
@@ -133,67 +192,48 @@ class ObservationsControllerIndexTest < FunctionalTestCase
                  "Advanced Search with 1 hit should show the hit")
   end
 
-  def test_index_advanced_search_no_hits
-    query = Query.lookup_and_save(
+  def oklahoma_query
+    Query.lookup_and_save(
       :Observation, search_name: "Don't know",
                     search_user: "myself",
                     search_content: "Long pink stem and small pink cap",
                     search_where: "Eastern Oklahoma"
     )
+  end
+
+  def test_index_advanced_search_no_hits
+    query = oklahoma_query
 
     login
     get(:index,
         params: @controller.query_params(query).merge({ advanced_search: "1" }))
 
-    assert_select("title", { text: "#{:app_title.l}: Index" },
-                  "Wrong page or metadata <title>")
     assert_flash_text(:runtime_no_matches.l(type: :observations.l))
-    assert_displayed_title("")
+    assert_displayed_title(:OBSERVATIONS.l)
+  end
+
+  def advanced_search_params
+    {
+      advanced_search: true,
+      search_name: "Fungi",
+      search_where: "String in notes"
+    }.freeze
   end
 
   def test_index_advanced_search_notes1
     login
-    get(:index,
-        params: {
-          advanced_search: true,
-          search_name: "Fungi",
-          search_where: "String in notes"
-          # Deliberately omit search_location_notes: 1
-        })
+    get(:index, params: advanced_search_params)
 
     assert_response(:success)
     assert_select(
       "#results a", false,
-      "There should be no results when string is missing from notes, " \
-      "and search_location_notes param is missing"
+      "There should be no results when string is missing from notes."
     )
     assert_flash_text(:runtime_no_matches.l(type: :observations.l))
-    assert_displayed_title("")
+    assert_displayed_title(:OBSERVATIONS.l)
   end
 
-  def test_index_advanced_search_notes2
-    login
-    # Include notes, but notes don't have string yet!
-    get(
-      :index,
-      params: {
-        advanced_search: true,
-        search_name: "Fungi",
-        search_where: '"String in notes"',
-        search_location_notes: 1
-      }
-    )
-
-    assert_response(:success)
-    assert_select(
-      "#results a", false,
-      "There should be no results when string is missing from notes, " \
-      "even if search_location_notes param is true"
-    )
-    assert_flash_text(:runtime_no_matches.l(type: :observations.l))
-    assert_displayed_title("")
-  end
-
+  # We currently no longer allow searching location notes.
   def test_index_advanced_search_notes3
     # Add string to notes, make sure it is actually added.
     login("rolf")
@@ -204,49 +244,15 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert(loc.notes.to_s.include?("String in notes"))
 
     login
-    # Forget to include notes again.
-    get(:index,
-        params: {
-          advanced_search: true,
-          search_name: "Fungi",
-          search_where: "String in notes"
-          # Deliberately omit search_location_notes: 1
-        })
+    get(:index, params: advanced_search_params)
 
     assert_response(:success)
     assert_select(
       "#results a", false,
-      "There should be no results when notes include search string, " \
-      "if search_location_notes param is missing"
+      "There should be no results even when notes include search string."
     )
     assert_flash_text(:runtime_no_matches.l(type: :observations.l))
-    assert_displayed_title("")
-  end
-
-  def test_index_advanced_search_notes4
-    # Add string to notes, make sure it is actually added.
-    login("rolf")
-    loc = locations(:burbank)
-    loc.notes = "blah blah blahString in notesblah blah blah"
-    loc.save
-    loc.reload
-    assert(loc.notes.to_s.include?("String in notes"))
-
-    login
-    # Now it should finally find the three unknowns at Burbank because Burbank
-    # has the magic string in its notes, and we're looking for it.
-    get(:index,
-        params: {
-          advanced_search: true,
-          search_name: "Fungi",
-          search_where: '"String in notes"',
-          search_location_notes: 1
-        })
-
-    assert_response(:success)
-
-    results = @controller.instance_variable_get(:@objects)
-    assert_equal(3, results.length)
+    assert_displayed_title(:OBSERVATIONS.l)
   end
 
   def test_index_advanced_search_error
@@ -284,9 +290,10 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     setup_rolfs_index
     get(:index, params: { pattern: pattern })
 
-    # Because this pattern is a name, the title will reflect that Query is
-    # assuming this is a search by name with synonyms and subtaxa.
-    # assert_displayed_title("Observations of #{pattern}")
+    # Pattern search guesses this is a name query
+    assert_displayed_title(:OBSERVATIONS.l)
+    assert_displayed_filters("#{:query_names.l}: #{pattern}")
+
     count = Observation.pattern(pattern).count
     assert_results(text: /#{pattern}/i, count:)
   end
@@ -295,9 +302,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     pattern = "Briceland"
 
     setup_rolfs_index
-    get(:index, params: { pattern: pattern, needs_naming: true })
+    get(:index, params: { pattern: pattern, needs_naming: rolf })
 
-    assert_displayed_title("")
     assert_match(/^#{identify_observations_url}/, redirect_to_url,
                  "Wrong page. Should redirect to #{:obs_needing_id.l}")
   end
@@ -308,13 +314,13 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     setup_rolfs_index
     get(:index, params: { pattern: pattern })
 
-    # assert_displayed_title("Observations Matching ‘#{pattern}’")
-    # assert_displayed_title(
-    #   :query_title_of_name.t(types: "Observations", name: pattern)
-    # )
+    # Pattern search guesses this is a name query
+    assert_displayed_title(:OBSERVATIONS.l)
+    assert_displayed_filters("#{:query_names.l}: #{pattern}")
+
     count = Observation.pattern(pattern).count
     assert_results(text: /#{pattern}/i, count:)
-    assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
+    assert_not_empty(css_select('[id="context_nav"]').text, "Tabset is empty")
   end
 
   def test_index_pattern_page2
@@ -323,11 +329,11 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login
     get(:index, params: { pattern: pattern, page: 2 })
 
-    # assert_displayed_title("Observations Matching ‘#{pattern}’")
-    # assert_displayed_title(
-    #   :query_title_of_name.t(types: "Observations", name: pattern)
-    # )
-    assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
+    # Pattern search guesses this is a name query
+    assert_displayed_title(:OBSERVATIONS.l)
+    assert_displayed_filters("#{:query_names.l}: #{pattern}")
+
+    assert_not_empty(css_select('[id="context_nav"]').text, "Tabset is empty")
     assert_select("#results a", { text: "« Prev" },
                   "Wrong page or display is missing a link to Prev page")
   end
@@ -338,9 +344,9 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login
     get(:index, params: { pattern: pattern })
 
-    assert_empty(css_select('[id="right_tabs"]').text,
+    assert_empty(css_select('[id="context_nav"]').text,
                  "RH tabset should be empty when search has no hits")
-    assert_displayed_title(:title_for_observation_search.l)
+    assert_displayed_title(:OBSERVATIONS.l)
   end
 
   def test_index_pattern_one_hit
@@ -369,7 +375,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     pattern = { error: "" }
 
     login
-    get(:index, params: { pattern: pattern, needs_naming: true })
+    get(:index, params: { pattern: pattern, needs_naming: rolf })
 
     assert_redirected_to(
       identify_observations_path,
@@ -389,7 +395,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     setup_rolfs_index
     get(:index, params: { look_alikes: "1", name: name.id })
 
-    assert_displayed_title("Observations of #{name.text_name}")
+    assert_displayed_title(:OBSERVATIONS.l)
+    assert_displayed_filters("#{:query_names.l}: #{name.text_name}")
     assert_results(count: look_alikes)
   end
 
@@ -405,7 +412,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: { look_alikes: "1", name: name.id })
 
     assert_response(:success)
-    assert_displayed_title("")
+    assert_displayed_title(:OBSERVATIONS.l)
     assert_results(count: look_alikes)
   end
 
@@ -421,7 +428,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     setup_rolfs_index
     get(:index, params: { related_taxa: "1", name: name.text_name })
-    # assert_displayed_title("Observations of #{parent.text_name}")
+    assert_displayed_title(:OBSERVATIONS.l)
+    assert_displayed_filters("#{:query_names.l}: #{parent.text_name}")
     assert_results(count: obss_of_related_taxa.count)
   end
 
@@ -435,7 +443,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: params)
 
     assert_response(:success)
-    assert_displayed_title("Observations of #{name.text_name}")
+    assert_displayed_title(:OBSERVATIONS.l)
+    assert_displayed_filters("#{:query_names.l}: #{name.text_name}")
     ids.each do |id|
       assert_select(
         "a:match('href', ?)", %r{^/#{id}}, true,
@@ -460,7 +469,9 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login(user.login)
     get(:index, params: { by_user: user.id })
 
-    assert_displayed_title("Observations created by #{user.name}")
+    assert_displayed_title(:OBSERVATIONS.l)
+    assert_displayed_filters("#{:query_by_users.l}: #{user.name}")
+
     assert_select(
       "#results img.image_#{obs.thumb_image_id}",
       true,
@@ -496,7 +507,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login
     get(:index, params: params)
 
-    assert_displayed_title("Observations from #{location.display_name}")
+    assert_displayed_title(:OBSERVATIONS.l)
+    assert_displayed_filters("#{:query_locations.l}: #{location.display_name}")
   end
 
   def test_index_location_without_observations
@@ -513,7 +525,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     assert_response(:success)
     assert_flash(flash_matcher)
-    assert_displayed_title("")
+    assert_displayed_title(:OBSERVATIONS.l)
   end
 
   def test_index_location_with_nonexistent_location
@@ -537,7 +549,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     login
     get(:index, params: { where: location.name })
-    assert_displayed_title("Observations from #{location.name}")
+    assert_displayed_title(:OBSERVATIONS.l)
+    assert_displayed_filters("#{:query_locations.l}: #{location.display_name}")
     assert_match(new_location_path(where: location.name), @response.body)
   end
 
@@ -548,8 +561,9 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: { where: location.name, page: 2 })
     assert_select("#results a", { text: "« Prev" },
                   "Wrong page or display is missing a link to Prev page")
-    assert_displayed_title("Observations from #{location.name}")
-    assert_not_empty(css_select('[id="right_tabs"]').text, "Tabset is empty")
+    assert_displayed_title(:OBSERVATIONS.l)
+    assert_displayed_filters("#{:query_locations.l}: #{location.display_name}")
+    assert_not_empty(css_select('[id="context_nav"]').text, "Tabset is empty")
   end
 
   def test_index_project
@@ -580,7 +594,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: { species_list: spl.id })
 
     assert_response(:success)
-    assert_displayed_title("Observations in #{spl.title}")
+    assert_displayed_title(:OBSERVATIONS.l)
+    assert_displayed_filters("#{:species_lists.l}: #{spl.title}")
   end
 
   def test_index_species_list_without_observations
@@ -590,7 +605,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: { species_list: spl.id })
 
     assert_response(:success)
-    assert_displayed_title("")
+    assert_displayed_title(:OBSERVATIONS.l)
     assert_flash_text(:runtime_no_matches.l(type: :observation))
   end
 
@@ -623,7 +638,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
   def test_index_with_region_filter
     observations_in_region =
-      Observation.reorder(id: :asc).in_region("California, USA")
+      Observation.reorder(id: :asc).region("California, USA")
 
     user = users(:californian)
     # Make sure the fixture is still okay

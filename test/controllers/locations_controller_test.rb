@@ -180,7 +180,21 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index)
 
-    assert_displayed_title("Locations by Name")
+    assert_displayed_title(:LOCATIONS.l)
+  end
+
+  def test_index_with_non_default_sort
+    check_index_sorting
+  end
+
+  def test_index_sorted_by_box_area
+    check_index_sorted_by(:reverse_box_area, do_login: true)
+  end
+
+  def test_index_sorted_by_scientific_name
+    login("roy")
+
+    check_index_sorted_by(:name, do_login: false)
   end
 
   def test_index_project
@@ -193,46 +207,10 @@ class LocationsControllerTest < FunctionalTestCase
     assert_match(location.display_name, @response.body)
   end
 
-  def test_index_with_non_default_sort
-    login
-
-    sort_orders = %w[num_views box_area]
-    sort_orders.each do |order|
-      get(:index, params: { by: order })
-      assert_displayed_title("Locations by #{:"sort_by_#{order}".l}")
-    end
-  end
-
-  # Makes no sense anymore. The box will have been tweaked in the link already.
-  # These params are no longer sent to the index, it's under q.
-  # def test_index_bounding_box_zero
-  #   north = south = east = west = 0
-  #   delta = 0.001
-  #   login
-  #   get(:index, params: { in_box: { north: north, south: south,
-  #                                   east: east, west: west } })
-  #   query = Query.find(QueryRecord.last.id)
-
-  #   assert_equal(north + delta, query.params.dig(:in_box, :north))
-  #   assert_equal(south - delta, query.params.dig(:in_box, :south))
-  #   assert_equal(east + delta, query.params.dig(:in_box, :east))
-  #   assert_equal(west - delta, query.params.dig(:in_box, :west))
-  # end
-
-  # def test_index_bounding_box_earth
-  #   login
-  #   get(:index, params: { in_box: { north: 90, south: -90,
-  #                                   east: 180, west: -180 } })
-  #   query = Query.find(QueryRecord.last.id)
-  #   assert_equal(90, query.params.dig(:in_box, :north))
-  #   assert_equal(-90, query.params.dig(:in_box, :south))
-  #   assert_equal(180, query.params.dig(:in_box, :east))
-  #   assert_equal(-180, query.params.dig(:in_box, :west))
-  # end
-
   def test_index_advanced_search
-    query = Query.lookup_and_save(:Location, search_where: "California")
-    matches = Location.name_has("California")
+    where = "California"
+    query = Query.lookup_and_save(:Location, search_where: where)
+    matches = Location.name_has(where)
 
     login
     get(:index,
@@ -244,8 +222,8 @@ class LocationsControllerTest < FunctionalTestCase
       "#content a:match('href', ?)", %r{#{locations_path}/\d+},
       { count: matches.count }, "Wrong number of Locations"
     )
-    # Don't care what the title is, but good to know if it changes.
-    assert_displayed_title("Matching Locations")
+    assert_displayed_title(:LOCATIONS.l)
+    assert_displayed_filters("#{:query_search_where.l}: #{where}")
   end
 
   def test_index_advanced_search_error
@@ -271,7 +249,8 @@ class LocationsControllerTest < FunctionalTestCase
       "#content a:match('href', ?)", %r{#{locations_path}/\d+},
       { count: matches.count }, "Wrong number of Locations"
     )
-    assert_displayed_title("Locations Matching ‘#{search_str}’")
+    assert_displayed_title(:LOCATIONS.l)
+    assert_displayed_filters("#{:query_pattern.l}: #{search_str}")
   end
 
   def test_index_pattern_id
@@ -289,9 +268,8 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { country: country })
 
-    # Use a regexp because the title is buggy and may change. jdc 2023-02-23.
-    # https://www.pivotaltracker.com/story/show/184554008
-    assert_displayed_title(/^Locations Matching ‘#{country}.?’/)
+    assert_displayed_title(:LOCATIONS.l)
+    assert_displayed_filters("#{:query_regexp.l}: #{country}")
     assert_select(
       "#content a:match('href', ?)", %r{#{locations_path}/\d+},
       { count: matches.count }, "Wrong number of Locations"
@@ -305,7 +283,8 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { country: country })
 
-    assert_displayed_title(/^Locations Matching ‘#{country}.?’/)
+    assert_displayed_title(:LOCATIONS.l)
+    assert_displayed_filters("#{:query_regexp.l}: #{country}")
     assert_select(
       "#content a:match('href', ?)", /#{location_path(new_mexico)}/,
       true, "USA page should include New Mexico"
@@ -358,7 +337,8 @@ class LocationsControllerTest < FunctionalTestCase
     get(:index, params: { by_user: user.id })
 
     assert_template("index")
-    assert_displayed_title("Locations created by #{user.name}")
+    assert_displayed_title(:LOCATIONS.l)
+    assert_displayed_filters("#{:query_by_users.l}: #{user.name}")
     assert_select(
       "#content a:match('href', ?)", %r{#{locations_path}/\d+},
       { count: Location.where(user: user).count },
@@ -410,7 +390,8 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_editor: user.id })
 
-    assert_displayed_title("Locations Edited by #{user.name}")
+    assert_displayed_title(:LOCATIONS.l)
+    assert_displayed_filters("#{:query_by_editor.l}: #{user.name}")
     assert_select("a:match('href',?)", %r{^/locations/\d+},
                   { count: locs_edited_by_user.count },
                   "Wrong number of results")
@@ -917,6 +898,6 @@ class LocationsControllerTest < FunctionalTestCase
   end
 
   def named_obs_query(name)
-    Query.lookup(:Observation, pattern: name, by: :name)
+    Query.lookup(:Observation, pattern: name, order_by: :name)
   end
 end

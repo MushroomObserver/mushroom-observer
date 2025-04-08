@@ -158,8 +158,8 @@ module ApplicationHelper
     # Put it back together.
     return addr if args.keys.empty?
 
-    addr + "?" + args.keys.sort.map do |k|
-      CGI.escape(k) + "=" + (args[k] || "")
+    addr + "?" + args.keys.sort.map do |k| # rubocop:disable Style/StringConcatenation
+      "#{CGI.escape(k)}=#{args[k] || ""}"
     end.join("&")
   end
 

@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require(File.expand_path("../config/boot.rb", __dir__))
-require(File.expand_path("../config/environment.rb", __dir__))
-require(File.expand_path("../app/extensions/extensions.rb", __dir__))
+require_relative("../config/boot")
+require_relative("../config/environment")
+require_relative("../config/initializers/extensions")
 
 abort(<<HELP) if ARGV.length != 2
 
@@ -39,7 +39,7 @@ table = ARGV[0]
 column = ARGV[1]
 
 model = table.classify.constantize
-model.all.pluck("id", column).each do |id, val|
+model.pluck("id", column).each do |id, val|
   find_links(val).each { |link| test_link!(id, link) } if val.present?
 end
 

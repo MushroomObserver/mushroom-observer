@@ -131,11 +131,12 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_index
     set = [nybg, herbaria(:rolf_herbarium)]
-    query = Query.lookup_and_save(:Herbarium, by: :name, id_in_set: set)
+    query = Query.lookup_and_save(:Herbarium, order_by: :name, id_in_set: set)
     login("zero") # Does not own any herbarium in set
     get(:index, params: { q: query.record.id.alphabetize })
 
     assert_response(:success)
+    assert_displayed_title(:HERBARIA.l)
     assert_select(
       "a:match('href', ?)", %r{^#{herbaria_path}/(\d+)}, { count: set.size },
       "Filtered index should list the results of the latest Herbaria query"
@@ -147,8 +148,7 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:index)
 
     assert_response(:success)
-    assert_select("#title", { text: "#{:HERBARIA.l} by Name" },
-                  "index should display #{:HERBARIA.l} by Name")
+    assert_displayed_title(:HERBARIA.l)
     Herbarium.find_each do |herbarium|
       assert_select(
         "a[href *= '#{herbarium_path(herbarium)}']", true,
@@ -157,14 +157,8 @@ class HerbariaControllerTest < FunctionalTestCase
     end
   end
 
-  def test_index_by_code
-    by = "code"
-
-    login
-    get(:index, params: { by: by })
-
-    assert_response(:success)
-    assert_displayed_title("Fungaria by Code")
+  def test_index_with_non_default_sort
+    check_index_sorting
   end
 
   def test_index_all_merge_source_links_presence_rolf
@@ -280,7 +274,8 @@ class HerbariaControllerTest < FunctionalTestCase
     login
     get(:index, params: { nonpersonal: true })
 
-    assert_displayed_title(:query_title_nonpersonal.l)
+    assert_displayed_title(:HERBARIA.l)
+    assert_displayed_filters(:query_nonpersonal.l)
     Herbarium.where(personal_user_id: nil).find_each do |herbarium|
       assert_select(
         "a[href ^= '#{herbarium_path(herbarium)}']", true,
@@ -297,15 +292,14 @@ class HerbariaControllerTest < FunctionalTestCase
     end
   end
 
-  def test_index_pattern_text
+  def test_index_pattern_text_personal
     pattern = "Personal Herbarium"
 
     login
     get(:index, params: { pattern: pattern })
 
-    assert_select("#title").text.start_with?(
-      :query_title_pattern_search.l(types: :HERBARIA.l, pattern: pattern)
-    )
+    assert_displayed_title(:HERBARIA.l)
+    assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
     Herbarium.where.not(personal_user_id: nil).find_each do |herbarium|
       assert_select(
         "a[href ^= '#{herbarium_path(herbarium)}']", true,
@@ -334,18 +328,12 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_index_reverse_records
     login
-    get(:index, params: { by: "reverse_records" })
+    by = "reverse_records"
+    get(:index, params: { by: })
 
     assert_response(:success)
-    assert_select(
-      "#title",
-      { text: "#{:HERBARIA.l} #{:by.l} #{:sort_by_records.l}" },
-      "Displayed title should be #{:HERBARIA.l} #{:by.l} #{:sort_by_records.l}"
-    )
-    assert_select(
-      "#sorts", true,
-      "Fungaria by #Records Reversed is missing sort tabs"
-    )
+    assert_displayed_title(:HERBARIA.l)
+    assert_sorted_by(by)
     Herbarium.find_each do |herbarium|
       assert_select(
         "a[href *= '#{herbarium_path(herbarium)}']", true,

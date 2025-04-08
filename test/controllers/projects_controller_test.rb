@@ -156,17 +156,12 @@ class ProjectsControllerTest < FunctionalTestCase
     login
     get(:index)
 
-    assert_displayed_title("Projects by Time Last Modified")
+    assert_displayed_title(:PROJECTS.l)
     assert_template("index")
   end
 
   def test_index_with_non_default_sort
-    login
-
-    get(:index, params: { by: "created_at" })
-
-    assert_template("index")
-    assert_displayed_title("Projects by Date Created")
+    check_index_sorting
   end
 
   def test_index_member
@@ -175,16 +170,7 @@ class ProjectsControllerTest < FunctionalTestCase
     get(:index, params: { member: dick.id })
 
     assert_template("index")
-    assert_displayed_title("Project Index")
-  end
-
-  def test_index_by_summary
-    login
-
-    get(:index, params: { by: "summary" })
-
-    assert_template("index")
-    assert_displayed_title("Projects by Summary")
+    assert_displayed_title(:PROJECTS.l)
   end
 
   def test_index_pattern_search_multiple_hits
@@ -193,7 +179,8 @@ class ProjectsControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: "Project" })
 
-    assert_displayed_title("Projects Matching ‘#{pattern}’")
+    assert_displayed_title(:PROJECTS.l)
+    assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
   end
 
   def test_index_pattern_search_by_name_one_hit

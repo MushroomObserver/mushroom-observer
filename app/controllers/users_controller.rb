@@ -2,9 +2,6 @@
 
 # display information about, and edit, users
 class UsersController < ApplicationController
-  # These need to be moved into the files where they are actually used.
-  require "find"
-
   before_action :login_required
 
   ##############################################################################
@@ -37,7 +34,7 @@ class UsersController < ApplicationController
   end
 
   def default_sort_order
-    :name
+    ::Query::Users.default_order # :name
   end
 
   # Used by ApplicationController to dispatch #index to a private method
@@ -79,20 +76,12 @@ class UsersController < ApplicationController
     query
   end
 
-  def index_display_opts(opts, query)
-    opts = {
+  def index_display_opts(opts, _query)
+    {
+      letters: true,
       include: :user_groups,
       matrix: !in_admin_mode?
     }.merge(opts)
-
-    # Paginate by "correct" letter.
-    opts[:letters] = if %w[login reverse_login].include?(query.params[:by])
-                       "users.login"
-                     else
-                       "users.name"
-                     end
-
-    opts
   end
 
   public
@@ -139,13 +128,13 @@ class UsersController < ApplicationController
     # First check the user's observation thumbnails for their own favorites
     image_includes = { thumb_image: [:image_votes, :projects, :license, :user] }
     @query = Query.lookup(:Observation, by_users: @show_user,
-                                        by: :owners_thumbnail_quality)
+                                        order_by: :owners_thumbnail_quality)
     observations = @query.results(limit: 6, include: image_includes)
 
     # If not enough, check for other people's favorites
     if (MAX_THUMBS - observations.length).positive?
       @query = Query.lookup(:Observation, by_users: @show_user,
-                                          by: :thumbnail_quality)
+                                          order_by: :thumbnail_quality)
       other_users_favorites = @query.results(limit: MAX_THUMBS,
                                              include: image_includes)
       observations = observations.union(other_users_favorites).take(MAX_THUMBS)

@@ -18,7 +18,8 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by: by })
 
-    assert_displayed_title("Comments by #{by.capitalize}")
+    assert_displayed_title(:COMMENTS.l)
+    assert_sorted_by(by)
   end
 
   def test_index_target_has_comments
@@ -29,9 +30,8 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:index, params: params)
     assert_select(".comment", count: comments.size)
-    assert_displayed_title(
-      "Comments on #{target.unique_format_name.t.as_displayed}"
-    )
+    assert_displayed_title(:COMMENTS.l)
+    assert_displayed_filters("#{:query_target.l}: #{target.unique_text_name.t}")
   end
 
   def test_index_target_valid_target_without_comments
@@ -80,7 +80,8 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: search_str })
 
-    assert_select("#title").text.downcase == "comments matching '#{search_str}'"
+    assert_displayed_title(:COMMENTS.l)
+    assert_displayed_filters("#{:query_pattern.l}: #{search_str}")
   end
 
   def test_index_by_user_who_created_one_comment
@@ -105,7 +106,8 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_user: user.id })
 
-    assert_displayed_title("Comments created by #{user.name}")
+    assert_displayed_title(:COMMENTS.l)
+    assert_displayed_filters("#{:query_by_users.l}: #{user.name}")
     # All Rolf's Comments are Observations, so the results should have
     # as many links to Observations as Rolf has Comments
     assert_select(
@@ -130,7 +132,7 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_user: id })
 
-    assert_flash_text(:runtime_object_not_found.l(type: "user", id: id))
+    assert_flash_text(:runtime_object_not_found.l(type: :user, id: id))
     assert_redirected_to(comments_path)
   end
 
@@ -141,7 +143,8 @@ class CommentsControllerTest < FunctionalTestCase
     get(:index, params: { for_user: user.id })
 
     assert_template("index")
-    assert_displayed_title("Comments for #{user.name}")
+    assert_displayed_title(:COMMENTS.l)
+    assert_displayed_filters("#{:query_for_user.l}: #{user.name}")
   end
 
   def test_index_for_user_who_received_one_comment
@@ -173,7 +176,7 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:index, params: { for_user: id })
 
-    assert_flash_text(:runtime_object_not_found.l(type: "user", id: id))
+    assert_flash_text(:runtime_object_not_found.l(type: :user, id: id))
     assert_redirected_to(comments_path)
   end
 
@@ -188,14 +191,14 @@ class CommentsControllerTest < FunctionalTestCase
 
   def test_add_comment
     obs_id = observations(:minimal_unknown_obs).id
-    requires_login(:new, target: obs_id, type: "Observation")
-    assert_form_action(action: :create, target: obs_id, type: "Observation")
+    requires_login(:new, target: obs_id, type: :Observation)
+    assert_form_action(action: :create, target: obs_id, type: :Observation)
   end
 
   def test_add_comment_to_project
     project_id = projects(:eol_project).id
-    requires_login(:new, target: project_id, type: "Project")
-    assert_form_action(action: :create, target: project_id, type: "Project")
+    requires_login(:new, target: project_id, type: :Project)
+    assert_form_action(action: :create, target: project_id, type: :Project)
   end
 
   def test_add_comment_no_id
@@ -206,15 +209,15 @@ class CommentsControllerTest < FunctionalTestCase
 
   def test_add_comment_to_name_with_synonyms
     name_id = names(:chlorophyllum_rachodes).id
-    requires_login(:new, target: name_id, type: "Name")
-    assert_form_action(action: :create, target: name_id, type: "Name")
+    requires_login(:new, target: name_id, type: :Name)
+    assert_form_action(action: :create, target: name_id, type: :Name)
   end
 
   def test_add_comment_to_unreadable_object
     katrina_is_not_reader = name_descriptions(:peltigera_user_desc)
     login(:katrina)
     get(:new,
-        params: { type: "NameDescription", target: katrina_is_not_reader.id })
+        params: { type: :NameDescription, target: katrina_is_not_reader.id })
 
     assert_flash_error("MO should flash if trying to comment on object" \
                        "for which user lacks read privileges")

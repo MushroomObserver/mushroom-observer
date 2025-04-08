@@ -37,7 +37,7 @@ class ProjectsController < ApplicationController
   end
 
   def index_display_opts(opts, _query)
-    { letters: "projects.title",
+    { letters: true,
       num_per_page: 50,
       include: :user }.merge(opts)
   end

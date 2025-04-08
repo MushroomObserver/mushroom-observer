@@ -19,15 +19,15 @@ module Locations
       build_index_with_query
     end
 
+    def controller_model_name
+      "LocationDescription"
+    end
+
     private
 
     # Is :name
     def default_sort_order
       ::Query::LocationDescriptions.default_order # :name
-    end
-
-    def controller_model_name
-      "LocationDescription"
     end
 
     # Used by ApplicationController to dispatch #index to a private method

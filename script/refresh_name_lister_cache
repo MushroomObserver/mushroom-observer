@@ -15,10 +15,10 @@
 #
 ################################################################################
 
-require(File.expand_path("../config/boot.rb", __dir__))
-require(File.expand_path("../config/environment.rb", __dir__))
+require_relative("../config/boot")
+require_relative("../config/environment")
 
-require("string_extensions")
+require_relative("../app/extensions/string")
 
 # Tired of fighting with ActionView to get it to let me use the one in
 # helpers/javascript_helper.rb, so I just copied it verbatim.
@@ -56,12 +56,12 @@ species = Name.connection.select_all(%(
 seen = {}
 genera = genera.map do |rec|
   n, d = rec.values_at("n", "d")
-  val = d.to_i == 1 ? n : n + "*"
+  val = d.to_i == 1 ? n : "#{n}*"
   seen[val] = true
   val
 end.uniq
 genera.reject! do |n|
-  seen[n + "*"]
+  seen["#{n}*"]
 end
 
 # How many times is each name used?

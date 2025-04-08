@@ -11,7 +11,7 @@ module Report
       end
 
       def initialize(args)
-        super(args)
+        super
         self.taxon_set = Set.new
         self.ids = []
       end

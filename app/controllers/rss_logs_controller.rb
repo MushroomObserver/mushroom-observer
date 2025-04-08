@@ -1,9 +1,6 @@
 # frozen_string_literal: true
 
 class RssLogsController < ApplicationController
-  # Uncertain these are necessary, can delete if not.
-  require "find"
-
   before_action :login_required, except: [
     # :index,
     :rss,
@@ -20,7 +17,7 @@ class RssLogsController < ApplicationController
   private
 
   def default_sort_order
-    :updated_at
+    ::Query::RssLogs.default_order # :updated_at
   end
 
   def unfiltered_index_opts

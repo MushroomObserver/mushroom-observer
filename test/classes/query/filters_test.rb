@@ -23,59 +23,66 @@ class Query::FiltersTest < UnitTestCase
   end
 
   def test_filtering_content_has_images
-    expects = Observation.has_images.index_order.uniq
+    expects = Observation.has_images.order_by_default
     assert_query(expects, :Observation, has_images: "yes")
 
-    expects = Observation.has_images(false).index_order.uniq
+    expects = Observation.has_images(false).order_by_default
     assert_query(expects, :Observation, has_images: "no")
   end
 
   def test_filtering_content_has_specimen
-    expects = Observation.has_specimen.index_order.uniq
+    expects = Observation.has_specimen.order_by_default
     assert_query(expects, :Observation, has_specimen: "yes")
 
-    expects = Observation.has_specimen(false).index_order.uniq
+    expects = Observation.has_specimen(false).order_by_default
     assert_query(expects, :Observation, has_specimen: "no")
   end
 
-  def test_filtering_content_with_lichen
-    expects_obs = Observation.lichen(:yes).index_order.uniq
+  def test_filtering_observations_with_lichen
+    expects_obs = Observation.lichen(true).order_by_default
     assert_query(expects_obs, :Observation, lichen: "yes")
-    expects_names = Name.with_correct_spelling.lichen(:yes).index_order.uniq
+  end
+
+  def test_filtering_names_with_lichen
+    expects_names = Name.with_correct_spelling.lichen(true).
+                    order_by_default
     assert_query(expects_names, :Name, lichen: "yes")
   end
 
-  def test_filtering_content_with_non_lichen
-    expects_obs = Observation.lichen(:no).index_order.uniq
+  def test_filtering_observations_with_non_lichen
+    expects_obs = Observation.lichen(false).order_by_default
     assert_query(expects_obs, :Observation, lichen: "no")
-    expects_names = Name.with_correct_spelling.lichen(:no).index_order.uniq
+  end
+
+  def test_filtering_names_with_non_lichen
+    expects_names = Name.with_correct_spelling.lichen(false).order_by_default
     assert_query(expects_names, :Name, lichen: "no")
   end
 
   def test_filtering_content_region
-    expects = Location.in_region("California, USA").index_order.uniq
+    expects = Location.region("California, USA").order_by_default
     assert_query(expects, :Location, region: "California, USA")
     assert_query(expects, :Location, region: "USA, California")
 
-    expects = Observation.in_region("California, USA").index_order.uniq
+    expects = Observation.region("California, USA").order_by_default
     assert_query(expects, :Observation, region: "California, USA")
 
-    expects = Location.in_region("North America").index_order.uniq
+    expects = Location.region("North America").order_by_default
     assert(expects.include?(locations(:albion))) # usa
     assert(expects.include?(locations(:elgin_co))) # canada
     assert_query(expects, :Location, region: "North America")
   end
 
   def test_filtering_content_clade
-    names = Name.in_clade("Agaricales").index_order.distinct
+    names = Name.clade("Agaricales").order_by_default
     assert_query(names, :Name, clade: "Agaricales")
-    obs = Observation.in_clade("Agaricales").index_order.distinct
+    obs = Observation.clade("Agaricales").order_by_default
     assert_query(obs, :Observation, clade: "Agaricales")
   end
 
   def test_filtering_content_with_subquery
-    expects_names = Name.joins(:observations).
-                    merge(Observation.has_specimen).index_order.uniq
+    expects_names = Name.joins(:observations).distinct.
+                    merge(Observation.has_specimen).order_by_default
     assert_query(expects_names,
                  :Name, observation_query: { has_specimen: "yes" })
   end

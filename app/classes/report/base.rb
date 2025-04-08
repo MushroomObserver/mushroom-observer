@@ -3,7 +3,7 @@
 module Report
   # base class
   class Base
-    attr_accessor :encoding
+    attr_accessor :encoding, :user
 
     # These used to be class attributes, now are just regular instance methods:
     #  default_encoding
@@ -13,6 +13,7 @@ module Report
 
     def initialize(args)
       self.encoding = args[:encoding] || default_encoding
+      self.user = args[:user] || nil
       raise("Report initialized without encoding!") unless encoding
     end
 

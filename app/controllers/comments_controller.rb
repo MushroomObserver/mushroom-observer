@@ -40,7 +40,7 @@ class CommentsController < ApplicationController
   # Passes explicit :by param to affect title (only).
   def sorted_index_opts
     sorted_by = params[:by] || default_sort_order
-    super.merge(query_args: { by: sorted_by })
+    super.merge(query_args: { order_by: sorted_by })
   end
 
   # Shows comments by a given user, most recent first. (Linked from show_user.)
@@ -74,8 +74,8 @@ class CommentsController < ApplicationController
     return no_model unless (model = Comment.safe_model_from_name(params[:type]))
     return unless (target = find_or_goto_index(model, params[:target].to_s))
 
-    query = create_query(:Comment, target: { id: target.id,
-                                             type: target.class.name })
+    query = create_query(:Comment, target: { type: target.class.name,
+                                             id: target.id })
     [query, {}]
   end
 
@@ -94,8 +94,8 @@ class CommentsController < ApplicationController
     }.merge(opts)
 
     # Paginate by letter if sorting by user.
-    if (query.params[:by] == "user") || (query.params[:by] == "reverse_user")
-      opts[:letters] = "users.login"
+    if %w[user reverse_user].include?(query.params[:order_by])
+      opts[:letters] = true
     end
 
     @full_detail = query.params[:target].present?

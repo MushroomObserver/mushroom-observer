@@ -284,9 +284,7 @@ class Description < AbstractModel
   end
 
   # Wrapper around class method of same name
-  def admins_join_table
-    self.class.admins_join_table
-  end
+  delegate :admins_join_table, to: :class
 
   # Name of the join table used to keep writer groups.
   def self.writers_join_table
@@ -294,9 +292,7 @@ class Description < AbstractModel
   end
 
   # Wrapper around class method of same name
-  def writers_join_table
-    self.class.writers_join_table
-  end
+  delegate :writers_join_table, to: :class
 
   # Name of the join table used to keep reader groups.
   def self.readers_join_table
@@ -304,9 +300,7 @@ class Description < AbstractModel
   end
 
   # Wrapper around class method of same name
-  def readers_join_table
-    self.class.readers_join_table
-  end
+  delegate :readers_join_table, to: :class
 
   # List of all the admins for this description
   def admins
@@ -442,9 +436,7 @@ class Description < AbstractModel
   end
 
   # Wrapper around class method of same name
-  def authors_join_table
-    self.class.authors_join_table
-  end
+  delegate :authors_join_table, to: :class
 
   # Name of the join table used to keep editors.
   def self.editors_join_table
@@ -452,9 +444,7 @@ class Description < AbstractModel
   end
 
   # Wrapper around class method of same name
-  def editors_join_table
-    self.class.editors_join_table
-  end
+  delegate :editors_join_table, to: :class
 
   # Is the given User an author?
   def author?(user)
@@ -539,6 +529,7 @@ class Description < AbstractModel
   # include the title of the parent object), in plain text.  [I'm not sure
   # I like this here.  It might violate MVC a bit too flagrantly... -JPH]
   def put_together_name(full_or_part)
+    source_type ||= :public
     tag = :"description_#{full_or_part}_title_#{source_type}"
     user_name = begin
                   user.legal_name

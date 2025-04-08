@@ -191,7 +191,7 @@ module NamingsHelper
   # N+1: naming includes user
   def naming_proposer_html(naming)
     user_link = user_link(naming.user, naming.user.login,
-                          { class: "btn btn-link px-0" })
+                          { class: "btn btn-link text-wrap text-left px-0" })
 
     # row props have mobile-friendly labels
     [tag.small("#{:show_namings_user.t}: ", class: "visible-xs-inline mr-4"),

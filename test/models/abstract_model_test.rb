@@ -3,8 +3,6 @@
 require("test_helper")
 
 class AbstractModelTest < UnitTestCase
-  require "extensions"
-
   # Make sure update_view_stats updated stuff correctly (and did nothing else).
   def assert_same_but_view_stats(old_attrs, new_attrs, msg = "")
     (old_attrs.keys + new_attrs.keys).map(&:to_s).uniq.sort.each do |key|
@@ -492,47 +490,85 @@ class AbstractModelTest < UnitTestCase
   end
 
   def test_scope_created_after
-    assert_equal(Observation.count,
-                 Observation.created_after(improbably_early).count)
-    assert_empty(Observation.created_after(a_century_from_now))
+    assert_equal(
+      Observation.count,
+      Observation.datetime_after(improbably_early, col: :created_at).count
+    )
+    assert_empty(
+      Observation.datetime_after(a_century_from_now, col: :created_at)
+    )
   end
 
   def test_scope_created_before
-    assert_equal(Observation.count,
-                 Observation.created_before(a_century_from_now).count)
-    assert_empty(Observation.created_before(improbably_early))
+    assert_equal(
+      Observation.count,
+      Observation.datetime_before(a_century_from_now, col: :created_at).count
+    )
+    assert_empty(
+      Observation.datetime_before(improbably_early, col: :created_at)
+    )
   end
 
   def test_scope_created_between
     assert_equal(
       Observation.count,
-      Observation.created_between(improbably_early, a_century_from_now).count
+      Observation.datetime_between(improbably_early, a_century_from_now,
+                                   col: :created_at).count
     )
     assert_empty(
-      Observation.created_between(a_century_from_now, two_centuries_from_now)
+      Observation.datetime_between(a_century_from_now, two_centuries_from_now,
+                                   col: :created_at)
     )
   end
 
   def test_scope_updated_after
-    assert_equal(Observation.count,
-                 Observation.updated_after(improbably_early).count)
-    assert_empty(Observation.updated_after(a_century_from_now))
+    assert_equal(
+      Observation.count,
+      Observation.datetime_after(improbably_early, col: :updated_at).count
+    )
+    assert_empty(
+      Observation.datetime_after(a_century_from_now, col: :updated_at)
+    )
   end
 
   def test_scope_updated_before
-    assert_equal(Observation.count,
-                 Observation.updated_before(a_century_from_now).count)
-    assert_empty(Observation.updated_before(improbably_early))
+    assert_equal(
+      Observation.count,
+      Observation.datetime_before(a_century_from_now, col: :updated_at).count
+    )
+    assert_empty(
+      Observation.datetime_before(improbably_early, col: :updated_at)
+    )
   end
 
   def test_scope_updated_between
     assert_equal(
       Observation.count,
-      Observation.updated_between(improbably_early, a_century_from_now).count
+      Observation.datetime_between(improbably_early, a_century_from_now,
+                                   col: :updated_at).count
     )
     assert_empty(
-      Observation.updated_between(a_century_from_now, two_centuries_from_now)
+      Observation.datetime_between(a_century_from_now, two_centuries_from_now,
+                                   col: :updated_at)
     )
+  end
+
+  # the scope enables this parsing of "within the year".
+  def test_scope_created_in_year
+    expects = Observation.where(Observation[:created_at].year.eq("2007")).
+              order_by_default
+    assert_equal(expects,
+                 Observation.order_by_default.created_at("2007", "2007"))
+  end
+
+  # Ditto for month.
+  def test_scope_created_in_month
+    expects = Observation.
+              where(Observation[:created_at].year.eq("2007").
+                    and(Observation[:created_at].month.eq("08"))).
+              order_by_default
+    assert_equal(expects,
+                 Observation.order_by_default.created_at("2007-08", "2007-08"))
   end
 
   def test_scope_by_editor

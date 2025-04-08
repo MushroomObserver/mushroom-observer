@@ -244,10 +244,7 @@ class API2::ObservationsTest < UnitTestCase
   end
 
   def test_getting_observations_in_box
-    obses = Observation.where(lat: [34..35], lng: [-119..-118])
-    locs = Location.in_box(north: 35, south: 34, east: -118, west: -119)
-
-    obses = (obses + locs.map(&:observations)).flatten.uniq.sort_by(&:id)
+    obses = Observation.in_box(north: 35, south: 34, east: -118, west: -119)
     assert_not_empty(obses)
     assert_api_fail(params_get(south: 34, east: -118, west: -119))
     assert_api_fail(params_get(north: 35, east: -118, west: -119))
@@ -257,8 +254,8 @@ class API2::ObservationsTest < UnitTestCase
     assert_api_results(obses)
   end
 
-  def test_getting_observations_in_region
-    obses = Observation.in_region("California, USA")
+  def test_getting_observations_region
+    obses = Observation.region("California, USA")
     assert_not_empty(obses)
     assert_api_pass(params_get(region: "California, USA"))
     assert_api_results(obses)

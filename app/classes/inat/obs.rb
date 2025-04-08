@@ -61,11 +61,9 @@ class Inat
     end
 
     # Allow hash key access to the iNat observation data
-    def [](key) = @obs[key]
+    delegate :[], to: :@obs
 
-    def []=(key, value)
-      @obs[key] = value
-    end
+    delegate :[]=, to: :@obs
 
     ########## iNat attributes
 

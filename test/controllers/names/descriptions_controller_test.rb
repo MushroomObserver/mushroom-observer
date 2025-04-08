@@ -26,14 +26,11 @@ module Names
       login
       get(:index)
 
-      assert_displayed_title("Name Descriptions by Name")
+      assert_displayed_title(:NAME_DESCRIPTIONS.l)
     end
 
-    def test_index_sorted_by_user
-      login
-      get(:index, params: { by: "user" })
-
-      assert_displayed_title("Name Descriptions by User")
+    def test_index_with_non_default_sort
+      check_index_sorting
     end
 
     def test_index_by_author_of_one_description
@@ -64,7 +61,8 @@ module Names
       get(:index, params: { by_author: user })
 
       assert_template("index")
-      assert_displayed_title("Name Descriptions Authored by #{user.name}")
+      assert_displayed_title(:NAME_DESCRIPTIONS.l)
+      assert_displayed_filters("#{:query_by_author.l}: #{user.name}")
       assert_select("a:match('href',?)", %r{^/names/descriptions/\d+},
                     { count: descs_authored_by_user_count },
                     "Wrong number of results")
@@ -124,7 +122,8 @@ module Names
       get(:index, params: { by_editor: user.id })
 
       assert_template("index")
-      assert_displayed_title("Name Descriptions Edited by #{user.name}")
+      assert_displayed_title(:NAME_DESCRIPTIONS.l)
+      assert_displayed_filters("#{:query_by_editor.l}: #{user.name}")
       assert_select("a:match('href',?)", %r{^/names/descriptions/\d+},
                     { count: descs_edited_by_user_count },
                     "Wrong number of results")

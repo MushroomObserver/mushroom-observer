@@ -1,9 +1,5 @@
 # frozen_string_literal: true
 
-# require("open3")
-# require("mimemagic")
-# require("fastimage")
-#
 #  = Image Model
 #
 #  Most images are, of course, mushrooms, but mugshots use this class, as well.
@@ -227,12 +223,8 @@
 ################################################################################
 #
 class Image < AbstractModel # rubocop:disable Metrics/ClassLength
-  require "fileutils"
-  require "net/http"
-  require "English"
-  require "open3"
-  require "mimemagic"
-  require "fastimage"
+  require("mimemagic")
+  require("fastimage")
 
   include Scopes
 
@@ -670,7 +662,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # to the :image field.  Returns true if the file is successfully saved.
   def save_to_temp_file
     result = true
-    unless upload_temp_file.present?
+    if upload_temp_file.blank?
 
       # Image is supplied in a input stream.  This can happen in a variety of
       # cases, including during testing, and also when the image comes in as
@@ -973,7 +965,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def reload(*args)
     @vote_hash = nil
-    super(*args)
+    super
   end
 
   ##############################################################################

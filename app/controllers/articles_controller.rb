@@ -32,11 +32,11 @@ class ArticlesController < ApplicationController
   private
 
   def default_sort_order
-    :created_at
+    ::Query::Articles.default_order # :created_at
   end
 
   def index_display_opts(opts, _query)
-    { letters: "articles.title",
+    { letters: true,
       num_per_page: 50,
       include: :user }.merge(opts)
   end

@@ -2,17 +2,10 @@
 
 class Lookup::Names < Lookup
   MODEL = Name
-  TITLE_COLUMN = :search_name
-
-  def initialize(vals, params = {})
-    super
-  end
+  TITLE_METHOD = :text_name
 
   def prepare_vals(vals)
-    if vals.blank?
-      complain_about_unused_flags!
-      return []
-    end
+    return [] if vals.blank?
 
     [vals].flatten
   end
@@ -106,8 +99,6 @@ class Lookup::Names < Lookup
   def add_synonyms_if_necessary(names)
     if @params[:include_synonyms]
       add_synonyms(names)
-    elsif !@params[:exclude_original_names]
-      add_other_spellings(names)
     else
       names
     end
@@ -129,7 +120,7 @@ class Lookup::Names < Lookup
     elsif @params[:include_synonyms]
       add_synonyms(names_plus_subtaxa)
     else
-      add_other_spellings(names_plus_subtaxa)
+      names_plus_subtaxa
     end
   end
 
@@ -224,17 +215,5 @@ class Lookup::Names < Lookup
   #    where(<x>.in(limited_id_set(name_ids)))
   def limited_id_set(name_ids)
     name_ids.map(&:to_i).uniq[0, MO.query_max_array]
-  end
-
-  def complain_about_unused_flags!
-    return if @params.blank?
-
-    @params.each_key { |param| complain_about_unused_flag!(param) }
-  end
-
-  def complain_about_unused_flag!(param)
-    return if @params[param].nil?
-
-    raise("Flag \"#{param}\" is invalid without \"names\" parameter.")
   end
 end

@@ -39,7 +39,11 @@ module APIKeysHelper
 
   def api_keys_sorted(user)
     user.api_keys.sort_by do |key|
-      last_use = (Time.zone.now - key.last_used) rescue 0
+      last_use = begin
+                   (Time.zone.now - key.last_used)
+                 rescue StandardError
+                   0
+                 end
       [-key.num_uses, last_use, key.id]
     end
   end

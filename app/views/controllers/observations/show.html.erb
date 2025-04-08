@@ -8,15 +8,15 @@ content_for(:edit_icons) do
   tag.span(obs_change_links(@observation),
            class: "h4 ml-3 d-inline-block text-nowrap")
 end
-# add_tab_set(show_observation_tabs(obs: @observation, user: @user))
+# add_context_nav(show_observation_tabs(obs: @observation, user: @user))
 
 @container = :double
 
 show_map   = @user ? @user.thumbnail_maps : !session[:hide_thumbnail_maps]
 show_lists = @user # && @observation.species_lists.any?
-show_links = @user && (@observation.external_links.any? || @other_sites.any?)
 
-obs_locals = { obs: @observation, consensus: @consensus, user: @user }
+obs_locals = { obs: @observation, consensus: @consensus, user: @user,
+               sites: @other_sites }
 carousel_locals = {
   object: @observation, images: @images, html_id: "observation_images",
   title: :IMAGES.t, links: observation_show_image_links(obs: @observation)
@@ -40,14 +40,10 @@ carousel_locals = {
         <%= render(partial: "observations/show/species_lists",
                    locals: obs_locals) %>
       <% end %>
-
-      <% if show_links %>
-        <%= render(partial: "observations/show/external_links",
-                   locals: obs_locals) %>
-      <% end %>
     <% end %>
   </div>
-</div><!--.row-->
+</div>
+<!--.row-->
 
 <div class="row">
   <div class="col-xs-12 col-md-8 col-lg-7 float-sm-left">
@@ -68,6 +64,7 @@ carousel_locals = {
                  locals: obs_locals) %>
     <% end %>
   </div>
-</div><!--.row-->
+</div>
+<!--.row-->
 
 <%= show_object_footer(@observation) %>
