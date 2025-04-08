@@ -46,7 +46,7 @@ module Name::Scopes
   included do # rubocop:disable Metrics/BlockLength
     # default ordering for index queries
     scope :order_by_default,
-          -> { order(sort_name: :asc, id: :desc) }
+          -> { order_by(::Query::Names.default_order) }
 
     scope :names, lambda { |lookup:, **related_name_args|
       ids = lookup_names_by_name(lookup, related_name_args.compact)
@@ -56,8 +56,8 @@ module Name::Scopes
     }
     scope :text_name_has,
           ->(phrase) { search_columns(Name[:text_name], phrase) }
-    scope :search_name_has,
-          ->(phrase) { search_columns(Name[:search_name], phrase) }
+    # scope :search_name_has,
+    #       ->(phrase) { search_columns(Name[:search_name], phrase) }
 
     # NOTE: with_correct_spelling is tacked on to most Name queries.
     scope :misspellings, lambda { |boolish = :no|
@@ -67,6 +67,8 @@ module Name::Scopes
         where(correct_spelling_id: nil)
       when :only
         where.not(correct_spelling_id: nil)
+      when :either
+        all
       end
     }
     scope :with_correct_spelling,
@@ -76,13 +78,12 @@ module Name::Scopes
     scope :with_self_referential_misspelling,
           -> { where(Name[:correct_spelling_id].eq(Name[:id])) }
 
-    scope :lichen, lambda { |boolish = :yes|
-      # if false, returns all
-      boolish = :yes if boolish == true
-      case boolish.to_sym
-      when :yes
+    # Query parses "yes" and "no", "on" and "off" to boolean. nil ignored.
+    scope :lichen, lambda { |bool = true|
+      case bool
+      when true
         where(Name[:lifeform].matches("%lichen%"))
-      when :no
+      when false
         where(Name[:lifeform].does_not_match("% lichen %"))
       end
     }
@@ -197,6 +198,8 @@ module Name::Scopes
     #   cols = Name.searchable_columns + Name[:classification]
     #   search_columns(cols, phrase)
     # }
+    # scope :search_name,
+    #       ->(phrase) { search_columns(Name[:search_name], phrase) }
     # # A more comprehensive search of Name fields, plus comments/descriptions.
     # scope :search_content_and_associations, lambda { |phrase|
     #   fields = Name.search_content(phrase).map(&:id)
@@ -205,11 +208,11 @@ module Name::Scopes
     #   where(id: fields + comments + descs).distinct
     # }
     # This is what's called by advanced_search
-    scope :advanced_search, lambda { |phrase|
-      fields = Name.search_columns(Name[:search_name], phrase).map(&:id)
-      comments = Name.comments_has(phrase).map(&:id)
-      where(id: fields + comments).distinct
-    }
+    # scope :advanced_search, lambda { |phrase|
+    #   fields = Name.search_columns(Name[:search_name], phrase).map(&:id)
+    #   comments = Name.comments_has(phrase).map(&:id)
+    #   where(id: fields + comments).distinct
+    # }
     # This is what's called by pattern_search
     scope :pattern, lambda { |phrase|
       cols = Name.searchable_columns + NameDescription.searchable_columns
@@ -231,13 +234,15 @@ module Name::Scopes
     scope :has_descriptions, lambda { |bool = true|
       return all unless bool
 
-      joins(:descriptions)
+      joins(:descriptions).distinct
     }
     # This is the scope we're more likely interested in
     scope :has_default_description,
           ->(bool = true) { presence_condition(Name[:description_id], bool:) }
     # Called by a special index page
-    scope :needs_description, lambda {
+    scope :needs_description, lambda { |bool = true|
+      return all unless bool
+
       has_default_description(false).joins(:observations).distinct.
         group(:name_id).order(Observation[:name_id].count.desc, Name[:id].desc)
     }
@@ -297,6 +302,14 @@ module Name::Scopes
           where(author: [parsed_name.author, ""])
       end
     }
+
+    scope :description_query, lambda { |hash|
+      joins(:descriptions).subquery(:NameDescription, hash)
+    }
+    scope :observation_query, lambda { |hash|
+      joins(:observations).subquery(:Observation, hash)
+    }
+
     scope :show_includes, lambda {
       strict_loading.includes(
         { comments: :user },

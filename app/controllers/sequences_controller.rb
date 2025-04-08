@@ -54,7 +54,7 @@ class SequencesController < ApplicationController
   private
 
   def default_sort_order
-    :created_at
+    ::Query::Sequences.default_order # :created_at
   end
 
   def index_active_params
@@ -301,7 +301,7 @@ class SequencesController < ApplicationController
   def render_sequences_section_update
     render(
       partial: "observations/show/section_update",
-      locals: { identifier: "sequences" }
+      locals: { identifier: "sequences", obs: @observation, user: @user }
     ) and return
   end
 

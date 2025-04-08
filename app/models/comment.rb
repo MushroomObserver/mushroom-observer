@@ -134,7 +134,7 @@ class Comment < AbstractModel
   after_create :oil_and_water
 
   scope :order_by_default,
-        -> { order(created_at: :desc, id: :desc) }
+        -> { order_by(::Query::Comments.default_order) }
 
   # This scope starts with a `where`, and chains subsequent `where` clauses
   # with `or`. So, rather than separately assembling `target_ids`, that would

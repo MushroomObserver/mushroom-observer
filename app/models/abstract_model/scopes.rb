@@ -260,8 +260,12 @@ module AbstractModel::Scopes
     }
 
     # Used in Name, Observation and Project so far.
-    scope :has_comments,
-          ->(bool = true) { joined_relation_condition(:comments, bool:) }
+    # Ignores false.
+    scope :has_comments, lambda { |bool = true|
+      return all unless bool
+
+      joined_relation_condition(:comments, bool:)
+    }
     scope :comments_has, lambda { |phrase|
       joins(:comments).merge(Comment.search_content(phrase)).distinct
     }
@@ -269,6 +273,12 @@ module AbstractModel::Scopes
 
   # class methods here, `self` included
   module ClassMethods
+    # Utility for all subqueries, which are defined on the model
+    def subquery(model_name, params)
+      subquery = Query.new(model_name, **params).scope.reorder("")
+      merge(subquery).distinct
+    end
+
     # array of max of MO.query_max_array unique ids for use with Arel "in"
     #    where(<x>.in(limited_id_set(ids)))
     def limited_id_set(ids)

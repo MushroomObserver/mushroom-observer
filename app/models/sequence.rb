@@ -42,7 +42,7 @@ class Sequence < AbstractModel
   after_destroy :log_destroy_sequence
 
   scope :order_by_default,
-        -> { order(created_at: :desc, id: :desc) }
+        -> { order_by(::Query::Sequences.default_order) }
 
   scope :observations,
         ->(ids) { where(observation_id: ids) }
@@ -63,6 +63,10 @@ class Sequence < AbstractModel
     cols = Sequence[:locus].coalesce("") + Sequence[:archive].coalesce("") +
            Sequence[:accession].coalesce("") + Sequence[:notes].coalesce("")
     search_columns(cols, phrase)
+  }
+
+  scope :observation_query, lambda { |hash|
+    joins(:observation).subquery(:Observation, hash)
   }
 
   ##############################################################################

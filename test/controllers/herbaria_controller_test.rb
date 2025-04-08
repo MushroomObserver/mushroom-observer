@@ -157,15 +157,8 @@ class HerbariaControllerTest < FunctionalTestCase
     end
   end
 
-  def test_index_by_code
-    by = "code"
-
-    login
-    get(:index, params: { by: by })
-
-    assert_response(:success)
-    assert_displayed_title(:HERBARIA.l)
-    assert_sorted_by(by)
+  def test_index_with_non_default_sort
+    check_index_sorting
   end
 
   def test_index_all_merge_source_links_presence_rolf

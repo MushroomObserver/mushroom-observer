@@ -29,13 +29,8 @@ module Names
       assert_displayed_title(:NAME_DESCRIPTIONS.l)
     end
 
-    def test_index_sorted_by_user
-      login
-      by = "user"
-      get(:index, params: { by: })
-
-      assert_displayed_title(:NAME_DESCRIPTIONS.l)
-      assert_sorted_by(by)
+    def test_index_with_non_default_sort
+      check_index_sorting
     end
 
     def test_index_by_author_of_one_description

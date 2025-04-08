@@ -126,15 +126,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_sorted_by(by)
   end
 
-  def test_index_sorted_by_non_default
-    login
-
-    sort_orders = %w[created_at updated_at title]
-    sort_orders.each do |order|
-      get(:index, params: { by: order })
-      assert_displayed_title(:SPECIES_LISTS.l)
-      assert_sorted_by(order)
-    end
+  def test_index_with_non_default_sort
+    check_index_sorting
   end
 
   def test_index_with_id_and_sorted_by_title
@@ -1180,10 +1173,10 @@ class SpeciesListsControllerTest < FunctionalTestCase
         "Psalliota",
         "Chlorophyllum Author",
         "Lepiota Author",
-        'Gen. "One"',
-        'Gen. "Two"',
-        'Gen. "Three"',
-        'Agaricus sp. "blah"'
+        "Gen. 'One'",
+        "Gen. 'Two'",
+        "Gen. 'Three'",
+        "Agaricus sp. 'blah'"
       ].sort,
       assigns(:species_list).observations.map { |x| x.name.search_name }.sort
     )
@@ -1192,10 +1185,10 @@ class SpeciesListsControllerTest < FunctionalTestCase
       "Fungi",
       "Agaricus sp",
       "Psalliota sp.",
-      '"One"',
-      '"Two" sp',
-      '"Three" sp.',
-      'Agaricus "blah"',
+      "'One'",
+      "'Two' sp",
+      "'Three' sp.",
+      "Agaricus 'blah'",
       "Chlorophyllum Author",
       "Lepiota sp Author",
       "Lepiota sp. Author"
@@ -1213,10 +1206,10 @@ class SpeciesListsControllerTest < FunctionalTestCase
         "Chlorophyllum Author",
         "Lepiota Author",
         "Lepiota Author",
-        'Gen. "One"',
-        'Gen. "Two"',
-        'Gen. "Three"',
-        'Agaricus sp. "blah"'
+        "Gen. 'One'",
+        "Gen. 'Two'",
+        "Gen. 'Three'",
+        "Agaricus sp. 'blah'"
       ].sort,
       assigns(:species_list).observations.map { |x| x.name.search_name }.sort
     )

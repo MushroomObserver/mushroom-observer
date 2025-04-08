@@ -1,75 +1,71 @@
 # frozen_string_literal: true
 
-# base class for Query searches
+#  == Class and Instance Methods
+#  parameter_declarations::
+#  takes_parameter?::
+#  scope_parameters::
+#  content_filter_parameters::
+#  default_order::
+#
+#  == Instance Methods
+#  relatable?::               Can a query of this model be converted to a
+#                             subquery filtering results of another model?
+#  subquery_of?(target)::
+#  serialize::          Returns string which describes the Query completely.
+#  record::
+#
 class Query::Base
-  include Query::Modules::ClassMethods
-  include Query::Modules::BoundingBox
-  include Query::Modules::Conditions
-  include Query::Modules::Associations
-  include Query::Modules::Datetime
-  include Query::Modules::GoogleSearch
-  include Query::Modules::HighLevelQueries
+  include ActiveModel::API
+  include ActiveModel::Attributes
+  include ActiveModel::Validations::Callbacks
+
+  include Query::Modules::QueryRecords
+  include Query::Modules::Subqueries
   include Query::Modules::Initialization
-  include Query::Modules::Joining
-  include Query::Modules::LookupObjects
-  include Query::Modules::LowLevelQueries
-  include Query::Modules::Ordering
-  include Query::Modules::SequenceOperators
-  include Query::Modules::Sql
+  include Query::Modules::Results
+  include Query::Modules::Sequence
   include Query::Modules::Validation
+
+  validates_with Query::Modules::Validator
+
+  # "clean up" and reassign attributes before validation
+  before_validation :clean_and_validate_params
 
   attr_writer :record
 
-  delegate :parameter_declarations, to: :class
-
   def self.parameter_declarations
-    {
-      join: [:string],
-      tables: [:string],
-      where: [:string],
-      group: :string,
-      order: :string,
-      selects: :string,
-      order_by: :string,
-      title: [:string]
-    }
+    { order_by: :string }
   end
 
-  delegate :takes_parameter?, to: :class
+  delegate :parameter_declarations, to: :class
 
+  # Could use has_attribute? here, but it doesn't exist yet for ActiveModel.
+  # Only called in ApplicationController::Queries#apply_one_content_filter
   def self.takes_parameter?(key)
     parameter_declarations.key?(key)
   end
 
-  def initialize_flavor
-    # These strings can never come direct from user, so no need to sanitize.
-    # (I believe they are only used by the site stats page. -JPH 20190708)
-    self.where += params[:where] if params[:where]
-    add_join(params[:join]) if params[:join]
+  delegate :takes_parameter?, to: :class
+
+  # :id_in_set must be moved to the last position so it can reorder results.
+  def self.scope_parameters
+    excepts = [:id_in_set, :preference_filter]
+    @scope_parameters = parameter_declarations.except(*excepts).keys +
+                        [:id_in_set]
   end
 
-  delegate :subquery_parameters, to: :class
+  delegate :scope_parameters, to: :class
 
-  def self.subquery_parameters
-    parameter_declarations.select { |key, _v| key.to_s.include?("_query") }
+  def self.content_filter_parameters
+    filters = Query::Filter.all
+    @content_filter_parameters ||= filters.each_with_object({}) do |f, p|
+      p[f.sym] = f.type
+    end.freeze
   end
 
-  # A "current_or_related_query" may be called for links:
-  # (1) for a new query on a related target model, using the current_query as
-  #     the filtering subquery.
-  # (2) from an index that itself was the result of a subquery.
-  #     For example, if you follow links in the current UI from:
-  #       [target model] of these [filtering model]
-  #       Observations of these names -> (that's a plain obs query)
-  #       Locations of these observations -> (location query with obs_subquery)
-  #       Map of these locations -> (loc, obs_subquery)
-  #       Names at these locations -> (name, obs_subquery, obs have the loc)
-  #       Observations of these names -> (obs query)
-  #     Note that the last index is really the original query, so to prevent
-  #     recursive subquery nesting, we always want check for the currently
-  #     needed (sub)query nested within the params.
-  # (3) from maps to indexes of the same objects. Returns the current_query.
-  #
+  delegate :content_filter_parameters, to: :class
+
+  # Can the current class be called as a subquery of the target Query class?
   def relatable?(target)
     self.class.related?(target, model.name.to_sym)
   end
@@ -87,24 +83,25 @@ class Query::Base
     serialize == other.try(&:serialize)
   end
 
-  # NOTE: QueryRecord[:description] is not a serialized column; we call
-  # `to_json` here for serialization.
-  # Prepare the query params, adding the model, for saving to the db. The
-  # :description column is accessed not just to recompose a query, but to
+  # NOTE: QueryRecord[:description] is not a Rails-serialized column; we call
+  # `to_json` here to serializate it ourselves.
+  # Prepares the query params, adding the model, for saving to a QueryRecord.
+  # The :description column is accessed not just to recompose a query, but to
   # identify existing query records that match current params. That's why the
   # keys are sorted here before being stored as strings in to_json - because
   # when matching a serialized hash, strings must match exactly. This is
   # more efficient however than using a Rails-serialized column and comparing
   # the parsed hashes (in whatever order), because when a column is serialized
   # you can't use SQL on the column value, you have to compare parsed instances.
+  # was params.sort.to_h.merge(model: model.name).to_json
   def serialize
-    params.sort.to_h.merge(model: model.name).to_json
+    attributes.compact.sort.to_h.merge(model: model.name).to_json
   end
 
   def record
     # This errors out if @record is not set since it
     # cannot find Query.get_record.  If you copy the
-    # above definition of get_record into the same scope
+    # definition of get_record into the same scope
     # as this method and get rid of "Query." it works,
     # but that is not a great solution.
     # You can trigger the issue which is

@@ -35,12 +35,13 @@ class ObservationsController
     def advanced_search
       query = advanced_search_query
       # Have to check this here because we're not running the query yet.
-      raise(:runtime_no_conditions.l) unless query.params.any?
+      raise(:runtime_no_conditions.l) unless query&.params&.any?
 
       [query, {}]
     rescue StandardError => e
       flash_error(e.to_s) if e.present?
       redirect_to(search_advanced_path)
+      [nil, {}]
     end
 
     def advanced_search_query
@@ -203,22 +204,11 @@ class ObservationsController
       query
     end
 
-    def index_display_opts(opts, query)
+    def index_display_opts(opts, _query)
       # We always want cached matrix boxes for observations if possible.
       # cache: true  will batch load the includes only for fragments not cached.
-      opts = {
-        matrix: true, cache: true,
-        include: observation_index_includes
-      }.merge(opts)
-
-      # Paginate by letter if sorting by user or name.
-      if %w[user reverse_user name reverse_name].include?(
-        query.params[:order_by]
-      )
-        opts[:letters] = true
-      end
-
-      opts
+      { matrix: true, cache: true,
+        include: observation_index_includes }.merge(opts)
     end
 
     # The { images: } hash is necessary for the index carousels.

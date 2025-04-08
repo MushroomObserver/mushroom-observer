@@ -362,10 +362,12 @@ class Name < AbstractModel
     "locked"
   )
 
+  before_validation :normalize_author_characters!
+
   validates :author, allow_blank: true,
                      # Contains only: letters, space, parens, hyphen,
                      # period, comma, ampersand, square brackets, single quote
-                     format: { with: /\A[\p{L} ()-.,&\[\]']*\z/,
+                     format: { with: /\A[\p{Alpha} ()-.,&\[\]']*\z/,
                                message: :validate_name_author_characters.t }
   validates :author, allow_blank: true,
                      # Ends only in letter, period plus any spaces

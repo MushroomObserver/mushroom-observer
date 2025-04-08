@@ -100,7 +100,7 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
   attr_accessor :data
 
   scope :order_by_default,
-        -> { order(title: :asc, id: :desc) }
+        -> { order_by(::Query::SpeciesLists.default_order) }
 
   scope :title_has,
         ->(phrase) { search_columns(SpeciesList[:title], phrase) }
@@ -126,6 +126,10 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
            Location[:id].when(present?).then(Location[:name]).
            else(SpeciesList[:where])
     left_outer_joins(:location).search_columns(cols, phrase)
+  }
+
+  scope :observation_query, lambda { |hash|
+    joins(:observations).subquery(:Observation, hash)
   }
 
   scope :show_includes, lambda {

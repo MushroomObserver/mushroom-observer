@@ -1,7 +1,34 @@
 # frozen_string_literal: true
 
-# methods for moving forward/back up/down in Query results
-module Query::Modules::SequenceOperators
+##############################################################################
+#
+#  :section: Sequence
+#
+#  Methods for moving forward/back up/down within Query results.
+#  Used on show pages of individual records.
+#
+#  NOTE: The next and prev sequence operators always grab the entire set of
+#  result_ids.  No attempt is made to reduce the query.  NOTE: we might be
+#  able to if we can turn the ORDER clause into an upper/lower bound.
+#
+#  The first and last sequence operators ignore result_ids.  However, they are
+#  able to execute optimized queries that return only the first or last result.
+#
+#  Methods:
+#
+#  current_id=::  Set current place in results by id.
+#  current=::     Same as above, but accepts record instances.
+#  current(*)     Current place in results, with record instantiated.
+#  reset::        Reset current place in results to place last set (via above).
+#  current::      Move to the current place
+#  first::        Move to the first record in the set, as sorted.
+#  previous::
+#  next::
+#  last::
+#
+###############################################################################
+
+module Query::Modules::Sequence
   # Current place in results, as an id.  (Returns nil if not set yet.)
   attr_reader :current_id
 
@@ -34,7 +61,7 @@ module Query::Modules::SequenceOperators
   # Move to first place.
   def first
     new_self = self
-    id = new_self.select_value(limit: "1").to_i
+    id = new_self.result_ids.first
     if id.positive?
       @current_id = id
     else
@@ -74,7 +101,7 @@ module Query::Modules::SequenceOperators
   # Move to last place.
   def last
     new_self = self
-    id = new_self.select_value(order: :reverse, limit: "1").to_i
+    id = new_self.result_ids.last
     if id.positive?
       @current_id = id
     else

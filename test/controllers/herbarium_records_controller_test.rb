@@ -29,28 +29,8 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
                   "Wrong number of Herbarium Records")
   end
 
-  def test_index_by_non_default_sort_order
-    by = "herbarium_name"
-
-    login
-    get(:index, params: { by: by })
-    assert_sorted_by(by)
-  end
-
-  def test_index_by_initial_determination
-    by = "initial_det"
-
-    login
-    get(:index, params: { by: by })
-    assert_sorted_by(by)
-  end
-
-  def test_index_by_accession_number
-    by = "accession_number"
-
-    login
-    get(:index, params: { by: by })
-    assert_sorted_by(by)
+  def test_index_with_non_default_sort
+    check_index_sorting
   end
 
   def test_index_pattern_with_multiple_matching_records
@@ -251,6 +231,14 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     obs = Observation.find(params[:observation_id])
     assert(obs.specimen)
     assert_response(:redirect)
+  end
+
+  def test_create_herbarium_record_with_turbo
+    login
+    assert_difference("HerbariumRecord.count", 1) do
+      post(:create, params: herbarium_record_params,
+                    format: :turbo_stream)
+    end
   end
 
   def test_create_herbarium_record_new_herbarium

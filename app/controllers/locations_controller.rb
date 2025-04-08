@@ -51,12 +51,13 @@ class LocationsController < ApplicationController
 
     query = find_query(:Location)
     # Have to check this here because we're not running the query yet.
-    raise(:runtime_no_conditions.l) unless query.params.any?
+    raise(:runtime_no_conditions.l) unless query&.params&.any?
 
     [query, { link_all_sorts: true }]
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
     redirect_to(search_advanced_path)
+    [nil, {}]
   end
 
   # Displays a list of locations matching a given string.
@@ -135,7 +136,7 @@ class LocationsController < ApplicationController
       return false
     end
 
-    @undef_location_format = User.current_location_format
+    @undef_location_format = @user.location_format
     if display_opts[:link_all_sorts]
       # (This tells it to say "by name" and "by frequency" by the subtitles.
       # If user has explicitly selected the order, then this is disabled.)
@@ -166,15 +167,16 @@ class LocationsController < ApplicationController
     # If these are passed, we're not looking for undefined locations.
     return nil if [:by_editor, :regexp].any? { |key| args[key] }
 
-    # Select only observations with undefined location.
-    args[:where] = [args[:where]].flatten.compact
+    # # Select only observations with undefined location.
+    # args[:where] = [args[:where]].flatten.compact
 
     # "By name" means something different to observation.
-    args[:by] = "where" if args[:by].blank? || (args[:by] == "name")
+    nosorts = ["name", "box_area", "reverse_name", "reverse_box_area", ""]
+    args[:order_by] = "where" if nosorts.include?(args[:order_by])
 
+    args[:search_where] ||= ""
     if args[:pattern]
-      search = SearchParams.new(phrase: args[:pattern])
-      args[:where] += query.google_conditions(search, "observations.where")
+      args[:search_where] += args[:pattern]
       args.delete(:pattern)
     end
 

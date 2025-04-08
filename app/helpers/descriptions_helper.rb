@@ -82,7 +82,8 @@ module DescriptionsHelper
       else
         item = description_link(desc)
         links = description_mod_links(desc, type)
-        item += indent + "[ " + links.safe_join(" | ") + " ]" if links.any?
+        # disable cop -- lh side is a safe buffer, not a string
+        item += indent + "[ " + links.safe_join(" | ") + " ]" if links.any? # rubocop:disable Style/StringConcatenation
       end
       item
     end
@@ -91,7 +92,8 @@ module DescriptionsHelper
     if fake_default && obj.descriptions.none? { |d| d.source_type == :public }
       str = :description_part_title_public.t
       link = link_to(*create_description_tab(obj))
-      str += indent + "[ " + link + " ]"
+      # disable cop because lh side (indent) is a safe buffer, not a string
+      str += indent + "[ " + link + " ]" # rubocop:disable Style/StringConcatenation
       list.unshift(str)
     end
 
@@ -177,7 +179,8 @@ module DescriptionsHelper
 
   def show_name_description_latest_review(desc)
     tag.span(class: "help-note") do
-      indent + "(" + :show_name_latest_review.t(
+      # disable cop -- lh side is a safe buffer, not a string
+      indent + "(" + :show_name_latest_review.t( # rubocop:disable Style/StringConcatenation
         date: desc.last_review ? desc.last_review.web_time : :UNKNOWN.l,
         user: user_link(desc.reviewer, desc.reviewer.login)
       ) + ")"
@@ -207,7 +210,8 @@ module DescriptionsHelper
     type = object.type_tag
 
     # Show existing drafts, with link to create new one.
-    head = tag.b(:show_name_descriptions.l) + ": "
+    # disable cop -- lh side is a safe buffer, not a string
+    head = tag.b(:show_name_descriptions.l) + ": " # rubocop:disable Style/StringConcatenation
     head += icon_link_to(*create_description_tab(object, type))
 
     # Add title and maybe "no descriptions", wrapping it all up in paragraph.
@@ -251,7 +255,7 @@ module DescriptionsHelper
   def add_list_of_projects(object, type, html, projects)
     return if projects.blank?
 
-    head2 = :show_name_create_draft.l + ": "
+    head2 = "#{:show_name_create_draft.l}: "
     list = [head2] + projects.map do |project|
       item = link_to(*new_description_for_project_tab(object, type, project))
       indent + item
@@ -295,6 +299,18 @@ module DescriptionsHelper
     end
   end
 
+  # Wrap description title in link to show_description.
+  #
+  #   Description: <%= description_link(name.description) %>
+  #
+  def description_link(desc)
+    result = description_title(desc)
+    return result if result.match?("(#{:private.t})$")
+
+    link_with_query(result, desc.show_link_args,
+                    class: "description_link_#{desc.id}")
+  end
+
   # Create a descriptive title for a Description.  Indicates the source and
   # very rough permissions (e.g. "public", "restricted", or "private").
   def description_title(desc)
@@ -319,18 +335,14 @@ module DescriptionsHelper
 
   # Source type options for description forms.
   def source_type_options_all
-    options = []
-    Description::ALL_SOURCE_TYPES.each do |type|
-      options << [:"form_description_source_#{type}".l, type]
+    Description::ALL_SOURCE_TYPES.map do |type|
+      [:"form_description_source_#{type}".l, type]
     end
-    options
   end
 
   def source_type_options_basic
-    options = []
-    Description::BASIC_SOURCE_TYPES.each do |type|
-      options << [:"form_description_source_#{type}".l, type]
+    Description::BASIC_SOURCE_TYPES.map do |type|
+      [:"form_description_source_#{type}".l, type]
     end
-    options
   end
 end

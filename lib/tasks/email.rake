@@ -6,13 +6,14 @@ namespace :email do
     print "#{MO.http_domain}, #{Rails.env}\n"
     QueuedEmail.includes(:queued_email_integers,
                          :queued_email_note,
-                         :queued_email_strings, :user).each(&:dump)
+                         :queued_email_strings, :user).
+      find_each(&:dump)
   end
 
   desc "Send queued emails"
   task(send: :environment) do
     count = 0
-    QueuedEmail.all.each do |e|
+    QueuedEmail.find_each do |e|
       now = Time.zone.now
       # Has it been queued (and unchanged) for MO.email_queue_delay or more.
       next unless e.queued + MO.email_queue_delay.seconds < now
@@ -54,7 +55,7 @@ namespace :email do
 
   desc "Purge the email queue without sending anything"
   task(purge: :environment) do
-    QueuedEmail.all.each do |e|
+    QueuedEmail.find_each do |e|
       print("Purging #{e.id}: from => #{e&.user&.login}, " \
             "to => #{e.to_user.login}, flavor => #{e.flavor}, " \
             "queued => #{e.queued}\n")

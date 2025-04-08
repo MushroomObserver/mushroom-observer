@@ -85,11 +85,8 @@ class LocationDescription < Description
   has_many :editors, through: :location_description_editors,
                      source: :user
 
-  scope :order_by_default, lambda {
-    joins(:location).order(Location[:name].asc,
-                           LocationDescription[:created_at].asc,
-                           LocationDescription[:id].desc)
-  }
+  scope :order_by_default,
+        -> { order_by(::Query::LocationDescriptions.default_order) }
 
   scope :is_public, lambda { |bool = true|
     where(public: bool)
@@ -107,6 +104,10 @@ class LocationDescription < Description
   scope :locations, lambda { |loc|
     ids = lookup_locations_by_name(loc)
     where(location: ids)
+  }
+
+  scope :location_query, lambda { |hash|
+    joins(:location).subquery(:Location, hash)
   }
 
   scope :show_includes, lambda {

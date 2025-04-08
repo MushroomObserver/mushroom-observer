@@ -250,6 +250,8 @@
   comments: comments
   CONSTRAINTS: Constraints
   CONTRIBUTORS: Contributors
+  CURATOR: Curator
+  CURATORS: Curators
   DESCRIPTION: Description
   description: description
   DESCRIPTIONS: Descriptions
@@ -2325,8 +2327,8 @@
   show_observation_view_notifications: View Notifications
   show_observation_hide_map: Hide thumbnail map.
   show_observation_thumbnail_map_hidden: Thumbnail map hidden.  To re-enable this feature, go to your "[:app_preferences]":/account/preferences/edit page.
-  show_observation_add_link: Create [site] link
-  show_observation_add_link_dialog: "Enter a link here to this observation on [site]. Use the full URL, including \"https://\":"
+  show_observation_add_link: Add an external link
+  show_observation_add_link_dialog: "Enter a link here to this observation on another website. Use the full URL, including \"https://\":"
   show_observation_no_collection_numbers: No [:collection_numbers]
   show_observation_remove_collection_number: Remove collection number from this observation
   show_observation_no_herbarium_records: No [:herbarium_records]
@@ -4374,6 +4376,19 @@
   api_help_when_seen: when seen
   api_help_when_taken: when photo taken
 
+  # Query validation.
+  query_validation_param_not_in_set: "Value for ':#{param}' should be one of the following: [set]."
+  query_validation_boolean: "Value for ':#{param}' should be boolean, got: [val]."
+  query_validation_float: "Value for ':#{param}' should be a float, got: [val]."
+  query_validation_record_unsaved: "Value for ':#{param}' is an unsaved :[type] instance."
+  query_validation_record: "Value for ':#{param}' should be id, string or :[type] instance, got: [val]."
+  query_validation_id_in_set: "Value for :id_in_set should be an array of ids or :[type] instances, got: [val]."
+  query_validation_string: "Value for ':#{param}' should be a string or symbol, got a :[class] : [val]."
+  query_validation_date: "Value for ':#{param}' should be a date (YYYY-MM-DD or MM-DD), got: [val]."
+  query_validation_time: "Value for ':#{param}' should be a UTC time (YYYY-MM-DD-HH-MM-SS), got: :[class] : [val]."
+  query_validation_lookup_id: "Couldn't find an id for: [val]."
+  query_validation_lookup: "Couldn't look up :[type] by: [val]."
+
   # Query filters.
   query_created_at: created
   query_updated_at: modified
@@ -4514,6 +4529,7 @@
   sort_by_contribution: Contribution
   sort_by_copyright_holder: "[:COPYRIGHT_HOLDER]"
   sort_by_created_at: Date Created
+  sort_by_curator: "[:CURATOR]"
   sort_by_date: "[:DATE]"
   sort_by_filename: File Name
   sort_by_header: "Sort by:"

@@ -12,9 +12,5 @@ class Query::Filter
         off_val: nil
       )
     end
-
-    def sql_conditions(_query, _model, val)
-      ["observations.specimen IS #{val ? "TRUE" : "FALSE"}"]
-    end
   end
 end

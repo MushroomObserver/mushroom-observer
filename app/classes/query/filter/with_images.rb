@@ -12,9 +12,5 @@ class Query::Filter
         off_val: nil
       )
     end
-
-    def sql_conditions(_query, _model, val)
-      ["observations.thumb_image_id IS #{val ? "NOT NULL" : "NULL"}"]
-    end
   end
 end
