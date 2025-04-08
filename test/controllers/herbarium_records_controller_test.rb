@@ -233,6 +233,14 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
+  def test_create_herbarium_record_with_turbo
+    login
+    assert_difference("HerbariumRecord.count", 1) do
+      post(:create, params: herbarium_record_params,
+                    format: :turbo_stream)
+    end
+  end
+
   def test_create_herbarium_record_new_herbarium
     mary = login("mary")
     herbarium_count = mary.curated_herbaria.count

@@ -48,7 +48,8 @@ module HerbariumRecords
         format.turbo_stream do
           render(
             partial: "observations/show/section_update",
-            locals: { identifier: "herbarium_records" }
+            locals: { identifier: "herbarium_records",
+                      obs: @observation, user: @user }
           ) and return
         end
       end
