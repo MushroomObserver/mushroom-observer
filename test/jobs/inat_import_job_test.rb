@@ -205,12 +205,9 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
 
-    Inat::PhotoImporter.stub(:new,
-                             stub_mo_photo_importer(mock_inat_response)) do
-      assert_difference("Observation.count", 1,
-                        "Failed to create observation") do
-        InatImportJob.perform_now(inat_import)
-      end
+    assert_difference("Observation.count", 1,
+                      "Failed to create observation") do
+      InatImportJob.perform_now(inat_import)
     end
 
     obs = Observation.last
@@ -229,7 +226,7 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_equal(
       "iNat photo_id: #{inat_photo["photo_id"]}, uuid: #{inat_photo["uuid"]}",
       imported_img.original_name
-    )
+    ) unless @default_user.keep_filenames == "toss"
 
     assert(obs.sequences.none?)
   end
@@ -249,13 +246,19 @@ class InatImportJobTest < ActiveJob::TestCase
 
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
+    stub_request(:get, "https://inaturalist-open-data.s3.amazonaws.com/photos/377332865/original.jpeg").
+      with(
+        headers: {
+          'Accept'=>'image/*',
+          'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+          'Host'=>'inaturalist-open-data.s3.amazonaws.com',
+          'User-Agent'=>'Ruby'
+        }).
+      to_return(status: 200, body: image_for_stubs, headers: {})
 
-    Inat::PhotoImporter.stub(:new,
-                             stub_mo_photo_importer(mock_inat_response)) do
-      assert_difference("Observation.count", 1,
-                        "Failed to create observation") do
-        InatImportJob.perform_now(inat_import)
-      end
+    assert_difference("Observation.count", 1,
+                      "Failed to create observation") do
+      InatImportJob.perform_now(inat_import)
     end
 
     obs = Observation.last
@@ -282,12 +285,9 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
 
-    Inat::PhotoImporter.stub(:new,
-                             stub_mo_photo_importer(mock_inat_response)) do
-      assert_difference("Observation.count", 1,
-                        "Failed to create observation") do
-        InatImportJob.perform_now(inat_import)
-      end
+    assert_difference("Observation.count", 1,
+                      "Failed to create observation") do
+      InatImportJob.perform_now(inat_import)
     end
 
     obs = Observation.last
@@ -329,13 +329,19 @@ class InatImportJobTest < ActiveJob::TestCase
 
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
+    stub_request(:get, "https://inaturalist-open-data.s3.amazonaws.com/photos/413872439/original.jpeg").
+      with(
+        headers: {
+          'Accept'=>'image/*',
+          'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+          'Host'=>'inaturalist-open-data.s3.amazonaws.com',
+          'User-Agent'=>'Ruby'
+        }).
+      to_return(status: 200, body: image_for_stubs, headers: {})
 
-    Inat::PhotoImporter.stub(:new,
-                             stub_mo_photo_importer(mock_inat_response)) do
-      assert_difference("Observation.count", 1,
-                        "Failed to create observation") do
-        InatImportJob.perform_now(inat_import)
-      end
+    assert_difference("Observation.count", 1,
+                      "Failed to create observation") do
+      InatImportJob.perform_now(inat_import)
     end
 
     obs = Observation.last
@@ -359,13 +365,28 @@ class InatImportJobTest < ActiveJob::TestCase
 
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
+    stub_request(:get, "https://inaturalist-open-data.s3.amazonaws.com/photos/381894665/original.jpeg").
+      with(
+        headers: {
+          'Accept'=>'image/*',
+          'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+          'Host'=>'inaturalist-open-data.s3.amazonaws.com',
+          'User-Agent'=>'Ruby'
+        }).
+      to_return(status: 200, body: image_for_stubs, headers: {})
+    stub_request(:get, "https://inaturalist-open-data.s3.amazonaws.com/photos/381894686/original.jpeg").
+      with(
+        headers: {
+          'Accept'=>'image/*',
+          'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+          'Host'=>'inaturalist-open-data.s3.amazonaws.com',
+          'User-Agent'=>'Ruby'
+        }).
+      to_return(status: 200, body: image_for_stubs, headers: {})
 
-    Inat::PhotoImporter.stub(:new,
-                             stub_mo_photo_importer(mock_inat_response)) do
-      assert_difference("Observation.count", 1,
-                        "Failed to create observation") do
-        InatImportJob.perform_now(inat_import)
-      end
+    assert_difference("Observation.count", 1,
+                      "Failed to create observation") do
+      InatImportJob.perform_now(inat_import)
     end
 
     obs = Observation.last
@@ -393,12 +414,19 @@ class InatImportJobTest < ActiveJob::TestCase
 
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
-    Inat::PhotoImporter.stub(:new,
-                             stub_mo_photo_importer(mock_inat_response)) do
-      assert_difference("Observation.count", 1,
-                        "Failed to create observation") do
-        InatImportJob.perform_now(inat_import)
-      end
+    stub_request(:get, "https://inaturalist-open-data.s3.amazonaws.com/photos/321536915/original.jpeg").
+      with(
+        headers: {
+          'Accept'=>'image/*',
+          'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+          'Host'=>'inaturalist-open-data.s3.amazonaws.com',
+          'User-Agent'=>'Ruby'
+        }).
+      to_return(status: 200, body: image_for_stubs, headers: {})
+
+    assert_difference("Observation.count", 1,
+                      "Failed to create observation") do
+      InatImportJob.perform_now(inat_import)
     end
 
     obs = Observation.last
@@ -423,10 +451,17 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
 
-    Inat::PhotoImporter.stub(:new,
-                             stub_mo_photo_importer(mock_inat_response)) do
-      InatImportJob.perform_now(inat_import)
-    end
+    stub_request(:get, "https://inaturalist-open-data.s3.amazonaws.com/photos/321536915/original.jpeg").
+      with(
+        headers: {
+          'Accept'=>'image/*',
+          'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+          'Host'=>'inaturalist-open-data.s3.amazonaws.com',
+          'User-Agent'=>'Ruby'
+        }).
+      to_return(status: 200, body: image_for_stubs, headers: {})
+
+    InatImportJob.perform_now(inat_import)
 
     obs = Observation.last
     name = Name.find_by(text_name: "Arrhenia sp. 'NY02'")
@@ -457,6 +492,25 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(obs.sequences.one?, "Obs should have one sequence")
   end
 
+  def image_for_stubs
+    @image_for_stubs ||= Rails.root.join("test/images/test_image.jpg").read
+  end
+
+  def image_stubs(image_ids)
+    image_data = image_for_stubs
+    image_ids.each do |id|
+      stub_request(:get, "https://static.inaturalist.org/photos/#{id}/original.jpg").
+        with(
+          headers: {
+            'Accept'=>'image/*',
+            'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+            'Host'=>'static.inaturalist.org',
+            'User-Agent'=>'Ruby'
+          }).
+        to_return(status: 200, body: image_data, headers: {})
+    end
+  end
+
   def test_import_job_prov_name_pnw_style
     file_name = "donadinia_PNW01"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
@@ -466,13 +520,11 @@ class InatImportJobTest < ActiveJob::TestCase
 
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
+    image_stubs([375217770, 375216871, 375217919])
 
-    Inat::PhotoImporter.stub(:new,
-                             stub_mo_photo_importer(mock_inat_response)) do
-      assert_difference("Observation.count", 1,
-                        "Failed to create observation") do
-        InatImportJob.perform_now(inat_import)
-      end
+    assert_difference("Observation.count", 1,
+                      "Failed to create observation") do
+      InatImportJob.perform_now(inat_import)
     end
 
     obs = Observation.last
@@ -816,7 +868,7 @@ class InatImportJobTest < ActiveJob::TestCase
               "User-Agent" => "Ruby"
             }
           ).
-          to_return(status: 200, body: "", headers: {}))
+          to_return(status: 200, body: image_for_stubs, headers: {}))
       end
     end
   end
