@@ -123,7 +123,8 @@ class Checklist
          Name[:id].cast("char") + "," +
          Name[:rank].cast("char")).minimum
       ).group(
-        Name[:synonym_id].when(present?).then(Name[:synonym_id]).else(Name[:id])
+        Name[:synonym_id].when(present?).then(Name[:synonym_id]).
+        else(Name[:id] * -1)
       )
     )
     synonyms.each do |row|
