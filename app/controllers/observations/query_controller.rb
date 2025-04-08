@@ -6,7 +6,7 @@
 # Only one action here. Call namespaced controller actions with a hash like
 # `{ controller: "/observations/filter", action: :create }`
 module Observations
-  class FiltersController < ApplicationController
+  class QueryController < ApplicationController
     include ::Filterable
 
     before_action :login_required
