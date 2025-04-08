@@ -1,13 +1,35 @@
 {
   "ignored_warnings": [
     {
+      "warning_type": "Format Validation",
+      "warning_code": 30,
+      "fingerprint": "0c8af6af0550c3a260334e38924836ad2b3073955b71ae565633a3f466a95542",
+      "check_name": "ValidationRegex",
+      "message": "Insufficient validation for `author` using `/[\\p{Alpha}\\.]( *)\\z/`. Use `\\A` and `\\z` as anchors",
+      "file": "app/models/name.rb",
+      "line": 374,
+      "link": "https://brakemanscanner.org/docs/warning_types/format_validation/",
+      "code": null,
+      "render_path": null,
+      "location": {
+        "type": "model",
+        "model": "Name"
+      },
+      "user_input": null,
+      "confidence": "High",
+      "cwe_id": [
+        777
+      ],
+      "note": "This validation checks only the termination of author, and therefore does not use \\A. Another validation checks the entirety of author."
+    },
+    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "681ca47f4db7740255860f5ec0363d27025626ea08ef772b118ed5bfb4792135",
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/description.rb",
-      "line": 423,
+      "line": 409,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "table.to_s.classify.constantize.joins(:user_group => :user_group_users).where(\"#{type_tag}_id\" => id)",
       "render_path": null,
@@ -30,7 +52,7 @@
       "check_name": "SQL",
       "message": "Possible SQL injection",
       "file": "app/models/description.rb",
-      "line": 434,
+      "line": 420,
       "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
       "code": "table.to_s.classify.constantize.where(\"#{type_tag}_id\" => id)",
       "render_path": null,
@@ -47,6 +69,5 @@
       "note": ""
     }
   ],
-  "updated": "2023-06-11 17:24:08 +0000",
-  "brakeman_version": "6.0.0"
+  "brakeman_version": "7.0.0"
 }

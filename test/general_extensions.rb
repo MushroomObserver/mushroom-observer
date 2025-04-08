@@ -417,9 +417,8 @@ module GeneralExtensions
   def dump_xml(exp, indent = "")
     print("#{indent}#{e.name}")
     if exp.has_attributes?
-      attrs = []
-      exp.attributes.each do |a, v|
-        attrs << "#{a}=#{v}"
+      attrs = exp.attributes.map do |a, v|
+        "#{a}=#{v}"
       end
       print("(#{attrs.join(" ")})")
     end
@@ -454,15 +453,61 @@ module GeneralExtensions
     assert_match(expect, css_select("#filters").text, msg)
   end
 
+  ######################################################################
+  #
+  #  INDEX SORTING
+  #  Tests loading index with all available sort orders
+  #  Checks that the relevant sort button is active
+  #
+  def check_index_sorting
+    login
+    index_sorts.each do |sort_order|
+      check_index_sorted_by(sort_order, do_login: false)
+    end
+  end
+
+  # Can be called independently to test a single sort order
+  def check_index_sorted_by(sort_order, do_login: true)
+    login if do_login
+    get(:index, params: { by: sort_order })
+
+    assert_template("index")
+    assert_sorted_by(sort_order.to_s)
+  end
+
+  # Checks for a consistently named helper method like "users_index_sorts"
+  # otherwise returns empty array.
+  def index_sorts
+    helpers_defined = @controller.helpers.respond_to?(sorts_helper_method)
+    assert(helpers_defined, "#{sorts_helper_method} not defined in helpers")
+    return [] unless helpers_defined
+
+    originals = @controller.helpers.send(sorts_helper_method).dup
+    originals.map! { |key, _label| key.to_sym }
+    originals.delete(:id)
+    reverses = originals.dup.map! { |key| :"reverse_#{key}" }
+    originals + reverses
+  end
+
+  def sorts_helper_method
+    @sorts_helper_method ||= :"#{helper_class}_index_sorts"
+  end
+
+  # Contributors index uses the same sorts as Users
+  def helper_class
+    @helper_class ||= case (name = @controller.controller_name)
+                      when "contributors"
+                        "users"
+                      else
+                        name
+                      end
+  end
+
   def assert_sorted_by(by, text = /.*/,
                        msg = "Wrong index sort, or sort by #{by} not available")
-    reverse = if by.include?("reverse")
-                by = by.delete_prefix("reverse_")
-                true
-              else
-                false
-              end
-    class_name = "#{adjusted_controller_class_name}_by_#{by}_link"
+    order_by = by.dup
+    reverse = order_by.sub!(/^reverse_/, "") # changes by and returns boolean
+    class_name = "#{adjusted_controller_class_name}_by_#{order_by}_link"
     assert_select("#sorts a.#{class_name}[disabled=disabled]", text, msg)
     return unless reverse
 

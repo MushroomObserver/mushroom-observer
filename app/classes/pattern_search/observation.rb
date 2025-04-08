@@ -53,6 +53,14 @@ module PatternSearch
       PARAMS
     end
 
+    delegate :params, to: :class
+
+    def self.model
+      ::Observation
+    end
+
+    delegate :model, to: :class
+
     # List of fields that are displayed in the search form.
     # Autocompleters have id fields, and range fields are concatenated.
     def self.fields
@@ -79,18 +87,6 @@ module PatternSearch
     def self.fields_with_requirements
       { name: [:exclude_consensus, :include_subtaxa, :include_synonyms,
                :include_all_name_proposals] }
-    end
-
-    def params
-      self.class.params
-    end
-
-    def self.model
-      ::Observation
-    end
-
-    def model
-      self.class.model
     end
 
     def build_query

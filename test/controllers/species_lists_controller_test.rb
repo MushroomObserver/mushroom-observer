@@ -120,21 +120,14 @@ class SpeciesListsControllerTest < FunctionalTestCase
     by = "user"
     get(:index, params: { by: by })
 
-    assert_equal(SpeciesList.order_by_user.map(&:user_id),
+    assert_equal(SpeciesList.order_by(:user).map(&:user_id),
                  assigns(:objects).map(&:user_id))
     assert_displayed_title(:SPECIES_LISTS.l)
     assert_sorted_by(by)
   end
 
-  def test_index_sorted_by_non_default
-    login
-
-    sort_orders = %w[created_at updated_at title]
-    sort_orders.each do |order|
-      get(:index, params: { by: order })
-      assert_displayed_title(:SPECIES_LISTS.l)
-      assert_sorted_by(order)
-    end
+  def test_index_with_non_default_sort
+    check_index_sorting
   end
 
   def test_index_with_id_and_sorted_by_title
@@ -362,7 +355,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
   def test_show_flow
     login
-    query = Query.lookup_and_save(:SpeciesList, by: "reverse_user")
+    query = Query.lookup_and_save(:SpeciesList, order_by: "reverse_user")
     query_params = @controller.query_params(query)
     get(:index, params: query_params)
     assert_template(:index)
@@ -1180,10 +1173,10 @@ class SpeciesListsControllerTest < FunctionalTestCase
         "Psalliota",
         "Chlorophyllum Author",
         "Lepiota Author",
-        '"One"',
-        '"Two"',
-        '"Three"',
-        'Agaricus "blah"'
+        "Gen. 'One'",
+        "Gen. 'Two'",
+        "Gen. 'Three'",
+        "Agaricus sp. 'blah'"
       ].sort,
       assigns(:species_list).observations.map { |x| x.name.search_name }.sort
     )
@@ -1192,10 +1185,10 @@ class SpeciesListsControllerTest < FunctionalTestCase
       "Fungi",
       "Agaricus sp",
       "Psalliota sp.",
-      '"One"',
-      '"Two" sp',
-      '"Three" sp.',
-      'Agaricus "blah"',
+      "'One'",
+      "'Two' sp",
+      "'Three' sp.",
+      "Agaricus 'blah'",
       "Chlorophyllum Author",
       "Lepiota sp Author",
       "Lepiota sp. Author"
@@ -1213,10 +1206,10 @@ class SpeciesListsControllerTest < FunctionalTestCase
         "Chlorophyllum Author",
         "Lepiota Author",
         "Lepiota Author",
-        '"One"',
-        '"Two"',
-        '"Three"',
-        'Agaricus "blah"'
+        "Gen. 'One'",
+        "Gen. 'Two'",
+        "Gen. 'Three'",
+        "Agaricus sp. 'blah'"
       ].sort,
       assigns(:species_list).observations.map { |x| x.name.search_name }.sort
     )
@@ -1378,9 +1371,9 @@ class SpeciesListsControllerTest < FunctionalTestCase
     spl1 = species_lists(:unknown_species_list)
     spl2 = species_lists(:one_genus_three_species_list)
     query1 = Query.lookup_and_save(:Observation,
-                                   species_lists: spl1.id, by: :name)
+                                   species_lists: spl1.id, order_by: :name)
     query2 = Query.lookup_and_save(:Observation,
-                                   species_lists: spl2.id, by: :name)
+                                   species_lists: spl2.id, order_by: :name)
 
     # make sure the "Set Source" link is on the page somewhere
     get(:show, params: { id: spl1.id })

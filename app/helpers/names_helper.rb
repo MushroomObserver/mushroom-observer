@@ -58,7 +58,7 @@ module NamesHelper
   # Use:
   #   query = Query.lookup(:Observation, names: { lookup: name.id,
   #                                               include_synonyms: true },
-  #                                      by: :confidence)
+  #                                      order_by: :confidence)
   #   link_to_obss_of(query, :obss_of_taxon.t)
   #   => <a href="/observations?q=Q">This Taxon, any name</a> (19)
   def link_to_obss_of(query, title, count)
@@ -66,9 +66,9 @@ module NamesHelper
 
     query.save
     # Debugging: we need to execute the query first by counting `num_results`,
-    # then we can get the actual SQL it executed via `last_query`:
+    # then we can get the actual SQL it executed via `sql`:
     # count = query.num_results
-    # last_query = query.last_query.squish
+    # last_query = query.sql.squish
     link_to(
       title,
       add_query_param(observations_path, query),
@@ -83,18 +83,18 @@ module NamesHelper
   # These don't run queries... it's query.select_count above, that does.
 
   def obss_of_taxon_this_name(name)
-    Query.new(:Observation, names: { lookup: name.id }, by: :confidence)
+    Query.new(:Observation, names: { lookup: name.id }, order_by: :confidence)
   end
 
   def obss_of_taxon_other_names(name)
     Query.new(:Observation, names: { lookup: name.id, include_synonyms: true,
                                      exclude_original_names: true },
-                            by: :confidence)
+                            order_by: :confidence)
   end
 
   def obss_of_taxon_any_name(name)
     Query.new(:Observation, names: { lookup: name.id, include_synonyms: true },
-                            by: :confidence)
+                            order_by: :confidence)
   end
 
   # These two do joins to Namings. Unbelievably, it's faster than the above?
@@ -102,13 +102,13 @@ module NamesHelper
     Query.new(:Observation, names: { lookup: name.id, include_synonyms: true,
                                      include_all_name_proposals: true,
                                      exclude_consensus: true },
-                            by: :confidence)
+                            order_by: :confidence)
   end
 
   def obss_this_name_proposed(name)
     Query.new(:Observation, names: { lookup: name.id,
                                      include_all_name_proposals: true },
-                            by: :confidence)
+                            order_by: :confidence)
   end
 
   #############################################################################

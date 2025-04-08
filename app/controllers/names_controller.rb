@@ -30,8 +30,8 @@ class NamesController < ApplicationController
     return if handle_advanced_search_invalid_q_param?
 
     query = find_query(:Name)
-    # Have to check this here because we're not running the query yet.
-    raise(:runtime_no_conditions.l) unless query.params.any?
+    # Would have to check this here because we're not running the query yet.
+    raise(:runtime_no_conditions.l) unless query&.params&.any?
 
     [query, {}]
   rescue StandardError => e
@@ -124,7 +124,7 @@ class NamesController < ApplicationController
 
   def index_display_opts(opts, _query)
     {
-      letters: "names.sort_name",
+      letters: true,
       num_per_page: (/^[a-z]/i.match?(params[:letter].to_s) ? 500 : 50),
       include: [:description]
     }.merge(opts)
@@ -253,11 +253,15 @@ class NamesController < ApplicationController
         :Observation, names: { lookup: @name.id,
                                include_subtaxa: true,
                                exclude_original_names: true,
-                               by: :confidence }
+                               order_by: :confidence }
       )
       # Determine if relevant and count the results of running the query if so.
       # Don't run if there aren't any children.
-      @has_subtaxa = @first_child ? @subtaxa_query.select_count : 0
+      @has_subtaxa = if @first_child
+                       @subtaxa_query.result_ids.count
+                     else
+                       0
+                     end
     end
 
     # NOTE: `_observation_menu` makes many select_count queries like this!

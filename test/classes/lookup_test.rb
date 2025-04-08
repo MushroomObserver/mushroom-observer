@@ -104,7 +104,8 @@ class LookupTest < UnitTestCase
                         exclude_original_names: true)
 
     name5.update(synonym_id: nil)
-    name5 = Name.where(text_name: "Pseudolepiota rachodes").index_order.first
+    name5 = Name.where(text_name: "Pseudolepiota rachodes").
+            order_by_default.first
     assert_lookup_names([name1, name2, name3, name4, name5],
                         ["Macrolepiota"],
                         include_synonyms: true,
@@ -136,22 +137,22 @@ class LookupTest < UnitTestCase
     name6.update(classification: name2.classification)
     name7.update(classification: name2.classification)
 
-    assert_lookup_names([name2, name3], ["Peltigera"])
-    assert_lookup_names([name2, name3], ["Petigera"])
-    assert_lookup_names([name2], ["Peltigera"],
-                        include_misspellings: false)
-    assert_lookup_names([name3], ["Petigera"],
-                        include_misspellings: false)
+    assert_lookup_names([name2], ["Peltigera"])
+    assert_lookup_names([name3], ["Petigera"])
+    assert_lookup_names([name1, name2, name4, name5, name6, name7],
+                        ["Peltigeraceae"],
+                        include_subtaxa: true)
     assert_lookup_names([name1, name2, name3, name4, name5, name6, name7],
                         ["Peltigeraceae"],
-                        include_subtaxa: true)
-    assert_lookup_names([name1, name2, name3],
+                        include_subtaxa: true,
+                        include_synonyms: true)
+    assert_lookup_names([name1, name2],
                         ["Peltigeraceae"],
                         include_immediate_subtaxa: true)
-    assert_lookup_names([name2, name3, name4, name5, name6, name7],
+    assert_lookup_names([name2, name4, name5, name6, name7],
                         ["Peltigera"],
                         include_subtaxa: true)
-    assert_lookup_names([name2, name3, name4, name6],
+    assert_lookup_names([name2, name4, name6],
                         ["Peltigera"],
                         include_immediate_subtaxa: true)
     assert_lookup_names([name6, name7],
@@ -170,7 +171,8 @@ class LookupTest < UnitTestCase
     name2.update(classification: name1.classification)
     name2.save
 
-    children = Name.index_order.where(Name[:text_name].matches("Lactarius %"))
+    children = Name.order_by_default.
+               where(Name[:text_name].matches("Lactarius %"))
 
     assert_lookup_names([name1] + children,
                         ["Lactarius"],

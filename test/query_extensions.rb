@@ -9,7 +9,7 @@ module QueryExtensions
     expects = [expects].flatten
     query = Query.lookup(*)
     actual = test_ids ? query.result_ids : query.results
-    msg = "Query results are wrong. SQL is:\n#{query.last_query}"
+    msg = "Query results are wrong. SQL is:\n#{query.sql}"
     if test_ids
       assert_equal(expects, actual, msg)
     else
@@ -25,8 +25,8 @@ module QueryExtensions
     query = Query.lookup(*)
     actual = test_ids ? query.result_ids : query.results
     msg1 = "Scope does not produce expects"
-    msg2 = "Query results are wrong. SQL is:\n#{query.last_query}"
-    msg3 = "Scope and Query do not agree. SQL is:\n#{query.last_query}"
+    msg2 = "Query results are wrong. SQL is:\n#{query.sql}"
+    msg3 = "Scope and Query do not agree. SQL is:\n#{query.sql}"
     if test_ids
       assert_equal(expects, scope_expects, msg1)
       assert_equal(expects, actual, msg2)

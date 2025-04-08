@@ -119,7 +119,7 @@ module TitleHelper
 
   def caption_params(query, truncate)
     tag.div(class: "small") do
-      query.params.except(:by).compact_blank.each do |key, val|
+      query.params.except(:order_by).compact_blank.each do |key, val|
         caption_one_filter_param(query, key, val, truncate:)
       end
     end
@@ -144,7 +144,7 @@ module TitleHelper
   # inside the brackets and indented.
   def caption_subquery(query, label, hash, truncate)
     concat(tag.span("#{:"query_#{label}".l}: [ "))
-    hash.except(:by).each do |key, val|
+    hash.except(:order_by).each do |key, val|
       caption_one_filter_param(query, key, val, truncate:, tag: :span)
     end
     concat(tag.span(" ] "))

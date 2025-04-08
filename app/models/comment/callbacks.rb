@@ -112,7 +112,7 @@ module Comment::Callbacks
   def search_for_highlighted_users(str, regex)
     users = []
     while str.match(regex)
-      str = Regexp.last_match.pre_match + "\n" + Regexp.last_match.post_match
+      str = "#{Regexp.last_match.pre_match}\n#{Regexp.last_match.post_match}"
       users << lookup_user(Regexp.last_match(1))
     end
     users

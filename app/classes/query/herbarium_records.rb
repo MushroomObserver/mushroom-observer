@@ -1,10 +1,6 @@
 # frozen_string_literal: true
 
 class Query::HerbariumRecords < Query::Base
-  def model
-    HerbariumRecord
-  end
-
   def self.parameter_declarations
     super.merge(
       created_at: [:time],
@@ -23,53 +19,21 @@ class Query::HerbariumRecords < Query::Base
     )
   end
 
-  def initialize_flavor
-    add_owner_and_time_stamp_conditions
-    add_id_in_set_condition
-    initialize_association_parameters
-    initialize_boolean_parameters
-    initialize_exact_match_parameters
-    initialize_search_parameters
-    add_pattern_condition
-    super
+  # Declare the parameters as model attributes, of custom type `query_param`
+
+  parameter_declarations.each_key do |param_name|
+    attribute param_name, :query_param
   end
 
-  def initialize_association_parameters
-    initialize_herbaria_parameter([])
-    initialize_observations_parameter
+  def model
+    @model ||= HerbariumRecord
   end
 
-  def initialize_boolean_parameters
-    add_boolean_condition("COALESCE(herbarium_records.notes,'') != ''",
-                          "COALESCE(herbarium_records.notes,'') = ''",
-                          params[:has_notes])
-  end
-
-  def initialize_exact_match_parameters
-    add_exact_match_condition("herbarium_records.initial_det",
-                              params[:initial_det])
-    add_exact_match_condition("herbarium_records.accession_number",
-                              params[:accession])
-  end
-
-  def initialize_search_parameters
-    add_search_condition("herbarium_records.notes",
-                         params[:notes_has])
-    add_search_condition("herbarium_records.initial_det",
-                         params[:initial_det_has])
-    add_search_condition("herbarium_records.accession_number",
-                         params[:accession_has])
-  end
-
-  def search_fields
-    "CONCAT(" \
-      "herbarium_records.initial_det," \
-      "herbarium_records.accession_number," \
-      "COALESCE(herbarium_records.notes,'')" \
-      ")"
+  def alphabetical_by
+    @alphabetical_by ||= HerbariumRecord[:initial_det]
   end
 
   def self.default_order
-    "herbarium_label"
+    :herbarium_label
   end
 end

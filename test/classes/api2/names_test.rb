@@ -146,8 +146,8 @@ class API2::NamesTest < UnitTestCase
     assert_api_results(names)
   end
 
-  def test_getting_names_with_rank
-    names = Name.with_correct_spelling.with_rank("Variety")
+  def test_getting_names_rank
+    names = Name.with_correct_spelling.rank("Variety")
     assert_not_empty(names)
     assert_api_pass(params_get(rank: "variety"))
     assert_api_results(names)

@@ -21,7 +21,7 @@ module PatternSearch
     def <<(val)
       while val.to_s =~ CONTAINS_QUOTES
         vals << dequote(Regexp.last_match(1))
-        val = val.to_s[Regexp.last_match(0).length..-1]
+        val = val.to_s[Regexp.last_match(0).length..]
         break if val.blank?
       end
     end
@@ -175,7 +175,7 @@ module PatternSearch
       raise(BadFloatError.new(var: var, val: val, min: min, max: max)) \
         unless /^-?(\d+(\.\d+)?|\.\d+)$/.match?(val.to_s)
       raise(BadFloatError.new(var: var, val: val, min: min, max: max)) \
-        unless val.to_f >= min && val.to_f <= max
+        unless val.to_f.between?(min, max)
 
       val.to_f
     end

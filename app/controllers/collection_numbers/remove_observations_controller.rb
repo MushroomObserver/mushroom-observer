@@ -49,7 +49,8 @@ module CollectionNumbers
         format.turbo_stream do
           render(
             partial: "observations/show/section_update",
-            locals: { identifier: "collection_numbers" }
+            locals: { identifier: "collection_numbers",
+                      obs: @observation, user: @user }
           ) and return
         end
       end

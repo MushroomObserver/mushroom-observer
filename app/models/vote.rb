@@ -155,17 +155,6 @@ class Vote < AbstractModel
 
   NO_OPINION_VAL = [:vote_no_opinion, 0].freeze
 
-  # Force unit tests to verify existence of these translations.
-  if false
-    :vote_confidence_100.l
-    :vote_confidence_80.l
-    :vote_confidence_60.l
-    :vote_confidence_40.l
-    :vote_confidence_20.l
-    :vote_confidence_0.l
-    :vote_no_opinion.l
-  end
-
   # List of options interpreted as "confidence".
   #
   #   for label, value in Vote.confidence_menu
@@ -304,11 +293,9 @@ class Vote < AbstractModel
   # private class methods
 
   def self.translate_menu(menu)
-    result = []
-    menu.each do |k, v|
-      result << [(k.is_a?(Symbol) ? k.l : k.to_s), v]
+    menu.map do |k, v|
+      [(k.is_a?(Symbol) ? k.l : k.to_s), v]
     end
-    result
   end
 
   private_class_method :translate_menu
