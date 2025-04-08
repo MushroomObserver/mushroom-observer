@@ -111,6 +111,8 @@ class Checklist
   end
 
   # `+` here is Arel extensions shorthand for `CONCAT`
+  # The group statement intends to be sure names without synonyms are sorted
+  # at the end of the array by giving all of them negative values.
   # rubocop:disable Style/StringConcatenation
   def self.all_site_taxa_by_user
     synonym_map = {}
