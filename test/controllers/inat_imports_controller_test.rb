@@ -20,6 +20,7 @@ class InatImportsControllerTest < FunctionalTestCase
   SITE = InatImportsController::SITE
   REDIRECT_URI = InatImportsController::REDIRECT_URI
   API_BASE = InatImportsController::API_BASE
+  MO_API_KEY_NOTES = InatImportsController::MO_API_KEY_NOTES
 
   def test_show
     import = inat_imports(:rolf_inat_import)
@@ -182,9 +183,11 @@ class InatImportsControllerTest < FunctionalTestCase
   end
 
   def test_create_strip_inat_username
-    user = users(:rolf)
-    inat_username = " rolf "
-    inat_import = inat_imports(:rolf_inat_import)
+    user = users(:mary)
+    assert(APIKey.where(user: user, notes: MO_API_KEY_NOTES).none?,
+           "Test needs user fixture without an MO API key for iNat imports")
+    inat_username = " #{user.name} " # simulate typing extra spaces
+    inat_import = inat_imports(:mary_inat_import)
     assert_equal("Unstarted", inat_import.state,
                  "Need a Unstarted inat_import fixture")
 
@@ -200,9 +203,14 @@ class InatImportsControllerTest < FunctionalTestCase
                      consent: 1 })
     end
 
+    assert(
+      APIKey.where(user: user, notes: MO_API_KEY_NOTES).
+             where.not(verified: nil).one?,
+      "MO should assure user has personal verified API key for iNat imports"
+    )
     assert_response(:redirect)
     assert_equal(
-      "rolf", inat_import.reload.inat_username,
+      user.name, inat_import.reload.inat_username,
       "It should strip leading/trailing whitespace from inat_username"
     )
   end

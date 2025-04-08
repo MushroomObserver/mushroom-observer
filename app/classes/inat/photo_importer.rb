@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Wraps API call that adds an Image an Observation from the Image url
+# Wraps API call that adds an Image, based on its url, to an Observation
 # This facilitates stubbing the call
 class Inat
   class PhotoImporter
