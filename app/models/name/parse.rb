@@ -107,9 +107,12 @@ module Name::Parse
   UPPER_WORD = /
                 [A-Z][a-zë-]*[a-zë] | ['"][A-Z][a-zë\-.]*[a-zë]['"]
   /x
+
+  UNQUOTED_PROV = /^(?:[a-z]+-)*[A-Z][A-Z0-9]*$/
   LOWER_WORD = /
     (?!(?:sensu|van|de)\b) [a-z][a-zë-]*[a-zë] |
-    (?:sp\. \s)?['"][a-z][\wë\-.]*[\wë]['"] /x
+    (?:sp\. \s)?['"]\w[\wë\-. ]*[\wë]['"] |
+    (?:sp\. \s)?(?:[a-z]+-)*[A-Z][A-Z0-9]* /x
   BINOMIAL   = / #{UPPER_WORD} \s #{LOWER_WORD} /x
   LOWER_WORD_OR_SP_NOV = / (?! sp\s|sp$|species) #{LOWER_WORD} |
                            sp\.\s\S*\d\S* /x
@@ -360,10 +363,18 @@ module Name::Parse
     nil
   end
 
+  def clean_prov_spaces(name)
+    while (match = /('[^' ]+ [^']+')/.match(name))
+      name.sub!(match[1], match[1].tr(" ", "-"))
+    end
+    name
+  end
+
   def parse_below_genus(str, deprecated, rank, pattern)
     results = nil
     if (match = pattern.match(str))
       name = match[2].tr('"', "'")
+      name = clean_prov_spaces(name)
       author = match[3].to_s
       name = standardize_sp_nov_variants(name) if rank == "Species"
       (name, author, rank) = fix_autonym(name, author, rank)
@@ -429,7 +440,7 @@ module Name::Parse
     names = split_name(name)
     return name if names.length != 2
 
-    split_name(name)
+    names[1] = "'#{names[1]}'" if UNQUOTED_PROV.match?(names[1])
     names[1].sub!(/^'sp-/i, "sp. '")
     names[1].sub!(/^'/, "sp. '")
     names.join(" ").strip

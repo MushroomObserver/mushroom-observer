@@ -1257,8 +1257,8 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def test_create_name_with_many_implicit_creates
-    text_name = "Genus spec ssp. subspecies v. variety forma form"
-    text_name2 = "Genus spec subsp. subspecies var. variety f. form"
+    text_name = "Some thing ssp. with v. many forma names"
+    text_name2 = "Some thing subsp. with var. many f. names"
     name = Name.find_by(text_name: text_name)
     count = Name.count
     assert_nil(name)
@@ -1373,9 +1373,9 @@ class NamesControllerTest < FunctionalTestCase
     assert_response(:success)
     name = Name.order(created_at: :desc).last
     assert_equal("Species", name.rank)
-    assert_equal('Hygrocybe sp. "constrictospora-PNW09"', name.text_name)
-    assert_equal('Hygrocybe sp. "constrictospora-PNW09"', name.search_name)
-    assert_equal('**__Hygrocybe__** sp. **__"constrictospora-PNW09"__**',
+    assert_equal("Hygrocybe sp. 'constrictospora-PNW09'", name.text_name)
+    assert_equal("Hygrocybe sp. 'constrictospora-PNW09'", name.search_name)
+    assert_equal("**__Hygrocybe__** sp. **__'constrictospora-PNW09'__**",
                  name.display_name)
     asser_equal("Hygrocybe constrictospora-pnw09", name.sort_name)
   end
@@ -1402,9 +1402,9 @@ class NamesControllerTest < FunctionalTestCase
     assert_response(:success)
     name = Name.order(created_at: :asc).last
     assert_equal("Species", name.rank)
-    assert_equal('Donadina sp. "PNW01"', name.text_name)
-    assert_equal('Donadina sp. "PNW01"', name.search_name)
-    assert_equal('**__Donadina__** sp. **__"PNW01"__**', name.display_name)
+    assert_equal("Donadina sp. 'PNW01'", name.text_name)
+    assert_equal("Donadina sp. 'PNW01'", name.search_name)
+    assert_equal("**__Donadina__** sp. **__'PNW01'__**", name.display_name)
     assert_equal("Donadina pnw01", name.sort_name)
   end
 
@@ -1433,10 +1433,10 @@ class NamesControllerTest < FunctionalTestCase
     assert_response(:success)
     name = Name.order(created_at: :asc).last
     assert_equal("Genus", name.rank)
-    assert_equal('Hemimycena gen. "3"', name.text_name)
-    assert_equal('Hemimycena gen. "3"', name.search_name)
-    assert_equal('**__Hemimycena__** gen. **__"3"__**', name.display_name)
-    assert_equal("Hemimycena 3", name.sort_name)
+    assert_equal("Genus 'Hemimycena3'", name.text_name)
+    assert_equal("Genus 'Hemimycena3'", name.search_name)
+    assert_equal("Genus **__'Hemimycena3'__**", name.display_name)
+    assert_equal("Hemimycena3", name.sort_name)
   end
 
   # ----------------------------
