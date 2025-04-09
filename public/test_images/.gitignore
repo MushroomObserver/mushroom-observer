@@ -1,4 +1,0 @@
-# Ignore everything in this directory
-*
-# Except this file, which is needed to retain= the test_images directory
-!.gitignore
