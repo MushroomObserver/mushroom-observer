@@ -38,6 +38,8 @@ class InatImportJobTest < ActiveJob::TestCase
   def setup
     @default_user = users(:rolf)
     @stubs = []
+    directory_path = Rails.public_path.join("test_images/orig")
+    FileUtils.mkdir_p(directory_path) unless Dir.exist?(directory_path)
   end
 
   def add_stub(stub)
@@ -246,16 +248,17 @@ class InatImportJobTest < ActiveJob::TestCase
 
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
+
     stub_request(:get, "https://inaturalist-open-data.s3.amazonaws.com/photos/377332865/original.jpeg").
       with(
         headers: {
-          'Accept'=>'image/*',
-          'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-          'Host'=>'inaturalist-open-data.s3.amazonaws.com',
-          'User-Agent'=>'Ruby'
+          "Accept"=>"image/*",
+          "Accept-Encoding"=>"gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+          "Host"=>"inaturalist-open-data.s3.amazonaws.com",
+          "User-Agent"=>"Ruby"
         }).
       to_return(status: 200, body: image_for_stubs, headers: {})
-
+debugger
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
       InatImportJob.perform_now(inat_import)
@@ -332,10 +335,10 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_request(:get, "https://inaturalist-open-data.s3.amazonaws.com/photos/413872439/original.jpeg").
       with(
         headers: {
-          'Accept'=>'image/*',
-          'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-          'Host'=>'inaturalist-open-data.s3.amazonaws.com',
-          'User-Agent'=>'Ruby'
+          "Accept"=>"image/*",
+          "Accept-Encoding"=>"gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+          "Host"=>"inaturalist-open-data.s3.amazonaws.com",
+          "User-Agent"=>"Ruby"
         }).
       to_return(status: 200, body: image_for_stubs, headers: {})
 
@@ -368,19 +371,19 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_request(:get, "https://inaturalist-open-data.s3.amazonaws.com/photos/381894665/original.jpeg").
       with(
         headers: {
-          'Accept'=>'image/*',
-          'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-          'Host'=>'inaturalist-open-data.s3.amazonaws.com',
-          'User-Agent'=>'Ruby'
+          "Accept"=>"image/*",
+          "Accept-Encoding"=>"gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+          "Host"=>"inaturalist-open-data.s3.amazonaws.com",
+          "User-Agent"=>"Ruby"
         }).
       to_return(status: 200, body: image_for_stubs, headers: {})
     stub_request(:get, "https://inaturalist-open-data.s3.amazonaws.com/photos/381894686/original.jpeg").
       with(
         headers: {
-          'Accept'=>'image/*',
-          'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-          'Host'=>'inaturalist-open-data.s3.amazonaws.com',
-          'User-Agent'=>'Ruby'
+          "Accept"=>"image/*",
+          "Accept-Encoding"=>"gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+          "Host"=>"inaturalist-open-data.s3.amazonaws.com",
+          "User-Agent"=>"Ruby"
         }).
       to_return(status: 200, body: image_for_stubs, headers: {})
 
@@ -417,10 +420,10 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_request(:get, "https://inaturalist-open-data.s3.amazonaws.com/photos/321536915/original.jpeg").
       with(
         headers: {
-          'Accept'=>'image/*',
-          'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-          'Host'=>'inaturalist-open-data.s3.amazonaws.com',
-          'User-Agent'=>'Ruby'
+          "Accept"=>"image/*",
+          "Accept-Encoding"=>"gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+          "Host"=>"inaturalist-open-data.s3.amazonaws.com",
+          "User-Agent"=>"Ruby"
         }).
       to_return(status: 200, body: image_for_stubs, headers: {})
 
@@ -454,10 +457,10 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_request(:get, "https://inaturalist-open-data.s3.amazonaws.com/photos/321536915/original.jpeg").
       with(
         headers: {
-          'Accept'=>'image/*',
-          'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-          'Host'=>'inaturalist-open-data.s3.amazonaws.com',
-          'User-Agent'=>'Ruby'
+          "Accept"=>"image/*",
+          "Accept-Encoding"=>"gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+          "Host"=>"inaturalist-open-data.s3.amazonaws.com",
+          "User-Agent"=>"Ruby"
         }).
       to_return(status: 200, body: image_for_stubs, headers: {})
 
@@ -502,10 +505,10 @@ class InatImportJobTest < ActiveJob::TestCase
       stub_request(:get, "https://static.inaturalist.org/photos/#{id}/original.jpg").
         with(
           headers: {
-            'Accept'=>'image/*',
-            'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-            'Host'=>'static.inaturalist.org',
-            'User-Agent'=>'Ruby'
+            "Accept"=>"image/*",
+            "Accept-Encoding"=>"gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+            "Host"=>"static.inaturalist.org",
+            "User-Agent"=>"Ruby"
           }).
         to_return(status: 200, body: image_data, headers: {})
     end
