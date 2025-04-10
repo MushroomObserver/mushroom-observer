@@ -204,22 +204,11 @@ class ObservationsController
       query
     end
 
-    def index_display_opts(opts, query)
+    def index_display_opts(opts, _query)
       # We always want cached matrix boxes for observations if possible.
       # cache: true  will batch load the includes only for fragments not cached.
-      opts = {
-        matrix: true, cache: true,
-        include: observation_index_includes
-      }.merge(opts)
-
-      # Paginate by letter if sorting by user or name.
-      if %w[user reverse_user name reverse_name].include?(
-        query.params[:order_by]
-      )
-        opts[:letters] = true
-      end
-
-      opts
+      { matrix: true, cache: true,
+        include: observation_index_includes }.merge(opts)
     end
 
     # The { images: } hash is necessary for the index carousels.

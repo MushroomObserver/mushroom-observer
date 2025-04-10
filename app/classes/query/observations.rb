@@ -67,15 +67,6 @@ class Query::Observations < Query::Base
     @model ||= Observation
   end
 
-  def alphabetical_by
-    @alphabetical_by ||= case params[:order_by].to_s
-                         when "user", "reverse_user"
-                           User[:login]
-                         when "name", "reverse_name"
-                           Name[:sort_name]
-                         end
-  end
-
   def self.default_order
     :date
   end

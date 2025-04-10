@@ -172,6 +172,19 @@ class SequencesControllerTest < FunctionalTestCase
            "Failed to include Sequence added in RssLog for Observation")
   end
 
+  def test_turbo_create
+    params = {
+      observation_id: observations(:detailed_unknown_obs).id,
+      sequence: { locus: "ITS",
+                  bases: ITS_BASES }
+    }
+    login
+    assert_difference("Sequence.count", 1) do
+      post(:create, params: params,
+                    format: :turbo_stream)
+    end
+  end
+
   def test_create_non_repo_sequence
     # Prove user can create non-repository Sequence
     obs = observations(:detailed_unknown_obs)

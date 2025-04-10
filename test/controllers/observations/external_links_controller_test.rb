@@ -46,6 +46,16 @@ module Observations
       assert_equal(url, ExternalLink.last.url)
     end
 
+    # And now with Turbo...
+    def test_add_external_link_turbo
+      _, _obs2, _, _, params = setup_create_test
+      login("rolf")
+      assert_difference("ExternalLink.count", 1) do
+        post(:create, params: params,
+                      format: :turbo_stream)
+      end
+    end
+
     # bad url
     def test_add_external_link_bad_url
       _obs, _obs2, _site, _url, params = setup_create_test
