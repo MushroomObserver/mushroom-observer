@@ -258,7 +258,6 @@ class InatImportJobTest < ActiveJob::TestCase
           "User-Agent"=>"Ruby"
         }).
       to_return(status: 200, body: image_for_stubs, headers: {})
-debugger
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
       InatImportJob.perform_now(inat_import)
