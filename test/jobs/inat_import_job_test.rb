@@ -225,10 +225,12 @@ class InatImportJobTest < ActiveJob::TestCase
     imported_img = obs.images.first
     assert_equal(@default_user, imported_img.user,
                  "Image should belong to importing user")
-    assert_equal(
-      "iNat photo_id: #{inat_photo["photo_id"]}, uuid: #{inat_photo["uuid"]}",
-      imported_img.original_name
-    ) unless @default_user.keep_filenames == "toss"
+    unless @default_user.keep_filenames == "toss"
+      assert_equal(
+        "iNat photo_id: #{inat_photo["photo_id"]}, uuid: #{inat_photo["uuid"]}",
+        imported_img.original_name
+      )
+    end
 
     assert(obs.sequences.none?)
   end
@@ -252,11 +254,12 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_request(:get, "https://inaturalist-open-data.s3.amazonaws.com/photos/377332865/original.jpeg").
       with(
         headers: {
-          "Accept"=>"image/*",
-          "Accept-Encoding"=>"gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
-          "Host"=>"inaturalist-open-data.s3.amazonaws.com",
-          "User-Agent"=>"Ruby"
-        }).
+          "Accept" => "image/*",
+          "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+          "Host" => "inaturalist-open-data.s3.amazonaws.com",
+          "User-Agent" => "Ruby"
+        }
+      ).
       to_return(status: 200, body: image_for_stubs, headers: {})
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
@@ -334,11 +337,12 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_request(:get, "https://inaturalist-open-data.s3.amazonaws.com/photos/413872439/original.jpeg").
       with(
         headers: {
-          "Accept"=>"image/*",
-          "Accept-Encoding"=>"gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
-          "Host"=>"inaturalist-open-data.s3.amazonaws.com",
-          "User-Agent"=>"Ruby"
-        }).
+          "Accept" => "image/*",
+          "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+          "Host" => "inaturalist-open-data.s3.amazonaws.com",
+          "User-Agent" => "Ruby"
+        }
+      ).
       to_return(status: 200, body: image_for_stubs, headers: {})
 
     assert_difference("Observation.count", 1,
@@ -370,20 +374,22 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_request(:get, "https://inaturalist-open-data.s3.amazonaws.com/photos/381894665/original.jpeg").
       with(
         headers: {
-          "Accept"=>"image/*",
-          "Accept-Encoding"=>"gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
-          "Host"=>"inaturalist-open-data.s3.amazonaws.com",
-          "User-Agent"=>"Ruby"
-        }).
+          "Accept" => "image/*",
+          "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+          "Host" => "inaturalist-open-data.s3.amazonaws.com",
+          "User-Agent" => "Ruby"
+        }
+      ).
       to_return(status: 200, body: image_for_stubs, headers: {})
     stub_request(:get, "https://inaturalist-open-data.s3.amazonaws.com/photos/381894686/original.jpeg").
       with(
         headers: {
-          "Accept"=>"image/*",
-          "Accept-Encoding"=>"gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
-          "Host"=>"inaturalist-open-data.s3.amazonaws.com",
-          "User-Agent"=>"Ruby"
-        }).
+          "Accept" => "image/*",
+          "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+          "Host" => "inaturalist-open-data.s3.amazonaws.com",
+          "User-Agent" => "Ruby"
+        }
+      ).
       to_return(status: 200, body: image_for_stubs, headers: {})
 
     assert_difference("Observation.count", 1,
@@ -419,11 +425,12 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_request(:get, "https://inaturalist-open-data.s3.amazonaws.com/photos/321536915/original.jpeg").
       with(
         headers: {
-          "Accept"=>"image/*",
-          "Accept-Encoding"=>"gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
-          "Host"=>"inaturalist-open-data.s3.amazonaws.com",
-          "User-Agent"=>"Ruby"
-        }).
+          "Accept" => "image/*",
+          "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+          "Host" => "inaturalist-open-data.s3.amazonaws.com",
+          "User-Agent" => "Ruby"
+        }
+      ).
       to_return(status: 200, body: image_for_stubs, headers: {})
 
     assert_difference("Observation.count", 1,
@@ -456,11 +463,12 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_request(:get, "https://inaturalist-open-data.s3.amazonaws.com/photos/321536915/original.jpeg").
       with(
         headers: {
-          "Accept"=>"image/*",
-          "Accept-Encoding"=>"gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
-          "Host"=>"inaturalist-open-data.s3.amazonaws.com",
-          "User-Agent"=>"Ruby"
-        }).
+          "Accept" => "image/*",
+          "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+          "Host" => "inaturalist-open-data.s3.amazonaws.com",
+          "User-Agent" => "Ruby"
+        }
+      ).
       to_return(status: 200, body: image_for_stubs, headers: {})
 
     InatImportJob.perform_now(inat_import)
@@ -504,11 +512,12 @@ class InatImportJobTest < ActiveJob::TestCase
       stub_request(:get, "https://static.inaturalist.org/photos/#{id}/original.jpg").
         with(
           headers: {
-            "Accept"=>"image/*",
-            "Accept-Encoding"=>"gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
-            "Host"=>"static.inaturalist.org",
-            "User-Agent"=>"Ruby"
-          }).
+            "Accept" => "image/*",
+            "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+            "Host" => "static.inaturalist.org",
+            "User-Agent" => "Ruby"
+          }
+        ).
         to_return(status: 200, body: image_data, headers: {})
     end
   end
@@ -522,7 +531,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
-    image_stubs([375217770, 375216871, 375217919])
+    image_stubs([375_217_770, 375_216_871, 375_217_919])
 
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
