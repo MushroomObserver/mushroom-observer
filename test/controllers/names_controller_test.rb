@@ -1366,18 +1366,19 @@ class NamesControllerTest < FunctionalTestCase
       }
     }
 
+    login(user.login)
     assert_difference("Name.count", 1, "Failed to create Name") do
       post(:create, params: params)
     end
 
-    assert_response(:success)
-    name = Name.order(created_at: :desc).last
+    assert_response(:redirect)
+    name = Name.find_by(text_name: "Hygrocybe sp. 'constrictospora-PNW08'")
+    assert(name)
     assert_equal("Species", name.rank)
-    assert_equal("Hygrocybe sp. 'constrictospora-PNW09'", name.text_name)
-    assert_equal("Hygrocybe sp. 'constrictospora-PNW09'", name.search_name)
-    assert_equal("**__Hygrocybe__** sp. **__'constrictospora-PNW09'__**",
+    assert_equal("Hygrocybe sp. 'constrictospora-PNW08'", name.search_name)
+    assert_equal("**__Hygrocybe__** sp. **__'constrictospora-PNW08'__**",
                  name.display_name)
-    asser_equal("Hygrocybe constrictospora-pnw09", name.sort_name)
+    assert_equal("Hygrocybe constrictospora-pnw08", name.sort_name)
   end
 
   def test_create_prov_sp_capitalized_unquoted_undashed_epithet
@@ -1395,17 +1396,17 @@ class NamesControllerTest < FunctionalTestCase
     }
 
     login(user.login)
-    assert_difference("Name.count", 1, "Failed to create Name") do
+    assert_difference("Name.count", 2, "Failed to create Name") do
       post(:create, params: params)
     end
 
-    assert_response(:success)
-    name = Name.order(created_at: :asc).last
+    assert_response(:redirect)
+    name = Name.find_by(text_name: "Donadinia sp. 'PNW01'")
+    assert(name)
     assert_equal("Species", name.rank)
-    assert_equal("Donadina sp. 'PNW01'", name.text_name)
-    assert_equal("Donadina sp. 'PNW01'", name.search_name)
-    assert_equal("**__Donadina__** sp. **__'PNW01'__**", name.display_name)
-    assert_equal("Donadina pnw01", name.sort_name)
+    assert_equal("Donadinia sp. 'PNW01'", name.search_name)
+    assert_equal("**__Donadinia__** sp. **__'PNW01'__**", name.display_name)
+    assert_equal("Donadinia pnw01", name.sort_name)
   end
 
   def test_create_prov_genus_numerical
@@ -1430,12 +1431,12 @@ class NamesControllerTest < FunctionalTestCase
       post(:create, params: params)
     end
 
-    assert_response(:success)
+    assert_response(:redirect)
     name = Name.order(created_at: :asc).last
     assert_equal("Genus", name.rank)
-    assert_equal("Genus 'Hemimycena3'", name.text_name)
-    assert_equal("Genus 'Hemimycena3'", name.search_name)
-    assert_equal("Genus **__'Hemimycena3'__**", name.display_name)
+    assert_equal("Gen. 'Hemimycena3'", name.text_name)
+    assert_equal("Gen. 'Hemimycena3'", name.search_name)
+    assert_equal("Gen. **__'Hemimycena3'__**", name.display_name)
     assert_equal("Hemimycena3", name.sort_name)
   end
 

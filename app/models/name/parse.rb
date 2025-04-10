@@ -105,7 +105,7 @@ module Name::Parse
   ANY_RANK_ABBR   = / #{ANY_SUBG_ABBR} | #{SP_ABBR} | #{ANY_SSP_ABBR} /x
 
   UPPER_WORD = /
-                [A-Z][a-zë-]*[a-zë] | ['"][A-Z][a-zë\-.]*[a-zë]['"]
+                [A-Z][a-zë-]*[a-zë0-9] | ['"][A-Z][a-zë\-.]*[a-zë0-9]['"]
   /x
 
   UNQUOTED_PROV = /^(?:[a-z]+-)*[A-Z][A-Z0-9]*$/
@@ -323,6 +323,7 @@ module Name::Parse
 
   def standardize_text_name(name, rank)
     result = name.tr('"', "'")
+    result = "'#{result}'" if /[0-9]/.match?(result) && result[0] != "'"
     if result[0] == "'"
       prefix = PROV_RANKS.key(rank)
       result = "#{prefix} #{result}" if prefix
