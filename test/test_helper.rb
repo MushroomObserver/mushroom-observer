@@ -19,9 +19,9 @@ require("simplecov-lcov")
 
 module SimpleCov
   class SourceFile
-    # this is needed for SimpleCov Issue#56
-    # it also shows up for views when we `enable_coverage_for_eval`
-    # patching here so that we can turn this off via ENV VAR
+    # 2025-04-11 jdc Monkeypatch to disable excessive coverage warnings.
+    # Else we get > 100 false positives because we enabled
+    # coverage for .erb files.
     def coverage_exceeding_source_warn
       return unless ENV["SHOW_EXCESS_LINE_WARNING"]
 
