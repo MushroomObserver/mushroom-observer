@@ -681,9 +681,9 @@ class Query::ObservationsTest < UnitTestCase
     assert_equal(
       # Compare ids because comparing AR objects causes FAIL
       # No visible difference in AR#inspect output.
-      Observation.where(location: locations(:burbank)).order(id: :asc).
+      Observation.where(location: locations(:burbank)).order_by_default.
                   pluck(:id),
-      Observation.location_query({ pattern: "Burbank" }).order(id: :asc).
+      Observation.location_query({ pattern: "Burbank" }).order_by_default.
                   pluck(:id)
     )
   end
@@ -692,9 +692,8 @@ class Query::ObservationsTest < UnitTestCase
     assert_equal(
       # Compare ids because comparing AR objects causes FAIL
       # No visible difference in  AR#inspect output.
-      Observation.joins(:sequences).order(id: :asc).uniq.pluck(:id),
-      Observation.sequence_query({ order_by: "created_at" }).order(id: :asc).
-                  pluck(:id)
+      Observation.joins(:sequences).order_by_default.uniq.pluck(:id),
+      Observation.sequence_query({ order_by: "created_at" }).pluck(:id)
     )
   end
 end
