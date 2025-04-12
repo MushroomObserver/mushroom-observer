@@ -672,13 +672,9 @@ class Query::ObservationsTest < UnitTestCase
   end
 
   def test_scope_image_query
-    assert_equal(
-      # Compare ids because comparing AR objects causes FAIL
-      # No visible difference in AR#inspect output.
-      Observation.where.not(thumb_image: nil).order(id: :asc).pluck(:id),
-      Observation.image_query({ order_by: "created_at" }).order(id: :asc).
-                  pluck(:id)
-    )
+    images = Image.copyright_holder_has("rolf").pluck(:id)
+    assert_query(Observation.where(thumb_image: images).order_by_default,
+                 :Observation, image_query: { copyright_holder_has: "rolf" })
   end
 
   def test_scope_location_query
