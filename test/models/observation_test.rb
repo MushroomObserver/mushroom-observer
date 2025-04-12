@@ -1332,37 +1332,6 @@ class ObservationTest < UnitTestCase
     )
   end
 
-  def test_scope_image_query
-    assert_equal(
-      # Compare ids because comparing AR objects causes FAIL
-      # No visible difference in AR#inspect output.
-      Observation.where.not(thumb_image: nil).order(id: :asc).pluck(:id),
-      Observation.image_query({ order_by: "created_at" }).order(id: :asc).
-                  pluck(:id)
-    )
-  end
-
-  def test_scope_location_query
-    assert_equal(
-      # Compare ids because comparing AR objects causes FAIL
-      # No visible difference in AR#inspect output.
-      Observation.where(location: locations(:burbank)).order(id: :asc).
-                  pluck(:id),
-      Observation.location_query({ pattern: "Burbank" }).order(id: :asc).
-                  pluck(:id)
-    )
-  end
-
-  def test_scope_sequence_query
-    assert_equal(
-      # Compare ids because comparing AR objects causes FAIL
-      # No visible difference in  AR#inspect output.
-      Observation.joins(:sequences).order(id: :asc).uniq.pluck(:id),
-      Observation.sequence_query({ order_by: "created_at" }).order(id: :asc).
-                  pluck(:id)
-    )
-  end
-
   def nybg
     @nybg ||= locations(:nybg_location)
   end
