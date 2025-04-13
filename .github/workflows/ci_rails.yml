@@ -11,6 +11,27 @@ on:
     branches: main
 
 jobs:
+  # Rails 8 default, except for runs-on
+  # https://github.com/rails/rails/blob/b97917da8a801bf5360c3a9da913415bc8582735/railties/lib/rails/generators/rails/app/templates/github/ci.yml.tt#L9
+  scan_ruby:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: Scan for common Rails security vulnerabilities using static analysis
+        run: bin/brakeman --no-pager
+
+      - name: Scan for known security vulnerabilities in gems used
+        run: bin/bundler-audit
+
   test:
     runs-on: ubuntu-22.04
     steps:
