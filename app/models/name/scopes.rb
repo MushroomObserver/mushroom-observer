@@ -304,10 +304,10 @@ module Name::Scopes
     }
 
     scope :description_query, lambda { |hash|
-      joins(:descriptions).subquery(:NameDescription, hash)
+      joins(:descriptions).subquery(:NameDescription, hash.except(:names))
     }
     scope :observation_query, lambda { |hash|
-      joins(:observations).subquery(:Observation, hash)
+      joins(:observations).subquery(:Observation, hash.except(:names))
     }
 
     scope :show_includes, lambda {
