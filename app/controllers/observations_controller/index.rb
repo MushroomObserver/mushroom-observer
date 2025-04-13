@@ -224,7 +224,7 @@ class ObservationsController
       opts
     end
 
-    # The { images: } hash is necessary for the index carousels.
+    # An { images: } hash is necessary if we're adding the index carousels.
     # :projects required by Bullet because it's needed to compute
     # `can_edit?` for an image.
     def observation_index_includes
