@@ -92,11 +92,12 @@ module Query::Modules::Initialization
   end
 
   # If it's a Name query, and one of the subqueries has a `names` param,
-  # just run that on the outer query and set a flag to skip it on the subquery.
+  # just run that on the outer query.
+  # The Name scopes have been adjusted to skip any `:names` param in a subquery.
   def check_for_nested_names_params
     return unless model == Name && (names_filter = nested_names_params)
 
-    @scopes.send(:names, **names_filter[:filter])
+    @scopes = @scopes.send(:names, **names_filter[:filter])
   end
 
   def nested_names_params

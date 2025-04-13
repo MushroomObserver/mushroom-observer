@@ -13,7 +13,11 @@ class Query::NameDescriptions < Query::Base
       sources: [{ string: Description::ALL_SOURCE_TYPES }],
       ok_for_export: :boolean,
       content_has: :string,
-      names: [Name],
+      names: { lookup: [Name],
+               include_synonyms: :boolean,
+               include_subtaxa: :boolean,
+               include_immediate_subtaxa: :boolean,
+               exclude_original_names: :boolean },
       projects: [Project],
       name_query: { subquery: :Name }
     )

@@ -129,4 +129,17 @@ class Query::NameDescriptionsTest < UnitTestCase
     assert_query(NameDescription.is_public(0).order_by_default,
                  :NameDescription, is_public: 0)
   end
+
+  def test_name_description_names
+    expects = [name_descriptions(:peltigera_desc),
+               name_descriptions(:peltigera_alt_desc),
+               name_descriptions(:peltigera_user_desc),
+               name_descriptions(:peltigera_source_desc)]
+    scope = NameDescription.names(lookup: "Peltigera", include_synonyms: true).
+            order_by_default
+    assert_query_scope(
+      expects, scope,
+      :NameDescription, names: { lookup: "Peltigera", include_synonyms: true }
+    )
+  end
 end

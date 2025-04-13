@@ -93,12 +93,12 @@ class LocationDescription < Description
   }
   scope :by_author, lambda { |user|
     ids = lookup_users_by_name(user)
-    joins(:location_description_authors).
+    joins(:location_description_authors).distinct.
       where(location_description_authors: { user_id: ids })
   }
   scope :by_editor, lambda { |user|
     ids = lookup_users_by_name(user)
-    joins(:location_description_editors).
+    joins(:location_description_editors).distinct.
       where(location_description_editors: { user_id: ids })
   }
   scope :locations, lambda { |loc|
