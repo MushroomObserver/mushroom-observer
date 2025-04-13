@@ -478,8 +478,8 @@ class Query::NamesTest < UnitTestCase
                        :Name, description_query: { id_in_set: set })
   end
 
-  # NOTE: Name.description_query moves any :names sub-param to the main query,
-  # because it is way more efficient.
+  # Test that Name.description_query moves any :names sub-params to the main
+  # query, because it is way more efficient than a circuitous join.
   def test_name_with_description_subquery_of_names
     expects = Name.names(lookup: "Peltigera", include_synonyms: true).
               joins(:descriptions).distinct.order_by_default
@@ -734,6 +734,8 @@ class Query::NamesTest < UnitTestCase
     )
   end
 
+  # Test that Name.observation_query moves any :names sub-params to the main
+  # query, because it is way more efficient than a circuitous join.
   def test_name_with_observation_subquery_of_names
     expects = Name.names(lookup: "Peltigera", include_synonyms: true).
               joins(:observations).distinct.order_by_default
