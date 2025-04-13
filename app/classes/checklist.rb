@@ -111,6 +111,10 @@ class Checklist
   end
 
   # `+` here is Arel extensions shorthand for `CONCAT`
+  # The group statement is to be sure names without synonyms are sorted
+  # separately in the array by giving all of them negative values in the group.
+  # The idea is that we don't want those with synonyms and those without
+  # to overlap; putting them last is arbitrary.
   # rubocop:disable Style/StringConcatenation
   def self.all_site_taxa_by_user
     synonym_map = {}
@@ -123,7 +127,8 @@ class Checklist
          Name[:id].cast("char") + "," +
          Name[:rank].cast("char")).minimum
       ).group(
-        Name[:synonym_id].when(present?).then(Name[:synonym_id]).else(Name[:id])
+        Name[:synonym_id].when(present?).then(Name[:synonym_id]).
+        else(Name[:id] * -1)
       )
     )
     synonyms.each do |row|

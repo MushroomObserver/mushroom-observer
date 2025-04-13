@@ -294,8 +294,8 @@ class NameTest < UnitTestCase
     assert_match(pat, '"sp-ABC"')
     assert_match(pat, '"sp-S01"')
     assert_match(pat, '"sp.S01"')
-    assert_no_match(pat, '"sp. S01"')
-    assert_no_match(pat, '"S01"')
+    assert_match(pat, '"sp. S01"')
+    assert_match(pat, '"S01"')
     assert_match(pat, '"abc\'')
     assert_match(pat, "'abc'")
     assert_no_match(pat, '\'"abc"')
@@ -1034,16 +1034,16 @@ class NameTest < UnitTestCase
 
   def test_name_parse_29
     do_name_parse_test(
-      'Amanita "Wrong Author"',
+      "Amanita Wrong Author",
       text_name: "Amanita",
       real_text_name: "Amanita",
-      search_name: 'Amanita "Wrong Author"',
-      real_search_name: 'Amanita "Wrong Author"',
+      search_name: "Amanita Wrong Author",
+      real_search_name: "Amanita Wrong Author",
       sort_name: "Amanita  Wrong Author",
-      display_name: '**__Amanita__** "Wrong Author"',
+      display_name: "**__Amanita__** Wrong Author",
       parent_name: nil,
       rank: "Genus",
-      author: '"Wrong Author"',
+      author: "Wrong Author",
       deprecated: false
     )
   end
@@ -1245,6 +1245,54 @@ class NameTest < UnitTestCase
       parent_name: "Strobilomyces strobilaceus",
       rank: "Variety",
       author: "R. Heim",
+      deprecated: false
+    )
+  end
+
+  def test_name_prov_name_no_quotes
+    do_name_parse_test(
+      "Pleurotus pulmonarius-PNW02",
+      text_name: "Pleurotus sp. 'pulmonarius-PNW02'",
+      real_text_name: "Pleurotus sp. 'pulmonarius-PNW02'",
+      search_name: "Pleurotus sp. 'pulmonarius-PNW02'",
+      real_search_name: "Pleurotus sp. 'pulmonarius-PNW02'",
+      sort_name: "Pleurotus pulmonarius-pnw02",
+      display_name: "**__Pleurotus__** sp. **__'pulmonarius-PNW02'__**",
+      parent_name: "Pleurotus",
+      rank: "Species",
+      author: "",
+      deprecated: false
+    )
+  end
+
+  def test_name_prov_name_with_spaces
+    do_name_parse_test(
+      "Pleurotus 'pulmonarius PNW02'",
+      text_name: "Pleurotus sp. 'pulmonarius-PNW02'",
+      real_text_name: "Pleurotus sp. 'pulmonarius-PNW02'",
+      search_name: "Pleurotus sp. 'pulmonarius-PNW02'",
+      real_search_name: "Pleurotus sp. 'pulmonarius-PNW02'",
+      sort_name: "Pleurotus pulmonarius-pnw02",
+      display_name: "**__Pleurotus__** sp. **__'pulmonarius-PNW02'__**",
+      parent_name: "Pleurotus",
+      rank: "Species",
+      author: "",
+      deprecated: false
+    )
+  end
+
+  def test_name_prov_name_no_epithet
+    do_name_parse_test(
+      "Pleurotus 'MA02'",
+      text_name: "Pleurotus sp. 'MA02'",
+      real_text_name: "Pleurotus sp. 'MA02'",
+      search_name: "Pleurotus sp. 'MA02'",
+      real_search_name: "Pleurotus sp. 'MA02'",
+      sort_name: "Pleurotus ma02",
+      display_name: "**__Pleurotus__** sp. **__'MA02'__**",
+      parent_name: "Pleurotus",
+      rank: "Species",
+      author: "",
       deprecated: false
     )
   end

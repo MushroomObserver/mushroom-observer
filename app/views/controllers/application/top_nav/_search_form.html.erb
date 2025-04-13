@@ -14,8 +14,6 @@ options = [
   [:USERS.l, :user],
   [:app_search_google.l, :google],
 ].sort
-default_search_type = session[:search_type] ||
-                      controller_name == "names" ? :name : :observation
 
 adv_search = link_to(
   content_tag(:span, :app_advanced_search.l, class: "text-nowrap"),
@@ -42,7 +40,7 @@ identify_page = controller.controller_name == "identify"
     <div class="form-group text-nowrap">
       <%= f_s.select(
             :type,
-            options_for_select(options, default_search_type),
+            options_for_select(options, session[:search_type] || :observation),
             { }, { class: "form-control w-auto" }
           ) %>
     </div><!--.form-group-->
