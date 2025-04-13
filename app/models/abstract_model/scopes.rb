@@ -274,7 +274,11 @@ module AbstractModel::Scopes
   # class methods here, `self` included
   module ClassMethods
     # Utility for all subqueries, which are defined on the model
+    # Callers must do their own joins to `model_name` because we can't know
+    # whether the association (has_one, has_many) is singular or plural.
     def subquery(model_name, params)
+      return all if params.blank?
+
       subquery = Query.new(model_name, **params).scope.reorder("")
       merge(subquery).distinct
     end

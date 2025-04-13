@@ -107,12 +107,12 @@ class NameDescription < Description
 
   scope :by_author, lambda { |user|
     ids = lookup_users_by_name(user)
-    joins(:name_description_authors).
+    joins(:name_description_authors).distinct.
       where(name_description_authors: { user_id: ids })
   }
   scope :by_editor, lambda { |user|
     ids = lookup_users_by_name(user)
-    joins(:name_description_editors).
+    joins(:name_description_editors).distinct.
       where(name_description_editors: { user_id: ids })
   }
 
@@ -123,10 +123,13 @@ class NameDescription < Description
   scope :ok_for_export,
         ->(bool = true) { where(ok_for_export: bool) }
 
-  scope :names, lambda { |names|
-    ids = lookup_names_by_name(names)
-    where(name: ids)
+  scope :names, lambda { |lookup:, **related_name_args|
+    ids = lookup_names_by_name(lookup, related_name_args.compact)
+    return none unless ids
+
+    where(name_id: ids).distinct
   }
+
   scope :projects, lambda { |projects|
     ids = lookup_projects_by_name(projects)
     where(project: ids)

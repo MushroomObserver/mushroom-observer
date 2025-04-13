@@ -478,6 +478,22 @@ class Query::NamesTest < UnitTestCase
                        :Name, description_query: { id_in_set: set })
   end
 
+  # Test that Name.description_query moves any :names sub-params to the main
+  # query, because it is way more efficient than a circuitous join.
+  def test_name_with_description_subquery_of_names
+    expects = Name.names(lookup: "Peltigera", include_synonyms: true).
+              joins(:descriptions).distinct.order_by_default
+    scope = Name.with_correct_spelling.description_query(
+      names: { lookup: "Peltigera", include_synonyms: true }
+    )
+    assert_query_scope(
+      expects, scope,
+      :Name, description_query: {
+        names: { lookup: "Peltigera", include_synonyms: true }
+      }
+    )
+  end
+
   def test_name_has_observations
     expects = Name.with_correct_spelling.has_observations.
               select(:name).distinct.pluck(:name_id).sort
@@ -716,5 +732,49 @@ class Query::NamesTest < UnitTestCase
     assert_query_scope(
       expects, scope, :Name, observation_query: { id_in_set: three_amigos }
     )
+  end
+
+  # Test that Name.observation_query moves any :names sub-params to the main
+  # query, because it is way more efficient than a circuitous join.
+  def test_name_with_observation_subquery_of_names
+    expects = Name.names(lookup: "Peltigera", include_synonyms: true).
+              joins(:observations).distinct.order_by_default
+    scope = Name.with_correct_spelling.observation_query(
+      names: { lookup: "Peltigera", include_synonyms: true }
+    ).order_by_default
+    assert_query_scope(
+      expects, scope,
+      :Name, observation_query: {
+        names: { lookup: "Peltigera", include_synonyms: true }
+      }
+    )
+  end
+
+  # Test that the :clade parameter is likewise applied to the Name query.
+  def test_name_with_observation_subquery_of_clade
+    clades = %w[Agaricales Tremellales]
+    clades.each do |clade|
+      expects = Name.with_correct_spelling.clade(clade).
+                joins(:observations).distinct.order_by_default
+      scope = Name.with_correct_spelling.observation_query(clade:).
+              order_by_default
+      assert_query_scope(
+        expects, scope, :Name, observation_query: { clade: }
+      )
+    end
+  end
+
+  # Test that the :lichen parameter is likewise applied to the Name query.
+  def test_name_with_observation_subquery_of_lichen
+    prefs = [true, false]
+    prefs.each do |pref|
+      expects = Name.with_correct_spelling.lichen(pref).
+                joins(:observations).distinct.order_by_default
+      scope = Name.with_correct_spelling.observation_query(lichen: pref).
+              order_by_default
+      assert_query_scope(
+        expects, scope, :Name, observation_query: { lichen: pref }
+      )
+    end
   end
 end

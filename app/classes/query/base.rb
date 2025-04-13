@@ -65,6 +65,12 @@ class Query::Base
 
   delegate :content_filter_parameters, to: :class
 
+  # def self.subquery_parameters
+  #   parameter_declarations.select { |key, _v| key.to_s.include?("_query") }
+  # end
+
+  # delegate :subquery_parameters, to: :class
+
   # Can the current class be called as a subquery of the target Query class?
   def relatable?(target)
     self.class.related?(target, model.name.to_sym)
