@@ -37,8 +37,9 @@ module Names
       false
     end
 
+    # should be new_query_instance. clear_form should update the current query.
     def new_filter_instance_from_session
-      if session[:pattern].present? && session[:search_type] == :name
+      if (@query = find_query(:Name)).params.present?
         terms = PatternSearch::Name.new(session[:pattern]).form_params
         @filter = NameFilter.new(terms)
       else
