@@ -109,11 +109,15 @@ module Query::Modules::Initialization
     @skippable_values = ["[]", "{}", "", nil].freeze
   end
 
-  # For RssLogs, remove any content filter params before passing to scopes
+  # For most queries, these are the `scope_parameters` defined in Query::Base.
+  # Makes sure `order_by` comes "last" in the hash, because some params may
+  # reset order.
+  # For RssLogs, removes any content filter params before passing to scopes
   # since they're already handled in subqueries above.
-  # Otherwise, these are the `scope_parameters` defined in Query::Base.
   def sendable_params
     sendable = params.slice(*scope_parameters)
+    order_by = sendable.delete(:order_by)
+    sendable[:order_by] = order_by if order_by.present?
     return sendable unless model == RssLog
 
     sendable.except(*content_filter_parameters.keys)
