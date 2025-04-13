@@ -138,7 +138,7 @@ class Lookup::Names < Lookup
 
     names.reject { |name| name[:synonym_id] } +
       Name.where(synonym_id: limited_id_set(name_ids)).
-      select(*minimal_name_columns)
+      distinct.select(*minimal_name_columns)
   end
 
   def add_subtaxa(names)
