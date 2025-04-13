@@ -686,6 +686,14 @@ class Query::ObservationsTest < UnitTestCase
     )
   end
 
+  def test_scope_name_query
+    name = names(:peltigera)
+    assert_query(
+      Observation.where(name: name).order_by_default,
+      :Observation, name_query: { pattern: name.text_name }
+    )
+  end
+
   def test_scope_sequence_query
     assert_query(
       Observation.joins(:sequences).order_by_default.uniq.pluck(:id),
