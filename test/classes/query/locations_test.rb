@@ -345,9 +345,8 @@ class Query::LocationsTest < UnitTestCase
   # Test that a :region subquery param is likewise moved to the Location query.
   def test_location_with_observations_regions
     region = "California, USA"
-    locations = [
-      locations(:mitrula_marsh), locations(:albion), locations(:burbank),
-      locations(:california), locations(:gualala), locations(:howarth_park),
+    locations_with_obs = [
+      locations(:burbank), locations(:california),
       locations(:point_reyes), locations(:salt_point)
     ]
     expects = Location.region(region).
@@ -356,7 +355,7 @@ class Query::LocationsTest < UnitTestCase
     assert_query_scope(
       expects, scope, :Location, observation_query: { region: }
     )
-    assert_equal(expects, locations)
+    assert_equal(locations_with_obs.map(&:id), expects.map(&:id))
   end
 
   def test_location_with_observations_projects
