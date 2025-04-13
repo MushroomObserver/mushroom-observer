@@ -164,7 +164,7 @@ module Location::Scopes
     scope :description_query, lambda { |hash|
       joins(:descriptions).subquery(:LocationDescription, hash)
     }
-    # Filter locations and region directly in the outer Location query,
+    # Filter :locations and :region directly in the outer Location query,
     # not via observations.
     scope :observation_query, lambda { |hash|
       scope = all
