@@ -212,8 +212,14 @@ class ObservationsController
         include: observation_index_includes
       }.merge(opts)
 
-      # Offer pagination by letter if the index has been filtered.
-      opts[:letters] = true if query.params.except(:order_by).present?
+      # Offer pagination by letter only if the index has been filtered
+      # and we're sorting by user or name.
+      if query.params.except(:order_by).present? &&
+         %w[user reverse_user name reverse_name].include?(
+           query.params[:order_by]
+         )
+        opts[:letters] = true
+      end
 
       opts
     end
