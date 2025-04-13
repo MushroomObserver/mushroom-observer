@@ -32,9 +32,21 @@ class Query::ObservationsTest < UnitTestCase
     assert_query(expects, :Observation, order_by: :location)
   end
 
+  # Test that subquery `reorder("")` does not interfere with explicit order.
   def test_observation_order_by_name
-    expects = Observation.order_by(:name)
-    assert_query(expects, :Observation, order_by: :name)
+    expects = Observation.location_query(pattern: "Falmouth").order_by(:name)
+    assert_query(
+      expects,
+      :Observation, location_query: { pattern: "Falmouth" }, order_by: :name
+    )
+  end
+
+  def test_observation_order_by_user
+    expects = Observation.name_query(pattern: "Agaricus").order_by(:user)
+    assert_query(
+      expects,
+      :Observation, name_query: { pattern: "Agaricus" }, order_by: :user
+    )
   end
 
   def test_observation_order_by_num_views
