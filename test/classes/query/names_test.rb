@@ -478,19 +478,14 @@ class Query::NamesTest < UnitTestCase
                        :Name, description_query: { id_in_set: set })
   end
 
+  # NOTE: Name.description_query moves any :names sub-param to the main query,
+  # because it is way more efficient.
   def test_name_with_description_subquery_of_names
-    desc = NameDescription.names(lookup: "Peltigera", include_synonyms: true)
-    expects = Name.with_correct_spelling.joins(:descriptions).distinct.
-              merge(desc).order_by_default
-    # NOTE: Name.description_query ignores any :names sub-param, because
-    # Query applies the :names to the Name scope more efficiently.
-    # So, we don't assert:
-    # scope = Name.with_correct_spelling.description_query(
-    #   names: { lookup: "Peltigera", include_synonyms: true }
-    # )
-    # but rather:
-    scope = Name.names(lookup: "Peltigera", include_synonyms: true).
-            joins(:descriptions).distinct.order_by_default
+    expects = Name.names(lookup: "Peltigera", include_synonyms: true).
+              joins(:descriptions).distinct.order_by_default
+    scope = Name.with_correct_spelling.description_query(
+      names: { lookup: "Peltigera", include_synonyms: true }
+    )
     assert_query_scope(
       expects, scope,
       :Name, description_query: {
@@ -740,18 +735,11 @@ class Query::NamesTest < UnitTestCase
   end
 
   def test_name_with_observation_subquery_of_names
-    obs = Observation.names(lookup: "Peltigera", include_synonyms: true)
-    expects = Name.with_correct_spelling.joins(:observations).distinct.
-              merge(obs).order_by_default
-    # NOTE: Name.observation_query ignores any :names sub-param, because
-    # Query applies the :names to the Name scope more efficiently.
-    # So, we don't assert:
-    # scope = Name.with_correct_spelling.observation_query(
-    #   names: { lookup: "Peltigera", include_synonyms: true }
-    # )
-    # but rather:
-    scope = Name.names(lookup: "Peltigera", include_synonyms: true).
-            joins(:observations).distinct.order_by_default
+    expects = Name.names(lookup: "Peltigera", include_synonyms: true).
+              joins(:observations).distinct.order_by_default
+    scope = Name.with_correct_spelling.observation_query(
+      names: { lookup: "Peltigera", include_synonyms: true }
+    )
     assert_query_scope(
       expects, scope,
       :Name, observation_query: {

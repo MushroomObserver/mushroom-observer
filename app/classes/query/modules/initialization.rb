@@ -84,46 +84,10 @@ module Query::Modules::Initialization
   private
 
   def initialize_scopes
-    check_for_nested_names_params
     initialize_parameter_set
     filter_misspellings_for_name_queries
     apply_rss_log_content_filters
     add_default_order_if_none_specified
-  end
-
-  # If it's a Name query, and one of the subqueries has a `names` param,
-  # just run that on the outer query.
-  # The Name scopes have been adjusted to skip any `:names` param in a subquery.
-  def check_for_nested_names_params
-    return unless model == Name && (names_filter = nested_names_params).present?
-
-    @scopes = @scopes.send(:names, **names_filter[:filter])
-  end
-
-  def nested_names_params
-    if params.slice(*subquery_parameters.keys).blank? ||
-       params.deep_find(:names).blank?
-      return false
-    end
-
-    names_params_from_subquery
-  end
-
-  # Take the first one, if present. More than one names param would be nuts.
-  # Could just return params.deep_find(:names).first, but this gives more info.
-  # Returns a hash containing the name of the subquery, and the names params.
-  def names_params_from_subquery
-    filter = {}
-    subquery_parameters.each_key do |subquery|
-      next unless params[subquery].present? &&
-                  params[subquery].key?(:names) &&
-                  (names_params = params.dig(subquery, :names)).present?
-
-      filter[:subquery] = subquery
-      filter[:filter] = names_params
-      break
-    end
-    filter
   end
 
   def initialize_parameter_set
