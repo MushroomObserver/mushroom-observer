@@ -303,6 +303,8 @@ module Name::Scopes
       end
     }
 
+    # Query pulls any :names param to the outer query, so we can skip it in
+    # subqueries, where it would be inefficient and redundant.
     scope :description_query, lambda { |hash|
       joins(:descriptions).subquery(:NameDescription, hash.except(:names))
     }

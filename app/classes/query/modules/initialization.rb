@@ -109,6 +109,7 @@ module Query::Modules::Initialization
   end
 
   # Take the first one, if present. More than one names param would be nuts.
+  # Could just return params.deep_find(:names).first, but this gives more info.
   # Returns a hash containing the name of the subquery, and the names params.
   def names_params_from_subquery
     filter = {}
