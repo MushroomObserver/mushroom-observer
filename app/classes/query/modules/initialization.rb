@@ -84,10 +84,19 @@ module Query::Modules::Initialization
   private
 
   def initialize_scopes
+    check_for_nested_names_param
     initialize_parameter_set
     filter_misspellings_for_name_queries
     apply_rss_log_content_filters
     add_default_order_if_none_specified
+  end
+
+  # If it's a Name query, and one of the subqueries has a `names` param,
+  # just run that on the outer query and set a flag to skip it on the subquery.
+  def check_for_nested_names_param
+    return unless model == Name && (names = params.deep_find(:names))
+    debugger
+    @scopes.send(names: names)
   end
 
   def initialize_parameter_set
