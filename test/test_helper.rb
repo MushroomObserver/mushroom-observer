@@ -17,6 +17,24 @@ require("rails")
 require("simplecov")
 require("simplecov-lcov")
 
+module SimpleCov
+  class SourceFile
+    # 2025-04-11 jdc Monkeypatch to disable excessive coverage warnings.
+    # Else we get > 100 false positives because we enabled
+    # coverage for .erb files.
+    def coverage_exceeding_source_warn
+      return unless ENV["SHOW_EXCESS_LINE_WARNING"]
+
+      message = <<~WARNING
+        Warning: coverage data provided by Coverage
+        [#{coverage_data["lines"].size}]
+        exceeds number of lines in #{filename} [#{src.size}]
+      WARNING
+      warn(message)
+    end
+  end
+end
+
 if ENV["CI"] == "true"
   SimpleCov::Formatter::LcovFormatter.config do |config|
     config.report_with_single_file = true
@@ -28,7 +46,10 @@ else
   SimpleCov.formatter = SimpleCov::Formatter::HTMLFormatter
 end
 
-SimpleCov.start("rails")
+SimpleCov.start("rails") do
+  # Cover .erb files. https://github.com/simplecov-ruby/simplecov/pull/1037
+  enable_coverage_for_eval
+end
 
 # Allow test results to be reported back to runner IDEs.
 # Enable progress bar output during the test running.
