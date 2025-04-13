@@ -8,17 +8,21 @@ class Query::NameDescriptionsTest < UnitTestCase
   include QueryExtensions
 
   def test_name_description_all
-    pelt = names(:peltigera)
     all_descs = NameDescription.all
-    all_pelt_descs = NameDescription.names(pelt)
+    all_pelt_descs = NameDescription.names(lookup: "Peltigera")
     public_pelt_descs = all_pelt_descs.is_public
     assert(all_pelt_descs.length < all_descs.length)
     assert(public_pelt_descs.length < all_pelt_descs.length)
 
     assert_query(all_descs, :NameDescription, order_by: :id)
-    assert_query(all_pelt_descs, :NameDescription, order_by: :id, names: pelt)
-    assert_query(public_pelt_descs,
-                 :NameDescription, order_by: :id, names: pelt, is_public: "yes")
+    assert_query(
+      all_pelt_descs,
+      :NameDescription, names: { lookup: "Peltigera" }, order_by: :id
+    )
+    assert_query(
+      public_pelt_descs,
+      :NameDescription, names: { lookup: "Peltigera" }, is_public: "yes",
+                        order_by: :id)
   end
 
   def test_name_description_order_by_name
@@ -131,10 +135,10 @@ class Query::NameDescriptionsTest < UnitTestCase
   end
 
   def test_name_description_names
-    expects = [name_descriptions(:peltigera_desc),
-               name_descriptions(:peltigera_alt_desc),
-               name_descriptions(:peltigera_user_desc),
-               name_descriptions(:peltigera_source_desc)]
+    expects = [name_descriptions(:peltigera_alt_desc),
+               name_descriptions(:peltigera_source_desc),
+               name_descriptions(:peltigera_desc),
+               name_descriptions(:peltigera_user_desc)]
     scope = NameDescription.names(lookup: "Peltigera", include_synonyms: true).
             order_by_default
     assert_query_scope(
