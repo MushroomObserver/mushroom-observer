@@ -305,14 +305,15 @@ module Name::Scopes
 
     # Pull any :names param out to the main Name query.
     # Skip it in subqueries, where it would be inefficient and redundant.
-    # (We don't need to query indirectly for "Names of Observations of Names".)
+    # (We don't want to query indirectly for "Names of Observations of Names".)
     scope :description_query, lambda { |hash|
       scope = all
       names_params = hash.delete(:names)
       scope = scope.names(**names_params) if names_params.present?
       scope.joins(:descriptions).subquery(:NameDescription, hash)
     }
-    # Likewise here, filter :clade or :lichen directly, not the circuitous way.
+    # Likewise here, filter :names, :clade or :lichen directly, not the
+    # circuitous way via Observations.
     scope :observation_query, lambda { |hash|
       scope = all
       names_params = hash.delete(:names)
@@ -320,8 +321,9 @@ module Name::Scopes
       clades = hash.delete(:clade)
       scope = scope.clade(clades) if clades.present?
       lichens = hash.delete(:lichen)
-      scope = scope.lichen(lichens) if lichens.present?
-      scope.joins(:observations).subquery(:Observation, hash)
+      scope = scope.lichen(lichens) unless lichens.nil?
+      # Lichen unexpectedly unscopes `distinct`, other scopes don't. IDK why.
+      scope.joins(:observations).distinct.subquery(:Observation, hash)
     }
 
     scope :show_includes, lambda {

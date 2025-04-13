@@ -37,6 +37,12 @@ module Location::Scopes
     scope :notes_has,
           ->(phrase) { search_columns(Location[:notes], phrase) }
 
+    # This is a convenience for lookup by text name. Used by `observation_query`
+    scope :locations, lambda { |locations|
+      location_ids = lookup_locations_by_name(locations)
+      where(id: location_ids).distinct
+    }
+
     # Does not search location notes, observation notes or comments on either.
     # We do not yet support location comment queries.
     scope :pattern, lambda { |phrase|
@@ -118,7 +124,7 @@ module Location::Scopes
     }
     # Use named parameters (lat:, lng:), any order
     scope :with_minimum_bounding_box_containing_point, lambda { |**args|
-      args => {lat:, lng:}
+      args => { lat:, lng: }
       containers = contains_point(lat: lat, lng: lng)
       # prevents returning all containers if contaimers empty
       return none if containers.empty?
@@ -158,8 +164,14 @@ module Location::Scopes
     scope :description_query, lambda { |hash|
       joins(:descriptions).subquery(:LocationDescription, hash)
     }
+    # Filter region directly in the outer query, not via observations.
     scope :observation_query, lambda { |hash|
-      joins(:observations).subquery(:Observation, hash)
+      scope = all
+      locations = hash.delete(:locations)
+      scope = scope.locations(locations) if locations.present?
+      regions = hash.delete(:region)
+      scope = scope.region(regions) if regions.present?
+      scope.joins(:observations).subquery(:Observation, hash)
     }
 
     scope :show_includes, lambda {

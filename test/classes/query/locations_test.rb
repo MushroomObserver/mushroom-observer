@@ -86,6 +86,22 @@ class Query::LocationsTest < UnitTestCase
                        :Location, notes_has: '"legal to collect" -"Salt Point"')
   end
 
+  def test_location_regions
+    region = "Sonoma Co., California, USA"
+    locations = [locations(:salt_point)]
+    assert_query(locations, :Location, region:)
+    region = "Massachusetts, USA"
+    locations = [locations(:falmouth), locations(:obs_default_location)]
+    assert_query(locations, :Location, region:)
+    region = "California, USA"
+    locations = [
+      locations(:mitrula_marsh), locations(:albion), locations(:burbank),
+      locations(:california), locations(:gualala), locations(:howarth_park),
+      locations(:point_reyes), locations(:salt_point)
+    ]
+    assert_query(locations, :Location, region:)
+  end
+
   def test_location_in_box
     expects = [locations(:burbank)]
     box = { north: 35, south: 34, east: -118, west: -119 }
@@ -310,14 +326,37 @@ class Query::LocationsTest < UnitTestCase
     )
   end
 
+  # Test that Location.observation_query moves any :locations sub-params to the
+  # main query, because it is way more efficient than a circuitous join.
   def test_location_with_observations_locations
-    loc_with_observations = locations(:burbank)
-    loc_without_observations = locations(:no_mushrooms_location)
-    locations = [loc_with_observations, loc_without_observations]
-    assert_query(
-      [loc_with_observations],
+    burbank = locations(:burbank)
+    salt_point = locations(:salt_point)
+    no_mushrooms = locations(:no_mushrooms_location)
+    locations = [burbank, salt_point, no_mushrooms]
+    expects = Location.where(id: [burbank, salt_point]).
+              joins(:observations).distinct.order_by_default
+    scope = Location.observation_query(locations: locations.map(&:name))
+    assert_query_scope(
+      expects, scope,
       :Location, observation_query: { locations: locations.map(&:name) }
     )
+  end
+
+  # Test that a :region subquery param is likewise moved to the Location query.
+  def test_location_with_observations_regions
+    region = "California, USA"
+    locations = [
+      locations(:mitrula_marsh), locations(:albion), locations(:burbank),
+      locations(:california), locations(:gualala), locations(:howarth_park),
+      locations(:point_reyes), locations(:salt_point)
+    ]
+    expects = Location.region(region).
+              joins(:observations).distinct.order_by_default
+    scope = Location.observation_query(region:)
+    assert_query_scope(
+      expects, scope, :Location, observation_query: { region: }
+    )
+    assert_equal(expects, locations)
   end
 
   def test_location_with_observations_projects
