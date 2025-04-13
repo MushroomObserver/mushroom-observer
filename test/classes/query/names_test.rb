@@ -717,4 +717,19 @@ class Query::NamesTest < UnitTestCase
       expects, scope, :Name, observation_query: { id_in_set: three_amigos }
     )
   end
+
+  def test_name_with_observation_subquery_of_names
+    obs = Observation.names(lookup: "Peltigera", include_synonyms: true)
+    expects = Name.with_correct_spelling.joins(:observations).distinct.
+              merge(obs).order_by_default
+    scope = Name.with_correct_spelling.observation_query(
+      names: { lookup: "Peltigera", include_synonyms: true }
+    )
+    assert_query_scope(
+      expects, scope,
+      :Name, observation_query: {
+        names: { lookup: "Peltigera", include_synonyms: true }
+      }
+    )
+  end
 end
