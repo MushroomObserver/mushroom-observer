@@ -8,21 +8,21 @@ class Query::NameDescriptionsTest < UnitTestCase
   include QueryExtensions
 
   def test_name_description_all
-    all_descs = NameDescription.all
-    all_pelt_descs = NameDescription.names(lookup: "Peltigera")
-    public_pelt_descs = all_pelt_descs.is_public
+    all_descs = NameDescription.order_by_default
+    all_pelt_descs = NameDescription.names(lookup: "Peltigera").order_by_default
+    public_pelt_descs = all_pelt_descs.is_public.order_by_default
     assert(all_pelt_descs.length < all_descs.length)
     assert(public_pelt_descs.length < all_pelt_descs.length)
 
-    assert_query(all_descs, :NameDescription, order_by: :id)
+    assert_query(all_descs, :NameDescription)
     assert_query(
       all_pelt_descs,
-      :NameDescription, names: { lookup: "Peltigera" }, order_by: :id
+      :NameDescription, names: { lookup: "Peltigera" }
     )
     assert_query(
       public_pelt_descs,
-      :NameDescription, names: { lookup: "Peltigera" }, is_public: "yes",
-                        order_by: :id)
+      :NameDescription, names: { lookup: "Peltigera" }, is_public: "yes"
+    )
   end
 
   def test_name_description_order_by_name
