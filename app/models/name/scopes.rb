@@ -312,10 +312,15 @@ module Name::Scopes
       scope = scope.names(**names_params) if names_params.present?
       scope.joins(:descriptions).subquery(:NameDescription, hash)
     }
+    # Likewise here, filter :clade or :lichen directly, not the circuitous way.
     scope :observation_query, lambda { |hash|
       scope = all
       names_params = hash.delete(:names)
       scope = scope.names(**names_params) if names_params.present?
+      clades = hash.delete(:clade)
+      scope = scope.clade(clades) if clades.present?
+      lichens = hash.delete(:lichen)
+      scope = scope.lichen(lichens) if lichens.present?
       scope.joins(:observations).subquery(:Observation, hash)
     }
 
