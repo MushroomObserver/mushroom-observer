@@ -670,4 +670,54 @@ class Query::ObservationsTest < UnitTestCase
       :Observation, "#{col}": %w[2009-08-22-03-04-22 2009-10-20-03-04-22]
     )
   end
+
+  def test_observation_image_query
+    images = Image.copyright_holder_has("rolf").pluck(:id)
+    assert_query(
+      Observation.where(thumb_image: images).order_by_default,
+      :Observation, image_query: { copyright_holder_has: "rolf" }
+    )
+  end
+
+  def test_observation_location_query_simple
+    assert_query(
+      Observation.where(location: locations(:burbank)).order_by_default,
+      :Observation, location_query: { pattern: "Burbank" }
+    )
+  end
+
+  def test_observation_location_query_in_box
+    box = { north: 35, south: 34, east: -118, west: -119 }
+    locations = Location.in_box(**box).by_users(mary)
+    expects = Observation.joins(:location).distinct.
+              where(location_id: locations).order_by_default
+    assert_query(expects,
+                 :Observation, location_query: { in_box: box, by_users: mary })
+  end
+
+  def test_observation_name_query_simple
+    name = names(:peltigera)
+    assert_query(
+      Observation.where(name: name).order_by_default,
+      :Observation, name_query: { pattern: name.text_name }
+    )
+  end
+
+  def test_observation_name_query_rank
+    names = Name.with_correct_spelling.rank("Genus", "Kingdom")
+    expects = Observation.joins(:name).distinct.
+              where(name_id: names).order_by_default
+    assert_query(expects,
+                 :Observation, name_query: { rank: %w[Genus Kingdom] })
+  end
+
+  def test_observation_sequence_query
+    sequences = Sequence.locus_has("LSU").by_users(dick)
+    expects = Observation.joins(:sequences).distinct.
+              merge(sequences).order_by_default
+    assert_query(
+      expects,
+      :Observation, sequence_query: { locus_has: "LSU", by_users: dick.id }
+    )
+  end
 end
