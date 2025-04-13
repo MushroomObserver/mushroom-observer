@@ -64,16 +64,20 @@ checks:
 plugins:
 # check Rails apps for security vulnerabilities
   brakeman:
+    # Disabled in favor of running Brakeman in the Github Actions workflow
+    # because CodeClimate is stuck on Brakeman 6.0.1
+    # JDC 2025-05-13
+    enabled: false
     # Use highest available channel https://docs.codeclimate.com/docs/brakeman
     # because Github actions linter is broken
     # See .github/workflows/ci_rails.yml
     # JDC 2023-06-04
     channel: brakeman-6-0-1
-    enabled: true
 
 # helps find security vulnerabilities in Ruby dependencies
+  # Disabled in favor of running bundler-audit in the Github Actions workflow
   bundler-audit:
-    enabled: true
+    enabled: false
 
 # report similar code blocks over a configurable mass threshold
   duplication:
