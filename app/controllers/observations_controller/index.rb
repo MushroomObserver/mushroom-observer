@@ -204,14 +204,27 @@ class ObservationsController
       query
     end
 
-    def index_display_opts(opts, _query)
+    def index_display_opts(opts, query)
       # We always want cached matrix boxes for observations if possible.
       # cache: true  will batch load the includes only for fragments not cached.
-      { matrix: true, cache: true,
-        include: observation_index_includes }.merge(opts)
+      opts = {
+        matrix: true, cache: true,
+        include: observation_index_includes
+      }.merge(opts)
+
+      # Offer pagination by letter only if the index has been filtered
+      # and we're sorting by user or name.
+      if query.params.except(:order_by).present? &&
+         %w[user reverse_user name reverse_name].include?(
+           query.params[:order_by]
+         )
+        opts[:letters] = true
+      end
+
+      opts
     end
 
-    # The { images: } hash is necessary for the index carousels.
+    # An { images: } hash is necessary if we're adding the index carousels.
     # :projects required by Bullet because it's needed to compute
     # `can_edit?` for an image.
     def observation_index_includes
