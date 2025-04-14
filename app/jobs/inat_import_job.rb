@@ -259,7 +259,7 @@ class InatImportJob < ApplicationJob
   def add_inat_images(inat_obs_photos)
     inat_obs_photos.each do |obs_photo|
       photo = Inat::ObsPhoto.new(obs_photo)
-      api = Inat::PhotoImporter.new(photo_importer_params(photo)).api
+      Inat::PhotoImporter.new(photo_importer_params(photo)).api
     end
   end
 
