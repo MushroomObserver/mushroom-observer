@@ -27,7 +27,7 @@ jobs:
           bundler-cache: true
 
       - name: Brakeman
-        uses: devmasx/brakeman-linter-action@v1.0.1
+        uses: GaboFDC/brakeman-linter-action@v1.1.0
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
