@@ -530,6 +530,15 @@ class InatImportJobTest < ActiveJob::TestCase
 
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
+
+    # JDC 2025-04-14 This obs's photos are All Rights Reserved, not CC licensed.
+    # Although physically hosted by Amazon they are
+    # not in the Amazon Open Data Sponsorship Program
+    # https://www.inaturalist.org/blog/49564-inaturalist-licensed-observation-images-in-the-amazon-open-data-sponsorship-program/
+    # cf. https://github.com/inaturalist/inaturalist-open-data
+    # Amazon Open Data Sponsorship Program images have a amazonaws.com url.
+    # Other images have a static.inaturalist.org url.
+    # They therefore are stubbed differently.
     image_stubs([375_217_770, 375_216_871, 375_217_919])
 
     assert_difference("Observation.count", 1,
