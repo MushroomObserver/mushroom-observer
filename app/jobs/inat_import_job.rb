@@ -259,20 +259,7 @@ class InatImportJob < ApplicationJob
   def add_inat_images(inat_obs_photos)
     inat_obs_photos.each do |obs_photo|
       photo = Inat::ObsPhoto.new(obs_photo)
-      api = Inat::PhotoImporter.new(photo_importer_params(photo)).api
-      next unless Rails.env.test?
-
-      # NOTE: 2025-04-01 jdc
-      # A hack faking the side effect of the above API call
-      # The API adds the imported image to the MO observation
-      image = api.results.first
-      ObservationImage.create!(
-        observation: @observation,
-        image: image
-      )
-      # NOTE: 2025-04-01 jdc. This line might be doable via stub/mock.
-      # I'm just tired of fighting with mocks//stubs I don't understand.
-      image.update(original_name: photo.original_name)
+      Inat::PhotoImporter.new(photo_importer_params(photo)).api
     end
   end
 

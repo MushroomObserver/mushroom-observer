@@ -48,6 +48,11 @@ dick_inat_api_key:
   user: dick
   notes: inat import # required to find the user's key for inat jobs
 
+inat_importer_inat_api_key:
+  <<: *DEFAULTS
+  user: inat_importer
+  notes: inat import # required to find the user's key for inat jobs
+
 # The next 3 fixtures are used to test whether sql collates accented letters.
 # Has nothing to do with APIs; This is just a convenient spot to add fixtures.
 api_key_u_1:

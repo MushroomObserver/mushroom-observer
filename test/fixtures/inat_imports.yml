@@ -25,3 +25,8 @@ mary_inat_import:
   <<: *DEFAULTS
   user: mary
   inat_username: mary_inat_username
+
+inat_importer_inat_import:
+  <<: *DEFAULTS
+  user: inat_importer
+  inat_username: inat_importer_inat_username
