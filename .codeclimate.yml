@@ -75,9 +75,8 @@ plugins:
     channel: brakeman-6-0-1
 
 # helps find security vulnerabilities in Ruby dependencies
-  # Disabled in favor of running bundler-audit in the Github Actions workflow
   bundler-audit:
-    enabled: false
+    enabled: true
 
 # report similar code blocks over a configurable mass threshold
   duplication:
