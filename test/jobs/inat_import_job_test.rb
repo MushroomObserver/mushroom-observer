@@ -36,7 +36,7 @@ class InatImportJobTest < ActiveJob::TestCase
   # Prevent stubs from persisting between test methods because
   # the same request (/users/me) needs diffferent responses
   def setup
-    @default_user = users(:rolf)
+    @default_user = users(:inat_importer)
     @stubs = []
     directory_path = Rails.public_path.join("test_images/orig")
     FileUtils.mkdir_p(directory_path) unless Dir.exist?(directory_path)
@@ -225,12 +225,11 @@ class InatImportJobTest < ActiveJob::TestCase
     imported_img = obs.images.first
     assert_equal(@default_user, imported_img.user,
                  "Image should belong to importing user")
-    unless @default_user.keep_filenames == "toss"
-      assert_equal(
-        "iNat photo_id: #{inat_photo["photo_id"]}, uuid: #{inat_photo["uuid"]}",
-        imported_img.original_name
-      )
-    end
+    assert_equal(
+      "iNat photo_id: #{inat_photo["photo_id"]}, uuid: #{inat_photo["uuid"]}",
+      imported_img.original_name,
+      "Image original_name should be iNat photo_id and uuid"
+    )
 
     assert(obs.sequences.none?)
   end
@@ -592,12 +591,13 @@ class InatImportJobTest < ActiveJob::TestCase
   end
 
   def test_import_update_inat_username_if_job_succeeds
-    assert_empty(@default_user.inat_username,
+    user = @default_user
+    assert_empty(user.inat_username,
                  "Test needs user fixture without an iNat username")
 
     file_name = "zero_results"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    inat_import = inat_imports(:rolf_inat_import)
+    inat_import = InatImport.find_by(user: user)
     inat_import.update(inat_ids: "123", token: "MockCode")
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
