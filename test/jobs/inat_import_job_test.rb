@@ -36,7 +36,7 @@ class InatImportJobTest < ActiveJob::TestCase
   # Prevent stubs from persisting between test methods because
   # the same request (/users/me) needs diffferent responses
   def setup
-    @default_user = users(:inat_importer)
+    @user = users(:inat_importer)
     @stubs = []
     directory_path = Rails.public_path.join("test_images/orig")
     FileUtils.mkdir_p(directory_path) unless Dir.exist?(directory_path)
@@ -62,7 +62,7 @@ class InatImportJobTest < ActiveJob::TestCase
     # You can import only your own observations.
     # So adjust importing user's inat_username to be the Inat login
     # of the iNat user who made the iNat observation
-    @default_user.update(inat_username: inat_import.inat_username)
+    @user.update(inat_username: inat_import.inat_username)
 
     # Add objects which are not included in fixtures
     name = Name.create(
@@ -70,9 +70,9 @@ class InatImportJobTest < ActiveJob::TestCase
       search_name: "Calostoma lutescens (Schweinitz) Burnap",
       display_name: "**__Calostoma lutescens__** (Schweinitz) Burnap",
       rank: "Species",
-      user: @default_user
+      user: @user
     )
-    loc = Location.create(user: @default_user,
+    loc = Location.create(user: @user,
                           name: "Sevier Co., Tennessee, USA",
                           north: 36.043571, south: 35.561849,
                           east: -83.253046, west: -83.794123)
@@ -81,7 +81,7 @@ class InatImportJobTest < ActiveJob::TestCase
                            mock_inat_response: mock_inat_response)
 
     QueuedEmail.queue = true
-    before_emails_to_user = QueuedEmail.where(to_user: @default_user).count
+    before_emails_to_user = QueuedEmail.where(to_user: @user).count
 
     Inat::PhotoImporter.stub(:new,
                              stub_mo_photo_importer(mock_inat_response)) do
@@ -119,7 +119,7 @@ class InatImportJobTest < ActiveJob::TestCase
                  "Missing 'none' for Observation Fields")
 
     assert_equal(
-      before_emails_to_user, QueuedEmail.where(to_user: @default_user).count,
+      before_emails_to_user, QueuedEmail.where(to_user: @user).count,
       "Should not have sent any emails to importing user for this obs"
     )
     QueuedEmail.queue = false
@@ -195,10 +195,10 @@ class InatImportJobTest < ActiveJob::TestCase
     name = Name.create(
       text_name: "Evernia", author: "Ach.", search_name: "Evernia Ach.",
       display_name: "**__Evernia__** Ach.",
-      rank: "Genus", user: @default_user
+      rank: "Genus", user: @user
     )
     loc = Location.create(
-      user: @default_user,
+      user: @user,
       name: "Troutdale, Multnomah Co., Oregon, USA",
       north: 45.5609, south: 45.5064,
       east: -122.367, west: -122.431
@@ -223,7 +223,7 @@ class InatImportJobTest < ActiveJob::TestCase
     inat_photo = JSON.parse(mock_inat_response)["results"].
                  first["observation_photos"].first
     imported_img = obs.images.first
-    assert_equal(@default_user, imported_img.user,
+    assert_equal(@user, imported_img.user,
                  "Image should belong to importing user")
     assert_equal(
       "iNat photo_id: #{inat_photo["photo_id"]}, uuid: #{inat_photo["uuid"]}",
@@ -245,7 +245,7 @@ class InatImportJobTest < ActiveJob::TestCase
                                   search_name: "Tremellales Fr.",
                                   display_name: "Tremellales",
                                   rank: "Order",
-                                  user: @default_user)
+                                  user: @user)
 
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
@@ -283,7 +283,7 @@ class InatImportJobTest < ActiveJob::TestCase
       search_name: "Lycoperdon Pers.",
       display_name: "**__Lycoperdon__** Pers.",
       rank: "Genus",
-      user: @default_user
+      user: @user
     )
 
     stub_inat_interactions(inat_import: inat_import,
@@ -299,7 +299,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
     assert(obs.images.any?, "Obs should have images")
     assert(obs.sequences.one?, "Obs should have a sequence")
-    assert_equal(@default_user, obs.sequences.first.user,
+    assert_equal(@user, obs.sequences.first.user,
                  "Sequences should belong to the user who imported the obs")
 
     ids = JSON.parse(mock_inat_response)["results"].first["identifications"]
@@ -328,7 +328,7 @@ class InatImportJobTest < ActiveJob::TestCase
       display_name: "**__Inonotus obliquus__** f. **__sterilis__** " \
                     "(Vanin) Balandaykin & Zmitr.",
       rank: "Form",
-      user: @default_user
+      user: @user
     )
 
     stub_inat_interactions(inat_import: inat_import,
@@ -365,7 +365,7 @@ class InatImportJobTest < ActiveJob::TestCase
       search_name: "Xeromphalina campanella group",
       display_name: "**__Xeromphalina campanella__** group",
       rank: "Group",
-      user: @default_user
+      user: @user
     )
 
     stub_inat_interactions(inat_import: inat_import,
@@ -416,7 +416,7 @@ class InatImportJobTest < ActiveJob::TestCase
       search_name: 'Arrhenia "sp-NY02" S.D. Russell crypt. temp.',
       display_name: '**__Arrhenia "sp-NY02"__** S.D. Russell crypt. temp.',
       rank: "Species",
-      user: @default_user
+      user: @user
     )
 
     stub_inat_interactions(inat_import: inat_import,
@@ -481,7 +481,7 @@ class InatImportJobTest < ActiveJob::TestCase
     standard_assertions(obs: obs, name: name)
 
     proposed_name = obs.namings.first
-    assert_equal(@default_user,
+    assert_equal(@user,
                  proposed_name.user,
                  "Name should be proposed by importing user")
     used_references = 2
@@ -544,8 +544,8 @@ class InatImportJobTest < ActiveJob::TestCase
                  "Failed to create new sp. (nom. prov.) and its genus")
     new_names.each do |new_name|
       assert_equal(
-        @default_user, new_name.user,
-        "#{new_name.text_name} author should be #{@default_user.login}"
+        @user, new_name.user,
+        "#{new_name.text_name} author should be #{@user.login}"
       )
     end
     name = new_names.find_by(rank: "Species")
@@ -591,7 +591,7 @@ class InatImportJobTest < ActiveJob::TestCase
   end
 
   def test_import_update_inat_username_if_job_succeeds
-    user = @default_user
+    user = @user
     assert_empty(user.inat_username,
                  "Test needs user fixture without an iNat username")
 
@@ -607,14 +607,14 @@ class InatImportJobTest < ActiveJob::TestCase
       InatImportJob.perform_now(inat_import)
     end
 
-    assert_equal(inat_import.inat_username, @default_user.reload.inat_username,
+    assert_equal(inat_import.inat_username, @user.reload.inat_username,
                  "Failed to update user's inat_username")
   end
 
   def test_import_multiple
     file_name = "listed_ids"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    inat_import = InatImport.create(user: @default_user,
+    inat_import = InatImport.create(user: @user,
                                     inat_ids: "231104466,195434438",
                                     token: "MockCode",
                                     inat_username: "anything")
@@ -645,7 +645,7 @@ class InatImportJobTest < ActiveJob::TestCase
   def test_import_all
     file_name = "import_all"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    inat_import = InatImport.create(user: @default_user,
+    inat_import = InatImport.create(user: @user,
                                     inat_ids: "",
                                     import_all: true,
                                     token: "MockCode",
@@ -748,7 +748,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
   # The InatImport object which is created in InatImportController#create
   # and recovered in InatImportController#authorization_response
-  def create_inat_import(user: @default_user,
+  def create_inat_import(user: @user,
                          inat_response: mock_inat_response)
     InatImport.create(
       user: user, token: "MockCode",
@@ -953,7 +953,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
   # -------- Standard Test assertions
 
-  def standard_assertions(obs:, user: @default_user, name: nil, loc: nil)
+  def standard_assertions(obs:, user: @user, name: nil, loc: nil)
     assert_not_nil(obs.rss_log, "Failed to log Observation")
     assert_equal("mo_inat_import", obs.source)
     assert_equal(loc, obs.location) if loc
