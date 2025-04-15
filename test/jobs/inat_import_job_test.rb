@@ -865,14 +865,6 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_modify_inat_observations(mock_inat_response)
   end
 
-  def good_response
-    { status: 200, body: "\"\"", headers: {} }.freeze
-  end
-
-  def bad_response
-    { status: 401, body: "Unauthorized" }.freeze
-  end
-
   def stub_token_requests
     stub_oauth_token_request
     # must trade oauth access token for a JWT in order to use iNat API v1
