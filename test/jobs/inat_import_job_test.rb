@@ -25,14 +25,6 @@ class MockPhotoImporter
 end
 
 class InatImportJobTest < ActiveJob::TestCase
-  SITE = InatImportsController::SITE
-  REDIRECT_URI = InatImportsController::REDIRECT_URI
-  API_BASE = InatImportsController::API_BASE
-  PHOTO_BASE = "https://inaturalist-open-data.s3.amazonaws.com/photos"
-
-  ICONIC_TAXA = InatImportJob::ICONIC_TAXA
-  IMPORTED_BY_MO = InatImportJob::IMPORTED_BY_MO
-
   # Prevent stubs from persisting between test methods because
   # the same request (/users/me) needs diffferent responses
   def setup
@@ -771,7 +763,93 @@ class InatImportJobTest < ActiveJob::TestCase
     )
   end
 
+  # -------- Standard Test assertions
+
+  def standard_assertions(obs:, user: @user, name: nil, loc: nil)
+    assert_not_nil(obs.rss_log, "Failed to log Observation")
+    assert_equal("mo_inat_import", obs.source)
+    assert_equal(loc, obs.location) if loc
+
+    assert_equal(1, obs.namings.length,
+                 "iNatImport should create exactly one Naming")
+    obs.namings.each do |naming|
+      assert_not(
+        naming.vote_cache.zero?,
+        "VoteCache for Proposed Name '#{naming.name.text_name}' incorrect"
+      )
+    end
+
+    if name
+      assert_equal(name, obs.name, "Wrong consensus id")
+
+      namings = obs.namings
+      naming = namings.find_by(name: name)
+      assert(naming.present?, "Missing Naming for MO consensus ID")
+      assert_equal(
+        user, naming.user,
+        "Consensus Naming for this MO obs should be by #{user.login}"
+      )
+      vote = Vote.find_by(naming: naming, user: naming.user)
+      assert(vote.present?, "Naming is missing a Vote")
+      assert_equal(Vote::MAXIMUM_VOTE, vote.value,
+                   "Vote for MO consensus should be highest possible vote")
+    end
+
+    view = ObservationView.
+           find_by(observation_id: obs.id, user_id: user.id)
+    assert(view.present?, "Failed to create ObservationView")
+
+    assert(obs.comments.any?, "Imported iNat should have >= 1 Comment")
+    obs_comments =
+      Comment.where(target_type: "Observation", target_id: obs.id)
+    assert(obs_comments.one?)
+    assert(obs_comments.where(Comment[:summary] =~ /iNat Data/).present?,
+           "Missing Initial Commment (#{:inat_data_comment.l})")
+    assert_equal(
+      user, obs_comments.first.user,
+      "Comment user should be user who creates the MO Observation"
+    )
+    inat_data_comment = obs_comments.first.comment
+    [
+      :USER.l, :OBSERVED.l, :show_observation_inat_lat_lng.l, :PLACE.l,
+      :ID.l, :DQA.l, :show_observation_inat_suggested_ids.l,
+      :OBSERVATION_FIELDS.l,
+      :ANNOTATIONS.l, :PROJECTS.l, :TAGS.l
+    ].each do |caption|
+      assert_match(
+        /#{caption}/, inat_data_comment,
+        "Initial Commment (#{:inat_data_comment.l}) is missing #{caption}"
+      )
+    end
+  end
+
+  def assert_naming(obs:, name:, user:)
+    namings = obs.namings
+    naming = namings.find_by(name: name)
+    assert(naming.present?, "Naming for MO consensus ID")
+    assert_equal(user, naming.user,
+                 "Naming should belong to #{user.login}")
+  end
+
+  # -------- Other Utilities
+
+  # Hack to turn results with many pages into results with one page
+  # By ignoring all pages but the first
+  def limited_to_first_page(mock_search_result)
+    ms_hash = JSON.parse(mock_search_result)
+    ms_hash["total_results"] = ms_hash["results"].length
+    JSON.generate(ms_hash)
+  end
+
   # -------- Test doubles
+
+  SITE = InatImportsController::SITE
+  REDIRECT_URI = InatImportsController::REDIRECT_URI
+  API_BASE = InatImportsController::API_BASE
+  PHOTO_BASE = "https://inaturalist-open-data.s3.amazonaws.com/photos"
+
+  ICONIC_TAXA = InatImportJob::ICONIC_TAXA
+  IMPORTED_BY_MO = InatImportJob::IMPORTED_BY_MO
 
   def stub_inat_interactions(
     inat_import:, mock_inat_response:, id_above: 0,
@@ -987,87 +1065,5 @@ class InatImportJobTest < ActiveJob::TestCase
         to_return(status: 200, body: "".to_json, headers: {})
       )
     end
-  end
-
-  # -------- Standard Test assertions
-
-  def standard_assertions(obs:, user: @user, name: nil, loc: nil)
-    assert_not_nil(obs.rss_log, "Failed to log Observation")
-    assert_equal("mo_inat_import", obs.source)
-    assert_equal(loc, obs.location) if loc
-
-    assert_equal(1, obs.namings.length,
-                 "iNatImport should create exactly one Naming")
-    obs.namings.each do |naming|
-      assert_not(
-        naming.vote_cache.zero?,
-        "VoteCache for Proposed Name '#{naming.name.text_name}' incorrect"
-      )
-    end
-
-    if name
-      assert_equal(name, obs.name, "Wrong consensus id")
-
-      namings = obs.namings
-      naming = namings.find_by(name: name)
-      assert(naming.present?, "Missing Naming for MO consensus ID")
-      assert_equal(
-        user, naming.user,
-        "Consensus Naming for this MO obs should be by #{user.login}"
-      )
-      vote = Vote.find_by(naming: naming, user: naming.user)
-      assert(vote.present?, "Naming is missing a Vote")
-      assert_equal(Vote::MAXIMUM_VOTE, vote.value,
-                   "Vote for MO consensus should be highest possible vote")
-    end
-
-    view = ObservationView.
-           find_by(observation_id: obs.id, user_id: user.id)
-    assert(view.present?, "Failed to create ObservationView")
-
-    assert(obs.comments.any?, "Imported iNat should have >= 1 Comment")
-    obs_comments =
-      Comment.where(target_type: "Observation", target_id: obs.id)
-    assert(obs_comments.one?)
-    assert(obs_comments.where(Comment[:summary] =~ /iNat Data/).present?,
-           "Missing Initial Commment (#{:inat_data_comment.l})")
-    assert_equal(
-      user, obs_comments.first.user,
-      "Comment user should be user who creates the MO Observation"
-    )
-    inat_data_comment = obs_comments.first.comment
-    [
-      :USER.l, :OBSERVED.l, :show_observation_inat_lat_lng.l, :PLACE.l,
-      :ID.l, :DQA.l, :show_observation_inat_suggested_ids.l,
-      :OBSERVATION_FIELDS.l,
-      :ANNOTATIONS.l, :PROJECTS.l, :TAGS.l
-    ].each do |caption|
-      assert_match(
-        /#{caption}/, inat_data_comment,
-        "Initial Commment (#{:inat_data_comment.l}) is missing #{caption}"
-      )
-    end
-  end
-
-  def assert_naming(obs:, name:, user:)
-    namings = obs.namings
-    naming = namings.find_by(name: name)
-    assert(naming.present?, "Naming for MO consensus ID")
-    assert_equal(user, naming.user,
-                 "Naming should belong to #{user.login}")
-  end
-
-  # -------- Other
-
-  # Hack to turn results with many pages into results with one page
-  # By ignoring all pages but the first
-  def limited_to_first_page(mock_search_result)
-    ms_hash = JSON.parse(mock_search_result)
-    ms_hash["total_results"] = ms_hash["results"].length
-    JSON.generate(ms_hash)
-  end
-
-  def mock_me_response(login)
-    { code: 200, body: { "results" => [{ "login" => login }] } }
   end
 end
