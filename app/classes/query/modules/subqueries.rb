@@ -20,7 +20,7 @@ module Query::Modules::Subqueries
     # Query needs to know which joins are necessary to make these conversions
     # work. Need to maintain RELATED_TYPES if the Query class is updated.
     # These could be derived by snooping through each Query subclass's
-    # parameter_declarations, but that seems wasteful; there are not so many.
+    # attributes, but that seems wasteful; there are not so many of these.
     #
     # target_model.name.to_sym: [:Association, :AnotherAssociation],
     RELATED_QUERIES = {

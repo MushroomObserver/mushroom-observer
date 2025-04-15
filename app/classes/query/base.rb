@@ -11,13 +11,14 @@
 #  parameters that filter a database query of a given model, like `Name` or
 #  `Observation`. A Query instance contains as little data as possible; it does
 #  not contain AR records. When you execute the Query by calling the `results`
-#  method, each parameter of the Query instance gets sent to an ActiveRecord
-#  scope of the corresponding model; scopes are chained to return the results.
-#  Query parameters are therefore specific to each scope of the AR model.
+#  or `result_ids` methods, each non-nil attribute of the Query instance gets
+#  sent to an ActiveRecord scope of the corresponding model; scopes are chained
+#  to return the results. Query parameters must therefore each correspond to a
+#  scope of the AR model.
 #
 #  Each Query class declares the parameters it will accept, and what type of
-#  data each parameter expects, in `parameter_declarations` at the top of the
-#  class. These are the `attributes` you initialize a new Query instance with.
+#  data each parameter expects, in the attributes at the top of the class.
+#  You initialize a new Query instance with any combination of these.
 #
 #    Query::Observations.new(           or     Query.new(:Observation,
 #      has_public_lat_lng: true,                 has_public_lat_lng: true,
@@ -30,63 +31,54 @@
 #
 #  For the sake of familiarity, Query classes use ActiveModel. Each instance of
 #  a Query class is a data object with validatable attributes, instance methods
-#  and class methods. The methods are all pretty standard. They are defined
-#  either here in Query::Base, or in one of the included Query::Modules.
+#  and class methods. The methods are mostly inherited from Query::Base, and
+#  defined either here, or in one of the included Query::Modules.
 #
 #  The main difference from ActiveRecord objects (that also use ActiveModel) is
 #  attribute validation. ActiveRecord attributes must have data types that can
 #  be validated and stored in a database. _ActiveModel_ attributes are "ad hoc"
-#  and temporary. Because they don't need to be stored in a database they can
+#  and temporary. Because they don't need to be stored in a database, they can
 #  have any data type. They only need to "work" for the use case — a form, a
-#  query, etc. But we can call the same `validate` patterns as on AR models.
+#  query, etc. But we can define the same `validate` methods as on AR models.
 #
 #  In our case, we define our own validator and data type. That data type is
-#  `query_param`, and the attribute values are both checked and sanitized by
+#  `query_param`, and the attribute values are checked and sanitized by
 #  Query::Modules::Validation on initialization. Calling `valid?` uses
 #  Query::Modules::Validator to check for any validation errors that may
 #  have been stored in the Query instance by `clean_and_validate_params`.
 #
-#  So, `valid?` should mean the parameter values are usable by the corresponding
+#  `valid?` should mean the parameter values are usable by the corresponding
 #  ActiveRecord scope in each model. The scopes are what actually execute the
 #  database query and define the parameter requirements.
-#
-#  * Potential gotcha: Most query attributes, like `has_public_lat_lng` for
-#    Observation, are declared in the Query class, e.g. Query::Observations.
-#    However, for certain params like `region`, they are declared in
-#    Query::Filter. These are handled differently, because default values for
-#    these params may be automatically passed in from the current user's
-#    preferences via methods in ApplicationController::Indexes.
 #
 #  ## PARAMETER DECLARATIONS
 #
 #  Query parameter names must map to AR scope names 1:1 (with few exceptions).
-#  So the first task is to write a scope for the model that does what you want.
+#  So the first task in making a class queryable is to write scopes for the
+#  each attribute of the model that you want to be able to query.
 #
-#  For example, in the query above, the parameter `has_public_lat_lng` is first
-#  a scope of our Observation model that accepts a Boolean value. It finds
-#  observations that both have a `lat` value and where `gps_hidden` is false.
-#  `region` is a scope of Observation that accepts a string, and finds
+#  For example, in the query above, the parameter `has_public_lat_lng` is also a
+#  scope of our Observation model that accepts a Boolean value. It is defined
+#  to find observations that have a `lat` value and where `gps_hidden` is false.
+#  `region` is an Observation scope that accepts a string, and finds
 #  observations within a given region. The scope `names` finds observations in
-#  given taxa. It accepts a hash of arguments, with `lookup` being required.
+#  given taxa. `names` accepts a hash of arguments, `lookup` being required.
 #  But all of these requirements and logic are ultimately defined in the scope;
 #  Query is simply there to gather and store them, and pass them along.
 #
 #  Since the scopes can only accept certain types of data, Query needs to
 #  validate (and sometimes "clean") the attributes passed to the Query instance.
-#  Even though `query_param` is a single declared data type, it actually is
-#  the `parameter_declarations` that give the information about the way the
-#  attribute is validated. (My plan was to add that as an arg to each
-#  `query_param` and have a custom validator parse the declared arg in order
-#  to know how to validate each `query_param`s, but i couldn't figure out
-#  how to do this. This would have allowed simpler `attribute` declarations,
-#  more similar to ActiveRecord models. - AN 2025)
+#  Even though `query_param` is a single declared data type, it has a custom
+#  attribute option `:accepts` that you use to pass an argument describing how
+#  the attribute should be validated. (We don't differentiate between
+#  `query_param` types at the attribute level because they are all validated
+#  recursively, and nested values may use the same methods as top-level values.)
 #
-#  We use a special syntax to declare the data type of each Query parameter /
-#  attribute. The syntax is important because it tells our validation method in
-#  Query::Modules::Validation, `clean_and_validate_params`, how to parse the
-#  attribute value.
+#  We use a special syntax in `:accepts` to declare the validation type of each
+#  attribute. The syntax is important because it tells
+#  Query::Modules::Validation how to parse the attribute value.
 #
-#  ### Simple
+#  ### Simple values
 #
 #  The simplest data types are pretty self explanatory:
 #
@@ -98,8 +90,8 @@
 #
 #  Note that with some parameters, a `:string` may be a "Google-search" syntax
 #  of search directives like 'Amanita -muscaria "odd coloring"', but Query
-#  doesn't handle any parsing of the string. It simply forwards the string to
-#  the scope of the same name. The parsing is all done by the scope.
+#  doesn't do any parsing of the string. It simply forwards the string to the
+#  scope of the same name. The parsing is all done by the scope.
 #
 #  ### Model
 #
@@ -124,11 +116,12 @@
 #    [User]
 #    [Location]
 #
-#  In some cases the array may be ultimately parsed in the scope as a duration
-#  or range of values (e.g. a range of dates, ranks, vote values, etc.). In this
-#  case, two values is the maximum length of the array; more will be ignored.
-#  But for arrays of model instances like [Name], any number of instances or
-#  ids can be passed.
+#  In some cases the scope may be configured to parse the array as a range of
+#  values (e.g. of dates, ranks, etc.). In these scopes, passing one value
+#  is valid and usually considered as a minimum value, and any values after the
+#  second will be ignored. For arrays of model instances like [Name], any
+#  number of instances or ids can be passed, up to the limit defined in
+#  `MO.query_max_array`.
 #
 #  ### Hash
 #
@@ -136,26 +129,30 @@
 #  important.
 #
 #  If the first key in the hash is `:string` or `:boolean`, the parameter
-#  value will be parsed as an `enum`. The declaration states allowable values,
-#  and others are ignored.
+#  value will be parsed like an ActiveRecord "enum". The declaration states
+#  allowable values, and others are ignored.
 #
 #    { string: [:no, :either, :only] }
 #    { boolean: [true] } # simply a way of saying "ignore false"
 #
-#  If the first key in the hash is `:subquery`, it's parsed as a subquery of
-#  the specified model. That means any enclosed params will be sent to a new
-#  Query instance of that model, and merged into the current query.
-#  For more on this, see Query::Modules::Subqueries.
+#  If the first key in the hash is `:subquery`, the attribute is parsed as a
+#  subquery of the specified model. Subqueries validate enclosed params by
+#  instantiating a new Query of the subquery model with the enclosed params.
+#  (During execution of the query, the enclosed params are simply sent to the
+#  main model's corresponding `:#{subquery_model}_query` scope. This uses the
+#  params to call scopes of the subquery model, and merges the subquery into
+#  the current query.) For more on this, see Query::Modules::Subqueries.
 #
 #    { subquery: :Observation }
 #
 #  If neither `:string`, `:boolean`, nor `:subquery` is the first key, the hash
 #  is parsed as a hash of arguments to be sent to the scope of the same name.
-#  Each argument is independently validated as declared.
+#  Each argument is independently validated as declared. For example, this is
+#  the declaration of the attribute `in_box`:
 #
-#  For example, this is the declaration of the attribute `in_box`:
+#    { north: :float, south: :float, east: :float, west: :float }
 #
-#  in_box: { north: :float, south: :float, east: :float, west: :float }
+#  Each sub-param is validated as a :float.
 #
 #  ############################################################################
 #
@@ -199,12 +196,6 @@ class Query::Base
   end
 
   delegate :attribute_types, to: :class
-
-  def self.parameter_declarations
-    attribute_types
-  end
-
-  delegate :parameter_declarations, to: :class
 
   # Define has_attribute? here, it doesn't exist yet for ActiveModel.
   def self.has_attribute?(key) # rubocop:disable Naming/PredicateName
