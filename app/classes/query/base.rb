@@ -12,8 +12,8 @@
 #  `Observation`. A Query instance contains as little data as possible; it does
 #  not contain AR records. When you execute the Query by calling the `results`
 #  method, each parameter of the Query instance gets sent to an ActiveRecord
-#  scope of the corresponding model, and the scope returns the results. Query
-#  parameters are therefore specific to each scope of the AR model.
+#  scope of the corresponding model; scopes are chained to return the results.
+#  Query parameters are therefore specific to each scope of the AR model.
 #
 #  Each Query class declares the parameters it will accept, and what type of
 #  data each parameter expects, in `parameter_declarations` at the top of the
