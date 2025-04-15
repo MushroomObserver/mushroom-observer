@@ -7,15 +7,16 @@
 #
 #  ## Overview
 #  Query is basically just a way to validate, sanitize, store and retrieve
-#  parameters. When you execute the Query (i.e., call the `results` method),
+#  parameters that filter a database query of a given model, like `Name` or
+#  `Observation`. When you execute the Query by calling the `results` method,
 #  each parameter of the Query instance gets sent to an ActiveRecord scope of
-#  the corresponding ActiveRecord model, e.g. `Observation`. So Query instance
-#  parameters obviously are specific to the AR model being queried.
+#  the corresponding model. Query instance parameters are specific to the
+#  AR model being queried.
 #
-#  For the sake of familiarity, Query classes use ActiveModel. Each instance
-#  of a Query class is just a data object with validatable attributes, instance
-#  methods and class methods. For Query classes, the methods are all pretty
-#  standard; they are defined either here in Query::Base or in one of its
+#  For the sake of familiarity, Query classes also use ActiveModel. Each
+#  instance of a Query class is a data object with validatable attributes,
+#  instance methods and class methods. For Query classes, the methods are all
+#  pretty standard; they are defined either here in Query::Base or in one of its
 #  included Query::Modules.
 #
 #  The main difference from ActiveRecord objects (that also use ActiveModel) is
@@ -23,11 +24,11 @@
 #  be validated and stored in a database. _ActiveModel_ attributes are "ad hoc"
 #  and temporary, and because they don't need to be stored in a database they
 #  can have any data type. They only need to "work" for the use case — a form,
-#  a query, etc. But they can call the same `validate` methods as AR models.
+#  a query, etc. But we can call the same `validate` methods as on AR models.
 #
 #  In our case, the parameter values need to be valid for use in corresponding
 #  ActiveRecord scopes in each model. The scopes are what actually execute the
-#  database query.
+#  database query and define the parameter requirements.
 #
 #  Each Query class declares the parameters it will accept, and what type of
 #  data each parameter expects, in `parameter_declarations` at the top of the
@@ -39,12 +40,12 @@
 #      names: { lookup: "Amanita" }              names: { lookup: "Amanita" }
 #    )                                         )
 #
-#  Potential gotcha: Most Observation query attributes, like
-#  `has_public_lat_lng`, are declared in Query::Observations. However, for
-#  certain params like `region`, they are declared in Query::Filter.
-#  These are handled differently because default values for these params
-#  may be automatically passed in according to the current user's preferences,
-#  via ApplicationController::Indexes.
+#  Potential gotcha: Most query attributes, like `has_public_lat_lng` for
+#  Observation, are declared as expected, in Query::Observations. However, for
+#  certain params like `region`, they are declared in Query::Filter. These are
+#  handled differently, because default values for these params may be
+#  automatically passed in from the current user's preferences via methods in
+#  ApplicationController::Indexes.
 #
 #  ## Parameter declarations
 #
@@ -57,10 +58,10 @@
 #  arguments, with `lookup` being required. All of these requirements are
 #  ultimately defined in the scope.
 #
-#  So, since the scopes can only accept certain types of data, Query needs to
-#  validate (and sometimes "clean") the attributes sent to the Query instance.
+#  Since the scopes can only accept certain types of data, Query needs to
+#  validate (and sometimes "clean") the attributes passed to the Query instance.
 #
-#  We use a special syntax to declare the data type of each Query parameter or
+#  We use a special syntax to declare the data type of each Query parameter /
 #  attribute. The syntax is important because it tells our validation method in
 #  Query::Modules::Validation, `clean_and_validate_params`, how to parse the
 #  attribute value.
@@ -100,16 +101,19 @@
 #    [User]
 #    [Location]
 #
+#  In some cases the array may be ultimately parsed in the scope as a duration
+#  or range of values (e.g. a range of dates, ranks, vote values, etc.)
+#
 #  ### HASH
 #  An attribute declared with a hash could mean several things, so syntax is
 #  important.
 #
 #  If the first key in the hash is `:string` or `:boolean`, the parameter
-#  value will be parsed like an `enum`. The declaration states the allowable
-#  values, and others are ignored.
+#  value will be parsed as an `enum`. The declaration states allowable values,
+#  and others are ignored.
 #
 #    { string: [:no, :either, :only] }
-#    { boolean: [true] }               # simply a way of saying "ignore false"
+#    { boolean: [true] } # simply a way of saying "ignore false"
 #
 #  If the first key in the hash is `:subquery`, it's parsed as a subquery of
 #  the specified model. That means any enclosed params will be sent to a new
