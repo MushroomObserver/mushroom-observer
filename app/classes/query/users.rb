@@ -1,24 +1,11 @@
 # frozen_string_literal: true
 
 class Query::Users < Query::Base
-  def self.parameter_declarations
-    super.merge(
-      created_at: [:time],
-      updated_at: [:time],
-      id_in_set: [User],
-      has_contribution: :boolean,
-      pattern: :string
-    )
-  end
-
-  # Declare the parameters as model attributes, of custom type `query_param`
-  parameter_declarations.each do |param_name, accepts|
-    attribute param_name, :query_param, accepts: accepts
-  end
-
-  def model
-    @model ||= User
-  end
+  query_attr(:created_at, [:time])
+  query_attr(:updated_at, [:time])
+  query_attr(:id_in_set, [User])
+  query_attr(:has_contribution, :boolean)
+  query_attr(:pattern, :string)
 
   def alphabetical_by
     @alphabetical_by ||= case params[:order_by].to_s

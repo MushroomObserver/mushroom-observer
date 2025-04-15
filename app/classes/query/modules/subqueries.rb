@@ -74,7 +74,14 @@ module Query::Modules::Subqueries
     end
 
     def find_subquery_param_name(filter)
-      parameter_declarations.key({ subquery: filter })
+      key = if filter.to_s.include?("Description")
+              :description_query
+            else
+              :"#{filter.to_s.underscore}_query"
+            end
+      return key if attribute_types.symbolize_keys.key?(key)
+
+      nil
     end
 
     def add_default_subquery_conditions(target, filter, params)

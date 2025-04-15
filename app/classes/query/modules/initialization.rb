@@ -120,7 +120,7 @@ module Query::Modules::Initialization
     sendable[:order_by] = order_by if order_by.present?
     return sendable unless model == RssLog
 
-    sendable.except(*content_filter_parameters.keys)
+    sendable.except(*content_filter_parameters)
   end
 
   # Most name queries are filtered to remove misspellings.
@@ -143,7 +143,7 @@ module Query::Modules::Initialization
   end
 
   def active_filters
-    @active_filters ||= params.slice(*content_filter_parameters.keys).compact
+    @active_filters ||= params.slice(*content_filter_parameters).compact
   end
 
   ##############################################################################

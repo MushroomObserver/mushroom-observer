@@ -1,25 +1,12 @@
 # frozen_string_literal: true
 
 class Query::GlossaryTerms < Query::Base
-  def self.parameter_declarations
-    super.merge(
-      created_at: [:time],
-      updated_at: [:time],
-      by_users: [User],
-      name_has: :string,
-      description_has: :string,
-      pattern: :string
-    )
-  end
-
-  # Declare the parameters as model attributes, of custom type `query_param`
-  parameter_declarations.each do |param_name, accepts|
-    attribute param_name, :query_param, accepts: accepts
-  end
-
-  def model
-    @model ||= GlossaryTerm
-  end
+  query_attr(:created_at, [:time])
+  query_attr(:updated_at, [:time])
+  query_attr(:by_users, [User])
+  query_attr(:name_has, :string)
+  query_attr(:description_has, :string)
+  query_attr(:pattern, :string)
 
   def alphabetical_by
     @alphabetical_by ||= GlossaryTerm[:name]

@@ -192,47 +192,56 @@ class Query::Base
 
   attr_writer :record
 
-  def attribute_types
-    self.class.attribute_types.symbolize_keys!
+  query_attr(:order_by, :string)
+
+  def self.attribute_types
+    super.symbolize_keys!
   end
 
+  delegate :attribute_types, to: :class
+
   def self.parameter_declarations
-    { order_by: :string }
+    attribute_types
   end
 
   delegate :parameter_declarations, to: :class
 
-  # Could use has_attribute? here, but it doesn't exist yet for ActiveModel.
-  # Only called in ApplicationController::Queries#apply_one_content_filter
-  def self.takes_parameter?(key)
-    parameter_declarations.key?(key)
+  # Define has_attribute? here, it doesn't exist yet for ActiveModel.
+  def self.has_attribute?(key) # rubocop:disable Naming/PredicateName
+    attribute_types.key?(key)
   end
 
-  delegate :takes_parameter?, to: :class
+  delegate :has_attribute?, to: :class
 
   # :id_in_set must be moved to the last position so it can reorder results.
   def self.scope_parameters
     excepts = [:id_in_set, :preference_filter]
-    @scope_parameters = parameter_declarations.except(*excepts).keys +
-                        [:id_in_set]
+    @scope_parameters = attribute_types.except(*excepts).keys + [:id_in_set]
   end
 
   delegate :scope_parameters, to: :class
 
+  # returns keys
   def self.content_filter_parameters
     filters = Query::Filter.all
-    @content_filter_parameters ||= filters.each_with_object({}) do |f, p|
-      p[f.sym] = f.type
+    @content_filter_parameters ||= filters.each_with_object([]) do |f, ary|
+      ary << f.sym
     end.freeze
   end
 
   delegate :content_filter_parameters, to: :class
 
   # def self.subquery_parameters
-  #   parameter_declarations.select { |key, _v| key.to_s.include?("_query") }
+  #   attribute_types.select { |key, _v| key.to_s.include?("_query") }
   # end
 
   # delegate :subquery_parameters, to: :class
+
+  def self.model
+    name.demodulize.singularize.constantize
+  end
+
+  delegate :model, to: :class
 
   # Can the current class be called as a subquery of the target Query class?
   def relatable?(target)
@@ -244,8 +253,7 @@ class Query::Base
   end
 
   def default_order
-    self.class.default_order ||
-      raise("Didn't supply default order for #{model} query.")
+    self.class.default_order || :id
   end
 
   def ==(other)

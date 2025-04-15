@@ -4,34 +4,36 @@ class Query::Locations < Query::Base
   include Query::Params::AdvancedSearch
   include Query::Params::Filters
 
-  def self.parameter_declarations
-    super.merge(
-      created_at: [:time],
-      updated_at: [:time],
-      id_in_set: [Location],
-      by_users: [User],
-      by_editor: User,
-      in_box: { north: :float, south: :float, east: :float, west: :float },
-      # region: :string, # content filter
-      pattern: :string,
-      regexp: :string,
-      has_notes: :boolean,
-      notes_has: :string,
-      has_descriptions: :boolean,
-      has_observations: :boolean,
-      description_query: { subquery: :LocationDescription },
-      observation_query: { subquery: :Observation }
-    ).merge(content_filter_parameter_declarations(Location)).
+  query_attr(:created_at, [:time])
+  query_attr(:updated_at, [:time])
+  query_attr(:id_in_set, [Location])
+  query_attr(:by_users, [User])
+  query_attr(:by_editor, User)
+  query_attr(:in_box, { north: :float, south: :float,
+                        east: :float, west: :float })
+  # query_attr(:region, :string) # content filter
+  query_attr(:has_notes, :boolean)
+  query_attr(:notes_has, :string)
+  query_attr(:pattern, :string)
+  query_attr(:regexp, :string)
+  # query_attr(:search_name, :string) # advanced search
+  # query_attr(:search_where, :string) # advanced search
+  # query_attr(:search_user, :string) # advanced search
+  # query_attr(:search_content, :string) # advanced search
+  query_attr(:has_descriptions, :boolean)
+  query_attr(:has_observations, :boolean)
+  query_attr(:description_query, { subquery: :LocationDescription })
+  query_attr(:observation_query, { subquery: :Observation })
+
+  def self.extra_parameter_declarations
+    content_filter_parameter_declarations(Location).
       merge(advanced_search_parameter_declarations)
   end
 
-  # Declare the parameters as model attributes, of custom type `query_param`
-  parameter_declarations.each do |param_name, accepts|
-    attribute param_name, :query_param, accepts: accepts
-  end
-
-  def model
-    @model ||= Location
+  # Declare filter and advanced search parameters as model attributes,
+  # of custom type `query_param`
+  extra_parameter_declarations.each do |param_name, accepts|
+    query_attr(param_name, accepts)
   end
 
   def self.default_order

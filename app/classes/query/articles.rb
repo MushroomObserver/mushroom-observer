@@ -1,25 +1,12 @@
 # frozen_string_literal: true
 
 class Query::Articles < Query::Base
-  def self.parameter_declarations
-    super.merge(
-      created_at: [:time],
-      updated_at: [:time],
-      id_in_set: [Article],
-      title_has: :string,
-      body_has: :string,
-      by_users: [User]
-    )
-  end
-
-  # Declare the parameters as model attributes, of custom type `query_param`
-  parameter_declarations.each do |param_name, accepts|
-    attribute param_name, :query_param, accepts: accepts
-  end
-
-  def model
-    @model ||= Article
-  end
+  query_attr(:created_at, [:time])
+  query_attr(:updated_at, [:time])
+  query_attr(:id_in_set, [Article])
+  query_attr(:title_has, :string)
+  query_attr(:body_has, :string)
+  query_attr(:by_users, [User])
 
   def alphabetical_by
     @alphabetical_by ||= Article[:title]
