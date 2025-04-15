@@ -13,7 +13,7 @@
 #  sorting and selection conditions.
 #
 #  To filter query results, you can send additional parameters.  For example,
-#  create_query(:Comment for_user: user.id) retrieves comments posted on a
+#  create_query(:Comment, for_user: user.id) retrieves comments posted on a
 #  given user's observations.  Query saves the parameters alongside the model,
 #  and together these fully specify a query that may be recreated and
 #  executed at a later time, even potentially by another user (e.g., if users
