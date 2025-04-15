@@ -25,14 +25,15 @@
 #   { north:, south:, east:, west: } (forwarded as a hash of values)
 #
 # re: custom attribute types - https://stackoverflow.com/a/79417688/3357635
+#                              https://stackoverflow.com/a/78668203/3357635
 #
 class QueryParamType < ActiveModel::Type::Value
   attr_reader :accepts
 
   # Add our custom arg :accepts to the default args.
-  def initialize(precision: nil, limit: nil, scale: nil, accepts: nil)
-    super(precision:, limit:, scale:)
+  def initialize(accepts: nil)
     @accepts = accepts
+    super()
   end
 
   # This is required and used if registering the type instead of just passing

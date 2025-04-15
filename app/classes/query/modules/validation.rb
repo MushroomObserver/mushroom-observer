@@ -8,10 +8,10 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     @validation_errors = []
     old_params = @params.dup&.deep_compact&.deep_symbolize_keys || {}
     new_params = {}
-    permitted_params = parameter_declarations.slice(*old_params.keys)
+    permitted_params = attribute_types.slice(*old_params.keys)
     permitted_params.each do |param, param_type|
       val = old_params[param]
-      val = validate_value(param_type, param, val) if val.present?
+      val = validate_value(param_type.accepts, param, val) if val.present?
       new_params[param] = val
     end
     @params = new_params

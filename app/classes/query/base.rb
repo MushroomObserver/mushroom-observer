@@ -192,6 +192,10 @@ class Query::Base
 
   attr_writer :record
 
+  def attribute_types
+    self.class.attribute_types.symbolize_keys!
+  end
+
   def self.parameter_declarations
     { order_by: :string }
   end

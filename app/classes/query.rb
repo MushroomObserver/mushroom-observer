@@ -133,9 +133,10 @@ class Query
 
   def self.new(model, params = {}, current = nil)
     klass = "Query::#{model.to_s.pluralize}".constantize
-    # Just ignore undeclared params:
-    query = klass.new(params.slice(*klass.parameter_declarations.keys))
-    query.params = query.attributes # initialize params for cleaning/validation
+    # Initialize an instance, ignoring undeclared params:
+    query = klass.new(params.slice(*klass.attribute_names.map(&:to_sym)))
+    # `params` are basically the active `attributes`
+    query.params = query.attributes.compact # initialize for cleaning/validation
     query.subqueries = {}
     query.current = current if current
     query.valid = query.valid? # reinitializes params after cleaning/validation
