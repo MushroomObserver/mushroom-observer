@@ -5,58 +5,71 @@
 #  To make an ActiveRecord model queryable, create a new class that inherits
 #  from this class, Query::Base.
 #
-#  ## Overview
+#  ## OVERVIEW
+#
 #  Query is basically just a way to validate, sanitize, store and retrieve
 #  parameters that filter a database query of a given model, like `Name` or
-#  `Observation`. When you execute the Query by calling the `results` method,
-#  each parameter of the Query instance gets sent to an ActiveRecord scope of
-#  the corresponding model. Query instance parameters are specific to the
-#  AR model being queried.
-#
-#  For the sake of familiarity, Query classes also use ActiveModel. Each
-#  instance of a Query class is a data object with validatable attributes,
-#  instance methods and class methods. For Query classes, the methods are all
-#  pretty standard; they are defined either here in Query::Base or in one of its
-#  included Query::Modules.
-#
-#  The main difference from ActiveRecord objects (that also use ActiveModel) is
-#  attribute validation. ActiveRecord attributes must have data types that can
-#  be validated and stored in a database. _ActiveModel_ attributes are "ad hoc"
-#  and temporary, and because they don't need to be stored in a database they
-#  can have any data type. They only need to "work" for the use case — a form,
-#  a query, etc. But we can call the same `validate` methods as on AR models.
-#
-#  In our case, the parameter values need to be valid for use in corresponding
-#  ActiveRecord scopes in each model. The scopes are what actually execute the
-#  database query and define the parameter requirements.
+#  `Observation`. A Query instance contains as little data as possible; it does
+#  not contain AR records. When you execute the Query by calling the `results`
+#  method, each parameter of the Query instance gets sent to an ActiveRecord
+#  scope of the corresponding model, and the scope returns the results. Query
+#  parameters are therefore specific to each scope of the AR model.
 #
 #  Each Query class declares the parameters it will accept, and what type of
 #  data each parameter expects, in `parameter_declarations` at the top of the
-#  class. These are the `attributes` you'd initialize a new Query instance with.
+#  class. These are the `attributes` you initialize a new Query instance with.
 #
 #    Query::Observations.new(           or     Query.new(:Observation,
 #      has_public_lat_lng: true,                 has_public_lat_lng: true,
 #      region: "Massachusetts, USA",             region: "Massachusetts, USA",
 #      names: { lookup: "Amanita" }              names: { lookup: "Amanita" }
 #    )                                         )
+#  * (see note below)
 #
-#  Potential gotcha: Most query attributes, like `has_public_lat_lng` for
-#  Observation, are declared as expected, in Query::Observations. However, for
-#  certain params like `region`, they are declared in Query::Filter. These are
-#  handled differently, because default values for these params may be
-#  automatically passed in from the current user's preferences via methods in
-#  ApplicationController::Indexes.
+#  ## VALIDATION
 #
-#  ## Parameter declarations
+#  For the sake of familiarity, Query classes use ActiveModel. Each instance of
+#  a Query class is a data object with validatable attributes, instance methods
+#  and class methods. The methods are all pretty standard. They are defined
+#  either here in Query::Base, or in one of the included Query::Modules.
+#
+#  The main difference from ActiveRecord objects (that also use ActiveModel) is
+#  attribute validation. ActiveRecord attributes must have data types that can
+#  be validated and stored in a database. _ActiveModel_ attributes are "ad hoc"
+#  and temporary. Because they don't need to be stored in a database they can
+#  have any data type. They only need to "work" for the use case — a form, a
+#  query, etc. But we can call the same `validate` patterns as on AR models.
+#
+#  In our case, we define our own validator and data type. That data type is
+#  `query_param`, and the attribute values are both checked and sanitized by
+#  Query::Modules::Validation on initialization. Calling `valid?` uses
+#  Query::Modules::Validator to check for any validation errors that may
+#  have been stored in the Query instance by `clean_and_validate_params`.
+#
+#  So, `valid?` should mean the parameter values are usable by the corresponding
+#  ActiveRecord scope in each model. The scopes are what actually execute the
+#  database query and define the parameter requirements.
+#
+#  * Potential gotcha: Most query attributes, like `has_public_lat_lng` for
+#    Observation, are declared in the Query class, e.g. Query::Observations.
+#    However, for certain params like `region`, they are declared in
+#    Query::Filter. These are handled differently, because default values for
+#    these params may be automatically passed in from the current user's
+#    preferences via methods in ApplicationController::Indexes.
+#
+#  ## PARAMETER DECLARATIONS
 #
 #  Query parameter names must map to AR scope names 1:1 (with few exceptions).
 #  So the first task is to write a scope for the model that does what you want.
 #
-#  For example, in the query above, the parameter `has_public_lat_lng` is also
-#  a scope of our Observation model that accepts a Boolean value. `region` is
-#  a scope of Observation that accepts a string, and `names` accepts a hash of
-#  arguments, with `lookup` being required. All of these requirements are
-#  ultimately defined in the scope.
+#  For example, in the query above, the parameter `has_public_lat_lng` is first
+#  a scope of our Observation model that accepts a Boolean value. It finds
+#  observations that both have a `lat` value and where `gps_hidden` is false.
+#  `region` is a scope of Observation that accepts a string, and finds
+#  observations within a given region. The scope `names` finds observations in
+#  given taxa. It accepts a hash of arguments, with `lookup` being required.
+#  But all of these requirements and logic are ultimately defined in the scope;
+#  Query is simply there to gather and store them, and pass them along.
 #
 #  Since the scopes can only accept certain types of data, Query needs to
 #  validate (and sometimes "clean") the attributes passed to the Query instance.
@@ -66,7 +79,8 @@
 #  Query::Modules::Validation, `clean_and_validate_params`, how to parse the
 #  attribute value.
 #
-#  ### SIMPLE
+#  ### Simple
+#
 #  The simplest data types are pretty self explanatory:
 #
 #    :string
@@ -80,7 +94,8 @@
 #  doesn't handle any parsing of the string. It simply forwards the string to
 #  the scope of the same name. The parsing is all done by the scope.
 #
-#  ### MODEL
+#  ### Model
+#
 #  An attribute declared with an ActiveRecord class name means that the
 #  parameter will accept either an `id` or an ActiveRecord model instance.
 #  If the caller sends an instance, it will be "sanitized" to an `id`, and
@@ -90,7 +105,8 @@
 #    Location
 #    Project
 #
-#  ### ARRAY
+#  ### Array
+#
 #  An attribute declared with an array means that the parameter will either
 #  accept one value, or an array of values. Single values do not need to be
 #  sent "inside arrays".
@@ -104,7 +120,8 @@
 #  In some cases the array may be ultimately parsed in the scope as a duration
 #  or range of values (e.g. a range of dates, ranks, vote values, etc.)
 #
-#  ### HASH
+#  ### Hash
+#
 #  An attribute declared with a hash could mean several things, so syntax is
 #  important.
 #
