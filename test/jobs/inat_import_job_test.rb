@@ -876,21 +876,47 @@ class InatImportJobTest < ActiveJob::TestCase
   def stub_inat_photo_requests(mock_inat_response)
     JSON.parse(mock_inat_response)["results"].each do |result|
       result["observation_photos"].each do |photo|
-        add_stub(stub_request(
-          :get,
-          "#{PHOTO_BASE}/#{photo["photo_id"]}/original.jpg"
-        ).
-          with(
-            headers: {
-              "Accept" => "image/*",
-              "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
-              "Host" => "inaturalist-open-data.s3.amazonaws.com",
-              "User-Agent" => "Ruby"
-            }
-          ).
-          to_return(status: 200, body: image_for_stubs, headers: {}))
+        if photo["photo"]["license_code"].present?
+          stub_inat_licensed_photo_request(photo)
+        else
+          stub_inat_unlicensed_photo_request(photo)
+        end
       end
     end
+  end
+
+  def stub_inat_licensed_photo_request(photo)
+    add_stub(stub_request(
+      :get,
+      "#{PHOTO_BASE}/#{photo["photo_id"]}/original.jpg"
+    ).
+      with(
+        headers: {
+          "Accept" => "image/*",
+          "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+          "Host" => "inaturalist-open-data.s3.amazonaws.com",
+          "User-Agent" => "Ruby"
+        }
+      ).
+      to_return(status: 200, body: image_for_stubs, headers: {}))
+  end
+
+  def stub_inat_unlicensed_photo_request(photo)
+    add_stub(
+      stub_request(
+        :get,
+        "https://static.inaturalist.org/photos/#{photo["id"]}/original.jpg"
+      ).
+        with(
+          headers: {
+            "Accept" => "image/*",
+            "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+            "Host" => "static.inaturalist.org",
+            "User-Agent" => "Ruby"
+          }
+        ).
+      to_return(status: 200, body: image_for_stubs, headers: {})
+    )
   end
 
   def stub_mo_photo_importer(mock_inat_response)
