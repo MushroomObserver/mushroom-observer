@@ -29,9 +29,10 @@
 class QueryParamType < ActiveModel::Type::Value
   attr_reader :accepts
 
-  def initialize(**args)
+  # We don't want to call `super` here, we want to overwrite it, because it
+  # will not accept our custom arg.
+  def initialize(**args) # rubocop:disable Lint/MissingSuper
     @accepts = args[:accepts]
-    super
   end
 
   # This is required and used if you register the type
