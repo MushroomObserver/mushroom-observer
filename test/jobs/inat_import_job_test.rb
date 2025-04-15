@@ -125,13 +125,16 @@ class InatImportJobTest < ActiveJob::TestCase
     QueuedEmail.queue = false
   end
 
-  def test_import_job_suggestion_by_mo_user
+  # Prove (inter alia) that the MO Naming.user differs from the importing user
+  # when the iNat user who made the 1st iNat id is another MO user
+  def test_import_job_inat_id_suggested_by_another_by_mo_user
     file_name = "calostoma_lutescens"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
+
+    # Tweak mock response to make mary the person who made the 1st iNat id
     user = users(:mary)
     assert(user.inat_username.present?,
            "Test needs user fixture with an inat_username")
-    # tweak mock response to make rolf the person who made the 1st iNat id
     parsed_response = JSON.parse(mock_inat_response)
     parsed_response["results"].first["identifications"].first["user"]["login"] =
       user.inat_username
