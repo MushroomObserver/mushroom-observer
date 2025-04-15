@@ -179,9 +179,7 @@ class InatImportJobTest < ActiveJob::TestCase
   end
 
   # Had 1 photo, 1 identification, 0 observation_fields; 0 sequences
-  # See note below about why this test is not run as its own test
-  # def test_import_job_obs_with_one_photo
-  def import_job_obs_with_one_photo
+  def test_import_job_obs_with_one_photo
     file_name = "evernia"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
     inat_import = create_inat_import(inat_response: mock_inat_response)
@@ -212,9 +210,6 @@ class InatImportJobTest < ActiveJob::TestCase
 
     assert_equal(1, obs.images.length, "Obs should have 1 image")
 
-    # JDC 2025-01-11
-    # Something weird happens with stubs if this method is run as its own test.
-    # The `assert_equal` passes only if certain other tests run before this one.
     inat_photo = JSON.parse(mock_inat_response)["results"].
                  first["observation_photos"].first
     imported_img = obs.images.first
@@ -305,9 +300,6 @@ class InatImportJobTest < ActiveJob::TestCase
       assert_match(taxon_name, obs.comments.first.comment,
                    "Snapshot comment missing suggested name #{taxon_name}")
     end
-
-    # See note in import_job_obs_with_one_photo
-    import_job_obs_with_one_photo
   end
 
   def test_import_job_infra_specific_name
