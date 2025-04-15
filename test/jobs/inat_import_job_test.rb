@@ -843,13 +843,20 @@ class InatImportJobTest < ActiveJob::TestCase
 
   # -------- Test doubles
 
+  # url for iNat authorization and authentication requests
   SITE = InatImportsController::SITE
+  # MO url called by iNat after iNat user authorizes MO to access their data
   REDIRECT_URI = InatImportsController::REDIRECT_URI
+  # iNat API url
   API_BASE = InatImportsController::API_BASE
-  PHOTO_BASE = "https://inaturalist-open-data.s3.amazonaws.com/photos"
-
+  # Value of the iNat API "iconic_taxa" query param
+  # That param is included in iNat API requests in order to limit the results
+  # to Fungi and slime molds (with Protozoa as a proxy for slime molds)
   ICONIC_TAXA = InatImportJob::ICONIC_TAXA
-  IMPORTED_BY_MO = InatImportJob::IMPORTED_BY_MO
+  # base url for iNat CC-licensed and public domain photos
+  LICENSED_PHOTO_BASE = "https://inaturalist-open-data.s3.amazonaws.com/photos"
+  # base url for iNat unlicensed photos
+  UNLICENSED_PHOTO_BASE = "https://static.inaturalist.org/photos"
 
   def stub_inat_interactions(
     inat_import:, mock_inat_response:, id_above: 0,
@@ -958,10 +965,13 @@ class InatImportJobTest < ActiveJob::TestCase
     end
   end
 
+  # stub the MO implicit request for the iNat photo
+  # Returns the same photo for all stubs, which is
+  # sufficient for testing purposes.
   def stub_inat_licensed_photo_request(photo)
     add_stub(stub_request(
       :get,
-      "#{PHOTO_BASE}/#{photo["photo_id"]}/original.jpg"
+      "#{LICENSED_PHOTO_BASE}/#{photo["photo_id"]}/original.jpg"
     ).
       with(
         headers: {
@@ -978,7 +988,7 @@ class InatImportJobTest < ActiveJob::TestCase
     add_stub(
       stub_request(
         :get,
-        "https://static.inaturalist.org/photos/#{photo["id"]}/original.jpg"
+        "#{UNLICENSED_PHOTO_BASE}/#{photo["id"]}/original.jpg"
       ).
         with(
           headers: {
