@@ -52,11 +52,13 @@ class Query::Observations < Query::Base
       location_query: { subquery: :Location },
       name_query: { subquery: :Name },
       sequence_query: { subquery: :Sequence }
-    ).merge(content_filter_parameter_declarations(Observation)).
+    ).
+      merge(content_filter_parameter_declarations(Observation)).
       merge(advanced_search_parameter_declarations)
   end
 
   # Declare the parameters as model attributes, of custom type `query_param`
+
   parameter_declarations.each_key do |param_name|
     attribute param_name, :query_param
   end
