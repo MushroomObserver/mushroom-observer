@@ -73,6 +73,11 @@
 #
 #  Since the scopes can only accept certain types of data, Query needs to
 #  validate (and sometimes "clean") the attributes passed to the Query instance.
+#  Even though `query_param` is a single declared data type, it actually is
+#  the `parameter_declarations` that give the information about the way the
+#  attribute is validated. (My plan was to add that as an arg to each
+#  `query_param` and have a validator automatically parse the declared arg for
+#  all `query_param`s, but i couldn't figure out how to do this.)
 #
 #  We use a special syntax to declare the data type of each Query parameter /
 #  attribute. The syntax is important because it tells our validation method in
