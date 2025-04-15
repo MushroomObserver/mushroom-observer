@@ -118,7 +118,10 @@
 #    [Location]
 #
 #  In some cases the array may be ultimately parsed in the scope as a duration
-#  or range of values (e.g. a range of dates, ranks, vote values, etc.)
+#  or range of values (e.g. a range of dates, ranks, vote values, etc.). In this
+#  case, two values is the maximum length of the array; more will be ignored.
+#  But for arrays of model instances like [Name], any number of instances or
+#  ids can be passed.
 #
 #  ### Hash
 #
