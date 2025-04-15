@@ -6,23 +6,28 @@
 #  from this class, Query::Base.
 #
 #  ## Overview
-#  Like ActiveRecord models, Query classes use ActiveModel. Each instance
+#  Query is basically just a way to validate, sanitize, store and retrieve
+#  parameters. When you execute the Query (i.e., call the `results` method),
+#  each parameter of the Query instance gets sent to an ActiveRecord scope of
+#  the corresponding ActiveRecord model, e.g. `Observation`. So Query instance
+#  parameters obviously are specific to the AR model being queried.
+#
+#  For the sake of familiarity, Query classes use ActiveModel. Each instance
 #  of a Query class is just a data object with validatable attributes, instance
 #  methods and class methods. For Query classes, the methods are all pretty
 #  standard; they are defined either here in Query::Base or in one of its
 #  included Query::Modules.
 #
-#  The main difference from ActiveRecord objects is attribute validation.
-#  ActiveRecord attributes must have data types that can be validated and
-#  stored in a database. _ActiveModel_ attributes are temporary, and because
-#  they don't need to be stored in a database they can have any data type.
-#  They only need to "work" for the use case — a form, a query, etc.
+#  The main difference from ActiveRecord objects (that also use ActiveModel) is
+#  attribute validation. ActiveRecord attributes must have data types that can
+#  be validated and stored in a database. _ActiveModel_ attributes are "ad hoc"
+#  and temporary, and because they don't need to be stored in a database they
+#  can have any data type. They only need to "work" for the use case — a form,
+#  a query, etc. But they can call the same `validate` methods as AR models.
 #
 #  In our case, the parameter values need to be valid for use in corresponding
-#  ActiveRecord scopes in each model - the scopes are what actually execute the
-#  database query. Query is basically just a way to validate, sanitize, store
-#  and retrieve these scope parameters, so Query instance parameters must be
-#  specific to the AR model being queried.
+#  ActiveRecord scopes in each model. The scopes are what actually execute the
+#  database query.
 #
 #  Each Query class declares the parameters it will accept, and what type of
 #  data each parameter expects, in `parameter_declarations` at the top of the
