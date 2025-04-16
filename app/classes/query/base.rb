@@ -206,6 +206,8 @@ class Query::Base
   # "clean up" and reassign attributes before validation
   before_validation :clean_and_validate_params
 
+  # `attribute_types` is a core Rails method, but it unexpectedly returns
+  # string keys, and they are not accessible with symbols.
   def self.attribute_types
     super.symbolize_keys!
   end
@@ -266,17 +268,17 @@ class Query::Base
     serialize == other.try(&:serialize)
   end
 
-  # NOTE: QueryRecord[:description] is not a Rails-serialized column; we call
-  # `to_json` here to serializate it ourselves.
-  # Prepares the query params, adding the model, for saving to a QueryRecord.
+  # Serialize the query params, adding the model, for saving to a QueryRecord.
   # The :description column is accessed not just to recompose a query, but to
   # identify existing query records that match current params. That's why the
   # keys are sorted here before being stored as strings in to_json - because
-  # when matching a serialized hash, strings must match exactly. This is
-  # more efficient however than using a Rails-serialized column and comparing
-  # the parsed hashes (in whatever order), because when a column is serialized
+  # when matching a serialized hash, strings must match exactly.
+  #
+  # NOTE: QueryRecord[:description] is not a Rails-serialized column; we call
+  # `to_json` here to serializate it ourselves. Using SQL to compare serialized
+  # strings is more efficient than making it a Rails-serialized column and using
+  # Ruby to compare hashes (in whatever order), because in a serialized column
   # you can't use SQL on the column value, you have to compare parsed instances.
-  # was params.sort.to_h.merge(model: model.name).to_json
   def serialize
     attributes.compact.sort.to_h.merge(model: model.name).to_json
   end
