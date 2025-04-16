@@ -269,10 +269,10 @@ class Query::Base
   end
 
   # Serialize the query params, adding the model, for saving to a QueryRecord.
-  # The :description column is accessed not just to recompose a query, but to
-  # identify existing query records that match current params. That's why the
-  # keys are sorted here before being stored as strings in to_json - because
-  # when matching a serialized hash, strings must match exactly.
+  # We use this column of QueryRecord to identify an existing query record that
+  # matches current params, and sometimes to recompose a query from the string.
+  # That's why the keys are sorted here before being serialized via `to_json` -
+  # when matching, strings must match exactly.
   #
   # NOTE: QueryRecord[:description] is not a Rails-serialized column; we call
   # `to_json` here to serializate it ourselves. Using SQL to compare serialized
