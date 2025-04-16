@@ -126,8 +126,8 @@
 #  the first, some scopes parse this as "match this value only". In all scopes
 #  expecting range arrays, any values after the second are ignored.
 #
-#  For arrays of model instances like [Project], any number of instances or ids
-#  can be passed, up to the limit defined in `MO.query_max_array`.
+#  For scopes accepting arrays of model instances like [Project], you can pass
+#  any number of objects or ids, up to a limit defined in `MO.query_max_array`.
 #
 #  ### Hash
 #
