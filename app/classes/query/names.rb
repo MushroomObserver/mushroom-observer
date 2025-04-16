@@ -5,6 +5,8 @@ class Query::Names < Query::Base
   include Query::Params::AdvancedSearch
   include Query::Params::Filters
 
+  # Commented-out attributes are here so we don't forget they're added
+  # via `extra_parameter_declarations` below.
   query_attr(:created_at, [:time])
   query_attr(:updated_at, [:time])
   query_attr(:id_in_set, [Name])

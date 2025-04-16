@@ -3,6 +3,8 @@
 class Query::RssLogs < Query::Base
   include Query::Params::Filters
 
+  # Commented-out attributes are here so we don't forget they're added
+  # via `extra_parameter_declarations` below.
   query_attr(:updated_at, [:time])
   query_attr(:id_in_set, [RssLog])
   query_attr(:type, :string)
