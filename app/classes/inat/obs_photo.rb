@@ -60,6 +60,8 @@ class Inat
       "iNat photo_id: #{@photo[:photo_id]}, uuid: #{@photo[:uuid]}"
     end
 
-    def url = @photo[:photo][:url].sub("/square.", "/original.")
+    # Convert the url returned by the iNat API to
+    # the url of the full-size image
+    def url = @photo[:photo][:url].sub("square", "original")
   end
 end
