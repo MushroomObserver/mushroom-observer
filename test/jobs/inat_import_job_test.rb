@@ -719,10 +719,10 @@ class InatImportJobTest < ActiveJob::TestCase
   )
     stub_token_requests
     stub_check_username_match(login)
-    stub_inat_api_request(inat_import: inat_import,
-                          mock_inat_response: mock_inat_response,
-                          id_above: id_above,
-                          superimporter: superimporter)
+    stub_inat_observation_request(inat_import: inat_import,
+                                  mock_inat_response: mock_inat_response,
+                                  id_above: id_above,
+                                  superimporter: superimporter)
     stub_inat_photo_requests(mock_inat_response)
     stub_modify_inat_observations(mock_inat_response)
   end
@@ -783,8 +783,9 @@ class InatImportJobTest < ActiveJob::TestCase
                 headers: {}))
   end
 
-  def stub_inat_api_request(inat_import:, mock_inat_response:, id_above: 0,
-                            superimporter: false)
+  def stub_inat_observation_request(inat_import:,
+                                    mock_inat_response:, id_above: 0,
+                                    superimporter: false)
     query_args = {
       iconic_taxa: ICONIC_TAXA,
       id: inat_import.inat_ids,
