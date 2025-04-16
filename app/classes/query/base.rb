@@ -122,10 +122,12 @@
 #
 #  In some cases the scope may be configured to parse the array as a range of
 #  values (e.g. of dates, ranks, etc.). In these scopes, passing one value
-#  is valid and usually considered as a minimum value, and any values after the
-#  second will be ignored. For arrays of model instances like [Name], any
-#  number of instances or ids can be passed, up to the limit defined in
-#  `MO.query_max_array`.
+#  is valid and often considered as a minimum value. If the second value matches
+#  the first, some scopes parse this as "match this value only". In all scopes
+#  expecting range arrays, any values after the second are ignored.
+#
+#  For arrays of model instances like [Project], any number of instances or ids
+#  can be passed, up to the limit defined in `MO.query_max_array`.
 #
 #  ### Hash
 #
@@ -133,21 +135,29 @@
 #  important.
 #
 #  If the first key in the hash is `:string` or `:boolean`, the parameter
-#  value will be parsed like an ActiveRecord "enum". The declaration states
-#  allowable values, and others are ignored.
+#  value will be parsed like an ActiveRecord "enum". The declaration should
+#  state an array of allowable values; others will be ignored.
 #
 #    { string: [:no, :either, :only] }
-#    { boolean: [true] } # simply a way of saying "ignore false"
+#    { boolean: [true] } # this is a way of saying "ignore false"
 #
 #  If the first key in the hash is `:subquery`, the attribute is parsed as a
-#  subquery of the specified model. Subqueries validate enclosed params by
-#  instantiating a new Query of the subquery model with the enclosed params.
-#  (During execution of the query, the enclosed params are simply sent to the
-#  main model's corresponding `:#{subquery_model}_query` scope. This uses the
-#  params to call scopes of the subquery model, and merges the subquery into
-#  the current query.) For more on this, see Query::Modules::Subqueries.
+#  subquery of the specified model.
 #
 #    { subquery: :Observation }
+#
+#  Subqueries validate enclosed params by instantiating a new Query of the
+#  subquery model, sending the enclosed hash of params. For example:
+#
+#    Query.new(:Name, pattern: "Lactarius",
+#                     observation_query: { notes_has: "Symbiota" })
+#
+#  The validator will call `Query.new(:Observation, notes_has: "Symbiota")`,
+#  to make sure that the params are valid and the subquery will work. However,
+#  during execution of the above query, the `notes_has` subparam is simply sent
+#  to the Name model's scope `:observation_query`. That uses the params to call
+#  scopes of the subquery (Observation) model, and merges the subquery into
+#  the current Name query. For more on this, see Query::Modules::Subqueries.
 #
 #  If neither `:string`, `:boolean`, nor `:subquery` is the first key, the hash
 #  is parsed as a hash of arguments to be sent to the scope of the same name.
