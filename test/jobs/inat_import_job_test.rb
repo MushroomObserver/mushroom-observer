@@ -423,26 +423,6 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(obs.sequences.one?, "Obs should have one sequence")
   end
 
-  def image_for_stubs
-    @image_for_stubs ||= Rails.root.join("test/images/test_image.jpg").read
-  end
-
-  def image_stubs(image_ids)
-    image_data = image_for_stubs
-    image_ids.each do |id|
-      stub_request(:get, "https://static.inaturalist.org/photos/#{id}/original.jpg").
-        with(
-          headers: {
-            "Accept" => "image/*",
-            "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
-            "Host" => "static.inaturalist.org",
-            "User-Agent" => "Ruby"
-          }
-        ).
-        to_return(status: 200, body: image_data, headers: {})
-    end
-  end
-
   def test_import_job_prov_name_pnw_style
     file_name = "donadinia_PNW01"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
@@ -461,7 +441,8 @@ class InatImportJobTest < ActiveJob::TestCase
     # Amazon Open Data Sponsorship Program images have a amazonaws.com url.
     # Other images have a static.inaturalist.org url.
     # They therefore are stubbed differently.
-    image_stubs([375_217_770, 375_216_871, 375_217_919])
+    # image_stubs([375_217_770, 375_216_871, 375_217_919])
+
 
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
@@ -880,13 +861,14 @@ class InatImportJobTest < ActiveJob::TestCase
       to_return(body: mock_inat_response))
   end
 
-  # Stub the MO requests to GET iNat original photos
-  # Returns the same photo for all stubs, which is
-  # sufficient for testing purposes.
+  # Stub MO requests which GET iNat original photos
   def stub_inat_photo_requests(mock_inat_response)
     JSON.parse(mock_inat_response)["results"].each do |result|
       result["observation_photos"].each do |photo|
         url = photo["photo"]["url"].sub("square", "original")
+        # NOTE: jdc 2025-04-16
+        # The following laysout mirrors how WebMock reports errors,
+        # making it easier to compare missing with actual stubs.
         stub_request(
           :get,
           url
@@ -899,9 +881,15 @@ class InatImportJobTest < ActiveJob::TestCase
               "User-Agent" => "Ruby"
             }
           ).
+          # Return the same photo for all stubs, which is
+          # sufficient for testing purposes.
           to_return(status: 200, body: image_for_stubs, headers: {})
       end
     end
+  end
+
+  def image_for_stubs
+    @image_for_stubs ||= Rails.root.join("test/images/test_image.jpg").read
   end
 
   def stub_mo_photo_importer(mock_inat_response)
