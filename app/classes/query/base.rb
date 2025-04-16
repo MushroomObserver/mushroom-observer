@@ -73,13 +73,14 @@
 #  the attribute should be validated. (We don't differentiate between
 #  `query_param` types at the attribute level because they are all validated
 #  recursively, and nested values may use the same methods as top-level values.)
-#  To keep this from getting too verbose, we assign Query attributes using the
-#  custom method `query_attr` whose second argument is the value of `:accepts`.
-#  See app/extensions/class.rb for the definition of `query_attr`.
 #
-#  `:accepts` expects a special syntax that declares a validation type for each
-#  attribute, and tells Query::Modules::Validation how to parse the attribute
-#  value. It uses the following patterns:
+#  To keep attribute assignment from getting too verbose, we assign them using a
+#  custom method `query_attr`, whose second argument is the value of `:accepts`.
+#  See app/extensions/class.rb for the definition of `query_attr`. This argument
+#  expects a special syntax declaring a validation type for each attribute, and
+#  telling Query::Modules::Validation how to parse the attribute value.
+#
+#  It uses the following patterns:
 #
 #  ### Simple values
 #
