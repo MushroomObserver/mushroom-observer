@@ -75,12 +75,9 @@ class InatImportJobTest < ActiveJob::TestCase
     QueuedEmail.queue = true
     before_emails_to_user = QueuedEmail.where(to_user: @user).count
 
-    Inat::PhotoImporter.stub(:new,
-                             stub_mo_photo_importer(mock_inat_response)) do
-      assert_difference("Observation.count", 1,
-                        "Failed to create observation") do
-        InatImportJob.perform_now(inat_import)
-      end
+    assert_difference("Observation.count", 1,
+                      "Failed to create observation") do
+      InatImportJob.perform_now(inat_import)
     end
 
     obs = Observation.last
@@ -149,12 +146,9 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
 
-    Inat::PhotoImporter.stub(:new,
-                             stub_mo_photo_importer(mock_inat_response)) do
-      assert_difference("Observation.count", 1,
-                        "Failed to create observation") do
-        InatImportJob.perform_now(inat_import)
-      end
+    assert_difference("Observation.count", 1,
+                      "Failed to create observation") do
+      InatImportJob.perform_now(inat_import)
     end
 
     obs = Observation.last
