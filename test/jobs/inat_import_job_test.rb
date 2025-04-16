@@ -1,29 +1,6 @@
 # frozen_string_literal: true
 
 require("test_helper")
-
-# Some classes with enough attributes to stub calls to Inat::PhotoImporter
-#   (which wraps calls to the MO Image API)
-# and get an image back like this
-#  api = Inat::PhotoImporter.new(params).api
-#  image = Image.find(api.results.first.id)
-class MockImageAPI
-  attr_reader :errors, :results
-
-  def initialize(errors: [], results: [])
-    @errors = errors
-    @results = results
-  end
-end
-
-class MockPhotoImporter
-  attr_reader :api
-
-  def initialize(api:)
-    @api = api
-  end
-end
-
 class InatImportJobTest < ActiveJob::TestCase
   # Prevent stubs from persisting between test methods because
   # the same request (/users/me) needs diffferent responses
@@ -860,31 +837,6 @@ class InatImportJobTest < ActiveJob::TestCase
 
   def image_for_stubs
     @image_for_stubs ||= Rails.root.join("test/images/test_image.jpg").read
-  end
-
-  def stub_mo_photo_importer(mock_inat_response)
-    # Suggested by CoPilot:
-    # I wanted to directly stub Inat::PhotoImporter.new,
-    # but that class doesn’t have a stub method by default. Therefore:
-    # Create a mock photo importer
-    mock_photo_importer = Minitest::Mock.new
-    img = images(:mock_imported_inat_image)
-    mock_photo_importer.expect(
-      :new, nil,
-      [{ api: MockImageAPI.new(errors: [], results: [img]) }]
-    )
-    results = JSON.parse(mock_inat_response)["results"]
-    # NOTE: This simply insures that ImageAPI is called the right # of times.
-    # It does NOT attach the right # of photos or even the correct photo.
-    results.each do |inat_obs|
-      inat_obs["observation_photos"].each do
-        mock_photo_importer.expect(
-          :api, # nil,
-          MockImageAPI.new(errors: [], results: [img])
-        )
-      end
-    end
-    mock_photo_importer
   end
 
   def stub_modify_inat_observations(mock_inat_response)
