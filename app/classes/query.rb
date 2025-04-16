@@ -145,6 +145,4 @@ class Query
     # query.initialize_query # if you want the attributes right away
     query
   end
-
-  delegate :default_order, to: :class
 end
