@@ -230,20 +230,9 @@ class InatImportJobTest < ActiveJob::TestCase
                                   display_name: "Tremellales",
                                   rank: "Order",
                                   user: @user)
-
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
 
-    stub_request(:get, "https://inaturalist-open-data.s3.amazonaws.com/photos/377332865/original.jpeg").
-      with(
-        headers: {
-          "Accept" => "image/*",
-          "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
-          "Host" => "inaturalist-open-data.s3.amazonaws.com",
-          "User-Agent" => "Ruby"
-        }
-      ).
-      to_return(status: 200, body: image_for_stubs, headers: {})
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
       InatImportJob.perform_now(inat_import)
@@ -939,53 +928,28 @@ class InatImportJobTest < ActiveJob::TestCase
       to_return(body: mock_inat_response))
   end
 
+  # Stub the MO requests to GET iNat original photos
+  # Returns the same photo for all stubs, which is
+  # sufficient for testing purposes.
   def stub_inat_photo_requests(mock_inat_response)
     JSON.parse(mock_inat_response)["results"].each do |result|
       result["observation_photos"].each do |photo|
-        if photo["photo"]["license_code"].present?
-          stub_inat_licensed_photo_request(photo)
-        else
-          stub_inat_unlicensed_photo_request(photo)
-        end
+        url = photo["photo"]["url"].sub("square", "original")
+        stub_request(
+          :get,
+          url
+        ).
+          with(
+            headers: {
+              "Accept" => "image/*",
+              "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+              "Host" => URI(url).host,
+              "User-Agent" => "Ruby"
+            }
+          ).
+          to_return(status: 200, body: image_for_stubs, headers: {})
       end
     end
-  end
-
-  # stub the MO implicit request for the iNat photo
-  # Returns the same photo for all stubs, which is
-  # sufficient for testing purposes.
-  def stub_inat_licensed_photo_request(photo)
-    add_stub(stub_request(
-      :get,
-      "#{LICENSED_PHOTO_BASE}/#{photo["photo_id"]}/original.jpg"
-    ).
-      with(
-        headers: {
-          "Accept" => "image/*",
-          "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
-          "Host" => "inaturalist-open-data.s3.amazonaws.com",
-          "User-Agent" => "Ruby"
-        }
-      ).
-      to_return(status: 200, body: image_for_stubs, headers: {}))
-  end
-
-  def stub_inat_unlicensed_photo_request(photo)
-    add_stub(
-      stub_request(
-        :get,
-        "#{UNLICENSED_PHOTO_BASE}/#{photo["id"]}/original.jpg"
-      ).
-        with(
-          headers: {
-            "Accept" => "image/*",
-            "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
-            "Host" => "static.inaturalist.org",
-            "User-Agent" => "Ruby"
-          }
-        ).
-      to_return(status: 200, body: image_for_stubs, headers: {})
-    )
   end
 
   def stub_mo_photo_importer(mock_inat_response)
