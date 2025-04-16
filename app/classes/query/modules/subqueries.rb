@@ -20,7 +20,7 @@ module Query::Modules::Subqueries
     # Query needs to know which joins are necessary to make these conversions
     # work. Need to maintain RELATED_TYPES if the Query class is updated.
     # These could be derived by snooping through each Query subclass's
-    # parameter_declarations, but that seems wasteful; there are not so many.
+    # attributes, but that seems wasteful; there are not so many of these.
     #
     # target_model.name.to_sym: [:Association, :AnotherAssociation],
     RELATED_QUERIES = {
@@ -74,7 +74,14 @@ module Query::Modules::Subqueries
     end
 
     def find_subquery_param_name(filter)
-      parameter_declarations.key({ subquery: filter })
+      key = if filter.to_s.include?("Description")
+              :description_query
+            else
+              :"#{filter.to_s.underscore}_query"
+            end
+      return key if attribute_types.symbolize_keys.key?(key)
+
+      nil
     end
 
     def add_default_subquery_conditions(target, filter, params)

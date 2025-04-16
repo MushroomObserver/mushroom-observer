@@ -13,7 +13,7 @@
 #  sorting and selection conditions.
 #
 #  To filter query results, you can send additional parameters.  For example,
-#  create_query(:Comment for_user: user.id) retrieves comments posted on a
+#  create_query(:Comment, for_user: user.id) retrieves comments posted on a
 #  given user's observations.  Query saves the parameters alongside the model,
 #  and together these fully specify a query that may be recreated and
 #  executed at a later time, even potentially by another user (e.g., if users
@@ -133,15 +133,16 @@ class Query
 
   def self.new(model, params = {}, current = nil)
     klass = "Query::#{model.to_s.pluralize}".constantize
-    # Just ignore undeclared params:
-    query = klass.new(params.slice(*klass.parameter_declarations.keys))
-    query.params = query.attributes # initialize params for cleaning/validation
+    # Initialize an instance, ignoring undeclared params:
+    query = klass.new(params.slice(*klass.attribute_names.map(&:to_sym)))
+    # Initialize `params`, where query stores the active `attributes`.
+    query.params = query.attributes.compact
+    # Initialize `subqueries`, to store any validated subquery instances.
     query.subqueries = {}
     query.current = current if current
-    query.valid = query.valid? # reinitializes params after cleaning/validation
+    # Calling `valid?` reinitializes `params` after cleaning/validation.
+    query.valid = query.valid?
     # query.initialize_query # if you want the attributes right away
     query
   end
-
-  delegate :default_order, to: :class
 end

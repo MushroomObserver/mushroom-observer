@@ -1,30 +1,16 @@
 # frozen_string_literal: true
 
 class Query::CollectionNumbers < Query::Base
-  def self.parameter_declarations
-    super.merge(
-      created_at: [:time],
-      updated_at: [:time],
-      id_in_set: [CollectionNumber],
-      collectors: [:string],
-      numbers: [:string],
-      collector_has: :string,
-      number_has: :string,
-      by_users: [User],
-      observations: [Observation],
-      pattern: :string
-    )
-  end
-
-  # Declare the parameters as model attributes, of custom type `query_param`
-
-  parameter_declarations.each_key do |param_name|
-    attribute param_name, :query_param
-  end
-
-  def model
-    @model ||= CollectionNumber
-  end
+  query_attr(:created_at, [:time])
+  query_attr(:updated_at, [:time])
+  query_attr(:id_in_set, [CollectionNumber])
+  query_attr(:by_users, [User])
+  query_attr(:collectors, [:string])
+  query_attr(:numbers, [:string])
+  query_attr(:collector_has, :string)
+  query_attr(:number_has, :string)
+  query_attr(:observations, [Observation])
+  query_attr(:pattern, :string)
 
   def alphabetical_by
     @alphabetical_by ||= CollectionNumber[:name]
