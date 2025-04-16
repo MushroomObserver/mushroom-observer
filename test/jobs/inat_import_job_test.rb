@@ -464,11 +464,8 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
 
-    Inat::PhotoImporter.stub(:new,
-                             stub_mo_photo_importer(mock_inat_response)) do
-      assert_no_difference("Observation.count", "Should not import Plantae") do
-        InatImportJob.perform_now(inat_import)
-      end
+    assert_no_difference("Observation.count", "Should not import Plantae") do
+      InatImportJob.perform_now(inat_import)
     end
   end
 
@@ -480,14 +477,11 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
 
-    Inat::PhotoImporter.stub(:new,
-                             stub_mo_photo_importer(mock_inat_response)) do
-      assert_no_difference(
-        "Observation.count",
-        "Should import nothing if no iNat obss match the user's list of id's"
-      ) do
-        InatImportJob.perform_now(inat_import)
-      end
+    assert_no_difference(
+      "Observation.count",
+      "Should import nothing if no iNat obss match the user's list of id's"
+    ) do
+      InatImportJob.perform_now(inat_import)
     end
   end
 
@@ -503,10 +497,7 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
 
-    Inat::PhotoImporter.stub(:new,
-                             stub_mo_photo_importer(mock_inat_response)) do
-      InatImportJob.perform_now(inat_import)
-    end
+    InatImportJob.perform_now(inat_import)
 
     assert_equal(inat_import.inat_username, @user.reload.inat_username,
                  "Failed to update user's inat_username")
@@ -532,12 +523,9 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
 
-    Inat::PhotoImporter.stub(:new,
-                             stub_mo_photo_importer(mock_inat_response)) do
-      assert_difference("Observation.count", 2,
-                        "Failed to create multiple observations") do
-        InatImportJob.perform_now(inat_import)
-      end
+    assert_difference("Observation.count", 2,
+                      "Failed to create multiple observations") do
+      InatImportJob.perform_now(inat_import)
     end
   end
 
@@ -558,12 +546,9 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response)
 
-    Inat::PhotoImporter.stub(:new,
-                             stub_mo_photo_importer(mock_inat_response)) do
-      assert_difference("Observation.count", 2,
-                        "Failed to create multiple observations") do
-        InatImportJob.perform_now(inat_import)
-      end
+    assert_difference("Observation.count", 2,
+                      "Failed to create multiple observations") do
+      InatImportJob.perform_now(inat_import)
     end
   end
 
@@ -607,13 +592,11 @@ class InatImportJobTest < ActiveJob::TestCase
                            mock_inat_response: mock_inat_response,
                            login: "another user")
 
-    Inat::PhotoImporter.stub(:new,
-                             stub_mo_photo_importer(mock_inat_response)) do
-      assert_difference("Observation.count", 0,
-                        "It should not import another user's observation") do
-        InatImportJob.perform_now(inat_import)
-      end
+    assert_difference("Observation.count", 0,
+                      "It should not import another user's observation") do
+      InatImportJob.perform_now(inat_import)
     end
+
     assert_match(
       :inat_wrong_user.l, inat_import.response_errors,
       "It should warn if a user tries to import another's iNat obs"
@@ -633,15 +616,13 @@ class InatImportJobTest < ActiveJob::TestCase
                            mock_inat_response: mock_inat_response,
                            superimporter: true)
 
-    Inat::PhotoImporter.stub(:new,
-                             stub_mo_photo_importer(mock_inat_response)) do
-      assert_difference(
-        "Observation.count", 1,
-        "'super_importer' failed to import another user's observation"
-      ) do
-        InatImportJob.perform_now(inat_import)
-      end
+    assert_difference(
+      "Observation.count", 1,
+      "'super_importer' failed to import another user's observation"
+    ) do
+      InatImportJob.perform_now(inat_import)
     end
+
     assert_empty(inat_import.response_errors, "There should be no errors")
   end
 
