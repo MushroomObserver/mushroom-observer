@@ -132,7 +132,7 @@ class InatImportsController < ApplicationController
     Rails.logger.info(
       "Enqueueing InatImportJob for InatImport id: #{inat_import.id}"
     )
-    # InatImportJob.perform_now(inat_import) # uncomment for manual testing
+    # InatImportJob.perform_now(inat_import) # uncomment to manually test job
     InatImportJob.perform_later(inat_import) # uncomment for production
 
     redirect_to(inat_import_path(inat_import,
