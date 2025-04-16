@@ -196,14 +196,15 @@ class Query::Base
   include Query::Modules::Sequence
   include Query::Modules::Validation
 
+  attr_writer :record
+
+  # Declare query attributes with method defined in app/extensions/class.rb
+  query_attr(:order_by, :string)
+
   validates_with Query::Modules::Validator
 
   # "clean up" and reassign attributes before validation
   before_validation :clean_and_validate_params
-
-  attr_writer :record
-
-  query_attr(:order_by, :string)
 
   def self.attribute_types
     super.symbolize_keys!
@@ -229,8 +230,8 @@ class Query::Base
   # returns keys
   def self.content_filter_parameters
     filters = Query::Filter.all
-    @content_filter_parameters ||= filters.each_with_object([]) do |f, ary|
-      ary << f.sym
+    @content_filter_parameters ||= filters.each_with_object(Set[]) do |f, set|
+      set << f.sym
     end.freeze
   end
 
