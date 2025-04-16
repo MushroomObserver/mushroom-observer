@@ -813,9 +813,6 @@ class InatImportJobTest < ActiveJob::TestCase
     JSON.parse(mock_inat_response)["results"].each do |result|
       result["observation_photos"].each do |photo|
         url = photo["photo"]["url"].sub("square", "original")
-        # NOTE: jdc 2025-04-16
-        # The following laysout mirrors how WebMock reports errors,
-        # making it easier to compare missing with actual stubs.
         stub_request(
           :get,
           url
