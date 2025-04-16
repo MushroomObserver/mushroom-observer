@@ -135,11 +135,13 @@ class Query
     klass = "Query::#{model.to_s.pluralize}".constantize
     # Initialize an instance, ignoring undeclared params:
     query = klass.new(params.slice(*klass.attribute_names.map(&:to_sym)))
-    # `params` are basically the active `attributes`
-    query.params = query.attributes.compact # initialize for cleaning/validation
+    # Initialize `params`, where query stores the active `attributes`.
+    query.params = query.attributes.compact
+    # Initialize `subqueries`, to store any validated subquery instances.
     query.subqueries = {}
     query.current = current if current
-    query.valid = query.valid? # reinitializes params after cleaning/validation
+    # Calling `valid?` reinitializes `params` after cleaning/validation.
+    query.valid = query.valid?
     # query.initialize_query # if you want the attributes right away
     query
   end
