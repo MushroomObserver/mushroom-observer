@@ -1,7 +1,12 @@
 # frozen_string_literal: true
 
-# Validation of Query parameters.
-class Query::Modules::Validator < ActiveModel::Validator
+##############################################################################
+#
+#  :class: Validator
+#
+#  Validation of Query parameters.
+#
+class Query::Validator < ActiveModel::Validator
   def initialize(options = {})
     super
     options[:class].attr_accessor(:validation_errors)

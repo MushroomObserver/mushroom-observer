@@ -1,5 +1,52 @@
 # frozen_string_literal: true
 
+#  == Query Base Model
+#
+#  This class encapsulates a hash of params that can produce an ActiveRecord
+#  statement for a database query, that looks up one or more objects of a
+#  given type, matching certain conditions in a certain order.
+#
+#  Queries are specified by a model.  The model specifies which kind
+#  of objects are being requested, e.g. :Name or :Observation. They are
+#  dyamically joined with any number of additional tables, as required by
+#  sorting and selection conditions.
+#
+#  To filter query results, you can send additional parameters.  For example,
+#  create_query(:Comment, for_user: user.id) retrieves comments posted on a
+#  given user's observations.  Query saves the parameters alongside the model,
+#  and together these fully specify a query that may be recreated and
+#  executed at a later time, even potentially by another user (e.g., if users
+#  share links that have query specs embedded in them). They can be serialized
+#  and printed as a permalink, or carried along in the session while the user
+#  is navigating around related records.
+#
+#  == Example Usage
+#
+#  Get observations created by @user:
+#
+#    query = Query.lookup(:Observation, by_users: [@user])
+#
+#  You may further tweak a query after it's been created:
+#
+#    query = Query.lookup(:Observation)
+#    query.add_join(:names)
+#    query.where << 'names.correct_spelling_id IS NULL'
+#    query.order = 'names.sort_name ASC'
+#
+#  Now you may execute it in various ways:
+#
+#    num_results = query.num_results
+#    ids         = query.result_ids
+#    instances   = query.results
+#
+#  == Attributes of all Query instances:
+#
+#  model::              Class of model results belong to.
+#  params::             Hash of parameters used to create query.
+#  current::            Current location in query (for sequence operators).
+#  subqueries::         Cache of subquery Query instances, used for filtering.
+#
+#
 #  CREATING A NEW QUERY SUBCLASS
 #
 #  To make an ActiveRecord model queryable, create a new class that inherits
@@ -44,8 +91,8 @@
 #  In our case, we define our own validator and data type. That data type is
 #  `query_param`, and the attribute values are checked and sanitized by
 #  Query::Modules::Validation on initialization. Calling `valid?` uses
-#  Query::Modules::Validator to check for any validation errors that may
-#  have been stored in the Query instance by `clean_and_validate_params`.
+#  Query::Validator to check for any validation errors that may have been
+#  stored in the Query instance by `clean_and_validate_params`.
 #
 #  `valid?` should mean the parameter values are usable by the corresponding
 #  ActiveRecord scope in each model. The scopes are what actually execute the
@@ -168,6 +215,27 @@
 #
 #  Each sub-param is validated as a :float.
 #
+#  ## DEFAULT ORDER
+#
+#  Each model should define a default search order (:default_order), which is a
+#  keyword parsed by the `order_by` scope, and should map to a scope or class
+#  method named `order_by_#{:default_order}` in `AbstractModel::Scopes`.
+#
+#  This order is also used by the prev and next actions when the specified query
+#  no longer exists. For example, if you click on an observation from the main
+#  index, prev and next travserse the results of an order_by: :rss_log query.
+#  If the user comes back a day later, this query will have been culled by the
+#  garbage collector (see Query::Modules::QueryRecords), so prev and next need
+#  to be able to create a default query on the fly.
+#
+#  ## ALPHABETICAL BY
+#
+#  For indexes where we want users to be able to paginate the results by letter,
+#  the Query class should specify which column to use for sorting. This should
+#  be given as `Model[:column]`, in case it is being sorted on the column of a
+#  joined table. Check existing examples.
+#
+#
 #  ############################################################################
 #
 #  == Class and Instance Methods
@@ -201,7 +269,7 @@ class Query::Base
   # Declare query attributes with method defined in app/extensions/class.rb
   query_attr(:order_by, :string)
 
-  validates_with Query::Modules::Validator
+  validates_with Query::Validator
 
   # "clean up" and reassign attributes before validation
   before_validation :clean_and_validate_params
@@ -264,10 +332,6 @@ class Query::Base
     self.class.default_order || :id
   end
 
-  def ==(other)
-    serialize == other.try(&:serialize)
-  end
-
   # Serialize the query params, adding the model, for saving to a QueryRecord.
   # We use this column of QueryRecord to identify an existing query record that
   # matches current params, and sometimes to recompose a query from the string.
@@ -281,6 +345,10 @@ class Query::Base
   # you can't use SQL on the column value, you have to compare parsed instances.
   def serialize
     attributes.compact.sort.to_h.merge(model: model.name).to_json
+  end
+
+  def ==(other)
+    serialize == other.try(&:serialize)
   end
 
   def record
