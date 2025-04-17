@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
-# Methods that are available to instances as class methods, and to ::Query.
-# ::Query is a convenience delegator class so callers can access these methods.
+##############################################################################
+#
+#  :module: Sequence
+#
+#  Methods that are available to instances as class methods, and to ::Query.
+#  ::Query is a convenience delegator class so callers can access these methods.
 #
 #  Subqueries:
 #  current_or_related_query:: Convert queries from one model to another; can be

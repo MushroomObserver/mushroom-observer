@@ -2,7 +2,7 @@
 
 ##############################################################################
 #
-#  :section: Results
+#  :module: Results
 #
 #  Caching note:
 #  Query caches results, and result_ids.  Any of results, result_ids,

@@ -2,7 +2,7 @@
 
 ##############################################################################
 #
-#  :section: Initialization
+#  :module: Initialization
 #
 #  Helper methods for turning Query parameters into AR conditions.
 #
@@ -13,6 +13,12 @@
 #  To get the results for an :index page or for pagination, the methods in
 #  `Query::Modules::Results` need to call `initialize_query`, which makes the
 #  scope chain of the Query instance accessible via `#query`.
+#
+#  `initialize_query` is the internal method that translates the params and
+#  their values to ActiveRecord scopes with the same names, without executing
+#  the query. (Scopes are independent of Query, and need to be defined on each
+#  model.) Only the public accessors like `results` actually load the database
+#  records for the current page of results.
 #
 #  Example:
 #
