@@ -17,6 +17,7 @@ class FieldSlipsController < ApplicationController
   # GET /field_slips/new
   def new
     @field_slip = FieldSlip.new
+    @field_slip.current_user = @user
     @field_slip.code = params[:code].upcase if params.include?(:code)
     project = @field_slip.project
     if project
@@ -28,7 +29,7 @@ class FieldSlipsController < ApplicationController
 
   # GET /field_slips/1/edit
   def edit
-    return if @field_slip.can_edit?
+    return if @field_slip.can_edit?(@user)
 
     redirect_to(field_slip_url(id: @field_slip.id))
   end
@@ -37,6 +38,8 @@ class FieldSlipsController < ApplicationController
   def create
     respond_to do |format|
       @field_slip = FieldSlip.new(field_slip_params)
+      @field_slip.current_user = @user
+      @field_slip.update_project
       check_project_membership
       if check_last_obs && @field_slip.save
         format.html do
@@ -85,7 +88,7 @@ class FieldSlipsController < ApplicationController
 
   # DELETE /field_slips/1 or /field_slips/1.json
   def destroy
-    unless @field_slip.can_edit?
+    unless @field_slip.can_edit?(@user)
       redirect_to(field_slip_url(id: @field_slip.id))
       return
     end
@@ -136,7 +139,7 @@ class FieldSlipsController < ApplicationController
     name = Name.find_by(text_name: fs_params[:field_slip_name])
     notes = field_slip_notes.compact_blank!
     date = extract_date
-    obs = Observation.build_observation(location, name, notes, date)
+    obs = Observation.build_observation(location, name, notes, date, @user)
     if obs
       @field_slip.project&.add_observation(obs)
       @field_slip.update!(observation: obs)
@@ -182,15 +185,16 @@ class FieldSlipsController < ApplicationController
     name = names[0]
     naming = @field_slip.observation.namings.find_by(name:)
     unless naming
-      naming = Naming.construct({}, @field_slip.observation)
+      naming = Naming.user_construct({}, @field_slip.observation, @user)
       naming.name = name
       naming.save!
     end
-    vote = Vote.find_by(user: User.current, naming:)
+    vote = Vote.find_by(user: @user, naming:)
     return if vote
 
-    Vote.create!(favorite: true, value: Vote.maximum_vote, naming:)
-    Observation::NamingConsensus.new(@field_slip.observation).calc_consensus
+    Vote.create!(favorite: true, value: Vote.maximum_vote, naming:, user: @user)
+    Observation::NamingConsensus.new(@field_slip.observation).
+      user_calc_consensus(@user)
   end
 
   def field_slip_notes
@@ -257,9 +261,9 @@ class FieldSlipsController < ApplicationController
 
   def check_project_membership
     project = @field_slip&.project
-    return unless project&.can_join?(User.current)
+    return unless project&.can_join?(@user)
 
-    user = User.current
+    user = @user
     project.user_group.users << user
     project_member = ProjectMember.find_by(project:, user:)
     flash_notice(:field_slip_welcome.t(title: project.title))
@@ -277,7 +281,7 @@ class FieldSlipsController < ApplicationController
     return if FieldSlip.find_by(observation: obs, project: proj)
 
     flash_warning(:field_slip_remove_observation.t(
-                    observation: obs.unique_format_name,
+                    observation: obs.user_unique_format_name(@user),
                     title: proj.title
                   ))
     proj.remove_observation(obs)
@@ -286,15 +290,15 @@ class FieldSlipsController < ApplicationController
   def check_last_obs
     return true unless params[:commit] == :field_slip_last_obs.t
 
-    obs = ObservationView.previous(User.current, @field_slip.observation)
+    obs = ObservationView.previous(@user, @field_slip.observation)
     return false unless obs # This should not ever happen
 
     project = @field_slip.project
     if project
-      return false unless project.user_can_add_observation?(obs, User.current)
+      return false unless project.user_can_add_observation?(obs, @user)
 
       if project.violates_constraints?(obs)
-        if project.admin?(User.current)
+        if project.admin?(@user)
           flash_warning(:field_slip_constraint_violation.t)
         else
           flash_error(:field_slip_constraint_violation.t)

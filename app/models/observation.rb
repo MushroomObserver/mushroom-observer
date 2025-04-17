@@ -218,19 +218,19 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     :where, :text_name, :notes
   ].freeze
 
-  def self.build_observation(location, name, notes, date)
+  def self.build_observation(location, name, notes, date, current_user = nil)
     return nil unless location
 
     name ||= Name.find_by(text_name: "Fungi")
     now = Time.zone.now
-    user = User.current
+    user = current_user || User.current
     obs = new({ created_at: now, updated_at: now, source: "mo_website",
                 when: date,
                 user:, location:, name:, notes: })
     return nil unless obs
 
-    obs.log(:log_observation_created)
-    naming = Naming.construct({ name: }, obs)
+    obs.user_log(user, :log_observation_created)
+    naming = Naming.user_construct({ name: }, obs, user)
     naming.save!
     naming.votes.create!(
       user:,
@@ -704,14 +704,28 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     string_with_id(name.real_search_name)
   end
 
+  def user_unique_text_name(user)
+    string_with_id(name.user_real_search_name(user))
+  end
+
   # Textile-marked-up name, never nil.
   def format_name
     name.observation_name
   end
 
+  def user_format_name(user)
+    name.user_observation_name(user)
+  end
+
   # Textile-marked-up name with id to make it unique, never nil.
   def unique_format_name
     string_with_id(name.observation_name)
+  rescue StandardError
+    ""
+  end
+
+  def user_unique_format_name(user)
+    string_with_id(name.user_observation_name(user))
   rescue StandardError
     ""
   end
@@ -970,12 +984,54 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
+  def user_announce_consensus_change(old_name, new_name, current_user)
+    user_log_consensus_change(old_name, new_name, current_user)
+
+    # Change can trigger emails.
+    owner  = user
+    sender = current_user
+    recipients = []
+
+    # Tell owner of observation if they want.
+    recipients.push(owner) if owner&.email_observations_consensus
+
+    # Send to people who have registered interest.
+    # Also remove everyone who has explicitly said they are NOT interested.
+    interests.each do |interest|
+      if interest.state
+        recipients.push(interest.user)
+      else
+        recipients.delete(interest.user)
+      end
+    end
+
+    # Remove users who have opted out of all emails.
+    recipients.reject!(&:no_emails)
+
+    # Send notification to all except the person who triggered the change.
+    (recipients.uniq - [sender]).each do |recipient|
+      QueuedEmail::ConsensusChange.create_email(sender, recipient, self,
+                                                old_name, new_name)
+    end
+  end
+
   def log_consensus_change(old_name, new_name)
     if old_name
       log(:log_consensus_changed, old: old_name.display_name,
                                   new: new_name.display_name)
     else
       log(:log_consensus_created, name: new_name.display_name)
+    end
+  end
+
+  def user_log_consensus_change(old_name, new_name, current_user)
+    if old_name
+      user_log(current_user, :log_consensus_changed,
+               { old: old_name.user_display_name(current_user),
+                 new: new_name.user_display_name(current_user) })
+    else
+      user_log(current_user, :log_consensus_created,
+               { name: new_name.user_display_name(current_user) })
     end
   end
 

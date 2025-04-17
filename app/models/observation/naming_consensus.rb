@@ -53,6 +53,9 @@
 # number of proposed namings per obs, so 3 namings meant 11 vote lookups).
 # The vote table is the slowest table in the db, so it was extremely slow.
 #
+
+# Disable Metrics/ClassLength temporarily while getting rid of User.current
+# rubocop:disable Metrics/ClassLength
 class Observation
   class NamingConsensus
     attr_accessor :observation, :namings, :votes
@@ -313,6 +316,23 @@ class Observation
       @observation.reload.announce_consensus_change(old, best) if best != old
     end
 
+    def user_calc_consensus(current_user)
+      reload_namings_and_votes!
+      calculator = ::Observation::ConsensusCalculator.new(@namings)
+      best, best_val = calculator.calc
+      old = @observation.name
+      if old != best || @observation.vote_cache != best_val
+        # If naming generic or specific, and vote positive, needs_naming = 0
+        needs_naming = !best.above_genus? && best_val&.positive? ? 0 : 1
+        @observation.update(name: best, vote_cache: best_val,
+                            needs_naming: needs_naming)
+      end
+      return unless best != old
+
+      @observation.reload.user_announce_consensus_change(old, best,
+                                                         current_user)
+    end
+
     # We interpret any naming vote to mean the user has reviewed the obs.
     # Setting this here makes the identify index query much cheaper.
     def mark_obs_reviewed
@@ -446,3 +466,4 @@ class Observation
     end
   end
 end
+# rubocop:enable Metrics/ClassLength

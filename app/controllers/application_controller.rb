@@ -213,7 +213,7 @@ class ApplicationController < ActionController::Base
     clear_user_globals
     stats = request_stats
     yield
-    IpStats.log_stats(stats)
+    IpStats.log_stats(stats, @user&.id)
     logger.warn(request_stats_log_message(stats))
   rescue StandardError => e
     raise(@error = e)

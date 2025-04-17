@@ -16,7 +16,7 @@
       make_table(
         headers: violation_table_headers(@project),
         rows: violation_table_rows(
-          form: form, project: @project, violations: @violations
+          form: form, project: @project, violations: @violations, user: @user
         )
       )
     %>

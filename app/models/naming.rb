@@ -67,6 +67,16 @@ class Naming < AbstractModel
     false
   end
 
+  def self.user_construct(args, observation, user)
+    now = Time.zone.now
+    naming = Naming.new(args)
+    naming.created_at = now
+    naming.updated_at = now
+    naming.user = user
+    naming.observation = observation
+    naming
+  end
+
   def self.construct(args, observation)
     now = Time.zone.now
     naming = Naming.new(args)
@@ -109,6 +119,11 @@ class Naming < AbstractModel
   end
 
   # Return name in plain text.
+  def user_text_name(user)
+    name ? name.user_real_search_name(user) : ""
+  end
+
+  # Return name in plain text.
   def text_name
     name ? name.real_search_name : ""
   end
@@ -121,6 +136,10 @@ class Naming < AbstractModel
   # Return name in Textile format.
   def format_name
     name ? name.observation_name : ""
+  end
+
+  def user_format_name(user)
+    name ? name.user_observation_name(user) : ""
   end
 
   def display_name_brief_authors
