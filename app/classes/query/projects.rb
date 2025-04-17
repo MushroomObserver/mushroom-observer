@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Query::Projects < Query::Base
+class Query::Projects < Query
   query_attr(:created_at, [:time])
   query_attr(:updated_at, [:time])
   query_attr(:id_in_set, [Project])

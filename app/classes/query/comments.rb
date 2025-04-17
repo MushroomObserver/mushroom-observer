@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Query::Comments < Query::Base
+class Query::Comments < Query
   query_attr(:created_at, [:time])
   query_attr(:updated_at, [:time])
   query_attr(:id_in_set, [Comment])

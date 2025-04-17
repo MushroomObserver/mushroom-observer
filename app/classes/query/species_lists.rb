@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Query::SpeciesLists < Query::Base
+class Query::SpeciesLists < Query
   query_attr(:created_at, [:time])
   query_attr(:updated_at, [:time])
   query_attr(:date, [:date])

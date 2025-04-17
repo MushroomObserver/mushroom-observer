@@ -107,7 +107,7 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
       return nil
     end
     submodel = param_type.values.first
-    subquery = Query.new(submodel, val)
+    subquery = Query.create_query(submodel, val)
     @subqueries[param] = subquery
     @validation_errors += subquery.validation_errors
     subquery.params

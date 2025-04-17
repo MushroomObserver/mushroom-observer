@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Query::GlossaryTerms < Query::Base
+class Query::GlossaryTerms < Query
   query_attr(:created_at, [:time])
   query_attr(:updated_at, [:time])
   query_attr(:by_users, [User])

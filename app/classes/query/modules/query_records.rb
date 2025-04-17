@@ -42,7 +42,7 @@ module Query::Modules::QueryRecords
     end
 
     def lookup(*)
-      query = Query.new(*)
+      query = Query.create_query(*)
       record = get_record(query)
       record.query = query
       query.record = record
@@ -63,7 +63,7 @@ module Query::Modules::QueryRecords
     # Get the model from the serialized params and instantiate new Query.
     def rebuild_from_description(description)
       model, params = deserialize(description)
-      ::Query.new(model, params)
+      ::Query.create_query(model, params)
     end
 
     def deserialize(description)
