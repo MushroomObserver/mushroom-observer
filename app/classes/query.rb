@@ -271,7 +271,9 @@ class Query
 
   attr_writer :record
 
-  # Declare query attributes with method defined in app/extensions/class.rb
+  # NOTE: Declare query subclass attributes with `query_attr`, a custom MO
+  # method defined by monkey-patching `Class` in app/extensions/class.rb.
+  # attribute `:order_by` is inherited by all subclasses, necessary for paging.
   query_attr(:order_by, :string)
 
   validates_with Query::Validator
@@ -279,11 +281,14 @@ class Query
   # "clean up" and reassign attributes before validation
   before_validation :clean_and_validate_params
 
-  # This method is simply a factory for Query instances.
+  # This is the factory method for Query instances. It is most often called via
+  # `Query.lookup` or others defined in `Query::Modules::QueryRecords`.
+  # Always call `Query.create_query` (or `lookup`) to initialize a usable query
+  # instance, rather than calling `Query::Subclass.new` directly.
   def self.create_query(model, params = {}, current = nil)
     klass = "Query::#{model.to_s.pluralize}".constantize
     # Initialize an instance, ignoring undeclared params:
-    query = klass.new(params.slice(*klass.attribute_names.map(&:to_sym)))
+    query = klass.new(params.slice(*klass.attribute_names))
     # Initialize `params`, where query stores the active `attributes`.
     query.params = query.attributes.compact
     # Initialize `subqueries`, to store any validated subquery instances.
@@ -300,14 +305,18 @@ class Query
   def self.attribute_types
     super.symbolize_keys!
   end
-
   delegate :attribute_types, to: :class
+
+  # Same with `attribute_names`
+  def self.attribute_names
+    super.map!(&:to_sym)
+  end
+  delegate :attribute_names, to: :class
 
   # Define has_attribute? here, it doesn't exist yet for ActiveModel.
   def self.has_attribute?(key) # rubocop:disable Naming/PredicateName
     attribute_types.key?(key)
   end
-
   delegate :has_attribute?, to: :class
 
   # :id_in_set must be moved to the last position so it can reorder results.
@@ -315,7 +324,6 @@ class Query
     excepts = [:id_in_set, :preference_filter]
     @scope_parameters = attribute_types.except(*excepts).keys + [:id_in_set]
   end
-
   delegate :scope_parameters, to: :class
 
   # returns keys
@@ -325,19 +333,16 @@ class Query
       set << f.sym
     end.freeze
   end
-
   delegate :content_filter_parameters, to: :class
 
   # def self.subquery_parameters
   #   attribute_types.select { |key, _v| key.to_s.include?("_query") }
   # end
-
   # delegate :subquery_parameters, to: :class
 
   def self.model
     name.demodulize.singularize.constantize
   end
-
   delegate :model, to: :class
 
   # Can the current class be called as a subquery of the target Query class?
@@ -383,9 +388,7 @@ class Query
     # second image.  See query_test.rb for more.
     @record ||= self.class.get_record(self)
   end
-
   delegate :id, to: :record
-
   delegate :save, to: :record
 
   def increment_access_count
