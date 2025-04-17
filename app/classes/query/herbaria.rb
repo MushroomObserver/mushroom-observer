@@ -1,29 +1,15 @@
 # frozen_string_literal: true
 
 class Query::Herbaria < Query::Base
-  def self.parameter_declarations
-    super.merge(
-      created_at: [:time],
-      updated_at: [:time],
-      id_in_set: [Herbarium],
-      code_has: :string,
-      name_has: :string,
-      description_has: :string,
-      mailing_address_has: :string,
-      pattern: :string,
-      nonpersonal: :boolean
-    )
-  end
-
-  # Declare the parameters as model attributes, of custom type `query_param`
-
-  parameter_declarations.each_key do |param_name|
-    attribute param_name, :query_param
-  end
-
-  def model
-    @model ||= Herbarium
-  end
+  query_attr(:created_at, [:time])
+  query_attr(:updated_at, [:time])
+  query_attr(:id_in_set, [Herbarium])
+  query_attr(:code_has, :string)
+  query_attr(:name_has, :string)
+  query_attr(:description_has, :string)
+  query_attr(:mailing_address_has, :string)
+  query_attr(:pattern, :string)
+  query_attr(:nonpersonal, :boolean)
 
   def alphabetical_by
     @alphabetical_by ||= Herbarium[:name]

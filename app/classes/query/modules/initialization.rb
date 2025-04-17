@@ -2,7 +2,7 @@
 
 ##############################################################################
 #
-#  :section: Initialization
+#  :module: Initialization
 #
 #  Helper methods for turning Query parameters into AR conditions.
 #
@@ -13,6 +13,12 @@
 #  To get the results for an :index page or for pagination, the methods in
 #  `Query::Modules::Results` need to call `initialize_query`, which makes the
 #  scope chain of the Query instance accessible via `#query`.
+#
+#  `initialize_query` is the internal method that translates the params and
+#  their values to ActiveRecord scopes with the same names, without executing
+#  the query. (Scopes are independent of Query, and need to be defined on each
+#  model.) Only the public accessors like `results` actually load the database
+#  records for the current page of results.
 #
 #  Example:
 #
@@ -120,7 +126,7 @@ module Query::Modules::Initialization
     sendable[:order_by] = order_by if order_by.present?
     return sendable unless model == RssLog
 
-    sendable.except(*content_filter_parameters.keys)
+    sendable.except(*content_filter_parameters)
   end
 
   # Most name queries are filtered to remove misspellings.
@@ -143,7 +149,7 @@ module Query::Modules::Initialization
   end
 
   def active_filters
-    @active_filters ||= params.slice(*content_filter_parameters.keys).compact
+    @active_filters ||= params.slice(*content_filter_parameters).compact
   end
 
   ##############################################################################

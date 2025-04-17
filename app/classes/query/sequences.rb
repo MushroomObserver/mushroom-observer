@@ -1,33 +1,19 @@
 # frozen_string_literal: true
 
 class Query::Sequences < Query::Base
-  def self.parameter_declarations
-    super.merge(
-      created_at: [:time],
-      updated_at: [:time],
-      id_in_set: [Sequence],
-      by_users: [User],
-      observations: [Observation],
-      locus: [:string],
-      locus_has: :string,
-      archive: [:string],
-      accession: [:string],
-      accession_has: :string,
-      notes_has: :string,
-      pattern: :string,
-      observation_query: { subquery: :Observation }
-    )
-  end
-
-  # Declare the parameters as model attributes, of custom type `query_param`
-
-  parameter_declarations.each_key do |param_name|
-    attribute param_name, :query_param
-  end
-
-  def model
-    @model ||= Sequence
-  end
+  query_attr(:created_at, [:time])
+  query_attr(:updated_at, [:time])
+  query_attr(:id_in_set, [Sequence])
+  query_attr(:by_users, [User])
+  query_attr(:observations, [Observation])
+  query_attr(:locus, [:string])
+  query_attr(:locus_has, :string)
+  query_attr(:archive, [:string])
+  query_attr(:accession, [:string])
+  query_attr(:accession_has, :string)
+  query_attr(:notes_has, :string)
+  query_attr(:pattern, :string)
+  query_attr(:observation_query, { subquery: :Observation })
 
   def alphabetical_by
     @alphabetical_by ||= Sequence[:locus]

@@ -130,7 +130,7 @@ module ApplicationController::Queries
   def apply_one_content_filter(fltr, query_params, model, user_filter)
     query_class = "Query::#{model.to_s.pluralize}".constantize
     key = fltr.sym
-    return unless query_class.takes_parameter?(key)
+    return unless query_class.has_attribute?(key)
     return if query_params.key?(key)
     return unless fltr.on?(user_filter)
 
