@@ -217,13 +217,24 @@
 #
 #  ## DEFAULT ORDER
 #
-#  Each model has a default search order (:default), which is used by the prev
-#  and next actions when the specified query no longer exists.  For example, if
-#  you click on an observation from the main index, prev and next travserse the
-#  results of an :Observation order_by: :rss_log query.  If the user comes back
-#  a day later, this query will have been culled by the garbage collector (see
-#  below), so prev and next need to be able to create a default query on the
-#  fly.
+#  Each model should define a default search order (:default_order), which is a
+#  keyword parsed by the `order_by` scope, and should map to a scope or class
+#  method named `order_by_#{:default_order}` in `AbstractModel::Scopes`.
+#
+#  This order is also used by the prev and next actions when the specified query
+#  no longer exists. For example, if you click on an observation from the main
+#  index, prev and next travserse the results of an order_by: :rss_log query.
+#  If the user comes back a day later, this query will have been culled by the
+#  garbage collector (see Query::Modules::QueryRecords), so prev and next need
+#  to be able to create a default query on the fly.
+#
+#  ## ALPHABETICAL BY
+#
+#  For indexes where we want users to be able to paginate the results by letter,
+#  the Query class should specify which column to use for sorting. This should
+#  be given as `Model[:column]`, in case it is being sorted on the column of a
+#  joined table. Check existing examples.
+#
 #
 #  ############################################################################
 #
