@@ -1,6 +1,30 @@
 # frozen_string_literal: true
 
-# Validation of Query parameters, plus substitution of ids for instances.
+##############################################################################
+#
+#  :module: Validation
+#
+#  This validator is recursive, because some params accept arrays or hashes of
+#  values. Each value is ultimately validated separately, via methods below
+#  that are specific to a data type. In the case of subqueries, the whole
+#  package of values is sent to a new Query instantiation which returns its own
+#  validation_messages. These are added to this query's messages.
+#
+#  Each validation method here may first "clean" the value, e.g. substituting
+#  ids for instances. Generally validators do not change data, but we do here
+#  to offer callers the convenience of passing instances rather than ids.
+#
+#  In the event it gets data that it cannot parse, it stores a message in the
+#  array of `@validation_messages`, and saves that to the Query. Callers can
+#  access these messages to return them via flash to users, for example when
+#  the query comes from a form.
+#
+#  == Instance methods:
+#
+#  clean_and_validate_params::  Described above.
+#
+#  Private methods described below.
+#
 module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
   attr_accessor :params, :params_cache, :subqueries, :valid, :validation_errors
 
@@ -8,15 +32,17 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     @validation_errors = []
     old_params = @params.dup&.deep_compact&.deep_symbolize_keys || {}
     new_params = {}
-    permitted_params = parameter_declarations.slice(*old_params.keys)
+    permitted_params = attribute_types.slice(*old_params.keys)
     permitted_params.each do |param, param_type|
       val = old_params[param]
-      val = validate_value(param_type, param, val) if val.present?
+      val = validate_value(param_type.accepts, param, val) if val.present?
       new_params[param] = val
     end
     @params = new_params
     assign_attributes(**@params) if @params.present?
   end
+
+  private
 
   def validate_value(param_type, param, val)
     if param_type.is_a?(Array)
@@ -102,8 +128,9 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
       return nil
     end
     submodel = param_type.values.first
-    subquery = Query.new(submodel, val)
+    subquery = Query.create_query(submodel, val)
     @subqueries[param] = subquery
+    @validation_errors += subquery.validation_errors
     subquery.params
   end
 
@@ -152,6 +179,7 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
   end
   # rubocop:enable Lint/BooleanSymbol
 
+  # We don't currently have params for integers, but this would enable them.
   # def validate_integer(param, val)
   #   if val.is_a?(Integer) || val.is_a?(String) && val.match(/^-?\d+$/)
   #     val.to_i

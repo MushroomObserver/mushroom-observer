@@ -61,8 +61,10 @@ class InatImportsController < ApplicationController
   # Site for authorization and authentication requests
   SITE = "https://www.inaturalist.org"
   # iNat calls this after iNat user authorizes MO to access their data.
+  # Different in production vs. test & development
   REDIRECT_URI = Rails.configuration.redirect_uri
   # iNat's id for the MO application
+  # Different in production vs. test & development
   APP_ID = Rails.application.credentials.inat.id
   # URL to obtain authorization from iNat user for access to their private data
   INAT_AUTHORIZATION_URL =
@@ -70,6 +72,8 @@ class InatImportsController < ApplicationController
     "&redirect_uri=#{REDIRECT_URI}&response_type=code".freeze
   # The iNat API. Not called here, but referenced in tests and ActiveJob
   API_BASE = "https://api.inaturalist.org/v1"
+  # notes for MO API Key used in iNat imports
+  MO_API_KEY_NOTES = "inat import"
 
   def show
     @tracker = InatImportJobTracker.find(params[:tracker_id])
@@ -81,14 +85,14 @@ class InatImportsController < ApplicationController
   def create
     return reload_form unless params_valid?
 
-    @inat_import = InatImport.find_or_create_by(user: User.current)
+    assure_user_has_inat_import_api_key
+    @inat_import = InatImport.find_or_create_by(user: @user)
     @inat_import.update(state: "Authorizing",
                         import_all: params[:all],
                         importables: 0, imported_count: 0,
                         inat_ids: params[:inat_ids],
                         inat_username: params[:inat_username].strip,
                         response_errors: "", token: "", log: [], ended_at: nil)
-
     request_inat_user_authorization
   end
 
@@ -100,6 +104,12 @@ class InatImportsController < ApplicationController
     @inat_ids = params[:inat_ids]
     @inat_username = params[:inat_username]
     render(:new)
+  end
+
+  def assure_user_has_inat_import_api_key
+    key = APIKey.find_by(user: @user, notes: MO_API_KEY_NOTES)
+    key = APIKey.create(user: @user, notes: MO_API_KEY_NOTES) if key.nil?
+    key.verify! if key.verified.nil?
   end
 
   def request_inat_user_authorization
@@ -122,7 +132,7 @@ class InatImportsController < ApplicationController
     Rails.logger.info(
       "Enqueueing InatImportJob for InatImport id: #{inat_import.id}"
     )
-    # InatImportJob.perform_now(inat_import) # uncomment for manual testing
+    # InatImportJob.perform_now(inat_import) # uncomment to manually test job
     InatImportJob.perform_later(inat_import) # uncomment for production
 
     redirect_to(inat_import_path(inat_import,

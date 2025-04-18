@@ -1,70 +1,79 @@
 # frozen_string_literal: true
 
-class Query::Observations < Query::Base
+class Query::Observations < Query
   include Query::Params::AdvancedSearch
   include Query::Params::Filters
 
-  def self.parameter_declarations # rubocop:disable Metrics/MethodLength
-    super.merge(
-      date: [:date],
-      created_at: [:time],
-      updated_at: [:time],
+  # Commented-out attributes are here so we don't forget they're added
+  # via `extra_parameter_declarations` below.
+  query_attr(:created_at, [:time])
+  query_attr(:updated_at, [:time])
+  query_attr(:date, [:date])
+  query_attr(:id_in_set, [Observation])
+  query_attr(:by_users, [User])
+  query_attr(:has_name, :boolean)
+  query_attr(:names, { lookup: [Name],
+                       include_synonyms: :boolean,
+                       include_subtaxa: :boolean,
+                       include_immediate_subtaxa: :boolean,
+                       exclude_original_names: :boolean,
+                       include_all_name_proposals: :boolean,
+                       exclude_consensus: :boolean })
+  query_attr(:confidence, [:float])
+  query_attr(:needs_naming, User)
+  # query_attr(:clade, :string) # content filter
+  # query_attr(:lichen, :boolean) # content filter
 
-      id_in_set: [Observation],
-      by_users: [User],
-      has_name: :boolean,
-      names: { lookup: [Name],
-               include_synonyms: :boolean,
-               include_subtaxa: :boolean,
-               include_immediate_subtaxa: :boolean,
-               exclude_original_names: :boolean,
-               include_all_name_proposals: :boolean,
-               exclude_consensus: :boolean },
-      confidence: [:float],
-      needs_naming: User,
-      # clade: :string, # content_filter
-      # lichen: :boolean, # content_filter
+  query_attr(:is_collection_location, :boolean)
+  query_attr(:has_public_lat_lng, :boolean)
+  query_attr(:in_box, { north: :float, south: :float,
+                        east: :float, west: :float })
+  query_attr(:location_undefined, { boolean: [true] })
+  query_attr(:locations, [Location])
+  # query_attr(:region, :string) # content filter
 
-      is_collection_location: :boolean,
-      has_public_lat_lng: :boolean,
-      location_undefined: { boolean: [true] },
-      locations: [Location],
-      in_box: { north: :float, south: :float, east: :float, west: :float },
-      # region: :string, # content filter
+  query_attr(:has_notes, :boolean)
+  query_attr(:notes_has, :string)
+  query_attr(:has_notes_fields, [:string])
+  query_attr(:pattern, :string)
+  query_attr(:has_comments, { boolean: [true] })
+  query_attr(:comments_has, :string)
+  query_attr(:has_sequences, { boolean: [true] })
+  # query_attr(:has_specimen, :boolean) # content filter
+  # query_attr(:has_images, :boolean) # content filter
 
-      has_notes: :boolean,
-      notes_has: :string,
-      has_notes_fields: [:string],
-      pattern: :string,
-      has_comments: { boolean: [true] },
-      comments_has: :string,
-      has_sequences: { boolean: [true] },
-      # has_specimen: :boolean, # content filter
-      # has_images: :boolean, # content filter
+  query_attr(:field_slips, [FieldSlip])
+  query_attr(:herbaria, [Herbarium])
+  query_attr(:herbarium_records, [HerbariumRecord])
+  query_attr(:projects, [Project])
+  query_attr(:project_lists, [Project])
+  query_attr(:species_lists, [SpeciesList])
+  # query_attr(:search_name, :string) # advanced search
+  # query_attr(:search_where, :string) # advanced search
+  # query_attr(:search_user, :string) # advanced search
+  # query_attr(:search_content, :string) # advanced search
+  query_attr(:image_query, { subquery: :Image })
+  query_attr(:location_query, { subquery: :Location })
+  query_attr(:name_query, { subquery: :Name })
+  query_attr(:sequence_query, { subquery: :Sequence })
 
-      field_slips: [FieldSlip],
-      herbaria: [Herbarium],
-      herbarium_records: [HerbariumRecord],
-      projects: [Project],
-      project_lists: [Project],
-      species_lists: [SpeciesList],
-      image_query: { subquery: :Image },
-      location_query: { subquery: :Location },
-      name_query: { subquery: :Name },
-      sequence_query: { subquery: :Sequence }
-    ).
-      merge(content_filter_parameter_declarations(Observation)).
+  def self.extra_parameter_declarations
+    content_filter_parameter_declarations(Observation).
       merge(advanced_search_parameter_declarations)
   end
 
   # Declare the parameters as model attributes, of custom type `query_param`
-
-  parameter_declarations.each_key do |param_name|
-    attribute param_name, :query_param
+  extra_parameter_declarations.each do |param_name, accepts|
+    query_attr(param_name, accepts)
   end
 
-  def model
-    @model ||= Observation
+  def alphabetical_by
+    @alphabetical_by ||= case params[:order_by].to_s
+                         when "user", "reverse_user"
+                           User[:login]
+                         when "name", "reverse_name"
+                           Name[:sort_name]
+                         end
   end
 
   def self.default_order

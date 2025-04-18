@@ -2,21 +2,27 @@
 
 ##############################################################################
 #
-#  :section: Initialization
+#  :module: Initialization
 #
 #  Helper methods for turning Query parameters into AR conditions.
 #
-#  Query.new basically accepts a hash of params, validates them and turns them
-#  into attributes describing analogous AR scopes, but does not create the
-#  scope chain yet.
+#  Query.create_query basically accepts a hash of params, validates them and
+#  turns them into attributes describing analogous AR scopes, but does not
+#  create the scope chain yet.
 #
 #  To get the results for an :index page or for pagination, the methods in
 #  `Query::Modules::Results` need to call `initialize_query`, which makes the
 #  scope chain of the Query instance accessible via `#query`.
 #
+#  `initialize_query` is the internal method that translates the params and
+#  their values to ActiveRecord scopes with the same names, without executing
+#  the query. (Scopes are independent of Query, and need to be defined on each
+#  model.) Only the public accessors like `results` actually load the database
+#  records for the current page of results.
+#
 #  Example:
 #
-#  query = Query.new(:Observation, has_public_lat_lng: true)
+#  query = Query.create_query(:Observation, has_public_lat_lng: true)
 #
 #    This gives you `query` as a Query instance with validated `params`
 #    you can inspect at `query.params`, `{ has_public_lat_lng: true }`
@@ -44,7 +50,7 @@
 #    database query until you execute it or assign it to a variable,
 #    like `results = Observation.all` or `results = query.scope`.
 #
-#  METHODS:
+#  == Instance Methods:
 #
 #  initialized?::     Has the Query instance been initialized?
 #  initialize_query:: Send the params to AR model scopes.
@@ -109,14 +115,18 @@ module Query::Modules::Initialization
     @skippable_values = ["[]", "{}", "", nil].freeze
   end
 
-  # For RssLogs, remove any content filter params before passing to scopes
+  # For most queries, these are the `scope_parameters` defined in Query.
+  # Makes sure `order_by` comes "last" in the hash, because some params may
+  # reset order.
+  # For RssLogs, removes any content filter params before passing to scopes
   # since they're already handled in subqueries above.
-  # Otherwise, these are the `scope_parameters` defined in Query::Base.
   def sendable_params
     sendable = params.slice(*scope_parameters)
+    order_by = sendable.delete(:order_by)
+    sendable[:order_by] = order_by if order_by.present?
     return sendable unless model == RssLog
 
-    sendable.except(*content_filter_parameters.keys)
+    sendable.except(*content_filter_parameters)
   end
 
   # Most name queries are filtered to remove misspellings.
@@ -139,7 +149,7 @@ module Query::Modules::Initialization
   end
 
   def active_filters
-    @active_filters ||= params.slice(*content_filter_parameters.keys).compact
+    @active_filters ||= params.slice(*content_filter_parameters).compact
   end
 
   ##############################################################################

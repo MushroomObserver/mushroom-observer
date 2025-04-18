@@ -1,35 +1,21 @@
 # frozen_string_literal: true
 
-class Query::SpeciesLists < Query::Base
-  def self.parameter_declarations
-    super.merge(
-      created_at: [:time],
-      updated_at: [:time],
-      date: [:date],
-      id_in_set: [SpeciesList],
-      by_users: [User],
-      title_has: :string,
-      has_notes: :boolean,
-      notes_has: :string,
-      has_comments: { boolean: [true] },
-      comments_has: :string,
-      search_where: :string,
-      locations: [Location],
-      projects: [Project],
-      pattern: :string,
-      observation_query: { subquery: :Observation }
-    )
-  end
-
-  # Declare the parameters as model attributes, of custom type `query_param`
-
-  parameter_declarations.each_key do |param_name|
-    attribute param_name, :query_param
-  end
-
-  def model
-    @model ||= SpeciesList
-  end
+class Query::SpeciesLists < Query
+  query_attr(:created_at, [:time])
+  query_attr(:updated_at, [:time])
+  query_attr(:date, [:date])
+  query_attr(:id_in_set, [SpeciesList])
+  query_attr(:by_users, [User])
+  query_attr(:title_has, :string)
+  query_attr(:has_notes, :boolean)
+  query_attr(:notes_has, :string)
+  query_attr(:has_comments, { boolean: [true] })
+  query_attr(:comments_has, :string)
+  query_attr(:search_where, :string)
+  query_attr(:pattern, :string)
+  query_attr(:locations, [Location])
+  query_attr(:projects, [Project])
+  query_attr(:observation_query, { subquery: :Observation })
 
   def alphabetical_by
     @alphabetical_by ||= case params[:order_by].to_s

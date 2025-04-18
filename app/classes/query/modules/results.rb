@@ -2,7 +2,7 @@
 
 ##############################################################################
 #
-#  :section: Results
+#  :module: Results
 #
 #  Caching note:
 #  Query caches results, and result_ids.  Any of results, result_ids,
@@ -14,6 +14,8 @@
 #
 #  NOTE: Calling most of these will `initialize_query`,
 #        i.e., instantiate the requested page of query results.
+#
+#  == Instance Methods:
 #
 #  num_results::        Number of results the query returns.
 #  results::            Array of all results, instantiated.
@@ -64,7 +66,7 @@ module Query::Modules::Results
   def ids_by_letter
     @letters = {}
     ids = []
-    minimal_query_of_all_records.each do |id, title|
+    minimal_letter_query_of_all_results.each do |id, title|
       letter = title[0, 1]
       @letters[id] = letter.upcase if /[a-zA-Z]/.match?(letter)
       ids << id
@@ -72,12 +74,13 @@ module Query::Modules::Results
     ids
   end
 
-  # Tries to be light about it, by selecting only two values.
-  # NOTE: `select(:id, :title)` returns instances having only these attributes -
-  # too heavy. We have to call `connection.select_rows` to return simple arrays.
-  # NOTE: `alphabetical_by` is defined in each letter-sortable Query class and
-  # returns a `Model[:column]`. We check the first four chars of that column.
-  def minimal_query_of_all_records
+  # Tries to be light about it, by selecting only two values, `id` and `title`.
+  # NOTE: `select(:id, :title)` would return AR instances having only those
+  # attributes - lighter, but still objects, and too heavy. We have to call
+  # `connection.select_rows` to return simple arrays. The method
+  # `alphabetical_by` is defined in each letter-sortable Query class and returns
+  # an AR `Model[:column]`. We check the first four chars of that column.
+  def minimal_letter_query_of_all_results
     model.connection.select_rows(
       @scopes.select(model[:id], alphabetical_by[0..3].as("title")).distinct
     )

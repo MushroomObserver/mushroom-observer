@@ -2,10 +2,12 @@
 
 ##############################################################################
 #
-#  :section: Sequence
+#  :module: Sequence
 #
-#  Methods for moving forward/back up/down within Query results.
-#  Used on show pages of individual records.
+#  Query keeps track of "where you are in the query".  Browsing through
+#  filtered results, if you visit a "show" page, you can continue navigating
+#  through the same results via the "next" and "prev" links on the show page,
+#  within the same query — as if you were paging through results in the index.
 #
 #  NOTE: The next and prev sequence operators always grab the entire set of
 #  result_ids.  No attempt is made to reduce the query.  NOTE: we might be
@@ -14,7 +16,10 @@
 #  The first and last sequence operators ignore result_ids.  However, they are
 #  able to execute optimized queries that return only the first or last result.
 #
-#  Methods:
+#  == Instance Methods:
+#
+#  Methods for moving forward/back up/down within Query results.
+#  Used on show pages of individual records.
 #
 #  current_id=::  Set current place in results by id.
 #  current=::     Same as above, but accepts record instances.
@@ -25,6 +30,62 @@
 #  previous::
 #  next::
 #  last::
+#
+#  Sequence operators let you use the query as a pseudo-iterator:  (Note, these
+#  are somewhat more subtle than shown here, as nested queries may require the
+#  creation of new query instances.  See the section on nested queries below.)
+#
+#    query = Query.lookup(:Observation)
+#    query.current = @observation
+#    next  = query.current if query.next
+#    this  = query.current if query.prev
+#    prev  = query.current if query.prev
+#    first = query.current if query.first
+#    last  = query.current if query.last
+#
+#  Query knows how to work with PaginationData:
+#
+#    # In controller:
+#    query = create_query(:Name)
+#    @pagination_data = number_pagination_data
+#    @names = query.paginate(@pagination_data)
+#
+#    # Or if you want to paginate by letter first, then page number:
+#    query = create_query(:Name)
+#    query.need_letters = 'names.sort_name'
+#    @pagination_data = letter_pagination_data
+#    @names = query.paginate(@pagination_data)
+#
+#  == Sequence Operators
+#
+#  The "correct" usage of the sequence operators is subtle and inflexible due
+#  to the complexities of the query potentially being nested.  This is how it
+#  is designed to work:
+#
+#    query = Query.lookup(:Image)
+#
+#    # Note that query.next *MAY* return a clone.
+#    if new_query = query.next
+#      puts "Next image is: " + new_query.current_id
+#    else
+#      puts "No more images."
+#    end
+#
+#    # Must reset otherwise query.prev just goes back to original place.
+#    query.reset
+#    if new_query = query.prev
+#      puts "Previous image is: " + new_query.current_id
+#    else
+#      puts "No more images."
+#    end
+#
+#    # Note: query.last works the same.
+#    if new_query = query.first
+#      puts "First image is: " + new_query.current_id
+#    else
+#      puts "There are no matching images!"
+#    end
+#
 #
 ###############################################################################
 

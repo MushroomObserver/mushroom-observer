@@ -2,6 +2,7 @@
 
 class InatImportJob < ApplicationJob
   # iNat's id for the MO application
+  # Different in production vs. test & development
   APP_ID = InatImportsController::APP_ID
   # site for authorization, authentication
   SITE = InatImportsController::SITE
@@ -13,16 +14,12 @@ class InatImportJob < ApplicationJob
   ICONIC_TAXA = "Fungi,Protozoa"
   # This string + date is added to description of iNat observation
   IMPORTED_BY_MO = "Imported by Mushroom Observer"
+  MO_API_KEY_NOTES = InatImportsController::MO_API_KEY_NOTES
 
   queue_as :default
 
   def perform(inat_import)
-    @inat_import = inat_import
-    log(
-      "InatImportJob #{inat_import.id} started, user: #{inat_import.user_id}"
-    )
-    @user = @inat_import.user
-
+    create_ivars(inat_import)
     access_token =
       use_auth_code_to_obtain_oauth_access_token(@inat_import.token)
     api_token = trade_access_token_for_jwt_api_token(access_token)
@@ -37,6 +34,15 @@ class InatImportJob < ApplicationJob
   end
 
   private
+
+  def create_ivars(inat_import)
+    @inat_import = inat_import
+    log(
+      "InatImportJob #{inat_import.id} started, user: #{inat_import.user_id}"
+    )
+    @user = @inat_import.user
+    @user_api_key = APIKey.find_by(user: @user, notes: MO_API_KEY_NOTES).key
+  end
 
   # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
   def use_auth_code_to_obtain_oauth_access_token(auth_code)
@@ -113,7 +119,6 @@ class InatImportJob < ApplicationJob
   end
 
   def import_requested_observations
-    @inat_manager = User.find_by(login: "MO Webmaster")
     inat_ids = inat_id_list
     return log("No observations requested") if @inat_import[:import_all].
                                                blank? && inat_ids.blank?
@@ -241,7 +246,7 @@ class InatImportJob < ApplicationJob
 
   def add_provisional_name(prov_name)
     params = { method: :post, action: :name,
-               api_key: inat_manager_key.key,
+               api_key: @user_api_key,
                name: "#{prov_name} crypt. temp.",
                rank: "Species" }
     api = API2.execute(params)
@@ -254,43 +259,24 @@ class InatImportJob < ApplicationJob
   def add_inat_images(inat_obs_photos)
     inat_obs_photos.each do |obs_photo|
       photo = Inat::ObsPhoto.new(obs_photo)
-      api = Inat::PhotoImporter.new(photo_importer_params(photo)).api
-
-      # NOTE: Error handling? 2024-06-19 jdc.
-      # https://github.com/MushroomObserver/mushroom-observer/issues/2382
-      image = Image.find(api.results.first.id)
-
-      # Imaage attributes to potentially update manually
-      # t.boolean "gps_stripped", default: false, null: false
-      image.update(
-        # NOTE: jdc 20250328 This throws errors if done via API params above
-        # because api key owner is webmaster, rather than the importing user
-        user_id: @user.id,
-        when: @observation.when,
-        original_name: photo.original_name
-      )
-      @observation.add_image(image)
+      params = post_photo_params(photo)
+      API2.execute(params)
     end
   end
 
-  def photo_importer_params(photo)
-    { method: :post, action: :image,
-      api_key: inat_manager_key.key,
-      upload_url: photo.url,
+  def post_photo_params(photo)
+    {
+      method: :post,
+      action: :image,
+      api_key: @user_api_key,
 
+      upload_url: photo.url,
+      notes: photo.notes,
       copyright_holder: photo.copyright_holder,
       license: photo.license_id,
-      notes: photo.notes,
-      original_name: photo.original_name }
-  end
-
-  # Key for managing iNat imports; avoids requiring each user to have own key.
-  # NOTE: Can this be done more elegantly via enviroment variable?
-  # It now relies on duplicating the following in the live db & fixtures:
-  # User with login: MO Webmaster, API_key with `notes: "inat import"`
-  # 2024-06-18 jdc
-  def inat_manager_key
-    APIKey.where(user: @inat_manager, notes: "inat import").first
+      original_name: photo.original_name,
+      observations: @observation.id
+    }
   end
 
   def update_names_and_proposals
@@ -347,6 +333,7 @@ class InatImportJob < ApplicationJob
       find { |id| id[:taxon][:name] == name.text_name }
   end
 
+  # iNat login of the iNat user who suggested the id on iNat
   def suggester(suggestion)
     suggestion[:user][:login]
   end
@@ -373,18 +360,14 @@ class InatImportJob < ApplicationJob
   def add_inat_sequences
     @inat_obs.sequences.each do |sequence|
       params = { action: :sequence, method: :post,
-                 api_key: inat_manager_key.key,
+                 api_key: @user_api_key,
                  observation: @observation.id,
                  locus: sequence[:locus],
                  bases: sequence[:bases],
                  archive: sequence[:archive],
                  accession: sequence[:accession],
                  notes: sequence[:notes] }
-      api = API2.execute(params)
-      next if api.errors.any?
-
-      seq = api.results.first
-      seq.update(user: @user)
+      API2.execute(params)
     end
   end
 

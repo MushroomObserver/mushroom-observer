@@ -212,3 +212,7 @@ ann_user:
   <<: *DEFAULTS
   login: user
   name: Ann User
+
+inat_importer:
+  <<: *DEFAULTS
+  keep_filenames: <%= User.keep_filenames[:keep_and_show] %>
