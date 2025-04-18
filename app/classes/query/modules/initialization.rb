@@ -6,9 +6,9 @@
 #
 #  Helper methods for turning Query parameters into AR conditions.
 #
-#  Query.new basically accepts a hash of params, validates them and turns them
-#  into attributes describing analogous AR scopes, but does not create the
-#  scope chain yet.
+#  Query.create_query basically accepts a hash of params, validates them and
+#  turns them into attributes describing analogous AR scopes, but does not
+#  create the scope chain yet.
 #
 #  To get the results for an :index page or for pagination, the methods in
 #  `Query::Modules::Results` need to call `initialize_query`, which makes the
@@ -22,7 +22,7 @@
 #
 #  Example:
 #
-#  query = Query.new(:Observation, has_public_lat_lng: true)
+#  query = Query.create_query(:Observation, has_public_lat_lng: true)
 #
 #    This gives you `query` as a Query instance with validated `params`
 #    you can inspect at `query.params`, `{ has_public_lat_lng: true }`
@@ -50,7 +50,7 @@
 #    database query until you execute it or assign it to a variable,
 #    like `results = Observation.all` or `results = query.scope`.
 #
-#  METHODS:
+#  == Instance Methods:
 #
 #  initialized?::     Has the Query instance been initialized?
 #  initialize_query:: Send the params to AR model scopes.
@@ -115,7 +115,7 @@ module Query::Modules::Initialization
     @skippable_values = ["[]", "{}", "", nil].freeze
   end
 
-  # For most queries, these are the `scope_parameters` defined in Query::Base.
+  # For most queries, these are the `scope_parameters` defined in Query.
   # Makes sure `order_by` comes "last" in the hash, because some params may
   # reset order.
   # For RssLogs, removes any content filter params before passing to scopes
