@@ -7,12 +7,18 @@
 #  Methods that are available to instances as class methods, and to ::Query.
 #  ::Query is a convenience delegator class so callers can access these methods.
 #
-#  QueryRecords:
+#  == Class Methods:
+#
 #  find::               Find a QueryRecord id and reinstantiate a Query from it.
 #  safe_find::          Same as above, with rescue.
-#  lookup::             Instantiate Query of given model, flavor and params.
-#  lookup_and_save::    Ditto, plus save the QueryRecord
-#  rebuild_from_description:: Instantiate Query described by description string.
+#  lookup::             Instantiate Query of given model, flavor and params,
+#                       Tries to `get_record` of identical params, resaving if
+#                       exists (extending its expiration time).
+#  get_record::         Checks if there is a QueryRecord with identical params,
+#                       returning it if so.
+#  lookup_and_save::    Same as `lookup`, plus saves the QueryRecord.
+#  rebuild_from_description:: Instantiate Query from `description` string.
+#  deserialize::        Reconsititute model and params hash from `description`.
 #
 module Query::Modules::QueryRecords
   def self.included(base)

@@ -4,7 +4,26 @@
 #
 #  :module: Validation
 #
-#  Validation of Query parameters, plus substitution of ids for instances.
+#  This validator is recursive, because some params accept arrays or hashes of
+#  values. Each value is ultimately validated separately, via methods below
+#  that are specific to a data type. In the case of subqueries, the whole
+#  package of values is sent to a new Query instantiation which returns its own
+#  validation_messages. These are added to this query's messages.
+#
+#  Each validation method here may first "clean" the value, e.g. substituting
+#  ids for instances. Generally validators do not change data, but we do here
+#  to offer callers the convenience of passing instances rather than ids.
+#
+#  In the event it gets data that it cannot parse, it stores a message in the
+#  array of `@validation_messages`, and saves that to the Query. Callers can
+#  access these messages to return them via flash to users, for example when
+#  the query comes from a form.
+#
+#  == Instance methods:
+#
+#  clean_and_validate_params::  Described above.
+#
+#  Private methods described below.
 #
 module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
   attr_accessor :params, :params_cache, :subqueries, :valid, :validation_errors
@@ -22,6 +41,8 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     @params = new_params
     assign_attributes(**@params) if @params.present?
   end
+
+  private
 
   def validate_value(param_type, param, val)
     if param_type.is_a?(Array)
@@ -158,6 +179,7 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
   end
   # rubocop:enable Lint/BooleanSymbol
 
+  # We don't currently have params for integers, but this would enable them.
   # def validate_integer(param, val)
   #   if val.is_a?(Integer) || val.is_a?(String) && val.match(/^-?\d+$/)
   #     val.to_i

@@ -50,7 +50,7 @@
 #    database query until you execute it or assign it to a variable,
 #    like `results = Observation.all` or `results = query.scope`.
 #
-#  METHODS:
+#  == Instance Methods:
 #
 #  initialized?::     Has the Query instance been initialized?
 #  initialize_query:: Send the params to AR model scopes.

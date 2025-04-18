@@ -235,20 +235,42 @@
 #
 #  ############################################################################
 #
+#  == Class methods
+#
+#  create_query::               Factory method for generating new queries.
+#                               Takes a model name (symbol) and parameters.
+#                               Instantiates a new Query and initializes some
+#                               (but not all) accessor values.
+#
+#    NOTE: other class methods defined in modules
+#
 #  == Class and Instance Methods
 #
-#  parameter_declarations::
-#  takes_parameter?::
-#  scope_parameters::
-#  content_filter_parameters::
-#  default_order::
+#  scope_parameters::           Attributes that should be forwarded to scopes.
+#                               Generally that's all of them, but we do have
+#                               one, `preference_filter`, that's a flag
+#                               indicating one or more user preference content
+#                               filters have been automatically applied to the
+#                               scope in ApplicationController.
+#  content_filter_parameters::  Attributes that may be affected by user content
+#                               filters. Queries may override these.
+#  default_order::              Keyword that specifies an `order_by_#{keyword}`
+#                               ordering scope, when there is no `order_by`
+#                               parameter passed.
+#  alphabetical_by::            `Model[:column]` that specifies what column to
+#                               pull text values from, for indexes that offer
+#                               pagination by letter. May be a joined column.
 #
 #  == Instance Methods
-#  relatable?::               Can a query of this model be converted to a
-#                             subquery filtering results of another model?
-#  subquery_of?(target)::
-#  serialize::          Returns string which describes the Query completely.
-#  record::
+#
+#  relatable?(target)::       Can the current class be called as a subquery of
+#                             the target class, filtering its results?
+#  subquery_of?(target)::     Is a query of this model serving as a subquery of
+#                             the target in the current query?
+#                             (Checks recursion.)
+#  serialize::                Returns string which describes the Query
+#                             completely.
+#  record::                   The QueryRecord of the current query, if exists.
 #
 #  == Attributes of all Query instances:
 #
@@ -350,10 +372,13 @@ class Query
     self.class.related?(target, model.name.to_sym)
   end
 
+  # Is the current class being used as a subquery of the target class?
+  # (Checks subquery recursion.)
   def subquery_of(target)
     self.class.current_or_related_query(target, model.name.to_sym, self)
   end
 
+  # Defined in each subclass. Default order when `order_by` param not passed.
   def default_order
     self.class.default_order || :id
   end
