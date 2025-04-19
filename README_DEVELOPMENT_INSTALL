@@ -198,12 +198,14 @@ jason> mysql -u root -p
   CREATE DATABASE mo_development;
   CREATE DATABASE mo_test;
   CREATE DATABASE cache_development;
+  CREATE DATABASE cable_development;
   CREATE USER 'mo'@'localhost' IDENTIFIED BY 'xxx';
   # Command used to reset password if needed later:
   # SET PASSWORD FOR 'mo'@'localhost' = PASSWORD('xxx');
   GRANT ALL PRIVILEGES ON mo_development.* TO 'mo'@'localhost' WITH GRANT OPTION;
   GRANT ALL PRIVILEGES ON mo_test.* TO 'mo'@'localhost' WITH GRANT OPTION;
   GRANT ALL PRIVILEGES ON cache_development.* TO 'mo'@'localhost' WITH GRANT OPTION;
+  GRANT ALL PRIVILEGES ON cable_development.* TO 'mo'@'localhost' WITH GRANT OPTION;
 mo> cp config/database.yml-template config/database.yml
 mo> vi config/database.yml
   shared:
@@ -235,6 +237,12 @@ mo> vi config/database.yml
       password: mo
       host: localhost
       migrations_paths: "db/cache/migrate"
+    cable:
+      database: cable_development
+      username: mo
+      password: mo
+      host: 127.0.0.1
+      migrations_paths: db/cable_migrate
 
   test:
     database: mo_test
@@ -267,10 +275,13 @@ mo> rake lang:update
 
 
 # NOTE: 2024/02/09 The `create database` section above contains the steps to
-# create and use the new solid_cache db. If your development install is already
+# create and use the new solid_cache db.
+#
+# NOTE: 2025/04/18 The `create database` section above also contains steps to
+# create and use the new solid_cable db. If your development install is already
 # running however, do the following to set it up:
 #
-# 1. Check out <main> to get the `solid_cache` gem, new configs and migrations
+# 1. Check out <main> to get the `solid_cable` gem, new configs and migrations
 # 2. Run `bundle`
 # 3. You have to manually change your `config/database.yml`, since that file is
 #    not checked in to git. The relevant change regards _nesting_ db configs:
@@ -286,10 +297,16 @@ mo> rake lang:update
 #     password: mo
 #     host: 127.0.0.1
 #     migrations_paths: "db/cache/migrate"
+#   cable:
+#     database: cable_development
+#     username: mo
+#     password: mo
+#     host: 127.0.0.1
+#     migrations_paths: db/cable_migrate
 #
-# Your main db config should now be nested under `primary`, and the cache db
-# config under `cache`. Both can use the same mysql user/pw, there are no
-# further config changes necessary.
+# Your main db config should now be nested under `primary`, the cache db config
+# under `cache`, and the cable db config under `cable`. All can use the same
+# mysql user/pw, there are no further config changes necessary.
 #
 # 4. `sudo mysql`, create the new db and grant user 'mo' privileges in the new
 #    cache db. With a default setup, you should be able to sudo into mysql using
