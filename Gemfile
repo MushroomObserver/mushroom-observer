@@ -47,6 +47,8 @@ gem("solid_queue")
 # https://github.com/rails/mission_control-jobs
 # Rails-based frontend to Active Job adapters for monitoring jobs
 gem("mission_control-jobs")
+# solid_cable for ActionCable without Redis
+gem("solid_cable")
 
 # sprockets for asset compilation and versioning
 gem("sprockets-rails")
