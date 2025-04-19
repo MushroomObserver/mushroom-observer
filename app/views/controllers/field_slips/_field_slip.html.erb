@@ -44,7 +44,7 @@ usr = field_slip.user
 
       <strong><%= :OBSERVATION.t %>:</strong>
       <% if obs %>
-      <%= link_to(obs.unique_format_name.t, observation_path(obs),
+      <%= link_to(obs.user_unique_format_name(@user).t, observation_path(obs),
                   class: "observation_link_#{obs.id}") %>
       <% else %>
       <%= :field_slip_no_observation.t %>

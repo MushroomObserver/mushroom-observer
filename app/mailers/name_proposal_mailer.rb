@@ -6,8 +6,10 @@ class NameProposalMailer < ApplicationMailer
 
   def build(sender, receiver, naming, observation)
     setup_user(receiver)
-    @title = :email_subject_name_proposal.l(name: naming.text_name,
-                                            id: observation.id)
+    @title = :email_subject_name_proposal.l(
+      name: naming.user_text_name(receiver),
+      id: observation.id
+    )
     @naming = naming
     @observation = observation
     debug_log(:name_proposal, sender, receiver,

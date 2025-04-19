@@ -7,6 +7,6 @@
                         image_link: observation_path(obs))
     end) if obs.thumb_image_id.present?
     concat(tag.div(class: "panel-body") do
-      link_to(obs.unique_format_name.t, observation_path(obs))
+      link_to(obs.user_unique_format_name(@user).t, observation_path(obs))
     end)
   end %>

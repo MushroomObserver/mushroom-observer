@@ -94,4 +94,4 @@ add_context_nav(species_list_show_tabs(list: @species_list, query: @query))
            locals: { object: @species_list, comments: @comments,
                      controls: @user, limit: nil }) %>
 
-<%= show_object_footer(@species_list) %>
+<%= show_object_footer(@user, @species_list) %>

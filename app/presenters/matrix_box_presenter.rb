@@ -89,7 +89,8 @@ class MatrixBoxPresenter < BasePresenter
     self.type       = :observation
     self.when       = observation.when.web_date
     self.who        = observation.user if observation.user
-    self.name       = observation.format_name.t.break_name.small_author
+    self.name       = observation.user_format_name(observation.user).
+                      t.break_name.small_author
     self.what       = observation
     self.where      = observation.where
     self.location   = observation.location

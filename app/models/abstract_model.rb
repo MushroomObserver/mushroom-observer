@@ -178,7 +178,13 @@ class AbstractModel < ApplicationRecord
   #    creation.
   before_create :set_user_and_autolog
   def set_user_and_autolog
-    self.user_id ||= User.current_id if respond_to?(:user_id=)
+    if respond_to?(:user_id=)
+      self.user_id ||= if respond_to?(:current_user)
+                         current_user
+                       else
+                         User.current_id
+                       end
+    end
     autolog_created if has_rss_log?
   end
 
@@ -621,6 +627,13 @@ class AbstractModel < ApplicationRecord
     touch_when_logging unless new_record? ||
                               args[:touch] == false
     rss_log.add_with_date(tag, args)
+  end
+
+  def user_log(user, tag, args = {})
+    init_rss_log unless rss_log
+    touch_when_logging unless new_record? ||
+                              args[:touch] == false
+    rss_log.user_add_with_date(user, tag, args)
   end
 
   # This allows a model to override touch in this context only, e.g.,

@@ -139,7 +139,7 @@ module ApplicationController::Queries
   end
 
   def current_user_preference_filters
-    User.current ? User.current.content_filter : MO.default_content_filter
+    @user ? @user.content_filter : MO.default_content_filter
   end
 
   public ##########

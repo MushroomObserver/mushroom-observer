@@ -78,13 +78,14 @@ class FieldSlipsControllerTest < FunctionalTestCase
 
     slip = FieldSlip.find_by(code: code)
     assert_redirected_to field_slip_url(slip)
-    assert_equal(slip.observation, ObservationView.last(User.current))
+    assert_equal(slip.observation, ObservationView.last(@field_slip.user))
   end
 
   test "should allow admin to create field_slip with constraint violation" do
-    login("dick") # Admin of :falmouth_2023_09_project
+    user = users(:dick)
+    login(user.login) # Admin of :falmouth_2023_09_project
     ObservationView.update_view_stats(@field_slip.observation_id,
-                                      User.current.id)
+                                      user.id)
     proj = projects(:falmouth_2023_09_project)
     code = "#{proj.field_slip_prefix}-1234"
     assert_difference("FieldSlip.count") do
@@ -101,7 +102,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_flash_warning
     slip = FieldSlip.find_by(code: code)
     assert_redirected_to field_slip_url(slip)
-    assert_equal(slip.observation, ObservationView.last(User.current))
+    assert_equal(slip.observation, ObservationView.last(user.id))
   end
 
   test "should not create field_slip with last viewed obs due to constraints" do
@@ -479,10 +480,11 @@ class FieldSlipsControllerTest < FunctionalTestCase
   end
 
   test "should update field_slip with last viewed obs" do
-    login(@field_slip.user.login)
+    user = @field_slip.user
+    login(user.login)
     orig_obs = @field_slip.observation
     obs = observations(:detailed_unknown_obs)
-    ObservationView.update_view_stats(obs.id, @field_slip.user_id)
+    ObservationView.update_view_stats(obs.id, user.id)
     patch(:update,
           params: { id: @field_slip.id,
                     commit: :field_slip_last_obs.t,
@@ -490,7 +492,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
                                   project_id: @field_slip.project_id } })
     assert_redirected_to field_slip_url(@field_slip)
     assert_equal(@field_slip.reload.observation,
-                 ObservationView.last(User.current))
+                 ObservationView.last(user))
     assert(@field_slip.project.observations.include?(obs))
     assert_not(@field_slip.project.observations.include?(orig_obs))
   end
