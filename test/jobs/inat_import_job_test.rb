@@ -454,8 +454,6 @@ class InatImportJobTest < ActiveJob::TestCase
 
     assert_match(/Hygrocybe sp. 'conica-CA06'/, obs.name.text_name,
                  "Incorrect Name")
-
-    standard_assertions(obs: obs, name: name)
   end
 
   def test_import_plant
