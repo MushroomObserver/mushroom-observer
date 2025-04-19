@@ -400,10 +400,12 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(obs.sequences.one?, "Obs should have one sequence")
   end
 
+  # Inat Provisional Species Name "Donadina PNW01" (no: quotes, sp. dash)
   def test_import_job_prov_name_pnw_style
     file_name = "donadinia_PNW01"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
     inat_import = create_inat_import(inat_response: mock_inat_response)
+
     assert(Name.where(Name[:text_name] =~ /Donadinia/).none?,
            "Test requires that MO not yet have `Donadinia` Names")
 
@@ -432,6 +434,28 @@ class InatImportJobTest < ActiveJob::TestCase
 
     assert(obs.images.any?, "Obs should have images")
     assert(obs.sequences.one?, "Obs should have one sequence")
+  end
+
+  # Inat Prov Species Name "Hygrocybe sp. 'conica-CA06'" (epithet single-quoted)
+  def test_import_job_prov_name_ncbi_style
+    file_name = "hygrocybe_sp_conica-CA06_ncbi_style"
+    mock_inat_response = File.read("test/inat/#{file_name}.txt")
+    inat_import = create_inat_import(inat_response: mock_inat_response)
+
+    stub_inat_interactions(inat_import: inat_import,
+                           mock_inat_response: mock_inat_response)
+
+    assert_difference("Observation.count", 1,
+                      "Failed to create observation") do
+      InatImportJob.perform_now(inat_import)
+    end
+
+    obs = Observation.last
+
+    assert_match(/Hygrocybe sp. 'conica-CA06'/, obs.name.text_name,
+                 "Incorrect Name")
+
+    standard_assertions(obs: obs, name: name)
   end
 
   def test_import_plant
