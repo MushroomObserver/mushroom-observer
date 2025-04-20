@@ -44,7 +44,8 @@ module Report
         row.genus,
         row.species,
         row.form_or_variety_or_subspecies,
-        *collector_and_number(row),
+        collector(row),
+        number(row),
         disposition(row),
         row.obs_when,
         row.year,
@@ -59,11 +60,21 @@ module Report
         row.best_low,
         row.best_high,
         row.obs_updated_at,
-        *explode_notes(row),
+        substrate(row),
+        host(row),
+        field_notes(row),
         row.obs_id,
         row.obs_url,
         image_urls(row)
       ]
+    end
+
+    def collector(row)
+      collector_and_number(row).first
+    end
+
+    def number(row)
+      collector_and_number(row).second
     end
 
     def collector_and_number(row)
@@ -72,6 +83,18 @@ module Report
       else
         row.val(2).split("\n").min_by(&:to_i).split("\t")[1..2]
       end
+    end
+
+    def substrate(row)
+      explode_notes(row).first
+    end
+
+    def host(row)
+      explode_notes(row).second
+    end
+
+    def field_notes(row)
+      explode_notes(row).third
     end
 
     def explode_notes(row)
