@@ -2,7 +2,14 @@
 
 module Report
   # Symbiota-style tsv report.
+  # https://symbiota.org/
+  # https://biokic.github.io/symbiota-docs/
+  # https://github.com/Symbiota/Symbiota
   class Symbiota < TSV
+    # These plus Column labels comprising
+    # Symbiota Standard Field names which are useful for our purposes
+    # https://biokic.github.io/symbiota-docs/editor/edit/fields/#standard-fields
+    # plus MO-specific fields that are useful for uploads to Symbiota portals
     def labels
       %w[
         scientificName
@@ -36,7 +43,7 @@ module Report
       ]
     end
 
-    def format_row(row)
+    def format_row(row) # rubocop:disable Metrics/AbcSize
       [
         row.name_text_name,
         row.name_author,
@@ -45,7 +52,7 @@ module Report
         row.species,
         row.form_or_variety_or_subspecies,
         collector(row),
-        number(row),
+        number(row), # collectors number || "MUOB #{observation.id}", Cf. obs_id
         disposition(row),
         row.obs_when,
         row.year,
@@ -61,11 +68,11 @@ module Report
         row.best_high,
         row.obs_updated_at,
         substrate(row),
-        host(row),
-        field_notes(row),
-        row.obs_id,
-        row.obs_url,
-        image_urls(row)
+        host(row), # MyCoPortal `host` == Sybiota/DWC associatedTaxa
+        field_notes(row), # occurrenceRemarks
+        row.obs_id, # MCP `dpk`; catalogNumber = "MUOB #{observation.id}"
+        row.obs_url, # MO-specific; used in MCP Desciption / verbatimAttributes
+        image_urls(row) # MO-specific
       ]
     end
 
