@@ -101,7 +101,6 @@ Metrics/AbcSize:
     - 'app/classes/report/darwin/observations.rb'
     - 'app/classes/report/fundis.rb'
     - 'app/classes/report/raw.rb'
-    - 'app/classes/report/symbiota.rb'
     - 'app/classes/site_data.rb'
     - 'app/classes/suggestion.rb'
     - 'app/classes/tree.rb'
