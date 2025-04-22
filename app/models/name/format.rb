@@ -8,6 +8,16 @@ module Name::Format
   end
 
   ##### Display of names ######################################################
+  def user_display_name(user)
+    str = self[:display_name]
+    if user &&
+       user.hide_authors == "above_species" &&
+       Name.ranks_above_species.include?(rank)
+      str = str.sub(/^(\**__.*__\**).*/, '\\1')
+    end
+    str
+  end
+
   def display_name
     str = self[:display_name]
     if User.current &&
@@ -37,6 +47,10 @@ module Name::Format
   # higher-ranked taxa here.)
   def observation_name
     display_name
+  end
+
+  def user_observation_name(user)
+    user_display_name(user)
   end
 
   # Marked up Name, authors shortened per ICN Recommendation 46C.2,
@@ -75,6 +89,10 @@ module Name::Format
 
   def real_text_name
     Name.display_to_real_text(self)
+  end
+
+  def user_real_search_name(user)
+    Name.user_display_to_real_search(self, user)
   end
 
   def real_search_name
@@ -141,6 +159,10 @@ module Name::Format
              ' \1 '). # Remove internal author
         gsub(/\*?\*?__\*?\*?/, ""). # Remove textile ornamentation
         concat(group_suffix(name)) # Readd group suffix
+    end
+
+    def user_display_to_real_search(name, user)
+      name.user_display_name(user).gsub(/\*?\*?__([^_]+)__\*?\*?/, '\1')
     end
 
     def display_to_real_search(name)

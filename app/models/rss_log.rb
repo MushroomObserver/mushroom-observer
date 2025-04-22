@@ -57,7 +57,7 @@
 #
 #  5) Add "show log" link at bottom of model's show page:
 #
-#       <%= show_object_footer(@object) %>
+#       <%= show_object_footer(@user, @object) %>
 #
 #
 #  == Usage
@@ -300,6 +300,20 @@ class RssLog < AbstractModel
 
   def relevant_args(args)
     { user: (User.current ? User.current.login : :UNKNOWN.l) }.
+      update(args).except(:save, :time, :touch)
+  end
+
+  def user_add_with_date(user, tag, args = {})
+    entry = encode(tag, user_relevant_args(args, user),
+                   args[:time] || Time.zone.now)
+    RssLog.record_timestamps = false if args.key?(:touch) && !args[:touch]
+    add_entry(entry)
+    save_without_our_callbacks unless args.key?(:save) && !args[:save]
+    RssLog.record_timestamps = true
+  end
+
+  def user_relevant_args(args, user)
+    { user: (user ? user.login : :UNKNOWN.l) }.
       update(args).except(:save, :time, :touch)
   end
 

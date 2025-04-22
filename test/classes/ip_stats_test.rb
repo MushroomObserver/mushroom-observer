@@ -114,25 +114,29 @@ class IpStatsTest < UnitTestCase
 
     ip1 = "1.2.3.4"
     ip2 = "5.6.7.8"
-    rolf = User.where(login: "rolf").first
 
-    User.current = nil
-    IpStats.log_stats(ip: ip1, time: 15.seconds.ago,
-                      controller: :observations, action: :show)
-    IpStats.log_stats(ip: ip1, time: 12.seconds.ago,
-                      controller: :observations, action: :show)
-    IpStats.log_stats(ip: ip1, time: 9.seconds.ago,
-                      controller: :observations, action: :show)
-    IpStats.log_stats(ip: ip1, time: 6.seconds.ago,
-                      controller: :observations, action: :show)
-    User.current = rolf
-    IpStats.log_stats(ip: ip2, time: 2.seconds.ago,
-                      controller: :observations, action: :show)
+    IpStats.log_stats({ ip: ip1, time: 15.seconds.ago,
+                        controller: :observations, action: :show },
+                      nil)
+    IpStats.log_stats({ ip: ip1, time: 12.seconds.ago,
+                        controller: :observations, action: :show },
+                      nil)
+    IpStats.log_stats({ ip: ip1, time: 9.seconds.ago,
+                        controller: :observations, action: :show },
+                      nil)
+    IpStats.log_stats({ ip: ip1, time: 6.seconds.ago,
+                        controller: :observations, action: :show },
+                      nil)
+
+    user_id = users(:rolf).id
+    IpStats.log_stats({ ip: ip2, time: 2.seconds.ago,
+                        controller: :observations, action: :show },
+                      user_id)
 
     stats = IpStats.read_stats(do_activity: true)
     assert_equal([ip1, ip2], stats.keys.sort)
     assert_nil(stats[ip1][:user])
-    assert_equal(rolf.id, stats[ip2][:user])
+    assert_equal(user_id, stats[ip2][:user])
     assert_operator(stats[ip1][:rate], :>, 0.01)
     assert_operator(stats[ip2][:rate], :<, 0.01)
     assert_operator(stats[ip1][:load], :>, 0.01)

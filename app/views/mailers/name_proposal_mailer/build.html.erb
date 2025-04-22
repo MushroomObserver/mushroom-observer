@@ -4,7 +4,7 @@
   intro = :email_name_proposal_intro.l(id: @observation.id)
 
   fields = ""
-  fields += "*#{:Name.l}:* #{@naming.format_name}\n"
+  fields += "*#{:Name.l}:* #{@naming.user_format_name(@user)}\n"
   fields += "*#{:Time.l}:* #{@naming.created_at.email_time}\n"
   fields += "*#{:By.l}:* #{@naming.user.legal_name} (#{@naming.user.login})\n" if @naming.user
   @naming.reasons_array.each do |reason|
