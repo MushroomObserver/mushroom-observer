@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Query::Observations < Query::Base
+class Query::Observations < Query
   include Query::Params::AdvancedSearch
   include Query::Params::Filters
 

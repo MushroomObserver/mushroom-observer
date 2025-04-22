@@ -15,6 +15,8 @@
 #  NOTE: Calling most of these will `initialize_query`,
 #        i.e., instantiate the requested page of query results.
 #
+#  == Instance Methods:
+#
 #  num_results::        Number of results the query returns.
 #  results::            Array of all results, instantiated.
 #  result_ids::         Array of all results, just ids.

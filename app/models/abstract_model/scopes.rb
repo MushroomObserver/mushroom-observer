@@ -279,7 +279,7 @@ module AbstractModel::Scopes
     def subquery(model_name, params)
       return all if params.blank?
 
-      subquery = Query.new(model_name, **params).scope.reorder("")
+      subquery = Query.create_query(model_name, **params).scope.reorder("")
       merge(subquery).distinct
     end
 

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Query::RssLogs < Query::Base
+class Query::RssLogs < Query
   include Query::Params::Filters
 
   # Commented-out attributes are here so we don't forget they're added

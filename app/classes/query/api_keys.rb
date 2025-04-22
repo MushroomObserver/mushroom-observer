@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Query::APIKeys < Query::Base
+class Query::APIKeys < Query
   query_attr(:created_at, [:time])
   query_attr(:updated_at, [:time])
   query_attr(:notes_has, :string)
