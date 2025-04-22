@@ -16,7 +16,7 @@
 #  The first and last sequence operators ignore result_ids.  However, they are
 #  able to execute optimized queries that return only the first or last result.
 #
-#  Methods:
+#  == Instance Methods:
 #
 #  Methods for moving forward/back up/down within Query results.
 #  Used on show pages of individual records.

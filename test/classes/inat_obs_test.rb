@@ -218,13 +218,22 @@ class InatObsTest < UnitTestCase
     prov_name = mock_inat_obs.inat_prov_name
     assert(prov_name.present?)
     assert_equal('Arrhenia "sp-NY02"', prov_name)
-    assert_equal('Arrhenia "sp-NY02"', mock_inat_obs.provisional_name)
+    assert_equal('Arrhenia "sp-NY02"', mock_inat_obs.provisional_name,
+                 "Provisional name should be unprocessed iNat provisional name")
 
     mock_inat_obs = mock_observation("donadinia_PNW01")
     prov_name = mock_inat_obs.inat_prov_name
     assert(prov_name.present?)
     assert_equal("Donadinia PNW01", prov_name)
-    assert_equal('Donadinia "sp-PNW01"', mock_inat_obs.provisional_name)
+    assert_equal("Donadinia PNW01", mock_inat_obs.provisional_name,
+                 "Provisional name should be unprocessed iNat provisional name")
+
+    mock_inat_obs = mock_observation("hygrocybe_sp_conica-CA06_ncbi_style")
+    prov_name = mock_inat_obs.inat_prov_name
+    assert(prov_name.present?)
+    assert_equal("Hygrocybe sp. 'conica-CA06'", prov_name)
+    assert_equal("Hygrocybe sp. 'conica-CA06'", mock_inat_obs.provisional_name,
+                 "Provisional name should be unprocessed iNat provisional name")
 
     assert_blank(
       mock_observation("amanita_flavorubens").inat_prov_name,

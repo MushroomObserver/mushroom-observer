@@ -550,7 +550,9 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login
     get(:index, params: { where: location.name })
     assert_displayed_title(:OBSERVATIONS.l)
-    assert_displayed_filters("#{:query_locations.l}: #{location.display_name}")
+    assert_displayed_filters(
+      "#{:query_search_where.l}: #{location.display_name}"
+    )
     assert_match(new_location_path(where: location.name), @response.body)
   end
 
@@ -562,7 +564,9 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_select("#results a", { text: "« Prev" },
                   "Wrong page or display is missing a link to Prev page")
     assert_displayed_title(:OBSERVATIONS.l)
-    assert_displayed_filters("#{:query_locations.l}: #{location.display_name}")
+    assert_displayed_filters(
+      "#{:query_search_where.l}: #{location.display_name}"
+    )
     assert_not_empty(css_select('[id="context_nav"]').text, "Tabset is empty")
   end
 

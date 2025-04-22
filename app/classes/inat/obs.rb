@@ -179,22 +179,17 @@ class Inat
 
     # The MO text_name for an iNat provisional species name
     def provisional_name
-      prov_sp_name = inat_prov_name
-      return nil if prov_sp_name.blank?
-      return prov_sp_name if in_mo_format?(prov_sp_name)
+      return nil if inat_prov_name.blank?
 
-      # prepend the epithet with "sp-"
-      # epithet must start with lower case letter, else MO thinks it's an author
-      # quote the epithet by convention to indicate it will be replaced
-      # by a ICN style published or provisional name.
-      # Ex: Donadinia PNW01 => Donadinia "sp-PNW01"
-      prov_sp_name.sub(/ (.*)/, ' "sp-\1"')
+      inat_prov_name
     end
 
     # derive a provisional name from some specific Observation Fields
     # NOTE: iNat does not allow provisional names as identifications.
-    # Also, iNat allows only 1 obs field with a given :name per obs.
-    # I assume iNat users will add only 1 provisional name per obs.
+    # Also, iNat allows only 1 obs field with a given :name per obs,
+    # so there can be only 1 Provisional Species Name per obs.
+    # NOTE: Edge case -- obs also has Provisional Genus Name, etc.
+    # NOTE: I assume iNat users will add only 1 provisional name per obs.
     def inat_prov_name
       prov_name_field = inat_prov_name_field
       return nil if prov_name_field.blank?

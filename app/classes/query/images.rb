@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Query::Images < Query::Base
+class Query::Images < Query
   query_attr(:created_at, [:time])
   query_attr(:updated_at, [:time])
   query_attr(:date, [:date])

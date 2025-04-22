@@ -83,32 +83,42 @@ module NamesHelper
   # These don't run queries... it's query.select_count above, that does.
 
   def obss_of_taxon_this_name(name)
-    Query.new(:Observation, names: { lookup: name.id }, order_by: :confidence)
+    Query.create_query(
+      :Observation, names: { lookup: name.id }, order_by: :confidence
+    )
   end
 
   def obss_of_taxon_other_names(name)
-    Query.new(:Observation, names: { lookup: name.id, include_synonyms: true,
-                                     exclude_original_names: true },
-                            order_by: :confidence)
+    Query.create_query(
+      :Observation, names: { lookup: name.id, include_synonyms: true,
+                             exclude_original_names: true },
+                    order_by: :confidence
+    )
   end
 
   def obss_of_taxon_any_name(name)
-    Query.new(:Observation, names: { lookup: name.id, include_synonyms: true },
-                            order_by: :confidence)
+    Query.create_query(
+      :Observation, names: { lookup: name.id, include_synonyms: true },
+                    order_by: :confidence
+    )
   end
 
   # These two do joins to Namings. Unbelievably, it's faster than the above?
   def obss_other_taxa_this_taxon_proposed(name)
-    Query.new(:Observation, names: { lookup: name.id, include_synonyms: true,
-                                     include_all_name_proposals: true,
-                                     exclude_consensus: true },
-                            order_by: :confidence)
+    Query.create_query(
+      :Observation, names: { lookup: name.id, include_synonyms: true,
+                             include_all_name_proposals: true,
+                             exclude_consensus: true },
+                    order_by: :confidence
+    )
   end
 
   def obss_this_name_proposed(name)
-    Query.new(:Observation, names: { lookup: name.id,
-                                     include_all_name_proposals: true },
-                            order_by: :confidence)
+    Query.create_query(
+      :Observation, names: { lookup: name.id,
+                             include_all_name_proposals: true },
+                    order_by: :confidence
+    )
   end
 
   #############################################################################
