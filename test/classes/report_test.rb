@@ -393,6 +393,132 @@ class ReportTest < UnitTestCase
     do_tsv_test(Report::Symbiota, obs, expect, &:id)
   end
 
+  def test_mycoportal1
+    obs = observations(:detailed_unknown_obs)
+    obs.notes = {
+      Substrate: "wood\tchips",
+      Habitat: "lawn",
+      Host: "_Agaricus_",
+      Other: "First\tline.\nSecond\tline."
+    }
+    obs.save!
+
+    img1 = images(:in_situ_image)
+    img2 = images(:turned_over_image)
+    expect = [
+      "Fungi",
+      "",
+      "Kingdom",
+      "Fungi",
+      "",
+      "",
+      "Mary Newbie",
+      "174",
+      "NY",
+      "2006-05-11",
+      "2006",
+      "5",
+      "11",
+      "USA",
+      "California",
+      "",
+      "Burbank",
+      "34.185",
+      "-118.33",
+      "148",
+      "294",
+      "#{obs.updated_at.api_time} UTC",
+      "wood chips",
+      "Agaricus",
+      "Habitat: lawn Other: First line. Second line.",
+      obs.id.to_s,
+      "https://mushroomobserver.org/#{obs.id}",
+      "https://mushroomobserver.org/images/orig/#{img1.id}.jpg " \
+        "https://mushroomobserver.org/images/orig/#{img2.id}.jpg"
+    ]
+    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal2
+    obs = observations(:agaricus_campestrus_obs)
+    expect = [
+      "Agaricus campestrus",
+      "L.",
+      "Species",
+      "Agaricus",
+      "campestrus",
+      "",
+      "Rolf Singer",
+      "MUOB #{obs.id}",
+      "",
+      "2007-06-23",
+      "2007",
+      "6",
+      "23",
+      "USA",
+      "California",
+      "",
+      "Burbank",
+      "34.185",
+      "-118.33",
+      "148",
+      "294",
+      "#{obs.updated_at.api_time} UTC",
+      "",
+      "",
+      "From somewhere else",
+      obs.id.to_s,
+      "https://mushroomobserver.org/#{obs.id}"
+    ]
+    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_compress_consecutive_whitespace
+    obs = observations(:detailed_unknown_obs)
+    obs.notes = {
+      Substrate: "wood\tchips",
+      Habitat: "lawn",
+      Host: "_Agaricus_",
+      Other: "1st line.\r\n\r\n2nd line.\r\n \r\n3rd line."
+    }
+    obs.save!
+
+    img1 = images(:in_situ_image)
+    img2 = images(:turned_over_image)
+    expect = [
+      "Fungi",
+      "",
+      "Kingdom",
+      "Fungi",
+      "",
+      "",
+      "Mary Newbie",
+      "174",
+      "NY",
+      "2006-05-11",
+      "2006",
+      "5",
+      "11",
+      "USA",
+      "California",
+      "",
+      "Burbank",
+      "34.185",
+      "-118.33",
+      "148",
+      "294",
+      "#{obs.updated_at.api_time} UTC",
+      "wood chips",
+      "Agaricus",
+      "Habitat: lawn Other: 1st line. 2nd line. 3rd line.",
+      obs.id.to_s,
+      "https://mushroomobserver.org/#{obs.id}",
+      "https://mushroomobserver.org/images/orig/#{img1.id}.jpg " \
+        "https://mushroomobserver.org/images/orig/#{img2.id}.jpg"
+    ]
+    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
   def test_rounding_of_latitudes_etc
     row = Report::Row.new(vals = [])
     vals[2] = 1.20456
