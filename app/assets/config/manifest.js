@@ -1,5 +1,7 @@
 //= link_tree ../images
 //= link_tree ../favicons
+//= link site.webmanifest
+
 //= link_tree ../../javascript .js
 //= link_tree ../../../vendor/javascript .js
 
@@ -10,5 +12,3 @@
 //= link Cantharellaceae.css
 //= link Hygrocybe.css
 //= link Sudo.css
-
-//= link site.webmanifest
