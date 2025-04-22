@@ -701,7 +701,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   # Merge all the stuff that refers to +old_loc+ into +self+.  No changes are
   # made to +self+; +old_loc+ is destroyed; all the things that referred to
   # +old_loc+ are updated and saved.
-  def merge(old_loc, _log = true)
+  def merge(user, old_loc, _log = true)
     return if old_loc == self
 
     # Move observations over first.
@@ -731,7 +731,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     update_location_descriptions(old_loc)
 
     # Log the action.
-    old_loc.rss_log&.orphan(old_loc.name, :log_location_merged,
+    old_loc.rss_log&.orphan(user, old_loc.name, :log_location_merged,
                             this: old_loc.name, that: name)
     old_loc.rss_log = nil
 

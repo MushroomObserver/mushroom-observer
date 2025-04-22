@@ -230,7 +230,8 @@ class ObservationTest < UnitTestCase
     new_naming = Naming.create(
       observation: obs,
       name: names(:agaricus_campestris),
-      vote_cache: 0
+      vote_cache: 0,
+      user: rolf
     )
     assert_equal(1, QueuedEmail.count)
     assert_equal(names(:coprinus_comatus), obs.reload.name)
@@ -261,7 +262,8 @@ class ObservationTest < UnitTestCase
     new_naming = Naming.create(
       observation: obs,
       name: names(:peltigera),
-      vote_cache: 0
+      vote_cache: 0,
+      user: dick
     )
     assert_equal(2, QueuedEmail.count)
     assert_equal(names(:agaricus_campestris), obs.reload.name)
@@ -316,7 +318,8 @@ class ObservationTest < UnitTestCase
     new_naming = Naming.create(
       observation: obs.reload,
       name: names(:agaricus_campestris),
-      vote_cache: 0
+      vote_cache: 0,
+      user: mary
     )
     assert_equal(2, QueuedEmail.count)
     assert_email(1,
@@ -330,16 +333,16 @@ class ObservationTest < UnitTestCase
     rolf.email_observations_naming = false
     rolf.email_observations_consensus = true
     assert_save(rolf)
-    # (Actually, Mary already gave this her highest possible vote,
-    # so think of this as Mary changing Rolf's vote. :)
-    User.current = mary
-    change_vote(obs, namings(:coprinus_comatus_other_naming), 3, rolf)
-    assert_equal(3,
-                 votes(:coprinus_comatus_other_naming_rolf_vote).reload.value)
+
+    # Gang up on Rolf
+    change_vote(obs, new_naming, 3, dick)
+    change_vote(obs, new_naming, 3, katrina)
+    change_vote(obs, namings(:coprinus_comatus_naming), -3, katrina)
+
     assert_equal(3, QueuedEmail.count)
     assert_email(2,
                  flavor: "QueuedEmail::ConsensusChange",
-                 from: mary,
+                 from: katrina,
                  to: rolf,
                  observation: obs.id,
                  old_name: names(:coprinus_comatus).id,
@@ -416,7 +419,8 @@ class ObservationTest < UnitTestCase
     new_naming = Naming.create(
       observation: observations(:coprinus_comatus_obs),
       name: names(:agaricus_campestris),
-      vote_cache: 0
+      vote_cache: 0,
+      user: mary
     )
     assert_equal(2, QueuedEmail.count)
     assert_email(1,
@@ -427,9 +431,7 @@ class ObservationTest < UnitTestCase
                  naming: new_naming.id)
 
     # Watcher is notified if consensus changed.
-    # (Actually, Mary already gave this her highest possible vote,
-    # so think of this as Mary changing Rolf's vote. :)
-    User.current = mary
+    User.current = rolf
     change_vote(obs, namings(:coprinus_comatus_other_naming), 3, rolf)
     assert_equal(3,
                  votes(:coprinus_comatus_other_naming_rolf_vote).reload.value)
@@ -437,7 +439,7 @@ class ObservationTest < UnitTestCase
     assert_equal(3, QueuedEmail.count)
     assert_email(2,
                  flavor: "QueuedEmail::ConsensusChange",
-                 from: mary,
+                 from: rolf,
                  to: dick,
                  observation: observations(:coprinus_comatus_obs).id,
                  old_name: names(:coprinus_comatus).id,
@@ -556,25 +558,29 @@ class ObservationTest < UnitTestCase
       when: Time.zone.today,
       where: "anywhere",
       name_id: @fungi.id,
-      needs_naming: true
+      needs_naming: true,
+      user: rolf
     )
 
     User.current = rolf
     namg1 = Naming.create!(
       observation_id: obs.id,
-      name_id: @name1.id
+      name_id: @name1.id,
+      user: rolf
     )
 
     User.current = mary
     namg2 = Naming.create!(
       observation_id: obs.id,
-      name_id: @name2.id
+      name_id: @name2.id,
+      user: mary
     )
 
     User.current = dick
     namg3 = Naming.create!(
       observation_id: obs.id,
-      name_id: @name3.id
+      name_id: @name3.id,
+      user: dick
     )
 
     namings = [namg1, namg2, namg3]
@@ -792,7 +798,7 @@ class ObservationTest < UnitTestCase
     no_votes_naming = Naming.new(
       observation_id: obs.id,
       name_id: names(:fungi).id,
-      user_id: users(:rolf).id
+      user_id: rolf.id
     )
     no_votes_naming.save!
     votes = "#{obs.namings.first.id} Agaricus campestris L.: " \
@@ -921,7 +927,7 @@ class ObservationTest < UnitTestCase
   def test_notes_nil
     User.current = mary
     obs = Observation.create!(name_id: names(:fungi).id, when_str: "2020-07-05",
-                              notes: nil)
+                              notes: nil, user: mary)
 
     assert_nothing_raised do
       obs.notes[:Collector]
@@ -936,7 +942,8 @@ class ObservationTest < UnitTestCase
   def test_notes_empty_string
     User.current = mary
     obs = Observation.create!(name_id: names(:fungi).id,
-                              when_str: "2020-07-05", notes: "")
+                              when_str: "2020-07-05", notes: "",
+                              user: mary)
     assert_nothing_raised do
       obs.notes[:Collector]
     rescue StandardError => e
@@ -1000,7 +1007,8 @@ class ObservationTest < UnitTestCase
     User.current = mary
     fungi = names(:fungi)
     exception = assert_raise(ActiveRecord::RecordInvalid) do
-      Observation.create!(name_id: fungi.id, when: Time.zone.today + 2.days)
+      Observation.create!(name_id: fungi.id, when: Time.zone.today + 2.days,
+                          user: mary)
     end
     assert_match(:validate_future_time.t, exception.message)
   end
@@ -1010,7 +1018,8 @@ class ObservationTest < UnitTestCase
     fungi = names(:fungi)
     exception = assert_raise(ActiveRecord::RecordInvalid) do
       # Note that 'when' gets automagically converted to Date
-      Observation.create!(name_id: fungi.id, when: 2.days.from_now)
+      Observation.create!(name_id: fungi.id, when: 2.days.from_now,
+                          user: mary)
     end
     assert_match(:validate_future_time.t, exception.message)
   end
@@ -1019,7 +1028,8 @@ class ObservationTest < UnitTestCase
     User.current = mary
     fungi = names(:fungi)
     exception = assert_raise(ActiveRecord::RecordInvalid) do
-      Observation.create!(name_id: fungi.id, when: Date.new(1499, 1, 1))
+      Observation.create!(name_id: fungi.id, when: Date.new(1499, 1, 1),
+                          user: mary)
     end
     assert_match(:validate_invalid_year.t, exception.message)
   end
@@ -1028,7 +1038,8 @@ class ObservationTest < UnitTestCase
     User.current = mary
     fungi = names(:fungi)
     exception = assert_raise(ActiveRecord::RecordInvalid) do
-      Observation.create!(name_id: fungi.id, where: "X" * 1025)
+      Observation.create!(name_id: fungi.id, where: "X" * 1025,
+                          user: mary)
     end
     assert_match(:validate_observation_where_too_long.t, exception.message)
   end
@@ -1037,7 +1048,7 @@ class ObservationTest < UnitTestCase
     User.current = mary
     fungi = names(:fungi)
     exception = assert_raise(ActiveRecord::RecordInvalid) do
-      Observation.create!(name_id: fungi.id, lng: 90.0)
+      Observation.create!(name_id: fungi.id, lng: 90.0, user: mary)
     end
     assert_match(:runtime_lat_long_error.t, exception.message)
   end
@@ -1046,7 +1057,7 @@ class ObservationTest < UnitTestCase
     User.current = mary
     fungi = names(:fungi)
     exception = assert_raise(ActiveRecord::RecordInvalid) do
-      Observation.create!(name_id: fungi.id, lat: 90.0)
+      Observation.create!(name_id: fungi.id, lat: 90.0, user: mary)
     end
     assert_match(:runtime_lat_long_error.t, exception.message)
   end
@@ -1056,7 +1067,8 @@ class ObservationTest < UnitTestCase
     fungi = names(:fungi)
     # Currently all strings are parsable as altitude
     assert_nothing_raised do
-      Observation.create!(name_id: fungi.id, alt: "This should be bad")
+      Observation.create!(name_id: fungi.id, alt: "This should be bad",
+                          user: mary)
     end
   end
 
@@ -1064,7 +1076,8 @@ class ObservationTest < UnitTestCase
     User.current = mary
     fungi = names(:fungi)
     assert_nothing_raised do
-      Observation.create!(name_id: fungi.id, when_str: "2020-07-05")
+      Observation.create!(name_id: fungi.id, when_str: "2020-07-05",
+                          user: mary)
     end
   end
 
@@ -1072,7 +1085,8 @@ class ObservationTest < UnitTestCase
     User.current = mary
     fungi = names(:fungi)
     exception = assert_raise(ActiveRecord::RecordInvalid) do
-      Observation.create!(name_id: fungi.id, when_str: "0000-00-00")
+      Observation.create!(name_id: fungi.id, when_str: "0000-00-00",
+                          user: mary)
     end
     assert_match(:runtime_date_invalid.t, exception.message)
   end
@@ -1081,7 +1095,8 @@ class ObservationTest < UnitTestCase
     User.current = mary
     fungi = names(:fungi)
     exception = assert_raise(ActiveRecord::RecordInvalid) do
-      Observation.create!(name_id: fungi.id, when_str: "This is not a date")
+      Observation.create!(name_id: fungi.id, when_str: "This is not a date",
+                          user: mary)
     end
     assert_match(:runtime_date_should_be_yyyymmdd.t, exception.message)
   end
@@ -1174,7 +1189,7 @@ class ObservationTest < UnitTestCase
   end
 
   def test_scope_with_vote_by_user
-    obs_with_vote_by_rolf = Observation.with_vote_by_user(users(:rolf))
+    obs_with_vote_by_rolf = Observation.with_vote_by_user(rolf)
     assert_includes(obs_with_vote_by_rolf,
                     observations(:coprinus_comatus_obs))
     assert_includes(Observation.with_vote_by_user(users(:mary)),
@@ -1184,7 +1199,7 @@ class ObservationTest < UnitTestCase
   end
 
   def test_scope_without_vote_by_user
-    obs = Observation.without_vote_by_user(users(:rolf))
+    obs = Observation.without_vote_by_user(rolf)
     assert_not_includes(obs, observations(:coprinus_comatus_obs))
     assert_includes(obs, observations(:peltigera_obs))
   end
@@ -1192,11 +1207,11 @@ class ObservationTest < UnitTestCase
   # There are no observation views in the fixtures
   def test_scope_reviewed_by_user
     ObservationView.create({ observation_id: observations(:fungi_obs).id,
-                             user_id: users(:rolf).id,
+                             user_id: rolf.id,
                              reviewed: true })
-    assert_includes(Observation.reviewed_by_user(users(:rolf)),
+    assert_includes(Observation.reviewed_by_user(rolf),
                     observations(:fungi_obs))
-    assert_not_includes(Observation.reviewed_by_user(users(:rolf)),
+    assert_not_includes(Observation.reviewed_by_user(rolf),
                         observations(:peltigera_obs))
   end
 
@@ -1209,11 +1224,11 @@ class ObservationTest < UnitTestCase
 
   def test_scope_needs_naming
     assert_includes(
-      Observation.needs_naming(users(:rolf)),
+      Observation.needs_naming(rolf),
       observations(:fungi_obs)
     )
     assert_not_includes(
-      Observation.needs_naming(users(:rolf)),
+      Observation.needs_naming(rolf),
       observations(:peltigera_obs)
     )
   end
@@ -1384,7 +1399,7 @@ class ObservationTest < UnitTestCase
     obss_in_nybg_box = Observation.in_box(**nybg_box)
     quito_obs =
       Observation.create!(
-        user: users(:rolf),
+        user: rolf,
         lat: -0.1865944,
         lng: -78.4305382,
         where: "Quito, Ecuador"
@@ -1393,7 +1408,7 @@ class ObservationTest < UnitTestCase
 
     wrangel_obs =
       Observation.create!(
-        user: users(:rolf),
+        user: rolf,
         lat: (wrangel.north + wrangel.south) / 2,
         lng: (wrangel.east + wrangel.west) / 2 + wrangel.west,
         where: "Wrangel Island, Russia"
@@ -1444,7 +1459,7 @@ class ObservationTest < UnitTestCase
 
     quito_obs =
       Observation.create!(
-        user: users(:rolf),
+        user: rolf,
         lat: -0.1865944,
         lng: -78.4305382,
         where: "Quito, Ecuador"
@@ -1453,7 +1468,7 @@ class ObservationTest < UnitTestCase
 
     wrangel_obs =
       Observation.create!(
-        user: users(:rolf),
+        user: rolf,
         lat: (wrangel.north + wrangel.south) / 2,
         lng: (wrangel.east + wrangel.west) / 2 + wrangel.west,
         where: "Wrangel Island, Russia"
@@ -1512,7 +1527,7 @@ class ObservationTest < UnitTestCase
                     observations(:substrate_notes_obs))
     obs_substrate_in_plain_text =
       Observation.create!(notes: "The substrate is wood",
-                          user: users(:rolf))
+                          user: rolf)
     assert_not_includes(Observation.has_notes_field("substrate"),
                         obs_substrate_in_plain_text)
     assert_empty(Observation.has_notes_field(ARBITRARY_SHA))

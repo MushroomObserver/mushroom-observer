@@ -108,8 +108,9 @@ module ApplicationController::FlashNotices
     false
   end
 
-  def save_with_log(obj)
+  def save_with_log(user, obj)
     type_sym = obj.class.to_s.underscore.to_sym
+    obj.current_user = user if obj.respond_to?(:current_user)
     if obj.save
       notice = if obj.respond_to?(:text_name) && (name = obj.text_name)
                  :runtime_created_name.t(type: type_sym, value: name)

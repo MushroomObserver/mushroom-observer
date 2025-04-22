@@ -300,20 +300,20 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
   #   spl.process_file_data(sorter = NameSorter.new)
   #   names = sorter.xxx
   #
-  def process_file_data(sorter)
+  def process_file_data(user, sorter)
     return unless data
 
     if data[0] == 91 # '[' character
       process_name_list(sorter)
     else
-      process_simple_list(sorter)
+      process_simple_list(user, sorter)
     end
   end
 
   # Process simple list: one Name per line.
-  def process_simple_list(sorter)
+  def process_simple_list(user, sorter)
     data.split(/\s*[\n\r]+\s*/).each do |name|
-      sorter.add_name(name.strip_squeeze)
+      sorter.add_name(user, name.strip_squeeze)
     end
   end
 

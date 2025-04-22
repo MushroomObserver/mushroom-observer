@@ -662,12 +662,13 @@ class ObservationsControllerCreateTest < FunctionalTestCase
   end
 
   def test_prevent_creation_of_species_under_deprecated_genus
-    login("katrina")
-    cladonia = Name.find_or_create_name_and_parents("Cladonia").last
+    login(katrina.login)
+    cladonia = Name.find_or_create_name_and_parents(katrina, "Cladonia").last
     cladonia.save!
-    cladonia_picta = Name.find_or_create_name_and_parents("Cladonia picta").last
+    cladonia_picta = Name.find_or_create_name_and_parents(katrina,
+                                                          "Cladonia picta").last
     cladonia_picta.save!
-    cladina = Name.find_or_create_name_and_parents("Cladina").last
+    cladina = Name.find_or_create_name_and_parents(katrina, "Cladina").last
     cladina.change_deprecated(true)
     cladina.save!
     cladina.merge_synonyms(cladonia)

@@ -153,6 +153,8 @@
 #  announce_consensus_change::  After consensus changes: send email.
 #
 class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
+  attr_accessor :current_user
+
   include Scopes
 
   belongs_to :thumb_image, class_name: "Image",

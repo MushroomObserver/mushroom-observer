@@ -14,7 +14,7 @@ add_context_nav(glossary_term_show_tabs(term: @glossary_term, user: @user))
   <% if @glossary_term.thumb_image %>
     <div class="col-sm-4">
       <%= interactive_image(
-        @glossary_term.thumb_image, size: :medium, votes: true,
+        @user, @glossary_term.thumb_image, size: :medium, votes: true,
                                     id_prefix: "glossary_term_image"
       ) %>
     </div>

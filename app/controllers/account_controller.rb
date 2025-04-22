@@ -149,6 +149,7 @@ class AccountController < ApplicationController
       # to automate creation of accounts?
 
       QueuedEmail::Webmaster.create_email(
+        @user,
         sender_email: MO.accounts_email_address,
         subject: "Account Denied",
         content: denied_message(@new_user)

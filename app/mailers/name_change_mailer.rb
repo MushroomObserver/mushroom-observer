@@ -24,6 +24,7 @@ class NameChangeMailer < ApplicationMailer
   end
 
   def calc_search_name(name_change)
-    (name_change.old_clone || name_change.new_clone).real_search_name
+    (name_change.old_clone || name_change.new_clone).
+      user_real_search_name(@user)
   end
 end

@@ -194,7 +194,7 @@ class NameSorter
   # Add a single name to the list.  It calculates "stats" as it goes, such as
   # whether the name has multiple synonyms, whether it is deprecated, whether
   # it is unrecognized, etc.
-  def add_name(spl_line, timestamp = nil)
+  def add_name(user, spl_line, timestamp = nil)
     # Need to store all this data
     name_parse = NameParse.new(spl_line)
     line_str = name_parse.line_str
@@ -210,7 +210,7 @@ class NameSorter
 
     # Need all deprecated names even when another name is chosen
     # in case something else forces a redisplay
-    names = name_parse.find_names
+    names = name_parse.find_names(user)
     check_for_deprecated_names(names, name_str)
 
     # Check radio boxes for multiple-names and/or approved-names that have
@@ -254,38 +254,11 @@ class NameSorter
     return unless name_parse.has_synonym
 
     @has_new_synonyms = true
-    if name_parse.find_synonym_names.empty?
+    if name_parse.find_synonym_names(user).empty?
       @new_name_strs.push(name_parse.synonym_search_name)
     end
     # Keep names in addition to parse for the chosen filter
     @synonym_data.push([name_parse, names])
-  end
-
-  # Deprecate all the "Species = Synonym" synonyms, and synonymize them.
-  # This relies on both the species and the synonym already existing and being
-  # unambiguous.  That is, only_single_names must be true.
-  def create_new_synonyms
-    @synonym_data.each do |parse, names|
-      if names.length == 1
-        # Merging earlier in this loop may have affected this name implicitly;
-        # reload to pick up potential changes.
-        name = names.first.reload
-        synonym_names = parse.find_synonym_names
-        synonym_names.each do |s|
-          s.change_deprecated(true)
-          s.save
-          name.merge_synonyms(s)
-        end
-        name.change_deprecated(false)
-        name.save
-      else
-        raise(
-          TypeError.new(
-            "Unexpected ambiguity: #{names.map(&:real_search_name).join(", ")}"
-          )
-        )
-      end
-    end
   end
 
   # Get a (mostly) full list of all the synonyms of the listed names, including
@@ -338,9 +311,9 @@ class NameSorter
   # Add a list of name strings.  *NOTE*: +name_list+ can be a String separated
   # by newlines or an Array of String's.  Each String must contain a single
   # name
-  def sort_names(name_list)
+  def sort_names(user, name_list)
     name_list.split("\n").each do |n|
-      add_name(n) if /\S/.match?(n)
+      add_name(user, n) if /\S/.match?(n)
     end
   end
 end

@@ -140,11 +140,12 @@ module Tabs
       ).tab
     end
 
-    def name_edit_description_tab(name)
+    def name_edit_description_tab(user, name)
       return unless name&.description
 
       InternalLink::Model.new(:EDIT.l, name,
-                              edit_name_description_path(name.description.id),
+                              edit_name_description_path(user,
+                                                         name.description.id),
                               html_options: { icon: :edit }).tab
     end
 
@@ -168,6 +169,12 @@ module Tabs
     def google_images_for_name_tab(name)
       url = format("https://images.google.com/images?q=%s",
                    name.real_text_name)
+      external_name_tab(:google_images.t, name, url)
+    end
+
+    def user_google_images_for_name_tab(user, name)
+      url = format("https://images.google.com/images?q=%s",
+                   name.user_real_text_name(user))
       external_name_tab(:google_images.t, name, url)
     end
 

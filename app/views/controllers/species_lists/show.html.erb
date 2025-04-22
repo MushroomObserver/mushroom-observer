@@ -47,6 +47,7 @@ add_context_nav(species_list_show_tabs(list: @species_list, query: @query))
             <div class="col-sm-4 col-md-3">
               <%= if observation.thumb_image_id
                   interactive_image(
+                    @user,
                     observation.thumb_image,
                     image_link: observation_path(id: observation.id),
                     votes: true

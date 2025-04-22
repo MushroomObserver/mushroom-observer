@@ -24,7 +24,7 @@ add_context_nav(location_show_tabs)
   <div class="col-md-5">
     <%= render(partial: "locations/show/coordinates") %>
     <%= render(partial: "locations/show/notes") %>
-    <%= show_alt_descriptions_panel(object: @location, projects: @projects) %>
+    <%= show_alt_descriptions_panel(user: @user, object: @location, projects: @projects) %>
     <%= render(partial: "locations/show/footer") %>
   </div>
 </div>

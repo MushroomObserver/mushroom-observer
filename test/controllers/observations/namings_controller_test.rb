@@ -506,6 +506,7 @@ module Observations
     # "Genus species (With) Author" was recognized even if "Genus species"
     # was already in the database.
     def test_create_with_author_when_name_without_author_already_exists
+      login("dick")
       params = {
         observation_id: observations(:coprinus_comatus_obs).id,
         naming: {
@@ -513,7 +514,6 @@ module Observations
           vote: { value: "3" }
         }
       }
-      login("dick")
       post(:create, params: params)
       obs = observations(:coprinus_comatus_obs)
       assert_redirected_to(permanent_observation_path(obs.id))

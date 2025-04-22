@@ -208,7 +208,8 @@ class NamesController < ApplicationController
   #   @first_child
   # notes:
   # descriptions:
-  #   description_links = list_descriptions(object: @name, type: :name)
+  #   description_links = list_descriptions(user: @user, object: @name,
+  #                                         type: :name)
   # projects:
   #   @projects
 
@@ -342,12 +343,12 @@ class NamesController < ApplicationController
     else
       @misspelling      = @name.is_misspelling?
       @correct_spelling = if @misspelling
-                            @name.correct_spelling.real_search_name
+                            @name.correct_spelling.user_real_search_name(@user)
                           else
                             ""
                           end
     end
-    @name_string = @name.real_text_name
+    @name_string = @name.user_real_text_name(@user)
   end
 
   # ------
@@ -358,20 +359,25 @@ class NamesController < ApplicationController
     matches = Name.matching_desired_new_parsed_name(@parse)
     if matches.one?
       raise(:runtime_name_create_already_exists.
-              t(name: matches.first.display_name))
+              t(name: matches.first.user_display_name(@user)))
     elsif matches.many?
-      raise(:create_name_multiple_names_match.t(str: @parse.real_search_name))
+      raise(:create_name_multiple_names_match.t(
+              str: @parse.user_real_search_name(@user)
+            ))
     end
   end
 
   def create_new_name
     @name = Name.new_name_from_parsed_name(@parse)
+    @name.user ||= @user
     set_unparsed_attrs
-    unless @name.save_with_log(:log_name_updated)
+    unless @name.save_with_log(@user, :log_name_updated)
       raise(:runtime_unable_to_save_changes.t)
     end
 
-    flash_notice(:runtime_create_name_success.t(name: @name.real_search_name))
+    flash_notice(:runtime_create_name_success.t(
+                   name: @name.user_real_search_name(@user)
+                 ))
     update_ancestors
     redirect_to_show_name
   end
@@ -424,7 +430,7 @@ class NamesController < ApplicationController
     return matches.first unless matches.many?
 
     args = {
-      str: @parse.real_search_name,
+      str: @parse.user_real_search_name(@user),
       matches: matches.map(&:unique_search_name).join(" / ")
     }
     raise(:edit_name_multiple_names_match.t(args))
@@ -462,10 +468,12 @@ class NamesController < ApplicationController
     set_unparsed_attrs
     if !@name.changed?
       any_changes = false
-    elsif !@name.save_with_log(:log_name_updated)
+    elsif !@name.save_with_log(@user, :log_name_updated)
       raise(:runtime_unable_to_save_changes.t)
     else
-      flash_notice(:runtime_edit_name_success.t(name: @name.real_search_name))
+      flash_notice(:runtime_edit_name_success.t(
+                     name: @name.user_real_search_name(@user)
+                   ))
       any_changes = true
     end
     # Update ancestors regardless whether name changed; maybe this will add
@@ -504,11 +512,12 @@ class NamesController < ApplicationController
   end
 
   def set_correct_spelling
-    correct_name = Name.find_names_filling_in_authors(@correct_spelling).first
+    correct_name = Name.find_names_filling_in_authors(@user,
+                                                      @correct_spelling).first
     raise(:runtime_form_names_misspelling_bad.t) unless correct_name
     raise(:runtime_form_names_misspelling_same.t) if correct_name.id == @name.id
 
-    @name.mark_misspelled(correct_name)
+    @name.mark_misspelled(@user, correct_name)
     # (This tells it not to redirect to "approve".)
     params[:name][:deprecated] = "true"
   end
@@ -529,7 +538,7 @@ class NamesController < ApplicationController
 
   def parsed_text_name
     if params[:name][:text_name].blank? && @name&.text_name.present?
-      @name.real_text_name
+      @name.user_real_text_name(@user)
     else
       params[:name][:text_name]
     end
@@ -546,8 +555,8 @@ class NamesController < ApplicationController
     return false if icn_id_conflict?(params[:name][:icn_id])
     return true if just_adding_author?
 
-    old_name = @name.real_search_name
-    new_name = @parse.real_search_name
+    old_name = @name.user_real_search_name(@user)
+    new_name = @parse.user_real_search_name(@user)
     new_name.percent_match(old_name) > 0.9
   end
 
@@ -561,14 +570,15 @@ class NamesController < ApplicationController
   end
 
   def update_ancestors
-    Name.find_or_create_parsed_name_and_parents(@parse).each do |name|
-      name.save_with_log(:log_name_created) if name&.new_record?
+    Name.find_or_create_parsed_name_and_parents(@user, @parse).each do |name|
+      name.save_with_log(@user, :log_name_created) if name&.new_record?
     end
   end
 
   def email_admin_name_change
     content = email_name_change_content
     QueuedEmail::Webmaster.create_email(
+      @user,
       sender_email: @user.email,
       subject: "Nontrivial Name Change",
       content: content
@@ -581,8 +591,8 @@ class NamesController < ApplicationController
       user: @user.login,
       old_identifier: @name.icn_id,
       new_identifier: params[:name][:icn_id],
-      old: @name.real_search_name,
-      new: @parse.real_search_name,
+      old: @name.user_real_search_name(@user),
+      new: @parse.user_real_search_name(@user),
       observations: @name.observations.length,
       namings: @name.namings.length,
       show_url: "#{MO.http_domain}/names/#{@name.id}",
@@ -612,7 +622,7 @@ class NamesController < ApplicationController
   def perform_merge_names(survivor)
     # Name to displayed in the log "Name Destroyed" entry
     logged_destroyed_name = display_name_without_user_filter(@name)
-    destroyed_real_search_name = @name.real_search_name
+    destroyed_real_search_name = @name.user_real_search_name(@user)
 
     prepare_presumptively_disappearing_name
     deprecation = change_deprecation_iff_user_requested
@@ -624,11 +634,13 @@ class NamesController < ApplicationController
     @name.display_name = logged_destroyed_name
     survivor.change_deprecated(deprecation) unless deprecation.nil?
 
-    survivor.merge(@name) # move associations to survivor, destroy @name object
+    # move associations to survivor, destroy @name object
+    survivor.merge(@user, @name)
 
     send_merger_messages(destroyed_real_search_name: destroyed_real_search_name,
                          survivor: survivor)
     @name = survivor
+    @name.current_user = @user
     @name.save
   end
 
@@ -656,14 +668,15 @@ class NamesController < ApplicationController
   end
 
   def send_merger_messages(destroyed_real_search_name:, survivor:)
-    args = { this: destroyed_real_search_name, that: survivor.real_search_name }
+    args = { this: destroyed_real_search_name,
+             that: survivor.user_real_search_name(@user) }
     flash_notice(:runtime_edit_name_merge_success.t(args))
     email_admin_icn_id_conflict(survivor) if icn_id_conflict?(survivor.icn_id)
   end
 
   def email_admin_icn_id_conflict(survivor)
     content = :email_merger_icn_id_conflict.l(
-      name: survivor.real_search_name,
+      name: survivor.user_real_search_name(@user),
       surviving_icn_id: survivor.icn_id,
       deleted_icn_id: @name.icn_id,
       user: @user.login,
@@ -671,6 +684,7 @@ class NamesController < ApplicationController
       edit_url: "#{MO.http_domain}/names/#{@name.id}/edit"
     )
     QueuedEmail::Webmaster.create_email(
+      @user,
       sender_email: @user.email,
       subject: "Merger identifier conflict",
       content: content

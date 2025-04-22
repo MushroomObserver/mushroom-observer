@@ -146,6 +146,14 @@ class Textile < String
     end
   end
 
+  def self.user_register_name(user, *names)
+    names.each do |name|
+      next unless name.try(:at_or_below_genus?)
+
+      Textile.private_register_name(name.user_real_text_name(user), name.rank)
+    end
+  end
+
   def self.private_register_name(name, rank)
     @@name_lookup ||= {}
     @@name_lookup[Regexp.last_match(1)] = name.split.first if name =~ /([A-Z])/

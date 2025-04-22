@@ -40,8 +40,8 @@ module Admin
         elsif non_user_potential_spam?
           flash_error(:runtime_ask_webmaster_antispam.t)
         else
-          QueuedEmail::Webmaster.create_email(sender_email: @email,
-                                              content: @content)
+          QueuedEmail::Webmaster.create_email(@user, sender_email: @email,
+                                                     content: @content)
           flash_notice(:runtime_ask_webmaster_success.t)
           redirect_to("/")
         end
