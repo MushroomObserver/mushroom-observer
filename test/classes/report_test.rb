@@ -405,34 +405,35 @@ class ReportTest < UnitTestCase
 
     img1 = images(:in_situ_image)
     img2 = images(:turned_over_image)
+
     expect = [
-      "Fungi",
-      "",
-      "Kingdom",
-      "Fungi",
-      "",
-      "",
-      "Mary Newbie",
-      "174",
-      "NY",
-      "2006-05-11",
-      "2006",
-      "5",
-      "11",
-      "USA",
-      "California",
-      "",
-      "Burbank",
-      "34.185",
-      "-118.33",
-      "148",
+      "Fungi", # scientificName
+      "", # scientificNameAuthorship
+      "Kingdom", # taxonRank
+      "Fungi", # genus
+      "", # specificEpithet
+      "", # infraspecificEpithet
+      "Mary Newbie", # recordedBy
+      "174", # recordNumber
+      "NY", # disposition
+      "2006-05-11", # eventDate
+      "2006", # year
+      "5", # month
+      "11", # day
+      "USA", # country
+      "California", # stateProvince
+      "", # county
+      "Burbank", # locality
+      "34.185", # decimalLatitude
+      "-118.33", # decimalLongitude
+      "148", # minimumElevationInMeters
       "294",
-      "#{obs.updated_at.api_time} UTC",
-      "wood chips",
-      "Agaricus",
-      "Habitat: lawn Other: First line. Second line.",
-      obs.id.to_s,
-      "https://mushroomobserver.org/#{obs.id}",
+      "#{obs.updated_at.api_time} UTC", # dateLastModified
+      "wood chips", # substrate
+      "Agaricus", # host
+      "Habitat: lawn Other: First line. Second line.", # fieldNotes
+      obs.id.to_s, # mushroomObserverId
+      "https://mushroomobserver.org/#{obs.id}", # observationUrl
       "https://mushroomobserver.org/images/orig/#{img1.id}.jpg " \
         "https://mushroomobserver.org/images/orig/#{img2.id}.jpg"
     ]
@@ -442,33 +443,33 @@ class ReportTest < UnitTestCase
   def test_mycoportal2
     obs = observations(:agaricus_campestrus_obs)
     expect = [
-      "Agaricus campestrus",
-      "L.",
-      "Species",
-      "Agaricus",
-      "campestrus",
-      "",
-      "Rolf Singer",
-      "MUOB #{obs.id}",
-      "",
-      "2007-06-23",
-      "2007",
-      "6",
-      "23",
-      "USA",
-      "California",
-      "",
-      "Burbank",
-      "34.185",
-      "-118.33",
-      "148",
-      "294",
-      "#{obs.updated_at.api_time} UTC",
-      "",
-      "",
-      "From somewhere else",
-      obs.id.to_s,
-      "https://mushroomobserver.org/#{obs.id}"
+      "Agaricus campestrus", # scientificName
+      "L.", # scientificNameAuthorship
+      "Species", # taxonRank
+      "Agaricus", # genus
+      "campestrus", # specificEpithet
+      "", # infraspecificEpithet
+      "Rolf Singer", # recordedBy
+      "MUOB #{obs.id}", # recordNumber
+      "", # disposition
+      "2007-06-23", # eventDate
+      "2007", # year
+      "6", # month
+      "23", # day
+      "USA", # country
+      "California", # stateProvince
+      "", # county
+      "Burbank", # locality
+      "34.185", # decimalLatitude
+      "-118.33", # decimalLongitude
+      "148", # minimumElevationInMeters
+      "294", # maximumElevationInMeters
+      "#{obs.updated_at.api_time} UTC", # dateLastModified
+      "", # substrate
+      "", # host
+      "From somewhere else", # fieldNotes
+      obs.id.to_s, # mushroomObserverId
+      "https://mushroomobserver.org/#{obs.id}" # observationUrl
     ]
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)
   end
@@ -486,35 +487,35 @@ class ReportTest < UnitTestCase
     img1 = images(:in_situ_image)
     img2 = images(:turned_over_image)
     expect = [
-      "Fungi",
-      "",
-      "Kingdom",
-      "Fungi",
-      "",
-      "",
-      "Mary Newbie",
-      "174",
-      "NY",
-      "2006-05-11",
-      "2006",
-      "5",
-      "11",
-      "USA",
-      "California",
-      "",
-      "Burbank",
-      "34.185",
-      "-118.33",
-      "148",
-      "294",
-      "#{obs.updated_at.api_time} UTC",
-      "wood chips",
-      "Agaricus",
-      "Habitat: lawn Other: 1st line. 2nd line. 3rd line.",
-      obs.id.to_s,
-      "https://mushroomobserver.org/#{obs.id}",
+      "Fungi", # scientificName
+      "", # scientificNameAuthorship
+      "Kingdom", # taxonRank
+      "Fungi", # genus
+      "", # specificEpithet
+      "", # infraspecificEpithet
+      "Mary Newbie", # recordedBy
+      "174", # recordNumber
+      "NY", # disposition
+      "2006-05-11", # eventDate
+      "2006", # year
+      "5", # month
+      "11", # day
+      "USA", # country
+      "California", # stateProvince
+      "", # county
+      "Burbank", # locality
+      "34.185", # decimalLatitude
+      "-118.33", # decimalLongitude
+      "148", # minimumElevationInMeters
+      "294", # maximumElevationInMeters
+      "#{obs.updated_at.api_time} UTC", # dateLastModified
+      "wood chips", # substrate
+      "Agaricus", # host
+      "Habitat: lawn Other: 1st line. 2nd line. 3rd line.", # fieldNotes
+      obs.id.to_s, # mushroomObserverId
+      "https://mushroomobserver.org/#{obs.id}", # observationUrl
       "https://mushroomobserver.org/images/orig/#{img1.id}.jpg " \
-        "https://mushroomobserver.org/images/orig/#{img2.id}.jpg"
+        "https://mushroomobserver.org/images/orig/#{img2.id}.jpg" # imageUrls
     ]
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)
   end

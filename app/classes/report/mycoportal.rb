@@ -4,7 +4,8 @@ module Report
   # Report for exporting Observations to MyCoPortal
   # https://mycoportal.org/
   # https://www.mycoportal.org/portal/api/v2/documentation
-  # MyCoPortal is a Symbiota-based portal for Mycology
+  #
+  # MyCoPortal is built on Symbiota
   # https://symbiota.org/
   # https://biokic.github.io/symbiota-docs/
   # https://github.com/Symbiota/Symbiota
@@ -14,63 +15,66 @@ module Report
     # https://biokic.github.io/symbiota-docs/editor/edit/fields/#standard-fields
     # plus MO-specific fields that are useful for uploads to Symbiota portals
     def labels
-      %w[
-        scientificName
-        scientificNameAuthorship
-        taxonRank
-        genus
-        specificEpithet
-        infraspecificEpithet
-        recordedBy
-        recordNumber
-        disposition
-        eventDate
-        year
-        month
-        day
-        country
-        stateProvince
-        county
-        locality
-        decimalLatitude
-        decimalLongitude
-        minimumElevationInMeters
-        maximumElevationInMeters
-        dateLastModified
-        substrate
-        host
-        fieldNotes
-        mushroomObserverId
-        observationUrl
-        imageUrls
+      [
+        # "occid", # MCP's internal id of the record : 7962944,
+        # "collid", # id of MCP's MO collection :  36
+        # "basisOfRecord", # : "HumanObservation",
+        "scientificName",
+        "scientificNameAuthorship",
+        "taxonRank",
+        "genus",
+        "specificEpithet",
+        "infraspecificEpithet",
+        "recordedBy",
+        "recordNumber", # collection no. assigned to specimen by the collector
+        "disposition", # controlled vocab: "vouchered" or nil
+        "eventDate",
+        "year",
+        "month",
+        "day",
+        "country",
+        "stateProvince",
+        "county",
+        "locality",
+        "decimalLatitude",
+        "decimalLongitude",
+        "minimumElevationInMeters",
+        "maximumElevationInMeters",
+        "dateLastModified",
+        "substrate",
+        "host",
+        "fieldNotes",
+        "mushroomObserverId", # probably should be dbpk, : "514",
+        "observationUrl",
+        "imageUrls"
       ]
     end
 
     def format_row(row) # rubocop:disable Metrics/AbcSize
       [
-        row.name_text_name,
-        row.name_author,
-        row.name_rank,
-        row.genus,
-        row.species,
-        row.form_or_variety_or_subspecies,
-        collector(row),
+        row.name_text_name, # scientificName
+        row.name_author, # scientificNameAuthorship
+        row.name_rank, # taxonRank
+        row.genus, # genus
+        row.species, # specificEpithet
+        row.form_or_variety_or_subspecies, # infraspecificEpithet
+        collector(row), # recordedBy
         number(row), # collectors number || "MUOB #{observation.id}", Cf. obs_id
-        disposition(row),
-        row.obs_when,
-        row.year,
-        row.month,
-        row.day,
-        row.country,
-        row.state,
-        row.county,
-        row.locality,
-        row.best_lat,
-        row.best_lng,
-        row.best_low,
-        row.best_high,
-        row.obs_updated_at,
-        substrate(row),
+        disposition(row), # disposition
+        row.obs_when, # eventDate
+        row.year, # year
+        row.month, # month
+        row.day, # day
+        row.country, # country
+        row.state, # stateProvince
+        row.county, # county
+        row.locality, # locality
+        row.best_lat, # decimalLatitude
+        row.best_lng, # decimalLongitude
+        row.best_low, # minimumElevationInMeters
+        row.best_high, # maximumElevationInMeters
+        row.obs_updated_at, # dateLastModified
+        substrate(row), # MyCoPortal `substrate` == Sybiota/DWC substrate
         host(row), # MyCoPortal `host` == Sybiota/DWC associatedTaxa
         field_notes(row), # occurrenceRemarks
         row.obs_id, # MCP `dpk`; catalogNumber = "MUOB #{observation.id}"
