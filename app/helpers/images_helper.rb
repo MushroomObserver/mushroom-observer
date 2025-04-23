@@ -103,15 +103,6 @@ module ImagesHelper
        image.copyright_holder != object.user&.legal_name)
   end
 
-  def show_best_image(user, obs)
-    return unless obs&.thumb_image
-
-    interactive_image(user, obs.thumb_image,
-                      link: observation_path(id: obs.id),
-                      size: :small,
-                      votes: true) + image_copyright(obs.thumb_image, obs)
-  end
-
   # pass an image instance if possible, to ensure access to fallback image.url
   def original_image_link(image_or_image_id, classes)
     id = if image_or_image_id.is_a?(Image)
