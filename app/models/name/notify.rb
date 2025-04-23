@@ -14,7 +14,6 @@ module Name::Notify
     user ||= @current_user || User.admin
     QueuedEmail::Webmaster.create_email(
       user,
-      sender_email: user.email,
       subject: "#{user.login} created #{user_real_text_name(user)}",
       content: "#{MO.http_domain}/names/#{id}"
     )

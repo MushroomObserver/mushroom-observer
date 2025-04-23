@@ -252,9 +252,9 @@ class NameSorter
     return unless name_parse.has_synonym
 
     @has_new_synonyms = true
-    if name_parse.find_synonym_names(user).empty?
-      @new_name_strs.push(name_parse.synonym_search_name)
-    end
+    return unless name_parse.find_synonym_names(user).empty?
+
+    @new_name_strs.push(name_parse.synonym_search_name)
   end
 
   # Get a (mostly) full list of all the synonyms of the listed names, including

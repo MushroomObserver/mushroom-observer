@@ -482,7 +482,6 @@ class LocationsController < ApplicationController
     content = email_location_change_content
     QueuedEmail::Webmaster.create_email(
       @user,
-      sender_email: @user.email,
       subject: "Nontrivial Location Change",
       content: content
     )
