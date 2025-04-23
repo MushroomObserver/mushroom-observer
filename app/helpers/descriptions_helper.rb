@@ -4,9 +4,9 @@
 module DescriptionsHelper
   include Tabs::DescriptionsHelper
 
-  def writer?(desc)
-    desc.writer?(User.current) || in_admin_mode?
-  end
+  # def writer?(desc)
+  #   desc.writer?(User.current) || in_admin_mode?
+  # end
 
   def user_writer?(user, desc)
     desc.writer?(user) || in_admin_mode?
@@ -20,9 +20,9 @@ module DescriptionsHelper
     desc.is_admin?(user) || in_admin_mode?
   end
 
-  def reader?(desc)
-    desc.is_reader?(User.current) || in_admin_mode?
-  end
+  # def reader?(desc)
+  #   desc.is_reader?(User.current) || in_admin_mode?
+  # end
 
   def user_reader?(user, desc)
     desc.is_reader?(user) || in_admin_mode?

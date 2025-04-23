@@ -166,11 +166,11 @@ module Tabs
       external_name_tab("EOL", name, name.eol_url)
     end
 
-    def google_images_for_name_tab(name)
-      url = format("https://images.google.com/images?q=%s",
-                   name.real_text_name)
-      external_name_tab(:google_images.t, name, url)
-    end
+    # def google_images_for_name_tab(name)
+    #   url = format("https://images.google.com/images?q=%s",
+    #                name.real_text_name)
+    #   external_name_tab(:google_images.t, name, url)
+    # end
 
     def user_google_images_for_name_tab(user, name)
       url = format("https://images.google.com/images?q=%s",
