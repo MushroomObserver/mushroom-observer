@@ -142,7 +142,7 @@ module API2InlineHelper
 
   def json_name(name)
     strip_hash(id: name.id,
-               name: name.real_text_name.to_s,
+               name: name.user_real_text_name(nil).to_s,
                author: name.author.to_s,
                rank: name.rank.to_s.downcase,
                deprecated: name.deprecated ? true : false,
@@ -232,18 +232,18 @@ module API2InlineHelper
     xml_string(xml, :legal_name, user.legal_name)
   end
 
-  def json_vote(user, vote)
-    show_vote = vote.user == user || !vote.anonymous?
+  def json_vote(vote)
+    show_vote = !vote.anonymous?
     strip_hash(id: vote.id,
                confidence: vote.value,
                naming_id: vote.naming_id,
                owner: show_vote ? json_user(vote.user) : :anonymous.l)
   end
 
-  def xml_vote(user, xml, vote)
+  def xml_vote(xml, vote)
     xml_confidence_level(xml, :confidence, vote.value)
     xml_integer(xml, :naming_id, vote.naming_id)
-    if vote.user == user || !vote.anonymous?
+    if !vote.anonymous?
       xml_detailed_object(xml, :owner, vote.user)
     else
       xml_string(xml, :owner, :anonymous.l)

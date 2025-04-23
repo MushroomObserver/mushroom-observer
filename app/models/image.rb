@@ -652,8 +652,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     name = name.sub(%r{^.*[/\\]}, "")
     # name = '(uploaded at %s)' % Time.now.web_time if name.empty?
     name = name.truncate(120)
-    return unless name.present? && User.current &&
-                  User.current.keep_filenames != "toss"
+    return unless name.present? && user&.keep_filenames != "toss"
 
     self.original_name = name
   end

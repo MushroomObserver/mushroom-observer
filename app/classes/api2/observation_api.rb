@@ -124,7 +124,7 @@ class API2
     end
 
     def after_create(obs)
-      obs.log(:log_observation_created) if @log
+      obs.user_log(user, :log_observation_created) if @log
       create_specimen_records(obs) if obs.specimen
       create_naming(obs)
       add_field_slip_code(obs)

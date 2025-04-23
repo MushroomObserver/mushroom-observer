@@ -29,8 +29,7 @@ if detail
   json.consensus(json_name(object.name)) if object.name
   json.namings(object.namings.map { |x| json_naming(x) }) \
     if object.namings.any?
-  debugger
-  json.votes(object.votes.map { |x| json_vote(nil, x) }) \
+  json.votes(object.votes.map { |x| json_vote(x) }) \
     if object.votes.any?
   if object.location
     json.location(json_location(object.location))
