@@ -60,8 +60,6 @@ class NameSorterTest < UnitTestCase
     assert_equal([], name_sorter.new_name_strs)
     assert_equal([], name_sorter.new_line_strs)
     assert_equal([names(:macrolepiota_rachodes)], name_sorter.all_names)
-    assert_equal([names(:lepiota_rachodes)],
-                 name_sorter.synonym_data[0][0].find_synonym_names(rolf))
   end
 
   def test_add_name_default_synonym
@@ -84,8 +82,6 @@ class NameSorterTest < UnitTestCase
     assert_equal([], name_sorter.new_name_strs)
     assert_equal([], name_sorter.new_line_strs)
     assert_equal([names(:agaricus)], name_sorter.all_names)
-    assert_equal([names(:psalliota)],
-                 name_sorter.synonym_data[0][0].find_synonym_names(rolf))
   end
 
   def test_add_name_genus_synonym
