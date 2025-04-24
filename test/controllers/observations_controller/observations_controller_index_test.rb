@@ -16,15 +16,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     # login
     get(:index)
 
-    assert_template("shared/_matrix_box")
-    assert_displayed_title(:OBSERVATIONS.l)
-  end
-
-  def test_index_spider_blocker
-    # login
-    get(:index, params: { page: 11 })
-
-    assert_equal(:runtime_spiders_begone.t, response.body)
+    assert_response(:redirect)
   end
 
   BUNCH_OF_NAMES = Name.take(10)

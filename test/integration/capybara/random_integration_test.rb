@@ -68,7 +68,7 @@ class RandomIntegrationTest < CapybaraIntegrationTestCase
 
   def test_thumbnail_maps
     visit("/#{observations(:minimal_unknown_obs).id}")
-    assert_selector("body.observations__show")
+    assert_selector("body.login__new")
 
     login("dick")
     assert_selector("body.observations__show")
