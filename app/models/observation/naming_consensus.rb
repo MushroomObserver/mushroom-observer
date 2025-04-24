@@ -197,7 +197,7 @@ class Observation
     # Note: multiple namings can return true for a given user and observation.
     def users_favorite?(naming, user)
       votes.any? do |v|
-        v.user_id == user.id && v.naming_id == naming.id && v.favorite
+        v.user_id == user&.id && v.naming_id == naming.id && v.favorite
       end
     end
 

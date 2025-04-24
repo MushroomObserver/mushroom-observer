@@ -57,14 +57,6 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     filtered_index(new_query, display_opts)
   end
 
-  def check_for_spider_block
-    return unless !User.current && params[:page].to_i > 10
-
-    Rails.logger.warn(:runtime_spiders_begone.t)
-    render(json: :runtime_spiders_begone.t,
-           status: :forbidden)
-  end
-
   # It's not always the controller_name, e.g. ContributorsController -> User
   def controller_model_name
     controller_name.classify
