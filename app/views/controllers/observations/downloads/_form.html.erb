@@ -26,7 +26,10 @@
     <%= radio_with_label(form: f, field: :format, value: :fundis,
                           checked: (@format == "fundis") && "checked",
                           label: :download_observations_fundis.t) %>
-  </div>
+    <%= radio_with_label(form: f, field: :format, value: :mycoportal,
+                          checked: (@format == "mycoportal") && "checked",
+                          label: :download_observations_mycoportal.t) %>
+</div>
 
   <p><%= :download_observations_encoding.t %>:</p>
   <div class="form-group">
