@@ -298,7 +298,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         and(Observation[:lat] <= box.north).
         and(Observation[:lng] >= box.west).
         or(Observation[:lng] <= box.east)
-      )
+      ).distinct
     }
     scope :cached_location_center_in_box_over_dateline, lambda { |box|
       where(
@@ -307,7 +307,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         and(Observation[:location_lat] <= box.north).
         and(Observation[:location_lng] >= box.west).
         or(Observation[:location_lng] <= box.east)
-      )
+      ).distinct
     }
     scope :associated_location_center_in_box_over_dateline, lambda { |box|
       left_outer_joins(:location).
@@ -317,7 +317,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
           and(Location[:center_lat] <= box.north).
           and(Location[:center_lng] >= box.west).
           or(Location[:center_lng] <= box.east)
-        )
+        ).distinct
     }
     # mostly a helper for in_box
     scope :in_box_regular, lambda { |**args|
@@ -351,7 +351,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         and(Observation[:location_lat] <= box.north).
         and(Observation[:location_lng] <= box.east).
         and(Observation[:location_lng] >= box.west)
-      )
+      ).distinct
     }
     scope :associated_location_center_in_box, lambda { |box|
       left_outer_joins(:location).
@@ -361,7 +361,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
           and(Location[:center_lat] <= box.north).
           and(Location[:center_lng] <= box.east).
           and(Location[:center_lng] >= box.west)
-        )
+        ).distinct
     }
     # Pass kwargs (:north, :south, :east, :west), any order
     scope :not_in_box, lambda { |**args|
