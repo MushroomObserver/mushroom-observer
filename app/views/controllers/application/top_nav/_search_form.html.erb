@@ -1,3 +1,4 @@
+<% if @user %>
 <%
 options = [
   [:COMMENTS.l, :comment],
@@ -67,3 +68,4 @@ identify_page = controller.controller_name == "identify"
 <div class="visible-xs">
   <%= adv_search %>
 </div>
+<% end %>
