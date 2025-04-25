@@ -331,7 +331,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
           or(Observation.associated_location_center_in_box(box))
       else
         gps_in_box(box).or(
-          Observation.cached_location_center_in_box(box).distinct
+          Observation.cached_location_center_in_box(box)
         )
       end
     }
