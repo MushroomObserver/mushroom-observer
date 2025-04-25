@@ -341,7 +341,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         and(Observation[:lat] <= box.north).
         and(Observation[:lng] <= box.east).
         and(Observation[:lng] >= box.west)
-      )
+      ).distinct
     }
     scope :cached_location_center_in_box, lambda { |box|
       # odd! AR will toss entire condition if below order is west, east
