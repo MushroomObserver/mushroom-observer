@@ -1443,7 +1443,7 @@ class ObservationTest < UnitTestCase
              east: "-82.92729999999999",
              west: "-96.3512" }
     obs = Observation.names(lookup: names(:coprinus)).in_box(**args)
-    assert(!obs.count.negative?)
+    assert_not(obs.count.negative?)
   end
 
   def test_scope_in_box_over_dateline_with_taxon
@@ -1452,7 +1452,7 @@ class ObservationTest < UnitTestCase
              east: "-82.92729999999999",
              west: "9.3512" }
     obs = Observation.names(lookup: names(:coprinus)).in_box(**args)
-    assert(!obs.count.negative?)
+    assert_not(obs.count.negative?)
   end
 
   def test_scope_in_box_with_taxon_vague
@@ -1462,7 +1462,7 @@ class ObservationTest < UnitTestCase
              east: "-82.92729999999999",
              west: "-96.3512" }
     obs = Observation.names(lookup: names(:coprinus)).in_box(**args)
-    assert(!obs.count.negative?)
+    assert_not(obs.count.negative?)
   end
 
   def test_scope_in_box_over_dateline_with_taxon_vague
@@ -1472,7 +1472,7 @@ class ObservationTest < UnitTestCase
              east: "-82.92729999999999",
              west: "9.3512" }
     obs = Observation.names(lookup: names(:coprinus)).in_box(**args)
-    assert(!obs.count.negative?)
+    assert_not(obs.count.negative?)
   end
 
   def test_scope_not_in_box
