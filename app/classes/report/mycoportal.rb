@@ -46,7 +46,7 @@ module Report
         "host",
         "occurrenceRemarks", # MO observation.notes
         "dbpk", # MO observation.id, was "mushroomObserverId",
-        "observationUrl",
+        "verbatimAttributes", # was observationUrl
         "imageUrls"
       ]
     end
@@ -79,7 +79,7 @@ module Report
         host(row), # MyCoPortal `host` == Sybiota/DWC associatedTaxa
         field_notes(row), # occurrenceRemarks
         row.obs_id, # MCP `dpk`; catalogNumber = "MUOB #{observation.id}"
-        row.obs_url, # MO-specific; used in MCP Desciption / verbatimAttributes
+        row.obs_url, # verbatimAttributes link to MO observation url
         image_urls(row) # MO-specific
       ]
     end
