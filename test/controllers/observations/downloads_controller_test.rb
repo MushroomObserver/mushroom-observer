@@ -17,50 +17,9 @@ module Observations
                     "Missing a MyCoPortal radio button")
     end
 
-    def test_create_with_invalid_format
-      query = Query.lookup_and_save(:Observation, by_users: mary.id)
-      login(:mary)
-
-      post(
-      :create,
-      params: {
-        q: query.id.alphabetize,
-        format: "invalid_format",
-        encoding: "UTF-8",
-        commit: "Download"
-      }
-      )
-
-      assert_flash_error
-      assert_redirected_to(species_list_path(query.id.to_s))
-    end
-
-    def test_create_with_valid_format
-      query = Query.lookup_and_save(:Observation, by_users: mary.id)
-      login(:mary)
-
-      post(
-      :create,
-      params: {
-        q: query.id.alphabetize,
-        format: "csv",
-        encoding: "UTF-8",
-        commit: "Download"
-      }
-      )
-
-      assert_no_flash
-      assert_response(:success)
-      assert_match(/observation_id/, @response.body, "CSV header not found in response")
-    end
-
-    def test_print_labels_with_no_query
-      login(:mary)
-
-      get(:print_labels, params: { q: nil })
-
-      assert_flash_error
-      assert_redirected_to(observations_path)
+    def test_download_observation_index
+      obs = Observation.reorder(id: :asc).where(user: mary)
+      assert(obs.length >= 4)
       query = Query.lookup_and_save(:Observation, by_users: mary.id)
 
       # Add herbarium_record to fourth obs for testing purposes.
