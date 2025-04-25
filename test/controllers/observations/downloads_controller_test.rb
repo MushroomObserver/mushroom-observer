@@ -165,6 +165,18 @@ module Observations
       )
       assert_no_flash
       assert_response(:success)
+
+      post(
+        :create,
+        params: {
+          q: query.id.alphabetize,
+          format: "mycoportal",
+          encoding: "UTF-8",
+          commit: "Download"
+        }
+      )
+      assert_no_flash
+      assert_response(:success)
     end
 
     def test_download_too_many_observations
