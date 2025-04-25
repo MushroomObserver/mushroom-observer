@@ -16,10 +16,11 @@ module Report
     # plus MO-specific fields that are useful for uploads to Symbiota portals
     def labels
       [
-        # "occid", # MCP's internal id of the record : 7962944,
-        # "collid", # id of MCP's MO collection :  36
         # "basisOfRecord", # : "HumanObservation",
-        "scientificName",
+
+        # scientificName joins sciname and scientificNameAuthorship.
+        # We need to supply them separately
+        "sciname", # scientificName joins sciname and scientificNameAuthorship
         "scientificNameAuthorship",
         "taxonRank",
         "genus",
@@ -43,8 +44,8 @@ module Report
         "dateLastModified",
         "substrate",
         "host",
-        "fieldNotes",
-        "mushroomObserverId", # probably should be dbpk, : "514",
+        "occurrenceRemarks", # MO observation.notes
+        "dbpk", # MO observation.id, was "mushroomObserverId",
         "observationUrl",
         "imageUrls"
       ]
