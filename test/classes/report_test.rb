@@ -432,7 +432,7 @@ class ReportTest < UnitTestCase
       "wood chips", # substrate
       "Agaricus", # host
       "Habitat: lawn Other: First line. Second line.", # fieldNotes
-      obs.id.to_s, # mushroomObserverId
+      obs.id.to_s, # dbpk
       "https://mushroomobserver.org/#{obs.id}", # observationUrl
       "https://mushroomobserver.org/images/orig/#{img1.id}.jpg " \
         "https://mushroomobserver.org/images/orig/#{img2.id}.jpg"
@@ -468,7 +468,7 @@ class ReportTest < UnitTestCase
       "", # substrate
       "", # host
       "From somewhere else", # fieldNotes
-      obs.id.to_s, # mushroomObserverId
+      obs.id.to_s, # dbpk
       "https://mushroomobserver.org/#{obs.id}" # observationUrl
     ]
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)
@@ -512,7 +512,7 @@ class ReportTest < UnitTestCase
       "wood chips", # substrate
       "Agaricus", # host
       "Habitat: lawn Other: 1st line. 2nd line. 3rd line.", # fieldNotes
-      obs.id.to_s, # mushroomObserverId
+      obs.id.to_s, # dbpk
       "https://mushroomobserver.org/#{obs.id}", # observationUrl
       "https://mushroomobserver.org/images/orig/#{img1.id}.jpg " \
         "https://mushroomobserver.org/images/orig/#{img2.id}.jpg" # imageUrls
