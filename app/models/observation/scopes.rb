@@ -330,7 +330,9 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         left_outer_joins(:location).gps_in_box(box).
           or(Observation.associated_location_center_in_box(box))
       else
-        gps_in_box(box).or(Observation.cached_location_center_in_box(box))
+        gps_in_box(box).or(
+          Observation.cached_location_center_in_box(box).distinct
+        )
       end
     }
     scope :gps_in_box, lambda { |box|
