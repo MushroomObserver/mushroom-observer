@@ -101,24 +101,36 @@ module Report
     end
 
     def substrate(row)
-      explode_notes(row).first
+      explode_notes(row)[:substrate]
     end
 
+    # https://github.com/BioKIC/symbiota-docs/issues/36#issuecomment-1015733243
     def associated_taxa(row)
-      explode_notes(row).second
+      host = explode_notes(row)[:host]
+      trees_shrubs = explode_notes(row)[:trees_shrubs]
+
+      associates = if host.present?
+                     "host: #{host}"
+                   else
+                     ""
+                   end
+      return associates if trees_shrubs.blank?
+
+      "#{trees_shrubs}; #{associates}"
     end
 
     def occurence_remarks(row)
-      explode_notes(row).third
+      explode_notes(row)[:other]
     end
 
     def explode_notes(row)
       notes = row.obs_notes_as_hash || {}
-      [
-        extract_notes_field(notes, :Substrate),
-        extract_notes_field(notes, :Host),
-        export_other_notes(notes)
-      ]
+      {
+        substrate: extract_notes_field(notes, :Substrate),
+        host: extract_notes_field(notes, :Host),
+        trees_shrubs: extract_notes_field(notes, FieldSlip::TREES_SHRUBS),
+        other: export_other_notes(notes)
+      }
     end
 
     def extract_notes_field(notes, field)

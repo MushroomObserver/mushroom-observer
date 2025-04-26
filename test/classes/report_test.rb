@@ -413,6 +413,25 @@ class ReportTest < UnitTestCase
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
+  def test_mycoportal_associated_taxa
+    obs = observations(:detailed_unknown_obs)
+    obs.notes = {
+      FieldSlip::TREES_SHRUBS => "oak, pine",
+      Host: "Pinus contorta",
+      Other: "other remarks"
+    }
+    obs.save!
+
+    expect = hashed_expect(obs).merge(
+      disposition: "NY",
+      # https://github.com/BioKIC/symbiota-docs/issues/36#issuecomment-1015733243
+      associatedTaxa: "oak, pine; host: Pinus contorta",
+      occurrenceRemarks: "other remarks"
+    ).values
+
+    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
   def test_mycoportal_agaricus_campestrus_obs
     obs = observations(:agaricus_campestrus_obs)
     expect = hashed_expect(obs).merge(
@@ -472,7 +491,7 @@ class ReportTest < UnitTestCase
       maximumElevationInMeters: obs_location.high.to_i.to_s,
       dateLastModified: "#{obs.updated_at.api_time} UTC",
       substrate: "",
-      host: "",
+      associatedTaxa: "",
       occurrenceRemarks: "",
       dbpk: obs.id.to_s,
       verbatimAttributes: observation_link(obs)
