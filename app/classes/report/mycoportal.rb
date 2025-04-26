@@ -43,7 +43,7 @@ module Report
         "maximumElevationInMeters",
         "dateLastModified",
         "substrate",
-        "host",
+        "associatedTaxa", # was "host"
         "occurrenceRemarks", # MO observation.notes
         "dbpk", # MO observation.id, was "mushroomObserverId",
         "verbatimAttributes", # was observationUrl
@@ -75,9 +75,9 @@ module Report
         row.best_low, # minimumElevationInMeters
         row.best_high, # maximumElevationInMeters
         row.obs_updated_at, # dateLastModified
-        substrate(row), # MyCoPortal `substrate` == Sybiota/DWC substrate
-        host(row), # MyCoPortal `host` == Sybiota/DWC associatedTaxa
-        field_notes(row), # occurrenceRemarks
+        substrate(row),
+        associated_taxa(row), # was`host`
+        occurence_remarks(row), # notes minus substrate and associatedTaxa
         row.obs_id, # MCP `dpk`; catalogNumber = "MUOB #{observation.id}"
         observation_link(row), # verbatimAttributes link to MO observation url
         image_urls(row) # MO-specific
@@ -104,11 +104,11 @@ module Report
       explode_notes(row).first
     end
 
-    def host(row)
+    def associated_taxa(row)
       explode_notes(row).second
     end
 
-    def field_notes(row)
+    def occurence_remarks(row)
       explode_notes(row).third
     end
 
