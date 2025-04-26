@@ -475,7 +475,7 @@ class ReportTest < UnitTestCase
       host: "",
       occurrenceRemarks: "",
       dbpk: obs.id.to_s,
-      verbatimAttributes: observation_link(obs),
+      verbatimAttributes: observation_link(obs)
     }
     # Include this key/value only if there are images.
     hsh[:imageUrls] = expected_image_urls(obs) if obs.images.any?
