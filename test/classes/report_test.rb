@@ -406,27 +406,8 @@ class ReportTest < UnitTestCase
     expect = hashed_expect(obs).merge(
       disposition: "NY",
       substrate: "wood chips",
-      host: "Agaricus",
+      associatedTaxa: "host: Agaricus",
       occurrenceRemarks: "Habitat: lawn Other: First line. Second line."
-    ).values
-
-    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
-  end
-
-  def test_mycoportal_associated_taxa
-    obs = observations(:detailed_unknown_obs)
-    obs.notes = {
-      FieldSlip::TREES_SHRUBS => "oak, pine",
-      Host: "Pinus contorta",
-      Other: "other remarks"
-    }
-    obs.save!
-
-    expect = hashed_expect(obs).merge(
-      disposition: "NY",
-      # https://github.com/BioKIC/symbiota-docs/issues/36#issuecomment-1015733243
-      associatedTaxa: "oak, pine; host: Pinus contorta",
-      occurrenceRemarks: "other remarks"
     ).values
 
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)
@@ -456,9 +437,29 @@ class ReportTest < UnitTestCase
     expect = hashed_expect(obs).merge(
       disposition: "NY",
       substrate: "wood chips",
-      host: "Agaricus",
+      associatedTaxa: "host: Agaricus",
       occurrenceRemarks: "Habitat: lawn Other: 1st line. 2nd line. 3rd line."
     ).values
+
+    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_associated_taxa_trees_shrubs_host
+    obs = observations(:detailed_unknown_obs)
+    obs.notes = {
+      FieldSlip::TREES_SHRUBS => "oak, pine",
+      Host: "Pinus contorta",
+      Other: "other remarks"
+    }
+    obs.save!
+
+    expect = hashed_expect(obs).merge(
+      disposition: "NY",
+      # https://github.com/BioKIC/symbiota-docs/issues/36#issuecomment-1015733243
+      associatedTaxa: "oak, pine; host: Pinus contorta",
+      occurrenceRemarks: "other remarks"
+    ).values
+
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
