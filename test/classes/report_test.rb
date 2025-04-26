@@ -393,7 +393,7 @@ class ReportTest < UnitTestCase
     do_tsv_test(Report::Symbiota, obs, expect, &:id)
   end
 
-  def test_mycoportal1
+  def test_mycoportal_notes_and_images
     obs = observations(:detailed_unknown_obs)
     obs.notes = {
       Substrate: "wood\tchips",
@@ -403,81 +403,24 @@ class ReportTest < UnitTestCase
     }
     obs.save!
 
-    img1 = images(:in_situ_image)
-    img2 = images(:turned_over_image)
+    expect = hashed_expect(obs).merge(
+      disposition: "NY",
+      substrate: "wood chips",
+      host: "Agaricus",
+      occurrenceRemarks: "Habitat: lawn Other: First line. Second line."
+    ).values
 
-    expect = [
-      "Fungi", # scientificName
-      "", # scientificNameAuthorship
-      "Kingdom", # taxonRank
-      "Fungi", # genus
-      "", # specificEpithet
-      "", # infraspecificEpithet
-      "Mary Newbie", # recordedBy
-      "174", # recordNumber
-      "NY", # disposition
-      "2006-05-11", # eventDate
-      "2006", # year
-      "5", # month
-      "11", # day
-      "USA", # country
-      "California", # stateProvince
-      "", # county
-      "Burbank", # locality
-      "34.185", # decimalLatitude
-      "-118.33", # decimalLongitude
-      "148", # minimumElevationInMeters
-      "294",
-      "#{obs.updated_at.api_time} UTC", # dateLastModified
-      "wood chips", # substrate
-      "Agaricus", # host
-      "Habitat: lawn Other: First line. Second line.", # fieldNotes
-      obs.id.to_s, # dbpk
-      "<a href='https://mushroomobserver.org/#{obs.id}' " \
-        "target='_blank' style='color: blue;'>" \
-        "Original observation ##{obs.id} (Mushroom Observer)" \
-        "</a>", # verbatimAttributes
-
-      "https://mushroomobserver.org/images/orig/#{img1.id}.jpg " \
-        "https://mushroomobserver.org/images/orig/#{img2.id}.jpg"
-    ]
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
-  def test_mycoportal2
+  def test_mycoportal_agaricus_campestrus_obs
     obs = observations(:agaricus_campestrus_obs)
-    expect = [
-      "Agaricus campestrus", # scientificName
-      "L.", # scientificNameAuthorship
-      "Species", # taxonRank
-      "Agaricus", # genus
-      "campestrus", # specificEpithet
-      "", # infraspecificEpithet
-      "Rolf Singer", # recordedBy
-      "MUOB #{obs.id}", # recordNumber
-      "", # disposition
-      "2007-06-23", # eventDate
-      "2007", # year
-      "6", # month
-      "23", # day
-      "USA", # country
-      "California", # stateProvince
-      "", # county
-      "Burbank", # locality
-      "34.185", # decimalLatitude
-      "-118.33", # decimalLongitude
-      "148", # minimumElevationInMeters
-      "294", # maximumElevationInMeters
-      "#{obs.updated_at.api_time} UTC", # dateLastModified
-      "", # substrate
-      "", # host
-      "From somewhere else", # fieldNotes
-      obs.id.to_s, # dbpk
-      "<a href='https://mushroomobserver.org/#{obs.id}' " \
-        "target='_blank' style='color: blue;'>" \
-        "Original observation ##{obs.id} (Mushroom Observer)" \
-        "</a>" # verbatimAttributes
-    ]
+    expect = hashed_expect(obs).merge(
+      scientificNameAuthorship: "L.",
+      specificEpithet: "campestrus",
+      occurrenceRemarks: "From somewhere else"
+    ).values
+
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
@@ -491,43 +434,65 @@ class ReportTest < UnitTestCase
     }
     obs.save!
 
-    img1 = images(:in_situ_image)
-    img2 = images(:turned_over_image)
-    expect = [
-      "Fungi", # scientificName
-      "", # scientificNameAuthorship
-      "Kingdom", # taxonRank
-      "Fungi", # genus
-      "", # specificEpithet
-      "", # infraspecificEpithet
-      "Mary Newbie", # recordedBy
-      "174", # recordNumber
-      "NY", # disposition
-      "2006-05-11", # eventDate
-      "2006", # year
-      "5", # month
-      "11", # day
-      "USA", # country
-      "California", # stateProvince
-      "", # county
-      "Burbank", # locality
-      "34.185", # decimalLatitude
-      "-118.33", # decimalLongitude
-      "148", # minimumElevationInMeters
-      "294", # maximumElevationInMeters
-      "#{obs.updated_at.api_time} UTC", # dateLastModified
-      "wood chips", # substrate
-      "Agaricus", # host
-      "Habitat: lawn Other: 1st line. 2nd line. 3rd line.", # fieldNotes
-      obs.id.to_s, # dbpk
-      "<a href='https://mushroomobserver.org/#{obs.id}' " \
-        "target='_blank' style='color: blue;'>" \
-        "Original observation ##{obs.id} (Mushroom Observer)" \
-        "</a>", # verbatimAttributes
-      "https://mushroomobserver.org/images/orig/#{img1.id}.jpg " \
-        "https://mushroomobserver.org/images/orig/#{img2.id}.jpg" # imageUrls
-    ]
+    expect = hashed_expect(obs).merge(
+      disposition: "NY",
+      substrate: "wood chips",
+      host: "Agaricus",
+      occurrenceRemarks: "Habitat: lawn Other: 1st line. 2nd line. 3rd line."
+    ).values
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def hashed_expect(obs)
+    obs_location = obs.location
+    obs_when = obs.when
+    obs_where = obs.where
+    hsh = {
+      sciname: obs.text_name,
+      scientificNameAuthorship: "",
+      taxonRank: obs.name.rank,
+      genus: obs.text_name.split.first,
+      specificEpithet: "",
+      infraspecificEpithet: "",
+      recordedBy: obs.user.name,
+      recordNumber: obs.collection_numbers.first&.number || "MUOB #{obs.id}",
+      disposition: "",
+      eventDate: obs_when.strftime("%Y-%m-%d"),
+      year: obs_when.strftime("%Y"),
+      month: obs_when.strftime("%-m"),
+      day: obs_when.strftime("%-d"),
+      # where is assumed to have just city, state/province, country
+      country: obs_where.split.last,
+      stateProvince: obs_where.split[-2]&.delete_suffix(",") || "",
+      county: "",
+      locality: obs_where.split[-3]&.delete_suffix(",") || "",
+      decimalLatitude: obs_location.center_lat.to_s,
+      decimalLongitude: obs_location.center_lng.to_s,
+      minimumElevationInMeters: obs_location.low.to_i.to_s,
+      maximumElevationInMeters: obs_location.high.to_i.to_s,
+      dateLastModified: "#{obs.updated_at.api_time} UTC",
+      substrate: "",
+      host: "",
+      occurrenceRemarks: "",
+      dbpk: obs.id.to_s,
+      verbatimAttributes: observation_link(obs),
+    }
+    # Include this key/value only if there are images.
+    hsh[:imageUrls] = expected_image_urls(obs) if obs.images.any?
+    hsh
+  end
+
+  def observation_link(obs)
+    "<a href='https://mushroomobserver.org/#{obs.id}' " \
+    "target='_blank' style='color: blue;'>" \
+    "Original observation ##{obs.id} (Mushroom Observer)" \
+    "</a>"
+  end
+
+  def expected_image_urls(obs)
+    obs.images.map do |img|
+      "https://mushroomobserver.org/images/orig/#{img.id}.jpg"
+    end.join(" ")
   end
 
   def test_rounding_of_latitudes_etc
