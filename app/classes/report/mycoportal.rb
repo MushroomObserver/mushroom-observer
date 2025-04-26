@@ -163,10 +163,9 @@ module Report
     end
 
     def observation_link(row)
-      foo = "<a href='#{row.obs_url}' " \
+      "<a href='#{row.obs_url}' " \
       "target='_blank' style='color: blue;'>" \
       "Original observation ##{row.obs_id} (Mushroom Observer)</a>"
-
     end
 
     def sort_before(rows)
