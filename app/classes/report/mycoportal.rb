@@ -79,7 +79,7 @@ module Report
         host(row), # MyCoPortal `host` == Sybiota/DWC associatedTaxa
         field_notes(row), # occurrenceRemarks
         row.obs_id, # MCP `dpk`; catalogNumber = "MUOB #{observation.id}"
-        row.obs_url, # verbatimAttributes link to MO observation url
+        observation_link(row), # verbatimAttributes link to MO observation url
         image_urls(row) # MO-specific
       ]
     end
@@ -160,6 +160,13 @@ module Report
       return str if str.present?
 
       "vouchered"
+    end
+
+    def observation_link(row)
+      foo = "<a href='#{row.obs_url}' " \
+      "target='_blank' style='color: blue;'>" \
+      "Original observation ##{row.obs_id} (Mushroom Observer)</a>"
+
     end
 
     def sort_before(rows)

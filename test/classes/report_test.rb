@@ -433,7 +433,11 @@ class ReportTest < UnitTestCase
       "Agaricus", # host
       "Habitat: lawn Other: First line. Second line.", # fieldNotes
       obs.id.to_s, # dbpk
-      "https://mushroomobserver.org/#{obs.id}", # verbatimAttributes
+      "<a href='https://mushroomobserver.org/#{obs.id}' " \
+        "target='_blank' style='color: blue;'>" \
+        "Original observation ##{obs.id} (Mushroom Observer)" \
+        "</a>", # verbatimAttributes
+
       "https://mushroomobserver.org/images/orig/#{img1.id}.jpg " \
         "https://mushroomobserver.org/images/orig/#{img2.id}.jpg"
     ]
@@ -469,7 +473,10 @@ class ReportTest < UnitTestCase
       "", # host
       "From somewhere else", # fieldNotes
       obs.id.to_s, # dbpk
-      "https://mushroomobserver.org/#{obs.id}" # verbatimAttributes
+      "<a href='https://mushroomobserver.org/#{obs.id}' " \
+        "target='_blank' style='color: blue;'>" \
+        "Original observation ##{obs.id} (Mushroom Observer)" \
+        "</a>" # verbatimAttributes
     ]
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)
   end
@@ -513,7 +520,10 @@ class ReportTest < UnitTestCase
       "Agaricus", # host
       "Habitat: lawn Other: 1st line. 2nd line. 3rd line.", # fieldNotes
       obs.id.to_s, # dbpk
-      "https://mushroomobserver.org/#{obs.id}", # verbatimAttributes
+      "<a href='https://mushroomobserver.org/#{obs.id}' " \
+        "target='_blank' style='color: blue;'>" \
+        "Original observation ##{obs.id} (Mushroom Observer)" \
+        "</a>", # verbatimAttributes
       "https://mushroomobserver.org/images/orig/#{img1.id}.jpg " \
         "https://mushroomobserver.org/images/orig/#{img2.id}.jpg" # imageUrls
     ]
