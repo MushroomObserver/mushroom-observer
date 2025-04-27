@@ -2837,6 +2837,24 @@ class NameTest < UnitTestCase
     assert_equal("Phylum", Name.guess_rank("Fossil-Anythingelse"))
   end
 
+  # --------------------------------------
+  #  Taxonomy
+  # --------------------------------------
+
+  def test_provisional
+    name = Name.new(text_name: "Amanita sp. 'Amidella-ID01'")
+    assert(name.provisional?)
+    name = Name.new(text_name: "Stropharia alboambigua", author: "nom. prov.")
+    assert(name.provisional?)
+
+    assert_not(names(:lepiota).provisional?)
+    assert_not(names(:coprinus_comatus).provisional?)
+  end
+
+  # --------------------------------------
+  #  Spelling
+  # --------------------------------------
+
   def test_parent_if_parent_deprecated
     User.current = rolf
     lepiota = names(:lepiota)

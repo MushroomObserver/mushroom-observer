@@ -27,6 +27,21 @@ module Name::Taxonomy
     (rank == "Species") || Name.ranks_below_species.include?(rank)
   end
 
+  def provisional?
+    return true if standard_provisional?
+    return true if explicit_provisional?
+
+    false
+  end
+
+  def standard_provisional?
+    text_name.match?(/['"]/)
+  end
+
+  def explicit_provisional?
+    author&.match?(/ (prov|crypt)\./)
+  end
+
   def rank_index(rank)
     Name.all_ranks.index(rank)
   end
