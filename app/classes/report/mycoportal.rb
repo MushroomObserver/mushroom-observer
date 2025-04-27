@@ -113,24 +113,28 @@ module Report
 
     def identification_qualifier(row)
       return "group" if row.name_rank == "Group"
-      return "nom. prov." if provisional?(row)
+      return "nom. prov." if provisional?(obs(row).name)
 
       nil
     end
 
-    def provisional?(row)
-      return true if standard_provisional?(row)
-      return true if explicit_provisional?(row)
+    def obs(row)
+      Observation.find(row.obs_id)
+    end
+
+    def provisional?(name)
+      return true if standard_provisional?(name)
+      return true if explicit_provisional?(name)
 
       false
     end
 
-    def standard_provisional?(row)
-      row.name_text_name.match?(/['"]/)
+    def standard_provisional?(name)
+      name.text_name.match?(/['"]/)
     end
 
-    def explicit_provisional?(row)
-      row.name_author&.match?(/ (prov|crypt)\./)
+    def explicit_provisional?(name)
+      name.author&.match?(/ (prov|crypt)\./)
     end
 
     def collector(row)
