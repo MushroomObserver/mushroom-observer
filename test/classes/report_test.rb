@@ -417,9 +417,15 @@ class ReportTest < UnitTestCase
     obs = observations(:agaricus_campestrus_obs)
     expect = hashed_expect(obs).merge(
       scientificNameAuthorship: "L.",
-      specificEpithet: "campestrus",
       occurrenceRemarks: "From somewhere else"
     ).values
+
+    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_minimal
+    obs = observations(:minimal_unknown_obs)
+    expect = hashed_expect(obs).values
 
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)
   end
@@ -463,6 +469,22 @@ class ReportTest < UnitTestCase
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
+  def test_mycoportal_identification_qualifier_group
+    location = locations(:burbank)
+    name = names(:boletus_edulis_group)
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: location, where: location.name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Boletus edulis",
+      scientificNameAuthorship: "Bull.",
+      identificationQualifier: "group"
+    ).values
+
+    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
   def hashed_expect(obs)
     obs_location = obs.location
     obs_when = obs.when
@@ -471,9 +493,10 @@ class ReportTest < UnitTestCase
       sciname: obs.text_name,
       scientificNameAuthorship: "",
       taxonRank: obs.name.rank,
-      genus: obs.text_name.split.first,
-      specificEpithet: "",
+      # genus: obs.text_name.split.first,
+      # specificEpithet: "",
       infraspecificEpithet: "",
+      identificationQualifier: "",
       recordedBy: obs.user.name,
       recordNumber: obs.collection_numbers.first&.number || "MUOB #{obs.id}",
       disposition: "",
@@ -493,7 +516,7 @@ class ReportTest < UnitTestCase
       dateLastModified: "#{obs.updated_at.api_time} UTC",
       substrate: "",
       associatedTaxa: "",
-      occurrenceRemarks: "",
+      occurrenceRemarks: obs.notes[:Other] || "",
       dbpk: obs.id.to_s,
       verbatimAttributes: observation_link(obs)
     }

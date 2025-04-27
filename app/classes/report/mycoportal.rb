@@ -20,12 +20,13 @@ module Report
 
         # scientificName joins sciname and scientificNameAuthorship.
         # We need to supply them separately
-        "sciname", # scientificName joins sciname and scientificNameAuthorship
+        "sciname", # not scientificName, which joins name and author
         "scientificNameAuthorship",
         "taxonRank",
-        "genus",
-        "specificEpithet",
+        # "genus",
+        # "specificEpithet",
         "infraspecificEpithet",
+        "identificationQualifier",
         "recordedBy",
         "recordNumber", # collection no. assigned to specimen by the collector
         "disposition", # controlled vocab: "vouchered" or nil
@@ -53,12 +54,17 @@ module Report
 
     def format_row(row) # rubocop:disable Metrics/AbcSize
       [
-        row.name_text_name, # scientificName
-        row.name_author, # scientificNameAuthorship
+        # NOTE: email from Scott Bates 2025-04-24 12:25 PDT
+        # We just need a species name (sciname) AND
+        # authors (scientificNameAuthorship) fields,
+        # the rest (e.g., family and genus etc.) is automatically generated
+        sciname(row), # sciname
+        scientific_name_authorship(row), # scientificNameAuthorship
         row.name_rank, # taxonRank
-        row.genus, # genus
-        row.species, # specificEpithet
+        # row.genus, # genus
+        # row.species, # specificEpithet
         row.form_or_variety_or_subspecies, # infraspecificEpithet
+        identification_remarks(row), # identificationRemarks
         collector(row), # recordedBy
         number(row), # collectors number || "MUOB #{observation.id}", Cf. obs_id
         disposition(row), # disposition
@@ -82,6 +88,33 @@ module Report
         observation_link(row), # verbatimAttributes link to MO observation url
         image_urls(row) # MO-specific
       ]
+    end
+
+    def sciname(row)
+      text_name = row.name_text_name
+      # The last word in text_name could be Group or Complex
+      return text_name_without_last_word(text_name) if row.name_rank == "Group"
+
+      text_name
+    end
+
+    def text_name_without_last_word(text_name)
+      text_name.split[0...-1].join(" ")
+    end
+
+    def scientific_name_authorship(row)
+      if row.name_rank == "Group"
+        binomial = text_name_without_last_word(row.name_text_name)
+        Name.find_by(text_name: binomial).try(:author)
+      else
+        row.name_author
+      end
+    end
+
+    def identification_remarks(row)
+      return "group" if row.name_rank == "Group"
+
+      nil
     end
 
     def collector(row)
