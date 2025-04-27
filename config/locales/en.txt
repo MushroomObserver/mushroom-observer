@@ -4005,6 +4005,7 @@
   runtime_removed_id_from: "Successfully removed [type] #[value] from [name]."
   runtime_removed_name: Successfully removed [type] '[value]'.
   runtime_removed_name_from: Successfully removed [type] '[value]' from [name].
+  runtime_spiders_begone: Spiders Begone!  Please login (mushroomobserver.org/account/login/new) to access this page.
   runtime_updated_at: Successfully updated [type].
   runtime_updated_id: "Successfully updated [type] #[value]."
   runtime_updated_name: Successfully updated [type] '[value]'.
