@@ -532,6 +532,28 @@ class ReportTest < UnitTestCase
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
+  def test_mycoportal_identification_qualifier_sensu
+    name = Name.create!(
+      user: rolf,
+      rank: "Genus",
+      text_name: "Mycena",
+      author: "sensu lato",
+      search_name: "Mycena sensu lato",
+      display_name: "**__Mycena__** sensu lato",
+      sort_name: "Mycena  sensu lato"
+    )
+    location = locations(:burbank)
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: location, where: location.name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      identificationQualifier: "sensu lato"
+    ).values
+
+    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
   def hashed_expect(obs)
     obs_location = obs.location
     obs_when = obs.when

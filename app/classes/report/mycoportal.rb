@@ -112,6 +112,9 @@ module Report
     end
 
     def identification_qualifier(row)
+      match = row.name_author&.match(/(sensu.*)/)
+      return match[1] if match
+
       return "group" if row.name_rank == "Group"
       return "nom. prov." if obs(row).name.provisional?
 
