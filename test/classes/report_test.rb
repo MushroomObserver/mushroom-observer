@@ -393,6 +393,14 @@ class ReportTest < UnitTestCase
     do_tsv_test(Report::Symbiota, obs, expect, &:id)
   end
 
+  # test bare-bones obs to differentiate from other tests
+  def test_mycoportal_minimal
+    obs = observations(:minimal_unknown_obs)
+    expect = hashed_expect(obs).values
+
+    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
   def test_mycoportal_notes_and_images
     obs = observations(:detailed_unknown_obs)
     obs.notes = {
@@ -419,13 +427,6 @@ class ReportTest < UnitTestCase
       scientificNameAuthorship: "L.",
       occurrenceRemarks: "From somewhere else"
     ).values
-
-    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
-  end
-
-  def test_mycoportal_minimal
-    obs = observations(:minimal_unknown_obs)
-    expect = hashed_expect(obs).values
 
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)
   end
@@ -485,13 +486,59 @@ class ReportTest < UnitTestCase
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
+  def test_mycoportal_identification_qualifier_standard_provisional
+    name = Name.create!(
+      user: rolf,
+      rank: "Species",
+      text_name: "Geoglossum sp. 'MI01'",
+      author: "",
+      search_name: "Geoglossum sp. 'MI01'",
+      display_name: "**__Geoglossum__** sp. **__'MI01'__**",
+      sort_name: "Geoglossum mi01"
+    )
+    location = locations(:burbank)
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: location, where: location.name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Geoglossum sp. 'MI01'",
+      identificationQualifier: "nom. prov."
+    ).values
+
+    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_identification_qualifier_explicit_provisional
+    name = Name.create!(
+      user: rolf,
+      rank: "Species",
+      text_name: "Gymnopus bakerensis",
+      author: "(A.H. Sm.) auct. comb. prov.",
+      search_name: "Gymnopus bakerensis (A.H. Sm.) auct. comb. prov.",
+      display_name: "__Gymnopus__ __bakerensis__ (A.H. Sm.) auct. comb. prov.",
+      sort_name: "Gymnopus bakerensis  (A.H. Sm.) auct. comb. prov."
+    )
+    location = locations(:burbank)
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: location, where: location.name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Gymnopus bakerensis",
+      identificationQualifier: "nom. prov."
+    ).values
+
+    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
   def hashed_expect(obs)
     obs_location = obs.location
     obs_when = obs.when
     obs_where = obs.where
     hsh = {
       sciname: obs.text_name,
-      scientificNameAuthorship: "",
+      scientificNameAuthorship: obs.name.author,
       taxonRank: obs.name.rank,
       # genus: obs.text_name.split.first,
       # specificEpithet: "",

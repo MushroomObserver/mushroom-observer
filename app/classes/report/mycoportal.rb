@@ -20,7 +20,7 @@ module Report
 
         # scientificName joins sciname and scientificNameAuthorship.
         # We need to supply them separately
-        "sciname", # not scientificName, which joins name and author
+        "sciname",
         "scientificNameAuthorship",
         "taxonRank",
         # "genus",
@@ -64,7 +64,7 @@ module Report
         # row.genus, # genus
         # row.species, # specificEpithet
         row.form_or_variety_or_subspecies, # infraspecificEpithet
-        identification_remarks(row), # identificationRemarks
+        identification_qualifier(row), # identificationRemarks
         collector(row), # recordedBy
         number(row), # collectors number || "MUOB #{observation.id}", Cf. obs_id
         disposition(row), # disposition
@@ -111,10 +111,26 @@ module Report
       end
     end
 
-    def identification_remarks(row)
+    def identification_qualifier(row)
       return "group" if row.name_rank == "Group"
+      return "nom. prov." if provisional?(row)
 
       nil
+    end
+
+    def provisional?(row)
+      return true if standard_provisional?(row)
+      return true if explicit_provisional?(row)
+
+      false
+    end
+
+    def standard_provisional?(row)
+      row.name_text_name.match?(/['"]/)
+    end
+
+    def explicit_provisional?(row)
+      row.name_author&.match?(/ (prov|crypt)\./)
     end
 
     def collector(row)
