@@ -22,8 +22,9 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
     original_name = obs.name
 
     namer_session.visit("/#{obs.id}")
-    namer_session.assert_selector("body.login__new")
+    assert_equal(403, namer_session.status_code)
     login(namer, session: namer_session)
+    namer_session.visit("/#{obs.id}")
     assert_false(namer_session.has_link?(class: /edit_naming/))
     assert_false(namer_session.has_selector?(class: /destroy_naming_link_/))
     namer_session.first(class: "propose-naming-link").click
