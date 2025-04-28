@@ -1,19 +1,21 @@
 # frozen_string_literal: true
 
+# Report (a TSV spreadsheet) for exporting Observations to MyCoPortal
+# https://mycoportal.org/
+# https://www.mycoportal.org/portal/api/v2/documentation
+
+# MyCoPortal is built on Symbiota
+# https://symbiota.org/
+# https://biokic.github.io/symbiota-docs/
+# https://github.com/Symbiota/Symbiota
 module Report
-  # Report for exporting Observations to MyCoPortal
-  # https://mycoportal.org/
-  # https://www.mycoportal.org/portal/api/v2/documentation
-  #
-  # MyCoPortal is built on Symbiota
-  # https://symbiota.org/
-  # https://biokic.github.io/symbiota-docs/
-  # https://github.com/Symbiota/Symbiota
   class Mycoportal < TSV
-    # These plus Column labels comprising
-    # Symbiota Standard Field names which are useful for our purposes
+    # Label names for the columns in the report.
+    # Some Symbiota Standard Fields
     # https://biokic.github.io/symbiota-docs/editor/edit/fields/#standard-fields
-    # plus MO-specific fields that are useful for uploads to Symbiota portals
+    # plus some MyCoPortal-specific fields
+    # Includes only fields needed for upload to MyCoPortal.
+    # MyCoPortal fills in other fields automatically.
     def labels
       [
         "basisOfRecord", # : "HumanObservation",
@@ -45,10 +47,10 @@ module Report
         "dateLastModified",
         "substrate",
         "associatedTaxa", # was "host"
-        "occurrenceRemarks", # MO observation.notes
-        "dbpk", # MO observation.id, was "mushroomObserverId",
+        "occurrenceRemarks", # MO observation.notes; was fieldNotes
+        "dbpk", # MCP-specific; MO observation.id; was "mushroomObserverId",
         "verbatimAttributes", # was observationUrl
-        "imageUrls"
+        "imageUrls" # not a Symbiota or MCP field;
       ]
     end
 
