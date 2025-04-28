@@ -1535,8 +1535,9 @@
   download_observations_raw: CSV spreadsheet
   download_observations_adolf: The Adolf Special™
   download_observations_darwin: Darwin Core
-  download_observations_symbiota: Symbiota
   download_observations_fundis: FunDiS
+  download_observations_mycoportal: MyCoPortal
+  download_observations_symbiota: Symbiota
   download_observations_what_is_this: what is this?
   download_observations_encoding: Choose character encoding
   download_observations_ascii: ASCII (no accents)
@@ -4004,6 +4005,7 @@
   runtime_removed_id_from: "Successfully removed [type] #[value] from [name]."
   runtime_removed_name: Successfully removed [type] '[value]'.
   runtime_removed_name_from: Successfully removed [type] '[value]' from [name].
+  runtime_spiders_begone: Spiders Begone!  Please login (mushroomobserver.org/account/login/new) to access this page.
   runtime_updated_at: Successfully updated [type].
   runtime_updated_id: "Successfully updated [type] #[value]."
   runtime_updated_name: Successfully updated [type] '[value]'.

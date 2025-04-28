@@ -4,6 +4,19 @@ require("test_helper")
 
 module Observations
   class DownloadsControllerTest < FunctionalTestCase
+    def test_new
+      query = Query.lookup_and_save(:Observation, by_users: mary.id)
+      assert(query.num_results > 1, "Test needs query with multiple results")
+
+      login(:rolf)
+      get(:new, params: { q: query.id.alphabetize })
+
+      assert_no_flash
+      assert_response(:success)
+      assert_select("input[type=radio][id=format_mycoportal]", true,
+                    "Missing a MyCoPortal radio button")
+    end
+
     def test_download_observation_index
       obs = Observation.reorder(id: :asc).where(user: mary)
       assert(obs.length >= 4)
@@ -146,6 +159,18 @@ module Observations
         params: {
           q: query.id.alphabetize,
           format: "fundis",
+          encoding: "UTF-8",
+          commit: "Download"
+        }
+      )
+      assert_no_flash
+      assert_response(:success)
+
+      post(
+        :create,
+        params: {
+          q: query.id.alphabetize,
+          format: "mycoportal",
           encoding: "UTF-8",
           commit: "Download"
         }
