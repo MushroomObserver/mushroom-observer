@@ -17,6 +17,7 @@ module Report
     def labels
       [
         "basisOfRecord", # : "HumanObservation",
+        "catalogNumber", # "MUOB" + space + observation.id"
         # scientificName joins sciname and scientificNameAuthorship.
         # We need to supply them separately
         "sciname",
@@ -54,6 +55,7 @@ module Report
     def format_row(row) # rubocop:disable Metrics/AbcSize
       [
         "HumanObservation", # basisOfRecord
+        "MUOB #{row.obs_id}", # catalogNumber
         # NOTE: email from Scott Bates 2025-04-24 12:25 PDT
         # We just need a species name (sciname) AND
         # authors (scientificNameAuthorship) fields,

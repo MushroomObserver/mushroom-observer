@@ -560,6 +560,7 @@ class ReportTest < UnitTestCase
     obs_where = obs.where
     hsh = {
       basisOfRecord: "HumanObservation",
+      catalogNumber: "MUOB #{obs.id}",
       sciname: obs.text_name,
       scientificNameAuthorship: obs.name.author,
       taxonRank: obs.name.rank,
