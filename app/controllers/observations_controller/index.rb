@@ -4,8 +4,6 @@
 class ObservationsController
   module Index
     def index
-      return if check_for_spider_block
-
       build_index_with_query
     end
 

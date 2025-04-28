@@ -72,6 +72,8 @@ module Observations
         Report::Symbiota.new(args)
       when "fundis"
         Report::Fundis.new(args)
+      when "mycoportal"
+        Report::Mycoportal.new(args)
       else
         raise("Invalid download type: #{format.inspect}")
       end

@@ -58,9 +58,9 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   end
 
   def check_for_spider_block
-    return unless !User.current && params[:page].to_i > 10
+    return if @user
 
-    Rails.logger.warn(:runtime_spiders_begone.t)
+    Rails.logger.warn(:runtime_spiders_begone)
     render(json: :runtime_spiders_begone.t,
            status: :forbidden)
   end
