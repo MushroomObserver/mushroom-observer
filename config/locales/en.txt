@@ -1905,6 +1905,10 @@
   login_data_without_login_caption: Get MO Data Without Logging In
   login_images_without_login: Get "MO Images for Machine Learning":/articles/20.
   login_data_without_login: Get "MO Data":https://github.com/MushroomObserver/mushroom-observer/blob/main/README_API.md#csv-files.
+  login_why: Why We Require a Login
+  login_spiders_bad1: We are temporarily restricting access to essentially all MO content to users who have verified accounts.
+  login_spiders_bad2: Creating an account on MO is a simple process.  It does require a valid email in order to get a verification link and that link must be visited before your account is considered verified.
+  login_spiders_bad3: We are committed to keeping all data contributed to Mushroom Observer freely and openly available. See "Why We Now Require a Login":https://mushroomobserver.org/articles/46 for more details.
 
   # account/logout
   logout_title: Logout
@@ -4001,7 +4005,7 @@
   runtime_removed_id_from: "Successfully removed [type] #[value] from [name]."
   runtime_removed_name: Successfully removed [type] '[value]'.
   runtime_removed_name_from: Successfully removed [type] '[value]' from [name].
-  runtime_spiders_begone: Spiders Begone!  Please login to access this page.
+  runtime_spiders_begone: Spiders Begone!  Please login (mushroomobserver.org/account/login/new) to access this page.
   runtime_updated_at: Successfully updated [type].
   runtime_updated_id: "Successfully updated [type] #[value]."
   runtime_updated_name: Successfully updated [type] '[value]'.

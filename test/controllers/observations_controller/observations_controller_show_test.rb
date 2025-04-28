@@ -31,6 +31,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
   end
 
   def test_show_observation_with_structured_notes
+    login
     obs = observations(:template_and_orphaned_notes_scrambled_obs)
     get(:show, params: { id: obs.id })
     assert_match("+photo", @response.body)
@@ -38,6 +39,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
   end
 
   def test_show_observation_with_simple_notes
+    login
     obs = observations(:coprinus_comatus_obs)
     get(:show, params: { id: obs.id })
     assert_match("<p>Notes:<br />", @response.body)
@@ -199,6 +201,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
   end
 
   def test_show_observation_nil_user
+    login
     obs = observations(:detailed_unknown_obs)
     obs.update(user: nil)
 

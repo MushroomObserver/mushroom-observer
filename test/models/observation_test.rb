@@ -1437,6 +1437,44 @@ class ObservationTest < UnitTestCase
     )
   end
 
+  def test_scope_in_box_with_taxon
+    args = { north: "36.2718",
+             south: "29.852",
+             east: "-82.92729999999999",
+             west: "-96.3512" }
+    obs = Observation.names(lookup: names(:coprinus)).in_box(**args)
+    assert_not(obs.count.negative?)
+  end
+
+  def test_scope_in_box_over_dateline_with_taxon
+    args = { north: "36.2718",
+             south: "29.852",
+             east: "-82.92729999999999",
+             west: "9.3512" }
+    obs = Observation.names(lookup: names(:coprinus)).in_box(**args)
+    assert_not(obs.count.negative?)
+  end
+
+  def test_scope_in_box_with_taxon_vague
+    args = { vague: 1,
+             north: "36.2718",
+             south: "29.852",
+             east: "-82.92729999999999",
+             west: "-96.3512" }
+    obs = Observation.names(lookup: names(:coprinus)).in_box(**args)
+    assert_not(obs.count.negative?)
+  end
+
+  def test_scope_in_box_over_dateline_with_taxon_vague
+    args = { vague: 1,
+             north: "36.2718",
+             south: "29.852",
+             east: "-82.92729999999999",
+             west: "9.3512" }
+    obs = Observation.names(lookup: names(:coprinus)).in_box(**args)
+    assert_not(obs.count.negative?)
+  end
+
   def test_scope_not_in_box
     obs_with_burbank_geoloc = observations(:unknown_with_lat_lng)
     obss_not_in_cal_box = Observation.not_in_box(**cal_box)
