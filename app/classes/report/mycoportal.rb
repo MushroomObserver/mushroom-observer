@@ -16,8 +16,7 @@ module Report
     # plus MO-specific fields that are useful for uploads to Symbiota portals
     def labels
       [
-        # "basisOfRecord", # : "HumanObservation",
-
+        "basisOfRecord", # : "HumanObservation",
         # scientificName joins sciname and scientificNameAuthorship.
         # We need to supply them separately
         "sciname",
@@ -54,6 +53,7 @@ module Report
 
     def format_row(row) # rubocop:disable Metrics/AbcSize
       [
+        "HumanObservation", # basisOfRecord
         # NOTE: email from Scott Bates 2025-04-24 12:25 PDT
         # We just need a species name (sciname) AND
         # authors (scientificNameAuthorship) fields,
