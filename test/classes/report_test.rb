@@ -582,8 +582,9 @@ class ReportTest < UnitTestCase
       locality: obs_where.split[-3]&.delete_suffix(",") || "",
       decimalLatitude: obs_location.center_lat.to_s,
       decimalLongitude: obs_location.center_lng.to_s,
-      minimumElevationInMeters: obs_location.low.to_i.to_s,
-      maximumElevationInMeters: obs_location.high.to_i.to_s,
+      # if low/high are nil, value must be empty string, not 0
+      minimumElevationInMeters: obs_location.low&.to_i.to_s,
+      maximumElevationInMeters: obs_location.high&.to_i.to_s,
       dateLastModified: "#{obs.updated_at.api_time} UTC",
       substrate: "",
       associatedTaxa: "",
