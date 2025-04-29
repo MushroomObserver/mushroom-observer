@@ -42,6 +42,7 @@ module Report
         "locality",
         "decimalLatitude",
         "decimalLongitude",
+        "coordinateUncertaintyInMeters",
         "minimumElevationInMeters",
         "maximumElevationInMeters",
         "dateLastModified",
@@ -82,6 +83,7 @@ module Report
         row.locality, # locality
         row.best_lat, # decimalLatitude
         row.best_lng, # decimalLongitude
+        lat_lng_uncertainty(row), # coordinateUncertaintyInMeters
         row.best_low, # minimumElevationInMeters
         row.best_high, # maximumElevationInMeters
         row.obs_updated_at, # dateLastModified
@@ -193,6 +195,14 @@ module Report
         # Example: `\r\n \r\n`
         gsub(/\s+/, " ").
         t.html_to_ascii
+    end
+
+    # coordinateUncertaintyInMeters
+    def lat_lng_uncertainty(row)
+      # If obs has lat/lng and isn't hidden, we don't know the uncertainty
+      return nil if row.best_lat.present? && !obs(row).gps_hidden?
+
+      # placehold
     end
 
     def image_urls(row)
