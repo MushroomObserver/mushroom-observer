@@ -200,9 +200,20 @@ module Report
     # coordinateUncertaintyInMeters
     def lat_lng_uncertainty(row)
       # If obs has lat/lng and isn't hidden, we don't know the uncertainty
-      return nil if row.best_lat.present? && !obs(row).gps_hidden?
+      return nil if row.obs_lat.present? && !obs(row).gps_hidden?
 
-      # placehold
+      if row.obs_lat
+        "placeholder for uncertainty" # TODO: add uncertainty to the report
+      else
+        distance_from_center_to_farthest_corner(row)
+      end
+    end
+
+    def distance_from_center_to_farthest_corner(row)
+      loc = obs(row).location
+      return nil if loc.blank?
+
+      distance_to_farthest_corner(loc.center_lat, loc.center_lng, loc)
     end
 
     def image_urls(row)
@@ -244,5 +255,36 @@ module Report
       add_collector_ids!(rows, 2)
       add_herbarium_accession_numbers!(rows, 3)
     end
+
+    ##########
+
+    private
+
+    def distance_to_farthest_corner(lat, lng, loc)
+      [
+        distance_to_ne_corner(lat, lng, loc),
+        distance_to_se_corner(lat, lng, loc),
+        distance_to_nw_corner(lat, lng, loc),
+        distance_to_sw_corner(lat, lng, loc)
+      ].max
+    end
+
+    def distance_to_ne_corner(lat, lng, loc)
+      Haversine.distance(lat, lng, loc.north, loc.east).to_meters.round
+    end
+
+    def distance_to_se_corner(lat, lng, loc)
+      Haversine.distance(lat, lng, loc.south, loc.east).to_meters.round
+    end
+
+    def distance_to_nw_corner(lat, lng, loc)
+      Haversine.distance(lat, lng, loc.north, loc.west).to_meters.round
+    end
+
+    def distance_to_sw_corner(lat, lng, loc)
+      Haversine.distance(lat, lng, loc.south, loc.west).to_meters.round
+    end
+
+
   end
 end

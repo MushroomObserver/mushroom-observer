@@ -554,10 +554,18 @@ class ReportTest < UnitTestCase
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
+  def test_mycoportal_coordinate_uncertainty_no_lat_lng
+    obs = observations(:minimal_unknown_obs)
+    expect = hashed_expect(obs).merge(
+    ).values
+
+    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
   def test_mycoportal_coordinate_uncertainty_lat_lng_public
     obs = observations(:falmouth_2022_obs)
 
-    # If obs has lat/lng & they are public,
+    # Obs has lat/lng & they are public,
     # We don't know coordinate uncertainty
     expect = hashed_expect(obs).merge(
       decimalLatitude: obs.lat.to_s,
@@ -568,23 +576,14 @@ class ReportTest < UnitTestCase
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
-  def test_mycoportal_coordinate_uncertainty_no_lat_lng
-    obs = observations(:minimal_unknown_obs)
-
-    expect = hashed_expect(obs).merge(
-      decimalLatitude: obs.lat.to_s,
-      decimalLongitude: obs.lng.to_s,
-      coordinateUncertaintyInMeters: obs.location.
-        distance_to_farthest_corner(obs.lat, obs.lng)
-    ).values
-
-    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
-  end
-
   def hashed_expect(obs)
     obs_location = obs.location
     obs_when = obs.when
     obs_where = obs.where
+    default_uncertainty = # for obss without lat/lng, in N hemisphere
+      Haversine.distance(obs_location.center_lat, obs_location.center_lng,
+                         obs_location.south, obs_location.east).
+      to_meters.round.to_s
     hsh = {
       basisOfRecord: "HumanObservation",
       catalogNumber: "MUOB #{obs.id}",
@@ -609,7 +608,7 @@ class ReportTest < UnitTestCase
       locality: obs_where.split[-3]&.delete_suffix(",") || "",
       decimalLatitude: obs_location.center_lat.to_s,
       decimalLongitude: obs_location.center_lng.to_s,
-      coordinateUncertaintyInMeters: "",
+      coordinateUncertaintyInMeters: default_uncertainty,
       # if low/high are nil, value must be empty string, not zero
       minimumElevationInMeters: obs_location.low&.to_i.to_s,
       maximumElevationInMeters: obs_location.high&.to_i.to_s,
