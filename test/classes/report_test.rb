@@ -568,6 +568,19 @@ class ReportTest < UnitTestCase
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
+  def test_mycoportal_coordinate_uncertainty_no_lat_lng
+    obs = observations(:minimal_unknown_obs)
+
+    expect = hashed_expect(obs).merge(
+      decimalLatitude: obs.lat.to_s,
+      decimalLongitude: obs.lng.to_s,
+      coordinateUncertaintyInMeters: obs.location.
+        distance_to_farthest_corner(obs.lat, obs.lng)
+    ).values
+
+    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
   def hashed_expect(obs)
     obs_location = obs.location
     obs_when = obs.when
