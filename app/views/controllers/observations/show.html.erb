@@ -19,7 +19,7 @@ show_lists = @user # && @observation.species_lists.any?
 obs_locals = { obs: @observation, consensus: @consensus, user: @user,
                sites: @other_sites }
 carousel_locals = {
-  object: @observation, images: @images, html_id: "observation_images",
+  object: @observation, images: @images, html_id: "observation_images", user: @user,
   title: :IMAGES.t, links: observation_show_image_links(obs: @observation)
 }
 %>
@@ -59,13 +59,18 @@ carousel_locals = {
     <%= @observation.source_credit.tpl if @observation.source_noteworthy? %>
   </div>
 
-  <div class="col-xs-12 col-md-4 col-lg-5 float-sm-right">
-    <% if show_map %>
-      <%= render(partial: "observations/show/thumbnail_map",
-                 locals: obs_locals) %>
-    <% end %>
-  </div>
+  <% if @user %>
+    <div class="col-xs-12 col-md-4 col-lg-5 float-sm-right">
+      <% if show_map %>
+        <%= render(partial: "observations/show/thumbnail_map",
+                   locals: obs_locals) %>
+      <% end %>
+    </div>
+  <% end %>
 </div>
 <!--.row-->
 
-<%= show_object_footer(@user, @observation) %>
+<% if @user %>
+  <%= show_object_footer(@user, @observation) %>
+<% end %>
+

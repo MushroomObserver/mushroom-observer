@@ -12,7 +12,7 @@ add_context_nav(info_site_stats_tabs)
       <% @observations[0,3].each do |obs| %>
         <div class="pb-1">
           <%= interactive_image(
-            obs.thumb_image, image_link: observation_path(obs.id), votes: true
+            @user, obs.thumb_image, image_link: observation_path(obs.id), votes: true
           ) %><br/>
           <br/>
         </div>

@@ -175,12 +175,12 @@ module ObservationsHelper
   # The following sections of the observation_details partial are also needed as
   # part of the lightbox caption, so that was called on the obs_index as a
   # sub-partial. Here they're converted to helpers to speed up loading of index
-  def observation_details_when_where_who(obs:)
+  def observation_details_when_where_who(obs:, user:)
     [
-      observation_details_when(obs: obs),
-      observation_details_where(obs: obs),
-      observation_details_where_gps(obs: obs),
-      observation_details_who(obs: obs)
+      observation_details_when(obs:),
+      observation_details_where(obs:, user:),
+      observation_details_where_gps(obs:, user:),
+      observation_details_who(obs:, user:)
     ].safe_join
   end
 
@@ -190,7 +190,7 @@ module ObservationsHelper
     end
   end
 
-  def observation_details_where(obs:)
+  def observation_details_where(obs:, user:)
     tag.p(class: "obs-where", id: "observation_where") do
       [
         "#{if obs.is_collection_location
@@ -198,7 +198,11 @@ module ObservationsHelper
            else
              :show_observation_seen_at.t
            end}:",
-        location_link(obs.where, obs.location, nil, true),
+        if user
+          location_link(obs.where, obs.location, nil, true)
+        else
+          obs.where
+        end,
         observation_where_vague_notice(obs: obs)
       ].safe_join(" ")
     end
@@ -214,8 +218,8 @@ module ObservationsHelper
     tag.p(class: "ml-3") { tag.em(title) }
   end
 
-  def observation_details_where_gps(obs:)
-    return "" unless obs.lat
+  def observation_details_where_gps(obs:, user:)
+    return "" unless obs.lat && user
 
     gps_display_link = link_to([obs.display_lat_lng.t,
                                 obs.display_alt.t,
@@ -230,13 +234,17 @@ module ObservationsHelper
     end
   end
 
-  def observation_details_who(obs:)
+  def observation_details_who(obs:, user:)
     obs_user = obs.user
     html = [
       "#{:WHO.t}:",
-      user_link(obs_user)
+      if user
+        user_link(obs_user)
+      else
+        obs_user.unique_text_name
+      end
     ]
-    if obs_user != User.current && !obs_user&.no_emails &&
+    if user && obs_user != User.current && !obs_user&.no_emails &&
        obs_user&.email_general_question
 
       html += [
