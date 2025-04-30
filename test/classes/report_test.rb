@@ -566,11 +566,31 @@ class ReportTest < UnitTestCase
     obs = observations(:falmouth_2022_obs)
 
     # Obs has lat/lng & they are public,
-    # We don't know coordinate uncertainty
+    # We don't know coordinate uncertainty; leave it blank.
     expect = hashed_expect(obs).merge(
       decimalLatitude: obs.lat.to_s,
       decimalLongitude: obs.lng.to_s,
       coordinateUncertaintyInMeters: ""
+    ).values
+
+    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_coordinate_uncertainty_lat_lng_hidden
+    obs = observations(:trusted_hidden)
+    loc = obs.location
+
+    # obs lat/lng is in the NE quadrant of loc; so SE corner is the furthest
+    uncertainty = Haversine.distance(obs.lat, obs.lng, loc.south, loc.west).
+                  to_meters.round.to_s
+
+    # public lat/lng is the loc center because obs coordinates are hidden.
+    expect = hashed_expect(obs).merge(
+      decimalLatitude: loc.center_lat.round(4).to_s,
+      decimalLongitude: loc.center_lng.round(4).to_s,
+      minimumElevationInMeters: obs.alt.to_s,
+      maximumElevationInMeters: obs.alt.to_s,
+      coordinateUncertaintyInMeters: uncertainty
     ).values
 
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)

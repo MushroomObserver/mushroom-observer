@@ -200,13 +200,19 @@ module Report
     # coordinateUncertaintyInMeters
     def lat_lng_uncertainty(row)
       # If obs has lat/lng and isn't hidden, we don't know the uncertainty
-      return nil if row.obs_lat.present? && !obs(row).gps_hidden?
+      return nil if obs(row).lat.present? && !obs(row).gps_hidden?
 
-      if row.obs_lat
-        "placeholder for uncertainty" # TODO: add uncertainty to the report
+      if obs(row).gps_hidden?
+        distance_from_obs_lat_lng_to_farthest_corner(row)
       else
         distance_from_center_to_farthest_corner(row)
       end
+    end
+
+    def distance_from_obs_lat_lng_to_farthest_corner(row)
+      obs = obs(row)
+      loc = obs.location
+      distance_to_farthest_corner(obs(row).lat, obs(row).lng, loc)
     end
 
     def distance_from_center_to_farthest_corner(row)
@@ -284,7 +290,5 @@ module Report
     def distance_to_sw_corner(lat, lng, loc)
       Haversine.distance(lat, lng, loc.south, loc.west).to_meters.round
     end
-
-
   end
 end
