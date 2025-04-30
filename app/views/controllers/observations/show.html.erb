@@ -1,6 +1,6 @@
 <%
 @owner_naming = owner_naming_line(@owner_name) # must before show_obs_title
-add_page_title(show_obs_title(obs: @observation, owner_naming: @owner_naming))
+add_page_title(show_obs_title(obs: @observation, owner_naming: @owner_naming, user: @user))
 add_owner_naming(@owner_naming)
 if @user
   add_pager_for(@observation)

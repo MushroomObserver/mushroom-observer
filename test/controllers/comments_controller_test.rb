@@ -111,7 +111,7 @@ class CommentsControllerTest < FunctionalTestCase
     # All Rolf's Comments are Observations, so the results should have
     # as many links to Observations as Rolf has Comments
     assert_select(
-      "#results a:match('href', ?)", %r{^/\d+}, # match links to observations
+      "#results a:match('href', ?)", %r{^/obs/\d+}, # match obs links
       { count: Comment.where(user: user).count },
       "Wrong number of links to Observations in results"
     )
