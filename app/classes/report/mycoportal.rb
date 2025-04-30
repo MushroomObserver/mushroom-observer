@@ -193,7 +193,8 @@ module Report
         t.html_to_ascii
     end
 
-    def coordinate_uncertainty(row) # coordinateUncertaintyInMeters
+    # coordinateUncertaintyInMeters
+    def coordinate_uncertainty(row)
       if obs(row).gps_hidden?
         distance_from_obs_lat_lng_to_farthest_corner(row)
       elsif obs(row).lat.present?

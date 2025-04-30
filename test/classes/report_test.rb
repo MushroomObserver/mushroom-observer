@@ -556,8 +556,7 @@ class ReportTest < UnitTestCase
 
   def test_mycoportal_coordinate_uncertainty_no_lat_lng
     obs = observations(:minimal_unknown_obs)
-    expect = hashed_expect(obs).merge(
-    ).values
+    expect = hashed_expect(obs).merge.values
 
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)
   end
