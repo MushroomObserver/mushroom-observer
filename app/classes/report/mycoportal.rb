@@ -20,22 +20,14 @@ module Report
       [
         "basisOfRecord", # : "HumanObservation",
         "catalogNumber", # "MUOB" + space + observation.id"
-        # scientificName joins sciname and scientificNameAuthorship.
-        # We need to supply them separately
         "sciname",
         "scientificNameAuthorship",
         "taxonRank",
-        # "genus",
-        # "specificEpithet",
-        "infraspecificEpithet",
         "identificationQualifier",
         "recordedBy",
         "recordNumber", # collection no. assigned to specimen by the collector
         "disposition", # controlled vocab: "vouchered" or nil
         "eventDate",
-        "year",
-        "month",
-        "day",
         "country",
         "stateProvince",
         "county",
@@ -59,24 +51,14 @@ module Report
       [
         "HumanObservation", # basisOfRecord
         "MUOB #{row.obs_id}", # catalogNumber
-        # NOTE: email from Scott Bates 2025-04-24 12:25 PDT
-        # We just need a species name (sciname) AND
-        # authors (scientificNameAuthorship) fields,
-        # the rest (e.g., family and genus etc.) is automatically generated
-        sciname(row), # sciname
+        sciname(row), # sciname (mono- or binomial without author)
         scientific_name_authorship(row), # scientificNameAuthorship
         row.name_rank, # taxonRank
-        # row.genus, # genus
-        # row.species, # specificEpithet
-        row.form_or_variety_or_subspecies, # infraspecificEpithet
         identification_qualifier(row), # identificationRemarks
         collector(row), # recordedBy
         number(row), # collectors number || "MUOB #{observation.id}", Cf. obs_id
         disposition(row), # disposition
         row.obs_when, # eventDate
-        row.year, # year
-        row.month, # month
-        row.day, # day
         row.country, # country
         row.state, # stateProvince
         row.county, # county
