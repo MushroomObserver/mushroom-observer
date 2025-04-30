@@ -83,7 +83,7 @@ module Report
         row.locality, # locality
         row.best_lat, # decimalLatitude
         row.best_lng, # decimalLongitude
-        lat_lng_uncertainty(row), # coordinateUncertaintyInMeters
+        coordinate_uncertainty(row), # coordinateUncertaintyInMeters
         row.best_low, # minimumElevationInMeters
         row.best_high, # maximumElevationInMeters
         row.obs_updated_at, # dateLastModified
@@ -125,10 +125,6 @@ module Report
       return "nom. prov." if obs(row).name.provisional?
 
       nil
-    end
-
-    def obs(row)
-      Observation.find(row.obs_id)
     end
 
     def collector(row)
@@ -197,29 +193,14 @@ module Report
         t.html_to_ascii
     end
 
-    # coordinateUncertaintyInMeters
-    def lat_lng_uncertainty(row)
-      # If obs has lat/lng and isn't hidden, we don't know the uncertainty
-      return nil if obs(row).lat.present? && !obs(row).gps_hidden?
-
+    def coordinate_uncertainty(row) # coordinateUncertaintyInMeters
       if obs(row).gps_hidden?
         distance_from_obs_lat_lng_to_farthest_corner(row)
+      elsif obs(row).lat.present?
+        nil
       else
         distance_from_center_to_farthest_corner(row)
       end
-    end
-
-    def distance_from_obs_lat_lng_to_farthest_corner(row)
-      obs = obs(row)
-      loc = obs.location
-      distance_to_farthest_corner(obs(row).lat, obs(row).lng, loc)
-    end
-
-    def distance_from_center_to_farthest_corner(row)
-      loc = obs(row).location
-      return nil if loc.blank?
-
-      distance_to_farthest_corner(loc.center_lat, loc.center_lng, loc)
     end
 
     def image_urls(row)
@@ -266,13 +247,30 @@ module Report
 
     private
 
+    def obs(row)
+      Observation.find(row.obs_id)
+    end
+
+    def distance_from_obs_lat_lng_to_farthest_corner(row)
+      obs = obs(row)
+      loc = obs.location
+      distance_to_farthest_corner(obs(row).lat, obs(row).lng, loc)
+    end
+
+    def distance_from_center_to_farthest_corner(row)
+      loc = obs(row).location
+      return nil if loc.blank?
+
+      distance_to_farthest_corner(loc.center_lat, loc.center_lng, loc)
+    end
+
     def distance_to_farthest_corner(lat, lng, loc)
       [
         distance_to_ne_corner(lat, lng, loc),
         distance_to_se_corner(lat, lng, loc),
         distance_to_nw_corner(lat, lng, loc),
         distance_to_sw_corner(lat, lng, loc)
-      ].max
+      ].max.to_s
     end
 
     def distance_to_ne_corner(lat, lng, loc)
