@@ -601,7 +601,7 @@ class ReportTest < UnitTestCase
       scientificNameAuthorship: obs.name.author,
       taxonRank: obs.name.rank,
       identificationQualifier: "",
-      recordedBy: obs.user.name,
+      recordedBy: obs.user.legal_name,
       recordNumber: obs.collection_numbers.first&.number || "",
       disposition: "",
       eventDate: obs_when.strftime("%Y-%m-%d"),

@@ -26,7 +26,7 @@ module Report
         "identificationQualifier",
         "recordedBy",
         "recordNumber", # collection no. assigned to specimen by the collector
-        "disposition", # controlled vocab: "vouchered" or nil
+        "disposition", # herbaria, "vouchered", or nil
         "eventDate",
         "country",
         "stateProvince",
@@ -42,7 +42,7 @@ module Report
         "associatedTaxa", # was "host"
         "occurrenceRemarks", # MO observation.notes; was fieldNotes
         "dbpk", # MCP-specific; MO observation.id; was "mushroomObserverId",
-        "verbatimAttributes", # was observationUrl
+        "verbatimAttributes", # anchored link to obs; was observationUrl
         "imageUrls" # not a Symbiota or MCP field;
       ]
     end
@@ -55,8 +55,8 @@ module Report
         scientific_name_authorship(row), # scientificNameAuthorship
         row.name_rank, # taxonRank
         identification_qualifier(row), # identificationRemarks
-        collector(row), # recordedBy
-        number(row), # collectors number || "MUOB #{observation.id}", Cf. obs_id
+        row.user_name_or_login, # recordedBy
+        lowest_collection_number(row), # recordNumber
         disposition(row), # disposition
         row.obs_when, # eventDate
         row.country, # country
@@ -124,19 +124,13 @@ module Report
       row.name_author&.match(/sensu.*/)&.[](0)
     end
 
-    def collector(row)
-      collector_and_number(row).first
-    end
-
-    def number(row)
-      collector_and_number(row).second
-    end
-
-    def collector_and_number(row)
-      if row.val(2).blank?
-        [row.user_name_or_login, ""]
+    def lowest_collection_number(row)
+      if collector_ids(row).blank?
+        ""
       else
-        row.val(2).split("\n").min_by(&:to_i).split("\t")[1..2]
+        collector_ids(row).split("\n").
+          min_by(&:to_i).
+          split("\t").last
       end
     end
 
@@ -202,7 +196,7 @@ module Report
     end
 
     def image_urls(row)
-      row.val(1).to_s.split(", ").sort_by(&:to_i).
+      image_ids(row).to_s.split(", ").sort_by(&:to_i).
         map { |id| image_url(id) }.join(" ")
     end
 
@@ -216,8 +210,8 @@ module Report
     def disposition(row)
       return nil unless row.obs_specimen
 
-      str = row.val(3).to_s.split("\n").map do |val|
-        # ignore accession number because our data is garbage
+      str = herbarium_accession_numbers(row).to_s.split("\n").map do |val|
+        # just herbaria; ignore accession number because our data is garbage
         val.split("\t").first
       end.join("; ")
       return str if str.present?
@@ -231,14 +225,31 @@ module Report
       "Original observation ##{row.obs_id} (Mushroom Observer)</a>"
     end
 
-    def sort_before(rows)
-      rows.sort_by(&:obs_id)
-    end
+    ####### Additional columns and utilities
 
+    # additional columns
+    # See app/classes/report/base_table.rb
     def extend_data!(rows)
       add_image_ids!(rows, 1)
       add_collector_ids!(rows, 2)
       add_herbarium_accession_numbers!(rows, 3)
+    end
+
+    # wrap magic number
+    def image_ids(row)
+      row.val(1)
+    end
+
+    def collector_ids(row)
+      row.val(2)
+    end
+
+    def herbarium_accession_numbers(row)
+      row.val(3)
+    end
+
+    def sort_before(rows)
+      rows.sort_by(&:obs_id)
     end
 
     ##########
