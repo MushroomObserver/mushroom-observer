@@ -493,8 +493,7 @@ class ReportTest < UnitTestCase
       text_name: "Geoglossum sp. 'MI01'",
       author: "",
       search_name: "Geoglossum sp. 'MI01'",
-      display_name: "**__Geoglossum__** sp. **__'MI01'__**",
-      sort_name: "Geoglossum mi01"
+      display_name: "**__Geoglossum__** sp. **__'MI01'__**"
     )
     location = locations(:burbank)
     obs = Observation.create!(user: rolf, when: Time.zone.now,
@@ -516,8 +515,7 @@ class ReportTest < UnitTestCase
       text_name: "Gymnopus bakerensis",
       author: "(A.H. Sm.) auct. comb. prov.",
       search_name: "Gymnopus bakerensis (A.H. Sm.) auct. comb. prov.",
-      display_name: "__Gymnopus__ __bakerensis__ (A.H. Sm.) auct. comb. prov.",
-      sort_name: "Gymnopus bakerensis  (A.H. Sm.) auct. comb. prov."
+      display_name: "__Gymnopus__ __bakerensis__ (A.H. Sm.) auct. comb. prov."
     )
     location = locations(:burbank)
     obs = Observation.create!(user: rolf, when: Time.zone.now,
@@ -532,22 +530,15 @@ class ReportTest < UnitTestCase
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
-  def test_mycoportal_identification_qualifier_sensu
-    name = Name.create!(
-      user: rolf,
-      rank: "Genus",
-      text_name: "Mycena",
-      author: "sensu lato",
-      search_name: "Mycena sensu lato",
-      display_name: "**__Mycena__** sensu lato",
-      sort_name: "Mycena  sensu lato"
-    )
+  def test_mycoportal_identification_qualifier_sensu_non_stricto
+    name = names(:coprinus_sensu_lato)
     location = locations(:burbank)
     obs = Observation.create!(user: rolf, when: Time.zone.now,
                               location: location, where: location.name,
                               name: name)
 
     expect = hashed_expect(obs).merge(
+      scientificNameAuthorship: names(:coprinus).author,
       identificationQualifier: "sensu lato"
     ).values
 

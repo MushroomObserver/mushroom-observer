@@ -92,19 +92,31 @@ module Report
 
     def scientific_name_authorship(row)
       if row.name_rank == "Group"
-        binomial = text_name_without_last_word(row.name_text_name)
-        Name.find_by(text_name: binomial).try(:author)
+        # For groups, MO appends Group, Complex, etc. to the text_name
+        # Remove the last word from the text_name to get the binomial
+        mono_or_binomial = text_name_without_last_word(row.name_text_name)
+        # return the author of the non-group name
+        Name.find_by(text_name: mono_or_binomial).try(:author)
+      elsif /sensu.*/.match?(row.name_author)
+        name_without_sensu =
+          Name.where(text_name: row.name_text_name).
+          where.not(Name[:author] =~ /sensu/).first
+        name_without_sensu.try(:author)
       else
         row.name_author
       end
     end
 
     def identification_qualifier(row)
-      match = row.name_author&.match(/(sensu.*)/)
-      return match[1] if match
-
       return "group" if row.name_rank == "Group"
       return "nom. prov." if obs(row).name.provisional?
+
+      author = row.name_author
+      return "" if author.blank?
+      return "" if author.match?(/sensu stricto/)
+
+      match = row.name_author&.match(/(sensu.*)/)
+      return match[1] if match
 
       nil
     end
