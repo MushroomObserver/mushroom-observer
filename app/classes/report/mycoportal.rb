@@ -90,6 +90,14 @@ module Report
       text_name.split[0...-1].join(" ")
     end
 
+    # For MO Group or sensu x names, MCP wants:
+    # sciname: valid, unqualified name
+    # scientificNameAuthorship: author of valid, unqualified name
+    # plus an identification qualifier. Example:
+    # MO text_name: Agaricales sensu lato
+    # MCP sciname: Agaricales
+    # MCP scientificNameAuthorship: Underw.
+    # MCP identificationQualifier: sensu lato
     def scientific_name_authorship(row)
       if row.name_rank == "Group"
         # For groups, MO appends Group, Complex, etc. to the text_name
@@ -108,17 +116,12 @@ module Report
     end
 
     def identification_qualifier(row)
+      return nil unless qualified_name?(row)
+
       return "group" if row.name_rank == "Group"
       return "nom. prov." if obs(row).name.provisional?
 
-      author = row.name_author
-      return "" if author.blank?
-      return "" if author.match?(/sensu stricto/)
-
-      match = row.name_author&.match(/(sensu.*)/)
-      return match[1] if match
-
-      nil
+      row.name_author&.match(/sensu.*/)&.[](0)
     end
 
     def collector(row)
@@ -244,6 +247,17 @@ module Report
 
     def obs(row)
       Observation.find(row.obs_id)
+    end
+
+    def qualified_name?(row)
+      row.name_rank == "Group" ||
+        sensu_non_stricto?(row) ||
+        obs(row).name.provisional?
+    end
+
+    def sensu_non_stricto?(row)
+      row.name_author.present? &&
+        row.name_author.match(/sensu(?!.*stricto)/)
     end
 
     def distance_from_obs_lat_lng_to_farthest_corner(row)
