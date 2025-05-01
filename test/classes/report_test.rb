@@ -602,7 +602,7 @@ class ReportTest < UnitTestCase
       taxonRank: obs.name.rank,
       identificationQualifier: "",
       recordedBy: obs.user.name,
-      recordNumber: obs.collection_numbers.first&.number || "MUOB #{obs.id}",
+      recordNumber: obs.collection_numbers.first&.number || "",
       disposition: "",
       eventDate: obs_when.strftime("%Y-%m-%d"),
       # where is assumed to have just city, state/province, country
