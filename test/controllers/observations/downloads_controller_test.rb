@@ -177,6 +177,16 @@ module Observations
       )
       assert_no_flash
       assert_response(:success)
+
+      format = "nonexistent"
+      assert_raises("Invalid download type: #{format}") do
+        post(:create,
+             params: {
+               q: query.id.alphabetize,
+               format: format,
+               commit: "Download"
+             })
+      end
     end
 
     def test_download_too_many_observations
