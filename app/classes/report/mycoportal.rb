@@ -157,33 +157,6 @@ module Report
       explode_notes(row)[:other]
     end
 
-    def explode_notes(row)
-      notes = row.obs_notes_as_hash || {}
-      {
-        substrate: extract_notes_field(notes, :Substrate),
-        host: extract_notes_field(notes, :Host),
-        trees_shrubs: extract_notes_field(notes, FieldSlip::TREES_SHRUBS),
-        other: export_other_notes(notes)
-      }
-    end
-
-    def extract_notes_field(notes, field)
-      clean_notes(notes.delete(field).to_s)
-    end
-
-    def export_other_notes(notes)
-      clean_notes(Observation.export_formatted(notes))
-    end
-
-    def clean_notes(str)
-      str.strip.
-        # Compress consecutive whitespaces before (not after) Textilizing
-        # because some whitespace combinations can confuse Textile
-        # Example: `\r\n \r\n`
-        gsub(/\s+/, " ").
-        t.html_to_ascii
-    end
-
     # coordinateUncertaintyInMeters
     def coordinate_uncertainty(row)
       if obs(row).gps_hidden?
@@ -307,6 +280,36 @@ module Report
 
     def distance_to_sw_corner(lat, lng, loc)
       Haversine.distance(lat, lng, loc.south, loc.west).to_meters.round
+    end
+
+    def explode_notes(row)
+      notes = row.obs_notes_as_hash || {}
+      {
+        substrate: extract_notes_field(notes, :Substrate),
+        host: extract_notes_field(notes, :Host),
+        trees_shrubs: extract_notes_field(notes, FieldSlip::TREES_SHRUBS),
+        other: export_other_notes(notes)
+      }
+    end
+
+    def extract_notes_field(notes, field)
+      clean_notes(notes.delete(field).to_s)
+    end
+
+    def export_other_notes(notes)
+      clean_notes(Observation.export_formatted(notes))
+    end
+
+    def clean_notes(str)
+      str.strip.
+        # Compress consecutive whitespaces before (not after) Textilizing
+        # because some whitespace combinations can confuse Textile
+        # Example: `\r\n \r\n`
+        gsub(/\s+/, " ").
+
+        # gsub("??", ""). # Remove Textile italics markup
+
+        t.html_to_ascii
     end
   end
 end
