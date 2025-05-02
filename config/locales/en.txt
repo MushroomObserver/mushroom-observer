@@ -492,6 +492,7 @@
   confidence_level: confidence level
   CONFIDENCE_LEVELS: Confidence Levels
   confidence_levels: confidence levels
+  CONNECTED_TO: Connected to
   CONSENSUS: Consensus
   CONSTRAINT_VIOLATIONS: Constraint Violations
   constraint_violations: constraint violations
@@ -513,6 +514,8 @@
   # deposit of Sequence Bases in an Archive
   DEPOSIT: Deposit
   deposit: deposit
+  DETAIL: Detail
+  detail: detail
   # DQA is iNat-ese for Data Quality Assessment
   DQA: Quality Grade
   EDITOR: Editor
@@ -617,6 +620,8 @@
   reviewer: reviewer
   REVIEWERS: Reviewers
   reviewers: reviewers
+  SCOPE: Scope
+  scope: scope
   SECONDS: Seconds
   SIZE: Size
   size: size
@@ -749,6 +754,8 @@
   OKAY: Okay
   okay: okay
   OPEN: Open
+  pattern: pattern
+  PATTERN: Pattern
   # reload a form
   RELOAD: Reload
   reload: reload
@@ -905,6 +912,8 @@
   "NO": "No"
   "yes": "yes"
   "no": "no"
+  TO: To
+  to: to
 
   ##############################################################################
 
@@ -1198,6 +1207,15 @@
   search_term_south: south
   search_term_user: user
   search_term_west: west
+  search_term_group_pattern: "[:PATTERN]"
+  search_term_group_search: "[:SEARCH]"
+  search_term_group_date: "[:DATE]"
+  search_term_group_quality: "[:QUALITY]"
+  search_term_group_scope: "[:SCOPE]"
+  search_term_group_detail: "[:DETAIL]"
+  search_term_group_name: "[:NAME]"
+  search_term_group_location: "[:LOCATION]"
+  search_term_group_connected: "[:CONNECTED_TO]"
 
   # Words recognized in search bar.
   # e.g. "user:me"
@@ -2302,7 +2320,7 @@
   show_observation_site_id: Site ID
   show_observation_owner_id: Observer Preference
   show_observation_no_clear_preference: no clear preference
-  show_observation_details: Details
+  show_observation_details: "[:DETAIL]"
   show_observation_details_inat_import: Imported [date] from
   show_observation_details_inat_export: Copied to iNaturalist as
   show_observation_inat_lat_lng: Public lat/lng
@@ -3709,6 +3727,7 @@
 
   # Search bar help
   pattern_search_terms_help: "Your search string may contain terms of the form \"variable:value\", where value can be quoted, and in some cases can contain more than one value separated by commas.  Recognized variables include:"
+  pattern_search_terms_multiple: Separate multiple values with commas.
 
   observation_term_when: Date mushroom was observed; YYYY-MM-DD, YYYY or MM; ranges okay.
   observation_term_created: Date observation was first posted.
@@ -3722,7 +3741,7 @@
   observation_term_location: "Location (\"[:WHERE]\") mushroom was observed. Must exactly match the entire [:WHERE] field. Note that commas must be protected with a back-slash: \"Albion\\, California\\, USA\"."
   observation_term_region: Location mushroom was observed. Partial match anchored at end, including country at least, e.g., "California\, USA". Note that commas must be protected with a back-slash as shown.
   observation_term_project: Observation belongs to one of these projects.
-  observation_term_project_lists: Observation belongs to list in one of these projects.
+  observation_term_project_lists: Observation belongs to a species list in one of these projects.
   observation_term_list: Observation belongs to one of these species lists.
   observation_term_user: Observation created by one of these users.
   observation_term_notes: Notes contains the given string.
@@ -3744,6 +3763,7 @@
   observation_term_has_comments: Has any comments?
   observation_term_is_collection_location: Mushroom was growing at the location. ("[:form_observations_is_collection_location]" is checked.)
 
+  name_term_pattern: "[:PATTERN]"
   name_term_created: Date name was first used.
   name_term_modified: Date name was last modified.
   name_term_rank: Rank or range of ranks, e.g., "genus" or "species-form".
