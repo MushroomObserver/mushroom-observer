@@ -22,7 +22,13 @@ target_type = tag.span(target.class.name.to_sym.t, class: "small") \
         concat(tag.div(comment.summary.tl, class: "font-weight-bold"))
         concat(tag.div(class: "comment-info") do
           concat(tag.span(class: "comment-author text-nowrap") do
-            ["#{:BY.t}: ", user_link(user), " "].safe_join
+            ["#{:BY.t}: ",
+             if controls
+               user_link(user)
+             else
+               user.unique_text_name
+             end,
+             " "].safe_join
           end)
           concat(tag.span(class: "text-nowrap",
                           data: { user_specific: comment.user.id }) do
