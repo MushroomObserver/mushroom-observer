@@ -421,6 +421,16 @@ class ReportTest < UnitTestCase
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
+  def test_mycoportal_sequence
+    obs = observations(:locally_sequenced_obs)
+    expect = hashed_expect(obs).merge(
+      occurrenceRemarks: "Sequenced; ",
+      locality: "North Falmouth, 68 Bay Rd., MO Inc."
+    ).values
+
+    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
   def test_mycoportal_agaricus_campestrus_obs
     obs = observations(:agaricus_campestrus_obs)
     expect = hashed_expect(obs).merge(

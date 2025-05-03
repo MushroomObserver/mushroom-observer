@@ -129,7 +129,9 @@ module Report
     end
 
     def occurence_remarks(row)
-      explode_notes(row)[:other]
+      return explode_notes(row)[:other] unless obs(row).sequences.any?
+
+      "Sequenced; #{explode_notes(row)[:other]}"
     end
 
     # https://github.com/BioKIC/symbiota-docs/issues/36#issuecomment-1015733243
