@@ -84,28 +84,21 @@ module Report
       text_name
     end
 
-    # For MO Group or sensu x names, MCP wants:
-    # sciname: valid, unqualified name
-    # scientificNameAuthorship: author of valid, unqualified name
-    # plus an identification qualifier. Example:
-    # MO text_name: Agaricales sensu lato
-    # MCP sciname: Agaricales
-    # MCP scientificNameAuthorship: Underw.
-    # MCP identificationQualifier: sensu lato
     def scientific_name_authorship(row)
-      if row.name_rank == "Group"
-        # For groups, MO appends Group, Complex, etc. to the text_name
-        # Remove the last word from the text_name to get the binomial
-        mono_or_binomial = text_name_without_last_word(row.name_text_name)
-        # return the author of the non-group name
-        Name.find_by(text_name: mono_or_binomial).try(:author)
-      elsif /sensu.*/.match?(row.name_author)
-        name_without_sensu =
-          Name.where(text_name: row.name_text_name).
-          where.not(Name[:author] =~ /sensu/).first
-        name_without_sensu.try(:author)
-      elsif obs(row).name.provisional?
-        ""
+      if qualified_name?(row)
+        if obs(row).name.provisional?
+          ""
+        else
+          # For MO Group or sensu x names, MCP wants:
+          # sciname: valid, unqualified name
+          # scientificNameAuthorship: author of valid, unqualified name
+          # plus an identification qualifier. Example:
+          # MO text_name: Agaricales sensu lato
+          # MCP sciname: Agaricales
+          # MCP scientificNameAuthorship: Underw.
+          # MCP identificationQualifier: sensu lato
+          unqualified_name(row).try(:author)
+        end
       else
         row.name_author
       end
@@ -236,6 +229,23 @@ module Report
     def sensu_non_stricto?(row)
       row.name_author.present? &&
         row.name_author.match(/sensu(?!.*stricto)/)
+    end
+
+    def unqualified_name(row)
+      if row.name_rank == "Group"
+        # For groups, MO appends Group, Complex, etc. to the text_name
+        # Remove the last word from the text_name to get the binomial
+        mono_or_binomial = text_name_without_last_word(row.name_text_name)
+        # return the author of the non-group name
+        Name.find_by(text_name: mono_or_binomial)
+      else
+        # For name sensu xxx (the other kind of qualified name with an author)
+        # Return the first un-deprecated non-sensu matching name
+        Name.where(text_name: row.name_text_name).
+          where.not(Name[:author] =~ /sensu/).
+          order(deprecated: :asc).
+          first
+      end
     end
 
     def provisional_identification_qualifier(row)
