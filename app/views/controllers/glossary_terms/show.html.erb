@@ -34,7 +34,8 @@ add_context_nav(glossary_term_show_tabs(term: @glossary_term, user: @user))
   <% @other_images.each do |image|  %>
     <div class="col-sm-4">
       <%= panel_block do
-        interactive_image(image, votes: true, id_prefix: "glossary_term_image")
+        interactive_image(@user, image, votes: true,
+                          id_prefix: "glossary_term_image")
       end %>
     </div>
   <% end %>
