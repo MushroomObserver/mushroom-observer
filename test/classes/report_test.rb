@@ -599,7 +599,6 @@ class ReportTest < UnitTestCase
       basisOfRecord: "HumanObservation",
       catalogNumber: "MUOB #{obs.id}",
       sciname: obs.text_name,
-      taxonRank: obs.name.rank,
       scientificNameAuthorship: obs.name.author,
       identificationQualifier: "",
       recordedBy: obs.user.legal_name,

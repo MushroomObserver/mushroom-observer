@@ -22,7 +22,6 @@ module Report
         "basisOfRecord", # : "HumanObservation",
         "catalogNumber", # "MUOB" + space + observation.id"
         "sciname",
-        "taxonRank",
         "scientificNameAuthorship",
         "identificationQualifier",
         "recordedBy",
@@ -53,7 +52,6 @@ module Report
         "HumanObservation", # basisOfRecord
         "MUOB #{row.obs_id}", # catalogNumber
         sciname(row), # (mono- or binomial without author)
-        row.name_rank, # taxonRank
         scientific_name_authorship(row),
         identification_qualifier(row), # group, nom. prov., etc.
         row.user_name_or_login, # recordedBy
