@@ -23,7 +23,7 @@ target_type = tag.span(target.class.name.to_sym.t, class: "small") \
         concat(tag.div(class: "comment-info") do
           concat(tag.span(class: "comment-author text-nowrap") do
             ["#{:BY.t}: ",
-             if controls
+             if defined?(controls) && controls
                user_link(user)
              else
                user.unique_text_name
