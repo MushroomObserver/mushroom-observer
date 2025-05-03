@@ -15,7 +15,12 @@ class ObservationsControllerShowTest < FunctionalTestCase
     obs = observations(:deprecated_name_obs)
     get(:show, params: { id: obs.id })
     assert_response(:success)
-    assert_not(@response.body.include?("flow=next"))
+  end
+
+  def test_show_no_login_with_flow
+    obs = observations(:deprecated_name_obs)
+    get(:show, params: { id: obs.id, flow: "next" })
+    assert_response(:redirect)
   end
 
   def test_show_login
