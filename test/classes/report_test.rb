@@ -621,7 +621,7 @@ class ReportTest < UnitTestCase
       minimumElevationInMeters: obs_location.low&.to_i.to_s,
       maximumElevationInMeters: obs_location.high&.to_i.to_s,
       disposition: "",
-      dateLastModified: "#{obs.updated_at.api_time} UTC",
+      dateLastModified: "#{obs.updated_at.api_time} UTC"
     }
     # Include this key/value only if there are images.
     hsh[:imageUrls] = expected_image_urls(obs) if obs.images.any?
