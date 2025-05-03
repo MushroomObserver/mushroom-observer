@@ -20,8 +20,7 @@ module ObservationsController::Show
   #   @other_sites
   #   @votes
   def show
-    return if check_for_spider_block
-
+    check_for_spider_block(request, params)
     pass_query_params
     store_location
     if params[:flow].present?

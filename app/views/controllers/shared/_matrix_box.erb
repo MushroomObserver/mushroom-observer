@@ -35,7 +35,7 @@ if presenter
         *header_components,
         tag.div(class: "panel-sizing") do
           [
-            matrix_box_image(image, **image_args),
+            matrix_box_image(@user, image, **image_args),
             matrix_box_details(presenter, object_id, identify),
           ].safe_join
         end,

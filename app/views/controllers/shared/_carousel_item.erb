@@ -1,4 +1,4 @@
-<%# locals: (image: nil, object: nil, size: :large, index: "") -%>
+<%# locals: (image: nil, object: nil, size: :large, index: "", user: nil) -%>
 
 <%=
 # Caption needs object for copyright info. Very expensive.
@@ -10,11 +10,11 @@ active = index == 0 ? "active" : ""
 tag.div(id: "carousel_item_#{image.id}",
         class: class_names("item carousel-item", active)) do
   concat(image_tag(presenter.img_src, presenter.options_lazy))
-  if presenter.image_link
+  if user && presenter.image_link
     concat(image_stretched_link(presenter.image_link,
                                 presenter.image_link_method))
   end
-  concat(lightbox_link(presenter.lightbox_data))
+  concat(lightbox_link(user, presenter.lightbox_data))
   concat(carousel_caption(image, object, presenter))
 end
 %>

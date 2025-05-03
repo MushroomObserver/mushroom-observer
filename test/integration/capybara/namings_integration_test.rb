@@ -36,7 +36,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
       "form[action*='/observations/#{obs.id}/namings']"
     )
     # (Make sure there is a tab to go back to observations/show.)
-    assert_true(namer_session.has_link?(href: "/#{obs.id}"))
+    assert_true(namer_session.has_link?(href: "/obs/#{obs.id}"))
 
     namer_session.within("#obs_#{obs.id}_naming_form") do |form|
       assert_true(form.has_field?("naming_name", text: ""))

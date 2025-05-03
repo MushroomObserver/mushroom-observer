@@ -11,10 +11,26 @@ class ObservationsControllerShowTest < FunctionalTestCase
   #  General tests.
   # ----------------------------
 
+  def test_show_no_login
+    obs = observations(:deprecated_name_obs)
+    get(:show, params: { id: obs.id })
+    assert_response(:success)
+    assert_not(@response.body.include?("flow=next"))
+  end
+
+  def test_show_login
+    login
+    obs = observations(:deprecated_name_obs)
+    get(:show, params: { id: obs.id })
+    assert_response(:success)
+    assert(@response.body.include?("flow=next"))
+  end
+
   # Test load a deprecated name obs, no strict_loading error
   def test_show_observation_deprecated_name
     obs = observations(:deprecated_name_obs)
     get(:show, params: { id: obs.id })
+    assert_response(:success)
   end
 
   def test_show_observation_noteless_image
@@ -23,11 +39,13 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_nil(img.notes)
     assert(obs.images.member?(img))
     get(:show, params: { id: obs.id })
+    assert_response(:success)
   end
 
   def test_show_observation_noteful_image
     obs = observations(:detailed_unknown_obs)
     get(:show, params: { id: obs.id })
+    assert_response(:success)
   end
 
   def test_show_observation_with_structured_notes

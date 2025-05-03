@@ -18,7 +18,7 @@ module ImagesHelper
   #   notes::            Show image notes??
   #
   # USE: interactive_image( image, args = { notes: "", extra_classes: "" } )
-  def interactive_image(image, **args)
+  def interactive_image(user, image, **args)
     # Caption needs object for copyright info
     presenter = ImagePresenter.new(image, args)
     set_width = presenter.width.present? ? "width: #{presenter.width}px;" : ""
@@ -39,7 +39,7 @@ module ImagesHelper
           end,
           image_stretched_link(presenter.image_link,
                                presenter.image_link_method),
-          lightbox_link(presenter.lightbox_data),
+          lightbox_link(user, presenter.lightbox_data),
           image_vote_section_html(presenter.image, presenter.votes)
         ].safe_join
       end,
