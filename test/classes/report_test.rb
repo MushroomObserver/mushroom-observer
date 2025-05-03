@@ -608,7 +608,7 @@ class ReportTest < UnitTestCase
       substrate: "",
       occurrenceRemarks: obs.notes[:Other] || "",
       associatedTaxa: "",
-      verbatimAttributes: observation_link(obs),
+      verbatimAttributes: verbatim_atttributes(obs),
       # where is assumed to have just city, state/province, country
       country: obs_where.split.last,
       stateProvince: obs_where.split[-2]&.delete_suffix(",") || "",
@@ -628,7 +628,7 @@ class ReportTest < UnitTestCase
     hsh
   end
 
-  def observation_link(obs)
+  def verbatim_atttributes(obs)
     "<a href='https://mushroomobserver.org/#{obs.id}' " \
     "target='_blank' style='color: blue;'>" \
     "Original observation ##{obs.id} (Mushroom Observer)" \

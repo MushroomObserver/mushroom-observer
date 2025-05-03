@@ -52,17 +52,17 @@ module Report
         row.obs_id, # MCP `dpk`; catalogNumber = "MUOB #{observation.id}"
         "HumanObservation", # basisOfRecord
         "MUOB #{row.obs_id}", # catalogNumber
-        sciname(row), # sciname (mono- or binomial without author)
+        sciname(row), # (mono- or binomial without author)
         row.name_rank, # taxonRank
-        scientific_name_authorship(row), # scientificNameAuthorship
-        identification_qualifier(row), # identificationRemarks
+        scientific_name_authorship(row),
+        identification_qualifier(row), # group, nom. prov., etc.
         row.user_name_or_login, # recordedBy
-        lowest_collection_number(row), # recordNumber
+        record_number(row), # recordNumber
         row.obs_when, # eventDate
         substrate(row),
         occurence_remarks(row), # notes minus substrate and associatedTaxa
         associated_taxa(row), # was`host`
-        observation_link(row), # verbatimAttributes link to MO observation url
+        verbatim_atttributes(row), # anchored link to MO observation url
         row.country, # country
         row.state, # stateProvince
         row.county, # county
@@ -120,7 +120,7 @@ module Report
       row.name_author&.match(/sensu.*/)&.[](0)
     end
 
-    def lowest_collection_number(row)
+    def record_number(row)
       if collector_ids(row).blank?
         ""
       else
@@ -153,7 +153,7 @@ module Report
       "#{trees_shrubs}; #{associates}"
     end
 
-    def observation_link(row)
+    def verbatim_atttributes(row)
       "<a href='#{row.obs_url}' " \
       "target='_blank' style='color: blue;'>" \
       "Original observation ##{row.obs_id} (Mushroom Observer)</a>"
