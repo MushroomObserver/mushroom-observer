@@ -470,7 +470,7 @@ class ReportTest < UnitTestCase
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
-  def test_mycoportal_identification_qualifier_group
+  def test_mycoportal_group
     location = locations(:burbank)
     name = names(:boletus_edulis_group)
     obs = Observation.create!(user: rolf, when: Time.zone.now,
@@ -486,7 +486,40 @@ class ReportTest < UnitTestCase
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
-  def test_mycoportal_identification_qualifier_standard_provisional
+  def test_mycoportal_group_sensu
+    name = Name.create!(
+      user: rolf,
+      rank: "Group",
+      text_name: "Tricholoma caligatum group",
+      author: "sensu Besette et al.",
+      search_name: "Tricholoma caligatum group sensu Besette et al.",
+      display_name: "**__Tricholoma__** **__caligatum__** group " \
+                    "sensu Besette et al."
+    )
+    unqualified_name = Name.create!(
+      user: rolf,
+      rank: "Species",
+      text_name: "Tricholoma caligatum",
+      author: "(Viv.) Ricken",
+      search_name: "Tricholoma caligatum (Viv.) Ricken",
+      display_name: "**__Tricholoma__** **__caligatum__** (Viv.) Ricken"
+    )
+
+    location = locations(:burbank)
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: location, where: location.name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: unqualified_name.text_name,
+      scientificNameAuthorship: unqualified_name.author,
+      identificationQualifier: "group sensu Besette et al."
+    ).values
+
+    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_standard_provisional
     name = Name.create!(
       user: rolf,
       rank: "Species",
@@ -508,7 +541,7 @@ class ReportTest < UnitTestCase
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
-  def test_mycoportal_identification_qualifier_explicit_provisional
+  def test_mycoportal_explicit_provisional
     name = Name.create!(
       user: rolf,
       rank: "Species",
@@ -524,7 +557,32 @@ class ReportTest < UnitTestCase
 
     expect = hashed_expect(obs).merge(
       sciname: "Gymnopus bakerensis",
-      identificationQualifier: "nom. prov."
+      scientificNameAuthorship: "",
+      identificationQualifier: "(A.H. Sm.) auct. comb. prov."
+    ).values
+
+    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_standard_provisional_crypt
+    name = Name.create!(
+      user: rolf,
+      rank: "Species",
+      text_name: "Agaricus sp. 'IN01'",
+      author: "S.D. Russell crypt. temp.",
+      search_name: "Agaricus sp. 'IN01' S.D. Russell crypt. temp.",
+      display_name: "**__Agaricus__** sp. **__'IN01'__** " \
+                    "S.D. Russell crypt. temp."
+    )
+    location = locations(:burbank)
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: location, where: location.name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Agaricus sp. 'IN01'",
+      scientificNameAuthorship: "",
+      identificationQualifier: "S.D. Russell crypt. temp."
     ).values
 
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)

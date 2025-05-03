@@ -104,6 +104,8 @@ module Report
           Name.where(text_name: row.name_text_name).
           where.not(Name[:author] =~ /sensu/).first
         name_without_sensu.try(:author)
+      elsif obs(row).name.provisional?
+        ""
       else
         row.name_author
       end
@@ -111,9 +113,10 @@ module Report
 
     def identification_qualifier(row)
       return nil unless qualified_name?(row)
-
-      return "group" if row.name_rank == "Group"
-      return "nom. prov." if obs(row).name.provisional?
+      return "group #{row.name_author}".strip if row.name_rank == "Group"
+      if obs(row).name.provisional?
+        return provisional_identification_qualifier(row)
+      end
 
       row.name_author&.match(/sensu.*/)&.[](0)
     end
@@ -233,6 +236,16 @@ module Report
     def sensu_non_stricto?(row)
       row.name_author.present? &&
         row.name_author.match(/sensu(?!.*stricto)/)
+    end
+
+    def provisional_identification_qualifier(row)
+      return "nom. prov." if row.name_author.blank?
+
+      if row.name_author&.match(/(prov|crypt)\./)
+        row.name_author
+      else
+        "#{row.name_author} nom.prov."
+      end
     end
 
     def distance_from_obs_lat_lng_to_farthest_corner(row)
