@@ -129,6 +129,16 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     end
   end
 
+  def test_old_observation_path_not_logged_in
+    visit(observation_path(Observation.first.id))
+    assert_equal(403, page.status_code) # forbidden
+  end
+
+  def test_raw_id_path_not_logged_in
+    visit("/#{Observation.first.id}")
+    assert_equal(403, page.status_code) # forbidden
+  end
+
   def test_locales_when_sending_email_question
     sender = users(:rolf)
     receiver = users(:mary)
