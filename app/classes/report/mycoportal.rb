@@ -18,16 +18,20 @@ module Report
     # MyCoPortal fills in other fields automatically.
     def labels
       [
+        "dbpk", # MCP-specific; MO observation.id; was "mushroomObserverId",
         "basisOfRecord", # : "HumanObservation",
         "catalogNumber", # "MUOB" + space + observation.id"
         "sciname",
-        "scientificNameAuthorship",
         "taxonRank",
+        "scientificNameAuthorship",
         "identificationQualifier",
         "recordedBy",
         "recordNumber", # collection no. assigned to specimen by the collector
-        "disposition", # herbaria, "vouchered", or nil
         "eventDate",
+        "substrate",
+        "occurrenceRemarks", # MO observation.notes; was fieldNotes
+        "associatedTaxa", # was "host"
+        "verbatimAttributes", # anchored link to obs; was observationUrl
         "country",
         "stateProvince",
         "county",
@@ -37,28 +41,28 @@ module Report
         "coordinateUncertaintyInMeters",
         "minimumElevationInMeters",
         "maximumElevationInMeters",
+        "disposition", # herbaria, "vouchered", or nil
         "dateLastModified",
-        "substrate",
-        "associatedTaxa", # was "host"
-        "occurrenceRemarks", # MO observation.notes; was fieldNotes
-        "dbpk", # MCP-specific; MO observation.id; was "mushroomObserverId",
-        "verbatimAttributes", # anchored link to obs; was observationUrl
         "imageUrls" # not a Symbiota or MCP field;
       ]
     end
 
     def format_row(row) # rubocop:disable Metrics/AbcSize
       [
+        row.obs_id, # MCP `dpk`; catalogNumber = "MUOB #{observation.id}"
         "HumanObservation", # basisOfRecord
         "MUOB #{row.obs_id}", # catalogNumber
         sciname(row), # sciname (mono- or binomial without author)
-        scientific_name_authorship(row), # scientificNameAuthorship
         row.name_rank, # taxonRank
+        scientific_name_authorship(row), # scientificNameAuthorship
         identification_qualifier(row), # identificationRemarks
         row.user_name_or_login, # recordedBy
         lowest_collection_number(row), # recordNumber
-        disposition(row), # disposition
         row.obs_when, # eventDate
+        substrate(row),
+        occurence_remarks(row), # notes minus substrate and associatedTaxa
+        associated_taxa(row), # was`host`
+        observation_link(row), # verbatimAttributes link to MO observation url
         row.country, # country
         row.state, # stateProvince
         row.county, # county
@@ -68,12 +72,8 @@ module Report
         coordinate_uncertainty(row), # coordinateUncertaintyInMeters
         row.best_low, # minimumElevationInMeters
         row.best_high, # maximumElevationInMeters
+        disposition(row), # disposition
         row.obs_updated_at, # dateLastModified
-        substrate(row),
-        associated_taxa(row), # was`host`
-        occurence_remarks(row), # notes minus substrate and associatedTaxa
-        row.obs_id, # MCP `dpk`; catalogNumber = "MUOB #{observation.id}"
-        observation_link(row), # verbatimAttributes link to MO observation url
         image_urls(row) # MO-specific
       ]
     end
@@ -84,10 +84,6 @@ module Report
       return text_name_without_last_word(text_name) if row.name_rank == "Group"
 
       text_name
-    end
-
-    def text_name_without_last_word(text_name)
-      text_name.split[0...-1].join(" ")
     end
 
     # For MO Group or sensu x names, MCP wants:
@@ -138,6 +134,10 @@ module Report
       explode_notes(row)[:substrate]
     end
 
+    def occurence_remarks(row)
+      explode_notes(row)[:other]
+    end
+
     # https://github.com/BioKIC/symbiota-docs/issues/36#issuecomment-1015733243
     def associated_taxa(row)
       host = explode_notes(row)[:host]
@@ -153,8 +153,10 @@ module Report
       "#{trees_shrubs}; #{associates}"
     end
 
-    def occurence_remarks(row)
-      explode_notes(row)[:other]
+    def observation_link(row)
+      "<a href='#{row.obs_url}' " \
+      "target='_blank' style='color: blue;'>" \
+      "Original observation ##{row.obs_id} (Mushroom Observer)</a>"
     end
 
     # coordinateUncertaintyInMeters
@@ -166,18 +168,6 @@ module Report
       else
         distance_from_center_to_farthest_corner(row)
       end
-    end
-
-    def image_urls(row)
-      image_ids(row).to_s.split(", ").sort_by(&:to_i).
-        map { |id| image_url(id) }.join(" ")
-    end
-
-    def image_url(id)
-      # Image.url(:full_size, id, transferred: true)
-      # The following URL is the permanent one, should always be correct,
-      # no matter how much we change the underlying image server(s) around.
-      "#{MO.http_domain}/images/orig/#{id}.jpg"
     end
 
     def disposition(row)
@@ -192,10 +182,9 @@ module Report
       "vouchered"
     end
 
-    def observation_link(row)
-      "<a href='#{row.obs_url}' " \
-      "target='_blank' style='color: blue;'>" \
-      "Original observation ##{row.obs_id} (Mushroom Observer)</a>"
+    def image_urls(row)
+      image_ids(row).to_s.split(", ").sort_by(&:to_i).
+        map { |id| image_url(id) }.join(" ")
     end
 
     ####### Additional columns and utilities
@@ -231,6 +220,10 @@ module Report
 
     def obs(row)
       Observation.find(row.obs_id)
+    end
+
+    def text_name_without_last_word(text_name)
+      text_name.split[0...-1].join(" ")
     end
 
     def qualified_name?(row)
@@ -310,6 +303,13 @@ module Report
         # gsub("??", ""). # Remove Textile italics markup
 
         t.html_to_ascii
+    end
+
+    def image_url(id)
+      # Image.url(:full_size, id, transferred: true)
+      # The following URL is the permanent one, should always be correct,
+      # no matter how much we change the underlying image server(s) around.
+      "#{MO.http_domain}/images/orig/#{id}.jpg"
     end
   end
 end
