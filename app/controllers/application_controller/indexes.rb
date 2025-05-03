@@ -58,10 +58,12 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   end
 
   def check_for_spider_block(request, params)
-    return if @user
-    return if request.url.include?(permanent_observation_path(id: params[:id]))
+    return false if @user
+    if request.url.include?(permanent_observation_path(id: params[:id]))
+      return false
+    end
 
-    Rails.logger.warn(:runtime_spiders_begone)
+    Rails.logger.warn(:runtime_spiders_begone.t)
     render(json: :runtime_spiders_begone.t,
            status: :forbidden)
   end
