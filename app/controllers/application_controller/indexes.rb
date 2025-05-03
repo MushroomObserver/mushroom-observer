@@ -61,7 +61,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     return false if @user
     return false if request.url.include?(permanent_observation_path(id: params[:id]))
 
-    Rails.logger.warn(:runtime_spiders_begone)
+    Rails.logger.warn(:runtime_spiders_begone.t)
     render(json: :runtime_spiders_begone.t,
            status: :forbidden)
   end
