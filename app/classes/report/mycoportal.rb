@@ -81,6 +81,7 @@ module Report
       ]
     end
 
+    # taxon name, without authority or qualifcation (such as "group")
     def sciname(row)
       text_name = row.name_text_name
       # The last word in text_name could be Group or Complex
@@ -89,6 +90,7 @@ module Report
       text_name
     end
 
+    # The author of the valid, unqualified sciname
     def scientific_name_authorship(row)
       if qualified_name?(row)
         if obs(row).name.provisional?
@@ -99,9 +101,9 @@ module Report
           # scientificNameAuthorship: author of valid, unqualified name
           # plus an identification qualifier. Example:
           # MO text_name: Agaricales sensu lato
-          # MCP sciname: Agaricales
-          # MCP scientificNameAuthorship: Underw.
-          # MCP identificationQualifier: sensu lato
+          #   sciname: Agaricales
+          #   scientificNameAuthorship: Underw.
+          #   identificationQualifier: sensu lato
           unqualified_name(row).try(:author)
         end
       else
@@ -109,6 +111,8 @@ module Report
       end
     end
 
+    # Qualifies unpublished MO text_name.
+    # Examples: nom. prov., crypt. temp., group, sensu lato, sensu auct.
     def identification_qualifier(row)
       return nil unless qualified_name?(row)
       return "group #{row.name_author}".strip if row.name_rank == "Group"
@@ -119,6 +123,7 @@ module Report
       row.name_author&.match(/sensu.*/)&.[](0)
     end
 
+    # collector's number
     def record_number(row)
       if collector_ids(row).blank?
         ""
@@ -133,12 +138,14 @@ module Report
       explode_notes(row)[:substrate]
     end
 
+    # MO notes
     def occurence_remarks(row)
       return explode_notes(row)[:other] unless obs(row).sequences.any?
 
       "Sequenced; #{explode_notes(row)[:other]}"
     end
 
+    # host plus associates
     # https://github.com/BioKIC/symbiota-docs/issues/36#issuecomment-1015733243
     def associated_taxa(row)
       host = explode_notes(row)[:host]
@@ -154,9 +161,8 @@ module Report
       "#{trees_shrubs}; #{associates}"
     end
 
+    # text of an anchored link to the MO Observation
     def verbatim_atttributes(row)
-      # Override obs_url so that a report for upload be generated locally
-      # in order to avoid taxing the webserver
       "<a href='#{HTTP_DOMAIN}/#{row.obs_id}' " \
       "target='_blank' style='color: blue;'>" \
       "Original observation ##{row.obs_id} (Mushroom Observer)</a>"
@@ -174,6 +180,7 @@ module Report
       end
     end
 
+    # "vouchered" or 1st herbarium where deposited
     def disposition(row)
       return nil unless row.obs_specimen
 
