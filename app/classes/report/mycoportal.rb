@@ -170,12 +170,13 @@ module Report
 
     # coordinateUncertaintyInMeters
     def coordinate_uncertainty(row)
-      if obs(row).gps_hidden? &&
-         obs(row).lat
-        distance_from_obs_lat_lng_to_farthest_corner(row)
-      elsif obs(row).lat.present?
+      if obs(row).location.blank?
+        # Cannot calculate uncertainty without a defined location
         nil
-      else
+      elsif obs(row).gps_hidden? &&
+            obs(row).lat
+        distance_from_obs_lat_lng_to_farthest_corner(row)
+      elsif obs(row).lat.blank?
         distance_from_center_to_farthest_corner(row)
       end
     end

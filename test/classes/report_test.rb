@@ -670,14 +670,40 @@ class ReportTest < UnitTestCase
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
+  def test_mycoportal_coordinate_uncertainty_lat_lng_hidden_nil_location
+    obs = observations(:minimal_unknown_obs)
+    obs.update!(
+      # actually found in the wild
+      location_id: nil,
+      lat: 18.0949,
+      lng: -65.8014,
+      where: "-65.801449, Humacao18.094914, Puerto Rico, USA",
+      gps_hidden: true,
+      location_lat: nil,
+      location_lng: nil
+    )
+    expect = hashed_expect(obs).merge(
+      stateProvince: "Puerto Rico",
+      locality: "Humacao18.094914, -65.801449",
+      decimalLatitude: "",
+      decimalLongitude: "",
+      coordinateUncertaintyInMeters: "",
+      minimumElevationInMeters: "",
+      maximumElevationInMeters: ""
+    ).values
+    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
   def hashed_expect(obs)
     obs_location = obs.location
     obs_when = obs.when
     obs_where = obs.where
-    default_uncertainty = # for obss without lat/lng, in N hemisphere
-      Haversine.distance(obs_location.center_lat, obs_location.center_lng,
-                         obs_location.south, obs_location.east).
-      to_meters.round.to_s
+    default_uncertainty =
+      if obs.location
+        Haversine.distance(obs_location.center_lat, obs_location.center_lng,
+                           obs_location.south, obs_location.east).
+          to_meters.round.to_s
+      end
     hsh = {
       dbpk: obs.id.to_s,
       basisOfRecord: "HumanObservation",
@@ -697,12 +723,12 @@ class ReportTest < UnitTestCase
       stateProvince: obs_where.split[-2]&.delete_suffix(",") || "",
       county: "",
       locality: obs_where.split[-3]&.delete_suffix(",") || "",
-      decimalLatitude: obs_location.center_lat.to_s,
-      decimalLongitude: obs_location.center_lng.to_s,
+      decimalLatitude: obs_location&.center_lat&.to_s,
+      decimalLongitude: obs_location&.center_lng&.to_s,
       coordinateUncertaintyInMeters: default_uncertainty,
       # if low/high are nil, value must be empty string, not zero
-      minimumElevationInMeters: obs_location.low&.to_i.to_s,
-      maximumElevationInMeters: obs_location.high&.to_i.to_s,
+      minimumElevationInMeters: obs_location&.low&.to_i.to_s,
+      maximumElevationInMeters: obs_location&.high&.to_i.to_s,
       disposition: "",
       dateLastModified: "#{obs.updated_at.api_time} UTC"
     }
