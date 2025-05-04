@@ -712,14 +712,14 @@ class ReportTest < UnitTestCase
   end
 
   def verbatim_atttributes(obs)
-    "<a href='https://mushroomobserver.org/#{obs.id}' " \
+    "<a href='#{Report::Mycoportal::HTTP_DOMAIN}/#{obs.id}' " \
     "target='_blank' style='color: blue;'>" \
     "Original observation ##{obs.id} (Mushroom Observer)" \
     "</a>"
   end
 
   def image_url(obs)
-    "https://mushroomobserver.org/images/1280/#{obs.thumb_image_id}.jpg"
+    "#{Report::Mycoportal::HTTP_DOMAIN}/images/1280/#{obs.thumb_image_id}.jpg"
   end
 
   def test_rounding_of_latitudes_etc

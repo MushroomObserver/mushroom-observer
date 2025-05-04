@@ -12,6 +12,9 @@ require "haversine"
 # https://github.com/Symbiota/Symbiota
 module Report
   class Mycoportal < TSV
+    # http_domain for links to Observations and Images
+    HTTP_DOMAIN = "https://mushroomobserver.org"
+
     # Label names for the columns in the report.
     # Some Symbiota Standard Fields
     # https://biokic.github.io/symbiota-docs/editor/edit/fields/#standard-fields
@@ -154,7 +157,7 @@ module Report
     def verbatim_atttributes(row)
       # Override obs_url so that a report for upload be generated locally
       # in order to avoid taxing the webserver
-      "<a href='https://mushroomobserver.org/#{row.obs_id}' " \
+      "<a href='#{HTTP_DOMAIN}/#{row.obs_id}' " \
       "target='_blank' style='color: blue;'>" \
       "Original observation ##{row.obs_id} (Mushroom Observer)</a>"
     end
@@ -329,7 +332,7 @@ module Report
       # let anonymous users access full-size images because of
       # bot/scraper issues
       if id.present?
-        "https://mushroomobserver.org/images/1280/#{id}.jpg"
+        "#{HTTP_DOMAIN}/images/1280/#{id}.jpg"
       else
         ""
       end
