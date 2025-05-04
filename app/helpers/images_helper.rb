@@ -39,7 +39,7 @@ module ImagesHelper
           end,
           image_stretched_link(presenter.image_link,
                                presenter.image_link_method),
-          lightbox_link(presenter.lightbox_data),
+          lightbox_link(user, presenter.lightbox_data),
           image_vote_section_html(user, presenter.image, presenter.votes)
         ].safe_join
       end,
@@ -102,15 +102,6 @@ module ImagesHelper
       (object.type_tag == :observation &&
        image.copyright_holder != object.user&.legal_name)
   end
-
-  # def show_best_image(obs)
-  #   return unless obs&.thumb_image
-
-  #   interactive_image(obs.thumb_image,
-  #                     link: observation_path(id: obs.id),
-  #                     size: :small,
-  #                     votes: true) + image_copyright(obs.thumb_image, obs)
-  # end
 
   # pass an image instance if possible, to ensure access to fallback image.url
   def original_image_link(image_or_image_id, classes)

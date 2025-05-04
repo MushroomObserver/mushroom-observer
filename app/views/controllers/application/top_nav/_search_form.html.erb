@@ -1,3 +1,4 @@
+<% if @user %>
 <%
 options = [
   [:COMMENTS.l, :comment],
@@ -67,3 +68,8 @@ identify_page = controller.controller_name == "identify"
 <div class="visible-xs">
   <%= adv_search %>
 </div>
+<% else %>
+  <strong class="navbar-text mx-2 text-nowrap">
+    <%= :app_login_reminder.t %>:
+  </strong>
+<% end %>

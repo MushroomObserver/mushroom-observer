@@ -40,8 +40,9 @@ add_context_nav(info_site_stats_tabs)
   <% if obs_length > 3 %>
     <% @observations[3,3].each do |obs| %>
       <%= interactive_image(
-          obs.thumb_image, image_link: observation_path(obs.id), votes: true
-        ) %><br/>
+            @user, obs.thumb_image, image_link: observation_path(obs.id),
+            votes: true
+          ) %><br/>
       <br/>
     <% end %>
   <% end %>

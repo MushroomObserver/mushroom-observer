@@ -1387,6 +1387,7 @@
   app_sort_by_title: "[:sort_by_object(type=:title)]"
   app_account: Account
   app_login: Login
+  app_login_reminder: Login or create an account to access more fungal content
   app_create_account: Create Account
   app_current_user: Current User
   app_comments_for_you: Comments for You
