@@ -250,7 +250,6 @@ class InatImportJob < ApplicationJob
                name: "#{prov_name} crypt. temp.",
                rank: "Species" }
     api = API2.execute(params)
-
     new_name = api.results.first
     new_name.log(:log_name_created)
     new_name

@@ -161,6 +161,7 @@ class API2
           reason.notes = @reasons[reason.num]
         end
       end
+      naming.user ||= @user
       naming.save!
       consensus = ::Observation::NamingConsensus.new(obs)
       consensus.change_vote(naming, @vote, user)

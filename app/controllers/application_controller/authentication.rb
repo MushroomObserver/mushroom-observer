@@ -151,15 +151,15 @@ module ApplicationController::Authentication
   end
 
   def owned_by_user?(obj)
-    obj.respond_to?(:user_id) && User.current_id == obj.user_id
+    obj.respond_to?(:user_id) && @user&.id == obj.user_id
   end
 
   def editable_by_user?(obj)
-    obj.try(&:can_edit?)
+    obj.try(:can_edit?, @user)
   end
 
   def obj_is_user?(obj)
-    (obj.is_a?(String) || obj.is_a?(Integer)) && obj.to_i == User.current_id
+    (obj.is_a?(String) || obj.is_a?(Integer)) && obj.to_i == @user.id
   end
 
   # Make sure user is logged in and has posted something -- i.e., not a spammer.

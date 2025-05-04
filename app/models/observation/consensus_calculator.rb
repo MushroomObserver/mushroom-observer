@@ -22,7 +22,7 @@ class Observation
     #
     # Returns Naming instance or nil.  Refreshes vote_cache as a
     # side-effect.
-    def calc
+    def calc(user)
       # Gather votes for names and synonyms.  Note that this is
       # trickier than one would expect since it is possible to propose
       # several synonyms for a single observation, and even worse
@@ -31,7 +31,7 @@ class Observation
       # (not naming) multiple times.  Likewise, of course, for
       # synonyms.  I choose the strongest vote in such cases.
       @namings.each do |naming|
-        process_naming(naming)
+        process_naming(user, naming)
       end
       votes = find_taxon_votes
       best, best_val = find_best_name(votes)
@@ -46,7 +46,8 @@ class Observation
 
     private
 
-    def process_naming(naming)
+    def process_naming(user, naming)
+      naming.current_user = user
       name_id = naming.name_id
       if !@name_ages[name_id] || naming.created_at < @name_ages[name_id]
         @name_ages[name_id] = naming.created_at

@@ -179,7 +179,7 @@ class FieldSlipsController < ApplicationController
     return unless id_str
 
     id_str.tr!("_", "")
-    names = Name.find_names(id_str)
+    names = Name.find_names(@user, id_str)
     return if names.blank?
 
     name = names[0]

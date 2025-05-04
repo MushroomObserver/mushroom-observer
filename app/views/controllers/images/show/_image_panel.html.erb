@@ -30,7 +30,7 @@
 
     <div class="mt-3 text-center">
       <% if User.current %>
-        <%= image_vote_links(@image) %>
+        <%= image_vote_links(@user, @image) %>
       <% end %>
       <% if !@image.original_name.blank? &&
             (check_permission(@image) ||

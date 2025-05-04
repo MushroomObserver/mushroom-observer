@@ -114,7 +114,7 @@ module SpeciesLists
       sorter.add_approved_deprecated_names(params[:approved_deprecated_names])
       sorter.check_for_deprecated_checklist(params[:checklist_data])
       sorter.check_for_deprecated_names(@species_list.names) if @species_list.id
-      sorter.sort_names(list)
+      sorter.sort_names(@user, list)
       sorter
     end
 

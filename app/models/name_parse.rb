@@ -95,14 +95,14 @@ class NameParse
     !@synonym.nil?
   end
 
-  def find_names
-    Name.find_names_filling_in_authors(@search_name, @rank)
+  def find_names(user)
+    Name.find_names_filling_in_authors(user, @search_name, @rank)
   end
 
-  def find_synonym_names
+  def find_synonym_names(user)
     result = []
     if @synonym
-      result = Name.find_names_filling_in_authors(@synonym_search_name,
+      result = Name.find_names_filling_in_authors(user, @synonym_search_name,
                                                   @synonym_rank)
     end
     result

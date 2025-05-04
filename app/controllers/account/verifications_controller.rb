@@ -81,6 +81,7 @@ module Account
             "auth_code=#{user.auth_code}"
       content = :email_verify_intro.tp(user: user.login, link: url)
       QueuedEmail::Webmaster.create_email(
+        @user,
         sender_email: user.email,
         subject: :email_subject_verify.l,
         content: "email: #{user.email}\n\n #{content.html_to_ascii}"

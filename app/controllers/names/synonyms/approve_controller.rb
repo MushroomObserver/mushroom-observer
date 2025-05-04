@@ -40,7 +40,8 @@ module Names::Synonyms
       @others = []
       @name.approved_synonyms.each do |n|
         n.change_deprecated(true)
-        n.save_with_log(:log_name_deprecated, other: @name.real_search_name)
+        n.save_with_log(@user, :log_name_deprecated,
+                        other: @name.real_search_name)
         @others << n.real_search_name
       end
       true
@@ -54,7 +55,7 @@ module Names::Synonyms
         tag = :log_name_approved
         args[:other] = @others.join(", ")
       end
-      @name.save_with_log(tag, args)
+      @name.save_with_log(@user, tag, args)
     end
 
     def post_approval_comment
