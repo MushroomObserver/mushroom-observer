@@ -4,7 +4,7 @@
 # Caption needs object for copyright info. Very expensive.
 presenter_args = { size:, fit: :contain, original: true,
                    extra_classes: "carousel-image" }
-presenter = ImagePresenter.new(@user, image, presenter_args)
+presenter = ImagePresenter.new(user, image, presenter_args)
 active = index == 0 ? "active" : ""
 
 tag.div(id: "carousel_item_#{image.id}",
@@ -14,7 +14,7 @@ tag.div(id: "carousel_item_#{image.id}",
     concat(image_stretched_link(presenter.image_link,
                                 presenter.image_link_method))
   end
-  concat(lightbox_link(presenter.lightbox_data))
-  concat(carousel_caption(@user, image, object, presenter))
+  concat(lightbox_link(user, presenter.lightbox_data))
+  concat(carousel_caption(user, image, object, presenter))
 end
 %>
