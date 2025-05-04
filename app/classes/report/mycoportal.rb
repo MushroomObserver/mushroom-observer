@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "haversine"
+
 # Report (a TSV spreadsheet) for exporting Observations to MyCoPortal
 # https://mycoportal.org/
 # https://www.mycoportal.org/portal/api/v2/documentation
