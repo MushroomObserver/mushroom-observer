@@ -152,7 +152,9 @@ module Report
     end
 
     def verbatim_atttributes(row)
-      "<a href='#{row.obs_url}' " \
+      # Override obs_url so that a report for upload be generated locally
+      # in order to avoid taxing the webserver
+      "<a href='https://mushroom-observer.org/#{row.obs_id}' " \
       "target='_blank' style='color: blue;'>" \
       "Original observation ##{row.obs_id} (Mushroom Observer)</a>"
     end
