@@ -159,7 +159,8 @@ module Report
 
     # coordinateUncertaintyInMeters
     def coordinate_uncertainty(row)
-      if obs(row).gps_hidden?
+      if obs(row).gps_hidden? &&
+         obs(row).lat
         distance_from_obs_lat_lng_to_farthest_corner(row)
       elsif obs(row).lat.present?
         nil

@@ -654,6 +654,22 @@ class ReportTest < UnitTestCase
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
+  def test_mycoportal_coordinate_uncertainty_nil_lat_lng_hidden
+    obs = observations(:trusted_hidden)
+    # There are many (5,285) Obss with gps hidden, but no lat/lng
+    obs.update!(lat: nil, lng: nil)
+    loc = obs.location
+
+    expect = hashed_expect(obs).merge(
+      decimalLatitude: loc.center_lat.round(4).to_s,
+      decimalLongitude: loc.center_lng.round(4).to_s,
+      minimumElevationInMeters: obs.alt.to_s,
+      maximumElevationInMeters: obs.alt.to_s
+    ).values
+
+    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
   def hashed_expect(obs)
     obs_location = obs.location
     obs_when = obs.when
