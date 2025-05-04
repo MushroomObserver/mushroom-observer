@@ -44,7 +44,7 @@ module Report
         "maximumElevationInMeters",
         "disposition", # herbaria, "vouchered", or nil
         "dateLastModified",
-        "imageUrls" # not a Symbiota or MCP field;
+        "imageUrl" # not a Symbiota or MCP field;
       ]
     end
 
@@ -74,7 +74,7 @@ module Report
         row.best_high, # maximumElevationInMeters
         disposition(row), # disposition
         row.obs_updated_at, # dateLastModified
-        image_urls(row) # MO-specific
+        image_url(row.obs_thumb_image_id) # MO-specific (not an MCP field)
       ]
     end
 
@@ -183,32 +183,21 @@ module Report
       "vouchered"
     end
 
-    def image_urls(row)
-      image_ids(row).to_s.split(", ").sort_by(&:to_i).
-        map { |id| image_url(id) }.join(" ")
-    end
-
     ####### Additional columns and utilities
 
     # additional columns
     # See app/classes/report/base_table.rb
     def extend_data!(rows)
-      add_image_ids!(rows, 1)
-      add_collector_ids!(rows, 2)
-      add_herbarium_accession_numbers!(rows, 3)
-    end
-
-    # wrap magic number
-    def image_ids(row)
-      row.val(1)
+      add_collector_ids!(rows, 1)
+      add_herbarium_accession_numbers!(rows, 2)
     end
 
     def collector_ids(row)
-      row.val(2)
+      row.val(1)
     end
 
     def herbarium_accession_numbers(row)
-      row.val(3)
+      row.val(2)
     end
 
     def sort_before(rows)
@@ -334,10 +323,16 @@ module Report
     end
 
     def image_url(id)
-      # Image.url(:full_size, id, transferred: true)
-      # The following URL is the permanent one, should always be correct,
-      # no matter how much we change the underlying image server(s) around.
-      "#{MO.http_domain}/images/orig/#{id}.jpg"
+      # This URL is permanent. It should always be correct,
+      # no matter how much we change the underlying image server(s).
+      # It is large, rather than full-size, because we no longer
+      # let anonymous users access full-size images because of
+      # bot/scraper issues
+      if id.present?
+        "https://mushroomobserver.org/images/1280/#{id}.jpg"
+      else
+        ""
+      end
     end
   end
 end

@@ -704,10 +704,10 @@ class ReportTest < UnitTestCase
       minimumElevationInMeters: obs_location.low&.to_i.to_s,
       maximumElevationInMeters: obs_location.high&.to_i.to_s,
       disposition: "",
-      dateLastModified: "#{obs.updated_at.api_time} UTC"
+      dateLastModified: "#{obs.updated_at.api_time} UTC",
     }
     # Include this key/value only if there are images.
-    hsh[:imageUrls] = expected_image_urls(obs) if obs.images.any?
+    hsh[:imageUrl] = image_url(obs) if obs.images.any?
     hsh
   end
 
@@ -718,10 +718,8 @@ class ReportTest < UnitTestCase
     "</a>"
   end
 
-  def expected_image_urls(obs)
-    obs.images.map do |img|
-      "https://mushroomobserver.org/images/orig/#{img.id}.jpg"
-    end.join(" ")
+  def image_url(obs)
+    "https://mushroomobserver.org/images/1280/#{obs.thumb_image_id}.jpg"
   end
 
   def test_rounding_of_latitudes_etc
