@@ -288,10 +288,24 @@ module Report
     end
 
     def distance_from_center_to_farthest_corner(row)
-      loc = obs(row).location
-      return nil if loc.blank?
+      return nil if row.obs_id.blank?
 
-      distance_to_farthest_corner(loc.center_lat, loc.center_lng, row)
+      distance_to_farthest_corner(center_lat(row), center_lng(row), row)
+    end
+
+    def center_lat(row)
+      (row.loc_north + row.loc_south) / 2.0
+    end
+
+    def center_lng(row)
+      lng = (row.loc_east + row.loc_west) / 2.0
+      if row.loc_west > row.loc_east && lng.negative?
+        lng + 180
+      elsif row.loc_west > row.loc_east && lng.positive?
+        lng - 180
+      else
+        lng
+      end
     end
 
     def distance_to_farthest_corner(lat, lng, row)
