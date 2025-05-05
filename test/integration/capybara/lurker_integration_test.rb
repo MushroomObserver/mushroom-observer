@@ -100,7 +100,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     reset_session!
     login(lurker.login)
 
-    visit("/#{obs.id}")
+    visit("/obs/#{obs.id}")
     assert_match(/#{:app_title.l}: Observation #{obs.id}/, page.title,
                  "Wrong page")
 
@@ -276,7 +276,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     assert_match("Observations", page.title, "Wrong title")
     assert_selector("#filters", text: "Burbank, California, USA")
     save_results = find_all("#results a").select do |l|
-      l[:href].match(%r{^/\d+})
+      l[:href].match(%r{^/obs/\d+})
     end
 
     # Bail if there are too many results — test will not work
@@ -368,7 +368,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
 
   def results_observation_links
     find_all("#results a").select do |l|
-      l[:href].match(%r{^/\d+})
+      l[:href].match(%r{^/obs/\d+})
     end
   end
 end

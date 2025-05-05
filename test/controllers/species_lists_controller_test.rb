@@ -1241,7 +1241,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
 
     # should have different default if recently create list attached to project
-    obs = Observation.create!
+    obs = Observation.create!(user: rolf)
     @proj1.add_observation(obs)
     get(:new)
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)

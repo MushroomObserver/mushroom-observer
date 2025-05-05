@@ -34,6 +34,7 @@ module Comment::Callbacks
     return unless user_ids.intersect?(::MO.oil_users)
 
     QueuedEmail::Webmaster.create_email(
+      User.admin,
       sender_email: MO.noreply_email_address,
       subject: oil_and_water_subject,
       content: oil_and_water_content(user_ids)

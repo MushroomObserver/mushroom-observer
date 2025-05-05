@@ -206,7 +206,7 @@ module Observations
 
     def save_changes
       update_naming(params.dig(:naming, :reasons), params[:was_js_on] == "yes")
-      save_with_log(@naming)
+      save_with_log(@user, @naming)
       change_vote_with_log unless @vote.value.nil?
     end
 
@@ -319,7 +319,7 @@ module Observations
 
       update_naming(params.dig(:naming, :reasons), params[:was_js_on] == "yes")
       # need to save the naming before we can move this user's vote
-      save_with_log(@naming)
+      save_with_log(@user, @naming)
       change_vote_with_log
       flash_warning(:create_new_naming_warn.l)
     end

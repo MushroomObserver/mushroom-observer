@@ -323,12 +323,12 @@ class QueuedEmailTest < UnitTestCase
     # because anyone can email the webmaster, even without an account.
     subject = "Euh..."
     content = "What's up with this button here?"
-    QueuedEmail::Webmaster.create_email(sender_email: mary.email,
-                                        content: content, subject: subject)
+    QueuedEmail::Webmaster.create_email(nil, sender_email: mary.email,
+                                             content: content, subject: subject)
     assert_email(0,
                  flavor: "QueuedEmail::Webmaster",
                  sender_email: mary.email,
                  subject: "Euh...",
-                 note: "What's up with this button here?")
+                 note: content)
   end
 end

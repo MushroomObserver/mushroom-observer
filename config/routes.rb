@@ -269,7 +269,8 @@ MushroomObserver::Application.routes.draw do
   root "observations#index"
 
   # Route /123 to /observations/123.
-  get ":id" => "observations#show", id: /\d+/, as: "permanent_observation"
+  get "obs/:id" => "observations#show", id: /\d+/, as: "permanent_observation"
+  get ":id" => "observations#show", id: /\d+/ # , as: "permanent_observation"
 
   # NOTE: The nesting below is necessary to get nice path helpers
   resource :account, only: [:new, :create], controller: "account"

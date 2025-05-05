@@ -435,7 +435,7 @@ class LocationTest < UnitTestCase
     obj.update_attribute(:location, loc1)
     obj.reload
     assert_equal(loc1.id, obj.location_id)
-    loc2.merge(loc1)
+    loc2.merge(rolf, loc1)
     obj.reload
     assert_equal(loc2.id, obj.location_id)
   end
@@ -509,7 +509,7 @@ class LocationTest < UnitTestCase
     log2 = loc2.rss_log
     assert_not_nil(log1)
     assert_not_nil(log2)
-    loc2.merge(loc1)
+    loc2.merge(rolf, loc1)
     assert_nil(log1.reload.target_id)
     assert_not_nil(log2.reload.target_id)
     assert_equal(:log_orphan, log1.parse_log[0][0])

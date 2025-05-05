@@ -2,7 +2,7 @@
 
 module CarouselHelper
   # Very similar to an interactive_image caption
-  def carousel_caption(image, object, presenter)
+  def carousel_caption(user, image, object, presenter)
     classes = "carousel-caption"
     caption = if (info = image_info(image, object,
                                     original: presenter.original)).present?
@@ -13,7 +13,7 @@ module CarouselHelper
 
     tag.div(class: classes) do
       [
-        image_vote_section_html(presenter.image, presenter.votes),
+        image_vote_section_html(user, presenter.image, presenter.votes),
         caption
       ].safe_join
     end

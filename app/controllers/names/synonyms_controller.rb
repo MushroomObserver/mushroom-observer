@@ -57,7 +57,7 @@ module Names
 
       # Parse the write-in list of names.
       sorter = NameSorter.new
-      sorter.sort_names(list)
+      sorter.sort_names(@user, list)
       sorter.append_approved_synonyms(params[:approved_synonyms])
       sorter
     end
@@ -134,7 +134,7 @@ module Names
 
       begin
         name.change_deprecated(true)
-        name.save_with_log(:log_deprecated_by)
+        name.save_with_log(@user, :log_deprecated_by)
       rescue RuntimeError => e
         flash_error(e.to_s) if e.present?
         false

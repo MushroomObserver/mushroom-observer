@@ -153,6 +153,8 @@
 #  announce_consensus_change::  After consensus changes: send email.
 #
 class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
+  attr_accessor :current_user
+
   include Scopes
 
   belongs_to :thumb_image, class_name: "Image",
@@ -238,7 +240,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       value: Vote.maximum_vote,
       favorite: true
     )
-    Observation::NamingConsensus.new(obs).calc_consensus
+    Observation::NamingConsensus.new(obs).user_calc_consensus(user)
     obs
   end
 

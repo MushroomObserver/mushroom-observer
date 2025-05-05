@@ -43,7 +43,7 @@ class ObservationsControllerProjectListTest < FunctionalTestCase
 
     # Should have different default
     # if recently posted observation attached to project.
-    obs = Observation.create!
+    obs = Observation.create!(user: dick)
     @proj2.add_observation(obs)
     get(:new)
     assert_project_checks(@proj1.id => :no_field, @proj2.id => :checked)
@@ -236,7 +236,7 @@ class ObservationsControllerProjectListTest < FunctionalTestCase
 
     # Should have different default
     # if recently posted observation attached to project.
-    obs = Observation.create!
+    obs = Observation.create!(user: dick)
     @spl1.add_observation(obs) # (shouldn't affect anything for create)
     @spl2.add_observation(obs)
     get(:new)

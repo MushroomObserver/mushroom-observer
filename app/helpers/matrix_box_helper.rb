@@ -54,11 +54,11 @@ module MatrixBoxHelper
     end
   end
 
-  def matrix_box_image(image = nil, **args)
+  def matrix_box_image(user, image = nil, **args)
     return unless image
 
     tag.div(class: "thumbnail-container") do
-      interactive_image(image, **args)
+      interactive_image(user, image, **args)
     end
   end
 

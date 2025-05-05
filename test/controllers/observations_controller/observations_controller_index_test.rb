@@ -109,7 +109,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_displayed_title(:OBSERVATIONS.l)
     assert_select("body.observations__index", true)
     assert_select(
-      "#results .rss-heading a[href ^= '/#{obs.id}'] .rss-name",
+      "#results .rss-heading a[href ^= '/obs/#{obs.id}'] .rss-name",
       { text: obs.format_name.t.strip_html },
       "Index should open at the page that includes #{obs.format_name}"
     )
@@ -439,7 +439,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_displayed_filters("#{:query_names.l}: #{name.text_name}")
     ids.each do |id|
       assert_select(
-        "a:match('href', ?)", %r{^/#{id}}, true,
+        "a:match('href', ?)", %r{^/obs/#{id}}, true,
         "Observations of Name should link to each Observation of Name"
       )
     end

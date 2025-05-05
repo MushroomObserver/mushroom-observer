@@ -393,6 +393,133 @@ class ReportTest < UnitTestCase
     do_tsv_test(Report::Symbiota, obs, expect, &:id)
   end
 
+  def test_mycoportal1
+    obs = observations(:detailed_unknown_obs)
+    obs.notes = {
+      Substrate: "wood\tchips",
+      Habitat: "lawn",
+      Host: "_Agaricus_",
+      Other: "First\tline.\nSecond\tline."
+    }
+    obs.save!
+
+    img1 = images(:in_situ_image)
+    img2 = images(:turned_over_image)
+
+    expect = [
+      "Fungi", # scientificName
+      "", # scientificNameAuthorship
+      "Kingdom", # taxonRank
+      "Fungi", # genus
+      "", # specificEpithet
+      "", # infraspecificEpithet
+      "Mary Newbie", # recordedBy
+      "174", # recordNumber
+      "NY", # disposition
+      "2006-05-11", # eventDate
+      "2006", # year
+      "5", # month
+      "11", # day
+      "USA", # country
+      "California", # stateProvince
+      "", # county
+      "Burbank", # locality
+      "34.185", # decimalLatitude
+      "-118.33", # decimalLongitude
+      "148", # minimumElevationInMeters
+      "294",
+      "#{obs.updated_at.api_time} UTC", # dateLastModified
+      "wood chips", # substrate
+      "Agaricus", # host
+      "Habitat: lawn Other: First line. Second line.", # fieldNotes
+      obs.id.to_s, # mushroomObserverId
+      "https://mushroomobserver.org/#{obs.id}", # observationUrl
+      "https://mushroomobserver.org/images/orig/#{img1.id}.jpg " \
+        "https://mushroomobserver.org/images/orig/#{img2.id}.jpg"
+    ]
+    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal2
+    obs = observations(:agaricus_campestrus_obs)
+    expect = [
+      "Agaricus campestrus", # scientificName
+      "L.", # scientificNameAuthorship
+      "Species", # taxonRank
+      "Agaricus", # genus
+      "campestrus", # specificEpithet
+      "", # infraspecificEpithet
+      "Rolf Singer", # recordedBy
+      "MUOB #{obs.id}", # recordNumber
+      "", # disposition
+      "2007-06-23", # eventDate
+      "2007", # year
+      "6", # month
+      "23", # day
+      "USA", # country
+      "California", # stateProvince
+      "", # county
+      "Burbank", # locality
+      "34.185", # decimalLatitude
+      "-118.33", # decimalLongitude
+      "148", # minimumElevationInMeters
+      "294", # maximumElevationInMeters
+      "#{obs.updated_at.api_time} UTC", # dateLastModified
+      "", # substrate
+      "", # host
+      "From somewhere else", # fieldNotes
+      obs.id.to_s, # mushroomObserverId
+      "https://mushroomobserver.org/#{obs.id}" # observationUrl
+    ]
+    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_compress_consecutive_whitespace
+    obs = observations(:detailed_unknown_obs)
+    obs.notes = {
+      Substrate: "wood\tchips",
+      Habitat: "lawn",
+      Host: "_Agaricus_",
+      Other: "1st line.\r\n\r\n2nd line.\r\n \r\n3rd line."
+    }
+    obs.save!
+
+    img1 = images(:in_situ_image)
+    img2 = images(:turned_over_image)
+    expect = [
+      "Fungi", # scientificName
+      "", # scientificNameAuthorship
+      "Kingdom", # taxonRank
+      "Fungi", # genus
+      "", # specificEpithet
+      "", # infraspecificEpithet
+      "Mary Newbie", # recordedBy
+      "174", # recordNumber
+      "NY", # disposition
+      "2006-05-11", # eventDate
+      "2006", # year
+      "5", # month
+      "11", # day
+      "USA", # country
+      "California", # stateProvince
+      "", # county
+      "Burbank", # locality
+      "34.185", # decimalLatitude
+      "-118.33", # decimalLongitude
+      "148", # minimumElevationInMeters
+      "294", # maximumElevationInMeters
+      "#{obs.updated_at.api_time} UTC", # dateLastModified
+      "wood chips", # substrate
+      "Agaricus", # host
+      "Habitat: lawn Other: 1st line. 2nd line. 3rd line.", # fieldNotes
+      obs.id.to_s, # mushroomObserverId
+      "https://mushroomobserver.org/#{obs.id}", # observationUrl
+      "https://mushroomobserver.org/images/orig/#{img1.id}.jpg " \
+        "https://mushroomobserver.org/images/orig/#{img2.id}.jpg" # imageUrls
+    ]
+    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
   def test_rounding_of_latitudes_etc
     row = Report::Row.new(vals = [])
     vals[2] = 1.20456

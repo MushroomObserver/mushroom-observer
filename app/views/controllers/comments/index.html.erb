@@ -13,7 +13,7 @@ flash_error(@error) if @error && @objects.empty?
     tag.div(class: "list-group") do
       @objects.each do |comment|
         concat(render(partial: "comments/comment", object: comment,
-                      locals: { show_name: true }))
+                      locals: { show_name: true, controls: @user.nil? }))
       end
     end
   end

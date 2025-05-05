@@ -70,7 +70,7 @@ module LinkHelper
 
   # Icon link with optional active state. (Tooltip title must be swapped in JS.)
   # Now also accepts active state options: active_icon, active_content
-  # NOTE: Takes same args as link_to, e.g. *edit_description_tab(desc, type)
+  # NOTE: Takes same args as link_to, e.g.
   # icon_link_to(text, path, **args). Can also print a button_to.
   def icon_link_to(text = nil, path = nil, options = {}, &block)
     return unless text

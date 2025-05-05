@@ -58,7 +58,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
       elsif location_exists_or_place_name_blank(params, user)
         # assert_redirected_to(action: :show)
         assert_response(:redirect)
-        assert_match(%r{/test.host/\d+\Z}, @response.redirect_url)
+        assert_match(%r{/test.host/obs/\d+\Z}, @response.redirect_url)
       else
         assert_response(:redirect)
         # assert_redirected_to(/#{new_location_path}/)
@@ -632,7 +632,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
 
     # assert_redirected_to(action: :show)
     assert_response(:redirect)
-    assert_match(%r{/test.host/\d+\Z}, @response.redirect_url)
+    assert_match(%r{/test.host/obs/\d+\Z}, @response.redirect_url)
     assert_equal(o_count + o_num, Observation.count, "Wrong Observation count")
     assert_equal(g_count + g_num, Naming.count, "Wrong Naming count")
     assert_equal(n_count + n_num, Name.count, "Wrong Name count")
@@ -662,12 +662,13 @@ class ObservationsControllerCreateTest < FunctionalTestCase
   end
 
   def test_prevent_creation_of_species_under_deprecated_genus
-    login("katrina")
-    cladonia = Name.find_or_create_name_and_parents("Cladonia").last
+    login(katrina.login)
+    cladonia = Name.find_or_create_name_and_parents(katrina, "Cladonia").last
     cladonia.save!
-    cladonia_picta = Name.find_or_create_name_and_parents("Cladonia picta").last
+    cladonia_picta = Name.find_or_create_name_and_parents(katrina,
+                                                          "Cladonia picta").last
     cladonia_picta.save!
-    cladina = Name.find_or_create_name_and_parents("Cladina").last
+    cladina = Name.find_or_create_name_and_parents(katrina, "Cladina").last
     cladina.change_deprecated(true)
     cladina.save!
     cladina.merge_synonyms(cladonia)

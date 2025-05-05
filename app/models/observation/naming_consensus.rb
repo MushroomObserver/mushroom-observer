@@ -289,7 +289,7 @@ class Observation
       end
 
       # Update consensus if anything changed.
-      calc_consensus if result
+      user_calc_consensus(user) if result
       result
     end
 
@@ -305,7 +305,7 @@ class Observation
     def calc_consensus
       reload_namings_and_votes!
       calculator = ::Observation::ConsensusCalculator.new(@namings)
-      best, best_val = calculator.calc
+      best, best_val = calculator.calc(User.current)
       old = @observation.name
       if old != best || @observation.vote_cache != best_val
         # If naming generic or specific, and vote positive, needs_naming = 0
@@ -319,11 +319,12 @@ class Observation
     def user_calc_consensus(current_user)
       reload_namings_and_votes!
       calculator = ::Observation::ConsensusCalculator.new(@namings)
-      best, best_val = calculator.calc
+      best, best_val = calculator.calc(current_user)
       old = @observation.name
       if old != best || @observation.vote_cache != best_val
         # If naming generic or specific, and vote positive, needs_naming = 0
         needs_naming = !best.above_genus? && best_val&.positive? ? 0 : 1
+        @observation.current_user = current_user
         @observation.update(name: best, vote_cache: best_val,
                             needs_naming: needs_naming)
       end

@@ -17,10 +17,10 @@ module ImagesHelper
   #   html_options::     Additional HTML attributes to add to <img> tag.
   #   notes::            Show image notes??
   #
-  # USE: interactive_image( image, args = { notes: "", extra_classes: "" } )
-  def interactive_image(image, **args)
+  # USE: interactive_image(user, image, args = { notes: "", extra_classes: "" })
+  def interactive_image(user, image, **args)
     # Caption needs object for copyright info
-    presenter = ImagePresenter.new(image, args)
+    presenter = ImagePresenter.new(user, image, args)
     set_width = presenter.width.present? ? "width: #{presenter.width}px;" : ""
 
     [
@@ -39,8 +39,8 @@ module ImagesHelper
           end,
           image_stretched_link(presenter.image_link,
                                presenter.image_link_method),
-          lightbox_link(presenter.lightbox_data),
-          image_vote_section_html(presenter.image, presenter.votes)
+          lightbox_link(user, presenter.lightbox_data),
+          image_vote_section_html(user, presenter.image, presenter.votes)
         ].safe_join
       end,
       image_owner_original_name(presenter.image, presenter.original)
@@ -101,15 +101,6 @@ module ImagesHelper
     object.type_tag != :observation ||
       (object.type_tag == :observation &&
        image.copyright_holder != object.user&.legal_name)
-  end
-
-  def show_best_image(obs)
-    return unless obs&.thumb_image
-
-    interactive_image(obs.thumb_image,
-                      link: observation_path(id: obs.id),
-                      size: :small,
-                      votes: true) + image_copyright(obs.thumb_image, obs)
   end
 
   # pass an image instance if possible, to ensure access to fallback image.url
@@ -174,17 +165,17 @@ module ImagesHelper
 
   # This is now a helper to avoid nested partials in loops - AN 2023
   # called in interactive_image above
-  def image_vote_section_html(image, votes)
+  def image_vote_section_html(user, image, votes)
     return "" unless votes && image
 
     tag.div(class: "vote-section require-user",
             id: "image_vote_#{image.id}") do
-      image_vote_meter_and_links(image)
+      image_vote_meter_and_links(user, image)
     end
   end
 
   # called in votes update.erb
-  def image_vote_meter_and_links(image)
+  def image_vote_meter_and_links(user, image)
     vote_pct = if image.vote_cache
                  ((image.vote_cache / Image.all_votes.length) * 100).floor
                else
@@ -193,7 +184,7 @@ module ImagesHelper
 
     [
       image_vote_meter(image, vote_pct),
-      image_vote_buttons(image, vote_pct)
+      image_vote_buttons(user, image, vote_pct)
     ].safe_join
   end
 
@@ -207,14 +198,14 @@ module ImagesHelper
     end
   end
 
-  def image_vote_buttons(image, vote_percentage)
+  def image_vote_buttons(user, image, vote_percentage)
     tag.div(class: "vote-buttons mt-2") do
       tag.div(class: "image-vote-links", id: "image_vote_links_#{image.id}") do
         [
           tag.div(class: "text-center small") do
             [
-              user_vote_link(image),
-              image_vote_links(image)
+              user_vote_link(user, image),
+              image_vote_links(user, image)
             ].safe_join
           end,
           tag.span(class: "hidden data_container",
@@ -225,16 +216,15 @@ module ImagesHelper
     end
   end
 
-  def user_vote_link(image)
-    user = User.current
+  def user_vote_link(user, image)
     return "" unless user && image.users_vote(user).present?
 
-    image_vote_link(image, 0) + "&nbsp;".html_safe
+    image_vote_link(user, image, 0) + "&nbsp;".html_safe
   end
 
-  def image_vote_links(image)
+  def image_vote_links(user, image)
     Image.all_votes.map do |vote|
-      image_vote_link(image, vote)
+      image_vote_link(user, image, vote)
     end.safe_join("|")
   end
 
@@ -242,8 +232,8 @@ module ImagesHelper
   # Returns a form input button if the user has NOT voted this way
   # JS is listening to any element with [data-role="image_vote"],
   # Even though this is not an <a> tag, but an <input>, it's ok.
-  def image_vote_link(image, vote)
-    current_vote = image.users_vote(User.current)
+  def image_vote_link(user, image, vote)
+    current_vote = image.users_vote(user)
     vote_text = if vote.zero?
                   "(x)"
                 else

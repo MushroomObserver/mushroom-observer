@@ -363,7 +363,7 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
 
   def notify_admins_of_new_herbarium
     QueuedEmail::Webmaster.create_email(
-      sender_email: @user.email,
+      @user,
       subject: "New Herbarium",
       content: "User created a new herbarium:\n" \
                "Name: #{@herbarium.name} (#{@herbarium.code})\n" \
