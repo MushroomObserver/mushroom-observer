@@ -267,40 +267,39 @@ module Report
 
     def distance_from_obs_lat_lng_to_farthest_corner(row)
       obs = obs(row)
-      loc = obs.location
-      distance_to_farthest_corner(obs(row).lat, obs(row).lng, loc)
+      distance_to_farthest_corner(obs(row).lat, obs(row).lng, row)
     end
 
     def distance_from_center_to_farthest_corner(row)
       loc = obs(row).location
       return nil if loc.blank?
 
-      distance_to_farthest_corner(loc.center_lat, loc.center_lng, loc)
+      distance_to_farthest_corner(loc.center_lat, loc.center_lng, row)
     end
 
-    def distance_to_farthest_corner(lat, lng, loc)
+    def distance_to_farthest_corner(lat, lng, row)
       [
-        distance_to_ne_corner(lat, lng, loc),
-        distance_to_se_corner(lat, lng, loc),
-        distance_to_nw_corner(lat, lng, loc),
-        distance_to_sw_corner(lat, lng, loc)
+        distance_to_ne_corner(lat, lng, row),
+        distance_to_se_corner(lat, lng, row),
+        distance_to_nw_corner(lat, lng, row),
+        distance_to_sw_corner(lat, lng, row)
       ].max.to_s
     end
 
-    def distance_to_ne_corner(lat, lng, loc)
-      Haversine.distance(lat, lng, loc.north, loc.east).to_meters.round
+    def distance_to_ne_corner(lat, lng, row)
+      Haversine.distance(lat, lng, row.loc_north, row.loc_east).to_meters.round
     end
 
-    def distance_to_se_corner(lat, lng, loc)
-      Haversine.distance(lat, lng, loc.south, loc.east).to_meters.round
+    def distance_to_se_corner(lat, lng, row)
+      Haversine.distance(lat, lng, row.loc_south, row.loc_east).to_meters.round
     end
 
-    def distance_to_nw_corner(lat, lng, loc)
-      Haversine.distance(lat, lng, loc.north, loc.west).to_meters.round
+    def distance_to_nw_corner(lat, lng, row)
+      Haversine.distance(lat, lng, row.loc_north, row.loc_west).to_meters.round
     end
 
-    def distance_to_sw_corner(lat, lng, loc)
-      Haversine.distance(lat, lng, loc.south, loc.west).to_meters.round
+    def distance_to_sw_corner(lat, lng, row)
+      Haversine.distance(lat, lng, row.loc_south, row.loc_west).to_meters.round
     end
 
     def explode_notes(row)
