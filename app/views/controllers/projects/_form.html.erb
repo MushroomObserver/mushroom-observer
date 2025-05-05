@@ -1,4 +1,5 @@
-<%= form_with(model: @project, id: "project_form") do |f| %>
+<%= form_with(model: @project,
+              html: { multipart: true }, id: "project_form") do |f| %>
 
   <%= submit_button(form: f, button: button, center: true) %>
 
