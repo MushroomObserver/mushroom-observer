@@ -93,7 +93,7 @@ module Report
     # The author of the valid, unqualified sciname
     def scientific_name_authorship(row)
       if qualified_name?(row)
-        if obs(row).name.provisional?
+        if provisional?(row)
           ""
         else
           # For MO Group or sensu x names, MCP wants:
@@ -116,9 +116,7 @@ module Report
     def identification_qualifier(row)
       return nil unless qualified_name?(row)
       return "group #{row.name_author}".strip if row.name_rank == "Group"
-      if obs(row).name.provisional?
-        return provisional_identification_qualifier(row)
-      end
+      return provisional_identification_qualifier(row) if provisional?(row)
 
       row.name_author&.match(/sensu.*/)&.[](0)
     end
@@ -230,12 +228,27 @@ module Report
     def qualified_name?(row)
       row.name_rank == "Group" ||
         sensu_non_stricto?(row) ||
-        obs(row).name.provisional?
+        provisional?(row)
     end
 
     def sensu_non_stricto?(row)
       row.name_author.present? &&
         row.name_author.match(/sensu(?!.*stricto)/)
+    end
+
+    def provisional?(row)
+      return true if standard_provisional?(row)
+      return true if explicit_provisional?(row)
+
+      false
+    end
+
+    def standard_provisional?(row)
+      row.name_text_name.match?(/['"]/)
+    end
+
+    def explicit_provisional?(row)
+      row.name_author&.match?(/ (prov|crypt)\./)
     end
 
     def unqualified_name(row)
