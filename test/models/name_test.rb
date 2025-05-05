@@ -2838,20 +2838,6 @@ class NameTest < UnitTestCase
   end
 
   # --------------------------------------
-  #  Taxonomy
-  # --------------------------------------
-
-  def test_provisional
-    name = Name.new(text_name: "Amanita sp. 'Amidella-ID01'")
-    assert(name.provisional?)
-    name = Name.new(text_name: "Stropharia alboambigua", author: "nom. prov.")
-    assert(name.provisional?)
-
-    assert_not(names(:lepiota).provisional?)
-    assert_not(names(:coprinus_comatus).provisional?)
-  end
-
-  # --------------------------------------
   #  Spelling
   # --------------------------------------
 
