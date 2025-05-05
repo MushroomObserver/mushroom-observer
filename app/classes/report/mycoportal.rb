@@ -85,7 +85,7 @@ module Report
     def sciname(row)
       text_name = row.name_text_name
       # The last word in text_name could be Group or Complex
-      return text_name_without_last_word(text_name) if row.name_rank == "Group"
+      return text_name_without_last_word(text_name) if group?(row)
 
       text_name
     end
@@ -115,7 +115,7 @@ module Report
     # Examples: nom. prov., crypt. temp., group, sensu lato, sensu auct.
     def identification_qualifier(row)
       return nil unless qualified_name?(row)
-      return "group #{row.name_author}".strip if row.name_rank == "Group"
+      return "group #{row.name_author}".strip if group?(row)
       return provisional_identification_qualifier(row) if provisional?(row)
 
       row.name_author&.match(/sensu.*/)&.[](0)
@@ -221,12 +221,16 @@ module Report
       Observation.find(row.obs_id)
     end
 
+    def group?(row)
+      row.name_rank == "Group"
+    end
+
     def text_name_without_last_word(text_name)
       text_name.split[0...-1].join(" ")
     end
 
     def qualified_name?(row)
-      row.name_rank == "Group" ||
+      group?(row) ||
         sensu_non_stricto?(row) ||
         provisional?(row)
     end
@@ -252,7 +256,7 @@ module Report
     end
 
     def unqualified_name(row)
-      if row.name_rank == "Group"
+      if group?(row)
         # For groups, MO appends Group, Complex, etc. to the text_name
         # Remove the last word from the text_name to get the binomial
         mono_or_binomial = text_name_without_last_word(row.name_text_name)
