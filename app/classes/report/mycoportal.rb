@@ -92,22 +92,20 @@ module Report
 
     # The author of the valid, unqualified sciname
     def scientific_name_authorship(row)
-      if qualified_name?(row)
-        if provisional?(row)
-          ""
-        else
-          # For MO Group or sensu x names, MCP wants:
-          # sciname: valid, unqualified name
-          # scientificNameAuthorship: author of valid, unqualified name
-          # plus an identification qualifier. Example:
-          # MO text_name: Agaricales sensu lato
-          #   sciname: Agaricales
-          #   scientificNameAuthorship: Underw.
-          #   identificationQualifier: sensu lato
-          unqualified_name(row).try(:author)
-        end
+      return row.name_author unless qualified_name?(row)
+
+      if provisional?(row)
+        ""
       else
-        row.name_author
+        # For MO Group or sensu x names, MCP wants:
+        # sciname: valid, unqualified name
+        # scientificNameAuthorship: author of valid, unqualified name
+        # plus an identification qualifier. Example:
+        # MO text_name: Agaricales sensu lato
+        #   sciname: Agaricales
+        #   scientificNameAuthorship: Underw.
+        #   identificationQualifier: sensu lato
+        unqualified_name(row).try(:author)
       end
     end
 
@@ -127,8 +125,7 @@ module Report
         ""
       else
         collector_ids(row).split("\n").
-          min_by(&:to_i).
-          split("\t").last
+          min_by(&:to_i).split("\t").last
       end
     end
 
@@ -171,8 +168,7 @@ module Report
       if row.loc_id.blank?
         # Cannot calculate uncertainty without a defined location
         nil
-      elsif obs(row).gps_hidden? &&
-            obs(row).lat
+      elsif obs(row).gps_hidden? && obs(row).lat
         distance_from_obs_lat_lng_to_farthest_corner(row)
       elsif obs(row).lat.blank?
         distance_from_center_to_farthest_corner(row)
@@ -284,53 +280,44 @@ module Report
 
     def distance_from_obs_lat_lng_to_farthest_corner(row)
       obs = obs(row)
-      distance_to_farthest_corner(obs.lat, obs.lng, row)
+      distance_to_farthest_corner(obs.lat, obs.lng, loc_box(row))
     end
 
     def distance_from_center_to_farthest_corner(row)
       return nil if row.obs_id.blank?
 
-      distance_to_farthest_corner(center_lat(row), center_lng(row), row)
+      center = loc_box(row).center
+      distance_to_farthest_corner(center.first, center.last, loc_box(row))
     end
 
-    def center_lat(row)
-      (row.loc_north + row.loc_south) / 2.0
+    def loc_box(row)
+      Mappable::Box.new(north: row.loc_north, south: row.loc_south,
+                        east: row.loc_east, west: row.loc_west)
     end
 
-    def center_lng(row)
-      lng = (row.loc_east + row.loc_west) / 2.0
-      if row.loc_west > row.loc_east && lng.negative?
-        lng + 180
-      elsif row.loc_west > row.loc_east && lng.positive?
-        lng - 180
-      else
-        lng
-      end
-    end
-
-    def distance_to_farthest_corner(lat, lng, row)
+    def distance_to_farthest_corner(lat, lng, box)
       [
-        distance_to_ne_corner(lat, lng, row),
-        distance_to_se_corner(lat, lng, row),
-        distance_to_nw_corner(lat, lng, row),
-        distance_to_sw_corner(lat, lng, row)
+        distance_to_ne_corner(lat, lng, box),
+        distance_to_se_corner(lat, lng, box),
+        distance_to_nw_corner(lat, lng, box),
+        distance_to_sw_corner(lat, lng, box)
       ].max.to_s
     end
 
-    def distance_to_ne_corner(lat, lng, row)
-      Haversine.distance(lat, lng, row.loc_north, row.loc_east).to_meters.round
+    def distance_to_ne_corner(lat, lng, box)
+      Haversine.distance(lat, lng, box.north, box.east).to_meters.round
     end
 
-    def distance_to_se_corner(lat, lng, row)
-      Haversine.distance(lat, lng, row.loc_south, row.loc_east).to_meters.round
+    def distance_to_se_corner(lat, lng, box)
+      Haversine.distance(lat, lng, box.south, box.east).to_meters.round
     end
 
-    def distance_to_nw_corner(lat, lng, row)
-      Haversine.distance(lat, lng, row.loc_north, row.loc_west).to_meters.round
+    def distance_to_nw_corner(lat, lng, box)
+      Haversine.distance(lat, lng, box.north, box.west).to_meters.round
     end
 
-    def distance_to_sw_corner(lat, lng, row)
-      Haversine.distance(lat, lng, row.loc_south, row.loc_west).to_meters.round
+    def distance_to_sw_corner(lat, lng, box)
+      Haversine.distance(lat, lng, box.south, box.west).to_meters.round
     end
 
     def explode_notes(row)
