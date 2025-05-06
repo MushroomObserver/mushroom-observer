@@ -3385,6 +3385,8 @@
   change_member_status_remove_member_help: Remove Member - Removes all member and admin privileges for a project.  [:user] will no longer be able view or create draft names for this project.  They will not be able to perform any admin functions.
   change_member_status_denied: Only the admins for a project can change member permissions.
   change_member_status_title: Changing [:user] Status of [name] for [title]
+  change_member_add_obs: Add My Observations
+  change_member_add_obs_flash: Added [count] Observations
   change_member_hidden_gps_trust: Share Hidden GPS
   change_member_hidden_gps_trust_flash: You now trust admins of this project with hidden GPS data for associated observations
   change_member_editing_trust: Allow Editing

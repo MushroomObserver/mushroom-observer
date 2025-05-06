@@ -133,9 +133,31 @@ module Projects
         flash_notice(:change_member_editing_trust_flash.l)
         set_trust(project, candidate, "editing")
         true
+      elsif params[:commit] == :change_member_add_obs.l
+        count = add_observations(project, candidate)
+        flash_notice(:change_member_add_obs_flash.t(count: count))
+        true
       else
         false
       end
+    end
+
+    def add_observations(project, candidate)
+      # Can't use candidate.observations due to a bug in in_box
+      obs = Observation.all
+      loc = project.location
+      if loc
+        obs = obs.in_box(north: loc.north, south: loc.south,
+                         east: loc.east, west: loc.west)
+      end
+      if project.start_date && project.end_date
+        obs = obs.found_between(project.start_date.strftime("%Y-%m,-%d"),
+                                project.end_date.strftime("%Y-%m,-%d"))
+      end
+      obs = obs.where(user: candidate)
+      before = project.observations.count
+      project.add_observations(obs)
+      project.observations.count - before
     end
 
     def set_trust(project, user, trust_level)
