@@ -128,8 +128,7 @@ class Comment < AbstractModel
 
   broadcasts_to(->(comment) { [comment.target, :comments] },
                 inserts_by: :prepend, partial: "comments/comment",
-                locals: { controls: true },
-                target: "comments")
+                locals: { controls: true }, target: "comments")
 
   after_create :notify_users
   after_create :oil_and_water
