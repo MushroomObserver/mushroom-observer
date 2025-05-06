@@ -563,7 +563,7 @@ class ProjectsControllerTest < FunctionalTestCase
     params = build_params("With background", "With background")
     project = projects(:eol_project)
     params[:id] = project.id
-    params[:project][:upload_image] = file
+    params[:upload][:image] = file
     File.stub(:rename, false) do
       login("rolf", "testpassword")
       put(:update, params: params)
@@ -586,7 +586,7 @@ class ProjectsControllerTest < FunctionalTestCase
     params = build_params("Bad background", "Bad background")
     project = projects(:eol_project)
     params[:id] = project.id
-    params[:project][:upload_image] = file
+    params[:upload][:image] = file
     image = images(:peltigera_image)
     image.stub(:process_image, false) do
       File.stub(:rename, false) do
@@ -607,7 +607,7 @@ class ProjectsControllerTest < FunctionalTestCase
     params = build_params("Bad background", "Bad background")
     project = projects(:eol_project)
     params[:id] = project.id
-    params[:project][:upload_image] = file
+    params[:upload][:image] = file
     image = images(:peltigera_image)
     image.stub(:save, false) do
       File.stub(:rename, false) do
