@@ -174,7 +174,8 @@ class ObservationsController
         project = find_or_goto_index(Project, params[:project].to_s)
       )
 
-      query = create_query(:Observation, projects: project)
+      query = create_query(:Observation, projects: project,
+                           order_by: "thumbnail_quality")
       @project = project
       [query, { always_index: true }]
     end
