@@ -434,7 +434,6 @@ class ReportTest < UnitTestCase
   def test_mycoportal_agaricus_campestrus_obs
     obs = observations(:agaricus_campestrus_obs)
     expect = hashed_expect(obs).merge(
-      scientificNameAuthorship: "L.",
       occurrenceRemarks: "From somewhere else"
     ).values
 
@@ -489,7 +488,6 @@ class ReportTest < UnitTestCase
 
     expect = hashed_expect(obs).merge(
       sciname: "Boletus edulis",
-      scientificNameAuthorship: "Bull.",
       identificationQualifier: "group"
     ).values
 
@@ -522,7 +520,6 @@ class ReportTest < UnitTestCase
 
     expect = hashed_expect(obs).merge(
       sciname: unqualified_name.text_name,
-      scientificNameAuthorship: unqualified_name.author,
       identificationQualifier: "group sensu Besette et al."
     ).values
 
@@ -567,7 +564,6 @@ class ReportTest < UnitTestCase
 
     expect = hashed_expect(obs).merge(
       sciname: "Gymnopus bakerensis",
-      scientificNameAuthorship: "",
       identificationQualifier: "(A.H. Sm.) auct. comb. prov."
     ).values
 
@@ -591,7 +587,6 @@ class ReportTest < UnitTestCase
 
     expect = hashed_expect(obs).merge(
       sciname: "Agaricus sp. 'IN01'",
-      scientificNameAuthorship: "",
       identificationQualifier: "S.D. Russell crypt. temp."
     ).values
 
@@ -606,7 +601,6 @@ class ReportTest < UnitTestCase
                               name: name)
 
     expect = hashed_expect(obs).merge(
-      scientificNameAuthorship: names(:coprinus).author,
       identificationQualifier: "sensu lato"
     ).values
 
@@ -709,7 +703,6 @@ class ReportTest < UnitTestCase
       basisOfRecord: "HumanObservation",
       catalogNumber: "MUOB #{obs.id}",
       sciname: obs.text_name,
-      scientificNameAuthorship: obs.name.author,
       identificationQualifier: "",
       recordedBy: obs.user.legal_name,
       recordNumber: obs.collection_numbers.first&.number || "",

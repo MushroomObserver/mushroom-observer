@@ -27,7 +27,6 @@ module Report
         "basisOfRecord", # : "HumanObservation",
         "catalogNumber", # "MUOB" + space + observation.id"
         "sciname",
-        "scientificNameAuthorship",
         "identificationQualifier",
         "recordedBy",
         "recordNumber", # collection no. assigned to specimen by the collector
@@ -57,7 +56,6 @@ module Report
         "HumanObservation", # basisOfRecord
         "MUOB #{row.obs_id}", # catalogNumber
         sciname(row), # (mono- or binomial without author)
-        scientific_name_authorship(row),
         identification_qualifier(row), # group, nom. prov., etc.
         row.user_name_or_login, # recordedBy
         record_number(row), # recordNumber
@@ -88,25 +86,6 @@ module Report
       return text_name_without_last_word(text_name) if group?(row)
 
       text_name
-    end
-
-    # The author of the valid, unqualified sciname
-    def scientific_name_authorship(row)
-      return row.name_author unless qualified_name?(row)
-
-      if provisional?(row)
-        ""
-      else
-        # For MO Group or sensu x names, MCP wants:
-        # sciname: valid, unqualified name
-        # scientificNameAuthorship: author of valid, unqualified name
-        # plus an identification qualifier. Example:
-        # MO text_name: Agaricales sensu lato
-        #   sciname: Agaricales
-        #   scientificNameAuthorship: Underw.
-        #   identificationQualifier: sensu lato
-        unqualified_name(row).try(:author)
-      end
     end
 
     # Qualifies unpublished MO text_name.
@@ -249,23 +228,6 @@ module Report
 
     def explicit_provisional?(row)
       row.name_author&.match?(/ (prov|crypt)\./)
-    end
-
-    def unqualified_name(row)
-      if group?(row)
-        # For groups, MO appends Group, Complex, etc. to the text_name
-        # Remove the last word from the text_name to get the binomial
-        mono_or_binomial = text_name_without_last_word(row.name_text_name)
-        # return the author of the non-group name
-        Name.find_by(text_name: mono_or_binomial)
-      else
-        # For name sensu xxx (the other kind of qualified name with an author)
-        # Return the first un-deprecated non-sensu matching name
-        Name.where(text_name: row.name_text_name).
-          where.not(Name[:author] =~ /sensu/).
-          order(deprecated: :asc).
-          first
-      end
     end
 
     def provisional_identification_qualifier(row)
