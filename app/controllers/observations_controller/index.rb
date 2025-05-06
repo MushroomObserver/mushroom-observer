@@ -175,7 +175,7 @@ class ObservationsController
       )
 
       query = create_query(:Observation, projects: project,
-                           order_by: "thumbnail_quality")
+                                         order_by: "thumbnail_quality")
       @project = project
       [query, { always_index: true }]
     end
