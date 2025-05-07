@@ -71,7 +71,7 @@ module Mappable
     # each time combining points and boxes which are the same.  In the end, it
     # rounds to nearest 90°, so it is guaranteed(?) to reach the target minimum
     # number of objects.
-    PRECISION = [
+    private_constant PRECISION = [
       10_000,
       5000,
       2000,
@@ -92,8 +92,8 @@ module Mappable
       1.0 / 50,
       1.0 / 90
     ].freeze
-    MAX_PRECISION = PRECISION.first
-    MIN_PRECISION = PRECISION.last
+    private_constant MAX_PRECISION = PRECISION.first
+    private_constant MIN_PRECISION = PRECISION.last
 
     def next_precision(prec)
       PRECISION[PRECISION.index(prec) + 1] || 0

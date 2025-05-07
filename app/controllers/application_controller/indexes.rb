@@ -449,7 +449,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     (redirect || controller.name).to_s
   end
 
-  REDIRECT_FALLBACK_MODELS = {
+  private_constant REDIRECT_FALLBACK_MODELS = {
     account: RssLog,
     comment: Comment,
     image: Image,

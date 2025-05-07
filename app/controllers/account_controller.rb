@@ -112,16 +112,19 @@ class AccountController < ApplicationController
   end
 
   # Some recurring patterns we've noticed
-  BOGUS_EMAILS = / namnerbca\.com |
-                   0mg0mg0mg |
-                   yourmail@gmail\.com |
-                   @mnawl.sibicomail\.com
-                   /ix
+  private_constant BOGUS_EMAILS = /
+    namnerbca\.com |
+    0mg0mg0mg |
+    yourmail@gmail\.com |
+    @mnawl.sibicomail\.com
+  /ix
 
   # Some recurring patterns we've noticed
-  BOGUS_LOGINS = / houghgype |
-                   uplilla |
-                   vemslons /ix
+  private_constant BOGUS_LOGINS = /
+    houghgype |
+    uplilla |
+    vemslons
+  /ix
 
   def evil_signup_credentials?
     bogus_email? || bogus_login?

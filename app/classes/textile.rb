@@ -217,7 +217,7 @@ class Textile < String
     convert_implicit_terms_to_tagged_glossary_terms!
   end
 
-  MARKUP_TO_TAG = {
+  private_constant MARKUP_TO_TAG = {
     comment: "COMMENT",
     glossary_term: "GLOSSARY_TERM",
     image: "IMAGE",
@@ -236,23 +236,22 @@ class Textile < String
   }.freeze
 
   # case-insenstive match any of the non-Name markup tags
-  NON_NAME_LINK_PATTERN =
-    /#{(MARKUP_TO_TAG.keys - [:name]).map(&:to_s).join("|")}/i
+  private_constant NON_NAME_LINK_PATTERN =
+                     /#{(MARKUP_TO_TAG.keys - [:name]).map(&:to_s).join("|")}/i
 
-  NAME_LINK_PATTERN =
-    %r{
-      (?<prefix> ^|\W) # capture start of string or non-word character
-      (?: \**_+) # any asterisks then at least one underscore
-      (?! #{NON_NAME_LINK_PATTERN}\ ) # not a link to a non-Name object
-      (?<formatted_label> [^_]+) # capture all non-underscores
-      (?: _+\**) # at least one underscore then any asterisks
-      (?= # not followed by
-        (?: s|ish|like)? # optional ns, ish, or like, then
-        (?: \W|\Z) # non-word char or end of string
-      )
+  private_constant NAME_LINK_PATTERN = %r{
+    (?<prefix> ^|\W) # capture start of string or non-word character
+    (?: \**_+) # any asterisks then at least one underscore
+    (?! #{NON_NAME_LINK_PATTERN}\ ) # not a link to a non-Name object
+    (?<formatted_label> [^_]+) # capture all non-underscores
+    (?: _+\**) # at least one underscore then any asterisks
+    (?= # not followed by
+      (?: s|ish|like)? # optional ns, ish, or like, then
+      (?: \W|\Z) # non-word char or end of string
+    )
 
-      (?! (?: </[a-z]+>)) # discard match if followed by html closing tag
-    }x
+    (?! (?: </[a-z]+>)) # discard match if followed by html closing tag
+  }x
 
   # Convert __Names__ to links in a textile string.
   def convert_name_links_to_tagged_objects!
@@ -346,20 +345,19 @@ class Textile < String
       sub(/ sp\.$/, "")
   end
 
-  OTHER_LINK_PATTERN =
-    %r{
-      (?<prefix> ^|\W)
-      (?: _+)
-      (?<marked_type>
-        [a-zA-Z]+ # model name or abbr
-        (?: _[a-zA-Z]+)? # optionally including underscores
-      )
-      \s+
-      (?<id> [^_\s](?:[^_\n]+[^_\s])?) # id -- integer or string
-      (?: _+)
+  private_constant OTHER_LINK_PATTERN = %r{
+    (?<prefix> ^|\W)
+    (?: _+)
+    (?<marked_type>
+      [a-zA-Z]+ # model name or abbr
+      (?: _[a-zA-Z]+)? # optionally including underscores
+    )
+    \s+
+    (?<id> [^_\s](?:[^_\n]+[^_\s])?) # id -- integer or string
+    (?: _+)
 
-      (?! (?: \w|</[a-z]+>)) # discard if trailed by word char or html close tag
-    }x
+    (?! (?: \w|</[a-z]+>)) # discard if trailed by word char or html close tag
+  }x
 
   # Convert _object name_ and _object id_ to a textile string.
   def convert_other_links_to_tagged_objects!
@@ -419,7 +417,7 @@ class Textile < String
   # https://github.com/MushroomObserver/mushroom-observer/pull/1528#issuecomment-1608114858
   # rubocop:disable Style/RegexpLiteral
   # cop gives false positive
-  IMPLICIT_TERM_PATTERN = /
+  private_constant IMPLICIT_TERM_PATTERN = /
     (?<! x{NAME) # discard match if it follows MO internal object tag
     (?<! x{GLOSSARY_TERM)
     (?<! x{OBSERVATION)
@@ -480,7 +478,7 @@ class Textile < String
     url.length > URL_TRUNCATION_LENGTH && !url.starts_with?(MO.http_domain)
   end
 
-  OBJECT_TAG_PATTERN = /
+  private_constant OBJECT_TAG_PATTERN = /
     x\{
         (?<type> [A-Z]+_?[A-Z]+)
         \s+
