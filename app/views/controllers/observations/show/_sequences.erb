@@ -15,9 +15,7 @@ tag.div(
     concat(sequences.any? ? "#{:Sequences.l}: " :
             "#{:show_observation_no_sequences.l} ")
     concat(
-      ["[",
-        modal_link_to("sequence", *new_sequence_tab(obs)),
-        "]"].safe_join
+      ["[", modal_link_to("sequence", *new_sequence_tab(obs)), "]"].safe_join
     ) if user
   end) if user || sequences.any?
 
