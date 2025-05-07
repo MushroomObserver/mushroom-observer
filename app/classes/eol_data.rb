@@ -129,18 +129,16 @@ class EolData
     most_desirable
   end
 
-  DESCRIPTION_CONDITIONS = %(
-    FROM name_descriptions, names
-    WHERE name_descriptions.name_id = names.id
-    AND names.ok_for_export
-    AND NOT names.deprecated
-    AND name_descriptions.review_status in (
-      #{NameDescription.review_statuses["vetted"]},
-      #{NameDescription.review_statuses["unvetted"]}
-    )
-    AND name_descriptions.ok_for_export
-    AND name_descriptions.public
-  ).freeze
+  DESCRIPTION_CONDITIONS = %(FROM name_descriptions, names
+                             WHERE name_descriptions.name_id = names.id
+                             AND names.ok_for_export
+                             AND NOT names.deprecated
+                             AND name_descriptions.review_status in (
+                              #{NameDescription.review_statuses["vetted"]},
+                              #{NameDescription.review_statuses["unvetted"]}
+                             )
+                             AND name_descriptions.ok_for_export
+                             AND name_descriptions.public).freeze
   private_constant(:DESCRIPTION_CONDITIONS)
 
   def description_names
