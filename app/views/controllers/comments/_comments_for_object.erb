@@ -5,9 +5,8 @@
   end
 %>
 
-<%= turbo_stream_from(object, :comments) %>
+<%# turbo_stream_from(object, :comments) %>
 <%# NOTE: #comments is the inner list-group, not the whole panel %>
-<%# It's a turbo-frame because section-update needs to listen to frame %>
 
 <%=
 tag.div(

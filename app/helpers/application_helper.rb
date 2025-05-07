@@ -57,25 +57,23 @@ module ApplicationHelper
   end
 
   # This can be called to display flash notices either in the page or a modal.
-  # Send it an html `id` to be able to find the notices via JS later.
   def flash_notices_html
     return "" unless flash_notices?
 
+    notices = flash_get_notices
     alert_class = case flash_notice_level
                   when 0 then "alert-success"
                   when 1 then "alert-warning"
                   when 2 then "alert-danger"
                   end
-
-    notices = flash_get_notices
     flash_clear
 
-    tag.div(notices, id: "flash_notices",
-                     class: class_names("alert mt-3", alert_class))
+    render(partial: "application/app/flash_notices",
+           locals: { notices:, alert_class: })
   end
 
   def render_turbo_stream_flash_messages
-    turbo_stream.replace("flash", partial: "application/app/flash_notices")
+    turbo_stream.update("page_flash") { flash_notices_html }
   end
 
   # Returns a string that indicates the current user/logged_in/admin status.
