@@ -47,9 +47,10 @@ class CountryCounter
     end
   end
 
-  private_constant UNDERSTOOD_COUNTRIES = Set.new(
+  UNDERSTOOD_COUNTRIES = Set.new(
     load_param_hash(MO.location_countries_file)
   )
+  private_constant(:UNDERSTOOD_COUNTRIES)
 
   def count(country)
     @counts[country] = @counts[country] ? @counts[country] + 1 : 1

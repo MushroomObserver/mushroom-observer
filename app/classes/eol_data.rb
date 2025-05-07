@@ -129,7 +129,7 @@ class EolData
     most_desirable
   end
 
-  private_constant DESCRIPTION_CONDITIONS = %(
+  DESCRIPTION_CONDITIONS = %(
     FROM name_descriptions, names
     WHERE name_descriptions.name_id = names.id
     AND names.ok_for_export
@@ -141,6 +141,7 @@ class EolData
     AND name_descriptions.ok_for_export
     AND name_descriptions.public
   ).freeze
+  private_constant(:DESCRIPTION_CONDITIONS)
 
   def description_names
     get_sorted_names(DESCRIPTION_CONDITIONS)
@@ -164,7 +165,7 @@ class EolData
     )
   end
 
-  private_constant IMAGE_CONDITIONS = %(
+  IMAGE_CONDITIONS = %(
     FROM observations, observation_images, images, names
     WHERE observations.name_id = names.id
     AND observations.vote_cache >= 2.4
@@ -178,12 +179,13 @@ class EolData
       "Form", "Variety", "Subspecies", "Species", "Genus"
     ).join(",")})
   ).freeze
+  private_constant(:IMAGE_CONDITIONS)
 
   def image_names
     get_sorted_names(IMAGE_CONDITIONS)
   end
 
-  private_constant GLOSSARY_TERM_CONDITIONS = %(
+  GLOSSARY_TERM_CONDITIONS = %(
     FROM images, observation_images, observations, names, glossary_terms
     LEFT OUTER JOIN glossary_term_images
     ON glossary_terms.id = glossary_term_images.glossary_term_id
@@ -198,7 +200,7 @@ class EolData
     AND names.ok_for_export
     AND NOT names.deprecated
   )
-  private_constant :GLOSSARY_TERM_CONDITIONS
+  private_constant(:GLOSSARY_TERM_CONDITIONS)
 
   def glossary_term_names
     get_sorted_names(GLOSSARY_TERM_CONDITIONS)

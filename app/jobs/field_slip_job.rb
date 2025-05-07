@@ -21,7 +21,8 @@ class FieldSlipJob < ApplicationJob
 
   private
 
-  private_constant MAX_JOB_AGE = 1.week
+  MAX_JOB_AGE = 1.week
+  private_constant(:MAX_JOB_AGE)
 
   def cleanup_old_pdfs(tracker_id)
     FieldSlipJobTracker.where.not(id: tracker_id).find_each do |tracker|
