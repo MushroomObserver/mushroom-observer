@@ -308,14 +308,13 @@ class CommentsController < ApplicationController
     # Comment broadcasts are sent from the model
     # return if request.format.symbol == :turbo_stream
     respond_to do |format|
-      format.turbo_stream do
-        case action_name
-        when "create", "update"
-          render(turbo_stream: turbo_stream.prepend("comments", @comment))
-        when "destroy"
-          render(turbo_stream: turbo_stream.remove(@comment))
-        end
-      end
+      format.turbo_stream { head(:ok) }
+        # case action_name
+        # when "create", "update"
+        #   render(turbo_stream: turbo_stream.prepend("comments", @comment))
+        # when "destroy"
+        #   render(turbo_stream: turbo_stream.remove(@comment))
+        # end
       format.html do
         redirect_with_query(controller: @target.show_controller,
                             action: @target.show_action, id: @target.id)
