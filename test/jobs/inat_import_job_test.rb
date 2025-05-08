@@ -66,7 +66,7 @@ class InatImportJobTest < ActiveJob::TestCase
     used_references = 2
     assert(
       proposed_name.reasons.key?(used_references),
-      "Proposed consensus Name reason should be #{:naming_reason_label_2.l}" # rubocop:disable Naming/VariableNumber
+      "Proposed consensus Name reason should be #{:naming_reason_label_2.l}"
     )
     proposed_name_notes = proposed_name[:reasons][used_references]
     suggesting_inat_user = JSON.parse(mock_inat_response)["results"].
@@ -135,7 +135,7 @@ class InatImportJobTest < ActiveJob::TestCase
     used_references = 2
     assert(
       proposed_name.reasons.key?(used_references),
-      "Proposed Name reason should be #{:naming_reason_label_2.l}" # rubocop:disable Naming/VariableNumber
+      "Proposed Name reason should be #{:naming_reason_label_2.l}"
     )
     proposed_name_notes = proposed_name[:reasons][used_references]
     suggesting_inat_user = JSON.parse(mock_inat_response)["results"].
@@ -386,7 +386,7 @@ class InatImportJobTest < ActiveJob::TestCase
     used_references = 2
     assert(
       proposed_name.reasons.key?(used_references),
-      "Proposed Name reason should be #{:naming_reason_label_2.l}" # rubocop:disable Naming/VariableNumber
+      "Proposed Name reason should be #{:naming_reason_label_2.l}"
     )
     proposed_name_notes = proposed_name[:reasons][used_references]
     provisional_field =
