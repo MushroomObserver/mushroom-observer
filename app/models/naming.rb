@@ -44,6 +44,8 @@
 #
 ################################################################################
 class Naming < AbstractModel
+  attr_accessor :current_user
+
   belongs_to :observation
   belongs_to :name
   belongs_to :user

@@ -79,6 +79,18 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     )
   end
 
+  def test_show_with_multiple_images
+    term = glossary_terms(:plane_glossary_term)
+    assert(term.images.size > 1, "Test needs term with multiple images")
+
+    get(:show, params: { id: term.id })
+
+    assert_response(
+      :success,
+      "Glossary Terms with >1 image should be viewable without logging in"
+    )
+  end
+
   def test_show_logged_in
     term = glossary_terms(:square_glossary_term)
     assert_operator(term.version, :>, 1,

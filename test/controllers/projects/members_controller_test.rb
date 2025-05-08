@@ -148,6 +148,35 @@ module Projects
                                   false, true, false, true)
     end
 
+    # member sharing all observations
+    def test_member_add_obs
+      target_user = project_members(:eol_member_katrina).user
+      project = projects(:eol_project)
+      obs_count = project.observations.count
+      params = {
+        project_id: project.id,
+        candidate: target_user.id,
+        commit: :change_member_add_obs.l
+      }
+      put_requires_login(:update, params, target_user.login)
+      assert_equal(obs_count + target_user.observations.count,
+                   project.observations.count)
+    end
+
+    # member sharing matching observations
+    def test_member_add_constrainted_obs
+      target_user = project_members(:eol_member_katrina).user
+      project = projects(:current_project)
+      obs_count = project.observations.count
+      params = {
+        project_id: project.id,
+        candidate: target_user.id,
+        commit: :change_member_add_obs.l
+      }
+      put_requires_login(:update, params, target_user.login)
+      assert(obs_count < project.observations.count)
+    end
+
     # untrusting member trusting
     def test_member_trust
       target_user = project_members(:eol_member_katrina).user

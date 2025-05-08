@@ -2,7 +2,7 @@
 target = comment.target
 user = comment.user
 
-target_name_link = link_to(target.unique_format_name.t, target.show_link_args) \
+target_name_link = link_to(target.user_unique_format_name(@user).t, target.show_link_args) \
                    rescue :comment_list_deleted.t
 target_type = tag.span(target.class.name.to_sym.t, class: "small") \
                        rescue :runtime_object_deleted
@@ -22,7 +22,13 @@ target_type = tag.span(target.class.name.to_sym.t, class: "small") \
         concat(tag.div(comment.summary.tl, class: "font-weight-bold"))
         concat(tag.div(class: "comment-info") do
           concat(tag.span(class: "comment-author text-nowrap") do
-            ["#{:BY.t}: ", user_link(user), " "].safe_join
+            ["#{:BY.t}: ",
+             if defined?(controls) && controls
+               user_link(user)
+             else
+               user.unique_text_name
+             end,
+             " "].safe_join
           end)
           concat(tag.span(class: "text-nowrap",
                           data: { user_specific: comment.user.id }) do

@@ -15,10 +15,12 @@ module ObservationsHelper
   #   Observation nnn: Aaa bbb Author(s) (Site ID)
   #
   # NOTE: Must pass owner naming, or it will be recalculated on every obs.
-  def show_obs_title(obs:, owner_naming: nil)
+  def show_obs_title(obs:, owner_naming: nil, user: nil)
     [
       obs_title_id(obs),
-      obs_title_consensus_name_link(name: obs.name, owner_naming: owner_naming)
+      obs_title_consensus_name_link(name: obs.name,
+                                    owner_naming: owner_naming,
+                                    user:)
     ].safe_join(" ")
   end
 
@@ -29,24 +31,33 @@ module ObservationsHelper
   end
 
   # name portion of Observation title
-  def obs_title_consensus_name_link(name:, owner_naming: nil)
+  def obs_title_consensus_name_link(name:, user:, owner_naming: nil)
     if name.deprecated &&
        (prefer_name = name.best_preferred_synonym).present?
-      obs_title_with_preferred_synonym_link(name, prefer_name)
+      obs_title_with_preferred_synonym_link(name, prefer_name, user)
     else
-      obs_title_name_link(name, owner_naming)
+      obs_title_name_link(name, owner_naming, user)
     end
   end
 
-  def obs_title_with_preferred_synonym_link(name, prefer_name)
-    [
-      link_to_display_name_brief_authors(
-        name, class: "obs_consensus_deprecated_synonym_link_#{name.id}"
-      ),
-      # Differentiate deprecated consensus from preferred name
-      obs_consensus_id_flag,
-      obs_title_preferred_synonym(prefer_name)
-    ].safe_join(" ")
+  def obs_title_with_preferred_synonym_link(name, prefer_name, user)
+    if user
+      [
+        link_to_display_name_brief_authors(
+          name, class: "obs_consensus_deprecated_synonym_link_#{name.id}"
+        ),
+        # Differentiate deprecated consensus from preferred name
+        obs_consensus_id_flag,
+        obs_title_preferred_synonym(prefer_name)
+      ]
+    else
+      [
+        name.display_name_brief_authors.t,
+        # Differentiate deprecated consensus from preferred name
+        obs_consensus_id_flag,
+        prefer_name.display_name_without_authors.t
+      ]
+    end.safe_join(" ")
   end
 
   def obs_title_preferred_synonym(prefer_name)
@@ -61,11 +72,15 @@ module ObservationsHelper
     end
   end
 
-  def obs_title_name_link(name, owner_naming)
+  def obs_title_name_link(name, owner_naming, user)
     text = [
-      link_to_display_name_brief_authors(
-        name, class: "obs_consensus_naming_link_#{name.id}"
-      )
+      if user
+        link_to_display_name_brief_authors(
+          name, class: "obs_consensus_naming_link_#{name.id}"
+        )
+      else
+        name.display_name_brief_authors.t
+      end
     ]
     # Differentiate this Name from Observer Preference
     text << obs_consensus_id_flag if owner_naming
@@ -160,12 +175,12 @@ module ObservationsHelper
   # The following sections of the observation_details partial are also needed as
   # part of the lightbox caption, so that was called on the obs_index as a
   # sub-partial. Here they're converted to helpers to speed up loading of index
-  def observation_details_when_where_who(obs:)
+  def observation_details_when_where_who(obs:, user:)
     [
-      observation_details_when(obs: obs),
-      observation_details_where(obs: obs),
-      observation_details_where_gps(obs: obs),
-      observation_details_who(obs: obs)
+      observation_details_when(obs:),
+      observation_details_where(obs:, user:),
+      observation_details_where_gps(obs:, user:),
+      observation_details_who(obs:, user:)
     ].safe_join
   end
 
@@ -175,7 +190,7 @@ module ObservationsHelper
     end
   end
 
-  def observation_details_where(obs:)
+  def observation_details_where(obs:, user:)
     tag.p(class: "obs-where", id: "observation_where") do
       [
         "#{if obs.is_collection_location
@@ -183,7 +198,11 @@ module ObservationsHelper
            else
              :show_observation_seen_at.t
            end}:",
-        location_link(obs.where, obs.location, nil, true),
+        if user
+          location_link(obs.where, obs.location, nil, true)
+        else
+          obs.where
+        end,
         observation_where_vague_notice(obs: obs)
       ].safe_join(" ")
     end
@@ -199,8 +218,8 @@ module ObservationsHelper
     tag.p(class: "ml-3") { tag.em(title) }
   end
 
-  def observation_details_where_gps(obs:)
-    return "" unless obs.lat
+  def observation_details_where_gps(obs:, user:)
+    return "" unless obs.lat && user
 
     gps_display_link = link_to([obs.display_lat_lng.t,
                                 obs.display_alt.t,
@@ -215,13 +234,17 @@ module ObservationsHelper
     end
   end
 
-  def observation_details_who(obs:)
+  def observation_details_who(obs:, user:)
     obs_user = obs.user
     html = [
       "#{:WHO.t}:",
-      user_link(obs_user)
+      if user
+        user_link(obs_user)
+      else
+        obs_user.unique_text_name
+      end
     ]
-    if obs_user != User.current && !obs_user&.no_emails &&
+    if user && obs_user != User.current && !obs_user&.no_emails &&
        obs_user&.email_general_question
 
       html += [

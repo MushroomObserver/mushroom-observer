@@ -425,7 +425,7 @@ class InatImportJobTest < ActiveJob::TestCase
     new_names.each do |new_name|
       assert_equal(
         @user, new_name.user,
-        "#{new_name.text_name} author should be #{@user.login}"
+        "#{new_name.text_name} owner should be #{@user.login}"
       )
     end
     name = new_names.find_by(rank: "Species")

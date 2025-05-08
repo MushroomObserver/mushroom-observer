@@ -201,7 +201,7 @@ class AbstractModelTest < UnitTestCase
     location_with_notes = locations(:albion)
     RssLog.update(rss_log.id, updated_at: time)
     rss_log.reload
-    location_with_notes.merge(loc)
+    location_with_notes.merge(rolf, loc)
     rss_log.reload
     # (extra line for orphan title)
     assert_rss_log_lines(5, rss_log)
@@ -248,7 +248,7 @@ class AbstractModelTest < UnitTestCase
 
     RssLog.update(rss_log.id, updated_at: time)
     rss_log.reload
-    Name.first.merge(name)
+    Name.first.merge(rolf, name)
     rss_log.reload
     # (extra line for orphan title)
     assert_rss_log_lines(4, rss_log)

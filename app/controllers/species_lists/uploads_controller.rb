@@ -24,7 +24,7 @@ module SpeciesLists
       if check_permission!(@species_list)
         sorter = NameSorter.new
         @species_list.file = params[:species_list][:file]
-        @species_list.process_file_data(sorter)
+        @species_list.process_file_data(@user, sorter)
         init_name_vars_from_sorter(@species_list, sorter)
         init_member_vars_for_edit(@species_list)
         init_project_vars_for_edit(@species_list)

@@ -3,15 +3,6 @@
 # html used in tabsets
 module Tabs
   module ObservationsHelper
-    # assemble links for "tabset" for show_observation
-    # actually a list of links and the interest icons
-    def show_observation_tabs(obs:, user:)
-      [
-        observation_manage_lists_tab(obs, user),
-        *obs_change_tabs(obs)&.reject(&:empty?)
-      ]
-    end
-
     ########################################################################
     # LINKS FOR PANELS
     #
@@ -41,10 +32,10 @@ module Tabs
 
     # uses context_nav_links with extra_args { class: "d-block" }
     # the hiccup here is that list_descriptions is already HTML, an inline list
-    def name_links_on_mo(name:)
+    def name_links_on_mo(user:, name:)
       tabs = context_nav_links(obs_related_name_tabs(name),
                                { class: "d-block" })
-      tabs += obs_name_description_tabs(name)
+      tabs += obs_name_description_tabs(user, name)
       tabs += context_nav_links([occurrence_map_for_name_tab(name)],
                                 { class: "d-block" })
       tabs.reject(&:empty?)
@@ -82,8 +73,8 @@ module Tabs
     end
 
     # from descriptions_helper
-    def obs_name_description_tabs(name)
-      list_descriptions(object: name, type: :name)&.map do |link|
+    def obs_name_description_tabs(user, name)
+      list_descriptions(user: user, object: name, type: :name)&.map do |link|
         tag.div(link)
       end
     end
@@ -97,16 +88,28 @@ module Tabs
     #   ).tab
     # end
 
-    def name_links_web(name:)
-      tabs = context_nav_links(observation_web_name_tabs(name),
+    # def name_links_web(name:)
+    #   tabs = context_nav_links(observation_web_name_tabs(name),
+    #                            { class: "d-block" })
+    #   tabs.reject(&:empty?)
+    # end
+
+    def user_name_links_web(user, name:)
+      tabs = context_nav_links(user_observation_web_name_tabs(user, name),
                                { class: "d-block" })
       tabs.reject(&:empty?)
     end
 
-    def observation_web_name_tabs(name)
+    # def observation_web_name_tabs(name)
+    #   [mycoportal_name_tab(name),
+    #    mycobank_name_search_tab(name),
+    #    google_images_for_name_tab(name)]
+    # end
+
+    def user_observation_web_name_tabs(user, name)
       [mycoportal_name_tab(name),
        mycobank_name_search_tab(name),
-       google_images_for_name_tab(name)]
+       user_google_images_for_name_tab(user, name)]
     end
 
     def observation_hide_thumbnail_map_tab(obs)
@@ -140,13 +143,13 @@ module Tabs
     end
 
     # for debugging
-    def dummy_disable_tab
-      InternalLink.new(
-        "Dummy link",
-        "https://google.com",
-        html_options: { data: { action: "links#disable" } }
-      ).tab
-    end
+    # def dummy_disable_tab
+    #   InternalLink.new(
+    #     "Dummy link",
+    #     "https://google.com",
+    #     html_options: { data: { action: "links#disable" } }
+    #   ).tab
+    # end
 
     def observations_at_where_tabs(query)
       # Add some extra links to the index user is sent to if they click on an
@@ -292,12 +295,12 @@ module Tabs
     #   ).tab
     # end
 
-    def obs_change_tabs(obs)
-      return unless check_permission(obs)
+    # def obs_change_tabs(obs)
+    #   return unless check_permission(obs)
 
-      [edit_observation_tab(obs),
-       destroy_observation_tab(obs)]
-    end
+    #   [edit_observation_tab(obs),
+    #    destroy_observation_tab(obs)]
+    # end
 
     def obs_details_links(obs)
       print_labels_button(obs)
@@ -319,13 +322,13 @@ module Tabs
       ).tab
     end
 
-    def destroy_observation_tab(obs)
-      InternalLink::Model.new(
-        :destroy_object.t(TYPE: Observation),
-        obs, objs,
-        html_options: { button: :destroy }
-      ).tab
-    end
+    # def destroy_observation_tab(obs)
+    #   InternalLink::Model.new(
+    #     :destroy_object.t(TYPE: Observation),
+    #     obs, objs,
+    #     html_options: { button: :destroy }
+    #   ).tab
+    # end
 
     # for show_obs - query is for a single obs label
     def print_labels_button(obs)

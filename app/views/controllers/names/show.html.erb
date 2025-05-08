@@ -1,7 +1,7 @@
 <%
-add_page_title(:show_name_title.t(name: @name.display_name))
+add_page_title(:show_name_title.t(name: @name.user_display_name(@user)))
 
-Textile.register_name(@name)
+Textile.user_register_name(@user, @name)
 add_pager_for(@name)
 add_interest_icons(@user, @name)
 add_context_nav(name_show_tabs(name: @name))

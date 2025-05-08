@@ -108,7 +108,7 @@ module ObservationsController::Create
     return unless @name
 
     @naming.create_reasons(reason, params[:was_js_on] == "yes")
-    save_with_log(@naming)
+    save_with_log(@user, @naming)
     consensus = ::Observation::NamingConsensus.new(@observation.reload)
     consensus.change_vote(@naming, @vote.value) unless @vote.value.nil?
   end

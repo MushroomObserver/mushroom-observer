@@ -54,7 +54,8 @@ module Account
         upload: {
           license_id: licenses(:ccnc25).id,
           copyright_holder: "Someone Else",
-          copyright_year: "2003"
+          copyright_year: "2003",
+          image: file
         }
       }
       File.stub(:rename, false) do

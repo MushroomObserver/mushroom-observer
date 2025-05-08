@@ -15,12 +15,24 @@ class Name::Parse::ParsedName
     @author = params[:author]
   end
 
+  def user_display_name(_user)
+    display_name
+  end
+
   def real_text_name
     Name.display_to_real_text(self)
   end
 
   def real_search_name
     Name.display_to_real_search(self)
+  end
+
+  def user_real_text_name(user)
+    Name.user_display_to_real_text(user, self)
+  end
+
+  def user_real_search_name(user)
+    Name.user_display_to_real_search(user, self)
   end
 
   # Values required to create/modify attributes of Name instance.

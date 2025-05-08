@@ -200,7 +200,7 @@ class API2
     def save_parents(parse)
       return unless parse.parent_name
 
-      parents = Name.find_or_create_name_and_parents(parse.parent_name)
+      parents = Name.find_or_create_name_and_parents(@user, parse.parent_name)
       parents.each { |n| n.save if n&.new_record? }
     end
 
@@ -271,7 +271,7 @@ class API2
       @name   ||= name.text_name
       @author ||= name.author
       @rank   ||= name.rank
-      name.change_text_name(@name, @author, @rank, :save_parents)
+      name.change_text_name(@user, @name, @author, @rank, :save_parents)
     end
 
     def change_deprecated(name)
