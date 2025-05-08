@@ -114,7 +114,7 @@ module Report
 
     # MO notes
     def occurence_remarks(row)
-      return explode_notes(row)[:other] unless obs(row).sequences.any?
+      return explode_notes(row)[:other] unless sequence_ids(row)
 
       "Sequenced; #{explode_notes(row)[:other]}"
     end
@@ -147,9 +147,9 @@ module Report
       if row.loc_id.blank?
         # Cannot calculate uncertainty without a defined location
         nil
-      elsif obs(row).gps_hidden? && obs(row).lat
+      elsif row.obs_lat
         distance_from_obs_lat_lng_to_farthest_corner(row)
-      elsif obs(row).lat.blank?
+      elsif row.obs_lat.blank?
         distance_from_center_to_farthest_corner(row)
       end
     end
@@ -174,6 +174,7 @@ module Report
     def extend_data!(rows)
       add_collector_ids!(rows, 1)
       add_herbarium_accession_numbers!(rows, 2)
+      add_sequence_ids!(rows, 3)
     end
 
     def collector_ids(row)
@@ -182,6 +183,10 @@ module Report
 
     def herbarium_accession_numbers(row)
       row.val(2)
+    end
+
+    def sequence_ids(row)
+      row.val(3)
     end
 
     def sort_before(rows)
@@ -241,8 +246,7 @@ module Report
     end
 
     def distance_from_obs_lat_lng_to_farthest_corner(row)
-      obs = obs(row)
-      distance_to_farthest_corner(obs.lat, obs.lng, loc_box(row))
+      distance_to_farthest_corner(row.obs_lat, row.obs_lng, loc_box(row))
     end
 
     def distance_from_center_to_farthest_corner(row)
