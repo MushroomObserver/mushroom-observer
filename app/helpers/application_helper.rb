@@ -57,6 +57,8 @@ module ApplicationHelper
   end
 
   # This can be called to display flash notices either in the page or a modal.
+  # `flash_notices?` `flash_get_notices` `flash_notice_level` and `flash_clear`
+  # are defined in ApplicationController::FlashNotices.
   def flash_notices_html
     return "" unless flash_notices?
 
