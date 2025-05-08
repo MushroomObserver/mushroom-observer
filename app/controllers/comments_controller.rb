@@ -306,11 +306,15 @@ class CommentsController < ApplicationController
 
   def refresh_comments_or_redirect_to_show
     # Comment broadcasts are sent from the model
+    # return if request.format.symbol == :turbo_stream
     respond_to do |format|
       format.turbo_stream do
-        turbo_stream.close_modal("modal_comment")
-        render(turbo_stream: turbo_stream.prepend("comments", @comment))
-        # turbo_stream.update("page_flash") { flash_notices_html }
+        case action_name
+        when "create", "update"
+          render(turbo_stream: turbo_stream.prepend("comments", @comment))
+        when "destroy"
+          render(turbo_stream: turbo_stream.remove(@comment))
+        end
       end
       format.html do
         redirect_with_query(controller: @target.show_controller,
