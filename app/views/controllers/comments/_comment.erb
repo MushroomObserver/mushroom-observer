@@ -9,9 +9,6 @@ target_type = tag.span(target.class.name.to_sym.t, class: "small") \
                        rescue :runtime_object_deleted
 %>
 
-<%# turbo_stream_from(target, :comment) %>
-<%= turbo_stream.close_modal("modal_comment") %>
-
 <%=
 tag.div(
   class: "list-group-item comment",
