@@ -1,4 +1,4 @@
-<%# locals: (comment: nil, controls: @user) %>
+<%# locals: (comment: nil, controls: @user, show_name: false) %>
 <%
 target = comment.target
 user = comment.user
@@ -10,8 +10,14 @@ target_type = tag.span(target.class.name.to_sym.t, class: "small") \
 %>
 
 <%# turbo_stream_from(target, :comment) %>
+<%= turbo_stream.close_modal("modal_comment") %>
 
-<%= tag.div(class: "list-group-item comment", id: dom_id(comment)) do
+<%=
+tag.div(
+  class: "list-group-item comment",
+  id: dom_id(comment),
+  data: { controller: "section-update" }
+) do
   concat(tag.div(class: "row") do
     [
       tag.div(class: "col-xs-12 col-sm-9 col-lg-10") do
