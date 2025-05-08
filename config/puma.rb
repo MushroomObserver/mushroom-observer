@@ -25,6 +25,7 @@ environment rails_env
 pidfile         "#{app_path}/tmp/pids/puma.pid"
 state_path      "#{app_path}/tmp/pids/puma.state"
 activate_control_app
+plugin :solid_queue
 
 if rails_env == "production"
   on_worker_boot do

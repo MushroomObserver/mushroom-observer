@@ -165,6 +165,7 @@ MushroomObserver::Application.configure do
   config.bot_enabled = true
 
   config.active_job.queue_adapter = :solid_queue
+  config.solid_queue.connects_to = { database: { writing: :queue } }
 
   # Disable Mission Control default HTTP Basic Authentication because
   # we specify AdminController as the base class for Mission Control

@@ -126,7 +126,9 @@ class Comment < AbstractModel
     }, foreign_key: "target_id", inverse_of: :comments
   end
 
-  broadcasts_to(->(comment) { [comment.target, :comments] })
+  broadcasts_to(->(comment) { [comment.target, :comments] },
+                inserts_by: :prepend, partial: "comments/comment",
+                locals: { controls: true }, target: "comments")
 
   after_create :notify_users
   after_create :oil_and_water
