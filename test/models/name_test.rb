@@ -1249,6 +1249,22 @@ class NameTest < UnitTestCase
     )
   end
 
+  def test_name_prov_name_with_periods
+    do_name_parse_test(
+      "Agaricus sp. 'A.G.'",
+      text_name: "Agaricus sp. 'A.G.'",
+      real_text_name: "Agaricus sp. 'A.G.'",
+      search_name: "Agaricus sp. 'A.G.'",
+      real_search_name: "Agaricus sp. 'A.G.'",
+      sort_name: "Agaricus A.G.",
+      display_name: "**__Agaricus__** sp. **__'A.G.'__**",
+      parent_name: "Agaricus",
+      rank: "Species",
+      author: "",
+      deprecated: false
+    )
+  end
+
   def test_name_prov_name_no_quotes
     do_name_parse_test(
       "Pleurotus pulmonarius-PNW02",
