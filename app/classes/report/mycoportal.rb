@@ -193,10 +193,6 @@ module Report
 
     private
 
-    def obs(row)
-      Observation.find(row.obs_id)
-    end
-
     def group?(row)
       row.name_rank == "Group"
     end
