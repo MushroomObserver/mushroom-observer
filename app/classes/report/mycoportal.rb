@@ -144,10 +144,8 @@ module Report
 
     # coordinateUncertaintyInMeters
     def coordinate_uncertainty(row)
-      if row.loc_id.blank?
-        # Cannot calculate uncertainty without a defined location
-        nil
-      elsif row.obs_lat.blank?
+      if row.loc_id.present? &&
+         row.obs_lat.blank?
         distance_from_center_to_farthest_corner(row)
       end
     end
@@ -241,10 +239,6 @@ module Report
       else
         "#{row.name_author} nom.prov."
       end
-    end
-
-    def distance_from_obs_lat_lng_to_farthest_corner(row)
-      distance_to_farthest_corner(row.obs_lat, row.obs_lng, loc_box(row))
     end
 
     def distance_from_center_to_farthest_corner(row)
