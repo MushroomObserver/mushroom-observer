@@ -34,16 +34,19 @@ module Name::Resolve
       names = []
       if output_what.nil? || input_what == output_what
         names = find_or_create_name_and_parents(user, input_what)
-        if names.last
-          names.each do |n|
-            next unless n&.new_record?
-
-            n.inherit_stuff
-            return nil unless n.save_with_log(user, :log_updated_by)
-          end
-        end
+        return nil if names.last && !update_and_save_names(user, names)
       end
       names.last
+    end
+
+    def update_and_save_names(user, names)
+      names.each do |n|
+        next unless n&.new_record?
+
+        n.inherit_stuff
+        return false unless n.save_with_log(user, :log_updated_by)
+      end
+      true
     end
 
     def save_names(user, names, deprecate)
