@@ -39,7 +39,7 @@ module Name::Resolve
             next unless n&.new_record?
 
             n.inherit_stuff
-            n.save_with_log(user, :log_updated_by)
+            return nil unless n.save_with_log(user, :log_updated_by)
           end
         end
       end

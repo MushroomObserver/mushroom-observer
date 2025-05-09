@@ -85,7 +85,7 @@ class Naming
       # has no author.)
       if @names.empty? &&
          (@name = Name.create_needed_names(user, approved_name2, corrected))
-        @names << name
+        @names << name if @name
       end
 
       # No matches -- suggest some correct names to make Debbie happy.
