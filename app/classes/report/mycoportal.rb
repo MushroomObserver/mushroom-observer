@@ -114,7 +114,7 @@ module Report
 
     # MO notes
     def occurence_remarks(row)
-      return explode_notes(row)[:other] unless obs(row).sequences.any?
+      return explode_notes(row)[:other] unless sequence_ids(row)
 
       "Sequenced; #{explode_notes(row)[:other]}"
     end
@@ -144,12 +144,8 @@ module Report
 
     # coordinateUncertaintyInMeters
     def coordinate_uncertainty(row)
-      if row.loc_id.blank?
-        # Cannot calculate uncertainty without a defined location
-        nil
-      elsif obs(row).gps_hidden? && obs(row).lat
-        distance_from_obs_lat_lng_to_farthest_corner(row)
-      elsif obs(row).lat.blank?
+      if row.loc_id.present? &&
+         row.obs_lat.blank?
         distance_from_center_to_farthest_corner(row)
       end
     end
@@ -174,6 +170,7 @@ module Report
     def extend_data!(rows)
       add_collector_ids!(rows, 1)
       add_herbarium_accession_numbers!(rows, 2)
+      add_sequence_ids!(rows, 3)
     end
 
     def collector_ids(row)
@@ -182,6 +179,10 @@ module Report
 
     def herbarium_accession_numbers(row)
       row.val(2)
+    end
+
+    def sequence_ids(row)
+      row.val(3)
     end
 
     def sort_before(rows)
@@ -240,14 +241,7 @@ module Report
       end
     end
 
-    def distance_from_obs_lat_lng_to_farthest_corner(row)
-      obs = obs(row)
-      distance_to_farthest_corner(obs.lat, obs.lng, loc_box(row))
-    end
-
     def distance_from_center_to_farthest_corner(row)
-      return nil if row.obs_id.blank?
-
       center = loc_box(row).center
       distance_to_farthest_corner(center.first, center.last, loc_box(row))
     end
@@ -258,12 +252,14 @@ module Report
     end
 
     def distance_to_farthest_corner(lat, lng, box)
-      [
-        distance_to_ne_corner(lat, lng, box),
-        distance_to_se_corner(lat, lng, box),
-        distance_to_nw_corner(lat, lng, box),
-        distance_to_sw_corner(lat, lng, box)
-      ].max.to_s
+      # east and west corners are equidistant from center because
+      # boxes are isoceles trapezoids with bases parallel to the equator
+      # farthest corner belongs to longest base
+      if lat.positive?
+        distance_to_se_corner(lat, lng, box)
+      else
+        distance_to_ne_corner(lat, lng, box)
+      end
     end
 
     def distance_to_ne_corner(lat, lng, box)
@@ -272,14 +268,6 @@ module Report
 
     def distance_to_se_corner(lat, lng, box)
       Haversine.distance(lat, lng, box.south, box.east).to_meters.round
-    end
-
-    def distance_to_nw_corner(lat, lng, box)
-      Haversine.distance(lat, lng, box.north, box.west).to_meters.round
-    end
-
-    def distance_to_sw_corner(lat, lng, box)
-      Haversine.distance(lat, lng, box.south, box.west).to_meters.round
     end
 
     def explode_notes(row)
