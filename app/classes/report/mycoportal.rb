@@ -294,9 +294,6 @@ module Report
         # because some whitespace combinations can confuse Textile
         # Example: `\r\n \r\n`
         gsub(/\s+/, " ").
-
-        # gsub("??", ""). # Remove Textile italics markup
-
         t.html_to_ascii
     end
 
