@@ -548,14 +548,14 @@ class ReportTest < UnitTestCase
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
-  def test_mycoportal_explicit_provisional
+  def test_mycoportal_standard_provisional_authored
     name = Name.create!(
       user: rolf,
       rank: "Species",
-      text_name: "Gymnopus bakerensis",
-      author: "(A.H. Sm.) auct. comb. prov.",
-      search_name: "Gymnopus bakerensis (A.H. Sm.) auct. comb. prov.",
-      display_name: "__Gymnopus__ __bakerensis__ (A.H. Sm.) auct. comb. prov."
+      text_name: "Geoglossum sp. 'MI01'",
+      author: "S.D. Russell",
+      search_name: "Geoglossum sp. 'MI01'",
+      display_name: "**__Geoglossum__** sp. **__'MI01'__**"
     )
     location = locations(:burbank)
     obs = Observation.create!(user: rolf, when: Time.zone.now,
@@ -563,14 +563,14 @@ class ReportTest < UnitTestCase
                               name: name)
 
     expect = hashed_expect(obs).merge(
-      sciname: "Gymnopus bakerensis",
-      identificationQualifier: "(A.H. Sm.) auct. comb. prov."
+      sciname: "Geoglossum sp. 'MI01'",
+      identificationQualifier: "S.D. Russell nom. prov."
     ).values
 
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
-  def test_mycoportal_standard_provisional_crypt
+  def test_mycoportal_standard_provisional_authored_crypt
     name = Name.create!(
       user: rolf,
       rank: "Species",
@@ -588,6 +588,28 @@ class ReportTest < UnitTestCase
     expect = hashed_expect(obs).merge(
       sciname: "Agaricus sp. 'IN01'",
       identificationQualifier: "S.D. Russell crypt. temp."
+    ).values
+
+    do_tsv_test(Report::Mycoportal, obs, expect, &:id)
+  end
+
+  def test_mycoportal_explicit_provisional
+    name = Name.create!(
+      user: rolf,
+      rank: "Species",
+      text_name: "Gymnopus bakerensis",
+      author: "(A.H. Sm.) auct. comb. prov.",
+      search_name: "Gymnopus bakerensis (A.H. Sm.) auct. comb. prov.",
+      display_name: "__Gymnopus__ __bakerensis__ (A.H. Sm.) auct. comb. prov."
+    )
+    location = locations(:burbank)
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: location, where: location.name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Gymnopus bakerensis",
+      identificationQualifier: "(A.H. Sm.) auct. comb. prov."
     ).values
 
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)
@@ -651,15 +673,25 @@ class ReportTest < UnitTestCase
 
   def test_mycoportal_coordinate_uncertainty_nil_lat_lng_hidden
     obs = observations(:trusted_hidden)
+    loc = locations(:pretoria)
     # There are many (5,285) Obss with gps hidden, but no lat/lng
-    obs.update!(lat: nil, lng: nil)
+    obs.update!(location_id: loc.id, where: loc.name,
+                lat: nil, lng: nil)
     loc = obs.location
+    uncertainty = Haversine.distance(
+      loc.center_lat, loc.center_lng, loc.north, loc.east
+    ).to_meters.round.to_s
 
     expect = hashed_expect(obs).merge(
+      country: "South Africa",
+      stateProvince: "Gauteng",
+      county: "",
+      locality: "City of Tshwane Metropolitan Municipality, Pretoria",
       decimalLatitude: loc.center_lat.round(4).to_s,
       decimalLongitude: loc.center_lng.round(4).to_s,
       minimumElevationInMeters: obs.alt.to_s,
-      maximumElevationInMeters: obs.alt.to_s
+      maximumElevationInMeters: obs.alt.to_s,
+      coordinateUncertaintyInMeters: uncertainty
     ).values
 
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)

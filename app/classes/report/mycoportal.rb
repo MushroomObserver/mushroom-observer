@@ -233,7 +233,7 @@ module Report
       if row.name_author&.match(/(prov|crypt)\./)
         row.name_author
       else
-        "#{row.name_author} nom.prov."
+        "#{row.name_author} nom. prov."
       end
     end
 

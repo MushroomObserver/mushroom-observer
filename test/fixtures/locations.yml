@@ -344,3 +344,16 @@ loc_2_edited_by_roy:
 loc_hidden:
   <<: *DEFAULTS
   hidden: true
+
+pretoria:
+  name: "Pretoria, City of Tshwane Metropolitan Municipality, Gauteng, South Africa"
+  scientific_name: "South Africa, Gauteng, City of Tshwane Metropolitan Municipality, Pretoria"
+  north: -0.256014995575e2
+  south: -0.259158000946e2
+  west: 0.279505996704e2
+  east: 0.284452991486e2
+  high: 1590.94
+  low: 1297.26
+  box_area: 0.17319684776877e4
+  center_lat: -0.257586498261e2
+  center_lng: 0.281979494095e2
