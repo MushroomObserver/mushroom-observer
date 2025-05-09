@@ -64,7 +64,7 @@ ACTIONS = {
     thanks: {},
     # Disable cop for legacy routes.
     # The routes are two very old pages that we might get rid of.
-    # rubocop:disable Naming/VariableNumber
+
     wrapup_2011: {},
     wrapup_2012: {}
     # rubocop:enable Naming/VariableNumber
