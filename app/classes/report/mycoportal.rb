@@ -242,8 +242,6 @@ module Report
     end
 
     def distance_from_center_to_farthest_corner(row)
-      return nil if row.obs_id.blank?
-
       center = loc_box(row).center
       distance_to_farthest_corner(center.first, center.last, loc_box(row))
     end
@@ -254,12 +252,14 @@ module Report
     end
 
     def distance_to_farthest_corner(lat, lng, box)
-      [
-        distance_to_ne_corner(lat, lng, box),
-        distance_to_se_corner(lat, lng, box),
-        distance_to_nw_corner(lat, lng, box),
-        distance_to_sw_corner(lat, lng, box)
-      ].max.to_s
+      # east and west corners are equidistant from center because
+      # boxes are isoceles trapezoids with bases parallel to the equator
+      # farthest corner belongs to longest base
+      if lat.positive?
+        distance_to_se_corner(lat, lng, box)
+      else
+        distance_to_ne_corner(lat, lng, box)
+      end
     end
 
     def distance_to_ne_corner(lat, lng, box)
@@ -268,14 +268,6 @@ module Report
 
     def distance_to_se_corner(lat, lng, box)
       Haversine.distance(lat, lng, box.south, box.east).to_meters.round
-    end
-
-    def distance_to_nw_corner(lat, lng, box)
-      Haversine.distance(lat, lng, box.north, box.west).to_meters.round
-    end
-
-    def distance_to_sw_corner(lat, lng, box)
-      Haversine.distance(lat, lng, box.south, box.west).to_meters.round
     end
 
     def explode_notes(row)
