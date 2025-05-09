@@ -633,7 +633,8 @@ class ReportTest < UnitTestCase
     loc = obs.location
 
     # obs lat/lng is in the NE quadrant of loc; so SE corner is the furthest
-    uncertainty = Haversine.distance(obs.lat, obs.lng, loc.south, loc.west).
+    uncertainty = Haversine.distance(loc.center_lat, loc.center_lng,
+                                     loc.south, loc.west).
                   to_meters.round.to_s
 
     # public lat/lng is the loc center because obs coordinates are hidden.

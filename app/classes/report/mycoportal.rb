@@ -147,8 +147,6 @@ module Report
       if row.loc_id.blank?
         # Cannot calculate uncertainty without a defined location
         nil
-      elsif row.obs_lat
-        distance_from_obs_lat_lng_to_farthest_corner(row)
       elsif row.obs_lat.blank?
         distance_from_center_to_farthest_corner(row)
       end
