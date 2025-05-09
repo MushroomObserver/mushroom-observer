@@ -503,32 +503,6 @@ Naming/PredicateName:
     - 'app/models/observation.rb'
     - 'app/models/project.rb'
 
-# Offense count: 124
-# Configuration parameters: EnforcedStyle, CheckMethodNames, CheckSymbols, AllowedIdentifiers, AllowedPatterns.
-# SupportedStyles: snake_case, normalcase, non_integer
-# AllowedIdentifiers: TLS1_1, TLS1_2, capture3, iso8601, rfc1123_date, rfc822, rfc2822, rfc3339, x86_64
-Naming/VariableNumber:
-  Exclude:
-    - 'app/controllers/info_controller.rb'
-    - 'app/controllers/support_controller.rb'
-    - 'app/models/naming.rb'
-    - 'app/models/vote.rb'
-    - 'test/classes/api2/collection_numbers_test.rb'
-    - 'test/classes/api2/comments_test.rb'
-    - 'test/classes/api2/herbarium_records_test.rb'
-    - 'test/classes/api2/observations_test.rb'
-    - 'test/classes/query/comments_test.rb'
-    - 'test/controllers/comments_controller_test.rb'
-    - 'test/controllers/lookups_controller_test.rb'
-    - 'test/controllers/names/synonyms_controller_test.rb'
-    - 'test/controllers/support_controller_test.rb'
-    - 'test/mailers/application_mailer_test.rb'
-    - 'test/mailers/queued_email_test.rb'
-    - 'test/models/name_sorter_test.rb'
-    - 'test/models/name_test.rb'
-    - 'test/models/observation_test.rb'
-    - 'test/system/observation_naming_system_test.rb'
-
 # Offense count: 45
 # Configuration parameters: Include.
 # Include: app/models/**/*.rb
