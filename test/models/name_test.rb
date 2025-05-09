@@ -1256,7 +1256,7 @@ class NameTest < UnitTestCase
       real_text_name: "Agaricus sp. 'A.G.'",
       search_name: "Agaricus sp. 'A.G.'",
       real_search_name: "Agaricus sp. 'A.G.'",
-      sort_name: "Agaricus A.G.",
+      sort_name: "Agaricus a.g.",
       display_name: "**__Agaricus__** sp. **__'A.G.'__**",
       parent_name: "Agaricus",
       rank: "Species",
