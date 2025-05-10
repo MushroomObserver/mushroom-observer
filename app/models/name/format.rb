@@ -173,6 +173,8 @@ module Name::Format
   ANY_ENDING_AFTER_COMMA     = /^(.*)(, [a-z. ]+)$/
   SOME_ENDINGS_WITHOUT_COMMA = /^(.*)( (#{PROV}|#{INVAL}))$/
   ENDINGS_WORTH_KEEPING      = / (#{PROV}|#{INVAL})$/
+  private_constant(:PROV, :INVAL, :ANY_ENDING_AFTER_COMMA,
+                   :SOME_ENDINGS_WITHOUT_COMMA, :ENDINGS_WORTH_KEEPING)
 
   # author(s) string shortened per ICN Recommendation 46C.2
   # Relies on name.author having a comma only if there are > 2 authors

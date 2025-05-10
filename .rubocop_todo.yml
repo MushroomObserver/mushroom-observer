@@ -48,22 +48,6 @@ Lint/SuppressedException:
     - 'script/make_eol_xml'
     - 'test/controllers/species_lists_controller_test.rb'
 
-# Offense count: 27
-Lint/UselessConstantScoping:
-  Exclude:
-    - 'app/classes/country_counter.rb'
-    - 'app/classes/eol_data.rb'
-    - 'app/classes/mappable/collapsible_collection_of_objects.rb'
-    - 'app/classes/query/modules/datetime.rb'
-    - 'app/classes/textile.rb'
-    - 'app/controllers/account_controller.rb'
-    - 'app/controllers/application_controller/authentication.rb'
-    - 'app/controllers/application_controller/indexes.rb'
-    - 'app/controllers/inat_imports_controller/validators.rb'
-    - 'app/controllers/users_controller.rb'
-    - 'app/jobs/field_slip_job.rb'
-    - 'app/models/name/format.rb'
-
 # Offense count: 326
 # Configuration parameters: AllowedMethods, AllowedPatterns, CountRepeatedAttributes, Max.
 Metrics/AbcSize:
