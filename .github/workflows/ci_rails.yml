@@ -26,8 +26,9 @@ jobs:
           ruby-version: .ruby-version
           bundler-cache: true
 
+      # https://github.com/marketplace/actions/brakeman-linter
       - name: Brakeman
-        uses: GaboFDC/brakeman-linter-action@v1.1.0
+        uses: devmasx/brakeman-linter-action@v1.0.1
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
