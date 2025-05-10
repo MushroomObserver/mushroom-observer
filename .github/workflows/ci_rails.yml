@@ -23,7 +23,6 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: .ruby-version
           bundler-cache: true
 
       # https://github.com/marketplace/actions/brakeman-linter
