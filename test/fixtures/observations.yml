@@ -783,6 +783,7 @@ falmouth_2022_obs:
   location: falmouth
   lat: 41.5862
   lng: -70.5976
+  gps_hidden: false
   notes:
     :Other: Some notes
 
