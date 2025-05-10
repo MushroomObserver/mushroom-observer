@@ -100,12 +100,10 @@ module Report
 
     # collector's number
     def record_number(row)
-      if collector_ids(row).blank?
-        ""
-      else
-        collector_ids(row).split("\n").
-          min_by(&:to_i).split("\t").last
-      end
+      return if collector_ids(row).blank?
+
+      collector_ids(row).split("\n").
+        min_by(&:to_i).split("\t").last
     end
 
     def substrate(row)
@@ -125,11 +123,7 @@ module Report
       host = explode_notes(row)[:host]
       trees_shrubs = explode_notes(row)[:trees_shrubs]
 
-      associates = if host.present?
-                     "host: #{host}"
-                   else
-                     ""
-                   end
+      associates = "host: #{host}" if host.present?
       return associates if trees_shrubs.blank?
 
       "#{trees_shrubs}; #{associates}"
@@ -213,10 +207,8 @@ module Report
     end
 
     def provisional?(row)
-      return true if standard_provisional?(row)
-      return true if explicit_provisional?(row)
-
-      false
+      standard_provisional?(row) ||
+        explicit_provisional?(row)
     end
 
     def standard_provisional?(row)
@@ -299,11 +291,7 @@ module Report
       # It is large, rather than full-size, because we no longer
       # let anonymous users access full-size images because of
       # bot/scraper issues
-      if id.present?
-        "#{HTTP_DOMAIN}/images/1280/#{id}.jpg"
-      else
-        ""
-      end
+      "#{HTTP_DOMAIN}/images/1280/#{id}.jpg" if id.present?
     end
   end
 end
