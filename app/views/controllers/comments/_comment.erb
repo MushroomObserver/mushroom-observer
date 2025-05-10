@@ -1,9 +1,10 @@
 <%# locals: (comment: nil, controls: @user, show_name: false) %>
 <%
-target = comment.target
+target = comment.target # comment is passed in as `object` in some cases
 user = comment.user
 
-target_name_link = link_to(target.user_unique_format_name(@user).t, target.show_link_args) \
+target_name_link = link_to(target.user_unique_format_name(@user).t,
+                           target.show_link_args) \
                    rescue :comment_list_deleted.t
 target_type = tag.span(target.class.name.to_sym.t, class: "small") \
                        rescue :runtime_object_deleted
