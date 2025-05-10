@@ -185,6 +185,8 @@ MushroomObserver::Application.configure do
   config.action_cable.allowed_request_origins = [%r{http://*}, %r{https://*/}]
 
   config.active_job.queue_adapter = :solid_queue
+  # Uncomment if queue tables are in a separate db. MO's are in the main db.
+  # config.solid_queue.connects_to = { database: { writing: :queue } }
 
   # Fixes SolidQueue intermittent NameError uninitialized constant
   # https://github.com/rails/solid_queue/issues/276
