@@ -94,6 +94,7 @@ module Mappable
     ].freeze
     MAX_PRECISION = PRECISION.first
     MIN_PRECISION = PRECISION.last
+    private_constant(:PRECISION, :MAX_PRECISION, :MIN_PRECISION)
 
     def next_precision(prec)
       PRECISION[PRECISION.index(prec) + 1] || 0

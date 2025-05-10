@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 module InatImportsController::Validators
-  private
-
   SITE = "https://www.inaturalist.org"
+
+  private
 
   def params_valid?
     username_present? &&

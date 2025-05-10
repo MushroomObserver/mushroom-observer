@@ -119,6 +119,7 @@ class UsersController < ApplicationController
 
   # User's best images for #show
   MAX_THUMBS = 6
+  private_constant(:MAX_THUMBS)
 
   # set @observations whose thumbnails will display in user summary
   def define_instance_vars_for_summary!
