@@ -20,9 +20,8 @@ module UserStatsHelper
     # Show a breakdown of translations
     if user_stats[:languages]
       lang_name_by_locale = Language.pluck(:locale, :name).to_h
-      lang_summary = []
-      user_stats[:languages].each do |locale, count|
-        lang_summary << tag.span(class: "ml-3 text-nowrap") do
+      lang_summary = user_stats[:languages].map do |locale, count|
+        tag.span(class: "ml-3 text-nowrap") do
           ["[", lang_name_by_locale[locale], ": ", count, "]"].safe_join
         end
       end
@@ -70,7 +69,7 @@ module UserStatsHelper
        name_descriptions_index_path(by_editor: user.id)],
       [:names, names_path(by_user: user.id)],
       [:name_versions, names_path(by_editor: user.id)],
-      [:observations, observations_path(user: user.id)],
+      [:observations, observations_path(by_user: user.id)],
       [:species_lists, species_lists_path(by_user: user.id)],
       [:life_list, checklist_path(id: user.id)]
     ]

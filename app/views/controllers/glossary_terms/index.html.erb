@@ -1,6 +1,6 @@
 <%
 add_page_title(:glossary_term_index_title.t)
-add_tab_set(glossary_term_index_tabs) if User.current
+add_context_nav(glossary_term_index_tabs) if User.current
 @container = :text_image
 %>
 
@@ -11,7 +11,7 @@ add_tab_set(glossary_term_index_tabs) if User.current
     class: "container-text"
   )
 %>
-<%= paginate_block(@pages) do %>
+<%= pagination_nav(@pagination_data) do %>
   <div class="list-group">
     <%= render(partial: "glossary_terms/object", collection: @objects) %>
   </div>

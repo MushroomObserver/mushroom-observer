@@ -8,12 +8,15 @@
 
   handy_links = :email_handy_links.l
 
-  links = [[:email_links_show_object.t(type: :herbarium_record),
-    "#{MO.http_domain}/herbarium_record/show_herbarium_record/#{@herbarium_record.id}"],
+  host = MO.http_domain
+  links = [
+    [:email_links_show_object.t(type: :herbarium_record),
+     herbarium_record_url(host: host, id: @herbarium_record.id)],
 		[:email_links_show_object.t(type: :herbarium),
-			"#{MO.http_domain}/herbaria/#{herbarium.id}"],
+      herbarium_url(host: MO.http_domain, id: herbarium.id)],
 		[:email_links_show_user.t(user: @user.login),
-		  "#{MO.http_domain}/users/#{@sender.id}"]]
+		  user_url(host: MO.http_domain, id: @sender.id)]
+  ]
 
 if @user.email_html %>
 <html>

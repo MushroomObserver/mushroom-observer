@@ -1,24 +1,41 @@
+<%# locals: (obs: nil, consensus: nil, user: nil, sites: nil) %>
+
 <%
 # The basic info of the observation. Sections get updated by JS
+show_links = user && (obs.external_links.any? || sites.any?)
 %>
 
 <%= panel_block(id: "observation_details",
                 heading: :show_observation_details.l,
-                heading_links: obs_details_links(obs),
+                heading_links: @user && obs_details_links(obs),
                 class: "name-section") do %>
 
-  <%= observation_details_inat(obs: @observation) %>
+  <%= observation_details_inat(obs: obs) %>
 
-  <%= observation_details_when_where_who(obs: obs) %>
+  <%= observation_details_when_where_who(obs:, user:) %>
 
-  <%= tag.div(class: "obs-projects", id: "observation_projects") do
-    concat([tag.span("#{:PROJECTS.t}:"), tag.br].safe_join)
-    obs.projects.each do |project|
-      concat(tag.div(link_to_object(project), class: "indent"))
-    end
-  end %>
+  <% if user %>
+    <%= tag.p(class: "obs-specimen", id: "observation_specimen_available") do
+      if obs.specimen
+        :show_observation_specimen_available.t
+      else
+        :show_observation_specimen_not_available.t
+      end
+    end %>
+  <% end %>
 
-  <% if obs.field_slips.present? %>
+  <%= observation_details_notes(obs: obs) %>
+
+  <% if user && obs.projects.present? %>
+    <%= tag.div(class: "obs-projects", id: "observation_projects") do
+      concat([tag.span("#{:PROJECTS.t}:"), tag.br].safe_join)
+      obs.projects.each do |project|
+        concat(tag.div(link_to_object(project), class: "indent"))
+      end
+    end %>
+  <% end %>
+
+  <% if user && obs.field_slips.present? %>
     <%= tag.div(class: "obs-field-slips", id: "observation_field_slips") do
       if obs.field_slips.count == 1
         concat(tag.span("#{:FIELD_SLIP.t}: "))
@@ -32,25 +49,19 @@
     end %>
   <% end %>
 
-  <%= tag.p(class: "obs-specimen", id: "observation_specimen_available") do
-    if obs.specimen
-      :show_observation_specimen_available.t
-    else
-      :show_observation_specimen_not_available.t
-    end
-  end %>
-
-  <% if @user %>
+  <% if user %>
     <%= render(partial: "observations/show/collection_numbers",
-              locals: { obs: obs }) %>
+               locals: { obs:, user: }) %>
 
     <%= render(partial: "observations/show/herbarium_records",
-              locals: { obs: obs }) %>
+               locals: { obs:, user: }) %>
 
     <%= render(partial: "observations/show/sequences",
-              locals: { obs: obs }) %>
+               locals: { obs:, user: }) %>
   <% end %>
 
-  <%= observation_details_notes(obs: obs) %>
-
+  <% if show_links %>
+    <%= render(partial: "observations/show/external_links",
+               locals: { obs:, user:, sites: }) %>
+  <% end %>
 <% end %>

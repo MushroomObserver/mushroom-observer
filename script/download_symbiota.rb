@@ -1,13 +1,13 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require(File.expand_path("../config/boot.rb", __dir__))
-require(File.expand_path("../config/environment.rb", __dir__))
-require(File.expand_path("../app/extensions/extensions.rb", __dir__))
+require_relative("../config/boot")
+require_relative("../config/environment")
+require_relative("../config/initializers/extensions")
 
 def do_report(year, do_labels = false)
   warn("Doing #{year.inspect}...")
-  query = Query.lookup(:Observation, :all, date: year)
+  query = Query.lookup(:Observation, date: year)
   report = Report::Symbiota.new(query: query).render
   report.sub!(/^[^\n]*\n/, "") unless do_labels
   puts(report)

@@ -43,11 +43,12 @@ class UsersControllerTest < FunctionalTestCase
   # When pattern matches multiple users, list them.
   def test_user_search_multiple_hits
     login
+
     pattern = "Roy"
     get(:index, params: { pattern: pattern })
     # matcher includes optional quotation mark (?.)
-    assert_match(/Users Matching .?#{pattern}/, css_select("title").text,
-                 "Wrong page displayed")
+    assert_displayed_title(:USERS.l)
+    assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
 
     prove_sorting_links_include_contribution
   end
@@ -56,21 +57,46 @@ class UsersControllerTest < FunctionalTestCase
   #  title displayed is default no_hits_title
   def test_user_search_unmatched
     login
+
     unmatched_pattern = "NonexistentUserContent"
     get_without_clearing_flash(:index,
                                params: { pattern: unmatched_pattern })
     assert_template("users/index")
 
-    assert_match(
-      :title_for_user_search.t,
-      css_select("title").text,
-      "metadata <title> tag incorrect"
-    )
-    assert_empty(css_select("#sorts"),
-                 "There should be no sort links")
+    assert_displayed_title(:USERS.l)
+    assert_empty(css_select("#sorts"), "There should be no sort links")
 
     flash_text = :runtime_no_matches.l.sub("[types]", "users")
     assert_flash_text(flash_text)
+  end
+
+  #   ---------------
+  #    admin indexes
+  #   ---------------
+
+  # Prove that user_index (without search or id param) is restricted to admins
+  def test_index
+    login("rolf")
+
+    get(:index)
+    assert_redirected_to(:root)
+
+    make_admin
+
+    get(:index)
+    assert_response(:success)
+  end
+
+  def test_index_sorted_by_non_default_admin_only
+    login
+    make_admin
+
+    sort_orders = %w[last_login contribution]
+    sort_orders.each do |order|
+      get(:index, params: { by: order })
+      assert_displayed_title(:USERS.l)
+      assert_sorted_by(order)
+    end
   end
 
   #   ---------------
@@ -110,43 +136,8 @@ class UsersControllerTest < FunctionalTestCase
     assert_redirected_to({ action: :index })
   end
 
-  #   ---------------
-  #    admin actions
-  #   ---------------
-
-  # Prove that user_index (without search or id param) is restricted to admins
-  def test_index
-    login("rolf")
-    get(:index)
-    assert_redirected_to(:root)
-
-    make_admin
-    get(:index)
-    assert_response(:success)
-  end
-
-  def test_index_sorted_by_last_login
-    by = "last_login"
-
-    login
-    make_admin
-    get(:index, params: { by: by })
-
-    assert_displayed_title("Users by Last Login")
-  end
-
-  def test_index_sorted_by_contribution
-    by = "contribution"
-
-    login
-    make_admin
-    get(:index, params: { by: by })
-
-    assert_displayed_title("Users by Contribution")
-  end
-
   #   ---------------------
-  #    show_selected_users
+  #    show_selected users
   #   ---------------------
 
   # The unfiltered user :index is admin-only, but selected/searched users
@@ -158,7 +149,7 @@ class UsersControllerTest < FunctionalTestCase
   end
 
   def test_show_next
-    query = Query.lookup_and_save(:User, :all)
+    query = Query.lookup_and_save(:User)
     assert_operator(query.num_results, :>, 1)
     number8 = query.results[7]
     number9 = query.results[8]
@@ -170,7 +161,7 @@ class UsersControllerTest < FunctionalTestCase
   end
 
   def test_show_prev
-    query = Query.lookup_and_save(:User, :all)
+    query = Query.lookup_and_save(:User)
     assert_operator(query.num_results, :>, 1)
     number8 = query.results[7]
     number7 = query.results[6]
@@ -179,5 +170,20 @@ class UsersControllerTest < FunctionalTestCase
     login
     get(:show, params: { id: number8.id, q: q, flow: "prev" })
     assert_redirected_to(user_path(number7.id, q: q))
+  end
+
+  #   ---------------
+
+  def test_admin_show_user
+    user = users(:mary)
+
+    login("rolf")
+    make_admin
+    get(:show, params: { id: user.id })
+
+    # Prove that the page has a Delete User button
+    assert_select("form.button_to[action =?]", admin_users_path(id: user.id)) do
+      assert_select("input[value=?]", "delete")
+    end
   end
 end

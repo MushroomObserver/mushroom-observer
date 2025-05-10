@@ -1,6 +1,6 @@
 <%
 add_page_title(@description.format_name.t)
-add_tab_set(
+add_context_nav(
   location_description_form_permissions_tabs(description: @description)
 )
 action = { controller: "/locations/descriptions/permissions", action: :update,

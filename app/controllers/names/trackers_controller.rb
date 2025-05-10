@@ -33,7 +33,7 @@ module Names
       return unless find_name!
 
       find_name_tracker
-      submit_tracking_form_udpate
+      submit_tracking_form_update
     end
 
     private
@@ -65,7 +65,7 @@ module Names
       redirect_to(name_path(@name.id, q: get_query_param))
     end
 
-    def submit_tracking_form_udpate
+    def submit_tracking_form_update
       case params[:commit]
       when :UPDATE.l
         create_or_update_name_tracker_and_interest(@name.id)
@@ -126,6 +126,7 @@ module Names
       user = name_tracker.user
       name = name_tracker.name
       QueuedEmail::Webmaster.create_email(
+        @user,
         sender_email: user.email,
         subject: "New Name Tracker with Template",
         content: "User: ##{user.id} / #{user.login} / #{user.email}\n" \

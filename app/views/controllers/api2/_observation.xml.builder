@@ -26,12 +26,12 @@ xml.tag!(
         notes_fields.each do |key, value|
           xml.notes_field do
             xml_string(xml, :key, key)
-            xml_html_string(xml, :value, value.tpl_nodiv)
+            xml_html_string(xml, :value, value.to_s.tl_for_api)
           end
         end
       end
     end
-    xml_html_string(xml, :notes, other_notes.to_s.tpl_nodiv)
+    xml_html_string(xml, :notes, other_notes.to_s.tl_for_api)
   end
   if detail
     xml_detailed_object(xml, :owner, object.user)

@@ -53,6 +53,7 @@ module ObservationsController::New
     init_project_vars_for_new
     init_list_vars
     defaults_from_last_observation_created
+    @observation.when = params[:date] if params[:date]
     add_field_slip_project(@field_code)
   end
 

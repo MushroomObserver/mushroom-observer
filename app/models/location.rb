@@ -38,16 +38,10 @@
 #
 #  == Scopes
 #
-#  created_on("yyyymmdd")
-#  created_after("yyyymmdd")
-#  created_before("yyyymmdd")
-#  created_between(start, end)
-#  updated_on("yyyymmdd")
-#  updated_after("yyyymmdd")
-#  updated_before("yyyymmdd")
-#  updated_between(start, end)
-#  name_includes(place_name)
-#  in_region(place_name)
+#  created_at("yyyy-mm-dd", "yyyy-mm-dd")
+#  updated_at("yyyy-mm-dd", "yyyy-mm-dd")
+#  name_has(place_name)
+#  region(place_name)
 #  in_box(north:, south:, east:, west:)
 #
 #  == Instance methods
@@ -92,7 +86,9 @@
 #
 ################################################################################
 class Location < AbstractModel # rubocop:disable Metrics/ClassLength
-  require "acts_as_versioned"
+  require("acts_as_versioned")
+
+  include Scopes
 
   belongs_to :description, class_name: "LocationDescription" # (main one)
   belongs_to :rss_log
@@ -105,6 +101,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
   has_many :observations
   has_many :projects
+  has_many :project_aliases, as: :target, dependent: :destroy
   has_many :species_lists
   has_many :herbaria     # should be at most one, but nothing preventing more
   has_many :users        # via profile location
@@ -140,6 +137,10 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   before_update :update_observation_cache
   after_update :notify_users
 
+  SEARCHABLE_FIELDS = [
+    :name, :notes
+  ].freeze
+
   # Automatically log standard events.  Merge will already log the destruction
   # as a merge and orphan the log.
   self.autolog_events = [:created!, :updated!, :destroyed]
@@ -154,123 +155,6 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
       UserStats.update_contribution(:add, :location_versions)
     end
   end
-
-  # NOTE: To improve Coveralls display, do not use one-line stabby lambda scopes
-  scope :name_includes,
-        ->(place_name) { where(Location[:name].matches("%#{place_name}%")) }
-  scope :in_region,
-        ->(place_name) { where(Location[:name].matches("%#{place_name}")) }
-  # This returns locations whose bounding box is entirely within the given box.
-  # Pass kwargs (:north, :south, :east, :west), any order
-  scope :in_box,
-        lambda { |**args|
-          box = Mappable::Box.new(**args)
-          return none unless box.valid?
-
-          if box.straddles_180_deg?
-            in_box_straddling_dateline(**args)
-          else
-            in_box_regular(**args)
-          end
-        }
-  scope :in_box_straddling_dateline, # mostly a helper for in_box
-        lambda { |**args|
-          box = Mappable::Box.new(**args)
-          return none unless box.valid?
-
-          where(
-            (Location[:south] >= box.south).
-              and(Location[:north] <= box.north).
-            # Location[:west] between w & 180 OR between 180 and e
-            and((Location[:west] >= box.west).
-              or(Location[:west] <= box.east)).
-            and((Location[:east] >= box.west).
-              or(Location[:east] <= box.east))
-          )
-        }
-  scope :in_box_regular, # mostly a helper for in_box
-        lambda { |**args|
-          box = Mappable::Box.new(**args)
-          return none unless box.valid?
-
-          where(
-            (Location[:south] >= box.south).
-              and(Location[:north] <= box.north).
-            and(Location[:west] >= box.west).
-              and(Location[:east] <= box.east).
-            and(Location[:west] <= Location[:east])
-          )
-        }
-  scope :not_in_box, # Pass kwargs (:north, :south, :east, :west), any order
-        lambda { |**args|
-          box = Mappable::Box.new(**args)
-          return none unless box.valid?
-
-          in_box(**args).invert_where
-        }
-  scope :contains_point, # Use named parameters (lat:, lng:), any order
-        lambda { |**args|
-          args => {lat:, lng:}
-          where(
-            (Location[:south]).lteq(lat).and((Location[:north]).gteq(lat)).
-            and(
-              Location[:west].lteq(lng).and(Location[:east].gteq(lng)).
-              or(
-                Location[:west].gteq(lng).and(Location[:east].lteq(lng))
-              )
-            )
-          )
-        }
-  scope :contains_box, # Use named parameters, north:, south:, east:, west:
-        lambda { |**args|
-          args => { north:, south:, east:, west: }
-
-          # w/e    | Location     | Location contains w/e
-          # ______ | ____________ | ______________________
-          # w <= e | west <= east | west <= w && e <= east
-          # w <= e | west > east  | west <= w || e <= east
-          # w > e  | west <= east | none
-          # w > e  | west > east  | west <= w && e <= east
-
-          if west <= east # w / e don't straddle 180
-            where(
-              Location[:south].lteq(south).and(Location[:north].gteq(north)).
-              # Location doesn't straddle 180
-              and(Location[:west].lteq(Location[:east]).
-              and(Location[:west] <= west).and(Location[:east] >= east).
-              # Location straddles 180
-              or(
-                Location[:west].gt(Location[:east]).
-                and((Location[:west] <= west).or(Location[:east] >= east))
-              ))
-            )
-          else # Location straddles 180
-            where(
-              Location[:south].lteq(south).and(Location[:north].gteq(north)).
-              # Location 100% wrap; necessarily straddles w/e
-              and(Location[:west].eq(Location[:east] - 360)).
-              # Location < 100% wrap-around
-              or(
-                Location[:west].gt(Location[:east]).
-                and(Location[:west] <= west).and(Location[:east] >= east)
-              )
-            )
-          end
-        }
-  scope :with_observations, -> { joins(:observations).distinct }
-
-  scope :show_includes,
-        lambda {
-          strict_loading.includes(
-            { comments: :user },
-            { description: { comments: :user } },
-            { descriptions: [:authors, :editors] },
-            :interests,
-            :observations,
-            :rss_log,
-            :versions
-          )
-        }
 
   # On save, calculate bounding box area for the `box_area` column, plus the
   # `center_lat` and `center_lng` values. If box_area is below a threshold, also
@@ -300,19 +184,20 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   # Can populate columns after migration, or be run as part of a recurring job.
   def self.update_box_area_and_center_columns
     # update the locations
-    update_all(update_center_and_area_sql)
-    # give center points to associated observations in batches
-    Observation.joins(:location).
-      where(Location[:box_area].lteq(MO.obs_location_max_area)).
-      group(:location_id).update_all(
-        location_lat: Location[:center_lat], location_lng: Location[:center_lng]
-      )
+    loc_updated = update_all(update_center_and_area_sql)
+    # give center points to associated observations in batches by location_id
+    obs_centered = Observation.
+                   in_box_of_max_area.group(:location_id).update_all(
+                     location_lat: Location[:center_lat],
+                     location_lng: Location[:center_lng]
+                   )
     # null center points where area is above the threshold
-    Observation.joins(:location).
-      where(Location[:box_area].gt(MO.obs_location_max_area)).
-      group(:location_id).update_all(
-        location_lat: nil, location_lng: nil
-      )
+    obs_center_nulled = Observation.
+                        in_box_gt_max_area.group(:location_id).update_all(
+                          location_lat: nil, location_lng: nil
+                        )
+    # Return counts
+    [loc_updated, obs_centered, obs_center_nulled]
   end
 
   # Let attached observations update their cache if these fields changed.
@@ -355,7 +240,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
               match[1].to_f - match[2].to_f / 60 - match[3].to_f / 3600
             end
       val = -val if match[4] == direction2
-      result = val.round(4) if val >= -max_degrees && val <= max_degrees
+      result = val.round(4) if val.between?(-max_degrees, max_degrees)
     end
     result
   end
@@ -490,6 +375,10 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     display_name
   end
 
+  def textile_name
+    display_name
+  end
+
   # Same as +text_name+ but with id tacked on.
   def unique_text_name
     text_name + " (#{id || "?"})"
@@ -573,7 +462,8 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Looks for a matching location using either location order just to be sure
   def self.find_by_name_or_reverse_name(name)
-    Location.where(name: name).or(Location.where(scientific_name: name)).first
+    Location.where(name: name).
+      or(Location.where(scientific_name: name)).first
   end
 
   def self.user_format(user, name)
@@ -621,7 +511,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
       if OK_PREFIXES.member?(s)
         count += 1
       else
-        trimmed = tokens[count..-1].join(" ")
+        trimmed = tokens[count..].join(" ")
         return trimmed if understood_places.member?(trimmed)
       end
     end
@@ -811,7 +701,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   # Merge all the stuff that refers to +old_loc+ into +self+.  No changes are
   # made to +self+; +old_loc+ is destroyed; all the things that referred to
   # +old_loc+ are updated and saved.
-  def merge(old_loc, _log = true)
+  def merge(user, old_loc, _log = true)
     return if old_loc == self
 
     # Move observations over first.
@@ -828,10 +718,12 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     end
 
     # Move over any interest in the old name.
-    Interest.where(target_type: "Location",
-                   target_id: old_loc.id).find_each do |int|
-      int.target = self
-      int.save
+    [Interest, ProjectAlias].each do |klass|
+      klass.where(target_type: "Location",
+                  target_id: old_loc.id).find_each do |obj|
+        obj.target = self
+        obj.save
+      end
     end
 
     add_note(explain_merge(old_loc))
@@ -839,7 +731,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     update_location_descriptions(old_loc)
 
     # Log the action.
-    old_loc.rss_log&.orphan(old_loc.name, :log_location_merged,
+    old_loc.rss_log&.orphan(user, old_loc.name, :log_location_merged,
                             this: old_loc.name, that: name)
     old_loc.rss_log = nil
 
@@ -928,11 +820,6 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
       user_list.each do |user|
         recipients.push(user) if user.email_locations_editor
       end
-    end
-
-    # Tell masochists who want to know about all location changes.
-    User.where(email_locations_all: true).find_each do |user|
-      recipients.push(user)
     end
 
     # Send to people who have registered interest.

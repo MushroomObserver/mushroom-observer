@@ -52,11 +52,12 @@ module Names
       @deprecate_all = (params[:deprecate_all] == "1")
 
       # Create any new names that have been approved.
-      construct_approved_names(list, params[:approved_names], @deprecate_all)
+      construct_approved_names(list, params[:approved_names],
+                               deprecate: @deprecate_all)
 
       # Parse the write-in list of names.
       sorter = NameSorter.new
-      sorter.sort_names(list)
+      sorter.sort_names(@user, list)
       sorter.append_approved_synonyms(params[:approved_synonyms])
       sorter
     end
@@ -133,7 +134,7 @@ module Names
 
       begin
         name.change_deprecated(true)
-        name.save_with_log(:log_deprecated_by)
+        name.save_with_log(@user, :log_deprecated_by)
       rescue RuntimeError => e
         flash_error(e.to_s) if e.present?
         false

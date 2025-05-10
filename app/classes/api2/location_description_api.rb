@@ -33,12 +33,12 @@ class API2
 
     def query_params
       {
-        where: sql_id_condition,
+        id_in_set: parse_array(:location_description, :id, as: :id),
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at),
-        users: parse_array(:user, :user, help: :first_user),
+        by_users: parse_array(:user, :user, help: :first_user),
         locations: parse_array(:location, :location),
-        public: true
+        is_public: true
       }
     end
 

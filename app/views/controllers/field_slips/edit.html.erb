@@ -1,6 +1,6 @@
 <%
   add_page_title("#{:field_slip_editing.t}: #{@field_slip.code}")
-  add_tab_set(field_slip_edit_tabs(@field_slip))
+  add_context_nav(field_slip_edit_tabs(@field_slip))
 %>
 
-<%= render "form", field_slip: @field_slip %>
+<%= render("form", field_slip: @field_slip) %>

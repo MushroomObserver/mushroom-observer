@@ -3,24 +3,17 @@
 # html used in tabsets
 module Tabs
   module ObservationsHelper
-    # assemble links for "tabset" for show_observation
-    # actually a list of links and the interest icons
-    def show_observation_tabs(obs:, user:)
-      [
-        observation_manage_lists_tab(obs, user),
-        *obs_change_tabs(obs)&.reject(&:empty?)
-      ]
-    end
-
     ########################################################################
     # LINKS FOR PANELS
     #
     # Used in the observation panel
 
     def send_observer_question_tab(obs)
-      [:show_observation_send_question.l,
-       add_query_param(new_question_for_observation_path(obs.id)),
-       { class: tab_id(__method__.to_s), icon: :email }]
+      InternalLink::Model.new(
+        :show_observation_send_question.l, obs,
+        add_query_param(new_question_for_observation_path(obs.id)),
+        html_options: { icon: :email }
+      ).tab
     end
 
     # Used in the lists panel
@@ -28,20 +21,23 @@ module Tabs
     def observation_manage_lists_tab(obs, user)
       return unless user&.species_list_ids&.any?
 
-      [:show_observation_manage_species_lists.l,
-       add_query_param(edit_observation_species_lists_path(obs.id)),
-       { class: tab_id(__method__.to_s), icon: :manage_lists }]
+      InternalLink::Model.new(
+        :show_observation_manage_species_lists.l, obs,
+        add_query_param(edit_observation_species_lists_path(obs.id)),
+        html_options: { icon: :manage_lists }
+      ).tab
     end
 
     # Name panel -- generates HTML
 
-    # uses create_links_to with extra_args { class: "d-block" }
+    # uses context_nav_links with extra_args { class: "d-block" }
     # the hiccup here is that list_descriptions is already HTML, an inline list
-    def name_links_on_mo(name:)
-      tabs = create_links_to(obs_related_name_tabs(name), { class: "d-block" })
-      tabs += obs_name_description_tabs(name)
-      tabs += create_links_to([occurrence_map_for_name_tab(name)],
-                              { class: "d-block" })
+    def name_links_on_mo(user:, name:)
+      tabs = context_nav_links(obs_related_name_tabs(name),
+                               { class: "d-block" })
+      tabs += obs_name_description_tabs(user, name)
+      tabs += context_nav_links([occurrence_map_for_name_tab(name)],
+                                { class: "d-block" })
       tabs.reject(&:empty?)
     end
 
@@ -56,59 +52,80 @@ module Tabs
     end
 
     def observations_of_name_tab(name)
-      [:show_observation_more_like_this.l,
-       observations_path(name: name.id),
-       { class: tab_id(__method__.to_s) }]
+      InternalLink::Model.new(
+        :show_observation_more_like_this.l, name,
+        observations_path(name: name.id)
+      ).tab
     end
 
     def observations_of_look_alikes_tab(name)
-      [:show_observation_look_alikes.l,
-       observations_path(name: name.id, look_alikes: "1"),
-       { class: tab_id(__method__.to_s) }]
+      InternalLink::Model.new(
+        :show_observation_look_alikes.l, name,
+        observations_path(name: name.id, look_alikes: "1")
+      ).tab
     end
 
     def observations_of_related_taxa_tab(name)
-      [:show_observation_related_taxa.l,
-       observations_path(name: name.id, related_taxa: "1"),
-       { class: tab_id(__method__.to_s) }]
+      InternalLink::Model.new(
+        :show_observation_related_taxa.l, name,
+        observations_path(name: name.id, related_taxa: "1")
+      ).tab
     end
 
     # from descriptions_helper
-    def obs_name_description_tabs(name)
-      list_descriptions(object: name, type: :name)&.map do |link|
+    def obs_name_description_tabs(user, name)
+      list_descriptions(user: user, object: name, type: :name)&.map do |link|
         tag.div(link)
       end
     end
 
-    def observation_map_tab(mappable)
-      return unless mappable
+    # This appears to be dead code
+    # def observation_map_tab(mappable)
+    #   return unless mappable
 
-      [:MAP.t, add_query_param(map_observation_path),
-       { class: tab_id(__method__.to_s) }]
-    end
+    #   InternalLink.new(
+    #     :MAP.t, add_query_param(map_observation_path)
+    #   ).tab
+    # end
 
-    def name_links_web(name:)
-      tabs = create_links_to(observation_web_name_tabs(name),
-                             { class: "d-block" })
+    # def name_links_web(name:)
+    #   tabs = context_nav_links(observation_web_name_tabs(name),
+    #                            { class: "d-block" })
+    #   tabs.reject(&:empty?)
+    # end
+
+    def user_name_links_web(user, name:)
+      tabs = context_nav_links(user_observation_web_name_tabs(user, name),
+                               { class: "d-block" })
       tabs.reject(&:empty?)
     end
 
-    def observation_web_name_tabs(name)
+    # def observation_web_name_tabs(name)
+    #   [mycoportal_name_tab(name),
+    #    mycobank_name_search_tab(name),
+    #    google_images_for_name_tab(name)]
+    # end
+
+    def user_observation_web_name_tabs(user, name)
       [mycoportal_name_tab(name),
        mycobank_name_search_tab(name),
-       google_images_for_name_tab(name)]
+       user_google_images_for_name_tab(user, name)]
     end
 
     def observation_hide_thumbnail_map_tab(obs)
-      [:show_observation_hide_map.l,
-       javascript_hide_thumbnail_map_path(id: obs.id),
-       { class: tab_id(__method__.to_s), icon: :hide }]
+      InternalLink::Model.new(
+        :show_observation_hide_map.l, obs,
+        javascript_hide_thumbnail_map_path(id: obs.id),
+        html_options: { icon: :hide }
+      ).tab
     end
 
     def reuse_images_for_observation_tab(obs)
-      [:show_observation_reuse_image.l,
-       reuse_images_for_observation_path(obs.id),
-       { class: tab_id(__method__.to_s), icon: :reuse }]
+      InternalLink::Model.new(
+        :show_observation_reuse_image.l, obs,
+        reuse_images_for_observation_path(obs.id),
+        html_options: { icon: :reuse }
+      ).tab
     end
 
     ############################################
@@ -118,7 +135,7 @@ module Tabs
       links = [
         *observations_at_where_tabs(query), # maybe multiple links
         map_observations_tab(query),
-        *observations_coerced_query_tabs(query), # multiple links
+        *observations_related_query_tabs(query), # multiple links
         observations_add_to_list_tab(query),
         observations_download_as_csv_tab(query)
       ]
@@ -126,16 +143,18 @@ module Tabs
     end
 
     # for debugging
-    def dummy_disable_tab
-      ["Dummy link",
-       "https://google.com",
-       { class: tab_id(__method__.to_s), data: { action: "links#disable" } }]
-    end
+    # def dummy_disable_tab
+    #   InternalLink.new(
+    #     "Dummy link",
+    #     "https://google.com",
+    #     html_options: { data: { action: "links#disable" } }
+    #   ).tab
+    # end
 
     def observations_at_where_tabs(query)
       # Add some extra links to the index user is sent to if they click on an
       # undefined location.
-      return [] unless query.flavor == :at_where
+      return [] if params[:where].blank?
 
       [define_location_tab(query),
        assign_undefined_location_tab(query),
@@ -144,17 +163,25 @@ module Tabs
 
     # these are from the observations form
     def define_location_tab(query)
-      [:list_observations_location_define.l,
-       add_query_param(new_location_path(where: query.params[:user_where])),
-       { class: tab_id(__method__.to_s) }]
+      InternalLink.new(
+        :list_observations_location_define.l,
+        add_query_param(new_location_path(where: where_param(query.params)))
+      ).tab
+    end
+
+    # Hack to use the :locations param if it's present and the :search_where
+    # param is missing.
+    def where_param(query_params)
+      query_params[:search_where] || params[:where]
     end
 
     def assign_undefined_location_tab(query)
-      [:list_observations_location_merge.l,
-       add_query_param(matching_locations_for_observations_path(
-                         where: query.params[:user_where]
-                       )),
-       { class: tab_id(__method__.to_s) }]
+      InternalLink.new(
+        :list_observations_location_merge.l,
+        add_query_param(matching_locations_for_observations_path(
+                          where: where_param(query.params)
+                        ))
+      ).tab
     end
 
     def observations_index_sorts
@@ -171,28 +198,32 @@ module Tabs
     end
 
     def map_observations_tab(query)
-      [:show_object.t(type: :map),
-       map_observations_path(q: get_query_param(query)),
-       { class: tab_id(__method__.to_s), data: { action: "links#disable" } }]
+      InternalLink.new(
+        :show_object.t(type: :map),
+        map_observations_path(q: get_query_param(query)),
+        html_options: { data: { action: "links#disable" } }
+      ).tab
     end
 
-    # NOTE: coerced_query_tab returns an array
-    def observations_coerced_query_tabs(query)
-      [coerced_location_query_tab(query),
-       coerced_name_query_tab(query),
-       coerced_image_query_tab(query)]
+    # NOTE: each tab returns an array
+    def observations_related_query_tabs(query)
+      [related_locations_tab(:Observation, query),
+       related_names_tab(:Observation, query),
+       related_images_tab(:Observation, query)]
     end
 
     def observations_add_to_list_tab(query)
-      [:list_observations_add_to_list.l,
-       add_query_param(edit_species_list_observations_path, query),
-       { class: tab_id(__method__.to_s) }]
+      InternalLink.new(
+        :list_observations_add_to_list.l,
+        add_query_param(edit_species_list_observations_path, query)
+      ).tab
     end
 
     def observations_download_as_csv_tab(query)
-      [:list_observations_download_as_csv.l,
-       add_query_param(new_observations_download_path, query),
-       { class: tab_id(__method__.to_s) }]
+      InternalLink.new(
+        :list_observations_download_as_csv.l,
+        add_query_param(new_observations_download_path, query)
+      ).tab
     end
 
     ############################################
@@ -208,14 +239,15 @@ module Tabs
     end
 
     def observation_maps_tabs(query:)
-      [coerced_observation_query_tab(query),
-       coerced_location_query_tab(query)]
+      [related_observations_tab(:Observation, query), # index of the same obs
+       related_locations_tab(:Observation, query)]
     end
 
     def new_inat_import_tab(query: nil)
-      [:create_observation_inat_import_link.l,
-       add_query_param(new_observations_inat_import_path, query),
-       { class: tab_id(__method__.to_s) }]
+      InternalLink.new(
+        :create_observation_inat_import_link.l,
+        add_query_param(new_inat_import_path, query)
+      ).tab
     end
 
     def naming_form_new_title(obs:)
@@ -251,22 +283,24 @@ module Tabs
        edit_observation_tab(obs)]
     end
 
-    def observation_download_tabs
-      [observations_index_tab]
-    end
+    # This appears to be dead code
+    # def observation_download_tabs
+    #   [observations_index_tab]
+    # end
 
-    def observations_index_tab
-      [:download_observations_back.l,
-       add_query_param(observations_path),
-       { class: tab_id(__method__.to_s) }]
-    end
+    # def observations_index_tab
+    #   InternalLink.new(
+    #     :download_observations_back.l,
+    #     add_query_param(observations_path)
+    #   ).tab
+    # end
 
-    def obs_change_tabs(obs)
-      return unless check_permission(obs)
+    # def obs_change_tabs(obs)
+    #   return unless check_permission(obs)
 
-      [edit_observation_tab(obs),
-       destroy_observation_tab(obs)]
-    end
+    #   [edit_observation_tab(obs),
+    #    destroy_observation_tab(obs)]
+    # end
 
     def obs_details_links(obs)
       print_labels_button(obs)
@@ -281,19 +315,25 @@ module Tabs
     end
 
     def edit_observation_tab(obs)
-      [:edit_object.t(type: Observation),
-       add_query_param(edit_observation_path(obs.id)),
-       { class: "#{tab_id(__method__.to_s)}_#{obs.id}", icon: :edit }]
+      InternalLink::Model.new(
+        :edit_object.t(type: Observation), obs,
+        add_query_param(edit_observation_path(obs.id)),
+        html_options: { icon: :edit }
+      ).tab
     end
 
-    def destroy_observation_tab(obs)
-      [nil, obs, { button: :destroy }]
-    end
+    # def destroy_observation_tab(obs)
+    #   InternalLink::Model.new(
+    #     :destroy_object.t(TYPE: Observation),
+    #     obs, objs,
+    #     html_options: { button: :destroy }
+    #   ).tab
+    # end
 
     # for show_obs - query is for a single obs label
     def print_labels_button(obs)
       name = :download_observations_print_labels.l
-      query = Query.lookup(Observation, :in_set, ids: [obs.id])
+      query = Query.lookup(Observation, id_in_set: [obs.id])
       path = add_query_param(observations_downloads_path(commit: name), query)
 
       post_button(name: name, path: path, icon: :print,

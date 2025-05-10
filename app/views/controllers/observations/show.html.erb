@@ -1,24 +1,25 @@
 <%
 @owner_naming = owner_naming_line(@owner_name) # must before show_obs_title
-add_page_title(show_obs_title(obs: @observation, owner_naming: @owner_naming))
+add_page_title(show_obs_title(obs: @observation, owner_naming: @owner_naming, user: @user))
 add_owner_naming(@owner_naming)
-add_pager_for(@observation)
-add_interest_icons(@user, @observation)
-content_for(:edit_icons) do
-  tag.span(obs_change_links(@observation),
-           class: "h4 ml-3 d-inline-block text-nowrap")
+if @user
+  add_pager_for(@observation)
+  add_interest_icons(@user, @observation)
+  content_for(:edit_icons) do
+    tag.span(obs_change_links(@observation),
+             class: "h4 ml-3 d-inline-block text-nowrap")
+  end
 end
-# add_tab_set(show_observation_tabs(obs: @observation, user: @user))
 
 @container = :double
 
 show_map   = @user ? @user.thumbnail_maps : !session[:hide_thumbnail_maps]
 show_lists = @user # && @observation.species_lists.any?
-show_links = @user && (@observation.external_links.any? || @other_sites.any?)
 
-obs_locals = { obs: @observation, consensus: @consensus, user: @user }
+obs_locals = { obs: @observation, consensus: @consensus, user: @user,
+               sites: @other_sites }
 carousel_locals = {
-  object: @observation, images: @images, html_id: "observation_images",
+  object: @observation, images: @images, html_id: "observation_images", user: @user,
   title: :IMAGES.t, links: observation_show_image_links(obs: @observation)
 }
 %>
@@ -40,14 +41,10 @@ carousel_locals = {
         <%= render(partial: "observations/show/species_lists",
                    locals: obs_locals) %>
       <% end %>
-
-      <% if show_links %>
-        <%= render(partial: "observations/show/external_links",
-                   locals: obs_locals) %>
-      <% end %>
     <% end %>
   </div>
-</div><!--.row-->
+</div>
+<!--.row-->
 
 <div class="row">
   <div class="col-xs-12 col-md-8 col-lg-7 float-sm-left">
@@ -62,12 +59,18 @@ carousel_locals = {
     <%= @observation.source_credit.tpl if @observation.source_noteworthy? %>
   </div>
 
-  <div class="col-xs-12 col-md-4 col-lg-5 float-sm-right">
-    <% if show_map %>
-      <%= render(partial: "observations/show/thumbnail_map",
-                 locals: obs_locals) %>
-    <% end %>
-  </div>
-</div><!--.row-->
+  <% if @user %>
+    <div class="col-xs-12 col-md-4 col-lg-5 float-sm-right">
+      <% if show_map %>
+        <%= render(partial: "observations/show/thumbnail_map",
+                   locals: obs_locals) %>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+<!--.row-->
 
-<%= show_object_footer(@observation) %>
+<% if @user %>
+  <%= show_object_footer(@user, @observation) %>
+<% end %>
+

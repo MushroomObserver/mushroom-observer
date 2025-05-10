@@ -10,7 +10,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     login
 
     visit("/activity_logs")
-    rss_log = RssLog.where.not(observation_id: nil).order(:updated_at).last
+    rss_log = RssLog.where.not(observation_id: nil).reorder(:updated_at).last
     assert_selector("#box_#{rss_log.id} .rss-id",
                     text: rss_log.observation_id)
 
@@ -79,12 +79,10 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
                  page.title, "Wrong page")
 
     click_on("Projects")
-    assert_equal("#{:app_title.l}: Projects by Time Last Modified", page.title,
-                 "Wrong page")
+    assert_equal("#{:app_title.l}: Projects", page.title, "Wrong page")
 
     click_on("Comments")
-    assert_equal("#{:app_title.l}: Comments by Date Created",
-                 page.title, "Wrong page")
+    assert_equal("#{:app_title.l}: Comments", page.title, "Wrong page")
 
     click_on("Site Stats")
     assert_equal("#{:app_title.l}: Site Statistics", page.title, "Wrong page")
@@ -102,7 +100,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     reset_session!
     login(lurker.login)
 
-    visit("/#{obs.id}")
+    visit("/obs/#{obs.id}")
     assert_match(/#{:app_title.l}: Observation #{obs.id}/, page.title,
                  "Wrong page")
 
@@ -203,7 +201,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     # There should be no locations of that name, though.
     select("Locations", from: "search_type")
     click_button("Search")
-    assert_match("Index", page.title, "Wrong page")
+    assert_match("Locations", page.title, "Wrong page")
     assert_selector("div.alert", text: /no.*found/i)
     refute_selector("#results a[href]")
 
@@ -231,7 +229,9 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     select("Region", from: "filter_type")
     click_button("Search")
     assert_match(/#{:obs_needing_id.t}/, page.title, "Wrong page")
-    where_ats = find_all(".rss-where").map(&:text)
+    # Note that .rss-where now gets both postal and scientific addresses as a
+    # single mashed up string, because they're shown/hidden by css.
+    where_ats = find_all(".rss-where .location-postal").map(&:text)
     assert(where_ats.all? { |wa| wa.match(place) },
            "Expected only obs from #{place}" \
            "Found these: #{where_ats.inspect}")
@@ -255,25 +255,28 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
 
   def test_obs_at_location
     login
+    nam = names(:fungi)
     # Start at distribution map for Fungi.
-    visit("/names/#{names(:fungi).id}/map")
+    visit("/names/#{nam.id}/map")
 
     # Get a list of locations shown on map. (One defined, one undefined.)
-    within("#right_tabs") { click_link("Show Locations") }
-    assert_match("Locations with Observations", page.title, "Wrong page")
+    within("#context_nav") { click_link("Show Locations") }
+    assert_match("Locations", page.title, "Wrong title")
+    assert_selector("#filters", text: nam.text_name)
 
     # Click on the defined location.
     click_link(text: /Burbank/)
-    assert_match("Location: Burbank, California, USA", page.title, "Wrong page")
+    assert_match("Location: Burbank, California, USA", page.title,
+                 "Wrong title")
 
     # Get a list of observations from there.  (Several so goes to index.)
     within("#location_coordinates") do
-      click_link(text: "Observations at this Location")
+      click_link(text: :show_location_observations.l)
     end
-    assert_match("Observations from Burbank",
-                 page.title, "Wrong page")
+    assert_match("Observations", page.title, "Wrong title")
+    assert_selector("#filters", text: "Burbank, California, USA")
     save_results = find_all("#results a").select do |l|
-      l[:href].match(%r{^/\d+})
+      l[:href].match(%r{^/obs/\d+})
     end
 
     # Bail if there are too many results — test will not work
@@ -351,7 +354,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     # Following gives more informative error message than
     # assert(page.has_title?("#{:app_title.l }: Activity Log"), "Wrong page")
     assert_equal(
-      "#{:app_title.l}: Observations by #{:sort_by_rss_log.l}",
+      "#{:app_title.l}: #{:OBSERVATIONS.l}", #  by #{:sort_by_rss_log.l}
       page.title, "Login failed"
     )
   end
@@ -365,7 +368,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
 
   def results_observation_links
     find_all("#results a").select do |l|
-      l[:href].match(%r{^/\d+})
+      l[:href].match(%r{^/obs/\d+})
     end
   end
 end

@@ -78,6 +78,15 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_select("form[action=?]", project_path(p_id), count: 0)
   end
 
+  def test_show_project_nonexistent
+    p_id = -1
+
+    login("zero")
+    get(:show, params: { id: p_id })
+
+    assert_redirected_to(projects_path)
+  end
+
   def test_show_project_logged_in_owner
     project = projects(:eol_project)
 
@@ -138,28 +147,21 @@ class ProjectsControllerTest < FunctionalTestCase
     login(user.login)
     get(:show, params: { id: project.id })
 
-    assert_select(
-      "#project_summary a[href =
-        '#{project_violations_path(project_id: project.id)}']",
-      true, "Page is missing a link to violations"
-    )
+    assert_match(project_violations_path(project_id: project.id),
+                 @response.body,
+                 "Page is missing a link to violations")
   end
 
   def test_index
     login
     get(:index)
 
-    assert_displayed_title("Projects by Time Last Modified")
+    assert_displayed_title(:PROJECTS.l)
     assert_template("index")
   end
 
   def test_index_with_non_default_sort
-    login
-
-    get(:index, params: { by: "created_at" })
-
-    assert_template("index")
-    assert_displayed_title("Projects by Date Created")
+    check_index_sorting
   end
 
   def test_index_member
@@ -168,16 +170,7 @@ class ProjectsControllerTest < FunctionalTestCase
     get(:index, params: { member: dick.id })
 
     assert_template("index")
-    assert_displayed_title("Project Index")
-  end
-
-  def test_index_by_summary
-    login
-
-    get(:index, params: { by: "summary" })
-
-    assert_template("index")
-    assert_displayed_title("Projects by Summary")
+    assert_displayed_title(:PROJECTS.l)
   end
 
   def test_index_pattern_search_multiple_hits
@@ -186,7 +179,8 @@ class ProjectsControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: "Project" })
 
-    assert_displayed_title("Projects Matching ‘#{pattern}’")
+    assert_displayed_title(:PROJECTS.l)
+    assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
   end
 
   def test_index_pattern_search_by_name_one_hit
@@ -204,9 +198,7 @@ class ProjectsControllerTest < FunctionalTestCase
 
     login
     get(:index, params: { pattern: project.id.to_s })
-
-    assert_response(:success)
-    assert_displayed_title(project.title)
+    assert_redirected_to(project_path(project.id))
   end
 
   def test_add_project
@@ -571,7 +563,7 @@ class ProjectsControllerTest < FunctionalTestCase
     params = build_params("With background", "With background")
     project = projects(:eol_project)
     params[:id] = project.id
-    params[:project][:upload_image] = file
+    params[:upload][:image] = file
     File.stub(:rename, false) do
       login("rolf", "testpassword")
       put(:update, params: params)
@@ -594,7 +586,7 @@ class ProjectsControllerTest < FunctionalTestCase
     params = build_params("Bad background", "Bad background")
     project = projects(:eol_project)
     params[:id] = project.id
-    params[:project][:upload_image] = file
+    params[:upload][:image] = file
     image = images(:peltigera_image)
     image.stub(:process_image, false) do
       File.stub(:rename, false) do
@@ -615,7 +607,7 @@ class ProjectsControllerTest < FunctionalTestCase
     params = build_params("Bad background", "Bad background")
     project = projects(:eol_project)
     params[:id] = project.id
-    params[:project][:upload_image] = file
+    params[:upload][:image] = file
     image = images(:peltigera_image)
     image.stub(:save, false) do
       File.stub(:rename, false) do

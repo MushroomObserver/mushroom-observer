@@ -34,8 +34,8 @@
 #
 ################################################################################
 
-require(File.expand_path("../config/boot.rb", __dir__))
-require(File.expand_path("../config/environment.rb", __dir__))
+require_relative("../config/boot")
+require_relative("../config/environment")
 
 require("json")
 
@@ -66,7 +66,8 @@ name_data.
   each do |id, _text_name, _rank, deprecated, synonym_id, _correct_spelling_id|
     synonyms[synonym_id] = id if synonym_id && !deprecated
   end
-name_data.
+# disable cop because 2nd loop uses result of 1st loop
+name_data. # rubocop:disable Style/CombinableLoops
   each do |id, text_name, rank, deprecated, synonym_id, correct_spelling_id|
     real_id = id
     real_id = correct_spelling_id if correct_spelling_id

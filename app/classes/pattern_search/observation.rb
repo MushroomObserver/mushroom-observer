@@ -18,7 +18,7 @@ module PatternSearch
 
       # strings / lists
       comments: [:comments_has, :parse_string],
-      has_field: [:with_notes_fields, :parse_string],
+      has_field: [:has_notes_fields, :parse_string],
       herbarium: [:herbaria, :parse_list_of_herbaria],
       list: [:species_lists, :parse_list_of_species_lists],
       location: [:locations, :parse_list_of_locations],
@@ -26,7 +26,7 @@ module PatternSearch
       project: [:projects, :parse_list_of_projects],
       project_lists: [:project_lists, :parse_list_of_projects],
       region: [:region, :parse_list_of_strings],
-      user: [:users, :parse_list_of_users],
+      user: [:by_users, :parse_list_of_users],
       field_slip: [:field_slips, :parse_list_of_strings],
 
       # numeric
@@ -38,51 +38,46 @@ module PatternSearch
       west: [:west, :parse_longitude],
 
       # booleanish
-      has_comments: [:with_comments, :parse_yes],
-      has_public_lat_lng: [:with_public_lat_lng, :parse_boolean],
-      has_name: [:with_name, :parse_boolean],
-      has_notes: [:with_notes, :parse_boolean],
-      has_images: [:with_images, :parse_boolean],
+      has_comments: [:has_comments, :parse_yes],
+      has_public_lat_lng: [:has_public_lat_lng, :parse_boolean],
+      has_name: [:has_name, :parse_boolean],
+      has_notes: [:has_notes, :parse_boolean],
+      has_images: [:has_images, :parse_boolean],
       is_collection_location: [:is_collection_location, :parse_boolean],
       lichen: [:lichen, :parse_boolean],
-      has_sequence: [:with_sequences, :parse_yes],
-      has_specimen: [:with_specimen, :parse_boolean]
+      has_sequence: [:has_sequences, :parse_yes],
+      has_specimen: [:has_specimen, :parse_boolean]
     }.freeze
 
     def self.params
       PARAMS
     end
 
-    def params
-      self.class.params
-    end
+    delegate :params, to: :class
 
     def self.model
       ::Observation
     end
 
-    def model
-      self.class.model
-    end
+    delegate :model, to: :class
 
     def build_query
       super
       hack_name_query
       default_to_including_synonyms_and_subtaxa
+      put_nsew_params_in_box
+      put_names_and_modifiers_in_hash
     end
 
     private
 
     # Temporary hack to get include_subtaxa/synonyms to work.
-    # Will rip out when we do away with pattern search query flavor.
     # This converts any search that *looks like* a name search into
-    # an actual name search.
+    # an actual name search. NOTE: This affects the index title.
     def hack_name_query
-      return unless flavor == :pattern_search &&
-                    args[:names].empty? &&
+      return unless args[:pattern].present? && args[:names].empty? &&
                     (is_pattern_a_name? || any_taxa_modifiers_present?)
 
-      self.flavor = :all
       args[:names] = args[:pattern]
       args.delete(:pattern)
     end
@@ -104,6 +99,36 @@ module PatternSearch
         !args[:include_synonyms].nil? ||
         !args[:include_all_name_proposals].nil? ||
         !args[:exclude_consensus].nil?
+    end
+
+    def put_nsew_params_in_box
+      north, south, east, west = args.values_at(:north, :south, :east, :west)
+      box = { north:, south:, east:, west: }
+      return if box.compact.blank?
+
+      box = validate_box(box)
+      args[:in_box] = box
+      args.except!(:north, :south, :east, :west)
+    end
+
+    def validate_box(box)
+      validator = Mappable::Box.new(**box)
+      return box if validator.valid?
+
+      check_for_missing_box_params
+      # Just fix the box if they've got it swapped
+      if args[:south] > args[:north]
+        box = box.merge(north: args[:south], south: args[:north])
+      end
+      box
+    end
+
+    def check_for_missing_box_params
+      [:north, :south, :east, :west].each do |term|
+        next if args[term].present?
+
+        raise(PatternSearch::MissingValueError.new(var: term))
+      end
     end
   end
 end

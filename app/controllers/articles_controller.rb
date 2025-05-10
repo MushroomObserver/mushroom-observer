@@ -22,9 +22,28 @@ class ArticlesController < ApplicationController
 
   # ---------- Actions to Display data (index, show, etc.) ---------------------
 
+  ##############################################################################
+  # INDEX
+  #
   def index
-    filter_index? ? index_filtered : index_full
+    build_index_with_query
   end
+
+  private
+
+  def default_sort_order
+    ::Query::Articles.default_order # :created_at
+  end
+
+  def index_display_opts(opts, _query)
+    { letters: true,
+      num_per_page: 50,
+      include: :user }.merge(opts)
+  end
+
+  public
+
+  ##############################################################################
 
   def show
     return false unless (@article = find_or_goto_index(Article, params[:id]))
@@ -45,13 +64,13 @@ class ArticlesController < ApplicationController
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
 
   def create
-    return render(:new) if flash_missing_title?
-
     @article = Article.new(
-      title: params[:article][:title],
-      body: params[:article][:body],
+      title: params.dig(:article, :title),
+      body: params.dig(:article, :body),
       user_id: @user.id
     )
+    return render(:new) if flash_missing_title?
+
     @article.save
     redirect_to(article_path(@article.id))
   end
@@ -60,8 +79,8 @@ class ArticlesController < ApplicationController
     @article = Article.find(params[:id])
     return render(:edit) if flash_missing_title?
 
-    @article.title = params[:article][:title]
-    @article.body = params[:article][:body]
+    @article.title = params.dig(:article, :title)
+    @article.body = params.dig(:article, :body)
 
     save_any_changes
     redirect_to(article_path(@article.id))
@@ -74,13 +93,7 @@ class ArticlesController < ApplicationController
     redirect_to(articles_path)
   end
 
-  # ---------- Public methods (unrouted) ---------------------------------------
-
-  ##############################################################################
-
   private
-
-  # --------- Filters
 
   # Filter: Unless user permitted to perform request, just index
   def ignore_request_unless_permitted
@@ -90,46 +103,9 @@ class ArticlesController < ApplicationController
     redirect_to(articles_path)
   end
 
-  # --------- Other private methods
-
-  # should index be filtered?
-  def filter_index?
-    params[:q] || params[:by]
-  end
-
-  def index_filtered
-    query = find_or_create_query(:Article, by: params[:by])
-    show_selected_articles(
-      query,
-      id: params[:id].to_s,
-      always_index: true
-    )
-  end
-
-  def index_full
-    query = create_query(
-      :Article,
-      :all,
-      by: :created_at
-    )
-    show_selected_articles(query)
-  end
-
-  # Show selected list of articles.
-  def show_selected_articles(query, args = {})
-    args = {
-      action: :index,
-      letters: "articles.title",
-      num_per_page: 50,
-      include: :user
-    }.merge(args)
-
-    show_index_of_objects(query, args)
-  end
-
   # add flash message if title missing
   def flash_missing_title?
-    return false if params[:article][:title].present?
+    return false if params.dig(:article, :title).present?
 
     flash_error(:article_title_required.t)
     true

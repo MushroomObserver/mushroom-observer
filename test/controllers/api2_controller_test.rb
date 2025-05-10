@@ -119,7 +119,13 @@ class API2ControllerTest < FunctionalTestCase
   end
 
   def do_basic_get_request_for_model(model, *args)
-    expected_object = args.empty? ? model.first : model.where(*args).first
+    # Some models have a default_scope sort order applied.
+    # Reorder our expects preventatively to match API2's order.
+    expected_object = if args.empty?
+                        model.reorder(id: :asc).first
+                      else
+                        model.reorder(id: :asc).where(*args).first
+                      end
     response_formats = [:xml, :json]
     [:none, :low, :high].each do |detail|
       response_formats.each do |format|
@@ -132,7 +138,7 @@ class API2ControllerTest < FunctionalTestCase
 
   def test_num_of_pages
     get(:observations, params: { detail: :high, format: :json })
-    json = JSON.parse(response.body)
+    json = response.parsed_body
     assert_equal((Observation.count / 100.0).ceil, json["number_of_pages"],
                  "Number of pages was not correctly calculated.")
   end
@@ -161,6 +167,25 @@ class API2ControllerTest < FunctionalTestCase
     assert_nil(obs.thumb_image)
     assert_obj_arrays_equal([], obs.projects)
     assert_obj_arrays_equal([], obs.species_lists)
+  end
+
+  def test_post_observation_with_code
+    params = { api_key: api_keys(:rolfs_api_key).key, location: "Earth",
+               code: "EOL-135" }
+    post(:observations, params: params)
+    assert_no_api_errors
+    obs = Observation.last
+    assert(obs.field_slips[0].project.observations.include?(obs))
+  end
+
+  def test_post_observation_joins_project
+    params = { api_key: api_keys(:rolfs_api_key).key, location: "Earth",
+               code: "OPEN-135" }
+    post(:observations, params: params)
+    assert_no_api_errors
+    obs = Observation.last
+    project = Project.find_by(field_slip_prefix: "OPEN")
+    assert(project.member?(obs.user))
   end
 
   def test_post_maximal_observation
@@ -201,7 +226,8 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal({ Observation.other_notes_key =>
                    "These are notes.\nThey look like this." }, obs.notes)
     assert_obj_arrays_equal([images(:in_situ_image),
-                             images(:turned_over_image)], obs.images)
+                             images(:turned_over_image)],
+                            obs.images.reorder(id: :asc))
     assert_objs_equal(images(:turned_over_image), obs.thumb_image)
     assert_obj_arrays_equal([projects(:eol_project)], obs.projects)
     assert_obj_arrays_equal([species_lists(:another_species_list)],
@@ -256,7 +282,7 @@ class API2ControllerTest < FunctionalTestCase
     end
     assert_no_api_errors
     assert_equal(count + 1, Image.count)
-    json = JSON.parse(response.body)
+    json = response.parsed_body
     checksum_returned = json["results"][0]["md5sum"].to_s
     assert_equal(checksum, checksum_returned, "Didn't get the right checksum.")
   end
@@ -352,7 +378,7 @@ class API2ControllerTest < FunctionalTestCase
               nil
             end
     assert_not_equal("", key.to_s)
-    assert_equal(CGI.escapeHTML("<p>New API2 Key</p>"), notes.to_s)
+    assert_equal(CGI.escapeHTML("New API2 Key"), notes.to_s)
   end
 
   # NOTE: Checking ActionMailer::Base.deliveries works here only because
@@ -458,7 +484,7 @@ class API2ControllerTest < FunctionalTestCase
 
     params[:format] = :json
     get(:observations, params: params.merge(api_key: rolfs_key.key))
-    json = JSON.parse(response.body)
+    json = response.parsed_body
     votes = json["results"][0]["votes"]
     assert_equal(
       "rolf",
@@ -470,7 +496,7 @@ class API2ControllerTest < FunctionalTestCase
     )
 
     get(:observations, params: params.merge(api_key: marys_key.key))
-    json = JSON.parse(response.body)
+    json = response.parsed_body
     votes = json["results"][0]["votes"]
     assert_equal(
       :anonymous.l,

@@ -124,7 +124,7 @@ class LocationTest < UnitTestCase
     assert_equal(not_set.center_lat, not_set.calculate_lat,
                  "Location #{not_set.name} should have had center_lat " \
                  "calculated by update_box_area_and_center_columns")
-    not_set.observations.each do |obs|
+    not_set.observations.find_each do |obs|
       assert_equal(obs.location_lat, not_set.center_lat,
                    "Observation #{obs.name} should have had location_lat " \
                    "copied from #{not_set.name}")
@@ -132,7 +132,7 @@ class LocationTest < UnitTestCase
     # Location area / center are in fixtures, but center not set in obs fixtures
     locs = [locations(:burbank), locations(:albion)]
     locs.each do |loc|
-      loc.observations.each do |obs|
+      loc.observations.find_each do |obs|
         assert_equal(obs.location_lat, loc.center_lat,
                      "Observation #{obs.name} should have had location_lat " \
                      "copied from #{loc.name}")
@@ -183,28 +183,25 @@ class LocationTest < UnitTestCase
     rolf.email_locations_admin  = false
     rolf.email_locations_author = true
     rolf.email_locations_editor = false
-    rolf.email_locations_all    = false
     rolf.save
 
     mary.email_locations_admin  = false
     mary.email_locations_author = true
     mary.email_locations_editor = false
-    mary.email_locations_all    = false
     mary.save
 
     dick.email_locations_admin  = false
     dick.email_locations_author = true
     dick.email_locations_editor = false
-    dick.email_locations_all    = true
     dick.save
 
     assert_equal(0, desc.authors.length)
     assert_equal(0, desc.editors.length)
 
-    # email types:  author  editor  all     interest
-    # 1 Rolf:       x       .       .       .
-    # 2 Mary:       x       .       .       .
-    # 3 Dick:       x       .       x       .
+    # email types:  author  editor  interest
+    # 1 Rolf:       x       .       .
+    # 2 Mary:       x       .       .
+    # 3 Dick:       x       .       .
     # Authors: --   editors: --
     # Rolf changes notes: notify Dick (all); Rolf becomes editor.
     User.current = rolf
@@ -215,30 +212,12 @@ class LocationTest < UnitTestCase
     assert_equal(0, desc.authors.length)
     assert_equal(1, desc.editors.length)
     assert_equal(rolf, desc.editors.first)
-    assert_equal(1, QueuedEmail.count)
-    assert_email(0,
-                 flavor: "QueuedEmail::LocationChange",
-                 from: rolf,
-                 to: dick,
-                 location: loc.id,
-                 description: desc.id,
-                 old_location_version: loc.version,
-                 new_location_version: loc.version,
-                 old_description_version: desc.version - 1,
-                 new_description_version: desc.version)
+    assert_equal(0, QueuedEmail.count)
 
-    # Dick wisely reconsiders getting emails for every location change.
-    # Have Mary opt in for all temporarily just to make sure she doesn't
-    # send herself emails when she changes things.
-    dick.email_locations_all = false
-    dick.save
-    mary.email_locations_all = true
-    mary.save
-
-    # email types:  author  editor  all     interest
-    # 1 Rolf:       x       .       .       .
-    # 2 Mary:       x       .       x       .
-    # 3 Dick:       x       .       .       .
+    # email types:  author  editor  interest
+    # 1 Rolf:       x       .       .
+    # 2 Mary:       x       .       .
+    # 3 Dick:       x       .       .
     # Authors: --   editors: Rolf
     # Mary writes notes: no emails; Mary becomes author.
     User.current = mary
@@ -250,16 +229,12 @@ class LocationTest < UnitTestCase
     assert_equal(1, desc.editors.length)
     assert_equal(mary, desc.authors.first)
     assert_equal(rolf, desc.editors.first)
-    assert_equal(1, QueuedEmail.count)
+    assert_equal(0, QueuedEmail.count)
 
-    # Have Mary opt back out.
-    mary.email_locations_all = false
-    mary.save
-
-    # email types:  author  editor  all     interest
-    # 1 Rolf:       x       .       .       .
-    # 2 Mary:       x       .       .       .
-    # 3 Dick:       x       .       .       .
+    # email types:  author  editor  interest
+    # 1 Rolf:       x       .       .
+    # 2 Mary:       x       .       .
+    # 3 Dick:       x       .       .
     # Authors: Mary   editors: Rolf
     # Now when Rolf changes the notes Mary should get notified.
     User.current = rolf
@@ -271,8 +246,8 @@ class LocationTest < UnitTestCase
     assert_equal(mary, desc.authors.first)
     assert_equal(rolf, desc.editors.first)
     assert_equal(description_version + 3, desc.version)
-    assert_equal(2, QueuedEmail.count)
-    assert_email(1,
+    assert_equal(1, QueuedEmail.count)
+    assert_email(0,
                  flavor: "QueuedEmail::LocationChange",
                  from: rolf,
                  to: mary,
@@ -288,10 +263,10 @@ class LocationTest < UnitTestCase
     mary.email_locations_author = false
     mary.save
 
-    # email types:  author  editor  all     interest
-    # 1 Rolf:       x       .       .       .
-    # 2 Mary:       .       .       .       .
-    # 3 Dick:       x       .       .       .
+    # email types:  author  editor  interest
+    # 1 Rolf:       x       .       .
+    # 2 Mary:       .       .       .
+    # 3 Dick:       x       .       .
     # Authors: Mary   editors: Rolf
     # Have Dick change it to make sure rolf doesn't get an email as he is just
     # an editor and he has opted out of such notifications.
@@ -304,7 +279,7 @@ class LocationTest < UnitTestCase
     assert_equal(2, desc.editors.length)
     assert_equal(mary, desc.authors.first)
     assert_equal([rolf.id, dick.id].sort, desc.editors.map(&:id).sort)
-    assert_equal(2, QueuedEmail.count)
+    assert_equal(1, QueuedEmail.count)
 
     # Have everyone request editor-notifications and have Dick change it again.
     # Only Rolf should get notified since Mary is an author, not an editor, and
@@ -316,10 +291,10 @@ class LocationTest < UnitTestCase
     dick.email_locations_editor = true
     dick.save
 
-    # email types:  author  editor  all     interest
-    # 1 Rolf:       x       x       .       .
-    # 2 Mary:       .       x       .       .
-    # 3 Dick:       x       x       .       .
+    # email types:  author  editor  interest
+    # 1 Rolf:       x       x       .
+    # 2 Mary:       .       x       .
+    # 3 Dick:       x       x       .
     # Authors: Mary   editors: Rolf, Dick
     User.current = dick
     desc.reload
@@ -330,8 +305,8 @@ class LocationTest < UnitTestCase
     assert_equal(2, desc.editors.length)
     assert_equal(mary, desc.authors.first)
     assert_user_arrays_equal([rolf, dick], desc.editors)
-    assert_equal(3, QueuedEmail.count)
-    assert_email(2,
+    assert_equal(2, QueuedEmail.count)
+    assert_email(1,
                  flavor: "QueuedEmail::LocationChange",
                  from: dick,
                  to: rolf,
@@ -348,10 +323,10 @@ class LocationTest < UnitTestCase
     Interest.create(target: loc, user: mary, state: true)
     Interest.create(target: loc, user: dick, state: true)
 
-    # email types:  author  editor  all     interest
-    # 1 Rolf:       x       x       .       no
-    # 2 Mary:       .       x       .       yes
-    # 3 Dick:       x       x       .       yes
+    # email types:  author  editor  interest
+    # 1 Rolf:       x       x       no
+    # 2 Mary:       .       x       yes
+    # 3 Dick:       x       x       yes
     # Authors: Mary   editors: Rolf, Dick
     User.current = dick
     loc.reload
@@ -363,7 +338,7 @@ class LocationTest < UnitTestCase
     assert_equal(2, desc.editors.length)
     assert_equal(mary, desc.authors.first)
     assert_user_arrays_equal([rolf, dick], desc.editors)
-    assert_email(3,
+    assert_email(2,
                  flavor: "QueuedEmail::LocationChange",
                  from: dick,
                  to: mary,
@@ -373,7 +348,7 @@ class LocationTest < UnitTestCase
                  new_location_version: loc.version,
                  old_description_version: desc.version,
                  new_description_version: desc.version)
-    assert_equal(4, QueuedEmail.count)
+    assert_equal(3, QueuedEmail.count)
     QueuedEmail.queue = false
   end
 
@@ -460,7 +435,7 @@ class LocationTest < UnitTestCase
     obj.update_attribute(:location, loc1)
     obj.reload
     assert_equal(loc1.id, obj.location_id)
-    loc2.merge(loc1)
+    loc2.merge(rolf, loc1)
     obj.reload
     assert_equal(loc2.id, obj.location_id)
   end
@@ -534,7 +509,7 @@ class LocationTest < UnitTestCase
     log2 = loc2.rss_log
     assert_not_nil(log1)
     assert_not_nil(log2)
-    loc2.merge(loc1)
+    loc2.merge(rolf, loc1)
     assert_nil(log1.reload.target_id)
     assert_not_nil(log2.reload.target_id)
     assert_equal(:log_orphan, log1.parse_log[0][0])
@@ -556,25 +531,43 @@ class LocationTest < UnitTestCase
   #    Explicit tests of some scopes to improve coverage
   # ----------------------------------------------------
 
-  def test_scope_name_includes
+  def test_scope_name_has
     assert_includes(
-      Location.name_includes("Albion"),
+      Location.name_has("Albion"),
       locations(:albion)
     )
-    assert_empty(Location.name_includes(ARBITRARY_SHA))
+    assert_empty(Location.name_has(ARBITRARY_SHA))
   end
 
-  def test_scope_in_region
+  def test_scope_one_region
     assert_includes(
-      Location.in_region("New York, USA"),
+      Location.one_region("New York, USA"),
       locations(:nybg_location)
     )
     assert_not_includes(
-      Location.in_region("York"),
+      Location.one_region("York"),
       locations(:nybg_location),
       "Entire trailing part of Location name should match region"
     )
-    assert_empty(Location.in_region(ARBITRARY_SHA))
+    assert_empty(Location.one_region(ARBITRARY_SHA))
+  end
+
+  def test_scope_region
+    expects = Location.region(["California, USA", "New York, USA"]).
+              reorder(id: :asc)
+    assert_includes(expects, locations(:nybg_location))
+    assert_includes(expects, albion)
+    assert_includes(expects, california)
+    assert_not_includes(expects, wrangel)
+    assert_not_includes(expects, perkatkun)
+  end
+
+  def test_contains_edges
+    loc = albion
+    assert(loc.contains_lat?(loc.north), "Location should contain its N edge")
+    assert(loc.contains_lat?(loc.south), "Location should contain its S edge")
+    assert(loc.contains_lng?(loc.west), "Location should contain its W edge")
+    assert(loc.contains_lng?(loc.east), "Location should contain its E edge")
   end
 
   def test_scope_contains_point
@@ -592,6 +585,22 @@ class LocationTest < UnitTestCase
       include?(loc), "#{loc.name} should contain its SW corner")
   end
 
+  def cal
+    locations(:california)
+  end
+
+  def missing_west_box
+    { north: cal.north, south: cal.south, east: cal.east }
+  end
+
+  def outa_bounds_box
+    { north: 91, south: cal.south, east: cal.east, west: cal.west }
+  end
+
+  def north_southerthan_south_box
+    { north: cal.south - 10, south: cal.south, east: cal.east, west: cal.west }
+  end
+
   # supplements API tests
   def test_scope_in_box
     cal = locations(:california)
@@ -605,19 +614,15 @@ class LocationTest < UnitTestCase
     assert_not_includes(locs_in_wrangel_box, cal)
 
     assert_empty(
-      Location.in_box(north: cal.north, south: cal.south, east: cal.east),
+      Location.in_box(**missing_west_box),
       "`scope: in_box` should be empty if an argument is missing"
     )
     assert_empty(
-      Location.in_box(
-        north: 91, south: cal.south, east: cal.east, west: cal.west
-      ),
+      Location.in_box(**outa_bounds_box),
       "`scope: in_box` should be empty if an argument is out of bounds"
     )
     assert_empty(
-      Location.in_box(
-        north: cal.south - 10, south: cal.south, east: cal.east, west: cal.west
-      ),
+      Location.in_box(**north_southerthan_south_box),
       "`scope: in_box` should be empty if N < S"
     )
   end
@@ -679,6 +684,23 @@ class LocationTest < UnitTestCase
     # These failed depending on the rounding correction used by `contains_box`
     do_contains_box(loc: perkatkun, regions: [wrangel, earth])
     do_contains_box(loc: california, regions: [earth])
+  end
+
+  def test_scope_with_minimum_bounding_box_containing_point
+    falmouth = locations(:falmouth)
+    assert_equal(
+      falmouth,
+      Location.with_minimum_bounding_box_containing_point(
+        lat: falmouth.center_lat, lng: falmouth.center_lng
+      )
+    )
+
+    california_locations = Location.where(Location[:name] =~ /California, USA$/)
+    assert_empty(
+      california_locations.with_minimum_bounding_box_containing_point(
+        lat: falmouth.center_lat, lng: falmouth.center_lng
+      )
+    )
   end
 
   def albion

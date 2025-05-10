@@ -3,7 +3,7 @@ add_page_title(:HERBARIUM_RECORD.t + " '" +
                @herbarium_record.format_name.t + "'".html_safe)
 
 add_pager_for(@herbarium_record)
-add_tab_set(herbarium_record_show_tabs(h_r: @herbarium_record))
+add_context_nav(herbarium_record_show_tabs(h_r: @herbarium_record))
 
 herbarium = @herbarium_record.herbarium
 %>
@@ -14,6 +14,11 @@ herbarium = @herbarium_record.herbarium
     <%= :herbarium_record_initial_det.t %>: <i><%= @herbarium_record.initial_det %></i><br/>
     <%= :herbarium_record_accession_number.t %>: <%= @herbarium_record.accession_number %><br/>
     <%= :herbarium_record_user.t %>: <%= user_link(@herbarium_record.user) %><br/>
+    <% if herbarium.web_searchable? %>
+      <%= link_to("#{herbarium.code} #{:herbarium_record_collection.t}",
+          herbarium.mcp_url(@herbarium_record.accession_number),
+          target: "_blank") %><br/>
+    <% end %>
   </p>
 
   <% if !@herbarium_record.notes.blank? %>
@@ -31,4 +36,5 @@ herbarium = @herbarium_record.herbarium
     <%= :CREATED_AT.t %>: <%= @herbarium_record.created_at.web_date %><br/>
     <%= :UPDATED_AT.t %>: <%= @herbarium_record.updated_at.web_date %><br/>
   </p>
-</div><!-- .text-center -->
+</div>
+<!-- .text-center -->

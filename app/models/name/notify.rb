@@ -1,12 +1,20 @@
 # frozen_string_literal: true
 
 module Name::Notify
+  attr_writer :skip_notify
+
+  def skip_notify
+    @skip_notify || false
+  end
+
   # Notify webmaster that a new name was created.
   def notify_webmaster
-    user = User.current || User.admin
+    return if skip_notify
+
+    user ||= @current_user || User.admin
     QueuedEmail::Webmaster.create_email(
-      sender_email: user.email,
-      subject: "#{user.login} created #{real_text_name}",
+      user,
+      subject: "#{user.login} created #{user_real_text_name(user)}",
       content: "#{MO.http_domain}/names/#{id}"
     )
   end
@@ -14,16 +22,17 @@ module Name::Notify
   # This is called after saving potential changes to a Name.  It will determine
   # if the changes are important enough to notify the authors, and do so.
   def notify_users
+    return if skip_notify
     return unless saved_version_changes?
 
-    sender = User.current
+    # debugger unless @current_user
+    sender = @current_user || User.current
     recipients = []
 
     notify_admins(recipients)
     notify_authors(recipients)
     notify_editors(recipients)
     notify_reviewers(recipients)
-    notify_masochists(recipients)
     notify_interested(recipients)
 
     # Remove users who have opted out of all emails.
@@ -66,13 +75,6 @@ module Name::Notify
   def notify_reviewers(recipients)
     descriptions.map(&:reviewer).each do |user|
       recipients.push(user) if user&.email_names_reviewer
-    end
-  end
-
-  # Tell masochists who want to know about all name changes.
-  def notify_masochists(recipients)
-    User.where(email_names_all: true).find_each do |user|
-      recipients.push(user)
     end
   end
 

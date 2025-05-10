@@ -21,7 +21,7 @@
 ################################################################################
 
 class TranslationString < AbstractModel
-  require "acts_as_versioned"
+  require("acts_as_versioned")
 
   belongs_to :language
   belongs_to :user
@@ -86,12 +86,6 @@ class TranslationString < AbstractModel
   # Utility method for batch updates. Currently used in tests.
   def self.store_localizations(locale, hash_of_tags_and_texts)
     I18n.backend.store_translations(locale, { mo: hash_of_tags_and_texts })
-  end
-
-  # Get age of official language's banner.  (Used by application layout to
-  # determine if user has dismissed it yet.)
-  def self.banner_time
-    find_by(tag: "app_banner_box", language: Language.official).updated_at
   end
 
   # Call this method from a migration whenever we rename a tag, so we don't lose

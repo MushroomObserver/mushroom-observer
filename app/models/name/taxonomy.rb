@@ -115,6 +115,10 @@ module Name::Taxonomy
 
   # ----------------------------------------------------------------------------
 
+  def homonyms
+    Name.where(text_name: text_name).where.not(id: id)
+  end
+
   # Returns an Array of all of this Name's ancestors, starting with its
   # immediate parent, running back to Eukarya.  It ignores misspellings.  It
   # chooses at random if there are more than one accepted parent taxa at a
@@ -263,13 +267,7 @@ module Name::Taxonomy
   #   'Letharia vulpina var. bogus f. foobar'
   #
   def children(all: false)
-    scoped_children =
-      if at_or_below_genus?
-        Name.with_correct_spelling.subtaxa_of_genus_or_below(text_name)
-      else
-        Name.with_correct_spelling.
-          with_rank_and_name_in_classification(rank, text_name)
-      end
+    scoped_children = correctly_spelled_subtaxa
 
     return scoped_children.to_a if all
 
@@ -362,6 +360,15 @@ module Name::Taxonomy
 
   private
 
+  def correctly_spelled_subtaxa
+    if at_or_below_genus?
+      Name.with_correct_spelling.subtaxa_of_genus_or_below(text_name)
+    else
+      Name.with_correct_spelling.
+        with_rank_and_name_in_classification(rank, text_name)
+    end
+  end
+
   def approved_synonym_of_correctly_spelt_proposed_name?
     !deprecated &&
       Naming.joins(:name).where(name: other_synonyms).
@@ -369,12 +376,7 @@ module Name::Taxonomy
   end
 
   def ancestor_of_correctly_spelled_name?
-    if at_or_below_genus?
-      Name.subtaxa_of_genus_or_below(text_name).with_correct_spelling.any?
-    else
-      Name.with_correct_spelling.
-        with_rank_and_name_in_classification(rank, text_name).any?
-    end
+    correctly_spelled_subtaxa.any?
   end
 
   def correctly_spelled_ancestor_of_proposed_name?
@@ -468,9 +470,9 @@ module Name::Taxonomy
     # Now allows includes, for batch lookup of Naming email interested parties
     # GOTCHA: `search_name` cannot be used as a field in this AR where clause
     def batch_lookup_all_matches(name_or_names, includes = [])
-      Name.includes(includes).where(Name[:search_name].in(name_or_names)).
+      Name.where(Name[:search_name].in(name_or_names)).
         or(Name.where(Name[:text_name].in(name_or_names))).
-        with_correct_spelling
+        with_correct_spelling.includes(includes)
     end
 
     # NOTE: may return nil if no match
@@ -606,11 +608,7 @@ module Name::Taxonomy
     # This is meant to be run nightly to ensure that all the classification
     # caches are up to date.  It only pays attention to genera or higher.
     def refresh_classification_caches(dry_run: false)
-      query =
-        Name.joins(:description).
-        where(rank: 0..Name.ranks[:Genus]).
-        where(NameDescription[:classification].not_eq(Name[:classification])).
-        where(NameDescription[:classification].not_blank)
+      query = Name.has_description_classification_differing
       msgs = query.map do |name|
         "Classification for #{name.search_name} didn't match description."
       end

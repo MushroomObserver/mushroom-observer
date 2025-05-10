@@ -58,7 +58,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
       elsif location_exists_or_place_name_blank(params, user)
         # assert_redirected_to(action: :show)
         assert_response(:redirect)
-        assert_match(%r{/test.host/\d+\Z}, @response.redirect_url)
+        assert_match(%r{/test.host/obs/\d+\Z}, @response.redirect_url)
       else
         assert_response(:redirect)
         # assert_redirected_to(/#{new_location_path}/)
@@ -104,7 +104,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_input_value(:herbarium_record_accession_number, "")
     assert_true(@response.body.include?("Albion, Mendocino Co., California"))
     assert_link_in_html(:create_observation_inat_import_link.l,
-                        new_observations_inat_import_path)
+                        new_inat_import_path)
 
     users(:rolf).update(location_format: "scientific")
     get(:new)
@@ -202,7 +202,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_flash_warning
   end
 
-  def test_create_observation_with_specimen_and_collector_but_no_number
+  def test_create_observation_has_specimen_and_collector_but_no_number
     generic_construct_observation(
       { observation: { specimen: "1" },
         collection_number: { name: "Rolf Singer", number: "" },
@@ -244,7 +244,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     generic_construct_observation(
       { observation: { specimen: "1" },
         herbarium_record: {
-          herbarium_name: herbaria(:nybg_herbarium).auto_complete_name,
+          herbarium_name: herbaria(:nybg_herbarium).autocomplete_name,
           accession_number: "1234"
         },
         naming: { name: "Coprinus comatus" } },
@@ -259,7 +259,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     generic_construct_observation(
       { observation: { specimen: "1" },
         herbarium_record: {
-          herbarium_name: herbaria(:nybg_herbarium).auto_complete_name,
+          herbarium_name: herbaria(:nybg_herbarium).autocomplete_name,
           accession_number: "1234"
         },
         naming: { name: "Cortinarius sp." } },
@@ -275,7 +275,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     generic_construct_observation(
       { observation: { specimen: "1" },
         herbarium_record: {
-          herbarium_name: herbaria(:nybg_herbarium).auto_complete_name,
+          herbarium_name: herbaria(:nybg_herbarium).autocomplete_name,
           accession_number: ""
         },
         naming: { name: name } },
@@ -289,7 +289,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
   def test_create_observation_with_herbarium_but_no_specimen
     generic_construct_observation(
       { herbarium_record: {
-          herbarium_name: herbaria(:nybg_herbarium).auto_complete_name,
+          herbarium_name: herbaria(:nybg_herbarium).autocomplete_name,
           accession_number: "1234"
         },
         naming: { name: "Coprinus comatus" } },
@@ -493,9 +493,16 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     QueuedEmail.queue = false
   end
 
-  def test_create_observation_with_decimal_geolocation_and_unknown_name
-    lat = 34.1622
-    lng = -118.3521
+  def test_create_observation_with_unknown_decimal_geolocation_and_unknown_name
+    # cannot use 0,0 because that's inside loc_edited_by_katrina
+    lat = 3.0
+    lng = 0.0
+    earth = Location.unknown
+    locs = Location.contains_point(lat: lat, lng: lng)
+    assert_equal(1, locs.length,
+                 "Test needs lat/lng outside all locations except Earth")
+    assert_equal(earth, locs.first)
+
     generic_construct_observation(
       { observation: { place_name: "", lat: lat, lng: lng },
         naming: { name: "Unknown" } },
@@ -505,7 +512,29 @@ class ObservationsControllerCreateTest < FunctionalTestCase
 
     assert_equal(lat.to_s, obs.lat.to_s)
     assert_equal(lng.to_s, obs.lng.to_s)
-    assert_objs_equal(Location.unknown, obs.location)
+    assert_objs_equal(earth, obs.location)
+    assert_not_nil(obs.rss_log)
+  end
+
+  def test_create_observation_with_known_decimal_geolocation_and_unknown_name
+    burbank = locations(:burbank)
+    lat = burbank.center_lat
+    lng = burbank.center_lng
+
+    generic_construct_observation(
+      { observation: { place_name: "", lat: lat, lng: lng },
+        naming: { name: "Unknown" } },
+      1, 0, 0, 0
+    )
+
+    obs = assigns(:observation)
+    assert_equal(lat.to_s, obs.lat.to_s)
+    assert_equal(lng.to_s, obs.lng.to_s)
+    assert_objs_equal(
+      locations(:burbank), obs.location,
+      "It should use smallest Location containing lat/lng " \
+      "even if user leaves Where blank or uses the unknown Location"
+    )
     assert_not_nil(obs.rss_log)
   end
 
@@ -521,7 +550,11 @@ class ObservationsControllerCreateTest < FunctionalTestCase
 
     assert_equal("34.1622", obs.lat.to_s)
     assert_equal("-118.3521", obs.lng.to_s)
-    assert_objs_equal(Location.unknown, obs.location)
+    assert_objs_equal(
+      locations(:burbank), obs.location,
+      "It should use smallest Location containing lat/lng " \
+      "even if user leaves Where blank or uses the unknown Location"
+    )
     assert_not_nil(obs.rss_log)
   end
 
@@ -599,7 +632,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
 
     # assert_redirected_to(action: :show)
     assert_response(:redirect)
-    assert_match(%r{/test.host/\d+\Z}, @response.redirect_url)
+    assert_match(%r{/test.host/obs/\d+\Z}, @response.redirect_url)
     assert_equal(o_count + o_num, Observation.count, "Wrong Observation count")
     assert_equal(g_count + g_num, Naming.count, "Wrong Naming count")
     assert_equal(n_count + n_num, Name.count, "Wrong Name count")
@@ -629,12 +662,13 @@ class ObservationsControllerCreateTest < FunctionalTestCase
   end
 
   def test_prevent_creation_of_species_under_deprecated_genus
-    login("katrina")
-    cladonia = Name.find_or_create_name_and_parents("Cladonia").last
+    login(katrina.login)
+    cladonia = Name.find_or_create_name_and_parents(katrina, "Cladonia").last
     cladonia.save!
-    cladonia_picta = Name.find_or_create_name_and_parents("Cladonia picta").last
+    cladonia_picta = Name.find_or_create_name_and_parents(katrina,
+                                                          "Cladonia picta").last
     cladonia_picta.save!
-    cladina = Name.find_or_create_name_and_parents("Cladina").last
+    cladina = Name.find_or_create_name_and_parents(katrina, "Cladina").last
     cladina.change_deprecated(true)
     cladina.save!
     cladina.merge_synonyms(cladonia)
@@ -900,74 +934,74 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     post(:create, params: params)
     # assert_template(controller: :observations, action: expected_page)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal('"One"', assigns(:observation).name.text_name)
-    assert_equal('"One"', assigns(:observation).name.search_name)
+    assert_equal("Gen. 'One'", assigns(:observation).name.text_name)
+    assert_equal("Gen. 'One'", assigns(:observation).name.search_name)
 
-    params[:naming][:name] = '"Two" sp'
-    params[:approved_name] = '"Two" sp'
+    params[:naming][:name] = "'Two' sp"
+    params[:approved_name] = "'Two' sp"
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal('"Two"', assigns(:observation).name.text_name)
-    assert_equal('"Two"', assigns(:observation).name.search_name)
+    assert_equal("Gen. 'Two'", assigns(:observation).name.text_name)
+    assert_equal("Gen. 'Two'", assigns(:observation).name.search_name)
 
-    params[:naming][:name] = '"Three" sp.'
-    params[:approved_name] = '"Three" sp.'
+    params[:naming][:name] = "Gen. 'Three' sp."
+    params[:approved_name] = "Gen. 'Three' sp."
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal('"Three"', assigns(:observation).name.text_name)
-    assert_equal('"Three"', assigns(:observation).name.search_name)
+    assert_equal("Gen. 'Three'", assigns(:observation).name.text_name)
+    assert_equal("Gen. 'Three'", assigns(:observation).name.search_name)
 
-    params[:naming][:name] = '"One"'
+    params[:naming][:name] = "'One'"
     params[:approved_name] = nil
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal('"One"', assigns(:observation).name.text_name)
+    assert_equal("Gen. 'One'", assigns(:observation).name.text_name)
 
-    params[:naming][:name] = '"One" sp'
+    params[:naming][:name] = "'One' sp"
     params[:approved_name] = nil
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal('"One"', assigns(:observation).name.text_name)
+    assert_equal("Gen. 'One'", assigns(:observation).name.text_name)
 
-    params[:naming][:name] = '"One" sp.'
+    params[:naming][:name] = "'One' sp."
     params[:approved_name] = nil
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal('"One"', assigns(:observation).name.text_name)
+    assert_equal("Gen. 'One'", assigns(:observation).name.text_name)
 
     # Can we create species under the quoted genus?
-    params[:naming][:name] = '"One" foo'
-    params[:approved_name] = '"One" foo'
+    params[:naming][:name] = "'One' foo"
+    params[:approved_name] = "'One' foo"
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal('"One" foo', assigns(:observation).name.text_name)
+    assert_equal("Gen. 'One' foo", assigns(:observation).name.text_name)
 
-    params[:naming][:name] = '"One" "bar"'
-    params[:approved_name] = '"One" "bar"'
+    params[:naming][:name] = "'One' 'bar'"
+    params[:approved_name] = "'One' 'bar'"
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal('"One" "bar"', assigns(:observation).name.text_name)
+    assert_equal("Gen. 'One' sp. 'bar'", assigns(:observation).name.text_name)
 
-    params[:naming][:name] = '"One" Author'
-    params[:approved_name] = '"One" Author'
+    params[:naming][:name] = "'One' Author"
+    params[:approved_name] = "'One' Author"
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal('"One"', assigns(:observation).name.text_name)
-    assert_equal('"One" Author', assigns(:observation).name.search_name)
+    assert_equal("Gen. 'One'", assigns(:observation).name.text_name)
+    assert_equal("Gen. 'One' Author", assigns(:observation).name.search_name)
 
-    params[:naming][:name] = '"One" sp Author'
+    params[:naming][:name] = "'One' sp Author"
     params[:approved_name] = nil
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal('"One"', assigns(:observation).name.text_name)
-    assert_equal('"One" Author', assigns(:observation).name.search_name)
+    assert_equal("Gen. 'One'", assigns(:observation).name.text_name)
+    assert_equal("Gen. 'One' Author", assigns(:observation).name.search_name)
 
-    params[:naming][:name] = '"One" sp. Author'
+    params[:naming][:name] = "'One' sp. Author"
     params[:approved_name] = nil
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal('"One"', assigns(:observation).name.text_name)
-    assert_equal('"One" Author', assigns(:observation).name.search_name)
+    assert_equal("Gen. 'One'", assigns(:observation).name.text_name)
+    assert_equal("Gen. 'One' Author", assigns(:observation).name.search_name)
   end
 
   def test_create_observation_strip_images

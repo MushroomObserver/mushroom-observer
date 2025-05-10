@@ -35,6 +35,16 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     )
   end
 
+  def test_index_by_id
+    term = glossary_terms(:plane_glossary_term)
+    get(:index, params: { id: term.id })
+    assert_template("index")
+    assert_select(
+      "a[href *= '#{glossary_term_path(term.id)}']", true,
+      "Glossary Index at `P` missing link to #{term.unique_text_name})"
+    )
+  end
+
   def test_glossary_term_search
     conic = glossary_terms(:conic_glossary_term)
     convex = glossary_terms(:convex_glossary_term)
@@ -42,6 +52,9 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     get(:index, params: { pattern: "conic" })
     qr = QueryRecord.last.id.alphabetize
     assert_redirected_to(glossary_term_path(conic.id, params: { q: qr }))
+
+    get(:index, params: { pattern: conic.id })
+    assert_redirected_to(glossary_term_path(conic.id))
 
     login
     get(:index, params: { pattern: "con" })
@@ -63,6 +76,18 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_response(
       :success,
       "Public should be able to view Glossary Terms without logging in"
+    )
+  end
+
+  def test_show_with_multiple_images
+    term = glossary_terms(:plane_glossary_term)
+    assert(term.images.size > 1, "Test needs term with multiple images")
+
+    get(:show, params: { id: term.id })
+
+    assert_response(
+      :success,
+      "Glossary Terms with >1 image should be viewable without logging in"
     )
   end
 
@@ -251,7 +276,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   end
 
   def test_create_duplicate_name
-    existing_name = GlossaryTerm.first.name
+    existing_name = GlossaryTerm.reorder(created_at: :asc).first.name
     params = create_term_params
     params[:glossary_term][:name] = existing_name
     login
@@ -405,7 +430,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_not(GlossaryTerm.exists?(term.id), "Failed to destroy GlossaryTerm")
   end
 
-  def test_destroy_term_with_images
+  def test_destroy_term_has_images
     term = glossary_terms(:unused_thumb_and_used_image_glossary_term)
     unused_image = term.thumb_image
     used_image = term.other_images.first
@@ -429,7 +454,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   end
 
   def test_destroy_no_login
-    term = GlossaryTerm.first
+    term = GlossaryTerm.reorder(created_at: :asc).first
     login(users(:zero_user).login)
     delete(:destroy, params: { id: term.id })
 

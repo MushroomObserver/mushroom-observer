@@ -49,14 +49,11 @@ module Locations
       login
       get(:index)
 
-      assert_displayed_title("Location Descriptions by Name")
+      assert_displayed_title(:LOCATION_DESCRIPTIONS.l)
     end
 
-    def test_index_sorted_by_user
-      login
-      get(:index, params: { by: "user" })
-
-      assert_displayed_title("Location Descriptions by User")
+    def test_index_with_non_default_sort
+      check_index_sorting
     end
 
     def test_index_with_id
@@ -65,7 +62,8 @@ module Locations
       login
       get(:index, params: { id: desc.id })
 
-      assert_displayed_title("Location Description Index")
+      assert_displayed_title(:LOCATION_DESCRIPTIONS.l)
+      assert_select("body.descriptions__index", true)
     end
 
     def test_index_by_author_of_one_description
@@ -108,7 +106,8 @@ module Locations
       get(:index, params: { by_author: user.id })
 
       assert_template("index")
-      assert_displayed_title("Location Descriptions Authored by #{user.name}")
+      assert_displayed_title(:LOCATION_DESCRIPTIONS.l)
+      assert_displayed_filters("#{:query_by_author.l}: #{user.name}")
       assert_equal(
         assert_select("#results").children.count,
         LocationDescription.joins(:authors).where(user: user).count
@@ -173,7 +172,8 @@ module Locations
       get(:index, params: { by_editor: user.id })
 
       assert_template("index")
-      assert_displayed_title("Location Descriptions Edited by #{user.name}")
+      assert_displayed_title(:LOCATION_DESCRIPTIONS.l)
+      assert_displayed_filters("#{:query_by_editor.l}: #{user.name}")
       assert_select("a:match('href',?)", %r{^/locations/descriptions/\d+},
                     { count: descs_edited_by_user_count },
                     "Wrong number of results")

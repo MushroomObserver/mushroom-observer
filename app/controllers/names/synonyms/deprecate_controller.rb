@@ -82,14 +82,15 @@ module Names::Synonyms
                   (name = Name.safe_find(chosen_id))
                  [name]
                else
-                 Name.find_names_filling_in_authors(@given_name)
+                 Name.find_names_filling_in_authors(@user, @given_name)
                end
     end
 
     def try_to_set_names_from_approved_name
       approved_name = params[:approved_name].to_s.strip_squeeze
       if @names.empty? &&
-         (new_name = Name.create_needed_names(approved_name, @given_name))
+         (new_name = Name.create_needed_names(@user, approved_name,
+                                              @given_name))
         @names = [new_name]
       end
     end
@@ -100,13 +101,13 @@ module Names::Synonyms
 
       # Change target name to "undeprecated".
       target_name.change_deprecated(false)
-      target_name.save_with_log(:log_name_approved,
+      target_name.save_with_log(@user, :log_name_approved,
                                 other: @name.real_search_name)
 
       # Change this name to "deprecated", set correct spelling, add note.
       @name.change_deprecated(true)
-      @name.mark_misspelled(target_name) if @misspelling
-      @name.save_with_log(:log_name_deprecated,
+      @name.mark_misspelled(@user, target_name) if @misspelling
+      @name.save_with_log(@user, :log_name_deprecated,
                           other: target_name.real_search_name)
       post_comment(:deprecate, @name, @comment) if @comment.present?
     end

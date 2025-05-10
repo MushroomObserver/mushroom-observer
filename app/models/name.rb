@@ -138,67 +138,12 @@
 #  ==== Constants
 #  unknown::                 "Unknown": instance of Name.
 #  names_for_unknown::       "Unknown": accepted names in local language.
-#  all_ranks::               Ranks: all
+#  all_ranks::               Ranks: all. Defined by enum.
 #  ranks_above_genus::       Ranks: above "Genus".
 #  ranks_below_genus::       Ranks: below "Genus".
 #  ranks_above_species::     Ranks: above "Species".
 #  ranks_below_species::     Ranks: below "Species".
 #  alt_ranks::               Ranks: map alternatives to our values.
-#
-#  ==== Scopes
-#  created_on("yyyymmdd")
-#  created_after("yyyymmdd")
-#  created_before("yyyymmdd")
-#  created_between(start, end)
-#  updated_on("yyyymmdd")
-#  updated_after("yyyymmdd")
-#  updated_before("yyyymmdd")
-#  updated_between(start, end)
-#  of_lichens
-#  not_lichens
-#  deprecated
-#  not_deprecated
-#  with_description
-#  without_description
-#  description_includes
-#  with_description_in_project(project)
-#  with_description_created_by(user)
-#  with_description_reviewed_by(user)
-#  with_description_of_type(source_type)
-#  with_correct_spelling
-#  with_incorrect_spelling
-#  with_self_referential_misspelling
-#  with_synonyms
-#  without_synonyms
-#  ok_for_export
-#  with_rank(rank)
-#  with_rank_below(rank)
-#  with_rank_and_name_in_classification(rank, text_name)
-#  with_rank_at_or_below_genus
-#  with_rank_above_genus
-#  subtaxa_of_genus_or_below(genus)
-#  subtaxa_of(name)
-#  include_synonyms_of(name)
-#  include_subtaxa_of(name)
-#  text_name_includes(text_name)
-#  with_classification
-#  without_classification
-#  classification_includes(classification)
-#  with_author
-#  without_author
-#  author_includes(author)
-#  with_citation
-#  without_citation
-#  citation_includes(citation)
-#  with_notes
-#  without_notes
-#  notes_include(notes)
-#  with_comments
-#  without_comments
-#  comments_include(summary)
-#  on_species_list(species_list)
-#  at_location(location)
-#  in_box(north:, south:, east:, west:)
 #
 #  ==== Classification
 #  validate_classification:: Make sure +classification+ syntax is valid.
@@ -317,7 +262,7 @@
 #  ==== Merging
 #  merger_destructive?::     Would merger into another Name destroy data?
 #  merge::                   Merge old name into this one and remove old one.
-#  dependents?::         Does another Name depend from this Name?
+#  dependents?::             Does another Name depend from this Name?
 #
 #  == Callbacks
 #
@@ -326,12 +271,11 @@
 #  notify_users::            After save: notify interested User's of changes.
 #
 ###############################################################################
-# rubocop:disable Metrics/ClassLength
 class Name < AbstractModel
-  require "acts_as_versioned"
-  require "fileutils"
+  require("acts_as_versioned")
 
   # modules with instance methods and maybe class methods
+  include Scopes
   include Validation
   include Taxonomy
   include Synonymy
@@ -348,7 +292,6 @@ class Name < AbstractModel
   extend Parse
   extend Create
 
-  # enum definitions for use by simple_enum gem
   # Do not change the integer associated with a value
   enum :rank, {
     Form: 1,
@@ -419,16 +362,29 @@ class Name < AbstractModel
     "locked"
   )
 
+  before_validation :normalize_author_characters!
+
+  validates :author, allow_blank: true,
+                     # Contains only: letters, space, parens, hyphen,
+                     # period, comma, ampersand, square brackets, single quote
+                     format: { with: /\A[\p{Alpha} ()-.,&\[\]']*\z/,
+                               message: :validate_name_author_characters.t }
+  validates :author, allow_blank: true,
+                     # Ends only in letter, period plus any spaces
+                     format: { with: /[\p{Alpha}\.]( *)\z/,
+                               message: :validate_name_author_ending.t }
+  validate  :author_length
+  validate  :citation_start
   validates :icn_id, numericality: { allow_nil: true,
                                      only_integer: true,
                                      greater_than_or_equal_to: 1 }
-  validate :icn_id_registrable
-  validate :icn_id_unique
-  validate :validate_lifeform
-  validate :check_user, :check_text_name, :check_author
-
-  validate :author_ending
-  validate :citation_start
+  validate  :icn_id_registrable
+  validate  :icn_id_unique
+  validate  :lifeform_known
+  validates :search_name, presence: true
+  validate  :search_name_indistinct
+  validate  :text_name_length
+  validate  :user_presence
 
   before_create :inherit_stuff
   after_create :notify_webmaster
@@ -436,8 +392,15 @@ class Name < AbstractModel
   before_update :update_observation_cache
   after_update :notify_users
 
+  # Used by notify_users and notify_webmaster
+  attr_accessor :current_user
+
   # Used by name/_form_name.rhtml
   attr_accessor :misspelling
+
+  SEARCHABLE_FIELDS = [
+    :search_name, :citation, :notes
+  ].freeze
 
   # (Create should not be logged at all.  Update is already logged with more
   # sphistication than the autologger allows.  Merge will already log the
@@ -446,232 +409,13 @@ class Name < AbstractModel
 
   # Callbacks whenever new version is created.
   versioned_class.before_save do |ver|
-    ver.user_id = User.current_id || 0
-    if (ver.version != 1) &&
-       Name::Version.where(name_id: ver.name_id,
-                           user_id: ver.user_id).none?
-      UserStats.update_contribution(:add, :name_versions)
-    end
+    # ver.user_id = @current_user || 0
+    # if (ver.version != 1) &&
+    #    Name::Version.where(name_id: ver.name_id,
+    #                        user_id: ver.user_id).none?
+    #   UserStats.update_contribution(:add, :name_versions)
+    # end
   end
-
-  # NOTE: To improve Coveralls display, do not use one-line stabby lambda scopes
-  scope :of_lichens,
-        -> { where(Name[:lifeform].matches("%lichen%")) }
-  scope :not_lichens,
-        -> { where(Name[:lifeform].does_not_match("% lichen %")) }
-  scope :deprecated,
-        -> { where(deprecated: true) }
-  scope :not_deprecated,
-        -> { where(deprecated: false) }
-  scope :with_description,
-        -> { where.not(description_id: nil) }
-  scope :without_description,
-        -> { where(description_id: nil) }
-  # Names without descriptions, order by most frequently used
-  scope :description_needed, lambda {
-    without_description.joins(:observations).
-      group(:name_id).order(Arel.star.count.desc)
-  }
-  scope :description_includes,
-        lambda { |text|
-          joins(:descriptions).
-            where(NameDescription[:gen_desc].matches("%#{text}%")).
-            or(where(NameDescription[:diag_desc].matches("%#{text}%"))).
-            or(where(NameDescription[:distribution].matches("%#{text}%"))).
-            or(where(NameDescription[:habitat].matches("%#{text}%"))).
-            or(where(NameDescription[:look_alikes].matches("%#{text}%"))).
-            or(where(NameDescription[:notes].matches("%#{text}%"))).
-            or(where(NameDescription[:refs].matches("%#{text}%")))
-        }
-  scope :with_description_in_project,
-        lambda { |project|
-          joins(descriptions: :project).
-            merge(NameDescription.where(project: project))
-        }
-  scope :with_description_created_by,
-        lambda { |user|
-          joins(:descriptions).
-            merge(NameDescription.where(user: user))
-        }
-  scope :with_description_reviewed_by,
-        lambda { |user|
-          joins(:descriptions).
-            merge(NameDescription.where(reviewer: user))
-        }
-  scope :with_description_of_type,
-        lambda { |source|
-          # Check that it's a valid source type (string enum value)
-          return none if Description.all_source_types.exclude?(source)
-
-          joins(:descriptions).
-            merge(NameDescription.where(source_type: source))
-        }
-
-  ### Module Name::Spelling
-  scope :with_correct_spelling,
-        -> { where(correct_spelling_id: nil) }
-  scope :with_incorrect_spelling,
-        -> { where.not(correct_spelling_id: nil) }
-  scope :with_self_referential_misspelling, lambda {
-    where(Name[:correct_spelling_id].eq(Name[:id]))
-  }
-  scope :with_synonyms,
-        -> { where.not(synonym_id: nil) }
-  scope :without_synonyms,
-        -> { where(synonym_id: nil) }
-  scope :ok_for_export,
-        -> { where(ok_for_export: true) }
-
-  ### Module Name::Taxonomy
-  scope :with_rank,
-        ->(rank) { where(rank: ranks[rank]) if rank }
-  scope :with_rank_below,
-        ->(rank) { where(Name[:rank] < ranks[rank]) if rank }
-  scope :with_rank_and_name_in_classification,
-        lambda { |rank, text_name|
-          where(Name[:classification].matches("%#{rank}: _#{text_name}_%"))
-        }
-  scope :with_rank_at_or_below_genus,
-        lambda {
-          where((Name[:rank] <= ranks[:Genus]).
-                or(Name[:rank].eq(ranks[:Group])))
-        }
-  scope :with_rank_above_genus,
-        lambda {
-          where(Name[:rank] > ranks[:Genus]).
-            where(Name[:rank].not_eq(ranks[:Group]))
-        }
-  scope :subtaxa_of_genus_or_below,
-        lambda { |text_name|
-          # Note small diff w :text_name_includes scope
-          where(Name[:text_name].matches("#{text_name} %"))
-        }
-  scope :subtaxa_of,
-        lambda { |name|
-          if name.at_or_below_genus?
-            # Subtaxa can be determined from the text_nam
-            subtaxa_of_genus_or_below(name.text_name).
-              with_correct_spelling
-          else
-            # Need to examine the classification strings
-            with_rank_and_name_in_classification(name.rank, name.text_name).
-              with_correct_spelling
-          end
-        }
-
-  ### Pattern Search
-  scope :include_synonyms_of,
-        lambda { |name|
-          where(id: name.synonyms.map(&:id)).with_correct_spelling
-        }
-  # alias of `include_subtaxa_of`
-  scope :in_clade, ->(name) { include_subtaxa_of(name) }
-  scope :include_subtaxa_of,
-        lambda { |name|
-          names = [name] + subtaxa_of(name)
-          where(id: names.map(&:id)).with_correct_spelling
-        }
-  scope :include_subtaxa_above_genus,
-        ->(name) { include_subtaxa_of(name).with_rank_above_genus }
-  scope :text_name_includes,
-        ->(text_name) { where(Name[:text_name].matches("%#{text_name}%")) }
-  scope :with_classification,
-        -> { where(Name[:classification].not_blank) }
-  scope :without_classification,
-        -> { where(Name[:classification].blank) }
-  scope :classification_includes,
-        lambda { |classification|
-          where(Name[:classification].matches("%#{classification}%"))
-        }
-  scope :with_author,
-        -> { where(Name[:author].not_blank) }
-  scope :without_author,
-        -> { where(Name[:author].blank) }
-  scope :author_includes,
-        ->(author) { where(Name[:author].matches("%#{author}%")) }
-  scope :with_citation,
-        -> { where(Name[:citation].not_blank) }
-  scope :without_citation,
-        -> { where(Name[:citation].blank) }
-  scope :citation_includes,
-        ->(citation) { where(Name[:citation].matches("%#{citation}%")) }
-  scope :with_notes,
-        -> { where(Name[:notes].not_blank) }
-  scope :without_notes,
-        -> { where(Name[:notes].blank) }
-  scope :notes_include,
-        ->(notes) { where(Name[:notes].matches("%#{notes}%")) }
-  scope :with_comments,
-        -> { joins(:comments).distinct }
-  scope :without_comments,
-        -> { where.not(id: with_comments) }
-  scope :comments_include, lambda { |summary|
-    joins(:comments).where(Comment[:summary].matches("%#{summary}%")).distinct
-  }
-  scope :on_species_list,
-        lambda { |species_list|
-          joins(observations: :species_lists).
-            merge(SpeciesListObservation.where(species_list: species_list))
-        }
-  # Accepts region string, location_id, or Location instance
-  scope :at_location,
-        lambda { |location|
-          case location
-          when String # treat it as a region, not looking for all string matches
-            joins(observations: :location).
-              where(Location[:name].matches("%#{location}"))
-          when Integer, Location
-            joins(:observations).where(observations: { location: location })
-          else
-            none
-          end
-        }
-  # Names with Observations whose lat/lon are in a box
-  scope :in_box, # Pass kwargs (:north, :south, :east, :west), any order
-        lambda { |**args|
-          joins(:observations).merge(Observation.in_box(**args)).distinct
-        }
-
-  ### Specialized Scopes for Name::Create
-  # Get list of Names that are potential matches when creating a new name.
-  # Takes results of Name.parse_name.  Used by NameController#create_name.
-  # Three cases:
-  #
-  #   1. group with author       - only accept exact matches
-  #   2. nongroup with author    - match names with correct author or no author
-  #   3. any name without author - ignore authors completely when matching names
-  #
-  # If the user provides an author, but the only match has no author, then we
-  # just need to add an author to the existing Name.  If the user didn't give
-  # an author, but there are matches with an author, then it already exists
-  # and we should just ignore the request.
-  #
-  scope :matching_desired_new_parsed_name, lambda { |parsed_name|
-    if parsed_name.rank == "Group"
-      where(search_name: parsed_name.search_name)
-    elsif parsed_name.author.empty?
-      where(text_name: parsed_name.text_name)
-    else
-      where(text_name: parsed_name.text_name).
-        where(author: [parsed_name.author, ""])
-    end
-  }
-  scope :show_includes, lambda {
-    strict_loading.includes(
-      { comments: :user },
-      :correct_spelling,
-      { description: [:authors, :reviewer] },
-      { descriptions: [:authors, :editors, :reviewer, :writer_groups] },
-      { interests: :user },
-      :misspellings,
-      # { namings: [:user] },
-      # { observations: [:location, :thumb_image, :user] },
-      :rss_log,
-      { synonym: :names },
-      :user,
-      :versions
-    )
-  }
 
   # This is called before a name is created to let us populate things like
   # classification and lifeform from the parent (if infrageneric only).
@@ -703,7 +447,7 @@ class Name < AbstractModel
   end
 
   def best_brief_description
-    (description.gen_desc.presence || description.diag_desc) if description
+    (description.gen_desc.presence || description.diag_desc) if description # rubocop:disable Style/RedundantParentheses
   end
 
   # Used by show_name.
@@ -711,66 +455,4 @@ class Name < AbstractModel
     Hash[*Observation.group(:name_id).where(name: names).
          pluck(:name_id, Arel.star.count).to_a.flatten]
   end
-
-  # For NameController#needed_descriptions
-  # Returns a list of the most popular 100 names that don't have descriptions.
-  def self.descriptions_needed
-    names = description_needed.limit(100).map(&:id)
-
-    ::Query.lookup(:Name, :in_set, ids: names,
-                                   title: :needed_descriptions_title.l)
-  end
-
-  ##############################################################################
-
-  private
-
-  # prevent assigning ICN registration identifier to unregistrable Name
-  def icn_id_registrable
-    return if icn_id.blank? || registrable?
-
-    errors.add(:base, :name_error_unregistrable.t(
-                        rank: rank.to_s, name: real_search_name
-                      ))
-  end
-
-  # Require icn_id to be unique
-  # Use validation method (rather than :validates_uniqueness_of)
-  # to get correct error message.
-  def icn_id_unique
-    return if icn_id.nil?
-    return if (conflicting_name = other_names_with_same_icn_id.first).blank?
-
-    errors.add(:base, :name_error_icn_id_in_use.t(
-                        number: icn_id, name: conflicting_name.real_search_name
-                      ))
-  end
-
-  def other_names_with_same_icn_id
-    Name.where(icn_id: icn_id).where.not(id: id)
-  end
-
-  def author_ending
-    # Should not end with punctuation
-    # other than quotes, period, close paren, close bracket
-    return unless (
-      punct = %r{[\s!#%&(*+,\-/:;<=>?@\[^_{|}~]+\Z}.match(author)
-    )
-
-    errors.add(:base, :name_error_field_end.t(field: :AUTHOR.t, end: punct))
-  end
-
-  def citation_start
-    # Should not start with punctuation other than:
-    # quotes, period, close paren, close bracket
-    # question mark (used for Textile italics)
-    # underscore (previously used for Textile italics)
-    return unless (
-      start = %r{\A[\s!#%&)*+,\-./:;<=>@\[\]^{|}~]+}.match(citation)
-    )
-
-    errors.add(:base,
-               :name_error_field_start.t(field: :CITATION.t, start: start))
-  end
 end
-# rubocop:enable Metrics/ClassLength

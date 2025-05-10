@@ -8,7 +8,7 @@ class RssLogTest < UnitTestCase
   # normalized.
   # See https://www.pivotaltracker.com/story/show/174685402
   def test_url_for_normalized_controllers
-    normalized_rss_log_types.each do |type|
+    RssLog::ALL_TYPE_TAGS.each do |type|
       rss_log = create_rss_log(type)
       id = rss_log.target_id
 
@@ -37,8 +37,9 @@ class RssLogTest < UnitTestCase
   end
 
   def test_detail_for_destroyed_object
-    User.current = users(:dick)
+    # User.current = users(:dick)
     obs = observations(:detailed_unknown_obs)
+    obs.current_user = users(:dick)
     log = obs.rss_log
     assert_not_nil(log)
     assert_false(log.orphan?)
@@ -54,7 +55,7 @@ class RssLogTest < UnitTestCase
     loc2 = locations(:mitrula_marsh)
     log = loc1.rss_log
     assert_false(log.orphan?)
-    loc2.merge(loc1)
+    loc2.merge(mary, loc1)
     log.reload
     assert_true(log.orphan?)
     assert_equal(:log_location_merged.t(that: loc2.display_name, user: "mary"),
@@ -77,14 +78,8 @@ class RssLogTest < UnitTestCase
 
   # ---------- helpers ---------------------------------------------------------
 
-  def normalized_rss_log_types
-    RssLog.all_types.each_with_object([]) do |type, ary|
-      ary << type if model(type).controller_normalized?
-    end
-  end
-
   def model(type)
-    type.camelize.constantize
+    type.to_s.camelize.constantize
   end
 
   # rss_log factory

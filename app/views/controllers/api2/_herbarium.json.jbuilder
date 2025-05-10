@@ -7,7 +7,7 @@ json.name(object.name.to_s) if object.name.present?
 json.email(object.email.to_s) if object.email.present?
 json.address(object.mailing_address.to_s.strip_html) \
   if object.mailing_address.present?
-json.description(object.description.to_s.tpl_nodiv) \
+json.description(object.description.to_s.tl_for_api) \
   if object.description.present?
 json.created_at(object.created_at.try(&:utc))
 json.updated_at(object.updated_at.try(&:utc))

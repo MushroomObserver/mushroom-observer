@@ -33,13 +33,33 @@ class ExternalLink < AbstractModel
   validates :user, presence: true
   validates :url, presence: true, length: { maximum: 100 }
   validate  :check_url_syntax
+  before_validation :format_url_for_external_site
 
-  VALID_URL_PAT = %r{^[a-z]+://}
+  scope :order_by_default,
+        -> { order_by(::Query::ExternalLinks.default_order) }
+  scope :url_has,
+        ->(phrase) { search_columns(ExternalLink[:url], phrase) }
+  scope :external_sites, lambda { |sites|
+    ids = lookup_external_sites_by_name(sites)
+    where(external_site_id: ids)
+  }
+  scope :observations,
+        ->(ids) { where(observation_id: ids) }
 
   def check_url_syntax
-    return if VALID_URL_PAT.match?(url.to_s)
+    return if format_url_for_external_site
 
     errors.add(:url, :validate_invalid_url.t)
+  end
+
+  def format_url_for_external_site
+    return false unless (base_url = external_site&.base_url)
+
+    test_url = FormatURL.new(url, base_url)
+    return false unless test_url.valid?
+
+    self.url = test_url.formatted
+    url
   end
 
   # Convenience function to allow +sort_by(&:site_name)+.
@@ -51,7 +71,7 @@ class ExternalLink < AbstractModel
     return false unless user
 
     user.id == observation.user_id ||
-      external_site.project.member?(user)
+      external_site&.project&.member?(user)
   end
 
   def self.show_controller; end

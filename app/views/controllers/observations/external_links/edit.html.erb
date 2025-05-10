@@ -1,0 +1,24 @@
+<%
+@container = :full
+add_page_title(:EXTERNAL_LINKS.l)
+# add_context_nav(
+#   external_link_form_edit_tabs(back: @back, link: @external_link,
+#                                obj: @back_object)
+# )
+%>
+
+<div class="row">
+  <div class="col-xs-12 col-sm-7">
+    <%= render(partial: "observations/external_links/form",
+               locals: { local: true }) %>
+  </div>
+
+  <div class="col-xs-12 col-sm-5">
+    <ul class="row list-unstyled">
+      <%= render(partial: "shared/matrix_box",
+                 locals: { object: @external_link.observation,
+                           columns: "col-xs-12" }) %>
+    </ul>
+  </div>
+</div>
+<!--.row-->

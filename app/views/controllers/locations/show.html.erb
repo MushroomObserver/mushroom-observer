@@ -2,7 +2,7 @@
 add_page_title(:show_location_title.t(name: @location.display_name))
 add_pager_for(@location)
 add_interest_icons(@user, @location)
-add_tab_set(location_show_tabs)
+add_context_nav(location_show_tabs)
 @container = :full
 %>
 
@@ -24,12 +24,12 @@ add_tab_set(location_show_tabs)
   <div class="col-md-5">
     <%= render(partial: "locations/show/coordinates") %>
     <%= render(partial: "locations/show/notes") %>
-    <%= show_alt_descriptions_panel(object: @location, projects: @projects) %>
+    <%= show_alt_descriptions_panel(user: @user, object: @location, projects: @projects) %>
     <%= render(partial: "locations/show/footer") %>
   </div>
-</div><!--.row-->
+</div>
+<!--.row-->
 
 <div class="mt-3">
-  <%= show_object_footer(@location, @versions) %>
+  <%= show_object_footer(@user, @location, @versions) %>
 </div>
-

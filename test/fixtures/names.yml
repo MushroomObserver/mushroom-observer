@@ -68,7 +68,7 @@ coprinus_comatus:
   version: 2
   text_name: Coprinus comatus
   author: '(O.F. Müll.) Pers.'
-  display_name: '**__Coprinus comatus__** (O.F. Müll.) Pers.'
+  display_name: '**__Coprinus__** **__comatus__** (O.F. Müll.) Pers.'
   search_name: Coprinus comatus (O.F. Müll.) Pers.
   sort_name: Coprinus comatus  (O.F. Müll.) Pers.
   created_at: 2007-02-26 20:48:00
@@ -102,7 +102,7 @@ stereum_hirsutum:
   <<: *DEFAULTS
   text_name: Stereum hirsutum
   author: '(Willd.) Pers.'
-  display_name: '**__Stereum hirsutum__** (Willd.) Pers.'
+  display_name: '**__Stereum__** **__hirsutum__** (Willd.) Pers.'
   search_name: Stereum hirsutum (Willd.) Pers.
   sort_name: Stereum hirsutum (Willd.) Pers.
   created_at: 2007-06-23 20:00:00
@@ -124,7 +124,7 @@ tubaria_furfuracea:
   <<: *DEFAULTS
   text_name: Tubaria furfuracea
   author: '(Pers.) Gillet'
-  display_name: '**__Tubaria furfuracea__** (Pers.) Gillet'
+  display_name: '**__Tubaria__** **__furfuracea__** (Pers.) Gillet'
   search_name: Tubaria furfuracea (Pers.) Gillet
   sort_name: Tubaria furfuracea (Pers.) Gillet
   created_at: 2007-06-23 20:00:00
@@ -147,7 +147,7 @@ agaricus_campestris:
   user: rolf
   text_name: Agaricus campestris
   author: L.
-  display_name: '**__Agaricus campestris__** L.'
+  display_name: '**__Agaricus__** **__campestris__** L.'
   search_name: Agaricus campestris L.
   sort_name: Agaricus campestris  L.
   created_at: 2007-03-19 17:20:00
@@ -169,7 +169,7 @@ conocybe_filaris:
   <<: *DEFAULTS
   user: rolf
   text_name: Conocybe filaris
-  display_name: '**__Conocybe filaris__**'
+  display_name: '**__Conocybe__** **__filaris__**'
   search_name: Conocybe filaris
   sort_name: Conocybe filaris
   synonym:                        # has no synonym
@@ -192,7 +192,7 @@ amanita_baccata_arora:
   user: rolf
   text_name: Amanita baccata
   author: sensu Arora
-  display_name: '**__Amanita baccata__** sensu Arora'
+  display_name: '**__Amanita__** **__baccata__** sensu Arora'
   search_name: Amanita baccata sensu Arora
   sort_name: Amanita baccata  sensu Arora
   created_at: 2007-04-09 08:53:30
@@ -203,7 +203,7 @@ amanita_baccata_borealis:
   user: rolf
   text_name: Amanita baccata
   author: sensu Borealis
-  display_name: '**__Amanita baccata__** sensu Borealis'
+  display_name: '**__Amanita__** **__baccata__** sensu Borealis'
   search_name: Amanita baccata sensu Borealis
   sort_name: Amanita baccata  sensu Borealis
   created_at: 2007-04-09 08:54:30
@@ -226,7 +226,7 @@ lepiota_rachodes:
   user: rolf
   text_name: Lepiota rachodes
   author: Vittad.
-  display_name: '**__Lepiota rachodes__** Vittad.'
+  display_name: '**__Lepiota__** **__rachodes__** Vittad.'
   search_name: Lepiota rachodes Vittad.
   sort_name: Lepiota rachodes  Vittad.
   created_at: 2007-04-30 21:34:00
@@ -238,7 +238,7 @@ lepiota_rhacodes:
   user: rolf
   text_name: Lepiota rhacodes
   author: Vittad.
-  display_name: '**__Lepiota rhacodes__** Vittad.'
+  display_name: '**__Lepiota__** **__rhacodes__** Vittad.'
   search_name: Lepiota rhacodes Vittad.
   sort_name: Lepiota rhacodes  Vittad.
   created_at: 2007-04-30 21:34:00
@@ -261,7 +261,7 @@ macrolepiota_rachodes:
   user: rolf
   text_name: Macrolepiota rachodes
   author: '(Vittad.) Singer'
-  display_name: '**__Macrolepiota rachodes__** (Vittad.) Singer'
+  display_name: '**__Macrolepiota__** **__rachodes__** (Vittad.) Singer'
   search_name: Macrolepiota rachodes (Vittad.) Singer
   sort_name: Macrolepiota rachodes  (Vittad.) Singer
   synonym: macrolepiota_rachodes_synonym
@@ -274,7 +274,7 @@ macrolepiota_rhacodes:
   user: mary
   text_name: Macrolepiota rhacodes
   author: '(Vittad.) Singer'
-  display_name: '**__Macrolepiota rhacodes__** (Vittad.) Singer'
+  display_name: '**__Macrolepiota__** **__rhacodes__** (Vittad.) Singer'
   search_name: Macrolepiota rhacodes (Vittad.) Singer
   sort_name: Macrolepiota rhacodes  (Vittad.) Singer
   synonym: macrolepiota_rachodes_synonym
@@ -298,7 +298,7 @@ chlorophyllum_rachodes:
   user: rolf
   text_name: Chlorophyllum rachodes
   author: '(Vittad.) Vellinga'
-  display_name: '**__Chlorophyllum rachodes__** (Vittad.) Vellinga'
+  display_name: '**__Chlorophyllum__** **__rachodes__** (Vittad.) Vellinga'
   search_name: Chlorophyllum rachodes (Vittad.) Vellinga
   sort_name: Chlorophyllum rachodes  (Vittad.) Vellinga
   synonym: chlorophyllum_rachodes_synonym
@@ -311,7 +311,7 @@ chlorophyllum_rhacodes:
   user: mary
   text_name: Chlorophyllum rhacodes
   author: '(Vittad.) Vellinga'
-  display_name: '**__Chlorophyllum rhacodes__** (Vittad.) Vellinga'
+  display_name: '**__Chlorophyllum__** **__rhacodes__** (Vittad.) Vellinga'
   search_name: Chlorophyllum rhacodes (Vittad.) Vellinga
   sort_name: Chlorophyllum rhacodes  (Vittad.) Vellinga
   synonym: chlorophyllum_rachodes_synonym
@@ -337,7 +337,7 @@ lactarius_alpinus:
   user: rolf
   text_name: Lactarius alpinus
   author: Peck
-  display_name: '**__Lactarius alpinus__** Peck'
+  display_name: '**__Lactarius__** **__alpinus__** Peck'
   search_name: Lactarius alpinus Peck
   sort_name: Lactarius alpinus  Peck
   synonym: lactarius_alpinus_synonym
@@ -349,7 +349,7 @@ lactarius_alpigenes:
   user: rolf
   text_name: Lactarius alpigenes
   author: Kühn.
-  display_name: __Lactarius alpigenes__ Kühn.
+  display_name: __Lactarius__ __alpigenes__ Kühn.
   search_name: Lactarius alpigenes Kühn.
   sort_name: Lactarius alpigenes  Kühn.
   synonym: lactarius_alpinus_synonym
@@ -362,7 +362,7 @@ lactarius_kuehneri:
   user: rolf
   text_name: Lactarius kuehneri
   author: Joss.
-  display_name: __Lactarius kuehneri__ Joss.
+  display_name: __Lactarius__ __kuehneri__ Joss.
   search_name: Lactarius kuehneri Joss.
   sort_name: Lactarius kuehneri  Joss.
   synonym: lactarius_alpinus_synonym
@@ -375,7 +375,7 @@ lactarius_subalpinus:
   user: rolf
   text_name: Lactarius subalpinus
   author: Kühn.
-  display_name: __Lactarius subalpinus__ Kühn.
+  display_name: __Lactarius__ __subalpinus__ Kühn.
   search_name: Lactarius subalpinus Kühn.
   sort_name: Lactarius subalpinus  Kühn.
   synonym: lactarius_alpinus_synonym
@@ -399,7 +399,7 @@ agaricus_campestrus:
   user: rolf
   text_name: Agaricus campestrus
   author: L.
-  display_name: '**__Agaricus campestrus__** L.'
+  display_name: '**__Agaricus__** **__campestrus__** L.'
   search_name: Agaricus campestrus L.
   sort_name: Agaricus campestrus  L.
   created_at: 2007-06-23 20:04:00
@@ -412,7 +412,7 @@ agaricus_campestras:
   user: rolf
   text_name: Agaricus campestras
   author: L.
-  display_name: '**__Agaricus campestras__** L.'
+  display_name: '**__Agaricus__** **__campestras__** L.'
   search_name: Agaricus campestras L.
   sort_name: Agaricus campestras  L.
   created_at: 2007-06-23 20:04:00
@@ -425,7 +425,7 @@ agaricus_campestros:
   user: rolf
   text_name: Agaricus campestros
   author: L.
-  display_name: '**__Agaricus campestros__** L.'
+  display_name: '**__Agaricus__** **__campestros__** L.'
   search_name: Agaricus campestros L.
   sort_name: Agaricus campestros  L.
   created_at: 2007-06-23 20:04:00
@@ -449,7 +449,7 @@ coprinellus_micaceus:
   version: 2
   text_name: Coprinellus micaceus
   author: '(Bull.) Vilgalys, Hopple & Jacq. Johnson'
-  display_name: '**__Coprinellus micaceus__** (Bull.) Vilgalys, Hopple & Jacq. Johnson'
+  display_name: '**__Coprinellus__** **__micaceus__** (Bull.) Vilgalys, Hopple & Jacq. Johnson'
   search_name: Coprinellus micaceus (Bull.) Vilgalys, Hopple & Jacq. Johnson
   sort_name: Coprinellus micaceus  (Bull.) Vilgalys, Hopple & Jacq. Johnson
   created_at: 2007-06-24 12:45:55
@@ -459,7 +459,7 @@ coprinellus_micaceus_no_author:
   <<: *DEFAULTS
   user: rolf
   text_name: Coprinellus micaceus
-  display_name: '**__Coprinellus micaceus__**'
+  display_name: '**__Coprinellus__** **__micaceus__**'
   search_name: Coprinellus micaceus
   sort_name: Coprinellus micaceus
   created_at: 2007-06-24 12:45:55
@@ -481,7 +481,7 @@ strobilurus_diminutivus_no_author:
   <<: *DEFAULTS
   user: rolf
   text_name: Strobilurus diminutivus
-  display_name: '**__Strobilurus diminutivus__**'
+  display_name: '**__Strobilurus__** **__diminutivus__**'
   search_name: Strobilurus diminutivus
   sort_name: Strobilurus diminutivus
   created_at: 2007-07-20 20:54:45
@@ -504,7 +504,7 @@ pluteus_petasatus_approved:
   user: rolf
   text_name: Pluteus petasatus
   author: '(Fr.) Gillet'
-  display_name: '**__Pluteus petasatus__** (Fr.) Gillet'
+  display_name: '**__Pluteus__** **__petasatus__** (Fr.) Gillet'
   search_name: Pluteus petasatus (Fr.) Gillet
   sort_name: Pluteus petasatus  (Fr.) Gillet
   created_at: 2007-07-20 20:54:45
@@ -516,7 +516,7 @@ pluteus_petasatus_deprecated:
   user: rolf
   text_name: Pluteus petasatus
   author: '(Fries) Gillet'
-  display_name: __Pluteus petasatus__ (Fries) Gillet
+  display_name: __Pluteus__** **__petasatus__ (Fries) Gillet
   search_name: Pluteus petasatus (Fries) Gillet
   sort_name: Pluteus petasatus  (Fries) Gillet
   correct_spelling: NULL
@@ -541,7 +541,7 @@ bugs_bunny_one:
   user: rolf
   author: One
   text_name: Warnerbros bugs-bunny
-  display_name: '**__Warnerbros bugs-bunny__** One'
+  display_name: '**__Warnerbros__** **__bugs-bunny__** One'
   search_name: Warnerbros bugs-bunny One
   sort_name: Warnerbros bugs-bunny  One
   created_at: 2008-01-31 01:01:01
@@ -552,7 +552,7 @@ bugs_bunny_two:
   user: rolf
   author: Two
   text_name: Warnerbros bugs-bunny
-  display_name: '**__Warnerbros bugs-bunny__** Two'
+  display_name: '**__Warnerbros__** **__bugs-bunny__** Two'
   search_name: Warnerbros bugs-bunny Two
   sort_name: Warnerbros bugs-bunny  Two
   created_at: 2008-01-31 01:01:01
@@ -573,7 +573,7 @@ russula_brevipes_no_author:
   <<: *DEFAULTS
   user: rolf
   text_name: Russula brevipes
-  display_name: '**__Russula brevipes__**'
+  display_name: '**__Russula__** **__brevipes__**'
   search_name: Russula brevipes
   sort_name: Russula brevipes
   created_at: 2008-03-10 22:31:27
@@ -585,7 +585,7 @@ russula_brevipes_author_notes:
   user: rolf
   text_name: Russula brevipes
   author: Peck
-  display_name: '**__Russula brevipes__** Peck'
+  display_name: '**__Russula__** **__brevipes__** Peck'
   search_name: Russula brevipes Peck
   sort_name: Russula brevipes  Peck
   citation: 'blah'
@@ -598,7 +598,7 @@ russula_cremoricolor_no_author_notes:
   description: russula_cremoricolor_no_author_notes_desc
   user: rolf
   text_name: Russula cremoricolor
-  display_name: '**__Russula cremoricolor__**'
+  display_name: '**__Russula__** **__cremoricolor__**'
   search_name: Russula cremoricolor
   sort_name: Russula cremoricolor
   created_at: 2008-03-12 20:53:18
@@ -610,43 +610,43 @@ russula_cremoricolor_author_notes:
   user: rolf
   text_name: Russula cremoricolor
   author: Earle
-  display_name: '**__Russula cremoricolor__** Earle'
+  display_name: '**__Russula__** **__cremoricolor__** Earle'
   search_name: Russula cremoricolor Earle
   sort_name: Russula cremoricolor  Earle
   created_at: 2008-03-12 20:53:40
   updated_at: 2008-03-12 20:53:40
 
-lentinellus:
+agrocybe:
   <<: *DEFAULTS
   user: rolf
-  text_name: Lentinellus
-  display_name: '**__Lentinellus__**'
-  search_name: Lentinellus
-  sort_name: Lentinellus
+  text_name: Agrocybe
+  display_name: '**__Agrocybe__**'
+  search_name: Agrocybe
+  sort_name: Agrocybe
   created_at: 2008-03-19 08:35:37
   updated_at: 2008-03-19 08:35:37
   rank: <%= Name.ranks[:Genus] %>
 
-lentinellus_ursinus_author1:
+dup_name_author1:
   <<: *DEFAULTS
   user: rolf
-  text_name: Lentinellus ursinus
-  author: Kühner
-  display_name: '**__Lentinellus ursinus__** Kühner'
-  search_name: Lentinellus ursinus Kühner
-  sort_name: Lentinellus ursinus  Kühner
+  text_name: Agrocybe arvalis
+  author: (Fr.) Singer
+  display_name: '**__Agrocybe__** **__arvalis__** (Fr.) Singer'
+  search_name: Agrocybe arvalis (Fr.) Singer
+  sort_name: Agrocybe arvalis  (Fr.) Singer
   created_at: 2008-03-19 08:35:37
   updated_at: 2008-03-19 08:35:37
   deprecated: false
 
-lentinellus_ursinus_author2:
+dup_name_author2:
   <<: *DEFAULTS
   user: rolf
-  text_name: Lentinellus ursinus
-  author: Kuhner
-  display_name: '**__Lentinellus ursinus__** Kuhner'
-  search_name: Lentinellus ursinus Kuhner
-  sort_name: Lentinellus ursinus  Kuhner
+  text_name: Agrocybe arvalis
+  author: '(Fr.) Heim & Romagn.'
+  display_name: '**__Agrocybe__** **__arvalis__** (Fr.) Heim & Romagn.'
+  search_name: Agrocybe arvalis (Fr.) Heim & Romagn.
+  sort_name: Agrocybe arvalis  (Fr.) Heim & Romagn.
   created_at: 2008-03-19 08:35:37
   updated_at: 2008-03-19 08:35:37
   deprecated: false
@@ -670,8 +670,8 @@ macrocybe_pegler:
   text_name: Macrocybe
   author: '(H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone'
   display_name: '**__Macrocybe__** (H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone'
-  search_name: Macrocybe
-  sort_name: Macrocybe
+  search_name: 'Macrocybe (H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone'
+  sort_name: 'Macrocybe  (H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone'
   created_at: 2008-09-05 22:30:00
   updated_at: 2008-09-05 22:30:00
 
@@ -702,7 +702,7 @@ boletus_edulis:
   <<: *DEFAULTS
   text_name: Boletus edulis
   author: Bull.
-  display_name: '**__Boletus edulis__** Bull.'
+  display_name: '**__Boletus__** **__edulis__** Bull.'
   search_name: Boletus edulis Bull.
   sort_name: Boletus edulis  Bull.
   created_at: 2008-10-05 16:17:08
@@ -798,7 +798,7 @@ tremella_mesenterica:
   user: rolf
   text_name: Tremella mesenterica
   author: Retz.
-  display_name: '**__Tremella mesenterica__** Retz.'
+  display_name: '**__Tremella__** **__mesenterica__** Retz.'
   search_name: Tremella mesenterica Retz.
   sort_name: Tremella mesenterica  Retz.
   created_at: 2010-10-12 21:30:01
@@ -811,7 +811,7 @@ tremella_justpublished:
   user: rolf
   text_name: Tremella justpublished
   author: Retz.
-  display_name: '**__Tremella justpublished__** Retz.'
+  display_name: '**__Tremella__** **__justpublished__** Retz.'
   search_name: Tremella justpublished Retz.
   sort_name: Tremella justpublished  Retz.
   notes: A Tremella not known to be a lichen
@@ -823,7 +823,7 @@ tremella_justpublished:
 tremella_celata:
   <<: *DEFAULTS
   text_name: Tremella celata
-  display_name: '**__Tremella celata__**'
+  display_name: '**__Tremella__** **__celata__**'
   search_name: Tremella celata
   sort_name: Tremella celata
   classification: "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Tremellomycetes_\r\nOrder: _Tremellales_\r\nFamily: _Tremellaceae_\r\nFamily: _Tremella_"
@@ -846,7 +846,7 @@ hygrocybe_russocoriacea_bad_author:
   text_name: Hygrocybe russocoriacea
   search_name: Hygrocybe russocoriacea (Berk. & T.K. Mill.) P.D. Orton & Watling
   sort_name: Hygrocybe russocoriacea  (Berk. & T.K. Mill.) P.D. Orton & Watling
-  display_name: '**__Hygrocybe russocoriacea__** (Berk. & T.K. Mill.) P.D. Orton & Watling'
+  display_name: '**__Hygrocybe__** **__russocoriacea__** (Berk. & T.K. Mill.) P.D. Orton & Watling'
   author: '(Berk. & T.K. Mill.) P.D. Orton & Watling'
   notes: '__Camarophyllus russocoriaceus__ is a synonym.  According to the Index Fungorum __Camarophyllus__ is now considered to be a synonym of __Hygrocybe__.'
   created_at: 2011-02-18 21:30:01
@@ -857,7 +857,7 @@ hygrocybe_russocoriacea_good_author:
   text_name: Hygrocybe russocoriacea
   search_name: Hygrocybe russocoriacea (Berk. & Jos.K. Mill.) P.D. Orton & Watling
   sort_name: Hygrocybe russocoriacea  (Berk. & Jos.K. Mill.) P.D. Orton & Watling
-  display_name: '**__Hygrocybe russocoriacea__** (Berk. & Jos.K. Mill.) P.D. Orton & Watling'
+  display_name: '**__Hygrocybe__** **__russocoriacea__** (Berk. & Jos.K. Mill.) P.D. Orton & Watling'
   author: '(Berk. & Jos.K. Mill.) P.D. Orton & Watling'
   created_at: 2011-07-11 21:30:01
   updated_at: 2011-07-11 21:30:01
@@ -890,7 +890,7 @@ abortiporus_biennis_for_eol:
   text_name: Abortiporus biennis
   search_name: Abortiporus biennis (Bull.) Singer
   sort_name: Abortiporus biennis  (Bull.) Singer
-  display_name: '**__Abortiporus biennis__** (Bull.) Singer'
+  display_name: '**__Abortiporus__** **__biennis__** (Bull.) Singer'
   author: '(Bull.) Singer'
   created_at: 2015-07-05 21:41:10
   updated_at: 2015-07-05 21:41:10
@@ -901,7 +901,7 @@ amanita_subgenus_lepidella:
   text_name: Amanita subg. Lepidella
   search_name: Amanita subg. Lepidella (E.-J. Gilbert) Veselý emend. Corner & Bas
   sort_name: Amanita subg. Lepidella  (E.-J. Gilbert) Veselý emend. Corner & Bas
-  display_name: '**__Amanita__ subg. __Lepidella__** (E.-J. Gilbert) Veselý emend. Corner & Bas'
+  display_name: '**__Amanita__** subg. **__Lepidella__** (E.-J. Gilbert) Veselý emend. Corner & Bas'
   author: '(E.-J. Gilbert) Veselý emend. Corner & Bas'
   created_at: 2015-09-17 21:30:01
   updated_at: 2015-09-17 21:30:01
@@ -912,7 +912,7 @@ amanita_boudieri:
   text_name: Amanita boudieri
   search_name: Amanita boudieri
   sort_name: Amanita boudieri
-  display_name: '**__Amanita boudieri__**'
+  display_name: '**__Amanita__** **__boudieri__**'
   created_at: 2015-09-17 21:30:01
   updated_at: 2015-09-17 21:30:01
 
@@ -922,7 +922,7 @@ amanita_boudieri_var_beillei:
   text_name: Amanita boudieri var. beillei
   search_name: Amanita boudieri var. beillei
   sort_name: Amanita boudieri var. beillei
-  display_name: '**__Amanita boudieri__ var. __beillei__**'
+  display_name: '**__Amanita__** **__boudieri__** var. **__beillei__**'
   created_at: 2015-09-17 21:30:01
   updated_at: 2015-09-17 21:30:01
 
@@ -932,7 +932,7 @@ boletus_edulis_group:
   text_name:         Boletus edulis group
   search_name:       Boletus edulis group
   sort_name:         Boletus edulis   group
-  display_name: '**__Boletus edulis__** group'
+  display_name: '**__Boletus__** **__edulis__** group'
   created_at: 2015-10-03 21:30:01
   updated_at: 2015-10-03 21:30:01
 
@@ -996,7 +996,7 @@ xa_genus:
 namings_deprecated:
   <<: *DEFAULTS
   text_name:    Xa current
-  display_name: "**__Xa current__**"
+  display_name: "**__Xa__** **__current__**"
   search_name:  Xa current
   sort_name:    Xa current
   synonym:      namings_deprecated_synonym
@@ -1006,7 +1006,7 @@ namings_deprecated:
 namings_deprecated_1:
   <<: *DEFAULTS
   text_name:    Xa deprecatedone
-  display_name: "**__Xa deprecatedone__**"
+  display_name: "**__Xa__** **__deprecatedone__**"
   search_name:  Xa deprecatedone
   sort_name:    Xa deprecatedone
   synonym:      namings_deprecated_synonym
@@ -1017,7 +1017,7 @@ namings_deprecated_1:
 namings_deprecated_2:
   <<: *DEFAULTS
   text_name:    Xa deprecatedtwo
-  display_name: "**__Xa deprecatedtwo__**"
+  display_name: "**__Xa__** **__deprecatedtwo__**"
   search_name:  Xa deprecatedtwo
   sort_name:    Xa deprecatedtwo
   synonym:      namings_deprecated_synonym
@@ -1030,7 +1030,7 @@ two_ancestors:
   <<: *DEFAULTS
   rank:              <%= Name.ranks[:Variety] %>
   text_name:         Coprinellus micaceus var. phony
-  display_name: "**__Coprinellus micaceus__ var. __phony__**"
+  display_name: "**__Coprinellus__** **__micaceus__ var. __phony__**"
   search_name:       Coprinellus micaceus var. phony
   sort_name:         Coprinellus micaceus var. phony
   created_at:        2016-09-11 21:30:01
@@ -1051,7 +1051,7 @@ mergeable_no_notes:
   text_name:         Mergeable noteless
   search_name:       Mergeable noteless
   sort_name:         Mergeable noteless
-  display_name: "**__Mergeable noteless__**"
+  display_name: "**__Mergeable__** **__noteless__**"
   created_at:        2016-09-11 21:30:01
   updated_at:        2016-09-11 21:30:01
 
@@ -1060,7 +1060,7 @@ mergeable_description_notes:
   text_name:         Mergeable description-notes
   search_name:       Mergeable description-notes
   sort_name:         Mergeable description-notes
-  display_name: "**__Mergeable description-notes__**"
+  display_name: "**__Mergeable__** **__description-notes__**"
   description:       mergeable_description_notes_desc
   created_at:        2016-09-11 21:30:01
   updated_at:        2016-09-11 21:30:01
@@ -1070,7 +1070,7 @@ mergeable_second_description_notes:
   text_name:         Mergeable second-description-notes
   search_name:       Mergeable second-description-notes
   sort_name:         Mergeable second-description-notes
-  display_name: "**__Mergeable second-description-notes__**"
+  display_name: "**__Mergeable__** **__second-description-notes__**"
   description:       mergeable_second_description_notes_desc
   created_at:        2016-09-11 21:30:01
   updated_at:        2016-09-11 21:30:01
@@ -1080,7 +1080,7 @@ mergeable_epithet_unauthored:
   text_name:         Mergeable epithet
   search_name:       Mergeable epithet
   sort_name:         Mergeable epithet
-  display_name: "**__Mergeable epithet__**"
+  display_name: "**__Mergeable__** **__epithet__**"
   created_at:        2016-09-11 21:30:01
   updated_at:        2016-09-11 21:30:01
 
@@ -1090,7 +1090,7 @@ mergeable_epithet_authored:
   text_name:         Mergeable epithet
   search_name:       Mergeable epithet Authored
   sort_name:         Mergeable epithet  Authored
-  display_name: "**__Mergeable epithet__** Authored"
+  display_name: "**__Mergeable__** **__epithet__** Authored"
   created_at:        2016-09-11 21:30:01
   updated_at:        2016-09-11 21:30:01
 
@@ -1099,7 +1099,7 @@ authored_with_naming:
   text_name:         Psalliota naming
   search_name:       Psalliota naming Authored
   sort_name:         Psalliota naming  Authored
-  display_name: "**__Psalliota naming__** Authored"
+  display_name: "**__Psalliota__** **__naming__** Authored"
   created_at:        2017-01-11 21:30:01
   updated_at:        2017-01-11 21:30:01
 
@@ -1108,7 +1108,7 @@ unauthored_with_naming:
   text_name:         Psalliota naming
   search_name:       Psalliota naming
   sort_name:         Psalliota naming
-  display_name: "**__Psalliota naming__**"
+  display_name: "**__Psalliota__** **__naming__**"
   created_at:        2017-01-11 21:30:01
   updated_at:        2017-01-11 21:30:01
 
@@ -1290,7 +1290,7 @@ sect_agaricus:
 lycoperdon_perlatum:
   <<: *DEFAULTS
   text_name: Lycoperdon perlatum
-  display_name: '**__Lycoperdon perlatum__**'
+  display_name: '**__Lycoperdon__** **__perlatum__**'
   search_name: Lycoperdon perlatum
   sort_name: Lycoperdon perlatum
   created_at: 2023-11-14 20:00:00
@@ -1310,7 +1310,7 @@ somion_unicolor:
   <<: *DEFAULTS
   text_name: Somion unicolor
   author: '(Fr.) Spirin & Miettinen'
-  display_name: '**__Somion unicolor__** (Fr.) Spirin & Miettinen'
+  display_name: '**__Somion__** **__unicolor__** (Fr.) Spirin & Miettinen'
   search_name: Somion unicolor (Fr.) Spirin & Miettinen
   sort_name: Somion unicolor (Fr.)  Spirin & Miettinen
   rank: <%= Name.ranks[:Species] %>

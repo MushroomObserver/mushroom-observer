@@ -62,8 +62,10 @@ MushroomObserver::Application.configure do
 
   # REDIRECT_URI (Callback URL)
   # iNat calls this after iNat user authorizes MO to access their data.
+  # Must match the redirect_uri in the iNat application settings for iNat's
+  # MushroomObserver Test app https://www.inaturalist.org/oauth/applications/851
   config.redirect_uri =
-    "http://localhost:3000/observations/inat_imports/authorization_response"
+    "http://localhost:3000/inat_imports/authorization_response"
 
   # ----------------------------
   #  Rails configuration.
@@ -163,6 +165,11 @@ MushroomObserver::Application.configure do
   config.bot_enabled = true
 
   config.active_job.queue_adapter = :solid_queue
+
+  # Disable Mission Control default HTTP Basic Authentication because
+  # we specify AdminController as the base class for Mission Control
+  # https://github.com/rails/mission_control-jobs?tab=readme-ov-file#authentication
+  config.mission_control.jobs.http_basic_auth_enabled = false
 
   # Set up ActionCable to use a standalone server at port 28080
   # config.action_cable.mount_path = nil

@@ -17,7 +17,7 @@ class NPlusOneIntegrationTest < IntegrationTestCase
     login
     get("/articles")
     get("/comments")
-    get("/herbaria?flavor=all")
+    get("/herbaria")
     get("/locations")
     get("/names")
     get("/images")
@@ -25,7 +25,7 @@ class NPlusOneIntegrationTest < IntegrationTestCase
     get("/activity_logs")
     get("/projects")
     get("/publications")
-    get("/sequences?flavor=all")
+    get("/sequences?all=true")
     get("/species_lists")
   end
 

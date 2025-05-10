@@ -1,9 +1,6 @@
 # frozen_string_literal: true
 
 class RssLogsController < ApplicationController
-  # Uncertain these are necessary, can delete if not.
-  require "find"
-
   before_action :login_required, except: [
     # :index,
     :rss,
@@ -14,54 +11,90 @@ class RssLogsController < ApplicationController
   # buried way down toward the end of this file.
   # Displays matrix of selected RssLog's (based on current Query, if exists).
   def index
-    # POST requests with param `type` potentially show an array of types
-    # of objects. The array comes from the checkboxes in tabset
-    if params[:type].present?
-      query = find_or_create_query(:RssLog,
-                                   type: types_query_string_from_params)
-    # Previously saved query, incorporating type and other params
-    elsif params[:q].present?
-      query = find_query(:RssLog)
-      query ||= create_query(:RssLog, :all,
-                             type: @user ? @user.default_rss_type : "all")
-    # Fresh version of the index, no existing query
-    else
-      query = create_query(:RssLog, :all,
-                           type: @user ? @user.default_rss_type : "all")
-    end
-    show_selected_rss_logs(query, id: params[:id].to_s, always_index: true)
+    build_index_with_query
   end
 
   private
 
+  def default_sort_order
+    ::Query::RssLogs.default_order # :updated_at
+  end
+
+  def unfiltered_index_opts
+    super.merge(query_args: { type: index_type_default })
+  end
+
+  def index_type_default
+    @user ? @user.default_rss_type : "all"
+  end
+
+  # ApplicationController uses this to dispatch #index to a private method
+  def index_active_params
+    [:type, :by, :q, :id].freeze
+  end
+
+  # Show selected list, based on current Query.
+  def sorted_index_opts
+    super.merge(query_args: { type: index_type_default })
+  end
+
+  # Requests with param `type` potentially show an array of types
+  # of objects. The array comes from the checkboxes in tabset
+  def type
+    query = find_or_create_query(:RssLog, type: index_type_from_params)
+    [query, index_display_at_id_opts]
+  end
+
   # Get the types whose value == "1"
-  def types_query_string_from_params
+  def index_type_from_params
     types = ""
     if params[:type].is_a?(ActionController::Parameters)
       types = params[:type].select { |_key, value| value == "1" }.keys
-      types = RssLog.all_types.intersection(types)
-      types = "all" if types.length == RssLog.all_types.length
+      types = RssLog::ALL_TYPE_TAGS.map(&:to_s).intersection(types)
+      types = "all" if types.length == RssLog::ALL_TYPE_TAGS.length
       types = "none" if types.empty?
-      types = types.map(&:to_s).join(" ") if types.is_a?(Array)
     elsif params[:type].is_a?(String)
       types = params[:type]
     end
+    types = types.map(&:to_s).join(" ") if types.is_a?(Array)
     types
+  end
+
+  # Hook runs before template displayed. Must return query.
+  def filtered_index_final_hook(query, _display_opts)
+    store_query_in_session(query)
+    query_params_set(query)
+
+    @types = query.params[:type].to_s.split.sort
+
+    # Let the user make this their default and fine tune.
+    if @user && params[:make_default] == "1"
+      @user.default_rss_type = @types.join(" ")
+      @user.save_without_our_callbacks
+    end
+
+    query
+  end
+
+  def index_display_opts(opts, _query)
+    { matrix: true, cache: true,
+      include: rss_log_includes }.merge(opts)
   end
 
   public
 
   # Show a single RssLog.
   def show
+    pass_query_params
+    store_location
     case params[:flow]
     when "next"
       redirect_to_next_object(:next, RssLog, params[:id].to_s)
     when "prev"
       redirect_to_next_object(:prev, RssLog, params[:id].to_s)
+    else
+      @rss_log = find_or_goto_index(RssLog, params["id"])
     end
-    pass_query_params
-    store_location
-    @rss_log = find_or_goto_index(RssLog, params["id"])
   end
 
   # This is the site's rss feed.
@@ -72,28 +105,6 @@ class RssLogsController < ApplicationController
             limit(100)
 
     render_xml(layout: false)
-  end
-
-  # Show selected search results as a matrix with "index" template.
-  def show_selected_rss_logs(query, args = {})
-    store_query_in_session(query)
-    query_params_set(query)
-
-    args = {
-      action: :index,
-      matrix: true, cache: true,
-      include: rss_log_includes
-    }.merge(args)
-
-    @types = query.params[:type].to_s.split.sort
-
-    # Let the user make this their default and fine tune.
-    if @user && params[:make_default] == "1"
-      @user.default_rss_type = @types.join(" ")
-      @user.save_without_our_callbacks
-    end
-
-    show_index_of_objects(query, args)
   end
 
   # rss_logs now requires a logged in user

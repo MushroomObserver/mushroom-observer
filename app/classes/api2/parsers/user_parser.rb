@@ -9,7 +9,7 @@ class API2
       end
 
       def try_finding_by_string(str)
-        User.where("login = ? OR name = ?", str, str).first
+        User.where("login = ? OR name = ? OR email = ?", str, str, str).first
       end
     end
   end

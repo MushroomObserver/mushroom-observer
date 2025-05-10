@@ -4,7 +4,7 @@ json.id(object.id)
 json.type("image")
 json.date(object.when)
 json.copyright_holder(object.copyright_holder.to_s)
-json.notes(object.notes.to_s.tpl_nodiv) if object.notes.present?
+json.notes(object.notes.to_s.tl_for_api) if object.notes.present?
 json.quality(object.vote_cache) if object.vote_cache.present?
 json.created_at(object.created_at.try(&:utc))
 json.updated_at(object.updated_at.try(&:utc))

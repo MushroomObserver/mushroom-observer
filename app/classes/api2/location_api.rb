@@ -30,16 +30,13 @@ class API2
     end
 
     def query_params
-      n, s, e, w = parse_bounding_box!
+      box = parse_bounding_box!
       {
-        where: sql_id_condition,
+        id_in_set: parse_array(:location, :id, as: :id),
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at),
-        users: parse_array(:user, :user, help: :first_user),
-        north: n,
-        south: s,
-        east: e,
-        west: w
+        by_users: parse_array(:user, :user, help: :first_user),
+        in_box: box
       }
     end
 

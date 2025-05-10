@@ -98,7 +98,7 @@ module Account
     end
 
     def update_content_filter(pref, val)
-      filter = ContentFilter.find(pref)
+      filter = Query::Filter.find(pref)
       @user.content_filter[pref] =
         if filter.type == :boolean && filter.prefs_vals.one?
           val == "1" ? filter.prefs_vals.first : filter.off_val
@@ -128,7 +128,6 @@ module Account
     # Used by update_prefs_from_form
     def prefs_types # rubocop:disable Metrics/MethodLength
       [
-        [:email_comments_all, :boolean],
         [:email_comments_owner, :boolean],
         [:email_comments_response, :boolean],
         [:email_general_commercial, :boolean],
@@ -136,15 +135,12 @@ module Account
         [:email_general_question, :boolean],
         [:email_html, :boolean],
         [:email_locations_admin, :boolean],
-        [:email_locations_all, :boolean],
         [:email_locations_author, :boolean],
         [:email_locations_editor, :boolean],
         [:email_names_admin, :boolean],
-        [:email_names_all, :boolean],
         [:email_names_author, :boolean],
         [:email_names_editor, :boolean],
         [:email_names_reviewer, :boolean],
-        [:email_observations_all, :boolean],
         [:email_observations_consensus, :boolean],
         [:email_observations_naming, :boolean],
         [:email, :string],
@@ -167,7 +163,7 @@ module Account
     end
 
     def content_filter_types
-      ContentFilter.all.map do |fltr|
+      Query::Filter.all.map do |fltr|
         [fltr.sym, :content_filter]
       end
     end

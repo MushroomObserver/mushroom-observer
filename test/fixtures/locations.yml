@@ -66,7 +66,7 @@ mitrula_marsh:
   created_at: 2007-12-27 06:47:00
   updated_at: 2007-12-27 06:47:00
   name: '"Mitrula Marsh", Sand Lake, Bassetts, Yuba Co., California, USA'
-  scientific_name: "USA, California, Yuba Co., Bassetts, Sand Lake"
+  scientific_name: 'USA, California, Yuba Co., Bassetts, Sand Lake, "Mitrula Marsh"'
   north: 39.7184
   west: -120.687
   east: -120.487
@@ -95,6 +95,7 @@ salt_point:
 
 gualala:
   <<: *DEFAULTS
+  description: user_public_location_desc
   created_at: 2007-12-27 06:47:00
   updated_at: 2007-12-27 06:47:00
   name: Gualala, California, USA
@@ -203,42 +204,43 @@ unused_location:
 
 no_mushrooms_location:
   <<: *DEFAULTS
+  description: no_mushrooms_location_desc
   user_id: 0
   name: No Mushrooms
   scientific_name: No Mushrooms
-  north: 90
-  west: -180
-  east: 180
-  south: -90
-  box_area: 510224605.17052704
-  center_lat: 0
-  center_lng: 0
+  north: 0.0001
+  west: 9
+  east: 9.0001
+  south: 0.00007
+  box_area: 3.710458035376616e-05
+  center_lat: 0.000085
+  center_lng: 9.00005
 
 collection_location:
   <<: *DEFAULTS
   user_id: 0
   name: Collection Location
   scientific_name: Collection Location
-  north: 90
-  west: -180
-  east: 180
-  south: -90
-  box_area: 510224605.17052704
-  center_lat: 0
-  center_lng: 0
+  north: 0.0001
+  west: 10.5
+  east: 10.5001
+  south: 0.00007
+  box_area: 3.710458035376616e-05
+  center_lat: 0.000085
+  center_lng: 10.50005
 
 display_location:
   <<: *DEFAULTS
   user_id: 0
   name: Display Location
   scientific_name: Display Location
-  north: 90
-  west: -180
-  east: 180
-  south: -90
-  box_area: 510224605.17052704
-  center_lat: 0
-  center_lng: 0
+  north: 0.0001
+  west: 12
+  east: 12.0001
+  south: 0.00007
+  box_area: 3.710458035376616e-05
+  center_lat: 0.000085
+  center_lng: 12.00005
 
 sortable_observation_user_location:
   <<: *DEFAULTS

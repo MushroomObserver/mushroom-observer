@@ -26,8 +26,24 @@
 
 class CopyrightChange < AbstractModel
   belongs_to :user
-  belongs_to :target, polymorphic: true
   belongs_to :license
+  belongs_to :target, polymorphic: true
+
+  # Maintain this Array of all models (Classes) which take copyright changes.
+  ALL_TYPES = [Image].freeze
+
+  # Returns Array of all valid +target_type+ values (Symbols).
+  ALL_TYPE_TAGS = ALL_TYPES.map { |type| type.to_s.underscore.to_sym }.freeze
+
+  # Allow explicit joining for all polymorphic associations,
+  # e.g. `CopyrightChange.joins(:image).where(target_id: 29513)`,
+  # by restating the association below with a scope.
+  # https://veelenga.github.io/joining-polymorphic-associations/
+  ALL_TYPE_TAGS.each do |model|
+    belongs_to model, lambda {
+      where(copyright_changes: { target_type: model.to_s.camelize })
+    }, foreign_key: "target_id", inverse_of: :copyright_changes
+  end
 
   ##############################################################################
 

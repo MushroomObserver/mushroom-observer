@@ -1,6 +1,6 @@
 <%
 add_page_title(:publication_index_title.l)
-add_tab_set(publications_index_tabs)
+add_context_nav(publications_index_tabs)
 @container = :wide
 %>
 
@@ -8,7 +8,8 @@ add_tab_set(publications_index_tabs)
   <%= :publication_index_intro.tp %>
   <%= :publication_citation.tp %>
   <%= link_to 'Wood, Michael (Summer 2008). "WebWatch: Observing Mushrooms". Fungi Magazine 1 (2).', "http://www.mykoweb.com/articles/Web%20Watch--Mushroom%20Observer.pdf" %>
-</div><!--.container-text-->
+</div>
+<!--.container-text-->
 
 <table class="table-striped table-publications mb-3 mt-3">
 
@@ -66,4 +67,5 @@ add_tab_set(publications_index_tabs)
 
 <div class="container-text">
   <%= :publication_legend.tp %>
-</div><!--.container-text-->
+</div>
+<!--.container-text-->

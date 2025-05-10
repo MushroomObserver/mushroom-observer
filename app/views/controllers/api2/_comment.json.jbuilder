@@ -3,7 +3,7 @@
 json.id(object.id)
 json.type("comment")
 json.summary(object.summary.to_s.tl) if object.summary.present?
-json.content(object.comment.to_s.tpl_nodiv) if object.comment.present?
+json.content(object.comment.to_s.tl_for_api) if object.comment.present?
 json.created_at(object.created_at.try(&:utc))
 json.updated_at(object.updated_at.try(&:utc))
 json.object_type(object.target_type)

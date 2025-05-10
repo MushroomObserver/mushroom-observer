@@ -40,15 +40,14 @@ class API2
       ]
     end
 
-    # rubocop:disable Metrics/MethodLength
     def query_params
-      n, s, e, w = parse_bounding_box!
+      box = parse_bounding_box!
       {
-        where: sql_id_condition,
+        id_in_set: parse_array(:observation, :id, as: :id),
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at),
         date: parse_range(:date, :date, help: :when_seen),
-        users: parse_array(:user, :user, help: :observer),
+        by_users: parse_array(:user, :user, help: :observer),
         names: parse_array(:name, :name, as: :id),
         locations: parse_array(:location, :location, as: :id),
         herbaria: parse_array(:herbarium, :herbarium, as: :id),
@@ -60,23 +59,19 @@ class API2
         is_collection_location: parse(:boolean, :is_collection_location,
                                       help: 1),
         gps_hidden: parse(:boolean, :gps_hidden, help: 1),
-        with_images: parse(:boolean, :has_images),
-        with_public_lat_lng: parse(:boolean, :has_public_lat_lng),
-        with_name: parse(:boolean, :has_name, help: :min_rank),
-        with_comments: parse(:boolean, :has_comments, limit: true),
-        with_specimen: parse(:boolean, :has_specimen),
-        with_notes: parse(:boolean, :has_notes),
-        with_notes_fields: parse_array(:string, :has_notes_field, help: 1),
+        has_images: parse(:boolean, :has_images),
+        has_public_lat_lng: parse(:boolean, :has_public_lat_lng),
+        has_name: parse(:boolean, :has_name, help: :min_rank),
+        has_comments: parse(:boolean, :has_comments, limit: true),
+        has_specimen: parse(:boolean, :has_specimen),
+        has_notes: parse(:boolean, :has_notes),
+        has_notes_fields: parse_array(:string, :has_notes_field, help: 1),
         notes_has: parse(:string, :notes_has, help: 1),
         comments_has: parse(:string, :comments_has, help: 1),
-        north: n,
-        south: s,
-        east: e,
-        west: w,
+        in_box: box,
         region: parse(:string, :region, help: 1)
       }.merge(parse_names_parameters)
     end
-    # rubocop:enable Metrics/MethodLength
 
     def create_params
       parse_create_params!
@@ -166,6 +161,7 @@ class API2
           reason.notes = @reasons[reason.num]
         end
       end
+      naming.user ||= @user
       naming.save!
       consensus = ::Observation::NamingConsensus.new(obs)
       consensus.change_vote(naming, @vote, user)
@@ -180,8 +176,22 @@ class API2
 
         field_slip.update!(observation:)
       else
-        FieldSlip.create!(observation:, code: @code)
+        field_slip = FieldSlip.create!(observation:, code: @code)
+        field_slip.current_user = @user
+        field_slip.update_project
+        field_slip.save!
       end
+      update_project(field_slip.project, observation)
+    end
+
+    def update_project(project, observation)
+      return unless project && !project.violates_constraints?(observation)
+
+      user = observation.user
+      project.join(user)
+      return unless project.member?(user)
+
+      project.add_observation(observation)
     end
 
     def create_specimen_records(obs)
@@ -361,6 +371,20 @@ class API2
       @latitude  = parse(:latitude, :latitude)
       @longitude = parse(:longitude, :longitude)
       @altitude  = parse(:altitude, :altitude)
+      prefer_minimum_bounding_box_to_earth!
+    end
+
+    def prefer_minimum_bounding_box_to_earth!
+      return unless Location.is_unknown?(@location) &&
+                    @latitude.present? && @longitude.present?
+
+      mbb =
+        Location.with_minimum_bounding_box_containing_point(
+          lat: @latitude, lng: @longitude
+        ).
+        # See comment at Observation#prefer_minimum_bounding_box_to_earth
+        presence || Location.unknown
+      @location = mbb.name
     end
 
     def parse_herbarium_and_specimen!

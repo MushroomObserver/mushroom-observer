@@ -48,18 +48,21 @@ module Tabs
     end
 
     def collection_numbers_index_tab(c_n)
-      [:edit_collection_number_back_to_index.t,
-       add_query_param(c_n.index_link_args),
-       { class: tab_id(__method__.to_s) }]
+      InternalLink::Model.new(
+        :edit_collection_number_back_to_index.t, c_n,
+        add_query_param(c_n.index_link_args)
+      ).tab
     end
 
     def show_collection_number_tab(c_n, obs)
       # This is passed in to show_collection_number, allowing users to do prev,
       # next and index from there to navigate through all the rest for this obs.
-      cn_query = Query.lookup(:CollectionNumber, :all, observations: obs.id)
+      cn_query = Query.lookup(:CollectionNumber, observations: obs.id)
 
-      [tag.i(c_n.format_name.t), add_query_param(c_n.show_link_args, cn_query),
-       { class: "#{tab_id(__method__.to_s)}_#{c_n.id}" }]
+      InternalLink::Model.new(
+        tag.i(c_n.format_name.t), c_n,
+        add_query_param(c_n.show_link_args, cn_query)
+      ).tab
     end
 
     def collection_number_mod_tabs(c_n)
@@ -69,22 +72,30 @@ module Tabs
 
     # These should just be ADD, EDIT, and DELETE.
     def new_collection_number_tab(obs)
-      [:create_collection_number.l,
-       add_query_param(new_collection_number_path(observation_id: obs.id)),
-       { class: tab_id(__method__.to_s), icon: :add }]
+      InternalLink::Model.new(
+        :create_collection_number.l, CollectionNumber,
+        add_query_param(new_collection_number_path(observation_id: obs.id)),
+        html_options: { icon: :add }
+      ).tab
     end
 
     def edit_collection_number_tab(c_n, obs = nil)
       back = obs&.id || :show
-      [:edit_collection_number.l,
-       add_query_param(edit_collection_number_path(id: c_n.id, back: back)),
-       { class: "#{tab_id(__method__.to_s)}_#{c_n.id}", icon: :edit }]
+      InternalLink::Model.new(
+        :edit_collection_number.l, c_n,
+        add_query_param(edit_collection_number_path(id: c_n.id, back: back)),
+        html_options: { icon: :edit }
+      ).tab
     end
 
     def destroy_collection_number_tab(c_n)
-      [:delete_collection_number.t, c_n, { button: :destroy, icon: :delete }]
+      InternalLink::Model.new(
+        :delete_collection_number.t, c_n, c_n,
+        html_options: { button: :destroy, icon: :delete }
+      ).tab
     end
 
+    # Dead code?
     # def collection_number_remove_obs_tab(c_n, obs)
     #   [:REMOVE.t,
     #    add_query_param(collection_number_remove_observation_path(
@@ -95,11 +106,13 @@ module Tabs
     # end
 
     def remove_collection_number_tab(c_n, obs)
-      [:REMOVE.t,
-       add_query_param(edit_collection_number_remove_observation_path(
-                         collection_number_id: c_n.id, observation_id: obs.id
-                       )),
-       { class: "#{tab_id(__method__.to_s)}_#{c_n.id}", icon: :remove }]
+      InternalLink::Model.new(
+        :REMOVE.t, c_n,
+        add_query_param(edit_collection_number_remove_observation_path(
+                          collection_number_id: c_n.id, observation_id: obs.id
+                        )),
+        html_options: { icon: :remove }
+      ).tab
     end
   end
 end

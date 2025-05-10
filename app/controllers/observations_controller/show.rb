@@ -20,6 +20,8 @@ module ObservationsController::Show
   #   @other_sites
   #   @votes
   def show
+    return if check_for_spider_block(request, params)
+
     pass_query_params
     store_location
     if params[:flow].present?
@@ -34,7 +36,9 @@ module ObservationsController::Show
     update_view_stats(@observation)
     @canonical_url = canonical_url(@observation)
     @mappable      = check_if_query_is_mappable
-    @other_sites   = helpers.external_sites_user_can_add_links_to(@observation)
+    @other_sites   = ExternalSite.sites_user_can_add_links_to(
+      @user, @observation, admin: in_admin_mode?
+    )
     @consensus     = Observation::NamingConsensus.new(@observation)
     @owner_name    = @consensus.owner_preference
     register_namings_for_textile_in_notes
@@ -77,7 +81,7 @@ module ObservationsController::Show
   # Decide if the current query can be used to create a map.
   def check_if_query_is_mappable
     query = find_query(:Observation)
-    query&.coercable?(:Location)
+    query&.params&.dig(:location_query)
   end
 
   # Incurs a costly namings lookup if called in the partial outside show_obs

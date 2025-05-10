@@ -136,3 +136,6 @@ lone_wolf_image:
 lone_wolf_image2:
   <<: *DEFAULTS
   user: lone_wolf
+
+mock_imported_inat_image: # used in inat_import_job_test.rb
+  <<: *DEFAULTS

@@ -208,8 +208,8 @@ module ControllerExtensions
       method: method,
       action: page,
       params: params,
-      user: (params[:username] || username),
-      password: (params[:password] || password),
+      user: params[:username] || username,
+      password: params[:password] || password,
       require_login: :login,
       require_user: altpage ? [altpage].flatten : nil
     )
@@ -646,5 +646,13 @@ module ControllerExtensions
       id = klass.notes_part_id(key.to_s.tr(" ", "_"))
       assert_textarea_value(id, val)
     end
+  end
+
+  # Assert index results. This measures <a> tags that link to an ID
+  def assert_results(**attributes)
+    assert_select(
+      "#results .rss-what a:match('href', ?)", %r{^/obs/\d+}, attributes,
+      "Wrong number of results displayed"
+    )
   end
 end

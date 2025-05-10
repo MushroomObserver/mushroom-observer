@@ -76,6 +76,7 @@ module PatternSearch
       def parse_date_word!(val, english, tag, unit, num)
         translation = Regexp.escape(:"search_value_#{tag}".l).
                       sub(/\bN\b/, '\d+')
+        # This bit of cleverness runs until there's nothing in line 1 to `sub!`
         1 while val.to_s.sub!(/(^|-)(#{english}|#{translation})(-|$)/) do |word|
           first = word.sub!(/-$/, "")
           last  = word.sub!(/^-/, "")

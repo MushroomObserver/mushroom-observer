@@ -17,6 +17,24 @@ require("rails")
 require("simplecov")
 require("simplecov-lcov")
 
+module SimpleCov
+  class SourceFile
+    # 2025-04-11 jdc Monkeypatch to disable excessive coverage warnings.
+    # Else we get > 100 false positives because we enabled
+    # coverage for .erb files.
+    def coverage_exceeding_source_warn
+      return unless ENV["SHOW_EXCESS_LINE_WARNING"]
+
+      message = <<~WARNING
+        Warning: coverage data provided by Coverage
+        [#{coverage_data["lines"].size}]
+        exceeds number of lines in #{filename} [#{src.size}]
+      WARNING
+      warn(message)
+    end
+  end
+end
+
 if ENV["CI"] == "true"
   SimpleCov::Formatter::LcovFormatter.config do |config|
     config.report_with_single_file = true
@@ -28,7 +46,10 @@ else
   SimpleCov.formatter = SimpleCov::Formatter::HTMLFormatter
 end
 
-SimpleCov.start("rails")
+SimpleCov.start("rails") do
+  # Cover .erb files. https://github.com/simplecov-ruby/simplecov/pull/1037
+  enable_coverage_for_eval
+end
 
 # Allow test results to be reported back to runner IDEs.
 # Enable progress bar output during the test running.
@@ -52,7 +73,7 @@ WebMock.disable_net_connect!(
 )
 
 ENV["RAILS_ENV"] ||= "test"
-require(File.expand_path("../config/environment", __dir__))
+require_relative("../config/environment")
 require("rails/test_help")
 
 %w[
@@ -79,6 +100,20 @@ require("rails/test_help")
 end
 
 I18n.enforce_available_locales = true
+
+# Function for creating a log (trace_tests.out) of the tests called
+# that somehow call this function.
+def trace_tests
+  regex = %r{/test/}
+  matches = caller.grep(regex)
+  return unless matches
+
+  last_match = matches.last
+  trim = last_match[last_match.index(regex) + 1..]
+  open("trace_tests.out", "a") do |f|
+    f.write("#{trim}\n")
+  end
+end
 
 module ActiveSupport
   class TestCase
@@ -134,7 +169,6 @@ module ActiveSupport
       # Disable cop; there's no block in which to limit the time zone change
       Time.zone = "America/New_York" # rubocop:disable Rails/TimeZoneAssignment
       User.current = nil
-      start_timer if false
       clear_logs unless defined?(@@cleared_logs)
       Symbol.missing_tags = []
     end
@@ -145,7 +179,6 @@ module ActiveSupport
       assert_equal([], Symbol.missing_tags, "Language tag(s) are missing.")
       FileUtils.rm_rf(MO.local_image_files)
       UserGroup.clear_cache_for_unit_tests
-      stop_timer if false
     end
 
     # Record time this test started to run.

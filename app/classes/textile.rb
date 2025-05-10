@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require("cgi")
 require("redcloth")
 
 #  == Textile Parser
@@ -144,6 +143,14 @@ class Textile < String
       next unless name.try(:at_or_below_genus?)
 
       Textile.private_register_name(name.real_text_name, name.rank)
+    end
+  end
+
+  def self.user_register_name(user, *names)
+    names.each do |name|
+      next unless name.try(:at_or_below_genus?)
+
+      Textile.private_register_name(name.user_real_text_name(user), name.rank)
     end
   end
 

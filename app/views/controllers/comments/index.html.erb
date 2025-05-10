@@ -8,12 +8,12 @@ add_sorter(@query, comments_index_sorts)
 flash_error(@error) if @error && @objects.empty?
 %>
 
-<%= paginate_block(@pages) do
+<%= pagination_nav(@pagination_data) do
   if @objects.any?
     tag.div(class: "list-group") do
       @objects.each do |comment|
         concat(render(partial: "comments/comment", object: comment,
-                      locals: { show_name: true }))
+                      locals: { show_name: true, controls: @user.nil? }))
       end
     end
   end

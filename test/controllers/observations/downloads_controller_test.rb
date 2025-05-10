@@ -4,10 +4,23 @@ require("test_helper")
 
 module Observations
   class DownloadsControllerTest < FunctionalTestCase
+    def test_new
+      query = Query.lookup_and_save(:Observation, by_users: mary.id)
+      assert(query.num_results > 1, "Test needs query with multiple results")
+
+      login(:rolf)
+      get(:new, params: { q: query.id.alphabetize })
+
+      assert_no_flash
+      assert_response(:success)
+      assert_select("input[type=radio][id=format_mycoportal]", true,
+                    "Missing a MyCoPortal radio button")
+    end
+
     def test_download_observation_index
-      obs = Observation.where(user: mary)
+      obs = Observation.reorder(id: :asc).where(user: mary)
       assert(obs.length >= 4)
-      query = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
+      query = Query.lookup_and_save(:Observation, by_users: mary.id)
 
       # Add herbarium_record to fourth obs for testing purposes.
       login("mary")
@@ -152,21 +165,58 @@ module Observations
       )
       assert_no_flash
       assert_response(:success)
+
+      post(
+        :create,
+        params: {
+          q: query.id.alphabetize,
+          format: "mycoportal",
+          encoding: "UTF-8",
+          commit: "Download"
+        }
+      )
+      assert_no_flash
+      assert_response(:success)
     end
 
     def test_download_too_many_observations
-      query = Query.lookup_and_save(:Observation, :all)
-
+      query = Query.lookup_and_save(:Observation)
       login("mary")
-      get(:new, params: { q: query.id.alphabetize })
+
+      MO.stub(:max_downloads, Observation.count - 1) do
+        get(:new, params: { q: query.id.alphabetize })
+      end
 
       assert_redirected_to(observations_path)
       assert_flash_error
     end
 
+    def test_download_too_many_observations_reasonable_query
+      query = Query.lookup_and_save(:Observation, locations: locations(:albion))
+      login("mary")
+
+      MO.stub(:max_downloads, Observation.count - 1) do
+        get(:new, params: { q: query.id.alphabetize })
+      end
+
+      assert_response(:success)
+    end
+
+    def test_download_too_many_observations_admin
+      query = Query.lookup_and_save(:Observation)
+      login("mary")
+      make_admin("mary")
+
+      MO.stub(:max_downloads, Observation.count - 1) do
+        get(:new, params: { q: query.id.alphabetize })
+      end
+
+      assert_response(:success)
+    end
+
     def test_print_labels
       login
-      query = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
+      query = Query.lookup_and_save(:Observation, by_users: mary.id)
       assert_operator(query.num_results, :>=, 4)
       get(:print_labels, params: { q: query.id.alphabetize })
       # \pard is paragraph command in rtf, one paragraph per result
@@ -187,8 +237,9 @@ module Observations
 
     def test_project_labels
       login("roy")
-      query = Query.lookup_and_save(:Observation, :for_project,
-                                    project: projects(:open_membership_project))
+      query = Query.lookup_and_save(
+        :Observation, projects: projects(:open_membership_project)
+      )
       get(:print_labels, params: { q: query.id.alphabetize })
       trusted_hidden = observations(:trusted_hidden)
       untrusted_hidden = observations(:untrusted_hidden)
@@ -200,13 +251,13 @@ module Observations
     # are tested and at least not crashing.
     def test_print_labels_all
       login
-      query = Query.lookup_and_save(:Observation, :all)
+      query = Query.lookup_and_save(:Observation)
       get(:print_labels, params: { q: query.id.alphabetize })
     end
 
     def test_print_labels_query_nil
       login
-      query = Query.lookup_and_save(:Observation, :by_user, user: mary.id)
+      query = Query.lookup_and_save(:Observation, by_users: mary.id)
 
       # simulate passing a query param, but that query doesn't exist
       @controller.stub(:find_query, nil) do

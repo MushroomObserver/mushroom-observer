@@ -14,14 +14,14 @@ module ProjectsHelper
     ]
   end
 
-  def violation_table_rows(form:, project:, violations:)
+  def violation_table_rows(form:, project:, violations:, user:)
     violations.each_with_object([]) do |obs, rows|
       rows << [
-        violation_checkbox(form: form, project: project, obs: obs),
+        violation_checkbox(form:, project:, obs:, user:),
         link_to_object(obs, obs.text_name) + " (#{obs.id})",
         styled_obs_when(project, obs),
-        styled_obs_lat(project, obs),
-        styled_obs_lng(project, obs),
+        styled_obs_lat(project, obs, user),
+        styled_obs_lng(project, obs, user),
         styled_obs_where(project, obs),
         user_link(obs.user)
       ]
@@ -40,17 +40,81 @@ module ProjectsHelper
     end
   end
 
-  def field_slip_link(tracker)
-    if tracker.status == "Done" && User.current == tracker.user
+  def field_slip_link(tracker, user)
+    if tracker.status == "Done" && user == tracker.user
       link_to(tracker.filename, tracker.link)
     else
       tracker.filename
     end
   end
 
+  def edit_project_alias_link(project_id, name, id)
+    tag.span(id: "project_alias_#{id}") do
+      modal_link_to(
+        "project_alias_#{id}",
+        *edit_project_alias_tab(project_id, name, id)
+      )
+    end
+  end
+
+  def new_project_alias_link(project_id, target_id, target_type)
+    tag.span(id: "project_alias") do
+      modal_link_to(
+        "project_alias",
+        *new_project_alias_tab(project_id, target_id, target_type)
+      )
+    end
+  end
+
+  def project_alias_headers
+    [:NAME.t, :TARGET_TYPE.t, :TARGET.t, :ACTIONS.t]
+  end
+
+  def project_alias_rows(project_aliases)
+    project_aliases.includes(:target).map do |project_alias|
+      project_alias_row(project_alias)
+    end
+  end
+
   #########
 
   private
+
+  def project_alias_row(project_alias)
+    [
+      project_alias.name,
+      project_alias.target_type,
+      link_to(project_alias.target.try(:format_name), project_alias.target),
+      project_alias_actions(project_alias.id, project_alias.project_id)
+    ]
+  end
+
+  def project_alias_actions(id, project_id)
+    capture do
+      concat(link_to(:EDIT.t,
+                     edit_project_alias_path(project_id:, id:)))
+      concat(" ")
+      concat(destroy_button(target: project_alias_path(project_id:, id:)))
+    end
+  end
+
+  def edit_project_alias_tab(project_id, name, id)
+    InternalLink::Model.new(
+      name, ProjectAlias,
+      add_query_param(edit_project_alias_path(project_id:, id:)),
+      alt_title: :EDIT.t
+    ).tab
+  end
+
+  def new_project_alias_tab(project_id, target_id, target_type)
+    InternalLink::Model.new(
+      :ADD.t, ProjectAlias,
+      add_query_param(new_project_alias_path(project_id:,
+                                             target_id:,
+                                             target_type:)),
+      html_options: { class: "btn btn-default" }
+    ).tab
+  end
 
   def violation_latitude_header(project)
     return :form_violations_latitude_none.l unless project.location
@@ -71,10 +135,10 @@ module ProjectsHelper
                   nil, false)
   end
 
-  def violation_checkbox(form:, project:, obs:)
-    if violation_checkbox_viewers(project, obs).include?(User.current.id)
-      form.check_box("remove_#{obs.id}")
-    end
+  def violation_checkbox(form:, project:, obs:, user:)
+    return unless violation_checkbox_viewers(project, obs).include?(user.id)
+
+    form.check_box("remove_#{obs.id}")
   end
 
   def violation_checkbox_viewers(project, obs)
@@ -89,11 +153,11 @@ module ProjectsHelper
     end
   end
 
-  def styled_obs_lat(project, obs)
+  def styled_obs_lat(project, obs, user)
     return "" if obs.lat.blank?
 
     displayed_coord =
-      coord_or_hidden(obs: obs, project: project, coord: obs.lat)
+      coord_or_hidden(obs:, project:, coord: obs.lat, user:)
 
     return displayed_coord if project.location_id.nil?
     return displayed_coord if project.location.contains_lat?(obs.lat)
@@ -101,11 +165,11 @@ module ProjectsHelper
     tag.span(displayed_coord, class: "violation-highlight")
   end
 
-  def styled_obs_lng(project, obs)
+  def styled_obs_lng(project, obs, user)
     return "" if obs.lng.blank?
 
     displayed_coord =
-      coord_or_hidden(obs: obs, project: project, coord: obs.lng)
+      coord_or_hidden(obs:, project:, coord: obs.lng, user:)
 
     return displayed_coord if project.location_id.nil?
     return displayed_coord if project.location.contains_lng?(obs.lng)
@@ -113,10 +177,10 @@ module ProjectsHelper
     tag.span(displayed_coord, class: "violation-highlight")
   end
 
-  def coord_or_hidden(obs:, project:, coord:)
+  def coord_or_hidden(obs:, project:, coord:, user:)
     if !obs.gps_hidden? ||
-       User.current == obs.user ||
-       project.trusted_by?(User.current) && project.admin?(User.current)
+       user == obs.user ||
+       project.trusted_by?(user) && project.admin?(user)
       coord
     else
       :hidden.l

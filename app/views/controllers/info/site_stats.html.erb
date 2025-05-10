@@ -1,7 +1,7 @@
 <%
 add_page_title(:show_site_stats_title.t)
 
-add_tab_set(info_site_stats_tabs)
+add_context_nav(info_site_stats_tabs)
 @container = :full
 %>
 
@@ -12,12 +12,14 @@ add_tab_set(info_site_stats_tabs)
       <% @observations[0,3].each do |obs| %>
         <div class="pb-1">
           <%= interactive_image(
-            obs.thumb_image, image_link: observation_path(obs.id), votes: true
-          ) %><br/><br/>
+            @user, obs.thumb_image, image_link: observation_path(obs.id), votes: true
+          ) %><br/>
+          <br/>
         </div>
       <% end %>
     <% end %>
-  </div><!--.row-->
+  </div>
+  <!--.row-->
 
   <div class="col-md-6 center-block">
     <table class="table">
@@ -25,22 +27,25 @@ add_tab_set(info_site_stats_tabs)
         label = "site_stats_#{field}".to_sym.t
         count = @site_data[field]
         if count && label.present? %>
-          <tr>
-            <td><%= "site_stats_#{field}".to_sym.t %></td>
-            <td class="text-right"><%= count %></td>
-          </tr>
-        <% end %>
-      <% end %>
-    </table>
-  </div>
-
-  <div class="hidden-xs col-md-3">
-    <% if obs_length > 3 %>
-      <% @observations[3,3].each do |obs| %>
-        <%= interactive_image(
-          obs.thumb_image, image_link: observation_path(obs.id), votes: true
-        ) %><br/><br/>
+        <tr>
+          <td><%= "site_stats_#{field}".to_sym.t %></td>
+          <td class="text-right"><%= count %></td>
+        </tr>
       <% end %>
     <% end %>
-  </div>
-</div><!--.row-->
+  </table>
+</div>
+
+<div class="hidden-xs col-md-3">
+  <% if obs_length > 3 %>
+    <% @observations[3,3].each do |obs| %>
+      <%= interactive_image(
+            @user, obs.thumb_image, image_link: observation_path(obs.id),
+            votes: true
+          ) %><br/>
+      <br/>
+    <% end %>
+  <% end %>
+</div>
+</div>
+<!--.row-->

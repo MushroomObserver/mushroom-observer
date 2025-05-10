@@ -1,14 +1,15 @@
 <%
 add_page_title(@sequence.unique_format_name)
 add_pager_for(@sequence)
-add_tab_set(sequence_show_tabs(seq: @sequence))
+add_context_nav(sequence_show_tabs(seq: @sequence))
 @container = :wide
 %>
 
 <div class="container-text">
   <%= render(partial: "sequences/observation_title",
             locals: { observation: @sequence.observation }) %>
-</div><!--.container-text-->
+</div>
+<!--.container-text-->
 
 <table class="table-namings">
   <thead>
@@ -36,8 +37,8 @@ add_tab_set(sequence_show_tabs(seq: @sequence))
       <tr>
         <td class="font-weight-bold"><%= :DEPOSIT.t %>:</td>
         <td>
-            <%= sequence_archive_link(@sequence) %>:
-            <%= sequence_accession_link(@sequence) %>
+          <%= sequence_archive_link(@sequence) %>:
+          <%= sequence_accession_link(@sequence) %>
         </td>
       </tr>
     <% end %>
@@ -61,4 +62,4 @@ add_tab_set(sequence_show_tabs(seq: @sequence))
   <%= user_link(@sequence.user) %>
 </div>
 
-<%= show_object_footer(@sequence) %>
+<%= show_object_footer(@user, @sequence) %>

@@ -14,7 +14,7 @@ module Account
       else
         @copyright_holder  = @user.legal_name
         @copyright_year    = Time.zone.now.year
-        @upload_license_id = @user.license ? @user.license.id : nil
+        @upload_license_id = @user&.license&.id
       end
     end
 
@@ -51,7 +51,7 @@ module Account
 
     def upload_image_if_present
       # Check if we need to upload an image.
-      upload = params[:user][:upload_image]
+      upload = params.dig(:upload, :image)
       return if upload.blank?
 
       image = upload_image(upload, params[:upload][:copyright_holder],

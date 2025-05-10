@@ -28,8 +28,10 @@ MushroomObserver::Application.configure do
 
   # REDIRECT_URI (Callback URL)
   # iNat calls this after iNat user authorizes MO to access their data.
+  # Must match the redirect_uri in the iNat application settings for iNat's
+  # MushroomObserver Test app https://www.inaturalist.org/oauth/applications/851
   config.redirect_uri =
-    "http://localhost:3000/observations/inat_imports/authorization_response"
+    "http://localhost:3000/inat_imports/authorization_response"
 
   # ----------------------------
   #  Rails configuration.
@@ -122,6 +124,8 @@ MushroomObserver::Application.configure do
   config.active_support.test_order = :random
 
   config.bot_enabled = true
+
+  config.active_job.queue_adapter = :test
 
   # ----------------------------
   #  Bullet configuration.

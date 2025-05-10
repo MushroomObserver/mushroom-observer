@@ -5,14 +5,14 @@ module Observations
     before_action :login_required
 
     def new
-      @query = find_or_create_query(:Observation, by: params[:by])
+      @query = find_or_create_query(:Observation, order_by: params[:by])
       return too_many_results if too_many_results?
 
       query_params_set(@query)
     end
 
     def create
-      @query = find_or_create_query(:Observation, by: params[:by])
+      @query = find_or_create_query(:Observation, order_by: params[:by])
       raise("no robots!") if browser.bot? # failsafe only!
 
       query_params_set(@query)
@@ -39,7 +39,7 @@ module Observations
     end
 
     def too_many_results?
-      @query.flavor == :all
+      !in_admin_mode? && @query.num_results > MO.max_downloads
     end
 
     def download_observations_switch
@@ -54,7 +54,7 @@ module Observations
 
     def create_and_render_report
       report = create_report(
-        query: @query, format: @format, encoding: @encoding
+        query: @query, format: @format, encoding: @encoding, user: @user
       )
       render_report(report)
     end
@@ -72,6 +72,8 @@ module Observations
         Report::Symbiota.new(args)
       when "fundis"
         Report::Fundis.new(args)
+      when "mycoportal"
+        Report::Mycoportal.new(args)
       else
         raise("Invalid download type: #{format.inspect}")
       end

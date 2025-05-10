@@ -15,14 +15,14 @@ class IpStats
     #   controller:: Controller (string).
     #   action::     Action (string).
     #   api_key::    API key (string).
-    def log_stats(stats)
+    def log_stats(stats, user_id)
       file = MO.ip_stats_file
       now = Time.now.utc
       File.open(file, "a") do |fh|
         fh.puts([
           stats[:time].utc,
           stats[:ip],
-          User.current_id,
+          user_id,
           now - stats[:time].utc,
           stats[:controller],
           stats[:action],

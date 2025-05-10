@@ -20,55 +20,30 @@ module Names
     include ::Descriptions
     include ::Names::Descriptions::SharedPrivateMethods
 
-    # disable cop because index is defined in ApplicationController
-    # rubocop:disable Rails/LexicallyScopedActionFilter
     before_action :store_location, except: [:index, :destroy]
     before_action :pass_query_params, except: [:index]
-    # rubocop:enable Rails/LexicallyScopedActionFilter
     before_action :login_required
 
     ############################################################################
+    # INDEX
     #
-    #  Index
-
-    # Used by ApplicationController to dispatch #index to a private method
-    @index_subaction_param_keys = [
-      :by_author,
-      :by_editor,
-      :by,
-      :q,
-      :id
-    ].freeze
-
-    @index_subaction_dispatch_table = {
-      by: :index_query_results,
-      q: :index_query_results,
-      id: :index_query_results
-    }.freeze
-
-    #############################################
-
-    private # private methods used by #index
-
-    def default_index_subaction
-      list_all
+    def index
+      build_index_with_query
     end
 
-    # Display list of all (correctly-spelled) name_descriptions in the database.
-    def list_all
-      query = create_query(:NameDescription, :all, by: default_sort_order)
-      show_selected_name_descriptions(query)
+    def controller_model_name
+      "NameDescription"
     end
 
-    # Display list of name descriptions in last index/search query.
-    def index_query_results
-      query = find_or_create_query(:NameDescription, by: params[:by])
-      show_selected_name_descriptions(query, id: params[:id].to_s,
-                                             always_index: true)
-    end
+    private
 
     def default_sort_order
-      ::Query::NameDescriptionBase.default_order
+      ::Query::NameDescriptions.default_order # :name
+    end
+
+    # Used by ApplicationController to dispatch #index to a private method
+    def index_active_params
+      [:by_author, :by_editor, :by, :q, :id].freeze
     end
 
     # Display list of name_descriptions that a given user is author on.
@@ -79,8 +54,8 @@ module Names
       )
       return unless user
 
-      query = create_query(:NameDescription, :by_author, user: user)
-      show_selected_name_descriptions(query)
+      query = create_query(:NameDescription, by_author: user)
+      [query, {}]
     end
 
     # Display list of name_descriptions that a given user is editor on.
@@ -91,27 +66,23 @@ module Names
       )
       return unless user
 
-      query = create_query(:NameDescription, :by_editor, user: user)
-      show_selected_name_descriptions(query)
+      query = create_query(:NameDescription, by_editor: user)
+      [query, {}]
     end
 
-    # Show selected search results as a list with ???
-    #              'names/descriptions/index' template ???
-    def show_selected_name_descriptions(query, args = {})
+    # Hook runs before template displayed. Must return query.
+    def filtered_index_final_hook(query, _display_opts)
       store_query_in_session(query)
+      query
+    end
 
-      args = {
-        controller: "/names/descriptions",
-        action: :index,
-        num_per_page: 50
-      }.merge(args)
-
-      show_index_of_objects(query, args)
+    def index_display_opts(opts, _query)
+      { num_per_page: 50 }.merge(opts)
     end
 
     public
 
-    # --------------------------------------------------------------------------
+    ############################################################################
 
     def show
       return unless find_description!

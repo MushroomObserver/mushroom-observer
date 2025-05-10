@@ -30,10 +30,10 @@
 #
 ################################################################################
 
-require(File.expand_path("../config/boot.rb", __dir__))
-require(File.expand_path("../config/environment.rb", __dir__))
+require_relative("../config/boot")
+require_relative("../config/environment")
 
-require "arel-helpers"
+require("arel-helpers")
 
 DOMAIN      = "https://mushroomobserver.org"
 SITEMAP_URL = "#{DOMAIN}/sitemap/NAME.xml".freeze
@@ -198,8 +198,8 @@ end
 def get_new_images(last_update)
   result = []
   Image.where(updated_at: last_update..).
-    includes(:observation_images).each do |img|
-      img.observation_images.each do |obs_img|
+    includes(:observation_images).find_each do |img|
+      img.observation_images.find_each do |obs_img|
         result << [obs_img.observation_id, img.updated_at]
       end
     end
@@ -219,7 +219,7 @@ end
 
 def update_times_of_new_objects(times, table, last_update)
   model = table.classify.constantize
-  model.where(updated_at: last_update..).each do |obj|
+  model.where(updated_at: last_update..).find_each do |obj|
     times[obj.id] = parse_mysql_time(obj.updated_at)
   end
 end
@@ -342,7 +342,7 @@ end
 ################################################################################
 
 # Times come out of the mysql adapter as Time objects right now.
-# Sitemaps require "yyyy:mm:ddThh:mm:ss+00:00" format.
+# Sitemaps require dates in "yyyy:mm:ddThh:mm:ss+00:00" format.
 # These functions ensure that all times are Strings in that format.
 def parse_mysql_time(time)
   format_time(time)

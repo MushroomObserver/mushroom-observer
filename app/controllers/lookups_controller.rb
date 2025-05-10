@@ -1,9 +1,6 @@
 # frozen_string_literal: true
 
 class LookupsController < ApplicationController
-  # These need to be moved into the files where they are actually used.
-  require "find"
-
   before_action :login_required, except: [
     :lookup_observation
   ]
@@ -252,7 +249,8 @@ class LookupsController < ApplicationController
     model:, id:, matches:, suggestions:
   )
     obj = matches.first || suggestions.first
-    query = Query.lookup(model, :in_set, ids: matches + suggestions)
+
+    query = Query.lookup(model, id_in_set: matches + suggestions)
     if suggestions.any?
       flash_warning(
         :runtime_suggest_multiple_alternates.t(match: id, type: model.type_tag)

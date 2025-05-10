@@ -6,76 +6,68 @@ module Observations
     before_action :pass_query_params
 
     def index
-      @layout = calc_layout_params
-      # first deal with filters, or clear filter
-      return unfiltered_index if params[:commit] == :CLEAR.l
+      build_index_with_query
+    end
 
-      if (type = params.dig(:filter, :type))
-        return filtered_index(type.to_sym)
-      end
-
-      unfiltered_index
+    def controller_model_name
+      "Observation"
     end
 
     private
 
-    def q_args
-      [:Observation, :needs_naming]
+    # override the default? maybe no longer necessary
+    def unfiltered_index_opts
+      super.merge(query_args: { needs_naming: @user, order_by: :rss_log })
     end
 
-    def q_kwargs
-      { by: :rss_log }
+    def index_active_params
+      [:filter, :q, :id].freeze
     end
 
-    def unfiltered_index
-      query = create_query(*q_args, q_kwargs)
-
-      show_selected_results(query)
-    end
-
-    # need both a :type and a :term
-    def filtered_index(type)
+    # Ideally the filter form should pass the clade/region params with separate
+    # terms, so we can build the query by multiple flat params as expected.
+    # However, this form uses a single field with swapping autocompleter;
+    # the form scope is :filter and the field name is always :term.
+    # Currently params needs both a :filter[:type] and a filter[:term] to work.
+    def filter
+      return unless (type = params.dig(:filter, :type).to_sym)
       return unless (term = params.dig(:filter, :term).strip)
 
       case type
       when :clade
-        clade_filter(term)
+        clade(term)
       when :region
-        region_filter(term)
+        region(term)
         # when :user
-        #   user_filter(term)
+        #   user(term)
       end
     end
 
     # Some inefficiency here comes from having to parse the name from a string.
-    # TODO: Write a filtered select/autocomplete that passes the name_id?
-    def clade_filter(term)
+    # Check if the autocompleters return a name_id or location_id.
+    def clade(term)
       # return unless (clade = Name.find_by(text_name: term))
 
-      query = create_query(*q_args, q_kwargs.merge({ in_clade: term }))
-
-      show_selected_results(query)
+      query = create_query(:Observation, needs_naming: @user, clade: term,
+                                         order_by: :rss_log)
+      [query, {}]
     end
 
-    def region_filter(term)
-      query = create_query(*q_args, q_kwargs.merge({ in_region: term }))
-
-      show_selected_results(query)
+    def region(term)
+      query = create_query(:Observation, needs_naming: @user, region: term,
+                                         order_by: :rss_log)
+      [query, {}]
     end
 
     # def user_filter(term)
-    #   query = create_query(*q_args, q_kwargs.merge({ by_user: term }))
-
-    #   show_selected_results(query)
+    #   query = create_query(:Observation, needs_naming: @user, by_users: term,
+    #                                      order_by: :rss_log)
+    #   [query, {}]
     # end
 
-    def show_selected_results(query)
-      args = {
-        matrix: true, cache: true,
-        include: observation_identify_index_includes
-      }
-
-      show_index_of_objects(query, args)
+    def index_display_opts(opts, _query)
+      { matrix: true, cache: true,
+        include: observation_identify_index_includes }.merge(opts)
     end
 
     def observation_identify_index_includes

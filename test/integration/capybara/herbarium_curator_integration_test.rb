@@ -106,7 +106,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     rec = obs.herbarium_records.find { |r| r.can_edit?(mary) }
     visit(herbarium_path(rec.herbarium.id))
     assert_selector(
-      "a[href*='#{herbarium_records_path(herbarium_id: rec.herbarium.id)}']"
+      "a[href*='#{herbarium_records_path(herbarium: rec.herbarium.id)}']"
     )
     first(class: "herbarium_records_for_herbarium_link").click
 
@@ -143,7 +143,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
   def test_index_sort_links
     user = users(:zero_user)
     login(user)
-    visit(herbaria_path(flavor: :all))
+    visit(herbaria_path)
     assert_selector("body.herbaria__index")
 
     herbaria_show_links = page.all("td > a[class^='herbarium_link']")
@@ -171,7 +171,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     visit(new_herbarium_record_path(observation_id: obs.id))
     click_link(class: "nonpersonal_herbaria_index_link")
 
-    assert_selector("#title", text: :query_title_nonpersonal.l)
+    assert_selector("#title", text: :HERBARIA.l)
   end
 
   def test_single_herbarium_search
@@ -188,25 +188,28 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
   def test_multiple_herbarium_search
     login
     visit("/")
+    pattern = "Personal"
     within("#pattern_search_form") do
-      fill_in("search_pattern", with: "Personal")
+      fill_in("search_pattern", with: pattern)
       select(:HERBARIA.l, from: "search_type")
       click_commit
     end
-    assert_selector("#title", text: "Fungaria Matching ‘Personal’")
+    assert_selector("#title", text: :HERBARIA.l)
+    assert_selector("#filters", text: "#{:query_pattern.l}: #{pattern}")
   end
 
   def test_herbarium_record_search
     login
     get("/")
+    pattern = "Coprinus comatus"
     within("#pattern_search_form") do
-      fill_in("search_pattern", with: "Coprinus comatus")
+      fill_in("search_pattern", with: pattern)
       select(:HERBARIUM_RECORDS.l, from: "search_type")
       click_commit
     end
     assert_selector("body.herbarium_records__index")
-    assert_selector("#title",
-                    text: "#{:HERBARIUM_RECORDS.l} Matching ‘Coprinus comatus’")
+    assert_selector("#title", text: :HERBARIUM_RECORDS.l)
+    assert_selector("#filters", text: "#{:query_pattern.l}: #{pattern}")
   end
 
   def test_herbarium_change_code
@@ -232,7 +235,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     user = users(:mary)
     assert_equal([], user.curated_herbaria)
     login!(user.login)
-    visit(herbaria_path(flavor: :all))
+    visit(herbaria_path)
     click_link(class: "new_herbarium_link")
 
     within("#herbarium_form") do
@@ -256,7 +259,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     )
     # Seems like these destroy links don't work with `click_button`
     first(class: /destroy_herbarium_link/).click
-    assert_selector("#title", text: :herbarium_index.l)
+    assert_selector("body.herbaria__index")
   end
 
   def test_add_curator
@@ -308,7 +311,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     mary_herbarium = mary.create_personal_herbarium
 
     login!("mary")
-    visit(herbaria_path(flavor: :all))
+    visit(herbaria_path)
     click_link(href: herbaria_path(merge: fundis))
     within("form[action *= 'dest=#{mary_herbarium.id}']") do
       click_commit

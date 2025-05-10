@@ -28,23 +28,22 @@ class API2
     end
 
     def query_params
-      @target = parse(:object, :target, limit: Comment.all_types, help: 1)
+      @target = parse(:object, :target, limit: Comment::ALL_TYPES, help: 1)
       {
-        where: sql_id_condition,
+        id_in_set: parse_array(:comment, :id, as: :id),
         created_at: parse_range(:time, :created_at),
         updated_at: parse_range(:time, :updated_at),
-        users: parse_array(:user, :user, help: :creator),
-        types: parse_array(:enum, :type, limit: Comment.all_type_tags),
+        by_users: parse_array(:user, :user, help: :creator),
+        types: parse_array(:enum, :type, limit: Comment::ALL_TYPE_TAGS),
         summary_has: parse(:string, :summary_has, help: 1),
         content_has: parse(:string, :content_has, help: 1),
-        target: @target ? @target.id : nil,
-        type: @target ? @target.class.name : nil
+        target: @target ? { type: @target.class.name, id: @target.id } : nil
       }
     end
 
     def create_params
       {
-        target: parse(:object, :target, limit: Comment.all_types),
+        target: parse(:object, :target, limit: Comment::ALL_TYPES),
         summary: parse(:string, :summary, limit: 100),
         comment: parse(:string, :content),
         user: @user
@@ -56,10 +55,6 @@ class API2
         summary: parse(:string, :set_summary, limit: 100, not_blank: true),
         comment: parse(:string, :set_content)
       }
-    end
-
-    def query_flavor
-      @target ? :for_target : :all
     end
 
     def validate_create_params!(params)

@@ -12,7 +12,7 @@ class CommentTest < UnitTestCase
   end
 
   def test_find_object_for_all_types
-    Comment.all_types.each do |type|
+    Comment::ALL_TYPES.each do |type|
       assert(AbstractModel.find_object(type.to_s, type.first.id),
              "Unable to use find_object to find #{type}")
     end
@@ -20,7 +20,7 @@ class CommentTest < UnitTestCase
 
   def test_user_highlighting_parsing
     do_highlight_test([], "")
-    do_highlight_test([mary], "_user #{mary.id}_")
+    do_highlight_test([mary], mary.textile_name)
     do_highlight_test([mary], "@Mary Newbie@")
     do_highlight_test([mary], "@mary foo bar")
     do_highlight_test([mary, rolf, dick], "@mary,@rolf,@dick")
@@ -28,7 +28,7 @@ class CommentTest < UnitTestCase
   end
 
   def do_highlight_test(expected, string)
-    comment = Comment.first
+    comment = Comment.reorder(created_at: :asc).first
     assert_user_arrays_equal(expected, comment.send(:highlighted_users, string))
   end
 
@@ -145,11 +145,29 @@ class CommentTest < UnitTestCase
   def queued_emails(start)
     return "No emails were queued" if num_emails == start
 
-    strs = QueuedEmail.all[start..-1].map do |mail|
+    strs = QueuedEmail.all[start..].map do |mail|
       to_user = mail&.to_user_id ? User.find(mail.to_user_id)&.login : nil
       email = mail&.id ? QueuedEmail.find(mail.id) : nil
       "to: #{to_user}, email: #{email}"
     end
     "These emails were queued:\n#{strs.join("\n")}"
+  end
+
+  def test_polymorphic_joins
+    Comment::ALL_TYPE_TAGS.each do |type_tag|
+      assert_true(Comment.joins(type_tag))
+    end
+  end
+
+  def test_scope_target
+    obss = Observation.has_comments
+    assert(obss.size > 1)
+    obs1 = obss.first
+    obs2 = obss.last
+    assert_not_equal(obs1.id, obs2.id)
+    assert_equal(obs1.id, Comment.target(obs1.id).first.target_id)
+    assert_equal(obs1.id, Comment.target(obs1).first.target_id)
+    assert_equal(obs2.id, Comment.target(obs2.id).first.target_id)
+    assert_equal(obs2.id, Comment.target(obs2).first.target_id)
   end
 end

@@ -54,9 +54,20 @@ class Inat
       "Imported from iNat #{DateTime.now.utc.strftime("%Y-%m-%d %H:%M:%S %z")}"
     end
 
-    # iNat doesn't preserve (or maybe reveal) user's original filename
-    # so map it to an iNat uuid
-    def original_name = "iNat photo uuid #{@photo[:uuid]}"
-    def url = @photo[:photo][:url].sub("/square.", "/original.")
+    # iNat doesn't preserve user's original filename
+    # Preserve photo_id and uuid for purposed of syncing updates
+    def original_name
+      "iNat photo_id: #{@photo[:photo_id]}, uuid: #{@photo[:uuid]}"
+    end
+
+    # Convert the url returned by the iNat API to
+    # the url of the full-size image
+    # NOTE: JDC 2025-04-16
+    # iNat photos are stored differently depending on their license.
+    # CC licensed photos have an amazonaws.com url.
+    # Other photos have a static.inaturalist.org url.
+    # https://www.inaturalist.org/blog/49564-inaturalist-licensed-observation-images-in-the-amazon-open-data-sponsorship-program/
+    # cf. https://github.com/inaturalist/inaturalist-open-data
+    def url = @photo[:photo][:url].sub("square", "original")
   end
 end

@@ -81,7 +81,7 @@
 #
 ################################################################################
 #
-class SpeciesList < AbstractModel
+class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
   belongs_to :location
   belongs_to :rss_log
   belongs_to :user
@@ -98,6 +98,39 @@ class SpeciesList < AbstractModel
   has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
 
   attr_accessor :data
+
+  scope :order_by_default,
+        -> { order_by(::Query::SpeciesLists.default_order) }
+
+  scope :title_has,
+        ->(phrase) { search_columns(SpeciesList[:title], phrase) }
+  scope :has_notes,
+        ->(bool = true) { not_blank_condition(SpeciesList[:notes], bool:) }
+  scope :notes_has,
+        ->(phrase) { search_columns(SpeciesList[:notes], phrase) }
+  scope :search_where,
+        ->(phrase) { search_columns(SpeciesList[:where], phrase) }
+
+  scope :locations, lambda { |loc|
+    ids = lookup_locations_by_name(loc)
+    where(location_id: ids).distinct
+  }
+  scope :projects, lambda { |projects|
+    ids = lookup_projects_by_name(projects)
+    joins(:project_species_lists).
+      where(project_species_lists: { project_id: ids }).distinct
+  }
+
+  scope :pattern, lambda { |phrase|
+    cols = SpeciesList[:title] + SpeciesList[:notes].coalesce("") +
+           Location[:id].when(present?).then(Location[:name]).
+           else(SpeciesList[:where])
+    left_outer_joins(:location).search_columns(cols, phrase)
+  }
+
+  scope :observation_query, lambda { |hash|
+    joins(:observations).subquery(:Observation, hash)
+  }
 
   scope :show_includes, lambda {
     strict_loading.includes(
@@ -267,20 +300,20 @@ class SpeciesList < AbstractModel
   #   spl.process_file_data(sorter = NameSorter.new)
   #   names = sorter.xxx
   #
-  def process_file_data(sorter)
+  def process_file_data(user, sorter)
     return unless data
 
     if data[0] == 91 # '[' character
       process_name_list(sorter)
     else
-      process_simple_list(sorter)
+      process_simple_list(user, sorter)
     end
   end
 
   # Process simple list: one Name per line.
-  def process_simple_list(sorter)
+  def process_simple_list(user, sorter)
     data.split(/\s*[\n\r]+\s*/).each do |name|
-      sorter.add_name(name.strip_squeeze)
+      sorter.add_name(user, name.strip_squeeze)
     end
   end
 
@@ -397,9 +430,7 @@ class SpeciesList < AbstractModel
     "#{notes_area_id_prefix}#{part.tr(" ", "_")}"
   end
 
-  def notes_part_id(part)
-    SpeciesList.notes_part_id(part)
-  end
+  delegate :notes_part_id, to: :SpeciesList
 
   # prefix for id of textarea
   def self.notes_area_id_prefix

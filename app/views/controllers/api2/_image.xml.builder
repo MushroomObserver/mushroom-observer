@@ -8,7 +8,7 @@ xml.tag!(
 ) do
   xml_date(xml, :date, object.when)
   xml_string(xml, :copyright_holder, object.copyright_holder)
-  xml_html_string(xml, :notes, object.notes.to_s.tpl_nodiv)
+  xml_html_string(xml, :notes, object.notes.to_s.tl_for_api)
   xml_image_quality(xml, :quality, object.vote_cache)
   xml_datetime(xml, :created_at, object.created_at)
   xml_datetime(xml, :updated_at, object.updated_at)

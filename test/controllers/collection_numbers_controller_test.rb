@@ -7,18 +7,19 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     login
     get(:index)
 
-    assert_displayed_title("Collection Number Index")
+    assert_displayed_title(:COLLECTION_NUMBERS.l)
   end
 
   def test_index_with_query
-    query = Query.lookup_and_save(:CollectionNumber, :all, users: rolf)
+    query = Query.lookup_and_save(:CollectionNumber, by_users: rolf)
     assert_operator(query.num_results, :>, 1)
 
     login
     get(:index, params: { q: query.record.id.alphabetize })
 
     assert_response(:success)
-    assert_displayed_title("Collection Number Index")
+    assert_displayed_title(:COLLECTION_NUMBERS.l)
+    assert_displayed_filters("#{:query_by_users.l}: Rolf Singer")
     # In results, expect 1 row per collection_number.
     assert_select("#results tr", query.num_results)
   end
@@ -31,7 +32,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     get(:index, params: params)
 
     assert_response(:success)
-    assert_displayed_title("Collection Numbers by Date")
+    assert_displayed_title(:COLLECTION_NUMBERS.l)
     assert(
       collection_number_links.first[:href].
         start_with?(collection_number_path(last_number.id)),
@@ -45,14 +46,11 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_equal(1, obs.collection_numbers.count)
 
     login
-    get(:index, params: { observation_id: obs.id })
+    get(:index, params: { observation: obs.id })
 
     assert_no_flash
-    assert_displayed_title(
-      :query_title_for_observation.t(type: :collection_number,
-                                     observation: obs.unique_format_name.t).
-      strip_html
-    )
+    assert_displayed_title(:COLLECTION_NUMBERS.l)
+    assert_displayed_filters("#{:query_observations.l}: #{obs.id}")
   end
 
   def test_index_observation_id_with_multiple_collection_numbers
@@ -60,14 +58,11 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_operator(obs.collection_numbers.count, :>, 1)
 
     login
-    get(:index, params: { observation_id: obs.id })
+    get(:index, params: { observation: obs.id })
 
     assert_no_flash
-    assert_displayed_title(
-      :query_title_for_observation.t(type: :collection_number,
-                                     observation: obs.unique_format_name.t).
-      strip_html
-    )
+    assert_displayed_title(:COLLECTION_NUMBERS.l)
+    assert_displayed_filters("#{:query_observations.l}: #{obs.id}")
   end
 
   def test_index_observation_id_with_no_hits
@@ -75,9 +70,9 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_empty(obs.collection_numbers)
 
     login
-    get(:index, params: { observation_id: obs.id })
+    get(:index, params: { observation: obs.id })
 
-    assert_displayed_title("List Collection Numbers")
+    assert_displayed_title(:COLLECTION_NUMBERS.l)
     assert_flash_text(/no matching collection numbers found/i)
   end
 
@@ -105,7 +100,8 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     get(:index, params: { pattern: pattern })
 
     assert_response(:success)
-    assert_displayed_title("Collection Numbers Matching ‘#{pattern}’")
+    assert_displayed_title(:COLLECTION_NUMBERS.l)
+    assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
     # Results should have 2 links per collection_number
     # a show link, and (because logged in user created the numbers)
     # an edit link
@@ -135,7 +131,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
   end
 
   def test_next_and_prev_collection_number
-    query = Query.lookup_and_save(:CollectionNumber, :all, users: rolf)
+    query = Query.lookup_and_save(:CollectionNumber, by_users: rolf)
     assert_operator(query.num_results, :>, 1)
     number1 = query.results[0]
     number2 = query.results[1]
@@ -172,6 +168,23 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     make_admin("mary")
     get(:new, params: { observation_id: obs.id })
     assert_response(:success)
+  end
+
+  def test_create_collection_number_with_turbo
+    obs = observations(:strobilurus_diminutivus_obs)
+    user = obs.user
+    params = {
+      observation_id: obs.id,
+      collection_number: {
+        name: user.login,
+        number: "1234"
+      }
+    }
+    login(user.login)
+    assert_difference("CollectionNumber.count", 1) do
+      post(:create, params: params,
+                    format: :turbo_stream)
+    end
   end
 
   def test_create_collection_number
@@ -273,7 +286,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
 
   def test_create_collection_number_redirect
     obs = observations(:coprinus_comatus_obs)
-    query = Query.lookup_and_save(:CollectionNumber, :all)
+    query = Query.lookup_and_save(:CollectionNumber)
     q = query.id.alphabetize
     params = {
       observation_id: obs.id,
@@ -412,7 +425,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
   def test_update_collection_number_redirect
     obs   = observations(:detailed_unknown_obs)
     num   = obs.collection_numbers.first
-    query = Query.lookup_and_save(:CollectionNumber, :all)
+    query = Query.lookup_and_save(:CollectionNumber)
     q     = query.id.alphabetize
     login(obs.user.login)
     params = {
@@ -478,7 +491,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
   def test_destroy_collection_number_redirect
     obs   = observations(:detailed_unknown_obs)
     nums  = obs.collection_numbers
-    query = Query.lookup_and_save(:CollectionNumber, :all)
+    query = Query.lookup_and_save(:CollectionNumber)
     q     = query.id.alphabetize
     login(obs.user.login)
     assert_operator(nums.length, :>, 1)

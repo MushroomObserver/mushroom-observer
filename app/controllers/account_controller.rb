@@ -66,7 +66,7 @@ class AccountController < ApplicationController
       UserStats.create({ user_id: @new_user.id })
     end
 
-    redirect_back_or_default("/")
+    redirect_back_or_default(info_how_to_use_path)
   end
 
   # This is the welcome page for new users who just verified an account.
@@ -149,6 +149,7 @@ class AccountController < ApplicationController
       # to automate creation of accounts?
 
       QueuedEmail::Webmaster.create_email(
+        @user,
         sender_email: MO.accounts_email_address,
         subject: "Account Denied",
         content: denied_message(@new_user)

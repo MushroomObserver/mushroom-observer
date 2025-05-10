@@ -3,11 +3,11 @@
 # special markup for the lightbox
 module LightboxHelper
   # this link needs to contain all the data for the lightbox image
-  def lightbox_link(lightbox_data)
+  def lightbox_link(user, lightbox_data)
     return unless lightbox_data
 
     icon = tag.i("", class: "glyphicon glyphicon-fullscreen")
-    caption = lightbox_caption_html(lightbox_data)
+    caption = lightbox_caption_html(user, lightbox_data)
 
     link_to(icon, lightbox_data[:url],
             class: "theater-btn",
@@ -15,13 +15,13 @@ module LightboxHelper
   end
 
   # everything in the caption
-  def lightbox_caption_html(lightbox_data)
+  def lightbox_caption_html(user, lightbox_data)
     return unless lightbox_data
 
     obs = lightbox_data[:obs]
     html = []
     if obs.is_a?(Observation)
-      html += lightbox_obs_caption(obs, lightbox_data[:identify])
+      html += lightbox_obs_caption(user, obs, lightbox_data[:identify])
     elsif lightbox_data[:image]&.notes.present?
       html << lightbox_image_caption(lightbox_data[:image])
     end
@@ -32,13 +32,13 @@ module LightboxHelper
 
   # observation part of the caption. returns an array of html strings (to join)
   # template local assign "caption" skips the obs relations (projects, etc)
-  def lightbox_obs_caption(obs, identify)
+  def lightbox_obs_caption(user, obs, identify)
     html = []
 
-    html << caption_identify_ui(obs: obs) if identify
-    html << caption_obs_title(obs: obs)
-    html << observation_details_when_where_who(obs: obs)
-    html << caption_truncated_notes(obs: obs)
+    html << caption_identify_ui(obs:) if identify
+    html << caption_obs_title(obs:, identify:)
+    html << observation_details_when_where_who(obs:, user:)
+    html << caption_truncated_notes(obs:)
     html
   end
 
@@ -52,10 +52,12 @@ module LightboxHelper
 
   # This gets removed on successful propose
   def caption_identify_ui(obs:)
-    tag.div(class: "obs-identify", id: "observation_identify_#{obs.id}") do
+    tag.div(class: "obs-identify mb-3", id: "observation_identify_#{obs.id}") do
       [
-        propose_naming_link(obs.id, context: "lightgallery",
-                                    btn_class: "btn d-inline-block"),
+        propose_naming_link(
+          obs.id, context: "lightgallery",
+                  btn_class: "btn btn-primary d-inline-block"
+        ),
         tag.span("&nbsp;".html_safe, class: "mx-2"),
         mark_as_reviewed_toggle(obs.id)
       ].safe_join
@@ -63,15 +65,24 @@ module LightboxHelper
   end
 
   # This is different from show_obs_title, it's more like the matrix_box title
-  def caption_obs_title(obs:)
-    tag.h4(class: "obs-what", id: "observation_what_#{obs.id}",
-           data: { controller: "section-update" }) do
+  def caption_obs_title(obs:, identify:)
+    btn_style = identify ? "text-bold" : "btn btn-primary"
+    text = if identify
+             tag.span("#{:OBSERVATION.l}: ", class: "font-weight-normal")
+           else
+             ""
+           end
+    tag.h4(
+      class: "obs-what", id: "observation_what_#{obs.id}",
+      data: { controller: "section-update" }
+    ) do
       [
+        text,
         link_to(obs.id, add_query_param(obs.show_link_args),
-                class: "btn btn-primary mr-3",
+                class: "#{btn_style} mr-3",
                 id: "caption_obs_link_#{obs.id}"),
         obs.format_name.t.small_author
-      ].safe_join(" ")
+      ].compact_blank!.safe_join(" ")
     end
   end
 

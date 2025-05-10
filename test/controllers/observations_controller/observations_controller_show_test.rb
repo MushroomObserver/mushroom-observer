@@ -11,10 +11,31 @@ class ObservationsControllerShowTest < FunctionalTestCase
   #  General tests.
   # ----------------------------
 
+  def test_show_no_login
+    obs = observations(:deprecated_name_obs)
+    get(:show, params: { id: obs.id })
+    assert_response(:success)
+  end
+
+  def test_show_no_login_with_flow
+    obs = observations(:deprecated_name_obs)
+    get(:show, params: { id: obs.id, flow: "next" })
+    assert_response(:redirect)
+  end
+
+  def test_show_login
+    login
+    obs = observations(:deprecated_name_obs)
+    get(:show, params: { id: obs.id })
+    assert_response(:success)
+    assert(@response.body.include?("flow=next"))
+  end
+
   # Test load a deprecated name obs, no strict_loading error
   def test_show_observation_deprecated_name
     obs = observations(:deprecated_name_obs)
     get(:show, params: { id: obs.id })
+    assert_response(:success)
   end
 
   def test_show_observation_noteless_image
@@ -23,11 +44,28 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_nil(img.notes)
     assert(obs.images.member?(img))
     get(:show, params: { id: obs.id })
+    assert_response(:success)
   end
 
   def test_show_observation_noteful_image
     obs = observations(:detailed_unknown_obs)
     get(:show, params: { id: obs.id })
+    assert_response(:success)
+  end
+
+  def test_show_observation_with_structured_notes
+    login
+    obs = observations(:template_and_orphaned_notes_scrambled_obs)
+    get(:show, params: { id: obs.id })
+    assert_match("+photo", @response.body)
+    assert_match("/lookups/lookup_user/rolf", @response.body)
+  end
+
+  def test_show_observation_with_simple_notes
+    login
+    obs = observations(:coprinus_comatus_obs)
+    get(:show, params: { id: obs.id })
+    assert_match("<p>Notes:<br />", @response.body)
   end
 
   def test_show_project_observation
@@ -122,6 +160,78 @@ class ObservationsControllerShowTest < FunctionalTestCase
       assert_includes(p.to_s,
                       :footer_last_you_viewed.t(date: last_view.web_time))
     end
+  end
+
+  def test_show_observation_curator_with_mcp_link
+    obs = observations(:agaricus_campestris_obs)
+    herbarium_record = herbarium_records(:agaricus_campestris_spec)
+    assert(
+      herbarium_record&.herbarium&.mcp_searchable?,
+      "Test needs Obs fixture with HerbariumRecord " \
+      "that's searchable via MyCoPortal"
+    )
+    user = users(:dick)
+    assert(user.curated_herbaria.any?,
+           "Test needs User who's a Herbarium curator")
+
+    login(user.login)
+    get(:show, params: { id: obs.id })
+
+    assert_match(:herbarium_record_collection.l, @response.body)
+    assert_select("a[href=?]", herbarium_record.mcp_url, true,
+                  "Missing link to MyCoPortal record")
+  end
+
+  def test_show_observation_non_curator_with_mcp_link
+    obs = observations(:agaricus_campestris_obs)
+    herbarium_record = herbarium_records(:agaricus_campestris_spec)
+    assert(
+      herbarium_record&.herbarium&.mcp_searchable?,
+      "Test needs Obs fixture with HerbariumRecord " \
+      "that's searchable via MyCoPortal"
+    )
+    user = users(:zero_user)
+    assert(user.curated_herbaria.none?,
+           "Test needs User who's not a Herbarium curator")
+
+    login(user.login)
+    get(:show, params: { id: obs.id })
+
+    assert_match(:herbarium_record_collection.l, @response.body)
+    assert_select("a[href=?]", herbarium_record.mcp_url, true,
+                  "Missing link to MyCoPortal record")
+  end
+
+  def test_show_observation_unsearchable_coded_herbarium
+    obs = observations(:agaricus_campestris_obs)
+    herbarium_record = herbarium_records(:agaricus_campestris_spec)
+    herbarium = herbarium_record&.herbarium
+    herbarium.update(code: "notInMcp")
+
+    user = users(:dick)
+    assert(user.curated_herbaria.any?,
+           "Test needs User who's a Herbarium curator")
+
+    login(user.login)
+    get(:show, params: { id: obs.id })
+
+    assert_no_match(:herbarium_record_collection.l, @response.body)
+    assert_select(
+      "a[href=?]", herbarium_record.mcp_url, false,
+      "Obs shouldn't link to MyCoPortal for Herbarium Record in a Herbarium " \
+      "that's not in the MCP network"
+    )
+  end
+
+  def test_show_observation_nil_user
+    login
+    obs = observations(:detailed_unknown_obs)
+    obs.update(user: nil)
+
+    get(:show, params: { id: obs.id })
+
+    assert_response(:success)
+    assert_template("observations/show")
   end
 
   ##############################################################################
@@ -567,10 +677,10 @@ class ObservationsControllerShowTest < FunctionalTestCase
 
   def test_prev_and_next_observation_simple
     # Uses non-default observation query. :when is the default order
-    o_chron = Observation.order(created_at: :desc, id: :desc)
+    o_chron = Observation.reorder(created_at: :desc, id: :desc)
     login
     # need to save a query here to get :next in a non-standard order
-    Query.lookup_and_save(:Observation, :all, by: :created_at)
+    Query.lookup_and_save(:Observation, order_by: :created_at)
     qr = QueryRecord.last.id.alphabetize
 
     get(:show, params: { id: o_chron.fourth.id, flow: :next, q: qr })
@@ -597,29 +707,29 @@ class ObservationsControllerShowTest < FunctionalTestCase
     o3 = n3.observations.first
     o4 = n4.observations.first
 
-    # When requesting non-synonym observations of n2, it should include n1,
-    # since an observation of n1 was clearly intended to be an observation of
+    # When requesting non-synonym observations of n2.  Does not include
+    # n1 even though n1 was clearly intended to be an observation of
     # n2.
-    query = Query.lookup_and_save(:Observation, :all,
-                                  names: n2.id,
-                                  include_synonyms: false,
-                                  by: :name)
-    assert_equal(2, query.num_results)
+    query = Query.lookup_and_save(
+      :Observation, names: { lookup: n2.id, include_synonyms: false },
+                    order_by: :name
+    )
+    assert_equal(1, query.num_results)
 
     # Likewise, when requesting *synonym* observations, neither n1 nor n2
     # should be included.
-    query = Query.lookup_and_save(:Observation, :all,
-                                  names: n2.id,
-                                  include_synonyms: true,
-                                  exclude_original_names: true,
-                                  by: :name)
+    query = Query.lookup_and_save(
+      :Observation, names: { lookup: n2.id, include_synonyms: true,
+                             exclude_original_names: true },
+                    order_by: :name
+    )
     assert_equal(2, query.num_results)
 
     # But for our prev/next test, lets do the all-inclusive query.
-    query = Query.lookup_and_save(:Observation, :all,
-                                  names: n2.id,
-                                  include_synonyms: true,
-                                  by: :name)
+    query = Query.lookup_and_save(
+      :Observation, names: { lookup: n2.id, include_synonyms: true },
+                    order_by: :name
+    )
     assert_equal(4, query.num_results)
     qp = @controller.query_params(query)
 
@@ -729,8 +839,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
   end
 
   def do_external_sites_test(expect, user, obs)
-    User.current = user
-    actual = @controller.helpers.external_sites_user_can_add_links_to(obs)
+    actual = ExternalSite.sites_user_can_add_links_to(user, obs)
     assert_equal(expect.map(&:name), actual.map(&:name))
   end
 

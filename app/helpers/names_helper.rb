@@ -56,18 +56,24 @@ module NamesHelper
   # return link to a query for observations + count of results
   # returns nil if no results
   # Use:
-  #   query = Query.lookup(:Observation, :all, names: name.id, by: :confidence,
-  #                        include_synonyms: true)
+  #   query = Query.lookup(:Observation, names: { lookup: name.id,
+  #                                               include_synonyms: true },
+  #                                      order_by: :confidence)
   #   link_to_obss_of(query, :obss_of_taxon.t)
   #   => <a href="/observations?q=Q">This Taxon, any name</a> (19)
   def link_to_obss_of(query, title, count)
-    # count = query.select_count # This executes a query per link.
     return nil if count.zero?
 
     query.save
+    # Debugging: we need to execute the query first by counting `num_results`,
+    # then we can get the actual SQL it executed via `sql`:
+    # count = query.num_results
+    # last_query = query.sql.squish
     link_to(
       title,
-      add_query_param(observations_path, query)
+      add_query_param(observations_path, query),
+      data: { query_params: query.params.deep_compact_blank.to_json,
+              query_record: query.record.id, alph: query.record.id.alphabetize }
     ) + " (#{count})"
   end
 
@@ -77,41 +83,42 @@ module NamesHelper
   # These don't run queries... it's query.select_count above, that does.
 
   def obss_of_taxon_this_name(name)
-    Query.lookup(:Observation, :all,
-                 names: name.id,
-                 by: :confidence)
+    Query.create_query(
+      :Observation, names: { lookup: name.id }, order_by: :confidence
+    )
   end
 
   def obss_of_taxon_other_names(name)
-    Query.lookup(:Observation, :all,
-                 names: name.id,
-                 include_synonyms: true,
-                 exclude_original_names: true,
-                 by: :confidence)
+    Query.create_query(
+      :Observation, names: { lookup: name.id, include_synonyms: true,
+                             exclude_original_names: true },
+                    order_by: :confidence
+    )
   end
 
   def obss_of_taxon_any_name(name)
-    Query.lookup(:Observation, :all,
-                 names: name.id,
-                 include_synonyms: true,
-                 by: :confidence)
+    Query.create_query(
+      :Observation, names: { lookup: name.id, include_synonyms: true },
+                    order_by: :confidence
+    )
   end
 
   # These two do joins to Namings. Unbelievably, it's faster than the above?
   def obss_other_taxa_this_taxon_proposed(name)
-    Query.lookup(:Observation, :all,
-                 names: name.id,
-                 include_synonyms: true,
-                 include_all_name_proposals: true,
-                 exclude_consensus: true,
-                 by: :confidence)
+    Query.create_query(
+      :Observation, names: { lookup: name.id, include_synonyms: true,
+                             include_all_name_proposals: true,
+                             exclude_consensus: true },
+                    order_by: :confidence
+    )
   end
 
   def obss_this_name_proposed(name)
-    Query.lookup(:Observation, :all,
-                 names: name.id,
-                 include_all_name_proposals: true,
-                 by: :confidence)
+    Query.create_query(
+      :Observation, names: { lookup: name.id,
+                             include_all_name_proposals: true },
+                    order_by: :confidence
+    )
   end
 
   #############################################################################

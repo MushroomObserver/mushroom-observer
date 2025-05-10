@@ -1,0 +1,23 @@
+<%
+  add_project_banner(@project_alias.project)
+  @container = :text
+  project_id = @project_alias.project_id
+%>
+
+<p>
+  <span class="font-weight-bold">Name:</span>
+  <%= @project_alias.name %>
+</p>
+
+<p>
+  <span class="font-weight-bold">Target Type:</span>
+  <%= @project_alias.target_type %>
+</p>
+
+<p>
+  <span class="font-weight-bold">Target:</span>
+  <%= @project_alias.target.try(:format_name) %>
+</p>
+
+<%= link_to(:EDIT.t, edit_project_alias_path(project_id:, id: @project_alias.id)) %> |
+<%= link_to(:BACK.t, project_aliases_path) %>

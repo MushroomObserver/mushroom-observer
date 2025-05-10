@@ -2,7 +2,7 @@
 add_page_title(:show_past_location_title.t(
   num: @location.version, name: @location.display_name
 ))
-add_tab_set(location_version_tabs(location: @location))
+add_context_nav(location_version_tabs(location: @location))
 %>
 
 <div class="row">
@@ -18,4 +18,4 @@ add_tab_set(location_version_tabs(location: @location))
 
 <%= show_past_versions(@location, @versions) %>
 
-<%= show_object_footer(@location, @versions) %>
+<%= show_object_footer(@user, @location, @versions) %>

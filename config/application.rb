@@ -31,19 +31,10 @@ module MushroomObserver
     # specified here.
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.
-    # Custom directories with classes and modules you want to be autoloadable.
-    config.autoload_paths += %W[
-      #{config.root}/app/classes
-      #{config.root}/app/extensions
-    ]
-    config.eager_load_paths += %W[
-      #{config.root}/app/classes
-      #{config.root}/app/extensions
-    ]
 
     # Uncomment this after migrating to all recommended default configs for 7.1
     # config/initializers/new_framework_defaults_7_1.rb
-    # config.load_defaults = 7.1
+    # config.load_defaults(7.1)
 
     # Set Time.zone default to the specified zone and
     # make Active Record auto-convert to this zone.
@@ -103,6 +94,10 @@ module MushroomObserver
     config.cache_store = :solid_cache_store
 
     config.solid_cache.connects_to = { database: { writing: :cache } }
+
+    # dartsass-sprockets - sssh! about the bootstrap deprectations
+    config.sass.quiet_deps = true
+    config.sass.silence_deprecations = ["import"]
   end
 end
 

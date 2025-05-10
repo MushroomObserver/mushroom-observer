@@ -4,12 +4,26 @@
 module Projects
   # Actions
   # -------
+  # index (get)
   # edit (get)
   # update (patch)
   #
   class ViolationsController < ApplicationController
     before_action :login_required
     before_action :pass_query_params
+    # Cannot figure out the eager loading here.
+    around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [:index]
+
+    def index
+      return unless find_project!
+
+      @violations = @project.violations
+      build_index_with_query
+    end
+
+    def controller_model_name
+      "Project"
+    end
 
     def update
       unless (@project = find_or_goto_index(Project, params[:project_id]))
@@ -26,22 +40,11 @@ module Projects
       redirect_with_query(project_path(@project))
     end
 
-    #########
-
     private
 
-    def default_index_subaction
-      list_all
-    end
-
-    def list_all
-      return unless find_project!
-
-      @violations = @project.violations
-    end
-
     def find_project!
-      @project = find_or_goto_index(Project, params[:project_id])
+      @project = Project.violations_includes.find(params[:project_id]) ||
+                 flash_error_and_goto_index(Project, params[:project_id])
     end
 
     def remove_observation_if_permitted(obs_id)

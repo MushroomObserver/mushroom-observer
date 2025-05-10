@@ -1,7 +1,7 @@
 <%
 @container = :wide
 add_page_title(article_show_title(@article))
-add_tab_set(article_show_tabs(article: @article, user: @user))
+add_context_nav(article_show_tabs(article: @article, user: @user))
 %>
 
 <div>
@@ -11,4 +11,4 @@ add_tab_set(article_show_tabs(article: @article, user: @user))
 
 <%= panel_block(class: "mt-3") do @article.body.tpl end %>
 
-<%= show_object_footer(@article) %>
+<%= show_object_footer(@user, @article) %>

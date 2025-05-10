@@ -1,21 +1,22 @@
 <%
 @container = :wide
-add_index_title(@query, no_hits: :list_herbaria_title.t)
-add_tab_set(herbaria_index_tabs(query: @query))
+add_index_title(@query)
+add_context_nav(herbaria_index_tabs(query: @query))
 add_sorter(@query, herbaria_index_sorts(query: @query))
 
 flash_error(@error) if @error && @objects.empty?
-nonpersonal = (@query&.flavor == :nonpersonal)
+nonpersonal = (@query&.params&.dig(:nonpersonal))
 %>
 
 <% if @merge %>
   <div class="alert alert-warning container-text mt-3">
     <%= :herbarium_index_merge_help.tp(name: @merge.format_name,
-                                       url: reload_with_args(merge: nil)) %>
-  </div><!--.container-text-->
+                                     url: reload_with_args(merge: nil)) %>
+  </div>
+  <!--.container-text-->
 <% end %>
 
-<%= paginate_block(@pages) do %>
+<%= pagination_nav(@pagination_data) do %>
   <% if @objects.any? %>
     <table class="table-striped table-herbarium mt-3">
       <thead>
@@ -61,15 +62,15 @@ nonpersonal = (@query&.flavor == :nonpersonal)
               <% end %>
               <% if @user && !@merge &&
                       (herbarium.can_edit? || in_admin_mode?) %>
-                [<%= link_with_query(:EDIT.t, edit_herbarium_path(herbarium),
+              [<%= link_with_query(:EDIT.t, edit_herbarium_path(herbarium),
                     class: "edit_herbarium_link_#{herbarium.id}") %> |
-                <%= link_to(:MERGE.t, herbaria_path(merge: herbarium.id),
+              <%= link_to(:MERGE.t, herbaria_path(merge: herbarium.id),
                     class: "merge_herbarium_link_#{herbarium.id}") %>]
-              <% end %>
-            </td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-  <% end %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>
 <% end %>

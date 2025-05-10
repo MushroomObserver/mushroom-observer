@@ -182,7 +182,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
     end
 
     # Redirected to the Welcome page, but email not verified.
-    assert_selector("body.observations__index")
+    assert_selector("body.info__how_to_use")
 
     # At this point there should be an unverified account for Dumbledore.
     wizard = User.find_by(email: "webmaster@hogwarts.org")
@@ -370,8 +370,8 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
 
     # Content filters
     within("#account_preferences_form") do
-      check("user_with_images")
-      check("user_with_specimen")
+      check("user_has_images")
+      check("user_has_specimen")
       select(:prefs_filters_lichen_yes.l, from: "user_lichen")
       click_commit
     end
@@ -428,22 +428,18 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
 
       uncheck("user_email_comments_owner")
       uncheck("user_email_comments_response")
-      check("user_email_comments_all")
 
       uncheck("user_email_observations_consensus")
       uncheck("user_email_observations_naming")
-      check("user_email_observations_all")
 
       uncheck("user_email_names_admin")
       uncheck("user_email_names_author")
       uncheck("user_email_names_editor")
       uncheck("user_email_names_reviewer")
-      check("user_email_names_all")
 
       uncheck("user_email_locations_admin")
       uncheck("user_email_locations_author")
       uncheck("user_email_locations_editor")
-      check("user_email_locations_all")
 
       uncheck("user_email_general_commercial")
       uncheck("user_email_general_feature")
@@ -456,10 +452,6 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
     mary.reload
     assert_equal(mary.email_html, false)
     assert_equal(mary.email_comments_owner, false)
-    assert_equal(mary.email_comments_all, true)
-    assert_equal(mary.email_observations_all, true)
-    assert_equal(mary.email_locations_all, true)
-    assert_equal(mary.email_names_all, true)
     assert_equal(mary.email_general_question, false)
     assert_equal(mary.email_general_feature, false)
   end

@@ -7,23 +7,6 @@
 #
 #  type_tag::           Language tag, e.g., :observation, :rss_log, etc.
 #
-#  == Scopes
-#
-#  Scopes for collecting objects created (or updated) on, before, after or
-#  between a given "%Y-%m-%d" string(s).
-#
-#  Examples: Observation.created_between("2006-09-01", "2012-09-01")
-#            Name.updated_after("2016-12-01")
-#
-#  created_on::
-#  created_after::
-#  created_before::
-#  created_between::
-#  updated_on::
-#  updated_after::
-#  updated_before::
-#  updated_between::
-#
 #  ==== Extensions to "find"
 #  safe_find::          Same as <tt>find(id)</tt> but return nil if not found.
 #  find_object::        Look up an object by class name and id.
@@ -80,6 +63,9 @@
 ############################################################################
 
 class AbstractModel < ApplicationRecord
+  include Scopes
+  include OrderingScopes
+
   self.abstract_class = true
 
   def self.acts_like_model?
@@ -99,39 +85,6 @@ class AbstractModel < ApplicationRecord
   def type_tag
     self.class.name.underscore.to_sym
   end
-
-  ##############################################################################
-  #
-  #  :section: Scopes
-  #
-  ##############################################################################
-
-  scope :created_on, lambda { |ymd_string|
-    where(arel_table[:created_at].format("%Y-%m-%d").eq(ymd_string))
-  }
-  scope :created_after, lambda { |ymd_string|
-    where(arel_table[:created_at].format("%Y-%m-%d") >= ymd_string)
-  }
-  scope :created_before, lambda { |ymd_string|
-    where(arel_table[:created_at].format("%Y-%m-%d") <= ymd_string)
-  }
-  scope :created_between, lambda { |earliest, latest|
-    where(arel_table[:created_at].format("%Y-%m-%d") >= earliest).
-      where(arel_table[:created_at].format("%Y-%m-%d") <= latest)
-  }
-  scope :updated_on, lambda { |ymd_string|
-    where(arel_table[:updated_at].format("%Y-%m-%d").eq(ymd_string))
-  }
-  scope :updated_after, lambda { |ymd_string|
-    where(arel_table[:updated_at].format("%Y-%m-%d") >= ymd_string)
-  }
-  scope :updated_before, lambda { |ymd_string|
-    where(arel_table[:updated_at].format("%Y-%m-%d") <= ymd_string)
-  }
-  scope :updated_between, lambda { |earliest, latest|
-    where(arel_table[:updated_at].format("%Y-%m-%d") >= earliest).
-      where(arel_table[:updated_at].format("%Y-%m-%d") <= latest)
-  }
 
   ##############################################################################
   #
@@ -225,7 +178,13 @@ class AbstractModel < ApplicationRecord
   #    creation.
   before_create :set_user_and_autolog
   def set_user_and_autolog
-    self.user_id ||= User.current_id if respond_to?(:user_id=)
+    if respond_to?(:user_id=)
+      self.user_id ||= if respond_to?(:current_user)
+                         current_user
+                       else
+                         User.current_id
+                       end
+    end
     autolog_created if has_rss_log?
   end
 
@@ -408,9 +367,7 @@ class AbstractModel < ApplicationRecord
     "/#{name.pluralize.underscore}" # Rails standard for most controllers
   end
 
-  def show_controller
-    self.class.show_controller
-  end
+  delegate :show_controller, to: :class
 
   # Has controller been normalized to Rails 6.0 standards:
   #  plural controller name, CRUD action names standardized if they exist
@@ -447,9 +404,7 @@ class AbstractModel < ApplicationRecord
     :index
   end
 
-  def index_action
-    self.class.index_action
-  end
+  delegate :index_action, to: :class
 
   # Return the link_to args of the "index_<object>" action
   # (the index, indexed to a particular id)
@@ -479,9 +434,7 @@ class AbstractModel < ApplicationRecord
     :show
   end
 
-  def show_action
-    self.class.show_action
-  end
+  delegate :show_action, to: :class
 
   # Return the URL of the "show_<object>" action (as a string)
   #
@@ -531,9 +484,7 @@ class AbstractModel < ApplicationRecord
     ":eol#{name}"
   end
 
-  def eol_predicate
-    self.class.eol_predicate
-  end
+  delegate :eol_predicate, to: :class
 
   ##############################################################################
   #
@@ -555,9 +506,7 @@ class AbstractModel < ApplicationRecord
     :edit
   end
 
-  def edit_action
-    self.class.edit_action
-  end
+  delegate :edit_action, to: :class
 
   # Return the URL of the "edit_<object>" action
   #
@@ -609,9 +558,7 @@ class AbstractModel < ApplicationRecord
     :destroy
   end
 
-  def destroy_action
-    self.class.destroy_action
-  end
+  delegate :destroy_action, to: :class
 
   # Return the URL of the "destroy_<object>" action.
   # For CRUD, must pass method: :delete or use destroy_button helper
@@ -682,6 +629,13 @@ class AbstractModel < ApplicationRecord
     rss_log.add_with_date(tag, args)
   end
 
+  def user_log(user, tag, args = {})
+    init_rss_log unless rss_log
+    touch_when_logging unless new_record? ||
+                              args[:touch] == false
+    rss_log.user_add_with_date(user, tag, args)
+  end
+
   # This allows a model to override touch in this context only, e.g.,
   # Observation caches a log_updated_at value so the activity index doesn't
   # have to do a join to rss_logs
@@ -697,7 +651,7 @@ class AbstractModel < ApplicationRecord
   #
   def orphan_log(*)
     rss_log = init_rss_log(orphan: true)
-    rss_log.orphan(format_name, *)
+    rss_log.orphan(@current_user, format_name, *)
   end
 
   # Callback that logs creation.

@@ -19,7 +19,21 @@ module API2::Helpers
     end
     deprecate_parameter(:synonyms_of)
     deprecate_parameter(:children_of)
-    args
+    put_names_and_modifiers_in_hash(args)
+  end
+
+  def put_names_and_modifiers_in_hash(args)
+    modifiers = [:include_subtaxa, :include_synonyms,
+                 :include_immediate_subtaxa, :exclude_original_names]
+    lookup, include_subtaxa, include_synonyms,
+    include_immediate_subtaxa, exclude_original_names =
+      args.values_at(:names, *modifiers)
+    names = { lookup:, include_subtaxa:, include_synonyms:,
+              include_immediate_subtaxa:, exclude_original_names: }
+    return {} if names.compact.blank?
+
+    args[:names] = names.compact
+    args.except!(*modifiers)
   end
 
   def make_sure_location_isnt_dubious!(name)
@@ -37,12 +51,16 @@ module API2::Helpers
   end
 
   def parse_bounding_box!
-    n = parse(:latitude, :north, help: 1)
-    s = parse(:latitude, :south, help: 1)
-    e = parse(:longitude, :east, help: 1)
-    w = parse(:longitude, :west, help: 1)
-    return if no_edges(n, s, e, w)
-    return [n, s, e, w] if all_edges(n, s, e, w)
+    north = parse(:latitude, :north, help: 1)
+    south = parse(:latitude, :south, help: 1)
+    east = parse(:longitude, :east, help: 1)
+    west = parse(:longitude, :west, help: 1)
+    return if no_edges(north, south, east, west)
+
+    raise(API2::NeedAllFourEdges.new) unless all_edges(north, south, east, west)
+
+    box = Mappable::Box.new(north:, south:, east:, west:)
+    return box.attributes.symbolize_keys if box.valid?
 
     raise(API2::NeedAllFourEdges.new)
   end

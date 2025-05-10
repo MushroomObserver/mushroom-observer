@@ -21,7 +21,7 @@ import { get } from "@rails/request.js"
 // margin-top of the <ul> to simulate scrolling.
 
 const DEFAULT_OPTS = {
-  // what type of autocompleter, corresponds to a subclass of `AutoComplete`
+  // what type of autocompleter, corresponds to a subclass of `Autocomplete`
   TYPE: null,
   // Whether to ignore order of words when matching, set by type
   // (collapse must be 0 if this is true!)
@@ -221,9 +221,9 @@ export default class extends Controller {
     if (type == undefined) { return; }
 
     let location = false;
-    if (detail.hasOwnProperty("request_params") &&
-      detail.request_params.hasOwnProperty("lat") &&
-      detail.request_params.hasOwnProperty("lng")) {
+    if (detail?.hasOwnProperty("request_params") &&
+      detail.request_params?.hasOwnProperty("lat") &&
+      detail.request_params?.hasOwnProperty("lng")) {
       location = detail.request_params;
     }
 

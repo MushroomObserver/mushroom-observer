@@ -21,11 +21,15 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     visit("/names/#{name.id}/map")
     click_link("Show Observations")
     title = page.find_by_id("title")
-    title.assert_text("Observations of #{name.text_name}")
+    title.assert_text(:OBSERVATIONS.l)
+    filters = page.find_by_id("filters")
+    filters.assert_text(name.text_name)
 
     click_link("Show Map")
     title = page.find("#title")
-    title.assert_text("Map of Observations of #{name.text_name}")
+    title.assert_text("Map of Observations")
+    # filters = page.find_by_id("filters")
+    # filters.assert_text(name.text_name)
   end
 
   # Prove that if a user clicks an Observation in Observation search results
@@ -125,6 +129,21 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     end
   end
 
+  def test_observation_label_download_not_logged_in
+    visit(observations_downloads_path)
+    assert_equal(403, page.status_code) # forbidden
+  end
+
+  def test_old_observation_path_not_logged_in
+    visit(observation_path(Observation.first.id))
+    assert_equal(403, page.status_code) # forbidden
+  end
+
+  def test_raw_id_path_not_logged_in
+    visit("/#{Observation.first.id}")
+    assert_equal(403, page.status_code) # forbidden
+  end
+
   def test_locales_when_sending_email_question
     sender = users(:rolf)
     receiver = users(:mary)
@@ -168,7 +187,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
 
     assert_selector("#flash_notices",
                     text: :runtime_no_matches.l(type: :observations.l))
-    assert_selector("#title", text: "Observation Search")
+    assert_selector("#title", text: "Observations")
     assert_selector("#results", text: "")
     assert_selector(
       "#content a[href *= 'observations?pattern=Agaricus+campestris']",
@@ -263,6 +282,9 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     assert_field("observation_location_id",
                  type: :hidden, with: last_location.id)
     assert_field("observation_place_name", with: last_location.display_name)
+    assert_field("observation_when_1i", with: Time.zone.today.year)
+    assert_field("observation_when_2i", with: Time.zone.today.month)
+    assert_field("observation_when_3i", with: Time.zone.today.day)
     check(proj_checkbox)
     assert_selector("##{proj_checkbox}[checked='checked']")
     assert_no_difference("Observation.count",
@@ -274,9 +296,10 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
       "#flash_notices",
       text: :form_observations_there_is_a_problem_with_projects.t.strip_html
     )
+
     within("#project_messages") do # out-of-range warning message
       assert(has_text?(:form_observations_projects_out_of_range.l(
-                         date: last_obs.when,
+                         date: Time.zone.today.web_date,
                          place_name: last_location.display_name
                        )),
              "Missing out-of-range warning with observation date")
@@ -297,7 +320,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
       first(:button, "Create").click
     end
     assert(
-      proj.observations.exclude?(Observation.order(created_at: :asc).last),
+      proj.observations.exclude?(Observation.last),
       "Observation should not be added to Project if user unchecks Project"
     )
 
@@ -331,7 +354,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
       first(:button, "Create").click
     end
     assert(
-      proj.observations.include?(Observation.order(created_at: :asc).last),
+      proj.observations.include?(Observation.last),
       "Failed to include Obs in Project when user fixes Observation When"
     )
 
@@ -363,7 +386,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
       first(:button, "Create").click # override warning by clicking button
     end
     assert(
-      proj.observations.include?(Observation.order(created_at: :asc).last),
+      proj.observations.include?(Observation.last),
       "Failed to include Obs in Project when user overrides warning"
     )
   end

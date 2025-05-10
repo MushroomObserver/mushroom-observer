@@ -6,6 +6,7 @@
 #
 #  user::            user who initiated the iNat import
 #  state::           state of the import
+#  ended_at::        when the job was Done
 #  token::           code, authenticity token, or JWT supplied by iNat
 #  inat_ids::        string of id's of iNat obss to be imported
 #  inat_username::   iNat login
@@ -13,6 +14,7 @@
 #  importables::     # of importable observations
 #  imported_count::  running count of iNat obss imported in the associated job
 #  response_errors:: string of newline-separated error messages
+#  log::             serialized log of inat import job
 #
 class InatImport < ApplicationRecord
   enum :state, {
@@ -27,24 +29,14 @@ class InatImport < ApplicationRecord
 
   belongs_to :user
 
-  def add_response_error(response)
-    # internal non-Ruby messages. Ex: { status: 401, body: "error message" }
-    if response.is_a?(Hash)
-      # for internal messages to be displayed as erros in tracker show
-      # Ex: { status: 401, body: "error message" }
-      code = response[:status]
-      body_text = response[:body]
-    else
-      code = response.code
-      begin
-        doc = Nokogiri::HTML(response.body)
-        body_text = doc.at("body").text.strip
-      rescue StandardError
-        body_text == ""
-      end
-    end
+  serialize :log, type: Array, coder: YAML
 
-    response_errors << "#{code} #{body_text}\n"
+  def add_response_error(error)
+    response_errors << "#{error.class.name}: #{error.message}\n"
     save
+  end
+
+  def self.super_importers
+    Project.find_by(title: "SuperImporters").user_group.users
   end
 end

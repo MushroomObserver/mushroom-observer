@@ -58,7 +58,7 @@ dick:
   name: Tricky Dick
   email_general_question: false
   verified: 2006-03-02 21:14:00
-  user_groups: all_users, bolete_users, bolete_admins, albion_users, albion_admins, dick_only, falmouth_2023_09_users
+  user_groups: all_users, bolete_users, bolete_admins, albion_users, albion_admins, dick_only, falmouth_2023_09_users, super_importers_users
 
 lone_wolf:
   <<: *DEFAULTS
@@ -103,7 +103,7 @@ zero_user:
 ignore_imageless_user:
   <<: *DEFAULTS
   verified:  2016-08-24 16:20:00
-  content_filter: <%= { with_images: "yes" }.to_yaml.inspect %>
+  content_filter: <%= { has_images: "yes" }.to_yaml.inspect %>
   # make this high so that there's only 1 page of observations
   layout_count: 96
 
@@ -111,7 +111,7 @@ ignore_imageless_user:
 vouchered_only_user:
   <<: *DEFAULTS
   verified:  2016-09-02 13:50:00
-  content_filter: <%= { with_specimen: "yes" }.to_yaml.inspect %>
+  content_filter: <%= { has_specimen: "yes" }.to_yaml.inspect %>
   layout_count: 24
 
 public_voter:
@@ -191,7 +191,28 @@ foray_newbie:
   <<: *DEFAULTS
   user_groups: all_users, burbank_users, foray_newbie_only
 
-# manages iNat imports; name and login must mirror production
+# manages iNat imports; name and login must track production
 webmaster:
   <<: *DEFAULTS
-  login: "MO Webmaster"
+  login: "MO Webmaster" # must match production
+  name: "webmaster" # must match production
+  user_groups: all_users, $LABEL_only, super_importers_admin
+
+paren_login:
+  <<: *DEFAULTS
+  login: Paren (user)
+  name: nil
+
+alt_user:
+  <<: *DEFAULTS
+  login: User
+  name: Alt User
+
+ann_user:
+  <<: *DEFAULTS
+  login: user
+  name: Ann User
+
+inat_importer:
+  <<: *DEFAULTS
+  keep_filenames: <%= User.keep_filenames[:keep_and_show] %>

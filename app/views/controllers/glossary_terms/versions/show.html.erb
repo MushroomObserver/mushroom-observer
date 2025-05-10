@@ -4,7 +4,7 @@ add_page_title(:show_past_glossary_term_title.t(
   name: @glossary_term.name
 ))
 
-add_tab_set(glossary_term_version_tabs(term: @glossary_term))
+add_context_nav(glossary_term_version_tabs(term: @glossary_term))
 @container = :wide
 %>
 
@@ -17,6 +17,7 @@ add_tab_set(glossary_term_version_tabs(term: @glossary_term))
   <div class="col-md-6">
     <%= show_past_versions(@glossary_term, @versions) %>
   </div>
-</div><!--.row-->
+</div>
+<!--.row-->
 
-<%= show_object_footer(@glossary_term, @versions) %>
+<%= show_object_footer(@user, @glossary_term, @versions) %>

@@ -113,7 +113,7 @@ module Mappable
     end
 
     def contains_lng?(lng)
-      return (west...east).cover?(lng) unless straddles_180_deg?
+      return (west..east).cover?(lng) unless straddles_180_deg?
 
       (lng >= west) || (lng <= east)
     end
@@ -138,12 +138,12 @@ module Mappable
     # postal address may be quite far from the observed GPS location.
     DELTA = 2.0
 
-    def delta_lat
-      north_south_distance * DELTA
+    def delta_lat(delta = DELTA)
+      @delta_lat ||= north_south_distance.abs * delta
     end
 
-    def delta_lng
-      east_west_distance * DELTA
+    def delta_lng(delta = DELTA)
+      @delta_lng ||= east_west_distance.abs * delta
     end
 
     # Determines if a given lat/long coordinate is within, or close to, a
@@ -151,7 +151,7 @@ module Mappable
     # with respect to the observation's assigned Location.
     def lat_lng_close?(pt_lat, pt_lng)
       loc = Box.new(north: north, south: south, east: east, west: west)
-      expanded = loc.expand(delta_lat, delta_lng)
+      expanded = loc.expand(DELTA)
       expanded.contains?(pt_lat, pt_lng)
     end
 

@@ -4,10 +4,11 @@
 # code:    string, unique code for field slip, starts with project prefix
 
 class FieldSlip < AbstractModel
+  attr_accessor :current_user
+
   belongs_to :observation
   belongs_to :project
   belongs_to :user
-  default_scope { order(:code) }
 
   validates :code, uniqueness: true
   validates :code, presence: true
@@ -17,23 +18,35 @@ class FieldSlip < AbstractModel
     end
   end
 
+  scope :order_by_default,
+        -> { order_by(::Query::FieldSlips.default_order) }
+
+  scope :projects, lambda { |projects|
+    project_ids = Lookup::Projects.new(projects).ids
+    where(project: project_ids).distinct
+  }
+
   def code=(val)
     code = val.upcase
     return unless self[:code] != code
 
     self[:code] = code
+    update_project
+  end
+
+  def update_project
     prefix_match = code.match(/(^.+)[ -]\d+$/)
     return unless prefix_match
 
     # Needs to get updated when Projects can share a field_slip_prefix
     candidate = Project.find_by(field_slip_prefix: prefix_match[1])
-    self.project = candidate if candidate&.can_add_field_slip(User.current)
+    self.project = candidate if candidate&.can_add_field_slip(@current_user)
   end
 
   def project=(project)
     return unless project != self.project
 
-    self[:project_id] = if project&.can_add_field_slip(User.current)
+    self[:project_id] = if project&.can_add_field_slip(@current_user)
                           project.id
                         end
   end
@@ -48,7 +61,7 @@ class FieldSlip < AbstractModel
 
   def find_projects
     result = Project.includes(:project_members).where(
-      project_members: { user: User.current }
+      project_members: { user: @current_user }
     ).order(:title).pluck(:title, :id)
     if project && result.exclude?([project.title, project.id])
       result.unshift([project.title, project.id])
@@ -58,7 +71,7 @@ class FieldSlip < AbstractModel
 
   def notes_fields
     # Should we figure out a way to internationalize these tags?
-    [:"Odor/Taste", :Substrate, :Plants, :Habit, :Other].map do |field|
+    [:"Odor/Taste", :"Trees/Shrubs", :Substrate, :Habit, :Other].map do |field|
       NoteField.new(name: field, value: field_value(field))
     end
   end
@@ -89,7 +102,7 @@ class FieldSlip < AbstractModel
   end
 
   def users_last_location
-    user = User.current
+    user = @current_user
     return nil unless user
 
     field_slip = user.field_slips.where(project:).
@@ -99,9 +112,13 @@ class FieldSlip < AbstractModel
   end
 
   def collector
-    observation.collector if observation&.collector
+    return observation.collector if observation&.collector
 
-    "_user #{(user || User.current).login}_"
+    (user || @current_user).textile_name
+  end
+
+  def date
+    observation&.when || created_at
   end
 
   def field_slip_name
@@ -116,8 +133,8 @@ class FieldSlip < AbstractModel
     observation&.other_codes || ""
   end
 
-  def can_edit?
-    user == User.current ||
-      (project&.is_admin?(User.current) && project&.trusted_by?(user))
+  def can_edit?(current_user)
+    user == current_user ||
+      (project&.is_admin?(current_user) && project.trusted_by?(user))
   end
 end

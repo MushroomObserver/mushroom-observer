@@ -61,6 +61,29 @@ class HerbariaControllerTest < FunctionalTestCase
     )
   end
 
+  def test_show_mcp_db
+    herbarium = nybg
+    assert(herbarium.mcp_searchable?,
+           "Test needs a herbarium serachble via MyCoPortal")
+
+    login("mary")
+    get(:show, params: { id: herbarium.id })
+
+    assert_select(
+      "#mcp_number",
+      { text: /#{:herbarium_mcp_db.l}:\s+#{herbarium.mcp_collid}/ }
+    )
+  end
+
+  def test_show_no_mcp_db
+    herbarium = dicks_personal
+
+    login("mary")
+    get(:show, params: { id: herbarium.id })
+
+    assert_select("#mcp_number", false)
+  end
+
   def test_show_destroy_buttons_presence
     herbarium = nybg
     assert(herbarium.curator?(roy))
@@ -83,7 +106,7 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   def test_show_next
-    query = Query.lookup_and_save(:Herbarium, :all)
+    query = Query.lookup_and_save(:Herbarium)
     assert_operator(query.num_results, :>, 1)
     number1 = query.results[0]
     number2 = query.results[1]
@@ -95,7 +118,7 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   def test_show_prev
-    query = Query.lookup_and_save(:Herbarium, :all)
+    query = Query.lookup_and_save(:Herbarium)
     assert_operator(query.num_results, :>, 1)
     number1 = query.results[0]
     number2 = query.results[1]
@@ -108,11 +131,12 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_index
     set = [nybg, herbaria(:rolf_herbarium)]
-    query = Query.lookup_and_save(:Herbarium, :in_set, by: :name, ids: set)
+    query = Query.lookup_and_save(:Herbarium, order_by: :name, id_in_set: set)
     login("zero") # Does not own any herbarium in set
     get(:index, params: { q: query.record.id.alphabetize })
 
     assert_response(:success)
+    assert_displayed_title(:HERBARIA.l)
     assert_select(
       "a:match('href', ?)", %r{^#{herbaria_path}/(\d+)}, { count: set.size },
       "Filtered index should list the results of the latest Herbaria query"
@@ -121,11 +145,10 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_index_all
     login
-    get(:index, params: { flavor: :all })
+    get(:index)
 
     assert_response(:success)
-    assert_select("#title", { text: "#{:HERBARIA.l} by Name" },
-                  "index should display #{:HERBARIA.l} by Name")
+    assert_displayed_title(:HERBARIA.l)
     Herbarium.find_each do |herbarium|
       assert_select(
         "a[href *= '#{herbarium_path(herbarium)}']", true,
@@ -134,14 +157,8 @@ class HerbariaControllerTest < FunctionalTestCase
     end
   end
 
-  def test_index_by_code
-    by = "code"
-
-    login
-    get(:index, params: { by: by })
-
-    assert_response(:success)
-    assert_displayed_title("Fungaria by Code")
+  def test_index_with_non_default_sort
+    check_index_sorting
   end
 
   def test_index_all_merge_source_links_presence_rolf
@@ -169,7 +186,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_true(dicks_personal.can_edit?(dick)) # user's personal herbarium
 
     login("dick")
-    get(:index, params: { flavor: :all })
+    get(:index)
 
     assert_select("a[href^='#{edit_herbarium_path(nybg)}']", count: 0)
     assert_select("a[href^='#{edit_herbarium_path(fundis)}']", count: 1)
@@ -184,7 +201,7 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_index_all_merge_source_links_presence_admin
     make_admin("zero")
-    get(:index, params: { flavor: :all })
+    get(:index)
 
     assert_select("a[href^='#{edit_herbarium_path(nybg)}']", count: 1)
     assert_select("a[href^='#{edit_herbarium_path(fundis)}']", count: 1)
@@ -198,7 +215,7 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   def test_index_all_no_login
-    get(:index, params: { flavor: :all })
+    get(:index)
     assert_redirected_to(new_account_login_path)
     assert_select("a[href*=edit]", count: 0)
     assert_select("a[href^='herbaria_merge_path']", count: 0)
@@ -211,7 +228,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_false(dicks_personal.can_edit?(rolf)) # another user's hebarium
 
     login("rolf")
-    get(:index, params: { flavor: :all, merge: source.id })
+    get(:index, params: { merge: source.id })
 
     assert_select("form[action *= 'dest=#{source.id}']", count: 0)
     assert_select("form[action *= 'dest=#{nybg.id}']", count: 1)
@@ -226,7 +243,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_true(dicks_personal.can_edit?(dick)) # user's personal herbarium
 
     login("dick")
-    get(:index, params: { flavor: :all, merge: source.id })
+    get(:index, params: { merge: source.id })
     assert_select("form[action *= 'dest=#{source.id}']", count: 0)
     assert_select("form[action *= 'dest=#{nybg.id}']", count: 1)
     assert_select("form[action *= 'dest=#{fundis.id}']", count: 1)
@@ -236,7 +253,7 @@ class HerbariaControllerTest < FunctionalTestCase
   def test_index_all_merge_target_buttons_presence_admin
     source = field_museum
     make_admin("zero")
-    get(:index, params: { flavor: :all, merge: source.id })
+    get(:index, params: { merge: source.id })
 
     assert_select("form[action *= 'dest=#{source.id}']", count: 0)
     assert_select("form[action *= 'dest=#{nybg.id}']", count: 1)
@@ -246,7 +263,7 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_index_all_merge_target_buttons_presence_no_login
     source = field_museum
-    get(:index, params: { flavor: :all, merge: source.id })
+    get(:index, params: { merge: source.id })
 
     assert_redirected_to(new_account_login_path)
     assert_select("a[href*=edit]", count: 0)
@@ -255,17 +272,18 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_index_nonpersonal
     login
-    get(:index, params: { flavor: :nonpersonal })
+    get(:index, params: { nonpersonal: true })
 
-    assert_displayed_title(:query_title_nonpersonal.l)
-    Herbarium.where(personal_user_id: nil).each do |herbarium|
+    assert_displayed_title(:HERBARIA.l)
+    assert_displayed_filters(:query_nonpersonal.l)
+    Herbarium.where(personal_user_id: nil).find_each do |herbarium|
       assert_select(
         "a[href ^= '#{herbarium_path(herbarium)}']", true,
         "List of Institutional Fungaria is missing a link to " \
         "#{herbarium.format_name})"
       )
     end
-    Herbarium.where.not(personal_user_id: nil).each do |herbarium|
+    Herbarium.where.not(personal_user_id: nil).find_each do |herbarium|
       assert_select(
         "a[href ^= '#{herbarium_path(herbarium)}']", false,
         "List of Institutional Fungaria should not have a link to " \
@@ -274,23 +292,22 @@ class HerbariaControllerTest < FunctionalTestCase
     end
   end
 
-  def test_index_pattern_text
+  def test_index_pattern_text_personal
     pattern = "Personal Herbarium"
 
     login
     get(:index, params: { pattern: pattern })
 
-    assert_select("#title").text.start_with?(
-      :query_title_pattern_search.l(types: :HERBARIA.l, pattern: pattern)
-    )
-    Herbarium.where.not(personal_user_id: nil).each do |herbarium|
+    assert_displayed_title(:HERBARIA.l)
+    assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
+    Herbarium.where.not(personal_user_id: nil).find_each do |herbarium|
       assert_select(
         "a[href ^= '#{herbarium_path(herbarium)}']", true,
         "Search for #{pattern} is missing a link to " \
         "#{herbarium.format_name})"
       )
     end
-    Herbarium.where(personal_user_id: nil).each do |herbarium|
+    Herbarium.where(personal_user_id: nil).find_each do |herbarium|
       assert_select(
         "a[href ^= '#{herbarium_path(herbarium)}']", false,
         "Search for #{pattern} should not have a link to " \
@@ -311,18 +328,12 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_index_reverse_records
     login
-    get(:index, params: { by: "reverse_records" })
+    by = "reverse_records"
+    get(:index, params: { by: })
 
     assert_response(:success)
-    assert_select(
-      "#title",
-      { text: "#{:HERBARIA.l} #{:by.l} #{:sort_by_records.l}" },
-      "Displayed title should be #{:HERBARIA.l} #{:by.l} #{:sort_by_records.l}"
-    )
-    assert_select(
-      "#sorts", true,
-      "Fungaria by #Records Reversed is missing sort tabs"
-    )
+    assert_displayed_title(:HERBARIA.l)
+    assert_sorted_by(by)
     Herbarium.find_each do |herbarium|
       assert_select(
         "a[href *= '#{herbarium_path(herbarium)}']", true,

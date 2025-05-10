@@ -127,6 +127,24 @@ MushroomObserver::Application.configure do
   config.keep_these_image_sizes_local =
     IMAGE_CONFIG_DATA.config["keep_these_image_sizes_local"]
 
+  # We transfer originals to cloud archive storage right away, but we keep
+  # them on the image server for as long as we can, deleting them in batches.
+  # All images with `id >= next_image_id_to_go_to_cloud` are still being served
+  # from the image server. NOTE: this number must be kept in sync with the
+  # nginx configuration!
+  config.next_image_id_to_go_to_cloud = 0
+
+  # This is where original images from cloud storage are temporarily cached.
+  config.local_original_image_cache_path = "#{config.root}/public/orig_cache"
+  config.local_original_image_cache_url = "/orig_cache"
+
+  # Maximum number of original images per day a user is allowed to download.
+  config.original_image_user_quota = 100
+  config.original_image_site_quota = 10_000
+
+  # Cloud storage bucket name.
+  config.image_bucket_name = "mo-image-archive-bucket"
+
   # Location of script used to process and transfer images.
   # (Set to nil to have it do nothing.)
   config.process_image_command =
@@ -165,11 +183,19 @@ MushroomObserver::Application.configure do
   # Default number of items for an RSS page
   config.default_layout_count = 12
 
-  # Max number of results Query will put in "IN (...)" clauses.
-  config.query_max_array = 1000
+  # Max number of results Query will put in "IN (...)" clauses.  This
+  # was originally 1000, but searching for "Russula" or "Amanita" now
+  # exceeds that limit (Dec. 2024) and is causing issues.  Raising it
+  # to 10,000 allows those cases to work.  Tested a simple query with
+  # 11,000 ids on the current version of MySQL which completed in
+  # around 0.1 seconds.
+  config.query_max_array = 10_000
 
   # Filter(s) to apply to all Querys
   config.default_content_filter = nil
+
+  # Maximum number of Observations that can be downloaded in a single request
+  config.max_downloads = 5000
 
   # List of User ids of users that can see the image recognition
   # "Suggest Names" button on the observation page.

@@ -1,15 +1,13 @@
 # frozen_string_literal: true
 
 Rails.autoloaders.main.inflector.inflect(
-  { "mo_paginator" => "MOPaginator",
-    "gmap" => "GMap",
+  { "gmap" => "GMap",
     "verify_api_key_email" => "VerifyAPIKeyMailer" }
 )
 
 Rails.autoloaders.main.ignore(
   "app/assets",
   "app/classes/api",
-  "app/extensions",
   "app/javascripts",
   "app/views"
 )

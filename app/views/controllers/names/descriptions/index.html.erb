@@ -1,19 +1,20 @@
 <%
 add_index_title(@query)
-add_tab_set(name_description_index_tabs(query: @query))
+add_context_nav(name_description_index_tabs(query: @query))
 add_sorter(@query, descriptions_index_sorts)
 flash_error(@error) if @error && @objects.empty?
 %>
 
-<%= paginate_block(@pages) do %>
+<%= pagination_nav(@pagination_data) do %>
   <% if @objects.any? %>
     <table class="table table-striped">
       <% (@objects || []).each do |desc| %>
         <tr>
           <td><%= link_with_query(desc.format_name.t,
-                                  name_description_path(desc.id)) %><td>
-        </tr>
+                                  name_description_path(desc.id)) %>
+            <td>
+            </tr>
+          <% end %>
+        </table>
       <% end %>
-    </table>
-  <% end %>
-<% end %>
+    <% end %>

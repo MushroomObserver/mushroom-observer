@@ -58,6 +58,29 @@ class CollectionNumber < AbstractModel
   before_update :log_update
   before_destroy :log_destroy
 
+  scope :order_by_default,
+        -> { order_by(::Query::CollectionNumbers.default_order) }
+
+  scope :collectors,
+        ->(names) { exact_match_condition(CollectionNumber[:name], names) }
+  scope :collector_has,
+        ->(str) { search_columns(CollectionNumber[:name], str) }
+
+  scope :numbers,
+        ->(nums) { exact_match_condition(CollectionNumber[:number], nums) }
+  scope :number_has,
+        ->(str) { search_columns(CollectionNumber[:number], str) }
+
+  scope :observations, lambda { |obs|
+    joins(:observation_collection_numbers).
+      where(observation_collection_numbers: { observation: obs })
+  }
+
+  scope :pattern, lambda { |phrase|
+    cols = (CollectionNumber[:name] + CollectionNumber[:number])
+    search_columns(cols, phrase)
+  }
+
   def format_name
     "#{name} #{number}"
   end

@@ -1,25 +1,23 @@
 # frozen_string_literal: true
 
 module PatternSearch
-  # Base class for PatternSearch; handles everything but build_query
+  # Base class for PatternSearch; handles everything plus build_query
   class Base
-    attr_accessor :errors, :parser, :flavor, :args, :query
+    attr_accessor :errors, :parser, :args, :query
 
     def initialize(string)
       self.errors = []
       self.parser = PatternSearch::Parser.new(string)
       build_query
-      self.query = Query.lookup(model.name.to_sym, flavor, args)
+      self.query = Query.lookup(model.name.to_sym, args)
     rescue Error => e
       errors << e
     end
 
     def build_query
-      self.flavor = :all
-      self.args   = {}
+      self.args = {}
       parser.terms.each do |term|
         if term.var == :pattern
-          self.flavor = :pattern_search
           args[:pattern] = term.parse_pattern
         elsif (param = lookup_param(term.var))
           query_param, parse_method = param
@@ -32,6 +30,23 @@ module PatternSearch
           )
         end
       end
+    end
+
+    def put_names_and_modifiers_in_hash
+      modifiers = [:include_subtaxa, :include_synonyms,
+                   :include_immediate_subtaxa, :exclude_original_names,
+                   :include_all_name_proposals, :exclude_consensus]
+      lookup, include_subtaxa, include_synonyms,
+      include_immediate_subtaxa, exclude_original_names,
+      include_all_name_proposals, exclude_consensus =
+        args.values_at(:names, *modifiers)
+      names = { lookup:, include_subtaxa:, include_synonyms:,
+                include_immediate_subtaxa:, exclude_original_names:,
+                include_all_name_proposals:, exclude_consensus: }
+      return if names.compact.blank?
+
+      args[:names] = names.compact
+      args.except!(*modifiers)
     end
 
     def help_message

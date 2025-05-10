@@ -103,7 +103,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login
     get(:index)
 
-    assert_displayed_title("Species Lists by Date")
+    assert_displayed_title(:SPECIES_LISTS.l)
     assert_select(
       "#content a:match('href', ?)", %r{^#{species_lists_path}/\d+},
       { count: SpeciesList.count },
@@ -111,42 +111,23 @@ class SpeciesListsControllerTest < FunctionalTestCase
     )
   end
 
+  # These tests for titles were never returning the actual sorted results!
+  # The params "created" and "modified" do not even work.
+  # The incorrect query (often blank) simply got the "right" title.
   def test_index_sorted_by_user
+    login
+
     by = "user"
-
-    login
     get(:index, params: { by: by })
 
-    assert_displayed_title("Species Lists by #{by.capitalize}")
+    assert_equal(SpeciesList.order_by(:user).map(&:user_id),
+                 assigns(:objects).map(&:user_id))
+    assert_displayed_title(:SPECIES_LISTS.l)
+    assert_sorted_by(by)
   end
 
-  def test_index_sorted_by_time_modifed
-    by = "modified"
-
-    login
-    get(:index, params: { by: by })
-
-    assert_response(:success)
-    assert_displayed_title("Species Lists by Time Last Modified")
-  end
-
-  def test_index_sorted_by_date_created
-    by = "created"
-
-    login
-    get(:index, params: { by: by })
-
-    assert_response(:success)
-    assert_displayed_title("Species Lists by Date Created")
-  end
-
-  def test_index_sorted_by_title
-    by = "title"
-
-    login
-    get(:index, params: { by: by })
-
-    assert_displayed_title("Species Lists by Title")
+  def test_index_with_non_default_sort
+    check_index_sorting
   end
 
   def test_index_with_id_and_sorted_by_title
@@ -156,7 +137,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login
     get(:index, params: { id: list.id, by: by })
 
-    assert_displayed_title("Species Lists by Title")
+    assert_displayed_title(:SPECIES_LISTS.l)
+    assert_sorted_by(by)
   end
 
   def test_index_with_id
@@ -165,7 +147,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login
     get(:index, params: { id: list.id })
 
-    assert_displayed_title("Species Lists by Date")
+    assert_displayed_title(:SPECIES_LISTS.l)
+    assert_sorted_by("date")
   end
 
   def test_index_pattern_multiple_hits
@@ -175,7 +158,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
     get(:index, params: { pattern: pattern })
 
     assert_response(:success)
-    assert_displayed_title("Species Lists Matching ‘#{pattern}’")
+    assert_displayed_title(:SPECIES_LISTS.l)
+    assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
     assert_select(
       "#content a:match('href', ?)", %r{^#{species_lists_path}/\d+},
       { count: SpeciesList.where(SpeciesList[:title] =~ pattern).count },
@@ -212,7 +196,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_user: user })
 
-    assert_displayed_title("Species Lists created by #{user.name}")
+    assert_displayed_title(:SPECIES_LISTS.l)
+    assert_displayed_filters("#{:query_by_users.l}: #{user.name}")
   end
 
   def test_index_by_user_with_no_species_lists
@@ -222,7 +207,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     get(:index, params: { by_user: user })
 
     assert_response(:success)
-    assert_displayed_title("")
+    assert_displayed_title(:SPECIES_LISTS.l)
   end
 
   def test_index_for_user_who_does_not_exist
@@ -243,19 +228,20 @@ class SpeciesListsControllerTest < FunctionalTestCase
     project = projects(:bolete_project)
 
     login
-    get(:index, params: { for_project: project.id })
+    get(:index, params: { project: project.id })
 
-    assert_displayed_title("Species Lists for #{project.title}")
+    assert_displayed_title(:SPECIES_LISTS.l)
+    assert_displayed_filters("#{:query_projects.l}: #{project.title}")
   end
 
   def test_index_for_project_with_no_lists
     project = projects(:empty_project)
 
     login
-    get(:index, params: { for_project: project.id })
+    get(:index, params: { project: project.id })
 
     assert_response(:success)
-    assert_displayed_title("")
+    assert_displayed_title(:SPECIES_LISTS.l)
     assert_flash_text(:runtime_no_matches.l(types: :species_lists))
   end
 
@@ -263,7 +249,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     project = observations(:minimal_unknown_obs)
 
     login
-    get(:index, params: { for_project: project.id })
+    get(:index, params: { project: project.id })
 
     assert_response(:redirect)
     assert_redirected_to(projects_path)
@@ -369,7 +355,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
   def test_show_flow
     login
-    query = Query.lookup_and_save(:SpeciesList, :all, by: "reverse_user")
+    query = Query.lookup_and_save(:SpeciesList, order_by: "reverse_user")
     query_params = @controller.query_params(query)
     get(:index, params: query_params)
     assert_template(:index)
@@ -1187,10 +1173,10 @@ class SpeciesListsControllerTest < FunctionalTestCase
         "Psalliota",
         "Chlorophyllum Author",
         "Lepiota Author",
-        '"One"',
-        '"Two"',
-        '"Three"',
-        'Agaricus "blah"'
+        "Gen. 'One'",
+        "Gen. 'Two'",
+        "Gen. 'Three'",
+        "Agaricus sp. 'blah'"
       ].sort,
       assigns(:species_list).observations.map { |x| x.name.search_name }.sort
     )
@@ -1199,10 +1185,10 @@ class SpeciesListsControllerTest < FunctionalTestCase
       "Fungi",
       "Agaricus sp",
       "Psalliota sp.",
-      '"One"',
-      '"Two" sp',
-      '"Three" sp.',
-      'Agaricus "blah"',
+      "'One'",
+      "'Two' sp",
+      "'Three' sp.",
+      "Agaricus 'blah'",
       "Chlorophyllum Author",
       "Lepiota sp Author",
       "Lepiota sp. Author"
@@ -1220,10 +1206,10 @@ class SpeciesListsControllerTest < FunctionalTestCase
         "Chlorophyllum Author",
         "Lepiota Author",
         "Lepiota Author",
-        '"One"',
-        '"Two"',
-        '"Three"',
-        'Agaricus "blah"'
+        "Gen. 'One'",
+        "Gen. 'Two'",
+        "Gen. 'Three'",
+        "Agaricus sp. 'blah'"
       ].sort,
       assigns(:species_list).observations.map { |x| x.name.search_name }.sort
     )
@@ -1249,13 +1235,13 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     login("rolf")
     get(:new)
-    assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
-    post(:create,
-         params: { project: { "id_#{@proj1.id}" => "0" } })
     assert_project_checks(@proj1.id => :unchecked, @proj2.id => :no_field)
+    post(:create,
+         params: { project: { "id_#{@proj1.id}" => "1" } })
+    assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
 
     # should have different default if recently create list attached to project
-    obs = Observation.create!
+    obs = Observation.create!(user: rolf)
     @proj1.add_observation(obs)
     get(:new)
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
@@ -1384,10 +1370,10 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login("rolf")
     spl1 = species_lists(:unknown_species_list)
     spl2 = species_lists(:one_genus_three_species_list)
-    query1 = Query.lookup_and_save(:Observation, :in_species_list,
-                                   species_list: spl1.id, by: :name)
-    query2 = Query.lookup_and_save(:Observation, :in_species_list,
-                                   species_list: spl2.id, by: :name)
+    query1 = Query.lookup_and_save(:Observation,
+                                   species_lists: spl1.id, order_by: :name)
+    query2 = Query.lookup_and_save(:Observation,
+                                   species_lists: spl2.id, order_by: :name)
 
     # make sure the "Set Source" link is on the page somewhere
     get(:show, params: { id: spl1.id })

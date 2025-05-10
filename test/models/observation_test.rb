@@ -165,14 +165,14 @@ class ObservationTest < UnitTestCase
 
   def test_minimal_map_observation
     obs = observations(:minimal_unknown_obs)
-
-    min_map = Mappable::MinimalObservation.new(obs.id, obs.lat, obs.lng,
-                                               obs.location.id)
+    atts = obs.attributes.symbolize_keys.slice(:id, :lat, :lng, :location_id)
+    min_map = Mappable::MinimalObservation.new(atts)
     assert_objs_equal(locations(:burbank), min_map.location)
     assert_equal(locations(:burbank).id, min_map.location_id)
 
-    min_map = Mappable::MinimalObservation.new(obs.id, obs.lat, obs.lng,
-                                               obs.location)
+    # try passing the instance
+    atts = atts.except(:location_id).merge(location: obs.location)
+    min_map = Mappable::MinimalObservation.new(atts)
     assert_objs_equal(locations(:burbank), min_map.location)
     assert_equal(locations(:burbank).id, min_map.location_id)
 
@@ -230,7 +230,8 @@ class ObservationTest < UnitTestCase
     new_naming = Naming.create(
       observation: obs,
       name: names(:agaricus_campestris),
-      vote_cache: 0
+      vote_cache: 0,
+      user: rolf
     )
     assert_equal(1, QueuedEmail.count)
     assert_equal(names(:coprinus_comatus), obs.reload.name)
@@ -261,7 +262,8 @@ class ObservationTest < UnitTestCase
     new_naming = Naming.create(
       observation: obs,
       name: names(:peltigera),
-      vote_cache: 0
+      vote_cache: 0,
+      user: dick
     )
     assert_equal(2, QueuedEmail.count)
     assert_equal(names(:agaricus_campestris), obs.reload.name)
@@ -316,7 +318,8 @@ class ObservationTest < UnitTestCase
     new_naming = Naming.create(
       observation: obs.reload,
       name: names(:agaricus_campestris),
-      vote_cache: 0
+      vote_cache: 0,
+      user: mary
     )
     assert_equal(2, QueuedEmail.count)
     assert_email(1,
@@ -330,16 +333,16 @@ class ObservationTest < UnitTestCase
     rolf.email_observations_naming = false
     rolf.email_observations_consensus = true
     assert_save(rolf)
-    # (Actually, Mary already gave this her highest possible vote,
-    # so think of this as Mary changing Rolf's vote. :)
-    User.current = mary
-    change_vote(obs, namings(:coprinus_comatus_other_naming), 3, rolf)
-    assert_equal(3,
-                 votes(:coprinus_comatus_other_naming_rolf_vote).reload.value)
+
+    # Gang up on Rolf
+    change_vote(obs, new_naming, 3, dick)
+    change_vote(obs, new_naming, 3, katrina)
+    change_vote(obs, namings(:coprinus_comatus_naming), -3, katrina)
+
     assert_equal(3, QueuedEmail.count)
     assert_email(2,
                  flavor: "QueuedEmail::ConsensusChange",
-                 from: mary,
+                 from: katrina,
                  to: rolf,
                  observation: obs.id,
                  old_name: names(:coprinus_comatus).id,
@@ -416,7 +419,8 @@ class ObservationTest < UnitTestCase
     new_naming = Naming.create(
       observation: observations(:coprinus_comatus_obs),
       name: names(:agaricus_campestris),
-      vote_cache: 0
+      vote_cache: 0,
+      user: mary
     )
     assert_equal(2, QueuedEmail.count)
     assert_email(1,
@@ -427,9 +431,7 @@ class ObservationTest < UnitTestCase
                  naming: new_naming.id)
 
     # Watcher is notified if consensus changed.
-    # (Actually, Mary already gave this her highest possible vote,
-    # so think of this as Mary changing Rolf's vote. :)
-    User.current = mary
+    User.current = rolf
     change_vote(obs, namings(:coprinus_comatus_other_naming), 3, rolf)
     assert_equal(3,
                  votes(:coprinus_comatus_other_naming_rolf_vote).reload.value)
@@ -437,7 +439,7 @@ class ObservationTest < UnitTestCase
     assert_equal(3, QueuedEmail.count)
     assert_email(2,
                  flavor: "QueuedEmail::ConsensusChange",
-                 from: mary,
+                 from: rolf,
                  to: dick,
                  observation: observations(:coprinus_comatus_obs).id,
                  old_name: names(:coprinus_comatus).id,
@@ -540,7 +542,7 @@ class ObservationTest < UnitTestCase
                  from: rolf,
                  to: katrina,
                  observation: 0,
-                 note: "**__Coprinus comatus__** (O.F. Müll.) Pers. " \
+                 note: "**__Coprinus__** **__comatus__** (O.F. Müll.) Pers. " \
                        "(#{observations(:coprinus_comatus_obs).id})")
     QueuedEmail.queue = false
   end
@@ -556,25 +558,29 @@ class ObservationTest < UnitTestCase
       when: Time.zone.today,
       where: "anywhere",
       name_id: @fungi.id,
-      needs_naming: true
+      needs_naming: true,
+      user: rolf
     )
 
     User.current = rolf
     namg1 = Naming.create!(
       observation_id: obs.id,
-      name_id: @name1.id
+      name_id: @name1.id,
+      user: rolf
     )
 
     User.current = mary
     namg2 = Naming.create!(
       observation_id: obs.id,
-      name_id: @name2.id
+      name_id: @name2.id,
+      user: mary
     )
 
     User.current = dick
     namg3 = Naming.create!(
       observation_id: obs.id,
-      name_id: @name3.id
+      name_id: @name3.id,
+      user: dick
     )
 
     namings = [namg1, namg2, namg3]
@@ -792,7 +798,7 @@ class ObservationTest < UnitTestCase
     no_votes_naming = Naming.new(
       observation_id: obs.id,
       name_id: names(:fungi).id,
-      user_id: users(:rolf).id
+      user_id: rolf.id
     )
     no_votes_naming.save!
     votes = "#{obs.namings.first.id} Agaricus campestris L.: " \
@@ -905,7 +911,7 @@ class ObservationTest < UnitTestCase
     # with order scrambled in the Observation
     obs   = observations(:template_and_orphaned_notes_scrambled_obs)
     parts = ["Cap", "Nearby trees", "odor", "orphaned caption 1",
-             "orphaned caption 2", "Other"]
+             "orphaned caption 2", "Collector", "Other"]
     assert_equal(parts, obs.form_notes_parts(obs.user))
   end
 
@@ -921,7 +927,7 @@ class ObservationTest < UnitTestCase
   def test_notes_nil
     User.current = mary
     obs = Observation.create!(name_id: names(:fungi).id, when_str: "2020-07-05",
-                              notes: nil)
+                              notes: nil, user: mary)
 
     assert_nothing_raised do
       obs.notes[:Collector]
@@ -936,7 +942,8 @@ class ObservationTest < UnitTestCase
   def test_notes_empty_string
     User.current = mary
     obs = Observation.create!(name_id: names(:fungi).id,
-                              when_str: "2020-07-05", notes: "")
+                              when_str: "2020-07-05", notes: "",
+                              user: mary)
     assert_nothing_raised do
       obs.notes[:Collector]
     rescue StandardError => e
@@ -983,7 +990,7 @@ class ObservationTest < UnitTestCase
                  "Pasadena, California, USA (34.1622°N 118.3521°W)")
   end
 
-  def test_place_name_and_coordinates_without_values
+  def test_place_name_and_coordinates_has_no_values
     obs = observations(:unknown_with_no_naming)
     assert_equal(obs.place_name_and_coordinates, "Who knows where")
   end
@@ -1000,7 +1007,8 @@ class ObservationTest < UnitTestCase
     User.current = mary
     fungi = names(:fungi)
     exception = assert_raise(ActiveRecord::RecordInvalid) do
-      Observation.create!(name_id: fungi.id, when: Time.zone.today + 2.days)
+      Observation.create!(name_id: fungi.id, when: Time.zone.today + 2.days,
+                          user: mary)
     end
     assert_match(:validate_future_time.t, exception.message)
   end
@@ -1010,7 +1018,8 @@ class ObservationTest < UnitTestCase
     fungi = names(:fungi)
     exception = assert_raise(ActiveRecord::RecordInvalid) do
       # Note that 'when' gets automagically converted to Date
-      Observation.create!(name_id: fungi.id, when: 2.days.from_now)
+      Observation.create!(name_id: fungi.id, when: 2.days.from_now,
+                          user: mary)
     end
     assert_match(:validate_future_time.t, exception.message)
   end
@@ -1019,7 +1028,8 @@ class ObservationTest < UnitTestCase
     User.current = mary
     fungi = names(:fungi)
     exception = assert_raise(ActiveRecord::RecordInvalid) do
-      Observation.create!(name_id: fungi.id, when: Date.new(1499, 1, 1))
+      Observation.create!(name_id: fungi.id, when: Date.new(1499, 1, 1),
+                          user: mary)
     end
     assert_match(:validate_invalid_year.t, exception.message)
   end
@@ -1028,7 +1038,8 @@ class ObservationTest < UnitTestCase
     User.current = mary
     fungi = names(:fungi)
     exception = assert_raise(ActiveRecord::RecordInvalid) do
-      Observation.create!(name_id: fungi.id, where: "X" * 1025)
+      Observation.create!(name_id: fungi.id, where: "X" * 1025,
+                          user: mary)
     end
     assert_match(:validate_observation_where_too_long.t, exception.message)
   end
@@ -1037,7 +1048,7 @@ class ObservationTest < UnitTestCase
     User.current = mary
     fungi = names(:fungi)
     exception = assert_raise(ActiveRecord::RecordInvalid) do
-      Observation.create!(name_id: fungi.id, lng: 90.0)
+      Observation.create!(name_id: fungi.id, lng: 90.0, user: mary)
     end
     assert_match(:runtime_lat_long_error.t, exception.message)
   end
@@ -1046,7 +1057,7 @@ class ObservationTest < UnitTestCase
     User.current = mary
     fungi = names(:fungi)
     exception = assert_raise(ActiveRecord::RecordInvalid) do
-      Observation.create!(name_id: fungi.id, lat: 90.0)
+      Observation.create!(name_id: fungi.id, lat: 90.0, user: mary)
     end
     assert_match(:runtime_lat_long_error.t, exception.message)
   end
@@ -1056,7 +1067,8 @@ class ObservationTest < UnitTestCase
     fungi = names(:fungi)
     # Currently all strings are parsable as altitude
     assert_nothing_raised do
-      Observation.create!(name_id: fungi.id, alt: "This should be bad")
+      Observation.create!(name_id: fungi.id, alt: "This should be bad",
+                          user: mary)
     end
   end
 
@@ -1064,7 +1076,8 @@ class ObservationTest < UnitTestCase
     User.current = mary
     fungi = names(:fungi)
     assert_nothing_raised do
-      Observation.create!(name_id: fungi.id, when_str: "2020-07-05")
+      Observation.create!(name_id: fungi.id, when_str: "2020-07-05",
+                          user: mary)
     end
   end
 
@@ -1072,7 +1085,8 @@ class ObservationTest < UnitTestCase
     User.current = mary
     fungi = names(:fungi)
     exception = assert_raise(ActiveRecord::RecordInvalid) do
-      Observation.create!(name_id: fungi.id, when_str: "0000-00-00")
+      Observation.create!(name_id: fungi.id, when_str: "0000-00-00",
+                          user: mary)
     end
     assert_match(:runtime_date_invalid.t, exception.message)
   end
@@ -1081,7 +1095,8 @@ class ObservationTest < UnitTestCase
     User.current = mary
     fungi = names(:fungi)
     exception = assert_raise(ActiveRecord::RecordInvalid) do
-      Observation.create!(name_id: fungi.id, when_str: "This is not a date")
+      Observation.create!(name_id: fungi.id, when_str: "This is not a date",
+                          user: mary)
     end
     assert_match(:runtime_date_should_be_yyyymmdd.t, exception.message)
   end
@@ -1133,8 +1148,8 @@ class ObservationTest < UnitTestCase
   #  Scopes: Tests of scopes not completely covered elsewhere
   # ----------------------------------------------------------
 
-  def start_of_time
-    Date.jd(0).strftime("%Y-%m-%d")
+  def long_ago
+    (Time.zone.today - 400.years).strftime("%Y-%m-%d")
   end
 
   def a_century_from_now
@@ -1147,34 +1162,34 @@ class ObservationTest < UnitTestCase
 
   def test_scope_found_on
     obs = observations(:minimal_unknown_obs)
-    assert_includes(Observation.found_on(obs.when), obs)
+    assert_includes(Observation.found_on(obs.when.to_s), obs)
     assert_empty(Observation.found_on(two_centuries_from_now))
   end
 
   def test_scope_found_after
     assert_equal(Observation.count,
-                 Observation.found_after(start_of_time).count)
+                 Observation.found_after(long_ago).count)
     assert_empty(Observation.found_after(two_centuries_from_now))
   end
 
   def test_scope_found_before
     assert_equal(Observation.count,
                  Observation.found_before(two_centuries_from_now).count)
-    assert_empty(Observation.found_before(start_of_time))
+    assert_empty(Observation.found_before(long_ago))
   end
 
   def test_scope_found_between
     assert_equal(
       Observation.count,
-      Observation.found_between(start_of_time, two_centuries_from_now).count
+      Observation.found_between(long_ago, two_centuries_from_now).count
     )
     assert_empty(
-      Observation.found_between(two_centuries_from_now, start_of_time)
+      Observation.found_between(two_centuries_from_now, long_ago)
     )
   end
 
   def test_scope_with_vote_by_user
-    obs_with_vote_by_rolf = Observation.with_vote_by_user(users(:rolf))
+    obs_with_vote_by_rolf = Observation.with_vote_by_user(rolf)
     assert_includes(obs_with_vote_by_rolf,
                     observations(:coprinus_comatus_obs))
     assert_includes(Observation.with_vote_by_user(users(:mary)),
@@ -1183,74 +1198,80 @@ class ObservationTest < UnitTestCase
                         observations(:peltigera_obs))
   end
 
+  def test_scope_without_vote_by_user
+    obs = Observation.without_vote_by_user(rolf)
+    assert_not_includes(obs, observations(:coprinus_comatus_obs))
+    assert_includes(obs, observations(:peltigera_obs))
+  end
+
   # There are no observation views in the fixtures
   def test_scope_reviewed_by_user
     ObservationView.create({ observation_id: observations(:fungi_obs).id,
-                             user_id: users(:rolf).id,
+                             user_id: rolf.id,
                              reviewed: true })
-    assert_includes(Observation.reviewed_by_user(users(:rolf)),
+    assert_includes(Observation.reviewed_by_user(rolf),
                     observations(:fungi_obs))
-    assert_not_includes(Observation.reviewed_by_user(users(:rolf)),
+    assert_not_includes(Observation.reviewed_by_user(rolf),
+                        observations(:peltigera_obs))
+  end
+
+  def test_scope_needs_naming_generally
+    assert_includes(Observation.needs_naming_generally,
+                    observations(:fungi_obs))
+    assert_not_includes(Observation.needs_naming_generally,
                         observations(:peltigera_obs))
   end
 
   def test_scope_needs_naming
-    assert_includes(Observation.needs_naming,
-                    observations(:fungi_obs))
-    assert_not_includes(Observation.needs_naming,
-                        observations(:peltigera_obs))
-  end
-
-  def test_scope_needs_naming_and_not_reviewed_by_user
     assert_includes(
-      Observation.needs_naming_and_not_reviewed_by_user(users(:rolf)),
+      Observation.needs_naming(rolf),
       observations(:fungi_obs)
     )
     assert_not_includes(
-      Observation.needs_naming_and_not_reviewed_by_user(users(:rolf)),
+      Observation.needs_naming(rolf),
       observations(:peltigera_obs)
     )
   end
 
-  def test_scope_of_name
-    assert_includes(Observation.of_name(names(:peltigera).id),
+  def test_scope_names
+    assert_includes(Observation.names(lookup: names(:peltigera).id),
                     observations(:peltigera_obs))
-    assert_not_includes(Observation.of_name(names(:fungi)),
+    assert_not_includes(Observation.names(lookup: names(:fungi)),
                         observations(:peltigera_obs))
   end
 
-  def test_scope_in_clade
-    assert_includes(Observation.in_clade("Agaricales"),
+  def test_scope_clade
+    assert_includes(Observation.clade("Agaricales"),
                     observations(:coprinus_comatus_obs))
-    assert_not_includes(Observation.in_clade("Agaricales"),
+    assert_not_includes(Observation.clade("Agaricales"),
                         observations(:peltigera_obs))
     # test the scope can handle a genus
-    assert_includes(Observation.in_clade("Tremella"),
+    assert_includes(Observation.clade("Tremella"),
                     observations(:owner_only_favorite_ne_consensus))
-    assert_includes(Observation.in_clade("Tremella"),
+    assert_includes(Observation.clade("Tremella"),
                     observations(:sortable_obs_users_first_obs))
-    assert_includes(Observation.in_clade("Tremella"),
+    assert_includes(Observation.clade("Tremella"),
                     observations(:sortable_obs_users_second_obs))
-    assert_not_includes(Observation.in_clade("Tremella"),
+    assert_not_includes(Observation.clade("Tremella"),
                         observations(:chlorophyllum_rachodes_obs))
     # test the scope can handle a name instance
-    assert_includes(Observation.in_clade(names(:coprinus)),
+    assert_includes(Observation.clade(names(:coprinus)),
                     observations(:coprinus_comatus_obs))
   end
 
-  def test_scope_by_user
-    assert_includes(Observation.by_user(users(:mary)),
+  def test_scope_by_users
+    assert_includes(Observation.by_users(users(:mary)),
                     observations(:minimal_unknown_obs))
-    assert_not_includes(Observation.by_user(users(:mary)),
+    assert_not_includes(Observation.by_users(users(:mary)),
                         observations(:coprinus_comatus_obs))
-    assert_empty(Observation.by_user(users(:zero_user)))
+    assert_empty(Observation.by_users(users(:zero_user)))
   end
 
   def test_scope_of_name_of_look_alikes
     # Prove that Observations of look-alikes of <Name> include
     # Observations of other Names proposed for Observations of <Name>
-    # NOTE: `of_look_alikes` is (currently) asymmetric / noncommunative. I.e.,
-    # Observations of look-alikes of <Name> does NOT necessarily include
+    # NOTE: `exclude_consensus` is (currently) asymmetric / noncommunative.
+    # I.e., Observations of look-alikes of <Name> does NOT necessarily include
     # Observations of other Names suggested for Observations of <Name>
 
     # Ensure fixtures aren't broken before testing Observations of look-alikes
@@ -1265,55 +1286,149 @@ class ObservationTest < UnitTestCase
                  tremella_obs,
                  "Test needs different fixture")
     assert_includes(
-      Observation.of_name(names(:tremella_mesenterica), of_look_alikes: true),
+      Observation.names(lookup: names(:tremella_mesenterica),
+                        exclude_consensus: true),
       tremella_obs,
       "Observations of look-alikes of <Name> should include " \
       "Observations of other Names for which <Name> was proposed"
     )
   end
 
+  def test_scope_has_location
+    loc = Observation.where(location_id: locations(:nybg_location)).first
+    no_loc = Observation.where(location_id: nil).first
+    assert_includes(
+      Observation.has_location, loc,
+      "Observations has_location should include obs at defined location."
+    )
+    assert_not_includes(
+      Observation.has_location, no_loc,
+      "Observations has_location should not include obs with no location."
+    )
+    assert_includes(
+      Observation.has_location(false), no_loc,
+      "Observations has_location(false) should include obs with no location."
+    )
+    assert_not_includes(
+      Observation.has_location(false), loc,
+      "Observations has_location(false) should not include obs with location."
+    )
+  end
+
+  def test_scope_has_geolocation
+    geoloc = Observation.where.not(lat: nil).first
+    no_geoloc = Observation.where(lat: nil).first
+    assert_includes(
+      Observation.has_geolocation, geoloc,
+      "Observations has_geolocation should include obs with latitude."
+    )
+    assert_not_includes(
+      Observation.has_geolocation, no_geoloc,
+      "Observations has_geolocation should not include obs with no latitude."
+    )
+    assert_includes(
+      Observation.has_geolocation(false), no_geoloc,
+      "Observations has_geolocation(false) should include obs with no latitude."
+    )
+    assert_not_includes(
+      Observation.has_geolocation(false), geoloc,
+      "Observations has_geolocation(false) shouldn't include obs with latitude."
+    )
+  end
+
+  def test_scope_location_undefined
+    results = Observation.location_undefined
+    top_undefined = "Briceland, California, USA"
+    # results.count gives counts of each result
+    assert_equal(top_undefined, results.first.where)
+    assert_equal(
+      results.count.first[1],
+      Observation.where(where: top_undefined).has_location(false).count
+    )
+  end
+
+  def nybg
+    @nybg ||= locations(:nybg_location)
+  end
+
+  def nybg_box
+    @nybg_box ||= nybg.bounding_box
+  end
+
+  def cal
+    @cal ||= locations(:california)
+  end
+
+  def cal_box
+    @cal_box ||= cal.bounding_box
+  end
+
+  def wrangel
+    @wrangel ||= locations(:east_lt_west_location)
+  end
+
+  # { north: 71.588, south: 70.759, west: 178.648, east: -177.433 }
+  def wrangel_box
+    @wrangel_box ||= wrangel.bounding_box
+  end
+
   def ecuador_box
-    { north: 1.49397, south: -5.06906, east: -75.1904, west: -92.6038 }
+    @ecuador_box ||=
+      { north: 1.49397, south: -5.06906, east: -75.1904, west: -92.6038 }
   end
 
   def tiny_box
-    { north: 0.0001, south: 0.0001, east: 0.0001, west: 0 }
+    @tiny_box ||= { north: 0.0001, south: 0.0001, east: 0.0001, west: 0 }
+  end
+
+  def missing_west_box
+    @missing_west_box ||= { north: cal.north, south: cal.south, east: cal.east }
+  end
+
+  def outta_bounds_box
+    @outta_bounds_box ||=
+      { north: 91, south: cal.south, east: cal.east, west: cal.west }
+  end
+
+  def north_souther_than_south_box
+    @north_souther_than_south_box ||= cal_box.merge(north: cal.south - 10)
   end
 
   def test_scope_in_box
-    cal = locations(:california)
-    obss_in_cal_box = Observation.in_box(**cal.bounding_box)
-    nybg = locations(:nybg_location)
-    obss_in_nybg_box = Observation.in_box(**nybg.bounding_box)
-    obss_in_ecuador_box = Observation.in_box(**ecuador_box)
+    obss_in_cal_box = Observation.in_box(**cal_box)
+    obss_in_nybg_box = Observation.in_box(**nybg_box)
     quito_obs =
       Observation.create!(
-        user: users(:rolf),
+        user: rolf,
         lat: -0.1865944,
         lng: -78.4305382,
         where: "Quito, Ecuador"
       )
-    wrangel = locations(:east_lt_west_location)
+    obss_in_ecuador_box = Observation.in_box(**ecuador_box)
+
     wrangel_obs =
       Observation.create!(
-        user: users(:rolf),
+        user: rolf,
         lat: (wrangel.north + wrangel.south) / 2,
-        lng: (wrangel.east + wrangel.west) / 2 + wrangel.west
+        lng: (wrangel.east + wrangel.west) / 2 + wrangel.west,
+        where: "Wrangel Island, Russia"
       )
-    obss_in_wrangel_box = Observation.in_box(**wrangel.bounding_box)
+    # lat: 34.1622 lng: -118.3521
+    unknown_lat_lng_obs = observations(:unknown_with_lat_lng)
+    minimal_unknown_obs = observations(:minimal_unknown_obs)
+    obss_in_wrangel_box = Observation.in_box(**wrangel_box)
 
+    # Tests are comparing IDs so the results are legible in the event of failure
     # boxes not straddling 180 deg
-    assert_includes(obss_in_cal_box, observations(:unknown_with_lat_lng))
-    assert_includes(obss_in_ecuador_box, quito_obs)
-    assert_not_includes(obss_in_nybg_box, observations(:unknown_with_lat_lng))
-    assert_not_includes(obss_in_cal_box,
-                        observations(:minimal_unknown_obs),
+    assert_includes(obss_in_cal_box.map(&:id), unknown_lat_lng_obs.id)
+    assert_includes(obss_in_ecuador_box.map(&:id), quito_obs.id)
+    assert_not_includes(obss_in_nybg_box.map(&:id), unknown_lat_lng_obs.id)
+    assert_not_includes(obss_in_cal_box.map(&:id), minimal_unknown_obs.id,
                         "Observation without lat/lon should not be in box")
 
     # box straddling 180 deg
-    assert_includes(obss_in_wrangel_box, wrangel_obs)
-    assert_not_includes(obss_in_wrangel_box,
-                        observations(:unknown_with_lat_lng))
+    assert_includes(obss_in_wrangel_box.map(&:id), wrangel_obs.id)
+    assert_not_includes(obss_in_wrangel_box.map(&:id), unknown_lat_lng_obs.id)
 
     assert_empty(Observation.where(lat: 0.001), "Test needs different fixture")
     assert_empty(
@@ -1324,58 +1439,94 @@ class ObservationTest < UnitTestCase
 
     # invalid arguments
     assert_empty(
-      Observation.in_box(north: cal.north, south: cal.south, east: cal.east),
+      Observation.in_box(**missing_west_box),
       "`Observation.in_box` should be empty if an argument is missing"
     )
     assert_empty(
-      Observation.in_box(
-        north: 91, south: cal.south, east: cal.east, west: cal.west
-      ),
+      Observation.in_box(**outta_bounds_box),
       "`Observation.in_box` should be empty if an argument is out of bounds"
     )
     assert_empty(
-      Observation.in_box(north: cal.south - 10,
-                         south: cal.south, east: cal.east, west: cal.west),
+      Observation.in_box(**north_souther_than_south_box),
       "`Observation.in_box` should be empty if N < S"
     )
   end
 
+  def test_scope_in_box_with_taxon
+    args = { north: "36.2718",
+             south: "29.852",
+             east: "-82.92729999999999",
+             west: "-96.3512" }
+    obs = Observation.names(lookup: names(:coprinus)).in_box(**args)
+    assert_not(obs.count.negative?)
+  end
+
+  def test_scope_in_box_over_dateline_with_taxon
+    args = { north: "36.2718",
+             south: "29.852",
+             east: "-82.92729999999999",
+             west: "9.3512" }
+    obs = Observation.names(lookup: names(:coprinus)).in_box(**args)
+    assert_not(obs.count.negative?)
+  end
+
+  def test_scope_in_box_with_taxon_vague
+    args = { vague: 1,
+             north: "36.2718",
+             south: "29.852",
+             east: "-82.92729999999999",
+             west: "-96.3512" }
+    obs = Observation.names(lookup: names(:coprinus)).in_box(**args)
+    assert_not(obs.count.negative?)
+  end
+
+  def test_scope_in_box_over_dateline_with_taxon_vague
+    args = { vague: 1,
+             north: "36.2718",
+             south: "29.852",
+             east: "-82.92729999999999",
+             west: "9.3512" }
+    obs = Observation.names(lookup: names(:coprinus)).in_box(**args)
+    assert_not(obs.count.negative?)
+  end
+
   def test_scope_not_in_box
-    cal = locations(:california)
-    obss_not_in_cal_box = Observation.not_in_box(**cal.bounding_box)
     obs_with_burbank_geoloc = observations(:unknown_with_lat_lng)
+    obss_not_in_cal_box = Observation.not_in_box(**cal_box)
+    obss_not_in_nybg_box = Observation.not_in_box(**nybg_box)
 
-    nybg = locations(:nybg_location)
-    obss_not_in_nybg_box = Observation.not_in_box(**nybg.bounding_box)
-
-    obss_not_in_ecuador_box = Observation.not_in_box(**ecuador_box)
     quito_obs =
       Observation.create!(
-        user: users(:rolf),
+        user: rolf,
         lat: -0.1865944,
         lng: -78.4305382,
         where: "Quito, Ecuador"
       )
+    obss_not_in_ecuador_box = Observation.not_in_box(**ecuador_box)
 
-    wrangel = locations(:east_lt_west_location)
     wrangel_obs =
       Observation.create!(
-        user: users(:rolf),
+        user: rolf,
         lat: (wrangel.north + wrangel.south) / 2,
-        lng: (wrangel.east + wrangel.west) / 2 + wrangel.west
+        lng: (wrangel.east + wrangel.west) / 2 + wrangel.west,
+        where: "Wrangel Island, Russia"
       )
-    obss_not_in_wrangel_box = Observation.not_in_box(**wrangel.bounding_box)
+    minimal_unknown_obs = observations(:minimal_unknown_obs)
+    obss_not_in_wrangel_box = Observation.not_in_box(**wrangel_box)
 
+    # Tests are comparing IDs so the results are legible in the event of failure
     # boxes not straddling 180 deg
-    assert_not_includes(obss_not_in_cal_box, obs_with_burbank_geoloc)
-    assert_not_includes(obss_not_in_ecuador_box, quito_obs)
-    assert_includes(obss_not_in_nybg_box, obs_with_burbank_geoloc)
-    assert_includes(obss_not_in_cal_box, observations(:minimal_unknown_obs),
+    assert_not_includes(obss_not_in_cal_box.map(&:id),
+                        obs_with_burbank_geoloc.id)
+    assert_not_includes(obss_not_in_ecuador_box.map(&:id), quito_obs.id)
+    assert_includes(obss_not_in_nybg_box.map(&:id), obs_with_burbank_geoloc.id)
+    assert_includes(obss_not_in_cal_box.map(&:id), minimal_unknown_obs.id,
                     "Observation without lat/lon should not be in box")
 
     # box straddling 180 deg
-    assert_not_includes(obss_not_in_wrangel_box, wrangel_obs)
-    assert_includes(obss_not_in_wrangel_box, obs_with_burbank_geoloc)
+    assert_not_includes(obss_not_in_wrangel_box.map(&:id), wrangel_obs.id)
+    assert_includes(obss_not_in_wrangel_box.map(&:id),
+                    obs_with_burbank_geoloc.id)
 
     assert_equal(
       Observation.count,
@@ -1387,23 +1538,17 @@ class ObservationTest < UnitTestCase
     all_observations_count = Observation.count
     assert_equal(
       all_observations_count,
-      Observation.not_in_box(
-        north: cal.north, south: cal.south, east: cal.east
-      ).count,
+      Observation.not_in_box(**missing_west_box).count,
       "All Observations should be excluded from a box with missing boundary"
     )
     assert_equal(
       all_observations_count,
-      Observation.not_in_box(
-        north: 91, south: cal.south, east: cal.east, west: cal.west
-      ).count,
+      Observation.not_in_box(**outta_bounds_box).count,
       "All Observations should be excluded from a box with an out-of-bounds arg"
     )
     assert_equal(
       all_observations_count,
-      Observation.not_in_box(
-        north: cal.south - 10, south: cal.south, east: cal.east, west: cal.west
-      ).count,
+      Observation.not_in_box(**north_souther_than_south_box).count,
       "All Observations should be excluded from box whose N < S"
     )
   end
@@ -1415,30 +1560,31 @@ class ObservationTest < UnitTestCase
                         observations(:displayed_at_obs))
   end
 
-  def test_scope_with_notes_field
-    assert_includes(Observation.with_notes_field("substrate"),
+  def test_scope_has_notes_field
+    assert_includes(Observation.has_notes_field("substrate"),
                     observations(:substrate_notes_obs))
     obs_substrate_in_plain_text =
       Observation.create!(notes: "The substrate is wood",
-                          user: users(:rolf))
-    assert_not_includes(Observation.with_notes_field("substrate"),
+                          user: rolf)
+    assert_not_includes(Observation.has_notes_field("substrate"),
                         obs_substrate_in_plain_text)
-    assert_empty(Observation.with_notes_field(ARBITRARY_SHA))
+    assert_empty(Observation.has_notes_field(ARBITRARY_SHA))
   end
 
-  def test_scope_with_sequences
-    assert_includes(Observation.with_sequences,
+  def test_scope_has_sequences
+    assert_includes(Observation.has_sequences,
                     observations(:genbanked_obs))
-    assert_not_includes(Observation.with_sequences,
+    assert_not_includes(Observation.has_sequences,
                         observations(:minimal_unknown_obs))
   end
 
-  def test_scope_without_sequences
-    assert_includes(Observation.without_sequences,
-                    observations(:minimal_unknown_obs))
-    assert_not_includes(Observation.without_sequences,
-                        observations(:genbanked_obs))
-  end
+  # Currently Query ignores false, so scope does too.
+  # def test_scope_has_sequences_false
+  #   assert_includes(Observation.has_sequences(false),
+  #                   observations(:minimal_unknown_obs))
+  #   assert_not_includes(Observation.has_sequences(false),
+  #                       observations(:genbanked_obs))
+  # end
 
   def test_scope_confidence
     assert_includes(Observation.confidence(0, 0),
@@ -1447,30 +1593,21 @@ class ObservationTest < UnitTestCase
                     observations(:minimal_unknown_obs))
     assert_includes(Observation.confidence(0, 1),
                     observations(:minimal_unknown_obs))
-    assert_includes(Observation.confidence(75, 100),
+    assert_includes(Observation.confidence(2.4, 3),
                     observations(:peltigera_obs))
-    assert_equal(Observation.count, Observation.confidence(-100, 100).count)
-    assert_empty(Observation.confidence(102, 103))
+    assert_includes(Observation.confidence([2.4, 3]), # array
+                    observations(:peltigera_obs))
+    assert_equal(Observation.count, Observation.confidence(-3, 3).count)
+    assert_empty(Observation.confidence(3.1, 3.2))
   end
 
-  def test_scope_without_comments
-    assert_includes(Observation.without_comments,
-                    observations(:unlisted_rolf_obs))
-    assert_not_includes(Observation.without_comments,
-                        observations(:minimal_unknown_obs))
-  end
-
-  def test_scope_herbarium_record_notes_include
-    obss_with_hr_notes =
-      Observation.herbarium_record_notes_include("cleaned & dried at 115°")
-    assert_includes(obss_with_hr_notes,
-                    observations(:minimal_unknown_obs))
-    assert_includes(obss_with_hr_notes,
-                    observations(:detailed_unknown_obs))
-    assert_not_includes(obss_with_hr_notes,
-                        observations(:imageless_unvouchered_obs))
-    assert_empty(Observation.herbarium_record_notes_include("ARBITRARY_SHA"))
-  end
+  # Currently Query ignores false, so scope does too.
+  # def test_scope_has_comments_false
+  #   assert_includes(Observation.has_comments(false),
+  #                   observations(:unlisted_rolf_obs))
+  #   assert_not_includes(Observation.has_comments(false),
+  #                       observations(:minimal_unknown_obs))
+  # end
 
   def test_source_credit
     obs = observations(:coprinus_comatus_obs)

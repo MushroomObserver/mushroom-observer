@@ -5,6 +5,7 @@
 #   advanced_search:
 #   pattern:
 #   country:
+#   project:
 #   by_user:
 #   by_editor:
 #  :show,
@@ -17,57 +18,31 @@
 # Locations controller.
 # rubocop:disable Metrics/ClassLength
 class LocationsController < ApplicationController
-  # disable cop because index is defined in ApplicationController
-  # rubocop:disable Rails/LexicallyScopedActionFilter
   before_action :store_location, except: [:index, :destroy]
   before_action :pass_query_params, except: [:index]
-  # rubocop:enable Rails/LexicallyScopedActionFilter
   before_action :login_required
 
   ##############################################################################
+  # INDEX
   #
-  # index::
-
-  # ApplicationController uses this to dispatch #index to a private method
-  @index_subaction_param_keys = [
-    :advanced_search,
-    :pattern,
-    :country,
-    :by_user,
-    :by_editor,
-    :by,
-    :q,
-    :id
-  ].freeze
-
-  @index_subaction_dispatch_table = {
-    by: :index_query_results,
-    q: :index_query_results,
-    id: :index_query_results
-  }.freeze
-
-  #############################################
-
-  private # private methods used by #index
-
-  def default_index_subaction
-    list_locations
+  def index
+    build_index_with_query
   end
 
-  # Displays a list of all locations.
-  def list_locations
-    query = create_query(:Location, :all, by: default_sort_order)
-    show_selected_locations(query, link_all_sorts: true)
-  end
+  private
 
   def default_sort_order
-    ::Query::LocationBase.default_order
+    ::Query::Locations.default_order # :name
   end
 
-  # Displays a list of selected locations, based on current Query.
-  def index_query_results
-    query = find_or_create_query(:Location, by: params[:by])
-    show_selected_locations(query, id: params[:id].to_s, always_index: true)
+  def unfiltered_index_opts
+    super.merge(display_opts: { link_all_sorts: true })
+  end
+
+  # ApplicationController uses this to dispatch #index to a private method
+  def index_active_params
+    [:advanced_search, :pattern, :country, :project, :by_user, :by_editor,
+     :by, :q, :id].freeze
   end
 
   # Displays matrix of advanced search results.
@@ -75,10 +50,14 @@ class LocationsController < ApplicationController
     return if handle_advanced_search_invalid_q_param?
 
     query = find_query(:Location)
-    show_selected_locations(query, link_all_sorts: true)
+    # Have to check this here because we're not running the query yet.
+    raise(:runtime_no_conditions.l) unless query&.params&.any?
+
+    [query, { link_all_sorts: true }]
   rescue StandardError => e
     flash_error(e.to_s) if e.present?
     redirect_to(search_advanced_path)
+    [nil, {}]
   end
 
   # Displays a list of locations matching a given string.
@@ -87,21 +66,27 @@ class LocationsController < ApplicationController
     loc = Location.safe_find(pattern) if /^\d+$/.match?(pattern)
     if loc
       redirect_to(location_path(loc.id))
+      [nil, {}]
     else
       query = create_query(
-        :Location, :pattern_search,
-        pattern: Location.user_format(@user, pattern)
+        :Location, pattern: Location.user_format(@user, pattern)
       )
-      show_selected_locations(query, link_all_sorts: true)
+      [query, { link_all_sorts: true }]
     end
   end
 
-  # Displays a list of all locations whose country matches the id param.
+  # Displays a list of all locations whose country matches the param.
   def country
-    query = create_query(
-      :Location, :regexp_search, regexp: "#{params[:country]}$"
-    )
-    show_selected_locations(query, link_all_sorts: true)
+    query = create_query(:Location, regexp: "#{params[:country]}$")
+    [query, { link_all_sorts: true }]
+  end
+
+  # Displays a list of locations of obs whose project matches the param.
+  def project
+    obs_query = create_query(:Observation,
+                             projects: Project.find(params[:project]))
+    query = create_query(:Location, observation_query: obs_query.params)
+    [query, { link_all_sorts: true }]
   end
 
   # Display list of locations that a given user created.
@@ -112,139 +97,95 @@ class LocationsController < ApplicationController
     )
     return unless user
 
-    query = create_query(:Location, :by_user, user: user)
-    show_selected_locations(query, link_all_sorts: true)
+    query = create_query(:Location, by_users: user)
+    [query, { link_all_sorts: true }]
   end
 
   # Display list of locations that a given user is editor on.
   def by_editor
-    user = find_obj_or_goto_index(
+    editor = find_obj_or_goto_index(
       model: User, obj_id: params[:by_editor].to_s,
       index_path: locations_path
     )
-    return unless user
+    return unless editor
 
-    query = create_query(:Location, :by_editor, user: user)
-    show_selected_locations(query)
+    query = create_query(:Location, by_editor: editor)
+    [query, {}]
   end
 
-  # Show selected search results as a list with 'list_locations' template.
-  def show_selected_locations(query, args = {})
-    # Restrict to subset within a geographical region (used by map
-    # if it needed to stuff multiple locations into a single marker).
-    query = restrict_query_to_box(query)
+  # Hook runs before template displayed. Must return query.
+  def filtered_index_final_hook(query, display_opts)
+    # Matching undefined locations is meaningless in a box.
+    # (Undefined locations don't have a box!)
+    return query if query.params[:in_box].present?
 
     # Get matching *undefined* locations.
-    get_matching_undefined_locations(query, args)
-
-    # Paginate the defined locations using the usual helper.
-    args[:always_index] = @undef_pages&.num_total&.positive?
-    args[:action] = args[:action] || :index
-    show_index_of_objects(query, args)
+    set_matching_undefined_location_ivars(query, display_opts)
+    query
   end
 
-  def get_matching_undefined_locations(query, args)
-    @undef_location_format = User.current_location_format
-    if (query2 = coerce_query_for_undefined_locations(query))
-      select_args = {
-        group: "observations.where",
-        select: "observations.where AS w, COUNT(observations.id) AS c"
-      }
-      if args[:link_all_sorts]
-        select_args[:order] = "c DESC"
-        # (This tells it to say "by name" and "by frequency" by the subtitles.
-        # If user has explicitly selected the order, then this is disabled.)
-        @default_orders = true
-      end
-      @undef_pages = paginate_letters(:letter2,
-                                      :page2,
-                                      args[:num_per_page] || 50)
-      @undef_data = query2.select_rows(select_args)
-      @undef_pages.used_letters = @undef_data.map { |row| row[0][0, 1] }.uniq
-      if (letter = params[:letter2].to_s.downcase) != ""
-        @undef_data = @undef_data.select do |row|
-          row[0][0, 1].downcase == letter
-        end
-      end
-      @undef_pages.num_total = @undef_data.length
-      @undef_data = @undef_data[@undef_pages.from..@undef_pages.to]
-    else
+  # Paginate the defined locations using the usual helper.
+  def index_display_opts(opts, _query)
+    { always_index: @undef_pages&.num_total&.positive? }.merge(opts)
+  end
+
+  def set_matching_undefined_location_ivars(query, display_opts)
+    unless (query2 = create_query_for_obs_undefined_where_strings(query))
       @undef_pages = nil
       @undef_data = nil
+      return false
     end
+
+    @undef_location_format = @user.location_format
+    if display_opts[:link_all_sorts]
+      # (This tells it to say "by name" and "by frequency" by the subtitles.
+      # If user has explicitly selected the order, then this is disabled.)
+      @default_orders = true
+    end
+    @undef_pages = letter_pagination_data(:letter2, :page2,
+                                          display_opts[:num_per_page] || 50)
+    @undef_data = query2.paginate(@undef_pages)
+    @undef_pages.used_letters = @undef_data.map { |obs| obs[:where][0, 1] }.uniq
+    if (letter = params[:letter2].to_s.downcase) != ""
+      @undef_data = @undef_data.select do |obs|
+        obs[:where][0, 1].downcase == letter
+      end
+    end
+    @undef_pages.num_total = @undef_data.length
+    @undef_data = @undef_data[@undef_pages.from..@undef_pages.to]
   end
 
-  #############################################
+  ##############################################################################
 
   public # for test!
 
   # Try to turn this into a query on observations.where instead.
   # Yes, still a kludge, but a little better than tweaking SQL by hand...
-  def coerce_query_for_undefined_locations(query)
-    model  = :Observation
-    flavor = query.flavor
-    args   = query.params.dup
-    result = nil
+  def create_query_for_obs_undefined_where_strings(query)
+    args   = query.params.dup.except(:observation_query)
+    # Location params not handled by Observation. (does handle :by_user)
+    # If these are passed, we're not looking for undefined locations.
+    return nil if [:by_editor, :regexp].any? { |key| args[key] }
 
-    # Select only observations with undefined location.
-    if !args[:where]
-      args[:where] = []
-    elsif !args[:where].is_a?(Array)
-      args[:where] = [args[:where]]
-    end
-    args[:where] << "observations.location_id IS NULL"
+    # # Select only observations with undefined location.
+    # args[:where] = [args[:where]].flatten.compact
 
     # "By name" means something different to observation.
-    if args[:by].blank? ||
-       (args[:by] == "name")
-      args[:by] = "where"
-    end
+    nosorts = ["name", "box_area", "reverse_name", "reverse_box_area", ""]
+    args[:order_by] = "where" if nosorts.include?(args[:order_by])
 
-    case query.flavor
-
-    # These are okay as-is.
-    when :all, :by_user
-      true
-
-    # Simple coercions.
-    when :with_observations
-      flavor = :all
-    when :with_observations_by_user
-      flavor = :by_user
-    when :with_observations_for_project
-      flavor = :for_project
-    when :with_observations_in_set
-      flavor = :in_set
-    when :with_observations_in_species_list
-      flavor = :in_species_list
-
-    # Temporarily kludge in pattern search the old way.
-    when :pattern_search
-      flavor = :all
-      search = query.google_parse(args[:pattern])
-      args[:where] += query.google_conditions(search, "observations.where")
+    args[:search_where] ||= ""
+    if args[:pattern]
+      args[:search_where] += args[:pattern]
       args.delete(:pattern)
-
-    # when :regexp_search  ### NOT SURE WHAT DO FOR THIS
-
-    # None of the rest make sense.
-    else
-      flavor = nil
     end
-
-    # These are only used to create title, which isn't used,
-    # they just get in the way.
-    args.delete(:old_title)
-    args.delete(:old_by)
 
     # Create query if okay.  (Still need to tweak select and group clauses.)
-    if flavor
-      result = create_query(model, flavor, args)
+    result = create_query(:Observation, args.merge(location_undefined: true))
 
-      # Also make sure it doesn't reference locations anywhere.  This would
-      # presumably be the result of customization of one of the above flavors.
-      result = nil if /\Wlocations\./.match?(result.query)
-    end
+    # Also make sure the sql doesn't reference locations anywhere.  This would
+    # presumably be the result of customization of one of the above.
+    result = nil if /\Wlocations\./.match?(result.sql)
 
     result
   end
@@ -480,7 +421,7 @@ class LocationsController < ApplicationController
     if in_admin_mode? || @location.mergable?
       old_name = @location.display_name
       new_name = merge.display_name
-      merge.merge(@location)
+      merge.merge(@user, @location)
       merge.save if merge.changed?
       @location = merge
       flash_notice(:runtime_location_merge_success.t(this: old_name,
@@ -540,7 +481,7 @@ class LocationsController < ApplicationController
   def email_admin_location_change
     content = email_location_change_content
     QueuedEmail::Webmaster.create_email(
-      sender_email: @user.email,
+      @user,
       subject: "Nontrivial Location Change",
       content: content
     )

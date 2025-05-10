@@ -19,7 +19,7 @@
 #  allow the owner/authors of the object commented on to be notified of the
 #  new comment.  Just follow these easy steps:
 #
-#  1. Add to +all_types+ Array in this file and AbstractModel.NAME_TO_TYPE
+#  1. Add to +ALL_TYPES+ Array in this file and AbstractModel.NAME_TO_TYPE
 #  2. Add +has_many+ relationships to the model:
 #
 #       has_many :comments,  :as => :target, :dependent => :destroy
@@ -60,17 +60,14 @@
 #
 #  ==== Scopes
 #
-#  created_on("yyyymmdd")
-#  created_after("yyyymmdd")
-#  created_before("yyyymmdd")
-#  created_between(start, end)
-#  updated_on("yyyymmdd")
-#  updated_after("yyyymmdd")
-#  updated_before("yyyymmdd")
-#  updated_between(start, end)
+#  created_at("yyyy-mm-dd", "yyyy-mm-dd")
+#  updated_at("yyyy-mm-dd", "yyyy-mm-dd")
 #  by_user(user)
 #  for_user(user)
-#  for_target(target)
+#  target(target)
+#  summary_has(phrase)
+#  content_has(phrase)
+#  pattern(phrase)
 #
 #  == Instance Methods
 #
@@ -107,8 +104,27 @@
 class Comment < AbstractModel
   include Callbacks
 
-  belongs_to :target, polymorphic: true
   belongs_to :user
+  belongs_to :target, polymorphic: true
+
+  # Maintain this Array of all models (Classes) which take comments.
+  ALL_TYPES = [
+    Location, LocationDescription, Name, NameDescription,
+    Observation, Project, SpeciesList
+  ].freeze
+
+  # Returns Array of all valid +target_type+ values (Symbols).
+  ALL_TYPE_TAGS = ALL_TYPES.map { |type| type.to_s.underscore.to_sym }.freeze
+
+  # Allow explicit joining for all polymorphic associations,
+  # e.g. `Comment.joins(:location).where(target_id: 29513)`,
+  # by restating the association below with a scope.
+  # https://veelenga.github.io/joining-polymorphic-associations/
+  ALL_TYPE_TAGS.each do |model|
+    belongs_to model, lambda {
+      where(comments: { target_type: model.to_s.camelize })
+    }, foreign_key: "target_id", inverse_of: :comments
+  end
 
   broadcasts_to(->(comment) { [comment.target, :comments] },
                 inserts_by: :prepend, partial: "comments/comment",
@@ -117,48 +133,67 @@ class Comment < AbstractModel
   after_create :notify_users
   after_create :oil_and_water
 
-  scope :by_user,
-        ->(user) { where(user: user) }
+  scope :order_by_default,
+        -> { order_by(::Query::Comments.default_order) }
 
   # This scope starts with a `where`, and chains subsequent `where` clauses
   # with `or`. So, rather than separately assembling `target_ids`, that would
   # execute multiple db queries:
   #
   #   target_ids = []
-  #   all_types.each do |model|
+  #   ALL_TYPES.each do |model|
   #     target_ids |= model.where(user: user).pluck(:id)
   #   end
   #   where(target_id: target_ids)
   #
-  # ...this `inject` iteration only generates one very complex sql statement,
+  # ...this `reduce` iteration only generates one very complex sql statement,
   # with inner selects, and it's faster because AR can figure out that all the
   # chained selects constitute one giant SELECT, and SQL is faster than Ruby.
   #
   # Basically it's iterating over all the types doing this:
   #   where(target_type: :location,
-  #        target_id: Location.where(user: user)).
+  #         target_id: Location.where(user: user)).
   #   or(where(target_type: :name,
   #            target_id: Name.where(user: user))) etc.
-  scope :for_user,
-        lambda { |user|
-          all_types.inject(nil) do |scope, model|
-            scope2 = where(target_type: model.name.underscore.to_sym,
-                           target_id: model.where(user: user))
-            scope ? scope.or(scope2) : scope2
-          end
-        }
-  scope :for_target,
-        ->(target) { where(target: target) }
+  scope :for_user, lambda { |user|
+    ALL_TYPES.reduce(nil) do |scope, model|
+      scope2 = where(target_type: model.name.underscore.to_sym,
+                     target_id: model.where(user: user))
+      scope ? scope.or(scope2) : scope2
+    end
+  }
+  # Pass either { type:, id: } or a commentable model instance.
+  # Scope makes sure instance exists.
+  scope :target, lambda { |target|
+    if target.is_a?(Hash) && target[:type] && target[:id]
+      type = target[:type]
+      return none unless (model = Comment.safe_model_from_name(type))
 
-  # Returns Array of all models (Classes) which take comments.
-  def self.all_types
-    [Location, Name, Observation, Project, SpeciesList]
-  end
+      target = model.safe_find(target[:id])
+    elsif target.is_a?(AbstractModel)
+      type = target.class.name
+      return none unless Comment.safe_model_from_name(type)
+    end
 
-  # Returns Array of all valid +target_type+ values (Symbol's).
-  def self.all_type_tags
-    [:location, :name, :observation, :project, :species_list]
-  end
+    where(target:)
+  }
+  scope :types,
+        ->(types) { where(target_type: types) }
+  scope :summary_has,
+        ->(phrase) { search_columns(Comment[:summary], phrase) }
+  scope :content_has,
+        ->(phrase) { search_columns(Comment[:comment], phrase) }
+
+  scope :pattern, lambda { |phrase|
+    cols = (Comment[:summary] + Comment[:comment].coalesce(""))
+    search_columns(cols, phrase)
+  }
+
+  scope :search_content, lambda { |phrase|
+    # `or` is 10-20% faster than concatenating the columns
+    search_columns(Comment[:comment], phrase).
+      or(Comment.search_columns(Comment[:summary], phrase)).distinct
+  }
 
   # Returns +summary+ for debugging.
   def text_name
@@ -200,7 +235,7 @@ class Comment < AbstractModel
   # Return model if params[:type] is the name of a commentable model
   # Else nil
   def self.safe_model_from_name(name)
-    all_types.find { |m| m.name == name }
+    ALL_TYPES.find { |m| m.name == name.to_s }
   end
 
   ############################################################################

@@ -46,7 +46,7 @@ class AutocompletersControllerTest < FunctionalTestCase
 
   ##############################################################################
 
-  def test_auto_complete_location
+  def test_autocomplete_location
     login("rolf")
     # names of Locations whose names have words starting with "m"
     locs = Location.where(Location[:name].matches_regexp("\\bM")).
@@ -80,7 +80,7 @@ class AutocompletersControllerTest < FunctionalTestCase
     assert_equivalent([{ name: "X", id: 0 }], JSON.parse(@response.body))
   end
 
-  def test_auto_complete_location_containing
+  def test_autocomplete_location_containing
     login("rolf")
     point_in_albion = { lat: 39.253, lng: -123.8 }
     locs = Location.where(id: locations(:albion).id).
@@ -94,7 +94,7 @@ class AutocompletersControllerTest < FunctionalTestCase
     assert_equivalent(expect, JSON.parse(@response.body))
   end
 
-  def test_auto_complete_herbarium
+  def test_autocomplete_herbarium
     login("rolf")
     # names of Herbariums whose names have words starting with "m"
     herbs = Herbarium.where(Herbarium[:name].matches_regexp("\\bD")).
@@ -108,13 +108,13 @@ class AutocompletersControllerTest < FunctionalTestCase
     assert_equivalent(expect, JSON.parse(@response.body))
   end
 
-  def test_auto_complete_empty
+  def test_autocomplete_empty
     login("rolf")
     good_autocompleter_request(type: :name, string: "")
     assert_equivalent([], JSON.parse(@response.body))
   end
 
-  def test_auto_complete_name_above_genus
+  def test_autocomplete_name_above_genus
     login("rolf")
     expect = [{ name: "F", id: 0 },
               { name: "Fungi", id: names(:fungi).id, deprecated: false }]
@@ -122,7 +122,7 @@ class AutocompletersControllerTest < FunctionalTestCase
     assert_equivalent(expect, JSON.parse(@response.body))
   end
 
-  def test_auto_complete_name
+  def test_autocomplete_name
     login("rolf")
     names = Name.with_correct_spelling.
             select(:text_name, :id, :deprecated).distinct.
@@ -149,7 +149,7 @@ class AutocompletersControllerTest < FunctionalTestCase
                       JSON.parse(@response.body))
   end
 
-  def test_auto_complete_project
+  def test_autocomplete_project
     login("rolf")
     # titles of Projects whose titles have words starting with "p"
     b_titles = Project.where(Project[:title].matches_regexp("\\bB")).
@@ -173,7 +173,7 @@ class AutocompletersControllerTest < FunctionalTestCase
                       JSON.parse(@response.body))
   end
 
-  def test_auto_complete_species_list
+  def test_autocomplete_species_list
     login("rolf")
     list1, list2, list3, list4 = SpeciesList.order(:title).select(:title, :id).
                                  take(4).map do |list|
@@ -199,25 +199,26 @@ class AutocompletersControllerTest < FunctionalTestCase
                       JSON.parse(@response.body))
   end
 
-  def test_auto_complete_user
+  def test_autocomplete_user
     login("rolf")
     good_autocompleter_request(type: :user, string: "Rover")
     assert_equivalent(
       [{ name: "R", id: 0 },
-       { name: "rolf <Rolf Singer>", id: rolf.id },
-       { name: "roy <Roy Halling>", id: roy.id },
-       { name: "second_roy <Roy Rogers>", id: users(:second_roy).id }],
+       { name: "Rolf Singer (rolf)", id: rolf.id },
+       { name: "Roy Halling (roy)", id: roy.id },
+       { name: "Roy Rogers (second_roy)", id: users(:second_roy).id }],
       JSON.parse(@response.body)
     )
 
     good_autocompleter_request(type: :user, string: "Dodo")
     assert_equivalent([{ name: "D", id: 0 },
-                       { name: "dick <Tricky Dick>", id: dick.id }],
+                       { name: "#{dick.name} (#{dick.login})",
+                         id: dick.id }],
                       JSON.parse(@response.body))
 
     good_autocompleter_request(type: :user, string: "Komodo")
     assert_equivalent([{ name: "K", id: 0 },
-                       { name: "#{katrina.login} <#{katrina.name}>",
+                       { name: "#{katrina.name} (#{katrina.login})",
                          id: katrina.id }],
                       JSON.parse(@response.body))
 
@@ -226,7 +227,7 @@ class AutocompletersControllerTest < FunctionalTestCase
                       JSON.parse(@response.body))
   end
 
-  def test_auto_complete_bogus
+  def test_autocomplete_bogus
     login("rolf")
     bad_autocompleter_request(type: :bogus, string: "bogus")
   end

@@ -506,6 +506,7 @@ module Observations
     # "Genus species (With) Author" was recognized even if "Genus species"
     # was already in the database.
     def test_create_with_author_when_name_without_author_already_exists
+      login("dick")
       params = {
         observation_id: observations(:coprinus_comatus_obs).id,
         naming: {
@@ -513,7 +514,6 @@ module Observations
           vote: { value: "3" }
         }
       }
-      login("dick")
       post(:create, params: params)
       obs = observations(:coprinus_comatus_obs)
       assert_redirected_to(permanent_observation_path(obs.id))
@@ -544,7 +544,7 @@ module Observations
     # "Genus species (With) Author" was recognized even if "Genus species"
     # was already in the database.
     def test_create_name_with_quotes
-      name = 'Foo "bar" Author'
+      name = "Foo 'bar' Author"
       params = {
         observation_id: observations(:coprinus_comatus_obs).id,
         naming: { name: name },
@@ -553,8 +553,21 @@ module Observations
       login("dick")
       post(:create, params: params)
       assert_response(:redirect)
-      assert(name = Name.find_by(text_name: 'Foo "bar"'))
-      assert_equal('Foo "bar" Author', name.search_name)
+      assert(new_name = Name.find_by(text_name: "Foo sp. 'bar'"))
+      assert_equal("Foo sp. 'bar' Author", new_name.search_name)
+    end
+
+    def test_create_bad_prov_name
+      # Must be a genus where all genus fixtures have an author
+      name = "Suillus sp. 'A*G'"
+      params = {
+        observation_id: observations(:coprinus_comatus_obs).id,
+        naming: { name: name },
+        approved_name: name
+      }
+      login("dick")
+      post(:create, params: params)
+      assert_equal(0, Naming.where(name_id: nil).count)
     end
 
     # Rolf can destroy his naming if Mary deletes her vote on it.

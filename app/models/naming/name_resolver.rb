@@ -35,7 +35,7 @@ class Naming
     attr_reader :success, :name, :names, :valid_names, :parent_deprecated,
                 :suggest_corrections
 
-    def initialize(given_name: "", approved_name: "",
+    def initialize(user, given_name: "", approved_name: "",
                    chosen_name: "")
       @success = true
       @given_name = given_name
@@ -45,11 +45,11 @@ class Naming
       @parent_deprecated = nil
       @suggest_corrections = false
 
-      resolve(given_name:, approved_name:, chosen_name:)
+      resolve(user, given_name:, approved_name:, chosen_name:)
     end
 
     # rubocop:disable Metrics/MethodLength
-    def resolve(given_name:, approved_name:, chosen_name:)
+    def resolve(user, given_name:, approved_name:, chosen_name:)
       corrected = given_name.to_s.tr("_", " ").strip_squeeze
       approved_name2 = approved_name.to_s.tr("_", " ").strip_squeeze
       if corrected.blank? || Name.names_for_unknown.member?(corrected.downcase)
@@ -70,7 +70,7 @@ class Naming
 
         # Look up name: can return zero (unrecognized), one
         # (unambiguous match), or many (multiple authors match).
-        @names = Name.find_names_filling_in_authors(corrected)
+        @names = Name.find_names_filling_in_authors(user, corrected)
         # end
       else
         @names = [Name.find(chosen_name)]
@@ -84,14 +84,15 @@ class Naming
       # EXCEPT in the case of user supplying author for existing name that
       # has no author.)
       if @names.empty? &&
-         (@name = Name.create_needed_names(approved_name2, corrected))
-        @names << name
+         (@name = Name.create_needed_names(user, approved_name2, corrected))
+        @names << name if @name
       end
 
       # No matches -- suggest some correct names to make Debbie happy.
       if @names.empty?
-        if (parent = Name.parent_if_parent_deprecated(corrected))
-          @valid_names = Name.names_from_synonymous_genera(corrected, parent)
+        if (parent = Name.parent_if_parent_deprecated(user, corrected))
+          @valid_names = Name.names_from_synonymous_genera(user, corrected,
+                                                           parent)
           @parent_deprecated = parent
         else
           @valid_names = Name.suggest_alternate_spellings(corrected)

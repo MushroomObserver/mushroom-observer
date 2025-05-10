@@ -74,8 +74,8 @@ module LoginSystem
     redirect_to(new_account_login_path)
   end
 
-  # store current uri in  the session.
-  # we can return to this location by calling return_location
+  # store current uri in the session.
+  # we can return to this location by calling redirect_back_or_default
   def store_location
     session["return-to"] = request.fullpath
   end

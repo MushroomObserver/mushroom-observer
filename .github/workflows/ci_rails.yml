@@ -28,19 +28,16 @@ jobs:
       - name: Install additional tools
         run: sudo apt-get install exiftool
 
-      - name: Install Chrome/Chromium
-        run: sudo apt-get install chromium-browser
+      # 2025-05-12 JDC Skip this step for now because it hangs intermittently
+      # and is needed only for system tests, which are currently not run in CI.
+      # - name: Install Chrome/Chromium
+      #   run: sudo apt-get install chromium-browser
 
       # MySQL is installed but does not run by default
       # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-README.md#mysql
       - name: Start mySQL
         run: sudo systemctl start mysql.service
 
-      # https://github.com/trilogy-libraries/activerecord-trilogy-adapter/issues/64
-      # Issue in the trilogy gem where it cannot support `caching_sha2_password`
-      # https://github.com/trilogy-libraries/trilogy/issues/26
-      # For now need to ensure user is IDENTIFIED WITH `mysql_native_password`
-      # (change is in db/initialize.sql)
       - name: Create and configure db
         run: |
           mysql -u root -proot < db/initialize.sql
@@ -81,6 +78,23 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: ./coverage/lcov/lcov.info
+
+  lint:
+    runs-on: ubuntu-22.04
+    steps:
+      # check-out repo under $GITHUB_WORKSPACE, so that workflow can access it.
+      # https://github.com/actions/checkout
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # https://github.com/ruby/setup-ruby
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true # runs bundle install, caches gems      # See Rails 8 default
+      # https://github.com/rails/rails/blob/4a78dcb326e57b5035c4df322e31875bfa74ae23/.github/workflows/rubocop.yml#L1
+      - name: Run RuboCop
+        run: bundle exec rubocop --parallel
 
     # https://github.com/devmasx/brakeman-linter-action
     # Temporarily disable brakeman in CI because it causes an error

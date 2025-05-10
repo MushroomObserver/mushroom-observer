@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-#  link_to_coerced_query        # link to query coerced into different model
 #  link_with_query              # link_to with query params
 #  destroy_button               # button to destroy object
 #  post_button                  # button to post to a path
@@ -46,15 +45,6 @@ module LinkHelper
     active_link_to(add_query_param(link), **) { content }
   end
 
-  # Take a query which can be coerced into a different model, and create a link
-  # to the results of that coerced query.  Return +nil+ if not coercable.
-  def link_to_coerced_query(query, model)
-    tab = coerced_query_tab(query, model)
-    return nil unless tab
-
-    link_to(*tab)
-  end
-
   # Link should be to a controller action that renders the form in the modal.
   # Stimulus modal-toggle controller fetches the form from the link as a .
   # turbo-stream response. It also checks if it needs to generate a modal, or
@@ -80,7 +70,7 @@ module LinkHelper
 
   # Icon link with optional active state. (Tooltip title must be swapped in JS.)
   # Now also accepts active state options: active_icon, active_content
-  # NOTE: Takes same args as link_to, e.g. *edit_description_tab(desc, type)
+  # NOTE: Takes same args as link_to, e.g.
   # icon_link_to(text, path, **args). Can also print a button_to.
   def icon_link_to(text = nil, path = nil, options = {}, &block)
     return unless text
@@ -198,7 +188,9 @@ module LinkHelper
     chevron_up: "chevron-up",
     chevron_left: "chevron-left",
     chevron_right: "chevron-right",
-    qrcode: "qrcode"
+    qrcode: "qrcode",
+    mobile: "phone",
+    project: "th-list"
   }.freeze
 
   # button to destroy object
@@ -321,7 +313,7 @@ module LinkHelper
   # Pass a block and a name if you want an icon with tooltip
   # NOTE: button_to with block generates a button, not an input #quirksmode
   def any_method_button(name:, path:, method: :post, **args, &block)
-    content = block ? capture(&block) : name
+    block ? capture(&block) : name
     path, identifier, icon, content = button_atts(method, path, args, name)
 
     html_options = {

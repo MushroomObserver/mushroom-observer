@@ -35,7 +35,7 @@ module Name::Spelling
         results = guess_word("", words.first)
         (2..num).each do |i|
           next unless results.any?
-          next unless (i & 1).zero?
+          next unless i.even?
 
           prefixes = results.map(&:text_name).uniq
           results = []
@@ -52,10 +52,10 @@ module Name::Spelling
     # within Cladonia, but tons of guides use Cladina anyway, so people like to
     # enter novel names under Cladina, not realizing those names already exist
     # under Cladonia. Returns the parent in question which is deprecated (Name).
-    def parent_if_parent_deprecated(str)
+    def parent_if_parent_deprecated(user, str)
       result = nil
-      names = find_or_create_name_and_parents(str)
-      if names.any? && names.last && names.last.deprecated
+      names = find_or_create_name_and_parents(user, str)
+      if names.any? && names.last&.deprecated
         names.reverse_each do |name|
           return name if name.id
         end
@@ -67,8 +67,8 @@ module Name::Spelling
     # is a corresponding child under on of the synonymous parents.  Returns an
     # Array of candidates (Name's).
     # str = "Agaricus bogus var. namus"
-    def names_from_synonymous_genera(str, parent = nil)
-      parent ||= parent_if_parent_deprecated(str) # parent = <Agaricus>
+    def names_from_synonymous_genera(user, str, parent = nil)
+      parent ||= parent_if_parent_deprecated(user, str) # parent = <Agaricus>
       parse = parse_name(str)
       result = []
       if parent && parse
@@ -111,8 +111,14 @@ module Name::Spelling
     ############################################################################
 
     # Guess correct name of partial string.
-    # This method should be private.
-    # See https://www.pivotaltracker.com/story/show/176098819
+    # NOTE: jdc 20250324 (copied from pivotaltracker)
+    # guess_word and guess_with_errors should be private.
+    # They were intended to be private
+    # and had been placed after a call to private.
+    # But that call was ineffective, so it was removed.
+    # https://docs.rubocop.org/rubocop/1.0/cops_lint.html#lintuselessaccessmodifier
+    # Furthermore, they can't be privatized because they are tested directly.
+    # So the tests should be fixed first.
     def guess_word(prefix, word)
       str = "#{prefix} #{word}"
       results = guess_with_errors(str, 1)
@@ -122,8 +128,6 @@ module Name::Spelling
     end
 
     # Look up name replacing n letters at a time with a star.
-    # This method should be private.
-    # See https://www.pivotaltracker.com/story/show/176098819
     def guess_with_errors(name, count)
       patterns = []
 
@@ -144,7 +148,7 @@ module Name::Spelling
               sub = ""
               sub += word[0..(j - 1)] if j.positive?
               sub += "%"
-              sub += word[(j + count)..-1] if j + count < word.length
+              sub += word[(j + count)..] if j + count < word.length
               patterns << guess_pattern(words, i, sub)
             end
           end
@@ -161,9 +165,8 @@ module Name::Spelling
 
     # String words together replacing the one at +index+ with +sub+.
     def guess_pattern(words, index, sub) # :nodoc:
-      result = []
-      (0..(words.length - 1)).each do |j|
-        result << (index == j ? sub : words[j])
+      result = (0..(words.length - 1)).map do |j|
+        (index == j ? sub : words[j])
       end
       result.join(" ")
     end

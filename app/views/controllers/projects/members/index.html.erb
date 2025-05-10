@@ -1,10 +1,5 @@
 <%
-add_page_title(:index_members_title.t + " " + link_to_object(@project))
-
-    def project_tab(project)
-      [:show_object.t(TYPE: "Project"), add_query_param(project_path(id: project.id)),
-       { class: tab_id(__method__.to_s) }]
-    end
+add_project_banner(@project)
 
 @container = :wide
 
@@ -32,6 +27,7 @@ action = { controller: "/projects/members", action: :create,
     <tr>
       <th class="text-center"><%= :Login_name.t %></th>
       <th><%= :Full_name.t %></th>
+      <th><%= :PROJECT_ALIASES.t %></th>
       <th><%= :Status.t %></th>
       <th></th>
     </tr>
@@ -40,22 +36,27 @@ action = { controller: "/projects/members", action: :create,
     <% @users.sort_by(&:login).each do |user| %>
       <tr>
         <td class="text-center">
-	  <%= if user.image_id
+          <%= if user.image_id
           interactive_image(
+            user,
             Image.find(user.image_id), votes: false, size: :thumbnail
           )
-	      end %>
+              end %>
           <%= user_link(user, user.login) %>
         </td>
         <td class="align-middle">
           <%= user.name %>
         </td>
         <td class="align-middle">
+          <%= render(partial: "projects/aliases",
+                     locals: { project: @project, target: user }) %>
+        </td>
+        <td class="align-middle">
           <%= @project.member_status(user) %>
         </td>
         <td class="align-middle">
-	  <% if @project.is_admin?(@user) %>
-	    <%= link_with_query(:change_member_status_change_status.t,
+          <% if @project.is_admin?(@user) %>
+            <%= link_with_query(:change_member_status_change_status.t,
                     edit_project_member_path(project_id: @project.id,
                         candidate: user.id)) %>
           <% end %>

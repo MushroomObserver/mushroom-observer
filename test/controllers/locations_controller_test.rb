@@ -174,68 +174,65 @@ class LocationsControllerTest < FunctionalTestCase
 
   # Tests of index, with tests arranged as follows:
   # default subaction; then
-  # other subactions in order of @index_subaction_param_keys
+  # other subactions in order of index_active_params
   # miscellaneous tests using get(:index)
   def test_index
     login
     get(:index)
 
-    assert_displayed_title("Locations by Name")
+    assert_displayed_title(:LOCATIONS.l)
   end
 
   def test_index_with_non_default_sort
-    login
-
-    sort_orders = %w[num_views box_area]
-    sort_orders.each do |order|
-      get(:index, params: { by: order })
-      assert_displayed_title("Locations by #{:"sort_by_#{order}".l}")
-    end
+    check_index_sorting
   end
 
-  def test_index_bounding_box
-    north = south = east = west = 0
-    delta = 0.001
+  def test_index_sorted_by_box_area
+    check_index_sorted_by(:reverse_box_area, do_login: true)
+  end
+
+  def test_index_sorted_by_scientific_name
+    login("roy")
+
+    check_index_sorted_by(:name, do_login: false)
+  end
+
+  def test_index_project
+    project = projects(:open_membership_project)
+
     login
-    get(:index,
-        params: { north: north, south: south, east: east, west: west })
-    query = Query.find(QueryRecord.last.id)
+    get(:index, params: { project: project.id })
 
-    assert_equal(north + delta, query.params[:north])
-    assert_equal(south - delta, query.params[:south])
-    assert_equal(east + delta, query.params[:east])
-    assert_equal(west - delta, query.params[:west])
-
-    get(:index,
-        params: { north: 90, south: -90, east: 180, west: -180 })
-    query = Query.find(QueryRecord.last.id)
-    assert_equal(90, query.params[:north])
-    assert_equal(-90, query.params[:south])
-    assert_equal(180, query.params[:east])
-    assert_equal(-180, query.params[:west])
+    location = project.observations[0].location
+    assert_match(location.display_name, @response.body)
   end
 
   def test_index_advanced_search
-    query = Query.lookup_and_save(:Location, :advanced_search,
-                                  location: "California")
+    where = "California"
+    query = Query.lookup_and_save(:Location, search_where: where)
+    matches = Location.name_has(where)
+
     login
     get(:index,
         params: @controller.query_params(query).merge(advanced_search: true))
 
     assert_response(:success)
     assert_template("index")
-    assert_displayed_title("Advanced Search")
+    assert_select(
+      "#content a:match('href', ?)", %r{#{locations_path}/\d+},
+      { count: matches.count }, "Wrong number of Locations"
+    )
+    assert_displayed_title(:LOCATIONS.l)
+    assert_displayed_filters("#{:query_search_where.l}: #{where}")
   end
 
   def test_index_advanced_search_error
-    query_without_conditions = Query.lookup_and_save(
-      :Location, :advanced_search
-    )
+    query_no_conditions = Query.lookup_and_save(:Location)
 
     login
-    get(:index,
-        params: @controller.query_params(query_without_conditions).
-                            merge(advanced_search: true))
+    params = @controller.query_params(query_no_conditions).
+             merge(advanced_search: true)
+    get(:index, params:)
 
     assert_flash_error(:runtime_no_conditions.l)
     assert_redirected_to(search_advanced_path)
@@ -243,11 +240,17 @@ class LocationsControllerTest < FunctionalTestCase
 
   def test_index_pattern
     search_str = "California"
+    matches = Location.where(Location[:name].matches("%#{search_str}%"))
 
     login
     get(:index, params: { pattern: search_str })
 
-    assert_displayed_title("Locations Matching ‘#{search_str}’")
+    assert_select(
+      "#content a:match('href', ?)", %r{#{locations_path}/\d+},
+      { count: matches.count }, "Wrong number of Locations"
+    )
+    assert_displayed_title(:LOCATIONS.l)
+    assert_displayed_filters("#{:query_pattern.l}: #{search_str}")
   end
 
   def test_index_pattern_id
@@ -260,17 +263,16 @@ class LocationsControllerTest < FunctionalTestCase
 
   def test_index_country
     country = "USA"
+    matches = Location.where(Location[:name].matches("%#{country}"))
 
     login
     get(:index, params: { country: country })
 
-    # Use a regexp because the title is buggy and may change. jdc 2023-02-23.
-    # https://www.pivotaltracker.com/story/show/184554008
-    assert_displayed_title(/^Locations Matching ‘#{country}.?’/)
+    assert_displayed_title(:LOCATIONS.l)
+    assert_displayed_filters("#{:query_regexp.l}: #{country}")
     assert_select(
       "#content a:match('href', ?)", %r{#{locations_path}/\d+},
-      { count: Location.where(Location[:name].matches("%#{country}")).count },
-      "Wrong number of Locations"
+      { count: matches.count }, "Wrong number of Locations"
     )
   end
 
@@ -281,11 +283,11 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { country: country })
 
-    assert_displayed_title(/^Locations Matching ‘#{country}.?’/)
+    assert_displayed_title(:LOCATIONS.l)
+    assert_displayed_filters("#{:query_regexp.l}: #{country}")
     assert_select(
       "#content a:match('href', ?)", /#{location_path(new_mexico)}/,
-      true,
-      "USA page should include New Mexico"
+      true, "USA page should include New Mexico"
     )
   end
 
@@ -315,12 +317,17 @@ class LocationsControllerTest < FunctionalTestCase
 
   def test_index_country_missing_country_with_apostrophe
     country = "Cote d'Ivoire"
+    matches = Location.where(Location[:name].matches("%#{country}"))
 
     login
     get(:index, params: { country: country })
 
     assert_template("index")
     assert_flash_text(:runtime_no_matches.l(type: :locations.l))
+    assert_select(
+      "#content a:match('href', ?)", %r{#{locations_path}/\d+},
+      { count: matches.count }, "Wrong number of Locations"
+    )
   end
 
   def test_index_by_user_who_created_multiple_locations
@@ -330,7 +337,8 @@ class LocationsControllerTest < FunctionalTestCase
     get(:index, params: { by_user: user.id })
 
     assert_template("index")
-    assert_displayed_title("Locations created by #{user.name}")
+    assert_displayed_title(:LOCATIONS.l)
+    assert_displayed_filters("#{:query_by_users.l}: #{user.name}")
     assert_select(
       "#content a:match('href', ?)", %r{#{locations_path}/\d+},
       { count: Location.where(user: user).count },
@@ -382,7 +390,8 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_editor: user.id })
 
-    assert_displayed_title("Locations Edited by #{user.name}")
+    assert_displayed_title(:LOCATIONS.l)
+    assert_displayed_filters("#{:query_by_editor.l}: #{user.name}")
     assert_select("a:match('href',?)", %r{^/locations/\d+},
                   { count: locs_edited_by_user.count },
                   "Wrong number of results")
@@ -391,7 +400,7 @@ class LocationsControllerTest < FunctionalTestCase
   def test_index_by_editor_of_one_location
     user = katrina
     locs_edited_by_user = Location.joins(:versions).
-                          where.not(user: user).
+                          where.not(user_id: user.id).
                           where(versions: { user_id: user.id })
     assert(locs_edited_by_user.one?)
 
@@ -493,7 +502,8 @@ class LocationsControllerTest < FunctionalTestCase
     params[:location][:display_name] = " Strip  This,  Maine,  USA "
     post(:create, params: params)
     assert_response(:redirect)
-    assert_equal("Strip This, Maine, USA", Location.last.display_name)
+    assert_equal("Strip This, Maine, USA",
+                 Location.last.display_name)
   end
 
   def test_construct_location_errors
@@ -749,9 +759,11 @@ class LocationsControllerTest < FunctionalTestCase
     past_descs_to_go = 0
 
     # Cannot use fixture here -- in these classes
-    # fixtures with location `alibion` break API2Test#test_patching_locations
+    # fixtures with location `albion` break API2Test#test_patching_locations
     herbarium = Herbarium.create(name: "Herbarium to move", location: to_go)
     project = Project.create(title: "Project to move", location: to_go)
+    project_alias = ProjectAlias.create(project:, name: "ALB", target: to_go,
+                                        target_type: "Location")
 
     make_admin("rolf")
     put(:update, params: params)
@@ -765,6 +777,7 @@ class LocationsControllerTest < FunctionalTestCase
                  LocationDescription::Version.count)
     assert_equal(to_stay, herbarium.reload.location)
     assert_equal(to_stay, project.reload.location)
+    assert_equal(to_stay, project_alias.reload.target)
     assert_match(old_notes, to_stay.reload.notes,
                  "Location.notes should include pre-merger notes")
   end
@@ -885,12 +898,6 @@ class LocationsControllerTest < FunctionalTestCase
   end
 
   def named_obs_query(name)
-    Query.lookup(:Observation, :pattern_search, pattern: name, by: :name)
-  end
-
-  def test_coercing_sorted_observation_query_into_location_query
-    @controller.
-      coerce_query_for_undefined_locations(named_obs_query("Pasadena").
-      coerce(:Location))
+    Query.lookup(:Observation, pattern: name, order_by: :name)
   end
 end

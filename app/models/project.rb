@@ -76,9 +76,12 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   has_many :project_observations, dependent: :destroy
   has_many :observations, through: :project_observations
+  has_many :locations, through: :observations
 
   has_many :project_species_lists, dependent: :destroy
   has_many :species_lists, through: :project_species_lists
+
+  has_many :aliases, class_name: "ProjectAlias", dependent: :destroy
 
   before_destroy :orphan_drafts
   validates :field_slip_prefix, uniqueness: true, allow_blank: true
@@ -87,10 +90,46 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
             format: { with: /\A[A-Z0-9][A-Z0-9-]*\z/,
                       message: proc { :alphanumerics_only.t } }
 
+  scope :order_by_default,
+        -> { order_by(::Query::Projects.default_order) }
+
+  scope :members, lambda { |members|
+    joins(user_group: :user_group_users).
+      merge(UserGroupUser.where(user: members))
+  }
+  scope :title_has,
+        ->(phrase) { search_columns(Project[:title], phrase) }
+  scope :has_summary,
+        ->(bool = true) { not_blank_condition(Project[:summary], bool:) }
+  scope :summary_has,
+        ->(phrase) { search_columns(Project[:summary], phrase) }
+  scope :field_slip_prefix_has,
+        ->(phrase) { search_columns(Project[:field_slip_prefix], phrase) }
+
+  scope :has_images,
+        ->(bool = true) { joined_relation_condition(:project_images, bool:) }
+  scope :has_observations, lambda { |bool = true|
+    joined_relation_condition(:project_observations, bool:)
+  }
+  scope :has_species_lists, lambda { |bool = true|
+    joined_relation_condition(:project_species_lists, bool:)
+  }
+
+  scope :pattern, lambda { |phrase|
+    cols = (Project[:title] + Project[:summary].coalesce("") +
+            Project[:field_slip_prefix].coalesce(""))
+    search_columns(cols, phrase).distinct
+  }
+
   scope :show_includes, lambda {
     strict_loading.includes(
       { comments: :user },
       :location
+    )
+  }
+  scope :violations_includes, lambda {
+    strict_loading.includes(
+      { observations: [:location, :user] }
     )
   }
 
@@ -149,6 +188,14 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     open_membership && !member?(user)
   end
 
+  def join(user)
+    return unless can_join?(user)
+
+    ProjectMember.create!(project: self, user:,
+                          trust_level: "hidden_gps")
+    user_group.users << user unless user_group.users.member?(user)
+  end
+
   def can_leave?(user)
     user && user_group.users.member?(user) && user.id != user_id
   end
@@ -171,6 +218,10 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def constraints
     "#{:DATES.t}: #{date_range}; #{:LOCATION.t}: #{place_name}"
+  end
+
+  def constraints?
+    start_date || end_date || location
   end
 
   # Check if user has permission to edit a given object.
@@ -399,6 +450,10 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     Checklist::ForProject.new(self).num_taxa
   end
 
+  def location_count
+    locations.distinct.count
+  end
+
   def count_collections(name)
     observations.where(name:).count
   end
@@ -420,14 +475,6 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   #  :section: queries re related Observations
   #
   ##############################################################################
-
-  def happening?
-    now = Time.zone.now
-    return false if start_date.present? && now < start_date
-    return false if end_date.present? && now > end_date
-
-    true
-  end
 
   def out_of_range_observations
     if start_date.nil? && end_date.nil?
@@ -489,7 +536,22 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     member?(user) || can_join?(user)
   end
 
+  def alias_data(target)
+    @target_alias_details ||= target_alias_details(target.class)
+    @target_alias_details[target.id] || []
+  end
+
   private ###############################
+
+  def target_alias_details(target_type)
+    aliases.
+      where(target_type:).
+      order(:name).
+      group_by(&:target_id).
+      transform_values do |aliases|
+        aliases.map { |project_alias| [project_alias.name, project_alias.id] }
+      end
+  end
 
   def obs_geoloc_outside_project_location
     observations.

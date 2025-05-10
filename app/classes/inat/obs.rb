@@ -17,6 +17,7 @@
 #                        Cf. [:private_location]
 #                        https://help.inaturalist.org/en/support/solutions/articles/151000169938-what-is-geoprivacy-what-does-it-mean-for-an-observation-to-be-obscured-
 #  inat_obs_fields::       array of fields, each field a hash. == [:ofvs]
+#  inat_prov_name_field::  (first) Provisional Species Name field
 #  [:observation_photos]   array of photos
 #  [:place_guess]          iNat's best guess at the location
 #  [:private_location]     lat, lng. Cf. [:location]
@@ -44,8 +45,10 @@
 #
 # == Other mappings used in MO Observations
 #
-#  dqa::               data quality grade
-#  provisional_name::  MO text_name corresponding to inat_prov_name
+#  dqa::                  data quality grade
+#  provisional_name::     MO text_name corresponding to inat_prov_name
+#  snapshot::             summary of state of Inat observation
+#  suggested_id_names::   suggested id taxon names
 #
 # == Utilities
 #
@@ -58,11 +61,9 @@ class Inat
     end
 
     # Allow hash key access to the iNat observation data
-    def [](key) = @obs[key]
+    delegate :[], to: :@obs
 
-    def []=(key, value)
-      @obs[key] = value
-    end
+    delegate :[]=, to: :@obs
 
     ########## iNat attributes
 
@@ -178,36 +179,37 @@ class Inat
 
     # The MO text_name for an iNat provisional species name
     def provisional_name
-      prov_sp_name = inat_prov_name
-      return nil if prov_sp_name.blank?
-      return prov_sp_name if in_mo_format?(prov_sp_name)
+      return nil if inat_prov_name.blank?
 
-      # prepend the epithet with "sp-"
-      # epithet must start with lower case letter, else MO thinks it's an author
-      # quote the epithet by convention to indicate it will be replaced
-      # by a ICN style published or provisional name.
-      # Ex: Donadinia PNW01 => Donadinia "sp-PNW01"
-      prov_sp_name.sub(/ (.*)/, ' "sp-\1"')
+      inat_prov_name
     end
 
     # derive a provisional name from some specific Observation Fields
     # NOTE: iNat does not allow provisional names as identifications.
-    # Also, iNat allows only 1 obs field with a given :name per obs.
-    # I assume iNat users will add only 1 provisional name per obs.
+    # Also, iNat allows only 1 obs field with a given :name per obs,
+    # so there can be only 1 Provisional Species Name per obs.
+    # NOTE: Edge case -- obs also has Provisional Genus Name, etc.
+    # NOTE: I assume iNat users will add only 1 provisional name per obs.
     def inat_prov_name
-      obs_fields = inat_obs_fields
-      return nil if obs_fields.blank?
-
-      prov_name_field =
-        inat_obs_fields.find do |field|
-          field[:name] =~ /^Provisional Species Name/
-        end
+      prov_name_field = inat_prov_name_field
       return nil if prov_name_field.blank?
 
       prov_name_field[:value]
     end
 
+    def inat_prov_name_field
+      obs_fields = inat_obs_fields
+      return nil if obs_fields.blank?
+
+      inat_obs_fields.
+        find { |field| field[:name] =~ /^Provisional Species Name/ }
+    end
+
     def snapshot
+      snapshop_raw_str.gsub(/^\s+/, "")
+    end
+
+    def snapshop_raw_str
       result = ""
       {
         USER: self[:user][:login],
@@ -216,6 +218,7 @@ class Inat
         PLACE: self[:place_guess],
         ID: inat_taxon_name,
         DQA: dqa,
+        show_observation_inat_suggested_ids: suggested_id_names,
         OBSERVATION_FIELDS: obs_fields(inat_obs_fields),
         PROJECTS: :inat_not_imported.t,
         ANNOTATIONS: :inat_not_imported.t,
@@ -223,7 +226,18 @@ class Inat
       }.each do |label, value|
         result += "#{label.to_sym.t}: #{value}\n"
       end
-      result.gsub(/^\s+/, "")
+      result
+    end
+
+    def suggested_id_names
+      # Get unique suggested taxon ids
+      # (iNat allows multiple suggestions for a single observation)
+      "\n#{
+        self[:identifications].each_with_object([]) do |id, ary|
+          ary << "&nbsp;&nbsp;_#{id[:taxon][:name]}_ by #{id[:user][:login]} " \
+          "#{id[:created_at_details][:date]}"
+        end.join("\n")
+      }"
     end
 
     def lat_lon_accuracy
@@ -275,7 +289,7 @@ class Inat
 
     def to_rad(degrees) = degrees * Math::PI / 180.0
 
-    # copied from AutoComplete::ForLocationContaining
+    # copied from Autocomplete::ForLocationContaining
     def location_box(loc)
       Mappable::Box.new(north: loc[:north], south: loc[:south],
                         east: loc[:east], west: loc[:west])

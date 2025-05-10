@@ -10,7 +10,6 @@ module Account
       password: "new_password",
       password_confirmation: "new_password",
       email: "new@email.com",
-      email_comments_all: "",
       email_comments_owner: "1",
       email_comments_response: "1",
       email_general_commercial: "1",
@@ -18,15 +17,12 @@ module Account
       email_general_question: "1",
       email_html: "1",
       email_locations_admin: "1",
-      email_locations_all: "",
       email_locations_author: "1",
       email_locations_editor: "",
       email_names_admin: "1",
-      email_names_all: "",
       email_names_author: "1",
       email_names_editor: "",
       email_names_reviewer: "1",
-      email_observations_all: "",
       email_observations_consensus: "1",
       email_observations_naming: "1",
       hide_authors: "above_species",
@@ -41,8 +37,8 @@ module Account
       thumbnail_maps: "",
       view_owner_id: "",
       votes_anonymous: "yes",
-      with_images: "1",
-      with_specimen: "1",
+      has_images: "1",
+      has_specimen: "1",
       lichen: "yes",
       region: "California, USA",
       clade: "Ascomycota"
@@ -67,8 +63,8 @@ module Account
       assert_input_value(:user_thumbnail_maps, "1")
       assert_input_value(:user_view_owner_id, "1")
       assert_input_value(:user_image_size, "medium")
-      assert_input_value(:user_with_images, "")
-      assert_input_value(:user_with_specimen, "")
+      assert_input_value(:user_has_images, "")
+      assert_input_value(:user_has_specimen, "")
       assert_input_value(:user_lichen, nil)
       assert_input_value(:user_region, "")
       assert_input_value(:user_clade, "")
@@ -91,7 +87,6 @@ module Account
       assert_input_value(:user_password, "")
       assert_input_value(:user_password_confirmation, "")
       assert_input_value(:user_email, "new@email.com")
-      assert_input_value(:user_email_comments_all, "")
       assert_input_value(:user_email_comments_owner, "1")
       assert_input_value(:user_email_comments_response, "1")
       assert_input_value(:user_email_general_commercial, "1")
@@ -99,15 +94,12 @@ module Account
       assert_input_value(:user_email_general_question, "1")
       assert_input_value(:user_email_html, "1")
       assert_input_value(:user_email_locations_admin, "1")
-      assert_input_value(:user_email_locations_all, "")
       assert_input_value(:user_email_locations_author, "1")
       assert_input_value(:user_email_locations_editor, "")
       assert_input_value(:user_email_names_admin, "1")
-      assert_input_value(:user_email_names_all, "")
       assert_input_value(:user_email_names_author, "1")
       assert_input_value(:user_email_names_editor, "")
       assert_input_value(:user_email_names_reviewer, "1")
-      assert_input_value(:user_email_observations_all, "")
       assert_input_value(:user_email_observations_consensus, "1")
       assert_input_value(:user_email_observations_naming, "1")
       assert_input_value(:user_hide_authors, "above_species")
@@ -122,8 +114,8 @@ module Account
       assert_input_value(:user_thumbnail_maps, "")
       assert_input_value(:user_view_owner_id, "")
       assert_input_value(:user_votes_anonymous, "yes")
-      assert_input_value(:user_with_images, "1")
-      assert_input_value(:user_with_specimen, "1")
+      assert_input_value(:user_has_images, "1")
+      assert_input_value(:user_has_specimen, "1")
       assert_input_value(:user_lichen, "yes")
       assert_input_value(:user_region, "California, USA")
       assert_input_value(:user_clade, "Ascomycota")
@@ -143,7 +135,6 @@ module Account
       assert_flash_text(:runtime_prefs_success.t)
       user = rolf.reload
       assert_equal("new@email.com", user.email)
-      assert_equal(false, user.email_comments_all)
       assert_equal(true, user.email_comments_owner)
       assert_equal(true, user.email_comments_response)
       assert_equal(true, user.email_general_commercial)
@@ -151,15 +142,12 @@ module Account
       assert_equal(true, user.email_general_question)
       assert_equal(true, user.email_html)
       assert_equal(true, user.email_locations_admin)
-      assert_equal(false, user.email_locations_all)
       assert_equal(true, user.email_locations_author)
       assert_equal(false, user.email_locations_editor)
       assert_equal(true, user.email_names_admin)
-      assert_equal(false, user.email_names_all)
       assert_equal(true, user.email_names_author)
       assert_equal(false, user.email_names_editor)
       assert_equal(true, user.email_names_reviewer)
-      assert_equal(false, user.email_observations_all)
       assert_equal(true, user.email_observations_consensus)
       assert_equal(true, user.email_observations_naming)
       assert_equal("above_species", user.hide_authors)
@@ -174,8 +162,8 @@ module Account
       assert_equal(false, user.thumbnail_maps)
       assert_equal(false, user.view_owner_id)
       assert_equal("yes", user.votes_anonymous)
-      assert_equal("yes", user.content_filter[:with_images])
-      assert_equal("yes", user.content_filter[:with_specimen])
+      assert_equal("yes", user.content_filter[:has_images])
+      assert_equal("yes", user.content_filter[:has_specimen])
       assert_equal("yes", user.content_filter[:lichen])
       assert_equal("California, USA", user.content_filter[:region])
       assert_equal("Ascomycota", user.content_filter[:clade])
@@ -272,17 +260,13 @@ module Account
       [
         :comments_owner,
         :comments_response,
-        :comments_all,
         :observations_consensus,
         :observations_naming,
-        :observations_all,
         :names_author,
         :names_editor,
         :names_reviewer,
-        :names_all,
         :locations_author,
         :locations_editor,
-        :locations_all,
         :general_feature,
         :general_commercial,
         :general_question

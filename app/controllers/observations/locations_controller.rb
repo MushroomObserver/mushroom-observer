@@ -12,7 +12,7 @@ module Observations
     #
     ############################################################################
 
-    # NOTE: This "form" is only accessed from one index flavor,
+    # NOTE: This "form" is only accessed from one index param,
     #       "OBSERVATIONS AT WHERE"
     #
     # It's a UI for Observations lacking a Location association in the db,
@@ -47,7 +47,7 @@ module Observations
       # and we're also assuming "postal" order when splitting the string.
       @where = params[:where].to_s
       @matches = locations_matching_where
-      @pages = paginate_locations!
+      @pagination_data = paginate_locations!
     end
 
     # Adds the Observation's associated with obs.where == params[:where]
@@ -76,28 +76,28 @@ module Observations
     private
 
     def locations_matching_where
-      matches = Location.name_includes(@where)
+      matches = Location.name_has(@where)
 
       # Try for segments: split by comma, or by space if no commas
       places = @where.split(",")
       words = @where.split
-      return unless places.length > 1 || words.length > 1
+      return matches unless places.length > 1 || words.length > 1
 
-      matches += Location.name_includes(places.first)
+      matches += Location.name_has(places.first)
       # Try for specific segment matches if we have enough of them.
       if places.length > 2
-        matches += Location.name_includes(places.second_to_last.strip)
+        matches += Location.name_has(places.second_to_last.strip)
       end
       if places.length >= 2
-        matches += Location.name_includes(places.second_to_last.split.last)
+        matches += Location.name_has(places.second_to_last.split.last)
       end
-      matches += Location.name_includes(words.first)
+      matches += Location.name_has(words.first)
 
       matches.uniq
     end
 
     def paginate_locations!
-      pages = paginate_numbers(:page, 100)
+      pages = number_pagination_data(:page, 100)
       pages.num_total = @matches.length
       @matches = @matches[pages.from..pages.to]
       pages

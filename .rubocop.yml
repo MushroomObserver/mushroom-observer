@@ -1,31 +1,15 @@
+
+# RuboCop configuration
+# https://docs.rubocop.org/rubocop/configuration.html
+
 inherit_from: .rubocop_todo.yml
 inherit_mode:
   merge:
     - Exclude
 
-require:
+plugins:
   - rubocop-performance
   - rubocop-rails
-
-# ------------------------------------------------------------------------------
-# Updating RuboCop
-#
-# *** Update The Codeclimate Channel When Updating Rubocop
-# See docs.codeclimate.com/docs/rubocop#section-using-rubocop-s-newer-versions
-# Use the highest available channel that's compatible with the RuboCop version.
-# Available channels: https://github.com/codeclimate/codeclimate-rubocop/branches/all?utf8=%E2%9C%93&query=channel%2Frubocop
-# .codeclimate.yml specifies the RuboCop version ('channel') used
-# by Code Climate, which can be different than the version in Gemfile.lock
-#
-# *** Re-generate the RuboCop auto-configuration todo list
-# at least run rubocop --regenerate-todo and commit changes
-# optionally follow other suggestions at
-# https://docs.rubocop.org/rubocop/configuration.html#automatically-generated-configuration
-#
-# ------------------------------------------------------------------------------
-
-# RuboCop configuration
-# https://docs.rubocop.org/rubocop/configuration.html
 
 AllCops:
   NewCops: enable
@@ -134,6 +118,12 @@ Naming/BlockForwarding:
   # Default is `anonymous`
   # Keeping it `explicit` until we're ready to switch.
   EnforcedStyle: explicit
+Naming/VariableNumber:
+  # We have a mix of snake_case and normal case.
+  # Standardizing plus creating exceptions, would take some effort,
+  # is low priority, and the devs are good with disabling the cop.
+  # 2025-05-08 jdc
+  Enabled: false
 
 Performance/Casecmp:
   # This cop does not work with Unicode in Ruby 2.4

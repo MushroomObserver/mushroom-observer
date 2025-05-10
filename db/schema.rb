@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_10_08_225112) do
+ActiveRecord::Schema[7.2].define(version: 2025_04_03_174427) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -28,6 +28,13 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_08_225112) do
     t.integer "rss_log_id"
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
+  end
+
+  create_table "banners", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.text "message"
+    t.integer "version"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "collection_numbers", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -83,6 +90,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_08_225112) do
   create_table "external_sites", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.string "name", limit: 100
     t.integer "project_id"
+    t.string "base_url", null: false
   end
 
   create_table "field_slip_job_trackers", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -209,6 +217,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_08_225112) do
     t.integer "importables"
     t.integer "imported_count"
     t.string "response_errors"
+    t.datetime "ended_at"
   end
 
   create_table "interests", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -544,6 +553,25 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_08_225112) do
     t.index ["needs_naming"], name: "needs_naming_index"
   end
 
+  create_table "original_image_requests", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.integer "user_id"
+    t.integer "image_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "project_aliases", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.integer "project_id", null: false
+    t.integer "target_id", null: false
+    t.string "target_type", null: false
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name", "project_id"], name: "index_project_aliases_on_name_and_project_id", unique: true
+    t.index ["project_id"], name: "index_project_aliases_on_project_id"
+    t.index ["target_type", "target_id"], name: "index_project_aliases_on_target_type_and_target_id"
+  end
+
   create_table "project_images", charset: "utf8mb3", force: :cascade do |t|
     t.integer "image_id", null: false
     t.integer "project_id", null: false
@@ -601,7 +629,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_08_225112) do
     t.datetime "updated_at", precision: nil
     t.integer "access_count"
     t.text "description"
-    t.integer "outer_id"
   end
 
   create_table "queued_email_integers", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -875,17 +902,13 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_08_225112) do
     t.string "locale", limit: 5
     t.boolean "email_comments_owner", default: true, null: false
     t.boolean "email_comments_response", default: true, null: false
-    t.boolean "email_comments_all", default: false, null: false
     t.boolean "email_observations_consensus", default: true, null: false
     t.boolean "email_observations_naming", default: true, null: false
-    t.boolean "email_observations_all", default: false, null: false
     t.boolean "email_names_author", default: true, null: false
     t.boolean "email_names_editor", default: false, null: false
     t.boolean "email_names_reviewer", default: true, null: false
-    t.boolean "email_names_all", default: false, null: false
     t.boolean "email_locations_author", default: true, null: false
     t.boolean "email_locations_editor", default: false, null: false
-    t.boolean "email_locations_all", default: false, null: false
     t.boolean "email_general_feature", default: true, null: false
     t.boolean "email_general_commercial", default: true, null: false
     t.boolean "email_general_question", default: true, null: false
@@ -914,6 +937,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_08_225112) do
     t.boolean "blocked", default: false, null: false
     t.boolean "no_emails", default: false, null: false
     t.string "inat_username"
+    t.integer "original_image_quota", default: 0
     t.index ["login"], name: "login_index"
   end
 
@@ -950,6 +974,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_08_225112) do
     t.index ["observation_id"], name: "observation_index"
   end
 
+  add_foreign_key "project_aliases", "projects"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
