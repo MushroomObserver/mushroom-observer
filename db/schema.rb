@@ -45,11 +45,11 @@ ActiveRecord::Schema[7.2].define(version: 2025_04_03_174427) do
     t.string "number"
   end
 
-  create_table "comments", id: :integer, charset: "utf8mb3", force: :cascade do |t|
+  create_table "comments", id: :integer, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.integer "user_id"
     t.string "summary", limit: 100
-    t.text "comment"
+    t.text "comment", size: :medium
     t.string "target_type", limit: 30
     t.integer "target_id"
     t.datetime "updated_at", precision: nil
@@ -656,11 +656,11 @@ ActiveRecord::Schema[7.2].define(version: 2025_04_03_174427) do
     t.integer "to_user_id"
   end
 
-  create_table "rss_logs", id: :integer, charset: "utf8mb3", force: :cascade do |t|
+  create_table "rss_logs", id: :integer, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "observation_id"
     t.integer "species_list_id"
     t.datetime "updated_at", precision: nil
-    t.text "notes"
+    t.text "notes", size: :medium
     t.integer "name_id"
     t.integer "location_id"
     t.integer "project_id"

@@ -265,6 +265,28 @@ class CommentsControllerTest < FunctionalTestCase
     assert_equal("Some text.", comment.comment)
   end
 
+  def test_save_comment_with_emojis
+    assert_equal(10, rolf.contribution)
+    obs = observations(:minimal_unknown_obs)
+    comment_count = obs.comments.size
+    params = { target: obs.id,
+               type: "Observation",
+               comment: { summary: "🍄 emoji in summary",
+                          comment: "🍄‍🟫 and in body" } }
+
+    assert_nothing_raised do
+      post_requires_login(:create, params)
+    end
+
+    assert_redirected_to(permanent_observation_path(obs.id))
+    assert_equal(11, rolf.reload.contribution)
+    obs.reload
+    assert_equal(comment_count + 1, obs.comments.size)
+    comment = Comment.last
+    assert_equal("🍄 emoji in summary", comment.summary)
+    assert_equal("🍄‍🟫 and in body", comment.comment)
+  end
+
   def test_update_comment
     comment = comments(:minimal_unknown_obs_comment_1)
     obs = comment.target
