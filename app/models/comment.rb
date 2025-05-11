@@ -126,6 +126,7 @@ class Comment < AbstractModel
     }, foreign_key: "target_id", inverse_of: :comments
   end
 
+  # Default broadcasting. create/update not working locally after first job.
   # broadcasts_to(->(comment) { [comment.target, :comments] },
   #               inserts_by: :prepend, partial: "comments/comment",
   #               locals: { controls: true },
@@ -143,8 +144,8 @@ class Comment < AbstractModel
     broadcast_remove_to(comment.target, :comments)
   }
 
-  # after_create :notify_users
-  # after_create :oil_and_water
+  after_create :notify_users
+  after_create :oil_and_water
 
   scope :order_by_default,
         -> { order_by(::Query::Comments.default_order) }
