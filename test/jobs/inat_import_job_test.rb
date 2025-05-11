@@ -481,33 +481,6 @@ class InatImportJobTest < ActiveJob::TestCase
     end
   end
 
-  def test_oauth_failure
-    create_ivars_from_filename("calostoma_lutescens")
-
-    oauth_return = { status: 401, body: "Unauthorized",
-                     headers: { "Content-Type" => "application/json" } }
-    stub_oauth_token_request(oauth_return: oauth_return)
-
-    InatImportJob.perform_now(@inat_import)
-
-    assert_match(/401 Unauthorized/, @inat_import.response_errors,
-                 "Failed to report OAuth failure")
-  end
-
-  def test_jwt_failure
-    create_ivars_from_filename("calostoma_lutescens")
-
-    stub_oauth_token_request
-    jwt_return = { status: 401, body: "Unauthorized",
-                   headers: { "Content-Type" => "application/json" } }
-    stub_jwt_request(jwt_return: jwt_return)
-
-    InatImportJob.perform_now(@inat_import)
-
-    assert_match(/401 Unauthorized/, @inat_import.response_errors,
-                 "Failed to report OAuth failure")
-  end
-
   def test_import_anothers_observation
     create_ivars_from_filename("calostoma_lutescens")
 
@@ -540,6 +513,33 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     assert_empty(@inat_import.response_errors, "There should be no errors")
+  end
+
+  def test_oauth_failure
+    create_ivars_from_filename("calostoma_lutescens")
+
+    oauth_return = { status: 401, body: "Unauthorized",
+                     headers: { "Content-Type" => "application/json" } }
+    stub_oauth_token_request(oauth_return: oauth_return)
+
+    InatImportJob.perform_now(@inat_import)
+
+    assert_match(/401 Unauthorized/, @inat_import.response_errors,
+                 "Failed to report OAuth failure")
+  end
+
+  def test_jwt_failure
+    create_ivars_from_filename("calostoma_lutescens")
+
+    stub_oauth_token_request
+    jwt_return = { status: 401, body: "Unauthorized",
+                   headers: { "Content-Type" => "application/json" } }
+    stub_jwt_request(jwt_return: jwt_return)
+
+    InatImportJob.perform_now(@inat_import)
+
+    assert_match(/401 Unauthorized/, @inat_import.response_errors,
+                 "Failed to report OAuth failure")
   end
 
   ########## Utilities
