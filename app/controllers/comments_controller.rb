@@ -307,14 +307,8 @@ class CommentsController < ApplicationController
   def refresh_comments_or_redirect_to_show
     # Comment broadcasts are sent from the model
     respond_to do |format|
-      format.turbo_stream { head(:ok) } # do
-      #   case action_name
-      #   when "create", "update"
-      #     render(turbo_stream: turbo_stream.prepend("comments", @comment))
-      #   when "destroy"
-      #     render(turbo_stream: turbo_stream.remove(@comment))
-      #   end
-      # end
+      # Simply send a head response for turbo here.
+      format.turbo_stream { head(:ok) }
       format.html do
         redirect_with_query(controller: @target.show_controller,
                             action: @target.show_action, id: @target.id)
