@@ -91,7 +91,7 @@ class InatImportJobTest < ActiveJob::TestCase
       user.inat_username
     @mock_inat_response = JSON.generate(parsed_response)
     @parsed_results = parsed_response[:results]
-    @inat_import = create_inat_import(inat_response: @mock_inat_response)
+    @inat_import = create_inat_import
 
     # Add objects which are not included in fixtures
     Name.create(
@@ -514,7 +514,7 @@ class InatImportJobTest < ActiveJob::TestCase
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
     @parsed_results =
       JSON.parse(mock_inat_response, symbolize_names: true)[:results]
-    inat_import = create_inat_import(inat_response: mock_inat_response)
+    inat_import = create_inat_import
 
     oauth_return = { status: 401, body: "Unauthorized",
                      headers: { "Content-Type" => "application/json" } }
@@ -531,7 +531,7 @@ class InatImportJobTest < ActiveJob::TestCase
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
     @parsed_results =
       JSON.parse(mock_inat_response, symbolize_names: true)[:results]
-    inat_import = create_inat_import(inat_response: mock_inat_response)
+    inat_import = create_inat_import
 
     stub_oauth_token_request
     jwt_return = { status: 401, body: "Unauthorized",
@@ -549,7 +549,7 @@ class InatImportJobTest < ActiveJob::TestCase
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
     @parsed_results =
       JSON.parse(mock_inat_response, symbolize_names: true)[:results]
-    inat_import = create_inat_import(inat_response: mock_inat_response)
+    inat_import = create_inat_import
 
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response,
@@ -575,8 +575,7 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(InatImport.super_importers.include?(user),
            "Test needs User fixture that's SuperImporter")
 
-    inat_import = create_inat_import(user: user,
-                                     inat_response: mock_inat_response)
+    inat_import = create_inat_import(user: user)
     stub_inat_interactions(inat_import: inat_import,
                            mock_inat_response: mock_inat_response,
                            superimporter: true)
@@ -597,18 +596,16 @@ class InatImportJobTest < ActiveJob::TestCase
     @mock_inat_response = File.read("test/inat/#{filename}.txt")
     @parsed_results =
       JSON.parse(@mock_inat_response, symbolize_names: true)[:results]
-    @inat_import = create_inat_import(inat_response: @mock_inat_response)
+    @inat_import = create_inat_import
   end
 
   # The InatImport object which is created in InatImportController#create
   # and recovered in InatImportController#authorization_response
-  def create_inat_import(user: @user,
-                         inat_response: mock_inat_response)
+  def create_inat_import(user: @user)
     InatImport.create(
       user: user, token: "MockCode",
-      inat_ids: JSON.parse(inat_response)["results"].first["id"],
-      inat_username: JSON.
-        parse(inat_response)["results"].first["user"]["login"],
+      inat_ids: @parsed_results.first&.dig(:id),
+      inat_username: @parsed_results.first&.dig(:user, :login),
       response_errors: ""
     )
   end
