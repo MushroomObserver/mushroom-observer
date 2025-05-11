@@ -34,8 +34,7 @@ class InatImportJobTest < ActiveJob::TestCase
                           north: 36.043571, south: 35.561849,
                           east: -83.253046, west: -83.794123)
 
-    stub_inat_interactions(inat_import: @inat_import,
-                           mock_inat_response: @mock_inat_response)
+    stub_inat_interactions
 
     QueuedEmail.queue = true
     before_emails_to_user = QueuedEmail.where(to_user: @user).count
@@ -106,8 +105,7 @@ class InatImportJobTest < ActiveJob::TestCase
                     north: 36.043571, south: 35.561849,
                     east: -83.253046, west: -83.794123)
 
-    stub_inat_interactions(inat_import: @inat_import,
-                           mock_inat_response: @mock_inat_response)
+    stub_inat_interactions
 
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
@@ -150,8 +148,7 @@ class InatImportJobTest < ActiveJob::TestCase
       east: -122.367, west: -122.431
     )
 
-    stub_inat_interactions(inat_import: @inat_import,
-                           mock_inat_response: @mock_inat_response)
+    stub_inat_interactions
 
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
@@ -185,8 +182,8 @@ class InatImportJobTest < ActiveJob::TestCase
                                   display_name: "Tremellales",
                                   rank: "Order",
                                   user: @user)
-    stub_inat_interactions(inat_import: @inat_import,
-                           mock_inat_response: @mock_inat_response)
+
+    stub_inat_interactions
 
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
@@ -211,8 +208,7 @@ class InatImportJobTest < ActiveJob::TestCase
       user: @user
     )
 
-    stub_inat_interactions(inat_import: @inat_import,
-                           mock_inat_response: @mock_inat_response)
+    stub_inat_interactions
 
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
@@ -250,8 +246,7 @@ class InatImportJobTest < ActiveJob::TestCase
       user: @user
     )
 
-    stub_inat_interactions(inat_import: @inat_import,
-                           mock_inat_response: @mock_inat_response)
+    stub_inat_interactions
 
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
@@ -275,8 +270,7 @@ class InatImportJobTest < ActiveJob::TestCase
       user: @user
     )
 
-    stub_inat_interactions(inat_import: @inat_import,
-                           mock_inat_response: @mock_inat_response)
+    stub_inat_interactions
 
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
@@ -304,8 +298,7 @@ class InatImportJobTest < ActiveJob::TestCase
       user: @user
     )
 
-    stub_inat_interactions(inat_import: @inat_import,
-                           mock_inat_response: @mock_inat_response)
+    stub_inat_interactions
 
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
@@ -327,8 +320,7 @@ class InatImportJobTest < ActiveJob::TestCase
                "Test requires that MO not yet have provisional name")
     create_ivars_from_filename("arrhenia_sp_NY02")
 
-    stub_inat_interactions(inat_import: @inat_import,
-                           mock_inat_response: @mock_inat_response)
+    stub_inat_interactions
 
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
@@ -369,8 +361,7 @@ class InatImportJobTest < ActiveJob::TestCase
            "Test requires that MO not yet have `Donadinia` Names")
 
     create_ivars_from_filename("donadinia_PNW01")
-    stub_inat_interactions(inat_import: @inat_import,
-                           mock_inat_response: @mock_inat_response)
+    stub_inat_interactions
 
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
@@ -398,8 +389,7 @@ class InatImportJobTest < ActiveJob::TestCase
   # Inat Prov Species Name "Hygrocybe sp. 'conica-CA06'" (epithet single-quoted)
   def test_import_job_prov_name_ncbi_style
     create_ivars_from_filename("hygrocybe_sp_conica-CA06_ncbi_style")
-    stub_inat_interactions(inat_import: @inat_import,
-                           mock_inat_response: @mock_inat_response)
+    stub_inat_interactions
 
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
@@ -415,8 +405,7 @@ class InatImportJobTest < ActiveJob::TestCase
   def test_import_plant
     create_ivars_from_filename("ceanothus_cordulatus")
 
-    stub_inat_interactions(inat_import: @inat_import,
-                           mock_inat_response: @mock_inat_response)
+    stub_inat_interactions
 
     assert_no_difference("Observation.count", "Should not import Plantae") do
       InatImportJob.perform_now(@inat_import)
@@ -426,8 +415,7 @@ class InatImportJobTest < ActiveJob::TestCase
   def test_import_zero_results
     create_ivars_from_filename("zero_results")
     @inat_import.update(inat_ids: "123", token: "MockCode")
-    stub_inat_interactions(inat_import: @inat_import,
-                           mock_inat_response: @mock_inat_response)
+    stub_inat_interactions
 
     assert_no_difference(
       "Observation.count",
@@ -444,8 +432,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
     create_ivars_from_filename("zero_results")
     @inat_import.update(inat_ids: "123", token: "MockCode")
-    stub_inat_interactions(inat_import: @inat_import,
-                           mock_inat_response: @mock_inat_response)
+    stub_inat_interactions
 
     InatImportJob.perform_now(@inat_import)
 
@@ -462,8 +449,7 @@ class InatImportJobTest < ActiveJob::TestCase
                                      token: "MockCode",
                                      inat_username: "anything")
 
-    stub_inat_interactions(inat_import: @inat_import,
-                           mock_inat_response: @mock_inat_response)
+    stub_inat_interactions
 
     assert_difference("Observation.count", 2,
                       "Failed to create multiple observations") do
@@ -487,8 +473,7 @@ class InatImportJobTest < ActiveJob::TestCase
     @parsed_results =
       JSON.parse(@mock_inat_response, symbolize_names: true)[:results]
 
-    stub_inat_interactions(inat_import: @inat_import,
-                           mock_inat_response: @mock_inat_response)
+    stub_inat_interactions
 
     assert_difference("Observation.count", 2,
                       "Failed to create multiple observations") do
@@ -526,9 +511,7 @@ class InatImportJobTest < ActiveJob::TestCase
   def test_import_anothers_observation
     create_ivars_from_filename("calostoma_lutescens")
 
-    stub_inat_interactions(inat_import: @inat_import,
-                           mock_inat_response: @mock_inat_response,
-                           login: "another user")
+    stub_inat_interactions(login: "another user")
 
     assert_difference("Observation.count", 0,
                       "It should not import another user's observation") do
@@ -547,9 +530,7 @@ class InatImportJobTest < ActiveJob::TestCase
            "Test needs User fixture that's SuperImporter")
 
     create_ivars_from_filename("calostoma_lutescens")
-    stub_inat_interactions(inat_import: @inat_import,
-                           mock_inat_response: @mock_inat_response,
-                           superimporter: true)
+    stub_inat_interactions(superimporter: true)
 
     assert_difference(
       "Observation.count", 1,

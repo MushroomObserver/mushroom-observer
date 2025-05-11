@@ -15,17 +15,18 @@ module InatImportJobTestDoubles
   UNLICENSED_PHOTO_BASE = "https://static.inaturalist.org/photos"
 
   def stub_inat_interactions(
-    inat_import:, mock_inat_response:, id_above: 0,
-    login: inat_import.inat_username, superimporter: false
+    id_above: 0,
+    login: @inat_import.inat_username,
+    superimporter: false
   )
     stub_token_requests
     stub_check_username_match(login)
-    stub_inat_observation_request(inat_import: inat_import,
-                                  mock_inat_response: mock_inat_response,
+    stub_inat_observation_request(inat_import: @inat_import,
+                                  mock_inat_response: @mock_inat_response,
                                   id_above: id_above,
                                   superimporter: superimporter)
-    stub_inat_photo_requests(mock_inat_response)
-    stub_modify_inat_observations(mock_inat_response)
+    stub_inat_photo_requests(@mock_inat_response)
+    stub_modify_inat_observations(@mock_inat_response)
   end
 
   def stub_token_requests
