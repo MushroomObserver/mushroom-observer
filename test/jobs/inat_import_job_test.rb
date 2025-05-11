@@ -71,7 +71,6 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_match(suggestion_date, proposed_name_notes)
 
     assert_not(obs.specimen, "Obs should not have a specimen")
-    assert_equal(0, obs.images.length, "Obs should not have images")
     assert_match(/Observation Fields: none/, obs.comments.first.comment,
                  "Missing 'none' for Observation Fields")
 
@@ -175,8 +174,6 @@ class InatImportJobTest < ActiveJob::TestCase
     obs = Observation.last
     standard_assertions(obs: obs, name: name, loc: loc)
 
-    assert_equal(1, obs.images.length, "Obs should have 1 image")
-
     inat_photo = @parsed_results.
                  first[:observation_photos].first
     imported_img = obs.images.first
@@ -215,7 +212,6 @@ class InatImportJobTest < ActiveJob::TestCase
 
     obs = Observation.last
     standard_assertions(obs: obs, name: name)
-    assert(obs.images.any?, "Obs should have images")
     assert(obs.sequences.none?)
   end
 
@@ -247,7 +243,6 @@ class InatImportJobTest < ActiveJob::TestCase
     obs = Observation.last
     standard_assertions(obs: obs, name: name)
 
-    assert(obs.images.any?, "Obs should have images")
     assert(obs.sequences.one?, "Obs should have a sequence")
     assert_equal(@user, obs.sequences.first.user,
                  "Sequences should belong to the user who imported the obs")
@@ -290,7 +285,6 @@ class InatImportJobTest < ActiveJob::TestCase
 
     obs = Observation.last
     standard_assertions(obs: obs, name: name)
-    assert_equal(1, obs.images.length, "Obs should have 1 image")
     assert(obs.sequences.none?)
   end
 
@@ -319,7 +313,6 @@ class InatImportJobTest < ActiveJob::TestCase
 
     obs = Observation.last
     standard_assertions(obs: obs, name: name)
-    assert_equal(2, obs.images.length, "Obs should have 2 images")
     assert(obs.sequences.none?)
   end
 
@@ -353,7 +346,6 @@ class InatImportJobTest < ActiveJob::TestCase
     obs = Observation.last
     standard_assertions(obs: obs, name: name)
 
-    assert(obs.images.any?, "Obs should have Images")
     assert(obs.sequences.one?, "Obs should have one Sequence")
     assert(obs.specimen, "Obs should show that a Specimen is available")
   end
@@ -404,7 +396,6 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_match(:naming_inat_provisional.l(user: adding_inat_user),
                  proposed_name_notes)
 
-    assert(obs.images.any?, "Obs should have images")
     assert(obs.sequences.one?, "Obs should have one sequence")
   end
 
@@ -442,7 +433,6 @@ class InatImportJobTest < ActiveJob::TestCase
 
     standard_assertions(obs: obs, name: name)
 
-    assert(obs.images.any?, "Obs should have images")
     assert(obs.sequences.one?, "Obs should have one sequence")
   end
 
@@ -677,6 +667,10 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_not_nil(obs.rss_log, "Failed to log Observation")
     assert_equal("mo_inat_import", obs.source)
     assert_equal(loc, obs.location) if loc
+
+    photo_count = @parsed_results.first[:observation_photos].length
+    assert_equal(photo_count, obs.images.length,
+                 "Observation should have #{photo_count} image(s)")
 
     assert_equal(1, obs.namings.length,
                  "iNatImport should create exactly one Naming")
