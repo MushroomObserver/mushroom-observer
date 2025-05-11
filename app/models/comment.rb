@@ -126,10 +126,22 @@ class Comment < AbstractModel
     }, foreign_key: "target_id", inverse_of: :comments
   end
 
-  broadcasts_to(->(comment) { [comment.target, :comments] },
-                inserts_by: :prepend, partial: "comments/comment",
-                locals: { controls: true },
-                target: "comments")
+  # broadcasts_to(->(comment) { [comment.target, :comments] },
+  #               inserts_by: :prepend, partial: "comments/comment",
+  #               locals: { controls: true },
+  #               target: "comments")
+
+  # Broadcast explicitly without using ActiveJob
+  # (broadcasts_to calls broadcast_prepend_later_to and _replace_later)
+  after_create_commit lambda { |comment|
+    broadcast_prepend_to(comment.target, :comments)
+  }
+  after_update_commit lambda { |comment|
+    broadcast_replace_to(comment.target, :comments)
+  }
+  after_destroy_commit lambda { |comment|
+    broadcast_remove_to(comment.target, :comments)
+  }
 
   # after_create :notify_users
   # after_create :oil_and_water
