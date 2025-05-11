@@ -131,14 +131,12 @@ class InatImportJobTest < ActiveJob::TestCase
       "Proposed Name reason should be #{:naming_reason_label_2.l}"
     )
     proposed_name_notes = proposed_name[:reasons][used_references]
-    suggesting_inat_user = JSON.parse(mock_inat_response)["results"].
-                           first["identifications"].
-                           first["user"]["login"]
+    suggesting_inat_user = @parsed_results.
+                           first[:identifications].first[:user][:login]
     assert_match(:naming_reason_suggested_on_inat.l(user: suggesting_inat_user),
                  proposed_name_notes)
-    suggestion_date = JSON.parse(mock_inat_response)["results"].
-                      first["identifications"].
-                      first["created_at"]
+    suggestion_date = @parsed_results.
+                      first[:identifications].first[:created_at]
     assert_match(suggestion_date, proposed_name_notes)
   end
 
