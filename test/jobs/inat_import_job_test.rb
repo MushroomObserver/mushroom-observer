@@ -540,8 +540,6 @@ class InatImportJobTest < ActiveJob::TestCase
   def test_import_all
     file_name = "import_all"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    @parsed_results =
-      JSON.parse(mock_inat_response, symbolize_names: true)[:results]
     inat_import = InatImport.create(user: @user,
                                     inat_ids: "",
                                     import_all: true,
