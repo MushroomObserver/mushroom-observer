@@ -120,6 +120,10 @@ MushroomObserver::Application.configure do
 
   # Highlight code that enqueued background job in logs.
   config.active_job.verbose_enqueue_logs = true
+  # Solid Queue as the queue adapter locally, as on production.
+  config.active_job.queue_adapter = :solid_queue
+  # Uncomment if queue tables are in a separate db. MO's are in the main db.
+  # config.solid_queue.connects_to = { database: { writing: :queue } }
 
   # New 7.1 logging uses BroadcastLogger. Not using TaggedLogging yet.
   # Enable this to format dev logs like the production logs.
@@ -163,10 +167,6 @@ MushroomObserver::Application.configure do
   config.web_console.allowed_ips = "10.0.2.2"
 
   config.bot_enabled = true
-
-  config.active_job.queue_adapter = :solid_queue
-  # Uncomment if queue tables are in a separate db. MO's are in the main db.
-  # config.solid_queue.connects_to = { database: { writing: :queue } }
 
   # Disable Mission Control default HTTP Basic Authentication because
   # we specify AdminController as the base class for Mission Control
