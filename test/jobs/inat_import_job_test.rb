@@ -442,45 +442,32 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_empty(user.inat_username,
                  "Test needs user fixture without an iNat username")
 
-    file_name = "zero_results"
-    mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    @parsed_results =
-      JSON.parse(mock_inat_response, symbolize_names: true)[:results]
-    inat_import = InatImport.find_by(user: user)
-    inat_import.update(inat_ids: "123", token: "MockCode")
-    stub_inat_interactions(inat_import: inat_import,
-                           mock_inat_response: mock_inat_response)
+    create_ivars_from_filename("zero_results")
+    @inat_import.update(inat_ids: "123", token: "MockCode")
+    stub_inat_interactions(inat_import: @inat_import,
+                           mock_inat_response: @mock_inat_response)
 
-    InatImportJob.perform_now(inat_import)
+    InatImportJob.perform_now(@inat_import)
 
-    assert_equal(inat_import.inat_username, @user.reload.inat_username,
+    assert_equal(@inat_import.inat_username, @user.reload.inat_username,
                  "Failed to update user's inat_username")
   end
 
   def test_import_multiple
-    file_name = "listed_ids"
-    mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    parsed_response = JSON.parse(mock_inat_response, symbolize_names: true)
-    @parsed_results = parsed_response[:results]
-    inat_import = InatImport.create(user: @user,
-                                    inat_ids: "231104466,195434438",
-                                    token: "MockCode",
-                                    inat_username: "anything")
+    create_ivars_from_filename("listed_ids")
 
-    # prove that mock was constructed properly
-    assert_equal(2, parsed_response[:total_results])
-    assert_equal(1, parsed_response[:page])
-    assert_equal(30, parsed_response[:per_page])
-    # mock is sorted by id, asc
-    assert_equal(195_434_438, @parsed_results.first[:id])
-    assert_equal(231_104_466, @parsed_results.second[:id])
+    # override ivar because this test wants to import multiple observations
+    @inat_import = InatImport.create(user: @user,
+                                     inat_ids: "231104466,195434438",
+                                     token: "MockCode",
+                                     inat_username: "anything")
 
-    stub_inat_interactions(inat_import: inat_import,
-                           mock_inat_response: mock_inat_response)
+    stub_inat_interactions(inat_import: @inat_import,
+                           mock_inat_response: @mock_inat_response)
 
     assert_difference("Observation.count", 2,
                       "Failed to create multiple observations") do
-      InatImportJob.perform_now(inat_import)
+      InatImportJob.perform_now(@inat_import)
     end
   end
 
@@ -489,105 +476,89 @@ class InatImportJobTest < ActiveJob::TestCase
   def test_import_all
     file_name = "import_all"
     mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    inat_import = InatImport.create(user: @user,
-                                    inat_ids: "",
-                                    import_all: true,
-                                    token: "MockCode",
-                                    inat_username: "anything")
+    @inat_import = InatImport.create(user: @user,
+                                     inat_ids: "",
+                                     import_all: true,
+                                     token: "MockCode",
+                                     inat_username: "anything")
     # limit it to one page to avoid complications of stubbing multiple
     # inat api requests with multiple files
-    mock_inat_response = limited_to_first_page(mock_inat_response)
+    @mock_inat_response = limited_to_first_page(mock_inat_response)
     @parsed_results =
-      JSON.parse(mock_inat_response, symbolize_names: true)[:results]
+      JSON.parse(@mock_inat_response, symbolize_names: true)[:results]
 
-    stub_inat_interactions(inat_import: inat_import,
-                           mock_inat_response: mock_inat_response)
+    stub_inat_interactions(inat_import: @inat_import,
+                           mock_inat_response: @mock_inat_response)
 
     assert_difference("Observation.count", 2,
                       "Failed to create multiple observations") do
-      InatImportJob.perform_now(inat_import)
+      InatImportJob.perform_now(@inat_import)
     end
   end
 
   def test_oauth_failure
-    file_name = "calostoma_lutescens"
-    mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    @parsed_results =
-      JSON.parse(mock_inat_response, symbolize_names: true)[:results]
-    inat_import = create_inat_import
+    create_ivars_from_filename("calostoma_lutescens")
 
     oauth_return = { status: 401, body: "Unauthorized",
                      headers: { "Content-Type" => "application/json" } }
     stub_oauth_token_request(oauth_return: oauth_return)
 
-    InatImportJob.perform_now(inat_import)
+    InatImportJob.perform_now(@inat_import)
 
-    assert_match(/401 Unauthorized/, inat_import.response_errors,
+    assert_match(/401 Unauthorized/, @inat_import.response_errors,
                  "Failed to report OAuth failure")
   end
 
   def test_jwt_failure
-    file_name = "calostoma_lutescens"
-    mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    @parsed_results =
-      JSON.parse(mock_inat_response, symbolize_names: true)[:results]
-    inat_import = create_inat_import
+    create_ivars_from_filename("calostoma_lutescens")
 
     stub_oauth_token_request
     jwt_return = { status: 401, body: "Unauthorized",
                    headers: { "Content-Type" => "application/json" } }
     stub_jwt_request(jwt_return: jwt_return)
 
-    InatImportJob.perform_now(inat_import)
+    InatImportJob.perform_now(@inat_import)
 
-    assert_match(/401 Unauthorized/, inat_import.response_errors,
+    assert_match(/401 Unauthorized/, @inat_import.response_errors,
                  "Failed to report OAuth failure")
   end
 
   def test_import_anothers_observation
-    file_name = "calostoma_lutescens"
-    mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    @parsed_results =
-      JSON.parse(mock_inat_response, symbolize_names: true)[:results]
-    inat_import = create_inat_import
+    create_ivars_from_filename("calostoma_lutescens")
 
-    stub_inat_interactions(inat_import: inat_import,
-                           mock_inat_response: mock_inat_response,
+    stub_inat_interactions(inat_import: @inat_import,
+                           mock_inat_response: @mock_inat_response,
                            login: "another user")
 
     assert_difference("Observation.count", 0,
                       "It should not import another user's observation") do
-      InatImportJob.perform_now(inat_import)
+      InatImportJob.perform_now(@inat_import)
     end
 
     assert_match(
-      :inat_wrong_user.l, inat_import.response_errors,
+      :inat_wrong_user.l, @inat_import.response_errors,
       "It should warn if a user tries to import another's iNat obs"
     )
   end
 
   def test_super_importer_anothers_observation
-    file_name = "calostoma_lutescens"
-    mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    @parsed_results =
-      JSON.parse(mock_inat_response, symbolize_names: true)[:results]
-    user = users(:dick)
-    assert(InatImport.super_importers.include?(user),
+    @user = users(:dick)
+    assert(InatImport.super_importers.include?(@user),
            "Test needs User fixture that's SuperImporter")
 
-    inat_import = create_inat_import(user: user)
-    stub_inat_interactions(inat_import: inat_import,
-                           mock_inat_response: mock_inat_response,
+    create_ivars_from_filename("calostoma_lutescens")
+    stub_inat_interactions(inat_import: @inat_import,
+                           mock_inat_response: @mock_inat_response,
                            superimporter: true)
 
     assert_difference(
       "Observation.count", 1,
       "'super_importer' failed to import another user's observation"
     ) do
-      InatImportJob.perform_now(inat_import)
+      InatImportJob.perform_now(@inat_import)
     end
 
-    assert_empty(inat_import.response_errors, "There should be no errors")
+    assert_empty(@inat_import.response_errors, "There should be no errors")
   end
 
   ########## Utilities
