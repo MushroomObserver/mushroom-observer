@@ -15,16 +15,11 @@ class InatImportJobTest < ActiveJob::TestCase
 
   # Had 1 identification, 0 photos, 0 observation_fields
   def test_import_job_basic_obs
-    file_name = "calostoma_lutescens"
-    mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    @parsed_results =
-      JSON.parse(mock_inat_response, symbolize_names: true)[:results]
-
-    inat_import = create_inat_import(inat_response: mock_inat_response)
+    create_ivars_from_filename("calostoma_lutescens")
     # You can import only your own observations.
     # So adjust importing user's inat_username to be the Inat login
     # of the iNat user who made the iNat observation
-    @user.update(inat_username: inat_import.inat_username)
+    @user.update(inat_username: @inat_import.inat_username)
 
     # Add objects which are not included in fixtures
     name = Name.create(
@@ -39,15 +34,15 @@ class InatImportJobTest < ActiveJob::TestCase
                           north: 36.043571, south: 35.561849,
                           east: -83.253046, west: -83.794123)
 
-    stub_inat_interactions(inat_import: inat_import,
-                           mock_inat_response: mock_inat_response)
+    stub_inat_interactions(inat_import: @inat_import,
+                           mock_inat_response: @mock_inat_response)
 
     QueuedEmail.queue = true
     before_emails_to_user = QueuedEmail.where(to_user: @user).count
 
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
-      InatImportJob.perform_now(inat_import)
+      InatImportJob.perform_now(@inat_import)
     end
 
     obs = Observation.last
@@ -84,21 +79,19 @@ class InatImportJobTest < ActiveJob::TestCase
   # Prove (inter alia) that the MO Naming.user differs from the importing user
   # when the iNat user who made the 1st iNat id is another MO user
   def test_import_job_inat_id_suggested_by_another_by_mo_user
-    file_name = "calostoma_lutescens"
-    mock_inat_response = File.read("test/inat/#{file_name}.txt")
+    create_ivars_from_filename("calostoma_lutescens")
 
-    # Tweak mock response to make mary the person who made the 1st iNat id
     user = users(:mary)
     assert(user.inat_username.present?,
            "Test needs user fixture with an inat_username")
-    parsed_response = JSON.parse(mock_inat_response)
-    parsed_response["results"].first["identifications"].first["user"]["login"] =
-      user.inat_username
 
-    mock_inat_response = JSON.generate(parsed_response)
-    @parsed_results =
-      JSON.parse(mock_inat_response, symbolize_names: true)[:results]
-    inat_import = create_inat_import(inat_response: mock_inat_response)
+    # re-do the ivars to make mary the iNat user who made the 1st iNat id
+    parsed_response = JSON.parse(@mock_inat_response, symbolize_names: true)
+    parsed_response[:results].first[:identifications].first[:user][:login] =
+      user.inat_username
+    @mock_inat_response = JSON.generate(parsed_response)
+    @parsed_results = parsed_response[:results]
+    @inat_import = create_inat_import(inat_response: @mock_inat_response)
 
     # Add objects which are not included in fixtures
     Name.create(
@@ -113,12 +106,12 @@ class InatImportJobTest < ActiveJob::TestCase
                     north: 36.043571, south: 35.561849,
                     east: -83.253046, west: -83.794123)
 
-    stub_inat_interactions(inat_import: inat_import,
-                           mock_inat_response: mock_inat_response)
+    stub_inat_interactions(inat_import: @inat_import,
+                           mock_inat_response: @mock_inat_response)
 
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
-      InatImportJob.perform_now(inat_import)
+      InatImportJob.perform_now(@inat_import)
     end
 
     obs = Observation.last
@@ -142,11 +135,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
   # Had 1 photo, 1 identification, 0 observation_fields; 0 sequences
   def test_import_job_obs_with_one_photo
-    file_name = "evernia"
-    mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    @parsed_results =
-      JSON.parse(mock_inat_response, symbolize_names: true)[:results]
-    inat_import = create_inat_import(inat_response: mock_inat_response)
+    create_ivars_from_filename("evernia")
 
     # Add objects which are not included in fixtures
     name = Name.create(
@@ -161,12 +150,12 @@ class InatImportJobTest < ActiveJob::TestCase
       east: -122.367, west: -122.431
     )
 
-    stub_inat_interactions(inat_import: inat_import,
-                           mock_inat_response: mock_inat_response)
+    stub_inat_interactions(inat_import: @inat_import,
+                           mock_inat_response: @mock_inat_response)
 
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
-      InatImportJob.perform_now(inat_import)
+      InatImportJob.perform_now(@inat_import)
     end
 
     obs = Observation.last
@@ -188,11 +177,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
   # Had 1 photo; 2 identifications, 1 not by user.
   def test_import_job_obs_with_many_namings
-    file_name = "tremella_mesenterica"
-    mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    @parsed_results =
-      JSON.parse(mock_inat_response, symbolize_names: true)[:results]
-    inat_import = create_inat_import(inat_response: mock_inat_response)
+    create_ivars_from_filename("tremella_mesenterica")
 
     name = Name.find_or_create_by(text_name: "Tremellales",
                                   author: "Fr.",
@@ -200,12 +185,12 @@ class InatImportJobTest < ActiveJob::TestCase
                                   display_name: "Tremellales",
                                   rank: "Order",
                                   user: @user)
-    stub_inat_interactions(inat_import: inat_import,
-                           mock_inat_response: mock_inat_response)
+    stub_inat_interactions(inat_import: @inat_import,
+                           mock_inat_response: @mock_inat_response)
 
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
-      InatImportJob.perform_now(inat_import)
+      InatImportJob.perform_now(@inat_import)
     end
 
     obs = Observation.last
@@ -216,11 +201,7 @@ class InatImportJobTest < ActiveJob::TestCase
   # Had 2 photos, 6 identifications of 3 taxa, a different taxon,
   # 9 obs fields, including "DNA Barcode ITS", "Collection number", "Collector"
   def test_import_job_obs_with_sequence_and_multiple_ids
-    file_name = "lycoperdon"
-    mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    @parsed_results =
-      JSON.parse(mock_inat_response, symbolize_names: true)[:results]
-    inat_import = create_inat_import(inat_response: mock_inat_response)
+    create_ivars_from_filename("lycoperdon")
 
     name = Name.create(
       text_name: "Lycoperdon", author: "Pers.",
@@ -230,12 +211,12 @@ class InatImportJobTest < ActiveJob::TestCase
       user: @user
     )
 
-    stub_inat_interactions(inat_import: inat_import,
-                           mock_inat_response: mock_inat_response)
+    stub_inat_interactions(inat_import: @inat_import,
+                           mock_inat_response: @mock_inat_response)
 
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
-      InatImportJob.perform_now(inat_import)
+      InatImportJob.perform_now(@inat_import)
     end
 
     obs = Observation.last
@@ -256,11 +237,7 @@ class InatImportJobTest < ActiveJob::TestCase
   end
 
   def test_import_job_infra_specific_name
-    file_name = "i_obliquus_f_sterilis"
-    mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    @parsed_results =
-      JSON.parse(mock_inat_response, symbolize_names: true)[:results]
-    inat_import = create_inat_import(inat_response: mock_inat_response)
+    create_ivars_from_filename("i_obliquus_f_sterilis")
 
     # Add objects which are not included in fixtures
     name = Name.create(
@@ -273,12 +250,12 @@ class InatImportJobTest < ActiveJob::TestCase
       user: @user
     )
 
-    stub_inat_interactions(inat_import: inat_import,
-                           mock_inat_response: mock_inat_response)
+    stub_inat_interactions(inat_import: @inat_import,
+                           mock_inat_response: @mock_inat_response)
 
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
-      InatImportJob.perform_now(inat_import)
+      InatImportJob.perform_now(@inat_import)
     end
 
     obs = Observation.last
@@ -287,11 +264,8 @@ class InatImportJobTest < ActiveJob::TestCase
   end
 
   def test_import_job_complex
-    file_name = "xeromphalina_campanella_complex"
-    mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    @parsed_results =
-      JSON.parse(mock_inat_response, symbolize_names: true)[:results]
-    inat_import = create_inat_import(inat_response: mock_inat_response)
+    create_ivars_from_filename("xeromphalina_campanella_complex")
+
     # Add objects which are not included in fixtures
     name = Name.create(
       text_name: "Xeromphalina campanella group", author: "",
@@ -301,12 +275,12 @@ class InatImportJobTest < ActiveJob::TestCase
       user: @user
     )
 
-    stub_inat_interactions(inat_import: inat_import,
-                           mock_inat_response: mock_inat_response)
+    stub_inat_interactions(inat_import: @inat_import,
+                           mock_inat_response: @mock_inat_response)
 
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
-      InatImportJob.perform_now(inat_import)
+      InatImportJob.perform_now(@inat_import)
     end
 
     obs = Observation.last
@@ -320,11 +294,8 @@ class InatImportJobTest < ActiveJob::TestCase
   # 3 comments, everyone has MO account;
   # obs fields(include("Voucher Number(s)", "Voucher Specimen Taken"))
   def test_import_job_nemf_plischke
-    file_name = "arrhenia_sp_NY02"
-    mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    @parsed_results =
-      JSON.parse(mock_inat_response, symbolize_names: true)[:results]
-    inat_import = create_inat_import(inat_response: mock_inat_response)
+    create_ivars_from_filename("arrhenia_sp_NY02")
+
     name = Name.create(
       text_name: 'Arrhenia "sp-NY02"', author: "S.D. Russell crypt. temp.",
       search_name: 'Arrhenia "sp-NY02" S.D. Russell crypt. temp.',
@@ -333,12 +304,12 @@ class InatImportJobTest < ActiveJob::TestCase
       user: @user
     )
 
-    stub_inat_interactions(inat_import: inat_import,
-                           mock_inat_response: mock_inat_response)
+    stub_inat_interactions(inat_import: @inat_import,
+                           mock_inat_response: @mock_inat_response)
 
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
-      InatImportJob.perform_now(inat_import)
+      InatImportJob.perform_now(@inat_import)
     end
 
     obs = Observation.last
@@ -354,19 +325,14 @@ class InatImportJobTest < ActiveJob::TestCase
   def test_import_job_create_prov_name
     assert_nil(Name.find_by(text_name: 'Arrhenia "sp-NY02"'),
                "Test requires that MO not yet have provisional name")
+    create_ivars_from_filename("arrhenia_sp_NY02")
 
-    file_name = "arrhenia_sp_NY02"
-    mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    @parsed_results =
-      JSON.parse(mock_inat_response, symbolize_names: true)[:results]
-    inat_import = create_inat_import(inat_response: mock_inat_response)
-
-    stub_inat_interactions(inat_import: inat_import,
-                           mock_inat_response: mock_inat_response)
+    stub_inat_interactions(inat_import: @inat_import,
+                           mock_inat_response: @mock_inat_response)
 
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
-      InatImportJob.perform_now(inat_import)
+      InatImportJob.perform_now(@inat_import)
     end
 
     obs = Observation.last
@@ -399,21 +365,16 @@ class InatImportJobTest < ActiveJob::TestCase
 
   # Inat Provisional Species Name "Donadina PNW01" (no: quotes, sp. dash)
   def test_import_job_prov_name_pnw_style
-    file_name = "donadinia_PNW01"
-    mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    @parsed_results =
-      JSON.parse(mock_inat_response, symbolize_names: true)[:results]
-    inat_import = create_inat_import(inat_response: mock_inat_response)
-
     assert(Name.where(Name[:text_name] =~ /Donadinia/).none?,
            "Test requires that MO not yet have `Donadinia` Names")
 
-    stub_inat_interactions(inat_import: inat_import,
-                           mock_inat_response: mock_inat_response)
+    create_ivars_from_filename("donadinia_PNW01")
+    stub_inat_interactions(inat_import: @inat_import,
+                           mock_inat_response: @mock_inat_response)
 
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
-      InatImportJob.perform_now(inat_import)
+      InatImportJob.perform_now(@inat_import)
     end
 
     obs = Observation.last
@@ -436,18 +397,13 @@ class InatImportJobTest < ActiveJob::TestCase
 
   # Inat Prov Species Name "Hygrocybe sp. 'conica-CA06'" (epithet single-quoted)
   def test_import_job_prov_name_ncbi_style
-    file_name = "hygrocybe_sp_conica-CA06_ncbi_style"
-    mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    @parsed_results =
-      JSON.parse(mock_inat_response, symbolize_names: true)[:results]
-    inat_import = create_inat_import(inat_response: mock_inat_response)
-
-    stub_inat_interactions(inat_import: inat_import,
-                           mock_inat_response: mock_inat_response)
+    create_ivars_from_filename("hygrocybe_sp_conica-CA06_ncbi_style")
+    stub_inat_interactions(inat_import: @inat_import,
+                           mock_inat_response: @mock_inat_response)
 
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
-      InatImportJob.perform_now(inat_import)
+      InatImportJob.perform_now(@inat_import)
     end
 
     obs = Observation.last
@@ -457,34 +413,27 @@ class InatImportJobTest < ActiveJob::TestCase
   end
 
   def test_import_plant
-    file_name = "ceanothus_cordulatus"
-    mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    @parsed_results =
-      JSON.parse(mock_inat_response, symbolize_names: true)[:results]
-    inat_import = create_inat_import(inat_response: mock_inat_response)
-    stub_inat_interactions(inat_import: inat_import,
-                           mock_inat_response: mock_inat_response)
+    create_ivars_from_filename("ceanothus_cordulatus")
+
+    stub_inat_interactions(inat_import: @inat_import,
+                           mock_inat_response: @mock_inat_response)
 
     assert_no_difference("Observation.count", "Should not import Plantae") do
-      InatImportJob.perform_now(inat_import)
+      InatImportJob.perform_now(@inat_import)
     end
   end
 
   def test_import_zero_results
-    file_name = "zero_results"
-    mock_inat_response = File.read("test/inat/#{file_name}.txt")
-    @parsed_results =
-      JSON.parse(mock_inat_response, symbolize_names: true)[:results]
-    inat_import = inat_imports(:rolf_inat_import)
-    inat_import.update(inat_ids: "123", token: "MockCode")
-    stub_inat_interactions(inat_import: inat_import,
-                           mock_inat_response: mock_inat_response)
+    create_ivars_from_filename("zero_results")
+    @inat_import.update(inat_ids: "123", token: "MockCode")
+    stub_inat_interactions(inat_import: @inat_import,
+                           mock_inat_response: @mock_inat_response)
 
     assert_no_difference(
       "Observation.count",
       "Should import nothing if no iNat obss match the user's list of id's"
     ) do
-      InatImportJob.perform_now(inat_import)
+      InatImportJob.perform_now(@inat_import)
     end
   end
 
@@ -643,6 +592,13 @@ class InatImportJobTest < ActiveJob::TestCase
   end
 
   ########## Utilities
+
+  def create_ivars_from_filename(filename)
+    @mock_inat_response = File.read("test/inat/#{filename}.txt")
+    @parsed_results =
+      JSON.parse(@mock_inat_response, symbolize_names: true)[:results]
+    @inat_import = create_inat_import(inat_response: @mock_inat_response)
+  end
 
   # The InatImport object which is created in InatImportController#create
   # and recovered in InatImportController#authorization_response
