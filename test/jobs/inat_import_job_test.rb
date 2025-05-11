@@ -9,20 +9,8 @@ class InatImportJobTest < ActiveJob::TestCase
   # the same request (/users/me) needs diffferent responses
   def setup
     @user = users(:inat_importer)
-    @stubs = []
     directory_path = Rails.public_path.join("test_images/orig")
     FileUtils.mkdir_p(directory_path) unless Dir.exist?(directory_path)
-  end
-
-  def add_stub(stub)
-    @stubs << stub
-    stub
-  end
-
-  def teardown
-    @stubs.each do |stub|
-      WebMock::StubRegistry.instance.remove_request_stub(stub)
-    end
   end
 
   # Had 1 identification, 0 photos, 0 observation_fields

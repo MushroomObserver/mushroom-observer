@@ -38,7 +38,7 @@ module InatImportJobTestDoubles
     body: { access_token: "MockAccessToken" }.to_json,
     headers: {}
   })
-    add_stub(stub_request(:post, "#{SITE}/oauth/token").
+    stub_request(:post, "#{SITE}/oauth/token").
       with(
         body: { "client_id" => Rails.application.credentials.inat.id,
                 "client_secret" => Rails.application.credentials.inat.secret,
@@ -46,14 +46,14 @@ module InatImportJobTestDoubles
                 "grant_type" => "authorization_code",
                 "redirect_uri" => REDIRECT_URI }
       ).
-      to_return(oauth_return))
+      to_return(oauth_return)
   end
 
   def stub_jwt_request(jwt_return:
     { status: 200,
       body: { api_token: "MockJWT" }.to_json,
       headers: {} })
-    add_stub(stub_request(:get, "#{SITE}/users/api_token").
+    stub_request(:get, "#{SITE}/users/api_token").
       with(
         headers: {
           "Accept" => "application/json",
@@ -62,11 +62,11 @@ module InatImportJobTestDoubles
           "Host" => "www.inaturalist.org"
         }
       ).
-      to_return(jwt_return))
+      to_return(jwt_return)
   end
 
   def stub_check_username_match(login)
-    add_stub(stub_request(:get, "#{API_BASE}/users/me").
+    stub_request(:get, "#{API_BASE}/users/me").
       with(
         headers: {
           "Accept" => "application/json",
@@ -78,7 +78,7 @@ module InatImportJobTestDoubles
       ).
       to_return(status: 200,
                 body: "{\"results\":[{\"login\":\"#{login}\"}]}",
-                headers: {}))
+                headers: {})
   end
 
   def stub_inat_observation_request(inat_import:,
@@ -96,14 +96,13 @@ module InatImportJobTestDoubles
       user_login: (inat_import.inat_username unless superimporter)
     }
 
-    add_stub(stub_request(:get,
-                          "#{API_BASE}/observations?#{query_args.to_query}").
+    stub_request(:get, "#{API_BASE}/observations?#{query_args.to_query}").
       with(headers:
     { "Accept" => "application/json",
       "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
       "Authorization" => "Bearer MockJWT",
       "Host" => "api.inaturalist.org" }).
-      to_return(body: mock_inat_response))
+      to_return(body: mock_inat_response)
   end
 
   def stub_inat_photo_requests(mock_inat_response)
@@ -137,9 +136,9 @@ module InatImportJobTestDoubles
   end
 
   def stub_add_observation_fields
-    add_stub(stub_request(:post, "#{API_BASE}/observation_field_values").
+    stub_request(:post, "#{API_BASE}/observation_field_values").
       to_return(status: 200, body: "".to_json,
-                headers: { "Content-Type" => "application/json" }))
+                headers: { "Content-Type" => "application/json" })
   end
 
   def stub_update_descriptions(mock_inat_response)
@@ -160,13 +159,11 @@ module InatImportJobTestDoubles
       }
       headers = { authorization: "Bearer MockJWT",
                   content_type: "application/json", accept: "application/json" }
-      add_stub(
-        stub_request(
-          :put, "#{API_BASE}/observations/#{obs["id"]}?ignore_photos=1"
-        ).
+      stub_request(
+        :put, "#{API_BASE}/observations/#{obs["id"]}?ignore_photos=1"
+      ).
         with(body: body.to_json, headers: headers).
         to_return(status: 200, body: "".to_json, headers: {})
-      )
     end
   end
 end
