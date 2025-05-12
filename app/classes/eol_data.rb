@@ -130,16 +130,16 @@ class EolData
   end
 
   DESCRIPTION_CONDITIONS = %(FROM name_descriptions, names
-    WHERE name_descriptions.name_id = names.id
-    AND names.ok_for_export
-    AND NOT names.deprecated
-    AND name_descriptions.review_status in (
-      #{NameDescription.review_statuses["vetted"]},
-      #{NameDescription.review_statuses["unvetted"]}
-    )
-    AND name_descriptions.ok_for_export
-    AND name_descriptions.public
-  ).freeze
+                             WHERE name_descriptions.name_id = names.id
+                             AND names.ok_for_export
+                             AND NOT names.deprecated
+                             AND name_descriptions.review_status in (
+                              #{NameDescription.review_statuses["vetted"]},
+                              #{NameDescription.review_statuses["unvetted"]}
+                             )
+                             AND name_descriptions.ok_for_export
+                             AND name_descriptions.public).freeze
+  private_constant(:DESCRIPTION_CONDITIONS)
 
   def description_names
     get_sorted_names(DESCRIPTION_CONDITIONS)
@@ -163,7 +163,8 @@ class EolData
     )
   end
 
-  IMAGE_CONDITIONS = %(FROM observations, observation_images, images, names
+  IMAGE_CONDITIONS = %(
+    FROM observations, observation_images, images, names
     WHERE observations.name_id = names.id
     AND observations.vote_cache >= 2.4
     AND observations.id = observation_images.observation_id
@@ -176,6 +177,8 @@ class EolData
       "Form", "Variety", "Subspecies", "Species", "Genus"
     ).join(",")})
   ).freeze
+  private_constant(:IMAGE_CONDITIONS)
+
   def image_names
     get_sorted_names(IMAGE_CONDITIONS)
   end
@@ -195,6 +198,7 @@ class EolData
     AND names.ok_for_export
     AND NOT names.deprecated
   )
+  private_constant(:GLOSSARY_TERM_CONDITIONS)
 
   def glossary_term_names
     get_sorted_names(GLOSSARY_TERM_CONDITIONS)

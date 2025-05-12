@@ -55,6 +55,7 @@ module ApplicationController::Authentication
 
   # Save a lookup of the mrtg stats "user".
   MRTG_USER_ID = 164_054
+  private_constant(:MRTG_USER_ID)
 
   def try_user_autologin(user_from_session)
     if Rails.env.production? && request.remote_ip == "127.0.0.1"
