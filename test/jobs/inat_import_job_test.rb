@@ -602,6 +602,13 @@ class InatImportJobTest < ActiveJob::TestCase
            find_by(observation_id: obs.id, user_id: user.id)
     assert(view.present?, "Failed to create ObservationView")
 
+    external_link = obs.external_links.first
+    assert_equal(
+      "https://inaturalist.org/observations/#{@parsed_results.first[:id]}",
+      external_link&.url,
+      "MO Observation should have ExternalLink to iNat observation"
+    )
+
     assert(obs.comments.any?, "Imported iNat should have >= 1 Comment")
     obs_comments =
       Comment.where(target_type: "Observation", target_id: obs.id)
