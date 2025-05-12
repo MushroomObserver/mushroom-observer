@@ -126,13 +126,14 @@ class Comment < AbstractModel
     }, foreign_key: "target_id", inverse_of: :comments
   end
 
-  # Default broadcasting. create/update not working locally after first job.
+  # Default broadcasting "later" (with solid_queue and ActiveJob)
+  # NOTE: create/update doesn't work locally after first job.
   # broadcasts_to(->(comment) { [comment.target, :comments] },
   #               inserts_by: :prepend, partial: "comments/comment",
   #               locals: { controls: true },
   #               target: "comments")
 
-  # Broadcast explicitly without using ActiveJob
+  # Broadcast "now" (without solid_queue and ActiveJob)
   # (broadcasts_to calls broadcast_prepend_later_to and _replace_later)
   after_create_commit lambda { |comment|
     broadcast_prepend_to(
