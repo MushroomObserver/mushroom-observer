@@ -135,10 +135,16 @@ class Comment < AbstractModel
   # Broadcast explicitly without using ActiveJob
   # (broadcasts_to calls broadcast_prepend_later_to and _replace_later)
   after_create_commit lambda { |comment|
-    broadcast_prepend_to(comment.target, :comments)
+    broadcast_prepend_to(
+      [comment.target, :comments],
+      partial: "comments/comment", locals: { controls: true }
+    )
   }
   after_update_commit lambda { |comment|
-    broadcast_replace_to(comment.target, :comments)
+    broadcast_replace_to(
+      [comment.target, :comments],
+      partial: "comments/comment", locals: { controls: true }
+    )
   }
   after_destroy_commit lambda { |comment|
     broadcast_remove_to(comment.target, :comments)
