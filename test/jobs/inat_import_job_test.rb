@@ -5,12 +5,11 @@ require_relative "inat_import_job_test_doubles"
 
 class InatImportJobTest < ActiveJob::TestCase
   include InatImportJobTestDoubles
-  # Prevent stubs from persisting between test methods because
-  # the same request (/users/me) needs diffferent responses
   def setup
     @user = users(:inat_importer)
     directory_path = Rails.public_path.join("test_images/orig")
     FileUtils.mkdir_p(directory_path) unless Dir.exist?(directory_path)
+    @external_link_base_url = ExternalSite.find_by(name: "iNaturalist").base_url
   end
 
   # Had 1 identification, 0 photos, 0 observation_fields
@@ -604,7 +603,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
     external_link = obs.external_links.first
     assert_equal(
-      "https://inaturalist.org/observations/#{@parsed_results.first[:id]}",
+      "#{@external_link_base_url}#{@parsed_results.first[:id]}",
       external_link&.url,
       "MO Observation should have ExternalLink to iNat observation"
     )
