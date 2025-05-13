@@ -127,7 +127,9 @@ class Comment < AbstractModel
   end
 
   # Default broadcasting "later" (with solid_queue and ActiveJob)
-  # NOTE: create/update doesn't work locally after first job.
+  # NOTE: create/update doesn't work locally after first job, but
+  # turbo-rails gem v >= 2.0.14 should fix this.
+  # https://github.com/hotwired/turbo-rails/pull/710 -
   # broadcasts_to(->(comment) { [comment.target, :comments] },
   #               inserts_by: :prepend, partial: "comments/comment",
   #               locals: { controls: true },
