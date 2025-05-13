@@ -426,6 +426,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
   def test_import_update_inat_username_if_job_succeeds
     create_ivars_from_filename("zero_results")
+    # simulate user entering new inat_username in iNat import form
     @inat_import.update(inat_username: "updatedInatUsername",
                         inat_ids: "123", token: "MockCode")
     stub_inat_interactions
