@@ -21,18 +21,7 @@ tag.div(
       tag.ul(class: "tight-list") do
         obs.external_links.sort_by(&:site_name).map do |link|
           tag.li(id: "external_link_#{link.id}") do
-            if link.external_site.name == "iNaturalist"
-              concat(
-                link_to(
-                  "iNat ##{link.url.sub(link.external_site.base_url, "")}", link.url
-                )
-              )
-              concat(" Imported ") if obs.source == "mo_inat_import"
-            else
-              concat(link_to(:on_site.t(site: link.external_site.name),
-                             link.url))
-            end
-            concat(tag.small(" #{link.created_at.web_date}"))
+            (external_link(@observation, link))
             concat(
               [
                 " [",
