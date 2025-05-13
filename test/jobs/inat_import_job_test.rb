@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require("test_helper")
-require_relative "inat_import_job_test_doubles"
+require_relative("inat_import_job_test_doubles")
 
 class InatImportJobTest < ActiveJob::TestCase
   include InatImportJobTestDoubles
