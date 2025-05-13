@@ -42,7 +42,7 @@ class InatImportJob < ApplicationJob
     )
     @user = @inat_import.user
     @user_api_key = APIKey.find_by(user: @user, notes: MO_API_KEY_NOTES).key
-    @external_link_site = ExternalSite.find_by(name: "iNaturalist")
+    @external_site = ExternalSite.find_by(name: "iNaturalist")
   end
 
   # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
@@ -249,8 +249,8 @@ class InatImportJob < ApplicationJob
     ExternalLink.create(
       user: @user,
       observation: @observation,
-      external_site: @external_link_site,
-      url: "#{@external_link_site.base_url}#{@inat_obs[:id]}"
+      external_site: @external_site,
+      url: "#{@external_site.base_url}#{@inat_obs[:id]}"
     )
   end
 
