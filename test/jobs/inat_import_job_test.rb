@@ -425,18 +425,14 @@ class InatImportJobTest < ActiveJob::TestCase
   end
 
   def test_import_update_inat_username_if_job_succeeds
-    user = @user
-    assert_empty(user.inat_username,
-                 "Test needs user fixture without an iNat username")
-
     create_ivars_from_filename("zero_results")
-    @inat_import.update(inat_ids: "123", token: "MockCode")
+    @inat_import.update(inat_username: "updatedInatUsername",
+                        inat_ids: "123", token: "MockCode")
     stub_inat_interactions
 
-    InatImportJob.perform_now(@inat_import)
-
-    assert_equal(@inat_import.inat_username, @user.reload.inat_username,
-                 "Failed to update user's inat_username")
+    assert_changes("@user.inat_username", to: "updatedInatUsername") do
+      InatImportJob.perform_now(@inat_import)
+    end
   end
 
   def test_import_multiple
