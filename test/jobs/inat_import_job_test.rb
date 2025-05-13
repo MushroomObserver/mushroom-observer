@@ -5,8 +5,7 @@ require_relative "inat_import_job_test_doubles"
 
 class InatImportJobTest < ActiveJob::TestCase
   include InatImportJobTestDoubles
-  # Prevent stubs from persisting between test methods because
-  # the same request (/users/me) needs diffferent responses
+
   def setup
     @user = users(:inat_importer)
     directory_path = Rails.public_path.join("test_images/orig")
