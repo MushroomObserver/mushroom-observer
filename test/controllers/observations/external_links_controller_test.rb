@@ -114,8 +114,12 @@ module Observations
     end
 
     def test_edit_external_link
-      skip
-      # {"controller"=>"observations/external_links", "action"=>"edit", "id"=>"3800"}
+      link = external_links(:imported_inat_obs_inat_link)
+
+      login(link.user.login)
+      post(:edit, params: { id: link.id })
+
+      assert_response(:success)
     end
 
     def test_update_external_link
