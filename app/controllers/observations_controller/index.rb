@@ -4,8 +4,6 @@
 class ObservationsController
   module Index
     def index
-      return if check_for_spider_block
-
       build_index_with_query
     end
 
@@ -176,7 +174,8 @@ class ObservationsController
         project = find_or_goto_index(Project, params[:project].to_s)
       )
 
-      query = create_query(:Observation, projects: project)
+      query = create_query(:Observation, projects: project,
+                                         order_by: "thumbnail_quality")
       @project = project
       [query, { always_index: true }]
     end

@@ -11,10 +11,31 @@ class ObservationsControllerShowTest < FunctionalTestCase
   #  General tests.
   # ----------------------------
 
+  def test_show_no_login
+    obs = observations(:deprecated_name_obs)
+    get(:show, params: { id: obs.id })
+    assert_response(:success)
+  end
+
+  def test_show_no_login_with_flow
+    obs = observations(:deprecated_name_obs)
+    get(:show, params: { id: obs.id, flow: "next" })
+    assert_response(:redirect)
+  end
+
+  def test_show_login
+    login
+    obs = observations(:deprecated_name_obs)
+    get(:show, params: { id: obs.id })
+    assert_response(:success)
+    assert(@response.body.include?("flow=next"))
+  end
+
   # Test load a deprecated name obs, no strict_loading error
   def test_show_observation_deprecated_name
     obs = observations(:deprecated_name_obs)
     get(:show, params: { id: obs.id })
+    assert_response(:success)
   end
 
   def test_show_observation_noteless_image
@@ -23,14 +44,17 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_nil(img.notes)
     assert(obs.images.member?(img))
     get(:show, params: { id: obs.id })
+    assert_response(:success)
   end
 
   def test_show_observation_noteful_image
     obs = observations(:detailed_unknown_obs)
     get(:show, params: { id: obs.id })
+    assert_response(:success)
   end
 
   def test_show_observation_with_structured_notes
+    login
     obs = observations(:template_and_orphaned_notes_scrambled_obs)
     get(:show, params: { id: obs.id })
     assert_match("+photo", @response.body)
@@ -38,6 +62,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
   end
 
   def test_show_observation_with_simple_notes
+    login
     obs = observations(:coprinus_comatus_obs)
     get(:show, params: { id: obs.id })
     assert_match("<p>Notes:<br />", @response.body)
@@ -199,6 +224,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
   end
 
   def test_show_observation_nil_user
+    login
     obs = observations(:detailed_unknown_obs)
     obs.update(user: nil)
 

@@ -3,15 +3,6 @@
 # html used in tabsets
 module Tabs
   module ObservationsHelper
-    # assemble links for "tabset" for show_observation
-    # actually a list of links and the interest icons
-    # def show_observation_tabs(obs:, user:)
-    #   [
-    #     observation_manage_lists_tab(obs, user),
-    #     *obs_change_tabs(obs)&.reject(&:empty?)
-    #   ]
-    # end
-
     ########################################################################
     # LINKS FOR PANELS
     #

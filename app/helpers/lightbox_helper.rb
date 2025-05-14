@@ -3,11 +3,11 @@
 # special markup for the lightbox
 module LightboxHelper
   # this link needs to contain all the data for the lightbox image
-  def lightbox_link(lightbox_data)
+  def lightbox_link(user, lightbox_data)
     return unless lightbox_data
 
     icon = tag.i("", class: "glyphicon glyphicon-fullscreen")
-    caption = lightbox_caption_html(lightbox_data)
+    caption = lightbox_caption_html(user, lightbox_data)
 
     link_to(icon, lightbox_data[:url],
             class: "theater-btn",
@@ -15,13 +15,13 @@ module LightboxHelper
   end
 
   # everything in the caption
-  def lightbox_caption_html(lightbox_data)
+  def lightbox_caption_html(user, lightbox_data)
     return unless lightbox_data
 
     obs = lightbox_data[:obs]
     html = []
     if obs.is_a?(Observation)
-      html += lightbox_obs_caption(obs, lightbox_data[:identify])
+      html += lightbox_obs_caption(user, obs, lightbox_data[:identify])
     elsif lightbox_data[:image]&.notes.present?
       html << lightbox_image_caption(lightbox_data[:image])
     end
@@ -32,12 +32,12 @@ module LightboxHelper
 
   # observation part of the caption. returns an array of html strings (to join)
   # template local assign "caption" skips the obs relations (projects, etc)
-  def lightbox_obs_caption(obs, identify)
+  def lightbox_obs_caption(user, obs, identify)
     html = []
 
     html << caption_identify_ui(obs:) if identify
     html << caption_obs_title(obs:, identify:)
-    html << observation_details_when_where_who(obs:)
+    html << observation_details_when_where_who(obs:, user:)
     html << caption_truncated_notes(obs:)
     html
   end
@@ -73,7 +73,7 @@ module LightboxHelper
              ""
            end
     tag.h4(
-      class: "obs-what", id: "observation_what_#{obs.id}",
+      id: "observation_what_#{obs.id}", class: "obs-what",
       data: { controller: "section-update" }
     ) do
       [

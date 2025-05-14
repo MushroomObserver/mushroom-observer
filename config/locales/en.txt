@@ -1387,6 +1387,7 @@
   app_sort_by_title: "[:sort_by_object(type=:title)]"
   app_account: Account
   app_login: Login
+  app_login_reminder: Login or create an account to access more fungal content
   app_create_account: Create Account
   app_current_user: Current User
   app_comments_for_you: Comments for You
@@ -1535,8 +1536,9 @@
   download_observations_raw: CSV spreadsheet
   download_observations_adolf: The Adolf Special™
   download_observations_darwin: Darwin Core
-  download_observations_symbiota: Symbiota
   download_observations_fundis: FunDiS
+  download_observations_mycoportal: MyCoPortal
+  download_observations_symbiota: Symbiota
   download_observations_what_is_this: what is this?
   download_observations_encoding: Choose character encoding
   download_observations_ascii: ASCII (no accents)
@@ -1904,6 +1906,10 @@
   login_data_without_login_caption: Get MO Data Without Logging In
   login_images_without_login: Get "MO Images for Machine Learning":/articles/20.
   login_data_without_login: Get "MO Data":https://github.com/MushroomObserver/mushroom-observer/blob/main/README_API.md#csv-files.
+  login_why: Why We Require a Login
+  login_spiders_bad1: We are temporarily restricting access to essentially all MO content to users who have verified accounts.
+  login_spiders_bad2: Creating an account on MO is a simple process.  It does require a valid email in order to get a verification link and that link must be visited before your account is considered verified.
+  login_spiders_bad3: We are committed to keeping all data contributed to Mushroom Observer freely and openly available. See "Why We Now Require a Login":https://mushroomobserver.org/articles/46 for more details.
 
   # account/logout
   logout_title: Logout
@@ -3379,6 +3385,8 @@
   change_member_status_remove_member_help: Remove Member - Removes all member and admin privileges for a project.  [:user] will no longer be able view or create draft names for this project.  They will not be able to perform any admin functions.
   change_member_status_denied: Only the admins for a project can change member permissions.
   change_member_status_title: Changing [:user] Status of [name] for [title]
+  change_member_add_obs: Add My Observations
+  change_member_add_obs_flash: Added [count] Observations
   change_member_hidden_gps_trust: Share Hidden GPS
   change_member_hidden_gps_trust_flash: You now trust admins of this project with hidden GPS data for associated observations
   change_member_editing_trust: Allow Editing
@@ -4000,7 +4008,7 @@
   runtime_removed_id_from: "Successfully removed [type] #[value] from [name]."
   runtime_removed_name: Successfully removed [type] '[value]'.
   runtime_removed_name_from: Successfully removed [type] '[value]' from [name].
-  runtime_spiders_begone: Spiders Begone!  Please login to access this page.
+  runtime_spiders_begone: Spiders Begone!  Please login (mushroomobserver.org/account/login/new) to access this page.
   runtime_updated_at: Successfully updated [type].
   runtime_updated_id: "Successfully updated [type] #[value]."
   runtime_updated_name: Successfully updated [type] '[value]'.

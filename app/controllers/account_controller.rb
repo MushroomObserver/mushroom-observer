@@ -66,7 +66,7 @@ class AccountController < ApplicationController
       UserStats.create({ user_id: @new_user.id })
     end
 
-    redirect_back_or_default("/")
+    redirect_back_or_default(info_how_to_use_path)
   end
 
   # This is the welcome page for new users who just verified an account.
@@ -112,16 +112,18 @@ class AccountController < ApplicationController
   end
 
   # Some recurring patterns we've noticed
-  BOGUS_EMAILS = / namnerbca\.com |
-                   0mg0mg0mg |
-                   yourmail@gmail\.com |
-                   @mnawl.sibicomail\.com
-                   /ix
-
-  # Some recurring patterns we've noticed
-  BOGUS_LOGINS = / houghgype |
-                   uplilla |
-                   vemslons /ix
+  BOGUS_EMAILS = /
+    namnerbca\.com |
+    0mg0mg0mg |
+    yourmail@gmail\.com |
+    @mnawl.sibicomail\.com
+  /ix
+  BOGUS_LOGINS = /
+    houghgype |
+    uplilla |
+    vemslons
+  /ix
+  private_constant(:BOGUS_EMAILS, :BOGUS_LOGINS)
 
   def evil_signup_credentials?
     bogus_email? || bogus_login?

@@ -1,6 +1,6 @@
 <%
 @owner_naming = owner_naming_line(@owner_name) # must before show_obs_title
-add_page_title(show_obs_title(obs: @observation, owner_naming: @owner_naming))
+add_page_title(show_obs_title(obs: @observation, owner_naming: @owner_naming, user: @user))
 num_images = @observation.images.length
 
 add_context_nav(naming_suggestion_tabs(obs: @observation))
@@ -58,8 +58,7 @@ add_context_nav(naming_suggestion_tabs(obs: @observation))
       </td>
       <td>
         <%= interactive_image(
-              @user,
-              sugg.image_obs.thumb_image,
+              @user, sugg.image_obs.thumb_image,
               image_link: image_path(id: sugg.image_obs.id)
             ) if sugg.image_obs.present? %>
       </td>

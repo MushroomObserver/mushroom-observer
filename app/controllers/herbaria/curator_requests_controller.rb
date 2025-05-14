@@ -31,7 +31,6 @@ module Herbaria
 
       QueuedEmail::Webmaster.create_email(
         @user,
-        sender_email: @user.email,
         subject: "Herbarium Curator Request",
         content: "User: ##{@user.id}, #{@user.login}, #{@user.show_url}\n" \
                  "Herbarium: #{@herbarium.name}, #{@herbarium.show_url}\n" \

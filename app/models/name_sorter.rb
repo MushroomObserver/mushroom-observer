@@ -79,8 +79,7 @@
 class NameSorter
   attr_accessor :approved_deprecated_names, :approved_synonyms, :chosen_names
 
-  attr_reader :has_new_synonyms, :has_unapproved_deprecated_names,
-              :synonym_data, :all_names,
+  attr_reader :has_new_synonyms, :has_unapproved_deprecated_names, :all_names,
               :deprecated_name_strs, :deprecated_names,
               :multiple_line_strs, :multiple_names,
               :single_line_strs, :single_names,
@@ -94,7 +93,6 @@ class NameSorter
     @has_new_synonyms                = false
     @has_unapproved_deprecated_names = false
 
-    @synonym_data              = [] # Array of [NameParse, [Name, Name, ...]]
     @all_names                 = [] # Array of Name's
     @deprecated_name_strs      = [] # Array of String's
     @deprecated_names          = [] # Array of Name's
@@ -254,11 +252,9 @@ class NameSorter
     return unless name_parse.has_synonym
 
     @has_new_synonyms = true
-    if name_parse.find_synonym_names(user).empty?
-      @new_name_strs.push(name_parse.synonym_search_name)
-    end
-    # Keep names in addition to parse for the chosen filter
-    @synonym_data.push([name_parse, names])
+    return unless name_parse.find_synonym_names(user).empty?
+
+    @new_name_strs.push(name_parse.synonym_search_name)
   end
 
   # Get a (mostly) full list of all the synonyms of the listed names, including

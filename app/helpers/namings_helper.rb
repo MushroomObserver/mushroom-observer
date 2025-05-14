@@ -75,12 +75,10 @@ module NamingsHelper
     namings = consensus.namings.sort_by(&:created_at)
     any_names = consensus.namings&.length&.positive?
 
-    tag.div(class: "list-group list-group-flush",
-            id: "namings_table_rows",
-            data: {
-              controller: "section-update",
-              updated_by: "modal_naming_#{consensus.observation.id}"
-            }) do
+    tag.div(
+      id: "namings_table_rows", class: "list-group list-group-flush",
+      data: { controller: "section-update" }
+    ) do
       if any_names
         namings.each do |naming|
           row = naming_row_content(consensus, naming)

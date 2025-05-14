@@ -579,7 +579,6 @@ class NamesController < ApplicationController
     content = email_name_change_content
     QueuedEmail::Webmaster.create_email(
       @user,
-      sender_email: @user.email,
       subject: "Nontrivial Name Change",
       content: content
     )
@@ -685,7 +684,6 @@ class NamesController < ApplicationController
     )
     QueuedEmail::Webmaster.create_email(
       @user,
-      sender_email: @user.email,
       subject: "Merger identifier conflict",
       content: content
     )

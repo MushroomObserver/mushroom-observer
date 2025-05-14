@@ -118,6 +118,12 @@ Naming/BlockForwarding:
   # Default is `anonymous`
   # Keeping it `explicit` until we're ready to switch.
   EnforcedStyle: explicit
+Naming/VariableNumber:
+  # We have a mix of snake_case and normal case.
+  # Standardizing plus creating exceptions, would take some effort,
+  # is low priority, and the devs are good with disabling the cop.
+  # 2025-05-08 jdc
+  Enabled: false
 
 Performance/Casecmp:
   # This cop does not work with Unicode in Ruby 2.4

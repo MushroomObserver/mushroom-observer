@@ -39,7 +39,7 @@ module ImagesHelper
           end,
           image_stretched_link(presenter.image_link,
                                presenter.image_link_method),
-          lightbox_link(presenter.lightbox_data),
+          lightbox_link(user, presenter.lightbox_data),
           image_vote_section_html(user, presenter.image, presenter.votes)
         ].safe_join
       end,

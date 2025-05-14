@@ -64,7 +64,7 @@ ACTIONS = {
     thanks: {},
     # Disable cop for legacy routes.
     # The routes are two very old pages that we might get rid of.
-    # rubocop:disable Naming/VariableNumber
+
     wrapup_2011: {},
     wrapup_2012: {}
     # rubocop:enable Naming/VariableNumber
@@ -269,7 +269,8 @@ MushroomObserver::Application.routes.draw do
   root "observations#index"
 
   # Route /123 to /observations/123.
-  get ":id" => "observations#show", id: /\d+/, as: "permanent_observation"
+  get "obs/:id" => "observations#show", id: /\d+/, as: "permanent_observation"
+  get ":id" => "observations#show", id: /\d+/ # , as: "permanent_observation"
 
   # NOTE: The nesting below is necessary to get nice path helpers
   resource :account, only: [:new, :create], controller: "account"

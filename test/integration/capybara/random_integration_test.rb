@@ -68,9 +68,10 @@ class RandomIntegrationTest < CapybaraIntegrationTestCase
 
   def test_thumbnail_maps
     visit("/#{observations(:minimal_unknown_obs).id}")
-    assert_selector("body.observations__show")
+    assert_equal(403, status_code)
 
     login("dick")
+    visit("/#{observations(:minimal_unknown_obs).id}")
     assert_selector("body.observations__show")
     assert_selector("div.thumbnail-map")
     click_link(text: "Hide thumbnail map")

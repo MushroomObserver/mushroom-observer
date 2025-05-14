@@ -15,7 +15,8 @@ class QueuedEmail
       get_note
     end
 
-    def self.create_email(user, sender_email:, content:, subject: nil)
+    def self.create_email(user, content:, sender_email: nil, subject: nil)
+      sender_email = user.email if user && sender_email.nil?
       raise("Missing email address!") unless sender_email
       raise("Missing content!") unless content
 
