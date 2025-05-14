@@ -221,7 +221,8 @@ class InatImportJob < ApplicationJob
       specimen: @inat_obs.specimen?,
       text_name: Name.find(name_id).text_name,
       notes: @inat_obs.notes,
-      source: @inat_obs.source }
+      source: @inat_obs.source,
+      inat_id: @inat_obs[:id] }
   end
 
   # NOTE: 1. iNat users seem to add a prov name only if there's a sequence.
