@@ -140,7 +140,7 @@ module LinkHelper
     tag.span(text, **args)
   end
 
-  def external_link(obs, link)
+  def external_link(link)
     case link.external_site.name
     when "iNaturalist"
       concat(
@@ -148,11 +148,10 @@ module LinkHelper
           "iNat ##{link.url.sub(link.external_site.base_url, "")}", link.url
         )
       )
-      concat(" Imported ") if obs.source == "mo_inat_import"
     else
       concat(link_to(:on_site.t(site: link.external_site.name), link.url))
+      concat(tag.small(" #{link.created_at.web_date}"))
     end
-    concat(tag.small(" #{link.created_at.web_date}"))
   end
 
   # NOTE: Specific to glyphicons
