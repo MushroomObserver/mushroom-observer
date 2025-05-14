@@ -279,4 +279,18 @@ class CommentsControllerTest < FunctionalTestCase
     assert_equal("New Summary", comment.summary)
     assert_equal("New text.", comment.comment)
   end
+
+  def test_comment_broadcast
+    obs = observations(:minimal_unknown_obs)
+    comment_count = obs.comments.size
+    params = { target: obs.id,
+               type: "Observation",
+               comment: { summary: "A Summary", comment: "Some text." } }
+    login
+    assert_turbo_stream_broadcasts([obs, :comments], count: 1) do
+      post(:create, params:)
+    end
+    obs.reload
+    assert_equal(comment_count + 1, obs.comments.size)
+  end
 end

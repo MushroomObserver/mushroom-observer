@@ -464,6 +464,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     user: RssLog,
     vote: Observation
   }.freeze
+  private_constant(:REDIRECT_FALLBACK_MODELS)
 
   public ##########
 

@@ -557,6 +557,19 @@ module Observations
       assert_equal("Foo sp. 'bar' Author", new_name.search_name)
     end
 
+    def test_create_bad_prov_name
+      # Must be a genus where all genus fixtures have an author
+      name = "Suillus sp. 'A*G'"
+      params = {
+        observation_id: observations(:coprinus_comatus_obs).id,
+        naming: { name: name },
+        approved_name: name
+      }
+      login("dick")
+      post(:create, params: params)
+      assert_equal(0, Naming.where(name_id: nil).count)
+    end
+
     # Rolf can destroy his naming if Mary deletes her vote on it.
     def test_rolf_destroy_rolfs_naming
       obs  = observations(:coprinus_comatus_obs)
