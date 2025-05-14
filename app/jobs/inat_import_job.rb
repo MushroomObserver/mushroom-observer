@@ -42,6 +42,7 @@ class InatImportJob < ApplicationJob
     )
     @user = @inat_import.user
     @user_api_key = APIKey.find_by(user: @user, notes: MO_API_KEY_NOTES).key
+    @external_site = ExternalSite.find_by(name: "iNaturalist")
   end
 
   # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
@@ -180,6 +181,7 @@ class InatImportJob < ApplicationJob
     return unless @inat_obs.importable?
 
     create_observation
+    add_external_link
     add_inat_images(@inat_obs[:observation_photos])
     update_names_and_proposals
     add_inat_sequences
@@ -219,8 +221,7 @@ class InatImportJob < ApplicationJob
       specimen: @inat_obs.specimen?,
       text_name: Name.find(name_id).text_name,
       notes: @inat_obs.notes,
-      source: @inat_obs.source,
-      inat_id: @inat_obs[:id] }
+      source: @inat_obs.source }
   end
 
   # NOTE: 1. iNat users seem to add a prov name only if there's a sequence.
@@ -242,6 +243,15 @@ class InatImportJob < ApplicationJob
 
   def need_new_prov_name?(prov_name)
     prov_name.blank? || Name.where(text_name: prov_name).none?
+  end
+
+  def add_external_link
+    ExternalLink.create(
+      user: @user,
+      observation: @observation,
+      external_site: @external_site,
+      url: "#{@external_site.base_url}#{@inat_obs[:id]}"
+    )
   end
 
   def add_provisional_name(prov_name)
@@ -385,9 +395,9 @@ class InatImportJob < ApplicationJob
   end
 
   def update_mushroom_observer_url_field
-    update_inat_observation_field(observation_id: @observation.inat_id,
+    update_inat_observation_field(observation_id: @inat_obs[:id],
                                   field_id: 5005,
-                                  value: "#{MO.http_domain}/#{@observation.id}")
+                                  value: "#{MO.http_domain}/#{@inat_obs[:id]}")
   end
 
   def update_inat_observation_field(observation_id:, field_id:, value:)

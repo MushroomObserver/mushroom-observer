@@ -21,9 +21,7 @@ tag.div(
       tag.ul(class: "tight-list") do
         obs.external_links.sort_by(&:site_name).map do |link|
           tag.li(id: "external_link_#{link.id}") do
-            concat(link_to(:on_site.t(site: link.external_site.name),
-                            link.url))
-            concat(tag.small(" #{link.created_at.web_date}"))
+            (external_link(link))
             concat(
               [
                 " [",

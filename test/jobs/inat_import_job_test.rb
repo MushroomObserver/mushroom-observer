@@ -10,6 +10,7 @@ class InatImportJobTest < ActiveJob::TestCase
     @user = users(:inat_importer)
     directory_path = Rails.public_path.join("test_images/orig")
     FileUtils.mkdir_p(directory_path) unless Dir.exist?(directory_path)
+    @external_link_base_url = ExternalSite.find_by(name: "iNaturalist").base_url
   end
 
   # Had 1 identification, 0 photos, 0 observation_fields
@@ -597,6 +598,13 @@ class InatImportJobTest < ActiveJob::TestCase
     view = ObservationView.
            find_by(observation_id: obs.id, user_id: user.id)
     assert(view.present?, "Failed to create ObservationView")
+
+    external_link = obs.external_links.first
+    assert_equal(
+      "#{@external_link_base_url}#{@parsed_results.first[:id]}",
+      external_link&.url,
+      "MO Observation should have ExternalLink to iNat observation"
+    )
 
     assert(obs.comments.any?, "Imported iNat should have >= 1 Comment")
     obs_comments =
