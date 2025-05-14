@@ -114,8 +114,13 @@ module Observations
     end
 
     def test_edit_external_link
+      skip
+      # {"controller"=>"observations/external_links", "action"=>"edit", "id"=>"3800"}
+    end
+
+    def test_update_external_link
       # obs owned by rolf, mary created link and is member of site's project
-      link    = ExternalLink.first
+      link = external_links(:coprinus_comatus_obs_inaturalist_link)
       new_url = "#{link.external_site.base_url}different_number"
       params = {
         id: link.id,
@@ -150,7 +155,7 @@ module Observations
 
     def test_remove_external_link_not_logged_in
       # obs owned by rolf, mary created link and is member of site's project
-      link = ExternalLink.first
+      link = external_links(:coprinus_comatus_obs_inaturalist_link)
       params = { id: link.id }
 
       # not logged in
@@ -160,7 +165,7 @@ module Observations
 
     # dick doesn't have permission
     def test_remove_external_link_no_permission
-      link = ExternalLink.first
+      link = external_links(:coprinus_comatus_obs_inaturalist_link)
       params = { id: link.id }
       login("dick")
       delete(:destroy, params:)
@@ -169,7 +174,7 @@ module Observations
 
     # mary can
     def test_remove_external_link_project_member
-      link = ExternalLink.first
+      link = external_links(:coprinus_comatus_obs_inaturalist_link)
       params = { id: link.id }
       login("mary")
       delete(:destroy, params:)
