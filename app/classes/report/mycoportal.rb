@@ -46,7 +46,7 @@ module Report
         "maximumElevationInMeters",
         "disposition", # herbaria, "vouchered", or nil
         "dateLastModified",
-        "imageUrl" # not a Symbiota or MCP field;
+        "imageUrls" # list of image urls; not a Symbiota or MCP field
       ]
     end
 
@@ -75,7 +75,7 @@ module Report
         row.best_high, # maximumElevationInMeters
         disposition(row), # disposition
         row.obs_updated_at, # dateLastModified
-        image_url(row.obs_thumb_image_id) # MO-specific (not an MCP field)
+        image_urls(row) # list of large-size image urls
       ]
     end
 
@@ -157,26 +157,33 @@ module Report
       "vouchered"
     end
 
+    # space-separated list of the large-sized Images for an Observation
+    def image_urls(row)
+      row.val(1).to_s.split(", ").sort_by(&:to_i).
+        map { |id| image_url(id) }.join(" ")
+    end
+
     ####### Additional columns and utilities
 
-    # additional columns
+    # extended data used to calculate some values
     # See app/classes/report/base_table.rb
     def extend_data!(rows)
-      add_collector_ids!(rows, 1)
-      add_herbarium_accession_numbers!(rows, 2)
-      add_sequence_ids!(rows, 3)
+      add_image_ids!(rows, 1)
+      add_collector_ids!(rows, 2)
+      add_herbarium_accession_numbers!(rows, 3)
+      add_sequence_ids!(rows, 4)
     end
 
     def collector_ids(row)
-      row.val(1)
-    end
-
-    def herbarium_accession_numbers(row)
       row.val(2)
     end
 
-    def sequence_ids(row)
+    def herbarium_accession_numbers(row)
       row.val(3)
+    end
+
+    def sequence_ids(row)
+      row.val(4)
     end
 
     def sort_before(rows)

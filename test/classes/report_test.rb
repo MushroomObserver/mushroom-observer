@@ -759,7 +759,7 @@ class ReportTest < UnitTestCase
       dateLastModified: "#{obs.updated_at.api_time} UTC"
     }
     # Include this key/value only if there are images.
-    hsh[:imageUrl] = image_url(obs) if obs.images.any?
+    hsh[:imageUrls] = image_urls(obs) if obs.images.any?
     hsh
   end
 
@@ -770,8 +770,12 @@ class ReportTest < UnitTestCase
     "</a>"
   end
 
-  def image_url(obs)
-    "#{Report::Mycoportal::HTTP_DOMAIN}/images/1280/#{obs.thumb_image_id}.jpg"
+  def image_urls(obs)
+    urls = ""
+    obs.images.each do |img|
+      urls += "#{Report::Mycoportal::HTTP_DOMAIN}/images/1280/#{img.id}.jpg "
+    end
+    urls.strip
   end
 
   def test_rounding_of_latitudes_etc
