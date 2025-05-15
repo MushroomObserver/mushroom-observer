@@ -17,9 +17,9 @@ FileUtils.cp(src, dest)
 rows = CSV.read(dest, col_sep: "\t", headers: true)
 
 # Remove all columns except catalogNumber and imagesUrl
-filtered_headers = %w[catalogNumber imagesUrl]
+filtered_headers = %w[catalogNumber imageUrls]
 filtered_rows = rows.map do |row|
-  [row["catalogNumber"], row["imagesUrl"]]
+  [row["catalogNumber"], row["imageUrls"]]
 end
 
 # Save the file (overwrite dest)
