@@ -979,7 +979,7 @@ class ObservationTest < UnitTestCase
     obs.update_attribute(:gps_hidden, true)
     assert_nil(obs.public_lat)
     assert_nil(obs.public_lng)
-    User.current = mary
+    obs.current_user = obs.user
     assert_equal(34.1622, obs.public_lat)
     assert_equal(-118.3521, obs.public_lng)
   end
