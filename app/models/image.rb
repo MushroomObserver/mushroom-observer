@@ -1006,7 +1006,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Log adding new image to an associated observation, glossary term, etc.
   def log_create_for(object)
-    object.log(:log_image_created, name: log_name, touch: true)
+    object.user_log(user, :log_image_created, name: log_name, touch: true)
   end
 
   # Log adding existing image to an associated observation, glossary term, etc.
