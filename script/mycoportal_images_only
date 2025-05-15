@@ -3,7 +3,13 @@
 
 # Creates a spreadsheet with only catalogNumber and imageUrls
 # from a full Mycoportal "report"
-# TODO: sample usage
+#
+# Sample usage
+# In the app, download Observations from, e.g., Search results
+# Download Observation Data using the MyCoPortal option,
+# saving the report in the tmp directory, e.g., tmp/observations_235im.tsv
+# Run this script with the saved report as the argument, e.g.:
+#  mushroom-observer % script/mycoportal_images_only tmp/observations_253im.tsv
 
 require "csv"
 require "fileutils"
