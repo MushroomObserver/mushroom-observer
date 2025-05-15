@@ -470,11 +470,11 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # or they are members of a project that the observation belongs to, but
   # those are harder to determine. This catches the majority of cases.
   def public_lat
-    gps_hidden && user_id != User.current_id ? nil : lat
+    gps_hidden && user_id != @current_user&.id ? nil : lat
   end
 
   def public_lng
-    gps_hidden && user_id != User.current_id ? nil : lng
+    gps_hidden && user_id != @current_user&.id ? nil : lng
   end
 
   def reveal_location?
