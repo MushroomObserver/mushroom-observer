@@ -19,3 +19,8 @@ coprinus_comatus_obs_inaturalist_link:
   external_site: inaturalist
   url:           "http://inaturalist.org/234723"
 
+imported_inat_obs_inat_link:
+  user:          dick
+  observation:   imported_inat_obs
+  external_site: inaturalist
+  url:           "https://www.inaturalist.org/12345"

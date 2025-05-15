@@ -811,6 +811,7 @@ recorder_obs:
 
 imported_inat_obs:
   <<: *DEFAULTS
+  user: dick
   inat_id: 12345
 #
 #
