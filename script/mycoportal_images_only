@@ -1,0 +1,31 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Creates a spreadsheet with only catalogNumber and imageUrls
+# from a full Mycoportal "report"
+# TODO: sample usage
+
+require "csv"
+require "fileutils"
+
+# Copy the full TSV file
+src = ARGV[0]
+dest = ARGV[1] || src.sub(/(\.tsv)?$/, "_images.tsv")
+FileUtils.cp(src, dest)
+
+# Load the copied file
+rows = CSV.read(dest, col_sep: "\t", headers: true)
+
+# Remove all columns except catalogNumber and imagesUrl
+filtered_headers = %w[catalogNumber imagesUrl]
+filtered_rows = rows.map do |row|
+  [row["catalogNumber"], row["imagesUrl"]]
+end
+
+# Save the file (overwrite dest)
+CSV.open(dest, "w", col_sep: "\t") do |csv|
+  csv << filtered_headers
+  filtered_rows.each { |row| csv << row }
+end
+
+puts "Filtered file saved to #{dest}"
