@@ -145,7 +145,6 @@ class API2Controller < ApplicationController
   def render_api_results(args)
     @user = user_from_key(args[:api_key])
     @api = API2.execute(args)
-    User.current = @api.user
     do_render
   rescue StandardError => e
     @api ||= API2.new
