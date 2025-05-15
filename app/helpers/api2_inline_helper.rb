@@ -151,7 +151,7 @@ module API2InlineHelper
   end
 
   def xml_name(xml, name)
-    xml_string(xml, :name, name.real_text_name)
+    xml_string(xml, :name, name.user_real_text_name(nil))
     xml_string(xml, :author, name.author)
     xml_string(xml, :rank, name.rank.to_s.downcase)
     xml_boolean(xml, :deprecated, name.deprecated)

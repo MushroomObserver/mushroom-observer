@@ -2,7 +2,7 @@
 
 json.id(object.id)
 json.type("name")
-json.name(object.real_text_name.to_s)
+json.name(object.user_real_text_name(nil).to_s)
 json.author(object.author.to_s) if object.author.present?
 json.rank(object.rank.to_s.downcase)
 json.deprecated(object.deprecated ? true : false)
