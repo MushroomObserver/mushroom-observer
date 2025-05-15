@@ -243,10 +243,10 @@ module API2InlineHelper
   def xml_vote(xml, vote)
     xml_confidence_level(xml, :confidence, vote.value)
     xml_integer(xml, :naming_id, vote.naming_id)
-    if !vote.anonymous?
-      xml_detailed_object(xml, :owner, vote.user)
-    else
+    if vote.anonymous?
       xml_string(xml, :owner, :anonymous.l)
+    else
+      xml_detailed_object(xml, :owner, vote.user)
     end
   end
 
