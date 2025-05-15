@@ -8,7 +8,6 @@ json.updated_at(object.updated_at.try(&:utc))
 json.name(json_name(object.name))
 json.owner_id(object.user_id)
 json.observation_id(object.observation_id)
-debugger
 json.votes(object.votes.map { |vote| json_vote(vote) }) if detail
 reasons = object.reasons_array.select(&:used?)
 if reasons.any?
