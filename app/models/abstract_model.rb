@@ -275,7 +275,7 @@ class AbstractModel < ApplicationRecord
   # *NOTE*: this saves the old stats for the page footer of show_observation,
   # show_name, etc. otherwise the footer will always show the last view as now!
   #
-  def update_view_stats
+  def update_view_stats(_current_user = nil)
     return unless respond_to?(:num_views=) || respond_to?(:last_view=)
 
     @old_num_views = num_views

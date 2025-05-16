@@ -349,13 +349,13 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     msgs
   end
 
-  def update_view_stats
+  def update_view_stats(current_user = User.current)
     super
-    return if User.current.blank?
+    return if current_user.blank?
 
     @old_last_viewed_by ||= {}
-    @old_last_viewed_by[User.current_id] = last_viewed_by(User.current)
-    ObservationView.update_view_stats(id, User.current_id)
+    @old_last_viewed_by[current_user.id] = last_viewed_by(current_user)
+    ObservationView.update_view_stats(id, current_user.id)
   end
 
   def last_viewed_by(user)

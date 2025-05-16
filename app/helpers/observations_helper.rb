@@ -94,8 +94,8 @@ module ObservationsHelper
   ##### Portion of page title that includes user's naming preference #########
 
   # Observer Preference: Hydnum repandum
-  def owner_naming_line(owner_name)
-    return unless User.current&.view_owner_id
+  def owner_naming_line(owner_name, current_user = User.current)
+    return unless current_user&.view_owner_id
 
     [
       "#{:show_observation_owner_id.t}:",
