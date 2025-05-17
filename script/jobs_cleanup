@@ -1,9 +1,19 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+#
+#  USAGE::
+#
+#    script/jobs_cleanup
+#
+#  DESCRIPTION::
+#
+#  Build robots.txt, a set of sitemap.xml files, and a set of pared-down
+#  index.html files for robots to use to index our site efficiently.
+
 require_relative("../config/boot")
 require_relative("../config/environment")
-include("mission_control")
+require("mission_control-jobs")
 
 # connect to mission_control
 connect_to mushroomobserver
