@@ -144,8 +144,8 @@ class Naming < AbstractModel
     name ? name.user_observation_name(user) : ""
   end
 
-  def display_name_brief_authors
-    name ? name.display_name_brief_authors : ""
+  def display_name_brief_authors(user = User.current)
+    name ? name.display_name_brief_authors(user) : ""
   end
 
   # Return name in Textile format (with id tacked on to make unique).

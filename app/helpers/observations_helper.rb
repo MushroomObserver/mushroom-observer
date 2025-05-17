@@ -44,7 +44,7 @@ module ObservationsHelper
     if user
       [
         link_to_display_name_brief_authors(
-          name, class: "obs_consensus_deprecated_synonym_link_#{name.id}"
+          user, name, class: "obs_consensus_deprecated_synonym_link_#{name.id}"
         ),
         # Differentiate deprecated consensus from preferred name
         obs_consensus_id_flag,
@@ -76,10 +76,10 @@ module ObservationsHelper
     text = [
       if user
         link_to_display_name_brief_authors(
-          name, class: "obs_consensus_naming_link_#{name.id}"
+          user, name, class: "obs_consensus_naming_link_#{name.id}"
         )
       else
-        name.display_name_brief_authors.t
+        name.display_name_brief_authors(user).t
       end
     ]
     # Differentiate this Name from Observer Preference
@@ -99,22 +99,23 @@ module ObservationsHelper
 
     [
       "#{:show_observation_owner_id.t}:",
-      owner_favorite_or_explanation(owner_name).t
+      owner_favorite_or_explanation(current_user, owner_name).t
     ].safe_join(" ")
   end
 
-  def owner_favorite_or_explanation(owner_name)
+  def owner_favorite_or_explanation(current_user, owner_name)
     if owner_name
       link_to_display_name_brief_authors(
-        owner_name, class: "obs_owner_naming_link_#{owner_name.id}"
+        current_user, owner_name,
+        class: "obs_owner_naming_link_#{owner_name.id}"
       )
     else
       :show_observation_no_clear_preference
     end
   end
 
-  def link_to_display_name_brief_authors(name, **)
-    link_to(name.display_name_brief_authors.t,
+  def link_to_display_name_brief_authors(user, name, **)
+    link_to(name.display_name_brief_authors(user).t,
             name_path(id: name.id), **)
   end
 
@@ -223,7 +224,7 @@ module ObservationsHelper
         obs_user.unique_text_name
       end
     ]
-    if user && obs_user != User.current && !obs_user&.no_emails &&
+    if user && obs_user != user && !obs_user&.no_emails &&
        obs_user&.email_general_question
 
       html += [

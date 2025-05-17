@@ -142,7 +142,7 @@ class Textile < String
     names.each do |name|
       next unless name.try(:at_or_below_genus?)
 
-      Textile.private_register_name(name.real_text_name, name.rank)
+      Textile.private_register_name(name.user_real_text_name(nil), name.rank)
     end
   end
 

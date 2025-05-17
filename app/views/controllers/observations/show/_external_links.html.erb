@@ -35,7 +35,7 @@ tag.div(
                 ),
                 "]"
               ].safe_join(" ")
-            ) if link.can_edit? || in_admin_mode?
+            ) if link.can_edit?(@user) || in_admin_mode?
           end
         end.safe_join
       end
