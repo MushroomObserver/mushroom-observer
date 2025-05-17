@@ -80,7 +80,15 @@ class InatImportsController < ApplicationController
     @inat_import = InatImport.find(params[:id])
   end
 
-  def new; end
+  def new
+    @inat_import = InatImport.find_by(user: @user)
+    return unless @inat_import.pending?
+
+    tracker = InatImportJobTracker.where(inat_import: @inat_import).last
+    redirect_to(
+      inat_import_path(@inat_import, params: { tracker_id: tracker.id })
+    )
+  end
 
   def create
     return reload_form unless params_valid?
