@@ -85,6 +85,7 @@ class InatImportsController < ApplicationController
     return unless @inat_import.pending?
 
     tracker = InatImportJobTracker.where(inat_import: @inat_import).last
+    flash_error(:inat_import_tracker_pending.t)
     redirect_to(
       inat_import_path(@inat_import, params: { tracker_id: tracker.id })
     )
