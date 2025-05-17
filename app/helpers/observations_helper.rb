@@ -65,7 +65,8 @@ module ObservationsHelper
       [
         "(",
         link_to_display_name_without_authors(
-          user, prefer_name, class: "obs_preferred_synonym_link_#{prefer_name.id}"
+          user, prefer_name,
+          class: "obs_preferred_synonym_link_#{prefer_name.id}"
         ),
         ")"
       ].safe_join
