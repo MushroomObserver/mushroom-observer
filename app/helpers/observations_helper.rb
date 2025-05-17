@@ -48,24 +48,24 @@ module ObservationsHelper
         ),
         # Differentiate deprecated consensus from preferred name
         obs_consensus_id_flag,
-        obs_title_preferred_synonym(prefer_name)
+        obs_title_preferred_synonym(user, prefer_name)
       ]
     else
       [
-        name.display_name_brief_authors.t,
+        name.user_display_name_brief_authors(user).t,
         # Differentiate deprecated consensus from preferred name
         obs_consensus_id_flag,
-        prefer_name.display_name_without_authors.t
+        prefer_name.user_display_name_without_authors(user).t
       ]
     end.safe_join(" ")
   end
 
-  def obs_title_preferred_synonym(prefer_name)
+  def obs_title_preferred_synonym(user, prefer_name)
     tag.span(class: "smaller") do
       [
         "(",
         link_to_display_name_without_authors(
-          prefer_name, class: "obs_preferred_synonym_link_#{prefer_name.id}"
+          user, prefer_name, class: "obs_preferred_synonym_link_#{prefer_name.id}"
         ),
         ")"
       ].safe_join
@@ -79,7 +79,7 @@ module ObservationsHelper
           user, name, class: "obs_consensus_naming_link_#{name.id}"
         )
       else
-        name.display_name_brief_authors(user).t
+        name.user_display_name_brief_authors(user).t
       end
     ]
     # Differentiate this Name from Observer Preference
@@ -115,12 +115,12 @@ module ObservationsHelper
   end
 
   def link_to_display_name_brief_authors(user, name, **)
-    link_to(name.display_name_brief_authors(user).t,
+    link_to(name.user_display_name_brief_authors(user).t,
             name_path(id: name.id), **)
   end
 
-  def link_to_display_name_without_authors(name, **)
-    link_to(name.display_name_without_authors.t,
+  def link_to_display_name_without_authors(user, name, **)
+    link_to(name.user_display_name_without_authors(user).t,
             name_path(id: name.id), **)
   end
 

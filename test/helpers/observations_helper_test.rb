@@ -36,7 +36,7 @@ class ObservationsHelperTest < ActionView::TestCase
     )
     assert_match(
       link_to_display_name_without_authors(
-        current_name,
+        user, current_name,
         class: "obs_preferred_synonym_link_#{current_name.id}"
       ),
       obs_title_consensus_name_link(name: deprecated_name, user:).unescape_html,
