@@ -1131,7 +1131,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def check_user
-    return if user || User.current
+    return if user || @current_user
 
     errors.add(:user, :validate_observation_user_missing.t)
   end

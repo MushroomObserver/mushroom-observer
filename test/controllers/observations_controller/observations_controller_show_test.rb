@@ -226,6 +226,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
   def test_show_observation_nil_user
     login
     obs = observations(:detailed_unknown_obs)
+    obs.current_user = rolf
     obs.update(user: nil)
 
     get(:show, params: { id: obs.id })
