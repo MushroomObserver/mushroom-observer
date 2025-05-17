@@ -6,13 +6,13 @@
 # rubocop:disable Metrics/ModuleLength
 module NamingsHelper
   ##### Observation Naming "table" content #########
-  def observation_namings_table(obs, consensus)
+  def observation_namings_table(user, obs, consensus)
     tag.div(class: "namings-table panel panel-default mb-4",
             id: "namings_table") do
       [
         observation_namings_table_header(obs),
-        observation_namings_table_rows(consensus), # only rows get updated
-        observation_namings_table_footer(obs)
+        observation_namings_table_rows(user, consensus), # only rows get updated
+        observation_namings_table_footer(user, obs)
       ].safe_join
     end
   end
@@ -71,7 +71,7 @@ module NamingsHelper
 
   # NEW - needs a current consensus object
   # n+1 should be ok
-  def observation_namings_table_rows(consensus)
+  def observation_namings_table_rows(user, consensus)
     namings = consensus.namings.sort_by(&:created_at)
     any_names = consensus.namings&.length&.positive?
 
@@ -81,7 +81,7 @@ module NamingsHelper
     ) do
       if any_names
         namings.each do |naming|
-          row = naming_row_content(consensus, naming)
+          row = naming_row_content(user, consensus, naming)
           concat(namings_table_row(row))
         end
       else
@@ -91,14 +91,14 @@ module NamingsHelper
   end
 
   # NEW - needs a current consensus object
-  def naming_row_content(consensus, naming)
-    vote = consensus.users_vote(naming, User.current) || Vote.new(value: 0)
+  def naming_row_content(user, consensus, naming)
+    vote = consensus.users_vote(naming, user) || Vote.new(value: 0)
     consensus_favorite = consensus.consensus_naming
     favorite = consensus.owners_favorite?(naming)
 
     {
       id: naming.id,
-      name: naming_name_html(naming),
+      name: naming_name_html(user, naming),
       proposer: naming_proposer_html(naming),
       vote_tally: vote_tally_html(naming),
       your_vote: your_vote_html(naming, vote),
@@ -138,7 +138,7 @@ module NamingsHelper
   end
 
   # N+1: should not be checking permission here
-  def naming_name_html(naming)
+  def naming_name_html(user, naming)
     if check_permission(naming)
       edit_link = modal_link_to(
         "obs_#{naming.observation_id}_naming_#{naming.id}",
@@ -152,7 +152,7 @@ module NamingsHelper
       proposer_links = ""
     end
 
-    [naming_name_link(naming), " ", proposer_links].safe_join
+    [naming_name_link(user, naming), " ", proposer_links].safe_join
   end
 
   # see link_helper.rb destroy_button
@@ -178,10 +178,10 @@ module NamingsHelper
   end
 
   # N+1: naming includes name
-  def naming_name_link(naming)
+  def naming_name_link(user, naming)
     Textile.register_name(naming.name)
     link_with_query(
-      naming.display_name_brief_authors.t.break_name.small_author,
+      naming.display_name_brief_authors(user).t.break_name.small_author,
       name_path(id: naming.name)
     )
   end
@@ -346,10 +346,10 @@ module NamingsHelper
   end
 
   # nested rows/columns parallel those in the row partial
-  def observation_namings_table_footer(obs)
+  def observation_namings_table_footer(user, obs)
     suggest = obs.thumb_image_id.present? &&
-              (User.current.admin ||
-               MO.image_model_beta_testers.include?(User.current_id))
+              (user.admin ||
+               MO.image_model_beta_testers.include?(user.id))
     buttons = observation_naming_buttons(obs, suggest)
     help_text = :show_namings_consensus_help.t
     help = content_tag(:div, help_text, class: "card-text small")

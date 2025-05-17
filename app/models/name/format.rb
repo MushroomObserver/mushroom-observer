@@ -63,16 +63,17 @@ module Name::Format
 
   # Marked up Name, authors shortened per ICN Recommendation 46C.2,
   #  e.g.: **__"Xxx yyy__ author1 et al.**
-  def display_name_brief_authors
+  def display_name_brief_authors(current_user = User.current)
     if rank == "Group"
       # Xxx yyy group author
-      display_name.sub(/ #{Regexp.quote(author)}$/, " #{brief_author}")
+      user_display_name(current_user).sub(/ #{Regexp.quote(author)}$/,
+                                          " #{brief_author}")
     else
       # Xxx yyy author, Xxx sect. yyy author, Xxx author sect. yyy
       # Relies on display_name having markup around name proper
       # Otherwise, it might delete author if that were part of the name proper
-      display_name.sub(/(\*+|_+) #{Regexp.quote(author)}/,
-                       "\\1 #{brief_author}")
+      user_display_name(current_user).sub(/(\*+|_+) #{Regexp.quote(author)}/,
+                                          "\\1 #{brief_author}")
     end
   end
 

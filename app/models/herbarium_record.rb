@@ -118,7 +118,7 @@ class HerbariumRecord < AbstractModel
 
   # Send email notifications when herbarium_record created by non-curator.
   def notify_curators
-    sender = User.current
+    sender = user
     recipients = herbarium.try(&:curators) || []
     return if recipients.member?(sender)
 
@@ -136,9 +136,9 @@ class HerbariumRecord < AbstractModel
 
     observations.push(obs)
     obs.update(specimen: true) unless obs.specimen
-    obs.log(:log_herbarium_record_added,
-            name: accession_at_herbarium,
-            touch: true)
+    obs.user_log(user, :log_herbarium_record_added,
+                 name: accession_at_herbarium,
+                 touch: true)
   end
 
   # Remove this HerbariumRecord from an Observation and log the action.

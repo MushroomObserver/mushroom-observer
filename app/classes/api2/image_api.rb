@@ -140,7 +140,7 @@ class API2
       # sure it doesn't accidentally explicitly set the original_name even if
       # the user has requested not to save it.  I'm not sure the mobile app
       # has access to that preference.
-      return nil if User.current&.keep_filenames == "toss"
+      return nil if @user&.keep_filenames == "toss"
 
       val
     end

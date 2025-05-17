@@ -181,7 +181,7 @@ class Sequence < AbstractModel
   protected
 
   def log_add_sequence
-    observation.log(:log_sequence_added, name: log_name, touch: true)
+    observation.user_log(user, :log_sequence_added, name: log_name, touch: true)
   end
 
   def log_update_sequence

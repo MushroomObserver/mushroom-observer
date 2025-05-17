@@ -33,7 +33,7 @@ module Tabs
     # uses context_nav_links with extra_args { class: "d-block" }
     # the hiccup here is that list_descriptions is already HTML, an inline list
     def name_links_on_mo(user:, name:)
-      tabs = context_nav_links(obs_related_name_tabs(name),
+      tabs = context_nav_links(obs_related_name_tabs(user, name),
                                { class: "d-block" })
       tabs += obs_name_description_tabs(user, name)
       tabs += context_nav_links([occurrence_map_for_name_tab(name)],
@@ -41,10 +41,11 @@ module Tabs
       tabs.reject(&:empty?)
     end
 
-    def obs_related_name_tabs(name)
+    def obs_related_name_tabs(user, name)
       [
-        show_object_tab(name,
-                        :show_name.t(name: name.display_name_brief_authors)),
+        show_object_tab(
+          name, :show_name.t(name: name.display_name_brief_authors(user))
+        ),
         observations_of_name_tab(name),
         observations_of_look_alikes_tab(name),
         observations_of_related_taxa_tab(name)

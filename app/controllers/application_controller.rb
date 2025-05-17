@@ -318,7 +318,7 @@ class ApplicationController < ActionController::Base
   def update_view_stats(object)
     return unless object.respond_to?(:update_view_stats) && !browser.bot?
 
-    object.update_view_stats
+    object.update_view_stats(@user)
   end
 
   # Default image size to use for thumbnails: either :thumbnail or :small.

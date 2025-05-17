@@ -277,7 +277,7 @@ class Observation
       result = false
       vote = users_vote(naming, user)
       value = value.to_f
-      mark_obs_reviewed # no matter what vote, currently
+      mark_obs_reviewed(user) # no matter what vote, currently
 
       if value == Vote.delete_vote
         result = delete_vote(naming, vote, user)
@@ -336,13 +336,13 @@ class Observation
 
     # We interpret any naming vote to mean the user has reviewed the obs.
     # Setting this here makes the identify index query much cheaper.
-    def mark_obs_reviewed
+    def mark_obs_reviewed(user)
       if (view = ObservationView.find_by(observation_id: @observation.id,
-                                         user_id: User.current_id))
+                                         user_id: user.id))
         view.update!(last_view: Time.zone.now, reviewed: 1)
       else
         ObservationView.create!(observation_id: @observation.id,
-                                user_id: User.current_id,
+                                user_id: user.id,
                                 last_view: Time.zone.now, reviewed: 1)
       end
     end
