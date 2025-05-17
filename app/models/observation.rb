@@ -712,7 +712,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Textile-marked-up name, never nil.
   def format_name
-    name.observation_name
+    name.user_observation_name(User.current)
   end
 
   def user_format_name(user)
@@ -891,6 +891,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # Observation is destroyed.
   def destroy_dependents
     @old_namings.each do |naming|
+      naming.current_user = naming.observation.current_user
       naming.observation = nil # (tells it not to recalc consensus)
       naming.destroy
     end
