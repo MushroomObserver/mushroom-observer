@@ -143,7 +143,12 @@ module Projects
     end
 
     def add_observations(project, candidate)
-      # Can't use candidate.observations due to a bug in in_box
+      # Returns the count of observations added.
+      #
+      # Can't use candidate.observations due to a bug in in_box.
+      # Specifially, candidate.observations.in_box doesn't return
+      # the right thing because it incorrectly adds observations not
+      # from the candidate if they have no lat/long data.
       obs = Observation.all
       loc = project.location
       if loc
