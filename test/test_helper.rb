@@ -115,6 +115,20 @@ def trace_tests
   end
 end
 
+def trace_callers
+  regex = %r{/app/|/test/}
+  matches = caller.grep(regex)
+  return unless matches
+
+  caller_match = matches.third # trace_caller / User.current / real caller
+  return unless caller_match
+
+  trim = caller_match[caller_match.index(regex) + 1..]
+  open("trace_callers.out", "a") do |f|
+    f.write("#{trim}\n")
+  end
+end
+
 module ActiveSupport
   class TestCase
     # Run tests in parallel with specified workers
