@@ -185,10 +185,13 @@ class Sequence < AbstractModel
   end
 
   def log_update_sequence
+    user = observation.current_user
     if accession_added?
-      observation.log(:log_sequence_accessioned, name: log_name, touch: true)
+      observation.user_log(user, :log_sequence_accessioned, name: log_name,
+                                                            touch: true)
     else
-      observation.log(:log_sequence_updated, name: log_name, touch: false)
+      observation.user_log(user, :log_sequence_updated, name: log_name,
+                                                        touch: false)
     end
   end
 
