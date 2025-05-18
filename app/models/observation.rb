@@ -477,8 +477,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     gps_hidden && user_id != @current_user&.id ? nil : lng
   end
 
-  def reveal_location?
-    !gps_hidden || can_edit? || project_admin?
+  def reveal_location?(user)
+    !gps_hidden || can_edit?(user) || project_admin?(user)
   end
 
   def display_lat_lng
