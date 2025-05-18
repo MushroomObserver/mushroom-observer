@@ -290,16 +290,8 @@ class RssLog < AbstractModel
   #   :time  => Time.now        # Timestamp to use.
   #   :save  => true            # Save changes?
   #
-  def add_with_date(tag, args = {})
-    entry = encode(tag, relevant_args(args), args[:time] || Time.zone.now)
-    RssLog.record_timestamps = false if args.key?(:touch) && !args[:touch]
-    add_entry(entry)
-    save_without_our_callbacks unless args.key?(:save) && !args[:save]
-    RssLog.record_timestamps = true
-  end
-
-  def user_add_with_date(user, tag, args = {})
-    entry = encode(tag, user_relevant_args(args, user),
+  def add_with_date(user, tag, args = {})
+    entry = encode(tag, relevant_args(args, user),
                    args[:time] || Time.zone.now)
     RssLog.record_timestamps = false if args.key?(:touch) && !args[:touch]
     add_entry(entry)
@@ -307,12 +299,7 @@ class RssLog < AbstractModel
     RssLog.record_timestamps = true
   end
 
-  def relevant_args(args)
-    { user: (User.current ? User.current.login : :UNKNOWN.l) }.
-      update(args).except(:save, :time, :touch)
-  end
-
-  def user_relevant_args(args, user)
+  def relevant_args(args, user)
     { user: (user ? user.login : :UNKNOWN.l) }.
       update(args).except(:save, :time, :touch)
   end
@@ -326,7 +313,7 @@ class RssLog < AbstractModel
   #
   def orphan(user, title, key, args = {})
     args = args.merge(save: false)
-    user_add_with_date(user, key, args)
+    add_with_date(user, key, args)
     add_entry(escape(title))
     clear_target_id
     save_without_our_callbacks

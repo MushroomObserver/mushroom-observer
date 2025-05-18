@@ -626,14 +626,14 @@ class AbstractModel < ApplicationRecord
     init_rss_log unless rss_log
     touch_when_logging unless new_record? ||
                               args[:touch] == false
-    rss_log.add_with_date(tag, args)
+    rss_log.add_with_date(nil, tag, args)
   end
 
   def user_log(user, tag, args = {})
     init_rss_log unless rss_log
     touch_when_logging unless new_record? ||
                               args[:touch] == false
-    rss_log.user_add_with_date(user, tag, args)
+    rss_log.add_with_date(user, tag, args)
   end
 
   # This allows a model to override touch in this context only, e.g.,

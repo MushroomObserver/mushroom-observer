@@ -69,7 +69,7 @@ class RssLogTest < UnitTestCase
     log.save
     assert_operator(max, ">", log.notes.length)
     assert_operator(max, "<", log.notes.length + 20)
-    log.add_with_date(:log_object_created_by_user,
+    log.add_with_date(nil, :log_object_created_by_user,
                       user: "make sure this is nice and long!",
                       type: :OBSERVATION)
     log.reload
