@@ -3099,6 +3099,7 @@
   inat_import_tracker_status: "[:STATUS]"
   inat_import_tracker_started: Started
   inat_import_tracker_elapsed: Elapsed Time
+  inat_import_tracker_remaining_time: Remaining Time
   inat_import_tracker_ended: Ended
   inat_import_imported: Imported
   inat_import_tracker_results: Results
