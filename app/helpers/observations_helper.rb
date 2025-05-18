@@ -193,9 +193,7 @@ module ObservationsHelper
     return "" unless obs.location&.vague?
 
     title = :show_observation_vague_location.l
-    if user == obs.user
-      title += " #{:show_observation_improve_location.l}"
-    end
+    title += " #{:show_observation_improve_location.l}" if user == obs.user
     tag.p(class: "ml-3") { tag.em(title) }
   end
 
