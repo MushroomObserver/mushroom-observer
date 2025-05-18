@@ -184,16 +184,16 @@ module ObservationsHelper
         else
           obs.where
         end,
-        observation_where_vague_notice(obs: obs)
+        observation_where_vague_notice(obs:, user:)
       ].safe_join(" ")
     end
   end
 
-  def observation_where_vague_notice(obs:)
+  def observation_where_vague_notice(obs:, user:)
     return "" unless obs.location&.vague?
 
     title = :show_observation_vague_location.l
-    if User.current == obs.user
+    if user == obs.user
       title += " #{:show_observation_improve_location.l}"
     end
     tag.p(class: "ml-3") { tag.em(title) }
