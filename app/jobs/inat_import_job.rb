@@ -231,19 +231,20 @@ class InatImportJob < ApplicationJob
   #   add an MO provisional name if none exists, and
   #   treat the provisional name as the MO consensus.
   def id_or_provisional_or_species_name
-    prov_name = @inat_obs.provisional_name
-    return @inat_obs.name_id if prov_name.blank?
+    return @inat_obs.name_id if @inat_obs.provisional_name.blank?
 
-    if need_new_prov_name?(prov_name)
-      name = add_provisional_name(prov_name)
+    parsed_prov_name = Name.parse_name(@inat_obs.provisional_name)
+
+    if need_new_prov_name?(parsed_prov_name)
+      name = add_provisional_name(parsed_prov_name)
       name.id
     else
-      best_mo_homonym(prov_name).id
+      best_mo_homonym(parsed_prov_name.text_name).id
     end
   end
 
-  def need_new_prov_name?(prov_name)
-    prov_name.blank? || Name.where(text_name: prov_name).none?
+  def need_new_prov_name?(parsed_prov_name)
+    Name.where(text_name: parsed_prov_name.text_name).none?
   end
 
   def add_external_link
@@ -255,11 +256,11 @@ class InatImportJob < ApplicationJob
     )
   end
 
-  def add_provisional_name(prov_name)
+  def add_provisional_name(parsed_prov_name)
     params = { method: :post, action: :name,
                api_key: @user_api_key,
-               name: "#{prov_name} crypt. temp.",
-               rank: "Species" }
+               name: parsed_prov_name.search_name,
+               rank: parsed_prov_name.rank }
     api = API2.execute(params)
     new_name = api.results.first
     new_name.log(:log_name_created)
