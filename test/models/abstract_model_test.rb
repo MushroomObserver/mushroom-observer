@@ -63,8 +63,8 @@ class AbstractModelTest < UnitTestCase
     assert_equal(1, obs.errors.size, "Should not have saved without login.")
     assert_equal(:validate_observation_user_missing.t, obs.dump_errors)
 
-    # Log Rolf in ang try again.
-    User.current = rolf
+    # Assign obs to rolf and try again
+    obs.user = rolf
     obs.save
     assert_equal(0, obs.errors.size, "Could not save even when logged in.")
 
@@ -259,9 +259,8 @@ class AbstractModelTest < UnitTestCase
   end
 
   def test_observation_rss_log_life_cycle
-    User.current = rolf
-
     obs = Observation.new(
+      user: rolf,
       when: Time.now.getlocal,
       where: "Anywhere",
       name_id: names(:fungi).id
@@ -306,10 +305,10 @@ class AbstractModelTest < UnitTestCase
   end
 
   def test_project_rss_log_life_cycle
-    User.current = rolf
     time = 1.minute.ago
 
     proj = Project.new(
+      user: rolf,
       title: "New Project",
       summary: "Old Summary"
     )
@@ -358,9 +357,8 @@ class AbstractModelTest < UnitTestCase
   end
 
   def test_species_list_rss_log_life_cycle
-    User.current = rolf
-
     spl = SpeciesList.new(
+      user: rolf,
       title: "New List",
       when: Time.now.getlocal,
       where: "Anywhere"

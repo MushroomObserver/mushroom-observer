@@ -28,7 +28,7 @@ class ObservationsHelperTest < ActionView::TestCase
     )
     assert_match(
       link_to_display_name_brief_authors(
-        deprecated_name,
+        user, deprecated_name,
         class: "obs_consensus_deprecated_synonym_link_#{deprecated_name.id}"
       ),
       obs_title_consensus_name_link(name: deprecated_name, user:).unescape_html,
@@ -36,7 +36,7 @@ class ObservationsHelperTest < ActionView::TestCase
     )
     assert_match(
       link_to_display_name_without_authors(
-        current_name,
+        user, current_name,
         class: "obs_preferred_synonym_link_#{current_name.id}"
       ),
       obs_title_consensus_name_link(name: deprecated_name, user:).unescape_html,

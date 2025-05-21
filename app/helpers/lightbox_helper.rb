@@ -36,7 +36,7 @@ module LightboxHelper
     html = []
 
     html << caption_identify_ui(obs:) if identify
-    html << caption_obs_title(obs:, identify:)
+    html << caption_obs_title(user:, obs:, identify:)
     html << observation_details_when_where_who(obs:, user:)
     html << caption_truncated_notes(obs:)
     html
@@ -65,7 +65,7 @@ module LightboxHelper
   end
 
   # This is different from show_obs_title, it's more like the matrix_box title
-  def caption_obs_title(obs:, identify:)
+  def caption_obs_title(user:, obs:, identify:)
     btn_style = identify ? "text-bold" : "btn btn-primary"
     text = if identify
              tag.span("#{:OBSERVATION.l}: ", class: "font-weight-normal")
@@ -81,7 +81,7 @@ module LightboxHelper
         link_to(obs.id, add_query_param(obs.show_link_args),
                 class: "#{btn_style} mr-3",
                 id: "caption_obs_link_#{obs.id}"),
-        obs.format_name.t.small_author
+        obs.user_format_name(user).t.small_author
       ].compact_blank!.safe_join(" ")
     end
   end

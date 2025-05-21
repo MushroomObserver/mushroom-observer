@@ -44,28 +44,29 @@ module ObservationsHelper
     if user
       [
         link_to_display_name_brief_authors(
-          name, class: "obs_consensus_deprecated_synonym_link_#{name.id}"
+          user, name, class: "obs_consensus_deprecated_synonym_link_#{name.id}"
         ),
         # Differentiate deprecated consensus from preferred name
         obs_consensus_id_flag,
-        obs_title_preferred_synonym(prefer_name)
+        obs_title_preferred_synonym(user, prefer_name)
       ]
     else
       [
-        name.display_name_brief_authors.t,
+        name.user_display_name_brief_authors(user).t,
         # Differentiate deprecated consensus from preferred name
         obs_consensus_id_flag,
-        prefer_name.display_name_without_authors.t
+        prefer_name.user_display_name_without_authors(user).t
       ]
     end.safe_join(" ")
   end
 
-  def obs_title_preferred_synonym(prefer_name)
+  def obs_title_preferred_synonym(user, prefer_name)
     tag.span(class: "smaller") do
       [
         "(",
         link_to_display_name_without_authors(
-          prefer_name, class: "obs_preferred_synonym_link_#{prefer_name.id}"
+          user, prefer_name,
+          class: "obs_preferred_synonym_link_#{prefer_name.id}"
         ),
         ")"
       ].safe_join
@@ -76,10 +77,10 @@ module ObservationsHelper
     text = [
       if user
         link_to_display_name_brief_authors(
-          name, class: "obs_consensus_naming_link_#{name.id}"
+          user, name, class: "obs_consensus_naming_link_#{name.id}"
         )
       else
-        name.display_name_brief_authors.t
+        name.user_display_name_brief_authors(user).t
       end
     ]
     # Differentiate this Name from Observer Preference
@@ -94,32 +95,33 @@ module ObservationsHelper
   ##### Portion of page title that includes user's naming preference #########
 
   # Observer Preference: Hydnum repandum
-  def owner_naming_line(owner_name)
-    return unless User.current&.view_owner_id
+  def owner_naming_line(owner_name, current_user = User.current)
+    return unless current_user&.view_owner_id
 
     [
       "#{:show_observation_owner_id.t}:",
-      owner_favorite_or_explanation(owner_name).t
+      owner_favorite_or_explanation(current_user, owner_name).t
     ].safe_join(" ")
   end
 
-  def owner_favorite_or_explanation(owner_name)
+  def owner_favorite_or_explanation(current_user, owner_name)
     if owner_name
       link_to_display_name_brief_authors(
-        owner_name, class: "obs_owner_naming_link_#{owner_name.id}"
+        current_user, owner_name,
+        class: "obs_owner_naming_link_#{owner_name.id}"
       )
     else
       :show_observation_no_clear_preference
     end
   end
 
-  def link_to_display_name_brief_authors(name, **)
-    link_to(name.display_name_brief_authors.t,
+  def link_to_display_name_brief_authors(user, name, **)
+    link_to(name.user_display_name_brief_authors(user).t,
             name_path(id: name.id), **)
   end
 
-  def link_to_display_name_without_authors(name, **)
-    link_to(name.display_name_without_authors.t,
+  def link_to_display_name_without_authors(user, name, **)
+    link_to(name.user_display_name_without_authors(user).t,
             name_path(id: name.id), **)
   end
 
@@ -182,18 +184,16 @@ module ObservationsHelper
         else
           obs.where
         end,
-        observation_where_vague_notice(obs: obs)
+        observation_where_vague_notice(obs:, user:)
       ].safe_join(" ")
     end
   end
 
-  def observation_where_vague_notice(obs:)
+  def observation_where_vague_notice(obs:, user:)
     return "" unless obs.location&.vague?
 
     title = :show_observation_vague_location.l
-    if User.current == obs.user
-      title += " #{:show_observation_improve_location.l}"
-    end
+    title += " #{:show_observation_improve_location.l}" if user == obs.user
     tag.p(class: "ml-3") { tag.em(title) }
   end
 
@@ -208,7 +208,7 @@ module ObservationsHelper
 
     tag.p(class: "obs-where-gps", id: "observation_where_gps") do
       # XXX Consider dropping this from indexes.
-      concat(gps_display_link) if obs.reveal_location?
+      concat(gps_display_link) if obs.reveal_location?(user)
       concat(gps_hidden_msg) if obs.gps_hidden
     end
   end
@@ -223,7 +223,7 @@ module ObservationsHelper
         obs_user.unique_text_name
       end
     ]
-    if user && obs_user != User.current && !obs_user&.no_emails &&
+    if user && obs_user != user && !obs_user&.no_emails &&
        obs_user&.email_general_question
 
       html += [

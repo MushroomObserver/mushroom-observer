@@ -143,13 +143,17 @@ class API2Controller < ApplicationController
   end
 
   def render_api_results(args)
+    @user = user_from_key(args[:api_key])
     @api = API2.execute(args)
-    User.current = @user = @api.user
     do_render
   rescue StandardError => e
     @api ||= API2.new
     @api.errors << API2::RenderFailed.new(e)
     do_render
+  end
+
+  def user_from_key(key)
+    APIKey.find_by(key: key)&.user
   end
 
   def do_render

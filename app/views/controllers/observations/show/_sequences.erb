@@ -2,7 +2,7 @@
 
 <%
 sequences = obs.sequences
-can_edit  = in_admin_mode? || obs.can_edit?
+can_edit  = in_admin_mode? || obs.can_edit?(user)
 %>
 
 <%=
