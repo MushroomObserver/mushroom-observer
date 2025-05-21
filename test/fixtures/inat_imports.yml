@@ -34,6 +34,6 @@ inat_importer_inat_import:
 timings_import:
   <<: *DEFAULTS
   state: <%= InatImport.states[:Importing] %>
-  importables: 12
-  imported_count: 4
-  created_at: <%= 40.seconds.ago %> # 10 secs./import for testing purposes
+  importables: 6
+  imported_count: 2
+  created_at: <%= 20.seconds.ago %> # 10 secs./import for testing purposes

@@ -9,11 +9,16 @@ class InatImportJobTrackerTest < ActiveSupport::TestCase
   def test_timings
     tracker = inat_import_job_trackers(:timings_tracker)
     inat_import = inat_imports(:timings_import)
+    imported = inat_import.imported_count
+    remaining = inat_import.importables - imported
+    seconds_per_import = 10
     created = tracker.created_at
 
-    # simulate 10 seconds per each obs imported so far
-    travel_to(created + (inat_import.imported_count * 10).seconds) do
-      assert_equal("00:01:20", tracker.remaining_time)
+    travel_to(created + (imported * seconds_per_import).seconds) do
+      assert_equal("00:00:#{imported * seconds_per_import}",
+                   tracker.elapsed_time)
+      assert_equal("00:00:#{remaining * seconds_per_import}",
+                   tracker.remaining_time)
     end
   end
 end
