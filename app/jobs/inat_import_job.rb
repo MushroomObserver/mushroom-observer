@@ -407,9 +407,8 @@ class InatImportJob < ApplicationJob
                                            value: value } }
     headers = { authorization: "Bearer #{@inat_import.token}",
                 content_type: :json, accept: :json }
-    response = RestClient.post("#{API_BASE}/observation_field_values",
-                               payload.to_json, headers)
-    JSON.parse(response.body)
+    RestClient.post("#{API_BASE}/observation_field_values",
+                    payload.to_json, headers)
   end
 
   def update_description
