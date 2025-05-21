@@ -84,7 +84,8 @@ class Naming < AbstractModel
     naming = Naming.new(args)
     naming.created_at = now
     naming.updated_at = now
-    naming.user = User.current
+    naming.current_user = observation.current_user
+    naming.user = naming.current_user || User.current
     naming.observation = observation
     naming
   end
@@ -144,8 +145,8 @@ class Naming < AbstractModel
     name ? name.user_observation_name(user) : ""
   end
 
-  def display_name_brief_authors
-    name ? name.display_name_brief_authors : ""
+  def display_name_brief_authors(user = User.current)
+    name ? name.display_name_brief_authors(user) : ""
   end
 
   # Return name in Textile format (with id tacked on to make unique).
@@ -235,7 +236,7 @@ class Naming < AbstractModel
   # clear naming.observation -- otherwise it will recalculate the consensus for
   # each deleted naming, and send a bunch of bogus emails.)
   def log_destruction
-    if User.current &&
+    if (@current_user || User.current) &&
        (obs = observation)
       obs.log(:log_naming_destroyed, name: format_name)
       obs = Observation.naming_includes.find(obs.id) # get a fresh eager-load
@@ -443,6 +444,6 @@ class Naming < AbstractModel
     end
     errors.add(:name, :validate_naming_name_missing.t) unless name
     errors.add(:user, :validate_naming_user_missing.t) if !user_id &&
-                                                          !User.current
+                                                          !@current_user
   end
 end

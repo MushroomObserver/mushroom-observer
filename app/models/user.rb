@@ -354,6 +354,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   #   user = User.current
   #
   def self.current
+    # trace_tests
     # debugger
     @@user = nil unless defined?(@@user)
     @@user
@@ -364,6 +365,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   #   user_id = User.current_id
   #
   def self.current_id
+    # trace_tests
     # debugger
     @@user = nil unless defined?(@@user)
     @@user&.id

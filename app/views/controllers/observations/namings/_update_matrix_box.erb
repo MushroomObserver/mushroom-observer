@@ -1,6 +1,6 @@
 <%# Replace the title in the lightbox caption %>
 <%= turbo_stream.replace("observation_what_#{obs.id}") do
-  caption_obs_title(obs: obs, identify: true)
+  caption_obs_title(user: @user, obs: obs, identify: true)
 end %>
 
 <%# Replace the title in the matrix_box %>

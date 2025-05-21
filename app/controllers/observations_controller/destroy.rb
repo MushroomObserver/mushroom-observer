@@ -10,6 +10,7 @@ module ObservationsController::Destroy
     param_id = params[:id].to_s
     return unless (@observation = find_or_goto_index(Observation, param_id))
 
+    @observation.current_user = @user
     obs_id = @observation.id
     next_state = nil
     # decide where to redirect after deleting observation

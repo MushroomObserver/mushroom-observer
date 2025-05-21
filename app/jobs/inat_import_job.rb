@@ -399,7 +399,7 @@ class InatImportJob < ApplicationJob
   def update_mushroom_observer_url_field
     update_inat_observation_field(observation_id: @inat_obs[:id],
                                   field_id: 5005,
-                                  value: "#{MO.http_domain}/#{@inat_obs[:id]}")
+                                  value: "#{MO.http_domain}/#{@observation.id}")
   end
 
   def update_inat_observation_field(observation_id:, field_id:, value:)
@@ -408,9 +408,8 @@ class InatImportJob < ApplicationJob
                                            value: value } }
     headers = { authorization: "Bearer #{@inat_import.token}",
                 content_type: :json, accept: :json }
-    response = RestClient.post("#{API_BASE}/observation_field_values",
-                               payload.to_json, headers)
-    JSON.parse(response.body)
+    RestClient.post("#{API_BASE}/observation_field_values",
+                    payload.to_json, headers)
   end
 
   def update_description
