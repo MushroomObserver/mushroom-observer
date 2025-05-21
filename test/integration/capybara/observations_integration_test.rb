@@ -248,7 +248,6 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     proj.save
 
     # Prove that Project is not re-checked for the next Observation
-    login(:katrina)
     visit(new_observation_path)
     assert(
       has_unchecked_field?(proj_checkbox),

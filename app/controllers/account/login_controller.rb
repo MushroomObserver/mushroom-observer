@@ -12,8 +12,12 @@ module Account
 
     # the login form
     def new
-      @login = ""
-      @remember = true
+      if @user
+        redirect_to(observations_path)
+      else
+        @login = ""
+        @remember = true
+      end
     end
 
     # login post action
@@ -85,7 +89,7 @@ module Account
       User.current = @user
       session_user_set(@user)
       @remember ? autologin_cookie_set(@user) : clear_autologin_cookie
-      redirect_back_or_default("/account/welcome")
+      redirect_back_or_default(observations_path)
     end
 
     def login_unverified(user)

@@ -266,7 +266,7 @@ MushroomObserver::Application.routes.draw do
   #   end
 
   # Default page "/" is /observations ordered order_by: :rss_log
-  root "observations#index"
+  root "account/login#new"
 
   # Route /123 to /observations/123.
   get "obs/:id" => "observations#show", id: /\d+/, as: "permanent_observation"
