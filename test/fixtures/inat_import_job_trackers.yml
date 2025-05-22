@@ -1,1 +1,5 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+timings_tracker:
+  created_at: <%= Time.now %>
+  inat_import: <%= ActiveRecord::FixtureSet.identify(:timings_import) %>
