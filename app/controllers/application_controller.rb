@@ -373,6 +373,7 @@ class ApplicationController < ActionController::Base
 
   def calc_layout_params
     count = @user&.layout_count || MO.default_layout_count
+    count = 1 if count < 1
     { "count" => count }
   end
   helper_method :calc_layout_params
