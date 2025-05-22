@@ -7,7 +7,7 @@ class DiscardStaleJobsJob < ApplicationJob
 
   def perform(discard_date = 1.week.ago.in_time_zone("UTC"))
     discard_stale_failed_jobs(discard_date)
-    discard_stale_finished_jobs(discard_date)
+    discard_stale_finished_jobs
   end
 
   def discard_stale_failed_jobs(discard_date)
@@ -28,12 +28,15 @@ class DiscardStaleJobsJob < ApplicationJob
     log("Discarded #{discarded} jobs which failed before #{discard_date}")
   end
 
-  def discard_stale_finished_jobs(discard_date)
+  def discard_stale_finished_jobs
     before_count = SolidQueue::Job.finished.count
 
-    SolidQueue::Job.clear_finished_in_batches(finished_before: discard_date)
+    SolidQueue::Job.clear_finished_in_batches
 
+    discard_date =
+      Time.zone.now -
+      Rails.application.config.solid_queue.clear_finished_jobs_after
     discarded = before_count - SolidQueue::Job.finished.count
-    log("Discarded #{discarded} jobs which finshed before #{discard_date}")
+    log("Discarded #{discarded} jobs which finished before #{discard_date}")
   end
 end
