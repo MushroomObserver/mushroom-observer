@@ -15,3 +15,6 @@ production:
   repopulate_location_and_observation_center_lat_lng:
     class: UpdateBoxAreaAndCenterColumnsJob
     schedule: every day at midnight
+  discard_stale_jobs:
+    class: DiscardStaleJobsJob
+    schedule: every day at midnight
