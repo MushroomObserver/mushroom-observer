@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 class DiscardStaleJobsJob < ApplicationJob
   queue_as :default
 
@@ -17,6 +18,8 @@ class DiscardStaleJobsJob < ApplicationJob
       job.discard if job.failed_at < discard_date
     end
     discarded = count - ActiveJobs.jobs.failed.count
-    puts("Discarded #{discarded} jobs which failed before #{discard_date}")
+    Rails.logger.debug do
+      "Discarded #{discarded} jobs which failed before #{discard_date}"
+    end
   end
 end
