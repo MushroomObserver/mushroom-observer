@@ -18,8 +18,6 @@ class DiscardStaleJobsJob < ApplicationJob
       job.discard if job.failed_at < discard_date
     end
     discarded = count - ActiveJobs.jobs.failed.count
-    Rails.logger.debug do
-      "Discarded #{discarded} jobs which failed before #{discard_date}"
-    end
+    log("Discarded #{discarded} jobs which failed before #{discard_date}")
   end
 end
