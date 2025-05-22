@@ -18,13 +18,15 @@ class DiscardStaleJobsJob < ApplicationJob
       SolidQueue::FailedExecution.where(created_at: ...discard_date)
     return if old_failed_executions.none?
 
+    old_failed_count = SolidQueue::FailedExecution.count
+
     old_failed_executions.each do |failed_execution|
       job = SolidQueue::Job.find_by(id: failed_execution.job_id)
       job&.destroy
       failed_execution.destroy
     end
 
-    discarded = old_failed_executions.count - SolidQueue::FailedExecution.count
+    discarded = old_failed_count - SolidQueue::FailedExecution.count
     log("Discarded #{discarded} jobs which failed before #{discard_date}")
   end
 
