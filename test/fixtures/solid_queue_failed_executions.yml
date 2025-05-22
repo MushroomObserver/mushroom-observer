@@ -1,0 +1,10 @@
+# Solid Queue tracks failed jobs using the finished_at column
+# and a related failed executions table
+
+failed_stale_job_execution:
+  job_id: <%= ActiveRecord::FixtureSet.identify(:failed_stale_job) %>
+  created_at: <%= 18.months.ago %>
+
+failed_fresh_job_execution:
+  job_id: <%= ActiveRecord::FixtureSet.identify(:failed_fresh_job) %>
+  created_at: <%= 1.minute.ago %>

@@ -6,18 +6,25 @@ class DiscardStaleJobsJob < ApplicationJob
   queue_as :default
 
   def perform(discard_date = 1.week.ago.in_time_zone("UTC"))
+    discard_stale_failed_jobs(discard_date)
     discard_stale_finished_jobs(discard_date)
-    # discard_stale_failed_jobs(discard_date)
   end
 
   def discard_stale_failed_jobs(discard_date)
-    count = ActiveJobs.jobs.failed.count
-    return unless count.positive?
+    # Solid Queue does not have a failed or failed_at column.
+    # Instead it tracks failed jobs using the finished_at column
+    # and a related failed executions table
+    old_failed_executions =
+      SolidQueue::FailedExecution.where(created_at: ...discard_date)
+    return if old_failed_executions.none?
 
-    ActiveJob.jobs.failed.each do |job|
-      job.discard if job.failed_at < discard_date
+    old_failed_executions.each do |failed_execution|
+      job = SolidQueue::Job.find_by(id: failed_execution.job_id)
+      job&.destroy
+      failed_execution.destroy
     end
-    discarded = count - ActiveJobs.jobs.failed.count
+
+    discarded = old_failed_executions.count - SolidQueue::FailedExecution.count
     log("Discarded #{discarded} jobs which failed before #{discard_date}")
   end
 
