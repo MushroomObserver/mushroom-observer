@@ -157,7 +157,7 @@ class AutocompletersControllerTest < FunctionalTestCase
       { name:, id: }
     end
     good_autocompleter_request(type: :project, string: "Babushka")
-    assert_equivalent(([{ name: "B", id: 0 }] + b_titles),
+    assert_equivalent([{ name: "B", id: 0 }] + b_titles,
                       JSON.parse(@response.body))
 
     p_titles = Project.where(Project[:title].matches_regexp("\\bP")).
@@ -165,7 +165,7 @@ class AutocompletersControllerTest < FunctionalTestCase
       { name:, id: }
     end
     good_autocompleter_request(type: :project, string: "Perfidy")
-    assert_equivalent(([{ name: "P", id: 0 }] + p_titles),
+    assert_equivalent([{ name: "P", id: 0 }] + p_titles,
                       JSON.parse(@response.body))
 
     good_autocompleter_request(type: :project, string: "Xystus")

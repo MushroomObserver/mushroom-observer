@@ -296,7 +296,7 @@ module Descriptions::Permissions
     def update_groups(desc, type, groups)
       groups.each do |id, val|
         if (group = UserGroup.safe_find(id))
-          update_group(desc, type, group, (val == "1"))
+          update_group(desc, type, group, val == "1")
         else
           flash_error(:runtime_description_user_not_found.t(name: id))
         end
