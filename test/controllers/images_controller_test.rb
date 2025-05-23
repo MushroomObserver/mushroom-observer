@@ -132,7 +132,7 @@ class ImagesControllerTest < FunctionalTestCase
   # Prove show works when params include obs
   def test_show_with_obs_param
     obs = observations(:peltigera_obs)
-    assert((image = obs.images.first), "Test needs Obs fixture with images")
+    assert(image = obs.images.first, "Test needs Obs fixture with images")
 
     login(obs.user.login)
 

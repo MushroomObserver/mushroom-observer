@@ -242,7 +242,7 @@ class LicensesControllerTest < FunctionalTestCase
 
     assert_equal(params.dig(:license, :display_name), license.display_name)
     assert_equal(params.dig(:license, :url), license.url)
-    assert_equal((params[:deprecated] == "1"), license.deprecated)
+    assert_equal(params[:deprecated] == "1", license.deprecated)
   end
 
   def test_update_no_changes

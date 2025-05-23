@@ -8,7 +8,7 @@ module Account::Profile
     # Prove there is no change when user tries to change profile image to itself
     def test_reuse_user_profile_image_as_itself
       user = users(:rolf)
-      assert((img = user.image), "Test needs User fixture with profile image")
+      assert(img = user.image, "Test needs User fixture with profile image")
 
       login(user.login)
       params = { id: rolf.id, img_id: img.id }

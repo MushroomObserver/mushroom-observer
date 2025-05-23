@@ -66,7 +66,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # (unlike Observation[:text_name]) and is not cached on the obs
     scope :pattern, lambda { |phrase|
       joins(:name).distinct.
-        search_columns((Observation[:where] + Name[:search_name]), phrase)
+        search_columns(Observation[:where] + Name[:search_name], phrase)
     }
     # More comprehensive search of Observation fields + Name.search_name,
     # (plus comments ?).

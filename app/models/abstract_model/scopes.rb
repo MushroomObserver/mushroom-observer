@@ -209,7 +209,7 @@ module AbstractModel::Scopes
             search_columns(Observation[:notes], phrase).distinct.map(&:id)
       ids += joins(comment_joins).
              search_columns(
-               (Observation[:notes] + Comment[:summary] + Comment[:comment]),
+               Observation[:notes] + Comment[:summary] + Comment[:comment],
                phrase
              ).distinct.map(&:id)
       where(id: ids).distinct
@@ -236,7 +236,7 @@ module AbstractModel::Scopes
               else
                 scope
               end
-      scope.search_columns((User[:login] + User[:name]), phrase)
+      scope.search_columns(User[:login] + User[:name], phrase)
     }
     scope :search_where, lambda { |phrase|
       scope = all

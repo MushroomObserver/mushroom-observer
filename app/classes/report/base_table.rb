@@ -133,8 +133,8 @@ module Report
       vals = HerbariumRecord.joins(:observations).
              merge(plain_query).
              select(ObservationHerbariumRecord[:observation_id],
-                    (HerbariumRecord[:initial_det] + ": " +
-                     HerbariumRecord[:accession_number])).
+                    HerbariumRecord[:initial_det] + ": " +
+                     HerbariumRecord[:accession_number]).
              map { |rec| rec.attributes.values[0..1] }
       add_column!(rows, vals, col)
     end
