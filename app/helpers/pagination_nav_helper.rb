@@ -56,7 +56,7 @@ module PaginationNavHelper
 
     pages.letter_arg &&
       (pages.letter || pages.num_total > pages.num_per_page) &&
-      (pages.used_letters && pages.used_letters.length > 1)
+      pages.used_letters && pages.used_letters.length > 1
   end
 
   # Insert numbered pagination links.
