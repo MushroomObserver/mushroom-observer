@@ -59,7 +59,7 @@ module Observations
       render_report(report)
     end
 
-    REPORTS = %w[
+    FORMATS = %w[
       raw
       adolf
       darwin
@@ -68,32 +68,19 @@ module Observations
       mycoportal
       mycoportal_images
     ].freeze
-    private_constant :REPORTS
+    private_constant :FORMATS
 
     def create_report(args)
       format = args[:format].to_s
-      return do_report(args, format) if REPORTS.include?(format)
+      return do_report(args, format) if FORMATS.include?(format)
 
       raise("Invalid download type: #{format.inspect}")
     end
 
     def do_report(args, format)
-      case format
-      when "raw"
-        Report::Raw.new(args)
-      when "adolf"
-        Report::Adolf.new(args)
-      when "darwin"
-        Report::Dwca.new(args)
-      when "symbiota"
-        Report::Symbiota.new(args)
-      when "fundis"
-        Report::Fundis.new(args)
-      when "mycoportal"
-        Report::Mycoportal.new(args)
-      else
-        Report::MycoportalImages.new(args)
-      end
+      report_class =
+        "Report::#{format.split("_").map(&:capitalize).join}".constantize
+      report_class.new(args)
     end
 
     def render_report(report)
