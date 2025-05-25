@@ -59,8 +59,25 @@ module Observations
       render_report(report)
     end
 
+    REPORTS = %w[
+      raw
+      adolf
+      darwin
+      symbiota
+      fundis
+      mycoportal
+      mycoportal_images
+    ].freeze
+    private_constant :REPORTS
+
     def create_report(args)
       format = args[:format].to_s
+      return do_report(args, format) if REPORTS.include?(format)
+
+      raise("Invalid download type: #{format.inspect}")
+    end
+
+    def do_report(args, format)
       case format
       when "raw"
         Report::Raw.new(args)
@@ -74,10 +91,8 @@ module Observations
         Report::Fundis.new(args)
       when "mycoportal"
         Report::Mycoportal.new(args)
-      when "mycoportal_images"
-        Report::MycoportalImages.new(args)
       else
-        raise("Invalid download type: #{format.inspect}")
+        Report::MycoportalImages.new(args)
       end
     end
 
