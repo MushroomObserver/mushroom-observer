@@ -763,6 +763,22 @@ class ReportTest < UnitTestCase
     hsh
   end
 
+  def test_mycoportal_images_none
+    obs = observations(:minimal_unknown_obs)
+
+    expect = ["MUOB #{obs.id}"]
+
+    do_tsv_test(Report::MycoportalImages, obs, expect, &:id)
+  end
+
+  def test_mycoportal_images_some
+    obs = observations(:detailed_unknown_obs)
+
+    expect = ["MUOB #{obs.id}", image_urls(obs)]
+
+    do_tsv_test(Report::MycoportalImages, obs, expect, &:id)
+  end
+
   def verbatim_atttributes(obs)
     "<a href='#{Report::Mycoportal::HTTP_DOMAIN}/#{obs.id}' " \
     "target='_blank' style='color: blue;'>" \
