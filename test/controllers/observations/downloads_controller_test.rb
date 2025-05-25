@@ -136,7 +136,7 @@ module Observations
         :create,
         params: {
           q: query.id.alphabetize,
-          format: "darwin",
+          format: "dwca",
           encoding: "UTF-8",
           commit: "Download"
         }

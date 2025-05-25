@@ -14,8 +14,8 @@
     <%= radio_with_label(form: f, field: :format, value: :adolf,
                           checked: (@format == "adolf") && "checked",
                           label: :download_observations_adolf.t) %>
-    <%= radio_with_label(form: f, field: :format, value: :darwin,
-                          checked: (@format == "darwin") && "checked",
+    <%= radio_with_label(form: f, field: :format, value: :dwca,
+                          checked: (@format == "dwca") && "checked",
                           label: :download_observations_darwin.t) %>
     (<%= link_to(:download_observations_what_is_this.t,
                   "http://rs.tdwg.org/dwc/index.htm",

@@ -62,7 +62,7 @@ module Observations
     FORMATS = %w[
       raw
       adolf
-      darwin
+      dwca
       symbiota
       fundis
       mycoportal
