@@ -74,6 +74,8 @@ module Observations
         Report::Fundis.new(args)
       when "mycoportal"
         Report::Mycoportal.new(args)
+      when "mycoportal_images"
+        Report::MycoportalImages.new(args)
       else
         raise("Invalid download type: #{format.inspect}")
       end
