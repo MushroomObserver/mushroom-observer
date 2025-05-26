@@ -423,6 +423,7 @@ class ReportTest < UnitTestCase
 
   def test_mycoportal_sequence
     obs = observations(:locally_sequenced_obs)
+
     expect = hashed_expect(obs).merge(
       occurrenceRemarks: "Sequenced; ",
       locality: "North Falmouth, 68 Bay Rd., MO Inc."
@@ -641,11 +642,13 @@ class ReportTest < UnitTestCase
 
     # Obs has lat/lng & they are public,
     # We don't know coordinate uncertainty; leave it blank.
-    expect = hashed_expect(obs).merge(
-      decimalLatitude: obs.lat.to_s,
-      decimalLongitude: obs.lng.to_s,
-      coordinateUncertaintyInMeters: ""
-    ).values
+    expect =
+      hashed_expect(obs).merge(
+        decimalLatitude: obs.lat.to_s,
+        decimalLongitude: obs.lng.to_s
+      )
+    expect.delete(:coordinateUncertaintyInMeters)
+    expect = expect.values
 
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)
   end
@@ -711,13 +714,16 @@ class ReportTest < UnitTestCase
     )
     expect = hashed_expect(obs).merge(
       stateProvince: "Puerto Rico",
-      locality: "Humacao18.094914, -65.801449",
-      decimalLatitude: "",
-      decimalLongitude: "",
-      coordinateUncertaintyInMeters: "",
-      minimumElevationInMeters: "",
-      maximumElevationInMeters: ""
-    ).values
+      locality: "Humacao18.094914, -65.801449"
+    )
+    [:decimalLatitude,
+     :decimalLongitude,
+     :coordinateUncertaintyInMeters,
+     :minimumElevationInMeters,
+     :maximumElevationInMeters
+    ].each { |key| expect.delete(key) }
+    expect = expect.values
+
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)
   end
 
@@ -731,7 +737,7 @@ class ReportTest < UnitTestCase
                            obs_location.south, obs_location.east).
           to_meters.round.to_s
       end
-    {
+    hash = {
       dbpk: obs.id.to_s,
       basisOfRecord: "HumanObservation",
       catalogNumber: "MUOB #{obs.id}",
@@ -754,10 +760,16 @@ class ReportTest < UnitTestCase
       coordinateUncertaintyInMeters: default_uncertainty,
       # if low/high are nil, value must be empty string, not zero
       minimumElevationInMeters: obs_location&.low&.to_i.to_s,
-      maximumElevationInMeters: obs_location&.high&.to_i.to_s,
-      disposition: "",
-      dateLastModified: "#{obs.updated_at.api_time} UTC"
+      maximumElevationInMeters: obs_location&.high&.to_i.to_s
     }
+    # delete trailing empty cells
+    keys = hash.keys.reverse
+    keys.each do |key|
+      break unless hash[key].nil? || hash[key] == ""
+
+      hash.delete(key)
+    end
+    hash
   end
 
   def test_mycoportal_images_none

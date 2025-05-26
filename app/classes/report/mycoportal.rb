@@ -44,8 +44,7 @@ module Report
         "coordinateUncertaintyInMeters",
         "minimumElevationInMeters",
         "maximumElevationInMeters",
-        "disposition", # herbaria, "vouchered", or nil
-        "dateLastModified"
+        "disposition" # herbaria, "vouchered", or nil
       ]
     end
 
@@ -72,8 +71,7 @@ module Report
         coordinate_uncertainty(row), # coordinateUncertaintyInMeters
         row.best_low, # minimumElevationInMeters
         row.best_high, # maximumElevationInMeters
-        disposition(row), # disposition
-        row.obs_updated_at
+        disposition(row) # disposition
       ]
     end
 
