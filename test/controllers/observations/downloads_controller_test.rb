@@ -15,6 +15,8 @@ module Observations
       assert_response(:success)
       assert_select("input[type=radio][id=format_mycoportal]", true,
                     "Missing a MyCoPortal radio button")
+      assert_select("input[type=radio][id=format_mycoportal_images]", true,
+                    "Missing a MyCoPortal Images radio button")
     end
 
     def test_download_observation_index
@@ -134,7 +136,7 @@ module Observations
         :create,
         params: {
           q: query.id.alphabetize,
-          format: "darwin",
+          format: "dwca",
           encoding: "UTF-8",
           commit: "Download"
         }
@@ -177,6 +179,16 @@ module Observations
       )
       assert_no_flash
       assert_response(:success)
+
+      format = "nonexistent"
+      assert_raises("Invalid download type: #{format}") do
+        post(:create,
+             params: {
+               q: query.id.alphabetize,
+               format: format,
+               commit: "Download"
+             })
+      end
     end
 
     def test_download_too_many_observations
