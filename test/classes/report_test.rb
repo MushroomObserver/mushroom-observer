@@ -720,8 +720,7 @@ class ReportTest < UnitTestCase
      :decimalLongitude,
      :coordinateUncertaintyInMeters,
      :minimumElevationInMeters,
-     :maximumElevationInMeters
-    ].each { |key| expect.delete(key) }
+     :maximumElevationInMeters].each { |key| expect.delete(key) }
     expect = expect.values
 
     do_tsv_test(Report::Mycoportal, obs, expect, &:id)
