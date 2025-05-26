@@ -731,7 +731,7 @@ class ReportTest < UnitTestCase
                            obs_location.south, obs_location.east).
           to_meters.round.to_s
       end
-    hsh = {
+    {
       dbpk: obs.id.to_s,
       basisOfRecord: "HumanObservation",
       catalogNumber: "MUOB #{obs.id}",
