@@ -758,9 +758,6 @@ class ReportTest < UnitTestCase
       disposition: "",
       dateLastModified: "#{obs.updated_at.api_time} UTC"
     }
-    # Include this key/value only if there are images.
-    hsh[:imageUrls] = image_urls(obs) if obs.images.any?
-    hsh
   end
 
   def test_mycoportal_images_none
