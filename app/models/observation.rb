@@ -877,7 +877,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # SpeciesList's.  (Also saves list of Namings so they can be destroyed
   # by hand afterword without causing superfluous calc_consensuses.)
   def notify_species_lists
-    # Tell all the species lists it belonged to.
+    # Tell all the species_lists it belonged to.
     species_lists.each do |spl|
       spl.log(:log_observation_destroyed2, name: unique_format_name,
                                            touch: false)
