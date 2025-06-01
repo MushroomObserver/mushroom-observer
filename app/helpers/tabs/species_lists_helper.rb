@@ -173,7 +173,7 @@ module Tabs
     end
 
     def species_list_form_name_list_tabs
-      [name_lister_classic_tab]
+      [species_list_create_tab]
     end
 
     def name_lister_tab
@@ -182,9 +182,9 @@ module Tabs
       ).tab
     end
 
-    def name_lister_classic_tab
+    def species_list_create_tab
       InternalLink.new(
-        :name_lister_classic.t, add_query_param(new_species_list_path)
+        :species_list_create_title.t, add_query_param(new_species_list_path)
       ).tab
     end
 

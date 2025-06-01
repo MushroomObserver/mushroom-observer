@@ -1386,6 +1386,7 @@
   app_sort_by_date_spl: "[:sort_by_object(type=:date)]"
   app_sort_by_title: "[:sort_by_object(type=:title)]"
   app_account: Account
+  app_all_lists: All Lists
   app_login: Login
   app_login_reminder: Login or create an account to access more fungal content
   app_create_account: Create Account
@@ -3133,7 +3134,6 @@
   name_lister_bad_submit: Invalid commit button '[button]'.
   name_lister_charset: Character Encoding
   name_lister_charset_help: "(Try changing this if authors get garbled.)"
-  name_lister_classic: Classic [:SPECIES_LIST] Generator
   name_lister_genera: Genera
   name_lister_help: "*Create List:* Click a genus in the first column to pull up a list of species in that genus.  Select any of these taxa and press return or double-click to add species to your list.  Accepted names are in boldface; deprecated names are followed by one or more accepted alternatives.  You may choose any.  To remove a name, select it in the third column, and press delete or double-click.  (You may also use arrows to navigate, or type partial names to search within a column.)\n\n*Save List:* When you are finished, click any of the buttons at the bottom of the page.  \"Create [:species_list]\" takes you back to the old creation form, where you will be able to enter date, location, notes, etc. before saving the list.\n\n*Reports :* The plain text report gives you a simple list of taxa with no formatting.  Rich text can be used to import the list into Microsoft Word complete with authors and all the formatting intact.  Spreadsheet produces a CSV file, with name, author, citation, and accepted columns.  Common names are not available yet.  Reports should automatically download in a separate tab or window; if not, go to your browser's File menu and click 'Save As'."
   name_lister_names: Selected
