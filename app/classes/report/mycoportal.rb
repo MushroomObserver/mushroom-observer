@@ -11,7 +11,7 @@ require "haversine"
 # https://biokic.github.io/symbiota-docs/
 # https://github.com/Symbiota/Symbiota
 module Report
-  class Mycoportal < TSV
+  class Mycoportal < CSV
     # http_domain for links to Observations
     HTTP_DOMAIN = "https://mushroomobserver.org"
 
