@@ -163,15 +163,14 @@ class FieldSlipsController < ApplicationController
   end
 
   def update_observation_fields
-    observation = @field_slip.observation
-    return unless observation
+    obs = @field_slip.observation
+    return unless obs
 
     check_name
-    observation.when = extract_date
-    observation.place_name = place_name
-    observation.notes.merge!(field_slip_notes)
-    observation.notes.compact_blank!
-    observation.save!
+    # Don't override obs.when or obs.place_name
+    obs.notes.value_merge!(field_slip_notes)
+    obs.notes.compact_blank!
+    obs.save!
   end
 
   def check_name
