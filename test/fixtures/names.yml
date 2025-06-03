@@ -535,7 +535,7 @@ warnerbros:
   updated_at: 2008-01-31 01:01:01
   rank: <%= Name.ranks[:Genus] %>
 
-# Two fake names with non-alphanumerics for severe stress-testing species lists.
+# Two fake names with non-alphanumerics for severe stress-testing species_lists.
 bugs_bunny_one:
   <<: *DEFAULTS
   user: rolf

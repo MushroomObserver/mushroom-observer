@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class API2
-  # Tried to create species list that already exists.
+  # Tried to create species_list that already exists.
   class SpeciesListAlreadyExists < FatalError
     def initialize(str)
       super()

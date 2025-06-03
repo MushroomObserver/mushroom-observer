@@ -402,11 +402,11 @@
   source: source
   SOURCES: Sources
   sources: sources
-  SPECIES_LIST: Species List
-  species_list: species list
-  SPECIES_LISTS: Species Lists
-  species_lists: species lists
-  SpeciesList: Species List
+  SPECIES_LIST: Observation List
+  species_list: observation list
+  SPECIES_LISTS: Observation Lists
+  species_lists: observation lists
+  SpeciesList: Observation List
   SPECIMEN: Specimen
   specimen: specimen
   SPECIMENS: Specimens
@@ -1386,6 +1386,7 @@
   app_sort_by_date_spl: "[:sort_by_object(type=:date)]"
   app_sort_by_title: "[:sort_by_object(type=:title)]"
   app_account: Account
+  app_all_lists: All Lists
   app_login: Login
   app_login_reminder: Login or create an account to access more fungal content
   app_create_account: Create Account
@@ -1622,7 +1623,7 @@
 
   # observer/_form_list_feedback
   form_list_feedback_missing_names: The following names could not be found.
-  form_list_feedback_missing_names_help: Click 'Save'/'Update' to create these names.  If you want to correct any you entered by hand, do so in the area below and click 'Save' to re-evaluate the list.  If the names came from an uploaded species list, create a correct file and select it for upload.
+  form_list_feedback_missing_names_help: Click 'Save'/'Update' to create these names.  If you want to correct any you entered by hand, do so in the area below and click 'Save' to re-evaluate the list.  If the names came from an uploaded observation list, create a correct file and select it for upload.
 
   # glossary
   form_glossary_name_help: "A mycology-specific term, all lower-case except if capitalized in ordinary use.\nAvoid (a) variations of other Terms, or (b) Names of taxa. Details:"
@@ -1734,7 +1735,7 @@
   form_observations_locate_on_map_help: Use the **[:form_observations_open_map]** button to bring this location up on the map. Then click to add a marker and drag it to the specific Latitude & Longitude.
   form_observations_dubious_help: Click '[button]' to use this location name or edit the text below to correct any typo.
   form_observations_project_help: Check any projects you wish to attach this observation to.  All images you upload will also automatically be attached to these projects, too.
-  form_observations_list_help: Check any species lists you would like to add this observation to.
+  form_observations_list_help: Check any observation lists you would like to add this observation to.
   form_observations_edit_specimens_help: Please add, edit and remove specimen data from the main observation page.
   form_observations_use_date: Use this date
   form_observations_date_warning: "Note: The camera date on some of your photos doesn't match the observation date you have entered."
@@ -1760,14 +1761,14 @@
   form_species_lists_title: Title
   form_species_lists_species_to_add: Select Species to Add
   form_species_lists_write_in_species: "Write-In Species: (enter a name on each line)"
-  form_species_lists_list_notes: Species List Notes
+  form_species_lists_list_notes: Observation List Notes
   form_species_lists_member_notes: Notes for each new member
   form_species_lists_confidence: Confidence in identifications
   form_species_lists_deprecated: The following names are deprecated
   form_species_lists_deprecated_help: Select any names you would prefer to use.  If you prefer a name you entered then don't select one of the suggested synonyms.
   form_species_lists_multiple_names: Multiple names match each of the following entries
   form_species_lists_multiple_names_help: In each case, select the intended name.  The number after each name is how many observations are currently using that name.
-  form_species_lists_project_help: Check any projects you wish to attach this species list to.  Any observations you create for this species list will also automatically be attached to these projects, too.  (But not pre-existing observations.)
+  form_species_lists_project_help: Check any projects you wish to attach this observation list to.  Any observations you create for this observation list will also automatically be attached to these projects, too.  (But not pre-existing observations.)
 
   # observations/_form_synonyms
   form_synonyms_names: Names
@@ -1856,7 +1857,7 @@
   list_observations_suggestions: Other Links
   list_observation_name: "[:NAME]"
   list_observation_observations: Observations of
-  list_observations_add_to_list: Add To / Remove From Species List
+  list_observations_add_to_list: Add To / Remove From Observation List
   list_observations_download_as_csv: Download Observations
 
   # locations/list_place_names (list_locations)
@@ -1966,7 +1967,7 @@
   news_content_pr_249: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/249\">PR #249</a> (December 24, 2016) Re-enabled donations through paypal  MO, Inc. can now officially accept tax-free donations!"
   news_content_pr_248: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/248\">PR #248</a> (December 22, 2016) You can now notify users by mentioning them in comments with the usual notations: \"_user john_\" or \"@john\".  If a user's login contains non-alphanumeric characters (like dashes, periods, spaces), then use this format: \"@John Doe@\"."
   news_content_pr_247: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/247\">PR #247</a> (December 22, 2016) The vote pull-down menus on observation pages now automatically save without requiring an additional page load."
-  news_content_pr_246: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/246\">PR #246</a> (December 22, 2016) Added ability to add (or remove) results of an observation query to (from) an existing species list.  Look for link in upper right corner of any observation index page."
+  news_content_pr_246: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/246\">PR #246</a> (December 22, 2016) Added ability to add (or remove) results of an observation query to (from) an existing observation list.  Look for link in upper right corner of any observation index page."
   news_content_commit_efa11ea: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/commit/efa11ea\">Commit #efa11ea</a> (December 20, 2016) Added support for already-existing query capabilities via the search bar.  Search for observations matching \"help:me\" to see full list of new capabilites."
   news_content_pr_241: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/241\">PR #241</a> (September 15, 2016) Extensive refactor of Query model in preparation for user filters."
   news_content_pr_240: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/240\">PR #240</a> (September 11, 2016) Allows 'comb.' e.g., comb. nov., in author field.  Standardize 'comb.' and similar status indicators in future Name edits and creates."
@@ -2328,7 +2329,7 @@
   show_observation_reuse_image: Reuse Image
   show_observation_add_images: "[:add_objects(type=:image)]"
   show_observation_species_lists: "[:SPECIES_LISTS]"
-  show_observation_manage_species_lists: Manage Species Lists
+  show_observation_manage_species_lists: Manage Observation Lists
   show_observation_send_question: Send Observer a Question
   show_observation_view_notifications: View Notifications
   show_observation_hide_map: Hide thumbnail map.
@@ -2446,17 +2447,17 @@
   species_list_edit_title: "[:edit_object(type=:species_list)]: [name]"
 
   # species_list/add_remove_observations
-  species_list_add_remove_title: Add or Remove Observations from Species List
+  species_list_add_remove_title: Add or Remove Observations from List
   species_list_add_remove_cancel: Cancel (back to observation index)
-  species_list_add_remove_body: Adding or removing [num] observation(s) to/from species list. Enter title or id of target species list. Don't worry, it will ignore observations already added or removed from the list.
-  species_list_add_remove_label: Target species list
-  species_list_add_remove_add_success: Successfully added [num] observation(s) to species list.
-  species_list_add_remove_remove_success: Successfully removed [num] observation(s) from species list.
+  species_list_add_remove_body: Adding or removing [num] observation(s) to/from list. Enter title or id of target observation list. Don't worry, it will ignore observations already added or removed from the list.
+  species_list_add_remove_label: Target observation list
+  species_list_add_remove_add_success: Successfully added [num] observation(s) to observation list.
+  species_list_add_remove_remove_success: Successfully removed [num] observation(s) from observation list.
   species_list_add_remove_no_query: Missing observation query results, or query has expired.
-  species_list_add_remove_bad_name: "Unrecognized species list id or title: [name]"
+  species_list_add_remove_bad_name: "Unrecognized observation list id or title: [name]"
 
   # species_list/manage_species_lists
-  species_list_manage_title: Manage Species Lists for [name]
+  species_list_manage_title: Manage Observation Lists for [name]
   species_list_manage_belongs_to: This observation belongs to
   species_list_manage_doesnt_contain: Lists you own that do not contain this observation
 
@@ -2464,7 +2465,7 @@
   species_list_projects_title: Manage Projects for [List]
   species_list_projects_which_objects: Which objects?
   species_list_projects_which_projects: Which projects?
-  species_list_projects_this_list: this species list
+  species_list_projects_this_list: this observation list
   species_list_projects_observations: observations in this list
   species_list_projects_images: images in this list
   species_list_projects_no_add_to_project: You do not have permission to attach objects to the project "[proj]".
@@ -2478,7 +2479,7 @@
   species_list_show_save_as_csv: Save as Spreadsheet
   species_list_show_print_labels: Print Labels
   species_list_show_set_source: Save This List for Later
-  species_list_show_set_source_help: Save this list for the next time you create or edit a species list. It will display a list of the species in this list for you to choose from.
+  species_list_show_set_source_help: Save this list for the next time you create or edit an observation list. It will display a list of the species in this list for you to choose from.
   species_list_show_clone_list: Make a Copy of This List
   species_list_show_add_remove_from_another_list: Add To / Remove From Another List
   species_list_show_manage_projects: Manage Projects
@@ -2502,11 +2503,11 @@
   # species_list/upload_species_list
   species_list_upload_title: "[:UPLOAD] [:SPECIES_LIST]"
   species_list_upload_label: "[:UPLOAD] [:SPECIES_LIST]"
-  species_list_upload_help: A species list can either be a simple text file with each name on its own line, or the 'list' format generated by the Name species listing program.
+  species_list_upload_help: An observation list should be a simple text file with each name on its own line.
 
   # species_list/download
-  species_list_download_title: Species List Reports and Downloads
-  species_list_download_back: Back to Species List
+  species_list_download_title: Observation List Reports and Downloads
+  species_list_download_back: Back to Observation List
   species_list_labels_header: Print Labels for Observation
   species_list_labels_button: Print Labels
   species_list_report_header: Save a Checklist of Names
@@ -3133,7 +3134,6 @@
   name_lister_bad_submit: Invalid commit button '[button]'.
   name_lister_charset: Character Encoding
   name_lister_charset_help: "(Try changing this if authors get garbled.)"
-  name_lister_classic: Classic [:SPECIES_LIST] Generator
   name_lister_genera: Genera
   name_lister_help: "*Create List:* Click a genus in the first column to pull up a list of species in that genus.  Select any of these taxa and press return or double-click to add species to your list.  Accepted names are in boldface; deprecated names are followed by one or more accepted alternatives.  You may choose any.  To remove a name, select it in the third column, and press delete or double-click.  (You may also use arrows to navigate, or type partial names to search within a column.)\n\n*Save List:* When you are finished, click any of the buttons at the bottom of the page.  \"Create [:species_list]\" takes you back to the old creation form, where you will be able to enter date, location, notes, etc. before saving the list.\n\n*Reports :* The plain text report gives you a simple list of taxa with no formatting.  Rich text can be used to import the list into Microsoft Word complete with authors and all the formatting intact.  Spreadsheet produces a CSV file, with name, author, citation, and accepted columns.  Common names are not available yet.  Reports should automatically download in a separate tab or window; if not, go to your browser's File menu and click 'Save As'."
   name_lister_names: Selected
@@ -3231,11 +3231,11 @@
   show_notifications_title: New Notifications for [user]
 
   # species_list/bulk_editor
-  species_list_bulk_editor_title: Species List Bulk Editor
+  species_list_bulk_editor_title: Observation List Bulk Editor
   species_list_bulk_editor_another: Another
   species_list_bulk_editor_reuse: Reuse
   species_list_bulk_editor_success: Successfully updated [n] observation(s).
-  species_list_bulk_editor_you_own_no_observations: You don't own any observations in this species list.
+  species_list_bulk_editor_you_own_no_observations: You don't own any observations in this observation list.
   species_list_bulk_editor_ambiguous_namings: "The proposed names are confusing for observation [id]: [name]. Please \"go to that observation\":/[id] and make your changes there."
   species_list_bulk_editor_help: "Hold your mouse over any of the fields in the table below to see what the field is supposed to be.  The text fields are, in order: notes (top right), date, location, latitude, longitude, elevation (second row).  Check boxes indicate, respectively, if location is where collected, and specimen.  All links open in new tabs."
 
@@ -3660,7 +3660,7 @@
   how_common_tasks: Common Tasks
   how_glossary: Concepts Glossary
   how_intro: This page provides some short descriptions of common uses of this website followed by an overview of the basic concepts used.
-  how_keeping_up: "*Keeping Up with Changes* - The default page for [:app_title] is the '[:rss_log_title]', it is also accessible through the '\"Latest Changes\":/' link in the left-hand panel.  This page shows you the most recent changes on the site.  It lists new \"Observations\":#observation and \"Species Lists\":#species_list as well as significant changes to any already existing ones.  Additions of \"Images\":#image and \"Comments\":#comment are considered significant changes to the relevant observations.  Changes to \"Names\":#name are also listed.  Click the page numbers at the top and bottom of the page to browse through older changes.  Observations and names created as a side effect of other changes are not listed separately.\n\nNote : The latest changes can be tracked using our \"RSS feed\":/activity_logs/rss. See this \"wikipedia article\":https://en.wikipedia.org/wiki/Rss for more information about RSS feeds."
+  how_keeping_up: "*Keeping Up with Changes* - The default page for [:app_title] is the '[:rss_log_title]', it is also accessible through the '\"Latest Changes\":/' link in the left-hand panel.  This page shows you the most recent changes on the site.  It lists new \"Observations\":#observation and \"Observation Lists\":#species_list as well as significant changes to any already existing ones.  Additions of \"Images\":#image and \"Comments\":#comment are considered significant changes to the relevant observations.  Changes to \"Names\":#name are also listed.  Click the page numbers at the top and bottom of the page to browse through older changes.  Observations and names created as a side effect of other changes are not listed separately.\n\nNote : The latest changes can be tracked using our \"RSS feed\":/activity_logs/rss. See this \"wikipedia article\":https://en.wikipedia.org/wiki/Rss for more information about RSS feeds."
   how_searching: "*Searching* - There are several interesting ways to search for information on the site.  The simplest is to type a search string into the search box near the top of each page and click one of the buttons next to it.  This will give you a list of all the \"Observations\":#observation, \"Images\":#image, \"Names\":#name or \"Locations\":#location that contain fields matching the given string.  If you need a little more control over the search, try clicking '[:app_advanced_search]'.\n\nYou may also browse the site using the links in the left-hand panel.  For example, clicking on 'Names' under 'Indexes' on the left of the page shows all the species that have observations, listed alphabetically.  You can page through this list, or skip directly to the letter of a name you are interested in by clicking the appropriate page number or letter along the top or bottom of the list.  Click a name from this list to see a description of the species and a list of observations of that species.  If you click a genus like 'Agaricus', it will also show a list of species in that genus.  Note, however, that in this case it will only show observations that have been identified to the genus level, not ones that have been identified as a species in that genus.  On the other hand, if two names are considered synonyms, you will see observations for either name on this page.  (*NOTE*: If you do a search on 'Agaricus', it _will_ show all the observations whose name contains that string, so you get all the observations that belong to that genus.)\n\nWhenever you click an observation or other result on an index page, it will take you to a page showing that result.  At the top of the page you will see '[:PREV]', '[:NEXT]', and '[:INDEX]' links.  These let you browse forward or backward through the results or return to the index.  At the top of the index page you will often see links allowing you to sort the results by different criteria, such as by date, name or user.  In the same place you will sometimes find links that let you turn an index of observations into an index of names or images of those same observations.  For example, if you click '[:app_your_observations]', it will show you a list of observations you have posted.  Click '[:show_objects(types=:names)]' at the top of the page to see a list of the species you have seen, or click '[:show_objects(types=:locations)]' to see a list of all the locations you've gone mushrooming in.\n\nPower users may also be interested in our new API providing direct access to our database back-end.  This can be used to mine our database for images or species descriptions for inclusion in wikipedia or other public websites. You can also use it to upload observations and images and much more.  Please contact the \"webmaster\":/admin/emails/webmaster_questions/new for more information."
   how_unknown_help: "*Getting Help with an Unknown* - In order to get help with an unknown, you need to have a user account.  These can be created easily by selecting '[:app_create_account]' from the left-hand panel.  See the discussion of \"Users\":#user below for more details.\n\nOnce you are logged in, create a new \"Observation\":#observation by selecting '[:app_create_observation]' in the left-hand panel.  Enter all the details you can into the resulting form.  You can leave the '[:WHAT]' field blank call it '[:unknown]', or if you think you know the genus or family or other group, give that \"Name\":#name followed by 'sp.', e.g., 'Russula sp.'. In the '[:NOTES]' field provide information about habitat, odor, smell and anything else not clear from the photos.  Once the form is as complete as you can make it, click '[:CREATE]'.\n\nYou should now be looking at a page showing you the information you just entered.  However, if you used a name that is not currently in the database, you will be asked if you want to add the name.  This also gives you a chance to catch and fix typos.  In addition, if you use a name that is considered deprecated, you will be given the option of using a preferred synonym.\n\nOnce you have created the new observation, you can upload any \"Images\":#image you have by selecting the '[:show_observation_add_images]' link on the right-side of the page.  It is very important either that it be an image you took or that you have the explicit permission of the person who created the image to upload it to the site.  If you did not take the image, please update the '[:form_images_copyright_holder]' field to reflect the actual owner.  This page also allows you to select the \"License\":#license you want to release the image under.\n\nWhen you add unknowns, the community will generally \"propose one or more names\":#proposing_names for it within 24-hours.  If you find any of the suggested names compelling, you should not hesitate to revisit your observation and \"Vote\":#vote on them.  Please see the discussion below on \"voting\":#voting, as well.  Members of the community may also post feedback via \"Comments\":#comment.  By default your account is set up to deliver comments posted about your observations to you by email.  If you are asked to provide more details on the collection, we prefer that you select '[:show_observation_edit_observation]' (at the top of the observation page) and add them to the '[:NOTES]' field than to just post another comment."
   how_adding_observations: "*Adding Observations You Have Identified* - Use the same process as \"Getting Help with an Unknown\":#unknown_help, except this time provide your identification in the '[:WHAT]' field.  You are strongly encouraged to say something about how you arrived at the identification.  We've provided a small set of checkboxes to make this easy ('[:naming_reason_label_1]', '[:naming_reason_label_3]', etc.), but you are encouraged to elaborate on them in the provided text fields (e.g., list the references you used, or enter 'sequenced the DNA and compared it against the data in GenBank'!). Community members will often post \"Comments\":#comment if there is some question about the collection or if they would like clarification as to why you ruled out other \"Names\":#name.  Roy Halling has provided beautifully illustrated presentations describing <a href=\"https://mushroomobserver.org/pdf/macro-features.pdf\">macroscopic</a> and <a href=\"https://mushroomobserver.org/pdf/micro-features.pdf\">microscopic</a> features. More documentation on creating scientifically valuable collections is available from the <a href=\"https://www.mycoportal.org/portal/misc/links.php\">MycoPortal Links Page</a>."
@@ -3672,7 +3672,7 @@
   how_projects: "*Projects* - Projects are a way for a group of \"Users\":#user to work together to create a set of work that they want to keep out of the public eye until they are ready to publish it.  The original purpose was to support university classes where there was a desire to keep a more controlled environment while the class was going.\n\nAnyone can create a new project by clicking on '\"[:app_list_projects]\":/projects' in the left-hand panel and then clicking on '[:list_projects_add_project]'.  The person who creates the project is always a member and an administrator for that project.  An administrator for a project can add new members by clicking the '[:show_project_add_members]' link at the top of a project's 'Show Project' page.  Administrators can also make other users administrators for the project by going to one of the '[:add_members_change_status]' links available on the 'Show Project' or 'Add Members' pages.  Any User can send requests to the admins for a project.  These requests are emailed to the admins and contain a link for changing that user's status.\n\nCurrently the primary focus of projects is writing \"Descriptions\":#description for various species.  Note, however, that anyone can now create new descriptions for a species (see \"Describing Species\":#describing_species) by clicking on '[:show_name_create_description]' at the top of the 'Show Name' page. Descriptions that are created for a project are visible only to members of that project until they are published, and editable only by the owner of the description and project administrators.  When a description is published it will become the official description if no official description exists yet."
   how_maps: "*Working with Maps* - Currently there are three types of maps available on [:app_title]: Occurrence Maps (e.g., \"Occurrence map for **__Craterellus cornucopioides__**\":/names/284/map), Location Maps (e.g., \"Salt Point State Park\":/locations/4) and the \"[:map_locations_global_map]\":/locations/map.\n\nTo see an occurrence map for a particular \"Name\":#name, go to the page for that name (e.g., enter the name in the search bar, select '[:NAMES]'), and click '[:app_search]', then click '[:show_name_distribution_map]' at the top of the page.\n\nUsers are encouraged to add to the occurrence map for a name.  The easiest way is to create a new \"Observation\":#observation using an already defined \"Location\":#location.  Note, however, that auto-completion for the '[:WHERE]' field will list all matching locations whether they are defined or not.\n\nYou can also explicitly choose not to have an observation show up on the occurrence map.  This allows you to record observations of mushrooms in places like mushroom fairs, old photos or other places where you may not know where the mushroom was actually collected.  When creating or editing an observation there is a checkbox labeled '[:form_observations_is_collection_location]'.  By default it is checked.  If you uncheck it, that observation will not appear in any occurrence maps."
   how_defining_locations: "*Defining Undefined Locations* - Many \"Observations\":#observation have been reported from undefined \"Locations\":#location.  These observations will not appear in our \"occurrence maps\":#maps.  An excellent, easy way for \"Users\":#user to help out if they have a little spare time is to locate and define these undefined locations.\n\nWhen browsing through observations, defined location names will be followed by a link labeled '[:click_for_map]'.  Undefined location names will be followed by a link labeled '[:SEARCH]'.  If you click the link for an undefined location, it will show a list of observations reported for that location.  The resulting page will include two links at the top of the page: '[:list_observations_location_define]' and '[:list_observations_location_merge]'.  Clicking on '[:list_observations_location_define]' will present a form which you can use to create that location.  Clicking on 'Merge With a Defined Location' will present you with a list of similar locations which have already been defined.  Clicking on any of these locations will perform the merge.\n\nYou can also see a list of all locations in use by clicking on '\"[:app_list_locations]\":/locations' in the left-hand panel. This page lists both the defined locations (first column, sorted alphabetically) and the undefined locations (second column, sorted by the number of observations reported from that location).  In some cases the same location has been given multiple names (e.g., 'Point Reyes National Seashore' and 'Pt Reyes Park').  You can merge an undefined location with a defined location by clicking on '[:list_place_names_merge]' next to the undefined location (see above).\n\nWhen defining a new location, the first thing to do is to review its name. Mushroom Observer tries to enforce a set of \"rules\":/locations/help.\n\nIn theory it is possible for the same location to be defined more than once (presumably by different users).  If this happens, you can request a merge by editing one of the two locations and changing its name to be exactly the same as the other's.  This will not have any immediate effect, but it will display a warning message, and an email will be sent to the site administrators with the details.  Merging defined locations is restricted since it can cause significant data loss."
-  how_creating_species_lists: "*Creating Species Lists* - To create a \"Species List\":#species_list, click '\"[:app_create_list]\":/species_lists/new' in the left-hand panel.  Fill out the various fields.  In the 'Write-In Species' field, you should give each species a \"Name\":#name on a line by itself.  When you go to create the list, each line is checked to see if there is a match in the database.  If there is no matching name, you will be asked if you want to add the unknown names to the database.  This gives you a chance to catch and fix typos as well as giving you a simple way to add missing names.  Each name given in the 'Write-In Species' field (or loaded from a file) will be used to create a completely new \"Observation\":#observation.  The '[:form_species_lists_list_notes]' are only shown when the entire species list is shown.  Use '[:form_species_lists_member_notes]' to indicate text you would like to add to each new observation.\n\nThere are several methods of collecting a set of existing observations into a new list.  In the simplest method, first create an empty species list, then go to each of the observations you want to add and select '[:show_observation_manage_species_lists]'.  This will give you the opportunity to add that observation to any species list you own.  (Note, you can add anyone's observations to a species list you own.)\n\nIn another method, you may select '[:app_create_list]' directly from any index of observations or names.  For example, you may use the search bar at the top of the page or the '\"[:app_advanced_search]\":/search/advanced' feature to request all observations from Michigan.  When it shows you the first page of results, click '[:app_create_list]' (in the left-hand panel), and it will give you a list of all the matching names to choose from in the new species list form.\n\nLastly, when you are viewing an existing species list, you may click '[:species_list_show_clone_list]' or '[:species_list_show_set_source]' at the top of the page.  '[:species_list_show_clone_list]' will take you directly to a new species list form, with all the information of the existing list already filled in.  '[:species_list_show_set_source]' will copy that species list's names to the clipboard.  The next time you click '[:app_create_list]', the new species list form will give you this list of names to choose from (unless you show another observation or name index in the meantime)."
+  how_creating_species_lists: "*Creating Observation Lists* - To create an \"Observation List\":#species_list, click '\"[:app_create_list]\":/species_lists/new' in the left-hand panel.  Fill out the various fields.  In the 'Write-In Species' field, you should give each species a \"Name\":#name on a line by itself.  When you go to create the list, each line is checked to see if there is a match in the database.  If there is no matching name, you will be asked if you want to add the unknown names to the database.  This gives you a chance to catch and fix typos as well as giving you a simple way to add missing names.  Each name given in the 'Write-In Species' field (or loaded from a file) will be used to create a completely new \"Observation\":#observation.  The '[:form_species_lists_list_notes]' are only shown when the entire observation list is shown.  Use '[:form_species_lists_member_notes]' to indicate text you would like to add to each new observation.\n\nThere are several methods of collecting a set of existing observations into a new list.  In the simplest method, first create an empty observation list, then go to each of the observations you want to add and select '[:show_observation_manage_species_lists]'.  This will give you the opportunity to add that observation to any observation list you own.  (Note, you can add anyone's observations to an observation list you own.)\n\nIn another method, you may select '[:app_create_list]' directly from any index of observations or names.  For example, you may use the search bar at the top of the page or the '\"[:app_advanced_search]\":/search/advanced' feature to request all observations from Michigan.  When it shows you the first page of results, click '[:app_create_list]' (in the left-hand panel), and it will give you a list of all the matching names to choose from in the new observation list form.\n\nLastly, when you are viewing an existing observation list, you may click '[:species_list_show_clone_list]' or '[:species_list_show_set_source]' at the top of the page.  '[:species_list_show_clone_list]' will take you directly to a new observation list form, with all the information of the existing list already filled in.  '[:species_list_show_set_source]' will copy that observation list's names to the clipboard.  The next time you click '[:app_create_list]', the new observation list form will give you this list of names to choose from (unless you show another observation or name index in the meantime)."
 
   # Note, glossary terms should appear in alphabetical order.
   how_glossary_body: "#(#comment)       [:how_comment]\n#(#image)         [:how_image]\n#(#license)       [:how_license]\n#(#location)      [:how_location]\n#(#name)          [:how_name]\n#(#observation)   [:how_observation]\n#(#proposed_name) [:how_proposed_name]\n#(#description)   [:how_description]\n#(#species_list)  [:how_species_list]\n#(#user)          [:how_user]\n#(#vote)          [:how_vote]"
@@ -3685,9 +3685,9 @@
 
   how_location: "*Location* - A rectangular region enclosing a given location, as defined by the northern, southern, eastern and western boundaries.  In addition to the position, locations can also include a minimum and maximum elevation along with various notes.  Note that the elevations should be in meters not feet. A location is not considered to be owned by a particular \"User\":#user.  Any user may change or define any location, but all of a user's changes are subject to review by the community.  To help with this review process, copies of the previous versions are kept."
   how_name: "*Name* - A name for some group of mushrooms.  Most commonly this is the name of a species, but it can be any taxon (genus, family, variety, etc.).  Names can also refer to groups that are not officially recognized scientific names such as common names or functional groups like Gasteromyces.  A name is *not* considered to be owned by a particular \"User\":#user.  Any user may change any name, but all changes are subject to review by the community.  To help with this review process, copies of previous versions are kept.  Names can have an acknowledged author.  The author is normally only given for scientific names. The author should follow the standard practice of listing the person who first correctly published the name.  In the case of names at or below the species level, the author may also include the person who transfered the species to the current genus, e.g., (Singer) Jenkins."
-  how_observation: "*Observation* - A record of a single mushroom species at a particular time and \"Location\":#location.  Typically associated with one or more \"Names\":#name (see \"Proposed Name\":#proposed_name below) and some number of \"Images\":#image.  Each observation is owned by a \"User\":#user, and can only be edited or deleted by that user or a site administrator.  However, any user may post \"Comments\":#comment about any observation.  Observations can also be included in one or more \"Species Lists\":#species_list."
+  how_observation: "*Observation* - A record of a single mushroom species at a particular time and \"Location\":#location.  Typically associated with one or more \"Names\":#name (see \"Proposed Name\":#proposed_name below) and some number of \"Images\":#image.  Each observation is owned by a \"User\":#user, and can only be edited or deleted by that user or a site administrator.  However, any user may post \"Comments\":#comment about any observation.  Observations can also be included in one or more \"Observation Lists\":#species_list."
   how_proposed_name: "*Proposed Name* - A \"Name\":#name as proposed for a given \"Observation\":#observation.  Any number of names may be proposed for a single observation by members of the community.  No special treatment is given to any member's name.  Community consensus is arrived at through the process of \"voting\":#voting.  Each proposed name for an observation is owned by a single \"User\":#user.  However, even the user who proposed the name cannot necessarily modify or delete a name once other members of the community have cast \"Votes\":#vote for or against it.  Fortunately you may always propose additional names.  There is never any sort of penalty associated with proposing incorrect names."
-  how_species_list: "*Species List* - A list of \"Observations\":#observation (not \"Names\":#name). Includes a date, a \"Location\":#location and a title for the list.  A given species list is owned by a particular \"User\":#user.  Only the owner or a site administrator can change or delete a species list.  There are no strict rules for how species lists should be used.  This is an area that is likely to change in the future as the community comes up with clearer ideas for how they should be used."
+  how_species_list: "*Observation List* - A list of \"Observations\":#observation (not \"Names\":#name). Includes a date, a \"Location\":#location and a title for the list.  A given observation list is owned by a particular \"User\":#user.  Only the owner or a site administrator can change or delete a observation list.  There are no strict rules for how observation lists should be used.  This is an area that is likely to change in the future as the community comes up with clearer ideas for how they should be used."
   how_user: "*User* - An account on [:app_title].  You are required to provide a valid email address when you first create an account.  This allows the system to stop automated programs from creating bogus accounts.  It also provides a way for other users to get in touch with you.  However, your email address will never be revealed unless you request an email be sent to another user and then only to that user.  If you are concerned about having your email address in our database, once you have verified your account, you can go to the '\"[:app_preferences]\":/account/preferences/edit' page and remove your address."
   how_vote: "*Vote* - One \"User's\":#user vote on a \"Proposed Name\":#proposed_name for a given \"Observation\":#observation.  Expresses a level of confidence or agreement with that name, with half the choices (\"[min_pos_vote]\" and up) being positive and half (\"[min_neg_vote]\" and below) being negative.  Votes are owned by that user, and can only be changed or deleted by the owner or a site administrator."
 
@@ -3726,7 +3726,7 @@
   observation_term_region: Location mushroom was observed. Partial match anchored at end, including country at least, e.g., "California\, USA". Note that commas must be protected with a back-slash as shown.
   observation_term_project: Observation belongs to one of these projects.
   observation_term_project_lists: Observation belongs to list in one of these projects.
-  observation_term_list: Observation belongs to one of these species lists.
+  observation_term_list: Observation belongs to one of these observation lists.
   observation_term_user: Observation created by one of these users.
   observation_term_notes: Notes contains the given string.
   observation_term_comments: Comments contain the given string.
@@ -4022,7 +4022,7 @@
   # One-time-use messages.
   runtime_api_key_notes_cannot_be_blank: Notes field cannot be blank.
   runtime_bad_qr_code: "Bad QR code: [code]."
-  runtime_bad_use_of_imageless: The special name _Imageless_ was not intended for observations that were created as part of species lists or which have good documentation.  Please read the discussion under "_Imageless_":/names/31080.
+  runtime_bad_use_of_imageless: The special name _Imageless_ was not intended for observations that were created as part of observation lists or which have good documentation.  Please read the discussion under "_Imageless_":/names/31080.
   runtime_dates_must_be_same_format: If you give two dates, they must be the same format.
   runtime_description_added_admin: Gave admin permission to [name].
   runtime_description_added_reader: Gave view permission to [name].
@@ -4220,7 +4220,7 @@
   pattern_search_bad_herbarium_error: Invalid or unrecognized value for [term], [value], expected fungarium id, code or name; nothing matched.
   pattern_search_bad_location_error: Invalid or unrecognized value for [term], [value], expected location id or name; nothing matched.
   pattern_search_bad_project_error: Invalid or unrecognized value for [term], [value], expected project id or title; nothing matched.
-  pattern_search_bad_species_list_error: Invalid or unrecognized value for [term], [value], expected species list id or title; nothing matched.
+  pattern_search_bad_species_list_error: Invalid or unrecognized value for [term], [value], expected observation list id or title; nothing matched.
   pattern_search_bad_user_error: Invalid or unrecognized value for [term], [value], expected user id, login or name; nothing matched.
   pattern_search_bad_date_range_error: Invalid value for [term], [value], expected date or date range of form YYYY, YYYY-YYYY, YYYY-MM, YYYY-MM-YYYY-MM, YYYY-MM-DD, YYYY-MM-DD-YYYY-MM-DD, MM, MM-MM or MM-DD-MM-DD.
   pattern_search_bad_rank_range_error: Invalid value for [term], [value], expected rank or range of ranks, e.g., "genus" or "species-form".
@@ -4262,7 +4262,7 @@
   api_bad_object_parameter_value: "Invalid or unknown object, \"[val]\", examples: \"name #1234\", \"observation #54321\", \"species_list #42\"."
   api_bad_observation_parameter_value: Invalid or unknown observation, "[val]", accept only numerical id.
   api_bad_project_parameter_value: Invalid or unknown project, "[val]", accept numerical id or project name.
-  api_bad_species_list_parameter_value: Invalid or unknown species list, "[val]", accept numerical id or species list title.
+  api_bad_species_list_parameter_value: Invalid or unknown observation list, "[val]", accept numerical id or observation list title.
   api_bad_time_parameter_value: Invalid time, "[val]", expect "YYYYMMDDHHMMSS".
   api_bad_time_range_parameter_value: Invalid time range, "[val]", expect "YYYYMMDDHHMMSS-YYYYMMDDHHMMSS", "YYYYMMDDHHMM-YYYYMMDDHHMM", "YYYYMMDDHH-YYYYMMDDHH", "YYYYMMDD-YYYYMMDD", "YYYYMM-YYYYMM", "YYYY-YYYY", "MM-MM", "YYYYMMHHMMSS", "YYYYMMDDHHMM", "YYYYMMDDHH", "YYYYMMDD", "YYYYMM", "YYYY", "MM".
   api_bad_user_parameter_value: Invalid or unknown user, "[val]", accept numerical id, login or name.
@@ -4440,7 +4440,7 @@
   query_has_observations: with observations
   query_has_public_lat_lng: public geolocation
   query_has_sequences: with sequences
-  query_has_species_lists: with species lists
+  query_has_species_lists: with observation lists
   query_has_specimen: with specimen
   query_has_summary: with summary
   query_has_synonyms: with synonyms

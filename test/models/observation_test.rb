@@ -782,7 +782,7 @@ class ObservationTest < UnitTestCase
     # has image
     assert_true(observations(:coprinus_comatus_obs).has_backup_data?)
 
-    # has species list
+    # has species_list
     assert_true(observations(:minimal_unknown_obs).has_backup_data?)
 
     # has specimen

@@ -181,7 +181,7 @@
 #                       (defaults to personal_herbarium).
 #  personal_herbarium:: User's private herbarium:
 #                       "Name (login): Personal Herbarium".
-#  all_editable_species_lists:: Species Lists they own
+#  all_editable_species_lists:: Observation Lists they own
 #                       or that are attached to projects they're on.
 #
 #  ==== Other Stuff
@@ -1044,14 +1044,15 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     Project.where(id: ids).delete_all
   end
 
-  # Delete all species lists the user created unless they belong to a project.
-  # (Private projects should already have been deleted by this point, so this
-  # in effect, really should read "unless they belong to a public project".)
-  # I think it's okay to delete observations even if they are attached to a
-  # project.  But species_lists are potentially a much more collaborative
-  # effort, so I don't think it's okay to delete lists that are attached to
-  # public projects just because the user happened to originally create them.
-  # -JPH 20220916
+  # Delete all species_lists the user created unless they belong
+  # to a project.  (Private projects should already have been deleted
+  # by this point, so this in effect, really should read "unless they
+  # belong to a public project".)  I think it's okay to delete
+  # observations even if they are attached to a project.  But
+  # species_lists are potentially a much more collaborative effort, so
+  # I don't think it's okay to delete lists that are attached to
+  # public projects just because the user happened to originally
+  # create them.  -JPH 20220916
   def delete_private_species_lists
     ids = (species_lists - species_lists.joins(:project_species_lists)).
           map(&:id)

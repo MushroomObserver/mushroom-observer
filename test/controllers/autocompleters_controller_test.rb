@@ -181,8 +181,8 @@ class AutocompletersControllerTest < FunctionalTestCase
                                    { name: list[:title], id: list[:id] }
                                  end
 
-    assert_equal("A Species List", list1[:name])
-    assert_equal("Another Species List", list2[:name])
+    assert_equal("An Observation List", list1[:name])
+    assert_equal("Another Observation List", list2[:name])
     assert_equal("List of mysteries", list3[:name])
     assert_equal("lone_wolf_list", list4[:name])
 

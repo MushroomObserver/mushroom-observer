@@ -95,7 +95,7 @@ class API2
     # Our restrictions on edit permissions for the API are much more strict
     # than on the website.  Revoke permission if anyone other than the creator
     # owns any attached objects: location versions, descriptions, observations,
-    # species lists, users (i.e. profile location), or herbaria.
+    # species_lists, users (i.e. profile location), or herbaria.
     def must_have_edit_permission!(loc)
       must_be_creator!(loc)
       must_be_only_editor!(loc)

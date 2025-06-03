@@ -89,8 +89,9 @@ class Query::SpeciesListsTest < UnitTestCase
   def test_species_list_title_has
     ids = [species_lists(:first_species_list).id,
            species_lists(:another_species_list).id]
-    scope = SpeciesList.title_has("A Species List").order_by_default
-    assert_query_scope(ids, scope, :SpeciesList, title_has: "A Species List")
+    scope = SpeciesList.title_has("An Observation List").order_by_default
+    assert_query_scope(ids, scope, :SpeciesList,
+                       title_has: "An Observation List")
   end
 
   def test_species_list_has_notes

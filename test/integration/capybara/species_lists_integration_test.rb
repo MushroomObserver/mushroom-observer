@@ -9,7 +9,7 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
   end
 
   # ----------------------------------------------------------
-  #  Test passing of arguments around in species list forms.
+  #  Test passing of arguments around in species_list forms.
   # ----------------------------------------------------------
 
   def test_species_list_forms
