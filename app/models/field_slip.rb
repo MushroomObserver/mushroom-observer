@@ -69,9 +69,12 @@ class FieldSlip < AbstractModel
     result.unshift([:field_slip_nil_project.t, nil])
   end
 
+  # Used by Mycoportal report
+  TREES_SHRUBS = :"Trees/Shrubs"
+
   def notes_fields
     # Should we figure out a way to internationalize these tags?
-    [:"Odor/Taste", :"Trees/Shrubs", :Substrate, :Habit, :Other].map do |field|
+    [:"Odor/Taste", TREES_SHRUBS, :Substrate, :Habit, :Other].map do |field|
       NoteField.new(name: field, value: field_value(field))
     end
   end

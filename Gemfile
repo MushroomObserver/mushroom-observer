@@ -157,6 +157,10 @@ gem("prawn-manual_builder")
 # csv generation support
 gem("csv")
 
+# calculate the Haversine distance between two points given their lat/lng
+# https://github.com/kristianmandrup/haversine
+gem("haversine")
+
 # Use puma as the app server, also available for system tests
 # To use Webrick locally, run `bundle config set --local without 'production'`
 # https://stackoverflow.com/a/23125762/3357635
