@@ -17,6 +17,7 @@ flash_error(@error) if @error && @objects.empty?
             link_to(when_span + ": " + what_span, species_list.show_link_args)
           %>
         </div><!-- .text-larger -->
+        <span><%= observation_count(species_list) %></span> |
         <span><%= species_list.place_name.t rescue :UNKNOWN.t %></span> |
         <span><%= user_link(species_list.user) %></span>
       </div>
