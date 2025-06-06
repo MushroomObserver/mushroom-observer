@@ -31,18 +31,6 @@ module Observations
       end
     end
 
-    def mycoportal_image_list
-      @query = find_query(:Observation)
-      if @query
-        return too_many_results if too_many_results?
-
-        render_report(MycoportalImageList.new(@query))
-      else
-        flash_error(:runtime_search_has_expired.t)
-        redirect_back_or_default("/")
-      end
-    end
-
     private
 
     def too_many_results
