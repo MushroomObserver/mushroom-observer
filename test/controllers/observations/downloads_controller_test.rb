@@ -15,7 +15,7 @@ module Observations
       assert_response(:success)
       assert_select("input[type=radio][id=format_mycoportal]", true,
                     "Missing a MyCoPortal radio button")
-      assert_select("input[type=radio][id=format_mycoportal_images]", true,
+      assert_select("input[type=radio][id=format_mycoportal_image_list]", true,
                     "Missing a MyCoPortal Images radio button")
     end
 
@@ -280,6 +280,38 @@ module Observations
       end
 
       assert_flash_error
+    end
+
+    def test_mycoportal_image_list
+      query = Query.lookup_and_save(:Observation, by_users: [dick])
+      obss_with_images =
+        Observation.joins(:images).where(id: query.results(&:id))
+      assert(obss_with_images.many?,
+             "Test needs query which results in many Observations with Images")
+      assert(
+        obss_with_images.any? { |obs| obs.images.many? },
+        "Test needs query which results in >=1 Observations with many Images"
+      )
+      expect = [
+        "catalogNumber,imageId",
+        "MUOB 826385865,https://images.mushroomobserver.org/1280/151852714.jpg",
+        "MUOB 826385865,https://images.mushroomobserver.org/1280/423121300.jpg",
+        "MUOB 478978184,https://images.mushroomobserver.org/1280/151852714.jpg",
+        "MUOB 640258977,https://images.mushroomobserver.org/1280/151852714.jpg",
+        "MUOB 883985479,https://images.mushroomobserver.org/1280/748212793.jpg"
+      ]
+
+      login
+      post(:create, params: { q: query.id.alphabetize,
+                              format: :mycoportal_image_list,
+                              encoding: "UTF-8",
+                              commit: "Download" })
+
+      assert_response(:success)
+      rows = @response.body.split("\n")
+      assert_equal("catalogNumber,imageId", rows.first, "Wrong header row")
+      assert_equal(obss_with_images.count + 1, rows.count)
+      assert_equal(expect, rows, "Wrong MyCoPortal Image List csv")
     end
   end
 end

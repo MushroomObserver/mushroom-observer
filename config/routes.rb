@@ -626,6 +626,8 @@ MushroomObserver::Application.routes.draw do
 
     collection do
       get("map", to: "observations/maps#index")
+      get("mycoportal_image_list",
+          to: "observations/downloads#mycoportal_image_list")
       post("print_labels", to: "observations/downloads#print_labels",
                            as: "print_labels_for")
       get("identify", to: "observations/identify#index", as: "identify")

@@ -29,11 +29,11 @@
     <%= radio_with_label(form: f, field: :format, value: :mycoportal,
                           checked: (@format == "mycoportal") && "checked",
                           label: :download_observations_mycoportal.t) %>
-    <%= radio_with_label(form: f, field: :format, value: :mycoportal_images,
-                          checked: (@format == "mycoportal_images") &&
+    <%= radio_with_label(form: f, field: :format, value: :mycoportal_image_list,
+                          checked: (@format == "mycoportal_image_list") &&
                                    "checked",
                           label: :download_observations_mycoportal_images.t) %>
-</div>
+  </div>
 
   <p><%= :download_observations_encoding.t %>:</p>
   <div class="form-group">
