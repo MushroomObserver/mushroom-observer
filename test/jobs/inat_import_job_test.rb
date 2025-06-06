@@ -290,11 +290,12 @@ class InatImportJobTest < ActiveJob::TestCase
   def test_import_job_nemf_plischke
     create_ivars_from_filename("arrhenia_sp_NY02")
 
+    parsed_inat_prov = Name.parse_name('Arrhenia "sp-NY02"')
     name = Name.create(
-      text_name: 'Arrhenia "sp-NY02"', author: "S.D. Russell crypt. temp.",
-      search_name: 'Arrhenia "sp-NY02" S.D. Russell crypt. temp.',
-      display_name: '**__Arrhenia "sp-NY02"__** S.D. Russell crypt. temp.',
-      rank: "Species",
+      text_name: parsed_inat_prov.text_name,
+      search_name: parsed_inat_prov.search_name,
+      display_name: parsed_inat_prov.display_name,
+      rank: parsed_inat_prov.rank,
       user: @user
     )
 
