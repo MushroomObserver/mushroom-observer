@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
-# List of images for updating MO's MyCoPortal database
+# List of image URLa for updating the images in MO's MyCoPortal database
+# via MyCoPortal's Occurence Management, Observation Project Management,
+#    Administration Control Panel. Processing Toolbox
+# MCP expects a CSV with one row per image and 2 columns: catalogNumber, imageId
 module Report
   class MycoportalImageList < CSV
     attr_accessor :query
@@ -41,7 +44,7 @@ module Report
       rows_data =
         Image.joins(:observations).
         where(observations: { id: @query.result_ids }).
-        pluck(:id, :observation_id)
+        pluck(:observation_id, :id)
 
       ::CSV.generate(col_sep: ",", encoding: "UTF-8") do |csv|
         csv << %w[catalogNumber imageId]
@@ -52,7 +55,11 @@ module Report
     end
 
     def formatted_row(row)
-      ["MUOB #{row.last}", large_image_url(row.first)]
+      [catalog_number(row.first), large_image_url(row.last)]
+    end
+
+    def catalog_number(observation_id)
+      "MUOB #{observation_id}"
     end
 
     def large_image_url(image_id)
