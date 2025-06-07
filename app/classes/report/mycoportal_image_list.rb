@@ -8,6 +8,12 @@ module Report
   class MycoportalImageList < CSV
     attr_accessor :query
 
+    # This URL prefix is permanent for large images, should always be correct,
+    # no matter how much we change the underlying image server(s).
+    # It should be the same in all environments, so that we can use the dev
+    # environment for MyCoPortal uploads.
+    LARGE_IMG_PERMALINK_PREFIX = "https://mushroomobserver.org/images/1280/"
+
     def initialize(query)
       super
       @query = query[:query]
@@ -44,6 +50,8 @@ module Report
       rows_data =
         Image.joins(:observations).
         where(observations: { id: @query.result_ids }).
+        # MCP doesn't care about order, but our tests do.
+        order(observation_id: :asc, id: :asc).
         pluck(:observation_id, :id)
 
       ::CSV.generate(col_sep: ",", encoding: "UTF-8") do |csv|
@@ -63,7 +71,7 @@ module Report
     end
 
     def large_image_url(image_id)
-      "https://images.mushroomobserver.org/1280/#{image_id}.jpg"
+      "#{LARGE_IMG_PERMALINK_PREFIX}#{image_id}.jpg"
     end
   end
 end

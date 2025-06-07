@@ -301,21 +301,21 @@ module Observations
     def test_mycoportal_image_list
       query = Query.lookup_and_save(:Observation, by_users: [dick])
       obss_with_images =
-        Observation.joins(:images).where(id: query.results(&:id))
+        Observation.joins(:images).where(id: query.results(&:id)).
+        order(id: :asc, image_id: :asc)
       assert(obss_with_images.many?,
              "Test needs query which results in many Observations with Images")
       assert(
         obss_with_images.any? { |obs| obs.images.many? },
         "Test needs query which results in >=1 Observations with many Images"
       )
-      expect = [
-        "catalogNumber,imageId",
-        "MUOB 826385865,https://images.mushroomobserver.org/1280/151852714.jpg",
-        "MUOB 826385865,https://images.mushroomobserver.org/1280/423121300.jpg",
-        "MUOB 478978184,https://images.mushroomobserver.org/1280/151852714.jpg",
-        "MUOB 640258977,https://images.mushroomobserver.org/1280/151852714.jpg",
-        "MUOB 883985479,https://images.mushroomobserver.org/1280/748212793.jpg"
-      ]
+      expect = ["catalogNumber,imageId"]
+      obss_with_images.uniq.each do |obs|
+        obs.images.each do |image|
+          expect << "MUOB #{obs.id}," \
+                    "https://mushroomobserver.org/images/1280/#{image.id}.jpg"
+        end
+      end
 
       login
       post(:create, params: { q: query.id.alphabetize,
