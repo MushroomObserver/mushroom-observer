@@ -159,7 +159,7 @@ class NameTest < UnitTestCase
     assert_equal("Coprinus", result[0].text_name)
     assert_equal("Coprinus comatus", result[1].text_name)
     assert_equal("Coprinus comatus var. bogus", result[2].text_name)
-    assert_equal("", result[0].author)
+    assert_equal(names(:coprinus).author, result[0].author)
     assert_equal("(O.F. Müll.) Pers.", result[1].author)
     assert_equal("(With) Author", result[2].author)
 
@@ -2852,6 +2852,10 @@ class NameTest < UnitTestCase
     assert_equal("Order", Name.guess_rank("Fossil-Agaricales"))
     assert_equal("Phylum", Name.guess_rank("Fossil-Anythingelse"))
   end
+
+  # --------------------------------------
+  #  Spelling
+  # --------------------------------------
 
   def test_parent_if_parent_deprecated
     User.current = rolf
