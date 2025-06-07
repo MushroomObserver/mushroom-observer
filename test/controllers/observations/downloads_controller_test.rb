@@ -29,9 +29,9 @@ module Observations
 
       assert_no_flash
       assert_response(:success)
-      assert_select("input[type=radio][id=format_mycoportal]", false,
+      assert_select("input[type=radio][id=format_mycoportal]", true,
                     "Missing a MyCoPortal radio button")
-      assert_select("input[type=radio][id=format_mycoportal_image_list]", false,
+      assert_select("input[type=radio][id=format_mycoportal_image_list]", true,
                     "Missing a MyCoPortal Images radio button")
     end
 
