@@ -13,9 +13,25 @@ module Observations
 
       assert_no_flash
       assert_response(:success)
-      assert_select("input[type=radio][id=format_mycoportal]", true,
+      assert_select("input[type=radio][id=format_mycoportal]", false,
                     "Missing a MyCoPortal radio button")
-      assert_select("input[type=radio][id=format_mycoportal_image_list]", true,
+      assert_select("input[type=radio][id=format_mycoportal_image_list]", false,
+                    "Missing a MyCoPortal Images radio button")
+    end
+
+    def test_new_admin
+      query = Query.lookup_and_save(:Observation, by_users: mary.id)
+      assert(query.num_results > 1, "Test needs query with multiple results")
+
+      login(:rolf)
+      make_admin("rolf")
+      get(:new, params: { q: query.id.alphabetize })
+
+      assert_no_flash
+      assert_response(:success)
+      assert_select("input[type=radio][id=format_mycoportal]", false,
+                    "Missing a MyCoPortal radio button")
+      assert_select("input[type=radio][id=format_mycoportal_image_list]", false,
                     "Missing a MyCoPortal Images radio button")
     end
 

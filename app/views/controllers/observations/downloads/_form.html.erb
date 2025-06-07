@@ -26,13 +26,19 @@
     <%= radio_with_label(form: f, field: :format, value: :fundis,
                           checked: (@format == "fundis") && "checked",
                           label: :download_observations_fundis.t) %>
-    <%= radio_with_label(form: f, field: :format, value: :mycoportal,
-                          checked: (@format == "mycoportal") && "checked",
-                          label: :download_observations_mycoportal.t) %>
-    <%= radio_with_label(form: f, field: :format, value: :mycoportal_image_list,
-                          checked: (@format == "mycoportal_image_list") &&
-                                   "checked",
-                          label: :download_observations_mycoportal_images.t) %>
+
+    <% if in_admin_mode? %>
+      <%= radio_with_label(form: f, field: :format, value: :mycoportal,
+                            checked: (@format == "mycoportal") && "checked",
+                            label: :download_observations_mycoportal.t) %>
+      <%= radio_with_label(
+            form: f, field: :format,
+            value: :mycoportal_image_list,
+            checked: (@format == "mycoportal_image_list") && "checked",
+            label: :download_observations_mycoportal_images.t)
+      %>
+    <% end %>
+
   </div>
 
   <p><%= :download_observations_encoding.t %>:</p>
