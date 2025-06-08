@@ -29,7 +29,7 @@ end
     <%= autocompleter_field(form:, field: :project_name, type: :project,
                             hidden_name: :project, inline: true,
                             value: project_title,
-                            label: "Filter by #{:project.l}:") %>
+                            label: "#{:field_slip_filter_by.l}:") %>
     <%= submit_button(form:, button: "Filter") %>
   <% end %>
 <% end %>

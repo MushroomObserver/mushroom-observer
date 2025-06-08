@@ -2,6 +2,23 @@
 
 # View Helpers for Projects, Project Violations
 module ProjectsHelper
+  def project_search_field(project:, form:)
+    trace_tests
+    tag.div(class: "project-search",
+            data: {
+              controller: "project-search",
+              names: names(project)
+            }) do
+      concat(autocompleter_field(form:, field: :name, type: :name,
+                                 label: "#{:SEARCH.l}:"))
+    end
+  end
+
+  def names(project)
+    project.observations.joins(:name).select("names.text_name", "names.id").
+      distinct.order("names.text_name")
+  end
+
   def violation_table_headers(project)
     [
       nil, # column for checkbox
