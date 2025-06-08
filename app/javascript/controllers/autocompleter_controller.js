@@ -1832,8 +1832,10 @@ export default class extends Controller {
     this.fetch_request = null;
     // Record string actually used to do matching: might be less strict
     // than one sent in request.
-    if (new_primer.length > 0)
-      this.last_fetch_request = new_primer[0]['name'];
+
+    // Why the following code?  The last_fetch_request is already correct.
+    // if (new_primer.length > 0)
+    //   this.last_fetch_request = new_primer[0]['name'];
 
     // Check for trailing "..." signaling incomplete set of results.
     if (new_primer.length > 1 &&
