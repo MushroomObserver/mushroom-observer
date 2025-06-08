@@ -32,9 +32,7 @@ class Autocomplete
 
   # returns an array of { name:, id: } objects
   def matching_records
-    # unless 'whole', use the first letter of the string to define the matches
-    token = string # whole ? string : string[0]
-    self.matches = rough_matches(token) || [] # defined in type-subclass
+    self.matches = rough_matches(string) || [] # defined in type-subclass
     clean_matches
 
     unless all
