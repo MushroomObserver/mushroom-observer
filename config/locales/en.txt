@@ -3460,6 +3460,7 @@
   show_project_edit: Edit Project
   show_project_field_slip_create: Create Field Slip PDF
   show_project_field_slip_prefix: Field Slip Prefix
+  show_project_has_name: Project has matching name
   show_project_join: Join Project
   show_project_location: Location
   show_project_leave: Leave Project
