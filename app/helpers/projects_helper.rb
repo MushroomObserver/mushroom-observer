@@ -3,7 +3,6 @@
 # View Helpers for Projects, Project Violations
 module ProjectsHelper
   def project_search_field(project:, form:)
-    trace_tests
     tag.div(class: "project-search",
             data: {
               controller: "project-search",

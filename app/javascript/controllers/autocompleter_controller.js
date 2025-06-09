@@ -577,7 +577,7 @@ export default class extends Controller {
   // ------------------------------ Timers ------------------------------
 
   // Schedule matches to be recalculated from primer, or even primer refreshed,
-  // after a polite delay. (Primer only refreshed if first letter changes.)
+  // after a polite delay.
   scheduleRefresh() {
     if (this.TYPE === "location_google") {
       this.scheduleGoogleRefresh();
