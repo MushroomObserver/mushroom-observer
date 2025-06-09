@@ -1,23 +1,7 @@
 <!-- ERB Template -->
-<div data-controller="status-light" class="status-light-container">
+<div class="status-light-container">
   <div class="status-indicator" data-status-light-target="light"></div>
-  
-  <div class="controls">
-    <button data-action="click->status-light#setRed" class="btn btn-danger">
-      Red
-    </button>
-    <button data-action="click->status-light#setGreen" class="btn btn-success">
-      Green
-    </button>
-    <button data-action="click->status-light#toggle" class="btn btn-secondary">
-      Toggle
-    </button>
-    <button data-action="click->status-light#turnOff" class="btn btn-outline-secondary">
-      Off
-    </button>
-  </div>
-  
-  <div class="status" data-status-light-target="status">
+  <div class="status" data-status-light-target="status" style="display: none;">
     Status: <span data-status-light-target="statusText">Off</span>
   </div>
 </div>

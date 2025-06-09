@@ -5,9 +5,10 @@ module ProjectsHelper
   def project_search_field(project:, form:)
     tag.div(class: "project-search",
             data: {
-              controller: "project-search",
-              names: names(project)
+              controller: "project-search status-light",
+              project_search_names_value: names(project)
             }) do
+      concat(render('status_light'))
       concat(autocompleter_field(form:, field: :name, type: :name,
                                  label: "#{:SEARCH.l}:"))
     end
