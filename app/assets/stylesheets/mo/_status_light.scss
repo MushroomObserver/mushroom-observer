@@ -13,19 +13,18 @@
   height: 20px;
   border-radius: 50%;
   border: 2px solid #ccc;
-  background: #f8f9fa;
   transition: all 0.3s ease;
   flex-shrink: 0;
 
   &.red {
-    background: #dc3545;
-    border-color: #dc3545;
-    box-shadow: 0 0 8px rgba(220, 53, 69, 0.5);
+    background: $DANGER_BORDER_COLOR;
+    border-color: $DANGER_BORDER_COLOR;
+    box-shadow: 0 0 8px $DANGER_BG_COLOR;
   }
 
   &.green {
-    background: #28a745;
-    border-color: #28a745;
-    box-shadow: 0 0 8px rgba(40, 167, 69, 0.5);
+    background: $SUCCESS_BORDER_COLOR;
+    border-color: $SUCCESS_BORDER_COLOR;
+    box-shadow: 0 0 8px $SUCCESS_BG_COLOR;
   }
 }
