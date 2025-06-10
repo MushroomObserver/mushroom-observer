@@ -8,7 +8,7 @@ module ProjectsHelper
               controller: "project-search status-light",
               project_search_names_value: names(project)
             }) do
-      concat(render('status_light'))
+      concat(render("status_light"))
       concat(autocompleter_field(form:, field: :name, type: :name,
                                  label: "#{:SEARCH.l}:"))
     end

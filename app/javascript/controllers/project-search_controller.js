@@ -32,7 +32,7 @@ export default class extends Controller {
     }
 
     // Check if input matches the start of any name
-    const hasMatch = this.namesValue.some(nameObj => 
+    const hasMatch = this.namesValue.some(nameObj =>
       nameObj.text_name.toLowerCase().startsWith(inputValue)
     )
 
@@ -44,7 +44,7 @@ export default class extends Controller {
 
     // Find status-light controller using Stimulus application
     const statusLightElement = this.element.querySelector('[data-status-light-target="light"]')?.closest('[data-controller*="status-light"]')
-  
+
     if (statusLightElement) {
       const statusLightController = this.application.getControllerForElementAndIdentifier(statusLightElement, "status-light")
       if (statusLightController) {
