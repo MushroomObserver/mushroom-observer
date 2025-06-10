@@ -5,6 +5,7 @@ export default class extends Controller {
   static targets = ["light", "statusText"]
 
   connect() {
+    this.element.dataset.statusLight = "connected";
     // console.log("Status light controller connected")
     this.currentState = "off"
     this.updateStatus()

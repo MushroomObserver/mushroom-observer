@@ -10,6 +10,8 @@ module ProjectsHelper
             }) do
       concat(render("status_light"))
       concat(autocompleter_field(form:, field: :name, type: :name,
+                                 data: { project_search_target: "input",
+                                         action: "input->projectSearch#checkMatch keyup->projectSearch#checkMatch"},
                                  label: "#{:SEARCH.l}:"))
     end
   end
