@@ -5,15 +5,15 @@ export default class extends Controller {
   static values = { names: Array }
 
   connect() {
-    console.log("Project search controller connected")
-    console.log("Names data:", this.namesValue)
+    // console.log("Project search controller connected")
+    // console.log("Names data:", this.namesValue)
     this.setupInputListener()
   }
 
   setupInputListener() {
     // Find the autocomplete input using querySelector - no target needed
     const input = this.element.querySelector('input[name="name"]')
-    console.log("Input found:", input)
+    // console.log("Input found:", input)
     if (input) {
       input.addEventListener('input', this.checkMatch.bind(this))
       input.addEventListener('keyup', this.checkMatch.bind(this))
@@ -24,9 +24,9 @@ export default class extends Controller {
 
   checkMatch(event) {
     const inputValue = event.target.value.toLowerCase().trim()
-    console.log("Checking match for:", inputValue)
+    // console.log("Checking match for:", inputValue)
     if (!inputValue) {
-      console.log("checkMatch: Empty input, setting to off")
+      // console.log("checkMatch: Empty input, setting to off")
       this.setStatusLight('off')
       return
     }
@@ -40,7 +40,7 @@ export default class extends Controller {
   }
 
   setStatusLight(state) {
-    console.log("Setting status light to:", state)
+    // console.log("Setting status light to:", state)
 
     // Find status-light controller using Stimulus application
     const statusLightElement = this.element.querySelector('[data-status-light-target="light"]')?.closest('[data-controller*="status-light"]')
@@ -51,7 +51,7 @@ export default class extends Controller {
         statusLightController.setState(state)
       }
     } else {
-      console.log("No status light controller found!")
+      // console.log("No status light controller found!")
     }
   }
 }
