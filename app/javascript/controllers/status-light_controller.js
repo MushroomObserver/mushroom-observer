@@ -1,88 +1,46 @@
 // app/javascript/controllers/status_light_controller.js
 import { Controller } from "@hotwired/stimulus"
 
+// This controller simply updates the status of a "status light", showing
+// whether an input value (possibly autocompleted) matches a set of data.
+// A separate Stimulus controller checks for the match using the dataset
+// sent to that controller. The first of these is "project-search".
 export default class extends Controller {
-  static targets = ["light", "statusText"]
+  // These messages are translatable, and sent as data values from Rails
+  static values = {
+    messages: { type: Object, default: { off: "", red: "", green: "" } }
+  }
+  static targets = ["light", "message"]
 
   connect() {
     this.element.dataset.statusLight = "connected";
     // console.log("Status light controller connected")
-    this.currentState = "off"
-    this.updateStatus()
+    this.validStates = ["off", "red", "green"]
+    this.setStatus("off")
   }
 
-  setRed() {
-    this.lightTarget.className = "status-indicator red"
-    this.currentState = "red"
-    this.updateStatus()
-
-    // Dispatch custom event
-    this.dispatch("changed", { detail: { state: "red" } })
+  // Public method to get current status
+  getStatus() {
+    return this.currentStatus
   }
 
-  setGreen() {
-    this.lightTarget.className = "status-indicator green"
-    this.currentState = "green"
-    this.updateStatus()
+  // Public method to set status programmatically
+  setStatus(status) {
+    // sanity check publicly sendable value
+    if (!this.validStates.includes(status)) return
 
-    // Dispatch custom event
-    this.dispatch("changed", { detail: { state: "green" } })
+    this.currentStatus = status
+    this.lightTarget.classList.remove("off", "red", "green")
+    this.lightTarget.classList.add(status)
+    console.log(this.messagesValue[this.currentStatus])
+    this.messageTarget.textContent = this.messagesValue[this.currentStatus]
   }
 
-  toggle() {
-    if (this.currentState === "off" || this.currentState === "red") {
-      this.setGreen()
-    } else {
-      this.setRed()
-    }
-  }
-
-  turnOff() {
-    this.lightTarget.className = "status-indicator"
-    this.currentState = "off"
-    this.updateStatus()
-
-    // Dispatch custom event
-    this.dispatch("changed", { detail: { state: "off" } })
-  }
-
-  // Public method to get current state
-  getState() {
-    return this.currentState
-  }
-
-  // Public method to set state programmatically
-  setState(state) {
-    switch(state) {
-      case "red":
-        this.setRed()
-        break
-      case "green":
-        this.setGreen()
-        break
-      case "off":
-        this.turnOff()
-        break
-    }
-  }
-
-  // Private method
-  updateStatus() {
-    const statusText = this.currentState.charAt(0).toUpperCase() + this.currentState.slice(1)
-    this.statusTextTarget.textContent = statusText
-  }
-
-  // Example of responding to external events
-  handleExternalEvent(event) {
-    // You can call this from other controllers or JavaScript
-    const { condition } = event.detail
-
-    if (condition === "success") {
-      this.setGreen()
-    } else if (condition === "error") {
-      this.setRed()
-    } else {
-      this.turnOff()
-    }
+  // Callback for externally emitted event "hasMatch",
+  // fired from the project-search or another Stimulus controller
+  // that determines if the input matches some set of data
+  hasMatch(event) {
+    const status = event.detail.status
+    this.setStatus(status)
   }
 }

@@ -1,5 +1,23 @@
 <!-- ERB Template -->
-<div class="status-light-container">
-  <div class="status-indicator" data-status-light-target="light"></div>
-  <span class="status-text"><%= :show_project_has_name.l %></span>
-</div>
+<%
+messages = {
+  off: :show_project_all_names.l,
+  red: :show_project_has_no_name.l,
+  green: :show_project_has_name.l
+}
+%>
+
+<%=
+tag.div(
+  class: "status-light-container",
+  data: { controller: "status-light",
+          action: "project-search:hasMatch@window->status-light#hasMatch",
+          status_light_messages_value: messages }
+) do
+  concat(tag.div(class: "status-indicator",
+                 data: { status_light_target: "light" }))
+  concat(tag.span(:show_project_all_names.l,
+                  class: "status-text",
+                  data: { status_light_target: "message" }))
+end
+%>
