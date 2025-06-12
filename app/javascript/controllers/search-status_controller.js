@@ -2,11 +2,11 @@
 import { Controller } from "@hotwired/stimulus"
 
 // This controller updates the status of a "status light" that shows
-// whether an autocompleted input value matches a set of supplied names.
+// whether an autocompleted input value matches a set of supplied matches.
+// The status light messages are translatable, sent as data values from Rails
 export default class extends Controller {
-  // The status light messages are translatable, sent as data values from Rails
   static values = {
-    names: Array,
+    matches: Array,
     messages: { type: Object, default: { off: "", red: "", green: "" } }
   }
   static targets = ["input", "light", "message"]
@@ -47,9 +47,9 @@ export default class extends Controller {
       return
     }
 
-    // Check if input matches the start of any name in the project
-    const hasMatch = this.namesValue.some(nameObj =>
-      nameObj.text_name.toLowerCase().startsWith(inputValue)
+    // Check if input matches the start of any text_name in the matches
+    const hasMatch = this.matchesValue.some(obj =>
+      obj.text_name.toLowerCase().startsWith(inputValue)
     )
 
     const status = hasMatch ? "green" : "red"

@@ -1,29 +1,29 @@
-<%# locals: (form: nil, names: [], messages: { off: "off", red: "red", green: "green" }) %>
+<%# locals: (form: nil, field: :name, type: :name, matches: [], messages: { off: "off", red: "red", green: "green" }) %>
 
 <%#
-Renders an autocompleter with a "status-light" UI that shows if any
-autocompleted results match the list of supplied names.
-`messages` should be a hash of translated status light messages.
+Renders an autocompleter with a "status-light" UI above it that shows if any
+autocompleted results match the list of supplied matches.
+NOTE: `messages` should be a hash of translated status messages with keys.
 %>
 <%=
 tag.div(
   class: "search-status",
   data: { controller: "search-status",
           search_status_messages_value: messages,
-          search_status_names_value: names }
+          search_status_matches_value: matches }
 ) do
-  concat(
+  [
     tag.div(class: "status-light-container") do
-      concat(tag.div(class: "status-indicator",
-                    data: { search_status_target: "light" }))
-      concat(tag.span(:show_project_all_names.l,
-                      class: "status-text",
-                      data: { search_status_target: "message" }))
-    end
-  )
-  concat(
+      [
+        tag.div(class: "status-indicator",
+                data: { search_status_target: "light" }),
+        tag.span(:show_project_all_names.l,
+                 class: "status-text",
+                 data: { search_status_target: "message" })
+      ].safe_join
+    end,
     autocompleter_field(
-      form:, field: :name, type: :name, label: "#{:SEARCH.l}:",
+      form:, field:, type:, label: "#{:SEARCH.l}:",
       data: {
         search_status_target: "input",
         action: [
@@ -32,6 +32,6 @@ tag.div(
         ].join(" ")
       }
     )
-  )
+  ].safe_join
 end
 %>

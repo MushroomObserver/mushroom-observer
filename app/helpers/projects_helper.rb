@@ -9,7 +9,7 @@ module ProjectsHelper
       green: :show_project_has_name.l
     }
     render(partial: "shared/search_status_autocompleter",
-           locals: { names: project_names(project), messages:, form: })
+           locals: { form:, matches: project_names(project), messages: })
   end
 
   # NOTE: Helper methods are not module-scoped, needs a more specific name
