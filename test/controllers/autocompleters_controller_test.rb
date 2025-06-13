@@ -49,7 +49,7 @@ class AutocompletersControllerTest < FunctionalTestCase
   def test_autocomplete_location
     login("rolf")
     # names of Locations whose names have words starting with "m"
-    locs = Location.where(Location[:name].matches_regexp("\\bM")).
+    locs = Location.where(Location[:name].matches_regexp("\\bModesto")).
            select(:name, :id, :north, :south, :east, :west)
 
     expect = locs.map do |loc|
@@ -59,7 +59,7 @@ class AutocompletersControllerTest < FunctionalTestCase
     expect.unshift({ name: "M", id: 0 })
     expect.sort_by! { |loc| [loc[:name], -loc[:id]] }
     expect.uniq! { |loc| loc[:name] }
-    good_autocompleter_request(type: :location, string: "M")
+    good_autocompleter_request(type: :location, string: "Modesto")
     assert_equivalent(expect, JSON.parse(@response.body))
 
     login("roy") # prefers location_format: :scientific
@@ -73,7 +73,7 @@ class AutocompletersControllerTest < FunctionalTestCase
     expect.unshift({ name: "M", id: 0 })
     expect.sort_by! { |loc| [loc[:name], -loc[:id]] }
     expect.uniq! { |loc| loc[:name] }
-    good_autocompleter_request(type: :location, string: "M")
+    good_autocompleter_request(type: :location, string: "Modesto")
     assert_equivalent(expect, JSON.parse(@response.body))
     login("mary") # prefers location_format: :postal
     good_autocompleter_request(type: :location, string: "Xystus")
