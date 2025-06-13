@@ -3,18 +3,17 @@
 # View Helpers for Projects, Project Violations
 module ProjectsHelper
   def project_search_field(project:, form:)
-    tag.div(class: "project-search",
-            data: {
-              controller: "project-search status-light",
-              project_search_names_value: names(project)
-            }) do
-      concat(render("status_light"))
-      concat(autocompleter_field(form:, field: :name, type: :name,
-                                 label: "#{:SEARCH.l}:"))
-    end
+    messages = {
+      off: :show_project_all_names.l,
+      red: :show_project_has_no_name.l,
+      green: :show_project_has_name.l
+    }
+    render(partial: "shared/search_status_autocompleter",
+           locals: { form:, matches: project_names(project), messages: })
   end
 
-  def names(project)
+  # NOTE: Helper methods are not module-scoped, needs a more specific name
+  def project_names(project)
     project.observations.joins(:name).select("names.text_name", "names.id").
       distinct.order("names.text_name")
   end

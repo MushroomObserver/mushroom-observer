@@ -1,0 +1,37 @@
+<%# locals: (form: nil, field: :name, type: :name, matches: [], messages: { off: "off", red: "red", green: "green" }) %>
+
+<%#
+Renders an autocompleter with a "status-light" UI above it that shows if any
+autocompleted results match the list of supplied matches.
+NOTE: `messages` should be a hash of translated status messages with keys.
+%>
+<%=
+tag.div(
+  class: "search-status",
+  data: { controller: "search-status",
+          search_status_messages_value: messages,
+          search_status_matches_value: matches }
+) do
+  [
+    tag.div(class: "status-light-container") do
+      [
+        tag.div(class: "status-indicator",
+                data: { search_status_target: "light" }),
+        tag.span(:show_project_all_names.l,
+                 class: "status-text",
+                 data: { search_status_target: "message" })
+      ].safe_join
+    end,
+    autocompleter_field(
+      form:, field:, type:, label: "#{:SEARCH.l}:",
+      data: {
+        search_status_target: "input",
+        action: [
+          "change->search-status#checkMatch",
+          "keyup->search-status#checkMatch"
+        ].join(" ")
+      }
+    )
+  ].safe_join
+end
+%>
