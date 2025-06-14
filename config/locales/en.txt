@@ -3461,7 +3461,7 @@
   show_project_field_slip_create: Create Field Slip PDF
   show_project_field_slip_prefix: Field Slip Prefix
   show_project_all_names: All Project Names
-  show_project_has_name: Project has this name
+  show_project_has_name: "Project has matching name:"
   show_project_has_no_name: Project does not have this name
   show_project_join: Join Project
   show_project_location: Location
