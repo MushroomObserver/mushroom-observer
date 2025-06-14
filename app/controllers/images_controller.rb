@@ -36,13 +36,13 @@ class ImagesController < ApplicationController
 
   # Don't show the index if they're asking too much.
   def unfiltered_index_permitted?
-    return true unless too_many_results
+    return true unless too_many_results?
 
     render_too_many_results
     false
   end
 
-  def too_many_results
+  def too_many_results?
     params[:page].to_s.to_i > 1000
   end
 

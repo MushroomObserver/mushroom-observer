@@ -20,7 +20,7 @@
 ################################################################################
 
 FILE = ARGV[0] || File.expand_path("../log/production.log", __dir__)
-NUM  = ARGV[1].to_i || 10
+NUM  = ARGV[1].to_i
 
 data = {}
 File.open(FILE).readlines.each do |line|

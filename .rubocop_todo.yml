@@ -449,7 +449,7 @@ Naming/HeredocDelimiterNaming:
 # ForbiddenPrefixes: is_, has_, have_, does_
 # AllowedMethods: is_a?
 # MethodDefinitionMacros: define_method, define_singleton_method
-Naming/PredicateName:
+Naming/PredicatePrefix:
   Exclude:
     - 'app/classes/eol_data.rb'
     - 'app/classes/pattern_search/observation.rb'

@@ -108,12 +108,12 @@ class API2
     private
 
     def validate_set_location!(params)
-      name = params[:place_name].to_s || return
+      name = params[:place_name].to_s
       make_sure_location_isnt_dubious!(name)
     end
 
     def validate_set_title!(params)
-      title = params[:title].to_s || return
+      title = params[:title].to_s
       return if query.num_results.zero?
       raise(TryingToSetMultipleLocationsToSameName.new) \
         if query.num_results > 1

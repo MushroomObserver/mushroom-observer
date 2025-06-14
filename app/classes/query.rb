@@ -336,7 +336,7 @@ class Query
   delegate :attribute_names, to: :class
 
   # Define has_attribute? here, it doesn't exist yet for ActiveModel.
-  def self.has_attribute?(key) # rubocop:disable Naming/PredicateName
+  def self.has_attribute?(key) # rubocop:disable Naming/PredicatePrefix
     attribute_types.key?(key)
   end
   delegate :has_attribute?, to: :class
