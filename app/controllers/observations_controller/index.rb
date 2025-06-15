@@ -180,7 +180,7 @@ class ObservationsController
       [query, { always_index: true }]
     end
 
-    # Display matrix of Observations attached to a given species list.
+    # Display matrix of Observations attached to a given species_list.
     def species_list
       return unless (
         spl = find_or_goto_index(SpeciesList, params[:species_list].to_s)

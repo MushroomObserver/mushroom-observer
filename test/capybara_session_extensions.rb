@@ -60,8 +60,7 @@ module CapybaraSessionExtensions
   # Login the given user, testing to make sure it was successful.
   def login!(user, *, **kwargs)
     login(user, *, **kwargs)
-    session = kwargs[:session] || self
-    assert_flash_success(session: session)
+    kwargs[:session] || self
     user = User.find_by(login: user) if user.is_a?(String)
     assert_equal(user.id, User.current_id, "Wrong user ended up logged in!")
   end

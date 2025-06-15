@@ -16,7 +16,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     10
   end
 
-  # Score for one species list.
+  # Score for one species_list.
   def v_spl
     5
   end
@@ -293,7 +293,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
       "form:match('action', ?)",
       %r{/observations/\d+/species_lists/#{list.id}/remove},
       { count: observations.size },
-      "Species List owner should get 1 Remove button per Observation"
+      "Observation List owner should get 1 Remove button per Observation"
     )
   end
 
@@ -422,7 +422,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
-  # Test constructing species lists in various ways.
+  # Test constructing species_lists in various ways.
   def test_construct_species_list
     list_title = "List Title"
     params = {
@@ -782,7 +782,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert(spl.name_included(bugs_names.second))
   end
 
-  # Test constructing species lists, tweaking member fields.
+  # Test constructing species_lists, tweaking member fields.
   def test_construct_species_list_with_member_fields
     list_title = "List Title"
     params = {
@@ -844,7 +844,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
   end
 
   # -----------------------------------------------
-  #  Test changing species lists in various ways.
+  #  Test changing species_lists in various ways.
   # -----------------------------------------------
 
   def test_edit_species_list

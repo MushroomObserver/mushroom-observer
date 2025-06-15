@@ -135,12 +135,12 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     end
     # back at Observation
 
-    # Check out species list.
+    # Check out species_list.
     go_back_after do
       list = SpeciesList.joins(:observations).
              where(observations: { id: obs.id }).first
       click_link(list.title)
-      assert_match(/^#{:app_title.l}: Species List: #{list.title}/,
+      assert_match(/^#{:app_title.l}: Observation List: #{list.title}/,
                    page.title, "Wrong page")
 
       # (Make sure observation is shown somewhere.)

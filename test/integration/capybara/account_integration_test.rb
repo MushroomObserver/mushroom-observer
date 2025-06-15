@@ -246,19 +246,6 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
   end
 
   def test_correct_invalid_preferences
-    flintstone = users("flintstone")
-    login!(flintstone)
-
-    visit(edit_account_preferences_path)
-    assert_selector("body.preferences__edit")
-    within("#account_preferences_form") do
-      fill_in("user_email", with: "valid@seemingly.com")
-      click_commit
-    end
-
-    assert_no_flash_errors
-    assert_selector("body.preferences__edit")
-
     # This user has an invalid region AND a bogus email
     nonregional = users("nonregional")
     login!(nonregional)

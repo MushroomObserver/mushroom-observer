@@ -172,6 +172,7 @@ class ApplicationController < ActionController::Base
   # Physically eject robots unless they're looking at accepted pages.
   def kick_out_robots
     return true if params[:controller].start_with?("api")
+    return true if params[:controller] == "account/login"
     return true unless browser.bot?
     return true if Robots.authorized?(browser.ua) &&
                    Robots.action_allowed?(
@@ -373,6 +374,7 @@ class ApplicationController < ActionController::Base
 
   def calc_layout_params
     count = @user&.layout_count || MO.default_layout_count
+    count = 1 if count < 1
     { "count" => count }
   end
   helper_method :calc_layout_params

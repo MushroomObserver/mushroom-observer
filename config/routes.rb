@@ -265,8 +265,10 @@ MushroomObserver::Application.routes.draw do
   #     resources :products
   #   end
 
-  # Default page "/" is /observations ordered order_by: :rss_log
-  root "observations#index"
+  # Default page "/" is the login page to push back on spiders.
+  # Visiting this page as a logged in user now redirects to the /observations
+  # index page.
+  root "account/login#new"
 
   # Route /123 to /observations/123.
   get "obs/:id" => "observations#show", id: /\d+/, as: "permanent_observation"

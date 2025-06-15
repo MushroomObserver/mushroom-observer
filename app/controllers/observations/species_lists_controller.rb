@@ -5,7 +5,7 @@
 # Table of links for dealing with a list of obs line by line, can add or remove
 #
 module Observations
-  # Add or remove one Observation from the Species List
+  # Add or remove one Observation from the Observation List
   class SpeciesListsController < ApplicationController
     before_action :login_required
 
@@ -13,7 +13,7 @@ module Observations
     # :manage_species_lists
     #
     # Form (table of post_button links) to let user add/remove one observation
-    # at a time from a species list. Maybe use param[:commit] like above?
+    # at a time from a species_list. Maybe use param[:commit] like above?
     def edit
       return unless (@observation = find_observation!)
 

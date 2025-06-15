@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 #  *NOTE*: There is some ambiguity between observations and names that makes
-#  this slightly confusing.  The end result of a species list is actually a
+#  this slightly confusing.  The end result of a species_list is actually a
 #  list of Observation's, not Name's.  However, creation and editing is
 #  generally accomplished via Name's alone (although see manage_species_lists
 #  for the one exception).  In the end all these Name's cause rudimentary

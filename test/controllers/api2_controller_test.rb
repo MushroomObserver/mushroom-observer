@@ -205,7 +205,7 @@ class API2ControllerTest < FunctionalTestCase
       thumbnail: images(:turned_over_image).id.to_s,
       projects: "EOL Project",
       code: "EOL-13579",
-      species_lists: "Another Species List"
+      species_lists: "Another Observation List"
     }
     post(:observations, params: params)
     assert_no_api_errors

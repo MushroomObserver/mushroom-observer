@@ -91,7 +91,7 @@ spammer:
   login: spamspamspam
 
 # Has nothing -- No: comments, descriptions, filters, images, locations, names,
-# observations, projects, publications, species lists, herbarium_records, or
+# observations, projects, publications, species_lists, herbarium_records, or
 # anything except account
 zero_user:
   <<: *DEFAULTS
