@@ -31,8 +31,9 @@ inat_importer_inat_import:
   user: inat_importer
   inat_username: inat_importer_inat_username
 
-# katrina is in the middle of an import
-katrina_inat_import:
+timings_import:
   <<: *DEFAULTS
-  user: katrina
   state: <%= InatImport.states[:Importing] %>
+  importables: 6
+  imported_count: 2
+  created_at: <%= 20.seconds.ago %> # 10 secs./import for testing purposes
