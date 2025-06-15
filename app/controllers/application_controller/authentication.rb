@@ -231,7 +231,7 @@ module ApplicationController::Authentication
 
   # Store User in session (id only).
   def session_user_set(user)
-    session[:user_id] = user ? user.id : nil
+    session[:user_id] = user&.id
     user
   end
 
