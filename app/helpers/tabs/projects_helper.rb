@@ -134,10 +134,6 @@ module Tabs
                           project_locations_path(project_id: project.id),
                           "locations")
       end
-      if project.field_slip_prefix
-        tabs << build_tab("#{project.field_slips.length} #{:FIELD_SLIPS.l}",
-                          field_slips_path(project:), "field_slips")
-      end
       tabs
     end
 
@@ -162,6 +158,12 @@ module Tabs
                  link_to(:list_observations_download_as_csv.l,
                          add_query_param(new_observations_download_path, query),
                          styling)]
+      if project.field_slip_prefix
+        buttons << link_to(:show_object.t(type: :field_slips),
+                           field_slips_path(project:),
+                           styling)
+      end
+
       # Download Observations
       content_for(:observation_buttons) do
         tag.div(safe_join(buttons))
