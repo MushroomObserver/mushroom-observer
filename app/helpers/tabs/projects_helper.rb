@@ -123,11 +123,15 @@ module Tabs
     end
 
     def observation_tabs(project)
+      trace_tests
       tabs = []
       if project.observations.any?
         tabs << build_tab("#{project.observations.length} #{:OBSERVATIONS.l}",
                           observations_path(project:),
                           "observations")
+        tabs << build_tab("#{project.species_lists.length} #{:SPECIES_LISTS.l}",
+                          species_lists_path(project:),
+                          "species_lists")
         tabs << build_tab("#{project.name_count} #{:NAMES.l}",
                           checklist_path(project_id: project.id), "checklists")
         tabs << build_tab("#{project.location_count} #{:LOCATIONS.l}",
