@@ -91,9 +91,18 @@ add_project_banner(@project)
   <% end %>
 
   <% if check_permission(@project) %>
-    <%= link_to(:show_project_edit.t,
-                edit_project_path(@project.id),
-                { class: "btn btn-default btn-sm" }) %>
+    <div class="mt-3">
+      <%= link_to(:show_project_edit.t,
+                  edit_project_path(@project.id),
+                  { class: "btn btn-default btn-sm" }) %>
+      <%= link_to("#{@project.user_group.users.count} #{:MEMBERS.l}",
+                  project_members_path(@project.id),
+                  { class: "btn btn-default btn-sm" }) %>
+      <%= link_to("#{@project.aliases.length} #{:PROJECT_ALIASES.l}",
+                  project_aliases_path(project_id: @project.id),
+                  { class: "btn btn-default btn-sm" }) %>
+      <%= violations_button(@project) %>
+    </div>
   <% else %>
     <%= link_to(:show_project_admin_request.t,
                 new_project_admin_request_path(project_id: @project.id),

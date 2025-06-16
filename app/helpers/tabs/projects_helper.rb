@@ -99,30 +99,23 @@ module Tabs
       end
     end
 
-    def violations_tab(project)
+    def violations_button(project)
+      return unless project.constraints?
+
       violations_count = project.count_violations
       classes = if violations_count.zero?
-                  "mt-3 nav-link #{active_tab?("violations") ? "active" : ""}"
+                  "btn btn-default btn-sm"
                 else
-                  "mt-3 nav-link text-warning"
+                  "btn btn-default btn-sm text-warning"
                 end
-
-      tag.li(class: "nav-item") do
-        link_to("#{violations_count} #{:CONSTRAINT_VIOLATIONS.l}",
-                project_violations_path(project_id: project.id),
-                { class: classes })
-      end
+      link_to("#{violations_count} #{:CONSTRAINT_VIOLATIONS.l}",
+              project_violations_path(project_id: project.id),
+              { class: classes })
     end
 
     def project_tabs(project)
       tabs = [build_tab(:SUMMARY.t, project_path(id: project.id), "projects")]
       tabs += observation_tabs(project)
-      tabs << build_tab("#{project.user_group.users.count} #{:MEMBERS.l}",
-                        project_members_path(project.id),
-                        "members")
-      tabs << build_tab("#{project.aliases.length} #{:PROJECT_ALIASES.l}",
-                        project_aliases_path(project_id: project.id), "aliases")
-      tabs << violations_tab(project) if project.constraints?
 
       content_for(:project_tabs) do
         tag.ul(safe_join(tabs), class: "nav nav-tabs")
