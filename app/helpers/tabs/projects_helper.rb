@@ -104,9 +104,9 @@ module Tabs
 
       violations_count = project.count_violations
       classes = if violations_count.zero?
-                  "btn btn-default btn-sm"
+                  "btn btn-default btn-lg"
                 else
-                  "btn btn-default btn-sm text-warning"
+                  "btn btn-default btn-lg text-warning"
                 end
       link_to("#{violations_count} #{:CONSTRAINT_VIOLATIONS.l}",
               project_violations_path(project_id: project.id),
