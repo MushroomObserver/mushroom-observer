@@ -123,7 +123,6 @@ module Tabs
     end
 
     def observation_tabs(project)
-      trace_tests
       tabs = []
       if project.observations.any?
         tabs << build_tab("#{project.observations.length} #{:OBSERVATIONS.l}",
