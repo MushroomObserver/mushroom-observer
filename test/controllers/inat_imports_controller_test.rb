@@ -221,6 +221,7 @@ class InatImportsControllerTest < FunctionalTestCase
     inat_import = inat_imports(:rolf_inat_import)
     assert_equal("Unstarted", inat_import.state,
                  "Need a Unstarted inat_import fixture")
+    inat_ids = "123,456,789"
 
     stub_request(:any, authorization_url)
     login(user.login)
@@ -230,11 +231,13 @@ class InatImportsControllerTest < FunctionalTestCase
       "Authorization request to iNat shouldn't create MO Observation(s)"
     ) do
       post(:create,
-           params: { inat_ids: 123_456_789, inat_username: inat_username,
+           params: { inat_ids: inat_ids, inat_username: inat_username,
                      consent: 1 })
     end
 
     assert_response(:redirect)
+    assert_equal(inat_ids.split(",").length, inat_import.reload.importables,
+                 "Failed to save InatImport.importables")
     assert_equal("Authorizing", inat_import.reload.state,
                  "MO should be awaiting authorization from iNat")
     assert_equal(inat_username, inat_import.inat_username,

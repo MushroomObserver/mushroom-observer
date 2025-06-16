@@ -95,13 +95,7 @@ class InatImportsController < ApplicationController
     return reload_form unless params_valid?
 
     assure_user_has_inat_import_api_key
-    @inat_import = InatImport.find_or_create_by(user: @user)
-    @inat_import.update(state: "Authorizing",
-                        import_all: params[:all],
-                        importables: 0, imported_count: 0,
-                        inat_ids: params[:inat_ids],
-                        inat_username: params[:inat_username].strip,
-                        response_errors: "", token: "", log: [], ended_at: nil)
+    init_ivars
     request_inat_user_authorization
   end
 
@@ -119,6 +113,28 @@ class InatImportsController < ApplicationController
     key = APIKey.find_by(user: @user, notes: MO_API_KEY_NOTES)
     key = APIKey.create(user: @user, notes: MO_API_KEY_NOTES) if key.nil?
     key.verify! if key.verified.nil?
+  end
+
+  def init_ivars
+    @inat_import = InatImport.find_or_create_by(user: @user)
+    @inat_import.update(state: "Authorizing",
+                        import_all: params[:all],
+                        importables: importables_count,
+                        imported_count: 0,
+                        inat_ids: params[:inat_ids],
+                        inat_username: params[:inat_username].strip,
+                        response_errors: "",
+                        token: "",
+                        log: [],
+                        ended_at: nil)
+  end
+
+  # NOTE: jdc 2024-06-15 This method is a quick & dirty way to get
+  # an initial estimate when the user provides a list of iNat ids.
+  # When implementing import_all, we should instead use the iNat API
+  # to get the number of observations to be imported.
+  def importables_count
+    params[:inat_ids].split(",").length
   end
 
   def request_inat_user_authorization
