@@ -1,12 +1,22 @@
 <%
-add_page_title(
-  :species_list_show_title.t(name: @species_list.unique_format_name)
-)
-add_pager_for(@species_list)
-add_interest_icons(@user, @species_list)
-add_context_nav(species_list_show_tabs(list: @species_list, query: @query))
-@container = :text_image
+  if @project
+    add_project_banner(@project)
+    @container = :wide
+  else
+    add_page_title(
+      :species_list_show_title.t(name: @species_list.unique_format_name)
+    )
+    add_context_nav(species_list_show_tabs(list: @species_list, query: @query))
+    @container = :text_image
+    add_pager_for(@species_list)
+    add_interest_icons(@user, @species_list)
+  end
 %>
+
+<%= panel_block(id: "list_search") do %>
+  <%= render(partial: "shared/search",
+             locals: { object: @species_list }) %>
+<% end %>
 
 <div class="container-text">
   <%= panel_block do %>
