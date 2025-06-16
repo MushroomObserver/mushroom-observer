@@ -70,6 +70,7 @@ class SpeciesListsController < ApplicationController
     return unless project
 
     query = create_query(:SpeciesList, projects: project)
+    @project = project
     [query, { always_index: true }]
   end
 

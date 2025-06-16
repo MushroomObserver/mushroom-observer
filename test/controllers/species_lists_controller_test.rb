@@ -230,8 +230,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login
     get(:index, params: { project: project.id })
 
-    assert_displayed_title(:SPECIES_LISTS.l)
-    assert_displayed_filters("#{:query_projects.l}: #{project.title}")
+    assert_displayed_title(project.title)
+    assert_match(project.species_lists.first.title, @response.body)
   end
 
   def test_index_for_project_with_no_lists
@@ -241,7 +241,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     get(:index, params: { project: project.id })
 
     assert_response(:success)
-    assert_displayed_title(:SPECIES_LISTS.l)
+    assert_displayed_title(project.title)
     assert_flash_text(:runtime_no_matches.l(types: :species_lists))
   end
 

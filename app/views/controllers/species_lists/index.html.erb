@@ -1,7 +1,13 @@
 <%
-add_index_title(@query)
-add_sorter(@query, species_lists_index_sorts(query: @query))
-flash_error(@error) if @error && @objects.empty?
+  if @project
+    add_project_banner(@project)
+    @container = :wide
+  else
+    add_index_title(@query)
+    @container = :full
+  end
+  add_sorter(@query, species_lists_index_sorts(query: @query))
+  flash_error(@error) if @error && @objects.empty?
 %>
 
 <%= pagination_nav(@pagination_data) do %>
