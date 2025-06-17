@@ -51,13 +51,6 @@
 <%= pagination_nav(@pagination_data) do %>
   <div class="list-group">
 
-    <div class="list-group-item default">
-      <%= :species_list_show_members.t %>:
-      <%= species_list_observations_tabs(@species_list, @query).map do |tab|
-          link_to(*tab)
-        end.safe_join(" | ") %>
-    </div>
-
     <% if @objects.any? %>
       <% @objects.each do |observation| %>
         <div class="list-group-item">
