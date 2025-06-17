@@ -149,22 +149,65 @@ module Tabs
       current_tab == tab_name
     end
 
+    def project_species_list_buttons(list, query)
+      return unless list
+
+      [project_species_list_map_button(query),
+       project_species_list_observations_button(query),
+       project_species_list_names_button(list),
+       project_species_list_locations_button(query),
+       project_species_list_images_button(query)]
+    end
+
+    def button_link(title, path)
+      styling = { class: "btn btn-default btn-lg my-3 mr-3" }
+      link_to(title, path, styling)
+    end
+
+    def project_species_list_map_button(query)
+      button_link(:show_object.t(type: :map),
+                  add_query_param(map_observations_path, query))
+    end
+
+    def project_species_list_observations_button(query)
+      button_link(:show_object.t(type: :observations),
+                  add_query_param(observations_path, query))
+    end
+
+    def project_species_list_names_button(list)
+      button_link(:show_object.t(type: :names),
+                  checklist_path(species_list_id: list.id))
+    end
+
+    def project_species_list_locations_button(query)
+      return unless query && Query.related?(:Location, :Observation)
+
+      button_link(:show_object.t(type: :locations),
+                  InternalLink::RelatedQuery.new(Location, :Observation,
+                                                 query, controller).url)
+    end
+
+    def project_species_list_images_button(query)
+      return unless query && Query.related?(:Location, :Observation)
+
+      button_link(:show_object.t(type: :images),
+                  InternalLink::RelatedQuery.new(Image, :Observation,
+                                                 query, controller).url)
+    end
+
     def project_observation_buttons(project, query)
       return unless project
 
       img_name, img_link, = related_images_tab(:Observation, query)
-      styling = { class: "btn btn-default btn-lg my-3 mr-3" }
-      buttons = [link_to(:show_object.t(type: :map),
-                         map_observations_path(q: get_query_param(query)),
-                         styling),
-                 link_to(img_name, img_link, styling),
-                 link_to(:list_observations_download_as_csv.l,
-                         add_query_param(new_observations_download_path, query),
-                         styling)]
+      buttons = [
+        button_link(:show_object.t(type: :map),
+                    map_observations_path(q: get_query_param(query))),
+        button_link(img_name, img_link),
+        button_link(:list_observations_download_as_csv.l,
+                    add_query_param(new_observations_download_path, query))]
       if project.field_slip_prefix
-        buttons << link_to(:show_object.t(type: :field_slips),
-                           field_slips_path(project:),
-                           styling)
+        buttons << button_link(:show_object.t(type: :field_slips),
+                               field_slips_path(project:))
       end
 
       # Download Observations

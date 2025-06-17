@@ -20,7 +20,13 @@
 
 <div class="container-text">
   <%= panel_block do %>
-    <div><b><%= :WHEN.t %>:</b> <%= @species_list.when.web_date %></div>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div><b><%= :WHEN.t %>:</b> <%= @species_list.when.web_date %></div>
+      <div>
+        <%= obs_change_links(@species_list) %> |
+        <%= download_button(target: @species_list, icon: :download) %>
+      </div>
+    </div>
     <div><b><%= :OBSERVATIONS.t %>:</b> <%= @query.num_results %></div>
     <div><b><%= :WHERE.t %>:</b>
       <%= location_link(@species_list.where, @species_list.location, nil, true) rescue :UNKNOWN.t %>
@@ -39,6 +45,8 @@
 
 <% if @pagination_data.any?
   query_params_set(@query) %>
+
+<%= project_species_list_buttons(@species_list, @query).safe_join %>
 
 <%= pagination_nav(@pagination_data) do %>
   <div class="list-group">

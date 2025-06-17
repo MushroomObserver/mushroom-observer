@@ -14,6 +14,10 @@ class InternalLink
     [@title, @url, @html_options]
   end
 
+  def url
+    @url
+  end
+
   private
 
   def html_class
