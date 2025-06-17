@@ -189,7 +189,7 @@ class InatImportJob < ApplicationJob
     # NOTE: update field slip 2024-09-09 jdc
     # https://github.com/MushroomObserver/mushroom-observer/issues/2380
     update_inat_observation
-    increment_imported_count
+    increment_imported_counts
   end
 
   def create_observation
@@ -434,8 +434,9 @@ class InatImportJob < ApplicationJob
     @inat_obs[:user][:login] != @inat_import.inat_username
   end
 
-  def increment_imported_count
-    @inat_import.increment!(:imported_count)
+  def increment_imported_counts
+    @inat_import.increment!(:imported_count) # count in this job
+    @inat_import.increment!(:total_imports) # all-time count
   end
 
   def update_user_inat_username

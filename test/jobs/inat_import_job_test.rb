@@ -33,12 +33,11 @@ class InatImportJobTest < ActiveJob::TestCase
                           name: "Sevier Co., Tennessee, USA",
                           north: 36.043571, south: 35.561849,
                           east: -83.253046, west: -83.794123)
-
-    stub_inat_interactions
-
     QueuedEmail.queue = true
     before_emails_to_user = QueuedEmail.where(to_user: @user).count
+    before_total_imports = @inat_import.total_imports.to_i
 
+    stub_inat_interactions
     assert_difference("Observation.count", 1,
                       "Failed to create observation") do
       InatImportJob.perform_now(@inat_import)
@@ -73,6 +72,9 @@ class InatImportJobTest < ActiveJob::TestCase
       "Should not have sent any emails to importing user for this obs"
     )
     QueuedEmail.queue = false
+
+    assert_equal(before_total_imports + 1, @inat_import.reload.total_imports,
+                 "Failed to update user's inat_import count")
   end
 
   # Prove (inter alia) that the MO Naming.user differs from the importing user
