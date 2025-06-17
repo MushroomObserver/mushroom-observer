@@ -204,7 +204,8 @@ module Tabs
                     map_observations_path(q: get_query_param(query))),
         button_link(:IMAGES.l, img_link),
         button_link(:DOWNLOAD.l,
-                    add_query_param(new_observations_download_path, query))]
+                    add_query_param(new_observations_download_path, query))
+      ]
       if project.field_slip_prefix
         buttons << button_link(:FIELD_SLIPS.t,
                                field_slips_path(project:))

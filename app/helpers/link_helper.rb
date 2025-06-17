@@ -256,7 +256,10 @@ module LinkHelper
   def download_button(target:, name: :DOWNLOAD.t, **args)
     # necessary if nil/empty string passed
     name = :DOWNLOAD.t if name.blank?
-    path, identifier, icon, content = button_atts(:download, new_species_list_download_path(id: target.id), args, name)
+    path, identifier, icon, content = button_atts(
+      :download,
+      new_species_list_download_path(id: target.id), args, name
+    )
 
     html_options = {
       class: class_names(identifier, args[:class]), # usually also btn
