@@ -17,7 +17,7 @@ tag.div(
       [
         tag.div(class: "status-indicator",
                 data: { search_status_target: "light" }),
-        tag.span(:show_project_all_names.l,
+        tag.span(:search_status_all_names.l(type:),
                  class: "status-text",
                  data: { search_status_target: "message" })
       ].safe_join

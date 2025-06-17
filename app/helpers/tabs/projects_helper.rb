@@ -104,7 +104,9 @@ module Tabs
 
       violations_count = project.count_violations
       classes = if violations_count.zero?
-                  "btn btn-default btn-lg #{"active" if active_tab?("violations")}"
+                  "btn btn-default btn-lg #{if active_tab?("violations")
+                                              "active"
+                                            end}"
                 else
                   "btn btn-default btn-lg text-warning"
                 end
