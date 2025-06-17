@@ -9,12 +9,13 @@
 #  ended_at::        when the job was Done
 #  token::           code, authenticity token, or JWT supplied by iNat
 #  inat_ids::        string of id's of iNat obss to be imported
-#  inat_username::   iNat login
+#  inat_username::   this user's iNat login
 #  import_all:       whether to import all of user's relevant iNat observations
-#  importables::     # of importable observations
+#  importables::     number of importable observations
 #  imported_count::  running count of iNat obss imported in the associated job
 #  response_errors:: string of newline-separated error messages
-#  log::             serialized log of inat import job
+#  total_imports::   all-time count of iNat obss imported by this user
+#  total_time::      all-time seconds this user spent importing iNat obss
 #
 class InatImport < ApplicationRecord
   enum :state, {
@@ -41,6 +42,7 @@ class InatImport < ApplicationRecord
     save
   end
 
+  # Users who can import others users' iNat observations
   def self.super_importers
     Project.find_by(title: "SuperImporters").user_group.users
   end
