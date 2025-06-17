@@ -12,12 +12,6 @@ add_project_banner(@project)
 <%= panel_block(id: "project_summary") do %>
   <%= tag.p(@project.summary.to_s.html_safe.tpl) %>
 
-  <% if @project.species_lists.any? %>
-    <p><b><%= :SPECIES_LISTS.t %>:</b>
-      <%= @project.species_lists.length %>
-      (<%= link_to(:SHOW.t, species_lists_path(project: @project.id)) %>)
-    </p>
-  <% end %>
   <% if @drafts.any? %>
     <p><b><%= :show_project_drafts.t %>:</b>
       <%= @drafts.length %><br />
