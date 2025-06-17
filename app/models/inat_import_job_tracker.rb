@@ -32,7 +32,7 @@ class InatImportJobTracker < ApplicationRecord
     time_in_hours_minutes_seconds(seconds)
   end
 
-  def remaining_time
+  def estimated_remaining_time
     # Can't calculate remaining time until we've imported at least one obs
     return "" unless imported_count&.positive?
 
