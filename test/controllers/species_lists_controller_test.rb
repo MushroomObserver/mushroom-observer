@@ -330,7 +330,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login("rolf")
     get(:show, params: { id: spl.id })
     assert_select("a[href*=?]", edit_species_list_path(spl.id), count: 0)
-    assert_select("form[action=?]", species_list_path(spl.id), count: 1)
+    assert_select("form[action=?]", search_status_path, count: 1)
     get(:edit, params: { id: spl.id })
     assert_response(:redirect)
     delete(:destroy, params: { id: spl.id })

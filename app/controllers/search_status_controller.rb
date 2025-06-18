@@ -13,7 +13,8 @@ class SearchStatusController < ApplicationController
     @field_slip_code = find_code(@project, params[:field_slip])
     # Need to pass @project, @species_list, params[:name], params[:name_id]
     if @field_slip_code
-      redirect_to("#{MO.http_domain}/qr/#{@field_slip_code.strip}")
+      redirect_to("#{MO.http_domain}/qr/#{@field_slip_code.strip}",
+                  code: @field_slip_code)
     else
       redirect_to(new_observation_path)
     end
