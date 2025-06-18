@@ -691,6 +691,9 @@ MushroomObserver::Application.routes.draw do
         to: "search#advanced", via: [:get, :post], id: /\d+/,
         as: "search_advanced")
 
+  # ----- Seartch status: standard actions ---------------------------------------
+  post 'search_status', to: 'search_status#add'
+
   # ----- Sequences: standard actions ---------------------------------------
   resources :sequences, id: /\d+/
 
