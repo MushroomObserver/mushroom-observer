@@ -10,11 +10,15 @@ class SearchStatusController < ApplicationController
   def add
     @project = Project.find(params[:project])
     @species_list = find_species_list
-    @field_slip_code = find_code(@project, params[:field_slip])
+    @field_slip_code = find_code(@project, params[:field_slip])&.strip
     # Need to pass @project, @species_list, params[:name], params[:name_id]
+    qr_params = {
+      species_list: @species_list&.id,
+      name: params[:name],
+      name_id: params[:name_id]
+    }.compact_blank.to_query
     if @field_slip_code
-      redirect_to("#{MO.http_domain}/qr/#{@field_slip_code.strip}",
-                  code: @field_slip_code)
+      redirect_to("#{MO.http_domain}/qr/#{@field_slip_code}?#{qr_params}")
     else
       redirect_to(new_observation_path)
     end
