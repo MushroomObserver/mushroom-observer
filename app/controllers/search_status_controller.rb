@@ -7,7 +7,6 @@ class SearchStatusController < ApplicationController
   before_action :login_required
   before_action :pass_query_params
 
-  # Redirects back to show_project.
   def add
     @project = Project.find(params[:project])
     @species_list = find_species_list
