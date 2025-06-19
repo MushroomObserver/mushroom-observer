@@ -361,7 +361,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     project = projects(:bolete_project)
     code = "#{project.field_slip_prefix}-1235"
     get(:show, params: { id: code })
-    assert_redirected_to(new_field_slip_url(code: code))
+    assert_redirected_to(new_field_slip_url(code: code, id: code))
   end
 
   def test_should_get_edit
