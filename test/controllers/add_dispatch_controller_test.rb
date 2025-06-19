@@ -28,7 +28,7 @@ class AddDispatchControllerTest < FunctionalTestCase
   end
 
   # Test with field slip code
-  def test_new_with_field_slip_code_creates_QR_URL
+  def test_new_with_field_slip_code_creates_qr_url
     field_slip_code = "ABC-123"
     get(:new, params: {
           project: @project.id,
@@ -106,7 +106,7 @@ class AddDispatchControllerTest < FunctionalTestCase
     redirect_url = response.location
     uri = URI.parse(redirect_url)
     redirect_params = CGI.parse(uri.query)
-    
+
     assert_equal(new_observation_path, uri.path)
     assert_equal([@project.id.to_s], redirect_params["project"])
     assert_equal([name], redirect_params["name"])
@@ -131,7 +131,7 @@ class AddDispatchControllerTest < FunctionalTestCase
     redirect_url = response.location
     uri = URI.parse(redirect_url)
     redirect_params = CGI.parse(uri.query)
-    
+
     assert_equal("/qr/#{field_slip_code}", uri.path)
     assert_equal([@project.id.to_s], redirect_params["project"])
     assert_equal([@species_list.id.to_s], redirect_params["species_list"])
