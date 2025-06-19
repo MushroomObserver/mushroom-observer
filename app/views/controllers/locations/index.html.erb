@@ -14,7 +14,7 @@ add_sorter(@query, locations_index_sorts(query: @query), link_all: all_links)
 
 @known_data  = @objects
 
-observation_counts = calc_counts(@objects)
+observation_counts = calc_counts(@objects, @query)
 flash_error(@error) if @error && @known_pages.empty? && @undef_pages.empty?
 %>
 
