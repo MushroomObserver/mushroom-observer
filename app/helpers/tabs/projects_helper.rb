@@ -103,13 +103,12 @@ module Tabs
       return unless project.constraints?
 
       violations_count = project.count_violations
-      classes = if violations_count.zero?
-                  "btn btn-default btn-lg #{if active_tab?("violations")
-                                              "active"
-                                            end}"
-                else
-                  "btn btn-default btn-lg text-warning"
-                end
+      btn_type = if violations_count.positive?
+                   "btn-warning"
+                 else
+                   "btn-default"
+                 end
+      classes = "btn btn-lg #{btn_type}"
       link_to("#{violations_count} #{:CONSTRAINT_VIOLATIONS.l}",
               project_violations_path(project_id: project.id),
               { class: classes })

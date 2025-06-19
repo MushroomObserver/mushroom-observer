@@ -297,6 +297,15 @@ class SpeciesListsControllerTest < FunctionalTestCase
     )
   end
 
+  def test_show_species_list_for_project
+    login
+    spl = species_lists(:reused_list)
+    project = spl.projects[0]
+
+    get(:show, params: { id: spl.id, project: project.id })
+    assert_match(project.title, @response.body)
+  end
+
   def test_show_species_lists_attached_to_projects
     login
     proj1 = projects(:eol_project)
