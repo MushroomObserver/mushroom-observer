@@ -5,16 +5,22 @@
   flex-direction: row;
   align-items: center;
   gap: 8px;
-  padding: 20px;
+  padding: 4px;
 }
 
 .status-indicator {
-  width: 20px;
-  height: 20px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  border: 2px solid #ccc;
+  border: 2px solid $BODY_BG_COLOR;
   transition: all 0.3s ease;
   flex-shrink: 0;
+
+  &.off {
+    background: $INPUT_BORDER_COLOR;
+    border-color: $INPUT_BORDER_COLOR;
+    box-shadow: 0 0 8px $INPUT_BG_COLOR;
+  }
 
   &.red {
     background: $DANGER_BORDER_COLOR;

@@ -70,6 +70,7 @@ class SpeciesListsController < ApplicationController
     return unless project
 
     query = create_query(:SpeciesList, projects: project)
+    @project = project
     [query, { always_index: true }]
   end
 
@@ -99,6 +100,7 @@ class SpeciesListsController < ApplicationController
     pass_query_params
     return unless (@species_list = find_species_list!)
 
+    @project = Project.safe_find(params[:project])
     case params[:flow]
     when "next"
       redirect_to_next_object(:next, SpeciesList, params[:id]) and return

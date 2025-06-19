@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class InternalLink
+  attr_reader :url
+
   def initialize(title, url, html_options: {}, alt_title: nil)
     @title = title
     @alt_title = alt_title

@@ -14,12 +14,12 @@ add_sorter(@query, locations_index_sorts(query: @query), link_all: all_links)
 
 @known_data  = @objects
 
-observation_counts = calc_counts(@objects)
+observation_counts = calc_counts(@objects, @query)
 flash_error(@error) if @error && @known_pages.empty? && @undef_pages.empty?
 %>
 
 <div class="mt-3">
-  <%= :list_place_names_popularity.t %>
+  <%= :list_place_names_popularity.t if @objects.count > 1 %>
   <%= :list_place_names_parenthetical.t %>
 </div>
 
