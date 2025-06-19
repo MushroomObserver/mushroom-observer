@@ -33,15 +33,16 @@ class InatImportJobTracker < ApplicationRecord
 
   def estimated_remaining_time
     # Can't calculate remaining time until we've imported at least one obs
-    return "" unless imported_count&.positive?
+    return nil unless imported_count&.positive?
 
     remaining_importables = importables - imported_count
     cumulative_avg_import_time = elapsed_seconds / imported_count
     (remaining_importables * cumulative_avg_import_time).to_i
-    # time_in_hours_minutes_seconds(seconds)
   end
 
   def time_in_hours_minutes_seconds(seconds)
+    return "Calculating..." if seconds.nil?
+
     hours = seconds / 3600
     minutes = (seconds % 3600) / 60
     seconds %= 60

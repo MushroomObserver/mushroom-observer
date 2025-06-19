@@ -75,6 +75,8 @@ class InatImportJobTest < ActiveJob::TestCase
 
     assert_equal(before_total_imports + 1, @inat_import.reload.total_imports,
                  "Failed to update user's inat_import count")
+    assert(@inat_import.total_time.to_i.positive?,
+           "Failed to update user's inat_import total_time")
   end
 
   # Prove (inter alia) that the MO Naming.user differs from the importing user
@@ -93,6 +95,7 @@ class InatImportJobTest < ActiveJob::TestCase
     @mock_inat_response = JSON.generate(parsed_response)
     @parsed_results = parsed_response[:results]
     @inat_import = create_inat_import
+    InatImportJobTracker.create(inat_import: @inat_import.id)
 
     # Add objects which are not included in fixtures
     Name.create(
@@ -448,7 +451,8 @@ class InatImportJobTest < ActiveJob::TestCase
                                      inat_ids: "231104466,195434438",
                                      token: "MockCode",
                                      inat_username: "anything")
-
+    # update the tracker's inat_import accordingly
+    InatImportJobTracker.update(inat_import: @inat_import.id)
     stub_inat_interactions
 
     assert_difference("Observation.count", 2,
@@ -467,6 +471,7 @@ class InatImportJobTest < ActiveJob::TestCase
                                      import_all: true,
                                      token: "MockCode",
                                      inat_username: "anything")
+    InatImportJobTracker.create(inat_import: @inat_import.id)
     # limit it to one page to avoid complications of stubbing multiple
     # inat api requests with multiple files
     @mock_inat_response = limited_to_first_page(mock_inat_response)
@@ -549,6 +554,7 @@ class InatImportJobTest < ActiveJob::TestCase
     @parsed_results =
       JSON.parse(@mock_inat_response, symbolize_names: true)[:results]
     @inat_import = create_inat_import
+    InatImportJobTracker.create(inat_import: @inat_import.id)
   end
 
   # The InatImport object which is created in InatImportController#create
