@@ -16,11 +16,13 @@ module LocationsHelper
 
   def calc_counts(locations, query)
     list = find_species_list(query)
-    return Observation.where(location: locations).group(:location_id).count unless list
+    unless list
+      return Observation.where(location: locations).group(:location_id).count
+    end
 
-    Observation.joins(:species_lists)
-      .where(location: locations, species_lists: { id: list })
-      .group(:location_id).count
+    Observation.joins(:species_lists).
+      where(location: locations, species_lists: { id: list }).
+      group(:location_id).count
   end
 
   def find_species_list(query)
