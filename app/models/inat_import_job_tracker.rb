@@ -28,8 +28,7 @@ class InatImportJobTracker < ApplicationRecord
                else
                  Time.zone.now
                end
-    seconds = (end_time - created_at).to_i
-    time_in_hours_minutes_seconds(seconds)
+    end_time - created_at
   end
 
   def estimated_remaining_time
@@ -38,9 +37,15 @@ class InatImportJobTracker < ApplicationRecord
 
     remaining_importables = importables - imported_count
     cumulative_avg_import_time = elapsed_seconds / imported_count
-    seconds =
-      (remaining_importables * cumulative_avg_import_time).to_i
-    time_in_hours_minutes_seconds(seconds)
+    (remaining_importables * cumulative_avg_import_time).to_i
+    # time_in_hours_minutes_seconds(seconds)
+  end
+
+  def time_in_hours_minutes_seconds(seconds)
+    hours = seconds / 3600
+    minutes = (seconds % 3600) / 60
+    seconds %= 60
+    format("%02d:%02d:%02d", hours, minutes, seconds)
   end
 
   def error_caption
@@ -64,12 +69,5 @@ class InatImportJobTracker < ApplicationRecord
                  Time.zone.now
                end
     (end_time - created_at).to_i
-  end
-
-  def time_in_hours_minutes_seconds(seconds)
-    hours = seconds / 3600
-    minutes = (seconds % 3600) / 60
-    seconds %= 60
-    format("%02d:%02d:%02d", hours, minutes, seconds)
   end
 end

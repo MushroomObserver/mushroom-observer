@@ -16,9 +16,11 @@ class InatImportJobTrackerTest < ActiveSupport::TestCase
 
     travel_to(created + (imported * seconds_per_import).seconds) do
       assert_equal("00:00:#{imported * seconds_per_import}",
-                   tracker.elapsed_time)
+                   tracker.time_in_hours_minutes_seconds(tracker.elapsed_time))
       assert_equal("00:00:#{remaining * seconds_per_import}",
-                   tracker.estimated_remaining_time)
+                   tracker.time_in_hours_minutes_seconds(
+                     tracker.estimated_remaining_time
+                   ))
     end
   end
 end
