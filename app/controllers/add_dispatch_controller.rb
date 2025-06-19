@@ -10,7 +10,7 @@ class AddDispatchController < ApplicationController
   before_action :pass_query_params
 
   def new
-    @project = Project.find(params[:project])
+    @project = Project.safe_find(params[:project])
     @field_slip_code = find_code(@project, params[:field_slip])&.strip
     url = if @field_slip_code
             "#{MO.http_domain}/qr/#{@field_slip_code}"
@@ -18,9 +18,9 @@ class AddDispatchController < ApplicationController
             new_observation_path
           end
     new_params = dispatch_params
-    return url if new_params.blank?
+    url = "#{url}?#{new_params}" if new_params.present?
 
-    "#{url}?#{new_params}"
+    redirect_to(url)
   end
 
   private
@@ -34,7 +34,7 @@ class AddDispatchController < ApplicationController
 
   def dispatch_params
     {
-      project: @project.id,
+      project: @project&.id,
       species_list: find_species_list&.id,
       name: params[:name],
       name_id: params[:name_id]
