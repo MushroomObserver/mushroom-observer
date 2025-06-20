@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 # Encapsulates a single user's iNatImport
+# and glues Job and Track to each other (and to Import)
 #
 # == Attributes
 #
