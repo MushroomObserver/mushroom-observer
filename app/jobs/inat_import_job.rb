@@ -446,7 +446,7 @@ class InatImportJob < ApplicationJob
 
   def increment_imported_counts
     @inat_import.increment!(:imported_count) # count in this job
-    @inat_import.increment!(:total_imports) # all-time count
+    @inat_import.increment!(:total_imported_count) # all-time count
   end
 
   def update_user_inat_username

@@ -10,7 +10,7 @@ DEFAULTS: &DEFAULTS
   importables: 0
   imported_count: 0
   response_errors: ""
-  total_imports: nil
+  total_imported_count: nil
   total_time: nil
 
 rolf_inat_import:

@@ -35,7 +35,7 @@ class InatImportJobTest < ActiveJob::TestCase
                           east: -83.253046, west: -83.794123)
     QueuedEmail.queue = true
     before_emails_to_user = QueuedEmail.where(to_user: @user).count
-    before_total_imports = @inat_import.total_imports.to_i
+    before_total_imported_count = @inat_import.total_imported_count.to_i
 
     stub_inat_interactions
     assert_difference("Observation.count", 1,
@@ -73,7 +73,8 @@ class InatImportJobTest < ActiveJob::TestCase
     )
     QueuedEmail.queue = false
 
-    assert_equal(before_total_imports + 1, @inat_import.reload.total_imports,
+    assert_equal(before_total_imported_count + 1,
+                 @inat_import.reload.total_imported_count,
                  "Failed to update user's inat_import count")
     assert(@inat_import.total_time.to_i.positive?,
            "Failed to update user's inat_import total_time")
