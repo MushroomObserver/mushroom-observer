@@ -13,10 +13,13 @@ DEFAULTS: &DEFAULTS
   total_imported_count: nil
   total_seconds: nil
 
+# has no import history
 rolf_inat_import:
   <<: *DEFAULTS
   user: rolf
   inat_username: rolf_inat_username
+  total_imported_count: nil
+  total_seconds: nil
 
 dick_inat_import:
   <<: *DEFAULTS
