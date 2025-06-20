@@ -76,8 +76,8 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_equal(before_total_imported_count + 1,
                  @inat_import.reload.total_imported_count,
                  "Failed to update user's inat_import count")
-    assert(@inat_import.total_time.to_i.positive?,
-           "Failed to update user's inat_import total_time")
+    assert(@inat_import.total_seconds.to_i.positive?,
+           "Failed to update user's inat_import total_seconds")
   end
 
   # Prove (inter alia) that the MO Naming.user differs from the importing user

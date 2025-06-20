@@ -11,7 +11,7 @@ DEFAULTS: &DEFAULTS
   imported_count: 0
   response_errors: ""
   total_imported_count: nil
-  total_time: nil
+  total_seconds: nil
 
 rolf_inat_import:
   <<: *DEFAULTS

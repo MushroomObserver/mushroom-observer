@@ -78,7 +78,7 @@ class InatImportJob < ApplicationJob
     @inat_import.update(
       state: "Done", ended_at: Time.zone.now,
       # Add at least a second to total_
-      total_time: @inat_import.total_time.to_i + elapsed
+      total_seconds: @inat_import.total_seconds.to_i + elapsed
     )
   end
 

@@ -15,8 +15,8 @@
 #  importables::           number of importable observations in job
 #  imported_count::        running count of iNat obss imported in associated job
 #  response_errors::       string of newline-separated error messages
-#  total_imported_count::  all-time count of iNat obss imported by this user
-#  total_time::            all-time seconds this user spent importing iNat obss
+#  total_imported_count::  historical count of iNat obss imported by this user
+#  total_seconds::         all-time seconds this user spent importing iNat obss
 #
 class InatImport < ApplicationRecord
   enum :state, {
