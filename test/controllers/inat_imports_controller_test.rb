@@ -217,7 +217,7 @@ class InatImportsControllerTest < FunctionalTestCase
 
   def test_create_authorization_request
     user = users(:rolf)
-    inat_username = "rolf"
+    inat_username = "rolf" # use different inat_username to test if it's updated
     inat_import = inat_imports(:rolf_inat_import)
     assert_equal("Unstarted", inat_import.state,
                  "Need a Unstarted inat_import fixture")
