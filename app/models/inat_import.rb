@@ -77,7 +77,7 @@ class InatImport < ApplicationRecord
   end
 
   def personal_initial_avg_import_seconds
-    total_imported_count / total_seconds
+    total_seconds / total_imported_count
   end
 
   def system_import_history?
@@ -85,6 +85,6 @@ class InatImport < ApplicationRecord
   end
 
   def system_initial_avg_import_seconds
-    InatImport.sum(:total_imported_count) / InatImport.sum(:total_seconds)
+    InatImport.sum(:total_seconds) / InatImport.sum(:total_imported_count)
   end
 end
