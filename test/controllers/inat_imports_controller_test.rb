@@ -221,6 +221,8 @@ class InatImportsControllerTest < FunctionalTestCase
     inat_import = inat_imports(:rolf_inat_import)
     assert_equal("Unstarted", inat_import.state,
                  "Need a Unstarted inat_import fixture")
+    assert_equal(0, inat_import.total_imported_count.to_i,
+                 "Test needs InatImport fixture without prior imports")
     inat_ids = "123,456,789"
 
     stub_request(:any, authorization_url)
@@ -240,6 +242,10 @@ class InatImportsControllerTest < FunctionalTestCase
                  "Failed to save InatImport.importables")
     assert_equal("Authorizing", inat_import.reload.state,
                  "MO should be awaiting authorization from iNat")
+    assert_equal(
+      InatImport.sum(:total_seconds) / InatImport.sum(:total_imported_count),
+      inat_import.avg_import_time
+    )
     assert_equal(inat_username, inat_import.inat_username,
                  "Failed to save InatImport.inat_username")
   end

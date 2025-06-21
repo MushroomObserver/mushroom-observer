@@ -117,16 +117,19 @@ class InatImportsController < ApplicationController
 
   def init_ivars
     @inat_import = InatImport.find_or_create_by(user: @user)
-    @inat_import.update(state: "Authorizing",
-                        import_all: params[:all],
-                        importables: importables_count,
-                        imported_count: 0,
-                        inat_ids: params[:inat_ids],
-                        inat_username: params[:inat_username].strip,
-                        response_errors: "",
-                        token: "",
-                        log: [],
-                        ended_at: nil)
+    @inat_import.update(
+      state: "Authorizing",
+      import_all: params[:all],
+      importables: importables_count,
+      imported_count: 0,
+      avg_import_time: @inat_import.initial_avg_import_seconds,
+      inat_ids: params[:inat_ids],
+      inat_username: params[:inat_username].strip,
+      response_errors: "",
+      token: "",
+      log: [],
+      ended_at: nil
+    )
   end
 
   # NOTE: jdc 2024-06-15 This method is a quick & dirty way to get
