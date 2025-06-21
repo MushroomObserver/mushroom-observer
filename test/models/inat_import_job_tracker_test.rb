@@ -3,24 +3,19 @@
 require "test_helper"
 
 class InatImportJobTrackerTest < ActiveSupport::TestCase
-  # test "the truth" do
-  #   assert true
-  # end
-  def test_timings
-    tracker = inat_import_job_trackers(:timings_tracker)
-    inat_import = inat_imports(:timings_import)
-    imported = inat_import.imported_count
-    remaining = inat_import.importables - imported
-    seconds_per_import = 10
-    created = tracker.created_at
+  def test_elapsed_and_remaining_time
+    import = inat_imports(:rolf_inat_import)
+    import.update(avg_import_time: import.initial_avg_import_seconds)
+    tracker = InatImportJobTracker.find_or_create_by(inat_import: import.id)
 
-    travel_to(created + (imported * seconds_per_import).seconds) do
-      assert_equal("00:00:#{imported * seconds_per_import}",
-                   tracker.time_in_hours_minutes_seconds(tracker.elapsed_time))
-      assert_equal("00:00:#{remaining * seconds_per_import}",
-                   tracker.time_in_hours_minutes_seconds(
-                     tracker.estimated_remaining_time
-                   ))
+    assert_in_delta(0, tracker.elapsed_time, 1)
+    assert_in_delta(import.total_expected_time,
+                    tracker.estimated_remaining_time, 1)
+
+    travel_to(tracker.created_at + 5.seconds) do
+      assert_in_delta(5, tracker.elapsed_time, 1)
+      assert_in_delta(import.total_expected_time - 5,
+                      tracker.estimated_remaining_time, 1)
     end
   end
 end

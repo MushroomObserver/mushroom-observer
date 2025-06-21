@@ -3,20 +3,19 @@
 # For display of status of an InatImportJob
 #
 # == Attributes
-#
-#  created_at::   when the tracker was created
-#  updated_at::   when the tracker was updated
 #  inat_import::  id of the iNatImport for the job
 #
 # == Methods
-#  status::       the state of the iNat import of this tracker
-#  elapsed::      time since the tracker was created
+#  status::           state of the iNat import of this tracker
+#  elapsed_time::  time since the tracker was created
 #
 class InatImportJobTracker < ApplicationRecord
   delegate :ended_at, to: :import
   delegate :importables, to: :import
   delegate :imported_count, to: :import
+  delegate :avg_import_time, to: :import
   delegate :response_errors, to: :import
+  delegate :total_expected_time, to: :import
 
   def status
     import.state
@@ -28,16 +27,14 @@ class InatImportJobTracker < ApplicationRecord
                else
                  Time.zone.now
                end
-    end_time - created_at
+    (end_time - created_at).to_i
   end
 
   def estimated_remaining_time
-    # Can't calculate remaining time until we've imported at least one obs
-    return nil unless imported_count&.positive?
+    # Can't calculate remaining time unless we know # of Obss to be imported
+    return nil unless importables.to_i&.positive?
 
-    remaining_importables = importables - imported_count
-    cumulative_avg_import_time = elapsed_seconds / imported_count
-    (remaining_importables * cumulative_avg_import_time).to_i
+    total_expected_time - elapsed_time
   end
 
   def time_in_hours_minutes_seconds(seconds)
@@ -61,14 +58,5 @@ class InatImportJobTracker < ApplicationRecord
 
   def import
     InatImport.find(inat_import)
-  end
-
-  def elapsed_seconds
-    end_time = if status == "Done"
-                 ended_at
-               else
-                 Time.zone.now
-               end
-    (end_time - created_at).to_i
   end
 end

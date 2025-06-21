@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 # Encapsulates a single user's iNatImport
-# and glues Job and Track to each other (and to Import)
 #
 # == Attributes
 #
@@ -17,6 +16,7 @@
 #  response_errors::       string of newline-separated error messages
 #  total_imported_count::  historical count of iNat obss imported by this user
 #  total_seconds::         all-time seconds this user spent importing iNat obss
+#  avg_import_time         user's historical seconds per import
 #
 # == Methods
 #  total_expected_time     total expected time for associated Job

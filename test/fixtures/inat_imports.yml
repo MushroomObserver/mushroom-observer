@@ -14,13 +14,12 @@ DEFAULTS: &DEFAULTS
   total_seconds: nil
   avg_import_time: nil
 
-# has no import history
 rolf_inat_import:
   <<: *DEFAULTS
   user: rolf
   importables: 4 # rolf wants to import 4 Observations
   inat_username: rolf_inat_username
-  total_imported_count: nil
+  total_imported_count: nil # has no import history
   total_seconds: nil
   avg_import_time: nil
 
@@ -39,11 +38,8 @@ inat_importer_inat_import:
   user: inat_importer
   inat_username: inat_importer_inat_username
 
-timings_import:
+# need >= 1 inat_import with an import history
+roy_inat_import:
   <<: *DEFAULTS
-  state: <%= InatImport.states[:Importing] %>
-  importables: 6 # wants to import a total of 6
-  imported_count: 2 # 2 of which have been imported this job
   total_imported_count: 3 # imports in prior jobs
   total_seconds: 36 # seconds in prior jobs
-  created_at: <%= 20.seconds.ago %> # 10 secs./import for testing purposes

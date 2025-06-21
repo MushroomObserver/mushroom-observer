@@ -5,7 +5,7 @@ require("test_helper")
 class InatImportTest < ActiveSupport::TestCase
   def test_total_expected_time_tabula_rasa
     zero_out_prior_import_records
-    import = inat_imports(:timings_import)
+    import = inat_imports(:rolf_inat_import)
 
     assert_equal(import.importables * InatImport::BASE_AVG_IMPORT_SECONDS,
                  import.total_expected_time)
@@ -29,7 +29,7 @@ class InatImportTest < ActiveSupport::TestCase
   end
 
   def test_total_expected_time_user_with_prior_imports
-    import = inat_imports(:timings_import)
+    import = inat_imports(:roy_inat_import)
 
     assert_equal(import.importables * import.initial_avg_import_seconds,
                  import.total_expected_time)
