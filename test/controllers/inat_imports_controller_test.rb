@@ -281,6 +281,11 @@ class InatImportsControllerTest < FunctionalTestCase
       end
     end
 
+    assert_in_delta(
+      0.25, inat_import.reload.last_obs_elapsed_time, 0.25,
+      "When job starts, elapsed time for 1st import should be <= 0.5 seconds"
+    )
+
     tracker = InatImportJobTracker.where(inat_import: inat_import.id).last
     assert_redirected_to(
       inat_import_path(inat_import, params: { tracker_id: tracker.id })

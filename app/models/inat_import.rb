@@ -17,9 +17,11 @@
 #  total_imported_count::  historical count of iNat obss imported by this user
 #  total_seconds::         all-time seconds this user spent importing iNat obss
 #  avg_import_time         user's historical seconds per import
+#  last_obs_start          when started importing a single iNat obs
 #
 # == Methods
 #  total_expected_time     total expected time for associated Job
+#  last_obs_elapsed        time spent importing a single iNat obs
 class InatImport < ApplicationRecord
   enum :state, {
     Unstarted: 0,
@@ -66,6 +68,16 @@ class InatImport < ApplicationRecord
     else
       BASE_AVG_IMPORT_SECONDS
     end
+  end
+
+  def reset_last_obs_start
+    update(last_obs_start: Time.now.utc)
+  end
+
+  def last_obs_elapsed_time
+    return 0 unless last_obs_start
+
+    Time.now.utc - last_obs_start
   end
 
   #########

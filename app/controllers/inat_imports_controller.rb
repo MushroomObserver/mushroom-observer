@@ -154,6 +154,7 @@ class InatImportsController < ApplicationController
     return not_authorized if auth_code.blank?
 
     inat_import = inat_import_authenticating(auth_code)
+    inat_import.reset_last_obs_start
     tracker = fresh_tracker(inat_import)
 
     Rails.logger.info(
