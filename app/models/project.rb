@@ -541,6 +541,13 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     @target_alias_details[target.id] || []
   end
 
+  def check_for_alias(str, target_type)
+    project_alias = aliases.find_by(name: str, target_type:)
+    return str unless project_alias
+
+    project_alias.target.format_name
+  end
+
   private ###############################
 
   def target_alias_details(target_type)
