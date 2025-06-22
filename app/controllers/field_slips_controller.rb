@@ -19,6 +19,8 @@ class FieldSlipsController < ApplicationController
     @field_slip = FieldSlip.new
     @field_slip.current_user = @user
     @field_slip.code = params[:code].upcase if params.include?(:code)
+    @field_slip.field_slip_name = params[:name]
+    @species_list = params[:species_list]
     project = @field_slip.project
     if project
       flash_notice(:field_slip_project_success.t(title: project.title))
@@ -143,12 +145,18 @@ class FieldSlipsController < ApplicationController
     if obs
       @field_slip.project&.add_observation(obs)
       @field_slip.update!(observation: obs)
+      check_for_species_list(obs, params[:species_list])
       name_flash_for_project(name, @field_slip.project)
       redirect_to(observation_url(obs.id))
     else
       redirect_to(new_observation_url(field_code: @field_slip.code,
                                       place_name:, date:, notes:))
     end
+  end
+
+  def check_for_species_list(obs, species_list)
+    sl = SpeciesList.safe_find(species_list)
+    sl.observations << obs if sl
   end
 
   def extract_date
