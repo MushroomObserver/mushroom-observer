@@ -1,0 +1,26 @@
+<%# locals: (user: nil, consensus: nil) %>
+
+<%
+namings = consensus.namings.sort_by(&:created_at)
+any_names = consensus.namings&.length&.positive?
+%>
+
+<%=
+tag.div(
+  id: "namings_table_rows",
+  class: "list-group list-group-flush",
+  data: { controller: "section-update" }
+) do
+  if any_names
+    namings.each do |naming|
+      row = naming_row_content(user, consensus, naming)
+      concat(
+        render(partial: "observations/show/namings/row",
+               locals: { **row })
+      )
+    end
+  else
+    tag.div(:show_namings_no_names_yet.t, class: "list-group-item")
+  end
+end
+%>

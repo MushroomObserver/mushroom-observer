@@ -90,7 +90,10 @@ module Observations::Namings
             render(partial: "observations/namings/update_matrix_box",
                    locals: { obs: @observation })
           else
-            redirect_with_query(@observation.show_link_args)
+            render(partial: "observations/show/section_update",
+                   locals: { identifier: "namings", obs: @observation,
+                             user: @user, consensus: @consensus })
+            # redirect_with_query(@observation.show_link_args)
           end
           return
         end
