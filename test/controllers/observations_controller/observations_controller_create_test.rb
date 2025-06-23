@@ -111,6 +111,13 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_true(@response.body.include?("California, Mendocino Co., Albion"))
   end
 
+  def test_new_with_name
+    login
+    name = names(:coprinus_comatus)
+    get(:new, params: { name: name.text_name })
+    assert(@response.body.include?(name.text_name))
+  end
+
   def test_create_log_updated_at
     params = {
       naming: { name: "", vote: { value: "" } },

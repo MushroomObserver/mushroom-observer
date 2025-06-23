@@ -65,7 +65,8 @@ module ObservationsController::New
   def init_naming_and_vote
     @naming      = Naming.new
     @vote        = Vote.new
-    @given_name  = "" # can't be nil else rails tries to call @name.name
+    trace_tests
+    @given_name  = params[:name] || ""  # can't be nil else rails tries to call @name.name
     return unless params[:notes] && params[:notes][:Field_Slip_ID]
 
     @given_name = params[:notes][:Field_Slip_ID].tr("_", "")
