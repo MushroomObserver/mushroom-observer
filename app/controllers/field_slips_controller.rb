@@ -121,12 +121,12 @@ class FieldSlipsController < ApplicationController
     if params[:commit] == :field_slip_quick_create_obs.t
       quick_create_observation
     elsif params[:commit] == :field_slip_add_images.t
-      # Need to pass params[:species_list]
       redirect_to(new_observation_url(
                     field_code: @field_slip.code,
                     place_name: place_name,
                     date: extract_date,
-                    notes: field_slip_notes.compact_blank!
+                    notes: field_slip_notes.compact_blank!,
+                    species_list: params[:species_list]
                   ))
     else
       update_observation_fields
