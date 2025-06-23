@@ -35,7 +35,8 @@ tag.div(
         search_status_target: "input",
         action: [
           "change->search-status#checkMatch",
-          "keyup->search-status#checkMatch"
+          "keyup->search-status#checkMatch",
+          "focus->search-status#checkMatch"
         ].join(" ")
       }
     )

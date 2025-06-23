@@ -393,7 +393,7 @@ export default class extends Controller {
   // events. Stimulus uses `handleEvent` under the hood.
   // https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
   handleEvent(event) {
-    // console.log(this.name);
+    // console.log("autocompleter: " + event.type)
     switch (event.type) {
       case "focus":
         this.ourFocus(event);
@@ -495,6 +495,7 @@ export default class extends Controller {
     const old_value = this.old_value;
     const new_value = this.inputTarget.value;
     // this.debug("ourChange(" + this.inputTarget.value + ")");
+    // console.log("ourChange(" + this.inputTarget.value + ")");
     if (new_value.length == 0) {
       this.cssCollapseFields();
       this.clearHiddenId();
@@ -780,11 +781,11 @@ export default class extends Controller {
     } else {
       this.scheduleHide();
     }
-    this.inputTarget.focus();
-    this.focused = true;
     this.assignHiddenId(new_match);
     this.setSearchToken(new_val); // updates input field
     this.ourChange(false);
+    this.inputTarget.focus();
+    this.focused = true;
   }
 
   // ------------------------------ Pulldown ------------------------------
