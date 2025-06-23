@@ -217,10 +217,6 @@ class FieldSlipsController < ApplicationController
     FieldSlipNotesBuilder.new(params, @field_slip).assemble
   end
 
-  def check_for_alias(str, target_type)
-    @field_slip.project&.check_for_alias(str, target_type) || str
-  end
-
   # Only allow a list of trusted parameters through.
   def field_slip_params
     params.require(:field_slip).permit(:observation_id, :project_id, :code)

@@ -56,13 +56,4 @@ class FieldSlipNotesBuilder
 
     str
   end
-
-  def check_for_alias(str, target_type)
-    return str unless @field_slip.project
-
-    project_alias = @field_slip.project.aliases.find_by(name: str, target_type:)
-    return str unless project_alias
-
-    project_alias.target.format_name
-  end
 end

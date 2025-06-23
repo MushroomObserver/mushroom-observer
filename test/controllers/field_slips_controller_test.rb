@@ -490,6 +490,39 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert(notes.include?(new_note))
   end
 
+  def test_should_update_field_slip_and_same_note
+    field_slip = field_slips(:field_slip_falmouth_one)
+    old_note = field_slip.observation.notes[:Other]
+    login
+    patch(:update,
+          params: { id: field_slip.id,
+                    commit: :field_slip_keep_obs.t,
+                    field_slip: { code: field_slip.code,
+                                  observation_id: field_slip.observation_id,
+                                  project_id: field_slip.project_id,
+                                  notes: { Other: old_note } } })
+    assert_redirected_to(field_slip_url(field_slip))
+    notes = field_slip.observation.reload.notes[:Other]
+    assert_equal(old_note, notes)
+  end
+
+  def test_should_update_field_slip_and_more_notes
+    field_slip = field_slips(:field_slip_falmouth_one)
+    old_note = field_slip.observation.notes[:Other]
+    new_note = "Start\n#{old_note}\nEnd"
+    login
+    patch(:update,
+          params: { id: field_slip.id,
+                    commit: :field_slip_keep_obs.t,
+                    field_slip: { code: field_slip.code,
+                                  observation_id: field_slip.observation_id,
+                                  project_id: field_slip.project_id,
+                                  notes: { Other: new_note } } })
+    assert_redirected_to(field_slip_url(field_slip))
+    notes = field_slip.observation.reload.notes[:Other]
+    assert_equal(new_note, notes)
+  end
+
   def test_should_update_field_slip_with_last_viewed_obs
     user = @field_slip.user
     login(user.login)
