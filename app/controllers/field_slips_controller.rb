@@ -121,6 +121,7 @@ class FieldSlipsController < ApplicationController
     if params[:commit] == :field_slip_quick_create_obs.t
       quick_create_observation
     elsif params[:commit] == :field_slip_add_images.t
+      # Need to pass params[:species_list]
       redirect_to(new_observation_url(
                     field_code: @field_slip.code,
                     place_name: place_name,
@@ -129,8 +130,10 @@ class FieldSlipsController < ApplicationController
                   ))
     else
       update_observation_fields
-      if @field_slip.observation
-        redirect_to(observation_url(@field_slip.observation),
+      obs = @field_slip.observation
+      if obs
+        check_for_species_list(obs, params[:species_list])
+        redirect_to(observation_url(obs),
                     notice: :field_slip_created.t)
       else
         redirect_to(field_slip_url(@field_slip),

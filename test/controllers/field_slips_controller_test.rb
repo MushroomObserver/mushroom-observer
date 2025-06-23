@@ -131,6 +131,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     user = @field_slip.user
     login(user.login)
     project = projects(:open_membership_project)
+    species_list = project.species_lists.first
     assert_not(project.member?(user))
     ObservationView.update_view_stats(@field_slip.observation_id,
                                       @field_slip.user_id)
@@ -139,6 +140,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
       post(:create,
            params: {
              commit: :field_slip_last_obs.t,
+             species_list: species_list.id,
              field_slip: {
                code: code,
                project_id: project.id
@@ -149,6 +151,8 @@ class FieldSlipsControllerTest < FunctionalTestCase
     obs = FieldSlip.find_by(code: code).observation
     assert_redirected_to(observation_url(obs))
     assert(project.member?(user))
+    assert(project.observations.member?(obs))
+    assert(species_list.observations.member?(obs))
   end
 
   def test_should_create_field_slip_and_redirect_to_create_obs
