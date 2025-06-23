@@ -558,14 +558,23 @@ class InatImportJobTest < ActiveJob::TestCase
     InatImportJobTracker.create(inat_import: @inat_import.id)
   end
 
-  # The InatImport object which is created in InatImportController#create
-  # and recovered in InatImportController#authorization_response
+  # On the app side, the Job is created by InatImportsController#create,
+  # which first finds or creates an InatImport instance.
+  # Because this test is not run in the context of a controller,
+  # we need to create the InatImport instance manually.
   def create_inat_import(user: @user)
     InatImport.create(
-      user: user, token: "MockCode",
+      user: user,
+      state: "Authorizing",
       inat_ids: @parsed_results.first&.dig(:id),
       inat_username: @parsed_results.first&.dig(:user, :login),
-      response_errors: ""
+      importables: @parsed_results.length,
+      imported_count: 0,
+      avg_import_time: InatImport::BASE_AVG_IMPORT_SECONDS,
+      response_errors: "",
+      token: "MockCode",
+      log: [],
+      ended_at: nil
     )
   end
 
