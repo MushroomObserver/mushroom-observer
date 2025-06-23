@@ -78,6 +78,10 @@ class InatImportJobTest < ActiveJob::TestCase
                  "Failed to update user's inat_import count")
     assert(@inat_import.total_seconds.to_i.positive?,
            "Failed to update user's inat_import total_seconds")
+    assert_equal(
+      0, @tracker.reload.estimated_remaining_time,
+      "Estimated remaining time should be 0 when InatImportJob is Done"
+    )
   end
 
   # Prove (inter alia) that the MO Naming.user differs from the importing user
@@ -562,8 +566,9 @@ class InatImportJobTest < ActiveJob::TestCase
     @mock_inat_response = File.read("test/inat/#{filename}.txt")
     @parsed_results =
       JSON.parse(@mock_inat_response, symbolize_names: true)[:results]
+
     @inat_import = create_inat_import(**attrs)
-    InatImportJobTracker.create(inat_import: @inat_import.id)
+    @tracker = InatImportJobTracker.create(inat_import: @inat_import.id)
   end
 
   # On the app side, the Job is created by InatImportsController#create,
