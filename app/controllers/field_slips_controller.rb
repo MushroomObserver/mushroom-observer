@@ -129,8 +129,13 @@ class FieldSlipsController < ApplicationController
                   ))
     else
       update_observation_fields
-      redirect_to(field_slip_url(@field_slip),
-                  notice: :field_slip_created.t)
+      if @field_slip.observation
+        redirect_to(observation_url(@field_slip.observation),
+                    notice: :field_slip_created.t)
+      else
+        redirect_to(field_slip_url(@field_slip),
+                    notice: :field_slip_created.t)
+      end
     end
   end
 

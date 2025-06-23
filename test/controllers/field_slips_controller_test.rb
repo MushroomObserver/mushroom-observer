@@ -77,7 +77,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     end
 
     slip = FieldSlip.find_by(code: code)
-    assert_redirected_to(field_slip_url(slip))
+    assert_redirected_to(observation_url(slip.observation))
     assert_equal(slip.observation, ObservationView.last(@field_slip.user))
   end
 
@@ -101,7 +101,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
 
     assert_flash_warning
     slip = FieldSlip.find_by(code: code)
-    assert_redirected_to(field_slip_url(slip))
+    assert_redirected_to(observation_url(slip.observation))
     assert_equal(slip.observation, ObservationView.last(user.id))
   end
 
@@ -146,7 +146,8 @@ class FieldSlipsControllerTest < FunctionalTestCase
            })
     end
 
-    assert_redirected_to(field_slip_url(FieldSlip.find_by(code: code)))
+    obs = FieldSlip.find_by(code: code).observation
+    assert_redirected_to(observation_url(obs))
     assert(project.member?(user))
   end
 
