@@ -73,13 +73,7 @@ class InatImportJob < ApplicationJob
   end
 
   def update_inat_import
-    tracker = InatImportJobTracker.where(inat_import: @inat_import).last
-    elapsed = (Time.zone.now - tracker.created_at).ceil
-    @inat_import.update(
-      state: "Done", ended_at: Time.zone.now,
-      # Add at least a second to total_
-      total_seconds: @inat_import.total_seconds.to_i + elapsed
-    )
+    @inat_import.update(state: "Done", ended_at: Time.zone.now)
   end
 
   # https://www.inaturalist.org/pages/api+recommended+practices
@@ -200,6 +194,7 @@ class InatImportJob < ApplicationJob
     # https://github.com/MushroomObserver/mushroom-observer/issues/2380
     update_inat_observation
     increment_imported_counts
+    update_timings
   end
 
   def create_observation
@@ -447,6 +442,16 @@ class InatImportJob < ApplicationJob
   def increment_imported_counts
     @inat_import.increment!(:imported_count) # count in this job
     @inat_import.increment!(:total_imported_count) # all-time count
+  end
+
+  def update_timings
+    total_seconds =
+      @inat_import.total_seconds.to_i + @inat_import.last_obs_elapsed_time
+    @inat_import.update(
+      total_seconds: total_seconds,
+      avg_import_time: total_seconds / (@inat_import.imported_count || 1)
+    )
+    @inat_import.reset_last_obs_start
   end
 
   def update_user_inat_username

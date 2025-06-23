@@ -582,6 +582,7 @@ class InatImportJobTest < ActiveJob::TestCase
       response_errors: "",
       token: "MockCode",
       log: [],
+      last_obs_start: Time.now.utc,
       ended_at: nil
     }
     import.update(default_attrs.merge(attrs))
