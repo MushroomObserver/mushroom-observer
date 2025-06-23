@@ -433,15 +433,23 @@ class InatImportJobTest < ActiveJob::TestCase
   end
 
   def test_import_update_inat_username_if_job_succeeds
-    create_ivars_from_filename("zero_results")
-    # simulate user entering new inat_username in iNat import form
-    @inat_import.update(inat_username: "updatedInatUsername",
-                        inat_ids: "123", token: "MockCode")
-    stub_inat_interactions
+    updated_inat_username = "updatedInatUsername"
 
-    assert_changes("@user.inat_username", to: "updatedInatUsername") do
-      InatImportJob.perform_now(@inat_import)
-    end
+    create_ivars_from_filename(
+      "zero_results",
+      # simulate entering new inat_username in iNat import form
+      inat_username: updated_inat_username,
+      # HACK: make it look like the import was successful
+      inat_ids: "123"
+    )
+
+    stub_inat_interactions
+    InatImportJob.perform_now(@inat_import)
+
+    assert_equal(
+      updated_inat_username, @user.reload.inat_username,
+      "Failed to update User's inat_username after successful import"
+    )
   end
 
   def test_import_multiple
@@ -550,11 +558,11 @@ class InatImportJobTest < ActiveJob::TestCase
 
   ########## Utilities
 
-  def create_ivars_from_filename(filename)
+  def create_ivars_from_filename(filename, **attrs)
     @mock_inat_response = File.read("test/inat/#{filename}.txt")
     @parsed_results =
       JSON.parse(@mock_inat_response, symbolize_names: true)[:results]
-    @inat_import = create_inat_import
+    @inat_import = create_inat_import(**attrs)
     InatImportJobTracker.create(inat_import: @inat_import.id)
   end
 
@@ -562,9 +570,9 @@ class InatImportJobTest < ActiveJob::TestCase
   # which first finds or creates an InatImport instance.
   # Because this test is not run in the context of a controller,
   # we need to create the InatImport instance manually.
-  def create_inat_import(user: @user)
-    InatImport.create(
-      user: user,
+  def create_inat_import(**attrs)
+    import = InatImport.find_or_create_by(user: @user)
+    default_attrs = {
       state: "Authorizing",
       inat_ids: @parsed_results.first&.dig(:id),
       inat_username: @parsed_results.first&.dig(:user, :login),
@@ -575,7 +583,9 @@ class InatImportJobTest < ActiveJob::TestCase
       token: "MockCode",
       log: [],
       ended_at: nil
-    )
+    }
+    import.update(default_attrs.merge(attrs))
+    import
   end
 
   # -------- Standard Test assertions
