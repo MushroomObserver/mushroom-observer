@@ -3,7 +3,7 @@
 # helpers for namings view
 # These helpers generate HTML for the "cells" of the "table".
 # The main sections of this table are partials under "observations/show/namings"
-# TODO: some of this could be in a presenter or component
+# NOTE: some of the assembling of data could be in a presenter or component.
 # NOTE: We don't even print this table unless @user is logged in.
 # rubocop:disable Metrics/ModuleLength
 module NamingsHelper
