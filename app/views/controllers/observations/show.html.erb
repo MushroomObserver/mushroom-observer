@@ -16,10 +16,10 @@ end
 show_map   = @user ? @user.thumbnail_maps : !session[:hide_thumbnail_maps]
 show_lists = @user # && @observation.species_lists.any?
 
-obs_locals = { obs: @observation, consensus: @consensus, user: @user,
-               sites: @other_sites }
+obs_locals = { obs: @observation, consensus: @consensus, user: @user }
 carousel_locals = {
-  object: @observation, images: @images, html_id: "observation_images", user: @user,
+  object: @observation, images: @images,
+  html_id: "observation_images", user: @user,
   title: :IMAGES.t, links: observation_show_image_links(obs: @observation)
 }
 %>
@@ -33,7 +33,7 @@ carousel_locals = {
 
   <div class="col-xs-12 col-md-4 col-lg-5 float-sm-right">
     <%= render(partial: "observations/show/observation_details",
-               locals: obs_locals) %>
+               locals: obs_locals.merge(sites: @other_sites)) %>
     <% if @user %>
       <%= render(partial: "observations/show/name_info", locals: obs_locals) %>
 
