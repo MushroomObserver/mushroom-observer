@@ -107,6 +107,20 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("#filters", text: corrected_pattern)
   end
 
+  def test_name_pattern_search_with_old_provisional
+    old_provisional = 'Cortinarius "sp-IN34"'
+
+    login
+    visit("/")
+    fill_in("search_pattern", with: old_provisional)
+    page.select("Names", from: :search_type)
+    click_button("Search")
+
+    assert_no_selector("#content div.alert-warning")
+    assert_selector("#title", text: :NAMES.l)
+    assert_selector("#filters", text: "Cortinarius sp. 'IN34'")
+  end
+
   def test_lifeform_edit
     name = names(:tremella_celata)
 
