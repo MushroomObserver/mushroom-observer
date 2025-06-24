@@ -7,8 +7,12 @@ class InatImportTest < ActiveSupport::TestCase
     zero_out_prior_import_records
     import = inat_imports(:rolf_inat_import)
 
-    assert_equal(import.importables * InatImport::BASE_AVG_IMPORT_SECONDS,
-                 import.total_expected_time)
+    assert_equal(
+      import.importables * InatImport::BASE_AVG_IMPORT_SECONDS,
+      import.total_expected_time,
+      "If nobody has imported anhy iNat obss, " \
+      "total expected time for the 1st import should be the system default"
+    )
   end
 
   def zero_out_prior_import_records
