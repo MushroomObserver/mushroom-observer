@@ -202,9 +202,10 @@ class Checklist
     end
 
     s_results.each do |result|
-      g, s = result[:text_name].split(" ", 3)
-      @genera[g] = g
-      @species[[g, s]] = ["#{g} #{s}", result[:id]]
+      gn, sp, pr = result[:text_name].split(" ", 3)
+      @genera[gn] = gn
+      sp = "#{sp} #{pr}" if sp == "sp." && pr
+      @species[[gn, sp]] = ["#{gn} #{sp}", result[:id]]
     end
   end
 

@@ -10,7 +10,6 @@ module PatternSearch
       self.parser = PatternSearch::Parser.new(string)
       build_query
       real_model = model.name.to_sym
-      self.query = Query.lookup(model.name.to_sym, args)
       if args.include?(:pattern) && real_model == :Name
         pat = args[:pattern]
         args[:pattern] = ::Name.parse_name(pat)&.search_name || pat
