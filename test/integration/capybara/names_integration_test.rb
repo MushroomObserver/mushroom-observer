@@ -117,8 +117,10 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     click_button("Search")
 
     assert_no_selector("#content div.alert-warning")
-    assert_selector("#title", text: :NAMES.l)
-    assert_selector("#filters", text: "Cortinarius sp. 'IN34'")
+    title = CGI.unescapeHTML(
+      "Mushroom Observer: Name: #{names(:provisional_name).text_name}".t
+    )
+    assert_title(title)
   end
 
   def test_lifeform_edit

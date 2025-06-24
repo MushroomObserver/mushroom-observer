@@ -30,6 +30,12 @@ class PatternSearch::ObservationTest < UnitTestCase
                             include_subtaxa: false } }, x.args)
   end
 
+  def test_observation_search_for_old_provisional
+    x = PatternSearch::Observation.new('Cortinarius "sp-IN34"')
+    assert_obj_arrays_equal([observations(:provisional_obs)],
+                            x.query.results, :sort)
+  end
+
   def test_observation_search
     x = PatternSearch::Observation.new("Amanita")
     assert_obj_arrays_equal([], x.query.results)
