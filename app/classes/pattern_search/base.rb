@@ -9,7 +9,12 @@ module PatternSearch
       self.errors = []
       self.parser = PatternSearch::Parser.new(string)
       build_query
-      self.query = Query.lookup(model.name.to_sym, args)
+      real_model = model.name.to_sym
+      if args.include?(:pattern) && real_model == :Name
+        pat = args[:pattern]
+        args[:pattern] = ::Name.parse_name(pat)&.search_name || pat
+      end
+      self.query = Query.lookup(real_model, args)
     rescue Error => e
       errors << e
     end
