@@ -10,7 +10,7 @@ module InatImportJobTrackersHelper
   end
 
   def time_in_hours_minutes_seconds(seconds)
-    return "Calculating..." if seconds.nil?
+    return :inat_import_tracker_calculating_time.l if seconds.nil?
 
     hours = seconds / 3600
     minutes = (seconds % 3600) / 60
