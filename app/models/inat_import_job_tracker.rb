@@ -38,15 +38,6 @@ class InatImportJobTracker < ApplicationRecord
     [total_expected_time - elapsed_time, 0].max
   end
 
-  def time_in_hours_minutes_seconds(seconds)
-    return "Calculating..." if seconds.nil?
-
-    hours = seconds / 3600
-    minutes = (seconds % 3600) / 60
-    seconds %= 60
-    format("%02d:%02d:%02d", hours, minutes, seconds)
-  end
-
   def error_caption
     if response_errors.blank?
       ""
