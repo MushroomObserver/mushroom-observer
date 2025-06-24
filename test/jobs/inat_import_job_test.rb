@@ -443,7 +443,8 @@ class InatImportJobTest < ActiveJob::TestCase
       "zero_results",
       # simulate entering new inat_username in iNat import form
       inat_username: updated_inat_username,
-      # HACK: make it look like the import was successful
+      # Supply an iNat id so that the Job runs. But it's an id
+      # which doesn't belong to the user, and therefore won't be imported.
       inat_ids: "123"
     )
 
