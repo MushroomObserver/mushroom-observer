@@ -30,6 +30,25 @@ class SearchControllerTest < FunctionalTestCase
     end
   end
 
+  def test_advanced_provisional_name
+    login
+    get(:advanced,
+        params: {
+          search: {
+            search_name: 'Cortinarius "sp-IN34"',
+            search_user: "",
+            model: "name",
+            search_content: "",
+            search_where: ""
+          },
+          commit: "Search"
+        }
+       )
+    assert_response(:redirect)
+    query = QueryRecord.find(redirect_to_url.split("=")[-1].dealphabetize)
+    assert_match(names(:provisional_name).text_name, query.description)
+  end
+
   def test_advanced_search_content_filters
     login
     # Make sure all the right buttons and fields are present.

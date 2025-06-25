@@ -91,9 +91,19 @@ class SearchController < ApplicationController
 
       # Treat User field differently; remove angle-bracketed user name,
       # since it was included by the auto-completer only as a hint.
-      val = user_login(params[:search]) if field == :search_user
+      if field == :search_user
+        val = user_login(params[:search])
+      elsif field == :search_name
+        val = parse_search_name(params[:search][:search_name])
+      end
       query_params[field] = val
     end
+  end
+
+  def parse_search_name(search_name)
+    return nil unless search_name
+
+    Name.parse_name(search_name)&.search_name || search_name
   end
 
   def user_login(params)
