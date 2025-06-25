@@ -8,13 +8,10 @@ tag.div(id: "observation_namings") do
     [
       render(partial: "observations/show/namings/header",
              locals: { obs: }),
-      # observation_namings_table_header(obs),
       render(partial: "observations/show/namings/rows",
              locals: { user:, consensus: }),
-      # observation_namings_table_rows(user, consensus), # only rows get updated
       render(partial: "observations/show/namings/footer",
              locals: { user:, obs: })
-      # observation_namings_table_footer(user, obs)
     ].safe_join
   end
 end %>
