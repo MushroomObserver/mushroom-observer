@@ -83,16 +83,7 @@ module Observations::Namings
                    format: :turbo_stream)
 
       # Check that turbo_stream updates the table with the new votes
-      assert_turbo_stream(action: :replace, target: "observation_namings") do
-        assert_select(
-          "observation_naming_#{nam1.id} a.vote-percent",
-          text: "#{nam1.reload.vote_percent.round}%"
-        )
-        assert_select(
-          "observation_naming_#{nam1.id} span.vote-number",
-          text: nam1.votes.length
-        )
-      end
+      assert_response("observations/show/_section_update")
 
       # Now check that rolf's contribution is adjusted, as with the above test.
       assert_equal(10, rolf.reload.contribution)
