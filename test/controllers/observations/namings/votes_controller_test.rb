@@ -70,6 +70,41 @@ module Observations::Namings
       assert_equal(2, nam1.votes.length)
     end
 
+    # Just like the last test, but test Turbo response
+    def test_cast_vote_rolf_change_turbo
+      obs  = observations(:coprinus_comatus_obs)
+      nam1 = namings(:coprinus_comatus_naming)
+
+      login("rolf")
+      consensus = ::Observation::NamingConsensus.new(obs)
+      vote = consensus.users_vote(nam1, rolf)
+      put(:update, params: { vote: { value: "2" }, id: vote.id,
+                             naming_id: nam1.id, observation_id: obs.id },
+                   format: :turbo_stream)
+
+      # Check that turbo_stream updates the table with the new votes
+      assert_turbo_stream(action: :replace, target: "observation_namings") do
+        assert_select(
+          "observation_naming_#{nam1.id} a.vote-percent",
+          text: "#{nam1.reload.vote_percent.round}%"
+        )
+        assert_select(
+          "observation_naming_#{nam1.id} span.vote-number",
+          text: nam1.votes.length
+        )
+      end
+
+      # Now check that rolf's contribution is adjusted, as with the above test.
+      assert_equal(10, rolf.reload.contribution)
+
+      # Make sure observation was updated right.
+      assert_equal(names(:coprinus_comatus).id, obs.reload.name_id)
+
+      # Check vote.
+      assert_equal(3, nam1.vote_sum)
+      assert_equal(2, nam1.votes.length)
+    end
+
     # Now have Rolf increase his vote for Mary's. (changes consensus)
     # Votes: rolf=2/-3->3, mary=1/3, dick=x/x
     def test_cast_vote_rolf_second_greater
