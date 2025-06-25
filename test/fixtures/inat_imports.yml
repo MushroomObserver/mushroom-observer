@@ -33,6 +33,13 @@ mary_inat_import:
   user: mary
   inat_username: mary_inat_username
 
+# katrina is in the middle of an import
+katrina_inat_import:
+  <<: *DEFAULTS
+  user: katrina
+  state: <%= InatImport.states[:Importing] %>
+  inat_username: katrina_inat_username
+
 inat_importer_inat_import:
   <<: *DEFAULTS
   user: inat_importer

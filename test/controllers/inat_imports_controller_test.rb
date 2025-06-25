@@ -47,6 +47,23 @@ class InatImportsControllerTest < FunctionalTestCase
                   "Form needs checkbox requiring consent")
   end
 
+  def test_new_inat_import_already_importing
+    user = users(:katrina)
+    import = inat_imports(:katrina_inat_import)
+    tracker = inat_import_job_trackers(:katrina_tracker)
+
+    login(user.login)
+    get(:new)
+
+    assert_flash_error(
+      "Should flash error when user tries to start a new iNat import " \
+      "while another is already in progress"
+    )
+    assert_redirected_to(
+      inat_import_path(import, params: { tracker_id: tracker.id })
+    )
+  end
+
   def test_new_inat_import_inat_username_prefilled
     user = users(:mary)
     assert(user.inat_username.present?,
