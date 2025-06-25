@@ -42,8 +42,7 @@ class SearchControllerTest < FunctionalTestCase
             search_where: ""
           },
           commit: "Search"
-        }
-       )
+        })
     assert_response(:redirect)
     query = QueryRecord.find(redirect_to_url.split("=")[-1].dealphabetize)
     assert_match(names(:provisional_name).text_name, query.description)
