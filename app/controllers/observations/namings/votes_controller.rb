@@ -93,7 +93,6 @@ module Observations::Namings
             render(partial: "observations/show/section_update",
                    locals: { identifier: "namings", obs: @observation,
                              user: @user, consensus: @consensus })
-            # redirect_with_query(@observation.show_link_args)
           end
           return
         end
