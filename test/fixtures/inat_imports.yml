@@ -50,3 +50,11 @@ roy_inat_import:
   <<: *DEFAULTS
   total_imported_count: 3 # imports in prior jobs
   total_seconds: 36 # seconds in prior jobs
+
+lone_wolf_import:
+  <<: *DEFAULTS
+  user: lone_wolf
+  importables: 2
+  state: <%= InatImport.states[:Done] %>
+  ended_at: <%= Time.zone.now + 15.seconds %>
+  response_errors: "Random error msg"
