@@ -187,7 +187,7 @@ to those MO Observations which
 * haven't yet been uploaded to MCP.
 
 Although it's possible to completely replace the MUOB collection,
-it's desireable to limit the data and images involved.
+it's desirable to limit the data and images involved.
 This generally speeds the process.
 
 Furthermore, MCP will not process image upload files which are too big.
