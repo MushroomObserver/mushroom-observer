@@ -15,7 +15,7 @@ export default class extends GeocodeController {
     "editBoxBtn", "autocompleter"]
 
   connect() {
-    this.element.dataset.stimulus = "map-connected"
+    this.element.dataset.map = "connected"
     this.map_type = this.mapDivTarget.dataset.mapType
     this.editable = (this.mapDivTarget.dataset.editable === "true")
     this.opened = this.element.dataset.mapOpen === "true"
