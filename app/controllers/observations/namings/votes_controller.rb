@@ -87,19 +87,30 @@ module Observations::Namings
         format.turbo_stream do
           case params[:context]
           when "matrix_box"
-            render(partial: "observations/namings/update_matrix_box",
-                   locals: { obs: @observation })
-          else
-            render(partial: "observations/show/section_update",
-                   locals: { identifier: "namings", obs: @observation,
-                             user: @user, consensus: @consensus })
+            render_matrix_box_naming_update
+          when "namings_table"
+            render_namings_section_update
           end
-          return
         end
         format.html do
           redirect_with_query(@observation.show_link_args)
         end
       end
+    end
+
+    def render_matrix_box_naming_update
+      render(
+        partial: "observations/namings/update_matrix_box",
+        locals: { obs: @observation }
+      ) and return
+    end
+
+    def render_namings_section_update
+      render(
+        partial: "observations/show/section_update",
+        locals: { identifier: "namings", obs: @observation,
+                  user: @user, consensus: @consensus }
+      ) and return
     end
   end
 end
