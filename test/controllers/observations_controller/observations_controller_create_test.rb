@@ -819,26 +819,26 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     post(:create, params: params)
     # assert_template(action: expected_page)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal(agaricus.id, assigns(:observation).name_id)
+    assert_equal(agaricus.id, assigns(:observation).reload.name_id)
 
     params[:naming][:name] = "Agaricus sp"
     params[:approved_name] = nil
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal(agaricus.id, assigns(:observation).name_id)
+    assert_equal(agaricus.id, assigns(:observation).reload.name_id)
 
     params[:naming][:name] = "Agaricus sp."
     params[:approved_name] = nil
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal(agaricus.id, assigns(:observation).name_id)
+    assert_equal(agaricus.id, assigns(:observation).reload.name_id)
 
     # Can we create observation with genus and add author?
     params[:naming][:name] = "Agaricus Author"
     params[:approved_name] = "Agaricus Author"
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal(agaricus.id, assigns(:observation).name_id)
+    assert_equal(agaricus.id, assigns(:observation).reload.name_id)
     assert_equal("Agaricus Author", agaricus.reload.search_name)
     agaricus.author = nil
     agaricus.search_name = "Agaricus"
@@ -848,7 +848,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     params[:approved_name] = "Agaricus sp Author"
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal(agaricus.id, assigns(:observation).name_id)
+    assert_equal(agaricus.id, assigns(:observation).reload.name_id)
     assert_equal("Agaricus Author", agaricus.reload.search_name)
     agaricus.author = nil
     agaricus.search_name = "Agaricus"
@@ -858,7 +858,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     params[:approved_name] = "Agaricus sp. Author"
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal(agaricus.id, assigns(:observation).name_id)
+    assert_equal(agaricus.id, assigns(:observation).reload.name_id)
     assert_equal("Agaricus Author", agaricus.reload.search_name)
 
     # Can we create observation with genus specifying author?
@@ -866,19 +866,19 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     params[:approved_name] = nil
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal(agaricus.id, assigns(:observation).name_id)
+    assert_equal(agaricus.id, assigns(:observation).reload.name_id)
 
     params[:naming][:name] = "Agaricus sp Author"
     params[:approved_name] = nil
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal(agaricus.id, assigns(:observation).name_id)
+    assert_equal(agaricus.id, assigns(:observation).reload.name_id)
 
     params[:naming][:name] = "Agaricus sp. Author"
     params[:approved_name] = nil
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal(agaricus.id, assigns(:observation).name_id)
+    assert_equal(agaricus.id, assigns(:observation).reload.name_id)
 
     # Can we create observation with deprecated genus?
     psalliota = names(:psalliota)
@@ -886,26 +886,26 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     params[:approved_name] = "Psalliota"
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal(psalliota.id, assigns(:observation).name_id)
+    assert_equal(psalliota.id, assigns(:observation).reload.name_id)
 
     params[:naming][:name] = "Psalliota sp"
     params[:approved_name] = "Psalliota sp"
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal(psalliota.id, assigns(:observation).name_id)
+    assert_equal(psalliota.id, assigns(:observation).reload.name_id)
 
     params[:naming][:name] = "Psalliota sp."
     params[:approved_name] = "Psalliota sp."
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal(psalliota.id, assigns(:observation).name_id)
+    assert_equal(psalliota.id, assigns(:observation).reload.name_id)
 
     # Can we create observation with deprecated genus, adding author?
     params[:naming][:name] = "Psalliota Author"
     params[:approved_name] = "Psalliota Author"
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal(psalliota.id, assigns(:observation).name_id)
+    assert_equal(psalliota.id, assigns(:observation).reload.name_id)
     assert_equal("Psalliota Author", psalliota.reload.search_name)
     psalliota.author = nil
     psalliota.search_name = "Psalliota"
@@ -915,7 +915,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     params[:approved_name] = "Psalliota sp Author"
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal(psalliota.id, assigns(:observation).name_id)
+    assert_equal(psalliota.id, assigns(:observation).reload.name_id)
     assert_equal("Psalliota Author", psalliota.reload.search_name)
     psalliota.author = nil
     psalliota.search_name = "Psalliota"
@@ -925,7 +925,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     params[:approved_name] = "Psalliota sp. Author"
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal(psalliota.id, assigns(:observation).name_id)
+    assert_equal(psalliota.id, assigns(:observation).reload.name_id)
     assert_equal("Psalliota Author", psalliota.reload.search_name)
 
     # Can we create new quoted genus?
@@ -934,73 +934,75 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     post(:create, params: params)
     # assert_template(controller: :observations, action: expected_page)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal("Gen. 'One'", assigns(:observation).name.text_name)
+    assert_equal("Gen. 'One'", assigns(:observation).reload.name.text_name)
     assert_equal("Gen. 'One'", assigns(:observation).name.search_name)
 
     params[:naming][:name] = "'Two' sp"
     params[:approved_name] = "'Two' sp"
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal("Gen. 'Two'", assigns(:observation).name.text_name)
+    assert_equal("Gen. 'Two'", assigns(:observation).reload.name.text_name)
     assert_equal("Gen. 'Two'", assigns(:observation).name.search_name)
 
     params[:naming][:name] = "Gen. 'Three' sp."
     params[:approved_name] = "Gen. 'Three' sp."
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal("Gen. 'Three'", assigns(:observation).name.text_name)
+    assert_equal("Gen. 'Three'", assigns(:observation).reload.name.text_name)
     assert_equal("Gen. 'Three'", assigns(:observation).name.search_name)
 
     params[:naming][:name] = "'One'"
     params[:approved_name] = nil
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal("Gen. 'One'", assigns(:observation).name.text_name)
+    assert_equal("Gen. 'One'", assigns(:observation).reload.name.text_name)
 
     params[:naming][:name] = "'One' sp"
     params[:approved_name] = nil
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal("Gen. 'One'", assigns(:observation).name.text_name)
+    assert_equal("Gen. 'One'", assigns(:observation).reload.name.text_name)
 
     params[:naming][:name] = "'One' sp."
     params[:approved_name] = nil
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal("Gen. 'One'", assigns(:observation).name.text_name)
+    assert_equal("Gen. 'One'", assigns(:observation).reload.name.text_name)
 
     # Can we create species under the quoted genus?
     params[:naming][:name] = "'One' foo"
     params[:approved_name] = "'One' foo"
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal("Gen. 'One' foo", assigns(:observation).name.text_name)
+    assert_equal("Gen. 'One' foo",
+                 assigns(:observation).reload.name.text_name)
 
     params[:naming][:name] = "'One' 'bar'"
     params[:approved_name] = "'One' 'bar'"
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal("Gen. 'One' sp. 'bar'", assigns(:observation).name.text_name)
+    assert_equal("Gen. 'One' sp. 'bar'",
+                 assigns(:observation).reload.name.text_name)
 
     params[:naming][:name] = "'One' Author"
     params[:approved_name] = "'One' Author"
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal("Gen. 'One'", assigns(:observation).name.text_name)
+    assert_equal("Gen. 'One'", assigns(:observation).reload.name.text_name)
     assert_equal("Gen. 'One' Author", assigns(:observation).name.search_name)
 
     params[:naming][:name] = "'One' sp Author"
     params[:approved_name] = nil
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal("Gen. 'One'", assigns(:observation).name.text_name)
+    assert_equal("Gen. 'One'", assigns(:observation).reload.name.text_name)
     assert_equal("Gen. 'One' Author", assigns(:observation).name.search_name)
 
     params[:naming][:name] = "'One' sp. Author"
     params[:approved_name] = nil
     post(:create, params: params)
     assert_redirected_to(/#{expected_page}/)
-    assert_equal("Gen. 'One'", assigns(:observation).name.text_name)
+    assert_equal("Gen. 'One'", assigns(:observation).reload.name.text_name)
     assert_equal("Gen. 'One' Author", assigns(:observation).name.search_name)
   end
 
