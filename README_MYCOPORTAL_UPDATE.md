@@ -31,7 +31,7 @@ This step is needed for incremental updates. See [Why Incremental Updates](#why-
   ![pointer to pencil icon][image2]
 
     This should bring you to the `Collection Profile` page.
-    {You should see the `Data Editor Control Panel`
+    (You should see the `Data Editor Control Panel`
     and the `Administration Control Panel`.)
 
 * Under `Administration Control Panel`, click `Processing Toolbox`
@@ -93,7 +93,7 @@ it avoids taxing the webserver.
   (This could take < 5 minutes on a fast computer).
 * `Save`
 
-#### Create image List file
+#### Create image list file
 
 * Select `Images for MyCoPortal`
 * Click the `Download` button
@@ -163,7 +163,7 @@ it avoids taxing the webserver.
 * In the `New Profile` panel, select `Image URL Mapping File`
 * click the `Choose File` button
   This should open a file selection window in your browser
-  * browse to the Image List File which you saved in [Create image file](#create-image-list-file)
+  * browse to the Image List File which you saved in [Create image list file](#create-image-list-file)
   * click the `Open` button
 * click the `Analyze Image Data File` button
 * in the `Image File Upload Map`, for the `imageId` row, `Target Field` column,
