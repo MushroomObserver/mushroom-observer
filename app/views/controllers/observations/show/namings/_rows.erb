@@ -8,8 +8,7 @@ any_names = consensus.namings&.length&.positive?
 <%=
 tag.div(
   id: "namings_table_rows",
-  class: "list-group list-group-flush",
-  data: { controller: "section-update" }
+  class: "list-group list-group-flush"
 ) do
   if any_names
     namings.each do |naming|
