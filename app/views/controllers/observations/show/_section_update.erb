@@ -1,18 +1,25 @@
 <%# locals: (identifier: "", obs: nil, user: nil, consensus: nil, sites: nil) %>
 
 <%#
-NOTE: This is a generalized Turbo-update template for the show obs page.
-It updates the observation view with results of an update or create action.
+Generalized template for Turbo live partial updates of the show obs page.
+This template is rendered by several controllers upon success of any action
+that creates or updates a resource associated with the Observation - for
+example a Naming, CollectionNumber, FungariumRecord, ExternalLink, or Sequence.
 
-It is intended to DRY the code for partial updates (although less direct),
-because these should have at least two consequences:
-  - updating a section of show obs
-  - updating the page flash to provide feedback that it's updated
-Otherwise, the create/update actions could render these explicitly.
+The reason this is a generalized template is because these updates should all
+do at least two things, via two separate `turbo_stream` actions below:
+  - Replace the relevant section of show obs
+  - Update the page flash to provide user feedback
+Each of the above controller responses could *explicitly* call both of these,
+but this partial is intended to be more DRY, at the cost of being indirect.
 
-The required local is `identifier`, which should match both
+Callers should pass the local_assign `identifier`, plus any locals needed by the section partial. The `identifier` is a string that should match both
   - the partial filename: views/controllers/observations/show/_#{identifier}.erb
-  - the last segment of the section's HTML ID as "observation_#{identifier}"
+  - the last segment of the section's HTML ID: "observation_#{identifier}"
+
+NOTE: The section partial should also have a `data-controller="status-update"`
+attribute on the outermost div. This calls the Stimulus controller to hide any
+modal forms when the div gets updated by Turbo.
 %>
 
 <%
