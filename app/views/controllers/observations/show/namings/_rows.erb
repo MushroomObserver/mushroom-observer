@@ -1,7 +1,7 @@
 <%# locals: (user: nil, consensus: nil) %>
 
 <%
-namings = consensus.namings.sort_by(&:created_at)
+namings = consensus.namings&.reload&.sort_by(&:created_at)
 any_names = consensus.namings&.length&.positive?
 %>
 
