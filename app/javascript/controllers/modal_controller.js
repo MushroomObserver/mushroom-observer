@@ -14,6 +14,7 @@ export default class extends Controller {
   // That event is broadcast from the section-update controller.
   // We can't fire on form submit response, because unless something's wrong
   // turbo-stream will send a 200 response.
+  // Must be in jQuery for Boostrap 3 and 4
   remove() {
     console.log("Removing modal")
     $(this.element).modal('hide')
