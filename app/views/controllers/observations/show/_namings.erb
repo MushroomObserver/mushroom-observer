@@ -9,7 +9,7 @@ tag.div(
 ) do
   [
     render(partial: "observations/show/namings/header",
-            locals: { obs: }),
+            locals: { obs:, **naming_header_row_content }),
     render(partial: "observations/show/namings/rows",
             locals: { user:, obs:, consensus: }),
     render(partial: "observations/show/namings/footer",

@@ -1,7 +1,6 @@
-<%# locals: (obs: nil) %>
+<%# locals: (obs: nil, heading: "", user_name: "", consensus_vote: "", your_vote: "") %>
 
 <%
-header = naming_header_row_content
 behavior = "flex-column justify-content-end"
 propose_icon = propose_naming_link(
   obs.id, text: :show_namings_propose_new_name.t,
@@ -17,13 +16,13 @@ tag.div(class: "panel-heading namings-table-header") do
       tag.div(class: "col-xs-10 col-sm-11") do
         tag.div(class: "row") do
           [
-            tag.div(header[:heading],
+            tag.div(heading,
                     class: "col col-sm-4 d-block #{behavior}"),
-            tag.div(header[:user_name],
+            tag.div(user_name,
                     class: "col col-sm-3 d-none d-sm-block #{behavior}"),
-            tag.div(header[:consensus_vote],
+            tag.div(consensus_vote,
                     class: "col col-sm-2 d-none d-sm-block #{behavior}"),
-            tag.div(header[:your_vote],
+            tag.div(your_vote,
                     class: "col col-sm-3 d-none d-sm-block #{behavior}")
           ].safe_join
         end
