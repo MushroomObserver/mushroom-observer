@@ -61,7 +61,7 @@ class Observation
     attr_accessor :observation, :namings, :votes
 
     def initialize(observation)
-      @observation = observation
+      @observation = ::Observation.naming_includes.find(observation.id)
       @namings = observation.namings
       @votes = @namings.map(&:votes).flatten
     end

@@ -1,8 +1,8 @@
-<%# locals: (user: nil, consensus: nil) %>
+<%# locals: (user: nil, obs: nil, consensus: nil) %>
 
 <%
-namings = consensus.namings&.reload&.sort_by(&:created_at)
-any_names = consensus.namings&.length&.positive?
+namings = obs.namings.sort_by(&:created_at)
+any_names = obs.namings&.length&.positive?
 %>
 
 <%=
@@ -12,10 +12,9 @@ tag.div(
 ) do
   if any_names
     namings.each do |naming|
-      row = naming_row_content(user, consensus, naming)
       concat(
         render(partial: "observations/show/namings/row",
-               locals: { **row })
+               locals: { **naming_row_content(user, consensus, naming) })
       )
     end
   else

@@ -11,7 +11,7 @@ tag.div(
     render(partial: "observations/show/namings/header",
             locals: { obs: }),
     render(partial: "observations/show/namings/rows",
-            locals: { user:, consensus: }),
+            locals: { user:, obs:, consensus: }),
     render(partial: "observations/show/namings/footer",
             locals: { user:, obs: })
   ].safe_join
