@@ -98,6 +98,8 @@ module Observations::Namings
       end
     end
 
+    # Re-render the whole obs template if the consensus changed. This will
+    # update the title and the name info panel. Otherwise, just update namings.
     def render_namings_section_update
       if @consensus.consensus_changed
         redirect_with_query(@observation.show_link_args) and return
