@@ -228,7 +228,7 @@ To get the most recent stripped checkpoint, which may be _not at all current_:
 - copy (or move) the downloaded .gz file to the `mushroom-observer` directory.
 
 OR, if you have SSH access to the images server, you can get a _current_ db backup and strip it yourself:
-- `cd` to your `mushroom-observer` directory, and use `scp` to download the most recent db backup. Below, `yourname` is your account name on the images server, and `yyyymmdd` is yesterday's date. Running this command will download it to `/mushroom-observer` and rename the `database-{yyyymmdd}.gz` file as `checkpoint.gz`.
+- `cd` to your `mushroom-observer` directory, and use `scp` to download the most recent db backup. Below, `yourname` is your account name on the images server, and `yyyymmdd` is yesterday's date. Running this command will download the daily db backup to `/mushroom-observer` and rename it as `checkpoint.gz`.
 ```
 scp {yourname}@images.mushroomobserver.org:/data/images/backup/database-{yyyymmdd}.gz ./checkpoint.gz
 ```
