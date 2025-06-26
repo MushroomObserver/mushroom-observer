@@ -15,7 +15,7 @@ export default class extends Controller {
   // We can't fire based on submit response, because unless something's wrong
   // with the request, turbo-stream will send a 200 OK even if it didn't save.
   remove() {
-    console.log("Removing modal")
+    // console.log("Removing modal")
     this.hide()
     this.element.remove()
   }
@@ -24,7 +24,7 @@ export default class extends Controller {
   // since it is printed in the layout and should not be removed from the page.
   // Must be in jQuery for Boostrap 3 and 4
   hide() {
-    console.log("Hiding modal")
+    // console.log("Hiding modal")
     $(this.element).modal('hide')
     this.resetProgress()
   }
