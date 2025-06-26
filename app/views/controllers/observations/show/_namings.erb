@@ -2,18 +2,19 @@
 
 <!--OBSERVATION_NAMINGS / TABLE REFRESHED BY TURBO -->
 <%=
-tag.div(id: "observation_namings",
-        data: { controller: "section-update" }) do
-  tag.div(class: "namings-table panel panel-default mb-4",
-          id: "namings_table") do
-    [
-      render(partial: "observations/show/namings/header",
-             locals: { obs: }),
-      render(partial: "observations/show/namings/rows",
-             locals: { user:, consensus: }),
-      render(partial: "observations/show/namings/footer",
-             locals: { user:, obs: })
-    ].safe_join
-  end
-end %>
+tag.div(
+  id: "observation_namings",
+  class: "namings-table panel panel-default mb-4",
+  data: { controller: "section-update" }
+) do
+  [
+    render(partial: "observations/show/namings/header",
+            locals: { obs: }),
+    render(partial: "observations/show/namings/rows",
+            locals: { user:, consensus: }),
+    render(partial: "observations/show/namings/footer",
+            locals: { user:, obs: })
+  ].safe_join
+end
+%>
 <!--/OBSERVATION_NAMINGS -->
