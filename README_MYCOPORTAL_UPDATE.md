@@ -4,19 +4,18 @@ How to update [MyCoPortal]'s collection of Mushroom Observer observations (“MU
 
 ## Summary
 
-There are three broad steps:
-
 1. [Determine the starting date](#determine-the-starting-date).
 2. [Create upload files](#create-upload-files).
-3. [Import the upload files in MCP](#import-the-upload-files-in-mcp).
+3. [Import the upload files in MCP](#import-the-upload-files-in-mcp) (MyCoPortal).
 
-(Note that this process updates all fields of the MUOB records which you are updating.)
+> [!CAUTION]
+> This process updates all fields of the MUOB records which you are updating.
 
 ## Details
 
 ### Determine the starting date
 
-This step is needed for incremental updates. See [Why Incremental Updates](#why-incremental-updates)
+This step is needed for incremental updates. See [Why Incremental Updates](#why-incremental-updates).
 
 * Login to [MyCoPortal] using an account with privileges to manage the MUOB collection.
 * Go to the Collection Profile page for the MUOB collection using this
@@ -31,9 +30,9 @@ This step is needed for incremental updates. See [Why Incremental Updates](#why-
 
   ![pointer to pencil icon][image2]
 
-    This should bring you to the Collection Profile page.
-    You should see the `Data Editor Control Panel`
-    and the `Administration Control Panel`
+    This should bring you to the `Collection Profile` page.
+    {You should see the `Data Editor Control Panel`
+    and the `Administration Control Panel`.)
 
 * Under `Administration Control Panel`, click `Processing Toolbox`
 
@@ -44,8 +43,7 @@ This step is needed for incremental updates. See [Why Incremental Updates](#why-
   You should see a `Log Files` panel with an `Image Mapping File` list.
 
 * Find the most recent Image Mapping File which has a *long* list of processed images.
-
-  It generally will be the first file. The list will begin like this:
+  It's generally the first file. The list will begin like this:
 
 ```txt
   Starting to process image URLs within image mapping file imageMappingFile_1749352588.csv (2025-06-07 20:16:51)
@@ -53,32 +51,36 @@ This step is needed for incremental updates. See [Why Incremental Updates](#why-
  Image linked to existing record: #7963048
 ```
 
-* Scroll to the bottom of that list.
+  (There might be file(s) with a dozen or fewer processed images.
+   These were tests. You should ignore these.)
+
+* Scroll to the bottom of the processed images list.
 
 * > [!IMPORTANT]
  Take note of the MUOB number after the final `Processing Catalog Number`.
- This is the `Observation.id` of most recent MO Observation in MUOB
+ This is the `Observation.id` of the most-recent Observation imported to MCP in the
+  last incremental update.
 
 ### Create upload files
 
 Do this locally (not on the webserver) because:
-It assures that the created files are based on the same Observations;
-It avoids taxing the webserver.
+It assures that the created files are based on the same Observations; and
+it avoids taxing the webserver.
 
 * Download the latest db snapshot.
 * Find the `created_at` of the most-recent Observation imported to MCP in the
   last incremental update.
   (You should have noted that at the end of [Determine the starting date](#determine-the-starting-date).)
 * [http://localhost:3000/observations](http://localhost:3000/observations)
-* Go into Admin Mode
+* Turn on Admin Mode
 * Pattern Search for Observations
-  modified 1 day before the above `created_at` through tomorrow,
+  `modified` 1 day before the above `created_at` date through tomorrow,
   with `confidence:67-100`
   >Sample pattern string:
-  `modified:2019-07-12-2025-06-07 confidence:67-100`
+  `modified:2025-06-06-2025-07-02 confidence:67-100`
 
-  (The extra days prevent missing Observations because of time zone differences.)
-  (`confidence` limits us to Observations whose identification is `Promising`
+  (The extra days insure that we won't miss Observations because of time zone differences.)
+  (`confidence:67-100` limits us to Observations whose identification is `Promising`
   or better.)
 
 * Click `Download Observations` (in the upper right side menu)
@@ -88,7 +90,7 @@ It avoids taxing the webserver.
 * Select `MyCoPortal`
 * Click the `Download` button
 * Wait until your browser shows the SaveAs popup.
-  (This could take several minutes on a fast computer).
+  (This could take < 5 minutes on a fast computer).
 * `Save`
 
 #### Create image List file
@@ -96,10 +98,12 @@ It avoids taxing the webserver.
 * Select `Images for MyCoPortal`
 * Click the `Download` button
 * Wait until your browser shows the SaveAs popup
-  Could take a long time (but should be faster than the data file).
+  (Should be faster than the data file.)
 * `Save`
 
 ### Import the upload files in MCP
+
+(The initial steps are the same as those in [Determine the starting date](#determine-the-starting-date).)
 
 * Goto [MyCoPortal][]
 * Login using an MCP account which has privileges to update the MUOB collection
@@ -117,8 +121,10 @@ It avoids taxing the webserver.
 
     ![][image2]
 
-    This should bring you to the `Collection Profile` page and
-    You should see the `Data Editor Control Panel` and the `Administration Control Panel`
+    This should bring you to the `Collection Profile` page.
+    (You should see the `Data Editor Control Panel`
+    and the `Administration Control Panel`.)
+
 * In the Administration Control Panel, click `Import/Update Specimen Records`
 * click `Saved Import Profiles`
   You should now be on the `Data Upload Management` page
@@ -137,12 +143,14 @@ It avoids taxing the webserver.
     The resulting display should include a Pending Data Transfer Report
 
   * Review the Pending Data Transfer Report
-  * If that Report makes sense,
+  * If that Report is error free and makes sense,
     click the `Transfer Records to Central Specimen Table` button
 
-  > [!IMPORTANT]
+  > [!CAUTION]
     This overwrites all data fields of the Records to be updated.
     It does not update Images.
+
+  * Wait until it finishes.
 
   **Update the Images**
 
@@ -163,7 +171,8 @@ It avoids taxing the webserver.
 
   ![][image4]
 
-* click the `Map Images` button
+* click the `Map Images` button.
+* Wait until it finishes.
 
 [MyCoPortal]: https://www.mycoportal.org/portal
 
@@ -171,18 +180,18 @@ It avoids taxing the webserver.
 
 #### Why Incremental Updates
 
-The point of selecting a starting date is to limit upload data and images
-of Observations to those which
+The point of selecting a starting date is to limit the upload data and images
+to those MO Observations which
 
-* have changed since the last upload or
-* have not yet been uploaded to MCP.
+* changed since the last upload or
+* haven't yet been uploaded to MCP.
 
 Although it's possible to completely replace the MUOB collection,
 it's desireable to limit the data and images involved.
 This generally speeds the process.
 
 Furthermore, MCP will not process image upload files which are too big.
-(I don't know the exact size limit.)
+(I don't know the exact size limit, but I've hit it. jdc 2025-06-25)
 If those files are too large they must be broken into smaller files,
 each of which must be imported to MCP.
 
