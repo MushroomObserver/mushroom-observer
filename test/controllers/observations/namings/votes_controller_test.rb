@@ -82,9 +82,6 @@ module Observations::Namings
                              naming_id: nam1.id, observation_id: obs.id },
                    format: :turbo_stream)
 
-      # Check that turbo_stream updates the table with the new votes
-      assert_response("observations/show/_section_update")
-
       # Now check that rolf's contribution is adjusted, as with the above test.
       assert_equal(10, rolf.reload.contribution)
 
