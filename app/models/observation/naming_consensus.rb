@@ -58,12 +58,13 @@
 # rubocop:disable Metrics/ClassLength
 class Observation
   class NamingConsensus
-    attr_accessor :observation, :namings, :votes
+    attr_accessor :observation, :namings, :votes, :consensus_changed
 
     def initialize(observation)
       @observation = ::Observation.naming_includes.find(observation.id)
       @namings = observation.namings
       @votes = @namings.map(&:votes).flatten
+      @consensus_changed = false
     end
 
     def reload_namings_and_votes!
@@ -313,7 +314,10 @@ class Observation
         @observation.update(name: best, vote_cache: best_val,
                             needs_naming: needs_naming)
       end
-      @observation.reload.announce_consensus_change(old, best) if best != old
+      return unless best != old
+
+      @consensus_changed = true
+      @observation.reload.announce_consensus_change(old, best)
     end
 
     def user_calc_consensus(current_user)
@@ -330,6 +334,7 @@ class Observation
       end
       return unless best != old
 
+      @consensus_changed = true
       @observation.reload.user_announce_consensus_change(old, best,
                                                          current_user)
     end
