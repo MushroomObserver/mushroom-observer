@@ -1,21 +1,20 @@
 import { Controller } from "@hotwired/stimulus"
 
+// Handles page sections that get updated by Turbo on successful form submit.
+// Dispatching an event here allows triggering other Stimulus controller actions
+// that "clean up", e.g. remove or hide a modal.
 // Connects to data-controller="section-update"
 export default class extends Controller {
-
-  // this is a handler for page elements that get updated
-  // on successful form submit, so it "cleans up"
   connect() {
     this.element.dataset.sectionUpdate = "connected"
 
-    // Simpler than adding a data-action attribute on every section
-    // replaced by Turbo?
+    // Currently we're just using this to trigger modal:remove or modal:hide
     this.element.addEventListener("turbo:frame-render", this.updated())
   }
 
+  // Dispatch a custom event to the window element
   updated() {
     // console.log(this.element.id + " turbo:frame-render section updated")
-    // broadcast change
     this.dispatch("updated")
   }
 }
