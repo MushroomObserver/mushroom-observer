@@ -30,13 +30,15 @@ partial = "observations/show/#{identifier}"
 <%=
 turbo_stream.replace(id) do
   render(
-    partial: partial,
-    locals: local_assigns.except(:identifier),
-    layout: false
+    partial: partial, layout: false,
+    locals: local_assigns.except(:identifier)
   )
 end
 
 turbo_stream.update("page_flash") do
   flash_notices_html
 end
+
+turbo_stream.close_modal("mo_ajax_progress")
+turbo_stream.remove("mo_ajax_progress")
 %>
