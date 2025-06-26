@@ -2,7 +2,8 @@
 
 <!--OBSERVATION_NAMINGS / TABLE REFRESHED BY TURBO -->
 <%=
-tag.div(id: "observation_namings") do
+tag.div(id: "observation_namings",
+        data: { controller: "section-update" }) do
   tag.div(class: "namings-table panel panel-default mb-4",
           id: "namings_table") do
     [
