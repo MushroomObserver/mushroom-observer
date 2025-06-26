@@ -343,7 +343,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_equal(where, obs.where)
     assert_equal(names(:coprinus_comatus).id, nam.name_id)
     assert_equal("2.03659",
-                 format("%<vote_cache>.5f", vote_cache: obs.vote_cache))
+                 format("%<vote_cache>.5f", vote_cache: obs.reload.vote_cache))
     assert_not_nil(obs.rss_log)
     # This was getting set to zero instead of nil if no images were uploaded
     # when obs was created.
