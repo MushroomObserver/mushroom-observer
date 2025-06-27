@@ -61,7 +61,7 @@ module Report
         substrate(row),
         occurence_remarks(row), # notes minus substrate and associatedTaxa
         associated_taxa(row), # was`host`
-        verbatim_atttributes(row), # anchored link to MO observation url
+        verbatim_attributes(row), # anchored link to MO observation url
         row.country, # country
         row.state, # stateProvince
         row.county, # county
@@ -126,7 +126,7 @@ module Report
     end
 
     # text of an anchored link to the MO Observation
-    def verbatim_atttributes(row)
+    def verbatim_attributes(row)
       "<a href='#{HTTP_DOMAIN}/#{row.obs_id}' " \
       "target='_blank' style='color: blue;'>" \
       "Original observation ##{row.obs_id} (Mushroom Observer)</a>"

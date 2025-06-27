@@ -753,7 +753,7 @@ class ReportTest < UnitTestCase
       substrate: "",
       occurrenceRemarks: obs.notes[:Other] || "",
       associatedTaxa: nil,
-      verbatimAttributes: verbatim_atttributes(obs),
+      verbatimAttributes: verbatim_attributes(obs),
       # where is assumed to have just city, state/province, country
       country: obs_where.split.last,
       stateProvince: obs_where.split[-2]&.delete_suffix(",") || nil,
@@ -769,7 +769,7 @@ class ReportTest < UnitTestCase
     }
   end
 
-  def verbatim_atttributes(obs)
+  def verbatim_attributes(obs)
     "<a href='#{Report::Mycoportal::HTTP_DOMAIN}/#{obs.id}' " \
     "target='_blank' style='color: blue;'>" \
     "Original observation ##{obs.id} (Mushroom Observer)" \
