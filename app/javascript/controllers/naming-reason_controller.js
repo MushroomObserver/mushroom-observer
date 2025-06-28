@@ -14,7 +14,7 @@ export default class extends Controller {
   static targets = ['collapse', 'input']
 
   connect() {
-    this.element.dataset.stimulus = "naming-reason-connected";
+    this.element.dataset.namingReason = "connected";
     this.delegate = delegate('shown.bs.collapse')
   }
 

@@ -13,7 +13,7 @@ export default class extends Controller {
   static outlets = ["autocompleter"]
 
   connect() {
-    this.element.dataset.stimulus = "geocode-connected"
+    this.element.dataset.geocode = "connected"
 
     // These private vars are for keeping track of user inputs to a form
     // that should update the form after a timeout.

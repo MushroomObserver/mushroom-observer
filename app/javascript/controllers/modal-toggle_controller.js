@@ -11,7 +11,7 @@ import { get } from "@rails/request.js"
 export default class extends Controller {
 
   connect() {
-    this.element.dataset.stimulus = "modal-toggle-connected";
+    this.element.dataset.modalToggle = "connected";
     this.modalSelector = this.element.dataset.modal
     this.destination = this.element.getAttribute("href")
   }

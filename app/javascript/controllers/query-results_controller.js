@@ -18,7 +18,7 @@ export default class extends Controller {
   static targets = ['link']
 
   connect() {
-    this.element.dataset.stimulus = "query-results-connected";
+    this.element.dataset.queryResults = "connected";
     this.queryString = this.element.closest("#results").dataset.q;
     this.syncQueryStringToLinks();
   }
