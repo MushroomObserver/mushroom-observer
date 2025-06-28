@@ -64,7 +64,7 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_match(suggestion_date, proposed_name_notes)
 
     assert_not(obs.specimen, "Obs should not have a specimen")
-    assert_match(/Observation Fields: none/, obs.comments.first.comment,
+    assert_match(/Observation Fields: none/, obs.notes.to_s,
                  "Missing 'none' for Observation Fields")
 
     assert_equal(
@@ -237,8 +237,8 @@ class InatImportJobTest < ActiveJob::TestCase
       ary << id[:taxon][:name]
     end
     unique_suggested_taxon_names.each do |taxon_name|
-      assert_match(taxon_name, obs.comments.first.comment,
-                   "Snapshot comment missing suggested name #{taxon_name}")
+      assert_match(taxon_name, obs.notes.to_s,
+                   "Notes Snapshot missing suggested name #{taxon_name}")
     end
   end
 
@@ -642,30 +642,12 @@ class InatImportJobTest < ActiveJob::TestCase
       "MO Observation should have ExternalLink to iNat observation"
     )
 
-    assert(obs.comments.any?, "Imported iNat should have >= 1 Comment")
-    obs_comments =
-      Comment.where(target_type: "Observation", target_id: obs.id)
-    assert(obs_comments.one?)
-    assert(obs_comments.where(Comment[:summary] =~ /iNat Data/).present?,
-           "Missing Initial Commment (#{:inat_snapshot_caption.l})")
-    assert_equal(
-      user, obs_comments.first.user,
-      "Comment user should be user who creates the MO Observation"
-    )
-    inat_snapshot_caption = obs_comments.first.comment
-    [
-      :USER.l, :OBSERVED.l, :show_observation_inat_lat_lng.l, :PLACE.l,
-      :ID.l, :DQA.l, :show_observation_inat_suggested_ids.l,
-      :OBSERVATION_FIELDS.l,
-      :ANNOTATIONS.l, :PROJECTS.l, :TAGS.l
-    ].each do |caption|
-      assert_match(
-        /#{caption}/, inat_snapshot_caption,
-        "Initial Commment (#{:inat_snapshot_caption.l}) is missing #{caption}"
-      )
-    end
-
     assert(obs.inat_id.present?, "Failed to set Observation inat_id")
+
+    assert_empty(
+      obs.comments.where(Comment[:summary] =~ :inat_snapshot_caption.l.to_s),
+      "Observation should not have a (#{:inat_snapshot_caption.l}) comment"
+    )
 
     ### Observation Notes
     assert(obs.notes.key?(:inat_snapshot_caption.l.to_sym),
