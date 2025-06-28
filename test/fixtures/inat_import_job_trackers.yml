@@ -1,1 +1,4 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+katrina_tracker:
+  inat_import: <%= ActiveRecord::FixtureSet.identify(:katrina_inat_import) %>

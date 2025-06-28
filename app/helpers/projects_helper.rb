@@ -2,6 +2,22 @@
 
 # View Helpers for Projects, Project Violations
 module ProjectsHelper
+  def project_search_field(project:, form:)
+    messages = {
+      off: :show_project_all_names.l,
+      red: :show_project_has_no_name.l,
+      green: :show_project_has_name.l
+    }
+    render(partial: "shared/search_status_autocompleter",
+           locals: { form:, matches: project_names(project), messages: })
+  end
+
+  # NOTE: Helper methods are not module-scoped, needs a more specific name
+  def project_names(project)
+    project.observations.joins(:name).select("names.text_name", "names.id").
+      distinct.order("names.text_name")
+  end
+
   def violation_table_headers(project)
     [
       nil, # column for checkbox

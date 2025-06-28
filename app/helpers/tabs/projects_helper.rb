@@ -93,7 +93,7 @@ module Tabs
 
     def build_tab(link_text, link, controller)
       tag.li(class: "nav-item") do
-        classes = "mt-3 nav-link #{active_tab?(controller) ? "active" : ""}"
+        classes = "mt-3 nav-link #{"active" if active_tab?(controller)}"
         link_to(link_text, link,
                 { class: classes })
       end
@@ -102,7 +102,7 @@ module Tabs
     def violations_tab(project)
       violations_count = project.count_violations
       classes = if violations_count.zero?
-                  "mt-3 nav-link #{active_tab?("violations") ? "active" : ""}"
+                  "mt-3 nav-link #{"active" if active_tab?("violations")}"
                 else
                   "mt-3 nav-link text-warning"
                 end

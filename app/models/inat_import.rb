@@ -28,8 +28,13 @@ class InatImport < ApplicationRecord
   }
 
   belongs_to :user
+  has_many :inat_import_job_trackers, dependent: :delete_all
 
   serialize :log, type: Array, coder: YAML
+
+  def pending?
+    %w[Authorizing Authenticating Importing].include?(state)
+  end
 
   def add_response_error(error)
     response_errors << "#{error.class.name}: #{error.message}\n"

@@ -814,6 +814,11 @@ imported_inat_obs:
   <<: *DEFAULTS
   user: dick
   inat_id: 12345
+
+provisional_obs:
+  <<: *DEFAULTS
+  name: provisional_name
+
 #
 #
 # IMPORTANT - AVOID CREATING FUTURE TEST ERRORS

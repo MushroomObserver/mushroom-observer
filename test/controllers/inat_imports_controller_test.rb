@@ -61,6 +61,19 @@ class InatImportsControllerTest < FunctionalTestCase
     )
   end
 
+  def test_new_inat_import_pending_import
+    user = users(:katrina)
+    import = inat_imports(:katrina_inat_import)
+    tracker = inat_import_job_trackers(:katrina_tracker)
+
+    login(user.login)
+    get(:new)
+
+    assert_redirected_to(
+      inat_import_path(import, params: { tracker_id: tracker.id })
+    )
+  end
+
   def test_create_missing_username
     user = users(:rolf)
     id = "123"

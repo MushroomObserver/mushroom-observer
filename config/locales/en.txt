@@ -2880,6 +2880,7 @@
   field_slip_edit: Edit [:FIELD_SLIP]
   field_slip_editing: Editing Field Slip
   field_slip_errors: prohibited this field_slip from being saved
+  field_slip_filter_by: Filter by [:PROJECT]
   field_slip_index: "[:FIELD_SLIP] Index"
   field_slip_job_no_project: No Project with id=[ID]
   field_slip_job_no_tracker: No Field Slip Tracker found
@@ -3105,6 +3106,7 @@
   inat_import_tracker_results: Results
   inat_import_tracker_importable_count: Number of Importable Observations
   inat_import_tracker_imported_count: Number Imported
+  inat_import_tracker_pending: Please wait until your pending iNat Import is Done before starting a new one.
   inat_importables_explanation: "An ??importable?? observation is an iNaturalist observation: which you created, which does not exist in MO, and whose iNat identity is a fungus or slime mold."
 
   # observer/list_notifications
@@ -3458,6 +3460,9 @@
   show_project_edit: Edit Project
   show_project_field_slip_create: Create Field Slip PDF
   show_project_field_slip_prefix: Field Slip Prefix
+  show_project_all_names: All Project Names
+  show_project_has_name: Project has this name
+  show_project_has_no_name: Project does not have this name
   show_project_join: Join Project
   show_project_location: Location
   show_project_leave: Leave Project

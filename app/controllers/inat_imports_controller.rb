@@ -80,7 +80,16 @@ class InatImportsController < ApplicationController
     @inat_import = InatImport.find(params[:id])
   end
 
-  def new; end
+  def new
+    @inat_import = InatImport.find_or_create_by(user: @user)
+    return unless @inat_import.pending?
+
+    tracker = InatImportJobTracker.where(inat_import: @inat_import).last
+    flash_error(:inat_import_tracker_pending.t)
+    redirect_to(
+      inat_import_path(@inat_import, params: { tracker_id: tracker.id })
+    )
+  end
 
   def create
     return reload_form unless params_valid?
@@ -125,9 +134,8 @@ class InatImportsController < ApplicationController
     auth_code = params[:code]
     return not_authorized if auth_code.blank?
 
-    inat_import = InatImport.find_or_create_by(user: User.current)
-    inat_import.update(token: auth_code, state: "Authenticating")
-    tracker = InatImportJobTracker.create(inat_import: inat_import.id)
+    inat_import = inat_import_authenticating(auth_code)
+    tracker = fresh_tracker(inat_import)
 
     Rails.logger.info(
       "Enqueueing InatImportJob for InatImport id: #{inat_import.id}"
@@ -146,5 +154,17 @@ class InatImportsController < ApplicationController
   def not_authorized
     flash_error(:inat_no_authorization.l)
     redirect_to(observations_path)
+  end
+
+  def inat_import_authenticating(auth_code)
+    inat_import = InatImport.find_or_create_by(user: @user)
+    inat_import.update(token: auth_code, state: "Authenticating")
+    inat_import
+  end
+
+  def fresh_tracker(inat_import)
+    # clean out this user's old tracker(s)
+    InatImportJobTracker.where(inat_import: inat_import.id).destroy_all
+    InatImportJobTracker.create(inat_import: inat_import.id)
   end
 end
