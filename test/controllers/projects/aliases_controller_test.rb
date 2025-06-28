@@ -16,11 +16,9 @@ module Projects
       get(:index, params: { project_id: @project.id })
       assert_response(:success)
       assert_not_nil(assigns(:project_aliases))
-      assert_select("li.nav-item") do
-        assert_select(
-          "a.nav-link.active[href='/projects/#{@project.id}/aliases']",
-          text: /Project Aliases/
-        )
+      url = "/projects/#{@project.id}/aliases/#{@project_alias.id}/edit"
+      assert_select("table.table-project-members") do
+        assert_select("a[href='#{url}']", text: "Edit")
       end
     end
 

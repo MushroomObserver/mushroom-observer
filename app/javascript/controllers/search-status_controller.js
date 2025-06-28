@@ -15,24 +15,12 @@ export default class extends Controller {
     this.element.dataset.searchStatus = "connected";
     // console.log("search-status controller connected")
     this.validStates = ["off", "red", "green"]
-    this.setStatus("off")
+    this.setOffStatus()
   }
 
   // Private method to get current status
   getStatus() {
     return this.currentStatus
-  }
-
-  // Private method to set status programmatically
-  setStatus(status) {
-    // sanitize publicly sendable value
-    if (!this.validStates.includes(status)) return
-
-    this.currentStatus = status
-    this.lightTarget.classList.remove("off", "red", "green")
-    this.lightTarget.classList.add(status)
-    console.log(this.messagesValue[this.currentStatus])
-    this.messageTarget.textContent = this.messagesValue[this.currentStatus]
   }
 
   // Public method to check input against list of matching names
@@ -43,7 +31,7 @@ export default class extends Controller {
     // If no input, show the "off" message
     if (!inputValue) {
       // console.log("checkMatch: Empty input, setting status 'off'")
-      this.setStatus("off")
+      this.setOffStatus()
       return
     }
 
@@ -51,9 +39,48 @@ export default class extends Controller {
     const hasMatch = this.matchesValue.some(obj =>
       obj.text_name.toLowerCase().startsWith(inputValue)
     )
-
-    const status = hasMatch ? "green" : "red"
-    this.setStatus(status)
+    const matchingValues = this.matchesValue.filter(obj =>
+      obj.text_name.toLowerCase().startsWith(inputValue)
+    )
+    this.setStatus(matchingValues)
   }
 
+  // Low-level function with common functionality
+  _updateDisplay(status, textContent) {
+    // sanitize publicly sendable value
+    if (!this.validStates.includes(status)) return
+
+    this.currentStatus = status
+    this.lightTarget.classList.remove("off", "red", "green")
+    this.lightTarget.classList.add(status)
+    // console.log(this.messagesValue[this.currentStatus])
+    this.messageTarget.textContent = textContent
+  }
+
+  // Function that only sets red or green based on values list
+  setStatus(values) {
+    let status, textContent;
+
+    if (values.length === 0) {
+      status = "red";
+      textContent = this.messagesValue[status];
+    } else {
+      status = "green";
+      const baseMessage = this.messagesValue[status];
+      if (values.length === 1) {
+        textContent = `${baseMessage} ${values[0].text_name || values[0]}`;
+      } else {
+        textContent = `${baseMessage} ${values[0].text_name || values[0]}, ...`;
+      }
+    }
+
+    this._updateDisplay(status, textContent);
+  }
+
+  // Function that handles the "off" case
+  setOffStatus() {
+    const status = "off";
+    const textContent = this.messagesValue[status];
+    this._updateDisplay(status, textContent);
+  }
 }

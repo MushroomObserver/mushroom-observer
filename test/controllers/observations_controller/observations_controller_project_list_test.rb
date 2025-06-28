@@ -214,6 +214,14 @@ class ObservationsControllerProjectListTest < FunctionalTestCase
     assert_obj_arrays_equal([project], obs.reload.projects)
   end
 
+  def test_with_species_list
+    init_for_list_checkbox_tests
+
+    login("rolf")
+    get(:new, params: { species_list: @spl1.id.to_s })
+    assert_list_checks(@spl1.id => :checked)
+  end
+
   def test_list_checkboxes_in_create_observation
     init_for_list_checkbox_tests
 

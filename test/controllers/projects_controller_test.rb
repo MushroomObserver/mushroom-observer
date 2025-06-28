@@ -75,7 +75,7 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_select(
       "a[href*=?]", new_project_member_path(project_id: p_id), count: 0
     )
-    assert_select("form[action=?]", project_path(p_id), count: 1)
+    assert_select("form[action=?]", add_dispatch_path, count: 1)
   end
 
   def test_show_project_nonexistent

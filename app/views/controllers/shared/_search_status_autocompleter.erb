@@ -17,9 +17,16 @@ tag.div(
       [
         tag.div(class: "status-indicator",
                 data: { search_status_target: "light" }),
-        tag.span(:show_project_all_names.l,
+        tag.span(:search_status_all_names.l(type:),
                  class: "status-text",
-                 data: { search_status_target: "message" })
+                 data: { search_status_target: "message" }),
+        tag.div(class: "field-slip-container vcenter") do
+          [
+            tag.span("Field Slip:", for: "field_slip", class: "mx-3"),
+            tag.input(type: "text", id: "field_slip", name: "field_slip"),
+            tag.button("Add", type: "submit", class: "btn btn-default mx-3")
+          ].safe_join
+        end
       ].safe_join
     end,
     autocompleter_field(
@@ -28,7 +35,8 @@ tag.div(
         search_status_target: "input",
         action: [
           "change->search-status#checkMatch",
-          "keyup->search-status#checkMatch"
+          "keyup->search-status#checkMatch",
+          "focus->search-status#checkMatch"
         ].join(" ")
       }
     )
