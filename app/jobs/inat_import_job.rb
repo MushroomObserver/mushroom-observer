@@ -215,8 +215,6 @@ class InatImportJob < ApplicationJob
 
   def new_obs_params
     name_id = id_or_provisional_or_species_name
-    notes = @inat_obs.notes
-    notes[:inat_snapshot_caption.l.to_sym] = @inat_obs.snapshot
     { user: @user,
       when: @inat_obs.when,
       location: @inat_obs.location,
@@ -252,6 +250,12 @@ class InatImportJob < ApplicationJob
 
   def need_new_prov_name?(parsed_prov_name)
     Name.where(text_name: parsed_prov_name.text_name).none?
+  end
+
+  def notes
+    notes = @inat_obs.notes
+    notes[:inat_snapshot_caption.l.to_sym] = @inat_obs.snapshot
+    notes
   end
 
   def add_external_link
