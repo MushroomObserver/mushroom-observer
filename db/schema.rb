@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_05_12_174607) do
+ActiveRecord::Schema[7.2].define(version: 2025_06_22_170532) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -218,6 +218,10 @@ ActiveRecord::Schema[7.2].define(version: 2025_05_12_174607) do
     t.integer "imported_count"
     t.string "response_errors"
     t.datetime "ended_at"
+    t.integer "total_imported_count"
+    t.integer "total_seconds"
+    t.float "avg_import_time"
+    t.datetime "last_obs_start"
   end
 
   create_table "interests", id: :integer, charset: "utf8mb3", force: :cascade do |t|

@@ -3100,7 +3100,9 @@
   inat_import_tracker: iNat Import Tracker
   inat_import_tracker_status: "[:STATUS]"
   inat_import_tracker_started: Started
-  inat_import_tracker_elapsed: Elapsed Time
+  inat_import_tracker_elapsed_time: Elapsed Time
+  inat_import_tracker_estimated_remaining_time: Estimated Remaining Time
+  inat_import_tracker_calculating_time: "Calculating ..."
   inat_import_tracker_ended: Ended
   inat_import_imported: Imported
   inat_import_tracker_results: Results

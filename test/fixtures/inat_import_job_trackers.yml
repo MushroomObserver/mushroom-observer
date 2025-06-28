@@ -2,3 +2,6 @@
 
 katrina_tracker:
   inat_import: <%= ActiveRecord::FixtureSet.identify(:katrina_inat_import) %>
+
+lone_wolf_tracker:
+  inat_import: <%= ActiveRecord::FixtureSet.identify(:lone_wolf_import) %>
