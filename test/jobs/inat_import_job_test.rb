@@ -664,6 +664,27 @@ class InatImportJobTest < ActiveJob::TestCase
         "Initial Commment (#{:inat_data_comment.l}) is missing #{caption}"
       )
     end
+
+    assert(obs.inat_id.present?, "Failed to set Observation inat_id")
+=begin
+    inat_id = @parsed_results.first[:id]
+    assert_match(
+      /#{inat_id}/, obs_notes,
+      "Observation notes should include iNat observation ID"
+    )
+
+    [
+      :USER.l, :OBSERVED.l, :show_observation_inat_lat_lng.l, :PLACE.l,
+      :ID.l, :DQA.l, :show_observation_inat_suggested_ids.l,
+      :OBSERVATION_FIELDS.l,
+      :ANNOTATIONS.l, :PROJECTS.l, :TAGS.l
+    ].each do |caption|
+      assert_match(
+        /#{caption}/, obs_notes,
+        "Observation notes are missing #{caption}"
+      )
+    end
+=end
   end
 
   def assert_naming(obs:, name:, user:)
