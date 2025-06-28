@@ -75,9 +75,6 @@ class InatObsTest < UnitTestCase
         #{:DQA.l}: #{mock_inat_obs.dqa}\n
         #{:show_observation_inat_suggested_ids.l}: #{mock_inat_obs.suggested_id_names}\n
         #{:OBSERVATION_FIELDS.t}: #{mock_inat_obs.obs_fields(mock_inat_obs.inat_obs_fields)}\n
-        #{:PROJECTS.l}: #{:inat_not_imported.l}\n
-        #{:ANNOTATIONS.l}: #{:inat_not_imported.l}\n
-        #{:TAGS.l}: #{:inat_not_imported.l}\n
       SNAPSHOT
     assert_equal(expected_snapshot, mock_inat_obs.snapshot)
 

@@ -655,8 +655,7 @@ class InatImportJobTest < ActiveJob::TestCase
     [
       :USER.l, :OBSERVED.l, :show_observation_inat_lat_lng.l, :PLACE.l,
       :ID.l, :DQA.l, :show_observation_inat_suggested_ids.l,
-      :OBSERVATION_FIELDS.l,
-      :ANNOTATIONS.l, :PROJECTS.l, :TAGS.l
+      :OBSERVATION_FIELDS.l
     ].each do |caption|
       assert_match(
         /#{caption}/, obs.notes.to_s,

@@ -219,15 +219,13 @@ class Inat
         ID: inat_taxon_name,
         DQA: dqa,
         show_observation_inat_suggested_ids: suggested_id_names,
-        OBSERVATION_FIELDS: obs_fields(inat_obs_fields),
-        PROJECTS: :inat_not_imported.t,
-        ANNOTATIONS: :inat_not_imported.t,
-        TAGS: :inat_not_imported.t
+        OBSERVATION_FIELDS: obs_fields(inat_obs_fields)
       }.each do |label, value|
         result += "#{label.to_sym.t}: #{value}\n"
       end
       result
     end
+    private :snapshop_raw_str
 
     def suggested_id_names
       # Get unique suggested taxon ids
