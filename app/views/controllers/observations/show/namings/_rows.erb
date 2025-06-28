@@ -1,0 +1,24 @@
+<%# locals: (user: nil, obs: nil, consensus: nil) %>
+
+<%
+namings = obs.namings.sort_by(&:created_at)
+any_names = obs.namings&.length&.positive?
+%>
+
+<%=
+tag.div(
+  id: "namings_table_rows",
+  class: "list-group list-group-flush"
+) do
+  if any_names
+    namings.each do |naming|
+      concat(
+        render(partial: "observations/show/namings/row",
+               locals: { **naming_row_content(user, consensus, naming) })
+      )
+    end
+  else
+    tag.div(:show_namings_no_names_yet.t, class: "list-group-item")
+  end
+end
+%>

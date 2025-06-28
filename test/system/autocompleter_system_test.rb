@@ -149,6 +149,6 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     assert_no_selector(".auto_complete")
     within("#obs_#{obs.id}_naming_form") { click_commit }
     assert_no_selector("#modal_obs_#{obs.id}_naming", wait: 9)
-    within("#namings_table") { assert_text("Peltigeraceae", wait: 6) }
+    within("#observation_namings") { assert_text("Peltigeraceae", wait: 6) }
   end
 end

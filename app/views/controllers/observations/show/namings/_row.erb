@@ -1,0 +1,25 @@
+<%# locals: (id: nil, name: nil, proposer: nil, vote_tally: nil, your_vote: nil, reasons: nil, eyes: nil) %>
+
+<%=
+tag.div(class: "list-group-item") do
+  tag.div(class: "row align-items-center naming-row",
+          id: "observation_naming_#{id}") do
+    [
+      tag.div(class: "col col-sm-11") do
+        [
+          tag.div(class: "row align-items-center") do
+            [
+              tag.div(name, class: "col col-sm-4"),
+              tag.div(proposer, class: "col col-sm-3"),
+              tag.div(vote_tally, class: "col col-sm-2"),
+              tag.div(your_vote, class: "col col-sm-3")
+            ].safe_join
+          end,
+          tag.div(reasons, class: "naming-reasons small mt-1")
+        ].safe_join
+      end,
+      tag.div(eyes, class: "col-sm-1 d-none d-sm-block px-sm-0")
+    ].safe_join
+  end
+end
+%>

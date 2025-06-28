@@ -95,13 +95,7 @@ class InatImportsController < ApplicationController
     return reload_form unless params_valid?
 
     assure_user_has_inat_import_api_key
-    @inat_import = InatImport.find_or_create_by(user: @user)
-    @inat_import.update(state: "Authorizing",
-                        import_all: params[:all],
-                        importables: 0, imported_count: 0,
-                        inat_ids: params[:inat_ids],
-                        inat_username: params[:inat_username].strip,
-                        response_errors: "", token: "", log: [], ended_at: nil)
+    init_ivars
     request_inat_user_authorization
   end
 
@@ -121,6 +115,31 @@ class InatImportsController < ApplicationController
     key.verify! if key.verified.nil?
   end
 
+  def init_ivars
+    @inat_import = InatImport.find_or_create_by(user: @user)
+    @inat_import.update(
+      state: "Authorizing",
+      import_all: params[:all],
+      importables: importables_count,
+      imported_count: 0,
+      avg_import_time: @inat_import.initial_avg_import_seconds,
+      inat_ids: params[:inat_ids],
+      inat_username: params[:inat_username].strip,
+      response_errors: "",
+      token: "",
+      log: [],
+      ended_at: nil
+    )
+  end
+
+  # NOTE: jdc 2024-06-15 This method is a quick & dirty way to get
+  # an initial estimate when the user provides a list of iNat ids.
+  # When implementing import_all, we should instead use the iNat API
+  # to get the number of observations to be imported.
+  def importables_count
+    params[:inat_ids].split(",").length
+  end
+
   def request_inat_user_authorization
     redirect_to(INAT_AUTHORIZATION_URL, allow_other_host: true)
   end
@@ -135,6 +154,7 @@ class InatImportsController < ApplicationController
     return not_authorized if auth_code.blank?
 
     inat_import = inat_import_authenticating(auth_code)
+    inat_import.reset_last_obs_start
     tracker = fresh_tracker(inat_import)
 
     Rails.logger.info(

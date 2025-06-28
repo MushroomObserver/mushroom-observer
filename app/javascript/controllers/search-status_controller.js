@@ -1,4 +1,4 @@
-// app/javascript/controllers/status_light_controller.js
+// app/javascript/controllers/search-status_controller.js
 import { Controller } from "@hotwired/stimulus"
 
 // This controller updates the status of a "status light" that shows
@@ -12,8 +12,8 @@ export default class extends Controller {
   static targets = ["input", "light", "message"]
 
   connect() {
-    this.element.dataset.statusLight = "connected";
-    // console.log("Status light controller connected")
+    this.element.dataset.searchStatus = "connected";
+    // console.log("search-status controller connected")
     this.validStates = ["off", "red", "green"]
     this.setOffStatus()
   }
