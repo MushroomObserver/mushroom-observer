@@ -215,6 +215,8 @@ class InatImportJob < ApplicationJob
 
   def new_obs_params
     name_id = id_or_provisional_or_species_name
+    notes = @inat_obs.notes
+    notes[:inat_snapshot_caption.l.to_sym] = @inat_obs.snapshot
     { user: @user,
       when: @inat_obs.when,
       location: @inat_obs.location,
@@ -225,7 +227,7 @@ class InatImportJob < ApplicationJob
       name_id: name_id,
       specimen: @inat_obs.specimen?,
       text_name: Name.find(name_id).text_name,
-      notes: @inat_obs.notes,
+      notes: notes,
       source: @inat_obs.source,
       inat_id: @inat_obs[:id] }
   end
@@ -390,7 +392,7 @@ class InatImportJob < ApplicationJob
   def add_snapshot_of_import_comment
     params = { user: @user,
                target: @observation,
-               summary: "#{:inat_data_comment.t} #{@observation.created_at}",
+               summary: "#{:inat_snapshot_caption.t} #{@observation.created_at}",
                comment: @inat_obs.snapshot }
     Comment.create(params)
   end

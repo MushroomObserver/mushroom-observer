@@ -647,12 +647,12 @@ class InatImportJobTest < ActiveJob::TestCase
       Comment.where(target_type: "Observation", target_id: obs.id)
     assert(obs_comments.one?)
     assert(obs_comments.where(Comment[:summary] =~ /iNat Data/).present?,
-           "Missing Initial Commment (#{:inat_data_comment.l})")
+           "Missing Initial Commment (#{:inat_snapshot_caption.l})")
     assert_equal(
       user, obs_comments.first.user,
       "Comment user should be user who creates the MO Observation"
     )
-    inat_data_comment = obs_comments.first.comment
+    inat_snapshot_caption = obs_comments.first.comment
     [
       :USER.l, :OBSERVED.l, :show_observation_inat_lat_lng.l, :PLACE.l,
       :ID.l, :DQA.l, :show_observation_inat_suggested_ids.l,
@@ -660,19 +660,16 @@ class InatImportJobTest < ActiveJob::TestCase
       :ANNOTATIONS.l, :PROJECTS.l, :TAGS.l
     ].each do |caption|
       assert_match(
-        /#{caption}/, inat_data_comment,
-        "Initial Commment (#{:inat_data_comment.l}) is missing #{caption}"
+        /#{caption}/, inat_snapshot_caption,
+        "Initial Commment (#{:inat_snapshot_caption.l}) is missing #{caption}"
       )
     end
 
     assert(obs.inat_id.present?, "Failed to set Observation inat_id")
-=begin
-    inat_id = @parsed_results.first[:id]
-    assert_match(
-      /#{inat_id}/, obs_notes,
-      "Observation notes should include iNat observation ID"
-    )
 
+    ### Observation Notes
+    assert(obs.notes.key?(:inat_snapshot_caption.l.to_sym),
+           "Observation notes missing #{:inat_snapshot_caption.l}")
     [
       :USER.l, :OBSERVED.l, :show_observation_inat_lat_lng.l, :PLACE.l,
       :ID.l, :DQA.l, :show_observation_inat_suggested_ids.l,
@@ -680,11 +677,10 @@ class InatImportJobTest < ActiveJob::TestCase
       :ANNOTATIONS.l, :PROJECTS.l, :TAGS.l
     ].each do |caption|
       assert_match(
-        /#{caption}/, obs_notes,
+        /#{caption}/, obs.notes.to_s,
         "Observation notes are missing #{caption}"
       )
     end
-=end
   end
 
   def assert_naming(obs:, name:, user:)
