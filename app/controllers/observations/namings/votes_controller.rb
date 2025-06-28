@@ -86,18 +86,37 @@ module Observations::Namings
       respond_to do |format|
         format.turbo_stream do
           case params[:context]
+          when "namings_table"
+            render_namings_section_update
           when "matrix_box"
-            render(partial: "observations/namings/update_matrix_box",
-                   locals: { obs: @observation })
-          else
-            redirect_with_query(@observation.show_link_args)
+            render_matrix_box_naming_update
           end
-          return
         end
         format.html do
           redirect_with_query(@observation.show_link_args)
         end
       end
+    end
+
+    # Re-render the whole obs template if the consensus changed. This will
+    # update the title and the name info panel. Otherwise, just update namings.
+    def render_namings_section_update
+      if @consensus.consensus_changed
+        redirect_with_query(@observation.show_link_args) and return
+      end
+
+      render(
+        partial: "observations/show/section_update",
+        locals: { identifier: "namings", obs: @observation,
+                  user: @user, consensus: @consensus }
+      ) and return
+    end
+
+    def render_matrix_box_naming_update
+      render(
+        partial: "observations/namings/update_matrix_box",
+        locals: { obs: @observation }
+      ) and return
     end
   end
 end
