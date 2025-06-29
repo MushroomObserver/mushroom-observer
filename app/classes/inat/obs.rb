@@ -102,7 +102,9 @@ class Inat
     def notes
       return { Collector: collector } if self[:description].empty?
 
-      { Collector: collector, Other: self[:description].gsub(%r{</?p>}, "") }
+      { Collector: collector,
+        :inat_snapshot_caption.l.to_sym => snapshot,
+        Other: self[:description].gsub(%r{</?p>}, "") }
     end
 
     # min bounding rectangle of iNat location blurred by public accuracy
@@ -219,15 +221,13 @@ class Inat
         ID: inat_taxon_name,
         DQA: dqa,
         show_observation_inat_suggested_ids: suggested_id_names,
-        OBSERVATION_FIELDS: obs_fields(inat_obs_fields),
-        PROJECTS: :inat_not_imported.t,
-        ANNOTATIONS: :inat_not_imported.t,
-        TAGS: :inat_not_imported.t
+        OBSERVATION_FIELDS: obs_fields(inat_obs_fields)
       }.each do |label, value|
-        result += "#{label.to_sym.t}: #{value}\n"
+        result += "#{label.to_sym.t} #{value}\n"
       end
-      result
+      result.chomp
     end
+    private :snapshop_raw_str
 
     def suggested_id_names
       # Get unique suggested taxon ids

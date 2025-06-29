@@ -189,7 +189,6 @@ class InatImportJob < ApplicationJob
     add_inat_images(@inat_obs[:observation_photos])
     update_names_and_proposals
     add_inat_sequences
-    add_snapshot_of_import_comment
     # NOTE: update field slip 2024-09-09 jdc
     # https://github.com/MushroomObserver/mushroom-observer/issues/2380
     update_inat_observation
@@ -225,7 +224,7 @@ class InatImportJob < ApplicationJob
       name_id: name_id,
       specimen: @inat_obs.specimen?,
       text_name: Name.find(name_id).text_name,
-      notes: @inat_obs.notes,
+      notes: notes,
       source: @inat_obs.source,
       inat_id: @inat_obs[:id] }
   end
@@ -250,6 +249,12 @@ class InatImportJob < ApplicationJob
 
   def need_new_prov_name?(parsed_prov_name)
     Name.where(text_name: parsed_prov_name.text_name).none?
+  end
+
+  def notes
+    notes = @inat_obs.notes
+    notes[:inat_snapshot_caption.l.to_sym] = @inat_obs.snapshot
+    notes
   end
 
   def add_external_link
@@ -385,14 +390,6 @@ class InatImportJob < ApplicationJob
                  notes: sequence[:notes] }
       API2.execute(params)
     end
-  end
-
-  def add_snapshot_of_import_comment
-    params = { user: @user,
-               target: @observation,
-               summary: "#{:inat_data_comment.t} #{@observation.created_at}",
-               comment: @inat_obs.snapshot }
-    Comment.create(params)
   end
 
   def update_inat_observation
