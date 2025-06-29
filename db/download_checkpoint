@@ -5,6 +5,10 @@
 yesterdays_date=$(date -v -1d '+%Y%m%d')
 
 # Prompt the user for their name
-read -p "Please enter your account name on the images server: " user_name
+read -p "Your account name on the images server: " user_name
 
-scp "$user_name@images.mushroomobserver.org:/data/images/backup/database-$yesterdays_date.gz" ./checkpoint.gz
+# Download the checkpoint and rename it
+scp "$user_name@images.mushroomobserver.org:/data/images/backup/database-$yesterdays_date.gz" "./checkpoint.gz"
+
+# Strip the checkpoint
+./db/strip_checkpoint
