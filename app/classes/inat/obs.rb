@@ -102,7 +102,9 @@ class Inat
     def notes
       return { Collector: collector } if self[:description].empty?
 
-      { Collector: collector, Other: self[:description].gsub(%r{</?p>}, "") }
+      { Collector: collector,
+        :inat_snapshot_caption.l.to_sym => snapshot,
+        Other: self[:description].gsub(%r{</?p>}, "") }
     end
 
     # min bounding rectangle of iNat location blurred by public accuracy
@@ -221,9 +223,9 @@ class Inat
         show_observation_inat_suggested_ids: suggested_id_names,
         OBSERVATION_FIELDS: obs_fields(inat_obs_fields)
       }.each do |label, value|
-        result += "#{label.to_sym.t}: #{value}\n"
+        result += "#{label.to_sym.t} #{value}\n"
       end
-      result
+      result.chomp
     end
     private :snapshop_raw_str
 

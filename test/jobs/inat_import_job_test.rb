@@ -64,7 +64,7 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_match(suggestion_date, proposed_name_notes)
 
     assert_not(obs.specimen, "Obs should not have a specimen")
-    assert_match(/Observation Fields: none/, obs.notes.to_s,
+    assert_match(/Observation Fields none/, obs.notes.to_s,
                  "Missing 'none' for Observation Fields")
 
     assert_equal(

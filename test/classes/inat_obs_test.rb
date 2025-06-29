@@ -56,27 +56,29 @@ class InatObsTest < UnitTestCase
                      mock_inat_obs.send(attribute))
       end
 
+    expected_snapshot =
+      <<~SNAPSHOT.gsub(/^\s+/, "").chomp
+        #{:USER.l} #{mock_inat_obs[:user][:login]}\n
+        #{:OBSERVED.l} #{mock_inat_obs.when}\n
+        #{:show_observation_inat_lat_lng.l} #{mock_inat_obs.lat_lon_accuracy}\n
+        #{:PLACE.l} #{mock_inat_obs[:place_guess]}\n
+        #{:ID.l} #{mock_inat_obs.inat_taxon_name}\n
+        #{:DQA.l} #{mock_inat_obs.dqa}\n
+        #{:show_observation_inat_suggested_ids.l} #{mock_inat_obs.suggested_id_names}\n
+        #{:OBSERVATION_FIELDS.t} #{mock_inat_obs.obs_fields(mock_inat_obs.inat_obs_fields)}
+      SNAPSHOT
+    assert_equal(expected_snapshot, mock_inat_obs.snapshot)
+
     expected_notes =
       { Collector: "jdcohenesq",
+        :inat_snapshot_caption.l.to_sym => expected_snapshot,
         Other: "on Quercus\n\n&#8212;\n\nOriginally posted " \
                "to Mushroom Observer on Mar. 7, 2024." }
-
     assert_equal(
       expected_notes, mock_inat_obs.notes,
       "MO notes should include: iNat Collector || login, iNat Description"
     )
-    expected_snapshot =
-      <<~SNAPSHOT.gsub(/^\s+/, "")
-        #{:USER.l}: #{mock_inat_obs[:user][:login]}\n
-        #{:OBSERVED.l}: #{mock_inat_obs.when}\n
-        #{:show_observation_inat_lat_lng.l}: #{mock_inat_obs.lat_lon_accuracy}\n
-        #{:PLACE.l}: #{mock_inat_obs[:place_guess]}\n
-        #{:ID.l}: #{mock_inat_obs.inat_taxon_name}\n
-        #{:DQA.l}: #{mock_inat_obs.dqa}\n
-        #{:show_observation_inat_suggested_ids.l}: #{mock_inat_obs.suggested_id_names}\n
-        #{:OBSERVATION_FIELDS.t}: #{mock_inat_obs.obs_fields(mock_inat_obs.inat_obs_fields)}\n
-      SNAPSHOT
-    assert_equal(expected_snapshot, mock_inat_obs.snapshot)
+
 
     expect = License.where(License[:url] =~ "/by-nc/").
              where(deprecated: false).order(id: :asc).first
