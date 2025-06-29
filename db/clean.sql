@@ -1,3 +1,5 @@
+use mo_development;
+
 update api_keys set `key` = 'cahja4s81achfojjlqzgkt16qgkl2hira';
 
 update donations set email = 'webmaster@mushroomobserver.org';
