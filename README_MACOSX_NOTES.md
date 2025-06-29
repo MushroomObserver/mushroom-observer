@@ -223,16 +223,15 @@ or for bash:
 - Make sure you have the file `config/database.yml`.
   If not, create the file with the content shown in footnote 2.<sup id="a2">[2](#f2)</sup>
 
-To get the most recent stripped checkpoint, which may be _not at all current_:
-- download the snapshot from <http://images.mushroomobserver.org/checkpoint_stripped.gz>  
-- copy (or move) the downloaded .gz file to the `mushroom-observer` directory.
+**Best and easiest:** If you have an account on the images server, you can download the most recent checkpoint and strip it locally. Simply `cd` to your `mushroom-observer` directory and run:
+```
+db/download_checkpoint
+```
+You will need to enter your account username for `images.mushroomobserver.org`.
 
-OR, if you have SSH access to the images server, you can get a _current_ db backup and strip it yourself:
-- `cd` to your `mushroom-observer` directory, and use `scp` to download the most recent db backup. Below, `yourname` is your account name on the images server, and `yyyymmdd` is yesterday's date. Running this command will download the daily db backup to `/mushroom-observer` and rename it as `checkpoint.gz`.
-```
-scp {yourname}@images.mushroomobserver.org:/data/images/backup/database-{yyyymmdd}.gz ./checkpoint.gz
-```
-- run `db/strip_checkpoint`. This will replace user passwords with "password" (among other things) and save the backup as `checkpoint_stripped.gz`.
+**Public alternative:** Every so often we generate a public, ready-made stripped checkpoint on the server, but it is likely _not at all current_. You can get this here:
+- download the snapshot from <http://images.mushroomobserver.org/checkpoint_stripped.gz>
+- copy (or move) the downloaded .gz file to the `mushroom-observer` directory.
 
 Then:
 
