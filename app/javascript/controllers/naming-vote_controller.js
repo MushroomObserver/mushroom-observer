@@ -13,7 +13,7 @@ export default class extends Controller {
 
   connect() {
     // console.log("Hello Modal");
-    this.element.dataset.stimulus = "naming-vote-connected";
+    this.element.dataset.namingVote = "connected";
     // The localized text is for the modal progress caption.
     Object.assign(this.localized_text,
       JSON.parse(this.element.dataset.localization));

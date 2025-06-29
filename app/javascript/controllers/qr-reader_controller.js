@@ -5,7 +5,7 @@ export default class extends Controller {
   static targets = ["input"]
 
   connect() {
-    this.element.dataset.stimulus = "qr-reader-connected"
+    this.element.dataset.qrReader = "connected"
 
     // focus as soon as the input appears
     if (this.hasInputTarget)

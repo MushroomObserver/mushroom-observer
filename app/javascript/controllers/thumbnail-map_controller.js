@@ -5,7 +5,7 @@ export default class extends Controller {
   static targets = ["mapContainer", "map", "globe"]
 
   connect() {
-    this.element.dataset.stimulus = "thumbnail-map-connected";
+    this.element.dataset.thumbnailMap = "connected";
 
     this.map_url = this.element.dataset.mapUrl
     this.coords = JSON.parse(this.element.dataset.coordinates)

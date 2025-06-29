@@ -176,6 +176,14 @@ module Report
       add_column!(rows, vals, col)
     end
 
+    def add_sequence_ids!(rows, col)
+      vals = Sequence.joins(:observation).
+             merge(plain_query).
+             select(Sequence[:observation_id], Sequence[:id]).
+             map { |rec| rec.attributes.values[0..1] }
+      add_column!(rows, vals, col)
+    end
+
     def plain_query
       # Sometimes the default order requires unnecessary joins!
       query.scope.reorder("")

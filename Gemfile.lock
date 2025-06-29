@@ -224,6 +224,7 @@ GEM
       signet (>= 0.16, < 2.a)
     hashdiff (1.2.0)
     hashie (5.0.0)
+    haversine (0.3.2)
     http-accept (1.7.0)
     http-cookie (1.0.8)
       domain_name (~> 0.5)
@@ -595,6 +596,7 @@ DEPENDENCIES
   debug
   fastimage
   google-cloud-storage
+  haversine
   i18n
   importmap-rails
   jbuilder

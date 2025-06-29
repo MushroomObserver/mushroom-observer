@@ -5,7 +5,7 @@ export default class extends Controller {
   static targets = ['input', 'name']
 
   connect() {
-    this.element.dataset.stimulus = "file-input-connected";
+    this.element.dataset.fileInput = "connected";
     this.max_size = Number(this.inputTarget.dataset.maxUploadSize);
     this.error_msg = this.inputTarget.dataset.maxUploadMsg;
     this.old_callback = this.inputTarget.onchange;

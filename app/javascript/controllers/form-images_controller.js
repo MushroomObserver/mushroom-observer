@@ -54,7 +54,7 @@ export default class extends Controller {
   }
 
   connect() {
-    this.element.dataset.stimulus = "form-images-connected";
+    this.element.dataset.formImages = "connected";
 
     Object.assign(this, internalConfig);
     Object.assign(this.localized_text,

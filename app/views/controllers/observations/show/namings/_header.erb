@@ -1,0 +1,36 @@
+<%# locals: (obs: nil, heading: "", user_name: "", consensus_vote: "", your_vote: "") %>
+
+<%
+behavior = "flex-column justify-content-end"
+propose_icon = propose_naming_link(
+  obs.id, text: :show_namings_propose_new_name.t,
+          btn_class: "",
+          context: "namings_table", icon: true
+)
+%>
+
+<%=
+tag.div(class: "panel-heading namings-table-header") do
+  tag.div(class: "row") do
+    concat(
+      tag.div(class: "col-xs-10 col-sm-11") do
+        tag.div(class: "row") do
+          [
+            tag.div(heading,
+                    class: "col col-sm-4 d-block #{behavior}"),
+            tag.div(user_name,
+                    class: "col col-sm-3 d-none d-sm-block #{behavior}"),
+            tag.div(consensus_vote,
+                    class: "col col-sm-2 d-none d-sm-block #{behavior}"),
+            tag.div(your_vote,
+                    class: "col col-sm-3 d-none d-sm-block #{behavior}")
+          ].safe_join
+        end
+      end
+    )
+    concat(tag.div(class: "col-xs-2 col-sm-1 #{behavior}") do
+      tag.span(propose_icon, class: "float-right d-sm-none")
+    end)
+  end
+end
+%>

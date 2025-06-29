@@ -5,7 +5,7 @@ export default class extends Controller {
   static targets = ['hamburger', 'search', 'container', 'offcanvas', 'topNav']
 
   connect() {
-    this.element.dataset.stimulus = "nav-connected";
+    this.element.dataset.nav = "connected";
   }
 
   // HAMBURGER HELPER action to toggle offcanvas left nav
