@@ -79,7 +79,6 @@ class InatObsTest < UnitTestCase
       "MO notes should include: iNat Collector || login, iNat Description"
     )
 
-
     expect = License.where(License[:url] =~ "/by-nc/").
              where(deprecated: false).order(id: :asc).first
     assert_equal(expect, mock_inat_obs.license)
