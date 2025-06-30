@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Installs a downloaded db snapshot which must be named `checkpoint.gz` and
+# located in the `/mushroom-observer` root directory, and calls `db/clean.sql`
+# to strip passwords and private gps data from the database.
 database="mo_development"
 username="mo"
 password="mo"
