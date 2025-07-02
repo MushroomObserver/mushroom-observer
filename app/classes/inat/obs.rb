@@ -210,10 +210,12 @@ class Inat
     end
 
     def snapshot
-      snapshop_raw_str.gsub(/^\s+/, "")
+      # add a newline to separate snapshot caption from its subparts
+      "\n#{snapshot_raw_str.gsub(/^\s+/, "")}".
+        chomp # revent extra blank line before Other part
     end
 
-    def snapshop_raw_str
+    def snapshot_raw_str
       result = ""
       {
         USER: self[:user][:login],
@@ -230,7 +232,7 @@ class Inat
       result.
         chomp # prevent blank line between Snapshot and :Other Notes fields
     end
-    private :snapshop_raw_str
+    private :snapshot_raw_str
 
     def suggested_id_names
       # Get unique suggested taxon ids
