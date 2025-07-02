@@ -100,13 +100,12 @@ class Inat
     end
 
     def notes
-      # return { Collector: collector } if self[:description].empty?
-
-      # Observation form needs the Notes "parts keys to be normalized
+      # Observation form requires a "normalized" key (no spaces) for Notes parts
       snapshot_key = Observation.notes_normalized_key(:inat_snapshot_caption.l)
 
       { Collector: collector,
         snapshot_key => snapshot,
+        # strip p tags and ensure it's a string
         Other: self[:description]&.gsub(%r{</?p>}, "").to_s }
     end
 
@@ -226,9 +225,10 @@ class Inat
         show_observation_inat_suggested_ids: suggested_id_names,
         OBSERVATION_FIELDS: obs_fields(inat_obs_fields)
       }.each do |label, value|
-        result += "#{label.to_sym.t}: #{value}\n"
+        result += "#{label.to_sym.l}: #{value}\n"
       end
-      result.chomp
+      result.
+        chomp # prevent blank line between Snapshot and :Other Notes fields
     end
     private :snapshop_raw_str
 

@@ -65,7 +65,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
     assert_not(obs.specimen, "Obs should not have a specimen")
     assert(obs.notes.to_s.include?("Observation Fields: none"),
-           "Notes should include 'Observation Fields: none'")
+           "Notes should indicate if there were no iNat 'Observation Fields'")
 
     assert_equal(
       before_emails_to_user, QueuedEmail.where(to_user: @user).count,

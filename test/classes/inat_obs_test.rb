@@ -383,8 +383,10 @@ class InatObsTest < UnitTestCase
       mock_observation("trametes").notes[:Other],
       "iNat Description should be mapped to MO Notes Other"
     )
-    assert_equal("", mock_observation("tremella_mesenterica").notes[:Other],
-                 "Notes Other should be blank if iNat Description is empty")
+    assert_equal(
+      "", mock_observation("tremella_mesenterica").notes[:Other],
+      "Notes Other should be a blank String if iNat Description is empty"
+    )
   end
 
   def test_sequences
