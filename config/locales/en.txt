@@ -3085,7 +3085,7 @@
   inat_wrong_user: You cannot import an iNat observation created by someone else. To import your own observation, make sure that noone else is logged into iNat on your device and that you entered the correct iNat username.
   inat_page_of_obs_failed: Failed to get page of observations from iNat API
 
-  inat_snapshot_caption: Snapshot
+  inat_snapshot_caption: iNat imported data
   inat_dqa_casual: Casual
   inat_dqa_needs_id: Needs ID
   inat_dqa_research: Research Grade
