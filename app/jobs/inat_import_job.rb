@@ -224,7 +224,7 @@ class InatImportJob < ApplicationJob
       name_id: name_id,
       specimen: @inat_obs.specimen?,
       text_name: Name.find(name_id).text_name,
-      notes: notes,
+      notes: @inat_obs.notes,
       source: @inat_obs.source,
       inat_id: @inat_obs[:id] }
   end
@@ -249,12 +249,6 @@ class InatImportJob < ApplicationJob
 
   def need_new_prov_name?(parsed_prov_name)
     Name.where(text_name: parsed_prov_name.text_name).none?
-  end
-
-  def notes
-    notes = @inat_obs.notes
-    notes[:inat_snapshot_caption.l.to_sym] = @inat_obs.snapshot
-    notes
   end
 
   def add_external_link

@@ -620,9 +620,11 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # Change spaces to underscores in keys
   #   notes_normalized_key("Nearby trees") #=> :Nearby_trees
   #   notes_normalized_key(:Other)         #=> :Other
-  def notes_normalized_key(part)
+  def self.notes_normalized_key(part)
     part.to_s.tr(" ", "_").to_sym
   end
+
+  delegate :notes_normalized_key, to: :Observation
 
   # Array of note parts (Strings) to display in create & edit form,
   # in following (display) order. Used by views.

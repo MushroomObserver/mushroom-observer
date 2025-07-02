@@ -64,8 +64,8 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_match(suggestion_date, proposed_name_notes)
 
     assert_not(obs.specimen, "Obs should not have a specimen")
-    assert_match(/Observation Fields none/, obs.notes.to_s,
-                 "Missing 'none' for Observation Fields")
+    assert(obs.notes.to_s.include?("Observation Fields: none"),
+           "Notes should include 'Observation Fields: none'")
 
     assert_equal(
       before_emails_to_user, QueuedEmail.where(to_user: @user).count,
@@ -644,14 +644,15 @@ class InatImportJobTest < ActiveJob::TestCase
 
     assert(obs.inat_id.present?, "Failed to set Observation inat_id")
 
+    snapshot_key = Observation.notes_normalized_key(:inat_snapshot_caption.l)
     assert_empty(
-      obs.comments.where(Comment[:summary] =~ :inat_snapshot_caption.l.to_s),
+      obs.comments.where(Comment[:summary] =~ snapshot_key.to_s),
       "Observation should not have a (#{:inat_snapshot_caption.l}) comment"
     )
 
     ### Observation Notes
-    assert(obs.notes.key?(:inat_snapshot_caption.l.to_sym),
-           "Observation notes missing #{:inat_snapshot_caption.l}")
+    assert(obs.notes.key?(snapshot_key),
+           "Observation Notes missing #{snapshot_key}")
     [
       :USER.l, :OBSERVED.l, :show_observation_inat_lat_lng.l, :PLACE.l,
       :ID.l, :DQA.l, :show_observation_inat_suggested_ids.l,

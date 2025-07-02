@@ -100,11 +100,14 @@ class Inat
     end
 
     def notes
-      return { Collector: collector } if self[:description].empty?
+      # return { Collector: collector } if self[:description].empty?
+
+      # Observation form needs the Notes "parts keys to be normalized
+      snapshot_key = Observation.notes_normalized_key(:inat_snapshot_caption.l)
 
       { Collector: collector,
-        :inat_snapshot_caption.l.to_sym => snapshot,
-        Other: self[:description].gsub(%r{</?p>}, "") }
+        snapshot_key => snapshot,
+        Other: self[:description]&.gsub(%r{</?p>}, "").to_s }
     end
 
     # min bounding rectangle of iNat location blurred by public accuracy
@@ -223,7 +226,7 @@ class Inat
         show_observation_inat_suggested_ids: suggested_id_names,
         OBSERVATION_FIELDS: obs_fields(inat_obs_fields)
       }.each do |label, value|
-        result += "#{label.to_sym.t} #{value}\n"
+        result += "#{label.to_sym.t}: #{value}\n"
       end
       result.chomp
     end
