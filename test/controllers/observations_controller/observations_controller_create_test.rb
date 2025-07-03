@@ -174,7 +174,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     )
     obs = assigns(:observation)
     assert(obs.specimen)
-    assert(obs.field_slips.count == 1)
+    assert(obs.field_slips.one?)
   end
 
   def test_create_observation_with_collection_number
@@ -186,7 +186,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     )
     obs = assigns(:observation)
     assert(obs.specimen)
-    assert(obs.collection_numbers.count == 1)
+    assert(obs.collection_numbers.one?)
   end
 
   def test_create_observation_with_used_collection_number
@@ -198,7 +198,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     )
     obs = assigns(:observation)
     assert(obs.specimen)
-    assert(obs.collection_numbers.count == 1)
+    assert(obs.collection_numbers.one?)
     assert_flash_warning
   end
 
@@ -234,7 +234,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     )
     obs = assigns(:observation)
     assert(obs.specimen)
-    assert(obs.collection_numbers.count == 1)
+    assert(obs.collection_numbers.one?)
     col_num = obs.collection_numbers.first
     assert_equal(rolf.legal_name, col_num.name)
     assert_equal("27-18A.2", col_num.number)
@@ -252,7 +252,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     )
     obs = assigns(:observation)
     assert(obs.specimen)
-    assert(obs.herbarium_records.count == 1)
+    assert(obs.herbarium_records.one?)
   end
 
   def test_create_observation_with_herbarium_duplicate_label
@@ -297,7 +297,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     )
     obs = assigns(:observation)
     assert_not(obs.specimen)
-    assert(obs.herbarium_records.count.zero?)
+    assert(obs.herbarium_records.none?)
   end
 
   def test_create_observation_with_new_nonpersonal_herbarium

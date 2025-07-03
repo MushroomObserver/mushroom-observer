@@ -52,7 +52,7 @@ def build_from_file(model_name, update_list)
       end
     end
   end
-  return unless model.errors.count.positive?
+  return unless model.errors.any?
 
   Rails.logger.error("VisualModel errors:")
   Rails.logger.error(model.errors.full_messages)

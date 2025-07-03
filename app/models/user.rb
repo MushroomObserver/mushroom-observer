@@ -462,7 +462,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def self.find_name_match(users, str)
-    return users.first if users.count == 1
+    return users.first if users.one?
 
     users.find_each do |user|
       return user if user.unique_text_name == str

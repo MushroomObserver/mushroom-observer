@@ -151,7 +151,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     if (ver.version != 1) &&
        Location::Version.where(
          location_id: ver.location_id, user_id: ver.user_id
-       ).count.zero?
+       ).none?
       UserStats.update_contribution(:add, :location_versions)
     end
   end
