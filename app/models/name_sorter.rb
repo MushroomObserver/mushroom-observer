@@ -249,7 +249,7 @@ class NameSorter
     end
 
     # Did user specify a synonym via the "Name = Synonym" syntax?
-    return unless name_parse.has_synonym
+    return unless name_parse.has_synonym?
 
     @has_new_synonyms = true
     return unless name_parse.find_synonym_names(user).empty?

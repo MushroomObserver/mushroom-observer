@@ -27,7 +27,7 @@
 #      np.comment                # nil
 #      np.find_names             # (Array of Name instances matching
 #                                   "L. umbellifera")
-#      np.has_synonym            # true
+#      np.has_synonym?           # true
 #      np.synonym                # "Omphalia ericetorum"
 #      np.synonym_search_name    # "Omphalia ericetorum"
 #      np.synonym_rank           # "Species"
@@ -41,7 +41,7 @@
 #      np.comment                # "Highly polyphyletic"
 #      np.find_names             # (Array of Name instances matching
 #                                   "Myxomycota")
-#      np.has_synonym            # false
+#      np.has_synonym?           # false
 #    end
 #
 #  The methods find_names and find_synonym_names both use
@@ -91,7 +91,7 @@ class NameParse
     (@rank, @search_name) = parse_rank(@name)
   end
 
-  def has_synonym
+  def has_synonym?
     !@synonym.nil?
   end
 

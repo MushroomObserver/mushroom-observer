@@ -304,7 +304,7 @@ module ApplicationController::Queries
 
   # Need to pass list of tags used in this action to next page if redirecting.
   def redirect_to(*args)
-    flash[:tags_on_last_page] = Language.save_tags if Language.tracking_usage
+    flash[:tags_on_last_page] = Language.save_tags if Language.tracking_usage?
     if args.member?(:back)
       redirect_back(fallback_location: "/")
     else
