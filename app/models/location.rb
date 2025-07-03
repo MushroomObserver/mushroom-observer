@@ -551,7 +551,6 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Check if a given place name (postal order) already exists,
   # defined as a Location or undefined as a saved `where` string.
-  # Disable cop because
   def self.location_name_exists?(name)
     return false unless name
 
