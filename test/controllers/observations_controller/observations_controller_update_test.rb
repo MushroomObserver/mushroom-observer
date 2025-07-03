@@ -310,8 +310,7 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     params
   end
 
-  # disable cop because RuboCop gives false positive
-  def location_name_exists(params, user) # rubocop:disable Naming/PredicateMethod
+  def location_name_exists(params, user)
     name = Location.user_format(user, params[:observation][:place_name])
     Location.find_by(name:) || Location.is_unknown?(name)
   end
