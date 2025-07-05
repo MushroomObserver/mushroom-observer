@@ -101,9 +101,13 @@ class Inat
     end
 
     def notes
-      return { Collector: collector } if self[:description].empty?
+      # Observation form requires a "normalized" key (no spaces) for Notes parts
+      snapshot_key = Observation.notes_normalized_key(:inat_snapshot_caption.l)
 
-      { Collector: collector, Other: self[:description].gsub(%r{</?p>}, "") }
+      { Collector: collector,
+        snapshot_key => snapshot,
+        # strip p tags and ensure it's a string
+        Other: self[:description]&.gsub(%r{</?p>}, "").to_s }
     end
 
     # min bounding rectangle of iNat location blurred by public accuracy
@@ -207,10 +211,12 @@ class Inat
     end
 
     def snapshot
-      snapshop_raw_str.gsub(/^\s+/, "")
+      # add a newline to separate snapshot caption from its subparts
+      "\n#{snapshot_raw_str.gsub(/^\s+/, "")}".
+        chomp # revent extra blank line before Other part
     end
 
-    def snapshop_raw_str
+    def snapshot_raw_str
       result = ""
       {
         USER: self[:user][:login],
@@ -220,15 +226,14 @@ class Inat
         ID: inat_taxon_name,
         DQA: dqa,
         show_observation_inat_suggested_ids: suggested_id_names,
-        OBSERVATION_FIELDS: obs_fields(inat_obs_fields),
-        PROJECTS: :inat_not_imported.t,
-        ANNOTATIONS: :inat_not_imported.t,
-        TAGS: :inat_not_imported.t
+        OBSERVATION_FIELDS: obs_fields(inat_obs_fields)
       }.each do |label, value|
-        result += "#{label.to_sym.t}: #{value}\n"
+        result += "#{label.to_sym.l}: #{value}\n"
       end
-      result
+      result.
+        chomp # prevent blank line between Snapshot and :Other Notes fields
     end
+    private :snapshot_raw_str
 
     def suggested_id_names
       # Get unique suggested taxon ids
