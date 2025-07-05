@@ -90,11 +90,8 @@ class InatImportJob < ApplicationJob
   def ensure_importing_own_observations
     return log("Skipped own-obs check (SuperImporter)") if super_importer?
 
-    headers = { authorization: "Bearer #{token}",
-                content_type: :json, accept: :json }
     begin
-      response =
-        inat_api_request(path: "users/me", headers: headers)
+      response = inat_api_request(path: "users/me")
     rescue RestClient::Unauthorized, RestClient::ExceptionWithResponse => e
       raise("iNat API user request failed: #{e.message}")
     end
@@ -104,7 +101,9 @@ class InatImportJob < ApplicationJob
     raise(:inat_wrong_user.t) unless right_user?(@inat_logged_in_user)
   end
 
-  def inat_api_request(path:, method: :get, payload: {}, headers: {})
+  def inat_api_request(path:, method: :get, payload: {},
+                       headers: { authorization: "Bearer #{token}",
+                                  content_type: :json, accept: :json })
     RestClient::Request.execute(
       method: method,
       url: "#{API_BASE}/#{path}",
@@ -401,10 +400,8 @@ class InatImportJob < ApplicationJob
     payload = { observation_field_value: { observation_id: observation_id,
                                            observation_field_id: field_id,
                                            value: value } }
-    headers = { authorization: "Bearer #{@inat_import.token}",
-                content_type: :json, accept: :json }
     inat_api_request(method: :post, path: "observation_field_values",
-                     payload: payload, headers: headers)
+                     payload: payload)
   end
 
   def update_description
@@ -417,13 +414,10 @@ class InatImportJob < ApplicationJob
 
     payload = { observation: { description: updated_description,
                                ignore_photos: 1 } }
-    headers = { authorization: "Bearer #{@inat_import.token}",
-                content_type: :json, accept: :json }
     # iNat API uses PUT + ignore_photos, not PATCH, to update an observation
     # https://api.inaturalist.org/v1/docs/#!/Observations/put_observations_id
     path = "observations/#{@inat_obs[:id]}?ignore_photos=1"
-    inat_api_request(method: :put, path: path,
-                     payload: payload, headers: headers)
+    inat_api_request(method: :put, path: path, payload: payload)
   end
 
   def importing_someone_elses_obs?
