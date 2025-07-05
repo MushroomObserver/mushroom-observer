@@ -23,7 +23,6 @@ class InatImportJob < ApplicationJob
     use_auth_code_to_obtain_oauth_access_token
     trade_access_token_for_jwt_api_token
     ensure_importing_own_observations
-    @inat_import.update(state: "Importing")
     import_requested_observations
   rescue StandardError => e
     log("Error occurred: #{e.message}")
@@ -133,6 +132,7 @@ class InatImportJob < ApplicationJob
   end
 
   def import_requested_observations
+    @inat_import.update(state: "Importing")
     inat_ids = inat_id_list
     return log("No observations requested") if @inat_import[:import_all].
                                                blank? && inat_ids.blank?
