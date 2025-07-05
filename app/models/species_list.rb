@@ -61,7 +61,7 @@
 #  ---
 #  observations::          List of Observation's attached to it.
 #  names::                 Get sorted list of Names used by its Observation's.
-#  name_included::         Does this list include the given Name?
+#  name_included?::         Does this list include the given Name?
 #  ---
 #  form_notes_parts::      Array of member note parts for create & edit form
 #  notes_part_id::         id of textarea for a member notes heading
@@ -236,7 +236,7 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Tests to see if the species_list includes an Observation with the given
   # Name (checks consensus only).  Primarily used by functional tests.
-  def name_included(name)
+  def name_included?(name)
     observations.map(&:name_id).include?(name.id)
   end
 

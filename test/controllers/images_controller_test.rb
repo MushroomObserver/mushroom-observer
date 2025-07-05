@@ -104,7 +104,7 @@ class ImagesControllerTest < FunctionalTestCase
 
   def test_show_image
     image = images(:peltigera_image)
-    assert(ImageVote.where(image: image).count > 1,
+    assert(ImageVote.where(image: image).many?,
            "Use Image fixture with multiple votes for better coverage")
     num_views = image.num_views
     login
@@ -146,7 +146,7 @@ class ImagesControllerTest < FunctionalTestCase
 
   def test_show_image_with_bad_vote
     image = images(:peltigera_image)
-    assert(ImageVote.where(image: image).count > 1,
+    assert(ImageVote.where(image: image).many?,
            "Use Image fixture with multiple votes for better coverage")
     # create invalid vote in order to cover line that rescues an error
     bad_vote = ImageVote.new(image: image, user: nil, value: Image.minimum_vote)

@@ -8,7 +8,7 @@ class NameParseTest < UnitTestCase
     assert_not_nil(name_parse)
     assert_nil(name_parse.rank)
     assert_equal("Foo bar", name_parse.search_name)
-    assert_not(name_parse.has_synonym)
+    assert_not(name_parse.has_synonym?)
     assert_equal([], name_parse.find_names(rolf))
     assert_equal([], name_parse.find_synonym_names(rolf))
   end
@@ -18,7 +18,7 @@ class NameParseTest < UnitTestCase
     assert_not_nil(name_parse)
     assert_nil(name_parse.rank)
     assert_equal(names(:coprinus_comatus).text_name, name_parse.search_name)
-    assert_not(name_parse.has_synonym)
+    assert_not(name_parse.has_synonym?)
     assert_equal([names(:coprinus_comatus)], name_parse.find_names(rolf))
     assert_equal([], name_parse.find_synonym_names(rolf))
   end
@@ -29,7 +29,7 @@ class NameParseTest < UnitTestCase
     assert_not_nil(name_parse)
     assert_nil(name_parse.rank)
     assert_equal(names(:fungi).text_name, name_parse.search_name)
-    assert_not(name_parse.has_synonym)
+    assert_not(name_parse.has_synonym?)
     assert_equal([names(:fungi)], name_parse.find_names(rolf))
     assert_equal([], name_parse.find_synonym_names(rolf))
   end
@@ -39,7 +39,7 @@ class NameParseTest < UnitTestCase
     assert_not_nil(name_parse)
     assert_equal("Species", name_parse.rank)
     assert_equal("Foo bar", name_parse.search_name)
-    assert_not(name_parse.has_synonym)
+    assert_not(name_parse.has_synonym?)
     assert_equal([], name_parse.find_names(rolf))
     assert_equal([], name_parse.find_synonym_names(rolf))
   end
@@ -51,7 +51,7 @@ class NameParseTest < UnitTestCase
     assert_not_nil(name_parse)
     assert_equal(names(:coprinus_comatus).rank, name_parse.rank)
     assert_equal(names(:coprinus_comatus).text_name, name_parse.search_name)
-    assert_not(name_parse.has_synonym)
+    assert_not(name_parse.has_synonym?)
     assert_equal([names(:coprinus_comatus)], name_parse.find_names(rolf))
     assert_equal([], name_parse.find_synonym_names(rolf))
   end
@@ -62,7 +62,7 @@ class NameParseTest < UnitTestCase
     assert_not_nil(name_parse)
     assert_equal(names(:fungi).rank, name_parse.rank)
     assert_equal(names(:fungi).text_name, name_parse.search_name)
-    assert_not(name_parse.has_synonym)
+    assert_not(name_parse.has_synonym?)
     assert_equal([names(:fungi)], name_parse.find_names(rolf))
     assert_equal([], name_parse.find_synonym_names(rolf))
   end
@@ -74,7 +74,7 @@ class NameParseTest < UnitTestCase
     assert_not_nil(name_parse)
     assert_equal(names(:coprinus_comatus).rank, name_parse.rank)
     assert_equal(names(:coprinus_comatus).search_name, name_parse.search_name)
-    assert_not(name_parse.has_synonym)
+    assert_not(name_parse.has_synonym?)
     assert_equal([names(:coprinus_comatus)], name_parse.find_names(rolf))
     assert_equal([], name_parse.find_synonym_names(rolf))
   end
@@ -84,7 +84,7 @@ class NameParseTest < UnitTestCase
     assert_not_nil(name_parse)
     assert_equal("Genus", name_parse.rank)
     assert_equal("Foobar", name_parse.search_name)
-    assert_not(name_parse.has_synonym)
+    assert_not(name_parse.has_synonym?)
     assert_equal([], name_parse.find_names(rolf))
     assert_equal([], name_parse.find_synonym_names(rolf))
   end
@@ -96,7 +96,7 @@ class NameParseTest < UnitTestCase
     assert_nil(name_parse.rank)
     assert_equal(names(:macrolepiota_rachodes).text_name,
                  name_parse.search_name)
-    assert(name_parse.has_synonym)
+    assert(name_parse.has_synonym?)
     assert_nil(name_parse.synonym_rank)
     assert_equal(names(:lepiota_rachodes).text_name,
                  name_parse.synonym_search_name)
@@ -110,7 +110,7 @@ class NameParseTest < UnitTestCase
     assert_not_nil(name_parse)
     assert_nil(name_parse.rank)
     assert_equal("Foo bar", name_parse.search_name)
-    assert(name_parse.has_synonym)
+    assert(name_parse.has_synonym?)
     assert_nil(name_parse.synonym_rank)
     assert_equal("Baz woof", name_parse.synonym_search_name)
     assert_equal([], name_parse.find_names(rolf))
@@ -125,7 +125,7 @@ class NameParseTest < UnitTestCase
     assert_not_nil(name_parse)
     assert_equal(names(:agaricus).rank, name_parse.rank)
     assert_equal(names(:agaricus).text_name, name_parse.search_name)
-    assert(name_parse.has_synonym)
+    assert(name_parse.has_synonym?)
     assert_equal(names(:psalliota).rank, name_parse.synonym_rank)
     assert_equal(names(:psalliota).text_name, name_parse.synonym_search_name)
     assert_equal([names(:agaricus)], name_parse.find_names(rolf))
@@ -137,7 +137,7 @@ class NameParseTest < UnitTestCase
     assert_not_nil(name_parse)
     assert_equal("Genus", name_parse.rank)
     assert_equal("Foobar", name_parse.search_name)
-    assert(name_parse.has_synonym)
+    assert(name_parse.has_synonym?)
     assert_equal("Genus", name_parse.synonym_rank)
     assert_equal("Bazwoof", name_parse.synonym_search_name)
     assert_equal([], name_parse.find_names(rolf))

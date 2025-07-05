@@ -179,7 +179,7 @@ export default class extends Controller {
   }
 
   connect() {
-    this.element.dataset.stimulus = "autocompleter-connected";
+    this.element.dataset.autocompleter = "connected";
 
     // Figure out a few browser-dependent dimensions.
     this.getScrollBarWidth;
