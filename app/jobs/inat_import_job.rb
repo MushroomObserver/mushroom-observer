@@ -21,7 +21,7 @@ class InatImportJob < ApplicationJob
   def perform(inat_import)
     create_ivars(inat_import)
     access_token =
-      use_auth_code_to_obtain_oauth_access_token(@inat_import.token)
+      use_auth_code_to_obtain_oauth_access_token
     api_token = trade_access_token_for_jwt_api_token(access_token)
     ensure_importing_own_observations(api_token)
     @inat_import.update(token: api_token, state: "Importing")
@@ -32,6 +32,8 @@ class InatImportJob < ApplicationJob
   ensure
     done
   end
+
+  delegate :token, to: :@inat_import
 
   private
 
@@ -46,11 +48,11 @@ class InatImportJob < ApplicationJob
   end
 
   # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
-  def use_auth_code_to_obtain_oauth_access_token(auth_code)
+  def use_auth_code_to_obtain_oauth_access_token
     log("Obtaining OAuth access token")
     payload = { client_id: APP_ID,
                 client_secret: Rails.application.credentials.inat.secret,
-                code: auth_code,
+                code: token,
                 redirect_uri: REDIRECT_URI,
                 grant_type: "authorization_code" }
 
@@ -60,9 +62,9 @@ class InatImportJob < ApplicationJob
       raise("OAuth token request failed: #{e.message}")
     end
 
-    token = JSON.parse(oauth_response.body)["access_token"]
-    @inat_import.update(token: token)
-    log("Obtained OAuth access token: #{masked_token(token)}")
+    oauth_access_token = JSON.parse(oauth_response.body)["access_token"]
+    @inat_import.update(token: oauth_access_token)
+    log("Obtained OAuth access token: #{masked_token(oauth_access_token)}")
     token
   end
 

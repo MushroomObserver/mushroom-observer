@@ -7,7 +7,10 @@
 #  user::                  user who initiated the iNat import
 #  state::                 state of the import
 #  ended_at::              when the job was Done
-#  token::                 code, authenticity token, or JWT supplied by iNat
+#  token::                 token used to validate request; can be a code,
+#                          authorization token, or jwt
+#                          depending on the state of the import
+#                          https://www.inaturalist.org/pages/api+reference#authorization_code_flow
 #  inat_ids::              string of id's of iNat obss to be imported
 #  inat_username::         this user's iNat login
 #  import_all:             whether to import all of user's relevant iNat obss
