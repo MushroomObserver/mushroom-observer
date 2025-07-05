@@ -52,7 +52,7 @@ def build_from_file(model_name, update_list)
       end
     end
   end
-  return unless model.errors.count.positive?
+  return unless model.errors.any?
 
   Rails.logger.error("VisualModel errors:")
   Rails.logger.error(model.errors.full_messages)
@@ -79,8 +79,8 @@ def parse_cmd(cmd)
   first_space = cmd.index(" ")
   return process_simple_cmd(cmd) if first_space.nil?
 
-  first_token = cmd[..first_space - 1]
-  rest = cmd[first_space + 1..]
+  first_token = cmd[..(first_space - 1)]
+  rest = cmd[(first_space + 1)..]
   return ["delete", rest] if first_token == "-"
   return ["merge", rest] if first_token == "="
 

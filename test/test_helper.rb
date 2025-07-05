@@ -109,7 +109,7 @@ def trace_tests
   return unless matches
 
   last_match = matches.last
-  trim = last_match[last_match.index(regex) + 1..]
+  trim = last_match[(last_match.index(regex) + 1)..]
   open("trace_tests.out", "a") do |f|
     f.write("#{trim}\n")
   end

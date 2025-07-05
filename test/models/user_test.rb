@@ -495,7 +495,7 @@ class UserTest < UnitTestCase
     # Delete all of Mary's many lists except those in projects
     mary_lists = SpeciesList.where(user: mary)
     before_count = mary_lists.count
-    proj_lists = mary_lists.select { |list| list.projects.count.positive? }
+    proj_lists = mary_lists.select { |list| list.projects.any? }
     proj_count = proj_lists.count
     assert_operator(proj_count, ">", 0)
     assert_operator(before_count, ">", proj_count)

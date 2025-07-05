@@ -118,6 +118,7 @@ Naming/BlockForwarding:
   # Keeping it `explicit` until we're ready to switch.
   EnforcedStyle: explicit
 Naming/PredicateMethod:
+  # NOTE: I disabled the cop for methods with side effects. jdc 2025-07-03
   AllowedMethods:
     - allowed_to_see!
     - already_have_personal_herbarium!

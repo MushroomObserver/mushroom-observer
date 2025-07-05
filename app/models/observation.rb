@@ -802,8 +802,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # Add species_lists and herbarium_records to naming_includes
   def has_backup_data?
     !thumb_image_id.nil? ||
-      species_lists.count.positive? ||
-      herbarium_records.count.positive? ||
+      species_lists.any? ||
+      herbarium_records.any? ||
       specimen ||
       notes.length >= 100
   end

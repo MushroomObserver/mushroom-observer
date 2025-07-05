@@ -151,7 +151,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     if (ver.version != 1) &&
        Location::Version.where(
          location_id: ver.location_id, user_id: ver.user_id
-       ).count.zero?
+       ).none?
       UserStats.update_contribution(:add, :location_versions)
     end
   end
@@ -551,7 +551,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Check if a given place name (postal order) already exists,
   # defined as a Location or undefined as a saved `where` string.
-  def self.location_name_exists(name)
+  def self.location_name_exists?(name)
     return false unless name
 
     location_name_cache.member?(name)
@@ -560,7 +560,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   # Decide if the given name is dubious for any reason
   def self.dubious_name?(name, provide_reasons = false, check_db = true)
     reasons = []
-    unless check_db && location_name_exists(name)
+    unless check_db && location_name_exists?(name)
       reasons += check_for_empty_name(name)
       reasons += check_for_dubious_commas(name)
       reasons += check_for_bad_country_or_state(name)
