@@ -109,12 +109,12 @@ class InatImportJob < ApplicationJob
         url: "#{API_BASE}/users/me",
         headers: headers
       )
-      @inat_logged_in_user = JSON.parse(response.body)["results"].first["login"]
-      log("inat_logged_in_user: #{@inat_logged_in_user}")
     rescue RestClient::Unauthorized, RestClient::ExceptionWithResponse => e
       raise("iNat API user request failed: #{e.message}")
     end
 
+    @inat_logged_in_user = JSON.parse(response.body)["results"].first["login"]
+    log("inat_logged_in_user: #{@inat_logged_in_user}")
     raise(:inat_wrong_user.t) unless right_user?(@inat_logged_in_user)
   end
 
