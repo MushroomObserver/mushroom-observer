@@ -143,7 +143,7 @@ class API2::ImagesTest < UnitTestCase
   end
 
   def test_getting_images_has_observation
-    attached   = Image.select { |i| i.observations.count.positive? }
+    attached   = Image.select { |i| i.observations.any? }
     unattached = Image.all - attached
     assert_not_empty(attached)
     assert_not_empty(unattached)

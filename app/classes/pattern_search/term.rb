@@ -218,14 +218,14 @@ module PatternSearch
       val = val.downcase
       ::Name.all_ranks.each do |rank|
         if val == rank.to_s.downcase ||
-           val == :"rank_#{rank.to_s.downcase}".l || alt_rank_check(rank, val)
+           val == :"rank_#{rank.to_s.downcase}".l || alt_rank_check?(rank, val)
           return rank
         end
       end
       nil
     end
 
-    def alt_rank_check(rank, val)
+    def alt_rank_check?(rank, val)
       if %w[Phylum Group].include?(rank)
         ranks = :"rank_alt_#{rank.to_s.downcase}".l.split(",")
         ranks.map(&:strip).include?(val)

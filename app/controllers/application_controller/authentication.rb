@@ -142,7 +142,7 @@ module ApplicationController::Authentication
   #     link_to('Destroy', :action => :destroy_object)
   #   end %>
   #
-  def check_permission(obj)
+  def check_permission(obj) # rubocop:disable Naming/PredicateMethod
     in_admin_mode? || correct_user_for_object?(obj)
   end
   # helper_method :check_permission

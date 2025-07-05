@@ -55,9 +55,11 @@ module API2::Helpers
     south = parse(:latitude, :south, help: 1)
     east = parse(:longitude, :east, help: 1)
     west = parse(:longitude, :west, help: 1)
-    return if no_edges(north, south, east, west)
+    return if no_edges?(north, south, east, west)
 
-    raise(API2::NeedAllFourEdges.new) unless all_edges(north, south, east, west)
+    unless all_edges?(north, south, east, west)
+      raise(API2::NeedAllFourEdges.new)
+    end
 
     box = Mappable::Box.new(north:, south:, east:, west:)
     return box.attributes.symbolize_keys if box.valid?
@@ -69,11 +71,11 @@ module API2::Helpers
 
   private
 
-  def no_edges(north, south, east, west)
+  def no_edges?(north, south, east, west)
     !(north || south || east || west)
   end
 
-  def all_edges(north, south, east, west)
+  def all_edges?(north, south, east, west)
     north && south && east && west
   end
 end

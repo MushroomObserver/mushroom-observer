@@ -40,13 +40,13 @@ class FieldSlip < AbstractModel
 
     # Needs to get updated when Projects can share a field_slip_prefix
     candidate = Project.find_by(field_slip_prefix: prefix_match[1])
-    self.project = candidate if candidate&.can_add_field_slip(@current_user)
+    self.project = candidate if candidate&.can_add_field_slip?(@current_user)
   end
 
   def project=(project)
     return unless project != self.project
 
-    self[:project_id] = if project&.can_add_field_slip(@current_user)
+    self[:project_id] = if project&.can_add_field_slip?(@current_user)
                           project.id
                         end
   end

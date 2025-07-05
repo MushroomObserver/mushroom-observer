@@ -515,7 +515,7 @@ module Name::Parse
     [
       format_name(names[..index].join(" "), deprecated),
       author,
-      format_name(names[index + 1..].join(" ").strip, deprecated)
+      format_name(names[(index + 1)..].join(" ").strip, deprecated)
     ].join(" ").strip
   end
 

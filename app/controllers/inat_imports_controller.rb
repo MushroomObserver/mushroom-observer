@@ -9,6 +9,7 @@
 #
 # Work flow:
 # 1. User calls `new`, fills out form
+#    Adds a InatImport instance if user lacks one
 # 2. create
 #      saves some user data in a InatImport instance
 #        attributes include: user, inat_ids, token, state
@@ -44,13 +45,15 @@
 #      For each iNat obs in the results,
 #         creates an Inat::Obs
 #         adds an MO Observation, mapping Inat::Obs details to the MO Obs
+#         adds the iNat id to the MO observation inat_id_field
+#         adds a Snapshot of the iNat observation to the MO Observation notes
 #         adds Inat photos to the MO Observation via the MO API
 #         maps iNat sequences to MO Sequences
-#         adds an MO Comment with a snapshot of the imported data
 #         updates the iNat obs with a Mushroom Observer URL Observation Field
 #         updates the iNat obs Notes
 #      updates the InatImport instance attributes:
-#         state, importables, imported_count, response_errors
+#         state, importables, imported_count, total_imported_count,
+#         total_seconds, avg_import_time,response_errors
 #
 class InatImportsController < ApplicationController
   include Validators
