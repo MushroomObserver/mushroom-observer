@@ -65,16 +65,6 @@ class InatImportJob < ApplicationJob
     log("Obtained OAuth access token: #{masked_token(oauth_access_token)}")
   end
 
-  def done
-    log("Updating inat_import state to Done")
-    update_inat_import
-    update_user_inat_username
-  end
-
-  def update_inat_import
-    @inat_import.update(state: "Done", ended_at: Time.zone.now)
-  end
-
   # https://www.inaturalist.org/pages/api+recommended+practices
   def trade_access_token_for_jwt_api_token
     log("Obtaining jwt")
@@ -455,21 +445,6 @@ class InatImportJob < ApplicationJob
     @inat_import.reset_last_obs_start
   end
 
-  def update_user_inat_username
-    # Prevent MO users from setting their inat_username
-    # to a non-existent iNat login
-    return unless job_successful_enough?
-
-    @inat_import.user.update(inat_username: @inat_import.inat_username)
-    log("Updated user inat_username")
-  end
-
-  # job successful enough to justify updating the MO user's iNat user_name
-  def job_successful_enough?
-    @inat_import.response_errors.empty? ||
-      @inat_import.imported_count&.positive?
-  end
-
   def masked_token(str)
     # Return the string as is if its length is less than or equal to 6
     return str if str.length <= 6
@@ -483,5 +458,26 @@ class InatImportJob < ApplicationJob
 
     # Combine the parts
     "#{first_part}#{asterisks}#{last_part}"
+  end
+
+  def done
+    log("Updating inat_import state to Done")
+    @inat_import.update(state: "Done", ended_at: Time.zone.now)
+    update_user_inat_username
+  end
+
+  def update_user_inat_username
+    # Prevent MO users from setting their inat_username
+    # to a non-existent iNat login
+    return unless job_successful_enough?
+
+    @inat_import.user.update(inat_username: @inat_import.inat_username)
+    log("Updated user inat_username")
+  end
+
+  # job successful enough to justify updating the MO user's iNat user_name
+  def job_successful_enough?
+    @inat_import.response_errors.empty? ||
+      @inat_import.imported_count&.positive?
   end
 end
