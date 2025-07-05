@@ -20,9 +20,8 @@ class InatImportJob < ApplicationJob
 
   def perform(inat_import)
     create_ivars(inat_import)
-    access_token =
-      use_auth_code_to_obtain_oauth_access_token
-    api_token = trade_access_token_for_jwt_api_token(access_token)
+    use_auth_code_to_obtain_oauth_access_token
+    api_token = trade_access_token_for_jwt_api_token
     ensure_importing_own_observations(api_token)
     @inat_import.update(token: api_token, state: "Importing")
     import_requested_observations
@@ -65,7 +64,6 @@ class InatImportJob < ApplicationJob
     oauth_access_token = JSON.parse(oauth_response.body)["access_token"]
     @inat_import.update(token: oauth_access_token)
     log("Obtained OAuth access token: #{masked_token(oauth_access_token)}")
-    token
   end
 
   def done
@@ -79,12 +77,12 @@ class InatImportJob < ApplicationJob
   end
 
   # https://www.inaturalist.org/pages/api+recommended+practices
-  def trade_access_token_for_jwt_api_token(access_token)
+  def trade_access_token_for_jwt_api_token
     log("Obtaining jwt")
     begin
       jwt_response = RestClient::Request.execute(
         method: :get, url: "#{SITE}/users/api_token",
-        headers: { authorization: "Bearer #{access_token}", accept: :json }
+        headers: { authorization: "Bearer #{token}", accept: :json }
       )
     rescue RestClient::Unauthorized, RestClient::ExceptionWithResponse => e
       raise("JWT request failed: #{e.message}")
