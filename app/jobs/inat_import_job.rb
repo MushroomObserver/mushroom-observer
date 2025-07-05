@@ -21,9 +21,9 @@ class InatImportJob < ApplicationJob
   def perform(inat_import)
     create_ivars(inat_import)
     use_auth_code_to_obtain_oauth_access_token
-    api_token = trade_access_token_for_jwt_api_token
-    ensure_importing_own_observations(api_token)
-    @inat_import.update(token: api_token, state: "Importing")
+    trade_access_token_for_jwt_api_token
+    ensure_importing_own_observations
+    @inat_import.update(state: "Importing")
     import_requested_observations
   rescue StandardError => e
     log("Error occurred: #{e.message}")
@@ -88,6 +88,7 @@ class InatImportJob < ApplicationJob
       raise("JWT request failed: #{e.message}")
     end
     api_token = JSON.parse(jwt_response)["api_token"]
+    @inat_import.update(token: api_token)
     log("Obtained JWT API token: #{masked_token(api_token)}")
     api_token
   end
@@ -97,10 +98,10 @@ class InatImportJob < ApplicationJob
   # if B authorized MO to access B's iNat data.  We don't want that.
   # Therefore check that the iNat login provided in the import form
   # is that of the user currently logged-in to iNat.
-  def ensure_importing_own_observations(api_token)
+  def ensure_importing_own_observations
     return log("Skipped own-obs check (SuperImporter)") if super_importer?
 
-    headers = { authorization: "Bearer #{api_token}",
+    headers = { authorization: "Bearer #{token}",
                 content_type: :json, accept: :json }
     begin
       response =
