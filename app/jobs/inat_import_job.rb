@@ -33,6 +33,17 @@ class InatImportJob < ApplicationJob
 
   delegate :token, to: :@inat_import
 
+  def inat_api_request(path:, method: :get, payload: {},
+                       headers: { authorization: "Bearer #{token}",
+                                  content_type: :json, accept: :json })
+    RestClient::Request.execute(
+      method: method,
+      url: "#{API_BASE}/#{path}",
+      payload: payload.to_json,
+      headers: headers
+    )
+  end
+
   private
 
   def create_ivars(inat_import)
@@ -99,17 +110,6 @@ class InatImportJob < ApplicationJob
     @inat_logged_in_user = JSON.parse(response.body)["results"].first["login"]
     log("inat_logged_in_user: #{@inat_logged_in_user}")
     raise(:inat_wrong_user.t) unless right_user?(@inat_logged_in_user)
-  end
-
-  def inat_api_request(path:, method: :get, payload: {},
-                       headers: { authorization: "Bearer #{token}",
-                                  content_type: :json, accept: :json })
-    RestClient::Request.execute(
-      method: method,
-      url: "#{API_BASE}/#{path}",
-      payload: payload.to_json,
-      headers: headers
-    )
   end
 
   def super_importer?
