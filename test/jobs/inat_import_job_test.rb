@@ -588,7 +588,7 @@ class InatImportJobTest < ActiveJob::TestCase
   ########## Utilities
 
   def create_ivars_from_filename(filename, **attrs)
-    @mock_inat_response = File.read("test/iG365nat/#{filename}.txt")
+    @mock_inat_response = File.read("test/inat/#{filename}.txt")
     @parsed_results =
       JSON.parse(@mock_inat_response, symbolize_names: true)[:results]
 
