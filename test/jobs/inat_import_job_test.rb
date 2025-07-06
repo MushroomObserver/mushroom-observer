@@ -585,7 +585,6 @@ class InatImportJobTest < ActiveJob::TestCase
                  "Failed to report iNat API request failure")
   end
 
-
   ########## Utilities
 
   def create_ivars_from_filename(filename, **attrs)
