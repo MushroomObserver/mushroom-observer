@@ -561,7 +561,7 @@ class InatImportJobTest < ActiveJob::TestCase
                  "Failed to report OAuth failure")
   end
 
-  def test_inat_api_request_
+  def test_inat_api_request_failure
     create_ivars_from_filename("calostoma_lutescens")
 
     stub_token_requests
@@ -588,7 +588,7 @@ class InatImportJobTest < ActiveJob::TestCase
   ########## Utilities
 
   def create_ivars_from_filename(filename, **attrs)
-    @mock_inat_response = File.read("test/inat/#{filename}.txt")
+    @mock_inat_response = File.read("test/iG365nat/#{filename}.txt")
     @parsed_results =
       JSON.parse(@mock_inat_response, symbolize_names: true)[:results]
 
