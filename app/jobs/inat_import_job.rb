@@ -132,14 +132,14 @@ class InatImportJob < ApplicationJob
     # To get one page, use iNats `per_page` & `id_above` params.
     # https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
     parser = Inat::PageParser.new(@inat_import, inat_ids, restricted_user_login)
-    while parsing(parser); end
+    while parsing?(parser); end
   end
 
   def inat_id_list
     @inat_import.inat_ids.delete(" ")
   end
 
-  def parsing(parser)
+  def parsing?(parser)
     # get a page of observations with id > id of last imported obs
     parsed_page = parser.next_page
     return false if parsed_page.nil?
