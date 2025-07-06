@@ -150,10 +150,10 @@ class InatImportJob < ApplicationJob
     import_page(parsed_page)
 
     parser.last_import_id = parsed_page["results"].last["id"]
-    return false if last_page?(parsed_page)
+    return true unless last_page?(parsed_page)
 
     log("Imported requested observations")
-    true
+    false
   end
 
   def page_empty?(page)
