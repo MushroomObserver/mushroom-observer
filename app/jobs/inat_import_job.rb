@@ -362,14 +362,8 @@ class InatImportJob < ApplicationJob
   def adjust_consensus_name_naming
     naming = Naming.find_by(observation: @observation,
                             name: @observation.name)
-
-    if naming.nil?
-      add_naming_with_vote(name: @observation.name,
-                           user: @user, value: Vote::MAXIMUM_VOTE)
-    else
-      vote = Vote.find_by(naming: naming, observation: @observation)
-      vote.update(value: Vote::MAXIMUM_VOTE)
-    end
+    vote = Vote.find_by(naming: naming, observation: @observation)
+    vote.update(value: Vote::MAXIMUM_VOTE)
   end
 
   def add_inat_sequences
