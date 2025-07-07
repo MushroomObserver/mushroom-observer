@@ -15,7 +15,7 @@ class Inat
     def mo_observation
       create_observation
       add_external_link
-      add_inat_images(@inat_obs[:observation_photos])
+      add_inat_images(inat_obs[:observation_photos])
       update_names_and_proposals
       add_inat_sequences
       inat_obs
@@ -45,18 +45,18 @@ class Inat
     def new_obs_params
       name_id = id_or_provisional_or_species_name
       { user: user,
-        when: @inat_obs.when,
-        location: @inat_obs.location,
-        where: @inat_obs.where,
-        lat: @inat_obs.lat,
-        lng: @inat_obs.lng,
-        gps_hidden: @inat_obs.gps_hidden,
+        when: inat_obs.when,
+        location: inat_obs.location,
+        where: inat_obs.where,
+        lat: inat_obs.lat,
+        lng: inat_obs.lng,
+        gps_hidden: inat_obs.gps_hidden,
         name_id: name_id,
-        specimen: @inat_obs.specimen?,
+        specimen: inat_obs.specimen?,
         text_name: Name.find(name_id).text_name,
-        notes: @inat_obs.notes,
-        source: @inat_obs.source,
-        inat_id: @inat_obs[:id] }
+        notes: inat_obs.notes,
+        source: inat_obs.source,
+        inat_id: inat_obs[:id] }
     end
 
     # NOTE: 1. iNat users seem to add a prov name only if there's a sequence.
@@ -65,9 +65,9 @@ class Inat
     #   add an MO provisional name if none exists, and
     #   treat the provisional name as the MO consensus.
     def id_or_provisional_or_species_name
-      return @inat_obs.name_id if @inat_obs.provisional_name.blank?
+      return inat_obs.name_id if inat_obs.provisional_name.blank?
 
-      parsed_prov_name = Name.parse_name(@inat_obs.provisional_name)
+      parsed_prov_name = Name.parse_name(inat_obs.provisional_name)
 
       if need_new_prov_name?(parsed_prov_name)
         name = add_provisional_name(parsed_prov_name)
@@ -87,7 +87,7 @@ class Inat
         user: user,
         observation: @observation,
         external_site: external_site,
-        url: "#{external_site.base_url}#{@inat_obs[:id]}"
+        url: "#{external_site.base_url}#{inat_obs[:id]}"
       )
     end
 
@@ -153,8 +153,8 @@ class Inat
 
     def used_references_explanation(name)
       # If iNat has a provisional name, it's the id of the MO observation.
-      if @inat_obs.provisional_name.present?
-        nom_prov_adder = @inat_obs.inat_prov_name_field[:user][:login]
+      if inat_obs.provisional_name.present?
+        nom_prov_adder = inat_obs.inat_prov_name_field[:user][:login]
         # force it to be a String instead of an ActiveSupport::SafeBuffer
         # SafeBuffer causes an errors later on. Idk why. jdc 20241126
         :naming_inat_provisional.l(user: nom_prov_adder).to_str
@@ -166,7 +166,7 @@ class Inat
     end
 
     def suggested?(name)
-      inat_ids = @inat_obs[:identifications].map { |id| id[:taxon][:name] }
+      inat_ids = inat_obs[:identifications].map { |id| id[:taxon][:name] }
       inat_ids.include?(name.text_name)
     end
 
@@ -178,7 +178,7 @@ class Inat
     end
 
     def suggestion(name)
-      @inat_obs[:identifications].
+      inat_obs[:identifications].
         find { |id| id[:taxon][:name] == name.text_name }
     end
 
