@@ -6,6 +6,7 @@ class Inat
     attr_reader :inat_obs, :user
 
     MO_API_KEY_NOTES = InatImportsController::MO_API_KEY_NOTES
+    NAMING_VOTE = Vote::MAXIMUM_VOTE
 
     def initialize(inat_obs:, user:)
       @inat_obs = inat_obs
@@ -137,8 +138,7 @@ class Inat
       Observation::NamingConsensus.new(@observation).calc_consensus
     end
 
-    def add_naming_with_vote(name:, namer:,
-                             value: Vote::MAXIMUM_VOTE)
+    def add_naming_with_vote(name:, namer:, value: NAMING_VOTE)
       used_references = 2
       explanation = used_references_explanation(name)
       naming = Naming.create(
@@ -200,7 +200,7 @@ class Inat
       naming = Naming.find_by(observation: @observation,
                               name: @observation.name)
       vote = Vote.find_by(naming: naming, observation: @observation)
-      vote.update(value: Vote::MAXIMUM_VOTE)
+      vote.update(value: NAMING_VOTE)
     end
 
     def add_inat_sequences
