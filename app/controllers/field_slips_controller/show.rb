@@ -27,6 +27,6 @@ module FieldSlipsController::Show
 
   # Only allow a list of trusted parameters through.
   def show_params
-    params.permit(:name, :name_id, :species_list, :code, :id)
+    params.permit(:name, :name_id, :species_list, :code, :id, :project)
   end
 end

@@ -21,6 +21,8 @@ class FieldSlipsController < ApplicationController
     @field_slip.code = params[:code].upcase if params.include?(:code)
     @field_slip.field_slip_name = params[:name]
     @species_list = params[:species_list]
+    @field_slip.project = Project.safe_find(params[:project]) ||
+                          @field_slip.project
     project = @field_slip.project
     if project
       flash_notice(:field_slip_project_success.t(title: project.title))
@@ -152,7 +154,7 @@ class FieldSlipsController < ApplicationController
     date = extract_date
     obs = Observation.build_observation(location, name, notes, date, @user)
     if obs
-      @field_slip.project&.add_observation(obs)
+      assign_project(obs)
       @field_slip.update!(observation: obs)
       check_for_species_list(obs, params[:species_list])
       name_flash_for_project(name, @field_slip.project)
@@ -161,6 +163,15 @@ class FieldSlipsController < ApplicationController
       redirect_to(new_observation_url(field_code: @field_slip.code,
                                       place_name:, date:, notes:))
     end
+  end
+
+  def assign_project(obs)
+    project = Project.safe_find(params[:field_slip][:project_id])
+    project ||= @filed_slip&.project
+    return if project.nil? || project.violates_constraints?(obs)
+
+    project.add_observation(obs)
+    @field_slip.update!(project:)
   end
 
   def check_for_species_list(obs, species_list)
@@ -261,12 +272,8 @@ class FieldSlipsController < ApplicationController
       return false unless project.user_can_add_observation?(obs, @user)
 
       if project.violates_constraints?(obs)
-        if project.admin?(@user)
-          flash_warning(:field_slip_constraint_violation.t)
-        else
-          flash_error(:field_slip_constraint_violation.t)
-          return false
-        end
+        flash_error(:field_slip_constraint_violation.t)
+        return false
       end
       project.add_observation(obs)
     end

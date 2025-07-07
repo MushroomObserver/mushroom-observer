@@ -81,14 +81,14 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_equal(slip.observation, ObservationView.last(@field_slip.user))
   end
 
-  def test_should_allow_admin_to_create_field_slip_with_constraint_violation
+  def test_disallow_admin_to_create_field_slip_with_constraint_violation
     user = users(:dick)
     login(user.login) # Admin of :falmouth_2023_09_project
     ObservationView.update_view_stats(@field_slip.observation_id,
                                       user.id)
     proj = projects(:falmouth_2023_09_project)
     code = "#{proj.field_slip_prefix}-1234"
-    assert_difference("FieldSlip.count") do
+    assert_difference("FieldSlip.count", 0) do
       post(:create,
            params: {
              commit: :field_slip_last_obs.t,
@@ -99,10 +99,9 @@ class FieldSlipsControllerTest < FunctionalTestCase
            })
     end
 
-    assert_flash_warning
+    assert_flash_error
     slip = FieldSlip.find_by(code: code)
-    assert_redirected_to(observation_url(slip.observation))
-    assert_equal(slip.observation, ObservationView.last(user.id))
+    assert_equal(response.status, 422)
   end
 
   def test_should_not_create_field_slip_with_last_viewed_obs_due_to_constraints

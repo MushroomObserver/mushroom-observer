@@ -2898,7 +2898,7 @@
   field_slip_other_codes: Other Codes
   field_slip_other_example: e.g., iNat ID
   field_slip_other_inat: Check if [:field_slip_other_codes] is an iNat ID
-  field_slip_project_success: Field Slip associated with the [TITLE] Project
+  field_slip_project_success: Field Slip will be associated with the [TITLE] Project
   field_slip_qr_intro: This page is primarily intended for scanning "MO Field Slips":https://mushroomobserver.org/articles/37 using a QR code scanner. It should work with QR codes that only contain the field slip code.  You can also enter the code by hand into the text box and hit return.
   field_slip_quick_no_location: Quick create requires an existing location
   field_slip_quick_no_name: Quick create requires an existing name
