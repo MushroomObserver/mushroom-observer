@@ -5,6 +5,8 @@ class Inat
   class MoObservationBuilder
     attr_reader :inat_obs, :user
 
+    MO_API_KEY_NOTES = InatImportsController::MO_API_KEY_NOTES
+
     def initialize(inat_obs:, user:)
       @inat_obs = inat_obs
       @user = user
@@ -19,6 +21,8 @@ class Inat
       inat_obs
       @observation
     end
+
+    private
 
     def create_observation
       @observation = Observation.create(new_obs_params)
@@ -87,13 +91,17 @@ class Inat
 
     def add_provisional_name(parsed_prov_name)
       params = { method: :post, action: :name,
-                 api_key: @user_api_key,
+                 api_key: user_api_key,
                  name: parsed_prov_name.search_name,
                  rank: parsed_prov_name.rank }
       api = API2.execute(params)
       new_name = api.results.first
       new_name.log(:log_name_created)
       new_name
+    end
+
+    def user_api_key
+      APIKey.find_by(user: user, notes: MO_API_KEY_NOTES).key
     end
 
     def add_inat_images(inat_obs_photos)
@@ -108,8 +116,7 @@ class Inat
       {
         method: :post,
         action: :image,
-        api_key: @user_api_key,
-
+        api_key: user_api_key,
         upload_url: photo.url,
         notes: photo.notes,
         copyright_holder: photo.copyright_holder,
@@ -126,7 +133,7 @@ class Inat
     end
 
     def add_naming_with_vote(name:, user: @user,
-                            value: Vote::MAXIMUM_VOTE)
+                             value: Vote::MAXIMUM_VOTE)
       used_references = 2
       explanation = used_references_explanation(name)
       naming = Naming.create(
@@ -136,7 +143,7 @@ class Inat
       )
 
       vote = Vote.create(naming: naming, observation: @observation,
-                        user: user, value: value)
+                         user: user, value: value)
       # We need an ObservationView, but noone has actually viewed this Obs.
       ObservationView.create!(observation: @observation, user: user,
                               last_view: vote.updated_at, reviewed: 1)
@@ -194,7 +201,7 @@ class Inat
     def add_inat_sequences
       @inat_obs.sequences.each do |sequence|
         params = { action: :sequence, method: :post,
-                   api_key: @user_api_key,
+                   api_key: user_api_key,
                    observation: @observation.id,
                    locus: sequence[:locus],
                    bases: sequence[:bases],
@@ -203,21 +210,6 @@ class Inat
                    notes: sequence[:notes] }
         API2.execute(params)
       end
-    end
-
-    def update_inat_observation
-      update_mushroom_observer_url_field
-      sleep(1)
-      update_description
-    end
-
-    def update_mushroom_observer_url_field
-      update_inat_observation_field(
-        observation_id: @inat_obs[:id],
-        # TODO: get rid of magic number
-        field_id: 5005,
-        value: "#{MO.http_domain}/#{@observation.id}"
-      )
     end
   end
 end
