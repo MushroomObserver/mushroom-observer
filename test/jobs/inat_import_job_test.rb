@@ -64,8 +64,8 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_match(suggestion_date, proposed_name_notes)
 
     assert_not(obs.specimen, "Obs should not have a specimen")
-    assert_match(/Observation Fields: none/, obs.comments.first.comment,
-                 "Missing 'none' for Observation Fields")
+    assert(obs.notes.to_s.include?("Observation Fields: none"),
+           "Notes should indicate if there were no iNat 'Observation Fields'")
 
     assert_equal(
       before_emails_to_user, QueuedEmail.where(to_user: @user).count,
@@ -237,8 +237,8 @@ class InatImportJobTest < ActiveJob::TestCase
       ary << id[:taxon][:name]
     end
     unique_suggested_taxon_names.each do |taxon_name|
-      assert_match(taxon_name, obs.comments.first.comment,
-                   "Snapshot comment missing suggested name #{taxon_name}")
+      assert_match(taxon_name, obs.notes.to_s,
+                   "Notes Snapshot missing suggested name #{taxon_name}")
     end
   end
 
@@ -561,6 +561,30 @@ class InatImportJobTest < ActiveJob::TestCase
                  "Failed to report OAuth failure")
   end
 
+  def test_inat_api_request_failure
+    create_ivars_from_filename("calostoma_lutescens")
+
+    stub_token_requests
+    stub_request(:get, "#{API_BASE}/users/me").
+      with(
+        headers: {
+          "Accept" => "application/json",
+          "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+          "Authorization" => "Bearer MockJWT",
+          "Content-Type" => "application/json",
+          "Host" => "api.inaturalist.org"
+        }
+      ).
+      to_return(status: 401,
+                body: JSON.generate({ error: "Unauthorized", status: 401 }),
+                headers: {})
+
+    InatImportJob.perform_now(@inat_import)
+
+    assert_match(/401 Unauthorized/, @inat_import.response_errors,
+                 "Failed to report iNat API request failure")
+  end
+
   ########## Utilities
 
   def create_ivars_from_filename(filename, **attrs)
@@ -642,26 +666,25 @@ class InatImportJobTest < ActiveJob::TestCase
       "MO Observation should have ExternalLink to iNat observation"
     )
 
-    assert(obs.comments.any?, "Imported iNat should have >= 1 Comment")
-    obs_comments =
-      Comment.where(target_type: "Observation", target_id: obs.id)
-    assert(obs_comments.one?)
-    assert(obs_comments.where(Comment[:summary] =~ /iNat Data/).present?,
-           "Missing Initial Commment (#{:inat_data_comment.l})")
-    assert_equal(
-      user, obs_comments.first.user,
-      "Comment user should be user who creates the MO Observation"
+    assert(obs.inat_id.present?, "Failed to set Observation inat_id")
+
+    snapshot_key = Observation.notes_normalized_key(:inat_snapshot_caption.l)
+    assert_empty(
+      obs.comments.where(Comment[:summary] =~ snapshot_key.to_s),
+      "Observation should not have a (#{:inat_snapshot_caption.l}) comment"
     )
-    inat_data_comment = obs_comments.first.comment
+
+    ### Observation Notes
+    assert(obs.notes.key?(snapshot_key),
+           "Observation Notes missing #{snapshot_key}")
     [
       :USER.l, :OBSERVED.l, :show_observation_inat_lat_lng.l, :PLACE.l,
       :ID.l, :DQA.l, :show_observation_inat_suggested_ids.l,
-      :OBSERVATION_FIELDS.l,
-      :ANNOTATIONS.l, :PROJECTS.l, :TAGS.l
+      :OBSERVATION_FIELDS.l
     ].each do |caption|
       assert_match(
-        /#{caption}/, inat_data_comment,
-        "Initial Commment (#{:inat_data_comment.l}) is missing #{caption}"
+        /#{caption}/, obs.notes.to_s,
+        "Observation notes are missing #{caption}"
       )
     end
   end
