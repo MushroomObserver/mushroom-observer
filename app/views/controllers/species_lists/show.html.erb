@@ -1,16 +1,34 @@
 <%
-add_page_title(
-  :species_list_show_title.t(name: @species_list.unique_format_name)
-)
-add_pager_for(@species_list)
-add_interest_icons(@user, @species_list)
-add_context_nav(species_list_show_tabs(list: @species_list, query: @query))
-@container = :text_image
+  if @project
+    add_project_banner(@project)
+    @container = :wide
+  else
+    add_page_title(
+      :species_list_show_title.t(name: @species_list.unique_format_name)
+    )
+    add_context_nav(species_list_show_tabs(list: @species_list, query: @query))
+    @container = :text_image
+    add_pager_for(@species_list)
+    add_interest_icons(@user, @species_list)
+  end
 %>
+
+<%= species_list_title_panel(@species_list) if @project %>
+
+<%= panel_block(id: "list_search") do %>
+  <%= render(partial: "shared/search",
+             locals: { object: @species_list }) %>
+<% end %>
 
 <div class="container-text">
   <%= panel_block do %>
-    <div><b><%= :WHEN.t %>:</b> <%= @species_list.when.web_date %></div>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div><b><%= :WHEN.t %>:</b> <%= @species_list.when.web_date %></div>
+      <div>
+        <%= obs_change_links(@species_list) %> |
+        <%= download_button(target: @species_list, icon: :download) %>
+      </div>
+    </div>
     <div><b><%= :OBSERVATIONS.t %>:</b> <%= @query.num_results %></div>
     <div><b><%= :WHERE.t %>:</b>
       <%= location_link(@species_list.where, @species_list.location, nil, true) rescue :UNKNOWN.t %>
@@ -30,15 +48,10 @@ add_context_nav(species_list_show_tabs(list: @species_list, query: @query))
 <% if @pagination_data.any?
   query_params_set(@query) %>
 
+<%= project_species_list_buttons(@species_list, @query).safe_join %>
+
 <%= pagination_nav(@pagination_data) do %>
   <div class="list-group">
-
-    <div class="list-group-item default">
-      <%= :species_list_show_members.t %>:
-      <%= species_list_observations_tabs(@species_list, @query).map do |tab|
-          link_to(*tab)
-        end.safe_join(" | ") %>
-    </div>
 
     <% if @objects.any? %>
       <% @objects.each do |observation| %>

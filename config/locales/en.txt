@@ -1152,6 +1152,11 @@
   lifeform_help_lichen_ally: Fungus related to lichens and often studied by lichenologists despite being nonlichenized.
   lifeform_help_lichenicolous: Fungus which often or exclusively grows on or within a lichen.
 
+  # For search-status widget
+  search_status_all_names: Enter text to search [type]
+  search_status_has_name: "Match found in [type]:"
+  search_status_has_no_name: No match found in [type]
+
   # These are the search terms we look for, e.g. "date" in "date:today".
   search_term_author: author
   search_term_citation: citation
@@ -2893,7 +2898,7 @@
   field_slip_other_codes: Other Codes
   field_slip_other_example: e.g., iNat ID
   field_slip_other_inat: Check if [:field_slip_other_codes] is an iNat ID
-  field_slip_project_success: Field Slip associated with the [TITLE] Project
+  field_slip_project_success: Field Slip will be associated with the [TITLE] Project
   field_slip_qr_intro: This page is primarily intended for scanning "MO Field Slips":https://mushroomobserver.org/articles/37 using a QR code scanner. It should work with QR codes that only contain the field slip code.  You can also enter the code by hand into the text box and hit return.
   field_slip_quick_no_location: Quick create requires an existing location
   field_slip_quick_no_name: Quick create requires an existing name
@@ -3462,9 +3467,6 @@
   show_project_edit: Edit Project
   show_project_field_slip_create: Create Field Slip PDF
   show_project_field_slip_prefix: Field Slip Prefix
-  show_project_all_names: All Project Names
-  show_project_has_name: Project has this name
-  show_project_has_no_name: Project does not have this name
   show_project_join: Join Project
   show_project_location: Location
   show_project_leave: Leave Project

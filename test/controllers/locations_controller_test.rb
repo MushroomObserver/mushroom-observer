@@ -207,6 +207,18 @@ class LocationsControllerTest < FunctionalTestCase
     assert_match(location.display_name, @response.body)
   end
 
+  def test_index_species_list
+    sl = species_lists(:one_genus_three_species_list)
+    query = Query.lookup_and_save(:Location,
+                                  observation_query: { species_lists: [sl] })
+
+    login
+    get(:index, params: @controller.query_params(query))
+
+    location = sl.observations.joins(:location).first&.location
+    assert_match(location.display_name, @response.body)
+  end
+
   def test_index_advanced_search
     where = "California"
     query = Query.lookup_and_save(:Location, search_where: where)

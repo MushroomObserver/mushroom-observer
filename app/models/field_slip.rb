@@ -125,7 +125,11 @@ class FieldSlip < AbstractModel
   end
 
   def field_slip_name
-    observation&.field_slip_name || ""
+    observation&.field_slip_name || @default_field_slip_name || ""
+  end
+
+  def field_slip_name=(value)
+    @default_field_slip_name = value
   end
 
   def field_slip_id_by
