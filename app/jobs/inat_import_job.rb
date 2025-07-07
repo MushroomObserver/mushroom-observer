@@ -132,14 +132,14 @@ class InatImportJob < ApplicationJob
     # To get one page, use iNats `per_page` & `id_above` params.
     # https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
     parser = Inat::PageParser.new(@inat_import, inat_ids, restricted_user_login)
-    while parsing(parser); end
+    while parsing?(parser); end
   end
 
   def inat_id_list
     @inat_import.inat_ids.delete(" ")
   end
 
-  def parsing(parser)
+  def parsing?(parser)
     # get a page of observations with id > id of last imported obs
     parsed_page = parser.next_page
     return false if parsed_page.nil?
@@ -150,10 +150,10 @@ class InatImportJob < ApplicationJob
     import_page(parsed_page)
 
     parser.last_import_id = parsed_page["results"].last["id"]
-    return false if last_page?(parsed_page)
+    return true unless last_page?(parsed_page)
 
     log("Imported requested observations")
-    true
+    false
   end
 
   def page_empty?(page)
@@ -362,14 +362,8 @@ class InatImportJob < ApplicationJob
   def adjust_consensus_name_naming
     naming = Naming.find_by(observation: @observation,
                             name: @observation.name)
-
-    if naming.nil?
-      add_naming_with_vote(name: @observation.name,
-                           user: @user, value: Vote::MAXIMUM_VOTE)
-    else
-      vote = Vote.find_by(naming: naming, observation: @observation)
-      vote.update(value: Vote::MAXIMUM_VOTE)
-    end
+    vote = Vote.find_by(naming: naming, observation: @observation)
+    vote.update(value: Vote::MAXIMUM_VOTE)
   end
 
   def add_inat_sequences
