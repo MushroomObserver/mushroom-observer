@@ -184,7 +184,6 @@ class InatImportJob < ApplicationJob
     @inat_obs = Inat::Obs.new(result)
     return unless @inat_obs.importable?
 
-
     builder = Inat::MoObservationBuilder.new(inat_obs: @inat_obs, user: @user)
     @observation = builder.mo_observation
 

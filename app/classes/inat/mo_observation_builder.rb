@@ -42,8 +42,7 @@ class Inat
       @observation.log(:log_observation_created)
     end
 
-    def new_obs_params
-      name_id = id_or_provisional_or_species_name
+    def new_obs_params # rubocop:disable Metrics/AbcSize
       { user: user,
         when: inat_obs.when,
         location: inat_obs.location,
@@ -51,9 +50,9 @@ class Inat
         lat: inat_obs.lat,
         lng: inat_obs.lng,
         gps_hidden: inat_obs.gps_hidden,
-        name_id: name_id,
+        name_id: id_or_provisional_or_species_name,
         specimen: inat_obs.specimen?,
-        text_name: Name.find(name_id).text_name,
+        text_name: text_name,
         notes: inat_obs.notes,
         source: inat_obs.source,
         inat_id: inat_obs[:id] }
@@ -79,6 +78,10 @@ class Inat
 
     def need_new_prov_name?(parsed_prov_name)
       Name.where(text_name: parsed_prov_name.text_name).none?
+    end
+
+    def text_name
+      Name.find(id_or_provisional_or_species_name).text_name
     end
 
     def add_external_link
@@ -201,7 +204,7 @@ class Inat
     end
 
     def add_inat_sequences
-      @inat_obs.sequences.each do |sequence|
+      inat_obs.sequences.each do |sequence|
         params = { action: :sequence, method: :post,
                    api_key: user_api_key,
                    observation: @observation.id,
