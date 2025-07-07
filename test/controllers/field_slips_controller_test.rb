@@ -100,7 +100,6 @@ class FieldSlipsControllerTest < FunctionalTestCase
     end
 
     assert_flash_error
-    slip = FieldSlip.find_by(code: code)
     assert_equal(response.status, 422)
   end
 
