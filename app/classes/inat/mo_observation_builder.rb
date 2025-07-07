@@ -29,22 +29,22 @@ class Inat
       # Ensure this Name wins consensus_calc ties
       # by creating this naming and vote first
       name = @observation.name
-      naming_user =
+      namer =
         if suggested?(name) &&
            (suggester = User.find_by(
              inat_username: suggester(suggestion(name))
            ))
           suggester
         else
-          @user
+          user
         end
-      add_naming_with_vote(name: @observation.name, user: naming_user)
+      add_naming_with_vote(name: @observation.name, namer: namer)
       @observation.log(:log_observation_created)
     end
 
     def new_obs_params
       name_id = id_or_provisional_or_species_name
-      { user: @user,
+      { user: user,
         when: @inat_obs.when,
         location: @inat_obs.location,
         where: @inat_obs.where,
@@ -84,7 +84,7 @@ class Inat
     def add_external_link
       external_site = ExternalSite.find_by(name: "iNaturalist")
       ExternalLink.create(
-        user: @user,
+        user: user,
         observation: @observation,
         external_site: external_site,
         url: "#{external_site.base_url}#{@inat_obs[:id]}"
@@ -134,13 +134,13 @@ class Inat
       Observation::NamingConsensus.new(@observation).calc_consensus
     end
 
-    def add_naming_with_vote(name:, user: @user,
+    def add_naming_with_vote(name:, namer:,
                              value: Vote::MAXIMUM_VOTE)
       used_references = 2
       explanation = used_references_explanation(name)
       naming = Naming.create(
         observation: @observation,
-        user: user, name: name,
+        user: namer, name: name,
         reasons: { used_references => explanation }
       )
 
