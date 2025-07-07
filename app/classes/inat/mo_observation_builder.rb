@@ -31,7 +31,9 @@ class Inat
       name = @observation.name
       naming_user =
         if suggested?(name) &&
-           (suggester = User.find_by(inat_username: suggester(suggestion(name))))
+           (suggester = User.find_by(
+             inat_username: suggester(suggestion(name))
+           ))
           suggester
         else
           @user
