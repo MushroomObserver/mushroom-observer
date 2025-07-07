@@ -184,11 +184,16 @@ class InatImportJob < ApplicationJob
     @inat_obs = Inat::Obs.new(result)
     return unless @inat_obs.importable?
 
+=begin
     create_observation
     add_external_link
     add_inat_images(@inat_obs[:observation_photos])
     update_names_and_proposals
     add_inat_sequences
+=end
+    builder = Inat::MoObservationBuilder.new(inat_obs: @inat_obs, user: @user)
+    @observation = builder.mo_observation
+
     # NOTE: update field slip 2024-09-09 jdc
     # https://github.com/MushroomObserver/mushroom-observer/issues/2380
     update_inat_observation
