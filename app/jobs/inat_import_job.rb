@@ -14,7 +14,6 @@ class InatImportJob < ApplicationJob
   ICONIC_TAXA = "Fungi,Protozoa"
   # This string + date is added to description of iNat observation
   IMPORTED_BY_MO = "Imported by Mushroom Observer"
-  MO_API_KEY_NOTES = InatImportsController::MO_API_KEY_NOTES
 
   queue_as :default
 
@@ -41,8 +40,6 @@ class InatImportJob < ApplicationJob
       "InatImportJob #{inat_import.id} started, user: #{inat_import.user_id}"
     )
     @user = @inat_import.user
-    @user_api_key = APIKey.find_by(user: @user, notes: MO_API_KEY_NOTES).key
-    @external_site = ExternalSite.find_by(name: "iNaturalist")
   end
 
   # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
