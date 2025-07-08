@@ -91,7 +91,7 @@ class InatImportJob < ApplicationJob
     return log("Skipped own-obs check (SuperImporter)") if super_importer?
 
     begin
-      response = ::Inat::APIRequest.new(token).request(path: "users/me")
+      response = Inat::APIRequest.new(token).request(path: "users/me")
     rescue RestClient::Unauthorized, RestClient::ExceptionWithResponse => e
       raise("iNat API user request failed: #{e.message}")
     end
@@ -380,16 +380,18 @@ class InatImportJob < ApplicationJob
   end
 
   def update_mushroom_observer_url_field
-    update_inat_observation_field(observation_id: @inat_obs[:id],
-                                  field_id: 5005,
-                                  value: "#{MO.http_domain}/#{@observation.id}")
+    update_inat_observation_field(
+      observation_id: @inat_obs[:id],
+      field_id: 5005, # id of iNat's "Mushroom Observer URL" observation field
+      value: "#{MO.http_domain}/#{@observation.id}"
+    )
   end
 
   def update_inat_observation_field(observation_id:, field_id:, value:)
     payload = { observation_field_value: { observation_id: observation_id,
                                            observation_field_id: field_id,
                                            value: value } }
-    ::Inat::APIRequest.new(token).
+    Inat::APIRequest.new(token).
       request(method: :post, path: "observation_field_values", payload: payload)
   end
 
