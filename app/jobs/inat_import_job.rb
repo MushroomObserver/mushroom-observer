@@ -33,6 +33,9 @@ class InatImportJob < ApplicationJob
 
   delegate :token, to: :@inat_import
 
+  # NOTE: `inat_api_request` is duplicated in InatImportJob and PageParser.
+  # It should be in a shared class, But I ran into issues when I extracted it.
+  # I couldn't stub it. JDC`2025-07-08`
   def inat_api_request(path:, method: :get, payload: {},
                        headers: { authorization: "Bearer #{token}",
                                   content_type: :json, accept: :json })
