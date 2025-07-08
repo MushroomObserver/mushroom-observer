@@ -54,26 +54,11 @@ class Inat
       }.merge(args)
       headers = { authorization: "Bearer #{@importer.token}", accept: :json }
 
-      inat_api_request(path: "observations?#{query_args.to_query}",
-                       headers: headers)
-
+      Inat::APIRequest.new(@importer.token).
+        request(path: "observations?#{query_args.to_query}", headers: headers)
     rescue ::RestClient::ExceptionWithResponse => e
       @importer.add_response_error(e.response)
       e.response
-    end
-
-    # NOTE: `inat_api_request` is duplicated in InatImportJob and PageParser.
-    # It should be in a shared class, But I ran into issues when I extracted it.
-    # I couldn't stub it. JDC 2025-07-08
-    def inat_api_request(path:, method: :get, payload: {},
-                         headers: { authorization: "Bearer #{token}",
-                                    content_type: :json, accept: :json })
-      RestClient::Request.execute(
-        method: method,
-        url: "#{API_BASE}/#{path}",
-        payload: payload.to_json,
-        headers: headers
-      )
     end
   end
 end

@@ -33,20 +33,6 @@ class InatImportJob < ApplicationJob
 
   delegate :token, to: :@inat_import
 
-  # NOTE: `inat_api_request` is duplicated in InatImportJob and PageParser.
-  # It should be in a shared class, But I ran into issues when I extracted it.
-  # I couldn't stub it. JDC`2025-07-08`
-  def inat_api_request(path:, method: :get, payload: {},
-                       headers: { authorization: "Bearer #{token}",
-                                  content_type: :json, accept: :json })
-    RestClient::Request.execute(
-      method: method,
-      url: "#{API_BASE}/#{path}",
-      payload: payload.to_json,
-      headers: headers
-    )
-  end
-
   private
 
   def create_ivars(inat_import)
@@ -105,7 +91,7 @@ class InatImportJob < ApplicationJob
     return log("Skipped own-obs check (SuperImporter)") if super_importer?
 
     begin
-      response = inat_api_request(path: "users/me")
+      response = ::Inat::APIRequest.new(token).request(path: "users/me")
     rescue RestClient::Unauthorized, RestClient::ExceptionWithResponse => e
       raise("iNat API user request failed: #{e.message}")
     end
@@ -403,8 +389,8 @@ class InatImportJob < ApplicationJob
     payload = { observation_field_value: { observation_id: observation_id,
                                            observation_field_id: field_id,
                                            value: value } }
-    inat_api_request(method: :post, path: "observation_field_values",
-                     payload: payload)
+    ::Inat::APIRequest.new(token).
+      request(method: :post, path: "observation_field_values", payload: payload)
   end
 
   def update_description
@@ -420,7 +406,8 @@ class InatImportJob < ApplicationJob
     # iNat API uses PUT + ignore_photos, not PATCH, to update an observation
     # https://api.inaturalist.org/v1/docs/#!/Observations/put_observations_id
     path = "observations/#{@inat_obs[:id]}?ignore_photos=1"
-    inat_api_request(method: :put, path: path, payload: payload)
+    Inat::APIRequest.new(token).
+      request(method: :put, path: path, payload: payload)
   end
 
   def importing_someone_elses_obs?
