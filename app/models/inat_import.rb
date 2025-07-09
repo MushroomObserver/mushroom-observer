@@ -8,7 +8,7 @@
 #  state::                 state of the import
 #  ended_at::              when the job was Done
 #  token::                 token used to validate request; can be a code,
-#                          authorization token, or jwt
+#                          authorization token, or JWT
 #                          depending on the state of the import
 #                          https://www.inaturalist.org/pages/api+reference#authorization_code_flow
 #  inat_ids::              string of id's of iNat obss to be imported
