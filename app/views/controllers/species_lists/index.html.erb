@@ -1,7 +1,13 @@
 <%
-add_index_title(@query)
-add_sorter(@query, species_lists_index_sorts(query: @query))
-flash_error(@error) if @error && @objects.empty?
+  if @project
+    add_project_banner(@project)
+    @container = :wide
+  else
+    add_index_title(@query)
+    @container = :full
+  end
+  add_sorter(@query, species_lists_index_sorts(query: @query))
+  flash_error(@error) if @error && @objects.empty?
 %>
 
 <%= pagination_nav(@pagination_data) do %>
@@ -14,7 +20,9 @@ flash_error(@error) if @error && @objects.empty?
             when_span = tag.span(species_list.when.to_s, class: "list_when")
             what_span = tag.span(species_list.unique_text_name.t,
                                 class: "list_what")
-            link_to(when_span + ": " + what_span, species_list.show_link_args)
+            args = species_list.show_link_args
+            args[:project] = @project if @project
+            link_to(when_span + ": " + what_span, args)
           %>
         </div><!-- .text-larger -->
         <span><%= species_list.place_name.t rescue :UNKNOWN.t %></span> |

@@ -561,6 +561,30 @@ class InatImportJobTest < ActiveJob::TestCase
                  "Failed to report OAuth failure")
   end
 
+  def test_inat_api_request_failure
+    create_ivars_from_filename("calostoma_lutescens")
+
+    stub_token_requests
+    stub_request(:get, "#{API_BASE}/users/me").
+      with(
+        headers: {
+          "Accept" => "application/json",
+          "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+          "Authorization" => "Bearer MockJWT",
+          "Content-Type" => "application/json",
+          "Host" => "api.inaturalist.org"
+        }
+      ).
+      to_return(status: 401,
+                body: JSON.generate({ error: "Unauthorized", status: 401 }),
+                headers: {})
+
+    InatImportJob.perform_now(@inat_import)
+
+    assert_match(/401 Unauthorized/, @inat_import.response_errors,
+                 "Failed to report iNat API request failure")
+  end
+
   ########## Utilities
 
   def create_ivars_from_filename(filename, **attrs)

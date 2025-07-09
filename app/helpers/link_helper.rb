@@ -204,7 +204,8 @@ module LinkHelper
     chevron_right: "chevron-right",
     qrcode: "qrcode",
     mobile: "phone",
-    project: "th-list"
+    project: "th-list",
+    download: "download-alt"
   }.freeze
 
   # button to destroy object
@@ -240,6 +241,25 @@ module LinkHelper
     # necessary if nil/empty string passed
     name = :EDIT.t if name.blank?
     path, identifier, icon, content = button_atts(:edit, target, args, name)
+
+    html_options = {
+      class: class_names(identifier, args[:class]), # usually also btn
+      title: name, data: { toggle: "tooltip", placement: "top", title: name }
+    }.deep_merge(args.except(:class, :back))
+
+    link_to(path, html_options) do
+      [content, icon].safe_join
+    end
+  end
+
+  # Note `link_to` - not a <button> element, but an <a> because it's a GET
+  def download_button(target:, name: :DOWNLOAD.t, **args)
+    # necessary if nil/empty string passed
+    name = :DOWNLOAD.t if name.blank?
+    path, identifier, icon, content = button_atts(
+      :download,
+      new_species_list_download_path(id: target.id), args, name
+    )
 
     html_options = {
       class: class_names(identifier, args[:class]), # usually also btn

@@ -230,8 +230,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login
     get(:index, params: { project: project.id })
 
-    assert_displayed_title(:SPECIES_LISTS.l)
-    assert_displayed_filters("#{:query_projects.l}: #{project.title}")
+    assert_displayed_title(project.title)
+    assert_match(project.species_lists.first.title, @response.body)
   end
 
   def test_index_for_project_with_no_lists
@@ -241,7 +241,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     get(:index, params: { project: project.id })
 
     assert_response(:success)
-    assert_displayed_title(:SPECIES_LISTS.l)
+    assert_displayed_title(project.title)
     assert_flash_text(:runtime_no_matches.l(types: :species_lists))
   end
 
@@ -297,6 +297,15 @@ class SpeciesListsControllerTest < FunctionalTestCase
     )
   end
 
+  def test_show_species_list_for_project
+    login
+    spl = species_lists(:reused_list)
+    project = spl.projects[0]
+
+    get(:show, params: { id: spl.id, project: project.id })
+    assert_match(project.title, @response.body)
+  end
+
   def test_show_species_lists_attached_to_projects
     login
     proj1 = projects(:eol_project)
@@ -330,7 +339,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login("rolf")
     get(:show, params: { id: spl.id })
     assert_select("a[href*=?]", edit_species_list_path(spl.id), count: 0)
-    assert_select("form[action=?]", species_list_path(spl.id), count: 0)
+    assert_select("form[action=?]", add_dispatch_path, count: 1)
     get(:edit, params: { id: spl.id })
     assert_response(:redirect)
     delete(:destroy, params: { id: spl.id })

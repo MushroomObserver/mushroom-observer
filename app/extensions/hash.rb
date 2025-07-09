@@ -88,7 +88,18 @@ class Hash
     return value1 if empty_value?(value2)
 
     # Both values have content - merge strings, otherwise replace
-    both_strings?(value1, value2) ? "#{value1}\n#{value2}" : value2
+    if both_strings?(value1, value2)
+      # Avoid duplicates
+      if value1.include?(value2)
+        value1
+      elsif value2.include?(value1)
+        value2
+      else
+        "#{value1}\n#{value2}"
+      end
+    else
+      value2
+    end
   end
 
   def empty_value?(value)

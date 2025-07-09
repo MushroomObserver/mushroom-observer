@@ -77,18 +77,18 @@ class FieldSlipsControllerTest < FunctionalTestCase
     end
 
     slip = FieldSlip.find_by(code: code)
-    assert_redirected_to(field_slip_url(slip))
+    assert_redirected_to(observation_url(slip.observation))
     assert_equal(slip.observation, ObservationView.last(@field_slip.user))
   end
 
-  def test_should_allow_admin_to_create_field_slip_with_constraint_violation
+  def test_disallow_admin_to_create_field_slip_with_constraint_violation
     user = users(:dick)
     login(user.login) # Admin of :falmouth_2023_09_project
     ObservationView.update_view_stats(@field_slip.observation_id,
                                       user.id)
     proj = projects(:falmouth_2023_09_project)
     code = "#{proj.field_slip_prefix}-1234"
-    assert_difference("FieldSlip.count") do
+    assert_difference("FieldSlip.count", 0) do
       post(:create,
            params: {
              commit: :field_slip_last_obs.t,
@@ -99,10 +99,8 @@ class FieldSlipsControllerTest < FunctionalTestCase
            })
     end
 
-    assert_flash_warning
-    slip = FieldSlip.find_by(code: code)
-    assert_redirected_to(field_slip_url(slip))
-    assert_equal(slip.observation, ObservationView.last(user.id))
+    assert_flash_error
+    assert_equal(response.status, 422)
   end
 
   def test_should_not_create_field_slip_with_last_viewed_obs_due_to_constraints
@@ -131,6 +129,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     user = @field_slip.user
     login(user.login)
     project = projects(:open_membership_project)
+    species_list = project.species_lists.first
     assert_not(project.member?(user))
     ObservationView.update_view_stats(@field_slip.observation_id,
                                       @field_slip.user_id)
@@ -139,6 +138,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
       post(:create,
            params: {
              commit: :field_slip_last_obs.t,
+             species_list: species_list.id,
              field_slip: {
                code: code,
                project_id: project.id
@@ -146,8 +146,11 @@ class FieldSlipsControllerTest < FunctionalTestCase
            })
     end
 
-    assert_redirected_to(field_slip_url(FieldSlip.find_by(code: code)))
+    obs = FieldSlip.find_by(code: code).observation
+    assert_redirected_to(observation_url(obs))
     assert(project.member?(user))
+    assert(project.observations.member?(obs))
+    assert(species_list.observations.member?(obs))
   end
 
   def test_should_create_field_slip_and_redirect_to_create_obs
@@ -361,7 +364,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     project = projects(:bolete_project)
     code = "#{project.field_slip_prefix}-1235"
     get(:show, params: { id: code })
-    assert_redirected_to(new_field_slip_url(code: code))
+    assert_redirected_to(new_field_slip_url(code: code, id: code))
   end
 
   def test_should_get_edit
@@ -483,6 +486,39 @@ class FieldSlipsControllerTest < FunctionalTestCase
     notes = field_slip.observation.reload.notes[:Other]
     assert(notes.include?(old_note))
     assert(notes.include?(new_note))
+  end
+
+  def test_should_update_field_slip_and_same_note
+    field_slip = field_slips(:field_slip_falmouth_one)
+    old_note = field_slip.observation.notes[:Other]
+    login
+    patch(:update,
+          params: { id: field_slip.id,
+                    commit: :field_slip_keep_obs.t,
+                    field_slip: { code: field_slip.code,
+                                  observation_id: field_slip.observation_id,
+                                  project_id: field_slip.project_id,
+                                  notes: { Other: old_note } } })
+    assert_redirected_to(field_slip_url(field_slip))
+    notes = field_slip.observation.reload.notes[:Other]
+    assert_equal(old_note, notes)
+  end
+
+  def test_should_update_field_slip_and_more_notes
+    field_slip = field_slips(:field_slip_falmouth_one)
+    old_note = field_slip.observation.notes[:Other]
+    new_note = "Start\n#{old_note}\nEnd"
+    login
+    patch(:update,
+          params: { id: field_slip.id,
+                    commit: :field_slip_keep_obs.t,
+                    field_slip: { code: field_slip.code,
+                                  observation_id: field_slip.observation_id,
+                                  project_id: field_slip.project_id,
+                                  notes: { Other: new_note } } })
+    assert_redirected_to(field_slip_url(field_slip))
+    notes = field_slip.observation.reload.notes[:Other]
+    assert_equal(new_note, notes)
   end
 
   def test_should_update_field_slip_with_last_viewed_obs
