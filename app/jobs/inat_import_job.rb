@@ -18,6 +18,8 @@ class InatImportJob < ApplicationJob
 
   queue_as :default
 
+  delegate :token, to: :@inat_import
+
   def perform(inat_import)
     create_ivars(inat_import)
     use_auth_code_to_obtain_oauth_access_token
@@ -30,8 +32,6 @@ class InatImportJob < ApplicationJob
   ensure
     done
   end
-
-  delegate :token, to: :@inat_import
 
   private
 
