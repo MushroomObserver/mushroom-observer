@@ -1,30 +1,17 @@
 # frozen_string_literal: true
 
 class InatImportJob < ApplicationJob
-  # iNat's id for the MO application
-  # Different in production vs. test & development
-  APP_ID = InatImportsController::APP_ID
-  # site for authorization, authentication
-  SITE = InatImportsController::SITE
-  # iNat calls this after iNat user authorizes MO access to user's data
-  REDIRECT_URI = InatImportsController::REDIRECT_URI
-  # The iNat API
-  API_BASE = InatImportsController::API_BASE
-  # limit results iNat API requests, with Protozoa as a proxy for slime molds
-  ICONIC_TAXA = "Fungi,Protozoa"
-  # This string + date is added to description of iNat observation
-  IMPORTED_BY_MO = "Imported by Mushroom Observer"
-  MO_API_KEY_NOTES = InatImportsController::MO_API_KEY_NOTES
+  include Inat::Constants
 
   queue_as :default
 
+  delegate :token, to: :@inat_import
+
   def perform(inat_import)
     create_ivars(inat_import)
-    access_token =
-      use_auth_code_to_obtain_oauth_access_token(@inat_import.token)
-    api_token = trade_access_token_for_jwt_api_token(access_token)
-    ensure_importing_own_observations(api_token)
-    @inat_import.update(token: api_token, state: "Importing")
+    use_auth_code_to_obtain_oauth_access_token
+    trade_access_token_for_jwt_api_token
+    ensure_importing_own_observations
     import_requested_observations
   rescue StandardError => e
     log("Error occurred: #{e.message}")
@@ -46,11 +33,11 @@ class InatImportJob < ApplicationJob
   end
 
   # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
-  def use_auth_code_to_obtain_oauth_access_token(auth_code)
+  def use_auth_code_to_obtain_oauth_access_token
     log("Obtaining OAuth access token")
     payload = { client_id: APP_ID,
                 client_secret: Rails.application.credentials.inat.secret,
-                code: auth_code,
+                code: token,
                 redirect_uri: REDIRECT_URI,
                 grant_type: "authorization_code" }
 
@@ -60,34 +47,24 @@ class InatImportJob < ApplicationJob
       raise("OAuth token request failed: #{e.message}")
     end
 
-    token = JSON.parse(oauth_response.body)["access_token"]
-    @inat_import.update(token: token)
-    log("Obtained OAuth access token: #{masked_token(token)}")
-    token
-  end
-
-  def done
-    log("Updating inat_import state to Done")
-    update_inat_import
-    update_user_inat_username
-  end
-
-  def update_inat_import
-    @inat_import.update(state: "Done", ended_at: Time.zone.now)
+    oauth_access_token = JSON.parse(oauth_response.body)["access_token"]
+    @inat_import.update(token: oauth_access_token)
+    log("Obtained OAuth access token: #{masked_token(oauth_access_token)}")
   end
 
   # https://www.inaturalist.org/pages/api+recommended+practices
-  def trade_access_token_for_jwt_api_token(access_token)
+  def trade_access_token_for_jwt_api_token
     log("Obtaining jwt")
     begin
       jwt_response = RestClient::Request.execute(
         method: :get, url: "#{SITE}/users/api_token",
-        headers: { authorization: "Bearer #{access_token}", accept: :json }
+        headers: { authorization: "Bearer #{token}", accept: :json }
       )
     rescue RestClient::Unauthorized, RestClient::ExceptionWithResponse => e
       raise("JWT request failed: #{e.message}")
     end
     api_token = JSON.parse(jwt_response)["api_token"]
+    @inat_import.update(token: api_token)
     log("Obtained JWT API token: #{masked_token(api_token)}")
     api_token
   end
@@ -97,21 +74,17 @@ class InatImportJob < ApplicationJob
   # if B authorized MO to access B's iNat data.  We don't want that.
   # Therefore check that the iNat login provided in the import form
   # is that of the user currently logged-in to iNat.
-  def ensure_importing_own_observations(api_token)
+  def ensure_importing_own_observations
     return log("Skipped own-obs check (SuperImporter)") if super_importer?
 
-    headers = { authorization: "Bearer #{api_token}",
-                content_type: :json, accept: :json }
     begin
-      # fetch the logged-in iNat user
-      # https://api.inaturalist.org/v1/docs/#!/Users/get_users_me
-      response = RestClient.get("#{API_BASE}/users/me", headers)
-      @inat_logged_in_user = JSON.parse(response.body)["results"].first["login"]
-      log("inat_logged_in_user: #{@inat_logged_in_user}")
+      response = Inat::APIRequest.new(token).request(path: "users/me")
     rescue RestClient::Unauthorized, RestClient::ExceptionWithResponse => e
       raise("iNat API user request failed: #{e.message}")
     end
 
+    @inat_logged_in_user = JSON.parse(response.body)["results"].first["login"]
+    log("inat_logged_in_user: #{@inat_logged_in_user}")
     raise(:inat_wrong_user.t) unless right_user?(@inat_logged_in_user)
   end
 
@@ -124,6 +97,7 @@ class InatImportJob < ApplicationJob
   end
 
   def import_requested_observations
+    @inat_import.update(state: "Importing")
     inat_ids = inat_id_list
     return log("No observations requested") if @inat_import[:import_all].
                                                blank? && inat_ids.blank?
@@ -387,19 +361,19 @@ class InatImportJob < ApplicationJob
   end
 
   def update_mushroom_observer_url_field
-    update_inat_observation_field(observation_id: @inat_obs[:id],
-                                  field_id: 5005,
-                                  value: "#{MO.http_domain}/#{@observation.id}")
+    update_inat_observation_field(
+      observation_id: @inat_obs[:id],
+      field_id: MO_URL_OBSERVATION_FIELD_ID,
+      value: "#{MO.http_domain}/#{@observation.id}"
+    )
   end
 
   def update_inat_observation_field(observation_id:, field_id:, value:)
     payload = { observation_field_value: { observation_id: observation_id,
                                            observation_field_id: field_id,
                                            value: value } }
-    headers = { authorization: "Bearer #{@inat_import.token}",
-                content_type: :json, accept: :json }
-    RestClient.post("#{API_BASE}/observation_field_values",
-                    payload.to_json, headers)
+    Inat::APIRequest.new(token).
+      request(method: :post, path: "observation_field_values", payload: payload)
   end
 
   def update_description
@@ -412,12 +386,11 @@ class InatImportJob < ApplicationJob
 
     payload = { observation: { description: updated_description,
                                ignore_photos: 1 } }
-    headers = { authorization: "Bearer #{@inat_import.token}",
-                content_type: :json, accept: :json }
     # iNat API uses PUT + ignore_photos, not PATCH, to update an observation
     # https://api.inaturalist.org/v1/docs/#!/Observations/put_observations_id
-    RestClient.put("#{API_BASE}/observations/#{@inat_obs[:id]}?ignore_photos=1",
-                   payload.to_json, headers)
+    path = "observations/#{@inat_obs[:id]}?ignore_photos=1"
+    Inat::APIRequest.new(token).
+      request(method: :put, path: path, payload: payload)
   end
 
   def importing_someone_elses_obs?
@@ -439,21 +412,6 @@ class InatImportJob < ApplicationJob
     @inat_import.reset_last_obs_start
   end
 
-  def update_user_inat_username
-    # Prevent MO users from setting their inat_username
-    # to a non-existent iNat login
-    return unless job_successful_enough?
-
-    @inat_import.user.update(inat_username: @inat_import.inat_username)
-    log("Updated user inat_username")
-  end
-
-  # job successful enough to justify updating the MO user's iNat user_name
-  def job_successful_enough?
-    @inat_import.response_errors.empty? ||
-      @inat_import.imported_count&.positive?
-  end
-
   def masked_token(str)
     # Return the string as is if its length is less than or equal to 6
     return str if str.length <= 6
@@ -467,5 +425,26 @@ class InatImportJob < ApplicationJob
 
     # Combine the parts
     "#{first_part}#{asterisks}#{last_part}"
+  end
+
+  def done
+    log("Updating inat_import state to Done")
+    @inat_import.update(state: "Done", ended_at: Time.zone.now)
+    update_user_inat_username
+  end
+
+  def update_user_inat_username
+    # Prevent MO users from setting their inat_username
+    # to a non-existent iNat login
+    return unless job_successful_enough?
+
+    @inat_import.user.update(inat_username: @inat_import.inat_username)
+    log("Updated user inat_username")
+  end
+
+  # job successful enough to justify updating the MO user's iNat user_name
+  def job_successful_enough?
+    @inat_import.response_errors.empty? ||
+      @inat_import.imported_count&.positive?
   end
 end
