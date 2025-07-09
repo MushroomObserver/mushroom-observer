@@ -2,12 +2,9 @@
 
 class Inat
   class PageParser
-    attr_accessor :last_import_id
+    include Inat::InatConstants
 
-    # The iNat API
-    API_BASE = InatImportsController::API_BASE
-    # limit results iNat API requests, with Protozoa as a proxy for slime molds
-    ICONIC_TAXA = "Fungi,Protozoa"
+    attr_accessor :last_import_id
 
     def initialize(importer, ids, restricted_user_login)
       @importer = importer

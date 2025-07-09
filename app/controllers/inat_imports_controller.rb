@@ -57,26 +57,10 @@
 #
 class InatImportsController < ApplicationController
   include Validators
+  include Inat::InatConstants
 
   before_action :login_required
   before_action :pass_query_params
-
-  # Site for authorization and authentication requests
-  SITE = "https://www.inaturalist.org"
-  # iNat calls this after iNat user authorizes MO to access their data.
-  # Different in production vs. test & development
-  REDIRECT_URI = Rails.configuration.redirect_uri
-  # iNat's id for the MO application
-  # Different in production vs. test & development
-  APP_ID = Rails.application.credentials.inat.id
-  # URL to obtain authorization from iNat user for access to their private data
-  INAT_AUTHORIZATION_URL =
-    "#{SITE}/oauth/authorize?client_id=#{APP_ID}" \
-    "&redirect_uri=#{REDIRECT_URI}&response_type=code".freeze
-  # The iNat API. Not called here, but referenced in tests and ActiveJob
-  API_BASE = "https://api.inaturalist.org/v1"
-  # notes for MO API Key used in iNat imports
-  MO_API_KEY_NOTES = "inat import"
 
   def show
     @tracker = InatImportJobTracker.find(params[:tracker_id])

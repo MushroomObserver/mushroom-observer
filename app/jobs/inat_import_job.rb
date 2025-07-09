@@ -1,20 +1,7 @@
 # frozen_string_literal: true
 
 class InatImportJob < ApplicationJob
-  # iNat's id for the MO application
-  # Different in production vs. test & development
-  APP_ID = InatImportsController::APP_ID
-  # site for authorization, authentication
-  SITE = InatImportsController::SITE
-  # iNat calls this after iNat user authorizes MO access to user's data
-  REDIRECT_URI = InatImportsController::REDIRECT_URI
-  # The iNat API
-  API_BASE = InatImportsController::API_BASE
-  # limit results iNat API requests, with Protozoa as a proxy for slime molds
-  ICONIC_TAXA = "Fungi,Protozoa"
-  # This string + date is added to description of iNat observation
-  IMPORTED_BY_MO = "Imported by Mushroom Observer"
-  MO_API_KEY_NOTES = InatImportsController::MO_API_KEY_NOTES
+  include Inat::InatConstants
 
   queue_as :default
 
