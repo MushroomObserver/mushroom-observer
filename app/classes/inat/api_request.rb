@@ -3,7 +3,7 @@
 # encapsulates requests to the iNat API
 # intended for all those requests that are not specific to a single iNatImport
 class Inat::APIRequest
-  include Inat::InatConstants
+  include Inat::Constants
 
   def initialize(token)
     @token = token

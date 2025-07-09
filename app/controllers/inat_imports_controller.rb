@@ -57,7 +57,7 @@
 #
 class InatImportsController < ApplicationController
   include Validators
-  include Inat::InatConstants
+  include Inat::Constants
 
   before_action :login_required
   before_action :pass_query_params

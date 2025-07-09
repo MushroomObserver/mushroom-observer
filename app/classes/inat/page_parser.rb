@@ -2,7 +2,7 @@
 
 class Inat
   class PageParser
-    include Inat::InatConstants
+    include Inat::Constants
 
     attr_accessor :last_import_id
 

@@ -2,7 +2,7 @@
 
 class Inat
   # constants used in importing iNaturalist observations
-  module InatConstants
+  module Constants
     # Site for authorization and authentication requests
     # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
     SITE = "https://www.inaturalist.org"

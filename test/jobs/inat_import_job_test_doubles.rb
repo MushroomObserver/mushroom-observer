@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module InatImportJobTestDoubles
-  include Inat::InatConstants
+  include Inat::Constants
 
   def stub_inat_interactions(
     id_above: 0,

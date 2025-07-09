@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class InatImportJob < ApplicationJob
-  include Inat::InatConstants
+  include Inat::Constants
 
   queue_as :default
 
