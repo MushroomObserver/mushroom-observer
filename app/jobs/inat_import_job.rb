@@ -363,7 +363,7 @@ class InatImportJob < ApplicationJob
   def update_mushroom_observer_url_field
     update_inat_observation_field(
       observation_id: @inat_obs[:id],
-      field_id: 5005, # id of iNat's "Mushroom Observer URL" observation field
+      field_id: MO_URL_OBSERVATION_FIELD_ID,
       value: "#{MO.http_domain}/#{@observation.id}"
     )
   end

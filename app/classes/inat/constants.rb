@@ -38,7 +38,10 @@ class Inat
       "https://inaturalist-open-data.s3.amazonaws.com/photos"
     # base url for iNat unlicensed photos
     UNLICENSED_PHOTO_BASE = "https://static.inaturalist.org/photos"
-    # This string + date is added to description of iNat observation
+    # id of iNat's "Mushroom Observer URL" observation field
+    MO_URL_OBSERVATION_FIELD_ID = 5005
+
+    # MO adds this string + date to the description of iNat observation
     IMPORTED_BY_MO = "Imported by Mushroom Observer"
   end
 end
