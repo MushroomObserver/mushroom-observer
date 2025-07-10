@@ -42,11 +42,8 @@ class InatImportJob < ApplicationJob
     log("Obtained iNat API token")
   end
 
-  # Ensure that normal MO users import only their own iNat observations.
-  # iNat allows MO user A to import iNat obs of iNat user B
-  # if B authorized MO to access B's iNat data.  We don't want that.
-  # Therefore check that the iNat login provided in the import form
-  # is that of the user currently logged-in to iNat.
+  # Prevent MO users from importing other users' iNat observations,
+  # unless they are super importers.
   def ensure_importing_own_observations
     return log("Skipped own-obs check (SuperImporter)") if super_importer?
 
