@@ -205,21 +205,6 @@ class InatImportJob < ApplicationJob
     @inat_import.reset_last_obs_start
   end
 
-  def masked_token(str)
-    # Return the string as is if its length is less than or equal to 6
-    return str if str.length <= 6
-
-    # Extract the first 3 and last 3 characters
-    first_part = str[0, 3]
-    last_part = str[-3, 3]
-
-    # Calculate the number of asterisks needed
-    asterisks = "*" * (str.length - 6)
-
-    # Combine the parts
-    "#{first_part}#{asterisks}#{last_part}"
-  end
-
   def done
     log("Updating inat_import state to Done")
     @inat_import.update(state: "Done", ended_at: Time.zone.now)
