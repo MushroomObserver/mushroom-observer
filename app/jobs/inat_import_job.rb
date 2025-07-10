@@ -9,8 +9,9 @@ class InatImportJob < ApplicationJob
 
   def perform(inat_import)
     create_ivars(inat_import)
-    use_auth_code_to_obtain_oauth_access_token
-    trade_access_token_for_jwt_api_token
+    # use_auth_code_to_obtain_oauth_access_token
+    # trade_access_token_for_jwt_api_token
+    obtain_api_token
     ensure_importing_own_observations
     import_requested_observations
   rescue StandardError => e
@@ -30,41 +31,21 @@ class InatImportJob < ApplicationJob
     @user = @inat_import.user
   end
 
-  # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
-  def use_auth_code_to_obtain_oauth_access_token
-    log("Obtaining OAuth access token")
-    payload = { client_id: APP_ID,
-                client_secret: Rails.application.credentials.inat.secret,
-                code: token,
-                redirect_uri: REDIRECT_URI,
-                grant_type: "authorization_code" }
-
-    begin
-      oauth_response = RestClient.post("#{SITE}/oauth/token", payload)
-    rescue RestClient::Unauthorized, RestClient::ExceptionWithResponse => e
-      raise("OAuth token request failed: #{e.message}")
-    end
-
-    oauth_access_token = JSON.parse(oauth_response.body)["access_token"]
-    @inat_import.update(token: oauth_access_token)
-    log("Obtained OAuth access token: #{masked_token(oauth_access_token)}")
-  end
-
-  # https://www.inaturalist.org/pages/api+recommended+practices
-  def trade_access_token_for_jwt_api_token
-    log("Obtaining jwt")
-    begin
-      jwt_response = RestClient::Request.execute(
-        method: :get, url: "#{SITE}/users/api_token",
-        headers: { authorization: "Bearer #{token}", accept: :json }
-      )
-    rescue RestClient::Unauthorized, RestClient::ExceptionWithResponse => e
-      raise("JWT request failed: #{e.message}")
-    end
-    api_token = JSON.parse(jwt_response)["api_token"]
+  def obtain_api_token
+    token_service = Inat::APIToken.new(
+      app_id: APP_ID, site: SITE,
+      redirect_uri: REDIRECT_URI,
+      secret: Rails.application.credentials.inat.secret
+    )
+    # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
+    access_token =
+      token_service.
+      use_auth_code_to_obtain_oauth_access_token(@inat_import.token)
+    # https://www.inaturalist.org/pages/api+recommended+practices
+    api_token =
+      token_service.
+      trade_access_token_for_jwt_api_token(access_token)
     @inat_import.update(token: api_token)
-    log("Obtained JWT API token: #{masked_token(api_token)}")
-    api_token
   end
 
   # Ensure that normal MO users import only their own iNat observations.
