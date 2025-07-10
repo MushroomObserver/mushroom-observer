@@ -3,12 +3,19 @@
 class Inat
   # Obtain an iNat API token --
   # Fetch OAuth and API tokens starting from an authorization code.
+  # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
   class APIToken
     def initialize(app_id:, site:, redirect_uri:, secret:)
       @app_id = app_id
       @site = site
       @redirect_uri = redirect_uri
       @secret = secret
+    end
+
+    def obtain_api_token(auth_code)
+      access_token =
+        use_auth_code_to_obtain_oauth_access_token(auth_code)
+      trade_access_token_for_jwt_api_token(access_token)
     end
 
     def use_auth_code_to_obtain_oauth_access_token(auth_code)

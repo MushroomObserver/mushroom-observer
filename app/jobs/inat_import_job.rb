@@ -11,7 +11,7 @@ class InatImportJob < ApplicationJob
     create_ivars(inat_import)
     # use_auth_code_to_obtain_oauth_access_token
     # trade_access_token_for_jwt_api_token
-    obtain_api_token
+    authenticate
     ensure_importing_own_observations
     import_requested_observations
   rescue StandardError => e
@@ -31,21 +31,15 @@ class InatImportJob < ApplicationJob
     @user = @inat_import.user
   end
 
-  def obtain_api_token
+  def authenticate
     token_service = Inat::APIToken.new(
       app_id: APP_ID, site: SITE,
       redirect_uri: REDIRECT_URI,
       secret: Rails.application.credentials.inat.secret
     )
-    # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
-    access_token =
-      token_service.
-      use_auth_code_to_obtain_oauth_access_token(@inat_import.token)
-    # https://www.inaturalist.org/pages/api+recommended+practices
-    api_token =
-      token_service.
-      trade_access_token_for_jwt_api_token(access_token)
-    @inat_import.update(token: api_token)
+    token = token_service.obtain_api_token(@inat_import.token)
+    @inat_import.update(token: token)
+    log("Obtained iNat API token")
   end
 
   # Ensure that normal MO users import only their own iNat observations.
