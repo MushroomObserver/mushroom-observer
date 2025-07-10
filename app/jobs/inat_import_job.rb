@@ -1,22 +1,23 @@
 # frozen_string_literal: true
 
 class InatImportJob < ApplicationJob
+  attr_accessor :inat_import
+
   include Inat::Constants
 
   queue_as :default
 
-  delegate :token, to: :@inat_import
+  delegate :token, to: :inat_import
+  delegate :user, to: :inat_import
 
   def perform(inat_import)
     create_ivars(inat_import)
-    # use_auth_code_to_obtain_oauth_access_token
-    # trade_access_token_for_jwt_api_token
     authenticate
     ensure_importing_own_observations
     import_requested_observations
   rescue StandardError => e
     log("Error occurred: #{e.message}")
-    @inat_import.add_response_error(e)
+    inat_import.add_response_error(e)
   ensure
     done
   end
@@ -26,9 +27,8 @@ class InatImportJob < ApplicationJob
   def create_ivars(inat_import)
     @inat_import = inat_import
     log(
-      "InatImportJob #{inat_import.id} started, user: #{inat_import.user_id}"
+      "InatImportJob #{inat_import.id} started, user: #{user.id}"
     )
-    @user = @inat_import.user
   end
 
   def authenticate
@@ -37,8 +37,8 @@ class InatImportJob < ApplicationJob
       redirect_uri: REDIRECT_URI,
       secret: Rails.application.credentials.inat.secret
     )
-    token = token_service.obtain_api_token(@inat_import.token)
-    @inat_import.update(token: token)
+    token = token_service.obtain_api_token(inat_import.token)
+    inat_import.update(token: token)
     log("Obtained iNat API token")
   end
 
@@ -53,34 +53,34 @@ class InatImportJob < ApplicationJob
       raise("iNat API user request failed: #{e.message}")
     end
 
-    @inat_logged_in_user = JSON.parse(response.body)["results"].first["login"]
-    log("inat_logged_in_user: #{@inat_logged_in_user}")
-    raise(:inat_wrong_user.t) unless right_user?(@inat_logged_in_user)
+    inat_logged_in_user = JSON.parse(response.body)["results"].first["login"]
+    log("inat_logged_in_user: #{inat_logged_in_user}")
+    raise(:inat_wrong_user.t) unless right_user?(inat_logged_in_user)
   end
 
   def super_importer?
-    InatImport.super_importers.include?(@user)
+    InatImport.super_importers.include?(user)
   end
 
   def right_user?(inat_logged_in_user)
-    inat_logged_in_user == @inat_import.inat_username
+    inat_logged_in_user == inat_import.inat_username
   end
 
   def import_requested_observations
-    @inat_import.update(state: "Importing")
+    inat_import.update(state: "Importing")
     inat_ids = inat_id_list
-    return log("No observations requested") if @inat_import[:import_all].
+    return log("No observations requested") if inat_import[:import_all].
                                                blank? && inat_ids.blank?
 
     # Search for one page of results at a time, until done with all pages
     # To get one page, use iNats `per_page` & `id_above` params.
     # https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
-    parser = Inat::PageParser.new(@inat_import, inat_ids, restricted_user_login)
+    parser = Inat::PageParser.new(inat_import, inat_ids, restricted_user_login)
     while parsing?(parser); end
   end
 
   def inat_id_list
-    @inat_import.inat_ids.delete(" ")
+    inat_import.inat_ids.delete(" ")
   end
 
   def parsing?(parser)
@@ -88,7 +88,7 @@ class InatImportJob < ApplicationJob
     parsed_page = parser.next_page
     return false if parsed_page.nil?
 
-    @inat_import.update(importables: parsed_page["total_results"])
+    inat_import.update(importables: parsed_page["total_results"])
     return false if page_empty?(parsed_page)
 
     import_page(parsed_page)
@@ -114,7 +114,7 @@ class InatImportJob < ApplicationJob
     if super_importer?
       nil
     else
-      @inat_import.inat_username
+      inat_import.inat_username
     end
   end
 
@@ -123,12 +123,13 @@ class InatImportJob < ApplicationJob
   end
 
   def observation_importer
-    @observation_importer ||= ::Inat::ObservationImporter.new(@inat_import, @user)
+    @observation_importer ||=
+      ::Inat::ObservationImporter.new(inat_import, user)
   end
 
   def done
     log("Updating inat_import state to Done")
-    @inat_import.update(state: "Done", ended_at: Time.zone.now)
+    inat_import.update(state: "Done", ended_at: Time.zone.now)
     update_user_inat_username
   end
 
@@ -137,13 +138,13 @@ class InatImportJob < ApplicationJob
     # to a non-existent iNat login
     return unless job_successful_enough?
 
-    @inat_import.user.update(inat_username: @inat_import.inat_username)
+    user.update(inat_username: inat_import.inat_username)
     log("Updated user inat_username")
   end
 
   # job successful enough to justify updating the MO user's iNat user_name
   def job_successful_enough?
-    @inat_import.response_errors.empty? ||
-      @inat_import.imported_count&.positive?
+    inat_import.response_errors.empty? ||
+      inat_import.imported_count&.positive?
   end
 end
