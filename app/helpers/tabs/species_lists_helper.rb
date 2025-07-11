@@ -138,7 +138,8 @@ module Tabs
 
     def species_list_index_tab
       InternalLink.new(
-        :cancel_to_index.t(type: :SPECIES_LIST), species_lists_path
+        :cancel_to_index.t(type: :SPECIES_LIST),
+        add_query_param(species_lists_path)
       ).tab
     end
 
