@@ -95,7 +95,7 @@ module Tabs
     end
 
     def species_list_form_new_tabs
-      [name_lister_tab]
+      [name_lister_tab, species_list_index_tab]
     end
 
     def species_list_form_edit_tabs(list:)
@@ -133,6 +133,12 @@ module Tabs
     def name_lister_tab
       InternalLink.new(
         :name_lister_title.t, new_species_list_name_lister_path
+      ).tab
+    end
+
+    def species_list_index_tab
+      InternalLink.new(
+        :cancel_to_index.t(type: :SPECIES_LIST), species_lists_path
       ).tab
     end
 

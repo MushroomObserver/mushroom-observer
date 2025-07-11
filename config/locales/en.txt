@@ -858,6 +858,7 @@
   add_objects: Add [TYPES]
   all_objects: All [TYPES]
   cancel_and_show: Cancel (Show [TYPE])
+  cancel_to_index: Cancel ([TYPE] Index)
   create_object: Create [TYPE]
   destroy_object: Destroy [TYPE]
   edit_object: Edit [TYPE]
