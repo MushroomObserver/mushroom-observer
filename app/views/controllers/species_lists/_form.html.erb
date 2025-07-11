@@ -45,7 +45,7 @@
              locals: { button: button } ) %>
 
   <%= autocompleter_field(form: f, field: :place_name, type: :location,
-                          label: "#{:WHERE.l}:", between: :required) %>
+                          label: "#{:WHERE.l}:") %>
 
   <%= render(partial: "species_lists/form/fields_for_member",
              locals: { f: f }) %>
