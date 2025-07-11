@@ -209,8 +209,8 @@ module Projects
       project_member = ProjectMember.find_by(project:, user:)
       unless project_member
         project_member = ProjectMember.create(project:, user:,
-                                              trust_level: "hidden_gps")
-        flash_notice(:add_members_with_gps_trust.l)
+                                              trust_level: "editing")
+        flash_notice(:add_members_with_editing.l)
       end
       return unless project_member
       return if type == :admin || add

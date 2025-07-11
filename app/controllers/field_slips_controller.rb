@@ -243,8 +243,8 @@ class FieldSlipsController < ApplicationController
     flash_notice(:field_slip_welcome.t(title: project.title))
     return if project_member
 
-    ProjectMember.create(project:, user:, trust_level: "hidden_gps")
-    flash_notice(:add_members_with_gps_trust.l)
+    ProjectMember.create(project:, user:, trust_level: "editing")
+    flash_notice(:add_members_with_editing.l)
   end
 
   def disconnect_observation(obs)
