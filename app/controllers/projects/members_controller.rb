@@ -106,7 +106,7 @@ module Projects
     def find_member(str)
       return User.safe_find(str) if str.to_s.match?(/^\d+$/)
 
-      User.find_by(login: str.to_s.sub(/ <.*>$/, ""))
+      User.lookup_unique_text_name(str)
     end
 
     def update_membership(project, candidate)
