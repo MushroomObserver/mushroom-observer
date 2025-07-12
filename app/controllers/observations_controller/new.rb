@@ -56,6 +56,7 @@ module ObservationsController::New
     add_list(SpeciesList.safe_find(params[:species_list]))
     @observation.when = params[:date] if params[:date]
     add_field_slip_project(@field_code)
+    check_location
   end
 
   ##############################################################################
@@ -123,6 +124,17 @@ module ObservationsController::New
       @project_checks[proj.id] = (proj == project) ||
                                  (@project_checks[proj.id] &&
                                   proj.field_slip_prefix.nil?)
+    end
+  end
+
+  def check_location
+    if params[:place_name]
+      # Cannot use @place_name since that's being used for approved_where
+      @default_place_name = params[:place_name]
+      loc = Location.place_name_to_location(@default_place_name)
+      @location = loc if loc
+    else
+      @default_place_name = @observation.place_name
     end
   end
 end

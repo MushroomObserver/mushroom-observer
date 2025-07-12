@@ -321,7 +321,7 @@ module Projects
       assert_not(target_user.in_group?(eol_project.user_group.name))
       params = {
         project_id: eol_project.id,
-        candidate: "#{target_user.login} <Should Ignore This>"
+        candidate: target_user.unique_text_name
       }
       post_requires_login(:create, params, mary.login)
       assert_redirected_to(project_members_path(eol_project.id))

@@ -35,7 +35,7 @@ module Tabs
     end
 
     def projects_index_tab
-      InternalLink.new(:app_list_projects.t, projects_path).tab
+      InternalLink.new(:cancel_to_index.t(type: :PROJECT), projects_path).tab
     end
 
     def new_project_tab

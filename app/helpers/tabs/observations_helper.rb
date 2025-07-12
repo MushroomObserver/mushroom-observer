@@ -231,8 +231,7 @@ module Tabs
     # FORMS
 
     def observation_form_new_tabs
-      # [new_inat_import_tab, new_herbarium_tab]
-      [new_inat_import_tab]
+      [new_inat_import_tab, observations_index_tab]
     end
 
     def observation_form_edit_tabs(obs:)
@@ -284,24 +283,12 @@ module Tabs
        edit_observation_tab(obs)]
     end
 
-    # This appears to be dead code
-    # def observation_download_tabs
-    #   [observations_index_tab]
-    # end
-
-    # def observations_index_tab
-    #   InternalLink.new(
-    #     :download_observations_back.l,
-    #     add_query_param(observations_path)
-    #   ).tab
-    # end
-
-    # def obs_change_tabs(obs)
-    #   return unless check_permission(obs)
-
-    #   [edit_observation_tab(obs),
-    #    destroy_observation_tab(obs)]
-    # end
+    def observations_index_tab
+      InternalLink.new(
+        :cancel_to_index.t(type: :OBSERVATION),
+        add_query_param(observations_path)
+      ).tab
+    end
 
     def obs_details_links(obs)
       print_labels_button(obs)
