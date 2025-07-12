@@ -16,11 +16,7 @@ end
 # test importing iNaturalist Observations to Mushroom Observer
 class InatImportsControllerTest < FunctionalTestCase
   include ActiveJob::TestHelper
-
-  SITE = InatImportsController::SITE
-  REDIRECT_URI = InatImportsController::REDIRECT_URI
-  API_BASE = InatImportsController::API_BASE
-  MO_API_KEY_NOTES = InatImportsController::MO_API_KEY_NOTES
+  include Inat::Constants
 
   def test_show
     import = inat_imports(:rolf_inat_import)
