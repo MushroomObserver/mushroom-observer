@@ -40,7 +40,7 @@
 # 5. The InatImportJob:
 #      Uses the `code` to obtain an oauth access_token
 #      Trades the oauth token for a JWT api_token
-#      Checks if the MO user is trying to import someone else's obss
+#      Checks if the MO user is trying to import someone else's observations
 #      Makes an authenticated iNat API request for the desired observations
 #      For each iNat obs in the results,
 #         creates an Inat::Obs
