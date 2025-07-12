@@ -857,7 +857,7 @@
   add_object: Add [TYPE]
   add_objects: Add [TYPES]
   all_objects: All [TYPES]
-  cancel_and_create: Cancel (Create [TYPE])
+  cancel_and_create: "[:CANCEL] ([:CREATE] [TYPE])"
   cancel_and_show: Cancel (Show [TYPE])
   create_object: Create [TYPE]
   destroy_object: Destroy [TYPE]
