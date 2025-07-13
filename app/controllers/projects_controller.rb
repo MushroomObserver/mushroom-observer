@@ -118,7 +118,8 @@ class ProjectsController < ApplicationController
     else
       return create_project(title, admin_name, params[:project][:place_name])
     end
-    @project = Project.new
+    @project = Project.new(project_params)
+    @project_dates_any = params[:project][:dates_any].downcase == "true"
     image_ivars
     render(:new, location: new_project_path(q: get_query_param))
   end
@@ -170,6 +171,15 @@ class ProjectsController < ApplicationController
   end
 
   private ############################################################
+
+  def project_params
+    params.require(:project).permit(
+      :open_membership, :title, :summary, :field_slip_prefix, :place_name,
+      :location_id,
+      :"start_date(1i)", :"start_date(2i)", :"start_date(3i)",
+      :"end_date(1i)", :"end_date(2i)", :"end_date(3i)"
+    )
+  end
 
   def image_ivars
     @licenses = License.available_names_and_ids(@user.license)

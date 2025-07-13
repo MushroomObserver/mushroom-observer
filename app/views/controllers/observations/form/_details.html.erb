@@ -33,6 +33,7 @@ t_s = {
                            class: "constrained-label"),
                   tag.span("#{:form_observations_create_locality.l}:",
                            class: "create-label")].safe_join(" "),
+          value: @default_place_name,
           help: observation_location_help,
           hidden_value: location&.id,
           hidden_data: { map_target: "locationId",

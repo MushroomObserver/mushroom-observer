@@ -31,7 +31,7 @@
     end %>
   </div>
 
-  <%= text_field_with_label(form: f, field: :title, between: :required,
+  <%= text_field_with_label(form: f, field: :title,
                             label: "#{:form_species_lists_title.l}:") %>
 
   <%= text_area_with_label(form: f, field: :notes, rows: 12,
@@ -45,7 +45,7 @@
              locals: { button: button } ) %>
 
   <%= autocompleter_field(form: f, field: :place_name, type: :location,
-                          label: "#{:WHERE.l}:", between: :required) %>
+                          label: "#{:WHERE.l}:") %>
 
   <%= render(partial: "species_lists/form/fields_for_member",
              locals: { f: f }) %>
