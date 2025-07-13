@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_06_22_170532) do
+ActiveRecord::Schema[7.2].define(version: 2025_07_13_142904) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -150,8 +150,9 @@ ActiveRecord::Schema[7.2].define(version: 2025_06_22_170532) do
     t.text "description"
     t.datetime "created_at", precision: nil
     t.datetime "updated_at", precision: nil
-    t.string "code", limit: 8, default: "", null: false
+    t.string "code", limit: 8
     t.integer "personal_user_id"
+    t.index ["code"], name: "index_herbaria_on_code", unique: true
   end
 
   create_table "herbarium_curators", charset: "utf8mb3", force: :cascade do |t|
