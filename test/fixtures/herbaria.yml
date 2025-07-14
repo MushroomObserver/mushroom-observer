@@ -20,19 +20,16 @@ nybg_herbarium:
 rolf_herbarium:
   name: "Uncle Rolf's Personal Herbarium"
   personal_user: rolf
-  code: null
   curators: rolf
 
 # Empty herbarium
 dick_herbarium:
   name: "Dick's Personal Herbarium"
   personal_user: dick
-  code: null
   curators: dick
 
 fundis_herbarium:
   name: "Fungal Diversity Survey"
-  code: null
 
 field_museum:
   name: The Field Museum
@@ -42,4 +39,3 @@ field_museum:
 
 curatorless_herbarium:
   name: $LABEL
-  code: null
