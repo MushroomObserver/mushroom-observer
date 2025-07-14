@@ -63,7 +63,7 @@ class Herbarium < AbstractModel
   # personal_user_id is set to mark whose personal herbarium it is.
   belongs_to :personal_user, class_name: "User"
 
-  validates :code, uniqueness: true, allow_nil: true
+  validates :code, uniqueness: true, allow_blank: true
 
   scope :order_by_default,
         -> { order_by(::Query::Herbaria.default_order) }
