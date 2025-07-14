@@ -135,7 +135,7 @@ MushroomObserver::Application.configure do
   #   # .then { |logger| ActiveSupport::TaggedLogging.new(logger) }
   # end
   # config.logger = ActiveSupport::BroadcastLogger.new(*loggers)
-  config.logger = ActiveSupport::Logger.new($stdout)
+  # config.logger = ActiveSupport::Logger.new($stdout)
 
   # Silence Solid Queue polling in the logs
   ENV["SOLID_QUEUE_LOG_ON"] = "false" # used by a temporary hack below
