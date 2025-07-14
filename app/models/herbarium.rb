@@ -63,7 +63,11 @@ class Herbarium < AbstractModel
   # personal_user_id is set to mark whose personal herbarium it is.
   belongs_to :personal_user, class_name: "User"
 
+  # Was unable to create an appropriate index that made Trilogy
+  # happy.
+  # rubocop:disable Rails/UniqueValidationWithoutIndex
   validates :code, uniqueness: true, allow_blank: true
+  # rubocop:enable Rails/UniqueValidationWithoutIndex
 
   scope :order_by_default,
         -> { order_by(::Query::Herbaria.default_order) }
