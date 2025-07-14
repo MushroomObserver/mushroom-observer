@@ -52,6 +52,9 @@
 
       tag.span(tracker.error_caption, class: "font-weight-bold"),
       tag.span(tracker.response_errors, class: "violation-highlight"),
+      tag.br,
+
+      tag.p(tracker.help, class: "alert alert-warning mt-3"),
       tag.br
     ].safe_join
   end
