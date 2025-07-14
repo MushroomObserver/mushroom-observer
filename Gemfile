@@ -74,7 +74,8 @@ gem("turbo-rails")
 # redis for combining actioncable broadcasts with turbo_stream
 gem("redis", "~> 4.0")
 # minimal two way bridge between the V8 JavaScript engine and Ruby
-gem("mini_racer")
+# Locked here because "0.19.0" will not compile for nimmolo
+gem("mini_racer", "~> 0.18.1")
 
 # Add Arel helpers for more concise query syntax in Arel
 # https://github.com/camertron/arel-helpers
