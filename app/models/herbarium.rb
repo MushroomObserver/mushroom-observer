@@ -64,7 +64,7 @@ class Herbarium < AbstractModel
   belongs_to :personal_user, class_name: "User"
 
   # Was unable to create an appropriate index that made Trilogy happy.
-  validates :code, uniqueness: true, allow_blank: true # rubocop:disable Rails/UniqueValidationWithoutIndex
+  validates :code, uniqueness: true, allow_blank: true
 
   scope :order_by_default,
         -> { order_by(::Query::Herbaria.default_order) }
