@@ -48,8 +48,8 @@ class InatImport < ApplicationRecord
   # (Only gets used once.)
   BASE_AVG_IMPORT_SECONDS = 15
 
-  def pending?
-    %w[Authorizing Authenticating Importing].include?(state)
+  def job_pending?
+    %w[Authenticating Importing].include?(state)
   end
 
   def add_response_error(error)

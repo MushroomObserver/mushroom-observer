@@ -3112,9 +3112,11 @@
   inat_import_tracker_calculating_time: "Calculating ..."
   inat_import_tracker_ended: Ended
   inat_import_imported: Imported
+  inat_import_tracker_done: "Click [:inat_import_tracker_results] to see imported Observations."
   inat_import_tracker_results: Results
   inat_import_tracker_importable_count: Number of Importable Observations
   inat_import_tracker_imported_count: Number Imported
+  inat_import_tracker_leave_page: You may continue working in MO by opening another tab, or by leaving this page. To return to this page, you can (a) go back in your browser, or (b) click Create Observation, iNat Import; if the import is in progress, this page will be redisplayed.
   inat_import_tracker_pending: Please wait until your pending iNat Import is Done before starting a new one.
   inat_importables_explanation: "An ??importable?? observation is an iNaturalist observation: which you created, which does not exist in MO, and whose iNat identity is a fungus or slime mold."
 

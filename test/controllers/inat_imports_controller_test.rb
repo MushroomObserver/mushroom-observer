@@ -51,9 +51,8 @@ class InatImportsControllerTest < FunctionalTestCase
     login(user.login)
     get(:new)
 
-    assert_flash_error(
-      "Should flash error when user tries to start a new iNat import " \
-      "while another is already in progress"
+    assert_flash_warning(
+      "Should flash warning if user starts iNat import while another is running"
     )
     assert_redirected_to(
       inat_import_path(import, params: { tracker_id: tracker.id })

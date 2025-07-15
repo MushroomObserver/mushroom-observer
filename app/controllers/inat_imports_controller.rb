@@ -69,10 +69,11 @@ class InatImportsController < ApplicationController
 
   def new
     @inat_import = InatImport.find_or_create_by(user: @user)
-    return unless @inat_import.pending?
+    return unless @inat_import.job_pending?
 
-    tracker = InatImportJobTracker.where(inat_import: @inat_import).last
-    flash_error(:inat_import_tracker_pending.t)
+    tracker = InatImportJobTracker.where(inat_import: @inat_import).
+              order(:created_at).last
+    flash_warning(:inat_import_tracker_pending.l)
     redirect_to(
       inat_import_path(@inat_import, params: { tracker_id: tracker.id })
     )

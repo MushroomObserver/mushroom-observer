@@ -3,11 +3,12 @@
 # For display of status of an InatImportJob
 #
 # == Attributes
-#  inat_import::  id of the iNatImport for the job
+#  inat_import::   id of the iNatImport for the job
 #
 # == Methods
-#  status::           state of the iNat import of this tracker
+#  status::        state of the iNat import of this tracker
 #  elapsed_time::  time since the tracker was created
+#  help::          help message displayed at the bottom of the page
 #
 class InatImportJobTracker < ApplicationRecord
   delegate :ended_at, to: :import
@@ -43,6 +44,14 @@ class InatImportJobTracker < ApplicationRecord
       ""
     else
       "#{:ERRORS.t}: "
+    end
+  end
+
+  def help
+    if status == "Done"
+      :inat_import_tracker_done.l
+    else
+      :inat_import_tracker_leave_page.l
     end
   end
 
