@@ -11,8 +11,8 @@
 # 1. User calls `new`, fills out form
 #    Adds a InatImport instance if user lacks one
 # 2. create
-#      saves some user data in a InatImport instance
-#        attributes include: user, inat_ids, token, state
+#    saves some user data in a InatImport instance
+#      attributes include: user, inat_ids, token, state
 #    passes things off (redirects) to iNat at the INAT_AUTHORIZATION_URL
 # 3. iNat
 #    checks if MO is authorized to access iNat user's confidential data
@@ -40,7 +40,7 @@
 # 5. The InatImportJob:
 #      Uses the `code` to obtain an oauth access_token
 #      Trades the oauth token for a JWT api_token
-#      Checks if the MO user is trying to import some else's obss
+#      Checks if the MO user is trying to import someone else's observations
 #      Makes an authenticated iNat API request for the desired observations
 #      For each iNat obs in the results,
 #         creates an Inat::Obs
