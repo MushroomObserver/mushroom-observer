@@ -1,5 +1,8 @@
 <%=
-  tag.div(id: "inat_import" data: { inat_import_id: inat_import.id }) do
+  tag.div(id: "current_status_#{inat_import.id}",
+          data: { created: inat_import.created_at,
+                  elapsed: inat_import.elapsed_time,
+                  remaining: inat_import.estimated_remaining_time }) do
     [
       tag.p do
         [
@@ -25,27 +28,33 @@
       tag.span(class: "font-weight-bold") do
         "#{:inat_import_tracker_started.l}: "
       end,
-      tag.span(inat_import.created_at&.strftime("%Y-%m-%d %H:%M:%S %z")),
+      tag.span(class: "inat-import-created") do
+        inat_import.created_at&.strftime("%Y-%m-%d %H:%M:%S %z")
+      end,
       tag.br,
 
       tag.span(class: "font-weight-bold") do
         "#{:inat_import_tracker_elapsed_time.l}: "
       end,
-      tag.span(time_in_hours_minutes_seconds(inat_import.elapsed_time)),
+      tag.span(class: "inat-import-elapsed") do
+        time_in_hours_minutes_seconds(inat_import.elapsed_time)
+      end,
       tag.br,
 
       tag.span(class: "font-weight-bold") do
         "#{:inat_import_tracker_estimated_remaining_time.l}: "
       end,
-      tag.span(
+      tag.span(class: "inat-import-remaining") do
         time_in_hours_minutes_seconds(inat_import.estimated_remaining_time)
-      ),
+      end,
       tag.br,
 
       tag.span(class: "font-weight-bold") do
         "#{:inat_import_tracker_ended.l}: "
       end,
-      tag.span(inat_import.ended_at),
+      tag.span(class: "inat-import-ended") do
+        inat_import.ended_at
+      end,
       tag.br,
 
       tag.span(inat_import.error_caption, class: "font-weight-bold"),
