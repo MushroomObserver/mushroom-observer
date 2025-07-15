@@ -7,4 +7,4 @@ updates:
   - package-ecosystem: "bundler"
     directory: "/"
     schedule:
-      interval: "monthly"
+      interval: "weekly"
