@@ -53,7 +53,12 @@ class InatImport < ApplicationRecord
   end
 
   def add_response_error(error)
-    response_errors << "#{error.class.name}: #{error.message}\n"
+    msg = if error.is_a?(::RestClient::Response)
+            error.body
+          else
+            error.message
+          end
+    response_errors << "#{error.class.name}: #{msg}\n"
     save
   end
 

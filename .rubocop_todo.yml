@@ -241,13 +241,12 @@ Metrics/BlockNesting:
   Exclude:
     - 'test/controller_extensions.rb'
 
-# Offense count: 5
+# Offense count: 4
 # Configuration parameters: CountComments, Max, CountAsOne.
 Metrics/ClassLength:
   Exclude:
     - 'app/classes/textile.rb'
     - 'app/extensions/string.rb'
-    - 'app/jobs/inat_import_job.rb'
     - 'app/models/abstract_model.rb'
     - 'app/models/description.rb'
 

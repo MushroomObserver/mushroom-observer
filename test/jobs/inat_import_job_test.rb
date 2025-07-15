@@ -561,7 +561,7 @@ class InatImportJobTest < ActiveJob::TestCase
                  "Failed to report OAuth failure")
   end
 
-  def test_inat_api_request_failure
+  def test_inat_api_request_user_failure
     create_ivars_from_filename("calostoma_lutescens")
 
     stub_token_requests
@@ -582,6 +582,42 @@ class InatImportJobTest < ActiveJob::TestCase
     InatImportJob.perform_now(@inat_import)
 
     assert_match(/401 Unauthorized/, @inat_import.response_errors,
+                 "Failed to report iNat API request failure")
+  end
+
+  def test_inat_api_request_observation_failure
+    create_ivars_from_filename("calostoma_lutescens")
+
+    stub_inat_interactions
+    query_args = {
+      iconic_taxa: ICONIC_TAXA,
+      id: @inat_import.inat_ids,
+      id_above: 0,
+      per_page: 200,
+      only_id: false,
+      order: "asc",
+      order_by: "id",
+      without_field: "Mushroom Observer URL",
+      user_login: @inat_import.inat_username
+    }
+
+    # stub the observation request to return an error
+    error = "Unauthorized"
+    status = 401
+    stub_request(:get, "#{API_BASE}/observations?#{query_args.to_query}").
+      with(headers:
+    { "Accept" => "application/json",
+      "Accept-Encoding" => "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+      "Authorization" => "Bearer MockJWT",
+      "Host" => "api.inaturalist.org" }).
+      to_return(status: status,
+                body: JSON.generate({ error: error, status: status }),
+                headers: {})
+
+    InatImportJob.perform_now(@inat_import)
+
+    assert_match(/RestClient::Response.*#{error}.*#{status}/,
+                 @inat_import.response_errors,
                  "Failed to report iNat API request failure")
   end
 

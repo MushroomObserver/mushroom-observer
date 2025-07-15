@@ -310,9 +310,6 @@ class Inat
       elsif infraspecific?
         # iNat :name string omits the rank. Ex: "Inonotus obliquus sterilis"
         insert_rank_between_species_and_final_epithet
-      elsif complex?
-        # iNat doesn't include "complex" in the name, MO does
-        "#{inat_taxon_name} complex"
       else
         inat_taxon_name
       end
@@ -377,11 +374,6 @@ class Inat
       return names.first.id if names.any?
 
       ::Name.unknown.id
-    end
-
-    def in_mo_format?(prov_sp_name)
-      # Genus followed by quoted epithet starting with a lower-case letter
-      prov_sp_name =~ /[A-Z][a-z]+ "[a-z]\S+"/
     end
 
     # ----- Other
