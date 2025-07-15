@@ -143,7 +143,7 @@ gem("google-cloud-storage")
 # See https://github.com/rubyzip/rubyzip for details. The Changelog also
 # lists other enhancements and bugfixes that have been implemented since
 # version 2.3.0.
-gem("rubyzip", "~> 2.3.0")
+gem("rubyzip", "~> 2.4.1")
 
 # QR code generator
 gem("rqrcode")
