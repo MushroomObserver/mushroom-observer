@@ -44,6 +44,12 @@ class InatImport < ApplicationRecord
 
   serialize :log, type: Array, coder: YAML
 
+  after_update_commit lambda { |inat_import|
+    broadcast_replace_to(
+      [inat_import.user, :inat_import], partial: "inat_imports/inat_import"
+    )
+  }
+
   # Expected average import time if no user has ever imported anything
   # (Only gets used once.)
   BASE_AVG_IMPORT_SECONDS = 15
@@ -84,6 +90,32 @@ class InatImport < ApplicationRecord
     return 0 unless last_obs_start
 
     Time.now.utc - last_obs_start
+  end
+
+  # from tracker
+  def elapsed_time
+    end_time = if state == "Done"
+                 ended_at
+               else
+                 Time.zone.now
+               end
+    (end_time - created_at).to_i
+  end
+
+  def estimated_remaining_time
+    # Can't calculate remaining time unless we know # of Obss to be imported
+    return nil unless importables.to_i&.positive?
+    return 0 if state == "Done"
+
+    [total_expected_time - elapsed_time, 0].max
+  end
+
+  def error_caption
+    if response_errors.blank?
+      ""
+    else
+      "#{:ERRORS.t}: "
+    end
   end
 
   #########

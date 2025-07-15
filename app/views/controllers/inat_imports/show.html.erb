@@ -4,16 +4,12 @@
   # add_context_nav(article_show_tabs(article: @article, user: @user))
 %>
 
+<%= turbo_stream_from(@inat_import.user, :inat_import) %>
+
 <%= # This is the container that gets updated with whatever's in the partial.
-  tag.div(
-    id: "status_#{@tracker.id}",
-    data: { controller: "inat-import-job",
-            endpoint: inat_import_job_tracker_path(
-              inat_import_id: @tracker.inat_import,
-              id: @tracker.id
-            ) }) do
-    render(partial: "inat_imports/job_trackers/current",
-           locals: { tracker: @tracker })
+  tag.div(id: "status_#{@inat_import.id}") do
+    render(partial: "inat_imports/inat_import",
+           locals: { inat_import: @inat_import })
   end
 %>
 

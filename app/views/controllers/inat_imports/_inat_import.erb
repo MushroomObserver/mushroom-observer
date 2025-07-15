@@ -1,7 +1,5 @@
 <%=
-  tag.div(id: "current_status_#{tracker.id}",
-          data: { inat_import_job_target: "current",
-                  status: tracker.status }) do
+  tag.div(id: "inat_import" data: { inat_import_id: inat_import.id }) do
     [
       tag.p do
         [
@@ -9,15 +7,15 @@
           tag.span(class: "font-weight-bold") do
             "#{:inat_import_tracker_status.t}: "
           end,
-          tag.span(tracker.status),
+          tag.span(inat_import.state),
           tag.br,
           # Imported n of m observations
           tag.span(class: "font-weight-bold") do
                    "#{:inat_import_imported.t}: "
           end,
-          tag.span(tracker.imported_count),
+          tag.span(inat_import.imported_count),
           tag.span(class: "mr-2") { " #{:of.t}" },
-          tag.span(tracker.importables),
+          tag.span(inat_import.importables),
           tag.span(" #{:observations.t}")
         ].safe_join
       end,
@@ -27,31 +25,31 @@
       tag.span(class: "font-weight-bold") do
         "#{:inat_import_tracker_started.l}: "
       end,
-      tag.span(tracker.created_at&.strftime("%Y-%m-%d %H:%M:%S %z")),
+      tag.span(inat_import.created_at&.strftime("%Y-%m-%d %H:%M:%S %z")),
       tag.br,
 
       tag.span(class: "font-weight-bold") do
         "#{:inat_import_tracker_elapsed_time.l}: "
       end,
-      tag.span(time_in_hours_minutes_seconds(tracker.elapsed_time)),
+      tag.span(time_in_hours_minutes_seconds(inat_import.elapsed_time)),
       tag.br,
 
       tag.span(class: "font-weight-bold") do
         "#{:inat_import_tracker_estimated_remaining_time.l}: "
       end,
       tag.span(
-        time_in_hours_minutes_seconds(tracker.estimated_remaining_time)
+        time_in_hours_minutes_seconds(inat_import.estimated_remaining_time)
       ),
       tag.br,
 
       tag.span(class: "font-weight-bold") do
         "#{:inat_import_tracker_ended.l}: "
       end,
-      tag.span(tracker.ended_at),
+      tag.span(inat_import.ended_at),
       tag.br,
 
-      tag.span(tracker.error_caption, class: "font-weight-bold"),
-      tag.span(tracker.response_errors, class: "violation-highlight"),
+      tag.span(inat_import.error_caption, class: "font-weight-bold"),
+      tag.span(inat_import.response_errors, class: "violation-highlight"),
       tag.br
     ].safe_join
   end
