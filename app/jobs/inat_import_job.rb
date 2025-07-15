@@ -112,11 +112,7 @@ class InatImportJob < ApplicationJob
 
   # limit iNat API search to observations by iNat user with this login
   def restricted_user_login
-    if super_importer?
-      nil
-    else
-      inat_import.inat_username
-    end
+    inat_import.inat_username
   end
 
   def import_page(page)
