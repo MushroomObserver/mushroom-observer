@@ -48,6 +48,7 @@ class InatImportJob < ApplicationJob
     return log("Skipped own-obs check (SuperImporter)") if super_importer?
 
     begin
+      # ask iNat who the logged-in user is
       response = Inat::APIRequest.new(token).request(path: "users/me")
     rescue RestClient::Unauthorized, RestClient::ExceptionWithResponse => e
       raise("iNat API user request failed: #{e.message}")
@@ -55,14 +56,14 @@ class InatImportJob < ApplicationJob
 
     inat_logged_in_user = JSON.parse(response.body)["results"].first["login"]
     log("inat_logged_in_user: #{inat_logged_in_user}")
-    raise(:inat_wrong_user.t) unless right_user?(inat_logged_in_user)
+    raise(:inat_wrong_user.t) unless importing_own_obss?(inat_logged_in_user)
   end
 
   def super_importer?
     InatImport.super_importers.include?(user)
   end
 
-  def right_user?(inat_logged_in_user)
+  def importing_own_obss?(inat_logged_in_user)
     inat_logged_in_user == inat_import.inat_username
   end
 
