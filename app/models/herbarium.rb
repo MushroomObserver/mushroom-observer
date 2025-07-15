@@ -88,7 +88,7 @@ class Herbarium < AbstractModel
         ->(str) { search_columns(Herbarium[:mailing_address], str) }
 
   scope :pattern, lambda { |phrase|
-    cols = (Herbarium[:code] + Herbarium[:name] +
+    cols = (Herbarium[:code].coalesce("") + Herbarium[:name] +
             Herbarium[:description].coalesce("") +
             Herbarium[:mailing_address].coalesce(""))
     search_columns(cols, phrase).distinct
