@@ -36,7 +36,8 @@ class InatImport < ApplicationRecord
     # trading iNat authorization code for an authentication token
     Authenticating: 2,
     Importing: 3,
-    Done: 4
+    Done: 4,
+    Cancelling: 5
   }
 
   belongs_to :user
