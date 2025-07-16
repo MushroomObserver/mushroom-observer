@@ -4,7 +4,7 @@
   # add_context_nav(article_show_tabs(article: @article, user: @user))
 %>
 
-<%= turbo_stream_from(@inat_import.user, :inat_import) %>
+<%= turbo_stream_from([@inat_import.user, :inat_import]) %>
 
 <%= # This is the container that gets updated with whatever's in the partial.
   # tag.div(id: "status_#{@inat_import.id}") do
