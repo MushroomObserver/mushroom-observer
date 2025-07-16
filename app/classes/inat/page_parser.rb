@@ -42,11 +42,9 @@ class Inat
       query_args = {
         id: nil, id_above: nil, only_id: false, per_page: 200,
         order: "asc", order_by: "id",
-        # obss of only the iNat user with iNat login @inat_import.inat_username
-        user_login: nil,
-        # only fungi and slime molds
-        iconic_taxa: ICONIC_TAXA,
-        # and which haven't been exported from or inported to MO
+        user_login: nil, # only observations of by InatImport.inat_username
+        iconic_taxa: ICONIC_TAXA, # of only fungi and slime molds
+        # which weren't exported from/imported to MO
         without_field: "Mushroom Observer URL"
       }.merge(args)
       headers = { authorization: "Bearer #{@importer.token}", accept: :json }

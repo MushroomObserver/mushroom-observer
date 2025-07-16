@@ -34,10 +34,14 @@ module InatImportsController::Validators
   end
 
   def imports_designated?
-    return true if params[:all] == "1" || params[:inat_ids].present?
+    return true if importing_all_observations? || params[:inat_ids].present?
 
     flash_warning(:inat_no_imports_designated.t)
     false
+  end
+
+  def importing_all_observations?
+    params[:all] == "1"
   end
 
   def list_within_size_limits?
@@ -62,7 +66,10 @@ module InatImportsController::Validators
     params[:inat_ids].delete(" ").split(",").map(&:to_i)
   end
 
+  # Was Obseervation previously "mirrored" to iNat by Pulk's `mirror` script?
   def unmirrored?
+    return true if importing_all_observations?
+
     conditions = inat_id_list.map do |inat_id|
       Observation[:notes].matches("%Mirrored on iNaturalist as <a href=\"https://www.inaturalist.org/observations/#{inat_id}\">%")
     end
