@@ -40,7 +40,7 @@ class InatImport < ApplicationRecord
   }
 
   belongs_to :user
-  has_many :inat_import_job_trackers, dependent: :delete_all
+  # has_many :inat_import_job_trackers, dependent: :delete_all
 
   serialize :log, type: Array, coder: YAML
 
@@ -92,20 +92,20 @@ class InatImport < ApplicationRecord
     Time.now.utc - last_obs_start
   end
 
-  # from tracker
+  # adjusted methods from old inat_import_job_tracker
   def elapsed_time
     end_time = if state == "Done"
                  ended_at
                else
                  Time.zone.now
                end
-    (end_time - created_at).to_i
+    (end_time - last_obs_start).to_i
   end
 
   def estimated_remaining_time
+    return 0 if state == "Done"
     # Can't calculate remaining time unless we know # of Obss to be imported
     return nil unless importables.to_i&.positive?
-    return 0 if state == "Done"
 
     [total_expected_time - elapsed_time, 0].max
   end
