@@ -7,10 +7,10 @@
 <%= turbo_stream_from(@inat_import.user, :inat_import) %>
 
 <%= # This is the container that gets updated with whatever's in the partial.
-  tag.div(id: "status_#{@inat_import.id}") do
+  # tag.div(id: "status_#{@inat_import.id}") do
     render(partial: "inat_imports/inat_import",
            locals: { inat_import: @inat_import })
-  end
+  # end
 %>
 
 <%=

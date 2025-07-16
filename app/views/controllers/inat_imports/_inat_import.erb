@@ -1,8 +1,9 @@
 <%=
-  tag.div(id: "current_status_#{inat_import.id}",
-          data: { created: inat_import.created_at,
-                  elapsed: inat_import.elapsed_time,
-                  remaining: inat_import.estimated_remaining_time }) do
+  tag.div(id: "inat_import",
+          data: { controller: "inat-import-job",
+                  created_value: inat_import.created_at,
+                  elapsed_value: inat_import.elapsed_time,
+                  remaining_value: inat_import.estimated_remaining_time }) do
     [
       tag.p do
         [
