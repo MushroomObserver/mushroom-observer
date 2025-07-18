@@ -4,8 +4,5 @@ Just adds <small> and line breaks.
 %>
 
 <% links ||= [] %>
-<%= tag.ul(class: "list-unstyled mb-0 small") do %>
-  <% links.reject(&:nil?).each do |link| %>
-    <%= tag.li(link) %>
-  <% end %>
-<% end %>
+
+<%= context_nav_dropdown(title: "Actions", id: "context_nav_toggle", links:) %>

@@ -86,4 +86,28 @@ module TitleContextNavHelper
     # merge in other args from extra_args (will overwrite keys!)
     kwargs&.merge(extra_args&.except(:class))
   end
+
+  def context_nav_dropdown(title: "", id: "", links: [])
+    tag.div(class: "dropdown") do
+      [
+        tag.button(
+          class: "btn btn-default dropdown-toggle",
+          id:, type: "button",
+          data: { toggle: "dropdown" },
+          aria: { haspopup: "true", expanded: "true" }
+        ) do
+          concat(title)
+          concat(tag.span(class: "caret"))
+        end,
+        tag.ul(
+          class: "dropdown-menu",
+          aria: { labelledby: "context_nav_toggle" }
+        ) do
+          links.compact.each do |link|
+            concat(tag.li(link))
+          end
+        end
+      ].safe_join
+    end
+  end
 end

@@ -4,7 +4,7 @@
 #  index_sorter                 # helper to render the sorter partial
 #
 module TitleSorterFilterHelper
-  # Conditionally dds a group of sorting links, for indexes, if relevant
+  # Conditionally adds a group of sorting links, for indexes, if relevant
   # These link back to the same index action, changing only the `by` param.
   #
   def add_sorter(query, sorts, link_all: false)
