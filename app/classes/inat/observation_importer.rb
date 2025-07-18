@@ -12,10 +12,11 @@ class Inat
       @user = user
     end
 
+    # Import a parsed page of iNat observations.
     def import_page(page)
-      return false if cancelling?
-
       page["results"].each do |result|
+        return false if cancelling?
+
         import_one_result(JSON.generate(result))
       end
     end
