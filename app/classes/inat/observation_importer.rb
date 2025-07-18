@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class Inat
+  # Imports a parsed page of iNat observations.
   class ObservationImporter
     include Inat::Constants
 
@@ -15,6 +16,8 @@ class Inat
       end
     end
 
+    private
+
     def import_one_result(result)
       @inat_obs = Inat::Obs.new(result)
       return unless @inat_obs.importable?
@@ -26,8 +29,6 @@ class Inat
       increment_imported_counts
       update_timings
     end
-
-    private
 
     def update_inat_observation
       update_mushroom_observer_url_field
