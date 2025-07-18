@@ -53,6 +53,10 @@ class InatImport < ApplicationRecord
     %w[Authenticating Importing].include?(state)
   end
 
+  def cancelling?
+    state == "Cancelling"
+  end
+
   def add_response_error(error)
     msg = if error.is_a?(::RestClient::Response)
             error.body
