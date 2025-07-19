@@ -6,11 +6,11 @@
     <%= tag.h4(rubric, class: "") %>
     <% if controller.controller_name == "identify" %>
       <%= render(partial: "observations/identify/form_identify_filter") %>
-    <% else %>
-      <%= render(partial: "application/top_nav/sorter") %>
+    <% elsif(content_for?(:sorter)) %>
+      <%= yield(:sorter) %>
     <% end %>
     <% if content_for?(:context_nav) %>
-      <%= render(partial: "application/top_nav/context_menu") %>
+      <%= yield(:context_nav) %>
     <% end %>
     <% if @user.nil? %>
       <%= render(partial: "application/top_nav/login") %>
