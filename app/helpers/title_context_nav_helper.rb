@@ -92,7 +92,7 @@ module TitleContextNavHelper
       [
         tag.button(
           class: "btn btn-default dropdown-toggle",
-          type: "button",
+          id: "context_nav_toggle", type: "button",
           data: { toggle: "dropdown" },
           aria: { haspopup: "true", expanded: "true" }
         ) do
