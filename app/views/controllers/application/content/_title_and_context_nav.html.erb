@@ -13,8 +13,8 @@ type_filters
 %>
 <%
 add_filter_help(@any_content_filters_applied)
-add_context_nav = (content_for?(:context_nav) || content_for?(:interest_icons))
-left_cols = add_context_nav ? "col-xs-8 col-lg-7" : "col-xs-12"
+add_interest_icons = (content_for?(:interest_icons))
+left_cols = add_interest_icons ? "col-xs-8 col-lg-7" : "col-xs-12"
 filters = content_for?(:filters) || content_for?(:filter_help) ||
           content_for?(:sorter)
 %>
@@ -61,11 +61,10 @@ filters = content_for?(:filters) || content_for?(:filter_help) ||
   <% end %>
 
   <!-- Tabsets and interest icons -->
-  <%= content_tag_if(add_context_nav, :div, id: "context_nav",
+  <%= content_tag_if(add_interest_icons, :div, id: "context_nav",
                     class: "hidden-print text-right col-sm-4 col-lg-5 mb-3") do
         concat(yield(:interest_icons))
         concat(yield(:edit_icons))
-        concat(yield(:context_nav))
       end %>
 
   <%= content_tag_if(content_for?(:type_filters), :div,

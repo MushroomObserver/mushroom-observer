@@ -9,7 +9,9 @@
     <% else ##user is logged in %>
       <%= render(partial: "application/top_nav/search_form") %>
     <% end %>
-
+    <% if content_for?(:context_nav) %>
+      <%= render(partial: "application/top_nav/context_menu") %>
+    <% end %>
     <% if @user.nil? %>
       <%= render(partial: "application/top_nav/login") %>
     <% else ##user is logged in %>

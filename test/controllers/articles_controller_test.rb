@@ -74,10 +74,10 @@ class ArticlesControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
-  # Partly duplicates the title_and_tabset_helper_test `test_context_nav_links`.
+  # Partly duplicates title_and_tabset_helper_test `test_context_nav_dropdown`.
   # But we want to test a `destroy_button` tab too.
   # That method calls `add_query_param` and others unavailable to helper tests
-  def test_context_nav_links_helper
+  def test_context_nav_dropdown_helper
     article = Article.last
     links = [[:create_article_title.t, new_article_path,
               { class: "new_article_link" }],
@@ -85,7 +85,7 @@ class ArticlesControllerTest < FunctionalTestCase
               { class: "edit_article_link" }],
              [nil, article, { button: :destroy }]]
 
-    tabs = @controller.helpers.context_nav_links(links)
+    tabs = @controller.helpers.context_nav_dropdown(links)
 
     tab1 = @controller.helpers.link_to(
       :create_article_title.t, new_article_path, { class: "new_article_link" }
