@@ -92,7 +92,7 @@ module TitleContextNavHelper
       [
         tag.button(
           class: "btn btn-default dropdown-toggle",
-          id:, type: "button",
+          type: "button",
           data: { toggle: "dropdown" },
           aria: { haspopup: "true", expanded: "true" }
         ) do
@@ -100,7 +100,7 @@ module TitleContextNavHelper
           concat(tag.span(class: "caret"))
         end,
         tag.ul(
-          class: "dropdown-menu",
+          id:, class: "dropdown-menu",
           aria: { labelledby: "context_nav_toggle" }
         ) do
           links.compact.each do |link|
