@@ -13,7 +13,7 @@ module TitleSorterFilterHelper
     content_for(:sorter) do
       links = create_sorting_links(query, sorts, link_all)
 
-      render(partial: "application/content/sorter", locals: { links: links })
+      render(partial: "application/top_nav/sorter", locals: { links: links })
     end
   end
 

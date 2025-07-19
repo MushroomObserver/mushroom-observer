@@ -3,11 +3,11 @@
      data-nav-target="topNav">
 
   <div class="container-fluid px-0">
-    <%= tag.span(rubric, class: "hidden") %>
+    <%= tag.h4(rubric, class: "") %>
     <% if controller.controller_name == "identify" %>
       <%= render(partial: "observations/identify/form_identify_filter") %>
-    <% else ##user is logged in %>
-      <%= render(partial: "application/top_nav/search_form") %>
+    <% else %>
+      <%= render(partial: "application/top_nav/sorter") %>
     <% end %>
     <% if content_for?(:context_nav) %>
       <%= render(partial: "application/top_nav/context_menu") %>
@@ -19,5 +19,8 @@
     <% end %>
   </div>
 
+  <div class="container-fluid px-0">
+    <%= render(partial: "application/top_nav/search_form") %>
+  </div>
 </nav>
 <!--/top_nav-->

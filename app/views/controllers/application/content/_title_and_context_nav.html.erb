@@ -4,7 +4,6 @@ May include:
 prev_next_pager
 title
 query filters (indexes)
-sorter
 context_help
 owner_naming
 interest_icons
@@ -15,8 +14,7 @@ type_filters
 add_filter_help(@any_content_filters_applied)
 add_interest_icons = (content_for?(:interest_icons))
 left_cols = add_interest_icons ? "col-xs-8 col-lg-7" : "col-xs-12"
-filters = content_for?(:filters) || content_for?(:filter_help) ||
-          content_for?(:sorter)
+filters = content_for?(:filters) || content_for?(:filter_help)
 %>
 
 <%= tag.div(class: "row") do %>
@@ -30,19 +28,10 @@ filters = content_for?(:filters) || content_for?(:filter_help) ||
           yield(:prev_next_object)
         end -%>
 
-    <!-- Title -->
+    <!-- Title or subtitle -->
     <!-- e.g. "Observation 5"; Can be multiple lines, e.g., with Observer ID -->
     <% if content_for?(:background_image) %>
-      <%= yield(:background_image) %>
-      <%= tag.div(class: "bottom-left ml-3 mb-3 p-2") do %>
-        <%= tag.h1(yield(:title), class: "h3 image-title-text", id: "title") -%>
-        <% if content_for?(:location) %>
-          <%= tag.div(yield(:location), class: "image-title-text") %>
-        <% end %>
-        <% if content_for?(:date_range) %>
-          <%= tag.div(yield(:date_range), class: "image-title-text") %>
-        <% end %>
-      <% end %>
+      <%= render(partial: "content/project_title") %>
     <% else %>
       <%= tag.h1(yield(:title), class: "h3", id: "title") -%>
       <% if content_for?(:location) %>
