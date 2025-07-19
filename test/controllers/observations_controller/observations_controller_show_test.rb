@@ -424,6 +424,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_select("a[href=?]",
                   reuse_images_for_observation_path(obs.id), minimum: 1)
     get(:edit, params: { id: obs.id })
+    assert_match(obs.location.name, response.body)
     assert_response(:success)
 
     login("dick") # Project permission
