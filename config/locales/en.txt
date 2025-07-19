@@ -3101,7 +3101,7 @@
   inat_details_heading: Details/Caveats
   inat_details_list: "- MO will list most iNat data and/or map it to analogous MO fields.\n- Coordinates are hidden from the public if iNat obscured them.\n- Location is a rectangle with an MO-style name, rather than the iNat Place name."
 
-  # /inat_import_job_tracker
+  # /inat_import
   INAT_IMPORTS: iNat Imports
   INAT_IMPORT_JOB_TRACKERS: iNat Import Trackers
   inat_import_tracker: iNat Import Tracker
@@ -3112,8 +3112,9 @@
   inat_import_tracker_calculating_time: "Calculating ..."
   inat_import_tracker_ended: Ended
   inat_import_imported: Imported
-  inat_import_tracker_done: "Click [:inat_import_tracker_results] to see imported Observations."
-  inat_import_tracker_results: Results
+  inat_import_tracker_done: "Click [:inat_import_job_results] to see imported Observations."
+  inat_import_job_results: Results
+  inat_import_job_cancel: "[:CANCEL]"
   inat_import_tracker_importable_count: Number of Importable Observations
   inat_import_tracker_imported_count: Number Imported
   inat_import_tracker_leave_page: You may continue working in MO by opening another tab, or by leaving this page. To return to this page, you can (a) go back in your browser, or (b) click Create Observation, iNat Import; if the import is in progress, this page will be redisplayed.

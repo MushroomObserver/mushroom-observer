@@ -5,13 +5,11 @@ module InatImportJobTestDoubles
 
   def stub_inat_interactions(
     id_above: 0,
-    login: @inat_import.inat_username,
-    superimporter: false
+    login: @inat_import.inat_username
   )
     stub_token_requests
     stub_check_username_match(login)
-    stub_inat_observation_request(id_above: id_above,
-                                  superimporter: superimporter)
+    stub_inat_observation_request(id_above: id_above)
     stub_inat_photo_requests
     stub_modify_inat_observations
   end
@@ -69,7 +67,7 @@ module InatImportJobTestDoubles
                 headers: {})
   end
 
-  def stub_inat_observation_request(id_above: 0, superimporter: false)
+  def stub_inat_observation_request(id_above: 0)
     query_args = {
       iconic_taxa: ICONIC_TAXA,
       id: @inat_import.inat_ids,
@@ -79,7 +77,7 @@ module InatImportJobTestDoubles
       order: "asc",
       order_by: "id",
       without_field: "Mushroom Observer URL",
-      user_login: (@inat_import.inat_username unless superimporter)
+      user_login: @inat_import.inat_username
     }
 
     stub_request(:get, "#{API_BASE}/observations?#{query_args.to_query}").

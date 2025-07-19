@@ -1,19 +1,27 @@
 # frozen_string_literal: true
 
 class Inat
+  # Imports a parsed page of iNat observations.
   class ObservationImporter
     include Inat::Constants
+
+    delegate :cancelling?, to: :@inat_import
 
     def initialize(inat_import, user)
       @inat_import = inat_import
       @user = user
     end
 
+    # Import a parsed page of iNat observations.
     def import_page(page)
       page["results"].each do |result|
+        return false if cancelling?
+
         import_one_result(JSON.generate(result))
       end
     end
+
+    private
 
     def import_one_result(result)
       @inat_obs = Inat::Obs.new(result)
@@ -26,8 +34,6 @@ class Inat
       increment_imported_counts
       update_timings
     end
-
-    private
 
     def update_inat_observation
       update_mushroom_observer_url_field
