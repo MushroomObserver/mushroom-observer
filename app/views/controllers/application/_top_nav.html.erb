@@ -1,8 +1,12 @@
 <!--top_nav-->
+<% container_classes = class_names(%w[
+container-fluid px-0 d-flex flex-row align-items-center justify-content-between
+]) %>
+
 <nav id="top_nav" class="navbar navbar-default hidden-xs hidden-print"
      data-nav-target="topNav">
 
-  <div class="container-fluid px-0">
+  <%= tag.div(class: container_classes) do %>
     <%= tag.h4(rubric, class: "") %>
     <% if controller.controller_name == "identify" %>
       <%= render(partial: "observations/identify/form_identify_filter") %>
@@ -17,10 +21,10 @@
     <% else ##user is logged in %>
       <%= render(partial: "application/top_nav/user_nav") %>
     <% end %>
-  </div>
+  <% end %>
 
-  <div class="container-fluid px-0">
+  <%= tag.div(class: container_classes) do %>
     <%= render(partial: "application/top_nav/search_form") %>
-  </div>
+  <% end %>
 </nav>
 <!--/top_nav-->

@@ -10,10 +10,13 @@ module TitleSorterFilterHelper
   def add_sorter(query, sorts, link_all: false)
     return unless sorts && (query&.num_results&.> 1)
 
+    links = create_sorting_links(query, sorts, link_all)
     content_for(:sorter) do
-      links = create_sorting_links(query, sorts, link_all)
-
-      render(partial: "application/top_nav/sorter", locals: { links: links })
+      tag.div(class: "d-inline-block") do
+        concat(tag.label("#{:sort_by_header.l}:", class: "mr-2"))
+        concat(context_nav_dropdown(title: "", id: "sorts",
+                                    links:, show_current: true))
+      end
     end
   end
 
@@ -28,9 +31,9 @@ module TitleSorterFilterHelper
     sort_links = assemble_sort_links(query, sorts, link_all)
 
     sort_links.map do |title, path, identifier, active|
-      classes = "btn btn-default"
-      classes += " active" if active
-      args = { class: class_names(classes, identifier) }
+      classes = [identifier] # "btn", "btn-default"
+      classes << "active" if active
+      args = { class: class_names(classes) }
       args = args.merge(disabled: true) if active
 
       link_with_query(title, path, **args)

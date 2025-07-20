@@ -13,10 +13,9 @@ module TitleContextNavHelper
     return unless links
 
     nav_links = context_nav_links(links)
-
     content_for(:context_nav) do
-      render(partial: "application/content/context_nav",
-             locals: { links: nav_links })
+      context_nav_dropdown(title: "Actions", id: "context_nav",
+                           links: nav_links)
     end
   end
 
@@ -87,8 +86,14 @@ module TitleContextNavHelper
     kwargs&.merge(extra_args&.except(:class))
   end
 
-  def context_nav_dropdown(title: "", id: "", links: [])
-    tag.div(class: "dropdown") do
+  # rubocop:disable Metrics/AbcSize
+  # The "dropdown-current" Stimulus controller should update the dropdown title
+  # with the currently selected option on load, if show_current == true
+  def context_nav_dropdown(title: "", id: "", links: [], show_current: false)
+    args = { class: "dropdown" }
+    args[:data] = { controller: "dropdown-current" } if show_current
+
+    tag.div(class: "dropdown d-inline-block") do
       [
         tag.button(
           class: "btn btn-default dropdown-toggle",
@@ -96,7 +101,7 @@ module TitleContextNavHelper
           data: { toggle: "dropdown" },
           aria: { haspopup: "true", expanded: "true" }
         ) do
-          concat(title)
+          concat(tag.span(title, data: { dropdown_current_target: "title" }))
           concat(tag.span(class: "caret"))
         end,
         tag.ul(
@@ -110,4 +115,5 @@ module TitleContextNavHelper
       ].safe_join
     end
   end
+  # rubocop:enable Metrics/AbcSize
 end
