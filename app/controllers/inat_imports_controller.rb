@@ -108,6 +108,7 @@ class InatImportsController < ApplicationController
     @inat_import = InatImport.find_or_create_by(user: @user)
     @inat_import.update(
       state: "Authorizing",
+      cancel: false,
       import_all: params[:all],
       importables: importables_count,
       imported_count: 0,
