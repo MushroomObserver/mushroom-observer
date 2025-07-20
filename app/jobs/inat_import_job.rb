@@ -33,6 +33,11 @@ class InatImportJob < ApplicationJob
   end
 
   def authenticate
+    # NOTE: jdc 2024-06-15
+    # Do not `return false if cancel?` here.
+    # Instead check `cancel?` only at the lowest level,
+    # (ObservationImporter#import_page).
+    # This lets us test whether cancel works at that level.
     token_service = Inat::APIToken.new(
       app_id: APP_ID, site: SITE,
       redirect_uri: REDIRECT_URI,
@@ -46,6 +51,11 @@ class InatImportJob < ApplicationJob
   # Prevent MO users from importing other users' iNat observations,
   # unless they are super importers.
   def ensure_importing_own_observations
+    # NOTE: jdc 2024-06-15
+    # Do not `return false if cancel?` here.
+    # Instead check `cancel?` only at the lowest level,
+    # (ObservationImporter#import_page).
+    # This lets us test whether cancel works at that level.
     return log("Skipped own-obs check (SuperImporter)") if super_importer?
 
     begin
@@ -86,7 +96,11 @@ class InatImportJob < ApplicationJob
   end
 
   def parsing?(parser)
-    return false if cancel?
+    # NOTE: jdc 2024-06-15
+    # Do not `return false if cancel?` here.
+    # Instead check `cancel?` only at the lowest level,
+    # (ObservationImporter#import_page).
+    # This lets us test whether cancel works at that level.
 
     # get a page of observations with id > id of last imported obs
     parsed_page = parser.next_page
