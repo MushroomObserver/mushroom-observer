@@ -534,6 +534,30 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_empty(@inat_import.response_errors, "There should be no errors")
   end
 
+  def test_cancel
+    create_ivars_from_filename("calostoma_lutescens")
+    # You can import only your own observations.
+    # So adjust importing user's inat_username to be the Inat login
+    # of the iNat user who made the iNat observation
+    @user.update(inat_username: @inat_import.inat_username)
+
+    stub_inat_interactions
+    @inat_import.update(cancel: true)
+
+    assert_no_difference(
+      "Observation.count", "Should not create observations if canceled"
+    ) do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    assert_equal(
+      @inat_import.state, "Done",
+      "InatImport state should be `Done` after canceled Job is finished"
+    )
+    assert(@inat_import.cancel?,
+           "Finishing a canceled InatImport should leave it canceled")
+  end
+
   def test_oauth_failure
     create_ivars_from_filename("calostoma_lutescens")
 
