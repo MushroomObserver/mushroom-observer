@@ -75,6 +75,20 @@ module Observations
       assert_select("option[selected]", count: 2)
     end
 
+    def test_update_observation_new_name_different_user
+      login("mary")
+      nam = namings(:coprinus_comatus_other_naming)
+      new_name = "Easter bunny"
+      params = {
+        observation_id: nam.observation_id,
+        id: nam.id.to_s,
+        naming: { name: new_name }
+      }
+      put(:update, params: params)
+      assert_select('option[selected="selected"][value="3.0"]',
+                    text: "I'd Call It That")
+    end
+
     def test_update_observation_approved_new_name
       login("rolf")
       nam = namings(:coprinus_comatus_naming)

@@ -75,7 +75,7 @@ module Observations
       return redirect_to_obs(@observation) unless check_permission!(@naming)
 
       @consensus = Observation::NamingConsensus.new(@observation)
-      @vote = @consensus.owners_vote(@naming)
+      @vote = @consensus.users_vote(@naming, @user)
 
       if can_update?
         need_new_naming? ? create_new_naming : change_naming
