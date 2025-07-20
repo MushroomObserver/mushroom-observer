@@ -59,7 +59,7 @@ module Observations
 
       init_edit_ivars
       @consensus = Observation::NamingConsensus.new(@observation)
-      @vote = @consensus.owners_vote(@naming)
+      @vote = @consensus.users_vote(@naming, @user)
 
       respond_to do |format|
         format.turbo_stream { render_modal_naming_form }

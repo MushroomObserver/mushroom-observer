@@ -39,6 +39,14 @@ module Observations
       )
     end
 
+    def test_edit_obs_owner_with_different_vote
+      nam = namings(:coprinus_comatus_other_naming)
+      params = { observation_id: nam.observation_id, id: nam.id.to_s }
+      login(nam.user.login)
+      get(:edit, params: params)
+      assert_select('option[selected="selected"][value="3.0"]', text: "I'd Call It That")
+    end
+
     def test_edit_naming_no_votes
       nam = namings(:minimal_unknown_naming)
       assert_empty(nam.votes)
