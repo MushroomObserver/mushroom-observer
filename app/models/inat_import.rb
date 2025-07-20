@@ -6,6 +6,7 @@
 #
 #  user::                  user who initiated the iNat import
 #  state::                 state of the import
+#  cancel::                whether the import was cancelled
 #  ended_at::              when the job was Done
 #  token::                 token used to validate request; can be a code,
 #                          authorization token, or JWT
@@ -36,8 +37,7 @@ class InatImport < ApplicationRecord
     # trading iNat authorization code for an authentication token
     Authenticating: 2,
     Importing: 3,
-    Done: 4,
-    Cancelling: 5
+    Done: 4
   }
 
   belongs_to :user
@@ -51,10 +51,6 @@ class InatImport < ApplicationRecord
 
   def job_pending?
     %w[Authenticating Importing].include?(state)
-  end
-
-  def cancelling?
-    state == "Cancelling"
   end
 
   def add_response_error(error)

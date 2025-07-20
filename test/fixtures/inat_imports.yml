@@ -13,6 +13,7 @@ DEFAULTS: &DEFAULTS
   total_imported_count: nil
   total_seconds: nil
   avg_import_time: nil
+  cancel: false
 
 rolf_inat_import:
   <<: *DEFAULTS
@@ -38,6 +39,7 @@ katrina_inat_import:
   <<: *DEFAULTS
   user: katrina
   state: <%= InatImport.states[:Importing] %>
+  cancel: false
   inat_username: katrina_inat_username
 
 inat_importer_inat_import:

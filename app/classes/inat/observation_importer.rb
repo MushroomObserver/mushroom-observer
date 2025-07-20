@@ -5,7 +5,7 @@ class Inat
   class ObservationImporter
     include Inat::Constants
 
-    delegate :cancelling?, to: :@inat_import
+    delegate :cancel?, to: :@inat_import
 
     def initialize(inat_import, user)
       @inat_import = inat_import
@@ -15,7 +15,7 @@ class Inat
     # Import a parsed page of iNat observations.
     def import_page(page)
       page["results"].each do |result|
-        return false if cancelling?
+        return false if cancel?
 
         import_one_result(JSON.generate(result))
       end

@@ -9,7 +9,7 @@ class InatImportJob < ApplicationJob
 
   delegate :token, to: :inat_import
   delegate :user, to: :inat_import
-  delegate :cancelling?, to: :inat_import
+  delegate :cancel?, to: :inat_import
 
   def perform(inat_import)
     create_ivars(inat_import)
@@ -86,7 +86,7 @@ class InatImportJob < ApplicationJob
   end
 
   def parsing?(parser)
-    return false if cancelling?
+    return false if cancel?
 
     # get a page of observations with id > id of last imported obs
     parsed_page = parser.next_page
