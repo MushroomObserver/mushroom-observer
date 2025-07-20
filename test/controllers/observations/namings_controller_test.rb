@@ -44,7 +44,8 @@ module Observations
       params = { observation_id: nam.observation_id, id: nam.id.to_s }
       login(nam.user.login)
       get(:edit, params: params)
-      assert_select('option[selected="selected"][value="3.0"]', text: "I'd Call It That")
+      assert_select('option[selected="selected"][value="3.0"]',
+                    text: "I'd Call It That")
     end
 
     def test_edit_naming_no_votes
