@@ -1,10 +1,12 @@
 <%
 add_index_title(@query)
 add_sorter(@query, sequences_index_sorts)
+add_pagination(@pagination_data)
+
 flash_error(@error) if @error && @objects.empty?
 %>
 
-<%= pagination_nav(@pagination_data) do %>
+<%= pagination_nav do %>
   <div class="list-group">
     <%# Following is a loop rather than a partial for performance reasons %>
     <% @objects.each do |object| %>

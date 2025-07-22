@@ -1,5 +1,6 @@
 <%
 add_page_title(:list_interests_title.t)
+add_pagination(@pagination_data)
 
 flash_error(@error) if @error && !@interests.any?(&:target)
 %>
@@ -26,7 +27,7 @@ flash_error(@error) if @error && !@interests.any?(&:target)
   </div>
 <% end %>
 
-<%= pagination_nav(@pagination_data) do %>
+<%= pagination_nav do %>
   <% if @interests.any?(&:target) %>
     <table class="table table-striped">
       <% @interests.select(&:target).each do |item|

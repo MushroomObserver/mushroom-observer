@@ -4,11 +4,12 @@
 @container = :text_image
 add_index_title(@query)
 add_sorter(@query, comments_index_sorts)
+add_pagination(@pagination_data)
 
 flash_error(@error) if @error && @objects.empty?
 %>
 
-<%= pagination_nav(@pagination_data) do
+<%= pagination_nav do
   if @objects.any?
     tag.div(class: "list-group") do
       @objects.each do |comment|

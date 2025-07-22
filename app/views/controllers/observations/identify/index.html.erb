@@ -1,6 +1,7 @@
 <%
 @container = :full
 add_page_title(:obs_needing_id.t)
+add_pagination(@pagination_data)
 
 flash_error(@error) if @error && @objects.empty?
 %>
@@ -10,7 +11,7 @@ flash_error(@error) if @error && @objects.empty?
   <%# render(partial: "observations/identify/form_identify_filter") %>
 </div>
 
-<%= pagination_nav(@pagination_data) do %>
+<%= pagination_nav do %>
   <%= matrix_table(objects: @objects, identify: true, cached: true) %>
 <% end %>
 

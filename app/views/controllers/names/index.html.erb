@@ -3,6 +3,7 @@
 add_index_title(@query)
 add_context_nav(all_names_index_tabs(query: @query))
 add_sorter(@query, names_index_sorts(query: @query))
+add_pagination(@pagination_data)
 
 flash_error(@error) if @error && @objects.empty?
 %>
@@ -25,7 +26,7 @@ flash_error(@error) if @error && @objects.empty?
 
 <% # Let test_index test pass args to pagination_links.
   args = @test_pagination_args || {} %>
-<%= pagination_nav(@pagination_data, args) do %>
+<%= pagination_nav(args) do %>
   <% if @objects.any? %>
     <% counts = Name.count_observations(@objects) %>
 

@@ -9,6 +9,7 @@
   end
   project_observation_buttons(@project, @query)
   add_sorter(@query, observations_index_sorts)
+  add_pagination(@pagination_data)
 
   flash_error(@error) if @error && @objects.empty?
 %>
@@ -40,6 +41,6 @@
 <% end %>
 <% end %>
 
-<%= pagination_nav(@pagination_data) do %>
+<%= pagination_nav do %>
   <%= matrix_table(objects: @objects, cached: true) %>
 <% end %>

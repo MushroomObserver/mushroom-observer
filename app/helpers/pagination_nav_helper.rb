@@ -4,6 +4,15 @@ module PaginationNavHelper
   # Letters used as text in pagination links
   LETTERS = ("A".."Z")
 
+  def add_pagination(pagination_data, args = {})
+    content_for(:letters) do
+      letter_pagination_nav(pagination_data, args)
+    end
+    content_for(:pages) do
+      number_pagination_nav(pagination_data, args)
+    end
+  end
+
   # Wrap a block in pagination links.  Includes letters if appropriate.
   #
   #   <%= pagination_nav(@pagination_data) do %>
@@ -11,17 +20,26 @@ module PaginationNavHelper
   #       <% object_link(object) %><br/>
   #     <% end %>
   #   <% end %>
-  #
-  def pagination_nav(pages, args = {}, &block)
+  # should call content_for the page and letter nav so it can be put anywhere
+  def pagination_nav(args = {}, &block)
     html_id = args[:html_id] ||= "results"
-    letters = letter_pagination_nav(pages, args)
-    numbers = number_pagination_nav(pages, args)
     body = capture(&block).to_s
     tag.div(id: html_id, data: { q: get_query_param }) do
-      letters + safe_br + numbers + body + numbers + safe_br + letters
+      capture do
+        [
+          yield(:letters),
+          safe_br,
+          yield(:numbers),
+          body,
+          yield(:numbers),
+          safe_br,
+          yield(:letters)
+        ].safe_join
+      end
     end
   end
 
+  # rubocop:disable Metrics/AbcSize
   # Insert letter pagination links.
   #
   #   # In controller:
@@ -35,22 +53,24 @@ module PaginationNavHelper
   #   <%= letter_pagination_nav(@pagination_data) %>
   #   <%= number_pagination_nav(@pagination_data) %>
   #
-  def letter_pagination_nav(pages, args = {}) # rubocop:disable Metrics/AbcSize
-    return safe_empty unless need_letter_pagination_links?(pages)
+  def letter_pagination_nav(pagination_data, args = {})
+    return safe_empty unless need_letter_pagination_links?(pagination_data)
 
     args = args.dup
     args[:params] = (args[:params] || {}).dup
-    args[:params][pages.number_arg] = nil
+    args[:params][pagination_data.number_arg] = nil
     str = LETTERS.map do |letter|
-      if pages.used_letters.include?(letter)
-        pagination_link(letter, letter, pages.letter_arg, args)
+      if pagination_data.used_letters.include?(letter)
+        pagination_link(letter, letter, pagination_data.letter_arg, args)
       else
         tag.li(tag.span(letter), class: "disabled")
       end
     end.safe_join(" ")
     tag.div(str, class: "pagination pagination-sm")
   end
+  # rubocop:enable Metrics/AbcSize
 
+  # pages is a pagination_data object
   def need_letter_pagination_links?(pages)
     return false unless pages
 

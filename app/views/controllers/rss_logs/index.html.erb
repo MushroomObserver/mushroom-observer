@@ -2,12 +2,13 @@
 add_page_title(tag.span(:rss_log_title.t, class: "text-nowrap"))
 add_context_nav(rss_logs_index_tabs(user: @user, types: @types))
 add_type_filters
+add_pagination(@pagination_data)
 
 @container = :full
 
 flash_error(@error) if @error && @objects.empty?
 %>
 
-<%= pagination_nav(@pagination_data) do %>
+<%= pagination_nav do %>
   <%= matrix_table(objects: @objects, cached: true) %>
 <% end %>

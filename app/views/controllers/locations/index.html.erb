@@ -11,8 +11,8 @@ all_links = if (params[:id].present? ||
             end
 add_sorter(@query, locations_index_sorts(query: @query), link_all: all_links)
 @known_pages = @pagination_data
-
 @known_data  = @objects
+add_pagination(@pagination_data)
 
 observation_counts = calc_counts(@objects, @query)
 flash_error(@error) if @error && @known_pages.empty? && @undef_pages.empty?
@@ -30,7 +30,7 @@ flash_error(@error) if @error && @known_pages.empty? && @undef_pages.empty?
         <%= :list_place_names_known.t %>
         <%= :list_place_names_known_order.t if @default_orders %>
       </div>
-      <%= pagination_nav(@known_pages) do %>
+      <%= pagination_nav do %>
         <div class="list-group">
           <% @known_data.each do |location| %>
             <div class="list-group-item">
@@ -49,9 +49,8 @@ flash_error(@error) if @error && @known_pages.empty? && @undef_pages.empty?
         <%= :list_place_names_undef.t %>
         <%= :list_place_names_undef_order.t if @default_orders %>
       </div>
-      <%= pagination_nav(@undef_pages, { html_id: "locations_undefined" }) do %>
-
-
+      <%# NOTE: I deleted pagination for undefined locations %>
+      <%= tag.div(id: "locations_undefined") do %>
         <div class="list-group">
           <% @undef_data.each do |obs, count|
             location_name = obs[:where] %>

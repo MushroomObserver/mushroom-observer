@@ -3,10 +3,11 @@
 add_index_title(@query)
 add_context_nav(images_index_tabs(query: @query))
 add_sorter(@query, images_index_sorts)
+add_pagination(@pagination_data)
 
 flash_error(@error) if @error && @objects.empty?
 %>
 
-<%= pagination_nav(@pagination_data) do %>
+<%= pagination_nav do %>
   <%= matrix_table(objects: @objects) %>
 <% end %>
