@@ -41,7 +41,7 @@
       }
     }
 
-    li + li {
+    > li + li {
       @extend .ml-4;
     }
   }
