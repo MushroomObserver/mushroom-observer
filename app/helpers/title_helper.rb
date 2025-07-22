@@ -44,16 +44,16 @@ module TitleHelper
   # Simple builder for index page titles,
   # with a complex builder for the "filter caption" that explains the query.
   def add_index_title(query, map: false)
-    title = if map
-              :map_locations_title.l(
-                locations: query.model.table_name.upcase.to_sym.l
-              )
-            elsif query
-              query.model.table_name.upcase.to_sym.l
-            else
-              ""
-            end
-    add_page_title(title)
+    # title = if map
+    #           :map_locations_title.l(
+    #             locations: query.model.table_name.upcase.to_sym.l
+    #           )
+    #         elsif query
+    #           query.model.table_name.upcase.to_sym.l
+    #         else
+    #           ""
+    #         end
+    # add_page_title(title)
     add_query_filters(query)
   end
 
