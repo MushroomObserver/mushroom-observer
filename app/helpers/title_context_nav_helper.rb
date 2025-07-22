@@ -115,4 +115,16 @@ module TitleContextNavHelper
     end
   end
   # rubocop:enable Metrics/AbcSize
+
+  def search_nav_toggle
+    tag.li(class: "d-inline-block navbar-form") do
+      tag.button(
+        link_icon(:search, title: :SEARCH.l),
+        class: "btn btn-sm btn-outline-default",
+        type: :button,
+        data: { toggle: "collapse", target: "#search_nav" },
+        aria: { expanded: "false", controls: "search_nav" }
+      )
+    end
+  end
 end

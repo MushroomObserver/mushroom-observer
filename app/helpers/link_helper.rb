@@ -205,7 +205,8 @@ module LinkHelper
     qrcode: "qrcode",
     mobile: "phone",
     project: "th-list",
-    download: "download-alt"
+    download: "download-alt",
+    search: "search"
   }.freeze
 
   # button to destroy object

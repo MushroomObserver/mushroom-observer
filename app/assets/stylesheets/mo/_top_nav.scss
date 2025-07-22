@@ -27,16 +27,22 @@
     margin-right: 2px;
   }
 
-  .navbar_right .dropdown > a {
-    color: $navbar-default-color !important;
-    background-color: $navbar-default-bg !important;
-    padding-left: 8px;
-    padding-right: 8px;
-    font-weight: bold !important;
+  .navbar_right {
+    .dropdown > a {
+      color: $navbar-default-color !important;
+      background-color: $navbar-default-bg !important;
+      padding-left: 8px;
+      padding-right: 8px;
+      font-weight: bold !important;
 
-    &:hover {
-      color: $navbar-default-link-hover-color !important;
-      background-color: $navbar-default-link-hover-bg !important;
+      &:hover {
+        color: $navbar-default-link-hover-color !important;
+        background-color: $navbar-default-link-hover-bg !important;
+      }
+    }
+
+    li + li {
+      @extend .ml-4;
     }
   }
 

@@ -1,8 +1,8 @@
 <!--top_nav-->
 <%
-container_classes = class_names(%w[
-container-fluid px-3 d-flex flex-row align-items-center justify-content-between
-])
+container_classes = %w[container-fluid px-3 d-flex flex-row align-items-center]
+top_nav_classes = class_names(container_classes, "justify-content-between")
+search_nav_classes = class_names(container_classes, "justify-content-center")
 left_classes = class_names(%w[
   d-flex flex-row align-items-center flex-grow-1 navbar_left
 ])
@@ -14,7 +14,7 @@ right_classes = class_names(%w[
 <nav id="top_nav" class="navbar navbar-default hidden-xs hidden-print"
      data-nav-target="topNav">
 
-  <%= tag.div(class: container_classes) do %>
+  <%= tag.div(class: top_nav_classes) do %>
     <%# left side %>
     <%= tag.div(class: left_classes) do %>
       <%= tag.h4(rubric, class: "font-weight-bold mr-4 mr-lg-5") %>
@@ -27,6 +27,7 @@ right_classes = class_names(%w[
     <%# right side %>
     <%= tag.div(class: right_classes) do %>
       <ul class="nav navbar-nav navbar-right hidden-xs mr-0">
+        <%= search_nav_toggle %>
         <% if content_for?(:context_nav) %>
           <%= yield(:context_nav) %>
         <% end %>
@@ -39,8 +40,10 @@ right_classes = class_names(%w[
     <% end %>
   <% end %>
 
-  <%= tag.div(class: container_classes) do %>
-    <%= render(partial: "application/top_nav/search_form") %>
+  <%= tag.div(class: search_nav_classes) do %>
+    <%= tag.div(class: "collapse", id: "search_nav") do %>
+      <%= render(partial: "application/top_nav/search_form") %>
+    <% end %>
   <% end %>
 </nav>
 <!--/top_nav-->
