@@ -41,7 +41,7 @@
       }
     }
 
-    > li + li {
+    > ul.navbar-right > li {
       @extend .ml-4;
     }
   }
