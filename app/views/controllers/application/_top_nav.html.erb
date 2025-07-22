@@ -1,25 +1,41 @@
 <!--top_nav-->
-<% container_classes = class_names(%w[
-container-fluid px-0 d-flex flex-row align-items-center justify-content-between
-]) %>
+<%
+container_classes = class_names(%w[
+container-fluid px-3 d-flex flex-row align-items-center justify-content-between
+])
+left_classes = class_names(%w[
+  d-flex flex-row align-items-center flex-grow-1 navbar_left
+])
+right_classes = class_names(%w[
+  d-flex flex-row align-items-center justify-content-end navbar_right
+])
+%>
 
 <nav id="top_nav" class="navbar navbar-default hidden-xs hidden-print"
      data-nav-target="topNav">
 
   <%= tag.div(class: container_classes) do %>
-    <%= tag.h4(rubric, class: "") %>
-    <% if controller.controller_name == "identify" %>
-      <%= render(partial: "observations/identify/form_identify_filter") %>
-    <% elsif(content_for?(:sorter)) %>
-      <%= yield(:sorter) %>
+    <%# left side %>
+    <%= tag.div(class: left_classes) do %>
+      <%= tag.h4(rubric, class: "font-weight-bold mr-4 mr-lg-5") %>
+      <% if controller.controller_name == "identify" %>
+        <%= render(partial: "observations/identify/form_identify_filter") %>
+      <% elsif(content_for?(:sorter)) %>
+        <%= yield(:sorter) %>
+      <% end %>
     <% end %>
-    <% if content_for?(:context_nav) %>
-      <%= yield(:context_nav) %>
-    <% end %>
-    <% if @user.nil? %>
-      <%= render(partial: "application/top_nav/login") %>
-    <% else ##user is logged in %>
-      <%= render(partial: "application/top_nav/user_nav") %>
+    <%# right side %>
+    <%= tag.div(class: right_classes) do %>
+      <ul class="nav navbar-nav navbar-right hidden-xs mr-0">
+        <% if content_for?(:context_nav) %>
+          <%= yield(:context_nav) %>
+        <% end %>
+        <% if @user.nil? %>
+          <%= render(partial: "application/top_nav/login") %>
+        <% else ##user is logged in %>
+          <%= render(partial: "application/top_nav/user_nav") %>
+        <% end %>
+      </ul>
     <% end %>
   <% end %>
 

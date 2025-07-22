@@ -89,15 +89,13 @@ module TitleContextNavHelper
   # rubocop:disable Metrics/AbcSize
   # The "dropdown-current" Stimulus controller should update the dropdown title
   # with the currently selected option on load, if show_current == true
-  def context_nav_dropdown(title: "", id: "", links: [], show_current: false)
-    args = { class: "dropdown d-inline-block" }
-    args[:data] = { controller: "dropdown-current" } if show_current
-
-    tag.div(**args) do
+  # For Bootstrap 3, this must be an <li> element for alignment
+  def context_nav_dropdown(title: "", id: "", links: [])
+    tag.li(class: "dropdown d-inline-block") do
       [
-        tag.button(
-          class: "btn btn-default dropdown-toggle",
-          id: "context_nav_toggle", type: "button",
+        tag.a(
+          class: class_names(%w[dropdown-toggle]),
+          id: "context_nav_toggle", role: "button",
           data: { toggle: "dropdown" },
           aria: { haspopup: "true", expanded: "true" }
         ) do

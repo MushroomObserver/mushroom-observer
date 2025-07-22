@@ -4553,7 +4553,7 @@
   sort_by_curator: "[:CURATOR]"
   sort_by_date: "[:DATE]"
   sort_by_filename: File Name
-  sort_by_header: "Sort by:"
+  sort_by_header: "Sort by"
   sort_by_herbarium_label: Label
   sort_by_herbarium_name: Fungarium
   sort_by_id: ID

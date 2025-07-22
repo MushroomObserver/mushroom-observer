@@ -36,12 +36,24 @@
   flex-direction: row;
 }
 
+.flex-grow-1 {
+  flex-grow: 1 !important;
+}
+
 .align-items-center {
   align-items: center !important;
 }
 
+.justify-content-start {
+  justify-content: start !important;
+}
+
 .justify-content-between {
   justify-content: space-between !important;
+}
+
+.justify-content-end {
+  justify-content: end !important;
 }
 
 .w-auto {
@@ -337,6 +349,12 @@
 
 .mr-5 {
   margin-right: 3rem !important;
+}
+
+.mr-lg-5 {
+  @media screen and (min-width: 992px) {
+    margin-right: 3rem !important;
+  }
 }
 
 .ml-0 {

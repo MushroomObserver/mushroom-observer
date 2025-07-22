@@ -9,6 +9,7 @@
   border-top-right-radius: 0px;
   border-bottom-right-radius: 0px;
   border-right-width: 0px;
+  border-left-width: 0px;
   padding: 0px;
 
   a,
@@ -26,12 +27,12 @@
     margin-right: 2px;
   }
 
-  .navbar-nav > li > a,
-  .navbar-nav > li > a.dropdown-toggle {
+  .navbar_right .dropdown > a {
     color: $navbar-default-color !important;
     background-color: $navbar-default-bg !important;
     padding-left: 8px;
     padding-right: 8px;
+    font-weight: bold !important;
 
     &:hover {
       color: $navbar-default-link-hover-color !important;

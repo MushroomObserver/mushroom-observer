@@ -13,9 +13,9 @@ module TitleSorterFilterHelper
     links = create_sorting_links(query, sorts, link_all)
     content_for(:sorter) do
       tag.div(class: "d-inline-block") do
-        concat(tag.label("#{:sort_by_header.l}:", class: "mr-2"))
-        concat(context_nav_dropdown(title: "", id: "sorts",
-                                    links:, show_current: true))
+        concat(tag.label("#{:sort_by_header.l}:",
+                         class: "font-weight-normal mr-2"))
+        concat(sort_nav_dropdown(title: "", id: "sorts", links:))
       end
     end
   end
@@ -90,6 +90,38 @@ module TitleSorterFilterHelper
 
     model.underscore.pluralize
   end
+
+  # rubocop:disable Metrics/AbcSize
+  # The "dropdown-current" Stimulus controller should update the dropdown title
+  # with the currently selected option on load
+  def sort_nav_dropdown(title: "", id: "", links: [])
+    toggle_classes = class_names(
+      %w[btn btn-sm btn-outline-default dropdown-toggle]
+    )
+    tag.div(class: "dropdown d-inline-block",
+            data: { controller: "dropdown-current" }) do
+      [
+        tag.button(
+          class: toggle_classes,
+          id: "sort_nav_toggle", type: "button",
+          data: { toggle: "dropdown" },
+          aria: { haspopup: "true", expanded: "true" }
+        ) do
+          concat(tag.span(title, data: { dropdown_current_target: "title" }))
+          concat(tag.span(class: "caret ml-2"))
+        end,
+        tag.ul(
+          id:, class: "dropdown-menu",
+          aria: { labelledby: "sort_nav_toggle" }
+        ) do
+          links.compact.each do |link|
+            concat(tag.li(link))
+          end
+        end
+      ].safe_join
+    end
+  end
+  # rubocop:enable Metrics/AbcSize
 
   # Different from sorting links: type_filters
   # currently only used in RssLogsController#index

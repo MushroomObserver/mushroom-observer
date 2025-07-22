@@ -3,85 +3,46 @@ admin_title = in_admin_mode? ? :app_turn_admin_off.t : :app_turn_admin_on.t
 admin_mode_args = in_admin_mode? ? { turn_off: true } : { turn_on: true }
 %>
 
-<ul class="nav navbar-nav navbar-right hidden-xs mr-0">
-  <% if @user.admin %>
+<li id="user_drop_down" class="dropdown d-inline-block ml-4">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <%= h(@user.login) %>
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li><%= link_to(:app_your_observations.l,
+                    observations_path(by_user: @user.id),
+                    { class: "" } ) %></li>
     <li>
-      <%= icon_link_to(
-          admin_title, admin_mode_path(**admin_mode_args),
-          { icon: :admin, id: "user_nav_admin_mode_link", button_to: true,
-            class: "btn btn-link navbar-btn", data: { placement: "bottom" } }
-        ) %>
+      <%= link_to(
+            :app_comments_for_you.l, comments_path(for_user: @user.id),
+            { icon: :inbox, id: "user_drop_inbox_link" }
+          ) %>
     </li>
-  <% end %>
-  <li>
-    <%= icon_link_to(
-          :app_qrcode.l, field_slips_qr_reader_new_path,
-          { icon: :qrcode, id: "user_nav_qrcode_link",
-            data: { placement: "bottom" } }
-        ) %>
-  </li>
-  <li>
-    <%= icon_link_to(
-          :app_mobile.l, article_path(34),
-          { icon: :mobile, id: "user_nav_mobile_link",
-            data: { placement: "bottom" } }
-        ) %>
-  </li>
-  <li>
-    <%= icon_link_to(
-          :app_comments_for_you.l, comments_path(for_user: @user.id),
-          { icon: :inbox, id: "user_nav_inbox_link",
-            data: { placement: "bottom" } }
-        ) %>
-  </li>
-  <li>
-    <%= icon_link_to(
-          :app_your_interests.l, interests_path,
-          { icon: :interests, id: "user_nav_interests_link",
-            data: { placement: "bottom" } }
-        ) %>
-  </li>
-  <li>
-    <%= icon_link_to(
-          :app_preferences.l, edit_account_preferences_path,
-          { icon: :settings, id: "user_nav_preferences_link",
-            data: { placement: "bottom" } }
-        ) %>
-  </li>
-  <li id="user_drop_down" class="dropdown">
-    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-      <%= h(@user.login) %>
-      <span class="caret"></span>
-    </a>
-    <ul class="dropdown-menu" role="menu">
-      <li><%= link_to(:app_your_observations.l,
-                      observations_path(by_user: @user.id),
-                      { class: "" } ) %></li>
-      <li><%= link_to(:app_your_projects.l, projects_path(member: @user.id),
-                      { class: "", id: "user_drop_projects_link" }) %></li>
-      <li><%= link_to(:app_your_lists.l, species_lists_path(by_user: @user.id),
-                      { class: "",
-                        id: "user_drop_species_lists_link" } ) %></li>
-      <li><%= link_to(:app_your_interests.l, interests_path,
-                      { class: "", id: "user_drop_interests_link" }) %></li>
-      <li><%= link_to(:app_your_summary.l, user_path(@user.id),
-                      { class: "", id: "user_drop_profile_link" }) %></li>
-      <li><%= link_to(:app_preferences.l, edit_account_preferences_path,
-                      { class: "", id: "user_drop_preferences_link" }) %></li>
-      <li class="divider"></li>
-      <li><%= button_to(
-                :app_logout.l,
-                account_logout_path,
-                { class: "btn btn-link", id: "user_drop_logout_link" }
-              ) %>
+    <li><%= link_to(:app_your_projects.l, projects_path(member: @user.id),
+                    { class: "", id: "user_drop_projects_link" }) %></li>
+    <li><%= link_to(:app_your_lists.l, species_lists_path(by_user: @user.id),
+                    { class: "",
+                      id: "user_drop_species_lists_link" } ) %></li>
+    <li><%= link_to(:app_your_interests.l, interests_path,
+                    { class: "", id: "user_drop_interests_link" }) %></li>
+    <li><%= link_to(:app_your_summary.l, user_path(@user.id),
+                    { class: "", id: "user_drop_profile_link" }) %></li>
+    <li><%= link_to(:app_preferences.l, edit_account_preferences_path,
+                    { class: "", id: "user_drop_preferences_link" }) %></li>
+    <li class="divider"></li>
+    <% if @user.admin %>
       <li>
-    </ul>
-  </li>
-  <li>
-    <%= icon_link_to(
-          :app_logout.l, account_logout_path,
-          { icon: :log_out, id: "user_nav_logout_link", button_to: true,
-            class: "btn btn-link navbar-btn", data: { placement: "bottom" } }
-        ) %>
-  </li>
-</ul>
+        <%= link_to(
+            admin_title, admin_mode_path(**admin_mode_args),
+            { id: "user_nav_admin_mode_link", button_to: true }
+          ) %>
+      </li>
+    <% end %>
+    <li><%= button_to(
+              :app_logout.l,
+              account_logout_path,
+              { class: "btn btn-link", id: "user_drop_logout_link" }
+            ) %>
+    <li>
+  </ul>
+</li>
