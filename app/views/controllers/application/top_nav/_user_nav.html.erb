@@ -1,48 +1,32 @@
 <%
-admin_title = in_admin_mode? ? :app_turn_admin_off.t : :app_turn_admin_on.t
-admin_mode_args = in_admin_mode? ? { turn_off: true } : { turn_on: true }
+logged_in_links = context_nav_links(user_logged_in_tabs(@user))
+log_out_links = context_nav_links(user_log_out_tabs)
 %>
 
-<li id="user_drop_down" class="dropdown d-inline-block ml-4">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    <%= h(@user.login) %>
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li><%= link_to(:app_your_observations.l,
-                    observations_path(by_user: @user.id),
-                    { class: "" } ) %></li>
-    <li>
-      <%= link_to(
-            :app_comments_for_you.l, comments_path(for_user: @user.id),
-            { icon: :inbox, id: "user_drop_inbox_link" }
-          ) %>
-    </li>
-    <li><%= link_to(:app_your_projects.l, projects_path(member: @user.id),
-                    { class: "", id: "user_drop_projects_link" }) %></li>
-    <li><%= link_to(:app_your_lists.l, species_lists_path(by_user: @user.id),
-                    { class: "",
-                      id: "user_drop_species_lists_link" } ) %></li>
-    <li><%= link_to(:app_your_interests.l, interests_path,
-                    { class: "", id: "user_drop_interests_link" }) %></li>
-    <li><%= link_to(:app_your_summary.l, user_path(@user.id),
-                    { class: "", id: "user_drop_profile_link" }) %></li>
-    <li><%= link_to(:app_preferences.l, edit_account_preferences_path,
-                    { class: "", id: "user_drop_preferences_link" }) %></li>
-    <li class="divider"></li>
-    <% if @user.admin %>
-      <li>
-        <%= link_to(
-            admin_title, admin_mode_path(**admin_mode_args),
-            { id: "user_nav_admin_mode_link", button_to: true }
-          ) %>
-      </li>
-    <% end %>
-    <li><%= button_to(
-              :app_logout.l,
-              account_logout_path,
-              { class: "btn btn-link", id: "user_drop_logout_link" }
-            ) %>
-    <li>
-  </ul>
-</li>
+<%=
+tag.li(class: "dropdown d-inline-block ml-4") do
+  [
+    tag.a(
+      class: class_names(%w[dropdown-toggle]),
+      id: "user_nav_toggle", role: "button",
+      data: { toggle: "dropdown" },
+      aria: { haspopup: "true", expanded: "false" }
+    ) do
+      concat(tag.span(@user.login))
+      concat(tag.span(class: "caret ml-2"))
+    end,
+    tag.ul(
+      id: "user_drop_down", class: "dropdown-menu",
+      aria: { labelledby: "user_nav_toggle" }
+    ) do
+      logged_in_links.compact.each do |link|
+        concat(tag.li(link))
+      end
+      concat(tag.li("", class: "divider"))
+      log_out_links.compact.each do |link|
+        concat(tag.li(link))
+      end
+    end
+  ].safe_join
+end
+%>

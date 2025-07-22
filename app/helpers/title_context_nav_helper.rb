@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-#  Helpers for the `InternalLink`, which are `link attribute arrays`
-#  for building nav links (in the context of a page)
+#  Helpers for the top nav bar's context menu, formerly "tabset links".
+#  Views should define the menu's content with an array of InternalLink.tabs
 
 #  add_context_nav(links)      # add content_for(:context_nav)
 #  context_nav_links(links)    # convert links -> link_to's / button_to's
@@ -9,6 +9,7 @@
 #
 module TitleContextNavHelper
   # Short-hand to render shared context_nav partial for a given set of links.
+  # Called in the view, defines `:context_nav` which is rendered in layout.
   def add_context_nav(links)
     return unless links
 
@@ -97,7 +98,7 @@ module TitleContextNavHelper
           class: class_names(%w[dropdown-toggle]),
           id: "context_nav_toggle", role: "button",
           data: { toggle: "dropdown" },
-          aria: { haspopup: "true", expanded: "true" }
+          aria: { haspopup: "true", expanded: "false" }
         ) do
           concat(tag.span(title, data: { dropdown_current_target: "title" }))
           concat(tag.span(class: "caret ml-2"))

@@ -6,6 +6,7 @@
 module TitleSorterFilterHelper
   # Conditionally adds a group of sorting links, for indexes, if relevant
   # These link back to the same index action, changing only the `by` param.
+  # Called in the view, defines `:sorter` content which is rendered in layout.
   #
   def add_sorter(query, sorts, link_all: false)
     return unless sorts && (query&.num_results&.> 1)
@@ -96,7 +97,7 @@ module TitleSorterFilterHelper
   # with the currently selected option on load
   def sort_nav_dropdown(title: "", id: "", links: [])
     toggle_classes = class_names(
-      %w[btn btn-sm btn-outline-default dropdown-toggle]
+      %w[btn btn-sm btn-outline-default dropdown-toggle font-weight-normal]
     )
     tag.div(class: "dropdown d-inline-block",
             data: { controller: "dropdown-current" }) do
@@ -105,7 +106,7 @@ module TitleSorterFilterHelper
           class: toggle_classes,
           id: "sort_nav_toggle", type: "button",
           data: { toggle: "dropdown" },
-          aria: { haspopup: "true", expanded: "true" }
+          aria: { haspopup: "true", expanded: "false" }
         ) do
           concat(tag.span(title, data: { dropdown_current_target: "title" }))
           concat(tag.span(class: "caret ml-2"))

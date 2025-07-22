@@ -54,6 +54,12 @@ module Tabs
                               html_options: { button: :destroy }).tab
     end
 
+    def projects_for_user_tab(user)
+      InternalLink.new(
+        :app_your_projects.l, projects_path(member: user.id)
+      ).tab
+    end
+
     # Add some alternate sorting criteria.
     def projects_index_sorts
       [
