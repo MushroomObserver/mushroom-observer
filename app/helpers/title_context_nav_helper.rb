@@ -90,10 +90,10 @@ module TitleContextNavHelper
   # The "dropdown-current" Stimulus controller should update the dropdown title
   # with the currently selected option on load, if show_current == true
   def context_nav_dropdown(title: "", id: "", links: [], show_current: false)
-    args = { class: "dropdown" }
+    args = { class: "dropdown d-inline-block" }
     args[:data] = { controller: "dropdown-current" } if show_current
 
-    tag.div(class: "dropdown d-inline-block") do
+    tag.div(**args) do
       [
         tag.button(
           class: "btn btn-default dropdown-toggle",
@@ -102,7 +102,7 @@ module TitleContextNavHelper
           aria: { haspopup: "true", expanded: "true" }
         ) do
           concat(tag.span(title, data: { dropdown_current_target: "title" }))
-          concat(tag.span(class: "caret"))
+          concat(tag.span(class: "caret ml-2"))
         end,
         tag.ul(
           id:, class: "dropdown-menu",

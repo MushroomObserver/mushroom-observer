@@ -29,14 +29,18 @@ module TitleSorterFilterHelper
   #
   def create_sorting_links(query, sorts, link_all)
     sort_links = assemble_sort_links(query, sorts, link_all)
-
-    sort_links.map do |title, path, identifier, active|
+    sort_links.map do |title, path_args, identifier, active|
       classes = [identifier] # "btn", "btn-default"
       classes << "active" if active
-      args = { class: class_names(classes) }
+      link_by = path_args[:by]
+      # Don't need to swap current dropdown title on click, so no action
+      args = {
+        class: class_names(classes),
+        data: { dropdown_current_target: "link", by: link_by }
+      }
       args = args.merge(disabled: true) if active
 
-      link_with_query(title, path, **args)
+      link_with_query(title, path_args, **args)
     end
   end
 
@@ -64,6 +68,7 @@ module TitleSorterFilterHelper
 
   # The final product of `assemble_sort_links`: an array of attributes
   # [text, action, identifier, active]
+  # label arg is a translation string
   def sort_link(label, by, this_by, link_all)
     model = controller.controller_model_name
     ctlr = controller.controller_name
@@ -86,7 +91,8 @@ module TitleSorterFilterHelper
     model.underscore.pluralize
   end
 
-  # type_filters, currently only used in RssLogsController#index
+  # Different from sorting links: type_filters
+  # currently only used in RssLogsController#index
   def add_type_filters
     content_for(:type_filters) do
       render(partial: "application/content/type_filters")
