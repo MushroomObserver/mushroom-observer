@@ -22,18 +22,17 @@ export default class extends Controller {
 
     const queryString = window.location.search, // guaranteed to be a string
       urlParams = new URLSearchParams(queryString),
-      currentBy = urlParams.get('by'),
+      currentBy = urlParams.get('by') || "",
       // Get the translated label of the current `by` param
       currentByItems = this.linkTargets.filter(
         item => item.dataset.by === currentBy
       ),
-      currentByText = currentByItems[0].innerText,
       defaultByText = this.linkTargets[0].innerText
 
     if (currentBy == "") {
       return defaultByText
     } else {
-      return currentByText
+      return currentByItems[0].innerText
     }
   }
 }
