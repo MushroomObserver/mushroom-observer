@@ -35,7 +35,7 @@ add_pagination(@pagination_data)
   <% end %>
 <% end %>
 
-<%= pagination_nav do %>
+<%= paginated_results do %>
   <div class="list-group">
     <%= render(partial: "field_slips/object", collection: @objects) %>
   </div>

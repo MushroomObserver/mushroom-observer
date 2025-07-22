@@ -27,7 +27,7 @@ flash_error(@error) if @error && !@interests.any?(&:target)
   </div>
 <% end %>
 
-<%= pagination_nav do %>
+<%= paginated_results do %>
   <% if @interests.any?(&:target) %>
     <table class="table table-striped">
       <% @interests.select(&:target).each do |item|

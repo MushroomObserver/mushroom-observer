@@ -13,7 +13,7 @@ add_pagination(@pagination_data)
 </div>
 <!--.row-->
 
-<%= pagination_nav do %>
+<%= paginated_results do %>
   <%= matrix_table(partial: "contributors/contributor",
                    objects: @objects, as: :user) %>
 <% end %>

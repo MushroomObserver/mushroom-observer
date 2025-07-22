@@ -8,7 +8,7 @@ module PaginationNavHelper
     content_for(:letters) do
       letter_pagination_nav(pagination_data, args)
     end
-    content_for(:pages) do
+    content_for(:numbers) do
       number_pagination_nav(pagination_data, args)
     end
   end
@@ -21,21 +21,18 @@ module PaginationNavHelper
   #     <% end %>
   #   <% end %>
   # should call content_for the page and letter nav so it can be put anywhere
-  def pagination_nav(args = {}, &block)
+  def paginated_results(args = {}, &block)
     html_id = args[:html_id] ||= "results"
     body = capture(&block).to_s
+
     tag.div(id: html_id, data: { q: get_query_param }) do
-      capture do
-        [
-          yield(:letters),
-          safe_br,
-          yield(:numbers),
-          body,
-          yield(:numbers),
-          safe_br,
-          yield(:letters)
-        ].safe_join
-      end
+      [
+        content_for(:letters),
+        content_for(:numbers),
+        body,
+        content_for(:numbers),
+        content_for(:letters)
+      ].safe_join
     end
   end
 
@@ -66,7 +63,7 @@ module PaginationNavHelper
         tag.li(tag.span(letter), class: "disabled")
       end
     end.safe_join(" ")
-    tag.div(str, class: "pagination pagination-sm")
+    tag.ul(str, class: "pagination pagination-sm")
   end
   # rubocop:enable Metrics/AbcSize
 
@@ -136,7 +133,9 @@ module PaginationNavHelper
     result << pagination_link(num, num, arg, args) if to < num
     result << pagination_link(nstr, this + 1, arg, args) if this < num
 
-    result = tag.ul(result.safe_join(" "), class: "pagination pagination-sm")
+    result = tag.ul(
+      result.safe_join(" "), class: "pagination pagination-sm"
+    )
   end
   # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity
   # rubocop:enable Metrics/PerceivedComplexity

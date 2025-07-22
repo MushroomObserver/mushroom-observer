@@ -8,7 +8,7 @@ add_pagination(@pagination_data)
 flash_error(@error) if @error && @objects.empty?
 %>
 
-<%= pagination_nav do %>
+<%= paginated_results do %>
   <% if @objects.any? %>
     <div class="list-group">
       <% @objects.each do |desc| %>

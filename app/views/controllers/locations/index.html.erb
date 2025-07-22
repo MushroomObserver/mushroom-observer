@@ -30,7 +30,7 @@ flash_error(@error) if @error && @known_pages.empty? && @undef_pages.empty?
         <%= :list_place_names_known.t %>
         <%= :list_place_names_known_order.t if @default_orders %>
       </div>
-      <%= pagination_nav do %>
+      <%= paginated_results do %>
         <div class="list-group">
           <% @known_data.each do |location| %>
             <div class="list-group-item">

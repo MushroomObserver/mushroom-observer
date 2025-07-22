@@ -8,7 +8,7 @@ add_pagination(@pagination_data)
 flash_error(@error) if @error && @objects.empty?
 %>
 
-<%= pagination_nav do %>
+<%= paginated_results do %>
   <div class="list-group">
     <%= render(partial: "articles/object", collection: @objects) %>
   </div>

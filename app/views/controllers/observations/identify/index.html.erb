@@ -11,7 +11,7 @@ flash_error(@error) if @error && @objects.empty?
   <%# render(partial: "observations/identify/form_identify_filter") %>
 </div>
 
-<%= pagination_nav do %>
+<%= paginated_results do %>
   <%= matrix_table(objects: @objects, identify: true, cached: true) %>
 <% end %>
 
