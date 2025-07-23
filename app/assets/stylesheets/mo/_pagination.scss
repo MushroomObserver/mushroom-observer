@@ -33,3 +33,9 @@
 .pagination > .disabled > a:focus {
   cursor: default; // $cursor-disabled
 }
+
+.pagination_numbers {
+  a {
+    color: $text-color;
+  }
+}

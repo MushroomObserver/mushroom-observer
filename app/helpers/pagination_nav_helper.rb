@@ -91,27 +91,23 @@ module PaginationNavHelper
   #
   # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity
   # rubocop:disable Metrics/PerceivedComplexity
-  def number_pagination_nav(pages, args = {})
-    result = safe_empty
-    if pages && pages.num_pages > 1
-      params = args[:params] ||= {}
-      if pages.letter_arg && pages.letter
-        params[pages.letter_arg] = pages.letter
-      end
+  def number_pagination_nav_old(pages, args = {})
+    return "" unless pages && pages.num_pages > 1
 
-      num = pages.num_pages
-      arg = pages.number_arg
-      this = pages.number
-      this = 1 if this < 1
-      this = num if this > num
-      size = args[:window_size] || 5
-      from = this - size
-      to = this + size
+    params = args[:params] ||= {}
+    params[pages.letter_arg] = pages.letter if pages.letter_arg && pages.letter
 
-      list_args = { num:, arg:, args:, this:, size:, from:, to: }
-      result = number_pagination_nav_list(list_args)
-    end
-    result
+    num = pages.num_pages
+    arg = pages.number_arg
+    this = pages.number
+    this = 1 if this < 1
+    this = num if this > num
+    size = args[:window_size] || 5
+    from = this - size
+    to = this + size
+
+    list_args = { num:, arg:, args:, this:, size:, from:, to: }
+    number_pagination_nav_list(list_args)
   end
 
   def number_pagination_nav_list(list_args)
@@ -137,54 +133,108 @@ module PaginationNavHelper
       result.safe_join(" "), class: "pagination pagination-sm"
     )
   end
+
+  def number_pagination_nav(pages, args = {})
+    return "" unless pages && pages.num_pages > 1
+
+    params = args[:params] ||= {}
+    params[pages.letter_arg] = pages.letter if pages.letter_arg && pages.letter
+    arg = pages.number_arg
+
+    this_page, prev_page, next_page, max_page = number_pagination_pages(pages)
+    max_url = pagination_link_url(max_page, arg, args)
+
+    tag.nav(class: "pagination_numbers navbar") do
+      tag.div(class: "container-fluid") do
+        [
+          tag.ul(class: "nav navbar-nav") do
+            [
+              tag.li { prev_page_link(prev_page, arg, args) },
+              tag.li { tag.p(:PAGE.l, class: "navbar-text mx-0") }
+            ].safe_join
+          end,
+          page_input(this_page, max_page, arg, args),
+          tag.ul(class: "nav navbar-nav navbar-left") do
+            [
+              tag.li { tag.p(:of.l, class: "navbar-text ml-0 mr-2") },
+              tag.li do
+                tag.p(link_to(max_page, max_url), class: "navbar-text mx-0")
+              end,
+              tag.li { next_page_link(next_page, max_page, arg, args) }
+            ].safe_join
+          end
+        ].safe_join
+      end
+      # end
+    end
+  end
   # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity
   # rubocop:enable Metrics/PerceivedComplexity
 
-  def previous_page_link(label, page, arg, args)
-    url = pagination_link_url(page, arg, args)
+  def number_pagination_pages(pages)
+    max_page = pages.num_pages
+    this_page = pages.number
+    this_page = 1 if this_page < 1
+    this_page = max_page if this_page > max_page
+    prev_page = this_page - 1
+    next_page = this_page + 1
+    [this_page, prev_page, next_page, max_page]
+  end
+
+  def prev_page_link(prev_page, arg, args)
+    disabled = (prev_page < 1)
+
+    url = pagination_link_url(prev_page, arg, args)
     icon_link_to(
-      label, url,
-      id: "previous_page_link", class: "mr-3",
-      icon: :previous, show_text: false, icon_class: "text-primary"
+      :PREV.t, url,
+      id: "previous_page_link",
+      class: "navbar-link navbar-left px-0 mr-3",
+      disabled:, icon: :previous, show_text: false, icon_class: ""
     )
   end
 
-  def next_page_link(label, page, arg, args)
-    url = pagination_link_url(page, arg, args)
+  def prev_page_link_disabled
+    link_icon(:previous, title: :PREV.t)
+  end
+
+  def next_page_link(next_page, max, arg, args)
+    disabled = (next_page > max)
+
+    url = pagination_link_url(next_page, arg, args)
     icon_link_to(
-      label, url,
-      id: "next_page_link", class: "mr-3",
-      icon: :next, show_text: false, icon_class: "text-primary"
+      :NEXT.t, url,
+      id: "next_page_link",
+      class: "navbar-link navbar-left px-0 ml-3",
+      disabled:, icon: :next, show_text: false, icon_class: ""
     )
   end
 
-  # rubocop:disable Metrics/AbcSize
-  def page_input(page, to, arg, args)
-    url = pagination_link_url(0, arg, args)
-    to_url = pagination_link_url(to, arg, args)
+  # zero_url has to be swapped out by JS on submit
+  def page_input(this_page, max_page, arg, args)
+    zero_url = pagination_link_url(0, arg, args)
 
-    tag.div(class: "navbar-form",
-            data: { controller: "page-link", page_link_max_value: to }) do
+    form_with(
+      url: zero_url, class: "navbar-form navbar-left px-0",
+      data: { controller: "page-input", page_input_max_value: max_page }
+    ) do
       [
-        tag.p(:PAGE.l),
-        tag.div(class: "form-group has-feedback has-search mx-3") do
+        tag.div(class: "input-group page-input mx-3") do
           [
-            tag.input(type: :text, value: page, class: "form-control",
-                      data: { page_link_target: "input" }),
-            icon_link_to(
-              :PAGE.l, url,
-              id: "goto_page_link",
-              icon: :goto, show_text: false, icon_class: "text-primary",
-              data: { action: "page-link#goto" }
-            )
+            tag.input(
+              type: :text, value: this_page, class: "form-control text-right",
+              size: max_page.digits.count,
+              data: { page_input_target: "input" }
+            ),
+            tag.span(class: "input-group-btn") do
+              tag.button(type: :submit, class: "btn btn-outline-default") do
+                link_icon(:goto, text: :PAGE.l)
+              end
+            end
           ].safe_join
-        end,
-        tag.p("#{:of.l} "),
-        tag.p(link_to(to, to_url))
+        end
       ].safe_join
     end
   end
-  # rubocop:enable Metrics/AbcSize
 
   # Render a single pagination link for number_pagination_data above.
   def pagination_link(label, page, arg, args)

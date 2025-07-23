@@ -209,7 +209,7 @@ module LinkHelper
     search: "search",
     previous: "triangle-left",
     next: "triangle-right",
-    goto: "step-forward"
+    goto: "option-vertical"
   }.freeze
 
   # button to destroy object

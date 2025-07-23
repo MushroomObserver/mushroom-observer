@@ -14,6 +14,17 @@
   padding-left: 30px;
 }
 
+.page-input .form-control-feedback {
+  right: 0;
+  left: initial;
+  background-color: transparent;
+}
+
+.page-input .form-control {
+  padding-right: 12px;
+  padding-left: 12px;
+}
+
 .toggle {
   @extend .close;
   font-size: inherit;
