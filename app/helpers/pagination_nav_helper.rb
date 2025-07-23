@@ -140,8 +140,59 @@ module PaginationNavHelper
   # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity
   # rubocop:enable Metrics/PerceivedComplexity
 
+  def previous_page_link(label, page, arg, args)
+    url = pagination_link_url(page, arg, args)
+    icon_link_to(
+      label, url,
+      id: "previous_page_link", class: "mr-3",
+      icon: :previous, show_text: false, icon_class: "text-primary"
+    )
+  end
+
+  def next_page_link(label, page, arg, args)
+    url = pagination_link_url(page, arg, args)
+    icon_link_to(
+      label, url,
+      id: "next_page_link", class: "mr-3",
+      icon: :next, show_text: false, icon_class: "text-primary"
+    )
+  end
+
+  # rubocop:disable Metrics/AbcSize
+  def page_input(page, to, arg, args)
+    url = pagination_link_url(0, arg, args)
+    to_url = pagination_link_url(to, arg, args)
+
+    tag.div(class: "navbar-form",
+            data: { controller: "page-link", page_link_max_value: to }) do
+      [
+        tag.p(:PAGE.l),
+        tag.div(class: "form-group has-feedback has-search mx-3") do
+          [
+            tag.input(type: :text, value: page, class: "form-control",
+                      data: { page_link_target: "input" }),
+            icon_link_to(
+              :PAGE.l, url,
+              id: "goto_page_link",
+              icon: :goto, show_text: false, icon_class: "text-primary",
+              data: { action: "page-link#goto" }
+            )
+          ].safe_join
+        end,
+        tag.p("#{:of.l} "),
+        tag.p(link_to(to, to_url))
+      ].safe_join
+    end
+  end
+  # rubocop:enable Metrics/AbcSize
+
   # Render a single pagination link for number_pagination_data above.
   def pagination_link(label, page, arg, args)
+    url = pagination_link_url(page, arg, args)
+    tag.li(link_to(label, url))
+  end
+
+  def pagination_link_url(page, arg, args)
     params = args[:params] || {}
     params[arg] = page
     url = reload_with_args(params)
@@ -149,6 +200,6 @@ module PaginationNavHelper
       url.sub!(/#.*/, "")
       url += "##{args[:anchor]}"
     end
-    tag.li(link_to(label, url))
+    url
   end
 end

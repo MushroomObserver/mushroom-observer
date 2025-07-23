@@ -30,28 +30,28 @@ identify_page = controller.controller_name == "identify"
               id: "pattern_search_form") do |f| %>
 
   <%= fields_for(:search) do |f_s| %>
-    <div class="form-group has-feedback has-search">
-      <%= content_tag(:span, "", class: "glyphicon glyphicon-search " \
-                                        "form-control-feedback") %>
+    <%= tag.div(class: "form-group has-feedback has-search") do %>
+      <%= tag.span("", class: "glyphicon glyphicon-search " \
+                              "form-control-feedback") %>
       <%= f_s.text_field(:pattern, { value: session[:pattern],
                                      class: "form-control",
                                      placeholder: :app_find.t }) %>
-    </div><!--.form-group-->
+    <% end %><!--.form-group-->
 
-    <div class="form-group text-nowrap">
+    <%= tag.div(class: "form-group text-nowrap") do %>
       <%= f_s.select(
             :type,
             options_for_select(options, session[:search_type] || :observation),
             { }, { class: "form-control w-auto" }
           ) %>
-    </div><!--.form-group-->
+    <% end %><!--.form-group-->
   <% end %>
 
   <%= hidden_field_tag(:needs_naming, true) if identify_page %>
 
-  <div class="form-group text-nowrap">
+  <%= tag.div(class: "form-group text-nowrap") do %>
     <%= submit_button(form: f, button: :app_search.l, class: "mr-2") %>
-  </div><!--.form-group-->
+  <% end %><!--.form-group-->
 
 <% end %>
 

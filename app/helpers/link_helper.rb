@@ -83,7 +83,7 @@ module LinkHelper
 
     # method = opts[:button] ? :button_to : :link_to
     active_icon = opts[:active_icon]
-    active_content = options[:active_content]
+    active_content = opts[:active_content]
     stateful = active_icon && active_content
     icon_class = class_names(opts[:icon_class], "px-2")
     icon_active_class = class_names(icon_class, "active-icon")
@@ -206,7 +206,10 @@ module LinkHelper
     mobile: "phone",
     project: "th-list",
     download: "download-alt",
-    search: "search"
+    search: "search",
+    previous: "triangle-left",
+    next: "triangle-right",
+    goto: "step-forward"
   }.freeze
 
   # button to destroy object
