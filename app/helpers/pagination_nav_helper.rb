@@ -211,10 +211,10 @@ module PaginationNavHelper
 
   # zero_url has to be swapped out by JS on submit
   def page_input(this_page, max_page, arg, args)
-    zero_url = pagination_link_url(0, arg, args)
+    this_url = pagination_link_url(this_page, arg, args)
 
     form_with(
-      url: zero_url, class: "navbar-form navbar-left px-0",
+      url: this_url, class: "navbar-form navbar-left px-0 page_input",
       data: { controller: "page-input", page_input_max_value: max_page }
     ) do
       [
@@ -223,7 +223,8 @@ module PaginationNavHelper
             tag.input(
               type: :text, value: this_page, class: "form-control text-right",
               size: max_page.digits.count,
-              data: { page_input_target: "input" }
+              data: { page_input_target: "input",
+                      action: "page-input#updateForm" }
             ),
             tag.span(class: "input-group-btn") do
               tag.button(type: :submit, class: "btn btn-outline-default") do
