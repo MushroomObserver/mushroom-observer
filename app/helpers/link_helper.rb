@@ -81,7 +81,7 @@ module LinkHelper
     icon_type = opts[:icon]
     return link_to(link, opts) { content } if icon_type.blank?
 
-    # method = opts[:button] ? :button_to : :link_to
+    opts[:role] = "button" if opts[:button_to]
     active_icon = opts[:active_icon]
     active_content = opts[:active_content]
     stateful = active_icon && active_content
@@ -92,23 +92,23 @@ module LinkHelper
     label_active_class = class_names(label_class, "active-label")
 
     link_opts = {
-      role: "button", title: content, # title is what shows up in tooltip
+      title: content, # title is what shows up in tooltip
       class: class_names("icon-link", opts[:class]),
       data: { toggle: "tooltip", title: content, # needed for swapping only
               active_title: opts[:active_content] }
     }.deep_merge(opts.except(:class, :icon, :icon_class, :show_text,
                              :active_icon, :active_content, :button_to))
 
-    html = capture do
+    inner_html = capture do
       concat(link_icon(icon_type, class: icon_class))
       concat(link_icon(active_icon, class: icon_active_class)) if stateful
       concat(tag.span(content, class: label_class))
       concat(tag.span(active_content, class: label_active_class)) if stateful
     end
     if opts[:button_to]
-      button_to(html, link_path, **link_opts)
+      button_to(inner_html, link_path, **link_opts)
     else
-      link_to(html, link_path, **link_opts)
+      link_to(inner_html, link_path, **link_opts)
     end
   end
 
