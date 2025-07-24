@@ -46,8 +46,22 @@
     }
   }
 
-  .dropdown-menu li button.btn-link {
-    padding: 3px 20px;
+  .dropdown-menu {
+    li {
+      button.btn-link {
+        padding: 3px 20px;
+      }
+
+      // extend styling of links to "button_to" elements
+      form.button_to {
+        display: block;
+        padding: 3px 20px;
+        clear: both;
+        font-weight: 400;
+        line-height: 1.428571429;
+        white-space: nowrap;
+      }
+    }
   }
 
   // The button_to form, not the button, needs to display: block
