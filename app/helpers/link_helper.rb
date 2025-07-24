@@ -11,7 +11,7 @@
 #  heads up about button_to input vs button
 #  https://blog.saeloun.com/2021/08/24/rails-7-button-to-rendering
 
-module LinkHelper
+module LinkHelper # rubocop:disable Metrics/ModuleLength
   # Call `link_to` with query params added.
   # Should now take exactly the same args as `link_to`.
   # You can pass a hash to `path`, but not separate args. Can take a block.
