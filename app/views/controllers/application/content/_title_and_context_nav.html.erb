@@ -32,8 +32,23 @@ filters = content_for?(:filters) || content_for?(:filter_help)
     <!-- e.g. "Observation 5"; Can be multiple lines, e.g., with Observer ID -->
     <% if content_for?(:background_image) %>
       <%= render(partial: "application/content/project_title") %>
-    <% else %>
-      <%= tag.h1(yield(:title), class: "h3", id: "title") -%>
+    <% end %>
+    <%= tag.div(class: "d-flex justify-content-between") do %>
+      <%= tag.div(class: "px-3") do %>
+        <% if filters %>
+          <%= yield(:filters) -%>
+          <%= yield(:filter_help) -%>
+        <% end %>
+      <% end %>
+      <%= tag.div do %>
+        <%= yield(:letters) %>
+        <%= yield(:numbers) %>
+      <% end %>
+    <% end %>
+    <% if !content_for?(:background_image) %>
+      <% unless action_name == "index" %>
+        <%= tag.h1(yield(:title), class: "h3", id: "title") -%>
+      <% end %>
       <% if content_for?(:location) %>
         <%= tag.div(yield(:location), class: "image-title-text") %>
       <% end %>

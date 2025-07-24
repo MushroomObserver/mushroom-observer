@@ -53,7 +53,7 @@ module TitleHelper
             else
               ""
             end
-    add_page_title(title) if map
+    add_page_title(title)
     add_query_filters(query)
   end
 
