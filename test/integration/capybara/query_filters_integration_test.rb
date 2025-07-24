@@ -16,7 +16,7 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
     login
     fill_in("search_pattern", with: obs.name.text_name)
     page.select("Observations", from: :search_type)
-    click_button("Search")
+    within("#pattern_search_form") { click_button("Search") }
     click_link("Show Locations")
     click_link("Map Locations")
 
@@ -39,7 +39,7 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
     # search for Observations with same name as obs
     fill_in("search_pattern", with: obs.name.text_name)
     page.select("Observations", from: :search_type)
-    click_button("Search")
+    within("#pattern_search_form") { click_button("Search") }
 
     assert_match(:OBSERVATIONS.l, page.title, "Wrong page")
     assert_selector("#filters", text: obs.name.text_name)
@@ -85,7 +85,7 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
     # Repeat the search
     fill_in("search_pattern", with: obs.name.text_name)
     page.select("Observations", from: :search_type)
-    click_button("Search")
+    within("#pattern_search_form") { click_button("Search") }
 
     # page.find("#title_bar").assert_no_text(:filtered.t)
     page.find("#filters").assert_no_text(:query_has_images.l)
@@ -129,7 +129,7 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
     fill_in("search_pattern", with: obs.name.text_name)
     page.select("Observations", from: :search_type)
 
-    click_button("Search")
+    within("#pattern_search_form") { click_button("Search") }
     # page.find("#title_bar").assert_text(:filtered.t)
     page.find("#filters").assert_text(:query_has_specimen.l)
 

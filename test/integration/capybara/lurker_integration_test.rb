@@ -178,13 +178,13 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     # Search for a name.  (Only one.)
     fill_in("search_pattern", with: "Coprinus comatus")
     select("Names", from: "search_type")
-    click_button("Search")
+    within("#pattern_search_form") { click_button("Search") }
     assert_match(names(:coprinus_comatus).search_name,
                  page.title, "Wrong page")
 
     # Search for observations of that name.  (Only one.)
     select("Observations", from: "search_type")
-    click_button("Search")
+    within("#pattern_search_form") { click_button("Search") }
     assert_match(/#{observations(:coprinus_comatus_obs).id}/,
                  page.title, "Wrong page")
 
@@ -192,7 +192,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     # 2021-09-12 JDC
     # Search for images of the same thing.  (Still only one.)
     # select("Images", from: "search_type")
-    # click_button("Search")
+    # within("#pattern_search_form") { click_button("Search") }
     # assert_match(
     #   %r{^/image/show_image/#{images(:connected_coprinus_comatus_image).id}},
     #   current_fullpath
@@ -200,7 +200,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
 
     # There should be no locations of that name, though.
     select("Locations", from: "search_type")
-    click_button("Search")
+    within("#pattern_search_form") { click_button("Search") }
     assert_match("Locations", page.title, "Wrong page")
     assert_selector("div.alert", text: /no.*found/i)
     refute_selector("#results a[href]")
@@ -208,7 +208,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     # This should give us just about all the locations.
     fill_in("search_pattern", with: "california OR canada")
     select("Locations", from: "search_type")
-    click_button("Search")
+    within("#pattern_search_form") { click_button("Search") }
     # assert_selector("#results a[href]")
     labels = find_all("#results a[href] .location-postal").map(&:text)
     assert(labels.any? { |l| l.end_with?("Canada") },
@@ -227,7 +227,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     place = "Massachusetts, USA"
     fill_in("filter_term", with: place)
     select("Region", from: "filter_type")
-    click_button("Search")
+    within("#pattern_search_form") { click_button("Search") }
     assert_match(/#{:obs_needing_id.t}/, page.title, "Wrong page")
     # Note that .rss-where now gets both postal and scientific addresses as a
     # single mashed up string, because they're shown/hidden by css.
@@ -243,7 +243,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     # Search for a name.  (More than one.)
     fill_in("search_pattern", with: "Fungi")
     select("Observations", from: "search_type")
-    click_button("Search")
+    within("#pattern_search_form") { click_button("Search") }
 
     obs = observations(:detailed_unknown_obs).id.to_s
     # assert_selector("a[href^='/#{obs}']")
