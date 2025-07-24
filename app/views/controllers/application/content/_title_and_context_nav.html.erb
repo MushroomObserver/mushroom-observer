@@ -31,7 +31,7 @@ filters = content_for?(:filters) || content_for?(:filter_help)
     <!-- Title or subtitle -->
     <!-- e.g. "Observation 5"; Can be multiple lines, e.g., with Observer ID -->
     <% if content_for?(:background_image) %>
-      <%= render(partial: "content/project_title") %>
+      <%= render(partial: "application/content/project_title") %>
     <% else %>
       <%= tag.h1(yield(:title), class: "h3", id: "title") -%>
       <% if content_for?(:location) %>
