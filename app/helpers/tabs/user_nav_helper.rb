@@ -32,14 +32,14 @@ module Tabs
 
       InternalLink.new(
         admin_title, admin_mode_path(**admin_mode_args),
-        html_options: { id: "user_nav_admin_mode_link", button_to: true }
+        html_options: { id: "user_nav_admin_mode_link", button: :post }
       ).tab
     end
 
     def logout_tab
       InternalLink.new(
         :app_logout.l, account_logout_path,
-        html_options: { id: "user_nav_logout_link", button_to: true }
+        html_options: { id: "user_nav_logout_link", button: :post }
       ).tab
     end
   end

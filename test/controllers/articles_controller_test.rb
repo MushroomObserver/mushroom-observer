@@ -85,7 +85,7 @@ class ArticlesControllerTest < FunctionalTestCase
               { class: "edit_article_link" }],
              [nil, article, { button: :destroy }]]
 
-    tabs = @controller.helpers.context_nav_dropdown(links)
+    tabs = @controller.helpers.context_nav_links(links)
 
     tab1 = @controller.helpers.link_to(
       :create_article_title.t, new_article_path, { class: "new_article_link" }

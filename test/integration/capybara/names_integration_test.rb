@@ -91,7 +91,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     visit("/")
     fill_in("search_pattern", with: near_miss_pattern)
     page.select("Names", from: :search_type)
-    click_button("Search")
+    within("#pattern_search_form") { click_button("Search") }
 
     assert_selector("#content div.alert-warning",
                     text: "Maybe you meant one of the following names?")
@@ -100,7 +100,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
 
     fill_in("search_pattern", with: corrected_pattern)
     page.select("Names", from: :search_type)
-    click_button("Search")
+    within("#pattern_search_form") { click_button("Search") }
 
     assert_no_selector("#content div.alert-warning")
     assert_selector("#title", text: :NAMES.l)
@@ -114,7 +114,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     visit("/")
     fill_in("search_pattern", with: old_provisional)
     page.select("Names", from: :search_type)
-    click_button("Search")
+    within("#pattern_search_form") { click_button("Search") }
 
     assert_no_selector("#content div.alert-warning")
     title = CGI.unescapeHTML(

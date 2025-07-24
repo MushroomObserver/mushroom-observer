@@ -183,7 +183,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     visit("/")
     fill_in("search_pattern", with: correctable_pattern)
     page.select("Observations", from: :search_type)
-    click_button("Search")
+    within("#pattern_search_form") { click_button("Search") }
 
     assert_selector("#flash_notices",
                     text: :runtime_no_matches.l(type: :observations.l))
@@ -199,7 +199,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
 
     fill_in("search_pattern", with: corrected_pattern)
     page.select("Observations", from: :search_type)
-    click_button("Search")
+    within("#pattern_search_form") { click_button("Search") }
 
     assert_no_selector("#content div.alert-warning")
     assert_selector("#title",

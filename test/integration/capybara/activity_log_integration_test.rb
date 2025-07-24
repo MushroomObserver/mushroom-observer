@@ -20,7 +20,7 @@ class ActivityLogIntegrationTest < CapybaraIntegrationTestCase
       assert(has_unchecked_field?("type_observation"))
     end
 
-    within("#header") do
+    within("#context_nav") do
       assert(has_link?(:rss_make_default.l))
     end
   end
