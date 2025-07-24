@@ -188,7 +188,7 @@ module PaginationNavHelper
     icon_link_to(
       :PREV.t, url,
       id: "previous_page_link",
-      class: "navbar-link navbar-left px-0 mr-3",
+      class: "navbar-link navbar-left px-0 mr-2",
       disabled:, icon: :previous, show_text: false, icon_class: ""
     )
   end
@@ -204,7 +204,7 @@ module PaginationNavHelper
     icon_link_to(
       :NEXT.t, url,
       id: "next_page_link",
-      class: "navbar-link navbar-left px-0 ml-3",
+      class: "navbar-link navbar-left px-0 ml-2",
       disabled:, icon: :next, show_text: false, icon_class: ""
     )
   end
@@ -214,20 +214,23 @@ module PaginationNavHelper
     this_url = pagination_link_url(this_page, arg, args)
 
     form_with(
-      url: this_url, class: "navbar-form navbar-left px-0 page_input",
+      url: this_url, method: :get, local: true,
+      class: "navbar-form navbar-left px-0 page_input",
       data: { controller: "page-input", page_input_max_value: max_page }
-    ) do
+    ) do |f|
       [
-        tag.div(class: "input-group page-input mx-3") do
+        tag.div(class: "input-group page-input mx-2") do
           [
-            tag.input(
+            f.text_field(
+              :page,
               type: :text, value: this_page, class: "form-control text-right",
               size: max_page.digits.count,
               data: { page_input_target: "input",
                       action: "page-input#updateForm" }
             ),
             tag.span(class: "input-group-btn") do
-              tag.button(type: :submit, class: "btn btn-outline-default") do
+              tag.button(type: :submit,
+                         class: "btn btn-outline-default px-2") do
                 link_icon(:goto, text: :PAGE.l)
               end
             end

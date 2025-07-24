@@ -16,14 +16,11 @@ export default class extends Controller {
     const pageInput = parseInt(this.inputTarget.value)
     if (pageInput == 0) { pageInput = 1 }
     if (pageInput > this.maxValue) { pageInput = this.maxValue }
-    const url = this.updateUrl(pageInput)
-    this.element.action = url
-  }
 
-  updateUrl() {
-    const currentUrl = new URL(this.element.action),
-      currentQueryString = currentUrl.search,
-      urlParams = new URLSearchParams(currentQueryString),
-      currentPage = urlParams.get("page")
+    const formUrl = new URL(this.element.action),
+      urlParams = formUrl.searchParams
+
+    urlParams.set("page", pageInput)
+    this.element.action = formUrl
   }
 }
