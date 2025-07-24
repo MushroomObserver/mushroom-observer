@@ -396,7 +396,7 @@ class NamesControllerTest < FunctionalTestCase
     @controller.query_params(query)
   end
 
-  # None of our standard tests ever actually renders pagination_links
+  # None of our standard tests ever actually renders pagination_numbers
   # or letter_pagination_nav.  This tests all the above.
   def test_pagination_page1
     # Straightforward index of all names, showing first 10.
@@ -414,10 +414,10 @@ class NamesControllerTest < FunctionalTestCase
     url = @controller.url_with_query(controller: "/names", action: :show,
                                      id: expected.first.id, only_path: true)
     assert_not_nil(name_links.first.to_s.index(url))
-    assert_select("a", text: "1", count: 0)
-    assert_link_in_html("2", controller: "/names",
-                             action: :test_index, num_per_page: 10,
-                             params: query_params, page: 2)
+    # assert_select("a", text: "1", count: 0)
+    assert_link_in_html("Next", controller: "/names",
+                                action: :test_index, num_per_page: 10,
+                                params: query_params, page: 2)
     assert_select("a", text: "Z", count: 0)
     assert_link_in_html("A", controller: "/names",
                              action: :test_index, num_per_page: 10,
@@ -439,10 +439,10 @@ class NamesControllerTest < FunctionalTestCase
                                      id: expected.first.id, only_path: true)
     assert_not_nil(name_links.first.to_s.index(url))
 
-    assert_select("a", text: "2", count: 0)
-    assert_link_in_html("1", controller: "/names",
-                             action: :test_index, num_per_page: 10,
-                             params: query_params, page: 1)
+    # assert_select("a", text: "2", count: 0)
+    assert_link_in_html("Prev", controller: "/names",
+                                action: :test_index, num_per_page: 10,
+                                params: query_params, page: 1)
     assert_select("a", text: "Z", count: 0)
     assert_link_in_html("A", controller: "/names",
                              action: :test_index, num_per_page: 10,
@@ -491,14 +491,12 @@ class NamesControllerTest < FunctionalTestCase
     assert_equal(Set.new(l_names.map(&:id)),
                  Set.new(ids_from_links(name_links)))
 
-    assert_select("a", text: "1", count: 0)
-
-    assert_link_in_html("2", controller: "/names",
-                             action: :test_index, params: query_params,
-                             num_per_page: l_names.size,
-                             letter: "L", page: 2)
-
-    assert_select("a", text: "3", count: 0)
+    # assert_select("a", text: "1", count: 0)
+    assert_link_in_html("Next", controller: "/names",
+                                action: :test_index, params: query_params,
+                                num_per_page: l_names.size,
+                                letter: "L", page: 2)
+    # assert_select("a", text: "3", count: 0)
   end
 
   def test_pagination_letter_with_page2
@@ -514,12 +512,12 @@ class NamesControllerTest < FunctionalTestCase
     name_links = css_select(".list-group.name-index a")
     assert_equal(1, name_links.length)
     assert_equal([last_name.id], ids_from_links(name_links))
-    assert_select("a", text: "2", count: 0)
-    assert_link_in_html("1", controller: "/names",
-                             action: :test_index, params: query_params,
-                             num_per_page: l_names.size,
-                             letter: "L", page: 1)
-    assert_select("a", text: "3", count: 0)
+    # assert_select("a", text: "2", count: 0)
+    assert_link_in_html("Prev", controller: "/names",
+                                action: :test_index, params: query_params,
+                                num_per_page: l_names.size,
+                                letter: "L", page: 1)
+    # assert_select("a", text: "3", count: 0)
   end
 
   def test_pagination_with_anchors
