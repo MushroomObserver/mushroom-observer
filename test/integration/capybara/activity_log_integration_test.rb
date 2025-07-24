@@ -12,8 +12,7 @@ class ActivityLogIntegrationTest < CapybaraIntegrationTestCase
       click_link("Glossary")
     end
 
-    title = page.find_by_id("title")
-    title.assert_text("Activity Log")
+    assert_match("Activity Log", page.title)
 
     within("#log_filter_form") do
       assert(has_checked_field?("type_glossary_term"))

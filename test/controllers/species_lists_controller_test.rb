@@ -230,7 +230,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login
     get(:index, params: { project: project.id })
 
-    assert_displayed_title(project.title)
+    assert_page_title(project.title)
     assert_match(project.species_lists.first.title, @response.body)
   end
 
@@ -241,7 +241,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     get(:index, params: { project: project.id })
 
     assert_response(:success)
-    assert_displayed_title(project.title)
+    assert_page_title(project.title)
     assert_flash_text(:runtime_no_matches.l(types: :species_lists))
   end
 

@@ -20,14 +20,12 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     name = names(:boletus_edulis)
     visit("/names/#{name.id}/map")
     click_link("Show Observations")
-    title = page.find_by_id("title")
-    title.assert_text(:OBSERVATIONS.l)
+    assert_match("Observations", page.title)
     filters = page.find_by_id("filters")
     filters.assert_text(name.text_name)
 
     click_link("Show Map")
-    title = page.find("#title")
-    title.assert_text("Map of Observations")
+    assert_match("Map of Observations", page.title)
     # filters = page.find_by_id("filters")
     # filters.assert_text(name.text_name)
   end
@@ -187,7 +185,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
 
     assert_selector("#flash_notices",
                     text: :runtime_no_matches.l(type: :observations.l))
-    assert_selector("#title", text: "Observations")
+    assert_match("Observations", page.title)
     assert_selector("#results", text: "")
     assert_selector(
       "#content a[href *= 'observations?pattern=Agaricus+campestris']",
