@@ -528,10 +528,10 @@ class NamesControllerTest < FunctionalTestCase
       num_per_page: 10,
       test_anchor: "blah"
     }.merge(query_params))
-    assert_link_in_html("2", controller: "/names",
-                             action: :test_index, num_per_page: 10,
-                             params: query_params, page: 2,
-                             test_anchor: "blah", anchor: "blah")
+    assert_link_in_html("Next", controller: "/names",
+                                action: :test_index, num_per_page: 10,
+                                params: query_params, page: 2,
+                                test_anchor: "blah", anchor: "blah")
     assert_link_in_html("A", controller: "/names",
                              action: :test_index, num_per_page: 10,
                              params: query_params, letter: "A",
