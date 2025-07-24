@@ -30,6 +30,12 @@ filters = content_for?(:filters) || content_for?(:filter_help)
 
     <!-- Title or subtitle -->
     <!-- e.g. "Observation 5"; Can be multiple lines, e.g., with Observer ID -->
+    <% if filters %>
+      <%= yield(:filters) -%>
+      <%= yield(:filter_help) -%>
+    <% end %>
+    <%= yield(:letters) %>
+    <%= yield(:numbers) %>
     <% if content_for?(:background_image) %>
       <%= render(partial: "content/project_title") %>
     <% else %>
@@ -40,11 +46,6 @@ filters = content_for?(:filters) || content_for?(:filter_help)
       <% if content_for?(:date_range) %>
         <%= tag.div(yield(:date_range), class: "image-title-text") %>
       <% end %>
-    <% end %>
-    <% if filters %>
-      <%= tag.hr(class: "my-2") %>
-      <%= yield(:filters) -%>
-      <%= yield(:filter_help) -%>
     <% end %>
     <%= yield(:owner_naming) %>
   <% end %>

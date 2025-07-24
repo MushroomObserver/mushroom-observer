@@ -27,8 +27,6 @@ module PaginationNavHelper
 
     tag.div(id: html_id, data: { q: get_query_param }) do
       [
-        content_for(:letters),
-        content_for(:numbers),
         body,
         content_for(:numbers),
         content_for(:letters)
