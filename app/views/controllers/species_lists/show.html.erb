@@ -50,7 +50,7 @@
 
 <%= project_species_list_buttons(@species_list, @query).safe_join %>
 
-<%= pagination_nav(@pagination_data) do %>
+<%= paginated_results do %>
   <div class="list-group">
 
     <% if @objects.any? %>
