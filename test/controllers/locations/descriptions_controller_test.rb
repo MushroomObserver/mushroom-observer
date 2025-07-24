@@ -109,8 +109,8 @@ module Locations
       assert_page_title(:LOCATION_DESCRIPTIONS.l)
       assert_displayed_filters("#{:query_by_author.l}: #{user.name}")
       assert_equal(
-        assert_select("#results").children.count,
-        LocationDescription.joins(:authors).where(user: user).count
+        assert_select("#results .list-group-item").count,
+        descs_authored_by_user_count
       )
       assert_select("a:match('href',?)", %r{^/locations/descriptions/\d+},
                     { count: descs_authored_by_user_count },
