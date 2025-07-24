@@ -156,7 +156,7 @@ class ProjectsControllerTest < FunctionalTestCase
     login
     get(:index)
 
-    assert_displayed_title(:PROJECTS.l)
+    assert_page_title(:PROJECTS.l)
     assert_template("index")
   end
 
@@ -170,7 +170,7 @@ class ProjectsControllerTest < FunctionalTestCase
     get(:index, params: { member: dick.id })
 
     assert_template("index")
-    assert_displayed_title(:PROJECTS.l)
+    assert_page_title(:PROJECTS.l)
   end
 
   def test_index_pattern_search_multiple_hits
@@ -179,7 +179,7 @@ class ProjectsControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: "Project" })
 
-    assert_displayed_title(:PROJECTS.l)
+    assert_page_title(:PROJECTS.l)
     assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
   end
 

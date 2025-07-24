@@ -106,7 +106,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: { id: obs.id })
 
     assert_template("shared/_matrix_box")
-    assert_displayed_title(:OBSERVATIONS.l)
+    assert_page_title(:OBSERVATIONS.l)
     assert_select("body.observations__index", true)
     assert_select(
       "#results .rss-heading a[href ^= '/obs/#{obs.id}'] .rss-name",
@@ -126,7 +126,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login
     get(:index, params: params)
 
-    assert_displayed_title(:OBSERVATIONS.l)
+    assert_page_title(:OBSERVATIONS.l)
   end
 
   def test_index_useless_param_page2
@@ -135,7 +135,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login
     get(:index, params: params)
 
-    assert_displayed_title(:OBSERVATIONS.l)
+    assert_page_title(:OBSERVATIONS.l)
     assert_select("#results a", { text: "« Prev" },
                   "Wrong page or display is missing a link to Prev page")
   end
@@ -164,7 +164,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     assert_response(:success)
     assert_results(count: expected_hits.count)
-    assert_displayed_title(:OBSERVATIONS.l)
+    assert_page_title(:OBSERVATIONS.l)
     assert_displayed_filters("#{:query_search_name.l}: #{name}")
     assert_displayed_filters("#{:query_search_where.l}: #{location}")
   end
@@ -201,7 +201,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
         params: @controller.query_params(query).merge({ advanced_search: "1" }))
 
     assert_flash_text(:runtime_no_matches.l(type: :observations.l))
-    assert_displayed_title(:OBSERVATIONS.l)
+    assert_page_title(:OBSERVATIONS.l)
   end
 
   def advanced_search_params
@@ -222,7 +222,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
       "There should be no results when string is missing from notes."
     )
     assert_flash_text(:runtime_no_matches.l(type: :observations.l))
-    assert_displayed_title(:OBSERVATIONS.l)
+    assert_page_title(:OBSERVATIONS.l)
   end
 
   # We currently no longer allow searching location notes.
@@ -244,7 +244,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
       "There should be no results even when notes include search string."
     )
     assert_flash_text(:runtime_no_matches.l(type: :observations.l))
-    assert_displayed_title(:OBSERVATIONS.l)
+    assert_page_title(:OBSERVATIONS.l)
   end
 
   def test_index_advanced_search_error
@@ -283,7 +283,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: { pattern: pattern })
 
     # Pattern search guesses this is a name query
-    assert_displayed_title(:OBSERVATIONS.l)
+    assert_page_title(:OBSERVATIONS.l)
     assert_displayed_filters("#{:query_names.l}: #{pattern}")
 
     count = Observation.pattern(pattern).count
@@ -307,7 +307,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: { pattern: pattern })
 
     # Pattern search guesses this is a name query
-    assert_displayed_title(:OBSERVATIONS.l)
+    assert_page_title(:OBSERVATIONS.l)
     assert_displayed_filters("#{:query_names.l}: #{pattern}")
 
     count = Observation.pattern(pattern).count
@@ -322,7 +322,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: { pattern: pattern, page: 2 })
 
     # Pattern search guesses this is a name query
-    assert_displayed_title(:OBSERVATIONS.l)
+    assert_page_title(:OBSERVATIONS.l)
     assert_displayed_filters("#{:query_names.l}: #{pattern}")
 
     assert_not_empty(css_select('[id="context_nav"]').text, "Tabset is empty")
@@ -338,7 +338,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     assert_empty(css_select('[id="context_nav"]').text,
                  "RH tabset should be empty when search has no hits")
-    assert_displayed_title(:OBSERVATIONS.l)
+    assert_page_title(:OBSERVATIONS.l)
   end
 
   def test_index_pattern_one_hit
@@ -387,7 +387,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     setup_rolfs_index
     get(:index, params: { look_alikes: "1", name: name.id })
 
-    assert_displayed_title(:OBSERVATIONS.l)
+    assert_page_title(:OBSERVATIONS.l)
     assert_displayed_filters("#{:query_names.l}: #{name.text_name}")
     assert_results(count: look_alikes)
   end
@@ -404,7 +404,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: { look_alikes: "1", name: name.id })
 
     assert_response(:success)
-    assert_displayed_title(:OBSERVATIONS.l)
+    assert_page_title(:OBSERVATIONS.l)
     assert_results(count: look_alikes)
   end
 
@@ -420,7 +420,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     setup_rolfs_index
     get(:index, params: { related_taxa: "1", name: name.text_name })
-    assert_displayed_title(:OBSERVATIONS.l)
+    assert_page_title(:OBSERVATIONS.l)
     assert_displayed_filters("#{:query_names.l}: #{parent.text_name}")
     assert_results(count: obss_of_related_taxa.count)
   end
@@ -435,7 +435,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: params)
 
     assert_response(:success)
-    assert_displayed_title(:OBSERVATIONS.l)
+    assert_page_title(:OBSERVATIONS.l)
     assert_displayed_filters("#{:query_names.l}: #{name.text_name}")
     ids.each do |id|
       assert_select(
@@ -461,7 +461,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login(user.login)
     get(:index, params: { by_user: user.id })
 
-    assert_displayed_title(:OBSERVATIONS.l)
+    assert_page_title(:OBSERVATIONS.l)
     assert_displayed_filters("#{:query_by_users.l}: #{user.name}")
 
     assert_select(
@@ -499,7 +499,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login
     get(:index, params: params)
 
-    assert_displayed_title(:OBSERVATIONS.l)
+    assert_page_title(:OBSERVATIONS.l)
     assert_displayed_filters("#{:query_locations.l}: #{location.display_name}")
   end
 
@@ -517,7 +517,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     assert_response(:success)
     assert_flash(flash_matcher)
-    assert_displayed_title(:OBSERVATIONS.l)
+    assert_page_title(:OBSERVATIONS.l)
   end
 
   def test_index_location_with_nonexistent_location
@@ -541,7 +541,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     login
     get(:index, params: { where: location.name })
-    assert_displayed_title(:OBSERVATIONS.l)
+    assert_page_title(:OBSERVATIONS.l)
     assert_displayed_filters(
       "#{:query_search_where.l}: #{location.display_name}"
     )
@@ -555,7 +555,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: { where: location.name, page: 2 })
     assert_select("#results a", { text: "« Prev" },
                   "Wrong page or display is missing a link to Prev page")
-    assert_displayed_title(:OBSERVATIONS.l)
+    assert_page_title(:OBSERVATIONS.l)
     assert_displayed_filters(
       "#{:query_search_where.l}: #{location.display_name}"
     )
@@ -590,7 +590,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: { species_list: spl.id })
 
     assert_response(:success)
-    assert_displayed_title(:OBSERVATIONS.l)
+    assert_page_title(:OBSERVATIONS.l)
     assert_displayed_filters("#{:species_lists.l}: #{spl.title}")
   end
 
@@ -601,7 +601,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: { species_list: spl.id })
 
     assert_response(:success)
-    assert_displayed_title(:OBSERVATIONS.l)
+    assert_page_title(:OBSERVATIONS.l)
     assert_flash_text(:runtime_no_matches.l(type: :observation))
   end
 

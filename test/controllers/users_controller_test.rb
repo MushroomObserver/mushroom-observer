@@ -47,7 +47,7 @@ class UsersControllerTest < FunctionalTestCase
     pattern = "Roy"
     get(:index, params: { pattern: pattern })
     # matcher includes optional quotation mark (?.)
-    assert_displayed_title(:USERS.l)
+    assert_page_title(:USERS.l)
     assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
 
     prove_sorting_links_include_contribution
@@ -63,7 +63,7 @@ class UsersControllerTest < FunctionalTestCase
                                params: { pattern: unmatched_pattern })
     assert_template("users/index")
 
-    assert_displayed_title(:USERS.l)
+    assert_page_title(:USERS.l)
     assert_empty(css_select("#sorts"), "There should be no sort links")
 
     flash_text = :runtime_no_matches.l.sub("[types]", "users")
@@ -94,7 +94,7 @@ class UsersControllerTest < FunctionalTestCase
     sort_orders = %w[last_login contribution]
     sort_orders.each do |order|
       get(:index, params: { by: order })
-      assert_displayed_title(:USERS.l)
+      assert_page_title(:USERS.l)
       assert_sorted_by(order)
     end
   end

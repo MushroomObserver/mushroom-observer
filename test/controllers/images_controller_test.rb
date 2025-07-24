@@ -9,7 +9,7 @@ class ImagesControllerTest < FunctionalTestCase
   def test_index_order
     check_index_sorted_by(::Query::Images.default_order) # :created_at
     assert_template(partial: "_matrix_box")
-    assert_displayed_title(:IMAGES.l)
+    assert_page_title(:IMAGES.l)
   end
 
   def test_index_with_non_default_sort
@@ -24,7 +24,7 @@ class ImagesControllerTest < FunctionalTestCase
 
     assert_template("index")
     assert_template(partial: "_matrix_box")
-    assert_displayed_title(:IMAGES.l)
+    assert_page_title(:IMAGES.l)
     assert_displayed_filters("#{:query_by_users.l}: #{user.legal_name}")
   end
 
@@ -47,7 +47,7 @@ class ImagesControllerTest < FunctionalTestCase
     get(:index, params: { project: project.id })
 
     assert_template("index", partial: "_image")
-    assert_displayed_title(:IMAGES.l)
+    assert_page_title(:IMAGES.l)
     assert_displayed_filters("#{:query_projects.l}: #{project.title}")
   end
 
@@ -79,7 +79,7 @@ class ImagesControllerTest < FunctionalTestCase
     get(:index, params: { pattern: pattern })
 
     assert_template("index", partial: "_image")
-    assert_displayed_title(:IMAGES.l)
+    assert_page_title(:IMAGES.l)
     assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
   end
 

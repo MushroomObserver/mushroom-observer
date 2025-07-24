@@ -59,7 +59,7 @@ class SequencesControllerTest < FunctionalTestCase
     get(:index, params: { by: })
 
     assert_response(:success)
-    assert_displayed_title(:SEQUENCES.l)
+    assert_page_title(:SEQUENCES.l)
     assert_sorted_by(by)
 
     Sequence.find_each do |sequence|

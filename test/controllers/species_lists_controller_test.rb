@@ -103,7 +103,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login
     get(:index)
 
-    assert_displayed_title(:SPECIES_LISTS.l)
+    assert_page_title(:SPECIES_LISTS.l)
     assert_select(
       "#content a:match('href', ?)", %r{^#{species_lists_path}/\d+},
       { count: SpeciesList.count },
@@ -122,7 +122,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     assert_equal(SpeciesList.order_by(:user).map(&:user_id),
                  assigns(:objects).map(&:user_id))
-    assert_displayed_title(:SPECIES_LISTS.l)
+    assert_page_title(:SPECIES_LISTS.l)
     assert_sorted_by(by)
   end
 
@@ -137,7 +137,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login
     get(:index, params: { id: list.id, by: by })
 
-    assert_displayed_title(:SPECIES_LISTS.l)
+    assert_page_title(:SPECIES_LISTS.l)
     assert_sorted_by(by)
   end
 
@@ -147,7 +147,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login
     get(:index, params: { id: list.id })
 
-    assert_displayed_title(:SPECIES_LISTS.l)
+    assert_page_title(:SPECIES_LISTS.l)
     assert_sorted_by("date")
   end
 
@@ -158,7 +158,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     get(:index, params: { pattern: pattern })
 
     assert_response(:success)
-    assert_displayed_title(:SPECIES_LISTS.l)
+    assert_page_title(:SPECIES_LISTS.l)
     assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
     assert_select(
       "#content a:match('href', ?)", %r{^#{species_lists_path}/\d+},
@@ -196,7 +196,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_user: user })
 
-    assert_displayed_title(:SPECIES_LISTS.l)
+    assert_page_title(:SPECIES_LISTS.l)
     assert_displayed_filters("#{:query_by_users.l}: #{user.name}")
   end
 
@@ -207,7 +207,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     get(:index, params: { by_user: user })
 
     assert_response(:success)
-    assert_displayed_title(:SPECIES_LISTS.l)
+    assert_page_title(:SPECIES_LISTS.l)
   end
 
   def test_index_for_user_who_does_not_exist
