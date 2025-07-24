@@ -113,7 +113,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
       { text: obs.format_name.t.strip_html },
       "Index should open at the page that includes #{obs.format_name}"
     )
-    assert_select("#results a", { text: "« Prev" },
+    assert_select(".pagination_numbers a", { text: "Prev" },
                   "Wrong page or display is missing a link to Prev page")
   end
 
@@ -136,7 +136,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: params)
 
     assert_page_title(:OBSERVATIONS.l)
-    assert_select("#results a", { text: "« Prev" },
+    assert_select(".pagination_numbers a", { text: "Prev" },
                   "Wrong page or display is missing a link to Prev page")
   end
 
@@ -326,7 +326,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_displayed_filters("#{:query_names.l}: #{pattern}")
 
     assert_not_empty(css_select('[id="context_nav"]').text, "Tabset is empty")
-    assert_select("#results a", { text: "« Prev" },
+    assert_select(".pagination_numbers a", { text: "Prev" },
                   "Wrong page or display is missing a link to Prev page")
   end
 
@@ -553,7 +553,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     login
     get(:index, params: { where: location.name, page: 2 })
-    assert_select("#results a", { text: "« Prev" },
+    assert_select(".pagination_numbers a", { text: "Prev" },
                   "Wrong page or display is missing a link to Prev page")
     assert_page_title(:OBSERVATIONS.l)
     assert_displayed_filters(
