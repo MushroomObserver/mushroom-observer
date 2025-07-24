@@ -151,7 +151,7 @@ module PaginationNavHelper
               tag.li { tag.p(:PAGE.l, class: "navbar-text mx-0") }
             ].safe_join
           end,
-          page_input(this_page, max_page, arg, args),
+          page_input(this_page, max_page),
           tag.ul(class: "nav navbar-nav navbar-left") do
             [
               tag.li { tag.p(:of.l, class: "navbar-text ml-0 mr-2") },
@@ -207,12 +207,10 @@ module PaginationNavHelper
     )
   end
 
-  # zero_url has to be swapped out by JS on submit
-  def page_input(this_page, max_page, arg, args)
-    this_url = pagination_link_url(this_page, arg, args)
-
+  # On input change, the form's page param is sanitized by Stimulus.
+  def page_input(this_page, max_page)
     form_with(
-      url: this_url, method: :get, local: true,
+      url: pagination_current_url, method: :get, local: true,
       class: "navbar-form navbar-left px-0 page_input",
       data: { controller: "page-input", page_input_max_value: max_page }
     ) do |f|
@@ -233,9 +231,26 @@ module PaginationNavHelper
               end
             end
           ].safe_join
-        end
+        end,
+        *pagination_hidden_param_fields(f)
       ].safe_join
     end
+  end
+
+  # The form won't commit to the form url with the params even if included.
+  # We need to re-send the incoming params as part of the form
+  # Can't convert to_h without knowing what to permit
+  def pagination_hidden_param_fields(form)
+    params.except(:controller, :action, :page).keys.map do |key|
+      form.hidden_field(key.to_sym, value: params[key])
+    end
+  end
+
+  # For the page input form, give form the current url without query string
+  def pagination_current_url
+    parsed_url = URI.parse(request.url)
+    parsed_url.fragment = parsed_url.query = nil
+    parsed_url.to_s
   end
 
   # Render a single pagination link for number_pagination_data above.

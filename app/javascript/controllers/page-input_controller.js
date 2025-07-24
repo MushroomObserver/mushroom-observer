@@ -1,26 +1,23 @@
 import { Controller } from "@hotwired/stimulus"
 
 // Connects to data-controller="page-input"
-// Updates form action url from input page number
+// Sanitizes the page number to min/max values
 export default class extends Controller {
   static targets = ["input"]
-  static values = ["max"]
+  static values = { max: Number }
 
   connect() {
     // Just a "sanity check" convention, so you can tell "is this thing on?"
     this.element.dataset.pageInput = "connected"
   }
 
-  // When the input changes, update the form element's action attribute
+  // When the input changes, sanitize the value of the input.
+  // Since this action is fired onInput, before the browser has changed the
+  // value attribute, also "manually" set the value *attribute*.
   updateForm() {
-    const pageInput = parseInt(this.inputTarget.value)
-    if (pageInput == 0) { pageInput = 1 }
+    let pageInput = parseInt(this.inputTarget.value || 1)
     if (pageInput > this.maxValue) { pageInput = this.maxValue }
-
-    const formUrl = new URL(this.element.action),
-      urlParams = formUrl.searchParams
-
-    urlParams.set("page", pageInput)
-    this.element.action = formUrl
+    this.inputTarget.value = pageInput
+    this.inputTarget.setAttribute("value", pageInput)
   }
 }
