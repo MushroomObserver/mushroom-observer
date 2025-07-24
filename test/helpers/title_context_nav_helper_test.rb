@@ -19,7 +19,7 @@ class TitleContextNavHelperTest < ActionView::TestCase
              ["move", article_path(article.id), { button: :patch }],
              ["celebrate", article_path(article.id), { button: :post }]]
 
-    tabs = context_nav_dropdown(links)
+    tabs = context_nav_links(links)
 
     tab1 = link_to(
       :create_article_title.t, new_article_path, { class: "new_article_link" }

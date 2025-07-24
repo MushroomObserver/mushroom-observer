@@ -9,6 +9,7 @@ left_classes = class_names(%w[
 right_classes = class_names(%w[
   d-flex flex-row align-items-center justify-content-end navbar_right
 ])
+identify_page = controller.controller_name == "identify"
 %>
 
 <nav id="top_nav" class="navbar navbar-default hidden-xs hidden-print"
@@ -18,9 +19,7 @@ right_classes = class_names(%w[
     <%# left side %>
     <%= tag.div(class: left_classes) do %>
       <%= tag.h4(rubric, class: "font-weight-bold mr-4 mr-lg-5") %>
-      <% if controller.controller_name == "identify" %>
-        <%= render(partial: "observations/identify/form_identify_filter") %>
-      <% elsif(content_for?(:sorter)) %>
+      <% if(content_for?(:sorter)) %>
         <%= yield(:sorter) %>
       <% end %>
     <% end %>
@@ -42,7 +41,11 @@ right_classes = class_names(%w[
 
   <%= tag.div(class: search_nav_classes) do %>
     <%= tag.div(class: "collapse", id: "search_nav") do %>
-      <%= render(partial: "application/top_nav/search_form") %>
+      <% if identify_page %>
+        <%= render(partial: "observations/identify/form_identify_filter") %>
+      <% else %>
+        <%= render(partial: "application/top_nav/search_form") %>
+      <% end %>
     <% end %>
   <% end %>
 </nav>
