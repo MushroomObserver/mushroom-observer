@@ -30,12 +30,18 @@ filters = content_for?(:filters) || content_for?(:filter_help)
 
     <!-- Title or subtitle -->
     <!-- e.g. "Observation 5"; Can be multiple lines, e.g., with Observer ID -->
-    <% if filters %>
-      <%= yield(:filters) -%>
-      <%= yield(:filter_help) -%>
+    <%= tag.div(class: "d-flex justify-content-between") do %>
+      <%= tag.div(class: "px-3") do %>
+        <% if filters %>
+          <%= yield(:filters) -%>
+          <%= yield(:filter_help) -%>
+        <% end %>
+      <% end %>
+      <%= tag.div do %>
+        <%= yield(:letters) %>
+        <%= yield(:numbers) %>
+      <% end %>
     <% end %>
-    <%= yield(:letters) %>
-    <%= yield(:numbers) %>
     <% if content_for?(:background_image) %>
       <%= render(partial: "content/project_title") %>
     <% else %>
