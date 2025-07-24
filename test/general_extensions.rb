@@ -451,11 +451,7 @@ module GeneralExtensions
 
   # for indexes: title is not displayed
   def assert_page_title(expect, msg = "Wrong page or page.title")
-    if expect.is_a?(Regexp)
-      assert_match(expect, css_select("title").text, msg)
-    else
-      assert_equal(expect, css_select("title").text, msg)
-    end
+    assert_match(expect, css_select("title").text, msg)
   end
 
   def assert_displayed_filters(expect, msg = "Wrong filters")
