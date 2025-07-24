@@ -24,9 +24,9 @@ flash_error(@error) if @error && @objects.empty?
 
 <%= @help.tp if @help %>
 
-<% # Let test_index test pass args to pagination_links.
-  args = @test_pagination_args || {} %>
-<%= paginated_results(args) do %>
+<%# Let test_index test pass args to pagination_links.
+  # args = @test_pagination_args || {} %>
+<%= paginated_results do %>
   <% if @objects.any? %>
     <% counts = Name.count_observations(@objects) %>
 
