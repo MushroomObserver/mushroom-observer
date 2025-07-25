@@ -6,7 +6,7 @@ filters = content_for?(:filters) || content_for?(:filter_help)
 <%= tag.div(class: "col-xs-12", id: "index_bar") do %>
   <%# Project banner %>
   <% if has_banner %>
-    <%= render(partial: "application/content/project_title") %>
+    <%= render(partial: "application/content/project_banner") %>
   <% end %>
 
   <%# Indexes: Query filter subtitle and pagination %>

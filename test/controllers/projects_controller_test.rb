@@ -132,7 +132,8 @@ class ProjectsControllerTest < FunctionalTestCase
     project = projects(:pinned_date_range_project)
     login
     get(:show, params: { id: project.id })
-
+    assert_template("show")
+    # NOTE: this project has no banner_image
     assert_select("#header", { text: /#{project.date_range}/ },
                   "Date range missing from Project header")
   end

@@ -93,7 +93,7 @@ module Tabs
       return unless image
 
       content_for(:banner_image) do
-        image_tag(image.large_url, class: "image-title")
+        image_tag(image.large_url, class: "banner-image")
       end
     end
 
