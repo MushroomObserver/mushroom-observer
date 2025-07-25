@@ -6,6 +6,7 @@
 # new (get)
 # create (post)
 # authorization_response (get)
+# cancel (post):: cancels the InatImportJob
 #
 # Work flow:
 # 1. User calls `new`, fills out form
@@ -174,5 +175,17 @@ class InatImportsController < ApplicationController
     # clean out this user's old tracker(s)
     InatImportJobTracker.where(inat_import: inat_import.id).destroy_all
     InatImportJobTracker.create(inat_import: inat_import.id)
+  end
+
+  public
+
+  def cancel
+    inat_import = InatImport.find(params[:id])
+    inat_import.update(cancel: true)
+    tracker = InatImportJobTracker.where(inat_import: inat_import).
+              order(:created_at).last
+    # flash_warning(:inat_import_tracker_canceled.l)
+    redirect_to(inat_import_path(inat_import,
+                                 params: { tracker_id: tracker.id }))
   end
 end
