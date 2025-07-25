@@ -34,7 +34,7 @@
   cursor: default; // $cursor-disabled
 }
 
-.pagination_numbers {
+.pagination_numbers, .show_object_nav {
   a {
     color: $text-color;
   }

@@ -2,6 +2,16 @@
 // top nav bar
 // --------------------------------------------------
 
+.navbar-nav {
+  li {
+    form.button_to {
+      display: block;
+      padding-top: 10px;
+      padding-bottom: 10px;
+    }
+  }
+}
+
 .navbar-default {
   border-width: 1px;
   border-style: solid;

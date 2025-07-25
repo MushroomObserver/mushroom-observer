@@ -181,25 +181,27 @@ module PaginationNavHelper
 
   def prev_page_link(prev_page, arg, args)
     disabled = prev_page < 1 ? "disabled" : ""
-    classes = class_names(%w[navbar-link navbar-left btn px-0 mr-2], disabled)
+    classes = class_names(
+      %w[navbar-link navbar-left btn px-0 mr-2 previous_page_link], disabled
+    )
 
     url = pagination_link_url(prev_page, arg, args)
     icon_link_to(
       :PREV.t, url,
-      id: "previous_page_link", class: classes,
-      icon: :previous, show_text: false, icon_class: ""
+      class: classes, icon: :previous, show_text: false, icon_class: ""
     )
   end
 
   def next_page_link(next_page, max, arg, args)
     disabled = next_page > max ? "disabled" : ""
-    classes = class_names(%w[navbar-link navbar-left btn px-0 ml-2], disabled)
+    classes = class_names(
+      %w[navbar-link navbar-left btn px-0 ml-2 next_page_link], disabled
+    )
 
     url = pagination_link_url(next_page, arg, args)
     icon_link_to(
       :NEXT.t, url,
-      id: "next_page_link", class: classes,
-      icon: :next, show_text: false, icon_class: ""
+      class: classes, icon: :next, show_text: false, icon_class: ""
     )
   end
 

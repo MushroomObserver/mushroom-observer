@@ -294,14 +294,6 @@ module Tabs
       print_labels_button(obs)
     end
 
-    # Buttons in "Details" panel header
-    def obs_change_links(obs)
-      return unless check_permission(obs)
-
-      [edit_button(target: obs, icon: :edit),
-       destroy_button(target: obs, icon: :delete)].safe_join(" | ")
-    end
-
     def edit_observation_tab(obs)
       InternalLink::Model.new(
         :edit_object.t(type: Observation), obs,

@@ -5,10 +5,7 @@ add_owner_naming(@owner_naming)
 if @user
   add_pager_for(@observation)
   add_interest_icons(@user, @observation)
-  content_for(:edit_icons) do
-    tag.span(obs_change_links(@observation),
-             class: "h4 ml-3 d-inline-block text-nowrap")
-  end
+  add_edit_icons(@observation)
 end
 
 @container = :double

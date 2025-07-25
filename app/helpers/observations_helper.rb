@@ -25,7 +25,7 @@ module ObservationsHelper
   end
 
   def obs_title_id(obs)
-    tag.span(obs.id || "?", class: "badge badge-outline")
+    tag.span(obs.id || "?", class: "badge badge-outline mr-3")
   end
 
   # name portion of Observation title

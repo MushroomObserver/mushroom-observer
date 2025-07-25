@@ -209,7 +209,8 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
     search: "search",
     previous: "triangle-left",
     next: "triangle-right",
-    goto: "stop"
+    goto: "stop",
+    index: "th"
   }.freeze
 
   # button to destroy object
