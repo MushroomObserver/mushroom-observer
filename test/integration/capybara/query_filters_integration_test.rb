@@ -43,7 +43,7 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
 
     assert_match(:OBSERVATIONS.l, page.title, "Wrong page")
     assert_selector("#filters", text: obs.name.text_name)
-    page.find("#title_bar").assert_text(:filtered.t)
+    page.find("#index_bar").assert_text(:filtered.t)
     results = page.find("#results")
     # Number of hits should == number of **imaged** Observations of obs.name
     results.assert_text(obs.name.text_name, count: imged_obss.size)
