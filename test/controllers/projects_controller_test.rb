@@ -132,7 +132,8 @@ class ProjectsControllerTest < FunctionalTestCase
     project = projects(:pinned_date_range_project)
     login
     get(:show, params: { id: project.id })
-
+    assert_template("show")
+    # NOTE: this project has no banner_image
     assert_select("#header", { text: /#{project.date_range}/ },
                   "Date range missing from Project header")
   end
@@ -156,7 +157,7 @@ class ProjectsControllerTest < FunctionalTestCase
     login
     get(:index)
 
-    assert_displayed_title(:PROJECTS.l)
+    assert_page_title(:PROJECTS.l)
     assert_template("index")
   end
 
@@ -170,7 +171,7 @@ class ProjectsControllerTest < FunctionalTestCase
     get(:index, params: { member: dick.id })
 
     assert_template("index")
-    assert_displayed_title(:PROJECTS.l)
+    assert_page_title(:PROJECTS.l)
   end
 
   def test_index_pattern_search_multiple_hits
@@ -179,7 +180,7 @@ class ProjectsControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: "Project" })
 
-    assert_displayed_title(:PROJECTS.l)
+    assert_page_title(:PROJECTS.l)
     assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
   end
 
@@ -557,7 +558,7 @@ class ProjectsControllerTest < FunctionalTestCase
     )
   end
 
-  def test_add_background_image
+  def test_add_banner_image
     file = image_setup
     num_images = Image.count
     params = build_params("With background", "With background")
@@ -580,10 +581,10 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_equal(params[:upload][:license_id], project.image.license_id)
   end
 
-  def test_bad_background_image
+  def test_bad_banner_image
     file = image_setup
     num_images = Image.count
-    params = build_params("Bad background", "Bad background")
+    params = build_params("Bad banner", "Bad banner")
     project = projects(:eol_project)
     params[:id] = project.id
     params[:upload][:image] = file
@@ -601,10 +602,10 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_equal(num_images, Image.count)
   end
 
-  def test_fail_save_background_image
+  def test_fail_save_banner_image
     file = image_setup
     num_images = Image.count
-    params = build_params("Bad background", "Bad background")
+    params = build_params("Bad banner", "Bad banner")
     project = projects(:eol_project)
     params[:id] = project.id
     params[:upload][:image] = file

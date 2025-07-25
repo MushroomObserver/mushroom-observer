@@ -38,9 +38,7 @@ include: [:user, { observations: :name }])
 <% end %>
 
 <% # Note this uses a specialized matrix box here, not the matrix_box partial. %>
-<%= pagination_nav(@pagination_data) do %>
-
-
+<%= paginated_results do %>
   <%= matrix_table do %>
 
     <% @objects.each do |image| %>

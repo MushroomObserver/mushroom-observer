@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-#  Helpers for the `InternalLink`, which are `link attribute arrays`
-#  for building nav links (in the context of a page)
+#  Helpers for the top nav bar's context menu, formerly "tabset links".
+#  Views should define the menu's content with an array of InternalLink.tabs
 
 #  add_context_nav(links)      # add content_for(:context_nav)
 #  context_nav_links(links)    # convert links -> link_to's / button_to's
@@ -9,14 +9,14 @@
 #
 module TitleContextNavHelper
   # Short-hand to render shared context_nav partial for a given set of links.
+  # Called in the view, defines `:context_nav` which is rendered in layout.
   def add_context_nav(links)
     return unless links
 
     nav_links = context_nav_links(links)
-
     content_for(:context_nav) do
-      render(partial: "application/content/context_nav",
-             locals: { links: nav_links })
+      context_nav_dropdown(title: "Actions", id: "context_nav",
+                           links: nav_links)
     end
   end
 
@@ -85,5 +85,46 @@ module TitleContextNavHelper
     kwargs[:class] = class_names(kwargs[:class], extra_args[:class])
     # merge in other args from extra_args (will overwrite keys!)
     kwargs&.merge(extra_args&.except(:class))
+  end
+
+  # rubocop:disable Metrics/AbcSize
+  # The "dropdown-current" Stimulus controller should update the dropdown title
+  # with the currently selected option on load, if show_current == true
+  # For Bootstrap 3, this must be an <li> element for alignment
+  def context_nav_dropdown(title: "", id: "", links: [])
+    tag.li(class: "dropdown d-inline-block") do
+      [
+        tag.a(
+          class: class_names(%w[dropdown-toggle]),
+          id: "context_nav_toggle", role: "button",
+          data: { toggle: "dropdown" },
+          aria: { haspopup: "true", expanded: "false" }
+        ) do
+          concat(tag.span(title, data: { dropdown_current_target: "title" }))
+          concat(tag.span(class: "caret ml-2"))
+        end,
+        tag.ul(
+          id:, class: "dropdown-menu",
+          aria: { labelledby: "context_nav_toggle" }
+        ) do
+          links.compact.each do |link|
+            concat(tag.li(link))
+          end
+        end
+      ].safe_join
+    end
+  end
+  # rubocop:enable Metrics/AbcSize
+
+  def search_nav_toggle
+    tag.li(class: "d-inline-block navbar-form") do
+      tag.button(
+        link_icon(:search, title: :SEARCH.l),
+        class: "btn btn-sm btn-outline-default",
+        type: :button,
+        data: { toggle: "collapse", target: "#search_nav" },
+        aria: { expanded: "false", controls: "search_nav" }
+      )
+    end
   end
 end

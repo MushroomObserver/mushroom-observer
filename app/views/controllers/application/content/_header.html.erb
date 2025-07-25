@@ -1,0 +1,55 @@
+<%#
+The header for page content (below the application top nav)
+May include:
+prev_next_pager
+title
+query filters (indexes)
+context_help
+owner_naming
+interest_icons
+context_nav
+type_filters
+%>
+<%
+has_banner = content_for?(:banner_image)
+add_filter_help(@any_content_filters_applied)
+title_cols = content_for?(:interest_icons) ? "col-sm-8 col-lg-7" : ""
+%>
+
+<%= tag.header(id: "header") do %>
+  <%= tag.div(class: "row") do %>
+    <%# Push down pager, title on small, xs screens so buttons do not block %>
+    <%# tag.div(safe_nbsp, class: "hidden-print visible-xs visible-sm mt-4") %>
+
+    <%# Index filters and pagination, full width %>
+    <%= render(partial: "application/content/index_bar") %>
+  <% end %>
+
+  <%= tag.div(class: "row") do %>
+    <%# Page title. Indexes have none — `rubric` in top_nav has model name. %>
+    <%= render(partial: "application/content/page_title") %>
+  <% end %>
+
+  <%= tag.div(class: "row") do %>
+    <%# RssLog type filters %>
+    <% if content_for?(:type_filters) %>
+      <%= tag.div(class: "hidden-print col-xs-12") do
+        yield(:type_filters)
+      end %>
+    <% end %>
+
+    <%# Project tabs %>
+    <% if content_for?(:project_tabs) %>
+      <%= tag.div(class: title_cols, id: "project_tabs") do
+        yield(:project_tabs)
+      end %>
+    <% end %>
+
+    <%# Project observation buttons %>
+    <% if content_for?(:observation_buttons) %>
+      <%= tag.div(class: title_cols, id: "observation_buttons") do
+        yield(:observation_buttons)
+      end %>
+    <% end %>
+  <% end %>
+<% end %>

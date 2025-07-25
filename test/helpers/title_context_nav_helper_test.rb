@@ -9,7 +9,7 @@ class TitleContextNavHelperTest < ActionView::TestCase
   # destroy_button tab tested in articles_controller_test
   # That method calls `add_query_param` and others unavailable to helper tests
   # put_button is not used for articles, but we're just testing HTML output
-  def test_context_nav_links
+  def test_context_nav_dropdown
     article = Article.last
     links = [[:create_article_title.t, new_article_path,
               { class: "new_article_link" }],

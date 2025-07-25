@@ -684,6 +684,7 @@
   south: south
   WEST: West
   west: west
+  PAGE: Page
 
   # Labels for fields answering: "What did you observe?", "When did you observe
   # it?", "Where did you observe it?", and "Who observed it?".
@@ -2306,8 +2307,6 @@
   show_namings_saving: Saving
 
   # observations/show_observation
-  show_observation_title: "[:OBSERVATION]: [name]"
-  show_observation_header: "[:OBSERVATION]"
   show_observation_site_id: Site ID
   show_observation_owner_id: Observer Preference
   show_observation_no_clear_preference: no clear preference
@@ -4553,7 +4552,7 @@
   sort_by_curator: "[:CURATOR]"
   sort_by_date: "[:DATE]"
   sort_by_filename: File Name
-  sort_by_header: "Sort by:"
+  sort_by_header: "Sort by"
   sort_by_herbarium_label: Label
   sort_by_herbarium_name: Fungarium
   sort_by_id: ID

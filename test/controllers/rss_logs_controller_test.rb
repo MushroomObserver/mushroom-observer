@@ -33,11 +33,6 @@ class RssLogsControllerTest < FunctionalTestCase
     post(:index)
     assert_template(:index)
 
-    # Show one.
-    post(:index,
-         params: { show_observations: observations(:minimal_unknown_obs).to_s })
-    assert_template(:index)
-
     # Show all.
     params = {}
     params[:type] = RssLog::ALL_TYPE_TAGS

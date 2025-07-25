@@ -1,21 +1,52 @@
 <!--top_nav-->
+<%
+container_classes = %w[container-fluid px-3 d-flex flex-row align-items-center]
+top_nav_classes = class_names(container_classes, "justify-content-between")
+search_nav_classes = class_names(container_classes, "justify-content-center")
+left_classes = class_names(%w[
+  d-flex flex-row align-items-center flex-grow-1 navbar_left
+])
+right_classes = class_names(%w[
+  d-flex flex-row align-items-center justify-content-end navbar_right
+])
+identify_page = controller.controller_name == "identify"
+%>
+
 <nav id="top_nav" class="navbar navbar-default hidden-xs hidden-print"
      data-nav-target="topNav">
 
-  <div class="container-fluid px-0">
-    <%= tag.span(rubric, class: "hidden") %>
-    <% if controller.controller_name == "identify" %>
-      <%= render(partial: "observations/identify/form_identify_filter") %>
-    <% else ##user is logged in %>
-      <%= render(partial: "application/top_nav/search_form") %>
+  <%= tag.div(class: top_nav_classes) do %>
+    <%# left side %>
+    <%= tag.div(class: left_classes) do %>
+      <%= tag.h4(rubric, class: "font-weight-bold mr-4 mr-lg-5") %>
+      <% if(content_for?(:sorter)) %>
+        <%= yield(:sorter) %>
+      <% end %>
     <% end %>
-
-    <% if @user.nil? %>
-      <%= render(partial: "application/top_nav/login") %>
-    <% else ##user is logged in %>
-      <%= render(partial: "application/top_nav/user_nav") %>
+    <%# right side %>
+    <%= tag.div(class: right_classes) do %>
+      <ul class="nav navbar-nav navbar-right hidden-xs mr-0">
+        <%= search_nav_toggle %>
+        <% if content_for?(:context_nav) %>
+          <%= yield(:context_nav) %>
+        <% end %>
+        <% if @user.nil? %>
+          <%= render(partial: "application/top_nav/login") %>
+        <% else ##user is logged in %>
+          <%= render(partial: "application/top_nav/user_nav") %>
+        <% end %>
+      </ul>
     <% end %>
-  </div>
+  <% end %>
 
+  <%= tag.div(class: search_nav_classes) do %>
+    <%= tag.div(class: "collapse", id: "search_nav") do %>
+      <% if identify_page %>
+        <%= render(partial: "observations/identify/form_identify_filter") %>
+      <% else %>
+        <%= render(partial: "application/top_nav/search_form") %>
+      <% end %>
+    <% end %>
+  <% end %>
 </nav>
 <!--/top_nav-->

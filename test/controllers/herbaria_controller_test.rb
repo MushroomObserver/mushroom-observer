@@ -136,7 +136,7 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:index, params: { q: query.record.id.alphabetize })
 
     assert_response(:success)
-    assert_displayed_title(:HERBARIA.l)
+    assert_page_title(:HERBARIA.l)
     assert_select(
       "a:match('href', ?)", %r{^#{herbaria_path}/(\d+)}, { count: set.size },
       "Filtered index should list the results of the latest Herbaria query"
@@ -148,7 +148,7 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:index)
 
     assert_response(:success)
-    assert_displayed_title(:HERBARIA.l)
+    assert_page_title(:HERBARIA.l)
     Herbarium.find_each do |herbarium|
       assert_select(
         "a[href *= '#{herbarium_path(herbarium)}']", true,
@@ -274,7 +274,7 @@ class HerbariaControllerTest < FunctionalTestCase
     login
     get(:index, params: { nonpersonal: true })
 
-    assert_displayed_title(:HERBARIA.l)
+    assert_page_title(:HERBARIA.l)
     assert_displayed_filters(:query_nonpersonal.l)
     Herbarium.where(personal_user_id: nil).find_each do |herbarium|
       assert_select(
@@ -298,7 +298,7 @@ class HerbariaControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: pattern })
 
-    assert_displayed_title(:HERBARIA.l)
+    assert_page_title(:HERBARIA.l)
     assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
     Herbarium.where.not(personal_user_id: nil).find_each do |herbarium|
       assert_select(
@@ -332,7 +332,7 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:index, params: { by: })
 
     assert_response(:success)
-    assert_displayed_title(:HERBARIA.l)
+    assert_page_title(:HERBARIA.l)
     assert_sorted_by(by)
     Herbarium.find_each do |herbarium|
       assert_select(

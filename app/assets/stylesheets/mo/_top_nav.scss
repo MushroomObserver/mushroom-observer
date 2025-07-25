@@ -2,6 +2,20 @@
 // top nav bar
 // --------------------------------------------------
 
+.navbar-nav {
+  li {
+    form.button_to {
+      display: block;
+      padding-top: 10px;
+      padding-bottom: 10px;
+    }
+  }
+}
+
+.navbar-flex {
+  @extend .d-flex, .justify-content-between, .align-items-center
+}
+
 .navbar-default {
   border-width: 1px;
   border-style: solid;
@@ -9,6 +23,7 @@
   border-top-right-radius: 0px;
   border-bottom-right-radius: 0px;
   border-right-width: 0px;
+  border-left-width: 0px;
   padding: 0px;
 
   a,
@@ -26,21 +41,41 @@
     margin-right: 2px;
   }
 
-  .navbar-nav > li > a,
-  .navbar-nav > li > a.dropdown-toggle {
-    color: $navbar-default-color !important;
-    background-color: $navbar-default-bg !important;
-    padding-left: 8px;
-    padding-right: 8px;
+  .navbar_right {
+    .dropdown > a {
+      color: $navbar-default-color !important;
+      background-color: $navbar-default-bg !important;
+      padding-left: 8px;
+      padding-right: 8px;
+      font-weight: bold !important;
 
-    &:hover {
-      color: $navbar-default-link-hover-color !important;
-      background-color: $navbar-default-link-hover-bg !important;
+      &:hover {
+        color: $navbar-default-link-hover-color !important;
+        background-color: $navbar-default-link-hover-bg !important;
+      }
+    }
+
+    > ul.navbar-right > li {
+      @extend .ml-4;
     }
   }
 
-  .dropdown-menu li button.btn-link {
-    padding: 3px 20px;
+  .dropdown-menu {
+    li {
+      button.btn-link {
+        padding: 3px 20px;
+      }
+
+      // extend styling of links to "button_to" elements
+      form.button_to {
+        display: block;
+        padding: 3px 20px;
+        clear: both;
+        font-weight: 400;
+        line-height: 1.428571429;
+        white-space: nowrap;
+      }
+    }
   }
 
   // The button_to form, not the button, needs to display: block
