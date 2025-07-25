@@ -31,3 +31,10 @@
     { class: "mt-3 btn btn-default" }
   )
 %>
+<%=
+  link_to(
+    :inat_import_tracker_cancel.l,
+    inat_import_cancel_path(id: @tracker.inat_import),
+    { class: "mt-3 btn btn-default" }
+  )
+%>
