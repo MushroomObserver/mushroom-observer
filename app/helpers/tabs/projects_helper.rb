@@ -74,25 +74,25 @@ module Tabs
       add_page_title(link_to_object(project))
 
       if project.location
-        content_for(:location) do
+        content_for(:project_location) do
           tag.b(link_to(project.place_name, location_path(project.location.id)))
         end
       end
 
       if project.start_date && project.end_date
-        content_for(:date_range) do
+        content_for(:project_date_range) do
           tag.b(project.date_range)
         end
       end
 
-      add_background_image(project.image)
+      add_banner_image(project.image)
       project_tabs(project)
     end
 
-    def add_background_image(image)
+    def add_banner_image(image)
       return unless image
 
-      content_for(:background_image) do
+      content_for(:banner_image) do
         image_tag(image.large_url, class: "image-title")
       end
     end

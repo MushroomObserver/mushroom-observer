@@ -1,0 +1,38 @@
+<%
+has_banner = content_for?(:banner_image)
+add_interest_icons = (content_for?(:interest_icons))
+title_cols = add_interest_icons ? "col-sm-8 col-lg-7" : ""
+%>
+
+<%# Page title. Indexes have none — `rubric` in top_nav has model name. %>
+<%= tag.div(class: class_names("col-xs-12", title_cols), id: "title_bar") do %>
+  <% if action_name != "index" && !has_banner %>
+    <%= tag.nav(class: "show_title_nav navbar-flex") do
+      [
+        tag.h1(yield(:title), class: "navbar-brand h3 my-0 pl-3",
+                              id: "title"),
+        tag.ul(class: "nav navbar-nav object_edit h4") do
+          concat(yield(:edit_icons))
+        end
+      ].safe_join
+    end %>
+  <% end %>
+  <%= yield(:owner_naming) %>
+<% end %>
+
+<%# Show pages (except projects): %>
+<%# Interest and edit icons, prev/index/next links %>
+<% if action_name == "show" && !has_banner %>
+  <%= tag.div(class: "col-sm-4 col-lg-5 hidden-print text-right") do
+    tag.nav(class: "show_object_nav navbar-flex") do
+      # tag.div(class: "container-fluid") do
+        [
+          tag.ul(class: "nav navbar-flex interest-eyes h4 my-0") do
+            concat(yield(:interest_icons))
+          end,
+          yield(:prev_next_object)
+        ].safe_join
+      # end
+    end
+  end %>
+<% end %>

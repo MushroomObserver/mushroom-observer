@@ -557,7 +557,7 @@ class ProjectsControllerTest < FunctionalTestCase
     )
   end
 
-  def test_add_background_image
+  def test_add_banner_image
     file = image_setup
     num_images = Image.count
     params = build_params("With background", "With background")
@@ -580,10 +580,10 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_equal(params[:upload][:license_id], project.image.license_id)
   end
 
-  def test_bad_background_image
+  def test_bad_banner_image
     file = image_setup
     num_images = Image.count
-    params = build_params("Bad background", "Bad background")
+    params = build_params("Bad banner", "Bad banner")
     project = projects(:eol_project)
     params[:id] = project.id
     params[:upload][:image] = file
@@ -601,10 +601,10 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_equal(num_images, Image.count)
   end
 
-  def test_fail_save_background_image
+  def test_fail_save_banner_image
     file = image_setup
     num_images = Image.count
-    params = build_params("Bad background", "Bad background")
+    params = build_params("Bad banner", "Bad banner")
     project = projects(:eol_project)
     params[:id] = project.id
     params[:upload][:image] = file

@@ -11,88 +11,45 @@ context_nav
 type_filters
 %>
 <%
+has_banner = content_for?(:banner_image)
 add_filter_help(@any_content_filters_applied)
-add_interest_icons = (content_for?(:interest_icons))
-left_cols = add_interest_icons ? "col-xs-8 col-lg-7" : "col-xs-12"
-filters = content_for?(:filters) || content_for?(:filter_help)
+title_cols = add_interest_icons ? "col-sm-8 col-lg-7" : ""
 %>
 
 <%= tag.header(id: "header") do %>
   <%= tag.div(class: "row") do %>
     <%# Push down pager, title on small, xs screens so buttons do not block %>
-    <%= tag.div(safe_nbsp, class: "hidden-print visible-xs visible-sm mt-4") %>
+    <%# tag.div(safe_nbsp, class: "hidden-print visible-xs visible-sm mt-4") %>
 
-    <%= tag.div(class: left_cols, id: "title_bar") do %>
-      <%# Project header %>
-      <% if content_for?(:background_image) %>
-        <%= render(partial: "application/content/project_title") %>
-      <% end %>
+    <%# Index filters and pagination, full width %>
+    <%= render(partial: "application/content/index_bar") %>
+  <% end %>
 
-      <%# Indexes: Query filter subtitle and pagination %>
-      <%= tag.div(class: "d-flex justify-content-between") do %>
-        <%= tag.div(class: "px-3") do %>
-          <% if filters %>
-            <%= yield(:filters) -%>
-            <%= yield(:filter_help) -%>
-          <% end %>
-        <% end %>
-        <%= tag.div do %>
-          <%= yield(:letters) %>
-          <%= yield(:numbers) %>
-        <% end %>
-      <% end %>
+  <%= tag.div(class: "row") do %>
+    <%# Page title. Indexes have none — `rubric` in top_nav has model name. %>
+    <%= render(partial: "application/content/page_title") %>
+  <% end %>
 
-      <%# Page title %>
-      <% if !content_for?(:background_image) %>
-        <% unless action_name == "index" %>
-          <%= tag.nav(class: "show_title_nav d-flex justify-content-between " \
-                             "align-items-center") do
-            [
-              tag.h1(yield(:title), class: "h3 my-0 pl-3", id: "title"),
-              tag.ul(class: "nav navbar-nav object_edit h4") do
-                concat(yield(:edit_icons))
-              end
-            ].safe_join
-          end %>
-        <% end %>
-      <% end %>
-      <%= yield(:owner_naming) %>
-    <% end %>
-
-    <%# Show pages: prev/index/next links %>
-    <%# Interest and edit icons %>
-    <%= tag.div(class: "hidden-print text-right col-sm-4 col-lg-5 mb-3") do
-      tag.nav(class: "show_object_nav navbar") do
-        tag.div(class: "container-fluid") do
-          [
-            tag.ul(class: "nav navbar-nav interest-eyes h4") do
-              concat(yield(:interest_icons))
-            end,
-            yield(:prev_next_object)
-          ].safe_join
-        end
-      end
-    end %>
-
+  <%= tag.div(class: "row") do %>
     <%# RssLog type filters %>
-    <%= content_tag_if(content_for?(:type_filters), :div,
-                      class: "hidden-print col-xs-12") do
-          yield(:type_filters)
-        end %>
+    <% if content_for?(:type_filters) %>
+      <%= tag.div(class: "hidden-print col-xs-12") do
+        yield(:type_filters)
+      end %>
+    <% end %>
 
     <%# Project tabs %>
     <% if content_for?(:project_tabs) %>
-      <%= tag.div(class: left_cols, id: "project_tabs") do
+      <%= tag.div(class: title_cols, id: "project_tabs") do
         yield(:project_tabs)
       end %>
     <% end %>
 
-    <%# Observation buttons %>
+    <%# Project observation buttons %>
     <% if content_for?(:observation_buttons) %>
-      <%= tag.div(class: left_cols, id: "observation_buttons") do
+      <%= tag.div(class: title_cols, id: "observation_buttons") do
         yield(:observation_buttons)
       end %>
     <% end %>
-
   <% end %>
 <% end %>
