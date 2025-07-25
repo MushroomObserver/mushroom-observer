@@ -15,8 +15,10 @@ module ObservationsHelper
   #   Observation nnn: Aaa bbb Author(s) (Site ID)
   #
   # NOTE: Must pass owner naming, or it will be recalculated on every obs.
+  # Only used for the page <title> element. #title is composed from parts.
   def show_obs_title(obs:, owner_naming: nil, user: nil)
     [
+      :OBSERVATION.l,
       obs_title_id(obs),
       obs_title_consensus_name_link(
         name: obs.name, owner_naming: owner_naming, user:

@@ -52,7 +52,6 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     click_button(class: "destroy_observation_link_#{first_obs.id}")
 
     # MO should show next Observation.
-    page.find("#title")
     assert_match(/#{:app_title.l}: Observation #{next_obs.id}/, page.title,
                  "Wrong page")
   end

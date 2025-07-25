@@ -41,8 +41,10 @@ module TitleHelper
     end
   end
 
-  # Simple builder for index page titles,
-  # with a complex builder for the "filter caption" that explains the query.
+  # Simple builder for index page titles, shown only in the <title>.
+  # The top_nav `rubric` contains what was formerly the index title, i.e.
+  # the model name pluralized.
+  # Also sets the "filter caption" that explains the query, shown on the page
   def add_index_title(query, map: false)
     title = if map
               :map_locations_title.l(
