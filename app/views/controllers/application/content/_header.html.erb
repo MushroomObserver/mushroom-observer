@@ -13,7 +13,7 @@ type_filters
 <%
 has_banner = content_for?(:banner_image)
 add_filter_help(@any_content_filters_applied)
-title_cols = add_interest_icons ? "col-sm-8 col-lg-7" : ""
+title_cols = content_for?(:interest_icons) ? "col-sm-8 col-lg-7" : ""
 %>
 
 <%= tag.header(id: "header") do %>
