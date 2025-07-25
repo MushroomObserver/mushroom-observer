@@ -594,7 +594,7 @@ class ObservationTest < UnitTestCase
     assert_not(consensus.user_voted?(namg1, rolf))
     assert_not(consensus.user_voted?(namg1, mary))
     assert_not(consensus.user_voted?(namg1, dick))
-    assert_nil(consensus.owners_vote(namg1))
+    assert_nil(consensus.users_vote(namg1, obs.user))
     assert_nil(consensus.users_vote(namg1, rolf))
     assert_nil(consensus.users_vote(namg1, mary))
     assert_nil(consensus.users_vote(namg1, dick))
@@ -622,7 +622,8 @@ class ObservationTest < UnitTestCase
     obs.reload
     assert(consensus.owner_voted?(namg1))
     assert(consensus.user_voted?(namg1, rolf))
-    assert(vote = consensus.owners_vote(namg1))
+
+    assert(vote = consensus.users_vote(namg1, obs.user))
     assert_equal(vote, consensus.users_vote(namg1, rolf))
     assert(consensus.owners_favorite?(namg1))
     assert(consensus.users_favorite?(namg1, rolf))
