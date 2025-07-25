@@ -100,6 +100,11 @@ ul.tight-list {
   font-weight: bold;
 }
 
-.btn-constraint-warning {
-  color: black;
+// Used for record id in title.
+.badge-outline {
+  font-size: $font-size-base;
+  background-color: transparent;
+  color: $text-color;
+  border: 1px solid $text-color;
+  border-radius: 3px;
 }
