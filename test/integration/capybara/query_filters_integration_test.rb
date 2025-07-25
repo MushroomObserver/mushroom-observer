@@ -52,12 +52,12 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
 
     # Show Locations (from obs index) should be filtered
     click_link("Show Locations")
-    # page.find("#title_bar").assert_text(:filtered.t)
+    # page.find("#index_bar").assert_text(:filtered.t)
     page.find("#filters").assert_text(:query_has_images.l)
 
     # And mapping them (from locations index) should also be filtered.
     click_link("Map Locations")
-    # page.find("#title_bar").assert_text(:filtered.t)
+    # page.find("#index_bar").assert_text(:filtered.t)
     # page.find("#filters").assert_text(:query_has_images.l)
 
     ### Now prove that turning filter off stops filtering ###
@@ -87,7 +87,7 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
     page.select("Observations", from: :search_type)
     within("#pattern_search_form") { click_button("Search") }
 
-    # page.find("#title_bar").assert_no_text(:filtered.t)
+    # page.find("#index_bar").assert_no_text(:filtered.t)
     page.find("#filters").assert_no_text(:query_has_images.l)
 
     results = page.find("#results")
@@ -130,7 +130,7 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
     page.select("Observations", from: :search_type)
 
     within("#pattern_search_form") { click_button("Search") }
-    # page.find("#title_bar").assert_text(:filtered.t)
+    # page.find("#index_bar").assert_text(:filtered.t)
     page.find("#filters").assert_text(:query_has_specimen.l)
 
     results = page.find("#results")
@@ -167,7 +167,7 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
     first(:button, :advanced_search_submit.l).click
 
     # Advance Search Filters should override user's { has_images: "yes" }
-    page.find("#title_bar").assert_no_text(:filtered.t)
+    page.find("#index_bar").assert_no_text(:filtered.t)
 
     results = page.find("#results")
     # Number of hits should == **total** Observations of obs.name
@@ -197,7 +197,7 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
 
     # Advance Search Filters should override user content_filter so hits
     #   should == vouchered Observations of obs.name, both imaged and imageless
-    page.find("#title_bar").assert_no_text(:filtered.t)
+    page.find("#index_bar").assert_no_text(:filtered.t)
     expect = Observation.where(name: obs.name).where(specimen: true)
     results = page.find("#results")
     results.assert_text(obs.name.text_name, count: expect.size)
