@@ -453,6 +453,23 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     end
   end
 
+  # For project_list_search, add dispatch controller
+  def object_search_field(object:, form:)
+    type = object.type_tag
+    messages = {
+      off: :search_status_all_names.l(type:),
+      red: :search_status_has_no_name.l(type:),
+      green: :search_status_has_name.l(type:)
+    }
+    render(partial: "shared/search_status_autocompleter",
+           locals: { form:, matches: object_names(object), messages: })
+  end
+
+  def object_names(object)
+    object.observations.joins(:name).select("names.text_name", "names.id").
+      distinct.order("names.text_name")
+  end
+
   # Unused
   # def search_field_with_submit(args)
   #   opts = separate_field_options_from_args(args)
