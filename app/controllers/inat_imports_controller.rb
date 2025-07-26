@@ -117,7 +117,8 @@ class InatImportsController < ApplicationController
       response_errors: "",
       token: "",
       log: [],
-      ended_at: nil
+      ended_at: nil,
+      cancel: false
     )
   end
 

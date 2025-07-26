@@ -60,3 +60,10 @@ lone_wolf_import:
   state: <%= InatImport.states[:Done] %>
   ended_at: <%= Time.zone.now + 15.seconds %>
   response_errors: "Random error msg"
+
+# ollie canceled an import
+ollie_inat_import:
+  <<: *DEFAULTS
+  user: ollie
+  state: <%= InatImport.states[:Done] %>
+  cancel: true

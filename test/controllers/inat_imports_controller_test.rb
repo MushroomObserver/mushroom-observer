@@ -73,6 +73,20 @@ class InatImportsControllerTest < FunctionalTestCase
     )
   end
 
+  def test_create_cancel_reset
+    user = users(:ollie)
+    import = inat_imports(:ollie_inat_import)
+    assert(import.canceled?, "Test needs a canceled InatImport fixture")
+    id = "123"
+    params = { inat_ids: id, inat_username: user.inat_username, consent: 1 }
+
+    login(user.login)
+    post(:create, params: params)
+
+    assert_not(import.reload.canceled?,
+               "`cancel` should be false when starting an import")
+  end
+
   def test_create_missing_username
     user = users(:rolf)
     id = "123"
