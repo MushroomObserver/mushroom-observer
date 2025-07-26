@@ -48,7 +48,7 @@ module PaginationNavHelper
   #   <%= letter_pagination_nav(@pagination_data) %>
   #   <%= number_pagination_nav(@pagination_data) %>
   #
-  def letter_pagination_nav(pagination_data, args = {})
+  def letter_pagination_nav_old(pagination_data, args = {})
     return safe_empty unless need_letter_pagination_links?(pagination_data)
 
     args = args.dup
@@ -62,6 +62,37 @@ module PaginationNavHelper
       end
     end.safe_join(" ")
     tag.ul(str, class: "pagination pagination-sm")
+  end
+
+  def letter_pagination_nav(pagination_data, args = {})
+    return "" unless need_letter_pagination_links?(pagination_data)
+
+    args = args.dup
+    args[:params] = (args[:params] || {}).dup
+    args[:params][pagination_data.number_arg] = nil
+    arg = pagination_data.letter_arg
+
+    this_letter, prev_letter, next_letter =
+      letter_pagination_pages(pagination_data)
+
+    tag.nav(class: "pagination_letters navbar") do
+      tag.div(class: "container-fluid") do
+        [
+          tag.ul(class: "nav navbar-nav") do
+            [
+              tag.li { prev_letter_link(prev_letter, arg, args) },
+              tag.li { tag.p(:ALPHABETICAL.l, class: "navbar-text mx-0") }
+            ].safe_join
+          end,
+          page_input(this_letter, max_page),
+          tag.ul(class: "nav navbar-nav navbar-left") do
+            [
+              tag.li { next_letter_link(next_letter, max_page, arg, args) }
+            ].safe_join
+          end
+        ].safe_join
+      end
+    end
   end
   # rubocop:enable Metrics/AbcSize
 
@@ -87,51 +118,7 @@ module PaginationNavHelper
   #   # In view: (it is wrapped in 'pagination' div already)
   #   <%= number_pagination_nav(@pagination_data) %>
   #
-  # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity
-  # rubocop:disable Metrics/PerceivedComplexity
-  def number_pagination_nav_old(pages, args = {})
-    return "" unless pages && pages.num_pages > 1
-
-    params = args[:params] ||= {}
-    params[pages.letter_arg] = pages.letter if pages.letter_arg && pages.letter
-
-    num = pages.num_pages
-    arg = pages.number_arg
-    this = pages.number
-    this = 1 if this < 1
-    this = num if this > num
-    size = args[:window_size] || 5
-    from = this - size
-    to = this + size
-
-    list_args = { num:, arg:, args:, this:, size:, from:, to: }
-    number_pagination_nav_list(list_args)
-  end
-
-  def number_pagination_nav_list(list_args)
-    list_args => { num:, arg:, args:, this:, size:, from:, to: }
-    result = []
-    pstr = "« #{:PREV.t}"
-    nstr = "#{:NEXT.t} »"
-    result << pagination_link(pstr, this - 1, arg, args) if this > 1
-    result << pagination_link(1, 1, arg, args) if from > 1
-    result << tag.li(tag.span("..."), class: "disabled") if from > 2
-    (from..to).each do |n|
-      if n == this
-        result << tag.li(tag.span(n), class: "active")
-      elsif n.positive? && n <= num
-        result << pagination_link(n, n, arg, args)
-      end
-    end
-    result << tag.li(tag.span("..."), class: "disabled") if to < num - 1
-    result << pagination_link(num, num, arg, args) if to < num
-    result << pagination_link(nstr, this + 1, arg, args) if this < num
-
-    result = tag.ul(
-      result.safe_join(" "), class: "pagination pagination-sm"
-    )
-  end
-
+  # rubocop:disable Metrics/AbcSize
   def number_pagination_nav(pages, args = {})
     return "" unless pages && pages.num_pages > 1
 
@@ -163,15 +150,22 @@ module PaginationNavHelper
           end
         ].safe_join
       end
-      # end
     end
   end
-  # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity
-  # rubocop:enable Metrics/PerceivedComplexity
+  # rubocop:enable Metrics/AbcSize
 
-  def number_pagination_pages(pages)
-    max_page = pages.num_pages
-    this_page = pages.number
+  def letter_pagination_pages(pagination_data)
+    letters = pagination_data.used_letters
+    this_letter = pagination_data.letter || "A"
+    this_letter_idx = letters.index(this_letter) || 0
+    prev_letter = letters[this_letter_idx - 1]
+    next_letter = letters[this_letter_idx + 1]
+    [this_letter, prev_letter, next_letter]
+  end
+
+  def number_pagination_pages(pagination_data)
+    max_page = pagination_data.num_pages
+    this_page = pagination_data.number
     this_page = 1 if this_page < 1
     this_page = max_page if this_page > max_page
     prev_page = this_page - 1
@@ -235,9 +229,9 @@ module PaginationNavHelper
     end
   end
 
-  # The form won't commit to the form url with the params even if included.
-  # We need to re-send the incoming params as part of the form
-  # Can't convert to_h without knowing what to permit
+  # The form url does not have the existing params, because these would
+  # be overwritten by the param set represented by the form fields.
+  # We need to re-send the incoming params as part of the form.
   def pagination_hidden_param_fields(form)
     params.except(:controller, :action, :page).keys.map do |key|
       form.hidden_field(key.to_sym, value: params[key])
