@@ -446,6 +446,8 @@ MushroomObserver::Application.routes.draw do
   get("inat_imports/authorization_response",
       to: "inat_imports#authorization_response",
       as: "inat_import_authorization_response")
+  get("inat_imports/cancel/:id", to: "inat_imports#cancel",
+                                 as: "inat_import_cancel")
   resources :inat_imports, only: [:show, :new, :create] do
     resources :job_trackers, only: [:show], module: :inat_imports
   end
