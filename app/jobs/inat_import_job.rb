@@ -9,6 +9,7 @@ class InatImportJob < ApplicationJob
 
   delegate :token, to: :inat_import
   delegate :user, to: :inat_import
+  delegate :canceled?, to: :inat_import
 
   def perform(inat_import)
     create_ivars(inat_import)
@@ -92,6 +93,7 @@ class InatImportJob < ApplicationJob
     return false if page_empty?(parsed_page)
 
     import_page(parsed_page)
+    return import_canceled if canceled?
 
     parser.last_import_id = parsed_page["results"].last["id"]
     return true unless last_page?(parsed_page)
@@ -102,6 +104,11 @@ class InatImportJob < ApplicationJob
 
   def page_empty?(page)
     page["total_results"].zero?
+  end
+
+  def import_canceled # rubocop:disable Naming/PredicateMethod
+    log("Import canceled by user")
+    false
   end
 
   def last_page?(parsed_page)
