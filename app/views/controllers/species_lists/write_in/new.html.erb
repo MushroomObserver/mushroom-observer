@@ -1,0 +1,11 @@
+<%
+add_page_title(:species_list_write_in_title.t)
+
+add_context_nav(species_list_form_new_tabs)
+@container = :text
+
+action = species_list_write_in_path
+%>
+
+<%= render(partial: "species_lists/write_in/form",
+           locals: { button: :ADD, action: action }) %>
