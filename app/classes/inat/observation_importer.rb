@@ -3,6 +3,7 @@
 class Inat
   class ObservationImporter
     include Inat::Constants
+    attr_reader :inat_import, :user
 
     def initialize(inat_import, user)
       @inat_import = inat_import
@@ -11,6 +12,8 @@ class Inat
 
     def import_page(page)
       page["results"].each do |result|
+        return false if inat_import.canceled?
+
         import_one_result(JSON.generate(result))
       end
     end
