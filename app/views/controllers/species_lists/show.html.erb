@@ -16,7 +16,7 @@
 <%= species_list_title_panel(@species_list) if @project %>
 
 <%= panel_block(id: "list_search") do
-  render(partial: "shared/list_search", locals: { object: @project })
+  render(partial: "shared/list_search", locals: { object: @species_list })
 end %>
 
 <%= panel_block do %>
