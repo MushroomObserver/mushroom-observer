@@ -15,10 +15,9 @@
 
 <%= species_list_title_panel(@species_list) if @project %>
 
-<%= panel_block(id: "list_search") do %>
-  <%= render(partial: "shared/project_list_search",
-             locals: { object: @species_list }) %>
-<% end %>
+<%= panel_block(id: "list_search") do
+  render(partial: "shared/list_search", locals: { object: @project })
+end %>
 
 <%= panel_block do %>
   <div class="d-flex justify-content-between align-items-center">

@@ -453,7 +453,7 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     end
   end
 
-  # For project_list_search, add dispatch controller
+  # For list_search, AddDispatch controller
   def object_search_field(object:, form:)
     type = object.type_tag
     messages = {
