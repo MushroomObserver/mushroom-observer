@@ -71,7 +71,7 @@ module PaginationNavHelper
     args[:params] = (args[:params] || {}).dup
     args[:params][pagination_data.number_arg] = nil
 
-    this_letter = pagination_data.letter || "A"
+    this_letter, letters = letter_pagination_pages(pagination_data)
 
     tag.nav(class: "pagination_letters navbar") do
       tag.div(class: "container-fluid") do
@@ -82,7 +82,7 @@ module PaginationNavHelper
               tag.li { tag.p(:by_letter.l, class: "navbar-text mx-0") }
             ].safe_join
           end,
-          letter_input(this_letter)
+          letter_input(this_letter, letters)
           # tag.ul(class: "nav navbar-nav navbar-left") do
           #   [
           #     tag.li { next_letter_link(next_letter, max_page, arg, args) }
@@ -154,11 +154,11 @@ module PaginationNavHelper
 
   def letter_pagination_pages(pagination_data)
     letters = pagination_data.used_letters
-    this_letter = pagination_data.letter || "A"
-    this_letter_idx = letters.index(this_letter) || 0
-    prev_letter = letters[this_letter_idx - 1]
-    next_letter = letters[this_letter_idx + 1]
-    [this_letter, prev_letter, next_letter]
+    this_letter = pagination_data.letter || ""
+    # this_letter_idx = letters.index(this_letter) || 0
+    # prev_letter = letters[this_letter_idx - 1]
+    # next_letter = letters[this_letter_idx + 1]
+    [this_letter, letters]
   end
 
   def number_pagination_pages(pagination_data)
@@ -172,9 +172,11 @@ module PaginationNavHelper
   end
 
   def prev_page_link(prev_page, arg, args)
-    disabled = prev_page < 1 ? "disabled" : ""
+    # disabled = prev_page < 1 ? "disabled" : ""
+    return "" if prev_page < 1
+
     classes = class_names(
-      %w[navbar-link navbar-left btn px-0 mr-2 previous_page_link], disabled
+      %w[navbar-link navbar-left btn px-0 mr-2 previous_page_link] # , disabled
     )
 
     url = pagination_link_url(prev_page, arg, args)
@@ -185,9 +187,11 @@ module PaginationNavHelper
   end
 
   def next_page_link(next_page, max, arg, args)
-    disabled = next_page > max ? "disabled" : ""
+    # disabled = next_page > max ? "disabled" : ""
+    return "" if next_page > max
+
     classes = class_names(
-      %w[navbar-link navbar-left btn px-0 ml-2 next_page_link], disabled
+      %w[navbar-link navbar-left btn px-0 ml-2 next_page_link] # , disabled
     )
 
     url = pagination_link_url(next_page, arg, args)
@@ -197,10 +201,11 @@ module PaginationNavHelper
     )
   end
 
-  def letter_input(this_letter)
+  def letter_input(this_letter, used_letters)
     form_with(
       url: pagination_current_url, method: :get, local: true,
-      class: "navbar-form navbar-left px-0 page_input"
+      class: "navbar-form navbar-left px-0 page_input",
+      data: { controller: "page-input", page_input_letters_value: used_letters }
     ) do |f|
       [
         tag.div(class: "input-group page-input mx-2") do
@@ -208,7 +213,9 @@ module PaginationNavHelper
             f.text_field(
               :letter,
               type: :text, value: this_letter, class: "form-control text-right",
-              size: 1
+              size: 1, placeholder: "—",
+              data: { page_input_target: "letterInput",
+                      action: "page-input#sanitizeLetter" }
             ),
             tag.span(class: "input-group-btn") do
               tag.button(type: :submit,
@@ -237,8 +244,8 @@ module PaginationNavHelper
               :page,
               type: :text, value: this_page, class: "form-control text-right",
               size: max_page.digits.count,
-              data: { page_input_target: "input",
-                      action: "page-input#updateForm" }
+              data: { page_input_target: "numberInput",
+                      action: "page-input#sanitizeNumber" }
             ),
             tag.span(class: "input-group-btn") do
               tag.button(type: :submit,
