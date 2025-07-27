@@ -78,18 +78,18 @@ module PaginationNavHelper
     tag.nav(class: "pagination_letters navbar") do
       tag.div(class: "container-fluid") do
         [
-          tag.ul(class: "nav navbar-nav") do
-            [
-              tag.li { prev_letter_link(prev_letter, arg, args) },
-              tag.li { tag.p(:ALPHABETICAL.l, class: "navbar-text mx-0") }
-            ].safe_join
-          end,
-          page_input(this_letter, max_page),
-          tag.ul(class: "nav navbar-nav navbar-left") do
-            [
-              tag.li { next_letter_link(next_letter, max_page, arg, args) }
-            ].safe_join
-          end
+          # tag.ul(class: "nav navbar-nav") do
+          #   [
+          #     tag.li { prev_letter_link(prev_letter, arg, args) },
+          #     tag.li { tag.p(:ALPHABETICAL.l, class: "navbar-text mx-0") }
+          #   ].safe_join
+          # end,
+          letter_input(this_letter, max_page)
+          # tag.ul(class: "nav navbar-nav navbar-left") do
+          #   [
+          #     tag.li { next_letter_link(next_letter, max_page, arg, args) }
+          #   ].safe_join
+          # end
         ].safe_join
       end
     end
@@ -199,6 +199,32 @@ module PaginationNavHelper
     )
   end
 
+  def letter_input(this_letter)
+    form_with(
+      url: pagination_current_url, method: :get, local: true,
+      class: "navbar-form navbar-left px-0 page_input"
+    ) do |f|
+      [
+        tag.div(class: "input-group page-input mx-2") do
+          [
+            f.text_field(
+              :letter,
+              type: :text, value: this_letter, class: "form-control text-right",
+              size: 1
+            ),
+            tag.span(class: "input-group-btn") do
+              tag.button(type: :submit,
+                         class: "btn btn-outline-default px-2") do
+                "•"
+              end
+            end
+          ].safe_join
+        end,
+        *pagination_hidden_param_fields(f, :letter)
+      ].safe_join
+    end
+  end
+
   # On input change, the form's page param is sanitized by Stimulus.
   def page_input(this_page, max_page)
     form_with(
@@ -224,7 +250,7 @@ module PaginationNavHelper
             end
           ].safe_join
         end,
-        *pagination_hidden_param_fields(f)
+        *pagination_hidden_param_fields(f, :page)
       ].safe_join
     end
   end
@@ -232,8 +258,8 @@ module PaginationNavHelper
   # The form url does not have the existing params, because these would
   # be overwritten by the param set represented by the form fields.
   # We need to re-send the incoming params as part of the form.
-  def pagination_hidden_param_fields(form)
-    params.except(:controller, :action, :page).keys.map do |key|
+  def pagination_hidden_param_fields(form, field = :page)
+    params.except(:controller, :action, field).keys.map do |key|
       form.hidden_field(key.to_sym, value: params[key])
     end
   end
