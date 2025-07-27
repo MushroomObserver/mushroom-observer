@@ -70,21 +70,19 @@ module PaginationNavHelper
     args = args.dup
     args[:params] = (args[:params] || {}).dup
     args[:params][pagination_data.number_arg] = nil
-    arg = pagination_data.letter_arg
 
-    this_letter, prev_letter, next_letter =
-      letter_pagination_pages(pagination_data)
+    this_letter = pagination_data.letter || "A"
 
     tag.nav(class: "pagination_letters navbar") do
       tag.div(class: "container-fluid") do
         [
-          # tag.ul(class: "nav navbar-nav") do
-          #   [
-          #     tag.li { prev_letter_link(prev_letter, arg, args) },
-          #     tag.li { tag.p(:ALPHABETICAL.l, class: "navbar-text mx-0") }
-          #   ].safe_join
-          # end,
-          letter_input(this_letter, max_page)
+          tag.ul(class: "nav navbar-nav") do
+            [
+              # tag.li { prev_letter_link(prev_letter, arg, args) },
+              tag.li { tag.p(:by_letter.l, class: "navbar-text mx-0") }
+            ].safe_join
+          end,
+          letter_input(this_letter)
           # tag.ul(class: "nav navbar-nav navbar-left") do
           #   [
           #     tag.li { next_letter_link(next_letter, max_page, arg, args) }
