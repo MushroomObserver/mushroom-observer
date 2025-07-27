@@ -1824,7 +1824,6 @@
   image_reuse_id_help: Either click one of the images below, or if you know the image ID, just enter it here and click '[:image_reuse_reuse]'.
 
   # images/show
-  image_show_title: "[:IMAGE]: [name]"
   image_show_inquiry: Send Commercial Inquiry
   image_show_rotate_left: Rotate Left
   image_show_rotate_right: Rotate Right
@@ -2213,7 +2212,6 @@
   show_location_hidden: This location is considered hidden either because it is private property whose owners do not want the location revealed or because it contains sensitive habitat. Its coordinates are intentionally imprecise and all associated observations have hidden GPS coordinates.
 
   # names
-  show_name_title: "[:NAME]: [name]"
   show_name_add_name: "[:add_object(type=:name)]"
   show_name_edit_name: "[:edit_object(type=:name)]"
   show_name_distribution_map: Occurrence Map
@@ -2479,7 +2477,6 @@
   species_list_projects_help: "This form allows you to either attach this list or its observations or images to one or more projects, or remove them from one or more projects.  Choose which objects you wish to attach or remove, then choose the project or projects you wish to attach them to or remove them from, then click on \"Attach\" or \"Remove\" to perform the operation.  Note: It will only allow you to attach or remove objects which you have permission to edit."
 
   # species_list/show_species_list
-  species_list_show_title: "[:SPECIES_LIST]: [name]"
   species_list_show_download: Downloads, Reports, Print Labels
   species_list_show_save_as_txt: Save as Plain Text
   species_list_show_save_as_rtf: Save as Rich Text

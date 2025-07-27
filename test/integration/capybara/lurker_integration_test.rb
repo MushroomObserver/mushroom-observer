@@ -179,7 +179,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     fill_in("search_pattern", with: "Coprinus comatus")
     select("Names", from: "search_type")
     within("#pattern_search_form") { click_button("Search") }
-    assert_match(names(:coprinus_comatus).search_name,
+    assert_match(names(:coprinus_comatus).text_name,
                  page.title, "Wrong page")
 
     # Search for observations of that name.  (Only one.)

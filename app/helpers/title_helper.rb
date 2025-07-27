@@ -14,12 +14,12 @@
 #
 module TitleHelper
   # sets both the html doc title and the title for the page (previously @title)
-  def add_page_title(title)
+  def add_page_title(title, document_title = title)
     content_for(:title) do
       title
     end
     content_for(:document_title) do
-      title_tag_contents(title)
+      title_tag_contents(document_title)
     end
   end
 

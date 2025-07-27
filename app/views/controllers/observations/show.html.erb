@@ -1,9 +1,10 @@
 <%
 # owner_naming must be defined before show_obs_page_title
 @owner_naming = owner_naming_line(@owner_name, @user)
-add_page_title(show_obs_title(
-  obs: @observation, owner_naming: @owner_naming, user: @user)
+show_title = observation_show_title(
+  obs: @observation, owner_naming: @owner_naming, user: @user
 )
+add_page_title(show_title, [:OBSERVATION.l, show_title].safe_join(" "))
 add_owner_naming(@owner_naming)
 if @user
   add_pager_for(@observation)

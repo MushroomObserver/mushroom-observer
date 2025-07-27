@@ -1,5 +1,8 @@
 <%
-add_page_title(:show_name_title.t(name: @name.user_display_name(@user)))
+add_page_title(
+  @name.user_display_name(@user),
+  ["#{:NAME.l}:", @name.text_name].safe_join(" ")
+)
 
 Textile.user_register_name(@user, @name)
 add_pager_for(@name)

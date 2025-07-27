@@ -20,7 +20,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("#title", text: title.as_displayed)
     # go back to the name page
     click_on(class: "latest_version_link")
-    title = :show_name_title.t(name: name.display_name)
+    title = name.display_name
     assert_selector("#title", text: title.as_displayed)
   end
 
@@ -117,9 +117,10 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     within("#pattern_search_form") { click_button("Search") }
 
     assert_no_selector("#content div.alert-warning")
-    title = CGI.unescapeHTML(
-      "Mushroom Observer: Name: #{names(:provisional_name).text_name}".t
-    )
+    title =
+      "Mushroom Observer: Name: #{names(:provisional_name).text_name}".t.
+      unescape_html.tr("‘", "'").tr("’", "'")
+
     assert_title(title)
   end
 

@@ -69,7 +69,7 @@ module Tabs
     def article_show_title(article)
       capture do
         concat(article.display_title.t)
-        concat(" (##{article.id || "?"})")
+        concat(tag.span(article.id || "?", class: "badge badge-outline ml-3"))
       end
     end
 
