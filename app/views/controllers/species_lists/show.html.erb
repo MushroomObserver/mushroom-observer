@@ -1,16 +1,16 @@
 <%
-  if @project
-    add_project_banner(@project)
-    @container = :wide
-  else
-    add_page_title(
-      :species_list_show_title.t(name: @species_list.unique_format_name)
-    )
-    add_context_nav(species_list_show_tabs(list: @species_list, query: @query))
-    @container = :text_image
-    add_pager_for(@species_list)
-    add_interest_icons(@user, @species_list)
-  end
+if @project
+  add_project_banner(@project)
+  @container = :wide
+else
+  add_page_title(
+    :species_list_show_title.t(name: @species_list.unique_format_name)
+  )
+  add_context_nav(species_list_show_tabs(list: @species_list, query: @query))
+  @container = :text_image
+  add_pager_for(@species_list)
+  add_interest_icons(@user, @species_list)
+end
 %>
 
 <%= species_list_title_panel(@species_list) if @project %>
