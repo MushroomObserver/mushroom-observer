@@ -23,7 +23,6 @@ end %>
   <div class="d-flex justify-content-between align-items-center">
     <div><b><%= :WHEN.t %>:</b> <%= @species_list.when.web_date %></div>
     <div>
-      <%= obs_change_links(@species_list) %> |
       <%= download_button(target: @species_list, icon: :download) %>
     </div>
   </div>
