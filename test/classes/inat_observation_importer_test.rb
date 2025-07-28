@@ -2,7 +2,6 @@
 
 require("test_helper")
 
-# test mapping of iNat observation photo key/values to MO Image attributes
 class InatObservationImporterTest < UnitTestCase
   def test_canceled
     import = inat_imports(:ollie_inat_import)
@@ -14,7 +13,8 @@ class InatObservationImporterTest < UnitTestCase
     importer = ::Inat::ObservationImporter.new(import, user)
     assert_no_difference(
       "Observation.count",
-      "ObservationImporter should stop importing if the Import is canceled"
+      "ObservationImporter should stop importing observations after " \
+      "user cancels the Import"
     ) do
       importer.import_page(page)
     end
