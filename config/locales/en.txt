@@ -686,6 +686,7 @@
   west: west
   PAGE: Page
   by_letter: By letter
+  GOTO: Go
 
   # Labels for fields answering: "What did you observe?", "When did you observe
   # it?", "Where did you observe it?", and "Who observed it?".

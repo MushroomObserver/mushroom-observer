@@ -220,7 +220,7 @@ module PaginationNavHelper
             tag.span(class: "input-group-btn") do
               tag.button(type: :submit,
                          class: "btn btn-outline-default px-2") do
-                "•"
+                link_icon(:goto, title: :GOTO.l)
               end
             end
           ].safe_join
@@ -250,7 +250,7 @@ module PaginationNavHelper
             tag.span(class: "input-group-btn") do
               tag.button(type: :submit,
                          class: "btn btn-outline-default px-2") do
-                "•"
+                link_icon(:goto, title: :GOTO.l)
               end
             end
           ].safe_join
