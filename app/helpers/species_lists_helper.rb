@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# View Helpers for Projects, Project Violations
+# View Helpers for Observation Lists
 module SpeciesListsHelper
   def species_list_title_panel(list)
     tag.div(class: "species_list_title") do
