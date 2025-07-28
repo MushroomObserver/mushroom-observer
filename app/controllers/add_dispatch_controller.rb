@@ -10,6 +10,10 @@ class AddDispatchController < ApplicationController
   before_action :pass_query_params
 
   def new
+    # The project field is not required since not all Observation Lists are
+    # associated with Projects. The field, if provided, overrides the project
+    # of the field slip if it's different.
+    # This is how the Project context gets passed if it is relevant.
     @project = Project.safe_find(params[:project])
     @field_slip_code = find_code(@project, params[:field_slip])&.strip
     url = if @field_slip_code

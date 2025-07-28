@@ -13,24 +13,29 @@ tag.div(
           search_status_matches_value: matches }
 ) do
   [
-    tag.div(class: "status-light-container") do
+    tag.div(class: "d-flex flex-row align-items-center form-inline mb-2") do
       [
-        tag.div(class: "status-indicator",
-                data: { search_status_target: "light" }),
-        tag.span(:search_status_all_names.l(type:),
-                 class: "status-text",
-                 data: { search_status_target: "message" }),
-        tag.div(class: "field-slip-container vcenter") do
+        tag.div(class: "status-light-container mb-1 mr-5") do
           [
-            tag.span("Field Slip:", for: "field_slip", class: "mx-3"),
-            tag.input(type: "text", id: "field_slip", name: "field_slip"),
-            tag.button("Add", type: "submit", class: "btn btn-default mx-3")
+            tag.div(class: "status-indicator",
+                    data: { search_status_target: "light" }),
+            tag.span(:search_status_all_names.l(type:),
+                    class: "status-text",
+                    data: { search_status_target: "message" })
+          ].safe_join
+        end,
+        tag.div(class: "field-slip-container field-group") do
+          [
+            form.label("Field Slip:", for: "field_slip",
+                       class: "font-weight-normal"),
+            form.text_field(:field_slip, class: "form-control mx-3", size: 9),
+            submit_button(form:, button: "Add")
           ].safe_join
         end
       ].safe_join
     end,
     autocompleter_field(
-      form:, field:, type:, label: "#{:SEARCH.l}:",
+      form:, field:, type:, label: "#{:SEARCH.l}:", class: "mb-2",
       data: {
         search_status_target: "input",
         action: [

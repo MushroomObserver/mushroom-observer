@@ -15,34 +15,32 @@ end
 
 <%= species_list_title_panel(@species_list) if @project %>
 
-<%= panel_block(id: "list_search") do %>
-  <%= render(partial: "shared/search",
-             locals: { object: @species_list }) %>
-<% end %>
+<%= panel_block(id: "list_search") do
+  render(partial: "shared/list_search", locals: { object: @species_list })
+end %>
 
-<div class="container-text">
-  <%= panel_block do %>
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-      <div><b><%= :WHEN.t %>:</b> <%= @species_list.when.web_date %></div>
-      <div>
-        <%= download_button(target: @species_list, icon: :download) %>
-      </div>
+<%= panel_block do %>
+  <div class="d-flex justify-content-between align-items-center">
+    <div><b><%= :WHEN.t %>:</b> <%= @species_list.when.web_date %></div>
+    <div>
+      <%= obs_change_links(@species_list) %> |
+      <%= download_button(target: @species_list, icon: :download) %>
     </div>
-    <div><b><%= :OBSERVATIONS.t %>:</b> <%= @query.num_results %></div>
-    <div><b><%= :WHERE.t %>:</b>
-      <%= location_link(@species_list.where, @species_list.location, nil, true) rescue :UNKNOWN.t %>
+  </div>
+  <div><b><%= :OBSERVATIONS.t %>:</b> <%= @query.num_results %></div>
+  <div><b><%= :WHERE.t %>:</b>
+    <%= location_link(@species_list.where, @species_list.location, nil, true) rescue :UNKNOWN.t %>
+  </div>
+  <div><b><%= :WHO.t %>:</b> <%= user_link(@species_list.user) %></div>
+  <% if @species_list.projects.any? %>
+    <div><b><%= :PROJECTS.t %>:</b>
+      <%= @species_list.projects.map {|p| link_to_object(p)}.safe_join(" | ") %>
     </div>
-    <div><b><%= :WHO.t %>:</b> <%= user_link(@species_list.user) %></div>
-    <% if @species_list.projects.any? %>
-      <div><b><%= :PROJECTS.t %>:</b>
-        <%= @species_list.projects.map {|p| link_to_object(p)}.safe_join(" | ") %>
-      </div>
-    <% end %>
-    <% if @species_list.notes.present? %>
-      <div><%= ("*" + :NOTES.t + ":* " + @species_list.notes.to_s).tpl %></div>
-    <% end %>
   <% end %>
-</div>
+  <% if @species_list.notes.present? %>
+    <div><%= ("*" + :NOTES.t + ":* " + @species_list.notes.to_s).tpl %></div>
+  <% end %>
+<% end %>
 
 <% if @pagination_data.any?
   query_params_set(@query) %>
