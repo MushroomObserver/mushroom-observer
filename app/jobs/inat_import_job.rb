@@ -7,9 +7,12 @@ class InatImportJob < ApplicationJob
 
   queue_as :default
 
+  delegate :canceled?, to: :inat_import
+  delegate :imported_count, to: :inat_import
+  delegate :inat_username, to: :inat_import
+  delegate :response_errors, to: :inat_import
   delegate :token, to: :inat_import
   delegate :user, to: :inat_import
-  delegate :canceled?, to: :inat_import
 
   def perform(inat_import)
     create_ivars(inat_import)
@@ -64,7 +67,7 @@ class InatImportJob < ApplicationJob
   end
 
   def right_user?(inat_logged_in_user)
-    inat_logged_in_user == inat_import.inat_username
+    inat_logged_in_user == inat_username
   end
 
   def import_requested_observations
@@ -73,7 +76,8 @@ class InatImportJob < ApplicationJob
     return log("No observations requested") if inat_import[:import_all].
                                                blank? && inat_ids.blank?
 
-    # Request one page of iNat observations at a time, until done with all pages
+    # Request a page of iNat observations at a time, until done with all pages
+    # (or canceled).
     # To get one page, use iNats `per_page` & `id_above` params.
     # https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
     parser = Inat::PageParser.new(inat_import, inat_ids, restricted_user_login)
@@ -89,7 +93,7 @@ class InatImportJob < ApplicationJob
     if super_importer?
       nil # Super importers can import anyone's iNat observations
     else
-      inat_import.inat_username
+      inat_username
     end
   end
 
@@ -138,13 +142,13 @@ class InatImportJob < ApplicationJob
     # to a non-existent iNat login
     return unless job_successful_enough?
 
-    user.update(inat_username: inat_import.inat_username)
+    user.update(inat_username: inat_username)
     log("Updated user inat_username")
   end
 
   # job successful enough to justify updating the MO user's iNat user_name
   def job_successful_enough?
-    inat_import.response_errors.empty? ||
-      inat_import.imported_count&.positive?
+    response_errors.empty? ||
+      imported_count.to_i.positive?
   end
 end
