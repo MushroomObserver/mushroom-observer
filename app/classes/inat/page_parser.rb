@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 class Inat
+  # Get one page of observations results (up to 200) from the iNat API,
+  # https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
+  # returning a parsed JSON object.
   class PageParser
     include Inat::Constants
 
@@ -13,14 +16,11 @@ class Inat
       @restricted_user_login = restricted_user_login
     end
 
-    # Get one page of observations (up to 200)
-    # This is where we actually hit the iNat API
-    # https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
-    # https://stackoverflow.com/a/11251654/3357635
     # NOTE: The `ids` parameter may be a comma-separated list of iNat obs
     # ids - that needs to be URL encoded to a string when passed as an arg here
     # because URI.encode_www_form deals with arrays by passing the same key
     # multiple times.
+    # https://stackoverflow.com/a/11251654/3357635
     def next_page
       result = next_request(id: @ids, id_above: @last_import_id,
                             user_login: @restricted_user_login)
