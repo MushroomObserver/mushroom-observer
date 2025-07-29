@@ -3,6 +3,7 @@
 class Inat
   class ObservationImporter
     include Inat::Constants
+
     attr_reader :inat_import, :user
 
     def initialize(inat_import, user)
