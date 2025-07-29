@@ -73,7 +73,7 @@ class InatImportJob < ApplicationJob
     return log("No observations requested") if inat_import[:import_all].
                                                blank? && inat_ids.blank?
 
-    # Search for one page of results at a time, until done with all pages
+    # Request one page of iNat observations at a time, until done with all pages
     # To get one page, use iNats `per_page` & `id_above` params.
     # https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
     parser = Inat::PageParser.new(inat_import, inat_ids, restricted_user_login)
@@ -84,6 +84,8 @@ class InatImportJob < ApplicationJob
     inat_import.inat_ids.delete(" ")
   end
 
+  # Import the next page of iNat API results,
+  # returning true if there are more pages of results, false if done.
   def parsing?(parser)
     # get a page of observations with id > id of last imported obs
     parsed_page = parser.next_page
@@ -92,28 +94,19 @@ class InatImportJob < ApplicationJob
     inat_import.update(importables: parsed_page["total_results"])
     return false if page_empty?(parsed_page)
 
-    import_page(parsed_page)
-    return import_canceled if canceled?
+    observation_importer.import_page(parsed_page)
+    return false if canceled?
 
     parser.last_import_id = parsed_page["results"].last["id"]
-    return true unless last_page?(parsed_page)
-
-    log("Imported requested observations")
-    false
+    more_pages?(parsed_page)
   end
 
   def page_empty?(page)
     page["total_results"].zero?
   end
 
-  def import_canceled # rubocop:disable Naming/PredicateMethod
-    log("Import canceled by user")
-    false
-  end
-
-  def last_page?(parsed_page)
-    parsed_page["total_results"] <=
-      parsed_page["page"] * parsed_page["per_page"]
+  def more_pages?(parsed_page)
+    parsed_page["total_results"] > parsed_page["page"] * parsed_page["per_page"]
   end
 
   # limit iNat API search to observations by iNat user with this login
