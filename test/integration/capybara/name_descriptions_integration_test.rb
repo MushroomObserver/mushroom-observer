@@ -293,6 +293,7 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
     include Minitest::Assertions
     include CapybaraSessionExtensions
     include GeneralExtensions
+
     attr_accessor :user, :abilities, :name_we_are_working_on,
                   :name_description_data, :group_expectations,
                   :assertions # needed by Minitest::Assertions
