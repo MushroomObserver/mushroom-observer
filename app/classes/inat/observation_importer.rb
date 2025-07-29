@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 class Inat
+  # Import a page of parsed iNat API observation search results,
+  # using Inat::Obs to parse each result and
+  # Inat::MoObservationBuilder to create an MO Observation.
   class ObservationImporter
     include Inat::Constants
 
