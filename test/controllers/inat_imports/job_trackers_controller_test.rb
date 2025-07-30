@@ -20,7 +20,7 @@ module InatImports
       # remove HTML tags for easier testing of displayed text
       body = strip_tags(@response.body)
 
-      assert(body.include?("#{:inat_import_tracker_status.l}: Unstarted"))
+      assert(body.include?("#{:STATUS.l}: Unstarted"))
       importables_line =
         "#{:inat_import_imported.l}: 0 of#{tracker.importables}"
       assert(body.include?(importables_line))
@@ -42,7 +42,7 @@ module InatImports
       assert_response(:success)
       body = strip_tags(@response.body)
 
-      assert(body.include?("#{:inat_import_tracker_status.l}: Done"))
+      assert(body.include?("#{:STATUS.l}: Done"))
       assert(body.include?(
                "#{:inat_import_tracker_estimated_remaining_time.l}: 00:00:00"
              ))
