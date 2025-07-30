@@ -117,7 +117,7 @@ module TitleContextNavHelper
   # rubocop:enable Metrics/AbcSize
 
   def nav_index_link(rubric, controller)
-    return rubric if controller.methods.exclude?(:new)
+    return rubric if controller.methods.exclude?(:index)
 
     link_to(
       rubric,
