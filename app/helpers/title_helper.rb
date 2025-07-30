@@ -63,14 +63,18 @@ module TitleHelper
     return unless query&.params
 
     content_for(:filters) do
-      tag.div(id: "filters",
-              data: { controller: "filter-caption",
-                      query_params: query.params.to_json,
-                      query_record: query.record.id,
-                      query_alph: query.record.id.alphabetize }) do
-        concat(caption_truncated(query))
-        concat(caption_full(query))
-      end
+      query_filters(query)
+    end
+  end
+
+  def query_filters(query)
+    tag.div(id: "filters",
+            data: { controller: "filter-caption",
+                    query_params: query.params.to_json,
+                    query_record: query.record.id,
+                    query_alph: query.record.id.alphabetize }) do
+      concat(caption_truncated(query))
+      concat(caption_full(query))
     end
   end
 
