@@ -120,9 +120,8 @@ class Query::SpeciesListsTest < UnitTestCase
     assert_query(expects, :SpeciesList, pattern: "query_first_list")
     # in title, with NULL where
     list = species_lists(:no_where_list)
-    ids = [list.id]
-    scope = SpeciesList.pattern(list.title).order_by_default
-    assert_query_scope(ids, scope, :SpeciesList, pattern: list.title)
+    pattern = list.title
+    assert_pattern_search_query_scope(list, pattern)
 
     # in notes
     pattern = species_lists(:query_notes_list).notes
@@ -145,5 +144,11 @@ class Query::SpeciesListsTest < UnitTestCase
 
   def species_list_pattern_search(pattern)
     SpeciesList.pattern(pattern).order_by_default
+  end
+
+  def assert_pattern_search_query_scope(list, pattern)
+    ids = [list.id]
+    scope = SpeciesList.pattern(pattern).order_by_default
+    assert_query_scope(ids, scope, :SpeciesList, pattern: pattern)
   end
 end
