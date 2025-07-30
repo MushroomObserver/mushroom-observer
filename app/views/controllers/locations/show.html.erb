@@ -1,5 +1,6 @@
 <%
-add_page_title(:show_location_title.t(name: @location.display_name))
+title = @location.display_name
+add_page_title(title, ["#{:LOCATION.l}:", title].safe_join(" "))
 add_pager_for(@location)
 add_interest_icons(@user, @location)
 add_context_nav(location_show_tabs)
@@ -7,9 +8,7 @@ add_context_nav(location_show_tabs)
 %>
 
 <% if @location.hidden %>
-  <p>
-    <%= :show_location_hidden.t %>
-  </p>
+  <%= tag.p(:show_location_hidden.t) %>
 <% end %>
 
 <div class="row">

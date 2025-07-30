@@ -2196,7 +2196,6 @@
   show_lists_header: "[:SPECIES_LISTS]"
 
   # location/show_location
-  show_location_title: "[:LOCATION]: [name]"
   show_location_create: "[:create_object(type=:location)]"
   show_location_edit: "[:edit_object(type=:location)]"
   show_location_destroy: "[:destroy_object(type=:location)]"
@@ -2575,7 +2574,6 @@
 
   # glossary_term#show
   show_glossary_term: Show Glossary Term
-  show_glossary_term_title: "Glossary Term: [name]"
   show_glossary_term_reuse_image: Add Example
   show_glossary_term_remove_image: Remove Examples
   show_glossary_term_creator: Creator of this Glossary Term
@@ -3474,7 +3472,6 @@
   show_project_leave: Leave Project
   show_project_published: Reviewed Published Names
   show_project_summary: Summary
-  show_project_title: "Project: [title]"
   show_project_user_group: User Group
   show_project_violation_count: Project has [count] constraint violation(s)
 

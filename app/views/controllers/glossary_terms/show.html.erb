@@ -1,5 +1,6 @@
 <%
-add_page_title(:show_glossary_term_title.t(name: @glossary_term.name))
+title = @glossary_term.name
+add_page_title(title, ["#{:GLOSSARY_TERM.l}:", title].safe_join(" "))
 
 add_context_nav(glossary_term_show_tabs(term: @glossary_term, user: @user))
 
