@@ -1,6 +1,6 @@
 <%
 add_page_title(
-  @name.user_display_name(@user),
+  @name.user_display_name(@user).t,
   ["#{:NAME.l}:", @name.text_name].safe_join(" ")
 )
 
