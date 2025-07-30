@@ -116,6 +116,21 @@ module TitleContextNavHelper
   end
   # rubocop:enable Metrics/AbcSize
 
+  def nav_index_link(rubric, controller)
+    link_to(
+      rubric,
+      { controller: controller, action: :index, q: get_query_param }
+    )
+  end
+
+  def nav_create(controller)
+    link_to(
+      link_icon(:add, title: :CREATE.l),
+      { controller: controller, action: :new },
+      class: "btn btn-sm btn-outline-default mx-3 top_nav_create"
+    )
+  end
+
   def search_nav_toggle
     tag.li(class: "d-inline-block navbar-form") do
       tag.button(

@@ -16,7 +16,7 @@
   @extend .d-flex, .justify-content-between, .align-items-center
 }
 
-.navbar-default {
+.navbar-default, #top_nav {
   border-width: 1px;
   border-style: solid;
   border-radius: 0;
@@ -28,7 +28,7 @@
 
   a,
   a:visited {
-    color: $navbar-default-link-color;
+    color: $navbar-default-color;
     background-color: $navbar-default-link-active-bg;
   }
 
