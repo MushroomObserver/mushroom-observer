@@ -116,25 +116,31 @@ module TitleContextNavHelper
   end
   # rubocop:enable Metrics/AbcSize
 
+  # Descriptions don't get an index link
   def nav_index_link(rubric, controller)
-    return rubric if controller.methods.exclude?(:index)
+    if controller.methods.exclude?(:index) ||
+       %w[descriptions].include?(controller.controller_name)
+      return rubric
+    end
 
     link_to(
       rubric,
-      { controller: controller.controller_name,
+      { controller: "/#{controller.controller_path}",
         action: :index, q: get_query_param }
     )
   end
 
+  # Descriptions also don't get a create button
   def nav_create(user, controller)
-    if !user || controller.controller_name == "users" ||
-       controller.methods.exclude?(:new)
+    if !user ||
+       controller.methods.exclude?(:new) ||
+       %w[users descriptions].include?(controller.controller_name)
       return ""
     end
 
     link_to(
       link_icon(:add, title: :CREATE.l),
-      { controller: controller.controller_name, action: :new },
+      { controller: "/#{controller.controller_path}", action: :new },
       class: "btn btn-sm btn-outline-default mx-3 top_nav_create"
     )
   end
