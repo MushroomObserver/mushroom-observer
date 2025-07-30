@@ -20,7 +20,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("#title", text: title.as_displayed)
     # go back to the name page
     click_on(class: "latest_version_link")
-    title = name.display_name
+    title = name.display_name.t
     assert_selector("#title", text: title.as_displayed)
   end
 
