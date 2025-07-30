@@ -108,7 +108,7 @@ class InatImportJob < ApplicationJob
     return false if page_empty?(parsed_page)
 
     observation_importer.import_page(parsed_page)
-    return false if canceled?
+    return false if inat_import.reload.canceled?
 
     parser.last_import_id = parsed_page["results"].last["id"]
     more_pages?(parsed_page)

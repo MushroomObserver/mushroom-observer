@@ -16,7 +16,7 @@ class Inat
 
     def import_page(page)
       page["results"].each do |result|
-        return false if inat_import.canceled?
+        return false if inat_import.reload.canceled?
 
         import_one_result(JSON.generate(result))
       end
