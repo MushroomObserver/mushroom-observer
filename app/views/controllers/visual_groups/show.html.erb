@@ -1,5 +1,6 @@
 <%
-  add_page_title(:show_visual_group_title.t(name: @visual_group.name))
+title = @visual_group.name
+add_page_title(title, [title, :VISUAL_GROUP.l].safe_join(" "))
 %>
 
 <p id="notice"><%= notice %></p>
