@@ -9,12 +9,11 @@ left_classes = class_names(%w[
 right_classes = class_names(%w[
   d-flex flex-row align-items-center justify-content-end navbar_right
 ])
-ctrlr = controller.controller_name
-identify_page = ctrlr == "identify"
+identify_page = controller.controller_name == "identify"
 nav_title = if action_name == "index"
               rubric
             else
-              nav_index_link(rubric, ctrlr)
+              nav_index_link(rubric, controller.controller_name)
             end
 %>
 
@@ -25,7 +24,7 @@ nav_title = if action_name == "index"
     <%# left side %>
     <%= tag.div(class: left_classes) do %>
       <%= tag.h4(class: "font-weight-bold mr-4 mr-lg-5") do
-        [nav_title, nav_create(@user, ctrlr)].safe_join(" ")
+        [nav_title, nav_create(@user, controller)].safe_join(" ")
       end %>
       <% if(content_for?(:sorter)) %>
         <%= yield(:sorter) %>

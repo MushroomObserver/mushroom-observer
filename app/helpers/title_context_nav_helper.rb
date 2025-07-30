@@ -116,19 +116,23 @@ module TitleContextNavHelper
   end
   # rubocop:enable Metrics/AbcSize
 
-  def nav_index_link(rubric, controller)
+  def nav_index_link(rubric, controller_name)
     link_to(
       rubric,
-      { controller: controller, action: :index, q: get_query_param }
+      { controller: controller_name,
+        action: :index, q: get_query_param }
     )
   end
 
   def nav_create(user, controller)
-    return "" unless user
+    if !user || controller.controller_name == "users" ||
+       controller.methods.exclude?(:new)
+      return ""
+    end
 
     link_to(
       link_icon(:add, title: :CREATE.l),
-      { controller: controller, action: :new },
+      { controller: controller.controller_name, action: :new },
       class: "btn btn-sm btn-outline-default mx-3 top_nav_create"
     )
   end
