@@ -140,7 +140,7 @@ class Query::SpeciesListsTest < UnitTestCase
     assert_query(expects, :SpeciesList, pattern: "")
   end
 
-  def assert_pattern_search_query_scope(list, pattern: search_pattern)
+  def assert_pattern_search_query_scope(list, pattern:)
     ids = [list.id]
     scope = species_list_pattern_search(pattern)
     assert_query_scope(ids, scope, :SpeciesList, pattern: pattern)
