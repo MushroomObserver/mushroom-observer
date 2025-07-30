@@ -123,7 +123,9 @@ module TitleContextNavHelper
     )
   end
 
-  def nav_create(controller)
+  def nav_create(user, controller)
+    return "" unless user
+
     link_to(
       link_icon(:add, title: :CREATE.l),
       { controller: controller, action: :new },

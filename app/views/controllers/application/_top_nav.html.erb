@@ -25,7 +25,7 @@ nav_title = if action_name == "index"
     <%# left side %>
     <%= tag.div(class: left_classes) do %>
       <%= tag.h4(class: "font-weight-bold mr-4 mr-lg-5") do
-        [nav_title, nav_create(ctrlr)].safe_join(" ")
+        [nav_title, nav_create(@user, ctrlr)].safe_join(" ")
       end %>
       <% if(content_for?(:sorter)) %>
         <%= yield(:sorter) %>
