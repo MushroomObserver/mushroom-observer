@@ -116,10 +116,12 @@ module TitleContextNavHelper
   end
   # rubocop:enable Metrics/AbcSize
 
-  def nav_index_link(rubric, controller_name)
+  def nav_index_link(rubric, controller)
+    return rubric if controller.methods.exclude?(:new)
+
     link_to(
       rubric,
-      { controller: controller_name,
+      { controller: controller.controller_name,
         action: :index, q: get_query_param }
     )
   end
