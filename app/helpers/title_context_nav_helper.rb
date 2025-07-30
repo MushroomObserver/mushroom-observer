@@ -138,8 +138,10 @@ module TitleContextNavHelper
       return ""
     end
 
+    obj_name = controller.controller_model_name.underscore.upcase.to_sym.l
+
     link_to(
-      link_icon(:add, title: :CREATE.l),
+      link_icon(:add, title: [:NEW.l, obj_name].safe_join(" ")),
       { controller: "/#{controller.controller_path}", action: :new },
       class: "btn btn-sm btn-outline-default mx-3 top_nav_create"
     )
