@@ -1,7 +1,7 @@
 <%
 has_banner = content_for?(:banner_image)
 add_interest_icons = (content_for?(:interest_icons))
-title_cols = add_interest_icons ? "col-sm-8 col-lg-7" : ""
+title_cols = "col-sm-8 col-lg-7"
 project_subtitle = content_for?(:project_location) ||
                    content_for?(:project_date_range)
 %>
@@ -11,9 +11,11 @@ project_subtitle = content_for?(:project_location) ||
   <%= tag.div(class: class_names("col-xs-12", title_cols),
               id: "title_bar") do %>
     <% if !has_banner %>
-      <%= tag.nav(class: "show_title_nav d-flex justify-content-between") do
+      <%= tag.nav(
+        class: "show_title_nav d-flex justify-content-between pl-3"
+      ) do
         [
-          tag.h1(yield(:title), class: "h4 mt-0 pl-3", id: "title"),
+          tag.h1(yield(:title), class: "h4", id: "title"),
           tag.ul(class: "nav navbar-nav object_edit h4") do
             concat(yield(:edit_icons))
           end
@@ -36,7 +38,7 @@ project_subtitle = content_for?(:project_location) ||
 <%# Interest and edit icons, prev/index/next links %>
 <% if action_name == "show" && !has_banner %>
   <%= tag.div(class: "col-sm-4 col-lg-5 hidden-print text-right") do
-    tag.nav(class: "show_object_nav d-flex justify-content-between") do
+    tag.nav(class: "show_object_nav d-flex justify-content-between pr-3") do
       # tag.div(class: "container-fluid") do
         [
           tag.ul(class: "nav navbar-flex interest-eyes h4 my-0") do
