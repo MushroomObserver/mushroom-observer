@@ -102,7 +102,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     get(:show, params: { id: term.id })
 
     assert_response(:success)
-    assert_head_title([:GLOSSARY_TERM.l, term.name].join(" "))
+    assert_head_title(["#{:GLOSSARY_TERM.l}:", term.name].join(" "))
 
     ESSENTIAL_ATTRIBUTES.each do |attr|
       assert_select("body", /#{term.send(attr)}/,
