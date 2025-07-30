@@ -133,7 +133,7 @@ module TitleContextNavHelper
   def nav_indexables
     %w[
       observations names species_lists projects locations images herbaria
-      glossary_terms comments
+      glossary_terms comments rss_logs
     ]
   end
 
