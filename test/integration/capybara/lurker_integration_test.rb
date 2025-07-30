@@ -228,7 +228,8 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     fill_in("filter_term", with: place)
     select("Region", from: "filter_type")
     within("#identify_filter") { click_button("Search") }
-    assert_match(/#{:obs_needing_id.t}/, page.title, "Wrong page")
+    assert_selector("#filters", text: /#{:query_needs_naming.l}/)
+    assert_selector("#filters", text: /#{:query_region.l}/)
     # Note that .rss-where now gets both postal and scientific addresses as a
     # single mashed up string, because they're shown/hidden by css.
     where_ats = find_all(".rss-where .location-postal").map(&:text)
