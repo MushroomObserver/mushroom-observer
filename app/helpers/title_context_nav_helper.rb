@@ -118,8 +118,8 @@ module TitleContextNavHelper
 
   # Descriptions don't get an index link
   def nav_index_link(rubric, controller)
-    if controller.methods.exclude?(:index) ||
-       %w[descriptions].include?(controller.controller_name)
+    unless controller.methods.include?(:index) &&
+           nav_indexables.include?(controller.controller_name)
       return rubric
     end
 
@@ -130,11 +130,18 @@ module TitleContextNavHelper
     )
   end
 
+  def nav_indexables
+    %w[
+      observations names species_lists projects locations images herbaria
+      glossary_terms comments
+    ]
+  end
+
   # Descriptions also don't get a create button
   def nav_create(user, controller)
-    if !user ||
-       controller.methods.exclude?(:new) ||
-       %w[users descriptions].include?(controller.controller_name)
+    unless user &&
+           controller.methods.include?(:new) &&
+           nav_creatables.include?(controller.controller_name)
       return ""
     end
 
@@ -145,6 +152,13 @@ module TitleContextNavHelper
       { controller: "/#{controller.controller_path}", action: :new },
       class: "btn btn-sm btn-outline-default mx-3 top_nav_create"
     )
+  end
+
+  def nav_creatables
+    %w[
+      observations names species_lists projects locations images herbaria
+      glossary_terms comments
+    ]
   end
 
   def search_nav_toggle
