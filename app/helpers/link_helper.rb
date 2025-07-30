@@ -209,7 +209,7 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
     search: "search",
     previous: "triangle-left",
     next: "triangle-right",
-    goto: "arrow-right",
+    goto: "share-alt",
     grid: "th"
   }.freeze
 
