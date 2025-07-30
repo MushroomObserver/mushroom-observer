@@ -122,7 +122,7 @@ class Query::SpeciesListsTest < UnitTestCase
     list = species_lists(:no_where_list)
     ids = [list.id]
     scope = SpeciesList.pattern(list.title).order_by_default
-    assert_query_scope(ids, scope, :SpeciesList, search_where: list.title)
+    assert_query_scope(ids, scope, :SpeciesList, pattern: list.title)
 
     # in notes
     pattern = species_lists(:query_notes_list).notes
