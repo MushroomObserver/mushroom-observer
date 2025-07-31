@@ -181,11 +181,10 @@ class InatImportsController < ApplicationController
   public
 
   def cancel
-    inat_import = InatImport.find(params[:id])
-    inat_import.update(cancel: true)
-    tracker = InatImportJobTracker.where(inat_import: inat_import).
-              order(:created_at).last
-    redirect_to(inat_import_path(inat_import,
-                                 params: { tracker_id: tracker.id }))
+    @inat_import = InatImport.find(params[:id])
+    @inat_import.update(cancel: true)
+    @tracker = InatImportJobTracker.where(inat_import: @inat_import).
+               order(:created_at).last
+    render(:show)
   end
 end
