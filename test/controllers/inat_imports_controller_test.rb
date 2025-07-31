@@ -343,16 +343,14 @@ class InatImportsControllerTest < FunctionalTestCase
     import = inat_imports(:katrina_inat_import)
     assert(import.job_pending? && !import.canceled?,
            "Test needs a Import fixture with a uncancelled, pending Job")
-    tracker = inat_import_job_trackers(:katrina_tracker)
 
     login
     get(:cancel, params: { id: import.id })
 
+    assert_response(:success)
+    assert_template(:show)
     assert(import.reload.canceled?,
            "Clicking cancel button should make InatImport.canceled? == true")
-    assert_redirected_to(
-      inat_import_path(import, params: { tracker_id: tracker.id })
-    )
   end
 
   ########## Utilities
