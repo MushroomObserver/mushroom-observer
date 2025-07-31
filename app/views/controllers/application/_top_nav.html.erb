@@ -51,7 +51,7 @@ nav_title = if action_name == "index"
   <% end %>
 
   <%= tag.div(class: search_nav_classes) do %>
-    <%= tag.div(class: "collapse", id: "search_nav") do %>
+    <%= tag.div(class: "collapse w-100", id: "search_nav") do %>
       <% if identify_page %>
         <%= render(partial: "observations/identify/form_identify_filter") %>
       <% else %>

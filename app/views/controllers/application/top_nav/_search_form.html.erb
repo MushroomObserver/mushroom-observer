@@ -17,31 +17,37 @@ options = [
 search_options = options_for_select(
                    options, session[:search_type] || :observation
                  )
-adv_search = link_to(
-  content_tag(:span, :app_advanced_search.l, class: "text-nowrap"),
-  search_advanced_path
-)
 identify_page = controller.controller_name == "identify"
+icon_class = class_names(%w[btn navbar-link px-0])
+form_group_class = class_names(
+  %w[form-group has-feedback has-search d-flex flex-grow-1 mb-0]
+)
+adv_search = icon_link_to(:app_advanced_search.l, search_advanced_path,
+                          icon: :plus, class: icon_class, show_text: false)
 
 # Fields have attributes nested under search via fields_for, eg search[:type]
 %>
 
 <% if @user %>
-  <%= tag.div(class: "navbar-flex") do %>
+  <%= tag.div(class: "navbar-flex w-100 gap-2") do %>
+
+    <%= icon_link_to(:search_bar_help.t, info_search_bar_help_path,
+                     icon: :info, class: icon_class, show_text: false) %>
+
     <%= form_with(url: search_pattern_path, method: :get,
-                  class: "navbar-form px-0",
+                  class: "navbar-flex flex-grow-1 navbar-form px-0 gap-2",
                   id: "pattern_search_form") do |f| %>
 
       <%= fields_for(:search) do |f_s| %>
-        <%= tag.div(class: "form-group has-feedback has-search") do %>
+        <%= tag.div(class: form_group_class) do %>
           <%= tag.span("", class: "glyphicon glyphicon-search " \
                                   "form-control-feedback") %>
           <%= f_s.text_field(:pattern, { value: session[:pattern],
-                                        class: "form-control",
+                                        class: "form-control flex-grow-1",
                                         placeholder: :app_find.t }) %>
         <% end %><!--.form-group-->
 
-        <%= tag.div(class: "form-group text-nowrap") do %>
+        <%= tag.div(class: "form-group text-nowrap mb-0") do %>
           <%= f_s.select(
                 :type, search_options,
                 { }, { class: "form-control w-auto" }
@@ -57,19 +63,9 @@ identify_page = controller.controller_name == "identify"
 
     <% end %>
 
-    <p class="navbar-text mx-2 text-nowrap">
-      <%= link_to(content_tag(:span, :search_bar_help.t),
-                  info_search_bar_help_path) %>
-      <span class=""> |</span>
-    </p>
+    <%= icon_link_to(:app_advanced_search.l, search_advanced_path,
+                     icon: :plus, class: icon_class, show_text: false) %>
 
-    <p class="navbar-text mx-2 hidden-xs">
-      <%= adv_search %>
-    </p>
-
-    <div class="visible-xs">
-      <%= adv_search %>
-    </div>
   <% end %>
 
 <% else %>
