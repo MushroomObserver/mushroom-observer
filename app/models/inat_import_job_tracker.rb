@@ -33,7 +33,7 @@ class InatImportJobTracker < ApplicationRecord
 
   def estimated_remaining_time
     # Can't calculate remaining time unless we know # of Obss to be imported
-    return nil unless importables.to_i&.positive?
+    return nil unless importables.to_i.positive?
     return 0 if status == "Done"
 
     [total_expected_time - elapsed_time, 0].max
