@@ -162,12 +162,25 @@ module TitleContextNavHelper
   end
 
   def search_nav_toggle
-    tag.li(class: "d-inline-block navbar-form") do
+    tag.div(class: "navbar-form pr-0") do
       tag.button(
         link_icon(:search, title: :SEARCH.l),
         class: "btn btn-sm btn-outline-default",
         type: :button,
         data: { toggle: "collapse", target: "#search_nav" },
+        aria: { expanded: "false", controls: "search_nav" }
+      )
+    end
+  end
+
+  def left_nav_toggle
+    tag.div(class: "visible-xs navbar-form pl-0") do
+      tag.button(
+        link_icon(:menu, title: :MENU.l),
+        class: "btn btn-sm btn-outline-default",
+        type: :button,
+        data: { toggle: "offcanvas", nav_target: "toggle",
+                action: "nav#toggleOffcanvas" },
         aria: { expanded: "false", controls: "search_nav" }
       )
     end

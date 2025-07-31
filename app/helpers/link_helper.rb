@@ -210,7 +210,8 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
     previous: "triangle-left",
     next: "triangle-right",
     goto: "share-alt",
-    grid: "th"
+    grid: "th",
+    menu: "align-justify"
   }.freeze
 
   # button to destroy object
