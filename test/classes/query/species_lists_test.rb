@@ -114,25 +114,36 @@ class Query::SpeciesListsTest < UnitTestCase
 
   def test_species_list_pattern
     assert_query([], :SpeciesList, pattern: "nonexistent pattern")
+
     # in title
-    pattern = "query_first_list"
-    expects = species_list_pattern_search(pattern)
-    assert_query(expects, :SpeciesList, pattern: "query_first_list")
+    list = species_lists(:query_first_list)
+    assert_pattern_search_query_scope(list, pattern: list.title)
+
+    # in title, with NULL where
+    list = species_lists(:no_where_list)
+    assert_pattern_search_query_scope(list, pattern: list.title)
+
     # in notes
-    pattern = species_lists(:query_notes_list).notes
-    expects = species_list_pattern_search(pattern)
-    assert_query(expects, :SpeciesList, pattern: pattern)
+    list = species_lists(:query_notes_list)
+    assert_pattern_search_query_scope(list, pattern: list.notes)
+
     # in location
     pattern = locations(:burbank).name
     expects = species_list_pattern_search(pattern)
     assert_query(expects, :SpeciesList, pattern: locations(:burbank).name)
+
     # in where
-    pattern = species_lists(:where_list).where
-    expects = species_list_pattern_search(pattern)
-    assert_query(expects, :SpeciesList, pattern: pattern)
+    list = species_lists(:where_list)
+    assert_pattern_search_query_scope(list, pattern: list.where)
 
     expects = SpeciesList.order_by_default
     assert_query(expects, :SpeciesList, pattern: "")
+  end
+
+  def assert_pattern_search_query_scope(list, pattern:)
+    ids = [list.id]
+    scope = species_list_pattern_search(pattern)
+    assert_query_scope(ids, scope, :SpeciesList, pattern: pattern)
   end
 
   def species_list_pattern_search(pattern)
