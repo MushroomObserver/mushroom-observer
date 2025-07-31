@@ -7,6 +7,7 @@ theme = "theme-#{@css_theme.underscore.dasherize}"
 location_format = "location-format-#{User.current_location_format || "postal"}"
 logged_in = @user ? "logged-in-user" : "no-user"
 body_class = class_names(ctrlr_action, theme, location_format, logged_in)
+content_classes = class_names(container_class, content_class)
 %>
 <!DOCTYPE html>
 <html class="<%= html_class %>">
@@ -36,7 +37,7 @@ body_class = class_names(ctrlr_action, theme, location_format, logged_in)
           <%= render(partial: "application/app/page_flash") %>
           <%= render(partial: "application/content/header") %>
 
-          <main id="content" class="<%= container_class %>"
+          <main id="content" class="<%= content_classes %>"
               data-controller="lightgallery">
 
             <%# unless @user&.verified? %>

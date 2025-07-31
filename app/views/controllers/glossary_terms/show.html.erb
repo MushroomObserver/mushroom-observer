@@ -9,8 +9,10 @@ add_context_nav(glossary_term_show_tabs(term: @glossary_term, user: @user))
 
 <div class="row mt-3">
   <div class="col-sm-8">
-    <%= @glossary_term.description.tpl %>
-    <%= tag.p(link_to(*search_tab_for(:Wikipedia, @glossary_term.name))) %>
+    <div class="content-block">
+      <%= @glossary_term.description.tpl %>
+      <%= tag.p(link_to(*search_tab_for(:Wikipedia, @glossary_term.name))) %>
+    </div>
   </div>
   <% if @glossary_term.thumb_image %>
     <div class="col-sm-4">
@@ -24,7 +26,7 @@ add_context_nav(glossary_term_show_tabs(term: @glossary_term, user: @user))
 </div>
 <!--.row-->
 
-<div class="mb-3">
+<div class="mb-3 content-block">
   <%= link_with_query(:show_glossary_term_reuse_image.t,
                       reuse_images_for_glossary_term_path(@glossary_term.id)) %><br/>
   <%= link_with_query(:show_glossary_term_remove_image.t,
@@ -43,16 +45,16 @@ add_context_nav(glossary_term_show_tabs(term: @glossary_term, user: @user))
 </div>
 <!--.row-->
 
-<div class="mt-3">
+<div class="mt-3 content-block">
   <%= show_previous_version(@glossary_term, @versions) %>
   <p class="Date">
     <%= :footer_created_at.t(date: @glossary_term.created_at.web_time) %><br/>
     <%= :footer_last_updated_at.t(date: @glossary_term.updated_at.web_time) %>
   </p>
-
-  <%= panel_block(id: "glossary_term_authors_editors") do
-    show_authors_and_editors(
-      obj: @glossary_term, versions: @versions, user: @user
-    )
-  end %>
 </div>
+
+<%= panel_block(id: "glossary_term_authors_editors") do
+  show_authors_and_editors(
+    obj: @glossary_term, versions: @versions, user: @user
+  )
+end %>

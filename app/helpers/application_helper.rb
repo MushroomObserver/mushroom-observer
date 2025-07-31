@@ -55,6 +55,16 @@ module ApplicationHelper
     end
   end
 
+  def content_class
+    @content_layout ||= case action_name
+                        when "index", "show"
+                          :panels
+                        else
+                          :no_panels
+                        end
+    @content_layout == :no_panels ? "p-3" : ""
+  end
+
   # This can be called to display flash notices either in the page or a modal.
   # `flash_notices?` `flash_get_notices` `flash_notice_level` and `flash_clear`
   # are defined in ApplicationController::FlashNotices.

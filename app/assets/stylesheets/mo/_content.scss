@@ -92,6 +92,10 @@ ul.tight-list {
   font-weight: bold;
 }
 
+.content-block {
+  @extend .p-3;
+}
+
 // Used for record id in title.
 .badge-outline {
   font-size: $font-size-base;

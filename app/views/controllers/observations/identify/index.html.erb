@@ -6,7 +6,7 @@ add_pagination(@pagination_data)
 flash_error(@error) if @error && @objects.empty?
 %>
 
-<div class="container-text p-3">
+<div class="container-text content-block">
   <%= tag.p(:obs_needing_id_intro.tp) %>
   <%# render(partial: "observations/identify/form_identify_filter") %>
 </div>
