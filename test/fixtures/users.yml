@@ -84,6 +84,7 @@ roy:
 ollie:
   <<: *DEFAULTS
   name: Ollie
+  inat_username: ollie_inat_username
   user_groups: all_users, burbank_users, ollie_only
 
 spammer:

@@ -3105,7 +3105,6 @@
   INAT_IMPORTS: iNat Imports
   INAT_IMPORT_JOB_TRACKERS: iNat Import Trackers
   inat_import_tracker: iNat Import Tracker
-  inat_import_tracker_status: "[:STATUS]"
   inat_import_tracker_started: Started
   inat_import_tracker_elapsed_time: Elapsed Time
   inat_import_tracker_estimated_remaining_time: Estimated Remaining Time

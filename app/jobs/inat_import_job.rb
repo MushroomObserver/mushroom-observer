@@ -7,6 +7,10 @@ class InatImportJob < ApplicationJob
 
   queue_as :default
 
+  delegate :canceled?, to: :inat_import
+  delegate :imported_count, to: :inat_import
+  delegate :inat_username, to: :inat_import
+  delegate :response_errors, to: :inat_import
   delegate :token, to: :inat_import
   delegate :user, to: :inat_import
 
@@ -63,7 +67,7 @@ class InatImportJob < ApplicationJob
   end
 
   def right_user?(inat_logged_in_user)
-    inat_logged_in_user == inat_import.inat_username
+    inat_logged_in_user == inat_username
   end
 
   def import_requested_observations
@@ -72,7 +76,8 @@ class InatImportJob < ApplicationJob
     return log("No observations requested") if inat_import[:import_all].
                                                blank? && inat_ids.blank?
 
-    # Search for one page of results at a time, until done with all pages
+    # Request a page of iNat observations at a time, until done with all pages
+    # (or canceled).
     # To get one page, use iNats `per_page` & `id_above` params.
     # https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
     parser = Inat::PageParser.new(inat_import, inat_ids, restricted_user_login)
@@ -83,6 +88,17 @@ class InatImportJob < ApplicationJob
     inat_import.inat_ids.delete(" ")
   end
 
+  # limit iNat API search to observations by iNat user with this login
+  def restricted_user_login
+    if super_importer?
+      nil # Super importers can import anyone's iNat observations
+    else
+      inat_username
+    end
+  end
+
+  # Import the next page of iNat API results,
+  # returning true if there are more pages of results, false if done.
   def parsing?(parser)
     # get a page of observations with id > id of last imported obs
     parsed_page = parser.next_page
@@ -91,35 +107,19 @@ class InatImportJob < ApplicationJob
     inat_import.update(importables: parsed_page["total_results"])
     return false if page_empty?(parsed_page)
 
-    import_page(parsed_page)
+    observation_importer.import_page(parsed_page)
+    return false if inat_import.reload.canceled?
 
     parser.last_import_id = parsed_page["results"].last["id"]
-    return true unless last_page?(parsed_page)
-
-    log("Imported requested observations")
-    false
+    more_pages?(parsed_page)
   end
 
   def page_empty?(page)
     page["total_results"].zero?
   end
 
-  def last_page?(parsed_page)
-    parsed_page["total_results"] <=
-      parsed_page["page"] * parsed_page["per_page"]
-  end
-
-  # limit iNat API search to observations by iNat user with this login
-  def restricted_user_login
-    if super_importer?
-      nil
-    else
-      inat_import.inat_username
-    end
-  end
-
-  def import_page(page)
-    observation_importer.import_page(page)
+  def more_pages?(parsed_page)
+    parsed_page["total_results"] > parsed_page["page"] * parsed_page["per_page"]
   end
 
   def observation_importer
@@ -138,13 +138,13 @@ class InatImportJob < ApplicationJob
     # to a non-existent iNat login
     return unless job_successful_enough?
 
-    user.update(inat_username: inat_import.inat_username)
+    user.update(inat_username: inat_username)
     log("Updated user inat_username")
   end
 
   # job successful enough to justify updating the MO user's iNat user_name
   def job_successful_enough?
-    inat_import.response_errors.empty? ||
-      inat_import.imported_count&.positive?
+    response_errors.empty? ||
+      imported_count.to_i.positive?
   end
 end

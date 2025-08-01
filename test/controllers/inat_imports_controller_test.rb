@@ -73,6 +73,20 @@ class InatImportsControllerTest < FunctionalTestCase
     )
   end
 
+  def test_create_cancel_reset
+    user = users(:ollie)
+    import = inat_imports(:ollie_inat_import)
+    assert(import.canceled?, "Test needs a canceled InatImport fixture")
+    id = "123"
+    params = { inat_ids: id, inat_username: user.inat_username, consent: 1 }
+
+    login(user.login)
+    post(:create, params: params)
+
+    assert_not(import.reload.canceled?,
+               "`cancel` should be false when starting an import")
+  end
+
   def test_create_missing_username
     user = users(:rolf)
     id = "123"
@@ -323,6 +337,20 @@ class InatImportsControllerTest < FunctionalTestCase
       user.reload.inat_username,
       "User inat_username shouldn't change if user denies authorization to MO"
     )
+  end
+
+  def test_cancel
+    import = inat_imports(:katrina_inat_import)
+    assert(import.job_pending? && !import.canceled?,
+           "Test needs a Import fixture with a uncancelled, pending Job")
+
+    login
+    get(:cancel, params: { id: import.id })
+
+    assert_response(:success)
+    assert_template(:show)
+    assert(import.reload.canceled?,
+           "Clicking cancel button should make InatImport.canceled? == true")
   end
 
   ########## Utilities
