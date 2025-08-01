@@ -28,8 +28,10 @@ module PaginationNavHelper
     tag.div(id: html_id, data: { q: get_query_param }) do
       [
         body,
-        content_for(:numbers),
-        content_for(:letters)
+        tag.div(class: "pagination-bottom d-flex justify-content-end") do
+          concat(content_for(:numbers))
+          concat(content_for(:letters))
+        end
       ].safe_join
     end
   end
