@@ -21,7 +21,7 @@ classes = {
     <div class="<%= classes[:wrapper] %>" data-controller="nav-active">
 
       <%# This cache depends only on user status (logged-in? admin?) %>
-      <% cache([user_status_string, "login"]) do %>
+      <% cache([user_status_string(@user), "login"]) do %>
         <% if in_admin_mode? %>
           <%= render(partial: "application/sidebar/admin",
                       locals: { classes: classes }) %>
@@ -45,7 +45,7 @@ classes = {
       <%# end %>
 
       <%# This cache depends only on user status (logged-in? admin?) %>
-      <% cache([user_status_string, "links"]) do %>
+      <% cache([user_status_string(@user), "links"]) do %>
         <%= render(partial: "application/sidebar/latest",
                     locals: { classes: classes }) %>
 

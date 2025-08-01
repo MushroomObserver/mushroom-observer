@@ -1,5 +1,5 @@
 <%
-@container = :full
+set_container(:full)
 add_page_title(:name_map_title.t(name: @name.display_name))
 add_context_nav(name_map_tabs(name: @name, query: @query))
 %>

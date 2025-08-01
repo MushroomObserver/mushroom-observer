@@ -1,5 +1,5 @@
 <%
-@css_theme = css_theme
+@css_theme = css_theme(@user)
 
 html_class = (Rails.env == "test") ? "" : "scroll-behavior-smooth"
 ctrlr_action = "#{controller.controller_name}__#{controller.action_name}"
@@ -7,7 +7,8 @@ theme = "theme-#{@css_theme.underscore.dasherize}"
 location_format = "location-format-#{User.current_location_format || "postal"}"
 logged_in = @user ? "logged-in-user" : "no-user"
 body_class = class_names(ctrlr_action, theme, location_format, logged_in)
-content_classes = class_names(container_class, content_class)
+set_content_padding
+content_classes = class_names(yield(:container_class), yield(:content_padding))
 %>
 <!DOCTYPE html>
 <html class="<%= html_class %>">

@@ -27,7 +27,6 @@ class InterestsController < ApplicationController
   # Outputs: @interests, @types, @pagination_data, @selected_type
   def index
     store_location
-    @container = :wide
     @interests = find_relevant_interests
     @types = interest_types(@interests)
     @selected_type = params[:type].to_s

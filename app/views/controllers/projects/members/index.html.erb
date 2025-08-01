@@ -1,7 +1,7 @@
 <%
 add_project_banner(@project)
 
-@container = :wide
+set_container(:wide)
 
 action = { controller: "/projects/members", action: :create,
             project_id: @project.id, q: get_query_param }

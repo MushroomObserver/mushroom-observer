@@ -1,5 +1,5 @@
 <%
-@container = :full
+set_container(:full)
 add_index_title(@query)
 add_sorter(@query, users_index_sorts(admin: in_admin_mode?))
 add_pagination(@pagination_data)

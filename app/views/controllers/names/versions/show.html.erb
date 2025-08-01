@@ -3,7 +3,7 @@ add_page_title(:show_past_name_title.t(
   num:  @name.version, name: @name.display_name
 ))
 add_context_nav(name_version_tabs(name: @name))
-@container = :full
+set_container(:full)
 set_columns(:six)
 %>
 

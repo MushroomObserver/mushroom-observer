@@ -5,7 +5,7 @@ add_context_nav(name_forms_return_tabs(name: @name))
 
 action = { controller: "/names/classification/inherit", action: :create,
             id: @name.id, q: get_query_param }
-@container = :text
+set_container(:text)
 %>
 
 <%= form_with(url: action) do |f| %>

@@ -6,7 +6,7 @@
 #  Methods available to all templates in the application:
 #
 #  css_theme
-#  container_class
+#  set_container
 #
 #  --------------------------
 #
@@ -19,80 +19,90 @@
 #
 module ApplicationHelper
   # All helpers are autoloaded under Zeitwerk
-  def css_theme
+  def css_theme(user = nil)
     if in_admin_mode?
       "Admin"
     elsif session[:real_user_id].present?
       "Sudo"
-    elsif browser.bot? || !@user
+    elsif browser.bot? || !user
       MO.default_theme
     elsif MO.themes.member?(controller.action_name)
       # when looking at a theme's info page render it in that theme
       controller.action_name
-    elsif @user && @user&.theme.present? &&
-          MO.themes.member?(@user.theme)
-      @user.theme
-    elsif @user
+    elsif user && user&.theme.present? && MO.themes.member?(user.theme)
+      user.theme
+    elsif user
       MO.themes.sample
     end
   end
 
-  # Return a width class for the layout content container.
+  # Set a width class for the layout content container.
   # Defaults to :text width, currently the most common. :wide is for forms
   # These classes are MO-defined
   #
-  def container_class
-    @container ||= :text
-    case @container
-    when :text
-      "container-text"
-    when :text_image
-      "container-text-image"
-    when :wide
-      "container-wide"
-    else
-      "container-full"
+  def set_container(container = :text)
+    content_for(:container_class) do
+      case container
+      when :text
+        "container-text"
+      when :text_image
+        "container-text-image"
+      when :wide
+        "container-wide"
+      else
+        "container-full"
+      end
     end
   end
 
-  def content_class
-    @content_layout ||= case action_name
-                        when "index", "show"
-                          :panels
-                        else
-                          :no_panels
-                        end
-    @content_layout == :no_panels ? "p-3" : ""
+  # Set content padding to line up with the title. If it needs different padding
+  # from the defaults below, call `set_content_padding(:panels)` or :no_panels
+  # in the template. If it's a mixed layout you can set it to :panels and wrap
+  # text blocks in the CSS class `content-block`, which will pad them the same.
+  def set_content_padding(content_has = nil)
+    # Give defaults per action.
+    content_has ||= case action_name
+                    when "index", "show"
+                      :panels
+                    else
+                      :no_panels
+                    end
+    content_for(:content_padding) do
+      content_has == :no_panels ? "p-3" : ""
+    end
   end
 
+  # Call in a layout to sync the title-bar columns with the content columns.
   def set_columns(columns = :twelve)
-    left_cols = case columns
-                when :nine_three
-                  "col-xs-12 col-md-9 col-lg-8"
-                when :eight_four
-                  "col-xs-12 col-md-8 col-lg-7"
-                when :seven_five
-                  "col-xs-12 col-md-7"
-                when :six
-                  "col-xs-12 col-md-6 col-lg-8"
-                else
-                  "col-xs-12"
-                end
-    content_for(:left_columns) { left_cols }
+    content_for(:left_columns) do
+      case columns
+      when :nine_three
+        "col-xs-12 col-md-9 col-lg-8"
+      when :eight_four
+        "col-xs-12 col-md-8 col-lg-7"
+      when :seven_five
+        "col-xs-12 col-md-7"
+      when :six
+        "col-xs-12 col-md-6 col-lg-8"
+      else
+        "col-xs-12"
+      end
+    end
 
-    right_cols = case columns
-                 when :nine_three
-                   "col-xs-12 col-md-3 col-lg-4"
-                 when :eight_four
-                   "col-xs-12 col-md-4 col-lg-5"
-                 when :seven_five
-                   "col-xs-12 col-md-5"
-                 when :six
-                   "col-xs-12 col-md-6 col-lg-4"
-                 else
-                   "col-xs-12"
-                 end
-    content_for(:right_columns) { right_cols }
+    content_for(:right_columns) do
+      case columns
+      when :nine_three
+        "col-xs-12 col-md-3 col-lg-4"
+      when :eight_four
+        "col-xs-12 col-md-4 col-lg-5"
+      when :seven_five
+        "col-xs-12 col-md-5"
+      when :six
+        "col-xs-12 col-md-6 col-lg-4"
+      else
+        "col-xs-12"
+      end
+    end
   end
 
   # This can be called to display flash notices either in the page or a modal.
@@ -120,12 +130,12 @@ module ApplicationHelper
   # Returns a string that indicates the current user/logged_in/admin status.
   # Used as a simple cache key for templates that may have three
   # possible versions of cached HTML
-  def user_status_string
+  def user_status_string(user = nil)
     if in_admin_mode?
       "admin_mode"
     elsif browser.bot?
       "robot"
-    elsif !@user.nil?
+    elsif !user.nil?
       "logged_in"
     else
       "no_user"

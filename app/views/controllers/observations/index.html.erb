@@ -1,10 +1,10 @@
 <%
 if @project
   add_project_banner(@project)
-  @container = :wide
+  set_container(:wide)
 else
   add_index_title(@query) # note default above is non-nil
-  @container = :full
+  set_container(:full)
   add_context_nav(observations_index_tabs(query: @query)) if @objects.any?
 end
 project_observation_buttons(@project, @query)

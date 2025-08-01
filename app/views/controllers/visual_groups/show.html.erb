@@ -43,7 +43,7 @@ add_page_title(title, [title, :VISUAL_GROUP.l].safe_join(" "))
 
 <%= render(partial: "visual_groups/image_matrix",
            locals: { visual_group: @visual_group, status: "included" }) %>
-<% @container = :full %>
+<% set_container(:full) %>
 
 <p>
   <%= link_to(:visual_group_edit.t,

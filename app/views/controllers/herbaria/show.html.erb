@@ -5,7 +5,7 @@ add_pager_for(@herbarium)
 add_context_nav(herbarium_show_tabs(herbarium: @herbarium, user: @user))
 
 map = @herbarium.location
-@container = :wide
+set_container(:wide)
 %>
 
 <% if @herbarium.mcp_searchable? %>

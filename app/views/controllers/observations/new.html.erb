@@ -2,7 +2,7 @@
 add_page_title(:create_observation_title.t)
 
 add_context_nav(observation_form_new_tabs)
-@container = :wide
+set_container(:wide)
 %>
 
 <%= render(partial: "observations/form", locals: { action: :create }) %>

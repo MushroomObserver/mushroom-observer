@@ -2,7 +2,7 @@
 add_page_title(:add_members_title.t(title: @project.title))
 
 add_context_nav(project_members_form_new_tabs(project: @project))
-@container = :wide
+set_container(:wide)
 
 action = { controller: "/projects/members", action: :create,
             project_id: @project.id, q: get_query_param }

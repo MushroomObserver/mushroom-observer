@@ -12,7 +12,7 @@ if @user
   add_edit_icons(@observation)
 end
 
-@container = :double
+set_container(:double)
 set_columns(:eight_four)
 
 show_map   = @user ? @user.thumbnail_maps : !session[:hide_thumbnail_maps]

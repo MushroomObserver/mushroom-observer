@@ -2,7 +2,7 @@
 add_page_title(:image_edit_title.t(name: @image.unique_format_name))
 
 add_context_nav(observation_images_edit_tabs(image: @image))
-@container = :wide
+set_container(:wide)
 form_action = { controller: "/observations/images",
                 action: :update,
                 id: @image.id,
