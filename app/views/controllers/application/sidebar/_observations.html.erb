@@ -8,6 +8,6 @@
                    observations_path(by_user: @user.id),
                    class: classes[:indent],
                    id: "nav_your_observations_link") if @user %>
-<%= active_link_with_query(:app_help_id_obs.t, identify_observations_path,
-                           class: classes[:indent],
-                           id: "nav_identify_observations_link") %>
+<%= active_link_to(:app_help_id_obs.t, identify_observations_path,
+                   class: classes[:indent],
+                   id: "nav_identify_observations_link") %>
