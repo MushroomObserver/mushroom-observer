@@ -127,6 +127,8 @@ class InatImportsController < ApplicationController
   # When implementing import_all, we should instead use the iNat API
   # to get the number of observations to be imported.
   def importables_count
+    return nil if importing_all?
+
     params[:inat_ids].split(",").length
   end
 
