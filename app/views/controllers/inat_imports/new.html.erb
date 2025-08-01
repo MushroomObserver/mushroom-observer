@@ -23,7 +23,7 @@
     <%= check_box_with_label(form: f, field: :consent,
                              class: "mt-3", label: :inat_import_consent.l) %>
     <%= panel_block do %>
-      <p><b><%= :inat_details_heading.t %></b></p>
+      <p><b><%= :inat_details_heading.l %></b></p>
       <%= :inat_details_list.t %>
     <% end %>
     <%= f.submit(:SUBMIT.l, { class: "btn btn-default" }) %>
