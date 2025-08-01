@@ -87,39 +87,45 @@ module TitleContextNavHelper
     kwargs&.merge(extra_args&.except(:class))
   end
 
-  # rubocop:disable Metrics/AbcSize
   # The "dropdown-current" Stimulus controller should update the dropdown title
   # with the currently selected option on load, if show_current == true
   # For Bootstrap 3, this must be an <li> element for alignment
   def context_nav_dropdown(title: "", id: "", links: [])
     tag.li(class: "dropdown d-inline-block") do
       [
-        tag.a(
-          class: class_names(%w[dropdown-toggle]),
-          id: "context_nav_toggle", role: "button",
-          data: { toggle: "dropdown" },
-          aria: { haspopup: "true", expanded: "false" }
-        ) do
-          concat(tag.span(title, data: { dropdown_current_target: "title" }))
-          concat(tag.span(class: "caret ml-2"))
-        end,
-        tag.ul(
-          id:, class: "dropdown-menu",
-          aria: { labelledby: "context_nav_toggle" }
-        ) do
-          links.compact.each do |link|
-            concat(tag.li(link))
-          end
-        end
+        context_nav_dropdown_toggle(title:),
+        context_nav_dropdown_menu(id:, links:)
       ].safe_join
     end
   end
-  # rubocop:enable Metrics/AbcSize
+
+  def context_nav_dropdown_toggle(title:)
+    tag.a(
+      class: class_names(%w[dropdown-toggle]),
+      id: "context_nav_toggle", role: "button",
+      data: { toggle: "dropdown" },
+      aria: { haspopup: "true", expanded: "false" }
+    ) do
+      concat(tag.span(title, data: { dropdown_current_target: "title" }))
+      concat(tag.span(class: "caret ml-2"))
+    end
+  end
+
+  def context_nav_dropdown_menu(id:, links:)
+    tag.ul(
+      id:, class: "dropdown-menu",
+      aria: { labelledby: "context_nav_toggle" }
+    ) do
+      links.compact.each do |link|
+        concat(tag.li(link))
+      end
+    end
+  end
 
   # Descriptions don't get an index link
   def nav_index_link(rubric, controller)
     unless controller.methods.include?(:index) &&
-           nav_indexables.include?(controller.controller_name)
+           NAV_INDEXABLES.include?(controller.controller_name)
       return rubric
     end
 
@@ -130,18 +136,16 @@ module TitleContextNavHelper
     )
   end
 
-  def nav_indexables
-    %w[
-      observations names species_lists projects locations images herbaria
-      glossary_terms comments rss_logs
-    ]
-  end
+  NAV_INDEXABLES = %w[
+    observations names species_lists projects locations images herbaria
+    glossary_terms comments rss_logs
+  ].freeze
 
   # Descriptions also don't get a create button
   def nav_create(user, controller)
     unless user &&
            controller.methods.include?(:new) &&
-           nav_creatables.include?(controller.controller_name)
+           NAV_CREATABLES.include?(controller.controller_name)
       return ""
     end
 
@@ -154,12 +158,10 @@ module TitleContextNavHelper
     )
   end
 
-  def nav_creatables
-    %w[
-      observations names species_lists projects locations images herbaria
-      glossary_terms comments
-    ]
-  end
+  NAV_CREATABLES = %w[
+    observations names species_lists projects locations images herbaria
+    glossary_terms
+  ].freeze
 
   def search_nav_toggle
     tag.div(class: "navbar-form pr-0") do
