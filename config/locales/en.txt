@@ -293,8 +293,8 @@
   glossary: glossary
   GLOSSARY_TERM: Glossary Term
   glossary_term: glossary term
-  GLOSSARY_TERMS: Glossary Terms
-  glossary_terms: glossary terms
+  GLOSSARY_TERMS: Glossary
+  glossary_terms: glossary
   HERBARIUM_RECORD: Fungarium Record
   herbarium_record: fungarium record
   HERBARIUM_RECORDS: Fungarium Records
@@ -2594,7 +2594,7 @@
   # glossary_term#index
   glossary_term_index: Glossary
   glossary_term_index_title: Glossary of Mycology Terms
-  glossary_term_index_documentation: Glossary Documentation and Guidelines
+  glossary_term_index_documentation: Documentation and Guidelines
 
   # glossary_term#edit
   edit_glossary_term: "[:edit_object(type=:glossary_term)]"

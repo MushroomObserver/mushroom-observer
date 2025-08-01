@@ -368,12 +368,7 @@ class ApplicationController < ActionController::Base
       return parent_module.to_s.underscore.upcase.to_sym.t
     end
 
-    rubr = controller_name.upcase.to_sym
-    if rubr == :GLOSSARY_TERMS
-      :GLOSSARY.t
-    else
-      controller_name.upcase.to_sym.t
-    end
+    controller_name.upcase.to_sym.t
   end
   helper_method :rubric
 
