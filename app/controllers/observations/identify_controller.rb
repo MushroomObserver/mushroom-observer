@@ -16,7 +16,7 @@ module Observations
     private
 
     # override the default? maybe no longer necessary
-    def unfiltered_index_opts
+    def sorted_index_opts
       super.merge(query_args: { needs_naming: @user, order_by: :rss_log })
     end
 
