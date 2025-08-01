@@ -13,6 +13,7 @@ if @user
 end
 
 @container = :double
+set_columns(:eight_four)
 
 show_map   = @user ? @user.thumbnail_maps : !session[:hide_thumbnail_maps]
 show_lists = @user # && @observation.species_lists.any?
@@ -25,14 +26,14 @@ carousel_locals = {
 }
 %>
 
-<div class="row">
-  <div class="col-xs-12 col-md-8 col-lg-7 float-sm-left">
+<%= tag.div(class: "row") do %>
+  <%= tag.div(class: yield(:left_columns)) do %>
     <%= tag.div(class: "panel panel-default") do
       render(partial: "shared/carousel", locals: carousel_locals)
     end %>
-  </div>
+  <% end %>
 
-  <div class="col-xs-12 col-md-4 col-lg-5 float-sm-right">
+  <%= tag.div(class: yield(:right_columns)) do %>
     <%= render(partial: "observations/show/observation_details",
                locals: obs_locals.merge(sites: @other_sites)) %>
     <% if @user %>
@@ -43,12 +44,12 @@ carousel_locals = {
                    locals: obs_locals) %>
       <% end %>
     <% end %>
-  </div>
-</div>
+  <% end %>
+<% end %>
 <!--.row-->
 
-<div class="row">
-  <div class="col-xs-12 col-md-8 col-lg-7 float-sm-left">
+<%= tag.div(class: "row") do %>
+  <%= tag.div(class: yield(:left_columns)) do %>
     <% if @user %>
       <%= render(partial: "observations/show/namings", locals: obs_locals) %>
     <% end %>
@@ -58,17 +59,17 @@ carousel_locals = {
                          controls: @user, limit: nil }) %>
 
     <%= @observation.source_credit.tpl if @observation.source_noteworthy? %>
-  </div>
+  <% end %>
 
   <% if @user %>
-    <div class="col-xs-12 col-md-4 col-lg-5 float-sm-right">
+    <%= tag.div(class: yield(:right_columns)) do %>
       <% if show_map %>
         <%= render(partial: "observations/show/thumbnail_map",
                    locals: obs_locals) %>
       <% end %>
-    </div>
+    <% end %>
   <% end %>
-</div>
+<% end %>
 <!--.row-->
 
 <% if @user %>

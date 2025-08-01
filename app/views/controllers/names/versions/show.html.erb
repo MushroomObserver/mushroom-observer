@@ -4,10 +4,11 @@ add_page_title(:show_past_name_title.t(
 ))
 add_context_nav(name_version_tabs(name: @name))
 @container = :full
+set_columns(:six)
 %>
 
 <%= tag.div(class: "row mt-4") do %>
-  <%= tag.div(class: "col-md-6") do %>
+  <%= tag.div(class: yield(:left_columns)) do %>
     <%= render(partial: "names/show/nomenclature",
                locals: { name: @name, synonyms: false }) %>
     <%= render(partial: "names/show/lifeform_panel") %>
@@ -16,7 +17,7 @@ add_context_nav(name_version_tabs(name: @name))
     <% end %>
   <% end %>
 
-  <%= tag.div(class: "col-md-6") do %>
+  <%= tag.div(class: yield(:right_columns)) do %>
     <%= show_past_versions(@name, @versions,
                            bold: lambda {|v| !v.deprecated}) %>
   <% end %>

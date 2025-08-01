@@ -3,9 +3,11 @@ Project list search form
 for objects associated with a project or observation list
 %>
 
-<%= form_with(url: add_dispatch_path, method: :post) do |form| %>
-  <%= form.hidden_field(:object_id, value: object.id) %>
-  <%= form.hidden_field(:object_type, value: object.class.name) %>
-  <%= form.hidden_field(:project, value: @project&.id) %>
-  <%= object_search_field(object:, form:) %>
+<%= panel_block(id: "list_search") do %>
+  <%= form_with(url: add_dispatch_path, method: :post) do |form| %>
+    <%= form.hidden_field(:object_id, value: object.id) %>
+    <%= form.hidden_field(:object_type, value: object.class.name) %>
+    <%= form.hidden_field(:project, value: @project&.id) %>
+    <%= object_search_field(object:, form:) %>
+  <% end %>
 <% end %>

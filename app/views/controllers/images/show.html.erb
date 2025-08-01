@@ -4,17 +4,18 @@ add_page_title(show_title, [:IMAGE.l, show_title].safe_join(" "))
 add_pager_for(@image)
 add_context_nav(show_image_tabs(image: @image))
 @container = :full
+set_columns(:six)
 %>
 
-<div class="row">
-  <div class="col-md-6 col-lg-8">
+<%= tag.div(class: "row") do %>
+  <%= tag.div(class: yield(:left_columns)) do %>
 
     <%= render(partial: "images/show/image_panel") %>
     <%= render(partial: "images/show/license_history_panel") %>
 
-  </div>
+  <% end %>
   <!--.col-lg-8-->
-  <div class="col-md-6 col-lg-4">
+  <%= tag.div(class: yield(:right_columns)) do %>
 
     <%= render(partial: "images/show/info_panel") %>
 
@@ -32,14 +33,14 @@ add_context_nav(show_image_tabs(image: @image))
     </div>
     <!-- #image_votes_container -->
 
-  </div>
+  <% end %>
   <!--.col-lg-4-->
-</div>
+<% end %>
 <!--.row-->
 
 <!-- LICENSE_AND_FOOTER -->
-<div class="row">
-  <div class="col-sm-6">
+<%= tag.div(class: "row") do %>
+  <%= tag.div(class: yield(:left_columns)) do %>
     <div class="small text-center">
       <div>
         <%= image_copyright(@image) %>
@@ -49,12 +50,12 @@ add_context_nav(show_image_tabs(image: @image))
                    locals: { license: @image.license }) %>
       </div>
     </div>
-  </div>
+  <% end %>
   <!--.col-->
-  <div class="col-sm-6">
+  <%= tag.div(class: yield(:right_columns)) do %>
     <%= show_object_footer(@user, @image) %>
-  </div>
+  <% end %>
   <!--.col-sm-6-->
-</div>
+<% end %>
 <!--.row-->
 <!-- /LICENSE_AND_FOOTER -->

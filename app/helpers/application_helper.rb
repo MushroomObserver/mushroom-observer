@@ -65,6 +65,36 @@ module ApplicationHelper
     @content_layout == :no_panels ? "p-3" : ""
   end
 
+  def set_columns(columns = :twelve)
+    left_cols = case columns
+                when :nine_three
+                  "col-xs-12 col-md-9 col-lg-8"
+                when :eight_four
+                  "col-xs-12 col-md-8 col-lg-7"
+                when :seven_five
+                  "col-xs-12 col-md-7"
+                when :six
+                  "col-xs-12 col-md-6 col-lg-8"
+                else
+                  "col-xs-12"
+                end
+    content_for(:left_columns) { left_cols }
+
+    right_cols = case columns
+                 when :nine_three
+                   "col-xs-12 col-md-3 col-lg-4"
+                 when :eight_four
+                   "col-xs-12 col-md-4 col-lg-5"
+                 when :seven_five
+                   "col-xs-12 col-md-5"
+                 when :six
+                   "col-xs-12 col-md-6 col-lg-4"
+                 else
+                   "col-xs-12"
+                 end
+    content_for(:right_columns) { right_cols }
+  end
+
   # This can be called to display flash notices either in the page or a modal.
   # `flash_notices?` `flash_get_notices` `flash_notice_level` and `flash_clear`
   # are defined in ApplicationController::FlashNotices.

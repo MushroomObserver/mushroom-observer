@@ -8,7 +8,7 @@ project_subtitle = content_for?(:project_location) ||
 
 <%# Page title. Indexes have none — `rubric` in top_nav has model name. %>
 <% if action_name != "index" %>
-  <%= tag.div(class: class_names("col-xs-12", title_cols),
+  <%= tag.div(class: yield(:left_columns),
               id: "title_bar") do %>
     <% if !has_banner %>
       <%= tag.nav(
@@ -37,7 +37,9 @@ project_subtitle = content_for?(:project_location) ||
 <%# Show pages (except projects): %>
 <%# Interest and edit icons, prev/index/next links %>
 <% if action_name == "show" && !has_banner %>
-  <%= tag.div(class: "col-sm-4 col-lg-5 hidden-print text-right") do
+  <%= tag.div(
+    class: class_names(yield(:right_columns), "hidden-print text-right")
+  ) do
     tag.nav(class: "show_object_nav d-flex justify-content-between pr-3") do
       # tag.div(class: "container-fluid") do
         [
