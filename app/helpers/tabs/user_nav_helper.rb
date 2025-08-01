@@ -8,7 +8,7 @@ module Tabs
         comments_for_user_tab(user, :app_comments_for_you.t),
         projects_for_user_tab(user),
         species_lists_for_user_tab(user),
-        account_show_notifications_tab,
+        account_show_interests_tab,
         account_edit_profile_tab,
         account_edit_preferences_tab
       ]
