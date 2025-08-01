@@ -123,8 +123,7 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
 
   scope :pattern, lambda { |phrase|
     cols = SpeciesList[:title] + SpeciesList[:notes].coalesce("") +
-           Location[:id].when(present?).then(Location[:name]).
-           else(SpeciesList[:where])
+           Location[:name].coalesce(SpeciesList[:where])
     left_outer_joins(:location).search_columns(cols, phrase)
   }
 
