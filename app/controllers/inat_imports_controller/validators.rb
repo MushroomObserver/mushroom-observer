@@ -34,20 +34,27 @@ module InatImportsController::Validators
   end
 
   def imports_designated?
-    return true if params[:all] == "1" || params[:inat_ids].present?
+    return true if importing_all? || params[:inat_ids].present?
 
     flash_warning(:inat_no_imports_designated.t)
     false
   end
 
+  def importing_all?
+    params[:all] == "1"
+  end
+
   def list_within_size_limits?
-    return true if params[:inat_ids].length <= 255
+    return true if importing_all? || params[:inat_ids].length <= 255
 
     flash_warning(:inat_too_many_ids_listed.t)
     false
   end
 
+  # Are the listed iNat IDs fresh (i.e., not already imported)?
   def fresh_import?
+    return true if importing_all?
+
     previous_imports = Observation.where(inat_id: inat_id_list)
     return true if previous_imports.none?
 
@@ -63,6 +70,8 @@ module InatImportsController::Validators
   end
 
   def unmirrored?
+    return true if importing_all?
+
     conditions = inat_id_list.map do |inat_id|
       Observation[:notes].matches("%Mirrored on iNaturalist as <a href=\"https://www.inaturalist.org/observations/#{inat_id}\">%")
     end
