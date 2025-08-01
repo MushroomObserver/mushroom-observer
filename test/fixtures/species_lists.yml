@@ -103,3 +103,9 @@ reused_list:
   <<: *DEFAULTS
   user: mary
   when: 2023-11-19
+
+no_where_list:
+  <<: *DEFAULTS
+  user: mary
+  when: 2023-11-19
+  where: NULL
