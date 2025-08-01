@@ -491,6 +491,11 @@
   padding-right: 0 !important;
 }
 
+.px-1 {
+  padding-left: 0.25rem !important;
+  padding-right: 0.25rem !important;
+}
+
 .px-2 {
   padding-left: 0.5rem !important;
   padding-right: 0.5rem !important;
@@ -517,8 +522,20 @@
   padding-left: 1.5rem !important;
 }
 
+.pr-0 {
+  padding-right: 0 !important;
+}
+
 .pr-10px {
   padding-right: 10px !important;
+}
+
+.pr-3 {
+  padding-right: 1rem !important;
+}
+
+.pr-4 {
+  padding-right: 1.5rem !important;
 }
 
 .text-nowrap {
@@ -562,6 +579,10 @@
 
 .dotted-border {
   border: 1px dotted;
+}
+
+.rounded-circle {
+  border-radius: 50%;
 }
 
 .img-fluid {
@@ -765,6 +786,11 @@
   .px-sm-0 {
     padding-left: 0 !important;
     padding-right: 0 !important;
+  }
+
+  .px-sm-3 {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
   }
 
   .table {

@@ -174,10 +174,12 @@ module TitleContextNavHelper
   end
 
   def left_nav_toggle
-    tag.div(class: "visible-xs navbar-form pl-0") do
+    tag.div(class: "visible-xs pr-4") do
       tag.button(
-        link_icon(:menu, title: :MENU.l),
-        class: "btn btn-sm btn-outline-default",
+        # link_icon(:menu, title: :MENU.l),
+        image_tag("mo_icon_bg.svg",
+                  width: "39px", alt: :MENU.t, title: :MENU.t),
+        class: "btn btn-outline-default rounded-circle overflow-hidden p-0",
         type: :button,
         data: { toggle: "offcanvas", nav_target: "toggle",
                 action: "nav#toggleOffcanvas" },
