@@ -125,9 +125,17 @@ module TitleHelper
 
   def caption_params(query, truncate)
     tag.div(class: "small") do
+      caption_param_text(query, truncate)
+    end
+  end
+
+  def caption_param_text(query, truncate)
+    if query.params.except(:order_by).present?
       query.params.except(:order_by).compact_blank.each do |key, val|
         caption_one_filter_param(query, key, val, truncate:)
       end
+    else
+      :ALL.l
     end
   end
 
