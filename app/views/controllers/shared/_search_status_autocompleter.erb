@@ -15,7 +15,7 @@ tag.div(
   [
     tag.div(class: "d-flex flex-row align-items-center form-inline mb-2") do
       [
-        tag.div(class: "status-light-container mb-1 mr-5") do
+        tag.div(class: "status-light-container mb-2 mr-5") do
           [
             tag.div(class: "status-indicator",
                     data: { search_status_target: "light" }),
@@ -24,10 +24,10 @@ tag.div(
                     data: { search_status_target: "message" })
           ].safe_join
         end,
-        tag.div(class: "field-slip-container field-group") do
+        tag.div(class: "field-slip-container field-group navbar-flex") do
           [
             form.label("Field Slip:", for: "field_slip",
-                       class: "font-weight-normal"),
+                       class: "font-weight-normal text-nowrap"),
             form.text_field(:field_slip, class: "form-control mx-3", size: 9),
             submit_button(form:, button: "Add")
           ].safe_join

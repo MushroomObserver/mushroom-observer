@@ -5,9 +5,7 @@ add_project_banner(@project)
 
 <br />
 
-<%= panel_block(id: "list_search") do
-  render(partial: "shared/list_search", locals: { object: @project })
-end %>
+<%= render(partial: "shared/list_search", locals: { object: @project }) %>
 
 <%= panel_block(id: "project_summary") do %>
   <%= tag.p(@project.summary.to_s.html_safe.tpl) %>

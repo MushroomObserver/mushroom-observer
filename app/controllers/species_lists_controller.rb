@@ -194,6 +194,9 @@ class SpeciesListsController < ApplicationController
                   [:user, :name, :location, { thumb_image: :image_votes }])
     # Save a lookup in comments_for_object
     @comments = @species_list.comments&.sort_by(&:created_at)&.reverse
+    @object_names = @species_list.observations.joins(:name).
+                    select(Name[:text_name], Name[:id]).distinct.
+                    order(Name[:text_name])
   end
 
   ##############################################################################
