@@ -15,13 +15,13 @@ tag.div(
   [
     tag.div(class: "d-flex flex-row align-items-center form-inline mb-2") do
       [
-        tag.div(class: "status-light-container mb-2 mr-5") do
+        tag.div(class: "status-light-container mr-5") do
           [
-            tag.div(class: "status-indicator",
-                    data: { search_status_target: "light" }),
+            tag.span(class: "status-indicator",
+                     data: { search_status_target: "light" }),
             tag.span(:search_status_all_names.l(type:),
-                    class: "status-text",
-                    data: { search_status_target: "message" })
+                     class: "status-text mb-1",
+                     data: { search_status_target: "message" })
           ].safe_join
         end,
         tag.div(class: "field-slip-container field-group navbar-flex") do
