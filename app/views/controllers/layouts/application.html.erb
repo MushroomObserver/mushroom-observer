@@ -7,6 +7,7 @@ theme = "theme-#{@css_theme.underscore.dasherize}"
 location_format = "location-format-#{User.current_location_format || "postal"}"
 logged_in = @user ? "logged-in-user" : "no-user"
 body_class = class_names(ctrlr_action, theme, location_format, logged_in)
+set_container
 set_columns
 set_content_padding
 content_classes = class_names(yield(:container_class), yield(:content_padding))
