@@ -7,7 +7,7 @@ else
   project_title = @query&.params_cache&.dig(:project)&.title || ""
 end
 add_pagination(@pagination_data)
-set_container(:wide)
+container_class(:wide)
 %>
 
 <% if notice %>

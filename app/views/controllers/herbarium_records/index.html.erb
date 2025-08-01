@@ -1,5 +1,5 @@
 <%
-set_container(:wide)
+container_class(:wide)
 add_index_title(@query)
 add_context_nav(herbarium_records_index_tabs(obs: @observation))
 add_sorter(@query, herbarium_records_index_sorts)

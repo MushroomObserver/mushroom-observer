@@ -3,8 +3,8 @@ add_page_title(:show_past_name_title.t(
   num:  @name.version, name: @name.display_name
 ))
 add_context_nav(name_version_tabs(name: @name))
-set_container(:full)
-set_columns(:six)
+container_class(:full)
+column_classes(:six)
 %>
 
 <%= tag.div(class: "row mt-4") do %>

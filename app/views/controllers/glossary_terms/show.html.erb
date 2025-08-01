@@ -4,8 +4,8 @@ add_page_title(title, ["#{:GLOSSARY_TERM.l}:", title].safe_join(" "))
 
 add_context_nav(glossary_term_show_tabs(term: @glossary_term, user: @user))
 
-set_container(:wide)
-set_columns(:eight_four)
+container_class(:wide)
+column_classes(:eight_four)
 %>
 
 <%= tag.div(class: "row") do %>

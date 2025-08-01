@@ -4,7 +4,7 @@ add_context_nav(rss_logs_index_tabs(user: @user, types: @types))
 add_type_filters
 add_pagination(@pagination_data)
 
-set_container(:full)
+container_class(:full)
 
 flash_error(@error) if @error && @objects.empty?
 %>

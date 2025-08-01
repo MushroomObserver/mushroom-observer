@@ -8,8 +8,7 @@ project_subtitle = content_for?(:project_location) ||
 
 <%# Page title. Indexes have none — `rubric` in top_nav has model name. %>
 <% if action_name != "index" %>
-  <%= tag.div(class: yield(:left_columns),
-              id: "title_bar") do %>
+  <%= tag.div(class: yield(:left_columns), id: "title_bar") do %>
     <% if !has_banner %>
       <%= tag.nav(
         class: "show_title_nav d-flex justify-content-between pl-3"

@@ -6,7 +6,7 @@ add_context_nav(name_forms_return_tabs(name: @name))
 rank = rank_as_lower_string(@name.rank)
 action = { controller: "/names/classification", action: :update,
             id: @name.id, q: get_query_param }
-set_container(:text)
+container_class(:text)
 %>
 
 <%= form_with(url: action, method: :put) do |f| %>

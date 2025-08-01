@@ -2,7 +2,7 @@
 add_page_title(:edit_lifeform_title.t(name: @name.display_name))
 
 add_context_nav(name_forms_return_tabs(name: @name))
-set_container(:text_image)
+container_class(:text_image)
 
 action = { controller: "/names/lifeforms", action: :update,
            id: @name.id, q: get_query_param }

@@ -7,8 +7,8 @@ if @user
   add_interest_icons(@user, @location)
   add_edit_icons(@location)
 end
-set_container(:full)
-set_columns(:seven_five)
+container_class(:full)
+column_classes(:seven_five)
 %>
 
 <% if @location.hidden %>

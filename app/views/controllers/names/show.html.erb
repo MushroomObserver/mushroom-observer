@@ -10,8 +10,8 @@ if @user
   add_interest_icons(@user, @name)
   add_edit_icons(@name)
 end
-set_container(:full)
-set_columns(:seven_five)
+container_class(:full)
+column_classes(:seven_five)
 %>
 
 <%= tag.div(class: "row") do %>

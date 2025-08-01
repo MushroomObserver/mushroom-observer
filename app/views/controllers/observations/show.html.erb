@@ -12,8 +12,8 @@ if @user
   add_edit_icons(@observation)
 end
 
-set_container(:double)
-set_columns(:eight_four)
+container_class(:double)
+column_classes(:eight_four)
 
 show_map   = @user ? @user.thumbnail_maps : !session[:hide_thumbnail_maps]
 show_lists = @user # && @observation.species_lists.any?

@@ -3,7 +3,7 @@ add_index_title(@query)
 add_context_nav(location_description_index_tabs(query: @query))
 add_sorter(@query, descriptions_index_sorts)
 add_pagination(@pagination_data)
-set_container(:wide)
+container_class(:wide)
 
 flash_error(@error) if @error && @objects.empty?
 %>

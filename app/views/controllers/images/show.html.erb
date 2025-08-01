@@ -3,8 +3,8 @@ show_title = @image.unique_format_name
 add_page_title(show_title, [:IMAGE.l, show_title].safe_join(" "))
 add_pager_for(@image)
 add_context_nav(show_image_tabs(image: @image))
-set_container(:full)
-set_columns(:six)
+container_class(:full)
+column_classes(:six)
 %>
 
 <%= tag.div(class: "row") do %>

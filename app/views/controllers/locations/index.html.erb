@@ -1,5 +1,5 @@
 <%
-set_container(:full)
+container_class(:full)
 add_index_title(@query)
 add_context_nav(locations_index_tabs(query: @query))
 all_links = if (params[:id].present? ||

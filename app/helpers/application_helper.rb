@@ -6,7 +6,12 @@
 #  Methods available to all templates in the application:
 #
 #  css_theme
-#  set_container
+#  default_container_class
+#  container_class
+#  default_column_classes
+#  column_classes
+#  default_content_padding
+#  content_padding
 #
 #  --------------------------
 #
@@ -36,12 +41,20 @@ module ApplicationHelper
     end
   end
 
+  # This executes in the layout, but AFTER the template!
+  def default_container_class
+    return if content_for?(:container_class)
+
+    container_class
+  end
+
   # Set a width class for the layout content container.
   # Defaults to :text width, currently the most common. :wide is for forms
   # These classes are MO-defined
   #
-  def set_container(container = :text)
-    content_for(:container_class) do
+  def container_class(container = :text)
+    container ||= :text
+    content_for(:container_class, flush: true) do
       case container
       when :text
         "container-text"
@@ -55,11 +68,58 @@ module ApplicationHelper
     end
   end
 
+  # This executes in the layout, but AFTER the template!
+  def default_column_classes
+    return if content_for?(:left_columns)
+
+    column_classes
+  end
+
+  # Call in a layout to sync the title-bar columns with the content columns.
+  def column_classes(columns = :twelve)
+    content_for(:left_columns, flush: true) do
+      case columns
+      when :nine_three
+        class_names("col-xs-12 col-md-9 col-lg-8")
+      when :eight_four
+        class_names("col-xs-12 col-md-8 col-lg-7")
+      when :seven_five
+        class_names("col-xs-12 col-md-7")
+      when :six
+        class_names("col-xs-12 col-md-6 col-lg-8")
+      else
+        class_names("col-xs-12")
+      end
+    end
+
+    content_for(:right_columns, flush: true) do
+      case columns
+      when :nine_three
+        class_names("col-xs-12 col-md-3 col-lg-4")
+      when :eight_four
+        class_names("col-xs-12 col-md-4 col-lg-5")
+      when :seven_five
+        class_names("col-xs-12 col-md-5")
+      when :six
+        class_names("col-xs-12 col-md-6 col-lg-4")
+      else
+        class_names("col-xs-12")
+      end
+    end
+  end
+
+  # This executes in the layout, but AFTER the template!
+  def default_content_padding
+    return if content_for?(:content_padding)
+
+    content_padding
+  end
+
   # Set content padding to line up with the title. If it needs different padding
-  # from the defaults below, call `set_content_padding(:panels)` or :no_panels
+  # from the defaults below, call `content_padding(:panels)` or :no_panels
   # in the template. If it's a mixed layout you can set it to :panels and wrap
   # text blocks in the CSS class `content-block`, which will pad them the same.
-  def set_content_padding(content_has = nil)
+  def content_padding(content_has = nil)
     # Give defaults per action.
     content_has ||= case action_name
                     when "index", "show"
@@ -67,41 +127,8 @@ module ApplicationHelper
                     else
                       :no_panels
                     end
-    content_for(:content_padding) do
+    content_for(:content_padding, flush: true) do
       content_has == :no_panels ? "p-3" : ""
-    end
-  end
-
-  # Call in a layout to sync the title-bar columns with the content columns.
-  def set_columns(columns = :twelve)
-    content_for(:left_columns) do
-      case columns
-      when :nine_three
-        "col-xs-12 col-md-9 col-lg-8"
-      when :eight_four
-        "col-xs-12 col-md-8 col-lg-7"
-      when :seven_five
-        "col-xs-12 col-md-7"
-      when :six
-        "col-xs-12 col-md-6 col-lg-8"
-      else
-        "col-xs-12"
-      end
-    end
-
-    content_for(:right_columns) do
-      case columns
-      when :nine_three
-        "col-xs-12 col-md-3 col-lg-4"
-      when :eight_four
-        "col-xs-12 col-md-4 col-lg-5"
-      when :seven_five
-        "col-xs-12 col-md-5"
-      when :six
-        "col-xs-12 col-md-6 col-lg-4"
-      else
-        "col-xs-12"
-      end
     end
   end
 

@@ -5,8 +5,8 @@ add_page_title(:show_past_glossary_term_title.t(
 ))
 
 add_context_nav(glossary_term_version_tabs(term: @glossary_term))
-set_container(:wide)
-set_columns(:six)
+container_class(:wide)
+column_classes(:six)
 %>
 
 <%= tag.div(class: "row") do %>
