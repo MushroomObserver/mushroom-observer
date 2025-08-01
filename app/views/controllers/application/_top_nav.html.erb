@@ -42,11 +42,12 @@ nav_title = if action_name == "index"
         <% if content_for?(:context_nav) %>
           <%= yield(:context_nav) %>
         <% end %>
-        <% if @user.nil? %>
-          <%= render(partial: "application/top_nav/login") %>
-        <% else ##user is logged in %>
+        <% if !@user.nil? %>
           <%= render(partial: "application/top_nav/user_nav") %>
         <% end %>
+      <% end %>
+      <% if @user.nil? ##user is logged in %>
+        <%= render(partial: "application/top_nav/login") %>
       <% end %>
     <% end %>
 
