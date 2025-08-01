@@ -122,10 +122,6 @@ class InatImportJob < ApplicationJob
     parsed_page["total_results"] > parsed_page["page"] * parsed_page["per_page"]
   end
 
-  def import_page(page)
-    observation_importer.import_page(page)
-  end
-
   def observation_importer
     @observation_importer ||=
       ::Inat::ObservationImporter.new(inat_import, user)
