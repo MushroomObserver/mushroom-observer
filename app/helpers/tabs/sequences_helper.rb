@@ -7,7 +7,7 @@ module Tabs
         link_to(:cancel_and_show.t(type: :observation),
                 seq.observation.show_link_args)
       ]
-      return unless check_permission(seq)
+      return links unless check_permission(seq)
 
       links += sequence_mod_tabs(seq)
       links

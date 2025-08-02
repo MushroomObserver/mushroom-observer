@@ -3,18 +3,19 @@ add_page_title(:show_past_location_title.t(
   num: @location.version, name: @location.display_name
 ))
 add_context_nav(location_version_tabs(location: @location))
+column_classes(:seven_five)
 %>
 
-<div class="row">
-  <div class="col-md-7">
+<%= tag.div(class: "row") do %>
+  <%= tag.div(class: yield(:left_columns)) do %>
     <%= tag.div(class: "mb-5") { make_map(objects: [@location]) } %>
-  </div>
+  <% end %>
 
-  <div class="col-md-5">
+  <%= tag.div(class: yield(:right_columns)) do %>
     <%= render(partial: "locations/show/coordinates") %>
     <%= render(partial: "locations/show/notes") %>
-  </div>
-</div>
+  <% end %>
+<% end %>
 
 <%= show_past_versions(@location, @versions) %>
 

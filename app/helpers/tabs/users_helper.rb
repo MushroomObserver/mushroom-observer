@@ -59,6 +59,12 @@ module Tabs
                               user_path(user.id)).tab
     end
 
+    # Same as above with "Your summary" caption
+    def user_summary_tab(user)
+      InternalLink::Model.new(:app_your_summary.l, user,
+                              user_path(user.id)).tab
+    end
+
     def user_observations_tab(user, text = nil)
       text ||= :show_user_observations_by.t(name: user.text_name)
       InternalLink::Model.new(text, user,

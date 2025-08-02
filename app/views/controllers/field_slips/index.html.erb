@@ -6,7 +6,8 @@ else
   add_context_nav(field_slips_index_tabs)
   project_title = @query&.params_cache&.dig(:project)&.title || ""
 end
-@container = :wide
+add_pagination(@pagination_data)
+container_class(:wide)
 %>
 
 <% if notice %>
@@ -34,7 +35,7 @@ end
   <% end %>
 <% end %>
 
-<%= pagination_nav(@pagination_data) do %>
+<%= paginated_results do %>
   <div class="list-group">
     <%= render(partial: "field_slips/object", collection: @objects) %>
   </div>

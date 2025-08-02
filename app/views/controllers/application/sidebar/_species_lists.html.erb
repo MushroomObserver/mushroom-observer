@@ -1,11 +1,14 @@
 <%= tag.div("#{:app_species_list.t}:", class: classes[:heading]) %>
-<% unless @user.nil? %>
-  <%= active_link_to(:app_your_lists.t, species_lists_path(by_user: @user.id),
+<% sidebar_species_lists_tabs(@user).compact.each do |link| %>
+  <%= sidebar_nav_link(link, class: classes[:indent]) %>
+<% end %>
+<%# unless @user.nil? %>
+  <%# active_link_to(:app_your_lists.t, species_lists_path(by_user: @user.id),
                      class: classes[:indent],
                      id: "nav_your_species_lists_link") %>
-<% end%>
-<%= active_link_to(:app_all_lists.t, species_lists_path(by: "updated_at"),
+<%# end%>
+<%# active_link_to(:app_all_lists.t, species_lists_path(by: "updated_at"),
                    class: classes[:indent],
                    id: "nav_species_lists_all") %>
-<%= active_link_to(:app_create_list.t, new_species_list_path,
+<%# active_link_to(:app_create_list.t, new_species_list_path,
                    class: classes[:indent], id: "nav_new_species_list_link" ) %>

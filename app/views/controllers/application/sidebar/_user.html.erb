@@ -4,40 +4,49 @@
     tag.span(h(@user.login), class: "ml-2")
   ].safe_join
 end %>
-<%= button_to(:app_logout.t,
-              account_logout_path,
-              { class: class_names("btn", "btn-link", classes[:indent],
-                                   classes[:mobile_only]),
-                id: "nav_user_logout_link" }) %>
 
-<%= active_link_to(:app_qrcode.t,
+<%= button_to(
+  :app_logout.t, account_logout_path,
+  class: class_names("btn btn-link", classes[:indent], classes[:mobile_only]),
+  id: "nav_user_logout_link"
+) %>
+
+<%# active_link_to(:app_qrcode.t,
                    field_slips_qr_reader_new_path,
                    class: class_names(classes[:indent], classes[:mobile_only]),
                    id: "nav_mobile_qr_reader") %>
-<%= active_link_to(:app_mobile.t,
+<%# active_link_to(:app_mobile.t,
                    article_path(34),
                    class: class_names(classes[:indent], classes[:mobile_only]),
                    id: "nav_mobile_mobile_link") %>
 
-<%= active_link_to(:app_comments_for_you.t,
+<% sidebar_user_tabs(@user).compact.each do |link| %>
+  <%= sidebar_nav_link(
+    link, class: class_names(classes[:indent], classes[:mobile_only])
+  ) %>
+<% end %>
+
+<%# active_link_to(:app_comments_for_you.t,
                    comments_path(for_user: @user.id),
                    class: class_names(classes[:indent], classes[:mobile_only]),
                    id: "nav_mobile_your_comments_link") %>
-<%= active_link_to(:app_your_interests.t, interests_path,
+<%# active_link_to(:app_your_interests.t, interests_path,
                    class: class_names(classes[:indent], classes[:mobile_only]),
                    id: "nav_mobile_interests_link") %>
-<%= active_link_to(:app_your_summary.t, user_path(@user.id),
+<%# active_link_to(:app_your_summary.t, user_path(@user.id),
                    class: class_names(classes[:indent], classes[:mobile_only]),
                    id: "nav_mobile_profile_link") %>
-<%= active_link_to(:app_preferences.t, edit_account_preferences_path,
+<%# active_link_to(:app_preferences.t, edit_account_preferences_path,
                    class: class_names(classes[:indent], classes[:mobile_only]),
                    id: "nav_mobile_preferences_link") %>
-<%= link_to(:app_join_mailing_list.t,
+<%# link_to(:app_join_mailing_list.t,
             "https://groups.google.com/forum/?fromgroups=#!forum/mo-general",
             class: class_names(classes[:indent], classes[:mobile_only]),
             id: "nav_mobile_mailing_list_link") %>
 <% if @user.admin && !in_admin_mode? %>
-  <%= button_to(:app_turn_admin_on.t, admin_mode_path(turn_on: true),
-                class: class_names(classes[:indent], classes[:mobile_only]),
-                id: "nav_mobile_admin_link" ) %>
+  <%= button_to(
+    :app_turn_admin_on.t, admin_mode_path(turn_on: true),
+    class: class_names("btn btn-link", classes[:indent], classes[:mobile_only]),
+    id: "nav_mobile_admin_link"
+  ) %>
 <% end %>

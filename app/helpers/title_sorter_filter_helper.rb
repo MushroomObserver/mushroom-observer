@@ -4,16 +4,20 @@
 #  index_sorter                 # helper to render the sorter partial
 #
 module TitleSorterFilterHelper
-  # Conditionally dds a group of sorting links, for indexes, if relevant
+  # Conditionally adds a group of sorting links, for indexes, if relevant
   # These link back to the same index action, changing only the `by` param.
+  # Called in the view, defines `:sorter` content which is rendered in layout.
   #
   def add_sorter(query, sorts, link_all: false)
     return unless sorts && (query&.num_results&.> 1)
 
+    links = create_sorting_links(query, sorts, link_all)
     content_for(:sorter) do
-      links = create_sorting_links(query, sorts, link_all)
-
-      render(partial: "application/content/sorter", locals: { links: links })
+      tag.div(class: "d-inline-block") do
+        concat(tag.label("#{:sort_by_header.l}:",
+                         class: "font-weight-normal mr-2 hidden-xs"))
+        concat(sort_nav_dropdown(title: "", id: "sorts", links:))
+      end
     end
   end
 
@@ -26,14 +30,18 @@ module TitleSorterFilterHelper
   #
   def create_sorting_links(query, sorts, link_all)
     sort_links = assemble_sort_links(query, sorts, link_all)
-
-    sort_links.map do |title, path, identifier, active|
-      classes = "btn btn-default"
-      classes += " active" if active
-      args = { class: class_names(classes, identifier) }
+    sort_links.map do |title, path_args, identifier, active|
+      classes = [identifier] # "btn", "btn-default"
+      classes << "active" if active
+      link_by = path_args[:by]
+      # Don't need to swap current dropdown title on click, so no action
+      args = {
+        class: class_names(classes),
+        data: { dropdown_current_target: "link", by: link_by }
+      }
       args = args.merge(disabled: true) if active
 
-      link_with_query(title, path, **args)
+      link_with_query(title, path_args, **args)
     end
   end
 
@@ -61,6 +69,7 @@ module TitleSorterFilterHelper
 
   # The final product of `assemble_sort_links`: an array of attributes
   # [text, action, identifier, active]
+  # label arg is a translation string
   def sort_link(label, by, this_by, link_all)
     model = controller.controller_model_name
     ctlr = controller.controller_name
@@ -83,7 +92,40 @@ module TitleSorterFilterHelper
     model.underscore.pluralize
   end
 
-  # type_filters, currently only used in RssLogsController#index
+  # rubocop:disable Metrics/AbcSize
+  # The "dropdown-current" Stimulus controller should update the dropdown title
+  # with the currently selected option on load
+  def sort_nav_dropdown(title: "", id: "", links: [])
+    toggle_classes = class_names(
+      %w[btn btn-sm btn-outline-default dropdown-toggle font-weight-normal]
+    )
+    tag.div(class: "dropdown d-inline-block",
+            data: { controller: "dropdown-current" }) do
+      [
+        tag.button(
+          class: toggle_classes,
+          id: "sort_nav_toggle", type: "button",
+          data: { toggle: "dropdown" },
+          aria: { haspopup: "true", expanded: "false" }
+        ) do
+          concat(tag.span(title, data: { dropdown_current_target: "title" }))
+          concat(tag.span(class: "caret ml-2"))
+        end,
+        tag.ul(
+          id:, class: "dropdown-menu",
+          aria: { labelledby: "sort_nav_toggle" }
+        ) do
+          links.compact.each do |link|
+            concat(tag.li(link))
+          end
+        end
+      ].safe_join
+    end
+  end
+  # rubocop:enable Metrics/AbcSize
+
+  # Different from sorting links: type_filters
+  # currently only used in RssLogsController#index
   def add_type_filters
     content_for(:type_filters) do
       render(partial: "application/content/type_filters")

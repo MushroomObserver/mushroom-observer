@@ -20,6 +20,10 @@ module Observations
       super.merge(query_args: { needs_naming: @user, order_by: :rss_log })
     end
 
+    def default_sort_order
+      :rss_log
+    end
+
     def index_active_params
       [:filter, :q, :id].freeze
     end

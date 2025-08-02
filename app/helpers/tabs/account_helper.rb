@@ -52,6 +52,11 @@ module Tabs
       InternalLink.new(:show_user_your_notifications.t, interests_path).tab
     end
 
+    # Note this is the same as the above, but says "Your interests"
+    def account_show_interests_tab
+      InternalLink.new(:app_your_interests.t, interests_path).tab
+    end
+
     def account_show_api_keys_tab
       InternalLink.new(:account_api_keys_link.t, account_api_keys_path).tab
     end

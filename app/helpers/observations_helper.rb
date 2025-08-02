@@ -15,19 +15,18 @@ module ObservationsHelper
   #   Observation nnn: Aaa bbb Author(s) (Site ID)
   #
   # NOTE: Must pass owner naming, or it will be recalculated on every obs.
-  def show_obs_title(obs:, owner_naming: nil, user: nil)
+  # Only used for the page <title> element. #title is composed from parts.
+  def observation_show_title(obs:, owner_naming: nil, user: nil)
     [
       obs_title_id(obs),
-      obs_title_consensus_name_link(name: obs.name,
-                                    owner_naming: owner_naming,
-                                    user:)
+      obs_title_consensus_name_link(
+        name: obs.name, owner_naming: owner_naming, user:
+      )
     ].safe_join(" ")
   end
 
   def obs_title_id(obs)
-    tag.span(class: "smaller") do
-      [:show_observation_header.t, tag.span("#{obs.id || "?"}:")].safe_join(" ")
-    end
+    tag.span(obs.id || "?", class: "badge badge-outline mr-3")
   end
 
   # name portion of Observation title

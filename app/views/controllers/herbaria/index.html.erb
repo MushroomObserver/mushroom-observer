@@ -1,8 +1,9 @@
 <%
-@container = :wide
+container_class(:wide)
 add_index_title(@query)
 add_context_nav(herbaria_index_tabs(query: @query))
 add_sorter(@query, herbaria_index_sorts(query: @query))
+add_pagination(@pagination_data)
 
 flash_error(@error) if @error && @objects.empty?
 nonpersonal = (@query&.params&.dig(:nonpersonal))
@@ -16,7 +17,7 @@ nonpersonal = (@query&.params&.dig(:nonpersonal))
   <!--.container-text-->
 <% end %>
 
-<%= pagination_nav(@pagination_data) do %>
+<%= paginated_results do %>
   <% if @objects.any? %>
     <table class="table-striped table-herbarium mt-3">
       <thead>

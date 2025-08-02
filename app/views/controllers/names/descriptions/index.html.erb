@@ -2,10 +2,11 @@
 add_index_title(@query)
 add_context_nav(name_description_index_tabs(query: @query))
 add_sorter(@query, descriptions_index_sorts)
+add_pagination(@pagination_data)
 flash_error(@error) if @error && @objects.empty?
 %>
 
-<%= pagination_nav(@pagination_data) do %>
+<%= paginated_results do %>
   <% if @objects.any? %>
     <table class="table table-striped">
       <% (@objects || []).each do |desc| %>

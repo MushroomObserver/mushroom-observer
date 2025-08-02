@@ -5,19 +5,21 @@ add_page_title(:show_past_glossary_term_title.t(
 ))
 
 add_context_nav(glossary_term_version_tabs(term: @glossary_term))
-@container = :wide
+container_class(:wide)
+column_classes(:six)
 %>
 
-<div class="row">
-  <div class="col-md-6">
+<%= tag.div(class: "row") do %>
+  <%= tag.div(class: yield(:left_columns)) do %>
     <%= render(partial: "glossary_terms/glossary_term",
                object: @glossary_term,
                locals: { synonyms: false }) %>
-  </div>
-  <div class="col-md-6">
+  <% end %>
+
+  <%= tag.div(class: yield(:right_columns)) do %>
     <%= show_past_versions(@glossary_term, @versions) %>
-  </div>
-</div>
+  <% end %>
+<% end %>
 <!--.row-->
 
 <%= show_object_footer(@user, @glossary_term, @versions) %>

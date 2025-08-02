@@ -22,7 +22,21 @@ module TitleInterestIconsHelper
     img1, img2, img3 = img_link_array(user, object)
 
     content_for(:interest_icons) do
-      tag.div(img1 + safe_br + img2 + img3, class: "interest-eyes")
+      [
+        tag.li { img1 },
+        tag.li { img2 + img3 }
+      ].safe_join
+    end
+  end
+
+  def add_edit_icons(object)
+    return unless check_permission(object)
+
+    content_for(:edit_icons) do
+      [
+        tag.li { edit_button(target: object, icon: :edit) },
+        tag.li { destroy_button(target: object, icon: :delete) }
+      ].safe_join
     end
   end
 

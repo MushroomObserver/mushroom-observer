@@ -153,6 +153,12 @@ module Tabs
       [object_return_tab(list)]
     end
 
+    def species_lists_for_user_tab(user)
+      InternalLink.new(
+        :app_your_lists.l, species_lists_path(by_user: user.id)
+      ).tab
+    end
+
     def species_lists_index_sorts(query: nil)
       [
         ["title",       :sort_by_title.t],

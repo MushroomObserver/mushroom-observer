@@ -7,30 +7,67 @@
 module TitlePrevNextHelper
   # Previous/next object links for show templates
   def add_pager_for(object)
+    return unless object
+
     content_for(:prev_next_object) do
-      render(partial: "application/content/prev_next_pager",
-             locals: { object: object })
+      tag.ul(class: "nav navbar-flex") do
+        [
+          tag.li { show_link_prev(object) },
+          tag.li { show_link_index(object) },
+          tag.li { show_link_next(object) }
+        ].safe_join
+      end
     end
   end
 
-  # used by application/content/prev_next_pager
-  # link to next object in query results
-  def link_next(object)
-    path = if object.type_tag == :rss_log
-             send(:activity_log_path, object.id, flow: "next")
-           else
-             send(:"#{object.type_tag}_path", object.id, flow: "next")
-           end
-    link_with_query("#{:NEXT.t} »", path)
-  end
-
   # link to previous object in query results
-  def link_prev(object)
+  def show_link_prev(object)
+    classes = class_names(
+      %w[navbar-link navbar-left btn px-0 prev_object_link]
+    )
     path = if object.type_tag == :rss_log
              send(:activity_log_path, object.id, flow: "prev")
            else
              send(:"#{object.type_tag}_path", object.id, flow: "prev")
            end
-    link_with_query("« #{:PREV.t}", path)
+
+    icon_link_to(
+      :PREV.t, add_query_param(path),
+      class: classes, icon: :previous, show_text: false
+    )
+  end
+
+  def show_link_index(object)
+    classes = class_names(
+      %w[navbar-link navbar-left btn px-0 mx-2 index_object_link]
+    )
+    iicon = case object.type_tag
+            when :observation
+              :grid
+            else
+              :list
+            end
+
+    icon_link_to(
+      :INDEX.t, add_query_param(object.index_link_args),
+      class: classes, icon: iicon, show_text: false
+    )
+  end
+
+  # link to next object in query results
+  def show_link_next(object)
+    classes = class_names(
+      %w[navbar-link navbar-left btn px-0 next_object_link]
+    )
+    path = if object.type_tag == :rss_log
+             send(:activity_log_path, object.id, flow: "next")
+           else
+             send(:"#{object.type_tag}_path", object.id, flow: "next")
+           end
+
+    icon_link_to(
+      :NEXT.t, add_query_param(path),
+      class: classes, icon: :next, show_text: false
+    )
   end
 end

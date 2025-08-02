@@ -2,10 +2,21 @@
 Project list search form
 for objects associated with a project or observation list
 %>
+<%
+type = object.type_tag
+messages = {
+  off: :search_status_all_names.l(type:),
+  red: :search_status_has_no_name.l(type:),
+  green: :search_status_has_name.l(type:)
+}
+%>
 
-<%= form_with(url: add_dispatch_path, method: :post) do |form| %>
-  <%= form.hidden_field(:object_id, value: object.id) %>
-  <%= form.hidden_field(:object_type, value: object.class.name) %>
-  <%= form.hidden_field(:project, value: @project&.id) %>
-  <%= object_search_field(object:, form:) %>
+<%= panel_block(id: "list_search") do %>
+  <%= form_with(url: add_dispatch_path, method: :post) do |form| %>
+    <%= form.hidden_field(:object_id, value: object.id) %>
+    <%= form.hidden_field(:object_type, value: object.class.name) %>
+    <%= form.hidden_field(:project, value: @project&.id) %>
+    <%= render(partial: "shared/search_status_autocompleter",
+               locals: { form:, matches: @object_names, messages: }) %>
+  <% end %>
 <% end %>

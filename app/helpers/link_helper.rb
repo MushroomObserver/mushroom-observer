@@ -11,7 +11,7 @@
 #  heads up about button_to input vs button
 #  https://blog.saeloun.com/2021/08/24/rails-7-button-to-rendering
 
-module LinkHelper
+module LinkHelper # rubocop:disable Metrics/ModuleLength
   # Call `link_to` with query params added.
   # Should now take exactly the same args as `link_to`.
   # You can pass a hash to `path`, but not separate args. Can take a block.
@@ -81,9 +81,9 @@ module LinkHelper
     icon_type = opts[:icon]
     return link_to(link, opts) { content } if icon_type.blank?
 
-    # method = opts[:button] ? :button_to : :link_to
+    opts[:role] = "button" if opts[:button_to]
     active_icon = opts[:active_icon]
-    active_content = options[:active_content]
+    active_content = opts[:active_content]
     stateful = active_icon && active_content
     icon_class = class_names(opts[:icon_class], "px-2")
     icon_active_class = class_names(icon_class, "active-icon")
@@ -92,23 +92,23 @@ module LinkHelper
     label_active_class = class_names(label_class, "active-label")
 
     link_opts = {
-      role: "button", title: content, # title is what shows up in tooltip
+      title: content, # title is what shows up in tooltip
       class: class_names("icon-link", opts[:class]),
       data: { toggle: "tooltip", title: content, # needed for swapping only
               active_title: opts[:active_content] }
     }.deep_merge(opts.except(:class, :icon, :icon_class, :show_text,
                              :active_icon, :active_content, :button_to))
 
-    html = capture do
+    inner_html = capture do
       concat(link_icon(icon_type, class: icon_class))
       concat(link_icon(active_icon, class: icon_active_class)) if stateful
       concat(tag.span(content, class: label_class))
       concat(tag.span(active_content, class: label_active_class)) if stateful
     end
     if opts[:button_to]
-      button_to(html, link_path, **link_opts)
+      button_to(inner_html, link_path, **link_opts)
     else
-      link_to(html, link_path, **link_opts)
+      link_to(inner_html, link_path, **link_opts)
     end
   end
 
@@ -205,7 +205,14 @@ module LinkHelper
     qrcode: "qrcode",
     mobile: "phone",
     project: "th-list",
-    download: "download-alt"
+    download: "download-alt",
+    search: "search",
+    previous: "triangle-left",
+    next: "triangle-right",
+    goto: "share-alt",
+    grid: "th",
+    menu: "align-justify",
+    info: "question-sign"
   }.freeze
 
   # button to destroy object

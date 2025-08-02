@@ -14,12 +14,12 @@
 #
 module TitleHelper
   # sets both the html doc title and the title for the page (previously @title)
-  def add_page_title(title)
+  def add_page_title(title, document_title = title)
     content_for(:title) do
       title
     end
     content_for(:document_title) do
-      title_tag_contents(title)
+      title_tag_contents(document_title)
     end
   end
 
@@ -41,8 +41,10 @@ module TitleHelper
     end
   end
 
-  # Simple builder for index page titles,
-  # with a complex builder for the "filter caption" that explains the query.
+  # Simple builder for index page titles, shown only in the <title>.
+  # The top_nav `rubric` contains what was formerly the index title, i.e.
+  # the model name pluralized.
+  # Also sets the "filter caption" that explains the query, shown on the page
   def add_index_title(query, map: false)
     title = if map
               :map_locations_title.l(
@@ -61,14 +63,18 @@ module TitleHelper
     return unless query&.params
 
     content_for(:filters) do
-      tag.div(id: "filters",
-              data: { controller: "filter-caption",
-                      query_params: query.params.to_json,
-                      query_record: query.record.id,
-                      query_alph: query.record.id.alphabetize }) do
-        concat(caption_truncated(query))
-        concat(caption_full(query))
-      end
+      query_filters(query)
+    end
+  end
+
+  def query_filters(query)
+    tag.div(id: "filters",
+            data: { controller: "filter-caption",
+                    query_params: query.params.to_json,
+                    query_record: query.record.id,
+                    query_alph: query.record.id.alphabetize }) do
+      concat(caption_truncated(query))
+      concat(caption_full(query))
     end
   end
 
@@ -119,9 +125,17 @@ module TitleHelper
 
   def caption_params(query, truncate)
     tag.div(class: "small") do
+      caption_param_text(query, truncate)
+    end
+  end
+
+  def caption_param_text(query, truncate)
+    if query.params.except(:order_by).present?
       query.params.except(:order_by).compact_blank.each do |key, val|
         caption_one_filter_param(query, key, val, truncate:)
       end
+    else
+      :ALL.l
     end
   end
 
@@ -205,7 +219,7 @@ module TitleHelper
     members: :Users
   }.freeze
   # The captions with these sub-params make more sense without the keys:
-  CAPTION_IGNORE_KEYS = [:lookup, :id, :type].freeze
+  CAPTION_IGNORE_KEYS = [:lookup, :id].freeze
   # Max number of values to display if truncated:
   CAPTION_TRUNCATE = 3
 
@@ -221,7 +235,7 @@ module TitleHelper
   # NOTE: Can respond to special methods for certain keys.
   # Defaults to using the lookup method defined in CAPTIONABLE_QUERY_PARAMS
   def lookup_text_val(query, key, val, truncate)
-    return param_val_itself(val, truncate) unless PARAM_LOOKUPS.key?(key)
+    return param_val_itself(key, val, truncate) unless PARAM_LOOKUPS.key?(key)
 
     # Allow overrides (second param `true` means check for private methods)
     if [:names, :lookup].include?(key)
@@ -232,8 +246,10 @@ module TitleHelper
   end
 
   # For values that aren't ids, just join and maybe truncate
-  def param_val_itself(val, truncate)
-    if val.is_a?(Array)
+  def param_val_itself(key, val, truncate)
+    if key == :type # lowercase strings joined by spaces
+      val = val.titleize.split.join(", ")
+    elsif val.is_a?(Array)
       val = val.first(CAPTION_TRUNCATE) if truncate
       val = val.join(", ")
       val += ", ..." if truncate && val.length > CAPTION_TRUNCATE

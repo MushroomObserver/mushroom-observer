@@ -1,7 +1,11 @@
 <%=
 tag.div("#{:INDEXES.t}:", class: classes[:heading])
 %>
-<%=
+<% sidebar_indexes_tabs.compact.each do |link| %>
+  <%= sidebar_nav_link(link, class: classes[:indent]) %>
+<% end %>
+
+<%#
 [
 active_link_to(:GLOSSARY.t, glossary_terms_path,
                class: classes[:indent], id: "nav_glossary_terms_link"),

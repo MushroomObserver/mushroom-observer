@@ -64,7 +64,7 @@ module LightboxHelper
     end
   end
 
-  # This is different from show_obs_title, it's more like the matrix_box title
+  # This is different from observation_show_title, more like matrix_box title
   def caption_obs_title(user:, obs:, identify:)
     btn_style = identify ? "text-bold" : "btn btn-primary"
     text = if identify

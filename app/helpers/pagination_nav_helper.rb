@@ -4,6 +4,15 @@ module PaginationNavHelper
   # Letters used as text in pagination links
   LETTERS = ("A".."Z")
 
+  def add_pagination(pagination_data, args = {})
+    content_for(:letters) do
+      letter_pagination_nav(pagination_data, args)
+    end
+    content_for(:numbers) do
+      number_pagination_nav(pagination_data, args)
+    end
+  end
+
   # Wrap a block in pagination links.  Includes letters if appropriate.
   #
   #   <%= pagination_nav(@pagination_data) do %>
@@ -11,14 +20,19 @@ module PaginationNavHelper
   #       <% object_link(object) %><br/>
   #     <% end %>
   #   <% end %>
-  #
-  def pagination_nav(pages, args = {}, &block)
+  # should call content_for the page and letter nav so it can be put anywhere
+  def paginated_results(args = {}, &block)
     html_id = args[:html_id] ||= "results"
-    letters = letter_pagination_nav(pages, args)
-    numbers = number_pagination_nav(pages, args)
     body = capture(&block).to_s
+
     tag.div(id: html_id, data: { q: get_query_param }) do
-      letters + safe_br + numbers + body + numbers + safe_br + letters
+      [
+        body,
+        tag.div(class: "pagination-bottom d-flex justify-content-end") do
+          concat(content_for(:numbers))
+          concat(content_for(:letters))
+        end
+      ].safe_join
     end
   end
 
@@ -35,22 +49,24 @@ module PaginationNavHelper
   #   <%= letter_pagination_nav(@pagination_data) %>
   #   <%= number_pagination_nav(@pagination_data) %>
   #
-  def letter_pagination_nav(pages, args = {}) # rubocop:disable Metrics/AbcSize
-    return safe_empty unless need_letter_pagination_links?(pages)
+  def letter_pagination_nav(pagination_data, args = {})
+    return "" unless need_letter_pagination_links?(pagination_data)
 
     args = args.dup
     args[:params] = (args[:params] || {}).dup
-    args[:params][pages.number_arg] = nil
-    str = LETTERS.map do |letter|
-      if pages.used_letters.include?(letter)
-        pagination_link(letter, letter, pages.letter_arg, args)
-      else
-        tag.li(tag.span(letter), class: "disabled")
-      end
-    end.safe_join(" ")
-    tag.div(str, class: "pagination pagination-sm")
+    args[:params][pagination_data.number_arg] = nil
+
+    this_letter, letters = letter_pagination_pages(pagination_data)
+
+    tag.nav(class: "pagination_letters navbar-flex pl-4") do
+      [
+        tag.div(:by_letter.l, class: "navbar-text mx-0"),
+        letter_input(this_letter, letters)
+      ].safe_join
+    end
   end
 
+  # pages is a pagination_data object
   def need_letter_pagination_links?(pages)
     return false unless pages
 
@@ -72,57 +88,161 @@ module PaginationNavHelper
   #   # In view: (it is wrapped in 'pagination' div already)
   #   <%= number_pagination_nav(@pagination_data) %>
   #
-  # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity
-  # rubocop:disable Metrics/PerceivedComplexity
+  # rubocop:disable Metrics/AbcSize
   def number_pagination_nav(pages, args = {})
-    result = safe_empty
-    if pages && pages.num_pages > 1
-      params = args[:params] ||= {}
-      if pages.letter_arg && pages.letter
-        params[pages.letter_arg] = pages.letter
-      end
+    return "" unless pages && pages.num_pages > 1
 
-      num = pages.num_pages
-      arg = pages.number_arg
-      this = pages.number
-      this = 1 if this < 1
-      this = num if this > num
-      size = args[:window_size] || 5
-      from = this - size
-      to = this + size
+    params = args[:params] ||= {}
+    params[pages.letter_arg] = pages.letter if pages.letter_arg && pages.letter
+    arg = pages.number_arg
 
-      list_args = { num:, arg:, args:, this:, size:, from:, to: }
-      result = number_pagination_nav_list(list_args)
+    this_page, prev_page, next_page, max_page = number_pagination_pages(pages)
+    max_url = pagination_link_url(max_page, arg, args)
+
+    tag.nav(class: "pagination_numbers navbar-flex pl-4") do
+      [
+        prev_page_link(prev_page, arg, args),
+        tag.div(:PAGE.l, class: "navbar-text mx-0"),
+        page_input(this_page, max_page),
+        tag.div(:of.l, class: "navbar-text ml-0 mr-2"),
+        tag.div(link_to(max_page, max_url), class: "navbar-text mx-0"),
+        next_page_link(next_page, max_page, arg, args)
+      ].safe_join
     end
-    result
+  end
+  # rubocop:enable Metrics/AbcSize
+
+  def letter_pagination_pages(pagination_data)
+    letters = pagination_data.used_letters
+    this_letter = pagination_data.letter || ""
+    # this_letter_idx = letters.index(this_letter) || 0
+    # prev_letter = letters[this_letter_idx - 1]
+    # next_letter = letters[this_letter_idx + 1]
+    [this_letter, letters]
   end
 
-  def number_pagination_nav_list(list_args)
-    list_args => { num:, arg:, args:, this:, size:, from:, to: }
-    result = []
-    pstr = "« #{:PREV.t}"
-    nstr = "#{:NEXT.t} »"
-    result << pagination_link(pstr, this - 1, arg, args) if this > 1
-    result << pagination_link(1, 1, arg, args) if from > 1
-    result << tag.li(tag.span("..."), class: "disabled") if from > 2
-    (from..to).each do |n|
-      if n == this
-        result << tag.li(tag.span(n), class: "active")
-      elsif n.positive? && n <= num
-        result << pagination_link(n, n, arg, args)
-      end
-    end
-    result << tag.li(tag.span("..."), class: "disabled") if to < num - 1
-    result << pagination_link(num, num, arg, args) if to < num
-    result << pagination_link(nstr, this + 1, arg, args) if this < num
-
-    result = tag.ul(result.safe_join(" "), class: "pagination pagination-sm")
+  def number_pagination_pages(pagination_data)
+    max_page = pagination_data.num_pages
+    this_page = pagination_data.number
+    this_page = 1 if this_page < 1
+    this_page = max_page if this_page > max_page
+    prev_page = this_page - 1
+    next_page = this_page + 1
+    [this_page, prev_page, next_page, max_page]
   end
-  # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity
-  # rubocop:enable Metrics/PerceivedComplexity
+
+  def prev_page_link(prev_page, arg, args)
+    disabled = prev_page < 1 ? "disabled opacity-0" : ""
+    # return "" if prev_page < 1
+
+    classes = class_names(
+      %w[navbar-link btn px-0 mr-2 previous_page_link], disabled
+    )
+
+    url = pagination_link_url(prev_page, arg, args)
+    icon_link_to(
+      :PREV.t, url,
+      class: classes, icon: :previous, show_text: false, icon_class: ""
+    )
+  end
+
+  def next_page_link(next_page, max, arg, args)
+    disabled = next_page > max ? "disabled opacity-0" : ""
+    # return "" if next_page > max
+
+    classes = class_names(
+      %w[navbar-link btn px-0 ml-2 next_page_link], disabled
+    )
+
+    url = pagination_link_url(next_page, arg, args)
+    icon_link_to(
+      :NEXT.t, url,
+      class: classes, icon: :next, show_text: false, icon_class: ""
+    )
+  end
+
+  def letter_input(this_letter, used_letters)
+    form_with(
+      url: pagination_current_url, method: :get, local: true,
+      class: "navbar-form px-0 page_input",
+      data: { controller: "page-input", page_input_letters_value: used_letters }
+    ) do |f|
+      [
+        tag.div(class: "input-group page-input ml-2") do
+          [
+            f.text_field(
+              :letter,
+              type: :text, value: this_letter, class: "form-control text-right",
+              size: 1, placeholder: "—",
+              data: { page_input_target: "letterInput",
+                      action: "page-input#sanitizeLetter" }
+            ),
+            tag.span(class: "input-group-btn") do
+              tag.button(type: :submit,
+                         class: "btn btn-outline-default px-2") do
+                link_icon(:goto, title: :GOTO.l)
+              end
+            end
+          ].safe_join
+        end,
+        *pagination_hidden_param_fields(f, :letter)
+      ].safe_join
+    end
+  end
+
+  # On input change, the form's page param is sanitized by Stimulus.
+  def page_input(this_page, max_page)
+    form_with(
+      url: pagination_current_url, method: :get, local: true,
+      class: "navbar-form px-0 page_input",
+      data: { controller: "page-input", page_input_max_value: max_page }
+    ) do |f|
+      [
+        tag.div(class: "input-group page-input mx-2") do
+          [
+            f.text_field(
+              :page,
+              type: :text, value: this_page, class: "form-control text-right",
+              size: max_page.digits.count,
+              data: { page_input_target: "numberInput",
+                      action: "page-input#sanitizeNumber" }
+            ),
+            tag.span(class: "input-group-btn") do
+              tag.button(type: :submit,
+                         class: "btn btn-outline-default px-2") do
+                link_icon(:goto, title: :GOTO.l)
+              end
+            end
+          ].safe_join
+        end,
+        *pagination_hidden_param_fields(f, :page)
+      ].safe_join
+    end
+  end
+
+  # The form url does not have the existing params, because these would
+  # be overwritten by the param set represented by the form fields.
+  # We need to re-send the incoming params as part of the form.
+  def pagination_hidden_param_fields(form, field = :page)
+    params.except(:controller, :action, field).keys.map do |key|
+      form.hidden_field(key.to_sym, value: params[key])
+    end
+  end
+
+  # For the page input form, give form the current url without query string
+  def pagination_current_url
+    parsed_url = URI.parse(request.url)
+    parsed_url.fragment = parsed_url.query = nil
+    parsed_url.to_s
+  end
 
   # Render a single pagination link for number_pagination_data above.
   def pagination_link(label, page, arg, args)
+    url = pagination_link_url(page, arg, args)
+    tag.li(link_to(label, url))
+  end
+
+  def pagination_link_url(page, arg, args)
     params = args[:params] || {}
     params[arg] = page
     url = reload_with_args(params)
@@ -130,6 +250,6 @@ module PaginationNavHelper
       url.sub!(/#.*/, "")
       url += "##{args[:anchor]}"
     end
-    tag.li(link_to(label, url))
+    url
   end
 end

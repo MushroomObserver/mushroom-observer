@@ -293,8 +293,8 @@
   glossary: glossary
   GLOSSARY_TERM: Glossary Term
   glossary_term: glossary term
-  GLOSSARY_TERMS: Glossary Terms
-  glossary_terms: glossary terms
+  GLOSSARY_TERMS: Glossary
+  glossary_terms: glossary
   HERBARIUM_RECORD: Fungarium Record
   herbarium_record: fungarium record
   HERBARIUM_RECORDS: Fungarium Records
@@ -684,6 +684,10 @@
   south: south
   WEST: West
   west: west
+  PAGE: Page
+  by_letter: By letter
+  GOTO: Go
+  MENU: Menu
 
   # Labels for fields answering: "What did you observe?", "When did you observe
   # it?", "Where did you observe it?", and "Who observed it?".
@@ -1527,7 +1531,7 @@
   create_new_naming_warn: Sorry, someone else has given this a positive vote, so we had to create a new Naming to accomodate your changes."
 
   # observations/identify
-  obs_needing_id: Observations Needing Identification
+  obs_needing_id: Needing Identification
   obs_needing_id_intro: "Here you can quickly scan unidentified observations, propose a name, or vote on a current name. Use the search bar above to filter by location, taxon or user.\n\nIf you feel you can't improve on an identification, \"[:mark_as_reviewed]\" and it won't come up again. (It will still appear for others.)\n\n*\"Lightbox\" shortcuts:*\n&lsqb;&larr;&rsqb; &lsqb;&rarr;&rsqb; move between observations, &lsqb;return&rsqb; propose a name, &lsqb;/&rsqb; mark as reviewed."
   mark_as_reviewed: Mark as reviewed
   marked_as_reviewed: Marked as reviewed
@@ -1822,7 +1826,6 @@
   image_reuse_id_help: Either click one of the images below, or if you know the image ID, just enter it here and click '[:image_reuse_reuse]'.
 
   # images/show
-  image_show_title: "[:IMAGE]: [name]"
   image_show_inquiry: Send Commercial Inquiry
   image_show_rotate_left: Rotate Left
   image_show_rotate_right: Rotate Right
@@ -2194,7 +2197,6 @@
   show_lists_header: "[:SPECIES_LISTS]"
 
   # location/show_location
-  show_location_title: "[:LOCATION]: [name]"
   show_location_create: "[:create_object(type=:location)]"
   show_location_edit: "[:edit_object(type=:location)]"
   show_location_destroy: "[:destroy_object(type=:location)]"
@@ -2211,7 +2213,6 @@
   show_location_hidden: This location is considered hidden either because it is private property whose owners do not want the location revealed or because it contains sensitive habitat. Its coordinates are intentionally imprecise and all associated observations have hidden GPS coordinates.
 
   # names
-  show_name_title: "[:NAME]: [name]"
   show_name_add_name: "[:add_object(type=:name)]"
   show_name_edit_name: "[:edit_object(type=:name)]"
   show_name_distribution_map: Occurrence Map
@@ -2306,8 +2307,6 @@
   show_namings_saving: Saving
 
   # observations/show_observation
-  show_observation_title: "[:OBSERVATION]: [name]"
-  show_observation_header: "[:OBSERVATION]"
   show_observation_site_id: Site ID
   show_observation_owner_id: Observer Preference
   show_observation_no_clear_preference: no clear preference
@@ -2479,7 +2478,6 @@
   species_list_projects_help: "This form allows you to either attach this list or its observations or images to one or more projects, or remove them from one or more projects.  Choose which objects you wish to attach or remove, then choose the project or projects you wish to attach them to or remove them from, then click on \"Attach\" or \"Remove\" to perform the operation.  Note: It will only allow you to attach or remove objects which you have permission to edit."
 
   # species_list/show_species_list
-  species_list_show_title: "[:SPECIES_LIST]: [name]"
   species_list_show_download: Downloads, Reports, Print Labels
   species_list_show_save_as_txt: Save as Plain Text
   species_list_show_save_as_rtf: Save as Rich Text
@@ -2577,7 +2575,6 @@
 
   # glossary_term#show
   show_glossary_term: Show Glossary Term
-  show_glossary_term_title: "Glossary Term: [name]"
   show_glossary_term_reuse_image: Add Example
   show_glossary_term_remove_image: Remove Examples
   show_glossary_term_creator: Creator of this Glossary Term
@@ -2597,7 +2594,7 @@
   # glossary_term#index
   glossary_term_index: Glossary
   glossary_term_index_title: Glossary of Mycology Terms
-  glossary_term_index_documentation: Glossary Documentation and Guidelines
+  glossary_term_index_documentation: Documentation and Guidelines
 
   # glossary_term#edit
   edit_glossary_term: "[:edit_object(type=:glossary_term)]"
@@ -3476,7 +3473,6 @@
   show_project_leave: Leave Project
   show_project_published: Reviewed Published Names
   show_project_summary: Summary
-  show_project_title: "Project: [title]"
   show_project_user_group: User Group
   show_project_violation_count: Project has [count] constraint violation(s)
 
@@ -4472,7 +4468,7 @@
   query_misspellings: misspellings
   query_name_has: name has
   query_needs_description: needs description
-  query_needs_naming: needs naming
+  query_needs_naming: needing identification, user
   query_nonpersonal: nonpersonal
   query_notes_has: notes has
   query_number_has: number has
@@ -4553,7 +4549,7 @@
   sort_by_curator: "[:CURATOR]"
   sort_by_date: "[:DATE]"
   sort_by_filename: File Name
-  sort_by_header: "Sort by:"
+  sort_by_header: "Sort by"
   sort_by_herbarium_label: Label
   sort_by_herbarium_name: Fungarium
   sort_by_id: ID

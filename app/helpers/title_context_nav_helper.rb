@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-#  Helpers for the `InternalLink`, which are `link attribute arrays`
-#  for building nav links (in the context of a page)
+#  Helpers for the top nav bar's context menu, formerly "tabset links".
+#  Views should define the menu's content with an array of InternalLink.tabs
 
 #  add_context_nav(links)      # add content_for(:context_nav)
 #  context_nav_links(links)    # convert links -> link_to's / button_to's
@@ -9,14 +9,14 @@
 #
 module TitleContextNavHelper
   # Short-hand to render shared context_nav partial for a given set of links.
+  # Called in the view, defines `:context_nav` which is rendered in layout.
   def add_context_nav(links)
-    return unless links
+    return unless links.compact.length.positive?
 
     nav_links = context_nav_links(links)
-
     content_for(:context_nav) do
-      render(partial: "application/content/context_nav",
-             locals: { links: nav_links })
+      context_nav_dropdown(title: "Actions", id: "context_nav",
+                           links: nav_links)
     end
   end
 
@@ -58,6 +58,18 @@ module TitleContextNavHelper
     crud_button_or_link(str, url, args, kwargs)
   end
 
+  def sidebar_nav_link(link, extra_args = {})
+    str, url, args = link
+    args ||= {}
+    kwargs = merge_context_nav_link_args(args, extra_args)
+    # remove d-block from buttons, other links need it
+    if args[:button].present? && kwargs[:class].present?
+      kwargs[:class] = kwargs[:class].gsub("d-block", "").strip
+    end
+
+    active_link_to(str, url, **kwargs)
+  end
+
   def crud_button_or_link(str, url, args, kwargs)
     case args[:button]
     when :destroy
@@ -85,5 +97,121 @@ module TitleContextNavHelper
     kwargs[:class] = class_names(kwargs[:class], extra_args[:class])
     # merge in other args from extra_args (will overwrite keys!)
     kwargs&.merge(extra_args&.except(:class))
+  end
+
+  # The "dropdown-current" Stimulus controller should update the dropdown title
+  # with the currently selected option on load, if show_current == true
+  # For Bootstrap 3, this must be an <li> element for alignment
+  def context_nav_dropdown(title: "", id: "", links: [])
+    tag.li(class: "dropdown d-inline-block") do
+      [
+        context_nav_dropdown_toggle(title:),
+        context_nav_dropdown_menu(id:, links:)
+      ].safe_join
+    end
+  end
+
+  def context_nav_dropdown_toggle(title:)
+    tag.a(
+      class: class_names(%w[dropdown-toggle]),
+      id: "context_nav_toggle", role: "button",
+      data: { toggle: "dropdown" },
+      aria: { haspopup: "true", expanded: "false" }
+    ) do
+      concat(tag.span(title, data: { dropdown_current_target: "title" }))
+      concat(tag.span(class: "caret ml-2"))
+    end
+  end
+
+  def context_nav_dropdown_menu(id:, links:)
+    tag.ul(
+      id:, class: "dropdown-menu",
+      aria: { labelledby: "context_nav_toggle" }
+    ) do
+      links.compact.each do |link|
+        concat(tag.li(link))
+      end
+    end
+  end
+
+  # Descriptions don't get an index link
+  def nav_index_link(rubric, controller)
+    unless controller.methods.include?(:index) &&
+           NAV_INDEXABLES.include?(controller.controller_name)
+      return rubric
+    end
+
+    link_to(
+      rubric,
+      { controller: "/#{controller.controller_path}",
+        action: :index, q: get_query_param }
+    )
+  end
+
+  NAV_INDEXABLES = %w[
+    observations names species_lists projects locations images herbaria
+    glossary_terms comments rss_logs
+  ].freeze
+
+  # Descriptions also don't get a create button
+  def nav_create(user, controller)
+    unless user &&
+           controller.methods.include?(:new) &&
+           NAV_CREATABLES.include?(controller.controller_name)
+      return ""
+    end
+
+    obj_name = controller.controller_model_name.underscore.upcase.to_sym.l
+
+    link_to(
+      link_icon(:add, title: [:NEW.l, obj_name].safe_join(" ")),
+      { controller: "/#{controller.controller_path}", action: :new },
+      class: "btn btn-sm btn-outline-default mx-3 top_nav_create"
+    )
+  end
+
+  NAV_CREATABLES = %w[
+    observations names species_lists projects locations images herbaria
+    glossary_terms field_slips
+  ].freeze
+
+  def nav_scan_qr_code(user, controller)
+    unless user &&
+           %w[observations field_slips].include?(controller.controller_name)
+      return ""
+    end
+
+    link_to(
+      link_icon(:qrcode, title: :app_qrcode.l),
+      field_slips_qr_reader_new_path,
+      class: "btn btn-sm btn-outline-default mx-2 top_nav_create"
+    )
+  end
+
+  def search_nav_toggle
+    tag.div(class: "navbar-form pr-0") do
+      tag.button(
+        link_icon(:search, title: :SEARCH.l),
+        class: "btn btn-sm btn-outline-default",
+        type: :button,
+        data: { toggle: "collapse", target: "#search_nav" },
+        aria: { expanded: "false", controls: "search_nav" }
+      )
+    end
+  end
+
+  def left_nav_toggle
+    tag.div(class: "visible-xs pr-4") do
+      tag.button(
+        # link_icon(:menu, title: :MENU.l),
+        image_tag("mo_icon_bg.svg",
+                  width: "39px", alt: :MENU.t, title: :MENU.t),
+        class: "btn btn-outline-default rounded-circle overflow-hidden p-0",
+        type: :button,
+        data: { toggle: "offcanvas", nav_target: "toggle",
+                action: "nav#toggleOffcanvas" },
+        aria: { expanded: "false", controls: "search_nav" }
+      )
+    end
   end
 end

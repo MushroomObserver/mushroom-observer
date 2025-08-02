@@ -1,8 +1,11 @@
 <%
-@container = :text_image
+container_class(:text_image)
 add_index_title(@query)
 add_context_nav(all_names_index_tabs(query: @query))
 add_sorter(@query, names_index_sorts(query: @query))
+# Let test_index test pass args to pagination_links.
+args = @test_pagination_args || {}
+add_pagination(@pagination_data, args)
 
 flash_error(@error) if @error && @objects.empty?
 %>
@@ -23,9 +26,7 @@ flash_error(@error) if @error && @objects.empty?
 
 <%= @help.tp if @help %>
 
-<% # Let test_index test pass args to pagination_links.
-  args = @test_pagination_args || {} %>
-<%= pagination_nav(@pagination_data, args) do %>
+<%= paginated_results do %>
   <% if @objects.any? %>
     <% counts = Name.count_observations(@objects) %>
 

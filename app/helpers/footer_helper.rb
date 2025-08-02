@@ -127,7 +127,7 @@ module FooterHelper
 
     html.concat(link_to_rss_log(obj))
     html = html.safe_join(safe_br)
-    tag.p(html, class: "small footer-view-stats mt-3")
+    content_padded(class: "small footer-view-stats") { html }
   end
 
   ###############################################################
