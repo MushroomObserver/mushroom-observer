@@ -12,7 +12,9 @@
 #                          depending on the state of the import
 #                          https://www.inaturalist.org/pages/api+reference#authorization_code_flow
 #  inat_ids::              string of id's of iNat obss to be imported
-#  inat_username::         this user's iNat login
+#  inat_username::         iNat login of user whose obss are being imported
+#                          Appended to iNat API query in order to generally
+#                          an MO user from importing someone else's iNat obss
 #  import_all:             whether to import all of user's relevant iNat obss
 #  importables::           number of importable observations in job
 #  imported_count::        running count of iNat obss imported in associated job
@@ -23,12 +25,15 @@
 #  last_obs_start          when started importing a single iNat obs
 #                          reset in InatImportsController#authorization_response
 #                          and in Job after each observation import
+#  cancel/canceled::       Did the user requested canceling the Job
 #
 # == Methods
 #  total_expected_time     total expected time for associated Job
 #  last_obs_elapsed_time   time spent importing a single iNat obs
 #
 class InatImport < ApplicationRecord
+  alias_attribute :canceled, :cancel # for readability, e.g., job.canceled?
+
   enum :state, {
     Unstarted: 0,
     # waiting for User to authorize MO to access iNat data

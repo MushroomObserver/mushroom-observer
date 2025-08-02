@@ -520,6 +520,7 @@ class InatImportJobTest < ActiveJob::TestCase
     @user = users(:dick)
     assert(InatImport.super_importers.include?(@user),
            "Test needs User fixture that's SuperImporter")
+    old_inat_username = @user.inat_username
 
     create_ivars_from_filename("calostoma_lutescens")
     stub_inat_interactions(superimporter: true)
@@ -532,6 +533,35 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     assert_empty(@inat_import.response_errors, "There should be no errors")
+    assert_equal(
+      old_inat_username, @user.reload.inat_username,
+      "SuperImporter's inat_username should not change"
+    )
+  end
+
+  def test_import_canceled
+    create_ivars_from_filename("listed_ids") # importing multiple observations
+    # override ivar because this test wants to import multiple observations
+    @inat_import = InatImport.create(user: @user,
+                                     inat_ids: "231104466,195434438",
+                                     token: "MockCode",
+                                     inat_username: "anything")
+    # update the tracker's inat_import accordingly
+    InatImportJobTracker.update(inat_import: @inat_import.id)
+    @inat_import.update(canceled: true) # simulate cancellation
+    stub_inat_interactions
+
+    assert_no_difference(
+      "Observation.count",
+      "It should not import observations after cancellation"
+    ) do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    assert_equal("Done", @inat_import.state,
+                 "Import should be Done")
+    assert(@inat_import.canceled?,
+           "Import should remain canceled")
   end
 
   def test_oauth_failure

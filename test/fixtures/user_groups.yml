@@ -81,6 +81,7 @@ thorsten_only:
 webmaster_only:
   name: user <%= ActiveRecord::FixtureSet.identify(:webmaster) %>
 
+# can import other users' iNat observations
 super_importers_users:
   name: SuperImporters Project
 
