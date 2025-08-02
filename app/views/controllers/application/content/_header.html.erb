@@ -16,14 +16,16 @@ add_filter_help(@any_content_filters_applied)
 title_cols = content_for?(:left_columns) || "col-sm-8 col-lg-7"
 title_cols = content_for?(:interest_icons) ? title_cols : ""
 title_cols = class_names("col-xs-12", title_cols)
-index_bar = content_for?(:interest_icons)
+index_bar =
+  (action_name == "index" && controller.controller_name != "articles") ||
+  controller.controller_name == "maps"
 %>
 
 <%= tag.header(id: "header") do %>
   <%# Immediately below the top nav: index filters or page title, plus page nav.
       Indexes have no "#title" — `rubric` in top_nav has the model name. %>
   <%= render(partial: "application/content/project_banner") if has_banner %>
-  <% if action_name == "index" && controller.controller_name != "articles" %>
+  <% if index_bar %>
     <%# Index filters and pagination, full width. %>
     <%= render(partial: "application/content/index_bar") %>
   <% elsif action_name != "index" %>
