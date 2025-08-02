@@ -58,7 +58,7 @@ module PaginationNavHelper
 
     this_letter, letters = letter_pagination_pages(pagination_data)
 
-    tag.nav(class: "pagination_letters navbar-flex pl-3") do
+    tag.nav(class: "pagination_letters navbar-flex pl-4") do
       [
         tag.div(:by_letter.l, class: "navbar-text mx-0"),
         letter_input(this_letter, letters)
@@ -99,7 +99,7 @@ module PaginationNavHelper
     this_page, prev_page, next_page, max_page = number_pagination_pages(pages)
     max_url = pagination_link_url(max_page, arg, args)
 
-    tag.nav(class: "pagination_numbers navbar-flex px-3") do
+    tag.nav(class: "pagination_numbers navbar-flex pl-4") do
       [
         prev_page_link(prev_page, arg, args),
         tag.div(:PAGE.l, class: "navbar-text mx-0"),
@@ -168,7 +168,7 @@ module PaginationNavHelper
       data: { controller: "page-input", page_input_letters_value: used_letters }
     ) do |f|
       [
-        tag.div(class: "input-group page-input mx-2") do
+        tag.div(class: "input-group page-input ml-2") do
           [
             f.text_field(
               :letter,
