@@ -7,8 +7,7 @@ module Tabs
         nav_latest_observations_tab,
         nav_new_observation_tab(user),
         nav_your_observations_tab(user),
-        nav_identify_observations_tab(user),
-        nav_qr_code_tab(user)
+        nav_identify_observations_tab(user)
       ]
     end
 

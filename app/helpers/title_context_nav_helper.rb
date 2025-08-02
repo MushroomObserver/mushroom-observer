@@ -179,9 +179,9 @@ module TitleContextNavHelper
     return "" unless user && controller.controller_name == "observations"
 
     link_to(
-      link_icon(:qr_reader, title: :app_qrcode.l),
+      link_icon(:qrcode, title: :app_qrcode.l),
       field_slips_qr_reader_new_path,
-      class: "btn btn-sm btn-outline-default mx-3 top_nav_create"
+      class: "btn btn-sm btn-outline-default mx-2 top_nav_create"
     )
   end
 
