@@ -4,7 +4,9 @@ module SpeciesLists
   class WriteInController < ApplicationController
     before_action :login_required
 
-    def new; end
+    def new
+      @species_list = SpeciesList.find(params[:id])
+    end
 
     def create
     end

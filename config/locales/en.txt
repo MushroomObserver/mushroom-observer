@@ -2521,6 +2521,9 @@
   species_list_report_button: Save Names
   species_list_download_header: Download Observation Data
 
+  # species_list/write_in
+  species_list_write_in_title: "Add New Observations to [list_title]"
+
   # sequence/add_sequence
   sequence_add_title: Add [:SEQUENCE]
   sequence_add_edit: "[:edit_object(type=:observation)]"
