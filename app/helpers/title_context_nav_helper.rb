@@ -172,11 +172,14 @@ module TitleContextNavHelper
 
   NAV_CREATABLES = %w[
     observations names species_lists projects locations images herbaria
-    glossary_terms
+    glossary_terms field_slips
   ].freeze
 
   def nav_scan_qr_code(user, controller)
-    return "" unless user && controller.controller_name == "observations"
+    unless user &&
+           %w[observations field_slips].include?(controller.controller_name)
+      return ""
+    end
 
     link_to(
       link_icon(:qrcode, title: :app_qrcode.l),
