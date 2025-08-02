@@ -7,7 +7,8 @@ module Tabs
         nav_latest_observations_tab,
         nav_new_observation_tab(user),
         nav_your_observations_tab(user),
-        nav_identify_observations_tab(user)
+        nav_identify_observations_tab(user),
+        nav_qr_code_tab(user)
       ]
     end
 
@@ -38,6 +39,13 @@ module Tabs
         :app_help_id_obs.t, identify_observations_path,
         html_options: { id: "nav_identify_observations_link" }
       ).tab
+    end
+
+    def nav_qr_code_tab(user)
+      return unless user
+
+      InternalLink.new(:app_qrcode.t, field_slips_qr_reader_new_path,
+                       html_options: { id: "nav_qr_code_link" }).tab
     end
 
     def sidebar_species_lists_tabs(user)
@@ -140,6 +148,7 @@ module Tabs
 
     def sidebar_info_tabs
       [
+        nav_mobile_app_tab,
         nav_intro_tab,
         nav_how_to_use_tab,
         nav_donate_tab,
@@ -152,6 +161,11 @@ module Tabs
         nav_publications_tab,
         nav_privacy_policy_tab
       ]
+    end
+
+    def nav_mobile_app_tab
+      InternalLink.new(:app_mobile.t, article_path(34),
+                       html_options: { id: "nav_mobile_app_link" }).tab
     end
 
     def nav_intro_tab
