@@ -133,17 +133,23 @@ class InatImportJob < ApplicationJob
     update_user_inat_username
   end
 
+  # A convenience to let a user to create/update their iNat username
+  # simply by entering it in the import form.
   def update_user_inat_username
-    # Prevent MO users from setting their inat_username
-    # to a non-existent iNat login
-    return unless job_successful_enough?
+    return unless inat_username_updateable?
 
     user.update(inat_username: inat_username)
     log("Updated user inat_username")
   end
 
-  # job successful enough to justify updating the MO user's iNat user_name
-  def job_successful_enough?
+  def inat_username_updateable?
+    # Don't update a SuperImporter's inat_username because
+    # InatImport.inat_username could be someone else's inat_username.
+    return false if InatImport.super_importers.include?(user)
+
+    # Prevent changing inat_username to a non-existent iNat login
+    # No errors or any imports means that iNat accepted the inat_username,
+    # so it's real inat_username.
     response_errors.empty? ||
       imported_count.to_i.positive?
   end

@@ -520,6 +520,7 @@ class InatImportJobTest < ActiveJob::TestCase
     @user = users(:dick)
     assert(InatImport.super_importers.include?(@user),
            "Test needs User fixture that's SuperImporter")
+    old_inat_username = @user.inat_username
 
     create_ivars_from_filename("calostoma_lutescens")
     stub_inat_interactions(superimporter: true)
@@ -532,6 +533,10 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     assert_empty(@inat_import.response_errors, "There should be no errors")
+    assert_equal(
+      old_inat_username, @user.reload.inat_username,
+      "SuperImporter's inat_username should not change"
+    )
   end
 
   def test_import_canceled
