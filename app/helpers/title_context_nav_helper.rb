@@ -11,7 +11,7 @@ module TitleContextNavHelper
   # Short-hand to render shared context_nav partial for a given set of links.
   # Called in the view, defines `:context_nav` which is rendered in layout.
   def add_context_nav(links)
-    return unless links
+    return unless links.compact.length.positive?
 
     nav_links = context_nav_links(links)
     content_for(:context_nav) do
