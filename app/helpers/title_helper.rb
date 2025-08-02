@@ -235,7 +235,7 @@ module TitleHelper
   # NOTE: Can respond to special methods for certain keys.
   # Defaults to using the lookup method defined in CAPTIONABLE_QUERY_PARAMS
   def lookup_text_val(query, key, val, truncate)
-    return param_val_itself(val, truncate) unless PARAM_LOOKUPS.key?(key)
+    return param_val_itself(key, val, truncate) unless PARAM_LOOKUPS.key?(key)
 
     # Allow overrides (second param `true` means check for private methods)
     if [:names, :lookup].include?(key)
@@ -246,8 +246,10 @@ module TitleHelper
   end
 
   # For values that aren't ids, just join and maybe truncate
-  def param_val_itself(val, truncate)
-    if val.is_a?(Array)
+  def param_val_itself(key, val, truncate)
+    if key == :type
+      val = val.titleize.split.join(", ")
+    elsif val.is_a?(Array)
       val = val.first(CAPTION_TRUNCATE) if truncate
       val = val.join(", ")
       val += ", ..." if truncate && val.length > CAPTION_TRUNCATE
