@@ -28,27 +28,23 @@ nav_title = if action_name == "index"
     <%= tag.div(class: left_classes) do %>
       <%= left_nav_toggle %>
       <%= tag.h4(class: "font-weight-bold mr-4 mr-lg-5") do
-        [nav_title, nav_create(@user, controller)].safe_join(" ")
+        [
+          nav_title,
+          nav_create(@user, controller),
+          nav_scan_qr_code(@user, controller)
+        ].safe_join(" ")
       end %>
-      <% if(content_for?(:sorter)) %>
-        <%= yield(:sorter) %>
-      <% end %>
+      <%= yield(:sorter) if(content_for?(:sorter)) %>
     <% end %>
 
     <%# right side %>
     <%= tag.div(class: right_classes) do %>
       <%= search_nav_toggle %>
       <%= tag.ul(class: "nav navbar-nav navbar-right hidden-xs mr-0") do %>
-        <% if content_for?(:context_nav) %>
-          <%= yield(:context_nav) %>
-        <% end %>
-        <% if !@user.nil? %>
-          <%= render(partial: "application/top_nav/user_nav") %>
-        <% end %>
+        <%= yield(:context_nav) if content_for?(:context_nav) %>
+        <%= render(partial: "application/top_nav/user_nav") if !@user.nil? %>
       <% end %>
-      <% if @user.nil? ##user is logged in %>
-        <%= render(partial: "application/top_nav/login") %>
-      <% end %>
+      <%= render(partial: "application/top_nav/login") if @user.nil? %>
     <% end %>
 
   <% end %>

@@ -175,6 +175,16 @@ module TitleContextNavHelper
     glossary_terms
   ].freeze
 
+  def nav_scan_qr_code(user, controller)
+    return "" unless user && controller.controller_name == "observations"
+
+    link_to(
+      link_icon(:qr_reader, title: :app_qrcode.l),
+      field_slips_qr_reader_new_path,
+      class: "btn btn-sm btn-outline-default mx-3 top_nav_create"
+    )
+  end
+
   def search_nav_toggle
     tag.div(class: "navbar-form pr-0") do
       tag.button(
