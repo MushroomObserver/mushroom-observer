@@ -189,7 +189,7 @@ module TitleContextNavHelper
   end
 
   def search_nav_toggle
-    tag.div(class: "navbar-form pr-0") do
+    tag.div(class: "navbar-form px-sm-3") do
       tag.button(
         link_icon(:search, title: :SEARCH.l),
         class: "btn btn-sm btn-outline-default",

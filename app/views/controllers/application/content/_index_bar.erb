@@ -1,29 +1,26 @@
 <%
-has_banner = content_for?(:banner_image)
 filters = content_for?(:filters) || content_for?(:filter_help)
+pagination = content_for?(:numbers) || content_for?(:letters)
 %>
 
-<%= tag.div(class: "row") do %>
-  <%= tag.div(class: "col-xs-12", id: "index_bar") do %>
-    <%# Project banner %>
-    <% if has_banner %>
-      <%= render(partial: "application/content/project_banner") %>
-    <% end %>
-
-    <%# Indexes: Query filter subtitle and pagination %>
-    <%= tag.div(class: "d-flex justify-content-between") do
-      [
-        tag.div(class: "px-3") do
-          if filters
+<% if filters || pagination %>
+  <%= tag.div(class: "row") do %>
+    <%= tag.div(class: "col-xs-12", id: "index_bar") do %>
+      <%# Indexes: Query filter subtitle and pagination %>
+      <%= tag.div(class: "d-flex justify-content-between") do %>
+        <% if filters %>
+          <%= tag.div(class: "px-3") do
             concat(yield(:filters))
             concat(yield(:filter_help))
-          end
-        end,
-        tag.div(class: "pagination-top navbar navbar-flex") do
-          concat(yield(:numbers))
-          concat(yield(:letters))
-        end
-      ].safe_join
-    end %>
+          end %>
+        <% end %>
+        <% if pagination %>
+          <%= tag.div(class: "pagination-top navbar navbar-flex") do
+            concat(yield(:numbers))
+            concat(yield(:letters))
+          end %>
+        <% end %>
+      <% end %>
+    <% end %>
   <% end %>
 <% end %>
