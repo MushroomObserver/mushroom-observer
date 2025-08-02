@@ -58,6 +58,18 @@ module TitleContextNavHelper
     crud_button_or_link(str, url, args, kwargs)
   end
 
+  def sidebar_nav_link(link, extra_args = {})
+    str, url, args = link
+    args ||= {}
+    kwargs = merge_context_nav_link_args(args, extra_args)
+    # remove d-block from buttons, other links need it
+    if args[:button].present? && kwargs[:class].present?
+      kwargs[:class] = kwargs[:class].gsub("d-block", "").strip
+    end
+
+    active_link_to(str, url, **kwargs)
+  end
+
   def crud_button_or_link(str, url, args, kwargs)
     case args[:button]
     when :destroy
