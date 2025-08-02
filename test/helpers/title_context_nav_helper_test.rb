@@ -29,7 +29,7 @@ class TitleContextNavHelperTest < ActionView::TestCase
     )
     tab3 = put_button(name: "merge", path: article_path(article.id))
     tab4 = patch_button(name: "move", path: article_path(article.id))
-    tab5 = post_button(name: "celebrate", path: article_path(article.id))
+    tab5 = button_to("celebrate", article_path(article.id))
 
     assert_includes(tabs, tab1)
     assert_includes(tabs, tab2)

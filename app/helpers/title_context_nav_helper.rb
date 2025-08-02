@@ -55,7 +55,7 @@ module TitleContextNavHelper
       kwargs[:class] = kwargs[:class].gsub("d-block", "").strip
     end
 
-    crud_button_or_link(str, url, args, kwargs)
+    crud_button_or_link(str, url, args, kwargs.compact_blank)
   end
 
   def sidebar_nav_link(link, extra_args = {})
