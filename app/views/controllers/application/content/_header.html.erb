@@ -19,16 +19,13 @@ title_cols = class_names("col-xs-12", title_cols)
 %>
 
 <%= tag.header(id: "header") do %>
-  <%= tag.div(class: "row") do %>
-    <%# Push down pager, title on small, xs screens so buttons do not block %>
-    <%# tag.div(safe_nbsp, class: "hidden-print visible-xs visible-sm mt-4") %>
-
-    <%# Index filters and pagination, full width %>
+  <%# Immediately below the top nav: index filters or page title, plus page nav.
+      Indexes have no "#title" — `rubric` in top_nav has the model name. %>
+  <% if action_name == "index" && controller.controller_name != "articles" %>
+    <%# Index filters and pagination, full width. %>
     <%= render(partial: "application/content/index_bar") %>
-  <% end %>
-
-  <%= tag.div(class: "row") do %>
-    <%# Page title. Indexes have none — `rubric` in top_nav has model name. %>
+  <% elsif action_name != "index" %>
+    <%# Page title, edit icons, interest icons and page nav. %>
     <%= render(partial: "application/content/page_title") %>
   <% end %>
 

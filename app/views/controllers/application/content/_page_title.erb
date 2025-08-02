@@ -6,48 +6,48 @@ project_subtitle = content_for?(:project_location) ||
                    content_for?(:project_date_range)
 %>
 
-<%# Page title. Indexes have none — `rubric` in top_nav has model name. %>
-<% if action_name != "index" %>
-  <%= tag.div(class: yield(:left_columns), id: "title_bar") do %>
-    <% if !has_banner %>
-      <%= tag.nav(
-        class: "show_title_nav d-flex justify-content-between pl-3"
-      ) do
-        [
-          tag.h1(yield(:title), class: "h4", id: "title"),
-          tag.ul(class: "nav navbar-nav object_edit h4") do
-            concat(yield(:edit_icons))
-          end
-        ].safe_join
-      end %>
-      <% if project_subtitle %>
-        <%= tag.div(class: "pl-3 mb-3") do
+<%= tag.div(class: "row") do %>
+  <%# Page title. Indexes have none — `rubric` in top_nav has model name. %>
+  <% if action_name != "index" %>
+    <%= tag.div(class: yield(:left_columns), id: "title_bar") do %>
+      <% if !has_banner %>
+        <%= tag.nav(
+          class: "show_title_nav d-flex justify-content-between pl-3"
+        ) do
           [
-            tag.div(yield(:project_location), class: "project_location"),
-            tag.div(yield(:project_date_range), class: "project_date_range")
+            tag.h1(yield(:title), class: "h4", id: "title"),
+            tag.ul(class: "nav navbar-nav object_edit h4") do
+              concat(yield(:edit_icons))
+            end
           ].safe_join
         end %>
+        <% if project_subtitle %>
+          <%= tag.div(class: "pl-3 mb-3") do
+            [
+              tag.div(yield(:project_location), class: "project_location"),
+              tag.div(yield(:project_date_range), class: "project_date_range")
+            ].safe_join
+          end %>
+        <% end %>
       <% end %>
+      <%= yield(:owner_naming) %>
     <% end %>
-    <%= yield(:owner_naming) %>
   <% end %>
-<% end %>
 
-<%# Show pages (except projects): %>
-<%# Interest and edit icons, prev/index/next links %>
-<% if action_name == "show" && !has_banner %>
-  <%= tag.div(
-    class: class_names(yield(:right_columns), "hidden-print text-right")
-  ) do
-    tag.nav(class: "show_object_nav d-flex justify-content-between pr-3") do
-      # tag.div(class: "container-fluid") do
+  <%# Show pages (except projects): %>
+  <%# Interest and edit icons, prev/index/next links %>
+  <% if action_name == "show" && !has_banner %>
+    <%= tag.div(
+      class: class_names(yield(:right_columns), "hidden-print text-right")
+    ) do
+      tag.nav(class: "show_object_nav d-flex justify-content-between pr-3") do
         [
           tag.ul(class: "nav navbar-flex interest-eyes h4 my-0") do
             concat(yield(:interest_icons))
           end,
           yield(:prev_next_object)
         ].safe_join
-      # end
-    end
-  end %>
+      end
+    end %>
+  <% end %>
 <% end %>
