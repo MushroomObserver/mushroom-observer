@@ -41,7 +41,8 @@ module Tabs
 
       InternalLink.new(
         :app_logout.l, account_logout_path,
-        html_options: { id: "user_nav_logout_link", button: :post }
+        html_options: { id: "user_nav_logout_link", button: :post,
+                        form: { data: { turbo: false } } }
       ).tab
     end
   end
