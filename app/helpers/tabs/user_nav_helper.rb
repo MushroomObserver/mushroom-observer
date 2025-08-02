@@ -14,10 +14,10 @@ module Tabs
       ]
     end
 
-    def user_log_out_tabs
+    def user_log_out_tabs(user)
       [
         admin_mode_tab,
-        logout_tab
+        logout_tab(user)
       ]
     end
 
@@ -36,7 +36,9 @@ module Tabs
       ).tab
     end
 
-    def logout_tab
+    def logout_tab(user)
+      return unless user
+
       InternalLink.new(
         :app_logout.l, account_logout_path,
         html_options: { id: "user_nav_logout_link", button: :post }
