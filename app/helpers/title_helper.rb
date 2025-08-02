@@ -247,7 +247,7 @@ module TitleHelper
 
   # For values that aren't ids, just join and maybe truncate
   def param_val_itself(key, val, truncate)
-    if key == :type
+    if key == :type # lowercase strings joined by spaces
       val = val.titleize.split.join(", ")
     elsif val.is_a?(Array)
       val = val.first(CAPTION_TRUNCATE) if truncate
