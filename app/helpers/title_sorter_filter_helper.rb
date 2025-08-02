@@ -15,7 +15,7 @@ module TitleSorterFilterHelper
     content_for(:sorter) do
       tag.div(class: "d-inline-block") do
         concat(tag.label("#{:sort_by_header.l}:",
-                         class: "font-weight-normal mr-2"))
+                         class: "font-weight-normal mr-2 hidden-xs"))
         concat(sort_nav_dropdown(title: "", id: "sorts", links:))
       end
     end
