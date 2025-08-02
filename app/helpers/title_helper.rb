@@ -219,7 +219,7 @@ module TitleHelper
     members: :Users
   }.freeze
   # The captions with these sub-params make more sense without the keys:
-  CAPTION_IGNORE_KEYS = [:lookup, :id, :type].freeze
+  CAPTION_IGNORE_KEYS = [:lookup, :id].freeze
   # Max number of values to display if truncated:
   CAPTION_TRUNCATE = 3
 

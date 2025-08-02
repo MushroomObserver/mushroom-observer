@@ -1,5 +1,5 @@
 <%
-add_page_title(tag.span(:rss_log_title.t, class: "text-nowrap"))
+add_index_title(@query)
 add_context_nav(rss_logs_index_tabs(user: @user, types: @types))
 add_type_filters
 add_pagination(@pagination_data)
