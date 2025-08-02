@@ -36,7 +36,6 @@ module PaginationNavHelper
     end
   end
 
-  # rubocop:disable Metrics/AbcSize
   # Insert letter pagination links.
   #
   #   # In controller:
@@ -50,22 +49,6 @@ module PaginationNavHelper
   #   <%= letter_pagination_nav(@pagination_data) %>
   #   <%= number_pagination_nav(@pagination_data) %>
   #
-  def letter_pagination_nav_old(pagination_data, args = {})
-    return safe_empty unless need_letter_pagination_links?(pagination_data)
-
-    args = args.dup
-    args[:params] = (args[:params] || {}).dup
-    args[:params][pagination_data.number_arg] = nil
-    str = LETTERS.map do |letter|
-      if pagination_data.used_letters.include?(letter)
-        pagination_link(letter, letter, pagination_data.letter_arg, args)
-      else
-        tag.li(tag.span(letter), class: "disabled")
-      end
-    end.safe_join(" ")
-    tag.ul(str, class: "pagination pagination-sm")
-  end
-
   def letter_pagination_nav(pagination_data, args = {})
     return "" unless need_letter_pagination_links?(pagination_data)
 
@@ -75,26 +58,13 @@ module PaginationNavHelper
 
     this_letter, letters = letter_pagination_pages(pagination_data)
 
-    tag.nav(class: "pagination_letters navbar") do
-      tag.div(class: "container-fluid") do
-        [
-          tag.ul(class: "nav navbar-nav") do
-            [
-              # tag.li { prev_letter_link(prev_letter, arg, args) },
-              tag.li { tag.p(:by_letter.l, class: "navbar-text mx-0") }
-            ].safe_join
-          end,
-          letter_input(this_letter, letters)
-          # tag.ul(class: "nav navbar-nav navbar-left") do
-          #   [
-          #     tag.li { next_letter_link(next_letter, max_page, arg, args) }
-          #   ].safe_join
-          # end
-        ].safe_join
-      end
+    tag.nav(class: "pagination_letters navbar-flex pl-3") do
+      [
+        tag.div(:by_letter.l, class: "navbar-text mx-0"),
+        letter_input(this_letter, letters)
+      ].safe_join
     end
   end
-  # rubocop:enable Metrics/AbcSize
 
   # pages is a pagination_data object
   def need_letter_pagination_links?(pages)
@@ -129,27 +99,15 @@ module PaginationNavHelper
     this_page, prev_page, next_page, max_page = number_pagination_pages(pages)
     max_url = pagination_link_url(max_page, arg, args)
 
-    tag.nav(class: "pagination_numbers navbar") do
-      tag.div(class: "container-fluid") do
-        [
-          tag.ul(class: "nav navbar-nav") do
-            [
-              tag.li { prev_page_link(prev_page, arg, args) },
-              tag.li { tag.p(:PAGE.l, class: "navbar-text mx-0") }
-            ].safe_join
-          end,
-          page_input(this_page, max_page),
-          tag.ul(class: "nav navbar-nav navbar-left") do
-            [
-              tag.li { tag.p(:of.l, class: "navbar-text ml-0 mr-2") },
-              tag.li do
-                tag.p(link_to(max_page, max_url), class: "navbar-text mx-0")
-              end,
-              tag.li { next_page_link(next_page, max_page, arg, args) }
-            ].safe_join
-          end
-        ].safe_join
-      end
+    tag.nav(class: "pagination_numbers navbar-flex px-3") do
+      [
+        prev_page_link(prev_page, arg, args),
+        tag.div(:PAGE.l, class: "navbar-text mx-0"),
+        page_input(this_page, max_page),
+        tag.div(:of.l, class: "navbar-text ml-0 mr-2"),
+        tag.div(link_to(max_page, max_url), class: "navbar-text mx-0"),
+        next_page_link(next_page, max_page, arg, args)
+      ].safe_join
     end
   end
   # rubocop:enable Metrics/AbcSize
@@ -178,7 +136,7 @@ module PaginationNavHelper
     # return "" if prev_page < 1
 
     classes = class_names(
-      %w[navbar-link navbar-left btn px-0 mr-2 previous_page_link], disabled
+      %w[navbar-link btn px-0 mr-2 previous_page_link], disabled
     )
 
     url = pagination_link_url(prev_page, arg, args)
@@ -193,7 +151,7 @@ module PaginationNavHelper
     # return "" if next_page > max
 
     classes = class_names(
-      %w[navbar-link navbar-left btn px-0 ml-2 next_page_link], disabled
+      %w[navbar-link btn px-0 ml-2 next_page_link], disabled
     )
 
     url = pagination_link_url(next_page, arg, args)
@@ -206,7 +164,7 @@ module PaginationNavHelper
   def letter_input(this_letter, used_letters)
     form_with(
       url: pagination_current_url, method: :get, local: true,
-      class: "navbar-form navbar-left px-0 page_input",
+      class: "navbar-form px-0 page_input",
       data: { controller: "page-input", page_input_letters_value: used_letters }
     ) do |f|
       [
@@ -236,7 +194,7 @@ module PaginationNavHelper
   def page_input(this_page, max_page)
     form_with(
       url: pagination_current_url, method: :get, local: true,
-      class: "navbar-form navbar-left px-0 page_input",
+      class: "navbar-form px-0 page_input",
       data: { controller: "page-input", page_input_max_value: max_page }
     ) do |f|
       [

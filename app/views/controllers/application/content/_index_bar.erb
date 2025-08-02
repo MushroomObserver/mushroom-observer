@@ -18,7 +18,7 @@ filters = content_for?(:filters) || content_for?(:filter_help)
           concat(yield(:filter_help))
         end
       end,
-      tag.div(class: "pagination-top navbar-flex") do
+      tag.div(class: "pagination-top navbar navbar-flex") do
         concat(yield(:numbers))
         concat(yield(:letters))
       end
