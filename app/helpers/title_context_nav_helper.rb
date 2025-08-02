@@ -72,10 +72,10 @@ module TitleContextNavHelper
 
   def crud_button_or_link(str, url, args, kwargs)
     case args[:button]
+    when :post
+      button_to(str, url, **kwargs)
     when :destroy
       destroy_button(name: str, target: args[:target] || url, **kwargs)
-    when :post
-      post_button(name: str, path: url, **kwargs)
     when :put
       put_button(name: str, path: url, **kwargs)
     when :patch
