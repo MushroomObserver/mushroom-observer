@@ -92,27 +92,14 @@ module TitleSorterFilterHelper
     model.underscore.pluralize
   end
 
-  # rubocop:disable Metrics/AbcSize
-  # The "dropdown-current" Stimulus controller should update the dropdown title
+  # The "dropdown-current" Stimulus controller updates the dropdown title
   # with the currently selected option on load
   def sort_nav_dropdown(title: "", id: "", links: [], query: nil)
-    current_sort = query&.params&.dig(:order_by)
-    toggle_classes = class_names(
-      %w[btn btn-sm btn-outline-default dropdown-toggle font-weight-normal]
-    )
     tag.div(class: "dropdown d-inline-block",
             data: { controller: "dropdown-current",
-                    dropdown_current_sort_value: current_sort }) do
+                    dropdown_current_sort_value: sort_nav_order_by(query) }) do
       [
-        tag.button(
-          class: toggle_classes,
-          id: "sort_nav_toggle", type: "button",
-          data: { toggle: "dropdown" },
-          aria: { haspopup: "true", expanded: "false" }
-        ) do
-          concat(tag.span(title, data: { dropdown_current_target: "title" }))
-          concat(tag.span(class: "caret ml-2"))
-        end,
+        sort_nav_toggle(title),
         tag.ul(
           id:, class: "dropdown-menu",
           aria: { labelledby: "sort_nav_toggle" }
@@ -124,7 +111,29 @@ module TitleSorterFilterHelper
       ].safe_join
     end
   end
-  # rubocop:enable Metrics/AbcSize
+
+  def sort_nav_toggle(title)
+    toggle_classes = class_names(
+      %w[btn btn-sm btn-outline-default dropdown-toggle font-weight-normal]
+    )
+    tag.button(
+      class: toggle_classes,
+      id: "sort_nav_toggle", type: "button",
+      data: { toggle: "dropdown" },
+      aria: { haspopup: "true", expanded: "false" }
+    ) do
+      concat(tag.span(title, data: { dropdown_current_target: "title" }))
+      concat(tag.span(class: "caret ml-2"))
+    end
+  end
+
+  def sort_nav_order_by(query)
+    current_sort = query&.params&.dig(:order_by)
+    if current_sort.start_with?("reverse_")
+      current_sort = current_sort.gsub("reverse_", "")
+    end
+    current_sort
+  end
 
   # Different from sorting links: type_filters
   # currently only used in RssLogsController#index
