@@ -13,7 +13,7 @@ module TitleSorterTypeFilterHelper
 
     links = create_sorting_links(query, sorts, link_all)
     content_for(:sorter) do
-      tag.div(class: "d-inline-block") do
+      tag.div(class: "d-inline-block", id: "sorter") do
         concat(tag.label("#{:sort_by_header.l}:",
                          class: "font-weight-normal mr-2 hidden-xs"))
         concat(sort_nav_dropdown(title: "", id: "sorts", links:, query:))
