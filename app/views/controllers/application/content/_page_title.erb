@@ -1,5 +1,6 @@
 <%
 has_banner = content_for?(:banner_image)
+needs_page_title = !(has_banner && controller.controller_name == "projects")
 add_interest_icons = (content_for?(:interest_icons))
 title_cols = "col-sm-8 col-lg-7"
 project_subtitle = content_for?(:project_location) ||
@@ -9,7 +10,7 @@ title_class = has_banner ? "h3" : "h4"
 
 <%= tag.div(class: "row") do %>
   <%# Page title. Indexes have none — `rubric` in top_nav has model name. %>
-  <% if action_name != "index" %>
+  <% if action_name != "index" && needs_page_title %>
     <%= tag.div(class: yield(:left_columns), id: "title_bar") do %>
       <%= tag.nav(
         class: "show_title_nav d-flex justify-content-between pl-3"
