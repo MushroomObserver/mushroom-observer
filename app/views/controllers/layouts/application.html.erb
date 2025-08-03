@@ -25,7 +25,7 @@ content_classes = class_names(yield(:container_class), yield(:content_padding))
       <%= render(partial: "application/app/gtm_iframe") %>
     <% end %>
 
-    <div id="main_container" class="container-fluid"
+    <div id="main_container" class="px-sm-3"
        data-controller="nav links" data-nav-target="container">
 
       <%= render(partial: "application/app/banners") %>

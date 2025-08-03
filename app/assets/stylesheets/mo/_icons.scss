@@ -9,9 +9,11 @@
   background-color: transparent;
 }
 
-.has-search .form-control {
-  padding-right: 12px;
-  padding-left: 30px;
+@media screen and (min-width: 767px) {
+  .has-search .form-control {
+    padding-right: 12px;
+    padding-left: 30px;
+  }
 }
 
 .page-input .form-control-feedback {

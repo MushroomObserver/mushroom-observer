@@ -24,7 +24,6 @@ form_group_class = class_names(
 )
 adv_search = icon_link_to(:app_advanced_search.l, search_advanced_path,
                           icon: :plus, class: icon_class, show_text: false)
-
 # Fields have attributes nested under search via fields_for, eg search[:type]
 %>
 
@@ -40,8 +39,7 @@ adv_search = icon_link_to(:app_advanced_search.l, search_advanced_path,
 
       <%= fields_for(:search) do |f_s| %>
         <%= tag.div(class: form_group_class) do %>
-          <%= tag.span("", class: "glyphicon glyphicon-search " \
-                                  "form-control-feedback") %>
+          <%= link_icon(:search, class: "form-control-feedback hidden-xs") %>
           <%= f_s.text_field(:pattern, { value: session[:pattern],
                                         class: "form-control flex-grow-1",
                                         placeholder: :app_find.t }) %>
@@ -49,8 +47,7 @@ adv_search = icon_link_to(:app_advanced_search.l, search_advanced_path,
 
         <%= tag.div(class: "form-group text-nowrap mb-0") do %>
           <%= f_s.select(
-                :type, search_options,
-                { }, { class: "form-control w-auto" }
+                :type, search_options, { }, { class: "form-control" }
               ) %>
         <% end %><!--.form-group-->
       <% end %>
@@ -58,7 +55,13 @@ adv_search = icon_link_to(:app_advanced_search.l, search_advanced_path,
       <%= hidden_field_tag(:needs_naming, true) if identify_page %>
 
       <%= tag.div(class: "form-group text-nowrap") do %>
-        <%= submit_button(form: f, button: :app_search.l, class: "mr-2") %>
+        <%= tag.button(type: :submit,
+                       class: "btn btn-outline-default px-2") do
+          [
+            tag.span(link_icon(:search), class: "d-sm-none"),
+            tag.span(:app_search.l, class: "hidden-xs")
+          ].safe_join
+        end %>
       <% end %><!--.form-group-->
 
     <% end %>
