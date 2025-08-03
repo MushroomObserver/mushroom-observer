@@ -15,7 +15,7 @@ query_params_set(@query) if @pagination_data.any?
   <%= tag.div(class: yield(:left_columns)) do %>
 
     <%# this needs to be a regular page_title, but below the project tabs %>
-    <%= species_list_title_panel(@species_list) if @project %>
+    <%# species_list_title_panel(@species_list) if @project %>
 
     <%= render(partial: "shared/list_search",
                locals: { object: @species_list }) %>

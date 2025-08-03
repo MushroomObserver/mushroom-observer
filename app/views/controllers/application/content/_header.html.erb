@@ -25,6 +25,16 @@ index_bar =
   <%# Immediately below the top nav: index filters or page title, plus page nav.
       Indexes have no "#title" — `rubric` in top_nav has the model name. %>
   <%= render(partial: "application/content/project_banner") if has_banner %>
+
+  <%= tag.div(class: "row") do %>
+    <%# Project tabs %>
+    <% if content_for?(:project_tabs) %>
+      <%= tag.div(class: title_cols, id: "project_tabs") do
+        yield(:project_tabs)
+      end %>
+    <% end %>
+  <% end %>
+
   <% if index_bar %>
     <%# Index filters and pagination, full width. %>
     <%= render(partial: "application/content/index_bar") %>
@@ -38,13 +48,6 @@ index_bar =
     <% if content_for?(:type_filters) %>
       <%= tag.div(class: "hidden-print col-xs-12") do
         yield(:type_filters)
-      end %>
-    <% end %>
-
-    <%# Project tabs %>
-    <% if content_for?(:project_tabs) %>
-      <%= tag.div(class: title_cols, id: "project_tabs") do
-        yield(:project_tabs)
       end %>
     <% end %>
 
