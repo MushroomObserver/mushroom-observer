@@ -27,7 +27,6 @@ module SpeciesLists
         @species_list.process_file_data(@user, sorter)
         init_name_vars_from_sorter(@species_list, sorter)
         init_project_vars_for_edit(@species_list)
-        @checklist ||= calc_checklist
         render("species_lists/edit")
       else
         redirect_to(species_list_path(@species_list))

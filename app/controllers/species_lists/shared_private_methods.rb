@@ -26,9 +26,6 @@ module SpeciesLists
     #     (Both the last two radio boxes are hashes with:
     #       key: ambiguous name as typed with nonalphas changed to underscores,
     #       val: id of name user has chosen (via radio boxes in feedback)
-    #   params[:checklist_data][...]          Radios: hash from name id to "1".
-    #   params[:checklist_names][name_id]     (Used by view to give a name to
-    #                                         each id in checklist_data hash.)
     # Bullet:
     # https://blog.appsignal.com/2018/06/19/activerecords-counter-cache.html
     def process_species_list(create_or_update)
@@ -112,7 +109,6 @@ module SpeciesLists
       sorter.add_chosen_names(params[:chosen_multiple_names])
       sorter.add_chosen_names(params[:chosen_approved_names])
       sorter.add_approved_deprecated_names(params[:approved_deprecated_names])
-      sorter.check_for_deprecated_checklist(params[:checklist_data])
       sorter.check_for_deprecated_names(@species_list.names) if @species_list.id
       sorter.sort_names(@user, list)
       sorter
@@ -181,10 +177,9 @@ module SpeciesLists
       true
     end
 
-    # Creates observations for names written in and/or selected from checklist.
+    # Creates observations for names written in
     # Uses the member instance vars, as well as:
     #   params[:chosen_approved_names]    Names from radio boxes.
-    #   params[:checklist_data]           Names from LHS check boxes.
     def construct_observations(spl, sorter)
       # Put together a list of arguments to use when creating new observations.
       spl_args = init_spl_args(spl)
@@ -203,17 +198,7 @@ module SpeciesLists
         spl.construct_observation(name, spl_args)
       end
 
-      # Add checked names from LHS check boxes.  It doesn't check if they are
-      # already in there; it creates new observations for each and stuffs it in.
       spl_args[:when] = spl.when
-      return unless params[:checklist_data]
-
-      params[:checklist_data].each do |key, value|
-        next unless value == "1"
-
-        name = find_chosen_name(key.to_i, params[:chosen_approved_names])
-        spl.construct_observation(name, spl_args)
-      end
     end
 
     def init_spl_args(spl)
@@ -280,51 +265,6 @@ module SpeciesLists
       end
     end
 
-    # Called by the actions which use create/edit_species_list form.
-    # It grabs a list of names to list with checkboxes in the
-    # left-hand column of the form.  By default it looks up a query
-    # stored in the session (you can for example "save" another
-    # species_list "for later" for this purpose).  The result is
-    # an Array of names where the values are [display_name, name_id].
-    # This is destined for the instance variable @checklist.
-    def calc_checklist(query = nil)
-      return unless query ||= query_from_session
-
-      results = case query.model.name
-                when "Name"
-                  checklist_from_name_query(query)
-                when "Observation"
-                  checklist_from_observation_query(query)
-                when "Location"
-                  checklist_from_location_query(query)
-                when "RssLog"
-                  checklist_from_rss_log_query(query)
-                end
-      results.pluck(Name[:display_name], Name[:id])
-    end
-
-    def checklist_from_name_query(query)
-      query.scope.select(Name[:display_name], Name[:id]).distinct.limit(1000)
-    end
-
-    # Only reason for ther join is to get the __Name formatting__.
-    # The obs table could be altered so it has both these values - AN 202503
-    def checklist_from_observation_query(query)
-      query.scope.joins(:name).
-        select(Name[:display_name], Name[:id]).distinct.limit(1000)
-    end
-
-    def checklist_from_location_query(query)
-      query.scope.joins(observations: :name).
-        select(Name[:display_name], Name[:id]).distinct.limit(1000)
-    end
-
-    def checklist_from_rss_log_query(query)
-      query.scope.joins(observations: :name).
-        where(RssLog[:observation_id].gt(0)).
-        select(Name[:display_name], Name[:id]).distinct.limit(1000)
-    end
-
     def init_list_for_clone(clone_id)
       return unless (clone = SpeciesList.safe_find(clone_id))
 
@@ -336,12 +276,10 @@ module SpeciesLists
     end
 
     def init_name_vars_from_sorter(spl, sorter)
-      @checklist_names = params[:checklist_data] || {}
       @new_names = sorter.new_name_strs.uniq.sort
       @multiple_names = sorter.multiple_names.uniq.sort_by(&:search_name)
       @deprecated_names = sorter.deprecated_names.uniq.sort_by(&:search_name)
       @list_members = sorter.all_line_strs.join("\r\n")
-      @checklist = nil
       @place_name = spl.place_name
     end
 
