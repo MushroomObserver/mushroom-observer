@@ -15,6 +15,10 @@ module InatImportsController::Validators
       consented?
   end
 
+  # Always require inat_username as a safety measure.
+  # Else we risk importing iNat observations of all users
+  # or even worse, importing all observations of all users
+  # See also Inat::PageParser#initialize
   def username_present?
     return true if params[:inat_username].present?
 
