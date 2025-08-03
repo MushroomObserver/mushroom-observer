@@ -3,6 +3,7 @@ import { Controller } from "@hotwired/stimulus"
 // Connects to data-controller="dropdown-current"
 export default class extends Controller {
   static targets = ["title", "link"]
+  static values = { sort: String }
 
   connect() {
     // Just a "sanity check" convention, so you can tell "is this thing on?"
@@ -20,9 +21,7 @@ export default class extends Controller {
   currentOrderingLabel() {
     if (this.linkTargets.length == 0) return
 
-    const queryString = window.location.search, // guaranteed to be a string
-      urlParams = new URLSearchParams(queryString),
-      currentBy = urlParams.get('by') || "",
+    const currentBy = this.getCurrentSort(),
       // Get the translated label of the current `by` param
       currentByItems = this.linkTargets.filter(
         item => item.dataset.by === currentBy
@@ -34,5 +33,15 @@ export default class extends Controller {
     } else {
       return currentByItems[0].innerText
     }
+  }
+
+  getCurrentSort() {
+    if (this.sortValue.length > 0)
+      return this.sortValue
+
+    const queryString = window.location.search, // guaranteed to be a string
+      urlParams = new URLSearchParams(queryString)
+
+    urlParams.get('by') || ""
   }
 }

@@ -16,7 +16,7 @@ module TitleSorterFilterHelper
       tag.div(class: "d-inline-block") do
         concat(tag.label("#{:sort_by_header.l}:",
                          class: "font-weight-normal mr-2 hidden-xs"))
-        concat(sort_nav_dropdown(title: "", id: "sorts", links:))
+        concat(sort_nav_dropdown(title: "", id: "sorts", links:, query:))
       end
     end
   end
@@ -95,12 +95,14 @@ module TitleSorterFilterHelper
   # rubocop:disable Metrics/AbcSize
   # The "dropdown-current" Stimulus controller should update the dropdown title
   # with the currently selected option on load
-  def sort_nav_dropdown(title: "", id: "", links: [])
+  def sort_nav_dropdown(title: "", id: "", links: [], query: nil)
+    current_sort = query&.params&.dig(:order_by)
     toggle_classes = class_names(
       %w[btn btn-sm btn-outline-default dropdown-toggle font-weight-normal]
     )
     tag.div(class: "dropdown d-inline-block",
-            data: { controller: "dropdown-current" }) do
+            data: { controller: "dropdown-current",
+                    dropdown_current_sort_value: current_sort }) do
       [
         tag.button(
           class: toggle_classes,
