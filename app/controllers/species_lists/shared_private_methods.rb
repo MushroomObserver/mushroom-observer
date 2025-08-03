@@ -325,27 +325,10 @@ module SpeciesLists
         select(Name[:display_name], Name[:id]).distinct.limit(1000)
     end
 
-    def init_name_vars_for_create
-      @checklist_names = {}
-      @new_names = []
-      @multiple_names = []
-      @deprecated_names = []
-      @list_members = nil
-      @checklist = nil
-      @place_name = nil
-    end
-
-    def init_name_vars_for_edit(spl)
-      init_name_vars_for_create
-      @deprecated_names = spl.names.where(deprecated: true)
-      @place_name = spl.place_name
-    end
-
-    def init_name_vars_for_clone(clone_id)
+    def init_list_for_clone(clone_id)
       return unless (clone = SpeciesList.safe_find(clone_id))
 
       query = create_query(:Observation, species_lists: clone)
-      @checklist = calc_checklist(query)
       @species_list.when = clone.when
       @species_list.place_name = clone.place_name
       @species_list.location = clone.location

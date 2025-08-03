@@ -113,16 +113,15 @@ class SpeciesListsController < ApplicationController
 
   def new
     @species_list = SpeciesList.new
-    init_name_vars_for_create
     init_project_vars_for_create
-    init_name_vars_for_clone(params[:clone]) if params[:clone].present?
+    init_list_for_clone(params[:clone]) if params[:clone].present?
   end
 
   def edit
     return unless (@species_list = find_species_list!)
 
     if check_permission!(@species_list)
-      init_name_vars_for_edit(@species_list)
+      @place_name = @species_list.place_name
       init_project_vars_for_edit(@species_list)
     else
       redirect_to(species_list_path(@species_list))

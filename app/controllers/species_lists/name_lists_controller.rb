@@ -57,7 +57,6 @@ module SpeciesLists
 
       @species_list = SpeciesList.new
       clear_query_in_session
-      init_name_vars_for_create
       init_project_vars_for_create
       @checklist ||= []
       @list_members = params[:results].tr("|", " ").delete("*")
