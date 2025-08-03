@@ -22,9 +22,10 @@ identify_page = controller.controller_name == "identify"
     <%# left side %>
     <%= tag.div(class: left_classes) do %>
       <%= left_nav_toggle %>
-      <%= tag.h4(class: "font-weight-bold mr-4 mr-lg-5") do
+      <%= tag.h4(nav_rubric(@query),
+                 class: "font-weight-bold mr-2", id: "rubric") %>
+      <%= tag.div(class: "mr-4 mr-lg-5") do
         [
-          nav_title(@query),
           nav_create(@user, controller),
           nav_scan_qr_code(@user, controller)
         ].safe_join(" ")

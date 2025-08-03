@@ -134,11 +134,12 @@ module TitleContextNavHelper
     end
   end
 
-  # The idea here is to give a link to an unfiltered index, if relevant.
-  # In the case of nested controllers, the parent controller's index.
-  def nav_title(query)
-    if !query ||
-       (action_name == "index" && query.params.except(:order_by).blank?)
+  # The idea here is to make the rubric link to an unfiltered index, or
+  # in the case of nested controllers, the parent controller's index,
+  # if an index link would be relevant.
+  def nav_rubric(query)
+    params = query&.params&.except(:order_by)
+    if action_name == "index" && (!params || params&.blank?)
       rubric
     else
       nav_index_link(rubric)
