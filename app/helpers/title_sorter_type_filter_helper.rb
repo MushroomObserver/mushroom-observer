@@ -12,11 +12,13 @@ module TitleSorterTypeFilterHelper
     return unless sorts && (query&.num_results&.> 1)
 
     links = create_sorting_links(query, sorts, link_all)
+    title = sort_nav_order_by(query, sorts)
+
     content_for(:sorter) do
       tag.div(class: "d-inline-block", id: "sorter") do
         concat(tag.label("#{:sort_by_header.l}:",
                          class: "font-weight-normal mr-2 hidden-xs"))
-        concat(sort_nav_dropdown(title: "", id: "sorts", links:, query:))
+        concat(sort_nav_dropdown(title:, id: "sorts", links:))
       end
     end
   end
@@ -37,7 +39,7 @@ module TitleSorterTypeFilterHelper
       # Don't need to swap current dropdown title on click, so no action
       args = {
         class: class_names(classes),
-        data: { dropdown_current_target: "link", by: link_by }
+        data: { by: link_by }
       }
       args = args.merge(disabled: true) if active
 
@@ -94,10 +96,8 @@ module TitleSorterTypeFilterHelper
 
   # The "dropdown-current" Stimulus controller updates the dropdown title
   # with the currently selected option on load
-  def sort_nav_dropdown(title: "", id: "", links: [], query: nil)
-    tag.div(class: "dropdown d-inline-block",
-            data: { controller: "dropdown-current",
-                    dropdown_current_sort_value: sort_nav_order_by(query) }) do
+  def sort_nav_dropdown(title: "", id: "", links: [])
+    tag.div(class: "dropdown d-inline-block") do
       [
         sort_nav_toggle(title),
         tag.ul(
@@ -122,17 +122,17 @@ module TitleSorterTypeFilterHelper
       data: { toggle: "dropdown" },
       aria: { haspopup: "true", expanded: "false" }
     ) do
-      concat(tag.span(title, data: { dropdown_current_target: "title" }))
+      concat(tag.span(title))
       concat(tag.span(class: "caret ml-2"))
     end
   end
 
-  def sort_nav_order_by(query)
+  def sort_nav_order_by(query, sorts)
     current_sort = query&.params&.dig(:order_by)
     if current_sort.start_with?("reverse_")
       current_sort = current_sort.gsub("reverse_", "")
     end
-    current_sort
+    sorts.to_h[current_sort] if sorts.to_h.key?(current_sort)
   end
 
   # Different from sorting links: type_filters
