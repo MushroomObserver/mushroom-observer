@@ -523,7 +523,7 @@ class InatImportJobTest < ActiveJob::TestCase
     old_inat_username = @user.inat_username
 
     create_ivars_from_filename("calostoma_lutescens")
-    stub_inat_interactions(superimporter: true)
+    stub_inat_interactions
 
     assert_difference(
       "Observation.count", 1,
