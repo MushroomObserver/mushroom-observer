@@ -9,6 +9,11 @@
   background-color: transparent;
 }
 
+.has-search .form-control {
+  padding-right: 6px;
+  padding-left: 6px;
+}
+
 @media screen and (min-width: 767px) {
   .has-search .form-control {
     padding-right: 12px;

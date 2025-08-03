@@ -24,7 +24,7 @@ identify_page = controller.controller_name == "identify"
       <%= left_nav_toggle %>
       <%= tag.h4(nav_rubric(@query),
                  class: "font-weight-bold mr-2", id: "rubric") %>
-      <%= tag.div(class: "mr-4 mr-lg-5") do
+      <%= tag.div(class: "mr-3 mr-sm-4 mr-lg-5") do
         [
           nav_create(@user, controller),
           nav_scan_qr_code(@user, controller)

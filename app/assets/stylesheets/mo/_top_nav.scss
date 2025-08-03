@@ -94,3 +94,31 @@
     }
   }
 }
+
+@media screen and (max-width: 767px) {
+  #top_nav {
+    h4 {
+      font-size: 14px;
+    }
+    .navbar-form {
+      padding-right: 0;
+    }
+    #left_nav_toggle img {
+      width: 30px;
+    }
+    #sorter button {
+      max-width: 60px;
+      overflow: hidden;
+    }
+  }
+
+  #header {
+    .pagination_letters {
+      display: none !important;
+    }
+  }
+
+  .paginate input[type="text"] {
+    min-width: 36px;
+  }
+}

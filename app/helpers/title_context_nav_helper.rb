@@ -188,7 +188,7 @@ module TitleContextNavHelper
     link_to(
       link_icon(:add, title: [:NEW.l, obj_name].safe_join(" ")),
       { controller: "/#{controller.controller_path}", action: :new },
-      class: "btn btn-sm btn-outline-default mx-3 top_nav_create"
+      class: "btn btn-sm btn-outline-default mx-2 mx-sm-3 top_nav_create"
     )
   end
 
@@ -206,7 +206,7 @@ module TitleContextNavHelper
     link_to(
       link_icon(:qrcode, title: :app_qrcode.l),
       field_slips_qr_reader_new_path,
-      class: "btn btn-sm btn-outline-default mx-2 top_nav_create"
+      class: "btn btn-sm btn-outline-default mx-1 mx-sm-2 top_nav_create"
     )
   end
 
@@ -223,13 +223,13 @@ module TitleContextNavHelper
   end
 
   def left_nav_toggle
-    tag.div(class: "visible-xs pr-4") do
+    tag.div(class: "visible-xs pr-3 pr-sm-4") do
       tag.button(
         # link_icon(:menu, title: :MENU.l),
         image_tag("mo_icon_bg.svg",
                   width: "39px", alt: :MENU.t, title: :MENU.t),
         class: "btn btn-outline-default rounded-circle overflow-hidden p-0",
-        type: :button,
+        type: :button, id: "left_nav_toggle",
         data: { toggle: "offcanvas", nav_target: "toggle",
                 action: "nav#toggleOffcanvas" },
         aria: { expanded: "false", controls: "search_nav" }
