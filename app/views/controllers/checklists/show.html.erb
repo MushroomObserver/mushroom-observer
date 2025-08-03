@@ -1,13 +1,8 @@
 <%
 container_class(:full)
-if @project
-  add_project_banner(@project)
-else
-  add_page_title(checklist_show_title(user: @show_user,
-                                      list: @species_list))
-  add_context_nav(checklist_show_tabs(user: @show_user,
-                                  list: @species_list))
-end
+add_project_banner(@project) if @project
+add_page_title(checklist_show_title(user: @show_user, list: @species_list))
+add_context_nav(checklist_show_tabs(user: @show_user, list: @species_list))
 %>
 
 <div class="my-4">

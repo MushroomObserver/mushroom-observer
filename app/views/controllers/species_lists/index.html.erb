@@ -1,13 +1,9 @@
 <%
-if @project
-  add_project_banner(@project)
-  container_class(:wide)
-else
-  add_index_title(@query)
-  container_class(:full)
-end
+add_project_banner(@project) if @project
+add_index_title(@query)
 add_sorter(@query, species_lists_index_sorts(query: @query))
 add_pagination(@pagination_data)
+container_class(:full)
 
 flash_error(@error) if @error && @objects.empty?
 %>

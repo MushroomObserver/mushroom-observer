@@ -1,13 +1,10 @@
 <%
-if @project
-  add_project_banner(@project)
-else
-  add_index_title(@query)
-  add_context_nav(field_slips_index_tabs)
-  project_title = @query&.params_cache&.dig(:project)&.title || ""
-end
+add_project_banner(@project) if @project
+add_index_title(@query)
+add_context_nav(field_slips_index_tabs)
 add_pagination(@pagination_data)
 container_class(:wide)
+project_title = @query&.params_cache&.dig(:project)&.title || ""
 %>
 
 <% if notice %>

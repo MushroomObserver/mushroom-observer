@@ -71,7 +71,7 @@ module Tabs
     end
 
     def add_project_banner(project)
-      add_page_title(link_to_object(project))
+      content_for(:banner_title) { link_to_object(project) }
 
       if project.location
         content_for(:project_location) do

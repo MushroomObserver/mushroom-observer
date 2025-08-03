@@ -1,10 +1,9 @@
 <%
-  add_project_banner(@project)
-  container_class(:wide)
-  project_id = @project.id
+add_project_banner(@project)
+add_page_title(:PROJECT_ALIASES.l)
+container_class(:wide)
+project_id = @project.id
 %>
-
-<h1>Project Aliases</h1>
 
 <%=
   make_table(headers: project_alias_headers,

@@ -15,7 +15,10 @@ container_class(:wide)
     <% @locations.each do |loc| %>
       <tr>
         <td class="align-middle">
-          <%= link_to(loc.display_name, checklist_path(project_id: @project.id, location_id: loc.id)) %>
+          <%= link_to(
+            loc.display_name,
+            checklist_path(project_id: @project.id, location_id: loc.id)
+          ) %>
         </td>
         <td class="align-middle">
           <%= render(partial: "projects/aliases",

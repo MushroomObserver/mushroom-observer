@@ -1,22 +1,20 @@
 <%
 container_class(:double)
 column_classes(:nine_three)
+add_project_banner(@project) if @project
+show_title = @species_list.unique_format_name
+add_page_title(show_title, ["#{:SPECIES_LIST.l}:", show_title].safe_join(" "))
+add_interest_icons(@user, @species_list)
+add_edit_icons(@species_list)
 add_context_nav(species_list_show_tabs(list: @species_list, query: @query))
-if @project
-  add_project_banner(@project)
-else
-  show_title = @species_list.unique_format_name
-  add_page_title(show_title, ["#{:SPECIES_LIST.l}:", show_title].safe_join(" "))
-  add_pager_for(@species_list)
-  add_interest_icons(@user, @species_list)
-  add_edit_icons(@species_list)
-end
+add_pager_for(@species_list)
 query_params_set(@query) if @pagination_data.any?
 %>
 
 <%= tag.div(class: "row") do %>
   <%= tag.div(class: yield(:left_columns)) do %>
 
+    <%# this needs to be a regular page_title, but below the project tabs %>
     <%= species_list_title_panel(@species_list) if @project %>
 
     <%= render(partial: "shared/list_search",
