@@ -21,7 +21,7 @@ module TitleSorterTypeFilterHelper
     end
   end
 
-  # Make HTML buttons after adding relevant info to the raw sorts
+  # Make dropdown links after adding relevant info to the raw sorts
   #
   # The terminology we're using to build these may be confusing:
   # `sorts` = the arrays of [by_param, :label.t] provided by index helpers.
