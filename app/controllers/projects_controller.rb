@@ -203,6 +203,10 @@ class ProjectsController < ApplicationController
               includes(:name, :user)
     # Save a lookup in comments_for_object
     @comments = @project.comments&.sort_by(&:created_at)&.reverse
+    # Matches for the list-search autocompleter
+    @object_names = @project.observations.joins(:name).
+                    select(Name[:text_name], Name[:id]).distinct.
+                    order(Name[:text_name])
   end
 
   def upload_image_if_present

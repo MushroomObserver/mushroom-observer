@@ -176,9 +176,8 @@ class SpeciesListsController < ApplicationController
   #
   ##############################################################################
 
-  def init_ivars_for_show
-    @canonical_url =
-      "#{MO.http_domain}/species_lists/#{@species_list.id}"
+  def init_ivars_for_show # rubocop:disable Metrics/AbcSize
+    @canonical_url = "#{MO.http_domain}/species_lists/#{@species_list.id}"
     @query = create_query(
       :Observation, order_by: :name, species_lists: @species_list
     )
@@ -188,10 +187,16 @@ class SpeciesListsController < ApplicationController
 
     @query.need_letters = true
     @pagination_data = letter_pagination_data(:letter, :page, 100)
-    @objects = @query.paginate(@pagination_data, include:
-                  [:user, :name, :location, { thumb_image: :image_votes }])
+    @objects = @query.paginate(
+      @pagination_data,
+      include: [:user, :name, :location, { thumb_image: :image_votes }]
+    )
     # Save a lookup in comments_for_object
     @comments = @species_list.comments&.sort_by(&:created_at)&.reverse
+    # Matches for the list-search autocompleter
+    @object_names = @species_list.observations.joins(:name).
+                    select(Name[:text_name], Name[:id]).distinct.
+                    order(Name[:text_name])
   end
 
   ##############################################################################
