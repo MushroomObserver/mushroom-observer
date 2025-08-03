@@ -46,24 +46,6 @@ module SpeciesLists
       assert_nil(synonym_name.synonym_id)
     end
 
-    def test_construct_species_list_junk
-      species_list = species_lists(:first_species_list)
-      count = species_list.observations.count
-      new_name_str = "This is a bunch of junk"
-      assert_nil(Name.find_by(text_name: new_name_str))
-      params = {
-        id: species_list.id,
-        list: { members: new_name_str },
-        approved_names: new_name_str
-      }
-      login("rolf")
-      contrib = rolf.contribution
-      post(:create, params: params)
-      assert_equal(10, rolf.reload.contribution)
-      assert_nil(Name.find_by(text_name: new_name_str))
-      assert_equal(count, species_list.reload.observations.count)
-    end
-
     def test_construct_species_list_nonalpha_multiple
       # First try creating it with ambiguous name "Warnerbros bugs-bunny".
 

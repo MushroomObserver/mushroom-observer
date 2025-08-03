@@ -167,7 +167,6 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
       click_commit
     end
     assert_flash_error
-    debugger
     assert_selector("body.write_in__create")
 
     # assert_selector("#missing_names",
