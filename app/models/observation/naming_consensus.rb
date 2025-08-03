@@ -59,7 +59,8 @@ class Observation
     attr_accessor :observation, :namings, :votes, :consensus_changed
 
     def initialize(observation)
-      @observation = ::Observation.naming_includes.find(observation.id)
+      # @observation = ::Observation.naming_includes.find(observation.id)
+      @observation = observation
       @namings = observation.namings
       @votes = @namings.map(&:votes).flatten
       @consensus_changed = false
