@@ -2491,6 +2491,8 @@
   species_list_show_add_remove_from_another_list: Add To / Remove From Another List
   species_list_show_manage_projects: Manage Projects
   species_list_show_manage_projects_help: Change which projects this list and its observations and images are attached to.
+  species_list_show_add_new_observations: Add New Observations
+  species_list_show_add_new_observations_help: Create and add a set of new observations to this list.
   species_list_show_manage_observations_too: If you would like to attach/remove observations or images, too, please use the "[:species_list_show_manage_projects]" link.
   species_list_show_edit: Edit This List
   species_list_show_clear_list: Clear This List

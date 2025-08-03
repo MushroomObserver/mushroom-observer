@@ -6,7 +6,7 @@
 
   <div class="form-group">
     <%= f_m.label(:notes, :form_species_lists_member_notes.t + ":") %>
-      (<%= :general_textile_link.t %>)
+      (<%= :general_textile_link.t %>)<br/>
     <%= f_m.fields_for(:notes) do |f_n| %>
       <% @species_list.form_notes_parts(@user).each do |part| %>
         <%= f_n.label(@species_list.notes_normalized_key(part),

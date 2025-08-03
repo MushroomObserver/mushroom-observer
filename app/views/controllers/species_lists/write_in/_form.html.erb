@@ -1,5 +1,6 @@
 <%= form_with(model: @species_list, url: action,
-              id: "species_list_write_in_form") do |f| %>
+    id: "species_list_write_in_form",
+    method: :post) do |f| %>
 
   <%= submit_button(form: f, button: button.l, center: true) %>
 
@@ -26,6 +27,16 @@
       )
     end %>
   </div>
+
+  <%= render(partial: "shared/form_location_feedback",
+             locals: { button: button } ) %>
+
+  <%= autocompleter_field(form: f, field: :place_name, type: :location,
+                          label: "#{:WHERE.l}:") %>
+
+  <%= render(partial: "species_lists/form/fields_for_member",
+             locals: { f: f }) %>
+
   <%= submit_button(form: f, button: button.l, center: true) %>
 
 <% end %>

@@ -1,6 +1,6 @@
 <%
 add_page_title(:species_list_write_in_title.t(list_title: @species_list.title))
-add_context_nav(species_list_form_new_tabs)
+add_context_nav(species_list_write_in_form_tabs(@species_list))
 @container = :text
 
 action = species_list_write_in_path
