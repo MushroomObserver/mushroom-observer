@@ -362,44 +362,6 @@ module SpeciesLists
       @place_name = spl.place_name
     end
 
-    def init_member_vars_for_create
-      @member_vote = Vote.maximum_vote
-      @member_notes_parts = @species_list.form_notes_parts(@user)
-      @member_notes = @member_notes_parts.each_with_object({}) do |part, h|
-        h[part.to_sym] = ""
-      end
-      @member_lat = nil
-      @member_lng = nil
-      @member_alt = nil
-      @member_is_collection_location = true
-      @member_specimen = false
-    end
-
-    def init_member_vars_for_edit(spl)
-      init_member_vars_for_create
-      spl_obss = spl.observations
-      return unless (obs = spl_obss.last)
-
-      # Not sure how to check vote efficiently...
-      consensus = Observation::NamingConsensus.new(obs)
-      @member_vote =
-        begin
-          consensus.users_vote(consensus.namings.first, @user).value
-        rescue StandardError
-          Vote.maximum_vote
-        end
-      init_member_notes_for_edit(spl_obss)
-      if all_obs_same_lat_lon_alt?(spl_obss)
-        @member_lat = obs.lat
-        @member_lng = obs.lng
-        @member_alt = obs.alt
-      end
-      if all_obs_same_attr?(spl_obss, :is_collection_location)
-        @member_is_collection_location = obs.is_collection_location
-      end
-      @member_specimen = obs.specimen if all_obs_same_attr?(spl_obss, :specimen)
-    end
-
     def init_member_notes_for_edit(observations)
       if all_obs_same_attr?(observations, :notes)
         obs = observations.last
