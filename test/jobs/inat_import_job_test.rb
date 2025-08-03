@@ -533,10 +533,8 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     assert_empty(@inat_import.response_errors, "There should be no errors")
-    assert_equal(
-      old_inat_username, @user.reload.inat_username,
-      "SuperImporter's inat_username should not change"
-    )
+    assert_nil(@user.reload.inat_username,
+               "SuperImporter's inat_username should not change")
   end
 
   def test_import_canceled
