@@ -117,7 +117,6 @@ class SpeciesListsController < ApplicationController
     init_member_vars_for_create
     init_project_vars_for_create
     init_name_vars_for_clone(params[:clone]) if params[:clone].present?
-    @checklist ||= calc_checklist # rubocop:disable Naming/MemoizedInstanceVariableName
   end
 
   def edit
@@ -127,7 +126,6 @@ class SpeciesListsController < ApplicationController
       init_name_vars_for_edit(@species_list)
       init_member_vars_for_edit(@species_list)
       init_project_vars_for_edit(@species_list)
-      @checklist ||= calc_checklist
     else
       redirect_to(species_list_path(@species_list))
     end
