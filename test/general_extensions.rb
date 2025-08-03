@@ -454,6 +454,10 @@ module GeneralExtensions
     assert_match(expect, css_select("title").text, msg)
   end
 
+  def assert_banner_title(expect, msg = "Wrong banner title")
+    assert_match(expect, css_select("#banner_title").text, msg)
+  end
+
   def assert_displayed_filters(expect, msg = "Wrong filters")
     assert_match(expect, css_select("#filters").text, msg)
   end

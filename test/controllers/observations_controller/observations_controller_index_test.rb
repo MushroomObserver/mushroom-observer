@@ -569,7 +569,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: { project: project.id })
 
     assert_response(:success)
-    assert_page_title(project.title)
+    assert_page_title(:OBSERVATIONS.l)
   end
 
   def test_index_project_without_observations
@@ -579,7 +579,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: { project: project.id })
 
     assert_response(:success)
-    assert_page_title(project.title)
+    assert_page_title(:OBSERVATIONS.l)
     assert_flash_text(:runtime_no_matches.l(type: :observation))
   end
 
