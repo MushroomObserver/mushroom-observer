@@ -9,21 +9,21 @@ class Inat
 
     attr_accessor :last_import_id
 
-    def initialize(importer, ids, restricted_user_login)
-      @importer = importer
+    def initialize(import, ids)
+      @import = import
       @last_import_id = 0
       @ids = ids
-      @restricted_user_login = restricted_user_login
     end
 
+    # Get next page of iNat API results, using per_page & id_above params.
+    # https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
     # NOTE: The `ids` parameter may be a comma-separated list of iNat obs
     # ids - that needs to be URL encoded to a string when passed as an arg here
     # because URI.encode_www_form deals with arrays by passing the same key
     # multiple times.
     # https://stackoverflow.com/a/11251654/3357635
     def next_page
-      result = next_request(id: @ids, id_above: @last_import_id,
-                            user_login: @restricted_user_login)
+      result = next_request(id: @ids, id_above: @last_import_id)
       return nil if response_bad?(result)
 
       JSON.parse(result)
@@ -43,18 +43,19 @@ class Inat
         id: nil, id_above: nil, only_id: false, per_page: 200,
         order: "asc", order_by: "id",
         # obss of only the iNat user with iNat login @inat_import.inat_username
-        user_login: nil,
+        # This prevents accidentally importing observations of multiple
+        user_login: @import.inat_username,
         # only fungi and slime molds
         iconic_taxa: ICONIC_TAXA,
         # and which haven't been exported from or inported to MO
         without_field: "Mushroom Observer URL"
       }.merge(args)
-      headers = { authorization: "Bearer #{@importer.token}", accept: :json }
+      headers = { authorization: "Bearer #{@import.token}", accept: :json }
 
-      Inat::APIRequest.new(@importer.token).
+      Inat::APIRequest.new(@import.token).
         request(path: "observations?#{query_args.to_query}", headers: headers)
     rescue ::RestClient::ExceptionWithResponse => e
-      @importer.add_response_error(e.response)
+      @import.add_response_error(e.response)
       e.response
     end
   end
