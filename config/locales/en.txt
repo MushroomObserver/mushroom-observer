@@ -3099,7 +3099,7 @@
   inat_not_imported: Not Imported
 
   inat_details_heading: Details/Caveats
-  inat_details_list: "* MO imports only fungal observations.\n* MO lists most iNat data and/or maps it to analogous MO fields.\n* MO hides coordinates from the public if iNat obscured them.\n* The MO Location is a rectangle with an MO-style name, rather than the iNat Place name."
+  inat_details_list: "* Excludes Observations previously imported from/exported to iNat.\n* MO imports only fungal observations.\n* MO lists most iNat data and/or maps it to analogous MO fields.\n* MO hides coordinates from the public if iNat obscured them.\n* The MO Location is a rectangle with an MO-style name, rather than the iNat Place name."
 
   # /inat_import_job_tracker
   INAT_IMPORTS: iNat Imports
