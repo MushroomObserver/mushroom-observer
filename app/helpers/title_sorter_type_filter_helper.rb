@@ -94,8 +94,6 @@ module TitleSorterTypeFilterHelper
     model.underscore.pluralize
   end
 
-  # The "dropdown-current" Stimulus controller updates the dropdown title
-  # with the currently selected option on load
   def sort_nav_dropdown(title: "", id: "", links: [])
     tag.div(class: "dropdown d-inline-block") do
       [
