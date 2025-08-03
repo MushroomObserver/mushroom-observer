@@ -134,18 +134,39 @@ module TitleContextNavHelper
     end
   end
 
-  # Descriptions don't get an index link
-  def nav_index_link(rubric, controller)
-    unless controller.methods.include?(:index) &&
-           NAV_INDEXABLES.include?(controller.controller_name)
-      return rubric
+  # The idea here is to give a link to an unfiltered index, if relevant.
+  # In the case of nested controllers, the parent controller's index.
+  def nav_title(query)
+    if !query ||
+       (action_name == "index" && query.params.except(:order_by).blank?)
+      rubric
+    else
+      nav_index_link(rubric)
     end
+  end
+
+  def nav_index_link(rubric)
+    return rubric unless (path = nav_linkable_controller_path)
 
     link_to(
       rubric,
-      { controller: "/#{controller.controller_path}",
+      { controller: "/#{path}",
         action: :index, q: get_query_param }
     )
+  end
+
+  # Check for a linkable (parent?) controller and return the path
+  def nav_linkable_controller_path
+    ctrlr = if (parent = parent_controller_module) &&
+               Object.const_defined?(klass = "::#{parent}Controller")
+              klass.constantize.new
+            else
+              controller
+            end
+    return false unless ctrlr.methods.include?(:index) &&
+                        NAV_INDEXABLES.include?(ctrlr.controller_name)
+
+    ctrlr.controller_path
   end
 
   NAV_INDEXABLES = %w[

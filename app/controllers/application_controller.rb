@@ -350,7 +350,6 @@ class ApplicationController < ActionController::Base
   # "Observations" or "Account". But in a nested controller like
   # "Locations::Descriptions::DefaultsController" though, what we want is just
   # the "Locations" part, so we need to parse the class.module_parent.
-  #   gotcha - `Object` is the module_parent of a top-level controller!
   #
   # NOTE: The rubric can of course be overridden in each controller.
   #
@@ -358,19 +357,28 @@ class ApplicationController < ActionController::Base
   #
   def rubric
     # Levels of nesting. parent_module is one level.
-    if (parent_module = self.class.module_parent).present? &&
-       parent_module != Object
-
-      if (grandma_module = parent_module.to_s.rpartition("::").first).present?
-        return grandma_module.underscore.upcase.to_sym.t
-      end
-
-      return parent_module.to_s.underscore.upcase.to_sym.t
+    if (parent = parent_controller_module)
+      return parent.underscore.upcase.to_sym.t
     end
 
     controller_name.upcase.to_sym.t
   end
   helper_method :rubric
+
+  # Returns the CamelCase parent module name, e.g. "Locations" for
+  # "Locations::MapsController"
+  # gotcha - `Object` is the module_parent of a top-level controller!
+  def parent_controller_module
+    return unless (parent_module = self.class.module_parent).present? &&
+                  parent_module != Object
+
+    if (grandma_module = parent_module.to_s.rpartition("::").first).present?
+      return grandma_module
+    end
+
+    parent_module.to_s
+  end
+  helper_method :parent_controller_module
 
   def calc_layout_params
     count = @user&.layout_count || MO.default_layout_count

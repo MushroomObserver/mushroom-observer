@@ -12,11 +12,6 @@ right_classes = class_names(%w[
   d-flex flex-row align-items-center justify-content-end navbar_right
 ])
 identify_page = controller.controller_name == "identify"
-nav_title = if action_name == "index"
-              rubric
-            else
-              nav_index_link(rubric, controller)
-            end
 %>
 
 <%= tag.nav(class: "navbar navbar-default hidden-print mb-2",
@@ -29,7 +24,7 @@ nav_title = if action_name == "index"
       <%= left_nav_toggle %>
       <%= tag.h4(class: "font-weight-bold mr-4 mr-lg-5") do
         [
-          nav_title,
+          nav_title(@query),
           nav_create(@user, controller),
           nav_scan_qr_code(@user, controller)
         ].safe_join(" ")
