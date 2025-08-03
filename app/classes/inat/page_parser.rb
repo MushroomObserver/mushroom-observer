@@ -55,7 +55,7 @@ class Inat
         id: nil, id_above: nil, only_id: false, per_page: 200,
         order: "asc", order_by: "id",
         # obss of only the iNat user with iNat login @inat_import.inat_username
-        # This prevents accidentally importing observations of multiple
+        # Prevents accidentally importing observations of multiple users
         user_login: @import.inat_username,
         # only fungi and slime molds
         iconic_taxa: ICONIC_TAXA,
