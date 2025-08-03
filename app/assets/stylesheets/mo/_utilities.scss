@@ -355,12 +355,6 @@
   margin-right: 3rem !important;
 }
 
-.mr-lg-5 {
-  @media screen and (min-width: 992px) {
-    margin-right: 3rem !important;
-  }
-}
-
 .ml-0 {
   margin-left: 0 !important;
 }
@@ -746,7 +740,7 @@
 // larger devices
 // --------------------------------------------------
 
-@media screen and (min-width: 767px) {
+@media screen and (min-width: $screen-sm-min) {
   .d-sm-none {
     display: none !important;
   }
@@ -813,5 +807,11 @@
 
   .table {
     overflow-x: scroll;
+  }
+}
+
+@media screen and (min-width: $screen-lg-min) {
+  .mr-lg-5 {
+    margin-right: 3rem !important;
   }
 }

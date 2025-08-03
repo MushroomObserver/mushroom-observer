@@ -135,7 +135,7 @@
 .image-form-carousel {
   // padding-bottom: 100%;
 
-  // @media screen and (min-width: 768px) {
+  // @media screen and (min-width: $screen-sm-min) {
   //   padding-bottom: 50%;
   // }
 
@@ -158,7 +158,7 @@
     padding-bottom: 100%;
     border-bottom: 1px solid $panel-inner-border;
 
-    @media screen and (min-width: 992px) {
+    @media screen and (min-width: $screen-md-min) {
       // padding-bottom: 50%;
       border-bottom: none;
       border-right: 1px solid $panel-inner-border;
@@ -168,7 +168,7 @@
   .form-panel {
     padding: 1rem 1.5rem;
 
-    @media screen and (min-width: 992px) {
+    @media screen and (min-width: $screen-md-min) {
       padding-top: 4.5rem;
       padding-right: 1.5rem;
     }
@@ -183,7 +183,7 @@
     width: 100%;
     padding-bottom: calc(50% - 12rem);
 
-    @media screen and (min-width: 992px) {
+    @media screen and (min-width: $screen-md-min) {
       width: 50%;
       bottom: 6rem;
     }

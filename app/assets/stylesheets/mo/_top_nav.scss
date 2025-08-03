@@ -95,7 +95,7 @@
   }
 }
 
-@media screen and (max-width: 767px) {
+@media screen and (max-width: $screen-xs-max) {
   #top_nav {
     h4 {
       font-size: 14px;
