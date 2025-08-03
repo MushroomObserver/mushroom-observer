@@ -128,7 +128,9 @@ module TitleSorterTypeFilterHelper
   end
 
   def sort_nav_order_by(query, sorts)
-    current_sort = query&.params&.dig(:order_by)
+    return unless query
+
+    current_sort = query&.params&.dig(:order_by) || query.default_order.to_s
     if current_sort.start_with?("reverse_")
       current_sort = current_sort.gsub("reverse_", "")
     end
