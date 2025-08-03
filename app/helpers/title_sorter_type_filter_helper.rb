@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 #  add_type_filters             # add content_for(:type_filters)
-#  index_sorter                 # helper to render the sorter partial
+#  add_sorter                   # helper to render the sorter partial
 #
-module TitleSorterFilterHelper
+module TitleSorterTypeFilterHelper
   # Conditionally adds a group of sorting links, for indexes, if relevant
   # These link back to the same index action, changing only the `by` param.
   # Called in the view, defines `:sorter` content which is rendered in layout.
