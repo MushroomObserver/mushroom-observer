@@ -102,9 +102,9 @@ module PaginationNavHelper
     tag.nav(class: "pagination_numbers navbar-flex pl-4") do
       [
         prev_page_link(prev_page, arg, args),
-        tag.div(:PAGE.l, class: "navbar-text mx-0"),
+        tag.div(:PAGE.l, class: "navbar-text mx-0 hidden-xs"),
         page_input(this_page, max_page),
-        tag.div(:of.l, class: "navbar-text ml-0 mr-2"),
+        tag.div(:of.l, class: "navbar-text ml-0 mr-2 hidden-xs"),
         tag.div(link_to(max_page, max_url), class: "navbar-text mx-0"),
         next_page_link(next_page, max_page, arg, args)
       ].safe_join
