@@ -520,7 +520,6 @@ class InatImportJobTest < ActiveJob::TestCase
     @user = users(:dick)
     assert(InatImport.super_importers.include?(@user),
            "Test needs User fixture that's SuperImporter")
-    old_inat_username = @user.inat_username
 
     create_ivars_from_filename("calostoma_lutescens")
     stub_inat_interactions
