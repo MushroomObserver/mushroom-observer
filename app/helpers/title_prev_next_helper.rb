@@ -23,7 +23,7 @@ module TitlePrevNextHelper
   # link to previous object in query results
   def show_link_prev(object)
     classes = class_names(
-      %w[navbar-link navbar-left btn px-0 prev_object_link]
+      %w[navbar-link navbar-left btn btn-lg px-0 prev_object_link]
     )
     path = if object.type_tag == :rss_log
              send(:activity_log_path, object.id, flow: "prev")
@@ -39,7 +39,7 @@ module TitlePrevNextHelper
 
   def show_link_index(object)
     classes = class_names(
-      %w[navbar-link navbar-left btn px-0 mx-2 index_object_link]
+      %w[navbar-link navbar-left btn btn-lg px-0 mx-1 index_object_link]
     )
     iicon = case object.type_tag
             when :observation
@@ -57,7 +57,7 @@ module TitlePrevNextHelper
   # link to next object in query results
   def show_link_next(object)
     classes = class_names(
-      %w[navbar-link navbar-left btn px-0 next_object_link]
+      %w[navbar-link navbar-left btn btn-lg px-0 next_object_link]
     )
     path = if object.type_tag == :rss_log
              send(:activity_log_path, object.id, flow: "next")

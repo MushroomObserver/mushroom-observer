@@ -136,7 +136,7 @@ module PaginationNavHelper
     # return "" if prev_page < 1
 
     classes = class_names(
-      %w[navbar-link btn px-0 mr-2 previous_page_link], disabled
+      %w[navbar-link btn btn-lg px-0 previous_page_link], disabled
     )
 
     url = pagination_link_url(prev_page, arg, args)
@@ -151,7 +151,7 @@ module PaginationNavHelper
     # return "" if next_page > max
 
     classes = class_names(
-      %w[navbar-link btn px-0 ml-2 next_page_link], disabled
+      %w[navbar-link btn btn-lg px-0 next_page_link], disabled
     )
 
     url = pagination_link_url(next_page, arg, args)
