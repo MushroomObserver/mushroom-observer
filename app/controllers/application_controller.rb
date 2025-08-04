@@ -391,7 +391,8 @@ class ApplicationController < ActionController::Base
   # having the project param stored inside the query record, q.
   def set_project_ivar
     # NOTE: Query param projects is always an array of ids.
-    query_projects = QueryRecord.check_param(:projects, params[:q])
+    query_projects = QueryRecord.check_param(:projects, params[:q]) || []
+    # If more than one project, it's none. Only want single-project associations
     query_project = query_projects.size > 1 ? nil : query_projects.first
     project_id = params[:project] || query_project
     # At this point, we still might not have one. That's fine - just return nil.
