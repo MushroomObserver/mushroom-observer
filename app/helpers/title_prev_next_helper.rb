@@ -26,13 +26,13 @@ module TitlePrevNextHelper
       %w[navbar-link navbar-left btn btn-lg px-0 prev_object_link]
     )
     path = if object.type_tag == :rss_log
-             send(:activity_log_path, object.id, flow: "prev")
+             :activity_log_path
            else
-             send(:"#{object.type_tag}_path", object.id, flow: "prev")
+             :"#{object.type_tag}_path"
            end
 
     icon_link_to(
-      :PREV.t, add_query_param(path),
+      :PREV.t, add_query_param(send(path, object.id, flow: "prev")),
       class: classes, icon: :previous, show_text: false
     )
   end
@@ -60,13 +60,13 @@ module TitlePrevNextHelper
       %w[navbar-link navbar-left btn btn-lg px-0 next_object_link]
     )
     path = if object.type_tag == :rss_log
-             send(:activity_log_path, object.id, flow: "next")
+             :activity_log_path
            else
-             send(:"#{object.type_tag}_path", object.id, flow: "next")
+             :"#{object.type_tag}_path"
            end
 
     icon_link_to(
-      :NEXT.t, add_query_param(path),
+      :NEXT.t, add_query_param(send(path, object.id, flow: "next")),
       class: classes, icon: :next, show_text: false
     )
   end
