@@ -387,6 +387,17 @@ class ApplicationController < ActionController::Base
   end
   helper_method :calc_layout_params
 
+  # NOTE: SpeciesList show pages cannot nav prev/next within a project without
+  # having the project param stored inside the query record, q.
+  def set_project_ivar
+    # NOTE: Query param projects is always an array of ids.
+    query_projects = QueryRecord.check_param(:projects, params[:q])
+    query_project = query_projects.size > 1 ? nil : query_projects.first
+    project_id = params[:project] || query_project
+    # At this point, we still might not have one. That's fine - just return nil.
+    @project = Project.safe_find(project_id)
+  end
+
   def permission?(obj, error_message)
     result = (in_admin_mode? || obj.can_edit?(@user)) # rubocop:disable Style/RedundantParentheses
     flash_error(error_message) unless result

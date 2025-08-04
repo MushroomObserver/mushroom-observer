@@ -100,7 +100,7 @@ class SpeciesListsController < ApplicationController
     pass_query_params
     return unless (@species_list = find_species_list!)
 
-    @project = Project.safe_find(params[:project])
+    set_project_ivar
     case params[:flow]
     when "next"
       redirect_to_next_object(:next, SpeciesList, params[:id]) and return
