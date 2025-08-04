@@ -18,11 +18,11 @@ module Header
     end
 
     def left_nav_toggle
-      tag.div(class: "visible-xs pr-3 pr-sm-4") do
+      tag.div(class: "visible-xs visible-sm pr-3 pr-sm-4") do
         tag.button(
           # link_icon(:menu, title: :MENU.l),
           image_tag("mo_icon_bg.svg",
-                    width: "39px", alt: :MENU.t, title: :MENU.t),
+                    width: "30px", alt: :MENU.t, title: :MENU.t),
           class: "btn btn-outline-default rounded-circle overflow-hidden p-0",
           type: :button, id: "left_nav_toggle",
           data: { toggle: "offcanvas", nav_target: "toggle",
