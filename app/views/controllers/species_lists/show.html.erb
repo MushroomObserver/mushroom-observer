@@ -1,7 +1,11 @@
 <%
 add_project_banner(@project) if @project
-show_title = @species_list.unique_format_name
-add_page_title(show_title, ["#{:SPECIES_LIST.l}:", show_title].safe_join(" "))
+page_title = "#{:SPECIES_LIST.l}: #{@species_list.unique_format_name}"
+show_title = [
+  @species_list.title,
+  tag.span(@species_list.id, class: "badge badge-outline ml-3")
+].safe_join(" ")
+add_page_title(show_title, page_title)
 add_interest_icons(@user, @species_list)
 add_edit_icons(@species_list)
 add_context_nav(species_list_show_tabs(list: @species_list, query: @query))
@@ -14,9 +18,6 @@ column_classes(:nine_three)
 
 <%= tag.div(class: "row") do %>
   <%= tag.div(class: yield(:left_columns)) do %>
-
-    <%# this needs to be a regular page_title, but below the project tabs %>
-    <%# species_list_title_panel(@species_list) if @project %>
 
     <%= render(partial: "shared/list_search",
                locals: { object: @species_list }) %>
