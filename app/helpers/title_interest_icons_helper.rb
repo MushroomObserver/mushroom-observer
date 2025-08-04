@@ -19,13 +19,15 @@ module TitleInterestIconsHelper
   def add_interest_icons(user, object)
     return unless user
 
-    img1, img2, img3 = img_link_array(user, object)
+    img1, img2, img3 = interest_links(user, object)
 
     content_for(:interest_icons) do
-      [
-        tag.li { img1 },
-        tag.li { img2 + img3 }
-      ].safe_join
+      tag.ul(class: "nav navbar-flex interest-eyes h4 my-0") do
+        [
+          tag.li { img1 },
+          tag.li { img2 + img3 }
+        ].safe_join
+      end
     end
   end
 
@@ -41,19 +43,19 @@ module TitleInterestIconsHelper
   end
 
   # Array of image links which user can click to control getting email re object
-  def img_link_array(user, object)
+  def interest_links(user, object)
     type = object.type_tag
     case user.interest_in(object)
     when :watching
-      img_links_when_watching(object, type)
+      interest_links_when_watching(object, type)
     when :ignoring
-      img_links_when_ignoring(object, type)
+      interest_links_when_ignoring(object, type)
     else
-      img_links_default(object, type)
+      interest_links_default(object, type)
     end
   end
 
-  def img_links_when_watching(object, type)
+  def interest_links_when_watching(object, type)
     alt1 = :interest_watching.l(object: type.l)
     alt2 = :interest_default_help.l(object: type.l)
     alt3 = :interest_ignore_help.l(object: type.l)
@@ -65,7 +67,7 @@ module TitleInterestIconsHelper
     [img1, img2, img3]
   end
 
-  def img_links_when_ignoring(object, type)
+  def interest_links_when_ignoring(object, type)
     alt1 = :interest_ignoring.l(object: type.l)
     alt2 = :interest_watch_help.l(object: type.l)
     alt3 = :interest_default_help.l(object: type.l)
@@ -77,7 +79,7 @@ module TitleInterestIconsHelper
     [img1, img2, img3]
   end
 
-  def img_links_default(object, type)
+  def interest_links_default(object, type)
     alt1 = :interest_watch_help.l(object: type.l)
     alt2 = :interest_ignore_help.l(object: type.l)
     img1 = interest_icon_small("watch", alt1)
