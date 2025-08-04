@@ -1,5 +1,6 @@
 <%
-filters = content_for?(:filters) || content_for?(:filter_help)
+filters = (content_for?(:filters) || content_for?(:filter_help)) &&
+          !content_for?(:banner_image)
 pagination = content_for?(:numbers) || content_for?(:letters)
 %>
 
