@@ -1,11 +1,13 @@
 <%
 has_banner = content_for?(:banner_image)
-needs_page_title = !(has_banner && controller.controller_name == "projects")
+is_projects = controller.controller_name == "projects"
+needs_page_title = !(has_banner && is_projects)
 add_interest_icons = (content_for?(:interest_icons))
 title_cols = "col-sm-8 col-lg-7"
 project_subtitle = content_for?(:project_location) ||
                    content_for?(:project_date_range)
 title_class = has_banner ? "h3" : "h4"
+title = is_projects ? "" : yield(:title)
 %>
 
 <%= tag.div(class: "row") do %>
@@ -16,7 +18,7 @@ title_class = has_banner ? "h3" : "h4"
         class: "show_title_nav d-flex justify-content-between pl-3"
       ) do
         [
-          tag.h1(yield(:title), class: title_class, id: "title"),
+          tag.h1(title, class: title_class, id: "title"),
           tag.ul(class: "nav navbar-nav object_edit h4") do
             concat(yield(:edit_icons))
           end
@@ -36,7 +38,7 @@ title_class = has_banner ? "h3" : "h4"
 
   <%# Show pages (except projects): %>
   <%# Interest and edit icons, prev/index/next links %>
-  <% if action_name == "show" && !has_banner %>
+  <% if action_name == "show" # && !has_banner %>
     <%= tag.div(
       class: class_names(yield(:right_columns), "hidden-print text-right")
     ) do
