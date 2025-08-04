@@ -18,8 +18,7 @@ title_cols = content_for?(:interest_icons) ? title_cols : ""
 title_cols = class_names("col-xs-12", title_cols)
 index_bar =
   (action_name == "index" && controller.controller_name != "articles") ||
-  controller.controller_name == "maps" ||
-  content_for?(:numbers) || content_for?(:letters)
+  controller.controller_name == "maps"
 %>
 
 <%= tag.header(id: "header") do %>

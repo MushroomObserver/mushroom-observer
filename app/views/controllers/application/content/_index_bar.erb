@@ -1,7 +1,6 @@
 <%
 filters = content_for?(:filters) || content_for?(:filter_help)
-
-pagination = content_for?(:numbers) || content_for?(:letters)
+pagination = content_for?(:index_pagination)
 %>
 
 <% if filters || pagination %>
@@ -17,8 +16,7 @@ pagination = content_for?(:numbers) || content_for?(:letters)
         end %>
         <% if pagination %>
           <%= tag.div(class: "pagination-top navbar-flex") do
-            concat(yield(:numbers))
-            concat(yield(:letters))
+            yield(:index_pagination)
           end %>
         <% end %>
       <% end %>

@@ -5,22 +5,25 @@ title_cols = "col-sm-8 col-lg-7"
 project_subtitle = content_for?(:project_location) ||
                    content_for?(:project_date_range)
 title_class = has_banner ? "h3" : "h4"
-title = yield(:title) unless has_banner
+is_projects = controller.controller_name == "projects" &&
+              %w[index, show].include?(action_name)
+# needs_title = !(has_banner && is_projects) || !is_projects
+title = is_projects ? "" : yield(:title)
 %>
 
 <%= tag.div(class: "row") do %>
   <%# Page title. Indexes have none — `rubric` in top_nav has model name. %>
-  <% if action_name != "index" && !has_banner %>
+  <% if action_name != "index" %>
     <%= tag.div(class: yield(:left_columns), id: "title_bar") do %>
       <%= tag.nav(
         class: "show_title_nav d-flex justify-content-between pl-3"
       ) do
-        [
-          tag.h1(title, class: title_class, id: "title"),
+        concat(tag.h1(title, class: title_class, id: "title"))
+        concat(
           tag.ul(class: "nav navbar-nav object_edit h4") do
             concat(yield(:edit_icons))
           end
-        ].safe_join
+        )
       end %>
       <% if !has_banner && project_subtitle %>
         <%= tag.div(class: "pl-3 mb-3") do
