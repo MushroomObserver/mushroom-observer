@@ -16,7 +16,7 @@ pagination = content_for?(:numbers) || content_for?(:letters)
           end
         end %>
         <% if pagination %>
-          <%= tag.div(class: "pagination-top navbar navbar-flex") do
+          <%= tag.div(class: "pagination-top navbar-flex") do
             concat(yield(:numbers))
             concat(yield(:letters))
           end %>
