@@ -25,6 +25,7 @@ class SpeciesListsController < ApplicationController
   # INDEX
   #
   def index
+    set_project_ivar
     build_index_with_query
   end
 
