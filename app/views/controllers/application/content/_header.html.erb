@@ -18,7 +18,8 @@ title_cols = content_for?(:interest_icons) ? title_cols : ""
 title_cols = class_names("col-xs-12", title_cols)
 index_bar =
   (action_name == "index" && controller.controller_name != "articles") ||
-  controller.controller_name == "maps"
+  controller.controller_name == "maps" ||
+  content_for?(:numbers) || content_for?(:letters)
 %>
 
 <%= tag.header(id: "header") do %>
@@ -35,12 +36,14 @@ index_bar =
     <% end %>
   <% end %>
 
-  <% if index_bar %>
-    <%# Index filters and pagination, full width. %>
-    <%= render(partial: "application/content/index_bar") %>
-  <% elsif action_name != "index" %>
+  <% if action_name != "index" %>
     <%# Page title, edit icons, interest icons and page nav. %>
     <%= render(partial: "application/content/page_title") %>
+  <% end %>
+
+  <% if index_bar %>
+    <%# Index filters and pagination, full width. Could be species list show %>
+    <%= render(partial: "application/content/index_bar") %>
   <% end %>
 
   <%= tag.div(class: "row") do %>
