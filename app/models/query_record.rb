@@ -41,4 +41,11 @@ class QueryRecord < ApplicationRecord
 
     @last_cleanup = Time.zone.now
   end
+
+  # Checks and returns the value of a param in the saved QueryRecord
+  def self.check_param(param, q_value)
+    qr = QueryRecord.find(q_value.dealphabetize)
+    qr_query = qr.query
+    qr_query.params[param]
+  end
 end
