@@ -1,6 +1,6 @@
 <%
-filters = (content_for?(:filters) || content_for?(:filter_help)) &&
-          !content_for?(:banner_image)
+filters = content_for?(:filters) || content_for?(:filter_help)
+
 pagination = content_for?(:numbers) || content_for?(:letters)
 %>
 
@@ -9,12 +9,12 @@ pagination = content_for?(:numbers) || content_for?(:letters)
     <%= tag.div(class: "col-xs-12", id: "index_bar") do %>
       <%# Indexes: Query filter subtitle and pagination %>
       <%= tag.div(class: "d-flex justify-content-between") do %>
-        <% if filters %>
-          <%= tag.div(class: "px-3 mb-3") do
-            concat(yield(:filters))
+        <%= tag.div(class: "px-3 mb-3") do
+          if filters
+            concat(yield(:filters)) if !content_for?(:banner_image)
             concat(yield(:filter_help))
-          end %>
-        <% end %>
+          end
+        end %>
         <% if pagination %>
           <%= tag.div(class: "pagination-top navbar navbar-flex") do
             concat(yield(:numbers))
