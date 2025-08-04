@@ -1,6 +1,4 @@
 <%
-container_class(:double)
-column_classes(:nine_three)
 add_project_banner(@project) if @project
 show_title = @species_list.unique_format_name
 add_page_title(show_title, ["#{:SPECIES_LIST.l}:", show_title].safe_join(" "))
@@ -9,6 +7,8 @@ add_edit_icons(@species_list)
 add_context_nav(species_list_show_tabs(list: @species_list, query: @query))
 add_pager_for(@species_list)
 query_params_set(@query) if @pagination_data.any?
+container_class(:double)
+column_classes(:nine_three)
 %>
 
 <%= tag.div(class: "row") do %>
