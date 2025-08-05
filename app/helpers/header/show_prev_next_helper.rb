@@ -75,9 +75,10 @@ module Header
     def show_link_index(object)
       classes = class_names(SHOW_LINK_BTN_CLASSES, %w[mx-1 index_object_link])
       icon = show_link_index_icon(object)
+      type = object.type_tag.to_s.pluralize
 
       icon_link_to(
-        :INDEX_OBJECT.t(type: :"#{object.type_tag.to_s.pluralize.upcase}".l),
+        :INDEX_OBJECT.t(type: :"#{type.upcase}".l),
         add_query_param(object.index_link_args),
         class: classes, icon: icon, show_text: false
       )
