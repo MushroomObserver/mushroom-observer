@@ -1,6 +1,6 @@
 <%
-title = @location.display_name
-add_page_title(title, ["#{:LOCATION.l}:", title].safe_join(" "))
+add_page_title(location_show_title(@location),
+               ["#{:LOCATION.l}:", @location.display_name].safe_join(" "))
 add_context_nav(location_show_tabs)
 if @user
   add_pager_for(@location)

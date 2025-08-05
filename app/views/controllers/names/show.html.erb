@@ -1,7 +1,7 @@
 <%
 Textile.user_register_name(@user, @name)
 add_page_title(
-  @name.user_display_name(@user).t,
+  name_show_title(@user, @name),
   ["#{:NAME.l}:", @name.text_name].safe_join(" ")
 )
 add_context_nav(name_show_tabs(name: @name))

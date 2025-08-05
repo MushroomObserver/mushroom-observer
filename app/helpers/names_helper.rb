@@ -2,6 +2,13 @@
 
 # helpers for ShowName view and ShowNameInfo section of ShowObservation
 module NamesHelper
+  def name_show_title(user, name)
+    [
+      name.user_display_name(user).t,
+      tag.span(name.id || "?", class: "badge badge-outline ml-3")
+    ].safe_join(" ")
+  end
+
   ######## links to queries of observations of name... or related taxa.
   # Counting these slows down the names#show page a LOT if done separately.
   # Counts now derived from `obss`, an instantiation of Name::Observations
