@@ -2759,7 +2759,6 @@
 
   # collection_number/edit_collection_number
   edit_collection_number: Edit Collection Number
-  edit_collection_number_title: Edit Collection Number [name]
   edit_collection_number_back_to_index: Back to Collection Number Index
   edit_collection_number_cant_add_or_remove: Only the observer can add or remove a collection number to or from an observation.
   edit_collection_number_already_used: This collection number is shared with another observation. If you need to fix it, remove it from your observation, then add the correct one.

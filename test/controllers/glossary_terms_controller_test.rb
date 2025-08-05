@@ -166,7 +166,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     post(:edit, params: { id: term.id })
 
     assert_response(:success)
-    assert_head_title("Editing Glossary Term #{term.id}: #{term.name}")
+    assert_head_title("Edit Glossary Term #{term.id}: #{term.name}")
 
     assert_select(
       "form [name='glossary_term[name]']", { count: 1 },

@@ -47,11 +47,11 @@ module Header
     end
 
     def edit_page_title(string, object)
-      ["#{:EDITING.l}:", show_page_title(string, object)].safe_join(" ")
+      ["#{:EDIT.l}:", show_page_title(string, object)].safe_join(" ")
     end
 
     def edit_document_title(string, object)
-      [:EDITING.l, show_document_title(string, object)].safe_join(" ")
+      [:EDIT.l, show_document_title(string, object)].safe_join(" ")
     end
 
     # sets both the html doc title and
