@@ -440,9 +440,9 @@ class NamesControllerTest < FunctionalTestCase
     assert_not_nil(name_links.first.to_s.index(url))
 
     # assert_select("a", text: "2", count: 0)
-    assert_link_in_html("Prev", controller: "/names",
-                                action: :test_index, num_per_page: 10,
-                                params: query_params, page: 1)
+    assert_link_in_html("Previous", controller: "/names",
+                                    action: :test_index, num_per_page: 10,
+                                    params: query_params, page: 1)
     # assert_select("a", text: "Z", count: 0)
     # assert_link_in_html("A", controller: "/names",
     #                          action: :test_index, num_per_page: 10,
@@ -513,10 +513,10 @@ class NamesControllerTest < FunctionalTestCase
     assert_equal(1, name_links.length)
     assert_equal([last_name.id], ids_from_links(name_links))
     # assert_select("a", text: "2", count: 0)
-    assert_link_in_html("Prev", controller: "/names",
-                                action: :test_index, params: query_params,
-                                num_per_page: l_names.size,
-                                letter: "L", page: 1)
+    assert_link_in_html("Previous", controller: "/names",
+                                    action: :test_index, params: query_params,
+                                    num_per_page: l_names.size,
+                                    letter: "L", page: 1)
     # assert_select("a", text: "3", count: 0)
   end
 

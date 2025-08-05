@@ -113,8 +113,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
       { text: obs.format_name.t.strip_html },
       "Index should open at the page that includes #{obs.format_name}"
     )
-    assert_select(".pagination_numbers a", { text: "Prev" },
-                  "Wrong page or display is missing a link to Prev page")
+    assert_select(".pagination_numbers a", { text: "Previous" },
+                  "Wrong page or display is missing a link to Previous page")
   end
 
   # Created in response to a bug seen in the wild
@@ -136,8 +136,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: params)
 
     assert_page_title(:OBSERVATIONS.l)
-    assert_select(".pagination_numbers a", { text: "Prev" },
-                  "Wrong page or display is missing a link to Prev page")
+    assert_select(".pagination_numbers a", { text: "Previous" },
+                  "Wrong page or display is missing a link to Previous page")
   end
 
   # In response to a bug seen in the wild where this request
@@ -326,8 +326,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_displayed_filters("#{:query_names.l}: #{pattern}")
 
     assert_not_empty(css_select('[id="context_nav"]').text, "Tabset is empty")
-    assert_select(".pagination_numbers a", { text: "Prev" },
-                  "Wrong page or display is missing a link to Prev page")
+    assert_select(".pagination_numbers a", { text: "Previous" },
+                  "Wrong page or display is missing a link to Previous page")
   end
 
   def test_index_pattern_no_hits
@@ -553,8 +553,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     login
     get(:index, params: { where: location.name, page: 2 })
-    assert_select(".pagination_numbers a", { text: "Prev" },
-                  "Wrong page or display is missing a link to Prev page")
+    assert_select(".pagination_numbers a", { text: "Previous" },
+                  "Wrong page or display is missing a link to Previous page")
     assert_page_title(:OBSERVATIONS.l)
     assert_displayed_filters(
       "#{:query_search_where.l}: #{location.display_name}"

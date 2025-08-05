@@ -30,7 +30,7 @@ module Header
 
     # link to previous object in query results
     def show_link_prev(object, query)
-      disabled = query.result_ids.first == object.id ? "disabled opacity-0" : ""
+      disabled = show_prev_is_first?(object, query) ? "disabled opacity-0" : ""
       classes = class_names(SHOW_LINK_BTN_CLASSES, "prev_object_link", disabled)
       type = object.type_tag
 
@@ -41,9 +41,15 @@ module Header
       )
     end
 
+    def show_prev_is_first?(object, query)
+      return false unless query
+
+      query.result_ids.first == object.id
+    end
+
     # link to next object in query results
     def show_link_next(object, query)
-      disabled = query.result_ids.last == object.id ? "disabled opacity-0" : ""
+      disabled = show_next_is_last?(object, query) ? "disabled opacity-0" : ""
       classes = class_names(SHOW_LINK_BTN_CLASSES, "next_object_link", disabled)
       type = object.type_tag
 
@@ -52,6 +58,12 @@ module Header
         add_query_param(send(show_link_path(type), object.id, flow: "next")),
         class: classes, icon: :next, show_text: false
       )
+    end
+
+    def show_next_is_last?(object, query)
+      return false unless query
+
+      query.result_ids.last == object.id
     end
 
     def show_link_path(type)
