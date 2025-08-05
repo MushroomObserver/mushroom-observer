@@ -77,7 +77,7 @@ class ProjectsControllerTest < FunctionalTestCase
     )
     assert_select("form[action=?]", add_dispatch_path, count: 1)
     assert_select("h1#title", /\S/,
-                  "H1 title element should exist but be empty")
+                  "H1 title element should exist and contain content")
     assert_select("div#project_banner", true,
                   "Project banner div should be present")
   end

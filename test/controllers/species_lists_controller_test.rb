@@ -305,6 +305,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     get(:show, params: { id: spl.id, project: project.id })
     assert_match(project.title, @response.body)
+    assert_select("h1#title", /#{spl.title}/,
+                  "H1 title element should exist and contain content")
   end
 
   def test_show_species_lists_attached_to_projects
