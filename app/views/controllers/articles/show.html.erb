@@ -1,7 +1,6 @@
 <%
 container_class(:wide)
-add_page_title(article_show_title(@article),
-               "#{:ARTICLE.l}: #{@article.display_title.t}")
+add_show_title(@article.display_title.t, @article)
 add_context_nav(article_show_tabs(article: @article, user: @user))
 %>
 

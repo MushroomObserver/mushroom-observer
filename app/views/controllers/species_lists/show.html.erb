@@ -3,7 +3,7 @@ add_project_banner(@project) if @project
 page_title = "#{:SPECIES_LIST.l}: #{@species_list.unique_format_name}"
 show_title = [
   @species_list.title,
-  tag.span(@species_list.id, class: "badge badge-outline ml-3")
+  tag.span(@species_list.id, class: "badge badge-id ml-3")
 ].safe_join(" ")
 add_page_title(show_title, page_title)
 add_interest_icons(@user, @species_list)

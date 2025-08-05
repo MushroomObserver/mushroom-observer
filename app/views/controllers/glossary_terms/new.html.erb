@@ -4,6 +4,6 @@ add_page_title(:create_glossary_term_title.t)
 add_context_nav(glossary_term_form_new_tabs)
 %>
 
-<%= render("form", button_name: :edit_glossary_term_save) do |f| %>
+<%= render("form", button_name: :SAVE.l) do |f| %>
   <%= render(partial: "shared/image_upload_fields") %>
 <% end %>

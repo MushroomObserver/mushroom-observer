@@ -6,7 +6,7 @@ module LocationsHelper
   def location_show_title(location)
     [
       location.display_name,
-      tag.span(location.id || "?", class: "badge badge-outline ml-3")
+      tag.span(location.id || "?", class: "badge badge-id ml-3")
     ].safe_join(" ")
   end
 

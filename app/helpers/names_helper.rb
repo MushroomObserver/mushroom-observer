@@ -5,7 +5,7 @@ module NamesHelper
   def name_show_title(user, name)
     [
       name.user_display_name(user).t,
-      tag.span(name.id || "?", class: "badge badge-outline ml-3")
+      tag.span(name.id || "?", class: "badge badge-id ml-3")
     ].safe_join(" ")
   end
 

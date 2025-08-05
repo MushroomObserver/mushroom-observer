@@ -14,6 +14,46 @@
 #
 module Header
   module TitleHelper
+    def add_show_title(string, object)
+      add_page_title(
+        show_page_title(string, object), show_document_title(string, object)
+      )
+    end
+
+    # The record title preceded by the id as a badge, as HTML
+    # "[23435] Amanita novinupta"
+    def show_page_title(string, object)
+      [show_title_id_badge(object), string].safe_join(" ")
+    end
+
+    def show_title_id_badge(object)
+      tag.span(object.id || "?", class: "badge badge-id mr-3")
+    end
+
+    # The record title as a string, preceded by the object type and id:
+    # "Observation 23435: Amanita novinupta"
+    def show_document_title(string, object)
+      [
+        :"#{object.type_tag.to_s.upcase}".l,
+        "#{object.id}:",
+        string
+      ].safe_join(" ")
+    end
+
+    def add_edit_title(string, object)
+      add_page_title(
+        edit_page_title(string, object), edit_document_title(string, object)
+      )
+    end
+
+    def edit_page_title(string, object)
+      ["#{:EDITING.l}:", show_page_title(string, object)].safe_join(" ")
+    end
+
+    def edit_document_title(string, object)
+      [:EDITING.l, show_document_title(string, object)].safe_join(" ")
+    end
+
     # sets both the html doc title and
     # the title for the page (previously @title)
     def add_page_title(title, document_title = title)

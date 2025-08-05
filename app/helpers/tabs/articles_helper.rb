@@ -64,21 +64,5 @@ module Tabs
     def articles_index_tab
       InternalLink::Model.new(:index_article.t, Article, articles_path).tab
     end
-
-    # "Title (#nnn)" textilized
-    def article_show_title(article)
-      capture do
-        concat(article.display_title.t)
-        concat(tag.span(article.id || "?", class: "badge badge-outline ml-3"))
-      end
-    end
-
-    # "Editing: Title (#nnn)"  textilized
-    def article_edit_title(article)
-      capture do
-        concat("#{:EDITING.l}: ")
-        concat(article_show_title(article))
-      end
-    end
   end
 end
