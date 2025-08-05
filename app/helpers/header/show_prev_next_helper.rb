@@ -11,66 +11,73 @@ module Header
     def add_pager_for(object)
       return unless object
 
+      # We need to get the query to figure out if we're at the first or last
+      qr_id = get_query_param
+      query = Query.find(qr_id.dealphabetize) if qr_id
+
       content_for(:prev_next_object) do
         tag.ul(class: "nav navbar-flex") do
           [
-            tag.li { show_link_prev(object) },
+            tag.li { show_link_prev(object, query) },
             tag.li { show_link_index(object) },
-            tag.li { show_link_next(object) }
+            tag.li { show_link_next(object, query) }
           ].safe_join
         end
       end
     end
 
+    SHOW_LINK_BTN_CLASSES = %w[navbar-link navbar-left btn btn-lg px-0].freeze
+
     # link to previous object in query results
-    def show_link_prev(object)
-      classes = class_names(
-        %w[navbar-link navbar-left btn btn-lg px-0 prev_object_link]
-      )
-      path = if object.type_tag == :rss_log
-               :activity_log_path
-             else
-               :"#{object.type_tag}_path"
-             end
+    def show_link_prev(object, query)
+      disabled = query.result_ids.first == object.id ? "disabled opacity-0" : ""
+      classes = class_names(SHOW_LINK_BTN_CLASSES, "prev_object_link", disabled)
+      type = object.type_tag
 
       icon_link_to(
-        :PREV.t, add_query_param(send(path, object.id, flow: "prev")),
+        :PREV_OBJECT.t(type: :"#{type.upcase}".l),
+        add_query_param(send(show_link_path(type), object.id, flow: "prev")),
         class: classes, icon: :previous, show_text: false
       )
     end
 
-    def show_link_index(object)
-      classes = class_names(
-        %w[navbar-link navbar-left btn btn-lg px-0 mx-1 index_object_link]
-      )
-      iicon = case object.type_tag
-              when :observation
-                :grid
-              else
-                :list
-              end
+    # link to next object in query results
+    def show_link_next(object, query)
+      disabled = query.result_ids.last == object.id ? "disabled opacity-0" : ""
+      classes = class_names(SHOW_LINK_BTN_CLASSES, "next_object_link", disabled)
+      type = object.type_tag
 
       icon_link_to(
-        :INDEX.t, add_query_param(object.index_link_args),
-        class: classes, icon: iicon, show_text: false
+        :NEXT_OBJECT.t(type: :"#{type.upcase}".l),
+        add_query_param(send(show_link_path(type), object.id, flow: "next")),
+        class: classes, icon: :next, show_text: false
       )
     end
 
-    # link to next object in query results
-    def show_link_next(object)
-      classes = class_names(
-        %w[navbar-link navbar-left btn btn-lg px-0 next_object_link]
-      )
-      path = if object.type_tag == :rss_log
-               :activity_log_path
-             else
-               :"#{object.type_tag}_path"
-             end
+    def show_link_path(type)
+      return :activity_log_path if type == :rss_log
+
+      :"#{type}_path"
+    end
+
+    def show_link_index(object)
+      classes = class_names(SHOW_LINK_BTN_CLASSES, %w[mx-1 index_object_link])
+      icon = show_link_index_icon(object)
 
       icon_link_to(
-        :NEXT.t, add_query_param(send(path, object.id, flow: "next")),
-        class: classes, icon: :next, show_text: false
+        :INDEX_OBJECT.t(type: :"#{object.type_tag.to_s.pluralize.upcase}".l),
+        add_query_param(object.index_link_args),
+        class: classes, icon: icon, show_text: false
       )
+    end
+
+    def show_link_index_icon(object)
+      case object.type_tag
+      when :observation
+        :grid
+      else
+        :list
+      end
     end
   end
 end

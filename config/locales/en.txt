@@ -668,8 +668,8 @@
   less: less
   MORE: More
   more: more
-  PREV: Prev
-  prev: prev
+  PREV: Previous
+  prev: previous
   NEXT: Next
   next: next
   BACK: Back
@@ -747,13 +747,16 @@
   ENABLE: Enable
   enable: enable
   IMPORT: Import
+  INDEX_OBJECT: "[TYPE] [:INDEX]"
   # merge one object into another
   MERGE: Merge
   merge: merge
+  NEXT_OBJECT: "[:NEXT] [TYPE]"
   OKAY: Okay
   okay: okay
   OPEN: Open
   # reload a form
+  PREV_OBJECT: "[:PREV] [TYPE]"
   RELOAD: Reload
   reload: reload
   # remove an image from an observation, or an observation from a project
