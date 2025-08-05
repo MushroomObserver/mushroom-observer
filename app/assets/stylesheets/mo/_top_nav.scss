@@ -119,3 +119,15 @@
     min-width: 36px;
   }
 }
+
+// Very small - get rid of button borders in top nav
+@media screen and (max-width: $screen-xs-min) {
+  #top_nav {
+    .top_nav_button {
+      border-color: transparent;
+      background-color: transparent;
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+  }
+}

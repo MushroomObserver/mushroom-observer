@@ -60,7 +60,7 @@ module Header
       link_to(
         link_icon(:add, title: [:NEW.l, obj_name].safe_join(" ")),
         { controller: "/#{controller.controller_path}", action: :new },
-        class: "btn btn-sm btn-outline-default mx-2 mx-sm-3 top_nav_create"
+        class: "btn btn-sm btn-outline-default ml-1 mr-0 mx-sm-3 top_nav_button"
       )
     end
 
@@ -78,7 +78,7 @@ module Header
       link_to(
         link_icon(:qrcode, title: :app_qrcode.l),
         field_slips_qr_reader_new_path,
-        class: "btn btn-sm btn-outline-default mx-1 mx-sm-2 top_nav_create"
+        class: "btn btn-sm btn-outline-default mx-0 mx-sm-2 top_nav_button"
       )
     end
   end

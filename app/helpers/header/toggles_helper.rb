@@ -9,7 +9,7 @@ module Header
       tag.div(class: "navbar-form px-sm-3") do
         tag.button(
           link_icon(:search, title: :SEARCH.l),
-          class: "btn btn-sm btn-outline-default",
+          class: "btn btn-sm btn-outline-default top_nav_button",
           type: :button,
           data: { toggle: "collapse", target: "#search_nav" },
           aria: { expanded: "false", controls: "search_nav" }
