@@ -88,9 +88,10 @@ module Header
 
     # Make a hash of the kwargs that will be passed to link helper for HTML.
     # e.g. { data: { pileus: "awesome" }, id: "best_pileus", class: "hidden" }
-    # Removes non-HTML args used by link_to/button helpers and merges with passed
-    # extra_args, e.g. removes { name: "Click here to post", target: obs }
-    # Note that class_names need to be concatenated, or the merge will overwrite.
+    # Removes non-HTML args used by link_to/button helpers and merges with
+    # passed-in extra_args.
+    #   e.g. removes { name: "Click here to post", target: obs }
+    # Note that class_names need to be concatenated or the merge will overwrite.
     #
     def merge_context_nav_link_args(args, extra_args)
       kwargs = args&.except(:button, :target)
@@ -100,8 +101,6 @@ module Header
       kwargs&.merge(extra_args&.except(:class))
     end
 
-    # The "dropdown-current" Stimulus controller should update the dropdown title
-    # with the currently selected option on load, if show_current == true
     # For Bootstrap 3, this must be an <li> element for alignment
     def context_nav_dropdown(title: "", id: "", links: [])
       tag.li(class: "dropdown d-inline-block") do

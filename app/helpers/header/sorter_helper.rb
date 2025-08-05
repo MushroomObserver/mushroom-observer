@@ -47,7 +47,7 @@ module Header
       end
     end
 
-    # Add some info to the raw sorts: path, identifier, and if is current sort_by
+    # Add info to raw sorts: path, identifier, and whether is current sort_by
     def assemble_sort_links(query, sorts, link_all)
       this_by = (query.params[:order_by] || query.default_order).
                 to_s.sub(/^reverse_/, "")

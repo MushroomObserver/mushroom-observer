@@ -2,14 +2,11 @@
 
 #  add_interest_icons(user, object) # add content_for(:interest_icons)
 #
-# Draw the cutesy eye icons in the upper right side of screen.  It does it
-# by creating a "right" tab set.  Thus this must be called in the header of
-# the view and must not actually be rendered.  Typical usage would be:
+# Draw the cutesy eye icons in the upper right side of screen. Typical usage:
 #
 #   # At top of view:
 #   <%
-#     # Specify the page's title.
-#     @title = "Page Title"
+#     add_page_title("Page Title")
 #     add_interest_icons(@user, @object)
 #   %>
 #
@@ -43,7 +40,7 @@ module Header
       end
     end
 
-    # Array of image links which user can click to control getting email re object
+    # Array of image links which user can click to control getting emails
     def interest_links(user, object)
       type = object.type_tag
       case user.interest_in(object)
