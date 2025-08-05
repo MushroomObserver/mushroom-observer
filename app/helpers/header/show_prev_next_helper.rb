@@ -13,7 +13,7 @@ module Header
 
       # We need to get the query to figure out if we're at the first or last
       qr_id = get_query_param
-      query = Query.find(qr_id.dealphabetize) if qr_id
+      query = Query.safe_find(qr_id.dealphabetize) if qr_id
 
       content_for(:prev_next_object) do
         tag.ul(class: "nav navbar-flex") do
