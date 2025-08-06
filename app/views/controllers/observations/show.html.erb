@@ -4,7 +4,7 @@
 show_title = observation_show_title(
   obs: @observation, owner_naming: @owner_naming, user: @user
 )
-add_page_title(show_title, [:OBSERVATION.l, show_title].safe_join(" "))
+add_show_title(show_title, @observation)
 add_owner_naming(@owner_naming)
 if @user
   add_pager_for(@observation)

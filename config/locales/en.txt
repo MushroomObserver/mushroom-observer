@@ -726,6 +726,7 @@
   # close a popup window
   CLOSE: Close
   close: close
+  COPY_THIS_ID: Copy this ID
   COPIED: Copied
   CREATE: Create
   create: create

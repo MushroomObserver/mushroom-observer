@@ -101,5 +101,6 @@ ul.tight-list {
 
   small {
     @extend .ml-3;
+    color: $text-color;
   }
 }

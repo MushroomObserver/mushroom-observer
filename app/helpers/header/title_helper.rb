@@ -29,12 +29,11 @@ module Header
     end
 
     def show_title_id_badge(object)
-      title = "Copy this ID"
       tag.button(
         object.id || "?",
         class: "badge badge-id mr-4", role: "button",
         data: {
-          toggle: "tooltip", placement: "bottom", title: title,
+          toggle: "tooltip", placement: "bottom", title: :COPY_THIS_ID.l,
           controller: "clipboard", clipboard_target: "source",
           action: "clipboard#copy", clipboard_copied_value: :COPIED.l
         }
@@ -60,11 +59,15 @@ module Header
 
     # Needs to be separate. Called in modal forms
     def edit_page_title(string, object)
-      [
-        :edit_object.t(type: object.type_tag),
-        show_title_id_badge(object),
-        string.t
-      ].safe_join(" ")
+      tag.div(class: "d-flex align-items-center") do
+        [
+          show_title_id_badge(object),
+          tag.span do
+            [:edit_object.t(type: object.type_tag),
+             string.t.small_author].safe_join(": ")
+          end
+        ].safe_join(" ")
+      end
     end
 
     def edit_document_title(string, object)
