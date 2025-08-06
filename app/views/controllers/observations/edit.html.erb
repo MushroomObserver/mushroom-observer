@@ -1,6 +1,5 @@
 <%
-add_page_title(:edit_observation_title.t(name: @observation.user_unique_format_name(@user)))
-
+add_edit_title(@observation.user_format_name(@user), @observation)
 add_context_nav(observation_form_edit_tabs(obs: @observation))
 container_class(:wide)
 %>

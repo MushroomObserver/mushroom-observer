@@ -1540,7 +1540,6 @@
   filter_by: "Filter by:"
 
   # observations/create_observation
-  create_observation_title: "[:create_object(type=:observation)]"
   create_observation_inat_import_link: Import from iNat
 
   # observations/download_observations
@@ -1584,7 +1583,6 @@
   edit_naming_title: "Edit [:NAMING] for Observation #[id]"
 
   # observations/edit
-  edit_observation_title: "[:edit_object(type=:observation)]: [name]"
   edit_observation_turn_off_specimen_with_records_present: You just told us there is no longer a specimen available.  Don't forget to remove the corresponding collection numbers, fungarium records and/or sequences below, too, if you need to.
 
   # account/email_new_password

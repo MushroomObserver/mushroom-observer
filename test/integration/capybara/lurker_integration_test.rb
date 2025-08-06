@@ -257,6 +257,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
   def test_obs_at_location
     login
     nam = names(:fungi)
+    loc = locations(:burbank)
     # Start at distribution map for Fungi.
     visit("/names/#{nam.id}/map")
 
@@ -267,7 +268,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
 
     # Click on the defined location.
     click_link(text: /Burbank/)
-    assert_match("Location: Burbank, California, USA", page.title,
+    assert_match("Location #{loc.id}: Burbank, California, USA", page.title,
                  "Wrong title")
 
     # Get a list of observations from there.  (Several so goes to index.)

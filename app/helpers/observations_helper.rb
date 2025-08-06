@@ -18,15 +18,11 @@ module ObservationsHelper
   # Only used for the page <title> element. #title is composed from parts.
   def observation_show_title(obs:, owner_naming: nil, user: nil)
     [
-      obs_title_id(obs),
+      show_title_id_badge(obs),
       obs_title_consensus_name_link(
         name: obs.name, owner_naming: owner_naming, user:
       )
     ].safe_join(" ")
-  end
-
-  def obs_title_id(obs)
-    tag.span(obs.id || "?", class: "badge badge-id mr-3")
   end
 
   # name portion of Observation title

@@ -49,7 +49,11 @@ module Header
 
     # Needs to be separate. Called in modal forms
     def edit_page_title(string, object)
-      [:EDIT.l, show_page_title(string, object)].safe_join(" ")
+      [
+        :edit_object.t(type: object.type_tag),
+        show_title_id_badge(object),
+        string.t
+      ].safe_join(" ")
     end
 
     def edit_document_title(string, object)
