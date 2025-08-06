@@ -38,8 +38,7 @@ class Inat
 
     def update_inat_observation
       update_mushroom_observer_url_field
-      sleep(1)
-      update_description
+      sleep(1) # Avoid hitting iNat API rate limits
     end
 
     def update_mushroom_observer_url_field
@@ -58,25 +57,6 @@ class Inat
         request(method: :post,
                 path: "observation_field_values",
                 payload: payload)
-    end
-
-    def update_description
-      return if super_importer? && importing_someone_elses_obs?
-
-      description = @inat_obs[:description]
-      updated_description =
-        "#{IMPORTED_BY_MO} #{Time.zone.today.strftime(MO.web_date_format)}"
-      updated_description.prepend("#{description}\n\n") if description.present?
-
-      payload = { observation: { description: updated_description,
-                                 ignore_photos: 1 } }
-      path = "observations/#{@inat_obs[:id]}?ignore_photos=1"
-      Inat::APIRequest.new(@inat_import.token).
-        request(method: :put, path: path, payload: payload)
-    end
-
-    def importing_someone_elses_obs?
-      @inat_obs[:user][:login] != @inat_import.inat_username
     end
 
     def increment_imported_counts
