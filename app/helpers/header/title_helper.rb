@@ -27,7 +27,16 @@ module Header
     end
 
     def show_title_id_badge(object)
-      tag.span(object.id || "?", class: "badge badge-id mr-3")
+      title = "Copy this ID"
+      tag.button(
+        object.id || "?",
+        class: "badge badge-id mr-3", role: "button",
+        data: {
+          toggle: "tooltip", placement: "bottom", title: title,
+          controller: "clipboard", clipboard_target: "source",
+          action: "clipboard#copy", clipboard_copied_value: :COPIED.l
+        }
+      )
     end
 
     # The record title as a string, preceded by the object type and id:

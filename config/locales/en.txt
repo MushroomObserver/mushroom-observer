@@ -726,6 +726,7 @@
   # close a popup window
   CLOSE: Close
   close: close
+  COPIED: Copied
   CREATE: Create
   create: create
   DEFINE: Define
