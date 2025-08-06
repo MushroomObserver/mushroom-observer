@@ -2851,8 +2851,6 @@
   update_visual_group_success: "[:UPDATED] [name] [:VISUAL_GROUP]"
 
   # visual_models/show
-  show_visual_model_title: "[name] [:VISUAL_MODEL]"
-  show_visual_model_edit: "[:EDIT] [:VISUAL_MODEL]"
   show_visual_model_index: "[:VISUAL_MODEL] [:INDEX]"
 
   # Visual Models
