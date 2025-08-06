@@ -145,7 +145,8 @@ module Tabs
 
     def species_list_create_tab
       InternalLink.new(
-        :species_list_create_title.t, add_query_param(new_species_list_path)
+        :create_object.t(type: :SPECIES_LIST),
+        add_query_param(new_species_list_path)
       ).tab
     end
 

@@ -8,7 +8,8 @@ add_show_title(@visual_model.name, @visual_model)
   [
     link_to(:visual_group_create.t,
             new_visual_model_visual_group_path(@visual_model)),
-    link_to(:show_visual_model_edit.t, edit_visual_model_path(@visual_model)),
+    link_to(:edit_object.t(type: :VISUAL_MODEL),
+            edit_visual_model_path(@visual_model)),
     link_to(:show_visual_model_index.t, visual_models_path)
   ].safe_join(" | ")
 end %>
