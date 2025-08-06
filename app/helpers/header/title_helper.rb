@@ -66,10 +66,13 @@ module Header
       :"#{string}".t(type: type_tag)
     end
 
-    # NOTE: When it's a show page for an ActiveRecord object, or an
-    # edit or new "form" page, prefer the helpers
+    # NOTE: When it's a show page for an ActiveRecord object, an
+    # edit form or a new form page, please use the helpers
     # `add_show_title`, `add_edit_title` or `add_new_title` above.
-    # Sets both the html doc <title> and the #title for the page
+    # These allow standardization of the record "ID" badge UI.
+    #
+    # NOTE: Sets both the html doc <title> and the #title for the page,
+    # but they are a bit different and can be explicitly set differently.
     def add_page_title(title, document_title = title)
       content_for(:title) do
         title

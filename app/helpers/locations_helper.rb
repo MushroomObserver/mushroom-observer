@@ -3,13 +3,6 @@
 # helper methods for Location-related views:
 # ListCountries, ListLocations, ShowLocation
 module LocationsHelper
-  def location_show_title(location)
-    [
-      location.display_name,
-      tag.span(location.id || "?", class: "badge badge-id ml-3")
-    ].safe_join(" ")
-  end
-
   def country_link(country, count = nil)
     str = country + (count ? ": #{count}" : "")
     link_to(str, locations_path(country: country))

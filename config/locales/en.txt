@@ -1519,7 +1519,6 @@
   create_location_description_title: "[:create_name_description_title]"
 
   # locations/new
-  create_location_title: "[:create_object(type=:location)]"
 
   # names/descriptions/new
   create_name_description_title: Create Description for [name]
@@ -1566,7 +1565,6 @@
   download_observations_too_many_results: You are trying to download too many Observations. Please see <a href="https://github.com/MushroomObserver/mushroom-observer/blob/main/README_API.md#csv-files" target="_new">CSV Files</a> for an alternative.
 
   # location/edit_location
-  edit_location_title: "[:edit_object(type=:location)]"
 
   # location/edit_location_description
   edit_location_description_title: Edit [name]
