@@ -867,6 +867,7 @@
   cancel_and_create: "[:CANCEL] ([:CREATE] [TYPE])"
   cancel_and_show: Cancel (Show [TYPE])
   cancel_to_index: "[:CANCEL] ([TYPE] [:INDEX])"
+  new_object: New [TYPE]
   create_object: Create [TYPE]
   destroy_object: Destroy [TYPE]
   edit_object: Edit [TYPE]
@@ -2592,7 +2593,6 @@
   # glossary_term#create_glossary_term
   create_glossary_term: Create New Glossary Term
   create_glossary_term_add: Add Glossary Term
-  create_glossary_term_title: Create New Glossary Term
 
   # glossary_term#index
   glossary_term_index: Glossary
@@ -2615,7 +2615,6 @@
   article_body: Body
 
   # article/create_article
-  create_article_title: "[:create_object(type=:article)]"
   article_body_required: "[:article_body] [:REQUIRED]"
   article_title_required: "[:article_title] [:REQUIRED]"
   form_article_title_help: This field will appear in the Activity Feed.
@@ -2672,7 +2671,6 @@
 
   # herbaria/create
   create_herbarium: New Fungarium
-  create_herbarium_title: New Fungarium
   create_herbarium_personal: Check this box if this is your personal fungarium
   create_herbarium_personal_help: Each user can have one personal fungarium that they have curator privileges for. By default it is called "[name]", but you can change that name to anything you like.
   create_herbarium_code: Standard Abbreviation
@@ -2687,7 +2685,6 @@
 
   # herbaria/edit
   edit_herbarium: Edit Fungarium
-  edit_herbarium_title: Editing Fungarium
   edit_herbarium_this_is_personal_herbarium: This is your personal fungarium. You are only allowed one personal fungarium. If you would like to change which fungarium is your personal fungarium, please contact the admins and explain the situation.
   edit_herbarium_cant_make_personal: You can't make this your personal fungarium because you don't own all the fungarium records. You will need to have an admin do this for you. Please send us a message explaining what's going on.
   edit_herbarium_admin_make_personal: Make this the personal fungarium for
@@ -2719,7 +2716,6 @@
 
   # herbarium_record/create_herbarium_record
   create_herbarium_record: Add Fungarium Record
-  create_herbarium_record_title: Add Fungarium Record
   create_herbarium_record_accession_number_help: "Must be a unique identifier for this fungarium.  If you do not know the accession number, or there isn't one yet, use the observation number or your own collection number.  Examples:\n&nbsp;&nbsp;12419\n&nbsp;&nbsp;BRY-L-0025845\n&nbsp;&nbsp;MO 174623\n&nbsp;&nbsp;Joe Smith 17-013"
   create_herbarium_separately: The fungarium you entered doesn't exist. Please create it separately and then add the fungarium record to your observation.
   create_herbarium_record_missing_herbarium_name: Missing fungarium name.
@@ -2729,7 +2725,6 @@
 
   # herbarium_record/edit_herbarium_record
   edit_herbarium_record: Edit Fungarium Record
-  edit_herbarium_record_title: Edit Fungarium Record [herbarium_label]
   edit_herbarium_record_back_to_index: Back to Fungarium Record Index
   edit_herbarium_record_cant_add_or_remove: Only curators or the observer can add or remove an observation to or from a fungarium record.
   edit_herbarium_record_already_used: This fungarium record already exists. If you want to merge records, move the observations from this record to the other, then delete this record.
@@ -2753,7 +2748,6 @@
 
   # collection_number/create_collection_number
   create_collection_number: Add Collection Number
-  create_collection_number_title: Add Collection Number
   create_collection_number_missing_name: Missing collector's name.
   create_collection_number_missing_number: Missing collector's number.
 

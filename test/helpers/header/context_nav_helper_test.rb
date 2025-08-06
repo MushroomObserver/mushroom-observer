@@ -12,7 +12,7 @@ module Header
     # put_button is not used for articles, but we're just testing HTML output
     def test_context_nav_dropdown
       article = Article.last
-      links = [[:create_article_title.t, new_article_path,
+      links = [["Create Article", new_article_path,
                 { class: "new_article_link" }],
                [:EDIT.t, edit_article_path(article.id),
                 { class: "edit_article_link" }],
@@ -23,7 +23,7 @@ module Header
       tabs = context_nav_links(links)
 
       tab1 = link_to(
-        :create_article_title.t, new_article_path, { class: "new_article_link" }
+        "Create Article", new_article_path, { class: "new_article_link" }
       )
       tab2 = link_to(
         :EDIT.t, edit_article_path(article.id), { class: "edit_article_link" }

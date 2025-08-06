@@ -140,7 +140,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     get(:new)
 
     assert_response(:success)
-    assert_head_title(:create_glossary_term_title.l)
+    assert_page_title(/Create Glossary Term/)
 
     ESSENTIAL_ATTRIBUTES.each do |attr|
       assert_select("form [name='glossary_term[#{attr}]']", { count: 1 },

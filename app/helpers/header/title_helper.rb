@@ -42,20 +42,34 @@ module Header
 
     def add_edit_title(string, object)
       add_page_title(
-        edit_page_title(string, object), edit_document_title(string, object)
+        edit_page_title(string, object),
+        edit_document_title(string, object)
       )
     end
 
+    # Needs to be separate. Called in modal forms
     def edit_page_title(string, object)
-      ["#{:EDIT.l}:", show_page_title(string, object)].safe_join(" ")
+      [:EDIT.l, show_page_title(string, object)].safe_join(" ")
     end
 
     def edit_document_title(string, object)
       [:EDIT.l, show_document_title(string, object)].safe_join(" ")
     end
 
-    # sets both the html doc title and
-    # the title for the page (previously @title)
+    # Translation string taking a type_tag, e.g. :add_object, :create_object
+    def add_new_title(string, type_tag)
+      add_page_title(new_page_title(string, type_tag))
+    end
+
+    # Needs to be separate. Called in modal forms.
+    def new_page_title(string, type_tag)
+      :"#{string}".t(type: type_tag)
+    end
+
+    # NOTE: When it's a show page for an ActiveRecord object, or an
+    # edit or new "form" page, prefer the helpers
+    # `add_show_title`, `add_edit_title` or `add_new_title` above.
+    # Sets both the html doc <title> and the #title for the page
     def add_page_title(title, document_title = title)
       content_for(:title) do
         title

@@ -45,8 +45,10 @@ module Tabs
     end
 
     def new_article_tab
-      InternalLink::Model.new(:create_article_title.t, Article,
-                              new_article_path).tab
+      InternalLink::Model.new(
+        new_page_title(:create_object, :ARTICLE), Article,
+        new_article_path
+      ).tab
     end
 
     def edit_article_tab(article)

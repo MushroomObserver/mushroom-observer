@@ -53,7 +53,7 @@ class HerbariaControllerTest < FunctionalTestCase
     login("mary")
     get(:show, params: { id: herbarium.id })
 
-    assert_displayed_title(herbarium.format_name)
+    assert_page_title(herbarium.format_name)
     assert_select(
       "a[href^='#{new_herbaria_curator_request_path(id: herbarium)}']",
       { text: :show_herbarium_curator_request.l },
@@ -90,7 +90,7 @@ class HerbariaControllerTest < FunctionalTestCase
     login("rolf")
     get(:show, params: { id: herbarium.id })
 
-    assert_displayed_title(herbarium.format_name)
+    assert_page_title(herbarium.format_name)
     assert_select("form[action^='#{herbarium_path(herbarium)}']") do
       assert_select("input[value='delete']", true,
                     "Show Herbarium page is missing a destroy herbarium button")
@@ -369,7 +369,7 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:edit, params: { id: herbarium.id })
 
     assert_response(:success)
-    assert_displayed_title(:edit_herbarium_title.l)
+    assert_page_title(:EDIT.l)
   end
 
   def test_edit_with_curators_by_non_curator
@@ -386,7 +386,7 @@ class HerbariaControllerTest < FunctionalTestCase
     login("rolf")
     get(:edit, params: { id: nybg.id })
     assert_response(:success)
-    assert_displayed_title(:edit_herbarium_title.l)
+    assert_page_title(:EDIT.l)
   end
 
   def test_edit_with_curators_by_admin
@@ -395,7 +395,7 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:edit, params: { id: nybg.id })
 
     assert_response(:success)
-    assert_displayed_title(:edit_herbarium_title.l)
+    assert_page_title(:EDIT.l)
   end
 
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
