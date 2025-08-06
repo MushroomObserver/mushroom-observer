@@ -182,9 +182,9 @@ module Observations
     def modal_title
       case action_name
       when "new", "create"
-        :show_observation_add_link.l
+        helpers.new_page_title(:add_object, :EXTERNAL_LINK)
       when "edit", "update"
-        :edit_object.t(type: :external_link)
+        helpers.edit_page_title(:EXTERNAL_LINK.l, @external_link)
       end
     end
 
