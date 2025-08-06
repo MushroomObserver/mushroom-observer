@@ -2844,7 +2844,6 @@
   destroy_visual_group_success: "[:VISUAL_GROUP] [:destroyed]"
 
   # visual_groups/edit
-  edit_visual_group_title: "[:EDITING] [name] [:VISUAL_GROUP]"
   edit_visual_group_filter_options: Filter Options
   edit_visual_group_update_filter: Update Filter
 
