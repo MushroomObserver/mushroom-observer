@@ -2524,7 +2524,6 @@
   species_list_download_header: Download Observation Data
 
   # sequence/add_sequence
-  sequence_add_title: Add [:SEQUENCE]
   sequence_add_edit: "[:edit_object(type=:observation)]"
   sequence_add_owner_id: "[:show_observation_owner_id]"
 

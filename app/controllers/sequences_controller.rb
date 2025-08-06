@@ -292,9 +292,9 @@ class SequencesController < ApplicationController
   def modal_title
     case action_name
     when "new", "create"
-      helpers.sequence_form_new_title
+      helpers.new_page_title(:add_object, :SEQUENCE)
     when "edit", "update"
-      helpers.sequence_form_edit_title(seq: @sequence)
+      helpers.edit_page_title(@sequence.unique_format_name, @sequence)
     end
   end
 
