@@ -23,14 +23,16 @@ module Header
     # The record title preceded by the id as a badge, as HTML
     # "[23435] Amanita novinupta"
     def show_page_title(string, object)
-      [show_title_id_badge(object), string].safe_join(" ")
+      tag.div(class: "d-flex align-items-center") do
+        [show_title_id_badge(object), tag.span(string)].safe_join(" ")
+      end
     end
 
     def show_title_id_badge(object)
       title = "Copy this ID"
       tag.button(
         object.id || "?",
-        class: "badge badge-id mr-3", role: "button",
+        class: "badge badge-id mr-4", role: "button",
         data: {
           toggle: "tooltip", placement: "bottom", title: title,
           controller: "clipboard", clipboard_target: "source",
