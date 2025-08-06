@@ -1492,7 +1492,6 @@
 
   # comments/new
   comment_add_title: Add Comment to [name]
-  comment_add_create: "[:CREATE]"
 
   # comments/edit
   comment_edit_title: Edit Comment on [name]
@@ -2445,10 +2444,8 @@
   signup_email_help: "In order to sign up, you must provide a working email address. (One-time addresses will not work. Addresses that block email from mushroomobserver.org will not work.)\n\nWhen you complete this page and click \"Signup\", we will send you an email with account verification information. (This helps us to block spammers.)\n\nOnce you verify your account, you can change your email on your account Preferences page. We are very careful to never show your email address on a webpage that others can access. We will never sell your email address. We will only share your email address if you ask us to (e.g., when you send an email to another member, they will see your email). By default your email address will be used to send you information about changes to the site as well as notifications relevant to your contributions to the site. You can opt out of these uses by changing your Preferences."
 
   # species_list/create_species_list
-  species_list_create_title: "[:create_object(type=:species_list)]"
 
   # species_list/edit_species_list
-  species_list_edit_title: "[:edit_object(type=:species_list)]: [name]"
 
   # species_list/add_remove_observations
   species_list_add_remove_title: Add or Remove Observations from List
@@ -2634,15 +2631,10 @@
   publication_citation: "We encourage you to cite Mushroom Observer this way:\n\nWilson, N., Hollinger, J., et al. 2006-present. Mushroom Observer. https://mushroomobserver.org\n\nHowever, your publisher may restrict how or whether websites can be cited. If you need a published reference the best current citation we are aware of is:"
 
   # publication/edit
-  edit_publication: Edit
-  edit_publication_title: Editing Publication
 
   # publication/create_event
-  create_publication: Add Publication
-  create_publication_title: Create New Publication
 
   # publication/show
-  show_publication_title: Publication
   show_publication_added_by: Added by
 
   # herbarium fields
@@ -3338,7 +3330,6 @@
   add_project_no_location: No location matching '[where]' found.
   add_project_need_title: Projects must have a title.
   add_project_success: Project was successfully created.
-  add_project_title: Create New Project
 
   # account/add_user_to_group
   add_user_to_group_already: "[user] is already a member of [group]."
@@ -3405,7 +3396,6 @@
 
   # project/edit_project
   edit_project_destroy: "[:destroy_object(type=:project)]"
-  edit_project_title: "[:edit_object(type=:project)]: [title]"
   alphanumerics_only: must only contain ASCII alphanumerics and dashes
 
   # project/_form_projects

@@ -1,7 +1,5 @@
 <%
-add_page_title(
-  :species_list_edit_title.t(name: @species_list.unique_format_name)
-)
+add_edit_title(@species_list.format_name, @species_list)
 add_context_nav(species_list_form_edit_tabs(list: @species_list))
 container_class(:text)
 

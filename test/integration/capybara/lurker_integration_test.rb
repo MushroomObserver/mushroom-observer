@@ -140,8 +140,10 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
       list = SpeciesList.joins(:observations).
              where(observations: { id: obs.id }).first
       click_link(list.title)
-      assert_match(/^#{:app_title.l}: Observation List: #{list.title}/,
-                   page.title, "Wrong page")
+      assert_match(
+        /^#{:app_title.l}: Observation List #{list.id}: #{list.title}/,
+        page.title, "Wrong page"
+      )
 
       # (Make sure observation is shown somewhere.)
       assert(has_selector?("a[href^='#{observation_path(obs.id)}']"),

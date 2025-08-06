@@ -1,11 +1,6 @@
 <%
 add_project_banner(@project) if @project
-page_title = "#{:SPECIES_LIST.l}: #{@species_list.unique_format_name}"
-show_title = [
-  @species_list.title,
-  tag.span(@species_list.id, class: "badge badge-id ml-3")
-].safe_join(" ")
-add_page_title(show_title, page_title)
+add_show_title(@species_list.title, @species_list)
 add_interest_icons(@user, @species_list)
 add_edit_icons(@species_list)
 add_context_nav(species_list_show_tabs(list: @species_list, query: @query))

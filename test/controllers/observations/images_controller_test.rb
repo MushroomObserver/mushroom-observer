@@ -121,7 +121,7 @@ module Observations
         end
       end
 
-      assert(assert_select("#title").text.start_with?("Editing Image"),
+      assert(assert_select("#title").text.start_with?("Edit Image"),
              "It should return to form if image save fails")
     end
 
