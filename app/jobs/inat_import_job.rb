@@ -86,15 +86,6 @@ class InatImportJob < ApplicationJob
     inat_import.inat_ids.delete(" ")
   end
 
-  # limit iNat API search to observations by iNat user with this login
-  def restricted_user_login
-    if super_importer?
-      nil # Super importers can import anyone's iNat observations
-    else
-      inat_username
-    end
-  end
-
   # Import the next page of iNat API results,
   # returning true if there are more pages of results, false if done.
   def parsing?(parser)
