@@ -1,12 +1,12 @@
 <%
-id = @show_user.id
-complete_name = @show_user.unique_text_name
-name = @show_user.login
-add_page_title(:show_user_about.t(user: complete_name))
+add_show_title(
+  :show_user_about.t(user: @show_user.unique_text_name), @show_user
+)
 add_pager_for(@show_user)
 add_context_nav(user_show_tabs)
-
-@container = :full
+container_class(:full)
+id = @show_user.id
+name = @show_user.login
 %>
 
 <div class="row">

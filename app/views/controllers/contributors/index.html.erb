@@ -1,8 +1,9 @@
 <%
-@container = :double
+container_class(:double)
 add_page_title(:users_by_contribution_title.t)
 add_context_nav(contributors_index_tabs)
 add_sorter(@query, users_index_sorts(admin: false))
+add_pagination(@pagination_data)
 %>
 
 <div class="row my-3">
@@ -12,7 +13,7 @@ add_sorter(@query, users_index_sorts(admin: false))
 </div>
 <!--.row-->
 
-<%= pagination_nav(@pagination_data) do %>
+<%= paginated_results do %>
   <%= matrix_table(partial: "contributors/contributor",
                    objects: @objects, as: :user) %>
 <% end %>

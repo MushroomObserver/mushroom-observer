@@ -29,7 +29,7 @@ module Tabs
     end
 
     def new_publication_tab
-      InternalLink.new(:create_publication.t, new_publication_path).tab
+      InternalLink.new(:add_object.t(:PUBLICATION), new_publication_path).tab
     end
 
     def publications_index_tab

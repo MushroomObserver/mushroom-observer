@@ -29,11 +29,21 @@ module ContentHelper
   # Create an in-line white-space element approximately the given width in
   # pixels.  It should be non-line-breakable, too.
   def indent
-    content_tag(:span, "&nbsp;".html_safe, class: "ml-10px")
+    tag.span("&nbsp;".html_safe, class: "ml-10px")
   end
 
   def spacer
-    content_tag(:span, "&nbsp;".html_safe, class: "mx-2")
+    tag.span("&nbsp;".html_safe, class: "mx-2")
+  end
+
+  def content_padded(**args, &block)
+    content = block ? capture(&block).to_s : ""
+    tag.div(
+      class: class_names("p-3", args[:class]),
+      **args.except(:class)
+    ) do
+      content
+    end
   end
 
   # Return escaped HTML.

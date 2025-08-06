@@ -1,9 +1,8 @@
 <%
+add_show_title(@project.title, @project)
 add_project_banner(@project)
-@container = :wide
+container_class(:wide)
 %>
-
-<br />
 
 <%= render(partial: "shared/list_search", locals: { object: @project }) %>
 

@@ -1,7 +1,5 @@
 <%
-add_page_title(:HERBARIUM_RECORD.t + " '" +
-               @herbarium_record.format_name.t + "'".html_safe)
-
+add_show_title(@herbarium_record.format_name.t, @herbarium_record)
 add_pager_for(@herbarium_record)
 add_context_nav(herbarium_record_show_tabs(h_r: @herbarium_record))
 

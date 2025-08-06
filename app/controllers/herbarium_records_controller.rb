@@ -402,9 +402,13 @@ class HerbariumRecordsController < ApplicationController
   def modal_title
     case action_name
     when "new", "create"
-      helpers.herbarium_record_form_new_title
+      helpers.new_page_title(:add_object, :HERBARIUM_RECORD)
     when "edit", "update"
-      helpers.herbarium_record_form_edit_title(h_r: @herbarium_record)
+      helpers.edit_page_title(
+        [@herbarium_record.format_name.t,
+         @herbarium_record.herbarium_label].safe_join(" "),
+        @herbarium_record
+      )
     end
   end
 

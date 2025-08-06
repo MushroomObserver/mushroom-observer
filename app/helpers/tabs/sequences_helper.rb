@@ -7,18 +7,10 @@ module Tabs
         link_to(:cancel_and_show.t(type: :observation),
                 seq.observation.show_link_args)
       ]
-      return unless check_permission(seq)
+      return links unless check_permission(seq)
 
       links += sequence_mod_tabs(seq)
       links
-    end
-
-    def sequence_form_new_title
-      :sequence_add_title.t
-    end
-
-    def sequence_form_edit_title(seq:)
-      :sequence_edit_title.t(name: seq.unique_format_name)
     end
 
     def sequence_form_tabs(obj:)

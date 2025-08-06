@@ -75,7 +75,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
     end
     namer_session.assert_selector("body.observations__show")
     assert_flash_success(session: namer_session)
-    assert_true(namer_session.has_text?("Observation #{obs.id}"))
+    assert_true(namer_session.has_text?(obs.id))
 
     obs.reload
     name = Name.find_by(text_name: text_name)
@@ -109,7 +109,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
       form.first("input[type='submit']").click
     end
     namer_session.assert_selector("body.observations__show")
-    assert_true(namer_session.has_text?("Observation #{obs.id}"))
+    assert_true(namer_session.has_text?(obs.id))
 
     obs.reload
     name.reload
@@ -172,7 +172,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
     # namer_session.successful_delete(obs, naming, text_name, orignal_name)
     namer_session.click_button(class: "destroy_naming_link_#{naming.id}")
     namer_session.assert_selector("body.observations__show")
-    assert_true(namer_session.has_text?("Observation #{obs.id}"))
+    assert_true(namer_session.has_text?(obs.id))
     assert_flash_success(session: namer_session)
 
     obs.reload

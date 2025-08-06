@@ -1,10 +1,9 @@
 <%
-@container = :full
-add_page_title(collection_number_form_edit_title(c_n: @collection_number))
-add_context_nav(
-  collection_number_form_edit_tabs(back: @back, c_n: @collection_number,
-                                    obj: @back_object)
-)
+container_class(:full)
+add_edit_title(@collection_number.format_name.t, @collection_number)
+add_context_nav(collection_number_form_edit_tabs(
+  back: @back, c_n: @collection_number, obj: @back_object
+))
 %>
 
 <div class="row">

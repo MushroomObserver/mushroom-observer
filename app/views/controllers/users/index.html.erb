@@ -1,7 +1,8 @@
 <%
-@container = :full
+container_class(:full)
 add_index_title(@query)
 add_sorter(@query, users_index_sorts(admin: in_admin_mode?))
+add_pagination(@pagination_data)
 
 flash_error(@error) if @error && @objects.empty?
 %>
@@ -16,7 +17,7 @@ flash_error(@error) if @error && @objects.empty?
         padding: 3px 5px 3px 5px
       }
     </style>
-    <%= pagination_nav(@pagination_data) do %>
+    <%= paginated_results do %>
       <table align="center" class="table table-striped permissions" cellspacing="2">
         <thead>
           <tr>
@@ -53,9 +54,7 @@ flash_error(@error) if @error && @objects.empty?
   #  Normal version.
   # ----------------------------
   else %>
-    <%= pagination_nav(@pagination_data) do %>
-
-
+    <%= paginated_results do %>
       <%= matrix_table(objects: @objects) %>
     <% end %>
 <% end %>

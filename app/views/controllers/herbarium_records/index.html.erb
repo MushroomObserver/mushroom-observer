@@ -1,13 +1,14 @@
 <%
-@container = :wide
+container_class(:wide)
 add_index_title(@query)
 add_context_nav(herbarium_records_index_tabs(obs: @observation))
 add_sorter(@query, herbarium_records_index_sorts)
+add_pagination(@pagination_data)
 
 flash_error(@error) if @error && @objects.empty?
 %>
 
-<%= pagination_nav(@pagination_data) do %>
+<%= paginated_results do %>
   <% if @objects.any? %>
     <table class="table table-striped">
       <% @objects.each do |rec|

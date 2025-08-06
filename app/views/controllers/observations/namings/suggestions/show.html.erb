@@ -1,10 +1,13 @@
 <%
-@owner_naming = owner_naming_line(@owner_name) # must before show_obs_title
-add_page_title(show_obs_title(obs: @observation, owner_naming: @owner_naming, user: @user))
+@owner_naming = owner_naming_line(@owner_name) # before observation_show_title
+show_title = observation_show_title(
+  obs: @observation, owner_naming: @owner_naming, user: @user
+)
+add_page_title(show_title, [:OBSERVATION.l, show_title].safe_join(" "))
 num_images = @observation.images.length
 
 add_context_nav(naming_suggestion_tabs(obs: @observation))
-@container = :double
+container_class(:double)
 %>
 
 <div class="row">

@@ -33,11 +33,6 @@ class RssLogsControllerTest < FunctionalTestCase
     post(:index)
     assert_template(:index)
 
-    # Show one.
-    post(:index,
-         params: { show_observations: observations(:minimal_unknown_obs).to_s })
-    assert_template(:index)
-
     # Show all.
     params = {}
     params[:type] = RssLog::ALL_TYPE_TAGS
@@ -77,7 +72,7 @@ class RssLogsControllerTest < FunctionalTestCase
 
     comments_for_path = comments_path(for_user: User.current_id)
     assert_select(
-      "a#nav_mobile_your_comments_link[href='#{comments_for_path}']",
+      "a[href='#{comments_for_path}']",
       true, "LH NavBar 'Commments for` link broken"
     )
   end

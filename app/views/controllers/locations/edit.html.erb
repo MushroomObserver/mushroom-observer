@@ -1,9 +1,9 @@
 <%
-add_page_title(:edit_location_title.t(name: @location.display_name))
+add_edit_title(@location.display_name, @location)
 add_pager_for(@image)
 add_context_nav(location_form_edit_tabs(location: @location))
 
-@container = :full
+container_class(:full)
 %>
 
 <%= render(partial: "locations/form", locals: { local: true }) %>

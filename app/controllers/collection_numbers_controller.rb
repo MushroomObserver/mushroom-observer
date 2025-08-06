@@ -338,9 +338,11 @@ class CollectionNumbersController < ApplicationController
   def modal_title
     case action_name
     when "new", "create"
-      helpers.collection_number_form_new_title
+      helpers.new_page_title(:add_object, :COLLECTION_NUMBER)
     when "edit", "update"
-      helpers.collection_number_form_edit_title(c_n: @collection_number)
+      helpers.edit_page_title(
+        @collection_number.format_name.t, @collection_number
+      )
     end
   end
 

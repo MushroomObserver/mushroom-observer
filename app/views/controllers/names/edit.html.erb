@@ -1,5 +1,5 @@
 <%
-add_page_title(:edit_name_title.t(name: @name.user_display_name(@user)))
+add_edit_title(@name.user_display_name(@user), @name)
 add_context_nav(name_form_edit_tabs(name: @name))
 action = { controller: "/names", action: :update, id: @name.id }
 %>

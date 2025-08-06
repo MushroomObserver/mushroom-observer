@@ -1,10 +1,9 @@
 <%
-  add_project_banner(@project_alias.project)
-  @container = :text
-  project_id = @project_alias.project_id
+add_project_banner(@project_alias.project)
+add_page_title(:project_alias_edit.l(name: @project_alias.name))
+container_class(:text)
+project_id = @project_alias.project_id
 %>
-
-<h1><%= :project_alias_edit.l(name: @project_alias.name) %></h1>
 
 <%= render("form", project_alias: @project_alias, local: true) %>
 

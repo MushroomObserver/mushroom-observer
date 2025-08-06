@@ -171,7 +171,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     visit(new_herbarium_record_path(observation_id: obs.id))
     click_link(class: "nonpersonal_herbaria_index_link")
 
-    assert_selector("#title", text: :HERBARIA.l)
+    assert_match(:HERBARIA.l, page.title)
   end
 
   def test_single_herbarium_search
@@ -194,7 +194,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
       select(:HERBARIA.l, from: "search_type")
       click_commit
     end
-    assert_selector("#title", text: :HERBARIA.l)
+    assert_match(:HERBARIA.l, page.title)
     assert_selector("#filters", text: "#{:query_pattern.l}: #{pattern}")
   end
 
@@ -208,7 +208,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
       click_commit
     end
     assert_selector("body.herbarium_records__index")
-    assert_selector("#title", text: :HERBARIUM_RECORDS.l)
+    assert_match(:HERBARIUM_RECORDS.l, page.title)
     assert_selector("#filters", text: "#{:query_pattern.l}: #{pattern}")
   end
 

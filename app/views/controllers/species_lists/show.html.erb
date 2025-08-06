@@ -1,106 +1,58 @@
 <%
-if @project
-  add_project_banner(@project)
-  @container = :wide
-else
-  add_page_title(
-    :species_list_show_title.t(name: @species_list.unique_format_name)
-  )
-  add_context_nav(species_list_show_tabs(list: @species_list, query: @query))
-  @container = :text_image
-  add_pager_for(@species_list)
-  add_interest_icons(@user, @species_list)
-end
+add_project_banner(@project) if @project
+add_show_title(@species_list.title, @species_list)
+add_interest_icons(@user, @species_list)
+add_edit_icons(@species_list)
+add_context_nav(species_list_show_tabs(list: @species_list, query: @query))
+add_pager_for(@species_list) # takes you to prev/next list, not page of obs
+add_pagination(@pagination_data)
+query_params_set(@query) if @pagination_data.any?
+container_class(:double)
+column_classes(:nine_three)
 %>
 
-<%= species_list_title_panel(@species_list) if @project %>
+<%= tag.div(class: "row") do %>
+  <%= tag.div(class: yield(:left_columns)) do %>
 
-<%= render(partial: "shared/list_search", locals: { object: @species_list }) %>
+    <%= render(partial: "species_lists/details") %>
 
-<%= panel_block do %>
-  <div class="d-flex justify-content-between align-items-center">
-    <div><b><%= :WHEN.t %>:</b> <%= @species_list.when.web_date %></div>
-    <div>
-      <%= obs_change_links(@species_list) %> |
-      <%= download_button(target: @species_list, icon: :download) %>
-    </div>
-  </div>
-  <div><b><%= :OBSERVATIONS.t %>:</b> <%= @query.num_results %></div>
-  <div><b><%= :WHERE.t %>:</b>
-    <%= location_link(@species_list.where, @species_list.location, nil, true) rescue :UNKNOWN.t %>
-  </div>
-  <div><b><%= :WHO.t %>:</b> <%= user_link(@species_list.user) %></div>
-  <% if @species_list.projects.any? %>
-    <div><b><%= :PROJECTS.t %>:</b>
-      <%= @species_list.projects.map {|p| link_to_object(p)}.safe_join(" | ") %>
-    </div>
-  <% end %>
-  <% if @species_list.notes.present? %>
-    <div><%= ("*" + :NOTES.t + ":* " + @species_list.notes.to_s).tpl %></div>
-  <% end %>
-<% end %>
+    <%= tag.div(id: "project_species_list_buttons") do
+      project_species_list_buttons(@species_list, @query).safe_join
+    end %>
 
-<% if @pagination_data.any?
-  query_params_set(@query) %>
+    <%= render(partial: "shared/list_search",
+               locals: { object: @species_list }) %>
 
-<%= project_species_list_buttons(@species_list, @query).safe_join %>
+    <%# Put pagination down where it feels right %>
+    <% if content_for?(:index_pagination) %>
+      <%= tag.div(
+        class: "pagination-top d-flex justify-content-end align-items-center"
+      ) do
+        yield(:index_pagination)
+      end %>
+    <% end %>
 
-<%= pagination_nav(@pagination_data) do %>
-  <div class="list-group">
-
-    <% if @objects.any? %>
-      <% @objects.each do |observation| %>
-        <div class="list-group-item">
-          <div class="row">
-            <div class="col-sm-4 col-md-3">
-              <%= if observation.thumb_image_id
-                  interactive_image(
-                    @user,
-                    observation.thumb_image,
-                    image_link: observation_path(id: observation.id),
-                    votes: true
-                  )
-                end %>
-            </div>
-            <div class="col-sm-8 col-md-9">
-              <p class="font-weight-bold mb-0">
-                <%= link_to(observation.unique_format_name.t,
-                              observation_path(id: observation.id,
-                                               q: get_query_param(@query))) %>
-              </p>
-              <p>
-                <b><%= location_link(observation.where,
-                                       observation.location) %></b><br />
-                <span><%= user_link(observation.user) %></span>:
-                <span><%= observation.when.web_date %></span>
-              </p>
-              <% if check_permission(@species_list) %>
-                <%= put_button(name: :REMOVE.t,
-                                 path: observation_species_list_path(
-                                   id: observation.id,
-                                   species_list_id: @species_list.id,
-                                   commit: "remove"
-                                 ),
-                                 class: "btn btn-default",
-                                 data: { confirm: :are_you_sure.l }) %>
-              <% end %>
-            </div>
-          </div>
-        </div>
+    <%= paginated_results do %>
+      <%= tag.div(class: "list-group") do %>
+        <% if @objects.any? %>
+          <% @objects.each do |observation| %>
+            <%= render(partial: "species_lists/observation",
+                       locals: { observation: }) %>
+          <% end %>
+        <% else %>
+          <%= tag.div(:species_list_show_no_members.tp) %>
+        <% end %>
       <% end %>
     <% end %>
 
-  </div>
+    <%= render(
+      partial: "comments/comments_for_object",
+      locals: { object: @species_list, comments: @comments,
+                controls: @user, limit: nil }
+    ) %>
+
+    <%= show_object_footer(@user, @species_list) %>
+
+  <% end %>
 <% end %>
 
-<% else %>
-  <div class="container-text">
-    <%= :species_list_show_no_members.tp %>
-  </div>
-<% end %>
-
-<%= render(partial: "comments/comments_for_object",
-           locals: { object: @species_list, comments: @comments,
-                     controls: @user, limit: nil }) %>
-
-<%= show_object_footer(@user, @species_list) %>

@@ -45,8 +45,10 @@ module Tabs
     end
 
     def new_article_tab
-      InternalLink::Model.new(:create_article_title.t, Article,
-                              new_article_path).tab
+      InternalLink::Model.new(
+        new_page_title(:create_object, :ARTICLE), Article,
+        new_article_path
+      ).tab
     end
 
     def edit_article_tab(article)
@@ -63,22 +65,6 @@ module Tabs
 
     def articles_index_tab
       InternalLink::Model.new(:index_article.t, Article, articles_path).tab
-    end
-
-    # "Title (#nnn)" textilized
-    def article_show_title(article)
-      capture do
-        concat(article.display_title.t)
-        concat(" (##{article.id || "?"})")
-      end
-    end
-
-    # "Editing: Title (#nnn)"  textilized
-    def article_edit_title(article)
-      capture do
-        concat("#{:EDITING.l}: ")
-        concat(article_show_title(article))
-      end
     end
   end
 end

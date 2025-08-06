@@ -1,0 +1,22 @@
+<%# Project banner with title, location, date_range %>
+<%
+title_id = controller.controller_name == "projects" ? "title" : "banner_title"
+%>
+
+<%= tag.div(class: "row") do %>
+  <%= tag.div(class: "col-xs-12", id: "project_banner") do %>
+    <%= yield(:banner_image) %>
+    <%= tag.div(class: "bottom-left ml-3 mb-3 p-2") do %>
+      <%= tag.h1(yield(:banner_title),
+                 class: "h3 banner-image-text", id: title_id) -%>
+      <% if content_for?(:project_location) %>
+        <%= tag.div(yield(:project_location),
+                    class: "project_location banner-image-text") %>
+      <% end %>
+      <% if content_for?(:project_date_range) %>
+        <%= tag.div(yield(:project_date_range),
+                    class: "project_date_range banner-image-text") %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>

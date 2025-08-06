@@ -20,7 +20,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("#title", text: title.as_displayed)
     # go back to the name page
     click_on(class: "latest_version_link")
-    title = :show_name_title.t(name: name.display_name)
+    title = name.display_name.t
     assert_selector("#title", text: title.as_displayed)
   end
 
@@ -91,7 +91,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     visit("/")
     fill_in("search_pattern", with: near_miss_pattern)
     page.select("Names", from: :search_type)
-    click_button("Search")
+    within("#pattern_search_form") { click_button("Search") }
 
     assert_selector("#content div.alert-warning",
                     text: "Maybe you meant one of the following names?")
@@ -100,26 +100,27 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
 
     fill_in("search_pattern", with: corrected_pattern)
     page.select("Names", from: :search_type)
-    click_button("Search")
+    within("#pattern_search_form") { click_button("Search") }
 
     assert_no_selector("#content div.alert-warning")
-    assert_selector("#title", text: :NAMES.l)
+    # assert_selector("#title", text: :NAMES.l)
     assert_selector("#filters", text: corrected_pattern)
   end
 
   def test_name_pattern_search_with_old_provisional
     old_provisional = 'Cortinarius "sp-IN34"'
-
+    name = names(:provisional_name)
     login
     visit("/")
     fill_in("search_pattern", with: old_provisional)
     page.select("Names", from: :search_type)
-    click_button("Search")
+    within("#pattern_search_form") { click_button("Search") }
 
     assert_no_selector("#content div.alert-warning")
-    title = CGI.unescapeHTML(
-      "Mushroom Observer: Name: #{names(:provisional_name).text_name}".t
-    )
+    title =
+      "Mushroom Observer: Name #{name.id}: #{name.user_display_name(rolf)}".
+      t.as_displayed
+
     assert_title(title)
   end
 

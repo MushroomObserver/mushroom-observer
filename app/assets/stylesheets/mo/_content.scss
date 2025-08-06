@@ -40,14 +40,6 @@
   width: 23px;
 }
 
-@media (min-width: $screen-sm-min) {
-  .interest-eyes {
-    position: absolute;
-    // bottom: $padding-base-horizontal;
-    left: $padding-base-horizontal;
-  }
-}
-
 //
 // style tweaks
 // --------------------------------------------------
@@ -100,6 +92,6 @@ ul.tight-list {
   font-weight: bold;
 }
 
-.btn-constraint-warning {
-  color: black;
+.content-block {
+  @extend .p-3;
 }
