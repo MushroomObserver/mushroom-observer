@@ -71,7 +71,15 @@ module Tabs
     end
 
     def add_project_banner(project)
-      content_for(:banner_title) { link_to_object(project) }
+      title = if controller.controller_name == "projects" &&
+                 action_name == "show"
+                [link_to_object(project),
+                 show_title_id_badge(project)].safe_join(" ")
+              else
+                link_to_object(project)
+              end
+
+      content_for(:banner_title) { title }
 
       if project.location
         content_for(:project_location) do

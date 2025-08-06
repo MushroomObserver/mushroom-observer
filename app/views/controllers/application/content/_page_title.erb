@@ -4,7 +4,6 @@ add_interest_icons = (content_for?(:interest_icons))
 title_cols = "col-sm-8 col-lg-7"
 project_subtitle = content_for?(:project_location) ||
                    content_for?(:project_date_range)
-title_class = has_banner ? "h3" : "h4"
 # If project show with banner, print a blank title (title already in banner).
 is_project = controller.controller_name == "projects" && action_name == "show"
 title = (is_project && has_banner) ? "" : yield(:title)
@@ -17,7 +16,7 @@ title = (is_project && has_banner) ? "" : yield(:title)
       <%= tag.nav(
         class: "show_title_nav d-flex justify-content-between pl-3"
       ) do
-        concat(tag.h1(title, class: title_class, id: "title"))
+        concat(tag.h1(title, class: "h3", id: "title"))
         concat(
           tag.ul(class: "nav navbar-nav object_edit h4") do
             concat(yield(:edit_icons))
