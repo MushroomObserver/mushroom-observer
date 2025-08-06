@@ -1524,7 +1524,6 @@
   create_name_description_title: Create Description for [name]
 
   # names/new
-  create_name_title: "[:create_object(type=:name)]"
   create_name_multiple_names_match: There are already multiple names matching "[str]".
   create_name_duplicate_identifier: is used by another Name
 
@@ -1573,7 +1572,6 @@
   edit_name_description_title: Edit [name]
 
   # name/edit_name
-  edit_name_title: Edit Name [name]
   edit_name_multiple_names_match: "Multiple names match \"[str]\".  If you want to get rid of this name, please choose one of the following names to merge it with: [matches]"
   edit_name_fill_in_classification_for_genus_first: You need to fill in a classification for the genus first.
   edit_lifeform_title: Edit Lifeform of [name]

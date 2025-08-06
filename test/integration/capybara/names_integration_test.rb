@@ -109,7 +109,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
 
   def test_name_pattern_search_with_old_provisional
     old_provisional = 'Cortinarius "sp-IN34"'
-
+    name = names(:provisional_name)
     login
     visit("/")
     fill_in("search_pattern", with: old_provisional)
@@ -118,8 +118,8 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
 
     assert_no_selector("#content div.alert-warning")
     title =
-      "Mushroom Observer: Name: #{names(:provisional_name).text_name}".t.
-      unescape_html.tr("‘", "'").tr("’", "'")
+      "Mushroom Observer: Name #{name.id}: #{name.user_display_name(rolf)}".
+      t.as_displayed
 
     assert_title(title)
   end
