@@ -10,7 +10,7 @@ columns ||= "col-xs-12 col-sm-6 col-md-4 col-lg-3"
     <%= tag.div(class: "panel-sizing") do %>
       <%= if user.image_id
         tag.div(class: "thumbnail-container") do
-          interactive_image(user, user.image_id, image_link: user_path(user.id),
+          interactive_image(user, user.image, image_link: user_path(user.id),
                             votes: false, full_width: true)
         end
       end %>
