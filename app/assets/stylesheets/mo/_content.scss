@@ -96,6 +96,10 @@ ul.tight-list {
   @extend .p-3;
 }
 
-#title small {
-  @extend .ml-3;
+.h3.page-title {
+  font-size: 20px;
+
+  small {
+    @extend .ml-3;
+  }
 }
