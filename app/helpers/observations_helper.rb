@@ -47,7 +47,7 @@ module ObservationsHelper
       ]
     else
       [
-        name.user_display_name_brief_authors(user).t,
+        name.user_display_name_brief_authors(user).t.small_author,
         # Differentiate deprecated consensus from preferred name
         obs_consensus_id_flag,
         prefer_name.user_display_name_without_authors(user).t
@@ -75,7 +75,7 @@ module ObservationsHelper
           user, name, class: "obs_consensus_naming_link_#{name.id}"
         )
       else
-        name.user_display_name_brief_authors(user).t
+        name.user_display_name_brief_authors(user).t.small_author
       end
     ]
     # Differentiate this Name from Observer Preference
@@ -111,7 +111,7 @@ module ObservationsHelper
   end
 
   def link_to_display_name_brief_authors(user, name, **)
-    link_to(name.user_display_name_brief_authors(user).t,
+    link_to(name.user_display_name_brief_authors(user).t.small_author,
             name_path(id: name.id), **)
   end
 

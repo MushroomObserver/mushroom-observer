@@ -95,3 +95,7 @@ ul.tight-list {
 .content-block {
   @extend .p-3;
 }
+
+#title small {
+  @extend .ml-3;
+}
