@@ -138,7 +138,8 @@ module Tabs
         map_observations_tab(query),
         *observations_related_query_tabs(query), # multiple links
         observations_add_to_list_tab(query),
-        observations_download_as_csv_tab(query)
+        observations_download_as_csv_tab(query),
+        new_inat_import_tab
       ]
       links.reject(&:empty?)
     end
