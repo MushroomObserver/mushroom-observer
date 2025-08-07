@@ -95,3 +95,12 @@ ul.tight-list {
 .content-block {
   @extend .p-3;
 }
+
+.h3.page-title {
+  font-size: 20px;
+
+  small {
+    @extend .ml-3;
+    color: $text-color;
+  }
+}

@@ -16,7 +16,7 @@ title = (is_project && has_banner) ? "" : yield(:title)
       <%= tag.nav(
         class: "show_title_nav d-flex justify-content-between pl-3"
       ) do
-        concat(tag.h1(title, class: "h3", id: "title"))
+        concat(tag.h1(title, class: "h3 page-title my-3", id: "title"))
         concat(
           tag.ul(class: "nav navbar-nav object_edit h4") do
             concat(yield(:edit_icons))

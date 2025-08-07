@@ -121,8 +121,8 @@ module Observations
         end
       end
 
-      assert(assert_select("#title").text.start_with?("Edit Image"),
-             "It should return to form if image save fails")
+      assert_page_title("Edit Image",
+                        "It should return to form if image save fails")
     end
 
     # Appear on both observations/images/new and images/edit

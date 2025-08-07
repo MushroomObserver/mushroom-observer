@@ -1,6 +1,6 @@
 <%
 Textile.user_register_name(@user, @name)
-add_show_title(@name.user_display_name(@user).t, @name)
+add_show_title(@name.user_display_name(@user).t.small_author, @name)
 add_context_nav(name_show_tabs(name: @name))
 if @user
   add_pager_for(@name)
