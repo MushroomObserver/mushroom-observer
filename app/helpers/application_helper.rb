@@ -76,7 +76,7 @@ module ApplicationHelper
   end
 
   # Call in a layout to sync the title-bar columns with the content columns.
-  def column_classes(columns = :twelve)
+  def column_classes(columns = :twelve) # rubocop:disable Metrics/MethodLength
     content_for(:left_columns, flush: true) do
       case columns
       when :nine_three
