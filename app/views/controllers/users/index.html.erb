@@ -55,7 +55,8 @@ flash_error(@error) if @error && @objects.empty?
   # ----------------------------
   else %>
     <%= paginated_results do %>
-      <%= matrix_table(objects: @objects) %>
+      <%= matrix_table(partial: "users/user",
+                       objects: @objects, as: :user) %>
     <% end %>
 <% end %>
 

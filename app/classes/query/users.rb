@@ -17,6 +17,6 @@ class Query::Users < Query
   end
 
   def self.default_order
-    :name
+    :contribution
   end
 end

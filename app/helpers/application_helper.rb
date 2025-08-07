@@ -87,6 +87,8 @@ module ApplicationHelper
         class_names("col-xs-12 col-md-7")
       when :six
         class_names("col-xs-12 col-md-6 col-lg-8")
+      when :six_even # users show
+        class_names("col-xs-12 col-lg-6")
       else
         class_names("col-xs-12")
       end
@@ -102,6 +104,8 @@ module ApplicationHelper
         class_names("col-xs-12 col-md-5")
       when :six
         class_names("col-xs-12 col-md-6 col-lg-4")
+      when :six_even
+        class_names("col-xs-12 col-lg-6")
       else
         class_names("col-xs-12")
       end
