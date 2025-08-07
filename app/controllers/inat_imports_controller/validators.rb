@@ -7,12 +7,18 @@ module InatImportsController::Validators
 
   def params_valid?
     username_present? &&
-      valid_inat_ids_param? &&
-      imports_designated? &&
+      consented? &&
+      imports_valid?
+  end
+
+  def imports_valid?
+    imports_designated? &&
       list_within_size_limits? &&
       fresh_import? &&
-      unmirrored? &&
-      consented?
+      unmirrored?
+      not_importing_all_anothers?
+  end
+
   end
 
   # Always require inat_username as a safety measure.
@@ -75,6 +81,7 @@ module InatImportsController::Validators
 
   def unmirrored?
     return true if importing_all?
+    return true if params[:all] == "1" # ignore id list if importing all
 
     conditions = inat_id_list.map do |inat_id|
       Observation[:notes].matches("%Mirrored on iNaturalist as <a href=\"https://www.inaturalist.org/observations/#{inat_id}\">%")
@@ -100,6 +107,19 @@ module InatImportsController::Validators
     return true if params[:consent] == "1"
 
     flash_warning(:inat_consent_required.t)
+    false
+  end
+
+  # Block importing **all** of another user's iNat observations
+  # Seems so hard to reverse if done accidentally that we should prevent it,
+  # at least for now.
+  def not_importing_all_anothers?
+    unless params[:all] == "1" &&
+           (params[:inat_username] != @user.inat_username)
+      return true
+    end
+
+    flash_warning(:inat_importing_all_anothers.t)
     false
   end
 end

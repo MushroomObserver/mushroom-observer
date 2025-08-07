@@ -53,6 +53,7 @@ junk:
 
 # Need third for testing votes
 # Also is the default user for Observation fixture set.
+# And Dick is a iNat superimporter
 dick:
   <<: *DEFAULTS
   name: Tricky Dick
