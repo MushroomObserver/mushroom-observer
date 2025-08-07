@@ -9,6 +9,7 @@ module Header
       content_for(:index_pagination) do
         concat(letter_pagination_nav(pagination_data, args))
         concat(number_pagination_nav(pagination_data, args))
+        concat(content_for(:sorter)) if content_for?(:sorter)
       end
     end
 

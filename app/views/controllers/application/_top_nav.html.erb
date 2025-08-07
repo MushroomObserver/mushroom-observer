@@ -30,7 +30,6 @@ identify_page = controller.controller_name == "identify"
           nav_scan_qr_code(@user, controller)
         ].safe_join(" ")
       end %>
-      <%= yield(:sorter) if(content_for?(:sorter)) %>
     <% end %>
 
     <%# right side %>

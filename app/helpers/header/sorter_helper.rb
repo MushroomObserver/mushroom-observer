@@ -15,7 +15,7 @@ module Header
       title = sort_nav_order_by(query, sorts)
 
       content_for(:sorter) do
-        tag.div(class: "d-inline-block", id: "sorter") do
+        tag.div(class: "d-inline-block pl-4", id: "sorter") do
           concat(tag.label("#{:sort_by_header.l}:",
                            class: "font-weight-normal mr-2 hidden-xs"))
           concat(sort_nav_dropdown(title:, id: "sorts", links:))

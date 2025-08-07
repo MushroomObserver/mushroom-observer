@@ -16,7 +16,7 @@ pagination = content_for?(:index_pagination)
         end %>
         <% if pagination %>
           <%= tag.div(class: "pagination-top navbar-flex") do
-            yield(:index_pagination)
+            concat(yield(:index_pagination))
           end %>
         <% end %>
       <% end %>
