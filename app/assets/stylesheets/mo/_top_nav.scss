@@ -95,6 +95,15 @@
   }
 }
 
+@media screen and (min-width: $screen-sm-min) {
+  .sorter {
+    .dropdown-menu {
+      right: 0;
+      left: auto;
+    }
+  }
+}
+
 @media screen and (max-width: $screen-sm-max) {
   #top_nav {
     h4 {

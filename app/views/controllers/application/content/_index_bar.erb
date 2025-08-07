@@ -7,7 +7,7 @@ pagination = content_for?(:index_pagination)
   <%= tag.div(class: "row") do %>
     <%= tag.div(class: "col-xs-12", id: "index_bar") do %>
       <%# Indexes: Query filter subtitle and pagination %>
-      <%= tag.div(class: "d-flex justify-content-between") do %>
+      <%= tag.div(class: "d-flex justify-content-between flex-wrap") do %>
         <%= tag.div(class: "px-3 mb-3") do
           if filters
             concat(yield(:filters)) if !content_for?(:banner_image)
@@ -15,7 +15,7 @@ pagination = content_for?(:index_pagination)
           end
         end %>
         <% if pagination %>
-          <%= tag.div(class: "pagination-top navbar-flex") do
+          <%= tag.div(class: "pagination-top navbar-flex px-3") do
             concat(yield(:index_pagination))
           end %>
         <% end %>

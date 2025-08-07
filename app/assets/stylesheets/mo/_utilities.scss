@@ -44,6 +44,10 @@
   flex-shrink: 0 !important;
 }
 
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
 .align-items-center {
   align-items: center !important;
 }
@@ -118,6 +122,10 @@
 
 .float-left {
   float: left !important;
+}
+
+.float-none {
+  float: none !important;
 }
 
 .align-middle {
