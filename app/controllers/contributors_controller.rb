@@ -18,7 +18,7 @@ class ContributorsController < ApplicationController
   private
 
   def default_sort_order
-    ::Query::Users.default_order # :contribution
+    :contribution # ::Query::Users.default_order is :name
   end
 
   def unfiltered_index_opts
