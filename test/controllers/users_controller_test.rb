@@ -64,7 +64,7 @@ class UsersControllerTest < FunctionalTestCase
     assert_template("users/index")
 
     assert_page_title(:USERS.l)
-    assert_empty(css_select("#sorts"), "There should be no sort links")
+    assert_empty(css_select(".sorts"), "There should be no sort links")
 
     flash_text = :runtime_no_matches.l.sub("[types]", "users")
     assert_flash_text(flash_text)
@@ -144,7 +144,7 @@ class UsersControllerTest < FunctionalTestCase
   # can be shown via the same action.
   # Prove that sorting links include "Contribution" (when not in admin mode)
   def prove_sorting_links_include_contribution
-    sorting_links = css_select("#sorts")
+    sorting_links = css_select(".sorts")
     assert_match(/Contribution/, sorting_links.text)
   end
 
