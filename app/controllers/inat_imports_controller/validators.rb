@@ -7,18 +7,8 @@ module InatImportsController::Validators
 
   def params_valid?
     username_present? &&
-      consented? &&
-      imports_valid?
-  end
-
-  def imports_valid?
-    imports_designated? &&
-      list_within_size_limits? &&
-      fresh_import? &&
-      unmirrored?
-      not_importing_all_anothers?
-  end
-
+      imports_valid? &&
+      consented?
   end
 
   # Always require inat_username as a safety measure.
@@ -32,15 +22,13 @@ module InatImportsController::Validators
     false
   end
 
-  def valid_inat_ids_param?
-    return true unless contains_illegal_characters?
-
-    flash_warning(:runtime_illegal_inat_id.l)
-    false
-  end
-
-  def contains_illegal_characters?
-    /[^\d ,]/.match?(params[:inat_ids])
+  def imports_valid?
+    imports_designated? &&
+      valid_inat_ids_param? &&
+      list_within_size_limits? &&
+      fresh_import? &&
+      unmirrored? &&
+      not_importing_all_anothers?
   end
 
   def imports_designated?
@@ -54,8 +42,20 @@ module InatImportsController::Validators
     params[:all] == "1"
   end
 
+  def valid_inat_ids_param?
+    return true unless contains_illegal_characters?
+
+    flash_warning(:runtime_illegal_inat_id.l)
+    false
+  end
+
+  def contains_illegal_characters?
+    /[^\d ,]/.match?(params[:inat_ids])
+  end
+
   def list_within_size_limits?
-    return true if importing_all? || params[:inat_ids].length <= 255
+    return true if importing_all? || # ignore list size if importing all
+                   params[:inat_ids].length <= 255
 
     flash_warning(:inat_too_many_ids_listed.t)
     false
@@ -80,8 +80,7 @@ module InatImportsController::Validators
   end
 
   def unmirrored?
-    return true if importing_all?
-    return true if params[:all] == "1" # ignore id list if importing all
+    return true if importing_all? # cannot test check this if importing all
 
     conditions = inat_id_list.map do |inat_id|
       Observation[:notes].matches("%Mirrored on iNaturalist as <a href=\"https://www.inaturalist.org/observations/#{inat_id}\">%")
@@ -103,23 +102,23 @@ module InatImportsController::Validators
     match[:inat_id]
   end
 
-  def consented?
-    return true if params[:consent] == "1"
-
-    flash_warning(:inat_consent_required.t)
-    false
-  end
-
   # Block importing **all** of another user's iNat observations
   # Seems so hard to reverse if done accidentally that we should prevent it,
   # at least for now.
   def not_importing_all_anothers?
-    unless params[:all] == "1" &&
+    unless importing_all? &&
            (params[:inat_username] != @user.inat_username)
       return true
     end
 
     flash_warning(:inat_importing_all_anothers.t)
+    false
+  end
+
+  def consented?
+    return true if params[:consent] == "1"
+
+    flash_warning(:inat_consent_required.t)
     false
   end
 end
