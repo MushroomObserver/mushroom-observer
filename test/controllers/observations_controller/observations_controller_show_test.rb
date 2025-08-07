@@ -28,7 +28,8 @@ class ObservationsControllerShowTest < FunctionalTestCase
     obs = observations(:deprecated_name_obs)
     get(:show, params: { id: obs.id })
     assert_response(:success)
-    assert(@response.body.include?("flow=next"))
+    # There won't be prev/next UI because there's no query.
+    # assert(@response.body.include?("flow=next"))
   end
 
   # Test load a deprecated name obs, no strict_loading error

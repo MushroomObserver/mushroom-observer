@@ -2,7 +2,7 @@
 add_show_title(
   :show_user_about.t(user: @show_user.unique_text_name), @show_user
 )
-# add_pager_for(@show_user) # No pager here. You have to search for users.
+add_pager_for(@show_user)
 add_context_nav(user_show_tabs)
 container_class(:full)
 column_classes(:six_even)
