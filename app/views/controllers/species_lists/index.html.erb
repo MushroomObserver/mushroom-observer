@@ -10,11 +10,10 @@ flash_error(@error) if @error && @objects.empty?
 
 <%= paginated_results do %>
   <% if @objects.any? %>
-    <div class="list-group">
-      <% @objects.each do |species_list| %>
-        <%= render(partial: "species_list", locals: { species_list: }) %>
-      <% end %>
-    </div>
+    <%= tag.div(class: "list-group") do %>
+      <%= render(partial: "species_list",
+                 collection: @objects, as: :species_list) %>
+    <% end %>
   <% end %>
 <% end %>
 
