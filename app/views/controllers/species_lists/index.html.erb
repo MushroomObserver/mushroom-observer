@@ -12,19 +12,7 @@ flash_error(@error) if @error && @objects.empty?
   <% if @objects.any? %>
     <div class="list-group">
       <% @objects.each do |species_list| %>
-        <div class="list-group-item">
-          <div class="text-larger">
-            <%=
-              when_span = tag.span(species_list.when.to_s, class: "list_when")
-              what_span = tag.span(species_list.unique_text_name.t,
-                                   class: "list_what")
-              args = add_query_param(species_list.show_link_args)
-              link_with_query(when_span + ": " + what_span, args)
-            %>
-          </div><!-- .text-larger -->
-          <span><%= species_list.place_name.t rescue :UNKNOWN.t %></span> |
-          <span><%= user_link(species_list.user) %></span>
-        </div>
+        <%= render(partial: "species_list", locals: { species_list: }) %>
       <% end %>
     </div>
   <% end %>
