@@ -13,7 +13,7 @@ export default class extends Controller {
     navigator.clipboard.writeText(this.sourceTarget.innerText)
     // this.sourceTarget.dataset.title = "Copied"
     const tooltipInner =
-      this.sourceTarget.nextElementSibling.querySelector(".tooltip-inner")
+      this.element.querySelector(".tooltip-inner")
     if (tooltipInner) { tooltipInner.innerText = this.copiedValue }
   }
 }

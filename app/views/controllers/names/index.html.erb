@@ -30,27 +30,10 @@ flash_error(@error) if @error && @objects.empty?
   <% if @objects.any? %>
     <% counts = Name.count_observations(@objects) %>
 
-    <div class="list-group name-index">
-      <% @objects.each do |name| %>
-        <%= tag.div(class: "list-group-item") do %>
-          <%= tag.span(show_title_id_badge(name, "rss-id mr-4")) %>
-          <%= link_with_query(name.show_link_args) do
-            tag.span(name.user_display_name(@user).html_safe.t,
-                    class: "display-name")
-          end %>
-          <%= tag.span(counts[name.id], class: "badge") if counts[name.id] %>
-        <% end %>
-        <% if @has_descriptions %>
-          <% if (desc = name.description)%>
-            <span><%= desc.authors.map(&:login).join(", ") %></span>
-            <span><%= desc.note_status.map(&:to_s).join("/") %></span>
-            <span><%= :"review_#{desc.review_status}".l %></span>
-          <% else %>
-            <span>--- not the default ---</span>
-          <% end %>
-        <% end %>
-      <% end %>
-    </div>
+    <%= tag.div(class: "list-group") do %>
+      <%= render(partial: "name", collection: @objects, as: :name,
+                 locals: { counts: }) %>
+    <% end %>
 
   <% end %>
 <% end %>
