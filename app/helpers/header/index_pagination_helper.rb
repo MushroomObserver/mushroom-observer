@@ -7,8 +7,13 @@ module Header
 
     def add_pagination(pagination_data, args = {})
       content_for(:index_pagination) do
-        concat(letter_pagination_nav(pagination_data, args))
-        concat(number_pagination_nav(pagination_data, args))
+        concat(tag.div do
+          concat(content_for(:sorter)) if content_for?(:sorter)
+        end)
+        concat(tag.div(class: "d-flex") do
+          concat(letter_pagination_nav(pagination_data, args))
+          concat(number_pagination_nav(pagination_data, args))
+        end)
       end
     end
 
@@ -25,6 +30,7 @@ module Header
       results = capture(&block).to_s
 
       tag.div(id: html_id, data: { q: get_query_param }) do
+        concat(bottom_pagination)
         concat(results)
         concat(bottom_pagination)
       end
@@ -33,7 +39,7 @@ module Header
     def bottom_pagination
       return "" unless content_for?(:index_pagination)
 
-      tag.div(class: "pagination-bottom d-flex justify-content-end") do
+      tag.div(class: "pagination-bottom navbar-flex") do
         content_for(:index_pagination)
       end
     end

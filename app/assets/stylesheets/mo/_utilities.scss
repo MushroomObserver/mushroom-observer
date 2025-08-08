@@ -44,6 +44,10 @@
   flex-shrink: 0 !important;
 }
 
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
 .align-items-start {
   align-items: flex-start !important;
 }
@@ -124,6 +128,10 @@
   float: left !important;
 }
 
+.float-none {
+  float: none !important;
+}
+
 .align-middle {
   vertical-align: middle !important;
 }
@@ -180,6 +188,10 @@
 
 .smaller {
   font-size: 80% !important;
+}
+
+.link-normal {
+  color: inherit !important;
 }
 
 .border-none {
@@ -544,6 +556,10 @@
   padding-right: 1.5rem !important;
 }
 
+.pr-5 {
+  padding-right: 3rem !important;
+}
+
 .text-nowrap {
   white-space: nowrap !important;
 }
@@ -742,6 +758,10 @@
 
 .opacity-0 {
   opacity: 0 !important;
+}
+
+.opacity-75 {
+  opacity: 75% !important;
 }
 
 .gap-2 {

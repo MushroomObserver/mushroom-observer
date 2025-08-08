@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Gather details for items in matrix-style ndex pages.
+# Gather details for items in matrix-style index pages.
 class MatrixBoxPresenter < BasePresenter
   attr_accessor \
     :id,         # id of the target or log object

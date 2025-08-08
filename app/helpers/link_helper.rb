@@ -181,6 +181,7 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
     question: "question-sign",
     alert: "alert",
     list: "list",
+    copy: "copy",
     clone: "duplicate",
     merge: "transfer",
     move: "random",

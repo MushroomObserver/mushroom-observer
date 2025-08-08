@@ -15,10 +15,10 @@ module Header
       title = sort_nav_order_by(query, sorts)
 
       content_for(:sorter) do
-        tag.div(class: "d-inline-block", id: "sorter") do
+        tag.div(class: "d-inline-block pl-3 sorter") do
           concat(tag.label("#{:sort_by_header.l}:",
                            class: "font-weight-normal mr-2 hidden-xs"))
-          concat(sort_nav_dropdown(title:, id: "sorts", links:))
+          concat(sort_nav_dropdown(title:, links:))
         end
       end
     end
@@ -94,12 +94,12 @@ module Header
       model.underscore.pluralize
     end
 
-    def sort_nav_dropdown(title: "", id: "", links: [])
+    def sort_nav_dropdown(title: "", links: [])
       tag.div(class: "dropdown d-inline-block") do
         [
           sort_nav_toggle(title),
           tag.ul(
-            id:, class: "dropdown-menu",
+            class: "sorts dropdown-menu",
             aria: { labelledby: "sort_nav_toggle" }
           ) do
             links.compact.each do |link|
