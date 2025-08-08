@@ -5,22 +5,23 @@ add_show_title(
 add_pager_for(@show_user)
 add_context_nav(user_show_tabs)
 container_class(:full)
+column_classes(:six_even)
 id = @show_user.id
 name = @show_user.login
 %>
 
-<div class="row">
+<%= tag.div(class: "row") do %>
 
-  <div class="col-xs-12 col-lg-5">
+  <%= tag.div(class: yield(:left_columns)) do %>
     <%= render(partial: "users/show/profile") %>
     <% if @show_user.contribution > 0 %>
       <%= render(partial: "users/show/user_stats", locals: { name: name }) %>
     <% end %>
-  </div>
+  <% end %>
 
-  <div class="col-xs-12 col-lg-7">
+  <%= tag.div(class: yield(:right_columns)) do %>
     <%= render(partial: "users/show/best_images", locals: { name: name }) %>
-  </div>
+  <% end %>
 
-</div>
+<% end %>
 <!--.row-->

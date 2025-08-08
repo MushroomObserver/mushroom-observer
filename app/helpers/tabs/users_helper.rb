@@ -79,7 +79,8 @@ module Tabs
     def email_user_question_tab(user)
       InternalLink::Model.new(
         :show_user_email_to.t(name: user.unique_text_name),
-        user, new_question_for_user_path(user.id)
+        user, new_question_for_user_path(user.id),
+        html_options: { icon: :email }
       ).tab
     end
 

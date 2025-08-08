@@ -121,13 +121,7 @@ class MatrixBoxPresenter < BasePresenter
   def user_to_presenter(user)
     self.id = user.id
     self.type = :user
-    # rubocop:disable Rails/OutputSafety
-    # The results of .t and web_date are guaranteed to be safe, and both
-    # user.contribution and observations.count are just numbers.
-    self.detail = "#{:list_users_joined.t}: #{user.created_at.web_date}<br/>
-                   #{:list_users_contribution.t}: #{user.contribution}<br/>
-                   #{:Observations.t}: #{user.observations.size}".html_safe
-    # rubocop:enable Rails/OutputSafety
+    self.detail = user
     self.name = user.unique_text_name
     self.what = user
     self.where = user.location.name if user.location
@@ -136,7 +130,7 @@ class MatrixBoxPresenter < BasePresenter
 
     # Not user.images because that's every image they've uploaded
     self.image_data = {
-      image: user.image_id,
+      image: user.image,
       # for matrix_box_carousels:
       # images: [user.image_id],
       image_link: user.show_link_args,
