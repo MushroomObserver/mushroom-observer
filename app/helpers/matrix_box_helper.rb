@@ -116,7 +116,6 @@ module MatrixBoxHelper
 
   def matrix_box_id_tag(object:)
     show_title_id_badge(object, "rss-id")
-    # tag.small(id, class: "rss-id badge badge-sm badge-id float-right")
   end
 
   # NOTE: This is what gets Turbo updates with the identify UI
