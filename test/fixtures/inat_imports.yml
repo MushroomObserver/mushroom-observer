@@ -66,4 +66,5 @@ ollie_inat_import:
   <<: *DEFAULTS
   user: ollie
   state: <%= InatImport.states[:Done] %>
+  inat_username: null # used in InatPageParserTest
   cancel: true
