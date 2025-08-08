@@ -10,7 +10,7 @@ add_pagination(@pagination_data)
 flash_error(@error) if @error && @objects.empty?
 %>
 
-<% if @name_suggestions.any? %>
+<% if @objects.empty? && @name_suggestions.any? %>
   <%= render(partial: "observations/show/name_suggestions",
              locals: { names: @name_suggestions }) %>
 <% end %>
