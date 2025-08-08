@@ -18,7 +18,7 @@ module Header
     end
 
     def query_filters(query)
-      tag.div(id: "filters",
+      tag.div(id: "filters", class: "position-relative pr-5",
               data: { controller: "filter-caption",
                       query_params: query.params.to_json,
                       query_record: query.record.id,
@@ -41,7 +41,7 @@ module Header
     end
 
     def filter_caption_truncated(query)
-      tag.div(class: "position-relative pr-3 collapse in",
+      tag.div(class: "collapse in",
               id: "caption-truncated",
               data: { filter_caption_target: "truncated" }) do
         concat(filter_caption_toggle_button(true))
@@ -50,7 +50,7 @@ module Header
     end
 
     def filter_caption_full(query)
-      tag.div(class: "position-relative pr-3 collapse", id: "caption-full",
+      tag.div(class: "collapse", id: "caption-full",
               data: { filter_caption_target: "full" }) do
         concat(filter_caption_toggle_button(false))
         concat(filter_caption_params(query, false))
@@ -81,11 +81,25 @@ module Header
 
     def filter_caption_param_text(query, truncate)
       if query.params.except(:order_by).present?
-        query.params.except(:order_by).compact_blank.each do |key, val|
-          filter_caption_one_param(query, key, val, truncate:)
-        end
+        tag = truncate ? :span : :div
+        filter_caption_params_joined(query, query.params, truncate:, tag:)
       else
         :ALL.l
+      end
+    end
+
+    # params_hash is separate from query to enable reusability in subqueries
+    def filter_caption_params_joined(query, params_hash, truncate:, tag:)
+      array = params_hash.except(:order_by).compact_blank.map do |key, val|
+        capture { filter_caption_one_param(query, key, val, truncate:, tag:) }
+      end
+
+      if truncate
+        concat(array.first(CAPTION_TRUNCATE).safe_join(", "))
+        concat("…") if array.length > CAPTION_TRUNCATE
+      else
+        joiner = tag == :span ? ", " : ""
+        concat(array.safe_join(joiner))
       end
     end
 
@@ -94,6 +108,7 @@ module Header
     def filter_caption_one_param(query, key, val, truncate: false, tag: :div)
       concat(content_tag(tag) do
         if key.to_s.include?("_query")
+          # val in this case is a params hash
           filter_caption_subquery(query, key, val, truncate)
         elsif val.is_a?(Hash)
           filter_caption_grouped_params(query, key, val, truncate)
@@ -108,9 +123,7 @@ module Header
     # inside the brackets and indented.
     def filter_caption_subquery(query, label, hash, truncate)
       concat(tag.span("#{:"query_#{label}".l}: [ "))
-      hash.except(:order_by).each do |key, val|
-        filter_caption_one_param(query, key, val, truncate:, tag: :span)
-      end
+      filter_caption_params_joined(query, hash, truncate:, tag: :span)
       concat(tag.span(" ] "))
     end
 
@@ -198,13 +211,15 @@ module Header
     # For values that aren't ids, just join and maybe truncate
     def param_val_itself(key, val, truncate)
       if key == :type # lowercase strings joined by spaces
-        val = val.titleize.split.join(", ")
+        string = val.titleize.split.join(", ")
       elsif val.is_a?(Array)
-        val = val.first(CAPTION_TRUNCATE) if truncate
-        val = val.join(", ")
-        val += ", ..." if truncate && val.length > CAPTION_TRUNCATE
+        string = truncate ? val.first(CAPTION_TRUNCATE) : val
+        string = string.join(", ")
+        string += ", ..." if truncate && val.length > CAPTION_TRUNCATE
+      else
+        string = val
       end
-      val
+      string
     end
 
     # The max number of named items is hardcoded here to 3.

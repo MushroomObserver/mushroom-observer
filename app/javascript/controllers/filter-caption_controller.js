@@ -9,7 +9,7 @@ export default class extends Controller {
     // if not, hide the buttons
     this.fullLength = this.fullTarget.lastChild.innerText.length
     this.truncLength = this.truncatedTarget.lastChild.innerText.length
-    if (Math.abs(this.fullLength - this.truncLength) <= 9) {
+    if (Math.abs(this.fullLength - this.truncLength) <= 3) {
       this.hideButtons()
     }
   }

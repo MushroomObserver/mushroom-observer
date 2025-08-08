@@ -18,18 +18,17 @@ observation_counts = calc_counts(@objects, @query)
 flash_error(@error) if @error && @known_pages.empty? && @undef_pages.empty?
 %>
 
-<%= content_for(:filters) do %>
-  <%= :list_place_names_popularity.t if @objects.count > 1 %>
-  <%= :list_place_names_parenthetical.t %>
-<% end %>
 
 <div class="row mt-3">
-  <div class="col-md-6">
+  <div class="col-md-7">
     <% if @known_pages.any? && @known_data.any? %>
-      <div class="h4 px-3">
+      <div class="h4 px-3 mb-0">
         <%= :list_place_names_known.t %>
         <%= :list_place_names_known_order.t if @default_orders %>
       </div>
+      <%= tag.div(class: "content-block") do %>
+        <%= tag.small(:list_place_names_parenthetical.t) %>
+      <% end %>
       <%= paginated_results do %>
         <div class="list-group">
           <% @known_data.each do |location| %>
@@ -43,7 +42,7 @@ flash_error(@error) if @error && @known_pages.empty? && @undef_pages.empty?
     <% end %>
   </div>
 
-  <div class="col-md-6">
+  <div class="col-md-5">
     <% if @undef_pages.any? && @undef_data.any? %>
       <div class="h4 px-3">
         <%= :list_place_names_undef.t %>
@@ -56,12 +55,13 @@ flash_error(@error) if @error && @known_pages.empty? && @undef_pages.empty?
             location_name = obs[:where] %>
           <div class="list-group-item">
             <%= location_link(location_name, nil, count) %>
-            <%=
-              link_to(
-                :list_place_names_merge.t,
-                matching_locations_for_observations_path(where: location_name)
-              )
-              %>
+            <%= icon_link_to(
+                  :list_place_names_merge.t,
+                  matching_locations_for_observations_path(
+                    where: location_name
+                  ),
+                  icon: :merge, show_text: false
+                ) %>
           </div>
         <% end %>
       </div>

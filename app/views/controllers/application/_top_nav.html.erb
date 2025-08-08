@@ -26,16 +26,15 @@ identify_page = controller.controller_name == "identify"
                  class: "font-weight-bold mr-2", id: "rubric") %>
       <%= tag.div(class: "mr-3 mr-sm-4 mr-lg-5") do
         [
-          nav_create(@user, controller),
-          nav_scan_qr_code(@user, controller)
+          nav_create(@user, controller)
         ].safe_join(" ")
       end %>
-      <%= yield(:sorter) if(content_for?(:sorter)) %>
     <% end %>
 
     <%# right side %>
     <%= tag.div(class: right_classes) do %>
       <%= search_nav_toggle %>
+      <%= nav_scan_qr_code(@user, controller) %>
       <%= tag.ul(class: "nav navbar-nav navbar-right hidden-xs mr-0") do %>
         <%= yield(:context_nav) if content_for?(:context_nav) %>
         <%= render(partial: "application/top_nav/user_nav") if !@user.nil? %>

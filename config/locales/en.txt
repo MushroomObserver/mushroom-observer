@@ -726,7 +726,8 @@
   # close a popup window
   CLOSE: Close
   close: close
-  COPY_THIS_ID: Copy this ID
+  COPY_THIS_ID: "Copy this [:ID]"
+  COPY_THIS_NAME: "Copy this [:NAME]"
   COPIED: Copied
   CREATE: Create
   create: create

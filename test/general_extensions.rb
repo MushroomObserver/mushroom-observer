@@ -517,10 +517,10 @@ module GeneralExtensions
     order_by = by.dup
     reverse = order_by.sub!(/^reverse_/, "") # changes by and returns boolean
     class_name = "#{adjusted_controller_class_name}_by_#{order_by}_link"
-    assert_select("#sorts a.#{class_name}[disabled=disabled]", text, msg)
+    assert_select(".sorts a.#{class_name}[disabled=disabled]", text, msg)
     return unless reverse
 
-    assert_select("#sorts a.#{class_name}[disabled=disabled]",
+    assert_select(".sorts a.#{class_name}[disabled=disabled]",
                   :sort_by_reverse.l, msg)
   end
 

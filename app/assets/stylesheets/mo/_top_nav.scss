@@ -95,6 +95,16 @@
   }
 }
 
+// If sorter is on the right:
+// @media screen and (min-width: $screen-sm-min) {
+//   .sorter {
+//     .dropdown-menu {
+//       right: 0;
+//       left: auto;
+//     }
+//   }
+// }
+
 @media screen and (max-width: $screen-sm-max) {
   #top_nav {
     h4 {
@@ -130,4 +140,9 @@
       padding-right: 0.5rem;
     }
   }
+}
+
+#index_bar {
+  @extend .d-flex, .justify-content-between, .flex-wrap, .border-bottom;
+  border-bottom-color: $navbar-default-border;
 }
