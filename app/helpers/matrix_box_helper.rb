@@ -94,6 +94,7 @@ module MatrixBoxHelper
     # TODO: make box layouts specific to object type
     h_style = presenter.image_data ? "h5" : "h3"
     what = presenter.what # for an obs or rss_log, it's the obs
+    type = presenter.type
     consensus = presenter.consensus || nil
     identify_ui = matrix_box_vote_or_propose_ui(identify, what, consensus)
 
@@ -104,7 +105,7 @@ module MatrixBoxHelper
                           data: { query_results_target: "link" }) do
             [
               matrix_box_id_tag(id: presenter.id),
-              matrix_box_title(name: presenter.name, id: object_id)
+              matrix_box_title(name: presenter.name, id: object_id, type:)
             ].safe_join
           end
         end,
@@ -119,8 +120,9 @@ module MatrixBoxHelper
 
   # NOTE: This is what gets Turbo updates with the identify UI
   #       (does not require presenter, only obs)
-  def matrix_box_title(name:, id:)
-    tag.span(name, class: "rss-name", id: "box_title_#{id}")
+  def matrix_box_title(name:, id:, type:)
+    bold = [:observation, :name].include?(type) ? "" : " font-weight-bold"
+    tag.span(name, class: class_names("rss-name", bold), id: "box_title_#{id}")
   end
 
   # Obs with uncertain name: vote on naming, or propose (if it's "Fungi")
