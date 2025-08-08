@@ -32,10 +32,14 @@ flash_error(@error) if @error && @objects.empty?
 
     <div class="list-group name-index">
       <% @objects.each do |name| %>
-        <%= link_with_query(name.show_link_args, class: "list-group-item") do
-          concat(tag.span(name.user_display_name(@user).html_safe.t, class: "display-name"))
-          concat(tag.span(counts[name.id], class: "badge")) if counts[name.id]
-        end %>
+        <%= tag.div(class: "list-group-item") do %>
+          <%= tag.span(show_title_id_badge(name, "rss-id mr-4")) %>
+          <%= link_with_query(name.show_link_args) do
+            tag.span(name.user_display_name(@user).html_safe.t,
+                    class: "display-name")
+          end %>
+          <%= tag.span(counts[name.id], class: "badge") if counts[name.id] %>
+        <% end %>
         <% if @has_descriptions %>
           <% if (desc = name.description)%>
             <span><%= desc.authors.map(&:login).join(", ") %></span>

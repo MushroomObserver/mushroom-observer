@@ -6,7 +6,8 @@ place = species_list.place_name.t rescue :UNKNOWN.l
 %>
 
 <%= tag.div(class: "list-group-item d-flex align-items-start") do %>
-  <%= tag.div(show_title_id_badge(species_list), class: "h3 my-0") %>
+  <%= tag.div(show_title_id_badge(species_list, "rss-id mr-4"),
+              class: "text-larger") %>
   <%= tag.div do %>
     <%= tag.div do
       [
