@@ -103,7 +103,7 @@ class UsersControllerTest < FunctionalTestCase
   #    show
   #   ---------------
 
-  def test_show
+  def test_show_user_no_query
     user = users(:rolf)
 
     login
@@ -127,6 +127,18 @@ class UsersControllerTest < FunctionalTestCase
       /\?.*id=(\d+).*&\S+=\1/, # id=n followed by another param with same value
       false,
       "Links should not use the same value for id and another param"
+    )
+    assert_select(
+      "a:match('href', ?)", /\?.*flow=prev/, false,
+      "There should not be a Prev/Index/Next UI without a User query"
+    )
+    assert_select(
+      "a:match('href', ?)", /\?.*flow=next/, false,
+      "There should not be a Prev/Index/Next UI without a User query"
+    )
+    assert_select(
+      "#content a:match('href', ?)", /users/, false,
+      "There should not be a Prev/Index/Next UI without a User query"
     )
   end
 

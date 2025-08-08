@@ -76,7 +76,7 @@ module ApplicationHelper
   end
 
   # Call in a layout to sync the title-bar columns with the content columns.
-  def column_classes(columns = :twelve)
+  def column_classes(columns = :twelve) # rubocop:disable Metrics/MethodLength
     content_for(:left_columns, flush: true) do
       case columns
       when :nine_three
@@ -87,6 +87,8 @@ module ApplicationHelper
         class_names("col-xs-12 col-md-7")
       when :six
         class_names("col-xs-12 col-md-6 col-lg-8")
+      when :six_even # users show
+        class_names("col-xs-12 col-lg-6")
       else
         class_names("col-xs-12")
       end
@@ -102,6 +104,8 @@ module ApplicationHelper
         class_names("col-xs-12 col-md-5")
       when :six
         class_names("col-xs-12 col-md-6 col-lg-4")
+      when :six_even
+        class_names("col-xs-12 col-lg-6")
       else
         class_names("col-xs-12")
       end

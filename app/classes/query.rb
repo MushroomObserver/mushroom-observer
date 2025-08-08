@@ -367,6 +367,11 @@ class Query
   end
   delegate :model, to: :class
 
+  def self.type_tag
+    name.demodulize.singularize.underscore.to_sym
+  end
+  delegate :type_tag, to: :class
+
   # Can the current class be called as a subquery of the target Query class?
   def relatable?(target)
     self.class.related?(target, model.name.to_sym)
