@@ -79,7 +79,7 @@ class UsersController < ApplicationController
   def index_display_opts(opts, _query)
     {
       letters: true,
-      include: :user_groups,
+      include: [:user_groups, :observations, :image],
       matrix: !in_admin_mode?
     }.merge(opts)
   end
