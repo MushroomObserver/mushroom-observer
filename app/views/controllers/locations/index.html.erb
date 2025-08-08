@@ -18,8 +18,7 @@ observation_counts = calc_counts(@objects, @query)
 flash_error(@error) if @error && @known_pages.empty? && @undef_pages.empty?
 %>
 
-<%= content_for(:filters) do %>
-  <%= :list_place_names_popularity.t if @objects.count > 1 %>
+<%= tag.div(class: "content-block") do %>
   <%= :list_place_names_parenthetical.t %>
 <% end %>
 
