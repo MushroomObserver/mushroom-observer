@@ -46,6 +46,7 @@
 
 // To make way for floating ID
 .rss-heading {
+  @extend .d-flex, .justify-content-between, .align-items-start;
 
   .rss-name {
     margin-right: 7.5rem;

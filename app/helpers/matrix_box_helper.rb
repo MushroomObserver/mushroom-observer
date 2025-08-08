@@ -101,13 +101,13 @@ module MatrixBoxHelper
     tag.div(class: "rss-what") do
       [
         tag.h5(class: class_names(%w[mt-0 rss-heading], h_style)) do
-          link_with_query(what.show_link_args,
-                          data: { query_results_target: "link" }) do
-            [
-              matrix_box_id_tag(object: presenter.what),
+          [
+            link_with_query(what.show_link_args,
+                            data: { query_results_target: "link" }) do
               matrix_box_title(name: presenter.name, id: object_id, type:)
-            ].safe_join
-          end
+            end,
+            matrix_box_id_tag(object: presenter.what)
+          ].safe_join
         end,
         identify_ui
       ].safe_join
@@ -115,7 +115,7 @@ module MatrixBoxHelper
   end
 
   def matrix_box_id_tag(object:)
-    show_title_id_badge(object, "rss-id float-right")
+    show_title_id_badge(object, "rss-id")
     # tag.small(id, class: "rss-id badge badge-sm badge-id float-right")
   end
 
