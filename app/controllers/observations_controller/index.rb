@@ -79,9 +79,10 @@ class ObservationsController
       search = PatternSearch::Observation.new(pattern)
       return render_pattern_search_error(search) if search.errors.any?
 
-      @suggest_alternate_spellings = search.query.params[:pattern]
       # Call create_query to apply user content filters
       query = create_query(:Observation, search.query.params)
+      make_name_suggestions(search)
+
       if params[:needs_naming]
         redirect_to(
           identify_observations_path(q: get_query_param(query))
@@ -90,6 +91,14 @@ class ObservationsController
       else
         [query, {}]
       end
+    end
+
+    def make_name_suggestions(search)
+      alternate_spellings = search.query.params[:pattern]
+      return unless alternate_spellings && @objects.empty?
+
+      @name_suggestions =
+        Name.suggest_alternate_spellings(alternate_spellings)
     end
 
     def render_pattern_search_error(search)
