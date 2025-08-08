@@ -33,7 +33,7 @@ module Header
       return nil unless params[:q]
 
       query = Query.safe_find(params[:q].dealphabetize)
-      return nil if [object.type_tag, :rss_log].exclude?(query&.model&.type_tag)
+      return nil if [object.type_tag, :rss_log].exclude?(query&.type_tag)
 
       query
     end

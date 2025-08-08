@@ -16,6 +16,10 @@ class QueryTest < UnitTestCase
     query = Query.lookup(:Observation)
     assert(query.record.new_record?)
     assert_equal("Observation", query.model.to_s)
+    assert_equal(:observation, query.type_tag)
+    # Test QueryRecord.model? method:
+    query.record.save
+    assert(QueryRecord.model?(:Observation, query.record.id.alphabetize))
 
     query2 = Query.lookup_and_save(:Observation)
     assert_not(query2.record.new_record?)
