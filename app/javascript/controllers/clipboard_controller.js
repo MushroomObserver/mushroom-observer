@@ -12,8 +12,8 @@ export default class extends Controller {
   copy() {
     navigator.clipboard.writeText(this.sourceTarget.innerText)
     // this.sourceTarget.dataset.title = "Copied"
-    const tooltipInner =
-      this.element.querySelector(".tooltip-inner")
+    const tooltipInner = this.element.querySelector(".tooltip-inner") ||
+      this.sourceTarget.nextElementSibling.querySelector(".tooltip-inner")
     if (tooltipInner) { tooltipInner.innerText = this.copiedValue }
   }
 }
