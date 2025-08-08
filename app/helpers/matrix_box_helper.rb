@@ -104,7 +104,7 @@ module MatrixBoxHelper
           link_with_query(what.show_link_args,
                           data: { query_results_target: "link" }) do
             [
-              matrix_box_id_tag(id: presenter.id),
+              matrix_box_id_tag(object: presenter.what),
               matrix_box_title(name: presenter.name, id: object_id, type:)
             ].safe_join
           end
@@ -114,8 +114,9 @@ module MatrixBoxHelper
     end
   end
 
-  def matrix_box_id_tag(id:)
-    tag.small("(#{id})", class: "rss-id float-right")
+  def matrix_box_id_tag(object:)
+    show_title_id_badge(object, "rss-id float-right")
+    # tag.small(id, class: "rss-id badge badge-sm badge-id float-right")
   end
 
   # NOTE: This is what gets Turbo updates with the identify UI
@@ -169,11 +170,22 @@ module MatrixBoxHelper
     return unless presenter.detail.present? || presenter.display_time.present?
 
     tag.div(class: "panel-footer log-footer") do
-      if presenter.detail.present?
+      if presenter.detail.is_a?(User)
+        detail = matrix_box_user_detail(presenter.what)
+        concat(tag.div(detail, class: "rss-detail small"))
+      elsif presenter.detail.present?
         concat(tag.div(presenter.detail, class: "rss-detail small"))
       end
       concat(tag.div(presenter.display_time, class: "rss-what small"))
     end
+  end
+
+  def matrix_box_user_detail(user)
+    [
+      "#{:list_users_joined.l}: #{user.created_at.web_date}",
+      "#{:list_users_contribution.l}: #{user.contribution}",
+      link_to(:OBSERVATIONS.l, observations_path(by_user: user.id))
+    ].safe_join(tag.br)
   end
 
   # Obs with uncertain name: mark as reviewed (to skip in future)

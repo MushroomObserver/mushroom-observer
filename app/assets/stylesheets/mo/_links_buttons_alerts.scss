@@ -40,6 +40,10 @@
   flex-shrink: 0;
   // align-self: self-start;
 
+  &.rss-id {
+    font-size: 80% !important;
+  }
+
   &:hover {
     background-color: $text-color;
     color: $body-bg;

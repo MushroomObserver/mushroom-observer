@@ -54,6 +54,8 @@
   // Standardize the size of the ID
   small.rss-id {
     font-size: 1.05rem !important;
+    color: $text-color;
+    border-color: $text-color;
   }
   // small {
   //   font-size: 81%;
