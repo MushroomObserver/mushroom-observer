@@ -1,0 +1,23 @@
+<%= tag.div(class: "alert-warning") do %>
+  <%= tag.p("#{:list_observations_suggestions.t}:") %>
+  <% names.sort_by(&:sort_name).each do |name| %>
+    <%= tag.div(class: "pl-3") do %>
+      <%=
+        search = PatternSearch::Observation.new(name.text_name)
+        count = search.query.num_results
+        if count.zero?
+          # link to Name because a pattern search would be circular
+          :list_observation_name.t + ": " +
+          link_to(
+            name.display_name.t, name.show_link_args
+          ) + " (0)"
+        else
+          :list_observation_observations.t + " " +
+          link_to(
+            name.display_name.t, observations_path(pattern: name.text_name)
+          ) + " (#{count})"
+        end
+      %>
+    <% end %>
+  <% end %>
+<% end %>

@@ -61,11 +61,19 @@ class NamesController < ApplicationController
       render("names/index")
       [nil, {}]
     else
-      @suggest_alternate_spellings = search.query.params[:pattern]
       # Call create_query to apply user content filters
       query = create_query(:Name, search.query.params)
+      make_name_suggestions(search)
       [query, {}]
     end
+  end
+
+  def make_name_suggestions(search)
+    alternate_spellings = search.query.params[:pattern]
+    return unless alternate_spellings && @objects.empty?
+
+    @name_suggestions =
+      Name.suggest_alternate_spellings(alternate_spellings)
   end
 
   # Disabling the cop because subaction methods are going away soon
