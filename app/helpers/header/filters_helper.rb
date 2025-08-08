@@ -88,6 +88,7 @@ module Header
       end
     end
 
+    # params_hash is separate from query to enable reusability in subqueries
     def filter_caption_params_joined(query, params_hash, truncate:, tag:)
       array = params_hash.except(:order_by).compact_blank.map do |key, val|
         capture { filter_caption_one_param(query, key, val, truncate:, tag:) }
@@ -215,6 +216,8 @@ module Header
         val = val.first(CAPTION_TRUNCATE) if truncate
         string = val.join(", ")
         string += ", …" if truncate && val.length > CAPTION_TRUNCATE
+      else
+        string = val
       end
       string
     end
