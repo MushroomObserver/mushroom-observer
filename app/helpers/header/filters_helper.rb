@@ -213,9 +213,9 @@ module Header
       if key == :type # lowercase strings joined by spaces
         string = val.titleize.split.join(", ")
       elsif val.is_a?(Array)
-        val = val.first(CAPTION_TRUNCATE) if truncate
-        string = val.join(", ")
-        string += ", …" if truncate && val.length > CAPTION_TRUNCATE
+        string = truncate ? val.first(CAPTION_TRUNCATE) : val
+        string = string.join(", ")
+        string += ", ..." if truncate && val.length > CAPTION_TRUNCATE
       else
         string = val
       end

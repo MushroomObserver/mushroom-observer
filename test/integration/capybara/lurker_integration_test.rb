@@ -291,17 +291,17 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     end
 
     # Try sorting differently.
-    within("#header .sorts") { click_link(text: "User") }
+    within(first("#results .sorts")) { click_link(text: "User") }
     check_results_length(save_results)
 
     # Date is ambiguous, there's also 'Date Posted'
-    within("#header .sorts") { click_link(exact_text: "Date") }
+    within(first("#results .sorts")) { click_link(exact_text: "Date") }
     check_results_length(save_results)
 
-    within("#header .sorts") { click_link(text: "Reverse Order") }
+    within(first("#results .sorts")) { click_link(text: "Reverse Order") }
     check_results_length(save_results)
 
-    within("#header .sorts") { click_link(text: "Name") }
+    within(first("#results .sorts")) { click_link(text: "Name") }
     # Last time through - reset `save_results` with current results
     save_results = check_results_length(save_results)
     # Must set `save_hrefs` here to avoid variable going stale...
