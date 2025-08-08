@@ -1,7 +1,7 @@
 <%= tag.div(class: "alert-warning") do %>
   <%= tag.p("#{:list_observations_suggestions.t}:") %>
   <% names.sort_by(&:sort_name).each do |name| %>
-    <div class="pl-3">
+    <%= tag.div(class: "pl-3") do %>
       <%=
         search = PatternSearch::Observation.new(name.text_name)
         count = search.query.num_results
@@ -18,6 +18,6 @@
           ) + " (#{count})"
         end
       %>
-    </div>
+    <% end %>
   <% end %>
 <% end %>
