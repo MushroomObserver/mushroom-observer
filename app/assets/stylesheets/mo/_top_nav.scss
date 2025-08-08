@@ -140,3 +140,8 @@
     }
   }
 }
+
+#index_bar {
+  @extend .d-flex, .justify-content-between, .flex-wrap, .border-bottom;
+  border-bottom-color: $navbar-default-border;
+}

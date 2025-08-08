@@ -23,15 +23,6 @@ column_classes(:nine_three)
     <%= render(partial: "shared/list_search",
                locals: { object: @species_list }) %>
 
-    <%# Put pagination down where it feels right %>
-    <% if content_for?(:index_pagination) %>
-      <%= tag.div(
-        class: "pagination-top d-flex justify-content-end align-items-center"
-      ) do
-        yield(:index_pagination)
-      end %>
-    <% end %>
-
     <%= paginated_results do %>
       <%= tag.div(class: "list-group") do %>
         <% if @objects.any? %>
