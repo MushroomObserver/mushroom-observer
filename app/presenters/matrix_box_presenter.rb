@@ -136,7 +136,7 @@ class MatrixBoxPresenter < BasePresenter
 
     # Not user.images because that's every image they've uploaded
     self.image_data = {
-      image: user.image_id,
+      image: user.image,
       # for matrix_box_carousels:
       # images: [user.image_id],
       image_link: user.show_link_args,
