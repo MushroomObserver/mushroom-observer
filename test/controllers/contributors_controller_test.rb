@@ -10,13 +10,13 @@ class ContributorsControllerTest < FunctionalTestCase
   def test_page_load
     login
     get(:index)
-    assert_template("users/_user")
+    assert_template("contributors/_contributor")
   end
 
   def test_indexing_by_id
     login
     get(:index, params: { id: users(:rolf).id })
-    assert_template("users/_user")
+    assert_template("contributors/_contributor")
   end
 
   def test_index_with_non_default_sort

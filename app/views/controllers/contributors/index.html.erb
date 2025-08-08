@@ -14,6 +14,6 @@ add_pagination(@pagination_data)
 <!--.row-->
 
 <%= paginated_results do %>
-  <%= matrix_table(partial: "users/user",
+  <%= matrix_table(partial: "contributors/contributor",
                    objects: @objects, as: :user) %>
 <% end %>
