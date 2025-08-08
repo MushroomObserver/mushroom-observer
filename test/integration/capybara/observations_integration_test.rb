@@ -47,7 +47,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     next_obs = observations.second
 
     # Show first Observation from Your Observations search.
-    click_link(first_obs.id.to_s)
+    click_link(first_obs.text_name)
     # Destroy it.
     click_button(class: "destroy_observation_link_#{first_obs.id}")
 
