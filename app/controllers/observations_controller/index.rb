@@ -75,9 +75,12 @@ class ObservationsController
       end
     end
 
+    # ObservationsIntegrationTest#
+    # test_observation_pattern_search_with_correctable_pattern/
     def return_pattern_search_results(pattern)
       query = create_query(:Observation, pattern:)
-      return render_pattern_search_error(query) if search.errors.any?
+      errors = query.validation_errors
+      return render_pattern_search_error(errors) if errors.any?
 
       make_name_suggestions(query)
 
@@ -99,8 +102,8 @@ class ObservationsController
         Name.suggest_alternate_spellings(alternate_spellings)
     end
 
-    def render_pattern_search_error(query)
-      query.validation_messages.each { |error| flash_error(error.to_s) }
+    def render_pattern_search_error(errors)
+      errors.each { |error| flash_error(error.to_s) }
       if params[:needs_naming]
         redirect_to(identify_observations_path(q: get_query_param))
       end

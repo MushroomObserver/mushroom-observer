@@ -52,12 +52,12 @@ class NamesController < ApplicationController
     end
   end
 
+  # NamesIntegrationTest#test_name_pattern_search_with_near_miss_corrected
   def show_non_id_pattern_results(pattern)
     query = create_query(:Name, pattern:)
-    if query.validation_messages.any?
-      query.validation_messages.each do |error|
-        flash_error(error.to_s)
-      end
+    errors = query.validation_errors
+    if errors.any?
+      errors.each { |error| flash_error(error.to_s) }
       render("names/index")
       [nil, {}]
     else
