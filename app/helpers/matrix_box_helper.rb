@@ -84,7 +84,8 @@ module MatrixBoxHelper
       [
         matrix_box_what(presenter, object_id, identify),
         matrix_box_where(presenter),
-        matrix_box_when_who(presenter)
+        matrix_box_when_who(presenter),
+        matrix_box_source_credit(presenter)
       ].safe_join
     end
   end
@@ -161,6 +162,28 @@ module MatrixBoxHelper
         concat(tag.span(presenter.when, class: "rss-when"))
         concat(": ")
         concat(user_link(presenter.who, nil, class: "rss-who"))
+      end
+    end
+  end
+
+  def matrix_box_source_credit(presenter)
+    return unless presenter.respond_to?(:source_credit) ||
+                  presenter.respond_to?(:target) # e.g. rss_log presenter
+
+    target = if presenter.respond_to?(:source_credit)
+               presenter
+             elsif presenter.respond_to?(:target) # rss_log presenter
+               presenter.target
+             else
+               return nil
+             end
+
+    return unless target.respond_to?(:source_credit) &&
+                  target.source_noteworthy?
+
+    tag.div(class: "textile") do
+      tag.small do
+        target.source_credit.tpl
       end
     end
   end

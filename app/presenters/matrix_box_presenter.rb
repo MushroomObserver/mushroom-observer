@@ -51,15 +51,8 @@ class MatrixBoxPresenter < BasePresenter
       self.location = target.location
     end
     self.time = rss_log.updated_at
-
     figure_out_rss_log_target_images(target)
-    return unless (temp = rss_log.detail)
-
-    temp = target.source_credit.tpl if target.respond_to?(:source_credit) &&
-                                       target.source_noteworthy?
-
-    # To avoid calling rss_log.detail twice
-    self.detail = temp
+    self.detail = rss_log.detail
   end
 
   # Grabs all the information needed for view from Image instance.
