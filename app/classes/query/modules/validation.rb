@@ -8,14 +8,14 @@
 #  values. Each value is ultimately validated separately, via methods below
 #  that are specific to a data type. In the case of subqueries, the whole
 #  package of values is sent to a new Query instantiation which returns its own
-#  validation_messages. These are added to this query's messages.
+#  validation_errors. These are added to this query's messages.
 #
 #  Each validation method here may first "clean" the value, e.g. substituting
 #  ids for instances. Generally validators do not change data, but we do here
 #  to offer callers the convenience of passing instances rather than ids.
 #
 #  In the event it gets data that it cannot parse, it stores a message in the
-#  array of `@validation_messages`, and saves that to the Query. Callers can
+#  array of `@validation_errors`, and saves that to the Query. Callers can
 #  access these messages to return them via flash to users, for example when
 #  the query comes from a form.
 #
