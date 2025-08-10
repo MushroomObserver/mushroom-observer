@@ -76,6 +76,8 @@ class ObservationsController
     end
 
     def return_pattern_search_results(pattern)
+      # Have to use PatternSearch here to catch invalid PatternSearch terms.
+      # Can't just send pattern to Query as create_query(:Observation, pattern:)
       search = PatternSearch::Observation.new(pattern)
       return render_pattern_search_error(search) if search.errors.any?
 
@@ -93,12 +95,17 @@ class ObservationsController
       end
     end
 
+    # Different from NamesController. Returns arrays of [name, count]
     def make_name_suggestions(search)
       alternate_spellings = search.query.params[:pattern]
       return unless alternate_spellings && @objects.empty?
 
-      @name_suggestions =
-        Name.suggest_alternate_spellings(alternate_spellings)
+      names = Name.suggest_alternate_spellings(alternate_spellings)
+      @name_suggestions = names.sort_by(&:sort_name).map do |name|
+        query = Query.create_query(:Observation, pattern: name.text_name)
+        count = query.num_results
+        [name, count]
+      end
     end
 
     def render_pattern_search_error(search)

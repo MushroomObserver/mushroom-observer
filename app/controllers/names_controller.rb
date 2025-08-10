@@ -53,6 +53,8 @@ class NamesController < ApplicationController
   end
 
   def show_non_id_pattern_results(pattern)
+    # Have to use PatternSearch here to catch invalid PatternSearch terms.
+    # Can't just send pattern to Query as create_query(:Observation, pattern:)
     search = PatternSearch::Name.new(pattern)
     if search.errors.any?
       search.errors.each do |error|
