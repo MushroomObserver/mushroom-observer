@@ -76,12 +76,10 @@ class ObservationsController
     end
 
     def return_pattern_search_results(pattern)
-      search = PatternSearch::Observation.new(pattern)
-      return render_pattern_search_error(search) if search.errors.any?
+      query = create_query(:Observation, pattern:)
+      return render_pattern_search_error(query) if search.errors.any?
 
-      # Call create_query to apply user content filters
-      query = create_query(:Observation, search.query.params)
-      make_name_suggestions(search)
+      make_name_suggestions(query)
 
       if params[:needs_naming]
         redirect_to(
@@ -93,16 +91,16 @@ class ObservationsController
       end
     end
 
-    def make_name_suggestions(search)
-      alternate_spellings = search.query.params[:pattern]
+    def make_name_suggestions(query)
+      alternate_spellings = query.params[:pattern]
       return unless alternate_spellings && @objects.empty?
 
       @name_suggestions =
         Name.suggest_alternate_spellings(alternate_spellings)
     end
 
-    def render_pattern_search_error(search)
-      search.errors.each { |error| flash_error(error.to_s) }
+    def render_pattern_search_error(query)
+      query.validation_messages.each { |error| flash_error(error.to_s) }
       if params[:needs_naming]
         redirect_to(identify_observations_path(q: get_query_param))
       end

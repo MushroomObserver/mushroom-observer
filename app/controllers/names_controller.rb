@@ -53,23 +53,21 @@ class NamesController < ApplicationController
   end
 
   def show_non_id_pattern_results(pattern)
-    search = PatternSearch::Name.new(pattern)
-    if search.errors.any?
-      search.errors.each do |error|
+    query = create_query(:Name, pattern:)
+    if query.validation_messages.any?
+      query.validation_messages.each do |error|
         flash_error(error.to_s)
       end
       render("names/index")
       [nil, {}]
     else
-      # Call create_query to apply user content filters
-      query = create_query(:Name, search.query.params)
-      make_name_suggestions(search)
+      make_name_suggestions(query)
       [query, {}]
     end
   end
 
-  def make_name_suggestions(search)
-    alternate_spellings = search.query.params[:pattern]
+  def make_name_suggestions(query)
+    alternate_spellings = query.params[:pattern]
     return unless alternate_spellings && @objects.empty?
 
     @name_suggestions =
@@ -77,7 +75,6 @@ class NamesController < ApplicationController
   end
 
   # Disabling the cop because subaction methods are going away soon
-  # rubocop:disable Naming/PredicatePrefix
   # Display list of names that have observations.
   def has_observations
     query = create_query(:Name, has_observations: 1)
@@ -90,7 +87,6 @@ class NamesController < ApplicationController
     query = create_query(:Name, has_descriptions: 1)
     [query, {}]
   end
-  # rubocop:enable Naming/PredicatePrefix
 
   # Display list of the most popular 100 names that don't have descriptions.
   # NOTE: all this extra info and help will be lost if user re-sorts.

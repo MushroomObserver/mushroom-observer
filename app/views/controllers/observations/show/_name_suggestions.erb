@@ -3,8 +3,8 @@
   <% names.sort_by(&:sort_name).each do |name| %>
     <%= tag.div(class: "pl-3") do %>
       <%=
-        search = PatternSearch::Observation.new(name.text_name)
-        count = search.query.num_results
+        query = Query.create_query(:Observation, pattern: name.text_name)
+        count = query.num_results
         if count.zero?
           # link to Name because a pattern search would be circular
           :list_observation_name.t + ": " +
