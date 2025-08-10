@@ -78,6 +78,7 @@ class ObservationsController
     # ObservationsIntegrationTest#
     # test_observation_pattern_search_with_correctable_pattern/
     def return_pattern_search_results(pattern)
+      # NOTE: the **controller** method `create_query` applies user filters
       query = create_query(:Observation, pattern:)
       errors = query.validation_errors
       return render_pattern_search_error(errors) if errors.any?

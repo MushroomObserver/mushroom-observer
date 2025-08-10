@@ -54,6 +54,7 @@ class NamesController < ApplicationController
 
   # NamesIntegrationTest#test_name_pattern_search_with_near_miss_corrected
   def show_non_id_pattern_results(pattern)
+    # NOTE: the **controller** method `create_query` applies user filters
     query = create_query(:Name, pattern:)
     errors = query.validation_errors
     if errors.any?
