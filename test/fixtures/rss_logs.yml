@@ -472,8 +472,8 @@ recorder_obs_rss_log:
 
 imported_inat_obs_rss_log:
   <<: *DEFAULTS
-  created_at: <%= Time.now.utc %>
-  updated_at: <%= Time.now.utc %>
+  created_at: 2025-08-01 04:05:03
+  updated_at: 2025-08-01 04:05:03
   observation: imported_inat_obs
   notes: "log_observation_created user dick\n"
 
