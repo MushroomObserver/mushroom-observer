@@ -150,4 +150,14 @@ class RssLogsControllerTest < FunctionalTestCase
     assert_match(activity_logs_path,
                  @response.header["Location"], "Redirected to wrong page")
   end
+
+  def test_rss_log_display_source_credit
+    obs = observations(:imported_inat_obs)
+
+    login
+    get(:index, params: { type: :observation })
+
+    assert_includes(@response.body, obs.source_credit.tpl,
+                    "RssLog is missing Source credit")
+  end
 end

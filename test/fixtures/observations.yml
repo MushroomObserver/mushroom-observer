@@ -35,6 +35,7 @@ DEFAULTS: &DEFAULTS
   classification: ""
   rss_log: $LABEL_rss_log
   needs_naming: 1
+  source: nil
 
 minimal_unknown_obs:
   <<: *DEFAULTS
@@ -813,7 +814,11 @@ recorder_obs:
 imported_inat_obs:
   <<: *DEFAULTS
   user: dick
+  created_at: <%= Time.now.utc %>
+  updated_at: <%= Time.now.utc %>
+  log_updated_at: <%= Time.now.utc %>
   inat_id: 12345
+  source: <%= Observation.sources[:mo_inat_import] %>
 
 provisional_obs:
   <<: *DEFAULTS

@@ -472,7 +472,10 @@ recorder_obs_rss_log:
 
 imported_inat_obs_rss_log:
   <<: *DEFAULTS
+  created_at: <%= Time.now.utc %>
+  updated_at: <%= Time.now.utc %>
   observation: imported_inat_obs
+  notes: "log_observation_created user dick\n"
 
 species_list_rss_log:
   species_list: first_species_list
