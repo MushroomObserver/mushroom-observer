@@ -1,10 +1,8 @@
 <%= tag.div(class: "alert-warning") do %>
   <%= tag.p("#{:list_observations_suggestions.t}:") %>
-  <% names.sort_by(&:sort_name).each do |name| %>
+  <% names.each do |name, count| %>
     <%= tag.div(class: "pl-3") do %>
       <%=
-        query = Query.create_query(:Observation, pattern: name.text_name)
-        count = query.num_results
         if count.zero?
           # link to Name because a pattern search would be circular
           :list_observation_name.t + ": " +

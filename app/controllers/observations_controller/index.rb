@@ -75,15 +75,15 @@ class ObservationsController
       end
     end
 
-    # ObservationsIntegrationTest#
-    # test_observation_pattern_search_with_correctable_pattern/
     def return_pattern_search_results(pattern)
-      # NOTE: the **controller** method `create_query` applies user filters
-      query = create_query(:Observation, pattern:)
-      errors = query.validation_errors
-      return render_pattern_search_error(errors) if errors.any?
+      # Have to use PatternSearch here to catch invalid PatternSearch terms.
+      # Can't just send pattern to Query as create_query(:Observation, pattern:)
+      search = PatternSearch::Observation.new(pattern)
+      return render_pattern_search_error(search) if search.errors.any?
 
-      make_name_suggestions(query)
+      # Call create_query to apply user content filters
+      query = create_query(:Observation, search.query.params)
+      make_name_suggestions(search)
 
       if params[:needs_naming]
         redirect_to(
@@ -95,16 +95,21 @@ class ObservationsController
       end
     end
 
-    def make_name_suggestions(query)
-      alternate_spellings = query.params[:pattern]
+    # Different from NamesController. Returns arrays of [name, count]
+    def make_name_suggestions(search)
+      alternate_spellings = search.query.params[:pattern]
       return unless alternate_spellings && @objects.empty?
 
-      @name_suggestions =
-        Name.suggest_alternate_spellings(alternate_spellings)
+      names = Name.suggest_alternate_spellings(alternate_spellings)
+      @name_suggestions = names.sort_by(&:sort_name).map do |name|
+        query = Query.create_query(:Observation, pattern: name.text_name)
+        count = query.num_results
+        [name, count]
+      end
     end
 
-    def render_pattern_search_error(errors)
-      errors.each { |error| flash_error(error.to_s) }
+    def render_pattern_search_error(search)
+      search.errors.each { |error| flash_error(error.to_s) }
       if params[:needs_naming]
         redirect_to(identify_observations_path(q: get_query_param))
       end
