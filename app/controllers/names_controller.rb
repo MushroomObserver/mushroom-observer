@@ -77,6 +77,7 @@ class NamesController < ApplicationController
 
   # Disabling the cop because subaction methods are going away soon
   # Display list of names that have observations.
+  # rubocop:disable Naming/PredicatePrefix
   def has_observations
     query = create_query(:Name, has_observations: 1)
     [query, {}]
@@ -88,6 +89,7 @@ class NamesController < ApplicationController
     query = create_query(:Name, has_descriptions: 1)
     [query, {}]
   end
+  # rubocop:enable Naming/PredicatePrefix
 
   # Display list of the most popular 100 names that don't have descriptions.
   # NOTE: all this extra info and help will be lost if user re-sorts.
