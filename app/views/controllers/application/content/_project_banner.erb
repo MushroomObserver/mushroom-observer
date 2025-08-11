@@ -9,11 +9,14 @@ title_id = is_project ? "title" : "banner_title"
   <%= tag.div(class: "col-xs-12", id: "project_banner") do %>
     <%= yield(:banner_image) %>
     <%= tag.div(class: "bottom-left ml-3 mb-3 p-2") do %>
-      <%= tag.div(class: "navbar-flex") do %>
-        <%= tag.h1(yield(:banner_title),
-                   class: "h3 banner-image-text", id: title_id) -%>
-        <% if is_project && content_for?(:edit_icons) %>
-          <%= tag.div(yield(:edit_icons)) %>
+      <%= tag.h1(class: "h3 banner-image-text", id: title_id) do %>
+        <%= tag.div(class: "d-flex align-items-center") do %>
+          <%= yield(:banner_title) %>
+          <% if is_project && content_for?(:edit_icons) %>
+            <%= tag.ul(class: "nav navbar-nav object_edit h4") do
+              yield(:edit_icons)
+            end %>
+          <% end %>
         <% end %>
       <% end %>
       <% if content_for?(:project_location) %>
