@@ -6,8 +6,8 @@ class LocationsControllerTest < FunctionalTestCase
   # EMAIL TESTS, currently in Names, Locations and their Descriptions
   # Has to be defined on class itself, include doesn't seem to work
   def self.report_email(email)
-    @@emails ||= []
-    @@emails << email
+    @emails ||= []
+    @emails << email
   end
 
   def setup
@@ -15,22 +15,22 @@ class LocationsControllerTest < FunctionalTestCase
     @chg_pts  = 10
     @auth_pts = 100
     @edit_pts = 10
-    @@emails = []
+    @emails = []
     super
   end
 
   def assert_email_generated
-    assert_not_empty(@@emails, "Was expecting an email notification.")
+    assert_not_empty(@emails, "Was expecting an email notification.")
   ensure
-    @@emails = []
+    @emails = []
   end
 
   def assert_no_emails
-    msg = @@emails.join("\n")
-    assert(@@emails.empty?,
+    msg = @emails.join("\n")
+    assert(@emails.empty?,
            "Wasn't expecting any email notifications; got:\n#{msg}")
   ensure
-    @@emails = []
+    @emails = []
   end
 
   # Init params based on existing location.
