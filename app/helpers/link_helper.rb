@@ -250,7 +250,7 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
 
   # Note `link_to` - not a <button> element, but an <a> because it's a GET
   def edit_button(target:, name: nil, **args)
-    # necessary if nil/empty string passed
+    # target could just be a path
     name ||= if target.is_a?(String)
                :EDIT.l
              else
