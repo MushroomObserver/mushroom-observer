@@ -85,7 +85,7 @@ module MatrixBoxHelper
         matrix_box_what(presenter, object_id, identify),
         matrix_box_where(presenter),
         matrix_box_when_who(presenter),
-        tag.small(matrix_box_source_credit(presenter))
+        tag.div(matrix_box_source_credit(presenter), class: "small mt-3")
       ].safe_join
     end
   end
