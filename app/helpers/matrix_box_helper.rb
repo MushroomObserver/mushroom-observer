@@ -176,7 +176,7 @@ module MatrixBoxHelper
     return unless target.respond_to?(:source_credit) &&
                   target.source_noteworthy?
 
-    tag.div(class: "textile") do
+    tag.div do
       tag.small do
         target.source_credit.tpl
       end
