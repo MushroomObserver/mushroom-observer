@@ -294,7 +294,7 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
       identifier = "" # can send one via args[:class]
     else
       prefix = action == :destroy ? "" : "#{action}_"
-      path_args = add_back_param_to_button_atts
+      path_args = add_back_param_to_button_atts(action)
       path = add_query_param(
         send(:"#{prefix}#{target.type_tag}_path", target.id, **path_args)
       )
@@ -310,14 +310,17 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
     [path, identifier, icon, content]
   end
 
-  BACKABLES = %w[collection_numbers herbarium_records sequences].freeze
+  SHOW_OBS_EDITABLES = %w[
+    collection_numbers herbarium_records sequences external_links
+  ].freeze
 
   # This allows expected and tested behavior of either
   # - returning to :show or :index of these types of records
   # - returning to the :show page of the observation they're associated with
   # depending on what page the form request originated.
-  def add_back_param_to_button_atts
-    return {} unless BACKABLES.include?(controller.controller_name)
+  def add_back_param_to_button_atts(action)
+    return {} unless action == :edit &&
+                     SHOW_OBS_EDITABLES.include?(controller.controller_name)
 
     case action_name
     when "show"
