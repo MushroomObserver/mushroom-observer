@@ -85,7 +85,7 @@ module MatrixBoxHelper
         matrix_box_what(presenter, object_id, identify),
         matrix_box_where(presenter),
         matrix_box_when_who(presenter),
-        matrix_box_source_credit(presenter)
+        tag.small(matrix_box_source_credit(presenter))
       ].safe_join
     end
   end
@@ -176,7 +176,7 @@ module MatrixBoxHelper
     return unless target.respond_to?(:source_credit) &&
                   target.source_noteworthy?
 
-    tag.div do
+    tag.div(class: "source-credit") do
       tag.small do
         target.source_credit.tpl
       end
