@@ -11,9 +11,20 @@
 #   %>
 #
 module Header
-  module InterestIconsHelper
-    # This will cause the set of three icons to be rendered floating in the
-    # top-right corner of the content portion of the page.
+  module InterestAndEditIconsHelper
+    # Edit and destroy icons for the show page title bar.
+    def add_edit_icons(object)
+      return unless check_permission(object)
+
+      content_for(:edit_icons) do
+        [
+          tag.li { edit_button(target: object, icon: :edit) },
+          tag.li { destroy_button(target: object, icon: :delete) }
+        ].safe_join
+      end
+    end
+
+    # Interest icons for email alerts, for the show page title bar.
     def add_interest_icons(user, object)
       return unless user
 
@@ -26,17 +37,6 @@ module Header
             tag.li { img2 + img3 }
           ].safe_join
         end
-      end
-    end
-
-    def add_edit_icons(object)
-      return unless check_permission(object)
-
-      content_for(:edit_icons) do
-        [
-          tag.li { edit_button(target: object, icon: :edit) },
-          tag.li { destroy_button(target: object, icon: :delete) }
-        ].safe_join
       end
     end
 

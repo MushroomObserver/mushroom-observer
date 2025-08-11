@@ -1,10 +1,9 @@
 <%
 add_show_title(@location.display_name, @location)
-add_context_nav(location_show_tabs)
 if @user
-  add_pager_for(@location)
-  add_interest_icons(@user, @location)
   add_edit_icons(@location)
+  add_interest_icons(@user, @location)
+  add_pager_for(@location)
 end
 container_class(:full)
 column_classes(:seven_five)

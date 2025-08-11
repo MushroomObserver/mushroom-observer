@@ -1,7 +1,7 @@
 <%
 container_class(:wide)
 add_show_title(@article.display_title.t, @article)
-add_context_nav(article_show_tabs(article: @article, user: @user))
+add_edit_icons(@article)
 %>
 
 <%= content_padded do %>

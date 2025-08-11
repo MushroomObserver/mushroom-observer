@@ -63,8 +63,8 @@ class ArticlesControllerTest < FunctionalTestCase
     # Prove privileged user gets extra links
     login(users(:article_writer).login)
     get(:show, params: { id: article.id })
-    assert_select("a", text: "Create Article")
-    assert_select("a", text: :EDIT.l)
+    assert_select("a", text: "New Article")
+    assert_select("a", text: :edit_object.t(type: :article))
     assert_select(".destroy_article_link_#{article.id}", true,
                   "Page is missing Destroy button")
 

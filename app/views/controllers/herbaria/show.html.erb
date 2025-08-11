@@ -1,7 +1,8 @@
 <%
 add_show_title(@herbarium.format_name.t, @herbarium)
+add_edit_icons(@herbarium)
 add_pager_for(@herbarium)
-add_context_nav(herbarium_show_tabs(herbarium: @herbarium, user: @user))
+add_context_nav(herbarium_show_tabs)
 container_class(:wide)
 
 map = @herbarium.location

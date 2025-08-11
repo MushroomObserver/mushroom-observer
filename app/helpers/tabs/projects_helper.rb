@@ -73,8 +73,8 @@ module Tabs
     def add_project_banner(project)
       title = if controller.controller_name == "projects" &&
                  action_name == "show"
-                [link_to_object(project),
-                 show_title_id_badge(project)].safe_join(" ")
+                [show_title_id_badge(project),
+                 link_to_object(project)].safe_join(" ")
               else
                 link_to_object(project)
               end

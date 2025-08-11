@@ -118,7 +118,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
   end
 
   def collection_number_links
-    assert_select("a[href ^= '/collection_numbers/']")
+    assert_select("#results a[href ^= '/collection_numbers/']")
   end
 
   def test_show_collection_number
