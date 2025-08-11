@@ -167,15 +167,10 @@ module MatrixBoxHelper
   end
 
   def matrix_box_source_credit(presenter)
-    return unless presenter.respond_to?(:source_credit) ||
-                  presenter.respond_to?(:target) # e.g. rss_log presenter
-
     target = if presenter.respond_to?(:source_credit)
                presenter
              elsif presenter.respond_to?(:target) # rss_log presenter
                presenter.target
-             else
-               return nil
              end
 
     return unless target.respond_to?(:source_credit) &&
