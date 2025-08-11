@@ -444,7 +444,7 @@ GEM
       rubocop (~> 1.72, >= 1.72.1)
       rubocop-ast (>= 1.44.0, < 2.0)
     ruby-progressbar (1.13.0)
-    rubyzip (3.0.0)
+    rubyzip (3.0.1)
     sass-embedded (1.89.2-aarch64-linux-gnu)
       google-protobuf (~> 4.31)
     sass-embedded (1.89.2-aarch64-linux-musl)
@@ -621,7 +621,7 @@ DEPENDENCIES
   rubocop-performance
   rubocop-rails
   rubocop-thread_safety
-  rubyzip (~> 3.0.0)
+  rubyzip (~> 3.0.1)
   simplecov
   simplecov-lcov
   solid_cable
