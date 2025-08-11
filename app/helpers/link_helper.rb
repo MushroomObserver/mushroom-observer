@@ -229,7 +229,7 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
   #
   def destroy_button(target:, name: nil, **args)
     # necessary if nil/empty string passed
-    name ||= :destroy_object.t(type: target.type_tag) || :DESTROY.l
+    name ||= :destroy_object.t(type: target&.type_tag) || :DESTROY.l
     path, identifier, icon, content = button_atts(:destroy, target, args, name)
 
     html_options = {
