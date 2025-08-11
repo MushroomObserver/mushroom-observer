@@ -294,7 +294,7 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
       identifier = "" # can send one via args[:class]
     else
       prefix = action == :destroy ? "" : "#{action}_"
-      path_args = args.slice(:back) # adds back arg, or empty hash if blank
+      path_args = add_back_param_to_button_atts
       path = add_query_param(
         send(:"#{prefix}#{target.type_tag}_path", target.id, **path_args)
       )
@@ -308,6 +308,23 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
       content = name
     end
     [path, identifier, icon, content]
+  end
+
+  BACKABLES = %w[collection_numbers herbarium_records sequences].freeze
+
+  # This allows expected and tested behavior of either
+  # - returning to :show or :index of these types of records
+  # - returning to the :show page of the observation they're associated with
+  # depending on what page the form request originated.
+  def add_back_param_to_button_atts
+    return {} unless BACKABLES.include?(controller.controller_name)
+
+    case action_name
+    when "show"
+      { back: :show }
+    when "index"
+      { back: :index }
+    end
   end
 
   # Refactor to accept a tab array
