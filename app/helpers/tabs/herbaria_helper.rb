@@ -39,20 +39,8 @@ module Tabs
       sorts.reject! { |x| x[0] == "user" }
     end
 
-    def herbarium_show_tabs(herbarium:, user:)
-      tabs = []
-      if herbarium.curators.empty? ||
-         herbarium.curator?(user) || in_admin_mode?
-        tabs += [
-          edit_herbarium_tab(herbarium),
-          destroy_herbarium_tab(herbarium)
-        ]
-      end
-      tabs += [
-        new_herbarium_tab,
-        nonpersonal_herbaria_index_tab
-      ]
-      tabs
+    def herbarium_show_tabs
+      [nonpersonal_herbaria_index_tab]
     end
 
     def herbarium_form_new_tabs

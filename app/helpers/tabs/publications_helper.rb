@@ -2,17 +2,6 @@
 
 module Tabs
   module PublicationsHelper
-    def publication_show_tabs(pub:, user:)
-      links = [
-        new_publication_tab,
-        publications_index_tab
-      ]
-      return links unless in_admin_mode? || pub.can_edit?(user)
-
-      links += publication_mod_tabs(pub)
-      links
-    end
-
     def publications_index_tabs
       [new_publication_tab]
     end

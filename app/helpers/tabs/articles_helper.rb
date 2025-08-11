@@ -23,16 +23,6 @@ module Tabs
       ].freeze
     end
 
-    def article_show_tabs(article:, user:)
-      links = [articles_index_tab]
-      # Can user modify all articles
-      return links unless Article.can_edit?(user)
-
-      links.push(new_article_tab,
-                 edit_article_tab(article),
-                 destroy_article_tab(article))
-    end
-
     def article_form_new_tabs
       [articles_index_tab]
     end
