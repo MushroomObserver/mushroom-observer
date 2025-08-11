@@ -41,18 +41,6 @@ module Tabs
       ).tab
     end
 
-    def edit_article_tab(article)
-      InternalLink::Model.new(:EDIT.t, article,
-                              edit_article_path(article.id)).tab
-    end
-
-    def destroy_article_tab(article)
-      InternalLink::Model.new(
-        :destroy_object.t(TYPE: Article), article, article,
-        html_options: { button: :destroy }
-      ).tab
-    end
-
     def articles_index_tab
       InternalLink::Model.new(:index_article.t, Article, articles_path).tab
     end

@@ -67,21 +67,6 @@ module Tabs
                               alt_title: "new_herbarium").tab
     end
 
-    def edit_herbarium_tab(herbarium)
-      InternalLink::Model.new(
-        :edit_herbarium.l, herbarium,
-        add_query_param(edit_herbarium_path(herbarium.id))
-      ).tab
-    end
-
-    def destroy_herbarium_tab(herbarium)
-      InternalLink::Model.new(
-        :destroy_object.t(type: :herbarium),
-        herbarium, herbarium,
-        html_options: { button: :destroy, back: url_after_delete(herbarium) }
-      ).tab
-    end
-
     def herbaria_index_tab
       InternalLink::Model.new(
         :herbarium_index_list_all_herbaria.l, Herbarium, herbaria_path

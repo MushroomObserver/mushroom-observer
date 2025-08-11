@@ -44,24 +44,10 @@ module Tabs
       ).tab
     end
 
-    def destroy_glossary_term_tab(term)
-      InternalLink::Model.new(
-        :destroy_object.t(type: :glossary_term), term, term,
-        html_options: { button: :destroy }
-      ).tab
-    end
-
     def glossary_terms_index_tab
       InternalLink::Model.new(
         :glossary_term_index.t, GlossaryTerm,
         glossary_terms_path
-      ).tab
-    end
-
-    def new_glossary_term_tab
-      InternalLink::Model.new(
-        :create_glossary_term.t, GlossaryTerm,
-        new_glossary_term_path
       ).tab
     end
 

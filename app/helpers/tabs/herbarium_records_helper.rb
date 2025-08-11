@@ -78,11 +78,6 @@ module Tabs
       ).tab
     end
 
-    def destroy_herbarium_record_tab(h_r)
-      [:destroy_object.t(type: :herbarium_record), h_r,
-       { button: :destroy, icon: :delete }]
-    end
-
     def herbarium_records_index_return_tab
       InternalLink.new(
         :edit_herbarium_record_back_to_index.t,
