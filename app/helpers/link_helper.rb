@@ -229,7 +229,7 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
   #
   def destroy_button(target:, name: nil, **args)
     # necessary if nil/empty string passed
-    name = :destroy_object.t(type: target.type_tag) if name.blank?
+    name ||= :destroy_object.t(type: target.type_tag) || :DESTROY.l
     path, identifier, icon, content = button_atts(:destroy, target, args, name)
 
     html_options = {
@@ -247,7 +247,7 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
   # Note `link_to` - not a <button> element, but an <a> because it's a GET
   def edit_button(target:, name: nil, **args)
     # necessary if nil/empty string passed
-    name = :edit_object.t(type: target.type_tag) if name.blank?
+    name ||= :edit_object.t(type: target&.type_tag) || :EDIT.l
     path, identifier, icon, content = button_atts(:edit, target, args, name)
 
     html_options = {
