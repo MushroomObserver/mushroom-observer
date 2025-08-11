@@ -346,7 +346,7 @@ GEM
       ttfunk (~> 1.8)
     prawn-manual_builder (0.3.1)
       coderay (~> 1.0.7)
-    prawn-svg (0.37.0)
+    prawn-svg (0.38.0)
       css_parser (~> 1.6)
       matrix (~> 0.4.2)
       prawn (>= 0.11.1, < 3)
