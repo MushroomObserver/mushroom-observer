@@ -628,18 +628,18 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def personal_herbarium
-    @personal_herbarium ||= Herbarium.find_by(personal_user_id: id)
+    # disable cop because RuboCop's suggested fix creates test failures
+    @personal_herbarium ||= Herbarium.find_by(personal_user_id: id) # rubocop:disable Rails/FindByOrAssignmentMemoization
   end
 
   def create_personal_herbarium
-    # rubocop:disable Naming/MemoizedInstanceVariableName
-    @personal_herbarium ||= Herbarium.create(
+    # cop gives false positive
+    @personal_herbarium ||= Herbarium.create( # rubocop:disable Naming/MemoizedInstanceVariableName
       name: personal_herbarium_name,
       email: email,
       personal_user: self,
       curators: [self]
     )
-    # rubocop:enable Naming/MemoizedInstanceVariableName
   end
 
   # Return an ActiveRecord::Association of SpeciesList's that User created or
