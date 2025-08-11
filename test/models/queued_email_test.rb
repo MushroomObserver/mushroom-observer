@@ -3,6 +3,14 @@
 require("test_helper")
 
 class QueuedEmailTest < UnitTestCase
+  def setup
+    QueuedEmail.queue = true
+  end
+
+  def teardown
+    QueuedEmail.queue = false
+  end
+
   def test_send_email
     email = QueuedEmail::NameChange.new(user: rolf, to_user: mary)
     assert_not(email.send_email)

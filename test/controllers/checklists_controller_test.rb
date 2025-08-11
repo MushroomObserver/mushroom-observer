@@ -90,13 +90,11 @@ class ChecklistsControllerTest < FunctionalTestCase
 
   def prove_checklist_content(expect)
     # Get expected names not included in the displayed checklist links.
-    missing_names = (
-      expect.each_with_object([]) do |taxon, missing|
-        next if /#{taxon.text_name}/.match?(css_select(".checklist a").text)
+    missing_names = expect.each_with_object([]) do |taxon, missing|
+      next if /#{taxon.text_name}/.match?(css_select(".checklist a").text)
 
-        missing << taxon.text_name
-      end
-    )
+      missing << taxon.text_name
+    end
 
     assert_select(".checklist a", count: expect.size)
     assert(missing_names.empty?, "Species List missing #{missing_names}")

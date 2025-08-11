@@ -150,4 +150,30 @@ class RssLogsControllerTest < FunctionalTestCase
     assert_match(activity_logs_path,
                  @response.header["Location"], "Redirected to wrong page")
   end
+
+  def test_rss_log_display_source_credit
+    obs = observations(:imported_inat_obs)
+
+    login
+    get(:index, params: { type: :observation })
+
+    assert_includes(@response.body, obs.source_credit.tpl,
+                    "RssLog is missing Source credit")
+  end
+
+  def test_rss_log_display_source_credit_updated_observation
+    obs = observations(:imported_inat_obs)
+    time = Time.now.utc
+    obs.update(updated_at: time, log_updated_at: time)
+    log = rss_logs(:imported_inat_obs_rss_log)
+    log.update(updated_at: time,
+               notes: "log_observation_updated user dick\n" \
+                      "log_observation_created user dick\n")
+
+    login
+    get(:index, params: { type: :observation })
+
+    assert_includes(@response.body, obs.source_credit.tpl,
+                    "RssLog is missing Source credit")
+  end
 end
