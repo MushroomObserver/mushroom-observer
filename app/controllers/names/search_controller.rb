@@ -7,7 +7,7 @@
 # `{ controller: "/names/filter", action: :create }`
 module Names
   class SearchController < ApplicationController
-    include ::Filterable
+    include ::Searchable
 
     before_action :login_required
 

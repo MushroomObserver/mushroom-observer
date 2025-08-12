@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 #
-#  = Filterable Concern
+#  = Searchable Concern
 #
 #  This is a module of reusable methods included by controllers that handle
-#  "faceted" pattern searches per model, with separate inputs for each keyword.
+#  "faceted" query searches per model, with separate inputs for each keyword.
 #
 #  We're translating the params hash into the format that the user would have
 #  typed into the search box if they knew how to do that, because that's what
@@ -18,7 +18,7 @@
 #
 ################################################################################
 
-module Filterable
+module Searchable
   extend ActiveSupport::Concern
 
   # Rubocop is incorrect here. This is a concern, not a class.

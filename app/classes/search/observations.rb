@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-# Non-AR model for the faceted PatternSearch form.
-class ObservationFilter < SearchFilter
-  # Assign attributes from the PatternSearch::Observation.params hash,
+# Non-AR model for the faceted search form.
+class Search::Observations < Search
+  # Assign attributes from the Query::Observations.attributes hash,
   # adjusting for range fields and autocompleters with hidden id fields.
-  PatternSearch::Observation.params.map do |keyword, values|
+  Query::Observations.attributes.map do |keyword, values|
     case values[1]
     when :parse_date_range
       attribute(keyword, :string)

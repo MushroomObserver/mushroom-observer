@@ -32,4 +32,5 @@ ActiveSupport::Inflector.inflections(:en) do |inflect|
   inflect.irregular("bonus", "bonuses")
   inflect.irregular("info", "info")
   inflect.irregular("user_stats", "user_stats")
+  inflect.irregular("search", "search")
 end

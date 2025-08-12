@@ -7,7 +7,7 @@
 # `{ controller: "/observations/filter", action: :create }`
 module Observations
   class SearchController < ApplicationController
-    include ::Filterable
+    include ::Searchable
 
     before_action :login_required
 
