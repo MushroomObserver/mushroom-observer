@@ -384,9 +384,18 @@ class InatObsTest < UnitTestCase
       mock_observation("trametes").notes[:Other],
       "iNat Description should be mapped to MO Notes Other"
     )
+
+    mock_obs = mock_observation("tremella_mesenterica")
     assert_equal(
-      "", mock_observation("tremella_mesenterica").notes[:Other],
+      "", mock_obs.notes[:Other],
       "Notes Other should be a blank String if iNat Description is empty"
+    )
+
+    mock_obs = mock_observation("tremella_mesenterica")
+    mock_obs[:description] = "before blank line\r\n\r\nafter blank line"
+    assert_equal(
+      "before blank line\nafter blank line", mock_obs.notes[:Other],
+      "Failed to compress consecutive newlines/returns in Notes[:Other]"
     )
   end
 
