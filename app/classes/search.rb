@@ -91,14 +91,33 @@ class Search
   def self.query_class
     return if name == "Search"
 
-    klass = "Query::#{name.demodulize}".constantize
+    klass = "Query::#{name.demodulize}"
     return nil unless Object.const_defined?(klass)
 
-    klass
+    klass.constantize
   end
 
   # Returns the type of search (table_name) the subclass filter is for.
   def self.search_type
     name.pluralize.underscore.to_sym
   end
+
+  # `attribute_types` is a core Rails method, but it unexpectedly returns
+  # string keys, and they are not accessible with symbols.
+  def self.attribute_types
+    super.symbolize_keys!
+  end
+  delegate :attribute_types, to: :class
+
+  # Same with `attribute_names`
+  def self.attribute_names
+    super.map!(&:to_sym)
+  end
+  delegate :attribute_names, to: :class
+
+  # Define has_attribute? here, it doesn't exist yet for ActiveModel.
+  def self.has_attribute?(key) # rubocop:disable Naming/PredicatePrefix
+    attribute_types.key?(key)
+  end
+  delegate :has_attribute?, to: :class
 end
