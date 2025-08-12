@@ -13,15 +13,16 @@ module Observations
 
     def new
       set_up_form_field_groupings
-      new_filter_instance_from_session
+      new_search_instance_from_query
     end
 
     def create
-      return if check_for_clear_form
+      return if clear_form?
 
       set_up_form_field_groupings # in case we need to re-render the form
-      set_filter_instance_from_form
-      set_pattern_string
+      validate_search_instance_from_form_params
+
+      set_new_query
 
       redirect_to(controller: "/observations", action: :index,
                   pattern: @pattern)
@@ -29,36 +30,32 @@ module Observations
 
     private
 
-    def check_for_clear_form
+    def clear_form?
       if params[:commit] == :CLEAR.l
-        session[:pattern] = ""
-        session[:search_type] = nil
+        clear_relevant_query
         redirect_to(new_observations_search_path) and return true
       end
       false
     end
 
-    def new_filter_instance_from_session
-      if session[:pattern].present? && session[:search_type] == :observation
-        terms = PatternSearch::Observation.new(session[:pattern]).form_params
-        @filter = Search::Observations.new(terms)
-      else
-        @filter = Search::Observations.new
-      end
+    def new_search_instance_from_query
+      @search = if (@query = find_query(:Observation)).params.present?
+                  Search::Observations.new(@query.params)
+                else
+                  Search::Observations.new
+                end
     end
 
-    def set_filter_instance_from_form
-      @filter = Search::Observations.new(
-        permitted_search_params[:observation_filter]
-      )
-      redirect_to(new_observations_search_path) && return if @filter.invalid?
+    def validate_search_instance_from_form_params
+      @search = Search::Observations.new(permitted_search_params)
+      redirect_to(new_observations_search_path) && return if @search.invalid?
     end
 
-    def set_pattern_string
-      @pattern = formatted_pattern_search_string
-      # Save it so that we can keep it in the search bar in subsequent pages.
-      session[:pattern] = @pattern
-      session[:search_type] = :observation
+    def clear_relevant_query
+      return if (@query = find_query(:Observation)).params.blank?
+
+      # Save blank so that we can keep it in the search bar in subsequent pages.
+      @query = Query.lookup_and_save(:Observation)
     end
 
     # This is the list of fields that are displayed in the search form. In the
@@ -93,13 +90,7 @@ module Observations
     end
 
     def permitted_search_params
-      params.permit(observation_search_params)
-    end
-
-    # need to add :pattern to the list of params, plus the hidden_id fields
-    # of the autocompleters.
-    def observation_search_params
-      [{ observation_filter: PatternSearch::Observation.fields }]
+      params.permit(Search::Observations.attribute_names)
     end
   end
 end

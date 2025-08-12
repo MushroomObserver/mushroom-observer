@@ -13,50 +13,48 @@ module Names
 
     def new
       set_up_form_field_groupings
-      new_filter_instance_from_session
+      new_search_instance_from_query
     end
 
     def create
-      return if check_for_clear_form
+      return if clear_form?
 
       set_up_form_field_groupings # in case we need to re-render the form
-      set_filter_instance_from_form
-      set_pattern_string
+      validate_search_instance_from_form_params
+      clear_relevant_query
 
       redirect_to(controller: "/names", action: :index, pattern: @pattern)
     end
 
     private
 
-    def check_for_clear_form
+    def clear_form?
       if params[:commit] == :CLEAR.l
-        session[:pattern] = ""
-        session[:search_type] = nil
+        clear_relevant_query
         redirect_to(new_names_search_path) and return true
       end
       false
     end
 
     # should be new_query_instance. clear_form should update the current query.
-    def new_filter_instance_from_session
-      if (@query = find_query(:Name)).params.present?
-        terms = PatternSearch::Name.new(session[:pattern]).form_params
-        @filter = Search::Names.new(terms)
-      else
-        @filter = Search::Names.new
-      end
+    def new_search_instance_from_query
+      @search = if (@query = find_query(:Name)).params.present?
+                  Search::Names.new(@query.params)
+                else
+                  Search::Names.new
+                end
     end
 
-    def set_filter_instance_from_form
-      @filter = Search::Names.new(permitted_search_params[:name_search])
-      redirect_to(new_names_search_path) && return if @filter.invalid?
+    def validate_search_instance_from_form_params
+      @search = Search::Names.new(permitted_search_params)
+      redirect_to(new_names_search_path) && return if @search.invalid?
     end
 
-    def set_pattern_string
-      @pattern = formatted_pattern_search_string
-      # Save it so that we can keep it in the search bar in subsequent pages.
-      session[:pattern] = @pattern
-      session[:search_type] = :name
+    def clear_relevant_query
+      return if (@query = find_query(:Name)).params.blank?
+
+      # Save blank so that we can keep it in the search bar in subsequent pages.
+      @query = Query.lookup_and_save(:Name)
     end
 
     # This is the list of fields that are displayed in the search form. In the
@@ -86,11 +84,7 @@ module Names
     end
 
     def permitted_search_params
-      params.permit(name_search_params)
-    end
-
-    def name_search_params
-      [{ name_search: Search::Names.attributes }]
+      params.permit(Search::Names.attribute_names)
     end
   end
 end
