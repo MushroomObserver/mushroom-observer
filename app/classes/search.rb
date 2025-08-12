@@ -1,38 +1,44 @@
 # frozen_string_literal: true
 
-# Non-AR model for the faceted search form. Subclass this for each model
+# Non-AR model for faceted search form input. Don't instantiate this class.
+# Usable search classes inherit from this; this class does all the attribute
+# assignment automatically. Subclasses just have to be declared.
+#
+# Search attributes map to query attributes, but contain info for the form:
+# field name, input type, resource type (for autocompleters, defaults to nil)
+#
+# Subclass this for each model
 # you want to search, named after the model it's for, eg "Search::Observations"
 class Search
   include ActiveModel::Model
   include ActiveModel::Attributes
 
-  # Search attributes map to query attributes, but contain info for the form:
-  # field name, input type, resource type (for autocompleters, defaults to nil)
-  search_attr(:pattern, :text)
-
   UNUSABLE_PARAMETERS = [
-    :description_query,
-    :image_query,
-    :location_query,
-    :name_query,
-    :observation_query,
-    :sequence_query,
-    :id_in_set,
-    :target,
-    :type,
-    :search_content,
-    :search_name,
-    :search_where,
-    :search_user,
+    :description_query, # subquery
+    :image_query, # subquery
+    :location_query, # subquery
+    :name_query, # subquery
+    :observation_query, # subquery
+    :sequence_query, # subquery
+    :id_in_set, # ids can just go in :pattern field
+    :target, # comment param
+    :type, # comment param
+    :search_content, # advanced search param
+    :search_name, # advanced search param
+    :search_where, # advanced search param
+    :search_user, # advanced search param
     :preference_filter # pseudo param indicating user content filter applied
   ].freeze
 
+  # All subclasses have a :pattern attribute.
+  search_attr(:pattern, :text)
+
   # Search attributes are assigned input types depending on the way the
   # corresponding Query attribute is defined. Most use text inputs.
-  def self.assign_attributes(query_class)
+  def self.assign_attributes
     query_class.attribute_types.except(*UNUSABLE_PARAMETERS).
       each do |attr_name, definition|
-      values = definition.accepts
+      values = definition.accepts # `accepts` is the Query attribute type def
       case values
       when Symbol
         assign_symbol_attribute(attr_name, values)
@@ -79,6 +85,16 @@ class Search
     else
       search_attr(attr_name, :text)
     end
+  end
+
+  # Search subclasses should be named the same as Query subclasses.
+  def self.query_class
+    return if name == "Search"
+
+    klass = "Query::#{name.demodulize}".constantize
+    return nil unless Object.const_defined?(klass)
+
+    klass
   end
 
   # Returns the type of search (table_name) the subclass filter is for.
