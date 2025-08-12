@@ -21,9 +21,10 @@ module Names
 
       set_up_form_field_groupings # in case we need to re-render the form
       validate_search_instance_from_form_params
-      clear_relevant_query
+      save_query
 
-      redirect_to(controller: "/names", action: :index, pattern: @pattern)
+      redirect_to(controller: "/names", action: :index,
+                  q: @query.record.id.alphabetize)
     end
 
     private
@@ -55,6 +56,10 @@ module Names
 
       # Save blank so that we can keep it in the search bar in subsequent pages.
       @query = Query.lookup_and_save(:Name)
+    end
+
+    def save_query
+      Query.lookup_and_save(:Name, **@search)
     end
 
     # This is the list of fields that are displayed in the search form. In the

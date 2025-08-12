@@ -21,11 +21,10 @@ module Observations
 
       set_up_form_field_groupings # in case we need to re-render the form
       validate_search_instance_from_form_params
-
-      set_new_query
+      save_query
 
       redirect_to(controller: "/observations", action: :index,
-                  pattern: @pattern)
+                  q: @query.record.id.alphabetize)
     end
 
     private
@@ -56,6 +55,10 @@ module Observations
 
       # Save blank so that we can keep it in the search bar in subsequent pages.
       @query = Query.lookup_and_save(:Observation)
+    end
+
+    def save_query
+      Query.lookup_and_save(:Observation, **@search)
     end
 
     # This is the list of fields that are displayed in the search form. In the
