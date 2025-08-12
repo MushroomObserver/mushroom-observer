@@ -67,7 +67,6 @@ ACTIONS = {
 
     wrapup_2011: {},
     wrapup_2012: {}
-    # rubocop:enable Naming/VariableNumber
   },
   theme: {
     color_themes: {}
@@ -505,6 +504,18 @@ MushroomObserver::Application.routes.draw do
   get("locations/map", to: "locations/maps#show", as: "map_locations")
 
   # ----- Names: a lot of actions  ----------------------------
+  namespace :names do
+    # Approve Name Tracker: GET endpoint for admin email links
+    get("trackers/:id/approve", to: "trackers/approve#new",
+                                as: "approve_tracker")
+    # Name EOL Data: show:
+    get("eol", to: "eol_data#show", as: "eol_data")
+    get("eol_preview", to: "eol_data/preview#show",
+                       as: "eol_preview")
+    get("eol_expanded_review", to: "eol_data/expanded_review#show",
+                               as: "eol_expanded_review")
+  end
+
   resources :names, id: /\d+/, shallow: true do
     # These routes are for dealing with name attributes.
     # They're not `resources` because they don't have their own IDs.
@@ -578,17 +589,6 @@ MushroomObserver::Application.routes.draw do
       to: "names/descriptions#index", as: "name_descriptions_index")
   # Test Index
   get("names/test_index", to: "names#test_index", as: "names_test_index")
-  # Names Map: show:
-  get("names/map", to: "names/maps#show", as: "map_names")
-  # Approve Name Tracker: GET endpoint for admin email links
-  get("names/trackers/:id/approve", to: "names/trackers/approve#new",
-                                    as: "approve_name_tracker")
-  # Name EOL Data: show:
-  get("names/eol", to: "names/eol_data#show", as: "names_eol_data")
-  get("names/eol_preview", to: "names/eol_data/preview#show",
-                           as: "names_eol_preview")
-  get("names/eol_expanded_review", to: "names/eol_data/expanded_review#show",
-                                   as: "names_eol_expanded_review")
 
   # ----- Observations: standard actions  ----------------------------
   namespace :observations do
