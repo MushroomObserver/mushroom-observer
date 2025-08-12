@@ -32,7 +32,7 @@ module Names
       if params[:commit] == :CLEAR.l
         session[:pattern] = ""
         session[:search_type] = nil
-        redirect_to(names_new_search_path) and return true
+        redirect_to(new_names_search_path) and return true
       end
       false
     end
@@ -49,7 +49,7 @@ module Names
 
     def set_filter_instance_from_form
       @filter = Search::Names.new(permitted_search_params[:name_search])
-      redirect_to(names_new_search_path) && return if @filter.invalid?
+      redirect_to(new_names_search_path) && return if @filter.invalid?
     end
 
     def set_pattern_string

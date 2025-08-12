@@ -33,7 +33,7 @@ module Observations
       if params[:commit] == :CLEAR.l
         session[:pattern] = ""
         session[:search_type] = nil
-        redirect_to(observations_new_search_path) and return true
+        redirect_to(new_observations_search_path) and return true
       end
       false
     end
@@ -41,17 +41,17 @@ module Observations
     def new_filter_instance_from_session
       if session[:pattern].present? && session[:search_type] == :observation
         terms = PatternSearch::Observation.new(session[:pattern]).form_params
-        @filter = ObservationFilter.new(terms)
+        @filter = Search::Observations.new(terms)
       else
-        @filter = ObservationFilter.new
+        @filter = Search::Observations.new
       end
     end
 
     def set_filter_instance_from_form
-      @filter = ObservationFilter.new(
+      @filter = Search::Observations.new(
         permitted_search_params[:observation_filter]
       )
-      redirect_to(observations_new_search_path) && return if @filter.invalid?
+      redirect_to(new_observations_search_path) && return if @filter.invalid?
     end
 
     def set_pattern_string
