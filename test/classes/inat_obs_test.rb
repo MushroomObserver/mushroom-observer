@@ -72,14 +72,14 @@ class InatObsTest < UnitTestCase
 
     # Observation form needs the Notes "parts keys to be normalized
     snapshot_key = Observation.notes_normalized_key(:inat_snapshot_caption.l)
-    expected_notes =
-      { Collector: "jdcohenesq",
-        snapshot_key => expected_snapshot,
-        Other: "on Quercus\n\n&#8212;\n\nOriginally posted " \
-               "to Mushroom Observer on Mar. 7, 2024." }
+    other = "on Quercus\n&#8212;\nOriginally posted " \
+            "to Mushroom Observer on Mar. 7, 2024."
+    expected_notes = { Collector: "jdcohenesq",
+                       snapshot_key => expected_snapshot,
+                       Other: other }
     assert_equal(
       expected_notes, mock_inat_obs.notes,
-      "MO notes should include: iNat Collector || login, iNat Description"
+      "MO notes should include: (iNat Collector || login) && iNat Description"
     )
 
     expect = License.where(License[:url] =~ "/by-nc/").
