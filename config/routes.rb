@@ -507,10 +507,6 @@ MushroomObserver::Application.routes.draw do
   namespace :names do
     resource :search, only: [:show, :new, :create]
 
-    # Test Index
-    get("test_index", to: "#test_index", as: "test_index")
-    # Names Map: index:
-    get("map", to: "maps#index")
     # Approve Name Tracker: GET endpoint for admin email links
     get("trackers/:id/approve", to: "trackers/approve#new",
                                 as: "approve_tracker")
@@ -593,6 +589,8 @@ MushroomObserver::Application.routes.draw do
   # MO doesn't index descriptions by parent_id, we index `all` e.g. by_author.
   get("names(/:name_id)/descriptions",
       to: "names/descriptions#index", as: "name_descriptions_index")
+  # Test Index
+  get("names/test_index", to: "names#test_index", as: "names_test_index")
 
   # ----- Observations: standard actions  ----------------------------
   namespace :observations do
