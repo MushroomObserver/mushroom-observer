@@ -9,7 +9,7 @@ module PatternSearch
       created: [:created_at, :parse_date_range],
       modified: [:updated_at, :parse_date_range],
 
-      # names. note that the last four require the first one to be present
+      # names
       name: [:names, :parse_list_of_names],
       exclude_consensus: [:exclude_consensus, :parse_boolean], # of_look_alikes
       include_subtaxa: [:include_subtaxa, :parse_boolean],
@@ -60,34 +60,6 @@ module PatternSearch
     end
 
     delegate :model, to: :class
-
-    # List of fields that are displayed in the search form.
-    # Autocompleters have id fields, and range fields are concatenated.
-    def self.fields
-      params.keys + [
-        :name_id, :location_id, :user_id, :herbarium_id, :list_id, :project_id,
-        :project_lists_id, :when_range, :created_range, :modified_range,
-        :rank_range, :confidence_range, :pattern
-      ]
-    end
-
-    def self.fields_with_dates
-      [:when, :created, :modified]
-    end
-
-    def self.fields_with_range
-      [:when, :created, :modified, :rank, :confidence]
-    end
-
-    def self.fields_with_ids
-      [:name, :location, :user, :herbarium, :list, :project, :species_list]
-    end
-
-    # hash of required: fields
-    def self.fields_with_requirements
-      { name: [:exclude_consensus, :include_subtaxa, :include_synonyms,
-               :include_all_name_proposals] }
-    end
 
     def build_query
       super
