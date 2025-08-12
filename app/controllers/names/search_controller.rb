@@ -2,9 +2,9 @@
 
 # Names pattern search form.
 #
-# Route: `new_name_search_path`
+# Route: `new_names_search_path`
 # Only one action here. Call namespaced controller actions with a hash like
-# `{ controller: "/names/filter", action: :create }`
+# `{ controller: "/names/search", action: :create }`
 module Names
   class SearchController < ApplicationController
     include ::Searchable
@@ -41,14 +41,14 @@ module Names
     def new_filter_instance_from_session
       if (@query = find_query(:Name)).params.present?
         terms = PatternSearch::Name.new(session[:pattern]).form_params
-        @filter = NameFilter.new(terms)
+        @filter = Search::Names.new(terms)
       else
-        @filter = NameFilter.new
+        @filter = Search::Names.new
       end
     end
 
     def set_filter_instance_from_form
-      @filter = NameFilter.new(permitted_search_params[:name_filter])
+      @filter = Search::Names.new(permitted_search_params[:name_search])
       redirect_to(names_new_search_path) && return if @filter.invalid?
     end
 
@@ -90,7 +90,7 @@ module Names
     end
 
     def name_search_params
-      [{ name_filter: PatternSearch::Name.fields }]
+      [{ name_search: Search::Names.attributes }]
     end
   end
 end
