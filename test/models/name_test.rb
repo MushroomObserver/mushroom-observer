@@ -150,7 +150,7 @@ class NameTest < UnitTestCase
     # create a duplicate species if one already exists.
     # Saw this bug 20080114 -JPH
     result = Name.find_or_create_name_and_parents(
-      "Coprinus comatus v. bogus (With) Author"
+      rolf, "Coprinus comatus v. bogus (With) Author"
     )
     assert_equal(3, result.length)
     assert_equal(names(:coprinus).id, result[0].id)
@@ -159,13 +159,13 @@ class NameTest < UnitTestCase
     assert_equal("Coprinus", result[0].text_name)
     assert_equal("Coprinus comatus", result[1].text_name)
     assert_equal("Coprinus comatus var. bogus", result[2].text_name)
-    assert_equal("", result[0].author)
+    assert_equal(names(:coprinus).author, result[0].author)
     assert_equal("(O.F. Müll.) Pers.", result[1].author)
     assert_equal("(With) Author", result[2].author)
 
     # Conocybe filaris does not have an author.
     result = Name.find_or_create_name_and_parents(
-      "Conocybe filaris var bogus (With) Author"
+      rolf, "Conocybe filaris var bogus (With) Author"
     )
     assert_equal(3, result.length)
     assert_equal(names(:conocybe).id, result[0].id)
@@ -179,7 +179,7 @@ class NameTest < UnitTestCase
     assert_equal("(With) Author", result[2].author)
 
     # Agaricus fixture does not have an author.
-    result = Name.find_or_create_name_and_parents("Agaricus L.")
+    result = Name.find_or_create_name_and_parents(rolf, "Agaricus L.")
     assert_equal(1, result.length)
     assert_equal(names(:agaricus).id, result[0].id)
     assert_equal("Agaricus", result[0].text_name)
@@ -187,7 +187,7 @@ class NameTest < UnitTestCase
 
     # Agaricus does not have an author.
     result = Name.find_or_create_name_and_parents(
-      "Agaricus abra f. cadabra (With) Another Author"
+      rolf, "Agaricus abra f. cadabra (With) Another Author"
     )
     assert_equal(3, result.length)
     assert_equal(names(:agaricus).id, result[0].id)
@@ -1245,6 +1245,22 @@ class NameTest < UnitTestCase
       parent_name: "Strobilomyces strobilaceus",
       rank: "Variety",
       author: "R. Heim",
+      deprecated: false
+    )
+  end
+
+  def test_name_prov_name_with_periods
+    do_name_parse_test(
+      "Agaricus sp. 'A.G.'",
+      text_name: "Agaricus sp. 'A.G.'",
+      real_text_name: "Agaricus sp. 'A.G.'",
+      search_name: "Agaricus sp. 'A.G.'",
+      real_search_name: "Agaricus sp. 'A.G.'",
+      sort_name: "Agaricus a.g.",
+      display_name: "**__Agaricus__** sp. **__'A.G.'__**",
+      parent_name: "Agaricus",
+      rank: "Species",
+      author: "",
       deprecated: false
     )
   end
@@ -2837,27 +2853,36 @@ class NameTest < UnitTestCase
     assert_equal("Phylum", Name.guess_rank("Fossil-Anythingelse"))
   end
 
+  # --------------------------------------
+  #  Spelling
+  # --------------------------------------
+
   def test_parent_if_parent_deprecated
     User.current = rolf
     lepiota = names(:lepiota)
     lepiota.change_deprecated(true)
     lepiota.save
-    assert_nil(Name.parent_if_parent_deprecated("Agaricus campestris"))
-    assert_nil(Name.parent_if_parent_deprecated("Agaricus campestris ssp. foo"))
+    assert_nil(Name.parent_if_parent_deprecated(rolf, "Agaricus campestris"))
+    assert_nil(Name.parent_if_parent_deprecated(rolf,
+                                                "Agaricus campestris ssp. foo"))
     assert_nil(
-      Name.parent_if_parent_deprecated("Agaricus campestris ssp. foo var. bar")
+      Name.parent_if_parent_deprecated(rolf,
+                                       "Agaricus campestris ssp. foo var. bar")
     )
-    assert(Name.parent_if_parent_deprecated("Lactarius alpigenes"))
-    assert(Name.parent_if_parent_deprecated("Lactarius alpigenes ssp. foo"))
+    assert(Name.parent_if_parent_deprecated(rolf, "Lactarius alpigenes"))
+    assert(Name.parent_if_parent_deprecated(rolf,
+                                            "Lactarius alpigenes ssp. foo"))
     assert(
-      Name.parent_if_parent_deprecated("Lactarius alpigenes ssp. foo var. bar")
+      Name.parent_if_parent_deprecated(rolf,
+                                       "Lactarius alpigenes ssp. foo var. bar")
     )
-    assert_nil(Name.parent_if_parent_deprecated("Peltigera"))
-    assert_nil(Name.parent_if_parent_deprecated("Peltigera neckeri"))
-    assert_nil(Name.parent_if_parent_deprecated("Peltigera neckeri f. alba"))
-    assert(Name.parent_if_parent_deprecated("Lepiota"))
-    assert(Name.parent_if_parent_deprecated("Lepiota barsii"))
-    assert(Name.parent_if_parent_deprecated("Lepiota barsii f. alba"))
+    assert_nil(Name.parent_if_parent_deprecated(rolf, "Peltigera"))
+    assert_nil(Name.parent_if_parent_deprecated(rolf, "Peltigera neckeri"))
+    assert_nil(Name.parent_if_parent_deprecated(rolf,
+                                                "Peltigera neckeri f. alba"))
+    assert(Name.parent_if_parent_deprecated(rolf, "Lepiota"))
+    assert(Name.parent_if_parent_deprecated(rolf, "Lepiota barsii"))
+    assert(Name.parent_if_parent_deprecated(rolf, "Lepiota barsii f. alba"))
   end
 
   def test_names_from_synonymous_genera
@@ -2887,18 +2912,23 @@ class NameTest < UnitTestCase
     d.merge_synonyms(c)
 
     assert_obj_arrays_equal([a1],
-                            Name.names_from_synonymous_genera("Lepiota testa"))
+                            Name.names_from_synonymous_genera(rolf,
+                                                              "Lepiota testa"))
     assert_obj_arrays_equal([a1],
-                            Name.names_from_synonymous_genera("Lepiota testus"))
+                            Name.names_from_synonymous_genera(rolf,
+                                                              "Lepiota testus"))
     assert_obj_arrays_equal([a1],
-                            Name.names_from_synonymous_genera("Lepiota testum"))
+                            Name.names_from_synonymous_genera(rolf,
+                                                              "Lepiota testum"))
     assert_obj_arrays_equal([a3],
-                            Name.names_from_synonymous_genera("Lepiota testii"))
+                            Name.names_from_synonymous_genera(rolf,
+                                                              "Lepiota testii"))
 
     a1.change_deprecated(true)
     a1.save
     assert_obj_arrays_equal([a1, b1, c1],
-                            Name.names_from_synonymous_genera("Lepiota testa"),
+                            Name.names_from_synonymous_genera(rolf,
+                                                              "Lepiota testa"),
                             :sort)
   end
 
@@ -3177,7 +3207,7 @@ class NameTest < UnitTestCase
     old_obs = Observation.where(name: bad)
     old_synonym_count = good.synonyms.count
 
-    bad.mark_misspelled(good, :save)
+    bad.mark_misspelled(nil, good, :save)
     good.reload
     bad.reload
 
@@ -3197,7 +3227,7 @@ class NameTest < UnitTestCase
   def test_clear_misspelled
     good = names(:peltigera)
     bad  = names(:petigera)
-    bad.clear_misspelled(:save)
+    bad.clear_misspelled(rolf, :save)
     good.reload
     bad.reload
 
@@ -3303,7 +3333,7 @@ class NameTest < UnitTestCase
     user = User.find(old_name.versions.second.user_id)
     old_contribution = user.contribution
 
-    names(:lichen).merge(old_name)
+    names(:lichen).merge(nil, old_name)
 
     assert_equal(
       old_contribution - UserStats::ALL_FIELDS[:name_versions][:weight],
@@ -3320,7 +3350,7 @@ class NameTest < UnitTestCase
     target = names(:agaricus_campestras)
     assert(target.interests.none?, "Test needs a fixture without interests")
 
-    target.merge(old_name)
+    target.merge(nil, old_name)
     assert_equal(
       interests, target.interests,
       "Old name (#{old_name.text_name}) interests " \
@@ -3450,7 +3480,7 @@ class NameTest < UnitTestCase
     log2 = name2.rss_log
     assert_not_nil(log1)
     assert_not_nil(log2)
-    name2.merge(name1)
+    name2.merge(nil, name1)
     assert_nil(log1.reload.target_id)
     assert_not_nil(log2.reload.target_id)
     assert_equal(:log_orphan, log1.parse_log[0][0])

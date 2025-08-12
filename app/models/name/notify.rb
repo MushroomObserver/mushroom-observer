@@ -11,10 +11,10 @@ module Name::Notify
   def notify_webmaster
     return if skip_notify
 
-    user = User.current || User.admin
+    user ||= @current_user || User.admin
     QueuedEmail::Webmaster.create_email(
-      sender_email: user.email,
-      subject: "#{user.login} created #{real_text_name}",
+      user,
+      subject: "#{user.login} created #{user_real_text_name(user)}",
       content: "#{MO.http_domain}/names/#{id}"
     )
   end
@@ -25,7 +25,8 @@ module Name::Notify
     return if skip_notify
     return unless saved_version_changes?
 
-    sender = User.current
+    # debugger unless @current_user
+    sender = @current_user || User.current
     recipients = []
 
     notify_admins(recipients)

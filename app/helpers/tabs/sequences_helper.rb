@@ -3,22 +3,7 @@
 module Tabs
   module SequencesHelper
     def sequence_show_tabs(seq:)
-      links = [
-        link_to(:cancel_and_show.t(type: :observation),
-                seq.observation.show_link_args)
-      ]
-      return unless check_permission(seq)
-
-      links += sequence_mod_tabs(seq)
-      links
-    end
-
-    def sequence_form_new_title
-      :sequence_add_title.t
-    end
-
-    def sequence_form_edit_title(seq:)
-      :sequence_edit_title.t(name: seq.unique_format_name)
+      [object_return_tab(seq.observation)]
     end
 
     def sequence_form_tabs(obj:)

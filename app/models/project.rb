@@ -532,13 +532,20 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     FieldSlipJobTracker.where(prefix: field_slip_prefix)
   end
 
-  def can_add_field_slip(user)
+  def can_add_field_slip?(user)
     member?(user) || can_join?(user)
   end
 
   def alias_data(target)
     @target_alias_details ||= target_alias_details(target.class)
     @target_alias_details[target.id] || []
+  end
+
+  def check_for_alias(str, target_type)
+    project_alias = aliases.find_by(name: str, target_type:)
+    return str unless project_alias
+
+    project_alias.target.format_name
   end
 
   private ###############################

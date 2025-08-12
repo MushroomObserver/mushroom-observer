@@ -77,13 +77,13 @@ def get_size(filename)
   File.exist?(filename) ? File::Stat.new(filename).size : 0
 end
 
-def testing
+def testing?
   ENV["RAILS_ENV"] == "test"
 end
 
 ################################################################################
 
-if testing
+if testing?
   LOCAL_URL = "http://localhost:3000/api2/observations?id=1"
   REMOTE_URL = "https://mushroomobserver.org/api2/observations?id=1"
 else
@@ -95,7 +95,7 @@ temp_file = Tempfile.new("eol")
 temp_filename = temp_file.path
 dest_filename = ARGV[0]
 
-if testing
+if testing?
   # Mock response because real MO website blocks robots
   File.open(temp_filename, "w") do |file|
     file.puts("Mock eol file content: ")

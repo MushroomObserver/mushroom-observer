@@ -12,7 +12,7 @@
 #
 #    before_action { Language.track_usage }
 #
-#    <%= if Language.tracking_usage
+#    <%= if Language.tracking_usage?
 #      handle = Language.save_tags
 #      link_to("edit", :action => :edit_translations, :handle => handle)
 #    end %>
@@ -50,7 +50,7 @@ module LanguageTracking
     @@tags_used = nil
   end
 
-  def tracking_usage
+  def tracking_usage?
     !!@@tags_used
   end
 

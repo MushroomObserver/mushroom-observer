@@ -79,7 +79,7 @@ class UsersController < ApplicationController
   def index_display_opts(opts, _query)
     {
       letters: true,
-      include: :user_groups,
+      include: [:user_groups, :image, :location],
       matrix: !in_admin_mode?
     }.merge(opts)
   end
@@ -119,6 +119,7 @@ class UsersController < ApplicationController
 
   # User's best images for #show
   MAX_THUMBS = 6
+  private_constant(:MAX_THUMBS)
 
   # set @observations whose thumbnails will display in user summary
   def define_instance_vars_for_summary!

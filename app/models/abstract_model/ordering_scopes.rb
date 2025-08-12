@@ -271,8 +271,9 @@ module AbstractModel::OrderingScopes
     def order_by_thumbnail_quality
       return all unless self == Observation
 
-      joins(:images).where(Observation[:thumb_image_id].eq(Image[:id])).
-        distinct.order(Image[:vote_cache].desc, Observation[:vote_cache].desc)
+      left_outer_joins(:images).where(
+        Observation[:thumb_image_id].eq(Image[:id]).or(Image[:id].eq(nil))
+      ).distinct.order(Image[:vote_cache].desc, Observation[:vote_cache].desc)
     end
 
     def order_by_title

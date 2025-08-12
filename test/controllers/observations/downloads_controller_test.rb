@@ -4,6 +4,37 @@ require("test_helper")
 
 module Observations
   class DownloadsControllerTest < FunctionalTestCase
+    def test_new
+      query = Query.lookup_and_save(:Observation, by_users: mary.id)
+      assert(query.num_results > 1, "Test needs query with multiple results")
+
+      login(:rolf)
+      get(:new, params: { q: query.id.alphabetize })
+
+      assert_no_flash
+      assert_response(:success)
+      assert_select("input[type=radio][id=format_mycoportal]", false,
+                    "Missing a MyCoPortal radio button")
+      assert_select("input[type=radio][id=format_mycoportal_image_list]", false,
+                    "Missing a MyCoPortal Images radio button")
+    end
+
+    def test_new_admin
+      query = Query.lookup_and_save(:Observation, by_users: mary.id)
+      assert(query.num_results > 1, "Test needs query with multiple results")
+
+      login(:rolf)
+      make_admin("rolf")
+      get(:new, params: { q: query.id.alphabetize })
+
+      assert_no_flash
+      assert_response(:success)
+      assert_select("input[type=radio][id=format_mycoportal]", true,
+                    "Missing a MyCoPortal radio button")
+      assert_select("input[type=radio][id=format_mycoportal_image_list]", true,
+                    "Missing a MyCoPortal Images radio button")
+    end
+
     def test_download_observation_index
       obs = Observation.reorder(id: :asc).where(user: mary)
       assert(obs.length >= 4)
@@ -121,7 +152,7 @@ module Observations
         :create,
         params: {
           q: query.id.alphabetize,
-          format: "darwin",
+          format: "dwca",
           encoding: "UTF-8",
           commit: "Download"
         }
@@ -152,6 +183,28 @@ module Observations
       )
       assert_no_flash
       assert_response(:success)
+
+      post(
+        :create,
+        params: {
+          q: query.id.alphabetize,
+          format: "mycoportal",
+          encoding: "UTF-8",
+          commit: "Download"
+        }
+      )
+      assert_no_flash
+      assert_response(:success)
+
+      format = "nonexistent"
+      assert_raises("Invalid download type: #{format}") do
+        post(:create,
+             params: {
+               q: query.id.alphabetize,
+               format: format,
+               commit: "Download"
+             })
+      end
     end
 
     def test_download_too_many_observations
@@ -243,6 +296,38 @@ module Observations
       end
 
       assert_flash_error
+    end
+
+    def test_mycoportal_image_list
+      query = Query.lookup_and_save(:Observation, by_users: [dick])
+      obss_with_images =
+        Observation.joins(:images).where(id: query.results(&:id)).
+        order(id: :asc, image_id: :asc)
+      assert(obss_with_images.many?,
+             "Test needs query which results in many Observations with Images")
+      assert(
+        obss_with_images.any? { |obs| obs.images.many? },
+        "Test needs query which results in >=1 Observations with many Images"
+      )
+      expect = ["catalogNumber,imageId"]
+      obss_with_images.uniq.each do |obs|
+        obs.images.each do |image|
+          expect << "MUOB #{obs.id}," \
+                    "https://mushroomobserver.org/images/1280/#{image.id}.jpg"
+        end
+      end
+
+      login
+      post(:create, params: { q: query.id.alphabetize,
+                              format: :mycoportal_image_list,
+                              encoding: "UTF-8",
+                              commit: "Download" })
+
+      assert_response(:success)
+      rows = @response.body.split("\n")
+      assert_equal("catalogNumber,imageId", rows.first, "Wrong header row")
+      assert_equal(obss_with_images.count + 1, rows.count)
+      assert_equal(expect, rows, "Wrong MyCoPortal Image List csv")
     end
   end
 end

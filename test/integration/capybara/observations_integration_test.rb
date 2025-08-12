@@ -20,14 +20,12 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     name = names(:boletus_edulis)
     visit("/names/#{name.id}/map")
     click_link("Show Observations")
-    title = page.find_by_id("title")
-    title.assert_text(:OBSERVATIONS.l)
+    assert_match("Observations", page.title)
     filters = page.find_by_id("filters")
     filters.assert_text(name.text_name)
 
     click_link("Show Map")
-    title = page.find("#title")
-    title.assert_text("Map of Observations")
+    assert_match("Map of Observations", page.title)
     # filters = page.find_by_id("filters")
     # filters.assert_text(name.text_name)
   end
@@ -49,12 +47,11 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     next_obs = observations.second
 
     # Show first Observation from Your Observations search.
-    click_link(first_obs.id.to_s)
+    click_link(first_obs.text_name)
     # Destroy it.
     click_button(class: "destroy_observation_link_#{first_obs.id}")
 
     # MO should show next Observation.
-    page.find("#title")
     assert_match(/#{:app_title.l}: Observation #{next_obs.id}/, page.title,
                  "Wrong page")
   end
@@ -129,6 +126,21 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     end
   end
 
+  def test_observation_label_download_not_logged_in
+    visit(observations_downloads_path)
+    assert_equal(403, page.status_code) # forbidden
+  end
+
+  def test_old_observation_path_not_logged_in
+    visit(observation_path(Observation.first.id))
+    assert_equal(403, page.status_code) # forbidden
+  end
+
+  def test_raw_id_path_not_logged_in
+    visit("/#{Observation.first.id}")
+    assert_equal(403, page.status_code) # forbidden
+  end
+
   def test_locales_when_sending_email_question
     sender = users(:rolf)
     receiver = users(:mary)
@@ -168,11 +180,11 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     visit("/")
     fill_in("search_pattern", with: correctable_pattern)
     page.select("Observations", from: :search_type)
-    click_button("Search")
+    within("#pattern_search_form") { click_button("Search") }
 
     assert_selector("#flash_notices",
                     text: :runtime_no_matches.l(type: :observations.l))
-    assert_selector("#title", text: "Observations")
+    assert_match("Observations", page.title)
     assert_selector("#results", text: "")
     assert_selector(
       "#content a[href *= 'observations?pattern=Agaricus+campestris']",
@@ -184,11 +196,10 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
 
     fill_in("search_pattern", with: corrected_pattern)
     page.select("Observations", from: :search_type)
-    click_button("Search")
+    within("#pattern_search_form") { click_button("Search") }
 
     assert_no_selector("#content div.alert-warning")
-    assert_selector("#title",
-                    text: "Observation #{obs.id}: #{obs.name.search_name}")
+    assert_selector("#title", text: "#{obs.id} #{obs.name.search_name}")
   end
 
   # Tests of show_name_helper module
@@ -233,7 +244,6 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     proj.save
 
     # Prove that Project is not re-checked for the next Observation
-    login(:katrina)
     visit(new_observation_path)
     assert(
       has_unchecked_field?(proj_checkbox),

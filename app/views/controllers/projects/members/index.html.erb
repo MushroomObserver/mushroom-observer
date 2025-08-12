@@ -1,7 +1,7 @@
 <%
 add_project_banner(@project)
 
-@container = :wide
+container_class(:wide)
 
 action = { controller: "/projects/members", action: :create,
             project_id: @project.id, q: get_query_param }
@@ -38,6 +38,7 @@ action = { controller: "/projects/members", action: :create,
         <td class="text-center">
           <%= if user.image_id
           interactive_image(
+            user,
             Image.find(user.image_id), votes: false, size: :thumbnail
           )
               end %>

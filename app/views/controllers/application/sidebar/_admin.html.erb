@@ -1,38 +1,9 @@
 <%=
 tag.div("#{:app_admin.t}:", class: classes[:heading])
 %>
-<%=
-active_link_to(:app_jobs.t, "/jobs",
-               class: classes[:admin], id: "nav_admin_jobs_link")
-%>
-<%=
-active_link_to(:app_blocked_ips.t, edit_admin_blocked_ips_path,
-               class: classes[:admin], id: "nav_admin_blocked_ips_link")
-%>
-<%=
-active_link_to(:app_switch_users.t, edit_admin_mode_path,
-               class: classes[:admin], id: "nav_admin_switch_users_link")
-%>
-<%=
-active_link_to(:app_users.t, users_path(by: "name"),
-               class: classes[:admin], id: "nav_admin_user_index_link")
-%>
-<%=
-active_link_to(:change_banner_title.t, admin_banners_path,
-               class: classes[:admin], id: "nav_admin_edit_banner_link")
-%>
-<%=
-active_link_to(:app_email_all_users.t, new_admin_emails_features_path,
-               class: classes[:admin], id: "nav_admin_emails_features_link")
-%>
-<%=
-active_link_to(:app_add_to_group.t, new_admin_add_user_to_group_path,
-               class: classes[:admin], id: "nav_admin_add_user_to_group_link")
-%>
-<%=
-active_link_to(:LICENSES.t, licenses_path,
-               class: classes[:admin], id: "nav_admin_licenses_link")
-%>
+<% sidebar_admin_tabs.compact.each do |link| %>
+  <%= sidebar_nav_link(link, class: classes[:admin]) %>
+<% end %>
 <%=
 button_to(:app_turn_admin_off.t, admin_mode_path(turn_off: true),
           class: [classes[:admin], "btn btn-link"], id: "nav_admin_off_link",

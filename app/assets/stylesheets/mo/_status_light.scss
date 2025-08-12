@@ -1,0 +1,36 @@
+// ./app/assets/stylesheets/mo/_status_light.scss
+
+.status-light-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding: 4px;
+}
+
+.status-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid $BODY_BG_COLOR;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+
+  &.off {
+    background: $INPUT_BORDER_COLOR;
+    border-color: $INPUT_BORDER_COLOR;
+    box-shadow: 0 0 8px $INPUT_BG_COLOR;
+  }
+
+  &.red {
+    background: $DANGER_BORDER_COLOR;
+    border-color: $DANGER_BORDER_COLOR;
+    box-shadow: 0 0 8px $DANGER_BG_COLOR;
+  }
+
+  &.green {
+    background: $SUCCESS_BORDER_COLOR;
+    border-color: $SUCCESS_BORDER_COLOR;
+    box-shadow: 0 0 8px $SUCCESS_BG_COLOR;
+  }
+}

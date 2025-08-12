@@ -13,33 +13,6 @@ module Tabs
       ]
     end
 
-    # Composed links because there's interest_icons
-    def location_show_tabs
-      [
-        # observations_at_location_tab(location),
-        locations_index_tab,
-        new_location_tab
-        # edit_location_tab(location)
-      ]
-      # if in_admin_mode?
-      #   links += [
-      #     destroy_location_tab(location),
-      #     location_reverse_order_tab(location)
-      #   ]
-      # end
-      # links
-    end
-
-    # Dead code ** KEEP for bootstrap PR
-    # def location_show_heading_links(location:)
-    #   links = location_show_tabs(location: location)
-    #   icons = []
-    #   links.each do |link|
-    #     icons << icon_link_to(*link)
-    #   end
-    #   icons
-    # end
-
     def new_location_tab
       InternalLink::Model.new(
         :show_location_create.t, Location,

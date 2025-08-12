@@ -8,6 +8,6 @@
 
 # seed License table.  Licenses, which are not user data, are required for
 # complete functioning of the MO development environment
-require("active_record/fixtures.rb")
-ActiveRecord::Fixtures.create_fixtures("#{Rails.root}/test/fixtures",
-                                       "licenses")
+# require("active_record/fixtures.rb")
+# ActiveRecord::Fixtures.create_fixtures("#{Rails.root}/test/fixtures",
+#                                        "licenses")

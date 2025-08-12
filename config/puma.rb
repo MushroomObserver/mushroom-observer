@@ -22,8 +22,15 @@ when "production"
 end
 
 environment rails_env
-pidfile         "#{app_path}/tmp/pids/puma.pid"
-state_path      "#{app_path}/tmp/pids/puma.state"
+pidfile     "#{app_path}/tmp/pids/puma.pid"
+state_path  "#{app_path}/tmp/pids/puma.state"
+
+# To run Solid Queue's supervisor together with Puma and have Puma monitor
+# and manage it. With this you don't have to `bin/rails solid_queue:start`,
+# but there's a lot of queue chatter in the console, even when debugging.
+# https://github.com/rails/solid_queue?tab=readme-ov-file#puma-plugin
+plugin :solid_queue
+
 activate_control_app
 
 if rails_env == "production"

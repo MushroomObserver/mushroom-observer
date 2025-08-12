@@ -1,4 +1,3 @@
-
 # RuboCop configuration
 # https://docs.rubocop.org/rubocop/configuration.html
 
@@ -118,6 +117,100 @@ Naming/BlockForwarding:
   # Default is `anonymous`
   # Keeping it `explicit` until we're ready to switch.
   EnforcedStyle: explicit
+Naming/PredicateMethod:
+  # NOTE: I disabled the cop for methods with side effects. jdc 2025-07-03
+  AllowedMethods:
+    - allowed_to_see!
+    - already_have_personal_herbarium!
+    - block_suspended_users
+    - cant_make_this_personal_herbarium!
+    - check_date
+    - check_dest_exists!
+    - check_dest_permission!
+    - check_external_link_permission!
+    - check_for_qr_code
+    - check_if_preference_filters_applied
+    - check_last_obs
+    - check_name
+    - check_observation_permission!
+    - check_params_or_flash_errors!
+    - check_permission_or_redirect!
+    - check_src_exists!
+    - check_src_permission!
+    - check_time
+    - check_year
+    - delete_vote
+    - deprecate_others
+    - enforce_default_reasons
+    - flash_error
+    - flash_error_and_reload_if_form_has_errors
+    - flash_notice
+    - flash_warning
+    - get_image_transferred_state_externally
+    - google_parse_one_clause
+    - image_or_projects_updated
+    - init_ivars_for_edit
+    - kick_out_excessive_traffic
+    - kick_out_robots
+    - login_required
+    - make_sure_can_delete!
+    - make_sure_can_edit!
+    - make_sure_genus_has_classification!
+    - make_sure_name_below_genus!
+    - make_sure_name_is_at_or_above_genus!
+    - make_sure_name_is_genus!
+    - make_sure_parent_has_classification!
+    - make_sure_parent_higher_rank!
+    - make_sure_theme_is_valid!
+    - match_ignoring_some_bits
+    - nonpersonal!
+    - ok_field_slip_count
+    - parsing
+    - public_write_was
+    - redirect_non_admins!
+    - redirect_to_referrer
+    - remove_observations
+    - request_merge
+    - require_successful_user
+    - save_location
+    - save_observation
+    - save_with_log
+    - show_url
+    - set_locale
+    - testing
+    - to_boolean
+    - too_many_results
+    - try_finding_matching_anchor
+    - try_finding_matching_button
+    - try_to_save_new_observation
+    - update_admin_status
+    - update_and_save_names
+    - update_object
+    - update_redirect_and_flash_notices
+    - update_trust_status
+    - valid_dates
+    - valid_title
+    - validate_and_save_new_user!
+    - validate_herbarium_name!
+    - validate_images
+    - validate_location!
+    - validate_name
+    - validate_naming
+    - validate_objects!
+    - validate_observation
+    - validate_personal_herbarium!
+    - validate_place_name
+    - validate_projects
+    - validate_vote
+    - verify_ip
+    - verify_user_owns_key
+    - we_have_a_what!
+Naming/VariableNumber:
+  # We have a mix of snake_case and normal case.
+  # Standardizing plus creating exceptions, would take some effort,
+  # is low priority, and the devs are good with disabling the cop.
+  # 2025-05-08 jdc
+  Enabled: false
 
 Performance/Casecmp:
   # This cop does not work with Unicode in Ruby 2.4

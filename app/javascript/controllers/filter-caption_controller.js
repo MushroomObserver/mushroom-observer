@@ -4,12 +4,12 @@ export default class extends Controller {
   static targets = ["truncated", "full", "showFull", "showTruncated"];
 
   connect() {
-    this.element.dataset.stimulus = "filter-caption-connected";
+    this.element.dataset.filterCaption = "connected";
     // check if length of text of full is greater than link of text of trunc
     // if not, hide the buttons
     this.fullLength = this.fullTarget.lastChild.innerText.length
     this.truncLength = this.truncatedTarget.lastChild.innerText.length
-    if (Math.abs(this.fullLength - this.truncLength) <= 9) {
+    if (Math.abs(this.fullLength - this.truncLength) <= 3) {
       this.hideButtons()
     }
   }

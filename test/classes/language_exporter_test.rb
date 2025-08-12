@@ -209,7 +209,7 @@ class LanguageExporterTest < UnitTestCase
         end
         seen[tag] = true
       end
-      (new_data.keys.reject { |tag| seen[tag] }).each do |tag|
+      new_data.keys.reject { |tag| seen[tag] }.each do |tag|
         flunk("Unexpected string for #{tag}.")
       end
     end

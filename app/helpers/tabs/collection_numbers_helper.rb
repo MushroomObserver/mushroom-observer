@@ -2,12 +2,6 @@
 
 module Tabs
   module CollectionNumbersHelper
-    def collection_number_show_tabs(c_n:)
-      return [] unless in_admin_mode? || c_n.can_edit?
-
-      collection_number_mod_tabs(c_n)
-    end
-
     def collection_numbers_index_tabs(obs:)
       return [] if obs.blank?
 
@@ -30,10 +24,6 @@ module Tabs
       [object_return_tab(obs)]
     end
 
-    def collection_number_form_new_title
-      :create_collection_number_title.l
-    end
-
     def collection_number_form_edit_tabs(c_n:, back:, obj:)
       links = []
       links << if back == "index"
@@ -41,10 +31,6 @@ module Tabs
                else
                  object_return_tab(obj)
                end
-    end
-
-    def collection_number_form_edit_title(c_n:)
-      :edit_collection_number_title.l(name: c_n.format_name)
     end
 
     def collection_numbers_index_tab(c_n)
@@ -63,11 +49,6 @@ module Tabs
         tag.i(c_n.format_name.t), c_n,
         add_query_param(c_n.show_link_args, cn_query)
       ).tab
-    end
-
-    def collection_number_mod_tabs(c_n)
-      [edit_collection_number_tab(c_n),
-       destroy_collection_number_tab(c_n)]
     end
 
     # These should just be ADD, EDIT, and DELETE.

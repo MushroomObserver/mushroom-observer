@@ -39,6 +39,15 @@ module Observations
       )
     end
 
+    def test_edit_obs_owner_with_different_vote
+      nam = namings(:coprinus_comatus_other_naming)
+      params = { observation_id: nam.observation_id, id: nam.id.to_s }
+      login(nam.user.login)
+      get(:edit, params: params)
+      assert_select('option[selected="selected"][value="3.0"]',
+                    text: "I'd Call It That")
+    end
+
     def test_edit_naming_no_votes
       nam = namings(:minimal_unknown_naming)
       assert_empty(nam.votes)
@@ -64,6 +73,20 @@ module Observations
       assert_not_equal(new_name, nam.text_name)
       assert_equal(old_name, nam.text_name)
       assert_select("option[selected]", count: 2)
+    end
+
+    def test_update_observation_new_name_different_user
+      login("mary")
+      nam = namings(:coprinus_comatus_other_naming)
+      new_name = "Easter bunny"
+      params = {
+        observation_id: nam.observation_id,
+        id: nam.id.to_s,
+        naming: { name: new_name }
+      }
+      put(:update, params: params)
+      assert_select('option[selected="selected"][value="3.0"]',
+                    text: "I'd Call It That")
     end
 
     def test_update_observation_approved_new_name
@@ -506,6 +529,7 @@ module Observations
     # "Genus species (With) Author" was recognized even if "Genus species"
     # was already in the database.
     def test_create_with_author_when_name_without_author_already_exists
+      login("dick")
       params = {
         observation_id: observations(:coprinus_comatus_obs).id,
         naming: {
@@ -513,7 +537,6 @@ module Observations
           vote: { value: "3" }
         }
       }
-      login("dick")
       post(:create, params: params)
       obs = observations(:coprinus_comatus_obs)
       assert_redirected_to(permanent_observation_path(obs.id))
@@ -555,6 +578,19 @@ module Observations
       assert_response(:redirect)
       assert(new_name = Name.find_by(text_name: "Foo sp. 'bar'"))
       assert_equal("Foo sp. 'bar' Author", new_name.search_name)
+    end
+
+    def test_create_bad_prov_name
+      # Must be a genus where all genus fixtures have an author
+      name = "Suillus sp. 'A*G'"
+      params = {
+        observation_id: observations(:coprinus_comatus_obs).id,
+        naming: { name: name },
+        approved_name: name
+      }
+      login("dick")
+      post(:create, params: params)
+      assert_equal(0, Naming.where(name_id: nil).count)
     end
 
     # Rolf can destroy his naming if Mary deletes her vote on it.

@@ -46,7 +46,7 @@ class Name
       @all.where(namings: { name_id: @name.id })
     end
 
-    def has_images # rubocop:disable Naming/PredicateName
+    def has_images # rubocop:disable Naming/PredicatePrefix
       of_taxon_this_name.reject { |obs| obs&.thumb_image_id.nil? }
     end
 

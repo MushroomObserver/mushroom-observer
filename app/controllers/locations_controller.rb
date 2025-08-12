@@ -421,7 +421,7 @@ class LocationsController < ApplicationController
     if in_admin_mode? || @location.mergable?
       old_name = @location.display_name
       new_name = merge.display_name
-      merge.merge(@location)
+      merge.merge(@user, @location)
       merge.save if merge.changed?
       @location = merge
       flash_notice(:runtime_location_merge_success.t(this: old_name,
@@ -481,7 +481,7 @@ class LocationsController < ApplicationController
   def email_admin_location_change
     content = email_location_change_content
     QueuedEmail::Webmaster.create_email(
-      sender_email: @user.email,
+      @user,
       subject: "Nontrivial Location Change",
       content: content
     )
@@ -517,9 +517,9 @@ class LocationsController < ApplicationController
   def modal_title
     case action_name
     when "new", "create"
-      :create_location_title.t
+      new_page_title(:create_object, :LOCATION)
     when "edit", "update"
-      :edit_location_title.t(name: @location.display_name)
+      edit_page_title(@location.display_name, @location)
     end
   end
 

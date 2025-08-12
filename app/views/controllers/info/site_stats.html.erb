@@ -2,7 +2,7 @@
 add_page_title(:show_site_stats_title.t)
 
 add_context_nav(info_site_stats_tabs)
-@container = :full
+container_class(:full)
 %>
 
 <div class="row mt-3">
@@ -12,7 +12,7 @@ add_context_nav(info_site_stats_tabs)
       <% @observations[0,3].each do |obs| %>
         <div class="pb-1">
           <%= interactive_image(
-            obs.thumb_image, image_link: observation_path(obs.id), votes: true
+            @user, obs.thumb_image, image_link: observation_path(obs.id), votes: true
           ) %><br/>
           <br/>
         </div>
@@ -40,8 +40,9 @@ add_context_nav(info_site_stats_tabs)
   <% if obs_length > 3 %>
     <% @observations[3,3].each do |obs| %>
       <%= interactive_image(
-          obs.thumb_image, image_link: observation_path(obs.id), votes: true
-        ) %><br/>
+            @user, obs.thumb_image, image_link: observation_path(obs.id),
+            votes: true
+          ) %><br/>
       <br/>
     <% end %>
   <% end %>

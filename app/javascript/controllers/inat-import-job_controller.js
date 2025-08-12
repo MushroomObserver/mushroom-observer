@@ -15,7 +15,7 @@ export default class extends Controller {
 
   connect() {
     // Just a "sanity check" convention, so you can tell "is this thing on?"
-    this.element.dataset.stimulus = "inat-import-job-connected";
+    this.element.dataset.inatImportJob = "connected";
 
     this.start_timer_sending_requests()
   }

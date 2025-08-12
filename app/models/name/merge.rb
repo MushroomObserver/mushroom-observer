@@ -25,17 +25,17 @@ class Name
     #  citation
     # All things that referred to old_name are moved to self and saved.
     # Finally, +old_name+ destroyed.
-    def merge(old_name)
+    def merge(user, old_name)
       return if old_name == self
 
       move_observations(old_name)
       move_namings(old_name)
       move_mispellings(old_name)
       move_followings(old_name) # move Interest and Tracking
-      move_descriptions(old_name)
+      move_descriptions(user, old_name)
       move_versions(old_name)
       move_nomenclature_attributes(old_name)
-      move_taxonomy_attributes(old_name)
+      move_taxonomy_attributes(user, old_name)
 
       old_name.destroy
     end
@@ -78,14 +78,15 @@ class Name
       NameTracker.where(name: old_name).update_all(name_id: id)
     end
 
-    def move_descriptions(old_name)
+    def move_descriptions(user, old_name)
       move_primary_description(old_name)
       # Move over any remaining descriptions.
       NameDescription.where(name_id: old_name.id).update_all(name_id: id)
 
       # Log the action.
-      old_name.rss_log&.orphan(old_name.display_name, :log_name_merged,
-                               this: old_name.display_name, that: display_name)
+      old_name.rss_log&.orphan(user, old_name[:display_name], :log_name_merged,
+                               this: old_name[:display_name],
+                               that: self[:display_name])
       old_name.rss_log = nil
     end
 
@@ -120,13 +121,14 @@ class Name
       self.citation = old_name.citation.strip_squeeze
     end
 
-    def move_taxonomy_attributes(old_name)
+    def move_taxonomy_attributes(user, old_name)
       return unless old_name.has_notes? && (old_name.notes != notes)
 
       prepare_notes_for_merger
       self.notes = "#{notes}These notes come from merge with " \
-                   "#{old_name.format_name}:\n\n #{old_name.notes}"
-      log(:log_name_updated, touch: true)
+                   "#{old_name.user_format_name(@user)}:\n\n #{old_name.notes}"
+      user_log(user, :log_name_updated, touch: true)
+      @current_user = user
       save
     end
 

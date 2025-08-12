@@ -330,7 +330,7 @@ class TextileTest < UnitTestCase
   end
 
   def within_underscores(str)
-    str =~ (/^_+(?<inside>.*)_+/)
+    str =~ /^_+(?<inside>.*)_+/
     $LAST_MATCH_INFO[:inside]
   end
 

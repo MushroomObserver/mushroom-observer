@@ -1,0 +1,32 @@
+<%# Project banner with title, location, date_range,
+    and potentially edit_icons %>
+<%
+is_project = controller.controller_name == "projects"
+title_id = is_project ? "title" : "banner_title"
+%>
+
+<%= tag.div(class: "row") do %>
+  <%= tag.div(class: "col-xs-12", id: "project_banner") do %>
+    <%= yield(:banner_image) %>
+    <%= tag.div(class: "bottom-left ml-3 mb-3 p-2") do %>
+      <%= tag.h1(class: "h3 banner-image-text", id: title_id) do %>
+        <%= tag.div(class: "d-flex align-items-center") do %>
+          <%= yield(:banner_title) %>
+          <% if is_project && content_for?(:edit_icons) %>
+            <%= tag.ul(class: "nav navbar-nav object_edit h4") do
+              yield(:edit_icons)
+            end %>
+          <% end %>
+        <% end %>
+      <% end %>
+      <% if content_for?(:project_location) %>
+        <%= tag.div(yield(:project_location),
+                    class: "project_location banner-image-text") %>
+      <% end %>
+      <% if content_for?(:project_date_range) %>
+        <%= tag.div(yield(:project_date_range),
+                    class: "project_date_range banner-image-text") %>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>

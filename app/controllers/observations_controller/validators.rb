@@ -36,7 +36,7 @@ module ObservationsController::Validators
   # @names, @valid_names, @parent_deprecated, @suggest_corrections.
   # Returns true if the name is resolved unambiguously.
   def resolve_name
-    resolver = Naming::NameResolver.new(**name_params)
+    resolver = Naming::NameResolver.new(@user, **name_params)
     success = false
     resolver.results.each do |ivar, value|
       if ivar == :success

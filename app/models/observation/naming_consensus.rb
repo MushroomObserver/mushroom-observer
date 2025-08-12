@@ -24,7 +24,6 @@
 # db lookups have been moved here.
 #
 #  name_been_proposed?::    Has someone proposed this Name already?
-#  owners_votes::           Get all of the onwer's Vote's for this Observation.
 #  owner_preference::       owners's unique prefered Name (if any) for this Obs
 #  consensus_naming::       Guess which Naming is responsible for consensus.
 #  calc_consensus::         Calculate and cache the consensus naming/name.
@@ -35,7 +34,6 @@
 #  user_voted?::            Has a given User voted on this Naming?
 #  owner_voted?::           Has the owner voted on a given Naming?
 #  users_vote::             Get a given User's Vote on this Naming.
-#  owners_vote::            Owner's Vote on a given Naming.
 #  users_favorite?::        Is this Naming the given User's favorite?
 #  owners_favorite?::       Is a given Naming one of the owner's favorite(s)?
 #  change_vote::            Change a given User's Vote for a given Naming.
@@ -53,14 +51,19 @@
 # number of proposed namings per obs, so 3 namings meant 11 vote lookups).
 # The vote table is the slowest table in the db, so it was extremely slow.
 #
+
+# Disable Metrics/ClassLength temporarily while getting rid of User.current
+# rubocop:disable Metrics/ClassLength
 class Observation
   class NamingConsensus
-    attr_accessor :observation, :namings, :votes
+    attr_accessor :observation, :namings, :votes, :consensus_changed
 
     def initialize(observation)
+      # @observation = ::Observation.naming_includes.find(observation.id)
       @observation = observation
       @namings = observation.namings
       @votes = @namings.map(&:votes).flatten
+      @consensus_changed = false
     end
 
     def reload_namings_and_votes!
@@ -146,11 +149,6 @@ class Observation
       !users_vote(naming, user).nil?
     end
 
-    # Get the owner's Vote on a given Naming.
-    def owners_vote(naming)
-      users_vote(naming, @observation.user)
-    end
-
     # Get a given User's Vote on a given Naming.
     def users_vote(naming, user)
       votes.select do |v|
@@ -194,14 +192,8 @@ class Observation
     # Note: multiple namings can return true for a given user and observation.
     def users_favorite?(naming, user)
       votes.any? do |v|
-        v.user_id == user.id && v.naming_id == naming.id && v.favorite
+        v.user_id == user&.id && v.naming_id == naming.id && v.favorite
       end
-    end
-
-    # All of observation.user's votes on all Namings for this Observation
-    # Used in Observation and in tests
-    def owners_votes
-      user_votes(@observation.user)
     end
 
     # All of a given User's votes on all Namings for this Observation
@@ -274,7 +266,7 @@ class Observation
       result = false
       vote = users_vote(naming, user)
       value = value.to_f
-      mark_obs_reviewed # no matter what vote, currently
+      mark_obs_reviewed(user) # no matter what vote, currently
 
       if value == Vote.delete_vote
         result = delete_vote(naming, vote, user)
@@ -286,7 +278,7 @@ class Observation
       end
 
       # Update consensus if anything changed.
-      calc_consensus if result
+      user_calc_consensus(user) if result
       result
     end
 
@@ -302,7 +294,7 @@ class Observation
     def calc_consensus
       reload_namings_and_votes!
       calculator = ::Observation::ConsensusCalculator.new(@namings)
-      best, best_val = calculator.calc
+      best, best_val = calculator.calc(User.current)
       old = @observation.name
       if old != best || @observation.vote_cache != best_val
         # If naming generic or specific, and vote positive, needs_naming = 0
@@ -310,18 +302,40 @@ class Observation
         @observation.update(name: best, vote_cache: best_val,
                             needs_naming: needs_naming)
       end
-      @observation.reload.announce_consensus_change(old, best) if best != old
+      return unless best != old
+
+      @consensus_changed = true
+      @observation.reload.announce_consensus_change(old, best)
+    end
+
+    def user_calc_consensus(current_user)
+      reload_namings_and_votes!
+      calculator = ::Observation::ConsensusCalculator.new(@namings)
+      best, best_val = calculator.calc(current_user)
+      old = @observation.name
+      if old != best || @observation.vote_cache != best_val
+        # If naming generic or specific, and vote positive, needs_naming = 0
+        needs_naming = !best.above_genus? && best_val&.positive? ? 0 : 1
+        @observation.current_user = current_user
+        @observation.update(name: best, vote_cache: best_val,
+                            needs_naming: needs_naming)
+      end
+      return unless best != old
+
+      @consensus_changed = true
+      @observation.reload.user_announce_consensus_change(old, best,
+                                                         current_user)
     end
 
     # We interpret any naming vote to mean the user has reviewed the obs.
     # Setting this here makes the identify index query much cheaper.
-    def mark_obs_reviewed
+    def mark_obs_reviewed(user)
       if (view = ObservationView.find_by(observation_id: @observation.id,
-                                         user_id: User.current_id))
+                                         user_id: user.id))
         view.update!(last_view: Time.zone.now, reviewed: 1)
       else
         ObservationView.create!(observation_id: @observation.id,
-                                user_id: User.current_id,
+                                user_id: user.id,
                                 last_view: Time.zone.now, reviewed: 1)
       end
     end
@@ -446,3 +460,4 @@ class Observation
     end
   end
 end
+# rubocop:enable Metrics/ClassLength

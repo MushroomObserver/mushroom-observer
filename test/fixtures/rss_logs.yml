@@ -472,7 +472,10 @@ recorder_obs_rss_log:
 
 imported_inat_obs_rss_log:
   <<: *DEFAULTS
+  created_at: 2025-08-01 04:05:03
+  updated_at: 2025-08-01 04:05:03
   observation: imported_inat_obs
+  notes: "log_observation_created user dick\n"
 
 species_list_rss_log:
   species_list: first_species_list
@@ -521,3 +524,7 @@ article_rss_log:
   updated_at: 2016-08-08 12:00:01
   created_at: 2016-08-08 08:25:02
   notes: "20160808082502 log_article_created user rolf\n"
+
+provisional_obs_rss_log:
+  <<: *DEFAULTS
+  observation: provisional_obs

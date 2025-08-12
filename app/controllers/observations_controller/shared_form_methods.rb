@@ -95,8 +95,8 @@ module ObservationsController::SharedFormMethods
   end
 
   def init_project_vars
-    @projects = User.current.projects_member(order: :title,
-                                             include: :user_group)
+    @projects = @user.projects_member(order: :title,
+                                      include: :user_group)
     @project_checks = {}
   end
 
@@ -111,7 +111,7 @@ module ObservationsController::SharedFormMethods
   end
 
   def init_list_vars
-    @lists = User.current.all_editable_species_lists.sort_by(&:title)
+    @lists = @user.all_editable_species_lists.sort_by(&:title)
     @list_checks = {}
   end
 
@@ -256,7 +256,7 @@ module ObservationsController::SharedFormMethods
   def update_projects
     return unless (checks = params[:project])
 
-    User.current.projects_member(include: :observations).each do |project|
+    @user.projects_member(include: :observations).each do |project|
       before = @observation.projects.include?(project)
       after = checks["id_#{project.id}"] == "1"
       next unless before != after
@@ -275,7 +275,7 @@ module ObservationsController::SharedFormMethods
   def update_species_lists
     return unless (checks = params[:list])
 
-    User.current.all_editable_species_lists.includes(:observations).
+    @user.all_editable_species_lists.includes(:observations).
       find_each do |list|
       before = @observation.species_lists.include?(list)
       after = checks["id_#{list.id}"] == "1"

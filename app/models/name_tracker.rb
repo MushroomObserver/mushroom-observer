@@ -54,7 +54,7 @@ class NameTracker < AbstractModel
       gsub(":observation", "#{MO.http_domain}/#{naming.observation_id}").
       gsub(":mailing_address", tracker.mailing_address || "").
       gsub(":location", naming.observation.place_name).
-      gsub(":name", naming.format_name)
+      gsub(":name", naming.user_format_name(tracker))
   end
 
   # Return a string summarizing what this NameTracker is about.

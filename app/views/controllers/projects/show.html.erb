@@ -1,19 +1,15 @@
 <%
+add_show_title(@project.title, @project)
 add_project_banner(@project)
-@container = :wide
+add_edit_icons(@project)
+container_class(:wide)
 %>
 
-<br />
+<%= render(partial: "shared/list_search", locals: { object: @project }) %>
 
 <%= panel_block(id: "project_summary") do %>
   <%= tag.p(@project.summary.to_s.html_safe.tpl) %>
 
-  <% if @project.species_lists.any? %>
-    <p><b><%= :SPECIES_LISTS.t %>:</b>
-      <%= @project.species_lists.length %>
-      (<%= link_to(:SHOW.t, species_lists_path(project: @project.id)) %>)
-    </p>
-  <% end %>
   <% if @drafts.any? %>
     <p><b><%= :show_project_drafts.t %>:</b>
       <%= @drafts.length %><br />
@@ -33,14 +29,14 @@ add_project_banner(@project)
 <p id="project_join_trust_edit">
   <% if @project.can_join?(@user) %>
     <%= post_button(name: :show_project_join.t,
-                    class: "btn btn-default btn-sm",
+                    class: "btn btn-default btn-lg",
                     path: project_members_path(project_id: @project.id,
                                               candidate: @user.id,
                                               target: :project_index)) %>
   <% elsif @project.member?(@user) %>
     <% if @project.trusted_by?(@user) %>
       <%= put_button(name: :change_member_status_revoke_trust.l,
-                     class: "btn btn-default btn-sm",
+                     class: "btn btn-default btn-lg",
                      path: project_member_path(
                        project_id: @project.id,
                        candidate: @user.id,
@@ -49,7 +45,7 @@ add_project_banner(@project)
                      ) %>
     <% else %>
       <%= put_button(name: :change_member_hidden_gps_trust.l,
-                     class: "btn btn-default btn-sm",
+                     class: "btn btn-default btn-lg",
                      path: project_member_path(
                        project_id: @project.id,
                        candidate: @user.id,
@@ -59,7 +55,7 @@ add_project_banner(@project)
     <% end %>
     <% unless @project.can_edit_content?(@user) %>
       <%= put_button(name: :change_member_editing_trust.l,
-                     class: "btn btn-default btn-sm",
+                     class: "btn btn-default btn-lg",
                      path: project_member_path(
                        project_id: @project.id,
                        candidate: @user.id,
@@ -69,23 +65,37 @@ add_project_banner(@project)
     <% end %>
     <% if @project.can_leave?(@user) %>
       <%= put_button(name: :show_project_leave.t,
-                     class: "btn btn-default btn-sm",
+                     class: "btn btn-default btn-lg",
                      path: project_member_path(
                        project_id: @project.id,
                        candidate: @user.id,
                        target: :project_index)
                      ) %>
     <% end %>
+    <%= put_button(name: :change_member_add_obs.t,
+        class: "btn btn-default btn-lg",
+        path: project_member_path(
+          project_id: @project.id,
+          candidate: @user.id,
+          commit: :change_member_add_obs.l,
+          target: :project_index)
+        ) %>
   <% end %>
 
   <% if check_permission(@project) %>
-    <%= link_to(:show_project_edit.t,
-                edit_project_path(@project.id),
-                { class: "btn btn-default btn-sm" }) %>
+    <div class="mt-3">
+      <%= link_to("#{@project.user_group.users.count} #{:MEMBERS.l}",
+                  project_members_path(@project.id),
+                  { class: "btn btn-default btn-lg" }) %>
+      <%= link_to("#{@project.aliases.length} #{:PROJECT_ALIASES.l}",
+                  project_aliases_path(project_id: @project.id),
+                  { class: "btn btn-default btn-lg" }) %>
+      <%= violations_button(@project) %>
+    </div>
   <% else %>
     <%= link_to(:show_project_admin_request.t,
                 new_project_admin_request_path(project_id: @project.id),
-                { class: "btn btn-default btn-sm" }) %>
+                { class: "btn btn-default btn-lg" }) %>
   <% end %>
 </p>
 
@@ -93,4 +103,4 @@ add_project_banner(@project)
            locals: { object: @project, comments: @comments,
                      controls: @user, limit: nil }) %>
 
-<%= show_object_footer(@project) %>
+<%= show_object_footer(@user, @project) %>

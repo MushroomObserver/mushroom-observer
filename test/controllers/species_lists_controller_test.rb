@@ -16,7 +16,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     10
   end
 
-  # Score for one species list.
+  # Score for one species_list.
   def v_spl
     5
   end
@@ -103,7 +103,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login
     get(:index)
 
-    assert_displayed_title(:SPECIES_LISTS.l)
+    assert_page_title(:SPECIES_LISTS.l)
     assert_select(
       "#content a:match('href', ?)", %r{^#{species_lists_path}/\d+},
       { count: SpeciesList.count },
@@ -122,7 +122,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     assert_equal(SpeciesList.order_by(:user).map(&:user_id),
                  assigns(:objects).map(&:user_id))
-    assert_displayed_title(:SPECIES_LISTS.l)
+    assert_page_title(:SPECIES_LISTS.l)
     assert_sorted_by(by)
   end
 
@@ -137,7 +137,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login
     get(:index, params: { id: list.id, by: by })
 
-    assert_displayed_title(:SPECIES_LISTS.l)
+    assert_page_title(:SPECIES_LISTS.l)
     assert_sorted_by(by)
   end
 
@@ -147,7 +147,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login
     get(:index, params: { id: list.id })
 
-    assert_displayed_title(:SPECIES_LISTS.l)
+    assert_page_title(:SPECIES_LISTS.l)
     assert_sorted_by("date")
   end
 
@@ -158,7 +158,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     get(:index, params: { pattern: pattern })
 
     assert_response(:success)
-    assert_displayed_title(:SPECIES_LISTS.l)
+    assert_page_title(:SPECIES_LISTS.l)
     assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
     assert_select(
       "#content a:match('href', ?)", %r{^#{species_lists_path}/\d+},
@@ -196,7 +196,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_user: user })
 
-    assert_displayed_title(:SPECIES_LISTS.l)
+    assert_page_title(:SPECIES_LISTS.l)
     assert_displayed_filters("#{:query_by_users.l}: #{user.name}")
   end
 
@@ -207,7 +207,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     get(:index, params: { by_user: user })
 
     assert_response(:success)
-    assert_displayed_title(:SPECIES_LISTS.l)
+    assert_page_title(:SPECIES_LISTS.l)
   end
 
   def test_index_for_user_who_does_not_exist
@@ -230,8 +230,9 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login
     get(:index, params: { project: project.id })
 
-    assert_displayed_title(:SPECIES_LISTS.l)
-    assert_displayed_filters("#{:query_projects.l}: #{project.title}")
+    # there's no banner for this project
+    assert_page_title(:SPECIES_LISTS.l)
+    assert_match(project.species_lists.first.title, @response.body)
   end
 
   def test_index_for_project_with_no_lists
@@ -241,7 +242,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     get(:index, params: { project: project.id })
 
     assert_response(:success)
-    assert_displayed_title(:SPECIES_LISTS.l)
+    assert_page_title(:SPECIES_LISTS.l)
     assert_flash_text(:runtime_no_matches.l(types: :species_lists))
   end
 
@@ -293,8 +294,19 @@ class SpeciesListsControllerTest < FunctionalTestCase
       "form:match('action', ?)",
       %r{/observations/\d+/species_lists/#{list.id}/remove},
       { count: observations.size },
-      "Species List owner should get 1 Remove button per Observation"
+      "Observation List owner should get 1 Remove button per Observation"
     )
+  end
+
+  def test_show_species_list_for_project
+    login
+    spl = species_lists(:reused_list)
+    project = spl.projects[0]
+
+    get(:show, params: { id: spl.id, project: project.id })
+    assert_match(project.title, @response.body)
+    assert_select("h1#title", /#{spl.title}/,
+                  "H1 title element should exist and contain content")
   end
 
   def test_show_species_lists_attached_to_projects
@@ -330,7 +342,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login("rolf")
     get(:show, params: { id: spl.id })
     assert_select("a[href*=?]", edit_species_list_path(spl.id), count: 0)
-    assert_select("form[action=?]", species_list_path(spl.id), count: 0)
+    assert_select("form[action=?]", add_dispatch_path, count: 1)
     get(:edit, params: { id: spl.id })
     assert_response(:redirect)
     delete(:destroy, params: { id: spl.id })
@@ -422,7 +434,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
-  # Test constructing species lists in various ways.
+  # Test constructing species_lists in various ways.
   def test_construct_species_list
     list_title = "List Title"
     params = {
@@ -443,7 +455,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_equal(BASE_CONTRIBUTION + v_spl + v_obs, rolf.reload.contribution)
     assert_not_nil(spl)
     assert_equal(list_title, spl.title)
-    assert(spl.name_included(names(:coprinus_comatus)))
+    assert(spl.name_included?(names(:coprinus_comatus)))
     obs = spl.observations.first
     assert_equal(Vote.maximum_vote, obs.namings.first.votes.first.value)
     assert(obs.vote_cache > 2)
@@ -498,7 +510,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_redirected_to(species_list_path(spl.id))
     assert_equal(BASE_CONTRIBUTION + v_spl + v_obs, rolf.reload.contribution)
     assert_not_nil(spl)
-    assert(spl.name_included(agaricus))
+    assert(spl.name_included?(agaricus))
   end
 
   def test_construct_species_list_new_family
@@ -533,7 +545,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     new_name = Name.find_by(text_name: new_name_str)
     assert_not_nil(new_name)
     assert_equal(rank, new_name.rank)
-    assert(spl.name_included(new_name))
+    assert(spl.name_included?(new_name))
   end
 
   # <name> = <name> shouldn't work in construct_species_list
@@ -620,7 +632,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_not_nil(obs.updated_at)
     name = Name.find_by(search_name: new_name_str.squeeze(" "))
     assert_not_nil(name)
-    assert(spl.name_included(name))
+    assert(spl.name_included?(name))
   end
 
   def test_construct_species_list_rankless_taxon
@@ -653,7 +665,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     new_name = Name.find_by(text_name: new_name_str)
     assert_not_nil(new_name)
     assert_equal("Family", new_name.rank)
-    assert(spl.name_included(new_name))
+    assert(spl.name_included?(new_name))
   end
 
   # Rather than repeat everything done for update_species, this construct
@@ -720,12 +732,12 @@ class SpeciesListsControllerTest < FunctionalTestCase
     # Creates "New" and "New name", spl, and five obs/naming/splentries.
     assert_equal(BASE_CONTRIBUTION + v_nam * 2 + v_spl + v_obs * 5,
                  rolf.reload.contribution)
-    assert(spl.name_included(deprecated_name))
-    assert(spl.name_included(multiple_name))
-    assert(spl.name_included(Name.find_by(text_name: new_name_str)))
-    assert(spl.name_included(current_checklist_name))
-    assert_not(spl.name_included(deprecated_checklist_name))
-    assert(spl.name_included(approved_name))
+    assert(spl.name_included?(deprecated_name))
+    assert(spl.name_included?(multiple_name))
+    assert(spl.name_included?(Name.find_by(text_name: new_name_str)))
+    assert(spl.name_included?(current_checklist_name))
+    assert_not(spl.name_included?(deprecated_checklist_name))
+    assert(spl.name_included?(approved_name))
   end
 
   def test_construct_species_list_nonalpha_multiple
@@ -779,10 +791,10 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     assert_redirected_to(species_list_path(spl.id))
     assert_equal(BASE_CONTRIBUTION + v_spl + v_obs, rolf.reload.contribution)
-    assert(spl.name_included(bugs_names.second))
+    assert(spl.name_included?(bugs_names.second))
   end
 
-  # Test constructing species lists, tweaking member fields.
+  # Test constructing species_lists, tweaking member fields.
   def test_construct_species_list_with_member_fields
     list_title = "List Title"
     params = {
@@ -811,7 +823,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_redirected_to(species_list_path(spl.id))
     assert_equal(BASE_CONTRIBUTION + v_spl + v_obs, rolf.reload.contribution)
     assert_not_nil(spl)
-    assert(spl.name_included(names(:coprinus_comatus)))
+    assert(spl.name_included?(names(:coprinus_comatus)))
     obs = spl.observations.first
     assert_equal(Vote.minimum_vote, obs.namings.first.votes.first.value)
     assert_equal([Observation.other_notes_key], obs.notes.keys)
@@ -844,7 +856,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
   end
 
   # -----------------------------------------------
-  #  Test changing species lists in various ways.
+  #  Test changing species_lists in various ways.
   # -----------------------------------------------
 
   def test_edit_species_list
@@ -982,7 +994,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size
     name = names(:amanita_baccata_arora)
-    assert_not(spl.name_included(name))
+    assert_not(spl.name_included?(name))
     params = spl_params(spl)
     params[:list][:members] = name.text_name
     login(spl.user.login)
@@ -990,14 +1002,14 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_edit_species_list
     assert_equal(10, spl.user.reload.contribution)
     assert_equal(sp_count, spl.reload.observations.size)
-    assert_not(spl.name_included(name))
+    assert_not(spl.name_included?(name))
   end
 
   def test_update_species_list_chosen_multiple_match
     spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size
     name = names(:amanita_baccata_arora)
-    assert_not(spl.name_included(name))
+    assert_not(spl.name_included?(name))
     params = spl_params(spl)
     params[:list][:members] = name.text_name
     params[:chosen_multiple_names] = { name.id.to_s => name.id.to_s }
@@ -1006,7 +1018,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_redirected_to(species_list_path(spl.id))
     assert_equal(BASE_CONTRIBUTION + v_obs, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
-    assert(spl.name_included(name))
+    assert(spl.name_included?(name))
   end
 
   def test_update_species_list_deprecated
@@ -1014,14 +1026,14 @@ class SpeciesListsControllerTest < FunctionalTestCase
     sp_count = spl.observations.size
     name = names(:lactarius_subalpinus)
     params = spl_params(spl)
-    assert_not(spl.name_included(name))
+    assert_not(spl.name_included?(name))
     params[:list][:members] = name.text_name
     login(spl.user.login)
     put(:update, params: params)
     assert_edit_species_list
     assert_equal(10, spl.user.reload.contribution)
     assert_equal(sp_count, spl.reload.observations.size)
-    assert_not(spl.name_included(name))
+    assert_not(spl.name_included?(name))
   end
 
   def test_update_species_list_approved_deprecated
@@ -1029,7 +1041,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     sp_count = spl.observations.size
     name = names(:lactarius_subalpinus)
     params = spl_params(spl)
-    assert_not(spl.name_included(name))
+    assert_not(spl.name_included?(name))
     params[:list][:members] = name.text_name
     params[:approved_deprecated_names] = [name.id.to_s]
     login(spl.user.login)
@@ -1037,7 +1049,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_redirected_to(species_list_path(spl.id))
     assert_equal(BASE_CONTRIBUTION + v_obs, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
-    assert(spl.name_included(name))
+    assert(spl.name_included?(name))
   end
 
   def test_update_species_list_checklist_add
@@ -1045,14 +1057,14 @@ class SpeciesListsControllerTest < FunctionalTestCase
     sp_count = spl.observations.size
     name = names(:lactarius_alpinus)
     params = spl_params(spl)
-    assert_not(spl.name_included(name))
+    assert_not(spl.name_included?(name))
     params[:checklist_data][name.id.to_s] = "1"
     login(spl.user.login)
     put(:update, params: params)
     assert_redirected_to(species_list_path(spl.id))
     assert_equal(BASE_CONTRIBUTION + v_obs, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
-    assert(spl.name_included(name))
+    assert(spl.name_included?(name))
   end
 
   def test_update_species_list_deprecated_checklist
@@ -1060,14 +1072,14 @@ class SpeciesListsControllerTest < FunctionalTestCase
     sp_count = spl.observations.size
     name = names(:lactarius_subalpinus)
     params = spl_params(spl)
-    assert_not(spl.name_included(name))
+    assert_not(spl.name_included?(name))
     params[:checklist_data][name.id.to_s] = "1"
     login(spl.user.login)
     put(:update, params: params)
     assert_edit_species_list
     assert_equal(10, spl.user.reload.contribution)
     assert_equal(sp_count, spl.reload.observations.size)
-    assert_not(spl.name_included(name))
+    assert_not(spl.name_included?(name))
   end
 
   def test_update_species_list_approved_deprecated_checklist
@@ -1075,7 +1087,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     sp_count = spl.observations.size
     name = names(:lactarius_subalpinus)
     params = spl_params(spl)
-    assert_not(spl.name_included(name))
+    assert_not(spl.name_included?(name))
     params[:checklist_data][name.id.to_s] = "1"
     params[:approved_deprecated_names] = [name.id.to_s]
     login(spl.user.login)
@@ -1083,7 +1095,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_redirected_to(species_list_path(spl.id))
     assert_equal(BASE_CONTRIBUTION + v_obs, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
-    assert(spl.name_included(name))
+    assert(spl.name_included?(name))
   end
 
   def test_update_species_list_approved_renamed_deprecated_checklist
@@ -1092,7 +1104,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     name = names(:lactarius_subalpinus)
     approved_name = names(:lactarius_alpinus)
     params = spl_params(spl)
-    assert_not(spl.name_included(name))
+    assert_not(spl.name_included?(name))
     params[:checklist_data][name.id.to_s] = "1"
     params[:approved_deprecated_names] = [name.id.to_s]
     params[:chosen_approved_names] =
@@ -1102,8 +1114,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_redirected_to(species_list_path(spl.id))
     assert_equal(BASE_CONTRIBUTION + v_obs, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
-    assert_not(spl.name_included(name))
-    assert(spl.name_included(approved_name))
+    assert_not(spl.name_included?(name))
+    assert(spl.name_included?(approved_name))
   end
 
   def test_update_species_list_approved_rename
@@ -1112,8 +1124,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
     name = names(:lactarius_subalpinus)
     approved_name = names(:lactarius_alpinus)
     params = spl_params(spl)
-    assert_not(spl.name_included(name))
-    assert_not(spl.name_included(approved_name))
+    assert_not(spl.name_included?(name))
+    assert_not(spl.name_included?(approved_name))
     params[:list][:members] = name.text_name
     params[:approved_deprecated_names] = name.id.to_s
     params[:chosen_approved_names] =
@@ -1123,8 +1135,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_redirected_to(species_list_path(spl.id))
     assert_equal(BASE_CONTRIBUTION + v_obs, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
-    assert_not(spl.name_included(name))
-    assert(spl.name_included(approved_name))
+    assert_not(spl.name_included?(name))
+    assert(spl.name_included?(approved_name))
   end
 
   # ----------------------------
@@ -1241,7 +1253,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)
 
     # should have different default if recently create list attached to project
-    obs = Observation.create!
+    obs = Observation.create!(user: rolf)
     @proj1.add_observation(obs)
     get(:new)
     assert_project_checks(@proj1.id => :checked, @proj2.id => :no_field)

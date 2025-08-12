@@ -2,9 +2,9 @@
 
 module Tabs
   module FieldSlipsHelper
-    def field_slip_show_tabs(field_slip)
+    def field_slip_show_tabs(field_slip, user)
       links = [field_slips_index_tab, new_field_slip_tab]
-      return links unless field_slip.can_edit?
+      return links unless field_slip.can_edit?(user)
 
       links.push(edit_field_slip_tab(field_slip),
                  destroy_field_slip_tab(field_slip))

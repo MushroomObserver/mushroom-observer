@@ -8,6 +8,16 @@ module Name::Format
   end
 
   ##### Display of names ######################################################
+  def user_display_name(user = nil)
+    str = self[:display_name]
+    if user &&
+       user.hide_authors == "above_species" &&
+       Name.ranks_above_species.include?(rank)
+      str = str.sub(/^(\**__.*__\**).*/, '\\1')
+    end
+    str
+  end
+
   def display_name
     str = self[:display_name]
     if User.current &&
@@ -23,9 +33,17 @@ module Name::Format
     display_name
   end
 
+  def user_format_name(user)
+    user_display_name(user)
+  end
+
   # Tack id on to end of +format_name+.
   def unique_format_name
     display_name + " (#{id || "?"})"
+  end
+
+  def user_unique_format_name(user)
+    user_display_name(user) + " (#{id || "?"})"
   end
 
   def unique_search_name
@@ -39,18 +57,37 @@ module Name::Format
     display_name
   end
 
+  def user_observation_name(user)
+    user_display_name(user)
+  end
+
   # Marked up Name, authors shortened per ICN Recommendation 46C.2,
   #  e.g.: **__"Xxx yyy__ author1 et al.**
-  def display_name_brief_authors
+  def display_name_brief_authors(current_user = User.current)
     if rank == "Group"
       # Xxx yyy group author
-      display_name.sub(/ #{Regexp.quote(author)}$/, " #{brief_author}")
+      user_display_name(current_user).sub(/ #{Regexp.quote(author)}$/,
+                                          " #{brief_author}")
     else
       # Xxx yyy author, Xxx sect. yyy author, Xxx author sect. yyy
       # Relies on display_name having markup around name proper
       # Otherwise, it might delete author if that were part of the name proper
-      display_name.sub(/(\*+|_+) #{Regexp.quote(author)}/,
-                       "\\1 #{brief_author}")
+      user_display_name(current_user).sub(/(\*+|_+) #{Regexp.quote(author)}/,
+                                          "\\1 #{brief_author}")
+    end
+  end
+
+  def user_display_name_brief_authors(user)
+    if rank == "Group"
+      # Xxx yyy group author
+      user_display_name(user).sub(/ #{Regexp.quote(author)}$/,
+                                  " #{brief_author}")
+    else
+      # Xxx yyy author, Xxx sect. yyy author, Xxx author sect. yyy
+      # Relies on display_name having markup around name proper
+      # Otherwise, it might delete author if that were part of the name proper
+      user_display_name(user).sub(/(\*+|_+) #{Regexp.quote(author)}/,
+                                  "\\1 #{brief_author}")
     end
   end
 
@@ -68,13 +105,32 @@ module Name::Format
     end
   end
 
+  def user_display_name_without_authors(user)
+    if rank == "Group"
+      # Remove author and preceding space at end
+      user_display_name(user).sub(/ #{Regexp.quote(author)}$/, "")
+    else
+      # Remove author and preceding space after markup
+      user_display_name(user).sub(/(\*+|_+) #{Regexp.quote(author)}/, "\\1 ").
+        strip_squeeze
+    end
+  end
+
   # Tack id on to end of +text_name+.
   def unique_text_name
     real_text_name + " (#{id || "?"})"
   end
 
+  def user_real_text_name(user)
+    Name.user_display_to_real_text(user, self)
+  end
+
   def real_text_name
     Name.display_to_real_text(self)
+  end
+
+  def user_real_search_name(user = nil)
+    Name.user_display_to_real_search(user, self)
   end
 
   def real_search_name
@@ -118,6 +174,8 @@ module Name::Format
   ANY_ENDING_AFTER_COMMA     = /^(.*)(, [a-z. ]+)$/
   SOME_ENDINGS_WITHOUT_COMMA = /^(.*)( (#{PROV}|#{INVAL}))$/
   ENDINGS_WORTH_KEEPING      = / (#{PROV}|#{INVAL})$/
+  private_constant(:PROV, :INVAL, :ANY_ENDING_AFTER_COMMA,
+                   :SOME_ENDINGS_WITHOUT_COMMA, :ENDINGS_WORTH_KEEPING)
 
   # author(s) string shortened per ICN Recommendation 46C.2
   # Relies on name.author having a comma only if there are > 2 authors
@@ -143,12 +201,29 @@ module Name::Format
         concat(group_suffix(name)) # Readd group suffix
     end
 
+    def user_display_to_real_text(user, name)
+      # Remove trailing author
+      name.user_display_name(user).gsub(/(_\*?\*?)[^_*]*$/, '\1').
+        gsub(/__\*?\*? [^_*]* \s (#{Name::Parse::ANY_NAME_ABBR}) \s \*?\*?__/ox,
+             ' \1 '). # Remove internal author
+        gsub(/\*?\*?__\*?\*?/, ""). # Remove textile ornamentation
+        concat(user_group_suffix(user, name)) # Readd group suffix
+    end
+
+    def user_display_to_real_search(user, name)
+      name.user_display_name(user).gsub(/\*?\*?__([^_]+)__\*?\*?/, '\1')
+    end
+
     def display_to_real_search(name)
       name.display_name.gsub(/\*?\*?__([^_]+)__\*?\*?/, '\1')
     end
 
     def group_suffix(name)
       Name::Parse::GROUP_CHUNK.match(name.display_name).to_s
+    end
+
+    def user_group_suffix(user, name)
+      Name::Parse::GROUP_CHUNK.match(name.user_display_name(user)).to_s
     end
 
     # Make sure display names are in boldface for accepted names, and not in

@@ -15,12 +15,13 @@ class QueuedEmail
       get_note
     end
 
-    def self.create_email(sender_email:, content:, subject: nil)
+    def self.create_email(user, content:, sender_email: nil, subject: nil)
+      sender_email = user.email if user && sender_email.nil?
       raise("Missing email address!") unless sender_email
       raise("Missing content!") unless content
 
-      content = prepend_logged_in_user(content)
-      result = create(nil, nil)
+      content = prepend_user(user, content)
+      result = create(user, nil)
       result.add_string(:sender_email, sender_email)
       result.add_string(:subject, subject) if subject
       result.set_note(content)
@@ -35,13 +36,12 @@ class QueuedEmail
 
     ##########
 
-    def self.prepend_logged_in_user(content)
-      user = User.current
+    def self.prepend_user(user, content)
       return content if user.blank?
 
       "(from User ##{user.id} #{user.name}(#{user.login}))\n#{content}"
     end
 
-    private_class_method :prepend_logged_in_user
+    private_class_method :prepend_user
   end
 end

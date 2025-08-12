@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_04_03_174427) do
+ActiveRecord::Schema[7.2].define(version: 2025_07_25_173255) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -150,8 +150,9 @@ ActiveRecord::Schema[7.2].define(version: 2025_04_03_174427) do
     t.text "description"
     t.datetime "created_at", precision: nil
     t.datetime "updated_at", precision: nil
-    t.string "code", limit: 8, default: "", null: false
+    t.string "code", limit: 8
     t.integer "personal_user_id"
+    t.index ["code"], name: "index_herbaria_on_code", unique: true
   end
 
   create_table "herbarium_curators", charset: "utf8mb3", force: :cascade do |t|
@@ -218,6 +219,11 @@ ActiveRecord::Schema[7.2].define(version: 2025_04_03_174427) do
     t.integer "imported_count"
     t.string "response_errors"
     t.datetime "ended_at"
+    t.integer "total_imported_count"
+    t.integer "total_seconds"
+    t.float "avg_import_time"
+    t.datetime "last_obs_start"
+    t.boolean "cancel"
   end
 
   create_table "interests", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -679,6 +685,16 @@ ActiveRecord::Schema[7.2].define(version: 2025_04_03_174427) do
     t.text "notes", size: :medium
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
+  end
+
+  create_table "solid_cable_messages", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.binary "channel", limit: 1024, null: false
+    t.binary "payload", size: :long, null: false
+    t.datetime "created_at", null: false
+    t.bigint "channel_hash", null: false
+    t.index ["channel"], name: "index_solid_cable_messages_on_channel"
+    t.index ["channel_hash"], name: "index_solid_cable_messages_on_channel_hash"
+    t.index ["created_at"], name: "index_solid_cable_messages_on_created_at"
   end
 
   create_table "solid_queue_blocked_executions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|

@@ -1,12 +1,12 @@
 <%= tag.div(id: "results") do
-  pagination_nav(@pagination_data) do
+  paginated_results do
     matrix_table do
       @subset.each do |row|
         concat(matrix_box(id: row[0]) do
           tag.div(class: "panel panel-default") do
             concat(tag.div(class: "thumbnail-container") do
               interactive_image(
-                row[0], original: true, votes: false, full_width: true
+                @user, row[0], original: true, votes: false, full_width: true
               )
             end)
             concat(tag.div(class: "panel-body") do

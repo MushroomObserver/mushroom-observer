@@ -1,13 +1,14 @@
 <%
-add_page_title(@sequence.unique_format_name)
+add_show_title(@sequence.format_name, @sequence)
+add_edit_icons(@sequence)
 add_pager_for(@sequence)
 add_context_nav(sequence_show_tabs(seq: @sequence))
-@container = :wide
+container_class(:wide)
 %>
 
 <div class="container-text">
   <%= render(partial: "sequences/observation_title",
-            locals: { observation: @sequence.observation }) %>
+             locals: { observation: @sequence.observation }) %>
 </div>
 <!--.container-text-->
 
@@ -62,4 +63,4 @@ add_context_nav(sequence_show_tabs(seq: @sequence))
   <%= user_link(@sequence.user) %>
 </div>
 
-<%= show_object_footer(@sequence) %>
+<%= show_object_footer(@user, @sequence) %>

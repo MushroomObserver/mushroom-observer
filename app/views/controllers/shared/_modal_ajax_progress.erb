@@ -9,7 +9,9 @@ message ||= ""
 tag.div(
   class: "modal", id: "mo_ajax_progress", role: "dialog",
   aria: { labelledby: "mo_ajax_progress_caption" },
-  data: { keyboard: false, backdrop: "static" }
+  data: { controller: "modal",
+          action: "section-update:updated@window->modal#hide",
+          keyboard: false, backdrop: "static" }
 ) do
   tag.div(class: "modal-dialog modal-sm", role: "document") do
     tag.div(class: "modal-content") do

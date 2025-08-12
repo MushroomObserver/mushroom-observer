@@ -1,6 +1,6 @@
 <%
   add_project_banner(@project)
-  @container = :wide
+  container_class(:wide)
 %>
 
 <%= tag.h4(:PROJECT.l + ": " + link_to_object(@project)) %>
@@ -16,7 +16,7 @@
       make_table(
         headers: violation_table_headers(@project),
         rows: violation_table_rows(
-          form: form, project: @project, violations: @violations
+          form: form, project: @project, violations: @violations, user: @user
         )
       )
     %>

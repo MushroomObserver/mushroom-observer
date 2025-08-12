@@ -118,8 +118,8 @@ module PatternSearch
     end
 
     def is_pattern_a_name?
-      ::Name.where("text_name = ? OR search_name = ?",
-                   args[:pattern].to_s, args[:pattern].to_s).any?
+      pat = ::Name.parse_name(args[:pattern])&.search_name || args[:pattern]
+      ::Name.where(text_name: pat).or(::Name.where(search_name: pat)).any?
     end
 
     def any_taxa_modifiers_present?

@@ -75,7 +75,21 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_select(
       "a[href*=?]", new_project_member_path(project_id: p_id), count: 0
     )
-    assert_select("form[action=?]", project_path(p_id), count: 0)
+    assert_select("form[action=?]", add_dispatch_path, count: 1)
+    assert_select("h1#title", /\S/,
+                  "H1 title element should exist and contain content")
+    assert_select("div#project_banner", true,
+                  "Project banner div should be present")
+  end
+
+  def test_show_project_without_banner
+    login("zero") # Not the owner of eol_project
+    p_id = projects(:empty_project).id
+    get(:show, params: { id: p_id })
+    assert_select("h1#title", /\S/,
+                  "H1 title element should exist and contain content")
+    assert_select("div#project_banner", false,
+                  "Project banner div should be absent")
   end
 
   def test_show_project_nonexistent
@@ -132,7 +146,8 @@ class ProjectsControllerTest < FunctionalTestCase
     project = projects(:pinned_date_range_project)
     login
     get(:show, params: { id: project.id })
-
+    assert_template("show")
+    # NOTE: this project has no banner_image
     assert_select("#header", { text: /#{project.date_range}/ },
                   "Date range missing from Project header")
   end
@@ -156,7 +171,7 @@ class ProjectsControllerTest < FunctionalTestCase
     login
     get(:index)
 
-    assert_displayed_title(:PROJECTS.l)
+    assert_page_title(:PROJECTS.l)
     assert_template("index")
   end
 
@@ -170,7 +185,7 @@ class ProjectsControllerTest < FunctionalTestCase
     get(:index, params: { member: dick.id })
 
     assert_template("index")
-    assert_displayed_title(:PROJECTS.l)
+    assert_page_title(:PROJECTS.l)
   end
 
   def test_index_pattern_search_multiple_hits
@@ -179,7 +194,7 @@ class ProjectsControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: "Project" })
 
-    assert_displayed_title(:PROJECTS.l)
+    assert_page_title(:PROJECTS.l)
     assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
   end
 
@@ -557,13 +572,13 @@ class ProjectsControllerTest < FunctionalTestCase
     )
   end
 
-  def test_add_background_image
+  def test_add_banner_image
     file = image_setup
     num_images = Image.count
     params = build_params("With background", "With background")
     project = projects(:eol_project)
     params[:id] = project.id
-    params[:project][:upload_image] = file
+    params[:upload][:image] = file
     File.stub(:rename, false) do
       login("rolf", "testpassword")
       put(:update, params: params)
@@ -580,13 +595,13 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_equal(params[:upload][:license_id], project.image.license_id)
   end
 
-  def test_bad_background_image
+  def test_bad_banner_image
     file = image_setup
     num_images = Image.count
-    params = build_params("Bad background", "Bad background")
+    params = build_params("Bad banner", "Bad banner")
     project = projects(:eol_project)
     params[:id] = project.id
-    params[:project][:upload_image] = file
+    params[:upload][:image] = file
     image = images(:peltigera_image)
     image.stub(:process_image, false) do
       File.stub(:rename, false) do
@@ -601,13 +616,13 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_equal(num_images, Image.count)
   end
 
-  def test_fail_save_background_image
+  def test_fail_save_banner_image
     file = image_setup
     num_images = Image.count
-    params = build_params("Bad background", "Bad background")
+    params = build_params("Bad banner", "Bad banner")
     project = projects(:eol_project)
     params[:id] = project.id
-    params[:project][:upload_image] = file
+    params[:upload][:image] = file
     image = images(:peltigera_image)
     image.stub(:save, false) do
       File.stub(:rename, false) do

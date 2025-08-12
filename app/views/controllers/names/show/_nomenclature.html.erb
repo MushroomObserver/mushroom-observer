@@ -31,7 +31,7 @@ synonym_links = [approve, deprecate].reject(&:nil?).safe_join(" | ")
         end,
         tag.p do
           concat("#{:NAME.l}: ")
-          concat(h(name.real_text_name))
+          concat(h(name.user_real_text_name(@user)))
           concat(
             [tag.span(class: "text-nowrap ml-3") { synonyms }].safe_join
           ) if synonyms
@@ -85,7 +85,7 @@ synonym_links = [approve, deprecate].reject(&:nil?).safe_join(" | ")
     concat(tag.p do
       concat("#{:show_name_misspelling_correct.l}: ")
       if name.correct_spelling
-        concat(link_with_query(name.correct_spelling.display_name.t,
+        concat(link_with_query(name.correct_spelling.user_display_name(@user).t,
                                name_path(name.correct_spelling_id)))
       else
         # This can apparently happen for past_names.
@@ -114,7 +114,7 @@ synonym_links = [approve, deprecate].reject(&:nil?).safe_join(" | ")
           concat("#{possible_synonyms[:label]}: ")
           concat(
             possible_synonyms[:names].map do |n|
-              link_with_query(n.display_name.t, name_path(n.id))
+              link_with_query(n.user_display_name(@user).t, name_path(n.id))
             end.safe_join(", ")
           )
         end)

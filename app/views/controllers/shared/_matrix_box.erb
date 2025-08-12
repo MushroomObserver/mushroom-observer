@@ -1,7 +1,7 @@
 <%
 # Requires local variable object: RssLog, Observation, Image, etc. instance.
 # NOTE panel-sizing div shd be deleted in bs4. thumbnail goes in card-img-top
-presenter = MatrixBoxPresenter.new(object)
+presenter = MatrixBoxPresenter.new(@user, object)
 
 if presenter
   identify ||= false
@@ -35,7 +35,7 @@ if presenter
         *header_components,
         tag.div(class: "panel-sizing") do
           [
-            matrix_box_image(image, **image_args),
+            matrix_box_image(@user, image, **image_args),
             matrix_box_details(presenter, object_id, identify),
           ].safe_join
         end,

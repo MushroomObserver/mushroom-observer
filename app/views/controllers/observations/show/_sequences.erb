@@ -2,22 +2,20 @@
 
 <%
 sequences = obs.sequences
-can_edit  = in_admin_mode? || obs.can_edit?
+can_edit  = in_admin_mode? || obs.can_edit?(user)
 %>
 
 <%=
 tag.div(
-  class: "obs-sequence", id: "observation_sequences",
-  data: { controller: "section-update", updated_by: "modal_sequence" }
+  id: "observation_sequences", class: "obs-sequence",
+  data: { controller: "section-update" }
 ) do
 
   concat(tag.div do
     concat(sequences.any? ? "#{:Sequences.l}: " :
             "#{:show_observation_no_sequences.l} ")
     concat(
-      ["[",
-        modal_link_to("sequence", *new_sequence_tab(obs)),
-        "]"].safe_join
+      ["[", modal_link_to("sequence", *new_sequence_tab(obs)), "]"].safe_join
     ) if user
   end) if user || sequences.any?
 

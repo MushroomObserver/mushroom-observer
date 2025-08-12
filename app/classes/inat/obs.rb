@@ -83,7 +83,8 @@ class Inat
 
     ########## MO attributes
 
-    def gps_hidden = @obs[:geoprivacy].present?
+    # disable cop because gps_hidden is a pseudo-attribute
+    def gps_hidden = @obs[:geoprivacy].present? # rubocop:disable Naming/PredicateMethod
 
     def license = Inat::License.new(@obs[:license_code]).mo_license
 
@@ -100,9 +101,13 @@ class Inat
     end
 
     def notes
-      return { Collector: collector } if self[:description].empty?
+      # Observation form requires a "normalized" key (no spaces) for Notes parts
+      snapshot_key = Observation.notes_normalized_key(:inat_snapshot_caption.l)
 
-      { Collector: collector, Other: self[:description].gsub(%r{</?p>}, "") }
+      { Collector: collector,
+        snapshot_key => snapshot,
+        # strip p tags and ensure it's a string
+        Other: self[:description]&.gsub(%r{</?p>}, "").to_s }
     end
 
     # min bounding rectangle of iNat location blurred by public accuracy
@@ -179,22 +184,17 @@ class Inat
 
     # The MO text_name for an iNat provisional species name
     def provisional_name
-      prov_sp_name = inat_prov_name
-      return nil if prov_sp_name.blank?
-      return prov_sp_name if in_mo_format?(prov_sp_name)
+      return nil if inat_prov_name.blank?
 
-      # prepend the epithet with "sp-"
-      # epithet must start with lower case letter, else MO thinks it's an author
-      # quote the epithet by convention to indicate it will be replaced
-      # by a ICN style published or provisional name.
-      # Ex: Donadinia PNW01 => Donadinia "sp-PNW01"
-      prov_sp_name.sub(/ (.*)/, ' "sp-\1"')
+      inat_prov_name
     end
 
     # derive a provisional name from some specific Observation Fields
     # NOTE: iNat does not allow provisional names as identifications.
-    # Also, iNat allows only 1 obs field with a given :name per obs.
-    # I assume iNat users will add only 1 provisional name per obs.
+    # Also, iNat allows only 1 obs field with a given :name per obs,
+    # so there can be only 1 Provisional Species Name per obs.
+    # NOTE: Edge case -- obs also has Provisional Genus Name, etc.
+    # NOTE: I assume iNat users will add only 1 provisional name per obs.
     def inat_prov_name
       prov_name_field = inat_prov_name_field
       return nil if prov_name_field.blank?
@@ -211,10 +211,12 @@ class Inat
     end
 
     def snapshot
-      snapshop_raw_str.gsub(/^\s+/, "")
+      # add a newline to separate snapshot caption from its subparts
+      "\n#{snapshot_raw_str.gsub(/^\s+/, "")}".
+        chomp # revent extra blank line before Other part
     end
 
-    def snapshop_raw_str
+    def snapshot_raw_str
       result = ""
       {
         USER: self[:user][:login],
@@ -224,15 +226,14 @@ class Inat
         ID: inat_taxon_name,
         DQA: dqa,
         show_observation_inat_suggested_ids: suggested_id_names,
-        OBSERVATION_FIELDS: obs_fields(inat_obs_fields),
-        PROJECTS: :inat_not_imported.t,
-        ANNOTATIONS: :inat_not_imported.t,
-        TAGS: :inat_not_imported.t
+        OBSERVATION_FIELDS: obs_fields(inat_obs_fields)
       }.each do |label, value|
-        result += "#{label.to_sym.t}: #{value}\n"
+        result += "#{label.to_sym.l}: #{value}\n"
       end
-      result
+      result.
+        chomp # prevent blank line between Snapshot and :Other Notes fields
     end
+    private :snapshot_raw_str
 
     def suggested_id_names
       # Get unique suggested taxon ids
@@ -309,9 +310,6 @@ class Inat
       elsif infraspecific?
         # iNat :name string omits the rank. Ex: "Inonotus obliquus sterilis"
         insert_rank_between_species_and_final_epithet
-      elsif complex?
-        # iNat doesn't include "complex" in the name, MO does
-        "#{inat_taxon_name} complex"
       else
         inat_taxon_name
       end
@@ -376,11 +374,6 @@ class Inat
       return names.first.id if names.any?
 
       ::Name.unknown.id
-    end
-
-    def in_mo_format?(prov_sp_name)
-      # Genus followed by quoted epithet starting with a lower-case letter
-      prov_sp_name =~ /[A-Z][a-z]+ "[a-z]\S+"/
     end
 
     # ----- Other

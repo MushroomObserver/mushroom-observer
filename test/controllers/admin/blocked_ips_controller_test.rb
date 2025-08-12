@@ -14,7 +14,8 @@ module Admin
                           time: Time.zone.now,
                           controller: "api",
                           action: "observations",
-                          api_key: api_key.key })
+                          api_key: api_key.key },
+                        nil)
       assert_false(IpStats.blocked?(new_ip))
 
       login(:rolf)

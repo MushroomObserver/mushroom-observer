@@ -11,7 +11,7 @@
 #  heads up about button_to input vs button
 #  https://blog.saeloun.com/2021/08/24/rails-7-button-to-rendering
 
-module LinkHelper
+module LinkHelper # rubocop:disable Metrics/ModuleLength
   # Call `link_to` with query params added.
   # Should now take exactly the same args as `link_to`.
   # You can pass a hash to `path`, but not separate args. Can take a block.
@@ -70,7 +70,7 @@ module LinkHelper
 
   # Icon link with optional active state. (Tooltip title must be swapped in JS.)
   # Now also accepts active state options: active_icon, active_content
-  # NOTE: Takes same args as link_to, e.g. *edit_description_tab(desc, type)
+  # NOTE: Takes same args as link_to, e.g.
   # icon_link_to(text, path, **args). Can also print a button_to.
   def icon_link_to(text = nil, path = nil, options = {}, &block)
     return unless text
@@ -81,9 +81,9 @@ module LinkHelper
     icon_type = opts[:icon]
     return link_to(link, opts) { content } if icon_type.blank?
 
-    # method = opts[:button] ? :button_to : :link_to
+    opts[:role] = "button" if opts[:button_to]
     active_icon = opts[:active_icon]
-    active_content = options[:active_content]
+    active_content = opts[:active_content]
     stateful = active_icon && active_content
     icon_class = class_names(opts[:icon_class], "px-2")
     icon_active_class = class_names(icon_class, "active-icon")
@@ -92,23 +92,23 @@ module LinkHelper
     label_active_class = class_names(label_class, "active-label")
 
     link_opts = {
-      role: "button", title: content, # title is what shows up in tooltip
+      title: content, # title is what shows up in tooltip
       class: class_names("icon-link", opts[:class]),
       data: { toggle: "tooltip", title: content, # needed for swapping only
               active_title: opts[:active_content] }
     }.deep_merge(opts.except(:class, :icon, :icon_class, :show_text,
                              :active_icon, :active_content, :button_to))
 
-    html = capture do
+    inner_html = capture do
       concat(link_icon(icon_type, class: icon_class))
       concat(link_icon(active_icon, class: icon_active_class)) if stateful
       concat(tag.span(content, class: label_class))
       concat(tag.span(active_content, class: label_active_class)) if stateful
     end
     if opts[:button_to]
-      button_to(html, link_path, **link_opts)
+      button_to(inner_html, link_path, **link_opts)
     else
-      link_to(html, link_path, **link_opts)
+      link_to(inner_html, link_path, **link_opts)
     end
   end
 
@@ -140,6 +140,20 @@ module LinkHelper
     tag.span(text, **args)
   end
 
+  def external_link(link)
+    case link.external_site.name
+    when "iNaturalist"
+      concat(
+        link_to(
+          "iNat ##{link.url.sub(link.external_site.base_url, "")}", link.url
+        )
+      )
+    else
+      concat(link_to(:on_site.t(site: link.external_site.name), link.url))
+      concat(tag.small(" #{link.created_at.web_date}"))
+    end
+  end
+
   # NOTE: Specific to glyphicons
   LINK_ICON_INDEX = {
     edit: "edit",
@@ -167,6 +181,7 @@ module LinkHelper
     question: "question-sign",
     alert: "alert",
     list: "list",
+    copy: "copy",
     clone: "duplicate",
     merge: "transfer",
     move: "random",
@@ -190,7 +205,15 @@ module LinkHelper
     chevron_right: "chevron-right",
     qrcode: "qrcode",
     mobile: "phone",
-    project: "th-list"
+    project: "th-list",
+    download: "download-alt",
+    search: "search",
+    previous: "triangle-left",
+    next: "triangle-right",
+    goto: "share-alt",
+    grid: "th",
+    menu: "align-justify",
+    info: "question-sign"
   }.freeze
 
   # button to destroy object
@@ -204,9 +227,13 @@ module LinkHelper
   #     target: herbarium_path(@herbarium, back: url_after_delete(@herbarium))
   #   )
   #
-  def destroy_button(target:, name: :DESTROY.t, **args)
-    # necessary if nil/empty string passed
-    name = :DESTROY.t if name.blank?
+  def destroy_button(target:, name: nil, **args)
+    # target could just be a path
+    name ||= if target.is_a?(String)
+               :DESTROY.l
+             else
+               :destroy_object.t(type: target.type_tag)
+             end
     path, identifier, icon, content = button_atts(:destroy, target, args, name)
 
     html_options = {
@@ -222,10 +249,33 @@ module LinkHelper
   end
 
   # Note `link_to` - not a <button> element, but an <a> because it's a GET
-  def edit_button(target:, name: :EDIT.t, **args)
-    # necessary if nil/empty string passed
-    name = :EDIT.t if name.blank?
+  def edit_button(target:, name: nil, **args)
+    # target could just be a path
+    name ||= if target.is_a?(String)
+               :EDIT.l
+             else
+               :edit_object.t(type: target.type_tag)
+             end
     path, identifier, icon, content = button_atts(:edit, target, args, name)
+
+    html_options = {
+      class: class_names(identifier, args[:class]), # usually also btn
+      title: name, data: { toggle: "tooltip", placement: "top", title: name }
+    }.deep_merge(args.except(:class, :back))
+
+    link_to(path, html_options) do
+      [content, icon].safe_join
+    end
+  end
+
+  # Note `link_to` - not a <button> element, but an <a> because it's a GET
+  def download_button(target:, name: :DOWNLOAD.t, **args)
+    # necessary if nil/empty string passed
+    name = :DOWNLOAD.t if name.blank?
+    path, identifier, icon, content = button_atts(
+      :download,
+      new_species_list_download_path(id: target.id), args, name
+    )
 
     html_options = {
       class: class_names(identifier, args[:class]), # usually also btn
@@ -244,7 +294,7 @@ module LinkHelper
       identifier = "" # can send one via args[:class]
     else
       prefix = action == :destroy ? "" : "#{action}_"
-      path_args = args.slice(:back) # adds back arg, or empty hash if blank
+      path_args = add_back_param_to_button_atts(action)
       path = add_query_param(
         send(:"#{prefix}#{target.type_tag}_path", target.id, **path_args)
       )
@@ -258,6 +308,26 @@ module LinkHelper
       content = name
     end
     [path, identifier, icon, content]
+  end
+
+  SHOW_OBS_EDITABLES = %w[
+    collection_numbers herbarium_records sequences external_links
+  ].freeze
+
+  # This allows expected and tested behavior of either
+  # - returning to :show or :index of these types of records
+  # - returning to the :show page of the observation they're associated with
+  # depending on what page the form request originated.
+  def add_back_param_to_button_atts(action)
+    return {} unless action == :edit &&
+                     SHOW_OBS_EDITABLES.include?(controller.controller_name)
+
+    case action_name
+    when "show"
+      { back: :show }
+    when "index"
+      { back: :index }
+    end
   end
 
   # Refactor to accept a tab array

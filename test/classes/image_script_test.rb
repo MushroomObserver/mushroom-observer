@@ -116,7 +116,7 @@ class ImageScriptTest < UnitTestCase
     end
     output, _status = Open3.capture2(script_file("jpegsize"), "-f", tempfile)
     sizes = output.each_line.map do |line|
-      line[local_root.length + 1..].chomp
+      line[(local_root.length + 1)..].chomp
     end
     assert_equal("orig//#{in_situ_id}.jpg: 2560 1920", sizes[0],
                  "full-size image is wrong size")

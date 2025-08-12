@@ -210,12 +210,8 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
   # Content for `between` and `label_after` come right after the label on left,
   # content for `label_end` is at the end of the same line, right justified.
   def text_label_row(args, label_opts)
-    row_class = if args[:inline] == true
-                  "d-inline-block"
-                else
-                  "d-flex justify-content-between"
-                end
-    tag.div(class: row_class) do
+    display = args[:inline] == true ? "d-inline-flex" : "d-flex"
+    tag.div(class: "#{display} justify-content-between") do
       concat(tag.div do
         concat(args[:form].label(args[:field], args[:label], label_opts))
         concat(args[:between]) if args[:between].present?

@@ -14,18 +14,28 @@
     <%= radio_with_label(form: f, field: :format, value: :adolf,
                           checked: (@format == "adolf") && "checked",
                           label: :download_observations_adolf.t) %>
-    <%= radio_with_label(form: f, field: :format, value: :darwin,
-                          checked: (@format == "darwin") && "checked",
+    <%= radio_with_label(form: f, field: :format, value: :dwca,
+                          checked: (@format == "dwca") && "checked",
                           label: :download_observations_darwin.t) %>
-    (<%= link_to(:download_observations_what_is_this.t,
-                  "http://rs.tdwg.org/dwc/index.htm",
-                  target: "_new") %>)
     <%= radio_with_label(form: f, field: :format, value: :symbiota,
                           checked: (@format == "symbiota") && "checked",
                           label: :download_observations_symbiota.t) %>
     <%= radio_with_label(form: f, field: :format, value: :fundis,
                           checked: (@format == "fundis") && "checked",
                           label: :download_observations_fundis.t) %>
+
+    <% if in_admin_mode? %>
+      <%= radio_with_label(form: f, field: :format, value: :mycoportal,
+                            checked: (@format == "mycoportal") && "checked",
+                            label: :download_observations_mycoportal.t) %>
+      <%= radio_with_label(
+            form: f, field: :format,
+            value: :mycoportal_image_list,
+            checked: (@format == "mycoportal_image_list") && "checked",
+            label: :download_observations_mycoportal_images.t)
+      %>
+    <% end %>
+
   </div>
 
   <p><%= :download_observations_encoding.t %>:</p>

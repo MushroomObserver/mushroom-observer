@@ -10,7 +10,7 @@ class ObservationsController < ApplicationController
 
   # Disable cop: all these methods are defined in files included above.
   # rubocop:disable Rails/LexicallyScopedActionFilter
-  before_action :login_required, except: [:show, :index]
+  before_action :login_required, except: [:show]
   before_action :pass_query_params, only: [:show, :edit, :update]
   # rubocop:enable Rails/LexicallyScopedActionFilter
 

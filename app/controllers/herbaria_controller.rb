@@ -173,9 +173,9 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   def modal_title
     case action_name
     when "new", "create"
-      :create_herbarium_title.l
+      helpers.new_page_title(:new_object, :HERBARIUM)
     when "edit", "update"
-      :edit_herbarium_title.l
+      helpers.edit_page_title(:HERBARIUM_RECORD.l, @herbarium)
     end
   end
 
@@ -363,7 +363,7 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
 
   def notify_admins_of_new_herbarium
     QueuedEmail::Webmaster.create_email(
-      sender_email: @user.email,
+      @user,
       subject: "New Herbarium",
       content: "User created a new herbarium:\n" \
                "Name: #{@herbarium.name} (#{@herbarium.code})\n" \

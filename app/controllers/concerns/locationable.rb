@@ -111,7 +111,7 @@ module Locationable
 
     # Save location only (at this point rest of form is okay).
     def save_location(object)
-      if save_with_log(@location)
+      if save_with_log(@user, @location)
         # Associate the location with the observation
         object.location_id = @location.id
         # flash_notice(:runtime_location_success.t(id: @location.id))

@@ -16,6 +16,7 @@
 
 <% if field_slip.code %>
   <%= form_with(model: field_slip) do |form| %>
+    <%= hidden_field_tag(:species_list, @species_list) %>
     <%= text_field_with_label(form:, field: :code, label: "#{:field_slip_code.t}:") %>
     <% if field_slip.projects %>
       <%= select_with_label(form:, field: :project_id, inline: true,
@@ -60,7 +61,7 @@
                                button: :field_slip_keep_obs.t }) %>
         </div>
       <% end %>
-      <% obs = previous_observation(field_slip.observation)
+      <% obs = previous_observation(field_slip.observation, @user)
          if obs %>
         <div class="col-sm-6">
           <%= render(partial: "field_slips/obs_thumbnail",

@@ -17,7 +17,7 @@ else
 end
 presenter_args = { size: :thumbnail, fit: :contain,
                    extra_classes: extra_classes }.merge(upload: upload)
-presenter = ImagePresenter.new(image || img_id, presenter_args)
+presenter = ImagePresenter.new(@user, image || img_id, presenter_args)
 data = data.merge(image_uuid: img_id, image_status:)
 
 tag.li(id: "carousel_thumbnail_#{img_id}",

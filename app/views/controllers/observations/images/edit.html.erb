@@ -1,8 +1,7 @@
 <%
-add_page_title(:image_edit_title.t(name: @image.unique_format_name))
-
+add_edit_title(@image.format_name, @image)
 add_context_nav(observation_images_edit_tabs(image: @image))
-@container = :wide
+container_class(:wide)
 form_action = { controller: "/observations/images",
                 action: :update,
                 id: @image.id,
@@ -39,7 +38,7 @@ form_action = { controller: "/observations/images",
   <!--.col-->
 
   <div class="col-xs-12 col-sm-4 col-md-6 col-lg-8">
-    <%= interactive_image(@image, size: :medium, votes: true) %>
+    <%= interactive_image(@user, @image, size: :medium, votes: true) %>
   </div>
   <!--.col-->
 

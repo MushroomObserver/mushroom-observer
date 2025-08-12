@@ -4,9 +4,6 @@
     tag.span("#{:app_account.t}:")
   ].safe_join
 end %>
-<%= active_link_to(:app_login.t, new_account_login_path,
-                   class: classes[:indent], id: "nav_login_link") %>
-<%= active_link_to(:app_create_account.t, account_signup_path,
-                   class: classes[:indent], id: "nav_signup_link") %>
-<%= active_link_to(:app_mobile.t, article_path(34),
-                   class: classes[:indent], id: "nav_mobile_link") %>
+<% sidebar_login_tabs.compact.each do |link| %>
+  <%= sidebar_nav_link(link, class: classes[:indent]) %>
+<% end %>

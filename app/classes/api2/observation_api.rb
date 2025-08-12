@@ -124,7 +124,7 @@ class API2
     end
 
     def after_create(obs)
-      obs.log(:log_observation_created) if @log
+      obs.user_log(user, :log_observation_created) if @log
       create_specimen_records(obs) if obs.specimen
       create_naming(obs)
       add_field_slip_code(obs)
@@ -161,6 +161,7 @@ class API2
           reason.notes = @reasons[reason.num]
         end
       end
+      naming.user ||= @user
       naming.save!
       consensus = ::Observation::NamingConsensus.new(obs)
       consensus.change_vote(naming, @vote, user)
@@ -176,6 +177,9 @@ class API2
         field_slip.update!(observation:)
       else
         field_slip = FieldSlip.create!(observation:, code: @code)
+        field_slip.current_user = @user
+        field_slip.update_project
+        field_slip.save!
       end
       update_project(field_slip.project, observation)
     end

@@ -52,7 +52,7 @@ module ApplicationController::NameValidation
     end
 
     # Do the same thing for synonym (found the Approved = Synonym syntax).
-    return unless name_parse.has_synonym &&
+    return unless name_parse.has_synonym? &&
                   approved_names.member?(name_parse.synonym)
 
     construct_synonyms(name_parse)
@@ -60,7 +60,7 @@ module ApplicationController::NameValidation
 
   def construct_given_name(name_parse, deprecate)
     # Create name object for this name (and any parents, such as genus).
-    names = Name.find_or_create_name_and_parents(name_parse.search_name)
+    names = Name.find_or_create_name_and_parents(@user, name_parse.search_name)
 
     # if above parse was successful
     if (name = names.last)
@@ -75,7 +75,7 @@ module ApplicationController::NameValidation
   end
 
   def save_approved_given_names(names, deprecate2)
-    Name.save_names(names, deprecate2)
+    Name.save_names(@user, names, deprecate2)
     names.each { |n| flash_object_errors(n) }
   end
 
@@ -95,13 +95,13 @@ module ApplicationController::NameValidation
   end
 
   def create_synonym(name_parse)
-    Name.find_or_create_name_and_parents(name_parse.synonym_search_name)
+    Name.find_or_create_name_and_parents(@user, name_parse.synonym_search_name)
   end
 
   # Deprecate and save.
   def save_synonyms(synonym, synonyms)
     synonym.change_deprecated(true)
-    synonym.save_with_log(:log_deprecated_by, touch: true)
-    Name.save_names(synonyms[0..-2], nil) # Don't change higher taxa
+    synonym.save_with_log(@user, :log_deprecated_by, touch: true)
+    Name.save_names(@user, synonyms[0..-2], nil) # Don't change higher taxa
   end
 end

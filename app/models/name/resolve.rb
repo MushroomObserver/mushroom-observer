@@ -6,35 +6,50 @@ module Name::Resolve
     base.extend(ClassMethods)
   end
 
-  def save_with_log(log = nil, args = {})
+  def save_with_log(user, log = nil, args = {})
     return false unless changed?
 
     log ||= :log_name_updated
     args = { touch: altered? }.merge(args)
+    @current_user = user
     return false unless save
 
-    log(log, args)
+    update_name_version(user.id)
+    user_log(user, log, args)
     true
   end
 
+  def update_name_version(user_id)
+    ver = Name::Version.where(name_id: id).last
+    ver.user_id = user_id || 0
+    if (ver.version != 1) &&
+       Name::Version.where(name_id: ver.name_id,
+                           user_id: ver.user_id).none?
+      UserStats.update_contribution(:add, :name_versions, user_id)
+    end
+  end
+
   module ClassMethods
-    def create_needed_names(input_what, output_what = nil)
+    def create_needed_names(user, input_what, output_what = nil)
       names = []
       if output_what.nil? || input_what == output_what
-        names = find_or_create_name_and_parents(input_what)
-        if names.last
-          names.each do |n|
-            next unless n&.new_record?
-
-            n.inherit_stuff
-            n.save_with_log(:log_updated_by)
-          end
-        end
+        names = find_or_create_name_and_parents(user, input_what)
+        return nil if names.last && !update_and_save_names(user, names)
       end
       names.last
     end
 
-    def save_names(names, deprecate)
+    def update_and_save_names(user, names)
+      names.each do |n|
+        next unless n&.new_record?
+
+        n.inherit_stuff
+        return false unless n.save_with_log(user, :log_updated_by)
+      end
+      true
+    end
+
+    def save_names(user, names, deprecate)
       log = nil
       unless deprecate.nil?
         log = if deprecate
@@ -48,7 +63,7 @@ module Name::Resolve
 
         n.change_deprecated(deprecate) if deprecate
         n.inherit_stuff
-        n.save_with_log(log)
+        n.save_with_log(user, log)
       end
     end
 

@@ -17,7 +17,7 @@ class ImagePresenter < BasePresenter
     :html_id,           # dom_id for broadcasts (image.id added)
     :upload             # is this an upload image? (no image instance, id fake)
 
-  def initialize(image, args = {})
+  def initialize(user, image, args = {})
     super
 
     # Pass an image instance (not id) whenever possible, to ensure access to
@@ -64,7 +64,7 @@ class ImagePresenter < BasePresenter
 
     args_to_presenter(image, image_id, img_urls, args)
     sizing_info_to_presenter(image, args)
-    lightbox_args_to_presenter(image, image_id, img_urls, args)
+    lightbox_args_to_presenter(user, image, image_id, img_urls, args)
   end
 
   def args_to_presenter(image, image_id, img_urls, args)
@@ -134,11 +134,11 @@ class ImagePresenter < BasePresenter
     end
   end
 
-  def lightbox_args_to_presenter(image, image_id, img_urls, args)
+  def lightbox_args_to_presenter(user, image, image_id, img_urls, args)
     return {} unless image
 
     # The src size appearing in the lightbox is a user pref
-    lb_size = User.current&.image_size&.to_sym || :huge
+    lb_size = user&.image_size&.to_sym || :huge
 
     self.lightbox_data = {
       url: img_urls[lb_size],

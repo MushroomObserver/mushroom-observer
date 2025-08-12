@@ -59,7 +59,7 @@ module Observations
 
       init_edit_ivars
       @consensus = Observation::NamingConsensus.new(@observation)
-      @vote = @consensus.owners_vote(@naming)
+      @vote = @consensus.users_vote(@naming, @user)
 
       respond_to do |format|
         format.turbo_stream { render_modal_naming_form }
@@ -75,7 +75,7 @@ module Observations
       return redirect_to_obs(@observation) unless check_permission!(@naming)
 
       @consensus = Observation::NamingConsensus.new(@observation)
-      @vote = @consensus.owners_vote(@naming)
+      @vote = @consensus.users_vote(@naming, @user)
 
       if can_update?
         need_new_naming? ? create_new_naming : change_naming
@@ -206,7 +206,7 @@ module Observations
 
     def save_changes
       update_naming(params.dig(:naming, :reasons), params[:was_js_on] == "yes")
-      save_with_log(@naming)
+      save_with_log(@user, @naming)
       change_vote_with_log unless @vote.value.nil?
     end
 
@@ -319,7 +319,7 @@ module Observations
 
       update_naming(params.dig(:naming, :reasons), params[:was_js_on] == "yes")
       # need to save the naming before we can move this user's vote
-      save_with_log(@naming)
+      save_with_log(@user, @naming)
       change_vote_with_log
       flash_warning(:create_new_naming_warn.l)
     end

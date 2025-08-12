@@ -1,63 +1,68 @@
 # frozen_string_literal: true
 
+# Added while getting rid of User.current references
 module DescriptionsHelper
   include Tabs::DescriptionsHelper
 
-  def writer?(desc)
-    desc.writer?(User.current) || in_admin_mode?
+  # def writer?(desc)
+  #   desc.writer?(User.current) || in_admin_mode?
+  # end
+
+  def user_writer?(user, desc)
+    desc.writer?(user) || in_admin_mode?
   end
 
   def is_admin?(desc)
     desc.is_admin?(User.current) || in_admin_mode?
   end
 
-  def reader?(desc)
-    desc.is_reader?(User.current) || in_admin_mode?
+  def user_is_admin?(user, desc)
+    desc.is_admin?(user) || in_admin_mode?
+  end
+
+  # def reader?(desc)
+  #   desc.is_reader?(User.current) || in_admin_mode?
+  # end
+
+  def user_reader?(user, desc)
+    desc.is_reader?(user) || in_admin_mode?
   end
 
   # Header of the embedded description within a show_object page.
   #
-  #   <%= show_embedded_description_title(desc, name) %>
+  #   <%= show_embedded_description_title(user, desc, name) %>
   #
   #   # Renders something like this:
   #   <p>EOL Project Draft: Show | Edit | Destroy</p>
-  #
-  # Maybe unused presently
-  # def show_embedded_description_title(desc, type)
-  #   title = description_title(desc)
-  #   links = description_mod_links(desc, type)
-  #   tag.div do
-  #     [tag.span(title, class: "text-lg"),
-  #      links.safe_join(" | ")].safe_join(safe_nbsp)
-  #   end
-  # end
 
-  def description_mod_links(desc, type)
+  def description_mod_links(user, desc, type)
     links = []
-    (text, path, args) = *edit_description_tab(desc, type)
-    links << icon_link_to(text, path, **args) if writer?(desc)
-    links << destroy_button(target: desc, icon: :delete) if is_admin?(desc)
+    (text, path, args) = *edit_description_tab(user, desc, type)
+    links << icon_link_to(text, path, **args) if user_writer?(user, desc)
+    links << destroy_button(target: desc, icon: :delete) if user_is_admin?(
+      user, desc
+    )
     links
   end
 
   # Show list of name/location descriptions.
-  def list_descriptions(object:, type:, fake_default: false, current: nil)
-    user = User.current
+  def list_descriptions(user:, object:, type:,
+                        fake_default: false, current: nil)
     # Filter out empty descriptions (unless it's public or one you own).
     list = object.descriptions.includes(:user).select do |desc|
       desc.notes? || (desc.user == user) ||
         reviewer? || (desc.source_type == :public) || in_admin_mode?
     end
 
-    list = sort_description_list(object, list)
+    list = sort_description_list(user, object, list)
 
     # Don't make a link if we're on that description's page (current)
-    make_list_links(list, type, fake_default, current)
+    make_list_links(user, list, type, fake_default, current)
   end
 
   # Sort, putting the default one on top, followed by public ones, followed
   # by others ending in personal ones, sorting by "length" among groups.
-  def sort_description_list(object, list)
+  def sort_description_list(user, object, list)
     type_order = Description::ALL_SOURCE_TYPES
     list.sort_by! do |x|
       [
@@ -65,7 +70,7 @@ module DescriptionsHelper
         type_order.index(x.source_type),
         -x.note_status[0],
         -x.note_status[1],
-        description_title(x),
+        description_title(user, x),
         x.id
       ]
     end
@@ -75,13 +80,13 @@ module DescriptionsHelper
 
   # Turn each into a link to show_description, and add optional controls.
   # (or if we're on that description's page currently, just the desc title)
-  def make_list_links(list, type, fake_default, current = nil)
+  def make_list_links(user, list, type, fake_default, current = nil)
     list.map! do |desc|
       if desc == current
-        item = description_title(desc)
+        item = description_title(user, desc)
       else
-        item = description_link(desc)
-        links = description_mod_links(desc, type)
+        item = description_link(user, desc)
+        links = description_mod_links(user, desc, type)
         # disable cop -- lh side is a safe buffer, not a string
         item += indent + "[ " + links.safe_join(" | ") + " ]" if links.any? # rubocop:disable Style/StringConcatenation
       end
@@ -101,7 +106,7 @@ module DescriptionsHelper
   end
 
   # Details of a description for a show_description page.
-  def show_description_details(description, versions, user = User.current)
+  def show_description_details(description, versions, user)
     parent = description.parent
     type = parent.type_tag
 
@@ -123,7 +128,7 @@ module DescriptionsHelper
 
     tag.div do
       [
-        ["#{:TITLE.l}:", description_title(description)].safe_join(" "),
+        ["#{:TITLE.l}:", description_title(user, description)].safe_join(" "),
         [
           "#{type.to_s.upcase.to_sym.t}:",
           link_to(parent.format_name.t, add_query_param(parent.show_link_args))
@@ -206,7 +211,7 @@ module DescriptionsHelper
   #   </p>
   #
   # Pass `current` to avoid linking to the current description on show desc page
-  def show_alt_descriptions(object:, projects: nil, current: nil)
+  def show_alt_descriptions(user:, object:, projects: nil, current: nil)
     type = object.type_tag
 
     # Show existing drafts, with link to create new one.
@@ -215,8 +220,7 @@ module DescriptionsHelper
     head += icon_link_to(*create_description_tab(object, type))
 
     # Add title and maybe "no descriptions", wrapping it all up in paragraph.
-    list = list_descriptions(object: object, type: type,
-                             current: current).map do |link|
+    list = list_descriptions(user:, object:, type:, current:).map do |link|
       indent + link
     end
     any = list.any?
@@ -230,11 +234,11 @@ module DescriptionsHelper
   end
 
   # This is the same as show_alt_descriptions, but in its own panel block.
-  def show_alt_descriptions_panel(object:, projects: nil, current: nil)
+  def show_alt_descriptions_panel(user:, object:, projects: nil, current: nil)
     type = object.type_tag
 
     # Add title and maybe "no descriptions", wrapping it all up in paragraph.
-    list = list_descriptions(object: object, type: type, current: current)
+    list = list_descriptions(user:, object:, type:, current:)
     any = list.any?
     list << indent + :"show_#{type}_no_descriptions".t unless any
     html = list.safe_join(safe_br)
@@ -287,7 +291,7 @@ module DescriptionsHelper
     :show_description_empty.tpl unless any_notes
   end
 
-  def show_description_authors_and_editors(desc, versions, user = User.current)
+  def show_description_authors_and_editors(desc, versions, user)
     tag.div(class: "text-center") do
       concat(
         show_authors_and_editors(obj: desc, versions: versions, user: user)
@@ -301,10 +305,10 @@ module DescriptionsHelper
 
   # Wrap description title in link to show_description.
   #
-  #   Description: <%= description_link(name.description) %>
+  #   Description: <%= description_link(user, name.description) %>
   #
-  def description_link(desc)
-    result = description_title(desc)
+  def description_link(user, desc)
+    result = description_title(user, desc)
     return result if result.match?("(#{:private.t})$")
 
     link_with_query(result, desc.show_link_args,
@@ -313,7 +317,7 @@ module DescriptionsHelper
 
   # Create a descriptive title for a Description.  Indicates the source and
   # very rough permissions (e.g. "public", "restricted", or "private").
-  def description_title(desc)
+  def description_title(user, desc)
     result = desc.partial_format_name
 
     # Indicate rough permissions.
@@ -321,7 +325,7 @@ module DescriptionsHelper
                :default.l
              elsif desc.public
                :public.l
-             elsif reader?(desc)
+             elsif user_reader?(user, desc)
                :restricted.l
              else
                :private.l

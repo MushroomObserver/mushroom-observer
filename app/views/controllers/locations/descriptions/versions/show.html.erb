@@ -1,5 +1,5 @@
 <%
-desc_title = description_title(@description)
+desc_title = description_title(@user, @description)
 add_page_title(:show_past_location_description_title.t(
   num: @description.version, name: desc_title
 ))
@@ -11,4 +11,4 @@ add_context_nav(location_description_version_tabs(description: @description,
 
 <%= render(partial: "descriptions/description_details_and_alts_panel") %>
 
-<%= show_object_footer(@description, @versions) %>
+<%= show_object_footer(@user, @description, @versions) %>

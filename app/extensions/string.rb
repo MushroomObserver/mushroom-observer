@@ -570,7 +570,7 @@ class String
     ind = rindex(tag)
     return self if !ind || !offset || (length <= (ind + offset))
 
-    insert((ind + offset), "<br/>".html_safe)
+    insert(ind + offset, "<br/>".html_safe)
   end
 
   # Wrap the author name in <small> HTML tag, with or without break
@@ -587,7 +587,7 @@ class String
     return self if !ind || !offset || (length <= (ind + offset))
 
     insert(length, "</small>".html_safe)
-    insert((ind + offset), "<small>".html_safe)
+    insert(ind + offset, "<small>".html_safe)
   end
 
   # Strip leading and trailing spaces, and squeeze embedded spaces.

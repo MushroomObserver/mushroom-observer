@@ -178,7 +178,13 @@ class AbstractModel < ApplicationRecord
   #    creation.
   before_create :set_user_and_autolog
   def set_user_and_autolog
-    self.user_id ||= User.current_id if respond_to?(:user_id=)
+    if respond_to?(:user_id=)
+      self.user_id ||= if respond_to?(:current_user)
+                         current_user
+                       else
+                         User.current_id
+                       end
+    end
     autolog_created if has_rss_log?
   end
 
@@ -269,7 +275,7 @@ class AbstractModel < ApplicationRecord
   # *NOTE*: this saves the old stats for the page footer of show_observation,
   # show_name, etc. otherwise the footer will always show the last view as now!
   #
-  def update_view_stats
+  def update_view_stats(_current_user = nil)
     return unless respond_to?(:num_views=) || respond_to?(:last_view=)
 
     @old_num_views = num_views
@@ -623,6 +629,13 @@ class AbstractModel < ApplicationRecord
     rss_log.add_with_date(tag, args)
   end
 
+  def user_log(user, tag, args = {})
+    init_rss_log unless rss_log
+    touch_when_logging unless new_record? ||
+                              args[:touch] == false
+    rss_log.user_add_with_date(user, tag, args)
+  end
+
   # This allows a model to override touch in this context only, e.g.,
   # Observation caches a log_updated_at value so the activity index doesn't
   # have to do a join to rss_logs
@@ -638,7 +651,12 @@ class AbstractModel < ApplicationRecord
   #
   def orphan_log(*)
     rss_log = init_rss_log(orphan: true)
-    rss_log.orphan(format_name, *)
+    name_str = if respond_to?(:user_format_name)
+                 user_format_name(@current_user)
+               else
+                 format_name
+               end
+    rss_log.orphan(@current_user, name_str, *)
   end
 
   # Callback that logs creation.

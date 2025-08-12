@@ -172,6 +172,7 @@ class ApplicationController < ActionController::Base
   # Physically eject robots unless they're looking at accepted pages.
   def kick_out_robots
     return true if params[:controller].start_with?("api")
+    return true if params[:controller] == "account/login"
     return true unless browser.bot?
     return true if Robots.authorized?(browser.ua) &&
                    Robots.action_allowed?(
@@ -213,7 +214,7 @@ class ApplicationController < ActionController::Base
     clear_user_globals
     stats = request_stats
     yield
-    IpStats.log_stats(stats)
+    IpStats.log_stats(stats, @user&.id)
     logger.warn(request_stats_log_message(stats))
   rescue StandardError => e
     raise(@error = e)
@@ -318,7 +319,7 @@ class ApplicationController < ActionController::Base
   def update_view_stats(object)
     return unless object.respond_to?(:update_view_stats) && !browser.bot?
 
-    object.update_view_stats
+    object.update_view_stats(@user)
   end
 
   # Default image size to use for thumbnails: either :thumbnail or :small.
@@ -349,7 +350,6 @@ class ApplicationController < ActionController::Base
   # "Observations" or "Account". But in a nested controller like
   # "Locations::Descriptions::DefaultsController" though, what we want is just
   # the "Locations" part, so we need to parse the class.module_parent.
-  #   gotcha - `Object` is the module_parent of a top-level controller!
   #
   # NOTE: The rubric can of course be overridden in each controller.
   #
@@ -357,25 +357,47 @@ class ApplicationController < ActionController::Base
   #
   def rubric
     # Levels of nesting. parent_module is one level.
-    if (parent_module = self.class.module_parent).present? &&
-       parent_module != Object
-
-      if (grandma_module = parent_module.to_s.rpartition("::").first).present?
-        return grandma_module.underscore.upcase.to_sym.t
-      end
-
-      return parent_module.to_s.underscore.upcase.to_sym.t
+    if (parent = parent_controller_module)
+      return parent.underscore.upcase.to_sym.t
     end
 
     controller_name.upcase.to_sym.t
   end
   helper_method :rubric
 
+  # Returns the CamelCase parent module name, e.g. "Locations" for
+  # "Locations::MapsController"
+  # gotcha - `Object` is the module_parent of a top-level controller!
+  def parent_controller_module
+    return unless (parent_module = self.class.module_parent).present? &&
+                  parent_module != Object
+
+    if (grandma_module = parent_module.to_s.rpartition("::").first).present?
+      return grandma_module
+    end
+
+    parent_module.to_s
+  end
+  helper_method :parent_controller_module
+
   def calc_layout_params
     count = @user&.layout_count || MO.default_layout_count
+    count = 1 if count < 1
     { "count" => count }
   end
   helper_method :calc_layout_params
+
+  # NOTE: SpeciesList show pages cannot nav prev/next within a project without
+  # having the project param stored inside the query record, q.
+  def set_project_ivar
+    # NOTE: Query param projects is always an array of ids.
+    query_projects = QueryRecord.check_param(:projects, params[:q]) || []
+    # If more than one project, it's none. Only want single-project associations
+    query_project = query_projects.size > 1 ? nil : query_projects.first
+    project_id = params[:project] || query_project
+    # At this point, we still might not have one. That's fine - just return nil.
+    @project = Project.safe_find(project_id)
+  end
 
   def permission?(obj, error_message)
     result = (in_admin_mode? || obj.can_edit?(@user)) # rubocop:disable Style/RedundantParentheses

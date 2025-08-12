@@ -153,6 +153,8 @@
 #  announce_consensus_change::  After consensus changes: send email.
 #
 class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
+  attr_accessor :current_user
+
   include Scopes
 
   belongs_to :thumb_image, class_name: "Image",
@@ -218,19 +220,19 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     :where, :text_name, :notes
   ].freeze
 
-  def self.build_observation(location, name, notes, date)
+  def self.build_observation(location, name, notes, date, current_user = nil)
     return nil unless location
 
     name ||= Name.find_by(text_name: "Fungi")
     now = Time.zone.now
-    user = User.current
+    user = current_user || User.current
     obs = new({ created_at: now, updated_at: now, source: "mo_website",
                 when: date,
                 user:, location:, name:, notes: })
     return nil unless obs
 
-    obs.log(:log_observation_created)
-    naming = Naming.construct({ name: }, obs)
+    obs.user_log(user, :log_observation_created)
+    naming = Naming.user_construct({ name: }, obs, user)
     naming.save!
     naming.votes.create!(
       user:,
@@ -238,7 +240,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       value: Vote.maximum_vote,
       favorite: true
     )
-    Observation::NamingConsensus.new(obs).calc_consensus
+    Observation::NamingConsensus.new(obs).user_calc_consensus(user)
     obs
   end
 
@@ -347,13 +349,13 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     msgs
   end
 
-  def update_view_stats
+  def update_view_stats(current_user = User.current)
     super
-    return if User.current.blank?
+    return if current_user.blank?
 
     @old_last_viewed_by ||= {}
-    @old_last_viewed_by[User.current_id] = last_viewed_by(User.current)
-    ObservationView.update_view_stats(id, User.current_id)
+    @old_last_viewed_by[current_user.id] = last_viewed_by(current_user)
+    ObservationView.update_view_stats(id, current_user.id)
   end
 
   def last_viewed_by(user)
@@ -468,15 +470,15 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # or they are members of a project that the observation belongs to, but
   # those are harder to determine. This catches the majority of cases.
   def public_lat
-    gps_hidden && user_id != User.current_id ? nil : lat
+    gps_hidden && user_id != @current_user&.id ? nil : lat
   end
 
   def public_lng
-    gps_hidden && user_id != User.current_id ? nil : lng
+    gps_hidden && user_id != @current_user&.id ? nil : lng
   end
 
-  def reveal_location?
-    !gps_hidden || can_edit? || project_admin?
+  def reveal_location?(user)
+    !gps_hidden || can_edit?(user) || project_admin?(user)
   end
 
   def display_lat_lng
@@ -618,9 +620,11 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # Change spaces to underscores in keys
   #   notes_normalized_key("Nearby trees") #=> :Nearby_trees
   #   notes_normalized_key(:Other)         #=> :Other
-  def notes_normalized_key(part)
+  def self.notes_normalized_key(part)
     part.to_s.tr(" ", "_").to_sym
   end
+
+  delegate :notes_normalized_key, to: :Observation
 
   # Array of note parts (Strings) to display in create & edit form,
   # in following (display) order. Used by views.
@@ -704,14 +708,28 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     string_with_id(name.real_search_name)
   end
 
+  def user_unique_text_name(user)
+    string_with_id(name.user_real_search_name(user))
+  end
+
   # Textile-marked-up name, never nil.
   def format_name
-    name.observation_name
+    name.user_observation_name(User.current)
+  end
+
+  def user_format_name(user)
+    name.user_observation_name(user)
   end
 
   # Textile-marked-up name with id to make it unique, never nil.
   def unique_format_name
     string_with_id(name.observation_name)
+  rescue StandardError
+    ""
+  end
+
+  def user_unique_format_name(user)
+    string_with_id(name.user_observation_name(user))
   rescue StandardError
     ""
   end
@@ -786,8 +804,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # Add species_lists and herbarium_records to naming_includes
   def has_backup_data?
     !thumb_image_id.nil? ||
-      species_lists.count.positive? ||
-      herbarium_records.count.positive? ||
+      species_lists.any? ||
+      herbarium_records.any? ||
       specimen ||
       notes.length >= 100
   end
@@ -843,21 +861,25 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Callback that updates a User's contribution after adding an Observation to
   # a SpeciesList.
-  def add_spl_callback(_obs)
-    UserStats.update_contribution(:add, :species_list_entries, user_id)
+  def add_spl_callback(spl)
+    tmp_id = user_id
+    tmp_id ||= spl.user_id if spl.respond_to?(:user_id)
+    UserStats.update_contribution(:add, :species_list_entries, tmp_id)
   end
 
   # Callback that updates a User's contribution after removing an Observation
   # from a SpeciesList.
-  def remove_spl_callback(_obs)
-    UserStats.update_contribution(:del, :species_list_entries, user_id)
+  def remove_spl_callback(spl)
+    tmp_id = user_id
+    tmp_id ||= spl.user_id if spl.respond_to?(:user_id)
+    UserStats.update_contribution(:del, :species_list_entries, tmp_id)
   end
 
   # Callback that logs an Observation's destruction on all of its
   # SpeciesList's.  (Also saves list of Namings so they can be destroyed
   # by hand afterword without causing superfluous calc_consensuses.)
   def notify_species_lists
-    # Tell all the species lists it belonged to.
+    # Tell all the species_lists it belonged to.
     species_lists.each do |spl|
       spl.log(:log_observation_destroyed2, name: unique_format_name,
                                            touch: false)
@@ -871,6 +893,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # Observation is destroyed.
   def destroy_dependents
     @old_namings.each do |naming|
+      naming.current_user = naming.observation.current_user
       naming.observation = nil # (tells it not to recalc consensus)
       naming.destroy
     end
@@ -970,12 +993,54 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
+  def user_announce_consensus_change(old_name, new_name, current_user)
+    user_log_consensus_change(old_name, new_name, current_user)
+
+    # Change can trigger emails.
+    owner  = user
+    sender = current_user
+    recipients = []
+
+    # Tell owner of observation if they want.
+    recipients.push(owner) if owner&.email_observations_consensus
+
+    # Send to people who have registered interest.
+    # Also remove everyone who has explicitly said they are NOT interested.
+    interests.each do |interest|
+      if interest.state
+        recipients.push(interest.user)
+      else
+        recipients.delete(interest.user)
+      end
+    end
+
+    # Remove users who have opted out of all emails.
+    recipients.reject!(&:no_emails)
+
+    # Send notification to all except the person who triggered the change.
+    (recipients.uniq - [sender]).each do |recipient|
+      QueuedEmail::ConsensusChange.create_email(sender, recipient, self,
+                                                old_name, new_name)
+    end
+  end
+
   def log_consensus_change(old_name, new_name)
     if old_name
       log(:log_consensus_changed, old: old_name.display_name,
                                   new: new_name.display_name)
     else
       log(:log_consensus_created, name: new_name.display_name)
+    end
+  end
+
+  def user_log_consensus_change(old_name, new_name, current_user)
+    if old_name
+      user_log(current_user, :log_consensus_changed,
+               { old: old_name.user_display_name(current_user),
+                 new: new_name.user_display_name(current_user) })
+    else
+      user_log(current_user, :log_consensus_created,
+               { name: new_name.user_display_name(current_user) })
     end
   end
 
@@ -1068,7 +1133,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def check_user
-    return if user || User.current
+    return if user || @current_user
 
     errors.add(:user, :validate_observation_user_missing.t)
   end

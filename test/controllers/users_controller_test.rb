@@ -47,7 +47,7 @@ class UsersControllerTest < FunctionalTestCase
     pattern = "Roy"
     get(:index, params: { pattern: pattern })
     # matcher includes optional quotation mark (?.)
-    assert_displayed_title(:USERS.l)
+    assert_page_title(:USERS.l)
     assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
 
     prove_sorting_links_include_contribution
@@ -63,8 +63,8 @@ class UsersControllerTest < FunctionalTestCase
                                params: { pattern: unmatched_pattern })
     assert_template("users/index")
 
-    assert_displayed_title(:USERS.l)
-    assert_empty(css_select("#sorts"), "There should be no sort links")
+    assert_page_title(:USERS.l)
+    assert_empty(css_select(".sorts"), "There should be no sort links")
 
     flash_text = :runtime_no_matches.l.sub("[types]", "users")
     assert_flash_text(flash_text)
@@ -94,7 +94,7 @@ class UsersControllerTest < FunctionalTestCase
     sort_orders = %w[last_login contribution]
     sort_orders.each do |order|
       get(:index, params: { by: order })
-      assert_displayed_title(:USERS.l)
+      assert_page_title(:USERS.l)
       assert_sorted_by(order)
     end
   end
@@ -103,7 +103,7 @@ class UsersControllerTest < FunctionalTestCase
   #    show
   #   ---------------
 
-  def test_show
+  def test_show_user_no_query
     user = users(:rolf)
 
     login
@@ -128,6 +128,18 @@ class UsersControllerTest < FunctionalTestCase
       false,
       "Links should not use the same value for id and another param"
     )
+    assert_select(
+      "a:match('href', ?)", /\?.*flow=prev/, false,
+      "There should not be a Prev/Index/Next UI without a User query"
+    )
+    assert_select(
+      "a:match('href', ?)", /\?.*flow=next/, false,
+      "There should not be a Prev/Index/Next UI without a User query"
+    )
+    assert_select(
+      "#content a:match('href', ?)", /users/, false,
+      "There should not be a Prev/Index/Next UI without a User query"
+    )
   end
 
   def test_show_nonexistent_user
@@ -144,7 +156,7 @@ class UsersControllerTest < FunctionalTestCase
   # can be shown via the same action.
   # Prove that sorting links include "Contribution" (when not in admin mode)
   def prove_sorting_links_include_contribution
-    sorting_links = css_select("#sorts")
+    sorting_links = css_select(".sorts")
     assert_match(/Contribution/, sorting_links.text)
   end
 

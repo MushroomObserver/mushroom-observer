@@ -94,6 +94,7 @@ module Mappable
     ].freeze
     MAX_PRECISION = PRECISION.first
     MIN_PRECISION = PRECISION.last
+    private_constant(:PRECISION, :MAX_PRECISION, :MIN_PRECISION)
 
     def next_precision(prec)
       PRECISION[PRECISION.index(prec) + 1] || 0
@@ -128,7 +129,7 @@ module Mappable
       raise("Tried to create empty map!") if objects.empty?
 
       @sets = {}
-      is_collection = objects.count > 1
+      is_collection = objects.many?
       will_be_grouped = objects.count > @max_objects
       objects.each do |obj|
         loc = obj.location? ? obj : obj.location

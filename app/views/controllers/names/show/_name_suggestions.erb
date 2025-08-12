@@ -1,0 +1,8 @@
+<%= tag.div(class: "alert-warning") do %>
+  <%= tag.div(:list_observations_alternate_spellings.t) %>
+  <%= tag.ul(type: "none") do %>
+    <% names.sort_by(&:sort_name).each do |name| %>
+      <%= link_to(name.user_display_name(@user).t, name.show_link_args) %><br />
+    <% end %>
+  <% end %>
+<% end %>

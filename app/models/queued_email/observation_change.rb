@@ -40,7 +40,7 @@ class QueuedEmail
 
     # This should be called when an observation is destroyed.
     def self.destroy_observation(sender, recipient, observation)
-      note = observation.unique_format_name
+      note = observation.user_unique_format_name(observation.current_user)
       if (email = find_email(recipient, observation))
         email.add_integer(:observation, 0)
         email.set_note(note)

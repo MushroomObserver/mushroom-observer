@@ -37,8 +37,9 @@ class RssLogTest < UnitTestCase
   end
 
   def test_detail_for_destroyed_object
-    User.current = users(:dick)
+    # User.current = users(:dick)
     obs = observations(:detailed_unknown_obs)
+    obs.current_user = users(:dick)
     log = obs.rss_log
     assert_not_nil(log)
     assert_false(log.orphan?)
@@ -54,7 +55,7 @@ class RssLogTest < UnitTestCase
     loc2 = locations(:mitrula_marsh)
     log = loc1.rss_log
     assert_false(log.orphan?)
-    loc2.merge(loc1)
+    loc2.merge(mary, loc1)
     log.reload
     assert_true(log.orphan?)
     assert_equal(:log_location_merged.t(that: loc2.display_name, user: "mary"),

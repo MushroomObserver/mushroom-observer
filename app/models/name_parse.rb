@@ -27,7 +27,7 @@
 #      np.comment                # nil
 #      np.find_names             # (Array of Name instances matching
 #                                   "L. umbellifera")
-#      np.has_synonym            # true
+#      np.has_synonym?           # true
 #      np.synonym                # "Omphalia ericetorum"
 #      np.synonym_search_name    # "Omphalia ericetorum"
 #      np.synonym_rank           # "Species"
@@ -41,7 +41,7 @@
 #      np.comment                # "Highly polyphyletic"
 #      np.find_names             # (Array of Name instances matching
 #                                   "Myxomycota")
-#      np.has_synonym            # false
+#      np.has_synonym?           # false
 #    end
 #
 #  The methods find_names and find_synonym_names both use
@@ -69,8 +69,8 @@ class NameParse
     @line_str = spl_line.strip_squeeze
     equal_pos = @line_str.index("=")
     if equal_pos
-      @name = @line_str[0..equal_pos - 1].strip
-      @synonym = @line_str[equal_pos + 1..].strip
+      @name = @line_str[0..(equal_pos - 1)].strip
+      @synonym = @line_str[(equal_pos + 1)..].strip
       @synonym_comment = nil
       if (match = COMMENT_PAT.match(@synonym))
         @synonym = match[1]
@@ -91,18 +91,18 @@ class NameParse
     (@rank, @search_name) = parse_rank(@name)
   end
 
-  def has_synonym
+  def has_synonym?
     !@synonym.nil?
   end
 
-  def find_names
-    Name.find_names_filling_in_authors(@search_name, @rank)
+  def find_names(user)
+    Name.find_names_filling_in_authors(user, @search_name, @rank)
   end
 
-  def find_synonym_names
+  def find_synonym_names(user)
     result = []
     if @synonym
-      result = Name.find_names_filling_in_authors(@synonym_search_name,
+      result = Name.find_names_filling_in_authors(user, @synonym_search_name,
                                                   @synonym_rank)
     end
     result
@@ -112,7 +112,7 @@ class NameParse
     result = [nil, str]
     space_pos = str.index(" ")
     if space_pos
-      rank = str[0..space_pos - 1]
+      rank = str[0..(space_pos - 1)]
       result = [rank, str[space_pos..].strip] if Name.all_ranks.member?(rank)
     end
     result

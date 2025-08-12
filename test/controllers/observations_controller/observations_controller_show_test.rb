@@ -11,10 +11,32 @@ class ObservationsControllerShowTest < FunctionalTestCase
   #  General tests.
   # ----------------------------
 
+  def test_show_no_login
+    obs = observations(:deprecated_name_obs)
+    get(:show, params: { id: obs.id })
+    assert_response(:success)
+  end
+
+  def test_show_no_login_with_flow
+    obs = observations(:deprecated_name_obs)
+    get(:show, params: { id: obs.id, flow: "next" })
+    assert_response(:redirect)
+  end
+
+  def test_show_login
+    login
+    obs = observations(:deprecated_name_obs)
+    get(:show, params: { id: obs.id })
+    assert_response(:success)
+    # There won't be prev/next UI because there's no query.
+    # assert(@response.body.include?("flow=next"))
+  end
+
   # Test load a deprecated name obs, no strict_loading error
   def test_show_observation_deprecated_name
     obs = observations(:deprecated_name_obs)
     get(:show, params: { id: obs.id })
+    assert_response(:success)
   end
 
   def test_show_observation_noteless_image
@@ -23,14 +45,17 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_nil(img.notes)
     assert(obs.images.member?(img))
     get(:show, params: { id: obs.id })
+    assert_response(:success)
   end
 
   def test_show_observation_noteful_image
     obs = observations(:detailed_unknown_obs)
     get(:show, params: { id: obs.id })
+    assert_response(:success)
   end
 
   def test_show_observation_with_structured_notes
+    login
     obs = observations(:template_and_orphaned_notes_scrambled_obs)
     get(:show, params: { id: obs.id })
     assert_match("+photo", @response.body)
@@ -38,6 +63,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
   end
 
   def test_show_observation_with_simple_notes
+    login
     obs = observations(:coprinus_comatus_obs)
     get(:show, params: { id: obs.id })
     assert_match("<p>Notes:<br />", @response.body)
@@ -106,7 +132,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     login
     get(:show, params: { id: obs.id })
     assert_equal(1, ObservationView.where(observation: obs).count)
-    assert_select("p.footer-view-stats") do |p|
+    assert_select(".footer-view-stats") do |p|
       assert_includes(p.to_s, :footer_viewed.t(date: :footer_never.l,
                                                times: :many_times.l(num: 0)))
     end
@@ -117,7 +143,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     get(:show, params: { id: obs.id })
     assert_equal(2, ObservationView.where(observation: obs).count)
     assert_operator(obs.last_viewed_by(dick), :>=, 2.seconds.ago)
-    assert_select("p.footer-view-stats") do |p|
+    assert_select(".footer-view-stats") do |p|
       assert_includes(p.to_s, :footer_viewed.t(date: last_view.web_time,
                                                times: :one_time.l))
       assert_includes(p.to_s, :footer_last_you_viewed.t(date: :footer_never.l))
@@ -129,7 +155,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     get(:show, params: { id: obs.id })
     assert_equal(2, ObservationView.where(observation: obs).count)
     assert_operator(obs.last_viewed_by(dick), :>=, 2.seconds.ago)
-    assert_select("p.footer-view-stats") do |p|
+    assert_select(".footer-view-stats") do |p|
       assert_includes(p.to_s, :footer_viewed.t(date: last_view.web_time,
                                                times: :many_times.l(num: 2)))
       assert_includes(p.to_s,
@@ -199,7 +225,9 @@ class ObservationsControllerShowTest < FunctionalTestCase
   end
 
   def test_show_observation_nil_user
+    login
     obs = observations(:detailed_unknown_obs)
+    obs.current_user = rolf
     obs.update(user: nil)
 
     get(:show, params: { id: obs.id })
@@ -397,6 +425,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_select("a[href=?]",
                   reuse_images_for_observation_path(obs.id), minimum: 1)
     get(:edit, params: { id: obs.id })
+    assert_match(obs.location.name, response.body)
     assert_response(:success)
 
     login("dick") # Project permission

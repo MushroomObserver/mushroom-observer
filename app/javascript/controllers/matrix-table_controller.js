@@ -3,7 +3,7 @@ import { Controller } from "@hotwired/stimulus"
 // Connects to data-controller="matrix-table"
 export default class extends Controller {
   connect() {
-    this.element.dataset.stimulus = "matrix-table-connected";
+    this.element.dataset.matrixTable = "connected";
 
     this.matrixBoxes = document.querySelectorAll('.matrix-box')
     this.boxes = document.querySelectorAll('.matrix-box .panel-sizing')

@@ -57,7 +57,7 @@
 #
 #  5) Add "show log" link at bottom of model's show page:
 #
-#       <%= show_object_footer(@object) %>
+#       <%= show_object_footer(@user, @object) %>
 #
 #
 #  == Usage
@@ -68,7 +68,7 @@
 #
 #    rss_log = observation.rss_log
 #    rss_log.add("Made some change.")
-#    rss_log.orphan("Deleting observation.")
+#    rss_log.orphan(user, "Deleting observation.")
 #
 #  *NOTE*: After an object is deleted, no one will ever be able to change that
 #  RssLog again -- i.e. it is orphaned.
@@ -298,8 +298,22 @@ class RssLog < AbstractModel
     RssLog.record_timestamps = true
   end
 
+  def user_add_with_date(user, tag, args = {})
+    entry = encode(tag, user_relevant_args(args, user),
+                   args[:time] || Time.zone.now)
+    RssLog.record_timestamps = false if args.key?(:touch) && !args[:touch]
+    add_entry(entry)
+    save_without_our_callbacks unless args.key?(:save) && !args[:save]
+    RssLog.record_timestamps = true
+  end
+
   def relevant_args(args)
     { user: (User.current ? User.current.login : :UNKNOWN.l) }.
+      update(args).except(:save, :time, :touch)
+  end
+
+  def user_relevant_args(args, user)
+    { user: (user ? user.login : :UNKNOWN.l) }.
       update(args).except(:save, :time, :touch)
   end
 
@@ -307,11 +321,12 @@ class RssLog < AbstractModel
   # associated object, and save.  Once this is done and the owner has been
   # deleted, this RssLog will be "orphaned" and will never change again.
   #
-  #   obs.rss_log.orphan(observation.format_name, :log_observation_destroyed)
+  #   obs.rss_log.orphan(user, observation.format_name,
+  #                      :log_observation_destroyed)
   #
-  def orphan(title, key, args = {})
+  def orphan(user, title, key, args = {})
     args = args.merge(save: false)
-    add_with_date(key, args)
+    user_add_with_date(user, key, args)
     add_entry(escape(title))
     clear_target_id
     save_without_our_callbacks

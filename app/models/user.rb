@@ -181,7 +181,7 @@
 #                       (defaults to personal_herbarium).
 #  personal_herbarium:: User's private herbarium:
 #                       "Name (login): Personal Herbarium".
-#  all_editable_species_lists:: Species Lists they own
+#  all_editable_species_lists:: Observation Lists they own
 #                       or that are attached to projects they're on.
 #
 #  ==== Other Stuff
@@ -354,6 +354,8 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   #   user = User.current
   #
   def self.current
+    # trace_tests
+    # debugger
     @@user = nil unless defined?(@@user)
     @@user
   end
@@ -363,6 +365,8 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   #   user_id = User.current_id
   #
   def self.current_id
+    # trace_tests
+    # debugger
     @@user = nil unless defined?(@@user)
     @@user&.id
   end
@@ -458,7 +462,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def self.find_name_match(users, str)
-    return users.first if users.count == 1
+    return users.first if users.one?
 
     users.find_each do |user|
       return user if user.unique_text_name == str
@@ -624,18 +628,18 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def personal_herbarium
-    @personal_herbarium ||= Herbarium.find_by(personal_user_id: id)
+    # disable cop because RuboCop's suggested fix creates test failures
+    @personal_herbarium ||= Herbarium.find_by(personal_user_id: id) # rubocop:disable Rails/FindByOrAssignmentMemoization
   end
 
   def create_personal_herbarium
-    # rubocop:disable Naming/MemoizedInstanceVariableName
-    @personal_herbarium ||= Herbarium.create(
+    # cop gives false positive
+    @personal_herbarium ||= Herbarium.create( # rubocop:disable Naming/MemoizedInstanceVariableName
       name: personal_herbarium_name,
       email: email,
       personal_user: self,
       curators: [self]
     )
-    # rubocop:enable Naming/MemoizedInstanceVariableName
   end
 
   # Return an ActiveRecord::Association of SpeciesList's that User created or
@@ -1040,14 +1044,15 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     Project.where(id: ids).delete_all
   end
 
-  # Delete all species lists the user created unless they belong to a project.
-  # (Private projects should already have been deleted by this point, so this
-  # in effect, really should read "unless they belong to a public project".)
-  # I think it's okay to delete observations even if they are attached to a
-  # project.  But species_lists are potentially a much more collaborative
-  # effort, so I don't think it's okay to delete lists that are attached to
-  # public projects just because the user happened to originally create them.
-  # -JPH 20220916
+  # Delete all species_lists the user created unless they belong
+  # to a project.  (Private projects should already have been deleted
+  # by this point, so this in effect, really should read "unless they
+  # belong to a public project".)  I think it's okay to delete
+  # observations even if they are attached to a project.  But
+  # species_lists are potentially a much more collaborative effort, so
+  # I don't think it's okay to delete lists that are attached to
+  # public projects just because the user happened to originally
+  # create them.  -JPH 20220916
   def delete_private_species_lists
     ids = (species_lists - species_lists.joins(:project_species_lists)).
           map(&:id)

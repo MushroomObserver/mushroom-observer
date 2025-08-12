@@ -139,7 +139,7 @@ module ApplicationController::Queries
   end
 
   def current_user_preference_filters
-    User.current ? User.current.content_filter : MO.default_content_filter
+    @user ? @user.content_filter : MO.default_content_filter
   end
 
   public ##########
@@ -304,7 +304,7 @@ module ApplicationController::Queries
 
   # Need to pass list of tags used in this action to next page if redirecting.
   def redirect_to(*args)
-    flash[:tags_on_last_page] = Language.save_tags if Language.tracking_usage
+    flash[:tags_on_last_page] = Language.save_tags if Language.tracking_usage?
     if args.member?(:back)
       redirect_back(fallback_location: "/")
     else

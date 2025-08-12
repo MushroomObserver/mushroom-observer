@@ -33,7 +33,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     # Click on next (catches a bug seen in the wild).
     # Above comment about "next" does not match "Prev" in code
     go_back_after do
-      click_link("« Prev")
+      click_link("Prev")
     end
     # back at Observation
     assert_match(/#{:app_title.l}: Observation/, page.title, "Wrong page")
@@ -100,7 +100,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     reset_session!
     login(lurker.login)
 
-    visit("/#{obs.id}")
+    visit("/obs/#{obs.id}")
     assert_match(/#{:app_title.l}: Observation #{obs.id}/, page.title,
                  "Wrong page")
 
@@ -135,13 +135,15 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     end
     # back at Observation
 
-    # Check out species list.
+    # Check out species_list.
     go_back_after do
       list = SpeciesList.joins(:observations).
              where(observations: { id: obs.id }).first
       click_link(list.title)
-      assert_match(/^#{:app_title.l}: Species List: #{list.title}/,
-                   page.title, "Wrong page")
+      assert_match(
+        /^#{:app_title.l}: Observation List #{list.id}: #{list.title}/,
+        page.title, "Wrong page"
+      )
 
       # (Make sure observation is shown somewhere.)
       assert(has_selector?("a[href^='#{observation_path(obs.id)}']"),
@@ -178,13 +180,13 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     # Search for a name.  (Only one.)
     fill_in("search_pattern", with: "Coprinus comatus")
     select("Names", from: "search_type")
-    click_button("Search")
-    assert_match(names(:coprinus_comatus).search_name,
+    within("#pattern_search_form") { click_button("Search") }
+    assert_match(names(:coprinus_comatus).text_name,
                  page.title, "Wrong page")
 
     # Search for observations of that name.  (Only one.)
     select("Observations", from: "search_type")
-    click_button("Search")
+    within("#pattern_search_form") { click_button("Search") }
     assert_match(/#{observations(:coprinus_comatus_obs).id}/,
                  page.title, "Wrong page")
 
@@ -192,7 +194,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     # 2021-09-12 JDC
     # Search for images of the same thing.  (Still only one.)
     # select("Images", from: "search_type")
-    # click_button("Search")
+    # within("#pattern_search_form") { click_button("Search") }
     # assert_match(
     #   %r{^/image/show_image/#{images(:connected_coprinus_comatus_image).id}},
     #   current_fullpath
@@ -200,7 +202,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
 
     # There should be no locations of that name, though.
     select("Locations", from: "search_type")
-    click_button("Search")
+    within("#pattern_search_form") { click_button("Search") }
     assert_match("Locations", page.title, "Wrong page")
     assert_selector("div.alert", text: /no.*found/i)
     refute_selector("#results a[href]")
@@ -208,7 +210,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     # This should give us just about all the locations.
     fill_in("search_pattern", with: "california OR canada")
     select("Locations", from: "search_type")
-    click_button("Search")
+    within("#pattern_search_form") { click_button("Search") }
     # assert_selector("#results a[href]")
     labels = find_all("#results a[href] .location-postal").map(&:text)
     assert(labels.any? { |l| l.end_with?("Canada") },
@@ -227,8 +229,9 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     place = "Massachusetts, USA"
     fill_in("filter_term", with: place)
     select("Region", from: "filter_type")
-    click_button("Search")
-    assert_match(/#{:obs_needing_id.t}/, page.title, "Wrong page")
+    within("#identify_filter") { click_button("Search") }
+    assert_selector("#filters", text: /#{:query_needs_naming.l}/)
+    assert_selector("#filters", text: /#{:query_region.l}/)
     # Note that .rss-where now gets both postal and scientific addresses as a
     # single mashed up string, because they're shown/hidden by css.
     where_ats = find_all(".rss-where .location-postal").map(&:text)
@@ -243,7 +246,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     # Search for a name.  (More than one.)
     fill_in("search_pattern", with: "Fungi")
     select("Observations", from: "search_type")
-    click_button("Search")
+    within("#pattern_search_form") { click_button("Search") }
 
     obs = observations(:detailed_unknown_obs).id.to_s
     # assert_selector("a[href^='/#{obs}']")
@@ -256,6 +259,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
   def test_obs_at_location
     login
     nam = names(:fungi)
+    loc = locations(:burbank)
     # Start at distribution map for Fungi.
     visit("/names/#{nam.id}/map")
 
@@ -266,7 +270,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
 
     # Click on the defined location.
     click_link(text: /Burbank/)
-    assert_match("Location: Burbank, California, USA", page.title,
+    assert_match("Location #{loc.id}: Burbank, California, USA", page.title,
                  "Wrong title")
 
     # Get a list of observations from there.  (Several so goes to index.)
@@ -276,7 +280,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     assert_match("Observations", page.title, "Wrong title")
     assert_selector("#filters", text: "Burbank, California, USA")
     save_results = find_all("#results a").select do |l|
-      l[:href].match(%r{^/\d+})
+      l[:href].match(%r{^/obs/\d+})
     end
 
     # Bail if there are too many results — test will not work
@@ -287,17 +291,17 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     end
 
     # Try sorting differently.
-    within("#sorts") { click_link(text: "User") }
+    within(first("#results .sorts")) { click_link(text: "User") }
     check_results_length(save_results)
 
     # Date is ambiguous, there's also 'Date Posted'
-    within("#sorts") { click_link(exact_text: "Date") }
+    within(first("#results .sorts")) { click_link(exact_text: "Date") }
     check_results_length(save_results)
 
-    within("#sorts") { click_link(text: "Reverse Order") }
+    within(first("#results .sorts")) { click_link(text: "Reverse Order") }
     check_results_length(save_results)
 
-    within("#sorts") { click_link(text: "Name") }
+    within(first("#results .sorts")) { click_link(text: "Name") }
     # Last time through - reset `save_results` with current results
     save_results = check_results_length(save_results)
     # Must set `save_hrefs` here to avoid variable going stale...
@@ -310,26 +314,24 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     results_observation_links.first.click
     save_path = current_fullpath
     assert_equal(query_params, parse_query_params(save_path))
-    within("#title_bar") { click_link(text: "Prev") }
+    within("#header") { click_link(text: "Prev") }
     assert_flash_text(/there are no more observations/i)
     assert_equal(save_path, current_fullpath)
     assert_equal(query_params, parse_query_params(save_path))
-    within("#title_bar") { click_link(text: "Next") }
+    within("#header") { click_link(text: "Next") }
     assert_no_flash
     assert_equal(query_params, parse_query_params(save_path))
 
     save_path = current_fullpath
-    within("#title_bar") { click_link(text: "Next") }
+    within("#header") { click_link(text: "Next") }
     assert_no_flash
     assert_equal(query_params, parse_query_params(save_path))
-    within("#title_bar") { click_link(text: "Prev") }
+    within("#header") { click_link(text: "Prev") }
     assert_no_flash
     assert_equal(query_params, parse_query_params(save_path))
     assert_equal(save_path, current_fullpath,
                  "Went next then prev, should be back where we started.")
-    within("#title_bar") do
-      click_link(text: "Index") # href: /#{observations_path}/
-    end
+    within("#header") { click_link(text: "Index") }
     results = results_observation_links
     assert_equal(query_params, parse_query_params(results.first[:href]))
     assert_equal(save_hrefs, results.pluck(:href),
@@ -368,7 +370,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
 
   def results_observation_links
     find_all("#results a").select do |l|
-      l[:href].match(%r{^/\d+})
+      l[:href].match(%r{^/obs/\d+})
     end
   end
 end

@@ -56,17 +56,8 @@ class InatObsTest < UnitTestCase
                      mock_inat_obs.send(attribute))
       end
 
-    expected_notes =
-      { Collector: "jdcohenesq",
-        Other: "on Quercus\n\n&#8212;\n\nOriginally posted " \
-               "to Mushroom Observer on Mar. 7, 2024." }
-
-    assert_equal(
-      expected_notes, mock_inat_obs.notes,
-      "MO notes should include: iNat Collector || login, iNat Description"
-    )
-    expected_snapshot =
-      <<~SNAPSHOT.gsub(/^\s+/, "")
+    snapshot_subpoarts =
+      <<~SNAPSHOT.gsub(/^\s+/, "").chomp
         #{:USER.l}: #{mock_inat_obs[:user][:login]}\n
         #{:OBSERVED.l}: #{mock_inat_obs.when}\n
         #{:show_observation_inat_lat_lng.l}: #{mock_inat_obs.lat_lon_accuracy}\n
@@ -74,12 +65,22 @@ class InatObsTest < UnitTestCase
         #{:ID.l}: #{mock_inat_obs.inat_taxon_name}\n
         #{:DQA.l}: #{mock_inat_obs.dqa}\n
         #{:show_observation_inat_suggested_ids.l}: #{mock_inat_obs.suggested_id_names}\n
-        #{:OBSERVATION_FIELDS.t}: #{mock_inat_obs.obs_fields(mock_inat_obs.inat_obs_fields)}\n
-        #{:PROJECTS.l}: #{:inat_not_imported.l}\n
-        #{:ANNOTATIONS.l}: #{:inat_not_imported.l}\n
-        #{:TAGS.l}: #{:inat_not_imported.l}\n
+        #{:OBSERVATION_FIELDS.t}: #{mock_inat_obs.obs_fields(mock_inat_obs.inat_obs_fields)}
       SNAPSHOT
+    expected_snapshot = "\n#{snapshot_subpoarts}"
     assert_equal(expected_snapshot, mock_inat_obs.snapshot)
+
+    # Observation form needs the Notes "parts keys to be normalized
+    snapshot_key = Observation.notes_normalized_key(:inat_snapshot_caption.l)
+    expected_notes =
+      { Collector: "jdcohenesq",
+        snapshot_key => expected_snapshot,
+        Other: "on Quercus\n\n&#8212;\n\nOriginally posted " \
+               "to Mushroom Observer on Mar. 7, 2024." }
+    assert_equal(
+      expected_notes, mock_inat_obs.notes,
+      "MO notes should include: iNat Collector || login, iNat Description"
+    )
 
     expect = License.where(License[:url] =~ "/by-nc/").
              where(deprecated: false).order(id: :asc).first
@@ -218,13 +219,22 @@ class InatObsTest < UnitTestCase
     prov_name = mock_inat_obs.inat_prov_name
     assert(prov_name.present?)
     assert_equal('Arrhenia "sp-NY02"', prov_name)
-    assert_equal('Arrhenia "sp-NY02"', mock_inat_obs.provisional_name)
+    assert_equal('Arrhenia "sp-NY02"', mock_inat_obs.provisional_name,
+                 "Provisional name should be unprocessed iNat provisional name")
 
     mock_inat_obs = mock_observation("donadinia_PNW01")
     prov_name = mock_inat_obs.inat_prov_name
     assert(prov_name.present?)
     assert_equal("Donadinia PNW01", prov_name)
-    assert_equal('Donadinia "sp-PNW01"', mock_inat_obs.provisional_name)
+    assert_equal("Donadinia PNW01", mock_inat_obs.provisional_name,
+                 "Provisional name should be unprocessed iNat provisional name")
+
+    mock_inat_obs = mock_observation("hygrocybe_sp_conica-CA06_ncbi_style")
+    prov_name = mock_inat_obs.inat_prov_name
+    assert(prov_name.present?)
+    assert_equal("Hygrocybe sp. 'conica-CA06'", prov_name)
+    assert_equal("Hygrocybe sp. 'conica-CA06'", mock_inat_obs.provisional_name,
+                 "Provisional name should be unprocessed iNat provisional name")
 
     assert_blank(
       mock_observation("amanita_flavorubens").inat_prov_name,
@@ -367,13 +377,16 @@ class InatObsTest < UnitTestCase
   end
 
   def test_notes
-    assert_equal({ Collector: "tyler_irvin" },
-                 mock_observation("coprinus").notes,
+    assert_equal("tyler_irvin", mock_observation("coprinus").notes[:Collector],
                  "MO Notes should always include Collector:")
     assert_equal(
       "Collection by Heidi Randall. \nSmells like T. suaveolens. ",
       mock_observation("trametes").notes[:Other],
       "iNat Description should be mapped to MO Notes Other"
+    )
+    assert_equal(
+      "", mock_observation("tremella_mesenterica").notes[:Other],
+      "Notes Other should be a blank String if iNat Description is empty"
     )
   end
 

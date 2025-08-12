@@ -140,9 +140,9 @@ module Descriptions::Permissions
 
     # Return name of group or user if it's a one-user group.
     def group_name(group)
-      return(:adjust_permissions_all_users.t) if group.name == "all users"
-      return(:REVIEWERS.t) if group.name == "reviewers"
-      return(group.users.first.legal_name) if /^user \d+$/.match?(group.name)
+      return :adjust_permissions_all_users.t if group.name == "all users"
+      return :REVIEWERS.t if group.name == "reviewers"
+      return group.users.first.legal_name if /^user \d+$/.match?(group.name)
 
       group.name
     end
@@ -296,7 +296,7 @@ module Descriptions::Permissions
     def update_groups(desc, type, groups)
       groups.each do |id, val|
         if (group = UserGroup.safe_find(id))
-          update_group(desc, type, group, (val == "1"))
+          update_group(desc, type, group, val == "1")
         else
           flash_error(:runtime_description_user_not_found.t(name: id))
         end

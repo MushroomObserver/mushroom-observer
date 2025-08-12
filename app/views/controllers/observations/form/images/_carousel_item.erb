@@ -22,7 +22,7 @@ else
 end
 presenter_args = { size: :large, fit: :contain, extra_classes: extra_classes,
                    upload: upload }
-presenter = ImagePresenter.new(img_id, presenter_args)
+presenter = ImagePresenter.new(@user, img_id, presenter_args)
 data = data.merge(image_uuid: img_id, image_status:)
 item_attrs = { id: "carousel_item_#{img_id}",
                class: ["item carousel-item", active] }.merge(data: data)

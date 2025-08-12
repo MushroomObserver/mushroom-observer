@@ -106,7 +106,7 @@ module Projects
     def find_member(str)
       return User.safe_find(str) if str.to_s.match?(/^\d+$/)
 
-      User.find_by(login: str.to_s.sub(/ <.*>$/, ""))
+      User.lookup_unique_text_name(str)
     end
 
     def update_membership(project, candidate)
@@ -133,9 +133,36 @@ module Projects
         flash_notice(:change_member_editing_trust_flash.l)
         set_trust(project, candidate, "editing")
         true
+      elsif params[:commit] == :change_member_add_obs.l
+        count = add_observations(project, candidate)
+        flash_notice(:change_member_add_obs_flash.t(count: count))
+        true
       else
         false
       end
+    end
+
+    def add_observations(project, candidate)
+      # Returns the count of observations added.
+      #
+      # Can't use candidate.observations due to a bug in in_box.
+      # Specifially, candidate.observations.in_box doesn't return
+      # the right thing because it incorrectly adds observations not
+      # from the candidate if they have no lat/long data.
+      obs = Observation.all
+      loc = project.location
+      if loc
+        obs = obs.in_box(north: loc.north, south: loc.south,
+                         east: loc.east, west: loc.west)
+      end
+      if project.start_date && project.end_date
+        obs = obs.found_between(project.start_date.strftime("%Y-%m,-%d"),
+                                project.end_date.strftime("%Y-%m,-%d"))
+      end
+      obs = obs.where(user: candidate)
+      before = project.observations.count
+      project.add_observations(obs)
+      project.observations.count - before
     end
 
     def set_trust(project, user, trust_level)
@@ -182,8 +209,8 @@ module Projects
       project_member = ProjectMember.find_by(project:, user:)
       unless project_member
         project_member = ProjectMember.create(project:, user:,
-                                              trust_level: "hidden_gps")
-        flash_notice(:add_members_with_gps_trust.l)
+                                              trust_level: "editing")
+        flash_notice(:add_members_with_editing.l)
       end
       return unless project_member
       return if type == :admin || add

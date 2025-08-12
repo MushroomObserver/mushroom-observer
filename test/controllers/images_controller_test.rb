@@ -9,7 +9,7 @@ class ImagesControllerTest < FunctionalTestCase
   def test_index_order
     check_index_sorted_by(::Query::Images.default_order) # :created_at
     assert_template(partial: "_matrix_box")
-    assert_displayed_title(:IMAGES.l)
+    assert_page_title(:IMAGES.l)
   end
 
   def test_index_with_non_default_sort
@@ -24,7 +24,7 @@ class ImagesControllerTest < FunctionalTestCase
 
     assert_template("index")
     assert_template(partial: "_matrix_box")
-    assert_displayed_title(:IMAGES.l)
+    assert_page_title(:IMAGES.l)
     assert_displayed_filters("#{:query_by_users.l}: #{user.legal_name}")
   end
 
@@ -47,7 +47,7 @@ class ImagesControllerTest < FunctionalTestCase
     get(:index, params: { project: project.id })
 
     assert_template("index", partial: "_image")
-    assert_displayed_title(:IMAGES.l)
+    assert_page_title(:IMAGES.l)
     assert_displayed_filters("#{:query_projects.l}: #{project.title}")
   end
 
@@ -79,7 +79,7 @@ class ImagesControllerTest < FunctionalTestCase
     get(:index, params: { pattern: pattern })
 
     assert_template("index", partial: "_image")
-    assert_displayed_title(:IMAGES.l)
+    assert_page_title(:IMAGES.l)
     assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
   end
 
@@ -104,7 +104,7 @@ class ImagesControllerTest < FunctionalTestCase
 
   def test_show_image
     image = images(:peltigera_image)
-    assert(ImageVote.where(image: image).count > 1,
+    assert(ImageVote.where(image: image).many?,
            "Use Image fixture with multiple votes for better coverage")
     num_views = image.num_views
     login
@@ -132,7 +132,7 @@ class ImagesControllerTest < FunctionalTestCase
   # Prove show works when params include obs
   def test_show_with_obs_param
     obs = observations(:peltigera_obs)
-    assert((image = obs.images.first), "Test needs Obs fixture with images")
+    assert(image = obs.images.first, "Test needs Obs fixture with images")
 
     login(obs.user.login)
 
@@ -146,7 +146,7 @@ class ImagesControllerTest < FunctionalTestCase
 
   def test_show_image_with_bad_vote
     image = images(:peltigera_image)
-    assert(ImageVote.where(image: image).count > 1,
+    assert(ImageVote.where(image: image).many?,
            "Use Image fixture with multiple votes for better coverage")
     # create invalid vote in order to cover line that rescues an error
     bad_vote = ImageVote.new(image: image, user: nil, value: Image.minimum_vote)

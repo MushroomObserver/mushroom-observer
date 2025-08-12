@@ -4,8 +4,6 @@
 class ObservationsController
   module Index
     def index
-      return if check_for_spider_block
-
       build_index_with_query
     end
 
@@ -78,12 +76,15 @@ class ObservationsController
     end
 
     def return_pattern_search_results(pattern)
+      # Have to use PatternSearch here to catch invalid PatternSearch terms.
+      # Can't just send pattern to Query as create_query(:Observation, pattern:)
       search = PatternSearch::Observation.new(pattern)
       return render_pattern_search_error(search) if search.errors.any?
 
-      @suggest_alternate_spellings = search.query.params[:pattern]
       # Call create_query to apply user content filters
       query = create_query(:Observation, search.query.params)
+      make_name_suggestions(search)
+
       if params[:needs_naming]
         redirect_to(
           identify_observations_path(q: get_query_param(query))
@@ -91,6 +92,19 @@ class ObservationsController
         [nil, {}]
       else
         [query, {}]
+      end
+    end
+
+    # Different from NamesController. Returns arrays of [name, count]
+    def make_name_suggestions(search)
+      alternate_spellings = search.query.params[:pattern]
+      return unless alternate_spellings && @objects.empty?
+
+      names = Name.suggest_alternate_spellings(alternate_spellings)
+      @name_suggestions = names.sort_by(&:sort_name).map do |name|
+        query = Query.create_query(:Observation, pattern: name.text_name)
+        count = query.num_results
+        [name, count]
       end
     end
 
@@ -161,19 +175,12 @@ class ObservationsController
     end
 
     # Display matrix of Observations whose "where" matches a string.
-    # NOTE: To consolidate flavors in Query, we're passing the possible
-    # `search_where` param from the advanced search form straight through to
-    # Query's obs advanced search class, which searches two tables (obs and
-    # loc) for the fuzzy match.
-    # Here we are passing the front end's `where` to the similar Query
-    # `locations` string handling param of Query::Observations. If the param
-    # names in Observations were the same, with ObservationAdvancedSearch,
-    # because of inheritance, query would use it first for AdvancedSearch's
-    # table-join search, but then Base would add an extra AND clause to search
-    # observations, that will preclude getting results.
+    # NOTE: We're passing the `search_where` param from advanced search to
+    # AbstractModel's scope `search_where`, which searches two tables
+    # (obs and loc) for the fuzzy match.
     def where
       where = params[:where].to_s
-      query = create_query(:Observation, locations: where)
+      query = create_query(:Observation, search_where: where)
       [query, { always_index: true }]
     end
 
@@ -183,12 +190,13 @@ class ObservationsController
         project = find_or_goto_index(Project, params[:project].to_s)
       )
 
-      query = create_query(:Observation, projects: project)
+      query = create_query(:Observation, projects: project,
+                                         order_by: "thumbnail_quality")
       @project = project
       [query, { always_index: true }]
     end
 
-    # Display matrix of Observations attached to a given species list.
+    # Display matrix of Observations attached to a given species_list.
     def species_list
       return unless (
         spl = find_or_goto_index(SpeciesList, params[:species_list].to_s)

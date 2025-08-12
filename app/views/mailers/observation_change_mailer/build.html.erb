@@ -2,7 +2,7 @@
   is_now = :email_field_is_now.l
 
   intro = @observation ?
-    :email_object_change_intro.l(type: :observation, name: @observation.unique_format_name) :
+    :email_object_change_intro.l(type: :observation, name: @observation.user_unique_format_name(@user)) :
     :email_observation_destroyed_intro.l
 
   fields = ""

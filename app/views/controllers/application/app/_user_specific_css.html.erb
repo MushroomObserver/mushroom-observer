@@ -1,17 +1,18 @@
 <%#
 show/hide controls per user.
-This needs to be in a template to access the User.current method.
+  This used to need to be in a template to access the User.current method.
+  Not clear if that applies to @user as well.
 
-  Use: `tag.div(data: { user_specific: User.current.id })`
+  Use: `tag.div(data: { user_specific: @user.id })`
 
 source: https://discuss.hotwired.dev/t/how-to-pass-current-user-id-to-a-controller/287/3
 %>
 
 <% unless in_admin_mode? %>
-  <%# cache User.current || "no_user" do %>
+  <%# cache @user || "no_user" do %>
     <style>
-      <% if User.current %>
-        [data-user-specific]:not([data-user-specific="<%= User.current.id %>"]) { display: none; }
+      <% if @user %>
+        [data-user-specific]:not([data-user-specific="<%= @user.id %>"]) { display: none; }
       <% else %>
         [data-user-specific] { display: none; }
       <% end %>

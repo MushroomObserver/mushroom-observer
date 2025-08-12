@@ -381,7 +381,7 @@ module SessionExtensions
     when :context_nav
       "#context_nav"
     when :sorts
-      "#sorts"
+      "#header .sorts"
     when :site_nav
       "#navigation"
     when :results

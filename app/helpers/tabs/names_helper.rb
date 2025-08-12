@@ -3,11 +3,6 @@
 # html used in tabsets
 module Tabs
   module NamesHelper
-    # assemble links for "tabset" for show_name
-    def name_show_tabs(name:)
-      [edit_name_tab(name), new_name_tab].reject(&:empty?)
-    end
-
     def edit_name_tab(name)
       InternalLink::Model.new(:show_name_edit_name.l, name,
                               add_query_param(edit_name_path(name.id)),
@@ -140,11 +135,12 @@ module Tabs
       ).tab
     end
 
-    def name_edit_description_tab(name)
+    def name_edit_description_tab(user, name)
       return unless name&.description
 
       InternalLink::Model.new(:EDIT.l, name,
-                              edit_name_description_path(name.description.id),
+                              edit_name_description_path(user,
+                                                         name.description.id),
                               html_options: { icon: :edit }).tab
     end
 
@@ -165,9 +161,15 @@ module Tabs
       external_name_tab("EOL", name, name.eol_url)
     end
 
-    def google_images_for_name_tab(name)
+    # def google_images_for_name_tab(name)
+    #   url = format("https://images.google.com/images?q=%s",
+    #                name.real_text_name)
+    #   external_name_tab(:google_images.t, name, url)
+    # end
+
+    def user_google_images_for_name_tab(user, name)
       url = format("https://images.google.com/images?q=%s",
-                   name.real_text_name)
+                   name.user_real_text_name(user))
       external_name_tab(:google_images.t, name, url)
     end
 

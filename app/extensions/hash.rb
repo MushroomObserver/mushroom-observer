@@ -68,4 +68,45 @@ class Hash
   def has_node?(*)
     Tree.has_node?(self, *)
   end
+
+  def value_merge!(dict2)
+    # Process each key-value pair from the second dictionary
+    dict2.each do |key, value2|
+      if key?(key)
+        value1 = self[key]
+        self[key] = merge_values(value1, value2)
+      else
+        # Key doesn't exist in first dictionary, just add it
+        self[key] = value2
+      end
+    end
+  end
+
+  def merge_values(value1, value2)
+    # Handle empty values first with early returns
+    return value2 if empty_value?(value1)
+    return value1 if empty_value?(value2)
+
+    # Both values have content - merge strings, otherwise replace
+    if both_strings?(value1, value2)
+      # Avoid duplicates
+      if value1.include?(value2)
+        value1
+      elsif value2.include?(value1)
+        value2
+      else
+        "#{value1}\n#{value2}"
+      end
+    else
+      value2
+    end
+  end
+
+  def empty_value?(value)
+    value.nil? || value == ""
+  end
+
+  def both_strings?(value1, value2)
+    value1.is_a?(String) && value2.is_a?(String)
+  end
 end

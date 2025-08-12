@@ -142,7 +142,15 @@ class Textile < String
     names.each do |name|
       next unless name.try(:at_or_below_genus?)
 
-      Textile.private_register_name(name.real_text_name, name.rank)
+      Textile.private_register_name(name.user_real_text_name(nil), name.rank)
+    end
+  end
+
+  def self.user_register_name(user, *names)
+    names.each do |name|
+      next unless name.try(:at_or_below_genus?)
+
+      Textile.private_register_name(name.user_real_text_name(user), name.rank)
     end
   end
 
@@ -226,26 +234,23 @@ class Textile < String
     spl: "SPECIES_LIST",
     user: "USER"
   }.freeze
-
   # case-insenstive match any of the non-Name markup tags
   NON_NAME_LINK_PATTERN =
     /#{(MARKUP_TO_TAG.keys - [:name]).map(&:to_s).join("|")}/i
+  NAME_LINK_PATTERN = %r{
+    (?<prefix> ^|\W) # capture start of string or non-word character
+    (?: \**_+) # any asterisks then at least one underscore
+    (?! #{NON_NAME_LINK_PATTERN}\ ) # not a link to a non-Name object
+    (?<formatted_label> [^_]+) # capture all non-underscores
+    (?: _+\**) # at least one underscore then any asterisks
+    (?= # not followed by
+      (?: s|ish|like)? # optional ns, ish, or like, then
+      (?: \W|\Z) # non-word char or end of string
+    )
 
-  NAME_LINK_PATTERN =
-    %r{
-      (?<prefix> ^|\W) # capture start of string or non-word character
-      (?: \**_+) # any asterisks then at least one underscore
-      (?! #{NON_NAME_LINK_PATTERN}\ ) # not a link to a non-Name object
-      (?<formatted_label> [^_]+) # capture all non-underscores
-      (?: _+\**) # at least one underscore then any asterisks
-      (?= # not followed by
-        (?: s|ish|like)? # optional ns, ish, or like, then
-        (?: \W|\Z) # non-word char or end of string
-      )
-
-      (?! (?: </[a-z]+>)) # discard match if followed by html closing tag
-    }x
-
+    (?! (?: </[a-z]+>)) # discard match if followed by html closing tag
+  }x
+  private_constant(:MARKUP_TO_TAG, :NON_NAME_LINK_PATTERN, :NAME_LINK_PATTERN)
   # Convert __Names__ to links in a textile string.
   def convert_name_links_to_tagged_objects!
     @@name_lookup ||= {}
@@ -338,20 +343,19 @@ class Textile < String
       sub(/ sp\.$/, "")
   end
 
-  OTHER_LINK_PATTERN =
-    %r{
-      (?<prefix> ^|\W)
-      (?: _+)
-      (?<marked_type>
-        [a-zA-Z]+ # model name or abbr
-        (?: _[a-zA-Z]+)? # optionally including underscores
-      )
-      \s+
-      (?<id> [^_\s](?:[^_\n]+[^_\s])?) # id -- integer or string
-      (?: _+)
+  OTHER_LINK_PATTERN = %r{
+    (?<prefix> ^|\W)
+    (?: _+)
+    (?<marked_type>
+      [a-zA-Z]+ # model name or abbr
+      (?: _[a-zA-Z]+)? # optionally including underscores
+    )
+    \s+
+    (?<id> [^_\s](?:[^_\n]+[^_\s])?) # id -- integer or string
+    (?: _+)
 
-      (?! (?: \w|</[a-z]+>)) # discard if trailed by word char or html close tag
-    }x
+    (?! (?: \w|</[a-z]+>)) # discard if trailed by word char or html close tag
+  }x
 
   # Convert _object name_ and _object id_ to a textile string.
   def convert_other_links_to_tagged_objects!
@@ -382,6 +386,7 @@ class Textile < String
       "\"!#{src}!\":#{link}"
     end
   end
+  private_constant(:OTHER_LINK_PATTERN)
 
   def strip_caps_class_spans!
     gsub!(%r{((<span class="caps">[A-Z]+</span>)+)}) do |url|
@@ -430,6 +435,7 @@ class Textile < String
     (?! (?: \w|<\/[a-z]+>)) # discard if followed by word char or close tag
   /x
   # rubocop:enable Style/RegexpLiteral
+  private_constant(:IMPLICIT_TERM_PATTERN)
 
   def convert_implicit_terms_to_tagged_glossary_terms!
     gsub!(IMPLICIT_TERM_PATTERN) do
@@ -485,6 +491,7 @@ class Textile < String
         \s+
       \}x
   /x
+  private_constant(:OBJECT_TAG_PATTERN)
 
   def convert_tagged_objects_to_proper_links!
     gsub!(OBJECT_TAG_PATTERN) do |_orig|

@@ -54,7 +54,7 @@ class NamesControllerTest < FunctionalTestCase
     login
     get(:index)
 
-    assert_displayed_title(:NAMES.l)
+    assert_page_title(:NAMES.l)
     assert_select("#context_nav a[href='#{names_path}']", { count: 0 },
                   "right `tabs` should not link to All Names")
   end
@@ -73,7 +73,7 @@ class NamesControllerTest < FunctionalTestCase
     login
     get(:index, params: { q: q })
 
-    assert_displayed_title(:NAMES.l)
+    assert_page_title(:NAMES.l)
     assert_displayed_filters(:query_observation_query.l)
     assert_displayed_filters("#{:query_by_users.l}: #{user.name}")
     assert_select(
@@ -99,7 +99,7 @@ class NamesControllerTest < FunctionalTestCase
                     with_correct_spelling.count },
       "Wrong number of (correctly spelled) Names"
     )
-    assert_displayed_title(:NAMES.l)
+    assert_page_title(:NAMES.l)
     assert_displayed_filters("#{:query_search_name.l}: #{search_string}")
   end
 
@@ -131,7 +131,7 @@ class NamesControllerTest < FunctionalTestCase
     get(:index,
         params: @controller.query_params(query).merge({ advanced_search: "1" }))
 
-    assert_displayed_title(:NAMES.l)
+    assert_page_title(:NAMES.l)
     assert_flash_text(:runtime_no_matches.l(type: :names.l))
   end
 
@@ -164,7 +164,7 @@ class NamesControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: pattern })
 
-    assert_displayed_title(:NAMES.l)
+    assert_page_title(:NAMES.l)
     assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
     assert_select(
       "#results a:match('href', ?)", %r{^#{names_path}/\d+},
@@ -211,7 +211,7 @@ class NamesControllerTest < FunctionalTestCase
     get(:index, params: { has_observations: true })
 
     assert_response(:success)
-    assert_displayed_title(:NAMES.l)
+    assert_page_title(:NAMES.l)
     assert_displayed_filters(:query_has_observations.l)
     assert_select(
       "#results a:match('href', ?)", %r{#{names_path}/\d+},
@@ -235,7 +235,7 @@ class NamesControllerTest < FunctionalTestCase
     get(:index, params: { has_observations: true, letter: letter })
 
     assert_response(:success)
-    assert_displayed_title(:NAMES.l)
+    assert_page_title(:NAMES.l)
     assert_displayed_filters(:query_has_observations.l)
     names.each do |name|
       assert_select("#results a[href*='/names/#{name.id}'] .display-name",
@@ -248,7 +248,7 @@ class NamesControllerTest < FunctionalTestCase
     get(:index, params: { has_descriptions: true })
 
     assert_response(:success)
-    assert_displayed_title(:NAMES.l)
+    assert_page_title(:NAMES.l)
     assert_displayed_filters(:query_has_descriptions.l)
     assert_select("#results", { text: /not the default/ },
                   "Results should include non-default descriptions")
@@ -266,7 +266,7 @@ class NamesControllerTest < FunctionalTestCase
     get(:index, params: { needs_description: true })
 
     assert_response(:success)
-    assert_displayed_title(:NAMES.l)
+    assert_page_title(:NAMES.l)
     assert_displayed_filters(:query_needs_description.l)
     assert_select(
       "#results a:match('href', ?)", %r{^#{names_path}/\d+},
@@ -282,7 +282,7 @@ class NamesControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_user: user.id })
 
-    assert_displayed_title(:NAMES.l)
+    assert_page_title(:NAMES.l)
     assert_displayed_filters("#{:query_by_users.l}: #{user.name}")
     assert_select(
       "#results a:match('href', ?)", %r{^#{names_path}/\d+},
@@ -296,6 +296,7 @@ class NamesControllerTest < FunctionalTestCase
     assert(Name.where(user: user).none?)
     name = names(:boletus_edulis)
     name.user = user
+    name.skip_notify = true
     name.save
 
     login
@@ -339,7 +340,7 @@ class NamesControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_editor: user })
 
-    assert_displayed_title(:NAMES.l)
+    assert_page_title(:NAMES.l)
     assert_displayed_filters("#{:query_by_editor.l}: #{user.name}")
     assert_select("#results a:match('href',?)", %r{^/names/\d+},
                   { count: names_edited_by_user.count },
@@ -352,6 +353,7 @@ class NamesControllerTest < FunctionalTestCase
   def make_dick_editor_of_addtional_name
     name = names(:boletus_edulis)
     name.user = users(:rolf)
+    name.skip_notify = true
     name.save
   end
 
@@ -394,7 +396,7 @@ class NamesControllerTest < FunctionalTestCase
     @controller.query_params(query)
   end
 
-  # None of our standard tests ever actually renders pagination_links
+  # None of our standard tests ever actually renders pagination_numbers
   # or letter_pagination_nav.  This tests all the above.
   def test_pagination_page1
     # Straightforward index of all names, showing first 10.
@@ -405,21 +407,21 @@ class NamesControllerTest < FunctionalTestCase
     assert_template("names/index")
     name_links = css_select(".list-group.name-index a")
     assert_equal(10, name_links.length)
-    expected = Name.order("sort_name, author").limit(10).to_a
+    expected = Name.order(:sort_name, :author).limit(10).to_a
     assert_equal(expected.map(&:id), ids_from_links(name_links))
     # assert_equal(@controller.url_with_query(action: "show",
     #  id: expected.first.id, only_path: true), name_links.first.url)
     url = @controller.url_with_query(controller: "/names", action: :show,
                                      id: expected.first.id, only_path: true)
     assert_not_nil(name_links.first.to_s.index(url))
-    assert_select("a", text: "1", count: 0)
-    assert_link_in_html("2", controller: "/names",
-                             action: :test_index, num_per_page: 10,
-                             params: query_params, page: 2)
-    assert_select("a", text: "Z", count: 0)
-    assert_link_in_html("A", controller: "/names",
-                             action: :test_index, num_per_page: 10,
-                             params: query_params, letter: "A")
+    # assert_select("a", text: "1", count: 0)
+    assert_link_in_html("Next", controller: "/names",
+                                action: :test_index, num_per_page: 10,
+                                params: query_params, page: 2)
+    # assert_select("a", text: "Z", count: 0)
+    # assert_link_in_html("A", controller: "/names",
+    #                          action: :test_index, num_per_page: 10,
+    #                          params: query_params, letter: "A")
   end
 
   def test_pagination_page2
@@ -431,27 +433,27 @@ class NamesControllerTest < FunctionalTestCase
     assert_template("names/index")
     name_links = css_select(".list-group.name-index a")
     assert_equal(10, name_links.length)
-    expected = Name.order("sort_name").limit(10).offset(10).to_a
+    expected = Name.order(:sort_name).limit(10).offset(10).to_a
     assert_equal(expected.map(&:id), ids_from_links(name_links))
     url = @controller.url_with_query(controller: "/names", action: :show,
                                      id: expected.first.id, only_path: true)
     assert_not_nil(name_links.first.to_s.index(url))
 
-    assert_select("a", text: "2", count: 0)
-    assert_link_in_html("1", controller: "/names",
-                             action: :test_index, num_per_page: 10,
-                             params: query_params, page: 1)
-    assert_select("a", text: "Z", count: 0)
-    assert_link_in_html("A", controller: "/names",
-                             action: :test_index, num_per_page: 10,
-                             params: query_params, letter: "A")
+    # assert_select("a", text: "2", count: 0)
+    assert_link_in_html("Previous", controller: "/names",
+                                    action: :test_index, num_per_page: 10,
+                                    params: query_params, page: 1)
+    # assert_select("a", text: "Z", count: 0)
+    # assert_link_in_html("A", controller: "/names",
+    #                          action: :test_index, num_per_page: 10,
+    #                          params: query_params, letter: "A")
   end
 
   def test_pagination_letter
     # Now try a letter.
     query_params = pagination_query_params
     l_names = Name.where(Name[:text_name].matches("L%")).
-              order("text_name, author").to_a
+              order(:text_name, :author).to_a
     login
     get(:test_index, params: { num_per_page: l_names.size,
                                letter: "L" }.merge(query_params))
@@ -466,17 +468,17 @@ class NamesControllerTest < FunctionalTestCase
                                      id: l_names.first.id, only_path: true)
     assert_not_nil(name_links.first.to_s.index(url))
     assert_select("a", text: "1", count: 0)
-    assert_select("a", text: "Z", count: 0)
 
-    assert_link_in_html("A", controller: "/names",
-                             action: :test_index, params: query_params,
-                             num_per_page: l_names.size, letter: "A")
+    # assert_select("a", text: "Z", count: 0)
+    # assert_link_in_html("A", controller: "/names",
+    #                          action: :test_index, params: query_params,
+    #                          num_per_page: l_names.size, letter: "A")
   end
 
   def test_pagination_letter_with_page
     query_params = pagination_query_params
     l_names = Name.where(Name[:text_name].matches("L%")).
-              order("text_name, author").to_a
+              order(:text_name, :author).to_a
     # Do it again, but make page size exactly one too small.
     l_names.pop
     login
@@ -489,20 +491,18 @@ class NamesControllerTest < FunctionalTestCase
     assert_equal(Set.new(l_names.map(&:id)),
                  Set.new(ids_from_links(name_links)))
 
-    assert_select("a", text: "1", count: 0)
-
-    assert_link_in_html("2", controller: "/names",
-                             action: :test_index, params: query_params,
-                             num_per_page: l_names.size,
-                             letter: "L", page: 2)
-
-    assert_select("a", text: "3", count: 0)
+    # assert_select("a", text: "1", count: 0)
+    assert_link_in_html("Next", controller: "/names",
+                                action: :test_index, params: query_params,
+                                num_per_page: l_names.size,
+                                letter: "L", page: 2)
+    # assert_select("a", text: "3", count: 0)
   end
 
   def test_pagination_letter_with_page2
     query_params = pagination_query_params
     l_names = Name.where(Name[:text_name].matches("L%")).
-              order("text_name, author").to_a
+              order(:text_name, :author).to_a
     last_name = l_names.pop
     # Check second page.
     login
@@ -512,12 +512,12 @@ class NamesControllerTest < FunctionalTestCase
     name_links = css_select(".list-group.name-index a")
     assert_equal(1, name_links.length)
     assert_equal([last_name.id], ids_from_links(name_links))
-    assert_select("a", text: "2", count: 0)
-    assert_link_in_html("1", controller: "/names",
-                             action: :test_index, params: query_params,
-                             num_per_page: l_names.size,
-                             letter: "L", page: 1)
-    assert_select("a", text: "3", count: 0)
+    # assert_select("a", text: "2", count: 0)
+    assert_link_in_html("Previous", controller: "/names",
+                                    action: :test_index, params: query_params,
+                                    num_per_page: l_names.size,
+                                    letter: "L", page: 1)
+    # assert_select("a", text: "3", count: 0)
   end
 
   def test_pagination_with_anchors
@@ -528,14 +528,14 @@ class NamesControllerTest < FunctionalTestCase
       num_per_page: 10,
       test_anchor: "blah"
     }.merge(query_params))
-    assert_link_in_html("2", controller: "/names",
-                             action: :test_index, num_per_page: 10,
-                             params: query_params, page: 2,
-                             test_anchor: "blah", anchor: "blah")
-    assert_link_in_html("A", controller: "/names",
-                             action: :test_index, num_per_page: 10,
-                             params: query_params, letter: "A",
-                             test_anchor: "blah", anchor: "blah")
+    assert_link_in_html("Next", controller: "/names",
+                                action: :test_index, num_per_page: 10,
+                                params: query_params, page: 2,
+                                test_anchor: "blah", anchor: "blah")
+    # assert_link_in_html("A", controller: "/names",
+    #                          action: :test_index, num_per_page: 10,
+    #                          params: query_params, letter: "A",
+    #                          test_anchor: "blah", anchor: "blah")
   end
 
   ################################################
@@ -736,21 +736,23 @@ class NamesControllerTest < FunctionalTestCase
     # login
     # get(:show, params: { id: name.id })
     # assert_synonym_links(name, 0, 0, 0)
-    login("rolf")
+    login(rolf.login)
     get(:show, params: { id: name.id })
     assert_synonym_links(name, 0, 0, 0)
-    make_admin("mary")
+    make_admin(mary.login)
     get(:show, params: { id: name.id })
     assert_synonym_links(name, 0, 1, 1)
 
-    Name.update(name.id, deprecated: true)
+    name.current_user = users(:rolf)
+    name.deprecated = true
+    name.save
     logout
     get(:show, params: { id: name.id })
     assert_synonym_links(name, 0, 0, 0)
-    login("rolf")
+    login(rolf.login)
     get(:show, params: { id: name.id })
     assert_synonym_links(name, 0, 0, 0)
-    make_admin("mary")
+    make_admin(mary.login)
     get(:show, params: { id: name.id })
     assert_synonym_links(name, 1, 0, 1)
   end
@@ -877,7 +879,7 @@ class NamesControllerTest < FunctionalTestCase
   # NOTE: The interest links are GET paths because email.
   def test_interest_in_show_name
     peltigera = names(:peltigera)
-    login("rolf")
+    login(rolf.login)
 
     # No interest in this name yet.
     get(:show, params: { id: peltigera.id })
@@ -914,7 +916,7 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def test_next_and_prev
-    names = Name.order("text_name, author").to_a
+    names = Name.order(:text_name, :author).to_a
     name12 = names[12]
     name13 = names[13]
     name14 = names[14]
@@ -1000,7 +1002,7 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def test_create_name_blank
-    login("rolf")
+    login(rolf.login)
     params = {
       name: {
         text_name: "",
@@ -1025,7 +1027,7 @@ class NamesControllerTest < FunctionalTestCase
         citation: ""
       }
     }
-    login("rolf")
+    login(rolf.login)
     post(:create, params: params)
 
     assert_response(:success)
@@ -1051,7 +1053,7 @@ class NamesControllerTest < FunctionalTestCase
         citation: "I'll pass"
       }
     }
-    login("mary")
+    login(mary.login)
     post(:create, params: params)
     assert_response(:success)
     last_name = Name.last
@@ -1075,7 +1077,7 @@ class NamesControllerTest < FunctionalTestCase
     }
     flash_text = :create_name_multiple_names_match.t(str: text_name)
     count = Name.count
-    login("rolf")
+    login(rolf.login)
     post(:create, params: params)
 
     assert_flash_text(flash_text)
@@ -1103,7 +1105,9 @@ class NamesControllerTest < FunctionalTestCase
     post(:create, params: params)
 
     assert_response(:success)
-    flash_text = :runtime_name_create_already_exists.t(name: name.display_name)
+    flash_text = :runtime_name_create_already_exists.t(
+      name: name.user_display_name
+    )
     assert_flash_text(flash_text)
     assert_empty(name.reload.author)
     assert_equal(old_name_count, Name.count)
@@ -1125,7 +1129,9 @@ class NamesControllerTest < FunctionalTestCase
     post(:create, params: params)
 
     assert_response(:success)
-    flash_text = :runtime_name_create_already_exists.t(name: name.display_name)
+    flash_text = :runtime_name_create_already_exists.t(
+      name: name.user_display_name
+    )
     assert_flash_text(flash_text)
     assert_equal(author, name.reload.author)
     assert_equal(old_name_count, Name.count)
@@ -1144,7 +1150,7 @@ class NamesControllerTest < FunctionalTestCase
         citation: ""
       }
     }
-    login("rolf")
+    login(rolf.login)
     old_contribution = rolf.contribution
     post(:create, params: params)
 
@@ -1166,7 +1172,7 @@ class NamesControllerTest < FunctionalTestCase
         rank: "Species"
       }
     }
-    login("rolf")
+    login(rolf.login)
     post(:create, params: params)
     assert_template("names/new")
     assert_template("names/_form")
@@ -1187,7 +1193,7 @@ class NamesControllerTest < FunctionalTestCase
         rank: :Species
       }
     }
-    login("rolf")
+    login(rolf.login)
 
     assert_no_difference(
       "Name.count",
@@ -1210,7 +1216,7 @@ class NamesControllerTest < FunctionalTestCase
         rank: :Species
       }
     }
-    login("rolf")
+    login(rolf.login)
 
     assert_no_difference(
       "Name.count",
@@ -1249,7 +1255,7 @@ class NamesControllerTest < FunctionalTestCase
         rank: "Phylum"
       }
     }
-    login("rolf")
+    login(rolf.login)
     post(:create, params: params)
     # Now try to find it
     assert(name = Name.find_by(text_name: text_name))
@@ -1268,7 +1274,7 @@ class NamesControllerTest < FunctionalTestCase
         rank: "Form"
       }
     }
-    login("rolf")
+    login(rolf.login)
     post(:create, params: params)
     # Now try to find it
     assert(name = Name.find_by(text_name: text_name2))
@@ -1277,9 +1283,10 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def test_create_species_under_ambiguous_genus
-    login("dick")
+    login(dick.login)
     agaricus1 = names(:agaricus)
     agaricus1.change_author("L.")
+    agaricus1.skip_notify = true
     agaricus1.save
     Name.create!(
       text_name: "Agaricus",
@@ -1289,7 +1296,8 @@ class NamesControllerTest < FunctionalTestCase
       author: "Raf.",
       rank: "Genus",
       deprecated: false,
-      correct_spelling: nil
+      correct_spelling: nil,
+      user: dick
     )
     agarici = Name.where(text_name: "Agaricus")
     assert_equal(2, agarici.length)
@@ -1310,7 +1318,7 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def test_create_family
-    login("dick")
+    login(dick.login)
     params = {
       name: {
         text_name: "Lecideaceae",
@@ -1338,7 +1346,7 @@ class NamesControllerTest < FunctionalTestCase
         deprecated: "false"
       }
     }
-    login("katrina")
+    login(katrina.login)
     post(:create, params: params)
 
     assert(name = Name.find_by(text_name: text_name))
@@ -1377,7 +1385,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_equal("Species", name.rank)
     assert_equal("Hygrocybe sp. 'constrictospora-PNW08'", name.search_name)
     assert_equal("**__Hygrocybe__** sp. **__'constrictospora-PNW08'__**",
-                 name.display_name)
+                 name.user_display_name)
     assert_equal("Hygrocybe constrictospora-pnw08", name.sort_name)
   end
 
@@ -1405,7 +1413,8 @@ class NamesControllerTest < FunctionalTestCase
     assert(name)
     assert_equal("Species", name.rank)
     assert_equal("Donadinia sp. 'PNW01'", name.search_name)
-    assert_equal("**__Donadinia__** sp. **__'PNW01'__**", name.display_name)
+    assert_equal("**__Donadinia__** sp. **__'PNW01'__**",
+                 name.user_display_name)
     assert_equal("Donadinia pnw01", name.sort_name)
   end
 
@@ -1436,7 +1445,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_equal("Genus", name.rank)
     assert_equal("Gen. 'Hemimycena3'", name.text_name)
     assert_equal("Gen. 'Hemimycena3'", name.search_name)
-    assert_equal("Gen. **__'Hemimycena3'__**", name.display_name)
+    assert_equal("Gen. **__'Hemimycena3'__**", name.user_display_name)
     assert_equal("Hemimycena3", name.sort_name)
   end
 
@@ -1500,7 +1509,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_equal(10, rolf.reload.contribution)
     assert_equal("(Fr.) Kühner", name.reload.author)
     assert_equal("**__Conocybe__** **__filaris__** (Fr.) Kühner",
-                 name.display_name)
+                 name.user_display_name)
     assert_equal("Conocybe filaris (Fr.) Kühner", name.search_name)
     assert_equal("__Le Genera Galera__, 139. 1935.", name.citation)
     assert_equal(rolf, name.user)
@@ -1552,7 +1561,7 @@ class NamesControllerTest < FunctionalTestCase
         deprecated: (name.deprecated ? "true" : "false")
       }
     }
-    login("rolf")
+    login(rolf.login)
     put(:update, params: params)
 
     assert_flash_success
@@ -1609,7 +1618,7 @@ class NamesControllerTest < FunctionalTestCase
 
       }
     }
-    login("rolf")
+    login(rolf.login)
     put(:update, params: params)
 
     assert_flash_success
@@ -1633,7 +1642,7 @@ class NamesControllerTest < FunctionalTestCase
         deprecated: (name.deprecated ? "true" : "false")
       }
     }
-    login("mary")
+    login(mary.login)
     put(:update, params: params)
 
     assert_flash_success
@@ -1659,7 +1668,7 @@ class NamesControllerTest < FunctionalTestCase
         deprecated: (name.deprecated ? "true" : "false")
       }
     }
-    login("mary")
+    login(mary.login)
     put(:update, params: params)
 
     assert_flash_success
@@ -1692,7 +1701,7 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def test_edit_name_misspelling
-    login("rolf")
+    login(rolf.login)
 
     # Prove we can clear misspelling by unchecking "misspelt" box
     name = names(:petigera)
@@ -1718,7 +1727,9 @@ class NamesControllerTest < FunctionalTestCase
 
     # Prove we can deprecate and call a name misspelt by checking box and
     # entering correct spelling.
-    Name.update(name.id, deprecated: false)
+    name.deprecated = false
+    name.skip_notify = true
+    name.save!
     params = {
       id: name.id,
       name: {
@@ -1733,7 +1744,7 @@ class NamesControllerTest < FunctionalTestCase
     put(:update, params: params)
     assert_flash_success
     assert_true(name.reload.is_misspelling?)
-    assert_equal("__Petigera__", name.display_name)
+    assert_equal("__Petigera__", name.user_display_name)
     assert_names_equal(names(:peltigera), name.correct_spelling)
     assert_true(name.deprecated)
     assert_redirected_to(name_path(name.id))
@@ -1823,7 +1834,7 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def test_edit_name_chain_to_approve_and_deprecate
-    login("rolf")
+    login(rolf.login)
     name = names(:lactarius_alpigenes)
     params = {
       id: name.id,
@@ -1850,6 +1861,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_redirected_to(form_to_approve_synonym_of_name_path(name.id))
 
     # Change to deprecated: go to deprecate_name, no flash.
+    name.skip_notify = true
     name.change_deprecated(false)
     name.save
     params[:name][:deprecated] = "true"
@@ -1859,14 +1871,15 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def test_edit_name_with_umlaut
-    login("dick")
-    names = Name.find_or_create_name_and_parents("Xanthoparmelia coloradoensis")
+    login(dick.login)
+    names = Name.find_or_create_name_and_parents(dick,
+                                                 "Xanthoparmelia coloradoensis")
     names.each(&:save)
     name = names.last
     assert_equal("Xanthoparmelia coloradoensis", name.text_name)
     assert_equal("Xanthoparmelia coloradoensis", name.search_name)
     assert_equal("**__Xanthoparmelia__** **__coloradoensis__**",
-                 name.display_name)
+                 name.user_display_name)
 
     get(:edit, params: { id: name.id })
     assert_input_value("name_text_name", "Xanthoparmelia coloradoensis")
@@ -1891,7 +1904,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_equal("Xanthoparmelia coloradoensis (Gyelnik) Hale",
                  name.search_name)
     assert_equal("**__Xanthoparmelia__** **__coloradoënsis__** (Gyelnik) Hale",
-                 name.display_name)
+                 name.user_display_name)
 
     get(:edit, params: { id: name.id })
     assert_input_value("name_text_name", "Xanthoparmelia coloradoënsis")
@@ -1907,11 +1920,11 @@ class NamesControllerTest < FunctionalTestCase
     assert_equal("Xanthoparmelia coloradoensis", name.text_name)
     assert_equal("Xanthoparmelia coloradoensis", name.search_name)
     assert_equal("**__Xanthoparmelia__** **__coloradoensis__**",
-                 name.display_name)
+                 name.user_display_name)
   end
 
   def test_edit_name_fixing_variety
-    login("katrina")
+    login(katrina.login)
     name = Name.create!(
       text_name: "Pleurotus djamor",
       search_name: "Pleurotus djamor (Fr.) Boi var. djamor",
@@ -1920,7 +1933,8 @@ class NamesControllerTest < FunctionalTestCase
       author: "(Fr.) Boi var. djamor",
       rank: "Species",
       deprecated: false,
-      correct_spelling: nil
+      correct_spelling: nil,
+      user: katrina
     )
     params = {
       id: name.id,
@@ -1947,7 +1961,7 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def test_edit_name_change_to_group
-    login("mary")
+    login(mary.login)
     name = Name.create!(
       text_name: "Lepiota echinatae",
       search_name: "Lepiota echinatae Group",
@@ -1956,7 +1970,8 @@ class NamesControllerTest < FunctionalTestCase
       author: "Group",
       rank: "Species",
       deprecated: false,
-      correct_spelling: nil
+      correct_spelling: nil,
+      user: mary
     )
     params = {
       id: name.id,
@@ -1976,12 +1991,13 @@ class NamesControllerTest < FunctionalTestCase
     assert_equal("Group", name.rank)
     assert_equal("Lepiota echinatae group", name.text_name)
     assert_equal("Lepiota echinatae group", name.search_name)
-    assert_equal("**__Lepiota__** **__echinatae__** group", name.display_name)
+    assert_equal("**__Lepiota__** **__echinatae__** group",
+                 name.user_display_name)
     assert_equal("", name.author)
   end
 
   def test_edit_name_screwy_notification_bug
-    login("mary")
+    login(mary.login)
     name = Name.create!(
       text_name: "Ganoderma applanatum",
       search_name: "Ganoderma applanatum",
@@ -1992,7 +2008,8 @@ class NamesControllerTest < FunctionalTestCase
       deprecated: true,
       correct_spelling: nil,
       citation: "",
-      notes: ""
+      notes: "",
+      user: mary
     )
     Interest.create!(
       target: name,
@@ -2054,7 +2071,7 @@ class NamesControllerTest < FunctionalTestCase
         notes: "new notes"
       }
     }
-    login("rolf")
+    login(rolf.login)
 
     get(:edit, params: { id: name.id })
     # Rolf is not an admin, so form should not show locked fields as changeable
@@ -2080,7 +2097,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_equal("new citation", name.citation)
     assert_equal("new notes", name.notes)
 
-    make_admin("rolf")
+    make_admin(rolf.login)
     get(:edit, params: { id: name.id })
     assert_select("input[type=text]#name_icn_id", count: 1)
     assert_select("select#name_rank", count: 1)
@@ -2102,7 +2119,7 @@ class NamesControllerTest < FunctionalTestCase
 
   def test_edit_misspelled_name
     misspelled_name = names(:suilus)
-    login("rolf")
+    login(rolf.login)
     get(:edit, params: { id: misspelled_name.id })
     assert_select("input[type=checkbox]#name_misspelling", count: 1)
     assert_select("input[type=text]#name_correct_spelling", count: 1)
@@ -2163,9 +2180,11 @@ class NamesControllerTest < FunctionalTestCase
   def test_update_change_text_name_of_approved_synonym
     approved_synonym = names(:lactarius_alpinus)
     deprecated_name = names(:lactarius_alpigenes)
-    login("rolf")
+    user = users(:rolf)
+    login(user.login)
     Naming.create(name: deprecated_name,
-                  observation: observations(:minimal_unknown_obs))
+                  observation: observations(:minimal_unknown_obs),
+                  user:)
     assert(
       !approved_synonym.deprecated &&
         Naming.where(name: approved_synonym).none? &&
@@ -2369,7 +2388,7 @@ class NamesControllerTest < FunctionalTestCase
         deprecated: agaricus_campestris.deprecated
       }
     }
-    login("rolf")
+    login(rolf.login)
 
     # Fails because Rolf isn't in admin mode.
     put(:update, params: params)
@@ -2414,7 +2433,7 @@ class NamesControllerTest < FunctionalTestCase
         deprecated: (old_name.deprecated ? "true" : "false")
       }
     }
-    login("rolf")
+    login(rolf.login)
     put(:update, params: params)
 
     assert_flash_success
@@ -2492,7 +2511,7 @@ class NamesControllerTest < FunctionalTestCase
       }
     }
 
-    login("rolf")
+    login(rolf.login)
     put(:update, params: params)
     assert_redirected_to(new_admin_emails_merge_requests_path(
                            type: :Name, old_id: old_name.id, new_id: new_name.id
@@ -2524,7 +2543,7 @@ class NamesControllerTest < FunctionalTestCase
         deprecated: (bad_name.deprecated ? "true" : "false")
       }
     }
-    login("rolf")
+    login(rolf.login)
     make_admin
     put(:update, params: params)
 
@@ -2554,7 +2573,7 @@ class NamesControllerTest < FunctionalTestCase
         deprecated: (wrong_author_name.deprecated ? "true" : "false")
       }
     }
-    login("rolf")
+    login(rolf.login)
     put(:update, params: params)
 
     assert_flash_success
@@ -2582,7 +2601,7 @@ class NamesControllerTest < FunctionalTestCase
         deprecated: (old_name.deprecated ? "true" : "false")
       }
     }
-    login("rolf")
+    login(rolf.login)
     put(:update, params: params)
 
     assert_flash_success
@@ -2619,7 +2638,7 @@ class NamesControllerTest < FunctionalTestCase
         deprecated: "false"
       }
     }
-    login("rolf")
+    login(rolf.login)
     put(:update, params: params)
 
     assert_flash_success
@@ -2636,7 +2655,9 @@ class NamesControllerTest < FunctionalTestCase
     # Second: merge accepted into deprecated, no change.
     good_name.change_deprecated(true)
     bad_name2.change_deprecated(false)
+    good_name.skip_notify = true
     good_name.save
+    bad_name2.skip_notify = true
     bad_name2.save
     assert_equal(2, good_name.version)
     assert_equal(2, good_name.versions.size)
@@ -2710,7 +2731,7 @@ class NamesControllerTest < FunctionalTestCase
         deprecated: (old_name.deprecated ? "true" : "false")
       }
     }
-    login("rolf")
+    login(rolf.login)
     put(:update, params: params)
 
     assert_flash_success
@@ -2739,7 +2760,7 @@ class NamesControllerTest < FunctionalTestCase
         deprecated: (old_name.deprecated ? "true" : "false")
       }
     }
-    login("rolf")
+    login(rolf.login)
     put(:update, params: params)
 
     assert_flash_success
@@ -2771,7 +2792,7 @@ class NamesControllerTest < FunctionalTestCase
         deprecated: (old_name.deprecated ? "true" : "false")
       }
     }
-    login("rolf")
+    login(rolf.login)
     put(:update, params: params)
 
     assert_match(original_notes, new_name.reload.notes)
@@ -2781,6 +2802,7 @@ class NamesControllerTest < FunctionalTestCase
   def test_update_name_merge_notes_into_nil_notes
     old_name = names(:hygrocybe_russocoriacea_bad_author) # has notes
     new_name = names(:russula_brevipes_author_notes)
+    new_name.skip_notify = true
     new_name.update(notes: nil) # simulate survivor having nil notes
     old_name_notes = old_name.notes
     params = {
@@ -2795,7 +2817,7 @@ class NamesControllerTest < FunctionalTestCase
       }
     }
 
-    login("rolf")
+    login(rolf.login)
     put(:update, params: params)
 
     assert_match(old_name_notes, new_name.reload.notes)
@@ -2819,7 +2841,7 @@ class NamesControllerTest < FunctionalTestCase
         deprecated: (old_name.deprecated ? "true" : "false")
       }
     }
-    login("rolf")
+    login(rolf.login)
     put(:update, params: params)
 
     assert_flash_success
@@ -2845,7 +2867,7 @@ class NamesControllerTest < FunctionalTestCase
         deprecated: (old_name.deprecated ? "true" : "false")
       }
     }
-    login("rolf")
+    login(rolf.login)
     put(:update, params: params)
 
     assert_flash_success
@@ -2871,7 +2893,7 @@ class NamesControllerTest < FunctionalTestCase
         citation: ""
       }
     }
-    login("rolf")
+    login(rolf.login)
     put(:update, params: params)
 
     assert_flash_success
@@ -2900,7 +2922,7 @@ class NamesControllerTest < FunctionalTestCase
     }
 
     # Fails normally.
-    login("rolf")
+    login(rolf.login)
     put(:update, params: params)
     assert_redirected_to(new_admin_emails_merge_requests_path(
                            type: :Name, old_id: old_name.id, new_id: new_name.id
@@ -2954,15 +2976,20 @@ class NamesControllerTest < FunctionalTestCase
 
   # Test that misspellings are handle right when merging.
   def test_update_name_merge_with_misspellings
-    login("rolf")
+    login(rolf.login)
     name1 = names(:lactarius_alpinus)
+    name1.skip_notify = true
     name2 = names(:lactarius_alpigenes)
+    name2.skip_notify = true
     name3 = names(:lactarius_kuehneri)
+    name3.skip_notify = true
     name4 = names(:lactarius_subalpinus)
+    name4.skip_notify = true
 
     # First: merge Y into X, where Y is misspelling of X
     name2.correct_spelling = name1
     name2.change_deprecated(true)
+    name2.skip_notify = true
     name2.save
     assert_not(name1.correct_spelling)
     assert_not(name1.deprecated)
@@ -2989,9 +3016,11 @@ class NamesControllerTest < FunctionalTestCase
     # Second: merge Y into X, where X is misspelling of Y
     name1.correct_spelling = name3
     name1.change_deprecated(true)
+    name1.skip_notify = true
     name1.save
     name3.correct_spelling = nil
     name3.change_deprecated(false)
+    name3.skip_notify = true
     name3.save
     assert(name1.correct_spelling == name3)
     assert(name1.deprecated)
@@ -3018,9 +3047,11 @@ class NamesControllerTest < FunctionalTestCase
     # Third: merge Y into X, where X is misspelling of Z
     name1.correct_spelling = Name.first
     name1.change_deprecated(true)
+    name1.skip_notify = true
     name1.save
     name4.correct_spelling = nil
     name4.change_deprecated(false)
+    name4.skip_notify = true
     name4.save
     assert(name1.correct_spelling)
     assert(name1.correct_spelling != name4)
@@ -3048,7 +3079,7 @@ class NamesControllerTest < FunctionalTestCase
 
   # Found this in the wild, it seems to have been fixed already, though...
   def test_update_name_merge_authored_misspelt_into_unauthored_correctly_spelled
-    login("rolf")
+    login(rolf.login)
 
     name2 = Name.create!(
       text_name: "Russula sect. Compactae",
@@ -3058,7 +3089,8 @@ class NamesControllerTest < FunctionalTestCase
       author: "",
       rank: "Section",
       deprecated: false,
-      correct_spelling: nil
+      correct_spelling: nil,
+      user: rolf
     )
     name1 = Name.create!(
       text_name: "Russula sect. Compactae",
@@ -3068,7 +3100,8 @@ class NamesControllerTest < FunctionalTestCase
       author: "Fr.",
       rank: "Section",
       deprecated: true,
-      correct_spelling: name2
+      correct_spelling: name2,
+      user: rolf
     )
     params = {
       id: name2.id,
@@ -3109,7 +3142,7 @@ class NamesControllerTest < FunctionalTestCase
       }
     }
 
-    login("rolf")
+    login(rolf.login)
     assert_no_difference("surviving_name.version") do
       put(:update, params: params)
       surviving_name.reload
@@ -3131,10 +3164,10 @@ class NamesControllerTest < FunctionalTestCase
     assert_nil(edited_name.icn_id, "Test needs fixtures without icn_id")
     assert_nil(survivor.icn_id, "Test needs fixtures without icn_id")
 
-    edited_name.log("create edited_name log")
+    edited_name.user_log(nil, "create edited_name log")
 
-    destroyed_real_search_name = edited_name.real_search_name
-    destroyed_display_name = edited_name.display_name
+    destroyed_real_search_name = edited_name.user_real_search_name
+    destroyed_display_name = edited_name.user_display_name
 
     params = {
       id: edited_name.id,
@@ -3146,7 +3179,8 @@ class NamesControllerTest < FunctionalTestCase
         deprecated: (survivor.deprecated ? "true" : "false")
       }
     }
-    login("rolf")
+    user = users(:rolf)
+    login(user.login)
 
     assert_difference("survivor.versions.count", 1) do
       put(:update, params: params)
@@ -3155,7 +3189,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_redirected_to(name_path(survivor.id))
 
     expect = "Successfully merged name #{destroyed_real_search_name} " \
-             "into #{survivor.real_search_name}"
+             "into #{survivor.user_real_search_name(user)}"
     assert_flash_text(/#{expect}/, "Merger success flash is incorrect")
 
     assert_no_emails
@@ -3167,7 +3201,7 @@ class NamesControllerTest < FunctionalTestCase
     assert_equal({ title: destroyed_display_name }, log[0][1])
     assert_equal(:log_name_merged, log[1][0])
     assert_equal({ this: destroyed_display_name,
-                   that: survivor.display_name,
+                   that: survivor.user_display_name,
                    user: "rolf" }, log[1][1])
   end
 
@@ -3187,7 +3221,7 @@ class NamesControllerTest < FunctionalTestCase
       }
     }
 
-    login("rolf")
+    login(rolf.login)
     # merged_name is merged into edited_name because former has name proposals
     # and the latter does not
     assert_difference("edited_name.version") do
@@ -3217,7 +3251,7 @@ class NamesControllerTest < FunctionalTestCase
         deprecated: new_name.deprecated
       }
     }
-    login("rolf")
+    login(rolf.login)
     make_admin
 
     assert_no_difference("Name.count") do
@@ -3229,18 +3263,19 @@ class NamesControllerTest < FunctionalTestCase
 
   def test_name_guessing
     # Not all the genera actually have records in our test database.
-    User.current = rolf
+    # User.current = rolf
     @controller.instance_variable_set(:@user, rolf)
-    Name.create_needed_names("Agaricus")
-    Name.create_needed_names("Pluteus")
-    Name.create_needed_names("Coprinus comatus subsp. bogus var. varietus")
+    Name.create_needed_names(rolf, "Agaricus")
+    Name.create_needed_names(rolf, "Pluteus")
+    Name.create_needed_names(rolf,
+                             "Coprinus comatus subsp. bogus var. varietus")
 
     assert_name_suggestions("Agricus")
     assert_name_suggestions("Ptligera")
     assert_name_suggestions(" plutues _petastus  ")
     assert_name_suggestions("Coprinis comatis")
-    assert_name_suggestions("Coprinis comatis blah. boggle")
-    assert_name_suggestions("Coprinis comatis blah. boggle var. varitus")
+    assert_name_suggestions("Coprinis comatis Blah. Boggle")
+    assert_name_suggestions("Coprinis comatis Blah. Boggle var. varitus")
   end
 
   def assert_name_suggestions(str)

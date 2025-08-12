@@ -69,7 +69,7 @@ module Admin
       def send_merge_request
         temporarily_set_locale(MO.default_locale) do
           QueuedEmail::Webmaster.create_email(
-            sender_email: @user.email,
+            @user,
             subject: "#{@model.name} Merge Request",
             content: merge_request_content
           )

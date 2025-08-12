@@ -55,6 +55,7 @@ module ApplicationController::Authentication
 
   # Save a lookup of the mrtg stats "user".
   MRTG_USER_ID = 164_054
+  private_constant(:MRTG_USER_ID)
 
   def try_user_autologin(user_from_session)
     if Rails.env.production? && request.remote_ip == "127.0.0.1"
@@ -141,7 +142,7 @@ module ApplicationController::Authentication
   #     link_to('Destroy', :action => :destroy_object)
   #   end %>
   #
-  def check_permission(obj)
+  def check_permission(obj) # rubocop:disable Naming/PredicateMethod
     in_admin_mode? || correct_user_for_object?(obj)
   end
   # helper_method :check_permission
@@ -151,15 +152,15 @@ module ApplicationController::Authentication
   end
 
   def owned_by_user?(obj)
-    obj.respond_to?(:user_id) && User.current_id == obj.user_id
+    obj.respond_to?(:user_id) && @user&.id == obj.user_id
   end
 
   def editable_by_user?(obj)
-    obj.try(&:can_edit?)
+    obj.try(:can_edit?, @user)
   end
 
   def obj_is_user?(obj)
-    (obj.is_a?(String) || obj.is_a?(Integer)) && obj.to_i == User.current_id
+    (obj.is_a?(String) || obj.is_a?(Integer)) && obj.to_i == @user.id
   end
 
   # Make sure user is logged in and has posted something -- i.e., not a spammer.
@@ -230,7 +231,7 @@ module ApplicationController::Authentication
 
   # Store User in session (id only).
   def session_user_set(user)
-    session[:user_id] = user ? user.id : nil
+    session[:user_id] = user&.id
     user
   end
 

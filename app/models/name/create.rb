@@ -4,9 +4,9 @@
 # Extending makes these module methods into class methods of Name.
 module Name::Create
   # Shorthand for calling Name.find_names with +fill_in_authors: true+.
-  def find_names_filling_in_authors(in_str, rank = nil,
+  def find_names_filling_in_authors(user, in_str, rank = nil,
                                     ignore_deprecated: false)
-    find_names(in_str, rank,
+    find_names(user, in_str, rank,
                ignore_deprecated: ignore_deprecated,
                fill_in_authors: true)
   end
@@ -25,7 +25,7 @@ module Name::Create
   #
   #  names = Name.find_names('Letharia vulpina')
   #
-  def find_names(in_str, rank = nil, ignore_deprecated: false,
+  def find_names(user, in_str, rank = nil, ignore_deprecated: false,
                  fill_in_authors: false)
     return [] unless (parse = parse_name(in_str))
 
@@ -39,7 +39,7 @@ module Name::Create
     return results if parse.author.blank?
     return [] if results.any? { |n| n.author.present? }
 
-    set_author(results, parse.author, fill_in_authors)
+    set_author(user, results, parse.author, fill_in_authors)
     results
   end
 
@@ -51,11 +51,13 @@ module Name::Create
     finder.to_a
   end
 
-  def set_author(names, author, fill_in_authors)
+  def set_author(user, names, author, fill_in_authors)
     return unless author.present? && fill_in_authors && names.length == 1
 
     names.first.change_author(author)
+    names.first.current_user = user
     names.first.save
+    names.first.update_name_version(user.id)
   end
 
   # Parses a String, creates a Name for it and all its ancestors (if any don't
@@ -64,37 +66,40 @@ module Name::Create
   # returned in that slot.  Check last slot especially.  Returns an Array of
   # Name instances, *UNSAVED*!!
   #
-  #   names = Name.find_or_create_name_and_parents('Letharia vulpina (L.) Hue')
+  #   names = Name.find_or_create_name_and_parents(
+  #             user, 'Letharia vulpina (L.) Hue')
   #   raise "Name is ambiguous!" if !names.last
   #   names.each do |name|
   #     name.save if name and name.new_record?
   #   end
   #
-  def find_or_create_name_and_parents(in_str)
+  def find_or_create_name_and_parents(user, in_str)
     return [] unless (parsed_name = parse_name(in_str))
 
-    find_or_create_parsed_name_and_parents(parsed_name)
+    find_or_create_parsed_name_and_parents(user, parsed_name)
   end
 
-  def find_or_create_parsed_name_and_parents(parsed_name)
+  def find_or_create_parsed_name_and_parents(user, parsed_name)
     result = []
     if names_for_unknown.member?(parsed_name.search_name.downcase)
       result << Name.unknown
     else
       if parsed_name.parent_name
-        result = find_or_create_name_and_parents(parsed_name.parent_name)
+        result = find_or_create_name_and_parents(user, parsed_name.parent_name)
       end
       deprecate = result.any? && result.last&.deprecated
-      result << find_or_create_parsed_name(parsed_name, deprecate)
+      result << find_or_create_parsed_name(user, parsed_name, deprecate)
     end
     result
   end
 
-  def find_or_create_parsed_name(parsed_name, deprecate)
+  def find_or_create_parsed_name(user, parsed_name, deprecate)
     result = nil
     matches = find_matching_names(parsed_name)
     if matches.empty?
-      result = Name.make_name(parsed_name.params)
+      params = parsed_name.params
+      params[:user] = user unless params.include?(:user)
+      result = Name.make_name(params)
       result.change_deprecated(true) if deprecate
     elsif matches.length == 1
       result = matches.first

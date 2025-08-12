@@ -3,11 +3,11 @@
 # special markup for the lightbox
 module LightboxHelper
   # this link needs to contain all the data for the lightbox image
-  def lightbox_link(lightbox_data)
+  def lightbox_link(user, lightbox_data)
     return unless lightbox_data
 
     icon = tag.i("", class: "glyphicon glyphicon-fullscreen")
-    caption = lightbox_caption_html(lightbox_data)
+    caption = lightbox_caption_html(user, lightbox_data)
 
     link_to(icon, lightbox_data[:url],
             class: "theater-btn",
@@ -15,13 +15,13 @@ module LightboxHelper
   end
 
   # everything in the caption
-  def lightbox_caption_html(lightbox_data)
+  def lightbox_caption_html(user, lightbox_data)
     return unless lightbox_data
 
     obs = lightbox_data[:obs]
     html = []
     if obs.is_a?(Observation)
-      html += lightbox_obs_caption(obs, lightbox_data[:identify])
+      html += lightbox_obs_caption(user, obs, lightbox_data[:identify])
     elsif lightbox_data[:image]&.notes.present?
       html << lightbox_image_caption(lightbox_data[:image])
     end
@@ -32,12 +32,12 @@ module LightboxHelper
 
   # observation part of the caption. returns an array of html strings (to join)
   # template local assign "caption" skips the obs relations (projects, etc)
-  def lightbox_obs_caption(obs, identify)
+  def lightbox_obs_caption(user, obs, identify)
     html = []
 
     html << caption_identify_ui(obs:) if identify
-    html << caption_obs_title(obs:, identify:)
-    html << observation_details_when_where_who(obs:)
+    html << caption_obs_title(user:, obs:, identify:)
+    html << observation_details_when_where_who(obs:, user:)
     html << caption_truncated_notes(obs:)
     html
   end
@@ -64,8 +64,8 @@ module LightboxHelper
     end
   end
 
-  # This is different from show_obs_title, it's more like the matrix_box title
-  def caption_obs_title(obs:, identify:)
+  # This is different from observation_show_title, more like matrix_box title
+  def caption_obs_title(user:, obs:, identify:)
     btn_style = identify ? "text-bold" : "btn btn-primary"
     text = if identify
              tag.span("#{:OBSERVATION.l}: ", class: "font-weight-normal")
@@ -73,7 +73,7 @@ module LightboxHelper
              ""
            end
     tag.h4(
-      class: "obs-what", id: "observation_what_#{obs.id}",
+      id: "observation_what_#{obs.id}", class: "obs-what",
       data: { controller: "section-update" }
     ) do
       [
@@ -81,7 +81,7 @@ module LightboxHelper
         link_to(obs.id, add_query_param(obs.show_link_args),
                 class: "#{btn_style} mr-3",
                 id: "caption_obs_link_#{obs.id}"),
-        obs.format_name.t.small_author
+        obs.user_format_name(user).t.small_author
       ].compact_blank!.safe_join(" ")
     end
   end

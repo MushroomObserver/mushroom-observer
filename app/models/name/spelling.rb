@@ -52,9 +52,9 @@ module Name::Spelling
     # within Cladonia, but tons of guides use Cladina anyway, so people like to
     # enter novel names under Cladina, not realizing those names already exist
     # under Cladonia. Returns the parent in question which is deprecated (Name).
-    def parent_if_parent_deprecated(str)
+    def parent_if_parent_deprecated(user, str)
       result = nil
-      names = find_or_create_name_and_parents(str)
+      names = find_or_create_name_and_parents(user, str)
       if names.any? && names.last&.deprecated
         names.reverse_each do |name|
           return name if name.id
@@ -67,8 +67,8 @@ module Name::Spelling
     # is a corresponding child under on of the synonymous parents.  Returns an
     # Array of candidates (Name's).
     # str = "Agaricus bogus var. namus"
-    def names_from_synonymous_genera(str, parent = nil)
-      parent ||= parent_if_parent_deprecated(str) # parent = <Agaricus>
+    def names_from_synonymous_genera(user, str, parent = nil)
+      parent ||= parent_if_parent_deprecated(user, str) # parent = <Agaricus>
       parse = parse_name(str)
       result = []
       if parent && parse

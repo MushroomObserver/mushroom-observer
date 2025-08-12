@@ -64,7 +64,7 @@ ACTIONS = {
     thanks: {},
     # Disable cop for legacy routes.
     # The routes are two very old pages that we might get rid of.
-    # rubocop:disable Naming/VariableNumber
+
     wrapup_2011: {},
     wrapup_2012: {}
     # rubocop:enable Naming/VariableNumber
@@ -265,11 +265,14 @@ MushroomObserver::Application.routes.draw do
   #     resources :products
   #   end
 
-  # Default page "/" is /observations ordered order_by: :rss_log
-  root "observations#index"
+  # Default page "/" is the login page to push back on spiders.
+  # Visiting this page as a logged in user now redirects to the /observations
+  # index page.
+  root "account/login#new"
 
   # Route /123 to /observations/123.
-  get ":id" => "observations#show", id: /\d+/, as: "permanent_observation"
+  get "obs/:id" => "observations#show", id: /\d+/, as: "permanent_observation"
+  get ":id" => "observations#show", id: /\d+/ # , as: "permanent_observation"
 
   # NOTE: The nesting below is necessary to get nice path helpers
   resource :account, only: [:new, :create], controller: "account"
@@ -443,6 +446,8 @@ MushroomObserver::Application.routes.draw do
   get("inat_imports/authorization_response",
       to: "inat_imports#authorization_response",
       as: "inat_import_authorization_response")
+  put("inat_imports/cancel/:id", to: "inat_imports#cancel",
+                                 as: "inat_import_cancel")
   resources :inat_imports, only: [:show, :new, :create] do
     resources :job_trackers, only: [:show], module: :inat_imports
   end
@@ -694,6 +699,9 @@ MushroomObserver::Application.routes.draw do
   match("/search/advanced(/:id)",
         to: "search#advanced", via: [:get, :post], id: /\d+/,
         as: "search_advanced")
+
+  # ----- Add dispatch: new -------------------------------------------------
+  post "add_dispatch", to: "add_dispatch#new"
 
   # ----- Sequences: standard actions ---------------------------------------
   resources :sequences, id: /\d+/

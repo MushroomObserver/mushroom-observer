@@ -1,14 +1,12 @@
 <%
 records = obs.herbarium_records
-can_add = in_admin_mode? || obs.can_edit? ||
+can_add = in_admin_mode? || obs.can_edit?(@user) ||
           @user && @user.curated_herbaria.any?
 %>
 <%=
   tag.div(
-    id: "observation_herbarium_records",
-    class: "obs-herbarium",
-    data: { controller: "section-update",
-            updated_by: "modal_herbarium_record" }
+    id: "observation_herbarium_records", class: "obs-herbarium",
+    data: { controller: "section-update" }
   ) do
 
     if records.any? && can_add
@@ -28,7 +26,7 @@ can_add = in_admin_mode? || obs.can_edit? ||
           records.map do |record|
             tag.li(id: "herbarium_record_#{record.id}") do
               concat(link_to(*herbarium_record_tab(record, obs)))
-              if record.can_edit? || in_admin_mode?
+              if record.can_edit?(@user) || in_admin_mode?
                 concat(
                   [
                     " [",

@@ -126,6 +126,7 @@ module Names
       user = name_tracker.user
       name = name_tracker.name
       QueuedEmail::Webmaster.create_email(
+        @user,
         sender_email: user.email,
         subject: "New Name Tracker with Template",
         content: "User: ##{user.id} / #{user.login} / #{user.email}\n" \

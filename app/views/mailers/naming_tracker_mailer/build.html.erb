@@ -6,7 +6,7 @@
 
   intro = :email_naming_for_tracker_intro.tp(obs: "xxx", name: "yyy")
   intro.gsub!(/xxx/, link_to(:observation.l, observation_url))
-  intro.gsub!(/yyy/, link_to(@naming.format_name.t, name_url))
+  intro.gsub!(/yyy/, link_to(@naming.user_format_name(@user).t, name_url))
 
   fields = ""
   fields += "*#{:Observer.l}:* xxx\n"

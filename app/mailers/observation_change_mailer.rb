@@ -6,7 +6,7 @@ class ObservationChangeMailer < ApplicationMailer
 
   def build(sender, receiver, obs, note, time)
     setup_user(receiver)
-    @title = observation_change_title(obs, note)
+    @title = observation_change_title(obs, note, receiver)
     @sender = sender
     @observation = obs
     @note = note
@@ -18,9 +18,10 @@ class ObservationChangeMailer < ApplicationMailer
   private
 
   # TODO: Translation keys really shouldn't be this long (32).
-  def observation_change_title(obs, note)
+  def observation_change_title(obs, note, receiver)
     if obs
-      :email_subject_observation_change.l(name: obs.unique_text_name) if obs
+      name = obs.user_unique_text_name(receiver)
+      :email_subject_observation_change.l(name:)
     else
       :email_subject_observation_destroy.l(name: note).t.html_to_ascii
     end

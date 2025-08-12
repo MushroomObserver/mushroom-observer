@@ -392,6 +392,9 @@ class Name < AbstractModel
   before_update :update_observation_cache
   after_update :notify_users
 
+  # Used by notify_users and notify_webmaster
+  attr_accessor :current_user
+
   # Used by name/_form_name.rhtml
   attr_accessor :misspelling
 
@@ -406,12 +409,12 @@ class Name < AbstractModel
 
   # Callbacks whenever new version is created.
   versioned_class.before_save do |ver|
-    ver.user_id = User.current_id || 0
-    if (ver.version != 1) &&
-       Name::Version.where(name_id: ver.name_id,
-                           user_id: ver.user_id).none?
-      UserStats.update_contribution(:add, :name_versions)
-    end
+    # ver.user_id = @current_user || 0
+    # if (ver.version != 1) &&
+    #    Name::Version.where(name_id: ver.name_id,
+    #                        user_id: ver.user_id).none?
+    #   UserStats.update_contribution(:add, :name_versions)
+    # end
   end
 
   # This is called before a name is created to let us populate things like

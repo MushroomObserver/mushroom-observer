@@ -197,13 +197,27 @@ root> systemctl enable solidqueue
 --------------------------------------------------------------------------------
 
 # If installing database locally:
-root> mysql -u root -p
+# As Linux root you can access the MySQL root account without a password. (May 14, 2025)
+root> mysql -u root
   CREATE DATABASE mo_production;
   CREATE USER 'mo'@'localhost' IDENTIFIED BY '$DB_PASSWORD';
   GRANT ALL PRIVILEGES ON mo_production.* TO 'mo'@'localhost' WITH GRANT OPTION;
   EXIT
 root> scp $SNAPSHOT_PATH/checkpoint.gz .
 root> gunzip -cd checkpoint.gz | mysql -u mo -p'$DB_PASSWORD' mo_production
+
+--------------------------------------------------------------------------------
+
+# Create cache database locally:
+# As Linux root you can access the MySQL root account without a password. (May 14, 2025)
+root> mysql -u root
+  CREATE DATABASE cache_production
+  # Get DB_PASSWORD from config/database.yml
+  CREATE USER 'mo'@'localhost' IDENTIFIED BY '$DB_PASSWORD';
+  GRANT ALL PRIVILEGES ON cache_production.* TO 'mo'@'localhost' WITH GRANT OPTION;
+  EXIT
+# Switch to mo user in the application root directory
+mo> rails db:migrate
 
 --------------------------------------------------------------------------------
 

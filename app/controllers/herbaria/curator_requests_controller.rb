@@ -30,7 +30,7 @@ module Herbaria
       return unless @herbarium
 
       QueuedEmail::Webmaster.create_email(
-        sender_email: @user.email,
+        @user,
         subject: "Herbarium Curator Request",
         content: "User: ##{@user.id}, #{@user.login}, #{@user.show_url}\n" \
                  "Herbarium: #{@herbarium.name}, #{@herbarium.show_url}\n" \

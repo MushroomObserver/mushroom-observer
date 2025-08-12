@@ -14,10 +14,9 @@ class QueuedEmail
       VerifyAccountMailer.build(to_user).deliver_now
     end
 
-    # AbstractModel#set_user_and_autolog will fill in user with User.current
-    # if we aren't careful.  This may be the simplest (and cheesiest) way to
-    # ensure user stays nil.  This should override the user column.
-    def user
+    # In this case we want current_user for
+    # AbstractModel#set_user_and_autolog to remain nil
+    def current_user
       nil
     end
   end

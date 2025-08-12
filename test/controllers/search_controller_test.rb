@@ -22,13 +22,30 @@ class SearchControllerTest < FunctionalTestCase
         }
       )
       assert_response(:redirect)
-      # Account for Observations being the home page
-      route = model == Observation ? "" : model.to_s.downcase.pluralize
+      route = model.to_s.downcase.pluralize
       assert_match(
         "http://test.host/#{route}?advanced_search=1",
         redirect_to_url
       )
     end
+  end
+
+  def test_advanced_provisional_name
+    login
+    get(:advanced,
+        params: {
+          search: {
+            search_name: 'Cortinarius "sp-IN34"',
+            search_user: "",
+            model: "name",
+            search_content: "",
+            search_where: ""
+          },
+          commit: "Search"
+        })
+    assert_response(:redirect)
+    query = QueryRecord.find(redirect_to_url.split("=")[-1].dealphabetize)
+    assert_match(names(:provisional_name).text_name, query.description)
   end
 
   def test_advanced_search_content_filters
@@ -64,7 +81,7 @@ class SearchControllerTest < FunctionalTestCase
     get(:advanced, params: params)
     query = QueryRecord.last.query
     q = QueryRecord.last.id.alphabetize
-    assert_redirected_to(root_path(advanced_search: 1, q:))
+    assert_redirected_to(observations_path(advanced_search: 1, q:))
     assert_true(query.num_results.positive?)
     assert_equal("", query.params[:has_images])
     assert_true(query.params[:has_specimen])

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Gather details for items in matrix-style ndex pages.
+# Gather details for items in matrix-style index pages.
 class MatrixBoxPresenter < BasePresenter
   attr_accessor \
     :id,         # id of the target or log object
@@ -16,7 +16,7 @@ class MatrixBoxPresenter < BasePresenter
     :detail,     # string with extra details
     :time        # when object or target was last modified
 
-  def initialize(object)
+  def initialize(_user, object)
     super
 
     case object
@@ -51,15 +51,8 @@ class MatrixBoxPresenter < BasePresenter
       self.location = target.location
     end
     self.time = rss_log.updated_at
-
     figure_out_rss_log_target_images(target)
-    return unless (temp = rss_log.detail)
-
-    temp = target.source_credit.tpl if target.respond_to?(:source_credit) &&
-                                       target.source_noteworthy?
-
-    # To avoid calling rss_log.detail twice
-    self.detail = temp
+    self.detail = rss_log.detail
   end
 
   # Grabs all the information needed for view from Image instance.
@@ -89,7 +82,8 @@ class MatrixBoxPresenter < BasePresenter
     self.type       = :observation
     self.when       = observation.when.web_date
     self.who        = observation.user if observation.user
-    self.name       = observation.format_name.t.break_name.small_author
+    self.name       = observation.user_format_name(observation.user).
+                      t.break_name.small_author
     self.what       = observation
     self.where      = observation.where
     self.location   = observation.location
@@ -120,13 +114,7 @@ class MatrixBoxPresenter < BasePresenter
   def user_to_presenter(user)
     self.id = user.id
     self.type = :user
-    # rubocop:disable Rails/OutputSafety
-    # The results of .t and web_date are guaranteed to be safe, and both
-    # user.contribution and observations.count are just numbers.
-    self.detail = "#{:list_users_joined.t}: #{user.created_at.web_date}<br/>
-                   #{:list_users_contribution.t}: #{user.contribution}<br/>
-                   #{:Observations.t}: #{user.observations.size}".html_safe
-    # rubocop:enable Rails/OutputSafety
+    self.detail = user
     self.name = user.unique_text_name
     self.what = user
     self.where = user.location.name if user.location
@@ -135,7 +123,7 @@ class MatrixBoxPresenter < BasePresenter
 
     # Not user.images because that's every image they've uploaded
     self.image_data = {
-      image: user.image_id,
+      image: user.image,
       # for matrix_box_carousels:
       # images: [user.image_id],
       image_link: user.show_link_args,

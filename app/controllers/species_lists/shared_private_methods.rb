@@ -52,7 +52,7 @@ module SpeciesLists
       failed = check_if_name_sorter_failed(sorter)
 
       # Okay, at this point we've apparently validated the new list of names.
-      # Save the OTHER changes to the species list, then let this other method
+      # Save the OTHER changes to the species_list, then let this other method
       # (construct_observations) create the observations.  This always succeeds,
       # so we can redirect to show_species_list (or chain to create location).
       if !failed && @dubious_where_reasons == []
@@ -114,7 +114,7 @@ module SpeciesLists
       sorter.add_approved_deprecated_names(params[:approved_deprecated_names])
       sorter.check_for_deprecated_checklist(params[:checklist_data])
       sorter.check_for_deprecated_names(@species_list.names) if @species_list.id
-      sorter.sort_names(list)
+      sorter.sort_names(@user, list)
       sorter
     end
 
@@ -280,12 +280,13 @@ module SpeciesLists
       end
     end
 
-    # Called by the actions which use create/edit_species_list form.  It grabs a
-    # list of names to list with checkboxes in the left-hand column of the form.
-    # By default it looks up a query stored in the session (you can for example
-    # "save" another species list "for later" for this purpose).  The result is
-    # an Array of names where the values are [display_name, name_id].  This
-    # is destined for the instance variable @checklist.
+    # Called by the actions which use create/edit_species_list form.
+    # It grabs a list of names to list with checkboxes in the
+    # left-hand column of the form.  By default it looks up a query
+    # stored in the session (you can for example "save" another
+    # species_list "for later" for this purpose).  The result is
+    # an Array of names where the values are [display_name, name_id].
+    # This is destined for the instance variable @checklist.
     def calc_checklist(query = nil)
       return unless query ||= query_from_session
 

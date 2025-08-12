@@ -180,7 +180,7 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index)
 
-    assert_displayed_title(:LOCATIONS.l)
+    assert_page_title(:LOCATIONS.l)
   end
 
   def test_index_with_non_default_sort
@@ -207,6 +207,18 @@ class LocationsControllerTest < FunctionalTestCase
     assert_match(location.display_name, @response.body)
   end
 
+  def test_index_species_list
+    sl = species_lists(:one_genus_three_species_list)
+    query = Query.lookup_and_save(:Location,
+                                  observation_query: { species_lists: [sl] })
+
+    login
+    get(:index, params: @controller.query_params(query))
+
+    location = sl.observations.joins(:location).first&.location
+    assert_match(location.display_name, @response.body)
+  end
+
   def test_index_advanced_search
     where = "California"
     query = Query.lookup_and_save(:Location, search_where: where)
@@ -222,7 +234,7 @@ class LocationsControllerTest < FunctionalTestCase
       "#content a:match('href', ?)", %r{#{locations_path}/\d+},
       { count: matches.count }, "Wrong number of Locations"
     )
-    assert_displayed_title(:LOCATIONS.l)
+    assert_page_title(:LOCATIONS.l)
     assert_displayed_filters("#{:query_search_where.l}: #{where}")
   end
 
@@ -249,7 +261,7 @@ class LocationsControllerTest < FunctionalTestCase
       "#content a:match('href', ?)", %r{#{locations_path}/\d+},
       { count: matches.count }, "Wrong number of Locations"
     )
-    assert_displayed_title(:LOCATIONS.l)
+    assert_page_title(:LOCATIONS.l)
     assert_displayed_filters("#{:query_pattern.l}: #{search_str}")
   end
 
@@ -268,7 +280,7 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { country: country })
 
-    assert_displayed_title(:LOCATIONS.l)
+    assert_page_title(:LOCATIONS.l)
     assert_displayed_filters("#{:query_regexp.l}: #{country}")
     assert_select(
       "#content a:match('href', ?)", %r{#{locations_path}/\d+},
@@ -283,7 +295,7 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { country: country })
 
-    assert_displayed_title(:LOCATIONS.l)
+    assert_page_title(:LOCATIONS.l)
     assert_displayed_filters("#{:query_regexp.l}: #{country}")
     assert_select(
       "#content a:match('href', ?)", /#{location_path(new_mexico)}/,
@@ -337,7 +349,7 @@ class LocationsControllerTest < FunctionalTestCase
     get(:index, params: { by_user: user.id })
 
     assert_template("index")
-    assert_displayed_title(:LOCATIONS.l)
+    assert_page_title(:LOCATIONS.l)
     assert_displayed_filters("#{:query_by_users.l}: #{user.name}")
     assert_select(
       "#content a:match('href', ?)", %r{#{locations_path}/\d+},
@@ -390,7 +402,7 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_editor: user.id })
 
-    assert_displayed_title(:LOCATIONS.l)
+    assert_page_title(:LOCATIONS.l)
     assert_displayed_filters("#{:query_by_editor.l}: #{user.name}")
     assert_select("a:match('href',?)", %r{^/locations/\d+},
                   { count: locs_edited_by_user.count },

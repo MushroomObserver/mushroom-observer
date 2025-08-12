@@ -336,7 +336,7 @@ class Query
   delegate :attribute_names, to: :class
 
   # Define has_attribute? here, it doesn't exist yet for ActiveModel.
-  def self.has_attribute?(key) # rubocop:disable Naming/PredicateName
+  def self.has_attribute?(key) # rubocop:disable Naming/PredicatePrefix
     attribute_types.key?(key)
   end
   delegate :has_attribute?, to: :class
@@ -366,6 +366,11 @@ class Query
     name.demodulize.singularize.constantize
   end
   delegate :model, to: :class
+
+  def self.type_tag
+    name.demodulize.singularize.underscore.to_sym
+  end
+  delegate :type_tag, to: :class
 
   # Can the current class be called as a subquery of the target Query class?
   def relatable?(target)

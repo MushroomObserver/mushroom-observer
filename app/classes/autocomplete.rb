@@ -15,7 +15,7 @@ class Autocomplete
   PUNCTUATION = '[ -\x2F\x3A-\x40\x5B-\x60\x7B-\x7F]'
 
   def limit
-    1000
+    5000
   end
 
   def self.subclass(type)
@@ -32,9 +32,7 @@ class Autocomplete
 
   # returns an array of { name:, id: } objects
   def matching_records
-    # unless 'whole', use the first letter of the string to define the matches
-    token = whole ? string : string[0]
-    self.matches = rough_matches(token) || [] # defined in type-subclass
+    self.matches = rough_matches(string) || [] # defined in type-subclass
     clean_matches
 
     unless all

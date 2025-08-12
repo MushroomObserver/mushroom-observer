@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 #  *NOTE*: There is some ambiguity between observations and names that makes
-#  this slightly confusing.  The end result of a species list is actually a
+#  this slightly confusing.  The end result of a species_list is actually a
 #  list of Observation's, not Name's.  However, creation and editing is
 #  generally accomplished via Name's alone (although see manage_species_lists
 #  for the one exception).  In the end all these Name's cause rudimentary
@@ -25,6 +25,7 @@ class SpeciesListsController < ApplicationController
   # INDEX
   #
   def index
+    set_project_ivar
     build_index_with_query
   end
 
@@ -70,6 +71,7 @@ class SpeciesListsController < ApplicationController
     return unless project
 
     query = create_query(:SpeciesList, projects: project)
+    @project = project
     [query, { always_index: true }]
   end
 
@@ -99,6 +101,7 @@ class SpeciesListsController < ApplicationController
     pass_query_params
     return unless (@species_list = find_species_list!)
 
+    set_project_ivar
     case params[:flow]
     when "next"
       redirect_to_next_object(:next, SpeciesList, params[:id]) and return
@@ -176,9 +179,8 @@ class SpeciesListsController < ApplicationController
   #
   ##############################################################################
 
-  def init_ivars_for_show
-    @canonical_url =
-      "#{MO.http_domain}/species_lists/#{@species_list.id}"
+  def init_ivars_for_show # rubocop:disable Metrics/AbcSize
+    @canonical_url = "#{MO.http_domain}/species_lists/#{@species_list.id}"
     @query = create_query(
       :Observation, order_by: :name, species_lists: @species_list
     )
@@ -188,10 +190,16 @@ class SpeciesListsController < ApplicationController
 
     @query.need_letters = true
     @pagination_data = letter_pagination_data(:letter, :page, 100)
-    @objects = @query.paginate(@pagination_data, include:
-                  [:user, :name, :location, { thumb_image: :image_votes }])
+    @objects = @query.paginate(
+      @pagination_data,
+      include: [:user, :name, :location, { thumb_image: :image_votes }]
+    )
     # Save a lookup in comments_for_object
     @comments = @species_list.comments&.sort_by(&:created_at)&.reverse
+    # Matches for the list-search autocompleter
+    @object_names = @species_list.observations.joins(:name).
+                    select(Name[:text_name], Name[:id]).distinct.
+                    order(Name[:text_name])
   end
 
   ##############################################################################

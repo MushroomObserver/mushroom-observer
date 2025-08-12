@@ -129,7 +129,9 @@ class UserStats < ApplicationRecord
     # including records we don't count
     # 2) pass in field name, when it's not ::model
     def update_contribution(mode, obj, user_id = nil, num = 1)
+      user_id ||= obj.current_user&.id if obj.respond_to?(:current_user)
       if obj.is_a?(ActiveRecord::Base)
+        get_applicable_field(obj)
         return unless user_id || obj.respond_to?(:user_id)
 
         field = get_applicable_field(obj)

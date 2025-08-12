@@ -12,7 +12,7 @@ moves.reject!(&:is_misspelling?)
   <div class="form-group">
     <% merges.each do |desc| %>
       <%= radio_with_label(form: f, field: :target, value: desc.id,
-                               label: description_title(desc),
+                               label: description_title(@user, desc),
                                checked: merges.length == 1 &&
                                         moves.length == 0) %>
     <% end

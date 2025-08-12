@@ -84,7 +84,7 @@ module FooterHelper
 
   # Renders the little footer at the bottom of show_object pages.
   #
-  #   <%= show_object_footer(@name) %>
+  #   <%= show_object_footer(@user, @name) %>
   #
   #   # Non-versioned object:
   #   <p>
@@ -115,18 +115,19 @@ module FooterHelper
   #     </span>
   #   </p>
   #
-  def show_object_footer(obj, versions = [])
+  def show_object_footer(user, obj, versions = [])
     num_versions = versions.length
 
     html = if num_versions.positive? && obj.version < num_versions
              html_for_old_version_of_versioned_object(obj, num_versions)
            else
-             html_for_latest_version_or_non_versioned_object(obj, versions)
+             html_for_latest_version_or_non_versioned_object(obj, versions,
+                                                             user)
            end
 
     html.concat(link_to_rss_log(obj))
     html = html.safe_join(safe_br)
-    tag.p(html, class: "small footer-view-stats mt-3")
+    content_padded(class: "small footer-view-stats") { html }
   end
 
   ###############################################################
@@ -149,7 +150,7 @@ module FooterHelper
     end
   end
 
-  def html_for_latest_version_or_non_versioned_object(obj, versions)
+  def html_for_latest_version_or_non_versioned_object(obj, versions, user)
     html = if versions.length.positive?
              html_for_latest_version(obj, versions)
            else
@@ -158,8 +159,8 @@ module FooterHelper
 
     html << html_num_views(obj) if obj.respond_to?(:num_views) && obj.last_view
 
-    if User.current && obj.respond_to?(:last_viewed_by)
-      html << html_last_viewed_by(obj)
+    if user && obj.respond_to?(:last_viewed_by)
+      html << html_last_viewed_by(obj, user)
     end
 
     html
@@ -214,8 +215,8 @@ module FooterHelper
   end
 
   # only for obs
-  def html_last_viewed_by(obj)
-    time = obj.old_last_viewed_by(User.current)&.web_time || :footer_never.l
+  def html_last_viewed_by(obj, user)
+    time = obj.old_last_viewed_by(user)&.web_time || :footer_never.l
     :footer_last_you_viewed.t(date: time)
   end
 end

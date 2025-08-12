@@ -1,5 +1,5 @@
 <%
-@container = :full
+container_class(:full)
 add_page_title(:profile_title.t)
 add_context_nav(account_profile_edit_tabs)
 %>
@@ -11,7 +11,7 @@ add_context_nav(account_profile_edit_tabs)
 
   <div class="col-sm-5 text-center">
     <% if @user.image %>
-      <%= interactive_image(@user.image_id, votes: false) %>
+      <%= interactive_image(@user, @user.image_id, votes: false) %>
       <%= put_button(name: :profile_image_remove.t,
                      path: account_profile_remove_image_path,
                      data: { confirm: :are_you_sure.l }) %>

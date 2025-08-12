@@ -1,0 +1,54 @@
+<%
+has_banner = content_for?(:banner_image)
+add_interest_icons = (content_for?(:interest_icons))
+title_cols = "col-sm-8 col-lg-7"
+project_subtitle = content_for?(:project_location) ||
+                   content_for?(:project_date_range)
+# If project show with banner, print a blank title (title already in banner).
+is_project = controller.controller_name == "projects" && action_name == "show"
+title = (is_project && has_banner) ? "" : yield(:title)
+%>
+
+<%= tag.div(class: "row") do %>
+  <%# Page title. Indexes have none — `rubric` in top_nav has model name. %>
+  <% if action_name != "index" %>
+    <%= tag.div(class: yield(:left_columns), id: "title_bar") do %>
+      <%= tag.nav(
+        class: "show_title_nav d-flex justify-content-between pl-3"
+      ) do
+        concat(tag.h1(title, class: "h3 page-title mt-3 mb-4", id: "title"))
+        concat(
+          tag.ul(class: "nav navbar-nav object_edit h4") do
+            concat(yield(:edit_icons))
+          end
+        )
+      end %>
+      <% if !has_banner && project_subtitle %>
+        <%= tag.div(class: "pl-3 mb-3") do
+          [
+            tag.div(yield(:project_location), class: "project_location"),
+            tag.div(yield(:project_date_range), class: "project_date_range")
+          ].safe_join
+        end %>
+      <% end %>
+      <%= yield(:owner_naming) %>
+    <% end %>
+  <% end %>
+
+  <%# Show pages (except projects): %>
+  <%# Interest and edit icons, prev/index/next links %>
+  <% if action_name == "show" # && !has_banner %>
+    <%= tag.div(
+      class: class_names(yield(:right_columns), "hidden-print text-right")
+    ) do
+      tag.nav(class: "show_object_nav d-flex justify-content-between pr-3") do
+        [
+          tag.ul(class: "nav navbar-flex interest-eyes h4 my-0") do
+            concat(yield(:interest_icons))
+          end,
+          yield(:prev_next_object)
+        ].safe_join
+      end
+    end %>
+  <% end %>
+<% end %>
