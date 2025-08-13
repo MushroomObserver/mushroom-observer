@@ -178,8 +178,8 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
 
     login
     visit("/")
-    fill_in("search_pattern", with: correctable_pattern)
-    page.select("Observations", from: :search_type)
+    fill_in("pattern_search_pattern", with: correctable_pattern)
+    page.select("Observations", from: :pattern_search_type)
     within("#pattern_search_form") { click_button("Search") }
 
     assert_selector("#flash_notices",
@@ -194,8 +194,8 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     corrected_pattern = "Agaricus campestris"
     obs = observations(:agaricus_campestris_obs)
 
-    fill_in("search_pattern", with: corrected_pattern)
-    page.select("Observations", from: :search_type)
+    fill_in("pattern_search_pattern", with: corrected_pattern)
+    page.select("Observations", from: :pattern_search_type)
     within("#pattern_search_form") { click_button("Search") }
 
     assert_no_selector("#content div.alert-warning")
