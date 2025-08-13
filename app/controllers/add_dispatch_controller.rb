@@ -2,9 +2,9 @@
 
 # Enables "Add" button on ProjectsController#show and
 # SpeciesListsController#show. Dispatches to either the
-# ObservationsController#new, FieldSlipsController#new, or
-# FieldSlipsController#new depending on whether field slip code is
-# provided and whether it already exists.
+# ObservationsController#new, or FieldSlipsController#new,
+# depending on whether field slip code is provided and
+# whether it already exists.
 class AddDispatchController < ApplicationController
   before_action :login_required
   before_action :pass_query_params

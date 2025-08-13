@@ -41,4 +41,27 @@ class QueryRecord < ApplicationRecord
 
     @last_cleanup = Time.zone.now
   end
+
+  # Checks and returns the value of a param in the saved QueryRecord
+  def self.check_param(param, q_param)
+    query_record = QueryRecord.safe_find(q_param&.dealphabetize)
+    return nil unless query_record
+
+    query_record.query.params[param]
+  end
+
+  # Checks query model. Send model as a symbol like :NameDescription
+  def self.model?(model, q_param)
+    query_record = QueryRecord.safe_find(q_param&.dealphabetize)
+    return false unless query_record
+
+    query_record.query.model.name == model.to_s
+  end
+
+  # copied from abstract model, which this does not inherit from
+  def self.safe_find(id)
+    find(id)
+  rescue ActiveRecord::RecordNotFound
+    nil
+  end
 end

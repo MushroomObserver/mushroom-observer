@@ -517,9 +517,9 @@ class LocationsController < ApplicationController
   def modal_title
     case action_name
     when "new", "create"
-      :create_location_title.t
+      new_page_title(:create_object, :LOCATION)
     when "edit", "update"
-      :edit_location_title.t(name: @location.display_name)
+      edit_page_title(@location.display_name, @location)
     end
   end
 

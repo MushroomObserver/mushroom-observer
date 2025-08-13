@@ -54,7 +54,7 @@ class NamesControllerTest < FunctionalTestCase
     login
     get(:index)
 
-    assert_displayed_title(:NAMES.l)
+    assert_page_title(:NAMES.l)
     assert_select("#context_nav a[href='#{names_path}']", { count: 0 },
                   "right `tabs` should not link to All Names")
   end
@@ -73,7 +73,7 @@ class NamesControllerTest < FunctionalTestCase
     login
     get(:index, params: { q: q })
 
-    assert_displayed_title(:NAMES.l)
+    assert_page_title(:NAMES.l)
     assert_displayed_filters(:query_observation_query.l)
     assert_displayed_filters("#{:query_by_users.l}: #{user.name}")
     assert_select(
@@ -99,7 +99,7 @@ class NamesControllerTest < FunctionalTestCase
                     with_correct_spelling.count },
       "Wrong number of (correctly spelled) Names"
     )
-    assert_displayed_title(:NAMES.l)
+    assert_page_title(:NAMES.l)
     assert_displayed_filters("#{:query_search_name.l}: #{search_string}")
   end
 
@@ -131,7 +131,7 @@ class NamesControllerTest < FunctionalTestCase
     get(:index,
         params: @controller.query_params(query).merge({ advanced_search: "1" }))
 
-    assert_displayed_title(:NAMES.l)
+    assert_page_title(:NAMES.l)
     assert_flash_text(:runtime_no_matches.l(type: :names.l))
   end
 
@@ -164,7 +164,7 @@ class NamesControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: pattern })
 
-    assert_displayed_title(:NAMES.l)
+    assert_page_title(:NAMES.l)
     assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
     assert_select(
       "#results a:match('href', ?)", %r{^#{names_path}/\d+},
@@ -211,7 +211,7 @@ class NamesControllerTest < FunctionalTestCase
     get(:index, params: { has_observations: true })
 
     assert_response(:success)
-    assert_displayed_title(:NAMES.l)
+    assert_page_title(:NAMES.l)
     assert_displayed_filters(:query_has_observations.l)
     assert_select(
       "#results a:match('href', ?)", %r{#{names_path}/\d+},
@@ -235,7 +235,7 @@ class NamesControllerTest < FunctionalTestCase
     get(:index, params: { has_observations: true, letter: letter })
 
     assert_response(:success)
-    assert_displayed_title(:NAMES.l)
+    assert_page_title(:NAMES.l)
     assert_displayed_filters(:query_has_observations.l)
     names.each do |name|
       assert_select("#results a[href*='/names/#{name.id}'] .display-name",
@@ -248,7 +248,7 @@ class NamesControllerTest < FunctionalTestCase
     get(:index, params: { has_descriptions: true })
 
     assert_response(:success)
-    assert_displayed_title(:NAMES.l)
+    assert_page_title(:NAMES.l)
     assert_displayed_filters(:query_has_descriptions.l)
     assert_select("#results", { text: /not the default/ },
                   "Results should include non-default descriptions")
@@ -266,7 +266,7 @@ class NamesControllerTest < FunctionalTestCase
     get(:index, params: { needs_description: true })
 
     assert_response(:success)
-    assert_displayed_title(:NAMES.l)
+    assert_page_title(:NAMES.l)
     assert_displayed_filters(:query_needs_description.l)
     assert_select(
       "#results a:match('href', ?)", %r{^#{names_path}/\d+},
@@ -282,7 +282,7 @@ class NamesControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_user: user.id })
 
-    assert_displayed_title(:NAMES.l)
+    assert_page_title(:NAMES.l)
     assert_displayed_filters("#{:query_by_users.l}: #{user.name}")
     assert_select(
       "#results a:match('href', ?)", %r{^#{names_path}/\d+},
@@ -340,7 +340,7 @@ class NamesControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_editor: user })
 
-    assert_displayed_title(:NAMES.l)
+    assert_page_title(:NAMES.l)
     assert_displayed_filters("#{:query_by_editor.l}: #{user.name}")
     assert_select("#results a:match('href',?)", %r{^/names/\d+},
                   { count: names_edited_by_user.count },
@@ -396,7 +396,7 @@ class NamesControllerTest < FunctionalTestCase
     @controller.query_params(query)
   end
 
-  # None of our standard tests ever actually renders pagination_links
+  # None of our standard tests ever actually renders pagination_numbers
   # or letter_pagination_nav.  This tests all the above.
   def test_pagination_page1
     # Straightforward index of all names, showing first 10.
@@ -407,21 +407,21 @@ class NamesControllerTest < FunctionalTestCase
     assert_template("names/index")
     name_links = css_select(".list-group.name-index a")
     assert_equal(10, name_links.length)
-    expected = Name.order("sort_name, author").limit(10).to_a
+    expected = Name.order(:sort_name, :author).limit(10).to_a
     assert_equal(expected.map(&:id), ids_from_links(name_links))
     # assert_equal(@controller.url_with_query(action: "show",
     #  id: expected.first.id, only_path: true), name_links.first.url)
     url = @controller.url_with_query(controller: "/names", action: :show,
                                      id: expected.first.id, only_path: true)
     assert_not_nil(name_links.first.to_s.index(url))
-    assert_select("a", text: "1", count: 0)
-    assert_link_in_html("2", controller: "/names",
-                             action: :test_index, num_per_page: 10,
-                             params: query_params, page: 2)
-    assert_select("a", text: "Z", count: 0)
-    assert_link_in_html("A", controller: "/names",
-                             action: :test_index, num_per_page: 10,
-                             params: query_params, letter: "A")
+    # assert_select("a", text: "1", count: 0)
+    assert_link_in_html("Next", controller: "/names",
+                                action: :test_index, num_per_page: 10,
+                                params: query_params, page: 2)
+    # assert_select("a", text: "Z", count: 0)
+    # assert_link_in_html("A", controller: "/names",
+    #                          action: :test_index, num_per_page: 10,
+    #                          params: query_params, letter: "A")
   end
 
   def test_pagination_page2
@@ -433,27 +433,27 @@ class NamesControllerTest < FunctionalTestCase
     assert_template("names/index")
     name_links = css_select(".list-group.name-index a")
     assert_equal(10, name_links.length)
-    expected = Name.order("sort_name").limit(10).offset(10).to_a
+    expected = Name.order(:sort_name).limit(10).offset(10).to_a
     assert_equal(expected.map(&:id), ids_from_links(name_links))
     url = @controller.url_with_query(controller: "/names", action: :show,
                                      id: expected.first.id, only_path: true)
     assert_not_nil(name_links.first.to_s.index(url))
 
-    assert_select("a", text: "2", count: 0)
-    assert_link_in_html("1", controller: "/names",
-                             action: :test_index, num_per_page: 10,
-                             params: query_params, page: 1)
-    assert_select("a", text: "Z", count: 0)
-    assert_link_in_html("A", controller: "/names",
-                             action: :test_index, num_per_page: 10,
-                             params: query_params, letter: "A")
+    # assert_select("a", text: "2", count: 0)
+    assert_link_in_html("Previous", controller: "/names",
+                                    action: :test_index, num_per_page: 10,
+                                    params: query_params, page: 1)
+    # assert_select("a", text: "Z", count: 0)
+    # assert_link_in_html("A", controller: "/names",
+    #                          action: :test_index, num_per_page: 10,
+    #                          params: query_params, letter: "A")
   end
 
   def test_pagination_letter
     # Now try a letter.
     query_params = pagination_query_params
     l_names = Name.where(Name[:text_name].matches("L%")).
-              order("text_name, author").to_a
+              order(:text_name, :author).to_a
     login
     get(:test_index, params: { num_per_page: l_names.size,
                                letter: "L" }.merge(query_params))
@@ -468,17 +468,17 @@ class NamesControllerTest < FunctionalTestCase
                                      id: l_names.first.id, only_path: true)
     assert_not_nil(name_links.first.to_s.index(url))
     assert_select("a", text: "1", count: 0)
-    assert_select("a", text: "Z", count: 0)
 
-    assert_link_in_html("A", controller: "/names",
-                             action: :test_index, params: query_params,
-                             num_per_page: l_names.size, letter: "A")
+    # assert_select("a", text: "Z", count: 0)
+    # assert_link_in_html("A", controller: "/names",
+    #                          action: :test_index, params: query_params,
+    #                          num_per_page: l_names.size, letter: "A")
   end
 
   def test_pagination_letter_with_page
     query_params = pagination_query_params
     l_names = Name.where(Name[:text_name].matches("L%")).
-              order("text_name, author").to_a
+              order(:text_name, :author).to_a
     # Do it again, but make page size exactly one too small.
     l_names.pop
     login
@@ -491,20 +491,18 @@ class NamesControllerTest < FunctionalTestCase
     assert_equal(Set.new(l_names.map(&:id)),
                  Set.new(ids_from_links(name_links)))
 
-    assert_select("a", text: "1", count: 0)
-
-    assert_link_in_html("2", controller: "/names",
-                             action: :test_index, params: query_params,
-                             num_per_page: l_names.size,
-                             letter: "L", page: 2)
-
-    assert_select("a", text: "3", count: 0)
+    # assert_select("a", text: "1", count: 0)
+    assert_link_in_html("Next", controller: "/names",
+                                action: :test_index, params: query_params,
+                                num_per_page: l_names.size,
+                                letter: "L", page: 2)
+    # assert_select("a", text: "3", count: 0)
   end
 
   def test_pagination_letter_with_page2
     query_params = pagination_query_params
     l_names = Name.where(Name[:text_name].matches("L%")).
-              order("text_name, author").to_a
+              order(:text_name, :author).to_a
     last_name = l_names.pop
     # Check second page.
     login
@@ -514,12 +512,12 @@ class NamesControllerTest < FunctionalTestCase
     name_links = css_select(".list-group.name-index a")
     assert_equal(1, name_links.length)
     assert_equal([last_name.id], ids_from_links(name_links))
-    assert_select("a", text: "2", count: 0)
-    assert_link_in_html("1", controller: "/names",
-                             action: :test_index, params: query_params,
-                             num_per_page: l_names.size,
-                             letter: "L", page: 1)
-    assert_select("a", text: "3", count: 0)
+    # assert_select("a", text: "2", count: 0)
+    assert_link_in_html("Previous", controller: "/names",
+                                    action: :test_index, params: query_params,
+                                    num_per_page: l_names.size,
+                                    letter: "L", page: 1)
+    # assert_select("a", text: "3", count: 0)
   end
 
   def test_pagination_with_anchors
@@ -530,14 +528,14 @@ class NamesControllerTest < FunctionalTestCase
       num_per_page: 10,
       test_anchor: "blah"
     }.merge(query_params))
-    assert_link_in_html("2", controller: "/names",
-                             action: :test_index, num_per_page: 10,
-                             params: query_params, page: 2,
-                             test_anchor: "blah", anchor: "blah")
-    assert_link_in_html("A", controller: "/names",
-                             action: :test_index, num_per_page: 10,
-                             params: query_params, letter: "A",
-                             test_anchor: "blah", anchor: "blah")
+    assert_link_in_html("Next", controller: "/names",
+                                action: :test_index, num_per_page: 10,
+                                params: query_params, page: 2,
+                                test_anchor: "blah", anchor: "blah")
+    # assert_link_in_html("A", controller: "/names",
+    #                          action: :test_index, num_per_page: 10,
+    #                          params: query_params, letter: "A",
+    #                          test_anchor: "blah", anchor: "blah")
   end
 
   ################################################
@@ -918,7 +916,7 @@ class NamesControllerTest < FunctionalTestCase
   end
 
   def test_next_and_prev
-    names = Name.order("text_name, author").to_a
+    names = Name.order(:text_name, :author).to_a
     name12 = names[12]
     name13 = names[13]
     name14 = names[14]

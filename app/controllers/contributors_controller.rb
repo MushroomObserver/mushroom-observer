@@ -18,7 +18,7 @@ class ContributorsController < ApplicationController
   private
 
   def default_sort_order
-    ::Query::Users.default_order # :contribution
+    :contribution # ::Query::Users.default_order is :name
   end
 
   def unfiltered_index_opts
@@ -35,6 +35,7 @@ class ContributorsController < ApplicationController
 
   def index_display_opts(opts, _query)
     { matrix: true,
-      include: [:image] }.merge(opts)
+      letters: true,
+      include: [:image, :location] }.merge(opts)
   end
 end

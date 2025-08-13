@@ -102,7 +102,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     get(:show, params: { id: term.id })
 
     assert_response(:success)
-    assert_head_title(:show_glossary_term_title.l(name: term.name))
+    assert_head_title(term.name)
 
     ESSENTIAL_ATTRIBUTES.each do |attr|
       assert_select("body", /#{term.send(attr)}/,
@@ -140,7 +140,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     get(:new)
 
     assert_response(:success)
-    assert_head_title(:create_glossary_term_title.l)
+    assert_page_title(/Create Glossary Term/)
 
     ESSENTIAL_ATTRIBUTES.each do |attr|
       assert_select("form [name='glossary_term[#{attr}]']", { count: 1 },
@@ -157,7 +157,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   end
 
   # ***** edit *****
-  def test_edit
+  def test_edit_glossary_term
     term = glossary_terms(:conic_glossary_term)
 
     login
@@ -166,7 +166,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     post(:edit, params: { id: term.id })
 
     assert_response(:success)
-    assert_head_title(:edit_glossary_term_title.l(name: term.name))
+    assert_head_title("Edit Glossary Term #{term.id}: #{term.name}")
 
     assert_select(
       "form [name='glossary_term[name]']", { count: 1 },
@@ -190,7 +190,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     )
   end
 
-  def test_edit_no_login
+  def test_edit_glossary_term_no_login
     term = glossary_terms(:conic_glossary_term)
 
     post(:edit, params: { id: term.id })
@@ -198,7 +198,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
                     "Unlogged-in user should not be able to edit term")
   end
 
-  def test_edit_in_admin_mode
+  def test_edit_glossary_term_in_admin_mode
     term = glossary_terms(:conic_glossary_term)
 
     login
@@ -212,7 +212,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     )
   end
 
-  def test_edit_locked_term_by_non_admin
+  def test_edit_locked_glossary_term_by_non_admin
     term = glossary_terms(:locked_glossary_term)
 
     login
@@ -225,7 +225,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   # ---------- Test actions that Modify data: (create, update, destroy, etc.) --
 
   # ***** create *****
-  def test_create
+  def test_create_glossary_term
     user = login
     params = create_term_params
 
@@ -241,7 +241,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
-  def test_create_upload_image
+  def test_create_glossary_term_upload_image
     params = term_with_image_params
     login
 
@@ -252,7 +252,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_equal(Image.last, term.thumb_image)
   end
 
-  def test_create_no_name
+  def test_create_glossary_term_no_name
     params = create_term_params
     params[:glossary_term][:name] = ""
     login
@@ -264,7 +264,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
-  def test_create_no_description_or_image
+  def test_create_glossary_term_no_description_or_image
     params = create_term_params
     params[:glossary_term][:description] = ""
     login
@@ -275,7 +275,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_flash(/#{:glossary_error_description_or_image.t}/)
   end
 
-  def test_create_duplicate_name
+  def test_create_glossary_term_duplicate_name
     existing_name = GlossaryTerm.reorder(created_at: :asc).first.name
     params = create_term_params
     params[:glossary_term][:name] = existing_name
@@ -290,7 +290,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     )
   end
 
-  def test_create_invalid_name_with_image
+  def test_create_glossary_term_invalid_name_with_image
     params = term_with_image_params
     params[:glossary_term][:name] = ""
     login
@@ -303,7 +303,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_flash(/#{:glossary_error_name_blank.t}/)
   end
 
-  def test_create_image_save_failure
+  def test_create_glossary_term_image_save_failure
     login
     # Simulate image.save failure.
     image = images(:disconnected_coprinus_comatus_image)
@@ -315,7 +315,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_empty(GlossaryTerm.last.images)
   end
 
-  def test_create_process_image_failure
+  def test_create_glossary_term_process_image_failure
     login
     image = images(:disconnected_coprinus_comatus_image)
 
@@ -330,7 +330,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   end
 
   # ***** update *****
-  def test_update
+  def test_update_glossary_term
     term = glossary_terms(:conic_glossary_term)
     creator = term.user
     user = mary
@@ -349,7 +349,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_redirected_to(glossary_term_path(term.id))
   end
 
-  def test_update_lock_by_admin
+  def test_update_glossary_term_lock_by_admin
     term = glossary_terms(:conic_glossary_term)
     assert_not(term.locked?, "Test needs an unlocked GlossaryTerm fixture")
 
@@ -362,7 +362,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_equal(true, term.reload.locked)
   end
 
-  def test_update_lock_by_non_admin
+  def test_update_glossary_term_lock_by_non_admin
     term = glossary_terms(:conic_glossary_term)
     assert_not(term.locked?, "Test needs an unlocked GlossaryTerm fixture")
 
@@ -374,7 +374,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_equal(false, term.reload.locked)
   end
 
-  def test_update_unlock_by_admin
+  def test_update_glossary_term_unlock_by_admin
     term = glossary_terms(:locked_glossary_term)
 
     login
@@ -386,7 +386,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_equal(false, term.reload.locked)
   end
 
-  def test_update_no_name
+  def test_update_glossary_term_no_name
     params = changes_to_conic.merge
     params[:glossary_term][:name] = ""
     login
@@ -395,7 +395,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_flash(/#{:glossary_error_name_blank.t}/)
   end
 
-  def test_update_no_description_or_image
+  def test_update_glossary_term_no_description_or_image
     params = changes_to_conic.merge
     params[:glossary_term][:description] = ""
     login
@@ -404,7 +404,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_flash(/#{:glossary_error_description_or_image.t}/)
   end
 
-  def test_update_duplicate_name
+  def test_update_glossary_term_duplicate_name
     existing_name = GlossaryTerm.where.not(name: "Conic").first.name
     params = changes_to_conic.merge
     params[:glossary_term][:name] = existing_name
@@ -418,7 +418,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   end
 
   # ***** destroy *****
-  def test_destroy_term_lacking_images
+  def test_destroy_glossary_term_lacking_images
     term = glossary_terms(:no_images_glossary_term)
 
     login
@@ -430,7 +430,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_not(GlossaryTerm.exists?(term.id), "Failed to destroy GlossaryTerm")
   end
 
-  def test_destroy_term_has_images
+  def test_destroy_glossary_term_has_images
     term = glossary_terms(:unused_thumb_and_used_image_glossary_term)
     unused_image = term.thumb_image
     used_image = term.other_images.first
@@ -453,7 +453,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
            "Image #{used_image.id} which was used elsewhere was destroyed")
   end
 
-  def test_destroy_no_login
+  def test_destroy_glossary_term_no_login
     term = GlossaryTerm.reorder(created_at: :asc).first
     login(users(:zero_user).login)
     delete(:destroy, params: { id: term.id })
@@ -464,7 +464,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
            "Non-admin should not be able to destroy glossary term")
   end
 
-  def test_destroy_fails
+  def test_destroy_glossary_term_fails
     term = glossary_terms(:no_images_glossary_term)
 
     login

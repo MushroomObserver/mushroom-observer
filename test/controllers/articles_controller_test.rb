@@ -47,7 +47,7 @@ class ArticlesControllerTest < FunctionalTestCase
   def test_index_links_to_create
     login(users(:article_writer).login)
     get(:index)
-    assert_select("a", { text: :create_article_title.l },
+    assert_select("a", { text: "Create Article" },
                   "Privileged user should get link to Create Article")
   end
 
@@ -63,8 +63,8 @@ class ArticlesControllerTest < FunctionalTestCase
     # Prove privileged user gets extra links
     login(users(:article_writer).login)
     get(:show, params: { id: article.id })
-    assert_select("a", text: :create_article_title.l)
-    assert_select("a", text: :EDIT.l)
+    assert_select("a", text: "New Article")
+    assert_select("a", text: :edit_object.t(type: :article))
     assert_select(".destroy_article_link_#{article.id}", true,
                   "Page is missing Destroy button")
 
@@ -74,12 +74,12 @@ class ArticlesControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
-  # Partly duplicates the title_and_tabset_helper_test `test_context_nav_links`.
+  # Partly duplicates title_and_tabset_helper_test `test_context_nav_dropdown`.
   # But we want to test a `destroy_button` tab too.
   # That method calls `add_query_param` and others unavailable to helper tests
-  def test_context_nav_links_helper
+  def test_context_nav_dropdown_helper
     article = Article.last
-    links = [[:create_article_title.t, new_article_path,
+    links = [["Create Article", new_article_path,
               { class: "new_article_link" }],
              [:EDIT.t, edit_article_path(article.id),
               { class: "edit_article_link" }],
@@ -88,7 +88,7 @@ class ArticlesControllerTest < FunctionalTestCase
     tabs = @controller.helpers.context_nav_links(links)
 
     tab1 = @controller.helpers.link_to(
-      :create_article_title.t, new_article_path, { class: "new_article_link" }
+      "Create Article", new_article_path, { class: "new_article_link" }
     )
     tab2 = @controller.helpers.link_to(
       :EDIT.t, edit_article_path(article.id), { class: "edit_article_link" }

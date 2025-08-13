@@ -14,7 +14,7 @@ class ObservationsHelperTest < ActionView::TestCase
       name: current_name, user:, when: Time.current, where: location
     )
     assert_match(
-      link_to(current_name.display_name_brief_authors.t,
+      link_to(current_name.display_name_brief_authors.t.small_author,
               name_path(id: current_name.id),
               class: "obs_consensus_naming_link_#{current_name.id}"),
       obs_title_consensus_name_link(name: current_name, user:),

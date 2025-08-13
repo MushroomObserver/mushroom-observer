@@ -53,12 +53,14 @@ junk:
 
 # Need third for testing votes
 # Also is the default user for Observation fixture set.
+# And Dick is a iNat superimporter
 dick:
   <<: *DEFAULTS
   name: Tricky Dick
   email_general_question: false
   verified: 2006-03-02 21:14:00
   user_groups: all_users, bolete_users, bolete_admins, albion_users, albion_admins, dick_only, falmouth_2023_09_users, super_importers_users
+  inat_username: null
 
 lone_wolf:
   <<: *DEFAULTS

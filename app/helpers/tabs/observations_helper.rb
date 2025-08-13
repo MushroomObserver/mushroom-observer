@@ -138,7 +138,8 @@ module Tabs
         map_observations_tab(query),
         *observations_related_query_tabs(query), # multiple links
         observations_add_to_list_tab(query),
-        observations_download_as_csv_tab(query)
+        observations_download_as_csv_tab(query),
+        new_inat_import_tab
       ]
       links.reject(&:empty?)
     end
@@ -292,14 +293,6 @@ module Tabs
 
     def obs_details_links(obs)
       print_labels_button(obs)
-    end
-
-    # Buttons in "Details" panel header
-    def obs_change_links(obs)
-      return unless check_permission(obs)
-
-      [edit_button(target: obs, icon: :edit),
-       destroy_button(target: obs, icon: :delete)].safe_join(" | ")
     end
 
     def edit_observation_tab(obs)

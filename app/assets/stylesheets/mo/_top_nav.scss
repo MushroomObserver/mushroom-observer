@@ -2,18 +2,33 @@
 // top nav bar
 // --------------------------------------------------
 
-.navbar-default {
+.navbar-nav {
+  li {
+    form.button_to {
+      display: block;
+      padding-top: 10px;
+      padding-bottom: 10px;
+    }
+  }
+}
+
+.navbar-flex {
+  @extend .d-flex, .justify-content-between, .align-items-center
+}
+
+.navbar-default, #top_nav {
   border-width: 1px;
   border-style: solid;
   border-radius: 0;
   border-top-right-radius: 0px;
   border-bottom-right-radius: 0px;
   border-right-width: 0px;
+  border-left-width: 0px;
   padding: 0px;
 
   a,
   a:visited {
-    color: $navbar-default-link-color;
+    color: $navbar-default-color;
     background-color: $navbar-default-link-active-bg;
   }
 
@@ -26,21 +41,50 @@
     margin-right: 2px;
   }
 
-  .navbar-nav > li > a,
-  .navbar-nav > li > a.dropdown-toggle {
-    color: $navbar-default-color !important;
-    background-color: $navbar-default-bg !important;
-    padding-left: 8px;
-    padding-right: 8px;
+  .navbar_right {
+    .dropdown > a {
+      color: $navbar-default-color !important;
+      background-color: $navbar-default-bg !important;
+      padding-left: 8px;
+      padding-right: 8px;
+      font-weight: bold !important;
 
-    &:hover {
-      color: $navbar-default-link-hover-color !important;
-      background-color: $navbar-default-link-hover-bg !important;
+      &:hover {
+        color: $navbar-default-link-hover-color !important;
+        background-color: $navbar-default-link-hover-bg !important;
+      }
+    }
+
+    > ul.navbar-right > li {
+      @extend .ml-4;
     }
   }
 
-  .dropdown-menu li button.btn-link {
-    padding: 3px 20px;
+  .dropdown-menu {
+    li {
+      button.btn-link {
+        padding: 3px 20px;
+      }
+
+      // extend styling of links to "button_to" elements
+      form.button_to {
+        display: block;
+        padding: 3px 20px;
+        clear: both;
+        font-weight: 400;
+        line-height: 1.428571429;
+        white-space: nowrap;
+
+        // ultra specificity annoying here
+        button[type=submit]:not(.btn):not(.text-danger) {
+          color: $navbar-default-color !important;
+
+          &:hover {
+            color: $navbar-default-link-hover-color !important;
+          }
+        }
+      }
+    }
   }
 
   // The button_to form, not the button, needs to display: block
@@ -49,4 +93,56 @@
       display: block;
     }
   }
+}
+
+// If sorter is on the right:
+// @media screen and (min-width: $screen-sm-min) {
+//   .sorter {
+//     .dropdown-menu {
+//       right: 0;
+//       left: auto;
+//     }
+//   }
+// }
+
+@media screen and (max-width: $screen-sm-max) {
+  #top_nav {
+    h4 {
+      font-size: 14px;
+    }
+    .navbar-form {
+      padding-right: 0;
+    }
+    #sorter button {
+      max-width: 60px;
+      overflow: hidden;
+    }
+  }
+
+  #header {
+    .pagination_letters {
+      display: none !important;
+    }
+  }
+
+  .paginate input[type="text"] {
+    min-width: 36px;
+  }
+}
+
+// Very small - get rid of button borders in top nav
+@media screen and (max-width: $screen-xs-min) {
+  #top_nav {
+    .top_nav_button {
+      border-color: transparent;
+      background-color: transparent;
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+  }
+}
+
+#index_bar {
+  @extend .d-flex, .justify-content-between, .flex-wrap, .border-bottom;
+  border-bottom-color: $navbar-default-border;
 }

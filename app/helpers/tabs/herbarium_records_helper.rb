@@ -10,8 +10,7 @@ module Tabs
       links = []
       if obs.present?
         links = [
-          object_return_tab(obs),
-          new_herbarium_record_tab(obs)
+          object_return_tab(obs)
         ]
       end
       links << new_herbarium_tab
@@ -29,20 +28,8 @@ module Tabs
       ].freeze
     end
 
-    def herbarium_record_show_tabs(h_r:)
-      links = []
-      if in_admin_mode? || h_r.can_edit?
-        links.push(
-          edit_herbarium_record_tab(h_r),
-          destroy_herbarium_record_tab(h_r)
-        )
-      end
-      links << nonpersonal_herbaria_index_tab
-      links
-    end
-
-    def herbarium_record_form_new_title
-      :create_herbarium_record_title.l
+    def herbarium_record_show_tabs
+      [nonpersonal_herbaria_index_tab]
     end
 
     def herbarium_record_form_new_tabs(obs:)
@@ -51,12 +38,6 @@ module Tabs
         new_herbarium_tab,
         nonpersonal_herbaria_index_tab
       ]
-    end
-
-    def herbarium_record_form_edit_title(h_r:)
-      :edit_herbarium_record_title.l(
-        herbarium_label: h_r.herbarium_label
-      )
     end
 
     def herbarium_record_form_edit_tabs(back:, back_object:)
@@ -95,11 +76,6 @@ module Tabs
         add_query_param(edit_herbarium_record_path(h_r.id, back: back)),
         html_options: { icon: :edit }
       ).tab
-    end
-
-    def destroy_herbarium_record_tab(h_r)
-      [:destroy_object.t(type: :herbarium_record), h_r,
-       { button: :destroy, icon: :delete }]
     end
 
     def herbarium_records_index_return_tab

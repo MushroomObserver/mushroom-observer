@@ -1,40 +1,44 @@
 <%
-if @project
-  add_project_banner(@project)
-else
-  add_index_title(@query)
-  add_context_nav(field_slips_index_tabs)
-  project_title = @query&.params_cache&.dig(:project)&.title || ""
-end
-@container = :wide
+add_project_banner(@project) if @project
+add_index_title(@query)
+add_context_nav(field_slips_index_tabs)
+add_pagination(@pagination_data)
+container_class(:wide)
+project_title = @query&.params_cache&.dig(:project)&.title || ""
 %>
 
 <% if notice %>
   <%= tag.p(notice, class: "alert alert-success") %>
 <% end %>
 
-<% if @project %>
-  <% if @project.field_slip_prefix %>
-    <div class="mt-3">
-      <b><%= :show_project_field_slip_prefix.t %>:</b> <%= @project.field_slip_prefix %>
-      <% if @project.member?(@user) %>
-        <%= link_to(:show_project_field_slip_create.t,
-                    new_project_field_slip_path(project_id: @project.id),
-                    { class: "btn btn-default" }) %>
+<%= tag.div(class: "content-block") do %>
+  <% if @project %>
+    <% if @project.field_slip_prefix %>
+      <div class="mt-3">
+        <b><%= :show_project_field_slip_prefix.t %>:</b> <%= @project.field_slip_prefix %>
+        <% if @project.member?(@user) %>
+          <%= link_to(:show_project_field_slip_create.t,
+                      new_project_field_slip_path(project_id: @project.id),
+                      { class: "btn btn-default" }) %>
+        <% end %>
+      </div>
+    <% end %>
+  <% else %>
+    <%= form_with(
+      method: :get, url: field_slips_path, class: "form-inline"
+    ) do |form| %>
+      <%= tag.div(class: "d-flex gap-2") do %>
+        <%= autocompleter_field(form:, field: :project_name, type: :project,
+                                hidden_name: :project, inline: true,
+                                value: project_title,
+                                label: "#{:field_slip_filter_by.l}:") %>
+        <%= submit_button(form:, button: "Filter") %>
       <% end %>
-    </div>
-  <% end %>
-<% else %>
-  <%= form_with(method: :get, url: field_slips_path) do |form| %>
-    <%= autocompleter_field(form:, field: :project_name, type: :project,
-                            hidden_name: :project, inline: true,
-                            value: project_title,
-                            label: "#{:field_slip_filter_by.l}:") %>
-    <%= submit_button(form:, button: "Filter") %>
+    <% end %>
   <% end %>
 <% end %>
 
-<%= pagination_nav(@pagination_data) do %>
+<%= paginated_results do %>
   <div class="list-group">
     <%= render(partial: "field_slips/object", collection: @objects) %>
   </div>

@@ -1,5 +1,5 @@
 <%= tag.div(id: "results") do
-  pagination_nav(@pagination_data) do
+  paginated_results do
     matrix_table do
       @subset.each do |row|
         concat(matrix_box(id: row[0]) do

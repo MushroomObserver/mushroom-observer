@@ -1,17 +1,15 @@
 <%
 add_page_title(:glossary_term_index_title.t)
-add_context_nav(glossary_term_index_tabs) if User.current
-@container = :text_image
+add_pagination(@pagination_data)
+container_class(:text_image)
 %>
 
-<%=
-  tag.div(
-    link_to(:glossary_term_index_documentation.tp,
-    "https://github.com/MushroomObserver/mushroom-observer/blob/main/doc/glossary.md"),
-    class: "container-text"
-  )
-%>
-<%= pagination_nav(@pagination_data) do %>
+<%= content_for(:filters) do
+  link_to(:glossary_term_index_documentation.tp,
+          "https://github.com/MushroomObserver/mushroom-observer/blob/main/doc/glossary.md")
+end %>
+
+<%= paginated_results do %>
   <div class="list-group">
     <%= render(partial: "glossary_terms/object", collection: @objects) %>
   </div>

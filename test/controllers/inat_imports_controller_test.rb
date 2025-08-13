@@ -285,6 +285,21 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_flash_error
   end
 
+  def test_import_all_anothers_observations
+    user = users(:dick) # Dick is a iNat superimporter
+    params = { inat_username: "anything", inat_ids: nil,
+               consent: 1, all: 1 }
+
+    login(user.login)
+    assert_no_difference("Observation.count",
+                         "iNat obss imported without consent") do
+      post(:create, params: params)
+    end
+
+    assert_flash_text(:inat_importing_all_anothers.t)
+    assert_form_action(action: :create)
+  end
+
   def test_import_authorized
     user = users(:rolf)
     assert_blank(user.inat_username,
@@ -316,6 +331,16 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_redirected_to(
       inat_import_path(inat_import, params: { tracker_id: tracker.id })
     )
+  end
+
+  def test_import_all
+    user = users(:mary)
+    params = { inat_username: user.inat_username, all: 1, consent: 1 }
+
+    login(user.login)
+    post(:create, params: params)
+
+    assert_redirected_to(INAT_AUTHORIZATION_URL, allow_other_host: true)
   end
 
   def test_inat_username_unchanged_if_authorization_denied

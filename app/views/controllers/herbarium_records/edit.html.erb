@@ -1,8 +1,13 @@
 <%
-@container = :wide
-add_page_title(herbarium_record_form_edit_title(h_r: @herbarium_record))
-add_context_nav(herbarium_record_form_edit_tabs(back: @back,
-                                              back_object: @back_object))
+container_class(:wide)
+add_edit_title(
+  [@herbarium_record.format_name.t,
+   @herbarium_record.herbarium_label].safe_join(" "),
+  @herbarium_record
+)
+add_context_nav(
+  herbarium_record_form_edit_tabs(back: @back, back_object: @back_object)
+)
 %>
 
 <div class="row">

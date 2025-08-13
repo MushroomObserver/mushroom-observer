@@ -3,11 +3,6 @@
 # html used in tabsets
 module Tabs
   module NamesHelper
-    # assemble links for "tabset" for show_name
-    def name_show_tabs(name:)
-      [edit_name_tab(name), new_name_tab].reject(&:empty?)
-    end
-
     def edit_name_tab(name)
       InternalLink::Model.new(:show_name_edit_name.l, name,
                               add_query_param(edit_name_path(name.id)),

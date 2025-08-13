@@ -166,12 +166,19 @@ module Tabs
 
     def species_list_create_tab
       InternalLink.new(
-        :species_list_create_title.t, add_query_param(new_species_list_path)
+        :create_object.t(type: :SPECIES_LIST),
+        add_query_param(new_species_list_path)
       ).tab
     end
 
     def species_list_download_tabs(list:)
       [object_return_tab(list)]
+    end
+
+    def species_lists_for_user_tab(user)
+      InternalLink.new(
+        :app_your_lists.l, species_lists_path(by_user: user.id)
+      ).tab
     end
 
     def species_lists_index_sorts(query: nil)

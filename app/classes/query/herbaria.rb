@@ -16,6 +16,6 @@ class Query::Herbaria < Query
   end
 
   def self.default_order
-    :name
+    :records
   end
 end
