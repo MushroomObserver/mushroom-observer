@@ -29,13 +29,44 @@ module Searchable
     end
 
     def search_params
-      attributes = search_subclass.attribute_types
-      attributes.delete_if do |_key, attr_def|
+      simple_atts = search_attribute_types.reject do |_key, attr_def|
         attr_def.nested_under.present?
       end
-      attributes.keys
+      simple_atts.keys + nesting_atts_hashes
     end
 
+    # Rails strong parameters take hashes for the nested parameters.
+    # Detects the param names that have nesting, and calls `nested_params`
+    # to create a hash of nested params for that param. Check this how-to:
+    # https://dev.to/christiankastner/rails-strong-params-and-accepting-nested-parameters-5bgd
+    def nesting_atts_hashes
+      nesting_atts = Set.new
+      search_attribute_types.each_value do |attr_def|
+        if (nesting_att = attr_def.nested_under).present?
+          nesting_atts.add(nesting_att)
+        end
+      end
+      return [] if nesting_atts.blank?
+
+      nesting_atts.map { |attr_name| nested_params(attr_name) }
+    end
+
+    # Returns the hash for each nested param. Hash key is :"#{param}_attributes"
+    def nested_params(attr_name)
+      nested_atts = search_attribute_types.select do |_key, attr_def|
+        attr_def.nested_under == attr_name
+      end
+      return [] if nested_atts.blank?
+
+      { "#{attr_name}_attributes": nested_atts.keys }
+    end
+
+    def search_attribute_types
+      search_subclass.attribute_types
+    end
+
+    # Gets the search form class relevant to each controller, if the controller
+    # is namespaced like Observations::SearchController
     def search_subclass
       Search.const_get(self.class.module_parent.name)
     end
