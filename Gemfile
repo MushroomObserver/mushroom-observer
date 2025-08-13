@@ -27,7 +27,7 @@ group :rails do
   gem("actionview", "~> 7.2.2.1")
   gem("activejob", "~> 7.2.2.1")
   gem("activemodel", "~> 7.2.2.1")
-  gem("activerecord", "~> 7.2.2.1")
+  gem("activerecord", "~> 7.2.2.2")
   # gem("activestorage", "~> 7.2.2.1")
   gem("activesupport", "~> 7.2.2.1")
   gem("bundler")
