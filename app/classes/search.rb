@@ -65,7 +65,8 @@ class Search
   def self.assign_array_attribute(attr_name, values)
     case values[0]
     when Class
-      search_attr(attr_name, :multiple_value_autocompleter, values[0]&.type_tag)
+      search_attr(attr_name, :multiple_value_autocompleter,
+                  validates: values[0]&.type_tag)
     else
       search_attr(attr_name, :text)
     end
@@ -75,11 +76,23 @@ class Search
   def self.assign_hash_attribute(attr_name, values)
     case values.first[0]
     when :lookup
-      search_attr(attr_name, :multiple_value_autocompleter, :name)
+      search_attr(:names, :lookup_inputs)
+      search_attr(:lookup, :multiple_value_autocompleter,
+                  validates: :name, nested_under: :names)
+      search_attr(:include_synonyms, :boolean_select, nested_under: :names)
+      search_attr(:include_subtaxa, :boolean_select, nested_under: :names)
+      search_attr(:include_immediate_subtaxa, :boolean_select,
+                  nested_under: :names)
+      search_attr(:exclude_original_names, :boolean_select,
+                  nested_under: :names)
     when :boolean
       search_attr(attr_name, :checkbox)
     when :north
-      search_attr(attr_name, :box_input)
+      search_attr(:in_box, :box_inputs)
+      search_attr(:north, :text, nested_under: :in_box)
+      search_attr(:south, :text, nested_under: :in_box)
+      search_attr(:east, :text, nested_under: :in_box)
+      search_attr(:west, :text, nested_under: :in_box)
     when :string # literally this symbol, not "any string".
       search_attr(attr_name, :no_either_only_select)
     else

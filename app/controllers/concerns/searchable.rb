@@ -24,8 +24,20 @@ module Searchable
   # Rubocop is incorrect here. This is a concern, not a class.
   # rubocop:disable Metrics/BlockLength
   included do
+    def permitted_search_params
+      params.permit(search_params)
+    end
+
+    def search_params
+      attributes = search_subclass.attribute_types
+      attributes.delete_if do |_key, attr_def|
+        attr_def.nested_under.present?
+      end
+      attributes.keys
+    end
+
     def search_subclass
-      PatternSearch.const_get(@filter.class.search_type.capitalize)
+      Search.const_get(self.class.module_parent.name)
     end
 
     def formatted_pattern_search_string

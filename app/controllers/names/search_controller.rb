@@ -70,26 +70,22 @@ module Names
         { pattern: { shown: [:pattern], collapsed: [] },
           quality: {
             shown: [[:has_observations, :deprecated]],
-            collapsed: [[:has_author, :author],
-                        [:has_citation, :citation]]
+            collapsed: [[:has_author, :author_has],
+                        [:has_citation, :citation_has]]
           },
-          date: { shown: [:created, :modified], collapsed: [] } },
+          date: { shown: [:created_at, :updated_at], collapsed: [] } },
         { scope: {
             shown: [[:has_synonyms, :include_synonyms],
-                    [:include_subtaxa, :include_misspellings]],
+                    [:include_subtaxa, :misspellings]],
             collapsed: [:rank, :lichen]
           },
           detail: {
-            shown: [[:has_classification, :classification]],
-            collapsed: [[:has_notes, :notes],
-                        [:has_comments, :comments],
-                        :has_description]
+            shown: [[:has_classification, :classification_has]],
+            collapsed: [[:has_notes, :notes_has],
+                        [:has_comments, :comments_has],
+                        :has_default_description]
           } }
       ].freeze
-    end
-
-    def permitted_search_params
-      params.permit(Search::Names.attribute_names)
     end
   end
 end

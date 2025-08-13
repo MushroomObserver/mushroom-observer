@@ -91,9 +91,5 @@ module Observations
           } }
       ].freeze
     end
-
-    def permitted_search_params
-      params.permit(Search::Observations.attribute_names)
-    end
   end
 end
