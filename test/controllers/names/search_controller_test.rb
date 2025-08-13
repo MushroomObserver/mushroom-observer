@@ -7,14 +7,9 @@ require("test_helper")
 # ------------------------------------------------------------
 module Names
   class SearchControllerTest < FunctionalTestCase
-    def test_existing_name_pattern
+    def test_get_form
       login("rolf")
-      # may need to do this in an integration test
-      # @request.session["pattern"] = "something"
-      # @request.session["search_type"] = "name"
       get(:new)
-      # assert_select("input[type=text]#name_search_pattern",
-      #               text: "something", count: 1)
     end
   end
 end

@@ -21,45 +21,13 @@ module Observations
 
       set_up_form_field_groupings # in case we need to re-render the form
       validate_search_instance_from_form_params
-      save_query
+      save_search_query
 
       redirect_to(controller: "/observations", action: :index,
                   q: @query.record.id.alphabetize)
     end
 
     private
-
-    def clear_form?
-      if params[:commit] == :CLEAR.l
-        clear_relevant_query
-        redirect_to(new_observations_search_path) and return true
-      end
-      false
-    end
-
-    def new_search_instance_from_query
-      @search = if (@query = find_query(:Observation)).params.present?
-                  Search::Observations.new(@query.params)
-                else
-                  Search::Observations.new
-                end
-    end
-
-    def validate_search_instance_from_form_params
-      @search = Search::Observations.new(permitted_search_params)
-      redirect_to(new_observations_search_path) && return if @search.invalid?
-    end
-
-    def clear_relevant_query
-      return if (@query = find_query(:Observation)).params.blank?
-
-      # Save blank so that we can keep it in the search bar in subsequent pages.
-      @query = Query.lookup_and_save(:Observation)
-    end
-
-    def save_query
-      Query.lookup_and_save(:Observation, **@search)
-    end
 
     # This is the list of fields that are displayed in the search form. In the
     # template, each hash is interpreted as a column, and each key is a

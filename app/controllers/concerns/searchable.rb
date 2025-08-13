@@ -24,6 +24,50 @@ module Searchable
   # Rubocop is incorrect here. This is a concern, not a class.
   # rubocop:disable Metrics/BlockLength
   included do
+    private
+
+    def clear_form?
+      if params[:commit] == :CLEAR.l
+        clear_relevant_query
+        redirect_to(action: :new) and return true
+      end
+      false
+    end
+
+    # should be new_query_instance. clear_form should update the current query.
+    def new_search_instance_from_query
+      @search = if (@query = find_query(query_model))&.params.present?
+                  search_subclass.new(@query.params)
+                else
+                  search_subclass.new
+                end
+    end
+
+    def validate_search_instance_from_form_params
+      @search = search_subclass.new(permitted_search_params)
+      redirect_to(action: :new) && return if @search.invalid?
+    end
+
+    def clear_relevant_query
+      return if (@query = find_query(query_model))&.params.blank?
+
+      # Save so that we can keep it in the search bar in subsequent pages.
+      @query = Query.lookup_and_save(query_model)
+    end
+
+    def save_search_query
+      Query.lookup_and_save(query_model, **@search)
+    end
+
+    # Returns the :Symbol used by Query for the type of query.
+    def query_model
+      self.class.module_parent.name.singularize.to_sym
+    end
+
+    #####################################################
+    #
+    #  Form input: PARAMS
+    #
     def permitted_search_params
       params.permit(search_params)
     end
