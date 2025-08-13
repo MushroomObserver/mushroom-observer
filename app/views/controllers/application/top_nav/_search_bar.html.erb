@@ -37,12 +37,15 @@ adv_search = icon_link_to(:app_advanced_search.l, search_advanced_path,
                   class: "navbar-flex flex-grow-1 navbar-form px-0 gap-2",
                   id: "pattern_search_form") do |f| %>
 
-      <%= fields_for(:search) do |f_s| %>
+      <%= fields_for(:pattern_search) do |f_s| %>
         <%= tag.div(class: form_group_class) do %>
           <%= link_icon(:search, class: "form-control-feedback hidden-xs") %>
-          <%= f_s.text_field(:pattern, { value: session[:pattern],
-                                        class: "form-control flex-grow-1",
-                                        placeholder: :app_find.t }) %>
+          <%= f_s.text_field(
+                :pattern,
+                value: session[:pattern],
+                class: "form-control flex-grow-1",
+                placeholder: :app_find.t
+              ) %>
         <% end %><!--.form-group-->
 
         <%= tag.div(class: "form-group text-nowrap mb-0") do %>
