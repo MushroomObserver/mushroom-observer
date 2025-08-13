@@ -1,8 +1,8 @@
 <%
-add_page_title(:title_for_observation_search.l)
+add_page_title(:OBSERVATIONS.l)
 @container = :wide
 %>
 
-<%= render(partial: "shared/filters_form",
-           locals: { local: true, filter: @filter,
+<%= render(partial: "shared/search_form",
+           locals: { local: true, search: @search,
                      field_columns: @field_columns } ) %>

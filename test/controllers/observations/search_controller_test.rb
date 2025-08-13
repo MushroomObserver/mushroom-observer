@@ -3,9 +3,9 @@
 require("test_helper")
 
 # ------------------------------------------------------------
-#  Names search
+#  Observation search
 # ------------------------------------------------------------
-module Names
+module Observations
   class SearchControllerTest < FunctionalTestCase
     def test_get_form
       login("rolf")

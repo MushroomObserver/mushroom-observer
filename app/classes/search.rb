@@ -109,11 +109,13 @@ class Search
 
     klass.constantize
   end
+  delegate :query_class, to: :class
 
   # Returns the type of search (table_name) the subclass filter is for.
   def self.search_type
     name.pluralize.underscore.to_sym
   end
+  delegate :search_type, to: :class
 
   # `attribute_types` is a core Rails method, but it unexpectedly returns
   # string keys, and they are not accessible with symbols.

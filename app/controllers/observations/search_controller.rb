@@ -12,14 +12,14 @@ module Observations
     before_action :login_required
 
     def new
-      set_up_form_field_groupings
+      # set_up_form_field_groupings
       new_search_instance_from_query
     end
 
     def create
       return if clear_form?
 
-      set_up_form_field_groupings # in case we need to re-render the form
+      # set_up_form_field_groupings # in case we need to re-render the form
       validate_search_instance_from_form_params
       save_search_query
 
