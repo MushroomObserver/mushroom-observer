@@ -73,6 +73,7 @@ class Search
   end
 
   # The hash is very flexible. This covers current uses:
+  # https://jamescrisp.org/2020/10/12/rails-activemodel-with-nested-objects-and-validation/
   def self.assign_hash_attribute(attr_name, values)
     case values.first[0]
     when :lookup
@@ -97,6 +98,26 @@ class Search
       search_attr(attr_name, :no_either_only_select)
     else
       search_attr(attr_name, :text)
+    end
+  end
+
+  # Prepare for nested params
+  # def initialize(*params)
+  #   self.names = []
+  #   self.in_box = []
+  #   super
+  # end
+
+  def names_attributes=(attributes)
+    param_class = "#{name}::NamesParam".constantize
+    attributes.each_value do |names_params|
+      @names.push(param_class.new(names_params))
+    end
+  end
+
+  def in_box_attributes=(attributes)
+    attributes.each_value do |names_params|
+      @names.push(Search::InBoxParam.new(names_params))
     end
   end
 

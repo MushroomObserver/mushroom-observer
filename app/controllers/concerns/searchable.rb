@@ -56,7 +56,9 @@ module Searchable
     end
 
     def save_search_query
-      Query.lookup_and_save(query_model, **@search)
+      @query = Query.lookup_and_save(
+        query_model, **@search.attributes.deep_symbolize_keys.compact_blank
+      )
     end
 
     # Returns the :Symbol used by Query for the type of query.

@@ -7,9 +7,30 @@ require("test_helper")
 # ------------------------------------------------------------
 module Names
   class SearchControllerTest < FunctionalTestCase
-    def test_get_form
-      login("rolf")
+    def test_new_names_search
+      login
       get(:new)
+    end
+
+    def test_create_names_search
+      login
+      params = {
+        pattern: "Agaricus campestris",
+        misspellings: :either
+      }
+      post(:create, params:)
+    end
+
+    def test_create_names_search_nested
+      login
+      params = {
+        names: {
+          lookup: "Agaricus campestris",
+          include_synonyms: true
+        },
+        misspellings: :either
+      }
+      post(:create, params:)
     end
   end
 end
