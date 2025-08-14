@@ -14,8 +14,8 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
     obs = observations(:boletus_edulis_obs)
 
     login
-    fill_in("search_pattern", with: obs.name.text_name)
-    page.select("Observations", from: :search_type)
+    fill_in("pattern_search_pattern", with: obs.name.text_name)
+    page.select("Observations", from: :pattern_search_type)
     within("#pattern_search_form") { click_button("Search") }
     click_link("Show Locations")
     click_link("Map Locations")
@@ -37,8 +37,8 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
     login(user)
 
     # search for Observations with same name as obs
-    fill_in("search_pattern", with: obs.name.text_name)
-    page.select("Observations", from: :search_type)
+    fill_in("pattern_search_pattern", with: obs.name.text_name)
+    page.select("Observations", from: :pattern_search_type)
     within("#pattern_search_form") { click_button("Search") }
 
     assert_match(:OBSERVATIONS.l, page.title, "Wrong page")
@@ -83,8 +83,8 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
                  "Region filter should be off")
 
     # Repeat the search
-    fill_in("search_pattern", with: obs.name.text_name)
-    page.select("Observations", from: :search_type)
+    fill_in("pattern_search_pattern", with: obs.name.text_name)
+    page.select("Observations", from: :pattern_search_type)
     within("#pattern_search_form") { click_button("Search") }
 
     # page.find("#index_bar").assert_no_text(:filtered.t)
@@ -126,8 +126,8 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
 
     # Prove that :has_specimen filter excludes voucherless Observations
     # Repeat the search
-    fill_in("search_pattern", with: obs.name.text_name)
-    page.select("Observations", from: :search_type)
+    fill_in("pattern_search_pattern", with: obs.name.text_name)
+    page.select("Observations", from: :pattern_search_type)
 
     within("#pattern_search_form") { click_button("Search") }
     # page.find("#index_bar").assert_text(:filtered.t)

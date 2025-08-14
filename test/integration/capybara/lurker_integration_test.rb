@@ -178,14 +178,14 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     login
 
     # Search for a name.  (Only one.)
-    fill_in("search_pattern", with: "Coprinus comatus")
-    select("Names", from: "search_type")
+    fill_in("pattern_search_pattern", with: "Coprinus comatus")
+    select("Names", from: "pattern_search_type")
     within("#pattern_search_form") { click_button("Search") }
     assert_match(names(:coprinus_comatus).text_name,
                  page.title, "Wrong page")
 
     # Search for observations of that name.  (Only one.)
-    select("Observations", from: "search_type")
+    select("Observations", from: "pattern_search_type")
     within("#pattern_search_form") { click_button("Search") }
     assert_match(/#{observations(:coprinus_comatus_obs).id}/,
                  page.title, "Wrong page")
@@ -193,7 +193,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     # Image pattern searches temporarily disabled for performamce
     # 2021-09-12 JDC
     # Search for images of the same thing.  (Still only one.)
-    # select("Images", from: "search_type")
+    # select("Images", from: "pattern_search_type")
     # within("#pattern_search_form") { click_button("Search") }
     # assert_match(
     #   %r{^/image/show_image/#{images(:connected_coprinus_comatus_image).id}},
@@ -201,15 +201,15 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     # )
 
     # There should be no locations of that name, though.
-    select("Locations", from: "search_type")
+    select("Locations", from: "pattern_search_type")
     within("#pattern_search_form") { click_button("Search") }
     assert_match("Locations", page.title, "Wrong page")
     assert_selector("div.alert", text: /no.*found/i)
     refute_selector("#results a[href]")
 
     # This should give us just about all the locations.
-    fill_in("search_pattern", with: "california OR canada")
-    select("Locations", from: "search_type")
+    fill_in("pattern_search_pattern", with: "california OR canada")
+    select("Locations", from: "pattern_search_type")
     within("#pattern_search_form") { click_button("Search") }
     # assert_selector("#results a[href]")
     labels = find_all("#results a[href] .location-postal").map(&:text)
@@ -244,8 +244,8 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     login
 
     # Search for a name.  (More than one.)
-    fill_in("search_pattern", with: "Fungi")
-    select("Observations", from: "search_type")
+    fill_in("pattern_search_pattern", with: "Fungi")
+    select("Observations", from: "pattern_search_type")
     within("#pattern_search_form") { click_button("Search") }
 
     obs = observations(:detailed_unknown_obs).id.to_s

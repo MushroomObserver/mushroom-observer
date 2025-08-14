@@ -89,8 +89,8 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
 
     login
     visit("/")
-    fill_in("search_pattern", with: near_miss_pattern)
-    page.select("Names", from: :search_type)
+    fill_in("pattern_search_pattern", with: near_miss_pattern)
+    page.select("Names", from: :pattern_search_type)
     within("#pattern_search_form") { click_button("Search") }
 
     assert_selector("#content div.alert-warning",
@@ -98,8 +98,8 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
 
     corrected_pattern = "Agaricus"
 
-    fill_in("search_pattern", with: corrected_pattern)
-    page.select("Names", from: :search_type)
+    fill_in("pattern_search_pattern", with: corrected_pattern)
+    page.select("Names", from: :pattern_search_type)
     within("#pattern_search_form") { click_button("Search") }
 
     assert_no_selector("#content div.alert-warning")
@@ -112,8 +112,8 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     name = names(:provisional_name)
     login
     visit("/")
-    fill_in("search_pattern", with: old_provisional)
-    page.select("Names", from: :search_type)
+    fill_in("pattern_search_pattern", with: old_provisional)
+    page.select("Names", from: :pattern_search_type)
     within("#pattern_search_form") { click_button("Search") }
 
     assert_no_selector("#content div.alert-warning")

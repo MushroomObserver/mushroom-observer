@@ -92,65 +92,65 @@ class SearchControllerTest < FunctionalTestCase
 
   def test_pattern_search
     login
-    params = { search: { pattern: "12", type: :observation } }
+    params = { pattern_search: { pattern: "12", type: :observation } }
     get(:pattern, params: params)
     assert_redirected_to(observations_path(pattern: "12"))
 
-    params = { search: { pattern: "34", type: :image } }
+    params = { pattern_search: { pattern: "34", type: :image } }
     get(:pattern, params: params)
     assert_redirected_to(images_path(pattern: "34"))
 
-    params = { search: { pattern: "56", type: :name } }
+    params = { pattern_search: { pattern: "56", type: :name } }
     get(:pattern, params: params)
     assert_redirected_to(names_path(pattern: "56"))
 
-    params = { search: { pattern: "78", type: :location } }
+    params = { pattern_search: { pattern: "78", type: :location } }
     get(:pattern, params: params)
     assert_redirected_to(locations_path(pattern: "78"))
 
-    params = { search: { pattern: "90", type: :comment } }
+    params = { pattern_search: { pattern: "90", type: :comment } }
     get(:pattern, params: params)
     assert_redirected_to(comments_path(pattern: "90"))
 
-    params = { search: { pattern: "21", type: :project } }
+    params = { pattern_search: { pattern: "21", type: :project } }
     get(:pattern, params: params)
     assert_redirected_to(projects_path(pattern: "21"))
 
-    params = { search: { pattern: "12", type: :species_list } }
+    params = { pattern_search: { pattern: "12", type: :species_list } }
     get(:pattern, params: params)
     assert_redirected_to(species_lists_path(pattern: "12"))
 
-    params = { search: { pattern: "34", type: :user } }
+    params = { pattern_search: { pattern: "34", type: :user } }
     get(:pattern, params: params)
     assert_redirected_to(users_path(pattern: "34"))
 
-    params = { search: { pattern: "34", type: :glossary_term } }
+    params = { pattern_search: { pattern: "34", type: :glossary_term } }
     get(:pattern, params: params)
     assert_redirected_to(glossary_terms_path(pattern: "34"))
 
     stub_request(:any, /google.com/)
     pattern =  "hexiexiva"
-    params = { search: { pattern: pattern, type: :google } }
+    params = { pattern_search: { pattern: pattern, type: :google } }
     target =
       "https://google.com/search?q=site%3Amushroomobserver.org+#{pattern}"
     get(:pattern, params: params)
     assert_redirected_to(target)
 
-    params = { search: { pattern: "", type: :google } }
+    params = { pattern_search: { pattern: "", type: :google } }
     get(:pattern, params: params)
     assert_redirected_to("/")
 
-    params = { search: { pattern: "x", type: :nonexistent_type } }
+    params = { pattern_search: { pattern: "x", type: :nonexistent_type } }
     get(:pattern, params: params)
     assert_redirected_to("/")
 
-    params = { search: { pattern: "", type: :observation } }
+    params = { pattern_search: { pattern: "", type: :observation } }
     get(:pattern, params: params)
     assert_redirected_to(observations_path)
 
     # Make sure this redirects to the index that lists all herbaria,
     # rather than the index that lists query results.
-    params = { search: { pattern: "", type: :herbarium } }
+    params = { pattern_search: { pattern: "", type: :herbarium } }
     get(:pattern, params: params)
     assert_redirected_to(herbaria_path)
   end
