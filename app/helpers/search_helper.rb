@@ -73,7 +73,7 @@ module SearchHelper
   def search_field(form:, search:, field:, model:, sections:)
     args = { form:, search:, field:, model: }
     args[:label] ||= search_label(field)
-    field_type = search_field_type_from_parser(field:, model:)
+    field_type = search_field_type_from_controller(field:)
     component = FILTER_FIELD_HELPERS[field_type][:component]
     return unless component
 
@@ -97,16 +97,14 @@ module SearchHelper
     end
   end
 
-  # The PatternSearch subclasses define how they're going to parse their
+  # The controllers define how they're going to parse their
   # fields, so we can use that to assign a field helper.
-  #   example: :parse_yes -> :yes, from which we deduce :search_yes_field
-  # If the field is :pattern, there's no assigned parser.
-  def search_field_type_from_parser(field:, model:)
+  def search_field_type_from_controller(field:)
     return :pattern if field == :pattern
 
-    subclass = PatternSearch.const_get(model.capitalize)
-    unless subclass.params[field]
-      raise("No parser defined for #{field} in #{subclass}")
+    permitted = controller.permitted_search_params
+    unless permitted[field]
+      raise("No input defined for #{field} in #{controller.controller_name}")
     end
 
     parser = subclass.params[field][1]
