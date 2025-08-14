@@ -21,8 +21,6 @@
 module Searchable
   extend ActiveSupport::Concern
 
-  # Rubocop is incorrect here. This is a concern, not a class.
-  # rubocop:disable Metrics/BlockLength
   included do
     def new
       # set_up_form_field_groupings
@@ -117,5 +115,4 @@ module Searchable
       [:location, :region].freeze
     end
   end
-  # rubocop:enable Metrics/BlockLength
 end
