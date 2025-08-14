@@ -1,95 +1,95 @@
 # frozen_string_literal: true
 
-# helpers for pattern search forms. These call field helpers in forms_helper.
+# helpers for search forms. These call field helpers in forms_helper.
 # args should provide form, field, label at a minimum.
 # rubocop:disable Metrics/ModuleLength
-module FiltersHelper
+module SearchHelper
   # Filter panel for a search form. Sections are shown and collapsed.
   # If sections[:collapsed] is present, part of the panel will be collapsed.
-  def filter_panel(form:, filter:, heading:, sections:, model:)
-    shown = filter_panel_shown(form:, filter:, sections:, model:)
-    collapsed = filter_panel_collapsed(form:, filter:, sections:, model:)
+  def search_panel(form:, search:, heading:, sections:, model:)
+    shown = search_panel_shown(form:, search:, sections:, model:)
+    collapsed = search_panel_collapsed(form:, search:, sections:, model:)
     open = collapse = false
     if sections[:collapsed].present?
       collapse = heading
-      open = filter_panel_open?(filter:, sections:)
+      open = search_panel_open?(search:, sections:)
     end
     panel_block(heading: :"search_term_group_#{heading}".l,
                 collapse:, open:, collapse_message: :MORE.l,
                 panel_bodies: [shown, collapsed])
   end
 
-  # This returns the current filter terms in the form of a hash.
-  def filter_params(filter:)
-    filter.attributes.compact_blank.transform_keys(&:to_sym)
+  # This returns the current search terms in the form of a hash.
+  def search_params(search:)
+    search.attributes.compact_blank.transform_keys(&:to_sym)
   end
 
-  def filter_panel_open?(filter:, sections:)
-    current = filter_params(filter:)&.keys || []
+  def search_panel_open?(search:, sections:)
+    current = search_params(search:)&.keys || []
     this_section = sections[:collapsed].flatten # could be pairs of fields
     return true if current.intersect?(this_section)
 
     false
   end
 
-  def filter_panel_shown(form:, filter:, sections:, model:)
+  def search_panel_shown(form:, search:, sections:, model:)
     return unless sections.is_a?(Hash) && sections[:shown].present?
 
     capture do
       sections[:shown].each do |field|
-        concat(filter_row(form:, filter:, field:, model:, sections:))
+        concat(search_row(form:, search:, field:, model:, sections:))
       end
     end
   end
 
   # Content of collapsed section, composed of field rows.
-  def filter_panel_collapsed(form:, filter:, sections:, model:)
+  def search_panel_collapsed(form:, search:, sections:, model:)
     return unless sections.is_a?(Hash) && sections[:collapsed].present?
 
     capture do
       sections[:collapsed].each do |field|
-        concat(filter_row(form:, filter:, field:, model:, sections:))
+        concat(search_row(form:, search:, field:, model:, sections:))
       end
     end
   end
 
   # Fields might be paired, so we need to check for that.
-  def filter_row(form:, filter:, field:, model:, sections:)
+  def search_row(form:, search:, field:, model:, sections:)
     if field.is_a?(Array)
       tag.div(class: "row") do
         field.each do |subfield|
-          concat(tag.div(class: filter_column_classes) do
-            filter_field(form:, filter:, field: subfield, model:, sections:)
+          concat(tag.div(class: search_column_classes) do
+            search_field(form:, search:, field: subfield, model:, sections:)
           end)
         end
       end
     else
-      filter_field(form:, filter:, field:, model:, sections:)
+      search_field(form:, search:, field:, model:, sections:)
     end
   end
 
   # Figure out what kind of field helper to call, based on definitions below.
   # Some field types need args, so there is both the component and args hash.
-  def filter_field(form:, filter:, field:, model:, sections:)
-    args = { form:, filter:, field:, model: }
-    args[:label] ||= filter_label(field)
-    field_type = filter_field_type_from_parser(field:, model:)
+  def search_field(form:, search:, field:, model:, sections:)
+    args = { form:, search:, field:, model: }
+    args[:label] ||= search_label(field)
+    field_type = search_field_type_from_parser(field:, model:)
     component = FILTER_FIELD_HELPERS[field_type][:component]
     return unless component
 
     # Prepare args for the field helper. Requires but removes args[:model].
-    args = prepare_args_for_filter_field(args, field_type, component)
+    args = prepare_args_for_search_field(args, field_type, component)
     # Re-add sections and model for conditional fields.
-    if component == :filter_autocompleter_with_conditional_fields
-      args = args.merge(sections:, model:, filter:)
+    if component == :search_autocompleter_with_conditional_fields
+      args = args.merge(sections:, model:, search:)
     end
-    return filter_region_with_compass_fields(**args) if field == :region
+    return search_region_with_compass_fields(**args) if field == :region
 
     send(component, **args)
   end
 
   # The field's label.
-  def filter_label(field)
+  def search_label(field)
     if field == :pattern
       :PATTERN.l
     else
@@ -99,9 +99,9 @@ module FiltersHelper
 
   # The PatternSearch subclasses define how they're going to parse their
   # fields, so we can use that to assign a field helper.
-  #   example: :parse_yes -> :yes, from which we deduce :filter_yes_field
+  #   example: :parse_yes -> :yes, from which we deduce :search_yes_field
   # If the field is :pattern, there's no assigned parser.
-  def filter_field_type_from_parser(field:, model:)
+  def search_field_type_from_parser(field:, model:)
     return :pattern if field == :pattern
 
     subclass = PatternSearch.const_get(model.capitalize)
@@ -116,18 +116,18 @@ module FiltersHelper
   # Prepares HTML args for the field helper. This is where we can make
   # adjustments to the args hash before passing it to the field helper.
   # NOTE: Bootstrap 3 can't do full-width inline label/field.
-  def prepare_args_for_filter_field(args, field_type, component)
+  def prepare_args_for_search_field(args, field_type, component)
     if component == :text_field_with_label && args[:field] != :pattern
       args[:inline] = true
     end
-    args[:help] = filter_help_text(args, field_type)
-    args[:hidden_name] = filter_check_for_hidden_field_name(args)
-    args = filter_prefill_or_select_values(args, field_type)
+    args[:help] = search_help_text(args, field_type)
+    args[:hidden_name] = search_check_for_hidden_field_name(args)
+    args = search_prefill_or_select_values(args, field_type)
 
-    FILTER_FIELD_HELPERS[field_type][:args].merge(args.except(:model, :filter))
+    FILTER_FIELD_HELPERS[field_type][:args].merge(args.except(:model, :search))
   end
 
-  def filter_help_text(args, field_type)
+  def search_help_text(args, field_type)
     component = FILTER_FIELD_HELPERS[field_type][:component]
     multiple_note = if component == :autocompleter_field
                       :pattern_search_terms_multiple.l
@@ -136,7 +136,7 @@ module FiltersHelper
   end
 
   # Overrides for the assumed name of the id field for autocompleter.
-  def filter_check_for_hidden_field_name(args)
+  def search_check_for_hidden_field_name(args)
     case args[:field]
     when :list
       return "list_id"
@@ -146,9 +146,9 @@ module FiltersHelper
     nil
   end
 
-  def filter_prefill_or_select_values(args, field_type)
+  def search_prefill_or_select_values(args, field_type)
     if FILTER_SELECT_TYPES.include?(field_type)
-      args[:selected] = args[:filter].send(args[:field]) || nil
+      args[:selected] = args[:search].send(args[:field]) || nil
     end
     args
   end
@@ -159,31 +159,31 @@ module FiltersHelper
   #
   # Complex mechanism: append collapsed fields to autocompleter that only appear
   # when autocompleter has a value. Only on the name field.
-  def filter_autocompleter_with_conditional_fields(**args)
+  def search_autocompleter_with_conditional_fields(**args)
     return if args[:sections].blank?
 
     # rightward destructuring assignment ruby 3 feature
-    args => { form:, model:, filter:, sections: }
-    append = filter_conditional_rows(form:, model:, filter:, sections:)
+    args => { form:, model:, search:, sections: }
+    append = search_conditional_rows(form:, model:, search:, sections:)
     autocompleter_field(
-      **args.except(:sections, :model, :filter).merge(append:)
+      **args.except(:sections, :model, :search), append:
     )
   end
 
   # Rows that only uncollapse if an autocompleter field has a value.
   # Note the data-autocompleter-target attribute.
-  def filter_conditional_rows(form:, model:, filter:, sections:)
+  def search_conditional_rows(form:, model:, search:, sections:)
     capture do
       tag.div(data: { autocompleter_target: "collapseFields" },
               class: "collapse") do
         sections[:conditional].each do |field|
-          concat(filter_row(form:, field:, model:, filter:, sections:))
+          concat(search_row(form:, field:, model:, search:, sections:))
         end
       end
     end
   end
 
-  def filter_yes_field(**)
+  def search_yes_field(**)
     options = [
       ["", nil],
       ["yes", "yes"]
@@ -191,7 +191,7 @@ module FiltersHelper
     select_with_label(options:, inline: true, **)
   end
 
-  def filter_boolean_field(**)
+  def search_boolean_field(**)
     options = [
       ["", nil],
       ["yes", "yes"],
@@ -200,7 +200,7 @@ module FiltersHelper
     select_with_label(options:, inline: true, **)
   end
 
-  def filter_yes_no_both_field(**)
+  def search_yes_no_both_field(**)
     options = [
       ["", nil],
       ["yes", "yes"],
@@ -210,129 +210,102 @@ module FiltersHelper
     select_with_label(options:, inline: true, **)
   end
 
-  # RANGE FIELDS The first field gets the label, name and ID of the actual
-  # param; the end `_range` field is optional. The controller needs to check for
-  # the second & join them with a hyphen if it exists (in both cases here).
-  def filter_date_range_field(**args)
-    tag.div(class: "row") do
-      [
-        tag.div(class: filter_column_classes) do
-          text_field_with_label(**filter_date_args(args))
-        end,
-        tag.div(class: filter_column_classes) do
-          text_field_with_label(**filter_date_range_args(args))
-        end
-      ].safe_join
-    end
-  end
-
-  def filter_date_args(args)
-    args.except(:filter).merge({ between: "(YYYY-MM-DD)" })
-  end
-
-  def filter_date_range_args(args)
-    args.except(:filter).merge(
-      { field: "#{args[:field]}_range", label: :to.l,
-        between: :optional, help: nil }
-    )
-  end
-
-  def filter_rank_range_field(**args)
+  def search_rank_range_field(**args)
     [
       tag.div(class: "d-inline-block mr-4") do
-        select_with_label(**filter_rank_args(args))
+        select_with_label(**search_rank_args(args))
       end,
       tag.div(class: "d-inline-block") do
-        select_with_label(**filter_rank_range_args(args))
+        select_with_label(**search_rank_range_args(args))
       end
     ].safe_join
   end
 
-  def filter_rank_args(args)
-    args.except(:filter).merge(
+  def search_rank_args(args)
+    args.except(:search).merge(
       { options: Name.all_ranks, include_blank: true, inline: true }
     )
   end
 
-  def filter_rank_range_args(args)
-    args.except(:filter).merge(
+  def search_rank_range_args(args)
+    args.except(:search).merge(
       { field: "#{args[:field]}_range", label: :to.l, options: Name.all_ranks,
         include_blank: true, between: :optional, help: nil, inline: true }
     )
   end
 
-  def filter_confidence_range_field(**args)
+  def search_confidence_range_field(**args)
     confidences = Vote.opinion_menu.map { |k, v| [k, Vote.percent(v)] }
     [
       tag.div(class: "d-inline-block mr-4") do
-        select_with_label(**filter_confidence_args(confidences, args))
+        select_with_label(**search_confidence_args(confidences, args))
       end,
       tag.div(class: "d-inline-block") do
-        select_with_label(**filter_confidence_range_args(confidences, args))
+        select_with_label(**search_confidence_range_args(confidences, args))
       end
     ].safe_join
   end
 
-  def filter_confidence_args(confidences, args)
-    args.except(:filter).merge(
+  def search_confidence_args(confidences, args)
+    args.except(:search).merge(
       { options: confidences, include_blank: true, inline: true }
     )
   end
 
-  def filter_confidence_range_args(confidences, args)
-    args.except(:filter).merge(
+  def search_confidence_range_args(confidences, args)
+    args.except(:search).merge(
       { field: "#{args[:field]}_range", label: :to.l, options: confidences,
         include_blank: true, between: :optional, help: nil, inline: true }
     )
   end
 
-  def filter_region_with_compass_fields(**args)
+  def search_region_with_compass_fields(**args)
     tag.div(data: { controller: "map", map_open: true }) do
       [
         form_location_input_find_on_map(form: args[:form], field: :region,
-                                        value: args[:filter].region,
+                                        value: args[:search].region,
                                         label: "#{:REGION.t}:"),
-        filter_compass_input_and_map(form: args[:form], filter: args[:filter])
+        search_compass_input_and_map(form: args[:form], search: args[:search])
       ].safe_join
     end
   end
 
-  def filter_compass_input_and_map(form:, filter:)
-    minimal_loc = filter_minimal_location(filter)
+  def search_compass_input_and_map(form:, search:)
+    minimal_loc = search_minimal_location(search)
     capture do
       [
-        form_compass_input_group(form:, obj: filter),
+        form_compass_input_group(form:, obj: search),
         make_map(objects: [minimal_loc], editable: true, map_type: "location",
                  map_open: false, controller: nil)
       ].safe_join
     end
   end
 
-  # To be mappable, we need to instantiate a minimal location from the filter.
-  def filter_minimal_location(filter)
-    if filter.north.present? && filter.south.present? &&
-       filter.east.present? && filter.west.present?
+  # To be mappable, we need to instantiate a minimal location from the search.
+  def search_minimal_location(search)
+    if search.north.present? && search.south.present? &&
+       search.east.present? && search.west.present?
       Mappable::MinimalLocation.new(
-        nil, nil, filter.north, filter.south, filter.east, filter.west
+        nil, nil, search.north, search.south, search.east, search.west
       )
     else
       Mappable::MinimalLocation.new(nil, nil, 0, 0, 0, 0)
     end
   end
 
-  def filter_longitude_field(**args)
+  def search_longitude_field(**args)
     text_field_with_label(
-      **args.except(:filter).merge(between: "(-180.0 to 180.0)")
+      **args.except(:search), between: "(-180.0 to 180.0)"
     )
   end
 
-  def filter_latitude_field(**args)
+  def search_latitude_field(**args)
     text_field_with_label(
-      **args.except(:filter).merge(between: "(-90.0 to 90.0)")
+      **args.except(:search), between: "(-90.0 to 90.0)"
     )
   end
 
-  def filter_column_classes
+  def search_column_classes
     "col-xs-12 col-sm-6 col-md-12 col-lg-6"
   end
 
@@ -342,11 +315,11 @@ module FiltersHelper
   # Convenience for subclasses to access helper methods via subclass.params
   FILTER_FIELD_HELPERS = {
     pattern: { component: :text_field_with_label, args: {} },
-    yes: { component: :filter_yes_field, args: {} },
-    boolean: { component: :filter_boolean_field, args: {} },
-    yes_no_both: { component: :filter_yes_no_both_field, args: {} },
-    date_range: { component: :filter_date_range_field, args: {} },
-    rank_range: { component: :filter_rank_range_field, args: {} },
+    yes: { component: :search_yes_field, args: {} },
+    boolean: { component: :search_boolean_field, args: {} },
+    yes_no_both: { component: :search_yes_no_both_field, args: {} },
+    date_range: { component: :search_date_range_field, args: {} },
+    rank_range: { component: :search_rank_range_field, args: {} },
     string: { component: :text_field_with_label, args: {} },
     list_of_strings: { component: :text_field_with_label, args: {} },
     list_of_herbaria: { component: :autocompleter_field,
@@ -354,7 +327,7 @@ module FiltersHelper
                                 separator: FILTER_SEPARATOR } },
     list_of_locations: { component: :autocompleter_field,
                          args: { type: :location, separator: "\n" } },
-    list_of_names: { component: :filter_autocompleter_with_conditional_fields,
+    list_of_names: { component: :search_autocompleter_with_conditional_fields,
                      args: { type: :name, separator: FILTER_SEPARATOR } },
     list_of_projects: { component: :autocompleter_field,
                         args: { type: :project,
@@ -364,8 +337,8 @@ module FiltersHelper
                                      separator: FILTER_SEPARATOR } },
     list_of_users: { component: :autocompleter_field,
                      args: { type: :user, separator: FILTER_SEPARATOR } },
-    confidence: { component: :filter_confidence_range_field, args: {} },
-    # handled in filter_region_with_compass_fields
+    confidence: { component: :search_confidence_range_field, args: {} },
+    # handled in search_region_with_compass_fields
     longitude: { component: nil, args: {} },
     latitude: { component: nil, args: {} }
   }.freeze

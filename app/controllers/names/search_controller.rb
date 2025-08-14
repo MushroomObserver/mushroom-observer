@@ -11,27 +11,12 @@ module Names
 
     before_action :login_required
 
-    def new
-      # set_up_form_field_groupings
-      new_search_instance_from_query
-    end
-
-    def create
-      return if clear_form?
-
-      # set_up_form_field_groupings # in case we need to re-render the form
-      validate_search_instance_from_form_params
-      save_search_query
-
-      redirect_to(controller: "/names", action: :index,
-                  q: @query.record.id.alphabetize)
-    end
-
     private
 
+    # Also an index of helper methods to use for each field.
     def permitted_search_params
       {
-        names: :names_fields,
+        names: :names_fields_for_names,
         pattern: :text_field,
         has_observations: :checkbox,
         deprecated: :boolean_select,
