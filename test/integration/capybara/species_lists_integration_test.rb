@@ -133,16 +133,10 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
     ]
     list = names.join("\r\n")
 
-    amanita = Name.where(text_name: "Amanita baccata")
+    Name.where(text_name: "Amanita baccata")
 
     albion = locations(:albion)
-    albion_name_reverse = Location.reverse_name(albion.name)
-
-    new_location = "Somewhere New, California, USA"
-    new_location_reverse = "USA, California, Somewhere New"
-
-    newer_location = "Somewhere Else, California, USA"
-    newer_location_reverse = "USA, California, Somewhere Else"
+    Location.reverse_name(albion.name)
 
     # Good opportunity to test scientific location notation!
 
