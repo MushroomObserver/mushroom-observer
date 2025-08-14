@@ -63,7 +63,9 @@ module Searchable
     end
 
     def validate_search_instance_from_form_params
-      @search = query_subclass.new(permitted_search_params.keys)
+      @search = query_subclass.new(
+        params.permit(permitted_search_params.keys)
+      )
       redirect_to(action: :new) && return if @search.invalid?
     end
 
