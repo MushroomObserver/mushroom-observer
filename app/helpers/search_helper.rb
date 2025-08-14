@@ -74,7 +74,7 @@ module SearchHelper
     args = { form:, search:, field:, model: }
     args[:label] ||= search_label(field)
     field_type = search_field_type_from_controller(field:)
-    component = FILTER_FIELD_HELPERS[field_type][:component]
+    component = SEARCH_FIELD_HELPERS[field_type][:component]
     return unless component
 
     # Prepare args for the field helper. Requires but removes args[:model].
@@ -122,11 +122,11 @@ module SearchHelper
     args[:hidden_name] = search_check_for_hidden_field_name(args)
     args = search_prefill_or_select_values(args, field_type)
 
-    FILTER_FIELD_HELPERS[field_type][:args].merge(args.except(:model, :search))
+    SEARCH_FIELD_HELPERS[field_type][:args].merge(args.except(:model, :search))
   end
 
   def search_help_text(args, field_type)
-    component = FILTER_FIELD_HELPERS[field_type][:component]
+    component = SEARCH_FIELD_HELPERS[field_type][:component]
     multiple_note = if component == :autocompleter_field
                       :pattern_search_terms_multiple.l
                     end
@@ -145,7 +145,7 @@ module SearchHelper
   end
 
   def search_prefill_or_select_values(args, field_type)
-    if FILTER_SELECT_TYPES.include?(field_type)
+    if SEARCH_SELECT_TYPES.include?(field_type)
       args[:selected] = args[:search].send(args[:field]) || nil
     end
     args
@@ -308,10 +308,10 @@ module SearchHelper
   end
 
   # Separator for autocompleter fields.
-  FILTER_SEPARATOR = ", "
+  SEARCH_SEPARATOR = ", "
 
   # Convenience for subclasses to access helper methods via subclass.params
-  FILTER_FIELD_HELPERS = {
+  SEARCH_FIELD_HELPERS = {
     pattern: { component: :text_field_with_label, args: {} },
     yes: { component: :search_yes_field, args: {} },
     boolean: { component: :search_boolean_field, args: {} },
@@ -322,26 +322,26 @@ module SearchHelper
     list_of_strings: { component: :text_field_with_label, args: {} },
     list_of_herbaria: { component: :autocompleter_field,
                         args: { type: :herbarium,
-                                separator: FILTER_SEPARATOR } },
+                                separator: SEARCH_SEPARATOR } },
     list_of_locations: { component: :autocompleter_field,
                          args: { type: :location, separator: "\n" } },
     list_of_names: { component: :search_autocompleter_with_conditional_fields,
-                     args: { type: :name, separator: FILTER_SEPARATOR } },
+                     args: { type: :name, separator: SEARCH_SEPARATOR } },
     list_of_projects: { component: :autocompleter_field,
                         args: { type: :project,
-                                separator: FILTER_SEPARATOR } },
+                                separator: SEARCH_SEPARATOR } },
     list_of_species_lists: { component: :autocompleter_field,
                              args: { type: :species_list,
-                                     separator: FILTER_SEPARATOR } },
+                                     separator: SEARCH_SEPARATOR } },
     list_of_users: { component: :autocompleter_field,
-                     args: { type: :user, separator: FILTER_SEPARATOR } },
+                     args: { type: :user, separator: SEARCH_SEPARATOR } },
     confidence: { component: :search_confidence_range_field, args: {} },
     # handled in search_region_with_compass_fields
     longitude: { component: nil, args: {} },
     latitude: { component: nil, args: {} }
   }.freeze
 
-  FILTER_SELECT_TYPES = [
+  SEARCH_SELECT_TYPES = [
     :yes, :boolean, :yes_no_both, :rank_range, :confidence
   ].freeze
 end
