@@ -49,7 +49,7 @@ identify_page = controller.controller_name == "identify"
       <% if identify_page %>
         <%= render(partial: "observations/identify/form_identify_filter") %>
       <% else %>
-        <% render(partial: "application/top_nav/search_bar") %>
+        <%= render(partial: "application/top_nav/search_bar") %>
       <% end %>
     <% end %>
   <% end %>

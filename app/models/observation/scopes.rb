@@ -7,7 +7,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
   # NOTE: To improve Coveralls display, avoid one-line stabby lambda scopes.
   # Two line stabby lambdas are OK, it's just the declaration line that will
   # always show as covered.
-  included do # rubocop:disable Metrics/BlockLength
+  included do
     # default ordering for index queries
     scope :order_by_default,
           -> { order_by(::Query::Observations.default_order) }

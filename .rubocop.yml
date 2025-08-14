@@ -80,6 +80,10 @@ Metrics/BlockLength:
   # This Cop makes less sense in tests, we regularly ignore it.
   Exclude:
     - "test//**/*"
+  # Concerns define two blocks with `included` (instance) and `class_methods`
+  AllowedMethods:
+    - included
+    - class_methods
 Metrics/ClassLength:
   # Rubocop default: 100
   # Relaxed metric based on actual practice

@@ -83,7 +83,6 @@
 module Descriptions::Permissions
   extend ActiveSupport::Concern
 
-  # rubocop:disable Metrics/BlockLength
   included do
     # Form to adjust permissions on a description.
     def edit
@@ -225,30 +224,9 @@ module Descriptions::Permissions
       @data = [nil]
       done = true
       params[:writein_name].keys.sort.each do |n|
-        name   = begin
-                   params[:writein_name][n].to_s
-                 rescue StandardError
-                   ""
-                 end
-        reader = begin
-                   params[:writein_reader][n] == "1"
-                 rescue StandardError
-                   false
-                 end
-        writer = begin
-                   params[:writein_writer][n] == "1"
-                 rescue StandardError
-                   false
-                 end
-        admin  = begin
-                   params[:writein_admin][n] == "1"
-                 rescue StandardError
-                   false
-                 end
-
-        next unless name.present? &&
-                    !update_writein(@description, name, reader, writer,
-                                    admin)
+        name, reader, writer, admin = writein_params(n)
+        next if name.blank? ||
+                update_writein(@description, name, reader, writer, admin)
 
         @data << { name: name, reader: reader, writer: writer,
                    admin: admin }
@@ -256,6 +234,30 @@ module Descriptions::Permissions
         done = false
       end
       done
+    end
+
+    def writein_params(index)
+      name   = begin
+                 params[:writein_name][index].to_s
+               rescue StandardError
+                 ""
+               end
+      reader = begin
+                 params[:writein_reader][index] == "1"
+               rescue StandardError
+                 false
+               end
+      writer = begin
+                 params[:writein_writer][index] == "1"
+               rescue StandardError
+                 false
+               end
+      admin  = begin
+                 params[:writein_admin][index] == "1"
+               rescue StandardError
+                 false
+               end
+      [name, reader, writer, admin]
     end
 
     # Throw up some flash notices to reassure user that we did in fact make the
@@ -316,5 +318,4 @@ module Descriptions::Permissions
 
     include ::Descriptions
   end
-  # rubocop:enable Metrics/BlockLength
 end

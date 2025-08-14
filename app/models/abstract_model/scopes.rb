@@ -41,7 +41,7 @@ module AbstractModel::Scopes
   # NOTE: To improve Coveralls display, avoid one-line stabby lambda scopes.
   # Two line stabby lambdas are OK, it's just the declaration line that will
   # always show as covered.
-  included do # rubocop:disable Metrics/BlockLength
+  included do
     scope :id_in_set, lambda { |ids|
       set = limited_id_set(ids) # [] is valid and should return none
       return none if set.empty?
