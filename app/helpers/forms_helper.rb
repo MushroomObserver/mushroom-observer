@@ -301,9 +301,7 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     # The field may not be an attribute of the object
     if obj.present? && obj.respond_to?(field)
       init_year = obj.try(&field.to_sym).try(&:year)
-      selected = obj.try(&field.to_sym)
-      # Keep blank fields blank on search filters
-      selected ||= Time.zone.today unless obj.is_a?(Search)
+      selected = obj.try(&field.to_sym) || Time.zone.today
     end
     if init_year && init_year < start_year && init_year > 1900
       start_year = init_year
