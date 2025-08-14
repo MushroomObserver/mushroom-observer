@@ -28,7 +28,7 @@ module SpeciesLists
     #       val: id of name user has chosen (via radio boxes in feedback)
     # Bullet:
     # https://blog.appsignal.com/2018/06/19/activerecords-counter-cache.html
-    def process_species_list(create_or_update)
+    def process_write_in_list(create_or_update)
       redirected = false
 
       # Update the timestamps/user/when/where/title/notes fields.
@@ -154,7 +154,7 @@ module SpeciesLists
       failed
     end
 
-    def update_redirect_and_flash_notices(create_or_update, sorter)
+    def update_redirect_and_flash_notices(create_or_update, sorter = nil)
       if create_or_update == :create
         @species_list.log(:log_species_list_created)
         id = @species_list.id
@@ -166,7 +166,7 @@ module SpeciesLists
       end
 
       update_projects(@species_list, params[:project])
-      construct_observations(@species_list, sorter)
+      construct_observations(@species_list, sorter) if sorter
 
       if @species_list.location_id.nil?
         redirect_to(new_location_path(where: @place_name,
@@ -268,7 +268,7 @@ module SpeciesLists
     def init_list_for_clone(clone_id)
       return unless (clone = SpeciesList.safe_find(clone_id))
 
-      query = create_query(:Observation, species_lists: clone)
+      create_query(:Observation, species_lists: clone)
       @species_list.when = clone.when
       @species_list.place_name = clone.place_name
       @species_list.location = clone.location

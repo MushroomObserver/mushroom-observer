@@ -12,7 +12,7 @@ module SpeciesLists
     def create
       @species_list = SpeciesList.find(params[:id])
       if check_permission!(@species_list)
-        process_species_list(:create)
+        process_write_in_list(:create)
       else
         redirect_to(species_list_path(@species_list))
       end

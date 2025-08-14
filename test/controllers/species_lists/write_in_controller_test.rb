@@ -36,7 +36,7 @@ module SpeciesLists
       assert_nil(synonym_name.synonym_id)
       params = {
         id: species_list.id,
-        list: { members: "#{name.text_name} = #{synonym_name.text_name}" },
+        list: { members: "#{name.text_name} = #{synonym_name.text_name}" }
       }
       login("rolf")
       contrib = rolf.contribution
@@ -146,7 +146,7 @@ module SpeciesLists
       params = {
         id: spl.id,
         list: { members: list_members.join("\r\n") },
-        member: { notes: Observation.no_notes },
+        member: { notes: Observation.no_notes }
       }
       params[:approved_names] = new_name_str
       params[:chosen_multiple_names] =
@@ -232,7 +232,6 @@ module SpeciesLists
 
     def test_construct_species_list_double_space
       spl = species_lists(:first_species_list)
-      list_title = "Double Space List"
       new_name_str = "Lactarius rubidus  (Hesler and Smith) Methven"
       params = {
         id: spl.id,
@@ -366,6 +365,197 @@ module SpeciesLists
         ].sort,
         assigns(:species_list).observations.map { |x| x.name.search_name }.sort
       )
+    end
+
+    def test_update_species_list_add_unknown
+      new_name = "Agaricus nova"
+      spl = species_lists(:unknown_species_list)
+      sp_count = spl.observations.size
+      old_contribution = mary.contribution
+      params = {
+        id: spl.id,
+        list: { members: new_name },
+        member: { notes: Observation.no_notes }
+      }
+      assert_equal(spl.user, mary)
+      login("mary")
+      post(:create, params: params)
+      spl.reload
+      assert_equal(sp_count, spl.observations.size)
+      assert_flash_error
+
+      params[:approved_names] = new_name
+      post(:create, params: params)
+      assert_redirected_to(species_list_path(spl.id))
+
+      spl.reload
+      assert_equal(sp_count + 1, spl.observations.size)
+      assert_equal(old_contribution + NAME_SCORE + OBSERVATION_SCORE,
+                   mary.reload.contribution)
+    end
+
+    def test_update_species_list_approved_new_name
+      spl = species_lists(:unknown_species_list)
+      sp_count = spl.observations.size
+      params = {
+        id: spl.id,
+        list: { members: "New name" },
+        member: { notes: Observation.no_notes },
+        approved_names: ["New name"]
+      }
+      login(spl.user.login)
+      contrib = spl.user.contribution + NAME_SCORE * 2 + OBSERVATION_SCORE
+      post(:create, params: params)
+      assert_redirected_to(species_list_path(spl.id))
+      assert_equal(contrib, spl.user.reload.contribution)
+      assert_equal(sp_count + 1, spl.reload.observations.size)
+    end
+
+    def test_update_species_list_approved_rename
+      spl = species_lists(:unknown_species_list)
+      sp_count = spl.observations.size
+      name = names(:lactarius_subalpinus)
+      approved_name = names(:lactarius_alpinus)
+      assert_not(spl.name_included?(name))
+      assert_not(spl.name_included?(approved_name))
+      params = {
+        id: spl.id,
+        list: { members: name.text_name },
+        member: { notes: Observation.no_notes },
+        approved_deprecated_names: name.id.to_s,
+        chosen_approved_names: { name.id.to_s => approved_name.id.to_s }
+      }
+      login(spl.user.login)
+      contrib = spl.user.contribution + OBSERVATION_SCORE
+      post(:create, params: params)
+      assert_redirected_to(species_list_path(spl.id))
+      assert_equal(contrib, spl.user.reload.contribution)
+      assert_equal(sp_count + 1, spl.reload.observations.size)
+      assert_not(spl.name_included?(name))
+      assert(spl.name_included?(approved_name))
+    end
+
+    def test_update_species_list_multiple_match
+      spl = species_lists(:unknown_species_list)
+      sp_count = spl.observations.size
+      name = names(:amanita_baccata_arora)
+      assert_not(spl.name_included?(name))
+      params = {
+        id: spl.id,
+        list: { members: name.text_name }
+      }
+      login(spl.user.login)
+      contrib = spl.user.contribution
+      post(:create, params: params)
+      assert_flash_error
+      assert_equal(contrib, spl.user.reload.contribution)
+      assert_equal(sp_count, spl.reload.observations.size)
+      assert_not(spl.name_included?(name))
+    end
+
+    def test_update_species_list_approved_deprecated
+      spl = species_lists(:unknown_species_list)
+      sp_count = spl.observations.size
+      name = names(:lactarius_subalpinus)
+      params = {
+        id: spl.id,
+        list: { members: name.text_name },
+        approved_deprecated_names: [name.id.to_s]
+      }
+      assert_not(spl.name_included?(name))
+      login(spl.user.login)
+      contrib = spl.user.contribution + OBSERVATION_SCORE
+      post(:create, params: params)
+      assert_redirected_to(species_list_path(spl.id))
+      assert_equal(contrib, spl.user.reload.contribution)
+      assert_equal(sp_count + 1, spl.reload.observations.size)
+      assert(spl.name_included?(name))
+    end
+
+    def test_update_species_list_text_add_multiple
+      spl = species_lists(:unknown_species_list)
+      contrib = spl.user.contribution + OBSERVATION_SCORE * 2
+      sp_count = spl.observations.size
+      params = {
+        id: spl.id,
+        list: { members: "Coprinus comatus\r\nAgaricus campestris" }
+      }
+      owner = spl.user.login
+      assert_not_equal("rolf", owner)
+
+      login("rolf")
+      post(:create, params: params)
+      assert_redirected_to(species_list_path(spl.id))
+      assert_equal(10, rolf.reload.contribution)
+      assert_equal(sp_count, spl.reload.observations.size)
+
+      login(owner)
+      post(:create, params: params)
+      assert_redirected_to(species_list_path(spl.id))
+      assert_equal(contrib, spl.user.reload.contribution)
+      assert_equal(sp_count + 2, spl.reload.observations.size)
+    end
+
+    def test_update_species_list_text_notifications
+      spl = species_lists(:first_species_list)
+      params = {
+        id: spl.id,
+        list: { members: "Coprinus comatus\r\nAgaricus campestris" }
+      }
+      login("rolf")
+      post(:create, params: params)
+      assert_redirected_to(species_list_path(spl.id))
+    end
+
+    def test_update_species_list_new_name
+      spl = species_lists(:unknown_species_list)
+      sp_count = spl.observations.size
+      params = {
+        id: spl.id,
+        list: { members: "New name" }
+      }
+      login(spl.user.login)
+      post(:create, params: params)
+      assert_flash_error
+      assert_equal(10, spl.user.reload.contribution)
+      assert_equal(sp_count, spl.reload.observations.size)
+    end
+
+    def test_update_species_list_chosen_multiple_match
+      spl = species_lists(:unknown_species_list)
+      sp_count = spl.observations.size
+      name = names(:amanita_baccata_arora)
+      assert_not(spl.name_included?(name))
+      params = {
+        id: spl.id,
+        list: { members: name.text_name },
+        chosen_multiple_names: { name.id.to_s => name.id.to_s }
+      }
+      assert_not(spl.name_included?(name))
+      login(spl.user.login)
+      contrib = spl.user.contribution + OBSERVATION_SCORE
+      post(:create, params: params)
+      assert_redirected_to(species_list_path(spl.id))
+      assert_equal(contrib, spl.user.reload.contribution)
+      assert_equal(sp_count + 1, spl.reload.observations.size)
+      assert(spl.name_included?(name))
+    end
+
+    def test_update_species_list_deprecated
+      spl = species_lists(:unknown_species_list)
+      sp_count = spl.observations.size
+      name = names(:lactarius_subalpinus)
+      params = {
+        id: spl.id,
+        list: { members: name.text_name }
+      }
+      assert_not(spl.name_included?(name))
+      login(spl.user.login)
+      post(:create, params: params)
+      assert_flash_error
+      assert_equal(10, spl.user.reload.contribution)
+      assert_equal(sp_count, spl.reload.observations.size)
+      assert_not(spl.name_included?(name))
     end
   end
 end

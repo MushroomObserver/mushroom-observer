@@ -144,6 +144,28 @@ class SpeciesListsController < ApplicationController
     end
   end
 
+  def process_species_list(create_or_update)
+    # Update the timestamps/user/when/where/title/notes fields.
+    init_basic_species_list_fields(create_or_update)
+
+    # Validate place name.
+    validate_place_name
+
+    # so we can redirect to show_species_list (or chain to create location).
+    redirected = false
+    if @dubious_where_reasons == []
+      if @species_list.save
+        redirected = update_redirect_and_flash_notices(create_or_update)
+      else
+        flash_object_errors(@species_list)
+      end
+    end
+    return if redirected
+
+    init_project_vars_for_reload(@species_list)
+    re_render_appropriate_form(create_or_update)
+  end
+
   # Custom endpoint to clear obs from spl
   def clear
     return unless (@species_list = find_species_list!)
