@@ -7,7 +7,7 @@ module Image::Scopes
   # NOTE: To improve Coveralls display, avoid one-line stabby lambda scopes.
   # Two line stabby lambdas are OK, it's just the declaration line that will
   # always show as covered.
-  included do # rubocop:disable Metrics/BlockLength
+  included do
     scope :order_by_default,
           -> { order_by(::Query::Images.default_order) }
 
