@@ -29,6 +29,32 @@ module Names
 
     private
 
+    def permitted_search_params
+      {
+        names: :names_fields,
+        pattern: :text_field,
+        has_observations: :checkbox,
+        deprecated: :boolean_select,
+        has_author: :boolean_select,
+        author_has: :text_field,
+        has_citation: :boolean_select,
+        citation_has: :text_field,
+        has_classification: :boolean_select,
+        classifiction_has: :text_field,
+        has_notes: :boolean_select,
+        notes_has: :text_field,
+        has_comments: :checkbox,
+        comments_has: :text_field,
+        has_default_description: :boolean_select,
+        created_at: :text_field,
+        updated_at: :text_field,
+        has_synonyms: :boolean_select,
+        misspellings: :misspelling_select,
+        rank: :rank_select,
+        lichen: :boolean_select
+      }
+    end
+
     # This is the list of fields that are displayed in the search form. In the
     # template, each hash is interpreted as a column, and each key is a panel
     # with an array of fields or field pairings.

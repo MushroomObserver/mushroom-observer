@@ -78,9 +78,10 @@ module Searchable
       simple_atts = search_attribute_types.reject do |_key, attr_def|
         attr_def.nested_under.present?
       end
-      simple_atts.keys + nesting_atts_hashes
+      simple_atts.keys # + nesting_atts_hashes
     end
 
+    # Move these to Search nested params
     # Rails strong parameters take hashes for the nested parameters.
     # Detects the param names that have nesting, and calls `nested_params`
     # to create a hash of nested params for that param. Check this how-to:

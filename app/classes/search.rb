@@ -13,6 +13,16 @@ class Search
   include ActiveModel::Model
   include ActiveModel::Attributes
 
+  # All subclasses have a :pattern attribute.
+  search_attr(:pattern, :text)
+
+  # Prepare for nested params
+  def new(*params)
+    self.names = []
+    self.in_box = []
+    super
+  end
+
   UNUSABLE_PARAMETERS = [
     :description_query, # subquery
     :image_query, # subquery
@@ -28,10 +38,9 @@ class Search
     :search_where, # advanced search param
     :search_user, # advanced search param
     :preference_filter # pseudo param indicating user content filter applied
+    # :names, # nested param, handled separately
+    # :in_box # nested param, handled separately
   ].freeze
-
-  # All subclasses have a :pattern attribute.
-  search_attr(:pattern, :text)
 
   # Search attributes are assigned input types depending on the way the
   # corresponding Query attribute is defined. Most use text inputs.
@@ -100,13 +109,6 @@ class Search
       search_attr(attr_name, :text)
     end
   end
-
-  # Prepare for nested params
-  # def initialize(*params)
-  #   self.names = []
-  #   self.in_box = []
-  #   super
-  # end
 
   def names_attributes=(attributes)
     param_class = "#{name}::NamesParam".constantize
