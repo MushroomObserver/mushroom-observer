@@ -544,4 +544,20 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_project_checks(@proj1.id => :checked_but_disabled,
                           @proj2.id => :checked)
   end
+
+  def test_clear
+    spl = species_lists(:unknown_species_list)
+    login(spl.user.login)
+    assert(spl.observations.any?)
+    put(:clear, params: { id: spl.id })
+    assert(spl.observations.none?)
+  end
+
+  def test_clear_not_owner
+    spl = species_lists(:unknown_species_list)
+    login("rolf")
+    initial_count = spl.observations.count
+    put(:clear, params: { id: spl.id })
+    assert(spl.observations.count == initial_count)
+  end
 end
