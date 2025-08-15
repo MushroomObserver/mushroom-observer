@@ -84,7 +84,7 @@ module Searchable
       self.class.name.deconstantize.underscore
     end
 
-    # Returns the :Symbol used by Query for the type of query.
+    # Returns the capitalized :Symbol used by Query for the type of query.
     def query_model
       self.class.module_parent.name.singularize.to_sym
     end
@@ -93,6 +93,11 @@ module Searchable
     # is namespaced like Observations::SearchController
     def query_subclass
       Query.const_get(self.class.module_parent.name)
+    end
+
+    # the underscored symbol
+    def search_type
+      self.class.name.deconstantize.singularize.underscore.to_sym
     end
 
     # Passing some fields will raise an error if the required field is missing,
