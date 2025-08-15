@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
-# Names pattern search form.
+# Names search form and help.
 #
-# Route: `new_names_search_path`
-# Only one action here. Call namespaced controller actions with a hash like
+# Route: `names_search_path`, `new_names_search_path`
+#
+# Call namespaced controller actions with a hash like
 # `{ controller: "/names/search", action: :create }`
 module Names
   class SearchController < ApplicationController

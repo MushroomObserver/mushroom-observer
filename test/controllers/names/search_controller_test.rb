@@ -7,6 +7,11 @@ require("test_helper")
 # ------------------------------------------------------------
 module Names
   class SearchControllerTest < FunctionalTestCase
+    def test_show
+      login
+      get(:show)
+    end
+
     def test_new_names_search
       login
       get(:new)

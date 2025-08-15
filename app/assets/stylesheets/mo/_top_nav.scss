@@ -27,7 +27,8 @@
   padding: 0px;
 
   a,
-  a:visited {
+  a:visited,
+  .btn-link {
     color: $navbar-default-color;
     background-color: $navbar-default-link-active-bg;
   }

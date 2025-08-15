@@ -5,16 +5,7 @@
 #
 #  This is a module of reusable methods included by controllers that handle
 #  "faceted" query searches per model, with separate inputs for each keyword.
-#
-#  We're translating the params hash into the format that the user would have
-#  typed into the search box if they knew how to do that, because that's what
-#  the PatternSearch class expects to parse. The PatternSearch class then
-#  unpacks, validates and re-translates all these params into the actual params
-#  used by the Query class. This may seem roundabout: of course we do know the
-#  Query param names in advance, so we could theoretically just pass the values
-#  directly into Query and render the index. But we'd still have to be able to
-#  validate the input, and give messages for all the possible errors there.
-#  PatternSearch class handles all that.
+#  It also handles rendering help for the pattern search bar, via `:show` action
 #
 ################################################################################
 
@@ -22,6 +13,18 @@ module Searchable
   extend ActiveSupport::Concern
 
   included do
+    def show
+      respond_to do |format|
+        format.turbo_stream do
+          render(turbo_stream: turbo_stream.update(
+            :search_nav_help, # id of element to update contents of
+            partial: "#{parent_controller}/search/help"
+          ))
+        end
+        format.html
+      end
+    end
+
     def new
       # set_up_form_field_groupings
       new_search_instance_from_query

@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-# Observations pattern search form.
+# Observations search form and help.
 #
-# Route: `new_observation_search_path`
+# Route: `observation_search_path`, `new_observation_search_path`
 # Only one action here. Call namespaced controller actions with a hash like
 # `{ controller: "/observations/search", action: :create }`
 module Observations

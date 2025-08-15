@@ -344,5 +344,23 @@ module SearchHelper
   SEARCH_SELECT_TYPES = [
     :yes, :boolean, :yes_no_both, :rank_range, :confidence
   ].freeze
+
+  def search_type_options
+    [
+      [:COMMENTS.l, :comments],
+      [:GLOSSARY.l, :glossary_terms],
+      [:HERBARIA.l, :herbaria],
+      # Temporarily disabled for performance reasons. 2021-09-12 JDC
+      # [:IMAGES.l, :images],
+      [:LOCATIONS.l, :locations],
+      [:NAMES.l, :names],
+      [:OBSERVATIONS.l, :observations],
+      [:PROJECTS.l, :projects],
+      [:SPECIES_LISTS.l, :species_lists],
+      [:HERBARIUM_RECORDS.l, :herbarium_records],
+      [:USERS.l, :users],
+      [:app_search_google.l, :google]
+    ].sort
+  end
 end
 # rubocop:enable Metrics/ModuleLength

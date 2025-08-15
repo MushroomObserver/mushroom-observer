@@ -31,6 +31,8 @@ ActiveSupport::Inflector.inflections(:en) do |inflect|
   inflect.acronym("QR")
   inflect.irregular("bonus", "bonuses")
   inflect.irregular("info", "info")
+  inflect.irregular("google", "google")
+  inflect.irregular("search", "search")
   inflect.irregular("user_stats", "user_stats")
   inflect.irregular("search", "search")
 end
