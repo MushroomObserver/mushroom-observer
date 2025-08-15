@@ -1,10 +1,11 @@
+<%# locals: (search_help_types: []) %>
+
 <%
 # Temporary 2025-08-14: safe-pluralize the type (will not double-pluralize)
 # When removing just revert to `session[:search_type]`
 default = session[:search_type]&.to_s&.pluralize&.to_sym || :observations
-help_controller = [:names, :observations].include?(default) ? default : nil
+help_controller = search_help_types.include?(default) ? default : nil
 search_options = options_for_select(search_type_options, default)
-identify_page = controller.controller_name == "identify"
 form_group_class = class_names(
   %w[form-group has-feedback has-search d-flex flex-grow-1 mb-0]
 )
@@ -21,7 +22,7 @@ help_classes << "d-none" unless help_controller
       class: class_names(help_classes),
       type: :button,
       data: { toggle: "collapse", target: "#search_nav_help",
-              search_type_target: "button" },
+              search_type_target: "toggle" },
       aria: { expanded: "false", controls: "search_nav_help" }
     ) %>
 
@@ -50,8 +51,6 @@ help_classes << "d-none" unless help_controller
         <% end %><!--.form-group-->
       <% end %>
 
-      <%= hidden_field_tag(:needs_naming, true) if identify_page %>
-
       <%= tag.div(class: "form-group text-nowrap") do %>
         <%= tag.button(type: :submit,
                        class: "btn btn-outline-default px-2") do
@@ -76,9 +75,6 @@ help_classes << "d-none" unless help_controller
     <%= render(partial: "#{help_controller}/search/help") if help_controller %>
   <% end %>
 <% else %>
-
-  <strong class="navbar-text mx-2 text-nowrap">
-    <%= :app_login_reminder.t %>:
-  </strong>
-
+  <%= tag.strong(:app_login_reminder.t,
+                 class: "navbar-text mx-2 text-nowrap") %>
 <% end %>

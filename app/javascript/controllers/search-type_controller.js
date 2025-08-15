@@ -3,7 +3,10 @@ import { get } from "@rails/request.js" // allows us to call `get` below
 
 // Connects to data-controller="search-type"
 export default class extends Controller {
-  static targets = ["select", "help", "button"]
+  // targetHelp is the collapse div where help text will be rendered
+  static targets = ["select", "help", "toggle"]
+  // types are the
+  static values = { helpTypes: Array }
 
   connect() {
     this.element.dataset.searchType = "connected";
@@ -14,32 +17,32 @@ export default class extends Controller {
     event.stopPropagation()
 
     const url = this.endpointUrl()
-    console.log(`got url ${url}`);
+    // console.log(`got url ${url}`);
 
     if (!url) {
-      this.emptyHelp()
+      this.hideHelp()
       return
     }
 
     const response = await get(url, { responseKind: "turbo-stream" });
     if (response.ok) {
       // Turbo updates the element in the page already
-      this.buttonTarget.classList.remove("d-none")
+      this.toggleTarget.classList.remove("d-none")
     } else {
       console.log(`got a ${response.status}`);
     }
   }
 
-  emptyHelp() {
+  // Both empties the collapse div and hides the toggle, to avoid confusion
+  hideHelp() {
     this.helpTarget.innerHTML = ""
-    this.buttonTarget.classList.add("d-none")
+    this.toggleTarget.classList.add("d-none")
   }
 
   endpointUrl() {
-    const controller = this.selectTarget.value,
-      havingHelp = ["names", "observations"]
+    const controller = this.selectTarget.value
 
-    if (!controller || !havingHelp.includes(controller)) {
+    if (!controller || !this.helpTypesValue.includes(controller)) {
       return null
     }
 
