@@ -153,6 +153,10 @@ class SearchControllerTest < FunctionalTestCase
     get(:pattern, params: params)
     assert_redirected_to("/")
 
+    params = { pattern_search: { pattern: "x", type: nil } }
+    get(:pattern, params: params)
+    assert_redirected_to("/")
+
     params = { pattern_search: { pattern: "", type: :observations } }
     get(:pattern, params: params)
     assert_redirected_to(observations_path)
