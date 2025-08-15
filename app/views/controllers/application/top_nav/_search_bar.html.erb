@@ -12,8 +12,7 @@ form_group_class = class_names(
 %>
 
 <% if @user %>
-  <%= tag.div(class: "navbar-flex w-100 gap-2",
-              data: { controller: "search-type" }) do %>
+  <%= tag.div(class: "navbar-flex w-100 gap-2") do %>
 
     <%= tag.button(
       link_icon(:info, title: :search_bar_help.t),
@@ -68,7 +67,8 @@ form_group_class = class_names(
 
   <% end %>
 
-  <%= tag.div(class: "collapse w-100", id: "search_nav_help") do %>
+  <%= tag.div(class: "collapse w-100", id: "search_nav_help",
+              data: { search_type_target: "help" }) do %>
     <%= render(partial: "#{help_controller}/search/help") if help_controller %>
   <% end %>
 <% else %>

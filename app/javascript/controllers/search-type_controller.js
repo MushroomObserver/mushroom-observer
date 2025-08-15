@@ -3,7 +3,7 @@ import { get } from "@rails/request.js" // allows us to call `get` below
 
 // Connects to data-controller="search-type"
 export default class extends Controller {
-  static targets = ["select"]
+  static targets = ["select", "help"]
 
   connect() {
     this.element.dataset.searchType = "connected";
@@ -16,7 +16,10 @@ export default class extends Controller {
     const url = this.endpointUrl()
     console.log(`got url ${url}`);
 
-    if (!url) return
+    if (!url) {
+      this.emptyHelp()
+      return
+    }
 
     const response = await get(url, { responseKind: "turbo-stream" });
     if (response.ok) {
@@ -24,6 +27,10 @@ export default class extends Controller {
     } else {
       console.log(`got a ${response.status}`);
     }
+  }
+
+  emptyHelp() {
+    this.helpTarget.innerHTML = ""
   }
 
   endpointUrl() {

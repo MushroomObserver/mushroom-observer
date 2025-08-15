@@ -45,7 +45,8 @@ identify_page = controller.controller_name == "identify"
   <% end %>
 
   <%= tag.div(class: search_nav_classes) do %>
-    <%= tag.div(class: "collapse w-100", id: "search_nav") do %>
+    <%= tag.div(class: "collapse w-100", id: "search_nav",
+                data: { controller: "search-type" }) do %>
       <% if identify_page %>
         <%= render(partial: "observations/identify/form_identify_filter") %>
       <% else %>
