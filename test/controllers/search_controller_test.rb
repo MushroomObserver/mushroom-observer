@@ -92,39 +92,39 @@ class SearchControllerTest < FunctionalTestCase
 
   def test_pattern_search
     login
-    params = { pattern_search: { pattern: "12", type: :observation } }
+    params = { pattern_search: { pattern: "12", type: :observations } }
     get(:pattern, params: params)
     assert_redirected_to(observations_path(pattern: "12"))
 
-    params = { pattern_search: { pattern: "34", type: :image } }
+    params = { pattern_search: { pattern: "34", type: :images } }
     get(:pattern, params: params)
     assert_redirected_to(images_path(pattern: "34"))
 
-    params = { pattern_search: { pattern: "56", type: :name } }
+    params = { pattern_search: { pattern: "56", type: :names } }
     get(:pattern, params: params)
     assert_redirected_to(names_path(pattern: "56"))
 
-    params = { pattern_search: { pattern: "78", type: :location } }
+    params = { pattern_search: { pattern: "78", type: :locations } }
     get(:pattern, params: params)
     assert_redirected_to(locations_path(pattern: "78"))
 
-    params = { pattern_search: { pattern: "90", type: :comment } }
+    params = { pattern_search: { pattern: "90", type: :comments } }
     get(:pattern, params: params)
     assert_redirected_to(comments_path(pattern: "90"))
 
-    params = { pattern_search: { pattern: "21", type: :project } }
+    params = { pattern_search: { pattern: "21", type: :projects } }
     get(:pattern, params: params)
     assert_redirected_to(projects_path(pattern: "21"))
 
-    params = { pattern_search: { pattern: "12", type: :species_list } }
+    params = { pattern_search: { pattern: "12", type: :species_lists } }
     get(:pattern, params: params)
     assert_redirected_to(species_lists_path(pattern: "12"))
 
-    params = { pattern_search: { pattern: "34", type: :user } }
+    params = { pattern_search: { pattern: "34", type: :users } }
     get(:pattern, params: params)
     assert_redirected_to(users_path(pattern: "34"))
 
-    params = { pattern_search: { pattern: "34", type: :glossary_term } }
+    params = { pattern_search: { pattern: "34", type: :glossary_terms } }
     get(:pattern, params: params)
     assert_redirected_to(glossary_terms_path(pattern: "34"))
 
@@ -144,13 +144,13 @@ class SearchControllerTest < FunctionalTestCase
     get(:pattern, params: params)
     assert_redirected_to("/")
 
-    params = { pattern_search: { pattern: "", type: :observation } }
+    params = { pattern_search: { pattern: "", type: :observations } }
     get(:pattern, params: params)
     assert_redirected_to(observations_path)
 
     # Make sure this redirects to the index that lists all herbaria,
     # rather than the index that lists query results.
-    params = { pattern_search: { pattern: "", type: :herbarium } }
+    params = { pattern_search: { pattern: "", type: :herbaria } }
     get(:pattern, params: params)
     assert_redirected_to(herbaria_path)
   end
