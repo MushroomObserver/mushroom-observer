@@ -19,7 +19,13 @@ class SearchController < ApplicationController
   #   /species_lists/index
   def pattern
     pattern = params.dig(:pattern_search, :pattern) { |p| p.to_s.strip_squeeze }
-    type = params.dig(:pattern_search, :type)&.to_sym
+    unless (type = params.dig(:pattern_search, :type))
+      flash_and_redirect_invalid_search(type) and return
+    end
+
+    # Temporary 2025-08-14: safe-pluralize the type (will not double-pluralize)
+    # When reverting, also remove the `unless` block above.
+    type = type.to_s.pluralize.to_sym
 
     # Save it so that we can keep it in the search bar in subsequent pages.
     session[:pattern] = pattern

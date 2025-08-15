@@ -505,6 +505,8 @@ MushroomObserver::Application.routes.draw do
 
   # ----- Names: a lot of actions  ----------------------------
   namespace :names do
+    resource :search, only: [:show]
+
     # Approve Name Tracker: GET endpoint for admin email links
     get("trackers/:id/approve", to: "trackers/approve#new",
                                 as: "approve_tracker")
@@ -593,8 +595,9 @@ MushroomObserver::Application.routes.draw do
   # ----- Observations: standard actions  ----------------------------
   namespace :observations do
     resources :downloads, only: [:new, :create]
+    resource :search, only: [:show]
 
-    # Not under resources :observations because the obs doesn't have an id yet
+    # uploads are not under resources because the obs doesn't have an id yet
     get("images/uploads/new", to: "images/uploads#new",
                               as: "new_image_upload_for")
     post("images/uploads", to: "images/uploads#create",

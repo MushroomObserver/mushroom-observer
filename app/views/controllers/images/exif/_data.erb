@@ -1,1 +1,5 @@
-<%= make_table(rows: @data, table_opts: { class: "table-striped mb-0" }) %>
+<%=
+tag.div(id: "exif_data_table") do
+  make_table(rows: @data, table_opts: { class: "table-striped mb-0" })
+end
+%>
