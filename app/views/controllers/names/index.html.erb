@@ -21,7 +21,7 @@ flash_error(@error) if @error && @objects.empty?
   <% if @objects.any? %>
     <% counts = Name.count_observations(@objects) %>
 
-    <%= tag.div(class: "list-group name-index") do %>
+    <%= tag.div(class: "list-group name-index mb-3") do %>
       <%= render(partial: "name", collection: @objects, as: :name,
                  locals: { counts: }) %>
     <% end %>

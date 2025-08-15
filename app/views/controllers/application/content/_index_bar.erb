@@ -1,24 +1,18 @@
 <%
 filters = content_for?(:filters) || content_for?(:filter_help)
-pagination = content_for?(:index_pagination)
 %>
 
-<% if filters || pagination %>
+<% if filters %>
   <%= tag.div(class: "row") do %>
     <%= tag.div(class: "col-xs-12") do %>
-      <%# Indexes: Query filter subtitle and pagination %>
-      <%= tag.div(id: "index_bar", class: "mb-3") do %>
+      <%# Indexes: Query filter subtitle %>
+      <%= tag.div(id: "index_bar", class: "mb-2") do %>
         <%= tag.div(class: "px-3 mt-2 mb-3") do
           if filters
             concat(yield(:filters)) if !content_for?(:banner_image)
             concat(yield(:filter_help))
           end
         end %>
-        <%# if pagination %>
-          <%# tag.div(class: "pagination-top navbar-flex px-3") do
-            concat(yield(:index_pagination))
-          end %>
-        <%# end %>
       <% end %>
     <% end %>
   <% end %>
