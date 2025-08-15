@@ -826,8 +826,8 @@ provisional_obs:
 
 old_name_obs:
   <<: *DEFAULTS
-  name: lactarius_subalpinus
-  text_name: Lactarius subalpinus
+  name: lactifluus_subalpinus
+  text_name: Lactifluus subalpinus
 
 #
 #

@@ -157,5 +157,5 @@ deprecated_name_obs_naming:
 old_name_obs_naming:
   user: dick
   observation: old_name_obs
-  name: lactarius_subalpinus
+  name: lactifluus_subalpinus
   vote_cache: <%= Vote.next_best_vote %>

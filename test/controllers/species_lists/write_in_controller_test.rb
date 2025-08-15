@@ -438,8 +438,8 @@ module SpeciesLists
     def test_update_species_list_chosen_update
       spl = species_lists(:unknown_species_list)
       spl.observations << observations(:old_name_obs)
-      name = names(:lactarius_subalpinus)
-      approved_name = names(:lactarius_alpinus)
+      name = names(:lactifluus_subalpinus)
+      approved_name = names(:lactifluus_alpinus)
       assert(spl.name_included?(name))
       assert_not(spl.name_included?(approved_name))
       params = {
