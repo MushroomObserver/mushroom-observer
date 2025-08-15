@@ -31,11 +31,19 @@ module Header
             class: "sorts dropdown-menu",
             aria: { labelledby: "sort_nav_toggle" }
           ) do
+            concat(sort_mobile_dropdown_header)
             links.compact.each do |link|
               concat(tag.li(link))
             end
           end
         ].safe_join
+      end
+    end
+
+    def sort_mobile_dropdown_header
+      tag.li(class: "visible-xs") do
+        tag.a("#{:sort_by_header.l}:",
+              href: "#", disabled: true, class: "opacity-75")
       end
     end
 
