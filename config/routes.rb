@@ -595,7 +595,7 @@ MushroomObserver::Application.routes.draw do
   # ----- Observations: standard actions  ----------------------------
   namespace :observations do
     resources :downloads, only: [:new, :create]
-    resource :search, only: [:show, :new, :create]
+    resource :search, only: [:show]
 
     # uploads are not under resources because the obs doesn't have an id yet
     get("images/uploads/new", to: "images/uploads#new",

@@ -9,8 +9,5 @@ module Observations
     include ::Searchable
 
     before_action :login_required
-
-    def show
-    end
   end
 end

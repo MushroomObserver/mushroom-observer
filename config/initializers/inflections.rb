@@ -32,5 +32,6 @@ ActiveSupport::Inflector.inflections(:en) do |inflect|
   inflect.irregular("bonus", "bonuses")
   inflect.irregular("info", "info")
   inflect.irregular("google", "google")
+  inflect.irregular("search", "search")
   inflect.irregular("user_stats", "user_stats")
 end

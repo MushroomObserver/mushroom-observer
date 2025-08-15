@@ -13,6 +13,18 @@ module Searchable
   extend ActiveSupport::Concern
 
   included do
+    def show
+      respond_to do |format|
+        format.turbo_stream do
+          render(turbo_stream: turbo_stream.update(
+            :search_nav_help, # id of element to update contents of
+            partial: "#{parent_controller}/search/help"
+          ))
+        end
+        format.html
+      end
+    end
+
     private
 
     def parent_controller

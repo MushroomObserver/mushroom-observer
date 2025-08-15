@@ -8,7 +8,8 @@ require("test_helper")
 module Observations
   class SearchControllerTest < FunctionalTestCase
     def test_show
-      login("rolf")
+      login
+      get(:show)
     end
   end
 end
