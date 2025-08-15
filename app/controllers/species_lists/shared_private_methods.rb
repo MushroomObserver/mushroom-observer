@@ -181,6 +181,29 @@ module SpeciesLists
       end
     end
 
+    # Called by the actions which use create/edit_species_list form.
+    # It grabs a list of names to list with checkboxes in the
+    # left-hand column of the form.  By default it looks up a query
+    # stored in the session (you can for example "save" another
+    # species_list "for later" for this purpose).  The result is
+    # an Array of names where the values are [display_name, name_id].
+    # This is destined for the instance variable @checklist.
+    def calc_checklist(query = nil)
+      return unless query ||= query_from_session
+
+      results = case query.model.name
+                when "Name"
+                  checklist_from_name_query(query)
+                when "Observation"
+                  checklist_from_observation_query(query)
+                when "Location"
+                  checklist_from_location_query(query)
+                when "RssLog"
+                  checklist_from_rss_log_query(query)
+                end
+      results.pluck(Name[:display_name], Name[:id])
+    end
+
     def clean_notes(notes_in)
       return {} if notes_in.blank?
 
