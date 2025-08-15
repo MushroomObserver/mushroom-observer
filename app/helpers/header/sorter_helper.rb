@@ -15,11 +15,27 @@ module Header
       title = sort_nav_order_by(query, sorts)
 
       content_for(:sorter) do
-        tag.div(class: "d-inline-block pl-3 sorter") do
-          concat(tag.label("#{:sort_by_header.l}:",
-                           class: "font-weight-normal mr-2 hidden-xs"))
+        tag.div(class: "navbar-flex pl-3 sorter") do
+          concat(tag.div("#{:sort_by_header.l}:",
+                         class: "navbar-text mx-0 hidden-xs"))
           concat(sort_nav_dropdown(title:, links:))
         end
+      end
+    end
+
+    def sort_nav_dropdown(title: "", links: [])
+      tag.div(class: "dropdown d-inline-block navbar-form px-2") do
+        [
+          sort_nav_toggle(title),
+          tag.ul(
+            class: "sorts dropdown-menu",
+            aria: { labelledby: "sort_nav_toggle" }
+          ) do
+            links.compact.each do |link|
+              concat(tag.li(link))
+            end
+          end
+        ].safe_join
       end
     end
 
@@ -92,22 +108,6 @@ module Header
       return ctlr unless model && ctlr != "contributors"
 
       model.underscore.pluralize
-    end
-
-    def sort_nav_dropdown(title: "", links: [])
-      tag.div(class: "dropdown d-inline-block") do
-        [
-          sort_nav_toggle(title),
-          tag.ul(
-            class: "sorts dropdown-menu",
-            aria: { labelledby: "sort_nav_toggle" }
-          ) do
-            links.compact.each do |link|
-              concat(tag.li(link))
-            end
-          end
-        ].safe_join
-      end
     end
 
     def sort_nav_toggle(title)

@@ -6,14 +6,13 @@ module Header
     LETTERS = ("A".."Z")
 
     def add_pagination(pagination_data, args = {})
-      content_for(:index_pagination) do
-        concat(tag.div do
-          concat(content_for(:sorter)) if content_for?(:sorter)
-        end)
-        concat(tag.div(class: "d-flex") do
-          concat(letter_pagination_nav(pagination_data, args))
-          concat(number_pagination_nav(pagination_data, args))
-        end)
+      content_for(:index_pagination_top) do
+        index_pagination(pagination_data, args, position: :top)
+      end
+      return unless pagination_data.num_pages > 1
+
+      content_for(:index_pagination_bottom) do
+        index_pagination(pagination_data, args, position: :bottom)
       end
     end
 
@@ -30,17 +29,21 @@ module Header
       results = capture(&block).to_s
 
       tag.div(id: html_id, data: { q: get_query_param }) do
-        concat(bottom_pagination)
+        concat(content_for(:index_pagination_top))
         concat(results)
-        concat(bottom_pagination)
+        concat(content_for(:index_pagination_bottom))
       end
     end
 
-    def bottom_pagination
-      return "" unless content_for?(:index_pagination)
-
-      tag.div(class: "pagination-bottom navbar-flex") do
-        content_for(:index_pagination)
+    def index_pagination(pagination_data, args = {}, position: :top)
+      tag.div(class: "pagination-#{position} navbar-flex mb-2") do
+        concat(tag.div(class: "d-flex") do
+          concat(content_for(:sorter)) if content_for?(:sorter)
+        end)
+        concat(tag.div(class: "d-flex") do
+          concat(letter_pagination_nav(pagination_data, args))
+          concat(number_pagination_nav(pagination_data, args))
+        end)
       end
     end
 
