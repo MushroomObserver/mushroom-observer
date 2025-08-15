@@ -435,6 +435,28 @@ module SpeciesLists
       assert(spl.name_included?(approved_name))
     end
 
+    def test_update_species_list_chosen_update
+      spl = species_lists(:unknown_species_list)
+      spl.observations << observations(:old_name_obs)
+      name = names(:lactarius_subalpinus)
+      approved_name = names(:lactarius_alpinus)
+      assert(spl.name_included?(name))
+      assert_not(spl.name_included?(approved_name))
+      params = {
+        id: spl.id,
+        list: { members: name.text_name },
+        member: { notes: Observation.no_notes },
+        approved_deprecated_names: name.id.to_s,
+        chosen_approved_names: { name.id.to_s => approved_name.id.to_s }
+      }
+      login(spl.user.login)
+      post(:create, params: params)
+      spl.reload
+      assert_redirected_to(species_list_path(spl.id))
+      assert_not(spl.name_included?(name))
+      assert(spl.name_included?(approved_name))
+    end
+
     def test_update_species_list_multiple_match
       spl = species_lists(:unknown_species_list)
       sp_count = spl.observations.size

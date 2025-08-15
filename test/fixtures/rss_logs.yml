@@ -528,3 +528,11 @@ article_rss_log:
 provisional_obs_rss_log:
   <<: *DEFAULTS
   observation: provisional_obs
+
+provisional_obs_rss_log:
+  <<: *DEFAULTS
+  observation: provisional_obs
+
+old_name_obs_rss_log:
+  <<: *DEFAULTS
+  observation: old_name_obs

@@ -163,7 +163,19 @@ module SpeciesLists
           # (compensate for gsub in _form_species_lists)
           next unless (alt_name_id = chosen_names[naming.name_id.to_s])
 
+          # Getting here means there is an Observation in the SpeciesList
+          # that is currently using a Name that the user has chosen against.
+          # The code for updating the Naming has been here for a long time
+          # but not covered by tests.  Adding a test revealed a bug where
+          # the Observation name was not getting updated.  Should we even
+          # be doing this in the write in species UI?  If so,
+          # should there be a method on Observation or Naming to
+          # do the following?
           alt_name = Name.find(alt_name_id)
+          if observation.name == naming.name
+            observation.name = alt_name
+            observation.save
+          end
           naming.name = alt_name
           naming.save
         end
