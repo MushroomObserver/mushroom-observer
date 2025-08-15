@@ -191,17 +191,13 @@ module SpeciesLists
     def calc_checklist(query = nil)
       return unless query ||= query_from_session
 
-      results = case query.model.name
-                when "Name"
-                  checklist_from_name_query(query)
-                when "Observation"
-                  checklist_from_observation_query(query)
-                when "Location"
-                  checklist_from_location_query(query)
-                when "RssLog"
-                  checklist_from_rss_log_query(query)
-                end
+      results = checklist_from_observation_query(query) if query.model.name == "Observation"
       results.pluck(Name[:display_name], Name[:id])
+    end
+
+    def checklist_from_observation_query(query)
+      query.scope.joins(:name).
+        select(Name[:display_name], Name[:id]).distinct.limit(1000)
     end
 
     def clean_notes(notes_in)
