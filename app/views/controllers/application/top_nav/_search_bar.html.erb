@@ -8,6 +8,8 @@ identify_page = controller.controller_name == "identify"
 form_group_class = class_names(
   %w[form-group has-feedback has-search d-flex flex-grow-1 mb-0]
 )
+help_classes = %w[btn btn-link navbar-link px-2]
+help_classes << "d-none" unless help_controller
 # Fields have attributes nested under search via fields_for, eg search[:type]
 %>
 
@@ -16,8 +18,10 @@ form_group_class = class_names(
 
     <%= tag.button(
       link_icon(:info, title: :search_bar_help.t),
-      class: class_names("btn btn-link navbar-link px-2"), type: :button,
-      data: { toggle: "collapse", target: "#search_nav_help" },
+      class: class_names(help_classes),
+      type: :button,
+      data: { toggle: "collapse", target: "#search_nav_help",
+              search_type_target: "button" },
       aria: { expanded: "false", controls: "search_nav_help" }
     ) %>
 
