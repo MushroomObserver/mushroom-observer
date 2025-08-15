@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 # private methods shared by SpeciesListsController and subcontrollers
-# rubocop:disable Metrics/ModuleLength
 module SpeciesLists
   module SharedPrivateMethods
     ############################################################################
@@ -192,15 +191,6 @@ module SpeciesLists
       notes_out
     end
 
-    def find_chosen_name(id, alternatives)
-      if alternatives &&
-         (alt_id = alternatives[id.to_s])
-        Name.find(alt_id)
-      else
-        Name.find(id)
-      end
-    end
-
     def re_render_appropriate_form(create_or_update)
       case create_or_update
       when :create
@@ -226,31 +216,6 @@ module SpeciesLists
       @deprecated_names = sorter.deprecated_names.uniq.sort_by(&:search_name)
       @list_members = sorter.all_line_strs.join("\r\n")
       @place_name = spl.place_name
-    end
-
-    def init_member_notes_for_edit(observations)
-      if all_obs_same_attr?(observations, :notes)
-        obs = observations.last
-        obs.form_notes_parts(@user).each do |part|
-          @member_notes[part.to_sym] = obs.notes_part_value(part)
-        end
-      else
-        @species_list.form_notes_parts(@user).each do |part|
-          @member_notes[part.to_sym] = ""
-        end
-      end
-    end
-
-    def all_obs_same_lat_lon_alt?(observations)
-      all_obs_same_attr?(observations, :lat) &&
-        all_obs_same_attr?(observations, :lng) &&
-        all_obs_same_attr?(observations, :alt)
-    end
-
-    # Do all observations have same values for the single given attribute?
-    def all_obs_same_attr?(observations, attr)
-      exemplar = observations.first.send(attr)
-      observations.all? { |o| o.send(attr) == exemplar }
     end
 
     def init_member_vars_for_reload
@@ -333,15 +298,5 @@ module SpeciesLists
     def permitted_species_list_args
       ["when(1i)", "when(2i)", "when(3i)", :place_name, :title, :notes]
     end
-
-    def bulk_editor_new_val(attr, val)
-      case attr
-      when :is_collection_location, :specimen
-        val == "1"
-      else
-        val
-      end
-    end
   end
 end
-# rubocop:enable Metrics/ModuleLength

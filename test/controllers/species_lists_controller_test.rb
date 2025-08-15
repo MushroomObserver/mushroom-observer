@@ -388,6 +388,14 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
+  def test_clone_species_list
+    login
+    spl = species_lists(:unknown_species_list)
+    get(:new, params: { clone: spl.id} )
+    assert_response(:success)
+    assert_match(spl.where, @response.body)
+  end
+
   # Test constructing species_lists in various ways.
   def test_construct_species_list
     list_title = "List Title"
