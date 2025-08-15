@@ -68,18 +68,22 @@ class SearchController < ApplicationController
     case type
     when :google
       site_google_search(pattern)
-    when :comment, :glossary_term, :herbarium, :herbarium_record, :image,
-         :location, :name, :observation, :project, :species_list, :user
+
+    when :comments, :glossary_terms, :herbaria, :herbarium_records, :images,
+         :locations, :names, :observations, :projects, :species_lists, :users
       redirect_to_search_or_index(
         pattern: pattern,
-        search_path: send(:"#{type.to_s.pluralize}_path",
-                          params: { pattern: pattern }),
-        index_path: send(:"#{type.to_s.pluralize}_path")
+        search_path: send(:"#{type}_path", params: { pattern: pattern }),
+        index_path: send(:"#{type}_path")
       )
     else
-      flash_error(:runtime_invalid.t(type: :search, value: type.inspect))
-      redirect_back_or_default("/")
+      flash_and_redirect_invalid_search(type) and return
     end
+  end
+
+  def flash_and_redirect_invalid_search(type)
+    flash_error(:runtime_invalid.t(type: :search, value: type.inspect))
+    redirect_back_or_default("/")
   end
 
   # NOTE: The autocompleters for name, location, and user all make the ids
