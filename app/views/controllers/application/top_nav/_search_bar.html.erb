@@ -1,23 +1,9 @@
 <%
-options = [
-  [:COMMENTS.l, :comments],
-  [:GLOSSARY.l, :glossary_terms],
-  [:HERBARIA.l, :herbaria],
-  # Temporarily disabled for performance reasons. 2021-09-12 JDC
-  # [:IMAGES.l, :images],
-  [:LOCATIONS.l, :locations],
-  [:NAMES.l, :names],
-  [:OBSERVATIONS.l, :observations],
-  [:PROJECTS.l, :projects],
-  [:SPECIES_LISTS.l, :species_lists],
-  [:HERBARIUM_RECORDS.l, :herbarium_records],
-  [:USERS.l, :users],
-  [:app_search_google.l, :google],
-].sort
 # Temporary 2025-08-14: safe-pluralize the type (will not double-pluralize)
 # When removing just revert to `session[:search_type]`
 default = session[:search_type]&.to_s&.pluralize&.to_sym
-search_options = options_for_select(options, default || :observations)
+search_options = options_for_select(search_type_options,
+                                    default || :observations)
 identify_page = controller.controller_name == "identify"
 icon_class = class_names(%w[btn navbar-link px-0])
 form_group_class = class_names(
