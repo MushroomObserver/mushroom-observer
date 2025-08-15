@@ -9,7 +9,7 @@ module Header
       content_for(:index_pagination_top) do
         index_pagination(pagination_data, args, position: :top)
       end
-      return unless pagination_data.num_pages > 1
+      return unless pagination_data && pagination_data.num_pages > 1
 
       content_for(:index_pagination_bottom) do
         index_pagination(pagination_data, args, position: :bottom)
