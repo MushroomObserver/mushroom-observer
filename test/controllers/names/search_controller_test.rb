@@ -10,6 +10,7 @@ module Names
     def test_show
       login
       get(:show)
+      assert_template("names/search/_help")
     end
 
     def test_new_names_search
