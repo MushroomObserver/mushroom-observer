@@ -3,6 +3,8 @@
 
   <%= submit_button(form: f, button: button.l, center: true) %>
 
+  <%= hidden_field_tag(:clone_id, @clone_id) if @clone_id %>
+
   <%= text_field_with_label(form: f, field: :title,
                             label: "#{:form_species_lists_title.l}:") %>
 

@@ -181,25 +181,6 @@ module SpeciesLists
       end
     end
 
-    # Called by the actions which use create/edit_species_list form.
-    # It grabs a list of names to list with checkboxes in the
-    # left-hand column of the form.  By default it looks up a query
-    # stored in the session (you can for example "save" another
-    # species_list "for later" for this purpose).  The result is
-    # an Array of names where the values are [display_name, name_id].
-    # This is destined for the instance variable @checklist.
-    def calc_checklist(query = nil)
-      return unless query ||= query_from_session
-
-      results = checklist_from_observation_query(query) if query.model.name == "Observation"
-      results.pluck(Name[:display_name], Name[:id])
-    end
-
-    def checklist_from_observation_query(query)
-      query.scope.joins(:name).
-        select(Name[:display_name], Name[:id]).distinct.limit(1000)
-    end
-
     def clean_notes(notes_in)
       return {} if notes_in.blank?
 
@@ -222,7 +203,7 @@ module SpeciesLists
     def init_list_for_clone(clone_id)
       return unless (clone = SpeciesList.safe_find(clone_id))
 
-      create_query(:Observation, species_lists: clone)
+      @clone_id = clone_id
       @species_list.when = clone.when
       @species_list.place_name = clone.place_name
       @species_list.location = clone.location

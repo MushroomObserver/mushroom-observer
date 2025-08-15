@@ -218,6 +218,7 @@ class SpeciesListsController < ApplicationController
     redirected = false
     if @dubious_where_reasons == []
       if @species_list.save
+        check_for_clone
         redirected = update_redirect_and_flash_notices(create_or_update)
       else
         flash_object_errors(@species_list)
@@ -229,11 +230,24 @@ class SpeciesListsController < ApplicationController
     re_render_appropriate_form(create_or_update)
   end
 
+  def check_for_clone
+    clone = SpeciesList.safe_find(params[:clone_id])
+    return if clone.blank?
+
+    clone.observations.each do |obs|
+      @species_list.observations << obs
+    end
+  end
+
   def init_basic_species_list_fields(create_or_update)
     now = Time.zone.now
     @species_list.created_at = now if create_or_update == :create
     @species_list.updated_at = now
     @species_list.user = @user
+    apply_species_list_params
+  end
+
+  def apply_species_list_params
     if params[:species_list]
       args = params[:species_list]
       @species_list.attributes = args.permit(permitted_species_list_args)
