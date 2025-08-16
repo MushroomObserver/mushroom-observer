@@ -51,8 +51,9 @@ module Searchable
       false
     end
 
-    # should be new_query_instance. clear_form should update the current query,
-    # removing params that wouldn't be in the form (like subqueries)
+    # Should be new_query_instance. clear_form should update the current query,
+    # removing params that wouldn't be in the form (like subqueries).
+    # Need to parse and prepopulate range fields if there is a query.
     def new_search_instance_from_query
       @search = if (@query = find_query(query_model))&.params.present?
                   query_subclass.new(
@@ -63,6 +64,11 @@ module Searchable
                 end
     end
 
+    # The controller needs to nest nested params? and concatenate range fields.
+    # We need to permit nested? and range params at the top level to render the
+    # form easily, but then we have to catch them here and parse them
+    # and remove them from the Query params.
+    # Need `permitted_query_params` separate from `permitted_search_params`.
     def validate_search_instance_from_form_params
       @search = query_subclass.new(
         params.permit(permitted_search_params.keys)

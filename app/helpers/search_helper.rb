@@ -74,16 +74,19 @@ module SearchHelper
     args = { form:, search:, field: }
     args[:label] ||= search_label(field)
     field_type = search_field_type_from_controller(field:)
+    # TODO: fix this, component should be field_type
     component = SEARCH_FIELD_HELPERS[field_type][:component]
     return unless component
 
     # Prepare args for the field helper.
     args = prepare_args_for_search_field(args, field_type, component)
+    if field_type == :multiple_autocompleter
+      args[:type] = field == :project_lists ? :project : :field
+    end
     # Re-add :sections for conditional fields.
-    if component == :search_autocompleter_with_conditional_fields
+    if [:names_fields_for_names, :names_fields_for_obs].include?(field_type)
       args = args.merge(sections:, search:)
     end
-    return search_region_with_compass_fields(**args) if field == :region
 
     send(component, **args)
   end
@@ -110,6 +113,7 @@ module SearchHelper
     permitted[field]
   end
 
+  # TODO: fix this, component should be field_type
   # Prepares HTML args for the field helper. This is where we can make
   # adjustments to the args hash before passing it to the field helper.
   # NOTE: Bootstrap 3 can't do full-width inline label/field.
@@ -124,6 +128,7 @@ module SearchHelper
     SEARCH_FIELD_HELPERS[field_type][:args].merge(args.except(:search))
   end
 
+  # TODO: fix this, needs query tags not pattern search term tags
   def search_help_text(args, field_type)
     component = SEARCH_FIELD_HELPERS[field_type][:component]
     multiple_note = if component == :autocompleter_field
@@ -155,31 +160,73 @@ module SearchHelper
   #
   # FIELD HELPERS
   #
+  def multiple_value_autocompleter(**args)
+    args[:type] = args[:field] == :project_lists ? :project : :field
+    args[:separator] = SEARCH_SEPARATOR
+    autocompleter_field(**args)
+  end
+
+  def names_fields_for_names(**args)
+    rows = [[:has_synonyms, :include_synonyms],
+            [:include_subtaxa, :include_immediate_subtaxa]]
+    capture do
+      fields_for(:names) do |f_n|
+        concat(
+          multiple_value_autocompleter(**args, form: f_n, field: :lookup)
+        )
+        concat(
+          rows.each do |field|
+            concat(search_row(form: f_n, field:, search:, sections:))
+          end
+        )
+      end
+    end
+  end
+
+  def names_fields_for_obs(**args)
+    rows = [[:include_synonyms, :include_subtaxa],
+            [:include_all_name_proposals, :exclude_consensus]]
+    search = args[:search]
+
+    capture do
+      fields_for(:names) do |f_n|
+        autocompleter_with_conditional_fields(
+          form: f_n, field: :lookup, search:, sections: rows
+        )
+      end
+    end
+  end
+
   # Complex mechanism: append collapsed fields to autocompleter that only appear
-  # when autocompleter has a value. Only on the name field.
-  def search_autocompleter_with_conditional_fields(**args)
+  # when autocompleter has a value. Only on names fields, for lookup modifiers.
+  def autocompleter_with_conditional_fields(**args)
     return if args[:sections].blank?
 
-    # rightward destructuring assignment ruby 3 feature
-    args => { form:, search:, sections: }
-    append = search_conditional_rows(form:, search:, sections:)
-    autocompleter_field(**args.except(:sections, :search), append:)
+    # rightward destructuring assignment, Ruby 3 feature
+    args => { form:, field:, search:, sections: }
+    # If there are conditional rows that should appear if user input, add these
+    append = autocompleter_conditional_rows(form:, search:, sections:)
+    multiple_value_autocompleter(form:, field:, append:)
   end
 
   # Rows that only uncollapse if an autocompleter field has a value.
   # Note the data-autocompleter-target attribute.
-  def search_conditional_rows(form:, search:, sections:)
+  def autocompleter_conditional_rows(form:, search:, sections:)
     capture do
       tag.div(data: { autocompleter_target: "collapseFields" },
               class: "collapse") do
-        sections[:conditional].each do |field|
+        sections.each do |field|
           concat(search_row(form:, field:, search:, sections:))
         end
       end
     end
   end
 
-  def search_yes_field(**)
+  def box_fields(**)
+    # use form_compass_input_group
+  end
+
+  def select_yes(**)
     options = [
       ["", nil],
       ["yes", "yes"]
@@ -187,7 +234,7 @@ module SearchHelper
     select_with_label(options:, inline: true, **)
   end
 
-  def search_boolean_field(**)
+  def select_boolean(**)
     options = [
       ["", nil],
       ["yes", "yes"],
@@ -196,7 +243,7 @@ module SearchHelper
     select_with_label(options:, inline: true, **)
   end
 
-  def search_yes_no_both_field(**)
+  def select_misspellings(**)
     options = [
       ["", nil],
       ["yes", "yes"],
@@ -206,7 +253,7 @@ module SearchHelper
     select_with_label(options:, inline: true, **)
   end
 
-  def search_rank_range_field(**args)
+  def select_rank_range(**args)
     [
       tag.div(class: "d-inline-block mr-4") do
         select_with_label(**search_rank_args(args))
@@ -230,7 +277,7 @@ module SearchHelper
     )
   end
 
-  def search_confidence_range_field(**args)
+  def select_confidence_range(**args)
     confidences = Vote.opinion_menu.map { |k, v| [k, Vote.percent(v)] }
     [
       tag.div(class: "d-inline-block mr-4") do
@@ -255,7 +302,7 @@ module SearchHelper
     )
   end
 
-  def search_region_with_compass_fields(**args)
+  def region_with_compass_fields(**args)
     tag.div(data: { controller: "map", map_open: true }) do
       [
         form_location_input_find_on_map(form: args[:form], field: :region,
@@ -289,17 +336,17 @@ module SearchHelper
     end
   end
 
-  def search_longitude_field(**args)
-    text_field_with_label(
-      **args.except(:search), between: "(-180.0 to 180.0)"
-    )
-  end
+  # def search_longitude_field(**args)
+  #   text_field_with_label(
+  #     **args.except(:search), between: "(-180.0 to 180.0)"
+  #   )
+  # end
 
-  def search_latitude_field(**args)
-    text_field_with_label(
-      **args.except(:search), between: "(-90.0 to 90.0)"
-    )
-  end
+  # def search_latitude_field(**args)
+  #   text_field_with_label(
+  #     **args.except(:search), between: "(-90.0 to 90.0)"
+  #   )
+  # end
 
   def search_column_classes
     "col-xs-12 col-sm-6 col-md-12 col-lg-6"
@@ -310,14 +357,10 @@ module SearchHelper
 
   # Convenience for subclasses to access helper methods via subclass.params
   SEARCH_FIELD_HELPERS = {
-    pattern: { component: :text_field_with_label, args: {} },
-    yes: { component: :search_yes_field, args: {} },
-    boolean: { component: :search_boolean_field, args: {} },
-    yes_no_both: { component: :search_yes_no_both_field, args: {} },
-    date_range: { component: :search_date_range_field, args: {} },
-    rank_range: { component: :search_rank_range_field, args: {} },
-    string: { component: :text_field_with_label, args: {} },
-    list_of_strings: { component: :text_field_with_label, args: {} },
+    text_field: { component: :text_field_with_label, args: {} },
+    select_yes: { component: :search_yes_field, args: {} },
+    select_boolean: { component: :search_boolean_field, args: {} },
+    select_rank_range: { component: :search_rank_range_field, args: {} },
     list_of_herbaria: { component: :autocompleter_field,
                         args: { type: :herbarium,
                                 separator: SEARCH_SEPARATOR } },
