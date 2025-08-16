@@ -6,6 +6,7 @@
 module SearchHelper
   # Filter panel for a search form. Sections are shown and collapsed.
   # If sections[:collapsed] is present, part of the panel will be collapsed.
+  # NOTE: the arg `:model` is the query type of the whole form, not the field.
   def search_panel(form:, search:, heading:, sections:, model:)
     shown = search_panel_shown(form:, search:, sections:, model:)
     collapsed = search_panel_collapsed(form:, search:, sections:, model:)
@@ -79,7 +80,7 @@ module SearchHelper
 
     # Prepare args for the field helper. Requires but removes args[:model].
     args = prepare_args_for_search_field(args, field_type, component)
-    # Re-add sections and model for conditional fields.
+    # Re-add :sections and :model for conditional fields.
     if component == :search_autocompleter_with_conditional_fields
       args = args.merge(sections:, model:, search:)
     end
@@ -107,8 +108,7 @@ module SearchHelper
       raise("No input defined for #{field} in #{controller.controller_name}")
     end
 
-    parser = subclass.params[field][1]
-    parser.to_s.gsub(/^parse_/, "").to_sym
+    permitted[field]
   end
 
   # Prepares HTML args for the field helper. This is where we can make

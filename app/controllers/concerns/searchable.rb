@@ -101,12 +101,26 @@ module Searchable
     # Passing some fields will raise an error if the required field is missing,
     # so just toss them.
     # def remove_invalid_field_combinations
-    #   return unless search_subclass.respond_to?(:fields_with_requirements)
+    #   return unless respond_to?(:fields_with_requirements)
 
-    #   search_subclass.fields_with_requirements.each do |req, fields|
-    #     next if @keywords[req].present?
+    #   fields_with_requirements.each do |req, fields|
+    #     next if @search[req].present?
 
-    #     fields.each { |field| @keywords.delete(field) }
+    #     fields.each { |field| @search.delete(field) }
+    #   end
+    # end
+
+    # Check for `fields_with_range`, and concatenate them if range val present,
+    # removing the `_range` field. Need to permit range fields.
+    # def concatenate_range_fields
+    #   return unless respond_to?(:fields_with_range)
+
+    #   fields_with_range.each do |key|
+    #     next if @search[:"#{key}_range"].blank?
+
+    #     @search[key] = [@search[key].to_s.strip,
+    #                     @search[:"#{key}_range"].to_s.strip].join("-")
+    #     @search.delete(:"#{key}_range")
     #   end
     # end
 
