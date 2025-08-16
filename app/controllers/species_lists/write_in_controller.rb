@@ -12,7 +12,7 @@ module SpeciesLists
     def create
       @species_list = SpeciesList.find(params[:id])
       if check_permission!(@species_list)
-        process_write_in_list(:create)
+        process_write_in_list
       else
         redirect_to(species_list_path(@species_list))
       end
@@ -48,11 +48,8 @@ module SpeciesLists
     #       val: id of name user has chosen (via radio boxes in feedback)
     # Bullet:
     # https://blog.appsignal.com/2018/06/19/activerecords-counter-cache.html
-    def process_write_in_list(create_or_update)
+    def process_write_in_list
       redirected = false
-
-      # Update the timestamps/user/when/where/title/notes fields.
-      # init_basic_species_list_fields(create_or_update)
 
       # Validate place name.
       validate_place_name
@@ -68,10 +65,6 @@ module SpeciesLists
       # Now let us count all the ways in which NameSorter can fail...
       failed = check_if_name_sorter_failed(sorter)
 
-      # Okay, at this point we've apparently validated the new list of names.
-      # Save the OTHER changes to the species_list, then let this other method
-      # (construct_observations) create the observations.  This always succeeds,
-      # so we can redirect to show_species_list (or chain to create location).
       if !failed && @dubious_where_reasons == []
         redirected = create_observations(sorter)
       end
@@ -82,7 +75,74 @@ module SpeciesLists
       init_name_vars_from_sorter(@species_list, sorter)
       init_member_vars_for_reload
       init_project_vars_for_reload(@species_list)
-      re_render_appropriate_form(create_or_update)
+      render(:new)
+    end
+
+    def list_without_underscores
+      params.dig(:list, :members).to_s.tr("_", " ").strip_squeeze
+    end
+
+    def check_if_name_sorter_failed(sorter)
+      result = new_synonyms?(sorter)
+      result = unrecognized_names?(sorter) || result
+      result = ambiguous_names?(sorter) || result
+      unapproved_deprecated_names?(sorter) || result
+    end
+
+    def new_synonyms?(sorter)
+      if sorter.has_new_synonyms
+        flash_error(:runtime_species_list_create_synonym.t)
+        sorter.reset_new_names
+        true
+      else
+        false
+      end
+    end
+
+    def unrecognized_names?(sorter)
+      if sorter.new_name_strs == []
+        false
+      else
+        if Rails.env.test?
+          x = sorter.new_name_strs.map(&:to_s).inspect
+          flash_error("Unrecognized names given: #{x}")
+        end
+        true
+      end
+    end
+
+    def ambiguous_names?(sorter)
+      if sorter.only_single_names
+        false
+      else
+        if Rails.env.test?
+          x = sorter.multiple_line_strs.map(&:to_s).inspect
+          flash_error("Ambiguous names given: #{x}")
+        end
+        true
+      end
+    end
+
+    def unapproved_deprecated_names?(sorter)
+      if sorter.has_unapproved_deprecated_names
+        if Rails.env.test?
+          x = sorter.deprecated_names.map(&:display_name).inspect
+          flash_error("Found deprecated names: #{x}")
+        end
+        true
+      else
+        false
+      end
+    end
+
+    def init_name_sorter(list)
+      sorter = NameSorter.new
+      sorter.add_chosen_names(params[:chosen_multiple_names])
+      sorter.add_chosen_names(params[:chosen_approved_names])
+      sorter.add_approved_deprecated_names(params[:approved_deprecated_names])
+      sorter.check_for_deprecated_names(@species_list.names) if @species_list.id
+      sorter.sort_names(@user, list)
+      sorter
     end
 
     def create_observations(sorter)
@@ -115,6 +175,23 @@ module SpeciesLists
 
       db_name = Location.user_format(@user, @place_name)
       @dubious_where_reasons = Location.dubious_name?(db_name, true)
+    end
+
+    def init_member_vars_for_reload
+      member_params = params[:member] || {}
+      @member_vote = member_params[:vote].to_s
+      @member_lat = member_params[:lat].to_s
+      @member_lng = member_params[:lng].to_s
+      @member_alt = member_params[:alt].to_s
+      calculated_member_vars_for_reload(member_params)
+    end
+
+    def calculated_member_vars_for_reload(member_params)
+      # cannot leave @member_notes == nil because view expects a hash
+      @member_notes = member_params[:notes] || Observation.no_notes
+      @member_is_collection_location =
+        member_params[:is_collection_location].to_s == "1"
+      @member_specimen = member_params[:specimen].to_s == "1"
     end
   end
 end
