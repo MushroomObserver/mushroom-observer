@@ -18,6 +18,7 @@ module Tabs
         species_list_download_tab(list),
         species_list_set_source_tab(list),
         clone_species_list_tab(list),
+        write_in_species_list_tab(list),
         species_list_add_remove_from_another_list_tab(list, query)
       ]
     end
@@ -92,6 +93,13 @@ module Tabs
       InternalLink::Model.new(
         :species_list_show_clone_list.t, list,
         add_query_param(new_species_list_path(clone: list.id))
+      ).tab
+    end
+
+    def write_in_species_list_tab(list)
+      InternalLink::Model.new(
+        :species_list_show_write_in.t, list,
+        add_query_param(new_species_list_write_in_path(id: list.id))
       ).tab
     end
 
