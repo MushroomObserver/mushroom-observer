@@ -106,8 +106,13 @@ class Inat
 
       { Collector: collector,
         snapshot_key => snapshot,
-        # strip p tags and ensure it's a string
-        Other: self[:description]&.gsub(%r{</?p>}, "").to_s }
+        Other: self[:description]&.
+          # strip p tags to avoid messing up textile and keep notes source clean
+          gsub(%r{</?p>}, "")&.
+          # compress newlines/returns to single newline because
+          # our textiling won't render anything after consecutive newlines
+          gsub(/[\n\r]+/, "\n").
+          to_s }
     end
 
     # min bounding rectangle of iNat location blurred by public accuracy

@@ -72,14 +72,14 @@ class InatObsTest < UnitTestCase
 
     # Observation form needs the Notes "parts keys to be normalized
     snapshot_key = Observation.notes_normalized_key(:inat_snapshot_caption.l)
-    expected_notes =
-      { Collector: "jdcohenesq",
-        snapshot_key => expected_snapshot,
-        Other: "on Quercus\n\n&#8212;\n\nOriginally posted " \
-               "to Mushroom Observer on Mar. 7, 2024." }
+    other = "on Quercus\n&#8212;\nOriginally posted " \
+            "to Mushroom Observer on Mar. 7, 2024."
+    expected_notes = { Collector: "jdcohenesq",
+                       snapshot_key => expected_snapshot,
+                       Other: other }
     assert_equal(
       expected_notes, mock_inat_obs.notes,
-      "MO notes should include: iNat Collector || login, iNat Description"
+      "MO notes should include: (iNat Collector || login) && iNat Description"
     )
 
     expect = License.where(License[:url] =~ "/by-nc/").
@@ -384,9 +384,18 @@ class InatObsTest < UnitTestCase
       mock_observation("trametes").notes[:Other],
       "iNat Description should be mapped to MO Notes Other"
     )
+
+    mock_obs = mock_observation("tremella_mesenterica")
     assert_equal(
-      "", mock_observation("tremella_mesenterica").notes[:Other],
+      "", mock_obs.notes[:Other],
       "Notes Other should be a blank String if iNat Description is empty"
+    )
+
+    mock_obs = mock_observation("tremella_mesenterica")
+    mock_obs[:description] = "before blank line\r\n\r\nafter blank line"
+    assert_equal(
+      "before blank line\nafter blank line", mock_obs.notes[:Other],
+      "Failed to compress consecutive newlines/returns in Notes[:Other]"
     )
   end
 
