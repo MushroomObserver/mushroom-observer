@@ -152,3 +152,10 @@ deprecated_name_obs_naming:
   observation: deprecated_name_obs
   name: petigera
   vote_cache: <%= Vote.next_best_vote %>
+
+# Just need an obs of deprecated name, trying to keep this out of queries
+old_name_obs_naming:
+  user: dick
+  observation: old_name_obs
+  name: lactifluus_subalpinus
+  vote_cache: <%= Vote.next_best_vote %>

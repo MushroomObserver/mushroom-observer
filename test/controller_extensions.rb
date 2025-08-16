@@ -51,6 +51,16 @@ module ControllerExtensions
   #
   ##############################################################################
 
+  NAME_SCORE = 10
+  SPECIES_LIST_SCORE = 5
+
+  # Score for one observation:
+  #   species_list entry  1
+  #   observation         1
+  #   naming              1
+  #   vote                1
+  OBSERVATION_SCORE = 4
+
   # Second "get" won't update fullpath, so we must reset the request.
   def reget(action, **args)
     @request = @request.class.new

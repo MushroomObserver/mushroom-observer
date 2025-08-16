@@ -18,17 +18,28 @@ module Tabs
         species_list_download_tab(list),
         species_list_set_source_tab(list),
         clone_species_list_tab(list),
+        write_in_species_list_tab(list),
         species_list_add_remove_from_another_list_tab(list, query)
       ]
     end
 
     def species_list_user_show_tabs(list)
       [
+        add_new_observations_tab(list),
         manage_species_list_projects_tab(list),
         edit_species_list_tab(list),
         clear_species_list_tab(list),
         destroy_species_list_tab(list)
       ]
+    end
+
+    def add_new_observations_tab(list)
+      InternalLink::Model.new(
+        :species_list_show_add_new_observations.t,
+        list,
+        add_query_param(new_species_list_write_in_path(list.id)),
+        html_options: { help: :species_list_show_add_new_observations_help.l }
+      ).tab
     end
 
     def manage_species_list_projects_tab(list)
@@ -62,6 +73,13 @@ module Tabs
       ).tab
     end
 
+    def species_list_show_tab(list)
+      InternalLink::Model.new(
+        :cancel_and_show.t(TYPE: list.type_tag), list,
+        add_query_param(species_list_path(list.id))
+      ).tab
+    end
+
     def species_list_add_remove_from_another_list_tab(list, query = nil)
       InternalLink::Model.new(
         :species_list_show_add_remove_from_another_list.t, list,
@@ -75,6 +93,13 @@ module Tabs
       InternalLink::Model.new(
         :species_list_show_clone_list.t, list,
         add_query_param(new_species_list_path(clone: list.id))
+      ).tab
+    end
+
+    def write_in_species_list_tab(list)
+      InternalLink::Model.new(
+        :species_list_show_write_in.t, list,
+        add_query_param(new_species_list_write_in_path(id: list.id))
       ).tab
     end
 
@@ -96,6 +121,10 @@ module Tabs
 
     def species_list_form_new_tabs
       [name_lister_tab, species_list_index_tab]
+    end
+
+    def species_list_write_in_form_tabs(list)
+      [species_list_show_tab(list)]
     end
 
     def species_list_form_edit_tabs(list:)

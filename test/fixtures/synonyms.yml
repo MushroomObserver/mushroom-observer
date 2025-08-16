@@ -20,3 +20,6 @@ namings_deprecated_synonym:
 
 suillus_synonym:
   id: <%= ActiveRecord::FixtureSet.identify(:suillus_synonym) %>
+
+lactifluus_alpinus_synonym:
+  id: <%= ActiveRecord::FixtureSet.identify(:lactifluus_alpinus_synonym) %>

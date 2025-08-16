@@ -3377,6 +3377,16 @@ class NameTest < UnitTestCase
     assert_names_equal(names(:stereum), names(:stereum_hirsutum).accepted_genus)
   end
 
+  def test_multiple_synonyms
+    name1 = names(:chlorophyllum_rachodes)
+    name2 = names(:macrolepiota_rachodes)
+    assert_not_equal(name1.synonym, name2.synonym)
+    name1.merge_synonyms(name2)
+    name1.reload
+    name2.reload
+    assert_equal(name1.synonym, name2.synonym)
+  end
+
   def test_can_propagate
     assert(names(:coprinus).can_propagate?,
            "Genus s.s. Classifications should be propagable")

@@ -3,33 +3,7 @@
 
   <%= submit_button(form: f, button: button.l, center: true) %>
 
-  <%= if !(partial = render(partial: "shared/form_list_feedback",
-                            locals: { f: f })).blank?
-    tag.div(partial)
-  end %>
-
-  <%= if @checklist&.any?
-    render(partial: "species_lists/form/fields_for_checklist", locals: { f: f })
-  end %>
-
-  <%= if !@new_names.blank?
-    hidden_field_tag(:approved_names, @new_names.join("\n"))
-  end %>
-
-  <%= if !@deprecated_names.blank?
-    hidden_field_tag(:approved_deprecated_names,
-                     @deprecated_names.map(&:id).join(" "))
-  end %>
-
-  <div class="form-group mt-3">
-    <%= fields_for(:list) do |f_l|
-      autocompleter_field(
-        form: f_l, field: :members, type: :name, rows: 8, value: @list_members,
-        label: "#{:form_species_lists_write_in_species.t}:",
-        separator: "\n", textarea: true
-      )
-    end %>
-  </div>
+  <%= hidden_field_tag(:clone_id, @clone_id) if @clone_id %>
 
   <%= text_field_with_label(form: f, field: :title,
                             label: "#{:form_species_lists_title.l}:") %>
@@ -46,9 +20,6 @@
 
   <%= autocompleter_field(form: f, field: :place_name, type: :location,
                           label: "#{:WHERE.l}:") %>
-
-  <%= render(partial: "species_lists/form/fields_for_member",
-             locals: { f: f }) %>
 
   <%= render(partial: "species_lists/form/fields_for_project",
              locals: { f: f }) if @projects.any? %>
