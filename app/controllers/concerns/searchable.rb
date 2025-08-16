@@ -98,11 +98,6 @@ module Searchable
       Query.const_get(self.class.module_parent.name)
     end
 
-    # the underscored symbol
-    def search_type
-      self.class.name.deconstantize.singularize.underscore.to_sym
-    end
-
     # Passing some fields will raise an error if the required field is missing,
     # so just toss them.
     # def remove_invalid_field_combinations
