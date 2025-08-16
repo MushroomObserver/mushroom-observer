@@ -73,8 +73,7 @@ module SpeciesLists
       # (construct_observations) create the observations.  This always succeeds,
       # so we can redirect to show_species_list (or chain to create location).
       if !failed && @dubious_where_reasons == []
-        redirected = update_redirect_and_flash_notices(create_or_update,
-                                                       sorter)
+        redirected = create_observations(sorter)
       end
 
       return if redirected
@@ -84,6 +83,38 @@ module SpeciesLists
       init_member_vars_for_reload
       init_project_vars_for_reload(@species_list)
       re_render_appropriate_form(create_or_update)
+    end
+
+    def create_observations(sorter)
+      return unless sorter
+
+      # Put together a list of arguments to use when creating new observations.
+      spl = @species_list
+      spl_args = init_spl_args(spl)
+      if @place_name
+        spl_args[:where] = @place_name
+        spl_args[:location] = Location.find_by_name_or_reverse_name(@place_name)
+      end
+
+      update_namings(spl)
+
+      # Add all names from text box into species_list. Creates a new observation
+      # for each name.  ("single names" are names that matched a single name
+      # uniquely.)
+      sorter.single_names.each do |name, timestamp|
+        spl_args[:when] = timestamp || spl.when
+        spl.construct_observation(name, spl_args)
+      end
+      redirect_to(species_list_path(spl))
+    end
+
+    def validate_place_name
+      @place_name = params[:place_name] || @species_list.place_name
+      @dubious_where_reasons = []
+      return if @place_name == params[:approved_where]
+
+      db_name = Location.user_format(@user, @place_name)
+      @dubious_where_reasons = Location.dubious_name?(db_name, true)
     end
   end
 end

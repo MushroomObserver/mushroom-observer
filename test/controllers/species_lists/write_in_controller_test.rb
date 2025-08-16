@@ -367,7 +367,7 @@ module SpeciesLists
       )
     end
 
-    def test_update_species_list_add_unknown
+    def test_create_species_list_add_unknown
       new_name = "Agaricus nova"
       spl = species_lists(:unknown_species_list)
       sp_count = spl.observations.size
@@ -394,7 +394,7 @@ module SpeciesLists
                    mary.reload.contribution)
     end
 
-    def test_update_species_list_approved_new_name
+    def test_create_species_list_approved_new_name
       spl = species_lists(:unknown_species_list)
       sp_count = spl.observations.size
       params = {
@@ -411,7 +411,7 @@ module SpeciesLists
       assert_equal(sp_count + 1, spl.reload.observations.size)
     end
 
-    def test_update_species_list_approved_rename
+    def test_create_species_list_approved_rename
       spl = species_lists(:unknown_species_list)
       sp_count = spl.observations.size
       name = names(:lactarius_subalpinus)
@@ -435,7 +435,7 @@ module SpeciesLists
       assert(spl.name_included?(approved_name))
     end
 
-    def test_update_species_list_chosen_update
+    def test_create_species_list_chosen_update
       spl = species_lists(:unknown_species_list)
       spl.observations << observations(:old_name_obs)
       name = names(:lactifluus_subalpinus)
@@ -457,7 +457,7 @@ module SpeciesLists
       assert(spl.name_included?(approved_name))
     end
 
-    def test_update_species_list_multiple_match
+    def test_create_species_list_multiple_match
       spl = species_lists(:unknown_species_list)
       sp_count = spl.observations.size
       name = names(:amanita_baccata_arora)
@@ -475,7 +475,7 @@ module SpeciesLists
       assert_not(spl.name_included?(name))
     end
 
-    def test_update_species_list_approved_deprecated
+    def test_create_species_list_approved_deprecated
       spl = species_lists(:unknown_species_list)
       sp_count = spl.observations.size
       name = names(:lactarius_subalpinus)
@@ -494,7 +494,7 @@ module SpeciesLists
       assert(spl.name_included?(name))
     end
 
-    def test_update_species_list_text_add_multiple
+    def test_create_species_list_text_add_multiple
       spl = species_lists(:unknown_species_list)
       contrib = spl.user.contribution + OBSERVATION_SCORE * 2
       sp_count = spl.observations.size
@@ -518,18 +518,22 @@ module SpeciesLists
       assert_equal(sp_count + 2, spl.reload.observations.size)
     end
 
-    def test_update_species_list_text_notifications
+    def test_create_with_different_location
       spl = species_lists(:first_species_list)
+      place_name = locations(:albion).text_name
       params = {
         id: spl.id,
-        list: { members: "Coprinus comatus\r\nAgaricus campestris" }
+        list: { members: "Coprinus comatus\r\nAgaricus campestris" },
+        place_name:
       }
       login("rolf")
       post(:create, params: params)
       assert_redirected_to(species_list_path(spl.id))
+      spl.reload
+      assert_equal(place_name, spl.observations.last.location.text_name)
     end
 
-    def test_update_species_list_new_name
+    def test_create_species_list_new_name
       spl = species_lists(:unknown_species_list)
       sp_count = spl.observations.size
       params = {
@@ -543,7 +547,7 @@ module SpeciesLists
       assert_equal(sp_count, spl.reload.observations.size)
     end
 
-    def test_update_species_list_chosen_multiple_match
+    def test_create_species_list_chosen_multiple_match
       spl = species_lists(:unknown_species_list)
       sp_count = spl.observations.size
       name = names(:amanita_baccata_arora)
@@ -563,7 +567,7 @@ module SpeciesLists
       assert(spl.name_included?(name))
     end
 
-    def test_update_species_list_deprecated
+    def test_create_species_list_deprecated
       spl = species_lists(:unknown_species_list)
       sp_count = spl.observations.size
       name = names(:lactarius_subalpinus)
