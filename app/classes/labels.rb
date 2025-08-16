@@ -87,7 +87,6 @@ class Labels
     label("Number")
     nums = collection_numbers + herbarium_records + [mo_number]
     @para << nums.join(" / ")
-    @para << " #{specimen_available}" if nums.length == 1
     @para.line_break
   end
 
