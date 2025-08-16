@@ -9,8 +9,4 @@ class Class
   def query_attr(attr, accepts)
     attribute(attr, :query_param, accepts:)
   end
-
-  def search_attr(attr, input, validates: nil, nested_under: nil)
-    attribute(attr, :search_param, input:, validates:, nested_under:)
-  end
 end
