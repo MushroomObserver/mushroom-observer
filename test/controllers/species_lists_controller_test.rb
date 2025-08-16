@@ -391,7 +391,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
   def test_clone_species_list
     login
     spl = species_lists(:unknown_species_list)
-    get(:new, params: { clone: spl.id} )
+    get(:new, params: { clone: spl.id })
     assert_response(:success)
     assert_match(spl.where, @response.body)
   end
@@ -456,6 +456,25 @@ class SpeciesListsControllerTest < FunctionalTestCase
     )
   end
 
+  def test_create_with_projects
+    params = {
+      species_list: {
+        place_name: "Earth",
+        title: "List with Project",
+        "when(1i)" => "2025",
+        "when(2i)" => "3",
+        "when(3i)" => "14"
+      },
+      project: rolf.projects_member.each_with_object({}) do |obj, result|
+        result["id_#{obj.id}"] = "1"
+      end
+    }
+    login("rolf")
+    post(:create, params: params)
+    spl = SpeciesList.last
+    assert(spl.projects.any?)
+  end
+
   # -----------------------------------------------
   #  Test changing species_lists in various ways.
   # -----------------------------------------------
@@ -468,6 +487,20 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_edit_species_list
     assert_form_action({ action: :update, id: spl.id,
                          approved_where: "Burbank, California, USA" })
+  end
+
+  def test_edit_with_projects
+    spl = species_lists(:reused_list)
+    count = spl.projects.count
+    login(spl.user.login)
+    params = { id: spl.id,
+               project: spl.projects.each_with_object({}) do |obj, result|
+                 result["id_#{obj.id}"] = "0"
+               end,
+               species_list: { title: spl.title } }
+    put(:update, params:)
+    spl.reload
+    assert(spl.projects.count < count)
   end
 
   def test_update_species_list_nochange

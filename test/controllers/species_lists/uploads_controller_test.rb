@@ -64,6 +64,19 @@ module SpeciesLists
       assert_equal(list_data, new_data)
     end
 
+    def test_unpermitted_species_list
+      spl = species_lists(:first_species_list)
+      login("mary")
+      params = {
+        "id" => spl.id,
+        "species_list" => {
+          "file" => nil
+        }
+      }
+      post(:create, params: params)
+      assert_redirected_to(species_list_path(spl.id))
+    end
+
     def assert_edit_species_list
       assert_template("species_lists/edit")
       assert_template("species_lists/_form")
