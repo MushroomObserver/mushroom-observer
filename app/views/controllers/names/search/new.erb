@@ -1,0 +1,8 @@
+<%
+add_page_title(:NAMES.l)
+@container = :wide
+%>
+
+<%= render(partial: "shared/search_form",
+           locals: { local: true, search: @search,
+                     field_columns: @field_columns } ) %>
