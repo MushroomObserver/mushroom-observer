@@ -6,10 +6,9 @@
 module SearchHelper
   # Filter panel for a search form. Sections are shown and collapsed.
   # If sections[:collapsed] is present, part of the panel will be collapsed.
-  # NOTE: the arg `:model` is the query type of the whole form, not the field.
-  def search_panel(form:, search:, heading:, sections:, model:)
-    shown = search_panel_shown(form:, search:, sections:, model:)
-    collapsed = search_panel_collapsed(form:, search:, sections:, model:)
+  def search_panel(form:, search:, heading:, sections:)
+    shown = search_panel_shown(form:, search:, sections:)
+    collapsed = search_panel_collapsed(form:, search:, sections:)
     open = collapse = false
     if sections[:collapsed].present?
       collapse = heading
@@ -33,56 +32,56 @@ module SearchHelper
     false
   end
 
-  def search_panel_shown(form:, search:, sections:, model:)
+  def search_panel_shown(form:, search:, sections:)
     return unless sections.is_a?(Hash) && sections[:shown].present?
 
     capture do
       sections[:shown].each do |field|
-        concat(search_row(form:, search:, field:, model:, sections:))
+        concat(search_row(form:, search:, field:, sections:))
       end
     end
   end
 
   # Content of collapsed section, composed of field rows.
-  def search_panel_collapsed(form:, search:, sections:, model:)
+  def search_panel_collapsed(form:, search:, sections:)
     return unless sections.is_a?(Hash) && sections[:collapsed].present?
 
     capture do
       sections[:collapsed].each do |field|
-        concat(search_row(form:, search:, field:, model:, sections:))
+        concat(search_row(form:, search:, field:, sections:))
       end
     end
   end
 
   # Fields might be paired, so we need to check for that.
-  def search_row(form:, search:, field:, model:, sections:)
+  def search_row(form:, search:, field:, sections:)
     if field.is_a?(Array)
       tag.div(class: "row") do
         field.each do |subfield|
           concat(tag.div(class: search_column_classes) do
-            search_field(form:, search:, field: subfield, model:, sections:)
+            search_field(form:, search:, field: subfield, sections:)
           end)
         end
       end
     else
-      search_field(form:, search:, field:, model:, sections:)
+      search_field(form:, search:, field:, sections:)
     end
   end
 
   # Figure out what kind of field helper to call, based on definitions below.
   # Some field types need args, so there is both the component and args hash.
-  def search_field(form:, search:, field:, model:, sections:)
-    args = { form:, search:, field:, model: }
+  def search_field(form:, search:, field:, sections:)
+    args = { form:, search:, field: }
     args[:label] ||= search_label(field)
     field_type = search_field_type_from_controller(field:)
     component = SEARCH_FIELD_HELPERS[field_type][:component]
     return unless component
 
-    # Prepare args for the field helper. Requires but removes args[:model].
+    # Prepare args for the field helper.
     args = prepare_args_for_search_field(args, field_type, component)
-    # Re-add :sections and :model for conditional fields.
+    # Re-add :sections for conditional fields.
     if component == :search_autocompleter_with_conditional_fields
-      args = args.merge(sections:, model:, search:)
+      args = args.merge(sections:, search:)
     end
     return search_region_with_compass_fields(**args) if field == :region
 
@@ -122,7 +121,7 @@ module SearchHelper
     args[:hidden_name] = search_check_for_hidden_field_name(args)
     args = search_prefill_or_select_values(args, field_type)
 
-    SEARCH_FIELD_HELPERS[field_type][:args].merge(args.except(:model, :search))
+    SEARCH_FIELD_HELPERS[field_type][:args].merge(args.except(:search))
   end
 
   def search_help_text(args, field_type)
@@ -130,7 +129,8 @@ module SearchHelper
     multiple_note = if component == :autocompleter_field
                       :pattern_search_terms_multiple.l
                     end
-    [:"#{args[:model]}_term_#{args[:field]}".l, multiple_note].compact.join(" ")
+    [:"#{args[:search].type_tag}_term_#{args[:field]}".l,
+     multiple_note].compact.join(" ")
   end
 
   # Overrides for the assumed name of the id field for autocompleter.
@@ -161,21 +161,19 @@ module SearchHelper
     return if args[:sections].blank?
 
     # rightward destructuring assignment ruby 3 feature
-    args => { form:, model:, search:, sections: }
-    append = search_conditional_rows(form:, model:, search:, sections:)
-    autocompleter_field(
-      **args.except(:sections, :model, :search), append:
-    )
+    args => { form:, search:, sections: }
+    append = search_conditional_rows(form:, search:, sections:)
+    autocompleter_field(**args.except(:sections, :search), append:)
   end
 
   # Rows that only uncollapse if an autocompleter field has a value.
   # Note the data-autocompleter-target attribute.
-  def search_conditional_rows(form:, model:, search:, sections:)
+  def search_conditional_rows(form:, search:, sections:)
     capture do
       tag.div(data: { autocompleter_target: "collapseFields" },
               class: "collapse") do
         sections[:conditional].each do |field|
-          concat(search_row(form:, field:, model:, search:, sections:))
+          concat(search_row(form:, field:, search:, sections:))
         end
       end
     end

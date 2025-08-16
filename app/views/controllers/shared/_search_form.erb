@@ -1,4 +1,4 @@
-<%# locals: (search: {}, field_columns: [], model: search.type_tag, local: true) -%>
+<%# locals: (search: {}, field_columns: [], local: true) -%>
 <%
 form_args = { model: search, url: { action: :create },
               id: "#{model}_search_form" }
@@ -12,7 +12,7 @@ form_args = { model: search, url: { action: :create },
 
       <%= tag.div(class: "col-xs-12 col-md-6") do %>
         <% panels.each do |heading, sections| %>
-          <%= search_panel(form:, search:, heading:, sections:, model:) %>
+          <%= search_panel(form:, search:, heading:, sections:) %>
         <% end %>
       <% end %>
 
