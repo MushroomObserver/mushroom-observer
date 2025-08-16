@@ -18,8 +18,14 @@ class SearchController < ApplicationController
   #   /project/project_search
   #   /species_lists/index
   def pattern
-    pattern = params.dig(:search, :pattern) { |p| p.to_s.strip_squeeze }
-    type = params.dig(:search, :type)&.to_sym
+    pattern = params.dig(:pattern_search, :pattern) { |p| p.to_s.strip_squeeze }
+    unless (type = params.dig(:pattern_search, :type))
+      flash_and_redirect_invalid_search(type) and return
+    end
+
+    # Temporary 2025-08-14: safe-pluralize the type (will not double-pluralize)
+    # When reverting, also remove the `unless` block above.
+    type = type.to_s.pluralize.to_sym
 
     # Save it so that we can keep it in the search bar in subsequent pages.
     session[:pattern] = pattern
@@ -68,18 +74,22 @@ class SearchController < ApplicationController
     case type
     when :google
       site_google_search(pattern)
-    when :comment, :glossary_term, :herbarium, :herbarium_record, :image,
-         :location, :name, :observation, :project, :species_list, :user
+
+    when :comments, :glossary_terms, :herbaria, :herbarium_records, :images,
+         :locations, :names, :observations, :projects, :species_lists, :users
       redirect_to_search_or_index(
         pattern: pattern,
-        search_path: send(:"#{type.to_s.pluralize}_path",
-                          params: { pattern: pattern }),
-        index_path: send(:"#{type.to_s.pluralize}_path")
+        search_path: send(:"#{type}_path", params: { pattern: pattern }),
+        index_path: send(:"#{type}_path")
       )
     else
-      flash_error(:runtime_invalid.t(type: :search, value: type.inspect))
-      redirect_back_or_default("/")
+      flash_and_redirect_invalid_search(type) and return
     end
+  end
+
+  def flash_and_redirect_invalid_search(type)
+    flash_error(:runtime_invalid.t(type: :search, value: type.inspect))
+    redirect_back_or_default("/")
   end
 
   # NOTE: The autocompleters for name, location, and user all make the ids

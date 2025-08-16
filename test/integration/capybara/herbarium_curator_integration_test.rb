@@ -178,8 +178,8 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     login
     visit("/")
     within("#pattern_search_form") do
-      fill_in("search_pattern", with: "New York")
-      select(:HERBARIA.l, from: "search_type")
+      fill_in("pattern_search_pattern", with: "New York")
+      select(:HERBARIA.l, from: "pattern_search_type")
       click_commit
     end
     assert_selector("#title", text: herbaria(:nybg_herbarium).format_name)
@@ -190,8 +190,8 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     visit("/")
     pattern = "Personal"
     within("#pattern_search_form") do
-      fill_in("search_pattern", with: pattern)
-      select(:HERBARIA.l, from: "search_type")
+      fill_in("pattern_search_pattern", with: pattern)
+      select(:HERBARIA.l, from: "pattern_search_type")
       click_commit
     end
     assert_match(:HERBARIA.l, page.title)
@@ -203,8 +203,8 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     get("/")
     pattern = "Coprinus comatus"
     within("#pattern_search_form") do
-      fill_in("search_pattern", with: pattern)
-      select(:HERBARIUM_RECORDS.l, from: "search_type")
+      fill_in("pattern_search_pattern", with: pattern)
+      select(:HERBARIUM_RECORDS.l, from: "pattern_search_type")
       click_commit
     end
     assert_selector("body.herbarium_records__index")

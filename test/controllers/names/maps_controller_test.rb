@@ -10,6 +10,7 @@ module Names
     #  Maps
     # ----------------------------
 
+    # We do not offer maps for multiple names. You have to pass a name ID.
     # name with Observations that have Locations
     def test_map_names
       login
