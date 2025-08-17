@@ -81,13 +81,17 @@ class Labels
   # Collector's number, e.g.: "John Doe 1234 / MO 56789"
   def add_number
     label("Number")
-    nums = collection_numbers + herbarium_records + [mo_number]
+    nums = collection_numbers + herbarium_records + mo_number + inat_number
     @para << nums.join(" / ")
     @para.line_break
   end
 
   def mo_number
-    "MO #{@obs.id}"
+    ["MO #{@obs.id}"]
+  end
+
+  def inat_number
+    @obs.inat_id ? ["iNat #{@obs.inat_id}"] : []
   end
 
   def specimen_available
