@@ -62,11 +62,7 @@ class Labels
     add_location
     add_gps
     add_date
-    add_observer_if_necessary
-    add_sequences
-    add_projects
-    add_species_lists
-    add_notes
+    add_collector_or_observer
     @para.to_rtf
   end
 
@@ -204,14 +200,37 @@ class Labels
   # --------------------
 
   # Observer's name if different from collector's name.
-  def add_observer_if_necessary
+  def add_collector_or_observer
+    if collector
+      label("Collector")
+      @para << collector
+    end
+
     observer = @obs.user.name || @obs.user.login
-    collector = @obs.collection_numbers.first&.name
     return if collector == observer
 
+    @para << "  " if collector
     label("Observer")
     @para << observer
     @para.line_break
+  end
+
+  def collector
+    @collector ||= calc_collector
+  end
+
+  def calc_collector
+    notes_collector = @obs.notes[:Collector]
+    return @obs.collection_numbers.first&.name unless notes_collector
+
+    collector_identifier = extract_user_string_regex(notes_collector)
+    user = User.find_by(login: collector_identifier)
+    user&.name || collector_identifier
+  end
+
+  def extract_user_string_regex(input)
+    match = input.match(/\A_user (.+)_\z/)
+    match ? match[1] : input
   end
 
   # --------------------
