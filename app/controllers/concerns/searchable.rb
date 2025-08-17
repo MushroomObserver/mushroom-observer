@@ -26,7 +26,7 @@ module Searchable
     end
 
     def new
-      # set_up_form_field_groupings
+      set_up_form_field_groupings
       new_search_instance_from_query
     end
 

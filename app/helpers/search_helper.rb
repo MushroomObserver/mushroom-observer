@@ -74,21 +74,23 @@ module SearchHelper
     args = { form:, search:, field: }
     args[:label] ||= search_label(field)
     field_type = search_field_type_from_controller(field:)
-    # TODO: fix this, component should be field_type
-    component = SEARCH_FIELD_HELPERS[field_type][:component]
-    return unless component
+    return unless field_type
 
     # Prepare args for the field helper.
-    args = prepare_args_for_search_field(args, field_type, component)
+    args = prepare_args_for_search_field(args, field_type)
     if field_type == :multiple_autocompleter
-      args[:type] = field == :project_lists ? :project : :field
+      args[:type] = if field == :project_lists
+                      :project
+                    else
+                      field
+                    end
     end
     # Re-add :sections for conditional fields.
     if [:names_fields_for_names, :names_fields_for_obs].include?(field_type)
       args = args.merge(sections:, search:)
     end
 
-    send(component, **args)
+    send(field_type, **args)
   end
 
   # The field's label.
@@ -103,35 +105,35 @@ module SearchHelper
   # The controllers define how they're going to parse their
   # fields, so we can use that to assign a field helper.
   def search_field_type_from_controller(field:)
-    return :pattern if field == :pattern
+    # return :pattern if field == :pattern
 
-    permitted = controller.permitted_search_params
-    unless permitted[field]
+    defined = controller.permitted_search_params.
+              merge(controller.nested_names_params)
+    unless defined[field]
       raise("No input defined for #{field} in #{controller.controller_name}")
     end
 
-    permitted[field]
+    defined[field]
   end
 
   # TODO: fix this, component should be field_type
   # Prepares HTML args for the field helper. This is where we can make
   # adjustments to the args hash before passing it to the field helper.
   # NOTE: Bootstrap 3 can't do full-width inline label/field.
-  def prepare_args_for_search_field(args, field_type, component)
-    if component == :text_field_with_label && args[:field] != :pattern
+  def prepare_args_for_search_field(args, field_type)
+    if field_type == :text_field_with_label && args[:field] != :pattern
       args[:inline] = true
     end
     args[:help] = search_help_text(args, field_type)
     args[:hidden_name] = search_check_for_hidden_field_name(args)
     args = search_prefill_or_select_values(args, field_type)
 
-    SEARCH_FIELD_HELPERS[field_type][:args].merge(args.except(:search))
+    args.except(:search)
   end
 
   # TODO: fix this, needs query tags not pattern search term tags
   def search_help_text(args, field_type)
-    component = SEARCH_FIELD_HELPERS[field_type][:component]
-    multiple_note = if component == :autocompleter_field
+    multiple_note = if field_type == :multiple_autocompleter
                       :pattern_search_terms_multiple.l
                     end
     [:"#{args[:search].type_tag}_term_#{args[:field]}".l,
@@ -167,17 +169,14 @@ module SearchHelper
   end
 
   def names_fields_for_names(**args)
-    rows = [[:has_synonyms, :include_synonyms],
+    rows = [[:include_synonyms, :exclude_original_names],
             [:include_subtaxa, :include_immediate_subtaxa]]
+    search = args[:search]
+
     capture do
       fields_for(:names) do |f_n|
-        concat(
-          multiple_value_autocompleter(**args, form: f_n, field: :lookup)
-        )
-        concat(
-          rows.each do |field|
-            concat(search_row(form: f_n, field:, search:, sections:))
-          end
+        autocompleter_with_conditional_fields(
+          form: f_n, field: :lookup, search:, sections: rows
         )
       end
     end
@@ -222,14 +221,16 @@ module SearchHelper
     end
   end
 
-  def box_fields(**)
-    # use form_compass_input_group
+  def box_fields(**args)
+    fields_for(:in_box) do |fib|
+      form_compass_input_group(form: fib, obj: args[:search])
+    end
   end
 
   def select_yes(**)
     options = [
       ["", nil],
-      ["yes", "yes"]
+      ["yes", true]
     ]
     select_with_label(options:, inline: true, **)
   end
@@ -237,8 +238,8 @@ module SearchHelper
   def select_boolean(**)
     options = [
       ["", nil],
-      ["yes", "yes"],
-      ["no", "no"]
+      ["yes", true],
+      ["no", false]
     ]
     select_with_label(options:, inline: true, **)
   end
@@ -246,9 +247,9 @@ module SearchHelper
   def select_misspellings(**)
     options = [
       ["", nil],
-      ["yes", "yes"],
-      ["no", "no"],
-      ["both", "either"]
+      ["yes", :yes],
+      ["no", :no],
+      ["both", :either]
     ]
     select_with_label(options:, inline: true, **)
   end

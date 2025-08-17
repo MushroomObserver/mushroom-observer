@@ -1179,7 +1179,8 @@
   search_status_has_name: "Match found in [type]:"
   search_status_has_no_name: No match found in [type]
 
-  # These are the search terms we look for, e.g. "date" in "date:today".
+  # These are the keywords the PatternSearch class resolves as Query params,
+  # e.g. "date" in "date:today". They should not depend on other translations.
   search_term_author: author
   search_term_citation: citation
   search_term_classification: classification
@@ -3753,15 +3754,15 @@
   observation_term_is_collection_location: Mushroom was growing at the location. ("[:form_observations_is_collection_location]" is checked.)
 
   name_term_pattern: "[:PATTERN]"
-  name_term_created: Date name was first used.
-  name_term_modified: Date name was last modified.
+  name_term_created_at: Date name was first used.
+  name_term_updated_at: Date name was last modified.
   name_term_rank: Rank or range of ranks, e.g., "genus" or "species-form".
   name_term_include_synonyms: Include synonyms of the given names.
   name_term_include_subtaxa: Include subtaxa of the given names.
   name_term_has_observations: Only names for which we have observations?
   name_term_has_synonyms: Has any synonyms?
   name_term_deprecated: "\"no\" = only accepted names, \"yes\" = only deprecated names."
-  name_term_include_misspellings: "\"no\" = ignore misspelled names (default), \"yes\" = only misspelled names, \"either\" = ignore whether names are misspelled or not."
+  name_term_misspellings: "\"no\" = ignore misspelled names (default), \"yes\" = only misspelled names, \"either\" = ignore whether names are misspelled or not."
   name_term_lichen: "\"no\" = exclude lichens, \"yes\" = include only lichens."
   name_term_has_author: Has Author filled in?
   name_term_has_citation: Has Citation filled in?
@@ -3769,11 +3770,11 @@
   name_term_has_notes: "[:form_names_taxonomic_notes] filled in?"
   name_term_has_comments: Has any Comments?
   name_term_has_description: Has a public description?
-  name_term_author: Author contains this string.
-  name_term_citation: Citation contains this string.
-  name_term_classification: Classification contains this string.
-  name_term_notes: "[:form_names_taxonomic_notes] contains this string."
-  name_term_comments: At least one Comment contains this string.
+  name_term_author_has: Author contains this string.
+  name_term_citation_has: Citation contains this string.
+  name_term_classification_has: Classification contains this string.
+  name_term_notes_has: "[:form_names_taxonomic_notes] contains this string."
+  name_term_comments_has: At least one Comment contains this string.
 
   # link to search bar help
   search_bar_help: Search Help

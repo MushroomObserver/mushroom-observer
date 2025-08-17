@@ -11,8 +11,6 @@ module Observations
 
     before_action :login_required
 
-    private
-
     # Also an index of helper methods to use for each field.
     def permitted_search_params
       {
@@ -45,6 +43,8 @@ module Observations
         field_slips: :multiple_autocompleter
       }
     end
+
+    private
 
     # This is the list of fields that are displayed in the search form. In the
     # template, each hash is interpreted as a column, and each key is a
