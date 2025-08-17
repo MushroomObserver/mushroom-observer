@@ -110,8 +110,11 @@ class Inat
         Other: self[:description]&.gsub(%r{</?p>}, "").to_s }
     end
 
-    # min bounding rectangle of iNat location blurred by public accuracy
+    # MO Location with min bounding rectangle
+    # of iNat location blurred by public accuracy
     def location
+      return nil if self[:location].blank?
+
       ::Location.contains_box(north: blurred_north,
                               south: blurred_south,
                               east: blurred_east,
@@ -119,14 +122,16 @@ class Inat
         min_by { |loc| location_box(loc).calculate_area }
     end
 
-    # location seems simplest source for lat/lng
-    # But :geojason might be possible.
     def lat
+      return nil if self[:location].blank?
+
       location = self[:private_location] || self[:location]
       location.split(",").first.to_f
     end
 
     def lng
+      return nil if self[:location].blank?
+
       location = self[:private_location] || self[:location]
       location.split(",").second.to_f
     end
