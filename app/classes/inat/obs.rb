@@ -122,6 +122,29 @@ class Inat
         min_by { |loc| location_box(loc).calculate_area }
     end
 
+    private
+
+    # These give a good approximation of the iNat blurred bounding box
+    def blurred_north = [lat + public_accuracy_in_degrees[:lat] / 2, 90].min
+
+    def blurred_south = [lat - public_accuracy_in_degrees[:lat] / 2, -90].max
+
+    def blurred_east
+      ((lng + public_accuracy_in_degrees[:lng] / 2 + 180) % 360) - 180
+    end
+
+    def blurred_west
+      ((lng - public_accuracy_in_degrees[:lng] / 2 + 180) % 360) - 180
+    end
+
+    # copied from Autocomplete::ForLocationContaining
+    def location_box(loc)
+      Mappable::Box.new(north: loc[:north], south: loc[:south],
+                        east: loc[:east], west: loc[:west])
+    end
+
+    public
+
     def lat
       return nil if self[:location].blank?
 
@@ -275,6 +298,9 @@ class Inat
         lng: accuracy_in_meters / 111_111 * Math.cos(to_rad(lat)) }
     end
 
+    def to_rad(degrees) = degrees * Math::PI / 180.0
+    private :to_rad
+
     def importable? = taxon_importable?
 
     def taxon_importable? = fungi? || slime_mold?
@@ -282,29 +308,6 @@ class Inat
     ##########
 
     private
-
-    # ----- location-related
-
-    # These give a good approximation of the iNat blurred bounding box
-    def blurred_north = [lat + public_accuracy_in_degrees[:lat] / 2, 90].min
-
-    def blurred_south = [lat - public_accuracy_in_degrees[:lat] / 2, -90].max
-
-    def blurred_east
-      ((lng + public_accuracy_in_degrees[:lng] / 2 + 180) % 360) - 180
-    end
-
-    def blurred_west
-      ((lng - public_accuracy_in_degrees[:lng] / 2 + 180) % 360) - 180
-    end
-
-    def to_rad(degrees) = degrees * Math::PI / 180.0
-
-    # copied from Autocomplete::ForLocationContaining
-    def location_box(loc)
-      Mappable::Box.new(north: loc[:north], south: loc[:south],
-                        east: loc[:east], west: loc[:west])
-    end
 
     # ---- name-related
 
