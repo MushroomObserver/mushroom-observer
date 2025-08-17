@@ -382,9 +382,9 @@ class InatObsTest < UnitTestCase
       mock_inat_obs.lat && mock_inat_obs.lng,
       "MO lat/lng should be nil for iNat observations without location"
     )
-    assert_equal(
-      Location.unknown, mock_inat_obs.location,
-      "MO obs.location should be unknown for iNat obss without location"
+    assert_nil(
+      mock_inat_obs.location,
+      "MO obs.location should be undefined for iNat obss without location"
     )
   end
 
