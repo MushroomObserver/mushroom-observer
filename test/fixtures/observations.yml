@@ -800,6 +800,8 @@ current_obs:
   user: katrina
   where: Salt Point State Park, Sonoma Co., California, USA
   location: salt_point
+  notes:
+    :Collector: _user katrina_
 
 newbie_obs:
   <<: *DEFAULTS
