@@ -74,10 +74,19 @@ module SpeciesLists
 
     def init_name_vars_from_sorter(spl, sorter)
       @new_names = sorter.new_name_strs.uniq.sort
-      @multiple_names = sorter.multiple_names.uniq.sort_by(&:search_name)
+      @multiple_names = names_with_other_authors(sorter)
       @deprecated_names = sorter.deprecated_names.uniq.sort_by(&:search_name)
       @list_members = sorter.all_line_strs.join("\r\n")
       @place_name = spl.place_name
+    end
+
+    def names_with_other_authors(sorter)
+      names = sorter.multiple_names.uniq.sort_by(&:search_name)
+
+      names.map do |name|
+        other_authors = name.other_authors.includes([:observations])
+        [name, other_authors]
+      end
     end
 
     def init_project_vars

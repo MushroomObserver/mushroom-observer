@@ -66,7 +66,7 @@ module SpeciesLists
       assert_equal("Warnerbros bugs-bunny",
                    @controller.instance_variable_get(:@list_members))
       assert_equal([], @controller.instance_variable_get(:@new_names))
-      assert_equal([bugs_names.first],
+      assert_equal([[bugs_names.first, bugs_names.first.other_authors]],
                    @controller.instance_variable_get(:@multiple_names))
       assert_equal([], @controller.instance_variable_get(:@deprecated_names))
 
