@@ -3730,23 +3730,33 @@
   pattern_search_terms_multiple: Separate multiple values with commas.
 
   observation_term_when: Date mushroom was observed; YYYY-MM-DD, YYYY or MM; ranges okay.
+  observation_term_date: "[:observation_term_when]"
   observation_term_created: Date observation was first posted.
+  observation_term_created_at: "[:observation_term_created]"
   observation_term_modified: Date observation was last modified.
+  observation_term_updated_at: "[:observation_term_modified]"
   observation_term_name: Consensus name is one of these names.
+  observation_term_names: "[:observation_term_name]"
   observation_term_exclude_consensus: Exclude Observations whose consensus is a name listed in "name:value". (When using exclude_consensus you must also use "include_all_name_proposals:yes".)
   observation_term_include_all_name_proposals: Include all name proposals, not just the consensus.
   observation_term_include_subtaxa: Include observations of subtaxa of the given names.
   observation_term_include_synonyms: Include observations of synonyms of the given names.
   observation_term_herbarium: Specimen at a fungarium.
+  observation_term_herbaria: "[:observation_term_herbarium]"
   observation_term_location: "Location (\"[:WHERE]\") mushroom was observed. Must exactly match the entire [:WHERE] field. Note that commas must be protected with a back-slash: \"Albion\\, California\\, USA\"."
+  observation_term_locations: "[observation_term_location]"
   observation_term_region: Location mushroom was observed. Partial match anchored at end, including country at least, e.g., "California\, USA". Note that commas must be protected with a back-slash as shown.
   observation_term_project: Observation belongs to one of these projects.
+  observation_term_projects: "[observation_term_project]"
   observation_term_project_lists: Observation belongs to list in one of these projects.
   observation_term_list: Observation belongs to one of these observation lists.
+  observation_term_species_lists: "[observation_term_list]"
   observation_term_user: Observation created by one of these users.
+  observation_term_by_users: "[observation_term_user]"
   observation_term_notes: Notes contains the given string.
   observation_term_comments: Comments contain the given string.
   observation_term_field_slip: Observation corresponds to this field slip.
+  observation_term_field_slips: "[observation_term_field_slip]"
   observation_term_confidence: Confidence is in this range.
   observation_term_east: Longitude of eastern edge of search region.
   observation_term_west: Longitude of western edge of search region.
@@ -3754,19 +3764,23 @@
   observation_term_south: Latitude of southern edge of search region.
   observation_term_has_images: Has images? ("yes" or "no")
   observation_term_has_sequence: Has a sequence?
+  observation_term_has_sequences: "[observation_term_has_sequence]"
   observation_term_has_specimen: Has a specimen?
   observation_term_lichen: "\"no\" = exclude lichens, \"yes\" = include only lichens."
   observation_term_has_name: Has a name? (other than "Fungi sp.")
   observation_term_has_notes: Has Notes?
   observation_term_has_public_lat_lng: Are the [:OBSERVATION]'s [:LATITUDE] and [:LONGITUDE] fields filled in, and public?
   observation_term_has_field: Has a given notes template field filled in.
+  observation_term_has_notes_fields: "[observation_term_has_field]"
   observation_term_has_comments: Has any comments?
   observation_term_is_collection_location: Mushroom was growing at the location. ("[:form_observations_is_collection_location]" is checked.)
 
   name_term_names: "[:NAMES]"
   name_term_pattern: "[:PATTERN]"
-  name_term_created_at: Date name was first used.
-  name_term_updated_at: Date name was last modified.
+  name_term_created: Date name was first used.
+  name_term_created_at: "[:name_term_created]"
+  name_term_modified: Date name was last modified.
+  name_term_updated_at: "[:name_term_modified]"
   name_term_rank: Rank or range of ranks, e.g., "genus" or "species-form".
   name_term_include_synonyms: Include synonyms of the given names.
   name_term_include_subtaxa: Include subtaxa of the given names.
@@ -3775,19 +3789,26 @@
   name_term_has_observations: Only names for which we have observations?
   name_term_has_synonyms: Has any synonyms?
   name_term_deprecated: "\"no\" = only accepted names, \"yes\" = only deprecated names."
-  name_term_misspellings: "\"no\" = ignore misspelled names (default), \"yes\" = only misspelled names, \"either\" = ignore whether names are misspelled or not."
+  name_term_include_misspellings: "\"no\" = ignore misspelled names (default), \"yes\" = only misspelled names, \"either\" = ignore whether names are misspelled or not."
+  name_term_misspellings: "[:name_term_include_misspellings]"
   name_term_lichen: "\"no\" = exclude lichens, \"yes\" = include only lichens."
   name_term_has_author: Has Author filled in?
   name_term_has_citation: Has Citation filled in?
   name_term_has_classification: Has Classification filled in?
   name_term_has_notes: "[:form_names_taxonomic_notes] filled in?"
   name_term_has_comments: Has any Comments?
-  name_term_has_default_description: Has a public description?
-  name_term_author_has: Author contains this string.
-  name_term_citation_has: Citation contains this string.
-  name_term_classification_has: Classification contains this string.
-  name_term_notes_has: "[:form_names_taxonomic_notes] contains this string."
-  name_term_comments_has: At least one Comment contains this string.
+  name_term_has_description: Has a public description?
+  name_term_has_default_description: "[:name_term_has_description]"
+  name_term_author: Author contains this string.
+  name_term_author_has: "[:name_term_author]"
+  name_term_citation: Citation contains this string.
+  name_term_citation_has: "[:name_term_citation]"
+  name_term_classification: Classification contains this string.
+  name_term_classification_has: "[:name_term_classification]"
+  name_term_notes: "[:form_names_taxonomic_notes] contains this string."
+  name_term_notes_has: "[:name_term_notes]"
+  name_term_comments: At least one Comment contains this string.
+  name_term_comments_has: "[:name_term_comments]"
 
   # link to search bar help
   search_bar_help: Search Help
