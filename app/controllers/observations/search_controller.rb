@@ -35,7 +35,7 @@ module Observations
         notes_has: :text_field_with_label,
         has_comments: :select_yes,
         comments_has: :text_field_with_label,
-        users: :multiple_value_autocompleter,
+        by_users: :multiple_value_autocompleter,
         projects: :multiple_value_autocompleter,
         herbaria: :multiple_value_autocompleter,
         species_lists: :multiple_value_autocompleter,
@@ -74,7 +74,7 @@ module Observations
           location: {
             shown: [:locations],
             collapsed: [[:has_public_lat_lng, :is_collection_location],
-                        [:region], [:in_box]]
+                        :region]
           }
         },
         {
@@ -86,7 +86,7 @@ module Observations
                         [:has_comments, :comments_has]]
           },
           connected: {
-            shown: [:users, :projects],
+            shown: [:by_users, :projects],
             collapsed: [:herbaria, :species_lists, :project_lists, :field_slips]
           }
         }

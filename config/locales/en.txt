@@ -4497,6 +4497,7 @@
   query_title_has: title has
   query_types: types
   query_url_has: url has
+  query_when: "[:when]"
 
   # in box
   query_in_box: in box

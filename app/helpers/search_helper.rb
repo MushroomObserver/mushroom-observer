@@ -175,6 +175,8 @@ module SearchHelper
       :project
     when :lookup
       :name
+    when :by_users
+      :user
     else
       field.to_s.singularize.to_sym
     end
@@ -197,7 +199,7 @@ module SearchHelper
   def names_fields_for_search(rows:, search:)
     fields_for(:names) do |f_n|
       autocompleter_with_conditional_fields(
-        form: f_n, field: :lookup, search:, sections: rows
+        form: f_n, field: :lookup, label: :NAMES.l, search:, sections: rows
       )
     end
   end
@@ -208,10 +210,10 @@ module SearchHelper
     return if args[:sections].blank?
 
     # rightward destructuring assignment, Ruby 3 feature
-    args => { form:, field:, search:, sections: }
+    args => { form:, field:, label:, search:, sections: }
     # If there are conditional rows that should appear if user input, add these
     append = autocompleter_conditional_rows(form:, field:, search:, sections:)
-    multiple_value_autocompleter(form:, field:, append:)
+    multiple_value_autocompleter(form:, field:, label:, append:)
   end
 
   # Rows that only uncollapse if an autocompleter field has a value.
