@@ -21,11 +21,11 @@ module Observations
         confidence: :select_confidence_range,
         has_name: :select_boolean,
         lichen: :select_boolean,
-        location: :multiple_autocompleter,
+        locations: :multiple_value_autocompleter,
         has_public_lat_lng: :select_boolean,
         is_collection_location: :select_boolean,
-        region: :region_with_compass_fields,
-        in_box: :box_fields,
+        region: :region_with_in_box_fields,
+        in_box: :in_box_fields,
         pattern: :text_field_with_label,
         has_specimen: :select_boolean,
         has_sequences: :select_yes,
@@ -35,12 +35,23 @@ module Observations
         notes_has: :text_field_with_label,
         has_comments: :select_yes,
         comments_has: :text_field_with_label,
-        users: :multiple_autocompleter,
-        projects: :multiple_autocompleter,
-        herbaria: :multiple_autocompleter,
-        species_lists: :multiple_autocompleter,
-        project_lists: :multiple_autocompleter,
-        field_slips: :multiple_autocompleter
+        users: :multiple_value_autocompleter,
+        projects: :multiple_value_autocompleter,
+        herbaria: :multiple_value_autocompleter,
+        species_lists: :multiple_value_autocompleter,
+        project_lists: :multiple_value_autocompleter,
+        field_slips: :text_field_with_label
+      }
+    end
+
+    def nested_names_params
+      {
+        include_synonyms: :select_boolean,
+        include_subtaxa: :select_boolean,
+        include_immediate_subtaxa: :select_boolean,
+        exclude_original_names: :select_boolean,
+        include_all_name_proposals: :select_boolean,
+        exclude_consensus: :select_boolean
       }
     end
 
@@ -52,7 +63,8 @@ module Observations
     # pairings.
     def set_up_form_field_groupings
       @field_columns = [
-        { date: { shown: [:when], collapsed: [:created_at, :updated_at] },
+        {
+          date: { shown: [:when], collapsed: [:created_at, :updated_at] },
           name: {
             shown: [:names],
             # conditional: [[:include_subtaxa, :include_synonyms],
@@ -60,11 +72,13 @@ module Observations
             collapsed: [:confidence, [:has_name, :lichen]]
           },
           location: {
-            shown: [:location],
+            shown: [:locations],
             collapsed: [[:has_public_lat_lng, :is_collection_location],
                         [:region], [:in_box]]
-          } },
-        { pattern: { shown: [:pattern], collapsed: [] },
+          }
+        },
+        {
+          pattern: { shown: [:pattern], collapsed: [] },
           detail: {
             shown: [[:has_specimen, :has_sequences]],
             collapsed: [[:has_images, :has_notes],
@@ -74,7 +88,8 @@ module Observations
           connected: {
             shown: [:users, :projects],
             collapsed: [:herbaria, :species_lists, :project_lists, :field_slips]
-          } }
+          }
+        }
       ].freeze
     end
   end

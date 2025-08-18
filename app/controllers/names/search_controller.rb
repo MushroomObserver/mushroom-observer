@@ -55,23 +55,20 @@ module Names
     # with an array of fields or field pairings.
     def set_up_form_field_groupings
       @field_columns = [
-        { pattern: { shown: [:names], collapsed: [[:rank, :lichen]] },
+        { name: { shown: [:names], collapsed: [[:pattern], [:rank, :lichen]] },
           quality: {
             shown: [[:has_synonyms, :deprecated]],
             collapsed: [[:has_author, :author_has],
-                        [:has_citation, :citation_has]]
-          },
-          date: { shown: [:created_at, :updated_at], collapsed: [] } },
-        { scope: {
-            shown: [:pattern],
-            collapsed: []
-          },
-          detail: {
+                        [:has_citation, :citation_has],
+                        [:has_default_description]]
+          } },
+        { detail: {
             shown: [[:has_classification, :classification_has]],
             collapsed: [[:has_notes, :notes_has],
                         [:has_comments, :comments_has],
-                        :has_observations, :has_default_description]
-          } }
+                        [:has_observations]]
+          },
+          date: { shown: [[:created_at, :updated_at]], collapsed: [] } }
       ].freeze
     end
   end

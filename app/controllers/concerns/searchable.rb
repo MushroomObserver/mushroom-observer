@@ -41,6 +41,10 @@ module Searchable
                   q: @query.record.id.alphabetize)
     end
 
+    def search_type
+      self.class.name.deconstantize.underscore.to_sym
+    end
+
     private
 
     def clear_form?

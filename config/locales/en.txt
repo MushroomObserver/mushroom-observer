@@ -896,6 +896,7 @@
   show_object: Show [TYPE]
   show_objects: Show [TYPES]
   sort_by_object: Sort by [TYPE]
+  search_object: Search [TYPE]
 
   # Other generic phrases.
   added_to_list: Added observation to "[list]".
@@ -1226,6 +1227,8 @@
   search_term_south: south
   search_term_user: user
   search_term_west: west
+
+  # These are for search forms and should recycle other translations
   search_term_group_pattern: "[:PATTERN]"
   search_term_group_search: "[:SEARCH]"
   search_term_group_date: "[:DATE]"
@@ -3753,12 +3756,15 @@
   observation_term_has_comments: Has any comments?
   observation_term_is_collection_location: Mushroom was growing at the location. ("[:form_observations_is_collection_location]" is checked.)
 
+  name_term_names: "[:NAMES]"
   name_term_pattern: "[:PATTERN]"
   name_term_created_at: Date name was first used.
   name_term_updated_at: Date name was last modified.
   name_term_rank: Rank or range of ranks, e.g., "genus" or "species-form".
   name_term_include_synonyms: Include synonyms of the given names.
   name_term_include_subtaxa: Include subtaxa of the given names.
+  name_term_include_immediate_subtaxa: Include immediate subtaxa of the given names.
+  name_term_exclude_original_names: Exclude the names entered above.
   name_term_has_observations: Only names for which we have observations?
   name_term_has_synonyms: Has any synonyms?
   name_term_deprecated: "\"no\" = only accepted names, \"yes\" = only deprecated names."
@@ -3769,7 +3775,7 @@
   name_term_has_classification: Has Classification filled in?
   name_term_has_notes: "[:form_names_taxonomic_notes] filled in?"
   name_term_has_comments: Has any Comments?
-  name_term_has_description: Has a public description?
+  name_term_has_default_description: Has a public description?
   name_term_author_has: Author contains this string.
   name_term_citation_has: Citation contains this string.
   name_term_classification_has: Classification contains this string.

@@ -98,7 +98,7 @@ module SearchHelper
     if field == :pattern
       :PATTERN.l
     else
-      :"search_term_#{field}".l.humanize
+      :"query_#{field}".l.humanize
     end
   end
 
@@ -163,36 +163,42 @@ module SearchHelper
   # FIELD HELPERS
   #
   def multiple_value_autocompleter(**args)
-    args[:type] = args[:field] == :project_lists ? :project : :field
+    args[:type] = search_autocompleter_type(args[:field])
     args[:separator] = SEARCH_SEPARATOR
+    args[:textarea] = true
     autocompleter_field(**args)
+  end
+
+  def search_autocompleter_type(field)
+    case field
+    when :project_lists
+      :project
+    when :lookup
+      :name
+    else
+      field.to_s.singularize.to_sym
+    end
   end
 
   def names_fields_for_names(**args)
     rows = [[:include_synonyms, :exclude_original_names],
             [:include_subtaxa, :include_immediate_subtaxa]]
     search = args[:search]
-
-    capture do
-      fields_for(:names) do |f_n|
-        autocompleter_with_conditional_fields(
-          form: f_n, field: :lookup, search:, sections: rows
-        )
-      end
-    end
+    names_fields_for_search(rows:, search:)
   end
 
   def names_fields_for_obs(**args)
     rows = [[:include_synonyms, :include_subtaxa],
             [:include_all_name_proposals, :exclude_consensus]]
     search = args[:search]
+    names_fields_for_search(rows:, search:)
+  end
 
-    capture do
-      fields_for(:names) do |f_n|
-        autocompleter_with_conditional_fields(
-          form: f_n, field: :lookup, search:, sections: rows
-        )
-      end
+  def names_fields_for_search(rows:, search:)
+    fields_for(:names) do |f_n|
+      autocompleter_with_conditional_fields(
+        form: f_n, field: :lookup, search:, sections: rows
+      )
     end
   end
 
@@ -204,27 +210,23 @@ module SearchHelper
     # rightward destructuring assignment, Ruby 3 feature
     args => { form:, field:, search:, sections: }
     # If there are conditional rows that should appear if user input, add these
-    append = autocompleter_conditional_rows(form:, search:, sections:)
+    append = autocompleter_conditional_rows(form:, field:, search:, sections:)
     multiple_value_autocompleter(form:, field:, append:)
   end
 
   # Rows that only uncollapse if an autocompleter field has a value.
   # Note the data-autocompleter-target attribute.
-  def autocompleter_conditional_rows(form:, search:, sections:)
-    capture do
-      tag.div(data: { autocompleter_target: "collapseFields" },
-              class: "collapse") do
-        sections.each do |field|
-          concat(search_row(form:, field:, search:, sections:))
+  def autocompleter_conditional_rows(form:, field:, search:, sections:)
+    # capture do
+    tag.div(data: { autocompleter_target: "collapseFields" },
+            class: "collapse") do
+      form.fields_for(field) do |f_f|
+        sections.each do |subfield|
+          concat(search_row(form: f_f, field: subfield, search:, sections:))
         end
       end
     end
-  end
-
-  def box_fields(**args)
-    fields_for(:in_box) do |fib|
-      form_compass_input_group(form: fib, obj: args[:search])
-    end
+    # end
   end
 
   def select_yes(**)
@@ -303,14 +305,21 @@ module SearchHelper
     )
   end
 
-  def region_with_compass_fields(**args)
+  def region_with_in_box_fields(**args)
     tag.div(data: { controller: "map", map_open: true }) do
       [
         form_location_input_find_on_map(form: args[:form], field: :region,
-                                        value: args[:search].region,
+                                        value: args[:search]&.region,
                                         label: "#{:REGION.t}:"),
-        search_compass_input_and_map(form: args[:form], search: args[:search])
+        in_box_fields(**args)
       ].safe_join
+    end
+  end
+
+  # currently combined with region for observations form
+  def in_box_fields(**args)
+    args[:form].fields_for(:in_box) do |fib|
+      search_compass_input_and_map(form: fib, search: args[:search])
     end
   end
 
@@ -318,23 +327,31 @@ module SearchHelper
     minimal_loc = search_minimal_location(search)
     capture do
       [
-        form_compass_input_group(form:, obj: search),
-        make_map(objects: [minimal_loc], editable: true, map_type: "location",
-                 map_open: false, controller: nil)
+        form_compass_input_group(form:, obj: minimal_loc),
+        search_editable_map(minimal_loc)
       ].safe_join
     end
   end
 
+  def search_editable_map(minimal_loc)
+    # capture do
+    make_map(objects: [minimal_loc], editable: true, map_type: "location",
+             map_open: true, controller: nil)
+    # end
+  end
+
   # To be mappable, we need to instantiate a minimal location from the search.
   def search_minimal_location(search)
-    if search.north.present? && search.south.present? &&
-       search.east.present? && search.west.present?
-      Mappable::MinimalLocation.new(
-        nil, nil, search.north, search.south, search.east, search.west
-      )
+    if search&.in_box.present?
+      box = search.in_box
+      args = {
+        id: nil, name: nil,
+        north: box.north, south: box.south, east: box.east, west: box.west
+      }
     else
-      Mappable::MinimalLocation.new(nil, nil, 0, 0, 0, 0)
+      args = { id: nil, name: nil, north: 0, south: 0, east: 0, west: 0 }
     end
+    Mappable::MinimalLocation.new(**args)
   end
 
   # def search_longitude_field(**args)

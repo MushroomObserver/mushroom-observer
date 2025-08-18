@@ -13,7 +13,7 @@ module Observations
       assert_template("observations/search/_help")
     end
 
-    def test_get_form
+    def test_new_observations_search
       login("rolf")
       get(:new)
     end
