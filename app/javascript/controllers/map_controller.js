@@ -195,6 +195,8 @@ export default class extends GeocodeController {
     } else {
       this.getElevations([set], "point")
       this.makeMarkerEditable(marker)
+      // Only set this.marker if it's a single-marker UI.
+      this.marker = marker
     }
   }
 
