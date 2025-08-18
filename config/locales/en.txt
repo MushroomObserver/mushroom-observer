@@ -3729,6 +3729,9 @@
   pattern_search_terms_help: "Your search string may contain terms of the form \"variable:value\", where value can be quoted, and in some cases can contain more than one value separated by commas.  Recognized variables include:"
   pattern_search_terms_multiple: Separate multiple values with commas.
 
+  # We're borrowing these for the help popups on the search forms, thus the
+  # similar entries. In the case of apparent duplicates, one will be the
+  # pattern search keyword, the other the query param.
   observation_term_when: Date mushroom was observed; YYYY-MM-DD, YYYY or MM; ranges okay.
   observation_term_date: "[:observation_term_when]"
   observation_term_created: Date observation was first posted.
@@ -3775,6 +3778,9 @@
   observation_term_has_comments: Has any comments?
   observation_term_is_collection_location: Mushroom was growing at the location. ("[:form_observations_is_collection_location]" is checked.)
 
+  # We're borrowing these for the help popups on the search forms, thus the
+  # similar entries. In the case of apparent duplicates, one will be the
+  # pattern search keyword, the other the query param.
   name_term_names: "[:NAMES]"
   name_term_pattern: "[:PATTERN]"
   name_term_created: Date name was first used.
