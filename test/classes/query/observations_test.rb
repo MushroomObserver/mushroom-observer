@@ -324,11 +324,15 @@ class Query::ObservationsTest < UnitTestCase
     box = locations(:california).bounding_box
     in_box_expects = Query.lookup(:Observation, in_box: box)
     # be sure we have more than one value in this box
-    box_icl = in_box_expects.results.pluck(:is_collection_location).uniq
-    assert(box_icl.size > 1)
+    box_names = in_box_expects.results.pluck(:name_id).uniq
+    assert(box_names.size > 1)
 
     chained_expects = Query.lookup(
-      :Observation, in_box: box, is_collection_location: 1
+      :Observation, in_box: box,
+                    names: {
+                      lookup: "Agaricus campestris",
+                      include_synonyms: true
+                    }
     )
     assert_not_equal(in_box_expects.result_ids, chained_expects.result_ids)
   end
