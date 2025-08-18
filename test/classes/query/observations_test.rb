@@ -310,25 +310,27 @@ class Query::ObservationsTest < UnitTestCase
   def test_observation_in_box_with_other_scopes
     # Have to do this, otherwise columns not populated
     Location.update_box_area_and_center_columns
+
     box = { north: 35, south: 34, east: -118, west: -119 }
-    in_box_expects = Observation.in_box(**box).order_by_default
+    in_box_expects = Query.lookup(:Observation, in_box: box)
     # be sure we have more than one user's obs in this box
-    box_users = in_box_expects.pluck(:user_id).uniq
+    box_users = in_box_expects.results.pluck(:user_id).uniq
     assert(box_users.size > 1)
     assert(box_users.include?(mary.id))
-    chained_expects = Observation.by_users(mary.id).
-                      in_box(**box).order_by_default
-    assert_not_equal(in_box_expects, chained_expects)
+
+    chained_expects = Query.lookup(:Observation, in_box: box, by_users: mary.id)
+    assert_not_equal(in_box_expects.result_ids, chained_expects.result_ids)
 
     box = locations(:california).bounding_box
-    in_box_expects = Observation.in_box(**box).order_by_default
-    chained_expects = Observation.by_users(mary.id).
-                      in_box(**box).order_by_default
-    # be sure we have more than one user's obs in this box
-    box_users = in_box_expects.pluck(:user_id).uniq
-    assert(box_users.size > 1)
-    assert(box_users.include?(mary.id))
-    assert_not_equal(in_box_expects, chained_expects)
+    in_box_expects = Query.lookup(:Observation, in_box: box)
+    # be sure we have more than one value in this box
+    box_icl = in_box_expects.results.pluck(:is_collection_location).uniq
+    assert(box_icl.size > 1)
+
+    chained_expects = Query.lookup(
+      :Observation, in_box: box, is_collection_location: 1
+    )
+    assert_not_equal(in_box_expects.result_ids, chained_expects.result_ids)
   end
 
   def test_observation_of_children
