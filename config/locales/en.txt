@@ -4487,6 +4487,7 @@
   query_has_default_description: with default description
   query_has_descriptions: with descriptions
   query_has_images: with images
+  query_has_name: with name
   query_has_notes: with notes
   query_has_notes_fields: with notes fields
   query_has_observations: with observations
