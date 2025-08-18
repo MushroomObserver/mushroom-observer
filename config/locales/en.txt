@@ -380,6 +380,8 @@
   project: project
   PROJECTS: Projects
   projects: projects
+  PROJECT_LISTS: Project Lists
+  project_lists: project lists
   PROJECT_ALIAS: Project Alias
   PROJECT_ALIASES: Project Aliases
   PUBLICATION: Publication
@@ -3747,19 +3749,22 @@
   observation_term_herbarium: Specimen at a fungarium.
   observation_term_herbaria: "[:observation_term_herbarium]"
   observation_term_location: "Location (\"[:WHERE]\") mushroom was observed. Must exactly match the entire [:WHERE] field. Note that commas must be protected with a back-slash: \"Albion\\, California\\, USA\"."
-  observation_term_locations: "[observation_term_location]"
+  observation_term_locations: "[:observation_term_location]"
   observation_term_region: Location mushroom was observed. Partial match anchored at end, including country at least, e.g., "California\, USA". Note that commas must be protected with a back-slash as shown.
+  observation_term_pattern: "[:pattern]"
   observation_term_project: Observation belongs to one of these projects.
-  observation_term_projects: "[observation_term_project]"
+  observation_term_projects: "[:observation_term_project]"
   observation_term_project_lists: Observation belongs to list in one of these projects.
   observation_term_list: Observation belongs to one of these observation lists.
-  observation_term_species_lists: "[observation_term_list]"
+  observation_term_species_lists: "[:observation_term_list]"
   observation_term_user: Observation created by one of these users.
-  observation_term_by_users: "[observation_term_user]"
+  observation_term_by_users: "[:observation_term_user]"
   observation_term_notes: Notes contains the given string.
+  observation_term_notes_has: "[:observation_term_notes]"
   observation_term_comments: Comments contain the given string.
+  observation_term_comments_has: "[:observation_term_comments]"
   observation_term_field_slip: Observation corresponds to this field slip.
-  observation_term_field_slips: "[observation_term_field_slip]"
+  observation_term_field_slips: "[:observation_term_field_slip]"
   observation_term_confidence: Confidence is in this range.
   observation_term_east: Longitude of eastern edge of search region.
   observation_term_west: Longitude of western edge of search region.
@@ -3767,14 +3772,14 @@
   observation_term_south: Latitude of southern edge of search region.
   observation_term_has_images: Has images? ("yes" or "no")
   observation_term_has_sequence: Has a sequence?
-  observation_term_has_sequences: "[observation_term_has_sequence]"
+  observation_term_has_sequences: "[:observation_term_has_sequence]"
   observation_term_has_specimen: Has a specimen?
   observation_term_lichen: "\"no\" = exclude lichens, \"yes\" = include only lichens."
   observation_term_has_name: Has a name? (other than "Fungi sp.")
   observation_term_has_notes: Has Notes?
   observation_term_has_public_lat_lng: Are the [:OBSERVATION]'s [:LATITUDE] and [:LONGITUDE] fields filled in, and public?
   observation_term_has_field: Has a given notes template field filled in.
-  observation_term_has_notes_fields: "[observation_term_has_field]"
+  observation_term_has_notes_fields: "[:observation_term_has_field]"
   observation_term_has_comments: Has any comments?
   observation_term_is_collection_location: Mushroom was growing at the location. ("[:form_observations_is_collection_location]" is checked.)
 
