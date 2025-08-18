@@ -71,7 +71,7 @@ module Searchable
     end
 
     # Passing some fields will raise an error if the required field is missing,
-    # so just toss them.
+    # so just toss them. Not sure we have to do this, because Query will.
     # def remove_invalid_field_combinations
     #   return unless respond_to?(:fields_with_requirements)
 
@@ -105,9 +105,34 @@ module Searchable
       end
     end
 
+    # `params.permit` will not accept nested params, so just add them back in.
+    # Query will validate and sanitize.
     def validate_search_query_instance_from_params
-      @search = query_subclass.new(params.permit(permitted_search_params.keys))
+      @search = query_subclass.new(
+        **params.permit(permitted_search_params.keys),
+        **nested_params_re_added
+      )
       redirect_to(action: :new) and return if @search.invalid?
+    end
+
+    # Add the nested params back in if they're present
+    def nested_params_re_added
+      { names: names_with_lookup,
+        in_box: in_box_with_values }.compact_blank
+    end
+
+    def names_with_lookup
+      return nil if params.dig(:names, :lookup).blank?
+
+      params[:names].to_unsafe_hash
+    end
+
+    def in_box_with_values
+      return nil if params[:in_box].blank? ||
+                    (params.dig(:in_box, :north).to_i.zero? &&
+                     params.dig(:in_box, :south).to_i.zero?)
+
+      params[:in_box].to_unsafe_hash
     end
 
     def clear_relevant_query

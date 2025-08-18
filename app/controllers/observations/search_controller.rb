@@ -63,6 +63,12 @@ module Observations
       [:confidence]
     end
 
+    # def fields_with_requirements
+    #   [{ names: [:include_synonyms, :include_subtaxa,
+    #              :include_immediate_subtaxa, :exclude_original_names,
+    #              :include_all_name_proposals, :exclude_consensus] }]
+    # end
+
     private
 
     # This is the list of fields that are displayed in the search form. In the

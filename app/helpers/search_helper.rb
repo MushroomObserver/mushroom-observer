@@ -167,6 +167,7 @@ module SearchHelper
     args[:separator] = SEARCH_SEPARATOR
     args[:textarea] = true
     args[:hidden_name] = :"#{args[:field]}_id"
+    args[:hidden_value] = args.dig(:search, args[:field])
     autocompleter_field(**args)
   end
 
