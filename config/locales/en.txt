@@ -4418,10 +4418,10 @@
   query_validation_lookup: "Couldn't look up :[type] by: [val]."
 
   # Query filters.
-  query_created_at: created
-  query_updated_at: modified
-  query_date: date
-  query_id_in_set: ids
+  query_created_at: "[:created]"
+  query_updated_at: "[:modified]"
+  query_date: "[:date]"
+  query_id_in_set: "[:ids]"
 
   query_accession: sequence identifier
   query_accession_has: sequence identifier has
@@ -4444,7 +4444,6 @@
   query_content_has: text has
   query_content_types: file types
   query_copyright_holder_has: copyright holder has
-  query_date: "[:date]"
   query_deprecated: deprecated
   query_description_has: description has
   query_field_slip_prefix_has: field slip prefix
