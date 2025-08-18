@@ -737,6 +737,12 @@ MushroomObserver::Application.routes.draw do
         to: "species_lists/projects#update",
         via: [:put, :patch],
         as: "species_list_projects")
+  get("/species_lists/:id/write_in/new",
+      to: "species_lists/write_in#new",
+      as: "new_species_list_write_in")
+  post("/species_lists/:id/write_in",
+       to: "species_lists/write_in#create",
+       as: "species_list_write_in")
 
   # ----- Test if server is up  -------------------------------------
   resources :test, only: [:index], controller: "test"
