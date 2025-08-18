@@ -144,10 +144,12 @@ module MapHelper
   def mapset_associated_links_for_type(set, type)
     query_type = type.to_s.camelize.to_sym
     path_helper = :"#{type.to_s.pluralize}_path"
-    # probably already have a query, from the index that got us here.
-    # this will correctly merge the in_box param into the query.
+    # We probably already have a query, from the index that got us here.
+    # This will correctly merge the in_box param into the query.
     query = controller.
             find_or_create_query(query_type, in_box: mapset_box_params(set))
+    # Add the query params to the link data for debugging.
+    # Can remove when we start splatting query params in the URL.
     [link_to(:show_all.t, add_query_param(send(path_helper), query),
              data: query.params),
      link_to(:map_all.t, add_query_param(send(:"map_#{path_helper}"), query),
