@@ -166,6 +166,7 @@ module SearchHelper
     args[:type] = search_autocompleter_type(args[:field])
     args[:separator] = SEARCH_SEPARATOR
     args[:textarea] = true
+    args[:hidden_name] = :"#{args[:field]}_id"
     autocompleter_field(**args)
   end
 
@@ -212,23 +213,19 @@ module SearchHelper
     # rightward destructuring assignment, Ruby 3 feature
     args => { form:, field:, label:, search:, sections: }
     # If there are conditional rows that should appear if user input, add these
-    append = autocompleter_conditional_rows(form:, field:, search:, sections:)
+    append = autocompleter_conditional_rows(form:, search:, sections:)
     multiple_value_autocompleter(form:, field:, label:, append:)
   end
 
   # Rows that only uncollapse if an autocompleter field has a value.
   # Note the data-autocompleter-target attribute.
-  def autocompleter_conditional_rows(form:, field:, search:, sections:)
-    # capture do
+  def autocompleter_conditional_rows(form:, search:, sections:)
     tag.div(data: { autocompleter_target: "collapseFields" },
             class: "collapse") do
-      form.fields_for(field) do |f_f|
-        sections.each do |subfield|
-          concat(search_row(form: f_f, field: subfield, search:, sections:))
-        end
+      sections.each do |subfield|
+        concat(search_row(form:, field: subfield, search:, sections:))
       end
     end
-    # end
   end
 
   def select_yes(**)
@@ -320,7 +317,7 @@ module SearchHelper
 
   # currently combined with region for observations form
   def in_box_fields(**args)
-    args[:form].fields_for(:in_box) do |fib|
+    fields_for(:in_box) do |fib|
       search_compass_input_and_map(form: fib, search: args[:search])
     end
   end

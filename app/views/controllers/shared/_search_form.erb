@@ -1,6 +1,6 @@
 <%# locals: (search: {}, field_columns: [], local: true) -%>
 <%
-form_args = { model: search, url: { action: :create },
+form_args = { url: { action: :create }, # model: search,
               id: "#{controller.search_type}_search_form" }
 # form_args[:model] = search if search&:id
 %>

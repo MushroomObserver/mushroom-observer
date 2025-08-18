@@ -33,8 +33,10 @@ module Searchable
     def create
       return if clear_form?
 
-      # set_up_form_field_groupings # in case we need to re-render the form
-      validate_search_instance_from_form_params
+      set_up_form_field_groupings # in case we need to re-render the form
+      replace_strings_with_ids
+      concatenate_range_fields
+      validate_search_query_instance_from_params
       save_search_query
 
       redirect_to(controller: "/#{parent_controller}", action: :index,
@@ -68,16 +70,44 @@ module Searchable
                 end
     end
 
-    # The controller needs to nest nested params? and concatenate range fields.
-    # We need to permit nested? and range params at the top level to render the
-    # form easily, but then we have to catch them here and parse them
-    # and remove them from the Query params.
-    # Need `permitted_query_params` separate from `permitted_search_params`.
-    def validate_search_instance_from_form_params
-      @search = query_subclass.new(
-        params.permit(permitted_search_params.keys)
-      )
-      redirect_to(action: :new) && return if @search.invalid?
+    # Passing some fields will raise an error if the required field is missing,
+    # so just toss them.
+    # def remove_invalid_field_combinations
+    #   return unless respond_to?(:fields_with_requirements)
+
+    #   fields_with_requirements.each do |req, fields|
+    #     next if @search[req].present?
+
+    #     fields.each { |field| @search.delete(field) }
+    #   end
+    # end
+
+    # Check for `fields_preferring_ids` and swap these in if appropriate
+    def replace_strings_with_ids
+      return unless respond_to?(:fields_preferring_ids)
+
+      fields_preferring_ids.each do |key|
+        next if params[:"#{key}_id"].blank?
+
+        params[key] = params[:"#{key}_id"]
+      end
+    end
+
+    # Check for `fields_with_range`, and concatenate them if range val present
+    def concatenate_range_fields # rubocop:disable Metrics/AbcSize
+      return unless respond_to?(:fields_with_range)
+
+      fields_with_range.each do |key|
+        next if params[:"#{key}_range"].blank?
+
+        params[key] = [params[key].to_s.strip,
+                       params[:"#{key}_range"].to_s.strip].join("-")
+      end
+    end
+
+    def validate_search_query_instance_from_params
+      @search = query_subclass.new(params.permit(permitted_search_params.keys))
+      redirect_to(action: :new) and return if @search.invalid?
     end
 
     def clear_relevant_query
@@ -107,32 +137,6 @@ module Searchable
     def query_subclass
       Query.const_get(self.class.module_parent.name)
     end
-
-    # Passing some fields will raise an error if the required field is missing,
-    # so just toss them.
-    # def remove_invalid_field_combinations
-    #   return unless respond_to?(:fields_with_requirements)
-
-    #   fields_with_requirements.each do |req, fields|
-    #     next if @search[req].present?
-
-    #     fields.each { |field| @search.delete(field) }
-    #   end
-    # end
-
-    # Check for `fields_with_range`, and concatenate them if range val present,
-    # removing the `_range` field. Need to permit range fields.
-    # def concatenate_range_fields
-    #   return unless respond_to?(:fields_with_range)
-
-    #   fields_with_range.each do |key|
-    #     next if @search[:"#{key}_range"].blank?
-
-    #     @search[key] = [@search[key].to_s.strip,
-    #                     @search[:"#{key}_range"].to_s.strip].join("-")
-    #     @search.delete(:"#{key}_range")
-    #   end
-    # end
 
     def escape_location_string(location)
       "\"#{location.tr(",", "\\,")}\""

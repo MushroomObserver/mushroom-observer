@@ -48,6 +48,10 @@ module Names
       }
     end
 
+    def fields_with_range
+      [:rank]
+    end
+
     private
 
     # This is the list of fields that are displayed in the search form. In the

@@ -14,7 +14,7 @@ module Observations
     # Also an index of helper methods to use for each field.
     def permitted_search_params
       {
-        when: :text_field_with_label,
+        date: :text_field_with_label,
         created_at: :text_field_with_label,
         updated_at: :text_field_with_label,
         names: :names_fields_for_obs,
@@ -31,7 +31,7 @@ module Observations
         has_sequences: :select_yes,
         has_images: :select_boolean,
         has_notes: :select_boolean,
-        has_field: :text_field_with_label,
+        has_notes_fields: :text_field_with_label,
         notes_has: :text_field_with_label,
         has_comments: :select_yes,
         comments_has: :text_field_with_label,
@@ -55,6 +55,14 @@ module Observations
       }
     end
 
+    def fields_preferring_ids
+      [:by_users]
+    end
+
+    def fields_with_range
+      [:confidence]
+    end
+
     private
 
     # This is the list of fields that are displayed in the search form. In the
@@ -64,7 +72,7 @@ module Observations
     def set_up_form_field_groupings
       @field_columns = [
         {
-          date: { shown: [:when], collapsed: [:created_at, :updated_at] },
+          date: { shown: [:date], collapsed: [:created_at, :updated_at] },
           name: {
             shown: [:names],
             # conditional: [[:include_subtaxa, :include_synonyms],
@@ -82,7 +90,7 @@ module Observations
           detail: {
             shown: [[:has_specimen, :has_sequences]],
             collapsed: [[:has_images, :has_notes],
-                        [:has_field, :notes_has],
+                        [:has_notes_fields, :notes_has],
                         [:has_comments, :comments_has]]
           },
           connected: {
