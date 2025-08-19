@@ -10,6 +10,9 @@ export default class extends Controller {
   connect() {
     this.element.dataset.sectionUpdate = "connected"
 
+    if (this.userValue == undefined) {
+      alert("Sections monitored by section-update require a userValue.")
+    }
     // Currently we're just using this to trigger modal:remove or modal:hide
     this.element.addEventListener("turbo:frame-render", this.updated())
   }
