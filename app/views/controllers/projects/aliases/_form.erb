@@ -15,7 +15,7 @@
 %>
 <%= form_with(**form_args) do |form| %>
   <% if project_alias.errors.any? %>
-    <div id="error_explanation">
+    <div id="error_explanation" class="alert alert-danger">
       <h2><%= pluralize(project_alias.errors.count, "error") %> prohibited this project alias from being saved:</h2>
       <ul>
         <% project_alias.errors.full_messages.each do |message| %>

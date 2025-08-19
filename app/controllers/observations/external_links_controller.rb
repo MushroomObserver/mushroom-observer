@@ -166,7 +166,7 @@ module Observations
       render(
         partial: "shared/modal_form",
         locals: { title: modal_title, identifier: modal_identifier,
-                  form: "observations/external_links/form" }
+                  user: @user, form: "observations/external_links/form" }
       ) and return
     end
 
@@ -197,7 +197,7 @@ module Observations
       render(
         partial: "observations/show/section_update",
         locals: { identifier: "external_links",
-                  obs: @observation, sites: @other_sites }
+                  obs: @observation, user: @user, sites: @other_sites }
       ) and return
     end
 

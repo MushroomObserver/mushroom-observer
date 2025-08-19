@@ -14,9 +14,11 @@ module Admin
           format.turbo_stream do
             render(
               partial: "shared/modal_form",
-              locals: { identifier: "webmaster_question_email",
-                        title: :ask_webmaster_title.l,
-                        form: "admin/email/webmaster_questions/form" }
+              locals: {
+                title: :ask_webmaster_title.l,
+                identifier: "webmaster_question_email",
+                user: @user, form: "admin/email/webmaster_questions/form"
+              }
             ) and return
           end
         end

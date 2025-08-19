@@ -502,7 +502,7 @@ class LocationsController < ApplicationController
   def render_modal_location_form
     render(partial: "shared/modal_form",
            locals: { title: modal_title, identifier: modal_identifier,
-                     form: "locations/form" }) and return
+                     user: @user, form: "locations/form" }) and return
   end
 
   def modal_identifier

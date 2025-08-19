@@ -67,14 +67,10 @@ module LightboxHelper
   # This is different from observation_show_title, more like matrix_box title
   def caption_obs_title(user:, obs:, identify:)
     btn_style = identify ? "text-bold" : "btn btn-primary"
-    text = if identify
-             tag.span("#{:OBSERVATION.l}: ", class: "font-weight-normal")
-           else
-             ""
-           end
+    text = caption_obs_title_text(identify)
     tag.h4(
       id: "observation_what_#{obs.id}", class: "obs-what",
-      data: { controller: "section-update" }
+      data: { controller: "section-update", section_update_user_value: user.id }
     ) do
       [
         text,
@@ -83,6 +79,14 @@ module LightboxHelper
                 id: "caption_obs_link_#{obs.id}"),
         obs.user_format_name(user).t.small_author
       ].compact_blank!.safe_join(" ")
+    end
+  end
+
+  def caption_obs_title_text(identify)
+    if identify
+      tag.span("#{:OBSERVATION.l}: ", class: "font-weight-normal")
+    else
+      ""
     end
   end
 
