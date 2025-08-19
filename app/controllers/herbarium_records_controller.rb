@@ -424,8 +424,7 @@ class HerbariumRecordsController < ApplicationController
   def reload_herbarium_record_modal_form_and_flash
     render(
       partial: "shared/modal_form_reload",
-      locals: { identifier: modal_identifier,
-                user: @user, form: "herbarium_records/form" }
+      locals: { identifier: modal_identifier, form: "herbarium_records/form" }
     ) and return true
   end
 end

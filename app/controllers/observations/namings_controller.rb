@@ -257,11 +257,8 @@ module Observations
           render(
             partial: "shared/modal_form_reload",
             locals: {
-              identifier: modal_identifier,
-              user: @user, form: "observations/namings/form",
-              form_locals: {
-                show_reasons: true, context: params[:context]
-              }
+              identifier: modal_identifier, form: "observations/namings/form",
+              form_locals: { show_reasons: true, context: params[:context] }
             }
           ) and return true
         end
