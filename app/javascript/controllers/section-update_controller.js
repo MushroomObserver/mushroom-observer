@@ -14,7 +14,10 @@ export default class extends Controller {
     this.element.addEventListener("turbo:frame-render", this.updated())
   }
 
-  // Dispatch a custom event to the window element
+  // Dispatch a custom event to the window element, containing a user_id
+  // of the user initiating the update (modifying the record updated).
+  // This is compared with the modal controller's userValue -- if they are the
+  // same, a turbo_frame-render dispatching this event should hide the modal.
   updated() {
     // console.log(this.element.id + " turbo:frame-render section updated")
     this.dispatch("updated", { detail: { user: this.userValue } })
