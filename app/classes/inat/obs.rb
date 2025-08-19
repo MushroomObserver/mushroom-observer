@@ -109,9 +109,9 @@ class Inat
         Other: self[:description]&.
           # strip p tags to avoid messing up textile and keep notes source clean
           gsub(%r{</?p>}, "")&.
-          # compress newlines/returns to single newline because
-          # our textiling won't render anything after consecutive newlines
-          gsub(/[\n\r]+/, "\n").
+          # compress newlines/returns to single newline, leaving an html comment
+          # because our textiling won't render text after consecutive newlines
+          gsub(/[\n\r]+/, "<!--- blank line(s) removed --->\n").
           to_s }
     end
 

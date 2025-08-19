@@ -223,7 +223,9 @@ class InatImportJobTest < ActiveJob::TestCase
 
     obs = Observation.last
     assert_equal(
-      "before blank line\nafter blank line", obs.notes[:Other],
+      "before blank line<!--- blank line(s) removed --->\n" \
+      "after blank line",
+      obs.notes[:Other],
       "Failed to compress consecutive newlines/returns in Notes[:Other]"
     )
   end
