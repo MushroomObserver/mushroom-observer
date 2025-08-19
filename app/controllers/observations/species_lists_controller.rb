@@ -17,7 +17,16 @@ module Observations
     def edit
       return unless (@observation = find_observation!)
 
-      @all_lists = @user.all_editable_species_lists
+      all_lists = @user.all_editable_species_lists
+      @obs_lists = []
+      @other_lists = []
+      all_lists.each do |list|
+        if list.observations.member?(@observation)
+          @obs_lists << list
+        else
+          @other_lists << list
+        end
+      end
     end
 
     # new endpoint for :add_observation_to_species_list and

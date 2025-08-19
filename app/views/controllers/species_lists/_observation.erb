@@ -41,9 +41,9 @@ listing_classes = image ? "col-sm-8 col-md-9" : "col-xs-12"
         <% if remove || add %>
           <%= tag.div(class: "manage_observation") do
             if remove
-              species_list_remove_button(species_list:, observation:)
+              species_list_remove_obs_button(species_list:, observation:)
             elsif add
-              species_list_add_button(species_list:, observation:)
+              species_list_add_obs_button(species_list:, observation:)
             end
           end %>
         <% end %>
