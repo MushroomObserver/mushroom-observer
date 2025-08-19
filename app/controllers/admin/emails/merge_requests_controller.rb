@@ -20,11 +20,11 @@ module Admin
           format.turbo_stream do
             render(
               partial: "shared/modal_form",
-              locals: { identifier: "merge_request_email",
-                        title: :email_merge_request_title.t(
-                          type: @model.type_tag
-                        ),
-                        user: @user, form: "admin/email/merge_requests/form" }
+              locals: {
+                title: :email_merge_request_title.t(type: @model.type_tag),
+                identifier: "merge_request_email",
+                user: @user, form: "admin/email/merge_requests/form"
+              }
             ) and return
           end
         end

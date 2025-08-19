@@ -15,12 +15,16 @@ module Images
       respond_to do |format|
         format.html
         format.turbo_stream do
-          render(partial: "shared/modal_form",
-                 locals: { identifier: "commercial_inquiry_email",
-                           title: :commercial_inquiry_title.t(
-                             name: @image.unique_format_name
-                           ),
-                           user: @user, form: "images/emails/form" }) and return
+          render(
+            partial: "shared/modal_form",
+            locals: {
+              title: :commercial_inquiry_title.t(
+                name: @image.unique_format_name
+              ),
+              identifier: "commercial_inquiry_email",
+              user: @user, form: "images/emails/form"
+            }
+          ) and return
         end
       end
     end

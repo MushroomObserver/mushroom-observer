@@ -14,13 +14,16 @@ module Observations
       respond_to do |format|
         format.html
         format.turbo_stream do
-          render(partial: "shared/modal_form",
-                 locals: { identifier: "observation_email",
-                           title: :ask_observation_question_title.t(
-                             name: @observation.unique_format_name
-                           ),
-                           user: @user,
-                           form: "observations/emails/form" }) and return
+          render(
+            partial: "shared/modal_form",
+            locals: {
+              title: :ask_observation_question_title.t(
+                name: @observation.unique_format_name
+              ),
+              identifier: "observation_email",
+              user: @user, form: "observations/emails/form"
+            }
+          ) and return
         end
       end
     end

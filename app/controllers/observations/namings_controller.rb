@@ -130,15 +130,16 @@ module Observations
     end
 
     def render_modal_naming_form
-      render(partial: "shared/modal_form",
-             locals: {
-               title: modal_title, local: false,
-               identifier: modal_identifier,
-               form: "observations/namings/form",
-               user: @user,
-               form_locals: { show_reasons: true,
-                              context: params[:context] }
-             }) and return
+      render(
+        partial: "shared/modal_form",
+        locals: {
+          title: modal_title, identifier: modal_identifier,
+          user: @user, form: "observations/namings/form",
+          form_locals: {
+            local: false, show_reasons: true, context: params[:context]
+          }
+        }
+      ) and return
     end
 
     def modal_identifier
@@ -253,14 +254,16 @@ module Observations
       respond_to do |format|
         format.html { render(action: redo_action) and return }
         format.turbo_stream do
-          render(partial: "shared/modal_form_reload",
-                 locals: {
-                   identifier: modal_identifier,
-                   form: "observations/namings/form",
-                   user: @user,
-                   form_locals: { show_reasons: true,
-                                  context: params[:context] }
-                 }) and return true
+          render(
+            partial: "shared/modal_form_reload",
+            locals: {
+              identifier: modal_identifier,
+              user: @user, form: "observations/namings/form",
+              form_locals: {
+                show_reasons: true, context: params[:context]
+              }
+            }
+          ) and return true
         end
       end
     end

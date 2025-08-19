@@ -113,7 +113,7 @@ module Projects
         partial: "shared/modal_form",
         locals: { title: modal_title, identifier: modal_identifier,
                   user: @user, form: "projects/aliases/form",
-                  project_alias: @project_alias }
+                  form_locals: { project_alias: @project_alias } }
       ) and return
     end
 
