@@ -19,7 +19,7 @@ module Users
                            title: :ask_user_question_title.t(
                              user: @target.legal_name
                            ),
-                           form: "users/emails/form" }) and return
+                           user: @user, form: "users/emails/form" }) and return
         end
       end
     end

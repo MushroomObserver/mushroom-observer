@@ -135,6 +135,7 @@ module Observations
                title: modal_title, local: false,
                identifier: modal_identifier,
                form: "observations/namings/form",
+               user: @user,
                form_locals: { show_reasons: true,
                               context: params[:context] }
              }) and return
@@ -256,6 +257,7 @@ module Observations
                  locals: {
                    identifier: modal_identifier,
                    form: "observations/namings/form",
+                   user: @user,
                    form_locals: { show_reasons: true,
                                   context: params[:context] }
                  }) and return true

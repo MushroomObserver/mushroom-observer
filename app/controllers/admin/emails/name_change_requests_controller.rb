@@ -22,6 +22,7 @@ module Admin
               partial: "shared/modal_form",
               locals: { identifier: "name_change_request_email",
                         title: :email_name_change_request_title.l,
+                        user: @user,
                         form: "admin/email/name_change_requests/form" }
             ) and return
           end

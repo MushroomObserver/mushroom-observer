@@ -158,7 +158,7 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     render(partial: "shared/modal_form",
            locals: { title: modal_title, action: modal_form_action,
                      identifier: modal_identifier, local: false,
-                     form: "herbaria/form" }) and return
+                     user: @user, form: "herbaria/form" }) and return
   end
 
   def modal_identifier
@@ -396,7 +396,8 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   def reload_herbarium_modal_form_and_flash
     render(
       partial: "shared/modal_form_reload",
-      locals: { identifier: modal_identifier, form: "herbaria/form" }
+      locals: { identifier: modal_identifier,
+                user: @user, form: "herbaria/form" }
     ) and return true
   end
 

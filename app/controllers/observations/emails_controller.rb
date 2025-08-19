@@ -19,6 +19,7 @@ module Observations
                            title: :ask_observation_question_title.t(
                              name: @observation.unique_format_name
                            ),
+                           user: @user,
                            form: "observations/emails/form" }) and return
         end
       end

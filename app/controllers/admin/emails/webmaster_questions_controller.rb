@@ -16,6 +16,7 @@ module Admin
               partial: "shared/modal_form",
               locals: { identifier: "webmaster_question_email",
                         title: :ask_webmaster_title.l,
+                        user: @user,
                         form: "admin/email/webmaster_questions/form" }
             ) and return
           end

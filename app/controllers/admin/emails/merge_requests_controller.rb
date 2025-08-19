@@ -24,7 +24,7 @@ module Admin
                         title: :email_merge_request_title.t(
                           type: @model.type_tag
                         ),
-                        form: "admin/email/merge_requests/form" }
+                        user: @user, form: "admin/email/merge_requests/form" }
             ) and return
           end
         end

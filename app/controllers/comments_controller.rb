@@ -266,13 +266,13 @@ class CommentsController < ApplicationController
   def render_modal_comment_form
     render(partial: "shared/modal_form",
            locals: { title: modal_title, identifier: modal_identifier,
-                     form: "comments/form" }) and return
+                     user: @user, form: "comments/form" }) and return
   end
 
   def reload_modal_form
     render(partial: "shared/modal_form_reload",
            locals: { identifier: modal_identifier,
-                     form: "comments/form" })
+                     user: @user, form: "comments/form" })
   end
 
   def modal_identifier

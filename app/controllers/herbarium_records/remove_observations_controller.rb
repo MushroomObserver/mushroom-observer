@@ -27,7 +27,7 @@ module HerbariumRecords
             locals: {
               title: @title,
               identifier: "herbarium_record_observation",
-              form: "herbarium_records/remove_observations/form"
+              user: @user, form: "herbarium_records/remove_observations/form"
             }
           ) and return
         end

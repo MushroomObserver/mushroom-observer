@@ -166,7 +166,7 @@ module Observations
       render(
         partial: "shared/modal_form",
         locals: { title: modal_title, identifier: modal_identifier,
-                  form: "observations/external_links/form" }
+                  user: @user, form: "observations/external_links/form" }
       ) and return
     end
 
@@ -206,7 +206,7 @@ module Observations
       render(
         partial: "shared/modal_form_reload",
         locals: { identifier: modal_identifier,
-                  form: "observations/external_links/form" }
+                  user: @user, form: "observations/external_links/form" }
       ) and return true
     end
   end

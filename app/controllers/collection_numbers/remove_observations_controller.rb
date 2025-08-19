@@ -27,7 +27,7 @@ module CollectionNumbers
             locals: {
               title: @title,
               identifier: "collection_number_observation",
-              form: "collection_numbers/remove_observations/form"
+              user: @user, form: "collection_numbers/remove_observations/form"
             }
           ) and return
         end

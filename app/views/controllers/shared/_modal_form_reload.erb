@@ -1,7 +1,7 @@
-<%# locals: (identifier:, form:, form_locals: {}) -%>
+<%# locals: (identifier:, form:, user:, form_locals: {}) -%>
 <%
 # What to do if a form submit doesn't succeed
-# Takes locals: { identifier:, form:, form_locals: {} }
+# Takes locals: { identifier:, form:, user:, form_locals: {} }
 # form_locals ||= {}
 %>
 
@@ -10,5 +10,5 @@
 end %>
 
 <%= turbo_stream.replace("#{identifier}_form") do
-  render(partial: form, locals: { local: false, form_locals: })
+  render(partial: form, locals: { local: false, user:, form_locals: })
 end %>

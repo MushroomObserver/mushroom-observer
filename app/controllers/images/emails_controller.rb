@@ -20,7 +20,7 @@ module Images
                            title: :commercial_inquiry_title.t(
                              name: @image.unique_format_name
                            ),
-                           form: "images/emails/form" }) and return
+                           user: @user, form: "images/emails/form" }) and return
         end
       end
     end

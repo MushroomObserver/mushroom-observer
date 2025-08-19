@@ -5,6 +5,8 @@ import { Controller } from "@hotwired/stimulus"
 // that "clean up", e.g. remove or hide a modal.
 // Connects to data-controller="section-update"
 export default class extends Controller {
+  static values = { user: Number }
+
   connect() {
     this.element.dataset.sectionUpdate = "connected"
 
@@ -15,6 +17,6 @@ export default class extends Controller {
   // Dispatch a custom event to the window element
   updated() {
     // console.log(this.element.id + " turbo:frame-render section updated")
-    this.dispatch("updated")
+    this.dispatch("updated", { detail: { user: this.userValue } })
   }
 }
