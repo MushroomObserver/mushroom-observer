@@ -281,14 +281,13 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       box = Mappable::Box.new(**args.except(:vague))
       return none unless box.valid?
 
-      scope = all
       if include_vague_locations
         # this join is necessary for the `or` condition, which requires it
-        scope.left_outer_joins(:location).gps_in_box_over_dateline(box).
-          or(scope.associated_location_center_in_box_over_dateline(box))
+        left_outer_joins(:location).gps_in_box_over_dateline(box).
+          or(Observation.associated_location_center_in_box_over_dateline(box))
       else
-        scope.gps_in_box_over_dateline(box).
-          or(scope.cached_location_center_in_box_over_dateline(box))
+        gps_in_box_over_dateline(box).
+          or(Observation.cached_location_center_in_box_over_dateline(box))
       end
     }
     # In these the box.east edge is in the w hemisphere, -180..
@@ -326,14 +325,13 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       box = Mappable::Box.new(**args.except(:vague))
       return none unless box.valid?
 
-      scope = all
       if include_vague_locations
         # this join is necessary for the `or` condition, which requires it
-        scope.left_outer_joins(:location).gps_in_box(box).
-          or(scope.associated_location_center_in_box(box))
+        left_outer_joins(:location).gps_in_box(box).
+          or(Observation.associated_location_center_in_box(box))
       else
-        scope.gps_in_box(box).or(
-          scope.cached_location_center_in_box(box)
+        gps_in_box(box).or(
+          Observation.cached_location_center_in_box(box)
         )
       end
     }
