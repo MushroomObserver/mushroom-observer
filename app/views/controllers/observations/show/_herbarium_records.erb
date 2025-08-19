@@ -6,7 +6,7 @@ can_add = in_admin_mode? || obs.can_edit?(@user) ||
 <%=
   tag.div(
     id: "observation_herbarium_records", class: "obs-herbarium",
-    data: { controller: "section-update" }
+    data: { controller: "section-update", section_update_user_value: @user.id }
   ) do
 
     if records.any? && can_add

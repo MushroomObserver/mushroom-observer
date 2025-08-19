@@ -74,7 +74,7 @@ module LightboxHelper
            end
     tag.h4(
       id: "observation_what_#{obs.id}", class: "obs-what",
-      data: { controller: "section-update" }
+      data: { controller: "section-update", section_update_user_value: user.id }
     ) do
       [
         text,
