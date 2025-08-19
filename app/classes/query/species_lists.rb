@@ -6,6 +6,7 @@ class Query::SpeciesLists < Query
   query_attr(:date, [:date])
   query_attr(:id_in_set, [SpeciesList])
   query_attr(:by_users, [User])
+  query_attr(:editable_by_user, User)
   query_attr(:title_has, :string)
   query_attr(:has_notes, :boolean)
   query_attr(:notes_has, :string)

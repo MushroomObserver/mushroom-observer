@@ -26,6 +26,13 @@ class ExternalSite < AbstractModel
   scope :name_has,
         ->(phrase) { search_columns(ExternalSite[:name], phrase) }
 
+  scope :user_is_member, lambda { |user|
+    user = User.safe_find(user)
+    return all unless user
+
+    where(project: Project.user_is_member(user))
+  }
+
   def check_url_syntax
     return if format_base_url
 

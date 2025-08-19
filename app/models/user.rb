@@ -645,20 +645,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   # Return an ActiveRecord::Association of SpeciesList's that User created or
   # that are attached to a Project that the User is a member of.
   def all_editable_species_lists
-    @all_editable_species_lists ||=
-      if projects_member.any?
-        SpeciesList.
-          where(SpeciesList[:user_id].eq(id).
-          or(SpeciesList[:id].in(species_lists_in_users_projects))).distinct
-      else
-        species_lists
-      end
-  end
-
-  def species_lists_in_users_projects
-    project_ids = projects_member.map(&:id)
-    ProjectSpeciesList.where(project_id: project_ids).distinct.
-      pluck(:species_list_id)
+    @all_editable_species_lists ||= SpeciesList.editable_by_user(self)
   end
 
   ##############################################################################

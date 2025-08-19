@@ -121,6 +121,20 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     search_columns(cols, phrase).distinct
   }
 
+  scope :user_is_member, lambda { |user|
+    user = User.safe_find(user)
+    return all unless user
+
+    where(user_group: user.user_groups)
+  }
+
+  scope :user_is_admin, lambda { |user|
+    user = User.safe_find(user)
+    return all unless user
+
+    joins(:admin_group_users).where(user: user)
+  }
+
   scope :show_includes, lambda {
     strict_loading.includes(
       { comments: :user },
