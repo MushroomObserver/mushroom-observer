@@ -238,7 +238,6 @@ export default class extends GeocodeController {
   // For point markers: make a clickable InfoWindow
   giveMarkerInfoWindow(marker, set) {
     this.verbose("map:giveMarkerInfoWindow")
-    // debugger
     const info_window = new google.maps.InfoWindow({
       content: set.caption,
       position: { lat: set.lat, lng: set.lng }
