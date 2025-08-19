@@ -1,12 +1,14 @@
+<%# locals: (obs: nil, user: nil) %>
+
 <%
 numbers  = obs.collection_numbers
-can_edit = in_admin_mode? || obs.can_edit?(@user)
+can_edit = in_admin_mode? || obs.can_edit?(user)
 %>
 
 <%=
   tag.div(
     id: "observation_collection_numbers", class: "obs-collection",
-    data: { controller: "section-update", section_update_user_value: @user.id }
+    data: { controller: "section-update", section_update_user_value: user.id }
   ) do
 
     if numbers.any? && can_edit

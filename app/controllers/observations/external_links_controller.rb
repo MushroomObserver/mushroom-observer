@@ -197,7 +197,7 @@ module Observations
       render(
         partial: "observations/show/section_update",
         locals: { identifier: "external_links",
-                  obs: @observation, sites: @other_sites }
+                  obs: @observation, user: @user, sites: @other_sites }
       ) and return
     end
 
