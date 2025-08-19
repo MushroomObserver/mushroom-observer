@@ -192,7 +192,7 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
   # end
 
   def validate_float(param, val)
-    if val.is_a?(Integer) || val.is_a?(Float) ||
+    if val.is_a?(Numeric) ||
        (val.is_a?(String) && val.match(/^-?(\d+(\.\d+)?|\.\d+)$/))
       val.to_f
     else
