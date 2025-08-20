@@ -594,7 +594,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   # Return an Array of ExternalSite's that this user has permission to add
   # links for.
   def external_sites
-    @external_sites ||= ExternalSite.user_is_member(id)
+    @external_sites ||= ExternalSite.user_is_site_project_member(id)
   end
 
   def preferred_herbarium_name

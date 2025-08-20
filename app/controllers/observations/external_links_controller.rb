@@ -52,7 +52,7 @@ module Observations
 
     def set_ivars_for_new
       @observation = Observation.find(params[:id].to_s)
-      @sites = ExternalSite.sites_user_can_add_links_to(
+      @sites = ExternalSite.sites_user_can_add_links_to_for_obs(
         @user, @observation, admin: in_admin_mode?
       )
       @base_urls = {} # used as placeholders in the url field
@@ -191,7 +191,7 @@ module Observations
     def render_external_links_section_update
       # need to reset this in case they can now add sites
       @observation = @observation.reload
-      @other_sites = ExternalSite.sites_user_can_add_links_to(
+      @other_sites = ExternalSite.sites_user_can_add_links_to_for_obs(
         @user, @observation, admin: in_admin_mode?
       )
       render(

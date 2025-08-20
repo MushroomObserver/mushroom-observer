@@ -36,7 +36,7 @@ module ObservationsController::Show
     update_view_stats(@observation)
     @canonical_url = canonical_url(@observation)
     @mappable      = check_if_query_is_mappable
-    @other_sites   = ExternalSite.sites_user_can_add_links_to(
+    @other_sites   = ExternalSite.sites_user_can_add_links_to_for_obs(
       @user, @observation, admin: in_admin_mode?
     )
     @consensus     = Observation::NamingConsensus.new(@observation)
