@@ -322,7 +322,7 @@ class CollectionNumbersController < ApplicationController
     render(
       partial: "shared/modal_form",
       locals: { title: modal_title, identifier: modal_identifier,
-                form: "collection_numbers/form" }
+                user: @user, form: "collection_numbers/form" }
     ) and return
   end
 
@@ -359,8 +359,7 @@ class CollectionNumbersController < ApplicationController
   def reload_collection_number_modal_form_and_flash
     render(
       partial: "shared/modal_form_reload",
-      locals: { identifier: modal_identifier,
-                form: "collection_numbers/form" }
+      locals: { identifier: modal_identifier, form: "collection_numbers/form" }
     ) and return true
   end
 end

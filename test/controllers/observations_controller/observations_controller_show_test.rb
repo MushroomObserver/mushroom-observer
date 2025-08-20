@@ -826,7 +826,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_response(:success)
   end
 
-  def test_external_sites_user_can_add_links_to
+  def test_external_sites_user_can_add_links_to_for_obs
     # not logged in
     do_external_sites_test([], nil, nil)
     # dick is neither owner nor member of any site's project
@@ -842,7 +842,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
   end
 
   def do_external_sites_test(expect, user, obs)
-    actual = ExternalSite.sites_user_can_add_links_to(user, obs)
+    actual = ExternalSite.sites_user_can_add_links_to_for_obs(user, obs)
     assert_equal(expect.map(&:name), actual.map(&:name))
   end
 

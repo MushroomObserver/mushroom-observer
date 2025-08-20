@@ -8,7 +8,7 @@ can_edit  = in_admin_mode? || obs.can_edit?(user)
 <%=
 tag.div(
   id: "observation_sequences", class: "obs-sequence",
-  data: { controller: "section-update" }
+  data: { controller: "section-update", section_update_user_value: user.id }
 ) do
 
   concat(tag.div do

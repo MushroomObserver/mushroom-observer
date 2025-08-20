@@ -14,12 +14,14 @@ module Users
       respond_to do |format|
         format.html
         format.turbo_stream do
-          render(partial: "shared/modal_form",
-                 locals: { identifier: "user_question_email",
-                           title: :ask_user_question_title.t(
-                             user: @target.legal_name
-                           ),
-                           form: "users/emails/form" }) and return
+          render(
+            partial: "shared/modal_form",
+            locals: {
+              title: :ask_user_question_title.t(user: @target.legal_name),
+              identifier: "user_question_email",
+              user: @user, form: "users/emails/form"
+            }
+          ) and return
         end
       end
     end

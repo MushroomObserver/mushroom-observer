@@ -14,7 +14,7 @@ target_type = tag.span(target.class.name.to_sym.t, class: "small") \
 tag.div(
   class: "list-group-item comment",
   id: dom_id(comment),
-  data: { controller: "section-update" }
+  data: { controller: "section-update", section_update_user_value: user.id }
 ) do
   concat(tag.div(class: "row") do
     [

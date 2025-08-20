@@ -1,6 +1,6 @@
 <%= form_with(model: visual_model) do |f| %>
   <% if visual_model.errors.any? %>
-    <div id="error_explanation">
+    <div id="error_explanation" class="alert alert-danger">
       <%= "#{pluralize(visual_model.errors.count,
         :error.t, plural: :errors.t)} #{:visual_model_errors.t}" %>:
       <ul>

@@ -20,9 +20,11 @@ module Admin
           format.turbo_stream do
             render(
               partial: "shared/modal_form",
-              locals: { identifier: "name_change_request_email",
-                        title: :email_name_change_request_title.l,
-                        form: "admin/email/name_change_requests/form" }
+              locals: {
+                title: :email_name_change_request_title.l,
+                identifier: "name_change_request_email",
+                user: @user, form: "admin/email/name_change_requests/form"
+              }
             ) and return
           end
         end
