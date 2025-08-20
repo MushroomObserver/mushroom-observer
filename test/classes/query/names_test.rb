@@ -649,8 +649,7 @@ class Query::NamesTest < UnitTestCase
 
   def test_name_with_observation_subquery_locations
     loc = locations(:burbank)
-    expects = Name.order_by_default.with_correct_spelling.joins(:observations).
-              where(observations: { location: loc }).distinct
+    expects = [names(:conocybe_filaris), names(:fungi)]
     scope = Name.with_correct_spelling.joins(:observations).distinct.
             merge(Observation.locations(loc)).order_by_default
     assert_query_scope(
