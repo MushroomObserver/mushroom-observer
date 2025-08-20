@@ -257,8 +257,8 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       end
     }
     scope :locations, lambda { |locations|
-      locations = Lookup::Locations.new(locations).instances
-      in_boxes = locations.map! { |location| in_box(location.bounding_box) }
+      locs = ::Lookup::Locations.new(locations).instances
+      in_boxes = locs.map! { |location| in_box(**location.bounding_box) }
       or_clause(*in_boxes).distinct
     }
     # Pass Box kwargs (:north, :south, :east, :west), any order.

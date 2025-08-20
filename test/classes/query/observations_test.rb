@@ -246,6 +246,15 @@ class Query::ObservationsTest < UnitTestCase
     assert_query(expects, :Observation, locations: locations(:burbank))
   end
 
+  def test_observation_locations_multiple
+    locs = [locations(:burbank), locations(:mitrula_marsh)]
+    expects = Observation.locations(locs).order_by_default
+    assert_query(expects, :Observation, locations: locs.map(&:name))
+
+    expects = Observation.locations(locs.map(&:id)).order_by_default
+    assert_query(expects, :Observation, locations: locs.map(&:id))
+  end
+
   def test_observation_projects
     assert_query([],
                  :Observation, projects: projects(:empty_project))
