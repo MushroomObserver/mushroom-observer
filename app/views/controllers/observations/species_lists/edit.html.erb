@@ -3,32 +3,40 @@
 add_page_title(
   :species_list_manage_title.t(name: @observation.unique_format_name)
 )
+add_sorter(@all_lists, species_lists_index_sorts(query: @all_lists))
 add_context_nav(observation_list_tabs(obs: @observation))
 container_class(:wide)
+content_padding(:panels)
 %>
 
-<% if @obs_lists.any? %>
-  <%= tag.h5("#{:species_list_manage_belongs_to.l}:", class: "mt-3") %>
-  <%= tag.div(class: "list-group") do %>
-    <% @obs_lists.each do |species_list| %>
-      <%= render(
-        partial: "species_lists/species_list",
-        locals: { species_list: species_list, observation: @observation,
-                  remove: check_permission(species_list) }
-      ) %>
+<%= tag.div(class: "navbar-flex mb-2") do
+  content_for(:sorter)
+end %>
+
+<%= content_padded do %>
+  <% if @obs_lists.any? %>
+    <%= tag.h5("#{:species_list_manage_belongs_to.l}:", class: "mt-3") %>
+    <%= tag.div(class: "list-group") do %>
+      <% @obs_lists.each do |species_list| %>
+        <%= render(
+          partial: "species_lists/species_list",
+          locals: { species_list: species_list, observation: @observation,
+                    remove: check_permission(species_list) }
+        ) %>
+      <% end %>
     <% end %>
   <% end %>
-<% end %>
 
-<% if @other_lists.any? %>
-  <%= tag.h5("#{:species_list_manage_doesnt_contain.l}:", class: "mt-3") %>
-  <%= tag.div(class: "list-group") do %>
-    <% @other_lists.each do |species_list| %>
-      <%= render(
-        partial: "species_lists/species_list",
-        locals: { species_list: species_list, observation: @observation,
-                  add: check_permission(species_list) }
-      ) %>
+  <% if @other_lists.any? %>
+    <%= tag.h5("#{:species_list_manage_doesnt_contain.l}:", class: "mt-3") %>
+    <%= tag.div(class: "list-group") do %>
+      <% @other_lists.each do |species_list| %>
+        <%= render(
+          partial: "species_lists/species_list",
+          locals: { species_list: species_list, observation: @observation,
+                    add: check_permission(species_list) }
+        ) %>
+      <% end %>
     <% end %>
   <% end %>
 <% end %>

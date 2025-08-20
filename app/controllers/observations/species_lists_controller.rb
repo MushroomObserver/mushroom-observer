@@ -50,11 +50,13 @@ module Observations
 
     def set_list_ivars
       order_by = params[:by] || :date
-      all_lists = Query.lookup(:SpeciesList, editable_by_user: @user, order_by:)
+      @all_lists = Query.lookup(
+        :SpeciesList, editable_by_user: @user, order_by:
+      )
 
       @obs_lists = []
       @other_lists = []
-      all_lists.results.each do |list|
+      @all_lists.results.each do |list|
         if list.observations.member?(@observation)
           @obs_lists << list
         else
