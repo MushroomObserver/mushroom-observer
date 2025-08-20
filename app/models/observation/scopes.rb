@@ -257,8 +257,9 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       end
     }
     scope :locations, lambda { |locations|
-      location_ids = lookup_locations_by_name(locations)
-      where(location: location_ids).distinct
+      locations = Lookup::Locations.new(locations).instances
+      in_boxes = locations.map! { |location| in_box(location.bounding_box) }
+      or_clause(*in_boxes).distinct
     }
     # Pass Box kwargs (:north, :south, :east, :west), any order.
     # By default this scope selects only obs either with lat/lng or with useful
