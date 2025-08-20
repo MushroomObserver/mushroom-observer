@@ -1,4 +1,4 @@
-<%# locals: (observation:, user:, species_list:, image: false, remove: false, add: false) %>
+<%# locals: (observation:, user:, species_list:, image: false, remove: false) %>
 
 <%# One observation for the species list show page %>
 <%
@@ -38,12 +38,10 @@ listing_classes = image ? "col-sm-8 col-md-9" : "col-xs-12"
           end %>
         <% end %>
 
-        <% if remove || add %>
+        <% if remove %>
           <%= tag.div(class: "manage_observation") do
             if remove
               species_list_remove_obs_button(species_list:, observation:)
-            elsif add
-              species_list_add_obs_button(species_list:, observation:)
             end
           end %>
         <% end %>
