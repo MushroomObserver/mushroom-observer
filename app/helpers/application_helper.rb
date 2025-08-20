@@ -123,6 +123,7 @@ module ApplicationHelper
   # from the defaults below, call `content_padding(:panels)` or :no_panels
   # in the template. If it's a mixed layout you can set it to :panels and wrap
   # text blocks in the CSS class `content-block`, which will pad them the same.
+  # Must set some string class value or `default_content_padding` will override.
   def content_padding(content_has = nil)
     # Give defaults per action.
     content_has ||= case action_name
@@ -132,7 +133,7 @@ module ApplicationHelper
                       :no_panels
                     end
     content_for(:content_padding, flush: true) do
-      content_has == :no_panels ? "p-3" : ""
+      content_has == :no_panels ? "p-3" : "p-0"
     end
   end
 
