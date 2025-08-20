@@ -127,6 +127,23 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
     left_outer_joins(:location).search_columns(cols, phrase)
   }
 
+  scope :editable_by_user, lambda { |user|
+    user = User.safe_find(user)
+    return all unless user
+
+    if (member_projects = Project.user_is_member(user.id)).any?
+      project_species_list_ids =
+        ProjectSpeciesList.where(project: member_projects).distinct.
+        pluck(:species_list_id)
+
+      scope = all
+      scope.where(user: user.id).
+        or(scope.where(id: project_species_list_ids)).distinct
+    else
+      where(user: user.id)
+    end
+  }
+
   scope :observation_query, lambda { |hash|
     joins(:observations).subquery(:Observation, hash)
   }

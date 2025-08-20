@@ -582,19 +582,19 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Return an Array of Project's that this User is an admin for.
   def projects_admin
-    Project.joins(:admin_group_users).where(user_id: id)
+    Project.user_is_admin(id)
   end
 
   # Return an Array of Project's that this User is a member of.
   def projects_member(order: :created_at, include: nil)
-    @projects_member ||= Project.where(user_group: user_groups.ids).
+    @projects_member ||= Project.user_is_member(id).
                          includes(include).order(order).to_a
   end
 
   # Return an Array of ExternalSite's that this user has permission to add
   # links for.
   def external_sites
-    @external_sites ||= ExternalSite.where(project: projects_member)
+    @external_sites ||= ExternalSite.user_is_site_project_member(id)
   end
 
   def preferred_herbarium_name
@@ -645,20 +645,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   # Return an ActiveRecord::Association of SpeciesList's that User created or
   # that are attached to a Project that the User is a member of.
   def all_editable_species_lists
-    @all_editable_species_lists ||=
-      if projects_member.any?
-        SpeciesList.
-          where(SpeciesList[:user_id].eq(id).
-          or(SpeciesList[:id].in(species_lists_in_users_projects))).distinct
-      else
-        species_lists
-      end
-  end
-
-  def species_lists_in_users_projects
-    project_ids = projects_member.map(&:id)
-    ProjectSpeciesList.where(project_id: project_ids).distinct.
-      pluck(:species_list_id)
+    @all_editable_species_lists ||= SpeciesList.editable_by_user(id)
   end
 
   ##############################################################################
