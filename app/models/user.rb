@@ -582,19 +582,19 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Return an Array of Project's that this User is an admin for.
   def projects_admin
-    Project.user_is_admin(self)
+    Project.user_is_admin(id)
   end
 
   # Return an Array of Project's that this User is a member of.
   def projects_member(order: :created_at, include: nil)
-    @projects_member ||= Project.user_is_member(self).
+    @projects_member ||= Project.user_is_member(id).
                          includes(include).order(order).to_a
   end
 
   # Return an Array of ExternalSite's that this user has permission to add
   # links for.
   def external_sites
-    @external_sites ||= ExternalSite.user_is_member(self)
+    @external_sites ||= ExternalSite.user_is_member(id)
   end
 
   def preferred_herbarium_name
