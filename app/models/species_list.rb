@@ -131,14 +131,14 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
     user = User.safe_find(user)
     return all unless user
 
-    if user.projects_member.any?
-      project_ids = user.projects_member.map(&:id)
+    if (member_projects = Project.user_is_member(user.id)).any?
       project_species_list_ids =
-        ProjectSpeciesList.where(project_id: project_ids).distinct.
+        ProjectSpeciesList.where(project: member_projects).distinct.
         pluck(:species_list_id)
 
-      where(SpeciesList[:user_id].eq(user.id).
-        or(SpeciesList[:id].in(project_species_list_ids))).distinct
+      scope = all
+      scope.where(user: user.id).
+        or(scope.where(id: project_species_list_ids)).distinct
     else
       where(user: user.id)
     end
