@@ -27,10 +27,9 @@ class ExternalSite < AbstractModel
         ->(phrase) { search_columns(ExternalSite[:name], phrase) }
 
   scope :user_is_site_project_member, lambda { |user|
-    user = User.safe_find(user)
-    return all unless user
+    user_id = user.is_a?(Integer) ? user : user&.id
 
-    where(project: Project.user_is_member(user))
+    where(project: Project.user_is_member(user_id))
   }
 
   def check_url_syntax

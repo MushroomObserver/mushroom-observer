@@ -129,10 +129,9 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   }
 
   scope :user_is_admin, lambda { |user|
-    user = User.safe_find(user)
-    return all unless user
+    user_id = user.is_a?(Integer) ? user : user&.id
 
-    joins(:admin_group_users).where(user: user)
+    joins(:admin_group_users).where(user: user_id)
   }
 
   scope :show_includes, lambda {

@@ -140,7 +140,7 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
       where(SpeciesList[:user_id].eq(user.id).
         or(SpeciesList[:id].in(project_species_list_ids))).distinct
     else
-      where(user_id: user.id)
+      where(user: user.id)
     end
   }
 
