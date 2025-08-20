@@ -82,10 +82,9 @@ module Image::Scopes
       joins(:observation_images).
         where(observation_images: { observation: obs })
     }
-    scope :locations, lambda { |loc|
-      ids = lookup_locations_by_name(loc)
+    scope :locations, lambda { |locations|
       joins(observation_images: :observation).
-        where(observation: { location_id: ids })
+        merge(Observation.locations(locations)).distinct
     }
     scope :projects, lambda { |proj|
       ids = lookup_projects_by_name(proj)

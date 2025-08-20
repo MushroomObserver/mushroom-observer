@@ -253,6 +253,9 @@ class Query::ObservationsTest < UnitTestCase
 
     expects = Observation.locations(locs.map(&:id)).order_by_default
     assert_query(expects, :Observation, locations: locs.map(&:id))
+
+    expects = Observation.locations(locs.map(&:name)).order_by_default
+    assert_query(expects, :Observation, locations: locs.map(&:id))
   end
 
   def test_observation_projects
