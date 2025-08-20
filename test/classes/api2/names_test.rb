@@ -128,9 +128,7 @@ class API2::NamesTest < UnitTestCase
 
   def test_getting_names_locations
     loc   = locations(:burbank)
-    names = loc.observations.map(&:name).
-            flatten.uniq.sort_by(&:id).
-            reject(&:correct_spelling_id)
+    names = Name.with_correct_spelling.locations(loc)
     assert_not_empty(names)
     assert_api_pass(params_get(location: loc.id))
     assert_api_results(names)

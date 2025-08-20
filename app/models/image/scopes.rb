@@ -83,6 +83,8 @@ module Image::Scopes
         where(observation_images: { observation: obs })
     }
     scope :locations, lambda { |locations|
+      return none if locations.blank?
+
       joins(observation_images: :observation).
         merge(Observation.locations(locations)).distinct
     }

@@ -21,7 +21,7 @@ class RelatedRecordsIntegrationTest < CapybaraIntegrationTestCase
     page.find("#filters").assert_text(location.display_name)
 
     results = find_all("#results .matrix-box")
-    assert_equal(location.observations.size, results.size)
+    assert_equal(Observation.locations(location).size, results.size)
     assert_selector("a", text: :show_objects.t(type: :location))
     click_link(text: :show_objects.t(type: :location))
 

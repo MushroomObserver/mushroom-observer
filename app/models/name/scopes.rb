@@ -268,6 +268,8 @@ module Name::Scopes
     }
     # Accepts region string, location_id, or Location instance
     scope :locations, lambda { |locations|
+      return none if locations.blank?
+
       joins(:observations).merge(Observation.locations(locations)).distinct
     }
     # Names with Observations whose lat/lon are in a box

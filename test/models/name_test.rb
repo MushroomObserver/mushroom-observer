@@ -3654,6 +3654,9 @@ class NameTest < UnitTestCase
   end
 
   def test_scope_locations
+    # Have to do this, otherwise columns not populated
+    Location.update_box_area_and_center_columns
+
     assert_includes(
       Name.locations(locations(:burbank)), # at location called with Location
       names(:agaricus_campestris)
