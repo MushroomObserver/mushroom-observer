@@ -78,7 +78,7 @@ module Observations
     def set_up_form_field_groupings
       @field_columns = [
         {
-          date: { shown: [:date], collapsed: [:created_at, :updated_at] },
+          dates: { shown: [:date], collapsed: [:created_at, :updated_at] },
           name: {
             shown: [:names],
             # conditional: [[:include_subtaxa, :include_synonyms],

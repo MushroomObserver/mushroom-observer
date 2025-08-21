@@ -126,6 +126,7 @@ module SearchHelper
     end
     args[:help] = search_help_text(args, field_type)
     args[:hidden_name] = search_check_for_hidden_field_name(args)
+    # args[:class] = "mb-3"
     args = search_prefill_or_select_values(args, field_type)
 
     args.except(:search)

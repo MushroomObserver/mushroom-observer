@@ -1233,7 +1233,7 @@
   # These are for search forms and should recycle other translations
   search_term_group_pattern: "[:PATTERN]"
   search_term_group_search: "[:SEARCH]"
-  search_term_group_date: "[:DATE]"
+  search_term_group_dates: "[:DATES]"
   search_term_group_quality: "[:QUALITY]"
   search_term_group_scope: "[:SCOPE]"
   search_term_group_detail: "[:DETAIL]"

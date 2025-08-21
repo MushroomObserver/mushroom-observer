@@ -27,7 +27,7 @@ module AutocompleterHelper
     ac_args[:label_end] = autocompleter_label_end(args)
     ac_args[:append] = autocompleter_append(args)
 
-    tag.div(id: args[:controller_id],
+    tag.div(id: args[:controller_id], class: "autocompleter",
             data: autocompleter_controller_data(args)) do
       if args[:textarea] == true
         concat(text_area_with_label(**ac_args))

@@ -182,7 +182,9 @@ form {
 }
 
 .panel-body {
-  .form-group:last-child {
-    margin-bottom: 0;
+  > .row:last-child .form-group,
+  > .autocompleter:last-child .form-group,
+  > .form-group:last-child {
+    margin-bottom: 0.25rem;
   }
 }
