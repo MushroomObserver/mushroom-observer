@@ -208,13 +208,6 @@ class Inat
     ].freeze
     # This will get put into MO Observation's Notes Collector:
     def collector
-=begin
-      if inat_obs_field("Collector").present?
-        inat_obs_field("Collector")[:value]
-      else
-        self[:user][:login]
-      end
-=end
       INAT_COLLECTOR_FIELDS.each do |field_name|
         if inat_obs_field(field_name).present?
           return inat_obs_field(field_name)[:value]
