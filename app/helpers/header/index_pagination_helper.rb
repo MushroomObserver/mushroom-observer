@@ -155,7 +155,7 @@ module Header
       url = pagination_link_url(prev_page, arg, args)
       icon_link_to(
         :PREV.t, url,
-        class: classes, icon: :previous, show_text: false, icon_class: ""
+        class: classes, icon: :prev, show_text: false, icon_class: ""
       )
     end
 
