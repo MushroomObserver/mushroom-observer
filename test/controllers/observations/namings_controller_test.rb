@@ -23,6 +23,15 @@ module Observations
                          observation_id: obs.id.to_s)
     end
 
+    def test_new_form_turbo
+      obs = observations(:coprinus_comatus_obs)
+      params = { observation_id: obs.id.to_s }
+      login
+      get(:new, params:, format: :turbo_stream)
+      assert_form_action(action: "create", approved_name: "",
+                         observation_id: obs.id.to_s)
+    end
+
     def test_edit_form
       nam = namings(:coprinus_comatus_naming)
       params = { observation_id: nam.observation_id, id: nam.id.to_s }
