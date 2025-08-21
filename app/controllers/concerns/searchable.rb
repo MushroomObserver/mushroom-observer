@@ -35,7 +35,7 @@ module Searchable
 
       set_up_form_field_groupings # in case we need to re-render the form
       replace_strings_with_ids
-      concatenate_range_fields
+      # concatenate_range_fields
       validate_search_query_instance_from_params
       save_search_query
 
@@ -93,24 +93,13 @@ module Searchable
       end
     end
 
-    # Check for `fields_with_range`, and concatenate them if range val present
-    def concatenate_range_fields # rubocop:disable Metrics/AbcSize
-      return unless respond_to?(:fields_with_range)
-
-      fields_with_range.each do |key|
-        next if params[:"#{key}_range"].blank?
-
-        params[key] = [params[key].to_s.strip,
-                       params[:"#{key}_range"].to_s.strip].join("-")
-      end
-    end
-
-    # `params.permit` will not accept nested params, so just add them back in.
-    # Query will validate and sanitize.
+    # `params.permit` will not accept nested params, or arrays from ranges,
+    # so just add them back in. Query will validate and sanitize.
     def validate_search_query_instance_from_params
       @search = query_subclass.new(
         **params.permit(permitted_search_params.keys),
-        **nested_params_re_added
+        **nested_params_re_added,
+        **concatenated_range_fields_re_added
       )
       redirect_to(action: :new) and return if @search.invalid?
     end
@@ -133,6 +122,21 @@ module Searchable
                      params.dig(:in_box, :south).to_i.zero?)
 
       params[:in_box].to_unsafe_hash
+    end
+
+    # Check for `fields_with_range`, and concatenate them if range val present
+    def concatenated_range_fields_re_added
+      return unless respond_to?(:fields_with_range)
+
+      re_added_hash = {}
+      fields_with_range.each do |key|
+        next if params[:"#{key}_range"].blank?
+
+        re_added_hash[key] = [params[key], params[:"#{key}_range"]].map do |val|
+          val.to_s.strip.to_f
+        end
+      end
+      re_added_hash
     end
 
     def clear_relevant_query
