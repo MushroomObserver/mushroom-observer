@@ -73,7 +73,7 @@ module Names
                         [:has_comments, :comments_has],
                         [:has_observations]]
           },
-          date: { shown: [[:created_at, :updated_at]], collapsed: [] } }
+          dates: { shown: [[:created_at, :updated_at]], collapsed: [] } }
       ].freeze
     end
   end
