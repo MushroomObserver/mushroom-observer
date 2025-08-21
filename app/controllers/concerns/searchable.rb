@@ -101,7 +101,17 @@ module Searchable
         **nested_params_re_added,
         **concatenated_range_fields_re_added
       )
-      redirect_to(action: :new) and return if @search.invalid?
+      return unless @search.invalid?
+
+      messages = search_query_error_messages
+      flash_error(messages) if messages
+      redirect_to(action: :new) and return
+    end
+
+    def search_query_error_messages
+      @search.validation_errors.compact_blank.map do |error|
+        concat(tag.div(error))
+      end
     end
 
     # Add the nested params back in if they're present
