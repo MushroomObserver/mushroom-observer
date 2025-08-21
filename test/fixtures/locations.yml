@@ -361,9 +361,7 @@ pretoria:
 low_alt_only:
   <<: *DEFAULTS
   low: -12345
-  name: Mariana, Massachusetts, USA
 
 high_alt_only:
   <<: *DEFAULTS
   high: 12345
-  name: Everest, Massachusetts, USA
