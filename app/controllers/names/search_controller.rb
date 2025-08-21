@@ -59,7 +59,8 @@ module Names
     # with an array of fields or field pairings.
     def set_up_form_field_groupings
       @field_columns = [
-        { name: { shown: [:names], collapsed: [[:pattern], [:rank, :lichen]] },
+        { name: { shown: [:names],
+                  collapsed: [:pattern, :rank, :lichen] },
           quality: {
             shown: [[:has_synonyms, :deprecated]],
             collapsed: [[:has_author, :author_has],
