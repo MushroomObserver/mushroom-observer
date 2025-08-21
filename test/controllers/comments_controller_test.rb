@@ -91,9 +91,11 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_user: rolf.id })
 
-    assert_redirected_to(action: "show",
-                         id: comments(:minimal_unknown_obs_comment_1).id,
-                         params: @controller.query_params(QueryRecord.last))
+    assert_redirected_to(
+      action: "show",
+      id: comments(:minimal_unknown_obs_comment_1).id,
+      params: @controller.query_params(QueryRecord.last.query)
+    )
   end
 
   def test_index_by_user_who_created_multiple_comments

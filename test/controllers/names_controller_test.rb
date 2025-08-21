@@ -922,7 +922,7 @@ class NamesControllerTest < FunctionalTestCase
     name14 = names[14]
     login
     get(:show, params: { flow: "next", id: name12.id })
-    q = @controller.query_params(QueryRecord.last)
+    q = @controller.query_params(QueryRecord.last.query)
     assert_redirected_to(name_path(name13.id, params: q))
     get(:show, params: { flow: "next", id: name13.id })
     assert_redirected_to(name_path(name14.id, params: q))

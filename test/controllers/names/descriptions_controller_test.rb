@@ -169,7 +169,7 @@ module Names
       params = @controller.find_query_and_next_object(object, :next, id)
       login
       get(:show, params: { flow: :next, id: description.id })
-      q = @controller.query_params(QueryRecord.last)
+      q = @controller.query_params(QueryRecord.last.query)
       # from params above
       assert_redirected_to(name_description_path(params[:id], params: q))
     end
@@ -181,7 +181,7 @@ module Names
       params = @controller.find_query_and_next_object(object, :prev, id)
       login
       get(:show, params: { flow: :prev, id: description.id })
-      q = @controller.query_params(QueryRecord.last)
+      q = @controller.query_params(QueryRecord.last.query)
       # from params above
       assert_redirected_to(name_description_path(params[:id], params: q))
     end
