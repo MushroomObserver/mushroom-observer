@@ -194,14 +194,18 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
     if query_record_id?(param_set[:q]) # i.e. QueryRecord.id
       Query.safe_find(param_set[:q].to_s.dealphabetize) # this may return nil
     elsif param_set[:q].present?
-      q_param = Rack::Utils.parse_nested_query(param_set[:q]).
-                deep_symbolize_keys
+      q_param = parse_q_param(param_set)
       Query.lookup(q_param[:model].to_sym, **q_param.except(:model))
     end
   end
 
   def query_record_id?(str)
     str&.match(/^[a-zA-Z0-9]*$/)
+  end
+
+  # This parses the results of `to_query`, called in `full_q_param`
+  def parse_q_param(param_set)
+    Rack::Utils.parse_nested_query(param_set[:q]).deep_symbolize_keys
   end
 
   # NOTE: If we're going to cache user stuff that depends on their present q,
@@ -400,12 +404,7 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
   def current_query_is_rss_log
     return unless params[:q]
 
-    query = if query_record_id?(params[:q])
-              query_record_exists(dealphabetize_q_param)
-            else
-              Query.lookup(params.dig(:q, :model), **params[:q])
-            end
-
+    query = query_from_q_param(params)
     query if query.model == RssLog
   end
 
