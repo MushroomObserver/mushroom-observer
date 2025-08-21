@@ -528,3 +528,11 @@ article_rss_log:
 provisional_obs_rss_log:
   <<: *DEFAULTS
   observation: provisional_obs
+
+low_alt_obs_rss_log:
+  <<: *DEFAULTS
+  observation: low_alt_obs
+
+high_alt_obs_rss_log:
+  <<: *DEFAULTS
+  observation: high_alt_obs

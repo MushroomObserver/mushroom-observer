@@ -357,3 +357,11 @@ pretoria:
   box_area: 0.17319684776877e4
   center_lat: -0.257586498261e2
   center_lng: 0.281979494095e2
+
+low_alt_only:
+  <<: *DEFAULTS
+  low: -12345
+
+high_alt_only:
+  <<: *DEFAULTS
+  high: 12345

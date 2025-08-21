@@ -826,6 +826,14 @@ provisional_obs:
   <<: *DEFAULTS
   name: provisional_name
 
+low_alt_obs:
+  <<: *DEFAULTS
+  location: low_alt_only
+
+high_alt_obs:
+  <<: *DEFAULTS
+  location: high_alt_only
+
 #
 #
 # IMPORTANT - AVOID CREATING FUTURE TEST ERRORS
