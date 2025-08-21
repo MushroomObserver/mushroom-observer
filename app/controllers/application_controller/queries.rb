@@ -266,11 +266,20 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
   def append_query_param_to_path(path, query_param)
     return path unless query_param
 
-    if path.include?("?") # Does path already have a query string?
-      "#{path}&q=#{query_param}" # add query_param to existing query string
-    else
-      "#{path}?q=#{query_param}" # create a query string comprising query_param
-    end
+    # Figure out if there's an existing URI query_string, like "flow=next"
+    # This query_string is not our q param, it's all the other params.
+    uri = URI.parse(path)
+    query_string = uri.query
+
+    # Parse the query_string as a Ruby hash, and add `q`
+    hash = if query_string
+             Rack::Utils.parse_query(query_string)
+           else
+             {}
+           end
+    hash["q"] = query_param
+    uri.query = hash.to_query
+    uri.to_s
   end
 
   # Allows us to add query to a path helper:
