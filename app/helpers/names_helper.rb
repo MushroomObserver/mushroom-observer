@@ -73,7 +73,8 @@ module NamesHelper
       title,
       add_query_param(observations_path, query),
       data: { query_params: query.params.deep_compact_blank.to_json,
-              query_record: query.record.id, alph: query.record.id.alphabetize }
+              query_record: query.record.id,
+              query_alph: query.record.id.alphabetize }
     ) + " (#{count})"
   end
 
