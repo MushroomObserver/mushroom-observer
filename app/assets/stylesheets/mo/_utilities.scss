@@ -158,6 +158,10 @@
   object-fit: contain;
 }
 
+.flex-grow-1 {
+  flex-grow: 1 !important;
+}
+
 .text-larger {
   font-size: larger !important;
 }
