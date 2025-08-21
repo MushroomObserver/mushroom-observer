@@ -50,14 +50,6 @@ class LabelsTest < UnitTestCase
     assert_match("#{obs.alt.abs} m", label.body)
   end
 
-  def test_with_lat_lng_alt
-    obs = observations(:unknown_with_lat_lng)
-    label = Labels.new(Query.lookup(:Observation, id_in_set: [obs.id]))
-    assert_match("#{obs.lat.abs}", label.body)
-    assert_match("#{obs.lng.abs}", label.body)
-    assert_match("#{obs.alt.abs} m", label.body)
-  end
-
   def test_low_alt
     obs = observations(:low_alt_obs)
     label = Labels.new(Query.lookup(:Observation, id_in_set: [obs.id]))
