@@ -316,7 +316,7 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
     return if params[:q].blank?
 
     query = query_from_q_param(params)
-    return if query.invalid?
+    return @query_params unless query&.valid?
 
     @query_params[:q] = full_q_param(query)
     @query_params
@@ -402,9 +402,9 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
     query =  next_params[:query]
 
     # Redirect to the show_object page appropriate for the new object.
-    redirect_to(add_query_param({ controller: object.show_controller,
-                                  action: object.show_action,
-                                  id: id }, query))
+    redirect_to({ controller: object.show_controller,
+                  action: object.show_action,
+                  id:, q: get_query_param(query) })
   end
 
   def find_query_and_next_object(object, method, id)
