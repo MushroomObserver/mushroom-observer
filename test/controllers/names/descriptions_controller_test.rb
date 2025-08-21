@@ -166,26 +166,26 @@ module Names
       description = name_descriptions(:coprinus_comatus_desc)
       id = description.id
       object = NameDescription.find(id)
-      params = @controller.find_query_and_next_object(object, :next, id)
       login
-      get(:show, params: { flow: :next, id: description.id })
-      params = { id: params[:id],
-                 q: @controller.get_query_param(QueryRecord.last.query) }
+      get(:show, params: { flow: :next, id: })
+      next_data = @controller.find_query_and_next_object(object, :next, id)
+      params = { id: next_data[:id],
+                 q: @controller.get_query_param(next_data[:query]) }
       # from params above
-      assert_redirected_to(name_description_path(params:))
+      assert_redirected_to(name_description_path(**params))
     end
 
     def test_prev_description
       description = name_descriptions(:coprinus_comatus_desc)
       id = description.id
       object = NameDescription.find(id)
-      params = @controller.find_query_and_next_object(object, :prev, id)
       login
-      get(:show, params: { flow: :prev, id: description.id })
-      params = { id: params[:id],
-                 q: @controller.get_query_param(QueryRecord.last.query) }
+      get(:show, params: { flow: :prev, id: })
+      prev_data = @controller.find_query_and_next_object(object, :prev, id)
+      params = { id: prev_data[:id],
+                 q: @controller.get_query_param(prev_data[:query]) }
       # from params above
-      assert_redirected_to(name_description_path(params:))
+      assert_redirected_to(name_description_path(**params))
     end
 
     def test_why_danny_cant_edit_lentinus_description

@@ -921,15 +921,15 @@ class NamesControllerTest < FunctionalTestCase
     name13 = names[13]
     name14 = names[14]
     login
-    get(:show, params: { flow: "next", id: name12.id })
+    get(:show, params: { flow: :next, id: name12.id })
     params = { q: @controller.get_query_param(QueryRecord.last.query) }
 
     assert_redirected_to(name_path(name13.id, params:))
-    get(:show, params: { flow: "next", id: name13.id })
+    get(:show, params: { flow: :next, id: name13.id })
     assert_redirected_to(name_path(name14.id, params:))
-    get(:show, params: { flow: "prev", id: name14.id })
+    get(:show, params: { flow: :prev, id: name14.id })
     assert_redirected_to(name_path(name13.id, params:))
-    get(:show, params: { flow: "prev", id: name13.id })
+    get(:show, params: { flow: :prev, id: name13.id })
     assert_redirected_to(name_path(name12.id, params:))
   end
 
@@ -943,19 +943,19 @@ class NamesControllerTest < FunctionalTestCase
     name4 = query.results[-1]
 
     login
-    get(:show, params: q.merge(id: name1.id, flow: :next))
+    get(:show, params: params.merge(id: name1.id, flow: :next))
     assert_redirected_to(name_path(name2.id, params:))
-    get(:show, params: q.merge(id: name3.id, flow: :next))
+    get(:show, params: params.merge(id: name3.id, flow: :next))
     assert_redirected_to(name_path(name4.id, params:))
-    get(:show, params: q.merge(id: name4.id, flow: :next))
+    get(:show, params: params.merge(id: name4.id, flow: :next))
     assert_redirected_to(name_path(name4.id, params:))
     assert_flash_text(/no more/i)
 
-    get(:show, params: q.merge(id: name4.id, flow: :prev))
+    get(:show, params: params.merge(id: name4.id, flow: :prev))
     assert_redirected_to(name_path(name3.id, params:))
-    get(:show, params: q.merge(id: name2.id, flow: :prev))
+    get(:show, params: params.merge(id: name2.id, flow: :prev))
     assert_redirected_to(name_path(name1.id, params:))
-    get(:show, params: q.merge(id: name1.id, flow: :prev))
+    get(:show, params: params.merge(id: name1.id, flow: :prev))
     assert_redirected_to(name_path(name1.id, params:))
     assert_flash_text(/no more/i)
   end
