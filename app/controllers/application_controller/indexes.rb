@@ -1,5 +1,15 @@
 # frozen_string_literal: true
 
+#  ==== Indexes
+#  show_index_of_objects::  Show paginated set of Query results as a list.
+#  add_sorting_links::      Create sorting links for index pages.
+#  find_or_goto_index::     Look up object by id, displaying error and
+#                           redirecting on failure.
+#  goto_index::             Redirect to a reasonable fallback (index) page
+#                           in case of error.
+#  letter_pagination_data::       Paginate an Array by letter.
+#  number_pagination_data::       Paginate an Array normally.
+#
 module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   def self.included(base)
     base.helper_method(:number_pagination_data)

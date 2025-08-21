@@ -1,6 +1,21 @@
 # frozen_string_literal: true
 
-# see application_controller.rb
+#  ==== Queries
+#  clear_query_in_session:: Clears out Query stored in session below.
+#  store_query_in_session:: Stores Query in session for use by
+#                           create_species_list.
+#  query_from_session::     Gets Query that was stored in the session above.
+#  query_params::           Parameters to add to link_to, etc. for passing
+#                           Query around.
+#  query_params_set::       Make +query_params+ refer to a given Query.
+#  pass_query_params::      Tell +query_params+ to pass-through the Query
+#                            given to this action.
+#  find_query::             Find a given Query or return nil.
+#  find_or_create_query::   Find appropriate Query or create as necessary.
+#  create_query::           Create a new Query from scratch.
+#  redirect_to_next_object:: Find next object from a Query and redirect to its
+#                            show page.
+#
 module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
   def self.included(base)
     base.helper_method(
@@ -184,8 +199,10 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
   # helper_method :query_from_session
 
   # Get instance of Query which is being passed to subsequent pages.
+  # The only caller of this is `ApplicationHelper#get_next_id` and is
+  # used only by `url_after_delete(object)`
   def passed_query
-    query_from_q_param(query_params)
+    query_from_q_param(params)
   end
   # helper_method :passed_query
 
@@ -231,13 +248,13 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
       @query_params || {}
     end
   end
-  # helper_method :query_params
+  private :query_params # only call this here, to avoid double-encoding params
 
   def add_query_param(params, query = nil)
     return params if browser.bot?
 
     query_param = get_query_param(query)
-    if params.is_a?(String) # i.e., if params is a path
+    if params.is_a?(String) # i.e., if "params" arg is a path
       append_query_param_to_path(params, query_param)
     else
       params[:q] = query_param if query_param
@@ -284,9 +301,15 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
   end
 
   # Pass the in-coming query parameter(s) through to the next request.
+  # Re-validate the params as a query, because they could be altered
   def pass_query_params
     @query_params = {}
-    @query_params[:q] = params[:q] if params[:q].present?
+    return if params[:q].blank?
+
+    query = query_from_q_param(params)
+    return if query.invalid?
+
+    @query_params[:q] = full_q_param(query)
     @query_params
   end
 

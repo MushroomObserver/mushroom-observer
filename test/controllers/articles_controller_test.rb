@@ -24,8 +24,8 @@ class ArticlesControllerTest < FunctionalTestCase
   def test_index_filtered
     article = Article.reorder(created_at: :asc).first # oldest
     query = Query.lookup(:Article, id_in_set: [article.id])
-    params = @controller.query_params(query)
-    get(:index, params: params)
+    params = { q: @controller.get_query_param(query) }
+    get(:index, params:)
     assert_no_flash
 
     assert_select("#content a:match('href',?)", %r{/articles/\d+},
@@ -39,8 +39,8 @@ class ArticlesControllerTest < FunctionalTestCase
 
   def test_index_query_validation_errors
     query = Query.lookup(:Article, id_in_set: "one")
-    params = @controller.query_params(query)
-    get(:index, params: params)
+    params = { q: @controller.get_query_param(query) }
+    get(:index, params:)
     assert_flash_error
   end
 
@@ -76,7 +76,8 @@ class ArticlesControllerTest < FunctionalTestCase
 
   # Partly duplicates title_and_tabset_helper_test `test_context_nav_dropdown`.
   # But we want to test a `destroy_button` tab too.
-  # That method calls `add_query_param` and others unavailable to helper tests
+  # That helper calls `add_query_param` and others.
+  # NOTE: we can actually call @controller.add_query_param here, fwiw.
   def test_context_nav_dropdown_helper
     article = Article.last
     links = [["Create Article", new_article_path,

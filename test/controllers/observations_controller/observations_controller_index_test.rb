@@ -57,7 +57,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login
 
     query = Query.lookup_and_save(:Observation, big_obs_query_params)
-    get(:index, params: @controller.query_params(query))
+    get(:index, params: { q: @controller.get_query_param(query) })
 
     names_joined_trunc = BUNCH_OF_NAMES.first(3).map(&:text_name).join(", ")
     names_joined_trunc += ", ..."
@@ -78,7 +78,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login
 
     query = Query.lookup_and_save(:Observation, long_obs_query_params)
-    get(:index, params: @controller.query_params(query))
+    get(:index, params: { q: @controller.get_query_param(query) })
 
     regions_joined = SUPERLONG_REGIONS.join(", ")
     regions_joined_trunc = "#{regions_joined[0...97]}..."
@@ -177,8 +177,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
            "Test needs a string that has exactly one hit")
 
     login
-    get(:index,
-        params: @controller.query_params(query).merge(advanced_search: true))
+    params = { q: @controller.get_query_param(query), advanced_search: true }
+    get(:index, params:)
 
     assert_match(/#{obs.id}/, redirect_to_url,
                  "Advanced Search with 1 hit should show the hit")
@@ -197,8 +197,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     query = oklahoma_query
 
     login
-    get(:index,
-        params: @controller.query_params(query).merge({ advanced_search: "1" }))
+    params = { q: @controller.get_query_param(query), advanced_search: true }
+    get(:index, params:)
 
     assert_flash_text(:runtime_no_matches.l(type: :observations.l))
     assert_page_title(:OBSERVATIONS.l)
@@ -251,8 +251,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     query_no_conditions = Query.lookup_and_save(:Observation)
 
     login
-    params = @controller.query_params(query_no_conditions).
-             merge(advanced_search: true)
+    params = { q: @controller.get_query_param(query_no_conditions),
+               advanced_search: true }
     get(:index, params:)
 
     assert_flash_error(:runtime_no_conditions.l)

@@ -94,7 +94,7 @@ class CommentsControllerTest < FunctionalTestCase
     assert_redirected_to(
       action: "show",
       id: comments(:minimal_unknown_obs_comment_1).id,
-      params: @controller.query_params(QueryRecord.last.query)
+      params: { q: @controller.get_query_param(QueryRecord.last.query) }
     )
   end
 

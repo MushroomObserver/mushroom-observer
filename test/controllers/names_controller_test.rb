@@ -89,8 +89,8 @@ class NamesControllerTest < FunctionalTestCase
     query = Query.lookup_and_save(:Name, search_name: search_string)
 
     login
-    get(:index,
-        params: @controller.query_params(query).merge(advanced_search: true))
+    params = { q: @controller.get_query_param(query), advanced_search: true }
+    get(:index, params:)
 
     assert_response(:success)
     assert_select(
@@ -110,8 +110,8 @@ class NamesControllerTest < FunctionalTestCase
            "Test needs a string that has exactly one hit")
 
     login
-    get(:index,
-        params: @controller.query_params(query).merge(advanced_search: true))
+    params = { q: @controller.get_query_param(query), advanced_search: true }
+    get(:index, params:)
     assert_match(name_path(names(:stereum_hirsutum)), redirect_to_url,
                  "Wrong page")
   end
@@ -128,8 +128,8 @@ class NamesControllerTest < FunctionalTestCase
   def test_index_advanced_search_no_hits
     query = oklahoma_query
     login
-    get(:index,
-        params: @controller.query_params(query).merge({ advanced_search: "1" }))
+    params = { q: @controller.get_query_param(query), advanced_search: true }
+    get(:index, params:)
 
     assert_page_title(:NAMES.l)
     assert_flash_text(:runtime_no_matches.l(type: :names.l))
@@ -137,11 +137,11 @@ class NamesControllerTest < FunctionalTestCase
 
   def test_index_advanced_search_with_deleted_query
     query = oklahoma_query
-    params = @controller.query_params(query).merge(advanced_search: true)
+    params = { q: @controller.get_query_param(query), advanced_search: true }
     query.record.delete
 
     login
-    get(:index, params: params)
+    get(:index, params:)
 
     assert_redirected_to(search_advanced_path)
   end
@@ -150,8 +150,8 @@ class NamesControllerTest < FunctionalTestCase
     query_no_conditions = Query.lookup_and_save(:Name)
 
     login
-    params = @controller.query_params(query_no_conditions).
-             merge({ advanced_search: true })
+    params = { q: @controller.get_query_param(query_no_conditions),
+               advanced_search: true }
     get(:index, params:)
 
     assert_flash_error(:runtime_no_conditions.l)
@@ -393,7 +393,7 @@ class NamesControllerTest < FunctionalTestCase
 
   def pagination_query_params
     query = Query.lookup_and_save(:Name, order_by: :name)
-    @controller.query_params(query)
+    { q: @controller.get_query_param(query) }
   end
 
   # None of our standard tests ever actually renders pagination_numbers
@@ -922,19 +922,20 @@ class NamesControllerTest < FunctionalTestCase
     name14 = names[14]
     login
     get(:show, params: { flow: "next", id: name12.id })
-    q = @controller.query_params(QueryRecord.last.query)
-    assert_redirected_to(name_path(name13.id, params: q))
+    params = { q: @controller.get_query_param(QueryRecord.last.query) }
+
+    assert_redirected_to(name_path(name13.id, params:))
     get(:show, params: { flow: "next", id: name13.id })
-    assert_redirected_to(name_path(name14.id, params: q))
+    assert_redirected_to(name_path(name14.id, params:))
     get(:show, params: { flow: "prev", id: name14.id })
-    assert_redirected_to(name_path(name13.id, params: q))
+    assert_redirected_to(name_path(name13.id, params:))
     get(:show, params: { flow: "prev", id: name13.id })
-    assert_redirected_to(name_path(name12.id, params: q))
+    assert_redirected_to(name_path(name12.id, params:))
   end
 
   def test_next_and_prev2
     query = Query.lookup_and_save(:Name, pattern: "lactarius")
-    q = @controller.query_params(query)
+    params = { q: @controller.get_query_param(query) }
 
     name1 = query.results[0]
     name2 = query.results[1]
@@ -943,19 +944,19 @@ class NamesControllerTest < FunctionalTestCase
 
     login
     get(:show, params: q.merge(id: name1.id, flow: :next))
-    assert_redirected_to(name_path(name2.id, params: q))
+    assert_redirected_to(name_path(name2.id, params:))
     get(:show, params: q.merge(id: name3.id, flow: :next))
-    assert_redirected_to(name_path(name4.id, params: q))
+    assert_redirected_to(name_path(name4.id, params:))
     get(:show, params: q.merge(id: name4.id, flow: :next))
-    assert_redirected_to(name_path(name4.id, params: q))
+    assert_redirected_to(name_path(name4.id, params:))
     assert_flash_text(/no more/i)
 
     get(:show, params: q.merge(id: name4.id, flow: :prev))
-    assert_redirected_to(name_path(name3.id, params: q))
+    assert_redirected_to(name_path(name3.id, params:))
     get(:show, params: q.merge(id: name2.id, flow: :prev))
-    assert_redirected_to(name_path(name1.id, params: q))
+    assert_redirected_to(name_path(name1.id, params:))
     get(:show, params: q.merge(id: name1.id, flow: :prev))
-    assert_redirected_to(name_path(name1.id, params: q))
+    assert_redirected_to(name_path(name1.id, params:))
     assert_flash_text(/no more/i)
   end
 

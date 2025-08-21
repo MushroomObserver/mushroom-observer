@@ -7,7 +7,7 @@ module SpeciesLists
     def test_add_remove_observations
       query = Query.lookup(:Observation, by_users: users(:mary))
       assert(query.num_results > 1)
-      params = @controller.query_params(query) ## .merge(species_list: "")
+      params = { q: @controller.get_query_param(query) }
 
       requires_login(:edit)
       assert_response(:redirect)
@@ -26,7 +26,7 @@ module SpeciesLists
     def test_post_add_remove_observations
       query = Query.lookup(:Observation, by_users: users(:mary))
       assert(query.num_results > 1)
-      params = @controller.query_params(query)
+      params = { q: @controller.get_query_param(query) }
 
       spl = species_lists(:unknown_species_list)
       old_count = spl.observations.size
@@ -118,12 +118,13 @@ module SpeciesLists
       new_obs = (Observation.all - spl.observations).first
       ids = [dup_obs.id, new_obs.id]
       query = Query.lookup(:Observation, id_in_set: ids)
-      params = @controller.query_params(query).merge(
+      params = {
+        q: @controller.get_query_param(query),
         commit: :ADD.l,
         species_list: spl.title
-      )
+      }
       login(spl.user.login)
-      put(:update, params: params)
+      put(:update, params:)
       assert_response(:redirect)
       assert_flash_success
       new_obs_list =

@@ -7,77 +7,9 @@
 #  all the important application-wide filters and lots of helper methods.
 #  Anything that appears here is available to every controller and view.
 #
-#  == Filters
-#
-#  autologin::          Determine which if any User is logged in.
-#  set_locale::         Determine which language is requested.
-#
 #  == Methods
 #  *NOTE*: Methods in parentheses are "private" helpers; you are encouraged to
 #  use the public ones instead.
-#
-#  ==== User authentication
-#  autologin::              (filter: determine which user is logged in)
-#  login_for_ajax::         (filter: minimal version of autologin for ajax)
-#  check_permission::       Make sure current User is the right one.
-#  check_permission!::      Same, but flashes "denied" message, too.
-#  reviewer?::              Is the current User a reviewer?
-#  in_admin_mode?::         Is the current User in admin mode?
-#  autologin_cookie_set::   (set autologin cookie)
-#  clear_autologin_cookie:: (clear autologin cookie)
-#  session_user_set::       (store user in session -- id only)
-#  session_user::           (retrieve user from session)
-#
-#  ==== Internationalization
-#  all_locales::            Array of available locales for which we have
-#                           translations.
-#  set_locale::             (filter: determine which locale is requested)
-#  set_timezone::           (filter: Set timezone from cookie set by client's
-#                            browser.)
-#  sorted_locales_from_request_header::
-#                           (parse locale preferences from request header)
-#  valid_locale_from_request_header::
-#                           (choose locale that best matches request header)
-#
-#  ==== Flash notices
-#  flash_notices?::         Are there any errors pending?
-#  flash_get_notices::      Get list of errors.
-#  flash_notice_level::     Get current notice level.
-#  flash_clear::            Clear error messages.
-#  flash_notice::           Add a success message.
-#  flash_warning::          Add a warning message.
-#  flash_error::            Add an error message.
-#  flash_object_errors::    Add all errors for a given instance.
-#
-#  ==== Name validation
-#  construct_approved_names:: Creates a list of names if they've been approved.
-#  construct_approved_name::  (helper)
-#
-#  ==== Queries
-#  clear_query_in_session:: Clears out Query stored in session below.
-#  store_query_in_session:: Stores Query in session for use by
-#                           create_species_list.
-#  query_from_session::     Gets Query that was stored in the session above.
-#  query_params::           Parameters to add to link_to, etc. for passing
-#                           Query around.
-#  query_params_set::       Make +query_params+ refer to a given Query.
-#  pass_query_params::      Tell +query_params+ to pass-through the Query
-#                            given to this action.
-#  find_query::             Find a given Query or return nil.
-#  find_or_create_query::   Find appropriate Query or create as necessary.
-#  create_query::           Create a new Query from scratch.
-#  redirect_to_next_object:: Find next object from a Query and redirect to its
-#                            show page.
-#
-#  ==== Indexes
-#  show_index_of_objects::  Show paginated set of Query results as a list.
-#  add_sorting_links::      Create sorting links for index pages.
-#  find_or_goto_index::     Look up object by id, displaying error and
-#                           redirecting on failure.
-#  goto_index::             Redirect to a reasonable fallback (index) page
-#                           in case of error.
-#  letter_pagination_data::       Paginate an Array by letter.
-#  number_pagination_data::       Paginate an Array normally.
 #
 #  ==== Memory usage
 #  extra_gc::               (filter: calls <tt>ObjectSpace.garbage_collect</tt>)
