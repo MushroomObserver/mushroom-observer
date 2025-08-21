@@ -130,7 +130,7 @@ module Mappable
     # Arbitrary test for whether a box covers too large an area to be useful on
     # a map with other boxes. Large boxes can obscure more precise locations.
     def vague?
-      calculate_area > 24_000 # kmˆ2   or use MO.obs_location_max_area
+      calculate_area > MO.obs_location_max_area
     end
 
     # NOTE: DELTA = 0.20 is way too strict a limit for remote locations.
