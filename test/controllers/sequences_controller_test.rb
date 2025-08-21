@@ -90,7 +90,7 @@ class SequencesControllerTest < FunctionalTestCase
     assert_operator(query.num_results, :>, 1)
     number1 = query.results[0]
     number2 = query.results[1]
-    q = query.record.id.alphabetize
+    q = @controller.full_q_param(query)
 
     login
     get(:show, params: { id: number1.id, q: q, flow: "next" })
@@ -102,7 +102,7 @@ class SequencesControllerTest < FunctionalTestCase
     assert_operator(query.num_results, :>, 1)
     number1 = query.results[0]
     number2 = query.results[1]
-    q = query.record.id.alphabetize
+    q = @controller.full_q_param(query)
 
     login
     get(:show, params: { id: number2.id, q: q, flow: "prev" })

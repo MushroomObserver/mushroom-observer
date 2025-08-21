@@ -165,7 +165,7 @@ class UsersControllerTest < FunctionalTestCase
     assert_operator(query.num_results, :>, 1)
     number8 = query.results[7]
     number9 = query.results[8]
-    q = query.record.id.alphabetize
+    q = @controller.full_q_param(query)
 
     login
     get(:show, params: { id: number8.id, q: q, flow: "next" })
@@ -177,7 +177,7 @@ class UsersControllerTest < FunctionalTestCase
     assert_operator(query.num_results, :>, 1)
     number8 = query.results[7]
     number7 = query.results[6]
-    q = query.record.id.alphabetize
+    q = @controller.full_q_param(query)
 
     login
     get(:show, params: { id: number8.id, q: q, flow: "prev" })

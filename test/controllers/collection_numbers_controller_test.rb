@@ -15,7 +15,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_operator(query.num_results, :>, 1)
 
     login
-    get(:index, params: { q: query.record.id.alphabetize })
+    get(:index, params: { q: @controller.full_q_param(query) })
 
     assert_response(:success)
     assert_page_title(:COLLECTION_NUMBERS.l)
@@ -135,7 +135,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_operator(query.num_results, :>, 1)
     number1 = query.results[0]
     number2 = query.results[1]
-    q = query.record.id.alphabetize
+    q = @controller.full_q_param(query)
 
     login
     get(:show, params: { flow: :next, id: number1.id, q: q })
