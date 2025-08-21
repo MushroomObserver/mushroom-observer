@@ -195,6 +195,8 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
       Query.safe_find(param_set[:q].to_s.dealphabetize) # this may return nil
     elsif param_set[:q].present?
       q_param = parse_q_param(param_set)
+      return nil if q_param[:model].blank?
+
       Query.lookup(q_param[:model].to_sym, **q_param.except(:model))
     end
   end
@@ -405,6 +407,8 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
     return unless params[:q]
 
     query = query_from_q_param(params)
+    return false unless query
+
     query if query.model == RssLog
   end
 
