@@ -204,7 +204,7 @@ class ProjectsControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: "Bolete Project" })
 
-    q = QueryRecord.last.id.alphabetize
+    q = @controller.full_q_param(QueryRecord.last.query)
     assert_redirected_to(project_path(project.id, q: q))
   end
 

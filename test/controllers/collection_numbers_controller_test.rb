@@ -83,9 +83,9 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: "neighbor" })
 
-    qr = QueryRecord.last.id.alphabetize
+    q = @controller.full_q_param(QueryRecord.last.query)
     assert_redirected_to(
-      collection_number_path(id: numbers.first.id, params: { q: qr })
+      collection_number_path(id: numbers.first.id, params: { q: })
     )
     assert_no_flash
   end
