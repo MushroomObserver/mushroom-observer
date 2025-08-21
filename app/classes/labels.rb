@@ -159,17 +159,24 @@ class Labels
   end
 
   def format_alt
-    loc = @obs.location
-    if @obs.alt.present?
-      ", #{@obs.alt.round(0)} m"
-    elsif loc&.low.present?
-      if loc.high.present? && loc.low < loc.high
-        ", #{loc.low.round(0)}–#{loc.high.round(0)} m"
+    return ", #{@obs.alt.round(0)} m" if @obs.alt.present?
+
+    format_loc_alt(@obs.location)
+  end
+
+  def format_loc_alt(loc)
+    return unless loc
+
+    low = loc.low
+    high = loc.high
+    if low.present?
+      if high.present? && low < high
+        ", #{low.round(0)}–#{high.round(0)} m"
       else
-        ", #{loc.low.round(0)} m"
+        ", #{low.round(0)} m"
       end
-    elsif loc&.high.present?
-      ", #{loc.high.round(0)} m"
+    elsif high.present?
+      ", #{high.round(0)} m"
     end
   end
 
