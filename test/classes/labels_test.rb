@@ -61,4 +61,10 @@ class LabelsTest < UnitTestCase
     label = Labels.new(Query.lookup(:Observation, id_in_set: [obs.id]))
     assert_match(obs.location.high.round.to_s, label.body)
   end
+
+  def test_longest_obs
+    obs = observations(:longest_obs)
+    label = Labels.new(Query.lookup(:Observation, id_in_set: [obs.id]))
+    assert_match("...", label.body)
+  end
 end

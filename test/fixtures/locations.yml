@@ -365,3 +365,15 @@ low_alt_only:
 high_alt_only:
   <<: *DEFAULTS
   high: 12345
+
+longest_location_name:
+  <<: *DEFAULTS
+  name: "Pacific Crest Trail on Mount Hood from Timberline Lodge to Cascade Locks, Zigzag Ranger District & Hood River Ranger District, Mount Hood National Forest, Clackamas Co. & Multnomah Co., Oregon, USA"
+  scientific_name: "USA, Oregon, Clackamas Co. & Multnomah Co., Mount Hood National Forest, Zigzag Ranger District & Hood River Ranger District, Pacific Crest Trail on Mount Hood from Timberline Lodge to Cascade Locks"
+  north: 45.6493988037
+  south: 45.3283004761
+  west: -121.9240036011
+  east: -121.7070007324
+  box_area: 604.1670134674
+  center_lat: 45.4888496399
+  center_lng: -121.8155021668

@@ -540,3 +540,7 @@ low_alt_obs_rss_log:
 high_alt_obs_rss_log:
   <<: *DEFAULTS
   observation: high_alt_obs
+
+longest_obs_rss_log:
+  <<: *DEFAULTS
+  observation: longest_obs

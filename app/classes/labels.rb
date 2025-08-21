@@ -10,6 +10,7 @@ class Labels
                      "\\lang1033\\kerning1\\ql\\tx4320"
 
   PARAGRAPH_SUFFIX = "\\par "
+  MAX_LENGTH = 50
 
   attr_accessor :query
   attr_accessor :document
@@ -112,9 +113,10 @@ class Labels
   # Mushroom name, in bold and italic.
   def add_name
     label("Name")
+    str = @obs.name.display_name_brief_authors.gsub("**", "")
     italic = false
     @para.bold do |bold|
-      @obs.name.display_name.gsub("**", "").split("__").each do |part|
+      str.split("__").each do |part|
         unless part.empty?
           if italic
             bold.italic { |i| i << part } if part.present?
@@ -132,8 +134,10 @@ class Labels
 
   def add_location
     label("Location")
-    @para << @obs.place_name
-    @para.line_break
+    reduce_long_strings(@obs.place_name).each do |line|
+      @para << line
+      @para.line_break
+    end
   end
 
   # --------------------
@@ -181,14 +185,20 @@ class Labels
   end
 
   def format_lat(val, precision = 4)
-    val = val.round(precision)
-    val = val.round(1) unless coordinates_visible?
+    val = if coordinates_visible?
+            val.round(precision)
+          else
+            val.round(1)
+          end
     val.negative? ? "#{-val}°S" : "#{val}°N"
   end
 
   def format_lng(val, precision = 4)
-    val = val.round(precision)
-    val = val.round(1) unless coordinates_visible?
+    val = if coordinates_visible?
+            val.round(precision)
+          else
+            val.round(1)
+          end
     val.negative? ? "#{-val}°W" : "#{val}°E"
   end
 
@@ -241,5 +251,26 @@ class Labels
   def extract_user_string_regex(input)
     match = input.match(/\A_user (.+)_\z/)
     match ? match[1] : input
+  end
+
+  def reduce_long_strings(str)
+    len = str.length
+    return [str] if len <= MAX_LENGTH
+
+    split = find_last_space_or_comma_before_nth(str, MAX_LENGTH)
+    return [str[..split], str[(split + 1)..]] if len - split <= MAX_LENGTH
+
+    if len > 2 * MAX_LENGTH
+      ["#{str[..MAX_LENGTH]}...", str[-MAX_LENGTH..]]
+    else
+      [str[..MAX_LENGTH], str[(MAX_LENGTH + 1)..]]
+    end
+  end
+
+  def find_last_space_or_comma_before_nth(string, index)
+    return nil if index <= 0 || index > string.length
+
+    substring = string[0, index]
+    substring.rindex(/[ ,]/)
   end
 end

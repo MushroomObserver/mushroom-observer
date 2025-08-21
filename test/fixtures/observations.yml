@@ -839,6 +839,13 @@ high_alt_obs:
   <<: *DEFAULTS
   location: high_alt_only
 
+longest_obs:
+  <<: *DEFAULTS
+  location: longest_location_name
+  where: "Pacific Crest Trail on Mount Hood from Timberline Lodge to Cascade Locks, Zigzag Ranger District & Hood River Ranger District, Mount Hood National Forest, Clackamas Co. & Multnomah Co., Oregon, USA"
+  name: longest_name
+  text_name: Singerocybe alboinfundibuliformis
+
 #
 #
 # IMPORTANT - AVOID CREATING FUTURE TEST ERRORS
