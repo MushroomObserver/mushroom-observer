@@ -9,7 +9,7 @@ require("test_helper")
 module Observations
   class SpeciesListsControllerTest < FunctionalTestCase
     def assigns_exist
-      !assigns(:all_lists).empty?
+      !assigns(:other_lists).empty? || !assigns(:obs_lists).empty?
     rescue StandardError
       # do nothing (This comment prevents Lint/SuppressedException offense.)
     end
@@ -17,7 +17,6 @@ module Observations
     def test_manage_species_lists
       obs = observations(:coprinus_comatus_obs)
       requires_login(:edit, id: obs.id)
-
       assert(assigns_exist, "Missing species_lists!")
     end
 

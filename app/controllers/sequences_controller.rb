@@ -277,7 +277,7 @@ class SequencesController < ApplicationController
   def render_modal_sequence_form
     render(partial: "shared/modal_form",
            locals: { title: modal_title, identifier: modal_identifier,
-                     form: "sequences/form" }) and return
+                     user: @user, form: "sequences/form" }) and return
   end
 
   def modal_identifier

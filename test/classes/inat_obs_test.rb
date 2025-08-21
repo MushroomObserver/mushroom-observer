@@ -300,7 +300,7 @@ class InatObsTest < UnitTestCase
     assert_equal(:inat_dqa_research.l, mock_observation("somion_unicolor").dqa)
   end
 
-  def test_public_location
+  def test_location_public
     loc = locations(:albion)
     all_bounding_boxes = Location.contains_box(**loc.bounding_box)
     phony_locs = Location.where(north: 90, south: -90,
@@ -327,7 +327,7 @@ class InatObsTest < UnitTestCase
     assert_equal(loc, mock_inat_obs.location)
   end
 
-  def test_obscured_location
+  def test_location_obscured
     mock_inat_obs = mock_observation("distantes")
 
     Location.create(user: rolf,
@@ -373,6 +373,18 @@ class InatObsTest < UnitTestCase
     assert_equal(
       blurred_location, mock_inat_obs.location,
       "Location should be blurred by at least Inat public_position_accuracy"
+    )
+  end
+
+  def test_location_absent
+    mock_inat_obs = mock_observation("no_location")
+    assert_nil(
+      mock_inat_obs.lat && mock_inat_obs.lng,
+      "MO lat/lng should be nil for iNat observations without location"
+    )
+    assert_nil(
+      mock_inat_obs.location,
+      "MO obs.location should be undefined for iNat obss without location"
     )
   end
 

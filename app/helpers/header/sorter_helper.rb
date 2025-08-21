@@ -102,7 +102,7 @@ module Header
       helper_name = sort_link_helper_name(model, ctlr)
       # path = send(:"#{helper_name}_path", q: get_query_param)
       path = { controller: ctlr,
-               action: :index,
+               action: action_name,
                by: by }.merge(query_params)
       # identifier = "#{query.model.to_s.pluralize.underscore}_by_#{by}_link"
       identifier = "#{helper_name}_by_#{by}_link"

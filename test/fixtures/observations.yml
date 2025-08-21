@@ -826,6 +826,11 @@ provisional_obs:
   <<: *DEFAULTS
   name: provisional_name
 
+old_name_obs:
+  <<: *DEFAULTS
+  name: lactifluus_subalpinus
+  text_name: Lactifluus subalpinus
+
 low_alt_obs:
   <<: *DEFAULTS
   location: low_alt_only

@@ -78,9 +78,9 @@ module Name::Synonymy
   def other_authors
     @other_authors ||= if @other_author_ids
                          # Slightly faster since id is primary index.
-                         Name.where(id: @other_author_ids).to_a
+                         Name.where(id: @other_author_ids)
                        else
-                         Name.where(text_name: text_name).to_a
+                         Name.where(text_name: text_name)
                        end
   end
 

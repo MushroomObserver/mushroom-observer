@@ -25,9 +25,8 @@ module HerbariumRecords
           render(
             partial: "shared/modal_form",
             locals: {
-              title: @title,
-              identifier: "herbarium_record_observation",
-              form: "herbarium_records/remove_observations/form"
+              title: @title, identifier: "herbarium_record_observation",
+              user: @user, form: "herbarium_records/remove_observations/form"
             }
           ) and return
         end

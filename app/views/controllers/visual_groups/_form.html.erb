@@ -2,7 +2,7 @@
               id: "visual_group_form") do |f| %>
 
   <% if visual_group.errors.any? %>
-    <div id="error_explanation">
+    <div id="error_explanation" class="alert alert-danger">
       <h2>
 	<%= pluralize(visual_group.errors.count, "error") %>
 	prohibited this visual_group from being saved:

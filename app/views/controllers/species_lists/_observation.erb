@@ -1,41 +1,51 @@
-<%# locals: (observation:) %>
+<%# locals: (observation:, user:, species_list:, image: false, remove: false) %>
 
 <%# One observation for the species list show page %>
+<%
+listing_classes = image ? "col-sm-8 col-md-9" : "col-xs-12"
+%>
 
 <%= tag.div(class: "list-group-item") do %>
   <%= tag.div(class: "row") do %>
-    <%= tag.div(class: "col-sm-4 col-md-3") do %>
-      <%= if observation.thumb_image_id
-          interactive_image(
-            @user,
-            observation.thumb_image,
-            image_link: observation_path(id: observation.id),
-            votes: true
-          )
-        end %>
-    <% end %>
-    <%= tag.div(class: "col-sm-8 col-md-9") do %>
-      <%= tag.p(class: "font-weight-bold mb-0") do %>
-        <%= link_to(
-          observation.unique_format_name.t,
-          observation_path(id: observation.id, q: get_query_param(@query))
-        ) %>
-      <% end %>
-      <%= tag.p(class: "font-weight-bold mb-0") do %>
-        <%= location_link(observation.where, observation.location) %>
-      <% end %>
-      <%= tag.p do
-        [user_link(observation.user), ": ", observation.when.web_date].safe_join
+    <% if image %>
+      <%= tag.div(class: "col-sm-4 col-md-3") do
+        interactive_image(
+          user,
+          observation.thumb_image,
+          image_link: observation_path(id: observation.id),
+          votes: true
+        )
       end %>
-      <% if check_permission(@species_list) %>
-        <%= put_button(
-          name: :REMOVE.t,
-          path: observation_species_list_path(
-            id: observation.id,
-            species_list_id: @species_list.id,
-            commit: "remove"
-          ), data: { confirm: :are_you_sure.l }
-        ) %>
+    <% end %>
+
+    <%= tag.div(class: listing_classes) do %>
+      <%= tag.div(
+        class: "d-flex justify-content-between align-items-start"
+      ) do %>
+
+        <%= tag.div(class: "observation_details") do %>
+          <%= tag.div(class: "font-weight-bold") do %>
+            <%= link_to(
+              observation.unique_format_name.t,
+              add_query_param(observation_path(id: observation.id))
+            ) %>
+          <% end %>
+          <%= tag.div(class: "font-weight-bold") do %>
+            <%= location_link(observation.where, observation.location) %>
+          <% end %>
+          <%= tag.div do
+            [user_link(observation.user), ": ", observation.when.web_date].safe_join
+          end %>
+        <% end %>
+
+        <% if remove %>
+          <%= tag.div(class: "manage_observation") do
+            if remove
+              species_list_remove_obs_button(species_list:, observation:)
+            end
+          end %>
+        <% end %>
+
       <% end %>
     <% end %>
   <% end %>

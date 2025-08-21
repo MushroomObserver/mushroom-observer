@@ -7,7 +7,7 @@ show_links = user && (obs.external_links.any? || sites.any?)
 
 <%= panel_block(id: "observation_details",
                 heading: :show_observation_details.l,
-                heading_links: @user && obs_details_links(obs),
+                heading_links: user && obs_details_links(obs),
                 class: "name-section") do %>
 
   <%= observation_details_when_where_who(obs:, user:) %>

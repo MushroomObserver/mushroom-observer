@@ -25,9 +25,8 @@ module CollectionNumbers
           render(
             partial: "shared/modal_form",
             locals: {
-              title: @title,
-              identifier: "collection_number_observation",
-              form: "collection_numbers/remove_observations/form"
+              title: @title, identifier: "collection_number_observation",
+              user: @user, form: "collection_numbers/remove_observations/form"
             }
           ) and return
         end

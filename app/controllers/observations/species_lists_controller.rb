@@ -17,21 +17,20 @@ module Observations
     def edit
       return unless (@observation = find_observation!)
 
-      @all_lists = @user.all_editable_species_lists
+      set_list_ivars
     end
 
     # new endpoint for :add_observation_to_species_list and
     # :remove_observation_from_species_list. use params[:commit]
     def update
-      return unless (@species_list = find_species_list!)
-
-      return unless (@observation = find_observation!)
+      return unless (@species_list = find_species_list!) &&
+                    (@observation = find_observation!)
 
       unless check_permission!(@species_list)
         return redirect_to(species_list_path(@species_list.id))
       end
 
-      @all_lists = @user.all_editable_species_lists
+      set_list_ivars
 
       case params[:commit]
       when "add"
@@ -48,6 +47,23 @@ module Observations
     end
 
     private
+
+    def set_list_ivars
+      order_by = params[:by] || :date
+      @all_lists = Query.lookup(
+        :SpeciesList, editable_by_user: @user, order_by:
+      )
+
+      @obs_lists = []
+      @other_lists = []
+      @all_lists.results.each do |list|
+        if list.observations.member?(@observation)
+          @obs_lists << list
+        else
+          @other_lists << list
+        end
+      end
+    end
 
     def find_observation!
       find_or_goto_index(Observation, params[:id])

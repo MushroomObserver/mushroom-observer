@@ -4,6 +4,7 @@ import { Controller } from "@hotwired/stimulus"
 // get updated on successful form submit, so it "cleans up"
 export default class extends Controller {
   // static targets = ["form"] // unused rn
+  static values = { user: Number }
 
   connect() {
     // console.log("Hello Modal " + this.element.id);
@@ -11,10 +12,15 @@ export default class extends Controller {
   }
 
   // Modal form is only removed in the event that the page section updates.
-  // That event is broadcast from the section-update controller.
+  // That event is broadcast from the section-update controller with a user id.
+  // Only remove the modal if the updating user is the same who has modal open.
   // We can't fire based on submit response, because unless something's wrong
   // with the request, turbo-stream will send a 200 OK even if it didn't save.
-  remove() {
+  remove(event) {
+    const initiatingUser = event?.detail?.user
+    debugger
+    if (!initiatingUser || initiatingUser !== this.userValue) { return }
+
     // console.log("Removing modal")
     this.hide()
     this.element.remove()

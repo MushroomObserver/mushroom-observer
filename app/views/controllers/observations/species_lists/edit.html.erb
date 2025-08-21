@@ -3,36 +3,40 @@
 add_page_title(
   :species_list_manage_title.t(name: @observation.unique_format_name)
 )
-
+add_sorter(@all_lists, species_lists_index_sorts(query: @all_lists))
 add_context_nav(observation_list_tabs(obs: @observation))
-
-obs_lists = []
-other_lists = []
-@all_lists.each do |list|
-  if list.observations.member?(@observation)
-    obs_lists << list
-  else
-    other_lists << list
-  end
-end
+container_class(:wide)
+content_padding(:panels)
 %>
 
-<% if obs_lists.any? %>
-  <p><%= :species_list_manage_belongs_to.t %>:</p>
-  <table class="table-striped table-manage-species-lists">
-    <% obs_lists.each do |species_list| %>
-      <%= render(partial: "observations/species_lists/remove",
-                 locals: { species_list: species_list }) %>
-    <% end %>
-  </table>
-<% end %>
+<%= tag.div(class: "navbar-flex mb-2") do
+  content_for(:sorter)
+end %>
 
-<% if other_lists.any? %>
-  <p class="mt-3"><%= :species_list_manage_doesnt_contain.t %>:</p>
-  <table class="table-striped table-manage-species-lists">
-    <% other_lists.each do |species_list| %>
-      <%= render(partial: "observations/species_lists/add",
-                 locals: { species_list: species_list }) %>
+<%= content_padded do %>
+  <% if @obs_lists.any? %>
+    <%= tag.h5("#{:species_list_manage_belongs_to.l}:", class: "mt-3") %>
+    <%= tag.div(class: "list-group") do %>
+      <% @obs_lists.each do |species_list| %>
+        <%= render(
+          partial: "species_lists/species_list",
+          locals: { species_list: species_list, observation: @observation,
+                    remove: check_permission(species_list) }
+        ) %>
+      <% end %>
     <% end %>
-  </table>
+  <% end %>
+
+  <% if @other_lists.any? %>
+    <%= tag.h5("#{:species_list_manage_doesnt_contain.l}:", class: "mt-3") %>
+    <%= tag.div(class: "list-group") do %>
+      <% @other_lists.each do |species_list| %>
+        <%= render(
+          partial: "species_lists/species_list",
+          locals: { species_list: species_list, observation: @observation,
+                    add: check_permission(species_list) }
+        ) %>
+      <% end %>
+    <% end %>
+  <% end %>
 <% end %>
