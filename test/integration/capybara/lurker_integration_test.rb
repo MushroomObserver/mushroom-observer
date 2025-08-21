@@ -226,7 +226,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
 
     visit("/observations/identify")
     # Search for a location.
-    place = "Massachusetts, USA"
+    place = "California, USA"
     fill_in("filter_term", with: place)
     select("Region", from: "filter_type")
     within("#identify_filter") { click_button("Search") }
