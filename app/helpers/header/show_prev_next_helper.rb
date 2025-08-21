@@ -46,8 +46,8 @@ module Header
       type = object.type_tag
       icon_link_to(
         :"#{dir.upcase}_OBJECT".t(type: :"#{type.upcase}".l),
-        send(show_link_path(type), object.id,
-             flow: dir.to_s, q: get_query_param(query)),
+        send(show_link_path(type),
+             id: object.id, flow: dir.to_s, q: get_query_param(query)),
         class: classes, icon: dir, show_text: false
       )
     end
