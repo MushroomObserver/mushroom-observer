@@ -43,10 +43,10 @@ module Observations
     # This is the standard case, nothing unusual or stressful here.
     def test_propose_naming
       args = propose_naming_setup
-
-      { obs:, consensus:, o_count:, g_count:,
-        n_count:, v_count:, params: } => args
       debugger
+      args =>
+        { obs:, consensus:, o_count:, g_count:, n_count:, v_count:, params: }
+
       login("rolf")
       post(:create, params: params)
       assert_response(:redirect)
