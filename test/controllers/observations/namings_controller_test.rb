@@ -43,12 +43,19 @@ module Observations
     # This is the standard case, nothing unusual or stressful here.
     def test_propose_naming
       args = propose_naming_setup
-      debugger
-      args =>
-        { obs:, consensus:, o_count:, g_count:, n_count:, v_count:, params: }
 
       login("rolf")
-      post(:create, params: params)
+      post(:create, params: args[:params])
+      assert_response(:redirect)
+
+      post_propose_naming_assertions(args)
+    end
+
+    def test_propose_naming_turbo
+      args = propose_naming_setup
+
+      login("rolf")
+      post(:create, params: args[:params], format: :turbo_stream)
       assert_response(:redirect)
 
       post_propose_naming_assertions(args)
@@ -97,7 +104,7 @@ module Observations
     end
 
     def post_propose_naming_assertions(args)
-      { obs:, consensus:, o_count:, g_count:, n_count:, v_count: } => args
+      args => { obs:, consensus:, o_count:, g_count:, n_count:, v_count: }
       # Make sure the right number of objects were created.
       assert_equal(o_count, Observation.count)
       assert_equal(g_count + 1, Naming.count)
