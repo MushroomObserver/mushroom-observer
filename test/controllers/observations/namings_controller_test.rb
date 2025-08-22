@@ -32,6 +32,8 @@ module Observations
       params = { observation_id: obs.id.to_s }
       login
       get(:new, params:, format: :turbo_stream)
+      assert_template("shared/_modal_form")
+      assert_template("observations/namings/_form")
       assert_form_action(action: "create", approved_name: "",
                          observation_id: obs.id.to_s)
     end
@@ -374,19 +376,34 @@ module Observations
     # ------------------------------------------------------------
 
     def test_edit_form
-      nam = namings(:coprinus_comatus_naming)
-      params = { observation_id: nam.observation_id, id: nam.id.to_s }
-      requires_user(:edit, { controller: "/observations", action: :show,
-                             id: nam.observation_id }, params)
-      assert_form_action(action: "update", approved_name: nam.text_name,
-                         id: nam.id.to_s)
-      assert_select("option[selected]", count: 2)
-
-      login(nam.user.login)
-      get(:edit, params: params)
+      params = edit_form_test_setup
+      get(:edit, params:)
       assert_no_flash(
         "User should be able to edit his own Naming without warning or error"
       )
+    end
+
+    def test_edit_form_turbo
+      params = edit_form_test_setup
+      get(:edit, params:, format: :turbo_stream)
+      assert_template("shared/_modal_form")
+      assert_template("observations/namings/_form")
+      assert_no_flash(
+        "User should be able to edit his own Naming without warning or error"
+      )
+    end
+
+    def edit_form_test_setup
+      nam = namings(:coprinus_comatus_naming)
+      params = { observation_id: nam.observation_id, id: nam.id }
+      requires_user(:edit, { controller: "/observations", action: :show,
+                             id: nam.observation_id }, params)
+      assert_form_action(action: "update", approved_name: nam.text_name,
+                         id: nam.id)
+      assert_select("option[selected]", count: 2)
+
+      login(nam.user.login)
+      params
     end
 
     def test_edit_obs_owner_with_different_vote
