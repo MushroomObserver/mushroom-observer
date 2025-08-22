@@ -5,6 +5,54 @@ require("test_helper")
 # tests of Votes (Confidence levels) of Proposed Names
 module Observations::Namings
   class VotesControllerTest < FunctionalTestCase
+    # --------------------------------------------------------
+    #  Test showing the votes for a naming of an obs (:index).
+    # --------------------------------------------------------
+
+    def test_votes_index
+      nam = namings(:coprinus_comatus_naming)
+      params = { naming_id: nam.id, observation_id: nam.observation_id }
+
+      login
+      # First just make sure the page displays.
+      get(:index, params:)
+      assert_template("observations/namings/votes/index")
+
+      votes_index_assertions(nam)
+    end
+
+    # Tests that the table is rendered in a modal for a Turbo request
+    def test_votes_index_turbo
+      nam = namings(:coprinus_comatus_naming)
+      params = { naming_id: nam.id, observation_id: nam.observation_id }
+
+      login
+      # First just make sure the page displays.
+      get(:index, params:, format: :turbo_stream)
+      assert_template("shared/_modal")
+      assert_template("observations/namings/votes/_table")
+
+      votes_index_assertions(nam)
+    end
+
+    def votes_index_assertions(nam)
+      # Now try to make somewhat sure the content is right.
+      obs = Observation.naming_includes.find(nam.observation_id)
+      consensus = ::Observation::NamingConsensus.new(obs)
+      table = consensus.calc_vote_table(nam)
+      str1 = Vote.confidence(votes(:coprinus_comatus_owner_vote).value)
+      str2 = Vote.confidence(votes(:coprinus_comatus_other_vote).value)
+      table.each_key do |str|
+        if str == str1 && str1 == str2
+          assert_equal(2, table[str][:num])
+        elsif str == str1 || str == str2
+          assert_equal(1, table[str][:num])
+        else
+          assert_equal(0, table[str][:num])
+        end
+      end
+    end
+
     # ----------------------------
     #  Test voting.
     # ----------------------------
@@ -209,68 +257,33 @@ module Observations::Namings
                    "Cache for 3: #{nam1.vote_cache}, 9: #{nam2.vote_cache}")
     end
 
-    def test_show_votes
-      nam = namings(:coprinus_comatus_naming)
-
-      login
-      # First just make sure the page displays.
-      get(
-        :index, params: { naming_id: nam.id,
-                          observation_id: nam.observation_id }
-      )
-      assert_template("observations/namings/votes/index")
-
-      # Now try to make somewhat sure the content is right.
-      obs = Observation.naming_includes.find(nam.observation_id)
-      consensus = ::Observation::NamingConsensus.new(obs)
-      table = consensus.calc_vote_table(nam)
-      str1 = Vote.confidence(votes(:coprinus_comatus_owner_vote).value)
-      str2 = Vote.confidence(votes(:coprinus_comatus_other_vote).value)
-      table.each_key do |str|
-        if str == str1 && str1 == str2
-          assert_equal(2, table[str][:num])
-        elsif str == str1 || str == str2
-          assert_equal(1, table[str][:num])
-        else
-          assert_equal(0, table[str][:num])
-        end
-      end
-    end
-
-    def test_ajax_vote
+    def test_create_and_update_same_vote
       naming = namings(:minimal_unknown_naming)
       consensus = ::Observation::NamingConsensus.new(naming.observation)
       assert_nil(consensus.users_vote(naming, dick))
+      params = { naming_id: naming.id, observation_id: naming.observation_id }
 
-      post(:create, params: { vote: { value: 3 },
-                              naming_id: naming.id,
-                              observation_id: naming.observation_id })
+      post(:create, params: params.merge(vote: { value: 3 }))
       assert_redirected_to(new_account_login_path)
 
       login("dick")
-      post(:create, params: { vote: { value: 3 }, naming_id: naming.id,
-                              observation_id: naming.observation_id })
+      post(:create, params: params.merge(vote: { value: 3 }))
       naming.reload
       consensus.reload_namings_and_votes!
       assert_equal(3, consensus.users_vote(naming, dick).value)
 
-      put(:update, params: { vote: { value: 0 },
-                             id: consensus.users_vote(naming, dick).id,
-                             naming_id: naming.id,
-                             observation_id: naming.observation_id })
+      # Now update the same user's vote
+      update_params = params.merge(
+        vote: { value: 0 }, id: consensus.users_vote(naming, dick).id
+      )
+      put(:update, params: update_params)
       naming.reload
       consensus.reload_namings_and_votes!
       assert_nil(consensus.users_vote(naming, dick))
 
       assert_raises(RuntimeError) do
-        post(:create, params: { vote: { value: 99 }, naming_id: naming.id,
-                                observation_id: naming.observation_id })
+        post(:create, params: params.merge(vote: { value: 99 }))
       end
-
-      # assert_raises(ActiveRecord::RecordNotFound) do
-      #   get(:update, xhr: true,
-      #                params: { naming_id: 99, vote: { value: 0 } })
-      # end
     end
   end
 end
