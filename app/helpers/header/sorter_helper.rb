@@ -77,7 +77,7 @@ module Header
                 to_s.sub(/^reverse_/, "")
 
       sort_links = sorts.map do |by, label|
-        sort_link(label, by, this_by, link_all)
+        sort_link(query, label, by, this_by, link_all)
       end
 
       # Add a "reverse" button.
@@ -96,14 +96,13 @@ module Header
     # The final product of `assemble_sort_links`: an array of attributes
     # [text, action, identifier, active]
     # label arg is a translation string
-    def sort_link(label, by, this_by, link_all)
+    def sort_link(query, label, by, this_by, link_all)
       model = controller.controller_model_name
       ctlr = controller.controller_name
       helper_name = sort_link_helper_name(model, ctlr)
       # path = send(:"#{helper_name}_path", q: get_query_param)
-      path = { controller: ctlr,
-               action: action_name,
-               by: by }.merge(query_params)
+      path = { controller: ctlr, action: action_name,
+               by: by, q: get_query_param(query) }
       # identifier = "#{query.model.to_s.pluralize.underscore}_by_#{by}_link"
       identifier = "#{helper_name}_by_#{by}_link"
       active = !link_all && (by.to_s == this_by) # boolean if current sort order

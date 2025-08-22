@@ -238,17 +238,17 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
 
   # Return query parameter(s) necessary to pass query information along to
   # the next request. *NOTE*: This method is available to views.
-  def query_params(query = nil)
-    if browser.bot?
-      {}
-    elsif query
-      query.save unless query.id
-      { q: full_q_param(query) }
-    else
-      @query_params || {}
-    end
-  end
-  # 4 maps show pages still call this
+  # def query_params(query = nil)
+  #   if browser.bot? || (!query && !@query_param)
+  #     {}
+  #   elsif query
+  #     query.save unless query.id
+  #     { q: full_q_param(query) }
+  #   elsif @query_param
+  #     { q: @query_param }
+  #   end
+  # end
+  # 4 maps show pages still call this - Not any more
   # private :query_params # only call this here, to avoid double-encoding params
 
   def add_query_param(params, query = nil)
@@ -292,8 +292,8 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
     if query
       query.save unless query.id
       full_q_param(query)
-    elsif @query_params
-      @query_params[:q]
+    elsif @query_param
+      @query_param
     end
   end
   # helper_method :get_query_param
@@ -315,27 +315,27 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
   # Pass the in-coming query parameter(s) through to the next request.
   # Re-validate the params as a query, because they could be altered
   def pass_query_params
-    @query_params = {}
+    @query_param = nil
     return if params[:q].blank?
 
     query = query_from_q_param(params)
-    return @query_params unless query&.valid?
+    return @query_param unless query&.valid?
 
-    @query_params[:q] = full_q_param(query)
-    @query_params
+    @query_param = full_q_param(query)
+    @query_param
   end
 
   # Change the query that +query_params+ passes along to the next request.
   # *NOTE*: This method is available to views.
   def query_params_set(query = nil)
-    @query_params = {}
+    @query_param = nil
     if browser.bot?
       # do nothing
     elsif query
       query.save unless query.id
-      @query_params[:q] = full_q_param(query)
+      @query_param = full_q_param(query)
     end
-    @query_params
+    @query_param
   end
   # helper_method :query_params_set
 
