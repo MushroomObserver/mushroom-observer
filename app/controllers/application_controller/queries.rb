@@ -291,7 +291,7 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
 
     if query
       query.save unless query.id
-      full_q_param(query)
+      full_q_param(query, encode: false)
     elsif @query_param
       @query_param
     end
@@ -299,8 +299,11 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
   # helper_method :get_query_param
 
   # Must call to_query because otherwise q params hash is not permitted
-  def full_q_param(query)
-    query.params.merge(model: query.model.name.to_sym).to_query
+  def full_q_param(query, encode: true)
+    hash = query.params.merge(model: query.model.name.to_sym)
+    return hash unless encode
+
+    hash.to_query
   end
 
   # NOTE: these two methods add q: param to urls built from controllers/actions.
@@ -321,7 +324,7 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
     query = query_from_q_param(params)
     return @query_param unless query&.valid?
 
-    @query_param = full_q_param(query)
+    @query_param = full_q_param(query, encode: false)
     @query_param
   end
 
@@ -333,7 +336,7 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
       # do nothing
     elsif query
       query.save unless query.id
-      @query_param = full_q_param(query)
+      @query_param = full_q_param(query, encode: false)
     end
     @query_param
   end
