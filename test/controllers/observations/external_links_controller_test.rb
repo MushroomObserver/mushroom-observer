@@ -29,8 +29,16 @@ module Observations
       obs, _obs2, _site, _url, params = setup_create_test
       login("dick")
       post(:create, params:)
-      assert_flash_error
+      assert_flash_warning
       assert_redirected_to(permanent_observation_path(obs.id))
+    end
+
+    def test_add_external_link_not_permitted_turbo
+      _obs, _obs2, _site, _url, params = setup_create_test
+      login("dick")
+      post(:create, params:, format: :turbo_stream)
+      assert_flash_warning
+      assert_template("shared/_modal_flash_update")
     end
 
     # rolf can because he owns it
@@ -138,7 +146,7 @@ module Observations
       # dick doesn't have permission
       login("dick")
       put(:update, params:)
-      assert_flash_error
+      assert_flash_warning
 
       # mary can
       login("mary")
@@ -173,7 +181,7 @@ module Observations
       params = { id: link.id }
       login("dick")
       delete(:destroy, params:)
-      assert_flash_error
+      assert_flash_warning
     end
 
     # mary can
@@ -192,26 +200,26 @@ module Observations
       obs  = observations(:coprinus_comatus_obs)
       link = external_links(:coprinus_comatus_obs_mycoportal_link)
       @controller.instance_variable_set(:@user, rolf)
-      assert_link_allowed(link)
-      assert_link_allowed(obs, site)
+      assert_link_allowed(link:)
+      assert_link_allowed(obs:, site:)
       @controller.instance_variable_set(:@user, mary)
-      assert_link_allowed(link)
-      assert_link_allowed(obs, site)
+      assert_link_allowed(link:)
+      assert_link_allowed(obs:, site:)
       @controller.instance_variable_set(:@user, dick)
-      assert_link_forbidden(link)
-      assert_link_forbidden(obs, site)
+      assert_link_forbidden(link:)
+      assert_link_forbidden(obs:, site:)
 
       dick.update(admin: true)
-      assert_link_allowed(link)
-      assert_link_allowed(obs, site)
+      assert_link_allowed(link:)
+      assert_link_allowed(obs:, site:)
     end
 
-    def assert_link_allowed(*)
-      assert_true(@controller.send(:check_external_link_permission!, *))
+    def assert_link_allowed(**)
+      assert_true(@controller.send(:check_external_link_permission!, **))
     end
 
-    def assert_link_forbidden(*)
-      assert_false(@controller.send(:check_external_link_permission!, *))
+    def assert_link_forbidden(**)
+      assert_false(@controller.send(:check_external_link_permission!, **))
     end
   end
 end
