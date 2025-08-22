@@ -219,7 +219,7 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
   end
 
   def query_record_id?(str)
-    str&.match(/^[a-zA-Z0-9]*$/)
+    str.is_a?(String) && str&.match(/^[a-zA-Z0-9]*$/)
   end
 
   # This parses the results of `to_query`, called in `full_q_param`
@@ -248,7 +248,8 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
       @query_params || {}
     end
   end
-  private :query_params # only call this here, to avoid double-encoding params
+  # 4 maps show pages still call this
+  # private :query_params # only call this here, to avoid double-encoding params
 
   def add_query_param(params, query = nil)
     return params if browser.bot?
@@ -257,6 +258,7 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
     if params.is_a?(String) # i.e., if "params" arg is a path
       append_query_param_to_path(params, query_param)
     else
+      # This branch is double-encoding the q
       params[:q] = query_param if query_param
       params
     end
@@ -296,6 +298,7 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
   end
   # helper_method :get_query_param
 
+  # Must call to_query because otherwise q params hash is not permitted
   def full_q_param(query)
     query.params.merge(model: query.model.name.to_sym).to_query
   end
