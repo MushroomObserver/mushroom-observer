@@ -175,23 +175,54 @@ module Observations::Namings
 
     # Now have Rolf increase his vote for Mary's. (changes consensus)
     # Votes: rolf=2/-3->3, mary=1/3, dick=x/x
-    def test_cast_vote_rolf_second_greater
-      obs  = observations(:coprinus_comatus_obs)
-      nam2 = namings(:coprinus_comatus_other_naming)
+    def test_cast_vote_rolf_changes_consensus
+      args = vote_changes_consensus_setup
+      args => { obs:, nam:, params: }
+
+      put(:update, params:)
+
+      post_vote_changes_consensus_assertions(obs:, nam:)
+    end
+
+    def test_cast_vote_rolf_changes_consensus_turbo
+      args = vote_changes_consensus_setup
+      args => { obs:, nam:, params: }
+      params = params.merge(context: "namings_table")
+
+      put(:update, params:, format: :turbo_stream)
+      assert_response(:redirect) # renders whole page, because title has changed
+
+      post_vote_changes_consensus_assertions(obs:, nam:)
+    end
+
+    def vote_changes_consensus_setup
+      obs = observations(:coprinus_comatus_obs)
+      nam = namings(:coprinus_comatus_other_naming)
 
       login("rolf")
       consensus = ::Observation::NamingConsensus.new(obs)
-      vote = consensus.users_vote(nam2, rolf)
-      put(:update, params: { vote: { value: "3" }, id: vote.id,
-                             naming_id: nam2.id, observation_id: obs.id })
+      vote = consensus.users_vote(nam, rolf)
+
+      params = {
+        vote: { value: "3" },
+        id: vote.id,
+        naming_id: nam.id,
+        observation_id: obs.id
+      }
+
+      { obs:, nam:, params: }
+    end
+
+    def post_vote_changes_consensus_assertions(obs:, nam:)
+      # Now check that rolf's contribution is adjusted, as with the above test.
       assert_equal(10, rolf.reload.contribution)
 
       # Make sure observation was updated right.
       assert_equal(names(:agaricus_campestris).id, obs.reload.name_id)
 
       # Check vote.
-      assert_equal(6, nam2.reload.vote_sum)
-      assert_equal(2, nam2.votes.length)
+      assert_equal(6, nam.reload.vote_sum)
+      assert_equal(2, nam.votes.length)
     end
 
     # Now have Rolf increase his vote for Mary's insufficiently. (no change)
