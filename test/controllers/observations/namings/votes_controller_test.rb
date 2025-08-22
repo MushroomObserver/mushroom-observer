@@ -51,37 +51,69 @@ module Observations::Namings
 
     # Now have Rolf change his vote on his own naming. (no change in prefs)
     # Votes: rolf=3->2/-3, mary=1/3, dick=x/x
-    def test_cast_vote_rolf_change
-      obs  = observations(:coprinus_comatus_obs)
-      nam1 = namings(:coprinus_comatus_naming)
+    def test_rolf_vote_change
+      args = vote_change_basic_setup
+      args => { obs:, nam:, params: }
 
-      login("rolf")
-      consensus = ::Observation::NamingConsensus.new(obs)
-      vote = consensus.users_vote(nam1, rolf)
-      put(:update, params: { vote: { value: "2" }, id: vote.id,
-                             naming_id: nam1.id, observation_id: obs.id })
-      assert_equal(10, rolf.reload.contribution)
+      put(:update, params:)
 
-      # Make sure observation was updated right.
-      assert_equal(names(:coprinus_comatus).id, obs.reload.name_id)
-
-      # Check vote.
-      assert_equal(3, nam1.reload.vote_sum)
-      assert_equal(2, nam1.votes.length)
+      post_vote_change_basic_assertions(obs:, nam:)
     end
 
     # Just like the last test, but test Turbo response
-    def test_cast_vote_rolf_change_turbo
-      obs  = observations(:coprinus_comatus_obs)
-      nam1 = namings(:coprinus_comatus_naming)
+    def test_rolf_vote_change_turbo
+      args = vote_change_basic_setup
+      args => { obs:, nam:, params: }
+
+      put(:update, params:, format: :turbo_stream)
+
+      post_vote_change_basic_assertions(obs:, nam:)
+    end
+
+    # Just like the last test, but test Turbo response
+    def test_rolf_vote_change_turbo_from_namings_table
+      args = vote_change_basic_setup
+      args => { obs:, nam:, params: }
+      params = params.merge(context: "namings_table")
+
+      put(:update, params:, format: :turbo_stream)
+      assert_template("observations/show/_section_update")
+      assert_template("observations/show/_namings")
+
+      post_vote_change_basic_assertions(obs:, nam:)
+    end
+
+    # Just like the last test, but test Turbo response
+    def test_rolf_vote_change_turbo_from_identify_ui
+      args = vote_change_basic_setup
+      args => { obs:, nam:, params: }
+      params = params.merge(context: "matrix_box")
+
+      put(:update, params:, format: :turbo_stream)
+      assert_template("observations/namings/_update_matrix_box")
+
+      post_vote_change_basic_assertions(obs:, nam:)
+    end
+
+    def vote_change_basic_setup
+      obs = observations(:coprinus_comatus_obs)
+      nam = namings(:coprinus_comatus_naming)
 
       login("rolf")
       consensus = ::Observation::NamingConsensus.new(obs)
-      vote = consensus.users_vote(nam1, rolf)
-      put(:update, params: { vote: { value: "2" }, id: vote.id,
-                             naming_id: nam1.id, observation_id: obs.id },
-                   format: :turbo_stream)
+      vote = consensus.users_vote(nam, rolf)
 
+      params = {
+        vote: { value: "2" },
+        id: vote.id,
+        naming_id: nam.id,
+        observation_id: obs.id
+      }
+
+      { obs:, nam:, params: }
+    end
+
+    def post_vote_change_basic_assertions(obs:, nam:)
       # Now check that rolf's contribution is adjusted, as with the above test.
       assert_equal(10, rolf.reload.contribution)
 
@@ -89,8 +121,8 @@ module Observations::Namings
       assert_equal(names(:coprinus_comatus).id, obs.reload.name_id)
 
       # Check vote.
-      assert_equal(3, nam1.vote_sum)
-      assert_equal(2, nam1.votes.length)
+      assert_equal(3, nam.vote_sum)
+      assert_equal(2, nam.votes.length)
     end
 
     # Now have Rolf increase his vote for Mary's. (changes consensus)
