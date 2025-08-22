@@ -81,7 +81,7 @@ module Header
       end
 
       # Add a "reverse" button.
-      sort_links << sort_link(:sort_by_reverse.t,
+      sort_links << sort_link(query, :sort_by_reverse.t,
                               reverse_by(query, this_by), this_by, link_all)
     end
 
