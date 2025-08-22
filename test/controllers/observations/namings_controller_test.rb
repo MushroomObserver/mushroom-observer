@@ -43,9 +43,10 @@ module Observations
     # This is the standard case, nothing unusual or stressful here.
     def test_propose_naming
       args = propose_naming_setup
+      args => { params: }
 
       login("rolf")
-      post(:create, params: args[:params])
+      post(:create, params:)
       assert_response(:redirect)
 
       post_propose_naming_assertions(args)
@@ -53,10 +54,33 @@ module Observations
 
     def test_propose_naming_turbo
       args = propose_naming_setup
+      args => { params: } # ruby 3 rightward assignment from hash
 
       login("rolf")
-      post(:create, params: args[:params], format: :turbo_stream)
+      post(:create, params:, format: :turbo_stream)
       assert_response(:redirect)
+
+      post_propose_naming_assertions(args)
+    end
+
+    def test_propose_naming_turbo_from_identify_ui
+      args = propose_naming_setup
+      params = args[:params].merge(context: "matrix_box")
+
+      login("rolf")
+      post(:create, params:, format: :turbo_stream)
+      assert_template("observations/namings/_update_matrix_box")
+
+      post_propose_naming_assertions(args)
+    end
+
+    def test_propose_naming_turbo_from_lightgallery_ui
+      args = propose_naming_setup
+      params = args[:params].merge(context: "lightgallery")
+
+      login("rolf")
+      post(:create, params:, format: :turbo_stream)
+      assert_template("observations/namings/_update_matrix_box")
 
       post_propose_naming_assertions(args)
     end
