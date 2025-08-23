@@ -174,7 +174,7 @@ class HerbariumRecordsController < ApplicationController
     @herbarium_record =
       HerbariumRecord.new(permitted_herbarium_record_params)
     normalize_parameters
-    return if flash_error_and_reload_if_form_has_errors
+    return if form_has_errors?
 
     if herbarium_label_free?
       save_herbarium_record_and_update_associations
@@ -225,7 +225,7 @@ class HerbariumRecordsController < ApplicationController
     old_herbarium = @herbarium_record.herbarium
     @herbarium_record.attributes = permitted_herbarium_record_params
     normalize_parameters
-    return if flash_error_and_reload_if_form_has_errors
+    return if form_has_errors?
 
     if herbarium_label_free?
       update_herbarium_record_and_notify_curators(old_herbarium)
@@ -254,24 +254,10 @@ class HerbariumRecordsController < ApplicationController
   end
 
   # create, update
-  def flash_error_and_reload_if_form_has_errors
-    redirect_params = case action_name # this is a rails var
-                      when "create"
-                        { action: :new }
-                      when "update"
-                        { action: :edit }
-                      end
-    redirect_params = redirect_params.merge({ back: @back }) if @back.present?
-
+  def form_has_errors?
     unless validate_herbarium_name! # may add flashes
-      respond_to do |format|
-        format.html do
-          redirect_to(redirect_params) and return true
-        end
-        format.turbo_stream do
-          reload_herbarium_record_modal_form_and_flash
-        end
-      end
+      flash_and_reload_form
+      return true
     end
 
     unless can_add_record_to_herbarium?
@@ -280,6 +266,25 @@ class HerbariumRecordsController < ApplicationController
     end
 
     false
+  end
+
+  def flash_and_reload_form
+    redirect_params = case action_name # this is a rails var
+                      when "create"
+                        { action: :new }
+                      when "update"
+                        { action: :edit }
+                      end
+    redirect_params[:back] = @back if @back.present?
+
+    respond_to do |format|
+      format.html do
+        redirect_to(redirect_params)
+      end
+      format.turbo_stream do
+        reload_herbarium_record_modal_form_and_flash
+      end
+    end
   end
 
   def permitted_herbarium_record_params

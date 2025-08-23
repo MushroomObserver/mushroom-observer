@@ -380,6 +380,9 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     nybg = herbarium_records(:coprinus_comatus_nybg_spec)
     post(:update, params: { id: nybg.id })
     assert_redirected_to(action: :edit)
+
+    post(:update, params: { id: nybg.id }, format: :turbo_stream)
+    assert_template("shared/_modal_form_reload")
   end
 
   def test_update_herbarium_record_redirect

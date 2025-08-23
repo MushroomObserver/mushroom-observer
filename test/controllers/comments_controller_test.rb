@@ -225,12 +225,16 @@ class CommentsControllerTest < FunctionalTestCase
 
   def test_new_comment_to_unreadable_object
     katrina_is_not_reader = name_descriptions(:peltigera_user_desc)
+    params = { type: :NameDescription, target: katrina_is_not_reader.id }
     login(:katrina)
-    get(:new,
-        params: { type: :NameDescription, target: katrina_is_not_reader.id })
 
+    get(:new, params:)
     assert_flash_error("MO should flash if trying to comment on object" \
                        "for which user lacks read privileges")
+
+    get(:new, params:, format: :turbo_stream)
+    assert_template("shared/_modal_form_reload")
+    assert_flash_error
   end
 
   def test_edit_comment
@@ -268,7 +272,7 @@ class CommentsControllerTest < FunctionalTestCase
     assert_not(obs.comments.member?(comment))
   end
 
-  def test_save_comment
+  def test_create_comment
     assert_equal(10, rolf.contribution)
     obs = observations(:minimal_unknown_obs)
     comment_count = obs.comments.size

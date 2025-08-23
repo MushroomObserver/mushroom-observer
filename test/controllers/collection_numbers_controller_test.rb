@@ -362,36 +362,34 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_not_equal(number.format_name, record2.accession_number)
     old_nybg_accession = record2.accession_number
 
-    params = {
+    collection_number = {
       name: "  New   Name <spam>  ",
       number: "  69-abc <spam>  "
     }
+    params = { id: number.id, collection_number: }
 
-    patch(:update,
-          params: { id: number.id, collection_number: params })
+    patch(:update, params:)
     assert_redirected_to(new_account_login_path)
 
     login("mary")
-    patch(:update,
-          params: { id: number.id, collection_number: params })
+    patch(:update, params:)
     assert_flash_text(/permission denied/i)
 
+    # test turbo
+    patch(:update, params:, format: :turbo_stream)
+    assert_flash_text(/permission denied/i)
+    assert_template("shared/_modal_flash_update")
+
     login("rolf")
-    patch(:update,
-          params: { id: number.id, collection_number: params.merge(name: "") })
+    patch(:update, params: params.deep_merge(collection_number: { name: "" }))
     assert_flash_text(/missing.*name/i)
     assert_not_equal("new number", number.reload.number)
 
-    patch(:update,
-          params: {
-            id: number.id,
-            collection_number: params.merge(number: "")
-          })
+    patch(:update, params: params.deep_merge(collection_number: { number: "" }))
     assert_flash_text(/missing.*number/i)
     assert_not_equal("New Name", number.reload.name)
 
-    patch(:update,
-          params: { id: number.id, collection_number: params })
+    patch(:update, params:)
     assert_flash_success
     assert_response(:redirect)
     assert_equal("New Name", number.reload.name)
