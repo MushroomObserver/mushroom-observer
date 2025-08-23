@@ -299,7 +299,7 @@ class HerbariumRecordsController < ApplicationController
     return true if @herbarium_record.herbarium.curator?(@user)
 
     flash_error(:permission_denied.t)
-    redirect_to_back_object_or_object(@back_object, @herbarium_record)
+    show_flash_and_send_back
     false
   end
 
