@@ -197,6 +197,7 @@ class CommentsControllerTest < FunctionalTestCase
 
   def test_new_comment_turbo
     obs_id = observations(:minimal_unknown_obs).id
+    login
     get(:new, params: { target: obs_id, type: :Observation },
               format: :turbo_stream)
     assert_template("shared/_modal_form")
