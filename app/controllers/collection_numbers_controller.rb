@@ -320,8 +320,7 @@ class CollectionNumbersController < ApplicationController
         redirect_to_back_object_or_object(@back_object, @collection_number) and
           return
       end
-      # renders the flash in the modal, but not sure it's necessary
-      # to have a response here. are they getting sent back?
+      # renders the flash in the modal
       format.turbo_stream do
         render(partial: "shared/modal_flash_update",
                locals: { identifier: modal_identifier }) and return
