@@ -3715,8 +3715,8 @@
   observation_term_include_subtaxa: Include observations of subtaxa of the given names.
   observation_term_include_synonyms: Include observations of synonyms of the given names.
   observation_term_herbarium: Specimen at a fungarium.
-  observation_term_location: "Location (\"[:WHERE]\") mushroom was observed. Must exactly match the entire [:WHERE] field. Note that commas must be protected with a back-slash: \"Albion\\, California\\, USA\"."
-  observation_term_region: Location mushroom was observed. Partial match anchored at end, including country at least, e.g., "California\, USA". Note that commas must be protected with a back-slash as shown.
+  observation_term_location: Mushroom was observed within the the geographic bounds ([:east], [:north], [:south], [:west]) of this Location, regardless of the exact name of the Location of the Observation. Location must be an existing MO Location. Cf. **[:region]**.
+  observation_term_region: The Observation's Location name includes this string. Partial match anchored at end, including country at least, e.g., "California\, USA". Note that commas must be protected with a back-slash as shown. Cf. **[:location]**.
   observation_term_project: Observation belongs to one of these projects.
   observation_term_project_lists: Observation belongs to list in one of these projects.
   observation_term_list: Observation belongs to one of these observation lists.
@@ -3725,10 +3725,10 @@
   observation_term_comments: Comments contain the given string.
   observation_term_field_slip: Observation corresponds to this field slip.
   observation_term_confidence: Confidence is in this range.
-  observation_term_east: Longitude of eastern edge of search region.
-  observation_term_west: Longitude of western edge of search region.
-  observation_term_north: Latitude of northern edge of search region.
-  observation_term_south: Latitude of southern edge of search region.
+  observation_term_east: Longitude of eastern edge of search area.
+  observation_term_west: Longitude of western edge of search area.
+  observation_term_north: Latitude of northern edge of search area.
+  observation_term_south: Latitude of southern edge of search area.
   observation_term_has_images: Has images? ("yes" or "no")
   observation_term_has_sequence: Has a sequence?
   observation_term_has_specimen: Has a specimen?
