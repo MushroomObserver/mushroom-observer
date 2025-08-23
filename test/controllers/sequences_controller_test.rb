@@ -117,7 +117,7 @@ class SequencesControllerTest < FunctionalTestCase
     params = { observation_id: obs.id, q: q }
 
     login("zero") # This user has no Observations
-    get(:new, params: params)
+    get(:new, params:)
 
     assert_response(:success,
                     "A user should be able to get form to add Sequence " \
@@ -131,6 +131,15 @@ class SequencesControllerTest < FunctionalTestCase
       "form[action*='q=#{q}']", true,
       "Sequence form submit action missing/incorrect 'q' query param"
     )
+  end
+
+  def test_new_turbo
+    obs = observations(:minimal_unknown_obs)
+
+    login("zero") # This user has no Observations
+    get(:new, params: { observation_id: obs.id }, format: :turbo_stream)
+    assert_template("shared/_modal_form")
+    assert_template("sequences/_form")
   end
 
   def test_new_login_required
@@ -343,6 +352,18 @@ class SequencesControllerTest < FunctionalTestCase
     login(observer.login)
     get(:edit, params: { id: sequence.id })
     assert_response(:success)
+  end
+
+  def test_edit_turbo
+    sequence = sequences(:local_sequence)
+    obs      = sequence.observation
+    observer = obs.user
+
+    # Prove Observation's creator can edit Sequence
+    login(observer.login)
+    get(:edit, params: { id: sequence.id }, format: :turbo_stream)
+    assert_template("shared/_modal_form")
+    assert_template("sequences/_form")
   end
 
   def test_edit_deposited_sequence

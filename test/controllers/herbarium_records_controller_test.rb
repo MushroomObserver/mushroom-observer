@@ -184,6 +184,16 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_equal(assigns(:herbarium_record).accession_number, "MO #{obs_id}")
   end
 
+  def test_new_herbarium_record_turbo
+    obs_id = observations(:unknown_with_no_naming).id
+
+    login("rolf")
+    get(:new, params: { observation_id: obs_id }, format: :turbo_stream)
+    assert_template("shared/_modal_form")
+    assert_template("herbarium_records/_form")
+    assert_equal(assigns(:herbarium_record).accession_number, "MO #{obs_id}")
+  end
+
   def test_new_herbarium_record_with_collection_number
     obs = observations(:coprinus_comatus_obs)
     get(:new, params: { observation_id: obs.id })
@@ -333,6 +343,15 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     make_admin("mary") # Non-curator, but an admin
     get(:edit, params: { id: nybg.id })
     assert_template(:edit)
+  end
+
+  def test_edit_herbarium_record_turbo
+    nybg = herbarium_records(:coprinus_comatus_nybg_spec)
+
+    login("rolf")
+    get(:edit, params: { id: nybg.id }, format: :turbo_stream)
+    assert_template("shared/_modal_form")
+    assert_template("herbarium_records/_form")
   end
 
   def test_update_herbarium_record

@@ -170,6 +170,15 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
+  def test_new_collection_number_turbo
+    obs_id = observations(:coprinus_comatus_obs).id
+
+    login("rolf")
+    get(:new, params: { observation_id: obs_id }, format: :turbo_stream)
+    assert_template("shared/_modal_form")
+    assert_template("collection_numbers/_form")
+  end
+
   def test_create_collection_number_with_turbo
     obs = observations(:strobilurus_diminutivus_obs)
     user = obs.user
@@ -325,6 +334,15 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     make_admin("mary")
     get(:edit, params: { id: number.id })
     assert_response(:success)
+  end
+
+  def test_edit_collection_number_turbo
+    number = collection_numbers(:coprinus_comatus_coll_num)
+
+    login("rolf")
+    get(:edit, params: { id: number.id }, format: :turbo_stream)
+    assert_template("shared/_modal_form")
+    assert_template("collection_numbers/_form")
   end
 
   def test_update_collection_number
