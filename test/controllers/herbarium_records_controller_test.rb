@@ -246,8 +246,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
   def test_create_herbarium_record_with_turbo
     login
     assert_difference("HerbariumRecord.count", 1) do
-      post(:create, params: herbarium_record_params,
-                    format: :turbo_stream)
+      post(:create, params: herbarium_record_params, format: :turbo_stream)
     end
   end
 
@@ -381,7 +380,9 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     post(:update, params: { id: nybg.id })
     assert_redirected_to(action: :edit)
 
+    # Test turbo shows flash
     post(:update, params: { id: nybg.id }, format: :turbo_stream)
+    assert_flash_text(/missing/i)
     assert_template("shared/_modal_form_reload")
   end
 

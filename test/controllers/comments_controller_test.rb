@@ -232,6 +232,7 @@ class CommentsControllerTest < FunctionalTestCase
     assert_flash_error("MO should flash if trying to comment on object" \
                        "for which user lacks read privileges")
 
+    # Test turbo shows flash error
     get(:new, params:, format: :turbo_stream)
     assert_template("shared/_modal_form_reload")
     assert_flash_error

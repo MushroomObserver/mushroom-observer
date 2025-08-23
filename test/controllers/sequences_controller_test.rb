@@ -410,6 +410,11 @@ class SequencesControllerTest < FunctionalTestCase
     # Prove user cannot edit Sequence he didn't create for Obs he didn't create
     get(:edit, params: { id: sequence.id })
     assert_redirected_to(obs.show_link_args)
+
+    # Test turbo shows flash warning
+    get(:edit, params: { id: sequence.id }, format: :turbo_stream)
+    assert_flash_warning
+    assert_template("shared/_modal_flash_update")
   end
 
   def test_edit_redirect

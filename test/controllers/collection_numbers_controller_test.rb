@@ -191,8 +191,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     }
     login(user.login)
     assert_difference("CollectionNumber.count", 1) do
-      post(:create, params: params,
-                    format: :turbo_stream)
+      post(:create, params: params, format: :turbo_stream)
     end
   end
 
@@ -375,7 +374,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     patch(:update, params:)
     assert_flash_text(/permission denied/i)
 
-    # test turbo
+    # Test turbo shows flash warning
     patch(:update, params:, format: :turbo_stream)
     assert_flash_text(/permission denied/i)
     assert_template("shared/_modal_flash_update")
