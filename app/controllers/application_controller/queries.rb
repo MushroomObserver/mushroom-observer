@@ -224,7 +224,8 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
 
   # This parses the results of `to_query`, called in `full_q_param`
   def parse_q_param(param_set)
-    Rack::Utils.parse_nested_query(param_set[:q]).deep_symbolize_keys
+    param_set[:q]
+    # Rack::Utils.parse_nested_query(param_set[:q]).deep_symbolize_keys
   end
 
   # NOTE: If we're going to cache user stuff that depends on their present q,
@@ -291,7 +292,7 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
 
     if query
       query.save unless query.id
-      full_q_param(query, encode: false)
+      full_q_param(query)
     elsif @query_param
       @query_param
     end
@@ -299,11 +300,8 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
   # helper_method :get_query_param
 
   # Must call to_query because otherwise q params hash is not permitted
-  def full_q_param(query, encode: true)
-    hash = query.params.merge(model: query.model.name.to_sym)
-    return hash unless encode
-
-    hash.to_query
+  def full_q_param(query)
+    query.params.merge(model: query.model.name.to_sym)
   end
 
   # NOTE: these two methods add q: param to urls built from controllers/actions.
@@ -315,20 +313,21 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
     url_for(add_query_param(args, query))
   end
 
-  # Pass the in-coming query parameter(s) through to the next request.
+  # Pass the incoming query parameter(s) through to the next request.
   # Re-validate the params as a query, because they could be altered
   def pass_query_params
+    params.permit!
     @query_param = nil
     return if params[:q].blank?
 
     query = query_from_q_param(params)
     return @query_param unless query&.valid?
 
-    @query_param = full_q_param(query, encode: false)
+    @query_param = full_q_param(query)
     @query_param
   end
 
-  # Change the query that +query_params+ passes along to the next request.
+  # Change the query that +query_param+ passes along to the next request.
   # *NOTE*: This method is available to views.
   def query_params_set(query = nil)
     @query_param = nil
@@ -336,7 +335,7 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
       # do nothing
     elsif query
       query.save unless query.id
-      @query_param = full_q_param(query, encode: false)
+      @query_param = full_q_param(query)
     end
     @query_param
   end
