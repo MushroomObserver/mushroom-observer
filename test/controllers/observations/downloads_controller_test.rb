@@ -51,11 +51,10 @@ module Observations
       )
 
       q = @controller.get_query_param(query)
-      query_string = observations_downloads_path(q:).split("?")[1]
       get(:new, params: { q: })
       assert_no_flash
       assert_response(:success)
-      assert_select("form[action*='#{query_string}']")
+      assert_select("form[action*='#{query_string(q)}']")
 
       post(
         :create,
