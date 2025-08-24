@@ -224,7 +224,7 @@ class ImagesControllerTest < FunctionalTestCase
     obs = image.observations.reorder(created_at: :asc).first
     assert(obs.images.member?(image))
     query = Query.lookup_and_save(:Image, by_users: user)
-    q = @controller.full_q_param(query)
+    q = @controller.get_query_param(query)
     params = { id: image.id, q: }
 
     delete_requires_user(:destroy, { action: :show, id: image.id, q: q },
