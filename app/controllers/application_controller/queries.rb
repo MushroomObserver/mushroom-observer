@@ -16,7 +16,7 @@
 #  redirect_to_next_object:: Find next object from a Query and redirect to its
 #                            show page.
 #
-module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
+module ApplicationController::Queries
   def self.included(base)
     base.helper_method(
       :query_from_session, :query_params, :add_query_param,
@@ -95,12 +95,6 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
 
   def query_needs_update?(new_args, query)
     new_args.any? { |_arg, val| query.params[:arg] != val }
-  end
-
-  def query_record_exists(q_param)
-    return unless q_param && (query = Query.safe_find(q_param))
-
-    query
   end
 
   # Turn old query into a new query for given model,
@@ -218,11 +212,11 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
   end
 
   # Get Query last stored on the "clipboard" (session).
-  def query_from_session
-    return unless (id = session[:checklist_source])
+  # def query_from_session
+  #   return unless (id = session[:checklist_source])
 
-    Query.safe_find(id)
-  end
+  #   Query.safe_find(id)
+  # end
   # helper_method :query_from_session
 
   # Opposite is `full_q_param` below
@@ -339,12 +333,6 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
 
     flash_error(:advanced_search_bad_q_error.t)
     redirect_to(search_advanced_path)
-  end
-
-  def dealphabetize_q_param
-    params[:q].dealphabetize
-  rescue StandardError
-    nil
   end
 
   def invalid_q_param?
