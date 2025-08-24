@@ -15,7 +15,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_operator(query.num_results, :>, 1)
 
     login
-    get(:index, params: { q: @controller.full_q_param(query) })
+    get(:index, params: { q: @controller.get_query_param(query) })
 
     assert_response(:success)
     assert_page_title(:COLLECTION_NUMBERS.l)
@@ -83,7 +83,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: "neighbor" })
 
-    q = @controller.full_q_param(QueryRecord.last.query)
+    q = @controller.get_query_param(QueryRecord.last.query)
     assert_redirected_to(
       collection_number_path(id: numbers.first.id, params: { q: })
     )
@@ -135,7 +135,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_operator(query.num_results, :>, 1)
     number1 = query.results[0]
     number2 = query.results[1]
-    q = @controller.full_q_param(query)
+    q = @controller.get_query_param(query)
 
     login
     get(:show, params: { flow: :next, id: number1.id, q: q })
