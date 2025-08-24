@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Pin npm packages by running ./bin/importmap
+# Pin npm packages by running ./bin/importmap package-name
 # If string literal error, it means the importmap is not functioning
 # check it with bin/importmap json
 
@@ -28,3 +28,4 @@ pin "jstz" # @2.1.1
 pin_all_from "app/javascript/src", under: "src", to: "src"
 pin "jquery-events-to-dom-events" # @1.1.0
 pin "geo-coordinates-parser" # @1.6.3
+pin "qs-esm" # @7.0.2

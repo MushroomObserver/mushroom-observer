@@ -27,8 +27,10 @@ module Header
     def paginated_results(args = {}, &block)
       html_id = args[:html_id] ||= "results"
       results = capture(&block).to_s
+      uri = URI.parse(observations_path(q: get_query_param))
+      encoded_q = uri.query
 
-      tag.div(id: html_id, data: { q: get_query_param }) do
+      tag.div(id: html_id, data: { q: encoded_q }) do
         concat(content_for(:index_pagination_top))
         concat(results)
         concat(content_for(:index_pagination_bottom))

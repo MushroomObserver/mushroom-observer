@@ -200,7 +200,8 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
 
   # Get instance of Query which is being passed to subsequent pages.
   # The only caller of this is `ApplicationHelper#get_next_id` and is
-  # used only by `url_after_delete(object)`
+  # used only by `url_after_delete(object)` and called by herbarium and
+  # sequences
   def passed_query
     query_from_q_param(params)
   end
@@ -211,7 +212,7 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
     if query_record_id?(param_set[:q]) # i.e. QueryRecord.id
       Query.safe_find(param_set[:q].to_s.dealphabetize) # this may return nil
     elsif param_set[:q].present?
-      q_param = parse_q_param(param_set)
+      q_param = param_set[:q]
       return nil if q_param[:model].blank?
 
       Query.lookup(q_param[:model].to_sym, **q_param.except(:model))
@@ -223,10 +224,9 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
   end
 
   # This parses the results of `to_query`, called in `full_q_param`
-  def parse_q_param(param_set)
-    param_set[:q]
-    # Rack::Utils.parse_nested_query(param_set[:q]).deep_symbolize_keys
-  end
+  # def parse_q_param(param_set)
+  # Rack::Utils.parse_nested_query(param_set[:q]).deep_symbolize_keys
+  # end
 
   # NOTE: If we're going to cache user stuff that depends on their present q,
   # we'll need a helper to make the current QueryRecord (not just the id)
@@ -259,7 +259,6 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
     if params.is_a?(String) # i.e., if "params" arg is a path
       append_query_param_to_path(params, query_param)
     else
-      # This branch is double-encoding the q
       params[:q] = query_param if query_param
       params
     end
@@ -299,9 +298,8 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
   end
   # helper_method :get_query_param
 
-  # Must call to_query because otherwise q params hash is not permitted
   def full_q_param(query)
-    query.params.merge(model: query.model.name.to_sym)
+    { model: query.model.name.to_sym }.merge(query.params)
   end
 
   # NOTE: these two methods add q: param to urls built from controllers/actions.
