@@ -212,11 +212,11 @@ module ControllerExtensions
   #     {controller: controller1, action: :access_denied, ...},
   #     {controller: controller2, action: :succeeded, ...})
   #
-  def either_requires_either(method, page, altpage, params = {},
+  def either_requires_either(method, action, altpage, params = {},
                              username = "rolf", password = "testpassword")
     assert_request(
       method: method,
-      action: page,
+      action: action,
       params: params,
       user: params[:username] || username,
       password: params[:password] || password,
@@ -236,7 +236,7 @@ module ControllerExtensions
     # By default expect relative links.  Allow caller to override by
     # explicitly setting only_path: false.
     args[:only_path] = true unless args.key?(:only_path)
-    URI.decode_www_form_component(@controller.url_for(args))
+    @controller.url_for(args)
   end
 
   # Extract error message and backtrace from Rails's 500 response.  This should
