@@ -117,6 +117,15 @@ class ObservationsControllerIndexTest < FunctionalTestCase
                   "Wrong page or display is missing a link to Previous page")
   end
 
+  def test_index_query_no_matches
+    query = Query.lookup(:Observation, id_in_set: "one")
+    params = { q: @controller.get_query_param(query) }
+
+    login
+    get(:index, params:)
+    assert_flash_error(:runtime_no_matches.t(type: :observation))
+  end
+
   # Created in response to a bug seen in the wild
   # place_name isn't a param for Observation#index
   # but is an API param and a param for Observation#create

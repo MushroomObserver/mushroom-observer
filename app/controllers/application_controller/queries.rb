@@ -62,7 +62,7 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
   def find_query(model = nil, update: !browser.bot?)
     model = model.to_s if model
     query = query_from_q_param(params)
-    return nil unless query&.valid?
+    return nil unless query # invalid is ok, we will report errors
 
     found_query = find_new_query_for_model(model, query)
     save_updated_query_record(found_query) if update && found_query

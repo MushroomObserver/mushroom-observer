@@ -37,16 +37,10 @@ class ArticlesControllerTest < FunctionalTestCase
     )
   end
 
-  # Hm. Because the query is looked up separately from the request, there are
-  # seemingly no errors to report
-  def test_index_query_validation_errors
+  def test_index_query_no_matches
     query = Query.lookup(:Article, id_in_set: "one")
     params = { q: @controller.get_query_param(query) }
     get(:index, params:)
-    # We should maybe check the behavior here because id_in_set is [nil], and
-    # query.result_ids is also []. Accordingly, the index (before permalinks)
-    # would show no results. But parsing the query string is allowing all
-    # articles to come through, unexpectedly
     assert_flash_error(:runtime_no_matches.t(type: :article))
   end
 
