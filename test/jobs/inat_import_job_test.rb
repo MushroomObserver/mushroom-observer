@@ -643,9 +643,10 @@ class InatImportJobTest < ActiveJob::TestCase
 
     InatImportJob.perform_now(@inat_import)
 
-    assert_match(/RestClient::Response.*#{error}.*#{status}/,
-                 @inat_import.response_errors,
-                 "Failed to report iNat API request failure")
+    errors = JSON.parse(@inat_import.response_errors, symbolize_names: true)
+    assert_equal(status, errors[:error], "Incorrect error status")
+    query = JSON.parse(errors[:query], symbolize_names: true)
+    assert_equal(query_args, query, "Incorrect error query")
   end
 
   ########## Utilities
