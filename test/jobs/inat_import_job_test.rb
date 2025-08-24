@@ -649,6 +649,31 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_equal(query_args, query, "Incorrect error query")
   end
 
+  def test_inat_api_request_post_observation_field_failure
+    create_ivars_from_filename("calostoma_lutescens")
+
+    stub_inat_interactions
+    # override the stub of writing the iNat Observation Field
+    error = "Unauthorized"
+    status = 401
+    stub_request(:post, "#{API_BASE}/observation_field_values").
+      with(headers: { "Content-Type" => "application/json" }).
+      to_return(status: status,
+                body: JSON.generate({ error: error, status: status }),
+                headers: {})
+
+    InatImportJob.perform_now(@inat_import)
+
+    errors = JSON.parse(@inat_import.response_errors, symbolize_names: true)
+    assert_equal(status, errors[:error], "Incorrect error status")
+    assert_equal(errors[:payload],
+                 { observation_field_value: {
+                   observation_id: @inat_import.inat_ids.to_i,
+                   observation_field_id: MO_URL_OBSERVATION_FIELD_ID,
+                   value: "#{MO.http_domain}/#{Observation.last.id}"
+                 } })
+  end
+
   ########## Utilities
 
   def create_ivars_from_filename(filename, **attrs)
