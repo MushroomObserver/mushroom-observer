@@ -545,7 +545,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_displayed_filters(
       "#{:query_search_where.l}: #{location.display_name}"
     )
-    assert_match(new_location_path(where: location.name), @response.body)
+    q = @controller.get_query_param
+    assert_select("a[href^='#{new_location_path(q:, where: location.name)}']")
   end
 
   def test_index_where_page2
