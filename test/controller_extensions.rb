@@ -665,4 +665,9 @@ module ControllerExtensions
       "Wrong number of results displayed"
     )
   end
+
+  # Get the query_params encoded as a query string. Hard to reproduce otherwise
+  def query_string(query_string)
+    observations_path(q: query_string).split("?")[1]
+  end
 end
