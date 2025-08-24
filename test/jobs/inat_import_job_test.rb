@@ -612,10 +612,11 @@ class InatImportJobTest < ActiveJob::TestCase
                  "Failed to report iNat API request failure")
   end
 
-  def test_inat_api_request_observation_failure
+  def test_inat_api_request_observation_response_error
     create_ivars_from_filename("calostoma_lutescens")
 
     stub_inat_interactions
+    # override the normal iNat API observation request to return an error
     query_args = {
       iconic_taxa: ICONIC_TAXA,
       id: @inat_import.inat_ids,
@@ -627,8 +628,6 @@ class InatImportJobTest < ActiveJob::TestCase
       without_field: "Mushroom Observer URL",
       user_login: @inat_import.inat_username
     }
-
-    # stub the observation request to return an error
     error = "Unauthorized"
     status = 401
     stub_request(:get, "#{API_BASE}/observations?#{query_args.to_query}").
@@ -649,11 +648,11 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_equal(query_args, query, "Incorrect error query")
   end
 
-  def test_inat_api_request_post_observation_field_failure
+  def test_inat_api_request_post_observation_field_response_error
     create_ivars_from_filename("calostoma_lutescens")
 
     stub_inat_interactions
-    # override the stub of writing the iNat Observation Field
+    # override the normal post of the iNat Observation Field to return an error
     error = "Unauthorized"
     status = 401
     stub_request(:post, "#{API_BASE}/observation_field_values").
