@@ -24,8 +24,17 @@ class QueryTest < UnitTestCase
     query2 = Query.lookup_and_save(:Observation)
     assert_not(query2.record.new_record?)
     assert_equal(query, query2)
-
     assert_equal(query2, Query.safe_find(query2.id))
+
+    query3 = Query.lookup_and_save(:Observation, by_users: [users(:rolf).id])
+    assert_not(query3.record.new_record?)
+    assert_not_equal(query2, query3)
+    assert_equal(query3, Query.safe_find(query3.id))
+    assert_equal(
+      [users(:rolf).id],
+      QueryRecord.check_param(:by_users, query3.record.id.alphabetize)
+    )
+
     assert_nil(Query.safe_find(0))
 
     updated_at = query2.record.updated_at
