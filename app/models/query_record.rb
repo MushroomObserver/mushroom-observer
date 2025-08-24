@@ -25,6 +25,12 @@
 class QueryRecord < ApplicationRecord
   attr_accessor :query
 
+  before_save :update_permalink_status
+
+  def update_permalink_status
+    self.permalink = true
+  end
+
   # This method instantiates a new Query from the description.
   def query # rubocop:disable Lint/DuplicateMethods
     ::Query.rebuild_from_description(description)
