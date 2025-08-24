@@ -22,7 +22,6 @@ module ObservationsController::Show
   def show
     return if check_for_spider_block(request, params)
 
-    pass_query_params
     store_location
     if params[:flow].present?
       redirect_to_next_object(params[:flow].to_sym, Observation, params[:id])
@@ -45,6 +44,14 @@ module ObservationsController::Show
     @comments      = @observation.comments&.sort_by(&:created_at)&.reverse
     @images        = @observation.images_sorted
   end
+
+  # Tell search engines what the "correct" URL is for this page.
+  # Used in application/app/head
+  def canonical_url(obs)
+    observation_url(obs.id)
+  end
+
+  private
 
   def load_observation_for_show_observation_page
     includes = @user ? "show_includes" : "not_logged_in_show_includes" # scopes
@@ -70,12 +77,6 @@ module ObservationsController::Show
     return if params[:set_thumbnail_size].blank?
 
     default_thumbnail_size_set(params[:set_thumbnail_size])
-  end
-
-  # Tell search engines what the "correct" URL is for this page.
-  # Used in application/app/head
-  def canonical_url(obs)
-    observation_url(obs.id)
   end
 
   # Decide if the current query can be used to create a map.

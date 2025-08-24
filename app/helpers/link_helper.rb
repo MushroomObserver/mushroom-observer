@@ -224,7 +224,8 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
   #                  target: term)
   #   destroy_button(
   #     name: :destroy_object.t(type: :herbarium),
-  #     target: herbarium_path(@herbarium, back: url_after_delete(@herbarium))
+  #     target: herbarium_path(@herbarium,
+  #     back: herbaria_path(@herbarium.try(&:id)))
   #   )
   #
   def destroy_button(target:, name: nil, **args)

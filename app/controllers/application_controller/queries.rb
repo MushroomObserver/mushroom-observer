@@ -19,7 +19,7 @@
 module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
   def self.included(base)
     base.helper_method(
-      :query_from_session, :passed_query, :query_params, :add_query_param,
+      :query_from_session, :query_params, :add_query_param,
       :get_query_param, :query_params_set
     )
   end
@@ -178,6 +178,33 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
   #
   ##############################################################################
 
+  # Pass the incoming query parameter(s) through to the next request.
+  # Re-validate the params as a query, because they could be altered
+  def pass_query_params
+    @query_param = nil
+    return if params[:q].blank?
+
+    query = query_from_q_param(params)
+    return @query_param unless query&.valid?
+
+    @query_param = full_q_param(query)
+    @query_param
+  end
+
+  # Change the query that +query_param+ passes along to the next request.
+  # *NOTE*: This method is available to views.
+  def query_params_set(query = nil)
+    @query_param = nil
+    if browser.bot?
+      # do nothing
+    elsif query
+      query.save unless query.id
+      @query_param = full_q_param(query)
+    end
+    @query_param
+  end
+  # helper_method :query_params_set
+
   # This clears the search/index saved in the session.
   def clear_query_in_session
     session[:checklist_source] = nil
@@ -197,15 +224,6 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
     Query.safe_find(id)
   end
   # helper_method :query_from_session
-
-  # Get instance of Query which is being passed to subsequent pages.
-  # The only caller of this is `ApplicationHelper#get_next_id` and is
-  # used only by `url_after_delete(object)` and called by herbarium and
-  # sequences
-  def passed_query
-    query_from_q_param(params)
-  end
-  # helper_method :passed_query
 
   # Opposite is `full_q_param` below
   def query_from_q_param(param_set)
@@ -234,7 +252,7 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
   # available to templates as an ApplicationController ivar. Something like:
   #
   # def current_query_record
-  #   current_query = passed_query || query_from_session # could both be nil!
+  #   current_query = query_from_session # could both be nil!
   #   current_query_record = current_query&.record || "no_query"
   # end
 
@@ -311,33 +329,6 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
   def url_with_query(args, query = nil)
     url_for(add_query_param(args, query))
   end
-
-  # Pass the incoming query parameter(s) through to the next request.
-  # Re-validate the params as a query, because they could be altered
-  def pass_query_params
-    @query_param = nil
-    return if params[:q].blank?
-
-    query = query_from_q_param(params)
-    return @query_param unless query&.valid?
-
-    @query_param = full_q_param(query)
-    @query_param
-  end
-
-  # Change the query that +query_param+ passes along to the next request.
-  # *NOTE*: This method is available to views.
-  def query_params_set(query = nil)
-    @query_param = nil
-    if browser.bot?
-      # do nothing
-    elsif query
-      query.save unless query.id
-      @query_param = full_q_param(query)
-    end
-    @query_param
-  end
-  # helper_method :query_params_set
 
   # Handle advanced_search actions with an invalid q param,
   # so that they get just one flash msg if the query has expired.
