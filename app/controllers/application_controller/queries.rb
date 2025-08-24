@@ -215,7 +215,8 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
       q_param = param_set[:q]
       return nil if q_param[:model].blank?
 
-      Query.lookup(q_param[:model].to_sym, **q_param.except(:model).to_h)
+      Query.lookup(q_param[:model].to_sym,
+                   **q_param.except(:model).to_unsafe_hash)
     end
   end
 
@@ -317,7 +318,6 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
     @query_param = nil
     return if params[:q].blank?
 
-    params.require(:q).permit!
     query = query_from_q_param(params)
     return @query_param unless query&.valid?
 
