@@ -19,7 +19,7 @@ class QueryTest < UnitTestCase
     assert_equal(:observation, query.type_tag)
     # Test QueryRecord.model? method:
     query.record.save
-    assert(QueryRecord.model?(:Observation, query.record.id.alphabetize))
+    assert(QueryRecord.model?(:Observation, query.record.id))
 
     query2 = Query.lookup_and_save(:Observation)
     assert_not(query2.record.new_record?)
@@ -30,10 +30,15 @@ class QueryTest < UnitTestCase
     assert_not(query3.record.new_record?)
     assert_not_equal(query2, query3)
     assert_equal(query3, Query.safe_find(query3.id))
+    # Test QueryRecord.check_param method:
     assert_equal(
       [users(:rolf).id],
-      QueryRecord.check_param(:by_users, query3.record.id.alphabetize)
+      QueryRecord.check_param(:by_users, query3.record.id)
     )
+    # Be sure the permalink has been set on all of these
+    assert(QueryRecord.safe_find(query.id).permalink)
+    assert(QueryRecord.safe_find(query2.id).permalink)
+    assert(QueryRecord.safe_find(query3.id).permalink)
 
     assert_nil(Query.safe_find(0))
 
