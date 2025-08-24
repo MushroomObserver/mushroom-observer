@@ -389,21 +389,20 @@ class NamesControllerShowTest < FunctionalTestCase
     name13 = names[13]
     name14 = names[14]
     login
-    get(:show, params: { flow: :next, id: name12.id })
-    params = { q: @controller.get_query_param(QueryRecord.last.query) }
-
-    assert_redirected_to(name_path(name13.id, params:))
-    get(:show, params: { flow: :next, id: name13.id })
-    assert_redirected_to(name_path(name14.id, params:))
-    get(:show, params: { flow: :prev, id: name14.id })
-    assert_redirected_to(name_path(name13.id, params:))
-    get(:show, params: { flow: :prev, id: name13.id })
-    assert_redirected_to(name_path(name12.id, params:))
+    get(:show, params: { flow: "next", id: name12.id })
+    q = @controller.query_params(QueryRecord.last)
+    assert_redirected_to(name_path(name13.id, params: q))
+    get(:show, params: { flow: "next", id: name13.id })
+    assert_redirected_to(name_path(name14.id, params: q))
+    get(:show, params: { flow: "prev", id: name14.id })
+    assert_redirected_to(name_path(name13.id, params: q))
+    get(:show, params: { flow: "prev", id: name13.id })
+    assert_redirected_to(name_path(name12.id, params: q))
   end
 
   def test_next_and_prev2
     query = Query.lookup_and_save(:Name, pattern: "lactarius")
-    params = { q: @controller.get_query_param(query) }
+    q = @controller.query_params(query)
 
     name1 = query.results[0]
     name2 = query.results[1]
@@ -411,20 +410,20 @@ class NamesControllerShowTest < FunctionalTestCase
     name4 = query.results[-1]
 
     login
-    get(:show, params: params.merge(id: name1.id, flow: :next))
-    assert_redirected_to(name_path(name2.id, params:))
-    get(:show, params: params.merge(id: name3.id, flow: :next))
-    assert_redirected_to(name_path(name4.id, params:))
-    get(:show, params: params.merge(id: name4.id, flow: :next))
-    assert_redirected_to(name_path(name4.id, params:))
+    get(:show, params: q.merge(id: name1.id, flow: :next))
+    assert_redirected_to(name_path(name2.id, params: q))
+    get(:show, params: q.merge(id: name3.id, flow: :next))
+    assert_redirected_to(name_path(name4.id, params: q))
+    get(:show, params: q.merge(id: name4.id, flow: :next))
+    assert_redirected_to(name_path(name4.id, params: q))
     assert_flash_text(/no more/i)
 
-    get(:show, params: params.merge(id: name4.id, flow: :prev))
-    assert_redirected_to(name_path(name3.id, params:))
-    get(:show, params: params.merge(id: name2.id, flow: :prev))
-    assert_redirected_to(name_path(name1.id, params:))
-    get(:show, params: params.merge(id: name1.id, flow: :prev))
-    assert_redirected_to(name_path(name1.id, params:))
+    get(:show, params: q.merge(id: name4.id, flow: :prev))
+    assert_redirected_to(name_path(name3.id, params: q))
+    get(:show, params: q.merge(id: name2.id, flow: :prev))
+    assert_redirected_to(name_path(name1.id, params: q))
+    get(:show, params: q.merge(id: name1.id, flow: :prev))
+    assert_redirected_to(name_path(name1.id, params: q))
     assert_flash_text(/no more/i)
   end
 end
