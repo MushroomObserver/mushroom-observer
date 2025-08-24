@@ -295,21 +295,23 @@ class CollectionNumbersControllerTest < FunctionalTestCase
   def test_create_collection_number_redirect
     obs = observations(:coprinus_comatus_obs)
     query = Query.lookup_and_save(:CollectionNumber)
-    q = query.id.alphabetize
+    q = @controller.get_query_param(query)
     params = {
       observation_id: obs.id,
       collection_number: { name: "John Doe", number: "31415" },
-      q: q
+      q:
     }
 
     # Prove that query params are added to form action.
     login(obs.user.login)
     get(:new, params: params)
-    assert_select("form[action*='numbers?observation_id=#{obs.id}&q=#{q}']")
+    assert_select(
+      "form[action*='numbers?observation_id=#{obs.id}&#{query_string(q)}']"
+    )
 
     # Prove that post keeps query params intact.
     post(:create, params: params)
-    assert_redirected_to(permanent_observation_path(id: obs.id, q: q))
+    assert_redirected_to(permanent_observation_path(id: obs.id, q:))
   end
 
   def test_edit_collection_number
@@ -441,7 +443,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     obs   = observations(:detailed_unknown_obs)
     num   = obs.collection_numbers.first
     query = Query.lookup_and_save(:CollectionNumber)
-    q     = query.id.alphabetize
+    q     = @controller.get_query_param(query)
     login(obs.user.login)
     params = {
       id: num.id,
@@ -449,20 +451,20 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     }
 
     # Prove that GET passes "back" and query param through to form.
-    get(:edit, params: params.merge(back: "foo", q: q))
-    assert_select("form[action*='?back=foo&q=#{q}']")
+    get(:edit, params: params.merge(back: "foo", q:))
+    assert_select("form[action*='?back=foo&#{query_string(q)}']")
 
     # Prove that POST keeps query param when returning to observation.
-    patch(:update, params: params.merge(back: obs.id, q: q))
-    assert_redirected_to(permanent_observation_path(id: obs.id, q: q))
+    patch(:update, params: params.merge(back: obs.id, q:))
+    assert_redirected_to(permanent_observation_path(id: obs.id, q:))
 
     # Prove that POST can return to show_collection_number with query intact.
-    patch(:update, params: params.merge(back: "show", q: q))
-    assert_redirected_to(collection_number_path(id: num.id, q: q))
+    patch(:update, params: params.merge(back: "show", q:))
+    assert_redirected_to(collection_number_path(id: num.id, q:))
 
     # Prove that POST can return to index_collection_number with query intact.
     patch(:update, params: params.merge(back: "index", q: q))
-    assert_redirected_to(collection_numbers_path(params: { id: num.id, q: q }))
+    assert_redirected_to(collection_numbers_path(params: { id: num.id, q: }))
   end
 
   def test_destroy_collection_number
@@ -507,7 +509,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     obs   = observations(:detailed_unknown_obs)
     nums  = obs.collection_numbers
     query = Query.lookup_and_save(:CollectionNumber)
-    q     = query.id.alphabetize
+    q     = @controller.get_query_param(query)
     login(obs.user.login)
     assert_operator(nums.length, :>, 1)
 
@@ -516,7 +518,11 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_redirected_to(collection_numbers_path)
 
     # Prove that it keeps query param intact when returning to index.
-    delete(:destroy, params: { id: nums[1].id, q: q })
-    assert_redirected_to(collection_numbers_path(params: { q: q }))
+    delete(:destroy, params: { id: nums[1].id, q: })
+    assert_redirected_to(collection_numbers_path(params: { q: }))
+  end
+
+  def query_string(q)
+    CGI.escapeHTML(collection_numbers_path(q:).split("?")[1])
   end
 end
