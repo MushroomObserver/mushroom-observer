@@ -34,13 +34,11 @@ if local == true
 else
   form_args = form_args.deep_merge({ data: { turbo: true } })
 end
-
 %>
 
 <%= form_with(**form_args) do |f| %>
 
   <%= f.hidden_field(:back, value: @back) %>
-  <%= f.hidden_field(:q, value: get_query_param) %>
 
   <%= text_field_with_label(form: f, field: :name, label: :NAME.t + ":",
                             between: :required, help:) %>
