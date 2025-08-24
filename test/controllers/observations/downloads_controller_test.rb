@@ -55,7 +55,7 @@ module Observations
       get(:new, params: { q: })
       assert_no_flash
       assert_response(:success)
-      assert_select("#content", { html: /#{CGI.escapeHTML(query_string)}/ })
+      assert_select("form[action*='#{query_string}']")
 
       post(
         :create,
