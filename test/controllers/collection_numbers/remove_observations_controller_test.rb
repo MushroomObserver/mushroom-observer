@@ -84,15 +84,15 @@ class CollectionNumbers::RemoveObservationsControllerTest < FunctionalTestCase
     obs   = observations(:detailed_unknown_obs)
     nums  = obs.collection_numbers
     query = Query.lookup_and_save(:CollectionNumber)
-    q     = query.id.alphabetize
+    q     = @controller.get_query_param(query)
 
     login(obs.user.login)
     assert_operator(nums.length, :>, 1)
 
     # Prove that it keeps query param intact when returning to observation.
     patch(:update, params: { collection_number_id: nums[1].id,
-                             observation_id: obs.id, q: q })
-    assert_redirected_to(observation_path(id: obs.id, q: q))
+                             observation_id: obs.id, q: })
+    assert_redirected_to(observation_path(id: obs.id, q:))
   end
 
   def test_turbo_remove_collection_number_non_owner
