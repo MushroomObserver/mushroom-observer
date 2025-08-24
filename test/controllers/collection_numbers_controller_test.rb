@@ -170,6 +170,15 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
+  def test_new_collection_number_turbo
+    obs_id = observations(:coprinus_comatus_obs).id
+
+    login("rolf")
+    get(:new, params: { observation_id: obs_id }, format: :turbo_stream)
+    assert_template("shared/_modal_form")
+    assert_template("collection_numbers/_form")
+  end
+
   def test_create_collection_number_with_turbo
     obs = observations(:strobilurus_diminutivus_obs)
     user = obs.user
@@ -182,8 +191,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     }
     login(user.login)
     assert_difference("CollectionNumber.count", 1) do
-      post(:create, params: params,
-                    format: :turbo_stream)
+      post(:create, params: params, format: :turbo_stream)
     end
   end
 
@@ -327,6 +335,15 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
+  def test_edit_collection_number_turbo
+    number = collection_numbers(:coprinus_comatus_coll_num)
+
+    login("rolf")
+    get(:edit, params: { id: number.id }, format: :turbo_stream)
+    assert_template("shared/_modal_form")
+    assert_template("collection_numbers/_form")
+  end
+
   def test_update_collection_number
     obs = observations(:coprinus_comatus_obs)
     number = collection_numbers(:coprinus_comatus_coll_num)
@@ -344,36 +361,34 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_not_equal(number.format_name, record2.accession_number)
     old_nybg_accession = record2.accession_number
 
-    params = {
+    collection_number = {
       name: "  New   Name <spam>  ",
       number: "  69-abc <spam>  "
     }
+    params = { id: number.id, collection_number: }
 
-    patch(:update,
-          params: { id: number.id, collection_number: params })
+    patch(:update, params:)
     assert_redirected_to(new_account_login_path)
 
     login("mary")
-    patch(:update,
-          params: { id: number.id, collection_number: params })
+    patch(:update, params:)
     assert_flash_text(/permission denied/i)
 
+    # Test turbo shows flash warning
+    patch(:update, params:, format: :turbo_stream)
+    assert_flash_text(/permission denied/i)
+    assert_template("shared/_modal_flash_update")
+
     login("rolf")
-    patch(:update,
-          params: { id: number.id, collection_number: params.merge(name: "") })
+    patch(:update, params: params.deep_merge(collection_number: { name: "" }))
     assert_flash_text(/missing.*name/i)
     assert_not_equal("new number", number.reload.number)
 
-    patch(:update,
-          params: {
-            id: number.id,
-            collection_number: params.merge(number: "")
-          })
+    patch(:update, params: params.deep_merge(collection_number: { number: "" }))
     assert_flash_text(/missing.*number/i)
     assert_not_equal("New Name", number.reload.name)
 
-    patch(:update,
-          params: { id: number.id, collection_number: params })
+    patch(:update, params:)
     assert_flash_success
     assert_response(:redirect)
     assert_equal("New Name", number.reload.name)

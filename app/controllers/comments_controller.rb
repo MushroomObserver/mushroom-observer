@@ -144,9 +144,7 @@ class CommentsController < ApplicationController
                        !in_admin_mode?
 
     flash_error(:runtime_show_description_denied.t)
-    parent = object.parent
-    redirect_to(controller: parent.show_controller,
-                action: parent.show_action, id: parent.id)
+    show_flash_and_send_back(object.parent)
     false
   end
 
@@ -333,8 +331,7 @@ class CommentsController < ApplicationController
   def check_permission_or_redirect!(comment, target)
     return true if check_permission!(comment)
 
-    redirect_with_query(controller: target.show_controller,
-                        action: target.show_action, id: target.id)
+    show_flash_and_send_back(target)
     false
   end
 
@@ -351,6 +348,19 @@ class CommentsController < ApplicationController
       @comment.log_update
       flash_notice(:runtime_form_comments_edit_success.t(id: @comment.id))
       true
+    end
+  end
+
+  def show_flash_and_send_back(target)
+    respond_to do |format|
+      format.html do
+        redirect_with_query(target.show_link_args) and return
+      end
+      # renders the flash in the modal
+      format.turbo_stream do
+        render(partial: "shared/modal_flash_update",
+               locals: { identifier: modal_identifier }) and return
+      end
     end
   end
 end

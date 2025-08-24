@@ -115,7 +115,7 @@ module Observations::Namings
     def render_matrix_box_naming_update
       render(
         partial: "observations/namings/update_matrix_box",
-        locals: { obs: @observation }
+        locals: { obs: @observation, user: @user }
       ) and return
     end
   end

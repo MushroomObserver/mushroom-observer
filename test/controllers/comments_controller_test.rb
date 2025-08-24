@@ -191,38 +191,53 @@ class CommentsControllerTest < FunctionalTestCase
     assert_template("show")
   end
 
-  def test_add_comment
+  def test_new_comment
     obs_id = observations(:minimal_unknown_obs).id
     requires_login(:new, target: obs_id, type: :Observation)
     assert_form_action(action: :create, target: obs_id, type: :Observation)
   end
 
-  def test_add_comment_to_project
+  def test_new_comment_turbo
+    obs_id = observations(:minimal_unknown_obs).id
+    login
+    get(:new, params: { target: obs_id, type: :Observation },
+              format: :turbo_stream)
+    assert_template("shared/_modal_form")
+    assert_template("comments/_form")
+    assert_form_action(action: :create, target: obs_id, type: :Observation)
+  end
+
+  def test_new_comment_for_project
     project_id = projects(:eol_project).id
     requires_login(:new, target: project_id, type: :Project)
     assert_form_action(action: :create, target: project_id, type: :Project)
   end
 
-  def test_add_comment_no_id
+  def test_new_comment_no_id
     login("dick")
     get(:new)
     assert_response(:redirect)
   end
 
-  def test_add_comment_to_name_with_synonyms
+  def test_new_comment_for_name_with_synonyms
     name_id = names(:chlorophyllum_rachodes).id
     requires_login(:new, target: name_id, type: :Name)
     assert_form_action(action: :create, target: name_id, type: :Name)
   end
 
-  def test_add_comment_to_unreadable_object
+  def test_new_comment_to_unreadable_object
     katrina_is_not_reader = name_descriptions(:peltigera_user_desc)
+    params = { type: :NameDescription, target: katrina_is_not_reader.id }
     login(:katrina)
-    get(:new,
-        params: { type: :NameDescription, target: katrina_is_not_reader.id })
 
+    get(:new, params:)
     assert_flash_error("MO should flash if trying to comment on object" \
                        "for which user lacks read privileges")
+
+    # Test turbo shows flash error
+    get(:new, params:, format: :turbo_stream)
+    assert_template("shared/_modal_flash_update")
+    assert_flash_error
   end
 
   def test_edit_comment
@@ -233,6 +248,16 @@ class CommentsControllerTest < FunctionalTestCase
     requires_user(:edit,
                   [{ controller: "/observations", action: :show,
                      id: obs.id }], params)
+    assert_form_action(action: :update, id: comment.id.to_s)
+  end
+
+  def test_edit_comment_turbo
+    comment = comments(:minimal_unknown_obs_comment_1)
+    login
+
+    get(:edit, params: { id: comment.id }, format: :turbo_stream)
+    assert_template("shared/_modal_form")
+    assert_template("comments/_form")
     assert_form_action(action: :update, id: comment.id.to_s)
   end
 
@@ -250,7 +275,7 @@ class CommentsControllerTest < FunctionalTestCase
     assert_not(obs.comments.member?(comment))
   end
 
-  def test_save_comment
+  def test_create_comment
     assert_equal(10, rolf.contribution)
     obs = observations(:minimal_unknown_obs)
     comment_count = obs.comments.size
