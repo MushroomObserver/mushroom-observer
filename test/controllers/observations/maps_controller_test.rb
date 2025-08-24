@@ -49,7 +49,7 @@ module Observations
       #                                    include?("118.3521"))
 
       obs.update(gps_hidden: true)
-      get(:index, params: { q: query.id.alphabetize })
+      get(:index, params: { q: @controller.full_q_param(query) })
       assert_false(assigns(:observations).map { |o| o.lat.to_s }.join.
                                           include?("34.1622"))
       assert_false(assigns(:observations).map { |o| o.lng.to_s }.join.
