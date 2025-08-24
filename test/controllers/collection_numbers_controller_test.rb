@@ -521,8 +521,4 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     delete(:destroy, params: { id: nums[1].id, q: })
     assert_redirected_to(collection_numbers_path(params: { q: }))
   end
-
-  def query_string(q)
-    CGI.escapeHTML(collection_numbers_path(q:).split("?")[1])
-  end
 end
