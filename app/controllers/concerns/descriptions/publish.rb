@@ -4,13 +4,16 @@
 module Descriptions::Publish
   extend ActiveSupport::Concern
 
+  class_methods do
+    before_action :pass_query_params
+  end
+
   included do
     # Publish a draft description.  If the name has no description, just turn
     # the draft into a public description and make it the default.  If the name
     # has a default description try to merge the draft into it.  If there is a
     # conflict bring up the edit_description form to let the user do the merge.
     def update
-      pass_query_params
       return unless (draft = find_description!(params[:id].to_s))
 
       parent = draft.parent

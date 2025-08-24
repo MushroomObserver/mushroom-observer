@@ -2,6 +2,7 @@
 
 class VisualGroupsController < ApplicationController
   before_action :login_required
+  before_action :pass_query_params, only: [:edit]
 
   # GET /visual_groups or /visual_groups.json
   def index
@@ -24,7 +25,6 @@ class VisualGroupsController < ApplicationController
 
   # GET /visual_groups/1/edit
   def edit
-    pass_query_params
     @visual_group = VisualGroup.find(params[:id])
     @filter = params[:filter]
     @filter = @visual_group.name unless @filter && @filter != ""

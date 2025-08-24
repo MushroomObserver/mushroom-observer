@@ -2,12 +2,12 @@
 
 class ObservationViewsController < ApplicationController
   before_action :login_required
+  before_action :pass_query_params
 
   # endpoint to mark an observation as 'reviewed' by the current user
   # Note that it doesn't take an ov.id param - it looks up or creates an ov
   # from an observation_id param (confusingly, :id!) and the current user
   def update
-    pass_query_params
     # basic sanitizing of the param. ivars needed in js response
     # checked is a string!
     @reviewed = params[:reviewed] == "1"

@@ -10,6 +10,7 @@
 class SpeciesListsController < ApplicationController
   before_action :login_required
   before_action :require_successful_user, only: [:new, :create]
+  before_action :pass_query_params, only: [:show]
   # Bullet wants us to eager load synonyms for @deprecated_names in
   # edit_species_list, and I thought it would be possible, but I can't
   # get it to work.  Seems toooo minor to waste any more time on.
@@ -98,7 +99,6 @@ class SpeciesListsController < ApplicationController
   def show
     store_location
     clear_query_in_session
-    pass_query_params
     return unless (@species_list = find_species_list!)
 
     set_project_ivar

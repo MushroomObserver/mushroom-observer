@@ -4,11 +4,11 @@
 module Names::Descriptions
   class ReviewStatusController < ApplicationController
     before_action :login_required
+    before_action :pass_query_params
 
     # PUT Callback to let reviewers change review_status of a NameDescription
     # from the show_name page.
     def update
-      pass_query_params
       desc = NameDescription.find(params[:id].to_s)
       desc.update_review_status(params[:value]) if reviewer?
       redirect_with_query(name_path(desc.name_id))

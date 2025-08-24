@@ -8,11 +8,11 @@
 module SpeciesLists
   class ObservationsController < ApplicationController
     before_action :login_required
+    before_action :pass_query_params
 
     # :add_remove_observations
     # Form to add or remove the current *query* of observations
     def edit
-      pass_query_params
       @id = params[:species_list].to_s
       @query = find_obs_query_or_redirect
     end
@@ -21,7 +21,6 @@ module SpeciesLists
     # PUT endpoint — via params[:commit], either add or remove a
     #                *query* of observations from a species_list
     def update
-      pass_query_params
       id = params[:species_list].to_s
       return unless (spl = find_list_or_reload_form!(id))
 
