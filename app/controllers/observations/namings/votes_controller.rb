@@ -3,6 +3,7 @@
 module Observations::Namings
   class VotesController < ApplicationController
     before_action :login_required # except: [:show]
+    before_action :pass_query_params
 
     # Index breakdown of votes for a given naming.
     # Linked from: observations/show
@@ -11,7 +12,6 @@ module Observations::Namings
     # Inputs: params[:naming_id], [:observation_id]
     # Outputs: @naming, @consensus
     def index
-      pass_query_params
       @naming = find_or_goto_index(Naming, params[:naming_id].to_s)
       obs = Observation.naming_includes.find(params[:observation_id])
       @consensus = Observation::NamingConsensus.new(obs)
@@ -64,8 +64,9 @@ module Observations::Namings
       create_or_update_vote
     end
 
+    private
+
     def create_or_update_vote
-      pass_query_params
       observation = load_observation_naming_includes # 1st load
       @naming = observation.namings.find(params[:naming_id])
       value_str = params.dig(:vote, :value).to_s

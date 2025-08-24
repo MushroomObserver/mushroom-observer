@@ -4,14 +4,13 @@
 module Names
   class LifeformsController < ApplicationController
     before_action :login_required
+    before_action :pass_query_params
 
     def edit
-      pass_query_params
       find_name!
     end
 
     def update
-      pass_query_params
       return unless find_name!
 
       words = Name.all_lifeforms.select do |word|

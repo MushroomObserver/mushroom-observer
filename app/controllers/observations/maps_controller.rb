@@ -3,6 +3,7 @@
 module Observations
   class MapsController < ApplicationController
     before_action :login_required
+    before_action :pass_query_params, only: :show
 
     def controller_model_name
       "Observation"
@@ -19,7 +20,6 @@ module Observations
 
     # Show map of one observation by id.
     def show
-      pass_query_params
       @observation = find_or_goto_index(Observation, params[:id].to_s)
       return unless @observation
 

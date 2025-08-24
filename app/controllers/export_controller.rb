@@ -6,6 +6,7 @@ class ExportController < ApplicationController
                        Name].freeze
 
   before_action :login_required
+  before_action :pass_query_params
 
   # Callback (no view) to let reviewers change the export status of an
   # Image, Name, Location or Description from the show pages.
@@ -48,7 +49,6 @@ class ExportController < ApplicationController
   end
 
   def parse_params
-    pass_query_params
     @type = params[:type].to_s
     @value = params[:value].to_s
     @model_class = EXPORTABLE_MODELS.find { |m| m.name.downcase == @type }

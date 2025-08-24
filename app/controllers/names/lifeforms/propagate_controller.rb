@@ -4,14 +4,13 @@
 module Names::Lifeforms
   class PropagateController < ApplicationController
     before_action :login_required
+    before_action :pass_query_params
 
     def edit
-      pass_query_params
       @name = find_or_goto_index(Name, params[:id])
     end
 
     def update
-      pass_query_params
       @name = find_or_goto_index(Name, params[:id])
 
       Name.all_lifeforms.each do |word|
