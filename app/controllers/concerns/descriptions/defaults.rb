@@ -4,11 +4,9 @@
 module Descriptions::Defaults
   extend ActiveSupport::Concern
 
-  class_methods do
-    before_action :pass_query_params
-  end
-
   included do
+    before_action :pass_query_params
+
     # PUT callback to make a description the default one.
     # Description must be publically readable and writable.
     def update
