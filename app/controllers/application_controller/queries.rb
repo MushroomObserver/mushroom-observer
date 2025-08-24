@@ -4,7 +4,7 @@
 module ApplicationController::Queries
   def self.included(base)
     base.helper_method(
-      :query_from_session, :passed_query, :query_params, :add_query_param,
+      :query_from_session, :query_params, :add_query_param,
       :get_query_param, :query_params_set
     )
   end
@@ -184,18 +184,12 @@ module ApplicationController::Queries
   end
   # helper_method :query_from_session
 
-  # Get instance of Query which is being passed to subsequent pages.
-  def passed_query
-    Query.safe_find(query_params[:q].to_s.dealphabetize)
-  end
-  # helper_method :passed_query
-
   # NOTE: If we're going to cache user stuff that depends on their present q,
   # we'll need a helper to make the current QueryRecord (not just the id)
   # available to templates as an ApplicationController ivar. Something like:
   #
   # def current_query_record
-  #   current_query = passed_query || query_from_session # could both be nil!
+  #   current_query = query_from_session # could both be nil!
   #   current_query_record = current_query&.record || "no_query"
   # end
 
