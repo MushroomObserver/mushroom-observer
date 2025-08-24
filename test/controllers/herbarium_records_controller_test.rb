@@ -515,8 +515,4 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     delete(:destroy, params: { id: recs[1].id, q: })
     assert_redirected_to(herbarium_records_path(q:))
   end
-
-  def query_string(q)
-    CGI.escapeHTML(herbarium_records_path(q:).split("?")[1])
-  end
 end
