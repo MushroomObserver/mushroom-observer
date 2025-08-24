@@ -314,10 +314,10 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
   # Pass the incoming query parameter(s) through to the next request.
   # Re-validate the params as a query, because they could be altered
   def pass_query_params
-    params.permit!
     @query_param = nil
     return if params[:q].blank?
 
+    params.require(:q).permit!
     query = query_from_q_param(params)
     return @query_param unless query&.valid?
 
