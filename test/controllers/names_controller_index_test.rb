@@ -6,15 +6,12 @@ class NamesControllerIndexTest < FunctionalTestCase
   tests NamesController
   include ObjectLinkHelper
 
-  ################################################
+  # ----------------------------
+  #  Index tests.
+  # ----------------------------
   #
-  #   TEST INDEX
-  #
-  ################################################
-  #
-  # Tests of index, with tests arranged as follows:
-  # default subaction; then
-  # other subactions in order of index_active_params
+  # Tests arranged as follows:
+  # default subaction; then other subactions in order of index_active_params
   # miscellaneous tests using get(:index)
   def test_index
     login
@@ -29,24 +26,40 @@ class NamesControllerIndexTest < FunctionalTestCase
     check_index_sorting
   end
 
-  def test_index_via_related_query
+  def test_index_via_related_query_old_and_new_q
     user = dick
     query = Query.lookup_and_save(:Observation, by_users: user)
     new_query = Query.current_or_related_query(:Name, :Observation, query)
     new_query.save # have to save here so we can send it as `q`
-    q = new_query.id.alphabetize
-
     login
-    get(:index, params: { q: q })
 
+    # Temporary 2025-08-24: Check that the old alphabetized param still works
+    q = new_query.id.alphabetize
+    get(:index, params: { q: q })
+    # Check that the controller sets a new permalink-style @query_param
+    expected_q = { model: :Name, observation_query: { by_users: [user.id] } }
+    assert_equal(assigns(:query_param), expected_q)
+    index_related_query_assertions(user, expected_q)
+
+    # Now check that the new param works the same
+    get(:index, params: { q: expected_q })
+    assert_equal(assigns(:query_param), expected_q)
+    index_related_query_assertions(user, expected_q)
+  end
+
+  def index_related_query_assertions(user, expected_q)
     assert_page_title(:NAMES.l)
     assert_displayed_filters(:query_observation_query.l)
     assert_displayed_filters("#{:query_by_users.l}: #{user.name}")
+    result_names = Name.joins(:observations).with_correct_spelling.
+                   where(observations: { user: user }).distinct
+    # Check both that the count of results is right, and
+    # that the new permalink version of the q param is in forward links
     assert_select(
-      "#results a:match('href', ?)", %r{^#{names_path}/\d+},
-      { count: Name.joins(:observations).with_correct_spelling.
-               where(observations: { user: user }).distinct.count },
-      "Wrong number of (correctly spelled) Names"
+      "#results a:match('href', ?)",
+      %r{^#{names_path}/\d+\?#{query_string(expected_q)}},
+      { count: result_names.count },
+      "Wrong number of (correctly spelled) Names, or wrong `q`"
     )
   end
 
