@@ -1348,3 +1348,15 @@ lactifluus_subalpinus:
   deprecated: 1
   created_at: 2025-08-14 15:14:10
   updated_at: 2025-08-14 15:14:10
+
+longest_name:
+  <<: *DEFAULTS
+  text_name: Singerocybe alboinfundibuliformis
+  search_name: Singerocybe alboinfundibuliformis (Seok, Yang S. Kim, K.M. Park, W.G. Kim, K.H. Yoo & I.C. Park) Zhu L. Yang, J. Qin & Har. Takahashi
+  display_name: "**__Singerocybe__** **__alboinfundibuliformis__** (Seok, Yang S. Kim, K.M. Park, W.G. Kim, K.H. Yoo & I.C. Park) Zhu L. Yang, J. Qin & Har. Takahashi"
+  sort_name: Singerocybe alboinfundibuliformis  (Seok, Yang S. Kim, K.M. Park, W.G. Kim, K.H. Yoo & I.C. Park) Zhu L. Yang, J. Qin & Har. Takahashi
+  citation: "Mycologia 106(5): 1022 (2014)"
+  deprecated: false
+  author: (Seok, Yang S. Kim, K.M. Park, W.G. Kim, K.H. Yoo & I.C. Park) Zhu L. Yang, J. Qin & Har. Takahashi
+  created_at: 2025-08-21 08:14:10
+  updated_at: 2025-08-21 08:14:10
