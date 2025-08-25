@@ -40,7 +40,7 @@ class ExternalLink < AbstractModel
   scope :url_has,
         ->(phrase) { search_columns(ExternalLink[:url], phrase) }
   scope :external_sites, lambda { |sites|
-    ids = lookup_external_sites_by_name(sites)
+    ids = Lookup::ExternalSites.new(sites).ids
     where(external_site_id: ids)
   }
   scope :observations,
