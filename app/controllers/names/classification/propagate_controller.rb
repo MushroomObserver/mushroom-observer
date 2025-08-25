@@ -4,10 +4,10 @@
 module Names::Classification
   class PropagateController < ApplicationController
     before_action :login_required
+    before_action :pass_query_params
 
     # PUT callback
     def update
-      pass_query_params
       return unless find_name!
       return unless make_sure_name_is_genus!(@name)
 

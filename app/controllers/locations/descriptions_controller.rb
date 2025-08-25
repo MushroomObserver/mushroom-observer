@@ -144,7 +144,6 @@ module Locations
     end
 
     def destroy
-      pass_query_params
       return unless find_description!
 
       check_delete_permission_flash_and_redirect

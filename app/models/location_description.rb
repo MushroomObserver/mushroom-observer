@@ -92,17 +92,17 @@ class LocationDescription < Description
     where(public: bool)
   }
   scope :by_author, lambda { |user|
-    ids = lookup_users_by_name(user)
+    ids = Lookup::Users.new(user).ids
     joins(:location_description_authors).distinct.
       where(location_description_authors: { user_id: ids })
   }
   scope :by_editor, lambda { |user|
-    ids = lookup_users_by_name(user)
+    ids = Lookup::Users.new(user).ids
     joins(:location_description_editors).distinct.
       where(location_description_editors: { user_id: ids })
   }
-  scope :locations, lambda { |loc|
-    ids = lookup_locations_by_name(loc)
+  scope :locations, lambda { |locations|
+    ids = Lookup::Locations.new(locations).ids
     where(location: ids)
   }
 

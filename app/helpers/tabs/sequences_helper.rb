@@ -76,7 +76,8 @@ module Tabs
       InternalLink::Model.new(
         :destroy_object.t(type: :sequence),
         seq, seq,
-        html_options: { button: :destroy, back: url_after_delete(seq) }
+        html_options: { button: :destroy,
+                        back: observation_path(seq.observation) }
       ).tab
     end
 

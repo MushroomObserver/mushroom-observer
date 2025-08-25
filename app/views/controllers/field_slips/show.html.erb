@@ -4,9 +4,7 @@ add_context_nav(field_slip_show_tabs(@field_slip, @user))
 container_class(:wide)
 %>
 
-<% if notice %>
-  <p class="alert alert-success"><%= notice %></p>
-<% end %>
+<%= alert_block(notice, level: :success) if notice %>
 
 <%= render(@field_slip) %>
 

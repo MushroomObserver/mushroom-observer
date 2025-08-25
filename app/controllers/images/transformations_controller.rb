@@ -3,10 +3,10 @@
 module Images
   class TransformationsController < ApplicationController
     before_action :login_required
+    before_action :pass_query_params
 
     # Used by show_image to rotate and flip image. was GET. Currently a PUT
     def update
-      pass_query_params
       image = find_or_goto_index(Image, params[:id].to_s)
       return unless image
 

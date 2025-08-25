@@ -4,11 +4,11 @@
 module Locations
   class VersionsController < ApplicationController
     before_action :login_required
+    before_action :pass_query_params
 
     # Show past version of Location.  Accessible only from show_location page.
     def show
       store_location
-      pass_query_params
       return unless find_location!
 
       if params[:version]
@@ -20,13 +20,15 @@ module Locations
       end
     end
 
+    def show_includes
+      [:user, :versions]
+    end
+
+    private
+
     def find_location!
       @location = Location.show_includes.safe_find(params[:id]) ||
                   flash_error_and_goto_index(Location, params[:id])
-    end
-
-    def show_includes
-      [:user, :versions]
     end
   end
 end

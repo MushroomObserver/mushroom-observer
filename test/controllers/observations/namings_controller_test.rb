@@ -15,6 +15,10 @@ module Observations
       )
     end
 
+    # ------------------------------------------------------------
+    #  Test propose naming form.
+    # ------------------------------------------------------------
+
     def test_new_form
       obs = observations(:coprinus_comatus_obs)
       params = { observation_id: obs.id.to_s }
@@ -23,20 +27,383 @@ module Observations
                          observation_id: obs.id.to_s)
     end
 
-    def test_edit_form
-      nam = namings(:coprinus_comatus_naming)
-      params = { observation_id: nam.observation_id, id: nam.id.to_s }
-      requires_user(:edit, { controller: "/observations", action: :show,
-                             id: nam.observation_id }, params)
-      assert_form_action(action: "update", approved_name: nam.text_name,
-                         id: nam.id.to_s)
-      assert_select("option[selected]", count: 2)
+    def test_new_form_turbo
+      obs = observations(:coprinus_comatus_obs)
+      params = { observation_id: obs.id.to_s }
+      login
+      get(:new, params:, format: :turbo_stream)
+      assert_template("shared/_modal_form")
+      assert_template("observations/namings/_form")
+      assert_form_action(action: "create", approved_name: "",
+                         observation_id: obs.id.to_s)
+    end
 
-      login(nam.user.login)
-      get(:edit, params: params)
+    # ------------------------------------------------------------
+    #  Test proposing new namings.
+    # ------------------------------------------------------------
+
+    # This is the standard case, nothing unusual or stressful here.
+    def test_propose_naming
+      args = propose_naming_setup
+      args => { params: }
+
+      login("rolf")
+      post(:create, params:)
+      assert_response(:redirect)
+
+      post_propose_naming_assertions(args)
+    end
+
+    def test_propose_naming_turbo
+      args = propose_naming_setup
+      args => { params: } # ruby 3 rightward assignment from hash
+
+      login("rolf")
+      post(:create, params:, format: :turbo_stream)
+      assert_response(:redirect)
+
+      post_propose_naming_assertions(args)
+    end
+
+    def test_propose_naming_turbo_from_identify_ui
+      args = propose_naming_setup
+      params = args[:params].merge(context: "matrix_box")
+
+      login("rolf")
+      post(:create, params:, format: :turbo_stream)
+      assert_template("observations/namings/_update_matrix_box")
+
+      post_propose_naming_assertions(args)
+    end
+
+    def test_propose_naming_turbo_from_lightgallery_ui
+      args = propose_naming_setup
+      params = args[:params].merge(context: "lightgallery")
+
+      login("rolf")
+      post(:create, params:, format: :turbo_stream)
+      assert_template("observations/namings/_update_matrix_box")
+
+      post_propose_naming_assertions(args)
+    end
+
+    def propose_naming_setup
+      o_count = Observation.count
+      g_count = Naming.count
+      n_count = Name.count
+      v_count = Vote.count
+
+      nam = names(:coprinus_comatus)
+      obs = observations(:coprinus_comatus_obs)
+      nmg1 = namings(:coprinus_comatus_naming)
+      nmg2 = namings(:coprinus_comatus_other_naming)
+      consensus = Observation::NamingConsensus.new(obs)
+
+      # Make a few assertions up front to make sure fixtures are as expected.
+      assert_equal(nam.id, obs.name_id)
+      assert(consensus.user_voted?(nmg1, rolf))
+      assert(consensus.user_voted?(nmg1, mary))
+      assert_not(consensus.user_voted?(nmg1, dick))
+      assert(consensus.user_voted?(nmg2, rolf))
+      assert(consensus.user_voted?(nmg2, mary))
+      assert_not(consensus.user_voted?(nmg2, dick))
+
+      # Rolf, the owner of observations(:coprinus_comatus_obs),
+      # already has a naming, which he's 80% sure of.
+      # Create a new one (the genus Agaricus) that he's 100%
+      # sure of.  (Mary also has a naming with two votes.)
+      params = {
+        observation_id: obs.id,
+        naming: {
+          name: "Agaricus",
+          vote: { value: "3" },
+          reasons: {
+            "1" => { check: "1", notes: "Looks good to me." },
+            "2" => { check: "1", notes: "" },
+            "3" => { check: "0", notes: "Spore texture." },
+            "4" => { check: "0", notes: "" }
+          }
+        }
+      }
+
+      { obs:, consensus:, o_count:, g_count:, n_count:, v_count:, params: }
+    end
+
+    def post_propose_naming_assertions(args)
+      args => { obs:, consensus:, o_count:, g_count:, n_count:, v_count: }
+      # Make sure the right number of objects were created.
+      assert_equal(o_count, Observation.count)
+      assert_equal(g_count + 1, Naming.count)
+      assert_equal(n_count, Name.count)
+      assert_equal(v_count + 1, Vote.count)
+
+      # Make sure contribution is updated correctly.
+      assert_equal(12, rolf.reload.contribution)
+
+      # Make sure everything I need is reloaded.
+      obs.reload
+
+      # Get new objects.
+      naming = Naming.last
+      vote = Vote.last
+
+      # Make sure observation was updated and referenced correctly.
+      assert_equal(3, obs.namings.length)
+      assert_equal(names(:agaricus).id, obs.name_id)
+
+      # Make sure naming was created correctly and referenced.
+      assert_equal(obs, naming.observation)
+      assert_equal(names(:agaricus).id, naming.name_id)
+      assert_equal(rolf, naming.user)
+      assert_equal(3, naming.reasons_array.count(&:used?))
+      assert_equal(1, naming.votes.length)
+
+      # Make sure vote was created correctly.
+      assert_equal(naming, vote.naming)
+      assert_equal(rolf, vote.user)
+      assert_equal(3, vote.value)
+
+      # Make sure reasons were created correctly.
+      nr1, nr2, nr3, nr4 = naming.reasons_array
+      assert_equal(1, nr1.num)
+      assert_equal(2, nr2.num)
+      assert_equal(3, nr3.num)
+      assert_equal(4, nr4.num)
+      assert_equal("Looks good to me.", nr1.notes)
+      assert_equal("", nr2.notes)
+      assert_equal("Spore texture.", nr3.notes)
+      assert_nil(nr4.notes)
+      assert(nr1.used?)
+      assert(nr2.used?)
+      assert(nr3.used?)
+      assert_not(nr4.used?)
+
+      # Make sure a few random methods work right, too. Must re-calc_consensus
+      consensus.calc_consensus
+      assert_equal(3, naming.vote_sum)
+      assert_equal(vote, consensus.users_vote(naming, rolf))
+      assert(consensus.user_voted?(naming, rolf))
+      assert_not(consensus.user_voted?(naming, mary))
+    end
+
+    # Now see what happens when rolf's new naming is less confident than old.
+    def test_propose_uncertain_naming
+      params = {
+        observation_id: observations(:coprinus_comatus_obs).id,
+        naming: {
+          name: "Agaricus",
+          vote: { value: "-1" }
+        }
+      }
+      login("rolf")
+      post(:create, params: params)
+      assert_response(:redirect)
+      assert_equal(12, rolf.reload.contribution)
+
+      # Make sure everything I need is reloaded.
+      observations(:coprinus_comatus_obs).reload
+      namings(:coprinus_comatus_naming).reload
+
+      # Make sure observation was updated right.
+      assert_equal(names(:coprinus_comatus).id,
+                   observations(:coprinus_comatus_obs).name_id)
+
+      # Sure, check the votes, too, while we're at it.
+      assert_equal(3, namings(:coprinus_comatus_naming).vote_sum) # 2+1 = 3
+    end
+
+    # Now see what happens when a third party proposes a name, and it wins.
+    def test_propose_dicks_naming
+      o_count = Observation.count
+      g_count = Naming.count
+      n_count = Name.count
+      v_count = Vote.count
+
+      # Dick proposes "Conocybe filaris" out of the blue.
+      params = {
+        observation_id: observations(:coprinus_comatus_obs).id,
+        naming: {
+          name: "Conocybe filaris",
+          vote: { value: "3" }
+        }
+      }
+      login("dick")
+      post(:create, params: params)
+      assert_response(:redirect)
+      assert_equal(12, dick.reload.contribution)
+      naming = Naming.last
+
+      # Make sure the right number of objects were created.
+      assert_equal(o_count + 0, Observation.count)
+      assert_equal(g_count + 1, Naming.count)
+      assert_equal(n_count + 0, Name.count)
+      assert_equal(v_count + 1, Vote.count)
+
+      # Make sure everything I need is reloaded.
+      observations(:coprinus_comatus_obs).reload
+      namings(:coprinus_comatus_naming).reload
+      namings(:coprinus_comatus_other_naming).reload
+
+      # Check votes.
+      assert_equal(3, namings(:coprinus_comatus_naming).vote_sum)
+      assert_equal(0, namings(:coprinus_comatus_other_naming).vote_sum)
+      assert_equal(3, naming.vote_sum)
+      assert_equal(2, namings(:coprinus_comatus_naming).votes.length)
+      assert_equal(2, namings(:coprinus_comatus_other_naming).votes.length)
+      assert_equal(1, naming.votes.length)
+
+      # Make sure observation was updated right.
+      assert_equal(names(:conocybe_filaris).id,
+                   observations(:coprinus_comatus_obs).name_id)
+    end
+
+    # Test a bug in name resolution: was failing to recognize that
+    # "Genus species (With) Author" was recognized even if "Genus species"
+    # was already in the database.
+    def test_propose_naming_with_author_when_name_without_author_already_exists
+      login("dick")
+      params = {
+        observation_id: observations(:coprinus_comatus_obs).id,
+        naming: {
+          name: "Conocybe filaris (With) Author",
+          vote: { value: "3" }
+        }
+      }
+      post(:create, params: params)
+      obs = observations(:coprinus_comatus_obs)
+      assert_redirected_to(permanent_observation_path(obs.id))
+      # Dick is getting points for the naming, vote, and name change.
+      assert_equal(12 + 10, dick.reload.contribution)
+      naming = Naming.last
+      assert_equal("Conocybe filaris", naming.name.text_name)
+      assert_equal("(With) Author", naming.name.author)
+      assert_equal(names(:conocybe_filaris).id, naming.name_id)
+    end
+
+    # Test a bug in name resolution: was failing to recognize that
+    # "Genus species (With) Author" was recognized even if "Genus species"
+    # was already in the database.
+    def test_propose_naming_fill_in_author
+      params = {
+        observation_id: observations(:coprinus_comatus_obs).id,
+        naming: { name: "Agaricus campestris" }
+      }
+      login("dick")
+      post(:create, params: params)
+      assert_response(:success) # really means failed
+      what = @controller.instance_variable_get(:@given_name)
+      assert_equal("Agaricus campestris L.", what)
+    end
+
+    # Test a bug in name resolution: was failing to recognize that
+    # "Genus species (With) Author" was recognized even if "Genus species"
+    # was already in the database.
+    def test_propose_naming_name_with_quotes
+      name = "Foo 'bar' Author"
+      params = {
+        observation_id: observations(:coprinus_comatus_obs).id,
+        naming: { name: name },
+        approved_name: name
+      }
+      login("dick")
+      post(:create, params: params)
+      assert_response(:redirect)
+      assert(new_name = Name.find_by(text_name: "Foo sp. 'bar'"))
+      assert_equal("Foo sp. 'bar' Author", new_name.search_name)
+    end
+
+    def test_propose_naming_bad_prov_name
+      # Must be a genus where all genus fixtures have an author
+      name = "Suillus sp. 'A*G'"
+      params = {
+        observation_id: observations(:coprinus_comatus_obs).id,
+        naming: { name: name },
+        approved_name: name
+      }
+      login("dick")
+      post(:create, params: params)
+      assert_equal(0, Naming.where(name_id: nil).count)
+    end
+
+    def test_propose_naming_enforce_imageless_rules
+      params = {
+        observation_id: observations(:coprinus_comatus_obs).id,
+        naming: { name: "Imageless" }
+      }
+      login("dick")
+      post(:create, params: params)
+      assert_response(:success) # really means failed
+    end
+
+    def test_propose_naming_automatic_author_bug
+      obs = observations(:minimal_unknown_obs)
+      name = names(:peltigera)
+      assert_equal("Genus", name.rank)
+      assert_not_empty(name.author)
+      old_author = name.author
+
+      params = {
+        observation_id: obs.id,
+        naming: { name: "#{name.text_name} Seneca #{name.author}" },
+        approved_name: "#{name.text_name} #{name.author}"
+      }
+      login("dick")
+      post(:create, params: params)
+
+      name.reload
+      assert_equal(old_author, name.author)
+      assert_flash_error
+      assert_response(:success, "Was expecting it to re-serve the form " \
+                                "because the name wasn't recognized.")
+    end
+
+    def test_propose_naming_automatic_case_correction
+      obs = observations(:minimal_unknown_obs)
+      name = names(:coprinus_comatus)
+      params = {
+        observation_id: obs.id,
+        naming: { name: "Coprinus Comatus" }
+      }
+      login("dick")
+      post(:create, params: params)
+      assert_flash_success
+      naming = obs.namings.where(user: dick).first
+      assert_names_equal(name, naming.name)
+    end
+
+    # ------------------------------------------------------------
+    #  Test edit naming form.
+    # ------------------------------------------------------------
+
+    def test_edit_form
+      params = edit_form_test_setup
+      get(:edit, params:)
       assert_no_flash(
         "User should be able to edit his own Naming without warning or error"
       )
+    end
+
+    def test_edit_form_turbo
+      params = edit_form_test_setup
+      get(:edit, params:, format: :turbo_stream)
+      assert_template("shared/_modal_form")
+      assert_template("observations/namings/_form")
+      assert_no_flash(
+        "User should be able to edit his own Naming without warning or error"
+      )
+    end
+
+    def edit_form_test_setup
+      nam = namings(:coprinus_comatus_naming)
+      params = { observation_id: nam.observation_id, id: nam.id }
+      requires_user(:edit, { controller: "/observations", action: :show,
+                             id: nam.observation_id }, params)
+      assert_form_action(action: "update", approved_name: nam.text_name,
+                         id: nam.id)
+      assert_select("option[selected]", count: 2)
+
+      login(nam.user.login)
+      params
     end
 
     def test_edit_obs_owner_with_different_vote
@@ -56,7 +423,12 @@ module Observations
       assert_select("#naming_vote_value", text: /#{:vote_no_opinion.l}/)
     end
 
-    def test_update_observation_new_name
+    # ------------------------------------------------------------
+    #  Test updating namings, and
+    #  setting and changing preferred_namings.
+    # ------------------------------------------------------------
+
+    def test_update_naming_new_name
       login("rolf")
       nam = namings(:coprinus_comatus_naming)
       old_name = nam.text_name
@@ -75,7 +447,7 @@ module Observations
       assert_select("option[selected]", count: 2)
     end
 
-    def test_update_observation_new_name_different_user
+    def test_update_naming_new_name_different_user
       login("mary")
       nam = namings(:coprinus_comatus_other_naming)
       new_name = "Easter bunny"
@@ -89,7 +461,7 @@ module Observations
                     text: "I'd Call It That")
     end
 
-    def test_update_observation_approved_new_name
+    def test_update_naming_approved_new_name
       login("rolf")
       nam = namings(:coprinus_comatus_naming)
       old_name = nam.text_name
@@ -119,7 +491,7 @@ module Observations
       )
     end
 
-    def test_update_observation_multiple_match
+    def test_update_naming_multiple_match
       login("rolf")
       nam = namings(:coprinus_comatus_naming)
       old_name = nam.text_name
@@ -138,7 +510,7 @@ module Observations
       assert_select("option[selected]", count: 2)
     end
 
-    def test_update_observation_chosen_multiple_match
+    def test_update_naming_chosen_multiple_match
       login("rolf")
       nmg = namings(:coprinus_comatus_naming)
       old_name = nmg.text_name
@@ -162,7 +534,7 @@ module Observations
       assert_not_equal(old_name, nam.text_name)
     end
 
-    def test_update_observation_deprecated
+    def test_update_naming_deprecated
       login("rolf")
       nam = namings(:coprinus_comatus_naming)
       old_name = nam.text_name
@@ -181,7 +553,7 @@ module Observations
       assert_select("option[selected]", count: 2)
     end
 
-    def test_update_observation_chosen_deprecated
+    def test_update_naming_chosen_deprecated
       login("rolf")
       nmg = namings(:coprinus_comatus_naming)
       start_name = nmg.name
@@ -206,7 +578,7 @@ module Observations
       assert_equal(chosen_name.id, nam.name_id)
     end
 
-    def test_update_observation_accepted_deprecated
+    def test_update_naming_accepted_deprecated
       login("rolf")
       nmg = namings(:coprinus_comatus_naming)
       start_name = nmg.name
@@ -351,246 +723,13 @@ module Observations
       assert_equal(rolf, vote.user)
     end
 
-    # ------------------------------------------------------------
-    #  Test proposing new names, casting and changing votes, and
-    #  setting and changing preferred_namings.
-    # ------------------------------------------------------------
-
-    # This is the standard case, nothing unusual or stressful here.
-    def test_propose_naming
-      o_count = Observation.count
-      g_count = Naming.count
-      n_count = Name.count
-      v_count = Vote.count
-
-      nam = names(:coprinus_comatus)
-      obs = observations(:coprinus_comatus_obs)
-      nmg1 = namings(:coprinus_comatus_naming)
-      nmg2 = namings(:coprinus_comatus_other_naming)
-      consensus = Observation::NamingConsensus.new(obs)
-
-      # Make a few assertions up front to make sure fixtures are as expected.
-      assert_equal(nam.id, obs.name_id)
-      assert(consensus.user_voted?(nmg1, rolf))
-      assert(consensus.user_voted?(nmg1, mary))
-      assert_not(consensus.user_voted?(nmg1, dick))
-      assert(consensus.user_voted?(nmg2, rolf))
-      assert(consensus.user_voted?(nmg2, mary))
-      assert_not(consensus.user_voted?(nmg2, dick))
-
-      # Rolf, the owner of observations(:coprinus_comatus_obs),
-      # already has a naming, which he's 80% sure of.
-      # Create a new one (the genus Agaricus) that he's 100%
-      # sure of.  (Mary also has a naming with two votes.)
-      params = {
-        observation_id: obs.id,
-        naming: {
-          name: "Agaricus",
-          vote: { value: "3" },
-          reasons: {
-            "1" => { check: "1", notes: "Looks good to me." },
-            "2" => { check: "1", notes: "" },
-            "3" => { check: "0", notes: "Spore texture." },
-            "4" => { check: "0", notes: "" }
-          }
-        }
-      }
-      login("rolf")
-      post(:create, params: params)
-      assert_response(:redirect)
-
-      # Make sure the right number of objects were created.
-      assert_equal(o_count + 0, Observation.count)
-      assert_equal(g_count + 1, Naming.count)
-      assert_equal(n_count + 0, Name.count)
-      assert_equal(v_count + 1, Vote.count)
-
-      # Make sure contribution is updated correctly.
-      assert_equal(12, rolf.reload.contribution)
-
-      # Make sure everything I need is reloaded.
-      obs.reload
-
-      # Get new objects.
-      naming = Naming.last
-      vote = Vote.last
-
-      # Make sure observation was updated and referenced correctly.
-      assert_equal(3, obs.namings.length)
-      assert_equal(names(:agaricus).id, obs.name_id)
-
-      # Make sure naming was created correctly and referenced.
-      assert_equal(obs, naming.observation)
-      assert_equal(names(:agaricus).id, naming.name_id)
-      assert_equal(rolf, naming.user)
-      assert_equal(3, naming.reasons_array.count(&:used?))
-      assert_equal(1, naming.votes.length)
-
-      # Make sure vote was created correctly.
-      assert_equal(naming, vote.naming)
-      assert_equal(rolf, vote.user)
-      assert_equal(3, vote.value)
-
-      # Make sure reasons were created correctly.
-      nr1, nr2, nr3, nr4 = naming.reasons_array
-      assert_equal(1, nr1.num)
-      assert_equal(2, nr2.num)
-      assert_equal(3, nr3.num)
-      assert_equal(4, nr4.num)
-      assert_equal("Looks good to me.", nr1.notes)
-      assert_equal("", nr2.notes)
-      assert_equal("Spore texture.", nr3.notes)
-      assert_nil(nr4.notes)
-      assert(nr1.used?)
-      assert(nr2.used?)
-      assert(nr3.used?)
-      assert_not(nr4.used?)
-
-      # Make sure a few random methods work right, too. Must re-calc_consensus
-      consensus.calc_consensus
-      assert_equal(3, naming.vote_sum)
-      assert_equal(vote, consensus.users_vote(naming, rolf))
-      assert(consensus.user_voted?(naming, rolf))
-      assert_not(consensus.user_voted?(naming, mary))
-    end
-
-    # Now see what happens when rolf's new naming is less confident than old.
-    def test_propose_uncertain_naming
-      params = {
-        observation_id: observations(:coprinus_comatus_obs).id,
-        naming: {
-          name: "Agaricus",
-          vote: { value: "-1" }
-        }
-      }
-      login("rolf")
-      post(:create, params: params)
-      assert_response(:redirect)
-      assert_equal(12, rolf.reload.contribution)
-
-      # Make sure everything I need is reloaded.
-      observations(:coprinus_comatus_obs).reload
-      namings(:coprinus_comatus_naming).reload
-
-      # Make sure observation was updated right.
-      assert_equal(names(:coprinus_comatus).id,
-                   observations(:coprinus_comatus_obs).name_id)
-
-      # Sure, check the votes, too, while we're at it.
-      assert_equal(3, namings(:coprinus_comatus_naming).vote_sum) # 2+1 = 3
-    end
-
-    # Now see what happens when a third party proposes a name, and it wins.
-    def test_propose_dicks_naming
-      o_count = Observation.count
-      g_count = Naming.count
-      n_count = Name.count
-      v_count = Vote.count
-
-      # Dick proposes "Conocybe filaris" out of the blue.
-      params = {
-        observation_id: observations(:coprinus_comatus_obs).id,
-        naming: {
-          name: "Conocybe filaris",
-          vote: { value: "3" }
-        }
-      }
-      login("dick")
-      post(:create, params: params)
-      assert_response(:redirect)
-      assert_equal(12, dick.reload.contribution)
-      naming = Naming.last
-
-      # Make sure the right number of objects were created.
-      assert_equal(o_count + 0, Observation.count)
-      assert_equal(g_count + 1, Naming.count)
-      assert_equal(n_count + 0, Name.count)
-      assert_equal(v_count + 1, Vote.count)
-
-      # Make sure everything I need is reloaded.
-      observations(:coprinus_comatus_obs).reload
-      namings(:coprinus_comatus_naming).reload
-      namings(:coprinus_comatus_other_naming).reload
-
-      # Check votes.
-      assert_equal(3, namings(:coprinus_comatus_naming).vote_sum)
-      assert_equal(0, namings(:coprinus_comatus_other_naming).vote_sum)
-      assert_equal(3, naming.vote_sum)
-      assert_equal(2, namings(:coprinus_comatus_naming).votes.length)
-      assert_equal(2, namings(:coprinus_comatus_other_naming).votes.length)
-      assert_equal(1, naming.votes.length)
-
-      # Make sure observation was updated right.
-      assert_equal(names(:conocybe_filaris).id,
-                   observations(:coprinus_comatus_obs).name_id)
-    end
-
-    # Test a bug in name resolution: was failing to recognize that
-    # "Genus species (With) Author" was recognized even if "Genus species"
-    # was already in the database.
-    def test_create_with_author_when_name_without_author_already_exists
-      login("dick")
-      params = {
-        observation_id: observations(:coprinus_comatus_obs).id,
-        naming: {
-          name: "Conocybe filaris (With) Author",
-          vote: { value: "3" }
-        }
-      }
-      post(:create, params: params)
-      obs = observations(:coprinus_comatus_obs)
-      assert_redirected_to(permanent_observation_path(obs.id))
-      # Dick is getting points for the naming, vote, and name change.
-      assert_equal(12 + 10, dick.reload.contribution)
-      naming = Naming.last
-      assert_equal("Conocybe filaris", naming.name.text_name)
-      assert_equal("(With) Author", naming.name.author)
-      assert_equal(names(:conocybe_filaris).id, naming.name_id)
-    end
-
-    # Test a bug in name resolution: was failing to recognize that
-    # "Genus species (With) Author" was recognized even if "Genus species"
-    # was already in the database.
-    def test_create_fill_in_author
-      params = {
-        observation_id: observations(:coprinus_comatus_obs).id,
-        naming: { name: "Agaricus campestris" }
-      }
-      login("dick")
-      post(:create, params: params)
-      assert_response(:success) # really means failed
-      what = @controller.instance_variable_get(:@given_name)
-      assert_equal("Agaricus campestris L.", what)
-    end
-
-    # Test a bug in name resolution: was failing to recognize that
-    # "Genus species (With) Author" was recognized even if "Genus species"
-    # was already in the database.
-    def test_create_name_with_quotes
-      name = "Foo 'bar' Author"
-      params = {
-        observation_id: observations(:coprinus_comatus_obs).id,
-        naming: { name: name },
-        approved_name: name
-      }
-      login("dick")
-      post(:create, params: params)
-      assert_response(:redirect)
-      assert(new_name = Name.find_by(text_name: "Foo sp. 'bar'"))
-      assert_equal("Foo sp. 'bar' Author", new_name.search_name)
-    end
-
-    def test_create_bad_prov_name
-      # Must be a genus where all genus fixtures have an author
-      name = "Suillus sp. 'A*G'"
-      params = {
-        observation_id: observations(:coprinus_comatus_obs).id,
-        naming: { name: name },
-        approved_name: name
-      }
-      login("dick")
-      post(:create, params: params)
-      assert_equal(0, Naming.where(name_id: nil).count)
+    def assert_edit
+      assert_template("observations/namings/edit")
+      assert_template("observations/show/_observation_details")
+      assert_template("shared/_form_name_feedback")
+      assert_template("observations/namings/_form")
+      assert_template("observations/namings/_fields")
+      assert_template("observations/show/_images")
     end
 
     # Rolf can destroy his naming if Mary deletes her vote on it.
@@ -670,61 +809,6 @@ module Observations
       assert_equal(3, nam1.votes.length)
       assert_equal(0, nam2.reload.vote_sum)
       assert_equal(2, nam2.votes.length)
-    end
-
-    def test_enforce_imageless_rules
-      params = {
-        observation_id: observations(:coprinus_comatus_obs).id,
-        naming: { name: "Imageless" }
-      }
-      login("dick")
-      post(:create, params: params)
-      assert_response(:success) # really means failed
-    end
-
-    def assert_edit
-      assert_template("observations/namings/edit")
-      assert_template("observations/show/_observation_details")
-      assert_template("shared/_form_name_feedback")
-      assert_template("observations/namings/_form")
-      assert_template("observations/namings/_fields")
-      assert_template("observations/show/_images")
-    end
-
-    def test_automatic_author_bug
-      obs = observations(:minimal_unknown_obs)
-      name = names(:peltigera)
-      assert_equal("Genus", name.rank)
-      assert_not_empty(name.author)
-      old_author = name.author
-
-      params = {
-        observation_id: obs.id,
-        naming: { name: "#{name.text_name} Seneca #{name.author}" },
-        approved_name: "#{name.text_name} #{name.author}"
-      }
-      login("dick")
-      post(:create, params: params)
-
-      name.reload
-      assert_equal(old_author, name.author)
-      assert_flash_error
-      assert_response(:success, "Was expecting it to re-serve the form " \
-                                "because the name wasn't recognized.")
-    end
-
-    def test_automatic_case_correction
-      obs = observations(:minimal_unknown_obs)
-      name = names(:coprinus_comatus)
-      params = {
-        observation_id: obs.id,
-        naming: { name: "Coprinus Comatus" }
-      }
-      login("dick")
-      post(:create, params: params)
-      assert_flash_success
-      naming = obs.namings.where(user: dick).first
-      assert_names_equal(name, naming.name)
     end
   end
 end

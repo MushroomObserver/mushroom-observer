@@ -34,8 +34,7 @@ tag.div(
           )
           links << destroy_button(
             name: :destroy_object.t(type: :sequence),
-            target: sequence_path(id: sequence.id,
-                                  back: url_after_delete(sequence)),
+            target: sequence_path(id: sequence.id, back: observation_path(obs)),
             icon: :remove,
             class: "destroy_sequence_link_#{sequence.id}"
           )
