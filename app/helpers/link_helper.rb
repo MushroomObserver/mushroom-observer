@@ -208,7 +208,7 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
     project: "th-list",
     download: "download-alt",
     search: "search",
-    previous: "triangle-left",
+    prev: "triangle-left",
     next: "triangle-right",
     goto: "share-alt",
     grid: "th",

@@ -1,6 +1,16 @@
 # frozen_string_literal: true
 
-# see application_controller.rb
+#  ==== Internationalization
+#  all_locales::            Array of available locales for which we have
+#                           translations.
+#  set_locale::             (filter: determine which locale is requested)
+#  set_timezone::           (filter: Set timezone from cookie set by client's
+#                            browser.)
+#  sorted_locales_from_request_header::
+#                           (parse locale preferences from request header)
+#  valid_locale_from_request_header::
+#                           (choose locale that best matches request header)
+#
 module ApplicationController::Internationalization
   ##############################################################################
   #

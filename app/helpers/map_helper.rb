@@ -157,13 +157,13 @@ module MapHelper
   end
 
   def mapset_observation_link(obs, args)
-    params = args[:query_params] || {}
+    params = args[:query_param] ? { q: args[:query_param] } : {}
     link_to("#{:Observation.t} ##{obs.id}",
             observation_path(id: obs.id, params: params))
   end
 
   def mapset_location_link(loc, args)
-    params = args[:query_params] || {}
+    params = args[:query_param] ? { q: args[:query_param] } : {}
     link_to(loc.display_name.t, location_path(id: loc.id, params: params))
   end
 

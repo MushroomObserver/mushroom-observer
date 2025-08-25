@@ -64,8 +64,8 @@ class ImagesControllerTest < FunctionalTestCase
     query_no_conditions = Query.lookup_and_save(:Image)
 
     login
-    params = @controller.query_params(query_no_conditions).
-             merge({ advanced_search: true })
+    params = { q: @controller.get_query_param(query_no_conditions),
+               advanced_search: true }
     get(:index, params:)
 
     assert_flash_error(:runtime_no_conditions.l)
@@ -224,8 +224,8 @@ class ImagesControllerTest < FunctionalTestCase
     obs = image.observations.reorder(created_at: :asc).first
     assert(obs.images.member?(image))
     query = Query.lookup_and_save(:Image, by_users: user)
-    q = query.id.alphabetize
-    params = { id: image.id, q: q }
+    q = @controller.get_query_param(query)
+    params = { id: image.id, q: }
 
     delete_requires_user(:destroy, { action: :show, id: image.id, q: q },
                          params, user.login)

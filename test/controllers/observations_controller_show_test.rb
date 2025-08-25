@@ -684,13 +684,13 @@ class ObservationsControllerShowTest < FunctionalTestCase
     login
     # need to save a query here to get :next in a non-standard order
     Query.lookup_and_save(:Observation, order_by: :created_at)
-    qr = QueryRecord.last.id.alphabetize
+    q = @controller.full_q_param(QueryRecord.last.query)
 
-    get(:show, params: { id: o_chron.fourth.id, flow: :next, q: qr })
-    assert_redirected_to(action: :show, id: o_chron.fifth.id, q: qr)
+    get(:show, params: { id: o_chron.fourth.id, flow: :next, q: })
+    assert_redirected_to(action: :show, id: o_chron.fifth.id, q:)
 
-    get(:show, params: { id: o_chron.fourth.id, flow: :prev, q: qr })
-    assert_redirected_to(action: :show, id: o_chron.third.id, q: qr)
+    get(:show, params: { id: o_chron.fourth.id, flow: :prev, q: })
+    assert_redirected_to(action: :show, id: o_chron.third.id, q:)
   end
 
   def test_prev_and_next_observation_with_fancy_query
@@ -734,35 +734,35 @@ class ObservationsControllerShowTest < FunctionalTestCase
                     order_by: :name
     )
     assert_equal(4, query.num_results)
-    qp = @controller.query_params(query)
+    params = { q: @controller.get_query_param(query) }
 
     o_id = observations(:minimal_unknown_obs).id
 
     login
-    get(:show, params: qp.merge({ id: o_id, flow: "next" }))
-    assert_redirected_to(action: :show, id: o_id, params: qp)
+    get(:show, params: params.merge({ id: o_id, flow: "next" }))
+    assert_redirected_to(action: :show, id: o_id, params:)
     assert_flash_text(/can.*t find.*results.*index/i)
-    get(:show, params: qp.merge({ id: o1.id, flow: "next" }))
-    assert_redirected_to(action: :show, id: o2.id, params: qp)
-    get(:show, params: qp.merge({ id: o2.id, flow: "next" }))
-    assert_redirected_to(action: :show, id: o3.id, params: qp)
-    get(:show, params: qp.merge({ id: o3.id, flow: "next" }))
-    assert_redirected_to(action: :show, id: o4.id, params: qp)
-    get(:show, params: qp.merge({ id: o4.id, flow: "next" }))
-    assert_redirected_to(action: :show, id: o4.id, params: qp)
+    get(:show, params: params.merge({ id: o1.id, flow: "next" }))
+    assert_redirected_to(action: :show, id: o2.id, params:)
+    get(:show, params: params.merge({ id: o2.id, flow: "next" }))
+    assert_redirected_to(action: :show, id: o3.id, params:)
+    get(:show, params: params.merge({ id: o3.id, flow: "next" }))
+    assert_redirected_to(action: :show, id: o4.id, params:)
+    get(:show, params: params.merge({ id: o4.id, flow: "next" }))
+    assert_redirected_to(action: :show, id: o4.id, params:)
     assert_flash_text(/no more/i)
 
-    get(:show, params: qp.merge({ id: o4.id, flow: "prev" }))
-    assert_redirected_to(action: :show, id: o3.id, params: qp)
-    get(:show, params: qp.merge({ id: o3.id, flow: "prev" }))
-    assert_redirected_to(action: :show, id: o2.id, params: qp)
-    get(:show, params: qp.merge({ id: o2.id, flow: "prev" }))
-    assert_redirected_to(action: :show, id: o1.id, params: qp)
-    get(:show, params: qp.merge({ id: o1.id, flow: "prev" }))
-    assert_redirected_to(action: :show, id: o1.id, params: qp)
+    get(:show, params: params.merge({ id: o4.id, flow: "prev" }))
+    assert_redirected_to(action: :show, id: o3.id, params:)
+    get(:show, params: params.merge({ id: o3.id, flow: "prev" }))
+    assert_redirected_to(action: :show, id: o2.id, params:)
+    get(:show, params: params.merge({ id: o2.id, flow: "prev" }))
+    assert_redirected_to(action: :show, id: o1.id, params:)
+    get(:show, params: params.merge({ id: o1.id, flow: "prev" }))
+    assert_redirected_to(action: :show, id: o1.id, params:)
     assert_flash_text(/no more/i)
-    get(:show, params: qp.merge({ id: o_id, flow: "prev" }))
-    assert_redirected_to(action: :show, id: o_id, params: qp)
+    get(:show, params: params.merge({ id: o_id, flow: "prev" }))
+    assert_redirected_to(action: :show, id: o_id, params:)
     assert_flash_text(/can.*t find.*results.*index/i)
   end
   # ----------------------------

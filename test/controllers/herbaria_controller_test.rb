@@ -110,7 +110,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_operator(query.num_results, :>, 1)
     number1 = query.results[0]
     number2 = query.results[1]
-    q = query.record.id.alphabetize
+    q = @controller.full_q_param(query)
 
     login
     get(:show, params: { id: number1.id, q: q, flow: "next" })
@@ -122,7 +122,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_operator(query.num_results, :>, 1)
     number1 = query.results[0]
     number2 = query.results[1]
-    q = query.record.id.alphabetize
+    q = @controller.full_q_param(query)
 
     login
     get(:show, params: { id: number2.id, q: q, flow: "prev" })
@@ -133,7 +133,7 @@ class HerbariaControllerTest < FunctionalTestCase
     set = [nybg, herbaria(:rolf_herbarium)]
     query = Query.lookup_and_save(:Herbarium, order_by: :name, id_in_set: set)
     login("zero") # Does not own any herbarium in set
-    get(:index, params: { q: query.record.id.alphabetize })
+    get(:index, params: { q: @controller.full_q_param(query) })
 
     assert_response(:success)
     assert_page_title(:HERBARIA.l)

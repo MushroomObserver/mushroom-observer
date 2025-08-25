@@ -20,9 +20,9 @@ module Header
       content_for(:prev_next_object) do
         tag.ul(class: "nav navbar-flex") do
           [
-            tag.li { show_link_prev(object, query) },
+            tag.li { show_link_adjacent(object, query, :prev) },
             tag.li { show_link_index(object, query) },
-            tag.li { show_link_next(object, query) }
+            tag.li { show_link_adjacent(object, query, :next) }
           ].safe_join
         end
       end
@@ -32,7 +32,7 @@ module Header
     def show_page_incoming_query(object)
       return nil unless params[:q]
 
-      query = Query.safe_find(params[:q].dealphabetize)
+      query = controller.query_from_q_param(params)
       return nil unless [object.type_tag, :rss_log].include?(query&.type_tag)
 
       query
@@ -40,40 +40,30 @@ module Header
 
     SHOW_LINK_BTN_CLASSES = %w[navbar-link navbar-left btn btn-lg px-0].freeze
 
-    # link to previous object in query results
-    def show_link_prev(object, query)
-      disabled = show_prev_is_first?(object, query) ? "disabled opacity-0" : ""
-      classes = class_names(SHOW_LINK_BTN_CLASSES, "prev_object_link", disabled)
+    def show_link_adjacent(object, query, dir = :prev)
+      hide = show_no_more?(object, query, dir) ? "disabled opacity-0" : ""
+      classes = class_names(SHOW_LINK_BTN_CLASSES, "#{dir}_object_link", hide)
       type = object.type_tag
-
       icon_link_to(
-        :PREV_OBJECT.t(type: :"#{type.upcase}".l),
-        add_query_param(
-          send(show_link_path(type), object.id, flow: "prev"), query
-        ),
-        class: classes, icon: :previous, show_text: false
+        :"#{dir.upcase}_OBJECT".t(type: :"#{type.upcase}".l),
+        send(show_link_path(type),
+             id: object.id, flow: dir.to_s, q: get_query_param(query)),
+        class: classes, icon: dir, show_text: false
       )
+    end
+
+    def show_no_more?(object, query, dir)
+      if dir == :prev
+        show_prev_is_first?(object, query)
+      elsif dir == :next
+        show_next_is_last?(object, query)
+      end
     end
 
     def show_prev_is_first?(object, query)
       return false unless query
 
       query.result_ids.first == object.id
-    end
-
-    # link to next object in query results
-    def show_link_next(object, query)
-      disabled = show_next_is_last?(object, query) ? "disabled opacity-0" : ""
-      classes = class_names(SHOW_LINK_BTN_CLASSES, "next_object_link", disabled)
-      type = object.type_tag
-
-      icon_link_to(
-        :NEXT_OBJECT.t(type: :"#{type.upcase}".l),
-        add_query_param(
-          send(show_link_path(type), object.id, flow: "next"), query
-        ),
-        class: classes, icon: :next, show_text: false
-      )
     end
 
     def show_next_is_last?(object, query)

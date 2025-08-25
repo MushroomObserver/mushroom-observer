@@ -56,10 +56,10 @@ module SpeciesLists
       login
       spl = species_lists(:one_genus_three_species_list)
       query = Query.lookup_and_save(:Observation, species_lists: spl)
-      query_params = @controller.query_params(query)
+      params = { q: @controller.get_query_param(query) }
       get(:print_labels, params: { id: spl.id })
       assert_redirected_to(
-        print_labels_for_observations_path(params: query_params)
+        print_labels_for_observations_path(params:)
       )
     end
 
@@ -67,15 +67,15 @@ module SpeciesLists
       login
       spl = species_lists(:one_genus_three_species_list)
       query = Query.lookup_and_save(:Observation, species_lists: spl)
-      query_params = @controller.query_params(query)
+      params = { q: @controller.get_query_param(query) }
       get(:new, params: { id: spl.id })
-      url = print_labels_for_observations_path(params: query_params)
+      url = print_labels_for_observations_path(params:)
       assert_select("form[action='#{url}']")
 
-      url = species_list_downloads_path(spl.id, params: query_params)
+      url = species_list_downloads_path(spl.id, params:)
       assert_select("form[action='#{url}']")
 
-      url = observations_downloads_path(params: query_params)
+      url = observations_downloads_path(params:)
       assert_select("form[action='#{url}']")
     end
   end
