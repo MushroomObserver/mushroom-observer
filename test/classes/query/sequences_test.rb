@@ -119,6 +119,7 @@ class Query::SequencesTest < UnitTestCase
   end
 
   def test_sequence_observation_query_locations_projects_species_lists
+    Location.update_box_area_and_center_columns
     seq1, seq2, seq3, seq4 = set_up_sequence_observation_query
 
     scope = Sequence.observation_query(locations: "Burbank").order_by(:id)

@@ -257,6 +257,9 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
   end
 
   def test_obs_at_location
+    # Have to do this to get enough obs, otherwise fixture columns not populated
+    Location.update_box_area_and_center_columns
+
     login
     nam = names(:fungi)
     loc = locations(:burbank)
@@ -282,7 +285,6 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     save_results = find_all("#results a").select do |l|
       l[:href].match(%r{^/obs/\d+})
     end
-
     # Bail if there are too many results — test will not work
     if has_selector?("#results .pagination a", text: /Next/)
       skip("Test skipped because it bombs when search results > " \
