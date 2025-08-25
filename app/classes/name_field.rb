@@ -16,23 +16,22 @@ class NameField
   def render(pdf, options = {})
     return if value.nil? || value.to_s.strip.empty?
 
-    debugger
     x_start = render_field_label(pdf, options)
     render_field_content(pdf, x_start)
   end
 
   private
 
-  def render_field_label(pdf, options)
+  def render_field_label(pdf, _options)
     label_text = "#{name}: "
-    
+
     # Calculate width using the bold font
     label_width = nil
     pdf.font("app/assets/fonts/DejaVuSerif-Bold.ttf") do
       label_width = pdf.width_of(label_text, size: 10)
       pdf.draw_text(label_text, at: [0, pdf.cursor], size: 10)
     end
-    
+
     label_width
   end
 
@@ -108,18 +107,18 @@ class NameField
   def process_regular_text(text, tokens, current_pos)
     word_end = find_word_boundary(text, current_pos)
     word = text[current_pos, word_end - current_pos]
-    
+
     # Split word by spaces to handle individual words
-    if word.include?(' ')
-      parts = word.split(' ')
+    if word.include?(" ")
+      parts = word.split
       parts.each_with_index do |part, index|
         add_plain_text_token(tokens, part) if part.length.positive?
-        add_plain_text_token(tokens, ' ') if index < parts.length - 1
+        add_plain_text_token(tokens, " ") if index < parts.length - 1
       end
-    else
-      add_plain_text_token(tokens, word) if word.length.positive?
+    elsif word.length.positive?
+      add_plain_text_token(tokens, word)
     end
-    
+
     word_end
   end
 
@@ -132,7 +131,8 @@ class NameField
     current_pos = 0
 
     while current_pos < text.length
-      current_pos = process_nested_character(text, tokens, base_styles, current_pos)
+      current_pos = process_nested_character(text, tokens, base_styles,
+                                             current_pos)
     end
 
     tokens
@@ -183,27 +183,27 @@ class NameField
   def process_nested_regular_text(text, tokens, base_styles, current_pos)
     word_end = find_word_boundary(text, current_pos)
     word = text[current_pos, word_end - current_pos]
-    
+
     # Split word by spaces to handle individual words
-    if word.include?(' ')
-      parts = word.split(' ')
+    if word.include?(" ")
+      parts = word.split
       parts.each_with_index do |part, index|
         tokens << [part, base_styles] if part.length.positive?
-        tokens << [' ', base_styles] if index < parts.length - 1
+        tokens << [" ", base_styles] if index < parts.length - 1
       end
-    else
-      tokens << [word, base_styles] if word.length.positive?
+    elsif word.length.positive?
+      tokens << [word, base_styles]
     end
-    
+
     word_end
   end
 
   def add_styled_words(tokens, text, styles)
     # Split by spaces and add each word with appropriate spacing
-    words = text.split(' ')
+    words = text.split
     words.each_with_index do |word, index|
       tokens << [word, styles] if word.length.positive?
-      tokens << [' ', styles] if index < words.length - 1
+      tokens << [" ", styles] if index < words.length - 1
     end
   end
 
@@ -215,6 +215,7 @@ class NameField
     pos = start_pos
     while pos < text.length
       return pos if at_word_boundary?(text, pos)
+
       pos += 1
     end
     pos
@@ -240,47 +241,66 @@ class NameField
   end
 
   def render_tokens(pdf, tokens, x_start)
-    current_line_height = pdf.font_size * 1.2
-    x_position = x_start
-    y_position = pdf.cursor
+    position = {
+      x: x_start,
+      y: pdf.cursor,
+      line_height: pdf.font_size * 1.2
+    }
 
     tokens.each do |text, styles|
       next if text.strip.empty?
-      
-      font_file = determine_font_style(styles)
-      
-      # Calculate text width with the specific font
-      text_width = nil
-      pdf.font(font_file) do
-        text_width = pdf.width_of(text, size: 10)
-      end
-      
-      # Check if we need to wrap to next line
-      if x_position + text_width > pdf.bounds.width
-        y_position -= current_line_height
-        x_position = 0
-      end
-      
-      # Draw the text at the calculated position with specific font
-      pdf.font(font_file) do
-        pdf.draw_text(text, at: [x_position, y_position], size: 10)
-      end
-      
-      x_position += text_width + pdf.width_of(" ", size: 10)
+
+      position = render_single_token(pdf, text, styles, position)
     end
-    
-    # Move cursor to below the rendered content
-    pdf.move_cursor_to(y_position - current_line_height)
+
+    final_y = position[:y] - position[:line_height]
+    pdf.move_cursor_to(final_y)
   end
 
-  def render_single_token(pdf, text, styles, x_position)
+  def render_single_token(pdf, text, styles, position)
     font_file = determine_font_style(styles)
-    text_width = calculate_text_width(pdf, text, font_file)
-    
-    x_position = handle_line_wrapping(pdf, x_position, text_width)
-    draw_styled_text(pdf, text, font_file, x_position)
-    
-    x_position + text_width
+    text_metrics = calculate_text_metrics(pdf, text, font_file)
+
+    position = handle_line_wrapping(pdf, position, text_metrics)
+
+    pdf.font(font_file) do
+      pdf.draw_text(text, at: [position[:x], position[:y]], size: 10)
+    end
+
+    advance_position(pdf, position, text_metrics)
+  end
+
+  def calculate_text_metrics(pdf, text, font_file)
+    metrics = {}
+    pdf.font(font_file) do
+      metrics[:width] = pdf.width_of(text, size: 10)
+      metrics[:height] = pdf.height_of(text, size: 10)
+    end
+    metrics
+  end
+
+  def handle_line_wrapping(pdf, position, text_metrics)
+    text_width = text_metrics[:width]
+
+    if position[:x] + text_width > pdf.bounds.width
+      {
+        x: 0,
+        y: position[:y] - position[:line_height],
+        line_height: position[:line_height]
+      }
+    else
+      position
+    end
+  end
+
+  def advance_position(pdf, position, text_metrics)
+    space_width = pdf.width_of(" ", size: 10)
+
+    {
+      x: position[:x] + text_metrics[:width] + space_width,
+      y: position[:y],
+      line_height: text_metrics[:height]
+    }
   end
 
   def determine_font_style(styles)
@@ -293,40 +313,6 @@ class NameField
       "app/assets/fonts/DejaVuSerif-Italic.ttf"
     else
       "app/assets/fonts/DejaVuSerif.ttf"
-    end
-  end
-
-  def render_single_token(pdf, text, styles, x_position)
-    font_style = determine_font_style(styles)
-    text_width = calculate_text_width(pdf, text)
-    
-    x_position = handle_line_wrapping(pdf, x_position, text_width)
-    draw_styled_text(pdf, text, font_style, x_position)
-    
-    x_position + text_width
-  end
-
-  def calculate_text_width(pdf, text, font_file = "app/assets/fonts/DejaVuSerif.ttf")
-    # Calculate width using the specific font
-    width = nil
-    pdf.font(font_file) do
-      width = pdf.width_of(text, size: 10)
-    end
-    width
-  end
-
-  def handle_line_wrapping(pdf, x_position, text_width)
-    if x_position + text_width > pdf.bounds.width
-      pdf.move_down(pdf.font_size * 1.2)
-      0
-    else
-      x_position
-    end
-  end
-
-  def draw_styled_text(pdf, text, font_file, x_position)
-    pdf.font(font_file) do
-      pdf.draw_text(text, at: [x_position, pdf.cursor], size: 10)
     end
   end
 end

@@ -12,55 +12,101 @@ class QRCodeField
   end
 
   # Renders the QR code with label underneath
-  def render(pdf, x, y, size = 0.75.in)
+  def render(pdf, x_coord, y_coord, size = 0.75.in)
     return if url.nil? || url.to_s.strip.empty?
 
+    temp_image = nil
     begin
-      # Generate QR code
-      qr_code = RQRCode::QRCode.new(url)
-
-      # Render QR code as PNG data
-      png_data = qr_code.as_png(
-        bit_depth: 1,
-        border_modules: 1,
-        color_mode: ChunkyPNG::COLOR_GRAYSCALE,
-        color: "black",
-        fill: "white",
-        module_px_size: 4
-      )
-
-      # Create temporary image from PNG data
-      temp_image = Tempfile.new(["qr", ".png"])
-      temp_image.binmode
-      temp_image.write(png_data.to_s)
-      temp_image.close
-
-      # Render the QR code image
-      pdf.image(temp_image.path, at: [x, y], width: size, height: size)
-
-      # Render the label below the QR code
-      if label && !label.strip.empty?
-        label_y = y - size - 0.05.in
-        pdf.bounding_box([x, label_y], width: size, height: 0.15.in) do
-          pdf.text(label, size: 8, align: :center, valign: :top)
-        end
-      end
+      temp_image = generate_qr_image
+      render_qr_code(pdf, temp_image.path, x_coord, y_coord, size)
+      render_label_if_present(pdf, x_coord, y_coord, size)
     rescue StandardError => e
-      # Fallback: render label as text if QR generation fails
-      if defined?(Rails)
-        Rails.logger.warn("QR code generation failed: #{e.message}")
-      end
-      pdf.bounding_box([x, y], width: size, height: size) do
-        pdf.text("QR: #{label}", size: 8, align: :center, valign: :center)
-      end
+      handle_qr_generation_error(pdf, e, x_coord, y_coord, size)
     ensure
-      temp_image&.unlink # Clean up temp file
+      cleanup_temp_file(temp_image)
     end
   end
 
-  # Calculate total height needed (QR code + label)
-  def height(size = 0.75.in)
-    label_height = label && !label.strip.empty? ? 0.2.in : 0
-    size + label_height
+  private
+
+  def generate_qr_image
+    qr_code = RQRCode::QRCode.new(url)
+    png_data = create_png_data(qr_code)
+    create_temp_image_file(png_data)
+  end
+
+  def create_png_data(qr_code)
+    qr_code.as_png(
+      bit_depth: 1,
+      border_modules: 1,
+      color_mode: ChunkyPNG::COLOR_GRAYSCALE,
+      color: "black",
+      fill: "white",
+      module_px_size: 4
+    )
+  end
+
+  def create_temp_image_file(png_data)
+    temp_image = Tempfile.new(["qr", ".png"])
+    temp_image.binmode
+    temp_image.write(png_data.to_s)
+    temp_image.close
+    temp_image
+  end
+
+  def render_qr_code(pdf, image_path, x_coord, y_coord, size)
+    pdf.image(image_path, at: [x_coord, y_coord], width: size, height: size)
+  end
+
+  def render_label_if_present(pdf, x_coord, y_coord, size)
+    return unless label_should_be_rendered?
+
+    label_position = calculate_label_position(pdf, x_coord, y_coord, size)
+    draw_centered_label(pdf, label_position)
+  end
+
+  def label_should_be_rendered?
+    label && !label.strip.empty?
+  end
+
+  def calculate_label_position(pdf, x_coord, y_coord, size)
+    label_y = y_coord - size - 0.05.in
+    width = pdf.width_of(label, size: 8)
+    label_x = x_coord + size / 2 - width / 2
+
+    {
+      x: label_x,
+      y: label_y,
+      width: width
+    }
+  end
+
+  def draw_centered_label(pdf, position)
+    pdf.bounding_box([position[:x], position[:y]],
+                     width: position[:width],
+                     height: 0.15.in) do
+      pdf.text(label, size: 8, align: :center, valign: :top)
+    end
+  end
+
+  def handle_qr_generation_error(pdf, error, x_coord, y_coord, size)
+    log_error_if_rails_available(error)
+    render_fallback_text(pdf, x_coord, y_coord, size)
+  end
+
+  def log_error_if_rails_available(error)
+    return unless defined?(Rails)
+
+    Rails.logger.warn("QR code generation failed: #{error.message}")
+  end
+
+  def render_fallback_text(pdf, x_coord, y_coord, size)
+    pdf.bounding_box([x_coord, y_coord], width: size, height: size) do
+      pdf.text("QR: #{label}", size: 8, align: :center, valign: :center)
+    end
+  end
+
+  def cleanup_temp_file(temp_image)
+    temp_image&.unlink
   end
 end
