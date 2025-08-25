@@ -350,7 +350,6 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     # obs1 = observations(:agaricus_campestris_obs)
     obs2 = observations(:coprinus_comatus_obs)
     num1 = collection_numbers(:agaricus_campestris_coll_num)
-    # num2 = collection_numbers(:coprinus_comatus_coll_num)
     num1.add_observation(obs2)
     assert(num1.observations.size > 1)
 
