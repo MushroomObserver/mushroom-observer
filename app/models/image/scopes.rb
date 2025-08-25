@@ -88,12 +88,12 @@ module Image::Scopes
       joins(observation_images: :observation).
         merge(Observation.locations(locations)).distinct
     }
-    scope :projects, lambda { |proj|
-      ids = lookup_projects_by_name(proj)
+    scope :projects, lambda { |projects|
+      ids = Lookup::Projects.new(projects).ids
       joins(:project_images).where(project_images: { project_id: ids })
     }
-    scope :species_lists, lambda { |spl|
-      ids = lookup_species_lists_by_name(spl)
+    scope :species_lists, lambda { |species_lists|
+      ids = Lookup::SpeciesLists.new(species_lists).ids
       joins(observation_images: { observation: :species_list_observations }).
         where(species_list_observations: { species_list_id: ids })
     }

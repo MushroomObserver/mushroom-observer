@@ -6,6 +6,7 @@ module Names
     include Names::Synonyms::SharedPrivateMethods
 
     before_action :login_required
+    before_action :pass_query_params
 
     ############################################################################
     #
@@ -16,7 +17,6 @@ module Names
     # Form accessible from show_name that lets a user review all the synonyms
     # of a name, removing others, writing in new, etc.
     def edit
-      pass_query_params
       return unless find_name!
       return if abort_if_name_locked!(@name)
 
@@ -24,8 +24,6 @@ module Names
     end
 
     def update
-      pass_query_params
-
       return unless find_name!
       return if abort_if_name_locked!(@name)
 

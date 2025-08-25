@@ -7,6 +7,7 @@ class JavascriptController < ApplicationController
     :turn_javascript_off,
     :turn_javascript_on
   ]
+  before_action :pass_query_params, only: [:hide_thumbnail_map]
 
   # Force javascript on.
   def turn_javascript_on
@@ -36,7 +37,6 @@ class JavascriptController < ApplicationController
   end
 
   def hide_thumbnail_map
-    pass_query_params
     id = params[:id].to_s
     if @user
       @user.update_attribute(:thumbnail_maps, false)

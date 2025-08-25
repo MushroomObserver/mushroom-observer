@@ -49,7 +49,7 @@ module Name::Scopes
           -> { order_by(::Query::Names.default_order) }
 
     scope :names, lambda { |lookup:, **related_name_args|
-      ids = lookup_names_by_name(lookup, related_name_args.compact)
+      ids = Lookup::Names.new(lookup, related_name_args.compact).ids
       return none unless ids
 
       where(id: ids).with_correct_spelling.distinct
@@ -261,7 +261,7 @@ module Name::Scopes
       joins(:observations).distinct
     }
     scope :species_lists, lambda { |species_lists|
-      species_list_ids = lookup_species_lists_by_name(species_lists)
+      species_list_ids = Lookup::SpeciesLists.new(species_lists).ids
       joins(observations: :species_list_observations).
         merge(SpeciesListObservation.where(species_list: species_list_ids)).
         distinct

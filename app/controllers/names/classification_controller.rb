@@ -4,18 +4,17 @@
 module Names
   class ClassificationController < ApplicationController
     before_action :login_required
+    before_action :pass_query_params
 
     # Form
     def edit
       store_location
-      pass_query_params
       nil unless find_name!
     end
 
     # PUT callback
     def update
       store_location
-      pass_query_params
       return unless find_name!
 
       @name.classification = params[:classification].to_s.strip_html.
