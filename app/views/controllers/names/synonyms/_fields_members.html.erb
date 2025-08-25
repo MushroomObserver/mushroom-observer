@@ -1,27 +1,32 @@
 <%# alerts plus list of members and option to deprecate all %>
 
-<% if @new_names && (@new_names != []) %>
-  <div class="alert alert-danger">
-    <%= :form_synonyms_missing_names.t %><br/>
-    <span class="pl-3">
-      <% @new_names.each do |n| %>
-        <%= h(n) %><br/>
-      <% end %>
-    </span>
-    <%= help_note(:span, :form_synonyms_missing_names_help.t) %>
-  </div>
-<% end %>
+<% alert_block(level: :danger) do
+  [
+    tag.div(:form_synonyms_missing_names.t),
+    tag.div(class: "pl-3") do
+      @new_names.each do |n|
+        concat(tag.div(h(n)))
+      end
+    end,
+    help_note(:span, :form_synonyms_missing_names_help.t)
+  ].safe_join
+end if @new_names.present? %>
 
-<div class="form-group">
-  <%= check_box_with_label(form: f, field: :deprecate_all, value: "1",
-                           checked: @deprecate_all && "checked",
-                           label: :form_synonyms_deprecate_synonyms.t) %>
-  <%= help_block(:p, :form_synonyms_deprecate_synonyms_help.t) %>
-</div>
+<%= tag.div(class: "form-group") do
+  [
+    check_box_with_label(
+      form: f, field: :deprecate_all, value: "1",
+      checked: @deprecate_all && "checked",
+      label: :form_synonyms_deprecate_synonyms.t
+    ),
+    help_block(:p, :form_synonyms_deprecate_synonyms_help.t)
+  ].safe_join
+end %>
 
 <%= text_area_with_label(
-      form: f, field: :synonym_members, value: @list_members,
-      label: :form_synonyms_names.t + ":", data: { autofocus: true },
-      between: help_block(:p, :form_synonyms_names_help.t(
-                                name: @name.display_name))
-    ) %>
+  form: f, field: :synonym_members, value: @list_members,
+  label: :form_synonyms_names.t + ":", data: { autofocus: true },
+  between: help_block(
+    :p, :form_synonyms_names_help.t(name: @name.display_name)
+  )
+) %>

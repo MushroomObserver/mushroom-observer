@@ -7,9 +7,7 @@ container_class(:wide)
 project_title = @query&.params_cache&.dig(:project)&.title || ""
 %>
 
-<% if notice %>
-  <%= tag.p(notice, class: "alert alert-success") %>
-<% end %>
+<%= alert_block(notice, level: :success) if notice %>
 
 <%= tag.div(class: "content-block") do %>
   <% if @project %>
