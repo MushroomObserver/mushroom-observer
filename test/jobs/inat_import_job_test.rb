@@ -670,7 +670,7 @@ class InatImportJobTest < ActiveJob::TestCase
                    observation_id: @inat_import.inat_ids.to_i,
                    observation_field_id: MO_URL_OBSERVATION_FIELD_ID,
                    value: "#{MO.http_domain}/#{Observation.last.id}"
-                 } })
+                 } }, "Incorrect error payload")
   end
 
   ########## Utilities
