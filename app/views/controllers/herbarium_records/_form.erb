@@ -24,7 +24,8 @@ end
 
   <% if @herbarium_record.observations.size > 1 %>
     <%= alert_block(
-      :warning, :edit_affects_multiple_observations.t(type: :herbarium_record)
+      :edit_affects_multiple_observations.t(type: :herbarium_record),
+      level: :warning, class: "multiple-observations-warning"
     ) %>
   <% end %>
 

@@ -24,9 +24,9 @@ end
   <%= fields_for(:project) do |f_p| %>
 
     <% if error_messages.present? || suspect_messages.present? %>
-      <%= tag.div(id: "project_messages") do %>
-        <% [error_messages, suspect_messages].compact.each do |messages| %>
-          <%= tag.div(class: "alert alert-#{messages[:level]}") do
+      <%= tag.div(id: "project_messages") do
+        [error_messages, suspect_messages].compact.each do |messages|
+          concat(alert_block(level: messages[:level]) do
             [
               tag.div(
                 "#{:form_observations_projects_out_of_range.t(
@@ -41,9 +41,9 @@ end
               end,
               tag.p(messages[:help])
             ].safe_join
-          end %>
-        <% end %>
-      <% end %>
+          end)
+        end
+      end %>
       <%= check_box_with_label(
         form: f_p, field: :ignore_proj_conflicts,
         label: :form_observations_projects_ignore_project_constraints.t
@@ -52,15 +52,15 @@ end
 
     <%= tag.p(:form_observations_project_help.t) %>
 
-    <%= tag.div(class: "overflow-scroll-checklist") do %>
-      <% @projects.each do |project| %>
-        <%= check_box_with_label(
+    <%= tag.div(class: "overflow-scroll-checklist") do
+      @projects.each do |project|
+        concat(check_box_with_label(
           form: f_p, field: :"id_#{project.id}", label: project.title,
           checked: @project_checks[project.id],
           disabled: !project.user_can_add_observation?(@observation, @user)
-        ) %>
-      <% end %>
-    <% end %>
+        ))
+      end
+    end %>
 
   <% end %>
 <%# end %>

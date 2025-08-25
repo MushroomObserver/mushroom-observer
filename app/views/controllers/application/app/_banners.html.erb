@@ -1,35 +1,50 @@
 <!--CALLOUT_BANNERS-->
-<div id="banners" class="hidden-print">
+<%
+admin_banner_classes = "h3 text-center font-weight-bold p-2"
+%>
+
+<%= tag.div(id: "banners", class: "hidden-print") do %>
 
   <% if in_admin_mode? %>
-    <div id="admin_banner" class="h3 text-center font-weight-bold p-2">
-      DANGER: You are in administrator mode. Proceed with caution.
-    </div>
+    <%= tag.div(
+      "DANGER: You are in administrator mode. Proceed with caution.",
+      id: "admin_banner", class: admin_banner_classes
+    ) %>
   <% elsif session[:real_user_id].present? %>
-    <div id="admin_banner" class="h3 text-center font-weight-bold p-2">
-      DANGER: You are currently logged in as <%= User.current.login %>.
-    </div>
+    <%= tag.div(
+      "DANGER: You are currently logged in as #{User.current.login}.",
+      id: "admin_banner", class: admin_banner_classes
+    ) %>
   <% end %>
 
-  <% if Banner.current %>
-    <div data-controller="banner">
-      <div id="banner" class="alert alert-success message-banner" data-banner-target="banner">
-        <button
-        class="close"
-        id="dismiss-banner"
-        data-banner-target="dismissButton"
-        aria-label="Close"
-        data-version="<%= Banner.current.version %>">
-          <span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span>
-        </button>
-        <p><%= Banner.current.message.t %></p>
-      </div>
-      <div class="show_banner_container position-relative d-block w-100 py-2 text-right" data-banner-target="container">
-        <div data-banner-target="showButton" class="show_banner_icon text-green d-block">
-          <span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span>
-        </div>
-      </div>
-    </div>
-  <% end %>
-</div>
+  <%= tag.div(data: { controller: "banner" }) do
+    [
+      alert_block(level: :success, class: "message-banner",
+                  data: { banner_target: "banner" }) do
+        [
+          tag.button(
+            link_icon(:chevron_up, title: :CLOSE.l),
+            type: :button, class: "close",
+            id: "dismiss-banner",
+            data: { banner_target: "dismissButton",
+                    version: Banner.current.version },
+            aria: { label: :CLOSE.l }
+          ),
+          tag.p(Banner.current.message.t)
+        ].safe_join
+      end,
+      tag.div(
+        class: "position-relative w-100 py-2 text-right",
+        data: { banner_target: "container" }
+      ) do
+        tag.div(
+          link_icon(:chevron_down, title: :SHOW.l),
+          class: "show_banner_icon text-green d-block",
+          data: { banner_target: "showButton" }
+        )
+      end
+    ].safe_join
+  end if Banner.current %>
+
+<% end %>
 <!--/CALLOUT_BANNERS-->
