@@ -256,11 +256,16 @@ class InatObsTest < UnitTestCase
     assert_equal(
       "Jasmine Silver & Jesse Burton",
       mock_observation("lycoperdon").collector,
-      "Notes Collector should be iNat Collector field if that field present"
+      "Notes Collector should be iNat `Collector` field if that field present"
     )
     assert_equal(
       "johnplischke", mock_observation("arrhenia_sp_NY02").collector,
       "Notes Collector should be iNat user if no iNat Collector field"
+    )
+    assert_equal(
+      "Michael Beug", mock_observation("russula_subabietis").collector,
+      "Notes Collector should be iNat \"Collector's Name\" field " \
+        "if that field present"
     )
   end
 

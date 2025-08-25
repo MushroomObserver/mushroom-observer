@@ -111,12 +111,12 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
   scope :search_where,
         ->(phrase) { search_columns(SpeciesList[:where], phrase) }
 
-  scope :locations, lambda { |loc|
-    ids = lookup_locations_by_name(loc)
+  scope :locations, lambda { |locations|
+    ids = Lookup::Locations.new(locations).ids
     where(location_id: ids).distinct
   }
   scope :projects, lambda { |projects|
-    ids = lookup_projects_by_name(projects)
+    ids = Lookup::Projects.new(projects).ids
     joins(:project_species_lists).
       where(project_species_lists: { project_id: ids }).distinct
   }

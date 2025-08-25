@@ -39,7 +39,7 @@ module Location::Scopes
 
     # This is a convenience for lookup by text name. Used by `observation_query`
     scope :locations, lambda { |locations|
-      location_ids = lookup_locations_by_name(locations)
+      location_ids = Lookup::Locations.new(locations).ids
       where(id: location_ids).distinct
     }
 
