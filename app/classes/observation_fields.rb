@@ -10,9 +10,14 @@ class ObservationFields
 
   # Returns an array of LabelField objects for the observation
   def fields
+    label_fields + qr_fields
+  end
+
+  # Returns an array of LabelField objects for the observation
+  def label_fields
     field_list = [
       create_field("ID", id_value),
-      create_field("Name", observation.text_name),
+      create_name_field("Name", observation.name.display_name_brief_authors),
       create_field("Location", observation.where),
       create_field("GPS", gps_value),
       create_field("Date", date_value),
@@ -22,12 +27,37 @@ class ObservationFields
     field_list.compact
   end
 
+  # Returns QR code fields for the observation
+  def qr_fields
+    qr_list = []
+
+    # Add Mushroom Observer URL if observation has mo_id
+    id = observation.id
+    mo_url = "https://mushroomobserver.org/observations/#{id}"
+    qr_list << QRCodeField.new("MO: #{id}", mo_url)
+
+    # Add iNaturalist URL if observation has inat_id
+    inat_id = observation.inat_id
+    if inat_id
+      inat_url = "https://www.inaturalist.org/observations/#{inat_id}"
+      qr_list << QRCodeField.new("iNat: #{inat_id}", inat_url)
+    end
+
+    qr_list
+  end
+
   private
 
   def create_field(name, value)
     return nil if value.nil? || value.to_s.strip.empty?
 
     LabelField.new(name, value)
+  end
+
+  def create_name_field(name, value)
+    return nil if value.nil? || value.to_s.strip.empty?
+
+    NameField.new(name, value)
   end
 
   def id_value
@@ -101,6 +131,11 @@ class ObservationFields
     collector_identifier = extract_user_string_regex(notes_collector)
     user = User.find_by(login: collector_identifier)
     user&.name || collector_identifier
+  end
+
+  def extract_user_string_regex(input)
+    match = input.match(/\A_user (.+)_\z/)
+    match ? match[1] : input
   end
 
   def collection_number_collector

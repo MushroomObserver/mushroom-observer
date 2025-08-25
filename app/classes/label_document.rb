@@ -14,8 +14,6 @@ class LabelDocument
   end
 
   # Generates the PDF document and returns it as a string
-
-  # Generates the PDF document and returns it as a string
   def generate
     pdf = create_pdf_document
     setup_document(pdf)
@@ -53,6 +51,7 @@ class LabelDocument
 
   def setup_document(pdf)
     register_fonts(pdf)
+    @font_family = font_family
   end
 
   def render_observations(pdf)
@@ -76,32 +75,48 @@ class LabelDocument
     label_position = index % labels_per_page
     x, y = calculate_label_position(label_position)
 
-    label = Label.new(observation)
+    label = Label.new(observation, @font_family)
     label.draw_border(pdf, x, y) if draw_borders
     label.render(pdf, x, y)
   end
 
   def register_fonts(pdf)
-    # Register DejaVu Sans font family
-    # Note: In a real Rails app, you'd typically put font files in
-    # app/assets/fonts/ and reference them with Rails.root.join('app',
-    # 'assets', 'fonts', 'filename.ttf')
+    # Use fonts from Rails app/assets/fonts directory
 
-    pdf.font_families.update(
-      "DejaVu Sans" => {
-        normal: "DejaVuSans.ttf",
-        bold: "DejaVuSans-Bold.ttf",
-        italic: "DejaVuSans-Oblique.ttf",
-        bold_italic: "DejaVuSans-BoldOblique.ttf"
-      }
-    )
+    font_path = Rails.root.join("app/assets/fonts")
+    register_app_fonts(pdf, font_path)
   rescue StandardError => e
-    # Fallback to Helvetica if DejaVu Sans is not available
     if defined?(Rails)
-      Rails.logger.warn("DejaVu Sans font not found, " \
-                        "falling back to Helvetica: #{e.message}")
+      Rails.logger.warn("Font registration failed, using Helvetica: #{e.message}")
     end
-    pdf.font("Helvetica")
+    @font_family = "Helvetica"
+  end
+
+  def register_app_fonts(pdf, font_path)
+    # Register DejaVu Sans font family from app assets
+    font_variants = {
+      normal: font_path.join("DejaVuSans.ttf"),
+      bold: font_path.join("DejaVuSans-Bold.ttf"),
+      italic: font_path.join("DejaVuSans-Oblique.ttf"),
+      bold_italic: font_path.join("DejaVuSans-BoldOblique.ttf")
+    }
+
+    # Only register variants that actually exist
+    available_fonts = {}
+    font_variants.each do |variant, font_file|
+      available_fonts[variant] = font_file.to_s if File.exist?(font_file)
+    end
+
+    unless available_fonts[:normal]
+      raise("DejaVuSans.ttf not found in #{font_path}")
+    end
+
+    pdf.font_families.update("DejaVu Sans" => available_fonts)
+    @font_family = "DejaVu Sans"
+  end
+
+  def font_family
+    @font_family || "Helvetica"
   end
 
   def calculate_labels_per_page
