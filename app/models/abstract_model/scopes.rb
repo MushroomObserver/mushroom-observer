@@ -50,7 +50,7 @@ module AbstractModel::Scopes
     }
 
     scope :by_users, lambda { |users|
-      ids = lookup_users_by_name(users)
+      ids = Lookup::Users.new(users).ids
       where(user: ids)
     }
     scope :by_editor, lambda { |user|
@@ -478,50 +478,6 @@ module AbstractModel::Scopes
       fields.reduce(starting) do |result, field|
         result + arel_table[field].coalesce("")
       end
-    end
-
-    def lookup_external_sites_by_name(vals)
-      Lookup::ExternalSites.new(vals).ids
-    end
-
-    def lookup_field_slips_by_name(vals)
-      Lookup::FieldSlips.new(vals).ids
-    end
-
-    def lookup_herbaria_by_name(vals)
-      Lookup::Herbaria.new(vals).ids
-    end
-
-    def lookup_herbarium_records_by_name(vals)
-      Lookup::HerbariumRecords.new(vals).ids
-    end
-
-    def lookup_locations_by_name(vals)
-      Lookup::Locations.new(vals).ids
-    end
-
-    def lookup_names_by_name(vals, params = {})
-      Lookup::Names.new(vals, **params).ids
-    end
-
-    def lookup_projects_by_name(vals)
-      Lookup::Projects.new(vals).ids
-    end
-
-    def lookup_lists_for_projects_by_name(vals)
-      Lookup::ProjectSpeciesLists.new(vals).ids
-    end
-
-    def lookup_species_lists_by_name(vals)
-      Lookup::SpeciesLists.new(vals).ids
-    end
-
-    def lookup_regions_by_name(vals)
-      Lookup::Regions.new(vals).ids
-    end
-
-    def lookup_users_by_name(vals)
-      Lookup::Users.new(vals).ids
     end
 
     def exact_match_condition(table_column, vals)
