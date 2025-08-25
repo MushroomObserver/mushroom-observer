@@ -57,6 +57,10 @@ class Inat
         request(method: :post,
                 path: "observation_field_values",
                 payload: payload)
+    rescue ::RestClient::ExceptionWithResponse => e
+      error = { error: e.http_code, payload: payload }.to_json
+      @inat_import.add_response_error(error)
+      e.response
     end
 
     def increment_imported_counts
