@@ -114,9 +114,11 @@ module PanelHelper
     end
   end
 
-  def alert_block(level = :warning, string = "", **args)
+  # Create a div for alert messages.
+  def alert_block(msg = nil, level: :warning, **args, &block)
+    msg = capture(&block) if block
     args[:class] = class_names("alert", "alert-#{level}", args[:class])
-    tag.div(string, **args)
+    tag.div(msg, **args)
   end
 
   # Create a div for notes.

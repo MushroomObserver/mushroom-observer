@@ -13,19 +13,26 @@
     form_args = form_args.deep_merge({ data: { turbo: true } })
   end
 %>
+
 <%= form_with(**form_args) do |form| %>
+
   <% if project_alias.errors.any? %>
-    <div id="error_explanation" class="alert alert-danger">
-      <h2><%= pluralize(project_alias.errors.count, "error") %> prohibited this project alias from being saved:</h2>
-      <ul>
-        <% project_alias.errors.full_messages.each do |message| %>
-          <li><%= message %></li>
-        <% end %>
-      </ul>
-    </div>
+    <% count = pluralize(project_alias.errors.count, "error") %>
+    <%= alert_block(level: :danger, id: "error_explanation") do
+      [
+        tag.h2("#{count} prohibited this project alias from being saved:"),
+        tag.ul do
+          project_alias.errors.full_messages.each do |message|
+            concat(tag.li(message))
+          end
+        end
+      ].safe_join
+    end %>
   <% end %>
 
-  <%= text_field_with_label(form:, field: :name, label: "#{:Name.t}:", inline: true) %>
+  <%= text_field_with_label(
+    form:, field: :name, label: "#{:Name.t}:", inline: true
+  ) %>
   <%= form.hidden_field(:project_id, value: project_alias.project_id) %>
 
   <%= tag.div(class: "form-group dropdown",
