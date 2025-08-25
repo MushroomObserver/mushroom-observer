@@ -82,8 +82,8 @@ module Image::Scopes
       joins(:observation_images).
         where(observation_images: { observation: obs })
     }
-    scope :locations, lambda { |loc|
-      ids = lookup_locations_by_name(loc)
+    scope :locations, lambda { |locations|
+      ids = Lookup::Locations.new(locations).ids
       joins(observation_images: :observation).
         where(observation: { location_id: ids })
     }
