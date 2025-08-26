@@ -45,7 +45,7 @@ export default class extends Controller {
           parsed_current_q = qs.parse(decoded_current_q)
 
         parsed_qs["q"] = parsed_current_q
-        const encoded_current_qs = qs.stringify(parsed)
+        const encoded_current_qs = qs.stringify(parsed_qs)
 
         link.href = url.pathname + "?" + encoded_current_qs
         link.classList.add("query-synced")
