@@ -87,7 +87,8 @@ class LabelDocument
     register_app_fonts(pdf, font_path)
   rescue StandardError => e
     if defined?(Rails)
-      Rails.logger.warn("Font registration failed, using Helvetica: #{e.message}")
+      Rails.logger.warn("Font registration failed, using Helvetica: " \
+                        "#{e.message}")
     end
     @font_family = "Helvetica"
   end

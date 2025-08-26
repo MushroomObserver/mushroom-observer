@@ -7,7 +7,7 @@ class Label
   MARGIN = 0.25.in
   QR_CODE_SIZE = 0.75.in
 
-  attr_reader :observation, :font_family
+  attr_reader :observation, :font_family, :pdf
 
   def initialize(observation, font_family = "DejaVu Sans")
     @observation = observation
@@ -16,31 +16,14 @@ class Label
 
   # Renders the label within the specified bounds
   def render(pdf, x_coord, y_coord)
-    # Create a bounding box for the label content (excluding margins)
-    content_width = LABEL_WIDTH - (2 * MARGIN)
-    content_height = LABEL_HEIGHT - (2 * MARGIN)
+    @pdf = pdf
+    label_dimensions = calculate_label_dimensions
+    observation_fields = prepare_observation_fields
+    space_allocation = calculate_space_allocation(label_dimensions,
+                                                  observation_fields)
 
-    # Get fields from the observation using ObservationFields
-    observation_fields = ObservationFields.new(observation)
-    label_fields = observation_fields.label_fields
-    qr_fields = observation_fields.qr_fields
-
-    # Calculate space allocation
-    qr_area_height = qr_fields.any? ? (QR_CODE_SIZE + 0.2.in) : 0
-    text_area_height = content_height - qr_area_height
-
-    pdf.bounding_box([x_coord + MARGIN, y_coord - MARGIN],
-                     width: content_width,
-                     height: content_height) do
-      # Set font for the entire label
-      pdf.font(font_family)
-
-      # Render text fields in the upper portion
-      render_text_fields(pdf, label_fields, text_area_height)
-
-      # Render QR codes at the bottom
-      render_qr_codes(pdf, qr_fields, content_width) if qr_fields.any?
-    end
+    render_label_content(x_coord, y_coord, label_dimensions,
+                         observation_fields, space_allocation)
   end
 
   # Draws a border around the label (used when multiple labels per page)
@@ -54,7 +37,59 @@ class Label
 
   private
 
-  def render_text_fields(pdf, fields, available_height)
+  def calculate_label_dimensions
+    content_width = LABEL_WIDTH - (2 * MARGIN)
+    content_height = LABEL_HEIGHT - (2 * MARGIN)
+
+    {
+      content_width: content_width,
+      content_height: content_height,
+      margin: MARGIN
+    }
+  end
+
+  def prepare_observation_fields
+    observation_fields = ObservationFields.new(observation)
+
+    {
+      label_fields: observation_fields.label_fields,
+      qr_fields: observation_fields.qr_fields
+    }
+  end
+
+  def calculate_space_allocation(dimensions, fields)
+    qr_area_height = fields[:qr_fields].any? ? (QR_CODE_SIZE + 0.2.in) : 0
+    text_area_height = dimensions[:content_height] - qr_area_height
+
+    {
+      qr_area_height: qr_area_height,
+      text_area_height: text_area_height
+    }
+  end
+
+  def render_label_content(x_coord, y_coord, dimensions, fields,
+                           space_allocation)
+    bounding_box_x = x_coord + dimensions[:margin]
+    bounding_box_y = y_coord - dimensions[:margin]
+
+    pdf.bounding_box([bounding_box_x, bounding_box_y],
+                     width: dimensions[:content_width],
+                     height: dimensions[:content_height]) do
+      pdf.font(font_family)
+      render_text_fields(fields[:label_fields],
+                         space_allocation[:text_area_height])
+      render_qr_content_if_present(fields[:qr_fields],
+                                   dimensions[:content_width])
+    end
+  end
+
+  def render_qr_content_if_present(qr_fields, content_width)
+    return unless qr_fields.any?
+
+    render_qr_codes(qr_fields, content_width)
+  end
+
+  def render_text_fields(fields, available_height)
     pdf.bounding_box([0, pdf.cursor], width: pdf.bounds.width,
                                       height: available_height) do
       fields.each do |field|
@@ -66,13 +101,17 @@ class Label
     end
   end
 
-  def render_qr_codes(pdf, qr_fields, content_width)
+  def render_qr_codes(qr_fields, content_width)
     return if qr_fields.empty?
 
     # Calculate positions for QR codes (distribute evenly across width)
     qr_count = qr_fields.length
     available_width = content_width - (qr_count * QR_CODE_SIZE)
-    spacing = qr_count > 1 ? available_width / (qr_count + 1) : available_width / 2
+    spacing = if qr_count > 1
+                available_width / (qr_count + 1)
+              else
+                available_width / 2
+              end
 
     # Position QR codes at the bottom of the label
     qr_y = QR_CODE_SIZE + 0.1.in
