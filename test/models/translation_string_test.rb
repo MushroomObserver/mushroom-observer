@@ -38,25 +38,19 @@ class TranslationStringTest < UnitTestCase
   end
 
   def test_no_double_spaces_in_en_txt_original_strings
+    substring_test("%.  %")
+    substring_test("%!  %")
+    substring_test("%;  %")
+    substring_test("%?  %")
+  end
+
+  def substring_test(substring)
+    matches = TranslationString.where(language_id: 2).
+              where(TranslationString[:text].matches(substring))
+
     assert_equal(
-      0,
-      TranslationString.where(language_id: 2).
-      where(TranslationString[:text].matches("%.  %")).count
-    )
-    assert_equal(
-      0,
-      TranslationString.where(language_id: 2).
-      where(TranslationString[:text].matches("%!  %")).count
-    )
-    assert_equal(
-      0,
-      TranslationString.where(language_id: 2).
-      where(TranslationString[:text].matches("%;  %")).count
-    )
-    assert_equal(
-      0,
-      TranslationString.where(language_id: 2).
-      where(TranslationString[:text].matches("%?  %")).count
+      0, matches.count,
+      "Double space found in translation string :#{matches.first(&:tag)}."
     )
   end
 end
