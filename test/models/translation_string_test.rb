@@ -36,4 +36,27 @@ class TranslationStringTest < UnitTestCase
     assert_not_nil(TranslationString.find_by(tag: "other_stuff"))
     assert_equal("Stuff that we may want to know.", str.reload.text)
   end
+
+  def test_no_double_spaces_in_en_txt_original_strings
+    assert_equal(
+      0,
+      TranslationString.where(language_id: 2).
+      where(TranslationString[:text].matches("%.  %")).count
+    )
+    assert_equal(
+      0,
+      TranslationString.where(language_id: 2).
+      where(TranslationString[:text].matches("%!  %")).count
+    )
+    assert_equal(
+      0,
+      TranslationString.where(language_id: 2).
+      where(TranslationString[:text].matches("%;  %")).count
+    )
+    assert_equal(
+      0,
+      TranslationString.where(language_id: 2).
+      where(TranslationString[:text].matches("%?  %")).count
+    )
+  end
 end

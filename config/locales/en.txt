@@ -1617,7 +1617,7 @@
   form_description_public_writable: Modifiable by the general public.
   form_description_public_readable: Visible to the general public.
   form_description_source_help: "There are three kinds of descriptions you can create:\n1. *Public:* These are wikipedia-style documents that are editable by everyone on the site. The default title is \"[:description_part_title_public]\". Use the text field above to customize this.\n2. *Source:* These descriptions come from a third-party source, and typically are not meant to be modifiable. Enter the name of the source in the text field above. Note, if you are posting a description that derives from copyrighted material, please be sure to rewrite it in your own words.\n3. *User:* Use this to create your own personalized description. The default title will be \"[:description_part_title_user(user=:name)]\". Use the text field above to customize this. In both this and the 'Source' type above, you will have exclusive rights to choose who can view and modify this description (see the check-boxes below)."
-  form_description_permissions_help: Is the general public is allowed to view or make modifications to this description?  If you wish to have more control over read, write and admin permissions, please use the '[:show_description_adjust_permissions]' link above.
+  form_description_permissions_help: Is the general public is allowed to view or make modifications to this description? If you wish to have more control over read, write and admin permissions, please use the '[:show_description_adjust_permissions]' link above.
   form_description_license_help: Please select "license":/info/how_to_use#license you want to use for this description.
 
   # observations/_form_images
@@ -1713,7 +1713,7 @@
   form_naming_not_recognized_help: "To proceed: Edit the name to be a correctly spelled scientific name\n(or -- if you are creating an Observation -- erase the name).\nThen click '[button]'."
   form_naming_multiple_names: Multiple names match '[name]'. Select the one you intended.
   form_naming_multiple_names_help: The number after each name is how many observations are currently using that name.
-  form_naming_confidence_help: How confident are you of this identification?  Please justify how you arrived at your decision in the boxes below, as well.
+  form_naming_confidence_help: How confident are you of this identification? Please justify how you arrived at your decision in the boxes below, as well.
 
   # observations/_form_observations
   form_observations_field_code: for field slip
@@ -1726,7 +1726,7 @@
   form_observations_creating_observation: Creating [:observation]
   form_observations_edit_image: "[:EDIT] [:image]"
   form_observations_remove_image: "[:REMOVE] [:image]"
-  form_observations_lat_long_help: "Optional GPS location within **[:WHERE]**. Latitude must be -90.0 to 90.0;  longitude must be -180.0 to 180.0. Elevation will be converted to meters. If you choose to provide this data please make it as accurate as possible. Examples: \"34.1164\" = \"34°6&apos;59&quot;N\", \"-118.1459\" = \"118 8.754 W\", \"239 m\" = \"784 ft.\""
+  form_observations_lat_long_help: "Optional GPS location within **[:WHERE]**. Latitude must be -90.0 to 90.0; longitude must be -180.0 to 180.0. Elevation will be converted to meters. If you choose to provide this data please make it as accurate as possible. Examples: \"34.1164\" = \"34°6&apos;59&quot;N\", \"-118.1459\" = \"118 8.754 W\", \"239 m\" = \"784 ft.\""
   form_observations_log_change: Log Change
   form_observations_is_collection_location_help: Check when the location is where the mushroom was growing. Uncheck when it is only where the mushroom was seen (e.g., mushroom fairs, grocery, foray id table where collection location is unknown etc.).
   form_observations_open_map: "[:SHOW] [:map]"
@@ -1738,7 +1738,7 @@
   form_observations_use_locality: Use these bounds and select a point within
   form_observations_edit_locality: "[:EDIT] this [:locality]"
   form_observations_notes_help: Please include any additional information you can think of about this observation that isn't clear from the photographs, e.g., habitat, substrate or nearby trees; distinctive texture, scent, taste, staining or bruising; results of chemical or microscopic analyses, etc.
-  form_observations_remove_image_confirm: Are you sure you want to remove this image?  This will only remove this image from this observation. If it is attached to other observations, it will remain attached to them.
+  form_observations_remove_image_confirm: Are you sure you want to remove this image? This will only remove this image from this observation. If it is attached to other observations, it will remain attached to them.
   form_observations_specimen_available_help: Check when there is a preserved specimen available for further study.
   form_observations_upload_help: Use the checkboxes on the left to select the image you would like to use as the thumbnail for this observation.
   form_observations_upload_help_multi_select: Use the checkboxes on the left to select the image you would like to use as the thumbnail for this observation. In the file select dialog you can select multiple images at a time. You can also continue to add additional images by clicking the button below.
@@ -1910,7 +1910,7 @@
   login_no_account: I don't have an account. "Create a new account.":/account/signup
   login_having_problems: If you are having problems logging into your account, send "email to the webmaster":/admin/emails/webmaster_questions/new.
   email_new_password_help: When you complete this page and click "Send", we will send you an email with verification information.
-  email_spam_notice: If you do not see the email in your inbox, check your spam folder. If it's in your spam folder, please (1) notify your email provider that it's  not spam and (2) whitelist "mushroomobserver.org". This may prevent future MO emails from ending up in your -- or other users' -- spam folders.
+  email_spam_notice: If you do not see the email in your inbox, check your spam folder. If it's in your spam folder, please (1) notify your email provider that it's not spam and (2) whitelist "mushroomobserver.org". This may prevent future MO emails from ending up in your -- or other users' -- spam folders.
   login_layout_description: A website to record observations about mushrooms, help people identify unfamiliar mushrooms, and expand the community around the scientific exploration of mushrooms (mycology).
   login_create_account_caption: Create a free account
   login_explain_login_requirement: To prevent automated programs from consuming too much of our resources, we limit website use to registered users.
@@ -1974,7 +1974,7 @@
   news_content_pr_261: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/261\">PR #261</a> (January 7, 2017) Added prototype ability to create \"external links\" between observations and corresponding records on external websites, such as MycoPortal and GenBank."
   news_content_pr_258: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/258\">PR #258</a> (December 27, 2016) Add - via user preferences - persistent filters giving user the option to exclude imageless observations and/or observations without specimens from Activity Feed and other displays of observations."
   news_content_pr_256: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/256\">PR #256</a> (December 25, 2016) Made it so users who have only proposed a name for an observation will get comment response notifications, instead of requiring users to comment in order to get comment response notifications."
-  news_content_pr_249: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/249\">PR #249</a> (December 24, 2016) Re-enabled donations through paypal  MO, Inc. can now officially accept tax-free donations!"
+  news_content_pr_249: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/249\">PR #249</a> (December 24, 2016) Re-enabled donations through paypal - MO, Inc. can now officially accept tax-free donations!"
   news_content_pr_248: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/248\">PR #248</a> (December 22, 2016) You can now notify users by mentioning them in comments with the usual notations: \"_user john_\" or \"@john\". If a user's login contains non-alphanumeric characters (like dashes, periods, spaces), then use this format: \"@John Doe@\"."
   news_content_pr_247: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/247\">PR #247</a> (December 22, 2016) The vote pull-down menus on observation pages now automatically save without requiring an additional page load."
   news_content_pr_246: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/246\">PR #246</a> (December 22, 2016) Added ability to add (or remove) results of an observation query to (from) an existing observation list. Look for link in upper right corner of any observation index page."
@@ -2408,7 +2408,7 @@
   show_votes_descript: User's votes are weighted by their contribution to the site (log<small>10</small> contribution). In addition, the user who created the observation gets an extra vote.
   show_votes_go_public_confirm: This will make all your votes for all observations public, not just your vote for this name. Is this what you want to do?
   show_votes_go_private_confirm: This will make all your votes for all observations anonymous, not just your vote for this name. Is this what you want to do?
-  show_votes_gone_public: Thank you!  Your preferences have been updated. Other users can now see your votes.
+  show_votes_gone_public: Thank you! Your preferences have been updated. Other users can now see your votes.
   show_votes_gone_private: Your preferences have been updated. Other users can no longer see your votes.
 
   # users/show
@@ -3049,7 +3049,7 @@
   list_name_tracker_pending_approval: "(Observer notification pending approval.)"
 
   # location/list_merge_options
-  list_merge_are_you_sure: Assign location?  This cannot be undone.
+  list_merge_are_you_sure: Assign location? This cannot be undone.
   list_merge_options_near_matches: Near Matches
   list_merge_options_others: Other Available [:locations]
   list_merge_options_title: Location Matches for [where]
@@ -3204,7 +3204,7 @@
   sandbox_look_like: This is what it will look like
   sandbox_more_help: Gotchas, more examples
   sandbox_quick_ref: Quick Reference
-  sandbox_sample: "??italics??        trademark(tm)\n**boldface**       copyright(c)\n+underline+        registered(r)\n^superscript^      1.6 &amp;&#109;icro;m  ->  1.6 &micro;m\n~subscript~        34&amp;&#100;eg;17' N  ->  34&deg;17' N\n\n\"External Link\":https://google.com or !https://random.com/image.jpg!\n\nInternal links:\n_name 371_, _Amanita ocreata_, or _A. ocreata_\n_location 382_, _location Mt. Wilson_\n_user 252_, _user jason_\n_observation 12345_\n_image 12345_, !image 12345!, or !image 640/12345!\n_glossary_term 270_, _term Bolete_, or _bolete_ (all lower-case)\n\nInclude footnote[[1]] references after any word[[2]].\n\nfn1. And then define the footnote at the bottom.\n\nfn2. Be sure to leave blank lines around these \"xx.\" directives.\n\nh1. Header\n\nbq. Block quote\n\n* bullet list item 1\n* bullet list item 2\n\n# numbered list item 1\n# numbered list item 2\n\nTables are useful for comparing species:\n| Species 1 | value 1.1 | value 1.2 |\n| Species 2 | value 2.1 | value 2.2 |\n| Species 3 | value 3.1 | value 3.2 |"
+  sandbox_sample: "??italics??        trademark(tm)\n**boldface**       copyright(c)\n+underline+        registered(r)\n^superscript^      1.6 &amp;&#109;icro;m -> 1.6 &micro;m\n~subscript~        34&amp;&#100;eg;17' N -> 34&deg;17' N\n\n\"External Link\":https://google.com or !https://random.com/image.jpg!\n\nInternal links:\n_name 371_, _Amanita ocreata_, or _A. ocreata_\n_location 382_, _location Mt. Wilson_\n_user 252_, _user jason_\n_observation 12345_\n_image 12345_, !image 12345!, or !image 640/12345!\n_glossary_term 270_, _term Bolete_, or _bolete_ (all lower-case)\n\nInclude footnote[[1]] references after any word[[2]].\n\nfn1. And then define the footnote at the bottom.\n\nfn2. Be sure to leave blank lines around these \"xx.\" directives.\n\nh1. Header\n\nbq. Block quote\n\n* bullet list item 1\n* bullet list item 2\n\n# numbered list item 1\n# numbered list item 2\n\nTables are useful for comparing species:\n| Species 1 | value 1.1 | value 1.2 |\n| Species 2 | value 2.1 | value 2.2 |\n| Species 3 | value 3.1 | value 3.2 |"
   sandbox_test: Test
   sandbox_test_codes: Show HTML
   sandbox_title: Textile Sandbox
@@ -3273,7 +3273,7 @@
   BlackOnWhite: Black on White
 
   # info/translators_note
-  translators_note: "Please help us make this website available around the world!  It's easy.\n\nThere are approximately 3000 lines with 25000 words of text on this site at the moment, but don't let that scare you. We've organized it so someone with limited time can concentrate on the most important text. Then as time and energy permits, they or someone else can continue working down the list until one day it is all finished.\n\nThere are several ways to get started. You can pick up a copy of the entire \"translation file\":[repo] and start translating it into any language you wish. \"Send us an email\":/admin/emails/webmaster_questions/new to learn more about this approach.\n\nIt's even easier to work on existing translations. Just look for \"[:app_edit_translations]\" at the bottom of any page. You can see immediately how your changes look in the context of the page. If your language is not available, \"send us an email\":/admin/emails/webmaster_questions/new and we can create a \"beta\" version for you to work on.\n\nYou will, of course, receive credit and contribution bonus for each line you translate, in addition to the gratitude of countless users."
+  translators_note: "Please help us make this website available around the world! It's easy.\n\nThere are approximately 3000 lines with 25000 words of text on this site at the moment, but don't let that scare you. We've organized it so someone with limited time can concentrate on the most important text. Then as time and energy permits, they or someone else can continue working down the list until one day it is all finished.\n\nThere are several ways to get started. You can pick up a copy of the entire \"translation file\":[repo] and start translating it into any language you wish. \"Send us an email\":/admin/emails/webmaster_questions/new to learn more about this approach.\n\nIt's even easier to work on existing translations. Just look for \"[:app_edit_translations]\" at the bottom of any page. You can see immediately how your changes look in the context of the page. If your language is not available, \"send us an email\":/admin/emails/webmaster_questions/new and we can create a \"beta\" version for you to work on.\n\nYou will, of course, receive credit and contribution bonus for each line you translate, in addition to the gratitude of countless users."
   translators_note_title: Translator's Note
 
   # translation/edit_translations
@@ -4000,7 +4000,7 @@
   runtime_removed_id_from: "Successfully removed [type] #[value] from [name]."
   runtime_removed_name: Successfully removed [type] '[value]'.
   runtime_removed_name_from: Successfully removed [type] '[value]' from [name].
-  runtime_spiders_begone: Spiders Begone!  Please login (mushroomobserver.org/account/login/new) to access this page.
+  runtime_spiders_begone: Spiders Begone! Please login (mushroomobserver.org/account/login/new) to access this page.
   runtime_updated_at: Successfully updated [type].
   runtime_updated_id: "Successfully updated [type] #[value]."
   runtime_updated_name: Successfully updated [type] '[value]'.
@@ -4189,7 +4189,7 @@
   runtime_name_for_description_not_found: Sorry, the name this description belongs to no longer exists.
   runtime_object_not_found: "Sorry, the [type] you tried to display (id #[id]) does not exist. Someone may have deleted it or merged it into another."
   runtime_profile_must_define: You must define this location before we can make it your primary location. Any other changes to your profile have been saved.
-  runtime_reverify_already_verified: Your account is already verified!  Please log in.
+  runtime_reverify_already_verified: Your account is already verified! Please log in.
   runtime_reverify_sent: Another verification email was sent.
   runtime_show_description_denied: You have not been given permission to see this description.
   runtime_show_draft_denied: "Permission denied: only project members can view drafts in progress."
