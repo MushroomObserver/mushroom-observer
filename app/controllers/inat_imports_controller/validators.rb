@@ -32,14 +32,18 @@ module InatImportsController::Validators
   end
 
   def imports_designated?
-    return true if importing_all? || params[:inat_ids].present?
+    return true if importing_all? ^ listing_ids?
 
-    flash_warning(:inat_no_imports_designated.t)
+    flash_warning(:inat_list_xor_all.l)
     false
   end
 
   def importing_all?
     params[:all] == "1"
+  end
+
+  def listing_ids?
+    params[:inat_ids].present?
   end
 
   def valid_inat_ids_param?
