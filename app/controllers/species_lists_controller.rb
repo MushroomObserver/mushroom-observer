@@ -185,6 +185,7 @@ class SpeciesListsController < ApplicationController
 
     @query.need_letters = true
     @pagination_data = letter_pagination_data(:letter, :page, 100)
+    query_params_set(@query) if @pagination_data.any? # also stores query
     @objects = @query.paginate(
       @pagination_data,
       include: [:user, :name, :location, { thumb_image: :image_votes }]

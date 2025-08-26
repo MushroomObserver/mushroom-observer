@@ -266,7 +266,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
 
   def show_index_setup(query, display_opts)
     store_location
-    clear_query_in_session if session[:checklist_source] != query.id
+    clear_query_in_session if session[:query_record] != query.id
     query_params_set(query)
     query.need_letters = display_opts[:letters] if display_opts[:letters]
     set_index_view_ivars(query, display_opts)
