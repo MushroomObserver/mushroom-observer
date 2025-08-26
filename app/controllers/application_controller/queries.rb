@@ -188,14 +188,15 @@ module ApplicationController::Queries
   end
 
   # Change the query that +query_param+ passes along to the next request,
-  # and update session[:query_record]. show_index_setup calls this.
+  # and update session[:query_record].
+  # NOTE: ApplicationController::Indexes#show_index_setup calls this.
   def query_params_set(query = nil)
     clear_query_in_session
     @query_param = nil
     if browser.bot?
       # do nothing
     elsif query
-      # store_query_in_session(query)
+      store_query_in_session(query)
       @query_param = full_q_param(query)
     end
     @query_param
@@ -285,6 +286,8 @@ module ApplicationController::Queries
     if query
       query.save unless query.id
       full_q_param(query)
+    # elsif @query_param # a bit quicker, if we have it. but could delete.
+    #   @query_param
     elsif (query = current_query)
       full_q_param(query)
     end
