@@ -32,7 +32,7 @@ module Header
     def show_page_incoming_query(object)
       return nil unless params[:q]
 
-      query = controller.query_from_q_param(params)
+      query = controller.current_query
       return nil unless [object.type_tag, :rss_log].include?(query&.type_tag)
 
       query
