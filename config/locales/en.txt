@@ -2722,7 +2722,7 @@
   edit_herbarium_record_back_to_index: Back to Fungarium Record Index
   edit_herbarium_record_cant_add_or_remove: Only curators or the observer can add or remove an observation to or from a fungarium record.
   edit_herbarium_record_already_used: This fungarium record already exists. If you want to merge records, move the observations from this record to the other, then delete this record.
-  edit_affects_multiple_observations: The changes you make here will affect all of the observations shown.  If you wish to change a single observation, go to that observation, remove the incorrect [type] from it, then add the correct one.  That will leave the [type] unchanged for any other observations associated with it.
+  edit_affects_multiple_observations: The changes you make here will affect all of the observations shown. If you wish to change a single observation, go to that observation, remove the incorrect [type] from it, then add the correct one. That will leave the [type] unchanged for any other observations associated with it.
 
   # herbarium_record/destroy_herbarium_record
   delete_herbarium_record: Destroy Fungarium Record

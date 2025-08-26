@@ -344,6 +344,21 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_template("collection_numbers/_form")
   end
 
+  def test_edit_collection_number_multiple_obs
+    # obs1 = observations(:agaricus_campestris_obs)
+    obs2 = observations(:coprinus_comatus_obs)
+    num1 = collection_numbers(:agaricus_campestris_coll_num)
+    num1.add_observation(obs2)
+    assert(num1.observations.size > 1)
+
+    login
+    get(:edit, params: { id: num1.id })
+    assert_select(
+      ".multiple-observations-warning",
+      text: :edit_affects_multiple_observations.t(type: :collection_number)
+    )
+  end
+
   def test_update_collection_number
     obs = observations(:coprinus_comatus_obs)
     number = collection_numbers(:coprinus_comatus_coll_num)

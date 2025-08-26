@@ -359,6 +359,21 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_template("herbarium_records/_form")
   end
 
+  def test_edit_herbarium_record_multiple_obs
+    # obs1 = observations(:coprinus_comatus_obs)
+    obs2 = observations(:agaricus_campestris_obs)
+    hr1 = herbarium_records(:coprinus_comatus_nybg_spec)
+    hr1.add_observation(obs2)
+    assert(hr1.observations.size > 1)
+
+    login
+    get(:edit, params: { id: hr1.id })
+    assert_select(
+      ".multiple-observations-warning",
+      text: :edit_affects_multiple_observations.t(type: :herbarium_record)
+    )
+  end
+
   def test_update_herbarium_record
     herbarium_record_setup => { params:, nybg_rec:, nybg_user:, rolf_herb: }
 
