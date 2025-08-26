@@ -37,6 +37,9 @@ class TranslationStringTest < UnitTestCase
     assert_equal("Stuff that we may want to know.", str.reload.text)
   end
 
+  # The reason for this test is that double spaces in translation strings are
+  # "squeezed" to single spaces by Textile, so tests that expect the original
+  # string will always fail against rendered results. Simpler not to allow them.
   def test_no_double_spaces_in_en_txt_original_strings
     substring_test("%.  %")
     substring_test("%!  %")
