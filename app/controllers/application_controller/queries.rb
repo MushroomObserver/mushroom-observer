@@ -48,7 +48,7 @@ module ApplicationController::Queries
 
   # Lookup an appropriate Query or create a default one if necessary.  If you
   # pass in arguments, it modifies the query as necessary to ensure they are
-  # correct.  (Useful for specifying sort conditions, for example.)
+  # correct. (Useful for specifying sort conditions, for example.)
   def find_or_create_query(model_symbol, args = {})
     map_past_bys(args)
     model = model_symbol.to_s
@@ -188,14 +188,14 @@ module ApplicationController::Queries
   end
 
   # Change the query that +query_param+ passes along to the next request,
-  # and update session[:query_record].
+  # and update session[:query_record]. show_index_setup calls this.
   def query_params_set(query = nil)
     clear_query_in_session
     @query_param = nil
     if browser.bot?
       # do nothing
     elsif query
-      store_query_in_session(query)
+      # store_query_in_session(query)
       @query_param = full_q_param(query)
     end
     @query_param
