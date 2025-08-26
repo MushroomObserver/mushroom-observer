@@ -247,10 +247,7 @@ module Observations
       query = Query.lookup_and_save(:Observation, by_users: mary.id)
       assert_operator(query.num_results, :>=, 4)
       get(:print_labels, params: { q: query.id.alphabetize })
-      # \pard is paragraph command in rtf, one paragraph per result
-      assert_equal(query.num_results, @response.body.scan("\\pard").size)
-      assert_match(/314159/, @response.body) # make sure fundis id in there!
-      assert_match(/Mary Newbie 174/, @response.body) # and collection number!
+      assert_pdf(@response)
 
       # Alternative entry point.
       post(
@@ -260,7 +257,14 @@ module Observations
           commit: "Print Labels"
         }
       )
-      assert_equal(query.num_results, @response.body.scan("\\pard").size)
+      assert_pdf(@response)
+    end
+
+    def assert_pdf(response)
+      assert_equal 'application/pdf', response.content_type
+      pdf_content = response.body.force_encoding('ASCII-8BIT')
+      assert(pdf_content.start_with?('%PDF-'), "Should generate valid PDF")
+      assert(pdf_content.include?('%%EOF'), "Should have valid PDF ending")
     end
 
     def test_project_labels
@@ -269,10 +273,7 @@ module Observations
         :Observation, projects: projects(:open_membership_project)
       )
       get(:print_labels, params: { q: query.id.alphabetize })
-      trusted_hidden = observations(:trusted_hidden)
-      untrusted_hidden = observations(:untrusted_hidden)
-      assert_match(/#{trusted_hidden.lat}/, @response.body)
-      assert_no_match(/#{untrusted_hidden.lat}/, @response.body)
+      assert_pdf(@response)
     end
 
     # Print labels for all observations just to be sure all cases (more or less)

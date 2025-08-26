@@ -66,7 +66,7 @@ class NameField
     elsif italic_marker_at?(text, current_pos)
       process_italic_formatting(text, tokens, current_pos)
     else
-      process_regular_text(text, tokens, current_pos)
+      process_text(text, tokens, current_pos)
     end
   end
 
@@ -104,21 +104,10 @@ class NameField
     end
   end
 
-  def process_regular_text(text, tokens, current_pos)
+  def process_text(text, tokens, current_pos, base_styles = [])
     word_end = find_word_boundary(text, current_pos)
     word = text[current_pos, word_end - current_pos]
-
-    # Split word by spaces to handle individual words
-    if word.include?(" ")
-      parts = word.split
-      parts.each_with_index do |part, index|
-        add_plain_text_token(tokens, part) if part.length.positive?
-        add_plain_text_token(tokens, " ") if index < parts.length - 1
-      end
-    elsif word.length.positive?
-      add_plain_text_token(tokens, word)
-    end
-
+    tokens << [word, base_styles] if word.length.positive?
     word_end
   end
 
@@ -144,7 +133,7 @@ class NameField
     elsif can_apply_italic?(text, current_pos, base_styles)
       process_nested_italic(text, tokens, base_styles, current_pos)
     else
-      process_nested_regular_text(text, tokens, base_styles, current_pos)
+      process_text(text, tokens, current_pos, base_styles)
     end
   end
 
@@ -178,24 +167,6 @@ class NameField
       tokens << [text[current_pos], base_styles]
       current_pos + 1
     end
-  end
-
-  def process_nested_regular_text(text, tokens, base_styles, current_pos)
-    word_end = find_word_boundary(text, current_pos)
-    word = text[current_pos, word_end - current_pos]
-
-    # Split word by spaces to handle individual words
-    if word.include?(" ")
-      parts = word.split
-      parts.each_with_index do |part, index|
-        tokens << [part, base_styles] if part.length.positive?
-        tokens << [" ", base_styles] if index < parts.length - 1
-      end
-    elsif word.length.positive?
-      tokens << [word, base_styles]
-    end
-
-    word_end
   end
 
   def add_styled_words(tokens, text, styles)
@@ -234,10 +205,6 @@ class NameField
 
   def formatting_marker?(char, next_char)
     (char == "*" && next_char == "*") || (char == "_" && next_char == "_")
-  end
-
-  def can_merge_with_previous?(merged, styles)
-    !merged.empty? && merged.last[1] == styles
   end
 
   def render_tokens(pdf, tokens, x_start)
@@ -307,8 +274,6 @@ class NameField
     # Return font file path based on styles
     if styles.include?(:bold) && styles.include?(:italic)
       "app/assets/fonts/DejaVuSerif-BoldItalic.ttf"
-    elsif styles.include?(:bold)
-      "app/assets/fonts/DejaVuSerif-Bold.ttf"
     elsif styles.include?(:italic)
       "app/assets/fonts/DejaVuSerif-Italic.ttf"
     else

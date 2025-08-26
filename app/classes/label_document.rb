@@ -30,7 +30,9 @@ class LabelDocument
     "application/pdf"
   end
 
-  def encoding; end
+  def encoding
+    "ASCII-8BIT"
+  end
 
   def filename
     "observation_labels_#{Date.current}.pdf"
