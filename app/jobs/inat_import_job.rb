@@ -78,7 +78,7 @@ class InatImportJob < ApplicationJob
 
     # Request a page of iNat observations at a time, until done with all pages
     # (or canceled).
-    parser = Inat::PageParser.new(inat_import, inat_ids)
+    parser = Inat::PageParser.new(inat_import)
     while parsing?(parser); end
   end
 

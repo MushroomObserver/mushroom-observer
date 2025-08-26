@@ -9,10 +9,11 @@ class Inat
 
     attr_accessor :last_import_id
 
-    def initialize(import, ids)
+    delegate :inat_ids, to: :@import
+
+    def initialize(import)
       @import = import
       @last_import_id = 0
-      @ids = ids
       return if @import.inat_username.present?
 
       # A belt-and-suspenders safety measure.
@@ -35,7 +36,7 @@ class Inat
     # multiple times.
     # https://stackoverflow.com/a/11251654/3357635
     def next_page
-      result = next_request(id: @ids, id_above: @last_import_id)
+      result = next_request(id: inat_ids, id_above: @last_import_id)
       return nil if response_bad?(result)
 
       JSON.parse(result)
