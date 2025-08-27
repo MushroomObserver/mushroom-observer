@@ -261,7 +261,7 @@ module ApplicationController::Queries
   # available to templates as an ApplicationController ivar. Something like:
   #
   def current_query
-    query_from_q_param || query_from_session
+    @query || query_from_q_param || query_from_session
   end
 
   def add_query_param(params, query = nil)
