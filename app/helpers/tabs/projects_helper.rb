@@ -139,6 +139,7 @@ module Tabs
 
     def observation_tabs(project)
       tabs = []
+      trace_tests
       if project.observations.any?
         tabs << build_tab("#{project.observations.length} #{:OBSERVATIONS.l}",
                           observations_path(project:),
@@ -151,6 +152,10 @@ module Tabs
         tabs << build_tab("#{project.location_count} #{:LOCATIONS.l}",
                           project_locations_path(project_id: project.id),
                           "locations")
+      elsif project.species_lists.any?
+        tabs << build_tab("#{project.species_lists.length} #{:SPECIES_LISTS.l}",
+                          species_lists_path(project:),
+                          "species_lists")
       end
       tabs
     end
