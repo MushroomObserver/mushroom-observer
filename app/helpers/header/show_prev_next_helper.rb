@@ -30,7 +30,7 @@ module Header
 
     # Returns the query if it's for the relevant type of object
     def show_page_incoming_query(object)
-      return nil unless params[:q]
+      return nil unless session[:query_record]
 
       query = controller.current_query
       return nil unless [object.type_tag, :rss_log].include?(query&.type_tag)
