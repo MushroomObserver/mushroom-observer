@@ -38,7 +38,8 @@ module ApplicationController::Queries
   # only place where user content filters are applied.
   # (Related query links will preserve content filters in the subquery.)
   def create_query(model_symbol, query_params = {})
-    add_user_content_filter_parameters(query_params, model_symbol)
+    query_params = add_user_content_filter_parameters(query_params,
+                                                      model_symbol)
     # NOTE: This param `:preference_filter` is used by the controller to
     # know when params have been filtered by @user.content_filter vs any
     # other search, which may send the same params.
@@ -52,6 +53,8 @@ module ApplicationController::Queries
   def find_or_create_query(model_symbol, args = {})
     map_past_bys(args)
     model = model_symbol.to_s
+    # New: the stored query may have content filters, need to update to compare
+    args = add_user_content_filter_parameters(args, model_symbol)
     found_query = existing_updated_or_default_query(model, args)
     save_query_record_unless_bot(found_query)
     found_query
@@ -81,7 +84,7 @@ module ApplicationController::Queries
       # If existing query needs updates, we need to create a new query,
       # otherwise the modifications won't persist.
       # Use the existing query as the template, though.
-      if query_needs_update?(args, query)
+      if query_needs_update?(query, args)
         query = create_query(model, query.params.merge(args))
       end
     # If no query found, just create a default one.
@@ -91,8 +94,11 @@ module ApplicationController::Queries
     query
   end
 
-  def query_needs_update?(new_args, query)
-    new_args.any? { |_arg, val| query.params[:arg] != val }
+  # Checks if new_args are different from query_params - also if applied user
+  # content_filters have been stored in the query, might need to be cleared.
+  def query_needs_update?(query, new_args)
+    new_args.any? { |arg, val| query.params[arg] != val } ||
+      query.params.any? { |arg, val| new_args[arg] != val }
   end
 
   # Turn old query into a new query for given model,
@@ -127,12 +133,13 @@ module ApplicationController::Queries
 
   def add_user_content_filter_parameters(query_params, model)
     filters = current_user_preference_filters || {}
-    return if filters.blank?
+    return query_params if filters.blank?
 
     # disable cop because Query::Filter is not an ActiveRecord model
     Query::Filter.all.each do |fltr| # rubocop:disable Rails/FindEach
       apply_one_content_filter(fltr, query_params, model, filters[fltr.sym])
     end
+    query_params
   end
 
   def apply_one_content_filter(fltr, query_params, model, user_filter)
@@ -223,17 +230,13 @@ module ApplicationController::Queries
   # helper_method :query_from_session
 
   # Opposite is `full_q_param` below
-  def query_from_q_param(param_set)
+  def query_from_q_param
     # For backwards compatibility with old q params. Delete condition when
     # QueryRecord.where.not(permalink: true).count == 0
-    if query_record_id?(param_set[:q]) # i.e. QueryRecord.id.alphabetize
-      Query.safe_find(param_set[:q].to_s.dealphabetize) # this may return nil
-    elsif param_set[:q].present?
-      q_param = param_set[:q]
-      return nil if q_param[:model].blank?
-
-      Query.lookup(q_param[:model].to_sym,
-                   **q_param.except(:model).to_unsafe_hash)
+    if query_record_id?(params[:q]) # i.e. QueryRecord.id.alphabetize
+      query_from_q_record_id
+    elsif params[:q].present?
+      query_from_full_q_param
     end
   end
 
@@ -241,12 +244,24 @@ module ApplicationController::Queries
     str.is_a?(String) && str&.match(/^[a-zA-Z0-9]*$/)
   end
 
+  def query_from_q_record_id
+    Query.safe_find(params[:q].to_s.dealphabetize) # this may return nil
+  end
+
+  def query_from_full_q_param
+    q_param = params[:q]
+    return nil if q_param[:model].blank?
+
+    Query.lookup(q_param[:model].to_sym,
+                 **q_param.except(:model).to_unsafe_hash)
+  end
+
   # NOTE: If we're going to cache user stuff that depends on their present q,
   # we'll need a helper to make the current QueryRecord (not just the id)
   # available to templates as an ApplicationController ivar. Something like:
   #
   def current_query
-    query_from_q_param(params) || query_from_session
+    query_from_q_param || query_from_session
   end
 
   def add_query_param(params, query = nil)
