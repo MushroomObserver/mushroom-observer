@@ -49,7 +49,9 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     current_params.each do |subaction|
       next if params[subaction].blank?
 
+      # May go through #sorted_index to create the query, before #filtered_index
       query, display_opts = send(index_param_method_or_default(subaction))
+
       # Some actions may redirect instead of returning a query, such as pattern
       # searches when they resolve to a single object or get no results.
       # So if we had the param, but got a blank query, we should bail to allow
@@ -140,7 +142,9 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     { query_args: {}, display_opts: {} }.freeze
   end
 
-  # This handles the index if you pass any of the basic params.
+  # This handles the index if you pass any of the basic params, and runs before
+  # #filtered_index. The big difference from #unfiltered_index is that it runs
+  # #find_or_create_query instead of #create_query
   def sorted_index
     return unless sorted_index_permitted?
 
