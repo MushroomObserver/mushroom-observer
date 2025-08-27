@@ -132,6 +132,22 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_select("a[href*=?]", location_path(project.location.id))
   end
 
+  def test_show_project_with_empty_list
+    project = projects(:empty_list_project)
+    login
+    get(:show, params: { id: project.id })
+
+    assert(project.species_lists.any?)
+    assert_match(species_lists_path(project:),
+                 @response.body,
+                 "Page is missing a link to observation list")
+
+    assert_not(project.observations.any?)
+    assert_no_match(observations_path(project:),
+                    @response.body,
+                    "The project should not have any observations")
+  end
+
   # exposes bug found ruing development
   def test_show_project_with_location_stradding_date_line
     project = projects(:wrangel_island_project)
