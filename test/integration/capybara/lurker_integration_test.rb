@@ -256,7 +256,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
            "Found these: #{links.inspect}")
   end
 
-  def test_obs_at_location
+  def test_obs_at_location_index
     login
     nam = names(:fungi)
     loc = locations(:burbank)
@@ -302,13 +302,32 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     check_results_length(save_results)
 
     within(first("#results .sorts")) { click_link(text: "Name") }
-    # Last time through - reset `save_results` with current results
+    check_results_length(save_results)
+  end
+
+  def test_obs_at_location_show
+    login
+    loc = locations(:burbank)
+
+    # Start at observations for location.
+    visit(observations_path(location: loc.id))
+    assert_match("Observations", page.title, "Wrong title")
+    assert_selector("#filters", text: "Burbank, California, USA")
+    save_results = find_all("#results a").select do |l|
+      l[:href].match(%r{^/obs/\d+})
+    end
+
+    within(first("#results .sorts")) { click_link(text: "Name") }
     save_results = check_results_length(save_results)
     # Must set `save_hrefs` here to avoid variable going stale...
     # Capybara::RackTest::Errors::StaleElementReferenceError
     save_hrefs = save_results.pluck(:href)
 
-    query_params = parse_query_params(save_results.first[:href])
+    query_params = parse_query_params(save_hrefs.first)
+    assert_equal(
+      query_params.symbolize_keys,
+      { locations: [loc.id.to_s], model: "Observation", order_by: "name" }
+    )
 
     # Go to first observation, and try stepping back and forth.
     results_observation_links.first.click
@@ -331,8 +350,17 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     assert_equal(query_params, parse_query_params(save_path))
     assert_equal(save_path, current_fullpath,
                  "Went next then prev, should be back where we started.")
+
+    # Be sure the index link goes back to the right sorted/filtered query
+    index_link = first(".index_object_link")
+    assert_equal(query_params, parse_query_params(index_link[:href]))
+
     within("#header") { click_link(text: "Index") }
+    # Be sure we're actually on that sorted/filtered query, now we're on index
+    assert_equal(query_params, parse_query_params(current_fullpath))
+
     results = results_observation_links
+    # Coming back to the index is where the q is off.
     assert_equal(query_params, parse_query_params(results.first[:href]))
     assert_equal(save_hrefs, results.pluck(:href),
                  "Went to show_obs, screwed around, then back to index. " \
