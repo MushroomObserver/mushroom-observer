@@ -6,16 +6,13 @@ module InatImportsController::Validators
   private
 
   def params_valid?
-    username_present? &&
+    import_adequately_constrained? &&
       imports_valid? &&
       consented?
   end
 
-  # Always require inat_username as a safety measure.
-  # Else we risk importing iNat observations of all users
-  # or even worse, importing all observations of all users
-  # See also Inat::PageParser#initialize
-  def username_present?
+  # See InatImport.adequate_constraints?
+  def import_adequately_constrained?
     return true if params[:inat_username].present?
 
     flash_warning(:inat_missing_username.l)

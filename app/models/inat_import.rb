@@ -30,6 +30,7 @@
 # == Methods
 #  total_expected_time     total expected time for associated Job
 #  last_obs_elapsed_time   time spent importing a single iNat obs
+#  adequate_constraints?   enough constraints on which observations to import?
 #
 class InatImport < ApplicationRecord
   alias_attribute :canceled, :cancel # for readability, e.g., job.canceled?
@@ -52,6 +53,15 @@ class InatImport < ApplicationRecord
   # Expected average import time if no user has ever imported anything
   # (Only gets used once.)
   BASE_AVG_IMPORT_SECONDS = 15
+
+  # Are there enough constraints on which observations to import?
+  # See also InatImportsController::Validators#adquately_constrained?
+  # Need to make sure that the iNat API query has enough constrains so
+  # that we don't import too many observations or, even worse,
+  # all observations of all users.
+  def adequate_constraints?
+    inat_username.present?
+  end
 
   def job_pending?
     %w[Authenticating Importing].include?(state)

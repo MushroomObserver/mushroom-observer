@@ -14,16 +14,12 @@ class Inat
     def initialize(import)
       @import = import
       @last_import_id = 0
-      return if @import.inat_username.present?
+      return if import.adequate_constraints?
 
-      # A belt-and-suspenders safety measure.
-      # See also InatImportsController::Validators#username_present?
-      # Always require inat_username as a safety measure.
-      # Else we risk importing iNat observations of all users
-      # or even worse, importing all observations of all users
+      # A belt-and-suspenders safety measure to prevent runaway imports
       raise(
         ArgumentError.new(
-          "PageParser called with InatImport which lacks inat_username"
+          "PageParser called with InatImport which lacks adequate constraints"
         )
       )
     end
