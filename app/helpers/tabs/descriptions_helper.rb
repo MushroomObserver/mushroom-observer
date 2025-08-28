@@ -30,8 +30,7 @@ module Tabs
     def create_description_tab(object, type)
       InternalLink::Model.new(
         :show_name_create_description.t, "#{type.capitalize}Description",
-        add_query_param(send(:"new_#{type}_description_path",
-                             { "#{type}_id": object.id })),
+        send(:"new_#{type}_description_path", { "#{type}_id": object.id }),
         html_options: { icon: :add }
       ).tab
     end
@@ -41,7 +40,7 @@ module Tabs
 
       InternalLink::Model.new(
         :show_description_edit.t, description,
-        add_query_param(send(:"edit_#{type}_description_path", description.id)),
+        send(:"edit_#{type}_description_path", description.id),
         html_options: { icon: :edit }
       ).tab
     end
@@ -59,10 +58,8 @@ module Tabs
     def clone_description_tab(description, type)
       InternalLink::Model.new(
         :show_description_clone.t, description,
-        add_query_param(
-          send(:"new_#{type}_description_path",
-               { clone: description.id, "#{type}_id": description.parent_id })
-        ),
+        send(:"new_#{type}_description_path",
+             { clone: description.id, "#{type}_id": description.parent_id }),
         html_options: { help: :show_description_clone_help.l, icon: :clone }
       ).tab
     end
@@ -72,9 +69,7 @@ module Tabs
 
       InternalLink::Model.new(
         :show_description_merge.t, description,
-        add_query_param(
-          send(:"new_merge_#{type}_description_path", description.id)
-        ),
+        send(:"new_merge_#{type}_description_path", description.id),
         html_options: { help: :show_description_merge_help.l, icon: :merge }
       ).tab
     end
@@ -86,9 +81,7 @@ module Tabs
     #   parent_type = description.parent.type_tag.to_s
     #   InternalLink::Model.new(
     #     :show_description_move.t, description,
-    #     add_query_param(
-    #       send(:"new_move_#{type}_description_path", description.id)
-    #     ),
+    #     send(:"new_move_#{type}_description_path", description.id),
     #     html_options: {
     #       help: :show_description_move_help.l(parent: parent_type),
     #       icon: :move
@@ -101,9 +94,7 @@ module Tabs
 
       InternalLink::Model.new(
         :show_description_adjust_permissions.t, description,
-        add_query_param(
-          send(:"edit_permissions_#{type}_description_path", description.id)
-        ),
+        send(:"edit_permissions_#{type}_description_path", description.id),
         html_options: { help: :show_description_adjust_permissions_help.l,
                         icon: :adjust }
       ).tab
@@ -115,9 +106,7 @@ module Tabs
 
       InternalLink::Model.new(
         :show_description_make_default.t, description,
-        add_query_param(
-          send(:"make_default_#{type}_description_path", description.id)
-        ),
+        send(:"make_default_#{type}_description_path", description.id),
         html_options: { button: :put,
                         help: :show_description_make_default_help.l,
                         icon: :make_default }
@@ -130,7 +119,7 @@ module Tabs
 
       InternalLink::Model.new(
         :show_object.t(type: :project), description,
-        add_query_param(project.show_link_args),
+        project.show_link_args,
         html_options: { icon: :project }
       ).tab
     end
@@ -141,9 +130,7 @@ module Tabs
 
       InternalLink::Model.new(
         :show_description_publish.t, description,
-        add_query_param(
-          send(:"publish_#{type}_description_path", description.id)
-        ),
+        send(:"publish_#{type}_description_path", description.id),
         html_options: { button: :put, help: :show_description_publish_help.l,
                         icon: :publish }
       ).tab
@@ -152,11 +139,9 @@ module Tabs
     def new_description_for_project_tab(object, type, project)
       InternalLink::Model.new(
         project.title, "#{type.capitalize}Description",
-        add_query_param(
-          send(:"new_#{type}_description_path",
-               { project: project.id, source: "project",
-                 "#{type}_id": object.id })
-        )
+        send(:"new_#{type}_description_path",
+             { project: project.id, source: "project",
+               "#{type}_id": object.id })
       ).tab
     end
 
