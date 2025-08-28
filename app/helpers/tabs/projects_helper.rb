@@ -39,8 +39,7 @@ module Tabs
     end
 
     def new_project_tab
-      InternalLink.new(:list_projects_add_project.t,
-                       add_query_param(new_project_path)).tab
+      InternalLink.new(:list_projects_add_project.t, new_project_path).tab
     end
 
     def change_member_status_tab(project)
@@ -216,7 +215,7 @@ module Tabs
       _img_name, img_link, = related_images_tab(:Observation, query)
       buttons = [
         button_link(:MAP.t,
-                    map_observations_path(q: get_query_param(query))),
+                    add_query_param(map_observations_path, query)),
         button_link(:IMAGES.l, img_link),
         button_link(:DOWNLOAD.l,
                     add_query_param(new_observations_download_path, query))
