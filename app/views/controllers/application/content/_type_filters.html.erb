@@ -1,10 +1,18 @@
+<%# locals: (query: nil, types: nil) %>
+
 <%# bs3
 https://getbootstrap.com/docs/3.4/javascript/#buttons-checkbox-radio
+%>
+<%
 %>
 
 <%= form_with(url: add_query_param(activity_logs_path),
               method: :get, scope: :type,
-              class: "filter-form", id: "log_filter_form") do |f|
+              class: "filter-form", id: "log_filter_form") do |form|
+
+  filters = RssLog::ALL_TYPE_TAGS.map(&:to_s).map do |type|
+    type_checkbox_with_button(query, types, type, form)
+  end
 
   tag.div(class: "btn-group pb-1 hidden-xs text-nowrap") do
     [
@@ -12,17 +20,15 @@ https://getbootstrap.com/docs/3.4/javascript/#buttons-checkbox-radio
 
       # Everything tab
       tag.span(
-        filter_for_everything(@types),
+        filter_for_everything(query, types),
         class: class_names("btn btn-default btn-sm",
-                           { active: @types == ['all'] })
+                           { active: types == ['all'] })
       ),
 
       # Tab for each type of log
-      render(partial: "application/content/type",
-             collection: RssLog::ALL_TYPE_TAGS.map(&:to_s),
-             locals: { f: f }),
+      *filters,
 
-      f.submit(:SUBMIT.t, class: "btn btn-default btn-sm")
+      form.submit(:SUBMIT.t, class: "btn btn-default btn-sm")
     ].safe_join
   end
 
