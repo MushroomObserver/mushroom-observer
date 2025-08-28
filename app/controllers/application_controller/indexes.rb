@@ -101,6 +101,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   end
 
   # Provide defaults for the params an index can handle.
+  # Note the order of this array governs logic in build_index_with_query.
   INDEX_BASIC_PARAMS = [:by, :q, :id].freeze
 
   # Overrides should include any of the above basics, if relevant.
@@ -114,7 +115,8 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     index_active_params.intersection(INDEX_BASIC_PARAMS)
   end
 
-  # Should this param be handled by :sorted_index or a named method?
+  # If param is [:by, :q, :id] it's handled by :sorted_index.
+  # Other params are handled by a named method in the downstream controller.
   def index_param_method_or_default(subaction)
     index_basic_params.include?(subaction) ? :sorted_index : subaction
   end
@@ -167,7 +169,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   end
 
   def order_by_or_flash_if_unknown
-    order_by = params[:by]
+    order_by = params.dig(:q, :order_by) || params[:by]
     return nil if order_by.blank?
 
     scope = :"order_by_#{order_by.to_s.sub(/^reverse_/, "")}"
