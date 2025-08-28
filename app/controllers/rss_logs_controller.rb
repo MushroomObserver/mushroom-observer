@@ -53,7 +53,6 @@ class RssLogsController < ApplicationController
   # Get the types whose value == "1"
   def index_type_from_params
     types = ""
-    debugger
     param = params.dig(:q, :type) || params[:type]
     if param.is_a?(ActionController::Parameters)
       types = param.select { |_key, value| value == "1" }.keys
@@ -71,7 +70,6 @@ class RssLogsController < ApplicationController
   def filtered_index_final_hook(query, _display_opts)
     # store_query_in_session(query)
     query_params_set(query) # also stores query in session
-    debugger
     @types = query.params[:type].to_s.split.sort
 
     # Let the user make this their default and fine tune.
