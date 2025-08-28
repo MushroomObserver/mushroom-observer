@@ -55,7 +55,7 @@ class InatImport < ApplicationRecord
   BASE_AVG_IMPORT_SECONDS = 15
 
   # Are there enough constraints on which observations to import?
-  # See also InatImportsController::Validators#adquately_constrained?
+  # See also InatImportsController::Validators#adequately_constrained?
   # Need to make sure that the iNat API query has enough constrains so
   # that we don't import too many observations or, even worse,
   # all observations of all users.
