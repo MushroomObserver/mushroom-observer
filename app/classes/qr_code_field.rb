@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "prawn"
+require "prawn/measurement_extensions"
 require "rqrcode"
 
 # Represents a QR code field with a label
