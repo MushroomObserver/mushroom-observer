@@ -35,6 +35,8 @@ module Header
       query = controller.current_query
       return nil unless [object.type_tag, :rss_log].include?(query&.type_tag)
 
+      # set current_id so prev_id and next_id will work
+      query.current_id = object.id
       query
     end
 
@@ -44,10 +46,10 @@ module Header
       hide = show_no_more?(object, query, dir) ? "disabled opacity-0" : ""
       classes = class_names(SHOW_LINK_BTN_CLASSES, "#{dir}_object_link", hide)
       type = object.type_tag
+      adjacent_id = query.send(:"#{dir}_id")
       icon_link_to(
         :"#{dir.upcase}_OBJECT".t(type: :"#{type.upcase}".l),
-        send(show_link_path(type),
-             id: object.id, flow: dir.to_s, q: get_query_param(query)),
+        send(show_link_path(type), id: adjacent_id || 0),
         class: classes, icon: dir, show_text: false
       )
     end
