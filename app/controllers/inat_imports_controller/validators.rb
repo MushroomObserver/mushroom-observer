@@ -20,7 +20,7 @@ module InatImportsController::Validators
   end
 
   def imports_valid?
-    imports_designated? &&
+    imports_unambiguously_designated? &&
       valid_inat_ids_param? &&
       list_within_size_limits? &&
       fresh_import? &&
@@ -28,8 +28,10 @@ module InatImportsController::Validators
       not_importing_all_anothers?
   end
 
-  def imports_designated?
-    return true if importing_all? ^ listing_ids?
+  def imports_unambiguously_designated?
+    if (importing_all? && !listing_ids?) || (listing_ids? && !importing_all?)
+      return true
+    end
 
     flash_warning(:inat_list_xor_all.l)
     false
