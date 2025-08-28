@@ -41,10 +41,10 @@ export default class extends Controller {
           cached_encoded_qs = url.search.split("?")[1],
           decoded_cached_qs = decodeURIComponent(cached_encoded_qs),
           parsed_qs = qs.parse(decoded_cached_qs),
-          decoded_current_q = decodeURIComponent(this.queryString),
-          parsed_current_q = qs.parse(decoded_current_q)
+          decoded_current_qs = decodeURIComponent(this.queryString),
+          parsed_current_qs = qs.parse(decoded_current_qs)
 
-        parsed_qs["q"] = parsed_current_q
+        parsed_qs["q"] = parsed_current_qs["q"]
         const encoded_current_qs = qs.stringify(parsed_qs)
 
         link.href = url.pathname + "?" + encoded_current_qs
