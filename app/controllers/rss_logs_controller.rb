@@ -36,11 +36,15 @@ class RssLogsController < ApplicationController
 
   # Show selected list, based on current Query.
   def sorted_index_opts
-    super.merge(query_args: { type: index_type_default })
+    super.merge(
+      query_args: { type: index_type_from_params || index_type_default }
+    )
   end
 
   # Requests with param `type` potentially show an array of types
-  # of objects. The array comes from the checkboxes in tabset
+  # of objects. The array comes from the checkboxes in tabset.
+  # Refactored so this sends type under q param, goes through :sorted_index
+  # This maintained for backwards compatibility only.
   def type
     query = find_or_create_query(:RssLog, type: index_type_from_params)
     [query, index_display_at_id_opts]
@@ -49,13 +53,15 @@ class RssLogsController < ApplicationController
   # Get the types whose value == "1"
   def index_type_from_params
     types = ""
-    if params[:type].is_a?(ActionController::Parameters)
-      types = params[:type].select { |_key, value| value == "1" }.keys
+    debugger
+    param = params.dig(:q, :type) || params[:type]
+    if param.is_a?(ActionController::Parameters)
+      types = param.select { |_key, value| value == "1" }.keys
       types = RssLog::ALL_TYPE_TAGS.map(&:to_s).intersection(types)
       types = "all" if types.length == RssLog::ALL_TYPE_TAGS.length
       types = "none" if types.empty?
-    elsif params[:type].is_a?(String)
-      types = params[:type]
+    elsif param.is_a?(String)
+      types = param
     end
     types = types.map(&:to_s).join(" ") if types.is_a?(Array)
     types
@@ -65,7 +71,7 @@ class RssLogsController < ApplicationController
   def filtered_index_final_hook(query, _display_opts)
     # store_query_in_session(query)
     query_params_set(query) # also stores query in session
-
+    debugger
     @types = query.params[:type].to_s.split.sort
 
     # Let the user make this their default and fine tune.
