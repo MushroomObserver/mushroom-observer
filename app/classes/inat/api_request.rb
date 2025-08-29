@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 # encapsulates requests to the iNat API
-# intended for all those requests that are not specific to a single iNatImport
 class Inat::APIRequest
   include Inat::Constants
 

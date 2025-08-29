@@ -108,7 +108,24 @@ class InatImportsControllerTest < FunctionalTestCase
       post(:create, params: params)
     end
 
-    assert_flash_text(:inat_no_imports_designated.l)
+    assert_flash_text(:inat_list_xor_all.l)
+  end
+
+  def test_create_list_and_all
+    params = { inat_username: "anything", inat_ids: "7,8,9",
+               all: 1, consent: 1 }
+    login
+
+    assert_no_difference(
+      "Observation.count",
+      "Imported obs though user both listed IDs and checked Import All"
+    ) do
+      post(:create, params: params)
+    end
+    assert_flash_text(
+      :inat_list_xor_all.l,
+      "It should warn about listing IDs while checking Import All"
+    )
   end
 
   def test_create_illegal_observation_id

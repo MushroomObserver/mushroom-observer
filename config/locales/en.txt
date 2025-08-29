@@ -3065,6 +3065,7 @@
   runtime_illegal_inat_id: iNat observation number can contain only numbers, commas, and spaces
   inat_missing_username: Missing your iNat Username
   inat_no_imports_designated: You must list the iNat observation(s) to be imported
+  inat_list_xor_all: "Either (a) list the iNat observation(s), or (b) check \"Import all ...\" (not both)"
   inat_previous_import: iNat [inat_id] previously imported as MO Observation [mo_obs_id]
   inat_previous_mirror: iNat [inat_id] is a "mirror" of existing MO Observation [mo_obs_id]
   inat_too_many_ids_listed: Too many ids listed

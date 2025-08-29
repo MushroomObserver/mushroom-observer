@@ -217,7 +217,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_08_24_194515) do
     t.boolean "import_all"
     t.integer "importables"
     t.integer "imported_count"
-    t.string "response_errors"
+    t.text "response_errors"
     t.datetime "ended_at"
     t.integer "total_imported_count"
     t.integer "total_seconds"

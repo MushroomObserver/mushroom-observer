@@ -150,6 +150,10 @@ module Tabs
         tabs << build_tab("#{project.location_count} #{:LOCATIONS.l}",
                           project_locations_path(project_id: project.id),
                           "locations")
+      elsif project.species_lists.any?
+        tabs << build_tab("#{project.species_lists.length} #{:SPECIES_LISTS.l}",
+                          species_lists_path(project:),
+                          "species_lists")
       end
       tabs
     end

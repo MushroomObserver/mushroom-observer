@@ -19,7 +19,6 @@ class Inat
       add_inat_images(inat_obs[:observation_photos])
       update_names_and_proposals
       add_inat_sequences
-      inat_obs
       @observation
     end
 
