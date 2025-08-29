@@ -449,7 +449,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     obs   = observations(:detailed_unknown_obs)
     rec   = obs.herbarium_records.first
     query = @controller.find_or_create_query(:HerbariumRecord)
-    q     = @controller.get_query_param(query)
+    q     = @controller.q_param(query)
     make_admin("rolf")
     params = {
       id: rec.id,
@@ -522,7 +522,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     obs   = observations(:detailed_unknown_obs)
     recs  = obs.herbarium_records
     query = @controller.find_or_create_query(:HerbariumRecord)
-    q     = @controller.get_query_param(query)
+    q     = @controller.q_param(query)
     assert_operator(recs.length, :>, 1)
     make_admin("rolf")
 

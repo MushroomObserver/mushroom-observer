@@ -51,7 +51,7 @@ module Tabs
       text ||= :list_objects.t(type: obj.type_tag)
 
       InternalLink::Model.new(
-        text, obj, add_query_param(obj.index_link_args),
+        text, obj, add_q_param(obj.index_link_args),
         html_options: { class: "#{obj.type_tag.to_s.pluralize}_index_link" }
       ).tab
     end

@@ -36,7 +36,7 @@ module Tabs
     def collection_numbers_index_tab(c_n)
       InternalLink::Model.new(
         :edit_collection_number_back_to_index.t, c_n,
-        add_query_param(c_n.index_link_args)
+        add_q_param(c_n.index_link_args)
       ).tab
     end
 
@@ -47,7 +47,7 @@ module Tabs
 
       InternalLink::Model.new(
         tag.i(c_n.format_name.t), c_n,
-        add_query_param(c_n.show_link_args, cn_query)
+        add_q_param(c_n.show_link_args, cn_query)
       ).tab
     end
 

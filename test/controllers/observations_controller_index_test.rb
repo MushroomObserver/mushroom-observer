@@ -57,7 +57,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login
 
     query = Query.lookup_and_save(:Observation, big_obs_query_params)
-    get(:index, params: { q: @controller.get_query_param(query) })
+    get(:index, params: { q: @controller.q_param(query) })
 
     names_joined_trunc = BUNCH_OF_NAMES.first(3).map(&:text_name).join(", ")
     names_joined_trunc += ", ..."
@@ -78,7 +78,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login
 
     query = Query.lookup_and_save(:Observation, long_obs_query_params)
-    get(:index, params: { q: @controller.get_query_param(query) })
+    get(:index, params: { q: @controller.q_param(query) })
 
     regions_joined = SUPERLONG_REGIONS.join(", ")
     regions_joined_trunc = "#{regions_joined[0...97]}..."
@@ -119,7 +119,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
   def test_index_query_no_matches
     query = Query.lookup(:Observation, id_in_set: "one")
-    params = { q: @controller.get_query_param(query) }
+    params = { q: @controller.q_param(query) }
 
     login
     get(:index, params:)
@@ -186,7 +186,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
            "Test needs a string that has exactly one hit")
 
     login
-    params = { q: @controller.get_query_param(query), advanced_search: true }
+    params = { q: @controller.q_param(query), advanced_search: true }
     get(:index, params:)
 
     assert_match(/#{obs.id}/, redirect_to_url,
@@ -206,7 +206,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     query = oklahoma_query
 
     login
-    params = { q: @controller.get_query_param(query), advanced_search: true }
+    params = { q: @controller.q_param(query), advanced_search: true }
     get(:index, params:)
 
     assert_flash_text(:runtime_no_matches.l(type: :observations.l))
@@ -260,7 +260,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     query_no_conditions = Query.lookup_and_save(:Observation)
 
     login
-    params = { q: @controller.get_query_param(query_no_conditions),
+    params = { q: @controller.q_param(query_no_conditions),
                advanced_search: true }
     get(:index, params:)
 
@@ -554,7 +554,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_displayed_filters(
       "#{:query_search_where.l}: #{location.display_name}"
     )
-    q = @controller.get_query_param
+    q = @controller.q_param
     assert_select("a[href^='#{new_location_path(q:, where: location.name)}']")
   end
 

@@ -734,7 +734,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
                     order_by: :name
     )
     assert_equal(4, query.num_results)
-    params = { q: @controller.get_query_param(query) }
+    params = { q: @controller.q_param(query) }
 
     o_id = observations(:minimal_unknown_obs).id
 

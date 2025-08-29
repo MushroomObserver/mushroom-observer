@@ -6,7 +6,7 @@ https://getbootstrap.com/docs/3.4/javascript/#buttons-checkbox-radio
 <%
 %>
 
-<%= form_with(url: add_query_param(activity_logs_path),
+<%= form_with(url: add_q_param(activity_logs_path),
               method: :get, scope: :type,
               class: "filter-form", id: "log_filter_form") do |form|
 

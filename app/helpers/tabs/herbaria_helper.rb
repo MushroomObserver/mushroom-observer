@@ -84,7 +84,7 @@ module Tabs
     def nonpersonal_herbaria_index_tab
       InternalLink.new(
         :herbarium_index.t,
-        add_query_param(herbaria_path(nonpersonal: true)),
+        add_q_param(herbaria_path(nonpersonal: true)),
         alt_title: "nonpersonal_herbaria_index"
       ).tab
     end

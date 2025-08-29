@@ -4,7 +4,7 @@ add_page_title(:propagate_lifeform_title.t(name: @name.display_name))
 add_context_nav(name_forms_return_tabs(name: @name))
 container_class(:text_image)
 action = { controller: "/names/lifeforms/propagate", action: :update,
-           id: @name.id, q: get_query_param }
+           id: @name.id, q: q_param }
 %>
 
 <%= form_with(url: action, method: :put, id: "propagate_name_lifeform_form") do |f| %>

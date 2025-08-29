@@ -87,7 +87,7 @@ module Header
 
       icon_link_to(
         :INDEX_OBJECT.t(type: :"#{type.upcase}".l),
-        add_query_param(object.index_link_args, query),
+        add_q_param(object.index_link_args, query),
         class: classes, icon: icon, show_text: false
       )
     end

@@ -165,7 +165,7 @@ class ProjectsController < ApplicationController
     else
       @project.log_destroy
       flash_notice(:destroy_project_success.t)
-      redirect_to(projects_path(q: get_query_param))
+      redirect_to(projects_path(q: q_param))
     end
   end
 

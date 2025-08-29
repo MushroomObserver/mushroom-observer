@@ -71,7 +71,7 @@ module NamesHelper
     # last_query = query.sql.squish
     link_to(
       title,
-      add_query_param(observations_path, query),
+      add_q_param(observations_path, query),
       data: { query_params: query.params.deep_compact_blank.to_json,
               query_record: query.record.id,
               query_alph: query.record.id.alphabetize }
@@ -157,7 +157,7 @@ module NamesHelper
 
     tag.p do
       link_to(:show_object.t(type: type),
-              add_query_param(names_path, subtaxa_query))
+              add_q_param(names_path, subtaxa_query))
     end
   end
 

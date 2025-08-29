@@ -23,7 +23,7 @@ module Tabs
 
     def map_locations_tab(query)
       InternalLink.new(
-        :list_place_names_map.t, add_query_param(map_locations_path, query)
+        :list_place_names_map.t, add_q_param(map_locations_path, query)
       ).tab
     end
 
@@ -108,7 +108,7 @@ module Tabs
     def observations_at_location_tab(location)
       InternalLink::Model.new(
         show_obs_link_title_with_count(location), location,
-        add_query_param(observations_path(location: location.id)),
+        add_q_param(observations_path(location: location.id)),
         alt_title: :show_location_observations.t,
         html_options: { icon: :observations, show_text: true }
       ).tab

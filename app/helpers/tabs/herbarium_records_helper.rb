@@ -58,7 +58,7 @@ module Tabs
 
       InternalLink::Model.new(
         h_r.accession_at_herbarium.t, h_r,
-        add_query_param(h_r.show_link_args, hr_query),
+        add_q_param(h_r.show_link_args, hr_query),
         alt_title: "herbarium_record"
       ).tab
     end
@@ -83,7 +83,7 @@ module Tabs
     def herbarium_records_index_return_tab
       InternalLink.new(
         :edit_herbarium_record_back_to_index.t,
-        herbarium_records_path(q: get_query_param)
+        herbarium_records_path(q: q_param)
       ).tab
     end
 
