@@ -29,7 +29,7 @@ module Observations
         :Observation, needs_naming: mary, clade: "Agaricales"
       )
 
-      # q = @controller.full_q_param(QueryRecord.last.query)
+      # q = @controller.q_param(QueryRecord.last.query)
       # get(:index, params: { q: })
       assert_equal(query.num_results, aga_obs.count)
       get(:index,
@@ -81,7 +81,7 @@ module Observations
         )
       end
 
-      # q = @controller.full_q_param(QueryRecord.last.query)
+      # q = @controller.q_param(QueryRecord.last.query)
       # get(:index, params: { q: })
       get(:index,
           params: { filter: { type: :region, term: "California, USA" } })
@@ -101,7 +101,7 @@ module Observations
       consensus = ::Observation::NamingConsensus.new(vote_on_obs)
       consensus.change_vote(vote_on_obs.namings.first, 1)
 
-      # q = @controller.full_q_param(QueryRecord.last.query)
+      # q = @controller.q_param(QueryRecord.last.query)
       # get(:index, params: { q: })
       get(:index,
           params: { filter: { type: :region, term: "California, USA" } })
