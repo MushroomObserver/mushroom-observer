@@ -64,7 +64,7 @@ module Descriptions
       if @description.project
         redirect_to(project_path(@description.project_id))
       else
-        redirect_to(add_query_param(@description.parent.show_link_args))
+        redirect_to(@description.parent.show_link_args)
       end
     end
 
@@ -348,7 +348,7 @@ module Descriptions
         flash_notice(:runtime_destroy_description_success.t)
         log_description_destroyed
         @description.destroy
-        redirect_to(add_query_param(@description.parent.show_link_args))
+        redirect_to(@description.parent.show_link_args)
       else
         flash_error(:runtime_destroy_description_not_admin.t)
         redirect_if_description_not_destroyed
@@ -357,9 +357,9 @@ module Descriptions
 
     def redirect_if_description_not_destroyed
       if in_admin_mode? || @description.is_reader?(@user)
-        redirect_to(add_query_param(@description.show_link_args))
+        redirect_to(@description.show_link_args)
       else
-        redirect_to(add_query_param(@description.parent.show_link_args))
+        redirect_to(@description.parent.show_link_args)
       end
     end
 
