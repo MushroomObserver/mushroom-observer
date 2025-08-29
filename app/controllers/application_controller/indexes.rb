@@ -313,9 +313,9 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   ###########################################################################
 
   def show_action_redirect(query)
-    redirect_with_query(controller: query.model.show_controller,
-                        action: query.model.show_action,
-                        id: query.result_ids.first)
+    redirect_to(controller: query.model.show_controller,
+                action: query.model.show_action,
+                id: query.result_ids.first)
   end
 
   def calc_pages_and_objects(query, display_opts)

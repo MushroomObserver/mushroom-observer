@@ -161,7 +161,7 @@ module Observations
     end
 
     def redirect_to_obs(obs)
-      redirect_with_query(obs.show_link_args)
+      redirect_to(obs.show_link_args)
     end
 
     ##########################################################################

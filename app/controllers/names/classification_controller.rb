@@ -22,7 +22,7 @@ module Names
       return render_edit unless validate_classification!
 
       @name.change_classification(@name.classification)
-      redirect_with_query(@name.show_link_args)
+      redirect_to(@name.show_link_args)
     end
 
     private

@@ -41,7 +41,7 @@ module GlossaryTerms
          @object.add_image(image) &&
          @object.save
         image.log_reuse_for(@object)
-        redirect_with_query(glossary_term_path(@object.id))
+        redirect_to(glossary_term_path(@object.id))
       else
         flash_error(:runtime_no_save.t(:glossary_term)) if image
         render(:reuse,
@@ -69,7 +69,7 @@ module GlossaryTerms
 
       return if check_permission!(@object)
 
-      redirect_with_query(glossary_term_path(@object.id))
+      redirect_to(glossary_term_path(@object.id))
     end
 
     # The remove form submits to this action
@@ -78,7 +78,7 @@ module GlossaryTerms
       return unless @object
 
       unless check_permission!(@object)
-        return redirect_with_query(glossary_term_path(@object.id))
+        return redirect_to(glossary_term_path(@object.id))
       end
 
       return unless (images_data = params[:selected])
@@ -108,9 +108,9 @@ module GlossaryTerms
         image.log_remove_from(@object)
         flash_notice(:runtime_image_remove_success.t(id: image_id))
       end
-      redirect_with_query(glossary_term_path(@object.id))
+      redirect_to(glossary_term_path(@object.id))
       # render("glossary_terms/show",
-      #        location: glossary_term_path(@object.id, q: get_query_param))
+      #        location: glossary_term_path(@object.id))
     end
   end
 end

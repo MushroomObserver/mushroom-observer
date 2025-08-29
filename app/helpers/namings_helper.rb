@@ -82,7 +82,7 @@ module NamingsHelper
   # N+1: naming includes name
   def naming_name_link(user, naming)
     Textile.register_name(naming.name)
-    link_with_query(
+    link_to(
       naming.display_name_brief_authors(user).t.break_name.small_author,
       name_path(id: naming.name)
     )

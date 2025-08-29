@@ -62,7 +62,7 @@ module Names
 
     def submit_tracking_form_create
       create_or_update_name_tracker_and_interest(@name.id)
-      redirect_to(name_path(@name.id, q: get_query_param))
+      redirect_to(name_path(@name.id))
     end
 
     def submit_tracking_form_update
@@ -72,7 +72,7 @@ module Names
       when :DISABLE.l
         destroy_name_tracker_interest_and_flash
       end
-      redirect_to(name_path(@name.id, q: get_query_param))
+      redirect_to(name_path(@name.id))
     end
 
     def create_or_update_name_tracker_and_interest(name_id)

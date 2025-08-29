@@ -37,7 +37,7 @@ module Projects
         remove_observation_if_permitted(obs_id)
       end
 
-      redirect_with_query(project_path(@project))
+      redirect_to(project_path(@project))
     end
 
     private

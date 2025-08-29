@@ -249,7 +249,7 @@ class ImagesController < ApplicationController
   private
 
   def delete_and_redirect(next_state = nil)
-    return redirect_with_query(action: :show, id: @image.id) unless
+    return redirect_to(action: :show, id: @image.id) unless
       check_permission!(@image)
 
     @image.log_destroy
@@ -258,6 +258,6 @@ class ImagesController < ApplicationController
     return redirect_to(action: :index) unless next_state
 
     query_params_set(next_state) # also stores query in session
-    redirect_with_query(action: :show, id: next_state.current_id)
+    redirect_to(action: :show, id: next_state.current_id)
   end
 end

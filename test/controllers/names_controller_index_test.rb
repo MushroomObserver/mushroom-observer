@@ -389,8 +389,8 @@ class NamesControllerIndexTest < FunctionalTestCase
     expected = Name.order(:sort_name, :author).limit(10).to_a
     assert_equal(expected.map(&:id), ids_from_links(name_links))
 
-    url = @controller.url_with_query(controller: "/names", action: :show,
-                                     id: expected.first.id, only_path: true)
+    url = @controller.url_for(controller: "/names", action: :show,
+                              id: expected.first.id, only_path: true)
     assert_equal(name_links.first[:href], url)
 
     assert_link_in_html("Next", controller: "/names",
@@ -410,8 +410,8 @@ class NamesControllerIndexTest < FunctionalTestCase
     expected = Name.order(:sort_name).limit(10).offset(10).to_a
     assert_equal(expected.map(&:id), ids_from_links(name_links))
 
-    url = @controller.url_with_query(controller: "/names", action: :show,
-                                     id: expected.first.id, only_path: true)
+    url = @controller.url_for(controller: "/names", action: :show,
+                              id: expected.first.id, only_path: true)
     assert_equal(name_links.first[:href], url)
 
     assert_link_in_html("Previous", controller: "/names",
@@ -433,8 +433,8 @@ class NamesControllerIndexTest < FunctionalTestCase
     assert_equal(Set.new(l_names.map(&:id)),
                  Set.new(ids_from_links(name_links)))
 
-    url = @controller.url_with_query(controller: "/names", action: :show,
-                                     id: l_names.first.id, only_path: true)
+    url = @controller.url_for(controller: "/names", action: :show,
+                              id: l_names.first.id, only_path: true)
     assert_equal(name_links.first[:href], url)
     assert_select("a", text: "1", count: 0)
   end

@@ -222,11 +222,10 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
 
     if user_can_destroy_herbarium?
       @herbarium.destroy
-      redirect_to_referrer ||
-        redirect_with_query(herbarium_path(@herbarium.try(&:id)))
+      redirect_to_referrer || redirect_to(herbarium_path(@herbarium.try(&:id)))
     else
       flash_error(:permission_denied.t)
-      redirect_to_referrer || redirect_with_query(herbarium_path(@herbarium))
+      redirect_to_referrer || redirect_to(herbarium_path(@herbarium))
     end
   end
 
@@ -240,7 +239,7 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     return true if in_admin_mode? || @herbarium.can_edit?
 
     flash_error(:permission_denied.t)
-    redirect_to_referrer || redirect_with_query(herbarium_path(@herbarium))
+    redirect_to_referrer || redirect_to(herbarium_path(@herbarium))
     false
   end
 
@@ -406,7 +405,7 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   def show_modal_flash_or_show_herbarium
     respond_to do |format|
       format.html do
-        redirect_with_query(herbarium_path(@herbarium)) and return
+        redirect_to(herbarium_path(@herbarium)) and return
       end
       format.turbo_stream do
         # Context here is the obs form.

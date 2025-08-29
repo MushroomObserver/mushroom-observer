@@ -307,8 +307,7 @@ class CommentsController < ApplicationController
       # Simply send a head response for turbo here.
       format.turbo_stream { head(:ok) }
       format.html do
-        redirect_with_query(controller: @target.show_controller,
-                            action: @target.show_action, id: @target.id)
+        redirect_to(@target.show_link_args)
       end
     end
   end
@@ -354,7 +353,7 @@ class CommentsController < ApplicationController
   def show_flash_and_send_back(target)
     respond_to do |format|
       format.html do
-        redirect_with_query(target.show_link_args) and return
+        redirect_to(target.show_link_args) and return
       end
       # renders the flash in the modal
       format.turbo_stream do

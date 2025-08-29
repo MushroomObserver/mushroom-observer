@@ -30,7 +30,7 @@ module Projects
                                                       content)
       end
       flash_notice(:admin_request_success.t(title: @project.title))
-      redirect_to(project_path(@project.id, q: get_query_param))
+      redirect_to(project_path(@project.id))
     end
 
     private

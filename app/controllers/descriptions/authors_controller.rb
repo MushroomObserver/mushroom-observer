@@ -14,8 +14,7 @@ module Descriptions
       else
         parent = @object.parent
         flash_error(:review_authors_denied.t)
-        redirect_with_query(controller: parent.show_controller,
-                            action: parent.show_action, id: parent.id)
+        redirect_to(parent.show_link_args)
       end
     end
 

@@ -28,7 +28,7 @@ module Names::Classification
       end
 
       @name.inherit_classification(parent)
-      redirect_with_query(@name.show_link_args)
+      redirect_to(@name.show_link_args)
     end
 
     private

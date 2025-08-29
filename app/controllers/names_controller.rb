@@ -414,12 +414,14 @@ class NamesController < ApplicationController
   def update_name
     @parse = parse_name
     if !minor_change? && @name.dependents? && !in_admin_mode?
-      redirect_with_query(new_admin_emails_name_change_requests_path(
-                            name_id: @name.id,
-                            # Auricularia Bull. [#17132]
-                            new_name_with_icn_id: "#{@parse.search_name} " \
-                                                  "[##{params[:name][:icn_id]}]"
-                          ))
+      redirect_to(
+        new_admin_emails_name_change_requests_path(
+          name_id: @name.id,
+          # Auricularia Bull. [#17132]
+          new_name_with_icn_id: "#{@parse.search_name} " \
+                                "[##{params[:name][:icn_id]}]"
+        )
+      )
       return
     end
 
@@ -461,14 +463,14 @@ class NamesController < ApplicationController
   end
 
   def redirect_to_show_name
-    redirect_with_query(@name.show_link_args)
+    redirect_to(@name.show_link_args)
   end
 
   def redirect_to_approve_or_deprecate
     if params[:name][:deprecated].to_s == "true"
-      redirect_with_query(form_to_deprecate_synonym_of_name_path(@name.id))
+      redirect_to(form_to_deprecate_synonym_of_name_path(@name.id))
     else
-      redirect_with_query(form_to_approve_synonym_of_name_path(@name.id))
+      redirect_to(form_to_approve_synonym_of_name_path(@name.id))
     end
   end
 
@@ -619,9 +621,9 @@ class NamesController < ApplicationController
       perform_merge_names(new_name)
       redirect_to_show_name
     else
-      redirect_with_query(new_admin_emails_merge_requests_path(
-                            type: :Name, old_id: @name.id, new_id: new_name.id
-                          ))
+      redirect_to(new_admin_emails_merge_requests_path(
+                    type: :Name, old_id: @name.id, new_id: new_name.id
+                  ))
     end
   end
 

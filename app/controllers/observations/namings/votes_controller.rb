@@ -94,7 +94,7 @@ module Observations::Namings
           end
         end
         format.html do
-          redirect_with_query(@observation.show_link_args)
+          redirect_to(@observation.show_link_args)
         end
       end
     end
@@ -103,7 +103,7 @@ module Observations::Namings
     # update the title and the name info panel. Otherwise, just update namings.
     def render_namings_section_update
       if @consensus.consensus_changed
-        redirect_with_query(@observation.show_link_args) and return
+        redirect_to(@observation.show_link_args) and return
       end
 
       render(

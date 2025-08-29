@@ -175,9 +175,7 @@ module DescriptionsHelper
       concat(tag.span(" | "))
       concat(%w[unvetted vetted inaccurate].map do |w|
         put_button(name: :"review_#{w}".l,
-                   path: review_status_name_description_path(
-                     desc.id, value: w, q: get_query_param
-                   ))
+                   path: review_status_name_description_path(desc.id, value: w))
       end.safe_join(tag.span(" | ")))
     end
   end
@@ -311,8 +309,7 @@ module DescriptionsHelper
     result = description_title(user, desc)
     return result if result.match?("(#{:private.t})$")
 
-    link_with_query(result, desc.show_link_args,
-                    class: "description_link_#{desc.id}")
+    link_to(result, desc.show_link_args, class: "description_link_#{desc.id}")
   end
 
   # Create a descriptive title for a Description.  Indicates the source and

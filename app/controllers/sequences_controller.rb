@@ -234,7 +234,7 @@ class SequencesController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_sequences_section_update }
-      format.html { redirect_with_query(redirect_to) }
+      format.html { redirect_to(redirect_to) }
     end
   end
 
@@ -255,8 +255,7 @@ class SequencesController < ApplicationController
     respond_to do |format|
       format.turbo_stream { render_modal_flash_update }
       format.html do
-        redirect_with_query(@sequence.observation.show_link_args) and
-          return
+        redirect_to(@sequence.observation.show_link_args) and return
       end
     end
   end
@@ -268,7 +267,7 @@ class SequencesController < ApplicationController
         if @back == "index"
           redirect_with_query(action: :index)
         else
-          redirect_with_query(@back_object.show_link_args)
+          redirect_to(@back_object.show_link_args)
         end
       end
     end

@@ -11,7 +11,7 @@ module Names::Descriptions
     def update
       desc = NameDescription.find(params[:id].to_s)
       desc.update_review_status(params[:value]) if reviewer?
-      redirect_with_query(name_path(desc.name_id))
+      redirect_to(name_path(desc.name_id))
     end
   end
 end

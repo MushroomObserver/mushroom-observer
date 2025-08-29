@@ -20,7 +20,7 @@ module Names::Lifeforms
           @name.propagate_remove_lifeform(word)
         end
       end
-      redirect_with_query(@name.show_link_args)
+      redirect_to(@name.show_link_args)
     end
   end
 end

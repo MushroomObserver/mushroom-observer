@@ -17,7 +17,7 @@ module Names
         params.dig(:lifeform, word) == "1"
       end
       @name.update(lifeform: " #{words.join(" ")} ")
-      redirect_with_query(@name.show_link_args)
+      redirect_to(@name.show_link_args)
     end
 
     private

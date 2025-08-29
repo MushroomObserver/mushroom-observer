@@ -15,7 +15,7 @@ module Names::Classification
       @name.update(classification: @name.accepted_genus.classification)
       desc = @name.description
       desc&.update(classification: @name.accepted_genus.classification)
-      redirect_with_query(@name.show_link_args)
+      redirect_to(@name.show_link_args)
     end
 
     include Names::Classification::SharedPrivateMethods

@@ -24,7 +24,7 @@ module Names::Synonyms
       deprecate_others
       approve_this_one
       post_approval_comment
-      redirect_with_query(@name.show_link_args)
+      redirect_to(@name.show_link_args)
     end
 
     private

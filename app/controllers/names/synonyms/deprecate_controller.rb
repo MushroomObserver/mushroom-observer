@@ -36,7 +36,7 @@ module Names::Synonyms
       # If written-in name matches uniquely an existing name:
       elsif target_name && @names.length == 1
         deprecate_and_post_comment(target_name)
-        redirect_to(name_path(@name.id, q: get_query_param))
+        redirect_to(name_path(@name.id))
       else
         # TODO: Flash a custom message about ambiguous name?
         # :api_ambiguous_name.l is kind of similar

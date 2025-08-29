@@ -136,7 +136,7 @@ module NamesHelper
       ([approved_name] + parents).reverse_each do |n|
         concat(tag.p do
           concat("#{rank_as_string(n.rank)}: ")
-          concat(tag.i(link_with_query(n.text_name.t, n.show_link_args)))
+          concat(tag.i(link_to(n.text_name.t, n.show_link_args)))
           if n == approved_name && approved_name != name
             concat([
               safe_br, safe_nbsp, safe_nbsp,

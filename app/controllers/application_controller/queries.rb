@@ -356,7 +356,7 @@ module ApplicationController::Queries
   # Objects that belong to a single observation:
   def redirect_to_back_object_or_object(back_obj, obj)
     if back_obj
-      redirect_with_query(back_obj.show_link_args)
+      redirect_to(back_obj.show_link_args)
     elsif obj
       redirect_with_query(obj.index_link_args)
     else

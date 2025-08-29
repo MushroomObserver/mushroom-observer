@@ -42,7 +42,7 @@ module HerbariumRecords
 
       respond_to do |format|
         format.html do
-          redirect_with_query(observation_path(@observation.id))
+          redirect_to(observation_path(@observation.id))
         end
         format.turbo_stream do
           render(
