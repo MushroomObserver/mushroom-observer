@@ -23,7 +23,7 @@ module Tabs
     # def description_parent_tab(description, type)
     #   InternalLink::Model.new(
     #     :show_object.t(type: type), description,
-    #     add_query_param(description.parent.show_link_args)
+    #     description.parent.show_link_args
     #   ).tab
     # end
 
