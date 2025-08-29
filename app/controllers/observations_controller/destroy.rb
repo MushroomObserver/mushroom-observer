@@ -15,6 +15,7 @@ module ObservationsController::Destroy
     # decide where to redirect after deleting observation, using Query.next_id
     if (this_query = find_query(:Observation))
       this_query.current_id = @observation.id
+      next_id = this_query.next_id
     end
 
     if !check_permission!(@observation)
@@ -26,7 +27,7 @@ module ObservationsController::Destroy
     else
       flash_notice(:runtime_destroy_observation_success.t(id: param_id))
       if this_query
-        redirect_to({ action: :show, id: this_query.next_id })
+        redirect_to({ action: :show, id: next_id })
       else
         redirect_to(action: :index)
       end
