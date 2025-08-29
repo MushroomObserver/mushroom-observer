@@ -333,22 +333,21 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     # Go to first observation, and try stepping back and forth.
     results_observation_links.first.click
     save_path = current_fullpath
-    # assert_equal(query_params, parse_query_params(save_path))
-    # Prev link does not appear or have an href, so nothing should happen.
+
+    # First. Prev link does not appear or have href, so nothing should happen.
     within("#header") { click_link(text: "Prev") }
     assert_equal(save_path, current_fullpath)
-    # assert_equal(query_params, parse_query_params(save_path))
+
     within("#header") { click_link(text: "Next") }
     assert_no_flash
-    # assert_equal(query_params, parse_query_params(save_path))
 
     save_path = current_fullpath
     within("#header") { click_link(text: "Next") }
     assert_no_flash
-    # assert_equal(query_params, parse_query_params(save_path))
+
     within("#header") { click_link(text: "Prev") }
     assert_no_flash
-    # assert_equal(query_params, parse_query_params(save_path))
+
     assert_equal(save_path, current_fullpath,
                  "Went next then prev, should be back where we started.")
 
