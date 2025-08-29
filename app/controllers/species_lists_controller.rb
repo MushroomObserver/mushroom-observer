@@ -34,7 +34,7 @@ class SpeciesListsController < ApplicationController
 
   # unused now. should be :date, maybe - AN
   def default_sort_order
-    ::Query::SpeciesLists.default_order # :title
+    ::Query::SpeciesLists.default_order # :date
   end
 
   def unfiltered_index_opts
