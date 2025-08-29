@@ -29,7 +29,7 @@ class ContributorsController < ApplicationController
   # Passes explicit :by param to affect title (only).
   # (Linked from show template, next to "prev" and "next"... or will be.)
   def sorted_index_opts
-    super.merge(query_args: { has_contribution: true })
+    super.deep_merge(query_args: { has_contribution: true })
   end
 
   def index_display_opts(opts, _query)
