@@ -249,9 +249,6 @@ class InterestsController < ApplicationController
       return redirect_back_or_default(interests_path)
     end
 
-    redirect_back_or_default(
-      add_query_param(controller: @target.show_controller,
-                      action: @target.show_action, id: @target.id)
-    )
+    redirect_back_or_default(@target.show_link_args)
   end
 end
