@@ -261,10 +261,10 @@ module Observations
     end
 
     def assert_pdf(response)
-      assert_equal 'application/pdf', response.content_type
-      pdf_content = response.body.force_encoding('ASCII-8BIT')
-      assert(pdf_content.start_with?('%PDF-'), "Should generate valid PDF")
-      assert(pdf_content.include?('%%EOF'), "Should have valid PDF ending")
+      assert_equal("application/pdf", response.content_type)
+      pdf_content = response.body.force_encoding("ASCII-8BIT")
+      assert(pdf_content.start_with?("%PDF-"), "Should generate valid PDF")
+      assert(pdf_content.include?("%%EOF"), "Should have valid PDF ending")
     end
 
     def test_project_labels

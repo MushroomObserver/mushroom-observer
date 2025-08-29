@@ -75,12 +75,16 @@ class Label
     pdf.bounding_box([bounding_box_x, bounding_box_y],
                      width: dimensions[:content_width],
                      height: dimensions[:content_height]) do
-      pdf.font(font_family)
-      render_text_fields(fields[:label_fields],
-                         space_allocation[:text_area_height])
-      render_qr_content_if_present(fields[:qr_fields],
-                                   dimensions[:content_width])
+      render_content_within_bounds(fields, space_allocation, dimensions)
     end
+  end
+
+  def render_content_within_bounds(fields, space_allocation, dimensions)
+    pdf.font(font_family)
+    render_text_fields(fields[:label_fields],
+                       space_allocation[:text_area_height])
+    render_qr_content_if_present(fields[:qr_fields],
+                                 dimensions[:content_width])
   end
 
   def render_qr_content_if_present(qr_fields, content_width)
@@ -104,21 +108,21 @@ class Label
   def render_qr_codes(qr_fields, content_width)
     return if qr_fields.empty?
 
-    # Calculate positions for QR codes (distribute evenly across width)
-    qr_count = qr_fields.length
-    available_width = content_width - (qr_count * QR_CODE_SIZE)
-    spacing = if qr_count > 1
-                available_width / (qr_count + 1)
-              else
-                available_width / 2
-              end
-
-    # Position QR codes at the bottom of the label
+    spacing = qr_spacing_for(qr_fields.length, content_width)
     qr_y = QR_CODE_SIZE + 0.1.in
 
     qr_fields.each_with_index do |qr_field, index|
-      qr_x = spacing + (index * (QR_CODE_SIZE + spacing))
+      qr_x = qr_x_position(index, spacing)
       qr_field.render(pdf, qr_x, qr_y, QR_CODE_SIZE)
     end
+  end
+
+  def qr_spacing_for(qr_count, content_width)
+    available_width = content_width - (qr_count * QR_CODE_SIZE)
+    qr_count > 1 ? available_width / (qr_count + 1) : available_width / 2
+  end
+
+  def qr_x_position(index, spacing)
+    spacing + (index * (QR_CODE_SIZE + spacing))
   end
 end

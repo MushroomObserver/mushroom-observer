@@ -846,6 +846,13 @@ longest_obs:
   name: longest_name
   text_name: Singerocybe alboinfundibuliformis
 
+even_longer_obs:
+  <<: *DEFAULTS
+  name: even_longer_name
+  location: even_longer_location_name
+  text_name: <%= "B#{'a'*80}" %>
+  where: <%= "Sh#{'e'*200}pland" %>
+
 #
 #
 # IMPORTANT - AVOID CREATING FUTURE TEST ERRORS

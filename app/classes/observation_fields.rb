@@ -9,11 +9,6 @@ class ObservationFields
   end
 
   # Returns an array of LabelField objects for the observation
-  def fields
-    label_fields + qr_fields
-  end
-
-  # Returns an array of LabelField objects for the observation
   def label_fields
     field_list = [
       create_field("ID", id_value),
