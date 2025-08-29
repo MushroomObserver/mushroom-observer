@@ -162,7 +162,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_operator(query.num_results, :>, 1)
     number1 = query.results[0]
     number2 = query.results[1]
-    q = @controller.full_q_param(query)
+    q = @controller.q_param(query)
 
     login
     get(:show, params: { id: number1.id, q: q, flow: :next })

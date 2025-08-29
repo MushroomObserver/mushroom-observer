@@ -16,7 +16,7 @@
 #  redirect_to_next_object:: Find next object from a Query and redirect to its
 #                            show page.
 #
-module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
+module ApplicationController::Queries
   def self.included(base)
     base.helper_method(
       :query_from_session, :query_params, :add_q_param, :q_param
@@ -181,7 +181,7 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
       # do nothing
     elsif query
       store_query_in_session(query)
-      @query_param = full_q_param(query)
+      @query_param = q_param(query)
     end
     @query_param
   end
@@ -206,14 +206,14 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
   end
   # helper_method :query_from_session
 
-  # Opposite is `full_q_param` below
+  # Opposite is `q_param` below
   def query_from_q_param
     # For backwards compatibility with old q params. Delete condition when
     # QueryRecord.where.not(permalink: true).count == 0
     if query_record_id?(params[:q]) # i.e. QueryRecord.id.alphabetize
       query_from_q_record_id
     elsif params[:q].present?
-      query_from_full_q_param
+      query_from_q_param
     end
   end
 
@@ -225,7 +225,7 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
     Query.safe_find(params[:q].to_s.dealphabetize) # this may return nil
   end
 
-  def query_from_full_q_param
+  def query_from_q_param
     q_param = params[:q]
     return nil if q_param[:model].blank?
 
@@ -246,7 +246,7 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
 
     q_param = q_param(query)
     if params.is_a?(String) # i.e., if "params" arg is a path
-      append_query_param_to_path(params, q_param)
+      append_q_param_to_path(params, q_param)
     else
       params[:q] = q_param if q_param
       params
@@ -254,7 +254,7 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
   end
   # helper_method :add_q_param
 
-  def append_query_param_to_path(path, q_param)
+  def append_q_param_to_path(path, q_param)
     return path unless q_param
 
     # Figure out if there's an existing URI query_string, like "flow=next"
@@ -275,20 +275,13 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
   def q_param(query = nil)
     return nil if browser.bot?
 
-    if query
-      query.save unless query.id
-      full_q_param(query)
-    # elsif @query_param # a bit quicker, if we have it. but could delete.
-    #   @query_param
-    elsif (query = current_query)
-      full_q_param(query)
-    end
-  end
-  # helper_method :q_param
+    query.save if query && !query.id
+    query ||= current_query
+    return nil unless query
 
-  def full_q_param(query)
     { model: query.model.name.to_sym, **query.params }
   end
+  # helper_method :q_param
 
   # NOTE: these two methods add q: param to urls built from controllers/actions.
   def redirect_with_query(args, query = nil)
