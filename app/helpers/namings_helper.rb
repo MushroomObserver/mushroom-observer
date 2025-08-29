@@ -120,11 +120,9 @@ module NamingsHelper
     percent = "#{naming.vote_percent.round}%"
 
     modal_link_to("naming_votes_#{naming.id}", h(percent),
-                  add_query_param(
-                    observation_naming_votes_path(
-                      observation_id: naming.observation_id,
-                      naming_id: naming.id
-                    )
+                  observation_naming_votes_path(
+                    observation_id: naming.observation_id,
+                    naming_id: naming.id
                   ),
                   class: "vote-percent btn btn-link px-0")
   end
