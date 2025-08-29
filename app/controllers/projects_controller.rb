@@ -96,7 +96,7 @@ class ProjectsController < ApplicationController
     @project_dates_any = !@start_date_fixed && !@end_date_fixed
     return if check_permission!(@project)
 
-    redirect_to(project_path(@project.id, q: get_query_param))
+    redirect_to(project_path(@project.id))
   end
 
   def create
@@ -121,14 +121,14 @@ class ProjectsController < ApplicationController
     @project = Project.new(project_params)
     @project_dates_any = params[:project][:dates_any].downcase == "true"
     image_ivars
-    render(:new, location: new_project_path(q: get_query_param))
+    render(:new, location: new_project_path)
   end
 
   def update
     return unless find_project_and_where!
 
     unless check_permission!(@project)
-      return redirect_to(project_path(@project.id, q: get_query_param))
+      return redirect_to(project_path(@project.id))
     end
 
     upload_image_if_present
@@ -140,13 +140,13 @@ class ProjectsController < ApplicationController
         @project.save
         @project.log_update
         flash_notice(:runtime_edit_project_success.t(id: @project.id))
-        return redirect_to(project_path(@project.id, q: get_query_param))
+        return redirect_to(project_path(@project.id))
       else
         flash_object_errors(@project)
       end
     end
     image_ivars
-    render(:edit, location: edit_project_path(@project.id, q: get_query_param))
+    render(:edit, location: edit_project_path(@project.id))
   end
 
   # Callback to destroy a project.
@@ -159,10 +159,10 @@ class ProjectsController < ApplicationController
     return unless find_project_and_where!
 
     if !check_permission!(@project)
-      redirect_to(project_path(@project.id, q: get_query_param))
+      redirect_to(project_path(@project.id))
     elsif !@project.destroy
       flash_error(:destroy_project_failed.t)
-      redirect_to(project_path(@project.id, q: get_query_param))
+      redirect_to(project_path(@project.id))
     else
       @project.log_destroy
       flash_notice(:destroy_project_success.t)
@@ -290,7 +290,7 @@ class ProjectsController < ApplicationController
                               trust_level: "hidden_gps")
         @project.log_create
         flash_notice(:add_project_success.t)
-        return redirect_to(project_path(@project.id, q: get_query_param))
+        return redirect_to(project_path(@project.id))
       else
         flash_object_errors(@project)
       end
@@ -299,7 +299,7 @@ class ProjectsController < ApplicationController
     user_group&.destroy
     @project = Project.new
     image_ivars
-    render(:new, location: new_project_path(q: get_query_param))
+    render(:new, location: new_project_path)
   end
 
   def override_fixed_dates
