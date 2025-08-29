@@ -108,21 +108,12 @@ class Label
   def render_qr_codes(qr_fields, content_width)
     return if qr_fields.empty?
 
-    spacing = qr_spacing_for(qr_fields.length, content_width)
+    code_space = QR_CODE_SIZE * 1.6667
     qr_y = QR_CODE_SIZE + 0.1.in
 
     qr_fields.each_with_index do |qr_field, index|
-      qr_x = qr_x_position(index, spacing)
+      qr_x = content_width - (index + 1) * code_space
       qr_field.render(pdf, qr_x, qr_y, QR_CODE_SIZE)
     end
-  end
-
-  def qr_spacing_for(qr_count, content_width)
-    available_width = content_width - (qr_count * QR_CODE_SIZE)
-    qr_count > 1 ? available_width / (qr_count + 1) : available_width / 2
-  end
-
-  def qr_x_position(index, spacing)
-    spacing + (index * (QR_CODE_SIZE + spacing))
   end
 end
