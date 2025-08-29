@@ -26,7 +26,7 @@ class SequencesControllerTest < FunctionalTestCase
     query = Query.lookup_and_save(:Sequence, observations: obs)
     results = query.results
     assert_operator(results.count, :>, 3)
-    q = @controller.get_query_param(query)
+    q = @controller.q_param(query)
 
     get(:index, params: { q:, id: results[2].id })
     assert_response(:success)
@@ -90,7 +90,7 @@ class SequencesControllerTest < FunctionalTestCase
     assert_operator(query.num_results, :>, 1)
     number1 = query.results[0]
     number2 = query.results[1]
-    q = @controller.get_query_param(query)
+    q = @controller.q_param(query)
 
     login
     get(:show, params: { id: number1.id, q: q, flow: "next" })
@@ -102,7 +102,7 @@ class SequencesControllerTest < FunctionalTestCase
     assert_operator(query.num_results, :>, 1)
     number1 = query.results[0]
     number2 = query.results[1]
-    q = @controller.get_query_param(query)
+    q = @controller.q_param(query)
 
     login
     get(:show, params: { id: number2.id, q: q, flow: "prev" })
@@ -737,7 +737,7 @@ class SequencesControllerTest < FunctionalTestCase
     obs   = observations(:genbanked_obs)
     seqs  = obs.sequences
     query = @controller.find_or_create_query(:Sequence, observations: obs)
-    q     = @controller.get_query_param(query)
+    q     = @controller.q_param(query)
 
     # Prove that it can return to index, too, with query intact.
     login(obs.user.login)

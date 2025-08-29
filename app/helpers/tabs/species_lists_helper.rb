@@ -61,14 +61,14 @@ module Tabs
     def species_list_download_tab(list)
       InternalLink::Model.new(
         :species_list_show_download.t, list,
-        add_query_param(new_species_list_download_path(list.id))
+        add_q_param(new_species_list_download_path(list.id))
       ).tab
     end
 
     def species_list_set_source_tab(list)
       InternalLink::Model.new(
         :species_list_show_set_source.t, list,
-        add_query_param(species_list_path(list.id, set_source: 1)),
+        add_q_param(species_list_path(list.id, set_source: 1)),
         html_options: { help: :species_list_show_set_source_help.l }
       ).tab
     end
@@ -83,7 +83,7 @@ module Tabs
     def species_list_add_remove_from_another_list_tab(list, query = nil)
       InternalLink::Model.new(
         :species_list_show_add_remove_from_another_list.t, list,
-        add_query_param(
+        add_q_param(
           edit_species_list_observations_path(species_list: list.id), query
         )
       ).tab
@@ -151,7 +151,7 @@ module Tabs
 
     def observations_index_return_tab
       InternalLink.new(
-        :species_list_add_remove_cancel.t, add_query_param(observations_path)
+        :species_list_add_remove_cancel.t, add_q_param(observations_path)
       ).tab
     end
 
@@ -168,7 +168,7 @@ module Tabs
     def species_list_index_tab
       InternalLink.new(
         :cancel_to_index.t(type: :SPECIES_LIST),
-        add_query_param(species_lists_path)
+        add_q_param(species_lists_path)
       ).tab
     end
 

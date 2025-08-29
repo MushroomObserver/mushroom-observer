@@ -31,7 +31,7 @@ module Header
       label = :rss_all.t
 
       link = activity_logs_path(
-        params: { q: get_query_param(query).merge(type: :all) }
+        params: { q: q_param(query).merge(type: :all) }
       )
       help = { title: :rss_all_help.t, class: "filter-only" }
       types == ["all"] ? label : link_with_query(label, link, **help)
@@ -41,7 +41,7 @@ module Header
     def filter_for_type(query, types, type)
       label = :"rss_one_#{type}".t
       link = activity_logs_path(
-        params: { q: get_query_param(query).merge(type:) }
+        params: { q: q_param(query).merge(type:) }
       )
       help = { title: :rss_one_help.t(type: type.to_sym), class: "filter-only" }
       types == [type] ? label : link_with_query(label, link, **help)

@@ -104,7 +104,7 @@ module Header
       # shouldn't need the :by param, it should check for an :order_by in the
       # incoming :q
       path = { controller: ctlr, action: action_name,
-               q: get_query_param(query).merge(order_by: by) }
+               q: q_param(query).merge(order_by: by) }
 
       helper_name = sort_link_helper_name(model, ctlr)
       identifier = "#{helper_name}_by_#{by}_link"

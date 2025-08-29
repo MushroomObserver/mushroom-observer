@@ -260,6 +260,6 @@ class LookupsController < ApplicationController
         :runtime_object_multiple_matches.t(match: id, type: model.type_tag)
       )
     end
-    redirect_to(add_query_param(obj.index_link_args, query))
+    redirect_to(add_q_param(obj.index_link_args, query))
   end
 end

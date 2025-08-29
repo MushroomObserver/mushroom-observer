@@ -16,7 +16,7 @@ heading_link = icon_link_to(*name_tracker_form_tab(@name, @user))
         # Observations of this name's subtaxa, if any
         concat(tag.p do
           [link_to(:show_subtaxa_obss.l,
-                   add_query_param(observations_path, @subtaxa_query)),
+                   add_q_param(observations_path, @subtaxa_query)),
            " (#{@has_subtaxa})"].safe_join
         end) if @has_subtaxa
       end)

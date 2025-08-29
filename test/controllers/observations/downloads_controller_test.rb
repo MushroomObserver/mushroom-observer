@@ -9,7 +9,7 @@ module Observations
       assert(query.num_results > 1, "Test needs query with multiple results")
 
       login(:rolf)
-      get(:new, params: { q: @controller.get_query_param(query) })
+      get(:new, params: { q: @controller.q_param(query) })
 
       assert_no_flash
       assert_response(:success)
@@ -25,7 +25,7 @@ module Observations
 
       login(:rolf)
       make_admin("rolf")
-      get(:new, params: { q: @controller.get_query_param(query) })
+      get(:new, params: { q: @controller.q_param(query) })
 
       assert_no_flash
       assert_response(:success)
@@ -50,7 +50,7 @@ module Observations
         accession_number: "Mary #1234"
       )
 
-      q = @controller.get_query_param(query)
+      q = @controller.q_param(query)
       get(:new, params: { q: })
       assert_no_flash
       assert_response(:success)
@@ -213,7 +213,7 @@ module Observations
       login("mary")
 
       MO.stub(:max_downloads, Observation.count - 1) do
-        get(:new, params: { q: @controller.get_query_param(query) })
+        get(:new, params: { q: @controller.q_param(query) })
       end
 
       assert_redirected_to(observations_path)
@@ -225,7 +225,7 @@ module Observations
       login("mary")
 
       MO.stub(:max_downloads, Observation.count - 1) do
-        get(:new, params: { q: @controller.get_query_param(query) })
+        get(:new, params: { q: @controller.q_param(query) })
       end
 
       assert_response(:success)
@@ -237,7 +237,7 @@ module Observations
       make_admin("mary")
 
       MO.stub(:max_downloads, Observation.count - 1) do
-        get(:new, params: { q: @controller.get_query_param(query) })
+        get(:new, params: { q: @controller.q_param(query) })
       end
 
       assert_response(:success)
@@ -247,7 +247,7 @@ module Observations
       login
       query = Query.lookup_and_save(:Observation, by_users: mary.id)
       assert_operator(query.num_results, :>=, 4)
-      get(:print_labels, params: { q: @controller.get_query_param(query) })
+      get(:print_labels, params: { q: @controller.q_param(query) })
       # \pard is paragraph command in rtf, one paragraph per result
       assert_equal(query.num_results, @response.body.scan("\\pard").size)
       assert_match(/314159/, @response.body) # make sure fundis id in there!
@@ -257,7 +257,7 @@ module Observations
       post(
         :create,
         params: {
-          q: @controller.get_query_param(query),
+          q: @controller.q_param(query),
           commit: "Print Labels"
         }
       )
@@ -269,7 +269,7 @@ module Observations
       query = Query.lookup_and_save(
         :Observation, projects: projects(:open_membership_project)
       )
-      get(:print_labels, params: { q: @controller.get_query_param(query) })
+      get(:print_labels, params: { q: @controller.q_param(query) })
       trusted_hidden = observations(:trusted_hidden)
       untrusted_hidden = observations(:untrusted_hidden)
       assert_match(/#{trusted_hidden.lat}/, @response.body)
@@ -281,7 +281,7 @@ module Observations
     def test_print_labels_all
       login
       query = Query.lookup_and_save(:Observation)
-      get(:print_labels, params: { q: @controller.get_query_param(query) })
+      get(:print_labels, params: { q: @controller.q_param(query) })
     end
 
     def test_print_labels_query_nil
@@ -293,7 +293,7 @@ module Observations
         get(
           :print_labels,
           params: {
-            q: @controller.get_query_param(query), commit: "Print Labels"
+            q: @controller.q_param(query), commit: "Print Labels"
           }
         )
       end
@@ -321,7 +321,7 @@ module Observations
       end
 
       login
-      post(:create, params: { q: @controller.get_query_param(query),
+      post(:create, params: { q: @controller.q_param(query),
                               format: :mycoportal_image_list,
                               encoding: "UTF-8",
                               commit: "Download" })

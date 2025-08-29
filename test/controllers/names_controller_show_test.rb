@@ -390,7 +390,7 @@ class NamesControllerShowTest < FunctionalTestCase
     name14 = names[14]
     login
     get(:show, params: { flow: :next, id: name12.id })
-    params = { q: @controller.get_query_param(QueryRecord.last.query) }
+    params = { q: @controller.q_param(QueryRecord.last.query) }
 
     assert_redirected_to(name_path(name13.id, params:))
     get(:show, params: { flow: :next, id: name13.id })
@@ -403,7 +403,7 @@ class NamesControllerShowTest < FunctionalTestCase
 
   def test_next_and_prev2
     query = Query.lookup_and_save(:Name, pattern: "lactarius")
-    params = { q: @controller.get_query_param(query) }
+    params = { q: @controller.q_param(query) }
 
     name1 = query.results[0]
     name2 = query.results[1]

@@ -16,10 +16,10 @@
 #  redirect_to_next_object:: Find next object from a Query and redirect to its
 #                            show page.
 #
-module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
+module ApplicationController::Queries
   def self.included(base)
     base.helper_method(
-      :query_from_session, :query_params, :add_query_param, :get_query_param
+      :query_from_session, :query_params, :add_q_param, :q_param
     )
   end
 
@@ -181,7 +181,7 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
       # do nothing
     elsif query
       store_query_in_session(query)
-      @query_param = full_q_param(query)
+      @query_param = q_param(query)
     end
     @query_param
   end
@@ -206,17 +206,18 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
   end
   # helper_method :query_from_session
 
-  # Opposite is `full_q_param` below
+  # Opposite is `q_param` below
   def query_from_q_param
-    # For backwards compatibility with old q params. Delete condition when
-    # QueryRecord.where.not(permalink: true).count == 0
+    # The first condition is for backwards compatibility with old q params.
+    # We can delete it when `QueryRecord.where.not(permalink: true).count == 0`
     if query_record_id?(params[:q]) # i.e. QueryRecord.id.alphabetize
       query_from_q_record_id
     elsif params[:q].present?
-      query_from_full_q_param
+      query_from_q_param_hash
     end
   end
 
+  # Check if the :q param is an older alphabetized QueryRecord id.
   def query_record_id?(str)
     str.is_a?(String) && str&.match(/^[a-zA-Z0-9]*$/)
   end
@@ -225,7 +226,7 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
     Query.safe_find(params[:q].to_s.dealphabetize) # this may return nil
   end
 
-  def query_from_full_q_param
+  def query_from_q_param_hash
     q_param = params[:q]
     return nil if q_param[:model].blank?
 
@@ -241,20 +242,22 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
     @query || query_from_q_param || query_from_session
   end
 
-  def add_query_param(params, query = nil)
-    return params if browser.bot?
+  # Add a :q param to a path helper like `names_path`,
+  # or a hash like { controller: "/names", action: :index }
+  def add_q_param(path_or_params, query = nil)
+    return path_or_params if browser.bot?
 
-    q_param = get_query_param(query)
-    if params.is_a?(String) # i.e., if "params" arg is a path
-      append_query_param_to_path(params, q_param)
+    q_param = q_param(query)
+    if path_or_params.is_a?(String) # i.e., if "path_or_params" arg is a path
+      append_q_param_to_path(path_or_params, q_param)
     else
-      params[:q] = q_param if q_param
-      params
+      path_or_params[:q] = q_param if q_param
+      path_or_params
     end
   end
-  # helper_method :add_query_param
+  # helper_method :add_q_param
 
-  def append_query_param_to_path(path, q_param)
+  def append_q_param_to_path(path, q_param)
     return path unless q_param
 
     # Figure out if there's an existing URI query_string, like "flow=next"
@@ -270,33 +273,26 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
   end
 
   # Allows us to add any passed query, or the current to a path helper:
-  #   link_to(@object.show_link_args.merge(q: get_query_param))
+  #   link_to(@object.show_link_args.merge(q: q_param))
   # Saves the query, but does not set session[:query_record]
-  def get_query_param(query = nil)
+  def q_param(query = nil)
     return nil if browser.bot?
 
-    if query
-      query.save unless query.id
-      full_q_param(query)
-    # elsif @query_param # a bit quicker, if we have it. but could delete.
-    #   @query_param
-    elsif (query = current_query)
-      full_q_param(query)
-    end
-  end
-  # helper_method :get_query_param
+    query.save if query && !query.id
+    query ||= current_query
+    return nil unless query
 
-  def full_q_param(query)
     { model: query.model.name.to_sym, **query.params }
   end
+  # helper_method :q_param
 
   # NOTE: these two methods add q: param to urls built from controllers/actions.
   def redirect_with_query(args, query = nil)
-    redirect_to(add_query_param(args, query))
+    redirect_to(add_q_param(args, query))
   end
 
   def url_with_query(args, query = nil)
-    url_for(add_query_param(args, query))
+    url_for(add_q_param(args, query))
   end
 
   # Handle advanced_search actions with an invalid q param,
@@ -361,7 +357,7 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
     # Redirect to the show_object page appropriate for the new object.
     redirect_to({ controller: object.show_controller,
                   action: object.show_action,
-                  id:, q: get_query_param(query) })
+                  id:, q: q_param(query) })
   end
 
   def find_query_and_next_object(object, method, id)

@@ -19,7 +19,7 @@ flash_error(@error) if @error && @objects.empty?
                   link_to(
                     :EDIT.t,
                     edit_herbarium_record_path(
-                      id: rec.id, back: :index, q: get_query_param
+                      id: rec.id, back: :index, q: q_param
                     ),
                     class: "btn btn-default btn-sm edit_herbarium_record_link_#{rec.id}"
                   )

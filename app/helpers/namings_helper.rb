@@ -281,7 +281,7 @@ module NamingsHelper
       error: :suggestions_error.t
     }.to_json
     # NOTE: suggestions does not actually commit to this path, it's a js request
-    results_url = add_query_param(
+    results_url = add_q_param(
       naming_suggestions_for_observation_path(id: obs.id, names: :xxx)
     )
 

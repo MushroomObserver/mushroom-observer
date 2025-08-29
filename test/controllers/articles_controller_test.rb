@@ -24,7 +24,7 @@ class ArticlesControllerTest < FunctionalTestCase
   def test_index_filtered
     article = Article.reorder(created_at: :asc).first # oldest
     query = Query.lookup(:Article, id_in_set: [article.id])
-    params = { q: @controller.get_query_param(query) }
+    params = { q: @controller.q_param(query) }
     get(:index, params:)
     assert_no_flash
 
@@ -39,7 +39,7 @@ class ArticlesControllerTest < FunctionalTestCase
 
   def test_index_query_no_matches
     query = Query.lookup(:Article, id_in_set: "one")
-    params = { q: @controller.get_query_param(query) }
+    params = { q: @controller.q_param(query) }
     get(:index, params:)
     assert_flash_error(:runtime_no_matches.t(type: :article))
   end
@@ -76,8 +76,8 @@ class ArticlesControllerTest < FunctionalTestCase
 
   # Partly duplicates title_and_tabset_helper_test `test_context_nav_dropdown`.
   # But we want to test a `destroy_button` tab too.
-  # That helper calls `add_query_param` and others.
-  # NOTE: we can actually call @controller.add_query_param here, fwiw.
+  # That helper calls `add_q_param` and others.
+  # NOTE: we can actually call @controller.add_q_param here, fwiw.
   def test_context_nav_dropdown_helper
     article = Article.last
     links = [["Create Article", new_article_path,

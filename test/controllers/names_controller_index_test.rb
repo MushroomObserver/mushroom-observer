@@ -70,7 +70,7 @@ class NamesControllerIndexTest < FunctionalTestCase
     query = Query.lookup_and_save(:Name, search_name: search_string)
 
     login
-    params = { q: @controller.get_query_param(query), advanced_search: true }
+    params = { q: @controller.q_param(query), advanced_search: true }
     get(:index, params:)
 
     assert_response(:success)
@@ -91,7 +91,7 @@ class NamesControllerIndexTest < FunctionalTestCase
            "Test needs a string that has exactly one hit")
 
     login
-    params = { q: @controller.get_query_param(query), advanced_search: true }
+    params = { q: @controller.q_param(query), advanced_search: true }
     get(:index, params:)
     assert_match(name_path(names(:stereum_hirsutum)), redirect_to_url,
                  "Wrong page")
@@ -109,7 +109,7 @@ class NamesControllerIndexTest < FunctionalTestCase
   def test_index_advanced_search_no_hits
     query = oklahoma_query
     login
-    params = { q: @controller.get_query_param(query), advanced_search: true }
+    params = { q: @controller.q_param(query), advanced_search: true }
     get(:index, params:)
 
     assert_page_title(:NAMES.l)
@@ -119,7 +119,7 @@ class NamesControllerIndexTest < FunctionalTestCase
   # This test no longer makes sense with permalinks
   # def test_index_advanced_search_with_deleted_query
   #   query = oklahoma_query
-  #   params = { q: @controller.get_query_param(query), advanced_search: true }
+  #   params = { q: @controller.q_param(query), advanced_search: true }
   #   query.record.delete
 
   #   login
@@ -132,7 +132,7 @@ class NamesControllerIndexTest < FunctionalTestCase
     query_no_conditions = Query.lookup_and_save(:Name)
 
     login
-    params = { q: @controller.get_query_param(query_no_conditions),
+    params = { q: @controller.q_param(query_no_conditions),
                advanced_search: true }
     get(:index, params:)
 
@@ -375,7 +375,7 @@ class NamesControllerIndexTest < FunctionalTestCase
 
   def pagination_query_param
     query = Query.lookup_and_save(:Name, order_by: :name)
-    @controller.get_query_param(query)
+    @controller.q_param(query)
   end
 
   # None of our standard tests ever actually renders pagination_numbers

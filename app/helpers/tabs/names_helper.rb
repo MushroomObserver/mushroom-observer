@@ -227,7 +227,7 @@ module Tabs
     def occurrence_map_for_name_tab(name)
       InternalLink::Model.new(
         :show_name_distribution_map.t, name,
-        add_query_param(map_name_path(id: name.id)),
+        add_q_param(map_name_path(id: name.id)),
         html_options: { data: { action: "links#disable" } }
       ).tab
     end
@@ -296,7 +296,7 @@ module Tabs
 
     #   desc_query = Query.lookup(:NameDescription, name_query: names_query)
     #   [:show_objects.t(type: :description),
-    #    add_query_param(name_descriptions_index_path, desc_query),
+    #    add_q_param(name_descriptions_index_path, desc_query),
     #    { class: tab_id(__method__.to_s) }]
     # end
 

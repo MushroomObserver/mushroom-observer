@@ -95,7 +95,7 @@ class RssLogsControllerTest < FunctionalTestCase
     get(:index, params: { type: :glossary_term, make_default: 1 })
     assert_equal("glossary_term", rolf.reload.default_rss_type)
     # Test that this actually works
-    q = @controller.full_q_param(QueryRecord.last.query)
+    q = @controller.q_param(QueryRecord.last.query)
     get(:index, params: { q: q })
     assert_template(:index)
   end

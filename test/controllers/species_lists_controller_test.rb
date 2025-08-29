@@ -345,7 +345,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
   def test_show_flow
     login
     query = Query.lookup_and_save(:SpeciesList, order_by: "reverse_user")
-    params = { q: @controller.get_query_param(query) }
+    params = { q: @controller.q_param(query) }
     get(:index, params:)
     assert_template(:index)
 

@@ -684,7 +684,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     login
     # need to save a query here to get :next in a non-standard order
     Query.lookup_and_save(:Observation, order_by: :created_at)
-    q = @controller.full_q_param(QueryRecord.last.query)
+    q = @controller.q_param(QueryRecord.last.query)
 
     get(:show, params: { id: o_chron.fourth.id, flow: :next, q: })
     assert_redirected_to(action: :show, id: o_chron.fifth.id, q:)
@@ -734,7 +734,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
                     order_by: :name
     )
     assert_equal(4, query.num_results)
-    params = { q: @controller.get_query_param(query) }
+    params = { q: @controller.q_param(query) }
 
     o_id = observations(:minimal_unknown_obs).id
 

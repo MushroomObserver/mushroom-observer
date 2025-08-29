@@ -143,10 +143,10 @@ class SearchController < ApplicationController
   end
 
   def redirect_to_model_controller(model, query)
-    advanced_search_path = add_query_param({ controller: model.show_controller,
-                                             action: :index,
-                                             advanced_search: 1 },
-                                           query)
+    advanced_search_path = add_q_param({ controller: model.show_controller,
+                                         action: :index,
+                                         advanced_search: 1 },
+                                       query)
     redirect_to(advanced_search_path)
   end
 end

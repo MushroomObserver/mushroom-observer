@@ -64,7 +64,7 @@ class ImagesControllerTest < FunctionalTestCase
     query_no_conditions = Query.lookup_and_save(:Image)
 
     login
-    params = { q: @controller.get_query_param(query_no_conditions),
+    params = { q: @controller.q_param(query_no_conditions),
                advanced_search: true }
     get(:index, params:)
 
@@ -224,7 +224,7 @@ class ImagesControllerTest < FunctionalTestCase
     obs = image.observations.reorder(created_at: :asc).first
     assert(obs.images.member?(image))
     query = @controller.find_or_create_query(:Image, by_users: user)
-    q = @controller.get_query_param(query)
+    q = @controller.q_param(query)
     params = { id: image.id, q: }
 
     delete_requires_user(:destroy, { action: :show, id: image.id },

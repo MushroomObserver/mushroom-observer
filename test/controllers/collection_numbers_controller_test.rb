@@ -15,7 +15,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_operator(query.num_results, :>, 1)
 
     login
-    get(:index, params: { q: @controller.get_query_param(query) })
+    get(:index, params: { q: @controller.q_param(query) })
 
     assert_response(:success)
     assert_page_title(:COLLECTION_NUMBERS.l)
@@ -133,7 +133,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_operator(query.num_results, :>, 1)
     number1 = query.results[0]
     number2 = query.results[1]
-    q = @controller.get_query_param(query)
+    q = @controller.q_param(query)
 
     login
     get(:show, params: { flow: :next, id: number1.id, q: q })
@@ -456,7 +456,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     obs   = observations(:detailed_unknown_obs)
     num   = obs.collection_numbers.first
     query = @controller.find_or_create_query(:CollectionNumber)
-    q     = @controller.get_query_param(query)
+    q     = @controller.q_param(query)
     login(obs.user.login)
     params = {
       id: num.id,
@@ -526,7 +526,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     obs   = observations(:detailed_unknown_obs)
     nums  = obs.collection_numbers
     query = Query.lookup_and_save(:CollectionNumber)
-    q     = @controller.get_query_param(query)
+    q     = @controller.q_param(query)
     login(obs.user.login)
     assert_operator(nums.length, :>, 1)
 
