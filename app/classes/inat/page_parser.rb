@@ -60,11 +60,11 @@ class Inat
         without_field: "Mushroom Observer URL"
       }.merge(args)
       headers = { authorization: "Bearer #{@import.token}", accept: :json }
-
       Inat::APIRequest.new(@import.token).
         request(path: "observations?#{query_args.to_query}", headers: headers)
     rescue ::RestClient::ExceptionWithResponse => e
-      @import.add_response_error(e.response)
+      error = { error: e.http_code, query: query_args.to_json }.to_json
+      @import.add_response_error(error)
       e.response
     end
   end
