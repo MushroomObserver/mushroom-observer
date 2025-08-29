@@ -38,13 +38,13 @@ class NamesControllerIndexTest < FunctionalTestCase
     get(:index, params: { q: q })
     # Check that the controller sets a new permalink-style @query_param
     expected_q = { model: :Name, observation_query: { by_users: [user.id] } }
-    assert_equal(assigns(:query_param), expected_q)
+    assert_equal(@controller.q_param, expected_q)
     assert_session_query_record_is_correct
     index_related_query_assertions(user)
 
     # Now check that the new param works the same
     get(:index, params: { q: expected_q })
-    assert_equal(assigns(:query_param), expected_q)
+    assert_equal(@controller.q_param, expected_q)
     assert_session_query_record_is_correct
     index_related_query_assertions(user)
   end
