@@ -193,9 +193,9 @@ module Descriptions
       unless in_admin_mode? || @description.writer?(@user)
         flash_error(:runtime_edit_description_denied.t)
         if in_admin_mode? || @description.is_reader?(@user)
-          redirect_to(object_path(@description))
+          redirect_to(@description.show_link_args)
         else
-          redirect_to(object_path(@description.parent))
+          redirect_to(@description.parent.show_link_args)
         end
 
         okay = false
@@ -288,18 +288,6 @@ module Descriptions
           new_writers << project.admin_group
         end
       end
-    end
-
-    def object_path(object)
-      { controller: object.show_controller,
-        action: object.show_action,
-        id: object.id }
-    end
-
-    def object_path_with_query(object)
-      { controller: object.show_controller,
-        action: object.show_action,
-        id: object.id, q: get_query_param }
     end
 
     def find_licenses

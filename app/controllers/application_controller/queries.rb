@@ -293,7 +293,7 @@ module ApplicationController::Queries
   end
 
   # Allows us to add any passed query, or the current to a path helper:
-  #   object_path(@object, q: get_query_param)
+  #   link_to(@object.show_link_args.merge(q: get_query_param))
   # Saves the query, but does not set session[:query_record]
   def get_query_param(query = nil)
     return nil if browser.bot?
