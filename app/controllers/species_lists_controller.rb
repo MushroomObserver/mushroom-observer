@@ -10,7 +10,7 @@
 class SpeciesListsController < ApplicationController
   before_action :login_required
   before_action :require_successful_user, only: [:new, :create]
-  before_action :pass_query_params, only: [:show]
+  before_action :store_location, only: [:show]
   # Bullet wants us to eager load synonyms for @deprecated_names in
   # edit_species_list, and I thought it would be possible, but I can't
   # get it to work.  Seems toooo minor to waste any more time on.
@@ -34,7 +34,7 @@ class SpeciesListsController < ApplicationController
 
   # unused now. should be :date, maybe - AN
   def default_sort_order
-    ::Query::SpeciesLists.default_order # :title
+    ::Query::SpeciesLists.default_order # :date
   end
 
   def unfiltered_index_opts
@@ -44,14 +44,6 @@ class SpeciesListsController < ApplicationController
   # Used by ApplicationController to dispatch #index to a private method
   def index_active_params
     [:pattern, :by_user, :project, :by, :q, :id].freeze
-  end
-
-  # Display list of selected species_lists, based on current Query.
-  # (Linked from show_species_list, next to "prev" and "next".)
-  # Passes explicit :by param to affect title (only).
-  def sorted_index_opts
-    sorted_by = params[:by] || :date
-    super.merge(query_args: { order_by: sorted_by })
   end
 
   # Display list of user's species_lists, sorted by date.
@@ -97,7 +89,6 @@ class SpeciesListsController < ApplicationController
   ##############################################################################
 
   def show
-    store_location
     clear_query_in_session
     return unless (@species_list = find_species_list!)
 
@@ -185,6 +176,7 @@ class SpeciesListsController < ApplicationController
 
     @query.need_letters = true
     @pagination_data = letter_pagination_data(:letter, :page, 100)
+    query_params_set(@query) if @pagination_data.any? # also stores query
     @objects = @query.paginate(
       @pagination_data,
       include: [:user, :name, :location, { thumb_image: :image_votes }]

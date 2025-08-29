@@ -8,7 +8,7 @@ add_context_nav(herbaria_curator_request_tabs(herbarium: @herbarium))
 <%= :show_herbarium_curator_help.tp %>
 
 <%= form_with(url: herbaria_curator_requests_path(id: @herbarium, back: @back,
-                                                  q: get_query_param),
+                                                  q: q_param),
               id: "herbarium_curator_request_form") do |f| %>
 
   <div class="form-group mt-3">

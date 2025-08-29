@@ -67,7 +67,7 @@ module Header
         }
         args = args.merge(disabled: true) if active
 
-        link_with_query(title, path_args, **args)
+        link_to(title, path_args, **args)
       end
     end
 
@@ -99,11 +99,14 @@ module Header
     def sort_link(query, label, by, this_by, link_all)
       model = controller.controller_model_name
       ctlr = controller.controller_name
-      helper_name = sort_link_helper_name(model, ctlr)
-      # path = send(:"#{helper_name}_path", q: get_query_param)
+      # For now, we still need the top-level :by param to trigger a new query
+      # when the link hits the index again. However, IMO build_index_with_query
+      # shouldn't need the :by param, it should check for an :order_by in the
+      # incoming :q
       path = { controller: ctlr, action: action_name,
-               by: by, q: get_query_param(query) }
-      # identifier = "#{query.model.to_s.pluralize.underscore}_by_#{by}_link"
+               q: q_param(query).merge(order_by: by) }
+
+      helper_name = sort_link_helper_name(model, ctlr)
       identifier = "#{helper_name}_by_#{by}_link"
       active = !link_all && (by.to_s == this_by) # boolean if current sort order
 

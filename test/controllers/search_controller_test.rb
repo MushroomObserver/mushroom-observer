@@ -82,7 +82,7 @@ class SearchControllerTest < FunctionalTestCase
     }
     get(:advanced, params: params)
     query = QueryRecord.last.query
-    q = @controller.full_q_param(query)
+    q = @controller.q_param(query)
     assert_redirected_to(observations_path(advanced_search: 1, q:))
     assert_true(query.num_results.positive?)
     assert_equal("", query.params[:has_images])

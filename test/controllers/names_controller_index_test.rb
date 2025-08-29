@@ -39,15 +39,17 @@ class NamesControllerIndexTest < FunctionalTestCase
     # Check that the controller sets a new permalink-style @query_param
     expected_q = { model: :Name, observation_query: { by_users: [user.id] } }
     assert_equal(assigns(:query_param), expected_q)
-    index_related_query_assertions(user, expected_q)
+    assert_session_query_record_is_correct
+    index_related_query_assertions(user)
 
     # Now check that the new param works the same
     get(:index, params: { q: expected_q })
     assert_equal(assigns(:query_param), expected_q)
-    index_related_query_assertions(user, expected_q)
+    assert_session_query_record_is_correct
+    index_related_query_assertions(user)
   end
 
-  def index_related_query_assertions(user, expected_q)
+  def index_related_query_assertions(user)
     assert_page_title(:NAMES.l)
     assert_displayed_filters(:query_observation_query.l)
     assert_displayed_filters("#{:query_by_users.l}: #{user.name}")
@@ -57,7 +59,7 @@ class NamesControllerIndexTest < FunctionalTestCase
     # that the new permalink version of the q param is in forward links
     assert_select(
       "#results a:match('href', ?)",
-      %r{^#{names_path}/\d+\?#{query_string(expected_q)}},
+      %r{^#{names_path}/\d+},
       { count: result_names.count },
       "Wrong number of (correctly spelled) Names, or wrong `q`"
     )
@@ -68,7 +70,7 @@ class NamesControllerIndexTest < FunctionalTestCase
     query = Query.lookup_and_save(:Name, search_name: search_string)
 
     login
-    params = { q: @controller.get_query_param(query), advanced_search: true }
+    params = { q: @controller.q_param(query), advanced_search: true }
     get(:index, params:)
 
     assert_response(:success)
@@ -89,7 +91,7 @@ class NamesControllerIndexTest < FunctionalTestCase
            "Test needs a string that has exactly one hit")
 
     login
-    params = { q: @controller.get_query_param(query), advanced_search: true }
+    params = { q: @controller.q_param(query), advanced_search: true }
     get(:index, params:)
     assert_match(name_path(names(:stereum_hirsutum)), redirect_to_url,
                  "Wrong page")
@@ -107,7 +109,7 @@ class NamesControllerIndexTest < FunctionalTestCase
   def test_index_advanced_search_no_hits
     query = oklahoma_query
     login
-    params = { q: @controller.get_query_param(query), advanced_search: true }
+    params = { q: @controller.q_param(query), advanced_search: true }
     get(:index, params:)
 
     assert_page_title(:NAMES.l)
@@ -117,7 +119,7 @@ class NamesControllerIndexTest < FunctionalTestCase
   # This test no longer makes sense with permalinks
   # def test_index_advanced_search_with_deleted_query
   #   query = oklahoma_query
-  #   params = { q: @controller.get_query_param(query), advanced_search: true }
+  #   params = { q: @controller.q_param(query), advanced_search: true }
   #   query.record.delete
 
   #   login
@@ -130,7 +132,7 @@ class NamesControllerIndexTest < FunctionalTestCase
     query_no_conditions = Query.lookup_and_save(:Name)
 
     login
-    params = { q: @controller.get_query_param(query_no_conditions),
+    params = { q: @controller.q_param(query_no_conditions),
                advanced_search: true }
     get(:index, params:)
 
@@ -373,7 +375,7 @@ class NamesControllerIndexTest < FunctionalTestCase
 
   def pagination_query_param
     query = Query.lookup_and_save(:Name, order_by: :name)
-    @controller.get_query_param(query)
+    @controller.q_param(query)
   end
 
   # None of our standard tests ever actually renders pagination_numbers
@@ -389,8 +391,8 @@ class NamesControllerIndexTest < FunctionalTestCase
     expected = Name.order(:sort_name, :author).limit(10).to_a
     assert_equal(expected.map(&:id), ids_from_links(name_links))
 
-    url = @controller.url_with_query(controller: "/names", action: :show,
-                                     id: expected.first.id, only_path: true)
+    url = @controller.url_for(controller: "/names", action: :show,
+                              id: expected.first.id, only_path: true)
     assert_equal(name_links.first[:href], url)
 
     assert_link_in_html("Next", controller: "/names",
@@ -410,8 +412,8 @@ class NamesControllerIndexTest < FunctionalTestCase
     expected = Name.order(:sort_name).limit(10).offset(10).to_a
     assert_equal(expected.map(&:id), ids_from_links(name_links))
 
-    url = @controller.url_with_query(controller: "/names", action: :show,
-                                     id: expected.first.id, only_path: true)
+    url = @controller.url_for(controller: "/names", action: :show,
+                              id: expected.first.id, only_path: true)
     assert_equal(name_links.first[:href], url)
 
     assert_link_in_html("Previous", controller: "/names",
@@ -433,8 +435,8 @@ class NamesControllerIndexTest < FunctionalTestCase
     assert_equal(Set.new(l_names.map(&:id)),
                  Set.new(ids_from_links(name_links)))
 
-    url = @controller.url_with_query(controller: "/names", action: :show,
-                                     id: l_names.first.id, only_path: true)
+    url = @controller.url_for(controller: "/names", action: :show,
+                              id: l_names.first.id, only_path: true)
     assert_equal(name_links.first[:href], url)
     assert_select("a", text: "1", count: 0)
   end

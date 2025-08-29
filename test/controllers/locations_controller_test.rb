@@ -213,7 +213,7 @@ class LocationsControllerTest < FunctionalTestCase
                                   observation_query: { species_lists: [sl] })
 
     login
-    get(:index, params: { q: @controller.get_query_param(query) })
+    get(:index, params: { q: @controller.q_param(query) })
 
     location = sl.observations.joins(:location).first&.location
     assert_match(location.display_name, @response.body)
@@ -223,7 +223,7 @@ class LocationsControllerTest < FunctionalTestCase
     where = "California"
     query = Query.lookup_and_save(:Location, search_where: where)
     matches = Location.name_has(where)
-    params = { q: @controller.get_query_param(query), advanced_search: true }
+    params = { q: @controller.q_param(query), advanced_search: true }
 
     login
     get(:index, params:)
@@ -242,7 +242,7 @@ class LocationsControllerTest < FunctionalTestCase
     query_no_conditions = Query.lookup_and_save(:Location)
 
     login
-    params = { q: @controller.get_query_param(query_no_conditions),
+    params = { q: @controller.q_param(query_no_conditions),
                advanced_search: true }
     get(:index, params:)
 

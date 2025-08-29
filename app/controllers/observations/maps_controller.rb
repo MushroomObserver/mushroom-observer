@@ -3,7 +3,6 @@
 module Observations
   class MapsController < ApplicationController
     before_action :login_required
-    before_action :pass_query_params, only: :show
 
     def controller_model_name
       "Observation"

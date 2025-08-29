@@ -670,4 +670,8 @@ module ControllerExtensions
   def query_string(query_string)
     observations_path(q: query_string).split("?")[1]
   end
+
+  def assert_session_query_record_is_correct
+    assert_equal(QueryRecord.last.id, session[:query_record])
+  end
 end

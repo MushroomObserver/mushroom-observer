@@ -170,7 +170,7 @@ module Names
       get(:show, params: { flow: :next, id: })
       next_data = @controller.find_query_and_next_object(object, :next, id)
       params = { id: next_data[:id],
-                 q: @controller.get_query_param(next_data[:query]) }
+                 q: @controller.q_param(next_data[:query]) }
       # from params above
       assert_redirected_to(name_description_path(**params))
     end
@@ -183,7 +183,7 @@ module Names
       get(:show, params: { flow: :prev, id: })
       prev_data = @controller.find_query_and_next_object(object, :prev, id)
       params = { id: prev_data[:id],
-                 q: @controller.get_query_param(prev_data[:query]) }
+                 q: @controller.q_param(prev_data[:query]) }
       # from params above
       assert_redirected_to(name_description_path(**params))
     end

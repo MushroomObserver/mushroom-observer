@@ -8,14 +8,14 @@ module Observations
       @query = find_or_create_query(:Observation, order_by: params[:by])
       return too_many_results if too_many_results?
 
-      query_params_set(@query)
+      query_params_set(@query) # also stores query in session
     end
 
     def create
       @query = find_or_create_query(:Observation, order_by: params[:by])
       raise("no robots!") if browser.bot? # failsafe only!
 
-      query_params_set(@query)
+      query_params_set(@query) # also stores query in session
       @format = params[:format] || "raw"
       @encoding = params[:encoding] || "UTF-8"
       download_observations_switch

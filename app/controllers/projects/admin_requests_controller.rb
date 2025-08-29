@@ -4,7 +4,6 @@
 module Projects
   class AdminRequestsController < ApplicationController
     before_action :login_required
-    before_action :pass_query_params
 
     # Form to compose email for the admins
     # Linked from: show_project
@@ -30,7 +29,7 @@ module Projects
                                                       content)
       end
       flash_notice(:admin_request_success.t(title: @project.title))
-      redirect_to(project_path(@project.id, q: get_query_param))
+      redirect_to(project_path(@project.id))
     end
 
     private

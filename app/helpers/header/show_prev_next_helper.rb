@@ -30,11 +30,13 @@ module Header
 
     # Returns the query if it's for the relevant type of object
     def show_page_incoming_query(object)
-      return nil unless params[:q]
+      return nil unless session[:query_record]
 
-      query = controller.query_from_q_param(params)
+      query = controller.current_query
       return nil unless [object.type_tag, :rss_log].include?(query&.type_tag)
 
+      # set current_id so prev_id and next_id will work
+      query.current_id = object.id
       query
     end
 
@@ -44,10 +46,10 @@ module Header
       hide = show_no_more?(object, query, dir) ? "disabled opacity-0" : ""
       classes = class_names(SHOW_LINK_BTN_CLASSES, "#{dir}_object_link", hide)
       type = object.type_tag
+      adjacent_id = query.send(:"#{dir}_id")
+      href = adjacent_id ? send(show_link_path(type), id: adjacent_id) : "#"
       icon_link_to(
-        :"#{dir.upcase}_OBJECT".t(type: :"#{type.upcase}".l),
-        send(show_link_path(type),
-             id: object.id, flow: dir.to_s, q: get_query_param(query)),
+        :"#{dir.upcase}_OBJECT".t(type: :"#{type.upcase}".l), href,
         class: classes, icon: dir, show_text: false
       )
     end
@@ -85,7 +87,7 @@ module Header
 
       icon_link_to(
         :INDEX_OBJECT.t(type: :"#{type.upcase}".l),
-        add_query_param(object.index_link_args, query),
+        add_q_param(object.index_link_args, query),
         class: classes, icon: icon, show_text: false
       )
     end

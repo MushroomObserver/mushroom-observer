@@ -1,6 +1,6 @@
 <%
 heading = :show_name_lifeform.l
-link = icon_link_with_query(*edit_name_lifeform_tab(@name))
+link = icon_link_to(*edit_name_lifeform_tab(@name))
 heading_links = @user ? link.html_safe : ""
 %>
 
@@ -21,8 +21,8 @@ panel_block(
 
   if @first_child
     concat(tag.p(
-      link_with_query(:show_name_propagate_lifeform.t,
-                      form_to_propagate_lifeform_of_name_path(@name.id))
+      link_to(:show_name_propagate_lifeform.t,
+              form_to_propagate_lifeform_of_name_path(@name.id))
     ))
   end
 

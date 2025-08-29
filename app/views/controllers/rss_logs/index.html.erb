@@ -1,7 +1,7 @@
 <%
 add_index_title(@query)
 add_context_nav(rss_logs_index_tabs(user: @user, types: @types))
-add_type_filters
+add_type_filters(@query, @types)
 add_pagination(@pagination_data)
 
 container_class(:full)

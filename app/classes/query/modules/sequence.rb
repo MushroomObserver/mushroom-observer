@@ -131,6 +131,12 @@ module Query::Modules::Sequence
     new_self
   end
 
+  def first_id
+    return nil unless result_ids.length
+
+    result_ids.first
+  end
+
   # Move to previous place.
   def prev
     new_self = self
@@ -143,6 +149,15 @@ module Query::Modules::Sequence
       new_self = nil
     end
     new_self
+  end
+
+  # Returns the previous id, or nil, without changing the query.
+  # Must set current_id= first
+  def prev_id
+    index = result_ids.index(current_id)
+    return nil unless index&.positive?
+
+    result_ids[index - 1]
   end
 
   # Move to next place.
@@ -159,6 +174,15 @@ module Query::Modules::Sequence
     new_self
   end
 
+  # Returns the previous id, or nil, without changing the query.
+  # Must set current_id= first
+  def next_id
+    index = result_ids.index(current_id)
+    return nil unless index && index < result_ids.length - 1
+
+    result_ids[index + 1]
+  end
+
   # Move to last place.
   def last
     new_self = self
@@ -169,5 +193,11 @@ module Query::Modules::Sequence
       new_self = nil
     end
     new_self
+  end
+
+  def last_id
+    return nil unless result_ids.length
+
+    result_ids.last
   end
 end

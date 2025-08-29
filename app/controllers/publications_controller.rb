@@ -4,11 +4,11 @@
 class PublicationsController < ApplicationController
   before_action :login_required, except: [:index, :show]
   before_action :require_successful_user, only: [:create]
+  before_action :store_location, only: [:index, :show]
 
   # GET /publications
   # GET /publications.xml
   def index
-    store_location
     @publications = Publication.order(:full)
     @full_count = @publications.length
     @peer_count = @publications.count(&:peer_reviewed)
@@ -22,7 +22,6 @@ class PublicationsController < ApplicationController
   # GET /publications/1
   # GET /publications/1.xml
   def show
-    store_location
     @publication = Publication.find(params[:id])
     respond_to do |format|
       format.html # show.html.erb

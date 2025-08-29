@@ -48,8 +48,7 @@ module MatrixBoxHelper
     wrap_class = "matrix-box #{columns} #{extra_classes}"
     wrap_args = args.except(:columns, :class, :id)
 
-    tag.li(class: wrap_class, id: box_id, **wrap_args,
-           data: { controller: "query-results" }) do
+    tag.li(class: wrap_class, id: box_id, **wrap_args) do
       capture(&block)
     end
   end
@@ -103,8 +102,7 @@ module MatrixBoxHelper
       [
         tag.h5(class: class_names(%w[mt-0 rss-heading], h_style)) do
           [
-            link_with_query(what.show_link_args,
-                            data: { query_results_target: "link" }) do
+            link_to(what.show_link_args) do
               matrix_box_title(name: presenter.name, id: object_id, type:)
             end,
             matrix_box_id_tag(object: presenter.what)
