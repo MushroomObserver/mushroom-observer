@@ -46,14 +46,6 @@ class SpeciesListsController < ApplicationController
     [:pattern, :by_user, :project, :by, :q, :id].freeze
   end
 
-  # Display list of selected species_lists, based on current Query.
-  # (Linked from show_species_list, next to "prev" and "next".)
-  # Passes explicit :by param to affect title (only).
-  def sorted_index_opts
-    sorted_by = params[:by] || :date
-    super.merge(query_args: { order_by: sorted_by })
-  end
-
   # Display list of user's species_lists, sorted by date.
   def by_user
     user = find_obj_or_goto_index(

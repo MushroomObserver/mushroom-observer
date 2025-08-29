@@ -35,14 +35,6 @@ class CommentsController < ApplicationController
     [:target, :pattern, :by_user, :for_user, :by].freeze
   end
 
-  # Show selected list of comments, based on current Query.
-  # (Linked from show_comment, next to "prev" and "next"... or will be.)
-  # Passes explicit :by param to affect title (only).
-  def sorted_index_opts
-    sorted_by = params[:by] || default_sort_order
-    super.merge(query_args: { order_by: sorted_by })
-  end
-
   # Shows comments by a given user, most recent first. (Linked from show_user.)
   def by_user
     user = find_obj_or_goto_index(

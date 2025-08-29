@@ -146,7 +146,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     visit(herbaria_path)
     assert_selector("body.herbaria__index")
 
-    herbaria_show_links = page.all("td > a[class^='herbarium_link']")
+    herbaria_show_links = page.all("a[class^='herbarium_link']")
 
     assert_equal(
       Herbarium.count, herbaria_show_links.size,
@@ -156,7 +156,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     first_herbarium_path = herbaria_show_links.first["href"].sub(/\?.*/, "")
     first(".sorts a", text: "Reverse Order").click
 
-    reverse_herbaria_show_links = page.all("td > a[class^='herbarium_link']")
+    reverse_herbaria_show_links = page.all("a[class^='herbarium_link']")
 
     assert_equal(
       first_herbarium_path,

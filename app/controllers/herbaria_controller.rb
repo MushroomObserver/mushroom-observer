@@ -80,19 +80,11 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   end
 
   def default_sort_order
-    ::Query::Herbaria.default_order # :name
+    ::Query::Herbaria.default_order # :records
   end
 
   def index_active_params
     [:pattern, :nonpersonal, :by, :q, :id].freeze
-  end
-
-  # Show selected list, based on current Query.
-  # (Linked from show template, next to "prev" and "next"... or will be.)
-  # Passes explicit :by param to affect title (only).
-  def sorted_index_opts
-    sorted_by = params[:by] || default_sort_order
-    super.merge(query_args: { order_by: sorted_by })
   end
 
   def nonpersonal
