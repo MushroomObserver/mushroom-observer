@@ -36,7 +36,7 @@ class RssLogsController < ApplicationController
 
   # Show selected list, based on current Query.
   def sorted_index_opts
-    super.merge(
+    super.deep_merge(
       query_args: { type: index_type_from_params || index_type_default }
     )
   end
