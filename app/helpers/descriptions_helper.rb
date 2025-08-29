@@ -131,7 +131,7 @@ module DescriptionsHelper
         ["#{:TITLE.l}:", description_title(user, description)].safe_join(" "),
         [
           "#{type.to_s.upcase.to_sym.t}:",
-          link_to(parent.format_name.t, add_query_param(parent.show_link_args))
+          link_to(parent.format_name.t, parent.show_link_args)
         ].safe_join(" "),
         "#{:show_description_read_permissions.l}: #{read}",
         "#{:show_description_write_permissions.l}: #{write}",
