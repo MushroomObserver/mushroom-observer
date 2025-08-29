@@ -49,7 +49,9 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     current_params.each do |subaction|
       next if params[subaction].blank?
 
+      # May go through #sorted_index to create the query, before #filtered_index
       query, display_opts = send(index_param_method_or_default(subaction))
+
       # Some actions may redirect instead of returning a query, such as pattern
       # searches when they resolve to a single object or get no results.
       # So if we had the param, but got a blank query, we should bail to allow
@@ -99,6 +101,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   end
 
   # Provide defaults for the params an index can handle.
+  # Note the order of this array governs logic in build_index_with_query.
   INDEX_BASIC_PARAMS = [:by, :q, :id].freeze
 
   # Overrides should include any of the above basics, if relevant.
@@ -112,7 +115,8 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     index_active_params.intersection(INDEX_BASIC_PARAMS)
   end
 
-  # Should this param be handled by :sorted_index or a named method?
+  # If param is [:by, :q, :id] it's handled by :sorted_index.
+  # Other params are handled by a named method in the downstream controller.
   def index_param_method_or_default(subaction)
     index_basic_params.include?(subaction) ? :sorted_index : subaction
   end
@@ -140,7 +144,9 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     { query_args: {}, display_opts: {} }.freeze
   end
 
-  # This handles the index if you pass any of the basic params.
+  # This handles the index if you pass any of the basic params, and runs before
+  # #filtered_index. The big difference from #unfiltered_index is that it runs
+  # #find_or_create_query instead of #create_query
   def sorted_index
     return unless sorted_index_permitted?
 
@@ -156,14 +162,22 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     true
   end
 
-  # This only deals with :by passed in url params.
+  # This only deals with :by, :id, and :type passed in url params.
   def sorted_index_opts
-    { query_args: { order_by: order_by_or_flash_if_unknown },
+    { query_args: {
+        order_by: order_by_or_flash_if_unknown
+        # id: params.dig(:q, :id)
+      },
       display_opts: index_display_at_id_opts }.freeze
   end
 
   def order_by_or_flash_if_unknown
-    order_by = params[:by]
+    # `query_from_q_param` is able to handle alphabetized :q params
+    order_by = if (query = query_from_q_param)
+                 query.params[:order_by]
+               else
+                 params[:by]
+               end
     return nil if order_by.blank?
 
     scope = :"order_by_#{order_by.to_s.sub(/^reverse_/, "")}"
@@ -266,7 +280,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
 
   def show_index_setup(query, display_opts)
     store_location
-    clear_query_in_session if session[:checklist_source] != query.id
+    clear_query_in_session if session[:query_record] != query.id
     query_params_set(query)
     query.need_letters = display_opts[:letters] if display_opts[:letters]
     set_index_view_ivars(query, display_opts)
@@ -304,9 +318,9 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   ###########################################################################
 
   def show_action_redirect(query)
-    redirect_with_query(controller: query.model.show_controller,
-                        action: query.model.show_action,
-                        id: query.result_ids.first)
+    redirect_to(controller: query.model.show_controller,
+                action: query.model.show_action,
+                id: query.result_ids.first)
   end
 
   def calc_pages_and_objects(query, display_opts)

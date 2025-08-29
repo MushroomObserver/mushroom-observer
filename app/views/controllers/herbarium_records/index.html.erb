@@ -31,10 +31,8 @@ flash_error(@error) if @error && @objects.empty?
                   :UNKNOWN.t %>
         </td>
         <td>
-          <%= link_to(rec.herbarium_label.t,
-                        herbarium_record_path(id: rec.id,
-                                              q: get_query_param),
-                        class: "herbarium_record_link_#{rec.id}") %>
+          <%= link_to(rec.herbarium_label.t, herbarium_record_path(id: rec.id),
+                      class: "herbarium_record_link_#{rec.id}") %>
         </td>
         <td>
           <%= rec.observations.map do |obs|

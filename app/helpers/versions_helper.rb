@@ -48,11 +48,11 @@ module VersionsHelper
     str = "#{:show_name_previous_version.t} #{previous_version.version}"
     current_version_html(obj) +
       # FIX THIS: Send the path helper the id and version param.
-      link_with_query(str,
-                      { controller: "#{obj.show_controller}/versions",
-                        action: :show, id: obj.id,
-                        version: previous_version.version },
-                      class: "previous_version_link") +
+      link_to(str,
+              { controller: "#{obj.show_controller}/versions",
+                action: :show, id: obj.id,
+                version: previous_version.version },
+              class: "previous_version_link") +
       safe_br
   end
 
@@ -86,14 +86,13 @@ module VersionsHelper
 
   def link_to_version(text, ver, obj, versions)
     if ver == versions.last
-      link_with_query(text, obj.show_link_args, class: "latest_version_link")
+      link_to(text, obj.show_link_args, class: "latest_version_link")
     else
-      link_with_query(text,
-                      # FIX THIS: url helper
-                      { controller: "#{obj.show_controller}/versions",
-                        action: :show, id: obj.id,
-                        version: ver.version },
-                      class: "initial_version_link")
+      link_to(text,
+              { controller: "#{obj.show_controller}/versions",
+                action: :show, id: obj.id,
+                version: ver.version },
+              class: "initial_version_link")
     end
   end
 

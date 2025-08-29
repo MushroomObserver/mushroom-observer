@@ -18,7 +18,7 @@ place = species_list.place_name.t rescue :UNKNOWN.l
     <%= tag.div do %>
       <%= tag.div do
         [
-          link_with_query(species_list.show_link_args) do
+          link_to(species_list.show_link_args) do
             tag.span(species_list.text_name.t, class: "list_what h4")
           end,
           tag.span("(#{species_list.when.to_s})", class: "list_when ml-4")

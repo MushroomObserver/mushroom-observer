@@ -16,11 +16,10 @@
 #  redirect_to_next_object:: Find next object from a Query and redirect to its
 #                            show page.
 #
-module ApplicationController::Queries
+module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
   def self.included(base)
     base.helper_method(
-      :query_from_session, :query_params, :add_query_param,
-      :get_query_param, :query_params_set
+      :query_from_session, :query_params, :add_query_param, :get_query_param
     )
   end
 
@@ -39,20 +38,23 @@ module ApplicationController::Queries
   # only place where user content filters are applied.
   # (Related query links will preserve content filters in the subquery.)
   def create_query(model_symbol, query_params = {})
-    add_user_content_filter_parameters(query_params, model_symbol)
-    # NOTE: This param is used by the controller to distinguish between params
-    # that have been filtered by @user.content_filter vs advanced search,
-    # because they use the same params.
+    query_params = add_user_content_filter_parameters(query_params,
+                                                      model_symbol)
+    # NOTE: This param `:preference_filter` is used by the controller to
+    # know when params have been filtered by @user.content_filter vs any
+    # other search, which may send the same params.
     query_params[:preference_filter] = true if @preference_filters_applied
     Query.lookup(model_symbol, query_params)
   end
 
   # Lookup an appropriate Query or create a default one if necessary.  If you
   # pass in arguments, it modifies the query as necessary to ensure they are
-  # correct.  (Useful for specifying sort conditions, for example.)
+  # correct. (Useful for specifying sort conditions, for example.)
   def find_or_create_query(model_symbol, args = {})
     map_past_bys(args)
     model = model_symbol.to_s
+    # New: the stored query may have content filters, need to update to compare
+    args = add_user_content_filter_parameters(args, model_symbol)
     found_query = existing_updated_or_default_query(model, args)
     save_query_record_unless_bot(found_query)
     found_query
@@ -61,8 +63,7 @@ module ApplicationController::Queries
   # Lookup the given kind of Query, returning nil if it no longer exists.
   def find_query(model = nil, update: !browser.bot?)
     model = model.to_s if model
-    query = query_from_q_param(params)
-    return nil unless query # invalid is ok, we will report errors
+    return nil unless (query = current_query) # invalid ok, will report errors
 
     found_query = find_new_query_for_model(model, query)
     save_updated_query_record(found_query) if update && found_query
@@ -83,7 +84,7 @@ module ApplicationController::Queries
       # If existing query needs updates, we need to create a new query,
       # otherwise the modifications won't persist.
       # Use the existing query as the template, though.
-      if query_needs_update?(args, query)
+      if query_needs_update?(query, args)
         query = create_query(model, query.params.merge(args))
       end
     # If no query found, just create a default one.
@@ -93,8 +94,11 @@ module ApplicationController::Queries
     query
   end
 
-  def query_needs_update?(new_args, query)
-    new_args.any? { |_arg, val| query.params[:arg] != val }
+  # Checks if new_args are different from query_params - also if applied user
+  # content_filters have been stored in the query, might need to be cleared.
+  def query_needs_update?(query, new_args)
+    new_args.any? { |arg, val| query.params[arg] != val } ||
+      query.params.any? { |arg, val| new_args[arg] != val }
   end
 
   # Turn old query into a new query for given model,
@@ -114,9 +118,11 @@ module ApplicationController::Queries
     save_updated_query_record(query)
   end
 
+  # Set the session[:query_record] here
   def save_updated_query_record(query)
     query.increment_access_count
     query.save
+    store_query_in_session(query)
   end
 
   def map_past_bys(args)
@@ -127,12 +133,13 @@ module ApplicationController::Queries
 
   def add_user_content_filter_parameters(query_params, model)
     filters = current_user_preference_filters || {}
-    return if filters.blank?
+    return query_params if filters.blank?
 
     # disable cop because Query::Filter is not an ActiveRecord model
     Query::Filter.all.each do |fltr| # rubocop:disable Rails/FindEach
       apply_one_content_filter(fltr, query_params, model, filters[fltr.sym])
     end
+    query_params
   end
 
   def apply_one_content_filter(fltr, query_params, model, user_filter)
@@ -154,81 +161,59 @@ module ApplicationController::Queries
 
   ##############################################################################
   #
-  #  :section: Query parameters and session query (session[:checklist_source])
+  #  :section: Query parameters and session[:query_record]
   #
   #  The general idea is that the user executes a search or requests an index,
-  #  then clicks on a result.  This takes the user to a show_object page.  This
-  #  page "knows" about the search or index via a special universal URL
-  #  parameter (via +query_params+).  When the user then clicks on "prev" or
-  #  "next", it can then step through the query results.
-  #
-  #  While browsing like this, the user may want to divert temporarily to add a
-  #  comment or propose a name or something.  These actions are responsible for
-  #  keeping track of these search parameters, and eventually passing them back
-  #  to the show_object page.  Usually they just pass the query parameter
-  #  through via +pass_query_params+.
-  #
-  #  See Query and AbstractQuery for more detail.
+  #  then clicks on a result.  This takes the user to a show_object page.
+  #  This page "knows" about the search or index via session[:query_record].
+  #  When the user then clicks on "prev" or "next", it can then step through
+  #  the query results.
   #
   ##############################################################################
 
-  # Pass the incoming query parameter(s) through to the next request.
-  # Re-validate the params as a query, because they could be altered
-  def pass_query_params
-    @query_param = nil
-    return if params[:q].blank?
-
-    query = query_from_q_param(params)
-    return @query_param unless query&.valid?
-
-    @query_param = full_q_param(query)
-    @query_param
-  end
-
-  # Change the query that +query_param+ passes along to the next request.
-  # *NOTE*: This method is available to views.
+  # Change the query that +query_param+ passes along to the next request,
+  # and update session[:query_record].
+  # NOTE: ApplicationController::Indexes#show_index_setup calls this.
   def query_params_set(query = nil)
+    clear_query_in_session
     @query_param = nil
     if browser.bot?
       # do nothing
     elsif query
-      query.save unless query.id
+      store_query_in_session(query)
       @query_param = full_q_param(query)
     end
     @query_param
   end
-  # helper_method :query_params_set
 
   # This clears the search/index saved in the session.
   def clear_query_in_session
-    session[:checklist_source] = nil
+    session[:query_record] = nil
   end
 
-  # This stores the latest search/index used for use by create_species_list.
-  # (Stores the Query id in <tt>session[:checklist_source]</tt>.)
+  # This stores the latest search/index used for use by links.
+  # (Stores the Query id in `session[:query_record]`.)
   def store_query_in_session(query)
     query.save unless query.id
-    session[:checklist_source] = query.id
+    session[:query_record] = query.id
   end
 
-  # Get Query last stored on the "clipboard" (session).
-  # def query_from_session
-  #   return unless (id = session[:checklist_source])
+  # Get the id of the query_record last stored in the session.
+  def query_from_session
+    return unless (id = session[:query_record])
 
-  #   Query.safe_find(id)
-  # end
+    Query.safe_find(id)
+  end
   # helper_method :query_from_session
 
   # Opposite is `full_q_param` below
-  def query_from_q_param(param_set)
-    if query_record_id?(param_set[:q]) # i.e. QueryRecord.id
-      Query.safe_find(param_set[:q].to_s.dealphabetize) # this may return nil
-    elsif param_set[:q].present?
-      q_param = param_set[:q]
-      return nil if q_param[:model].blank?
-
-      Query.lookup(q_param[:model].to_sym,
-                   **q_param.except(:model).to_unsafe_hash)
+  def query_from_q_param
+    # For backwards compatibility with old q params. Delete condition when
+    # QueryRecord.where.not(permalink: true).count == 0
+    if query_record_id?(params[:q]) # i.e. QueryRecord.id.alphabetize
+      query_from_q_record_id
+    elsif params[:q].present?
+      query_from_full_q_param
     end
   end
 
@@ -236,50 +221,41 @@ module ApplicationController::Queries
     str.is_a?(String) && str&.match(/^[a-zA-Z0-9]*$/)
   end
 
-  # This parses the results of `to_query`, called in `full_q_param`
-  # def parse_q_param(param_set)
-  # Rack::Utils.parse_nested_query(param_set[:q]).deep_symbolize_keys
-  # end
+  def query_from_q_record_id
+    Query.safe_find(params[:q].to_s.dealphabetize) # this may return nil
+  end
+
+  def query_from_full_q_param
+    q_param = params[:q]
+    return nil if q_param[:model].blank?
+
+    Query.lookup(q_param[:model].to_sym,
+                 **q_param.except(:model).to_unsafe_hash)
+  end
 
   # NOTE: If we're going to cache user stuff that depends on their present q,
   # we'll need a helper to make the current QueryRecord (not just the id)
   # available to templates as an ApplicationController ivar. Something like:
   #
-  # def current_query_record
-  #   current_query = query_from_session # could both be nil!
-  #   current_query_record = current_query&.record || "no_query"
-  # end
-
-  # Return query parameter(s) necessary to pass query information along to
-  # the next request. *NOTE*: This method is available to views.
-  # def query_params(query = nil)
-  #   if browser.bot? || (!query && !@query_param)
-  #     {}
-  #   elsif query
-  #     query.save unless query.id
-  #     { q: full_q_param(query) }
-  #   elsif @query_param
-  #     { q: @query_param }
-  #   end
-  # end
-  # 4 maps show pages still call this - Not any more
-  # private :query_params # only call this here, to avoid double-encoding params
+  def current_query
+    @query || query_from_q_param || query_from_session
+  end
 
   def add_query_param(params, query = nil)
     return params if browser.bot?
 
-    query_param = get_query_param(query)
+    q_param = get_query_param(query)
     if params.is_a?(String) # i.e., if "params" arg is a path
-      append_query_param_to_path(params, query_param)
+      append_query_param_to_path(params, q_param)
     else
-      params[:q] = query_param if query_param
+      params[:q] = q_param if q_param
       params
     end
   end
   # helper_method :add_query_param
 
-  def append_query_param_to_path(path, query_param)
-    return path unless query_param
+  def append_query_param_to_path(path, q_param)
+    return path unless q_param
 
     # Figure out if there's an existing URI query_string, like "flow=next"
     # This query_string is not our q param, it's all the other params.
@@ -287,32 +263,31 @@ module ApplicationController::Queries
     query_string = uri.query
 
     # Parse the query_string as a Ruby hash, and add `q`
-    hash = if query_string
-             Rack::Utils.parse_query(query_string)
-           else
-             {}
-           end
-    hash["q"] = query_param
+    hash = query_string ? Rack::Utils.parse_query(query_string) : {}
+    hash["q"] = q_param
     uri.query = hash.to_query
     uri.to_s
   end
 
-  # Allows us to add query to a path helper:
-  #   object_path(@object, q: get_query_param)
+  # Allows us to add any passed query, or the current to a path helper:
+  #   link_to(@object.show_link_args.merge(q: get_query_param))
+  # Saves the query, but does not set session[:query_record]
   def get_query_param(query = nil)
     return nil if browser.bot?
 
     if query
       query.save unless query.id
       full_q_param(query)
-    elsif @query_param
-      @query_param
+    # elsif @query_param # a bit quicker, if we have it. but could delete.
+    #   @query_param
+    elsif (query = current_query)
+      full_q_param(query)
     end
   end
   # helper_method :get_query_param
 
   def full_q_param(query)
-    { model: query.model.name.to_sym }.merge(query.params)
+    { model: query.model.name.to_sym, **query.params }
   end
 
   # NOTE: these two methods add q: param to urls built from controllers/actions.
@@ -340,7 +315,7 @@ module ApplicationController::Queries
   end
 
   def query_invalid?
-    return true unless (query = query_from_q_param(params))
+    return true unless (query = current_query)
 
     query.invalid?
   end
@@ -358,7 +333,7 @@ module ApplicationController::Queries
   # Objects that belong to a single observation:
   def redirect_to_back_object_or_object(back_obj, obj)
     if back_obj
-      redirect_with_query(back_obj.show_link_args)
+      redirect_to(back_obj.show_link_args)
     elsif obj
       redirect_with_query(obj.index_link_args)
     else
@@ -418,10 +393,7 @@ module ApplicationController::Queries
 
   # q parameter exists, a query exists for that param, and it's an rss query
   def current_query_is_rss_log
-    return unless params[:q]
-
-    query = query_from_q_param(params)
-    return false unless query
+    return false unless (query = current_query)
 
     query if query.model == RssLog
   end

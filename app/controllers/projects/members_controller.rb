@@ -10,7 +10,6 @@ module Projects
   # CRUD for project members
   class MembersController < ApplicationController
     before_action :login_required
-    before_action :pass_query_params
 
     def index
       return unless find_project!
@@ -97,7 +96,7 @@ module Projects
 
     def return_to_caller(project, target)
       if target == "project_index"
-        redirect_to(project_path(project.id, q: get_query_param))
+        redirect_to(project_path(project.id))
       else
         redirect_to(project_members_path(project.id, q: get_query_param))
       end

@@ -49,11 +49,11 @@ map = @herbarium.location
 
       <% else %>
 
-        <%= link_with_query(
-                :show_herbarium_curator_request.t,
-                new_herbaria_curator_request_path(id: @herbarium.id),
-                class: "new_herbaria_curator_request_link"
-              ) %>
+        <%= link_to(
+              :show_herbarium_curator_request.t,
+              new_herbaria_curator_request_path(id: @herbarium.id),
+              class: "new_herbaria_curator_request_link"
+            ) %>
 
       <% end %>
     </div>

@@ -22,7 +22,6 @@ module ObservationsController::Show
   def show
     return if check_for_spider_block(request, params)
 
-    store_location
     if params[:flow].present?
       redirect_to_next_object(params[:flow].to_sym, Observation, params[:id])
       return

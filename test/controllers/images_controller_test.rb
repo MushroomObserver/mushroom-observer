@@ -223,14 +223,15 @@ class ImagesControllerTest < FunctionalTestCase
     next_image = user.images.reorder(created_at: :asc).first
     obs = image.observations.reorder(created_at: :asc).first
     assert(obs.images.member?(image))
-    query = Query.lookup_and_save(:Image, by_users: user)
+    query = @controller.find_or_create_query(:Image, by_users: user)
     q = @controller.get_query_param(query)
     params = { id: image.id, q: }
 
-    delete_requires_user(:destroy, { action: :show, id: image.id, q: q },
+    delete_requires_user(:destroy, { action: :show, id: image.id },
                          params, user.login)
 
-    assert_redirected_to(action: :show, id: next_image.id, q: q)
+    assert_redirected_to(action: :show, id: next_image.id)
+    assert_session_query_record_is_correct
     assert_equal(0, user.reload.contribution)
     assert_not(obs.reload.images.member?(image))
   end

@@ -93,8 +93,7 @@ class CommentsControllerTest < FunctionalTestCase
 
     assert_redirected_to(
       action: "show",
-      id: comments(:minimal_unknown_obs_comment_1).id,
-      params: { q: @controller.get_query_param(QueryRecord.last.query) }
+      id: comments(:minimal_unknown_obs_comment_1).id
     )
   end
 
@@ -117,6 +116,7 @@ class CommentsControllerTest < FunctionalTestCase
       { count: Comment.where(user: user).count },
       "Wrong number of links to Observations in results"
     )
+    assert_session_query_record_is_correct
   end
 
   def test_index_by_user_who_created_no_comments
@@ -147,6 +147,7 @@ class CommentsControllerTest < FunctionalTestCase
     assert_template("index")
     assert_page_title(:COMMENTS.l)
     assert_displayed_filters("#{:query_for_user.l}: #{user.name}")
+    assert_session_query_record_is_correct
   end
 
   def test_index_for_user_who_received_one_comment
@@ -161,6 +162,7 @@ class CommentsControllerTest < FunctionalTestCase
     get(:index, params: { for_user: user.id })
 
     assert_match(comment_path(comment), redirect_to_url)
+    assert_session_query_record_is_correct
   end
 
   def test_index_for_user_who_received_no_comments

@@ -11,7 +11,7 @@ module Tabs
     def send_observer_question_tab(obs)
       InternalLink::Model.new(
         :show_observation_send_question.l, obs,
-        add_query_param(new_question_for_observation_path(obs.id)),
+        new_question_for_observation_path(obs.id),
         html_options: { icon: :email }
       ).tab
     end
@@ -298,7 +298,7 @@ module Tabs
     def edit_observation_tab(obs)
       InternalLink::Model.new(
         :edit_object.t(type: Observation), obs,
-        add_query_param(edit_observation_path(obs.id)),
+        edit_observation_path(obs.id),
         html_options: { icon: :edit }
       ).tab
     end

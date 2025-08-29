@@ -6,7 +6,6 @@ module Locations
     include ::Locations::Descriptions::SharedPrivateMethods
 
     before_action :store_location, except: [:index, :destroy]
-    before_action :pass_query_params, except: [:index]
     before_action :login_required
     before_action :require_successful_user, only: [
       :new, :create
