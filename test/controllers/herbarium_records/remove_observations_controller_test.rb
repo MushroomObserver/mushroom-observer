@@ -82,16 +82,15 @@ class HerbariumRecords::RemoveObservationsControllerTest < FunctionalTestCase
   def test_remove_observation_redirect
     obs   = observations(:detailed_unknown_obs)
     recs  = obs.herbarium_records
-    query = Query.lookup_and_save(:HerbariumRecord)
-    q     = @controller.get_query_param(query)
+    @controller.find_or_create_query(:HerbariumRecord)
     login(obs.user.login)
     assert_operator(recs.length, :>, 1)
 
     # Prove that it keeps query param intact when returning to observation.
     patch(:update,
-          params: { herbarium_record_id: recs[1].id, observation_id: obs.id,
-                    q: })
-    assert_redirected_to(observation_path(id: obs.id, q:))
+          params: { herbarium_record_id: recs[1].id, observation_id: obs.id })
+    assert_redirected_to(observation_path(id: obs.id))
+    assert_session_query_record_is_correct
   end
 
   def test_turbo_remove_herbarium_record_non_owner

@@ -292,12 +292,10 @@ class CollectionNumbersControllerTest < FunctionalTestCase
 
   def test_create_collection_number_redirect
     obs = observations(:coprinus_comatus_obs)
-    query = @controller.find_or_create_query(:CollectionNumber)
-    q = @controller.get_query_param(query)
+    @controller.find_or_create_query(:CollectionNumber)
     params = {
       observation_id: obs.id,
-      collection_number: { name: "John Doe", number: "31415" },
-      q:
+      collection_number: { name: "John Doe", number: "31415" }
     }
 
     # Prove that query params are added to form action.

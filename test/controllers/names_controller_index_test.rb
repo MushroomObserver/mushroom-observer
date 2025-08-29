@@ -39,15 +39,17 @@ class NamesControllerIndexTest < FunctionalTestCase
     # Check that the controller sets a new permalink-style @query_param
     expected_q = { model: :Name, observation_query: { by_users: [user.id] } }
     assert_equal(assigns(:query_param), expected_q)
-    index_related_query_assertions(user, expected_q)
+    assert_session_query_record_is_correct
+    index_related_query_assertions(user)
 
     # Now check that the new param works the same
     get(:index, params: { q: expected_q })
     assert_equal(assigns(:query_param), expected_q)
-    index_related_query_assertions(user, expected_q)
+    assert_session_query_record_is_correct
+    index_related_query_assertions(user)
   end
 
-  def index_related_query_assertions(user, expected_q)
+  def index_related_query_assertions(user)
     assert_page_title(:NAMES.l)
     assert_displayed_filters(:query_observation_query.l)
     assert_displayed_filters("#{:query_by_users.l}: #{user.name}")
@@ -57,7 +59,7 @@ class NamesControllerIndexTest < FunctionalTestCase
     # that the new permalink version of the q param is in forward links
     assert_select(
       "#results a:match('href', ?)",
-      %r{^#{names_path}/\d+\?#{query_string(expected_q)}},
+      %r{^#{names_path}/\d+},
       { count: result_names.count },
       "Wrong number of (correctly spelled) Names, or wrong `q`"
     )

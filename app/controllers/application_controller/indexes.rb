@@ -172,7 +172,8 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   end
 
   def order_by_or_flash_if_unknown
-    order_by = params.dig(:q, :order_by) || params[:by]
+    # `query_from_q_param` is able to handle alphabetized :q params
+    order_by = query_from_q_param.params[:order_by] || params[:by]
     return nil if order_by.blank?
 
     scope = :"order_by_#{order_by.to_s.sub(/^reverse_/, "")}"
