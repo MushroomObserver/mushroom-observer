@@ -9,5 +9,5 @@
       ].safe_join
     end,
     truncate(strip_tags(object.body), length: 80).tpl
-  ]
+  ].safe_join
 end %>
