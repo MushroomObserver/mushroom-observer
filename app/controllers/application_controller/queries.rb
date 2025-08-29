@@ -208,15 +208,16 @@ module ApplicationController::Queries
 
   # Opposite is `q_param` below
   def query_from_q_param
-    # For backwards compatibility with old q params. Delete condition when
-    # QueryRecord.where.not(permalink: true).count == 0
+    # The first condition is for backwards compatibility with old q params.
+    # We can delete it when `QueryRecord.where.not(permalink: true).count == 0`
     if query_record_id?(params[:q]) # i.e. QueryRecord.id.alphabetize
       query_from_q_record_id
     elsif params[:q].present?
-      query_from_q_param
+      query_from_q_param_hash
     end
   end
 
+  # Check if the :q param is an older alphabetized QueryRecord id.
   def query_record_id?(str)
     str.is_a?(String) && str&.match(/^[a-zA-Z0-9]*$/)
   end
@@ -225,7 +226,7 @@ module ApplicationController::Queries
     Query.safe_find(params[:q].to_s.dealphabetize) # this may return nil
   end
 
-  def query_from_q_param
+  def query_from_q_param_hash
     q_param = params[:q]
     return nil if q_param[:model].blank?
 
@@ -241,15 +242,17 @@ module ApplicationController::Queries
     @query || query_from_q_param || query_from_session
   end
 
-  def add_q_param(params, query = nil)
-    return params if browser.bot?
+  # Add a :q param to a path helper like `names_path`,
+  # or a hash like { controller: "/names", action: :index }
+  def add_q_param(path_or_params, query = nil)
+    return path_or_params if browser.bot?
 
     q_param = q_param(query)
-    if params.is_a?(String) # i.e., if "params" arg is a path
-      append_q_param_to_path(params, q_param)
+    if path_or_params.is_a?(String) # i.e., if "path_or_params" arg is a path
+      append_q_param_to_path(path_or_params, q_param)
     else
-      params[:q] = q_param if q_param
-      params
+      path_or_params[:q] = q_param if q_param
+      path_or_params
     end
   end
   # helper_method :add_q_param
