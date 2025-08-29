@@ -74,7 +74,7 @@ class RssLogsController < ApplicationController
   # Hook runs before template displayed. Must return query.
   def filtered_index_final_hook(query, _display_opts)
     # store_query_in_session(query)
-    query_params_set(query) # also stores query in session
+    update_stored_query(query) # also stores query in session
     @types = query.params[:type].to_s.split.sort
 
     # Let the user make this their default and fine tune.

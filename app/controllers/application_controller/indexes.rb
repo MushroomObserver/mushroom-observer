@@ -263,7 +263,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   #                           location.
   # clear_query_in_session::  Clears the query from the "clipboard"
   #                           (if you didn't just store this query on it!).
-  # query_params_set::        Tells +query_params+ to pass this query on
+  # update_stored_query::        Tells +query_params+ to pass this query on
   #                           in links on this page.
   #
   def show_index_of_objects(query, display_opts = {})
@@ -281,7 +281,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   def show_index_setup(query, display_opts)
     store_location
     clear_query_in_session if session[:query_record] != query.id
-    query_params_set(query)
+    update_stored_query(query)
     query.need_letters = display_opts[:letters] if display_opts[:letters]
     set_index_view_ivars(query, display_opts)
     flash_query_validation_errors(query)

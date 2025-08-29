@@ -1,18 +1,22 @@
 # frozen_string_literal: true
 
 #  ==== Queries
+#  create_query::           Create a new Query from scratch.
+#  find_or_create_query::   Find appropriate Query or create as necessary.
+#  find_query::             Find a given Query or return nil.
+#
+#  update_stored_query::    Saves a passed query and stores id in the session.
 #  clear_query_in_session:: Clears out Query stored in session below.
 #  store_query_in_session:: Stores Query in session for use by
 #                           create_species_list.
 #  query_from_session::     Gets Query that was stored in the session above.
-#  query_params::           Parameters to add to link_to, etc. for passing
-#                           Query around.
-#  query_params_set::       Make +query_params+ refer to a given Query.
-#  pass_query_params::      Tell +query_params+ to pass-through the Query
-#                            given to this action.
-#  find_query::             Find a given Query or return nil.
-#  find_or_create_query::   Find appropriate Query or create as necessary.
-#  create_query::           Create a new Query from scratch.
+#
+#  current_query::          Returns @query, #query_from_q_param or
+#                           #query_from_session (in order of precedence)
+#  query_from_q_param::     Query instance from current params[:q]
+#  query_from_session::     Query instance from the session[:query_record]
+#  add_q_param::            Adds :q param to path or hash. Accepts passed query.
+#  q_param::                Returns :q param hash. Accepts passed query.
 #  redirect_to_next_object:: Find next object from a Query and redirect to its
 #                            show page.
 #
@@ -174,16 +178,11 @@ module ApplicationController::Queries
   # Change the query that +query_param+ passes along to the next request,
   # and update session[:query_record].
   # NOTE: ApplicationController::Indexes#show_index_setup calls this.
-  def query_params_set(query = nil)
+  def update_stored_query(query = nil)
     clear_query_in_session
-    @query_param = nil
-    if browser.bot?
-      # do nothing
-    elsif query
-      store_query_in_session(query)
-      @query_param = q_param(query)
-    end
-    @query_param
+    return if browser.bot? || !query
+
+    store_query_in_session(query)
   end
 
   # This clears the search/index saved in the session.
@@ -198,13 +197,13 @@ module ApplicationController::Queries
     session[:query_record] = query.id
   end
 
-  # Get the id of the query_record last stored in the session.
-  def query_from_session
-    return unless (id = session[:query_record])
-
-    Query.safe_find(id)
+  # NOTE: If we're going to cache user stuff that depends on their present q,
+  # we'll need a helper to make the current QueryRecord (not just the id)
+  # available to templates as an ApplicationController ivar. Something like:
+  #
+  def current_query
+    @query || query_from_q_param || query_from_session
   end
-  # helper_method :query_from_session
 
   # Opposite is `q_param` below
   def query_from_q_param
@@ -222,6 +221,16 @@ module ApplicationController::Queries
     str.is_a?(String) && str&.match(/^[a-zA-Z0-9]*$/)
   end
 
+  # Get the id of the query_record last stored in the session.
+  def query_from_session
+    return unless (id = session[:query_record])
+
+    Query.safe_find(id)
+  end
+  # helper_method :query_from_session
+
+  private
+
   def query_from_q_record_id
     Query.safe_find(params[:q].to_s.dealphabetize) # this may return nil
   end
@@ -234,13 +243,7 @@ module ApplicationController::Queries
                  **q_param.except(:model).to_unsafe_hash)
   end
 
-  # NOTE: If we're going to cache user stuff that depends on their present q,
-  # we'll need a helper to make the current QueryRecord (not just the id)
-  # available to templates as an ApplicationController ivar. Something like:
-  #
-  def current_query
-    @query || query_from_q_param || query_from_session
-  end
+  public
 
   # Add a :q param to a path helper like `names_path`,
   # or a hash like { controller: "/names", action: :index }
@@ -257,6 +260,8 @@ module ApplicationController::Queries
   end
   # helper_method :add_q_param
 
+  private
+
   def append_q_param_to_path(path, q_param)
     return path unless q_param
 
@@ -271,6 +276,8 @@ module ApplicationController::Queries
     uri.query = hash.to_query
     uri.to_s
   end
+
+  public
 
   # Allows us to add any passed query, or the current to a path helper:
   #   link_to(@object.show_link_args.merge(q: q_param))

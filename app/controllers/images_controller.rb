@@ -197,7 +197,7 @@ class ImagesController < ApplicationController
     # obs_query = find_or_create_query(:Observation)
     # img_query = create_query(:Image, observation_query: obs_query.params)
     img_query = create_query(:Image, observations: obs)
-    query_params_set(img_query) # also stores query in session
+    update_stored_query(img_query) # also stores query in session
   end
 
   # change_vote directly, does not call public cast_vote below
@@ -238,7 +238,7 @@ class ImagesController < ApplicationController
     next_state = nil
     # decide where to redirect after deleting image
     if (this_state = find_query(:Image))
-      query_params_set(this_state) # also stores query in session
+      update_stored_query(this_state) # also stores query in session
       this_state.current = @image
       next_state = this_state.next
     end
@@ -256,7 +256,7 @@ class ImagesController < ApplicationController
     flash_notice(:runtime_image_destroy_success.t(id: params[:id].to_s))
     return redirect_to(action: :index) unless next_state
 
-    query_params_set(next_state) # also stores query in session
+    update_stored_query(next_state) # also stores query in session
     redirect_to(action: :show, id: next_state.current_id)
   end
 end
