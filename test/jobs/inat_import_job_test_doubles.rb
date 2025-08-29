@@ -116,37 +116,11 @@ module InatImportJobTestDoubles
 
   def stub_modify_inat_observations
     stub_add_observation_fields
-    stub_update_descriptions
   end
 
   def stub_add_observation_fields
     stub_request(:post, "#{API_BASE}/observation_field_values").
       to_return(status: 200, body: "".to_json,
                 headers: { "Content-Type" => "application/json" })
-  end
-
-  def stub_update_descriptions
-    date = Time.zone.today.strftime(MO.web_date_format)
-    @parsed_results.each do |obs|
-      updated_description =
-        "Imported by Mushroom Observer #{date}"
-      if obs[:description].present?
-        updated_description.prepend("#{obs[:description]}\n\n")
-      end
-
-      body = {
-        observation: {
-          description: updated_description,
-          ignore_photos: 1
-        }
-      }
-      headers = { authorization: "Bearer MockJWT",
-                  content_type: "application/json", accept: "application/json" }
-      stub_request(
-        :put, "#{API_BASE}/observations/#{obs[:id]}?ignore_photos=1"
-      ).
-        with(body: body.to_json, headers: headers).
-        to_return(status: 200, body: "".to_json, headers: {})
-    end
   end
 end

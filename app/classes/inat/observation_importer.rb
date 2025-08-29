@@ -73,9 +73,5 @@ class Inat
       )
       @inat_import.reset_last_obs_start
     end
-
-    def super_importer?
-      InatImport.super_importers.include?(@user)
-    end
   end
 end
