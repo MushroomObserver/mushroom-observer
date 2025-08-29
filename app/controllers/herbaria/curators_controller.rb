@@ -5,7 +5,6 @@ module Herbaria
   class CuratorsController < ApplicationController
     # filters
     before_action :login_required
-    before_action :pass_query_params, only: [:destroy]
     before_action :keep_track_of_referrer, only: [:destroy]
 
     # Old MO Action (method)        New "Normalized" Action (method)

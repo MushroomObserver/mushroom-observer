@@ -4,7 +4,6 @@
 module Names::Synonyms
   class ApproveController < ApplicationController
     before_action :login_required
-    before_action :pass_query_params
 
     # Form accessible from show_name that lets a user make call this an accepted
     # name, possibly deprecating its synonyms at the same time.

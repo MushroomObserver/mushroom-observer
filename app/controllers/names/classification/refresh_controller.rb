@@ -4,7 +4,6 @@
 module Names::Classification
   class RefreshController < ApplicationController
     before_action :login_required
-    before_action :pass_query_params
 
     # PUT callback
     def update

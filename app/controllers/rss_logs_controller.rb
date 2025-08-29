@@ -6,7 +6,7 @@ class RssLogsController < ApplicationController
     :rss,
     :show
   ]
-  before_action :pass_query_params, only: [:show]
+  before_action :store_location, only: [:show]
 
   # Default page.  Just displays latest happenings.  The actual action is
   # buried way down toward the end of this file.
@@ -95,7 +95,6 @@ class RssLogsController < ApplicationController
 
   # Show a single RssLog.
   def show
-    store_location
     case params[:flow]
     when "next"
       redirect_to_next_object(:next, RssLog, params[:id].to_s)

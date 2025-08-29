@@ -161,38 +161,15 @@ module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
 
   ##############################################################################
   #
-  #  :section: Query parameters and session query (session[:checklist_source])
+  #  :section: Query parameters and session[:query_record]
   #
   #  The general idea is that the user executes a search or requests an index,
-  #  then clicks on a result.  This takes the user to a show_object page.  This
-  #  page "knows" about the search or index via a special universal URL
-  #  parameter (via +query_params+).  When the user then clicks on "prev" or
-  #  "next", it can then step through the query results.
-  #
-  #  While browsing like this, the user may want to divert temporarily to add a
-  #  comment or propose a name or something.  These actions are responsible for
-  #  keeping track of these search parameters, and eventually passing them back
-  #  to the show_object page.  Usually they just pass the query parameter
-  #  through via +pass_query_params+.
-  #
-  #  See Query and AbstractQuery for more detail.
+  #  then clicks on a result.  This takes the user to a show_object page.
+  #  This page "knows" about the search or index via session[:query_record].
+  #  When the user then clicks on "prev" or "next", it can then step through
+  #  the query results.
   #
   ##############################################################################
-
-  # Pass the incoming q parameter through to the next request as an ivar.
-  # Re-validate the params as a query, because they could be altered.
-  # Does not update session[:query_record].
-  #
-  # May not be necessary if we access the query from the session instead!
-  def pass_query_params
-    @query_param = nil
-    return if params[:q].blank?
-
-    return @query_param unless (query = current_query)&.valid?
-
-    @query_param = full_q_param(query)
-    @query_param
-  end
 
   # Change the query that +query_param+ passes along to the next request,
   # and update session[:query_record].

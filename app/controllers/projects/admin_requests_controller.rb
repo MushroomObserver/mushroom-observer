@@ -4,7 +4,6 @@
 module Projects
   class AdminRequestsController < ApplicationController
     before_action :login_required
-    before_action :pass_query_params
 
     # Form to compose email for the admins
     # Linked from: show_project

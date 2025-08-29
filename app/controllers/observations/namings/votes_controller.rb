@@ -3,7 +3,6 @@
 module Observations::Namings
   class VotesController < ApplicationController
     before_action :login_required # except: [:show]
-    before_action :pass_query_params
 
     # Index breakdown of votes for a given naming.
     # Linked from: observations/show

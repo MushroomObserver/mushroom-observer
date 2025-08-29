@@ -8,7 +8,6 @@ module Observations
   # Upload, attach, detach, edit Observation Images
   class ImagesController < ApplicationController
     before_action :login_required
-    before_action :pass_query_params
 
     ###########################################################################
 

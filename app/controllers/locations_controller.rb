@@ -19,7 +19,6 @@
 # rubocop:disable Metrics/ClassLength
 class LocationsController < ApplicationController
   before_action :store_location, except: [:index, :destroy]
-  before_action :pass_query_params, except: [:index]
   before_action :login_required
 
   ##############################################################################

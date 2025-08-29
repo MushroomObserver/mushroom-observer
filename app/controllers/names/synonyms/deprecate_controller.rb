@@ -4,7 +4,6 @@
 module Names::Synonyms
   class DeprecateController < ApplicationController
     before_action :login_required
-    before_action :pass_query_params
 
     # Form accessible from show_name that lets the user deprecate a name
     # in favor of another name.

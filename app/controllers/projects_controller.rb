@@ -4,7 +4,7 @@ class ProjectsController < ApplicationController
   include Validators
 
   before_action :login_required
-  before_action :pass_query_params, except: [:index]
+  before_action :store_location, only: [:show]
 
   ##############################################################################
   # INDEX
@@ -49,7 +49,6 @@ class ProjectsController < ApplicationController
   # Inputs: params[:id] (project)
   # Outputs: @project
   def show
-    store_location
     return if find_project_and_where!.blank?
 
     set_ivars_for_show

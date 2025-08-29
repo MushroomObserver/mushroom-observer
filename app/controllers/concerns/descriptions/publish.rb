@@ -5,8 +5,6 @@ module Descriptions::Publish
   extend ActiveSupport::Concern
 
   included do
-    before_action :pass_query_params
-
     # Publish a draft description.  If the name has no description, just turn
     # the draft into a public description and make it the default.  If the name
     # has a default description try to merge the draft into it.  If there is a

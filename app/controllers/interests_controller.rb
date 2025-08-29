@@ -19,14 +19,13 @@
 
 class InterestsController < ApplicationController
   before_action :login_required
-  before_action :pass_query_params, except: [:index]
+  before_action :store_location, only: [:index]
 
   # Show list of objects user has expressed interest in.
   # Linked from: left-hand panel
   # Inputs: params[:page], params[:type]
   # Outputs: @interests, @types, @pagination_data, @selected_type
   def index
-    store_location
     @interests = find_relevant_interests
     @types = interest_types(@interests)
     @selected_type = params[:type].to_s

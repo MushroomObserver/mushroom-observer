@@ -5,7 +5,6 @@
 #  approve_tracker::
 module Names
   class TrackersController < ApplicationController
-    before_action :pass_query_params
     before_action :login_required
 
     # Form accessible from show_name that lets a user setup a tracker

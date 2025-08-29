@@ -2,8 +2,9 @@
 
 # Controller for community support including donations and summary letters
 class SupportController < ApplicationController
+  before_action :store_location, except: :confirm
+
   def donate
-    store_location
     @donation = Donation.new
     @donation.user = @user
     @donation.amount = 100
@@ -51,27 +52,16 @@ class SupportController < ApplicationController
   end
 
   def donors
-    store_location
     @donor_list = Donation.donor_list
   end
 
-  def wrapup_2011
-    store_location
-  end
+  def wrapup_2011; end
 
-  def wrapup_2012
-    store_location
-  end
+  def wrapup_2012; end
 
-  def letter
-    store_location
-  end
+  def letter; end
 
-  def thanks
-    store_location
-  end
+  def thanks; end
 
-  def governance
-    store_location
-  end
+  def governance; end
 end

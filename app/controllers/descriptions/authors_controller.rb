@@ -5,7 +5,6 @@ module Descriptions
   class AuthorsController < ApplicationController
     # filters
     before_action :login_required
-    before_action :pass_query_params
 
     def show
       set_object_and_authors

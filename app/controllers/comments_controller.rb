@@ -11,7 +11,7 @@
 #
 class CommentsController < ApplicationController
   before_action :login_required
-  before_action :pass_query_params, except: [:index]
+  before_action :store_location, only: [:show]
 
   # Bullet doesn't seem to be able to figure out that we cannot eager load
   # through polymorphic relations, so I'm just disabling it for these actions.
@@ -108,7 +108,6 @@ class CommentsController < ApplicationController
   # Inputs: params[:id] (comment)
   # Outputs: @comment, @object
   def show
-    store_location
     return unless (@comment = find_comment!)
 
     case params[:flow]

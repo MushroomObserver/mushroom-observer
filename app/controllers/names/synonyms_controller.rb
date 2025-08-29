@@ -6,7 +6,6 @@ module Names
     include Names::Synonyms::SharedPrivateMethods
 
     before_action :login_required
-    before_action :pass_query_params
 
     ############################################################################
     #

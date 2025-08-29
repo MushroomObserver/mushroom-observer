@@ -7,7 +7,6 @@ module Observations
     include ObservationsController::Validators
 
     before_action :login_required
-    before_action :pass_query_params
 
     # Bullet wants us to eager load interests on taxa, which is loaded in
     # Naming#create_emails

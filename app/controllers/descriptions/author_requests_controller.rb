@@ -5,7 +5,6 @@ module Descriptions
   class AuthorRequestsController < ApplicationController
     # filters
     before_action :login_required
-    before_action :pass_query_params
 
     # Form to compose email for the authors/reviewers.
     # Linked from show_<object>.

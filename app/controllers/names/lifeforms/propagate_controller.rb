@@ -4,7 +4,6 @@
 module Names::Lifeforms
   class PropagateController < ApplicationController
     before_action :login_required
-    before_action :pass_query_params
 
     def edit
       @name = find_or_goto_index(Name, params[:id])

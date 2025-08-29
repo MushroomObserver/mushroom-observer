@@ -8,7 +8,6 @@
 module CollectionNumbers
   class RemoveObservationsController < ApplicationController
     before_action :login_required
-    before_action :pass_query_params
 
     # The edit action exists just to present a dialog box explaining
     # what the action does, with a remove button (to the :update action)

@@ -19,7 +19,7 @@
 #
 class ImagesController < ApplicationController
   before_action :login_required
-  before_action :pass_query_params, except: [:index]
+  before_action :store_location, only: [:show]
 
   ##############################################################################
   # INDEX
@@ -139,7 +139,6 @@ class ImagesController < ApplicationController
   # Inputs: params[:id] (image)
   # Outputs: @image
   def show
-    store_location
     return false unless find_image!
 
     case params[:flow]

@@ -3,7 +3,6 @@
 # rubocop:disable Metrics/ClassLength
 class NamesController < ApplicationController
   before_action :store_location, except: [:index]
-  before_action :pass_query_params, except: [:index]
   before_action :login_required
 
   ##############################################################################
