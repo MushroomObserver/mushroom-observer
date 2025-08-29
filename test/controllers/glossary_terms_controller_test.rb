@@ -50,8 +50,8 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     convex = glossary_terms(:convex_glossary_term)
 
     get(:index, params: { pattern: "conic" })
-    q = @controller.full_q_param(QueryRecord.last.query)
-    assert_redirected_to(glossary_term_path(conic.id, params: { q: }))
+    assert_redirected_to(glossary_term_path(conic.id))
+    assert_equal(QueryRecord.last.id, session[:query_record])
 
     get(:index, params: { pattern: conic.id })
     assert_redirected_to(glossary_term_path(conic.id))
