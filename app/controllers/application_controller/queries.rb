@@ -16,7 +16,7 @@
 #  redirect_to_next_object:: Find next object from a Query and redirect to its
 #                            show page.
 #
-module ApplicationController::Queries
+module ApplicationController::Queries # rubocop:disable Metrics/ModuleLength
   def self.included(base)
     base.helper_method(
       :query_from_session, :query_params, :add_query_param, :get_query_param

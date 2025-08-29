@@ -47,9 +47,9 @@ module Header
       classes = class_names(SHOW_LINK_BTN_CLASSES, "#{dir}_object_link", hide)
       type = object.type_tag
       adjacent_id = query.send(:"#{dir}_id")
+      href = adjacent_id ? send(show_link_path(type), id: adjacent_id) : "#"
       icon_link_to(
-        :"#{dir.upcase}_OBJECT".t(type: :"#{type.upcase}".l),
-        send(show_link_path(type), id: adjacent_id || 0),
+        :"#{dir.upcase}_OBJECT".t(type: :"#{type.upcase}".l), href,
         class: classes, icon: dir, show_text: false
       )
     end
