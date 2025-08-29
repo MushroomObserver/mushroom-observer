@@ -296,9 +296,7 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
     else
       prefix = action == :destroy ? "" : "#{action}_"
       path_args = add_back_param_to_button_atts(action)
-      path = add_query_param(
-        send(:"#{prefix}#{target.type_tag}_path", target.id, **path_args)
-      )
+      path = send(:"#{prefix}#{target.type_tag}_path", target.id, **path_args)
       identifier = "#{action}_#{target.type_tag}_link_#{target.id}"
     end
     if args[:icon]
