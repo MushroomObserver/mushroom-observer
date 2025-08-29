@@ -170,7 +170,7 @@ module NamesHelper
     tag.p do
       put_button(
         name: :show_name_refresh_classification.t,
-        path: add_query_param(refresh_classification_of_name_path(name.id))
+        path: refresh_classification_of_name_path(name.id)
       )
     end
   end
@@ -181,7 +181,7 @@ module NamesHelper
     tag.p do
       put_button(
         name: :show_name_propagate_classification.t,
-        path: add_query_param(propagate_classification_of_name_path(name.id))
+        path: propagate_classification_of_name_path(name.id)
       )
     end
   end
@@ -190,8 +190,8 @@ module NamesHelper
     return unless !name.below_genus? && name.classification.blank?
 
     tag.p do
-      link_with_query(:show_name_inherit_classification.t,
-                      form_to_inherit_classification_of_name_path(name.id))
+      link_to(:show_name_inherit_classification.t,
+              form_to_inherit_classification_of_name_path(name.id))
     end
   end
 end
