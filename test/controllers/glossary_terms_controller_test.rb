@@ -51,7 +51,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
 
     get(:index, params: { pattern: "conic" })
     assert_redirected_to(glossary_term_path(conic.id))
-    assert_equal(QueryRecord.last.id, session[:query_record])
+    assert_session_query_record_is_correct
 
     get(:index, params: { pattern: conic.id })
     assert_redirected_to(glossary_term_path(conic.id))

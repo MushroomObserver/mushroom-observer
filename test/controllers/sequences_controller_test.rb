@@ -112,9 +112,7 @@ class SequencesControllerTest < FunctionalTestCase
   def test_new
     # choose an obs not owned by Rolf (`requires_login` will login Rolf)
     obs = observations(:minimal_unknown_obs)
-    query = Query.lookup_and_save(:Sequence)
-    q = @controller.get_query_param(query)
-    params = { observation_id: obs.id, q: }
+    params = { observation_id: obs.id }
 
     login("zero") # This user has no Observations
     get(:new, params:)
@@ -126,10 +124,6 @@ class SequencesControllerTest < FunctionalTestCase
       "form[action^='#{sequences_path(params: { observation_id: obs.id })}']",
       true,
       "Sequence form has missing/incorrect `observation_id`` query param"
-    )
-    assert_select(
-      "form[action*='#{query_string(q)}']", true,
-      "Sequence form submit action missing/incorrect 'q' query param"
     )
   end
 
@@ -308,18 +302,17 @@ class SequencesControllerTest < FunctionalTestCase
 
   def test_create_redirect
     obs = observations(:genbanked_obs)
-    query = Query.lookup_and_save(:Sequence)
-    q = @controller.get_query_param(query)
+    @controller.find_or_create_query(:Sequence, observations: obs)
     params = { observation_id: obs.id,
-               sequence: { locus: "ITS", bases: "atgc" },
-               q: }
+               sequence: { locus: "ITS", bases: "atgc" } }
 
     login(obs.user.login)
 
     # Prove that post keeps query params intact.
     post(:create, params: params)
-    assert_redirected_to(obs.show_link_args.merge(q:),
+    assert_redirected_to(obs.show_link_args,
                          "User should go to last query after creating Sequence")
+    assert_session_query_record_is_correct
   end
 
   # See https://github.com/MushroomObserver/mushroom-observer/issues/1808
@@ -421,8 +414,7 @@ class SequencesControllerTest < FunctionalTestCase
     obs      = observations(:genbanked_obs)
     sequence = obs.sequences[2]
     assert_operator(obs.sequences.count, :>, 3)
-    query = Query.lookup_and_save(:Sequence, observations: obs)
-    q     = @controller.get_query_param(query)
+    @controller.find_or_create_query(:Sequence, observations: obs)
     params = { id: sequence.id,
                sequence: { locus: sequence.locus,
                            bases: sequence.bases,
@@ -431,7 +423,7 @@ class SequencesControllerTest < FunctionalTestCase
 
     # Prove that GET passes "back" and query param through to form.
     login(obs.user.login)
-    get(:edit, params: params.merge(back: obs.id, q:))
+    get(:edit, params: params.merge(back: obs.id))
 
     assert_select("form:match('action', ?)",
                   %r{^/sequences/#{sequence.id}}, true,
@@ -440,9 +432,7 @@ class SequencesControllerTest < FunctionalTestCase
     assert_select("form:match('action', ?)", /back=#{obs.id}/, true,
                   "submit action for edit Sequence form should include " \
                   "param to go back to Observation (back=#{obs.id})")
-    assert_select("form[action*='#{query_string(q)}']", true,
-                  "submit action for edit Sequence form should include " \
-                  "query param (#{query_string(q)})")
+    assert_session_query_record_is_correct
   end
 
   def test_update
@@ -636,8 +626,7 @@ class SequencesControllerTest < FunctionalTestCase
     obs = observations(:genbanked_obs)
     assert_operator(obs.sequences.count, :>, 3)
     sequence = obs.sequences[2]
-    query = Query.lookup_and_save(:Sequence, observations: obs)
-    q     = @controller.get_query_param(query)
+    @controller.find_or_create_query(:Sequence, observations: obs)
     params = { id: sequence.id,
                sequence: { locus: sequence.locus,
                            bases: sequence.bases,
@@ -645,16 +634,16 @@ class SequencesControllerTest < FunctionalTestCase
                            accession: sequence.accession } }
     # Prove that POST keeps query param when returning to observation.
     login(obs.user.login)
-    patch(:update, params: params.merge(q:))
-    assert_redirected_to(obs.show_link_args.merge(q:))
+    patch(:update, params: params)
+    assert_redirected_to(obs.show_link_args)
+    assert_session_query_record_is_correct
   end
 
   def test_update_redirect_to_sequence_keeps_params
     obs = observations(:genbanked_obs)
     assert_operator(obs.sequences.count, :>, 3)
     sequence = obs.sequences[2]
-    query = Query.lookup_and_save(:Sequence, observations: obs)
-    q     = @controller.get_query_param(query)
+    @controller.find_or_create_query(:Sequence, observations: obs)
     params = { id: sequence.id,
                sequence: { locus: sequence.locus,
                            bases: sequence.bases,
@@ -663,8 +652,9 @@ class SequencesControllerTest < FunctionalTestCase
 
     # Prove that POST keeps query param when returning to sequence.
     login(obs.user.login)
-    patch(:update, params: params.merge(back: "show", q:))
-    assert_redirected_to(sequence.show_link_args.merge(q:))
+    patch(:update, params: params.merge(back: "show"))
+    assert_redirected_to(sequence.show_link_args)
+    assert_session_query_record_is_correct
   end
 
   def test_destroy
@@ -734,24 +724,25 @@ class SequencesControllerTest < FunctionalTestCase
   def test_destroy_redirect_to_observation_with_query
     obs   = observations(:genbanked_obs)
     seqs  = obs.sequences
-    query = Query.lookup_and_save(:Sequence, observations: obs)
-    q     = @controller.get_query_param(query)
+    @controller.find_or_create_query(:Sequence, observations: obs)
 
-    # Prove that it keeps query param intact when returning to observation.
+    # Prove that it keeps track of query when returning to observation.
     login(obs.user.login)
-    delete(:destroy, params: { id: seqs[1].id, q: })
-    assert_redirected_to(obs.show_link_args.merge(q:))
+    delete(:destroy, params: { id: seqs[1].id })
+    assert_redirected_to(obs.show_link_args)
+    assert_session_query_record_is_correct
   end
 
   def test_destroy_redirect_to_index_with_query
     obs   = observations(:genbanked_obs)
     seqs  = obs.sequences
-    query = Query.lookup_and_save(:Sequence, observations: obs)
+    query = @controller.find_or_create_query(:Sequence, observations: obs)
     q     = @controller.get_query_param(query)
 
     # Prove that it can return to index, too, with query intact.
     login(obs.user.login)
-    delete(:destroy, params: { id: seqs[2].id, q:, back: "index" })
+    delete(:destroy, params: { id: seqs[2].id, back: "index" })
     assert_redirected_to(action: :index, q:)
+    assert_session_query_record_is_correct
   end
 end

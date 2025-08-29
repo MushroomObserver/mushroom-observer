@@ -83,11 +83,9 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: "neighbor" })
 
-    q = @controller.get_query_param(QueryRecord.last.query)
-    assert_redirected_to(
-      collection_number_path(id: numbers.first.id, params: { q: })
-    )
+    assert_redirected_to(collection_number_path(id: numbers.first.id))
     assert_no_flash
+    assert_session_query_record_is_correct
   end
 
   def test_index_pattern_str_matching_multiple_collection_numbers
@@ -294,7 +292,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
 
   def test_create_collection_number_redirect
     obs = observations(:coprinus_comatus_obs)
-    query = Query.lookup_and_save(:CollectionNumber)
+    query = @controller.find_or_create_query(:CollectionNumber)
     q = @controller.get_query_param(query)
     params = {
       observation_id: obs.id,
@@ -306,12 +304,14 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     login(obs.user.login)
     get(:new, params: params)
     assert_select(
-      "form[action*='numbers?observation_id=#{obs.id}&#{query_string(q)}']"
+      "form[action*='numbers?observation_id=#{obs.id}']"
     )
+    assert_session_query_record_is_correct
 
     # Prove that post keeps query params intact.
     post(:create, params: params)
-    assert_redirected_to(permanent_observation_path(id: obs.id, q:))
+    assert_redirected_to(permanent_observation_path(id: obs.id))
+    assert_session_query_record_is_correct
   end
 
   def test_edit_collection_number
@@ -457,7 +457,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
   def test_update_collection_number_redirect
     obs   = observations(:detailed_unknown_obs)
     num   = obs.collection_numbers.first
-    query = Query.lookup_and_save(:CollectionNumber)
+    query = @controller.find_or_create_query(:CollectionNumber)
     q     = @controller.get_query_param(query)
     login(obs.user.login)
     params = {
@@ -466,20 +466,24 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     }
 
     # Prove that GET passes "back" and query param through to form.
-    get(:edit, params: params.merge(back: "foo", q:))
-    assert_select("form[action*='?back=foo&#{query_string(q)}']")
+    get(:edit, params: params.merge(back: "foo"))
+    assert_select("form[action*='?back=foo']")
+    assert_session_query_record_is_correct
 
     # Prove that POST keeps query param when returning to observation.
-    patch(:update, params: params.merge(back: obs.id, q:))
-    assert_redirected_to(permanent_observation_path(id: obs.id, q:))
+    patch(:update, params: params.merge(back: obs.id))
+    assert_redirected_to(permanent_observation_path(id: obs.id))
+    assert_session_query_record_is_correct
 
     # Prove that POST can return to show_collection_number with query intact.
-    patch(:update, params: params.merge(back: "show", q:))
-    assert_redirected_to(collection_number_path(id: num.id, q:))
+    patch(:update, params: params.merge(back: "show"))
+    assert_redirected_to(collection_number_path(id: num.id))
+    assert_session_query_record_is_correct
 
     # Prove that POST can return to index_collection_number with query intact.
-    patch(:update, params: params.merge(back: "index", q: q))
+    patch(:update, params: params.merge(back: "index"))
     assert_redirected_to(collection_numbers_path(params: { id: num.id, q: }))
+    assert_session_query_record_is_correct
   end
 
   def test_destroy_collection_number
