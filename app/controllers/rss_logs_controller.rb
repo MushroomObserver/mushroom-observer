@@ -53,7 +53,12 @@ class RssLogsController < ApplicationController
   # Get the types whose value == "1"
   def index_type_from_params
     types = ""
-    param = params.dig(:q, :type) || params[:type]
+    param = if (query = query_from_q_param)
+              query.params[:type]
+            else
+              params[:type]
+            end
+
     if param.is_a?(ActionController::Parameters)
       types = param.select { |_key, value| value == "1" }.keys
       types = RssLog::ALL_TYPE_TAGS.map(&:to_s).intersection(types)
