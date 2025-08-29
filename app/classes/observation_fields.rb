@@ -22,14 +22,24 @@ class ObservationFields
     field_list.compact
   end
 
+  def mo_url(observation)
+    field_slip = observation.field_slips.first
+    if field_slip
+      code = field_slip.code
+      [code, "https://mushroomobserver.org/qr/#{code}"]
+    else
+      id = observation.id
+      [id, "https://mushroomobserver.org/observations/#{id}"]
+    end
+  end
+
   # Returns QR code fields for the observation
   def qr_fields
     qr_list = []
 
     # Add Mushroom Observer URL if observation has mo_id
-    id = observation.id
-    mo_url = "https://mushroomobserver.org/observations/#{id}"
-    qr_list << QRCodeField.new("MO: #{id}", mo_url)
+    id, url = mo_url(observation)
+    qr_list << QRCodeField.new("MO: #{id}", url)
 
     # Add iNaturalist URL if observation has inat_id
     inat_id = observation.inat_id
