@@ -23,7 +23,7 @@ module Tabs
 
       InternalLink::Model.new(
         txt.t, seq,
-        add_query_param(seq.show_link_args, sq_query),
+        add_q_param(seq.show_link_args, sq_query),
         alt_title: :show_object.t(TYPE: Sequence)
       ).tab
     end
@@ -59,7 +59,7 @@ module Tabs
     def edit_sequence_tab(seq, obs)
       InternalLink::Model.new(
         :EDIT.t, seq,
-        edit_sequence_path(id: seq.id, back: obs.id, q: get_query_param),
+        edit_sequence_path(id: seq.id, back: obs.id),
         html_options: { icon: :edit }
       ).tab
     end
@@ -67,7 +67,7 @@ module Tabs
     def new_sequence_tab(obs)
       InternalLink::Model.new(
         :show_observation_add_sequence.t, Sequence,
-        new_sequence_path(observation_id: obs.id, q: get_query_param),
+        new_sequence_path(observation_id: obs.id),
         html_options: { icon: :add }
       ).tab
     end

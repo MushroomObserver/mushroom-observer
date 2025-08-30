@@ -1,6 +1,17 @@
 # frozen_string_literal: true
 
-# see application_controller.rb
+#  ==== User authentication
+#  autologin::              (filter: determine which user is logged in)
+#  login_for_ajax::         (filter: minimal version of autologin for ajax)
+#  check_permission::       Make sure current User is the right one.
+#  check_permission!::      Same, but flashes "denied" message, too.
+#  reviewer?::              Is the current User a reviewer?
+#  in_admin_mode?::         Is the current User in admin mode?
+#  autologin_cookie_set::   (set autologin cookie)
+#  clear_autologin_cookie:: (clear autologin cookie)
+#  session_user_set::       (store user in session -- id only)
+#  session_user::           (retrieve user from session)
+#
 module ApplicationController::Authentication
   def self.included(base)
     base.helper_method(:check_permission, :reviewer?, :in_admin_mode?)

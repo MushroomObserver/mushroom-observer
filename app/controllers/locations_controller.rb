@@ -19,7 +19,6 @@
 # rubocop:disable Metrics/ClassLength
 class LocationsController < ApplicationController
   before_action :store_location, except: [:index, :destroy]
-  before_action :pass_query_params, except: [:index]
   before_action :login_required
 
   ##############################################################################
@@ -428,10 +427,11 @@ class LocationsController < ApplicationController
                                                      that: new_name))
       redirect_to(@location.show_link_args)
     else
-      redirect_with_query(new_admin_emails_merge_requests_path(
-                            type: :Location, old_id: @location.id,
-                            new_id: merge.id
-                          ))
+      redirect_to(
+        new_admin_emails_merge_requests_path(
+          type: :Location, old_id: @location.id, new_id: merge.id
+        )
+      )
     end
   end
 

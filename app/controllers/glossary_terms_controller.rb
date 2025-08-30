@@ -23,14 +23,6 @@ class GlossaryTermsController < ApplicationController
     [:pattern, :by, :q, :id].freeze
   end
 
-  # Show selected list, based on current Query.
-  # (Linked from show template, next to "prev" and "next"... or will be.)
-  # Passes explicit :by param to affect title (only).
-  def sorted_index_opts
-    sorted_by = params[:by] || default_sort_order
-    super.merge(query_args: { order_by: sorted_by })
-  end
-
   def index_display_opts(opts, _query)
     { letters: true,
       num_per_page: 50,

@@ -33,19 +33,19 @@ container_class(:double)
       <% last_level = sugg.confident? %>
       <tr>
         <td>
-          <%= link_with_query(sugg.name.display_name_brief_authors.t,
-                              name_path(id: sugg.name.id)) %><br/>
+          <%= link_to(sugg.name.display_name_brief_authors.t,
+                      name_path(id: sugg.name.id)) %><br/>
           <% if @observation.namings.any? \
                 {|n| n.name.synonyms.include?(sugg.name)} %>
           (<%= :suggestions_already_proposed.t %>)
         <% else %>
-          <%= link_with_query(:suggestions_propose_name.t,
-                                new_observation_naming_path(
-                                  @observation.id,
-                                  name: sugg.name.search_name,
-                                  ref: "AI Observer: #{sugg.max.to_f.round(2)}% confidence"
-                                ),
-                                class: "btn btn-default mt-3") %>
+          <%= link_to(:suggestions_propose_name.t,
+                      new_observation_naming_path(
+                        @observation.id,
+                        name: sugg.name.search_name,
+                        ref: "AI Observer: #{sugg.max.to_f.round(2)}% confidence"
+                      ),
+                      class: "btn btn-default mt-3") %>
         <% end %>
         <br/>
         <br/>

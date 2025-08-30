@@ -21,7 +21,7 @@ module Descriptions::Moves
 
       # Doesn't have permission to see source.
       flash_error(:runtime_description_private.t)
-      redirect_to(object_path_with_query(@src.parent))
+      redirect_to(@src.parent.show_link_args)
     end
 
     # POST method. Moves the description to a new parent object.
@@ -47,7 +47,7 @@ module Descriptions::Moves
       return true if in_admin_mode? || @src.is_reader?(@user)
 
       flash_error(:runtime_description_private.t)
-      redirect_to(object_path_with_query(@src.parent))
+      redirect_to(@src.parent.show_link_args)
       false
     end
 
@@ -82,7 +82,7 @@ module Descriptions::Moves
 
       flash_notice(:runtime_description_move_success.t(old: @src.format_name,
                                                        new: @dest.format_name))
-      redirect_to(object_path_with_query(@src))
+      redirect_to(@src.show_link_args)
     end
 
     def remove_parent_default_desc_and_log_it
@@ -143,7 +143,7 @@ module Descriptions::Moves
                   touch: true)
         flash_notice(:runtime_description_copy_success.
                      t(old: @src.format_name, new: desc.format_name))
-        redirect_to(object_path_with_query(desc))
+        redirect_to(desc.show_link_args)
       else
         flash_object_errors(desc)
       end

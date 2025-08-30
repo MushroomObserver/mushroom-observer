@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_08_24_140322) do
+ActiveRecord::Schema[7.2].define(version: 2025_08_24_194515) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -635,6 +635,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_08_24_140322) do
     t.datetime "updated_at", precision: nil
     t.integer "access_count"
     t.text "description"
+    t.boolean "permalink", default: false
   end
 
   create_table "queued_email_integers", id: :integer, charset: "utf8mb3", force: :cascade do |t|

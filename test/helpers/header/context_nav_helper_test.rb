@@ -8,7 +8,7 @@ module Header
     include LinkHelper
 
     # destroy_button tab tested in articles_controller_test
-    # That method calls `add_query_param` and others unavailable to helper tests
+    # That method calls `add_q_param` and others unavailable to helper tests
     # put_button is not used for articles, but we're just testing HTML output
     def test_context_nav_dropdown
       article = Article.last

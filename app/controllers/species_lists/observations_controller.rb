@@ -8,7 +8,6 @@
 module SpeciesLists
   class ObservationsController < ApplicationController
     before_action :login_required
-    before_action :pass_query_params
 
     # :add_remove_observations
     # Form to add or remove the current *query* of observations

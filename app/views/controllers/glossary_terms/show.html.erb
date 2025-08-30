@@ -28,10 +28,10 @@ column_classes(:eight_four)
 <!--.row-->
 
 <%= tag.div(class: "mb-3 content-block") do %>
-  <%= link_with_query(:show_glossary_term_reuse_image.t,
-                      reuse_images_for_glossary_term_path(@glossary_term.id)) %><br/>
-  <%= link_with_query(:show_glossary_term_remove_image.t,
-                      remove_images_from_glossary_term_path(@glossary_term.id)) %><br/>
+  <%= link_to(:show_glossary_term_reuse_image.t,
+              reuse_images_for_glossary_term_path(@glossary_term.id)) %><br/>
+  <%= link_to(:show_glossary_term_remove_image.t,
+              remove_images_from_glossary_term_path(@glossary_term.id)) %><br/>
 <% end %>
 
 <%= tag.div(class: "row") do %>

@@ -79,7 +79,7 @@ module Tabs
     def edit_image_tab(image)
       InternalLink::Model.new(
         :edit_object.t(type: :image), image,
-        add_query_param(edit_image_path(image.id))
+        edit_image_path(image.id)
       ).tab
     end
 
@@ -92,7 +92,7 @@ module Tabs
 
       InternalLink::Model.new(
         :image_show_inquiry.t, image,
-        add_query_param(new_commercial_inquiry_for_image_path(image.id))
+        new_commercial_inquiry_for_image_path(image.id)
       ).tab
     end
 

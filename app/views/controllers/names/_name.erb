@@ -3,7 +3,7 @@
   <%= tag.span(
     data: { controller: "clipboard", clipboard_copied_value: :COPIED.l }
   ) do %>
-    <%= link_with_query(name.show_link_args) do
+    <%= link_to(name.show_link_args) do
       tag.span(name.user_display_name(@user).html_safe.t,
               class: "display-name",
               data: { clipboard_target: "source" })

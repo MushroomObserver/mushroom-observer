@@ -5,7 +5,7 @@ ranks = Name.all_ranks.map { |r| [rank_as_string(r), r] }
 statuses = [[:ACCEPTED.l, false], [:DEPRECATED.l, true]]
 %>
 <!--[form:name]-->
-<%= form_with(model: @name, url: add_query_param(action)) do |f| %>
+<%= form_with(model: @name, url: action) do |f| %>
 
   <%= submit_button(form: f, button: button, center: true) %>
 

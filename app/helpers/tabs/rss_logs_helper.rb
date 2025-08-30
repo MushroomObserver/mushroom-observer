@@ -16,7 +16,7 @@ module Tabs
       return unless user&.default_rss_type.to_s.split.sort != types
 
       InternalLink.new(:rss_make_default.t,
-                       add_query_param(action: :index, make_default: 1)).tab
+                       add_q_param(action: :index, make_default: 1)).tab
     end
   end
 end

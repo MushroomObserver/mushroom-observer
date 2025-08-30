@@ -4,7 +4,7 @@ add_page_title(:inherit_classification_title.t(name: @name.display_name))
 add_context_nav(name_forms_return_tabs(name: @name))
 
 action = { controller: "/names/classification/inherit", action: :create,
-            id: @name.id, q: get_query_param }
+            id: @name.id }
 container_class(:text)
 %>
 

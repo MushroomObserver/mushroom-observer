@@ -27,11 +27,11 @@ include: [:user, { observations: :name }])
                     class: "help-block form-group") %>
 
     <%= tag.div(class: "form-group mt-3") do %>
-      <%= link_with_query((@all_users ? :image_reuse_just_yours.t :
-                            :image_reuse_all_users.t),
-                          form_action.merge(action: :reuse,
-                                            all_users: @all_users ? 0 : 1),
-                          class: "btn btn-default") %>
+      <%= link_to(
+        (@all_users ? :image_reuse_just_yours.t : :image_reuse_all_users.t),
+        form_action.merge(action: :reuse, all_users: @all_users ? 0 : 1),
+        class: "btn btn-default"
+      ) %>
     <% end %>
   <% end %>
 

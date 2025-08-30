@@ -5,7 +5,6 @@ module Herbaria
   class CuratorRequestsController < ApplicationController
     # filters
     before_action :login_required
-    before_action :pass_query_params
     before_action :keep_track_of_referrer
 
     # Old MO Action (method)        New "Normalized" Action (method)
@@ -37,8 +36,7 @@ module Herbaria
                  "Notes: #{params[:notes]}"
       )
       flash_notice(:show_herbarium_request_sent.t)
-      redirect_to_referrer ||
-        redirect_with_query(herbarium_path(@herbarium))
+      redirect_to_referrer || redirect_to(herbarium_path(@herbarium))
     end
 
     ############################################################################

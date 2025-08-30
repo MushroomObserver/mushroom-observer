@@ -36,7 +36,7 @@ end if @merge %>
             </td>
             <td>
               <% if !@merge || !@user %>
-                <%= link_with_query(
+                <%= link_to(
                       herbarium.name.t, herbarium_path(herbarium),
                       class: "herbarium_link_#{herbarium.id}"
                     ) %>
@@ -54,10 +54,10 @@ end if @merge %>
               <% end %>
               <% if @user && !@merge &&
                       (herbarium.can_edit? || in_admin_mode?) %>
-                [<%= link_with_query(:EDIT.t, edit_herbarium_path(herbarium),
-                      class: "edit_herbarium_link_#{herbarium.id}") %> |
+                [<%= link_to(:EDIT.t, edit_herbarium_path(herbarium),
+                             class: "edit_herbarium_link_#{herbarium.id}") %> |
                 <%= link_to(:MERGE.t, herbaria_path(merge: herbarium.id),
-                      class: "merge_herbarium_link_#{herbarium.id}") %>]
+                            class: "merge_herbarium_link_#{herbarium.id}") %>]
               <% end %>
             </td>
             <td>

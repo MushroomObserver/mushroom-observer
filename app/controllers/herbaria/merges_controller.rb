@@ -5,7 +5,6 @@ module Herbaria
   class MergesController < ApplicationController
     # filters
     before_action :login_required
-    before_action :pass_query_params
     before_action :keep_track_of_referrer
 
     # Old MO Action (method)        New "Normalized" Action (method)
@@ -29,7 +28,7 @@ module Herbaria
       result = perform_or_request_merge(src, dest) || return
 
       # redirect_to_herbarium_index(result)
-      redirect_with_query(herbarium_path(result.try(&:id)))
+      redirect_to(herbarium_path(result.try(&:id)))
     end
 
     ############################################################################

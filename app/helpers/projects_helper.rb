@@ -101,7 +101,7 @@ module ProjectsHelper
   def edit_project_alias_tab(project_id, name, id)
     InternalLink::Model.new(
       name, ProjectAlias,
-      add_query_param(edit_project_alias_path(project_id:, id:)),
+      edit_project_alias_path(project_id:, id:),
       alt_title: :EDIT.t
     ).tab
   end
@@ -109,9 +109,7 @@ module ProjectsHelper
   def new_project_alias_tab(project_id, target_id, target_type)
     InternalLink::Model.new(
       :ADD.t, ProjectAlias,
-      add_query_param(new_project_alias_path(project_id:,
-                                             target_id:,
-                                             target_type:)),
+      new_project_alias_path(project_id:, target_id:, target_type:),
       html_options: { class: "btn btn-default" }
     ).tab
   end

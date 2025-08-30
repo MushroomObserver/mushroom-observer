@@ -46,7 +46,7 @@ module Images
     def show_flash_and_send_back
       respond_to do |format|
         format.html do
-          redirect_with_query(image_path(@image.id)) and return
+          redirect_to(image_path(@image.id)) and return
         end
         format.turbo_stream do
           render(partial: "shared/modal_flash_update",

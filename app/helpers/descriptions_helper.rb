@@ -131,7 +131,7 @@ module DescriptionsHelper
         ["#{:TITLE.l}:", description_title(user, description)].safe_join(" "),
         [
           "#{type.to_s.upcase.to_sym.t}:",
-          link_to(parent.format_name.t, add_query_param(parent.show_link_args))
+          link_to(parent.format_name.t, parent.show_link_args)
         ].safe_join(" "),
         "#{:show_description_read_permissions.l}: #{read}",
         "#{:show_description_write_permissions.l}: #{write}",
@@ -175,9 +175,7 @@ module DescriptionsHelper
       concat(tag.span(" | "))
       concat(%w[unvetted vetted inaccurate].map do |w|
         put_button(name: :"review_#{w}".l,
-                   path: review_status_name_description_path(
-                     desc.id, value: w, q: get_query_param
-                   ))
+                   path: review_status_name_description_path(desc.id, value: w))
       end.safe_join(tag.span(" | ")))
     end
   end
@@ -311,8 +309,7 @@ module DescriptionsHelper
     result = description_title(user, desc)
     return result if result.match?("(#{:private.t})$")
 
-    link_with_query(result, desc.show_link_args,
-                    class: "description_link_#{desc.id}")
+    link_to(result, desc.show_link_args, class: "description_link_#{desc.id}")
   end
 
   # Create a descriptive title for a Description.  Indicates the source and

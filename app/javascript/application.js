@@ -41,14 +41,17 @@ import "@rails/request.js"
 import "@hotwired/stimulus"
 import "@hotwired/stimulus-loading"
 
-import 'exifreader'
-import jstz from 'jstz'
+import "exifreader"
+import jstz from "jstz"
 try {
   document.cookie = "tz=" + jstz.determine().name() + ";samesite=lax"
 }
 catch (err) {
   // console.error(err)
 }
+// Allows js to parse Rails-formatted nested params under `q` as query strings
+// (they are different from other formats). This is the dependency-free version.
+import "qs-esm"
 
 import LazyLoad from "vanilla-lazyload"
 if (!window.lazyLoadInstance) {

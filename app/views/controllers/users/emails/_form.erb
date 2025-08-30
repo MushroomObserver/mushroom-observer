@@ -1,4 +1,4 @@
-<%= form_with(url: add_query_param({ action: :create, id: @target.id }),
+<%= form_with(url: { action: :create, id: @target.id },
               scope: :email) do |f| %>
 
   <%= tag.p(:ask_user_question_label.t(user: @target.legal_name),

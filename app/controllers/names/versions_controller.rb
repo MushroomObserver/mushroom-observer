@@ -4,11 +4,10 @@
 module Names
   class VersionsController < ApplicationController
     before_action :login_required
-    before_action :pass_query_params
+    before_action :store_location
 
     # Show past version of Name.  Accessible only from show_name page.
     def show
-      store_location
       return unless find_name!
 
       @name.revert_to(params[:version].to_i)

@@ -114,7 +114,7 @@ module Observations
       flash_error(@external_link.formatted_errors.join("\n").strip_html)
       respond_to do |format|
         format.turbo_stream { reload_external_link_modal_form_and_flash }
-        format.html { redirect_with_query(redirect_params) and return true }
+        format.html { redirect_to(redirect_params) and return true }
       end
     end
 
@@ -131,7 +131,7 @@ module Observations
       respond_to do |format|
         format.turbo_stream { render_external_links_section_update }
         format.html do
-          redirect_with_query(permanent_observation_path(@observation))
+          redirect_to(permanent_observation_path(@observation))
         end
       end
     end
@@ -163,8 +163,7 @@ module Observations
         # to have a response here. are they getting sent back?
         format.turbo_stream { render_modal_flash_update }
         format.html do
-          redirect_with_query(permanent_observation_path(@observation)) and
-            return
+          redirect_to(permanent_observation_path(@observation)) and return
         end
       end
     end

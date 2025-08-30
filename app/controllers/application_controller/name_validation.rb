@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
-# see application_controller.rb
+#  ==== Name validation
+#  construct_approved_names:: Creates a list of names if they've been approved.
+#  construct_approved_name::  (helper)
+#
 module ApplicationController::NameValidation
   ##############################################################################
   #

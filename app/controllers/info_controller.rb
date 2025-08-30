@@ -7,38 +7,28 @@ class InfoController < ApplicationController
     :how_to_use,
     :intro
   ]
+  before_action :store_location, except: [:textile_sandbox, :translators_note]
 
   # Intro to site.
-  def intro
-    store_location
-  end
+  def intro; end
 
   # Recent features.
-  def news
-    store_location
-  end
+  def news; end
 
   # Help page.
   def how_to_use
-    store_location
     @min_pos_vote = Vote.confidence(Vote.min_pos_vote)
     @min_neg_vote = Vote.confidence(Vote.min_neg_vote)
     @maximum_vote = Vote.confidence(Vote.maximum_vote)
   end
 
   # A few ways in which users can help.
-  def how_to_help
-    store_location
-  end
+  def how_to_help; end
 
-  def wrapup_2011
-    store_location
-  end
+  def wrapup_2011; end
 
   # linked from search bar
-  def search_bar_help
-    store_location
-  end
+  def search_bar_help; end
 
   # Simple form letting us test our implementation of Textile.
   def textile_sandbox
@@ -55,7 +45,6 @@ class InfoController < ApplicationController
   def translators_note; end
 
   def site_stats
-    store_location
     @site_data = SiteData.new.get_site_data
 
     # Get the last six observations whose thumbnails are highly rated.

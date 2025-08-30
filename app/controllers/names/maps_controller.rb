@@ -4,7 +4,6 @@
 module Names
   class MapsController < ApplicationController
     before_action :login_required
-    before_action :pass_query_params
 
     def controller_model_name
       "Name"

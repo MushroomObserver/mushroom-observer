@@ -47,9 +47,12 @@ form_element_data = {
 
 <%= form_with(
   model: @observation,
-  url: add_query_param(action:, id: @observation,
-                       approved_name: @given_name,
-                       approved_where: @place_name),
+  url: {
+    action:,
+    id: @observation,
+    approved_name: @given_name,
+    approved_where: @place_name
+  },
   method:,
   multipart: true,
   id: "observation_form",

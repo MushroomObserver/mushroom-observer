@@ -9,7 +9,6 @@ module Projects
   # Index for project locations
   class LocationsController < ApplicationController
     before_action :login_required
-    before_action :pass_query_params
 
     def index
       return unless find_project!

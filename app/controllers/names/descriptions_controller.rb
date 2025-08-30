@@ -21,7 +21,6 @@ module Names
     include ::Names::Descriptions::SharedPrivateMethods
 
     before_action :store_location, except: [:index, :destroy]
-    before_action :pass_query_params, except: [:index]
     before_action :login_required
 
     ############################################################################

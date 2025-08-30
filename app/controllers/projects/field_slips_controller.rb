@@ -7,7 +7,6 @@
 module Projects
   class FieldSlipsController < ApplicationController
     before_action :login_required
-    before_action :pass_query_params
 
     def new
       flash_error(:field_slip_no_project.t) unless find_project!

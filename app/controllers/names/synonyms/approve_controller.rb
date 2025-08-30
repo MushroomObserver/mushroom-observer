@@ -4,7 +4,6 @@
 module Names::Synonyms
   class ApproveController < ApplicationController
     before_action :login_required
-    before_action :pass_query_params
 
     # Form accessible from show_name that lets a user make call this an accepted
     # name, possibly deprecating its synonyms at the same time.
@@ -24,7 +23,7 @@ module Names::Synonyms
       deprecate_others
       approve_this_one
       post_approval_comment
-      redirect_with_query(@name.show_link_args)
+      redirect_to(@name.show_link_args)
     end
 
     private

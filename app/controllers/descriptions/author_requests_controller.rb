@@ -5,7 +5,6 @@ module Descriptions
   class AuthorRequestsController < ApplicationController
     # filters
     before_action :login_required
-    before_action :pass_query_params
 
     # Form to compose email for the authors/reviewers.
     # Linked from show_<object>.
@@ -17,8 +16,7 @@ module Descriptions
       @object = AbstractModel.find_object(params[:type], params[:id].to_s)
       send_author_emails
       flash_notice(:request_success.t)
-      redirect_with_query(controller: @object.show_controller,
-                          action: @object.show_action, id: @object.id)
+      redirect_to(@object.show_link_args)
     end
 
     private

@@ -162,7 +162,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_operator(query.num_results, :>, 1)
     number1 = query.results[0]
     number2 = query.results[1]
-    q = query.record.id.alphabetize
+    q = @controller.q_param(query)
 
     login
     get(:show, params: { id: number1.id, q: q, flow: :next })
@@ -312,23 +312,25 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
   def test_create_herbarium_record_redirect
     obs = observations(:coprinus_comatus_obs)
-    query = Query.lookup_and_save(:HerbariumRecord)
-    q = query.id.alphabetize
+    @controller.find_or_create_query(:HerbariumRecord)
     params = {
       observation_id: obs.id,
       herbarium_record: { herbarium_name:
-                          obs.user.preferred_herbarium.autocomplete_name },
-      q: q
+                          obs.user.preferred_herbarium.autocomplete_name }
     }
 
     # Prove that query params are added to form action.
     login(obs.user.login)
     get(:new, params:)
-    assert_select("form[action*='records?observation_id=#{obs.id}&q=#{q}']")
+    assert_select(
+      "form[action*='records?observation_id=#{obs.id}']"
+    )
+    assert_session_query_record_is_correct
 
     # Prove that post keeps query params intact.
     post(:create, params:)
-    assert_redirected_to(permanent_observation_path(id: obs.id, q: q))
+    assert_redirected_to(permanent_observation_path(id: obs.id))
+    assert_session_query_record_is_correct
   end
 
   def test_edit_herbarium_record
@@ -446,8 +448,8 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
   def test_update_herbarium_record_redirect
     obs   = observations(:detailed_unknown_obs)
     rec   = obs.herbarium_records.first
-    query = Query.lookup_and_save(:HerbariumRecord)
-    q     = query.id.alphabetize
+    query = @controller.find_or_create_query(:HerbariumRecord)
+    q     = @controller.q_param(query)
     make_admin("rolf")
     params = {
       id: rec.id,
@@ -460,20 +462,24 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     }
 
     # Prove that GET passes "back" and query param through to form.
-    get(:edit, params: params.merge(back: "foo", q: q))
-    assert_select("form[action*='?back=foo&q=#{q}']")
+    get(:edit, params: params.merge(back: "foo"))
+    assert_select("form[action*='?back=foo']")
+    assert_session_query_record_is_correct
 
     # Prove that POST keeps query param when returning to observation.
-    post(:update, params: params.merge(back: obs.id, q: q))
-    assert_redirected_to(permanent_observation_path(id: obs.id, q: q))
+    post(:update, params: params.merge(back: obs.id))
+    assert_redirected_to(permanent_observation_path(id: obs.id))
+    assert_session_query_record_is_correct
 
     # Prove that POST can return to show_herbarium_record with query intact.
-    post(:update, params: params.merge(back: "show", q: q))
-    assert_redirected_to(herbarium_record_path(id: rec.id, q: q))
+    post(:update, params: params.merge(back: "show"))
+    assert_redirected_to(herbarium_record_path(id: rec.id))
+    assert_session_query_record_is_correct
 
     # Prove that POST can return to index_herbarium_record with query intact.
-    post(:update, params: params.merge(back: "index", q: q))
-    assert_redirected_to(herbarium_records_path(id: rec.id, q: q))
+    post(:update, params: params.merge(back: "index"))
+    assert_redirected_to(herbarium_records_path(id: rec.id, q:))
+    assert_session_query_record_is_correct
   end
 
   def test_destroy_herbarium_record
@@ -515,17 +521,14 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
   def test_destroy_herbarium_record_redirect
     obs   = observations(:detailed_unknown_obs)
     recs  = obs.herbarium_records
-    query = Query.lookup_and_save(:HerbariumRecord)
-    q     = query.id.alphabetize
+    query = @controller.find_or_create_query(:HerbariumRecord)
+    q     = @controller.q_param(query)
     assert_operator(recs.length, :>, 1)
     make_admin("rolf")
 
     # Prove by default it goes back to index.
     delete(:destroy, params: { id: recs[0].id })
-    assert_redirected_to(herbarium_records_path)
-
-    # Prove that it keeps query param intact when returning to index.
-    delete(:destroy, params: { id: recs[1].id, q: q })
-    assert_redirected_to(herbarium_records_path(q: q))
+    assert_redirected_to(herbarium_records_path(q:))
+    assert_session_query_record_is_correct
   end
 end

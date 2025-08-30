@@ -8,7 +8,6 @@
 module Account::Profile
   class ImagesController < ApplicationController
     before_action :login_required
-    before_action :pass_query_params
 
     # was reuse_image params[:mode] = profile
     def reuse

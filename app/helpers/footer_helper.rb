@@ -50,7 +50,7 @@ module FooterHelper
 
   def authors_plus_review_authors(obj, authors)
     authors += safe_nbsp
-    authors += link_with_query(
+    authors += link_to(
       "(#{:review_authors_review_authors.t})",
       description_authors_path(id: obj.id, type: obj.type_tag)
     )
@@ -59,7 +59,7 @@ module FooterHelper
 
   def authors_plus_author_request(obj, authors)
     authors += safe_nbsp
-    authors += link_with_query(
+    authors += link_to(
       "(#{:review_authors_review_authors.t})",
       description_authors_path(id: obj.id, type: obj.type_tag)
     )

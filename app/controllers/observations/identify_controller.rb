@@ -3,7 +3,6 @@
 module Observations
   class IdentifyController < ApplicationController
     before_action :login_required
-    before_action :pass_query_params
 
     def index
       build_index_with_query

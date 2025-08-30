@@ -19,7 +19,7 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
     link = block ? text : path # first two positional, if block then path first
     content = block ? capture(&block) : text
 
-    link_to(add_query_param(link), opts) { content }
+    link_to(add_q_param(link), opts) { content }
   end
 
   # https://stackoverflow.com/questions/18642001/add-an-active-class-to-all-active-links-in-rails
@@ -42,7 +42,7 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
     link = block ? text : path # because positional
     content = block ? capture(&block) : text
 
-    active_link_to(add_query_param(link), **) { content }
+    active_link_to(add_q_param(link), **) { content }
   end
 
   # Link should be to a controller action that renders the form in the modal.
@@ -120,7 +120,7 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
     content = block ? capture(&block) : text
     opts = block ? path : options
 
-    icon_link_to(add_query_param(link), opts) { content }
+    icon_link_to(add_q_param(link), opts) { content }
   end
 
   # pass title if it's a plain button (say for collapse) but you want a tooltip
@@ -208,7 +208,7 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
     project: "th-list",
     download: "download-alt",
     search: "search",
-    previous: "triangle-left",
+    prev: "triangle-left",
     next: "triangle-right",
     goto: "share-alt",
     grid: "th",
@@ -296,9 +296,7 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
     else
       prefix = action == :destroy ? "" : "#{action}_"
       path_args = add_back_param_to_button_atts(action)
-      path = add_query_param(
-        send(:"#{prefix}#{target.type_tag}_path", target.id, **path_args)
-      )
+      path = send(:"#{prefix}#{target.type_tag}_path", target.id, **path_args)
       identifier = "#{action}_#{target.type_tag}_link_#{target.id}"
     end
     if args[:icon]

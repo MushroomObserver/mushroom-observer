@@ -24,7 +24,7 @@ module Tabs
       text ||= :cancel_and_show.t(type: obj.type_tag)
 
       InternalLink::Model.new(
-        text, obj, add_query_param(obj.show_link_args),
+        text, obj, obj.show_link_args,
         html_options: { class: "#{obj.type_tag}_return_link" }
       ).tab
     end
@@ -33,7 +33,7 @@ module Tabs
       text ||= :show_object.t(type: obj.type_tag)
 
       InternalLink::Model.new(
-        text, obj, add_query_param(obj.show_link_args),
+        text, obj, obj.show_link_args,
         html_options: { class: "#{obj.type_tag}_link" }
       ).tab
     end
@@ -42,7 +42,7 @@ module Tabs
       text ||= :show_object.t(type: obj.parent.type_tag)
 
       InternalLink::Model.new(
-        text, obj, add_query_param(obj.parent.show_link_args),
+        text, obj, obj.parent.show_link_args,
         html_options: { class: "parent_#{obj.parent.type_tag}_link" }
       ).tab
     end
@@ -51,7 +51,7 @@ module Tabs
       text ||= :list_objects.t(type: obj.type_tag)
 
       InternalLink::Model.new(
-        text, obj, add_query_param(obj.index_link_args),
+        text, obj, add_q_param(obj.index_link_args),
         html_options: { class: "#{obj.type_tag.to_s.pluralize}_index_link" }
       ).tab
     end

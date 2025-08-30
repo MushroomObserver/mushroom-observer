@@ -4,18 +4,12 @@
 # rubocop:disable Metrics/ClassLength
 class CollectionNumbersController < ApplicationController
   before_action :login_required
-  before_action :pass_query_params, only: [
-    :show, :new, :create, :edit, :update, :destroy
-  ]
-  before_action :store_location, only: [
-    :show, :new, :create, :edit, :update
-  ]
+  before_action :store_location, except: [:destroy]
 
   ##############################################################################
   # INDEX
   #
   def index
-    store_location
     build_index_with_query
   end
 
@@ -32,7 +26,6 @@ class CollectionNumbersController < ApplicationController
   # Display list of CollectionNumbers for an Observation
   def observation
     @observation = Observation.find(params[:observation])
-    store_location
     query = create_query(
       :CollectionNumber, observations: params[:observation].to_s
     )

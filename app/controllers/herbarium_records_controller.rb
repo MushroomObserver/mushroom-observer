@@ -4,14 +4,12 @@
 # rubocop:disable Metrics/ClassLength
 class HerbariumRecordsController < ApplicationController
   before_action :login_required
-  before_action :pass_query_params, except: :index
-  before_action :store_location, except: [:index, :destroy]
+  before_action :store_location, except: [:destroy]
 
   ##############################################################################
   # INDEX
   #
   def index
-    store_location
     build_index_with_query
   end
 
@@ -27,7 +25,6 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def herbarium
-    store_location
     query = create_query(:HerbariumRecord,
                          herbaria: params[:herbarium].to_s,
                          order_by: :herbarium_label)
@@ -36,7 +33,6 @@ class HerbariumRecordsController < ApplicationController
 
   def observation
     @observation = Observation.find(params[:observation])
-    store_location
     query = create_query(:HerbariumRecord,
                          observations: params[:observation].to_s,
                          order_by: :herbarium_label)

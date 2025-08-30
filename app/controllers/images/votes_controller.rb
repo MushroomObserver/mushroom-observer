@@ -22,7 +22,7 @@ module Images
           if params[:next]
             redirect_to_next_object(:next, Image, @id)
           else
-            redirect_with_query(image_path(id: @id))
+            redirect_to(image_path(id: @id))
           end
         end
         format.turbo_stream do

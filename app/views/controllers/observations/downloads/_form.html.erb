@@ -2,7 +2,8 @@
 # This form partial is also called by species_lists/downloads
 %>
 
-<%= form_with(url: observations_downloads_path(q: query_param)) do |f| %>
+<%= form_with(url: observations_downloads_path(q: query_param),
+              id: "observations_download_form") do |f| %>
 
   <h3 class="mt-5"><%= :species_list_download_header.t %>:</h3>
 

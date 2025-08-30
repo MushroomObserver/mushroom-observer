@@ -103,7 +103,7 @@ module Descriptions::Permissions
       @data = nil
 
       if done
-        redirect_to(object_path_with_query(@description))
+        redirect_to(@description.show_link_args)
       else
         gather_list_of_groups
       end
@@ -130,7 +130,7 @@ module Descriptions::Permissions
       end
 
       if done
-        redirect_to(object_path_with_query(@description))
+        redirect_to(@description.show_link_args)
       else
         gather_list_of_groups
         render("new")

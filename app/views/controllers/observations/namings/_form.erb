@@ -11,8 +11,7 @@ when "new", "create"
   method = :post
   id = "obs_#{@observation.id}_naming_form"
   url = observation_namings_path(observation_id: @observation.id,
-                                 approved_name: @given_name,
-                                 q: get_query_param)
+                                 approved_name: @given_name)
 when "edit", "update"
   create = false
   button_name = :SAVE_EDITS.l
@@ -20,8 +19,7 @@ when "edit", "update"
   id = "obs_#{@observation.id}_naming_#{@naming.id}_form"
   url = observation_naming_path(observation_id: @observation.id,
                                 id: @naming.id,
-                                approved_name: @given_name,
-                                q: get_query_param)
+                                approved_name: @given_name)
 end
 
 # `local` true means do not send via Turbo.

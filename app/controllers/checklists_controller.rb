@@ -3,7 +3,7 @@
 class ChecklistsController < ApplicationController
   # filters
   before_action :login_required
-  before_action :pass_query_params
+  before_action :store_location
 
   # Old MO Action (method)        New "Normalized" Action (method)
   # ----------------------------  --------------------------------
@@ -12,7 +12,6 @@ class ChecklistsController < ApplicationController
   # Display a checklist of species seen by a User, Project,
   # SpeciesList or the entire site.
   def show
-    store_location
     user_id = params[:user_id] || params[:id]
     proj_id = params[:project_id]
     list_id = params[:species_list_id]

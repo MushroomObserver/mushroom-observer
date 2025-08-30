@@ -7,7 +7,6 @@
 # whether it already exists.
 class AddDispatchController < ApplicationController
   before_action :login_required
-  before_action :pass_query_params
 
   def new
     # The project field is not required since not all Observation Lists are

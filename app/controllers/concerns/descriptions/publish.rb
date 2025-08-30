@@ -5,8 +5,6 @@ module Descriptions::Publish
   extend ActiveSupport::Concern
 
   included do
-    before_action :pass_query_params
-
     # Publish a draft description.  If the name has no description, just turn
     # the draft into a public description and make it the default.  If the name
     # has a default description try to merge the draft into it.  If there is a
@@ -21,16 +19,12 @@ module Descriptions::Publish
       # to delete the draft after publishing it.)
       if !in_admin_mode? && !draft.is_admin?(@user)
         flash_error(:runtime_edit_description_denied.t)
-        redirect_to(controller: parent.show_controller,
-                    action: parent.show_action,
-                    id: parent.id, q: get_query_param)
+        redirect_to(parent.show_link_args)
 
       # Can't merge it into itself!
       elsif old == draft
         flash_error(:runtime_description_already_default.t)
-        redirect_to(controller: draft.show_controller,
-                    action: draft.show_action,
-                    id: draft.id, q: get_query_param)
+        redirect_to(draft.show_link_args)
 
       # I've temporarily decided to always just turn it into a public desc.
       # User can then merge by hand if public desc already exists.
@@ -51,7 +45,7 @@ module Descriptions::Publish
                    touch: true)
         parent.description = draft
         parent.save
-        redirect_to(object_path_with_query(parent))
+        redirect_to(parent.show_link_args)
       end
     end
 

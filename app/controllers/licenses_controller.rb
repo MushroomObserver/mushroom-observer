@@ -5,7 +5,6 @@
 # NOTE: for badges see, e.g., app/views/controllers/shared/_form_ccbysa30.erb
 class LicensesController < AdminController
   before_action :store_location, except: :destroy
-  before_action :pass_query_params, except: :index
 
   def index
     @objects = License.all

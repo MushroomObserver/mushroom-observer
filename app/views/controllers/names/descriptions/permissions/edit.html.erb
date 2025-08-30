@@ -3,7 +3,7 @@ add_page_title(@description.format_name.t)
 add_context_nav(name_description_form_permissions_tabs(description: @description))
 
 action = { controller: "/names/descriptions/permissions", action: :update,
-            id: @description.id, q: get_query_param }
+           id: @description.id }
 %>
 
 <%= render(partial: "descriptions/form_permissions",

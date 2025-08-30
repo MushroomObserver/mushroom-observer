@@ -29,8 +29,9 @@ module Images
       assert_difference("ImageVote.count", 1, "Failed to cast vote") do
         put(:update, params: { image_id: image.id, value: value, next: true })
       end
+      q = @controller.q_param(QueryRecord.last.query)
       assert_redirected_to(
-        image_path(id: image.id, q: QueryRecord.last.id.alphabetize)
+        image_path(id: image.id, q:)
       )
       vote = ImageVote.last
       assert(vote.image == image && vote.user == user && vote.value == value,

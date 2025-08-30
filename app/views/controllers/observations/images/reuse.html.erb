@@ -9,8 +9,7 @@ container_class(:full)
 # Use a path here:
 form_action = { controller: "/observations/images",
                 action: :attach,
-                id: @observation.id,
-                q: get_query_param }
+                id: @observation.id }
 %>
 
 <%= render(partial: "shared/images_to_reuse",

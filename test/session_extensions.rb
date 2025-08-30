@@ -187,8 +187,8 @@ module SessionExtensions
   # Get string representing (our) query from the given URL.  Defaults to the
   # current page's URL.  (In practice, for now, this is just the Query id.)
   def parse_query_params(url = path)
-    _path, query = url.split("?")
-    params = CGI.parse(query)
+    uri = URI.parse(url)
+    params = Rack::Utils.parse_nested_query(uri.query)
     params["q"]
   end
 

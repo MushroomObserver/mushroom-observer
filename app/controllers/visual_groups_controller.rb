@@ -2,7 +2,6 @@
 
 class VisualGroupsController < ApplicationController
   before_action :login_required
-  before_action :pass_query_params, only: [:edit]
 
   # GET /visual_groups or /visual_groups.json
   def index

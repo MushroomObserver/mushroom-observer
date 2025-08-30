@@ -16,8 +16,8 @@ class InternalLink
       target = model.name.to_sym
       @title = :show_objects.t(type: model.type_tag)
       query = Query.current_or_related_query(target, filter, current_query)
-      @url = controller.add_query_param({ controller: model.show_controller,
-                                          action: model.index_action }, query)
+      @url = controller.add_q_param({ controller: model.show_controller,
+                                      action: model.index_action }, query)
 
       super(@title, @url, html_options:)
     end

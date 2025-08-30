@@ -212,11 +212,11 @@ module ControllerExtensions
   #     {controller: controller1, action: :access_denied, ...},
   #     {controller: controller2, action: :succeeded, ...})
   #
-  def either_requires_either(method, page, altpage, params = {},
+  def either_requires_either(method, action, altpage, params = {},
                              username = "rolf", password = "testpassword")
     assert_request(
       method: method,
-      action: page,
+      action: action,
       params: params,
       user: params[:username] || username,
       password: params[:password] || password,
@@ -236,7 +236,7 @@ module ControllerExtensions
     # By default expect relative links.  Allow caller to override by
     # explicitly setting only_path: false.
     args[:only_path] = true unless args.key?(:only_path)
-    URI.decode_www_form_component(@controller.url_for(args))
+    @controller.url_for(args)
   end
 
   # Extract error message and backtrace from Rails's 500 response.  This should
@@ -664,5 +664,14 @@ module ControllerExtensions
       "#results .rss-what a:match('href', ?)", %r{^/obs/\d+}, attributes,
       "Wrong number of results displayed"
     )
+  end
+
+  # Get the query_params encoded as a query string. Hard to reproduce otherwise
+  def query_string(query_string)
+    observations_path(q: query_string).split("?")[1]
+  end
+
+  def assert_session_query_record_is_correct
+    assert_equal(QueryRecord.last.id, session[:query_record])
   end
 end

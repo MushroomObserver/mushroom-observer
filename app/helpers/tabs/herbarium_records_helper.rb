@@ -56,15 +56,17 @@ module Tabs
       # next and index from there to navigate through all the rest for this obs.
       hr_query = Query.lookup(:HerbariumRecord, observations: obs.id)
 
-      InternalLink::Model.new(h_r.accession_at_herbarium.t, h_r,
-                              add_query_param(h_r.show_link_args, hr_query),
-                              alt_title: "herbarium_record").tab
+      InternalLink::Model.new(
+        h_r.accession_at_herbarium.t, h_r,
+        add_q_param(h_r.show_link_args, hr_query),
+        alt_title: "herbarium_record"
+      ).tab
     end
 
     def new_herbarium_record_tab(obs)
       InternalLink::Model.new(
         :create_herbarium_record.l, Herbarium,
-        add_query_param(new_herbarium_record_path(observation_id: obs.id)),
+        new_herbarium_record_path(observation_id: obs.id),
         html_options: { icon: :add }
       ).tab
     end
@@ -73,7 +75,7 @@ module Tabs
       back = obs&.id || :show
       InternalLink::Model.new(
         :edit_herbarium_record.t, h_r,
-        add_query_param(edit_herbarium_record_path(h_r.id, back: back)),
+        edit_herbarium_record_path(h_r.id, back: back),
         html_options: { icon: :edit }
       ).tab
     end
@@ -81,15 +83,14 @@ module Tabs
     def herbarium_records_index_return_tab
       InternalLink.new(
         :edit_herbarium_record_back_to_index.t,
-        herbarium_records_path(q: get_query_param)
+        herbarium_records_path(q: q_param)
       ).tab
     end
 
     def remove_herbarium_record_tab(h_r, obs)
-      url = add_query_param(edit_herbarium_record_remove_observation_path(
-                              herbarium_record_id: h_r.id,
-                              observation_id: obs.id
-                            ))
+      url = edit_herbarium_record_remove_observation_path(
+        herbarium_record_id: h_r.id, observation_id: obs.id
+      )
       InternalLink::Model.new(:REMOVE.t, h_r, url,
                               html_options: { icon: :remove }).tab
     end

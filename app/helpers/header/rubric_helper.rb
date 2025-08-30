@@ -24,7 +24,7 @@ module Header
       link_to(
         rubric,
         { controller: "/#{path}",
-          action: :index, q: get_query_param }
+          action: :index, q: q_param }
       )
     end
 

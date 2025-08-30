@@ -16,15 +16,16 @@ flash_error(@error) if @error && @objects.empty?
         <tr>
           <td>
             <%= if in_admin_mode? || collection_number.can_edit?
-              link_with_query(:EDIT.t,
+              link_to(:EDIT.t,
                 edit_collection_number_path(id: collection_number.id,
                                             params: { back: :index }),
-                class: "btn btn-default btn-sm")
+                class: "btn btn-default btn-sm"
+              )
             end %>
           </td>
           <td>
-            <i><%= link_with_query(collection_number.format_name.t,
-                     collection_number_path(collection_number)) %></i>
+            <i><%= link_to(collection_number.format_name.t,
+                           collection_number_path(collection_number)) %></i>
           </td>
           <td>
             <%= collection_number.observations.map do |obs|
