@@ -210,29 +210,34 @@ module Header
     # On input change, the form's page param is sanitized by Stimulus.
     def page_input(this_page, max_page)
       form_with(
-        url: pagination_current_url, method: :get, local: true,
+        url: add_q_param(pagination_current_url),
+        method: :get, local: true,
         class: "navbar-form px-0 page_input",
         data: { controller: "page-input", page_input_max_value: max_page }
       ) do |f|
         [
-          tag.div(class: "input-group page-input mx-2") do
-            [
-              f.text_field(
-                :page,
-                type: :text, value: this_page, class: "form-control text-right",
-                size: max_page.digits.count,
-                data: { page_input_target: "numberInput",
-                        action: "page-input#sanitizeNumber" }
-              ),
-              tag.span(class: "input-group-btn") do
-                tag.button(type: :submit,
-                           class: "btn btn-outline-default px-2") do
-                  link_icon(:goto, title: :GOTO.l)
-                end
-              end
-            ].safe_join
-          end,
+          page_input_group_with_button(f, this_page, max_page),
           *pagination_hidden_param_fields(f, :page)
+        ].safe_join
+      end
+    end
+
+    def page_input_group_with_button(f, this_page, max_page)
+      tag.div(class: "input-group page-input mx-2") do
+        [
+          f.text_field(
+            :page,
+            type: :text, value: this_page, class: "form-control text-right",
+            size: max_page.digits.count,
+            data: { page_input_target: "numberInput",
+                    action: "page-input#sanitizeNumber" }
+          ),
+          tag.span(class: "input-group-btn") do
+            tag.button(type: :submit,
+                       class: "btn btn-outline-default px-2") do
+              link_icon(:goto, title: :GOTO.l)
+            end
+          end
         ].safe_join
       end
     end
@@ -241,7 +246,7 @@ module Header
     # be overwritten by the param set represented by the form fields.
     # We need to re-send the incoming params as part of the form.
     def pagination_hidden_param_fields(form, field = :page)
-      params.except(:controller, :action, field).keys.map do |key|
+      params.except(:controller, :action, :q, :id, field).keys.map do |key|
         form.hidden_field(key.to_sym, value: params[key])
       end
     end
