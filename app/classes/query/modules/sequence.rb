@@ -132,9 +132,7 @@ module Query::Modules::Sequence
   end
 
   def first_id
-    return nil unless result_ids.length
-
-    result_ids.first
+    result_ids&.first
   end
 
   # Move to previous place.
@@ -196,8 +194,6 @@ module Query::Modules::Sequence
   end
 
   def last_id
-    return nil unless result_ids.length
-
-    result_ids.last
+    result_ids&.last
   end
 end
