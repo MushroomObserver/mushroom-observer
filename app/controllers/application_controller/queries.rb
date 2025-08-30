@@ -247,14 +247,15 @@ module ApplicationController::Queries
 
   # Add a :q param to a path helper like `names_path`,
   # or a hash like { controller: "/names", action: :index }
+  # How many cases would it cover if we add :by and :id in here?
+  # Check sorter, other params
   def add_q_param(path_or_params, query = nil)
-    return path_or_params if browser.bot?
+    return path_or_params if browser.bot? || !(q_param = q_param(query))
 
-    q_param = q_param(query)
     if path_or_params.is_a?(String) # i.e., if "path_or_params" arg is a path
       append_q_param_to_path(path_or_params, q_param)
     else
-      path_or_params[:q] = q_param if q_param
+      path_or_params[:q] = q_param
       path_or_params
     end
   end
