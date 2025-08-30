@@ -11,14 +11,13 @@ export default class extends Controller {
     this.element.dataset.modal = "connected"
   }
 
-  // Modal form is only removed in the event that the page section updates.
+  // Modal form is removed in the event that the page section updates.
   // That event is broadcast from the section-update controller with a user id.
   // Only remove the modal if the updating user is the same who has modal open.
   // We can't fire based on submit response, because unless something's wrong
   // with the request, turbo-stream will send a 200 OK even if it didn't save.
   remove(event) {
     const initiatingUser = event?.detail?.user
-    debugger
     if (!initiatingUser || initiatingUser !== this.userValue) { return }
 
     // console.log("Removing modal")
