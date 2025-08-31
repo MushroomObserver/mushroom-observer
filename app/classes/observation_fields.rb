@@ -12,11 +12,12 @@ class ObservationFields
   def label_fields
     field_list = [
       create_field("ID", id_value),
-      create_name_field("Name", observation.name.display_name_brief_authors),
+      create_name_field("Name", name_value),
       create_field("Location", observation.where),
       create_field("GPS", gps_value),
       create_field("Date", date_value),
-      create_field("Collector", collector_value)
+      create_field("Collector", collector_value),
+      create_field("Similar Observations", similar_observations_value)
     ]
     # Remove any nil fields and return
     field_list.compact
@@ -63,6 +64,10 @@ class ObservationFields
     return nil if value.nil? || value.to_s.strip.empty?
 
     NameField.new(name, value)
+  end
+
+  def name_value
+    observation.name.display_name_brief_authors
   end
 
   def id_value
@@ -153,5 +158,44 @@ class ObservationFields
 
   def date_value
     observation.when.strftime("%B %d, %Y")
+  end
+
+  def similar_observations_value
+    return unless Name.ranks[observation.name.rank] <= Name.ranks[:Species]
+
+    similar_observations.count.to_s
+  end
+
+  def similar_observations
+    location_filter(
+      observation.name.observations.joins(:project_observations).
+        where(project_observations: { project_id: observation.project_ids }).
+        where(when: week_before..week_after).where.not(id: observation.id)
+    ).distinct
+  end
+
+  def location_filter(results)
+    lat = observation.lat || observation.location_lat
+    lng = observation.lng || observation.location_lng
+    if lat && lng
+      results.in_box(north: [90, lat + 1].min,
+                     south: [-90, lat - 1].max,
+                     east: lng_add(lng, 1),
+                     west: lng_add(lng, -1))
+    else
+      results
+    end
+  end
+
+  def lng_add(value, offset)
+    ((value + offset + 180) % 360) - 180
+  end
+
+  def week_before
+    observation.when - 1.week
+  end
+
+  def week_after
+    observation.when + 1.week
   end
 end

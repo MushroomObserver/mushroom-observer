@@ -116,39 +116,4 @@ class Label
       qr_field.render(pdf, qr_x, qr_y, QR_CODE_SIZE)
     end
   end
-
-  def count_similar_observations
-    # def count_similar_observations(observation)
-    # Share a name and a project and occur within a week of each other
-    location_filter(
-      observation.name.observations.joins(:project_observations).
-        where(project_observations: { project_id: observation.project_ids }).
-        where(when: week_before..week_after).where.not(id: observation.id)
-    ).distinct.count
-  end
-
-  def location_filter(results)
-    lat = observation.lat || observation.location_lat
-    lng = observation.lng || observation.location_lng
-    if lat && lng
-      results.in_box(north: [90, lat + 1].min,
-                     south: [-90, lat - 1].max,
-                     east: lng_add(lng, 1),
-                     west: lng_add(lng, -1))
-    else
-      results
-    end
-  end
-
-  def lng_add(value, offset)
-    ((value + offset + 180) % 360) - 180
-  end
-
-  def week_before
-    observation.when - 1.week
-  end
-
-  def week_after
-    observation.when + 1.week
-  end
 end
