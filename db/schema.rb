@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_08_24_194515) do
+ActiveRecord::Schema[7.2].define(version: 2025_08_31_181722) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -198,6 +198,26 @@ ActiveRecord::Schema[7.2].define(version: 2025_08_24_194515) do
     t.boolean "transferred", default: false, null: false
     t.boolean "gps_stripped", default: false, null: false
     t.boolean "diagnostic", default: true, null: false
+  end
+
+  create_table "inat_exports", charset: "utf8mb3", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id"
+    t.integer "state", default: 0
+    t.string "mo_ids"
+    t.string "token"
+    t.string "inat_username"
+    t.boolean "export_all"
+    t.integer "exportables"
+    t.integer "exported_count"
+    t.datetime "ended_at"
+    t.integer "total_exported_count"
+    t.integer "total_seconds"
+    t.float "avg_export_time"
+    t.datetime "last_obs_start"
+    t.boolean "cancel"
+    t.text "response_errors"
   end
 
   create_table "inat_import_job_trackers", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
