@@ -691,6 +691,15 @@ class ObservationsControllerShowTest < FunctionalTestCase
 
     get(:show, params: { id: o_chron.fourth.id, flow: :prev, q: })
     assert_redirected_to(action: :show, id: o_chron.third.id, q:)
+
+    # Test that prev/next links do not have :q, and index link does
+    get(:show, params: { id: o_chron.third.id })
+    next_href = observation_path(o_chron.fourth.id)
+    prev_href = observation_path(o_chron.second.id)
+    index_href = observations_path(params: { id: o_chron.third.id, q: })
+    assert_select("a.next_object_link[href='#{next_href}']")
+    assert_select("a.prev_object_link[href='#{prev_href}']")
+    assert_select("a.index_object_link[href='#{index_href}']")
   end
 
   def test_prev_and_next_observation_with_fancy_query

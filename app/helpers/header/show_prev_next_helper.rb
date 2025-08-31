@@ -18,7 +18,7 @@ module Header
       return unless object && (query = show_page_incoming_query(object))
 
       content_for(:prev_next_object) do
-        tag.ul(class: "nav navbar-flex") do
+        tag.ul(class: "nav navbar-flex object_pager") do
           [
             tag.li { show_link_adjacent(object, query, :prev) },
             tag.li { show_link_index(object, query) },

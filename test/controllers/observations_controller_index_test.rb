@@ -572,6 +572,23 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_not_empty(css_select('[id="context_nav"]').text, "Tabset is empty")
   end
 
+  def test_index_prev_next_page_links
+    location = locations(:obs_default_location)
+    query = Query.lookup_and_save(:Observation, locations: [location])
+    q = @controller.q_param(QueryRecord.last.query)
+    o_loc = query.results
+
+    login
+    # Test index links lose the id param on next/prev page and goto_page
+    get(:index, params: { id: o_loc.third.id, q: })
+    next_href = observations_path(params: { page: 2, q: })
+    prev_href = observations_path(params: { q: })
+    assert_select("a.next_page_link[href='#{next_href}']")
+    assert_select("a.prev_page_link[href='#{prev_href}']", count: 0)
+    assert_select("form.page_input[action='#{observations_url}']")
+    assert_select("input[type='hidden'][name='q[model]'][value='Observation']")
+  end
+
   def test_index_project
     project = projects(:bolete_project)
 

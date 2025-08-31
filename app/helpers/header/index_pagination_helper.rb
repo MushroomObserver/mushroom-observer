@@ -158,6 +158,18 @@ module Header
       )
     end
 
+    def pagination_link_url(page, arg, args)
+      # Do not pass the :id through to next/prev page.
+      params = args[:params] || {}
+      params[arg] = page
+      url = reload_with_args(params.merge(id: nil))
+      if args[:anchor]
+        url.sub!(/#.*/, "")
+        url += "##{args[:anchor]}"
+      end
+      url
+    end
+
     # NOTE: On input change, the form's page param is sanitized by Stimulus.
     #
     # NOTE: Because this is a `form_with(method: :get, url: index)` and submits
@@ -251,6 +263,13 @@ module Header
       end
     end
 
+    # For the page input form, give form the current url without query string
+    def pagination_current_url
+      parsed_url = URI.parse(request.url)
+      parsed_url.fragment = parsed_url.query = nil
+      parsed_url.to_s
+    end
+
     # We need to re-send the incoming :q param hash as part of the form,
     # so the index the form submits to will have a valid permalink with :q.
     # https://stackoverflow.com/questions/2505902/
@@ -268,31 +287,6 @@ module Header
         form.hidden_field(key, value: value)
       end
       tags.safe_join("\n")
-    end
-
-    # For the page input form, give form the current url without query string
-    def pagination_current_url
-      parsed_url = URI.parse(request.url)
-      parsed_url.fragment = parsed_url.query = nil
-      parsed_url.to_s
-    end
-
-    # Render a single pagination link for number_pagination_data above.
-    def pagination_link(label, page, arg, args)
-      url = pagination_link_url(page, arg, args)
-      tag.li(link_to(label, url))
-    end
-
-    def pagination_link_url(page, arg, args)
-      # Do not pass the :id through to next/prev page.
-      params = args[:params].except(:id) || {}
-      params[arg] = page
-      url = reload_with_args(params)
-      if args[:anchor]
-        url.sub!(/#.*/, "")
-        url += "##{args[:anchor]}"
-      end
-      url
     end
   end
 end
