@@ -4,6 +4,7 @@
 module Observations
   class LocationsController < ApplicationController
     before_action :login_required
+    before_action :store_location, only: :edit
 
     ############################################################################
     #
@@ -41,7 +42,6 @@ module Observations
     # to the given Location (AR record)
 
     def edit
-      store_location
       # NOTE: Don't use or pass Location.user_format for @where. Needs "postal".
       # This is the string we're looking for in the db, in the `name` column,
       # and we're also assuming "postal" order when splitting the string.

@@ -62,9 +62,10 @@ module Tabs
     end
 
     def new_herbarium_tab
-      InternalLink::Model.new(:create_herbarium.l, Herbarium,
-                              add_query_param(new_herbarium_path),
-                              alt_title: "new_herbarium").tab
+      InternalLink::Model.new(
+        :create_herbarium.l, Herbarium,
+        new_herbarium_path, alt_title: "new_herbarium"
+      ).tab
     end
 
     def herbaria_index_tab
@@ -76,14 +77,14 @@ module Tabs
     def herbarium_return_tab(herbarium)
       InternalLink::Model.new(
         :cancel_and_show.t(type: :herbarium), herbarium,
-        add_query_param(herbarium_path(herbarium))
+        herbarium_path(herbarium)
       ).tab
     end
 
     def nonpersonal_herbaria_index_tab
       InternalLink.new(
         :herbarium_index.t,
-        add_query_param(herbaria_path(nonpersonal: true)),
+        add_q_param(herbaria_path(nonpersonal: true)),
         alt_title: "nonpersonal_herbaria_index"
       ).tab
     end

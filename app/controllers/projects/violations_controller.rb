@@ -10,7 +10,6 @@ module Projects
   #
   class ViolationsController < ApplicationController
     before_action :login_required
-    before_action :pass_query_params
     # Cannot figure out the eager loading here.
     around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [:index]
 
@@ -37,7 +36,7 @@ module Projects
         remove_observation_if_permitted(obs_id)
       end
 
-      redirect_with_query(project_path(@project))
+      redirect_to(project_path(@project))
     end
 
     private

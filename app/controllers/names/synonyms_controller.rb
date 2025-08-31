@@ -6,7 +6,6 @@ module Names
     include Names::Synonyms::SharedPrivateMethods
 
     before_action :login_required
-    before_action :pass_query_params
 
     ############################################################################
     #
@@ -71,7 +70,7 @@ module Names
         flash_notice(:name_change_synonyms_confirm.t)
       else
         success = deprecate_other_names(sorter)
-        return redirect_to(name_path(@name.id, q: get_query_param)) if success
+        return redirect_to(name_path(@name.id)) if success
 
         flash_object_errors(@name)
         flash_object_errors(@name.synonym)

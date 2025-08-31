@@ -36,7 +36,7 @@ module Tabs
     def collection_numbers_index_tab(c_n)
       InternalLink::Model.new(
         :edit_collection_number_back_to_index.t, c_n,
-        add_query_param(c_n.index_link_args)
+        add_q_param(c_n.index_link_args)
       ).tab
     end
 
@@ -47,7 +47,7 @@ module Tabs
 
       InternalLink::Model.new(
         tag.i(c_n.format_name.t), c_n,
-        add_query_param(c_n.show_link_args, cn_query)
+        add_q_param(c_n.show_link_args, cn_query)
       ).tab
     end
 
@@ -55,7 +55,7 @@ module Tabs
     def new_collection_number_tab(obs)
       InternalLink::Model.new(
         :create_collection_number.l, CollectionNumber,
-        add_query_param(new_collection_number_path(observation_id: obs.id)),
+        new_collection_number_path(observation_id: obs.id),
         html_options: { icon: :add }
       ).tab
     end
@@ -64,7 +64,7 @@ module Tabs
       back = obs&.id || :show
       InternalLink::Model.new(
         :edit_collection_number.l, c_n,
-        add_query_param(edit_collection_number_path(id: c_n.id, back: back)),
+        edit_collection_number_path(id: c_n.id, back: back),
         html_options: { icon: :edit }
       ).tab
     end
@@ -79,9 +79,9 @@ module Tabs
     # Dead code?
     # def collection_number_remove_obs_tab(c_n, obs)
     #   [:REMOVE.t,
-    #    add_query_param(collection_number_remove_observation_path(
-    #                      collection_number_id: c_n.id, observation_id: obs.id
-    #                    )),
+    #    collection_number_remove_observation_path(
+    #      collection_number_id: c_n.id, observation_id: obs.id
+    #    ),
     #    { class: "#{tab_id(__method__.to_s)}_#{c_n.id}", icon: :remove,
     #      method: :patch, data: { confirm: :are_you_sure.t } }]
     # end
@@ -89,9 +89,9 @@ module Tabs
     def remove_collection_number_tab(c_n, obs)
       InternalLink::Model.new(
         :REMOVE.t, c_n,
-        add_query_param(edit_collection_number_remove_observation_path(
-                          collection_number_id: c_n.id, observation_id: obs.id
-                        )),
+        edit_collection_number_remove_observation_path(
+          collection_number_id: c_n.id, observation_id: obs.id
+        ),
         html_options: { icon: :remove }
       ).tab
     end

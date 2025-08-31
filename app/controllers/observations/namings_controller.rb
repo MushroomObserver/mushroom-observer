@@ -7,7 +7,6 @@ module Observations
     include ObservationsController::Validators
 
     before_action :login_required
-    before_action :pass_query_params
 
     # Bullet wants us to eager load interests on taxa, which is loaded in
     # Naming#create_emails
@@ -161,7 +160,7 @@ module Observations
     end
 
     def redirect_to_obs(obs)
-      redirect_with_query(obs.show_link_args)
+      redirect_to(obs.show_link_args)
     end
 
     ##########################################################################

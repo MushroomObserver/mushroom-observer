@@ -27,7 +27,7 @@ listing_classes = image ? "col-sm-8 col-md-9" : "col-xs-12"
           <%= tag.div(class: "font-weight-bold") do %>
             <%= link_to(
               observation.unique_format_name.t,
-              add_query_param(observation_path(id: observation.id))
+              observation_path(id: observation.id)
             ) %>
           <% end %>
           <%= tag.div(class: "font-weight-bold") do %>

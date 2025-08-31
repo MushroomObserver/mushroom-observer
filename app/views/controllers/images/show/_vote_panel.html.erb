@@ -23,7 +23,7 @@ votes = find_list_of_votes(@image)
         <%= :image_show_your_vote.t %>:
         <span class="small"><%= image_vote_as_long_string(current).t %></span>
         <div class="mt-3">
-          <% args = add_query_param(id: @image.id)
+          <% args = { id: @image.id }
           args[:size] = @size if @size != @default_size
           ([0] + Image.all_votes).each do |value|
             str1 = image_vote_as_short_string(value)

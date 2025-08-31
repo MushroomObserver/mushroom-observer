@@ -87,8 +87,8 @@ class Query::SpeciesListsTest < UnitTestCase
   end
 
   def test_species_list_title_has
-    ids = [species_lists(:first_species_list).id,
-           species_lists(:another_species_list).id]
+    ids = [species_lists(:another_species_list).id,
+           species_lists(:first_species_list).id]
     scope = SpeciesList.title_has("An Observation List").order_by_default
     assert_query_scope(ids, scope, :SpeciesList,
                        title_has: "An Observation List")
@@ -100,8 +100,8 @@ class Query::SpeciesListsTest < UnitTestCase
   end
 
   def test_species_list_notes_has
-    ids = [species_lists(:first_species_list).id,
-           species_lists(:another_species_list).id]
+    ids = [species_lists(:another_species_list).id,
+           species_lists(:first_species_list).id]
     scope = SpeciesList.notes_has("Skunked").order_by_default
     assert_query_scope(ids, scope, :SpeciesList, notes_has: "Skunked")
   end

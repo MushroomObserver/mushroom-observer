@@ -15,8 +15,8 @@ container_class(:wide)
       <%= @drafts.length %><br />
       <div class="ml-3">
         <% @drafts.each do |draft| %>
-        <%= link_with_query(draft.name&.display_name&.t,
-                                  name_description_path(draft.id)) %>
+        <%= link_to(draft.name&.display_name&.t,
+                    name_description_path(draft.id)) %>
         (<%= user_link(draft.user) %>)<br />
         <% end %>
       </div>
