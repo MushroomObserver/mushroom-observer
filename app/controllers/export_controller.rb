@@ -6,7 +6,6 @@ class ExportController < ApplicationController
                        Name].freeze
 
   before_action :login_required
-  before_action :pass_query_params
 
   # Callback (no view) to let reviewers change the export status of an
   # Image, Name, Location or Description from the show pages.

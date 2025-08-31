@@ -30,6 +30,7 @@
 # == Methods
 #  total_expected_time     total expected time for associated Job
 #  last_obs_elapsed_time   time spent importing a single iNat obs
+#  adequate_constraints?   enough constraints on which observations to import?
 #
 class InatImport < ApplicationRecord
   alias_attribute :canceled, :cancel # for readability, e.g., job.canceled?
@@ -53,17 +54,28 @@ class InatImport < ApplicationRecord
   # (Only gets used once.)
   BASE_AVG_IMPORT_SECONDS = 15
 
+  # Are there enough constraints on which observations to import?
+  # See also InatImportsController::Validators#adequately_constrained?
+  # Need to make sure that the iNat API query has enough constrains so
+  # that we don't import too many observations or, even worse,
+  # all observations of all users.
+  def adequate_constraints?
+    inat_username.present?
+  end
+
   def job_pending?
     %w[Authenticating Importing].include?(state)
   end
 
   def add_response_error(error)
-    msg = if error.is_a?(::RestClient::Response)
+    msg = if error.is_a?(String)
+            error
+          elsif error.is_a?(::RestClient::Response)
             error.body
           else
             error.message
           end
-    response_errors << "#{error.class.name}: #{msg}\n"
+    response_errors << "#{msg}\n"
     save
   end
 

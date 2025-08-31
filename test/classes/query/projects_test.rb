@@ -110,9 +110,7 @@ class Query::ProjectsTest < UnitTestCase
   end
 
   def test_project_has_species_lists
-    expects = [projects(:two_list_project), projects(:lone_wolf_project),
-               projects(:open_membership_project), projects(:bolete_project),
-               projects(:eol_project)]
+    expects = Project.joins(:species_lists).distinct.order_by_default
     scope = Project.has_species_lists.order_by_default
     assert_query_scope(expects, scope, :Project, has_species_lists: "yes")
   end

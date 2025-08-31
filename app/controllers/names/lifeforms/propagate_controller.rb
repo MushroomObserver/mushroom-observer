@@ -4,7 +4,6 @@
 module Names::Lifeforms
   class PropagateController < ApplicationController
     before_action :login_required
-    before_action :pass_query_params
 
     def edit
       @name = find_or_goto_index(Name, params[:id])
@@ -20,7 +19,7 @@ module Names::Lifeforms
           @name.propagate_remove_lifeform(word)
         end
       end
-      redirect_with_query(@name.show_link_args)
+      redirect_to(@name.show_link_args)
     end
   end
 end

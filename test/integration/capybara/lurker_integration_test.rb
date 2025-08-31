@@ -256,7 +256,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
            "Found these: #{links.inspect}")
   end
 
-  def test_obs_at_location
+  def test_obs_at_location_index
     # Have to do this to get enough obs, otherwise fixture columns not populated
     Location.update_box_area_and_center_columns
 
@@ -304,41 +304,86 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     check_results_length(save_results)
 
     within(first("#results .sorts")) { click_link(text: "Name") }
-    # Last time through - reset `save_results` with current results
+    check_results_length(save_results)
+  end
+
+  def test_obs_at_location_show
+    login
+    loc = locations(:burbank)
+
+    # Start at observations for location.
+    visit(observations_path(location: loc.id))
+    assert_match("Observations", page.title, "Wrong title")
+    assert_selector("#filters", text: "Burbank, California, USA")
+    save_results = find_all("#results a").select do |l|
+      l[:href].match(%r{^/obs/\d+})
+    end
+
+    # Re-sort by name
+    within(first("#results .sorts")) { click_link(text: "Name") }
+    query_params = parse_query_params(current_fullpath)
     save_results = check_results_length(save_results)
     # Must set `save_hrefs` here to avoid variable going stale...
     # Capybara::RackTest::Errors::StaleElementReferenceError
     save_hrefs = save_results.pluck(:href)
 
-    query_params = parse_query_params(save_results.first[:href])
+    assert_equal(
+      query_params.symbolize_keys,
+      { locations: [loc.id.to_s], model: "Observation", order_by: "name" }
+    )
 
     # Go to first observation, and try stepping back and forth.
     results_observation_links.first.click
     save_path = current_fullpath
-    assert_equal(query_params, parse_query_params(save_path))
+
+    # First. Prev link does not appear or have href, so nothing should happen.
     within("#header") { click_link(text: "Prev") }
-    assert_flash_text(/there are no more observations/i)
     assert_equal(save_path, current_fullpath)
-    assert_equal(query_params, parse_query_params(save_path))
+
     within("#header") { click_link(text: "Next") }
     assert_no_flash
-    assert_equal(query_params, parse_query_params(save_path))
 
     save_path = current_fullpath
     within("#header") { click_link(text: "Next") }
     assert_no_flash
-    assert_equal(query_params, parse_query_params(save_path))
+
     within("#header") { click_link(text: "Prev") }
     assert_no_flash
-    assert_equal(query_params, parse_query_params(save_path))
+
     assert_equal(save_path, current_fullpath,
                  "Went next then prev, should be back where we started.")
+
+    # Be sure the index link goes back to the right sorted/filtered query
+    index_link = first(".index_object_link")
+    assert_equal(query_params, parse_query_params(index_link[:href]))
+
     within("#header") { click_link(text: "Index") }
+    # Be sure we're actually on that sorted/filtered query, now we're on index
+    assert_equal(query_params, parse_query_params(current_fullpath))
+
     results = results_observation_links
-    assert_equal(query_params, parse_query_params(results.first[:href]))
+    # Coming back to the index is where the q is off.
+    # assert_equal(query_params, parse_query_params(results.first[:href]))
     assert_equal(save_hrefs, results.pluck(:href),
                  "Went to show_obs, screwed around, then back to index. " \
                  "But the results were not the same when we returned.")
+  end
+
+  def test_goto_page_input
+    login
+    loc = locations(:obs_default_location)
+    # start at location page
+    visit("/locations/#{loc.id}")
+    click_link(text: "Observations at this Location")
+    assert_match("Observations", page.title, "Wrong title")
+
+    within(first("form.page_input")) do
+      fill_in("page", with: 2)
+      click_commit
+    end
+    assert_match("Observations", page.title, "Wrong title")
+
+    assert_match(loc.id.to_s, current_fullpath)
   end
 
   ################

@@ -44,8 +44,10 @@ class SearchControllerTest < FunctionalTestCase
           commit: "Search"
         })
     assert_response(:redirect)
-    query = QueryRecord.find(redirect_to_url.split("=")[-1].dealphabetize)
-    assert_match(names(:provisional_name).text_name, query.description)
+    # query = QueryRecord.find(redirect_to_url.split("=")[-1].dealphabetize)
+    query_string = redirect_to_url.split("advanced_search=1&")[1]
+    assert_match("Cortinarius", query_string)
+    assert_match("IN34", query_string)
   end
 
   def test_advanced_search_content_filters
@@ -80,7 +82,7 @@ class SearchControllerTest < FunctionalTestCase
     }
     get(:advanced, params: params)
     query = QueryRecord.last.query
-    q = QueryRecord.last.id.alphabetize
+    q = @controller.q_param(query)
     assert_redirected_to(observations_path(advanced_search: 1, q:))
     assert_true(query.num_results.positive?)
     assert_equal("", query.params[:has_images])

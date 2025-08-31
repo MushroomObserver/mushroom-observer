@@ -78,7 +78,7 @@ class InatImportJob < ApplicationJob
 
     # Request a page of iNat observations at a time, until done with all pages
     # (or canceled).
-    parser = Inat::PageParser.new(inat_import, inat_ids)
+    parser = Inat::PageParser.new(inat_import)
     while parsing?(parser); end
   end
 
@@ -89,22 +89,25 @@ class InatImportJob < ApplicationJob
   # Import the next page of iNat API results,
   # returning true if there are more pages of results, false if done.
   def parsing?(parser)
-    # get a page of observations with id > id of last imported obs
     parsed_page = parser.next_page
-    return false if parsed_page.nil?
+    return false if parsing_should_stop?(parsed_page)
 
-    inat_import.update(importables: parsed_page["total_results"])
-    return false if page_empty?(parsed_page)
-
-    observation_importer.import_page(parsed_page)
-    return false if inat_import.reload.canceled?
-
+    import_parsed_page_of_observations(parsed_page)
     parser.last_import_id = parsed_page["results"].last["id"]
     more_pages?(parsed_page)
   end
 
-  def page_empty?(page)
-    page["total_results"].zero?
+  def parsing_should_stop?(parsed_page)
+    parsed_page.nil? ||
+      parsed_page["total_results"].zero? ||
+      inat_import.reload.canceled?
+  end
+
+  def import_parsed_page_of_observations(parsed_page)
+    log("Got iNat response page #{parsed_page["page"]}")
+    inat_import.update(importables: parsed_page["total_results"])
+    observation_importer.import_page(parsed_page)
+    log("Imported observations on page ##{parsed_page["page"]}")
   end
 
   def more_pages?(parsed_page)

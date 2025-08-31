@@ -6,12 +6,11 @@ module Locations::Descriptions
     include ::Locations::Descriptions::SharedPrivateMethods
 
     before_action :login_required
-    before_action :pass_query_params
+    before_action :store_location
 
     # Show past version of LocationDescription.  Accessible only from
     # show_location_description page.
     def show
-      store_location
       return unless find_description!
 
       @location = @description.location

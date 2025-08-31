@@ -11,11 +11,11 @@ flash_error(@error) if @error && @objects.empty?
     <table class="table table-striped">
       <% (@objects || []).each do |desc| %>
         <tr>
-          <td><%= link_with_query(desc.format_name.t,
-                                  name_description_path(desc.id)) %>
-            <td>
-            </tr>
-          <% end %>
-        </table>
+          <td>
+            <%= link_to(desc.format_name.t, name_description_path(desc.id)) %>
+          </td>
+        </tr>
       <% end %>
-    <% end %>
+    </table>
+  <% end %>
+<% end %>

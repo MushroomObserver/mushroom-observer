@@ -4,7 +4,7 @@
   <%= tag.div do %>
     <%= tag.div do
       [
-        link_with_query(project.show_link_args) do
+        link_to(project.show_link_args) do
           tag.span(project.title.t, class: "h4")
         end,
         tag.span(project.open_membership ? "(#{:OPEN.t})" : "", class: "ml-4")

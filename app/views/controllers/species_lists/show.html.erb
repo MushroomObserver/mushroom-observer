@@ -6,7 +6,6 @@ add_edit_icons(@species_list)
 add_context_nav(species_list_show_tabs(list: @species_list, query: @query))
 add_pager_for(@species_list) # takes you to prev/next list, not page of obs
 add_pagination(@pagination_data)
-query_params_set(@query) if @pagination_data.any?
 container_class(:double)
 column_classes(:nine_three)
 %>

@@ -259,3 +259,7 @@ super_importers_project:
   user: webmaster # should track production
   admin_group: webmaster_only # should track production
   user_group: super_importers_users
+
+empty_list_project:
+  <<: *DEFAULTS
+  species_lists: reused_list

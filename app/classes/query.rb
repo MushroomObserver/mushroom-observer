@@ -388,6 +388,12 @@ class Query
     self.class.default_order || :id
   end
 
+  # Returns a hash describing the query instance.
+  # This gets encoded as the URL :q param for indexes etc.
+  def q_param
+    { model: model.name.to_sym, **params }
+  end
+
   # Serialize the query params, adding the model, for saving to a QueryRecord.
   # We use this column of QueryRecord to identify an existing query record that
   # matches current params, and sometimes to recompose a query from the string.

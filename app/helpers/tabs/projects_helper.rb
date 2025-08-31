@@ -39,8 +39,7 @@ module Tabs
     end
 
     def new_project_tab
-      InternalLink.new(:list_projects_add_project.t,
-                       add_query_param(new_project_path)).tab
+      InternalLink.new(:list_projects_add_project.t, new_project_path).tab
     end
 
     def change_member_status_tab(project)
@@ -151,6 +150,10 @@ module Tabs
         tabs << build_tab("#{project.location_count} #{:LOCATIONS.l}",
                           project_locations_path(project_id: project.id),
                           "locations")
+      elsif project.species_lists.any?
+        tabs << build_tab("#{project.species_lists.length} #{:SPECIES_LISTS.l}",
+                          species_lists_path(project:),
+                          "species_lists")
       end
       tabs
     end
@@ -180,13 +183,11 @@ module Tabs
     end
 
     def project_species_list_map_button(query)
-      button_link(:MAP.t,
-                  add_query_param(map_observations_path, query))
+      button_link(:MAP.t, add_q_param(map_observations_path, query))
     end
 
     def project_species_list_observations_button(query)
-      button_link(:OBSERVATIONS.t,
-                  add_query_param(observations_path, query))
+      button_link(:OBSERVATIONS.t, add_q_param(observations_path, query))
     end
 
     def project_species_list_names_button(list)
@@ -215,11 +216,10 @@ module Tabs
 
       _img_name, img_link, = related_images_tab(:Observation, query)
       buttons = [
-        button_link(:MAP.t,
-                    map_observations_path(q: get_query_param(query))),
+        button_link(:MAP.t, add_q_param(map_observations_path, query)),
         button_link(:IMAGES.l, img_link),
         button_link(:DOWNLOAD.l,
-                    add_query_param(new_observations_download_path, query))
+                    add_q_param(new_observations_download_path, query))
       ]
       if project.field_slip_prefix
         buttons << button_link(:FIELD_SLIPS.t,
