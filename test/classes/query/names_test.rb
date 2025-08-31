@@ -651,12 +651,8 @@ class Query::NamesTest < UnitTestCase
     # Have to do this, otherwise columns not populated
     Location.update_box_area_and_center_columns
     loc = locations(:burbank)
-    expects = [
-      names(:agaricus_campestras), names(:agaricus_campestris),
-      names(:agaricus_campestros), names(:agaricus_campestrus),
-      names(:conocybe_filaris), names(:fungi), names(:stereum_hirsutum),
-      names(:tubaria_furfuracea)
-    ]
+    expects = Name.order_by_default.with_correct_spelling.joins(:observations).
+              where(observations: { location: loc }).distinct
     scope = Name.with_correct_spelling.joins(:observations).distinct.
             merge(Observation.locations(loc)).order_by_default
     assert_query_scope(
