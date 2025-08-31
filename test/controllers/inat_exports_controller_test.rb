@@ -31,25 +31,7 @@ class InatExportsControllerTest < FunctionalTestCase
                   "Form needs a field for inputting iNat username")
   end
 
-  def test_new_inat_export_already_importing
-    skip("Under Construction")
-    user = users(:katrina)
-    import = inat_imports(:katrina_inat_import)
-    tracker = inat_import_job_trackers(:katrina_tracker)
-
-    login(user.login)
-    get(:new)
-
-    assert_flash_warning(
-      "Should flash warning if user starts iNat import while another is running"
-    )
-    assert_redirected_to(
-      inat_import_path(import, params: { tracker_id: tracker.id })
-    )
-  end
-
-  def test_new_inat_import_inat_username_prefilled
-    skip("Under Construction")
+  def test_new_inat_export_inat_username_prefilled
     user = users(:mary)
     assert(user.inat_username.present?,
            "Test needs a user fixture with an inat_username")
@@ -59,7 +41,24 @@ class InatExportsControllerTest < FunctionalTestCase
 
     assert_select(
       "input[name=?][value=?]", "inat_username", user.inat_username, true,
-      "InatImport should pre-fill `inat_username` with user's inat_username"
+      "InatExport should pre-fill `inat_username` with user's inat_username"
+    )
+  end
+
+  def test_new_inat_export_already_exporting
+    skip("Under Construction")
+    user = users(:katrina)
+    export = inat_exports(:katrina_inat_export)
+    tracker = inat_export_job_trackers(:katrina_tracker)
+
+    login(user.login)
+    get(:new)
+
+    assert_flash_warning(
+      "Should flash warning if user starts iNat import while another is running"
+    )
+    assert_redirected_to(
+      inat_export_path(export, params: { tracker_id: tracker.id })
     )
   end
 
@@ -133,19 +132,6 @@ class InatExportsControllerTest < FunctionalTestCase
     end
 
     assert_flash_text(:runtime_illegal_inat_id.l)
-  end
-
-  def test_create_no_consent
-    skip("Under Construction")
-    params = { inat_username: "anything", inat_ids: 123,
-               consent: 0 }
-    login
-    assert_no_difference("Observation.count",
-                         "iNat obss imported without consent") do
-      post(:create, params: params)
-    end
-
-    assert_flash_text(:inat_consent_required.l)
   end
 
   def test_create_too_many_ids_listed
@@ -234,7 +220,7 @@ class InatExportsControllerTest < FunctionalTestCase
     assert_equal("Unstarted", inat_import.state,
                  "Need a Unstarted inat_import fixture")
 
-    stub_request(:any, authorization_url)
+    stub_request(:any, INAT_AUTHORIZATION_URL)
     login(user.login)
 
     assert_no_difference(
@@ -262,14 +248,14 @@ class InatExportsControllerTest < FunctionalTestCase
     skip("Under Construction")
     user = users(:rolf)
     inat_username = "rolf" # use different inat_username to test if it's updated
-    inat_import = inat_imports(:rolf_inat_import)
-    assert_equal("Unstarted", inat_import.state,
-                 "Need a Unstarted inat_import fixture")
-    assert_equal(0, inat_import.total_imported_count.to_i,
-                 "Test needs InatImport fixture without prior imports")
+    export = inat_exports(:rolf_inat_export)
+    assert_equal("Unstarted", export.state,
+                 "Need a Unstarted inat_export fixture")
+    assert_equal(0, export.total_imported_count.to_i,
+                 "Test needs InatExport fixture without prior imports")
     inat_ids = "123,456,789"
 
-    stub_request(:any, authorization_url)
+    stub_request(:any, INAT_AUTHORIZATION_URL)
     login(user.login)
 
     assert_no_difference(
@@ -277,7 +263,7 @@ class InatExportsControllerTest < FunctionalTestCase
       "Authorization request to iNat shouldn't create MO Observation(s)"
     ) do
       post(:create,
-           params: { inat_ids: inat_ids, inat_username: inat_username,
+           params: { mo_ids: inat_ids, inat_username: inat_username,
                      consent: 1 })
     end
 
@@ -298,7 +284,7 @@ class InatExportsControllerTest < FunctionalTestCase
     skip("Under Construction")
     login
 
-    get(:authorization_response, params: authorization_denial_callback_params)
+    get(:authorization_response, params: AUTHORIZATION_DENIAL_CALLBACK_PARAMS)
 
     assert_redirected_to(observations_path)
     assert_flash_error
@@ -378,8 +364,7 @@ class InatExportsControllerTest < FunctionalTestCase
     )
 
     login(user.login)
-    get(:authorization_response,
-        params: authorization_denial_callback_params)
+    get(:authorization_response, params: AUTHORIZATION_DENIAL_CALLBACK_PARAMS)
 
     assert_blank(
       user.reload.inat_username,
@@ -400,23 +385,5 @@ class InatExportsControllerTest < FunctionalTestCase
     assert_template(:show)
     assert(import.reload.canceled?,
            "Clicking cancel button should make InatImport.canceled? == true")
-  end
-
-  ########## Utilities
-
-  # iNat url where user is sent in order to authorize MO access
-  # to iNat confidential data
-  # https://www.inaturalist.org/pages/api+reference#authorization_code_flow
-  def authorization_url
-    "https://www.inaturalist.org/oauthenticate/authorize?" \
-    "client_id=#{Rails.application.credentials.inat.id}" \
-    "&redirect_uri=#{REDIRECT_URI}" \
-    "&response_type=code"
-  end
-
-  def authorization_denial_callback_params
-    { error: "access_denied",
-      error_description:
-        "The resource owner or authorization server denied the request." }
   end
 end
