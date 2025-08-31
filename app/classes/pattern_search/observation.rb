@@ -21,7 +21,7 @@ module PatternSearch
       has_field: [:has_notes_fields, :parse_string],
       herbarium: [:herbaria, :parse_list_of_herbaria],
       list: [:species_lists, :parse_list_of_species_lists],
-      location: [:locations, :parse_list_of_locations],
+      location: [:within_locations, :parse_list_of_locations],
       notes: [:notes_has, :parse_string],
       project: [:projects, :parse_list_of_projects],
       project_lists: [:project_lists, :parse_list_of_projects],

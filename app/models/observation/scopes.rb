@@ -257,11 +257,10 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       end
     }
     scope :locations, lambda { |locations|
-      locs = ::Lookup::Locations.new(locations).instances
-      in_boxes = locs.map! { |location| in_box(**location.bounding_box) }
-      or_clause(*in_boxes).distinct
+      location_ids = Lookup::Locations.new(locations).ids
+      where(location: location_ids).distinct
     }
-    # This is the default search scope for observations by location:
+    # This is the new default search scope for observations by location:
     # returns all observations whose lat/lng or location_lat/lng are
     # within the box(es) of the given observations.
     scope :within_locations, lambda { |locations|

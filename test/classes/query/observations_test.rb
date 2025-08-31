@@ -258,6 +258,13 @@ class Query::ObservationsTest < UnitTestCase
     assert_query(expects, :Observation, locations: locs.map(&:id))
   end
 
+  def test_observation_within_locations
+    expects = Observation.within_locations(locations(:california)).
+              order_by_default
+    assert_query(expects, :Observation,
+                 within_locations: locations(:california))
+  end
+
   def test_observation_projects
     assert_query([],
                  :Observation, projects: projects(:empty_project))
