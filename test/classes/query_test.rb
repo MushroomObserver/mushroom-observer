@@ -638,6 +638,12 @@ class QueryTest < UnitTestCase
     assert_not(Query.lookup(:Herbarium, order_by: :id).relatable?(:Project))
   end
 
+  def test_q_param
+    params = { by_users: [rolf.id], names: { lookup: ["Coprinus comatus"] } }
+    query = Query.lookup(:Observation, **params)
+    assert_equal(query.q_param, { model: :Observation, **params })
+  end
+
   ##############################################################################
   #
   #  :section: Other stuff

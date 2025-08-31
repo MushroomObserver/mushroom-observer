@@ -288,9 +288,7 @@ module ApplicationController::Queries
 
     query.save if query && !query.id
     query ||= current_query
-    return nil unless query
-
-    { model: query.model.name.to_sym, **query.params }
+    query&.q_param
   end
   # helper_method :q_param
 
