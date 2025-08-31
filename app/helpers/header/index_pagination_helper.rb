@@ -118,7 +118,7 @@ module Header
         [
           prev_page_link(prev_page, arg, args),
           tag.div(:PAGE.l, class: "navbar-text mx-0 hidden-xs"),
-          page_input(this_page, max_page),
+          goto_page_input(this_page, max_page),
           tag.div(:of.l, class: "navbar-text ml-0 mr-2 hidden-xs"),
           tag.div(link_to(max_page, max_url), class: "navbar-text mx-0"),
           next_page_link(next_page, max_page, arg, args)
@@ -207,25 +207,33 @@ module Header
       end
     end
 
-    # On input change, the form's page param is sanitized by Stimulus.
-    def page_input(this_page, max_page)
+    # NOTE: On input change, the form's page param is sanitized by Stimulus.
+    #
+    # NOTE: Because this is a `form_with(method: :get, url: index)` and submits
+    # with its own form params, any params in the form's commit url are ignored!
+    # In other words we can't submit to `add_q_param(pagination_current_url)`:
+    # unless the form sends a value for :q it will not be in the resulting url.
+    # That's why we are sending :q params through hidden fields. (It also
+    # doesn't work to send the :q string as a single hidden field, the hidden
+    # fields must be built iteratively like a fields_for(:q) block.)
+    def goto_page_input(this_page, max_page)
       form_with(
-        url: add_q_param(pagination_current_url),
+        url: pagination_current_url,
         method: :get, local: true,
         class: "navbar-form px-0 page_input",
         data: { controller: "page-input", page_input_max_value: max_page }
       ) do |f|
         [
           page_input_group_with_button(f, this_page, max_page),
-          *pagination_hidden_param_fields(f, :page)
+          q_param_to_hidden_fields(f) # (Just :q. :id not relevant on next page)
         ].safe_join
       end
     end
 
-    def page_input_group_with_button(f, this_page, max_page)
+    def page_input_group_with_button(frm, this_page, max_page)
       tag.div(class: "input-group page-input mx-2") do
         [
-          f.text_field(
+          frm.text_field(
             :page,
             type: :text, value: this_page, class: "form-control text-right",
             size: max_page.digits.count,
@@ -242,13 +250,23 @@ module Header
       end
     end
 
-    # The form url does not have the existing params, because these would
-    # be overwritten by the param set represented by the form fields.
-    # We need to re-send the incoming params as part of the form.
-    def pagination_hidden_param_fields(form, field = :page)
-      params.except(:controller, :action, :q, :id, field).keys.map do |key|
-        form.hidden_field(key.to_sym, value: params[key])
+    # We need to re-send the incoming :q param hash as part of the form,
+    # so the index the form submits to will have a valid permalink with :q.
+    # https://stackoverflow.com/questions/2505902/
+    # passing-hash-as-values-in-hidden-field-tag/9488247
+    def q_param_to_hidden_fields(form)
+      # This flattens the hash as it is in the permalink.
+      # Seems safer than trying to parse the incoming URI's query_string.
+      query_string = Rack::Utils.build_nested_query(
+        { q: q_param(query_from_session) }
+      )
+      # Sets them up them the way a form would, i.e. fields_for(:q)
+      pairs = query_string.split(Rack::Utils::DEFAULT_SEP)
+      tags = pairs.map do |pair|
+        key, value = pair.split("=", 2).map { |str| Rack::Utils.unescape(str) }
+        form.hidden_field(key, value: value)
       end
+      tags.safe_join("\n")
     end
 
     # For the page input form, give form the current url without query string

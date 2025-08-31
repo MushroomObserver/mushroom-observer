@@ -229,21 +229,21 @@ module ApplicationController::Queries
   end
   # helper_method :query_from_session
 
-  private
-
   def query_from_q_record_id
     Query.safe_find(params[:q].to_s.dealphabetize) # this may return nil
   end
 
+  # ShowPrevNextHelper#page_input may send an encoded string.
+  # We could try to parse it but we have it
   def query_from_q_param_hash
     q_param = params[:q]
+    return query_from_session if q_param.is_a?(String)
+
     return nil if q_param[:model].blank?
 
     Query.lookup(q_param[:model].to_sym,
                  **q_param.except(:model).to_unsafe_hash)
   end
-
-  public
 
   # Add a :q param to a path helper like `names_path`,
   # or a hash like { controller: "/names", action: :index }
