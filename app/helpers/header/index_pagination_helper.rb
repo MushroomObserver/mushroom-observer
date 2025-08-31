@@ -79,15 +79,6 @@ module Header
       end
     end
 
-    # pages is a pagination_data object
-    def need_letter_pagination_links?(pages)
-      return false unless pages
-
-      pages.letter_arg &&
-        (pages.letter || pages.num_total > pages.num_per_page) &&
-        pages.used_letters && pages.used_letters.length > 1
-    end
-
     # Insert numbered pagination links.
     # (See also letter_pagination_nav above.)
     #
@@ -126,15 +117,6 @@ module Header
       end
     end
     # rubocop:enable Metrics/AbcSize
-
-    def letter_pagination_pages(pagination_data)
-      letters = pagination_data.used_letters
-      this_letter = pagination_data.letter || ""
-      # this_letter_idx = letters.index(this_letter) || 0
-      # prev_letter = letters[this_letter_idx - 1]
-      # next_letter = letters[this_letter_idx + 1]
-      [this_letter, letters]
-    end
 
     def number_pagination_pages(pagination_data)
       max_page = pagination_data.num_pages
@@ -176,37 +158,6 @@ module Header
       )
     end
 
-    def letter_input(this_letter, used_letters)
-      form_with(
-        url: pagination_current_url, method: :get, local: true,
-        class: "navbar-form px-0 page_input",
-        data: { controller: "page-input",
-                page_input_letters_value: used_letters }
-      ) do |f|
-        [
-          tag.div(class: "input-group page-input ml-2") do
-            [
-              f.text_field(
-                :letter,
-                type: :text, value: this_letter,
-                class: "form-control text-right",
-                size: 1, placeholder: "—",
-                data: { page_input_target: "letterInput",
-                        action: "page-input#sanitizeLetter" }
-              ),
-              tag.span(class: "input-group-btn") do
-                tag.button(type: :submit,
-                           class: "btn btn-outline-default px-2") do
-                  link_icon(:goto, title: :GOTO.l)
-                end
-              end
-            ].safe_join
-          end,
-          *pagination_hidden_param_fields(f, :letter)
-        ].safe_join
-      end
-    end
-
     # NOTE: On input change, the form's page param is sanitized by Stimulus.
     #
     # NOTE: Because this is a `form_with(method: :get, url: index)` and submits
@@ -246,6 +197,56 @@ module Header
               link_icon(:goto, title: :GOTO.l)
             end
           end
+        ].safe_join
+      end
+    end
+
+    # pages is a pagination_data object
+    def need_letter_pagination_links?(pages)
+      return false unless pages
+
+      pages.letter_arg &&
+        (pages.letter || pages.num_total > pages.num_per_page) &&
+        pages.used_letters && pages.used_letters.length > 1
+    end
+
+    def letter_pagination_pages(pagination_data)
+      letters = pagination_data.used_letters
+      this_letter = pagination_data.letter || ""
+      # this_letter_idx = letters.index(this_letter) || 0
+      # prev_letter = letters[this_letter_idx - 1]
+      # next_letter = letters[this_letter_idx + 1]
+      [this_letter, letters]
+    end
+
+    # Check #goto_page_input above
+    def letter_input(this_letter, used_letters)
+      form_with(
+        url: pagination_current_url, method: :get, local: true,
+        class: "navbar-form px-0 page_input",
+        data: { controller: "page-input",
+                page_input_letters_value: used_letters }
+      ) do |f|
+        [
+          tag.div(class: "input-group page-input ml-2") do
+            [
+              f.text_field(
+                :letter,
+                type: :text, value: this_letter,
+                class: "form-control text-right",
+                size: 1, placeholder: "—",
+                data: { page_input_target: "letterInput",
+                        action: "page-input#sanitizeLetter" }
+              ),
+              tag.span(class: "input-group-btn") do
+                tag.button(type: :submit,
+                           class: "btn btn-outline-default px-2") do
+                  link_icon(:goto, title: :GOTO.l)
+                end
+              end
+            ].safe_join
+          end,
+          *q_param_to_hidden_fields(f)
         ].safe_join
       end
     end
