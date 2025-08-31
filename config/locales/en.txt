@@ -3091,6 +3091,7 @@
 
   # /inat_export_job_tracker
   INAT_EXPORTS: iNat Exports
+  inat_export_all: Export all my MO Observations
   inat_export_tracker_pending: Please wait until your pending iNat Export is Done before starting a new one.
 
   # /inat_import_job_tracker
