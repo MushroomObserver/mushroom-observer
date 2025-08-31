@@ -3054,6 +3054,10 @@
   list_merge_options_others: Other Available [:locations]
   list_merge_options_title: Location Matches for [where]
 
+# observation/inat_exports
+  inat_export_create_title: Export to iNat
+  inat_export_details: "* Excludes Observations which are not yours.\n* Excludes Observations previously imported from/exported to iNat."
+
   # observation/inat_imports
   inat_import_create_title: Import from iNat
   inat_choose_observations: "Inat Observations to Import:"
@@ -3086,6 +3090,7 @@
   inat_details_list: "* Excludes Observations previously imported from/exported to iNat.\n* MO imports only fungal observations.\n* MO lists most iNat data and/or maps it to analogous MO fields.\n* MO hides coordinates from the public if iNat obscured them.\n* The MO Location is a rectangle with an MO-style name, rather than the iNat Place name."
 
   # /inat_export_job_tracker
+  INAT_EXPORTS: iNat Exports
   inat_export_tracker_pending: Please wait until your pending iNat Export is Done before starting a new one.
 
   # /inat_import_job_tracker
