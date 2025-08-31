@@ -330,6 +330,27 @@ class ObservationsControllerIndexTest < FunctionalTestCase
                   "Wrong page or display is missing a link to Previous page")
   end
 
+  def test_index_filter_display_is_concise
+    pattern = "Agrocybe arvalis" # There are two
+
+    setup_rolfs_index
+    get(:index, params: { pattern: pattern })
+    assert_page_title(:OBSERVATIONS.l)
+    assert_displayed_filters("#{:query_names.l}: #{pattern}")
+
+    filter_txt = "#{:query_names.l}: #{pattern}, with synonyms, with subtaxa"
+    assert_equal(filter_txt + filter_txt,
+                 css_select("#filters").text, "Filter text is wrong.")
+
+    filter_txt_dup =
+      "#{:query_names.l}: #{pattern}, #{pattern}, with synonyms, with subtaxa"
+    assert_not_equal(
+      filter_txt_dup + filter_txt_dup,
+      css_select("#filters").text,
+      "Filter caption for 'Names' is repeating a text_name."
+    )
+  end
+
   def test_index_pattern_no_hits
     pattern = "no hits"
 
