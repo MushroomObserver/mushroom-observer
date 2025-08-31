@@ -232,8 +232,10 @@ module Header
                 end
       subclass = PARAM_LOOKUPS[param]
       lookup = "Lookup::#{subclass}".constantize
-      joined_vals = lookup.new(lookups, include_misspellings: false).
-                    titles.join(", ")
+      # Use Set in case there are doubles, as for many Genus names
+      joined_vals = Set.new(
+        lookup.new(lookups, include_misspellings: false).titles
+      ).join(", ")
       return joined_vals unless truncate
 
       filter_truncate_joined_string(joined_vals, ids)
