@@ -32,6 +32,13 @@ class ObservationsControllerShowTest < FunctionalTestCase
     # assert(@response.body.include?("flow=next"))
   end
 
+  def test_show_no_q_param_when_no_query
+    login
+    get(:show, params: { id: Observation.first.id })
+    assert_response(:success)
+    assert_nil(@controller.q_param)
+  end
+
   # Test load a deprecated name obs, no strict_loading error
   def test_show_observation_deprecated_name
     obs = observations(:deprecated_name_obs)

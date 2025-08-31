@@ -367,6 +367,23 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
                  "But the results were not the same when we returned.")
   end
 
+  def test_goto_page_input
+    login
+    loc = locations(:obs_default_location)
+    # start at location page
+    visit("/locations/#{loc.id}")
+    click_link(text: "Observations at this Location")
+    assert_match("Observations", page.title, "Wrong title")
+
+    within(first("form.page_input")) do
+      fill_in("page", with: 2)
+      click_commit
+    end
+    assert_match("Observations", page.title, "Wrong title")
+
+    assert_match(loc.id.to_s, current_fullpath)
+  end
+
   ################
 
   private
