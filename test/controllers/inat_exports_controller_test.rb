@@ -367,7 +367,6 @@ class InatExportsControllerTest < FunctionalTestCase
 
   def test_inat_username_unchanged_if_authorization_denied
     skip("Under Construction")
-    skip("Under Construction")
     user = users(:rolf)
     assert_blank(user.inat_username,
                  "Test needs user fixture without an iNat username")
@@ -389,6 +388,7 @@ class InatExportsControllerTest < FunctionalTestCase
   end
 
   def test_cancel
+    skip("Under Construction")
     import = inat_imports(:katrina_inat_import)
     assert(import.job_pending? && !import.canceled?,
            "Test needs a Import fixture with a uncancelled, pending Job")
