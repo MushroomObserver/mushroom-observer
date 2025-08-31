@@ -283,7 +283,8 @@ module Header
     end
 
     def pagination_link_url(page, arg, args)
-      params = args[:params] || {}
+      # Do not pass the :id through to next/prev page.
+      params = args[:params].except(:id) || {}
       params[arg] = page
       url = reload_with_args(params)
       if args[:anchor]
