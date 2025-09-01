@@ -19,19 +19,19 @@ source("https://rubygems.org")
 # Convenience group for updating rails constituents with one command
 # Usage: bundle update --group==rails
 group :rails do
-  gem("actioncable", "~> 7.2.2.1")
+  gem("actioncable", "~> 8.0.2.1")
   # gem("actionmailbox", "~> 7.2.2.1")
-  gem("actionmailer", "~> 7.2.2.1")
-  gem("actionpack", "~> 7.2.2.1")
+  gem("actionmailer", "~> 8.0.2.1")
+  gem("actionpack", "~> 8.0.2.1")
   # gem("actiontext", "~> 7.2.2.1")
-  gem("actionview", "~> 7.2.2.1")
-  gem("activejob", "~> 7.2.2.1")
-  gem("activemodel", "~> 7.2.2.1")
-  gem("activerecord", "~> 7.2.2.2")
+  gem("actionview", "~> 8.0.2.1")
+  gem("activejob", "~> 8.0.2.1")
+  gem("activemodel", "~> 8.0.2.1")
+  gem("activerecord", "~> 8.0.2.1")
   # gem("activestorage", "~> 7.2.2.1")
-  gem("activesupport", "~> 7.2.2.1")
+  gem("activesupport", "~> 8.0.2.1")
   gem("bundler")
-  gem("railties", "~> 7.2.2.1")
+  gem("railties", "~> 8.0.2.1")
 end
 
 # Use trilogy as db connector
