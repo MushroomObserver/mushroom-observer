@@ -582,7 +582,9 @@ class ObservationsControllerIndexTest < FunctionalTestCase
       "#{:query_within_locations.l}: #{location.display_name}"
     )
     cali_locs = Location.where(Location[:name].matches("%California, USA%"))
-    # This is the count of obs associated to these individual locations.
+    # This is the count of obs associated specifically with each California
+    # location. The "within" scope should retrieve all of them (and currently,
+    # from most of Nevada too, if we have any - because it's "in_box").
     count = Observation.locations([cali_locs]).count
     assert_results(count:)
   end
