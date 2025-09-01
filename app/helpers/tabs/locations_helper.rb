@@ -106,9 +106,11 @@ module Tabs
     end
 
     def observations_at_location_tab(location)
+      query = Query.lookup(:Observation, locations: location.id)
+
       InternalLink::Model.new(
         show_obs_link_title_with_count(location), location,
-        add_q_param(observations_path(location: location.id)),
+        add_q_param(observations_path, query),
         alt_title: :show_location_observations.t,
         html_options: { icon: :observations, show_text: true }
       ).tab

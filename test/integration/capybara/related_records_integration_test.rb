@@ -19,6 +19,8 @@ class RelatedRecordsIntegrationTest < CapybaraIntegrationTestCase
 
     assert_match(:OBSERVATIONS.l, page.title, "Wrong page")
     page.find("#filters").assert_text(location.display_name)
+    # Be sure we're not getting the "within_locations" scope.
+    assert_no_selector("#filters", text: :within_locations.l)
 
     results = find_all("#results .matrix-box")
     assert_equal(Observation.locations(location).size, results.size)
