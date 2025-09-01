@@ -19,4 +19,12 @@ class InatExportsController < ApplicationController
     )
 =end
   end
+
+  def create
+    return reload_form unless params_valid?
+
+    assure_user_has_inat_export_api_key
+    init_ivars
+    request_inat_user_authorization
+  end
 end
