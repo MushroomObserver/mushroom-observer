@@ -96,47 +96,65 @@ class SearchControllerTest < FunctionalTestCase
     login
     params = { pattern_search: { pattern: "12", type: :observations } }
     get(:pattern, params: params)
-    assert_redirected_to(observations_path(pattern: "12"))
+    assert_redirected_to(
+      observations_path(q: { model: :Observation, pattern: "12" })
+    )
     assert_equal(:observations, @request.session[:search_type])
 
     params = { pattern_search: { pattern: "34", type: :images } }
     get(:pattern, params: params)
-    assert_redirected_to(images_path(pattern: "34"))
+    assert_redirected_to(
+      images_path(q: { model: :Image, pattern: "34" })
+    )
     assert_equal(:images, @request.session[:search_type])
 
     params = { pattern_search: { pattern: "56", type: :names } }
     get(:pattern, params: params)
-    assert_redirected_to(names_path(pattern: "56"))
+    assert_redirected_to(
+      names_path(q: { model: :Name, pattern: "56" })
+    )
     assert_equal(:names, @request.session[:search_type])
 
     params = { pattern_search: { pattern: "78", type: :locations } }
     get(:pattern, params: params)
-    assert_redirected_to(locations_path(pattern: "78"))
+    assert_redirected_to(
+      locations_path(q: { model: :Location, pattern: "78" })
+    )
     assert_equal(:locations, @request.session[:search_type])
 
     params = { pattern_search: { pattern: "90", type: :comments } }
     get(:pattern, params: params)
-    assert_redirected_to(comments_path(pattern: "90"))
+    assert_redirected_to(
+      comments_path(q: { model: :Comment, pattern: "90" })
+    )
     assert_equal(:comments, @request.session[:search_type])
 
     params = { pattern_search: { pattern: "21", type: :projects } }
     get(:pattern, params: params)
-    assert_redirected_to(projects_path(pattern: "21"))
+    assert_redirected_to(
+      projects_path(q: { model: :Project, pattern: "21" })
+    )
     assert_equal(:projects, @request.session[:search_type])
 
     params = { pattern_search: { pattern: "12", type: :species_lists } }
     get(:pattern, params: params)
-    assert_redirected_to(species_lists_path(pattern: "12"))
+    assert_redirected_to(
+      species_lists_path(q: { model: :SpeciesList, pattern: "12" })
+    )
     assert_equal(:species_lists, @request.session[:search_type])
 
     params = { pattern_search: { pattern: "34", type: :users } }
     get(:pattern, params: params)
-    assert_redirected_to(users_path(pattern: "34"))
+    assert_redirected_to(
+      users_path(q: { model: :User, pattern: "34" })
+    )
     assert_equal(:users, @request.session[:search_type])
 
     params = { pattern_search: { pattern: "34", type: :glossary_terms } }
     get(:pattern, params: params)
-    assert_redirected_to(glossary_terms_path(pattern: "34"))
+    assert_redirected_to(
+      glossary_terms_path(q: { model: :GlossaryTerm, pattern: "34" })
+    )
     assert_equal(:glossary_terms, @request.session[:search_type])
 
     stub_request(:any, /google.com/)
