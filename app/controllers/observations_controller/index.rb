@@ -170,7 +170,7 @@ class ObservationsController
         location = find_or_goto_index(Location, params[:location].to_s)
       )
 
-      query = create_query(:Observation, locations: location)
+      query = create_query(:Observation, within_locations: location)
       [query, {}]
     end
 

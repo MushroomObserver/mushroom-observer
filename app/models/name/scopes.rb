@@ -268,9 +268,9 @@ module Name::Scopes
     }
     # Accepts region string, location_id, or Location instance
     scope :locations, lambda { |locations|
-      location_ids = Lookup::Regions.new(locations).ids
-      joins(:observations).
-        where(observations: { location: location_ids }).distinct
+      return none if locations.blank?
+
+      joins(:observations).merge(Observation.locations(locations)).distinct
     }
     # Names with Observations whose lat/lon are in a box
     # Pass kwargs (:north, :south, :east, :west), any order

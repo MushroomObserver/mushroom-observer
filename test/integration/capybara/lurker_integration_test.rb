@@ -282,7 +282,6 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     save_results = find_all("#results a").select do |l|
       l[:href].match(%r{^/obs/\d+})
     end
-
     # Bail if there are too many results — test will not work
     if has_selector?("#results .pagination a", text: /Next/)
       skip("Test skipped because it bombs when search results > " \
@@ -327,7 +326,8 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
 
     assert_equal(
       query_params.symbolize_keys,
-      { locations: [loc.id.to_s], model: "Observation", order_by: "name" }
+      { model: "Observation", order_by: "name",
+        within_locations: [loc.id.to_s] }
     )
 
     # Go to first observation, and try stepping back and forth.

@@ -5,6 +5,11 @@ require("test_helper")
 class ObservationsControllerIndexTest < FunctionalTestCase
   tests ObservationsController
 
+  def setup
+    # Must do this to get center lats saved on fixtures without lat/lng.
+    Location.update_box_area_and_center_columns
+  end
+
   ######## Index ################################################
   # Tests of index, with tests arranged as follows:
   # default subaction; then
@@ -530,7 +535,9 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: params)
 
     assert_page_title(:OBSERVATIONS.l)
-    assert_displayed_filters("#{:query_locations.l}: #{location.display_name}")
+    assert_displayed_filters(
+      "#{:query_within_locations.l}: #{location.display_name}"
+    )
   end
 
   def test_index_location_without_observations
@@ -564,6 +571,25 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     assert_flash(flash_matcher)
     assert_redirected_to(locations_path)
+  end
+
+  def test_index_within_location_california
+    location = locations(:california)
+    q_param = { model: :Observation, within_locations: location.id }
+
+    login
+    get(:index, params: { q: q_param })
+
+    assert_page_title(:OBSERVATIONS.l)
+    assert_displayed_filters(
+      "#{:query_within_locations.l}: #{location.display_name}"
+    )
+    cali_locs = Location.where(Location[:name].matches("%California, USA%"))
+    # This is the count of obs associated specifically with each California
+    # location. The "within" scope should retrieve all of them (and currently,
+    # from most of Nevada too, if we have any - because it's "in_box").
+    count = Observation.locations([cali_locs]).count
+    assert_results(count:)
   end
 
   def test_index_where

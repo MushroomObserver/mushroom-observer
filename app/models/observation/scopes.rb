@@ -260,6 +260,14 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       location_ids = Lookup::Locations.new(locations).ids
       where(location: location_ids).distinct
     }
+    # This is the new default search scope for observations by location:
+    # returns all observations whose lat/lng or location_lat/lng are
+    # within the box(es) of the given observations.
+    scope :within_locations, lambda { |locations|
+      locs = ::Lookup::Locations.new(locations).instances
+      in_boxes = locs.map! { |location| in_box(**location.bounding_box) }
+      or_clause(*in_boxes).distinct
+    }
     # Pass Box kwargs (:north, :south, :east, :west), any order.
     # By default this scope selects only obs either with lat/lng or with useful
     # locations, where we have cached the location center point on the obs.
