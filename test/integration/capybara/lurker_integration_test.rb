@@ -257,9 +257,6 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
   end
 
   def test_obs_at_location_index
-    # Have to do this to get enough obs, otherwise fixture columns not populated
-    Location.update_box_area_and_center_columns
-
     login
     nam = names(:fungi)
     loc = locations(:burbank)
@@ -329,7 +326,8 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
 
     assert_equal(
       query_params.symbolize_keys,
-      { locations: [loc.id.to_s], model: "Observation", order_by: "name" }
+      { model: "Observation", order_by: "name",
+        within_locations: [loc.id.to_s] }
     )
 
     # Go to first observation, and try stepping back and forth.

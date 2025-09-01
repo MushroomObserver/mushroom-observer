@@ -5,6 +5,11 @@ require("test_helper")
 class ObservationsControllerIndexTest < FunctionalTestCase
   tests ObservationsController
 
+  def setup
+    # Must do this to get center lats saved on fixtures without lat/lng.
+    Location.update_box_area_and_center_columns
+  end
+
   ######## Index ################################################
   # Tests of index, with tests arranged as follows:
   # default subaction; then
@@ -569,8 +574,6 @@ class ObservationsControllerIndexTest < FunctionalTestCase
   end
 
   def test_index_within_location_california
-    # Must do this to get center lats saved on fixtures without lat/lng.
-    Location.update_box_area_and_center_columns
     location = locations(:california)
     q_param = { model: :Observation, within_locations: location.id }
 

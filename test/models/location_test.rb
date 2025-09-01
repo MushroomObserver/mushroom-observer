@@ -117,8 +117,6 @@ class LocationTest < UnitTestCase
   # Method should populate location box_area, center_lat, center_lng
   # and observation location_lat location_lng columns
   def test_update_box_area_and_center_columns
-    Location.update_box_area_and_center_columns
-
     # this Location does not have area or center already set in fixtures
     not_set = locations(:sortable_observation_user_location)
     assert_equal(not_set.center_lat, not_set.calculate_lat,
