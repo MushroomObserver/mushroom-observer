@@ -438,6 +438,8 @@
   visual_model: visual model
   VISUAL_MODELS: Visual Models
   visual_models: visual models
+  WITHIN_LOCATIONS: Within Locations
+  within_locations: within locations
   VOTE: Vote
   vote: vote
   VOTES: Votes
@@ -4500,6 +4502,7 @@
   query_herbaria: "[:herbaria]"
   query_herbarium_records: "[:herbarium_records]"
   query_locations: "[:locations]"
+  query_within_locations: "[:within_locations]"
   query_observations: "[:observations]"
   query_project_lists: "[:project_lists]"
   query_projects: "[:projects]"
