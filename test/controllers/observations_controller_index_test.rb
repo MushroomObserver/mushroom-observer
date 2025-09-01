@@ -569,7 +569,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
   end
 
   def test_index_within_location_california
-    # Must do this to get center lats saved on fixtures
+    # Must do this to get center lats saved on fixtures without lat/lng.
     Location.update_box_area_and_center_columns
     location = locations(:california)
     q_param = { model: :Observation, within_locations: location.id }
