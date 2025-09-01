@@ -6,6 +6,8 @@ class InatExportsController < ApplicationController
 
   before_action :login_required
 
+
+  # Display the iNat export form
   def new
     @inat_export = InatExport.find_or_create_by(user: @user)
 =begin

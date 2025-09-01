@@ -319,7 +319,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
                        observation_id: obs.id,
                        id: consensus.users_vote(rolf_nmg, rolf))
     assert_match(
-      /inat_exports\?id=#{obs.id}/, @response.body,
+      %r{inat_exports/new\?id=#{obs.id}}, @response.body,
       "Obs should link to iNat export if owner logged in and " \
       "obs not imported from, exported to, or mirrored on iNat"
     )
@@ -335,7 +335,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
                        observation_id: obs.id,
                        id: consensus.users_vote(rolf_nmg, mary))
     assert_no_match(
-      /inat_exports\?id=#{obs.id}/, @response.body,
+      %r{inat_exports/new\?id=#{obs.id}}, @response.body,
       "Obs should not link to iNat export if owner not logged in"
     )
 
