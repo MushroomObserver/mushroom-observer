@@ -325,6 +325,8 @@ class Query::ObservationsTest < UnitTestCase
   # original scope on both branches of the `or` condition. The result was
   # that a chained `in_box` query returned (seemingly) everything `in_box`.
   def test_observation_in_box_with_other_scopes
+    # Have to do this, otherwise columns not populated
+    Location.update_box_area_and_center_columns
     box = { north: 35, south: 34, east: -118, west: -119 }
     in_box_expects = Query.lookup(:Observation, in_box: box)
     # be sure we have more than one user's obs in this box

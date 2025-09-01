@@ -113,6 +113,8 @@ class API2::ImagesTest < UnitTestCase
   end
 
   def test_getting_images_location
+    # Have to do this, otherwise columns not populated
+    Location.update_box_area_and_center_columns
     burbank = locations(:burbank)
     imgs = Image.locations(burbank)
     assert_not_empty(imgs)

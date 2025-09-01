@@ -648,6 +648,8 @@ class Query::NamesTest < UnitTestCase
   end
 
   def test_name_with_observation_subquery_locations
+    # Have to do this, otherwise columns not populated
+    Location.update_box_area_and_center_columns
     loc = locations(:burbank)
     expects = Name.order_by_default.with_correct_spelling.joins(:observations).
               where(observations: { location: loc }).distinct

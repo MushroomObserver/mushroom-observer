@@ -171,7 +171,6 @@ module ActiveSupport
       User.current = nil
       clear_logs unless defined?(@@cleared_logs)
       Symbol.missing_tags = []
-      Location.update_box_area_and_center_columns
     end
 
     # Standard teardown to run after every test.  Just makes sure any
