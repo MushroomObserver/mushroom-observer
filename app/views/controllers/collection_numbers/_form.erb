@@ -1,12 +1,10 @@
 <%
 case action_name
 when "new", "create"
-  url_params = add_query_param(
-    { action: :create, observation_id: @observation.id }
-  )
+  url_params = { action: :create, observation_id: @observation.id }
   button = :ADD.l
 when "edit", "update"
-  url_params = add_query_param({ action: :update })
+  url_params = { action: :update }
   url_params = url_params.merge({ back: @back }) if @back.present?
   button = :SAVE.l
 end
@@ -24,7 +22,8 @@ end
 
   <% if @collection_number.observations.size > 1 %>
     <%= alert_block(
-      :warning, :edit_affects_multiple_observations.t(type: :collection_number)
+      :edit_affects_multiple_observations.t(type: :collection_number),
+      level: :warning, class: "multiple-observations-warning"
     ) %>
   <% end %>
 

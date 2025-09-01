@@ -11,7 +11,6 @@ module Observations::Namings
     # Inputs: params[:naming_id], [:observation_id]
     # Outputs: @naming, @consensus
     def index
-      pass_query_params
       @naming = find_or_goto_index(Naming, params[:naming_id].to_s)
       obs = Observation.naming_includes.find(params[:observation_id])
       @consensus = Observation::NamingConsensus.new(obs)
@@ -64,8 +63,9 @@ module Observations::Namings
       create_or_update_vote
     end
 
+    private
+
     def create_or_update_vote
-      pass_query_params
       observation = load_observation_naming_includes # 1st load
       @naming = observation.namings.find(params[:naming_id])
       value_str = params.dig(:vote, :value).to_s
@@ -93,7 +93,7 @@ module Observations::Namings
           end
         end
         format.html do
-          redirect_with_query(@observation.show_link_args)
+          redirect_to(@observation.show_link_args)
         end
       end
     end
@@ -102,7 +102,7 @@ module Observations::Namings
     # update the title and the name info panel. Otherwise, just update namings.
     def render_namings_section_update
       if @consensus.consensus_changed
-        redirect_with_query(@observation.show_link_args) and return
+        redirect_to(@observation.show_link_args) and return
       end
 
       render(
@@ -115,7 +115,7 @@ module Observations::Namings
     def render_matrix_box_naming_update
       render(
         partial: "observations/namings/update_matrix_box",
-        locals: { obs: @observation }
+        locals: { obs: @observation, user: @user }
       ) and return
     end
   end

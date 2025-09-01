@@ -371,7 +371,7 @@ class Name < AbstractModel
                                message: :validate_name_author_characters.t }
   validates :author, allow_blank: true,
                      # Ends only in letter, period plus any spaces
-                     format: { with: /[\p{Alpha}\.]( *)\z/,
+                     format: { with: /[\p{Alpha}.]( *)\z/,
                                message: :validate_name_author_ending.t }
   validate  :author_length
   validate  :citation_start

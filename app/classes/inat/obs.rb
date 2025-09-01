@@ -106,8 +106,15 @@ class Inat
 
       { Collector: collector,
         snapshot_key => snapshot,
-        # strip p tags and ensure it's a string
-        Other: self[:description]&.gsub(%r{</?p>}, "").to_s }
+        Other: self[:description]&.
+          # strip p tags to avoid messing up textile and keep notes source clean
+          gsub(%r{</?p>}, "")&.
+          # compress newlines/returns to single newline, leaving an html comment
+          # because our textiling won't render text after consecutive newlines:
+          #   manually typed blank lines appear as `\r\n\r\n` in iNat notes
+          #   Pulk's mirror script inserts `\n\n` in iNat notes
+          gsub(/(\r?\n){2,}/, "<!--- blank line(s) removed --->\n").
+          to_s }
     end
 
     # MO Location with min bounding rectangle
@@ -190,13 +197,31 @@ class Inat
 
     ########## Other mappings used in MO Observations
 
+    # some iNat Observation Fields used for the collector(s) name
+    # https://www.inaturalist.org/observation_fields?commit=Search&page=1&q=collector&utf8=%E2%9C%93
+    # iNat Observation fields are a mess, with lots of duplication
+    INAT_COLLECTOR_FIELDS = [ # rubocop:disable Lint/UselessConstantScoping
+      "Collector's name", # 2025 Continental MycoBlitz
+      "Collector’s Name", # right single quote
+      "Collector Names",
+      "Names of Collectors",
+      "Collector's Full Name",
+      "Collector",
+      "Name of collector",
+      "Original Collector/Observer",
+      "Collector name",
+      "Collectors Name",
+      "Original Collector/ Observer"
+    ].freeze
     # This will get put into MO Observation's Notes Collector:
     def collector
-      if inat_obs_field("Collector").present?
-        inat_obs_field("Collector")[:value]
-      else
-        self[:user][:login]
+      INAT_COLLECTOR_FIELDS.each do |field_name|
+        if inat_obs_field(field_name).present?
+          return inat_obs_field(field_name)[:value]
+        end
       end
+
+      self[:user][:login]
     end
 
     def dqa

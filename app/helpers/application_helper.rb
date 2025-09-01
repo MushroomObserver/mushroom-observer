@@ -19,7 +19,6 @@
 #  add_header                   # add to html header from within view
 #  reload_with_args             # add args to url that got us to this page
 #  add_args_to_url              # change params of arbitrary url
-#  url_after_delete             # url to return to after deleting object
 #  get_next_id
 #
 module ApplicationHelper
@@ -242,32 +241,6 @@ module ApplicationHelper
     addr + "?" + args.keys.sort.map do |k| # rubocop:disable Style/StringConcatenation
       "#{CGI.escape(k)}=#{args[k] || ""}"
     end.join("&")
-  end
-
-  # Returns URL to return to after deleting an object.  Can't just return to
-  # the index, because we'd prefer to return to the correct page in the index,
-  # but to do that we need to know the id of next object.
-  def url_after_delete(object)
-    return nil unless object
-
-    id = get_next_id(object)
-    args = {
-      controller: object.show_controller,
-      action: object.index_action
-    }
-    args[:id] = id if id
-    url_for(add_query_param(args))
-  end
-
-  def get_next_id(object)
-    query = passed_query
-    return nil unless query
-    return nil unless query.model.to_s == object.class.name
-
-    idx = query.index(object)
-    return nil unless idx
-
-    query.result_ids[idx + 1] || query.result_ids[idx - 1]
   end
 
   def form_submit_text(obj)

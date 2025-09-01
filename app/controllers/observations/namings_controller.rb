@@ -7,7 +7,6 @@ module Observations
     include ObservationsController::Validators
 
     before_action :login_required
-    before_action :pass_query_params
 
     # Bullet wants us to eager load interests on taxa, which is loaded in
     # Naming#create_emails
@@ -161,7 +160,7 @@ module Observations
     end
 
     def redirect_to_obs(obs)
-      redirect_with_query(obs.show_link_args)
+      redirect_to(obs.show_link_args)
     end
 
     ##########################################################################
@@ -218,7 +217,7 @@ module Observations
           case params[:context]
           when "lightgallery", "matrix_box"
             render(partial: "observations/namings/update_matrix_box",
-                   locals: { obs: @observation })
+                   locals: { obs: @observation, user: @user })
           else
             redirect_to_obs(@observation)
           end
@@ -297,18 +296,6 @@ module Observations
 
     def add_reasons(reasons)
       @reasons = @naming.init_reasons(reasons)
-    end
-
-    # Define local_assigns for the update_observation partial
-    # @observation.reload doesn't do the includes
-    # This is a reload of all the naming table associations, after update
-    # The destroy action already preloads the obs, however.
-    def locals_for_update_observation(preloaded_obs = nil)
-      obs = preloaded_obs || Observation.naming_includes.find(@observation.id)
-      consensus = Observation::NamingConsensus.new(obs)
-      owner_name = consensus.owner_preference
-
-      [obs, consensus, owner_name]
     end
 
     # Use case: user changes their mind on a name they've proposed, but it's

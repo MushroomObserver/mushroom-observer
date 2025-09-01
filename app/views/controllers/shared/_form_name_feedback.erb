@@ -19,7 +19,8 @@ parent_deprecated - t/f
 <%=
 ##### Warnings #####
 if valid_names
-  tag.div(class: "alert alert-warning", id: "name_messages") do
+
+  alert_block(level: :warning, id: "name_messages") do
     concat(tag.div do
       if suggest_corrections || names.blank?
         :form_naming_not_recognized.t(name: given_name)
@@ -50,8 +51,10 @@ if valid_names
         end
         concat(fields_for(:chosen_name) do |f_c|
           valid_names.each do |n|
-            concat(radio_with_label(form: f_c, field: :name_id, value: n.id,
-                                    label: n.display_name.t, class: "ml-4"))
+            concat(radio_with_label(
+              form: f_c, field: :name_id, value: n.id,
+              label: n.display_name.t, class: "ml-4"
+            ))
           end
         end)
       end)
@@ -65,7 +68,7 @@ if valid_names
 ##### Errors #####
 elsif names&.length == 0
 
-  tag.div(class: "alert alert-danger", id: "name_messages") do
+  alert_block(level: :danger, id: "name_messages") do
     concat(tag.div(:form_naming_not_recognized.t(name: given_name)))
     concat(help_note(
       :div, :form_naming_not_recognized_help.t(button: button_name)
@@ -74,15 +77,17 @@ elsif names&.length == 0
 
 elsif names&.length &.> 1
 
-  tag.div(class: "alert alert-danger", id: "name_messages") do
+  alert_block(level: :danger, id: "name_messages") do
     concat(tag.div(
       [:form_naming_multiple_names.t(name: given_name), ":"].safe_join
     ))
     concat(fields_for(:chosen_name) do |f_c|
       names.each do |n|
-        concat(radio_with_label(form: f_c, field: :name_id, value: n.id,
-                                label: n.display_name.t, class: "ml-4 name-radio",
-                                append: tag.span(" (#{n.observations.size})")))
+        concat(radio_with_label(
+          form: f_c, field: :name_id, value: n.id,
+          label: n.display_name.t, class: "ml-4 name-radio",
+          append: tag.span(" (#{n.observations.size})")
+        ))
       end
     end)
     concat(help_note(:div, :form_naming_multiple_names_help.t))

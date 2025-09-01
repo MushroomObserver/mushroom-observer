@@ -3,21 +3,22 @@
 
 case action_name
 when "new", "create"
-  url_params = add_query_param({
+  url_params = {
     action: :create,
     where: @original_name,
     approved_where: @display_name,
     set_observation: @set_observation,
     set_species_list: @set_species_list,
     set_user: @set_user,
-    set_herbarium: @set_herbarium,
-    q: get_query_param
-  })
+    set_herbarium: @set_herbarium
+  }
   button = :CREATE.l
 when "edit", "update"
-  url_params = add_query_param(
-    { action: :update, id: @location.id, approved_where: @display_name }
-  )
+  url_params = {
+    action: :update,
+    id: @location.id,
+    approved_where: @display_name
+  }
   button = :UPDATE.l
 end
 

@@ -18,11 +18,11 @@ module Header
       return unless object && (query = show_page_incoming_query(object))
 
       content_for(:prev_next_object) do
-        tag.ul(class: "nav navbar-flex") do
+        tag.ul(class: "nav navbar-flex object_pager") do
           [
-            tag.li { show_link_prev(object, query) },
+            tag.li { show_link_adjacent(object, query, :prev) },
             tag.li { show_link_index(object, query) },
-            tag.li { show_link_next(object, query) }
+            tag.li { show_link_adjacent(object, query, :next) }
           ].safe_join
         end
       end
@@ -30,50 +30,42 @@ module Header
 
     # Returns the query if it's for the relevant type of object
     def show_page_incoming_query(object)
-      return nil unless params[:q]
+      return nil unless session[:query_record]
 
-      query = Query.safe_find(params[:q].dealphabetize)
+      query = controller.current_query
       return nil unless [object.type_tag, :rss_log].include?(query&.type_tag)
 
+      # set current_id so prev_id and next_id will work
+      query.current_id = object.id
       query
     end
 
     SHOW_LINK_BTN_CLASSES = %w[navbar-link navbar-left btn btn-lg px-0].freeze
 
-    # link to previous object in query results
-    def show_link_prev(object, query)
-      disabled = show_prev_is_first?(object, query) ? "disabled opacity-0" : ""
-      classes = class_names(SHOW_LINK_BTN_CLASSES, "prev_object_link", disabled)
+    def show_link_adjacent(object, query, dir = :prev)
+      hide = show_no_more?(object, query, dir) ? "disabled opacity-0" : ""
+      classes = class_names(SHOW_LINK_BTN_CLASSES, "#{dir}_object_link", hide)
       type = object.type_tag
-
+      adjacent_id = query.send(:"#{dir}_id")
+      href = adjacent_id ? send(show_link_path(type), id: adjacent_id) : "#"
       icon_link_to(
-        :PREV_OBJECT.t(type: :"#{type.upcase}".l),
-        add_query_param(
-          send(show_link_path(type), object.id, flow: "prev"), query
-        ),
-        class: classes, icon: :previous, show_text: false
+        :"#{dir.upcase}_OBJECT".t(type: :"#{type.upcase}".l), href,
+        class: classes, icon: dir, show_text: false
       )
+    end
+
+    def show_no_more?(object, query, dir)
+      if dir == :prev
+        show_prev_is_first?(object, query)
+      elsif dir == :next
+        show_next_is_last?(object, query)
+      end
     end
 
     def show_prev_is_first?(object, query)
       return false unless query
 
       query.result_ids.first == object.id
-    end
-
-    # link to next object in query results
-    def show_link_next(object, query)
-      disabled = show_next_is_last?(object, query) ? "disabled opacity-0" : ""
-      classes = class_names(SHOW_LINK_BTN_CLASSES, "next_object_link", disabled)
-      type = object.type_tag
-
-      icon_link_to(
-        :NEXT_OBJECT.t(type: :"#{type.upcase}".l),
-        add_query_param(
-          send(show_link_path(type), object.id, flow: "next"), query
-        ),
-        class: classes, icon: :next, show_text: false
-      )
     end
 
     def show_next_is_last?(object, query)
@@ -95,7 +87,7 @@ module Header
 
       icon_link_to(
         :INDEX_OBJECT.t(type: :"#{type.upcase}".l),
-        add_query_param(object.index_link_args, query),
+        add_q_param(object.index_link_args, query),
         class: classes, icon: icon, show_text: false
       )
     end

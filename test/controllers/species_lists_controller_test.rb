@@ -345,17 +345,15 @@ class SpeciesListsControllerTest < FunctionalTestCase
   def test_show_flow
     login
     query = Query.lookup_and_save(:SpeciesList, order_by: "reverse_user")
-    query_params = @controller.query_params(query)
-    get(:index, params: query_params)
+    params = { q: @controller.q_param(query) }
+    get(:index, params:)
     assert_template(:index)
 
-    get(:show, params: query_params.merge(id: query.result_ids[0], flow: :next))
-    assert_redirected_to(query_params.merge(action: :show,
-                                            id: query.result_ids[1]))
+    get(:show, params: params.merge(id: query.result_ids[0], flow: :next))
+    assert_redirected_to(params.merge(action: :show, id: query.result_ids[1]))
 
-    get(:show, params: query_params.merge(id: query.result_ids[1], flow: :prev))
-    assert_redirected_to(query_params.merge(action: :show,
-                                            id: query.result_ids[0]))
+    get(:show, params: params.merge(id: query.result_ids[1], flow: :prev))
+    assert_redirected_to(params.merge(action: :show, id: query.result_ids[0]))
   end
 
   def test_destroy_species_list

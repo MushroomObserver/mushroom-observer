@@ -30,8 +30,7 @@ module Emailable
 
       flash_error(:permission_denied.t)
       # Method could also respond to a js handler that flashes directly on page
-      redirect_with_query(controller: target.show_controller,
-                          action: target.show_action, id: target.id)
+      redirect_to(target.show_link_args)
       false
     end
 

@@ -4,18 +4,12 @@
 # rubocop:disable Metrics/ClassLength
 class CollectionNumbersController < ApplicationController
   before_action :login_required
-  before_action :pass_query_params, only: [
-    :show, :new, :create, :edit, :update, :destroy
-  ]
-  before_action :store_location, only: [
-    :show, :new, :create, :edit, :update
-  ]
+  before_action :store_location, except: [:destroy]
 
   ##############################################################################
   # INDEX
   #
   def index
-    store_location
     build_index_with_query
   end
 
@@ -32,7 +26,6 @@ class CollectionNumbersController < ApplicationController
   # Display list of CollectionNumbers for an Observation
   def observation
     @observation = Observation.find(params[:observation])
-    store_location
     query = create_query(
       :CollectionNumber, observations: params[:observation].to_s
     )
@@ -136,7 +129,7 @@ class CollectionNumbersController < ApplicationController
     @collection_number =
       CollectionNumber.new(permitted_collection_number_params)
     normalize_parameters
-    return if flash_error_and_reload_if_form_has_errors
+    return if form_has_errors?
 
     if name_and_number_free?
       save_collection_number_and_update_associations
@@ -146,31 +139,42 @@ class CollectionNumbersController < ApplicationController
   end
 
   # create, update
-  def flash_error_and_reload_if_form_has_errors
+  def form_has_errors?
+    unless validate_collection_number?
+      flash_and_reload_form
+      return true
+    end
+    false
+  end
+
+  def validate_collection_number?
+    if @collection_number.name.blank?
+      flash_error(:create_collection_number_missing_name.t)
+      return false
+    elsif @collection_number.number.blank?
+      flash_error(:create_collection_number_missing_number.t)
+      return false
+    end
+    true
+  end
+
+  def flash_and_reload_form
     redirect_params = case action_name # this is a rails var
                       when "create"
                         { action: :new }
                       when "update"
                         { action: :edit }
                       end
-    redirect_params = redirect_params.merge({ back: @back }) if @back.present?
+    redirect_params[:back] = @back if @back.present?
 
-    if @collection_number.name.blank? || @collection_number.number.blank?
-      if @collection_number.name.blank?
-        flash_error(:create_collection_number_missing_name.t)
-      elsif @collection_number.number.blank?
-        flash_error(:create_collection_number_missing_number.t)
+    respond_to do |format|
+      format.html do
+        redirect_to(redirect_params)
       end
-      respond_to do |format|
-        format.html do
-          redirect_to(redirect_params) and return true
-        end
-        format.turbo_stream do
-          reload_collection_number_modal_form_and_flash
-        end
+      format.turbo_stream do
+        reload_collection_number_modal_form_and_flash
       end
     end
-    false
   end
 
   # create
@@ -204,7 +208,7 @@ class CollectionNumbersController < ApplicationController
     old_format_name = @collection_number.format_name
     @collection_number.attributes = permitted_collection_number_params
     normalize_parameters
-    return if flash_error_and_reload_if_form_has_errors
+    return if form_has_errors?
 
     if name_and_number_free?
       update_collection_number_and_associations(old_format_name)
@@ -309,8 +313,7 @@ class CollectionNumbersController < ApplicationController
         redirect_to_back_object_or_object(@back_object, @collection_number) and
           return
       end
-      # renders the flash in the modal, but not sure it's necessary
-      # to have a response here. are they getting sent back?
+      # renders the flash in the modal
       format.turbo_stream do
         render(partial: "shared/modal_flash_update",
                locals: { identifier: modal_identifier }) and return

@@ -6,7 +6,6 @@ module Locations
     include ::Locations::Descriptions::SharedPrivateMethods
 
     before_action :store_location, except: [:index, :destroy]
-    before_action :pass_query_params, except: [:index]
     before_action :login_required
     before_action :require_successful_user, only: [
       :new, :create
@@ -144,7 +143,6 @@ module Locations
     end
 
     def destroy
-      pass_query_params
       return unless find_description!
 
       check_delete_permission_flash_and_redirect

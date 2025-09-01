@@ -19,7 +19,6 @@ module Observations
 
     # Show map of one observation by id.
     def show
-      pass_query_params
       @observation = find_or_goto_index(Observation, params[:id].to_s)
       return unless @observation
 

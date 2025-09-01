@@ -205,6 +205,31 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(obs.sequences.none?)
   end
 
+  def test_import_job_blank_line_in_description
+    create_ivars_from_filename("tremella_mesenterica")
+
+    # modify iNat observation description to include blank line
+    parsed_response = JSON.parse(@mock_inat_response, symbolize_names: true)
+    description = "before blank line\r\n\r\nafter blank line"
+    parsed_response[:results].first[:description] = description
+    @mock_inat_response = parsed_response.to_json
+
+    stub_inat_interactions
+
+    assert_difference("Observation.count", 1,
+                      "Failed to create observation") do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    obs = Observation.last
+    assert_equal(
+      "before blank line<!--- blank line(s) removed --->\n" \
+      "after blank line",
+      obs.notes[:Other],
+      "Failed to compress consecutive newlines/returns in Notes[:Other]"
+    )
+  end
+
   # Had 2 photos, 6 identifications of 3 taxa, a different taxon,
   # 9 obs fields, including "DNA Barcode ITS", "Collection number", "Collector"
   def test_import_job_obs_with_sequence_and_multiple_ids
@@ -612,10 +637,11 @@ class InatImportJobTest < ActiveJob::TestCase
                  "Failed to report iNat API request failure")
   end
 
-  def test_inat_api_request_observation_failure
+  def test_inat_api_request_observation_response_error
     create_ivars_from_filename("calostoma_lutescens")
 
     stub_inat_interactions
+    # override the normal iNat API observation request to return an error
     query_args = {
       iconic_taxa: ICONIC_TAXA,
       id: @inat_import.inat_ids,
@@ -627,8 +653,6 @@ class InatImportJobTest < ActiveJob::TestCase
       without_field: "Mushroom Observer URL",
       user_login: @inat_import.inat_username
     }
-
-    # stub the observation request to return an error
     error = "Unauthorized"
     status = 401
     stub_request(:get, "#{API_BASE}/observations?#{query_args.to_query}").
@@ -643,9 +667,35 @@ class InatImportJobTest < ActiveJob::TestCase
 
     InatImportJob.perform_now(@inat_import)
 
-    assert_match(/RestClient::Response.*#{error}.*#{status}/,
-                 @inat_import.response_errors,
-                 "Failed to report iNat API request failure")
+    errors = JSON.parse(@inat_import.response_errors, symbolize_names: true)
+    assert_equal(status, errors[:error], "Incorrect error status")
+    query = JSON.parse(errors[:query], symbolize_names: true)
+    assert_equal(query_args, query, "Incorrect error query")
+  end
+
+  def test_inat_api_request_post_observation_field_response_error
+    create_ivars_from_filename("calostoma_lutescens")
+
+    stub_inat_interactions
+    # override the normal post of the iNat Observation Field to return an error
+    error = "Unauthorized"
+    status = 401
+    stub_request(:post, "#{API_BASE}/observation_field_values").
+      with(headers: { "Content-Type" => "application/json" }).
+      to_return(status: status,
+                body: JSON.generate({ error: error, status: status }),
+                headers: {})
+
+    InatImportJob.perform_now(@inat_import)
+
+    errors = JSON.parse(@inat_import.response_errors, symbolize_names: true)
+    assert_equal(status, errors[:error], "Incorrect error status")
+    assert_equal(errors[:payload],
+                 { observation_field_value: {
+                   observation_id: @inat_import.inat_ids.to_i,
+                   observation_field_id: MO_URL_OBSERVATION_FIELD_ID,
+                   value: "#{MO.http_domain}/#{Observation.last.id}"
+                 } }, "Incorrect error payload")
   end
 
   ########## Utilities

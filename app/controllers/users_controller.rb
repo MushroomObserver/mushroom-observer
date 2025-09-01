@@ -3,6 +3,7 @@
 # display information about, and edit, users
 class UsersController < ApplicationController
   before_action :login_required
+  before_action :store_location, only: [:show]
 
   ##############################################################################
   # INDEX
@@ -89,7 +90,6 @@ class UsersController < ApplicationController
   #############################################################################
 
   def show
-    store_location
     id = params[:id].to_s
     return unless find_user!
 

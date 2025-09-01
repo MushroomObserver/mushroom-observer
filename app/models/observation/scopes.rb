@@ -257,7 +257,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       end
     }
     scope :locations, lambda { |locations|
-      location_ids = lookup_locations_by_name(locations)
+      location_ids = Lookup::Locations.new(locations).ids
       where(location: location_ids).distinct
     }
     # Pass Box kwargs (:north, :south, :east, :west), any order.

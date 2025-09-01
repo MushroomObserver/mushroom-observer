@@ -11,7 +11,6 @@ module Names
 
     # Draw a map of all the locations where this name has been observed.
     def show
-      pass_query_params
       @name = find_or_goto_index(Name, params[:id].to_s)
       return unless @name
 

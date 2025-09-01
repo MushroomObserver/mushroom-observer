@@ -74,7 +74,7 @@ module LightboxHelper
     ) do
       [
         text,
-        link_to(obs.id, add_query_param(obs.show_link_args),
+        link_to(obs.id, obs.show_link_args,
                 class: "#{btn_style} mr-3",
                 id: "caption_obs_link_#{obs.id}"),
         obs.user_format_name(user).t.small_author

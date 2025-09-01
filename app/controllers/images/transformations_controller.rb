@@ -6,14 +6,13 @@ module Images
 
     # Used by show_image to rotate and flip image. was GET. Currently a PUT
     def update
-      pass_query_params
       image = find_or_goto_index(Image, params[:id].to_s)
       return unless image
 
       transform_image_and_flash_notices(image) if check_permission!(image)
 
       # NOTE: 2022/12 params[:size] is unused in show_image
-      redirect_with_query(image_path(image))
+      redirect_to(image_path(image))
     end
 
     private

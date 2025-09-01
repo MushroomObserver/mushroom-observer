@@ -11,7 +11,7 @@ module Observations
         user: @user,
         observation: @observation
       )
-      check_external_link_permission!(@observation)
+      check_external_link_permission!(obs: @observation)
       respond_to do |format|
         format.turbo_stream { render_modal_external_link_form }
         format.html
@@ -22,13 +22,17 @@ module Observations
       set_ivars_for_new
       @url = params.dig(:external_link, :url).to_s
       @site = ExternalSite.find(params.dig(:external_link, :external_site_id))
-      check_external_link_permission!(@observation, @site)
+      unless check_external_link_permission!(obs: @observation, site: @site)
+        return
+      end
+
       create_external_link
     end
 
     def edit
       set_ivars_for_edit
-      check_external_link_permission!(@external_link)
+      return unless check_external_link_permission!(link: @external_link)
+
       respond_to do |format|
         format.turbo_stream { render_modal_external_link_form }
         format.html
@@ -38,13 +42,15 @@ module Observations
     def update
       set_ivars_for_edit
       @url = params.dig(:external_link, :url).to_s
-      check_external_link_permission!(@external_link)
+      return unless check_external_link_permission!(link: @external_link)
+
       update_external_link
     end
 
     def destroy
       set_ivars_for_edit
-      check_external_link_permission!(@external_link)
+      return unless check_external_link_permission!(link: @external_link)
+
       remove_external_link
     end
 
@@ -69,15 +75,15 @@ module Observations
       @back_object = @observation
     end
 
-    def check_external_link_permission!(obs, site = nil)
-      if obs.is_a?(ExternalLink)
-        link = obs
+    def check_external_link_permission!(link: nil, obs: nil, site: nil)
+      if link
         obs  = link.observation
         site = link.external_site
       end
       return true if obs&.user == @user || site&.member?(@user) || @user.admin
 
-      flash_error("Permission denied.")
+      flash_warning(:permission_denied.t)
+      show_flash_and_send_back
       false
     end
 
@@ -148,16 +154,16 @@ module Observations
     end
 
     def show_flash_and_send_back
+      # for ExternalLinksControllerTest#test_external_link_permission, which
+      # tests check_external_link_permission! directly without sending a request
+      return unless @_response
+
       respond_to do |format|
-        format.html do
-          redirect_to(permanent_observation_path(@observation)) and
-            return
-        end
         # renders the flash in the modal, but not sure it's necessary
         # to have a response here. are they getting sent back?
-        format.turbo_stream do
-          render(partial: "shared/modal_flash_update",
-                 locals: { identifier: modal_identifier }) and return
+        format.turbo_stream { render_modal_flash_update }
+        format.html do
+          redirect_to(permanent_observation_path(@observation)) and return
         end
       end
     end
@@ -199,6 +205,11 @@ module Observations
         locals: { identifier: "external_links",
                   obs: @observation, user: @user, sites: @other_sites }
       ) and return
+    end
+
+    def render_modal_flash_update
+      render(partial: "shared/modal_flash_update",
+             locals: { identifier: modal_identifier }) and return
     end
 
     # this updates both the form and the flash

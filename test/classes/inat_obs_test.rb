@@ -72,14 +72,15 @@ class InatObsTest < UnitTestCase
 
     # Observation form needs the Notes "parts keys to be normalized
     snapshot_key = Observation.notes_normalized_key(:inat_snapshot_caption.l)
-    expected_notes =
-      { Collector: "jdcohenesq",
-        snapshot_key => expected_snapshot,
-        Other: "on Quercus\n\n&#8212;\n\nOriginally posted " \
-               "to Mushroom Observer on Mar. 7, 2024." }
+    other = "on Quercus<!--- blank line(s) removed --->\n" \
+            "&#8212;<!--- blank line(s) removed --->\n" \
+            "Originally posted to Mushroom Observer on Mar. 7, 2024."
+    expected_notes = { Collector: "jdcohenesq",
+                       snapshot_key => expected_snapshot,
+                       Other: other }
     assert_equal(
       expected_notes, mock_inat_obs.notes,
-      "MO notes should include: iNat Collector || login, iNat Description"
+      "MO notes should include: (iNat Collector || login) && iNat Description"
     )
 
     expect = License.where(License[:url] =~ "/by-nc/").
@@ -256,11 +257,16 @@ class InatObsTest < UnitTestCase
     assert_equal(
       "Jasmine Silver & Jesse Burton",
       mock_observation("lycoperdon").collector,
-      "Notes Collector should be iNat Collector field if that field present"
+      "Notes Collector should be iNat `Collector` field if that field present"
     )
     assert_equal(
       "johnplischke", mock_observation("arrhenia_sp_NY02").collector,
       "Notes Collector should be iNat user if no iNat Collector field"
+    )
+    assert_equal(
+      "Michael Beug", mock_observation("russula_subabietis").collector,
+      "Notes Collector should be iNat \"Collector's Name\" field " \
+        "if that field present"
     )
   end
 
@@ -393,14 +399,35 @@ class InatObsTest < UnitTestCase
                  "MO Notes should always include Collector:")
     assert_equal(
       "Collection by Heidi Randall. \nSmells like T. suaveolens. ",
-      mock_observation("trametes").notes[:Other],
+      strip_html_comments(mock_observation("trametes").notes[:Other]),
       "iNat Description should be mapped to MO Notes Other"
     )
+
+    mock_obs = mock_observation("tremella_mesenterica")
     assert_equal(
-      "", mock_observation("tremella_mesenterica").notes[:Other],
+      "", mock_obs.notes[:Other],
       "Notes Other should be a blank String if iNat Description is empty"
     )
+
+    mock_obs = mock_observation("tremella_mesenterica")
+    mock_obs[:description] = "before blank line\r\n\r\nafter blank line"
+    assert_not(
+      mock_obs.notes[:Other].match?(/\n{2,}/),
+      "Failed to compress consecutive newlines/returns from iNat Notes"
+    )
+    # Account for the solution of adding an html comment
+    # when compressing multiple blank lines
+    assert_equal(
+      "before blank line\nafter blank line",
+      strip_html_comments(mock_obs.notes[:Other]),
+      "Failed to compress consecutive newlines/returns from iNat Notes"
+    )
   end
+
+  def strip_html_comments(str)
+    str.gsub(/<!---.*?--->/m, "")
+  end
+  private :strip_html_comments
 
   def test_sequences
     mock_inat_obs = mock_observation("lycoperdon")

@@ -38,4 +38,16 @@ class InatImportTest < ActiveSupport::TestCase
     assert_equal(import.importables * import.initial_avg_import_seconds,
                  import.total_expected_time)
   end
+
+  def test_adequate_constraints
+    assert(
+      inat_imports(:rolf_inat_import).adequate_constraints?,
+      "iNat username adequately constrains imports"
+    )
+
+    assert_not(
+      inat_imports(:ollie_inat_import).adequate_constraints?,
+      "Import without an iNat username does not adequately constrain imports"
+    )
+  end
 end

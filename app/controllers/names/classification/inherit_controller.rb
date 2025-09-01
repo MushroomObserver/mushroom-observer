@@ -4,11 +4,10 @@
 module Names::Classification
   class InheritController < ApplicationController
     before_action :login_required
+    before_action :store_location
 
     # form
     def new
-      store_location
-      pass_query_params
       return unless find_name!
 
       nil unless make_sure_name_is_at_or_above_genus!(@name)
@@ -16,9 +15,6 @@ module Names::Classification
 
     # POST callback
     def create
-      store_location
-      pass_query_params
-
       return unless find_name!
       return unless make_sure_name_is_at_or_above_genus!(@name)
 
@@ -30,7 +26,7 @@ module Names::Classification
       end
 
       @name.inherit_classification(parent)
-      redirect_with_query(@name.show_link_args)
+      redirect_to(@name.show_link_args)
     end
 
     private
