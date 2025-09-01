@@ -47,26 +47,20 @@ class NamesController < ApplicationController
       redirect_to(name_path(name.id))
       [nil, {}]
     else
-      show_non_id_pattern_results(pattern)
+      return_pattern_search_results(pattern)
     end
   end
 
-  def show_non_id_pattern_results(pattern)
+  def return_pattern_search_results(pattern)
     # Have to use PatternSearch here to catch invalid PatternSearch terms.
     # Can't just send pattern to Query as create_query(:Observation, pattern:)
     search = PatternSearch::Name.new(pattern)
-    if search.errors.any?
-      search.errors.each do |error|
-        flash_error(error.to_s)
-      end
-      render("names/index")
-      [nil, {}]
-    else
-      # Call create_query to apply user content filters
-      query = create_query(:Name, search.query.params)
-      make_name_suggestions(search)
-      [query, {}]
-    end
+    return render_pattern_search_error(search) if search.errors.any?
+
+    # Call create_query to apply user content filters
+    query = create_query(:Name, search.query.params)
+    make_name_suggestions(search)
+    [query, {}]
   end
 
   def make_name_suggestions(search)
@@ -75,6 +69,12 @@ class NamesController < ApplicationController
 
     @name_suggestions =
       Name.suggest_alternate_spellings(alternate_spellings)
+  end
+
+  def render_pattern_search_error(search)
+    search.errors.each { |error| flash_error(error.to_s) }
+    render("names/index")
+    [nil, {}]
   end
 
   # Disabling the cop because subaction methods are going away soon
