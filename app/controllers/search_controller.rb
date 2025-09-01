@@ -68,12 +68,12 @@ class SearchController < ApplicationController
   # Convert pattern into :q here, so we hit the index with a standard permalink.
   # In the case of "needs_naming", this is added to the search path params?
   def forward_pattern_search(type, pattern)
-    model_name = type.to_s.singularize.titleize.to_sym
+    model_name = type.to_s.singularize.camelize.to_sym
 
     if pattern.blank?
       redirect_to(send(:"#{type}_path"))
     elsif (obj = exact_match(model_name, pattern))
-      redirect_to(send(:"#{model_name.underscore}_path", obj.id))
+      redirect_to(send(:"#{type.to_s.singularize}_path", obj.id))
     else
       build_query_and_redirect(type, model_name, pattern)
     end
@@ -102,7 +102,7 @@ class SearchController < ApplicationController
 
   def maybe_pattern_is_an_id(model_name, pattern)
     if /^\d+$/.match?(pattern)
-      return model_name.constantize.safe_find(pattern)
+      return model_name.to_s.constantize.safe_find(pattern)
     end
 
     false
@@ -128,9 +128,9 @@ class SearchController < ApplicationController
     when :Observation, :Name
       pattern_search_query_from_pattern(model_name, pattern)
     when :Location
-      send(:"#{model_name.underscore}_query_from_pattern", pattern)
+      send(:"#{model_name.to_s.underscore}_query_from_pattern", pattern)
     else
-      create_query(model_name.to_sym, pattern:)
+      create_query(model_name, pattern:)
     end
   end
 
