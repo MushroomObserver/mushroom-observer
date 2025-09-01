@@ -530,7 +530,9 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: params)
 
     assert_page_title(:OBSERVATIONS.l)
-    assert_displayed_filters("#{:query_locations.l}: #{location.display_name}")
+    assert_displayed_filters(
+      "#{:query_within_locations.l}: #{location.display_name}"
+    )
   end
 
   def test_index_location_without_observations
@@ -564,6 +566,25 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     assert_flash(flash_matcher)
     assert_redirected_to(locations_path)
+  end
+
+  def test_index_within_location_california
+    # Must do this to get center lats saved on fixtures
+    Location.update_box_area_and_center_columns
+    location = locations(:california)
+    q_param = { model: :Observation, within_locations: location.id }
+
+    login
+    get(:index, params: { q: q_param })
+
+    assert_page_title(:OBSERVATIONS.l)
+    assert_displayed_filters(
+      "#{:query_within_locations.l}: #{location.display_name}"
+    )
+    cali_locs = Location.where(Location[:name].matches("%California, USA%"))
+    # This is the count of obs associated to these individual locations.
+    count = Observation.locations([cali_locs]).count
+    assert_results(count:)
   end
 
   def test_index_where
