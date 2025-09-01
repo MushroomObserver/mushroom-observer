@@ -27,8 +27,10 @@ module Header
     def paginated_results(args = {}, &block)
       html_id = args[:html_id] ||= "results"
       results = capture(&block).to_s
+      uri = URI.parse(observations_path(q: q_param))
+      encoded_q = uri.query
 
-      tag.div(id: html_id, data: { q: get_query_param }) do
+      tag.div(id: html_id, data: { q: encoded_q }) do
         concat(content_for(:index_pagination_top))
         concat(results)
         concat(content_for(:index_pagination_bottom))
@@ -77,15 +79,6 @@ module Header
       end
     end
 
-    # pages is a pagination_data object
-    def need_letter_pagination_links?(pages)
-      return false unless pages
-
-      pages.letter_arg &&
-        (pages.letter || pages.num_total > pages.num_per_page) &&
-        pages.used_letters && pages.used_letters.length > 1
-    end
-
     # Insert numbered pagination links.
     # (See also letter_pagination_nav above.)
     #
@@ -116,7 +109,7 @@ module Header
         [
           prev_page_link(prev_page, arg, args),
           tag.div(:PAGE.l, class: "navbar-text mx-0 hidden-xs"),
-          page_input(this_page, max_page),
+          goto_page_input(this_page, max_page),
           tag.div(:of.l, class: "navbar-text ml-0 mr-2 hidden-xs"),
           tag.div(link_to(max_page, max_url), class: "navbar-text mx-0"),
           next_page_link(next_page, max_page, arg, args)
@@ -124,15 +117,6 @@ module Header
       end
     end
     # rubocop:enable Metrics/AbcSize
-
-    def letter_pagination_pages(pagination_data)
-      letters = pagination_data.used_letters
-      this_letter = pagination_data.letter || ""
-      # this_letter_idx = letters.index(this_letter) || 0
-      # prev_letter = letters[this_letter_idx - 1]
-      # next_letter = letters[this_letter_idx + 1]
-      [this_letter, letters]
-    end
 
     def number_pagination_pages(pagination_data)
       max_page = pagination_data.num_pages
@@ -155,7 +139,7 @@ module Header
       url = pagination_link_url(prev_page, arg, args)
       icon_link_to(
         :PREV.t, url,
-        class: classes, icon: :previous, show_text: false, icon_class: ""
+        class: classes, icon: :prev, show_text: false, icon_class: ""
       )
     end
 
@@ -174,6 +158,80 @@ module Header
       )
     end
 
+    def pagination_link_url(page, arg, args)
+      # Do not pass the :id through to next/prev page.
+      params = args[:params] || {}
+      params[arg] = page
+      url = reload_with_args(params.merge(id: nil))
+      if args[:anchor]
+        url.sub!(/#.*/, "")
+        url += "##{args[:anchor]}"
+      end
+      url
+    end
+
+    # NOTE: On input change, the form's page param is sanitized by Stimulus.
+    #
+    # NOTE: Because this is a `form_with(method: :get, url: index)` and submits
+    # with its own form params, any params in the form's commit url are ignored!
+    # In other words we can't submit to `add_q_param(pagination_current_url)`:
+    # unless the form sends a value for :q it will not be in the resulting url.
+    # That's why we are sending :q params through hidden fields. (It also
+    # doesn't work to send the :q string as a single hidden field, the hidden
+    # fields must be built iteratively like a fields_for(:q) block.)
+    def goto_page_input(this_page, max_page)
+      form_with(
+        url: pagination_current_url,
+        method: :get, local: true,
+        class: "navbar-form px-0 page_input",
+        data: { controller: "page-input", page_input_max_value: max_page }
+      ) do |f|
+        [
+          page_input_group_with_button(f, this_page, max_page),
+          q_param_to_hidden_fields(f) # (Just :q. :id not relevant on next page)
+        ].safe_join
+      end
+    end
+
+    def page_input_group_with_button(frm, this_page, max_page)
+      tag.div(class: "input-group page-input mx-2") do
+        [
+          frm.text_field(
+            :page,
+            type: :text, value: this_page, class: "form-control text-right",
+            size: max_page.digits.count,
+            data: { page_input_target: "numberInput",
+                    action: "page-input#sanitizeNumber" }
+          ),
+          tag.span(class: "input-group-btn") do
+            tag.button(type: :submit,
+                       class: "btn btn-outline-default px-2") do
+              link_icon(:goto, title: :GOTO.l)
+            end
+          end
+        ].safe_join
+      end
+    end
+
+    # pages is a pagination_data object
+    def need_letter_pagination_links?(pages)
+      return false unless pages
+
+      pages.letter_arg &&
+        (pages.letter || pages.num_total > pages.num_per_page) &&
+        pages.used_letters && pages.used_letters.length > 1
+    end
+
+    def letter_pagination_pages(pagination_data)
+      letters = pagination_data.used_letters
+      this_letter = pagination_data.letter || ""
+      # this_letter_idx = letters.index(this_letter) || 0
+      # prev_letter = letters[this_letter_idx - 1]
+      # next_letter = letters[this_letter_idx + 1]
+      [this_letter, letters]
+    end
+
+    # Check #goto_page_input above
     def letter_input(this_letter, used_letters)
       form_with(
         url: pagination_current_url, method: :get, local: true,
@@ -200,47 +258,8 @@ module Header
               end
             ].safe_join
           end,
-          *pagination_hidden_param_fields(f, :letter)
+          *q_param_to_hidden_fields(f)
         ].safe_join
-      end
-    end
-
-    # On input change, the form's page param is sanitized by Stimulus.
-    def page_input(this_page, max_page)
-      form_with(
-        url: pagination_current_url, method: :get, local: true,
-        class: "navbar-form px-0 page_input",
-        data: { controller: "page-input", page_input_max_value: max_page }
-      ) do |f|
-        [
-          tag.div(class: "input-group page-input mx-2") do
-            [
-              f.text_field(
-                :page,
-                type: :text, value: this_page, class: "form-control text-right",
-                size: max_page.digits.count,
-                data: { page_input_target: "numberInput",
-                        action: "page-input#sanitizeNumber" }
-              ),
-              tag.span(class: "input-group-btn") do
-                tag.button(type: :submit,
-                           class: "btn btn-outline-default px-2") do
-                  link_icon(:goto, title: :GOTO.l)
-                end
-              end
-            ].safe_join
-          end,
-          *pagination_hidden_param_fields(f, :page)
-        ].safe_join
-      end
-    end
-
-    # The form url does not have the existing params, because these would
-    # be overwritten by the param set represented by the form fields.
-    # We need to re-send the incoming params as part of the form.
-    def pagination_hidden_param_fields(form, field = :page)
-      params.except(:controller, :action, field).keys.map do |key|
-        form.hidden_field(key.to_sym, value: params[key])
       end
     end
 
@@ -251,21 +270,23 @@ module Header
       parsed_url.to_s
     end
 
-    # Render a single pagination link for number_pagination_data above.
-    def pagination_link(label, page, arg, args)
-      url = pagination_link_url(page, arg, args)
-      tag.li(link_to(label, url))
-    end
-
-    def pagination_link_url(page, arg, args)
-      params = args[:params] || {}
-      params[arg] = page
-      url = reload_with_args(params)
-      if args[:anchor]
-        url.sub!(/#.*/, "")
-        url += "##{args[:anchor]}"
+    # We need to re-send the incoming :q param hash as part of the form,
+    # so the index the form submits to will have a valid permalink with :q.
+    # https://stackoverflow.com/questions/2505902/
+    # passing-hash-as-values-in-hidden-field-tag/9488247
+    def q_param_to_hidden_fields(form)
+      # This flattens the hash as it is in the permalink.
+      # Seems safer than trying to parse the incoming URI's query_string.
+      query_string = Rack::Utils.build_nested_query(
+        { q: q_param(query_from_session) }
+      )
+      # Sets them up them the way a form would, i.e. fields_for(:q)
+      pairs = query_string.split(Rack::Utils::DEFAULT_SEP)
+      tags = pairs.map do |pair|
+        key, value = pair.split("=", 2).map { |str| Rack::Utils.unescape(str) }
+        form.hidden_field(key, value: value)
       end
-      url
+      tags.safe_join("\n")
     end
   end
 end

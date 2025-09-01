@@ -150,20 +150,20 @@ module MapHelper
             find_or_create_query(query_type, in_box: mapset_box_params(set))
     # Add the query params to the link data for debugging.
     # Can remove when we start splatting query params in the URL.
-    [link_to(:show_all.t, add_query_param(send(path_helper), query),
+    [link_to(:show_all.t, add_q_param(send(path_helper), query),
              data: query.params),
-     link_to(:map_all.t, add_query_param(send(:"map_#{path_helper}"), query),
+     link_to(:map_all.t, add_q_param(send(:"map_#{path_helper}"), query),
              data: query.params)]
   end
 
   def mapset_observation_link(obs, args)
-    params = args[:query_params] || {}
+    params = args[:query_param] ? { q: args[:query_param] } : {}
     link_to("#{:Observation.t} ##{obs.id}",
             observation_path(id: obs.id, params: params))
   end
 
   def mapset_location_link(loc, args)
-    params = args[:query_params] || {}
+    params = args[:query_param] ? { q: args[:query_param] } : {}
     link_to(loc.display_name.t, location_path(id: loc.id, params: params))
   end
 

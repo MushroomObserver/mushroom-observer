@@ -5,6 +5,11 @@ require("test_helper")
 class ObservationsControllerIndexTest < FunctionalTestCase
   tests ObservationsController
 
+  def setup
+    # Must do this to get center lats saved on fixtures without lat/lng.
+    Location.update_box_area_and_center_columns
+  end
+
   ######## Index ################################################
   # Tests of index, with tests arranged as follows:
   # default subaction; then
@@ -57,7 +62,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login
 
     query = Query.lookup_and_save(:Observation, big_obs_query_params)
-    get(:index, params: @controller.query_params(query))
+    get(:index, params: { q: @controller.q_param(query) })
 
     names_joined_trunc = BUNCH_OF_NAMES.first(3).map(&:text_name).join(", ")
     names_joined_trunc += ", ..."
@@ -78,7 +83,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login
 
     query = Query.lookup_and_save(:Observation, long_obs_query_params)
-    get(:index, params: @controller.query_params(query))
+    get(:index, params: { q: @controller.q_param(query) })
 
     regions_joined = SUPERLONG_REGIONS.join(", ")
     regions_joined_trunc = "#{regions_joined[0...97]}..."
@@ -115,6 +120,15 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     )
     assert_select(".pagination_numbers a", { text: "Previous" },
                   "Wrong page or display is missing a link to Previous page")
+  end
+
+  def test_index_query_no_matches
+    query = Query.lookup(:Observation, id_in_set: "one")
+    params = { q: @controller.q_param(query) }
+
+    login
+    get(:index, params:)
+    assert_flash_error(:runtime_no_matches.t(type: :observation))
   end
 
   # Created in response to a bug seen in the wild
@@ -177,8 +191,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
            "Test needs a string that has exactly one hit")
 
     login
-    get(:index,
-        params: @controller.query_params(query).merge(advanced_search: true))
+    params = { q: @controller.q_param(query), advanced_search: true }
+    get(:index, params:)
 
     assert_match(/#{obs.id}/, redirect_to_url,
                  "Advanced Search with 1 hit should show the hit")
@@ -197,8 +211,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     query = oklahoma_query
 
     login
-    get(:index,
-        params: @controller.query_params(query).merge({ advanced_search: "1" }))
+    params = { q: @controller.q_param(query), advanced_search: true }
+    get(:index, params:)
 
     assert_flash_text(:runtime_no_matches.l(type: :observations.l))
     assert_page_title(:OBSERVATIONS.l)
@@ -251,8 +265,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     query_no_conditions = Query.lookup_and_save(:Observation)
 
     login
-    params = @controller.query_params(query_no_conditions).
-             merge(advanced_search: true)
+    params = { q: @controller.q_param(query_no_conditions),
+               advanced_search: true }
     get(:index, params:)
 
     assert_flash_error(:runtime_no_conditions.l)
@@ -328,6 +342,27 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_not_empty(css_select('[id="context_nav"]').text, "Tabset is empty")
     assert_select(".pagination_numbers a", { text: "Previous" },
                   "Wrong page or display is missing a link to Previous page")
+  end
+
+  def test_index_filter_display_is_concise
+    pattern = "Agrocybe arvalis" # There are two
+
+    setup_rolfs_index
+    get(:index, params: { pattern: pattern })
+    assert_page_title(:OBSERVATIONS.l)
+    assert_displayed_filters("#{:query_names.l}: #{pattern}")
+
+    filter_txt = "#{:query_names.l}: #{pattern}, with synonyms, with subtaxa"
+    assert_equal(filter_txt + filter_txt,
+                 css_select("#filters").text, "Filter text is wrong.")
+
+    filter_txt_dup =
+      "#{:query_names.l}: #{pattern}, #{pattern}, with synonyms, with subtaxa"
+    assert_not_equal(
+      filter_txt_dup + filter_txt_dup,
+      css_select("#filters").text,
+      "Filter caption for 'Names' is repeating a text_name."
+    )
   end
 
   def test_index_pattern_no_hits
@@ -500,7 +535,9 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: params)
 
     assert_page_title(:OBSERVATIONS.l)
-    assert_displayed_filters("#{:query_locations.l}: #{location.display_name}")
+    assert_displayed_filters(
+      "#{:query_within_locations.l}: #{location.display_name}"
+    )
   end
 
   def test_index_location_without_observations
@@ -536,6 +573,25 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_redirected_to(locations_path)
   end
 
+  def test_index_within_location_california
+    location = locations(:california)
+    q_param = { model: :Observation, within_locations: location.id }
+
+    login
+    get(:index, params: { q: q_param })
+
+    assert_page_title(:OBSERVATIONS.l)
+    assert_displayed_filters(
+      "#{:query_within_locations.l}: #{location.display_name}"
+    )
+    cali_locs = Location.where(Location[:name].matches("%California, USA%"))
+    # This is the count of obs associated specifically with each California
+    # location. The "within" scope should retrieve all of them (and currently,
+    # from most of Nevada too, if we have any - because it's "in_box").
+    count = Observation.locations([cali_locs]).count
+    assert_results(count:)
+  end
+
   def test_index_where
     location = locations(:obs_default_location)
 
@@ -545,7 +601,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_displayed_filters(
       "#{:query_search_where.l}: #{location.display_name}"
     )
-    assert_match(new_location_path(where: location.name), @response.body)
+    q = @controller.q_param
+    assert_select("a[href^='#{new_location_path(q:, where: location.name)}']")
   end
 
   def test_index_where_page2
@@ -560,6 +617,23 @@ class ObservationsControllerIndexTest < FunctionalTestCase
       "#{:query_search_where.l}: #{location.display_name}"
     )
     assert_not_empty(css_select('[id="context_nav"]').text, "Tabset is empty")
+  end
+
+  def test_index_prev_next_page_links
+    location = locations(:obs_default_location)
+    query = Query.lookup_and_save(:Observation, locations: [location])
+    q = @controller.q_param(QueryRecord.last.query)
+    o_loc = query.results
+
+    login
+    # Test index links lose the id param on next/prev page and goto_page
+    get(:index, params: { id: o_loc.third.id, q: })
+    next_href = observations_path(params: { page: 2, q: })
+    prev_href = observations_path(params: { q: })
+    assert_select("a.next_page_link[href='#{next_href}']")
+    assert_select("a.prev_page_link[href='#{prev_href}']", count: 0)
+    assert_select("form.page_input[action='#{observations_url}']")
+    assert_select("input[type='hidden'][name='q[model]'][value='Observation']")
   end
 
   def test_index_project

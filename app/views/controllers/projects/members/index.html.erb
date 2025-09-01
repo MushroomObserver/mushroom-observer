@@ -4,7 +4,7 @@ add_project_banner(@project)
 container_class(:wide)
 
 action = { controller: "/projects/members", action: :create,
-            project_id: @project.id, q: get_query_param }
+           project_id: @project.id }
 %>
 
 <div class="container-text mt-3 pb-2">
@@ -56,9 +56,12 @@ action = { controller: "/projects/members", action: :create,
         </td>
         <td class="align-middle">
           <% if @project.is_admin?(@user) %>
-            <%= link_with_query(:change_member_status_change_status.t,
-                    edit_project_member_path(project_id: @project.id,
-                        candidate: user.id)) %>
+            <%= link_to(
+              :change_member_status_change_status.t,
+              edit_project_member_path(
+                project_id: @project.id, candidate: user.id
+              )
+            ) %>
           <% end %>
         </td>
       </tr>

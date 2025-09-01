@@ -142,7 +142,7 @@ module ObservationsHelper
   def observation_show_image_links(obs:)
     return "" unless check_permission(obs)
 
-    icon_link_with_query(*reuse_images_for_observation_tab(obs))
+    icon_link_to(*reuse_images_for_observation_tab(obs))
   end
 
   # The following sections of the observation_details partial are also needed as

@@ -87,7 +87,7 @@ class ObservationsController
 
       if params[:needs_naming]
         redirect_to(
-          identify_observations_path(q: get_query_param(query))
+          identify_observations_path(q: q_param(query))
         )
         [nil, {}]
       else
@@ -111,7 +111,7 @@ class ObservationsController
     def render_pattern_search_error(search)
       search.errors.each { |error| flash_error(error.to_s) }
       if params[:needs_naming]
-        redirect_to(identify_observations_path(q: get_query_param))
+        redirect_to(identify_observations_path(q: q_param))
       end
       [nil, {}]
     end
@@ -170,7 +170,7 @@ class ObservationsController
         location = find_or_goto_index(Location, params[:location].to_s)
       )
 
-      query = create_query(:Observation, locations: location)
+      query = create_query(:Observation, within_locations: location)
       [query, {}]
     end
 

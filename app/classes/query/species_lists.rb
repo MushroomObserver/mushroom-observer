@@ -28,6 +28,6 @@ class Query::SpeciesLists < Query
   end
 
   def self.default_order
-    :title
+    :date
   end
 end

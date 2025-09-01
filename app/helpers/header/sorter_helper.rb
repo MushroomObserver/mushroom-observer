@@ -67,7 +67,7 @@ module Header
         }
         args = args.merge(disabled: true) if active
 
-        link_with_query(title, path_args, **args)
+        link_to(title, path_args, **args)
       end
     end
 
@@ -77,11 +77,11 @@ module Header
                 to_s.sub(/^reverse_/, "")
 
       sort_links = sorts.map do |by, label|
-        sort_link(label, by, this_by, link_all)
+        sort_link(query, label, by, this_by, link_all)
       end
 
       # Add a "reverse" button.
-      sort_links << sort_link(:sort_by_reverse.t,
+      sort_links << sort_link(query, :sort_by_reverse.t,
                               reverse_by(query, this_by), this_by, link_all)
     end
 
@@ -96,15 +96,17 @@ module Header
     # The final product of `assemble_sort_links`: an array of attributes
     # [text, action, identifier, active]
     # label arg is a translation string
-    def sort_link(label, by, this_by, link_all)
+    def sort_link(query, label, by, this_by, link_all)
       model = controller.controller_model_name
       ctlr = controller.controller_name
+      # For now, we still need the top-level :by param to trigger a new query
+      # when the link hits the index again. However, IMO build_index_with_query
+      # shouldn't need the :by param, it should check for an :order_by in the
+      # incoming :q
+      path = { controller: ctlr, action: action_name,
+               q: q_param(query).merge(order_by: by) }
+
       helper_name = sort_link_helper_name(model, ctlr)
-      # path = send(:"#{helper_name}_path", q: get_query_param)
-      path = { controller: ctlr,
-               action: action_name,
-               by: by }.merge(query_params)
-      # identifier = "#{query.model.to_s.pluralize.underscore}_by_#{by}_link"
       identifier = "#{helper_name}_by_#{by}_link"
       active = !link_all && (by.to_s == this_by) # boolean if current sort order
 

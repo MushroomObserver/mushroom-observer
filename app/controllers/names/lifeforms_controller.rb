@@ -4,7 +4,6 @@
 module Names
   class LifeformsController < ApplicationController
     before_action :login_required
-    before_action :pass_query_params
 
     def edit
       find_name!
@@ -17,7 +16,7 @@ module Names
         params.dig(:lifeform, word) == "1"
       end
       @name.update(lifeform: " #{words.join(" ")} ")
-      redirect_with_query(@name.show_link_args)
+      redirect_to(@name.show_link_args)
     end
 
     private

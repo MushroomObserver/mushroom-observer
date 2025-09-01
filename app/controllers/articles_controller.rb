@@ -17,7 +17,6 @@
 class ArticlesController < ApplicationController
   before_action :login_required, except: [:index, :show]
   before_action :store_location, except: :destroy
-  before_action :pass_query_params, except: :index
   before_action :ignore_request_unless_permitted, except: [:index, :show]
 
   # ---------- Actions to Display data (index, show, etc.) ---------------------

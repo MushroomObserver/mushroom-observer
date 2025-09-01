@@ -246,6 +246,25 @@ class Query::ObservationsTest < UnitTestCase
     assert_query(expects, :Observation, locations: locations(:burbank))
   end
 
+  def test_observation_locations_multiple
+    locs = [locations(:burbank), locations(:mitrula_marsh)]
+    expects = Observation.locations(locs).order_by_default
+    assert_query(expects, :Observation, locations: locs.map(&:name))
+
+    expects = Observation.locations(locs.map(&:id)).order_by_default
+    assert_query(expects, :Observation, locations: locs.map(&:id))
+
+    expects = Observation.locations(locs.map(&:name)).order_by_default
+    assert_query(expects, :Observation, locations: locs.map(&:id))
+  end
+
+  def test_observation_within_locations
+    expects = Observation.within_locations(locations(:california)).
+              order_by_default
+    assert_query(expects, :Observation,
+                 within_locations: locations(:california))
+  end
+
   def test_observation_projects
     assert_query([],
                  :Observation, projects: projects(:empty_project))
@@ -297,8 +316,6 @@ class Query::ObservationsTest < UnitTestCase
   end
 
   def test_observation_in_box
-    # Have to do this, otherwise columns not populated
-    Location.update_box_area_and_center_columns
     box = { north: 35, south: 34, east: -118, west: -119 }
     assert_query(Observation.in_box(**box).order_by_default,
                  :Observation, in_box: box)
@@ -310,7 +327,6 @@ class Query::ObservationsTest < UnitTestCase
   def test_observation_in_box_with_other_scopes
     # Have to do this, otherwise columns not populated
     Location.update_box_area_and_center_columns
-
     box = { north: 35, south: 34, east: -118, west: -119 }
     in_box_expects = Query.lookup(:Observation, in_box: box)
     # be sure we have more than one user's obs in this box

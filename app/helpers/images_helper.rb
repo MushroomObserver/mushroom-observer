@@ -146,8 +146,7 @@ module ImagesHelper
   def image_stretched_link(path, link_method)
     case link_method
     when :get
-      link_with_query("", path, class: stretched_link_classes,
-                                data: { query_results_target: "link" })
+      link_to("", path, class: stretched_link_classes)
     when :post
       post_button(name: "", path: path, class: stretched_link_classes)
     when :put

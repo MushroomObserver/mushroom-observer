@@ -7,7 +7,6 @@ class JavascriptController < ApplicationController
     :turn_javascript_off,
     :turn_javascript_on
   ]
-  before_action :pass_query_params, only: [:hide_thumbnail_map]
 
   # Force javascript on.
   def turn_javascript_on
@@ -44,6 +43,6 @@ class JavascriptController < ApplicationController
     else
       session[:hide_thumbnail_maps] = true
     end
-    redirect_with_query(permanent_observation_path(id: id))
+    redirect_to(permanent_observation_path(id: id))
   end
 end

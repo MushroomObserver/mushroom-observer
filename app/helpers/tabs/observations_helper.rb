@@ -11,7 +11,7 @@ module Tabs
     def send_observer_question_tab(obs)
       InternalLink::Model.new(
         :show_observation_send_question.l, obs,
-        add_query_param(new_question_for_observation_path(obs.id)),
+        new_question_for_observation_path(obs.id),
         html_options: { icon: :email }
       ).tab
     end
@@ -23,7 +23,7 @@ module Tabs
 
       InternalLink::Model.new(
         :show_observation_manage_species_lists.l, obs,
-        add_query_param(edit_observation_species_lists_path(obs.id)),
+        add_q_param(edit_observation_species_lists_path(obs.id)),
         html_options: { icon: :manage_lists }
       ).tab
     end
@@ -85,7 +85,7 @@ module Tabs
     #   return unless mappable
 
     #   InternalLink.new(
-    #     :MAP.t, add_query_param(map_observation_path)
+    #     :MAP.t, add_q_param(map_observation_path)
     #   ).tab
     # end
 
@@ -167,7 +167,7 @@ module Tabs
     def define_location_tab(query)
       InternalLink.new(
         :list_observations_location_define.l,
-        add_query_param(new_location_path(where: where_param(query.params)))
+        add_q_param(new_location_path(where: where_param(query.params)))
       ).tab
     end
 
@@ -180,9 +180,9 @@ module Tabs
     def assign_undefined_location_tab(query)
       InternalLink.new(
         :list_observations_location_merge.l,
-        add_query_param(matching_locations_for_observations_path(
-                          where: where_param(query.params)
-                        ))
+        add_q_param(matching_locations_for_observations_path(
+                      where: where_param(query.params)
+                    ))
       ).tab
     end
 
@@ -202,7 +202,7 @@ module Tabs
     def map_observations_tab(query)
       InternalLink.new(
         :show_object.t(type: :map),
-        map_observations_path(q: get_query_param(query)),
+        map_observations_path(q: q_param(query)),
         html_options: { data: { action: "links#disable" } }
       ).tab
     end
@@ -217,14 +217,14 @@ module Tabs
     def observations_add_to_list_tab(query)
       InternalLink.new(
         :list_observations_add_to_list.l,
-        add_query_param(edit_species_list_observations_path, query)
+        add_q_param(edit_species_list_observations_path, query)
       ).tab
     end
 
     def observations_download_as_csv_tab(query)
       InternalLink.new(
         :list_observations_download_as_csv.l,
-        add_query_param(new_observations_download_path, query)
+        add_q_param(new_observations_download_path, query)
       ).tab
     end
 
@@ -247,7 +247,7 @@ module Tabs
     def new_inat_import_tab(query: nil)
       InternalLink.new(
         :create_observation_inat_import_link.l,
-        add_query_param(new_inat_import_path, query)
+        add_q_param(new_inat_import_path, query)
       ).tab
     end
 
@@ -287,7 +287,7 @@ module Tabs
     def observations_index_tab
       InternalLink.new(
         :cancel_to_index.t(type: :OBSERVATION),
-        add_query_param(observations_path)
+        add_q_param(observations_path)
       ).tab
     end
 
@@ -298,7 +298,7 @@ module Tabs
     def edit_observation_tab(obs)
       InternalLink::Model.new(
         :edit_object.t(type: Observation), obs,
-        add_query_param(edit_observation_path(obs.id)),
+        edit_observation_path(obs.id),
         html_options: { icon: :edit }
       ).tab
     end
@@ -315,7 +315,7 @@ module Tabs
     def print_labels_button(obs)
       name = :download_observations_print_labels.l
       query = Query.lookup(Observation, id_in_set: [obs.id])
-      path = add_query_param(observations_downloads_path(commit: name), query)
+      path = add_q_param(observations_downloads_path(commit: name), query)
 
       post_button(name: name, path: path, icon: :print,
                   class: "print_label_observation_#{obs.id}",

@@ -220,8 +220,8 @@ class ProjectsControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: "Bolete Project" })
 
-    q = QueryRecord.last.id.alphabetize
-    assert_redirected_to(project_path(project.id, q: q))
+    assert_redirected_to(project_path(project.id))
+    assert_session_query_record_is_correct
   end
 
   def test_index_pattern_search_by_id

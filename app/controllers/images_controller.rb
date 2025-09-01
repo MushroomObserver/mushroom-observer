@@ -19,7 +19,7 @@
 #
 class ImagesController < ApplicationController
   before_action :login_required
-  before_action :pass_query_params, except: [:index]
+  before_action :store_location, only: [:show]
 
   ##############################################################################
   # INDEX
@@ -139,7 +139,6 @@ class ImagesController < ApplicationController
   # Inputs: params[:id] (image)
   # Outputs: @image
   def show
-    store_location
     return false unless find_image!
 
     case params[:flow]
@@ -198,7 +197,7 @@ class ImagesController < ApplicationController
     # obs_query = find_or_create_query(:Observation)
     # img_query = create_query(:Image, observation_query: obs_query.params)
     img_query = create_query(:Image, observations: obs)
-    query_params_set(img_query)
+    update_stored_query(img_query) # also stores query in session
   end
 
   # change_vote directly, does not call public cast_vote below
@@ -239,7 +238,7 @@ class ImagesController < ApplicationController
     next_state = nil
     # decide where to redirect after deleting image
     if (this_state = find_query(:Image))
-      query_params_set(this_state)
+      update_stored_query(this_state) # also stores query in session
       this_state.current = @image
       next_state = this_state.next
     end
@@ -249,15 +248,15 @@ class ImagesController < ApplicationController
   private
 
   def delete_and_redirect(next_state = nil)
-    return redirect_with_query(action: "show", id: @image.id) unless
+    return redirect_to(action: :show, id: @image.id) unless
       check_permission!(@image)
 
     @image.log_destroy
     @image.destroy
     flash_notice(:runtime_image_destroy_success.t(id: params[:id].to_s))
-    return redirect_to(action: "index") unless next_state
+    return redirect_to(action: :index) unless next_state
 
-    query_params_set(next_state)
-    redirect_with_query(action: "show", id: next_state.current_id)
+    update_stored_query(next_state) # also stores query in session
+    redirect_to(action: :show, id: next_state.current_id)
   end
 end

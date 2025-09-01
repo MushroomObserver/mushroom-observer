@@ -197,7 +197,7 @@ module Observations
       get(:reuse, params: params)
 
       assert_response(:success)
-      # qr = QueryRecord.last.id.alphabetize
+      # q = @controller.q_param(QueryRecord.last.query)
       assert_form_action(action: :attach, id: obs.id)
     end
 
@@ -208,7 +208,7 @@ module Observations
       login(obs.user.login)
       get(:reuse, params: params)
 
-      # qr = QueryRecord.last.id.alphabetize
+      # q = @controller.q_param(QueryRecord.last.query)
       assert_form_action(action: :attach, id: obs.id)
       assert_select("a", { text: :image_reuse_just_yours.l },
                     "Form should have a link to show only the user's images.")

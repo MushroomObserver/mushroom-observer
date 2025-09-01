@@ -6,12 +6,11 @@ module Names::Descriptions
     include ::Names::Descriptions::SharedPrivateMethods
 
     before_action :login_required
-    before_action :pass_query_params
+    before_action :store_location
 
     # Show past versions of NameDescription.  Accessible only from
     # show_name_description page.
     def show
-      store_location
       return unless find_description!
 
       @name = @description.name
