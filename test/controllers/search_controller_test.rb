@@ -192,12 +192,11 @@ class SearchControllerTest < FunctionalTestCase
 
   def test_pattern_search_from_needs_naming
     pattern = "Briceland"
+    params = { pattern_search: { pattern:, type: :observations },
+               needs_naming: rolf }
 
     login
-    get(:pattern, params: {
-      pattern_search: { pattern:, type: :observations },
-      needs_naming: rolf
-    })
+    get(:pattern, params:)
 
     assert_redirected_to(
       identify_observations_path(q: { model: :Observation, pattern: }),
@@ -208,12 +207,11 @@ class SearchControllerTest < FunctionalTestCase
 
   def test_pattern_search_from_needs_naming_bad_pattern
     pattern = { error: "" }
+    params = { pattern_search: { pattern:, type: :observations },
+               needs_naming: rolf }
 
     login
-    get(:pattern, params: {
-      pattern_search: { pattern:, type: :observations },
-      needs_naming: rolf
-    })
+    get(:pattern, params:)
 
     assert_redirected_to(
       identify_observations_path(q: { model: :Observation }),

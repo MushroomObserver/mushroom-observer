@@ -141,7 +141,7 @@ class NamesControllerIndexTest < FunctionalTestCase
   end
 
   def q_pattern(pattern)
-    { model: :Name, pattern: }
+    { q: { model: :Name, pattern: } }
   end
 
   # The pattern param is maintained only for backwards compatibility.
@@ -158,9 +158,10 @@ class NamesControllerIndexTest < FunctionalTestCase
 
   def test_index_pattern_multiple_hits
     pattern = "Agaricus"
+    params = q_pattern(pattern)
 
     login
-    get(:index, params: { q: q_pattern(pattern) })
+    get(:index, params:)
     assert_page_title(:NAMES.l)
     assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
     assert_select(

@@ -85,14 +85,15 @@ class ImagesControllerTest < FunctionalTestCase
   end
 
   def q_pattern(pattern)
-    { model: :Image, pattern: }
+    { q: { model: :Image, pattern: } }
   end
 
   def test_index_pattern_text_multiple_hits
     pattern = "USA"
+    params = q_pattern(pattern)
 
     login
-    get(:index, params: { q: q_pattern(pattern) })
+    get(:index, params:)
 
     assert_template("index", partial: "_image")
     assert_page_title(:IMAGES.l)
@@ -101,9 +102,10 @@ class ImagesControllerTest < FunctionalTestCase
 
   def test_index_pattern_text_no_hits
     pattern = "nothingMatchesAxotl"
+    params = q_pattern(pattern)
 
     login
-    get(:index, params: { q: q_pattern(pattern) })
+    get(:index, params:)
 
     assert_flash_text(:runtime_no_matches.l(type: :images.l))
     assert_template("index")

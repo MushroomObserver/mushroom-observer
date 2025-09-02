@@ -76,18 +76,6 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_flash_text(/no matching collection numbers found/i)
   end
 
-  def test_index_pattern_str_matching_one_collection_number
-    numbers = CollectionNumber.where("name like '%neighbor%'")
-    assert_equal(1, numbers.count)
-
-    login
-    get(:index, params: { pattern: "neighbor" })
-
-    assert_redirected_to(collection_number_path(id: numbers.first.id))
-    assert_no_flash
-    assert_session_query_record_is_correct
-  end
-
   def test_index_pattern_str_matching_multiple_collection_numbers
     pattern = "Singer"
     numbers = CollectionNumber.where(CollectionNumber[:name] =~ pattern)
@@ -95,7 +83,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
            "Test needs a pattern matching many collection numbers")
 
     login
-    get(:index, params: { pattern: pattern })
+    get(:index, params: { q: { model: :CollectionNumber, pattern: pattern } })
 
     assert_response(:success)
     assert_page_title(:COLLECTION_NUMBERS.l)
@@ -104,15 +92,6 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     # a show link, and (because logged in user created the numbers)
     # an edit link
     assert_equal(numbers.count * 2, collection_number_links.count)
-  end
-
-  def test_index_pattern_number_matching_one_collection_number
-    number = collection_numbers(:minimal_unknown_coll_num).id
-
-    login
-    get(:index, params: { pattern: number })
-
-    assert_redirected_to(collection_number_path(number))
   end
 
   def collection_number_links

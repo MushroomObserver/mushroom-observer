@@ -296,21 +296,26 @@ class ObservationsControllerIndexTest < FunctionalTestCase
   end
 
   def q_pattern(pattern)
-    { model: :Observation, pattern: }
+    { q: { model: :Observation, pattern: } }
   end
 
-  def test_index_pattern_multiple_hits
-    pattern = "Agaricus"
-
-    setup_rolfs_index
-    get(:index, params: {
+  def q_name_params(pattern)
+    {
       q: {
         model: :Observation,
         names: {
           lookup: pattern, include_synonyms: true, include_subtaxa: true
         }
       }
-    })
+    }
+  end
+
+  def test_index_pattern_multiple_hits
+    pattern = "Agaricus"
+    params = q_name_params(pattern)
+
+    setup_rolfs_index
+    get(:index, params:)
 
     # Pattern search guesses this is a name query
     assert_page_title(:OBSERVATIONS.l)
@@ -322,16 +327,10 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
   def test_index_pattern1
     pattern = "Boletus edulis"
+    params = q_name_params(pattern)
 
     setup_rolfs_index
-    get(:index, params: {
-      q: {
-        model: :Observation,
-        names: {
-          lookup: pattern, include_synonyms: true, include_subtaxa: true
-        }
-      }
-    })
+    get(:index, params:)
 
     # Pattern search guesses this is a name query
     assert_page_title(:OBSERVATIONS.l)
@@ -344,17 +343,10 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
   def test_index_pattern_page2
     pattern = "Boletus edulis"
+    params = q_name_params(pattern).merge(page: 2)
 
     login
-    get(:index, params: {
-      q: {
-        model: :Observation,
-        names: {
-          lookup: pattern, include_synonyms: true, include_subtaxa: true
-        }
-      },
-      page: 2
-    })
+    get(:index, params:)
 
     # Pattern search guesses this is a name query
     assert_page_title(:OBSERVATIONS.l)
@@ -367,17 +359,11 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
   def test_index_filter_display_is_concise
     pattern = "Agrocybe arvalis" # There are two
+    params = q_name_params(pattern)
 
     setup_rolfs_index
     # This is what search_controller sends for that pattern:
-    get(:index, params: {
-      q: {
-        model: :Observation,
-        names: {
-          lookup: pattern, include_synonyms: true, include_subtaxa: true
-        }
-      }
-    })
+    get(:index, params:)
     assert_page_title(:OBSERVATIONS.l)
     assert_displayed_filters("#{:query_names.l}: #{pattern}")
 
@@ -396,9 +382,10 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
   def test_index_pattern_no_hits
     pattern = "no hits"
+    params = q_pattern(pattern)
 
     login
-    get(:index, params: { q: q_pattern(pattern) })
+    get(:index, params:)
 
     assert_empty(css_select('[id="context_nav"]').text,
                  "RH tabset should be empty when search has no hits")

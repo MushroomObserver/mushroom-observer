@@ -63,16 +63,16 @@ class CommentsControllerTest < FunctionalTestCase
   end
 
   def test_index_pattern_search_str
-    search_str = "Let's"
+    pattern = "Let's"
     assert(comments(:minimal_unknown_obs_comment_2).summary.
-           start_with?(search_str),
+           start_with?(pattern),
            "Search string must have a hit in Comment fixtures")
 
     login
-    get(:index, params: { pattern: search_str })
+    get(:index, params: { q: { model: :Comment, pattern: } })
 
     assert_page_title(:COMMENTS.l)
-    assert_displayed_filters("#{:query_pattern.l}: #{search_str}")
+    assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
   end
 
   def test_index_by_user_who_created_one_comment
