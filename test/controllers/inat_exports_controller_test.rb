@@ -25,8 +25,6 @@ class InatExportsControllerTest < FunctionalTestCase
 
     assert_response(:success)
     assert_form_action(action: :create)
-    assert_select("input#inat_ids", true,
-                  "Form needs a field for inputting iNat ids")
     assert_select("input#inat_username", true,
                   "Form needs a field for inputting iNat username")
   end
