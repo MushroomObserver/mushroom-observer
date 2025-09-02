@@ -81,6 +81,8 @@ module Observations
           dates: { shown: [:date], collapsed: [:created_at, :updated_at] },
           name: {
             shown: [:names],
+            # NOTE: These appear via js if names[:lookup] input has any value.
+            # See SearchHelper#autocompleter_with_conditional_fields
             # conditional: [[:include_subtaxa, :include_synonyms],
             #               [:include_all_name_proposals, :exclude_consensus]],
             collapsed: [:confidence, [:has_name, :lichen]]

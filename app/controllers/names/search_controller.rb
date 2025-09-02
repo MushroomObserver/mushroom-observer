@@ -59,8 +59,16 @@ module Names
     # with an array of fields or field pairings.
     def set_up_form_field_groupings
       @field_columns = [
-        { name: { shown: [:names],
-                  collapsed: [:pattern, :rank, :lichen] },
+        { name: {
+            shown: [:names],
+            # NOTE: These appear via js if names[:lookup] input has any value.
+            # See SearchHelper#autocompleter_with_conditional_fields
+            # conditional: [
+            #   [:include_subtaxa, :include_synonyms],
+            #   [:include_immediate_subtaxa, :exclude_original_names]
+            # ],
+            collapsed: [:pattern, :rank, :lichen]
+          },
           quality: {
             shown: [[:has_synonyms, :deprecated]],
             collapsed: [[:has_author, :author_has],
