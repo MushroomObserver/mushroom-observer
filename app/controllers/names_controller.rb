@@ -40,29 +40,6 @@ class NamesController < ApplicationController
     [nil, {}]
   end
 
-  # Display list of names that match a string.
-  # def pattern
-  #   if pattern.match?(/^\d+$/) &&
-  #      (name = Name.safe_find(pattern))
-  #     redirect_to(name_path(name.id))
-  #     [nil, {}]
-  #   else
-  #     return_pattern_search_results(pattern)
-  #   end
-  # end
-
-  # def return_pattern_search_results(pattern)
-  #   # Have to use PatternSearch here to catch invalid PatternSearch terms.
-  #   # Can't just send pattern to Query as create_query(:Observation, pattern:)
-  #   search = PatternSearch::Name.new(pattern)
-  #   return render_pattern_search_error(search) if search.errors.any?
-
-  #   # Call create_query to apply user content filters
-  #   query = create_query(:Name, search.query.params)
-  #   make_name_suggestions(search)
-  #   [query, {}]
-  # end
-
   def make_name_suggestions
     return unless @objects.empty? &&
                   params[:q].is_a?(ActionController::Parameters) &&
@@ -72,20 +49,6 @@ class NamesController < ApplicationController
 
     @name_suggestions = Name.suggest_alternate_spellings(original_spelling)
   end
-
-  # def make_name_suggestions(search)
-  #   alternate_spellings = search.query.params[:pattern]
-  #   return unless alternate_spellings && @objects.empty?
-
-  #   @name_suggestions =
-  #     Name.suggest_alternate_spellings(alternate_spellings)
-  # end
-
-  # def render_pattern_search_error(search)
-  #   search.errors.each { |error| flash_error(error.to_s) }
-  #   render("names/index")
-  #   [nil, {}]
-  # end
 
   # Disabling the cop because subaction methods are going away soon
   # rubocop:disable Naming/PredicatePrefix

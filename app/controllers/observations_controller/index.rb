@@ -65,37 +65,6 @@ class ObservationsController
       raise("Query::Observations.advanced_search_params is undefined.")
     end
 
-    # Display matrix of Observations whose notes, etc. match a string pattern.
-    # def pattern
-    #   pattern = params[:pattern].to_s
-    #   if pattern.match?(/^\d+$/) &&
-    #      (observation = Observation.safe_find(pattern))
-    #     redirect_to(permanent_observation_path(observation.id))
-    #   else
-    #     return_pattern_search_results(pattern)
-    #   end
-    # end
-
-    # def return_pattern_search_results(pattern)
-    #   # Have to use PatternSearch here to catch invalid PatternSearch terms.
-    #   # Can't just send pattern to Query as create_query(:Observation, pattern:)
-    #   search = PatternSearch::Observation.new(pattern)
-    #   return render_pattern_search_error(search) if search.errors.any?
-
-    #   # Call create_query to apply user content filters
-    #   query = create_query(:Observation, search.query.params)
-    #   make_name_suggestions(search)
-
-    #   if params[:needs_naming]
-    #     redirect_to(
-    #       identify_observations_path(q: q_param(query))
-    #     )
-    #     [nil, {}]
-    #   else
-    #     [query, {}]
-    #   end
-    # end
-
     # Different from NamesController. Returns arrays of [name, count]
     def make_name_suggestions
       return unless @objects.empty? &&
@@ -109,26 +78,6 @@ class ObservationsController
         [name, count]
       end
     end
-
-    # def make_name_suggestions(search)
-    #   alternate_spellings = search.query.params[:pattern]
-    #   return unless alternate_spellings && @objects.empty?
-
-    #   names = Name.suggest_alternate_spellings(alternate_spellings)
-    #   @name_suggestions = names.sort_by(&:sort_name).map do |name|
-    #     query = Query.create_query(:Observation, pattern: name.text_name)
-    #     count = query.num_results
-    #     [name, count]
-    #   end
-    # end
-
-    # def render_pattern_search_error(search)
-    #   search.errors.each { |error| flash_error(error.to_s) }
-    #   if params[:needs_naming]
-    #     redirect_to(identify_observations_path(q: q_param))
-    #   end
-    #   [nil, {}]
-    # end
 
     # Displays matrix of Observations with the given name proposed but not
     # actually that name.
