@@ -187,20 +187,6 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("#title", text: "#{obs.id} #{obs.name.search_name}")
   end
 
-  # I don't understand this test. There's no way to enter a hash in the form.
-  # def test_observation_pattern_search_with_bad_pattern
-  #   pattern = { error: "" }
-
-  #   login
-  #   visit("/")
-  #   fill_in("pattern_search_pattern", with: pattern)
-  #   page.select("Observations", from: :pattern_search_type)
-  #   within("#pattern_search_form") { click_button("Search") }
-
-  #   assert_selector("#flash_notices div.alert-warning")
-  #   assert_selector("#results", { text: "" }, "There should be no results")
-  # end
-
   # Tests of show_name_helper module
   # Prove that all these links appear under "Observations of"
   def test_links_to_observations_of

@@ -26,17 +26,6 @@ class SearchController < ApplicationController
     save_pattern_and_proceed(type, pattern)
   end
 
-  # Bring indexes #pattern and #maybe_pattern_is_an_id here
-  # Harmonize methods in Locations, names, obs, users that create query, opts
-  # Figure out what the special cases are, name and make methods
-  #
-  # forward_pattern_search with :q q_param, not :pattern param.
-  # Pattern is already saved in session, so that rehydrates pattern form.
-  # :q will rehydrate search form.
-  #
-  # Make controllers forward :pattern param from existing bookmarks to this
-  # controller, which will send it back as a :q.
-  #
   private
 
   def save_pattern_and_proceed(type, pattern)

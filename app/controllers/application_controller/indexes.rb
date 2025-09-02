@@ -224,24 +224,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     pattern = params[:pattern].to_s
     type = controller_model_name.pluralize.underscore.to_sym
     redirect_to(search_pattern_path(pattern_search: { pattern:, type: }))
-    # pattern = params[:pattern].to_s
-    # if (obj = maybe_pattern_is_an_id(pattern))
-    #   redirect_to(send(:"#{controller_model_name.underscore}_path", obj.id))
-    #   [nil, {}]
-    # else
-    #   query = create_query(controller_model_name.to_sym, pattern:)
-    #   [query, {}]
-    # end
   end
-
-  # If so, redirect to the show page for that object.
-  # def maybe_pattern_is_an_id(pattern)
-  #   if /^\d+$/.match?(pattern)
-  #     return controller_model_name.constantize.safe_find(pattern)
-  #   end
-
-  #   false
-  # end
 
   # Render an index or set of search results as a list or matrix. Arguments:
   # query::         Query instance describing search/index.
