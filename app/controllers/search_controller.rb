@@ -11,21 +11,8 @@ class SearchController < ApplicationController
   # Image advanced search retired in 2021
   ADVANCED_SEARCHABLE_MODELS = [Location, Name, Observation].freeze
 
-  # This is the action the search bar commits to.  It just redirects to one of
-  # several "foreign" search actions:
-  #   /comments/index (params[:pattern])
-  #   /glossary_terms/index (params[:pattern])
-  #   /herbaria/index (params[:pattern])
-  #   /herbarium_records/index (params[:pattern])
-  #   /images/index (params[:pattern])
-  #   /locations/index (params[:pattern])
-  #   /names/index (params[:pattern])
-  #   /observations/index (params[:pattern])
-  #   /projects/index (params[:pattern])
-  #   /species_lists/index (params[:pattern])
-  #   /users/index (params[:pattern])
-  #   /project/project_search
-  #   /species_lists/index
+  # This is the action the search bar commits to.
+  # It creates a query and forwards that to the appropriate index as :q.
   def pattern
     pattern = params.dig(:pattern_search, :pattern).to_s.strip_squeeze
     type = params.dig(:pattern_search, :type)
