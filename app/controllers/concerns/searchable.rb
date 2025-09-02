@@ -27,7 +27,7 @@ module Searchable
 
     def new
       set_up_form_field_groupings
-      new_search_instance_from_query
+      @search = new_search_instance_from_query
     end
 
     def create
@@ -61,13 +61,13 @@ module Searchable
     # removing params that wouldn't be in the form (like subqueries).
     # Need to parse and prepopulate range fields if there is a query.
     def new_search_instance_from_query
-      @search = if (@query = find_query(query_model))&.params.present?
-                  query_subclass.new(
-                    @query.params.slice(permitted_search_params.keys)
-                  )
-                else
-                  query_subclass.new
-                end
+      if (@query = find_query(query_model))&.params.present?
+        query_subclass.new(
+          @query.params.slice(permitted_search_params.keys)
+        )
+      else
+        query_subclass.new
+      end
     end
 
     # Passing some fields will raise an error if the required field is missing,
