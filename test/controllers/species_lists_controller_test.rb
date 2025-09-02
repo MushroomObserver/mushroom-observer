@@ -132,7 +132,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     pattern = "query"
 
     login
-    get(:index, params: { pattern: pattern })
+    get(:index, params: { q: { model: :SpeciesList, pattern: } })
 
     assert_response(:success)
     assert_page_title(:SPECIES_LISTS.l)
@@ -141,29 +141,6 @@ class SpeciesListsControllerTest < FunctionalTestCase
       "#content a:match('href', ?)", %r{^#{species_lists_path}/\d+},
       { count: SpeciesList.where(SpeciesList[:title] =~ pattern).count },
       "Wrong number of results"
-    )
-  end
-
-  def test_index_pattern_id
-    spl = species_lists(:unknown_species_list)
-
-    login
-    get(:index, params: { pattern: spl.id })
-
-    assert_redirected_to(species_list_path(spl.id))
-  end
-
-  def test_index_pattern_one_hit
-    pattern = "mysteries"
-
-    login
-    get(:index, params: { pattern: pattern })
-
-    assert_response(:redirect)
-    assert_match(
-      species_list_path(species_lists(:unknown_species_list)),
-      redirect_to_url,
-      "Wrong page"
     )
   end
 

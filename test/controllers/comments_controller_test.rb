@@ -62,15 +62,6 @@ class CommentsControllerTest < FunctionalTestCase
                                          value: params[:type].to_s))
   end
 
-  def test_index_pattern_id
-    id = comments(:fungi_comment).id
-
-    login
-    get(:index, params: { pattern: id })
-
-    assert_redirected_to(comment_path(id))
-  end
-
   def test_index_pattern_search_str
     search_str = "Let's"
     assert(comments(:minimal_unknown_obs_comment_2).summary.

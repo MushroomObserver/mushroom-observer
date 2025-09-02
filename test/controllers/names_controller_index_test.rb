@@ -171,41 +171,6 @@ class NamesControllerIndexTest < FunctionalTestCase
     )
   end
 
-  # def test_index_pattern_id
-  #   id = names(:agaricus).id
-
-  #   login
-  #   get(:index, params: { pattern: id })
-
-  #   assert_redirected_to(name_path(id))
-  # end
-
-  # def test_index_pattern_help
-  #   pattern = "help:me"
-  #   login
-  #   get(:index, params: { q: q_pattern(pattern) })
-
-  #   assert_match(/unexpected term/i, css_select("#flash_notices").text)
-  # end
-
-  # # It's not getting near_misses
-  # def test_index_pattern_near_miss
-  #   near_miss_pattern = "agaricis campestrus"
-  #   assert_empty(
-  #     Name.with_correct_spelling.where(search_name: near_miss_pattern),
-  #     "Test needs a pattern without a correctly spelled exact match"
-  #   )
-  #   near_misses = Name.with_correct_spelling.
-  #                 where(Name[:search_name] =~ /agaric.s campestr.s/)
-
-  #   login
-  #   get(:index, params: { pattern: near_miss_pattern })
-  #   near_misses.each do |near_miss|
-  #     assert_select("#results a[href*='names/#{near_miss.id}'] .display-name",
-  #                   text: near_miss.search_name)
-  #   end
-  # end
-
   def test_index_has_observations
     login
     get(:index, params: { has_observations: true })

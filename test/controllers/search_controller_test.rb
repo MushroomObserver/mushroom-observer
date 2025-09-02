@@ -113,7 +113,9 @@ class SearchControllerTest < FunctionalTestCase
       # Increment to keep this unpredictable
       pattern = (pattern.to_i + 9).to_s
     end
+  end
 
+  def test_pattern_search_invalid_redirects_to_indexes
     params = { pattern_search: { pattern: "x", type: :nonexistent_type } }
     get(:pattern, params:)
     assert_redirected_to("/")
@@ -131,6 +133,41 @@ class SearchControllerTest < FunctionalTestCase
     params = { pattern_search: { pattern: "", type: :herbaria } }
     get(:pattern, params:)
     assert_redirected_to(herbaria_path)
+  end
+
+  def test_pattern_search_matching_an_id_redirects_to_show
+    login
+
+    SearchController::PATTERN_SEARCHABLE_MODELS.each do |model|
+      model_name = model.to_s.singularize.camelize.to_sym
+      id = model_name.to_s.constantize.last.id
+      params = { pattern_search: { pattern: id, type: model } }
+      get(:pattern, params:)
+
+      show_path = :"#{model.to_s.singularize}_path"
+      assert_redirected_to(
+        send(show_path, id:)
+      )
+    end
+  end
+
+  def test_pattern_search_matching_title_redirects_to_show
+    login
+
+    models = SearchController::PATTERN_SEARCHABLE_MODELS.dup
+    models.each do |model|
+      model_name = model.to_s.singularize.camelize.to_sym
+      last = model_name.to_s.constantize.last
+      next unless last.respond_to?(:title)
+
+      title = last.title
+      id = last.id
+      params = { pattern_search: { pattern: title, type: model } }
+      get(:pattern, params:)
+
+      show_path = :"#{model.to_s.singularize}_path"
+      assert_redirected_to(send(show_path, id:))
+    end
   end
 
   def test_pattern_search_flashes_term_errors
