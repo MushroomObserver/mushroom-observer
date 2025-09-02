@@ -92,6 +92,17 @@ class SearchControllerTest < FunctionalTestCase
     assert_equal("", query.params[:clade])
   end
 
+  # This permalink caused a server error when setting session[:pattern] without
+  # checking bytesize.
+  def test_pattern_search_long_permalink_pattern
+    pattern = "created%3A2006-2024+has_observations%3A1+" \
+              "has_classification%3A1+has_notes%3A%22yes%22+has_comments%3A1"
+    params = { pattern_search: { pattern:, type: :names } }
+
+    get(:pattern, params:)
+    assert_redirected_to(names_path(q: { model: :Name, pattern: }))
+  end
+
   def test_pattern_search_redirects_to_controllers_with_q
     login
 

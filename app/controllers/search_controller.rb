@@ -41,8 +41,11 @@ class SearchController < ApplicationController
 
   def save_pattern_and_proceed(type, pattern)
     # Save it so that we can keep it in the search bar in subsequent pages.
-    session[:pattern] = pattern
-    session[:search_type] = type
+    # But don't save encoded incoming patterns that are too large.
+    unless pattern.bytesize > 4096
+      session[:pattern] = pattern
+      session[:search_type] = type
+    end
 
     if type == :google
       site_google_search(pattern)
