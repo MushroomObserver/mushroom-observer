@@ -18,7 +18,7 @@ class SearchController < ApplicationController
   #   /project/project_search
   #   /species_lists/index
   def pattern
-    pattern = params.dig(:pattern_search, :pattern) { |p| p.to_s.strip_squeeze }
+    pattern = params.dig(:pattern_search, :pattern).to_s.strip_squeeze
     type = params.dig(:pattern_search, :type)
     # safe pluralize in case session[:search_type] is singular
     type = type.to_s.pluralize.to_sym unless type == :google
@@ -116,6 +116,8 @@ class SearchController < ApplicationController
     query = query_from_pattern(model_name, pattern)
     if model_name == :Observation && params[:needs_naming]
       redirect_to(identify_observations_path(q: query.q_param))
+    elsif query.result_ids.length == 1
+      redirect_to(send(:"#{type.to_s.singularize}_path", query.first_id))
     else
       redirect_to(send(:"#{type}_path", params: { q: query.q_param }))
     end
@@ -140,7 +142,7 @@ class SearchController < ApplicationController
   def pattern_search_query_from_pattern(model_name, pattern)
     search = "PatternSearch::#{model_name}".constantize.new(pattern)
     flash_pattern_search_errors(search) if search.errors.any?
-    create_query(model_name, search.query.params)
+    create_query(model_name, search.query&.params || {})
   end
 
   def location_query_from_pattern(pattern)

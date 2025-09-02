@@ -72,6 +72,18 @@ class ImagesControllerTest < FunctionalTestCase
     assert_redirected_to(search_advanced_path)
   end
 
+  # The pattern param is maintained only for backwards compatibility.
+  # Should redirect to SearchController#pattern
+  def test_index_pattern_param_redirected_to_search
+    pattern = "USA"
+
+    login
+    get(:index, params: { pattern: pattern })
+    assert_redirected_to(
+      search_pattern_path(pattern_search: { pattern:, type: :images })
+    )
+  end
+
   def test_index_pattern_text_multiple_hits
     pattern = "USA"
 

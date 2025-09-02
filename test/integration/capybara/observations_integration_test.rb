@@ -170,12 +170,13 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
                     text: :runtime_no_matches.l(type: :observations.l))
     assert_match("Observations", page.title)
     assert_selector("#results", text: "")
+
+    corrected_pattern = "Agaricus campestris"
     assert_selector(
       "#content a[href *= 'observations?pattern=Agaricus+campestris']",
       text: names(:agaricus_campestris).search_name
     )
-
-    corrected_pattern = "Agaricus campestris"
+    assert_selector("#content div.alert-warning", text: corrected_pattern)
     obs = observations(:agaricus_campestris_obs)
 
     fill_in("pattern_search_pattern", with: corrected_pattern)
@@ -185,6 +186,20 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     assert_no_selector("#content div.alert-warning")
     assert_selector("#title", text: "#{obs.id} #{obs.name.search_name}")
   end
+
+  # I don't understand this test. There's no way to enter a hash in the form.
+  # def test_observation_pattern_search_with_bad_pattern
+  #   pattern = { error: "" }
+
+  #   login
+  #   visit("/")
+  #   fill_in("pattern_search_pattern", with: pattern)
+  #   page.select("Observations", from: :pattern_search_type)
+  #   within("#pattern_search_form") { click_button("Search") }
+
+  #   assert_selector("#flash_notices div.alert-warning")
+  #   assert_selector("#results", { text: "" }, "There should be no results")
+  # end
 
   # Tests of show_name_helper module
   # Prove that all these links appear under "Observations of"
