@@ -3056,6 +3056,9 @@
 
 # observation/inat_exports
   inat_export_create_title: Export to iNat
+  inat_export_observation_counts: Observation Counts
+  inat_export_requested: Export requested
+  inat_export_exportables: Exportable
   inat_export_details: "* Excludes Observations which are not yours.\n* Excludes Observations previously imported from/exported to iNat."
 
   # observation/inat_imports
