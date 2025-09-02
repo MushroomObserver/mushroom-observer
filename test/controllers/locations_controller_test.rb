@@ -250,12 +250,12 @@ class LocationsControllerTest < FunctionalTestCase
     assert_redirected_to(search_advanced_path)
   end
 
-  def test_index_pattern
+  def test_index_pattern_multiple_hits
     search_str = "California"
     matches = Location.where(Location[:name].matches("%#{search_str}%"))
 
     login
-    get(:index, params: { pattern: search_str })
+    get(:index, params: { q: { model: :Location, pattern: search_str } })
 
     assert_select(
       "#content a:match('href', ?)", %r{#{locations_path}/\d+},
@@ -263,14 +263,6 @@ class LocationsControllerTest < FunctionalTestCase
     )
     assert_page_title(:LOCATIONS.l)
     assert_displayed_filters("#{:query_pattern.l}: #{search_str}")
-  end
-
-  def test_index_pattern_id
-    loc = locations(:salt_point)
-
-    login
-    get(:index, params: { pattern: loc.id.to_s })
-    assert_redirected_to(location_path(loc.id))
   end
 
   def test_index_country

@@ -208,28 +208,10 @@ class ProjectsControllerTest < FunctionalTestCase
     pattern = "Project"
 
     login
-    get(:index, params: { pattern: "Project" })
+    get(:index, params: { q: { model: :Project, pattern: } })
 
     assert_page_title(:PROJECTS.l)
     assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
-  end
-
-  def test_index_pattern_search_by_name_one_hit
-    project = projects(:bolete_project)
-
-    login
-    get(:index, params: { pattern: "Bolete Project" })
-
-    assert_redirected_to(project_path(project.id))
-    assert_session_query_record_is_correct
-  end
-
-  def test_index_pattern_search_by_id
-    project = projects(:bolete_project)
-
-    login
-    get(:index, params: { pattern: project.id.to_s })
-    assert_redirected_to(project_path(project.id))
   end
 
   def test_add_project

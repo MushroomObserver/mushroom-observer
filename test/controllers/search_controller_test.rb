@@ -92,81 +92,178 @@ class SearchControllerTest < FunctionalTestCase
     assert_equal("", query.params[:clade])
   end
 
-  def test_pattern_search
+  # This permalink caused a server error when setting session[:pattern] without
+  # checking bytesize.
+  def test_pattern_search_long_permalink_pattern
+    pattern = "created%3A2006-2024+has_observations%3A1+" \
+              "has_classification%3A1+has_notes%3A%22yes%22+has_comments%3A1"
+    params = { pattern_search: { pattern:, type: :names } }
+
+    get(:pattern, params:)
+    assert_redirected_to(names_path(q: { model: :Name, pattern: }))
+  end
+
+  def test_pattern_search_redirects_to_controllers_with_q
     login
-    params = { pattern_search: { pattern: "12", type: :observations } }
-    get(:pattern, params: params)
-    assert_redirected_to(observations_path(pattern: "12"))
-    assert_equal(:observations, @request.session[:search_type])
 
-    params = { pattern_search: { pattern: "34", type: :images } }
-    get(:pattern, params: params)
-    assert_redirected_to(images_path(pattern: "34"))
-    assert_equal(:images, @request.session[:search_type])
+    pattern = "12"
 
-    params = { pattern_search: { pattern: "56", type: :names } }
-    get(:pattern, params: params)
-    assert_redirected_to(names_path(pattern: "56"))
-    assert_equal(:names, @request.session[:search_type])
+    # Test basic pattern for all the models with pattern queries/scopes.
+    SearchController::PATTERN_SEARCHABLE_MODELS.each do |model|
+      model_name = model.to_s.singularize.camelize.to_sym
+      params = { pattern_search: { pattern:, type: model } }
+      get(:pattern, params:)
 
-    params = { pattern_search: { pattern: "78", type: :locations } }
-    get(:pattern, params: params)
-    assert_redirected_to(locations_path(pattern: "78"))
-    assert_equal(:locations, @request.session[:search_type])
+      assert_redirected_to(
+        send(:"#{model}_path", q: { model: model_name, pattern: })
+      )
 
-    params = { pattern_search: { pattern: "90", type: :comments } }
-    get(:pattern, params: params)
-    assert_redirected_to(comments_path(pattern: "90"))
-    assert_equal(:comments, @request.session[:search_type])
+      assert_equal(model, @request.session[:search_type])
+      assert_equal(pattern, @request.session[:pattern])
 
-    params = { pattern_search: { pattern: "21", type: :projects } }
-    get(:pattern, params: params)
-    assert_redirected_to(projects_path(pattern: "21"))
-    assert_equal(:projects, @request.session[:search_type])
+      # Increment to keep this unpredictable
+      pattern = (pattern.to_i + 9).to_s
+    end
+  end
 
-    params = { pattern_search: { pattern: "12", type: :species_lists } }
-    get(:pattern, params: params)
-    assert_redirected_to(species_lists_path(pattern: "12"))
-    assert_equal(:species_lists, @request.session[:search_type])
-
-    params = { pattern_search: { pattern: "34", type: :users } }
-    get(:pattern, params: params)
-    assert_redirected_to(users_path(pattern: "34"))
-    assert_equal(:users, @request.session[:search_type])
-
-    params = { pattern_search: { pattern: "34", type: :glossary_terms } }
-    get(:pattern, params: params)
-    assert_redirected_to(glossary_terms_path(pattern: "34"))
-    assert_equal(:glossary_terms, @request.session[:search_type])
-
-    stub_request(:any, /google.com/)
-    pattern =  "hexiexiva"
-    params = { pattern_search: { pattern: pattern, type: :google } }
-    target =
-      "https://google.com/search?q=site%3Amushroomobserver.org+#{pattern}"
-    get(:pattern, params: params)
-    assert_redirected_to(target)
-
-    params = { pattern_search: { pattern: "", type: :google } }
-    get(:pattern, params: params)
-    assert_redirected_to("/")
-
+  def test_pattern_search_invalid_redirects_to_indexes
     params = { pattern_search: { pattern: "x", type: :nonexistent_type } }
-    get(:pattern, params: params)
+    get(:pattern, params:)
     assert_redirected_to("/")
 
     params = { pattern_search: { pattern: "x", type: nil } }
-    get(:pattern, params: params)
+    get(:pattern, params:)
     assert_redirected_to("/")
 
     params = { pattern_search: { pattern: "", type: :observations } }
-    get(:pattern, params: params)
+    get(:pattern, params:)
     assert_redirected_to(observations_path)
 
     # Make sure this redirects to the index that lists all herbaria,
     # rather than the index that lists query results.
     params = { pattern_search: { pattern: "", type: :herbaria } }
-    get(:pattern, params: params)
+    get(:pattern, params:)
     assert_redirected_to(herbaria_path)
+  end
+
+  def test_pattern_search_matching_an_id_redirects_to_show
+    login
+
+    SearchController::PATTERN_SEARCHABLE_MODELS.each do |model|
+      model_name = model.to_s.singularize.camelize.to_sym
+      id = model_name.to_s.constantize.last.id
+      params = { pattern_search: { pattern: id, type: model } }
+      get(:pattern, params:)
+
+      show_path = :"#{model.to_s.singularize}_path"
+      assert_redirected_to(
+        send(show_path, id:)
+      )
+    end
+  end
+
+  def test_pattern_search_matching_title_redirects_to_show
+    login
+
+    models = SearchController::PATTERN_SEARCHABLE_MODELS.dup
+    models.each do |model|
+      model_name = model.to_s.singularize.camelize.to_sym
+      last = model_name.to_s.constantize.last
+      next unless last.respond_to?(:title)
+
+      title = last.title
+      id = last.id
+      params = { pattern_search: { pattern: title, type: model } }
+      get(:pattern, params:)
+
+      show_path = :"#{model.to_s.singularize}_path"
+      assert_redirected_to(send(show_path, id:))
+    end
+  end
+
+  def test_pattern_search_flashes_term_errors
+    login
+    params = { pattern_search: { pattern: "help:me", type: :names } }
+    get(:pattern, params:)
+    assert_redirected_to(names_path(q: { model: :Name }))
+    assert_flash_error("Unexpected term")
+  end
+
+  def test_index_pattern_bad_pattern
+    pattern = { error: "" }
+
+    login
+    get(:pattern, params: { pattern_search: { pattern:, type: :observations } })
+
+    assert_redirected_to(
+      observations_path(q: { model: :Observation }),
+      "Bad pattern in obs search should render blank obs index"
+    )
+  end
+
+  def test_pattern_search_from_needs_naming
+    pattern = "Briceland"
+    params = { pattern_search: { pattern:, type: :observations },
+               needs_naming: rolf }
+
+    login
+    get(:pattern, params:)
+
+    assert_redirected_to(
+      identify_observations_path(q: { model: :Observation, pattern: }),
+      "Pattern in search from obs_needing_ids should render " \
+      "obs_needing_ids"
+    )
+  end
+
+  def test_pattern_search_from_needs_naming_bad_pattern
+    pattern = { error: "" }
+    params = { pattern_search: { pattern:, type: :observations },
+               needs_naming: rolf }
+
+    login
+    get(:pattern, params:)
+
+    assert_redirected_to(
+      identify_observations_path(q: { model: :Observation }),
+      "Bad pattern in search from obs_needing_ids should render " \
+      "obs_needing_ids"
+    )
+  end
+
+  def test_pattern_search_redirects_to_google
+    login
+    stub_request(:any, /google.com/)
+    pattern =  "hexiexiva"
+    params = { pattern_search: { pattern: pattern, type: :google } }
+    target =
+      "https://google.com/search?q=site%3Amushroomobserver.org+#{pattern}"
+    get(:pattern, params:)
+    assert_redirected_to(target)
+
+    params = { pattern_search: { pattern: "", type: :google } }
+    get(:pattern, params:)
+    assert_redirected_to("/")
+  end
+
+  def test_id_pattern_redirects_to_show_page
+    obs = Observation.first
+    params = { pattern_search: { pattern: obs.id, type: :observations } }
+    get(:pattern, params:)
+    assert_redirected_to(observation_path(obs.id))
+
+    name = names(:agaricus)
+    params = { pattern_search: { pattern: name.id, type: :names } }
+    get(:pattern, params:)
+    assert_redirected_to(name_path(name.id))
+
+    user = users(:rolf)
+    params = { pattern_search: { pattern: user.id, type: :users } }
+    get(:pattern, params:)
+    assert_redirected_to(user_path(user.id))
+    # User email should work too
+    params = { pattern_search: { pattern: user.email, type: :users } }
+    get(:pattern, params:)
+    assert_redirected_to(user_path(user.id))
   end
 end

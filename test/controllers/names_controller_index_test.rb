@@ -140,12 +140,28 @@ class NamesControllerIndexTest < FunctionalTestCase
     assert_redirected_to(search_advanced_path)
   end
 
-  def test_index_pattern_multiple_hits
+  def q_pattern(pattern)
+    { q: { model: :Name, pattern: } }
+  end
+
+  # The pattern param is maintained only for backwards compatibility.
+  # Should redirect to SearchController#pattern
+  def test_index_pattern_param_redirected_to_search
     pattern = "Agaricus"
 
     login
-    get(:index, params: { pattern: pattern })
+    get(:index, params: { pattern: })
+    assert_redirected_to(
+      search_pattern_path(pattern_search: { pattern:, type: :names })
+    )
+  end
 
+  def test_index_pattern_multiple_hits
+    pattern = "Agaricus"
+    params = q_pattern(pattern)
+
+    login
+    get(:index, params:)
     assert_page_title(:NAMES.l)
     assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
     assert_select(
@@ -154,38 +170,6 @@ class NamesControllerIndexTest < FunctionalTestCase
                     with_correct_spelling.count },
       "Wrong number of (correctly spelled) Names"
     )
-  end
-
-  def test_index_pattern_id
-    id = names(:agaricus).id
-
-    login
-    get(:index, params: { pattern: id })
-
-    assert_redirected_to(name_path(id))
-  end
-
-  def test_index_pattern_help
-    login
-    get(:index, params: { pattern: "help:me" })
-
-    assert_match(/unexpected term/i, @response.body)
-  end
-
-  def test_index_pattern_near_miss
-    near_miss_pattern = "agaricis campestrus"
-    assert_empty(Name.with_correct_spelling.
-                      where(search_name: near_miss_pattern),
-                 "Test needs a pattern without a correctly spelled exact match")
-    near_misses = Name.with_correct_spelling.
-                  where(Name[:search_name] =~ /agaric.s campestr.s/)
-
-    login
-    get(:index, params: { near_miss_pattern: })
-    near_misses.each do |near_miss|
-      assert_select("#results a[href*='names/#{near_miss.id}'] .display-name",
-                    text: near_miss.search_name)
-    end
   end
 
   def test_index_has_observations

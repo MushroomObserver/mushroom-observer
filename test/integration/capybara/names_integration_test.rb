@@ -84,12 +84,12 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     assert_nil(good_name.synonym_id)
   end
 
-  def test_name_pattern_search_with_near_miss_corrected
-    near_miss_pattern = "agaricis campestrus"
+  def test_name_pattern_search_with_correctable_pattern
+    correctable_pattern = "agaricis campestrus"
 
     login
     visit("/")
-    fill_in("pattern_search_pattern", with: near_miss_pattern)
+    fill_in("pattern_search_pattern", with: correctable_pattern)
     page.select("Names", from: :pattern_search_type)
     within("#pattern_search_form") { click_button("Search") }
 
@@ -97,6 +97,10 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
                     text: "Maybe you meant one of the following names?")
 
     corrected_pattern = "Agaricus"
+    name = names(:agaricus_campestris)
+    assert_selector("#content a[href *= 'names/#{name.id}']",
+                    text: name.search_name)
+    assert_selector("#content div.alert-warning", text: corrected_pattern)
 
     fill_in("pattern_search_pattern", with: corrected_pattern)
     page.select("Names", from: :pattern_search_type)

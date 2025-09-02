@@ -21,7 +21,7 @@ class ProjectsController < ApplicationController
 
   # ApplicationController uses this to dispatch #index to a private method
   def index_active_params
-    [:pattern, :member, :by].freeze
+    [:pattern, :member, :by, :q].freeze
   end
 
   # Display list of projects with a given member, sorted by date.

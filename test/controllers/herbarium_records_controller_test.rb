@@ -38,23 +38,13 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     pattern = "Coprinus comatus"
 
     login
-    get(:index, params: { pattern: pattern })
+    get(:index, params: { q: { model: :HerbariumRecord, pattern: pattern } })
 
     assert_response(:success)
     assert_page_title(:HERBARIUM_RECORDS.l)
     assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
     # In results, expect 1 row per herbarium_record
     assert_select("#results tr", 2)
-  end
-
-  def test_index_pattern_with_one_matching_record
-    record = herbarium_records(:interesting_unknown)
-
-    login
-    get(:index, params: { pattern: record.id })
-
-    assert_redirected_to(herbarium_record_path(record.id))
-    assert_no_flash
   end
 
   def test_index_herbarium_id_with_multiple_records

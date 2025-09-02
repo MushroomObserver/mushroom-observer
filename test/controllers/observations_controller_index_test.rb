@@ -276,12 +276,17 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     )
   end
 
-  def test_index_pattern_search_help
-    login
-    get(:index, params: { pattern: "help:me" })
+  # The pattern param is maintained only for backwards compatibility.
+  # Should redirect to SearchController#pattern, which instantiates the
+  # PatternSearch::Observation and then redirects here with :q param
+  def test_index_pattern_param_redirected_to_search
+    pattern = "Agaricus"
 
-    assert_flash_error
-    assert_match(/unexpected term/i, @response.body)
+    login
+    get(:index, params: { pattern: })
+    assert_redirected_to(
+      search_pattern_path(pattern_search: { pattern:, type: :observations })
+    )
   end
 
   def setup_rolfs_index
@@ -290,11 +295,27 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login
   end
 
+  def q_pattern(pattern)
+    { q: { model: :Observation, pattern: } }
+  end
+
+  def q_name_params(pattern)
+    {
+      q: {
+        model: :Observation,
+        names: {
+          lookup: pattern, include_synonyms: true, include_subtaxa: true
+        }
+      }
+    }
+  end
+
   def test_index_pattern_multiple_hits
     pattern = "Agaricus"
+    params = q_name_params(pattern)
 
     setup_rolfs_index
-    get(:index, params: { pattern: pattern })
+    get(:index, params:)
 
     # Pattern search guesses this is a name query
     assert_page_title(:OBSERVATIONS.l)
@@ -304,21 +325,12 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_results(text: /#{pattern}/i, count:)
   end
 
-  def test_index_pattern_needs_naming_with_filter
-    pattern = "Briceland"
-
-    setup_rolfs_index
-    get(:index, params: { pattern: pattern, needs_naming: rolf })
-
-    assert_match(/^#{identify_observations_url}/, redirect_to_url,
-                 "Wrong page. Should redirect to #{:obs_needing_id.l}")
-  end
-
   def test_index_pattern1
     pattern = "Boletus edulis"
+    params = q_name_params(pattern)
 
     setup_rolfs_index
-    get(:index, params: { pattern: pattern })
+    get(:index, params:)
 
     # Pattern search guesses this is a name query
     assert_page_title(:OBSERVATIONS.l)
@@ -331,9 +343,10 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
   def test_index_pattern_page2
     pattern = "Boletus edulis"
+    params = q_name_params(pattern).merge(page: 2)
 
     login
-    get(:index, params: { pattern: pattern, page: 2 })
+    get(:index, params:)
 
     # Pattern search guesses this is a name query
     assert_page_title(:OBSERVATIONS.l)
@@ -346,9 +359,11 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
   def test_index_filter_display_is_concise
     pattern = "Agrocybe arvalis" # There are two
+    params = q_name_params(pattern)
 
     setup_rolfs_index
-    get(:index, params: { pattern: pattern })
+    # This is what search_controller sends for that pattern:
+    get(:index, params:)
     assert_page_title(:OBSERVATIONS.l)
     assert_displayed_filters("#{:query_names.l}: #{pattern}")
 
@@ -367,9 +382,10 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
   def test_index_pattern_no_hits
     pattern = "no hits"
+    params = q_pattern(pattern)
 
     login
-    get(:index, params: { pattern: pattern })
+    get(:index, params:)
 
     assert_empty(css_select('[id="context_nav"]').text,
                  "RH tabset should be empty when search has no hits")
@@ -384,31 +400,6 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     assert_match(/#{obs.id}/, redirect_to_url,
                  "Search with 1 hit should show the hit")
-  end
-
-  def test_index_pattern_bad_pattern
-    pattern = { error: "" }
-
-    login
-    get(:index, params: { pattern: pattern })
-
-    assert_response(:success)
-    assert_flash_error
-    assert_displayed_title("")
-    assert_select("#results", { text: "" }, "There should be no results")
-  end
-
-  def test_index_pattern_bad_pattern_from_needs_naming
-    pattern = { error: "" }
-
-    login
-    get(:index, params: { pattern: pattern, needs_naming: rolf })
-
-    assert_redirected_to(
-      identify_observations_path,
-      "Bad pattern in search from obs_needing_ids should render " \
-      "obs_needing_ids"
-    )
   end
 
   def test_index_look_alikes
