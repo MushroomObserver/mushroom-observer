@@ -63,7 +63,7 @@ module Searchable
     def new_search_instance_from_query
       @search = if (@query = find_query(query_model))&.params.present?
                   query_subclass.new(
-                    @query.params.permit(permitted_search_params.keys)
+                    @query.params.slice(permitted_search_params.keys)
                   )
                 else
                   query_subclass.new
