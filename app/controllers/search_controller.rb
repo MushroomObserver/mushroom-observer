@@ -27,15 +27,7 @@ class SearchController < ApplicationController
       flash_and_redirect_invalid_search(type) and return
     end
 
-    # Save it so that we can keep it in the search bar in subsequent pages.
-    session[:pattern] = pattern
-    session[:search_type] = type
-
-    if type == :google
-      site_google_search(pattern)
-    else
-      forward_pattern_search(type, pattern)
-    end
+    save_pattern_and_proceed(type, pattern)
   end
 
   PATTERN_SEARCHABLE_MODELS = [
@@ -55,6 +47,18 @@ class SearchController < ApplicationController
   # controller, which will send it back as a :q.
   #
   private
+
+  def save_pattern_and_proceed(type, pattern)
+    # Save it so that we can keep it in the search bar in subsequent pages.
+    session[:pattern] = pattern
+    session[:search_type] = type
+
+    if type == :google
+      site_google_search(pattern)
+    else
+      forward_pattern_search(type, pattern)
+    end
+  end
 
   def site_google_search(pattern)
     if pattern.blank?
