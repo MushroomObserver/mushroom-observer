@@ -2,6 +2,15 @@
 
 # searches defined by the url query string
 class SearchController < ApplicationController
+  # These are plural symbols because the search bar sends them this way.
+  PATTERN_SEARCHABLE_MODELS = [
+    :comments, :glossary_terms, :herbaria, :herbarium_records, :images,
+    :locations, :names, :observations, :projects, :species_lists, :users
+  ].freeze
+
+  # Image advanced search retired in 2021
+  ADVANCED_SEARCHABLE_MODELS = [Location, Name, Observation].freeze
+
   # This is the action the search bar commits to.  It just redirects to one of
   # several "foreign" search actions:
   #   /comments/index (params[:pattern])
@@ -29,11 +38,6 @@ class SearchController < ApplicationController
 
     save_pattern_and_proceed(type, pattern)
   end
-
-  PATTERN_SEARCHABLE_MODELS = [
-    :comments, :glossary_terms, :herbaria, :herbarium_records, :images,
-    :locations, :names, :observations, :projects, :species_lists, :users
-  ].freeze
 
   # Bring indexes #pattern and #maybe_pattern_is_an_id here
   # Harmonize methods in Locations, names, obs, users that create query, opts
@@ -170,9 +174,6 @@ class SearchController < ApplicationController
   end
 
   public
-
-  # Image advanced search retired in 2021
-  ADVANCED_SEARCHABLE_MODELS = [Location, Name, Observation].freeze
 
   # Advanced search form.  When it posts it just redirects to one of several
   # "foreign" search actions:
