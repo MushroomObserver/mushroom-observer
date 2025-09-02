@@ -69,8 +69,8 @@ class SearchController < ApplicationController
     end
   end
 
-  # Convert pattern into :q here, so we hit the index with a standard permalink.
-  # In the case of "needs_naming", this is added to the search path params?
+  # Convert pattern into :q here, so we hit the index with a standard permalink
+  # and have a saved query that we can refine in a search form.
   def forward_pattern_search(type, pattern)
     model_name = type.to_s.singularize.camelize.to_sym
 
@@ -141,7 +141,7 @@ class SearchController < ApplicationController
     when :Observation, :Name
       pattern_search_query_from_pattern(model_name, pattern)
     when :Location
-      send(:"#{model_name.to_s.underscore}_query_from_pattern", pattern)
+      location_query_from_pattern(pattern)
     else
       create_query(model_name, pattern:)
     end
