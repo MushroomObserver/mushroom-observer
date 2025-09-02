@@ -1640,9 +1640,13 @@ class ObservationTest < UnitTestCase
   def test_exportable_to_inat
     obs = observations(:minimal_unknown_obs)
     assert(obs.exportable_to_inat?)
+
     assert_not(observations(:imported_inat_obs).exportable_to_inat?)
-    obs.other_notes = "Exported to iNaturalist as"
+
+    obs.inat_id = 1234
     assert_not(obs.exportable_to_inat?)
+
+    obs.inat_id = nil
     obs.other_notes = "Mirrored on iNaturalist as"
     assert_not(obs.exportable_to_inat?)
   end

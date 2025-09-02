@@ -1209,12 +1209,11 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   private
 
   def imported_from_inat?
-    source == "mo_inat_import"
+    inat_id.present? || source == "mo_inat_import"
   end
 
   def exported_to_inat?
-    # TODO: use translation string instead of hardcoded string
-    notes_part_value(:Other)&.match?(/Exported to iNaturalist as/)
+    inat_id.present?
   end
 
   def mirrored_on_inat?
