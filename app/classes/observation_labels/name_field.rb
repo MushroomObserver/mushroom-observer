@@ -3,7 +3,7 @@
 # Represents a taxonomic name field with proper formatting for
 # scientific names Handles Textile markup (**bold** and __italic__)
 # and renders with appropriate font styling
-class NameField
+class ObservationLabels::NameField
   attr_reader :name, :value, :tokens
 
   def initialize(name, textile_value)

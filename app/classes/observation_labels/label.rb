@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Represents a single 5"x3" label for one mushroom observation
-class Label
+class ObservationLabels::Label
   LABEL_WIDTH = 5.in
   LABEL_HEIGHT = 3.in
   MARGIN = 0.25.in
@@ -49,7 +49,7 @@ class Label
   end
 
   def prepare_observation_fields
-    observation_fields = ObservationFields.new(observation)
+    observation_fields = ObservationLabels::Fields.new(observation)
 
     {
       label_fields: observation_fields.label_fields,

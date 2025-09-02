@@ -853,28 +853,28 @@ even_longer_obs:
   text_name: <%= "B#{'a'*80}" %>
   where: <%= "Sh#{'e'*200}pland" %>
 
-suillus_weaverae_obs:
+megacollybia_rodmanii_obs:
   <<: *DEFAULTS
-  name: suillus_weaverae
-  text_name: Suillus weaverae
+  name: megacollybia_rodmanii
+  text_name: Megacollybia rodmanii
   where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
   when: 2025-09-01
   created_at: 2025-09-01 04:05:03
   updated_at: 2025-09-01 04:05:03
 
-dup_suillus_weaverae_obs:
+dup_megacollybia_rodmanii_obs:
   <<: *DEFAULTS
-  name: suillus_weaverae
-  text_name: Suillus weaverae
+  name: megacollybia_rodmanii
+  text_name: Megacollybia rodmanii
   where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
   when: 2025-09-01
   created_at: 2025-09-01 04:05:03
   updated_at: 2025-09-01 04:05:03
 
-nearby_suillus_weaverae_obs:
+nearby_megacollybia_rodmanii_obs:
   <<: *DEFAULTS
-  name: suillus_weaverae
-  text_name: Suillus weaverae
+  name: megacollybia_rodmanii
+  text_name: Megacollybia rodmanii
   lat: 41.6592
   lng: -70.6975
   location: falmouth
@@ -883,10 +883,10 @@ nearby_suillus_weaverae_obs:
   created_at: 2025-09-08 04:05:03
   updated_at: 2025-09-08 04:05:03
 
-faraway_suillus_weaverae_obs:
+faraway_megacollybia_rodmanii_obs:
   <<: *DEFAULTS
-  name: suillus_weaverae
-  text_name: Suillus weaverae
+  name: megacollybia_rodmanii
+  text_name: Megacollybia rodmanii
   lat: 40.867
   lng: -73.879
   location: nybg_location
@@ -895,19 +895,19 @@ faraway_suillus_weaverae_obs:
   created_at: 2025-09-08 04:05:03
   updated_at: 2025-09-08 04:05:03
 
-older_suillus_weaverae_obs:
+older_megacollybia_rodmanii_obs:
   <<: *DEFAULTS
-  name: suillus_weaverae
-  text_name: Suillus weaverae
+  name: megacollybia_rodmanii
+  text_name: Megacollybia rodmanii
   where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
   when: 2025-08-01
   created_at: 2025-08-01 04:05:03
   updated_at: 2025-08-01 04:05:03
 
-suillus_granulatus_obs:
+megacollybia_platyphylla_obs:
   <<: *DEFAULTS
-  name: suillus_granulatus
-  text_name: Suillus granulatus
+  name: megacollybia_platyphylla
+  text_name: Megacollybia platyphylla
   where: MO Inc., 68 Bay Rd., North Falmouth, Massachusetts, USA
   when: 2025-09-01
   created_at: 2025-09-01 04:05:03

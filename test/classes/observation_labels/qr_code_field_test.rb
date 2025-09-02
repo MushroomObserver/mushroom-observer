@@ -5,7 +5,7 @@ require "prawn/measurement_extensions"
 
 class QRCodeFieldTest < UnitTestCase
   def test_error_case
-    qrcf = QRCodeField.new("Home Page", 1.234)
+    qrcf = ObservationLabels::QRCodeField.new("Home Page", 1.234)
     pdf = Prawn::Document.new(
       page_size: [10.in, 10.in],
       margin: 0

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Handles the creation of label fields from an observation
-class ObservationFields
+class ObservationLabels::Fields
   attr_reader :observation
 
   def initialize(observation)
@@ -40,13 +40,14 @@ class ObservationFields
 
     # Add Mushroom Observer URL if observation has mo_id
     id, url = mo_url(observation)
-    qr_list << QRCodeField.new("MO: #{id}", url)
+    qr_list << ObservationLabels::QRCodeField.new("MO: #{id}", url)
 
     # Add iNaturalist URL if observation has inat_id
     inat_id = observation.inat_id
     if inat_id
       inat_url = "https://www.inaturalist.org/observations/#{inat_id}"
-      qr_list << QRCodeField.new("iNat: #{inat_id}", inat_url)
+      qr_list << ObservationLabels::QRCodeField.new("iNat: #{inat_id}",
+                                                    inat_url)
     end
 
     qr_list
@@ -71,13 +72,13 @@ class ObservationFields
   def create_field(name, value)
     return nil if value.nil? || value.to_s.strip.empty?
 
-    LabelField.new(name, value)
+    ObservationLabels::TextField.new(name, value)
   end
 
   def create_name_field(name, value)
     return nil if value.nil? || value.to_s.strip.empty?
 
-    NameField.new(name, value)
+    ObservationLabels::NameField.new(name, value)
   end
 
   def name_value

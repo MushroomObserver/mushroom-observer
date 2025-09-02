@@ -1372,26 +1372,26 @@ even_longer_name:
   created_at: 2025-08-21 08:14:10
   updated_at: 2025-08-21 08:14:10
 
-suillus_weaverae:
+megacollybia_rodmanii:
   <<: *DEFAULTS
   rank: <%= Name.ranks[:Species] %>
-  text_name: Suillus weaverae
-  author: '(A.H. Sm. & Shaffer) H. Engel & Klofac'
-  search_name: Suillus weaverae (A.H. Sm. & Shaffer) H. Engel & Klofac
-  display_name: '**__Suillus__** **__weaverae__** (A.H. Sm. & Shaffer) H. Engel & Klofac'
-  sort_name: Suillus weaverae  (A.H. Sm. & Shaffer) H. Engel & Klofac
+  text_name: Megacollybia rodmanii
+  author: R.H. Petersen, K.W. Hughes & Lickey
+  search_name: Megacollybia rodmanii R.H. Petersen, K.W. Hughes & Lickey
+  display_name: '**__Megacollybia__** **__rodmanii__** R.H. Petersen, K.W. Hughes & Lickey'
+  sort_name: Megacollybia rodmanii  R.H. Petersen, K.W. Hughes & Lickey
   deprecated: false
   created_at: 2025-09-01 08:14:10
   updated_at: 2025-09-01 08:14:10
 
-suillus_granulatus:
+megacollybia_platyphylla:
   <<: *DEFAULTS
   rank: <%= Name.ranks[:Species] %>
-  text_name: Suillus granulatus
-  author: '(L.) Roussel'
-  search_name: Suillus granulatus (L.) Roussel
-  display_name: '**__Suillus__** **__granulatus__** (L.) Roussel'
-  sort_name: Suillus granulatus  (L.) Roussel
+  text_name: Megacollybia platyphylla
+  author: '(Pers.) Kotl. & Pouzar'
+  search_name: Megacollybia platyphylla (Pers.) Kotl. & Pouzarl
+  display_name: '**__Megacollybia__** **__platyphylla__** (Pers.) Kotl. & Pouzar'
+  sort_name: Megacollybia platyphylla (Pers.) Kotl. & Pouzar
   deprecated: false
   created_at: 2025-09-01 08:14:10
   updated_at: 2025-09-01 08:14:10

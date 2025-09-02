@@ -5,7 +5,7 @@ require "prawn/measurement_extensions"
 require "rqrcode"
 
 # Represents a QR code field with a label
-class QRCodeField
+class ObservationLabels::QRCodeField
   attr_reader :label, :url
 
   def initialize(label, url)

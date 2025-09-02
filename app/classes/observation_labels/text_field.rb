@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Represents a single field on a mushroom observation label
-class LabelField
+class ObservationLabels::TextField
   attr_reader :pdf, :name, :value
 
   def initialize(name, value)

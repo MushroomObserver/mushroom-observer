@@ -4,7 +4,7 @@ require "prawn"
 require "prawn/measurement_extensions"
 
 # Main document class for generating PDF labels
-class LabelDocument
+class ObservationLabels
   attr_reader :query, :page_width, :page_height
 
   def initialize(query, page_width, page_height)
@@ -77,7 +77,7 @@ class LabelDocument
     label_position = index % labels_per_page
     x, y = calculate_label_position(label_position)
 
-    label = Label.new(observation, @font_family)
+    label = ObservationLabels::Label.new(observation, @font_family)
     label.draw_border(pdf, x, y) if draw_borders
     label.render(pdf, x, y)
   end

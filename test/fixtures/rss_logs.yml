@@ -553,26 +553,26 @@ even_longer_obs_rss_log:
   <<: *DEFAULTS
   observation: even_longer_obs
 
-suillus_weaverae_obs_rss_log:
+megacollybia_rodmanii_obs_rss_log:
   <<: *DEFAULTS
-  observation: suillus_weaverae_obs
+  observation: megacollybia_rodmanii_obs
 
-dup_suillus_weaverae_obs_rss_log:
+dup_megacollybia_rodmanii_obs_rss_log:
   <<: *DEFAULTS
-  observation: dup_suillus_weaverae_obs
+  observation: dup_megacollybia_rodmanii_obs
 
-nearby_suillus_weaverae_obs_rss_log:
+nearby_megacollybia_rodmanii_obs_rss_log:
   <<: *DEFAULTS
-  observation: nearby_suillus_weaverae_obs
+  observation: nearby_megacollybia_rodmanii_obs
 
-faraway_suillus_weaverae_obs_rss_log:
+faraway_megacollybia_rodmanii_obs_rss_log:
   <<: *DEFAULTS
-  observation: faraway_suillus_weaverae_obs
+  observation: faraway_megacollybia_rodmanii_obs
 
-older_suillus_weaverae_obs_rss_log:
+older_megacollybia_rodmanii_obs_rss_log:
   <<: *DEFAULTS
-  observation: older_suillus_weaverae_obs
+  observation: older_megacollybia_rodmanii_obs
 
-suillus_granulatus_obs_rss_log:
+megacollybia_platyphylla_obs_rss_log:
   <<: *DEFAULTS
-  observation: suillus_granulatus_obs
+  observation: megacollybia_platyphylla_obs
