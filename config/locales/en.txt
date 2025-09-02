@@ -4482,24 +4482,24 @@
   query_description_has: description has
   query_field_slip_prefix_has: field slip prefix
   query_for_user: for
-  query_has_author: with author
-  query_has_citation: with citation
+  query_has_author: has author
+  query_has_citation: has citation
   query_has_classification: has classification
-  query_has_comments: with comments
-  query_has_default_description: with default description
-  query_has_descriptions: with descriptions
-  query_has_images: with images
-  query_has_name: with name
-  query_has_notes: with notes
-  query_has_notes_fields: with notes fields
-  query_has_observations: with observations
+  query_has_comments: has comments
+  query_has_default_description: has default description
+  query_has_descriptions: has descriptions
+  query_has_images: has images
+  query_has_name: has name
+  query_has_notes: has notes
+  query_has_notes_fields: has notes fields
+  query_has_observations: has observations
   query_has_public_lat_lng: public geolocation
-  query_has_sequences: with sequences
-  query_has_species_lists: with observation lists
-  query_has_specimen: with specimen
-  query_has_summary: with summary
-  query_has_synonyms: with synonyms
-  query_has_votes: with votes
+  query_has_sequences: has sequences
+  query_has_species_lists: has observation lists
+  query_has_specimen: has specimen
+  query_has_summary: has summary
+  query_has_synonyms: has synonyms
+  query_has_votes: has votes
   query_initial_det: initial determination
   query_initial_det_has: initial determination has
   query_is_collection_location: is collection location
